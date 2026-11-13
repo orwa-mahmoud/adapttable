@@ -1603,6 +1603,14 @@
       "behavior": ""
     },
     {
+      "export": "AlwaysAllowedState",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
       "export": "ApprovalOutcome",
       "currentImport": "@adapttable/ai/assistant",
       "kind": "type",
@@ -1652,6 +1660,14 @@
     },
     {
       "export": "AssistantAudio",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantBindingOptions",
       "currentImport": "@adapttable/ai/assistant",
       "kind": "type",
       "class": "neutral-model",
@@ -1771,6 +1787,14 @@
       "behavior": ""
     },
     {
+      "export": "AssistantTableState",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
       "export": "AssistantTransport",
       "currentImport": "@adapttable/ai/assistant",
       "kind": "type",
@@ -1812,6 +1836,22 @@
     },
     {
       "export": "AssistantUndoOffer",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "assistantUndoView",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantUndoView",
       "currentImport": "@adapttable/ai/assistant",
       "kind": "type",
       "class": "neutral-model",
@@ -2023,6 +2063,30 @@
       "currentImport": "@adapttable/ai/assistant",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "tableAssistantFields",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantFields",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "tableAssistantInputs",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "value",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/ai/assistant",
       "behavior": ""
     },
@@ -5971,6 +6035,14 @@
       "behavior": ""
     },
     {
+      "export": "createSpeechSession",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
       "export": "readRememberedLanguage",
       "currentImport": "@adapttable/ai/voice",
       "kind": "value",
@@ -5980,6 +6052,14 @@
     },
     {
       "export": "rememberLanguage",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "SPEECH_UNSUPPORTED",
       "currentImport": "@adapttable/ai/voice",
       "kind": "value",
       "class": "neutral-model",
@@ -6011,7 +6091,47 @@
       "behavior": ""
     },
     {
+      "export": "speechLanguages",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
       "export": "SpeechMode",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechSession",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "speechSessionKey",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechSessionOptions",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechSessionView",
       "currentImport": "@adapttable/ai/voice",
       "kind": "type",
       "class": "neutral-model",
@@ -6987,6 +7107,14 @@
       "behavior": ""
     },
     {
+      "export": "AssistantBindingOptions",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "AssistantConversation",
       "currentImport": "@adapttable/ai",
       "kind": "type",
@@ -7147,6 +7275,14 @@
       "behavior": ""
     },
     {
+      "export": "AssistantTableState",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "AssistantTransport",
       "currentImport": "@adapttable/ai",
       "kind": "type",
@@ -7196,6 +7332,22 @@
     },
     {
       "export": "AssistantUndoOffer",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "assistantUndoView",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantUndoView",
       "currentImport": "@adapttable/ai",
       "kind": "type",
       "class": "neutral-model",
@@ -7428,6 +7580,14 @@
     },
     {
       "export": "createSpeechInput",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "createSpeechSession",
       "currentImport": "@adapttable/ai",
       "kind": "value",
       "class": "neutral-operation",
@@ -8043,6 +8203,14 @@
       "behavior": ""
     },
     {
+      "export": "SPEECH_UNSUPPORTED",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "SpeechClip",
       "currentImport": "@adapttable/ai",
       "kind": "type",
@@ -8067,7 +8235,47 @@
       "behavior": ""
     },
     {
+      "export": "speechLanguages",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "SpeechMode",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechSession",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "speechSessionKey",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechSessionOptions",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechSessionView",
       "currentImport": "@adapttable/ai",
       "kind": "type",
       "class": "neutral-model",
@@ -8214,6 +8422,30 @@
       "export": "TableAgentWebMcpOptions",
       "currentImport": "@adapttable/ai",
       "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "tableAssistantFields",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantFields",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "tableAssistantInputs",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai",
       "behavior": ""

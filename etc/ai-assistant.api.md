@@ -5,7 +5,10 @@
 ```ts
 
 import { ActionAiOptions } from '@adapttable/core';
+import { AgentAlwaysAllowState } from '@adapttable/core/binding';
+import { AgentApprovalPending } from '@adapttable/core';
 import { AgentProgress } from '@adapttable/core';
+import { AgentViewState } from '@adapttable/core/binding';
 import { ApprovalPresentation } from '@adapttable/core';
 import { RowPinState } from '@adapttable/core/binding';
 import { TableSourceCapabilities } from '@adapttable/core';
@@ -314,6 +317,12 @@ export interface AgentSession {
 }
 
 // @public
+export interface AlwaysAllowedState {
+    readonly capabilities: readonly string[];
+    readonly revoke: (capability: string) => void;
+}
+
+// @public
 export type ApprovalOutcome = "pending" | "approved" | "partial" | "rejected" | "cancelled" | "not-required";
 
 // @public
@@ -356,6 +365,13 @@ export interface AssistantAudio {
     readonly base64: string;
     readonly durationMs: number;
     readonly mimeType: string;
+}
+
+// @public
+export interface AssistantBindingOptions extends Omit<TableAssistantInputs, "approval" | "progress" | "alwaysAllowed" | "onRevokeAlwaysAllow"> {
+    readonly alwaysAllow?: AlwaysAllowedState;
+    readonly approval?: AgentApprovalPending | null;
+    readonly progress?: AgentProgress | null;
 }
 
 // @public
@@ -462,6 +478,14 @@ export interface AssistantSuggestion {
     readonly title: string;
 }
 
+// @public
+export interface AssistantTableState {
+    readonly alwaysAllow?: AgentAlwaysAllowState | null;
+    readonly approval?: AgentApprovalPending | null;
+    readonly progress?: AgentProgress | null;
+    readonly viewState?: AgentViewState | null;
+}
+
 // @public (undocumented)
 export interface AssistantTransport {
     connect?(input: {
@@ -515,6 +539,16 @@ export interface AssistantUndoOffer {
     readonly blocked?: UndoBlock;
     readonly messageId: string;
 }
+
+// @public
+export interface AssistantUndoView {
+    readonly available: boolean;
+    readonly blockedCode?: string;
+    readonly messageId: string;
+}
+
+// @public
+export function assistantUndoView(undo: AssistantUndoOffer | null): AssistantUndoView | null;
 
 // @public
 export interface AssistantUnresolved {
@@ -679,6 +713,14 @@ export interface RowWindowRow {
 export function runUndo(session: AgentSession, undo: AssistantUndo, idempotencyKey: string, signal?: AbortSignal, view?: AgentContextView): Promise<readonly ExecuteResult[]>;
 
 // @public
+export type TableAssistantFields = Pick<TableAssistantSnapshot, "messages" | "draft" | "interrupted" | "resumable" | "status" | "busy" | "progress" | "alwaysAllowed" | "suggestions" | "error" | "errorCode"> & Pick<TableAssistantStore, "setDraft" | "send" | "sendClip" | "stop" | "resume" | "clear" | "answer" | "undoTurn" | "undoAction" | "revokeAlwaysAllow" | "runSuggestion"> & {
+    readonly undo: AssistantUndoView | null;
+};
+
+// @public
+export function tableAssistantFields(state: TableAssistantSnapshot, store: TableAssistantStore): TableAssistantFields;
+
+// @public
 export interface TableAssistantInputs {
     readonly alwaysAllowed?: readonly string[];
     readonly approval?: unknown;
@@ -696,6 +738,9 @@ export interface TableAssistantInputs {
     readonly transport?: AssistantTransport;
     readonly transportKey?: string;
 }
+
+// @public
+export function tableAssistantInputs(options: AssistantBindingOptions, table: AssistantTableState): TableAssistantInputs;
 
 // @public
 export interface TableAssistantSnapshot {

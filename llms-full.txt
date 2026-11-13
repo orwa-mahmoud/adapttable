@@ -20273,6 +20273,15 @@ call and passes it on as `AgentProgress`. Receipts come from
 one for a built-in capability, as `AssistantReceiptTerm` pairs of column label
 and formatted value — and `turnStatus` reads the `AssistantTurnStatus`.
 
+**Assistant bindings.** A framework binding of the assistant maps its own
+options and the table's feature state with `tableAssistantInputs(options,
+table)`: `AssistantBindingOptions` are the options it reads, where a panel
+outside the table passes `approval`, `progress` and an `AlwaysAllowedState`,
+and `AssistantTableState` is what a panel inside the table reads from feature
+state. `tableAssistantFields(snapshot, store)` is the `TableAssistantFields` a
+panel renders, its undo offer an `AssistantUndoView` — `assistantUndoView`
+builds one from an `AssistantUndoOffer`.
+
 **Undo.** `planUndo` turns a finished turn into an `AssistantUndo` of
 `UndoCall`s, or an `UndoBlock` saying why not (`isUndoBlock` narrows it,
 `undoBlocked` explains it); `runUndo` applies one, and `AssistantUndoOffer` is
@@ -20470,6 +20479,13 @@ back as `AiSdkToolOutput`s and approvals as `AiSdkApprovalResponse`s;
 recording an audio `SpeechClip` for a backend to transcribe;
 `SpeechInputOptions` and `VoiceOptions` configure it, and `rememberLanguage` /
 `readRememberedLanguage` keep the reader's dictation language between visits.
+`createSpeechSession(read)` is dictation for one composer across the options it
+lives through: a `SpeechSession` keeps one controller while the mode and the
+offered languages stand, `sync`s to new ones and `release`s the microphone, and
+its snapshot is the `SpeechSessionView` a composer draws, read from
+`SpeechSessionOptions`. `speechLanguages` is what a composer offers,
+`speechSessionKey` what identifies the controller it needs, and
+`SPEECH_UNSUPPORTED` the state of a composer with no microphone.
 
 ### `@adapttable/ai-react` — the React binding
 

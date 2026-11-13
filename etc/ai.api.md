@@ -5,11 +5,13 @@
 ```ts
 
 import { ActionAiOptions } from '@adapttable/core';
+import { AgentAlwaysAllowState } from '@adapttable/core/binding';
 import { AgentApprovalDecision } from '@adapttable/core';
 import { AgentApprovalOperation } from '@adapttable/core';
 import { AgentApprovalPending } from '@adapttable/core';
 import { AgentApprovalProposal } from '@adapttable/core';
 import { AgentProgress } from '@adapttable/core';
+import { AgentViewState } from '@adapttable/core/binding';
 import { ApprovalPresentation } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
@@ -582,6 +584,13 @@ export interface AssistantAudio {
 }
 
 // @public
+export interface AssistantBindingOptions extends Omit<TableAssistantInputs, "approval" | "progress" | "alwaysAllowed" | "onRevokeAlwaysAllow"> {
+    readonly alwaysAllow?: AlwaysAllowedState;
+    readonly approval?: AgentApprovalPending | null;
+    readonly progress?: AgentProgress | null;
+}
+
+// @public
 export interface AssistantConversation {
     readonly tableId: string;
     readonly turns: readonly AssistantTurn[];
@@ -725,6 +734,14 @@ export interface AssistantSuggestion {
     readonly title: string;
 }
 
+// @public
+export interface AssistantTableState {
+    readonly alwaysAllow?: AgentAlwaysAllowState | null;
+    readonly approval?: AgentApprovalPending | null;
+    readonly progress?: AgentProgress | null;
+    readonly viewState?: AgentViewState | null;
+}
+
 // @public (undocumented)
 export interface AssistantTransport {
     connect?(input: {
@@ -788,6 +805,16 @@ export interface AssistantUndoOffer {
     readonly blocked?: UndoBlock;
     readonly messageId: string;
 }
+
+// @public
+export interface AssistantUndoView {
+    readonly available: boolean;
+    readonly blockedCode?: string;
+    readonly messageId: string;
+}
+
+// @public
+export function assistantUndoView(undo: AssistantUndoOffer | null): AssistantUndoView | null;
 
 // @public
 export interface AssistantUnresolved {
@@ -955,6 +982,9 @@ export function createRevisionCounter(): RevisionCounter;
 
 // @public
 export function createSpeechInput(options?: SpeechInputOptions): SpeechInput;
+
+// @public
+export function createSpeechSession(read: () => SpeechSessionOptions): SpeechSession;
 
 // @public
 export function createStreamReply(onText?: (text: string) => void): {
@@ -1426,6 +1456,9 @@ export type SharedApproval = ApprovalPolicy | {
 export function sharedApproval(approval: SharedApproval | undefined): ResolvedApproval;
 
 // @public
+export const SPEECH_UNSUPPORTED: SpeechState;
+
+// @public
 export interface SpeechClip {
     readonly base64: string;
     // (undocumented)
@@ -1458,7 +1491,39 @@ export interface SpeechInputOptions {
 }
 
 // @public
+export function speechLanguages(options: SpeechSessionOptions): readonly string[];
+
+// @public
 export type SpeechMode = "browser" | "backend";
+
+// @public
+export interface SpeechSession {
+    readonly getSnapshot: () => SpeechSessionView;
+    readonly release: () => void;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly sync: () => void;
+}
+
+// @public
+export function speechSessionKey(options: SpeechSessionOptions): string | undefined;
+
+// @public
+export interface SpeechSessionOptions {
+    readonly locale?: string;
+    readonly onClip?: (clip: SpeechClip) => void;
+    readonly setDraft: (text: string) => void;
+    readonly voice?: VoiceOptions;
+}
+
+// @public
+export interface SpeechSessionView {
+    readonly available: boolean;
+    readonly languages: readonly string[];
+    readonly setLanguage: (language: string) => void;
+    readonly start: () => void;
+    readonly state: SpeechState;
+    readonly stop: () => void;
+}
 
 // @public
 export interface SpeechState {
@@ -1592,6 +1657,14 @@ export interface TableAgentWebMcpOptions {
 }
 
 // @public
+export type TableAssistantFields = Pick<TableAssistantSnapshot, "messages" | "draft" | "interrupted" | "resumable" | "status" | "busy" | "progress" | "alwaysAllowed" | "suggestions" | "error" | "errorCode"> & Pick<TableAssistantStore, "setDraft" | "send" | "sendClip" | "stop" | "resume" | "clear" | "answer" | "undoTurn" | "undoAction" | "revokeAlwaysAllow" | "runSuggestion"> & {
+    readonly undo: AssistantUndoView | null;
+};
+
+// @public
+export function tableAssistantFields(state: TableAssistantSnapshot, store: TableAssistantStore): TableAssistantFields;
+
+// @public
 export interface TableAssistantInputs {
     readonly alwaysAllowed?: readonly string[];
     readonly approval?: unknown;
@@ -1609,6 +1682,9 @@ export interface TableAssistantInputs {
     readonly transport?: AssistantTransport;
     readonly transportKey?: string;
 }
+
+// @public
+export function tableAssistantInputs(options: AssistantBindingOptions, table: AssistantTableState): TableAssistantInputs;
 
 // @public
 export interface TableAssistantSnapshot {

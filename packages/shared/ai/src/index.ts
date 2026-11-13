@@ -36,6 +36,15 @@ export {
   settleDecisions,
 } from "./approvalTransaction";
 export {
+  type AssistantBindingOptions,
+  type AssistantTableState,
+  type AssistantUndoView,
+  assistantUndoView,
+  type TableAssistantFields,
+  tableAssistantFields,
+  tableAssistantInputs,
+} from "./assistantBinding";
+export {
   assertUniqueSuggestions,
   type AssistantAction,
   type AssistantAnswer,
@@ -261,12 +270,19 @@ export type {
 export { validateSchema } from "./validate";
 export {
   createSpeechInput,
+  createSpeechSession,
   readRememberedLanguage,
   rememberLanguage,
+  SPEECH_UNSUPPORTED,
   type SpeechClip,
   type SpeechInput,
   type SpeechInputOptions,
+  speechLanguages,
   type SpeechMode,
+  type SpeechSession,
+  speechSessionKey,
+  type SpeechSessionOptions,
+  type SpeechSessionView,
   type SpeechState,
   type SpeechStatus,
   type VoiceOptions,
