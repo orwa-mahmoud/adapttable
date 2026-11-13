@@ -7,7 +7,7 @@ import {
 } from "@adapttable/react/adapter";
 import { DropdownMenu } from "@radix-ui/themes";
 
-import { usePortalContainer } from "./portalContainer";
+import { PortalContainerProvider, usePortalContainer } from "./portalContainer";
 
 /**
  * The kit's own menu, opened at the point the pointer was.
@@ -82,5 +82,11 @@ const slots: ContextMenuSlots = { Surface, Item, Separator };
 export function ContextMenu(
   props: Readonly<Omit<ContextMenuChromeProps, "slots">>
 ) {
-  return <ContextMenuChrome {...props} slots={slots} />;
+  // The menu opens where the table is, fullscreen included.
+  const outer = usePortalContainer();
+  return (
+    <PortalContainerProvider value={props.container ?? outer}>
+      <ContextMenuChrome {...props} slots={slots} />
+    </PortalContainerProvider>
+  );
 }

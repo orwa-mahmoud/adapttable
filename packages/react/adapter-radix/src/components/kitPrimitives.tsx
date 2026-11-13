@@ -227,7 +227,7 @@ export function Text({
 /** A horizontal rule. */
 export function Divider({ style }: Readonly<KitDividerProps>): ReactElement {
   "use no memo";
-  return <Separator style={style} />;
+  return <Separator size="4" style={style} />;
 }
 
 const noop = (): void => undefined;
