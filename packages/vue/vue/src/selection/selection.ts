@@ -114,6 +114,22 @@ export function useRowSelection<TRow>(
         action(...args);
     };
   };
+  // A row's control acts while its row is drawn and the selection lives; it
+  // does not hold the visible-rows array, so a data write that replaces the
+  // array leaves every other row's control, and its drawing, as it is.
+  const ownedRowAction = (id: string, action: () => void) => {
+    const version = lifetime.value;
+    const admitted = enabled.value;
+    return (): void => {
+      if (
+        admitted &&
+        available.value &&
+        version === lifetime.value &&
+        visibleIds.value.includes(id)
+      )
+        action();
+    };
+  };
   const headerState = computed(() =>
     headerSelectionOf(visibleIds.value, selectedIds.value)
   );
@@ -200,7 +216,7 @@ export function useRowSelection<TRow>(
         return isSelected(id);
       },
       ...(!enabled.value ? { disabled: true } : {}),
-      onChange: ownedAction(() => toggle(id)),
+      onChange: ownedRowAction(id, () => toggle(id)),
     }),
     headerCheckboxAttrs: () => ({
       type: "checkbox",

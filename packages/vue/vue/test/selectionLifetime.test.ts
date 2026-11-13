@@ -3,7 +3,7 @@ import { effectScope, shallowRef } from "vue";
 
 import { useRowSelection } from "../src/selection/selection";
 
-it("retires old row and header controls on row identity replacement and all actions on disposal", () => {
+it("keeps a row's control while its row is drawn, retires the header's on row replacement and every action on disposal", () => {
   const rows = shallowRef([{ id: "first" }, { id: "second" }]);
   const changes = vi.fn();
   const scope = effectScope();
@@ -16,12 +16,23 @@ it("retires old row and header controls on row identity replacement and all acti
     })
   )!;
   const oldRow = selection.rowCheckboxAttrs("first");
+  const goneRow = selection.rowCheckboxAttrs("second");
   const oldHeader = selection.headerCheckboxAttrs();
   rows.value = [{ id: "first" }, { id: "second" }];
-  oldRow.onChange();
   oldHeader.onChange();
   expect(changes).not.toHaveBeenCalled();
+  // A data write replaces the rows array; a row still drawn keeps its control.
+  oldRow.onChange();
+  expect(changes).toHaveBeenLastCalledWith(["first"]);
+  oldRow.onChange();
+  expect(changes).toHaveBeenLastCalledWith([]);
+  // A row no longer drawn has no control.
+  rows.value = [{ id: "first" }];
+  changes.mockClear();
+  goneRow.onChange();
+  expect(changes).not.toHaveBeenCalled();
   expect([...selection.selectedIds.value]).toEqual([]);
+  rows.value = [{ id: "first" }, { id: "second" }];
   const liveRow = selection.rowCheckboxAttrs("first");
   const liveHeader = selection.headerCheckboxAttrs();
   liveRow.onChange();

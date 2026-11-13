@@ -29,6 +29,7 @@ import {
   type ExternalStoreOptions,
   requireScope,
   useExternalStore,
+  useOptionFields,
   useScopeActivity,
 } from "../store";
 import { injectTableStore } from "../tableStore";
@@ -50,7 +51,16 @@ export function useGridFocus<TRow>(
   requireScope("useGridFocus");
   const owner = useScopeActivity();
   let disposed = false;
-  const options = computed(() => toValue(input));
+  // Read option by option: a host that writes a new rows array back after an
+  // edit changes the rows field alone, and the focus state below reads only
+  // what the rows array decides (how many rows are loaded).
+  const options = useOptionFields(() => toValue(input));
+  const loadedRows = computed(() => options.value.rows.length);
+  const columnCount = computed(() => options.value.columns.length);
+  const canFill = computed(() => options.value.onFill !== undefined);
+  const fillHandleLabel = computed(
+    () => options.value.labels?.gridFillHandle ?? GRID_LABELS.gridFillHandle
+  );
   const active = computed(
     () =>
       !disposed &&
@@ -215,7 +225,7 @@ export function useGridFocus<TRow>(
       fillPreview,
       announcement,
     } = snapshot.value;
-    const windowed = current.rowCount > current.rows.length;
+    const windowed = current.rowCount > loadedRows.value;
     const getCellProps = (cell: GridCell): Record<string, unknown> =>
       toVueAttrs({
         ...gridCellAttributes(
@@ -244,10 +254,9 @@ export function useGridFocus<TRow>(
       fillHandleCell: gridFillHandleCell({
         enabled,
         range,
-        canFill: current.onFill !== undefined,
+        canFill: canFill.value,
       }),
-      fillHandleLabel:
-        current.labels?.gridFillHandle ?? GRID_LABELS.gridFillHandle,
+      fillHandleLabel: fillHandleLabel.value,
       getFillHandleProps: () =>
         toVueAttrs({
           onMouseDown: pressFill,
@@ -259,7 +268,7 @@ export function useGridFocus<TRow>(
             windowed,
             columnsWindowed: current.columnsWindowed === true,
             rowCount: current.rowCount,
-            colCount: current.columns.length,
+            colCount: columnCount.value,
           }),
           ...(enabled
             ? {
@@ -297,7 +306,7 @@ export function useGridFocus<TRow>(
             enabled,
             range,
             firstRowIndex: first,
-            loadedRows: current.rows.length,
+            loadedRows: loadedRows.value,
           },
           col
         ),

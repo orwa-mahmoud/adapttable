@@ -29,6 +29,13 @@ it.each([
   { name: "navigation", nav: true },
   { name: "both", selectable: true, nav: true },
   { name: "writes back", writeBack: true },
+  { name: "navigation writes back", nav: true, writeBack: true },
+  {
+    name: "selectable navigation writes back",
+    selectable: true,
+    nav: true,
+    writeBack: true,
+  },
 ])("redraws only the row whose cell is edited: $name", async (variant) => {
   const redrawn: string[] = [];
   const data = shallowRef<readonly Row[]>(rows);
