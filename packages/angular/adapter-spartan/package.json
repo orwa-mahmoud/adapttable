@@ -232,7 +232,6 @@
     "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
   },
   "devDependencies": {
-    "@adapttable/core": "workspace:*",
     "@analogjs/vite-plugin-angular": "^2.7.5",
     "@analogjs/vitest-angular": "^2.7.5",
     "@angular/build": "^22.2.3",

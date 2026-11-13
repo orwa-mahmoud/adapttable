@@ -31,7 +31,6 @@
     "vuetify": "^4.2.4"
   },
   "devDependencies": {
-    "@adapttable/core": "workspace:*",
     "vue": "^3.5.43",
     "vuetify": "^4.2.4",
     "@adapttable/i18n": "workspace:*",

@@ -53,7 +53,6 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
-    "@adapttable/core": "workspace:*",
     "vue": "^3.5.43",
     "reka-ui": "^2.11.0",
     "tailwindcss": "^4.3.3",
