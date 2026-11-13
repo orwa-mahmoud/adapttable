@@ -1,5 +1,5 @@
-import type { GroupedFlatEntry } from "@adapttable/core";
 import { type ColumnDef, type SelectionState } from "@adapttable/react";
+import { type GroupedFlatEntry } from "@adapttable/react/adapter";
 import { Table } from "@radix-ui/themes";
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

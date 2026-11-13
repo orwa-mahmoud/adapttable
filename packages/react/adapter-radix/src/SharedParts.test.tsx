@@ -1,5 +1,6 @@
 /** The shared shell hooks are asserted on rendered elements, not source literals. */
-import { createMemoryAdapter, defaultLabels } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
+import { defaultLabels } from "@adapttable/react/adapter";
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";

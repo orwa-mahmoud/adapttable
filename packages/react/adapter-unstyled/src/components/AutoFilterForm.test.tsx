@@ -4,7 +4,7 @@ import {
   type FilterOption,
   resolveFilterRegistry,
   type TableSource,
-} from "@adapttable/core";
+} from "@adapttable/react/adapter";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

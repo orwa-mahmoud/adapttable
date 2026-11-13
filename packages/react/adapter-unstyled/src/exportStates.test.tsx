@@ -1,4 +1,4 @@
-import { xlsxWriter } from "@adapttable/core/xlsx";
+import { xlsxWriter } from "@adapttable/react/xlsx";
 import { act, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

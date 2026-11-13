@@ -6,7 +6,7 @@
  * agent slot. Neither is reached by any other test in the package, so a broken
  * export here would ship silently.
  */
-import type { SelectionStats } from "@adapttable/core";
+import { type SelectionStats } from "@adapttable/react/adapter";
 import { render as renderKit } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

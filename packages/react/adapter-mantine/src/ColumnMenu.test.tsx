@@ -1,9 +1,9 @@
-import type { UseColumnLayoutResult } from "@adapttable/core";
 import type { ColumnDef } from "@adapttable/react";
 import {
   featureHostOf,
   FeatureHostProvider,
   type GroupingPanelState,
+  type UseColumnLayoutResult,
   useTableFeatures,
 } from "@adapttable/react/adapter";
 import type { TableFeature } from "@adapttable/react/features";

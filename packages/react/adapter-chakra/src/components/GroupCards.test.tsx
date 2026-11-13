@@ -1,5 +1,5 @@
-import { resolveLabels } from "@adapttable/core";
 import type { ColumnDef } from "@adapttable/react";
+import { resolveLabels } from "@adapttable/react/adapter";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

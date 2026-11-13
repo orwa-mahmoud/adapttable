@@ -1,6 +1,8 @@
-import type { TableSource } from "@adapttable/core";
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
-import { flattenReactColumnTree } from "@adapttable/react/adapter";
+import {
+  flattenReactColumnTree,
+  type TableSource,
+} from "@adapttable/react/adapter";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 

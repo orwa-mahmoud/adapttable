@@ -1,8 +1,8 @@
-import { defaultLabels } from "@adapttable/core";
 import type { ColumnDef } from "@adapttable/react";
-import type {
-  GroupingPanelSlotProps,
-  GroupingPanelState,
+import {
+  defaultLabels,
+  type GroupingPanelSlotProps,
+  type GroupingPanelState,
 } from "@adapttable/react/adapter";
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

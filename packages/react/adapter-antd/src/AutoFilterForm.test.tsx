@@ -5,7 +5,7 @@ import {
   type FilterDef,
   type FilterOption,
   resolveFilterRegistry,
-} from "@adapttable/core";
+} from "@adapttable/react/adapter";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";

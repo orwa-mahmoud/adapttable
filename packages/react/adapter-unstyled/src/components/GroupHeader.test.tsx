@@ -1,5 +1,8 @@
-import { defaultLabels, type GroupedFlatEntry } from "@adapttable/core";
 import { type ColumnDef, type SelectionState } from "@adapttable/react";
+import {
+  defaultLabels,
+  type GroupedFlatEntry,
+} from "@adapttable/react/adapter";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

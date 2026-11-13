@@ -6,8 +6,8 @@
  * still attached: the part name, the validation ARIA, the draft round-trip and
  * the commit gesture.
  */
-import { formatMultiDraft } from "@adapttable/core";
 import type { EditableCellEditorCtrl } from "@adapttable/react";
+import { formatMultiDraft } from "@adapttable/react/adapter";
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

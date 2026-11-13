@@ -6,11 +6,11 @@
  * selection) against a start pin, the selected-row fill, and the scroll-box
  * path (maxHeight) that turns page-stick off.
  */
-import { resolveLabels } from "@adapttable/core";
 import {
   DELETE_ROW_ACTION_KEY,
   DUPLICATE_ROW_ACTION_KEY,
 } from "@adapttable/react";
+import { resolveLabels } from "@adapttable/react/adapter";
 import { Theme } from "@radix-ui/themes";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

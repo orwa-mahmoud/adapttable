@@ -6,8 +6,8 @@
  * Base UI portals its popover content; internals appear once the trigger opens,
  * so they are queried by label/placeholder/text after the popover mounts.
  */
-import { defaultLabels } from "@adapttable/core";
 import { createMemoryAdapter, type LayoutStorage } from "@adapttable/react";
+import { defaultLabels } from "@adapttable/react/adapter";
 import { act, fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

@@ -6,7 +6,8 @@
  * that the whole panel works from the keyboard, which is the promise a
  * drag-only pivot UI breaks.
  */
-import { EMPTY_PIVOT_CONFIG, type PivotConfig } from "@adapttable/core/pivot";
+import { type PivotConfig } from "@adapttable/react/adapter";
+import { EMPTY_PIVOT_CONFIG } from "@adapttable/react/pivot";
 import { Theme } from "@radix-ui/themes";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";

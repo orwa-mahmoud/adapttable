@@ -5,7 +5,7 @@
  * break: a kit that draws a disabled Undo button for a table with no undo
  * handler has put a dead control in every toolbar that never asked for one.
  */
-import { defaultLabels } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/react/adapter";
 import { describe, expect, it, vi } from "vitest";
 
 import {

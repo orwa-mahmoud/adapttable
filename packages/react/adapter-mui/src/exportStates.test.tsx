@@ -1,9 +1,9 @@
-import type {
-  ExportAllControls,
-  ExportAllQuery,
-  ExportAllResult,
-} from "@adapttable/core";
-import { xlsxWriter } from "@adapttable/core/xlsx";
+import {
+  type ExportAllControls,
+  type ExportAllQuery,
+  type ExportAllResult,
+} from "@adapttable/react/adapter";
+import { xlsxWriter } from "@adapttable/react/xlsx";
 import { act, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

@@ -3,10 +3,10 @@
  * branches in DataTable.tsx, components/chrome.tsx and components/tables.tsx
  * that the existing suites only hit on one side.
  */
-import { defaultLabels } from "@adapttable/core";
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import type * as AdapterModule from "@adapttable/react/adapter";
 import {
+  defaultLabels,
   type KitTable,
   type KitTableFrameProps,
   TableComposition,

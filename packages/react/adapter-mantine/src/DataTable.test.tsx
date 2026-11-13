@@ -1,10 +1,10 @@
-import type { TableSource } from "@adapttable/core";
 import {
   createMemoryAdapter,
   type TableErrorState,
   useColumnLayoutUrlState,
   useFrontendData,
 } from "@adapttable/react";
+import { type TableSource } from "@adapttable/react/adapter";
 import { sparklineColumn } from "@adapttable/react/sparkline";
 import { MantineProvider } from "@mantine/core";
 import {

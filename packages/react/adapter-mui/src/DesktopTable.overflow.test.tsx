@@ -4,12 +4,12 @@
  * sticky headers depend on that), and must gain `overflow-x: auto` once the
  * measured content is wider than the wrapper.
  */
-import { defaultConfirm } from "@adapttable/core";
 import {
   createMemoryAdapter,
   useDataTable,
   useFrontendData,
 } from "@adapttable/react";
+import { defaultConfirm } from "@adapttable/react/adapter";
 import { act } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 

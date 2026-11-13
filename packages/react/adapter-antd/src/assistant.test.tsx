@@ -4,7 +4,7 @@
  * Parity is not a shared look: it is that every visible control here comes
  * from Ant Design, and that the structure the chrome owns arrives intact.
  */
-import { defaultLabels } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/react/adapter";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { ConfigProvider } from "antd";
 import type { ReactElement } from "react";

@@ -5,7 +5,7 @@ import {
   defaultLabels,
   type ExtraFilters,
   type FilterDef,
-} from "@adapttable/core";
+} from "@adapttable/react/adapter";
 import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
