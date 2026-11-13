@@ -207,12 +207,12 @@
     {
       "name": "appendBaseKey",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#appendBaseKey",
+      "identity": "source/serverRequest.ts#appendBaseKey",
       "subpaths": ["."]
     },
     {
@@ -229,12 +229,12 @@
     {
       "name": "appendedRows",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#appendedRows",
+      "identity": "source/serverRequest.ts#appendedRows",
       "subpaths": ["."]
     },
     {
@@ -603,12 +603,12 @@
     {
       "name": "buildTableQuery",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#buildTableQuery",
+      "identity": "source/serverRequest.ts#buildTableQuery",
       "subpaths": ["."]
     },
     {
@@ -680,12 +680,12 @@
     {
       "name": "canRequestCursorPage",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#canRequestCursorPage",
+      "identity": "source/serverRequest.ts#canRequestCursorPage",
       "subpaths": ["."]
     },
     {
@@ -988,12 +988,12 @@
     {
       "name": "clampedPage",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#clampedPage",
+      "identity": "source/serverRequest.ts#clampedPage",
       "subpaths": ["."]
     },
     {
@@ -1802,12 +1802,12 @@
     {
       "name": "createFirstLoadLatch",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#createFirstLoadLatch",
+      "identity": "source/serverRequest.ts#createFirstLoadLatch",
       "subpaths": ["."]
     },
     {
@@ -2088,23 +2088,23 @@
     {
       "name": "cursorHasMore",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#cursorHasMore",
+      "identity": "source/serverRequest.ts#cursorHasMore",
       "subpaths": ["."]
     },
     {
       "name": "cursorTrailKey",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#cursorTrailKey",
+      "identity": "source/serverRequest.ts#cursorTrailKey",
       "subpaths": ["."]
     },
     {
@@ -2462,12 +2462,12 @@
     {
       "name": "effectiveQueryAggregates",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#effectiveQueryAggregates",
+      "identity": "source/serverRequest.ts#effectiveQueryAggregates",
       "subpaths": ["."]
     },
     {
@@ -2484,12 +2484,12 @@
     {
       "name": "EMPTY_CURSOR_TRAIL",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#EMPTY_CURSOR_TRAIL",
+      "identity": "source/serverRequest.ts#EMPTY_CURSOR_TRAIL",
       "subpaths": ["."]
     },
     {
@@ -5223,23 +5223,23 @@
     {
       "name": "queryAggregationSource",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#queryAggregationSource",
+      "identity": "source/serverRequest.ts#queryAggregationSource",
       "subpaths": ["."]
     },
     {
       "name": "queryGroupBy",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#queryGroupBy",
+      "identity": "source/serverRequest.ts#queryGroupBy",
       "subpaths": ["."]
     },
     {
@@ -5465,12 +5465,12 @@
     {
       "name": "recordCursor",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#recordCursor",
+      "identity": "source/serverRequest.ts#recordCursor",
       "subpaths": ["."]
     },
     {
@@ -6862,12 +6862,12 @@
     {
       "name": "staleAppendStash",
       "kind": "runtime",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#staleAppendStash",
+      "identity": "source/serverRequest.ts#staleAppendStash",
       "subpaths": ["."]
     },
     {
@@ -7720,12 +7720,12 @@
     {
       "name": "AppendStash",
       "kind": "type",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#AppendStash",
+      "identity": "source/serverRequest.ts#AppendStash",
       "subpaths": ["."]
     },
     {
@@ -8754,12 +8754,12 @@
     {
       "name": "CursorTrail",
       "kind": "type",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#CursorTrail",
+      "identity": "source/serverRequest.ts#CursorTrail",
       "subpaths": ["."]
     },
     {
@@ -9414,12 +9414,12 @@
     {
       "name": "FirstLoadLatch",
       "kind": "type",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#FirstLoadLatch",
+      "identity": "source/serverRequest.ts#FirstLoadLatch",
       "subpaths": ["."]
     },
     {
@@ -11658,12 +11658,12 @@
     {
       "name": "TableQueryInput",
       "kind": "type",
-      "module": "source/dataTier.ts",
+      "module": "source/serverRequest.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "source/dataTier.ts#TableQueryInput",
+      "identity": "source/serverRequest.ts#TableQueryInput",
       "subpaths": ["."]
     },
     {

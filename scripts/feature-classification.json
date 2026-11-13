@@ -786,6 +786,7 @@
       "core/src/source/queryKey.ts",
       "core/src/source/querySource.ts",
       "core/src/source/responseAggregateOps.ts",
+      "core/src/source/serverRequest.ts",
       "core/src/source/serverSource.ts",
       "core/src/source/sourceState.ts",
       "core/src/source/tableData.ts",

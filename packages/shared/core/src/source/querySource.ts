@@ -28,19 +28,18 @@ import type {
   TableQueryParams,
 } from "../types";
 import { stableKey } from "../utils/stableKey";
+import { type InfiniteQueryLike, type PageSelector } from "./dataTier";
+import { applyQuerySupport } from "./queryContract";
+import { createResponseAggregateOps } from "./responseAggregateOps";
 import {
   clampedPage,
   type CursorTrail,
   cursorTrailKey,
   effectiveQueryAggregates,
   EMPTY_CURSOR_TRAIL,
-  type InfiniteQueryLike,
-  type PageSelector,
   queryGroupBy,
   recordCursor,
-} from "./dataTier";
-import { applyQuerySupport } from "./queryContract";
-import { createResponseAggregateOps } from "./responseAggregateOps";
+} from "./serverRequest";
 import type { ServerSourceViewState } from "./serverSource";
 import { createSourceSignal } from "./sourceState";
 

@@ -33,6 +33,8 @@ import type { GroupAggregateOps } from "../grouping/groupRowLayout";
 import type { ResolvedPaginationMode } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { stableKey } from "../utils/stableKey";
+import { createQueryEmitter, type TableQueryListener } from "./dataTier";
+import { createResponseAggregateOps } from "./responseAggregateOps";
 import {
   appendBaseKey,
   appendedRows,
@@ -41,7 +43,6 @@ import {
   canRequestCursorPage,
   clampedPage,
   createFirstLoadLatch,
-  createQueryEmitter,
   cursorHasMore,
   type CursorTrail,
   cursorTrailKey,
@@ -50,9 +51,7 @@ import {
   queryGroupBy,
   recordCursor,
   staleAppendStash,
-  type TableQueryListener,
-} from "./dataTier";
-import { createResponseAggregateOps } from "./responseAggregateOps";
+} from "./serverRequest";
 import { createSourceSignal } from "./sourceState";
 
 /**
