@@ -326,7 +326,6 @@ import { unpinAllColumns } from '@adapttable/core/binding';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
 import { VNode } from 'vue';
-import { VNodeArrayChildren } from 'vue';
 import { VNodeChild } from 'vue';
 import { VNodeProps } from 'vue';
 import { VNodeRef } from 'vue';
@@ -1715,13 +1714,9 @@ export const DesktopTableChrome: (<TRow>(props: {
     readonly model: DesktopTableModel<TRow>;
     readonly slots: TableChromeSlots<TRow>;
     readonly classNames?: TableChromeClassNames;
-    readonly hosts?: DesktopTableHosts;
 }) => VNodeChild) & {
     props: string[];
 };
-
-// @public
-export type DesktopTableHosts = Partial<Record<DesktopTableTag, (attrs: Attrs, children: VNodeArrayChildren) => VNode>>;
 
 // @public (undocumented)
 export interface DesktopTableModel<TRow> {
@@ -1757,9 +1752,6 @@ export interface DesktopTableModel<TRow> {
     // (undocumented)
     readonly summary?: TableSummaryModel<TRow>;
 }
-
-// @public
-export type DesktopTableTag = "table" | "tr" | "th" | "td";
 
 // @public (undocumented)
 export type DirtyEdits = Readonly<Pick<DirtyCellState, "count" | "confirm" | "confirmRow" | "confirmAll">>;
@@ -2831,41 +2823,14 @@ export { MenuNavigationKey }
 // @public
 export function mergeVueAttrs(binding: Attrs, host: Attrs): Record<string, unknown>;
 
-// @public
-export interface MobileCardRegion {
-    // (undocumented)
-    readonly attrs: Attrs;
-    // (undocumented)
-    readonly content: VNodeChild;
-}
-
-// @public
-export interface MobileCardRegions {
-    readonly actions: MobileCardRegion | null;
-    readonly body: VNodeChild;
-    readonly detail: MobileCardRegion | null;
-    readonly reorder: VNodeChild;
-    readonly select: VNodeChild;
-}
-
 // @public (undocumented)
 export const MobileCardsChrome: (<TRow>(props: {
     readonly model: MobileCardsModel<TRow>;
     readonly slots: TableChromeSlots<TRow>;
     readonly classNames?: TableChromeClassNames;
-    readonly hosts?: MobileCardsHosts;
 }) => VNodeChild) & {
     props: string[];
 };
-
-// @public
-export interface MobileCardsHosts {
-    readonly card?: (attrs: Attrs, regions: MobileCardRegions) => VNode;
-    readonly extra?: (attrs: Attrs, cell: VNode) => VNode;
-    readonly fields?: (attrs: Attrs, rows: VNodeArrayChildren) => VNode;
-    readonly list?: (attrs: Attrs, children: VNodeChild[]) => VNode;
-    readonly pad?: (attrs: Attrs) => VNode;
-}
 
 // @public (undocumented)
 export interface MobileCardsModel<TRow> {
