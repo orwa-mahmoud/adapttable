@@ -36,23 +36,24 @@ export async function GET(request: Request) {
 `URLSearchParams` — so Next.js route handlers, Remix loaders and Server
 Actions all work without an adapter — and returns a `ServerTableQuery`:
 
-| Field            | What it is                                                                               |
-| ---------------- | ---------------------------------------------------------------------------------------- |
-| `page`           | 1-based, always at least 1                                                               |
-| `limit`          | clamped to the schema's ceiling                                                          |
-| `offset`         | `(page - 1) * limit`, computed once so every caller does not                             |
-| `search`         | the free-text [search](./search.md) query, absent when there was none                    |
-| `sort`           | the multi-sort chain, outermost first                                                    |
-| `groupBy`        | a single grouping column, when the schema allows it                                      |
-| `groupByKeys`    | every grouping key, outermost first — at every level, with `groupByKeys: true`           |
-| `filters`        | column filters, keyed by the name after `f_`                                             |
-| `shapedFilters`  | at level 0: each filter's operator beside it, a range's bounds joined, values as strings |
-| `typedFilters`   | at levels 2 and 3: each declared filter typed, its operator and value checked            |
-| `filterTree`     | the advanced AND/OR tree                                                                 |
-| `pivot`          | the [pivot configuration](./pivot.md)                                                    |
-| `pivotCollapsed` | the folded pivot groups, by collapse key                                                 |
-| `cursor`         | the opaque cursor, in cursor mode                                                        |
-| `rejected`       | everything it refused, and why                                                           |
+| Field             | What it is                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| `page`            | 1-based, always at least 1                                                               |
+| `limit`           | clamped to the schema's ceiling                                                          |
+| `offset`          | `(page - 1) * limit`, computed once so every caller does not                             |
+| `search`          | the free-text [search](./search.md) query, absent when there was none                    |
+| `sort`            | the multi-sort chain, outermost first                                                    |
+| `groupBy`         | a single grouping column, when the schema allows it                                      |
+| `groupByKeys`     | every grouping key, outermost first — at every level, with `groupByKeys: true`           |
+| `groupAggregates` | the reader's aggregation per grouped column, for each column the schema allows           |
+| `filters`         | column filters, keyed by the name after `f_`                                             |
+| `shapedFilters`   | at level 0: each filter's operator beside it, a range's bounds joined, values as strings |
+| `typedFilters`    | at levels 2 and 3: each declared filter typed, its operator and value checked            |
+| `filterTree`      | the advanced AND/OR tree                                                                 |
+| `pivot`           | the [pivot configuration](./pivot.md)                                                    |
+| `pivotCollapsed`  | the folded pivot groups, by collapse key                                                 |
+| `cursor`          | the opaque cursor, in cursor mode                                                        |
+| `rejected`        | everything it refused, and why                                                           |
 
 ## The schema is an allowlist
 
@@ -69,13 +70,21 @@ the request.
 }
 ```
 
-A schema cannot raise `maxLimit` past the table's own ceiling of 500.
+A schema cannot raise `maxLimit` past the table's own ceiling of 500
+(`MAX_LIMIT`); without `defaultLimit` the page size is the table's own
+default of 25 (`DEFAULT_LIMIT`).
 
 The parser reads `q`, `page`, `limit`, `sort` (or `sortBy` + `sortDir`),
-every `f_*` param, `groupBy`, `ft`, `pivot` and `cursor`, each under the
-`<urlKey>.` prefix when `urlKey` is set. Session-only params — `groupAgg`,
+every `f_*` param, `groupBy`, `groupAgg`, `ft`, `pivot` and `cursor`, each
+under the `<urlKey>.` prefix when `urlKey` is set. Session-only params —
 `groupClosed`, `rowPin`, `formula`, `density`, the `col*` layout — are not
-read.
+read. Every state the table's own store writes reads back as the same query.
+
+`groupAggregates` keeps each column's operation as the table wrote it: a
+built-in (`sum`, `avg`, …), a host-defined operation id, or `"none"` when
+the reader took the column's aggregate away. An aggregate on a column outside
+`columns` is refused; the operation ids are the client's words — map them to
+your own, never interpolate them.
 
 ## Four levels of checking
 
@@ -154,7 +163,8 @@ A filter outside the subset is refused like any undeclared one.
 The table writes a multi-value filter (`multiSelect`, checklist) as ONE
 parameter: entries joined with commas, each percent-encoded, so a value may
 itself contain a comma. `typedFilters` splits it; at level 1 the raw string
-is in `filters`, and `splitFilterValues(raw)` is the exact inverse.
+is in `filters`, and `splitListParam(raw)` is the exact inverse
+(`splitFilterValues` is its deprecated name).
 
 `groupByKeys` lists every grouping key, outermost first
 (`groupBy=team,status` → `["team", "status"]`), each checked against
@@ -166,7 +176,7 @@ is in `filters`, and `splitFilterValues(raw)` is the exact inverse.
 | Hand-written                                                     | Declared instead                                                                                  |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `budgetMin` / `budgetMax` listed in `columns` to let a range in  | `filters: { budget: "numberRange" }` — one `typedFilters.budget` with `op`, `min` and `max`       |
-| Splitting `"Core,Data"` on commas by hand                        | `splitFilterValues(raw)` at level 1, or a declared `multiSelect` / `checklist` for `values`       |
+| Splitting `"Core,Data"` on commas by hand                        | `splitListParam(raw)` at level 1, or a declared `multiSelect` / `checklist` for `values`          |
 | `f_<key>Op` refused on a column list, so the operator is guessed | Declared `filters` — the operator is read, checked against the type and returned beside the value |
 | Splitting `groupBy` on commas by hand                            | `groupByKeys` — every key, outermost first, each one checked                                      |
 
@@ -232,7 +242,8 @@ table above, where `filters` values are `ServerFilterValue` (one string, or an
 array for a repeated param), `shapedFilters` is `ShapedFilter` per key,
 `typedFilters` is `TypedFilter` per key (`TextFilter`, `SelectFilter`,
 `ListFilter`, `BooleanFilter`, `NumberRangeFilter`, `DateRangeFilter`,
-`CustomTypedFilter`), `groupByKeys` lists every grouping key, `pivotCollapsed`
+`CustomTypedFilter`), `groupByKeys` lists every grouping key,
+`groupAggregates` is a `GroupAggregateOverrides`, `pivotCollapsed`
 is absent rather than empty when nothing is folded, and `rejected` is a list of
 `QueryRejection` — each carrying the `param` it came from, the `value` that
 arrived, and the `reason` it was refused.

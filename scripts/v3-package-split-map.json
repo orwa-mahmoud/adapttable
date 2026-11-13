@@ -54003,6 +54003,14 @@
       "behavior": ""
     },
     {
+      "export": "splitListParam",
+      "currentImport": "@adapttable/server",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/server",
+      "behavior": ""
+    },
+    {
       "export": "TextFilter",
       "currentImport": "@adapttable/server",
       "kind": "type",

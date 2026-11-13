@@ -2241,8 +2241,9 @@ and [connect a backend](./ai-http.md).
 
 **Server queries.** `parseTableQuery(input, schema)` from
 `@adapttable/server` validates a request against a `QuerySchema` and returns a
-`ServerTableQuery` — page, limit, offset, search, sort chain, grouping,
-filters, filter tree, pivot, the folded pivot groups in `pivotCollapsed`, and
+`ServerTableQuery` — page, limit, offset, search, sort chain, grouping, the
+reader's group aggregation per column in `groupAggregates`, filters, filter
+tree, pivot, the folded pivot groups in `pivotCollapsed`, and
 cursor, plus a `QueryRejection[]` naming everything it refused. The schema
 picks the level of checking: `columns: "any"` shapes every filter
 (`shapedFilters`, one `ShapedFilter` per key), a column list checks names,
@@ -2253,9 +2254,10 @@ and `filters` — a shorthand record or the table's own `FilterDef[]`, read as
 `CustomTypedFilter`), with `filterTypes` (`ServerFilterType`s) for registered
 types. `groupByKeys: true`
 lists every grouping key. `pickFilters(defs, keys)` scopes the declared
-filters per caller, and `splitFilterValues(raw)` inverts the table's
-multi-value encoding. `QueryInput` is a `Request`, `URL`, query string or
-`URLSearchParams`; `ServerFilterValue` is one filter's value. See
+filters per caller, and `splitListParam(raw)` inverts the table's
+multi-value encoding (`splitFilterValues` is its deprecated name).
+`QueryInput` is a `Request`, `URL`, query string or `URLSearchParams`;
+`ServerFilterValue` is one filter's value. See
 [server queries](./server-queries.md).
 
 **The query model without React.** `@adapttable/core/query` is the half of the

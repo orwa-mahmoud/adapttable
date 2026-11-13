@@ -38,12 +38,29 @@
  * @packageDocumentation
  */
 import {
+  DEFAULT_LIMIT,
   deserializePivotState,
+  FILTER_PREFIX,
+  FILTER_TREE_PARAM,
+  type GroupAggregateOverride,
+  type GroupAggregateOverrides,
   isFilterGroup,
+  MAX_LIMIT,
+  PARAM_GROUP_AGGREGATES,
+  PARAM_GROUP_BY,
+  PARAM_LIMIT,
+  PARAM_PAGE,
+  PARAM_PIVOT,
+  PARAM_SEARCH,
+  PARAM_SORT,
+  PARAM_SORT_BY,
+  PARAM_SORT_DIR,
   parseFilterTree,
+  parseGroupAggregateOverrides,
   type PivotConfig,
   type PivotUrlState,
   type QueryFilterGroup,
+  safeDecode,
   type SortDirection,
   type SortLevel,
 } from "@adapttable/core/query";
@@ -51,7 +68,7 @@ import {
 import {
   checkTree,
   declaredFilters,
-  FILTER_PREFIX,
+  type Refuse,
   type ServerFilterDef,
   type ServerFilterType,
   type ShapedFilter,
@@ -75,13 +92,13 @@ export {
   type TextFilter,
   type TypedFilter,
 } from "./filters";
+export { splitListParam } from "@adapttable/core/query";
 
 /**
- * The table's own ceiling on a page size, mirrored rather than imported: it
- * is part of the wire contract, and the parser has to know it even when the
- * schema names no maximum of its own.
+ * The cursor parameter: the server's own, beside the table's state, for a
+ * backend that pages by cursor.
  */
-const TABLE_MAX_LIMIT = 500;
+const PARAM_CURSOR = "cursor";
 
 /**
  * What a client is allowed to ask for.
@@ -125,11 +142,14 @@ export interface QuerySchema {
   groupByKeys?: boolean;
   /**
    * The largest page a client may ask for. Defaults to the table's own
-   * ceiling. A backend that pages by 25 and never expects more should say so
+   * ceiling, `MAX_LIMIT`. A backend that pages by 25 and never expects more should say so
    * here rather than discover `limit=100000` in production.
    */
   maxLimit?: number;
-  /** The page size when the request does not name one. Defaults to 25. */
+  /**
+   * The page size when the request does not name one. Defaults to the
+   * table's own, `DEFAULT_LIMIT`.
+   */
   defaultLimit?: number;
   /**
    * The URL namespace the table was mounted with (`urlKey`). Needed when two
@@ -171,6 +191,13 @@ export interface ServerTableQuery {
    * table grouped several levels deep (`groupBy=team,status`).
    */
   groupByKeys?: readonly string[];
+  /**
+   * The reader's aggregation choice per grouped column, for each column the
+   * schema allows: a built-in operation, a host-defined operation id, or
+   * `"none"` when the reader took the column's aggregate away. Operation ids
+   * are the client's words — map them to yours, never interpolate them.
+   */
+  groupAggregates?: GroupAggregateOverrides;
   /** Column filters, keyed by column. Only columns in the schema appear. */
   filters: Readonly<Record<string, ServerFilterValue>>;
   /**
@@ -247,9 +274,6 @@ function toParams(input: QueryInput): URLSearchParams {
   return new URL(input.url).searchParams;
 }
 
-/** The default page size, matching the table's own. */
-const DEFAULT_LIMIT = 25;
-
 /** Every column key a filter tree names, however deeply nested. */
 function treeColumns(group: QueryFilterGroup): string[] {
   const found: string[] = [];
@@ -291,12 +315,12 @@ export function parseTableQuery(
   };
 
   const { page, limit } = readPaging(get, schema, refuse);
-  const search = get("q") ?? undefined;
-  const cursor = get("cursor");
-  const sort = validSort(params, ns, allowed, refuse);
-  const grouping = readGrouping(get("groupBy"), schema, allowed, refuse);
+  const search = get(PARAM_SEARCH) ?? undefined;
+  const cursor = get(PARAM_CURSOR);
+  const sort = validSort(get, allowed, refuse);
+  const grouping = readGrouping(get, schema, allowed, refuse);
   const filtering = readFiltering(params, ns, schema, listed, allowed, refuse);
-  const pivot = validPivot(get("pivot"), allowed, refuse);
+  const pivot = validPivot(get(PARAM_PIVOT), allowed, refuse);
 
   return {
     page,
@@ -321,32 +345,37 @@ function readPaging(
   schema: QuerySchema,
   refuse: Refuse
 ): { readonly page: number; readonly limit: number } {
-  const ceiling = Math.min(schema.maxLimit ?? TABLE_MAX_LIMIT, TABLE_MAX_LIMIT);
-  const askedLimit = get("limit");
+  const ceiling = Math.min(schema.maxLimit ?? MAX_LIMIT, MAX_LIMIT);
+  const askedLimit = get(PARAM_LIMIT);
   const limit = readCount(askedLimit, schema.defaultLimit ?? DEFAULT_LIMIT);
   if (limit > ceiling) {
     refuse(
-      "limit",
+      PARAM_LIMIT,
       askedLimit ?? "",
       `above the maximum of ${String(ceiling)}`
     );
   }
-  return { page: readCount(get("page"), 1), limit: Math.min(limit, ceiling) };
+  return {
+    page: readCount(get(PARAM_PAGE), 1),
+    limit: Math.min(limit, ceiling),
+  };
 }
 
 /**
- * The grouping column, and every grouping key when the schema asks for them.
+ * The grouping column, every grouping key when the schema asks for them, and
+ * the reader's aggregation choices.
  *
  * Every schema answers with `groupBy` alone unless it sets `groupByKeys:
  * true`; then it also lists the keys, and refuses each one it does not allow
  * exactly once.
  */
 function readGrouping(
-  raw: string | null,
+  get: (name: string) => string | null,
   schema: QuerySchema,
   allowed: Allows,
   refuse: Refuse
-): Pick<ServerTableQuery, "groupBy" | "groupByKeys"> {
+): Pick<ServerTableQuery, "groupBy" | "groupByKeys" | "groupAggregates"> {
+  const raw = get(PARAM_GROUP_BY);
   const reportsKeys = schema.groupByKeys === true;
   const groupByKeys = reportsKeys
     ? validGroupByKeys(raw, allowed, refuse)
@@ -356,9 +385,15 @@ function readGrouping(
     allowed,
     reportsKeys ? () => undefined : refuse
   );
+  const groupAggregates = validGroupAggregates(
+    get(PARAM_GROUP_AGGREGATES),
+    allowed,
+    refuse
+  );
   return {
     ...(groupBy === undefined ? {} : { groupBy }),
     ...(groupByKeys === undefined ? {} : { groupByKeys }),
+    ...(groupAggregates === undefined ? {} : { groupAggregates }),
   };
 }
 
@@ -379,7 +414,7 @@ function readFiltering(
   ServerTableQuery,
   "filters" | "shapedFilters" | "typedFilters" | "filterTree"
 > {
-  const tree = params.get(`${ns}ft`);
+  const tree = params.get(`${ns}${FILTER_TREE_PARAM}`);
   if (schema.filters === undefined) {
     const filters = validFilters(params, ns, allowed, refuse);
     const filterTree = validTree(tree, allowed, refuse);
@@ -415,42 +450,39 @@ function readCount(raw: string | null, fallback: number): number {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
-/** What `refuse` looks like to the validators below. */
-type Refuse = (param: string, value: string, reason: string) => void;
-
 /** Whether the schema lets a client name a column. */
 type Allows = (key: string) => boolean;
 
 /** The sort chain, minus any level naming a column the client may not sort. */
 function validSort(
-  params: URLSearchParams,
-  ns: string,
+  get: (name: string) => string | null,
   allowed: Allows,
   refuse: Refuse
 ): SortLevel[] {
-  const levels = readChain(params.get(`${ns}sort`));
+  const levels = readChain(get(PARAM_SORT));
   if (levels.length > 0) {
     return levels.filter((level) => {
       if (allowed(level.key)) return true;
-      refuse("sort", level.key, "not a sortable column");
+      refuse(PARAM_SORT, level.key, "not a sortable column");
       return false;
     });
   }
-  // The single-column form, which predates the chain and still appears in
-  // older links.
-  const by = params.get(`${ns}sortBy`);
+  // The single-column form the table writes for a one-column sort.
+  const by = get(PARAM_SORT_BY);
   if (by === null || by === "") return [];
   if (!allowed(by)) {
-    refuse("sortBy", by, "not a sortable column");
+    refuse(PARAM_SORT_BY, by, "not a sortable column");
     return [];
   }
-  const raw = params.get(`${ns}sortDir`);
+  const raw = get(PARAM_SORT_DIR);
   const dir: SortDirection = raw === "desc" ? "desc" : "asc";
   return [{ key: by, dir }];
 }
 
 /**
- * The multi-sort chain as the table writes it: `name:asc,team:desc`.
+ * The multi-sort chain as the table writes it: `name:asc,team:desc`, each key
+ * percent-encoded so a key holding `:` or `,` survives the chain's own
+ * separators. A key that does not decode is kept as it arrived.
  *
  * A malformed level is skipped rather than failing the chain — losing one
  * level of an ordering is a smaller lie than losing the ordering.
@@ -461,20 +493,9 @@ function readChain(raw: string | null): SortLevel[] {
   for (const part of raw.split(",")) {
     const [key, dir] = part.split(":");
     if (!key) continue;
-    out.push({ key: decodeKey(key), dir: dir === "desc" ? "desc" : "asc" });
+    out.push({ key: safeDecode(key), dir: dir === "desc" ? "desc" : "asc" });
   }
   return out;
-}
-
-/** A malformed `%` escape the table never writes; a key carrying one is kept. */
-const BROKEN_ESCAPE = /%(?![\dA-Fa-f]{2})/;
-
-/**
- * A sort key as the table wrote it: percent-encoded, so a key holding `:` or
- * `,` survives the chain's own separators.
- */
-function decodeKey(key: string): string {
-  return BROKEN_ESCAPE.test(key) ? key : decodeURIComponent(key);
 }
 
 /** The grouping column, if the client may group by it. */
@@ -485,7 +506,7 @@ function validGroupBy(
 ): string | undefined {
   if (raw === null || raw === "") return undefined;
   if (allowed(raw)) return raw;
-  refuse("groupBy", raw, "not a groupable column");
+  refuse(PARAM_GROUP_BY, raw, "not a groupable column");
   return undefined;
 }
 
@@ -504,10 +525,29 @@ function validGroupByKeys(
     .filter((key) => key.length > 0);
   const kept = keys.filter((key) => {
     if (allowed(key)) return true;
-    refuse("groupBy", key, "not a groupable column");
+    refuse(PARAM_GROUP_BY, key, "not a groupable column");
     return false;
   });
   return kept.length === 0 ? undefined : kept;
+}
+
+/**
+ * The reader's aggregation choice per column, minus any column the schema
+ * does not allow. The operation ids pass through: a host may define its own,
+ * so there is nothing to check them against.
+ */
+function validGroupAggregates(
+  raw: string | null,
+  allowed: Allows,
+  refuse: Refuse
+): GroupAggregateOverrides | undefined {
+  const overrides = parseGroupAggregateOverrides(raw);
+  const kept: Partial<Record<string, GroupAggregateOverride>> = {};
+  for (const key of Object.keys(overrides)) {
+    if (allowed(key)) kept[key] = overrides[key];
+    else refuse(PARAM_GROUP_AGGREGATES, key, "not an aggregatable column");
+  }
+  return Object.keys(kept).length === 0 ? undefined : kept;
 }
 
 /**
@@ -525,12 +565,12 @@ function typedTree(
   if (raw === null || raw === "") return undefined;
   const tree = parseFilterTree(raw);
   if (!tree) {
-    refuse("ft", raw, "not a readable filter tree");
+    refuse(FILTER_TREE_PARAM, raw, "not a readable filter tree");
     return undefined;
   }
   const checked = checkTree(tree, defs, custom);
   if ("problem" in checked) {
-    refuse("ft", raw, checked.problem);
+    refuse(FILTER_TREE_PARAM, raw, checked.problem);
     return undefined;
   }
   return checked.tree;
@@ -576,12 +616,16 @@ function validTree(
   if (raw === null || raw === "") return undefined;
   const tree = parseFilterTree(raw);
   if (!tree) {
-    refuse("ft", raw, "not a readable filter tree");
+    refuse(FILTER_TREE_PARAM, raw, "not a readable filter tree");
     return undefined;
   }
   const unknown = treeColumns(tree).filter((field) => !allowed(field));
   if (unknown.length > 0) {
-    refuse("ft", unknown.join(", "), "filter tree names unknown columns");
+    refuse(
+      FILTER_TREE_PARAM,
+      unknown.join(", "),
+      "filter tree names unknown columns"
+    );
     return undefined;
   }
   return tree;
@@ -605,7 +649,7 @@ function validPivot(
   const { config, collapsed } = deserializePivotState(raw);
   const keep = (key: string, what: string) => {
     if (allowed(key)) return true;
-    refuse("pivot", key, `not a ${what} column`);
+    refuse(PARAM_PIVOT, key, `not a ${what} column`);
     return false;
   };
   const rows = config.rows.filter((key) => keep(key, "pivotable"));
