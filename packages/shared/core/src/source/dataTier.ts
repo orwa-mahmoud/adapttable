@@ -138,6 +138,55 @@ export function createQueryEmitter(seenKey?: string): QueryEmitter {
   };
 }
 
+/**
+ * Sends a server tier's query once per real change.
+ *
+ * @internal
+ */
+export interface QuerySender {
+  /**
+   * Send `query` unless it is the one last sent for `generation`, aborting
+   * the request it supersedes. Without a listener nothing is sent and nothing
+   * is recorded, so the handler a table gains when it moves onto the server
+   * tier hears the query it is already showing.
+   */
+  readonly send: (
+    listener: TableQueryListener | undefined,
+    query: TableQuery,
+    queryKey: string,
+    generation: number
+  ) => void;
+  /** Abort the request in flight and forget it, so the next send goes out. */
+  readonly dispose: () => void;
+}
+
+/**
+ * Create a query sender. A server tier hands one from its loader to its engine,
+ * so the engine's first query supersedes the one sent before it existed.
+ *
+ * @internal
+ */
+export function createQuerySender(): QuerySender {
+  const emitter = createQueryEmitter();
+  let sent: string | undefined;
+  let abortSent: (() => void) | undefined;
+  return {
+    send(listener, query, queryKey, generation) {
+      const key = `${queryKey}#${String(generation)}`;
+      if (sent === key) return;
+      abortSent?.();
+      abortSent = undefined;
+      sent = listener ? key : undefined;
+      if (listener) abortSent = emitter.emit(listener, query, queryKey);
+    },
+    dispose() {
+      abortSent?.();
+      abortSent = undefined;
+      sent = undefined;
+    },
+  };
+}
+
 /* ── Async filter options ──────────────────────────────────────────── */
 
 /**

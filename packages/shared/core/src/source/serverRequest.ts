@@ -20,6 +20,7 @@ import type {
   SortLevel,
   TableQuery,
 } from "../contracts/query";
+import { settledFilterTree } from "../filters/filterTreeCodec";
 import {
   type GroupAggregateOverrides,
   withQueryAggregateOverrides,
@@ -151,6 +152,89 @@ export function buildTableQuery(input: TableQueryInput): TableQuery {
       input.supports
     ),
   };
+}
+
+/**
+ * The view state and settings a server tier's query is built from.
+ *
+ * @internal
+ */
+export interface ServerQueryInput {
+  /** The view-state store's snapshot. */
+  readonly view: {
+    readonly page: number;
+    readonly limit: number;
+    readonly search: string;
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly sortLevels: readonly SortLevel[];
+    readonly groupBy: string | undefined;
+    readonly extra: ExtraFilters;
+    readonly filterTree: QueryFilterGroup | undefined;
+  };
+  /** What the endpoint can answer. */
+  readonly supports: QuerySupport | undefined;
+  /** Tree nodes the reader has open. */
+  readonly expandedIds: readonly string[] | undefined;
+  /** Filter keys to count distinct values for. */
+  readonly facetKeys: readonly string[] | undefined;
+  /** The aggregates the query asks for, from {@link effectiveQueryAggregates}. */
+  readonly aggregates: readonly QueryAggregate[] | undefined;
+  /** The token that opens the page, in cursor mode. */
+  readonly cursor: string | undefined;
+}
+
+/**
+ * The query a server tier sends for its view, and its value key.
+ *
+ * @internal
+ */
+export function serverQuery(input: ServerQueryInput): {
+  readonly query: TableQuery;
+  readonly queryKey: string;
+} {
+  const { view } = input;
+  const query = buildTableQuery({
+    page: view.page,
+    limit: view.limit,
+    search: view.search,
+    sortBy: view.sortBy,
+    sortDir: view.sortDir,
+    sortLevels: view.sortLevels,
+    filters: view.extra,
+    groupBy: queryGroupBy(view.groupBy),
+    aggregates: input.aggregates,
+    cursor: input.cursor,
+    expandedIds: input.expandedIds,
+    filterTree: settledFilterTree(view.filterTree),
+    facets: input.facetKeys,
+    supports: input.supports,
+  });
+  // Value-keyed, so an identical query is never sent twice.
+  return { query, queryKey: stableKey(query) };
+}
+
+/**
+ * Whether a request can carry aggregates at all: the host asked for some,
+ * a column offers them, or — without columns to check them against — the
+ * reader chose one. When it cannot, {@link effectiveQueryAggregates} is
+ * `undefined` without resolving a single operation.
+ *
+ * @internal
+ */
+export function requestsAggregates<TRow>(
+  aggregates: readonly QueryAggregate[] | undefined,
+  overrides: GroupAggregateOverrides,
+  columns: readonly ColumnMetadata<TRow>[] | undefined
+): boolean {
+  if (aggregates !== undefined && aggregates.length > 0) return true;
+  if (columns) {
+    return columns.some(
+      (column) =>
+        column.aggregatable !== undefined && column.aggregatable !== false
+    );
+  }
+  return Object.values(overrides).some((choice) => choice !== undefined);
 }
 
 /* ── Loading ───────────────────────────────────────────────────────── */

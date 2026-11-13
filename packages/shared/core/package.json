@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/core",
   "version": "3.13.1",
-  "description": "Framework-neutral AdaptTable engine \u2014 models, state, URL sync, and a unified client/server TableSource. Zero UI-kit or React imports.",
+  "description": "Framework-neutral AdaptTable engine — models, state, URL sync, and a unified client/server TableSource. Zero UI-kit or React imports.",
   "keywords": [
     "data-table",
     "table",
@@ -168,6 +168,12 @@
       }
     },
     "./package.json": "./package.json"
+  },
+  "imports": {
+    "#server-engine": {
+      "import": "./dist/serverEngine.js",
+      "require": "./dist/serverEngine.cjs"
+    }
   },
   "scripts": {
     "build": "node ../../../scripts/build-library.mjs",

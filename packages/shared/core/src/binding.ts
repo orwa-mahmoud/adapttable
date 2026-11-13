@@ -617,6 +617,11 @@ export type {
   FlattenedColumns,
 } from "./columns/columnTree";
 export type { GroupedHeaderAlign } from "./columns/headerGroups";
+export type {
+  QueryExtensions,
+  QuerySupport,
+  TableQuery,
+} from "./contracts/query";
 export type { DisplayValue } from "./display";
 export type {
   CustomCellEditorConflict,
@@ -932,11 +937,18 @@ export type {
   TableSourceCapabilities,
   TotalCountCapability,
 } from "./source/capabilities";
+export type { TableQueryListener } from "./source/dataTier";
 export {
   frontendRowModelOf,
   withFrontendRowModel,
 } from "./source/frontendRowModel";
 export type { FrontendEngineFactory } from "./source/frontendSource";
+export {
+  createLazyServerSource,
+  type LazyServerSource,
+  type ServerEnginePhase,
+  type ServerTierFrame,
+} from "./source/lazyServerSource";
 export type {
   AggregateFn,
   QueryAggregate,
@@ -946,6 +958,12 @@ export type {
 } from "./source/queryContract";
 export type { QueryGroupRow } from "./source/queryGroups";
 export { commitSearchOnBlur } from "./source/searchInputFlush";
+export type {
+  ServerSource,
+  ServerSourceConfig,
+  ServerSourceFrame,
+  ServerSourceViewState,
+} from "./source/serverSource";
 export {
   type CachedSnapshot,
   cachedSnapshot,

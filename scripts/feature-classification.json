@@ -782,6 +782,7 @@
       "core/src/source/TableSource.ts",
       "core/src/source/dataTier.ts",
       "core/src/source/frontendSource.ts",
+      "core/src/source/lazyServerSource.ts",
       "core/src/source/queryContract.ts",
       "core/src/source/queryKey.ts",
       "core/src/source/querySource.ts",

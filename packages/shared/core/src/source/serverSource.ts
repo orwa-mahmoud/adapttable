@@ -24,7 +24,6 @@ import type {
   SortLevel,
   TableQuery,
 } from "../contracts/query";
-import { settledFilterTree } from "../filters/filterTreeCodec";
 import {
   type GroupAggregateOverrides,
   queryAggregateOps,
@@ -32,14 +31,16 @@ import {
 import type { GroupAggregateOps } from "../grouping/groupRowLayout";
 import type { ResolvedPaginationMode } from "../types";
 import { devWarn } from "../utils/devWarn";
-import { stableKey } from "../utils/stableKey";
-import { createQueryEmitter, type TableQueryListener } from "./dataTier";
+import {
+  createQuerySender,
+  type QuerySender,
+  type TableQueryListener,
+} from "./dataTier";
 import { createResponseAggregateOps } from "./responseAggregateOps";
 import {
   appendBaseKey,
   appendedRows,
   type AppendStash,
-  buildTableQuery,
   canRequestCursorPage,
   clampedPage,
   createFirstLoadLatch,
@@ -48,8 +49,9 @@ import {
   cursorTrailKey,
   effectiveQueryAggregates,
   EMPTY_CURSOR_TRAIL,
-  queryGroupBy,
+  type FirstLoadLatch,
   recordCursor,
+  serverQuery,
   staleAppendStash,
 } from "./serverRequest";
 import { createSourceSignal } from "./sourceState";
@@ -199,6 +201,20 @@ interface Latest<TRow> {
 }
 
 /**
+ * What a server tier hands its engine when the engine arrives after the table
+ * mounted: the sender that may already have sent the first query, and the
+ * first-load latch that has been watching the host.
+ *
+ * @internal
+ */
+export interface ServerSourceHandoff {
+  readonly sender: QuerySender;
+  readonly firstLoad: FirstLoadLatch;
+  /** Refetches already asked for, so the next one is a new request. */
+  readonly generation: number;
+}
+
+/**
  * Create one table's server tier.
  *
  * @returns The source; call {@link ServerSource.update} before the rest.
@@ -206,22 +222,34 @@ interface Latest<TRow> {
  * @public
  */
 export function createServerSource<TRow>(): ServerSource<TRow> {
+  return createServerSourceWith<TRow>({
+    sender: createQuerySender(),
+    firstLoad: createFirstLoadLatch(),
+    generation: 0,
+  });
+}
+
+/**
+ * Create one table's server tier over the sender and latch it continues.
+ *
+ * @internal
+ */
+export function createServerSourceWith<TRow>(
+  handoff: ServerSourceHandoff
+): ServerSource<TRow> {
   const signal = createSourceSignal();
   const { notify } = signal;
 
-  const emitter = createQueryEmitter();
-  const firstLoad = createFirstLoadLatch();
+  const { sender, firstLoad } = handoff;
   const aggregateOps = createResponseAggregateOps();
 
   let cursors: CursorTrail = EMPTY_CURSOR_TRAIL;
   let stash: AppendStash<TRow> | null = null;
-  let generation = 0;
+  let generation = handoff.generation;
   let cursorBase: string | undefined;
   let latest: Latest<TRow> | undefined;
 
   // What the last commit acted on, so each rule runs when its inputs move.
-  let sent: string | undefined;
-  let abortSent: (() => void) | undefined;
   let recordedFor: string | undefined;
 
   function update(
@@ -230,7 +258,7 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
   ): ServerSourceFrame<TRow> {
     const { rows, total, supports } = config;
     const loading = config.loading ?? false;
-    const { page, limit, search, sortBy, sortDir, sortLevels, extra } = view;
+    const { page, limit, extra } = view;
     const paged = config.paginationMode === "paged";
 
     const aggregates = effectiveQueryAggregates(
@@ -242,24 +270,14 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
     // Cursor mode keeps the trail of every token the server has handed out —
     // what lets the user page back through what they have already seen.
     const cursorMode = supports?.cursor === true;
-    const query = buildTableQuery({
-      page,
-      limit,
-      search,
-      sortBy,
-      sortDir,
-      sortLevels,
-      filters: extra,
-      groupBy: queryGroupBy(view.groupBy),
+    const { query, queryKey } = serverQuery({
+      view,
+      supports,
+      expandedIds: config.expandedIds,
+      facetKeys: config.facetKeys,
       aggregates,
       cursor: cursorMode ? cursors[page - 1] : undefined,
-      expandedIds: config.expandedIds,
-      filterTree: settledFilterTree(view.filterTree),
-      facets: config.facetKeys,
-      supports,
     });
-    // Value-keyed, so an identical query is never sent twice.
-    const queryKey = stableKey(query);
 
     const requested = queryAggregateOps(aggregates);
     aggregateOps.remember(queryKey, requested);
@@ -304,20 +322,9 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
     return frame;
   }
 
-  /**
-   * One request per real change; the one it supersedes is aborted. Without a
-   * handler nothing is sent and nothing is recorded, so the handler a table
-   * gains when it moves onto the server tier hears the query it is showing.
-   */
+  /** One request per real change; the one it supersedes is aborted. */
   function send({ config, frame }: Latest<TRow>): void {
-    const key = `${frame.queryKey}#${String(generation)}`;
-    if (sent === key) return;
-    abortSent?.();
-    abortSent = undefined;
-    const listener = config.onQueryChange;
-    sent = listener ? key : undefined;
-    if (listener)
-      abortSent = emitter.emit(listener, frame.query, frame.queryKey);
+    sender.send(config.onQueryChange, frame.query, frame.queryKey, generation);
   }
 
   /**
@@ -431,10 +438,6 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
     },
     subscribe: signal.subscribe,
     revision: signal.revision,
-    dispose() {
-      abortSent?.();
-      abortSent = undefined;
-      sent = undefined;
-    },
+    dispose: sender.dispose,
   };
 }

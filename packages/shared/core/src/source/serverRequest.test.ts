@@ -13,6 +13,8 @@ import {
   queryAggregationSource,
   queryGroupBy,
   recordCursor,
+  requestsAggregates,
+  serverQuery,
   staleAppendStash,
 } from "./serverRequest";
 
@@ -159,5 +161,92 @@ describe("infinite pages", () => {
     expect(staleAppendStash(stash, key, false)).toBe(false);
     expect(staleAppendStash(stash, "other", false)).toBe(true);
     expect(staleAppendStash(stash, key, true)).toBe(true);
+  });
+});
+
+describe("requestsAggregates", () => {
+  const aggregatable = {
+    key: "amount",
+    aggregatable: {
+      operations: ["sum" as const, "avg" as const],
+      default: "sum" as const,
+    },
+  };
+  const plain = { key: "name" };
+  const support = { grouping: true, aggregates: true };
+
+  it.each([
+    ["no columns, no choices", undefined, {}, undefined],
+    ["plain columns and a stray choice", undefined, { name: "sum" }, [plain]],
+    [
+      "a column that offers nothing",
+      undefined,
+      {},
+      [{ ...plain, aggregatable: false }],
+    ],
+    [
+      "no columns and an absent choice",
+      undefined,
+      { amount: undefined },
+      undefined,
+    ],
+  ])(
+    "when it says no request can carry aggregates, none does: %s",
+    (_name, base, overrides, columns) => {
+      expect(requestsAggregates(base, overrides, columns)).toBe(false);
+      expect(
+        effectiveQueryAggregates(base, overrides, columns, support)
+      ).toBeUndefined();
+    }
+  );
+
+  it("says yes for a host request, an aggregatable column, or a reader's choice without columns", () => {
+    expect(
+      requestsAggregates([{ key: "amount", fn: "sum" }], {}, [plain])
+    ).toBe(true);
+    expect(requestsAggregates(undefined, {}, [plain, aggregatable])).toBe(true);
+    expect(requestsAggregates(undefined, { amount: "sum" }, undefined)).toBe(
+      true
+    );
+    expect(
+      effectiveQueryAggregates(undefined, {}, [aggregatable], support)
+    ).toEqual([{ key: "amount", fn: "sum" }]);
+  });
+});
+
+describe("serverQuery", () => {
+  it("keys the query by value, so an equal view keys the same", () => {
+    const input = {
+      view: {
+        page: 2,
+        limit: 25,
+        search: "ada",
+        sortBy: "name",
+        sortDir: "asc" as const,
+        sortLevels: [],
+        groupBy: "team",
+        extra: { status: "open" },
+        filterTree: undefined,
+      },
+      supports: { grouping: true },
+      expandedIds: undefined,
+      facetKeys: undefined,
+      aggregates: undefined,
+      cursor: undefined,
+    };
+    const first = serverQuery(input);
+    expect(first.query).toMatchObject({
+      page: 2,
+      limit: 25,
+      search: "ada",
+      groupBy: ["team"],
+      filters: { status: "open" },
+    });
+    expect(serverQuery({ ...input, view: { ...input.view } }).queryKey).toBe(
+      first.queryKey
+    );
+    expect(
+      serverQuery({ ...input, view: { ...input.view, page: 3 } }).queryKey
+    ).not.toBe(first.queryKey);
   });
 });

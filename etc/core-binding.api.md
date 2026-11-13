@@ -1871,6 +1871,9 @@ export function coreVirtualize(options?: VirtualizeInput): CoreFeature;
 export function createFeatureHost<TPanel extends SidePanelEntry = SidePanelEntry>(features: readonly FeatureSetup<unknown, TPanel>[] | undefined): FeatureHostState;
 
 // @public
+export function createLazyServerSource<TRow>(): LazyServerSource<TRow>;
+
+// @public
 export function createMenuNavigation(): MenuNavigationController;
 
 // @public
@@ -4540,6 +4543,14 @@ export interface LazyChildrenState<TRow> {
 }
 
 // @public
+export interface LazyServerSource<TRow> extends Omit<ServerSource<TRow>, "update"> {
+    readonly load: () => void;
+    readonly phase: () => ServerEnginePhase;
+    readonly throwIfFailed: () => void;
+    readonly update: (config: ServerSourceConfig<TRow>, view: ServerSourceViewState) => ServerTierFrame<TRow>;
+}
+
+// @public
 export interface LeafColumn {
     // (undocumented)
     readonly groupable?: boolean;
@@ -5102,6 +5113,16 @@ export interface QueryContribution {
 }
 
 // @public
+export interface QueryExtensions {
+    aggregates?: readonly QueryAggregate[];
+    cursor?: string;
+    expandedIds?: readonly string[];
+    facets?: readonly string[];
+    filterTree?: QueryFilterGroup;
+    groupBy?: readonly string[];
+}
+
+// @public
 export interface QueryFilterGroup {
     combinator: "and" | "or";
     conditions: readonly (QueryCondition | QueryFilterGroup)[];
@@ -5114,6 +5135,17 @@ export interface QueryGroupRow<TRow = unknown> {
     groups?: readonly QueryGroupRow<TRow>[];
     rows?: readonly TRow[];
     value: unknown;
+}
+
+// @public
+export interface QuerySupport {
+    aggregateOperations?: readonly string[];
+    aggregates?: boolean;
+    cursor?: boolean;
+    facets?: boolean;
+    filterTree?: boolean;
+    grouping?: boolean;
+    tree?: boolean;
 }
 
 // @public
@@ -6055,6 +6087,67 @@ export interface SelectionStatsSlotProps {
 export interface SelectionStatsSlots<TNode = unknown> {
     readonly Stats: (props: SelectionStatsSlotProps) => TNode;
 }
+
+// @public
+export type ServerEnginePhase = "pending" | "ready" | "failed";
+
+// @public
+export interface ServerSource<TRow> {
+    readonly commit: () => void;
+    readonly dispose: () => void;
+    readonly fetchNextPage: () => void;
+    readonly refetch: () => void;
+    readonly revision: () => number;
+    readonly setPage: (page: number) => void;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly update: (config: ServerSourceConfig<TRow>, view: ServerSourceViewState) => ServerSourceFrame<TRow>;
+}
+
+// @public
+export interface ServerSourceConfig<TRow> {
+    readonly aggregates?: readonly QueryAggregate[];
+    readonly columns?: readonly ColumnMetadata<TRow>[];
+    readonly error?: unknown;
+    readonly expandedIds?: readonly string[];
+    readonly facetKeys?: readonly string[];
+    readonly loading?: boolean;
+    readonly nextCursor?: string | null;
+    readonly onQueryChange?: TableQueryListener;
+    readonly paginationMode: ResolvedPaginationMode;
+    readonly responseKey?: string;
+    readonly rows: readonly TRow[];
+    readonly supports?: QuerySupport;
+    readonly total: number;
+}
+
+// @public
+export interface ServerSourceFrame<TRow> {
+    readonly groupAggregations: GroupAggregateOps | undefined;
+    readonly hasNextPage: boolean;
+    readonly isFetchingNextPage: boolean;
+    readonly isLoading: boolean;
+    readonly query: TableQuery;
+    readonly queryKey: string;
+    readonly rows: readonly TRow[];
+}
+
+// @public
+export interface ServerSourceViewState {
+    readonly extra: ExtraFilters;
+    readonly filterTree: QueryFilterGroup | undefined;
+    readonly groupAggregateOverrides: GroupAggregateOverrides;
+    readonly groupBy: string | undefined;
+    readonly limit: number;
+    readonly page: number;
+    readonly search: string;
+    readonly setPage: (page: number) => void;
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly sortLevels: readonly SortLevel[];
+}
+
+// @public
+export type ServerTierFrame<TRow> = Omit<ServerSourceFrame<TRow>, "query" | "queryKey">;
 
 // @public
 export function shallowEqualByKeys<T>(keys: readonly (keyof T)[], prev: Readonly<T>, next: Readonly<T>): boolean;
@@ -7250,6 +7343,23 @@ export type TableOperation = {
     readonly type: "setSelection";
     readonly ids?: readonly string[];
 };
+
+// @public
+export interface TableQuery extends QueryExtensions {
+    filters: ExtraFilters;
+    limit: number;
+    page: number;
+    search: string;
+    sortBy: string | undefined;
+    sortDir: SortDirection | undefined;
+    sortLevels: readonly SortLevel[];
+}
+
+// @public
+export type TableQueryListener = (query: TableQuery, info: {
+    signal: AbortSignal;
+    key: string;
+}) => void | Promise<void>;
 
 // @public
 export type TableRevisionAxis = keyof TableRevisions;

@@ -10454,7 +10454,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "contracts/query.ts#QueryExtensions",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "QueryGroupsPage",
@@ -10520,7 +10520,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "contracts/query.ts#QuerySupport",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "RangeFieldWidget",
@@ -11323,7 +11323,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "source/serverSource.ts#ServerSource",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "ServerSourceConfig",
@@ -11334,7 +11334,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "source/serverSource.ts#ServerSourceConfig",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "ServerSourceFrame",
@@ -11345,7 +11345,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "source/serverSource.ts#ServerSourceFrame",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "ServerSourceViewState",
@@ -11356,7 +11356,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "source/serverSource.ts#ServerSourceViewState",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "ShellOperation",
@@ -11653,7 +11653,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "contracts/query.ts#TableQuery",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "TableQueryInput",
@@ -11686,7 +11686,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "source/dataTier.ts#TableQueryListener",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "TableQueryParams",
@@ -13556,6 +13556,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/liveFeatureHost.ts#createFeatureHost",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "createLazyServerSource",
+      "kind": "runtime",
+      "module": "source/lazyServerSource.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/lazyServerSource.ts#createLazyServerSource",
       "subpaths": ["./binding"]
     },
     {
@@ -18421,6 +18432,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "LazyServerSource",
+      "kind": "type",
+      "module": "source/lazyServerSource.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/lazyServerSource.ts#LazyServerSource",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "LeafColumn",
       "kind": "type",
       "module": "layout/desktopHeader.ts",
@@ -19122,6 +19144,28 @@
       "forward": true,
       "deprecated": false,
       "identity": "focus/selectionStatsContract.ts#SelectionStatsSlots",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "ServerEnginePhase",
+      "kind": "type",
+      "module": "source/lazyServerSource.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/lazyServerSource.ts#ServerEnginePhase",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "ServerTierFrame",
+      "kind": "type",
+      "module": "source/lazyServerSource.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/lazyServerSource.ts#ServerTierFrame",
       "subpaths": ["./binding"]
     },
     {

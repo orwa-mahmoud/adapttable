@@ -17818,7 +17818,24 @@ explains which import a program changes. This list is the reference.
   records the cursor the host returned; `setPage`, `fetchNextPage` and
   `refetch` are the source's own actions, `subscribe` / `revision` report when
   its state moved, and `dispose()` aborts the request in flight.
-  `useServerData` runs on it.
+- `createLazyServerSource()` — the server tier a binding holds for every
+  table, as a `LazyServerSource`, with its engine loaded on demand from
+  `@adapttable/core/binding`: `load()` starts fetching the engine the first
+  time a table is on the server tier, and every later table creates it at
+  once. Until it lands, `update` returns a `ServerTierFrame` — the engine's
+  first frame without the query: the host's rows, `isLoading`,
+  `hasNextPage` — and `commit()` sends the first query itself, so the
+  request travels beside the engine. A query that asks for aggregates needs
+  the engine and follows it. `refetch` resends that first query; `setPage`
+  and `fetchNextPage` wait for the engine, which takes over the request
+  already sent without sending it again.
+  `phase()` (`ServerEnginePhase`) says whether the engine is `"pending"`,
+  `"ready"` or `"failed"`; a failed load is thrown from `update` and from
+  `throwIfFailed()`. The entry also names the types its signature uses:
+  `ServerSource`, `ServerSourceConfig`, `ServerSourceFrame`,
+  `ServerSourceViewState`, `TableQueryListener`, `TableQuery`,
+  `QueryExtensions` and `QuerySupport`. `useServerData`, Vue's
+  `useServerData` and Angular's `injectServerData` run on it.
 - `createQuerySource()` — the query-library tier as a `QuerySource`: call
   `params(config, view)` with the host's `QuerySourceConfig` and the
   view-state store's snapshot for the params to hand the library (the same

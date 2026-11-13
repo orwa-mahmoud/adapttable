@@ -14795,6 +14795,14 @@
       "behavior": ""
     },
     {
+      "export": "createLazyServerSource",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "createMenuNavigation",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -17531,6 +17539,14 @@
       "behavior": ""
     },
     {
+      "export": "LazyServerSource",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "LeafColumn",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -18147,6 +18163,14 @@
       "behavior": ""
     },
     {
+      "export": "QueryExtensions",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "QueryFilterGroup",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -18156,6 +18180,14 @@
     },
     {
       "export": "QueryGroupRow",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "QuerySupport",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -19219,6 +19251,54 @@
       "behavior": ""
     },
     {
+      "export": "ServerEnginePhase",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ServerSource",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ServerSourceConfig",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ServerSourceFrame",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ServerSourceViewState",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ServerTierFrame",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "shallowEqualByKeys",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -19892,6 +19972,22 @@
     },
     {
       "export": "TableOperation",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "TableQuery",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "TableQueryListener",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
