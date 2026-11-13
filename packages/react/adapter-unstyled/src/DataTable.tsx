@@ -1,43 +1,22 @@
 import {
-  ACTIVE_FILTER_CHIPS,
-  AGENT_APPROVAL,
-  AGENT_APPROVAL_STATE,
-  BATCH_EDIT_BAR,
-  BULK_BAR,
-  COLUMN_MENU,
-  COMMAND_PALETTE_LIVE,
-  contextMenuCopyTarget,
-  ContextMenuLiveGate,
-  DataTableShellView,
-  FeatureHostProvider,
+  type DataTableShellResult,
   FeatureProviders,
-  FeatureSlot,
-  fillSlot,
-  FILTER_DRAWER,
-  FILTERS_FORM,
-  type FiltersFormSlotProps,
-  FIND_BAR,
-  GRID_FOCUS_ANNOUNCER,
-  GROUPING_PANEL,
-  type GroupingPanelSlotProps,
-  OptionalSidePanel,
-  resolveStickyToolbar,
-  ROW_REORDER_ANNOUNCER,
-  SAVED_VIEWS,
-  showSimpleFilterFields,
-  SIDE_PANEL,
-  STATUS_BAR,
-  type TableSource,
-  TableStatusAnnouncer,
-  useDataTableShell,
-  useFeatureState,
+  type KitSkeletonShape,
+  type KitTable,
+  type KitTableFrameProps,
+  type KitToolbarProps,
+  TableComposition,
+  type TableErrorState,
+  type TableLabels,
   useMountStagger,
-  useStickyToolbarLayout,
   useTableFeatures,
 } from "@adapttable/react/adapter";
-import type { ReactElement, ReactNode, RefObject } from "react";
+import type { CSSProperties } from "react";
 
-import { ClassNamesProvider } from "./components/classNamesContext";
+import {
+  ClassNamesProvider,
+  useClassNames,
+} from "./components/classNamesContext";
 import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
 import { MobileCards } from "./components/MobileCards";
@@ -46,544 +25,209 @@ import { PortalContainerProvider } from "./components/portalContainer";
 import { LoadingState } from "./components/TableSkeleton";
 import { Toolbar } from "./components/Toolbar";
 import { cx } from "./cx";
-import type { DataTableClassNames, DataTableProps } from "./types";
+import type { DataTableProps } from "./types";
 
-// A stable default: the memoized desktop rows compare `classNames` by
-// identity, so an inline `{}` default would defeat them on every render.
-const NO_CLASSNAMES: DataTableClassNames = {};
-
-/**
- * `DataTableProps` after tier resolution: the source is definite (whichever
- * tier provided it) and `filters` is plain JSX (the auto-built form when the
- * caller passed the declarative array).
- */
-type ResolvedDataTableProps<TRow> = Omit<
-  DataTableProps<TRow>,
-  "source" | "filters"
-> & {
-  source: TableSource<TRow>;
-  filters?: ReactNode;
+const TOOLBAR: CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  rowGap: 8,
 };
 
-/** The shell's return shape, derived so no extra public type is needed. */
-type ShellResult<TRow> = ReturnType<typeof useDataTableShell<TRow>>;
-
-interface DataTableBodyProps<TRow> {
-  chrome: ShellResult<TRow>["chrome"];
-  props: Readonly<ResolvedDataTableProps<TRow>>;
-  classNames: NonNullable<DataTableProps<TRow>["classNames"]>;
-  labels: ShellResult<TRow>["labels"];
-  /** The shell's kit-agnostic render bundle, spread straight onto the renderer. */
-  tableProps: ShellResult<TRow>["tableProps"];
-}
-
-function DataTableBody<TRow>({
-  chrome,
-  props,
-  classNames,
+/**
+ * The table's regions in reading order, as semantic markup with class hooks:
+ * the root, the toolbar host, the bars, a native refresh progress, the body,
+ * the load-more button and the footers, with the overlays last.
+ */
+function Frame({
+  rootProps,
+  rootRef,
+  fullscreenContainer,
+  announcers,
+  toolbarRef,
+  toolbarClassName,
+  toolbarStyle,
+  toolbar,
+  bars,
+  refreshing,
+  main,
+  loadMore,
+  footers,
+  overlays,
   labels,
-  tableProps,
-}: Readonly<DataTableBodyProps<TRow>>): ReactElement {
-  // The shell already applied the column layout to the injected actions
-  // column: hidden strips `rowActions` before the renderers, an end pin sets
-  // `actionsPinned`.
-  const rowActions = tableProps.rowActions;
-  if (chrome.body === "skeleton") {
-    return (
-      <>
-        {props.slots?.skeleton ?? (
-          <LoadingState
-            rows={props.skeletonRows ?? props.source.limit}
-            columns={chrome.table.columns.length}
-            variant={chrome.isMobile ? "cards" : "table"}
-            labels={labels}
-            classNames={classNames}
-            hasActions={(rowActions?.length ?? 0) > 0}
+  rowCount,
+  mobile,
+  density,
+  animate,
+}: Readonly<KitTableFrameProps>) {
+  useMountStagger(rootRef, [rowCount, mobile], { enabled: animate });
+  const classNames = useClassNames();
+  const { className, ...root } = rootProps;
+  return (
+    <PortalContainerProvider value={fullscreenContainer}>
+      <div
+        ref={rootRef}
+        {...root}
+        data-adapttable-part="root"
+        data-mobile={mobile || undefined}
+        data-density={density}
+        data-refreshing={refreshing || undefined}
+        className={cx(
+          "adapttable",
+          typeof className === "string" ? className : undefined
+        )}
+      >
+        {announcers}
+        <div
+          ref={toolbarRef}
+          data-adapttable-part="toolbar"
+          className={toolbarClassName}
+          style={{ ...TOOLBAR, ...toolbarStyle }}
+        >
+          {toolbar}
+        </div>
+        {bars}
+        {refreshing && (
+          // Native indeterminate progress (no `value`): an implicit
+          // progressbar with the right semantics on every device.
+          <progress
+            aria-label={labels.loading}
+            data-adapttable-part="refresh-indicator"
+            className={classNames.refreshIndicator}
           />
         )}
-      </>
-    );
-  }
-  if (chrome.body === "empty") {
-    // "noResults" means an active search/filter matched nothing — say so and
-    // offer a clear CTA; "noData" means the source itself is empty.
-    const noResults = chrome.emptyVariant === "noResults";
-    return (
-      <>
-        {(noResults ? props.slots?.noResults : undefined) ??
-          props.slots?.empty ?? (
-            <output data-adapttable-part="empty" className={classNames.empty}>
-              {noResults ? labels.noResults : labels.noData}
-              {noResults && (
-                <button
-                  type="button"
-                  data-adapttable-part="empty-clear"
-                  className={classNames.emptyClear}
-                  onClick={chrome.clearFilters}
-                >
-                  {labels.clearAll}
-                </button>
-              )}
-            </output>
-          )}
-      </>
-    );
-  }
-  return chrome.isMobile ? (
-    <MobileCards {...tableProps} classNames={classNames} />
-  ) : (
-    <DesktopTable {...tableProps} />
+        {main}
+        {loadMore && (
+          <div
+            ref={loadMore.ref}
+            data-adapttable-part="load-more"
+            className={classNames.loadMore}
+          >
+            <button
+              type="button"
+              disabled={loadMore.busy}
+              data-adapttable-part="load-more-button"
+              className={classNames.loadMoreButton}
+              onClick={loadMore.onClick}
+            >
+              {labels.loadMore}
+            </button>
+          </div>
+        )}
+        {footers}
+        {overlays}
+      </div>
+    </PortalContainerProvider>
   );
 }
+
+/** The toolbar; infinite scroll keeps its page size there. */
+function KitToolbar<TRow>(props: Readonly<KitToolbarProps<TRow>>) {
+  "use no memo";
+  return <Toolbar {...props} showRowsPerPage={props.loadsMore} />;
+}
+
+/** The desktop table or the cards, with the table's class map. */
+function Body<TRow>({
+  view,
+  headerOffset,
+}: Readonly<{ view: DataTableShellResult<TRow>; headerOffset: number }>) {
+  // Redrawn with the table; the bodies below memoize their own rows.
+  "use no memo";
+  const classNames = useClassNames();
+  if (view.chrome.body === "mobile") {
+    return <MobileCards {...view.tableProps} classNames={classNames} />;
+  }
+  return <DesktopTable {...view.tableProps} stickyTop={headerOffset} />;
+}
+
+function Skeleton({
+  rows,
+  columns,
+  labels,
+  shape,
+}: Readonly<{
+  rows: number;
+  columns: number;
+  labels: Required<TableLabels>;
+  shape: KitSkeletonShape;
+}>) {
+  "use no memo";
+  return (
+    <LoadingState
+      rows={rows}
+      columns={columns}
+      variant={shape.mobile ? "cards" : "table"}
+      labels={labels}
+      classNames={useClassNames()}
+      hasActions={shape.actions}
+    />
+  );
+}
+
+/**
+ * The empty view: "no results" when a search or filter matched nothing, with
+ * a way back; otherwise the source itself is empty.
+ */
+function Empty({
+  labels,
+  onClear,
+}: Readonly<{ labels: Required<TableLabels>; onClear?: () => void }>) {
+  "use no memo";
+  const classNames = useClassNames();
+  return (
+    <output data-adapttable-part="empty" className={classNames.empty}>
+      {onClear ? labels.noResults : labels.noData}
+      {onClear && (
+        <button
+          type="button"
+          data-adapttable-part="empty-clear"
+          className={classNames.emptyClear}
+          onClick={onClear}
+        >
+          {labels.clearAll}
+        </button>
+      )}
+    </output>
+  );
+}
+
+function Failure({
+  state,
+  labels,
+}: Readonly<{ state: TableErrorState; labels: Required<TableLabels> }>) {
+  "use no memo";
+  return (
+    <ErrorState
+      error={state.error}
+      labels={labels}
+      onRetry={state.retry}
+      classNames={useClassNames()}
+    />
+  );
+}
+
+const kit: KitTable = {
+  Frame,
+  toolbar: (props) => <KitToolbar {...props} />,
+  body: (view, headerOffset) => (
+    <Body view={view} headerOffset={headerOffset} />
+  ),
+  skeleton: (rows, columns, labels, shape) => (
+    <Skeleton rows={rows} columns={columns} labels={labels} shape={shape} />
+  ),
+  empty: (labels, onClear) => <Empty labels={labels} onClear={onClear} />,
+  error: (state, labels) => <Failure state={state} labels={labels} />,
+  footer,
+};
 
 /**
  * Headless, unstyled AdaptTable for Tailwind / shadcn / custom CSS. Renders
  * semantic HTML with `data-adapttable-part` hooks and `className` overrides;
  * ships no styles of its own. Built on the `@adapttable/core` prop-getters.
  *
- * @typeParam TRow - The row type.
- *
- * @public
- */
-function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = useTableFeatures(incoming);
-  const {
-    dir,
-    filtersMode = "popover",
-    bulkActions,
-    classNames = NO_CLASSNAMES,
-    animate = false,
-  } = props;
-
-  // The whole shared orchestration — data tier, filter runtime, chrome,
-  // scroll reset, body windowing — lives in core's shell; this file renders
-  // only semantic markup with class hooks over it.
-  const headerFiltersOn =
-    props.headerFilters === true || props.filtersMode === "header";
-  const simpleFiltersOn = showSimpleFilterFields(
-    headerFiltersOn,
-    props.filterFields
-  );
-  const shell = useDataTableShell<TRow>(
-    props,
-    (defs, source, registry, labels) => {
-      const formProps = {
-        defs,
-        source,
-        registry,
-        labels,
-        defaultExpanded: !simpleFiltersOn,
-        showSimpleFields: simpleFiltersOn,
-      } as unknown as FiltersFormSlotProps<never>;
-      return <FeatureSlot slot={FILTERS_FORM} props={formProps} />;
-    }
-  );
-  const {
-    chrome,
-    labels,
-    density,
-    filtersNode: filters,
-    filtersOpen,
-    setFiltersOpen,
-    filtersTrigger,
-    rootRef,
-  } = shell;
-  const approval = useFeatureState(AGENT_APPROVAL_STATE);
-  const stickyBar = useStickyToolbarLayout(
-    resolveStickyToolbar(
-      props.stickyHeader,
-      props.stickyToolbar,
-      props.maxHeight != null
-    ),
-    props.stickyTop ?? 0
-  );
-  // Everything rendered below reads the chrome's VIEW facade — identical to
-  // the raw source except under grouping, where it presents the full set.
-  const viewSource = shell.source;
-  // One binding covers headers, rows and cells: the target is resolved from
-  // wherever the event started, so there is no third handler to forget.
-
-  // The palette lists the table's own actions; its shortcut is bound here
-  // so an adapter cannot ship one without the other.
-  const chromeProps: ResolvedDataTableProps<TRow> = {
-    ...props,
-    source: viewSource,
-    filters,
-  };
-  useMountStagger(rootRef, [viewSource.rows.length, chrome.isMobile], {
-    enabled: animate,
-  });
-
-  // The export button comes from the shell, already single-flight and already
-  // carrying the selection, the full column set and the highlighted range. It
-  // used to be rebuilt here from the same parts, which is precisely how a new
-  // scope can work in seven kits and silently fall back in the eighth.
-  return (
-    <DataTableShellView shell={shell}>
-      {(view) => {
-        const chrome = view.chrome;
-        const table = view.table;
-        const viewSource = view.source;
-        const canLoadMore = view.canLoadMore;
-        // React 18's `ref` attribute rejects core's `RefObject<HTMLDivElement |
-        // null>` through interface variance; the same object viewed through its
-        // structural shape attaches fine.
-        const loadMoreRef: RefObject<HTMLDivElement | null> = view.loadMoreRef;
-        const tableProps = {
-          ...view.tableProps,
-          stickyTop: stickyBar.headerOffset,
-        };
-        return (
-          <FeatureHostProvider host={shell.featureHost}>
-            <PortalContainerProvider value={view.fullscreen.container}>
-              <ContextMenuLiveGate
-                props={{
-                  contextMenu: props.contextMenu,
-                  columns: chrome.allColumns as never,
-                  labels,
-                  rowFor: (rowId) =>
-                    shell.source.rows.find(
-                      (row) => props.rowKey(row) === rowId
-                    ) as never,
-                  actions: {
-                    onCopy: (target) => {
-                      // The cell that was right-clicked, unless it sits inside a
-                      // selection — then the selection is what was asked for.
-                      const copy = contextMenuCopyTarget(
-                        view.gridFocus,
-                        target
-                      );
-                      if (!copy.available) return;
-                      view.gridFocus.copyCells(copy.cell);
-                    },
-                    // Cut writes the target to the clipboard, then asks the host to
-                    // clear it through onCellCut — offered only when both exist.
-                    onCut:
-                      props.onCellCut && view.gridFocus.enabled
-                        ? (target) => {
-                            const copy = contextMenuCopyTarget(
-                              view.gridFocus,
-                              target
-                            );
-                            if (!copy.available) return;
-                            view.gridFocus.copyCells(copy.cell, true);
-                          }
-                        : undefined,
-                    onSort: (key, dir) => {
-                      shell.source.setSort(key, dir);
-                    },
-                    onHide: (key) => {
-                      chrome.columnLayout.toggleVisible(key);
-                    },
-                    onFilter: () => {
-                      shell.setFiltersOpen(true);
-                    },
-                  },
-                  sortBy: shell.source.sortBy,
-                  sortDir: shell.source.sortDir,
-                  rowPins: chrome.rowPinning?.actions,
-                  featureHost: shell.featureHost,
-                  container: view.fullscreen.container,
-                }}
-              >
-                {(regionProps) => (
-                  <div
-                    ref={rootRef}
-                    dir={dir}
-                    {...regionProps}
-                    data-adapttable-part="root"
-                    data-mobile={chrome.isMobile || undefined}
-                    data-density={density}
-                    data-refreshing={chrome.isRefreshing || undefined}
-                    // The root wraps the whole table region, so a background refresh marks
-                    // it busy for assistive tech (the indicator below is decorative-ish).
-                    aria-busy={chrome.isRefreshing || undefined}
-                    className={cx("adapttable", classNames.root)}
-                  >
-                    <FeatureSlot
-                      slot={GRID_FOCUS_ANNOUNCER}
-                      props={{ focus: view.gridFocus }}
-                    />
-                    <TableStatusAnnouncer
-                      announcement={shell.statusAnnouncement}
-                    />
-                    {view.tableProps.rowReorder ? (
-                      <FeatureSlot
-                        slot={ROW_REORDER_ANNOUNCER}
-                        props={{
-                          announcement: view.tableProps.rowReorder.announcement,
-                        }}
-                      />
-                    ) : null}
-                    <FeatureSlot
-                      slot={FIND_BAR}
-                      props={{ find: view.find, labels }}
-                    />
-                    <div
-                      data-adapttable-part="toolbar"
-                      ref={stickyBar.toolbarRef}
-                      className={classNames.toolbar}
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        alignItems: "center",
-                        rowGap: 8,
-                        ...stickyBar.toolbarStyle,
-                      }}
-                    >
-                      <Toolbar
-                        {...view.toolbarProps}
-                        // Infinite scroll keeps a page size; the grouped
-                        // full-set view has none.
-                        showRowsPerPage={canLoadMore && !chrome.grouping}
-                        filtersMode={filtersMode}
-                        filtersOpen={filtersOpen}
-                        onToggleFilters={filtersTrigger.onClick}
-                        onFiltersTriggerPointerDown={
-                          filtersTrigger.onPointerDown
-                        }
-                        onCloseFilters={() => setFiltersOpen(false)}
-                        savedViewsMenu={
-                          props.savedViews ? (
-                            // The menu must capture/apply through the SAME URL
-                            // backend and namespace the table reads, so those
-                            // default from the table's own props (explicit
-                            // option values still win).
-                            <FeatureSlot
-                              slot={SAVED_VIEWS}
-                              props={{
-                                options: {
-                                  urlAdapter: shell.urlAdapter,
-                                  urlKey: props.urlKey,
-                                  ...props.savedViews,
-                                },
-                                labels,
-                              }}
-                            />
-                          ) : undefined
-                        }
-                        columnMenu={
-                          props.enableColumnMenu && !chrome.isMobile ? (
-                            <FeatureSlot
-                              slot={COLUMN_MENU}
-                              props={{
-                                allColumns: chrome.allColumns,
-                                onAutoSize: view.autoSizeColumns,
-                                onAutoSizeColumn: view.autoSizeColumn,
-                                onSortColumn: (key, dir) =>
-                                  shell.source.setSort(key, dir),
-                                onFilterColumn: () => setFiltersOpen(true),
-                                onRenameColumn: props.onColumnRename
-                                  ? chrome.columnLayout.setName
-                                  : undefined,
-                                sortBy: shell.source.sortBy,
-                                sortDir: shell.source.sortDir,
-                                layout: chrome.columnLayout,
-                                labels,
-                                hasRowActions: view.hasRowActions,
-                                hasRowReorder: view.hasRowReorder,
-                                groupingPanel: chrome.groupingPanel,
-                                dir: props.dir,
-                              }}
-                            />
-                          ) : undefined
-                        }
-                      />
-                    </div>
-
-                    {filters && filtersMode === "drawer" && (
-                      <FeatureSlot
-                        slot={FILTER_DRAWER}
-                        props={{
-                          open: filtersOpen,
-                          onClose: () => setFiltersOpen(false),
-                          filters: filters,
-                          activeFilterCount: chrome.activeFilterCount,
-                          onClearFilters: chrome.clearFilters,
-                          labels,
-                          dir: props.dir,
-                        }}
-                      />
-                    )}
-
-                    <FeatureSlot
-                      slot={ACTIVE_FILTER_CHIPS}
-                      props={{
-                        chips: chrome.mergedChips,
-                        onClearAll: chrome.clearFilters,
-                        labels,
-                      }}
-                    />
-
-                    {chrome.editing?.batch && (
-                      <FeatureSlot
-                        slot={BATCH_EDIT_BAR}
-                        props={{
-                          batch: chrome.editing.batch,
-                          contested: chrome.editing.conflict?.anyContested,
-                          labels,
-                        }}
-                      />
-                    )}
-                    <FeatureSlot
-                      slot={AGENT_APPROVAL}
-                      props={{ pending: approval, labels }}
-                    />
-
-                    {table.selection && bulkActions && (
-                      <FeatureSlot
-                        slot={BULK_BAR}
-                        props={{
-                          selection: table.selection,
-                          total: shell.source.total,
-                          bulkActions: bulkActions,
-                          confirm: chrome.confirm,
-                          labels,
-                        }}
-                      />
-                    )}
-
-                    {chrome.isRefreshing && (
-                      // Native indeterminate progress (no `value`) — implicit progressbar
-                      // role with correct semantics on every device.
-                      <progress
-                        aria-label={labels.loading}
-                        data-adapttable-part="refresh-indicator"
-                        className={classNames.refreshIndicator}
-                      />
-                    )}
-
-                    <FeatureSlot
-                      slot={COMMAND_PALETTE_LIVE}
-                      props={{
-                        commandPalette: props.commandPalette,
-                        labels,
-                        onPrint: props.onPrint,
-                        onExport: view.toolbarProps.onExportCsv,
-                        exportLabel: view.toolbarProps.exportLabel,
-                        onClearFilters: chrome.clearFilters,
-                        hasFilters: chrome.activeFilterCount > 0,
-                        featureHost: shell.featureHost,
-                      }}
-                    />
-
-                    {view.groupingPanelProps ? (
-                      <FeatureSlot
-                        slot={GROUPING_PANEL}
-                        props={
-                          view.groupingPanelProps as GroupingPanelSlotProps<never>
-                        }
-                      />
-                    ) : null}
-
-                    <OptionalSidePanel
-                      side={props.sidePanel?.side}
-                      body={
-                        <>
-                          {chrome.errorState ? (
-                            (fillSlot(
-                              props.slots?.error,
-                              chrome.errorState
-                            ) ?? (
-                              <ErrorState
-                                error={chrome.errorState.error}
-                                labels={labels}
-                                onRetry={chrome.errorState.retry}
-                                classNames={classNames}
-                              />
-                            ))
-                          ) : (
-                            <DataTableBody
-                              chrome={chrome}
-                              props={chromeProps}
-                              classNames={classNames}
-                              labels={labels}
-                              tableProps={tableProps}
-                            />
-                          )}
-                        </>
-                      }
-                      panel={
-                        props.sidePanel?.open != null && (
-                          <FeatureSlot
-                            slot={SIDE_PANEL}
-                            props={{
-                              panels: props.sidePanel.panels,
-                              openPanel: props.sidePanel.open,
-                              onOpenPanel: props.sidePanel.onOpenChange,
-                              onClose: () => {
-                                props.sidePanel?.onOpenChange(null);
-                              },
-                              side: props.sidePanel?.side,
-                              labels,
-                            }}
-                          />
-                        )
-                      }
-                    />
-
-                    {canLoadMore && viewSource.hasNextPage && (
-                      <div
-                        ref={loadMoreRef}
-                        data-adapttable-part="load-more"
-                        className={classNames.loadMore}
-                      >
-                        <button
-                          type="button"
-                          disabled={viewSource.isFetchingNextPage}
-                          data-adapttable-part="load-more-button"
-                          className={classNames.loadMoreButton}
-                          onClick={() => viewSource.fetchNextPage()}
-                        >
-                          {labels.loadMore}
-                        </button>
-                      </div>
-                    )}
-
-                    {props.tableFooter ? (
-                      <div
-                        data-adapttable-part="table-footer"
-                        className={classNames.tableFooter}
-                      >
-                        {props.tableFooter}
-                      </div>
-                    ) : null}
-
-                    {chrome.showFooter &&
-                      footer({ table, source: viewSource, labels, chrome })}
-                    <FeatureSlot
-                      slot={STATUS_BAR}
-                      props={{
-                        enabled: props.statusBar === true,
-                        notices: chrome.featureNotices,
-                        shown: shell.source.rows.length,
-                        page: shell.source.page,
-                        limit: shell.source.limit,
-                        total: shell.source.total,
-                        selected: table.selection?.selectedCount ?? 0,
-                        stats: view.selectionStats,
-                        labels,
-                        locale: props.locale,
-                      }}
-                    />
-                  </div>
-                )}
-              </ContextMenuLiveGate>
-            </PortalContainerProvider>
-          </FeatureHostProvider>
-        );
-      }}
-    </DataTableShellView>
-  );
-}
-
-/**
- * Resolve `features` and mount whatever providers they contribute, then render
- * the table inside them.
- *
- * A feature that owns hooks owns a component, so its provider has to sit ABOVE
- * the body that reads what it publishes — that is the whole reason this is two
- * components rather than one.
+ * The features it composes mount their providers above the table that reads
+ * them.
  *
  * @typeParam TRow - The row type.
  *
@@ -594,7 +238,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   return (
     <ClassNamesProvider classNames={incoming.classNames}>
       <FeatureProviders props={props}>
-        <DataTableContent<TRow> {...props} />
+        <TableComposition<TRow> props={props} kit={kit} />
       </FeatureProviders>
     </ClassNamesProvider>
   );

@@ -10,7 +10,10 @@ import { useClassNames } from "./classNamesContext";
 import { Button, Text } from "./partPrimitives";
 import { RowsPerPage } from "./Toolbar";
 
-/** Page size and range, then the pager: "page n of m" and the pages. */
+/**
+ * Page size and range, then the pager: "page n of m" and the pages. The
+ * table draws the footer element around them.
+ */
 function Frame({
   rowsPerPage,
   range,
@@ -18,16 +21,15 @@ function Frame({
   pages,
 }: Readonly<KitPagerFrameProps>) {
   "use no memo";
-  const classNames = useClassNames();
   return (
-    <div data-adapttable-part="footer" className={classNames.footer}>
+    <>
       {rowsPerPage}
       {range}
-      <div data-adapttable-part="pager" className={classNames.pager}>
+      <div data-adapttable-part="pager" className={useClassNames().pager}>
         {pageOf}
         {pages}
       </div>
-    </div>
+    </>
   );
 }
 
