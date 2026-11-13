@@ -18,7 +18,6 @@ import { BodyRow } from '@adapttable/angular/adapter';
 import { BodySlot } from '@adapttable/angular/adapter';
 import { BrnFieldControl } from '@spartan-ng/brain/field';
 import { BrnInput } from '@spartan-ng/brain/input';
-import { BulkAction } from '@adapttable/core';
 import { BulkActionRunnerState } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular/adapter';
 import { ChecklistSlots } from '@adapttable/angular/adapter';
@@ -26,7 +25,6 @@ import { ColumnDef } from '@adapttable/angular';
 import { ColumnGroupToggleButtonProps } from '@adapttable/angular/adapter';
 import { ColumnGroupToggleProps } from '@adapttable/angular/adapter';
 import { ColumnGroupToggleSlots } from '@adapttable/angular/adapter';
-import { ColumnModel } from '@adapttable/core';
 import { ColumnRenameEditorState } from '@adapttable/angular/adapter';
 import { ColumnSelectCheckboxChromeProps } from '@adapttable/angular/adapter';
 import { ColumnSelectCheckboxProps } from '@adapttable/angular/adapter';
@@ -57,7 +55,7 @@ import * as i0 from '@angular/core';
 import * as i1 from '@spartan-ng/brain/button';
 import * as i2 from '@spartan-ng/brain/input';
 import * as i3 from '@spartan-ng/brain/field';
-import { IconDescriptor } from '@adapttable/core/binding';
+import { IconDescriptor } from '@adapttable/angular/adapter';
 import { InputSignal } from '@angular/core';
 import { isBooleanEditor } from '@adapttable/angular/adapter';
 import { isDraftChecked } from '@adapttable/angular/adapter';
@@ -103,9 +101,9 @@ export class AdaptAutoFilterForm<TRow> extends AdaptAutoFilterFormModel<TRow> {
 // @internal
 export class AdaptBulkBar {
     // (undocumented)
-    protected readonly actions: Signal<    {
-    action: BulkAction;
-    reason: string | undefined;
+    protected readonly actions: Signal<{
+        action: BulkBarSlotProps<SelectionState>["bulkActions"][number];
+        reason: string | undefined;
     }[]>;
     // (undocumented)
     protected readonly banner: Signal<boolean>;
@@ -308,7 +306,7 @@ export class AdaptEditableCell<TRow> {
     // @internal
     protected editing(): EditableCellEditing<TRow> | undefined;
     readonly editor: InputSignal<Type<unknown>>;
-    readonly props: InputSignal<EditableCellSlotProps<TRow, unknown, ColumnModel<TRow>, unknown>>;
+    readonly props: InputSignal<EditableCellSlotProps<TRow>>;
     // (undocumented)
     protected readonly slots: EditableCellSlots;
     // (undocumented)

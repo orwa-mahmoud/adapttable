@@ -34,6 +34,7 @@ import {
   computed,
   type ElementRef,
   input,
+  type InputSignal,
   TemplateRef,
   type Type,
   viewChild,
@@ -363,7 +364,8 @@ const SLOTS: EditableCellSlots = {
 })
 export class AdaptEditableCell<TRow> {
   /** Slot props from the table's editable-cell fill. */
-  readonly props = input.required<EditableCellSlotProps<TRow>>();
+  readonly props: InputSignal<EditableCellSlotProps<TRow>> =
+    input.required<EditableCellSlotProps<TRow>>();
 
   /** Editor component override; native controls remain the default. */
   readonly editor = input<Type<unknown>>(AdaptNativeCellEditor);

@@ -5,6 +5,7 @@ import {
   AdaptAttrs,
   AdaptIcon,
   expandChevronIcon,
+  type IconDescriptor,
 } from "@adapttable/angular/adapter";
 import {
   afterNextRender,
@@ -19,6 +20,7 @@ import {
   input,
   output,
   Renderer2,
+  type Signal,
   untracked,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
@@ -211,13 +213,13 @@ export class AdaptPaginationFooter<TRow> {
   }
 
   /** Pagination follows reading order, including live direction changes. */
-  protected readonly previousIcon = computed(() =>
+  protected readonly previousIcon: Signal<IconDescriptor> = computed(() =>
     expandChevronIcon({
       open: false,
       dir: this.view().table.dir() === "rtl" ? "ltr" : "rtl",
     })
   );
-  protected readonly nextIcon = computed(() =>
+  protected readonly nextIcon: Signal<IconDescriptor> = computed(() =>
     expandChevronIcon({ open: false, dir: this.view().table.dir() })
   );
 }

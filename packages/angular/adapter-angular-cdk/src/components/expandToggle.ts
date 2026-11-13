@@ -5,6 +5,7 @@ import {
   AdaptIcon,
   expandChevronIcon,
   type ExpandToggleSlotProps,
+  type IconDescriptor,
 } from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import {
@@ -12,6 +13,7 @@ import {
   Component,
   computed,
   input,
+  type Signal,
 } from "@angular/core";
 
 /**
@@ -54,7 +56,7 @@ export class AdaptExpandToggle {
   readonly props = input.required<ExpandToggleSlotProps>();
 
   /** The chevron, turned for the state and the writing direction. @internal */
-  protected readonly chevron = computed(() => {
+  protected readonly chevron: Signal<IconDescriptor> = computed(() => {
     const { expanded, dir } = this.props();
     return expandChevronIcon({ open: expanded, dir });
   });

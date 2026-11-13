@@ -5,6 +5,7 @@ import {
   AdaptAttrs,
   AdaptIcon,
   expandChevronIcon,
+  type IconDescriptor,
 } from "@adapttable/angular/adapter";
 import { Toolbar, ToolbarWidget } from "@angular/aria/toolbar";
 import { Dir } from "@angular/cdk/bidi";
@@ -13,6 +14,7 @@ import {
   Component,
   computed,
   input,
+  type Signal,
 } from "@angular/core";
 
 import type { TableView } from "../dataTable";
@@ -126,13 +128,13 @@ export class AdaptPaginationFooter<TRow> {
   readonly view = input.required<TableView<TRow>>();
 
   /** Pagination follows reading order, including live direction changes. */
-  protected readonly previousIcon = computed(() =>
+  protected readonly previousIcon: Signal<IconDescriptor> = computed(() =>
     expandChevronIcon({
       open: false,
       dir: this.view().table.dir() === "rtl" ? "ltr" : "rtl",
     })
   );
-  protected readonly nextIcon = computed(() =>
+  protected readonly nextIcon: Signal<IconDescriptor> = computed(() =>
     expandChevronIcon({ open: false, dir: this.view().table.dir() })
   );
 }

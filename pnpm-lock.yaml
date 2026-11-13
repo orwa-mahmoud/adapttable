@@ -654,13 +654,13 @@ importers:
       '@adapttable/angular':
         specifier: workspace:*
         version: link:../angular
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
     devDependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../../shared/core
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
         version: 2.7.5(@angular/build@22.2.3(1b4fa7f56bc3a43f78aadd56a7893c03))(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(vite@8.3.5(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
@@ -709,13 +709,13 @@ importers:
       '@adapttable/angular':
         specifier: workspace:*
         version: link:../angular
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
     devDependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../../shared/core
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
         version: 2.7.5(@angular/build@22.2.3(1b4fa7f56bc3a43f78aadd56a7893c03))(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(vite@8.3.5(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
@@ -764,13 +764,13 @@ importers:
       '@adapttable/angular':
         specifier: workspace:*
         version: link:../angular
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
     devDependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../../shared/core
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
         version: 2.7.5(@angular/build@22.2.3(1b4fa7f56bc3a43f78aadd56a7893c03))(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(vite@8.3.5(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
@@ -813,13 +813,13 @@ importers:
       '@adapttable/angular':
         specifier: workspace:*
         version: link:../angular
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
     devDependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../../shared/core
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
         version: 2.7.5(@angular/build@22.2.3(1b4fa7f56bc3a43f78aadd56a7893c03))(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(vite@8.3.5(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
@@ -871,13 +871,13 @@ importers:
       '@adapttable/angular':
         specifier: workspace:*
         version: link:../angular
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
     devDependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../../shared/core
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
         version: 2.7.5(@angular/build@22.2.3(1b4fa7f56bc3a43f78aadd56a7893c03))(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(vite@8.3.5(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
@@ -944,13 +944,13 @@ importers:
       '@adapttable/angular':
         specifier: workspace:*
         version: link:../angular
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
     devDependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../../shared/core
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
         version: 2.7.5(@angular/build@22.2.3(1b4fa7f56bc3a43f78aadd56a7893c03))(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(vite@8.3.5(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
@@ -1005,13 +1005,13 @@ importers:
       '@adapttable/angular':
         specifier: workspace:*
         version: link:../angular
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
     devDependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../../shared/core
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
         version: 2.7.5(@angular/build@22.2.3(1b4fa7f56bc3a43f78aadd56a7893c03))(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(vite@8.3.5(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
@@ -1072,13 +1072,13 @@ importers:
       '@adapttable/angular':
         specifier: workspace:*
         version: link:../angular
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
     devDependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../../shared/core
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
         version: 2.7.5(@angular/build@22.2.3(1b4fa7f56bc3a43f78aadd56a7893c03))(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(vite@8.3.5(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
@@ -1139,13 +1139,13 @@ importers:
       '@adapttable/angular':
         specifier: workspace:*
         version: link:../angular
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
     devDependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../../shared/core
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
         version: 2.7.5(@angular/build@22.2.3(1b4fa7f56bc3a43f78aadd56a7893c03))(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(vite@8.3.5(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))

@@ -9,6 +9,7 @@ import {
   type ColumnGroupToggleProps,
   type ColumnGroupToggleSlots,
   expandChevronIcon,
+  type IconDescriptor,
 } from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import {
@@ -16,6 +17,7 @@ import {
   Component,
   computed,
   input,
+  type Signal,
 } from "@angular/core";
 
 /**
@@ -73,7 +75,7 @@ export class AdaptColumnGroupButton {
   readonly props = input.required<ColumnGroupToggleButtonProps>();
 
   /** Shape and open state come from core; direction follows the host. */
-  protected readonly chevron = computed(() =>
+  protected readonly chevron: Signal<IconDescriptor> = computed(() =>
     expandChevronIcon({ open: this.props().expanded })
   );
 }

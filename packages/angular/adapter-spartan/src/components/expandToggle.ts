@@ -5,12 +5,14 @@ import {
   AdaptIcon,
   expandChevronIcon,
   type ExpandToggleSlotProps,
+  type IconDescriptor,
 } from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   input,
+  type Signal,
 } from "@angular/core";
 
 import { HlmButton } from "../helm/controls";
@@ -54,7 +56,7 @@ export class AdaptExpandToggle {
   readonly props = input.required<ExpandToggleSlotProps>();
 
   /** The chevron, turned for the state and the writing direction. @internal */
-  protected readonly chevron = computed(() => {
+  protected readonly chevron: Signal<IconDescriptor> = computed(() => {
     const { expanded, dir } = this.props();
     return expandChevronIcon({ open: expanded, dir });
   });
