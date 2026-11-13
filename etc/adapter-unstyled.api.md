@@ -65,6 +65,7 @@ import { getHistoryAdapter } from '@adapttable/react';
 import { GroupMoreButtonProps } from '@adapttable/react/adapter';
 import { InfiniteQueryLike } from '@adapttable/react';
 import { JSX } from 'react';
+import { KitChecklistFilter } from '@adapttable/react/adapter';
 import { MobileCardRenderer } from '@adapttable/react/adapter';
 import { PageSelector } from '@adapttable/react';
 import { PaginatedResponse } from '@adapttable/react/adapter';
@@ -153,7 +154,7 @@ export { CellEditor }
 export { CellProps }
 
 // @public
-export function ChecklistFilter<TRow>(props: Readonly<ChecklistFilterProps<TRow>>): JSX.Element;
+export const ChecklistFilter: KitChecklistFilter;
 
 export { ChecklistFilterProps }
 

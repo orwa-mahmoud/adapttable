@@ -245,6 +245,8 @@ export function Checkbox({
   indeterminate,
   label,
   className,
+  rootPart,
+  style,
   ...rest
 }: Readonly<KitCheckboxProps>): ReactElement {
   "use no memo";
@@ -264,7 +266,11 @@ export function Checkbox({
   );
   if (label == null) return box;
   return (
-    <label className={className} style={LABELLED}>
+    <label
+      data-adapttable-part={rootPart}
+      className={className}
+      style={style ?? LABELLED}
+    >
       {box}
       {label}
     </label>
