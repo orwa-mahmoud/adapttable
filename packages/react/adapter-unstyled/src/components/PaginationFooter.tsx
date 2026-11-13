@@ -1,130 +1,49 @@
-/** Row count and the windowed pager. */
+/** Row count and the windowed pager, drawn by the binding with native controls. */
 import {
-  pageSizeOptions,
-  type PaginationInfo,
-  paginationSlots,
-  type TableLabels,
-  type TableSource,
+  createPageButtons,
+  createPager,
+  type KitPagerFrameProps,
 } from "@adapttable/react/adapter";
+import type { ReactNode } from "react";
 
-import type { DataTableClassNames } from "../types";
+import { useClassNames } from "./classNamesContext";
+import { Button, Text } from "./partPrimitives";
+import { RowsPerPage } from "./Toolbar";
 
-/** The rows-per-page selector shared by the toolbar (infinite) and footer. */
-export function RowsPerPageSelect({
-  source,
-  labels,
-  classNames,
-}: Readonly<{
-  source: Pick<TableSource<unknown>, "limit" | "defaultLimit" | "setLimit">;
-  labels: Required<TableLabels>;
-  classNames: DataTableClassNames;
-}>) {
-  return (
-    <label>
-      {labels.rowsPerPage}{" "}
-      <select
-        aria-label={labels.rowsPerPage}
-        data-adapttable-part="rows-per-page"
-        className={classNames.rowsPerPage}
-        value={source.limit}
-        onChange={(e) => source.setLimit(Number(e.currentTarget.value))}
-      >
-        {pageSizeOptions([source.limit, source.defaultLimit]).map((n) => (
-          <option key={n} value={n}>
-            {n}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-/** Prev/next pager with a rows-per-page select. */
-export function Footer({
-  pagination,
-  source,
-  labels,
-  classNames,
-  showRowsPerPage = true,
-}: Readonly<{
-  pagination: PaginationInfo;
-  source: {
-    limit: number;
-    defaultLimit: number;
-    total: number;
-    setPage: (n: number) => void;
-    setLimit: (n: number) => void;
-  };
-  labels: Required<TableLabels>;
-  classNames: DataTableClassNames;
-  /** Hidden in the grouped full-set view, where page size has no effect. */
-  showRowsPerPage?: boolean;
-}>) {
-  const { safePage, totalPages, fromIndex, toIndex } = pagination;
+/** Page size and range, then the pager: "page n of m" and the pages. */
+function Frame({
+  rowsPerPage,
+  range,
+  pageOf,
+  pages,
+}: Readonly<KitPagerFrameProps>) {
+  "use no memo";
+  const classNames = useClassNames();
   return (
     <div data-adapttable-part="footer" className={classNames.footer}>
-      {showRowsPerPage && (
-        <RowsPerPageSelect
-          source={source}
-          labels={labels}
-          classNames={classNames}
-        />
-      )}
-      {source.total > 0 && (
-        <span>
-          {labels.showing({
-            from: fromIndex,
-            to: toIndex,
-            total: source.total,
-          })}
-        </span>
-      )}
+      {rowsPerPage}
+      {range}
       <div data-adapttable-part="pager" className={classNames.pager}>
-        <span>{labels.pageOf({ page: safePage, total: totalPages })}</span>
-        <button
-          type="button"
-          aria-label={labels.previousPage}
-          data-adapttable-part="page-prev"
-          className={classNames.pagePrev}
-          disabled={safePage <= 1}
-          onClick={() => source.setPage(safePage - 1)}
-        >
-          ‹
-        </button>
-        {paginationSlots(safePage, totalPages).map(({ item, key }) =>
-          item === "ellipsis" ? (
-            <span
-              key={key}
-              data-adapttable-part="page-ellipsis"
-              aria-hidden="true"
-              className={classNames.pageEllipsis}
-            >
-              …
-            </span>
-          ) : (
-            <button
-              key={key}
-              type="button"
-              data-adapttable-part="page-number"
-              aria-current={item === safePage ? "page" : undefined}
-              className={classNames.pageNumber}
-              onClick={() => source.setPage(item)}
-            >
-              {item}
-            </button>
-          )
-        )}
-        <button
-          type="button"
-          aria-label={labels.nextPage}
-          data-adapttable-part="page-next"
-          className={classNames.pageNext}
-          disabled={safePage >= totalPages}
-          onClick={() => source.setPage(safePage + 1)}
-        >
-          ›
-        </button>
+        {pageOf}
+        {pages}
       </div>
     </div>
   );
 }
+
+function Caption({ children }: Readonly<{ children: ReactNode }>) {
+  "use no memo";
+  return <span>{children}</span>;
+}
+
+/** The table's footer: page size, range, "page n of m" and the pages. */
+export const footer = /* @__PURE__ */ createPager({
+  Frame,
+  RowsPerPage,
+  Caption,
+  // The pages sit in the pager's own flow, beside "page n of m".
+  Pages: /* @__PURE__ */ createPageButtons(
+    { Button, Text },
+    { row: { display: "contents" }, ellipsis: {} }
+  ),
+});

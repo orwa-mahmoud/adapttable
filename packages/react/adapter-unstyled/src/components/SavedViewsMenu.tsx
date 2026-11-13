@@ -15,7 +15,7 @@ import {
   Divider,
   IconButton,
   TextInput,
-} from "./ColumnMenu";
+} from "./partPrimitives";
 
 /**
  * Layout for a panel row: the name/input takes the space, the trailing

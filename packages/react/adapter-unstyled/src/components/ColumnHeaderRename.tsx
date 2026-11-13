@@ -5,7 +5,13 @@ import {
 } from "@adapttable/react/adapter";
 
 import { usePartClass } from "./classNamesContext";
-import { Button, IconButton, RenameField, Text, TextInput } from "./ColumnMenu";
+import {
+  Button,
+  IconButton,
+  RenameField,
+  Text,
+  TextInput,
+} from "./partPrimitives";
 
 const LOOK: KitHeaderRenameLook = {
   // The button, the caption and the announcer sit in the header's own flow,

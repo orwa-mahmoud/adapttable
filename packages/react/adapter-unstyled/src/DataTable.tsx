@@ -41,7 +41,7 @@ import { ClassNamesProvider } from "./components/classNamesContext";
 import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
 import { MobileCards } from "./components/MobileCards";
-import { Footer } from "./components/PaginationFooter";
+import { footer } from "./components/PaginationFooter";
 import { PortalContainerProvider } from "./components/portalContainer";
 import { LoadingState } from "./components/TableSkeleton";
 import { Toolbar } from "./components/Toolbar";
@@ -549,15 +549,8 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                       </div>
                     ) : null}
 
-                    {chrome.showFooter && (
-                      <Footer
-                        pagination={table.pagination}
-                        source={viewSource}
-                        labels={labels}
-                        classNames={classNames}
-                        showRowsPerPage={!chrome.grouping}
-                      />
-                    )}
+                    {chrome.showFooter &&
+                      footer({ table, source: viewSource, labels, chrome })}
                     <FeatureSlot
                       slot={STATUS_BAR}
                       props={{

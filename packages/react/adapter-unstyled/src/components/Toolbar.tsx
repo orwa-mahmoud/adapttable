@@ -154,7 +154,7 @@ function FiltersButton({
 }
 
 /** The rows-per-page choice, labelled. */
-function RowsPerPage({
+export function RowsPerPage({
   label,
   value,
   options,
