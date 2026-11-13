@@ -15,7 +15,7 @@ import { asBatchGesture } from '@adapttable/core/editing';
 import { asGesture } from '@adapttable/core/editing';
 import { BatchEditingState } from '@adapttable/core';
 import { BatchEditStoreOptions } from '@adapttable/core/editing';
-import { BatchRowEdit } from '@adapttable/core';
+import { BatchRowEdit as BatchRowEdit_2 } from '@adapttable/core';
 import { BooleanChoice } from '@adapttable/core';
 import { BooleanFieldWidget } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
@@ -271,7 +271,8 @@ export interface BaseDataTableProps<TRow> extends TableOptions<TRow, ReactNode> 
 
 export { BatchEditingState }
 
-export { BatchRowEdit }
+// @public
+export type BatchRowEdit<TRow> = BatchRowEdit_2<TRow>;
 
 // @public
 export function bindHeaderFilterDismiss<TRow>(source: FilterFormSource<TRow>, options: {

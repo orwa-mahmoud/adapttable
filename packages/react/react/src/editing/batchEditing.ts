@@ -6,7 +6,7 @@
  */
 import {
   type BatchEditingState,
-  type BatchRowEdit,
+  type BatchRowEdit as CoreBatchRowEdit,
   type EditableColumnLike,
   type FeatureHostState,
 } from "@adapttable/core";
@@ -20,7 +20,15 @@ import { useContext, useMemo, useState, useSyncExternalStore } from "react";
 import { TableStoreContext } from "../state/tableStoreContext";
 import type { EditEventHandler } from "./editingEvents";
 
-export type { BatchEditingState, BatchRowEdit } from "@adapttable/core";
+export type { BatchEditingState } from "@adapttable/core";
+
+/**
+ * One row's held edits in a batch, as the host's `onBatchEdit` receives them.
+ * Declared here so a kit's types name this binding, not core.
+ *
+ * @public
+ */
+export type BatchRowEdit<TRow> = CoreBatchRowEdit<TRow>;
 
 /**
  * What {@link useBatchEditing} needs.

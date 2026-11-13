@@ -45,7 +45,7 @@ import { BatchEditBarProps } from '@adapttable/core/binding';
 import { BatchEditBarSlots as BatchEditBarSlots_2 } from '@adapttable/core/binding';
 import { BatchEditButtonProps } from '@adapttable/core/binding';
 import { BatchEditingState } from '@adapttable/core';
-import { BatchRowEdit } from '@adapttable/core';
+import { BatchRowEdit as BatchRowEdit_2 } from '@adapttable/core';
 import { bindFeatureHostFn } from '@adapttable/core';
 import { bindMobileCardList } from '@adapttable/core';
 import { TableBodyCell as BodyCell } from '@adapttable/core';
@@ -978,7 +978,8 @@ export interface BatchEditCellProps<TRow> {
 
 export { BatchEditingState }
 
-export { BatchRowEdit }
+// @public
+export type BatchRowEdit<TRow> = BatchRowEdit_2<TRow>;
 
 export { bindFeatureHostFn }
 

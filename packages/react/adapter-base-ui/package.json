@@ -462,7 +462,6 @@
     "clean": "rimraf dist coverage .turbo"
   },
   "dependencies": {
-    "@adapttable/core": "3.13.1",
     "react-compiler-runtime": "^1.0.0",
     "@adapttable/react": "1.9.1"
   },
@@ -472,6 +471,7 @@
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
+    "@adapttable/core": "workspace:*",
     "@base-ui/react": "^1.7.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^7.0.1",

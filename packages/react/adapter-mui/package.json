@@ -457,7 +457,6 @@
     "clean": "rimraf dist coverage .turbo"
   },
   "dependencies": {
-    "@adapttable/core": "3.13.1",
     "react-compiler-runtime": "^1.0.0",
     "@adapttable/react": "1.9.1"
   },
@@ -467,6 +466,7 @@
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
+    "@adapttable/core": "workspace:*",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^9.3.1",
