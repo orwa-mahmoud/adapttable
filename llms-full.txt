@@ -19953,8 +19953,12 @@ under it, the body for the state the data is in, the side panel, the footers
 and the overlays, and hands them to the kit as `KitTableFrameProps`. A kit
 passes a `KitTable` (its `Frame`, toolbar, body, skeleton, empty, error and
 pager renderers) and props shaped as `KitTableProps`, which adds
-`KitTableSlots` and `KitTableClassNames` to the shell's props; its toolbar
-receives `KitToolbarProps`.
+`KitTableSlots` and `KitTableClassNames` (root, toolbar, table, card, footer
+and the host's `tableFooter`) to the shell's props; its toolbar receives
+`KitToolbarProps`, whose `loadsMore` says the table loads its next page as it
+scrolls. The frame receives the table's `density`, and the skeleton renderer a
+`KitSkeletonShape`: whether the body will be cards and whether rows have
+actions.
 
 A kit's desktop table and mobile cards name each optional control through
 its slot wrapper, so a table that omits the feature omits the component:

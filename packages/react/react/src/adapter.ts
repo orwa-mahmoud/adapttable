@@ -660,6 +660,7 @@ export {
   type KitSavedViewsLook,
 } from "./kit/savedViewsMenu";
 export {
+  type KitSkeletonShape,
   type KitTable,
   type KitTableClassNames,
   type KitTableFrameProps,

@@ -3505,6 +3505,12 @@ export interface KitSelectProps extends KitDataAttributes {
 }
 
 // @public
+export interface KitSkeletonShape {
+    readonly actions: boolean;
+    readonly mobile: boolean;
+}
+
+// @public
 export interface KitSortLabelProps {
     readonly active: boolean;
     readonly buttonProps: SortButtonElementProps;
@@ -3528,7 +3534,7 @@ export interface KitTable {
     readonly error: (state: TableErrorState, labels: Required<TableLabels>) => ReactNode;
     readonly footer: <TRow>(view: DataTableShellResult<TRow>) => ReactNode;
     readonly Frame: (props: KitTableFrameProps) => ReactNode;
-    readonly skeleton: (rows: number, columns: number, labels: Required<TableLabels>) => ReactNode;
+    readonly skeleton: (rows: number, columns: number, labels: Required<TableLabels>, shape: KitSkeletonShape) => ReactNode;
     readonly toolbar: <TRow>(props: KitToolbarProps<TRow>) => ReactNode;
 }
 
@@ -3538,6 +3544,7 @@ export interface KitTableClassNames {
     readonly footer?: string;
     readonly root?: string;
     readonly table?: string;
+    readonly tableFooter?: string;
     readonly toolbar?: string;
 }
 
@@ -3546,6 +3553,7 @@ export interface KitTableFrameProps {
     readonly animate: boolean;
     readonly announcers: ReactNode;
     readonly bars: ReactNode;
+    readonly density: Density;
     readonly footers: ReactNode;
     readonly fullscreenContainer: HTMLElement | undefined;
     readonly labels: Required<TableLabels>;
@@ -3638,6 +3646,7 @@ export interface KitToolbarProps<TRow> extends DataTableShellToolbarProps<TRow> 
     readonly columnMenu: ReactNode;
     readonly filtersMode: "popover" | "drawer" | "header";
     readonly filtersOpen: boolean;
+    readonly loadsMore: boolean;
     readonly onCloseFilters: () => void;
     readonly onFiltersTriggerPointerDown: () => void;
     readonly onToggleFilters: () => void;

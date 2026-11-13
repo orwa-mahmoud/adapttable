@@ -47347,6 +47347,14 @@
       "behavior": ""
     },
     {
+      "export": "KitSkeletonShape",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "KitSortLabelProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",

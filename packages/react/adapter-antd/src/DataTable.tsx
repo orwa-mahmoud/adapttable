@@ -2818,6 +2818,7 @@ function AntdTableBody<TRow>({
                             />
                           }
                           showRowsPerPage={!c.isPaged}
+                          loadsMore={!c.isPaged}
                         />
                       </div>
                       <FeatureSlot

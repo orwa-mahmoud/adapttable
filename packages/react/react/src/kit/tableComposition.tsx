@@ -55,6 +55,7 @@ import type {
   DataTableShellToolbarProps,
 } from "../shell/shellContract";
 import { fillSlot, type Slot } from "../state/slots";
+import type { Density } from "../url/useDensityUrlState";
 import { useDataTableShell } from "../useDataTableShell";
 
 /**
@@ -89,6 +90,8 @@ export interface KitTableClassNames {
   readonly card?: string;
   /** The pager host. */
   readonly footer?: string;
+  /** The host's own footer, under the rows. */
+  readonly tableFooter?: string;
 }
 
 /**
@@ -131,6 +134,8 @@ export interface KitToolbarProps<
   readonly savedViewsMenu: ReactNode;
   /** The columns menu, when the host asked for one. */
   readonly columnMenu: ReactNode;
+  /** Whether the table loads its next page as it scrolls, outside a grouped view. */
+  readonly loadsMore: boolean;
 }
 
 /**
@@ -182,8 +187,22 @@ export interface KitTableFrameProps {
   readonly rowCount: number;
   /** Whether the body is the mobile cards. */
   readonly mobile: boolean;
+  /** The row density the table is drawn at. */
+  readonly density: Density;
   /** Whether the rows stagger in when they mount. */
   readonly animate: boolean;
+}
+
+/**
+ * What the first-load placeholder stands in for.
+ *
+ * @public
+ */
+export interface KitSkeletonShape {
+  /** The body will be the mobile cards. */
+  readonly mobile: boolean;
+  /** Rows will have an actions column. */
+  readonly actions: boolean;
 }
 
 /**
@@ -212,7 +231,8 @@ export interface KitTable {
   readonly skeleton: (
     rows: number,
     columns: number,
-    labels: Required<TableLabels>
+    labels: Required<TableLabels>,
+    shape: KitSkeletonShape
   ) => ReactNode;
   /** The no-data view; `onClear` is set when filters hid every row. */
   readonly empty: (
@@ -248,7 +268,11 @@ function bodyOf<TRow>(
       kit.skeleton(
         props.skeletonRows ?? view.source.limit,
         view.table.columns.length,
-        labels
+        labels,
+        {
+          mobile: chrome.isMobile,
+          actions: (view.tableProps.rowActions?.length ?? 0) > 0,
+        }
       )
     );
   }
@@ -322,6 +346,7 @@ function toolbarOf<TRow>(
   return kit.toolbar<TRow>({
     ...view.toolbarProps,
     filtersMode: props.filtersMode ?? "popover",
+    loadsMore: view.canLoadMore && !chrome.grouping,
     filtersOpen: view.filtersOpen,
     onToggleFilters: view.filtersTrigger.onClick,
     onFiltersTriggerPointerDown: view.filtersTrigger.onPointerDown,
@@ -569,7 +594,10 @@ export function TableComposition<TRow>({
                   footers={
                     <>
                       {props.tableFooter == null ? null : (
-                        <div data-adapttable-part="table-footer">
+                        <div
+                          data-adapttable-part="table-footer"
+                          className={classNames?.tableFooter}
+                        >
                           {props.tableFooter}
                         </div>
                       )}
@@ -621,6 +649,7 @@ export function TableComposition<TRow>({
                   labels={labels}
                   rowCount={source.rows.length}
                   mobile={chrome.isMobile}
+                  density={view.density}
                   animate={props.animate === true}
                 />
               )}
