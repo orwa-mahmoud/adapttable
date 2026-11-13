@@ -180,6 +180,9 @@ export function Select({
   );
 }
 
+/** A labelled checkbox on its own line, inset from the panel edge. */
+const LABELLED = { display: "flex", mx: 1 } as const;
+
 /** A checkbox, labelled when it has a label. @public */
 export function Checkbox({
   checked,
@@ -189,6 +192,8 @@ export function Checkbox({
   "aria-label": ariaLabel,
   disabled,
   className,
+  rootPart,
+  style,
   ...data
 }: Readonly<KitCheckboxProps>) {
   // A pass-through: the compiler's cache would outweigh the element it saves.
@@ -209,7 +214,9 @@ export function Checkbox({
     <FormControlLabel
       label={label}
       className={className}
-      sx={{ display: "flex", mx: 1 }}
+      data-adapttable-part={rootPart}
+      style={style}
+      sx={style ? undefined : LABELLED}
       control={box}
     />
   );
