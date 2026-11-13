@@ -296,7 +296,7 @@ function FindStage<TRow>({
 }): ReactNode {
   const filled = useFeatureSlotFilled(FIND_LIVE);
   const findProps = {
-    enabled: true,
+    enabled: props.findInTable === true,
     rows,
     columns,
     firstRowIndex,
