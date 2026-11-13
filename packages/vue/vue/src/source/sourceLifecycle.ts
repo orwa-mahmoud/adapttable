@@ -4,7 +4,7 @@ import {
   type ResolvedPaginationMode,
   resolvePaginationMode,
 } from "@adapttable/core";
-import { preserveEditorFocusOnLayoutChange } from "@adapttable/core/binding";
+import { notifyLayoutChange } from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,
@@ -46,7 +46,7 @@ export function useViewportMobile(
         return;
       const media = window.matchMedia(`(max-width: ${String(breakpoint)}px)`);
       const update = (): void => {
-        if (mobile.value !== media.matches) preserveEditorFocusOnLayoutChange();
+        if (mobile.value !== media.matches) notifyLayoutChange();
         mobile.value = media.matches;
       };
       update();
