@@ -1,11 +1,21 @@
-import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
-import type { TableLabels } from "@adapttable/react/adapter";
-import { type CSSProperties, useState } from "react";
-import { createPortal } from "react-dom";
+/** The saved-views menu, drawn by the binding with native controls. */
+import type { UseSavedViewsOptions } from "@adapttable/react";
+import {
+  createSavedViewsMenu,
+  type KitSavedViewsLook,
+  type TableLabels,
+} from "@adapttable/react/adapter";
+import type { CSSProperties } from "react";
 
 import type { DataTableClassNames } from "../types";
-import { MENU_PANEL_STYLE, useMenuPopover } from "./menuPopover";
-import { usePortalContainer } from "./portalContainer";
+import { ClassNamesProvider, usePartClass } from "./classNamesContext";
+import {
+  anchoredPopover,
+  Button,
+  Divider,
+  IconButton,
+  TextInput,
+} from "./ColumnMenu";
 
 /**
  * Layout for a panel row: the name/input takes the space, the trailing
@@ -42,6 +52,30 @@ export interface SavedViewsMenuProps {
   classNames: DataTableClassNames;
 }
 
+const LOOK: KitSavedViewsLook = {
+  // The wrapper the popover places scrolls; the panel inside only stacks.
+  panel: { maxHeight: "none", overflowY: "visible" },
+  row: ROW_STYLE,
+  divider: {},
+  saveRow: ROW_STYLE,
+  nameInput: {},
+};
+
+const useLook = (): KitSavedViewsLook => LOOK;
+
+const Menu = /* @__PURE__ */ createSavedViewsMenu(
+  {
+    Button,
+    IconButton,
+    TextInput,
+    Popover: anchoredPopover({ "data-adapttable-part": "views-menu" }),
+    Divider,
+    usePartClass,
+    deleteIcon: "×",
+  },
+  useLook
+);
+
 /**
  * Saved-views popover: a disclosure button + a panel listing the saved views
  * (click applies one and closes; each has a delete button) above a save row
@@ -56,104 +90,9 @@ export function SavedViewsMenu({
   labels,
   classNames,
 }: Readonly<SavedViewsMenuProps>) {
-  const portalContainer = usePortalContainer();
-  const { views, save, apply, remove } = useSavedViews(options);
-  const { open, setOpen, rootRef, triggerRef, panelRef } = useMenuPopover();
-  const [name, setName] = useState("");
-  const trimmed = name.trim();
-
   return (
-    <div
-      ref={rootRef}
-      data-adapttable-part="views-menu"
-      className={classNames.viewsMenu}
-      style={{ position: "relative" }}
-    >
-      <button
-        ref={triggerRef}
-        type="button"
-        aria-expanded={open}
-        aria-haspopup="true"
-        data-adapttable-part="views-button"
-        data-active={open || undefined}
-        className={classNames.viewsButton}
-        style={{ flexShrink: 0, whiteSpace: "nowrap" }}
-        onClick={() => setOpen((v) => !v)}
-      >
-        {labels.savedViews}
-      </button>
-      {open &&
-        createPortal(
-          <div
-            ref={panelRef}
-            data-adapttable-part="views-panel"
-            className={classNames.viewsPanel}
-            style={MENU_PANEL_STYLE}
-          >
-            {views.map((view) => (
-              <div
-                key={view.name}
-                data-adapttable-part="views-row"
-                className={classNames.viewsRow}
-                style={ROW_STYLE}
-              >
-                <button
-                  type="button"
-                  data-adapttable-part="views-item"
-                  className={classNames.viewsItem}
-                  onClick={() => {
-                    apply(view.name);
-                    setOpen(false);
-                  }}
-                >
-                  {view.name}
-                </button>
-                <button
-                  type="button"
-                  aria-label={`${labels.deleteView}: ${view.name}`}
-                  data-adapttable-part="views-delete"
-                  className={classNames.viewsDelete}
-                  onClick={() => remove(view.name)}
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-            {views.length > 0 && (
-              <hr
-                data-adapttable-part="views-divider"
-                className={classNames.viewsDivider}
-              />
-            )}
-            <div
-              data-adapttable-part="views-save-row"
-              className={classNames.viewsSaveRow}
-              style={ROW_STYLE}
-            >
-              <input
-                aria-label={labels.viewName}
-                placeholder={labels.viewName}
-                data-adapttable-part="views-input"
-                className={classNames.viewsInput}
-                value={name}
-                onChange={(e) => setName(e.currentTarget.value)}
-              />
-              <button
-                type="button"
-                disabled={trimmed === ""}
-                data-adapttable-part="views-save"
-                className={classNames.viewsSave}
-                onClick={() => {
-                  save(trimmed);
-                  setName("");
-                }}
-              >
-                {labels.saveView}
-              </button>
-            </div>
-          </div>,
-          portalContainer ?? document.body
-        )}
-    </div>
+    <ClassNamesProvider classNames={classNames}>
+      <Menu options={options} labels={labels} />
+    </ClassNamesProvider>
   );
 }

@@ -1,13 +1,10 @@
 import {
   type CSSProperties,
-  type Dispatch,
   type RefCallback,
   type RefObject,
-  type SetStateAction,
   useCallback,
   useEffect,
   useRef,
-  useState,
 } from "react";
 
 import { OVERLAY_Z, placeOverlayBelowTrigger } from "./overlayPlacement";
@@ -83,32 +80,4 @@ export function useAnchoredPanel(
   }, [open]);
 
   return { rootRef, triggerRef, panelRef };
-}
-
-/** Disclosure state shared by the toolbar menu popovers. */
-export interface MenuPopoverState extends AnchoredPanelRefs {
-  open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-}
-
-/**
- * Disclosure behaviour for a toolbar menu that keeps its own state: an
- * anchored panel that also closes on Escape, handing focus back to the
- * trigger.
- */
-export function useMenuPopover(): MenuPopoverState {
-  const [open, setOpen] = useState(false);
-  const refs = useAnchoredPanel(open, () => setOpen(false));
-  const { triggerRef } = refs;
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setOpen(false);
-      triggerRef.current?.focus();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, triggerRef]);
-  return { open, setOpen, ...refs };
 }

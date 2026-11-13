@@ -141,7 +141,7 @@ export function TextInput({
 
 /** The caption and select parts of each labelled choice, by its own part. */
 /** An element's part, as the attribute it carries. */
-interface PartAttribute {
+export interface PartAttribute {
   readonly "data-adapttable-part": string;
 }
 
@@ -200,7 +200,7 @@ function Select({
   );
 }
 
-function Divider({ style: _style, ...data }: Readonly<KitDividerProps>) {
+export function Divider({ style: _style, ...data }: Readonly<KitDividerProps>) {
   "use no memo";
   return (
     <hr className={useClassOfPart(data["data-adapttable-part"])} {...data} />
@@ -260,63 +260,65 @@ export function RenameField({
 const RELATIVE: CSSProperties = { position: "relative" };
 
 /** The wrapper around a menu's trigger, by the part of its panel. */
-const MENU_PARTS = {
-  "column-menu-panel": { "data-adapttable-part": "column-menu" },
-  "views-panel": { "data-adapttable-part": "views-menu" },
-};
-
-const menuParts: Readonly<Partial<Record<string, PartAttribute>>> = MENU_PARTS;
-
 /**
- * A panel portalled under its trigger: the fieldset takes the panel's part
- * and the wrapper around the trigger the menu's (the panel's without
- * `-panel`, from a literal table so the parts check reads it). A pointer-down outside closes it, and the binding owns Escape;
- * the binding's own group inside carries the panel's name.
+ * A popover that portals its panel under the trigger, in a wrapper named
+ * `root`. Given a part, the panel is a fieldset with that part; without one,
+ * a plain box that only places the binding's own panel. A pointer-down
+ * outside closes it, and the binding owns Escape and names the panel.
  */
-export function Popover({
-  trigger,
-  children,
-  open = false,
-  onOpenChange,
-  part = "menu-panel",
-  dir,
-}: Readonly<KitPopoverProps>) {
-  "use no memo";
-  const classOf = usePartClass();
-  const root = menuParts[part];
-  const portalContainer = usePortalContainer();
-  const { rootRef, triggerRef, panelRef } = useAnchoredPanel(open, () =>
-    onOpenChange?.(false)
-  );
-  return (
-    <div
-      ref={rootRef}
-      {...root}
-      className={root && classOf(root["data-adapttable-part"])}
-      style={RELATIVE}
-    >
-      {trigger({
-        elementRef: triggerRef,
-        onClick: () => onOpenChange?.(!open),
-        "aria-expanded": open,
-        "aria-haspopup": "dialog",
-      })}
-      {open &&
-        createPortal(
-          <fieldset
-            ref={panelRef}
-            dir={dir}
-            data-adapttable-part={part}
-            className={classOf(part)}
-            style={MENU_PANEL_STYLE}
-          >
-            {children}
-          </fieldset>,
-          portalContainer ?? document.body
-        )}
-    </div>
-  );
+export function anchoredPopover(
+  root: PartAttribute
+): (props: Readonly<KitPopoverProps>) => ReactElement {
+  const rootPart = root["data-adapttable-part"];
+  return function Popover({
+    trigger,
+    children,
+    open = false,
+    onOpenChange,
+    part,
+    dir,
+  }) {
+    "use no memo";
+    const classOf = usePartClass();
+    const portalContainer = usePortalContainer();
+    const { rootRef, triggerRef, panelRef } = useAnchoredPanel(open, () =>
+      onOpenChange?.(false)
+    );
+    const Panel = part === undefined ? "div" : "fieldset";
+    return (
+      <div
+        ref={rootRef}
+        {...root}
+        className={classOf(rootPart)}
+        style={RELATIVE}
+      >
+        {trigger({
+          elementRef: triggerRef,
+          onClick: () => onOpenChange?.(!open),
+          "aria-expanded": open,
+          "aria-haspopup": "dialog",
+        })}
+        {open &&
+          createPortal(
+            <Panel
+              ref={panelRef}
+              dir={dir}
+              data-adapttable-part={part}
+              className={part && classOf(part)}
+              style={MENU_PANEL_STYLE}
+            >
+              {children}
+            </Panel>,
+            portalContainer ?? document.body
+          )}
+      </div>
+    );
+  };
 }
+
+const Popover = /* @__PURE__ */ anchoredPopover({
+  "data-adapttable-part": "column-menu",
+});
 
 const CONTENTS: CSSProperties = { display: "contents" };
 
