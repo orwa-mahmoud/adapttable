@@ -7,9 +7,11 @@
  * often no React, and no business loading a table engine to decode a query
  * string.
  *
- * So the parts of the model that are pure — the AND/OR filter-tree encoding,
- * the pivot encoding, the formula-column encoding, and the types that describe
- * them — are exported here as well, from an entry that imports nothing. No
+ * So the parts of the model that are pure — the parameter names and page-size
+ * limits, the filter operators, the AND/OR filter-tree encoding, the list,
+ * pivot, group-aggregate and formula-column encodings, and the types that
+ * describe them — are exported here as well, from an entry that imports
+ * nothing. No
  * hooks, no components, no `"use client"` boundary: this file is the one place
  * in the package a backend can import and stay a backend.
  *
@@ -40,6 +42,7 @@ export type {
   AggregateOrderedValue,
   Aggregator,
 } from "./aggregate/aggregate";
+export { DEFAULT_LIMIT, MAX_LIMIT } from "./constants";
 export {
   FILTER_TYPES,
   type FilterDef,
@@ -60,8 +63,14 @@ export {
 } from "./filters/filterTreeCodec";
 export {
   DATE_OPS,
+  type DateOp,
   FILTER_OP_SUFFIX,
+  FILTER_TYPE_OPS,
+  type FilterTypeOps,
+  isListFilterOp,
+  isValuelessFilterOp,
   NUMBER_OPS,
+  parseDateOp,
   TEXT_OPS,
 } from "./filters/operators";
 export { parseRelativeToken } from "./filters/relativeDates";
@@ -71,6 +80,7 @@ export {
   deserializeFormulaColumns,
   serializeFormulaColumns,
 } from "./formula/formulaUrlCodec";
+export { parseGroupAggregateOverrides } from "./grouping/groupAggregateUrlCodec";
 export type { PivotConfig, PivotMeasure } from "./pivot/pivotModel";
 export {
   deserializePivot,
@@ -86,6 +96,20 @@ export {
   type QueryFilterGroup,
 } from "./source/queryContract";
 export type { SortDirection } from "./types";
+export {
+  FILTER_PREFIX,
+  PARAM_GROUP_AGGREGATES,
+  PARAM_GROUP_BY,
+  PARAM_LIMIT,
+  PARAM_PAGE,
+  PARAM_PIVOT,
+  PARAM_SEARCH,
+  PARAM_SORT,
+  PARAM_SORT_BY,
+  PARAM_SORT_DIR,
+} from "./url/urlParams";
+export { splitListParam } from "./utils/listParam";
+export { safeDecode } from "./utils/safeDecode";
 
 /**
  * The member types the signatures above hand back.

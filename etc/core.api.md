@@ -3648,6 +3648,9 @@ export const FILTER_TREE_PARAM = "ft";
 export const FILTER_TREE_VERSION = 1;
 
 // @public
+export const FILTER_TYPE_OPS: Readonly<Record<FilterType, FilterTypeOps>>;
+
+// @public
 export const FILTER_TYPES: readonly ["text", "select", "multiSelect", "checklist", "boolean", "dateRange", "numberRange"];
 
 // @public
@@ -3869,6 +3872,12 @@ export function filterTypeDefaultOp(def: Pick<FilterDef, "type">, registry: Filt
 export interface FilterTypeExtend {
     readonly patch: Partial<FilterTypeSpec>;
     readonly type: string;
+}
+
+// @public
+export interface FilterTypeOps {
+    readonly defaultOp: string;
+    readonly ops: readonly string[];
 }
 
 // @public
@@ -5950,7 +5959,7 @@ export const PARAM_GROUP_CLOSED = "groupClosed";
 // @public (undocumented)
 export const PARAM_LIMIT = "limit";
 
-// @public (undocumented)
+// @public
 export const PARAM_PAGE = "page";
 
 // @public
@@ -5958,6 +5967,9 @@ export const PARAM_PIVOT = "pivot";
 
 // @public (undocumented)
 export const PARAM_SEARCH = "q";
+
+// @public
+export const PARAM_SORT = "sort";
 
 // @public (undocumented)
 export const PARAM_SORT_BY = "sortBy";
@@ -7766,6 +7778,9 @@ export function runRowAction<TRow>(action: RowAction<TRow>, row: TRow, confirm: 
 export function runWithFeatureHost<T>(host: FeatureHostState | undefined, fn: () => T): T;
 
 // @public
+export function safeDecode(value: string): string;
+
+// @public
 export function safeLocalStorage(): Pick<Storage, "getItem" | "setItem" | "removeItem"> | undefined;
 
 // @public
@@ -8267,6 +8282,9 @@ export function sparklineSortValue(values: readonly number[]): number | undefine
 
 // @public
 export function sparklineSummary(values: readonly number[]): string;
+
+// @public
+export function splitListParam(raw: string | null | undefined): string[];
 
 // @public
 export function splitRelativeToken(raw: string): {

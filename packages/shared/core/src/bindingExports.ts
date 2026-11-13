@@ -269,6 +269,7 @@ export {
   PARAM_PAGE,
   PARAM_PIVOT,
   PARAM_SEARCH,
+  PARAM_SORT,
   PARAM_SORT_BY,
   PARAM_SORT_DIR,
   readCollapsedGroups,

@@ -6,6 +6,7 @@
  */
 import type { ExtraFilters, FilterValue } from "../contracts/columns";
 import type { TableLabels } from "../types";
+import type { FilterType } from "./filterDefs";
 
 /**
  * Suffix on the filter key that stores the operator token (`name` → `nameOp`).
@@ -81,6 +82,42 @@ export const DATE_OPS = [
   "relative",
   "empty",
 ] as const;
+
+/**
+ * The operators a filter type accepts, and the one it reads when a link
+ * names none.
+ *
+ * @public
+ */
+export interface FilterTypeOps {
+  /** Every operator the type accepts, in menu order. */
+  readonly ops: readonly string[];
+  /** The operator used until the reader picks another. */
+  readonly defaultOp: string;
+}
+
+/** The one operator of a one-choice type: `select`, `boolean`. */
+const CHOICE_OPS: FilterTypeOps = { ops: ["eq"], defaultOp: "eq" };
+
+/** The one operator of a list type: `multiSelect`, `checklist`. */
+const LIST_OPS: FilterTypeOps = { ops: ["in"], defaultOp: "in" };
+
+/**
+ * The operators of every built-in filter type — what the table's widgets
+ * offer and what a server checks a link against. Each built-in type's spec
+ * offers exactly these.
+ *
+ * @public
+ */
+export const FILTER_TYPE_OPS: Readonly<Record<FilterType, FilterTypeOps>> = {
+  text: { ops: TEXT_OPS, defaultOp: "contains" },
+  select: CHOICE_OPS,
+  multiSelect: LIST_OPS,
+  checklist: LIST_OPS,
+  boolean: CHOICE_OPS,
+  dateRange: { ops: DATE_OPS, defaultOp: "on" },
+  numberRange: { ops: NUMBER_OPS, defaultOp: "gte" },
+};
 
 /**
  * One text operator token.

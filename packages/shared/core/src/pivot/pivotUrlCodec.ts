@@ -35,6 +35,7 @@
  * of React is what lets `@adapttable/core/query` — and `@adapttable/server`
  * through it — decode the same string a backend never renders.
  */
+import { safeDecode } from "../utils/safeDecode";
 import { EMPTY_PIVOT_CONFIG } from "./pivotConfigModel";
 import { PATH_SEP } from "./pivotKeys";
 import type { PivotConfig, PivotMeasure } from "./pivotModel";
@@ -82,21 +83,6 @@ const RESERVED = /* @__PURE__ */ new Set<string>([
 ]);
 
 /**
- * Decode one field, tolerating the malformed input a hand-edited URL brings.
- *
- * Local rather than shared with `url/serialize`: this module is one of the few a
- * backend reads a shared link with in a process where React is not installed,
- * and it stays that light by importing almost nothing.
- */
-function decodeField(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
-
-/**
  * A folded path in URL form: `EU/Alpha`.
  *
  * A collapse key is dimension values joined by a control character, and those
@@ -111,7 +97,7 @@ function encodeCollapsed(key: string): string {
 
 /** The collapse key a URL path names. Inverse of {@link encodeCollapsed}. */
 function decodeCollapsed(value: string): string {
-  return value.split(COLLAPSED_PATH_SEP).map(decodeField).join(PATH_SEP);
+  return value.split(COLLAPSED_PATH_SEP).map(safeDecode).join(PATH_SEP);
 }
 
 /**

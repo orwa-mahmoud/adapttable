@@ -217,23 +217,23 @@ export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | 
 
 // @public
 export interface ColumnModel<TRow = unknown> {
-    accessor?: RowCallback<[row: NoInfer<TRow>], unknown>;
+    accessor?: (row: TRow) => unknown;
     aggregatable?: Aggregatable;
     ai?: ColumnAiOptions;
     align?: "start" | "center" | "end";
-    colSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
-    editable?: boolean | RowCallback<[row: NoInfer<TRow>], boolean>;
+    colSpan?: number | ((row: TRow) => number);
+    editable?: boolean | ((row: TRow) => boolean);
     editor?: ColumnModelEditor;
-    editValue?: RowCallback<[row: NoInfer<TRow>], string>;
-    exportValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
+    editValue?: (row: TRow) => string;
+    exportValue?: (row: TRow) => unknown;
     filter?: ColumnModelFilter;
     flex?: number;
     formatAggregate?: (value: DisplayValue | undefined, context: AggregateFormatContext) => DisplayValue | undefined;
-    formatValue?: RowCallback<[row: NoInfer<TRow>], string>;
+    formatValue?: (row: TRow) => string;
     group?: string | readonly string[];
     groupable?: boolean;
     groupShow?: ColumnGroupShow;
-    groupValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
+    groupValue?: (row: TRow) => unknown;
     header?: string;
     headerTooltip?: string;
     hideOnDesktop?: boolean;
@@ -248,13 +248,13 @@ export interface ColumnModel<TRow = unknown> {
     meta?: Record<string, unknown>;
     minWidth?: number;
     mobileLabel?: string;
-    parseValue?: RowCallback<[draft: string, row: NoInfer<TRow>], unknown>;
+    parseValue?: (draft: string, row: TRow) => unknown;
     renameable?: boolean;
     responsivePriority?: number;
-    rowSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
+    rowSpan?: number | ((row: TRow) => number);
     sortable?: boolean;
-    sortValue?: RowCallback<[row: NoInfer<TRow>], SortableValue>;
-    validate?: RowCallback<[value: unknown, row: NoInfer<TRow>], string | undefined | Promise<string | undefined>>;
+    sortValue?: (row: TRow) => SortableValue;
+    validate?: (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
     width?: number | string;
 }
 
@@ -278,7 +278,7 @@ export interface ContextMenuItem {
 }
 
 // @public
-export type ContextMenuItemsFactory<TRow = unknown> = RowCallback<[target: ContextMenuTarget<TRow>], readonly ContextMenuItem[]>;
+export type ContextMenuItemsFactory<TRow = unknown> = (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
 
 // @public
 export type ContextMenuTarget<TRow> = {
@@ -339,7 +339,13 @@ export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => DisplayValu
 export const DATE_OPS: readonly ["before", "after", "on", "gte", "lte", "between", "relative", "empty"];
 
 // @public
+export type DateOp = (typeof DATE_OPS)[number];
+
+// @public
 export type DeclaredAggregates = Readonly<Record<string, string>>;
+
+// @public
+export const DEFAULT_LIMIT = 25;
 
 // @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
@@ -420,10 +426,16 @@ export interface FeatureHostState<TRow = unknown> {
 export const FILTER_OP_SUFFIX = "Op";
 
 // @public
+export const FILTER_PREFIX = "f_";
+
+// @public
 export const FILTER_TREE_PARAM = "ft";
 
 // @public
 export const FILTER_TREE_VERSION = 1;
+
+// @public
+export const FILTER_TYPE_OPS: Readonly<Record<FilterType, FilterTypeOps>>;
 
 // @public
 export const FILTER_TYPES: readonly ["text", "select", "multiSelect", "checklist", "boolean", "dateRange", "numberRange"];
@@ -437,7 +449,7 @@ export interface FilterAiOptions {
 export interface FilterDef<TRow = unknown> {
     ai?: false | FilterAiOptions;
     column?: string;
-    getValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
+    getValue?: (row: TRow) => unknown;
     key: string;
     label?: string;
     options?: FilterOptionsSource;
@@ -464,6 +476,12 @@ export type FilterType = (typeof FILTER_TYPES)[number];
 export interface FilterTypeExtend {
     readonly patch: Partial<FilterTypeSpec>;
     readonly type: string;
+}
+
+// @public
+export interface FilterTypeOps {
+    readonly defaultOp: string;
+    readonly ops: readonly string[];
 }
 
 // @public
@@ -705,10 +723,52 @@ export function isFilterGroup(node: QueryCondition | QueryFilterGroup): node is 
 export function isFilterTreeConditionSet(condition: QueryCondition): boolean;
 
 // @public
+export function isListFilterOp(op: string): boolean;
+
+// @public
+export function isValuelessFilterOp(op: string): boolean;
+
+// @public
+export const MAX_LIMIT = 500;
+
+// @public
 export const NUMBER_OPS: readonly ["eq", "neq", "gt", "gte", "lt", "lte", "between", "in", "notIn"];
 
 // @public
+export const PARAM_GROUP_AGGREGATES = "groupAgg";
+
+// @public
+export const PARAM_GROUP_BY = "groupBy";
+
+// @public (undocumented)
+export const PARAM_LIMIT = "limit";
+
+// @public
+export const PARAM_PAGE = "page";
+
+// @public
+export const PARAM_PIVOT = "pivot";
+
+// @public (undocumented)
+export const PARAM_SEARCH = "q";
+
+// @public
+export const PARAM_SORT = "sort";
+
+// @public (undocumented)
+export const PARAM_SORT_BY = "sortBy";
+
+// @public (undocumented)
+export const PARAM_SORT_DIR = "sortDir";
+
+// @public
+export function parseDateOp(raw: FilterValue | undefined): DateOp | undefined;
+
+// @public
 export function parseFilterTree(raw: string | null | undefined): QueryFilterGroup | undefined;
+
+// @public
+export function parseGroupAggregateOverrides(value: string | null | undefined): GroupAggregateOverrides;
 
 // @public
 export function parseRelativeToken(raw: string | undefined): RelativeDateToken | undefined;
@@ -806,9 +866,7 @@ export interface ResolvedAggregateOperation {
 export type ResolvedPaginationMode = "infinite" | "paged";
 
 // @public
-export type RowCallback<TArgs extends readonly unknown[], TResult> = {
-    bivarianceHack(...args: TArgs): TResult;
-}["bivarianceHack"];
+export function safeDecode(value: string): string;
 
 // @public
 export function serializeFilterTree(tree: QueryFilterGroup | undefined): string | undefined;
@@ -843,12 +901,15 @@ export interface SortLevel {
 }
 
 // @public
+export function splitListParam(raw: string | null | undefined): string[];
+
+// @public
 export interface TableCallbackRefresh<TRow> {
     readonly columns?: NonNullable<IncrementalViewConfig<TRow>["columns"]>;
     readonly filterFn?: NonNullable<IncrementalViewConfig<TRow>["filterFn"]>;
     readonly filterTreeFn?: NonNullable<IncrementalViewConfig<TRow>["filterTreeFn"]>;
-    readonly getRowId?: RowCallback<[row: NoInfer<TRow>], string>;
-    readonly getSearchText?: RowCallback<[row: NoInfer<TRow>], string>;
+    readonly getRowId?: (row: TRow) => string;
+    readonly getSearchText?: (row: TRow) => string;
     readonly getSortValue?: NonNullable<IncrementalViewConfig<TRow>["getSortValue"]>;
 }
 
@@ -856,24 +917,24 @@ export interface TableCallbackRefresh<TRow> {
 export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
     readonly candidate: TableEngineReader<TRow>;
     readonly commitCandidate: () => void;
-    readonly configure: RowCallback<[patch: TableEngineConfigPatch<TRow>, options?: {
+    readonly configure: (patch: TableEngineConfigPatch<TRow>, options?: {
         silent?: boolean;
-    }], void>;
+    }) => void;
     readonly discardCandidate: () => void;
     readonly dispatch: (operation: TableOperation) => void;
     readonly dispose: () => void;
-    readonly invalidate: RowCallback<[axes: readonly TableRevisionAxis[], next?: {
+    readonly invalidate: (axes: readonly TableRevisionAxis[], next?: {
         readonly data?: readonly TRow[];
         readonly columns?: readonly ColumnMetadata<TRow>[];
     }, options?: {
         silent?: boolean;
-    }], void>;
-    readonly refreshCallbacks: RowCallback<[patch: TableCallbackRefresh<TRow>], void>;
-    readonly rowKey: RowCallback<[row: NoInfer<TRow>], string>;
-    readonly stageCandidate: RowCallback<[patch: TableEngineConfigPatch<TRow>, next?: {
+    }) => void;
+    readonly refreshCallbacks: (patch: TableCallbackRefresh<TRow>) => void;
+    readonly rowKey: (row: TRow) => string;
+    readonly stageCandidate: (patch: TableEngineConfigPatch<TRow>, next?: {
         readonly data?: readonly TRow[];
         readonly columns?: readonly ColumnMetadata<TRow>[];
-    }], void>;
+    }) => void;
     readonly subscribe: (axes: readonly TableRevisionAxis[] | "all", listener: (revisions: TableRevisions) => void) => () => void;
     readonly tableId: string;
 }
@@ -888,7 +949,7 @@ export interface TableEngineConfigPatch<TRow> extends Partial<IncrementalViewCon
 
 // @public
 export interface TableEngineReader<TRow = unknown> {
-    readonly cellValue: RowCallback<[row: NoInfer<TRow>, columnKey: string], unknown>;
+    readonly cellValue: (row: TRow, columnKey: string) => unknown;
     readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
     readonly rowByKey: (rowKey: string) => TRow | undefined;
     readonly rows: (scope: TableRowScope) => readonly TRow[];

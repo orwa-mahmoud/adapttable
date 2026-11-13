@@ -1,10 +1,18 @@
 import { safeDecode } from "./safeDecode";
 
 /**
- * A list param's entries: split at its commas, each decoded and trimmed,
- * empty ones dropped.
+ * A list param's entries — the exact inverse of how the table writes a
+ * multi-value filter: split at its commas, each decoded and trimmed, empty
+ * ones dropped. An entry that is not valid percent-encoding stays as it
+ * arrived.
+ *
+ * @param raw - The parameter's value, as `URLSearchParams.get` returns it.
+ * @returns The entries; none for an absent or empty parameter.
+ *
+ * @public
  */
-export function splitListParam(raw: string): string[] {
+export function splitListParam(raw: string | null | undefined): string[] {
+  if (raw == null) return [];
   return raw
     .split(",")
     .map((entry) => safeDecode(entry).trim())

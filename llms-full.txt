@@ -17555,12 +17555,15 @@ All from `@adapttable/react` unless marked `@adapttable/react/adapter`.
   `updateTableUrlState(search, namespace, mutate)` returns the next one;
   `applyTableUrlState` / `captureTableUrlState` move that state on and off a
   live table. Per param: `PARAM_PAGE`, `PARAM_LIMIT`, `PARAM_SEARCH`,
-  `PARAM_FIND`, `PARAM_SORT_BY`, `PARAM_SORT_DIR`, `PARAM_GROUP_BY`,
+  `PARAM_FIND`, `PARAM_SORT`, `PARAM_SORT_BY`, `PARAM_SORT_DIR`, `PARAM_GROUP_BY`,
   `PARAM_GROUP_AGGREGATES`, `PARAM_COL_HIDDEN`, `PARAM_DENSITY`,
   `PARAM_FORMULA`, `PARAM_PIVOT`, with `readPage`, `readLimit`, `readSortDir`,
   `readSortLevels` / `writeSortLevels`, `readColumnLayout` /
   `writeColumnLayout`, `readExtra` / `writeExtra`, `readFilterTreeParam` /
-  `writeFilterTreeParam`, and `readRowPins` / `writeRowPins`.
+  `writeFilterTreeParam`, and `readRowPins` / `writeRowPins`. A
+  multi-value param reads back with `splitListParam(raw)`, and
+  `safeDecode(part)` decodes one encoded part, keeping text that is not
+  valid percent-encoding as it arrived.
 - `useTableUrlState(options?): UseTableUrlStateResult` — page / limit /
   search / sort / grouping / group-aggregation overrides / extra-filter bag in
   the query string, with setters
@@ -18759,7 +18762,9 @@ confirmation, success, policy, sort, and cycle labels extend
 
 **Pinned summary rows.** `pinnedSummaryRows({ top, bottom })` (`PinnedRows`) sticks host-owned objects outside the row model — sort, filter, grouping, pagination and selection never see them, so they coexist with grouped and tree tables. Identities are `pinnedSummaryRowId(side, index)` (`PINNED_SUMMARY_KEY_PREFIX` + `:side:index`); `PinnedSummaryEntry` / `isPinnedSummaryRowId` / `pinnedSummarySideFromId` / `pinnedSummaryEntries` / `allPinnedSummaryEntries` / `resolvePinnedRows` / `EMPTY_PINNED_ROWS` are the helpers. Parts: `PINNED_SUMMARY_TOP_PART` / `PINNED_SUMMARY_BOTTOM_PART` via `pinnedSummaryPart`. Labels: `pinnedSummaryRow`, `pinnedSummaryTop`, `pinnedSummaryBottom`. Not URL or Saved Views — the objects are host data. See [pinned summary rows](./pinned-summary-rows.md).
 
-**Filter internals.** `FILTER_TYPES` lists the built-in types, `filterLabel`
+**Filter internals.** `FILTER_TYPES` lists the built-in types and
+`FILTER_TYPE_OPS` the operators each one offers (a `FilterTypeOps`: its `ops`
+and its `defaultOp`), `filterLabel`
 resolves a filter's caption, `filterStateKeys` names the URL keys one filter
 owns, `hasActiveHeaderFilter` says whether any of them holds a value worth
 marking the column with — a cleared text field leaves `""` and a cleared
@@ -19290,7 +19295,14 @@ multi-value encoding. `QueryInput` is a `Request`, `URL`, query string or
 [server queries](./server-queries.md).
 
 **The query model without React.** `@adapttable/core/query` is the half of the
-model a backend needs and no more: the `ft=1.{…}` codec (`parseFilterTree`,
+model a backend needs and no more: the parameter names (`PARAM_PAGE`,
+`PARAM_LIMIT`, `PARAM_SEARCH`, `PARAM_SORT`, `PARAM_SORT_BY`,
+`PARAM_SORT_DIR`, `PARAM_GROUP_BY`, `PARAM_GROUP_AGGREGATES`, `PARAM_PIVOT`,
+`FILTER_PREFIX`), the page-size defaults (`DEFAULT_LIMIT`, `MAX_LIMIT`), the
+operators (`FILTER_TYPE_OPS`, `TEXT_OPS`, `NUMBER_OPS`, `DATE_OPS`,
+`parseDateOp`, `isListFilterOp`, `isValuelessFilterOp`), the list and
+group-aggregate codecs (`splitListParam`, `safeDecode`,
+`parseGroupAggregateOverrides`), the `ft=1.{…}` codec (`parseFilterTree`,
 `serializeFilterTree`, `isActiveFilterTree`, `FILTER_TREE_PARAM`,
 `FILTER_TREE_VERSION`, and `isFilterTreeConditionSet` / `settledFilterTree` for
 the tree that actually filters), the `pivot=rows:…` codec (`serializePivot`,

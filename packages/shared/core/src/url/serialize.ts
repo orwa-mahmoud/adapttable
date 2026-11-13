@@ -22,6 +22,22 @@ import { isEmptyFilterValue } from "../filters/isEmptyFilterValue";
 import { type RowPinSide, type RowPinState } from "../rows/rowPinModel";
 import { joinListParam, splitListParam } from "../utils/listParam";
 import { safeDecode } from "../utils/safeDecode";
+import {
+  FILTER_PREFIX,
+  PARAM_COL_GROUPS,
+  PARAM_COL_HIDDEN,
+  PARAM_COL_NAMES,
+  PARAM_COL_ORDER,
+  PARAM_COL_PINNED,
+  PARAM_COL_WIDTHS,
+  PARAM_FILTER_TREE,
+  PARAM_GROUP_CLOSED,
+  PARAM_LIMIT,
+  PARAM_PAGE,
+  PARAM_ROW_PIN,
+  PARAM_SORT,
+  PARAM_SORT_DIR,
+} from "./urlParams";
 
 /** Split a comma list into trimmed, non-empty raw (still-encoded) parts. */
 function splitRaw(raw: string | null): string[] {
@@ -32,43 +48,30 @@ function splitRaw(raw: string | null): string[] {
     .filter(Boolean);
 }
 
-export const PARAM_PAGE = "page";
-export const PARAM_LIMIT = "limit";
-export const PARAM_SEARCH = "q";
-/** Find-bar query — the in-table walk, not the filter search term. */
-export const PARAM_FIND = "find";
-export const PARAM_SORT_BY = "sortBy";
-export const PARAM_SORT_DIR = "sortDir";
-/** Multi-sort chain: `sort=name:asc,age:desc` (keys percent-encoded). */
-export const PARAM_SORT = "sort";
-/** Row grouping keys, comma-separated — outermost first. */
-export const PARAM_GROUP_BY = "groupBy";
-/** Per-column group aggregate overrides. */
-export const PARAM_GROUP_AGGREGATES = "groupAgg";
-/** Keys under this prefix flow through as-is into the `extra` bag. */
-export const FILTER_PREFIX = "f_";
-/** Versioned AND/OR filter tree (`ft=1.{…}`). */
-export const PARAM_FILTER_TREE = "ft";
-/** Column-layout params (hidden / pinned / order / widths). */
-/** Collapsed group keys, comma-separated. */
-export const PARAM_GROUP_CLOSED = "groupClosed";
-export const PARAM_COL_HIDDEN = "colHide";
-export const PARAM_COL_PINNED = "colPin";
-export const PARAM_COL_ORDER = "colOrder";
-export const PARAM_COL_WIDTHS = "colW";
-export const PARAM_COL_NAMES = "colName";
-export const PARAM_COL_GROUPS = "colGroupCollapse";
-/** Pinned rows: `rowPin=id1:top,id2:bottom`. */
-export const PARAM_ROW_PIN = "rowPin";
-
-/** Row density — a display choice, captured by saved views like the rest. */
-export const PARAM_DENSITY = "density";
-
-/** The pivot configuration. See `@adapttable/core/pivot`. */
-export const PARAM_PIVOT = "pivot";
-
-/** The user-typed formula columns. See `@adapttable/core/formula`. */
-export const PARAM_FORMULA = "formula";
+export {
+  FILTER_PREFIX,
+  PARAM_COL_GROUPS,
+  PARAM_COL_HIDDEN,
+  PARAM_COL_NAMES,
+  PARAM_COL_ORDER,
+  PARAM_COL_PINNED,
+  PARAM_COL_WIDTHS,
+  PARAM_DENSITY,
+  PARAM_FILTER_TREE,
+  PARAM_FIND,
+  PARAM_FORMULA,
+  PARAM_GROUP_AGGREGATES,
+  PARAM_GROUP_BY,
+  PARAM_GROUP_CLOSED,
+  PARAM_LIMIT,
+  PARAM_PAGE,
+  PARAM_PIVOT,
+  PARAM_ROW_PIN,
+  PARAM_SEARCH,
+  PARAM_SORT,
+  PARAM_SORT_BY,
+  PARAM_SORT_DIR,
+} from "./urlParams";
 
 /** Read a 1-based page number, falling back when absent/invalid. */
 export function readPage(

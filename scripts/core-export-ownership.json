@@ -2207,17 +2207,6 @@
       "subpaths": ["."]
     },
     {
-      "name": "DEFAULT_LIMIT",
-      "kind": "runtime",
-      "module": "constants.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "constants.ts#DEFAULT_LIMIT",
-      "subpaths": ["."]
-    },
-    {
       "name": "DEFAULT_ROW_SIZE_PX",
       "kind": "runtime",
       "module": "constants.ts",
@@ -2854,17 +2843,6 @@
       "deprecated": false,
       "identity": "labelGroups/filterLabels.ts#FILTER_LABELS",
       "subpaths": [".", "./binding"]
-    },
-    {
-      "name": "FILTER_PREFIX",
-      "kind": "runtime",
-      "module": "url/serialize.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "url/serialize.ts#FILTER_PREFIX",
-      "subpaths": ["."]
     },
     {
       "name": "filterColumnMenuRows",
@@ -4297,17 +4275,6 @@
       "subpaths": ["."]
     },
     {
-      "name": "isListFilterOp",
-      "kind": "runtime",
-      "module": "filters/operators.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "filters/operators.ts#isListFilterOp",
-      "subpaths": ["."]
-    },
-    {
       "name": "isPinnedSummaryRowId",
       "kind": "runtime",
       "module": "rows/pinnedSummaryRows.ts",
@@ -4371,17 +4338,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "actions/shortcuts.ts#isTextEntryTarget",
-      "subpaths": ["."]
-    },
-    {
-      "name": "isValuelessFilterOp",
-      "kind": "runtime",
-      "module": "filters/operators.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "filters/operators.ts#isValuelessFilterOp",
       "subpaths": ["."]
     },
     {
@@ -4492,17 +4448,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "columns/widthBounds.ts#MAX_COLUMN_WIDTH",
-      "subpaths": ["."]
-    },
-    {
-      "name": "MAX_LIMIT",
-      "kind": "runtime",
-      "module": "constants.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "constants.ts#MAX_LIMIT",
       "subpaths": ["."]
     },
     {
@@ -4827,144 +4772,56 @@
     {
       "name": "PARAM_COL_HIDDEN",
       "kind": "runtime",
-      "module": "url/serialize.ts",
+      "module": "url/urlParams.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "url/serialize.ts#PARAM_COL_HIDDEN",
+      "identity": "url/urlParams.ts#PARAM_COL_HIDDEN",
       "subpaths": ["."]
     },
     {
       "name": "PARAM_DENSITY",
       "kind": "runtime",
-      "module": "url/serialize.ts",
+      "module": "url/urlParams.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "url/serialize.ts#PARAM_DENSITY",
+      "identity": "url/urlParams.ts#PARAM_DENSITY",
       "subpaths": ["."]
     },
     {
       "name": "PARAM_FIND",
       "kind": "runtime",
-      "module": "url/serialize.ts",
+      "module": "url/urlParams.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "url/serialize.ts#PARAM_FIND",
+      "identity": "url/urlParams.ts#PARAM_FIND",
       "subpaths": ["."]
     },
     {
       "name": "PARAM_FORMULA",
       "kind": "runtime",
-      "module": "url/serialize.ts",
+      "module": "url/urlParams.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "url/serialize.ts#PARAM_FORMULA",
-      "subpaths": ["."]
-    },
-    {
-      "name": "PARAM_GROUP_AGGREGATES",
-      "kind": "runtime",
-      "module": "url/serialize.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "url/serialize.ts#PARAM_GROUP_AGGREGATES",
-      "subpaths": ["."]
-    },
-    {
-      "name": "PARAM_GROUP_BY",
-      "kind": "runtime",
-      "module": "url/serialize.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "url/serialize.ts#PARAM_GROUP_BY",
+      "identity": "url/urlParams.ts#PARAM_FORMULA",
       "subpaths": ["."]
     },
     {
       "name": "PARAM_GROUP_CLOSED",
       "kind": "runtime",
-      "module": "url/serialize.ts",
+      "module": "url/urlParams.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "url/serialize.ts#PARAM_GROUP_CLOSED",
-      "subpaths": ["."]
-    },
-    {
-      "name": "PARAM_LIMIT",
-      "kind": "runtime",
-      "module": "url/serialize.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "url/serialize.ts#PARAM_LIMIT",
-      "subpaths": ["."]
-    },
-    {
-      "name": "PARAM_PAGE",
-      "kind": "runtime",
-      "module": "url/serialize.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "url/serialize.ts#PARAM_PAGE",
-      "subpaths": ["."]
-    },
-    {
-      "name": "PARAM_PIVOT",
-      "kind": "runtime",
-      "module": "url/serialize.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "url/serialize.ts#PARAM_PIVOT",
-      "subpaths": ["."]
-    },
-    {
-      "name": "PARAM_SEARCH",
-      "kind": "runtime",
-      "module": "url/serialize.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "url/serialize.ts#PARAM_SEARCH",
-      "subpaths": ["."]
-    },
-    {
-      "name": "PARAM_SORT_BY",
-      "kind": "runtime",
-      "module": "url/serialize.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "url/serialize.ts#PARAM_SORT_BY",
-      "subpaths": ["."]
-    },
-    {
-      "name": "PARAM_SORT_DIR",
-      "kind": "runtime",
-      "module": "url/serialize.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "url/serialize.ts#PARAM_SORT_DIR",
+      "identity": "url/urlParams.ts#PARAM_GROUP_CLOSED",
       "subpaths": ["."]
     },
     {
@@ -4998,17 +4855,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "focus/pasteRange.ts#parseClipboardTable",
-      "subpaths": ["."]
-    },
-    {
-      "name": "parseDateOp",
-      "kind": "runtime",
-      "module": "filters/operators.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "filters/operators.ts#parseDateOp",
       "subpaths": ["."]
     },
     {
@@ -8925,17 +8771,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "source/dataTier.ts#DataTier",
-      "subpaths": ["."]
-    },
-    {
-      "name": "DateOp",
-      "kind": "type",
-      "module": "filters/operators.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "filters/operators.ts#DateOp",
       "subpaths": ["."]
     },
     {
@@ -23078,12 +22913,12 @@
     {
       "name": "GroupAggregateOverride",
       "kind": "type",
-      "module": "grouping/groupAggregateOverrides.ts",
+      "module": "grouping/groupAggregateUrlCodec.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "grouping/groupAggregateOverrides.ts#GroupAggregateOverride",
+      "identity": "grouping/groupAggregateUrlCodec.ts#GroupAggregateOverride",
       "subpaths": [
         ".",
         "./binding",
@@ -23096,12 +22931,12 @@
     {
       "name": "GroupAggregateOverrides",
       "kind": "type",
-      "module": "grouping/groupAggregateOverrides.ts",
+      "module": "grouping/groupAggregateUrlCodec.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "grouping/groupAggregateOverrides.ts#GroupAggregateOverrides",
+      "identity": "grouping/groupAggregateUrlCodec.ts#GroupAggregateOverrides",
       "subpaths": [
         ".",
         "./binding",
@@ -24577,13 +24412,13 @@
     {
       "name": "parseGroupAggregateOverrides",
       "kind": "runtime",
-      "module": "grouping/groupAggregateOverrides.ts",
+      "module": "grouping/groupAggregateUrlCodec.ts",
       "audience": "app",
       "path": "./grouping",
       "forward": true,
       "deprecated": false,
-      "identity": "grouping/groupAggregateOverrides.ts#parseGroupAggregateOverrides",
-      "subpaths": [".", "./grouping"]
+      "identity": "grouping/groupAggregateUrlCodec.ts#parseGroupAggregateOverrides",
+      "subpaths": [".", "./grouping", "./query"]
     },
     {
       "name": "parseGroupBy",
@@ -24610,12 +24445,12 @@
     {
       "name": "serializeGroupAggregateOverrides",
       "kind": "runtime",
-      "module": "grouping/groupAggregateOverrides.ts",
+      "module": "grouping/groupAggregateUrlCodec.ts",
       "audience": "app",
       "path": "./grouping",
       "forward": true,
       "deprecated": false,
-      "identity": "grouping/groupAggregateOverrides.ts#serializeGroupAggregateOverrides",
+      "identity": "grouping/groupAggregateUrlCodec.ts#serializeGroupAggregateOverrides",
       "subpaths": [".", "./grouping"]
     },
     {
@@ -25488,6 +25323,17 @@
       "subpaths": [".", "./query"]
     },
     {
+      "name": "DEFAULT_LIMIT",
+      "kind": "runtime",
+      "module": "constants.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "constants.ts#DEFAULT_LIMIT",
+      "subpaths": [".", "./query"]
+    },
+    {
       "name": "FILTER_OP_SUFFIX",
       "kind": "runtime",
       "module": "filters/operators.ts",
@@ -25496,6 +25342,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "filters/operators.ts#FILTER_OP_SUFFIX",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "FILTER_PREFIX",
+      "kind": "runtime",
+      "module": "url/urlParams.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "url/urlParams.ts#FILTER_PREFIX",
       "subpaths": [".", "./query"]
     },
     {
@@ -25518,6 +25375,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "filters/filterTreeCodec.ts#FILTER_TREE_VERSION",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "FILTER_TYPE_OPS",
+      "kind": "runtime",
+      "module": "filters/operators.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/operators.ts#FILTER_TYPE_OPS",
       "subpaths": [".", "./query"]
     },
     {
@@ -25554,6 +25422,39 @@
       "subpaths": [".", "./query"]
     },
     {
+      "name": "isListFilterOp",
+      "kind": "runtime",
+      "module": "filters/operators.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/operators.ts#isListFilterOp",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "isValuelessFilterOp",
+      "kind": "runtime",
+      "module": "filters/operators.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/operators.ts#isValuelessFilterOp",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "MAX_LIMIT",
+      "kind": "runtime",
+      "module": "constants.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "constants.ts#MAX_LIMIT",
+      "subpaths": [".", "./query"]
+    },
+    {
       "name": "NUMBER_OPS",
       "kind": "runtime",
       "module": "filters/operators.ts",
@@ -25562,6 +25463,116 @@
       "forward": true,
       "deprecated": false,
       "identity": "filters/operators.ts#NUMBER_OPS",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "PARAM_GROUP_AGGREGATES",
+      "kind": "runtime",
+      "module": "url/urlParams.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "url/urlParams.ts#PARAM_GROUP_AGGREGATES",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "PARAM_GROUP_BY",
+      "kind": "runtime",
+      "module": "url/urlParams.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "url/urlParams.ts#PARAM_GROUP_BY",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "PARAM_LIMIT",
+      "kind": "runtime",
+      "module": "url/urlParams.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "url/urlParams.ts#PARAM_LIMIT",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "PARAM_PAGE",
+      "kind": "runtime",
+      "module": "url/urlParams.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "url/urlParams.ts#PARAM_PAGE",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "PARAM_PIVOT",
+      "kind": "runtime",
+      "module": "url/urlParams.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "url/urlParams.ts#PARAM_PIVOT",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "PARAM_SEARCH",
+      "kind": "runtime",
+      "module": "url/urlParams.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "url/urlParams.ts#PARAM_SEARCH",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "PARAM_SORT",
+      "kind": "runtime",
+      "module": "url/urlParams.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "url/urlParams.ts#PARAM_SORT",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "PARAM_SORT_BY",
+      "kind": "runtime",
+      "module": "url/urlParams.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "url/urlParams.ts#PARAM_SORT_BY",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "PARAM_SORT_DIR",
+      "kind": "runtime",
+      "module": "url/urlParams.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "url/urlParams.ts#PARAM_SORT_DIR",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "parseDateOp",
+      "kind": "runtime",
+      "module": "filters/operators.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/operators.ts#parseDateOp",
       "subpaths": [".", "./query"]
     },
     {
@@ -25609,6 +25620,17 @@
       "subpaths": [".", "./query"]
     },
     {
+      "name": "safeDecode",
+      "kind": "runtime",
+      "module": "utils/safeDecode.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "utils/safeDecode.ts#safeDecode",
+      "subpaths": [".", "./query"]
+    },
+    {
       "name": "serializeFilterTree",
       "kind": "runtime",
       "module": "filters/filterTreeCodec.ts",
@@ -25631,6 +25653,17 @@
       "subpaths": [".", "./query"]
     },
     {
+      "name": "splitListParam",
+      "kind": "runtime",
+      "module": "utils/listParam.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "utils/listParam.ts#splitListParam",
+      "subpaths": [".", "./query"]
+    },
+    {
       "name": "TEXT_OPS",
       "kind": "runtime",
       "module": "filters/operators.ts",
@@ -25639,6 +25672,28 @@
       "forward": true,
       "deprecated": false,
       "identity": "filters/operators.ts#TEXT_OPS",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "DateOp",
+      "kind": "type",
+      "module": "filters/operators.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/operators.ts#DateOp",
+      "subpaths": [".", "./query"]
+    },
+    {
+      "name": "FilterTypeOps",
+      "kind": "type",
+      "module": "filters/operators.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/operators.ts#FilterTypeOps",
       "subpaths": [".", "./query"]
     },
     {

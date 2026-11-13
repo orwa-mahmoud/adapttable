@@ -25867,9 +25867,25 @@
       "behavior": ""
     },
     {
+      "export": "DateOp",
+      "currentImport": "@adapttable/core/query",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
       "export": "DeclaredAggregates",
       "currentImport": "@adapttable/core/query",
       "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "DEFAULT_LIMIT",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/query",
       "behavior": ""
@@ -26003,6 +26019,14 @@
       "behavior": ""
     },
     {
+      "export": "FILTER_PREFIX",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
       "export": "FILTER_TREE_PARAM",
       "currentImport": "@adapttable/core/query",
       "kind": "value",
@@ -26012,6 +26036,14 @@
     },
     {
       "export": "FILTER_TREE_VERSION",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "FILTER_TYPE_OPS",
       "currentImport": "@adapttable/core/query",
       "kind": "value",
       "class": "neutral-model",
@@ -26076,6 +26108,14 @@
     },
     {
       "export": "FilterTypeExtend",
+      "currentImport": "@adapttable/core/query",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "FilterTypeOps",
       "currentImport": "@adapttable/core/query",
       "kind": "type",
       "class": "neutral-model",
@@ -26323,6 +26363,30 @@
       "behavior": ""
     },
     {
+      "export": "isListFilterOp",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "isValuelessFilterOp",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "MAX_LIMIT",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
       "export": "NUMBER_OPS",
       "currentImport": "@adapttable/core/query",
       "kind": "value",
@@ -26331,7 +26395,95 @@
       "behavior": ""
     },
     {
+      "export": "PARAM_GROUP_AGGREGATES",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "PARAM_GROUP_BY",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "PARAM_LIMIT",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "PARAM_PAGE",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "PARAM_PIVOT",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "PARAM_SEARCH",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "PARAM_SORT",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "PARAM_SORT_BY",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "PARAM_SORT_DIR",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "parseDateOp",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
       "export": "parseFilterTree",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "parseGroupAggregateOverrides",
       "currentImport": "@adapttable/core/query",
       "kind": "value",
       "class": "neutral-operation",
@@ -26467,6 +26619,14 @@
       "behavior": ""
     },
     {
+      "export": "safeDecode",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
       "export": "serializeFilterTree",
       "currentImport": "@adapttable/core/query",
       "kind": "value",
@@ -26535,6 +26695,14 @@
       "currentImport": "@adapttable/core/query",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "splitListParam",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/query",
       "behavior": ""
     },
@@ -32019,6 +32187,14 @@
       "behavior": ""
     },
     {
+      "export": "FILTER_TYPE_OPS",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "FILTER_TYPES",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -32327,6 +32503,14 @@
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "FilterTypeOps",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -35115,6 +35299,14 @@
       "behavior": ""
     },
     {
+      "export": "PARAM_SORT",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "PARAM_SORT_BY",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -37667,6 +37859,14 @@
       "behavior": ""
     },
     {
+      "export": "safeDecode",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "safeLocalStorage",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -38380,6 +38580,14 @@
     },
     {
       "export": "sparklineSummary",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "splitListParam",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",

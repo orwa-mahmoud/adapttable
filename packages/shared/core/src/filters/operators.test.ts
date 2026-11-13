@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { defaultFilterRegistry } from "./filterBuiltins";
+import { FILTER_TYPES } from "./filterDefs";
 import {
   DATE_OPS,
+  FILTER_TYPE_OPS,
   filterOpKey,
   formatFilterChip,
   isBetweenFilterOp,
@@ -89,5 +92,20 @@ describe("registries", () => {
     expect(NUMBER_OPS).toContain("notIn");
     expect(DATE_OPS).toContain("before");
     expect(DATE_OPS).toContain("relative");
+  });
+});
+
+describe("FILTER_TYPE_OPS", () => {
+  it("names exactly the operators and default each built-in filter offers", () => {
+    for (const type of FILTER_TYPES) {
+      const spec = defaultFilterRegistry.get(type);
+      expect({ type, ops: spec?.ops, defaultOp: spec?.defaultOp }).toEqual({
+        type,
+        ...FILTER_TYPE_OPS[type],
+      });
+    }
+    expect(new Set(Object.keys(FILTER_TYPE_OPS))).toEqual(
+      new Set(FILTER_TYPES)
+    );
   });
 });

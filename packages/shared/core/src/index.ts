@@ -476,8 +476,10 @@ export {
   DATE_OP_LABEL_KEYS,
   DATE_OPS,
   FILTER_OP_SUFFIX,
+  FILTER_TYPE_OPS,
   type FilterOp,
   filterOpKey,
+  type FilterTypeOps,
   formatFilterChip,
   isBetweenFilterOp,
   isEmptyRowValue,
@@ -662,8 +664,10 @@ export {
 } from "./state/tableStores";
 export { isBrowser } from "./utils/env";
 export { humanizeKey } from "./utils/humanizeKey";
+export { splitListParam } from "./utils/listParam";
 export { normalizeLocaleTag, resolveLocaleTag } from "./utils/localeTag";
 export { getPath } from "./utils/path";
+export { safeDecode } from "./utils/safeDecode";
 /* ── Labels ────────────────────────────────────────────────────────── */
 export { BASE_LABELS } from "./labelGroups/baseLabels";
 export { FILTER_LABELS, type FilterStrings } from "./labelGroups/filterLabels";
