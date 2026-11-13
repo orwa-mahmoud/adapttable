@@ -2943,7 +2943,7 @@ error passes a `RenameField` (`KitRenameFieldProps`) for the rename form; the
 field receives the part names its label, input and error carry
 (`KitRenameFieldParts`). `flatItem` puts each column's controls straight in its
 `column-menu-item`, which then takes the row's style and drag wiring, and
-`footerDivider: false` drops the rule above the size and reset buttons. An
+`footerDivider: false` drops the rule above the size and reset buttons. `panelInset` is the height the kit's popover adds around the panel (its padding, border and gap from the trigger), kept clear of the window's edge when the panel's height is set by the room below the trigger. An
 optional `usePartClass` (`KitUsePartClass`) gives the host's class to the
 elements the menu draws itself. Every kit's menu names the panel
 `column-menu-panel`, its title, search, bulk row, each item (the injected

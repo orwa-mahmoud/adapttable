@@ -89,6 +89,11 @@ export interface KitColumnMenuLook {
   readonly flatItem?: boolean;
   /** Whether a rule sets the size and reset buttons apart. Absent, one does. */
   readonly footerDivider?: boolean;
+  /**
+   * What the kit's popover adds around the panel (padding, border, the gap
+   * from its trigger), kept clear of the window's edge. Absent, nothing.
+   */
+  readonly panelInset?: number;
 }
 
 /** What the Columns menu draws with. */
@@ -572,7 +577,7 @@ export function createColumnMenu(
             ...look.panel,
             maxHeight:
               look.panel.maxHeight ??
-              spaceBelow(anchorRef.current, PANEL_MAX_HEIGHT),
+              spaceBelow(anchorRef.current, PANEL_MAX_HEIGHT, look.panelInset),
             overflowY: look.panel.overflowY ?? "auto",
           }}
         >

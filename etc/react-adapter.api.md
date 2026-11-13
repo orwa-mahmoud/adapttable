@@ -3074,6 +3074,7 @@ export interface KitColumnMenuLook {
     readonly grip: CSSProperties;
     readonly heading: CSSProperties;
     readonly panel: CSSProperties;
+    readonly panelInset?: number;
     readonly renameActions: CSSProperties;
     readonly renameForm: CSSProperties;
     readonly row: CSSProperties;
