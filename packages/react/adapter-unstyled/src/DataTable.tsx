@@ -14,7 +14,6 @@ import {
   FeatureSlot,
   fillSlot,
   FILTER_DRAWER,
-  FILTER_POPOVER,
   FILTERS_FORM,
   type FiltersFormSlotProps,
   FIND_BAR,
@@ -30,7 +29,6 @@ import {
   STATUS_BAR,
   type TableSource,
   TableStatusAnnouncer,
-  TOOLBAR_EXTRAS,
   useDataTableShell,
   useFeatureState,
   useMountStagger,
@@ -42,11 +40,11 @@ import type { ReactElement, ReactNode, RefObject } from "react";
 import { ClassNamesProvider } from "./components/classNamesContext";
 import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
-import { FiltersIcon, SearchIcon } from "./components/icons";
 import { MobileCards } from "./components/MobileCards";
-import { Footer, RowsPerPageSelect } from "./components/PaginationFooter";
+import { Footer } from "./components/PaginationFooter";
 import { PortalContainerProvider } from "./components/portalContainer";
 import { LoadingState } from "./components/TableSkeleton";
+import { Toolbar } from "./components/Toolbar";
 import { cx } from "./cx";
 import type { DataTableClassNames, DataTableProps } from "./types";
 
@@ -147,14 +145,10 @@ function DataTableBody<TRow>({
 function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
   const {
-    searchPlaceholder,
-    sortByOptions,
     dir,
     filtersMode = "popover",
     bulkActions,
     classNames = NO_CLASSNAMES,
-    toolbar,
-    toolbarSlots,
     animate = false,
   } = props;
 
@@ -183,7 +177,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   );
   const {
     chrome,
-    table,
     labels,
     density,
     filtersNode: filters,
@@ -217,13 +210,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   useMountStagger(rootRef, [viewSource.rows.length, chrome.isMobile], {
     enabled: animate,
   });
-  const searchProps = table.getSearchInputProps(
-    searchPlaceholder ? { placeholder: searchPlaceholder } : undefined
-  );
-  // Explicit options win; otherwise auto-derive on mobile, where the card
-  // layout has no clickable headers to sort by.
-  const sortOptions =
-    sortByOptions ?? (chrome.isMobile ? table.sortByOptions : undefined);
 
   // The export button comes from the shell, already single-flight and already
   // carrying the selection, the full column set and the highlighted range. It
@@ -235,29 +221,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
         const chrome = view.chrome;
         const table = view.table;
         const viewSource = view.source;
-        const {
-          onExportCsv,
-          exportBusy,
-          exportAnnouncement,
-          exportProgressState,
-          exportLabel,
-          exportDisabled,
-          exportDisabledReason,
-          onAddRow,
-          addRowLabel,
-          onUndo,
-          onRedo,
-          density: toolbarDensity,
-          onDensityChange,
-          onToggleFullscreen,
-          isFullscreen,
-          canUndo,
-          canRedo,
-          undoLabel,
-          redoLabel,
-          onPrint,
-          printLabel,
-        } = view.toolbarProps;
         const canLoadMore = view.canLoadMore;
         // React 18's `ref` attribute rejects core's `RefObject<HTMLDivElement |
         // null>` through interface variance; the same object viewed through its
@@ -267,35 +230,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
           ...view.tableProps,
           stickyTop: stickyBar.headerOffset,
         };
-        const filtersButton = (
-          <button
-            type="button"
-            aria-expanded={filtersMode === "popover" ? filtersOpen : undefined}
-            data-active={filtersOpen || undefined}
-            data-adapttable-part="filters-button"
-            className={classNames.filtersButton}
-            style={{ flexShrink: 0, whiteSpace: "nowrap" }}
-            onPointerDown={filtersTrigger.onPointerDown}
-            onClick={filtersTrigger.onClick}
-          >
-            <span
-              data-adapttable-part="filters-icon"
-              className={classNames.filtersIcon}
-              style={{ display: "inline-flex" }}
-            >
-              <FiltersIcon />
-            </span>
-            {labels.filters}
-            {chrome.activeFilterCount > 0 && (
-              <span
-                data-adapttable-part="filters-count"
-                className={classNames.filtersCount}
-              >
-                {chrome.activeFilterCount}
-              </span>
-            )}
-          </button>
-        );
         return (
           <FeatureHostProvider host={shell.featureHost}>
             <PortalContainerProvider value={view.fullscreen.container}>
@@ -394,188 +328,64 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                         ...stickyBar.toolbarStyle,
                       }}
                     >
-                      {toolbarSlots?.start}
-                      {props.searchable !== false && (
-                        <span
-                          data-adapttable-part="search-field"
-                          className={classNames.searchField}
-                          style={{
-                            flex: "1 1 200px",
-                            minWidth: "min(200px, 100%)",
-                            display: "inline-flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span
-                            data-adapttable-part="search-icon"
-                            className={classNames.searchIcon}
-                            style={{ display: "inline-flex" }}
-                          >
-                            <SearchIcon size={14} />
-                          </span>
-                          <input
-                            {...searchProps}
-                            data-adapttable-part="search"
-                            className={classNames.search}
-                            style={{ flex: 1, minWidth: 0 }}
-                          />
-                        </span>
-                      )}
-                      {sortOptions && sortOptions.length > 0 && (
-                        <label>
-                          {labels.sortBy}{" "}
-                          <select
-                            aria-label={labels.sortBy}
-                            data-adapttable-part="sort-select"
-                            className={classNames.sortSelect}
-                            value={viewSource.sortBy ?? ""}
-                            onChange={(e) =>
-                              viewSource.setSort(
-                                e.currentTarget.value || undefined,
-                                viewSource.sortDir ?? "asc"
-                              )
-                            }
-                          >
-                            <option value="">—</option>
-                            {sortOptions.map((o) => (
-                              <option key={o.value} value={o.value}>
-                                {o.label}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                      )}
-                      {chrome.isMobile &&
-                        sortOptions &&
-                        sortOptions.length > 0 && (
-                          <button
-                            type="button"
-                            data-adapttable-part="sort-direction"
-                            className={classNames.sortDirection}
-                            disabled={!viewSource.sortBy}
-                            aria-label={
-                              viewSource.sortDir === "desc"
-                                ? labels.sortAscending
-                                : labels.sortDescending
-                            }
-                            onClick={() =>
-                              viewSource.setSort(
-                                viewSource.sortBy,
-                                viewSource.sortDir === "desc" ? "asc" : "desc"
-                              )
-                            }
-                          >
-                            {viewSource.sortDir === "desc"
-                              ? labels.sortDescending
-                              : labels.sortAscending}
-                          </button>
-                        )}
-                      {toolbar}
-                      {filters &&
-                        (filtersMode === "popover" ? (
-                          <FeatureSlot
-                            slot={FILTER_POPOVER}
-                            props={{
-                              open: filtersOpen,
-                              onClose: () => setFiltersOpen(false),
-                              filters,
-                              activeFilterCount: chrome.activeFilterCount,
-                              onClearFilters: chrome.clearFilters,
-                              labels,
-                              dir,
-                              children: filtersButton,
-                            }}
-                          />
-                        ) : (
-                          filtersButton
-                        ))}
-                      {props.savedViews && (
-                        // The menu must capture/apply through the SAME URL backend and
-                        // namespace the table reads, so those default from the table's
-                        // own props (explicit option values still win).
-                        <FeatureSlot
-                          slot={SAVED_VIEWS}
-                          props={{
-                            options: {
-                              urlAdapter: shell.urlAdapter,
-                              urlKey: props.urlKey,
-                              ...props.savedViews,
-                            },
-                            labels,
-                          }}
-                        />
-                      )}
-                      {props.enableColumnMenu && !chrome.isMobile && (
-                        <FeatureSlot
-                          slot={COLUMN_MENU}
-                          props={{
-                            allColumns: chrome.allColumns,
-                            onAutoSize: view.autoSizeColumns,
-                            onAutoSizeColumn: view.autoSizeColumn,
-                            onSortColumn: (key, dir) =>
-                              shell.source.setSort(key, dir),
-                            onFilterColumn: () => setFiltersOpen(true),
-                            onRenameColumn: props.onColumnRename
-                              ? chrome.columnLayout.setName
-                              : undefined,
-                            sortBy: shell.source.sortBy,
-                            sortDir: shell.source.sortDir,
-                            layout: chrome.columnLayout,
-                            labels,
-                            hasRowActions: view.hasRowActions,
-                            hasRowReorder: view.hasRowReorder,
-                            groupingPanel: chrome.groupingPanel,
-                            dir: props.dir,
-                          }}
-                        />
-                      )}
-                      <FeatureSlot
-                        slot={TOOLBAR_EXTRAS}
-                        props={{
-                          onUndo,
-                          onRedo,
-                          canUndo,
-                          canRedo,
-                          undoLabel,
-                          redoLabel,
-                          onPrint,
-                          printLabel,
-                          density: toolbarDensity,
-                          onDensityChange,
-                          onToggleFullscreen,
-                          isFullscreen,
-                          onExportCsv,
-                          exportBusy,
-                          exportAnnouncement,
-                          exportProgressState,
-                          exportLabel,
-                          exportDisabled,
-                          exportDisabledReason,
-                          // A plain object, because the kit's class map is an
-                          // interface and the slot takes any kit's map.
-                          classNames: { ...classNames },
-                          labels,
-                        }}
+                      <Toolbar
+                        {...view.toolbarProps}
+                        // Infinite scroll keeps a page size; the grouped
+                        // full-set view has none.
+                        showRowsPerPage={canLoadMore && !chrome.grouping}
+                        filtersMode={filtersMode}
+                        filtersOpen={filtersOpen}
+                        onToggleFilters={filtersTrigger.onClick}
+                        onFiltersTriggerPointerDown={
+                          filtersTrigger.onPointerDown
+                        }
+                        onCloseFilters={() => setFiltersOpen(false)}
+                        savedViewsMenu={
+                          props.savedViews ? (
+                            // The menu must capture/apply through the SAME URL
+                            // backend and namespace the table reads, so those
+                            // default from the table's own props (explicit
+                            // option values still win).
+                            <FeatureSlot
+                              slot={SAVED_VIEWS}
+                              props={{
+                                options: {
+                                  urlAdapter: shell.urlAdapter,
+                                  urlKey: props.urlKey,
+                                  ...props.savedViews,
+                                },
+                                labels,
+                              }}
+                            />
+                          ) : undefined
+                        }
+                        columnMenu={
+                          props.enableColumnMenu && !chrome.isMobile ? (
+                            <FeatureSlot
+                              slot={COLUMN_MENU}
+                              props={{
+                                allColumns: chrome.allColumns,
+                                onAutoSize: view.autoSizeColumns,
+                                onAutoSizeColumn: view.autoSizeColumn,
+                                onSortColumn: (key, dir) =>
+                                  shell.source.setSort(key, dir),
+                                onFilterColumn: () => setFiltersOpen(true),
+                                onRenameColumn: props.onColumnRename
+                                  ? chrome.columnLayout.setName
+                                  : undefined,
+                                sortBy: shell.source.sortBy,
+                                sortDir: shell.source.sortDir,
+                                layout: chrome.columnLayout,
+                                labels,
+                                hasRowActions: view.hasRowActions,
+                                hasRowReorder: view.hasRowReorder,
+                                groupingPanel: chrome.groupingPanel,
+                                dir: props.dir,
+                              }}
+                            />
+                          ) : undefined
+                        }
                       />
-                      {onAddRow && (
-                        <button
-                          type="button"
-                          data-adapttable-part="add-row"
-                          className={classNames.addRow}
-                          style={{ flexShrink: 0, whiteSpace: "nowrap" }}
-                          onClick={onAddRow}
-                        >
-                          {addRowLabel}
-                        </button>
-                      )}
-                      {toolbarSlots?.end}
-                      {canLoadMore && !chrome.grouping && (
-                        <RowsPerPageSelect
-                          source={viewSource}
-                          labels={labels}
-                          classNames={classNames}
-                        />
-                      )}
                     </div>
 
                     {filters && filtersMode === "drawer" && (
