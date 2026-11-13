@@ -358,7 +358,6 @@ function DesktopRowBase<TRow>(
                 actions={rowEdit.actions}
                 confirm={confirm}
                 labels={labels}
-                classNames={classNames}
                 layout={rowActionsLayout}
                 render={renderRowActions}
               />
