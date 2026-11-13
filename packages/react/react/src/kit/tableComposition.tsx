@@ -183,7 +183,7 @@ export interface KitTableFrameProps {
   readonly overlays: ReactNode;
   /** Resolved labels. */
   readonly labels: Required<TableLabels>;
-  /** How many rows are drawn. */
+  /** How many rows the table holds; the stagger replays when it changes. */
   readonly rowCount: number;
   /** Whether the body is the mobile cards. */
   readonly mobile: boolean;
@@ -647,7 +647,10 @@ export function TableComposition<TRow>({
                     </>
                   }
                   labels={labels}
-                  rowCount={source.rows.length}
+                  // The rows the table holds, not the body's view of them: a
+                  // regroup or a move redraws the body without new rows, and
+                  // must not stagger them in again.
+                  rowCount={shell.source.rows.length}
                   mobile={chrome.isMobile}
                   density={view.density}
                   animate={props.animate === true}
