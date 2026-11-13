@@ -8,6 +8,7 @@ import { AgentApprovalPending } from '@adapttable/vue';
 import { AgentProgress } from '@adapttable/vue';
 import { AgentSession } from '@adapttable/ai';
 import { AlwaysAllowedState } from '@adapttable/ai';
+import { AssistantUndoView } from '@adapttable/ai';
 import { ComputedRef } from 'vue';
 import { MaybeRefOrGetter } from 'vue';
 import { ShallowRef } from 'vue';
@@ -86,11 +87,7 @@ export type TableAssistantState = { readonly [K in "status" | "busy" | "messages
     readonly approval: ComputedRef<AgentApprovalPending | null>;
     readonly open: ComputedRef<boolean>;
     readonly setOpen: (open: boolean) => void;
-    readonly undo: ComputedRef<{
-        readonly messageId: string;
-        readonly available: boolean;
-        readonly blockedCode?: string;
-    } | null>;
+    readonly undo: ComputedRef<AssistantUndoView | null>;
 };
 
 // @public

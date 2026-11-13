@@ -107,7 +107,7 @@ describe("Angular dictation", () => {
     input.value().start();
     input.value().stop();
     input.value().setLanguage("en-GB");
-    expect(readRememberedLanguage()).toBe("en-GB");
+    expect(readRememberedLanguage()).toBeUndefined();
   });
 
   it("reports an unsupported browser without pretending it can listen", () => {

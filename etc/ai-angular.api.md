@@ -28,6 +28,7 @@ import { AssistantTransport } from '@adapttable/ai';
 import { AssistantTransportReply } from '@adapttable/ai';
 import { AssistantTurnStatus } from '@adapttable/ai';
 import { AssistantUndoOffer } from '@adapttable/ai';
+import { AssistantUndoView } from '@adapttable/ai';
 import { CommitPolicy } from '@adapttable/ai';
 import { MaybeSignal } from '@adapttable/angular';
 import { RowAddressScope } from '@adapttable/ai';
@@ -166,11 +167,7 @@ export interface TableAssistantState {
     readonly status: AssistantStatus;
     readonly stop: () => void;
     readonly suggestions: readonly AssistantSuggestion[];
-    readonly undo: {
-        readonly messageId: string;
-        readonly available: boolean;
-        readonly blockedCode?: string;
-    } | null;
+    readonly undo: AssistantUndoView | null;
     readonly undoAction: (idempotencyKey: string) => Promise<void>;
     readonly undoTurn: () => Promise<void>;
 }

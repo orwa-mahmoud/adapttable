@@ -11,7 +11,10 @@ import {
   type AssistantStatus,
   type AssistantSuggestion,
   type AssistantTransport,
+  type AssistantUndoView,
   createTableAssistant,
+  tableAssistantFields,
+  tableAssistantInputs,
 } from "@adapttable/ai";
 import {
   fromStore,
@@ -24,10 +27,8 @@ import {
   AGENT_APPROVAL_STATE,
   AGENT_PROGRESS_STATE,
   AGENT_VIEW_STATE,
-  type AgentAlwaysAllowState,
   type AgentApprovalPending,
   type AgentProgress,
-  type AgentViewState,
 } from "@adapttable/angular/adapter";
 import {
   assertInInjectionContext,
@@ -99,8 +100,9 @@ export interface TableAssistantOptions {
    * Whether a write from this conversation is waiting on a human.
    *
    * `execute` does not return while an approval is open, so the turn looks
-   * like thinking from in here. A host that renders the approval — or wires
-   * `bridge.approvals` — passes it back so the panel can say what is
+   * like thinking from in here. Defaults to whether the table has a write
+   * waiting on the reader; a host that renders the approval elsewhere — or
+   * wires `bridge.approvals` — passes it so the panel can say what is
    * actually happening. The turn is still in flight and still stoppable.
    */
   readonly awaitingApproval?: boolean;
@@ -223,11 +225,7 @@ export interface TableAssistantState {
    * the moment anything else changes the view. `blockedCode` is a token the
    * labels translate — the panel never shows a reader a code.
    */
-  readonly undo: {
-    readonly messageId: string;
-    readonly available: boolean;
-    readonly blockedCode?: string;
-  } | null;
+  readonly undo: AssistantUndoView | null;
   /** Put that turn back. A no-op once the offer has expired. */
   readonly undoTurn: () => Promise<void>;
   /** Put one action of the last turn back, by its receipt's replay identity. */
@@ -274,13 +272,12 @@ export function injectTableAssistant(
   const viewState = injectFeatureState(AGENT_VIEW_STATE);
   const progress = injectFeatureState(AGENT_PROGRESS_STATE);
   const inputs = () =>
-    inputsOf(
-      readMaybe(options),
-      approval(),
-      alwaysAllow(),
-      viewState(),
-      progress()
-    );
+    tableAssistantInputs(readMaybe(options), {
+      approval: approval(),
+      alwaysAllow: alwaysAllow(),
+      viewState: viewState(),
+      progress: progress(),
+    });
   const store = createTableAssistant(inputs());
   const snapshot = fromStore({
     getSnapshot: store.getState,
@@ -309,82 +306,10 @@ export function injectTableAssistant(
   return computed(() => {
     const state = snapshot();
     return {
-      messages: state.messages,
-      draft: state.draft,
-      setDraft: store.setDraft,
-      send: store.send,
-      sendClip: store.sendClip,
-      stop: store.stop,
-      resume: store.resume,
-      interrupted: state.interrupted,
-      resumable: state.resumable,
-      clear: store.clear,
-      status: state.status,
-      busy: state.busy,
+      ...tableAssistantFields(state, store),
       approval: approval() ?? null,
-      progress: state.progress,
-      answer: store.answer,
-      undo: state.undo
-        ? {
-            messageId: state.undo.messageId,
-            available: state.undo.available,
-            ...(state.undo.blocked
-              ? { blockedCode: state.undo.blocked.code }
-              : {}),
-          }
-        : null,
-      undoTurn: store.undoTurn,
-      undoAction: store.undoAction,
-      alwaysAllowed: state.alwaysAllowed,
-      revokeAlwaysAllow: store.revokeAlwaysAllow,
-      suggestions: state.suggestions,
-      runSuggestion: store.runSuggestion,
       open: readMaybe(options).open ?? uncontrolledOpen(),
       setOpen,
-      error: state.error,
-      errorCode: state.errorCode,
     };
   });
-}
-
-/** The hook's options as the store's live inputs. A projection, not a decision. */
-function inputsOf(
-  options: TableAssistantOptions,
-  approval: AgentApprovalPending | null | undefined,
-  alwaysAllow: AgentAlwaysAllowState | null | undefined,
-  viewState: AgentViewState | null | undefined,
-  progress: AgentProgress | null | undefined
-) {
-  // The host's own reader wins; otherwise the table's, which is what makes
-  // per-turn undo work without a host lifting page and sort into its state.
-  const contextInputs =
-    options.contextInputs ??
-    (viewState ? () => viewState.read() as AgentContextInputs : undefined);
-  return {
-    session: options.session,
-    transport: options.transport,
-    transportKey: options.transportKey,
-    suggestions: options.suggestions,
-    awaitingApproval: options.awaitingApproval,
-    approval: approval ?? null,
-    progress: progress ?? null,
-    ...(contextInputs ? { contextInputs } : {}),
-    ...(options.onDetach ? { onDetach: options.onDetach } : {}),
-    ...(options.messages ? { messages: options.messages } : {}),
-    ...(options.onMessagesChange
-      ? { onMessagesChange: options.onMessagesChange }
-      : {}),
-    ...(options.conversation === undefined
-      ? {}
-      : { conversation: options.conversation }),
-    ...(options.resumeHandle ? { resumeHandle: options.resumeHandle } : {}),
-    // The host's own wins, for the same reason `contextInputs` does: a panel
-    // beside the table has no feature state to read.
-    ...((options.alwaysAllow ?? alwaysAllow)
-      ? {
-          alwaysAllowed: (options.alwaysAllow ?? alwaysAllow)?.capabilities,
-          onRevokeAlwaysAllow: (options.alwaysAllow ?? alwaysAllow)?.revoke,
-        }
-      : {}),
-  };
 }
