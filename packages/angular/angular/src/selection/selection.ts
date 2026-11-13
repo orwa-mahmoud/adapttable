@@ -7,7 +7,6 @@
  * `onSelectionChange`, leaving the host to decide.
  */
 import {
-  applyGroupLeafSelection,
   createControllableStore,
   headerSelectionOf,
   type TableLabels,
@@ -195,7 +194,7 @@ export function injectRowSelection<TRow>(
     commit(new Set(ids));
   };
   const toggleGroupLeaves = (ids: readonly string[]): void => {
-    commit(applyGroupLeafSelection(ids, selectedIds()));
+    commit(toggleIds(selectedIds(), ids));
   };
   const selectAllMatching = (): void => {
     if (!destroyRef.destroyed) scope.select(acrossPages());
