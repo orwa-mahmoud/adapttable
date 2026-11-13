@@ -626,6 +626,7 @@ export {
   type KitPagerView,
   type KitPagesProps,
 } from "./kit/pager";
+export type { KitUsePartClass } from "./kit/partClass";
 export type {
   KitButtonProps,
   KitButtonVariant,

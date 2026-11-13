@@ -6910,6 +6910,7 @@
       "KitDesktopTable",
       "KitDesktopTableProps",
       "KitSortLabelProps",
+      "KitUsePartClass",
       "createMobileCards",
       "KitCardRegions",
       "KitCardSelectProps",

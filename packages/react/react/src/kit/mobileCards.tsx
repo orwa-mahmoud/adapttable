@@ -32,6 +32,7 @@ import {
   type MobileCardBodyProps,
   type MobileCardEntry,
   mobileCardPropsEqual,
+  type MobileCardSlotKit,
   mobileCardSlots,
 } from "../layout/mobileCardSlots";
 import {
@@ -48,6 +49,7 @@ import {
   OptionalTreeToggle,
 } from "./featureSlots";
 import { MobileTarget } from "./mobileTarget";
+import { type KitUsePartClass, noPartClass } from "./partClass";
 import type { KitDataAttributes } from "./primitives";
 
 /**
@@ -191,13 +193,23 @@ export interface KitMobileCards<TExtra> {
   ) => Record<string, unknown>;
   /** The cell of an extra row drawn as a card. */
   readonly extraCell: (part: string, content: ReactNode) => ReactNode;
+  /** An extra row's card element props, beside the binding's. */
+  readonly extraProps?: NonNullable<MobileCardSlotKit<unknown>["extraProps"]>;
+  /** A group card's list element props; absent, the group card stands alone. */
+  readonly groupProps?: NonNullable<MobileCardSlotKit<unknown>["groupProps"]>;
+  /**
+   * The host's class for a part the binding draws itself: each field's row,
+   * the actions and detail boxes, and the tree and reorder controls. A hook,
+   * so it can read the kit's class map; absent, those parts carry no class.
+   */
+  readonly usePartClass?: KitUsePartClass;
   /** The list elements and their props. */
   readonly useChrome: <TRow>(
     props: KitMobileCardsProps<TRow, TExtra>,
     compact: boolean
   ) => Pick<
     MobileCardsChromeProps,
-    "hosts" | "listProps" | "listStyle" | "classNames"
+    "hosts" | "listProps" | "listStyle" | "classNames" | "dir"
   >;
 }
 
@@ -220,6 +232,7 @@ export function createMobileCards<TExtra>(
   kit: KitMobileCards<TExtra>
 ): <TRow>(props: Readonly<KitMobileCardsProps<TRow, TExtra>>) => ReactElement {
   const { CardFrame, FieldLabel, FieldValue, Select, RowActions } = kit;
+  const usePartClass = kit.usePartClass ?? noPartClass;
 
   function CardBase<TRow>(
     props: Readonly<MobileCardBodyProps<TRow> & CardExtras>
@@ -256,6 +269,7 @@ export function createMobileCards<TExtra>(
       dir,
     } = props;
     const look = kit.useLook();
+    const classOf = usePartClass();
     // Built once and used by both paths, so a custom card shows the very
     // same value node the built-in would have — cell renderers and editors
     // included.
@@ -296,6 +310,7 @@ export function createMobileCards<TExtra>(
             <div
               key={column.key}
               data-adapttable-part="card-row"
+              className={classOf("card-row")}
               style={look.field(labelled, compact)}
             >
               {labelled && (
@@ -325,6 +340,8 @@ export function createMobileCards<TExtra>(
                 entry={treeEntry}
                 labels={labels}
                 onToggle={onToggleTree ?? NO_TREE_TOGGLE}
+                toggleClassName={classOf("tree-toggle")}
+                spacerClassName={classOf("tree-spacer")}
               />
             ) : null
           }
@@ -359,6 +376,9 @@ export function createMobileCards<TExtra>(
                 row={row}
                 windowStart={windowStart}
                 rowCount={rowCount}
+                className={classOf("row-reorder-buttons")}
+                upClassName={classOf("row-reorder-up")}
+                downClassName={classOf("row-reorder-down")}
               />
             ) : null
           }
@@ -377,7 +397,11 @@ export function createMobileCards<TExtra>(
           }
           actions={
             rowEdit.actions.length > 0 ? (
-              <div data-adapttable-part="card-actions" style={look.actions}>
+              <div
+                data-adapttable-part="card-actions"
+                className={classOf("card-actions")}
+                style={look.actions}
+              >
                 <RowActions
                   minTargetSize={44}
                   row={row}
@@ -394,7 +418,11 @@ export function createMobileCards<TExtra>(
             // Inside the card, and so inside the measured element, so
             // virtualization keeps accurate card heights.
             expanded && renderDetail ? (
-              <div data-adapttable-part="card-detail" style={look.detail}>
+              <div
+                data-adapttable-part="card-detail"
+                className={classOf("card-detail")}
+                style={look.detail}
+              >
                 {renderDetail(row)}
               </div>
             ) : null
@@ -445,6 +473,8 @@ export function createMobileCards<TExtra>(
         content: <CardItem {...entry.body} compact={compact} dir={props.dir} />,
       }),
       extraCell: kit.extraCell,
+      extraProps: kit.extraProps,
+      groupProps: kit.groupProps,
       groupCard: (entry, grouping) => (
         <OptionalGroupHeaderCard
           entry={entry}

@@ -47475,6 +47475,14 @@
       "behavior": ""
     },
     {
+      "export": "KitUsePartClass",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "LayoutStorage",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",

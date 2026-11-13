@@ -3155,7 +3155,7 @@ export interface KitDesktopTable<TExtra> {
     readonly SortLabel: ComponentType<KitSortLabelProps>;
     readonly useChrome: <TRow>(props: KitDesktopTableProps<TRow, TExtra>, assembly: DesktopTableAssembly<TRow>) => Omit<DesktopTableChromeProps<TRow>, "assembly" | "renderLeading" | "renderTrailing" | "renderPlanCell" | "renderLeaf" | "renderRow" | "renderGroup" | "renderExtra" | "renderVirtualPad" | "renderSummary">;
     readonly usePaint: (stickyHeader: boolean) => KitDesktopPaint;
-    readonly usePartClass?: () => (part: string) => string | undefined;
+    readonly usePartClass?: KitUsePartClass;
     readonly widths: {
         readonly expansion: number;
         readonly selection: number;
@@ -3301,8 +3301,10 @@ export interface KitMobileCards<TExtra> {
     readonly cardProps: <TRow>(entry: MobileCardEntry<TRow>, props: KitMobileCardsProps<TRow, TExtra>) => Record<string, unknown>;
     readonly compact: <TRow>(props: KitMobileCardsProps<TRow, TExtra>) => boolean;
     readonly extraCell: (part: string, content: ReactNode) => ReactNode;
+    readonly extraProps?: NonNullable<MobileCardSlotKit<unknown>["extraProps"]>;
     readonly FieldLabel: ComponentType<KitCardTextProps>;
     readonly FieldValue: ComponentType<KitCardTextProps>;
+    readonly groupProps?: NonNullable<MobileCardSlotKit<unknown>["groupProps"]>;
     readonly RowActions: <TRow>(props: {
         readonly minTargetSize: number;
         readonly row: TRow;
@@ -3318,8 +3320,9 @@ export interface KitMobileCards<TExtra> {
         readonly compact: boolean;
     }>;
     readonly summaryPlacement: "last-card" | "after-list";
-    readonly useChrome: <TRow>(props: KitMobileCardsProps<TRow, TExtra>, compact: boolean) => Pick<MobileCardsChromeProps, "hosts" | "listProps" | "listStyle" | "classNames">;
+    readonly useChrome: <TRow>(props: KitMobileCardsProps<TRow, TExtra>, compact: boolean) => Pick<MobileCardsChromeProps, "hosts" | "listProps" | "listStyle" | "classNames" | "dir">;
     readonly useLook: () => KitCardsLook;
+    readonly usePartClass?: KitUsePartClass;
 }
 
 // @public
@@ -3657,6 +3660,9 @@ export interface KitTriggerProps {
     readonly elementRef: Ref<HTMLButtonElement>;
     readonly onClick: () => void;
 }
+
+// @public
+export type KitUsePartClass = () => (part: string) => string | undefined;
 
 export { LayoutStorage }
 

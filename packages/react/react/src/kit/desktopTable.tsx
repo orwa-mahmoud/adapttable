@@ -78,6 +78,7 @@ import {
   OptionalRowReorderHandle,
   OptionalTreeCell,
 } from "./featureSlots";
+import { type KitUsePartClass, noPartClass } from "./partClass";
 import type { KitCheckboxProps, KitDataAttributes } from "./primitives";
 
 /**
@@ -322,7 +323,7 @@ export interface KitDesktopTable<TExtra> {
    * column-select and column-group controls. A hook, so it can read the
    * kit's class map; absent, those parts carry no class.
    */
-  readonly usePartClass?: () => (part: string) => string | undefined;
+  readonly usePartClass?: KitUsePartClass;
   /**
    * The table elements and their props: the kit's own scroll box, table,
    * head and body, and anything its look puts around them.
@@ -1058,10 +1059,5 @@ const pinnedSide = <TSide extends "start" | "end">(
   side: TSide,
   pinned: boolean
 ): TSide | undefined => (pinned ? side : undefined);
-
-const NO_PART_CLASS = (): undefined => undefined;
-
-/** No class for any part: the default for a kit without a class map. */
-const noPartClass = (): ((part: string) => string | undefined) => NO_PART_CLASS;
 
 const NO_MORE = (): void => undefined;
