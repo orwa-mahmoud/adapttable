@@ -65,7 +65,6 @@ import {
   type KeyedWindowSlotProps,
   mobileCardListStyle,
   OptionalSidePanel,
-  pageSizeOptions,
   partitionPinnedRows,
   pinnedRowPart,
   pinnedRowStickyStyle,
@@ -124,21 +123,15 @@ import {
   ConfigProvider,
   Empty,
   Flex,
-  Pagination,
-  Select,
   Space,
   Table,
   type TableProps,
-  Typography,
 } from "antd";
 import {
-  cloneElement,
   createContext,
   type CSSProperties,
   type HTMLAttributes,
-  isValidElement,
   type Key,
-  type ReactElement,
   type ReactNode,
   type Ref,
   type TdHTMLAttributes,
@@ -178,6 +171,7 @@ import {
   isAdaptTableGroupRow,
 } from "./components/grouping";
 import { MobileCards } from "./components/MobileCards";
+import { footer } from "./components/PaginationFooter";
 import { SkeletonTable } from "./components/SkeletonTable";
 import { Toolbar } from "./components/Toolbar";
 import { useAntdLibrary } from "./libraryEnvironment";
@@ -933,89 +927,6 @@ function chainToggler<TRow>(
 ): ((key: string) => void) | undefined {
   if (!multiSort) return undefined;
   return (key) => source.toggleSortLevel(key);
-}
-
-/**
- * The split footer every kit shares — rows-per-page + showing on the start
- * side, the pager on the end side — built from antd's own Select and
- * Pagination instead of the table-internal pagination (which crams
- * everything, size changer included, onto one end).
- */
-function PagedFooter<TRow>({
-  table,
-  source,
-  labels,
-  showRowsPerPage = true,
-}: Readonly<{
-  table: UseDataTableResult<TRow>;
-  source: TableSource<TRow>;
-  labels: Required<TableLabels>;
-  /** Hidden in the grouped full-set view, where page size has no effect. */
-  showRowsPerPage?: boolean;
-}>) {
-  const from = (table.pagination.safePage - 1) * source.limit + 1;
-  const to = Math.min(table.pagination.safePage * source.limit, source.total);
-  return (
-    <Flex justify="space-between" align="center" wrap gap={8}>
-      <Flex align="center" gap={8}>
-        {showRowsPerPage && (
-          <>
-            <Typography.Text type="secondary">
-              {labels.rowsPerPage}
-            </Typography.Text>
-            <Select
-              size="small"
-              aria-label={labels.rowsPerPage}
-              value={source.limit}
-              onChange={(value: number) => source.setLimit(value)}
-              options={pageSizeOptions([source.limit, source.defaultLimit]).map(
-                (n) => ({
-                  value: n,
-                  label: n,
-                })
-              )}
-            />
-          </>
-        )}
-        {source.total > 0 && (
-          <Typography.Text type="secondary">
-            {labels.showing({ from, to, total: source.total })}
-          </Typography.Text>
-        )}
-      </Flex>
-      <Pagination
-        current={table.pagination.safePage}
-        pageSize={source.limit}
-        total={source.total}
-        showSizeChanger={false}
-        onChange={(page: number) => source.setPage(page)}
-        // antd's pager exposes neither aria-current nor per-arrow names by
-        // default — clone its own items with the missing attributes.
-        itemRender={(page, type, original) => {
-          let extra: Record<string, unknown> | null = null;
-          if (isValidElement(original)) {
-            if (type === "page") {
-              extra = {
-                "aria-current":
-                  page === table.pagination.safePage ? "page" : undefined,
-              };
-            } else if (type === "prev" || type === "next") {
-              extra = {
-                "aria-label":
-                  type === "prev" ? labels.previousPage : labels.nextPage,
-              };
-            }
-          }
-          return extra
-            ? cloneElement(
-                original as ReactElement<Record<string, unknown>>,
-                extra
-              )
-            : original;
-        }}
-      />
-    </Flex>
-  );
 }
 
 /**
@@ -2896,12 +2807,7 @@ function AntdTableBody<TRow>({
                           data-adapttable-part="footer"
                           className={classNames?.footer}
                         >
-                          <PagedFooter
-                            table={table}
-                            source={source}
-                            labels={labels}
-                            showRowsPerPage={!c.grouping}
-                          />
+                          {footer({ table, source, labels, chrome: c })}
                         </div>
                       )}
                       {!c.isPaged && !source.error && source.hasNextPage && (
