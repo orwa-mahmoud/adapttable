@@ -1,4 +1,4 @@
-import { preserveEditorFocusOnLayoutChange } from "@adapttable/core/binding";
+import { notifyLayoutChange } from "@adapttable/core/binding";
 import { useCallback, useSyncExternalStore } from "react";
 
 /**
@@ -46,7 +46,7 @@ export function useMediaQuery(query: string, defaultValue = false): boolean {
       const mql = cachedMatchMedia(query);
       if (!mql) return () => undefined;
       const update = () => {
-        preserveEditorFocusOnLayoutChange();
+        notifyLayoutChange();
         onChange();
       };
       mql.addEventListener("change", update);
