@@ -1,15 +1,17 @@
 import {
   type ColumnMetadata,
-  createServerSource,
   type FacetMap,
   type PaginationMode,
   type QueryAggregate,
   type QuerySupport,
   resolvePaginationMode,
-  type ServerSource,
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
+import {
+  createLazyServerSource,
+  type LazyServerSource,
+} from "@adapttable/core/binding";
 import {
   useEffect,
   useMemo,
@@ -209,7 +211,10 @@ export function useServerData<TRow>(
   const resolvedMode = resolvePaginationMode(paginationMode, isMobile);
 
   const state = useTableUrlState(urlOptions);
-  const [source] = useState<ServerSource<TRow>>(createServerSource);
+  const [source] = useState<LazyServerSource<TRow>>(createLazyServerSource);
+  // The engine loads the first time this table is on the server tier; the
+  // request starts during this render, before anything below it mounts.
+  if (activeOption) source.load();
   // The source's own state — an append, the cursor trail, a refetch, the
   // aggregate operations — re-renders through its subscription.
   const revision = useSyncExternalStore(
@@ -218,7 +223,7 @@ export function useServerData<TRow>(
     source.revision
   );
   const held = useRef<FrameHold<
-    ReturnType<ServerSource<TRow>["update"]>
+    ReturnType<LazyServerSource<TRow>["update"]>
   > | null>(null);
   const seenRevision = useRef<number | null>(null);
   // A repeat of inputs already committed skips the refresh. The first
@@ -229,6 +234,8 @@ export function useServerData<TRow>(
     held,
     [
       activeOption,
+      // The engine landing, or failing to, replaces the pending frame.
+      source.phase(),
       rows,
       total,
       nextCursor,
