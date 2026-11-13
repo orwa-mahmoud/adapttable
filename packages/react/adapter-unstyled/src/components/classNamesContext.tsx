@@ -65,6 +65,18 @@ const keyOfPart = (part: string): string =>
  * of its own here.
  */
 export function useClassOfPart(part: string | undefined): string | undefined {
+  return classOfPartIn(useContext(ClassesByKeyContext), part);
+}
+
+/** The host's class for any part, for code that names parts in a loop. */
+export function usePartClass(): (part: string) => string | undefined {
   const byKey = useContext(ClassesByKeyContext);
+  return (part) => classOfPartIn(byKey, part);
+}
+
+function classOfPartIn(
+  byKey: ClassesByKey,
+  part: string | undefined
+): string | undefined {
   return part === undefined ? undefined : byKey[keyOfPart(part)];
 }

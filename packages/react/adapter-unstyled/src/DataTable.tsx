@@ -129,8 +129,11 @@ function DataTableBody<TRow>({
       </>
     );
   }
-  const Renderer = chrome.isMobile ? MobileCards : DesktopTable;
-  return <Renderer {...tableProps} classNames={classNames} />;
+  return chrome.isMobile ? (
+    <MobileCards {...tableProps} classNames={classNames} />
+  ) : (
+    <DesktopTable {...tableProps} />
+  );
 }
 
 /**
