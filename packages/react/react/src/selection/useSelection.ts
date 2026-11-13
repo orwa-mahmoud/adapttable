@@ -1,5 +1,4 @@
 import {
-  applyGroupLeafSelection,
   headerSelectionOf,
   idSetReader,
   offersAllMatching as neutralOffersAllMatching,
@@ -172,7 +171,8 @@ export function useSelection<TRow>(
 
   const toggleGroupLeaves = useCallback(
     (leafIds: readonly string[]) => {
-      commit((prev) => applyGroupLeafSelection(leafIds, prev));
+      // A group checkbox selects every leaf unless all are selected already.
+      commit((prev) => toggleIds(prev, leafIds));
     },
     [commit]
   );
