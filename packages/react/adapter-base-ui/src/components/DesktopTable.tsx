@@ -1,7 +1,6 @@
 /** The desktop `<table>`, drawn by the binding with Base UI's table elements. */
 import {
   createDesktopTable,
-  type Direction,
   groupedHeaderAlign,
   groupedHeaderCellStyle,
   type KitDesktopCellProps,
@@ -11,12 +10,10 @@ import {
   type KitSortLabelProps,
   PIN_Z,
   pinnedEdgeCellStyle,
-  type SharedTableRenderProps,
   sortArrow,
 } from "@adapttable/react/adapter";
 import type { CSSProperties, ReactNode } from "react";
 
-import type { BaseUiAccentColor } from "../types";
 import { Table, Text } from "../ui";
 import { Checkbox } from "./kitPrimitives";
 import { RowActionButtons } from "./RowActionButtons";
@@ -33,22 +30,6 @@ const PIN_BG = "var(--adapttable-surface, #ffffff)";
 const STICKY_FIX_CLASS = "adapttable-base-ui-scroll";
 
 const STICKY_FIX_CSS = `.${STICKY_FIX_CLASS} table{overflow:visible;min-width:var(--adapttable-min-width,0)}`;
-
-export interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
-  /** Class hook for the table (desktop) / each card (mobile). */
-  className?: string;
-  /** The kit's size token for the table. */
-  size: TableSize;
-  /** The kit's accent, so chrome matches the table. */
-  accentColor?: BaseUiAccentColor;
-  /** Text direction — flips the expand chevron for RTL. */
-  dir?: Direction;
-  /**
-   * The injected actions column is end-pinned (via the Columns menu), so
-   * its cells stick to the inline end even with zero data columns pinned.
-   */
-  actionsPinned?: boolean;
-}
 
 /** A header that sticks over the rows, on the panel surface. */
 function stickify(

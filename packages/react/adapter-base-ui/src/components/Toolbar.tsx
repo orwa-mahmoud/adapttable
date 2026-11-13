@@ -5,11 +5,9 @@ import {
   type KitFiltersButtonProps,
   type KitRowsPerPageProps,
   type KitToolbarFrameProps,
-  type KitToolbarProps,
   type KitToolbarSearchProps,
   type KitToolbarSortProps,
   mergeRefs,
-  pageSizeOptions,
   SearchIcon,
 } from "@adapttable/react/adapter";
 import { createContext, forwardRef, useContext } from "react";
@@ -17,21 +15,11 @@ import { createContext, forwardRef, useContext } from "react";
 import { FiltersIcon } from "../icons";
 import { Badge, Box, Button as UiButton, Flex, TextField } from "../ui";
 import { useAccentColor } from "./accent";
-import { NativeSelect, type SelectOption } from "./primitives";
+import { NativeSelect } from "./primitives";
 
 /** Name the actual input wrapper owned by the kit. */
 function nameSearchField(input: HTMLInputElement | null): void {
   input?.parentElement?.setAttribute("data-adapttable-part", "search-field");
-}
-
-export function pageSizeSelectOptions(
-  limit: number,
-  defaultLimit: number = limit
-): SelectOption[] {
-  return pageSizeOptions([limit, defaultLimit]).map((n) => ({
-    value: String(n),
-    label: String(n),
-  }));
 }
 
 /** The host's class for the toolbar, handed to its frame. */
@@ -194,7 +182,8 @@ function RowsPerPage({
   );
 }
 
-const KitToolbar = /* @__PURE__ */ createToolbar({
+/** The toolbar; its frame takes the host's class from `ToolbarClassName`. */
+export const Toolbar = /* @__PURE__ */ createToolbar({
   Frame,
   Search,
   SortSelect,
@@ -203,20 +192,3 @@ const KitToolbar = /* @__PURE__ */ createToolbar({
   filtersPopover: "wrap",
   RowsPerPage,
 });
-
-/** The props of Base UI's toolbar: the binding's, plus the host's class. */
-export interface ToolbarProps<TRow> extends KitToolbarProps<TRow> {
-  readonly className?: string;
-}
-
-/** The toolbar, with the host's class on its root. */
-export function Toolbar<TRow>({
-  className,
-  ...props
-}: Readonly<ToolbarProps<TRow>>) {
-  return (
-    <ToolbarClassName.Provider value={className}>
-      <KitToolbar {...props} />
-    </ToolbarClassName.Provider>
-  );
-}

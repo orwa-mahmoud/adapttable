@@ -12,7 +12,7 @@ import {
   mergeRefs,
 } from "@adapttable/react/adapter";
 import { Popover as BasePopover } from "@base-ui/react/popover";
-import { forwardRef, type ReactElement } from "react";
+import { type CSSProperties, forwardRef, type ReactElement } from "react";
 
 import { Button as UiButton, IconButton as UiIconButton } from "../ui";
 import { Divider, Select, Text, TextInput } from "./kitPrimitives";
@@ -65,7 +65,7 @@ export const Button = forwardRef<HTMLButtonElement, KitButtonProps>(
 );
 
 /** Quiet and grey; a pinned column's pin is solid teal. */
-function IconButton({
+export function IconButton({
   elementRef,
   variant,
   tone: _tone,
@@ -90,68 +90,73 @@ function IconButton({
 
 const noop = (): void => undefined;
 
-const POPUP_STYLE = {
+/**
+ * A panel under its button's end edge, never flipped, sized by `style`. The
+ * binding owns Escape, so Escape inside a field in it never closes the whole
+ * panel.
+ */
+export function panelPopover(
+  style: CSSProperties
+): (props: Readonly<KitPopoverProps>) => ReactElement {
+  return function Popover({
+    trigger,
+    children,
+    open,
+    onOpenChange,
+    dir,
+    "aria-label": label,
+  }) {
+    const portalContainer = usePortalContainer();
+    return (
+      <BasePopover.Root
+        open={open}
+        onOpenChange={(next, details) => {
+          if (!next && details.reason === "escape-key") return;
+          onOpenChange?.(next);
+        }}
+      >
+        <BasePopover.Trigger
+          render={
+            trigger({
+              elementRef: noop,
+              onClick: noop,
+              "aria-expanded": open === true,
+              "aria-haspopup": "dialog",
+            }) as ReactElement
+          }
+        />
+        <BasePopover.Portal container={portalContainer}>
+          <BasePopover.Positioner
+            className="adapttable-popup-positioner"
+            side="bottom"
+            align="end"
+            sideOffset={8}
+            collisionAvoidance={{
+              side: "none",
+              align: "shift",
+              fallbackAxisSide: "none",
+            }}
+          >
+            <BasePopover.Popup
+              aria-label={label}
+              className="adapttable-popup"
+              dir={dir}
+              style={style}
+            >
+              {children}
+            </BasePopover.Popup>
+          </BasePopover.Positioner>
+        </BasePopover.Portal>
+      </BasePopover.Root>
+    );
+  };
+}
+
+const Popover = /* @__PURE__ */ panelPopover({
   minWidth: "min(260px, calc(100vw - 48px))",
   maxHeight: "min(var(--available-height), 70vh, 480px)",
   overflowY: "auto",
-} as const;
-
-/**
- * The panel under its button's end edge, never flipped. The binding owns
- * Escape, so Escape inside the rename field never closes the whole menu.
- */
-export function Popover({
-  trigger,
-  children,
-  open,
-  onOpenChange,
-  dir,
-  "aria-label": label,
-}: Readonly<KitPopoverProps>): ReactElement {
-  const portalContainer = usePortalContainer();
-  return (
-    <BasePopover.Root
-      open={open}
-      onOpenChange={(next, details) => {
-        if (!next && details.reason === "escape-key") return;
-        onOpenChange?.(next);
-      }}
-    >
-      <BasePopover.Trigger
-        render={
-          trigger({
-            elementRef: noop,
-            onClick: noop,
-            "aria-expanded": open === true,
-            "aria-haspopup": "dialog",
-          }) as ReactElement
-        }
-      />
-      <BasePopover.Portal container={portalContainer}>
-        <BasePopover.Positioner
-          className="adapttable-popup-positioner"
-          side="bottom"
-          align="end"
-          sideOffset={8}
-          collisionAvoidance={{
-            side: "none",
-            align: "shift",
-            fallbackAxisSide: "none",
-          }}
-        >
-          <BasePopover.Popup
-            aria-label={label}
-            className="adapttable-popup"
-            dir={dir}
-            style={POPUP_STYLE}
-          >
-            {children}
-          </BasePopover.Popup>
-        </BasePopover.Positioner>
-      </BasePopover.Portal>
-    </BasePopover.Root>
-  );
-}
+});
 
 /** Base UI's step of 0.25rem between the menu's controls. */
 const STEP = "0.25rem";

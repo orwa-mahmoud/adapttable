@@ -340,7 +340,7 @@ export { SavedView }
 export type SavedViewsLabels = Pick<Required<TableLabels>, "savedViews" | "saveView" | "viewName" | "deleteView">;
 
 // @public
-export function SavedViewsMenu(input: Readonly<SavedViewsMenuProps>): JSX.Element;
+export function SavedViewsMenu(input: Readonly<SavedViewsMenuProps>): ReactElement;
 
 // @public
 export interface SavedViewsMenuProps {

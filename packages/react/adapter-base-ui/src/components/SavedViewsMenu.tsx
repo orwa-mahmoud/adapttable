@@ -1,11 +1,19 @@
-import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
-import type { TableLabels } from "@adapttable/react/adapter";
-import { Popover } from "@base-ui/react/popover";
-import { useState } from "react";
+/** The saved-views menu, drawn by the binding with Base UI's controls. */
+import type { UseSavedViewsOptions } from "@adapttable/react";
+import {
+  createSavedViewsMenu,
+  type KitButtonProps,
+  type KitSavedViewsLook,
+  mergeRefs,
+  type TableLabels,
+} from "@adapttable/react/adapter";
+import { forwardRef, type ReactElement } from "react";
 
 import type { BaseUiAccentColor } from "../types";
-import { Button, Flex, IconButton, Separator, TextField } from "../ui";
-import { usePortalContainer } from "./portalContainer";
+import { Button as UiButton } from "../ui";
+import { AccentColor, useAccentColor } from "./accent";
+import { IconButton, panelPopover } from "./ColumnMenu";
+import { Divider, TextInput } from "./kitPrimitives";
 
 /** Small × glyph for the per-view delete button. */
 function CrossIcon() {
@@ -52,6 +60,83 @@ export interface SavedViewsMenuProps {
 }
 
 /**
+ * The menu's buttons: the trigger outlined at the toolbar's size, each view a
+ * quiet compact button filling its row, the save button solid in the accent
+ * given to the menu.
+ */
+const Button = forwardRef<HTMLButtonElement, KitButtonProps>(function Button(
+  {
+    elementRef,
+    variant,
+    tone: _tone,
+    fullWidth,
+    justify,
+    busy,
+    style,
+    ...rest
+  },
+  ref
+) {
+  "use no memo";
+  const accent = useAccentColor();
+  const trigger = variant === "outlined";
+  const quiet = variant === "text";
+  let look: "outline" | "ghost" | "solid" = "solid";
+  if (trigger) look = "outline";
+  else if (quiet) look = "ghost";
+  return (
+    <UiButton
+      ref={mergeRefs(ref, elementRef)}
+      type="button"
+      size={trigger ? "2" : "1"}
+      variant={look}
+      color={look === "solid" ? accent : undefined}
+      loading={busy}
+      style={{
+        ...(fullWidth ? { flex: 1 } : undefined),
+        ...(justify ? { justifyContent: "flex-start" } : undefined),
+        ...(look === "solid" ? { flexShrink: 0 } : undefined),
+        ...style,
+      }}
+      {...rest}
+    />
+  );
+});
+
+const ROW = { display: "flex", alignItems: "center", gap: "0.25rem" } as const;
+
+const LOOK: KitSavedViewsLook = {
+  panel: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.25rem",
+    maxHeight: "none",
+  },
+  row: ROW,
+  divider: {},
+  saveRow: ROW,
+  nameInput: { flex: 1 },
+};
+
+const useLook = (): KitSavedViewsLook => LOOK;
+
+const Menu = /* @__PURE__ */ createSavedViewsMenu(
+  {
+    Button,
+    IconButton,
+    TextInput,
+    Popover: /* @__PURE__ */ panelPopover({
+      minWidth: "min(240px, calc(100vw - 48px))",
+      maxHeight: "min(70vh, 360px)",
+      overflowY: "auto",
+    }),
+    Divider,
+    deleteIcon: <CrossIcon />,
+  },
+  useLook
+);
+
+/**
  * Saved-views toolbar menu on core's `useSavedViews`: a popover listing the
  * captured views (click applies and closes; the trailing × deletes) above a
  * save row that snapshots the table's CURRENT URL state under a typed name.
@@ -59,98 +144,14 @@ export interface SavedViewsMenuProps {
  * @public
  */
 export function SavedViewsMenu({
-  options,
-  labels,
   accentColor,
-}: Readonly<SavedViewsMenuProps>) {
-  const portalContainer = usePortalContainer();
-  const { views, save, apply, remove } = useSavedViews(options);
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const trimmed = name.trim();
-  const saveCurrent = () => {
-    save(trimmed);
-    setName("");
-  };
+  ...props
+}: Readonly<SavedViewsMenuProps>): ReactElement {
+  "use no memo";
+  // The save button takes the accent given here, not the table's.
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger
-        className="adapttable-btn"
-        data-size="2"
-        data-variant="outline"
-      >
-        {labels.savedViews}
-      </Popover.Trigger>
-      <Popover.Portal container={portalContainer}>
-        <Popover.Positioner
-          className="adapttable-popup-positioner"
-          side="bottom"
-          align="end"
-          sideOffset={8}
-          collisionAvoidance={{
-            side: "none",
-            align: "shift",
-            fallbackAxisSide: "none",
-          }}
-        >
-          <Popover.Popup
-            className="adapttable-popup"
-            style={{
-              minWidth: "min(240px, calc(100vw - 48px))",
-              maxHeight: "min(70vh, 360px)",
-              overflowY: "auto",
-            }}
-          >
-            <Flex direction="column" gap="1">
-              {views.map((view) => (
-                <Flex key={view.name} gap="1" align="center">
-                  <Button
-                    size="1"
-                    variant="ghost"
-                    style={{ flex: 1, justifyContent: "flex-start" }}
-                    onClick={() => {
-                      apply(view.name);
-                      setOpen(false);
-                    }}
-                  >
-                    {view.name}
-                  </Button>
-                  <IconButton
-                    size="1"
-                    variant="ghost"
-                    color="gray"
-                    aria-label={`${labels.deleteView}: ${view.name}`}
-                    onClick={() => remove(view.name)}
-                  >
-                    <CrossIcon />
-                  </IconButton>
-                </Flex>
-              ))}
-              <Separator my="1" size="4" />
-              <Flex gap="1" align="center">
-                <TextField.Root
-                  size="1"
-                  aria-label={labels.viewName}
-                  placeholder={labels.viewName}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  style={{ flex: 1 }}
-                />
-                <Button
-                  size="1"
-                  color={accentColor}
-                  variant="solid"
-                  disabled={trimmed === ""}
-                  onClick={saveCurrent}
-                  style={{ flexShrink: 0 }}
-                >
-                  {labels.saveView}
-                </Button>
-              </Flex>
-            </Flex>
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
-    </Popover.Root>
+    <AccentColor.Provider value={accentColor}>
+      <Menu {...props} />
+    </AccentColor.Provider>
   );
 }
