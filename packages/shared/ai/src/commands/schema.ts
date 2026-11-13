@@ -3,7 +3,8 @@ import type { JsonSchema } from "../types";
 
 const DRAFT = "https://json-schema.org/draft/2020-12/schema";
 
-/** A closed object schema. */
+/** A closed object schema. Pure, so an unused schema costs a bundle nothing. */
+/*#__NO_SIDE_EFFECTS__*/
 export function objectSchema(
   properties: Record<string, JsonSchema>,
   required: readonly string[] = []
@@ -26,6 +27,7 @@ export const OK_OUTPUT = objectSchema({
 });
 
 /** A view change that also names what landed. */
+/*#__NO_SIDE_EFFECTS__*/
 export function okWith(properties: Record<string, JsonSchema>): JsonSchema {
   return objectSchema({
     ok: { type: "boolean", const: true },
@@ -90,15 +92,13 @@ export const ID: JsonSchema = { type: "string", minLength: 1 };
 /** A list of non-empty strings. */
 export const ID_LIST: JsonSchema = { type: "array", items: ID };
 
-/** A row addressed by stable key, or by 1-based position in a scope. */
-export const ROW_REF_PROPERTIES: Record<string, JsonSchema> = {
-  rowKey: ID,
-  position: { type: "integer", minimum: 1 },
-  scope: SCOPE,
-};
+/** A 1-based row position. */
+export const POSITION: JsonSchema = { type: "integer", minimum: 1 };
 
 /** A row reference that carries the revision its position was read at. */
 export const ROW_KEY_OR_POSITION = objectSchema({
-  ...ROW_REF_PROPERTIES,
+  rowKey: ID,
+  position: POSITION,
+  scope: SCOPE,
   expectedRevision: REVISION,
 });

@@ -56,9 +56,8 @@ const COMMANDS: { readonly [K in CapabilityKey]: TableCommand<K> } = {
 };
 
 /** Every built-in command, in catalog order. */
-export const TABLE_COMMANDS: readonly TableCommand[] = CAPABILITY_KEYS.map(
-  (key) => COMMANDS[key]
-);
+export const TABLE_COMMANDS: readonly TableCommand[] =
+  /* @__PURE__ */ CAPABILITY_KEYS.map((key) => COMMANDS[key]);
 
 /** The built-in command for a key, or `undefined` for any other string. */
 export function tableCommand(key: string): TableCommand | undefined {

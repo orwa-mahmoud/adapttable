@@ -26,11 +26,12 @@ import {
   rowProvenance,
 } from "./rowAddress";
 import {
+  ID,
   ID_LIST,
   objectSchema,
   OK_OUTPUT,
+  POSITION,
   ROW_KEY_OR_POSITION,
-  ROW_REF_PROPERTIES,
   SCOPE,
   STRING_LIST,
 } from "./schema";
@@ -196,7 +197,9 @@ export const pinRowCommand: TableCommand<"view.pinRow"> = {
     "group rows are not data rows and cannot be pinned this way.",
   input: objectSchema(
     {
-      ...ROW_REF_PROPERTIES,
+      rowKey: ID,
+      position: POSITION,
+      scope: SCOPE,
       expectedRevision: { type: "integer", minimum: 1 },
       side: { type: ["string", "null"], enum: ["top", "bottom", null] },
     },

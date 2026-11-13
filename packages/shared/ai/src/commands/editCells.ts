@@ -16,7 +16,7 @@ import {
   type TableCommand,
 } from "./command";
 import { asRowRef, readMaxOf, resolveRowArg } from "./rowAddress";
-import { objectSchema, ROW_REF_PROPERTIES, WRITE_RESULT } from "./schema";
+import { ID, objectSchema, POSITION, SCOPE, WRITE_RESULT } from "./schema";
 import { applyEach, writePayload } from "./writeResult";
 
 interface CellEdit {
@@ -211,7 +211,9 @@ export const editCellsCommand: TableCommand<"edit.cells"> = {
           {
             column: { type: "string", minLength: 1 },
             value: {},
-            ...ROW_REF_PROPERTIES,
+            rowKey: ID,
+            position: POSITION,
+            scope: SCOPE,
           },
           ["column"]
         ),

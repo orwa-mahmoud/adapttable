@@ -56,6 +56,7 @@ export function knownColumn(
  * that can misname a column and one that cannot — and it follows the live
  * table, so a column that stops being sortable stops being offered.
  */
+/*#__NO_SIDE_EFFECTS__*/
 export function describeColumnChoice(
   property: string,
   usable: (column: AgentColumn) => boolean,

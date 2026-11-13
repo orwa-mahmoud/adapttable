@@ -14,7 +14,7 @@ import {
   type TableCommand,
 } from "./command";
 import { resolveRowArg } from "./rowAddress";
-import { ID, objectSchema, ROW_REF_PROPERTIES, WRITE_RESULT } from "./schema";
+import { ID, objectSchema, POSITION, SCOPE, WRITE_RESULT } from "./schema";
 import { applyEach, writePayload } from "./writeResult";
 
 /** A write the table offers only where the host allows writes. */
@@ -118,7 +118,10 @@ export const deleteRowsCommand: TableCommand<"rows.delete"> = {
     "Delete rows through the host delete callback. Each row needs a rowKey or a 1-based position. Resolves every row before deleting, so a row that names nothing is refused before anything is removed. This is destructive.",
   input: objectSchema(
     {
-      rows: { type: "array", items: objectSchema({ ...ROW_REF_PROPERTIES }) },
+      rows: {
+        type: "array",
+        items: objectSchema({ rowKey: ID, position: POSITION, scope: SCOPE }),
+      },
     },
     ["rows"]
   ),
