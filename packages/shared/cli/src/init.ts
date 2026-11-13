@@ -12,7 +12,7 @@ import {
   installCommand,
   type PackageManager,
 } from "./packageManager";
-import { packagesFor, scaffoldFiles } from "./scaffold";
+import { packagesFor, scaffoldFiles, templateFor } from "./scaffold";
 
 /**
  * The filesystem + logging surface `runInit` depends on (injectable).
@@ -89,76 +89,23 @@ function chakraVersionWarning(
   return `   Note: @chakra-ui/react ${chakraSpec} detected — @adapttable/chakra targets Chakra v3. Upgrade @chakra-ui/react to v3, or use @adapttable/unstyled.`;
 }
 
-/** Registry install targets, preserving peers the Angular host already owns. */
+/** Registry install targets, preserving peers a host already owns. */
 function missingPackages(
   info: KitInfo,
   framework: Framework,
   deps: Readonly<Record<string, string>>
 ): string[] {
+  const { keepsHostPeers } = templateFor(framework);
   return packagesFor(info).filter((specifier) => {
     if (info.privatePreview && specifier === info.adapter) return false;
-    if (
-      (framework !== "angular" && framework !== "vue") ||
-      !info.extras.includes(specifier)
-    )
-      return true;
-    // Angular extras in KITS carry version ranges; compare their bare names so
-    // an existing host peer is not reinstalled or upgraded by the command.
+    if (!keepsHostPeers || !info.extras.includes(specifier)) return true;
+    // Extras in KITS carry version ranges; compare their bare names so an
+    // existing host peer is not reinstalled or upgraded by the command.
     const versionStart = specifier.indexOf("@", 1);
     const name =
       versionStart < 0 ? specifier : specifier.slice(0, versionStart);
     return !Object.hasOwn(deps, name);
   });
-}
-
-/** Explain the selected framework's host component, providers, and styling. */
-function logHostSetup(io: InitIO, framework: Framework, info: KitInfo): void {
-  if (framework === "angular") {
-    io.log(
-      '3. Import { PeopleTable } from "./peopleTable" in your host component, add PeopleTable to its imports, and render <people-table />.'
-    );
-    const setup: Partial<Record<Kit, string>> = {
-      "angular-aria":
-        "Import @angular/cdk/overlay-prebuilt.css and @adapttable/angular-aria/styles.css. See /angular/aria/.",
-      "angular-cdk":
-        "Import @angular/cdk/overlay-prebuilt.css and @adapttable/angular-cdk/styles.css. See /angular/angular-cdk/.",
-      "ngx-bootstrap":
-        "Use zoneless Angular 22 and import @adapttable/ngx-bootstrap/styles.css. Do not load global Bootstrap CSS or JavaScript. See /angular/ngx-bootstrap/.",
-      "angular-material":
-        "Configure an Angular Material Sass theme and import @adapttable/angular-material/styles.css plus @angular/cdk/overlay-prebuilt.css. See /angular/material/.",
-      "ng-bootstrap":
-        "Import @angular/localize/init and @adapttable/ng-bootstrap/styles.css. Do not load global Bootstrap CSS or JavaScript. See /angular/ng-bootstrap/.",
-      spartan:
-        "Process @adapttable/spartan/styles.css through Tailwind 4 and import @angular/cdk/overlay-prebuilt.css. See /angular/spartan/.",
-      "taiga-ui":
-        "Register provideAdaptTaiga() from @adapttable/taiga-ui in bootstrap providers, configure Less and serve matching @taiga-ui/icons@5.26.0 src assets from assets/taiga-ui/icons. See /angular/taiga-ui/.",
-    };
-    if (setup[info.kit]) io.log(`   ${setup[info.kit]}`);
-    if (info.kit === "ng-zorro") {
-      io.log(
-        '   NG-ZORRO requires Angular 22 and ng-zorro-antd 22.1.1-compatible peers. Match any missing Angular peers to your installed Angular version. Add @import "ng-zorro-antd/ng-zorro-antd.min.css"; to your global stylesheet.'
-      );
-    }
-  } else if (framework === "vue") {
-    io.log(
-      '3. Import PeopleTable from "./PeopleTable.vue" and render <PeopleTable /> in your Vue component.'
-    );
-    io.log(
-      '   In src/main.ts: import { installAdaptTable } from "./adapttable"; call installAdaptTable(app) before app.mount().'
-    );
-    if (info.kit === "nuxt-ui" || info.kit === "quasar") {
-      io.log(
-        '   Merge adaptTableViteConfig from "./adapttable.vite.ts" into vite.config.ts with Vite mergeConfig. This includes the Vue compiler; do not register it twice.'
-      );
-    }
-    io.log(
-      `   Provider and style setup: src/adapttable.ts. Kit guide: https://adapttable.orwamahmoud.com/vue/${info.kit === "vue-unstyled" ? "getting-started" : info.kit}/`
-    );
-  } else {
-    io.log(
-      "3. Wrap your app in your UI kit's provider (MantineProvider / ThemeProvider / ChakraProvider / ConfigProvider — per its docs), render <PeopleTable />, done."
-    );
-  }
 }
 
 /** Validate the native host before creating any file. */
@@ -237,21 +184,15 @@ export function runInit(io: InitIO, options: InitOptions = {}): InitResult {
     written.push(file.path);
   }
 
-  const frameworkLabel = { react: "React", angular: "Angular", vue: "Vue" }[
-    framework
-  ];
+  const template = templateFor(framework);
   io.log(
-    framework !== "react"
-      ? `AdaptTable — detected ${frameworkLabel} (${info.label}).`
-      : `AdaptTable — detected ${info.label}.`
+    template.label === undefined
+      ? `AdaptTable — detected ${info.label}.`
+      : `AdaptTable — detected ${template.label} (${info.label}).`
   );
   const chakraNote = chakraVersionWarning(info.kit, deps["@chakra-ui/react"]);
   if (chakraNote) io.log(chakraNote);
-  if (framework === "angular") {
-    io.log(
-      "   Note: Angular kits are prepared for their first public release. Check registry availability before installing; use built local packages until your registry provides the Angular binding and kit."
-    );
-  }
+  if (template.notice) io.log(template.notice);
   io.log("");
   io.log(
     info.privatePreview
@@ -274,7 +215,7 @@ export function runInit(io: InitIO, options: InitOptions = {}): InitResult {
     );
   }
   io.log("");
-  logHostSetup(io, framework, info);
+  for (const line of template.hostSetup(info)) io.log(line);
   io.log("   Docs: https://github.com/orwa-mahmoud/adapttable");
 
   return {
