@@ -26,32 +26,33 @@ export const MENU_PANEL_STYLE: CSSProperties = {
   overflowY: "auto",
 };
 
-/** Disclosure state shared by the toolbar menu popovers. */
-export interface MenuPopoverState {
-  open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
+/** The elements an anchored panel tracks. */
+export interface AnchoredPanelRefs {
   /** Attach to the wrapper — pointer-downs inside it do not close the panel. */
   rootRef: RefObject<HTMLDivElement | null>;
-  /** Attach to the trigger — Escape hands keyboard focus back to it. */
+  /** Attach to the trigger — the panel sits under it. */
   triggerRef: RefObject<HTMLButtonElement | null>;
   /** Attach to the portalled panel — clicks inside it must not count as outside. */
   panelRef: RefCallback<HTMLElement>;
 }
 
 /**
- * Disclosure behaviour for the toolbar menus (ColumnMenu, SavedViewsMenu):
- * open/close state that also closes on outside mousedown or Escape, with
- * Escape restoring focus to the trigger. The panel is portalled, so outside
- * detection has to include `panelRef` as well as the trigger wrapper.
+ * A panel portalled under its trigger: it follows the trigger through
+ * scrolling and resizing, and a pointer-down outside the wrapper and the
+ * panel asks it to close.
  */
-export function useMenuPopover(): MenuPopoverState {
-  const [open, setOpen] = useState(false);
+export function useAnchoredPanel(
+  open: boolean,
+  onClose: () => void
+): AnchoredPanelRefs {
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelNode = useRef<HTMLElement>(null);
   const panelRef = useCallback<RefCallback<HTMLElement>>((el) => {
     panelNode.current = el;
   }, []);
+  const close = useRef(onClose);
+  close.current = onClose;
 
   useEffect(() => {
     if (!open) return;
@@ -59,19 +60,10 @@ export function useMenuPopover(): MenuPopoverState {
       const target = event.target as Node;
       if (rootRef.current?.contains(target)) return;
       if (panelNode.current?.contains(target)) return;
-      setOpen(false);
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setOpen(false);
-      triggerRef.current?.focus();
+      close.current();
     };
     document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
+    return () => document.removeEventListener("mousedown", onDown);
   }, [open]);
 
   useEffect(() => {
@@ -90,5 +82,33 @@ export function useMenuPopover(): MenuPopoverState {
     };
   }, [open]);
 
-  return { open, setOpen, rootRef, triggerRef, panelRef };
+  return { rootRef, triggerRef, panelRef };
+}
+
+/** Disclosure state shared by the toolbar menu popovers. */
+export interface MenuPopoverState extends AnchoredPanelRefs {
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+}
+
+/**
+ * Disclosure behaviour for a toolbar menu that keeps its own state: an
+ * anchored panel that also closes on Escape, handing focus back to the
+ * trigger.
+ */
+export function useMenuPopover(): MenuPopoverState {
+  const [open, setOpen] = useState(false);
+  const refs = useAnchoredPanel(open, () => setOpen(false));
+  const { triggerRef } = refs;
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      triggerRef.current?.focus();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, triggerRef]);
+  return { open, setOpen, ...refs };
 }

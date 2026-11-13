@@ -9,6 +9,7 @@ import {
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ClassNamesProvider } from "./components/classNamesContext";
 import { ColumnMenu } from "./components/ColumnMenu";
 
 interface Row {
@@ -96,7 +97,6 @@ function open(
       onAutoSize={() => undefined}
       layout={layout}
       labels={labels}
-      classNames={{}}
       hasRowActions={hasRowActions}
       hasRowReorder={hasRowReorder}
       onRenameColumn={onRenameColumn}
@@ -184,18 +184,21 @@ describe("unstyled ColumnMenu", () => {
     };
     render(
       <FeatureHostProvider host={host}>
-        <ColumnMenu
-          allColumns={cols}
-          onAutoSize={() => undefined}
-          layout={fakeLayout()}
-          labels={labels}
+        <ClassNamesProvider
           classNames={{
             columnMenuChoice: "choice",
             columnMenuChoiceLabel: "choice-label",
             columnMenuChoiceSelect: "choice-select",
           }}
-          groupingPanel={groupingPanel}
-        />
+        >
+          <ColumnMenu
+            allColumns={cols}
+            onAutoSize={() => undefined}
+            layout={fakeLayout()}
+            labels={labels}
+            groupingPanel={groupingPanel}
+          />
+        </ClassNamesProvider>
       </FeatureHostProvider>
     );
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
@@ -424,7 +427,6 @@ describe("unstyled ColumnMenu", () => {
         onSortColumn={onSortColumn}
         layout={fakeLayout()}
         labels={labels}
-        classNames={{}}
       />
     );
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
@@ -566,7 +568,6 @@ describe("unstyled ColumnMenu", () => {
         onAutoSize={() => undefined}
         layout={fakeLayout()}
         labels={labels}
-        classNames={{}}
         dir="rtl"
       />
     );
