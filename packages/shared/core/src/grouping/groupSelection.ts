@@ -1,4 +1,5 @@
 import type { HeaderSelectionState } from "../selection/selectionState";
+import { toggleIds } from "../state/tableStores";
 
 /**
  * Tri-state for a group checkbox over its leaf row ids — same enum as the
@@ -35,17 +36,12 @@ export function nextGroupSelection(
 
 /**
  * Apply a group checkbox toggle in one pass — returns the next selected-id
- * set (adapters / {@link useSelection.toggleGroupLeaves} commit this).
+ * set. It is the same rule as {@link toggleIds} over the group's leaves, which
+ * is what a selection's `toggleGroupLeaves` commits.
  */
 export function applyGroupLeafSelection(
   leafIds: readonly string[],
   selectedIds: ReadonlySet<string>
 ): Set<string> {
-  const { action, ids } = nextGroupSelection(leafIds, selectedIds);
-  const next = new Set(selectedIds);
-  for (const id of ids) {
-    if (action === "select") next.add(id);
-    else next.delete(id);
-  }
-  return next;
+  return toggleIds(selectedIds, leafIds);
 }
