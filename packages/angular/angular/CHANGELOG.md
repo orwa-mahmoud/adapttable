@@ -1,5 +1,49 @@
 # @adapttable/angular
 
+## 0.9.0
+
+### Minor Changes
+
+- 1ee0ea3: A table bundles only the code of the features it composes. Editing, edit history, find, CSV export, filters, header filters, grouping, the grouping panel, row reorder, row pinning and the tree each bring their implementation on the feature, so every Angular kit's plain table is about 32 KiB smaller gzipped (the unstyled kit: 129.0 KiB to 97.4 KiB). New exports: `withFeatureImplementation`, `featureImplementation` and the `FEATURE_IMPLEMENTATIONS` keys with their implementation types.
+- 39057e0: Angular kits draw the desktop table and the phone cards through one structure, `AdaptDesktopStructure` and `AdaptMobileStructure`. Each kit still supplies its own table, rows, cells, cards and controls, and `AdaptDesktopTable` and `AdaptMobileCards` keep the same inputs.
+  
+  `injectTableSurfaceHost` from `@adapttable/angular/adapter` composes a lean structural table from the features it is given and returns a `TableSurfaceView`, with `editingBundleFor` and the surface tokens in `@adapttable/angular`; kit tables keep typing their view as `TableView`. `AdaptHeaderTemplate` and `AdaptHeaderTemplateSlot` let a kit declare its header cell inside its table template.
+  
+  `AdaptDesktopTableHost` and `AdaptMobileCardsHost` carry a kit table's inputs and scroll box, `AdaptTableSurface` is the base the structures share, `provideAdaptTableState()` provides the find, palette and context-menu state a kit's data table needs, and `scrollBoxStyle` is the scroll box's style rule.
+- 39057e0: Vue and Angular tables take `animate`: rows and cards stagger in on mount with the shared timing, and stay still when the reader prefers reduced motion. Both mount the shared high-contrast stylesheet, so focus, selection, dirty cells, validation and find hits keep an outline under forced colors.
+  
+  Vue compact density shortens rows, the status bar no longer repeats the footer count, and opening a context menu no longer overflows the Vue shell. Compact and comfortable density reach cells inside nested Angular Aria hosts.
+  
+  `scheduleTick` from `@adapttable/vue/adapter` runs work after Vue commits the DOM and rethrows its failure; every Vue kit and `@adapttable/ai-vue` use it.
+
+### Patch Changes
+
+- 2ecf579: The lean table host follows its features after mount: adding, removing or adding again cell navigation, editing or grouping updates its grid, editing and grouping state and the body built over them.
+- 68db6b2: Cell editors hand their focus target to the table after they render and again whenever it changes, and the editor layer and ngx-bootstrap's pager links attach their browser listeners only in the browser.
+- 39057e0: `@adapttable/core/engine`, `/grouping`, `/editing` and `/selection` let an app import one domain without the whole root, and every root import keeps working. `createBasicTableEngine` builds the filter, sort, search and page session on its own.
+  
+  Grouping no longer throws on rows that carry the basic engine's view, and changing how a group total is formatted no longer recomputes it. A batch of row patches rebuilds its position indexes once instead of once per patch, so streaming updates on large tables do far less work with the same results.
+  
+  Decisions every binding makes the same way — source refresh, cell text, approval lines, virtualizer fields, column-select names, the built-in English labels — have one implementation in `@adapttable/core/binding`, which also exports `KitEnvironment` and `withKitEnvironment`. `renderedRowsOf` again accepts a tree entry that only carries its row.
+  
+  `sameItems` compares two lists item by item with `Object.is`, and `retainItems` keeps the previous list while its items are unchanged; both are exported from `@adapttable/core/binding`, with `isRecord` for a plain-record check. `sameRows` is deprecated in favour of `sameItems` and keeps working. `approvalProposalText` writes one proposed change as its review line, and `rowMoveMenuProps` builds a row's move menu and its confirmation, for every binding.
+- 39057e0: Tables follow their UI library's app-wide settings. An explicit `dir`, `labels`, `density` or `size` still wins, and a setting the app left at its default stays with the page:
+  
+  - Ant Design: ConfigProvider direction, locale, component size and `theme.token.motion`.
+  - Chakra: `LocaleProvider`. Mantine and Base UI: `DirectionProvider`. MUI: a right-to-left `theme.direction`.
+  - Element Plus: `ElConfigProvider` locale and size. Naive UI: `n-config-provider` locale, `rtl` and table size. Nuxt UI: a parent `UApp` locale and `dir`. Quasar: the active language pack and its `rtl`. Reka UI and shadcn-vue: a parent `ConfigProvider`'s direction and locale. Vuetify: the locale, its RTL map and `defaults.global.density`.
+  - Angular Material, Angular CDK, Angular Aria and Spartan: CDK `Directionality`. NG-ZORRO: `Directionality`, a provided `NZ_I18N` locale and `NZ_CONFIG` table size. ng-bootstrap: `NgbConfig.animation`. Taiga UI: `TUI_LANGUAGE` and reduced or disabled animation.
+  
+  A followed locale loads only that language's labels, the first time it is seen, so a plain table carries no label data. Server rendering and the first client render show the current labels until the language arrives; pass `labels` to render it from the first paint. `@adapttable/i18n/load` exports `loadLabels(locale)`, and `useLocaleLabels` in `@adapttable/react/adapter` and `@adapttable/vue/adapter` turns a library locale into those labels for a kit.
+- Updated dependencies [39057e0]
+- Updated dependencies [8bc96c5]
+- Updated dependencies [f20f914]
+- Updated dependencies [39057e0]
+- Updated dependencies [aa07a99]
+- Updated dependencies [b8b52f4]
+  - @adapttable/core@3.14.0
+  - @adapttable/i18n@3.4.0
+
 ## 0.8.1
 
 ### Patch Changes

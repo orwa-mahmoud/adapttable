@@ -1,5 +1,25 @@
 # @adapttable/unstyled
 
+## 3.4.5
+
+### Patch Changes
+
+- 39057e0: Every React kit draws its desktop table and phone cards through one shared structure, `DesktopTableChrome` and `MobileCardsChrome`. Each kit still supplies its own table, rows, cells, cards and controls, and every table looks and behaves as before. `mobileCardSlots` builds the card list (order, pinned totals, groups, extra rows and each card's list-item attributes) and `mobileCardPropsEqual` is its card body's memo comparator, so a kit draws only its card host and body. A card now re-renders when the host passes a new `renderCard`, and a card offers no expand toggle without `renderRowDetail`, as the desktop table does.
+  
+  A plain React table no longer loads the editing session or the extra-row splicer: enter-to-edit and batch undo come with the cell-navigation and editing features, and extra rows are spliced only when `extraRows()` is composed.
+  
+  The MUI filters panel stays within the window below its trigger after the page shifts while it is open, and inside its left edge in a right-to-left page with a scrollbar.
+- Updated dependencies [693ad8e]
+- Updated dependencies [39057e0]
+- Updated dependencies [8bc96c5]
+- Updated dependencies [f20f914]
+- Updated dependencies [39057e0]
+- Updated dependencies [aa07a99]
+- Updated dependencies [39057e0]
+- Updated dependencies [b8b52f4]
+  - @adapttable/react@1.10.0
+  - @adapttable/core@3.14.0
+
 ## 3.4.4
 
 ### Patch Changes

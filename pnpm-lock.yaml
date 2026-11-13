@@ -1268,7 +1268,7 @@ importers:
         specifier: workspace:*
         version: link:../../shared/core
       '@adapttable/i18n':
-        specifier: 3.3.9
+        specifier: 3.4.0
         version: link:../../shared/i18n
       '@tanstack/angular-virtual':
         specifier: ^6.0.6
@@ -1668,7 +1668,7 @@ importers:
         specifier: workspace:*
         version: link:../../shared/core
       '@adapttable/i18n':
-        specifier: 3.3.9
+        specifier: 3.4.0
         version: link:../../shared/i18n
       '@tanstack/react-virtual':
         specifier: ^3.14.10
@@ -1741,7 +1741,7 @@ importers:
   packages/vue/adapter-element-plus:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.4.1
+        specifier: 0.5.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
@@ -1760,7 +1760,7 @@ importers:
   packages/vue/adapter-naive-ui:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.4.1
+        specifier: 0.5.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
@@ -1782,7 +1782,7 @@ importers:
   packages/vue/adapter-nuxt-ui:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.4.1
+        specifier: 0.5.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
@@ -1801,7 +1801,7 @@ importers:
   packages/vue/adapter-quasar:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.4.1
+        specifier: 0.5.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
@@ -1826,7 +1826,7 @@ importers:
   packages/vue/adapter-reka-ui:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.4.1
+        specifier: 0.5.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
@@ -1848,7 +1848,7 @@ importers:
   packages/vue/adapter-shadcn-vue:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.4.1
+        specifier: 0.5.0
         version: link:../vue
       '@lucide/vue':
         specifier: ^1.28.0
@@ -1891,7 +1891,7 @@ importers:
         specifier: workspace:*
         version: link:../../shared/core
       '@adapttable/vue':
-        specifier: 0.4.1
+        specifier: 0.5.0
         version: link:../vue
     devDependencies:
       '@adapttable/i18n':
@@ -1907,7 +1907,7 @@ importers:
   packages/vue/adapter-vuetify:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.4.1
+        specifier: 0.5.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
@@ -1938,14 +1938,14 @@ importers:
         specifier: workspace:*
         version: link:../../shared/ai
       '@adapttable/vue':
-        specifier: 0.4.1
+        specifier: 0.5.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../../shared/core
       '@adapttable/vue-unstyled':
-        specifier: 0.2.3
+        specifier: 0.2.4
         version: link:../adapter-vue-unstyled
       vue:
         specifier: ^3.5.43
@@ -1957,7 +1957,7 @@ importers:
         specifier: workspace:*
         version: link:../../shared/core
       '@adapttable/i18n':
-        specifier: 3.3.9
+        specifier: 3.4.0
         version: link:../../shared/i18n
       '@tanstack/virtual-core':
         specifier: ^3.17.11

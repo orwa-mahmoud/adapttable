@@ -1,5 +1,17 @@
 # @adapttable/ai
 
+## 0.6.7
+
+### Patch Changes
+
+- d92b039: Agent context `pinnedRows` accepts the table's row pin state, `{ top, bottom }` lists of row ids, as well as any record.
+- Updated dependencies [39057e0]
+- Updated dependencies [8bc96c5]
+- Updated dependencies [f20f914]
+- Updated dependencies [aa07a99]
+- Updated dependencies [b8b52f4]
+  - @adapttable/core@3.14.0
+
 ## 0.6.6
 
 ### Patch Changes

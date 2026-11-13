@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/ai-vue",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Optional Vue bindings for AdaptTable AI agents, assistants and speech input — the agent acts through the table's own capabilities, with approval before writes.",
   "keywords": [
     "vue",
@@ -40,8 +40,8 @@
     "vue": "^3.5.0"
   },
   "dependencies": {
-    "@adapttable/ai": "0.6.6",
-    "@adapttable/vue": "0.4.1"
+    "@adapttable/ai": "0.6.7",
+    "@adapttable/vue": "0.5.0"
   },
   "scripts": {
     "build": "tsdown",
@@ -59,8 +59,8 @@
   },
   "devDependencies": {
     "vue": "^3.5.43",
-    "@adapttable/core": "3.13.1",
-    "@adapttable/vue-unstyled": "0.2.3"
+    "@adapttable/core": "3.14.0",
+    "@adapttable/vue-unstyled": "0.2.4"
   },
   "author": "Orwa Mahmoud",
   "repository": {

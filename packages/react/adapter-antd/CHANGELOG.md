@@ -1,5 +1,41 @@
 # @adapttable/antd
 
+## 3.4.0
+
+### Minor Changes
+
+- 39057e0: Tables follow their UI library's app-wide settings. An explicit `dir`, `labels`, `density` or `size` still wins, and a setting the app left at its default stays with the page:
+  
+  - Ant Design: ConfigProvider direction, locale, component size and `theme.token.motion`.
+  - Chakra: `LocaleProvider`. Mantine and Base UI: `DirectionProvider`. MUI: a right-to-left `theme.direction`.
+  - Element Plus: `ElConfigProvider` locale and size. Naive UI: `n-config-provider` locale, `rtl` and table size. Nuxt UI: a parent `UApp` locale and `dir`. Quasar: the active language pack and its `rtl`. Reka UI and shadcn-vue: a parent `ConfigProvider`'s direction and locale. Vuetify: the locale, its RTL map and `defaults.global.density`.
+  - Angular Material, Angular CDK, Angular Aria and Spartan: CDK `Directionality`. NG-ZORRO: `Directionality`, a provided `NZ_I18N` locale and `NZ_CONFIG` table size. ng-bootstrap: `NgbConfig.animation`. Taiga UI: `TUI_LANGUAGE` and reduced or disabled animation.
+  
+  A followed locale loads only that language's labels, the first time it is seen, so a plain table carries no label data. Server rendering and the first client render show the current labels until the language arrives; pass `labels` to render it from the first paint. `@adapttable/i18n/load` exports `loadLabels(locale)`, and `useLocaleLabels` in `@adapttable/react/adapter` and `@adapttable/vue/adapter` turns a library locale into those labels for a kit.
+
+### Patch Changes
+
+- c186ce6: A group's row count and totals stay on one line when the first column is narrow; only the group label wraps.
+- 693ad8e: An Ant Design grouped table describes its full grouped set in the footer ("Showing 1–30 of 30" on one page) and, with `virtualize`, windows its group and row lines on a paged table like every other kit; a three-level grouped drop redraws in about 45 ms instead of 140–190 ms. `@adapttable/react/adapter` re-exports `isBodyEligible`.
+- 39057e0: Every React kit draws its desktop table and phone cards through one shared structure, `DesktopTableChrome` and `MobileCardsChrome`. Each kit still supplies its own table, rows, cells, cards and controls, and every table looks and behaves as before. `mobileCardSlots` builds the card list (order, pinned totals, groups, extra rows and each card's list-item attributes) and `mobileCardPropsEqual` is its card body's memo comparator, so a kit draws only its card host and body. A card now re-renders when the host passes a new `renderCard`, and a card offers no expand toggle without `renderRowDetail`, as the desktop table does.
+  
+  A plain React table no longer loads the editing session or the extra-row splicer: enter-to-edit and batch undo come with the cell-navigation and editing features, and extra rows are spliced only when `extraRows()` is composed.
+  
+  The MUI filters panel stays within the window below its trigger after the page shifts while it is open, and inside its left edge in a right-to-left page with a scrollbar.
+- b8b52f4: Dragging a row redraws only the rows it crosses, not the table. In Mantine, MUI, Chakra and Ant Design each row a drag passes now takes about 10 ms instead of 13–25 ms on the row-reordering demos.
+  
+  `RowReorderController.getTableSnapshot()` returns the state the table draws from, `RowReorderState.hover` follows the drop edge as a drag moves, and `withRowDropTarget` from `@adapttable/react/adapter` applies that edge to a row.
+- Updated dependencies [693ad8e]
+- Updated dependencies [39057e0]
+- Updated dependencies [8bc96c5]
+- Updated dependencies [f20f914]
+- Updated dependencies [39057e0]
+- Updated dependencies [aa07a99]
+- Updated dependencies [39057e0]
+- Updated dependencies [b8b52f4]
+  - @adapttable/react@1.10.0
+  - @adapttable/core@3.14.0
+
 ## 3.3.11
 
 ### Patch Changes
