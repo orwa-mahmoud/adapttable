@@ -660,13 +660,24 @@ export function createEditableCellSlots(
   };
 }
 
-/** What the header filters draw with. */
-type FilterHeaderKit = KitPrimitivesOf<
-  "TextInput" | "Select" | "Button" | "Checkbox" | "Popover"
->;
+/**
+ * What the header filters draw with: the primitives, and for the multiple
+ * choice either the popover the shared one opens in or the kit's own.
+ *
+ * @public
+ */
+export type KitFilterHeader = KitPrimitivesOf<
+  "TextInput" | "Select" | "Button" | "Checkbox"
+> &
+  (
+    | KitPrimitivesOf<"Popover">
+    | {
+        readonly Multi: (props: Readonly<FilterHeaderMultiProps>) => ReactNode;
+      }
+  );
 
-function headerSlots(kit: FilterHeaderKit): FilterHeaderSlots {
-  const { TextInput, Select, Button, Checkbox, Popover } = kit;
+function headerSlots(kit: KitFilterHeader): FilterHeaderSlots {
+  const { TextInput, Select, Button, Checkbox } = kit;
   return {
     Search: ({
       label,
@@ -712,15 +723,26 @@ function headerSlots(kit: FilterHeaderKit): FilterHeaderSlots {
         onValueChange={onChange}
       />
     ),
-    Multi: ({
-      label,
-      summary,
-      options,
-      selected,
-      className,
-      menuClassName,
-      onToggle,
-    }: Readonly<FilterHeaderMultiProps>) => (
+    Multi: "Multi" in kit ? kit.Multi : multiOf(kit.Popover, Button, Checkbox),
+  };
+}
+
+/** The multiple choice as a list of checkboxes in the kit's popover. */
+function multiOf(
+  Popover: KitPrimitivesOf<"Popover">["Popover"],
+  Button: KitPrimitivesOf<"Button">["Button"],
+  Checkbox: KitPrimitivesOf<"Checkbox">["Checkbox"]
+): (props: Readonly<FilterHeaderMultiProps>) => ReactElement {
+  return function Multi({
+    label,
+    summary,
+    options,
+    selected,
+    className,
+    menuClassName,
+    onToggle,
+  }: Readonly<FilterHeaderMultiProps>) {
+    return (
       <Popover
         role="menu"
         part="filter-header-menu"
@@ -751,7 +773,7 @@ function headerSlots(kit: FilterHeaderKit): FilterHeaderSlots {
           ))}
         </div>
       </Popover>
-    ),
+    );
   };
 }
 
@@ -761,9 +783,7 @@ function headerSlots(kit: FilterHeaderKit): FilterHeaderSlots {
  * @public
  */
 export function createFilterHeaderRow(
-  kit: KitPrimitivesOf<
-    "TextInput" | "Select" | "Button" | "Checkbox" | "Popover"
-  >
+  kit: KitFilterHeader
 ): <TRow>(props: Readonly<FilterHeaderRowProps<TRow>>) => ReactElement | null {
   const slots = headerSlots(kit);
   return function FilterHeaderRow(props) {
@@ -777,9 +797,7 @@ export function createFilterHeaderRow(
  * @public
  */
 export function createFilterHeaderControl(
-  kit: KitPrimitivesOf<
-    "TextInput" | "Select" | "Button" | "Checkbox" | "Popover"
-  >
+  kit: KitFilterHeader
 ): <TRow>(
   props: Readonly<FilterHeaderControlProps<TRow>>
 ) => ReactElement | null {

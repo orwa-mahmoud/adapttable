@@ -562,6 +562,7 @@ export {
   createRowReorderHandle,
   createTreeCell,
   createTreeToggle,
+  type KitFilterHeader,
 } from "./kit/controls";
 export {
   createDesktopTable,

@@ -6834,6 +6834,7 @@
       "createEditableCellSlots",
       "createFilterHeaderControl",
       "createFilterHeaderRow",
+      "KitFilterHeader",
       "createFindBar",
       "createGroupMoreButton",
       "createRowEditActions",

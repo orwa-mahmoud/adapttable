@@ -1563,10 +1563,10 @@ export function createEditableCellSlots(kit: KitPrimitivesOf<"Button">): Editabl
 export function createExportCsvButton(Button: ComponentType<KitButtonProps>, Surface: (props: ExportProgressSurfaceSlotProps) => ReactNode): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
 
 // @public
-export function createFilterHeaderControl(kit: KitPrimitivesOf<"TextInput" | "Select" | "Button" | "Checkbox" | "Popover">): <TRow>(props: Readonly<FilterHeaderControlProps<TRow>>) => ReactElement | null;
+export function createFilterHeaderControl(kit: KitFilterHeader): <TRow>(props: Readonly<FilterHeaderControlProps<TRow>>) => ReactElement | null;
 
 // @public
-export function createFilterHeaderRow(kit: KitPrimitivesOf<"TextInput" | "Select" | "Button" | "Checkbox" | "Popover">): <TRow>(props: Readonly<FilterHeaderRowProps<TRow>>) => ReactElement | null;
+export function createFilterHeaderRow(kit: KitFilterHeader): <TRow>(props: Readonly<FilterHeaderRowProps<TRow>>) => ReactElement | null;
 
 export { createFilterRegistry }
 
@@ -3172,6 +3172,11 @@ export interface KitDividerProps {
 }
 
 export { KitEnvironment }
+
+// @public
+export type KitFilterHeader = KitPrimitivesOf<"TextInput" | "Select" | "Button" | "Checkbox"> & (KitPrimitivesOf<"Popover"> | {
+    readonly Multi: (props: Readonly<FilterHeaderMultiProps>) => ReactNode;
+});
 
 // @public
 export interface KitFiltersButtonProps {

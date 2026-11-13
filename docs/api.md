@@ -2908,7 +2908,7 @@ factory per feature control returns the component the kit exports:
 `createRowReorderButtons`, `createEditableCellSlots`, `createFilterHeaderRow`
 and `createFilterHeaderControl`. `createRowReorderHandle` and `createRowReorderButtons` take
 either the primitives the shared keyboard move menu draws with or the kit's
-own `MoveMenu`. `MobileTarget` is the context a mobile card list sets, and `useMobileTarget`
+own `MoveMenu`; `createFilterHeaderRow` and `createFilterHeaderControl` take a `KitFilterHeader`: the primitives, with either a popover for the shared multiple choice or the kit's own `Multi`. `MobileTarget` is the context a mobile card list sets, and `useMobileTarget`
 returns the 44 px touch-target style inside it.
 
 `TableComposition` draws one table from a kit's pieces: it builds the
