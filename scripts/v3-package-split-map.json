@@ -20611,6 +20611,54 @@
       "behavior": ""
     },
     {
+      "export": "CaseArgs",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "collectConformanceTests",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceBody",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceDescribe",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceIt",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceRegistry",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
       "export": "ActionAiOptions",
       "currentImport": "@adapttable/core/editing",
       "kind": "type",

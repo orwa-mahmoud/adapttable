@@ -5,16 +5,31 @@
 ```ts
 
 // @public
+export type CaseArgs<TCase> = TCase extends readonly unknown[] ? [...TCase] : [TCase];
+
+// @public
+export function collectConformanceTests(define: (registry: ConformanceRegistry) => void): readonly ConformanceTest[];
+
+// @public
 export const CONFORMANCE_COLUMNS: readonly ConformanceColumn[];
 
 // @public
 export const CONFORMANCE_ROWS: readonly ConformanceRow[];
 
 // @public
+export type ConformanceBody = () => unknown;
+
+// @public
 export interface ConformanceColumn {
     readonly header: string;
     readonly key: "name" | "age";
     readonly sortable?: boolean;
+}
+
+// @public
+export interface ConformanceDescribe {
+    (name: string, body: () => void): void;
+    each<TCase>(cases: readonly TCase[]): (name: string, body: (...args: CaseArgs<TCase>) => void) => void;
 }
 
 // @public
@@ -47,6 +62,12 @@ export interface ConformanceHarness {
 }
 
 // @public
+export interface ConformanceIt {
+    (name: string, body: ConformanceBody): void;
+    each<TCase>(cases: readonly TCase[]): (name: string, body: (...args: CaseArgs<TCase>) => unknown) => void;
+}
+
+// @public
 export interface ConformanceLabels {
     readonly nextPage?: string;
     readonly noData?: string;
@@ -63,6 +84,14 @@ export interface ConformanceMount {
     readonly ready?: Promise<void>;
     readonly refresh?: () => void | Promise<void>;
     readonly unmount: () => void;
+}
+
+// @public
+export interface ConformanceRegistry {
+    readonly afterEach: (body: ConformanceBody) => void;
+    readonly beforeEach: (body: ConformanceBody) => void;
+    readonly describe: ConformanceDescribe;
+    readonly it: ConformanceIt;
 }
 
 // @public
