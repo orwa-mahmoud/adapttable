@@ -3109,6 +3109,7 @@ export interface KitDesktopLeafState {
 export interface KitDesktopPaint {
     readonly captionRow?: (align: ColumnDef<unknown>["align"]) => CSSProperties;
     readonly cell: (pin: CSSProperties | undefined, row: KitDesktopRowState) => CSSProperties | undefined;
+    readonly classHighlight?: boolean;
     readonly group: (cell: Exclude<HtmlGroupedHeaderCell, {
         readonly kind: "leaf";
     }>) => CSSProperties;
@@ -3154,6 +3155,7 @@ export interface KitDesktopTable<TExtra> {
     readonly SortLabel: ComponentType<KitSortLabelProps>;
     readonly useChrome: <TRow>(props: KitDesktopTableProps<TRow, TExtra>, assembly: DesktopTableAssembly<TRow>) => Omit<DesktopTableChromeProps<TRow>, "assembly" | "renderLeading" | "renderTrailing" | "renderPlanCell" | "renderLeaf" | "renderRow" | "renderGroup" | "renderExtra" | "renderVirtualPad" | "renderSummary">;
     readonly usePaint: (stickyHeader: boolean) => KitDesktopPaint;
+    readonly usePartClass?: () => (part: string) => string | undefined;
     readonly widths: {
         readonly expansion: number;
         readonly selection: number;

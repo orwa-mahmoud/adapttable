@@ -38,7 +38,13 @@ import {
 import { VISUALLY_HIDDEN } from "../a11y/visuallyHidden";
 import type { ColumnDef } from "../columnDef";
 import { resolveColumnFooter } from "../columns/columnHeader";
-import { cellHighlightStyle, mergedCellStyle } from "../display";
+import {
+  cellHighlightStyle,
+  isCurrentMatchCell,
+  isMatchedCell,
+  isSelectedCell,
+  mergedCellStyle,
+} from "../display";
 import {
   resolveRowEditTrigger,
   rowEditConflict,
@@ -220,6 +226,12 @@ export interface KitDesktopPaint {
   ) => CSSProperties | undefined;
   /** What a cell inside the cell selection adds. */
   readonly selectedCell: CSSProperties;
+  /**
+   * The kit marks selected and matched cells by class alone: the binding
+   * adds no inline highlight to them, and a merged cell's fill steps aside
+   * so the class shows.
+   */
+  readonly classHighlight?: boolean;
   /** What a data cell of a pinned total row adds; absent, semibold type. */
   readonly summaryCell?: CSSProperties;
   /**
@@ -305,6 +317,13 @@ export interface KitDesktopTable<TExtra> {
   /** The paint, as a hook so it can read the kit's theme. */
   readonly usePaint: (stickyHeader: boolean) => KitDesktopPaint;
   /**
+   * The host's class for a part the binding draws itself: the caption
+   * control, header actions and resize handle, and the tree, reorder,
+   * column-select and column-group controls. A hook, so it can read the
+   * kit's class map; absent, those parts carry no class.
+   */
+  readonly usePartClass?: () => (part: string) => string | undefined;
+  /**
    * The table elements and their props: the kit's own scroll box, table,
    * head and body, and anything its look puts around them.
    */
@@ -358,6 +377,7 @@ export function createDesktopTable<TExtra>(
 ): <TRow>(props: Readonly<KitDesktopTableProps<TRow, TExtra>>) => ReactElement {
   const { Cell, HeaderCell, Checkbox, SortLabel, RowActions } = kit;
   const KitRow = kit.Row;
+  const usePartClass = kit.usePartClass ?? noPartClass;
 
   function RowBase<TRow>(
     props: Readonly<DesktopRowWiring<TRow> & RowExtras>
@@ -418,6 +438,7 @@ export function createDesktopTable<TExtra>(
       dir,
     } = props;
     const paint = kit.usePaint(stickyHeader);
+    const classOf = usePartClass();
     const state: KitDesktopRowState = {
       rowPinned: rowPinSide !== undefined,
       stickyHeader,
@@ -455,6 +476,7 @@ export function createDesktopTable<TExtra>(
             <Cell
               kind="lead"
               data-adapttable-part="expand-cell"
+              data-pinned={pinnedSide("start", hasStartPin)}
               style={rail("start", hasStartPin)}
             >
               <OptionalExpandToggle
@@ -471,6 +493,7 @@ export function createDesktopTable<TExtra>(
             <Cell
               kind="lead"
               data-adapttable-part="reorder-cell"
+              data-pinned={pinnedSide("start", hasStartPin || reorderPinned)}
               style={rail("start", hasStartPin || reorderPinned, expansionLead)}
             >
               <OptionalRowReorderHandle
@@ -481,6 +504,7 @@ export function createDesktopTable<TExtra>(
                 row={row}
                 windowStart={windowStart}
                 rowCount={rowCount}
+                className={classOf("row-reorder-handle")}
               />
             </Cell>
           )}
@@ -488,6 +512,7 @@ export function createDesktopTable<TExtra>(
             <Cell
               kind="lead"
               data-adapttable-part="selection-cell"
+              data-pinned={pinnedSide("start", hasStartPin)}
               style={rail("start", hasStartPin, selectionLead)}
             >
               <Checkbox
@@ -519,7 +544,8 @@ export function createDesktopTable<TExtra>(
                 data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
                 data-cell-span={cellSpanMark(colSpan, rowSpan)}
                 {...focusProps}
-                style={cellHighlightStyle(
+                style={cellStyle(
+                  paint,
                   focusProps,
                   {
                     ...cellProps.style,
@@ -527,9 +553,10 @@ export function createDesktopTable<TExtra>(
                     ...(summaryRow
                       ? (paint.summaryCell ?? SEMIBOLD)
                       : undefined),
-                    ...mergedCellStyle(colSpan, rowSpan, cellSpanAppearance),
                   },
-                  paint.selectedCell
+                  colSpan,
+                  rowSpan,
+                  cellSpanAppearance
                 )}
               >
                 <OptionalTreeCell
@@ -541,6 +568,9 @@ export function createDesktopTable<TExtra>(
                     collapseRow: labels.collapseRow,
                   }}
                   onToggle={onToggleTree}
+                  className={classOf("tree-cell")}
+                  toggleClassName={classOf("tree-toggle")}
+                  spacerClassName={classOf("tree-spacer")}
                 >
                   <OptionalEditableCell
                     editing={editing}
@@ -570,6 +600,7 @@ export function createDesktopTable<TExtra>(
             <Cell
               kind="actions"
               data-adapttable-part="actions-cell"
+              data-pinned={pinnedSide("end", hasEndPin || actionsPinned)}
               style={rail("end", hasEndPin || actionsPinned)}
             >
               {editing?.rowEditing && (
@@ -633,6 +664,7 @@ export function createDesktopTable<TExtra>(
     "use no memo";
     const { column } = leaf;
     const { labels } = props.table;
+    const classOf = usePartClass();
     const caption = column.sortable ? (
       <SortLabel
         active={leaf.sortActive}
@@ -647,7 +679,12 @@ export function createDesktopTable<TExtra>(
       <span title={column.headerTooltip}>{leaf.caption}</span>
     );
     const control = (
-      <span data-adapttable-part="header-caption-control">{caption}</span>
+      <span
+        data-adapttable-part="header-caption-control"
+        className={classOf("header-caption-control")}
+      >
+        {caption}
+      </span>
     );
     return (
       <HeaderCell
@@ -658,6 +695,9 @@ export function createDesktopTable<TExtra>(
         {...leaf.headerProps}
         {...leaf.columnHeaderProps}
         rowSpan={span(leaf.rowSpan)}
+        data-sorted={leaf.sortDir}
+        data-sticky={assembly.pin.stickyAttr}
+        data-pinned={leaf.pinSide}
         style={paint.leaf(
           {
             style: leaf.style,
@@ -687,10 +727,14 @@ export function createDesktopTable<TExtra>(
             label={leaf.columnSelectAriaLabel}
             checked={leaf.columnCheckboxChecked}
             onToggle={leaf.onToggleColumn}
+            className={classOf("column-select")}
           />
         ) : null}
         {column.headerActions ? (
-          <span data-adapttable-part="header-actions">
+          <span
+            data-adapttable-part="header-actions"
+            className={classOf("header-actions")}
+          >
             {column.headerActions}
           </span>
         ) : null}
@@ -706,6 +750,7 @@ export function createDesktopTable<TExtra>(
         {leaf.resizeHandleProps && (
           <span
             {...leaf.resizeHandleProps}
+            className={classOf("resize-handle")}
             style={paint.resizeHandle(assembly.resizeHandleStyle)}
           />
         )}
@@ -730,6 +775,7 @@ export function createDesktopTable<TExtra>(
     );
     const chrome = kit.useChrome(props, assembly);
     const paint = kit.usePaint(stickyHeader);
+    const classOf = usePartClass();
     const { model, summary, showColumnFooter, header, pin, callbacks } =
       assembly;
     const { columns, selection, labels, showActions, showReorder } = model;
@@ -741,6 +787,8 @@ export function createDesktopTable<TExtra>(
             kind="lead"
             railWidth={kit.widths.expansion}
             data-adapttable-part="expand-header"
+            data-sticky={pin.stickyAttr}
+            data-pinned={pinnedSide("start", pin.hasStartPin)}
             rowSpan={span(rowSpan)}
             style={paint.headRail("start", pin.hasStartPin, 0, pin)}
           >
@@ -753,6 +801,11 @@ export function createDesktopTable<TExtra>(
             railWidth={REORDER_COLUMN_WIDTH}
             aria-label={labels.reorderRow}
             data-adapttable-part="reorder-header"
+            data-sticky={pin.stickyAttr}
+            data-pinned={pinnedSide(
+              "start",
+              pin.hasStartPin || Boolean(props.reorderPinned)
+            )}
             rowSpan={span(rowSpan)}
             style={paint.headRail(
               "start",
@@ -767,6 +820,8 @@ export function createDesktopTable<TExtra>(
             kind="lead"
             railWidth={kit.widths.selection}
             data-adapttable-part="selection-header"
+            data-sticky={pin.stickyAttr}
+            data-pinned={pinnedSide("start", pin.hasStartPin)}
             rowSpan={span(rowSpan)}
             style={paint.headRail(
               "start",
@@ -803,6 +858,8 @@ export function createDesktopTable<TExtra>(
             kind="actions"
             railWidth={kit.widths.actions}
             data-adapttable-part="actions-header"
+            data-sticky={pin.stickyAttr}
+            data-pinned={pinnedSide("end", pin.hasEndPin || pin.stickActions)}
             rowSpan={span(rowSpan)}
             style={paint.headRail(
               "end",
@@ -857,6 +914,7 @@ export function createDesktopTable<TExtra>(
                     cell={cell.cell}
                     labels={labels}
                     onToggle={props.onToggleColumnGroup}
+                    className={classOf("column-group-toggle")}
                   />
                 ) : null}
                 {columnGroupHeaderCaption(cell.cell)}
@@ -911,7 +969,12 @@ export function createDesktopTable<TExtra>(
           );
         }}
         renderVirtualPad={(slot) => (
-          <KitRow key={slot.key} kind="pad" aria-hidden>
+          <KitRow
+            key={slot.key}
+            kind="pad"
+            data-adapttable-part="virtual-spacer"
+            aria-hidden
+          >
             <Cell
               kind="pad"
               colSpan={slot.colSpan}
@@ -955,5 +1018,50 @@ export function createDesktopTable<TExtra>(
 }
 
 const SEMIBOLD: CSSProperties = { fontWeight: 600 };
+
+/**
+ * A data cell's style: its own, its merged-cell look, and the selection or
+ * match highlight unless the kit marks those by class.
+ */
+function cellStyle(
+  paint: KitDesktopPaint,
+  focusProps: Readonly<Record<string, unknown>> | undefined,
+  own: CSSProperties,
+  colSpan: number,
+  rowSpan: number,
+  appearance: DesktopRowWiring<unknown>["cellSpanAppearance"]
+): CSSProperties | undefined {
+  if (paint.classHighlight !== true) {
+    return cellHighlightStyle(
+      focusProps,
+      { ...own, ...mergedCellStyle(colSpan, rowSpan, appearance) },
+      paint.selectedCell
+    );
+  }
+  const highlighted =
+    isSelectedCell(focusProps) ||
+    isMatchedCell(focusProps) ||
+    isCurrentMatchCell(focusProps);
+  return {
+    ...own,
+    ...mergedCellStyle(
+      colSpan,
+      rowSpan,
+      appearance,
+      highlighted ? "off" : "on"
+    ),
+  };
+}
+
+/** The side a rail is pinned to, for its `data-pinned`. */
+const pinnedSide = <TSide extends "start" | "end">(
+  side: TSide,
+  pinned: boolean
+): TSide | undefined => (pinned ? side : undefined);
+
+const NO_PART_CLASS = (): undefined => undefined;
+
+/** No class for any part: the default for a kit without a class map. */
+const noPartClass = (): ((part: string) => string | undefined) => NO_PART_CLASS;
 
 const NO_MORE = (): void => undefined;
