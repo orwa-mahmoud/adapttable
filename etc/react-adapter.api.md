@@ -3117,6 +3117,7 @@ export interface KitDesktopPaint {
     readonly rail: (side: "start" | "end", pinned: boolean, inset: number, row: KitDesktopRowState) => CSSProperties | undefined;
     readonly resizeHandle: (style: CSSProperties) => CSSProperties;
     readonly selectedCell: CSSProperties;
+    readonly summaryCell?: CSSProperties;
 }
 
 // @public

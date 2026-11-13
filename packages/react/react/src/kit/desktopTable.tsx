@@ -220,6 +220,8 @@ export interface KitDesktopPaint {
   ) => CSSProperties | undefined;
   /** What a cell inside the cell selection adds. */
   readonly selectedCell: CSSProperties;
+  /** What a data cell of a pinned total row adds; absent, semibold type. */
+  readonly summaryCell?: CSSProperties;
   /**
    * A header rail cell, like {@link KitDesktopPaint.rail}.
    *
@@ -522,7 +524,9 @@ export function createDesktopTable<TExtra>(
                   {
                     ...cellProps.style,
                     ...paint.cell(bodyPinStyle(column.key), state),
-                    ...(summaryRow ? SEMIBOLD : undefined),
+                    ...(summaryRow
+                      ? (paint.summaryCell ?? SEMIBOLD)
+                      : undefined),
                     ...mergedCellStyle(colSpan, rowSpan, cellSpanAppearance),
                   },
                   paint.selectedCell
