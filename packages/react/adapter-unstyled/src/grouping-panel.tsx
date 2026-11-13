@@ -6,7 +6,7 @@ import {
 import { GroupHeaderCard, GroupHeaderRow } from "./components/GroupHeader";
 import { GroupingPanel } from "./components/GroupingPanel";
 
-function GroupingPanelSlot(props: Readonly<GroupingPanelSlotProps<never>>) {
+function GroupingPanelSlot(props: Readonly<GroupingPanelSlotProps<unknown>>) {
   return <GroupingPanel {...props} />;
 }
 

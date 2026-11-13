@@ -53,7 +53,7 @@ export function OptionalEditableCell<TRow>(
   return filled ? (
     <FeatureSlot
       slot={EDITABLE_CELL}
-      props={{ ...props, display } as unknown as EditableCellSlotProps<never>}
+      props={{ ...props, display } as unknown as EditableCellSlotProps<unknown>}
     />
   ) : (
     display
@@ -65,10 +65,7 @@ export function OptionalTreeCell<TRow>(
 ): ReactNode {
   const filled = useFeatureSlotFilled(TREE_CELL);
   return filled ? (
-    <FeatureSlot
-      slot={TREE_CELL}
-      props={props as unknown as TreeCellProps<never>}
-    />
+    <FeatureSlot slot={TREE_CELL} props={props} />
   ) : (
     props.children
   );

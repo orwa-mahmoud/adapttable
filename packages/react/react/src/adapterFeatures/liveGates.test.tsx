@@ -82,7 +82,7 @@ function MenuTable({
   onCopy,
 }: {
   readonly onCopy?: NonNullable<
-    ContextMenuLiveSlotProps<never>["actions"]["onCopy"]
+    ContextMenuLiveSlotProps<unknown>["actions"]["onCopy"]
   >;
 }) {
   return (
@@ -91,7 +91,7 @@ function MenuTable({
         contextMenu: true,
         columns: COLUMNS as never,
         labels: defaultLabels,
-        rowFor: (id) => ROWS.find((r) => r.id === id) as never,
+        rowFor: (id) => ROWS.find((r) => r.id === id),
         actions: onCopy ? { onCopy } : {},
       }}
     >
@@ -380,14 +380,14 @@ describe("the kit's editable cell", () => {
     UndoRedoButtons: () => null,
   });
 
-  function drawCell(slotProps: Partial<EditableCellSlotProps<never>>) {
-    const base: EditableCellSlotProps<never> = {
+  function drawCell(slotProps: Partial<EditableCellSlotProps<unknown>>) {
+    const base: EditableCellSlotProps<unknown> = {
       editing: undefined,
-      row: ROWS[0] as never,
+      row: ROWS[0],
       column: COLUMNS[0] as never,
       rowId: "r1",
       rowIndex: 0,
-      rows: ROWS as never[],
+      rows: ROWS,
       columns: COLUMNS as never[],
       rowKey: () => "r1",
       editLabel: "Edit",
@@ -408,9 +408,13 @@ describe("the kit's editable cell", () => {
   });
 
   it("shows the column's own Cell when nothing was worked out", () => {
+    // Slot props erase the row to `unknown`; the cell reads it back through
+    // the fixture's own rows.
     const column = {
       key: "name",
-      Cell: ({ row }: { readonly row: Row }) => <b>{row.name}!</b>,
+      Cell: ({ row }: { readonly row: unknown }) => (
+        <b>{ROWS.find((candidate) => candidate === row)?.name}!</b>
+      ),
     };
     expect(drawCell({ column: column })).toHaveTextContent("Ada!");
   });

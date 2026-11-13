@@ -21,7 +21,7 @@ import type { TableFeature } from "../features/tableFeature";
 import type { AdapterFeatureComponent } from "./component";
 
 type MenuOptions = Omit<
-  ContextMenuLiveSlotProps<never>,
+  ContextMenuLiveSlotProps<unknown>,
   "children" | "container"
 >;
 /**
@@ -68,7 +68,7 @@ export function createAdapterContextMenuFeature(
     children,
     container,
     ...hookOptions
-  }: Readonly<ContextMenuLiveSlotProps<never>>): ReactNode {
+  }: Readonly<ContextMenuLiveSlotProps<unknown>>): ReactNode {
     // Copy acts on the grid's selection when `cellNavigation()` is composed,
     // and on the right-clicked cell when it is not.
     const gridNavigation = useFeatureSlotFilled(GRID_FOCUS_ANNOUNCER);

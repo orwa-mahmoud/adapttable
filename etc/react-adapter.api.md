@@ -739,10 +739,10 @@ export type AdapterContextMenuProps = Omit<ContextMenuChromeProps, "slots">;
 
 // @public
 export interface AdapterEditingComponents {
-    readonly BatchEditBar: AdapterFeatureComponent<BatchEditBarProps<never>>;
-    readonly EditableCell: AdapterFeatureComponent<EditableCellRenderProps<never>>;
+    readonly BatchEditBar: AdapterFeatureComponent<BatchEditBarProps<unknown>>;
+    readonly EditableCell: AdapterFeatureComponent<EditableCellRenderProps<unknown>>;
     readonly historyIncludesControls?: boolean;
-    readonly RowEditActions: AdapterFeatureComponent<RowEditActionsProps<never>>;
+    readonly RowEditActions: AdapterFeatureComponent<RowEditActionsProps<unknown>>;
     readonly UndoRedoButtons: AdapterFeatureComponent<ToolbarExtrasSlotProps>;
 }
 
@@ -764,7 +764,7 @@ export interface AdapterFiltersComponents {
     readonly ActiveFilterChips: AdapterFeatureComponent<ActiveFilterChipsSlotProps>;
     readonly FilterDrawer: AdapterFeatureComponent<FilterOverlaySlotProps>;
     readonly FilterPopover: AdapterFeatureComponent<FilterOverlaySlotProps>;
-    readonly FiltersForm: AdapterFeatureComponent<FiltersFormSlotProps<never>>;
+    readonly FiltersForm: AdapterFeatureComponent<FiltersFormSlotProps<unknown>>;
 }
 
 // @public
@@ -781,8 +781,8 @@ export interface AdapterFindButtonProps extends ToolbarExtrasSlotProps {
 
 // @public
 export interface AdapterGroupingComponents {
-    readonly GroupHeaderCard: AdapterFeatureComponent<GroupHeaderCardSlotProps<never>>;
-    readonly GroupHeaderRow: AdapterFeatureComponent<GroupHeaderRowSlotProps<never>>;
+    readonly GroupHeaderCard: AdapterFeatureComponent<GroupHeaderCardSlotProps<unknown>>;
+    readonly GroupHeaderRow: AdapterFeatureComponent<GroupHeaderRowSlotProps<unknown>>;
 }
 
 // @public
@@ -793,9 +793,9 @@ export interface AdapterGroupingFeature {
 
 // @public
 export interface AdapterGroupingPanelComponents {
-    GroupHeaderCard: AdapterFeatureComponent<GroupHeaderCardSlotProps<never>>;
-    GroupHeaderRow: AdapterFeatureComponent<GroupHeaderRowSlotProps<never>>;
-    GroupingPanel: AdapterFeatureComponent<GroupingPanelSlotProps<never>>;
+    GroupHeaderCard: AdapterFeatureComponent<GroupHeaderCardSlotProps<unknown>>;
+    GroupHeaderRow: AdapterFeatureComponent<GroupHeaderRowSlotProps<unknown>>;
+    GroupingPanel: AdapterFeatureComponent<GroupingPanelSlotProps<unknown>>;
 }
 
 // @public
@@ -817,8 +817,8 @@ export interface AdapterRowDetailFeatures {
 
 // @public
 export interface AdapterRowReorderComponents {
-    readonly RowReorderButtons: AdapterFeatureComponent<RowReorderButtonsProps<never>>;
-    readonly RowReorderHandle: AdapterFeatureComponent<RowReorderHandleProps<never>>;
+    readonly RowReorderButtons: AdapterFeatureComponent<RowReorderButtonsProps<unknown>>;
+    readonly RowReorderHandle: AdapterFeatureComponent<RowReorderHandleProps<unknown>>;
 }
 
 // @public
@@ -1432,7 +1432,7 @@ export { ConfirmRequest }
 export const CONTEXT_MENU: FeatureSlotKey<Omit<ContextMenuChromeProps, "slots">>;
 
 // @public
-export const CONTEXT_MENU_LIVE: FeatureSlotKey<ContextMenuLiveSlotProps<never>>;
+export const CONTEXT_MENU_LIVE: FeatureSlotKey<ContextMenuLiveSlotProps<unknown>>;
 
 export { ContextMenuActions }
 
@@ -1454,7 +1454,7 @@ export { ContextMenuItemsFactory }
 
 // @public
 export function ContextMenuLiveGate(input: {
-    readonly props: Omit<ContextMenuLiveSlotProps<never>, "children">;
+    readonly props: Omit<ContextMenuLiveSlotProps<unknown>, "children">;
     readonly children: (regionProps: Record<string, unknown>) => ReactNode;
 }): ReactNode;
 
@@ -2078,7 +2078,7 @@ export { edgePinStyle }
 export { EDIT_HISTORY_LIVE }
 
 // @public
-export const EDITABLE_CELL: FeatureSlotKey<EditableCellSlotProps<never>>;
+export const EDITABLE_CELL: FeatureSlotKey<EditableCellSlotProps<unknown>>;
 
 // @public
 export type EditableCellActivateProps = EditableCellActivateProps_2<ReactNode>;
@@ -2714,10 +2714,10 @@ export { GridFocusState }
 export function GripIcon(): ReactElement;
 
 // @public
-export const GROUP_HEADER_CARD: FeatureSlotKey<GroupHeaderCardSlotProps<never>>;
+export const GROUP_HEADER_CARD: FeatureSlotKey<GroupHeaderCardSlotProps<unknown>>;
 
 // @public
-export const GROUP_HEADER_ROW: FeatureSlotKey<GroupHeaderRowSlotProps<never>>;
+export const GROUP_HEADER_ROW: FeatureSlotKey<GroupHeaderRowSlotProps<unknown>>;
 
 export { groupAggregateEntries }
 
@@ -2759,7 +2759,7 @@ export const groupIndentStyle: (level: number) => CSSProperties;
 export { GROUPING_LIVE }
 
 // @public
-export const GROUPING_PANEL: FeatureSlotKey<GroupingPanelSlotProps<never>>;
+export const GROUPING_PANEL: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
 
 export { GroupingCapability }
 
@@ -4226,10 +4226,10 @@ export { ROW_ID_ATTRIBUTE }
 export { ROW_REORDER_ANNOUNCER }
 
 // @public
-export const ROW_REORDER_BUTTONS: FeatureSlotKey<RowReorderButtonsProps<never>>;
+export const ROW_REORDER_BUTTONS: FeatureSlotKey<RowReorderButtonsProps<unknown>>;
 
 // @public
-export const ROW_REORDER_HANDLE: FeatureSlotKey<RowReorderHandleProps<never>>;
+export const ROW_REORDER_HANDLE: FeatureSlotKey<RowReorderHandleProps<unknown>>;
 
 export { RowAction }
 
@@ -5108,7 +5108,7 @@ export function toReactColumnResizeHandleProps(props: ColumnResizeHandleProps): 
 export { TotalCountCapability }
 
 // @public
-export const TREE_CELL: FeatureSlotKey<TreeCellProps<never>>;
+export const TREE_CELL: FeatureSlotKey<TreeCellProps<unknown>>;
 
 export { TREE_LIVE }
 

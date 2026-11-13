@@ -26,11 +26,11 @@ import type { AdapterFeatureComponent } from "./component";
 export interface AdapterGroupingComponents {
   /** Desktop group header, footer and show-more row. */
   readonly GroupHeaderRow: AdapterFeatureComponent<
-    GroupHeaderRowSlotProps<never>
+    GroupHeaderRowSlotProps<unknown>
   >;
   /** Mobile group header, footer and show-more card. */
   readonly GroupHeaderCard: AdapterFeatureComponent<
-    GroupHeaderCardSlotProps<never>
+    GroupHeaderCardSlotProps<unknown>
   >;
 }
 

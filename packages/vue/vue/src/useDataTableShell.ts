@@ -24,6 +24,7 @@ import {
   filterTreeSnapshot,
   FIND_BAR,
   LiveFeatureHost,
+  overlayFeatureOptions,
   type RuntimeChromeInput,
   sameFilterTree,
   STATUS_BAR,
@@ -261,17 +262,12 @@ export function useDataTableShell<TRow>(
   );
   const patches = computed(() => featureOptionsOf(declarations.value));
   // Read option by option: a change to one option reaches its readers only.
-  const resolved = useOptionFields(() => {
-    const featureValues = patches.value;
-    const explicitValues = Object.fromEntries(
-      Object.entries(options.value).filter(([, value]) => value !== undefined)
-    );
-    return {
-      ...featureValues,
-      featureLabels: featureLabelsOf(declarations.value),
-      ...explicitValues,
-    } as unknown as ResolvedTableOptions<TRow>;
-  });
+  const resolved = useOptionFields(() =>
+    overlayFeatureOptions<
+      UseDataTableShellOptions<TRow>,
+      ResolvedTableOptions<TRow>
+    >(patches.value, featureLabelsOf(declarations.value), options.value)
+  );
   const localUrlAdapter = createMemoryAdapter();
   const urlAdapter = computed(() =>
     resolveUrlAdapter(

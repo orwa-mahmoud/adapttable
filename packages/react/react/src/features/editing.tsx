@@ -48,7 +48,7 @@ import type {
  * The confirm functions are the table's own stable ones.
  */
 function useReportDirty(
-  onDirtyChange: ComposedTableProps<never>["onDirtyChange"],
+  onDirtyChange: ComposedTableProps<unknown>["onDirtyChange"],
   dirty: {
     readonly count: number;
     readonly signature: string;

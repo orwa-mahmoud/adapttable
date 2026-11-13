@@ -186,5 +186,5 @@ export function extendFeature<
 export function eraseTableRuntime<TRow>(
   runtime: TableRuntime<TRow>
 ): TableRuntime<unknown> {
-  return runtime as unknown as TableRuntime<unknown>;
+  return runtime;
 }

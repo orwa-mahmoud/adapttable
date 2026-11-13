@@ -10,7 +10,7 @@ import { headerFilters as core } from "@adapttable/react/features";
 import { useClassNames } from "./components/classNamesContext";
 import { FilterHeaderTrigger } from "./components/kitControls";
 
-function HeaderFilterSlot(props: Readonly<FilterHeaderControlProps<never>>) {
+function HeaderFilterSlot(props: Readonly<FilterHeaderControlProps<unknown>>) {
   const classNames = useClassNames();
   return <FilterHeaderTrigger {...props} classNames={classNames} />;
 }

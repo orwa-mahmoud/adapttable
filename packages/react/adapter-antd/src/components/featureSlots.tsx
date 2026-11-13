@@ -55,7 +55,7 @@ export function OptionalEditableCell<TRow>(
   return filled ? (
     <FeatureSlot
       slot={EDITABLE_CELL}
-      props={{ ...props, display } as unknown as EditableCellSlotProps<never>}
+      props={{ ...props, display } as unknown as EditableCellSlotProps<unknown>}
     />
   ) : (
     display
@@ -67,10 +67,7 @@ export function OptionalTreeCell<TRow>(
 ): ReactNode {
   const filled = useFeatureSlotFilled(TREE_CELL);
   return filled ? (
-    <FeatureSlot
-      slot={TREE_CELL}
-      props={props as unknown as TreeCellProps<never>}
-    />
+    <FeatureSlot slot={TREE_CELL} props={props} />
   ) : (
     props.children
   );
@@ -79,12 +76,7 @@ export function OptionalTreeCell<TRow>(
 export function OptionalTreeToggle<TRow>(
   props: Readonly<TreeToggleProps<TRow>>
 ): ReactNode {
-  return (
-    <FeatureSlot
-      slot={TREE_TOGGLE}
-      props={props as unknown as TreeToggleProps<never>}
-    />
-  );
+  return <FeatureSlot slot={TREE_TOGGLE} props={props} />;
 }
 
 export function OptionalFillHandle(
@@ -102,45 +94,25 @@ export function OptionalExpandToggle(
 export function OptionalFilterHeader<TRow>(
   props: Readonly<FilterHeaderControlProps<TRow>>
 ): ReactNode {
-  return (
-    <FeatureSlot
-      slot={FILTER_HEADER}
-      props={props as unknown as FilterHeaderControlProps<never>}
-    />
-  );
+  return <FeatureSlot slot={FILTER_HEADER} props={props} />;
 }
 
 export function OptionalRowEditActions<TRow>(
   props: Readonly<RowEditActionsProps<TRow>>
 ): ReactNode {
-  return (
-    <FeatureSlot
-      slot={ROW_EDIT_ACTIONS}
-      props={props as unknown as RowEditActionsProps<never>}
-    />
-  );
+  return <FeatureSlot slot={ROW_EDIT_ACTIONS} props={props} />;
 }
 
 export function OptionalRowReorderHandle<TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
 ): ReactNode {
-  return (
-    <FeatureSlot
-      slot={ROW_REORDER_HANDLE}
-      props={props as unknown as RowReorderHandleProps<never>}
-    />
-  );
+  return <FeatureSlot slot={ROW_REORDER_HANDLE} props={props} />;
 }
 
 export function OptionalRowReorderButtons<TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
 ): ReactNode {
-  return (
-    <FeatureSlot
-      slot={ROW_REORDER_BUTTONS}
-      props={props as unknown as RowReorderButtonsProps<never>}
-    />
-  );
+  return <FeatureSlot slot={ROW_REORDER_BUTTONS} props={props} />;
 }
 
 export function OptionalColumnGroupToggle(
@@ -177,7 +149,7 @@ export function OptionalGroupHeaderRow(
   return (
     <FeatureSlot
       slot={GROUP_HEADER_ROW}
-      props={props as unknown as GroupHeaderRowSlotProps<never>}
+      props={props as unknown as GroupHeaderRowSlotProps<unknown>}
     />
   );
 }
@@ -199,7 +171,7 @@ export function OptionalGroupHeaderCard(
   return (
     <FeatureSlot
       slot={GROUP_HEADER_CARD}
-      props={props as unknown as GroupHeaderCardSlotProps<never>}
+      props={props as unknown as GroupHeaderCardSlotProps<unknown>}
     />
   );
 }

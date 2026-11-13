@@ -317,7 +317,7 @@ export interface ContextMenuLiveSlotProps<
  * @public
  */
 export const CONTEXT_MENU_LIVE: FeatureSlotKey<
-  ContextMenuLiveSlotProps<never>
+  ContextMenuLiveSlotProps<unknown>
 > = NEUTRAL_CONTEXT_MENU_LIVE;
 
 /**
@@ -473,7 +473,7 @@ export type ChromeExtraDraw = <TRow>(
 ) => ReactNode;
 
 /** Adapter-owned interactive grouping strip above the table body. @public */
-export const GROUPING_PANEL: FeatureSlotKey<GroupingPanelSlotProps<never>> =
+export const GROUPING_PANEL: FeatureSlotKey<GroupingPanelSlotProps<unknown>> =
   NEUTRAL_GROUPING_PANEL;
 
 /**
@@ -532,7 +532,7 @@ export type EditableCellSlotProps<TRow = never> = NeutralEditableCellSlotProps<
  * @public
  */
 export const EDITABLE_CELL = NEUTRAL_EDITABLE_CELL as FeatureSlotKey<
-  EditableCellSlotProps<never>
+  EditableCellSlotProps<unknown>
 >;
 
 /**
@@ -557,7 +557,7 @@ export const FILL_HANDLE: FeatureSlotKey<FillHandleCellSlotProps> =
  *
  * @public
  */
-export const TREE_CELL: FeatureSlotKey<TreeCellProps<never>> =
+export const TREE_CELL: FeatureSlotKey<TreeCellProps<unknown>> =
   NEUTRAL_TREE_CELL;
 
 /**
@@ -565,8 +565,9 @@ export const TREE_CELL: FeatureSlotKey<TreeCellProps<never>> =
  *
  * @public
  */
-export const ROW_REORDER_HANDLE: FeatureSlotKey<RowReorderHandleProps<never>> =
-  NEUTRAL_ROW_REORDER_HANDLE;
+export const ROW_REORDER_HANDLE: FeatureSlotKey<
+  RowReorderHandleProps<unknown>
+> = NEUTRAL_ROW_REORDER_HANDLE;
 
 /**
  * Mobile row-reorder buttons.
@@ -574,7 +575,7 @@ export const ROW_REORDER_HANDLE: FeatureSlotKey<RowReorderHandleProps<never>> =
  * @public
  */
 export const ROW_REORDER_BUTTONS: FeatureSlotKey<
-  RowReorderButtonsProps<never>
+  RowReorderButtonsProps<unknown>
 > = NEUTRAL_ROW_REORDER_BUTTONS;
 
 /**
@@ -593,7 +594,7 @@ export type GroupHeaderRowSlotProps<TRow = never> =
  * @public
  */
 export const GROUP_HEADER_ROW = NEUTRAL_GROUP_HEADER_ROW as FeatureSlotKey<
-  GroupHeaderRowSlotProps<never>
+  GroupHeaderRowSlotProps<unknown>
 >;
 
 /**
@@ -611,7 +612,7 @@ export type GroupHeaderCardSlotProps<TRow = never> =
  * @public
  */
 export const GROUP_HEADER_CARD = NEUTRAL_GROUP_HEADER_CARD as FeatureSlotKey<
-  GroupHeaderCardSlotProps<never>
+  GroupHeaderCardSlotProps<unknown>
 >;
 
 export {

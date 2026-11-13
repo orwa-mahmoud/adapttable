@@ -949,7 +949,7 @@ function autoFilterForm<TRow>(
     labels,
     defaultExpanded: !simpleFiltersOn,
     showSimpleFields: simpleFiltersOn,
-  } as unknown as FiltersFormSlotProps<never>;
+  } as unknown as FiltersFormSlotProps<unknown>;
   return <FeatureSlot slot={FILTERS_FORM} props={formProps} />;
 }
 
@@ -2127,7 +2127,13 @@ function AntdGroupingPanel<TRow>({
     <FeatureSlot
       slot={GROUPING_PANEL}
       props={
-        { state, columns, labels, mobile, dir } as GroupingPanelSlotProps<never>
+        {
+          state,
+          columns,
+          labels,
+          mobile,
+          dir,
+        } as GroupingPanelSlotProps<unknown>
       }
     />
   );
@@ -2605,7 +2611,7 @@ function AntdTableBody<TRow>({
           rowPins: c.rowPinning?.actions,
           featureHost,
           container: fullscreen.container,
-        } as Omit<ContextMenuLiveSlotProps<never>, "children">;
+        } as Omit<ContextMenuLiveSlotProps<unknown>, "children">;
 
         return (
           <FeatureHostProvider host={featureHost}>

@@ -290,7 +290,7 @@ function bodyOf<TRow>(
 function contextMenuProps<TRow>(
   view: DataTableShellResult<TRow>,
   props: KitTableProps<TRow>
-): Omit<ContextMenuLiveSlotProps<never>, "children"> {
+): Omit<ContextMenuLiveSlotProps<unknown>, "children"> {
   const { chrome, gridFocus, source } = view;
   const copy = (
     target: Parameters<typeof contextMenuCopyTarget>[1],
@@ -334,7 +334,7 @@ function contextMenuProps<TRow>(
     rowPins: chrome.rowPinning?.actions,
     featureHost: view.featureHost,
     container: view.fullscreen.container,
-  } as Omit<ContextMenuLiveSlotProps<never>, "children">;
+  } as Omit<ContextMenuLiveSlotProps<unknown>, "children">;
 }
 
 function toolbarOf<TRow>(
@@ -430,12 +430,7 @@ export function TableComposition<TRow>({
         defaultExpanded: !simpleFields,
         showSimpleFields: simpleFields,
       };
-      return (
-        <FeatureSlot
-          slot={FILTERS_FORM}
-          props={form as unknown as FiltersFormSlotProps<never>}
-        />
-      );
+      return <FeatureSlot slot={FILTERS_FORM} props={form} />;
     }
   );
   const approval = useFeatureState(AGENT_APPROVAL_STATE);
@@ -553,7 +548,7 @@ export function TableComposition<TRow>({
                         <FeatureSlot
                           slot={GROUPING_PANEL}
                           props={
-                            view.groupingPanelProps as GroupingPanelSlotProps<never>
+                            view.groupingPanelProps as GroupingPanelSlotProps<unknown>
                           }
                         />
                       ) : null}

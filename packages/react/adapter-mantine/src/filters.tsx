@@ -11,7 +11,7 @@ import { FilterDrawer } from "./components/FilterDrawer";
 import { FilterPopover } from "./components/FilterPopover";
 import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
 
-function FiltersForm(props: Readonly<FiltersFormSlotProps<never>>) {
+function FiltersForm(props: Readonly<FiltersFormSlotProps<unknown>>) {
   return (
     <div
       data-adapttable-part="filters-form"

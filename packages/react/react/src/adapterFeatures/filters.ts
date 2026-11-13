@@ -25,7 +25,7 @@ import type { AdapterFeatureComponent } from "./component";
  */
 export interface AdapterFiltersComponents {
   /** Declarative tree and optional simple fields. */
-  readonly FiltersForm: AdapterFeatureComponent<FiltersFormSlotProps<never>>;
+  readonly FiltersForm: AdapterFeatureComponent<FiltersFormSlotProps<unknown>>;
   /** Removable active-filter chips. */
   readonly ActiveFilterChips: AdapterFeatureComponent<ActiveFilterChipsSlotProps>;
   /** Drawer or sheet used on constrained layouts. */

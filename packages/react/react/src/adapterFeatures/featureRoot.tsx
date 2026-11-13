@@ -13,7 +13,7 @@ export function ContextMenuLiveGate({
   props,
   children,
 }: {
-  readonly props: Omit<ContextMenuLiveSlotProps<never>, "children">;
+  readonly props: Omit<ContextMenuLiveSlotProps<unknown>, "children">;
   readonly children: (regionProps: Record<string, unknown>) => ReactNode;
 }): ReactNode {
   const filled = useFeatureSlotFilled(CONTEXT_MENU_LIVE);

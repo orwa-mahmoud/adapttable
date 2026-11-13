@@ -12,7 +12,7 @@ import { FilterPopover } from "./components/FilterPopover";
 import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
 import type { RadixAccentColor } from "./types";
 
-function FiltersForm(props: Readonly<FiltersFormSlotProps<never>>) {
+function FiltersForm(props: Readonly<FiltersFormSlotProps<unknown>>) {
   return (
     <div
       data-adapttable-part="filters-form"

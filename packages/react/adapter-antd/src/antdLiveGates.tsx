@@ -93,7 +93,7 @@ export function AntdHistoryGate<TRow>({
     onCellEdit,
     onBatchEdit,
     children: apply,
-  } as unknown as EditHistoryLiveSlotProps<never>;
+  } as unknown as EditHistoryLiveSlotProps<unknown>;
   return filled ? (
     <FeatureSlot slot={EDIT_HISTORY_LIVE} props={historyProps} />
   ) : (
@@ -304,7 +304,7 @@ function FindStage<TRow>({
     urlKey: props.urlKey,
     root,
     children,
-  } as unknown as FindLiveSlotProps<never>;
+  } as unknown as FindLiveSlotProps<unknown>;
   return filled ? (
     <FeatureSlot slot={FIND_LIVE} props={findProps} />
   ) : (
@@ -382,7 +382,7 @@ function NavStage<TRow>({
     // Enter and F2 open the focused cell inside the cell-navigation entry.
     editing,
     children,
-  } as unknown as CellNavLiveSlotProps<never>;
+  } as unknown as CellNavLiveSlotProps<unknown>;
   return filled ? (
     <FeatureSlot slot={CELL_NAV_LIVE} props={navProps} />
   ) : (
@@ -470,7 +470,7 @@ function StatsStage<TRow>({
     columns,
     firstRowIndex,
     children,
-  } as unknown as SelectionStatsLiveSlotProps<never>;
+  } as unknown as SelectionStatsLiveSlotProps<unknown>;
   return filled ? (
     <FeatureSlot slot={SELECTION_STATS_LIVE} props={statsProps} />
   ) : (
