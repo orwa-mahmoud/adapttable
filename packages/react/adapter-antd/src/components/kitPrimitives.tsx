@@ -180,17 +180,30 @@ export function Checkbox({
   checked,
   onCheckedChange,
   label,
+  rootPart,
+  style,
+  className,
   ...rest
 }: Readonly<KitCheckboxProps>): ReactElement {
   "use no memo";
-  return (
+  const rooted = rootPart !== undefined || style !== undefined;
+  const box = (
     <AntCheckbox
       checked={checked}
+      className={rooted ? undefined : className}
       onChange={(event) => onCheckedChange(event.target.checked)}
       {...rest}
     >
       {label}
     </AntCheckbox>
+  );
+  if (!rooted) return box;
+  // antd routes loose props to the inner <input> and `className` to its own
+  // wrapper; one span outside both keeps the part and the class together.
+  return (
+    <span data-adapttable-part={rootPart} className={className} style={style}>
+      {box}
+    </span>
   );
 }
 
