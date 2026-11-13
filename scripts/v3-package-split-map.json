@@ -44835,6 +44835,14 @@
       "behavior": ""
     },
     {
+      "export": "createChecklistFilter",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "createColumnGroupToggle",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -46956,6 +46964,22 @@
     },
     {
       "export": "KitCheckboxProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitChecklistFilter",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitChecklistLook",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",

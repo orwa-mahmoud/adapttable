@@ -541,6 +541,11 @@ export {
   type KitCellEditors,
   type KitCellInputProps,
 } from "./kit/cellEditor";
+export {
+  createChecklistFilter,
+  type KitChecklistFilter,
+  type KitChecklistLook,
+} from "./kit/checklist";
 export { createColumnMenu, type KitColumnMenuLook } from "./kit/columnMenu";
 export {
   createColumnHeaderRename,

@@ -99,6 +99,8 @@ function Checkbox({
   onCheckedChange,
   indeterminate,
   label,
+  rootPart,
+  style,
   ...rest
 }: Readonly<KitCheckboxProps>) {
   const box = (
@@ -112,7 +114,7 @@ function Checkbox({
   );
   if (label == null) return box;
   return (
-    <label>
+    <label data-adapttable-part={rootPart} style={style}>
       {box}
       {label}
     </label>

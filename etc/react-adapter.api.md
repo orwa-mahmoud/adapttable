@@ -1525,6 +1525,9 @@ export function createBulkBar(kit: KitBulkBar): (props: Readonly<BulkBarChromePr
 export function createCellEditor(kit: KitCellEditors): ComponentType<CellEditorProps>;
 
 // @public
+export function createChecklistFilter(kit: KitPrimitivesOf<"TextInput" | "Button" | "Checkbox">, look?: KitChecklistLook): KitChecklistFilter;
+
+// @public
 export function createColumnGroupToggle(kit: KitPrimitivesOf<"IconButton">): (props: Readonly<ColumnGroupToggleProps>) => ReactElement;
 
 // @public
@@ -3061,6 +3064,17 @@ export interface KitCheckboxProps extends KitDataAttributes {
     readonly indeterminate?: boolean;
     readonly label?: ReactNode;
     readonly onCheckedChange: (checked: boolean) => void;
+    readonly rootPart?: string;
+    readonly style?: CSSProperties;
+}
+
+// @public
+export type KitChecklistFilter = <TRow>(props: Readonly<ChecklistFilterProps<TRow>>) => ReactElement;
+
+// @public
+export interface KitChecklistLook {
+    readonly button?: Pick<KitButtonProps, "variant" | "tone">;
+    readonly checkbox?: CSSProperties;
 }
 
 // @public

@@ -20016,6 +20016,13 @@ with `createPageButtons(kit, look)`: previous, the first, last and nearby page
 numbers with an ellipsis where pages are skipped, and next, the current page
 filled and marked `aria-current="page"`, spaced by `KitPageButtonsLook`.
 
+`createChecklistFilter(kit, look)` returns a kit's checklist filter
+(`KitChecklistFilter`): the search field, the "select all" and "clear"
+buttons and one labelled checkbox per value with its count, from the kit's
+text input, button and checkbox. A checkbox with a label puts `rootPart` and
+`style` on its labelled root. `KitChecklistLook` gives the buttons' variant
+and each checkbox's layout in the wrapping list.
+
 `createDesktopTable(kit)` builds the desktop table: every row with its
 leading rails, column-window spacers, data cells and actions rail, the
 detail row, the header leaves and groups, the virtual spacers and the column

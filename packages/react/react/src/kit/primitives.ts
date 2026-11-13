@@ -181,6 +181,10 @@ export interface KitCheckboxProps extends KitDataAttributes {
   readonly disabled?: boolean;
   /** Class on the checkbox's root element. */
   readonly className?: string;
+  /** With a label: the part on the labelled control's root. */
+  readonly rootPart?: string;
+  /** With a label: styles for the labelled control's root. */
+  readonly style?: CSSProperties;
 }
 
 /**
