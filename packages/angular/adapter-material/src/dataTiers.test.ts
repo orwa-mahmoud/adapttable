@@ -6,6 +6,7 @@ import {
   ADAPTTABLE_URL_ADAPTER,
   type AdaptTableFeature,
   type ColumnDef,
+  createMemoryAdapter,
   type InfiniteQuerySignals,
   injectFrontendData,
   injectQuerySource,
@@ -15,7 +16,6 @@ import {
   type TableSource,
 } from "@adapttable/angular";
 import { filters } from "@adapttable/angular-material/filters";
-import { createMemoryAdapter } from "@adapttable/core";
 import { Component, computed, type Signal, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";

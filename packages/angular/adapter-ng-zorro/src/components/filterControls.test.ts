@@ -1,4 +1,4 @@
-import { defaultLabels } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/angular/adapter";
 import { TestBed } from "@angular/core/testing";
 import { getByLabelText } from "@testing-library/dom";
 import { describe, expect, it, vi } from "vitest";

@@ -1,7 +1,10 @@
 import type { ColumnDef } from "@adapttable/angular";
-import type { GroupingPanelSlotProps } from "@adapttable/angular/adapter";
+import {
+  type GroupingPanelSlotProps,
+  type GroupingPanelState,
+  resolveLabels,
+} from "@adapttable/angular/adapter";
 import { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
-import { type GroupingPanelState, resolveLabels } from "@adapttable/core";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";

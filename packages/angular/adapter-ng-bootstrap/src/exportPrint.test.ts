@@ -6,8 +6,11 @@ import type {
   ColumnDef,
   ExportCsvOptions,
 } from "@adapttable/angular";
-import type { ToolbarExtrasSlotProps } from "@adapttable/angular/adapter";
-import { type ExportProgressState, type ExportTable } from "@adapttable/core";
+import {
+  type ExportProgressState,
+  type ExportTable,
+  type ToolbarExtrasSlotProps,
+} from "@adapttable/angular/adapter";
 import { bulkActions } from "@adapttable/ng-bootstrap/bulk-actions";
 import { cellNavigation } from "@adapttable/ng-bootstrap/cell-navigation";
 import { columnMenu } from "@adapttable/ng-bootstrap/column-menu";

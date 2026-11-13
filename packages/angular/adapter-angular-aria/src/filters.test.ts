@@ -12,11 +12,11 @@ import {
 } from "@adapttable/angular";
 import {
   defaultFilterRegistry,
+  defaultLabels,
   type FilterWidgetRenderProps,
 } from "@adapttable/angular/adapter";
 import { filters, filterTypes } from "@adapttable/angular-aria/filters";
 import { headerFilters } from "@adapttable/angular-aria/header-filters";
-import { defaultLabels } from "@adapttable/core";
 import { CdkConnectedOverlay } from "@angular/cdk/overlay";
 import {
   ChangeDetectionStrategy,

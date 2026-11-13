@@ -1,6 +1,10 @@
 /** NG-ZORRO fill handles and clipboard gestures through the complete table. */
-import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
-import { applyRowPatches, updateRow } from "@adapttable/core";
+import {
+  type AdaptTableFeature,
+  applyRowPatches,
+  type ColumnDef,
+  updateRow,
+} from "@adapttable/angular";
 import { cellNavigation } from "@adapttable/ng-zorro/cell-navigation";
 import {
   editHistory,

@@ -6,7 +6,11 @@ import type {
   ColumnDef,
   ExportCsvOptions,
 } from "@adapttable/angular";
-import type { ToolbarExtrasSlotProps } from "@adapttable/angular/adapter";
+import {
+  type ExportProgressState,
+  type ExportTable,
+  type ToolbarExtrasSlotProps,
+} from "@adapttable/angular/adapter";
 import { bulkActions } from "@adapttable/angular-cdk/bulk-actions";
 import { cellNavigation } from "@adapttable/angular-cdk/cell-navigation";
 import { columnMenu } from "@adapttable/angular-cdk/column-menu";
@@ -17,7 +21,6 @@ import {
 } from "@adapttable/angular-cdk/export";
 import { grouping } from "@adapttable/angular-cdk/grouping";
 import { tree } from "@adapttable/angular-cdk/tree";
-import { type ExportProgressState, type ExportTable } from "@adapttable/core";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";

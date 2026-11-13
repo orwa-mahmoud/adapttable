@@ -6,6 +6,7 @@ import {
   ADAPTTABLE_URL_ADAPTER,
   type AdaptTableFeature,
   type ColumnDef,
+  createMemoryAdapter,
   type InfiniteQuerySignals,
   injectFrontendData,
   injectQuerySource,
@@ -15,7 +16,6 @@ import {
   type TableQueryParams,
   type TableSource,
 } from "@adapttable/angular";
-import { createMemoryAdapter } from "@adapttable/core";
 import { filters } from "@adapttable/ng-zorro/filters";
 import {
   Component,

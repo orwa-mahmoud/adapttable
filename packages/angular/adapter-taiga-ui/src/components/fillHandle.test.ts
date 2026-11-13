@@ -1,5 +1,9 @@
-import { type AdaptTableFeature, type ColumnDef } from "@adapttable/angular";
-import { applyRowPatches, updateRow } from "@adapttable/core";
+import {
+  type AdaptTableFeature,
+  applyRowPatches,
+  type ColumnDef,
+  updateRow,
+} from "@adapttable/angular";
 import { cellNavigation } from "@adapttable/taiga-ui/cell-navigation";
 import {
   editHistory,

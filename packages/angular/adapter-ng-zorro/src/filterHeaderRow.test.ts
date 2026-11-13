@@ -2,15 +2,12 @@
  * NG-ZORRO header-filter controls: the same writes the React kit's header
  * harness covers, drawn through the compact row.
  */
+import { type ExtraFilters, type FilterDef } from "@adapttable/angular";
 import {
   defaultFilterRegistry,
+  defaultLabels,
   type FilterHeaderControlProps,
 } from "@adapttable/angular/adapter";
-import {
-  defaultLabels,
-  type ExtraFilters,
-  type FilterDef,
-} from "@adapttable/core";
 import {
   AdaptFilterHeaderControl,
   AdaptFilterHeaderRow,

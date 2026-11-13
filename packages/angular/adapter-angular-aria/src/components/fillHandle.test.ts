@@ -1,12 +1,16 @@
 /** Native fill handles and clipboard gestures through the complete table. */
-import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
+import {
+  type AdaptTableFeature,
+  applyRowPatches,
+  type ColumnDef,
+  updateRow,
+} from "@adapttable/angular";
 import { cellNavigation } from "@adapttable/angular-aria/cell-navigation";
 import {
   editHistory,
   editing,
   undoRedoButtons,
 } from "@adapttable/angular-aria/editing";
-import { applyRowPatches, updateRow } from "@adapttable/core";
 import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";

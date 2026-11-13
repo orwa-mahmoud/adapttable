@@ -3,8 +3,11 @@ import type {
   ColumnDef,
   ExportCsvOptions,
 } from "@adapttable/angular";
-import type { ToolbarExtrasSlotProps } from "@adapttable/angular/adapter";
-import { type ExportProgressState, type ExportTable } from "@adapttable/core";
+import {
+  type ExportProgressState,
+  type ExportTable,
+  type ToolbarExtrasSlotProps,
+} from "@adapttable/angular/adapter";
 import { bulkActions } from "@adapttable/taiga-ui/bulk-actions";
 import { cellNavigation } from "@adapttable/taiga-ui/cell-navigation";
 import { columnMenu } from "@adapttable/taiga-ui/column-menu";

@@ -1,7 +1,9 @@
 import "@angular/compiler";
 
-import type { FilterHeaderControlProps } from "@adapttable/angular/adapter";
-import { defaultLabels } from "@adapttable/core";
+import {
+  defaultLabels,
+  type FilterHeaderControlProps,
+} from "@adapttable/angular/adapter";
 import {
   Component,
   Directive,

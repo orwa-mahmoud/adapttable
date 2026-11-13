@@ -1,5 +1,8 @@
-import type { FilterHeaderControlProps } from "@adapttable/angular/adapter";
-import { defaultLabels, type ExtraFilters } from "@adapttable/core";
+import { type ExtraFilters } from "@adapttable/angular";
+import {
+  defaultLabels,
+  type FilterHeaderControlProps,
+} from "@adapttable/angular/adapter";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";

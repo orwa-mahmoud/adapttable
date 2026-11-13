@@ -1,7 +1,7 @@
 /**
  * The NG-ZORRO saved-views panel: the parts, and the actions each row offers.
  */
-import type { SavedView, TableLabels } from "@adapttable/core";
+import { type SavedView, type TableLabels } from "@adapttable/angular";
 import { Component, signal, type TemplateRef, viewChild } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";

@@ -2,15 +2,12 @@
  * Native header-filter controls: the same writes the React kit's header
  * harness covers, drawn through the compact row.
  */
+import { type ExtraFilters, type FilterDef } from "@adapttable/angular";
+import { defaultLabels } from "@adapttable/angular/adapter";
 import {
   AdaptFilterHeaderControl,
   AdaptFilterHeaderRow,
 } from "@adapttable/angular-cdk/header-filters";
-import {
-  defaultLabels,
-  type ExtraFilters,
-  type FilterDef,
-} from "@adapttable/core";
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";

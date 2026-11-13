@@ -3,7 +3,7 @@
  * and a panel beside the body.
  */
 import type { ColumnDef, TableLabels, TableQuery } from "@adapttable/angular";
-import { resolveLabels } from "@adapttable/core";
+import { resolveLabels } from "@adapttable/angular/adapter";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it } from "vitest";

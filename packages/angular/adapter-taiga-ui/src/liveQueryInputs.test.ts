@@ -2,11 +2,11 @@ import {
   ADAPTTABLE_URL_ADAPTER,
   type AdaptTableFeature,
   type ColumnDef,
+  createMemoryAdapter,
   type PaginationMode,
   type TableQueryHandler,
   type UrlStateAdapter,
 } from "@adapttable/angular";
-import { createMemoryAdapter } from "@adapttable/core";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";

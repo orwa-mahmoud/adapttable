@@ -6,7 +6,7 @@ import {
   pivot,
   type PivotConfig,
   type PivotField,
-} from "@adapttable/core";
+} from "@adapttable/angular/pivot";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
