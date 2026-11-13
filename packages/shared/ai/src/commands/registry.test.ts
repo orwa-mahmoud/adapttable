@@ -6,7 +6,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { guideOf } from "../guides";
+import { guideOf, summaryOf } from "../guides";
 import {
   CAPABILITY_KEYS,
   type CapabilityKey,
@@ -193,6 +193,16 @@ describe("the command registry", () => {
     }
     expect(tableCommand("orders.archive")).toBeUndefined();
     expect(tableCommand("toString")).toBeUndefined();
+  });
+
+  it("refuses a guide or summary for a key it does not define, by name", () => {
+    const unknown = "orders.archive" as CapabilityKey;
+    expect(() => guideOf(unknown)).toThrow(
+      'unknown capability "orders.archive"'
+    );
+    expect(() => summaryOf(unknown)).toThrow(
+      'unknown capability "orders.archive"'
+    );
   });
 
   it("classes exactly the published write and destructive keys as governed", () => {
