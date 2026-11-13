@@ -66,17 +66,22 @@ function conditionTargets(entry, into) {
 
 /**
  * Resolve every target a package advertises: the `exports` map, the legacy
- * fields, and `bin`.
+ * fields, `bin`, and the private `imports` map.
  *
  * A binary is an entry point like any other — `npx adapttable init` runs it,
  * and a `bin` pointing at a file the build did not emit is as broken as an
  * `exports` target that does. It is not a TYPED entry point, so extraction
  * ignores it; reaching it from here is what keeps its own graph honest and
- * stops the reachability walk from calling it dead weight.
+ * stops the reachability walk from calling it dead weight. A private `#`
+ * import is the same: the package's own modules load it on demand by that
+ * name, so it is shipped, must exist, and its graph is held to the same rules.
  */
 function exportTargets(pkgJson) {
   const targets = new Set();
-  for (const entry of Object.values(pkgJson.exports ?? {})) {
+  for (const entry of [
+    ...Object.values(pkgJson.exports ?? {}),
+    ...Object.values(pkgJson.imports ?? {}),
+  ]) {
     conditionTargets(entry, targets);
   }
   if (pkgJson.main) targets.add(pkgJson.main);
