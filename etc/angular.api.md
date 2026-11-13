@@ -10,6 +10,7 @@ import { AgentApprovalOperation } from '@adapttable/core';
 import { AgentApprovalProposal } from '@adapttable/core';
 import { AggregateOptions } from '@adapttable/core';
 import { AggregateSpec } from '@adapttable/core';
+import { applyRowPatches } from '@adapttable/core';
 import { ApprovalReview } from '@adapttable/core';
 import { ApprovalReviewItem } from '@adapttable/core';
 import { asBatchGesture } from '@adapttable/core/editing';
@@ -44,6 +45,7 @@ import { ContextMenuState } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
 import { ContextMenuTriggerHandlers } from '@adapttable/core';
 import { createGroupingPanelController } from '@adapttable/core';
+import { createMemoryAdapter } from '@adapttable/core';
 import { createRowReorderController } from '@adapttable/core';
 import { DEFAULT_SHORTCUTS } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
@@ -198,6 +200,7 @@ import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
 import { treeExportExpandedIds } from '@adapttable/core';
 import { Type } from '@angular/core';
+import { updateRow } from '@adapttable/core';
 import { UrlSliceSpec } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
@@ -270,6 +273,8 @@ export function aggregate<TRow>(spec: AggregateSpec, options?: AggregateOptions<
 export { AggregateOptions }
 
 export { AggregateSpec }
+
+export { applyRowPatches }
 
 export { ApprovalReview }
 
@@ -441,6 +446,8 @@ export function createFeatureResources(parent: Injector): FeatureResources;
 
 // @public
 export function createFeatureState(): FeatureState;
+
+export { createMemoryAdapter }
 
 // @public
 export interface DataTable<TRow> {
@@ -1782,6 +1789,8 @@ export interface TreeImplementation {
     readonly lazyChildren: typeof injectLazyChildren;
     readonly toggle: typeof toggleTreeNode;
 }
+
+export { updateRow }
 
 // @public
 export function urlAdapterFor(options: Pick<TableUrlStateOptions, "urlAdapter" | "urlSync">, injector: Injector): UrlStateAdapter;

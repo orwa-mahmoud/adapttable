@@ -109,6 +109,7 @@ import { coreSavedViews } from '@adapttable/core/binding';
 import { CssProperties } from '@adapttable/core';
 import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
+import { defaultLabels } from '@adapttable/core';
 import { desktopBodySlots } from '@adapttable/core/binding';
 import { desktopDetailMeasureRef } from '@adapttable/core/binding';
 import { desktopRowMeasureRef } from '@adapttable/core/binding';
@@ -140,6 +141,8 @@ import { ExpandToggleSlotProps } from '@adapttable/core/binding';
 import { ExportProgressState } from '@adapttable/core';
 import { ExportProgressSurfaceSlotProps } from '@adapttable/core/binding';
 import { ExportProgressView } from '@adapttable/core';
+import { ExportRequest } from '@adapttable/core';
+import { ExportTable } from '@adapttable/core';
 import { ExportWriter } from '@adapttable/core';
 import { EXTRA_OVER_SPAN_ROW_STYLE } from '@adapttable/core/binding';
 import { EXTRA_OVER_SPAN_STYLE } from '@adapttable/core/binding';
@@ -312,6 +315,7 @@ import { resolveDensity } from '@adapttable/core';
 import { resolveDisabledReason } from '@adapttable/core';
 import { resolveEditableCellDisplay } from '@adapttable/core/editing';
 import { resolveEditingArming } from '@adapttable/core/editing';
+import { resolveLabels } from '@adapttable/core';
 import { resolveMobileLabel } from '@adapttable/core/binding';
 import { resolveRowEditTrigger } from '@adapttable/core/editing';
 import { resolveRowStyle } from '@adapttable/core/binding';
@@ -5389,6 +5393,8 @@ export { defaultConfirm }
 
 export { defaultFilterRegistry }
 
+export { defaultLabels }
+
 export { desktopBodySlots }
 
 export { desktopDetailMeasureRef }
@@ -5456,7 +5462,13 @@ export interface ExportProgressSlots {
     readonly Surface: Type<unknown>;
 }
 
+export { ExportProgressState }
+
 export { ExportProgressSurfaceSlotProps }
+
+export { ExportRequest }
+
+export { ExportTable }
 
 export { EXTRA_OVER_SPAN_ROW_STYLE }
 
@@ -6017,6 +6029,8 @@ export interface ResolvedRenderer<TContext> {
 export { resolveEditableCellDisplay }
 
 export { resolveEditingArming }
+
+export { resolveLabels }
 
 export { resolveMobileLabel }
 

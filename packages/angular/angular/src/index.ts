@@ -343,6 +343,7 @@ export {
   type AgentApprovalDecision,
   type AgentApprovalOperation,
   type AgentApprovalProposal,
+  applyRowPatches,
   type ApprovalReview,
   type ApprovalReviewItem,
   type BatchEditingState,
@@ -359,6 +360,7 @@ export {
   type ContextMenuItem,
   type ContextMenuRegionHandlers,
   type ContextMenuTarget,
+  createMemoryAdapter,
   type Direction,
   type EditEvent,
   type EditEventHandler,
@@ -413,6 +415,7 @@ export {
   type TableVirtualization,
   type TextOp,
   type TreeEntry,
+  updateRow,
   type UrlStateAdapter,
   type VirtualTableRow,
 } from "@adapttable/core";
