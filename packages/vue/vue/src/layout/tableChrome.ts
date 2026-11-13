@@ -15,6 +15,7 @@ import {
   isVNode,
   Text,
   type VNode,
+  type VNodeArrayChildren,
   type VNodeChild,
 } from "vue";
 
@@ -271,13 +272,37 @@ function hasHeaderActionContent(content: VNodeChild): boolean {
  */
 export const NO_CLASS_NAMES: Readonly<Record<string, undefined>> =
   Object.freeze({});
+/**
+ * The table elements the desktop chrome draws a cell, row or table with.
+ *
+ * @public
+ */
+export type DesktopTableTag = "table" | "tr" | "th" | "td";
+
+/**
+ * A kit's own element for each table element; an absent one is the plain
+ * element. Each receives the binding's attributes (parts, classes, keys and
+ * ARIA) and children.
+ *
+ * @public
+ */
+export type DesktopTableHosts = Partial<
+  Record<DesktopTableTag, (attrs: Attrs, children: VNodeArrayChildren) => VNode>
+>;
+
 export const DesktopTableChrome = /* @__PURE__ */ withProps(
   function DesktopTableChrome<TRow>(props: {
     readonly model: DesktopTableModel<TRow>;
     readonly slots: TableChromeSlots<TRow>;
     readonly classNames?: TableChromeClassNames;
+    readonly hosts?: DesktopTableHosts;
   }): VNodeChild {
-    const { model, slots, classNames = NO_CLASS_NAMES } = props;
+    const { model, slots, classNames = NO_CLASS_NAMES, hosts } = props;
+    const el = (
+      tag: DesktopTableTag,
+      attrs: Attrs,
+      children: VNodeArrayChildren = []
+    ): VNode => hosts?.[tag]?.(attrs, children) ?? h(tag, attrs, children);
     const selection = (
       attrs: SelectionCheckboxAttrs,
       header: boolean
@@ -337,7 +362,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
         },
         [caption]
       );
-      return h(
+      return el(
         "th",
         {
           ...mergeVueAttrs(leaf.attrs, {
@@ -398,7 +423,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
         : null;
     const expandHeader = (rowspan = 1): VNodeChild =>
       model.expandLabel
-        ? h("th", {
+        ? el("th", {
             scope: "col",
             rowspan,
             "aria-label": model.expandLabel,
@@ -409,7 +434,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
         : null;
     const reorderHeader = (rowspan = 1): VNodeChild =>
       model.reorderLabel
-        ? h(
+        ? el(
             "th",
             {
               scope: "col",
@@ -417,12 +442,12 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
               class: [classNames.th, classNames.reorderHeader],
               "data-adapttable-part": "reorder-header",
             },
-            model.reorderLabel
+            [model.reorderLabel]
           )
         : null;
     const actionsHeader = (rowspan = 1): VNodeChild =>
       model.actionsLabel
-        ? h(
+        ? el(
             "th",
             {
               scope: "col",
@@ -431,7 +456,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
               class: classNames.actionsHeader,
               "data-adapttable-part": "actions-header",
             },
-            model.actionsLabel
+            [model.actionsLabel]
           )
         : null;
     const groupContent = (cell: HeaderGroupCell): VNodeChild[] => {
@@ -450,7 +475,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
     };
     const headerRows = model.headerPlan?.length
       ? model.headerPlan.map((row, rowIndex) =>
-          h(
+          el(
             "tr",
             {
               ...mergeVueAttrs(model.headerRowAttrs, { class: classNames.tr }),
@@ -463,7 +488,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
             [
               rowIndex === 0 ? expandHeader(model.headerPlan?.length) : null,
               rowIndex === 0 && model.headerCheckboxAttrs
-                ? h(
+                ? el(
                     "th",
                     {
                       scope: "col",
@@ -487,7 +512,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
               ...row.map((cell) =>
                 cell.kind === "leaf"
                   ? header(cell.key, { rowspan: cell.rowSpan })
-                  : h(
+                  : el(
                       "th",
                       {
                         key: cell.key,
@@ -512,7 +537,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
           )
         )
       : [
-          h(
+          el(
             "tr",
             mergeVueAttrs(model.headerRowAttrs, {
               class: classNames.tr,
@@ -521,7 +546,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
             [
               expandHeader(),
               model.headerCheckboxAttrs
-                ? h(
+                ? el(
                     "th",
                     {
                       scope: "col",
@@ -556,12 +581,12 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
         : null,
     ];
     const rowContent = (row: TableRowModel<TRow>): VNode => {
-      const data = h(
+      const data = el(
         "tr",
         { ...mergeVueAttrs(row.attrs, { class: classNames.tr }), key: row.key },
         [
           model.expandLabel
-            ? h(
+            ? el(
                 "td",
                 mergeVueAttrs(row.expandCellAttrs ?? {}, {
                   class: [classNames.td, classNames.expandCell],
@@ -587,7 +612,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
               )
             : null,
           model.headerCheckboxAttrs
-            ? h(
+            ? el(
                 "td",
                 {
                   class: classNames.selectionCell,
@@ -603,7 +628,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
               )
             : null,
           model.reorderLabel
-            ? h(
+            ? el(
                 "td",
                 {
                   class: [classNames.td, classNames.reorderCell],
@@ -614,7 +639,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
             : null,
           columnSpacer("td", "start"),
           ...row.cells.map((cell) =>
-            h(
+            el(
               "td",
               {
                 ...mergeVueAttrs(cell.attrs, {
@@ -628,7 +653,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
           ),
           columnSpacer("td", "end"),
           model.actionsLabel
-            ? h(
+            ? el(
                 "td",
                 {
                   class: classNames.actionsCell,
@@ -642,7 +667,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
       return h(Fragment, { key: row.key }, [
         data,
         row.detail?.expanded
-          ? h(
+          ? el(
               "tr",
               {
                 "data-adapttable-part": "detail-row",
@@ -651,7 +676,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
                 class: classNames.detailRow,
               },
               [
-                h(
+                el(
                   "td",
                   {
                     colspan: model.columnCount,
@@ -692,7 +717,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
           ),
         ]);
       if (slot.kind === "virtualPad")
-        return h(
+        return el(
           "tr",
           {
             key: slot.key,
@@ -701,7 +726,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
             "data-adapttable-part": "virtual-spacer",
           },
           [
-            h("td", {
+            el("td", {
               colspan: slot.colSpan,
               style: {
                 height: `${String(slot.height)}px`,
@@ -713,11 +738,11 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
         );
       const parts = EXTRA_ROW_PARTS[slot.extraKind];
       const spans = extraUncoveredColSpans(slot.colSpan, slot.coveredSlots);
-      return h(
+      return el(
         "tr",
         { ...slot.attrs, key: slot.key, "data-adapttable-part": parts.row },
         spans.map((span, index) =>
-          h(
+          el(
             "td",
             mergeVueAttrs(
               {
@@ -733,7 +758,7 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
         )
       );
     };
-    return h(
+    return el(
       "table",
       mergeVueAttrs(model.attrs, {
         class: classNames.table,
@@ -768,111 +793,176 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
       ]
     );
   },
-  ["model", "slots", "classNames"]
+  ["model", "slots", "classNames", "hosts"]
 );
+/**
+ * A card region the kit places in its own surface: the attributes its element
+ * carries (part and class) and what goes inside.
+ *
+ * @public
+ */
+export interface MobileCardRegion {
+  readonly attrs: Attrs;
+  readonly content: VNodeChild;
+}
+
+/**
+ * One card's regions, built by the binding, in reading order.
+ *
+ * @public
+ */
+export interface MobileCardRegions {
+  /** The row's selection checkbox, while rows can be selected. */
+  readonly select: VNodeChild;
+  /** The row's move controls, while rows can be reordered. */
+  readonly reorder: VNodeChild;
+  /** The labelled fields, or the host's own card. */
+  readonly body: VNodeChild;
+  /** The row's detail, while expanded. */
+  readonly detail: MobileCardRegion | null;
+  /** The row editor's and the row's actions. */
+  readonly actions: MobileCardRegion | null;
+}
+
+/**
+ * The elements a kit draws the card list with; each absent one is the
+ * binding's own plain element.
+ *
+ * @public
+ */
+export interface MobileCardsHosts {
+  /** The list around the cards. */
+  readonly list?: (attrs: Attrs, children: VNodeChild[]) => VNode;
+  /** One card, arranging its regions. */
+  readonly card?: (attrs: Attrs, regions: MobileCardRegions) => VNode;
+  /** An extra row, around its cell. */
+  readonly extra?: (attrs: Attrs, cell: VNode) => VNode;
+  /** A virtual spacer. */
+  readonly pad?: (attrs: Attrs) => VNode;
+  /** The list of a card's labelled fields. */
+  readonly fields?: (attrs: Attrs, rows: VNodeArrayChildren) => VNode;
+}
+
+const defaultCard = (attrs: Attrs, regions: MobileCardRegions): VNode =>
+  h("article", attrs, [
+    regions.select,
+    regions.reorder,
+    regions.body,
+    regions.detail
+      ? h("div", regions.detail.attrs, [regions.detail.content])
+      : null,
+    regions.actions
+      ? h("div", regions.actions.attrs, [regions.actions.content])
+      : null,
+  ]);
+
+const defaultList = (attrs: Attrs, children: VNodeChild[]): VNode =>
+  h("div", attrs, children);
+
+const defaultExtra = (attrs: Attrs, cell: VNode): VNode =>
+  h("div", attrs, [cell]);
+
+const defaultPad = (attrs: Attrs): VNode => h("div", attrs);
+
+const defaultFields = (attrs: Attrs, rows: VNodeArrayChildren): VNode =>
+  h("dl", attrs, rows);
+
 export const MobileCardsChrome = /* @__PURE__ */ withProps(
   function MobileCardsChrome<TRow>(props: {
     readonly model: MobileCardsModel<TRow>;
     readonly slots: TableChromeSlots<TRow>;
     readonly classNames?: TableChromeClassNames;
+    readonly hosts?: MobileCardsHosts;
   }): VNodeChild {
-    const { model, slots, classNames = NO_CLASS_NAMES } = props;
-    const card = (row: TableRowModel<TRow>): VNode =>
-      h(
-        "article",
-        {
-          ...mergeVueAttrs(row.attrs, { class: classNames.card }),
-          key: row.key,
-        },
-        [
-          row.checkboxAttrs
-            ? control(
-                slots.SelectionCheckbox,
-                {
-                  ...selectionCheckboxControl(row.checkboxAttrs),
-                  attrs: mergeVueAttrs(row.checkboxAttrs, {
-                    class: classNames.selectionCheckbox,
-                    "data-adapttable-part": "checkbox",
-                  }),
-                  header: false,
-                },
-                "SelectionCheckbox"
-              )
-            : null,
-          row.reorder?.(true),
-          slots.card
-            ? slots.card({
-                row: row.row,
-                index: row.index,
-                selected: row.checkboxAttrs?.checked === true,
-                expanded: row.detail?.expanded === true,
-                fields: row.cells.map((cell) => ({
-                  column: cell.context.column,
-                  label:
-                    cell.context.column.mobileLabel ??
-                    cell.context.column.header ??
-                    cell.key,
-                  value: cellContent(cell, row, slots, classNames, true),
-                })),
-              })
-            : h(
-                "dl",
-                {
-                  class: classNames.cardFields,
-                },
-                row.cells.map((cell) =>
-                  h(
-                    "div",
-                    {
-                      key: cell.key,
-                      class: classNames.cardRow,
-                      "data-adapttable-part": "card-row",
-                    },
-                    [
-                      h(
-                        "dt",
-                        {
-                          key: `${cell.key}-label`,
-                          class: classNames.cardLabel,
-                          "data-adapttable-part": "card-label",
-                        },
-                        cell.context.column.mobileLabel ??
-                          cell.context.column.header ??
-                          cell.key
-                      ),
-                      h(
-                        "dd",
-                        {
-                          ...mergeVueAttrs(cell.attrs, {
-                            class: classNames.cardValue,
-                          }),
-                          key: cell.key,
-                          "data-adapttable-part": "card-value",
-                        },
-                        [cellContent(cell, row, slots, classNames, true)]
-                      ),
-                    ]
-                  )
+    const { model, slots, classNames = NO_CLASS_NAMES, hosts } = props;
+    const card = (row: TableRowModel<TRow>): VNode => {
+      const regions: MobileCardRegions = {
+        select: row.checkboxAttrs
+          ? control(
+              slots.SelectionCheckbox,
+              {
+                ...selectionCheckboxControl(row.checkboxAttrs),
+                attrs: mergeVueAttrs(row.checkboxAttrs, {
+                  class: classNames.selectionCheckbox,
+                  "data-adapttable-part": "checkbox",
+                }),
+                header: false,
+              },
+              "SelectionCheckbox"
+            )
+          : null,
+        reorder: row.reorder?.(true),
+        body: slots.card
+          ? slots.card({
+              row: row.row,
+              index: row.index,
+              selected: row.checkboxAttrs?.checked === true,
+              expanded: row.detail?.expanded === true,
+              fields: row.cells.map((cell) => ({
+                column: cell.context.column,
+                label:
+                  cell.context.column.mobileLabel ??
+                  cell.context.column.header ??
+                  cell.key,
+                value: cellContent(cell, row, slots, classNames, true),
+              })),
+            })
+          : (hosts?.fields ?? defaultFields)(
+              {
+                class: classNames.cardFields,
+              },
+              row.cells.map((cell) =>
+                h(
+                  "div",
+                  {
+                    key: cell.key,
+                    class: classNames.cardRow,
+                    "data-adapttable-part": "card-row",
+                  },
+                  [
+                    h(
+                      "dt",
+                      {
+                        key: `${cell.key}-label`,
+                        class: classNames.cardLabel,
+                        "data-adapttable-part": "card-label",
+                      },
+                      cell.context.column.mobileLabel ??
+                        cell.context.column.header ??
+                        cell.key
+                    ),
+                    h(
+                      "dd",
+                      {
+                        ...mergeVueAttrs(cell.attrs, {
+                          class: classNames.cardValue,
+                        }),
+                        key: cell.key,
+                        "data-adapttable-part": "card-value",
+                      },
+                      [cellContent(cell, row, slots, classNames, true)]
+                    ),
+                  ]
                 )
-              ),
-          row.detail?.expanded
-            ? h(
-                "div",
-                {
-                  "data-adapttable-part": "card-detail",
-                  class: classNames.cardDetail,
-                },
-                [row.detail.render()]
               )
-            : null,
+            ),
+        detail: row.detail?.expanded
+          ? {
+              attrs: {
+                "data-adapttable-part": "card-detail",
+                class: classNames.cardDetail,
+              },
+              content: [row.detail.render()],
+            }
+          : null,
+        actions:
           row.actionControls || row.editActions
-            ? h(
-                "div",
-                {
+            ? {
+                attrs: {
                   class: classNames.cardActions,
                   "data-adapttable-part": "card-actions",
                 },
-                [
+                content: [
                   row.editActions?.(),
                   row.actionControls?.length
                     ? control(
@@ -885,11 +975,16 @@ export const MobileCardsChrome = /* @__PURE__ */ withProps(
                         "RowActions"
                       )
                     : null,
-                ]
-              )
+                ],
+              }
             : null,
-        ]
-      );
+      };
+      const attrs = {
+        ...mergeVueAttrs(row.attrs, { class: classNames.card }),
+        key: row.key,
+      };
+      return (hosts?.card ?? defaultCard)(attrs, regions);
+    };
     // Each card in a component of its own: it redraws for its own changes.
     const cardView = (row: TableRowModel<TRow>): VNode =>
       tableRowView(row, { model, controls: slots, classNames }, () =>
@@ -906,7 +1001,7 @@ export const MobileCardsChrome = /* @__PURE__ */ withProps(
           ),
         ]);
       if (slot.kind === "virtualPad")
-        return h("div", {
+        return (hosts?.pad ?? defaultPad)({
           key: slot.key,
           "aria-hidden": "true",
           class: classNames.virtualSpacer,
@@ -914,8 +1009,7 @@ export const MobileCardsChrome = /* @__PURE__ */ withProps(
           "data-adapttable-part": "virtual-spacer",
         });
       const parts = EXTRA_ROW_PARTS[slot.extraKind];
-      return h(
-        "div",
+      return (hosts?.extra ?? defaultExtra)(
         mergeVueAttrs(
           {
             ...slot.attrs,
@@ -926,21 +1020,24 @@ export const MobileCardsChrome = /* @__PURE__ */ withProps(
           },
           {}
         ),
-        [h("div", { "data-adapttable-part": parts.cell }, [slot.render?.()])]
+        h("div", { "data-adapttable-part": parts.cell }, [slot.render?.()])
       );
     };
-    return h("div", mergeVueAttrs(model.attrs, { class: classNames.cards }), [
-      ...(model.bodySlots
-        ? model.bodySlots.map(bodySlot)
-        : model.rows.map(cardView)),
-      model.summary
-        ? h(MobileSummaryChrome<TRow>, {
-            model: model.summary,
-            footer: slots.footer,
-            classNames,
-          })
-        : null,
-    ]);
+    return (hosts?.list ?? defaultList)(
+      mergeVueAttrs(model.attrs, { class: classNames.cards }),
+      [
+        ...(model.bodySlots
+          ? model.bodySlots.map(bodySlot)
+          : model.rows.map(cardView)),
+        model.summary
+          ? h(MobileSummaryChrome<TRow>, {
+              model: model.summary,
+              footer: slots.footer,
+              classNames,
+            })
+          : null,
+      ]
+    );
   },
-  ["model", "slots", "classNames"]
+  ["model", "slots", "classNames", "hosts"]
 );

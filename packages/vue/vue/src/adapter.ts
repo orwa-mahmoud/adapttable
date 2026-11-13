@@ -294,6 +294,11 @@ export {
   type TableRowViewContext,
 } from "./layout/rowView";
 export type {
+  DesktopTableHosts,
+  DesktopTableTag,
+  MobileCardRegion,
+  MobileCardRegions,
+  MobileCardsHosts,
   SelectionCheckboxProps,
   SortButtonProps,
   TableChromeClassNames,
