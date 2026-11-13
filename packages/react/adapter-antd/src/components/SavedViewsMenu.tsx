@@ -1,7 +1,16 @@
-import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
-import type { Direction, TableLabels } from "@adapttable/react/adapter";
-import { Button, Divider, Flex, Input, Popover } from "antd";
-import { useEffect, useRef, useState } from "react";
+/** The saved-views menu, drawn by the binding with antd's controls. */
+import type { UseSavedViewsOptions } from "@adapttable/react";
+import {
+  createSavedViewsMenu,
+  type Direction,
+  type KitPopoverProps,
+  type KitSavedViewsLook,
+  type TableLabels,
+} from "@adapttable/react/adapter";
+import { createContext, type CSSProperties, useContext } from "react";
+
+import { Button, Divider, IconButton, panelPopover } from "./ColumnMenu";
+import { TextInput } from "./kitPrimitives";
 
 /**
  * The label strings the saved-views menu renders.
@@ -27,16 +36,52 @@ export interface SavedViewsMenuProps {
   dir?: Direction;
 }
 
-/** The input's intrinsic size would set the panel wider than a phone. */
-const NAME_INPUT_STYLE = { flex: "1 1 10rem", width: "10rem", minWidth: 0 };
+/** The writing direction a standalone menu was given. */
+const MenuDir = /* @__PURE__ */ createContext<Direction | undefined>(undefined);
+
+const ViewsPopover = /* @__PURE__ */ panelPopover(false);
+
+/** antd's popover, on the side the menu's direction asks for. */
+function Popover(props: Readonly<KitPopoverProps>) {
+  "use no memo";
+  const dir = useContext(MenuDir);
+  return <ViewsPopover {...props} dir={props.dir ?? dir} />;
+}
+
+const ROW: CSSProperties = { display: "flex", alignItems: "center", gap: 4 };
+
+const LOOK: KitSavedViewsLook = {
+  panel: {
+    padding: 8,
+    minWidth: "min(240px, calc(100vw - 48px))",
+    maxHeight: "min(70vh, 360px)",
+  },
+  row: ROW,
+  divider: { margin: "8px 0" },
+  saveRow: ROW,
+  // The input's intrinsic size would set the panel wider than a phone.
+  nameInput: { flex: "1 1 10rem", width: "10rem", minWidth: 0 },
+};
+
+const useLook = (): KitSavedViewsLook => LOOK;
+
+const Menu = /* @__PURE__ */ createSavedViewsMenu(
+  {
+    Button,
+    IconButton,
+    TextInput,
+    Popover,
+    Divider,
+    deleteIcon: <span aria-hidden="true">×</span>,
+  },
+  useLook
+);
 
 /**
  * AntD saved-views popover on core's headless `useSavedViews`: a list of
  * captured views (click re-applies one to the table's URL state, a trailing
  * button deletes it) plus a name-input row that saves the table's CURRENT
- * state. Controlled open state so Escape dismisses it (antd's Popover has no
- * built-in Escape handling) and the trigger reports `aria-expanded`, matching
- * the ColumnMenu beside it.
+ * state. Escape closes it and returns focus to its button.
  *
  * @public
  */
@@ -45,90 +90,9 @@ export function SavedViewsMenu({
   labels,
   dir,
 }: Readonly<SavedViewsMenuProps>) {
-  const { views, save, apply, remove } = useSavedViews(options);
-  const [open, setOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const [name, setName] = useState("");
-  useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-        triggerRef.current?.focus();
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open]);
-  const trimmed = name.trim();
-  const content = (
-    <div
-      style={{
-        padding: 8,
-        minWidth: "min(240px, calc(100vw - 48px))",
-        maxHeight: "min(70vh, 360px)",
-        overflowY: "auto",
-      }}
-    >
-      {views.map((view) => (
-        <Flex key={view.name} align="center" gap={4}>
-          <Button
-            size="small"
-            type="text"
-            style={{ flex: 1, justifyContent: "flex-start" }}
-            onClick={() => {
-              apply(view.name);
-              setOpen(false);
-            }}
-          >
-            {view.name}
-          </Button>
-          <Button
-            size="small"
-            type="text"
-            aria-label={`${labels.deleteView}: ${view.name}`}
-            onClick={() => remove(view.name)}
-          >
-            <span aria-hidden="true">×</span>
-          </Button>
-        </Flex>
-      ))}
-      {views.length > 0 && <Divider style={{ margin: "8px 0" }} />}
-      <Flex align="center" gap={4}>
-        <Input
-          size="small"
-          style={NAME_INPUT_STYLE}
-          placeholder={labels.viewName}
-          aria-label={labels.viewName}
-          value={name}
-          onChange={(event) => setName(event.currentTarget.value)}
-        />
-        <Button
-          size="small"
-          disabled={trimmed === ""}
-          onClick={() => {
-            save(trimmed);
-            setName("");
-          }}
-        >
-          {labels.saveView}
-        </Button>
-      </Flex>
-    </div>
-  );
   return (
-    <Popover
-      trigger="click"
-      open={open}
-      onOpenChange={setOpen}
-      placement={dir === "rtl" ? "bottomLeft" : "bottomRight"}
-      autoAdjustOverflow={{ adjustX: 1, adjustY: 0 }}
-      content={content}
-      styles={{ content: { padding: 0 } }}
-    >
-      <Button ref={triggerRef} aria-expanded={open} aria-haspopup="true">
-        {labels.savedViews}
-      </Button>
-    </Popover>
+    <MenuDir.Provider value={dir}>
+      <Menu options={options} labels={labels} />
+    </MenuDir.Provider>
   );
 }
