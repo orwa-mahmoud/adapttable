@@ -77,8 +77,8 @@ export interface KitCellCheckboxProps extends KitCellEditorProps {
  * @public
  */
 export interface KitCellInputProps extends KitCellEditorProps {
-  /** The input type: text, number, date. */
-  readonly type: string;
+  /** The input type: text, number, a date, a date and time, or a time. */
+  readonly type: ReturnType<typeof editorInputType>;
 }
 
 /**

@@ -3045,7 +3045,7 @@ export interface KitCellEditors {
 
 // @public
 export interface KitCellInputProps extends KitCellEditorProps {
-    readonly type: string;
+    readonly type: ReturnType<typeof editorInputType>;
 }
 
 // @public
