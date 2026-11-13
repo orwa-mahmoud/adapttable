@@ -13739,6 +13739,14 @@
       "behavior": ""
     },
     {
+      "export": "clearSearchAndFilters",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "clearSelection",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -17787,6 +17795,14 @@
       "behavior": ""
     },
     {
+      "export": "overlayFeatureOptions",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "PatchFeature",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -18503,6 +18519,14 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "RowCallback",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -22603,6 +22627,14 @@
       "behavior": ""
     },
     {
+      "export": "RowCallback",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
       "export": "rowEditActionsLayout",
       "currentImport": "@adapttable/core/editing",
       "kind": "value",
@@ -23875,6 +23907,14 @@
       "behavior": ""
     },
     {
+      "export": "RowCallback",
+      "currentImport": "@adapttable/core/engine",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/engine",
+      "behavior": ""
+    },
+    {
       "export": "SidePanelEntry",
       "currentImport": "@adapttable/core/engine",
       "kind": "type",
@@ -24332,6 +24372,14 @@
     },
     {
       "export": "ParseResult",
+      "currentImport": "@adapttable/core/formula",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/formula",
+      "behavior": ""
+    },
+    {
+      "export": "RowCallback",
       "currentImport": "@adapttable/core/formula",
       "kind": "type",
       "class": "neutral-model",
@@ -24907,6 +24955,14 @@
       "behavior": ""
     },
     {
+      "export": "RowCallback",
+      "currentImport": "@adapttable/core/grouping",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/grouping",
+      "behavior": ""
+    },
+    {
       "export": "RowGroupLevel",
       "currentImport": "@adapttable/core/grouping",
       "kind": "type",
@@ -25363,6 +25419,14 @@
       "behavior": ""
     },
     {
+      "export": "RowCallback",
+      "currentImport": "@adapttable/core/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pdf",
+      "behavior": ""
+    },
+    {
       "export": "SortableValue",
       "currentImport": "@adapttable/core/pdf",
       "kind": "type",
@@ -25815,6 +25879,14 @@
       "currentImport": "@adapttable/core/pivot",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/pivot",
+      "behavior": ""
+    },
+    {
+      "export": "RowCallback",
+      "currentImport": "@adapttable/core/pivot",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core/pivot",
       "behavior": ""
     },
@@ -26955,6 +27027,14 @@
       "behavior": ""
     },
     {
+      "export": "RowCallback",
+      "currentImport": "@adapttable/core/query",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
       "export": "safeDecode",
       "currentImport": "@adapttable/core/query",
       "kind": "value",
@@ -27636,6 +27716,14 @@
     },
     {
       "export": "FilterType",
+      "currentImport": "@adapttable/core/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "RowCallback",
       "currentImport": "@adapttable/core/xlsx",
       "kind": "type",
       "class": "neutral-model",
@@ -37444,6 +37532,14 @@
     },
     {
       "export": "RowActionsRenderer",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "RowCallback",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
