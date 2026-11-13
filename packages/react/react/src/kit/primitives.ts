@@ -278,7 +278,8 @@ export interface KitMenuProps {
  *
  * @public
  */
-export interface KitTextProps extends HTMLAttributes<HTMLElement> {
+export interface KitTextProps
+  extends HTMLAttributes<HTMLElement>, KitDataAttributes {
   /** Its type role. Absent, `"body"`. */
   readonly variant?: "body" | "title" | "caption";
   /** Its colour role. Absent, the surface's text colour. */
@@ -294,7 +295,7 @@ export interface KitTextProps extends HTMLAttributes<HTMLElement> {
  *
  * @public
  */
-export interface KitDividerProps {
+export interface KitDividerProps extends KitDataAttributes {
   /** Spacing around the rule. */
   readonly style?: CSSProperties;
 }

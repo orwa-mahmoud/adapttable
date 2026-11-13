@@ -1530,11 +1530,13 @@ export function createColumnGroupToggle(kit: KitPrimitivesOf<"IconButton">): (pr
 export function createColumnHeaderRename(kit: KitPrimitivesOf<"Button" | "IconButton" | "TextInput" | "Text"> & {
     readonly RenameField?: (props: KitRenameFieldProps) => ReactElement;
     readonly editIcon: ReactNode;
+    readonly usePartClass?: KitUsePartClass;
 }, useLook: () => KitHeaderRenameLook): (props: Readonly<ColumnHeaderRenameSlotProps>) => ReactElement;
 
 // @public
 export function createColumnMenu(kit: KitPrimitivesOf<"Button" | "IconButton" | "TextInput" | "Select" | "Popover" | "Text" | "Divider"> & {
     readonly RenameField?: (props: KitRenameFieldProps) => ReactElement;
+    readonly usePartClass?: KitUsePartClass;
 }, useLook: () => KitColumnMenuLook): <TRow>(props: Readonly<ColumnMenuSlotProps<TRow>>) => ReactElement;
 
 // @public
@@ -3066,6 +3068,8 @@ export interface KitColumnMenuLook {
     readonly choice: CSSProperties;
     readonly divider: CSSProperties;
     readonly fixedRow?: CSSProperties;
+    readonly flatItem?: boolean;
+    readonly footerDivider?: boolean;
     readonly grip: CSSProperties;
     readonly heading: CSSProperties;
     readonly panel: CSSProperties;
@@ -3169,7 +3173,7 @@ export type KitDesktopTableProps<TRow, TExtra> = SharedTableRenderProps<TRow> & 
 } & TExtra;
 
 // @public
-export interface KitDividerProps {
+export interface KitDividerProps extends KitDataAttributes {
     readonly style?: CSSProperties;
 }
 
@@ -3600,7 +3604,7 @@ export interface KitTextInputProps extends KitDataAttributes {
 }
 
 // @public
-export interface KitTextProps extends HTMLAttributes<HTMLElement> {
+export interface KitTextProps extends HTMLAttributes<HTMLElement>, KitDataAttributes {
     readonly as?: "span" | "p" | "div" | "label";
     readonly htmlFor?: string;
     readonly tone?: "secondary" | "disabled" | "danger";

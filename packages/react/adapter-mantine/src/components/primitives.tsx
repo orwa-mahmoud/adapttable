@@ -225,9 +225,9 @@ export function Text({
 }
 
 /** A rule between groups. @public */
-export function Divider({ style }: Readonly<KitDividerProps>) {
+export function Divider({ style, ...data }: Readonly<KitDividerProps>) {
   "use no memo";
-  return <MantineDivider style={style} />;
+  return <MantineDivider style={style} {...data} />;
 }
 
 /**

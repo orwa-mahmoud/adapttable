@@ -19973,14 +19973,24 @@ spacing of the panel, heading, search, bulk row, column rows, submenu and
 rename form, and the colour of the drop line; `fixedRow`, when given, spaces the rows of the columns the table injects (row reorder, actions) apart from column rows. A kit whose text input draws its own label and
 error passes a `RenameField` (`KitRenameFieldProps`) for the rename form; the
 field receives the part names its label, input and error carry
-(`KitRenameFieldParts`).
+(`KitRenameFieldParts`). `flatItem` puts each column's controls straight in its
+`column-menu-item`, which then takes the row's style and drag wiring, and
+`footerDivider: false` drops the rule above the size and reset buttons. An
+optional `usePartClass` (`KitUsePartClass`) gives the host's class to the
+elements the menu draws itself. Every kit's menu names the panel
+`column-menu-panel`, its title, search, bulk row, each item (the injected
+reorder and actions rows too, marked `data-reorder` and `data-actions`) with
+its grip, visibility, label, pin and more controls, the submenu, the rule
+`column-menu-separator`, and the `column-menu-auto-size` and
+`column-menu-reset` buttons; visibility and pin carry `data-active` while on,
+and the label `data-hidden` while its column is hidden.
 
 `createColumnHeaderRename(kit, useLook)` returns a column header's rename
 control: a button beside the caption that swaps the caption for the same
 rename form, and the announcer that reports the new name. The kit gives its
 button, icon button, text input and text, an optional `RenameField`, and the
 button's `editIcon`; `useLook` returns `KitHeaderRenameLook`, the spacing of
-the control, the form and its buttons, and `buttonFirst` to put the button before the caption. Enter in the field saves.
+the control, the form and its buttons, and `buttonFirst` to put the button before the caption; it also takes `usePartClass`. Enter in the field saves.
 
 `createSavedViewsMenu(kit, useLook)` returns the saved-views menu: a button
 that opens a panel listing the saved views — a click applies one and closes

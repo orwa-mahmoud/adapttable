@@ -225,9 +225,12 @@ export function Text({
 }
 
 /** A horizontal rule. */
-export function Divider({ style }: Readonly<KitDividerProps>): ReactElement {
+export function Divider({
+  style,
+  ...data
+}: Readonly<KitDividerProps>): ReactElement {
   "use no memo";
-  return <AntDivider style={style} />;
+  return <AntDivider style={style} {...data} />;
 }
 
 /** The surface of a panel the binding opens, in antd's raised colours. */

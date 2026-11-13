@@ -384,10 +384,10 @@ export function Text({
 }
 
 /** A rule between groups. @public */
-export function Divider({ style }: Readonly<KitDividerProps>) {
+export function Divider({ style, ...data }: Readonly<KitDividerProps>) {
   // A pass-through: the compiler's cache would outweigh the element it saves.
   "use no memo";
-  return <MuiDivider style={style} />;
+  return <MuiDivider style={style} {...data} />;
 }
 
 /** Every MUI primitive; the type check is that none is missing. */

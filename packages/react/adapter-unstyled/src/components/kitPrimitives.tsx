@@ -283,7 +283,10 @@ export function Text({
 }
 
 /** A horizontal rule. */
-export function Divider({ style }: Readonly<KitDividerProps>): ReactElement {
+export function Divider({
+  style,
+  ...data
+}: Readonly<KitDividerProps>): ReactElement {
   "use no memo";
-  return <hr style={style} />;
+  return <hr style={style} {...data} />;
 }

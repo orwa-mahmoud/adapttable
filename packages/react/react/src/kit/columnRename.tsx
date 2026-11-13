@@ -23,6 +23,7 @@ import {
   useColumnRenameEditor,
 } from "../columns/useColumnRenameEditor";
 import type { ColumnHeaderRenameSlotProps } from "../features/slotKeys";
+import { type KitUsePartClass, noPartClass } from "./partClass";
 import type { KitPrimitivesOf } from "./primitives";
 
 /**
@@ -109,6 +110,7 @@ export function RenameForm({
   rename,
   formStyle,
   actionsStyle,
+  classOf,
 }: Readonly<{
   kit: RenameFormKit;
   place: RenamePlace;
@@ -116,6 +118,8 @@ export function RenameForm({
   rename: ColumnRenameEditorState;
   formStyle: CSSProperties;
   actionsStyle: CSSProperties;
+  /** The host's class for the form, by its part. */
+  classOf: (part: string) => string | undefined;
 }>): ReactElement {
   // Drawn fresh with its row: the compiler's cache would outweigh it.
   "use no memo";
@@ -137,6 +141,7 @@ export function RenameForm({
   return (
     <form
       data-adapttable-part={parts.form}
+      className={classOf(parts.form)}
       style={formStyle}
       onSubmit={(event) => {
         event.preventDefault();
@@ -243,10 +248,13 @@ export function createColumnHeaderRename(
     readonly RenameField?: (props: KitRenameFieldProps) => ReactElement;
     /** The rename button's glyph. */
     readonly editIcon: ReactNode;
+    /** The host's class for the rename form; absent, it carries none. */
+    readonly usePartClass?: KitUsePartClass;
   },
   useLook: () => KitHeaderRenameLook
 ): (props: Readonly<ColumnHeaderRenameSlotProps>) => ReactElement {
   const { IconButton } = kit;
+  const usePartClass = kit.usePartClass ?? noPartClass;
   return function ColumnHeaderRename({
     columnKey,
     name,
@@ -255,6 +263,7 @@ export function createColumnHeaderRename(
     children,
   }: Readonly<ColumnHeaderRenameSlotProps>): ReactElement {
     const look = useLook();
+    const classOf = usePartClass();
     const rename = useColumnRenameEditor({
       key: columnKey,
       name,
@@ -280,6 +289,7 @@ export function createColumnHeaderRename(
             kit={kit}
             place="header"
             labels={labels}
+            classOf={classOf}
             rename={rename}
             formStyle={look.form}
             actionsStyle={look.actions}

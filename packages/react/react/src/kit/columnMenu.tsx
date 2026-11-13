@@ -42,6 +42,7 @@ import { useFeatureHost } from "../features/featureHostContext";
 import { useEscapeClose } from "../overlays/useEscapeClose";
 import { type KitRenameFieldProps, RenameForm } from "./columnRename";
 import { spaceBelow } from "./panelHeight";
+import { type KitUsePartClass, noPartClass } from "./partClass";
 import type { KitPrimitivesOf, KitTriggerProps } from "./primitives";
 
 /**
@@ -80,6 +81,14 @@ export interface KitColumnMenuLook {
   readonly renameActions: CSSProperties;
   /** The colour of the line that shows where a dragged row lands. */
   readonly accent: string;
+  /**
+   * Each column's controls sit straight in its item, which takes the row's
+   * style and drag wiring, with the actions and the rename status beside
+   * them. Absent, the item holds a row of controls with the actions below.
+   */
+  readonly flatItem?: boolean;
+  /** Whether a rule sets the size and reset buttons apart. Absent, one does. */
+  readonly footerDivider?: boolean;
 }
 
 /** What the Columns menu draws with. */
@@ -94,6 +103,11 @@ type ColumnMenuKit = KitPrimitivesOf<
 > & {
   /** The kit's own rename field; absent, the label, input and error are drawn apart. */
   readonly RenameField?: (props: KitRenameFieldProps) => ReactElement;
+  /**
+   * The host's class for a part the menu draws itself: each item, the bulk
+   * row, a column's actions and the rename form. Absent, they carry none.
+   */
+  readonly usePartClass?: KitUsePartClass;
 };
 
 const NOOP_RENAME = (): void => undefined;
@@ -110,6 +124,7 @@ interface Shared {
   readonly kit: ColumnMenuKit;
   readonly look: KitColumnMenuLook;
   readonly labels: ColumnMenuLabels;
+  readonly classOf: (part: string) => string | undefined;
 }
 
 /** Eye, name and pin: what every row shows, movable or not. */
@@ -125,7 +140,7 @@ function RowControls({
   canPin = true,
   onPin,
 }: Readonly<
-  Omit<Shared, "look"> & {
+  Omit<Shared, "look" | "classOf"> & {
     hidden: boolean;
     name: string;
     canHide?: boolean;
@@ -142,6 +157,8 @@ function RowControls({
   return (
     <>
       <IconButton
+        data-adapttable-part="column-menu-visibility"
+        data-active={hidden ? undefined : ""}
         aria-label={`${hidden ? labels.showColumn : labels.hideColumn}: ${name}`}
         aria-pressed={!hidden}
         tone={hidden ? "neutral" : "primary"}
@@ -151,12 +168,17 @@ function RowControls({
         <EyeIcon off={hidden} />
       </IconButton>
       <Text
+        data-adapttable-part="column-menu-label"
+        data-hidden={hidden ? "" : undefined}
         tone={hidden ? "disabled" : undefined}
         style={{ flex: 1, textDecoration: hidden ? "line-through" : "none" }}
       >
         {name}
       </Text>
       <IconButton
+        data-adapttable-part="column-menu-pin"
+        data-active={pinned ? "" : undefined}
+        aria-pressed={pinned}
         aria-label={`${pinLabel}: ${name}`}
         variant={pinned ? "filled" : "text"}
         tone={pinned ? "primary" : "neutral"}
@@ -177,6 +199,7 @@ function FixedRow<TRow>({
   kit,
   look,
   labels,
+  classOf,
   layout,
   columnKey,
   name,
@@ -194,8 +217,16 @@ function FixedRow<TRow>({
   const hidden = layout.isHidden(columnKey);
   const pinned = layout.state.pinned[columnKey] !== undefined;
   const pinLabel = side === "start" ? labels.pinStart : labels.pinEnd;
-  return (
-    <div style={look.fixedRow ?? look.row}>
+  const item = {
+    "data-adapttable-part": "column-menu-item",
+    // The reorder column leads and the actions column trails.
+    [side === "start" ? "data-reorder" : "data-actions"]: "",
+    "data-hidden": hidden ? "" : undefined,
+    "data-pinned": pinned ? side : undefined,
+    className: classOf("column-menu-item"),
+  };
+  const controls = (
+    <>
       <span aria-hidden style={look.rowSpacer} />
       <RowControls
         kit={kit}
@@ -207,6 +238,16 @@ function FixedRow<TRow>({
         pinLabel={pinned ? labels.unpin : pinLabel}
         onPin={() => layout.setPinned(columnKey, pinned ? undefined : side)}
       />
+    </>
+  );
+  const rowStyle = look.fixedRow ?? look.row;
+  return look.flatItem ? (
+    <div {...item} style={rowStyle}>
+      {controls}
+    </div>
+  ) : (
+    <div {...item}>
+      <div style={rowStyle}>{controls}</div>
     </div>
   );
 }
@@ -215,6 +256,7 @@ function Submenu({
   kit,
   look,
   labels,
+  classOf,
   actions,
   rename,
   onClose,
@@ -229,7 +271,11 @@ function Submenu({
   "use no memo";
   const { Button, Select } = kit;
   return (
-    <div data-adapttable-part="column-menu-submenu" style={look.submenu}>
+    <div
+      data-adapttable-part="column-menu-submenu"
+      className={classOf("column-menu-submenu")}
+      style={look.submenu}
+    >
       {actions.map((action) =>
         "kind" in action ? (
           <Select
@@ -267,6 +313,7 @@ function Submenu({
           kit={kit}
           place="menu"
           labels={labels}
+          classOf={classOf}
           rename={rename}
           formStyle={look.renameForm}
           actionsStyle={look.renameActions}
@@ -296,6 +343,7 @@ function RowItem<TRow>({
   kit,
   look,
   labels,
+  classOf,
   row,
   layout,
   drag,
@@ -333,63 +381,62 @@ function RowItem<TRow>({
   const indicator = canMove ? drag.rowAttrs(key, index) : {};
   const edge = indicator["data-drop"];
   const moveLabel = `${labels.moveStart} / ${labels.moveEnd}: ${name}`;
-  return (
-    <div
-      data-adapttable-part="column-menu-item"
-      data-hidden={hidden || undefined}
-      data-pinned={pinned}
-    >
-      <div
-        style={{
-          ...look.row,
-          cursor: canMove ? "grab" : "default",
-          opacity: "data-dragging" in indicator ? 0.4 : undefined,
-          boxShadow: edge ? dropLine(edge, look.accent) : undefined,
-        }}
+  const rowStyle: CSSProperties = {
+    ...look.row,
+    cursor: canMove ? "grab" : "default",
+    opacity: "data-dragging" in indicator ? 0.4 : undefined,
+    boxShadow: edge ? dropLine(edge, look.accent) : undefined,
+  };
+  const rowWiring = canMove
+    ? {
+        ...drag.rowDragProps(key, index),
+        ...drag.dropProps(index, layout.move),
+        ...indicator,
+      }
+    : {};
+  const controls = (
+    <>
+      <IconButton
+        data-adapttable-part="column-menu-grip"
+        aria-label={moveLabel}
+        disabled={!canMove}
+        style={{ ...look.grip, cursor: canMove ? "grab" : "default" }}
         {...(canMove
-          ? {
-              ...drag.rowDragProps(key, index),
-              ...drag.dropProps(index, layout.move),
-              ...indicator,
-            }
+          ? columnReorderKeyProps(key, index, layout.move, moveLabel)
           : {})}
       >
-        <IconButton
-          aria-label={moveLabel}
-          disabled={!canMove}
-          style={{ ...look.grip, cursor: canMove ? "grab" : "default" }}
-          {...(canMove
-            ? columnReorderKeyProps(key, index, layout.move, moveLabel)
-            : {})}
-        >
-          <GripIcon />
-        </IconButton>
-        <RowControls
-          kit={kit}
-          labels={labels}
-          hidden={hidden}
-          name={name}
-          canHide={row.canHide}
-          onToggleVisible={() => layout.toggleVisible(key)}
-          pinned={pinned !== undefined}
-          pinLabel={pinActionLabel(pinned, labels)}
-          canPin={row.canPin}
-          onPin={() => layout.setPinned(key, nextPinSide(pinned))}
-        />
-        <IconButton
-          data-adapttable-part="column-menu-more"
-          aria-expanded={open}
-          aria-label={`${labels.columnActions}: ${name}`}
-          onClick={() => setOpen((value) => !value)}
-        >
-          ⋯
-        </IconButton>
-      </div>
+        <GripIcon />
+      </IconButton>
+      <RowControls
+        kit={kit}
+        labels={labels}
+        hidden={hidden}
+        name={name}
+        canHide={row.canHide}
+        onToggleVisible={() => layout.toggleVisible(key)}
+        pinned={pinned !== undefined}
+        pinLabel={pinActionLabel(pinned, labels)}
+        canPin={row.canPin}
+        onPin={() => layout.setPinned(key, nextPinSide(pinned))}
+      />
+      <IconButton
+        data-adapttable-part="column-menu-more"
+        aria-expanded={open}
+        aria-label={`${labels.columnActions}: ${name}`}
+        onClick={() => setOpen((value) => !value)}
+      >
+        ⋯
+      </IconButton>
+    </>
+  );
+  const details = (
+    <>
       {open ? (
         <Submenu
           kit={kit}
           look={look}
           labels={labels}
+          classOf={classOf}
           actions={actions}
           rename={rename}
           onClose={() => setOpen(false)}
@@ -398,6 +445,25 @@ function RowItem<TRow>({
       <LiveRegion part="column-rename-announcer" statusRole={false}>
         {rename.announcement}
       </LiveRegion>
+    </>
+  );
+  const item = {
+    "data-adapttable-part": "column-menu-item",
+    "data-hidden": hidden ? "" : undefined,
+    "data-pinned": pinned,
+    className: classOf("column-menu-item"),
+  };
+  return look.flatItem ? (
+    <div {...item} style={rowStyle} {...rowWiring}>
+      {controls}
+      {details}
+    </div>
+  ) : (
+    <div {...item}>
+      <div style={rowStyle} {...rowWiring}>
+        {controls}
+      </div>
+      {details}
     </div>
   );
 }
@@ -427,10 +493,12 @@ export function createColumnMenu(
     | "Divider"
   > & {
     readonly RenameField?: (props: KitRenameFieldProps) => ReactElement;
+    readonly usePartClass?: KitUsePartClass;
   },
   useLook: () => KitColumnMenuLook
 ): <TRow>(props: Readonly<ColumnMenuSlotProps<TRow>>) => ReactElement {
   const { Button, TextInput, Popover, Text, Divider } = kit;
+  const usePartClass = kit.usePartClass ?? noPartClass;
   return function ColumnMenu<TRow>({
     allColumns,
     layout,
@@ -448,6 +516,7 @@ export function createColumnMenu(
     dir,
   }: Readonly<ColumnMenuSlotProps<TRow>>): ReactElement {
     const look = useLook();
+    const classOf = usePartClass();
     const drag = useColumnDragState();
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState("");
@@ -468,11 +537,12 @@ export function createColumnMenu(
         ignoreWithin: '[data-adapttable-part="column-rename-input"]',
       }
     );
-    const shared = { kit, look, labels };
+    const shared = { kit, look, labels, classOf };
     return (
       <Popover
         open={open}
         onOpenChange={setOpen}
+        part="column-menu-panel"
         placement="bottom-start"
         flush
         dir={dir}
@@ -488,6 +558,7 @@ export function createColumnMenu(
             variant="outlined"
             aria-haspopup="true"
             data-adapttable-part="column-menu-button"
+            data-active={open ? "" : undefined}
           >
             {labels.columns}
           </Button>
@@ -505,7 +576,12 @@ export function createColumnMenu(
             overflowY: look.panel.overflowY ?? "auto",
           }}
         >
-          <Text variant="caption" tone="secondary" style={look.heading}>
+          <Text
+            variant="caption"
+            tone="secondary"
+            data-adapttable-part="column-menu-title"
+            style={look.heading}
+          >
             {labels.columns}
           </Text>
           <TextInput
@@ -518,7 +594,11 @@ export function createColumnMenu(
             style={look.search}
             onValueChange={setQuery}
           />
-          <div data-adapttable-part="column-menu-bulk" style={look.bulk}>
+          <div
+            data-adapttable-part="column-menu-bulk"
+            className={classOf("column-menu-bulk")}
+            style={look.bulk}
+          >
             <Button
               data-adapttable-part="column-menu-bulk-button"
               onClick={() => showAllColumns(rows, layout)}
@@ -555,18 +635,19 @@ export function createColumnMenu(
             />
           ))}
           {hasRowReorder || hasRowActions ? (
-            <Divider style={look.divider} />
+            <Divider
+              data-adapttable-part="column-menu-separator"
+              style={look.divider}
+            />
           ) : null}
           {hasRowReorder ? (
-            <div data-adapttable-part="column-menu-item" data-reorder="">
-              <FixedRow
-                {...shared}
-                layout={layout}
-                columnKey={REORDER_COLUMN_KEY}
-                name={labels.reorderRow}
-                side="start"
-              />
-            </div>
+            <FixedRow
+              {...shared}
+              layout={layout}
+              columnKey={REORDER_COLUMN_KEY}
+              name={labels.reorderRow}
+              side="start"
+            />
           ) : null}
           {hasRowActions ? (
             <FixedRow
@@ -577,11 +658,23 @@ export function createColumnMenu(
               side="end"
             />
           ) : null}
-          <Divider style={look.divider} />
-          <Button fullWidth justify="start" onClick={onAutoSize}>
+          {look.footerDivider === false ? null : (
+            <Divider style={look.divider} />
+          )}
+          <Button
+            fullWidth
+            justify="start"
+            data-adapttable-part="column-menu-auto-size"
+            onClick={onAutoSize}
+          >
             {labels.autoSizeColumns}
           </Button>
-          <Button fullWidth justify="start" onClick={() => layout.reset()}>
+          <Button
+            fullWidth
+            justify="start"
+            data-adapttable-part="column-menu-reset"
+            onClick={() => layout.reset()}
+          >
             {labels.resetColumns}
           </Button>
         </div>
