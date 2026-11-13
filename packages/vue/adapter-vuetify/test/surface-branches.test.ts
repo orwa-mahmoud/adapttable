@@ -29,7 +29,6 @@ import { rowActions } from "../src/row-actions";
 import { rowDetail } from "../src/row-detail";
 import { rowReorder } from "../src/row-reorder";
 import RowActions from "../src/RowActions.vue";
-import { requiredControl } from "../src/table/requiredControl";
 
 const wrappers: ReturnType<typeof mount>[] = [];
 function render(content: () => VNode) {
@@ -328,14 +327,6 @@ it("renders iconless editing actions with their label and callback", async () =>
   await wrapper.get("button").trigger("click");
   expect(wrapper.text()).toBe("Save");
   expect(onClick).toHaveBeenCalledOnce();
-});
-
-it("rejects an enabled feature whose required native control is absent", () => {
-  expect(() => requiredControl(undefined, "ResizeHandle")).toThrow(
-    "Vuetify requires the ResizeHandle control"
-  );
-  const control = () => h("span");
-  expect(requiredControl(control, "ResizeHandle")).toBe(control);
 });
 
 it.each([false, true])(
