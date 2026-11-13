@@ -1,6 +1,5 @@
 import {
   type ColumnMetadata,
-  createServerSource,
   type FacetMap,
   type QueryAggregate,
   type QuerySupport,
@@ -9,10 +8,17 @@ import {
 } from "@adapttable/core";
 import {
   type CachedSnapshot,
+  createLazyServerSource,
   sameItems,
   sourceViewKey,
 } from "@adapttable/core/binding";
-import { computed, type MaybeRefOrGetter, type ShallowRef, toValue } from "vue";
+import {
+  computed,
+  type MaybeRefOrGetter,
+  type ShallowRef,
+  toValue,
+  watch,
+} from "vue";
 
 import {
   type MaybeRefOrGetterOptional,
@@ -67,21 +73,37 @@ export type ServerDataState<TRow> = Readonly<ShallowRef<TableSource<TRow>>>;
  * Adapt the neutral server tier, retaining its abort, cursor, append and
  * aggregate rules. Requests start after mount, stop on deactivation/unmount,
  * and resume against current inputs. The host always owns its returned rows.
+ * The tier's engine loads on first use while the first query goes out; a
+ * query that asks for aggregates is sent once the engine is in place.
  * @public
  */
 export function useServerData<TRow>(
   input: MaybeRefOrGetter<UseServerDataOptions<TRow>>
+): ServerDataState<TRow> {
+  return useServerTier(input, () => true);
+}
+
+/**
+ * {@link useServerData} for a table that holds a server tier whatever tier it
+ * is on: the engine loads only while `serving` says the table is on it.
+ */
+export function useServerTier<TRow>(
+  input: MaybeRefOrGetter<UseServerDataOptions<TRow>>,
+  serving: () => boolean
 ): ServerDataState<TRow> {
   requireScope("useServerData");
   const options = computed(() => toValue(input));
   const { state, ...actions } = useTableUrlState(options);
   const mode = useSourceMode(options);
   const active = useScopeActivity();
-  const source = createServerSource<TRow>();
+  const source = createLazyServerSource<TRow>();
   const revision = useExternalStore({
     getSnapshot: source.revision,
     subscribe: source.subscribe,
   });
+  // A failed engine load reaches the component's error handling from a watch
+  // callback; the snapshot keeps the last frame instead of throwing on read.
+  watch(revision, source.throwIfFailed);
   const fetchNextPage = (): void => {
     if (active.value) source.fetchNextPage();
   };
@@ -104,8 +126,12 @@ export function useServerData<TRow>(
       const total = toValue(value.total);
       const rows = toValue(value.rows);
       const facets = toValue(value.facets);
+      if (serving()) source.load();
       const previous = held.current;
+      if (previous && source.phase() === "failed") return previous.snapshot;
       const identity = [
+        // The engine landing, or failing to, replaces the pending frame.
+        source.phase(),
         rows,
         total,
         toValue(value.nextCursor) ?? null,
