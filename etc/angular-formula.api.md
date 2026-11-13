@@ -5,6 +5,7 @@
 ```ts
 
 import { ColumnMetadata } from '@adapttable/core';
+import { ColumnModelFilter } from '@adapttable/core';
 import { ExtraFilters } from '@adapttable/core';
 import { URL_SLICE_WRITE_DEBOUNCE_MS as FORMULA_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { FormulaColumnSpec } from '@adapttable/core';
@@ -34,8 +35,9 @@ export interface CellContext<TRow> {
 }
 
 // @public
-export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
+export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header" | "filter"> {
     cell?: Renderer<CellContext<TRow>>;
+    filter?: ColumnModelFilter;
     footer?: Renderer<FooterContext<TRow>>;
     header?: string;
     headerActions?: string | Renderer<HeaderContext<TRow>>;

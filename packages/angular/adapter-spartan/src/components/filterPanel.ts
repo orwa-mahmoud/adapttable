@@ -69,7 +69,7 @@ import { TREE_SLOTS } from "./filterTreeBuilder";
 })
 export class AdaptFiltersForm {
   /** The slot's props. */
-  readonly props = input.required<FiltersFormSlotProps<never>>();
+  readonly props = input.required<FiltersFormSlotProps<unknown>>();
 
   protected readonly treeSlots = TREE_SLOTS;
 }

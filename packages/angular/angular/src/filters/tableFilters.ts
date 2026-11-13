@@ -40,7 +40,7 @@ export interface FiltersView {
   /** Open the panel. A context-menu Filter uses this. */
   readonly show: () => void;
   /** The form's props. */
-  readonly form: Signal<FiltersFormSlotProps<never>>;
+  readonly form: Signal<FiltersFormSlotProps<unknown>>;
   /** The popover's or the drawer's props. */
   readonly overlay: Signal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
   /** The chips' props. */
@@ -49,7 +49,7 @@ export interface FiltersView {
   readonly header: boolean;
   /** A column's header funnel props, when the column has a filter. */
   readonly headerProps: Signal<
-    ReadonlyMap<string, FilterHeaderControlProps<never>>
+    ReadonlyMap<string, FilterHeaderControlProps<unknown>>
   >;
 }
 
@@ -126,14 +126,14 @@ export function filtersViewFor<TRow>(
     })),
     header: input.header,
     headerProps: computed(() => {
-      const byColumn = new Map<string, FilterHeaderControlProps<never>>();
+      const byColumn = new Map<string, FilterHeaderControlProps<unknown>>();
       const { defs, registry } = runtime();
       for (const column of table.columns()) {
         const def = filterDefForColumn(defs, column.key);
         if (!def) continue;
         byColumn.set(column.key, {
           def: def,
-          source: source() as never,
+          source: source(),
           labels: table.labels(),
           registry,
           closeOnSelect: input.closeHeaderFilterOnSelect,

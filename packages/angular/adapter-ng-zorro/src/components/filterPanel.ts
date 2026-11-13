@@ -65,7 +65,7 @@ import { OVERLAY_Z, overlayEscapeHandled } from "./overlayPlacement";
 })
 export class AdaptFiltersForm {
   /** The slot's props. */
-  readonly props = input.required<FiltersFormSlotProps<never>>();
+  readonly props = input.required<FiltersFormSlotProps<unknown>>();
 
   protected readonly treeSlots = TREE_SLOTS;
 }

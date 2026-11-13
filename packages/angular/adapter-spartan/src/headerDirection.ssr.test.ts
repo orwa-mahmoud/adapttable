@@ -40,7 +40,7 @@ class ServerDirectionProbe {
   </div>`,
 })
 class App {
-  readonly props: FilterHeaderControlProps<never> = {
+  readonly props: FilterHeaderControlProps<unknown> = {
     def: { key: "team", type: "select", label: "Team", options: [] },
     source: {
       extra: {},

@@ -482,7 +482,7 @@ export class AdaptFilterPopover {
 
 // @internal
 export class AdaptFiltersForm {
-    readonly props: InputSignal<FiltersFormSlotProps<never>>;
+    readonly props: InputSignal<FiltersFormSlotProps<unknown>>;
     // (undocumented)
     protected readonly treeSlots: FilterTreeSlots;
     // (undocumented)

@@ -35,6 +35,7 @@ import { ColumnGroupDef } from '@adapttable/core';
 import { ColumnGroupRecord } from '@adapttable/core';
 import { ColumnLayoutState } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
+import { ColumnModelFilter } from '@adapttable/core';
 import { Command } from '@adapttable/core';
 import { ConfirmHandler } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
@@ -369,8 +370,9 @@ export interface ChangedCellFlashOptions {
 export { ChromeBodyRegion }
 
 // @public
-export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
+export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header" | "filter"> {
     cell?: Renderer<CellContext<TRow>>;
+    filter?: ColumnModelFilter;
     footer?: Renderer<FooterContext<TRow>>;
     header?: string;
     headerActions?: string | Renderer<HeaderContext<TRow>>;

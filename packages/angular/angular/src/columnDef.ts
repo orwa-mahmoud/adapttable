@@ -6,6 +6,7 @@ import type {
   ColumnGroupDef,
   ColumnGroupRecord,
   ColumnMetadata,
+  ColumnModelFilter,
 } from "@adapttable/core";
 import {
   flattenColumnTree,
@@ -70,9 +71,14 @@ export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
  *
  * @public
  */
-export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
+export interface ColumnDef<TRow> extends Omit<
+  ColumnMetadata<TRow>,
+  "header" | "filter"
+> {
   /** Plain-text header. Defaults to the key, humanized. */
   header?: string;
+  /** Declarative filter shorthand: a filter type name or a filter spec. */
+  filter?: ColumnModelFilter;
   /** Renders the cell. Without one, the cell shows the accessor value. */
   cell?: Renderer<CellContext<TRow>>;
   /** Renders the header content. Without one, it shows `header`. */

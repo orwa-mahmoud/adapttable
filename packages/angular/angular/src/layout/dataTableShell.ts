@@ -509,7 +509,7 @@ export interface TableView<TRow> extends TableSurfaceView<TRow> {
   /** Whether the Columns menu is composed. */
   readonly columnMenu: boolean;
   /** The Columns menu's props. */
-  readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
+  readonly columnMenuProps: Signal<ColumnMenuSlotProps<unknown>>;
   /** The filters, when a filters feature is composed. */
   readonly filters: FiltersView | undefined;
   /** The selection bar's props, when bulk actions are composed. */
@@ -1438,7 +1438,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
           labels: table.labels(),
         }))
       : undefined;
-    const columnMenuProps = computed((): ColumnMenuSlotProps<never> => ({
+    const columnMenuProps = computed((): ColumnMenuSlotProps<unknown> => ({
       allColumns: table.allColumns() as never,
       layout: table.layout(),
       labels: table.labels(),

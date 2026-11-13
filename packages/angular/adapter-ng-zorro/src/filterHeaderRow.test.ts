@@ -141,7 +141,7 @@ class TriggerHost {
   readonly extra = signal<ExtraFilters>({});
   readonly closeOnSelect = signal(false);
   readonly explicitRegistry = signal(false);
-  readonly props = computed((): FilterHeaderControlProps<never> => ({
+  readonly props = computed((): FilterHeaderControlProps<unknown> => ({
     def: {
       key: "team",
       type: "select",

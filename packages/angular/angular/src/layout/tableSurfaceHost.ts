@@ -117,7 +117,7 @@ import { tableRuntimeFor } from "./tableRuntime";
  */
 export interface RowActionsCell<TRow> {
   /** The row-edit controls' props, when row editing is composed. */
-  readonly rowEdit: RowEditActionsProps<never> | undefined;
+  readonly rowEdit: RowEditActionsProps<unknown> | undefined;
   /** The host's actions, less any whose trigger row editing now owns. */
   readonly actions: readonly RowAction<TRow>[];
 }
@@ -183,15 +183,15 @@ function groupHeadersFor<TRow>(options: {
   readonly leadingCells: Signal<number>;
   readonly showActions: Signal<boolean>;
 }): Signal<{
-  readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<never>>;
-  readonly cards: ReadonlyMap<string, GroupHeaderCardSlotProps<never>>;
+  readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<unknown>>;
+  readonly cards: ReadonlyMap<string, GroupHeaderCardSlotProps<unknown>>;
 }> {
   const { table } = options;
   const getCellProps = (column: ColumnDef<TRow>) => table.cellAttrs(column);
   return computed(() => {
     const grouping = options.grouping();
-    const rows = new Map<string, GroupHeaderRowSlotProps<never>>();
-    const cards = new Map<string, GroupHeaderCardSlotProps<never>>();
+    const rows = new Map<string, GroupHeaderRowSlotProps<unknown>>();
+    const cards = new Map<string, GroupHeaderCardSlotProps<unknown>>();
     if (!grouping) return { rows, cards };
     const columns = options.columns();
     const labels = table.labels();
@@ -214,11 +214,11 @@ function groupHeadersFor<TRow>(options: {
         leadingCells: options.leadingCells(),
         showActions: options.showActions(),
         getCellProps,
-      } as unknown as GroupHeaderRowSlotProps<never>);
+      });
       cards.set(slot.key, {
         ...shared,
         compact: false,
-      } as unknown as GroupHeaderCardSlotProps<never>);
+      });
     }
     return { rows, cards };
   });
@@ -235,7 +235,7 @@ function editableCellsFor<TRow>(options: {
   readonly editing: Signal<EditableCellEditing<TRow>>;
   readonly rows: Signal<readonly BodyRow<TRow>[]>;
   readonly rowKey: Signal<(row: TRow) => string>;
-}): Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> {
+}): Signal<ReadonlyMap<string, EditableCellSlotProps<unknown>>> {
   return computed(() => {
     const { table } = options;
     const editing = options.editing();
@@ -243,7 +243,7 @@ function editableCellsFor<TRow>(options: {
     const rows = table.rows();
     const columns = table.columns();
     const rowKey = options.rowKey();
-    const cells = new Map<string, EditableCellSlotProps<never>>();
+    const cells = new Map<string, EditableCellSlotProps<unknown>>();
     for (const entry of options.rows()) {
       const rowId = rowKey(entry.row);
       for (const column of columns) {
@@ -259,10 +259,7 @@ function editableCellsFor<TRow>(options: {
           editLabel: labels.editCell,
           undoLabel: labels.undoEdit,
         };
-        cells.set(
-          `${rowId}:${column.key}`,
-          props as unknown as EditableCellSlotProps<never>
-        );
+        cells.set(`${rowId}:${column.key}`, props);
       }
     }
     return cells;
@@ -306,7 +303,7 @@ function actionsCellsFor<TRow>(options: {
         labels,
       };
       cells.set(rowId, {
-        rowEdit: rowEdit as unknown as RowEditActionsProps<never> | undefined,
+        rowEdit,
         actions: trigger.actions,
       });
     }
@@ -941,7 +938,7 @@ export interface TableSurfaceView<TRow> {
   readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
   /** Each window cell's editable-cell props, when editing is composed. */
   readonly editableCells:
-    Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> | undefined;
+    Signal<ReadonlyMap<string, EditableCellSlotProps<unknown>>> | undefined;
   /** Whether the actions column is drawn. */
   readonly showActions: Signal<boolean>;
   /** Each window row's actions cell, keyed by row id. */
@@ -954,8 +951,8 @@ export interface TableSurfaceView<TRow> {
   readonly body: Signal<readonly BodySlot<TRow>[]>;
   /** The group header, footer and "show more" slots' props, by entry key. */
   readonly groupHeaders: Signal<{
-    readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<never>>;
-    readonly cards: ReadonlyMap<string, GroupHeaderCardSlotProps<never>>;
+    readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<unknown>>;
+    readonly cards: ReadonlyMap<string, GroupHeaderCardSlotProps<unknown>>;
   }>;
   /** Column span for spacer/detail cells. */
   readonly bodyColSpan: Signal<number>;

@@ -33,7 +33,7 @@ function source(extra: ReturnType<typeof signal<ExtraFilters>>) {
 class Host {
   readonly dir = signal<"ltr" | "rtl">("rtl");
   readonly extra = signal<ExtraFilters>({});
-  readonly props: FilterHeaderControlProps<never> = {
+  readonly props: FilterHeaderControlProps<unknown> = {
     def: {
       key: "team",
       type: "select",

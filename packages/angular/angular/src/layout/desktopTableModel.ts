@@ -112,11 +112,14 @@ export abstract class AdaptDesktopTableModel<
   }): Attrs | undefined {
     const table = this.view().table;
     if (table.featureOptions.resizableColumns !== true) return undefined;
-    return injectColumnResize(
-      column.key,
-      table.layout().setWidth,
-      `${table.labels().resizeColumn}: ${this.columnName(column)}`
-    ) as unknown as Attrs;
+    // An attribute record copies the handle's own properties.
+    return {
+      ...injectColumnResize(
+        column.key,
+        table.layout().setWidth,
+        `${table.labels().resizeColumn}: ${this.columnName(column)}`
+      ),
+    };
   }
   protected readonly headerPlan = computed(() => {
     const view = this.view();
@@ -186,7 +189,7 @@ export abstract class AdaptDesktopTableModel<
   private handlePropsCache = new Map<string, RowReorderHandleProps<TRow>>();
   private handlePropsToken = "";
   private handlePropsLabels: TableLabels | undefined;
-  private treeCellCache = new Map<string, TreeCellProps<never>>();
+  private treeCellCache = new Map<string, TreeCellProps<unknown>>();
   private treeCellModel: TableTree<TRow> | undefined;
   private treeCellLabels: TableLabels | undefined;
   protected readonly headerCells = computed(() => {
@@ -241,7 +244,7 @@ export abstract class AdaptDesktopTableModel<
     reorder: RowReorderState<TRow>,
     row: TRow,
     localIndex: number
-  ): RowReorderHandleProps<never> {
+  ): RowReorderHandleProps<unknown> {
     const view = this.view();
     const windowStart = view.table.windowStart();
     const rowCount = view.table.source().rows.length;
@@ -265,7 +268,7 @@ export abstract class AdaptDesktopTableModel<
     const key = `${rowId}:${String(localIndex)}`;
     const cached = this.handlePropsCache.get(key);
     if (cached?.reorder === reorder && cached.row === row) {
-      return cached as unknown as RowReorderHandleProps<never>;
+      return cached;
     }
     const props: RowReorderHandleProps<TRow> = {
       reorder,
@@ -277,13 +280,13 @@ export abstract class AdaptDesktopTableModel<
       rowCount,
     };
     this.handlePropsCache.set(key, props);
-    return props as unknown as RowReorderHandleProps<never>;
+    return props;
   }
   protected treeCellProps(
     entry: BodyRow<TRow>,
     columnKey: string,
     children: TemplateRef<unknown>
-  ): TreeCellProps<never> | undefined {
+  ): TreeCellProps<unknown> | undefined {
     const view = this.view();
     const tree = view.tree?.();
     if (!tree || !view.treeCellFilled || !entry.treeEntry) return undefined;
@@ -304,7 +307,7 @@ export abstract class AdaptDesktopTableModel<
       labels,
       onToggle: tree.expansion.toggle,
       children,
-    } as unknown as TreeCellProps<never>;
+    };
     this.treeCellCache.set(entry.treeEntry.key, props);
     return props;
   }
