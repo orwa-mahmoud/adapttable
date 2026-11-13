@@ -1004,6 +1004,9 @@ export interface ChromeVirtualPadSlot {
 export function clearChromeFilters(source: Pick<TableSource<unknown>, "clearExtras" | "setFilterTree">, onClearFilters?: () => void): void;
 
 // @public
+export function clearSearchAndFilters(source: Pick<TableSource<unknown>, "clearExtras" | "setFilterTree">, setSearch: (term: string) => void, onClearFilters?: () => void): void;
+
+// @public
 export const clearSelection: ActionDefinition<void>;
 
 // @public

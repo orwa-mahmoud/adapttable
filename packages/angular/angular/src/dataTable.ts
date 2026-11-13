@@ -41,6 +41,7 @@ import {
   chromeIsRefreshing,
   chromeShowFooter,
   clearChromeFilters,
+  clearSearchAndFilters,
   type CssProperties,
   desktopTableStyle,
   type FeatureHostState,
@@ -271,6 +272,11 @@ export interface DataTable<TRow> {
   readonly setLimit: (limit: number) => void;
   /** Clear every filter, then call `onClearFilters`. */
   readonly clearFilters: () => void;
+  /**
+   * Clear the search as well as every filter, then call `onClearFilters`:
+   * what the no-results view offers.
+   */
+  readonly clearSearchAndFilters: () => void;
   /**
    * Size every visible column to its rendered content, measured under
    * `root`, and keep the widths in the layout.
@@ -583,6 +589,13 @@ export function injectDataTable<TRow>(
     },
     clearFilters: () => {
       clearChromeFilters(source(), options.onClearFilters);
+    },
+    clearSearchAndFilters: () => {
+      clearSearchAndFilters(
+        source(),
+        searchInput.commit,
+        options.onClearFilters
+      );
     },
     rowKey,
     cellValue: (column, row) => column.accessor?.(row) ?? null,

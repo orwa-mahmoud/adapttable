@@ -454,6 +454,7 @@ export interface DataTable<TRow> {
     readonly cellAttrs: (column: ColumnDef<TRow>) => Attrs;
     readonly cellValue: (column: ColumnDef<TRow>, row: TRow) => unknown;
     readonly clearFilters: () => void;
+    readonly clearSearchAndFilters: () => void;
     readonly columnGroups: Signal<ReadonlyMap<string, ColumnGroupRecord<TRow>>>;
     readonly columns: Signal<readonly ColumnDef<TRow>[]>;
     readonly dir: Signal<Direction>;

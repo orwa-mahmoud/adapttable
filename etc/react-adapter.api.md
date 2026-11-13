@@ -4861,6 +4861,7 @@ export interface TableChrome<TRow> {
     autoSizeColumns?: () => void;
     body: TableBodyRegion;
     clearFilters: () => void;
+    clearSearchAndFilters: () => void;
     columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
     columnLayout: ReactUseColumnLayoutResult<TRow>;
     columnLayoutLive?: boolean;

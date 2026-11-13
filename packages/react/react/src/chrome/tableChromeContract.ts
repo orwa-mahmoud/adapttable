@@ -98,11 +98,16 @@ export interface TableChrome<TRow> {
    */
   isRefreshing: boolean;
   /**
-   * Clear-filters handler: the caller's `onClearFilters`, falling back to
-   * `source.clearExtras` — so chips, the drawer and the no-results CTA can
-   * always offer a working "clear".
+   * Clear the filter extras and the filter tree, then call the host's
+   * `onClearFilters`: what the chips' and the filter panel's "Clear all" do.
    */
   clearFilters: () => void;
+  /**
+   * Clear the search as well as the filters, then call `onClearFilters`:
+   * what the no-results view offers, since a search alone can be what
+   * matched nothing.
+   */
+  clearSearchAndFilters: () => void;
   /**
    * Row-detail bundle — present iff `renderRowDetail` is set, so ONE guard
    * narrows both the renderer and the expansion state (no correlated

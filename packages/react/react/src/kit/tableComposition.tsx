@@ -281,7 +281,7 @@ function bodyOf<TRow>(
     return (
       (noResults ? slots?.noResults : undefined) ??
       slots?.empty ??
-      kit.empty(labels, noResults ? chrome.clearFilters : undefined)
+      kit.empty(labels, noResults ? chrome.clearSearchAndFilters : undefined)
     );
   }
   return kit.body(view, headerOffset, props);

@@ -174,8 +174,9 @@ describe("the Spartan Angular table", () => {
     expect(part("footer")).toBeNull();
     part<HTMLButtonElement>("empty-clear")!.click();
     await settle();
-    // Clearing filters leaves the search: the host typed it.
-    expect(part("empty")).not.toBeNull();
+    // A search alone matched nothing, so the clear takes the search too.
+    expect(part<HTMLInputElement>("search")?.value).toBe("");
+    expect(part("empty")).toBeNull();
   });
 
   it("reports selection changes and shows the ids the host controls", async () => {

@@ -123,6 +123,26 @@ export function clearChromeFilters(
 }
 
 /**
+ * Clear everything that narrows the rows — the search, the filter extras and
+ * the filter tree — then tell the host. This is what an empty "no results"
+ * view offers: a search alone can be what matched nothing.
+ *
+ * @param source - The source whose filters are cleared.
+ * @param setSearch - The binding's search setter, so its search box follows.
+ * @param onClearFilters - Host notification, called after the clear.
+ *
+ * @public
+ */
+export function clearSearchAndFilters(
+  source: Pick<TableSource<unknown>, "clearExtras" | "setFilterTree">,
+  setSearch: (term: string) => void,
+  onClearFilters?: () => void
+): void {
+  setSearch("");
+  clearChromeFilters(source, onClearFilters);
+}
+
+/**
  * The ids to hand an uncontrolled selection observer, or `undefined` when it
  * must stay quiet: a controlled selection already reports every change
  * synchronously, and echoing it would double-fire.

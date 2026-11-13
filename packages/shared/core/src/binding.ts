@@ -898,6 +898,7 @@ export {
   chromeIsRefreshing,
   chromeShowFooter,
   clearChromeFilters,
+  clearSearchAndFilters,
   featureNoticesAttribute,
   FilterTriggerToggleState,
   type GroupingPanelSource,

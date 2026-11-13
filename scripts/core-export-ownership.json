@@ -12778,6 +12778,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "clearSearchAndFilters",
+      "kind": "runtime",
+      "module": "layout/tableChromeState.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/tableChromeState.ts#clearSearchAndFilters",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "clearSelection",
       "kind": "runtime",
       "module": "state/selectionState.ts",

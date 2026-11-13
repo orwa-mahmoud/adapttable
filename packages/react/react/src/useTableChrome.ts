@@ -15,6 +15,7 @@ import {
   chromeIsRefreshing,
   chromeShowFooter,
   clearChromeFilters,
+  clearSearchAndFilters as clearSearchAndFiltersOf,
   rowReorderEnablement,
   selectionObserverIds,
 } from "@adapttable/core/binding";
@@ -201,12 +202,14 @@ export function useTableChrome<TRow>(
   });
   const isRefreshing = chromeIsRefreshing(source);
 
-  // `onClearFilters` is a pure NOTIFICATION: the chrome always performs
-  // the clear itself, then tells the host. (It used to REPLACE the clear,
-  // so a logging handler silently broke the button — take full control
-  // via `source.clearExtras` instead.)
+  // `onClearFilters` is a notification: the chrome performs the clear
+  // itself, then tells the host. A host takes full control through
+  // `source.clearExtras`.
   const clearFilters = useCallback(() => {
     clearChromeFilters(source, onClearFilters);
+  }, [onClearFilters, source]);
+  const clearSearchAndFilters = useCallback(() => {
+    clearSearchAndFiltersOf(source, source.setSearch, onClearFilters);
   }, [onClearFilters, source]);
 
   // Grouping, tree, expansion and editing hooks live on their feature
@@ -368,6 +371,7 @@ export function useTableChrome<TRow>(
     emptyVariant,
     isRefreshing,
     clearFilters,
+    clearSearchAndFilters,
     detail,
     rowMutations,
     rowActions,

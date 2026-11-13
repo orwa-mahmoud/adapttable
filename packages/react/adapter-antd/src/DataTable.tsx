@@ -2489,7 +2489,7 @@ function AntdTableBody<TRow>({
           <EmptyState
             variant={c.emptyVariant}
             labels={labels}
-            onClearFilters={c.clearFilters}
+            onClearFilters={c.clearSearchAndFilters}
           />
         );
 

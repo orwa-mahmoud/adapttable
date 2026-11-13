@@ -236,8 +236,11 @@ describe("<DataTable> (unstyled)", () => {
     const clear = screen.getByRole("button", { name: "Clear all" });
     expect(clear).toHaveAttribute("data-adapttable-part", "empty-clear");
     expect(clear).toHaveClass("my-clear");
+    expect(screen.getByRole("searchbox")).toHaveValue("zzz");
     fireEvent.click(clear);
     expect(onClearFilters).toHaveBeenCalledTimes(1);
+    // A search alone matched nothing, so the clear takes the search too.
+    expect(screen.getByRole("searchbox")).toHaveValue("");
   });
 
   it("renders a custom empty state", () => {

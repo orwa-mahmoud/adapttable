@@ -32,6 +32,7 @@ import {
   chromeIsRefreshing,
   chromeShowFooter,
   clearChromeFilters,
+  clearSearchAndFilters,
   commitSearchOnBlur,
   fetchNextBodyPage,
   headerCellAttributes,
@@ -427,10 +428,12 @@ export function useDataTable<TRow>(
     setLimit: (limit: number): void => source.value.setLimit(limit),
     clearFilters: (): void =>
       clearChromeFilters(source.value, options.value.onClearFilters),
-    clearSearchAndFilters: (): void => {
-      setSearch("");
-      clearChromeFilters(source.value, options.value.onClearFilters);
-    },
+    clearSearchAndFilters: (): void =>
+      clearSearchAndFilters(
+        source.value,
+        setSearch,
+        options.value.onClearFilters
+      ),
     loadMore,
     autoSizeColumns: (root: HTMLElement | null): void => {
       if (root)

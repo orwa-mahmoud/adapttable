@@ -7353,6 +7353,7 @@
       "ChromeSortState",
       "ChromeVirtualPadSlot",
       "clearChromeFilters",
+      "clearSearchAndFilters",
       "clearSelection",
       "CollectFeatureNoticesInput",
       "COLUMN_GROUP_ID_SEP",

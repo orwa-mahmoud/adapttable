@@ -1306,7 +1306,8 @@ shares, so a new binding calls them rather than re-deriving them.
   finish the shell.
 - **Table chrome state.** `chromeBodyRegion` (`ChromeBodyRegion`),
   `chromeEmptyVariant`, `chromeIsRefreshing`, `chromeShowFooter`,
-  `clearChromeFilters`, `selectionObserverIds`, `rowReorderEnablement`,
+  `clearChromeFilters`, `clearSearchAndFilters` (the no-results view's clear,
+  which takes the search too), `selectionObserverIds`, `rowReorderEnablement`,
   `groupingPanelState`, `chromeFeatureNotices` (`ChromeFeatureNoticesInput`),
   `featureNoticesAttribute`, `applyFeatureNoticesAttribute`,
   `FilterTriggerToggleState`, `scrollResetKeys`, `cardSetSize` and
