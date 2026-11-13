@@ -133,6 +133,7 @@ export type {
   UseFrontendDataOptions,
 } from "./source/useFrontendData";
 export { useFrontendData } from "./source/useFrontendData";
+/** The full frontend evaluator, for `useFrontendData`'s `createEngine`. */
 export type {
   InfiniteQueryState,
   QuerySourceState,
@@ -375,3 +376,4 @@ export type {
   TableRuntime,
   TableRuntimeView,
 } from "@adapttable/core/binding";
+export { createTableEngine } from "@adapttable/core/engine";
