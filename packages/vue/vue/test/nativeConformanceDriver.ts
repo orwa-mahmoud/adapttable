@@ -8,6 +8,7 @@ import {
   type ConformanceRow,
   type ConformanceScenario,
   type ConformanceTest,
+  tableConformanceTests,
 } from "@adapttable/core/conformance";
 import { expect, vi } from "vitest";
 import { type App, createApp, nextTick, ref, type VNode } from "vue";
@@ -189,6 +190,23 @@ export const nativeConformanceHarness = {
 };
 
 /** Additional rendered range checks over the same real native mount. */
+export type { ConformanceRow } from "@adapttable/core/conformance";
+
+/**
+ * The neutral table conformance tests, mounted through a Vue kit's driver.
+ *
+ * @param driver - The kit's driver.
+ * @returns The tests, for the kit's runner to register.
+ */
+export function nativeTableConformanceTests(
+  driver: NativeDriver
+): readonly ConformanceTest[] {
+  return tableConformanceTests(driver, {
+    expect,
+    ...nativeConformanceHarness,
+  });
+}
+
 export function nativeRangeConformanceTests(
   driver: NativeDriver
 ): readonly ConformanceTest[] {

@@ -27,6 +27,7 @@
     "sparkline",
     "router",
     "stream",
+    "test",
     "vitest.config.ts",
     "vitest.setup.ts"
   ],

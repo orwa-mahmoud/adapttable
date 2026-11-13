@@ -5,9 +5,17 @@
     "types": ["node", "vitest/globals", "@testing-library/jest-dom"],
     "paths": {
       "@adapttable/core": ["../../shared/core/src/index.ts"],
-      "@adapttable/core/*": ["../../shared/core/src/*"]
+      "@adapttable/core/*": ["../../shared/core/src/*"],
+      "@adapttable/react": ["./src/index.ts"],
+      "@adapttable/react/*": ["./src/*.ts"]
     }
   },
-  "include": ["src", "tsup.config.ts", "vitest.config.ts", "vitest.setup.ts"],
+  "include": [
+    "src",
+    "test",
+    "tsup.config.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts"
+  ],
   "exclude": ["node_modules", "dist", "coverage"]
 }
