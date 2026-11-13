@@ -1,4 +1,4 @@
-import { enabledBuiltInKeys } from "./capabilities/enabled";
+import { enabledCommandKeys } from "./commands";
 import { AGENT_SCHEMA_VERSION, type CapabilityKey } from "./keys";
 import type { AgentManifest, AgentObservation } from "./types";
 
@@ -8,7 +8,7 @@ import type { AgentManifest, AgentObservation } from "./types";
  * @public
  */
 export function enabledKeys(observation: AgentObservation): CapabilityKey[] {
-  return enabledBuiltInKeys(observation);
+  return enabledCommandKeys(observation);
 }
 
 /**

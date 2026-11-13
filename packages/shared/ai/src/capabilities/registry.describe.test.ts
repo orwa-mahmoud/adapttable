@@ -5,12 +5,15 @@
  */
 import { describe, expect, it } from "vitest";
 
-import type { AgentCapabilityDefinition, CapabilityPlan } from "../types";
+import type { SessionGuard } from "../commands/command";
+import type { AgentCapabilityDefinition, AgentObservation } from "../types";
 import { createCapabilityRegistry } from "./registry";
 
-const HANDLERS = {
-  plan: (): Promise<CapabilityPlan> => Promise.resolve({ proposals: [] }),
-  execute: (): Promise<unknown> => Promise.resolve(undefined),
+const HANDLERS: SessionGuard = {
+  observe: (): AgentObservation => {
+    throw new Error("describe never observes the table");
+  },
+  isEnabled: () => true,
 };
 
 function custom(key: string): AgentCapabilityDefinition {

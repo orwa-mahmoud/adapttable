@@ -1,44 +1,42 @@
 import { type ActionAiOptions, stableKey } from "@adapttable/core";
 
-import { guideOf, summaryOf } from "../guides";
+import { TABLE_COMMANDS } from "../commands";
 import {
-  AGENT_SCHEMA_VERSION,
-  CAPABILITY_KEYS,
-  type CapabilityKey,
-} from "../keys";
+  type CommandCall,
+  runCommand,
+  type SessionGuard,
+  type TableCommand,
+} from "../commands/command";
+import { AGENT_SCHEMA_VERSION } from "../keys";
 import type {
   AgentCapabilityContext,
   AgentCapabilityDefinition,
   AgentObservation,
   CapabilityGuide,
-  CapabilityPlan,
 } from "../types";
-import { isBuiltInEnabled } from "./enabled";
 
-type BuiltInDispatch = (
-  key: CapabilityKey,
-  context: AgentCapabilityContext,
-  args: unknown
-) => Promise<unknown>;
+export { openAiToolNameMap } from "./toolNames";
 
-type BuiltInPlanner = (
-  key: CapabilityKey,
-  context: AgentCapabilityContext,
-  args: unknown
-) => Promise<CapabilityPlan>;
-
-/** Built-in plan and apply halves, supplied by the session. */
-export interface BuiltInHandlers {
-  readonly plan: BuiltInPlanner;
-  readonly execute: BuiltInDispatch;
+/**
+ * One registered command: the definition the session runs, and the built-in
+ * command behind it when there is one. A host's own capability registers as
+ * a definition with no built-in, and runs through the same loop.
+ */
+export interface RegisteredCommand {
+  readonly definition: AgentCapabilityDefinition;
+  readonly builtIn?: TableCommand;
 }
 
 /** Resolved registry for one session. */
 export interface CapabilityRegistry {
   has(key: string): boolean;
   get(key: string): AgentCapabilityDefinition | undefined;
+  /** The built-in command behind a key, or `undefined` for a host's own. */
+  builtIn(key: string): TableCommand | undefined;
   catalogOrder(): readonly string[];
   enabledKeys(observation: AgentObservation): readonly string[];
+  /** The definitions behind {@link CapabilityRegistry.enabledKeys}, in the same order. */
+  enabled(observation: AgentObservation): readonly AgentCapabilityDefinition[];
   describe(key: string): CapabilityGuide;
   /**
    * Whether the agent may use this key at all.
@@ -54,20 +52,20 @@ export interface CapabilityRegistry {
 }
 
 class SessionCapabilityRegistry implements CapabilityRegistry {
-  private readonly definitions: Map<string, AgentCapabilityDefinition>;
+  private readonly commands: Map<string, RegisteredCommand>;
   private readonly excludedKeys: ReadonlySet<string>;
 
   constructor(
-    definitions: Map<string, AgentCapabilityDefinition>,
+    commands: Map<string, RegisteredCommand>,
     excluded: ReadonlySet<string>
   ) {
-    this.definitions = definitions;
+    this.commands = commands;
     this.excludedKeys = excluded;
   }
 
   permits(key: string, observation: AgentObservation): boolean {
     if (this.excludedKeys.has(key)) return false;
-    const def = this.definitions.get(key);
+    const def = this.commands.get(key)?.definition;
     return def?.isEnabled(observation) ?? false;
   }
 
@@ -76,27 +74,35 @@ class SessionCapabilityRegistry implements CapabilityRegistry {
   }
 
   has(key: string): boolean {
-    return this.definitions.has(key);
+    return this.commands.has(key);
   }
 
   get(key: string): AgentCapabilityDefinition | undefined {
-    return this.definitions.get(key);
+    return this.commands.get(key)?.definition;
+  }
+
+  builtIn(key: string): TableCommand | undefined {
+    return this.commands.get(key)?.builtIn;
   }
 
   catalogOrder(): readonly string[] {
-    return [...this.definitions.keys()];
+    return [...this.commands.keys()];
   }
 
   enabledKeys(observation: AgentObservation): readonly string[] {
-    const keys: string[] = [];
-    for (const key of this.catalogOrder()) {
-      if (this.permits(key, observation)) keys.push(key);
+    return this.enabled(observation).map((definition) => definition.key);
+  }
+
+  enabled(observation: AgentObservation): readonly AgentCapabilityDefinition[] {
+    const definitions: AgentCapabilityDefinition[] = [];
+    for (const [key, { definition }] of this.commands) {
+      if (this.permits(key, observation)) definitions.push(definition);
     }
-    return keys;
+    return definitions;
   }
 
   describe(key: string): CapabilityGuide {
-    const def = this.definitions.get(key);
+    const def = this.commands.get(key)?.definition;
     if (!def) throw new Error(`unknown capability "${key}"`);
     return {
       schemaVersion: AGENT_SCHEMA_VERSION,
@@ -172,6 +178,48 @@ export function capabilityDefinitionStamp(
 }
 
 /**
+ * The definition the session runs for a built-in command.
+ *
+ * `approval` is the table's own word on this one command, carried exactly as
+ * a row action's is. `resolveApproval` lets it replace the shared policy in
+ * either direction — that is the point of authoring one — and holds the one
+ * line that does not move: an action marked `required` drops `alwaysAllow`,
+ * so a reader's "don't ask again" cannot answer for it.
+ */
+function builtInDefinition(
+  command: TableCommand,
+  guard: SessionGuard,
+  approval: ActionAiOptions | undefined
+): AgentCapabilityDefinition {
+  const call = (
+    context: AgentCapabilityContext,
+    args: unknown
+  ): CommandCall => ({
+    context,
+    body: args as Record<string, unknown>,
+    guard,
+  });
+  const { preview } = command;
+  return {
+    key: command.key,
+    summary: command.summary,
+    guide: {
+      guide: command.guide,
+      input: command.input,
+      output: command.output,
+    },
+    kind: command.kind,
+    staging: command.staging,
+    partial: command.partial,
+    idempotent: command.idempotent,
+    ...(approval ? { ai: approval } : {}),
+    isEnabled: command.isEnabled,
+    plan: preview ? (context, args) => preview(call(context, args)) : undefined,
+    execute: (context, args) => runCommand(command, call(context, args)),
+  };
+}
+
+/**
  * Register built-ins and custom capabilities for one session.
  *
  * `exclude` is the host's own denial list. It never enables anything — a key
@@ -181,54 +229,24 @@ export function capabilityDefinitionStamp(
  */
 export function createCapabilityRegistry(
   custom: readonly AgentCapabilityDefinition[],
-  builtIn: BuiltInHandlers,
+  guard: SessionGuard,
   exclude: readonly string[] = [],
   approvals: Readonly<Record<string, ActionAiOptions>> = {}
 ): CapabilityRegistry {
-  const definitions = new Map<string, AgentCapabilityDefinition>();
-  for (const key of CAPABILITY_KEYS) {
-    const guide = guideOf(key);
-    const kind = capabilityKind(key);
-    const governed = kind === "write" || kind === "destructive";
-    definitions.set(key, {
-      key,
-      summary: summaryOf(key),
-      guide: {
-        guide: guide.guide,
-        input: guide.input,
-        output: guide.output,
-      },
-      kind,
-      // edit.cells is the only built-in with a staging path (stageCells).
-      staging: key === "edit.cells" ? "supported" : "unsupported",
-      // These three apply plan.payload row by row, so a reader may decide
-      // them one at a time. A row move reads its own two keys and is one
-      // indivisible change; every other built-in writes nothing.
-      partial:
-        key === "edit.cells" || key === "rows.add" || key === "rows.delete"
-          ? "supported"
-          : "unsupported",
-      idempotent: isIdempotent(key),
-      // The table's own word on this one capability, carried exactly as a row
-      // action's is. `resolveApproval` lets it replace the shared policy in
-      // either direction — that is the point of authoring one — and holds the
-      // one line that does not move: an action marked `required` drops
-      // `alwaysAllow`, so a reader's "don't ask again" cannot answer for it.
-      ...(approvals[key] ? { ai: approvals[key] } : {}),
-      isEnabled: (observation) => isBuiltInEnabled(key, observation),
-      plan: governed
-        ? (context, args) => builtIn.plan(key, context, args)
-        : undefined,
-      execute: (context, args) => builtIn.execute(key, context, args),
+  const commands = new Map<string, RegisteredCommand>();
+  for (const builtIn of TABLE_COMMANDS) {
+    commands.set(builtIn.key, {
+      definition: builtInDefinition(builtIn, guard, approvals[builtIn.key]),
+      builtIn,
     });
   }
-  for (const def of custom) {
-    if (definitions.has(def.key)) {
-      throw new Error(`duplicate capability "${def.key}"`);
+  for (const definition of custom) {
+    if (commands.has(definition.key)) {
+      throw new Error(`duplicate capability "${definition.key}"`);
     }
-    definitions.set(def.key, def);
+    commands.set(definition.key, { definition });
   }
-  return new SessionCapabilityRegistry(definitions, new Set(exclude));
+  return new SessionCapabilityRegistry(commands, new Set(exclude));
 }
 
 /** Longest description a tool surface with a hard cap will still show. */
@@ -246,44 +264,4 @@ export function shortForm(guide: string): string {
   const clipped = sentence.slice(0, SHORT_LIMIT - 1);
   const lastSpace = clipped.lastIndexOf(" ");
   return `${lastSpace > 40 ? clipped.slice(0, lastSpace) : clipped}…`;
-}
-
-/**
- * Whether running a built-in twice lands where running it once did.
- *
- * Assignment against accumulation, and nothing else: every setter names an
- * absolute state, so repeating it changes nothing, and that holds for a cell
- * value and a deleted row key as much as for a page number. The two that
- * accumulate are the two that produce something new each time — `rows.add`
- * appends another row, and `export.run` emits another file.
- */
-function isIdempotent(key: CapabilityKey): boolean {
-  return key !== "rows.add" && key !== "export.run";
-}
-
-function capabilityKind(key: CapabilityKey): AgentCapabilityDefinition["kind"] {
-  if (key === "rows.delete") return "destructive";
-  if (key === "edit.cells" || key === "rows.add" || key === "rows.reorder") {
-    return "write";
-  }
-  if (key === "rows.read" || key === "columns.describe") return "read";
-  return "view";
-}
-
-/** Build a reversible OpenAI function-name map and detect dot/underscore collisions. @public */
-export function openAiToolNameMap(
-  keys: readonly string[]
-): ReadonlyMap<string, string> {
-  const map = new Map<string, string>();
-  for (const key of keys) {
-    const encoded = key.replaceAll(".", "_");
-    const existing = map.get(encoded);
-    if (existing !== undefined && existing !== key) {
-      throw new Error(
-        `OpenAI tool name collision: "${existing}" and "${key}" both encode to "${encoded}"`
-      );
-    }
-    map.set(encoded, key);
-  }
-  return map;
 }

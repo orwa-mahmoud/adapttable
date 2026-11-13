@@ -105,7 +105,7 @@ export {
   tableActionSignature,
   type TableActionSource,
 } from "./capabilities/actions";
-export { openAiToolNameMap } from "./capabilities/registry";
+export { openAiToolNameMap } from "./capabilities/toolNames";
 export {
   type AgentContext,
   type AgentContextContract,
