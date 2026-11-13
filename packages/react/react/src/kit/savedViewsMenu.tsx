@@ -18,6 +18,7 @@ import type { SavedViewsSlotProps } from "../features/slotKeys";
 import { useEscapeClose } from "../overlays/useEscapeClose";
 import { useSavedViews } from "../url/useSavedViews";
 import { spaceBelow } from "./panelHeight";
+import { type KitUsePartClass, noPartClass } from "./partClass";
 import type { KitPrimitivesOf, KitTriggerProps } from "./primitives";
 
 /**
@@ -48,6 +49,7 @@ const VIEWS_PARTS = {
   row: "views-row",
   item: "views-item",
   remove: "views-delete",
+  divider: "views-divider",
   saveRow: "views-save-row",
   input: "views-input",
   save: "views-save",
@@ -69,15 +71,22 @@ export function createSavedViewsMenu(
   > & {
     /** The delete button's glyph. */
     readonly deleteIcon: ReactNode;
+    /**
+     * The host's class for a part the menu draws itself: the panel, each row
+     * and the save row. Absent, they carry none.
+     */
+    readonly usePartClass?: KitUsePartClass;
   },
   useLook: () => KitSavedViewsLook
 ): (props: Readonly<SavedViewsSlotProps>) => ReactElement {
   const { Button, IconButton, TextInput, Popover, Divider } = kit;
+  const usePartClass = kit.usePartClass ?? noPartClass;
   return function SavedViewsMenu({
     options,
     labels,
   }: Readonly<SavedViewsSlotProps>): ReactElement {
     const look = useLook();
+    const classOf = usePartClass();
     const { views, save, apply, remove } = useSavedViews(options);
     const [open, setOpen] = useState(false);
     const [name, setName] = useState("");
@@ -108,6 +117,7 @@ export function createSavedViewsMenu(
             variant="outlined"
             aria-haspopup="true"
             data-adapttable-part={VIEWS_PARTS.button}
+            data-active={open ? "" : undefined}
           >
             {labels.savedViews}
           </Button>
@@ -115,6 +125,7 @@ export function createSavedViewsMenu(
       >
         <div
           data-adapttable-part={VIEWS_PARTS.panel}
+          className={classOf(VIEWS_PARTS.panel)}
           style={{
             ...look.panel,
             maxHeight:
@@ -127,6 +138,7 @@ export function createSavedViewsMenu(
             <div
               key={view.name}
               data-adapttable-part={VIEWS_PARTS.row}
+              className={classOf(VIEWS_PARTS.row)}
               style={look.row}
             >
               <Button
@@ -150,8 +162,17 @@ export function createSavedViewsMenu(
               </IconButton>
             </div>
           ))}
-          {views.length > 0 ? <Divider style={look.divider} /> : null}
-          <div data-adapttable-part={VIEWS_PARTS.saveRow} style={look.saveRow}>
+          {views.length > 0 ? (
+            <Divider
+              data-adapttable-part={VIEWS_PARTS.divider}
+              style={look.divider}
+            />
+          ) : null}
+          <div
+            data-adapttable-part={VIEWS_PARTS.saveRow}
+            className={classOf(VIEWS_PARTS.saveRow)}
+            style={look.saveRow}
+          >
             <TextInput
               elementRef={nameRef}
               aria-label={labels.viewName}

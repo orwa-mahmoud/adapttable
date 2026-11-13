@@ -2963,7 +2963,7 @@ table's current state under a typed name and keeps the name field focused for
 the next one. A rule separates the list from that row while there is a list.
 The kit gives its button, icon button, text input, popover and divider, and
 the delete button's `deleteIcon`; `useLook` returns `KitSavedViewsLook`, the
-spacing of the panel, the rows, the rule, the save row and the name field.
+spacing of the panel, the rows, the rule, the save row and the name field. An optional `usePartClass` gives the host's class to the panel, rows and save row; the rule is `views-divider`, and the button carries `data-active` while the panel is open.
 
 `createPager(kit)` takes a `KitPager` and returns the table's footer (`KitTable.footer`): the
 page-size choice (none in a grouped table, where every row is on one page),

@@ -1623,6 +1623,7 @@ export function createRowReorderHandle(kit: KitPrimitivesOf<"IconButton"> & (Kit
 // @public
 export function createSavedViewsMenu(kit: KitPrimitivesOf<"Button" | "IconButton" | "TextInput" | "Popover" | "Divider"> & {
     readonly deleteIcon: ReactNode;
+    readonly usePartClass?: KitUsePartClass;
 }, useLook: () => KitSavedViewsLook): (props: Readonly<SavedViewsSlotProps>) => ReactElement;
 
 // @public
