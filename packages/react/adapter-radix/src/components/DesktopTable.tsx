@@ -1,119 +1,32 @@
-/** The desktop `<table>`: header, pinned columns, rows and summary. */
-import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
+/** The desktop `<table>`, drawn by the binding with Radix Themes' table elements. */
 import {
-  cellFlashAttr,
-  cellHighlightStyle,
-  cellSpanMark,
-  columnFlexShares,
-  columnGroupHeaderCaption,
-  columnSizeStyle,
-  ColumnSpacer,
-  createDesktopRow,
-  type DesktopHeaderLeaf,
-  type DesktopRowWiring,
-  DesktopTableChrome,
-  type Direction,
-  EXTRA_OVER_SPAN_ROW_STYLE,
-  EXTRA_OVER_SPAN_STYLE,
-  EXTRA_ROW_PARTS,
+  createDesktopTable,
   groupedHeaderAlign,
   groupedHeaderCellStyle,
-  groupedHeaderLabelStyle,
-  type HtmlGroupedHeaderCell,
-  logicalAlign,
-  mergedCellStyle,
+  type KitCheckboxProps,
+  type KitDesktopCellProps,
+  type KitDesktopHeaderCellProps,
+  type KitDesktopPaint,
+  type KitDesktopRowProps,
+  type KitSortLabelProps,
   PIN_Z,
-  PINNED_SUMMARY_BOTTOM_PART,
-  PINNED_SUMMARY_TOP_PART,
   pinnedEdgeCellStyle,
-  type PinSide,
-  REORDER_COLUMN_WIDTH,
-  resolveRowEditTrigger,
-  rowEditConflict,
-  type SharedTableRenderProps,
   sortArrow,
-  type TableLabels,
-  useDesktopTableAssembly,
 } from "@adapttable/react/adapter";
 import { Box, Table, Text } from "@radix-ui/themes";
 import {
   type ComponentProps,
   type CSSProperties,
-  type ReactElement,
   type ReactNode,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
 } from "react";
 
-import type { RadixAccentColor } from "../types";
-import {
-  OptionalColumnGroupToggle,
-  OptionalColumnHeaderRename,
-  OptionalColumnSelect,
-  OptionalEditableCell,
-  OptionalExpandToggle,
-  OptionalFillHandle,
-  OptionalFilterHeader,
-  OptionalGroupHeaderRow,
-  OptionalRowEditActions,
-  OptionalRowReorderHandle,
-  OptionalTreeCell,
-} from "./featureSlots";
-import { Checkbox } from "./primitives";
+import { Checkbox as UiCheckbox } from "./primitives";
 import { RowActionButtons } from "./RowActionButtons";
 
-function ExtraSlotRow({
-  kind,
-  colSpan,
-  render,
-  labels,
-  fillStyle,
-}: Readonly<{
-  kind: "separator" | "fullWidth";
-  colSpan: number;
-  render?: () => ReactNode;
-  labels: TableLabels;
-  fillStyle?: CSSProperties;
-}>) {
-  const parts = EXTRA_ROW_PARTS[kind];
-  return (
-    <Table.Row
-      data-adapttable-part={parts.row}
-      style={EXTRA_OVER_SPAN_ROW_STYLE}
-    >
-      <Table.Cell
-        colSpan={colSpan}
-        data-adapttable-part={parts.cell}
-        role={kind === "separator" ? "separator" : undefined}
-        aria-label={kind === "separator" ? labels.rowSeparator : undefined}
-        style={{ ...EXTRA_OVER_SPAN_STYLE, ...fillStyle }}
-      >
-        {kind === "fullWidth" ? render?.() : null}
-      </Table.Cell>
-    </Table.Row>
-  );
-}
-
-type RadixSize = "1" | "2" | "3";
-
-const EXPANSION_WIDTH = 32;
-const SELECTION_WIDTH = 48;
-const ACTIONS_WIDTH = 120;
-const KIT_WIDTHS = {
-  expansion: EXPANSION_WIDTH,
-  selection: SELECTION_WIDTH,
-  actions: ACTIONS_WIDTH,
-} as const;
-
-function When({
-  show,
-  children,
-}: Readonly<{ show: boolean; children: ReactNode }>) {
-  if (!show) return null;
-  return children;
-}
+type TableSize = "1" | "2" | "3";
 
 /** Opaque background for sticky/pinned cells (the panel surface). */
 const PIN_BG = "var(--color-background)";
@@ -172,431 +85,195 @@ const STICKY_FIX_CSS =
   `.rt-TableRoot[dir="rtl"] .rt-r-ta-left{text-align:right}` +
   `.rt-TableRoot[dir="rtl"] .rt-r-ta-right{text-align:left}`;
 
-export interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
-  /** Class hook for the table (desktop) / each card (mobile). */
-  className?: string;
-  /** The kit's size token for the table. */
-  size: RadixSize;
-  /** The kit's accent, so chrome matches the table. */
-  accentColor?: RadixAccentColor;
-  /** Text direction — flips the expand chevron for RTL. */
-  dir?: Direction;
-  /**
-   * The injected actions column is end-pinned (via the Columns menu), so
-   * its cells stick to the inline end even with zero data columns pinned.
-   */
-  actionsPinned?: boolean;
-}
-
-const justifyFor = logicalAlign;
-const sortGlyph = (sort: unknown): string => sortArrow(sort) + "\uFE0E";
-const edgeCellStyle = (side: PinSide, active: boolean, z: number, shift = 0) =>
-  pinnedEdgeCellStyle(side, active, z, PIN_BG, shift);
-
-interface DesktopRowProps<TRow> extends DesktopRowWiring<TRow> {
-  size: RadixSize;
-  accentColor?: RadixAccentColor;
-  dir?: Direction;
-}
-
-function rowExtrasEqual<TRow>(
-  prev: Readonly<DesktopRowProps<TRow>>,
-  next: Readonly<DesktopRowProps<TRow>>
-): boolean {
-  return (
-    prev.size === next.size &&
-    prev.dir === next.dir &&
-    prev.accentColor === next.accentColor
-  );
-}
-
-const SUMMARY_CELL_STYLE = { fontWeight: "var(--font-weight-bold)" } as const;
-
-function DesktopRowBase<TRow>(
-  props: Readonly<DesktopRowProps<TRow>>
-): ReactElement {
-  const {
-    row,
-    index,
-    id,
-    gridFocus,
-    columns,
-    bodyCells,
-    labels,
-    selected,
-    expanded,
-    showActions,
-    showReorder,
-    rowReorder,
-    windowStart,
-    rowCount,
-    reorderPinned,
-    rowActions,
-    rowActionsLayout,
-    cellSpanAppearance,
-    renderRowActions,
-    confirm,
-    columnSpan,
-    columnSpacers,
-    treeEntry,
-    treeColumnKey: treeKey,
-    onToggleTree,
-    hasStartPin,
-    hasEndPin,
-    actionsPinned,
-    rowClass,
-    isCellFlashing,
-    hasPrefetch,
-    editing,
-    rows,
-    getRowId,
-    onPrefetch,
-    onToggleSelect,
-    onToggleExpand,
-    renderDetail,
-    focusIndex,
-    edgeRowPin,
-    measureRef,
-    detailMeasureRef,
-    rowDomProps,
-    bodyPinStyle,
-    bodyPinSide,
-    dir,
-    pinPart,
-    rowPinSide,
-  } = props;
-  // A pinned row sticks, so its leading and trailing cells need the surface
-  // too: the rows scrolling beneath must not show through them.
-  const edgeRowPaint =
-    rowPinSide === undefined
-      ? edgeRowPin
-      : { ...edgeRowPin, background: PIN_BG };
-  // A pinned total is the host's figure, not a person: it reads bold.
-  const summaryRow =
-    pinPart === PINNED_SUMMARY_TOP_PART ||
-    pinPart === PINNED_SUMMARY_BOTTOM_PART;
-  const expandable = expanded !== undefined;
-  const dataPinStyle = (key: string) => {
-    const pin = bodyPinStyle(key);
-    if (!pin) return undefined;
-    return { ...pin, background: pin.background ?? PIN_BG };
+/** A header that sticks over the rows, on the page background. */
+function stickify(
+  base: CSSProperties | undefined,
+  stickyHeader: boolean,
+  top: number
+): CSSProperties | undefined {
+  if (!stickyHeader) return base;
+  if (base?.position === "sticky") return { ...base, top, background: PIN_BG };
+  return {
+    ...base,
+    position: "sticky",
+    top,
+    zIndex: PIN_Z.header,
+    background: PIN_BG,
   };
-  const rowEdit = resolveRowEditTrigger(
-    rowActions,
-    editing?.rowEditing,
-    row,
-    id
-  );
-  const rowConflict = rowEditConflict(editing, id);
+}
+
+/**
+ * The paint: the panel surface behind every rail, pinned cell and pinned
+ * row's rail, and the kit's tint on a selected cell.
+ */
+function usePaint(stickyHeader: boolean): KitDesktopPaint {
+  return {
+    rail: (side, pinned, inset, row) => ({
+      ...pinnedEdgeCellStyle(side, pinned, PIN_Z.body, PIN_BG, inset),
+      ...(row.rowPinned ? { background: PIN_BG } : undefined),
+    }),
+    cell: (pin) =>
+      pin ? { ...pin, background: pin.background ?? PIN_BG } : undefined,
+    selectedCell: { background: "var(--accent-a3)" },
+    // A pinned total reads in the theme's bold weight.
+    summaryCell: { fontWeight: "var(--font-weight-bold)" },
+    headRail: (side, pinned, inset, pin) =>
+      stickify(
+        pinnedEdgeCellStyle(side, pinned, PIN_Z.headerPinned, PIN_BG, inset),
+        stickyHeader,
+        pin.headerStickTop
+      ),
+    leaf: (leaf, pin) =>
+      stickify(
+        { ...leaf.style, ...leaf.size },
+        stickyHeader,
+        pin.headerStickTop
+      ),
+    group: (cell) => ({
+      textAlign: groupedHeaderAlign(cell.cell.align),
+      ...groupedHeaderCellStyle(
+        cell,
+        "var(--gray-a6, color-mix(in srgb, currentColor 22%, transparent))"
+      ),
+    }),
+    resizeHandle: (style) => style,
+    // The caption sits in the header cell's own flow.
+    captionRow: () => CAPTION_IN_FLOW,
+  };
+}
+
+const CAPTION_IN_FLOW: CSSProperties = { display: "contents" };
+
+/** A body row: a selected one takes the kit's grey tint. */
+export function Row({
+  kind,
+  elementRef,
+  selected,
+  style,
+  ...rest
+}: Readonly<KitDesktopRowProps>) {
+  "use no memo";
+  if (kind === "summary")
+    return (
+      <Table.Row ref={elementRef} data-summary="" style={style} {...rest} />
+    );
+  if (kind !== "body")
+    return <Table.Row ref={elementRef} style={style} {...rest} />;
   return (
-    <>
-      <Table.Row
-        {...rowDomProps}
-        ref={measureRef}
-        className={rowClass}
-        style={{
-          background: selected ? "var(--gray-a3)" : undefined,
-          ...(rowDomProps.style as CSSProperties | undefined),
-        }}
-        onMouseEnter={hasPrefetch ? () => onPrefetch(row) : undefined}
-      >
-        {expandable && (
-          <Table.Cell
-            data-adapttable-part="expand-cell"
-            style={{
-              ...edgeCellStyle("start", hasStartPin, PIN_Z.body),
-              ...edgeRowPaint,
-            }}
-          >
-            <OptionalExpandToggle
-              id={id}
-              expanded={Boolean(expanded)}
-              onToggle={onToggleExpand}
-              dir={dir}
-              expandLabel={labels.expandRow}
-              collapseLabel={labels.collapseRow}
-            />
-          </Table.Cell>
-        )}
-        {showReorder && rowReorder && (
-          <Table.Cell
-            data-adapttable-part="reorder-cell"
-            style={{
-              ...edgeCellStyle(
-                "start",
-                hasStartPin || reorderPinned,
-                PIN_Z.body,
-                expandable ? EXPANSION_WIDTH : 0
-              ),
-              ...edgeRowPaint,
-            }}
-          >
-            <OptionalRowReorderHandle
-              reorder={rowReorder}
-              labels={labels}
-              rowId={id}
-              localIndex={index}
-              row={row}
-              windowStart={windowStart}
-              rowCount={rowCount}
-            />
-          </Table.Cell>
-        )}
-        {selected !== undefined && (
-          <Table.Cell
-            data-adapttable-part="selection-cell"
-            style={{
-              ...edgeCellStyle(
-                "start",
-                hasStartPin,
-                PIN_Z.body,
-                (expandable ? EXPANSION_WIDTH : 0) +
-                  (showReorder ? REORDER_COLUMN_WIDTH : 0)
-              ),
-              ...edgeRowPaint,
-            }}
-          >
-            <Checkbox
-              aria-label={labels.selectRow}
-              checked={selected}
-              onToggle={() => onToggleSelect(id)}
-            />
-          </Table.Cell>
-        )}
-        {columnSpacers && (
-          <ColumnSpacer width={columnSpacers.start} side="start" />
-        )}
-        {bodyCells.map((cell) => {
-          const { column, columnIndex, colSpan, rowSpan } = cell;
-          const focusProps = gridFocus?.getCellPropsAt(focusIndex, columnIndex);
-          return (
-            <Table.Cell
-              key={column.key}
-              colSpan={colSpan > 1 ? colSpan : undefined}
-              rowSpan={rowSpan > 1 ? rowSpan : undefined}
-              data-column-key={column.key}
-              data-pinned={bodyPinSide(column.key)}
-              data-adapttable-part="cell"
-              data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
-              data-cell-span={cellSpanMark(colSpan, rowSpan)}
-              {...focusProps}
-              justify={
-                mergedCellStyle(colSpan, rowSpan, cellSpanAppearance)
-                  ? "center"
-                  : justifyFor(column.align)
-              }
-              style={cellHighlightStyle(
-                focusProps,
-                {
-                  ...dataPinStyle(column.key),
-                  ...mergedCellStyle(colSpan, rowSpan, cellSpanAppearance),
-                  ...(summaryRow ? SUMMARY_CELL_STYLE : undefined),
-                },
-                {
-                  background: "var(--accent-a3)",
-                }
-              )}
-            >
-              <OptionalTreeCell
-                entry={treeEntry}
-                columnKey={column.key}
-                treeColumnKey={treeKey}
-                labels={labels}
-                onToggle={onToggleTree}
-              >
-                <OptionalEditableCell
-                  editing={editing}
-                  row={row}
-                  column={column as ColumnDef<TRow>}
-                  rowId={id}
-                  rowIndex={focusIndex}
-                  rows={rows}
-                  columns={columns}
-                  rowKey={getRowId}
-                  editLabel={labels.editCell}
-                  undoLabel={labels.undoEdit}
-                />
-              </OptionalTreeCell>
-              <OptionalFillHandle
-                focus={gridFocus}
-                windowIndex={focusIndex}
-                col={columnIndex}
-              />
-            </Table.Cell>
-          );
-        })}
-        {columnSpacers && <ColumnSpacer width={columnSpacers.end} side="end" />}
-        {showActions && (
-          <Table.Cell
-            data-adapttable-part="actions-cell"
-            justify="end"
-            style={{
-              ...edgeCellStyle("end", hasEndPin || actionsPinned, PIN_Z.body),
-              ...edgeRowPaint,
-            }}
-          >
-            {editing?.rowEditing && (
-              <OptionalRowEditActions
-                rowEditing={editing.rowEditing}
-                row={row}
-                rowId={id}
-                showBegin={rowEdit.showBegin}
-                icons={editing.rowEditIcons}
-                conflict={rowConflict}
-                labels={labels}
-              />
-            )}
-            {rowEdit.actions.length > 0 && (
-              <RowActionButtons
-                row={row}
-                actions={rowEdit.actions}
-                confirm={confirm}
-                labels={labels}
-                layout={rowActionsLayout}
-                render={renderRowActions}
-              />
-            )}
-          </Table.Cell>
-        )}
-      </Table.Row>
-      {expandable && expanded && (
-        <Table.Row ref={detailMeasureRef} data-adapttable-part="detail-row">
-          <Table.Cell colSpan={columnSpan} data-adapttable-part="detail-cell">
-            {renderDetail(row)}
-          </Table.Cell>
-        </Table.Row>
-      )}
-    </>
+    <Table.Row
+      ref={elementRef}
+      style={{
+        background: selected ? "var(--gray-a3)" : undefined,
+        ...style,
+      }}
+      {...rest}
+    />
   );
 }
 
-function LeafHeader<TRow>({
-  leaf,
-  stickify,
-  flexShares,
-  columnWidths,
-  filterRegistry,
-  closeHeaderFilterOnSelect,
-  source,
-  labels,
-  resizeHandleStyle,
-  onRenameColumn,
-}: Readonly<{
-  leaf: DesktopHeaderLeaf<TRow>;
-  stickify: (base: CSSProperties | undefined) => CSSProperties | undefined;
-  flexShares: ReturnType<typeof columnFlexShares>;
-  columnWidths: SharedTableRenderProps<TRow>["columnWidths"];
-  filterRegistry: SharedTableRenderProps<TRow>["filterRegistry"];
-  closeHeaderFilterOnSelect: boolean | undefined;
-  source: SharedTableRenderProps<TRow>["table"]["source"];
-  labels: Required<TableLabels>;
-  resizeHandleStyle: CSSProperties;
-  onRenameColumn: SharedTableRenderProps<TRow>["onRenameColumn"];
-}>): ReactElement {
-  const { column } = leaf;
-  const canRename = column.renameable === true && onRenameColumn !== undefined;
-  const ariaSort = leaf.headerProps["aria-sort"] as
-    "ascending" | "descending" | "none" | undefined;
-  const style = stickify({
-    ...leaf.style,
-    ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),
-  });
-  const caption = column.sortable ? (
+/** The kit's justify hook for a cell aligned by its column. */
+function justifyOf(
+  align: CSSProperties["textAlign"]
+): "start" | "center" | "end" | undefined {
+  return align === "start" || align === "center" || align === "end"
+    ? align
+    : undefined;
+}
+
+/** A body or summary cell, justified as its column; actions end the row. */
+export function Cell({
+  kind,
+  width: _width,
+  ...rest
+}: Readonly<KitDesktopCellProps>) {
+  "use no memo";
+  if (kind === "actions" && rest["data-adapttable-part"] === "actions-cell")
+    return <Table.Cell justify="end" {...rest} />;
+  return <Table.Cell justify={justifyOf(rest.style?.textAlign)} {...rest} />;
+}
+
+/** A header cell, justified as its column; the actions header ends its row. */
+function HeaderCell({
+  kind,
+  railWidth: _railWidth,
+  ...rest
+}: Readonly<KitDesktopHeaderCellProps>) {
+  "use no memo";
+  if (kind === "actions")
+    return <Table.ColumnHeaderCell justify="end" {...rest} />;
+  return (
+    <Table.ColumnHeaderCell
+      justify={justifyOf(rest.style?.textAlign)}
+      {...rest}
+    />
+  );
+}
+
+const SUMMARY_FOOT: CSSProperties = { verticalAlign: "inherit" };
+
+function Foot(
+  props: Readonly<{ "data-adapttable-part": string; children: ReactNode }>
+) {
+  "use no memo";
+  return <tfoot style={SUMMARY_FOOT} {...props} />;
+}
+
+const ARIA_SORT = { asc: "ascending", desc: "descending" } as const;
+
+const SORT_BUTTON: CSSProperties = {
+  cursor: "pointer",
+  font: "inherit",
+  color: "inherit",
+  background: "none",
+  border: 0,
+  padding: 0,
+  display: "inline-flex",
+  alignItems: "center",
+};
+
+const SORT_INDEX: CSSProperties = {
+  borderRadius: "9999px",
+  padding: "0 0.4em",
+  background: "var(--gray-a3)",
+};
+
+/** The caption as a bare button with an arrow and a level badge. */
+function SortLabel({
+  active,
+  dir,
+  index,
+  title,
+  buttonProps,
+  children,
+}: Readonly<KitSortLabelProps>) {
+  "use no memo";
+  return (
     <button
       type="button"
       className="rt-reset"
-      style={{
-        cursor: "pointer",
-        font: "inherit",
-        color: "inherit",
-        background: "none",
-        border: 0,
-        padding: 0,
-        display: "inline-flex",
-        alignItems: "center",
-      }}
-      aria-label={`${labels.sortBy}: ${leaf.columnName}`}
-      onClick={leaf.sortButtonProps.onClick}
-      title={column.headerTooltip}
+      style={SORT_BUTTON}
+      aria-label={buttonProps["aria-label"]}
+      onClick={buttonProps.onClick}
+      title={title}
     >
-      {leaf.caption}
+      {children}
       <Text as="span" aria-hidden>
-        {sortGlyph(ariaSort)}
+        {sortArrow(active && dir ? ARIA_SORT[dir] : "none") + "︎"}
       </Text>
-      {leaf.sortIndex !== undefined && (
+      {index !== undefined && (
         <Text
           as="span"
           aria-hidden
-          data-sort-index={leaf.sortIndex}
+          data-sort-index={index}
           size="1"
           weight="bold"
           ml="1"
-          style={{
-            borderRadius: "9999px",
-            padding: "0 0.4em",
-            background: "var(--gray-a3)",
-          }}
+          style={SORT_INDEX}
         >
-          {leaf.sortIndex}
+          {index}
         </Text>
       )}
     </button>
-  ) : (
-    <span title={column.headerTooltip}>{leaf.caption}</span>
-  );
-  const captionControl = (
-    <span data-adapttable-part="header-caption-control">{caption}</span>
-  );
-  return (
-    <Table.ColumnHeaderCell
-      key={column.key}
-      data-adapttable-part="header-cell"
-      // Every header prop core states, in full. Cherry-picking named fields
-      // meant a prop core added reached only the kits that happened to name
-      // it; the kit's own props below still win where they overlap.
-      {...leaf.headerProps}
-      {...leaf.columnHeaderProps}
-      justify={justifyFor(column.align)}
-      rowSpan={leaf.rowSpan > 1 ? leaf.rowSpan : undefined}
-      style={style}
-    >
-      {canRename ? (
-        <OptionalColumnHeaderRename
-          columnKey={column.key}
-          name={leaf.columnName}
-          labels={labels}
-          onRenameColumn={onRenameColumn}
-        >
-          {captionControl}
-        </OptionalColumnHeaderRename>
-      ) : (
-        captionControl
-      )}
-      {leaf.showColumnCheckbox && leaf.onToggleColumn ? (
-        <OptionalColumnSelect
-          label={leaf.columnSelectAriaLabel}
-          checked={leaf.columnCheckboxChecked}
-          onToggle={leaf.onToggleColumn}
-        />
-      ) : null}
-      {column.headerActions ? (
-        <span data-adapttable-part="header-actions">
-          {column.headerActions}
-        </span>
-      ) : null}
-      {leaf.headerDef ? (
-        <OptionalFilterHeader
-          def={leaf.headerDef}
-          source={source}
-          labels={labels}
-          registry={filterRegistry}
-          closeOnSelect={closeHeaderFilterOnSelect}
-        />
-      ) : null}
-      {leaf.resizeHandleProps && (
-        <span style={resizeHandleStyle} {...leaf.resizeHandleProps} />
-      )}
-    </Table.ColumnHeaderCell>
   );
 }
 
@@ -629,264 +306,101 @@ function RadixRowHost(props: ComponentProps<typeof Table.Row>) {
   return <Table.Row {...props} />;
 }
 
-/** Desktop Radix Themes table. */
-export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
-  // The compiler's cache around these slots is larger than the slots.
+const HOSTS = {
+  ScrollBox: RadixScrollHost,
+  Table: RadixTableHost,
+  Head: RadixHeadHost,
+  Body: RadixBodyHost,
+  Row: RadixRowHost,
+};
+
+/** The selection checkboxes, at Radix's default size. */
+function Checkbox({
+  checked,
+  onCheckedChange,
+  label: _label,
+  ...rest
+}: Readonly<KitCheckboxProps>) {
   "use no memo";
-  const {
-    size,
-    accentColor,
-    dir,
-    className,
-    filterRegistry,
-    closeHeaderFilterOnSelect,
-    columnWidths,
-    fitColumns,
-    stickyHeader = false,
-    maxHeight,
-  } = props;
-  const assembly = useDesktopTableAssembly(props, { widths: KIT_WIDTHS });
-  const Row = useMemo(
-    () =>
-      createDesktopRow<TRow, DesktopRowProps<TRow>>(
-        DesktopRowBase,
-        rowExtrasEqual
-      ),
-    []
-  );
-  const {
-    model,
-    summary,
-    showColumnFooter,
-    header,
-    pin,
-    scroll,
-    tableStyle,
-    tableProps,
-    gridProps,
-    callbacks,
-    resizeHandleStyle,
-  } = assembly;
-  const {
-    columns,
-    selection,
-    labels,
-    showActions,
-    showReorder,
-    leadingCells,
-    columnSpacers,
-  } = model;
-
-  const flexShares = columnFlexShares({
-    columns,
-    fitColumns,
-    widths: columnWidths,
-  });
-  const pageStick = Boolean(stickyHeader) && !pin.inScrollBox;
-  const stickify = (
-    base: CSSProperties | undefined
-  ): CSSProperties | undefined => {
-    if (!stickyHeader) return base;
-    const top = pin.inScrollBox ? 0 : pin.headerStickTop;
-    if (base?.position === "sticky")
-      return { ...base, top, background: PIN_BG };
-    return {
-      ...base,
-      position: "sticky",
-      top,
-      zIndex: PIN_Z.header,
-      background: PIN_BG,
-    };
-  };
-  const tableRootRef = useRef<HTMLDivElement | null>(null);
-  const nameTableElement = useCallback((node: HTMLDivElement | null) => {
-    tableRootRef.current = node;
-    node?.querySelector("table")?.setAttribute("data-adapttable-part", "table");
-  }, []);
-  // Radix's `Table.Root` spreads every prop it does not recognise onto its own
-  // scroll wrapper, so the grid semantics would land on a div with no role:
-  // `aria-rowcount` would state the dataset size to nothing and `aria-label`
-  // would name nothing. There is no prop route to the inner element, so mirror
-  // them onto the `<table>` the wrapper owns and keep them in step as the
-  // window moves.
-  // Everything the effect below owns is withheld from the wrapper, so exactly
-  // one element claims the grid. `onKeyDown` stays on the wrapper — key events
-  // bubble out of the table. The focus container ref is withheld too: Radix
-  // takes a single ref, and this component already needs it to reach the inner
-  // element, so the effect hands core the same node instead.
-  const {
-    role: gridRole,
-    "aria-rowcount": gridRowCount,
-    "aria-colcount": gridColCount,
-    ref: focusContainerRef,
-    ...wrapperGridProps
-  } = gridProps as Record<string, unknown> & {
-    role?: string;
-    "aria-rowcount"?: number;
-    "aria-colcount"?: number;
-    ref?: (node: HTMLElement | null) => void;
-  };
-  const gridLabel = tableProps["aria-label"];
-  useEffect(() => {
-    const root = tableRootRef.current;
-    focusContainerRef?.(root);
-    const element = root?.querySelector("table");
-    if (!element) return;
-    const apply = (name: string, value: string | number | undefined): void => {
-      if (value === undefined) element.removeAttribute(name);
-      else element.setAttribute(name, String(value));
-    };
-    apply("role", gridRole);
-    apply("aria-rowcount", gridRowCount);
-    apply("aria-colcount", gridColCount);
-    apply("aria-label", gridLabel);
-  }, [focusContainerRef, gridRole, gridRowCount, gridColCount, gridLabel]);
-  const leafProps = {
-    stickify,
-    flexShares,
-    columnWidths,
-    filterRegistry,
-    closeHeaderFilterOnSelect,
-    source: props.table.source,
-    labels,
-    resizeHandleStyle,
-    onRenameColumn: props.onRenameColumn,
-  };
-
-  const renderPlanCell = (cell: HtmlGroupedHeaderCell): ReactElement => {
-    if (cell.kind === "leaf") {
-      return (
-        <LeafHeader
-          key={cell.key}
-          leaf={header.leaf(
-            columns[cell.columnIndex]!,
-            cell.columnIndex,
-            cell.rowSpan
-          )}
-          {...leafProps}
-        />
-      );
-    }
-    return (
-      <Table.ColumnHeaderCell
-        key={cell.key}
-        colSpan={cell.colSpan}
-        rowSpan={cell.rowSpan > 1 ? cell.rowSpan : undefined}
-        justify={groupedHeaderAlign(cell.cell.align)}
-        data-adapttable-part="header-group-cell"
-        style={groupedHeaderCellStyle(
-          cell,
-          "var(--gray-a6, color-mix(in srgb, currentColor 22%, transparent))"
-        )}
-      >
-        <span style={groupedHeaderLabelStyle()}>
-          {props.onToggleColumnGroup ? (
-            <OptionalColumnGroupToggle
-              cell={cell.cell}
-              labels={labels}
-              onToggle={props.onToggleColumnGroup}
-            />
-          ) : null}
-          {columnGroupHeaderCaption(cell.cell)}
-        </span>
-      </Table.ColumnHeaderCell>
-    );
-  };
-
-  const leadingHeaders = (rowSpan: number): ReactElement => (
-    <>
-      {header.leading.expand && (
-        <Table.ColumnHeaderCell
-          data-adapttable-part="expand-header"
-          aria-label={labels.expandRow}
-          rowSpan={rowSpan > 1 ? rowSpan : undefined}
-          style={stickify(
-            edgeCellStyle("start", pin.hasStartPin, PIN_Z.headerPinned)
-          )}
-        />
-      )}
-      <When show={header.leading.reorder}>
-        <Table.ColumnHeaderCell
-          aria-label={labels.reorderRow}
-          data-adapttable-part="reorder-header"
-          rowSpan={rowSpan > 1 ? rowSpan : undefined}
-          style={stickify(
-            edgeCellStyle(
-              "start",
-              pin.hasStartPin || Boolean(props.reorderPinned),
-              PIN_Z.headerPinned,
-              pin.expansionLead
-            )
-          )}
-        />
-      </When>
-      {header.leading.selection && selection && (
-        <Table.ColumnHeaderCell
-          data-adapttable-part="selection-header"
-          rowSpan={rowSpan > 1 ? rowSpan : undefined}
-          style={stickify(
-            edgeCellStyle(
-              "start",
-              pin.hasStartPin,
-              PIN_Z.headerPinned,
-              pin.selectionLead
-            )
-          )}
-        >
-          <Checkbox
-            aria-label={labels.selectAll}
-            checked={selection.headerState === "all"}
-            indeterminate={selection.headerState === "some"}
-            onToggle={selection.toggleAll}
-          />
-        </Table.ColumnHeaderCell>
-      )}
-      {header.leading.spacerStart && columnSpacers && (
-        <ColumnSpacer width={columnSpacers.start} side="start" as="th" />
-      )}
-    </>
-  );
-
-  const trailingHeaders = (rowSpan: number): ReactElement => (
-    <>
-      {header.trailing.spacerEnd && columnSpacers && (
-        <ColumnSpacer width={columnSpacers.end} side="end" as="th" />
-      )}
-      {header.trailing.actions && (
-        <Table.ColumnHeaderCell
-          data-adapttable-part="actions-header"
-          justify="end"
-          rowSpan={rowSpan > 1 ? rowSpan : undefined}
-          style={stickify(
-            edgeCellStyle(
-              "end",
-              pin.hasEndPin || pin.stickActions,
-              PIN_Z.headerPinned
-            )
-          )}
-        >
-          {labels.actions}
-        </Table.ColumnHeaderCell>
-      )}
-    </>
-  );
-
-  const minWidth =
-    typeof tableStyle?.minWidth === "number" ? tableStyle.minWidth : 0;
-
   return (
-    <DesktopTableChrome
-      assembly={assembly}
-      hosts={{
-        ScrollBox: RadixScrollHost,
-        Table: RadixTableHost,
-        Head: RadixHeadHost,
-        Body: RadixBodyHost,
-        Row: RadixRowHost,
-      }}
-      applyHeaderRowProps={false}
-      beforeTable={<style>{STICKY_FIX_CSS}</style>}
-      scrollBoxProps={{
+    <UiCheckbox
+      checked={checked}
+      onToggle={() => onCheckedChange(!checked)}
+      {...rest}
+    />
+  );
+}
+
+/** Desktop Radix Themes table. */
+export const DesktopTable = /* @__PURE__ */ createDesktopTable<{
+  readonly size: TableSize;
+  readonly className?: string;
+}>({
+  widths: { expansion: 32, selection: 48, actions: 120 },
+  Row,
+  Cell,
+  HeaderCell,
+  Foot,
+  Checkbox,
+  SortLabel,
+  RowActions: RowActionButtons,
+  usePaint,
+  useChrome: (
+    { size, className, maxHeight, stickyHeader, fitColumns, dir },
+    { tableProps, gridProps, tableStyle, pin, scroll }
+  ) => {
+    const minWidth =
+      typeof tableStyle?.minWidth === "number" ? tableStyle.minWidth : 0;
+    const pageStick = Boolean(stickyHeader) && !pin.inScrollBox;
+    const tableRootRef = useRef<HTMLDivElement | null>(null);
+    const nameTableElement = useCallback((node: HTMLDivElement | null) => {
+      tableRootRef.current = node;
+      node
+        ?.querySelector("table")
+        ?.setAttribute("data-adapttable-part", "table");
+    }, []);
+    // Radix's `Table.Root` spreads every prop it does not recognise onto its
+    // own scroll wrapper, so the grid semantics would land on a div with no
+    // role. There is no prop route to the inner element, so they are mirrored
+    // onto the `<table>` the wrapper owns and kept in step as the window
+    // moves. The focus container ref is withheld too: Radix takes a single
+    // ref, which reaches the inner element here, so the effect hands core the
+    // same node.
+    const {
+      role: gridRole,
+      "aria-rowcount": gridRowCount,
+      "aria-colcount": gridColCount,
+      ref: focusContainerRef,
+      ...wrapperGridProps
+    } = gridProps as Record<string, unknown> & {
+      role?: string;
+      "aria-rowcount"?: number;
+      "aria-colcount"?: number;
+      ref?: (node: HTMLElement | null) => void;
+    };
+    const gridLabel = tableProps["aria-label"];
+    useEffect(() => {
+      const root = tableRootRef.current;
+      focusContainerRef?.(root);
+      const element = root?.querySelector("table");
+      if (!element) return;
+      const apply = (
+        name: string,
+        value: string | number | undefined
+      ): void => {
+        if (value === undefined) element.removeAttribute(name);
+        else element.setAttribute(name, String(value));
+      };
+      apply("role", gridRole);
+      apply("aria-rowcount", gridRowCount);
+      apply("aria-colcount", gridColCount);
+      apply("aria-label", gridLabel);
+    }, [focusContainerRef, gridRole, gridRowCount, gridColCount, gridLabel]);
+    return {
+      hosts: HOSTS,
+      applyHeaderRowProps: false,
+      beforeTable: <style>{STICKY_FIX_CSS}</style>,
+      scrollBoxProps: {
         ref: (node: HTMLDivElement | null) => {
           scroll.bindScrollBox(node);
           node?.style.setProperty(
@@ -905,8 +419,8 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
               : undefined,
           overflowY: maxHeight == null ? undefined : "auto",
         },
-      }}
-      tableProps={{
+      },
+      tableProps: {
         ...wrapperGridProps,
         size,
         variant: "ghost",
@@ -922,84 +436,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
         "aria-label": undefined,
         style: undefined,
         "data-adapttable-part": gridRole === "grid" ? "grid" : undefined,
-      }}
-      renderLeading={leadingHeaders}
-      renderTrailing={trailingHeaders}
-      renderPlanCell={renderPlanCell}
-      renderLeaf={(leaf, column) => (
-        <LeafHeader key={column.key} leaf={leaf} {...leafProps} />
-      )}
-      renderRow={(slot) => (
-        <Row
-          key={slot.key}
-          {...slot.wiring}
-          size={size}
-          accentColor={accentColor}
-          dir={dir}
-        />
-      )}
-      renderGroup={(slot) => (
-        <OptionalGroupHeaderRow
-          key={slot.key}
-          entry={slot.entry}
-          columns={columns}
-          leadingCells={leadingCells}
-          showActions={showActions}
-          getCellProps={props.table.getCellProps}
-          selection={selection}
-          labels={labels}
-          onToggleCollapse={callbacks.onToggleGroup}
-          onShowMore={props.grouping?.showMore ?? (() => undefined)}
-        />
-      )}
-      renderExtra={(slot) => (
-        <ExtraSlotRow
-          key={slot.key}
-          kind={slot.extraKind}
-          colSpan={slot.colSpan}
-          render={slot.render}
-          labels={labels}
-          fillStyle={slot.fillStyle}
-        />
-      )}
-      renderVirtualPad={(slot) => (
-        <Table.Row key={slot.key} aria-hidden>
-          <Table.Cell
-            colSpan={slot.colSpan}
-            style={{ height: slot.height, padding: 0 }}
-          />
-        </Table.Row>
-      )}
-      renderSummary={() =>
-        showColumnFooter ? (
-          <tfoot
-            data-adapttable-part="summary"
-            style={{ verticalAlign: "inherit" }}
-          >
-            <Table.Row data-summary="" data-adapttable-part="summary-row">
-              {header.leading.expand && (
-                <Table.Cell data-adapttable-part="summary-cell" />
-              )}
-              <When show={showReorder}>
-                <Table.Cell data-adapttable-part="summary-cell" />
-              </When>
-              {selection && <Table.Cell data-adapttable-part="summary-cell" />}
-              {columns.map((column) => (
-                <Table.Cell
-                  key={column.key}
-                  data-adapttable-part="summary-cell"
-                  justify={justifyFor(column.align)}
-                >
-                  {resolveColumnFooter(column, summary?.[column.key])}
-                </Table.Cell>
-              ))}
-              {showActions && (
-                <Table.Cell data-adapttable-part="summary-cell" />
-              )}
-            </Table.Row>
-          </tfoot>
-        ) : null
-      }
-    />
-  );
-}
+      },
+    };
+  },
+});
