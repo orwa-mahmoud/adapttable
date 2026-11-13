@@ -7,7 +7,7 @@ import {
   type TableViewStore,
   type UrlStateAdapter,
 } from "@adapttable/core";
-import { retainItems,type TableStore  } from "@adapttable/core/binding";
+import { retainItems, type TableStore } from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,
