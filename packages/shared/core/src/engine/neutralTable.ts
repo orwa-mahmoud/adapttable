@@ -8,6 +8,7 @@ import type {
   TableRevisions,
   TableRowScope,
 } from "../contracts/lifecycle";
+import type { RowCallback } from "../contracts/rowCallback";
 import type { TableSourceCapabilities } from "../contracts/source";
 import type { TableEngine } from "./createTableEngine";
 
@@ -41,10 +42,13 @@ export interface NeutralTable<TRow = unknown> {
   readonly tableId: string;
   readonly revisions: TableRevisions;
   readonly columns: readonly ColumnMetadata<TRow>[];
-  readonly cellValue: (row: TRow, columnKey: string) => unknown;
+  readonly cellValue: RowCallback<
+    [row: NoInfer<TRow>, columnKey: string],
+    unknown
+  >;
   readonly rows: (scope: TableRowScope) => readonly TRow[];
   readonly rowByKey: (rowKey: string) => TRow | undefined;
-  readonly rowKey: (row: TRow) => string;
+  readonly rowKey: RowCallback<[row: NoInfer<TRow>], string>;
   readonly capabilities: TableSourceCapabilities;
   readonly operations: Readonly<Record<string, boolean>>;
   readonly subscribe: TableEngine<TRow>["subscribe"];

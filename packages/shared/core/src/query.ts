@@ -128,6 +128,7 @@ export type {
   ColumnModelEditor,
   ColumnModelFilter,
   FilterValue,
+  RowCallback,
 } from "./columnModel";
 export type {
   ColumnLayoutState,

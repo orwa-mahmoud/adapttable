@@ -99,6 +99,7 @@ export type {
   ColumnModel,
   ColumnModelEditor,
   ColumnModelFilter,
+  RowCallback,
   SortableValue,
 } from "./columnModel";
 export type { DisplayValue } from "./display";

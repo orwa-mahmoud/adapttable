@@ -15286,6 +15286,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "overlayFeatureOptions",
+      "kind": "runtime",
+      "module": "features/featurePatch.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featurePatch.ts#overlayFeatureOptions",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "pendingListSize",
       "kind": "runtime",
       "module": "virtual/viewportState.ts",
@@ -23562,6 +23573,28 @@
       "deprecated": false,
       "identity": "types.ts#RowAction",
       "subpaths": [".", "./binding", "./editing"]
+    },
+    {
+      "name": "RowCallback",
+      "kind": "type",
+      "module": "contracts/rowCallback.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "contracts/rowCallback.ts#RowCallback",
+      "subpaths": [
+        ".",
+        "./binding",
+        "./editing",
+        "./engine",
+        "./formula",
+        "./grouping",
+        "./pdf",
+        "./pivot",
+        "./query",
+        "./xlsx"
+      ]
     },
     {
       "name": "RowEditActionsLayout",

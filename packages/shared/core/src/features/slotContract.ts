@@ -21,6 +21,7 @@ import type {
   ColumnMenuSlotProps,
 } from "../columns/columnMenuModel";
 import type { ColumnModel } from "../contracts/columns";
+import type { RowCallback } from "../contracts/rowCallback";
 import type { BatchEditHandler } from "../editing/batchEditing";
 import type {
   BatchEditBarProps,
@@ -62,7 +63,7 @@ import { featureSlotKey, type RowSlotKey } from "./featureKeys";
  *
  * @public
  */
-export const COLUMN_MENU = featureSlotKey<ColumnMenuSlotProps<never>>(
+export const COLUMN_MENU = featureSlotKey<ColumnMenuSlotProps<unknown>>(
   "column-menu",
   { single: true }
 );
@@ -234,7 +235,7 @@ export const FIND_BAR = featureSlotKey<FindBarProps>("find-bar", {
  *
  * @public
  */
-export const BATCH_EDIT_BAR = featureSlotKey<BatchEditBarProps<never>>(
+export const BATCH_EDIT_BAR = featureSlotKey<BatchEditBarProps<unknown>>(
   "batch-edit-bar",
   { single: true }
 );
@@ -328,7 +329,7 @@ export const BULK_BAR = featureSlotKey<BulkBarSlotProps>("bulk-bar", {
  *
  * @public
  */
-export const FILTERS_FORM = featureSlotKey<FiltersFormSlotProps<never>>(
+export const FILTERS_FORM = featureSlotKey<FiltersFormSlotProps<unknown>>(
   "filters-form",
   { single: true }
 );
@@ -536,7 +537,7 @@ export const FIND_LIVE = featureSlotKey<never>("find-live", {
  * @public
  */
 export interface EditHistoryLiveSlotProps<
-  TRow = never,
+  TRow = unknown,
   THistory = unknown,
   TOptions = unknown,
   TColumn = ColumnModel<TRow>,
@@ -547,7 +548,10 @@ export interface EditHistoryLiveSlotProps<
   /** Columns, for reading a cell's value before it changes. */
   columns: readonly TColumn[];
   /** The host's commit channel. */
-  onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+  onCellEdit?: RowCallback<
+    [row: NoInfer<TRow>, key: string, nextValue: unknown],
+    unknown
+  >;
   /** The host's batch channel, recorded as one gesture per batch. */
   onBatchEdit?: BatchEditHandler<TRow>;
   /** The table; receives history and the recording commit channels. */
@@ -646,7 +650,7 @@ export const CELL_NAV_LIVE = featureSlotKey<never>("cell-nav-live", {
  * @public
  */
 export interface ExportLiveSlotProps<
-  TRow = never,
+  TRow = unknown,
   TExport = unknown,
   TColumn = ColumnModel<TRow>,
   TNode = unknown,
@@ -861,7 +865,7 @@ export const SELECTION_LIVE = featureSlotKey<never>("selection-live", {
  * @public
  */
 export interface SelectionStatsLiveSlotProps<
-  TRow = never,
+  TRow = unknown,
   TColumn = ColumnModel<TRow>,
   TNode = unknown,
 > {
@@ -931,7 +935,7 @@ export const GRID_FOCUS_ANNOUNCER = featureSlotKey<GridFocusAnnouncerSlotProps>(
  *
  * @public
  */
-export const FILTER_HEADER = featureSlotKey<FilterHeaderControlProps<never>>(
+export const FILTER_HEADER = featureSlotKey<FilterHeaderControlProps<unknown>>(
   "filter-header",
   { single: true }
 );
@@ -947,7 +951,7 @@ export const FILTER_HEADER = featureSlotKey<FilterHeaderControlProps<never>>(
  * @public
  */
 export interface EditableCellSlotProps<
-  TRow = never,
+  TRow = unknown,
   TEditing = unknown,
   TColumn = ColumnModel<TRow>,
   TNode = unknown,
@@ -967,7 +971,7 @@ export interface EditableCellSlotProps<
   /** Visible columns in the current view. */
   columns: readonly TColumn[];
   /** Resolve a row's stable key. */
-  rowKey: (row: TRow) => string;
+  rowKey: RowCallback<[row: NoInfer<TRow>], string>;
   /** Accessible label for the editor. */
   editLabel: string;
   /** Accessible undo label. */
@@ -1086,7 +1090,7 @@ export const TOOLBAR_EXTRAS =
  *
  * @public
  */
-export const TREE_CELL = featureSlotKey<TreeCellProps<never>>("tree-cell");
+export const TREE_CELL = featureSlotKey<TreeCellProps<unknown>>("tree-cell");
 
 /**
  * Mobile tree disclosure control.
@@ -1094,7 +1098,7 @@ export const TREE_CELL = featureSlotKey<TreeCellProps<never>>("tree-cell");
  * @public
  */
 export const TREE_TOGGLE =
-  featureSlotKey<TreeToggleProps<never>>("tree-toggle");
+  featureSlotKey<TreeToggleProps<unknown>>("tree-toggle");
 
 /**
  * Save / cancel for a row being edited. One renderer: `editing()` and
@@ -1103,7 +1107,7 @@ export const TREE_TOGGLE =
  *
  * @public
  */
-export const ROW_EDIT_ACTIONS = featureSlotKey<RowEditActionsProps<never>>(
+export const ROW_EDIT_ACTIONS = featureSlotKey<RowEditActionsProps<unknown>>(
   "row-edit-actions",
   { single: true }
 );
@@ -1114,7 +1118,7 @@ export const ROW_EDIT_ACTIONS = featureSlotKey<RowEditActionsProps<never>>(
  * @public
  */
 export const ROW_REORDER_HANDLE =
-  featureSlotKey<RowReorderHandleProps<never>>("row-reorder-handle");
+  featureSlotKey<RowReorderHandleProps<unknown>>("row-reorder-handle");
 
 /**
  * Mobile row-reorder buttons.
@@ -1122,7 +1126,7 @@ export const ROW_REORDER_HANDLE =
  * @public
  */
 export const ROW_REORDER_BUTTONS = featureSlotKey<
-  RowReorderButtonsProps<never>
+  RowReorderButtonsProps<unknown>
 >("row-reorder-buttons");
 
 /**
@@ -1144,7 +1148,7 @@ export const COLUMN_GROUP_TOGGLE = featureSlotKey<ColumnGroupToggleProps>(
  * @public
  */
 export interface GroupHeaderRowSlotProps<
-  TRow = never,
+  TRow = unknown,
   TSelection = unknown,
   TColumn = ColumnModel<TRow>,
 > {
@@ -1189,7 +1193,7 @@ export const GROUP_HEADER_ROW =
  * @public
  */
 export interface GroupHeaderCardSlotProps<
-  TRow = never,
+  TRow = unknown,
   TSelection = unknown,
   TColumn = ColumnModel<TRow>,
 > {

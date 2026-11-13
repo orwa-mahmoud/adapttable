@@ -6,6 +6,7 @@
  * empty. Nothing here is constructed from a registry, and grouping's entry
  * type is imported as a type only.
  */
+import type { RowCallback } from "../contracts/rowCallback";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import { devWarn } from "../utils/devWarn";
 
@@ -41,17 +42,18 @@ export interface GroupingContribution<TRow> {
  */
 export interface EditingContribution<TRow> {
   /** The host callback. A write goes through the host, not the table. */
-  readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+  readonly onCellEdit?: RowCallback<
+    [row: NoInfer<TRow>, key: string, nextValue: unknown],
+    unknown
+  >;
   /**
    * Stage one cell while a batch is open. Absent when batch editing is not
    * composed.
    */
-  readonly stageCell?: (
-    row: TRow,
-    rowId: string,
-    columnKey: string,
-    value: string
-  ) => void;
+  readonly stageCell?: RowCallback<
+    [row: NoInfer<TRow>, rowId: string, columnKey: string, value: string],
+    void
+  >;
 }
 
 /**

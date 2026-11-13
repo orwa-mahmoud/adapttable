@@ -10,6 +10,7 @@
  * host ONE patch. Cancel throws all of it away. The unit changes; nothing else
  * does — the same editors, the same validators, the same save states.
  */
+import type { RowCallback } from "../contracts/rowCallback";
 import type { FeatureHostState } from "../features/currentHost";
 import type { TableStore } from "../state/tableStore";
 import {
@@ -63,7 +64,7 @@ export interface RowEditingState<TRow> {
   /** One column's draft in the open row. */
   draftFor: (columnKey: string) => string;
   /** Open a row, seeding every editable column from its current value. */
-  begin: (row: TRow, rowId: string) => void;
+  begin: RowCallback<[row: NoInfer<TRow>, rowId: string], void>;
   /** Replace one column's draft. */
   setDraft: (columnKey: string, value: string) => void;
   /**
@@ -91,13 +92,19 @@ export interface RowEditingState<TRow> {
    * leaving the drafts alone: the reader keeps what they typed, and the patch
    * still carries it.
    */
-  acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+  acceptSeeds: RowCallback<
+    [row: NoInfer<TRow>, columnKeys: readonly string[]],
+    void
+  >;
   /**
    * Take an incoming row's values for these fields, into both the drafts and
    * what they are measured against — nothing of the reader's is lost, because
    * these are fields they had not typed in, or chose to give up.
    */
-  takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+  takeSeeds: RowCallback<
+    [row: NoInfer<TRow>, columnKeys: readonly string[]],
+    void
+  >;
   /** The table that owns these editors — never a sibling's host. */
   featureHost?: FeatureHostState;
 }
@@ -173,7 +180,7 @@ export interface RowEditStore<TRow> {
   /** Replace the options. */
   readonly configure: (options: RowEditStoreOptions<TRow>) => void;
   /** Open a row; a no-op unless `enabled`. */
-  readonly begin: (row: TRow, rowId: string) => void;
+  readonly begin: RowCallback<[row: NoInfer<TRow>, rowId: string], void>;
   /** Replace one column's draft. */
   readonly setDraft: (columnKey: string, value: string) => void;
   /** Request a save; close on success and retain drafts after an async failure. */
@@ -185,9 +192,15 @@ export interface RowEditStore<TRow> {
   /** What each field is measured against. */
   readonly seeds: () => RowEditDrafts | undefined;
   /** Keep mine: these fields' seeds take the incoming values. */
-  readonly acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+  readonly acceptSeeds: RowCallback<
+    [row: NoInfer<TRow>, columnKeys: readonly string[]],
+    void
+  >;
   /** Take theirs: these fields' seeds and drafts take the incoming values. */
-  readonly takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+  readonly takeSeeds: RowCallback<
+    [row: NoInfer<TRow>, columnKeys: readonly string[]],
+    void
+  >;
 }
 
 /** Every column a reader may edit on a given row. */

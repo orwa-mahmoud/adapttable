@@ -27,7 +27,7 @@ export type ActionApprovalPolicy = "required" | "automatic";
 export interface ActionConfirm<TArg> {
     confirmLabel: string;
     danger?: boolean;
-    message: (arg: TArg) => string;
+    message: RowCallback<[arg: TArg], string>;
     title: string;
 }
 
@@ -430,7 +430,7 @@ export function asSizeEstimator(estimateSize: number | ((index: number) => numbe
 export const BASE_LABELS: Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed">;
 
 // @public
-export const BATCH_EDIT_BAR: FeatureSlotKey<BatchEditBarProps<never>>;
+export const BATCH_EDIT_BAR: FeatureSlotKey<BatchEditBarProps<unknown>>;
 
 // @public
 export interface BatchEditBarProps<TRow> {
@@ -467,21 +467,21 @@ export type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => u
 
 // @public
 export interface BatchEditingState<TRow> {
-    acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    acceptSeeds: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]], void>;
     cancelAll: () => void;
     cancelRow: (rowId: string) => void;
     readonly commit?: EditCommitSnapshot;
     count: number;
-    draftFor: (row: TRow, rowId: string, columnKey: string) => string;
+    draftFor: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string], string>;
     entries: readonly BatchEditEntry[];
     featureHost?: FeatureHostState;
     isChanged: (rowId: string, columnKey: string) => boolean;
     isPending: (rowId: string) => boolean;
     pending: boolean;
     saveAll: () => void;
-    setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
+    setDraft: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string, value: string], void>;
     signature: string;
-    takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    takeSeeds: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]], void>;
 }
 
 // @public
@@ -1050,7 +1050,7 @@ export const COLUMN_HEADER_RENAME: FeatureSlotKey<ColumnHeaderRenameSlotProps<un
 export const COLUMN_LAYOUT_LIVE: RowSlotKey<ChromeExtraDraw>;
 
 // @public
-export const COLUMN_MENU: FeatureSlotKey<ColumnMenuSlotProps<never>>;
+export const COLUMN_MENU: FeatureSlotKey<ColumnMenuSlotProps<unknown>>;
 
 // @public
 export const COLUMN_MENU_LABELS: Pick<Required<TableLabels>, "pinEnd" | "moveStart" | "moveEnd" | "resetColumns" | "autoSizeColumns" | "autoSizeColumn" | "showColumn" | "searchColumns" | "showAllColumns" | "hideAllColumns" | "unpinAllColumns" | "resetColumn" | "columnActions" | "groupByColumn" | "ungroupColumn" | "groupingAggregation">;
@@ -1327,23 +1327,23 @@ export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | 
 
 // @public
 export interface ColumnModel<TRow = unknown> {
-    accessor?: (row: TRow) => unknown;
+    accessor?: RowCallback<[row: NoInfer<TRow>], unknown>;
     aggregatable?: Aggregatable;
     ai?: ColumnAiOptions;
     align?: "start" | "center" | "end";
-    colSpan?: number | ((row: TRow) => number);
-    editable?: boolean | ((row: TRow) => boolean);
+    colSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
+    editable?: boolean | RowCallback<[row: NoInfer<TRow>], boolean>;
     editor?: ColumnModelEditor;
-    editValue?: (row: TRow) => string;
-    exportValue?: (row: TRow) => unknown;
+    editValue?: RowCallback<[row: NoInfer<TRow>], string>;
+    exportValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     filter?: ColumnModelFilter;
     flex?: number;
     formatAggregate?: (value: DisplayValue | undefined, context: AggregateFormatContext) => DisplayValue | undefined;
-    formatValue?: (row: TRow) => string;
+    formatValue?: RowCallback<[row: NoInfer<TRow>], string>;
     group?: string | readonly string[];
     groupable?: boolean;
     groupShow?: ColumnGroupShow;
-    groupValue?: (row: TRow) => unknown;
+    groupValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     header?: string;
     headerTooltip?: string;
     hideOnDesktop?: boolean;
@@ -1358,13 +1358,13 @@ export interface ColumnModel<TRow = unknown> {
     meta?: Record<string, unknown>;
     minWidth?: number;
     mobileLabel?: string;
-    parseValue?: (draft: string, row: TRow) => unknown;
+    parseValue?: RowCallback<[draft: string, row: NoInfer<TRow>], unknown>;
     renameable?: boolean;
     responsivePriority?: number;
-    rowSpan?: number | ((row: TRow) => number);
+    rowSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
     sortable?: boolean;
-    sortValue?: (row: TRow) => SortableValue;
-    validate?: (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
+    sortValue?: RowCallback<[row: NoInfer<TRow>], SortableValue>;
+    validate?: RowCallback<[value: unknown, row: NoInfer<TRow>], string | undefined | Promise<string | undefined>>;
     width?: number | string;
 }
 
@@ -1599,7 +1599,7 @@ export interface ContextMenuItemProps {
 }
 
 // @public
-export type ContextMenuItemsFactory<TRow = unknown> = (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
+export type ContextMenuItemsFactory<TRow = unknown> = RowCallback<[target: ContextMenuTarget<TRow>], readonly ContextMenuItem[]>;
 
 // @public
 export type ContextMenuLiveSlotProps<TOptions = unknown, TNode = unknown> = TOptions & {
@@ -1883,11 +1883,11 @@ export interface CreateTableEngineOptions<TRow> {
         readonly extra?: ExtraFilters;
         readonly groupBy?: string;
     };
-    readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
-    readonly getSearchText?: (row: TRow) => string;
+    readonly filterFn?: RowCallback<[row: NoInfer<TRow>, extra: ExtraFilters], boolean>;
+    readonly getSearchText?: RowCallback<[row: NoInfer<TRow>], string>;
     readonly locale?: string;
     readonly paginationMode?: "paged" | "infinite";
-    readonly rowKey: (row: TRow) => string;
+    readonly rowKey: RowCallback<[row: NoInfer<TRow>], string>;
     readonly tableId?: string;
 }
 
@@ -2546,7 +2546,7 @@ export function drawnSlotFills<TNode>(slot: {
 export const EDIT_HISTORY_LIVE: RowSlotKey<EditHistoryLiveDraw>;
 
 // @public
-export const EDITABLE_CELL: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
+export const EDITABLE_CELL: FeatureSlotKey<EditableCellSlotProps<unknown, unknown, ColumnModel<unknown>, unknown>>;
 
 // @public
 export interface EditableCellActivateProps<TNode = unknown> {
@@ -2584,7 +2584,7 @@ export interface EditableCellButtonProps {
 }
 
 // @public
-export interface EditableCellSlotProps<TRow = never, TEditing = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
+export interface EditableCellSlotProps<TRow = unknown, TEditing = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
     column: TColumn;
     columns: readonly TColumn[];
     display?: TNode;
@@ -2593,7 +2593,7 @@ export interface EditableCellSlotProps<TRow = never, TEditing = unknown, TColumn
     row: TRow;
     rowId: string;
     rowIndex: number;
-    rowKey: (row: TRow) => string;
+    rowKey: RowCallback<[row: NoInfer<TRow>], string>;
     rows: readonly TRow[];
     undoLabel?: string;
 }
@@ -2606,23 +2606,13 @@ export interface EditableCellSlots<TNode = unknown> {
 
 // @public
 export interface EditableColumnLike<TRow = unknown> {
-    editable?: boolean | {
-        bivarianceHack(row: TRow): boolean;
-    }["bivarianceHack"];
+    editable?: boolean | RowCallback<[row: NoInfer<TRow>], boolean>;
     editor?: ColumnModelEditor;
-    editValue?: {
-        bivarianceHack(row: TRow): string;
-    }["bivarianceHack"];
+    editValue?: RowCallback<[row: NoInfer<TRow>], string>;
     key: string;
-    parseValue?: {
-        bivarianceHack(draft: string, row: TRow): unknown;
-    }["bivarianceHack"];
-    sortValue?: {
-        bivarianceHack(row: TRow): SortableValue;
-    }["bivarianceHack"];
-    validate?: {
-        bivarianceHack(value: unknown, row: TRow): string | undefined | Promise<string | undefined>;
-    }["bivarianceHack"];
+    parseValue?: RowCallback<[draft: string, row: NoInfer<TRow>], unknown>;
+    sortValue?: RowCallback<[row: NoInfer<TRow>], SortableValue>;
+    validate?: RowCallback<[value: unknown, row: NoInfer<TRow>], string | undefined | Promise<string | undefined>>;
 }
 
 // @public
@@ -2664,7 +2654,7 @@ export type EditHistoryInput = boolean | {
 export type EditHistoryLiveDraw = <TRow, THistory, TOptions, TColumn, TNode>(props: EditHistoryLiveSlotProps<TRow, THistory, TOptions, TColumn, TNode>) => TNode;
 
 // @public
-export interface EditHistoryLiveSlotProps<TRow = never, THistory = unknown, TOptions = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
+export interface EditHistoryLiveSlotProps<TRow = unknown, THistory = unknown, TOptions = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
     children: (result: {
         history: THistory;
         onCellEdit: ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
@@ -2673,7 +2663,7 @@ export interface EditHistoryLiveSlotProps<TRow = never, THistory = unknown, TOpt
     columns: readonly TColumn[];
     editHistory: boolean | TOptions | undefined;
     onBatchEdit?: BatchEditHandler<TRow>;
-    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+    onCellEdit?: RowCallback<[row: NoInfer<TRow>, key: string, nextValue: unknown], unknown>;
 }
 
 // @public
@@ -2684,8 +2674,8 @@ export const EDITING_LIVE: RowSlotKey<ChromeExtraDraw>;
 
 // @public
 export interface EditingContribution<TRow> {
-    readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
-    readonly stageCell?: (row: TRow, rowId: string, columnKey: string, value: string) => void;
+    readonly onCellEdit?: RowCallback<[row: NoInfer<TRow>, key: string, nextValue: unknown], unknown>;
+    readonly stageCell?: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string, value: string], void>;
 }
 
 // @public
@@ -2833,7 +2823,7 @@ export interface ExportInfo<TRow> {
 export type ExportLiveDraw = <TRow, TExport, TColumn, TNode>(props: ExportLiveSlotProps<TRow, TExport, TColumn, TNode>) => TNode;
 
 // @public
-export interface ExportLiveSlotProps<TRow = never, TExport = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
+export interface ExportLiveSlotProps<TRow = unknown, TExport = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
     children: (exportHandler: TExport) => TNode;
     columns: readonly TColumn[];
     context: ExportContext<TRow>;
@@ -3213,7 +3203,7 @@ export const FILTER_DRAWER: FeatureSlotKey<FilterOverlaySlotProps<unknown>>;
 export const FILTER_ENGINE: FeatureStateKey<FilterEngine>;
 
 // @public
-export const FILTER_HEADER: FeatureSlotKey<FilterHeaderControlProps<never>>;
+export const FILTER_HEADER: FeatureSlotKey<FilterHeaderControlProps<unknown>>;
 
 // @public
 export const FILTER_LABELS: Pick<Required<TableLabels>, "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "boolAny" | "boolTrue" | "boolFalse" | "removeFilter" | "filtersDone" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters">;
@@ -3236,7 +3226,7 @@ export function filterColumnMenuRows<TRow>(rows: readonly ColumnMenuRow<TRow>[],
 export interface FilterDef<TRow = unknown> {
     ai?: false | FilterAiOptions;
     column?: string;
-    getValue?: (row: TRow) => unknown;
+    getValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     key: string;
     label?: string;
     options?: FilterOptionsSource;
@@ -3422,7 +3412,7 @@ export interface FilterRuntime<TRow> {
 }
 
 // @public
-export const FILTERS_FORM: FeatureSlotKey<FiltersFormSlotProps<never>>;
+export const FILTERS_FORM: FeatureSlotKey<FiltersFormSlotProps<unknown>>;
 
 // @public
 export const FILTERS_ICON: IconDescriptor;
@@ -3824,10 +3814,10 @@ export interface GridFocusState {
 export const GRIP_ICON: IconDescriptor;
 
 // @public
-export const GROUP_HEADER_CARD: FeatureSlotKey<GroupHeaderCardSlotProps<never, unknown, ColumnModel<never>>>;
+export const GROUP_HEADER_CARD: FeatureSlotKey<GroupHeaderCardSlotProps<unknown, unknown, ColumnModel<unknown>>>;
 
 // @public
-export const GROUP_HEADER_ROW: FeatureSlotKey<GroupHeaderRowSlotProps<never, unknown, ColumnModel<never>>>;
+export const GROUP_HEADER_ROW: FeatureSlotKey<GroupHeaderRowSlotProps<unknown, unknown, ColumnModel<unknown>>>;
 
 // @public
 export type GroupAggregateOps = Readonly<Partial<Record<string, AggregateOperationId | "none">>>;
@@ -3926,7 +3916,7 @@ export function groupedHeaderChildRule(hairline: string): {
 export function groupedHeaderLabelStyle(): CssProperties;
 
 // @public
-export interface GroupHeaderCardSlotProps<TRow = never, TSelection = unknown, TColumn = ColumnModel<TRow>> {
+export interface GroupHeaderCardSlotProps<TRow = unknown, TSelection = unknown, TColumn = ColumnModel<TRow>> {
     columns: readonly TColumn[];
     compact: boolean;
     entry: Extract<GroupedFlatEntry<TRow>, {
@@ -3942,7 +3932,7 @@ export interface GroupHeaderCardSlotProps<TRow = never, TSelection = unknown, TC
 }
 
 // @public
-export interface GroupHeaderRowSlotProps<TRow = never, TSelection = unknown, TColumn = ColumnModel<TRow>> {
+export interface GroupHeaderRowSlotProps<TRow = unknown, TSelection = unknown, TColumn = ColumnModel<TRow>> {
     columns: readonly TColumn[];
     entry: Extract<GroupedFlatEntry<TRow>, {
         kind: "group" | "groupFooter" | "groupMore";
@@ -4719,7 +4709,7 @@ export interface NeutralTable<TRow = unknown> {
     // (undocumented)
     readonly capabilities: TableSourceCapabilities;
     // (undocumented)
-    readonly cellValue: (row: TRow, columnKey: string) => unknown;
+    readonly cellValue: RowCallback<[row: NoInfer<TRow>, columnKey: string], unknown>;
     // (undocumented)
     readonly columns: readonly ColumnMetadata<TRow>[];
     // (undocumented)
@@ -4731,7 +4721,7 @@ export interface NeutralTable<TRow = unknown> {
     // (undocumented)
     readonly rowByKey: (rowKey: string) => TRow | undefined;
     // (undocumented)
-    readonly rowKey: (row: TRow) => string;
+    readonly rowKey: RowCallback<[row: NoInfer<TRow>], string>;
     // (undocumented)
     readonly rows: (scope: TableRowScope) => readonly TRow[];
     // (undocumented)
@@ -4833,6 +4823,9 @@ export function overlayChromeExtras<TShell extends PipelineShell & {
         readonly onColumnRename?: unknown;
     };
 }>(shell: TShell, chrome: OverlayChrome): TShell;
+
+// @public
+export function overlayFeatureOptions<TOptions extends object, TResolved extends TOptions = TOptions>(patches: Readonly<Record<string, unknown>>, featureLabels: readonly Partial<TableLabels>[], options: TOptions): TResolved;
 
 // @public
 export interface PatchFeature<TRow = unknown> extends FeatureRegistration<TRow> {
@@ -5261,7 +5254,7 @@ export const ROW_ACTIONS_LIVE: RowSlotKey<ChromeExtraDraw>;
 export const ROW_DND_MIME = "application/x-adapttable-row";
 
 // @public
-export const ROW_EDIT_ACTIONS: FeatureSlotKey<RowEditActionsProps<never>>;
+export const ROW_EDIT_ACTIONS: FeatureSlotKey<RowEditActionsProps<unknown>>;
 
 // @public
 export const ROW_LABELS: Pick<Required<TableLabels>, "duplicateRow" | "deleteRow" | "deleteRowConfirm" | "moveRowUp" | "moveRowDown" | "rowLifted" | "rowMoved" | "rowReorderCancelled" | "rowMoveOptions" | "moveToGroup" | "moveUnder" | "moveToTopLevel" | "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever" | "moveRejectedSorted" | "moveRejectedCycle" | "moveUnavailable" | "rootLevel" | "pinToTop" | "pinToBottom" | "unpinRow">;
@@ -5275,24 +5268,24 @@ export const ROW_REORDER_ANNOUNCER: FeatureSlotKey<{
 }>;
 
 // @public
-export const ROW_REORDER_BUTTONS: FeatureSlotKey<RowReorderButtonsProps<never, unknown>>;
+export const ROW_REORDER_BUTTONS: FeatureSlotKey<RowReorderButtonsProps<unknown, unknown>>;
 
 // @public
-export const ROW_REORDER_HANDLE: FeatureSlotKey<RowReorderHandleProps<never, unknown>>;
+export const ROW_REORDER_HANDLE: FeatureSlotKey<RowReorderHandleProps<unknown, unknown>>;
 
 // @public
 export interface RowAction<TRow> {
     ai?: ActionAiOptions | false;
     color?: string;
     confirm?: ActionConfirm<TRow>;
-    disabledReason?: (row: TRow) => string | undefined;
+    disabledReason?: RowCallback<[row: TRow], string | undefined>;
     editsRow?: boolean;
     icon?: DisplayValue;
-    isDisabled?: (row: TRow) => boolean;
-    isHidden?: (row: TRow) => boolean;
+    isDisabled?: RowCallback<[row: TRow], boolean>;
+    isHidden?: RowCallback<[row: TRow], boolean>;
     key: string;
     label: string;
-    onClick?: (row: TRow) => void;
+    onClick?: RowCallback<[row: TRow], void>;
 }
 
 // @public
@@ -5303,6 +5296,11 @@ export function rowAttributes(id: string, index: number, selected: boolean | und
     "data-index": number;
     "aria-selected": boolean | undefined;
 };
+
+// @public
+export type RowCallback<TArgs extends readonly unknown[], TResult> = {
+    bivarianceHack(...args: TArgs): TResult;
+}["bivarianceHack"];
 
 // @public
 export type RowDropPosition = "before" | "inside" | "after";
@@ -5360,9 +5358,9 @@ export interface RowEditIcons {
 
 // @public
 export interface RowEditingState<TRow> {
-    acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+    acceptSeeds: RowCallback<[row: NoInfer<TRow>, columnKeys: readonly string[]], void>;
     activeRowId: string | null;
-    begin: (row: TRow, rowId: string) => void;
+    begin: RowCallback<[row: NoInfer<TRow>, rowId: string], void>;
     cancel: () => void;
     readonly commit?: EditCommitSnapshot;
     draftFor: (columnKey: string) => string;
@@ -5375,7 +5373,7 @@ export interface RowEditingState<TRow> {
     seeds: () => RowEditDrafts | undefined;
     setDraft: (columnKey: string, value: string) => void;
     signature: string;
-    takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+    takeSeeds: RowCallback<[row: NoInfer<TRow>, columnKeys: readonly string[]], void>;
 }
 
 // @public
@@ -5686,24 +5684,24 @@ export interface RowReorderState<TRow, TDragEvent = unknown, TKeyEvent = unknown
         onDragStart: (event: TDragEvent) => void;
         onDragEnd: () => void;
     };
-    dropProps: (localIndex: number, row: TRow, windowStart: number) => {
+    dropProps: RowCallback<[localIndex: number, row: NoInfer<TRow>, windowStart: number], {
         onDragOver: (event: TDragEvent) => void;
         onDrop: (event: TDragEvent) => void;
-    };
-    handleKeyDown: (event: TKeyEvent, rowId: string, localIndex: number, row: TRow, windowStart: number, rowCount: number) => void;
+    }>;
+    handleKeyDown: RowCallback<[event: TKeyEvent, rowId: string, localIndex: number, row: NoInfer<TRow>, windowStart: number, rowCount: number], void>;
     hostConfirmPending: boolean;
     hover?: {
         readonly subscribe: (listener: () => void) => () => void;
         readonly dropAt: (rowId: string, localIndex: number) => RowDropPosition | undefined;
     };
     isLifted: (rowId: string) => boolean;
-    isMovePending?: (row: TRow) => boolean;
+    isMovePending?: RowCallback<[row: NoInfer<TRow>], boolean>;
     lifted: {
         rowId: string;
         from: number;
     } | null;
-    moveBy: (localIndex: number, delta: -1 | 1, row: TRow, windowStart: number, rowCount: number) => void;
-    moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
+    moveBy: RowCallback<[localIndex: number, delta: -1 | 1, row: NoInfer<TRow>, windowStart: number, rowCount: number], void>;
+    moveMenu: RowCallback<[row: NoInfer<TRow>], RowMoveMenuModel<TRow> | undefined>;
     overIndex: number | null;
     overPosition: RowDropPosition | null;
     pendingMove: RowMoveRequest<TRow> | null;
@@ -5711,7 +5709,7 @@ export interface RowReorderState<TRow, TDragEvent = unknown, TKeyEvent = unknown
         "data-dragging"?: "";
         "data-drop"?: RowDropPosition;
     };
-    selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
+    selectMoveTarget: RowCallback<[target: NoInfer<RowMoveTarget<TRow>>], void>;
 }
 
 // @public
@@ -6036,7 +6034,7 @@ export interface SelectionStatsChromeProps<TNode = unknown> {
 export type SelectionStatsLiveDraw = <TRow, TColumn, TNode>(props: SelectionStatsLiveSlotProps<TRow, TColumn, TNode>) => TNode;
 
 // @public
-export interface SelectionStatsLiveSlotProps<TRow = never, TColumn = ColumnModel<TRow>, TNode = unknown> {
+export interface SelectionStatsLiveSlotProps<TRow = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
     children: (stats: SelectionStats | null) => TNode;
     columns: readonly TColumn[];
     firstRowIndex: number;
@@ -6799,8 +6797,8 @@ export interface TableCallbackRefresh<TRow> {
     readonly columns?: NonNullable<IncrementalViewConfig<TRow>["columns"]>;
     readonly filterFn?: NonNullable<IncrementalViewConfig<TRow>["filterFn"]>;
     readonly filterTreeFn?: NonNullable<IncrementalViewConfig<TRow>["filterTreeFn"]>;
-    readonly getRowId?: (row: TRow) => string;
-    readonly getSearchText?: (row: TRow) => string;
+    readonly getRowId?: RowCallback<[row: NoInfer<TRow>], string>;
+    readonly getSearchText?: RowCallback<[row: NoInfer<TRow>], string>;
     readonly getSortValue?: NonNullable<IncrementalViewConfig<TRow>["getSortValue"]>;
 }
 
@@ -6811,24 +6809,24 @@ export type TableDensity = "comfortable" | "compact";
 export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
     readonly candidate: TableEngineReader<TRow>;
     readonly commitCandidate: () => void;
-    readonly configure: (patch: TableEngineConfigPatch<TRow>, options?: {
+    readonly configure: RowCallback<[patch: TableEngineConfigPatch<TRow>, options?: {
         silent?: boolean;
-    }) => void;
+    }], void>;
     readonly discardCandidate: () => void;
     readonly dispatch: (operation: TableOperation) => void;
     readonly dispose: () => void;
-    readonly invalidate: (axes: readonly TableRevisionAxis[], next?: {
+    readonly invalidate: RowCallback<[axes: readonly TableRevisionAxis[], next?: {
         readonly data?: readonly TRow[];
         readonly columns?: readonly ColumnMetadata<TRow>[];
     }, options?: {
         silent?: boolean;
-    }) => void;
-    readonly refreshCallbacks: (patch: TableCallbackRefresh<TRow>) => void;
-    readonly rowKey: (row: TRow) => string;
-    readonly stageCandidate: (patch: TableEngineConfigPatch<TRow>, next?: {
+    }], void>;
+    readonly refreshCallbacks: RowCallback<[patch: TableCallbackRefresh<TRow>], void>;
+    readonly rowKey: RowCallback<[row: NoInfer<TRow>], string>;
+    readonly stageCandidate: RowCallback<[patch: TableEngineConfigPatch<TRow>, next?: {
         readonly data?: readonly TRow[];
         readonly columns?: readonly ColumnMetadata<TRow>[];
-    }) => void;
+    }], void>;
     readonly subscribe: (axes: readonly TableRevisionAxis[] | "all", listener: (revisions: TableRevisions) => void) => () => void;
     readonly tableId: string;
 }
@@ -6843,7 +6841,7 @@ export interface TableEngineConfigPatch<TRow> extends Partial<IncrementalViewCon
 
 // @public
 export interface TableEngineReader<TRow = unknown> {
-    readonly cellValue: (row: TRow, columnKey: string) => unknown;
+    readonly cellValue: RowCallback<[row: NoInfer<TRow>, columnKey: string], unknown>;
     readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
     readonly rowByKey: (rowKey: string) => TRow | undefined;
     readonly rows: (scope: TableRowScope) => readonly TRow[];
@@ -7300,7 +7298,7 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly filterRegistry?: FilterTypeRegistry;
     readonly find?: FindContribution;
     readonly fullscreen?: FullscreenContribution;
-    readonly getRowId: (row: TRow) => string;
+    readonly getRowId: RowCallback<[row: NoInfer<TRow>], string>;
     readonly grouping?: GroupingContribution<TRow>;
     readonly groupingState?: {
         readonly groupBy: string | undefined;
@@ -7319,7 +7317,7 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly pinning?: PinningContribution;
     readonly print?: PrintContribution;
     readonly query?: QueryContribution;
-    readonly rowLabel: (row: TRow) => string;
+    readonly rowLabel: RowCallback<[row: NoInfer<TRow>], string>;
     readonly rows: readonly TRow[];
     readonly selection?: SelectionContribution;
     readonly sortBy?: string;
@@ -7475,13 +7473,13 @@ export interface ToolbarExtrasSlotProps {
 export type TotalCountCapability = "exact" | "loaded";
 
 // @public
-export const TREE_CELL: FeatureSlotKey<TreeCellProps<never, unknown>>;
+export const TREE_CELL: FeatureSlotKey<TreeCellProps<unknown, unknown>>;
 
 // @public
 export const TREE_LIVE: RowSlotKey<ChromeExtraDraw>;
 
 // @public
-export const TREE_TOGGLE: FeatureSlotKey<TreeToggleProps<never>>;
+export const TREE_TOGGLE: FeatureSlotKey<TreeToggleProps<unknown>>;
 
 // @public
 export interface TreeCellProps<TRow, TNode = unknown> {

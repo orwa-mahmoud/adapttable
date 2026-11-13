@@ -21,6 +21,7 @@ import type {
   ColumnMenuRow,
 } from "../columns/columnMenuModel";
 import type { Aggregator } from "../contracts/columns";
+import type { RowCallback } from "../contracts/rowCallback";
 import type { CustomCellEditorRender } from "../editing/cellEditing";
 import type { ExportWriter } from "../export/exportWriter";
 import {
@@ -51,9 +52,10 @@ export type ColumnMenuActionFactory<TRow = unknown> = (
  *
  * @public
  */
-export type ContextMenuItemsFactory<TRow = unknown> = (
-  target: ContextMenuTarget<TRow>
-) => readonly ContextMenuItem[];
+export type ContextMenuItemsFactory<TRow = unknown> = RowCallback<
+  [target: ContextMenuTarget<TRow>],
+  readonly ContextMenuItem[]
+>;
 
 /**
  * A patch `TableFeatureHost.extendFilterType` queued for the registry.
@@ -132,7 +134,7 @@ export function runWithFeatureHost<T>(
  */
 export function currentFeatureHost<TRow = unknown>():
   FeatureHostState<TRow> | undefined {
-  return scoped.at(-1) as FeatureHostState<TRow> | undefined;
+  return scoped.at(-1);
 }
 
 /**

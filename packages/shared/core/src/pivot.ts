@@ -85,7 +85,7 @@ export type {
   AggregateOperationId,
   AggregateOrderedValue,
 } from "./aggregate/aggregate";
-export type { ColumnModel, SortableValue } from "./columnModel";
+export type { ColumnModel, RowCallback, SortableValue } from "./columnModel";
 export type {
   ColumnGroupShow,
   ColumnModelEditor,

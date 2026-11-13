@@ -19,7 +19,7 @@ export type ActionApprovalPolicy = "required" | "automatic";
 export interface ActionConfirm<TArg> {
     confirmLabel: string;
     danger?: boolean;
-    message: (arg: TArg) => string;
+    message: RowCallback<[arg: TArg], string>;
     title: string;
 }
 
@@ -129,21 +129,21 @@ export type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => u
 
 // @public
 export interface BatchEditingState<TRow> {
-    acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    acceptSeeds: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]], void>;
     cancelAll: () => void;
     cancelRow: (rowId: string) => void;
     readonly commit?: EditCommitSnapshot;
     count: number;
-    draftFor: (row: TRow, rowId: string, columnKey: string) => string;
+    draftFor: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string], string>;
     entries: readonly BatchEditEntry[];
     featureHost?: FeatureHostState;
     isChanged: (rowId: string, columnKey: string) => boolean;
     isPending: (rowId: string) => boolean;
     pending: boolean;
     saveAll: () => void;
-    setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
+    setDraft: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string, value: string], void>;
     signature: string;
-    takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    takeSeeds: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]], void>;
 }
 
 // @public
@@ -162,16 +162,16 @@ export interface BatchEditSnapshot {
 
 // @public
 export interface BatchEditStore<TRow> {
-    readonly acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    readonly acceptSeeds: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]], void>;
     readonly cancelAll: () => void;
     readonly cancelRow: (rowId: string) => void;
-    readonly configure: (options: BatchEditStoreOptions<TRow>) => void;
+    readonly configure: RowCallback<[options: BatchEditStoreOptions<TRow>], void>;
     readonly dispose?: () => void;
     readonly getSnapshot: () => BatchEditSnapshot;
     readonly saveAll: () => void;
-    readonly setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
+    readonly setDraft: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string, value: string], void>;
     readonly subscribe: (listener: () => void) => () => void;
-    readonly takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    readonly takeSeeds: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]], void>;
 }
 
 // @public
@@ -557,23 +557,23 @@ export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | 
 
 // @public
 export interface ColumnModel<TRow = unknown> {
-    accessor?: (row: TRow) => unknown;
+    accessor?: RowCallback<[row: NoInfer<TRow>], unknown>;
     aggregatable?: Aggregatable;
     ai?: ColumnAiOptions;
     align?: "start" | "center" | "end";
-    colSpan?: number | ((row: TRow) => number);
-    editable?: boolean | ((row: TRow) => boolean);
+    colSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
+    editable?: boolean | RowCallback<[row: NoInfer<TRow>], boolean>;
     editor?: ColumnModelEditor;
-    editValue?: (row: TRow) => string;
-    exportValue?: (row: TRow) => unknown;
+    editValue?: RowCallback<[row: NoInfer<TRow>], string>;
+    exportValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     filter?: ColumnModelFilter;
     flex?: number;
     formatAggregate?: (value: DisplayValue | undefined, context: AggregateFormatContext) => DisplayValue | undefined;
-    formatValue?: (row: TRow) => string;
+    formatValue?: RowCallback<[row: NoInfer<TRow>], string>;
     group?: string | readonly string[];
     groupable?: boolean;
     groupShow?: ColumnGroupShow;
-    groupValue?: (row: TRow) => unknown;
+    groupValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     header?: string;
     headerTooltip?: string;
     hideOnDesktop?: boolean;
@@ -588,13 +588,13 @@ export interface ColumnModel<TRow = unknown> {
     meta?: Record<string, unknown>;
     minWidth?: number;
     mobileLabel?: string;
-    parseValue?: (draft: string, row: TRow) => unknown;
+    parseValue?: RowCallback<[draft: string, row: NoInfer<TRow>], unknown>;
     renameable?: boolean;
     responsivePriority?: number;
-    rowSpan?: number | ((row: TRow) => number);
+    rowSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
     sortable?: boolean;
-    sortValue?: (row: TRow) => SortableValue;
-    validate?: (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
+    sortValue?: RowCallback<[row: NoInfer<TRow>], SortableValue>;
+    validate?: RowCallback<[value: unknown, row: NoInfer<TRow>], string | undefined | Promise<string | undefined>>;
     width?: number | string;
 }
 
@@ -632,7 +632,7 @@ export interface ContextMenuItem {
 }
 
 // @public
-export type ContextMenuItemsFactory<TRow = unknown> = (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
+export type ContextMenuItemsFactory<TRow = unknown> = RowCallback<[target: ContextMenuTarget<TRow>], readonly ContextMenuItem[]>;
 
 // @public
 export type ContextMenuTarget<TRow> = {
@@ -861,23 +861,13 @@ export function editableCellPresentation<TRow>(editing: EditingBundle<TRow> | un
 
 // @public
 export interface EditableColumnLike<TRow = unknown> {
-    editable?: boolean | {
-        bivarianceHack(row: TRow): boolean;
-    }["bivarianceHack"];
+    editable?: boolean | RowCallback<[row: NoInfer<TRow>], boolean>;
     editor?: ColumnModelEditor;
-    editValue?: {
-        bivarianceHack(row: TRow): string;
-    }["bivarianceHack"];
+    editValue?: RowCallback<[row: NoInfer<TRow>], string>;
     key: string;
-    parseValue?: {
-        bivarianceHack(draft: string, row: TRow): unknown;
-    }["bivarianceHack"];
-    sortValue?: {
-        bivarianceHack(row: TRow): SortableValue;
-    }["bivarianceHack"];
-    validate?: {
-        bivarianceHack(value: unknown, row: TRow): string | undefined | Promise<string | undefined>;
-    }["bivarianceHack"];
+    parseValue?: RowCallback<[draft: string, row: NoInfer<TRow>], unknown>;
+    sortValue?: RowCallback<[row: NoInfer<TRow>], SortableValue>;
+    validate?: RowCallback<[value: unknown, row: NoInfer<TRow>], string | undefined | Promise<string | undefined>>;
 }
 
 // @public
@@ -1306,7 +1296,7 @@ export interface FilterAiOptions {
 export interface FilterDef<TRow = unknown> {
     ai?: false | FilterAiOptions;
     column?: string;
-    getValue?: (row: TRow) => unknown;
+    getValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     key: string;
     label?: string;
     options?: FilterOptionsSource;
@@ -1765,15 +1755,20 @@ export interface RowAction<TRow> {
     ai?: ActionAiOptions | false;
     color?: string;
     confirm?: ActionConfirm<TRow>;
-    disabledReason?: (row: TRow) => string | undefined;
+    disabledReason?: RowCallback<[row: TRow], string | undefined>;
     editsRow?: boolean;
     icon?: DisplayValue;
-    isDisabled?: (row: TRow) => boolean;
-    isHidden?: (row: TRow) => boolean;
+    isDisabled?: RowCallback<[row: TRow], boolean>;
+    isHidden?: RowCallback<[row: TRow], boolean>;
     key: string;
     label: string;
-    onClick?: (row: TRow) => void;
+    onClick?: RowCallback<[row: TRow], void>;
 }
+
+// @public
+export type RowCallback<TArgs extends readonly unknown[], TResult> = {
+    bivarianceHack(...args: TArgs): TResult;
+}["bivarianceHack"];
 
 // @public
 export type RowEditActionsLayout = {
@@ -1830,9 +1825,9 @@ export type RowEditHandler<TRow> = (row: TRow, patch: Readonly<Record<string, un
 
 // @public
 export interface RowEditingState<TRow> {
-    acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+    acceptSeeds: RowCallback<[row: NoInfer<TRow>, columnKeys: readonly string[]], void>;
     activeRowId: string | null;
-    begin: (row: TRow, rowId: string) => void;
+    begin: RowCallback<[row: NoInfer<TRow>, rowId: string], void>;
     cancel: () => void;
     readonly commit?: EditCommitSnapshot;
     draftFor: (columnKey: string) => string;
@@ -1845,7 +1840,7 @@ export interface RowEditingState<TRow> {
     seeds: () => RowEditDrafts | undefined;
     setDraft: (columnKey: string, value: string) => void;
     signature: string;
-    takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+    takeSeeds: RowCallback<[row: NoInfer<TRow>, columnKeys: readonly string[]], void>;
 }
 
 // @public
@@ -1870,8 +1865,8 @@ export interface RowEditSnapshot {
 
 // @public
 export interface RowEditStore<TRow> {
-    readonly acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
-    readonly begin: (row: TRow, rowId: string) => void;
+    readonly acceptSeeds: RowCallback<[row: NoInfer<TRow>, columnKeys: readonly string[]], void>;
+    readonly begin: RowCallback<[row: NoInfer<TRow>, rowId: string], void>;
     readonly cancel: () => void;
     readonly configure: (options: RowEditStoreOptions<TRow>) => void;
     readonly dispose?: () => void;
@@ -1881,7 +1876,7 @@ export interface RowEditStore<TRow> {
     readonly seeds: () => RowEditDrafts | undefined;
     readonly setDraft: (columnKey: string, value: string) => void;
     readonly subscribe: (listener: () => void) => () => void;
-    readonly takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+    readonly takeSeeds: RowCallback<[row: NoInfer<TRow>, columnKeys: readonly string[]], void>;
 }
 
 // @public
@@ -1994,8 +1989,8 @@ export interface TableCallbackRefresh<TRow> {
     readonly columns?: NonNullable<IncrementalViewConfig<TRow>["columns"]>;
     readonly filterFn?: NonNullable<IncrementalViewConfig<TRow>["filterFn"]>;
     readonly filterTreeFn?: NonNullable<IncrementalViewConfig<TRow>["filterTreeFn"]>;
-    readonly getRowId?: (row: TRow) => string;
-    readonly getSearchText?: (row: TRow) => string;
+    readonly getRowId?: RowCallback<[row: NoInfer<TRow>], string>;
+    readonly getSearchText?: RowCallback<[row: NoInfer<TRow>], string>;
     readonly getSortValue?: NonNullable<IncrementalViewConfig<TRow>["getSortValue"]>;
 }
 
@@ -2003,24 +1998,24 @@ export interface TableCallbackRefresh<TRow> {
 export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
     readonly candidate: TableEngineReader<TRow>;
     readonly commitCandidate: () => void;
-    readonly configure: (patch: TableEngineConfigPatch<TRow>, options?: {
+    readonly configure: RowCallback<[patch: TableEngineConfigPatch<TRow>, options?: {
         silent?: boolean;
-    }) => void;
+    }], void>;
     readonly discardCandidate: () => void;
     readonly dispatch: (operation: TableOperation) => void;
     readonly dispose: () => void;
-    readonly invalidate: (axes: readonly TableRevisionAxis[], next?: {
+    readonly invalidate: RowCallback<[axes: readonly TableRevisionAxis[], next?: {
         readonly data?: readonly TRow[];
         readonly columns?: readonly ColumnMetadata<TRow>[];
     }, options?: {
         silent?: boolean;
-    }) => void;
-    readonly refreshCallbacks: (patch: TableCallbackRefresh<TRow>) => void;
-    readonly rowKey: (row: TRow) => string;
-    readonly stageCandidate: (patch: TableEngineConfigPatch<TRow>, next?: {
+    }], void>;
+    readonly refreshCallbacks: RowCallback<[patch: TableCallbackRefresh<TRow>], void>;
+    readonly rowKey: RowCallback<[row: NoInfer<TRow>], string>;
+    readonly stageCandidate: RowCallback<[patch: TableEngineConfigPatch<TRow>, next?: {
         readonly data?: readonly TRow[];
         readonly columns?: readonly ColumnMetadata<TRow>[];
-    }) => void;
+    }], void>;
     readonly subscribe: (axes: readonly TableRevisionAxis[] | "all", listener: (revisions: TableRevisions) => void) => () => void;
     readonly tableId: string;
 }
@@ -2035,7 +2030,7 @@ export interface TableEngineConfigPatch<TRow> extends Partial<IncrementalViewCon
 
 // @public
 export interface TableEngineReader<TRow = unknown> {
-    readonly cellValue: (row: TRow, columnKey: string) => unknown;
+    readonly cellValue: RowCallback<[row: NoInfer<TRow>, columnKey: string], unknown>;
     readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
     readonly rowByKey: (rowKey: string) => TRow | undefined;
     readonly rows: (scope: TableRowScope) => readonly TRow[];

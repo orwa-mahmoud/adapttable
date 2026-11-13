@@ -196,6 +196,41 @@ export function mergeFeaturePatches(
 }
 
 /**
+ * Lay a table's own options over what its features set: a defined host option
+ * wins over every feature's patch, and the features' strings ride along as
+ * `featureLabels` when there are any.
+ *
+ * Feature patches are untyped option bags, so this is the one place their
+ * merge takes the host options' type: the host's defined values win, which
+ * keeps every option the host typed at its type.
+ *
+ * @param patches - The features' merged patches ({@link mergeFeaturePatches}).
+ * @param featureLabels - The features' strings ({@link featureLabelsOf}).
+ * @typeParam TOptions - The host's options.
+ * @typeParam TResolved - The options the table reads: the host's, plus the
+ *   keys its features set.
+ * @param options - The host's own options.
+ * @returns The options the table reads.
+ *
+ * @public
+ */
+export function overlayFeatureOptions<
+  TOptions extends object,
+  TResolved extends TOptions = TOptions,
+>(
+  patches: Readonly<Record<string, unknown>>,
+  featureLabels: readonly Partial<TableLabels>[],
+  options: TOptions
+): TResolved {
+  const resolved: Record<string, unknown> = {
+    ...patches,
+    ...(featureLabels.length > 0 ? { featureLabels } : {}),
+    ...definedEntries(options),
+  };
+  return resolved as TResolved;
+}
+
+/**
  * Resolve `features` onto the existing option surface.
  *
  * Later features win; defined host options win over both. `features` is
@@ -221,12 +256,11 @@ export function applyTableFeatures<P extends object>(options: P): P {
     return rest;
   }
 
-  const featureLabels = featureLabelsOf(list);
-  const resolved = {
-    ...mergeFeaturePatches(list),
-    ...(featureLabels.length > 0 ? { featureLabels } : {}),
-    ...definedEntries(omitFeatures(options)),
-  } as P;
+  const resolved = overlayFeatureOptions(
+    mergeFeaturePatches(list),
+    featureLabelsOf(list),
+    omitFeatures(options)
+  );
   applied.add(resolved);
   rememberAppliedFeatures(resolved, list);
   return resolved;

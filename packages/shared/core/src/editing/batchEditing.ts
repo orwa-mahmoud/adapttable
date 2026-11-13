@@ -12,6 +12,7 @@
  * also what makes the write atomic if the host wants it to be — a single request
  * with every change in it.
  */
+import type { RowCallback } from "../contracts/rowCallback";
 import type { FeatureHostState } from "../features/currentHost";
 import type { TableStore } from "../state/tableStore";
 import { type EditableColumnLike, readEditableCellValue } from "./cellEditing";
@@ -70,16 +71,17 @@ export interface BatchEditingState<TRow> {
   /** Whether this row has pending changes. */
   isPending: (rowId: string) => boolean;
   /** This cell's draft, or the row's stored value when it has none. */
-  draftFor: (row: TRow, rowId: string, columnKey: string) => string;
+  draftFor: RowCallback<
+    [row: NoInfer<TRow>, rowId: string, columnKey: string],
+    string
+  >;
   /** Whether this cell has been changed. */
   isChanged: (rowId: string, columnKey: string) => boolean;
   /** Change one cell, without telling the host. */
-  setDraft: (
-    row: TRow,
-    rowId: string,
-    columnKey: string,
-    value: string
-  ) => void;
+  setDraft: RowCallback<
+    [row: NoInfer<TRow>, rowId: string, columnKey: string, value: string],
+    void
+  >;
   /** Request one atomic save; retain drafts until the host accepts it. */
   saveAll: () => void;
   /** Forget everything, restoring nothing — the drafts were never applied. */
@@ -92,16 +94,18 @@ export interface BatchEditingState<TRow> {
    * Keep mine: these fields now read the incoming values, and the drafts
    * stand — so the patch still carries what the reader typed.
    */
-  acceptSeeds: (
-    row: TRow,
-    rowId: string,
-    columnKeys: readonly string[]
-  ) => void;
+  acceptSeeds: RowCallback<
+    [row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]],
+    void
+  >;
   /**
    * Take theirs: these fields stop being changes at all, so the cells fall
    * back to what the row now reads.
    */
-  takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+  takeSeeds: RowCallback<
+    [row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]],
+    void
+  >;
   /** A digest of the pending drafts, for a row memo comparator. */
   signature: string;
   /** The table that owns these editors — never a sibling's host. */
@@ -186,14 +190,12 @@ export interface BatchEditStore<TRow> {
   /** Listen for changes. Returns the unsubscribe. */
   readonly subscribe: (listener: () => void) => () => void;
   /** Replace the options. */
-  readonly configure: (options: BatchEditStoreOptions<TRow>) => void;
+  readonly configure: RowCallback<[options: BatchEditStoreOptions<TRow>], void>;
   /** Change one cell; a no-op unless `enabled`. */
-  readonly setDraft: (
-    row: TRow,
-    rowId: string,
-    columnKey: string,
-    value: string
-  ) => void;
+  readonly setDraft: RowCallback<
+    [row: NoInfer<TRow>, rowId: string, columnKey: string, value: string],
+    void
+  >;
   /** Hand the host every pending row, clearing drafts only after success. */
   readonly saveAll: () => void;
   /** Forget everything. */
@@ -201,17 +203,15 @@ export interface BatchEditStore<TRow> {
   /** Forget one row's changes. */
   readonly cancelRow: (rowId: string) => void;
   /** Keep mine for these fields of one row. */
-  readonly acceptSeeds: (
-    row: TRow,
-    rowId: string,
-    columnKeys: readonly string[]
-  ) => void;
+  readonly acceptSeeds: RowCallback<
+    [row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]],
+    void
+  >;
   /** Take theirs for these fields of one row. */
-  readonly takeSeeds: (
-    row: TRow,
-    rowId: string,
-    columnKeys: readonly string[]
-  ) => void;
+  readonly takeSeeds: RowCallback<
+    [row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]],
+    void
+  >;
 }
 
 /** The snapshot for a pending set. */

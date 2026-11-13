@@ -5,6 +5,7 @@
  * `columnModel` and the aggregate modules forward these names.
  */
 import type { DisplayValue } from "../display";
+import type { RowCallback } from "./rowCallback";
 
 /**
  * Sort direction for a column.
@@ -246,7 +247,7 @@ export interface ColumnModel<TRow = unknown> {
   /**
    * Opt this column into inline cell editing.
    */
-  editable?: boolean | ((row: TRow) => boolean);
+  editable?: boolean | RowCallback<[row: NoInfer<TRow>], boolean>;
   /**
    * Editor widget when editable. React columns narrow the type.
    */
@@ -254,18 +255,18 @@ export interface ColumnModel<TRow = unknown> {
   /**
    * Override the draft seed for the editor (raw value).
    */
-  editValue?: (row: TRow) => string;
+  editValue?: RowCallback<[row: NoInfer<TRow>], string>;
   /**
    * Turn the edited text back into the value to commit.
    */
-  parseValue?: (draft: string, row: TRow) => unknown;
+  parseValue?: RowCallback<[draft: string, row: NoInfer<TRow>], unknown>;
   /**
    * Gate a commit on this column's own rule.
    */
-  validate?: (
-    value: unknown,
-    row: TRow
-  ) => string | undefined | Promise<string | undefined>;
+  validate?: RowCallback<
+    [value: unknown, row: NoInfer<TRow>],
+    string | undefined | Promise<string | undefined>
+  >;
   /**
    * What this column reads from a row.
    *
@@ -276,11 +277,11 @@ export interface ColumnModel<TRow = unknown> {
    * only when it is already a primitive or a Date, falling through to
    * `sortValue` when the binding returned something it drew instead.
    */
-  accessor?: (row: TRow) => unknown;
+  accessor?: RowCallback<[row: NoInfer<TRow>], unknown>;
   /**
    * Primitive extractor used by the client-side sort comparator.
    */
-  sortValue?: (row: TRow) => SortableValue;
+  sortValue?: RowCallback<[row: NoInfer<TRow>], SortableValue>;
   /**
    * What this column buckets a row by when the table groups on it, and the
    * caption the group then carries.
@@ -291,15 +292,15 @@ export interface ColumnModel<TRow = unknown> {
    * bucket — the month a date falls in, the band a number sits in — and rows
    * sharing it group together under it.
    */
-  groupValue?: (row: TRow) => unknown;
+  groupValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
   /**
    * The value this column contributes to an export.
    */
-  exportValue?: (row: TRow) => unknown;
+  exportValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
   /**
    * The cell as plain text, for every context that cannot render JSX.
    */
-  formatValue?: (row: TRow) => string;
+  formatValue?: RowCallback<[row: NoInfer<TRow>], string>;
   /**
    * How an aggregate of this column reads.
    *
@@ -356,9 +357,9 @@ export interface ColumnModel<TRow = unknown> {
   /** Text alignment within the cell. Defaults to `"start"`. */
   align?: "start" | "center" | "end";
   /** How many columns this cell covers. */
-  colSpan?: number | ((row: TRow) => number);
+  colSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
   /** How many rows this cell covers. */
-  rowSpan?: number | ((row: TRow) => number);
+  rowSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
   /** Label used on mobile card layouts. */
   mobileLabel?: string;
   /** Hide this column entirely on mobile layouts. */

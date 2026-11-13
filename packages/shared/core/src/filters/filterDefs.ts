@@ -13,6 +13,7 @@ import type {
   FilterValue,
 } from "../contracts/columns";
 import type { QueryCondition } from "../contracts/query";
+import type { RowCallback } from "../contracts/rowCallback";
 import { FILTER_LABELS } from "../labelGroups/filterLabels";
 import type { TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
@@ -150,7 +151,7 @@ export interface FilterDef<TRow = unknown> {
   /** Choices for `select` / `multiSelect` — see {@link FilterOptionsSource}. */
   options?: FilterOptionsSource;
   /** Row-value extractor for the client-side predicate; defaults to `key` as a path. */
-  getValue?: (row: TRow) => unknown;
+  getValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
   /** Placeholder for text-like inputs. */
   placeholder?: string;
   /**

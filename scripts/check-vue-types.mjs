@@ -239,7 +239,7 @@ export const VUE_TYPE_EXPECTATIONS = {
       },
       {
         code: 2322,
-        message: /different: boolean.*row: Row/,
+        message: /different: boolean.*row: (NoInfer<)?Row/,
       },
     ],
     "MissingColumnMenuControls.ts": [

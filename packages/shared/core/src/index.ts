@@ -72,6 +72,7 @@ export type {
   PaginationMode,
   ResolvedPaginationMode,
   RowAction,
+  RowCallback,
   SortableValue,
   SortByOption,
   SortDirection,

@@ -254,6 +254,7 @@ export type {
   ColumnModelFilter,
   ExtraFilters,
   FilterValue,
+  RowCallback,
   SortableValue,
   SortDirection,
 } from "./columnModel";

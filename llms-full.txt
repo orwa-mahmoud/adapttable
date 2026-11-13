@@ -17394,6 +17394,13 @@ Kit `/pivot` re-exports `PivotPanel` plus the `@adapttable/core/pivot` engine.
 | `ai`                 | `ColumnAiOptions`                                                                    | —             | What an agent is told about this column. Ignored on a table with no agent. See [the pieces in core and react](#the-pieces-in-core-and-react).                                                                                                                            |
 | `meta`               | `Record<string, unknown>`                                                            | —             | Arbitrary metadata adapters (or your own code) may read back.                                                                                                                                                                                                            |
 
+Core's column, filter, editing, reorder and runtime contracts type their row
+functions as `RowCallback<[row: TRow, …], Result>`: an ordinary function whose
+parameters are compared the way TypeScript compares methods, so a column typed
+over your row type is accepted where a slot reads rows as `unknown`. The row
+type itself comes from the rows a table is given (`data`, `rows`), never from a
+callback's annotation.
+
 ## ColumnGroupDef
 
 A parent header with `children`. Collapse options live here, not on the table.
@@ -18312,8 +18319,9 @@ shares, so a new binding calls them rather than re-deriving them.
 - **Feature patch layer.** `applyTableFeatures` merges each feature's `apply`
   patch into the table's props: later features win, `assembly` is merged one
   level deep, host props win, and a second call is a no-op.
-  `mergeFeaturePatches`, `getAppliedFeatures` and `rememberAppliedFeatures`
-  are its parts. `FeaturePatch`, `PatchFeature`, `CoreFeature`,
+  `mergeFeaturePatches`, `overlayFeatureOptions` (a table's defined options
+  over its features' patches, with the features' strings as `featureLabels`),
+  `getAppliedFeatures` and `rememberAppliedFeatures` are its parts. `FeaturePatch`, `PatchFeature`, `CoreFeature`,
   `CoreFeatureRegistrar`, `CoreRowFeatureRegistrar` and `VirtualizeInput` are
   the types. Each built-in factory's id and option normalization is its own export, named `core` plus the factory: `coreFeature`, `coreCellSpan`, `coreExtraRows`, `corePinnedSummaryRows`, `coreRowAppearance`, `coreColumnMenu`, `coreResizableColumns`, `coreCollapsibleColumnGroups`, `coreCommandPalette`, `coreContextMenu`, `coreSidePanel`, `coreBulkActions`, `coreFilterTypes`, `coreHeaderFilters`, `coreSavedViews`, `corePrint`, `coreStatusBar`, `coreUndoRedoButtons`, `coreMultiSort`, `coreFitColumns`, `coreColumnSelectionCheckbox`, `coreCellNavigation`, `coreDensityChooser`, `coreEditHistory`, `coreEditing`, `coreRowEditing`, `coreBatchEditing`, `coreDirtyIndicators`, `coreExportCsv`, `coreFilters`, `coreFindInTable`, `coreFullscreen`, `coreGrouping`, `coreGroupingPanel`, `coreRowActions`, `coreRowDetail`, `coreNestedTable`, `coreRowPinning`, `coreSelectionStats`, `coreTree`, `coreVirtualize`. They are separate functions so a table bundles only the features it uses; a binding spreads one and adds what it draws.
 - **Standard preset.** `standardFeatureList` (`CoreStandardFeatureFactories`,

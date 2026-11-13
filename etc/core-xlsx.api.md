@@ -120,23 +120,23 @@ export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | 
 
 // @public
 export interface ColumnModel<TRow = unknown> {
-    accessor?: (row: TRow) => unknown;
+    accessor?: RowCallback<[row: NoInfer<TRow>], unknown>;
     aggregatable?: Aggregatable;
     ai?: ColumnAiOptions;
     align?: "start" | "center" | "end";
-    colSpan?: number | ((row: TRow) => number);
-    editable?: boolean | ((row: TRow) => boolean);
+    colSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
+    editable?: boolean | RowCallback<[row: NoInfer<TRow>], boolean>;
     editor?: ColumnModelEditor;
-    editValue?: (row: TRow) => string;
-    exportValue?: (row: TRow) => unknown;
+    editValue?: RowCallback<[row: NoInfer<TRow>], string>;
+    exportValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     filter?: ColumnModelFilter;
     flex?: number;
     formatAggregate?: (value: DisplayValue | undefined, context: AggregateFormatContext) => DisplayValue | undefined;
-    formatValue?: (row: TRow) => string;
+    formatValue?: RowCallback<[row: NoInfer<TRow>], string>;
     group?: string | readonly string[];
     groupable?: boolean;
     groupShow?: ColumnGroupShow;
-    groupValue?: (row: TRow) => unknown;
+    groupValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     header?: string;
     headerTooltip?: string;
     hideOnDesktop?: boolean;
@@ -151,13 +151,13 @@ export interface ColumnModel<TRow = unknown> {
     meta?: Record<string, unknown>;
     minWidth?: number;
     mobileLabel?: string;
-    parseValue?: (draft: string, row: TRow) => unknown;
+    parseValue?: RowCallback<[draft: string, row: NoInfer<TRow>], unknown>;
     renameable?: boolean;
     responsivePriority?: number;
-    rowSpan?: number | ((row: TRow) => number);
+    rowSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
     sortable?: boolean;
-    sortValue?: (row: TRow) => SortableValue;
-    validate?: (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
+    sortValue?: RowCallback<[row: NoInfer<TRow>], SortableValue>;
+    validate?: RowCallback<[value: unknown, row: NoInfer<TRow>], string | undefined | Promise<string | undefined>>;
     width?: number | string;
 }
 
@@ -270,7 +270,7 @@ export interface FilterAiOptions {
 export interface FilterDef<TRow = unknown> {
     ai?: false | FilterAiOptions;
     column?: string;
-    getValue?: (row: TRow) => unknown;
+    getValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     key: string;
     label?: string;
     options?: FilterOptionsSource;
@@ -289,6 +289,11 @@ export type FilterOptionsSource = readonly FilterOption[] | "auto" | (() => Prom
 
 // @public
 export type FilterType = (typeof FILTER_TYPES)[number];
+
+// @public
+export type RowCallback<TArgs extends readonly unknown[], TResult> = {
+    bivarianceHack(...args: TArgs): TResult;
+}["bivarianceHack"];
 
 // @public
 export type SortableValue = string | number | boolean | null | undefined;

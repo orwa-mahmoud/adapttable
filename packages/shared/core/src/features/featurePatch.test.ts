@@ -5,6 +5,7 @@ import {
   applyTableFeatures,
   getAppliedFeatures,
   mergeFeaturePatches,
+  overlayFeatureOptions,
   type PatchFeature,
   rememberAppliedFeatures,
   resolveFeatureGrouping,
@@ -112,6 +113,28 @@ describe("mergeFeaturePatches", () => {
         set("b", { assembly: { first } }),
       ]).assembly
     ).toEqual({ first });
+  });
+});
+
+describe("overlayFeatureOptions", () => {
+  it("lays the host's defined options over the features' patches", () => {
+    const resolved = overlayFeatureOptions(
+      { density: "compact", stickyHeader: true },
+      [{ search: "Find" }],
+      { density: "comfortable", stickyHeader: undefined, rowKey: "id" }
+    );
+    expect(resolved).toEqual({
+      density: "comfortable",
+      stickyHeader: true,
+      rowKey: "id",
+      featureLabels: [{ search: "Find" }],
+    });
+  });
+
+  it("adds no featureLabels when no feature brings strings", () => {
+    expect(overlayFeatureOptions({}, [], { rowKey: "id" })).toEqual({
+      rowKey: "id",
+    });
   });
 });
 

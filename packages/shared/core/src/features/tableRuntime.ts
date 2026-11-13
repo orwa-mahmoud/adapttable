@@ -14,6 +14,7 @@ import type {
 } from "../columns/columnLayoutModel";
 import type { ColumnMetadata } from "../contracts/columns";
 import type { QueryAggregate } from "../contracts/query";
+import type { RowCallback } from "../contracts/rowCallback";
 import type { TableSourceCapabilities } from "../contracts/source";
 import type { NeutralTable } from "../engine/neutralTable";
 import type { FilterDef } from "../filters/filterDefs";
@@ -53,9 +54,9 @@ export interface TableRuntimeView<TRow = unknown> {
   /** Live neutral binding when the source published an engine. */
   readonly neutralTable?: NeutralTable<TRow>;
   /** Stable row identity. */
-  readonly getRowId: (row: TRow) => string;
+  readonly getRowId: RowCallback<[row: NoInfer<TRow>], string>;
   /** Best available human-readable row label. */
-  readonly rowLabel: (row: TRow) => string;
+  readonly rowLabel: RowCallback<[row: NoInfer<TRow>], string>;
   /** Active sort key, when visual order is source-controlled. */
   readonly sortBy?: string;
   /**

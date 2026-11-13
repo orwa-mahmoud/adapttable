@@ -578,6 +578,7 @@ export type {
   ColumnModelFilter,
   ExtraFilters,
   FilterValue,
+  RowCallback,
   SortableValue,
   SortDirection,
 } from "./columnModel";
@@ -728,6 +729,7 @@ export {
   type FeaturePatch,
   getAppliedFeatures,
   mergeFeaturePatches,
+  overlayFeatureOptions,
   type PatchFeature,
   rememberAppliedFeatures,
   resolveFeatureGrouping,

@@ -102,6 +102,7 @@ export type {
   ColumnMetadata,
   ColumnModelEditor,
   ColumnModelFilter,
+  RowCallback,
 } from "./columnModel";
 export type { ColumnAiOptions } from "./columnModel";
 export type { DisplayValue } from "./display";

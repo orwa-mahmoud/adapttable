@@ -1,4 +1,5 @@
 import type { ColumnModelEditor, SortableValue } from "../contracts/columns";
+import type { RowCallback } from "../contracts/rowCallback";
 import type { DisplayValue } from "../display";
 import {
   currentFeatureHost,
@@ -139,8 +140,8 @@ export interface CustomCellEditorConflict {
  * satisfies this; using a narrow shape avoids `ColumnModel<T>` variance
  * issues when Tab-navigation crosses generic boundaries.
  *
- * `editable` uses a bivariant callback (same pattern as React's event
- * handlers) so `ColumnModel<Person>` is assignable to `EditableColumnLike`.
+ * Its row functions are {@link RowCallback}s, so `ColumnModel<Person>` is
+ * assignable to `EditableColumnLike`.
  *
  * @public
  */
@@ -148,24 +149,20 @@ export interface EditableColumnLike<TRow = unknown> {
   /** The column's key. */
   key: string;
   /** Whether the column is editable, per row when it is a function. */
-  editable?: boolean | { bivarianceHack(row: TRow): boolean }["bivarianceHack"];
+  editable?: boolean | RowCallback<[row: NoInfer<TRow>], boolean>;
   /** Which editor the cell opens. Defaults to a text field. */
   editor?: ColumnModelEditor;
   /** Turns the stored value into the draft text the editor starts with. */
-  editValue?: { bivarianceHack(row: TRow): string }["bivarianceHack"];
+  editValue?: RowCallback<[row: NoInfer<TRow>], string>;
   /** Turns the draft text back into the stored value's type. */
-  parseValue?: {
-    bivarianceHack(draft: string, row: TRow): unknown;
-  }["bivarianceHack"];
+  parseValue?: RowCallback<[draft: string, row: NoInfer<TRow>], unknown>;
   /** Rejects a value with a message; may be async. */
-  validate?: {
-    bivarianceHack(
-      value: unknown,
-      row: TRow
-    ): string | undefined | Promise<string | undefined>;
-  }["bivarianceHack"];
+  validate?: RowCallback<
+    [value: unknown, row: NoInfer<TRow>],
+    string | undefined | Promise<string | undefined>
+  >;
   /** Value this column sorts by, when it differs from what is displayed. */
-  sortValue?: { bivarianceHack(row: TRow): SortableValue }["bivarianceHack"];
+  sortValue?: RowCallback<[row: NoInfer<TRow>], SortableValue>;
 }
 
 /**
