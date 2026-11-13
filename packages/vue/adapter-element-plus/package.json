@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/element-plus",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "Element Plus data table controls for the AdaptTable Vue binding — sorting, filters, editing, grouping, responsive cards, URL state and RTL.",
   "keywords": [
     "vue",
@@ -27,7 +27,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@adapttable/vue": "0.4.1"
+    "@adapttable/vue": "0.5.0"
   },
   "peerDependencies": {
     "element-plus": "^2.14.7",

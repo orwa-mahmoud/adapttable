@@ -8,8 +8,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@adapttable/core": "^3.13.1",
-    "@adapttable/unstyled": "^3.4.4",
+    "@adapttable/core": "^3.14.0",
+    "@adapttable/unstyled": "^3.4.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

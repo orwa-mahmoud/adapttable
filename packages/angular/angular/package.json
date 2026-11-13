@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/angular",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "Headless Angular binding for AdaptTable. Signals over the framework-neutral engine in @adapttable/core — tables with sorting, filtering, editing, grouping, URL state and server data.",
   "keywords": [
     "angular",
@@ -91,8 +91,8 @@
     }
   },
   "dependencies": {
-    "@adapttable/core": "3.13.1",
-    "@adapttable/i18n": "3.3.9",
+    "@adapttable/core": "3.14.0",
+    "@adapttable/i18n": "3.4.0",
     "@tanstack/angular-virtual": "^6.0.6",
     "tslib": "^2.8.1"
   },

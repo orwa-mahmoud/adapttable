@@ -1,5 +1,26 @@
 # @adapttable/vue-unstyled
 
+## 0.2.4
+
+### Patch Changes
+
+- 39057e0: Vue and Angular tables take `animate`: rows and cards stagger in on mount with the shared timing, and stay still when the reader prefers reduced motion. Both mount the shared high-contrast stylesheet, so focus, selection, dirty cells, validation and find hits keep an outline under forced colors.
+  
+  Vue compact density shortens rows, the status bar no longer repeats the footer count, and opening a context menu no longer overflows the Vue shell. Compact and comfortable density reach cells inside nested Angular Aria hosts.
+  
+  `scheduleTick` from `@adapttable/vue/adapter` runs work after Vue commits the DOM and rethrows its failure; every Vue kit and `@adapttable/ai-vue` use it.
+- a1638fa: Every Vue kit component declares its prop defaults by destructuring `defineProps`, with the same defaults as before.
+- Updated dependencies [39057e0]
+- Updated dependencies [8bc96c5]
+- Updated dependencies [f20f914]
+- Updated dependencies [39057e0]
+- Updated dependencies [aa07a99]
+- Updated dependencies [b8b52f4]
+- Updated dependencies [39057e0]
+- Updated dependencies [0e7e0bb]
+  - @adapttable/core@3.14.0
+  - @adapttable/vue@0.5.0
+
 ## 0.2.3
 
 ### Patch Changes

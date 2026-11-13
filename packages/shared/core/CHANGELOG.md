@@ -1,5 +1,30 @@
 # @adapttable/core
 
+## 3.14.0
+
+### Minor Changes
+
+- 39057e0: `@adapttable/core/engine`, `/grouping`, `/editing` and `/selection` let an app import one domain without the whole root, and every root import keeps working. `createBasicTableEngine` builds the filter, sort, search and page session on its own.
+  
+  Grouping no longer throws on rows that carry the basic engine's view, and changing how a group total is formatted no longer recomputes it. A batch of row patches rebuilds its position indexes once instead of once per patch, so streaming updates on large tables do far less work with the same results.
+  
+  Decisions every binding makes the same way — source refresh, cell text, approval lines, virtualizer fields, column-select names, the built-in English labels — have one implementation in `@adapttable/core/binding`, which also exports `KitEnvironment` and `withKitEnvironment`. `renderedRowsOf` again accepts a tree entry that only carries its row.
+  
+  `sameItems` compares two lists item by item with `Object.is`, and `retainItems` keeps the previous list while its items are unchanged; both are exported from `@adapttable/core/binding`, with `isRecord` for a plain-record check. `sameRows` is deprecated in favour of `sameItems` and keeps working. `approvalProposalText` writes one proposed change as its review line, and `rowMoveMenuProps` builds a row's move menu and its confirmation, for every binding.
+- 8bc96c5: Moving the cell focus or dragging a cell range repaints only the rows the focus, range, fill handle or find matches touch. With 30 rows on screen an arrow key takes 7–12 ms in Chakra, MUI and Mantine instead of 21–54 ms, and each cell a range drag crosses takes 11–22 ms instead of 27–55 ms.
+  
+  `gridRowFocusSignature` digests what the focus draws on one row.
+- f20f914: Dragging over the grouping strip redraws only the strip. The table redraws when a column header's drag starts or ends, never while a drag hovers: on a table of 161 grouped rows each drag move takes under 10 ms instead of about 90 ms.
+  
+  `GroupingPanelController.getTableSnapshot()` returns the state the table draws from, and the panel interactions carry `live`, the drag and announcement the strip follows.
+- b8b52f4: Dragging a row redraws only the rows it crosses, not the table. In Mantine, MUI, Chakra and Ant Design each row a drag passes now takes about 10 ms instead of 13–25 ms on the row-reordering demos.
+  
+  `RowReorderController.getTableSnapshot()` returns the state the table draws from, `RowReorderState.hover` follows the drop edge as a drag moves, and `withRowDropTarget` from `@adapttable/react/adapter` applies that edge to a row.
+
+### Patch Changes
+
+- aa07a99: A table engine shows every reader one committed state. A staged row identity, filter or callback stays private until the candidate commits, and the commit tells subscribers about every axis it changed, including rows a callback refresh filtered. A search, filter or patch that throws leaves the committed table, its search term and its revisions as they were. Switching a frontend source between the basic and full evaluators keeps the same engine, table id, selection and subscribers: the new evaluator is staged with the next update and published with its commit. On the basic evaluator a one-row patch evaluates only that row, and a page-only change reuses the derived rows.
+
 ## 3.13.1
 
 ### Patch Changes
