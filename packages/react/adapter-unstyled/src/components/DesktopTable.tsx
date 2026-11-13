@@ -85,7 +85,7 @@ const PAINT: KitDesktopPaint = {
 const CAPTION_IN_FLOW: CSSProperties = { display: "contents" };
 
 /** A row: a body row takes the row class, the others their part's. */
-function Row({
+export function Row({
   kind,
   elementRef,
   selected: _selected,
@@ -120,13 +120,17 @@ function dataCellClass(
     .join(" ");
 }
 
-function Cell({ kind, ...rest }: Readonly<KitDesktopCellProps>) {
+export function Cell({ kind, ...rest }: Readonly<KitDesktopCellProps>) {
   "use no memo";
   const classNames = useClassNames();
   const own = usePartClasses(rest["data-adapttable-part"]);
   return (
     <td
-      className={kind === "data" ? dataCellClass(classNames, rest) : own}
+      className={
+        kind === "data" && rest["data-adapttable-part"] === "cell"
+          ? dataCellClass(classNames, rest)
+          : own
+      }
       {...rest}
     />
   );

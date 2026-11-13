@@ -37,7 +37,6 @@ describe("group cards (unstyled)", () => {
         selection={null}
         labels={LABELS}
         onToggleCollapse={() => undefined}
-        classNames={{}}
         onShowMore={() => undefined}
       />
     );
@@ -65,7 +64,6 @@ describe("group cards (unstyled)", () => {
         selection={null}
         labels={LABELS}
         onToggleCollapse={() => undefined}
-        classNames={{}}
         onShowMore={onShowMore}
       />
     );

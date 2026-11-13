@@ -80,7 +80,6 @@ function renderRow(
           getCellProps={() => ({})}
           selection={null}
           labels={labels}
-          classNames={{}}
           onToggleCollapse={onToggleCollapse}
           onShowMore={() => undefined}
           {...props}
@@ -185,7 +184,6 @@ describe("GroupHeaderRow (unstyled)", () => {
             getCellProps={() => ({})}
             selection={none}
             labels={labels}
-            classNames={{}}
             onToggleCollapse={vi.fn()}
             onShowMore={() => undefined}
           />
@@ -210,7 +208,6 @@ describe("GroupHeaderRow (unstyled)", () => {
             getCellProps={() => ({})}
             selection={all}
             labels={labels}
-            classNames={{}}
             onToggleCollapse={vi.fn()}
             onShowMore={() => undefined}
           />
@@ -233,7 +230,6 @@ describe("GroupHeaderRow (unstyled)", () => {
             getCellProps={() => ({})}
             selection={some}
             labels={labels}
-            classNames={{}}
             onToggleCollapse={vi.fn()}
             onShowMore={() => undefined}
           />
@@ -256,7 +252,6 @@ describe("GroupHeaderCard (unstyled)", () => {
         entry={makeGroupEntry({ collapsed: true })}
         selection={selection}
         labels={labels}
-        classNames={{}}
         onToggleCollapse={onToggleCollapse}
         onShowMore={() => undefined}
       />
