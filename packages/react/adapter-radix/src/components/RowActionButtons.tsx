@@ -1,121 +1,80 @@
-/** The trailing row-action buttons, shared by rows and cards. */
+/** A row's actions, decided by the binding and drawn with Radix's controls. */
 import {
-  type ConfirmHandler,
-  resolveDisabledReason,
-  type RowAction,
-  type RowActionsLayout,
-  type RowActionsRenderer,
-  runRowAction,
-  type TableLabels,
-  visibleRowActions,
+  createRowActionButtons,
+  type KitRowActionMenuProps,
+  type KitRowActionProps,
 } from "@adapttable/react/adapter";
 import { Button, DropdownMenu, Flex, IconButton } from "@radix-ui/themes";
 import type { ReactNode } from "react";
 
 import { iconForRowAction, MoreVerticalIcon } from "../icons";
-import type { RadixAccentColor } from "../types";
+import { useAccentColor } from "./accent";
 import { usePortalContainer } from "./portalContainer";
 import { Tooltip } from "./primitives";
 
-interface RowActionButtonsProps<TRow> {
-  row: TRow;
-  minTargetSize?: number;
-  actions: readonly RowAction<TRow>[];
-  confirm: ConfirmHandler;
-  labels: Required<TableLabels>;
-  layout?: RowActionsLayout;
-  render?: RowActionsRenderer<TRow>;
-  accentColor?: RadixAccentColor;
+const targetOf = (size: number | undefined) => ({
+  minWidth: size,
+  minHeight: size,
+});
+
+/** One action: a glyph or a caption, explaining itself in a tooltip. */
+function Action({
+  label,
+  icon,
+  disabled,
+  reason,
+  minTargetSize,
+  onClick,
+}: Readonly<KitRowActionProps>) {
+  const accent = useAccentColor();
+  const shared = {
+    size: "1",
+    variant: "ghost",
+    disabled,
+    style: targetOf(minTargetSize),
+    "data-adapttable-part": "action-button",
+    onClick,
+  } as const;
+  return (
+    <Tooltip label={reason ?? label}>
+      {icon ? (
+        <IconButton {...shared} color={accent ?? "gray"} aria-label={label}>
+          {icon}
+        </IconButton>
+      ) : (
+        <Button {...shared} color={accent}>
+          {label}
+        </Button>
+      )}
+    </Tooltip>
+  );
 }
 
-function ActionStrip<TRow>({
-  row,
-  minTargetSize,
-  actions,
-  confirm,
-  cancelLabel,
-  accentColor,
-}: Readonly<{
-  row: TRow;
-  minTargetSize?: number;
-  actions: readonly RowAction<TRow>[];
-  confirm: ConfirmHandler;
-  cancelLabel: string;
-  accentColor?: RadixAccentColor;
-}>): ReactNode {
+function Strip({ children }: Readonly<{ children: ReactNode }>) {
+  "use no memo";
   return (
     <Flex gap="1" justify="end">
-      {actions.map((action) => {
-        const reason = resolveDisabledReason(action.disabledReason?.(row));
-        const disabled =
-          reason !== undefined || (action.isDisabled?.(row) ?? false);
-        const handleClick = disabled
-          ? undefined
-          : (e: React.MouseEvent) => {
-              e.stopPropagation();
-              runRowAction(action, row, confirm, cancelLabel);
-            };
-        const icon = iconForRowAction(action);
-        return icon ? (
-          <Tooltip key={action.key} label={reason ?? action.label}>
-            <IconButton
-              size="1"
-              variant="ghost"
-              color={accentColor ?? "gray"}
-              disabled={disabled}
-              aria-label={action.label}
-              style={{ minWidth: minTargetSize, minHeight: minTargetSize }}
-              data-adapttable-part="action-button"
-              onClick={handleClick}
-            >
-              {icon}
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <Tooltip key={action.key} label={reason ?? action.label}>
-            <Button
-              size="1"
-              variant="ghost"
-              color={accentColor}
-              disabled={disabled}
-              style={{ minWidth: minTargetSize, minHeight: minTargetSize }}
-              data-adapttable-part="action-button"
-              onClick={handleClick}
-            >
-              {action.label}
-            </Button>
-          </Tooltip>
-        );
-      })}
+      {children}
     </Flex>
   );
 }
 
-function ActionMenu<TRow>({
-  row,
+function Menu({
+  label,
   minTargetSize,
-  actions,
-  confirm,
-  labels,
-  accentColor,
-}: Readonly<{
-  row: TRow;
-  minTargetSize?: number;
-  actions: readonly RowAction<TRow>[];
-  confirm: ConfirmHandler;
-  labels: Required<TableLabels>;
-  accentColor?: RadixAccentColor;
-}>): ReactNode {
+  items,
+}: Readonly<KitRowActionMenuProps>) {
   const portalContainer = usePortalContainer();
+  const accent = useAccentColor();
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
         <IconButton
           size="1"
           variant="ghost"
-          color={accentColor ?? "gray"}
-          aria-label={labels.rowActionsMenu}
-          style={{ minWidth: minTargetSize, minHeight: minTargetSize }}
+          color={accent ?? "gray"}
+          aria-label={label}
+          style={targetOf(minTargetSize)}
           data-adapttable-part="row-actions-trigger"
           onClick={(event) => event.stopPropagation()}
         >
@@ -127,65 +86,29 @@ function ActionMenu<TRow>({
         data-adapttable-part="row-actions-menu"
         onClick={(event) => event.stopPropagation()}
       >
-        {actions.map((action) => {
-          const reason = resolveDisabledReason(action.disabledReason?.(row));
-          const disabled =
-            reason !== undefined || (action.isDisabled?.(row) ?? false);
-          return (
-            <DropdownMenu.Item
-              key={action.key}
-              disabled={disabled}
-              color={action.color === "red" ? "red" : undefined}
-              style={{ minWidth: minTargetSize, minHeight: minTargetSize }}
-              data-adapttable-part="action-button"
-              title={reason}
-              onSelect={() => runRowAction(action, row, confirm, labels.cancel)}
-            >
-              {iconForRowAction(action)}
-              {action.label}
-            </DropdownMenu.Item>
-          );
-        })}
+        {items.map((item) => (
+          <DropdownMenu.Item
+            key={item.key}
+            disabled={item.disabled}
+            color={item.color === "red" ? "red" : undefined}
+            style={targetOf(item.minTargetSize)}
+            data-adapttable-part="action-button"
+            title={item.reason}
+            onSelect={item.onSelect}
+          >
+            {item.icon}
+            {item.label}
+          </DropdownMenu.Item>
+        ))}
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   );
 }
 
-export function RowActionButtons<TRow>({
-  row,
-  minTargetSize,
-  actions,
-  confirm,
-  labels,
-  layout,
-  render,
-  accentColor,
-}: Readonly<RowActionButtonsProps<TRow>>): ReactNode {
-  const visible = visibleRowActions(actions, row);
-  let content: ReactNode = null;
-  if (render) {
-    content = render({ row, actions, confirm, labels }) as ReactNode;
-  } else if (visible.length > 0) {
-    content =
-      layout === "menu" ? (
-        <ActionMenu
-          row={row}
-          minTargetSize={minTargetSize}
-          actions={visible}
-          confirm={confirm}
-          labels={labels}
-          accentColor={accentColor}
-        />
-      ) : (
-        <ActionStrip
-          row={row}
-          minTargetSize={minTargetSize}
-          actions={visible}
-          confirm={confirm}
-          cancelLabel={labels.cancel}
-          accentColor={accentColor}
-        />
-      );
-  }
-  return content;
-}
+/** A row's actions as Radix buttons or one menu. */
+export const RowActionButtons = /* @__PURE__ */ createRowActionButtons({
+  Action,
+  Strip,
+  Menu,
+  iconFor: iconForRowAction,
+});

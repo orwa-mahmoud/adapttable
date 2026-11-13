@@ -72,7 +72,6 @@ function MobileCardBase<TRow>({
   onToggleExpand,
   renderDetail,
   dir,
-  accentColor,
   editing,
   rows,
   getRowId,
@@ -242,7 +241,6 @@ function MobileCardBase<TRow>({
             labels={labels}
             layout={rowActionsLayout}
             render={renderRowActions}
-            accentColor={accentColor}
           />
         </Box>
       )}

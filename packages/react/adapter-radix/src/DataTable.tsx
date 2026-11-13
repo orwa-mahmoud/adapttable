@@ -39,6 +39,7 @@ import {
 import { Box, Button, Flex, Progress, Text } from "@radix-ui/themes";
 import type { ReactNode } from "react";
 
+import { AccentColor } from "./components/accent";
 import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
 import { MobileCards } from "./components/MobileCards";
@@ -326,7 +327,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                               />
                             ) : undefined
                           }
-                          accentColor={accentColor}
                         />
                       </Box>
                       {chrome.isRefreshing && (
@@ -516,7 +516,9 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
   return (
     <FeatureProviders props={props}>
-      <DataTableContent<TRow> {...props} />
+      <AccentColor.Provider value={props.accentColor}>
+        <DataTableContent<TRow> {...props} />
+      </AccentColor.Provider>
     </FeatureProviders>
   );
 }
