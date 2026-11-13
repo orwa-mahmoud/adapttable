@@ -120,7 +120,7 @@ export function createSavedViewsMenu(
             maxHeight:
               look.panel.maxHeight ??
               spaceBelow(anchorRef.current, PANEL_MAX_HEIGHT),
-            overflowY: "auto",
+            overflowY: look.panel.overflowY ?? "auto",
           }}
         >
           {views.map((view) => (

@@ -502,7 +502,7 @@ export function createColumnMenu(
             maxHeight:
               look.panel.maxHeight ??
               spaceBelow(anchorRef.current, PANEL_MAX_HEIGHT),
-            overflowY: "auto",
+            overflowY: look.panel.overflowY ?? "auto",
           }}
         >
           <Text variant="caption" tone="secondary" style={look.heading}>
