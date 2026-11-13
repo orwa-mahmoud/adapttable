@@ -304,15 +304,20 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
     return frame;
   }
 
-  /** One request per real change; the one it supersedes is aborted. */
+  /**
+   * One request per real change; the one it supersedes is aborted. Without a
+   * handler nothing is sent and nothing is recorded, so the handler a table
+   * gains when it moves onto the server tier hears the query it is showing.
+   */
   function send({ config, frame }: Latest<TRow>): void {
     const key = `${frame.queryKey}#${String(generation)}`;
     if (sent === key) return;
-    sent = key;
     abortSent?.();
-    abortSent = config.onQueryChange
-      ? emitter.emit(config.onQueryChange, frame.query, frame.queryKey)
-      : undefined;
+    abortSent = undefined;
+    const listener = config.onQueryChange;
+    sent = listener ? key : undefined;
+    if (listener)
+      abortSent = emitter.emit(listener, frame.query, frame.queryKey);
   }
 
   /**
