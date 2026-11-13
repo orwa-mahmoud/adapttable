@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Korean (`ko`) label preset.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "완료",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "내보내기",
 };
 
+/**
+ * Korean (`ko`) label preset.
+ *
+ * @public
+ */
 export const ko: Required<TableLabels> = {
   table: "데이터 테이블",
   search: "검색",

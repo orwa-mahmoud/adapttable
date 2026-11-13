@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Traditional Chinese (`zh-TW`) label preset.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "已完成",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "匯出",
 };
 
+/**
+ * Traditional Chinese (`zh-TW`) label preset.
+ *
+ * @public
+ */
 export const zhTW: Required<TableLabels> = {
   table: "資料表",
   search: "搜尋",

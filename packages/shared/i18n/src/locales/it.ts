@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Italian (`it`) label preset.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "eseguito",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "esportare",
 };
 
+/**
+ * Italian (`it`) label preset.
+ *
+ * @public
+ */
 export const it: Required<TableLabels> = {
   table: "Tabella dati",
   search: "Cerca",

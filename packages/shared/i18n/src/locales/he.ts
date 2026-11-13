@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Hebrew (`he`) label preset. Pairs with `dir="rtl"`.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "בוצע",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "ייצוא",
 };
 
+/**
+ * Hebrew (`he`) label preset. Pairs with `dir="rtl"`.
+ *
+ * @public
+ */
 export const he: Required<TableLabels> = {
   table: "טבלת נתונים",
   search: "חיפוש",

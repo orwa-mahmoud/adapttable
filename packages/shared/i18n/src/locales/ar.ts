@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Arabic (`ar`) label preset. Pairs with `dir="rtl"`.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "تم",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "التصدير",
 };
 
+/**
+ * Arabic (`ar`) label preset. Pairs with `dir="rtl"`.
+ *
+ * @public
+ */
 export const ar: Required<TableLabels> = {
   table: "جدول البيانات",
   search: "بحث",

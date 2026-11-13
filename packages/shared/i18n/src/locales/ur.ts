@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Urdu (`ur`) label preset. Pairs with `dir="rtl"`.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "ہو گیا",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "برآمد کرنا",
 };
 
+/**
+ * Urdu (`ur`) label preset. Pairs with `dir="rtl"`.
+ *
+ * @public
+ */
 export const ur: Required<TableLabels> = {
   table: "ڈیٹا ٹیبل",
   search: "تلاش",

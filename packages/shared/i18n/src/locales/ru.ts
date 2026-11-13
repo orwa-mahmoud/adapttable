@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Russian (`ru`) label preset.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "выполнено",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "экспорт",
 };
 
+/**
+ * Russian (`ru`) label preset.
+ *
+ * @public
+ */
 export const ru: Required<TableLabels> = {
   table: "Таблица данных",
   search: "Поиск",

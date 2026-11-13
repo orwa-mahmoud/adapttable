@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Persian / Farsi (`fa`) label preset. Pairs with `dir="rtl"`.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "انجام شد",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "برون‌بری",
 };
 
+/**
+ * Persian / Farsi (`fa`) label preset. Pairs with `dir="rtl"`.
+ *
+ * @public
+ */
 export const fa: Required<TableLabels> = {
   table: "جدول داده",
   search: "جستجو",

@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Turkish (`tr`) label preset.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "tamamlandı",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "dışa aktarma",
 };
 
+/**
+ * Turkish (`tr`) label preset.
+ *
+ * @public
+ */
 export const tr: Required<TableLabels> = {
   table: "Veri tablosu",
   search: "Ara",
