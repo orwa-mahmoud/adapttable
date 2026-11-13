@@ -33,11 +33,14 @@ import {
 type AntButtonType = "default" | "link" | "text" | "primary";
 
 /**
- * A captioned button of one antd type for each emphasis: `text` is the type
+ * A captioned button of one antd size, a type for each emphasis: `text` is the type
  * a quiet caption takes (antd's `link` for most controls, `text` for a row's
  * edit buttons).
  */
-export function buttonOfType(quiet: AntButtonType) {
+export function buttonOfType(
+  quiet: AntButtonType,
+  size: "small" | "middle" = "small"
+) {
   return forwardRef<HTMLButtonElement, KitButtonProps>(function Button(
     {
       elementRef,
@@ -60,7 +63,7 @@ export function buttonOfType(quiet: AntButtonType) {
       <AntButton
         ref={mergeRefs(ref, elementRef)}
         htmlType={htmlType}
-        size="small"
+        size={size}
         type={type}
         danger={tone === "danger"}
         block={fullWidth}

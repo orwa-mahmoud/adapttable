@@ -1,106 +1,121 @@
+/** The in-place cell editor and editable cell, drawn with antd's inputs. */
 import {
-  type ColumnDef,
-  type EditableCellEditing,
-  type EditableCellEditorCtrl,
-  EditableCellGate,
-} from "@adapttable/react";
-import {
-  commitBooleanDraft,
-  editorInputType,
-  editorValidationProps,
+  createCellEditor,
+  createEditableCell,
   formatMultiDraft,
-  isBooleanEditor,
-  isDraftChecked,
-  isMultiSelectEditor,
-  isSelectEditor,
+  type KitCellCheckboxProps,
+  type KitCellEditorProps,
+  type KitCellInputProps,
   readMultiDraft,
-  stopEditKeys,
 } from "@adapttable/react/adapter";
-import { Checkbox, Input, Select } from "antd";
-import type { KeyboardEvent, ReactElement, ReactNode } from "react";
+import {
+  Checkbox as AntCheckbox,
+  Input as AntInput,
+  Select as AntSelect,
+} from "antd";
 
 import { editableCellSlots } from "./kitControls";
 
-/** Ant Design text / number / select editor for the active cell. */
-export function AntdCellEditor({
+const FULL_WIDTH = { width: "100%" } as const;
+
+const statusOf = (error: unknown) =>
+  error === undefined ? undefined : "error";
+
+function Checkbox({
+  label,
+  aria,
+  checked,
+  onCheckedChange,
+  onKeyDown,
+}: Readonly<KitCellCheckboxProps>) {
+  "use no memo";
+  return (
+    <AntCheckbox
+      data-adapttable-part="edit-cell-editor"
+      aria-label={label}
+      checked={checked}
+      onChange={(event) => onCheckedChange(event.target.checked)}
+      onKeyDown={onKeyDown}
+      {...aria}
+    />
+  );
+}
+
+const optionsOf = (ctrl: KitCellEditorProps["ctrl"]) =>
+  ctrl.selectOptions.map((option) => ({
+    value: option.value,
+    label: option.label,
+  }));
+
+/** Several choices: antd's multiple select. */
+function MultiSelect({
   ctrl,
   label,
-}: Readonly<{
-  ctrl: EditableCellEditorCtrl;
-  label: string;
-}>): ReactElement {
-  const onKeyDown = (event: KeyboardEvent) => {
-    ctrl.onEditorKeyDown(event);
-    stopEditKeys(event);
-  };
-
-  if (isBooleanEditor(ctrl.editor)) {
-    return (
-      <Checkbox
-        data-adapttable-part="edit-cell-editor"
-        aria-label={label}
-        checked={isDraftChecked(ctrl.draft)}
-        onChange={(event) => commitBooleanDraft(ctrl, event.target.checked)}
-        onKeyDown={onKeyDown}
-        {...editorValidationProps(ctrl)}
-      />
-    );
-  }
-
-  if (isMultiSelectEditor(ctrl.editor)) {
-    return (
-      <Select
-        mode="multiple"
-        status={ctrl.error === undefined ? undefined : "error"}
-        ref={ctrl.focusRef}
-        data-adapttable-part="edit-cell-editor"
-        {...editorValidationProps(ctrl)}
-        aria-label={label}
-        size="small"
-        style={{ width: "100%" }}
-        options={ctrl.selectOptions.map((option) => ({
-          value: option.value,
-          label: option.label,
-        }))}
-        value={readMultiDraft(ctrl.draft)}
-        onChange={(values: string[]) => ctrl.setDraft(formatMultiDraft(values))}
-        onKeyDown={onKeyDown}
-        onBlur={ctrl.commitOnBlur}
-      />
-    );
-  }
-
-  if (isSelectEditor(ctrl.editor)) {
-    return (
-      <Select
-        status={ctrl.error === undefined ? undefined : "error"}
-        ref={ctrl.focusRef}
-        data-adapttable-part="edit-cell-editor"
-        {...editorValidationProps(ctrl)}
-        aria-label={label}
-        size="small"
-        style={{ width: "100%" }}
-        options={ctrl.selectOptions.map((option) => ({
-          value: option.value,
-          label: option.label,
-        }))}
-        value={ctrl.draft}
-        onChange={(value: string) => ctrl.setDraft(value)}
-        onKeyDown={onKeyDown}
-        onBlur={ctrl.commitOnBlur}
-      />
-    );
-  }
-
+  aria,
+  onKeyDown,
+}: Readonly<KitCellEditorProps>) {
+  "use no memo";
   return (
-    <Input
-      status={ctrl.error === undefined ? undefined : "error"}
+    <AntSelect
+      mode="multiple"
+      status={statusOf(ctrl.error)}
       ref={ctrl.focusRef}
       data-adapttable-part="edit-cell-editor"
-      {...editorValidationProps(ctrl)}
+      {...aria}
       aria-label={label}
       size="small"
-      type={editorInputType(ctrl.editor)}
+      style={FULL_WIDTH}
+      options={optionsOf(ctrl)}
+      value={readMultiDraft(ctrl.draft)}
+      onChange={(values: string[]) => ctrl.setDraft(formatMultiDraft(values))}
+      onKeyDown={onKeyDown}
+      onBlur={ctrl.commitOnBlur}
+    />
+  );
+}
+
+function Select({
+  ctrl,
+  label,
+  aria,
+  onKeyDown,
+}: Readonly<KitCellEditorProps>) {
+  "use no memo";
+  return (
+    <AntSelect
+      status={statusOf(ctrl.error)}
+      ref={ctrl.focusRef}
+      data-adapttable-part="edit-cell-editor"
+      {...aria}
+      aria-label={label}
+      size="small"
+      style={FULL_WIDTH}
+      options={optionsOf(ctrl)}
+      value={ctrl.draft}
+      onChange={(value: string) => ctrl.setDraft(value)}
+      onKeyDown={onKeyDown}
+      onBlur={ctrl.commitOnBlur}
+    />
+  );
+}
+
+function Input({
+  ctrl,
+  label,
+  aria,
+  type,
+  onKeyDown,
+}: Readonly<KitCellInputProps>) {
+  "use no memo";
+  return (
+    <AntInput
+      status={statusOf(ctrl.error)}
+      ref={ctrl.focusRef}
+      data-adapttable-part="edit-cell-editor"
+      {...aria}
+      aria-label={label}
+      size="small"
+      type={type}
       value={ctrl.draft}
       onChange={(event) => ctrl.setDraft(event.target.value)}
       onKeyDown={onKeyDown}
@@ -109,41 +124,18 @@ export function AntdCellEditor({
   );
 }
 
-/** Opt-in editable cell — pass-through when `editing` is omitted. */
-export function EditableDataCell<TRow>(props: {
-  readonly editing: EditableCellEditing<TRow> | undefined;
-  readonly row: TRow;
-  readonly column: ColumnDef<TRow>;
-  readonly rowId: string;
-  readonly rows: readonly TRow[];
-  readonly columns: readonly ColumnDef<TRow>[];
-  readonly rowKey: (row: TRow) => string;
-  readonly editLabel: string;
-  /** `labels.undoEdit` — the control a failed save offers. */
-  readonly undoLabel?: string;
-  /**
-   * What the cell shows when nothing is being edited. The binding resolves it
-   * — the row's precomputed display, the column's `Cell`, or its accessor —
-   * so the accessor runs in this cell's own memo scope.
-   */
-  readonly display: ReactNode;
-}): ReactElement {
-  return (
-    <EditableCellGate
-      editing={props.editing}
-      row={props.row}
-      column={props.column}
-      rowId={props.rowId}
-      rows={props.rows}
-      columns={props.columns}
-      rowKey={props.rowKey}
-      editLabel={props.editLabel}
-      undoLabel={props.undoLabel}
-      display={props.display}
-      slots={editableCellSlots}
-      renderEditor={(ctrl) => (
-        <AntdCellEditor ctrl={ctrl} label={props.editLabel} />
-      )}
-    />
-  );
-}
+/** The editor for the active cell, with antd's inputs. */
+export const AntdCellEditor = /* @__PURE__ */ createCellEditor({
+  Checkbox,
+  MultiSelect,
+  Select,
+  Input,
+  rendersError: false,
+});
+
+/** A cell that edits in place; shows its value until editing starts. */
+export const EditableDataCell = /* @__PURE__ */ createEditableCell({
+  Editor: AntdCellEditor,
+  slots: editableCellSlots,
+  rendersError: false,
+});

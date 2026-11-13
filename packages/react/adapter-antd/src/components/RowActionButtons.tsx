@@ -1,13 +1,8 @@
-/** The trailing row-action buttons, shared by rows and cards. */
+/** A row's actions, decided by the binding and drawn with antd's controls. */
 import {
-  type ConfirmHandler,
-  resolveDisabledReason,
-  type RowAction,
-  type RowActionsLayout,
-  type RowActionsRenderer,
-  runRowAction,
-  type TableLabels,
-  visibleRowActions,
+  createRowActionButtons,
+  type KitRowActionMenuProps,
+  type KitRowActionProps,
 } from "@adapttable/react/adapter";
 import { Button, Dropdown, Tooltip } from "antd";
 import type { ReactNode } from "react";
@@ -15,124 +10,92 @@ import type { ReactNode } from "react";
 import { isDangerColor } from "../colors";
 import { iconForRowAction, MoreVerticalIcon } from "../icons";
 
-interface RowActionButtonsProps<TRow> {
-  row: TRow;
-  minTargetSize?: number;
-  actions: readonly RowAction<TRow>[];
-  confirm: ConfirmHandler;
-  labels: Required<TableLabels>;
-  layout?: RowActionsLayout;
-  render?: RowActionsRenderer<TRow>;
-}
+const targetOf = (size: number | undefined) => ({
+  minWidth: size,
+  minHeight: size,
+});
 
-function ActionStrip<TRow>({
-  row,
+/** A tooltip is a label, not a control: it must not hold the pointer. */
+const PASS_THROUGH = { root: { pointerEvents: "none" } } as const;
+
+/** One action: a text button, its glyph or its caption, explained on hover. */
+function Action({
+  label,
+  icon,
+  color,
+  disabled,
+  reason,
   minTargetSize,
-  actions,
-  confirm,
-  cancelLabel,
-}: Readonly<{
-  row: TRow;
-  minTargetSize?: number;
-  actions: readonly RowAction<TRow>[];
-  confirm: ConfirmHandler;
-  cancelLabel: string;
-}>): ReactNode {
+  onClick,
+}: Readonly<KitRowActionProps>) {
+  "use no memo";
   return (
-    <>
-      {actions.map((action) => {
-        const reason = resolveDisabledReason(action.disabledReason?.(row));
-        const disabled =
-          reason !== undefined || (action.isDisabled?.(row) ?? false);
-        const icon = iconForRowAction(action);
-        return (
-          <Tooltip
-            key={action.key}
-            title={reason ?? action.label}
-            // A label, not a control: it must not hold the pointer, or the
-            // bubble over the next row's buttons swallows the click meant
-            // for them.
-            styles={{ root: { pointerEvents: "none" } }}
-          >
-            <Button
-              size="small"
-              type="text"
-              danger={isDangerColor(action.color)}
-              disabled={disabled}
-              icon={icon}
-              title={reason}
-              aria-label={action.label}
-              style={{ minWidth: minTargetSize, minHeight: minTargetSize }}
-              data-adapttable-part="action-button"
-              onClick={
-                disabled
-                  ? undefined
-                  : (event) => {
-                      event.stopPropagation();
-                      runRowAction(action, row, confirm, cancelLabel);
-                    }
-              }
-            >
-              {icon ? undefined : action.label}
-            </Button>
-          </Tooltip>
-        );
-      })}
-    </>
+    <Tooltip
+      title={reason ?? label}
+      // Over the next row's buttons, a bubble that held the pointer would
+      // swallow the click meant for them.
+      styles={PASS_THROUGH}
+    >
+      <Button
+        size="small"
+        type="text"
+        danger={isDangerColor(color)}
+        disabled={disabled}
+        icon={icon}
+        title={reason}
+        aria-label={label}
+        style={targetOf(minTargetSize)}
+        data-adapttable-part="action-button"
+        onClick={onClick}
+      >
+        {icon ? undefined : label}
+      </Button>
+    </Tooltip>
   );
 }
 
-/** Tags the dropdown surface with its part name for adapter styling hooks. */
+function Strip({ children }: Readonly<{ children: ReactNode }>) {
+  "use no memo";
+  return children;
+}
+
+/** Tags the dropdown surface with its part name. */
 function renderMenuSurface(menu: ReactNode): ReactNode {
   return <div data-adapttable-part="row-actions-menu">{menu}</div>;
 }
 
-function ActionMenu<TRow>({
-  row,
+function Menu({
+  label,
   minTargetSize,
-  actions,
-  confirm,
-  labels,
-}: Readonly<{
-  row: TRow;
-  minTargetSize?: number;
-  actions: readonly RowAction<TRow>[];
-  confirm: ConfirmHandler;
-  labels: Required<TableLabels>;
-}>): ReactNode {
+  items,
+}: Readonly<KitRowActionMenuProps>) {
+  "use no memo";
   return (
     <Dropdown
       trigger={["click"]}
       popupRender={renderMenuSurface}
       menu={{
-        items: actions.map((action) => {
-          const reason = resolveDisabledReason(action.disabledReason?.(row));
-          const disabled =
-            reason !== undefined || (action.isDisabled?.(row) ?? false);
-          return {
-            key: action.key,
-            label: action.label,
-            icon: iconForRowAction(action),
-            disabled,
-            danger: isDangerColor(action.color),
-            title: reason,
-          };
-        }),
+        items: items.map((item) => ({
+          key: item.key,
+          label: item.label,
+          icon: item.icon,
+          disabled: item.disabled,
+          danger: isDangerColor(item.color),
+          title: item.reason,
+        })),
         onClick: (info) => {
           // The menu sits inside the row, so the choice must not read as a
           // click on the row underneath it.
           info.domEvent.stopPropagation();
-          const action = actions.find((item) => item.key === info.key);
-          if (!action) return;
-          runRowAction(action, row, confirm, labels.cancel);
+          items.find((item) => item.key === info.key)?.onSelect();
         },
       }}
     >
       <Button
         size="small"
         type="text"
-        aria-label={labels.rowActionsMenu}
-        style={{ minWidth: minTargetSize, minHeight: minTargetSize }}
+        aria-label={label}
+        style={targetOf(minTargetSize)}
         data-adapttable-part="row-actions-trigger"
         icon={<MoreVerticalIcon />}
         onClick={(event) => event.stopPropagation()}
@@ -141,38 +104,10 @@ function ActionMenu<TRow>({
   );
 }
 
-export function RowActionButtons<TRow>({
-  row,
-  minTargetSize,
-  actions,
-  confirm,
-  labels,
-  layout,
-  render,
-}: Readonly<RowActionButtonsProps<TRow>>): ReactNode {
-  const visible = visibleRowActions(actions, row);
-  let content: ReactNode = null;
-  if (render) {
-    content = render({ row, actions, confirm, labels }) as ReactNode;
-  } else if (visible.length > 0) {
-    content =
-      layout === "menu" ? (
-        <ActionMenu
-          row={row}
-          minTargetSize={minTargetSize}
-          actions={visible}
-          confirm={confirm}
-          labels={labels}
-        />
-      ) : (
-        <ActionStrip
-          row={row}
-          minTargetSize={minTargetSize}
-          actions={visible}
-          confirm={confirm}
-          cancelLabel={labels.cancel}
-        />
-      );
-  }
-  return content;
-}
+/** A row's actions as antd text buttons or one dropdown. */
+export const RowActionButtons = /* @__PURE__ */ createRowActionButtons({
+  Action,
+  Strip,
+  Menu,
+  iconFor: iconForRowAction,
+});

@@ -1,230 +1,210 @@
-/** Search field, sort select, filters trigger, menus and rows-per-page. */
+/** The toolbar, laid out by the binding and drawn with antd's controls. */
 import {
-  FeatureSlot,
-  FILTER_POPOVER,
-  pageSizeOptions,
-  TOOLBAR_EXTRAS,
-  type ToolbarChromeProps,
+  createToolbar,
+  type KitButtonProps,
+  type KitFiltersButtonProps,
+  type KitRowsPerPageProps,
+  type KitToolbarFrameProps,
+  type KitToolbarProps,
+  type KitToolbarSearchProps,
+  type KitToolbarSortProps,
+  mergeRefs,
 } from "@adapttable/react/adapter";
-import { Badge, Button, Flex, Input, Select, Spin } from "antd";
-import type { ReactNode } from "react";
+import {
+  Badge,
+  Button as AntButton,
+  Flex,
+  Input,
+  type InputRef,
+  Select,
+  Spin,
+} from "antd";
+import { createContext, forwardRef, useContext } from "react";
 
 import { FiltersIcon, SearchIcon } from "../icons";
 
-export interface ToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
-  /** Filter content (anchored popover or drawer). */
-  filters?: ReactNode;
-  /** Whether to anchor a popover or open the drawer. */
-  filtersMode: "popover" | "drawer" | "header";
-  /** Close the filter container. */
-  onCloseFilters: () => void;
-  /** Clear every active filter (always wired — falls back to `clearExtras`). */
-  onClearFilters: () => void;
-  /** Show the subtle background-refresh spinner in the toolbar. */
-  isRefreshing: boolean;
-}
+/** Whether rows already shown are being refreshed, for the frame's spinner. */
+const Refreshing = /* @__PURE__ */ createContext<{
+  readonly busy: boolean;
+  readonly label: string;
+}>({ busy: false, label: "" });
 
-/** Search field + sort select + filters button + rows-per-page. */
-export function Toolbar<TRow>({
-  table,
-  searchable,
-  searchPlaceholder,
-  sortByOptions,
-  toolbar,
-  toolbarSlots,
-  onUndo,
-  onRedo,
-  canUndo,
-  canRedo,
-  undoLabel,
-  redoLabel,
-  onPrint,
-  printLabel,
-  density,
-  onDensityChange,
-  onToggleFullscreen,
-  isFullscreen,
-  hasFilters,
-  activeFilterCount,
-  filters,
-  filtersMode,
-  filtersOpen,
-  onToggleFilters,
-  onFiltersTriggerPointerDown,
-  onCloseFilters,
-  onClearFilters,
-  isRefreshing,
-  dir,
-  columnMenu,
-  onAddRow,
-  addRowLabel,
-  onExportCsv,
-  exportBusy,
-  exportAnnouncement = "",
-  exportProgressState,
-  exportDisabled = false,
-  exportDisabledReason = "",
-  exportLabel,
-  savedViewsMenu,
-  showRowsPerPage,
-}: Readonly<ToolbarProps<TRow>>) {
-  const { labels, source } = table;
-  const sortOptions =
-    sortByOptions ?? (table.isMobile ? table.sortByOptions : undefined);
-  const searchProps = table.getSearchInputProps(
-    searchPlaceholder ? { placeholder: searchPlaceholder } : undefined
-  );
-
-  const filtersButton = (
-    <Badge count={activeFilterCount} size="small">
-      <Button
-        icon={<FiltersIcon size={16} />}
-        aria-expanded={filtersMode === "popover" ? filtersOpen : undefined}
-        data-active={filtersOpen || undefined}
-        onPointerDown={onFiltersTriggerPointerDown}
-        onClick={onToggleFilters}
-      >
-        {labels.filters}
-      </Button>
-    </Badge>
-  );
-
+function Frame({ start, search, controls }: Readonly<KitToolbarFrameProps>) {
+  const refreshing = useContext(Refreshing);
   return (
     <Flex gap="small" wrap align="center" justify="space-between">
-      {toolbarSlots?.start}
-      {searchable !== false && (
-        <Input
-          type="search"
-          data-adapttable-part="search"
-          ref={(input) => {
-            if (input?.nativeElement) {
-              input.nativeElement.dataset.adapttablePart = "search-field";
-            }
-            const icon = input?.input?.previousElementSibling;
-            if (icon instanceof HTMLElement) {
-              icon.dataset.adapttablePart = "search-icon";
-            }
-          }}
-          allowClear
-          prefix={<SearchIcon size={14} />}
-          style={{ flex: 1, minWidth: 160, maxWidth: 360 }}
-          aria-label={labels.search}
-          value={searchProps.value}
-          placeholder={searchProps.placeholder}
-          onChange={searchProps.onChange}
-        />
-      )}
+      {start}
+      {search}
       <Flex gap="small" wrap align="center">
-        {isRefreshing && <Spin size="small" aria-label={labels.loading} />}
-        {sortOptions && sortOptions.length > 0 && (
-          <Select
-            style={{ minWidth: 160 }}
-            aria-label={labels.sortBy}
-            placeholder={labels.sortBy}
-            allowClear
-            value={source.sortBy ?? undefined}
-            options={sortOptions.map((o) => ({
-              value: o.value,
-              label: o.label,
-            }))}
-            onChange={(value?: string) =>
-              source.setSort(value, source.sortDir ?? "asc")
-            }
-          />
-        )}
-        {table.isMobile && sortOptions && sortOptions.length > 0 && (
-          <Button
-            size="small"
-            htmlType="button"
-            data-adapttable-part="sort-direction"
-            disabled={!source.sortBy}
-            aria-label={
-              source.sortDir === "desc"
-                ? labels.sortAscending
-                : labels.sortDescending
-            }
-            onClick={() =>
-              source.setSort(
-                source.sortBy,
-                source.sortDir === "desc" ? "asc" : "desc"
-              )
-            }
-          >
-            {source.sortDir === "desc"
-              ? labels.sortDescending
-              : labels.sortAscending}
-          </Button>
-        )}
-        {toolbar}
-        {hasFilters && filtersMode === "popover" ? (
-          <FeatureSlot
-            slot={FILTER_POPOVER}
-            props={{
-              open: filtersOpen,
-              onClose: onCloseFilters,
-              filters,
-              activeFilterCount,
-              onClearFilters,
-              labels,
-              dir,
-              children: filtersButton,
-            }}
-          />
-        ) : (
-          hasFilters && filtersButton
-        )}
-        {savedViewsMenu}
-        {columnMenu}
-        <FeatureSlot
-          slot={TOOLBAR_EXTRAS}
-          props={{
-            onUndo,
-            onRedo,
-            canUndo,
-            canRedo,
-            undoLabel,
-            redoLabel,
-            onPrint,
-            printLabel,
-            density,
-            onDensityChange,
-            onToggleFullscreen,
-            isFullscreen,
-            onExportCsv,
-            exportBusy,
-            exportAnnouncement,
-            exportProgressState,
-            exportLabel,
-            exportDisabled,
-            exportDisabledReason,
-            labels,
-          }}
-        />
-        {onAddRow && (
-          <Button
-            type="primary"
-            data-adapttable-part="add-row"
-            onClick={onAddRow}
-          >
-            {addRowLabel}
-          </Button>
-        )}
-        {toolbarSlots?.end}
-        {showRowsPerPage && (
-          <Select
-            style={{ minWidth: 110 }}
-            aria-label={labels.rowsPerPage}
-            value={source.limit}
-            options={pageSizeOptions([source.limit, source.defaultLimit]).map(
-              (n) => ({
-                value: n,
-                label: String(n),
-              })
-            )}
-            onChange={(value: number) => source.setLimit(value)}
-          />
-        )}
+        {refreshing.busy && <Spin size="small" aria-label={refreshing.label} />}
+        {controls}
       </Flex>
     </Flex>
+  );
+}
+
+const SEARCH_BOX = { flex: 1, minWidth: 160, maxWidth: 360 } as const;
+
+/** Names the wrapper and the icon antd draws around its input. */
+function nameSearchParts(input: InputRef | null): void {
+  if (input?.nativeElement) {
+    input.nativeElement.dataset.adapttablePart = "search-field";
+  }
+  const icon = input?.input?.previousElementSibling;
+  if (icon instanceof HTMLElement) {
+    icon.dataset.adapttablePart = "search-icon";
+  }
+}
+
+function Search({ input }: Readonly<KitToolbarSearchProps>) {
+  "use no memo";
+  return (
+    <Input
+      type="search"
+      data-adapttable-part="search"
+      ref={nameSearchParts}
+      allowClear
+      prefix={<SearchIcon size={14} />}
+      style={SEARCH_BOX}
+      aria-label={input["aria-label"]}
+      value={input.value}
+      placeholder={input.placeholder}
+      onChange={input.onChange}
+    />
+  );
+}
+
+const SORT_SELECT = { minWidth: 160 } as const;
+
+function SortSelect({
+  label,
+  value,
+  options,
+  onValueChange,
+}: Readonly<KitToolbarSortProps>) {
+  "use no memo";
+  return (
+    <Select
+      style={SORT_SELECT}
+      aria-label={label}
+      placeholder={label}
+      allowClear
+      value={value || undefined}
+      options={options.map((option) => ({
+        value: option.value,
+        label: option.label,
+      }))}
+      onChange={(next?: string) => onValueChange(next)}
+    />
+  );
+}
+
+/** The toolbar's buttons: add-row primary at antd's size, the rest small. */
+const Button = forwardRef<HTMLButtonElement, KitButtonProps>(function Button(
+  {
+    elementRef,
+    variant,
+    tone: _tone,
+    fullWidth: _fullWidth,
+    justify: _justify,
+    busy,
+    type: htmlType = "button",
+    ...rest
+  },
+  ref
+) {
+  "use no memo";
+  const primary = variant === "filled";
+  return (
+    <AntButton
+      ref={mergeRefs(ref, elementRef)}
+      htmlType={htmlType}
+      size={primary ? undefined : "small"}
+      type={primary ? "primary" : "default"}
+      loading={busy}
+      {...rest}
+    />
+  );
+});
+
+const FiltersButton = forwardRef<HTMLButtonElement, KitFiltersButtonProps>(
+  function FiltersButton(
+    {
+      elementRef,
+      label,
+      count,
+      expanded,
+      open,
+      onPointerDown,
+      onClick,
+      ...target
+    },
+    ref
+  ) {
+    return (
+      <Badge count={count} size="small">
+        <AntButton
+          ref={mergeRefs(ref, elementRef)}
+          icon={<FiltersIcon size={16} />}
+          aria-expanded={expanded}
+          data-active={open || undefined}
+          onPointerDown={onPointerDown}
+          onClick={onClick}
+          {...target}
+        >
+          {label}
+        </AntButton>
+      </Badge>
+    );
+  }
+);
+
+const ROWS_PER_PAGE = { minWidth: 110 } as const;
+
+function RowsPerPage({
+  label,
+  value,
+  options,
+  onValueChange,
+}: Readonly<KitRowsPerPageProps>) {
+  "use no memo";
+  return (
+    <Select
+      style={ROWS_PER_PAGE}
+      aria-label={label}
+      value={value}
+      options={options.map((size) => ({ value: size, label: String(size) }))}
+      onChange={(next: number) => onValueChange(next)}
+    />
+  );
+}
+
+const KitToolbar = /* @__PURE__ */ createToolbar({
+  Frame,
+  Search,
+  SortSelect,
+  Button,
+  FiltersButton,
+  filtersPopover: "wrap",
+  RowsPerPage,
+});
+
+/** The props of antd's toolbar: the binding's, plus the refresh state. */
+export interface ToolbarProps<TRow> extends KitToolbarProps<TRow> {
+  /** Whether rows already shown are being refreshed. */
+  readonly isRefreshing: boolean;
+}
+
+/** The toolbar, with a spinner among its controls while rows refresh. */
+export function Toolbar<TRow>({
+  isRefreshing,
+  ...props
+}: Readonly<ToolbarProps<TRow>>) {
+  return (
+    <Refreshing.Provider
+      value={{ busy: isRefreshing, label: props.table.labels.loading }}
+    >
+      <KitToolbar {...props} />
+    </Refreshing.Provider>
   );
 }
