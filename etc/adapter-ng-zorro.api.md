@@ -29,6 +29,7 @@ import { ColumnSelectCheckboxChromeProps } from '@adapttable/angular/adapter';
 import { ColumnSelectCheckboxProps } from '@adapttable/angular/adapter';
 import { ColumnSelectSlots } from '@adapttable/angular/adapter';
 import { DataTableClassNames } from '@adapttable/angular';
+import { Direction } from '@adapttable/angular';
 import { EditableCellEditing } from '@adapttable/angular';
 import { EditableCellEditorCtrl } from '@adapttable/angular/adapter';
 import { EditableCellSlotProps } from '@adapttable/angular/adapter';
@@ -736,7 +737,7 @@ export class AdaptSavedViewsMenu implements OnInit {
     // (undocumented)
     protected apply(name: string): void;
     // (undocumented)
-    protected readonly direction: WritableSignal<"rtl" | "ltr">;
+    protected readonly direction: WritableSignal<Direction>;
     protected readonly inputStyle: {
         flex: string;
         "inline-size": string;
