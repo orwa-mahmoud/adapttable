@@ -74,7 +74,7 @@ export function useShellDataTier<TRow>(
         supplied.value?.allFilteredRows ?? toValue(resolved.value.data) ?? [],
       loadedOptions: {},
       filterTypes: resolved.value.filterTypes,
-      featureHost: registered.value as FeatureHostState | undefined,
+      featureHost: registered.value,
       optionCache: filterOptionCache.reconcile(columns, definitions),
     });
   });
