@@ -642,6 +642,9 @@
       "adapter-element-plus-context-menu",
       "adapter-element-plus-density",
       "adapter-element-plus-editing",
+      "adapter-element-plus-export-csv",
+      "adapter-element-plus-export-pdf",
+      "adapter-element-plus-export-xlsx",
       "adapter-element-plus-export",
       "adapter-element-plus-extra-rows",
       "adapter-element-plus-filters",
@@ -679,10 +682,14 @@
       "adapter-naive-ui-column-groups",
       "adapter-naive-ui-column-menu",
       "adapter-naive-ui-column-selection",
+      "adapter-naive-ui-columns",
       "adapter-naive-ui-command-palette",
       "adapter-naive-ui-context-menu",
       "adapter-naive-ui-density",
       "adapter-naive-ui-editing",
+      "adapter-naive-ui-export-csv",
+      "adapter-naive-ui-export-pdf",
+      "adapter-naive-ui-export-xlsx",
       "adapter-naive-ui-export",
       "adapter-naive-ui-extra-rows",
       "adapter-naive-ui-filters",
@@ -703,6 +710,7 @@
       "adapter-naive-ui-row-detail",
       "adapter-naive-ui-row-pinning",
       "adapter-naive-ui-row-reorder",
+      "adapter-naive-ui-rows",
       "adapter-naive-ui-saved-views",
       "adapter-naive-ui-selection-stats",
       "adapter-naive-ui-side-panel",
@@ -725,6 +733,9 @@
       "adapter-nuxt-ui-context-menu",
       "adapter-nuxt-ui-density",
       "adapter-nuxt-ui-editing",
+      "adapter-nuxt-ui-export-csv",
+      "adapter-nuxt-ui-export-pdf",
+      "adapter-nuxt-ui-export-xlsx",
       "adapter-nuxt-ui-export",
       "adapter-nuxt-ui-extra-rows",
       "adapter-nuxt-ui-filters",
@@ -762,12 +773,14 @@
       "adapter-quasar-column-groups",
       "adapter-quasar-column-menu",
       "adapter-quasar-column-selection",
+      "adapter-quasar-columns",
       "adapter-quasar-command-palette",
       "adapter-quasar-context-menu",
       "adapter-quasar-density",
       "adapter-quasar-editing",
       "adapter-quasar-export-pdf",
       "adapter-quasar-export-xlsx",
+      "adapter-quasar-export-csv",
       "adapter-quasar-export",
       "adapter-quasar-extra-rows",
       "adapter-quasar-filters",
@@ -787,6 +800,7 @@
       "adapter-quasar-row-detail",
       "adapter-quasar-row-pinning",
       "adapter-quasar-row-reorder",
+      "adapter-quasar-rows",
       "adapter-quasar-saved-views",
       "adapter-quasar-selection-stats",
       "adapter-quasar-side-panel",
@@ -907,6 +921,9 @@
       "adapter-vuetify-context-menu",
       "adapter-vuetify-density",
       "adapter-vuetify-editing",
+      "adapter-vuetify-export-csv",
+      "adapter-vuetify-export-pdf",
+      "adapter-vuetify-export-xlsx",
       "adapter-vuetify-export",
       "adapter-vuetify-extra-rows",
       "adapter-vuetify-filters",
@@ -13230,6 +13247,31 @@
       "TableEditingOptions",
       "undoRedoButtons"
     ],
+    "adapter-element-plus-export-csv": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-element-plus-export-pdf": [
+      "buildPrintDocument",
+      "buildPrintTableHtml",
+      "buildTablePdf",
+      "exportPdf",
+      "ExportPdfOptions",
+      "openPrintLayout",
+      "pdfWriter",
+      "PdfWriterOptions",
+      "PrintLayoutOptions",
+      "PrintPageBreak",
+      "PrintPageSize",
+      "printStyles",
+      "printTable"
+    ],
+    "adapter-element-plus-export-xlsx": [
+      "buildTableXlsx",
+      "exportXlsx",
+      "ExportXlsxOptions",
+      "xlsxWriter"
+    ],
     "adapter-element-plus-export": [
       "exportCsv",
       "ExportCsvOptions"
@@ -13458,6 +13500,14 @@
     "adapter-naive-ui-column-selection": [
       "columnSelectionCheckbox"
     ],
+    "adapter-naive-ui-columns": [
+      "collapsibleColumnGroups",
+      "ColumnResizeHandleOptions",
+      "ColumnResizeHandleProps",
+      "fitColumns",
+      "multiSort",
+      "resizableColumns"
+    ],
     "adapter-naive-ui-command-palette": [
       "commandPalette",
       "CommandPaletteOptions"
@@ -13486,6 +13536,31 @@
       "RowEditingState",
       "TableEditingOptions",
       "undoRedoButtons"
+    ],
+    "adapter-naive-ui-export-csv": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-naive-ui-export-pdf": [
+      "buildPrintDocument",
+      "buildPrintTableHtml",
+      "buildTablePdf",
+      "exportPdf",
+      "ExportPdfOptions",
+      "openPrintLayout",
+      "pdfWriter",
+      "PdfWriterOptions",
+      "PrintLayoutOptions",
+      "PrintPageBreak",
+      "PrintPageSize",
+      "printStyles",
+      "printTable"
+    ],
+    "adapter-naive-ui-export-xlsx": [
+      "buildTableXlsx",
+      "exportXlsx",
+      "ExportXlsxOptions",
+      "xlsxWriter"
     ],
     "adapter-naive-ui-export": [
       "exportCsv",
@@ -13586,6 +13661,33 @@
       "RowReorderHandler",
       "RowReorderOptions",
       "useRowReorder"
+    ],
+    "adapter-naive-ui-rows": [
+      "cellSpan",
+      "CellSpanAppearance",
+      "CellSpanRequest",
+      "ConfirmHandler",
+      "ConfirmRequest",
+      "ExtraEntry",
+      "ExtraRow",
+      "ExtraRowKind",
+      "extraRows",
+      "GetCellSpan",
+      "GetCellSpanArgs",
+      "PinnedRows",
+      "PinnedSummaryEntry",
+      "pinnedSummaryRows",
+      "RowAction",
+      "rowActions",
+      "rowAppearance",
+      "RowAppearanceOptions",
+      "RowHeight",
+      "RowMutationHandlers",
+      "rowPinning",
+      "RowPinningFeatureOptions",
+      "RowPinSide",
+      "RowPinState",
+      "RowStyle"
     ],
     "adapter-naive-ui-saved-views": [
       "DataTableClassNames",
@@ -13721,6 +13823,31 @@
       "RowEditingState",
       "TableEditingOptions",
       "undoRedoButtons"
+    ],
+    "adapter-nuxt-ui-export-csv": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-nuxt-ui-export-pdf": [
+      "buildPrintDocument",
+      "buildPrintTableHtml",
+      "buildTablePdf",
+      "exportPdf",
+      "ExportPdfOptions",
+      "openPrintLayout",
+      "pdfWriter",
+      "PdfWriterOptions",
+      "PrintLayoutOptions",
+      "PrintPageBreak",
+      "PrintPageSize",
+      "printStyles",
+      "printTable"
+    ],
+    "adapter-nuxt-ui-export-xlsx": [
+      "buildTableXlsx",
+      "exportXlsx",
+      "ExportXlsxOptions",
+      "xlsxWriter"
     ],
     "adapter-nuxt-ui-export": [
       "exportCsv",
@@ -13934,6 +14061,14 @@
     "adapter-quasar-column-selection": [
       "columnSelectionCheckbox"
     ],
+    "adapter-quasar-columns": [
+      "collapsibleColumnGroups",
+      "ColumnResizeHandleOptions",
+      "ColumnResizeHandleProps",
+      "fitColumns",
+      "multiSort",
+      "resizableColumns"
+    ],
     "adapter-quasar-command-palette": [
       "CommandPalette",
       "commandPalette",
@@ -13982,6 +14117,10 @@
       "exportXlsx",
       "ExportXlsxOptions",
       "xlsxWriter"
+    ],
+    "adapter-quasar-export-csv": [
+      "exportCsv",
+      "ExportCsvOptions"
     ],
     "adapter-quasar-export": [
       "exportCsv",
@@ -14069,6 +14208,33 @@
       "RowReorderHandler",
       "RowReorderOptions",
       "useRowReorder"
+    ],
+    "adapter-quasar-rows": [
+      "cellSpan",
+      "CellSpanAppearance",
+      "CellSpanRequest",
+      "ConfirmHandler",
+      "ConfirmRequest",
+      "ExtraEntry",
+      "ExtraRow",
+      "ExtraRowKind",
+      "extraRows",
+      "GetCellSpan",
+      "GetCellSpanArgs",
+      "PinnedRows",
+      "PinnedSummaryEntry",
+      "pinnedSummaryRows",
+      "RowAction",
+      "rowActions",
+      "rowAppearance",
+      "RowAppearanceOptions",
+      "RowHeight",
+      "RowMutationHandlers",
+      "rowPinning",
+      "RowPinningFeatureOptions",
+      "RowPinSide",
+      "RowPinState",
+      "RowStyle"
     ],
     "adapter-quasar-saved-views": [
       "SavedView",
@@ -15033,6 +15199,31 @@
       "VuetifyBatchEditBar",
       "VuetifyEditableCell",
       "VuetifyRowEditActions"
+    ],
+    "adapter-vuetify-export-csv": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-vuetify-export-pdf": [
+      "buildPrintDocument",
+      "buildPrintTableHtml",
+      "buildTablePdf",
+      "exportPdf",
+      "ExportPdfOptions",
+      "openPrintLayout",
+      "pdfWriter",
+      "PdfWriterOptions",
+      "PrintLayoutOptions",
+      "PrintPageBreak",
+      "PrintPageSize",
+      "printStyles",
+      "printTable"
+    ],
+    "adapter-vuetify-export-xlsx": [
+      "buildTableXlsx",
+      "exportXlsx",
+      "ExportXlsxOptions",
+      "xlsxWriter"
     ],
     "adapter-vuetify-export": [
       "exportCsv",
@@ -17741,6 +17932,15 @@
     "adapter-element-plus-editing.api.md": {
       "surface": "adapter-element-plus-editing"
     },
+    "adapter-element-plus-export-csv.api.md": {
+      "surface": "adapter-element-plus-export-csv"
+    },
+    "adapter-element-plus-export-pdf.api.md": {
+      "surface": "adapter-element-plus-export-pdf"
+    },
+    "adapter-element-plus-export-xlsx.api.md": {
+      "surface": "adapter-element-plus-export-xlsx"
+    },
     "adapter-element-plus-export.api.md": {
       "surface": "adapter-element-plus-export"
     },
@@ -17852,6 +18052,9 @@
     "adapter-naive-ui-column-selection.api.md": {
       "surface": "adapter-naive-ui-column-selection"
     },
+    "adapter-naive-ui-columns.api.md": {
+      "surface": "adapter-naive-ui-columns"
+    },
     "adapter-naive-ui-command-palette.api.md": {
       "surface": "adapter-naive-ui-command-palette"
     },
@@ -17863,6 +18066,15 @@
     },
     "adapter-naive-ui-editing.api.md": {
       "surface": "adapter-naive-ui-editing"
+    },
+    "adapter-naive-ui-export-csv.api.md": {
+      "surface": "adapter-naive-ui-export-csv"
+    },
+    "adapter-naive-ui-export-pdf.api.md": {
+      "surface": "adapter-naive-ui-export-pdf"
+    },
+    "adapter-naive-ui-export-xlsx.api.md": {
+      "surface": "adapter-naive-ui-export-xlsx"
     },
     "adapter-naive-ui-export.api.md": {
       "surface": "adapter-naive-ui-export"
@@ -17923,6 +18135,9 @@
     },
     "adapter-naive-ui-row-reorder.api.md": {
       "surface": "adapter-naive-ui-row-reorder"
+    },
+    "adapter-naive-ui-rows.api.md": {
+      "surface": "adapter-naive-ui-rows"
     },
     "adapter-naive-ui-saved-views.api.md": {
       "surface": "adapter-naive-ui-saved-views"
@@ -17989,6 +18204,15 @@
     },
     "adapter-nuxt-ui-editing.api.md": {
       "surface": "adapter-nuxt-ui-editing"
+    },
+    "adapter-nuxt-ui-export-csv.api.md": {
+      "surface": "adapter-nuxt-ui-export-csv"
+    },
+    "adapter-nuxt-ui-export-pdf.api.md": {
+      "surface": "adapter-nuxt-ui-export-pdf"
+    },
+    "adapter-nuxt-ui-export-xlsx.api.md": {
+      "surface": "adapter-nuxt-ui-export-xlsx"
     },
     "adapter-nuxt-ui-export.api.md": {
       "surface": "adapter-nuxt-ui-export"
@@ -18101,6 +18325,9 @@
     "adapter-quasar-column-selection.api.md": {
       "surface": "adapter-quasar-column-selection"
     },
+    "adapter-quasar-columns.api.md": {
+      "surface": "adapter-quasar-columns"
+    },
     "adapter-quasar-command-palette.api.md": {
       "surface": "adapter-quasar-command-palette"
     },
@@ -18118,6 +18345,9 @@
     },
     "adapter-quasar-export-xlsx.api.md": {
       "surface": "adapter-quasar-export-xlsx"
+    },
+    "adapter-quasar-export-csv.api.md": {
+      "surface": "adapter-quasar-export-csv"
     },
     "adapter-quasar-export.api.md": {
       "surface": "adapter-quasar-export"
@@ -18175,6 +18405,9 @@
     },
     "adapter-quasar-row-reorder.api.md": {
       "surface": "adapter-quasar-row-reorder"
+    },
+    "adapter-quasar-rows.api.md": {
+      "surface": "adapter-quasar-rows"
     },
     "adapter-quasar-saved-views.api.md": {
       "surface": "adapter-quasar-saved-views"
@@ -18535,6 +18768,15 @@
     },
     "adapter-vuetify-editing.api.md": {
       "surface": "adapter-vuetify-editing"
+    },
+    "adapter-vuetify-export-csv.api.md": {
+      "surface": "adapter-vuetify-export-csv"
+    },
+    "adapter-vuetify-export-pdf.api.md": {
+      "surface": "adapter-vuetify-export-pdf"
+    },
+    "adapter-vuetify-export-xlsx.api.md": {
+      "surface": "adapter-vuetify-export-xlsx"
     },
     "adapter-vuetify-export.api.md": {
       "surface": "adapter-vuetify-export"

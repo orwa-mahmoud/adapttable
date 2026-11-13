@@ -4,6 +4,7 @@ import Vue from "unplugin-vue/rolldown";
 export default defineConfig({
   entry: [
     "src/column-selection.ts",
+    "src/columns.ts",
     "src/nested-table.ts",
     "src/cell-navigation.ts",
     "src/side-panel.ts",
@@ -11,6 +12,7 @@ export default defineConfig({
     "src/command-palette.ts",
     "src/context-menu.ts",
     "src/row-reorder.ts",
+    "src/rows.ts",
 
     "src/index.ts",
     "src/features.ts",
@@ -43,6 +45,7 @@ export default defineConfig({
     "src/selection-stats.ts",
     "src/saved-views.ts",
     "src/export.ts",
+    "src/export-csv.ts",
     "src/export-pdf.ts",
     "src/export-xlsx.ts",
     "src/pivot.ts",

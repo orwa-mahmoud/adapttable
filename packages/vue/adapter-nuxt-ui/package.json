@@ -361,6 +361,36 @@
         "default": "./dist/export.cjs"
       }
     },
+    "./export-csv": {
+      "import": {
+        "types": "./dist/export-csv.d.ts",
+        "default": "./dist/export-csv.js"
+      },
+      "require": {
+        "types": "./dist/export-csv.d.cts",
+        "default": "./dist/export-csv.cjs"
+      }
+    },
+    "./export-pdf": {
+      "import": {
+        "types": "./dist/export-pdf.d.ts",
+        "default": "./dist/export-pdf.js"
+      },
+      "require": {
+        "types": "./dist/export-pdf.d.cts",
+        "default": "./dist/export-pdf.cjs"
+      }
+    },
+    "./export-xlsx": {
+      "import": {
+        "types": "./dist/export-xlsx.d.ts",
+        "default": "./dist/export-xlsx.js"
+      },
+      "require": {
+        "types": "./dist/export-xlsx.d.cts",
+        "default": "./dist/export-xlsx.cjs"
+      }
+    },
     "./pivot": {
       "import": {
         "types": "./dist/pivot.d.ts",

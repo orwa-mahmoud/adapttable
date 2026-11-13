@@ -322,7 +322,7 @@ export const ElementHeaderFilter: typeof __VLS_export;
 // @public (undocumented)
 export const ElementRowEditActions: typeof __VLS_export_2;
 
-// @public (undocumented)
+// @public
 export function exportCsv(options?: boolean): StaticTableFeature;
 
 // @public (undocumented)
