@@ -85,6 +85,7 @@ import { fetchPeople, type PeoplePage, type PeopleParams } from "./mockApi";
 import { usePatchSink } from "./patchSink";
 import { summaryPerson } from "./people";
 import { useRealtimeSlot } from "./realtimeSlot";
+import { revealHiddenOnPin } from "./shared/peopleTable";
 
 /**
  * Where the rows come from.
@@ -304,21 +305,6 @@ export type TableRender = (
   source: TableSource<Person>,
   columns: DemoColumnProps
 ) => ReactNode;
-
-/**
- * Demo affordance: pinning a column reveals every hidden column, so the table
- * widens past its container and the pin's stickiness becomes visible while
- * scrolling. Only fires when a *new* pin is added (not on unpin/resize).
- */
-function revealHiddenOnPin(
-  prev: ColumnLayoutState,
-  next: ColumnLayoutState
-): ColumnLayoutState {
-  const pinAdded = Object.keys(next.pinned).some(
-    (key) => !(key in prev.pinned)
-  );
-  return pinAdded && next.hidden.length > 0 ? { ...next, hidden: [] } : next;
-}
 
 function usePeopleQuery(params: PeopleParams) {
   return useInfiniteQuery({

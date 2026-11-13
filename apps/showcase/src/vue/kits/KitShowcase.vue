@@ -10,6 +10,7 @@ import {
 import type { DataTableProps } from "@adapttable/vue/adapter";
 import { computed, shallowRef, type VNodeChild, watch } from "vue";
 
+import { revealHiddenOnPin } from "../../shared/peopleTable";
 import { workspaceCopy } from "../workspace/copy";
 import {
   date,
@@ -139,13 +140,7 @@ function changeSelection(ids: string[]): void {
   selected.value = ids;
 }
 function changeColumnLayout(next: ColumnLayoutState): void {
-  const previous = columnState.layout.value;
-  const pinAdded = Object.keys(next.pinned).some(
-    (key) => !(key in previous.pinned)
-  );
-  columnState.onLayoutChange(
-    pinAdded && next.hidden.length ? { ...next, hidden: [] } : next
-  );
+  columnState.onLayoutChange(revealHiddenOnPin(columnState.layout.value, next));
 }
 const presentationControls = computed(() => [
   {

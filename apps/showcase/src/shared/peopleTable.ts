@@ -24,6 +24,7 @@ import {
   formatMoney,
   formatMonth,
   formatPercent,
+  loadAggregateText,
   PEOPLE,
   type Person,
   personName,
@@ -34,6 +35,7 @@ import {
   strings,
   TEAM_LABELS,
   TEAMS,
+  timelineAggregateText,
   utilization,
 } from "../people";
 
@@ -132,19 +134,70 @@ export function statusTone(row: Person): StatusTone {
  */
 export type PeopleColumn = Omit<
   ColumnMetadata<Person>,
-  "header" | "filter" | "accessor"
+  "header" | "filter" | "accessor" | "editor" | "formatAggregate"
 > & {
   readonly key: string;
   readonly header: string;
   readonly accessor: (row: Person) => string;
+  readonly editor?: PeopleEditor;
+  /** An aggregate of the column, as text. */
+  readonly formatAggregate?: AggregateText;
 };
 
-/** An ISO day (`2026-03-08`) for the date editor's draft. */
+/** How a column writes one of its aggregates as text. */
+export type AggregateText = (
+  value: unknown,
+  context: { readonly aggregation?: string }
+) => string | undefined;
+
+/**
+ * An aggregate formatter from a number formatter: a number reads through it;
+ * text something else already formatted reads as it is.
+ *
+ * @param format - Formats a number for the aggregation that produced it.
+ * @param dataLocale - The language of the cell data.
+ * @returns The column's aggregate formatter.
+ */
+function aggregateText(
+  format: (
+    value: number,
+    aggregation: string | undefined,
+    locale: "ar" | "en"
+  ) => string,
+  dataLocale: "ar" | "en"
+): AggregateText {
+  return (value, context) => {
+    if (typeof value === "number")
+      return format(value, context.aggregation, dataLocale);
+    return typeof value === "string" ? value : undefined;
+  };
+}
+
+/** The editors the people columns open, in a shape every binding accepts. */
+export type PeopleEditor =
+  | "text"
+  | "number"
+  | "date"
+  | {
+      readonly type: "select";
+      readonly options: readonly { value: string; label: string }[];
+    };
+
+/** A local day (`2026-03-08`) for the browser's date control. */
+function localDay(value: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${String(value.getFullYear())}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
+}
+
+/** An ISO day (`2026-03-08`), the start date a spreadsheet can sort. */
 const isoDay = (date: Date): string => date.toISOString().slice(0, 10);
 
 /**
- * The people columns: name, team, status, timeline, budget and load. With
- * `editable`, name, team, status, timeline and budget open an editor.
+ * The people columns, in the order every page shows them: name, email, team,
+ * status, timeline, budget and load. Widths are fixed pixels, so revealing a
+ * hidden column pushes the table past its frame and a pinned column is seen
+ * to stick. With `editable`, every column but the derived ones opens an
+ * editor.
  *
  * @param dataLocale - The language of the cell data.
  * @param options - `editable` marks the editable columns.
@@ -160,15 +213,32 @@ export function peopleColumns(
     {
       key: "person",
       header: s.person,
+      headerTooltip: s.person,
+      renameable: true,
       accessor: (row) => personName(row, dataLocale),
       sortValue: (row) => personName(row, dataLocale),
       sortable: true,
+      // A name adds up to nothing; counting the people in a group does.
+      aggregatable: { operations: ["count"] },
       editable,
       editor: "text",
+      editValue: (row) => personName(row, dataLocale),
       validate: (value) =>
         String(value).trim() === "" ? s.nameRequired : undefined,
-      width: 200,
+      width: 230,
+      // The card's identity block explains itself; a "Person" label is noise.
       mobileLabel: "",
+    },
+    {
+      key: "email",
+      header: s.email,
+      headerTooltip: s.email,
+      accessor: (row) => row.email,
+      aggregatable: false,
+      editable,
+      editor: "text",
+      width: 250,
+      mobileLabel: s.email,
     },
     {
       key: "team",
@@ -182,6 +252,7 @@ export function peopleColumns(
           label: TEAM_LABELS[dataLocale][team] ?? team,
         })),
       },
+      editValue: (row) => row.team,
       width: 130,
       mobileLabel: s.team,
     },
@@ -210,13 +281,18 @@ export function peopleColumns(
       accessor: (row) =>
         `${formatDate(startDate(row), dataLocale)} → ${formatDate(dueDate(row), dataLocale)}`,
       sortValue: (row) => startDate(row).getTime(),
+      // The month is the bucket a reader means when they group a timeline.
       groupValue: (row) => formatMonth(startDate(row), dataLocale),
+      // A spreadsheet gets the sortable start date, not the localized range.
       exportValue: (row) => isoDay(startDate(row)),
       sortable: true,
+      // Dates compare but do not add up.
+      aggregatable: { operations: ["min", "max", "count"] },
+      formatAggregate: aggregateText(timelineAggregateText, dataLocale),
       editable,
       editor: "date",
-      editValue: (row) => isoDay(startDate(row)),
-      width: 240,
+      editValue: (row) => localDay(startDate(row)),
+      width: 185,
       mobileLabel: s.timeline,
     },
     {
@@ -224,21 +300,19 @@ export function peopleColumns(
       header: s.budget,
       accessor: (row) => formatMoney(budget(row), dataLocale),
       sortValue: (row) => budget(row),
+      // A spreadsheet cannot sum "$25,300"; the file carries the number.
       exportValue: (row) => budget(row),
       sortable: true,
       aggregatable: {
-        operations: ["sum", "avg", "min", "max"],
         default: "sum",
+        operations: ["sum", "avg", "min", "max", "count"],
       },
-      formatAggregate: (value, context) =>
-        typeof value === "number"
-          ? budgetAggregateText(value, context.aggregation, dataLocale)
-          : value,
+      formatAggregate: aggregateText(budgetAggregateText, dataLocale),
       editable,
       editor: "number",
       editValue: (row) => String(budget(row)),
       parseValue: (draft) => Number(draft),
-      width: 120,
+      width: 130,
       mobileLabel: s.budget,
     },
     {
@@ -247,7 +321,14 @@ export function peopleColumns(
       accessor: (row) => formatPercent(utilization(row), dataLocale),
       sortValue: (row) => utilization(row),
       sortable: true,
-      width: 100,
+      // Available, and off until a reader asks for it.
+      aggregatable: { operations: ["avg", "min", "max", "count"] },
+      formatAggregate: aggregateText(loadAggregateText, dataLocale),
+      editable,
+      editor: "number",
+      editValue: (row) => String(utilization(row)),
+      parseValue: (draft) => Number(draft),
+      width: 175,
       mobileLabel: s.load,
     },
   ];
@@ -291,10 +372,33 @@ export function groupPeopleColumns<TColumn extends { readonly key: string }>(
 }
 
 /**
- * The fields a cell edit writes: the column's field set to the value the
- * table hands the host. The timeline cell shows a range; its editor edits the
- * start it sorts by. A name edit writes the field of the language the cell
- * reads.
+ * The row field a column's edit writes. A composite cell shows one thing and
+ * edits another: Person edits the name in the language the cell reads, Load
+ * the utilization, and Timeline the start date it sorts by. Every other
+ * column key is its field.
+ *
+ * @param columnKey - The edited column.
+ * @param dataLocale - The language of the cell data.
+ * @returns The field.
+ */
+export function personEditField(
+  columnKey: string,
+  dataLocale: "ar" | "en"
+): keyof Person {
+  switch (columnKey) {
+    case "person":
+      return dataLocale === "ar" ? "nameAr" : "name";
+    case "load":
+      return "utilization";
+    case "timeline":
+      return "start";
+    default:
+      return columnKey as keyof Person;
+  }
+}
+
+/**
+ * The fields a cell edit writes, each value in its field's type.
  *
  * @param key - The column that was edited.
  * @param value - The committed value.
@@ -306,21 +410,15 @@ function personChanges(
   value: unknown,
   dataLocale: "ar" | "en"
 ): Partial<Person> {
-  switch (key) {
-    case "person":
-      return dataLocale === "ar"
-        ? { nameAr: String(value) }
-        : { name: String(value) };
-    case "team":
-      return { team: String(value) };
+  const field = personEditField(key, dataLocale);
+  switch (field) {
+    case "budget":
+    case "utilization":
+      return { [field]: Number(value) };
     case "status":
       return { status: STATUSES.find((status) => status === value) };
-    case "timeline":
-      return { start: String(value) };
-    case "budget":
-      return { budget: Number(value) };
     default:
-      return {};
+      return { [field]: value };
   }
 }
 

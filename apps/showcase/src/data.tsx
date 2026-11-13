@@ -49,6 +49,7 @@ import {
   timelineDays,
   utilization,
 } from "./people";
+import { peopleColumns } from "./shared/peopleTable";
 
 export {
   allocationCount,
@@ -109,12 +110,6 @@ export function nestedOpenIds(
 ): readonly string[] | undefined {
   const first = rows[0]?.id;
   return nested && first ? [first] : undefined;
-}
-
-/** `YYYY-MM-DD` in local time — what a date editor holds. */
-function localDay(value: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${String(value.getFullYear())}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
 }
 
 /** Columns for the nested orders table — a different shape from the parent's. */
@@ -535,26 +530,22 @@ export function makeColumns(
         }),
       ]
     : [];
-  // Fixed pixel widths (not %) so revealing the hidden team column
-  // pushes the total past the container and the table scrolls horizontally —
-  // the only way a pinned column can be seen to stick.
+  // The columns every framework shows, from the shared definition; React
+  // draws its kit's cells over them.
+  const shared = new Map(
+    peopleColumns(locale, { editable: canEdit }).map((column) => [
+      column.key,
+      column,
+    ])
+  );
+  const sharedColumn = (key: string): ColumnDef<Person> => {
+    const found = shared.get(key);
+    if (!found) throw new Error(`no people column "${key}"`);
+    return found;
+  };
   const leaves: ColumnDef<Person>[] = [
     {
-      key: "person",
-      header: s.person,
-      headerTooltip: s.person,
-      renameable: true,
-      sortable: true,
-      sortValue: (r) => r.name,
-      editable: canEdit,
-      editor: "text",
-      editValue: (r) => personName(r, locale),
-      // A name adds up to nothing; counting the people in a group does.
-      aggregatable: { operations: ["count"] },
-      // A rule the reader can trip on purpose: clear the name and commit.
-      validate: (value) =>
-        String(value).trim() === "" ? s.nameRequired : undefined,
-      width: 230,
+      ...sharedColumn("person"),
       accessor: (row) => (
         <span
           className="demo-person-identity"
@@ -571,88 +562,29 @@ export function makeColumns(
           </span>
         </span>
       ),
-      // The first mobile field is the card identity block; its Avatar + name
-      // already explain themselves, so repeating "Person" adds visual noise.
-      mobileLabel: "",
     },
     ...trend,
     ...editors,
     {
-      key: "email",
-      header: s.email,
-      headerTooltip: s.email,
-      aggregatable: false,
-      // Opt-in cell editing — only when this page also passes `onCellEdit`.
-      editable: canEdit,
-      editor: "text",
+      ...sharedColumn("email"),
       accessor: (r) => (
         <span style={{ opacity: 0.7, fontSize: "0.9em" }}>{r.email}</span>
       ),
-      width: 250,
-      mobileLabel: s.email,
     },
+    sharedColumn("team"),
     {
-      // The library's own column i18n: under `locale="ar"` the cell, sort
-      // and filter all follow the `teamAr` path — no accessor needed.
-      key: "team",
-      header: s.team,
-      i18n: { ar: "teamAr" },
-      editable: canEdit,
-      editor: {
-        type: "select",
-        options: TEAMS.map((v) => ({ value: v, label: v })),
-      },
-      editValue: (r) => r.team,
-      width: 130,
-      mobileLabel: s.team,
-    },
-    {
-      key: "status",
-      header: s.status,
-      aggregatable: { operations: ["count"] },
+      ...sharedColumn("status"),
       accessor: (r) => (
         <Status
           status={personStatus(r)}
           label={STATUS_LABELS[locale][personStatus(r)]}
         />
       ),
-      sortValue: (r) => personStatus(r),
-      sortable: true,
-      editable: canEdit,
-      editor: {
-        type: "select",
-        options: STATUSES.map((v) => ({
-          value: v,
-          label: STATUS_LABELS[locale][v],
-        })),
-      },
-      editValue: (r) => personStatus(r),
-      width: 130,
-      mobileLabel: s.status,
     },
     {
-      key: "timeline",
-      header: s.timeline,
-      // Dates compare but do not add up, and a millisecond count is not a
-      // date: min and max read back as the day they name.
-      aggregatable: { operations: ["min", "max", "count"] },
+      ...sharedColumn("timeline"),
       formatAggregate: (value, context) =>
         formatTimelineAggregate(value, context, locale),
-      sortValue: (r) => startDate(r).getTime(),
-      // Grouping by the instant a project starts gives every row a group of
-      // its own, captioned with the epoch. The month is the bucket a reader
-      // means when they group a timeline.
-      groupValue: (r) => formatMonth(startDate(r), locale),
-      // A localized "Mar 8, 2026 → Apr 22, 2026" is unusable in a spreadsheet;
-      // the file gets the sortable ISO start date.
-      exportValue: (r) => startDate(r).toISOString().slice(0, 10),
-      sortable: true,
-      // The cell shows a localized range; the editor edits the start date it
-      // sorts by, in the browser's own date control.
-      editable: canEdit,
-      editor: "date",
-      editValue: (r) => localDay(startDate(r)),
-      width: 185,
       accessor: (row) => (
         <span className="demo-person-identity__details" style={cellStack}>
           <strong style={{ fontWeight: 550 }}>
@@ -663,50 +595,21 @@ export function makeColumns(
           </small>
         </span>
       ),
-      mobileLabel: s.timeline,
     },
     {
-      key: "budget",
-      header: s.budget,
-      // The developer's own choice, visible in the panel before anyone
-      // touches it: Budget opens summed, and offers the rest.
-      aggregatable: {
-        default: "sum",
-        operations: ["sum", "avg", "min", "max", "count"],
-      },
+      ...sharedColumn("budget"),
       accessor: (r) => (
         <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
           {formatMoney(budget(r), locale)}
         </span>
       ),
-      sortValue: (r) => budget(r),
-      // A subtotal of this column is money too — whether the table computed it
-      // or the reader chose the operation from the grouping strip.
       formatAggregate: (value, context) =>
         formatBudgetAggregate(value, context, locale),
-      // The screen shows "$25,300"; a spreadsheet cannot sum that, so the file
-      // carries the number underneath.
-      exportValue: (r) => budget(r),
-      sortable: true,
-      editable: canEdit,
-      editor: "number",
-      editValue: (r) => String(budget(r)),
-      width: 130,
-      mobileLabel: s.budget,
     },
     {
-      key: "load",
-      header: s.load,
-      // Available, and off until a reader asks for it.
-      aggregatable: { operations: ["avg", "min", "max", "count"] },
+      ...sharedColumn("load"),
       formatAggregate: (value, context) =>
         formatLoadAggregate(value, context, locale),
-      sortValue: (r) => utilization(r),
-      sortable: true,
-      editable: canEdit,
-      editor: "number",
-      editValue: (r) => String(utilization(r)),
-      width: 175,
       accessor: (row) => (
         <Load
           label={s.load}
@@ -714,7 +617,6 @@ export function makeColumns(
           meta={`${formatPercent(utilization(row), locale)} · ${allocationCount(row)}`}
         />
       ),
-      mobileLabel: s.load,
     },
     // Last, so a column somebody just typed appears at the end of the table
     // rather than in the middle of the set they already know.

@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { applyRowReorder } from "@adapttable/core";
-import { aggregate, useServerData } from "@adapttable/vue";
+import { applyRowReorder, type ColumnLayoutState } from "@adapttable/core";
+import {
+  aggregate,
+  useColumnLayoutUrlState,
+  useServerData,
+} from "@adapttable/vue";
 import { onScopeDispose, shallowRef } from "vue";
 
 import {
@@ -9,6 +13,10 @@ import {
   registerDemoCapture,
 } from "../../angular/demoTransitions.mjs";
 import { formatMoney } from "../../people";
+import {
+  LIVE_DEFAULT_LAYOUT,
+  revealHiddenOnPin,
+} from "../../shared/peopleTable";
 import {
   applyPersonEdit,
   fetchPeople,
@@ -38,6 +46,16 @@ onScopeDispose(
 );
 const columns = peopleColumns({ editable: editing, status: kit.status });
 const urlKey = props.lab ? "vue-lab" : "vue-live";
+// The live demo controls its layout so a new pin reveals the hidden columns:
+// the table widens past its frame and the pinned column is seen to stick.
+const columnState = useColumnLayoutUrlState({
+  urlKey,
+  urlAdapter: demoUrlAdapter,
+  defaultColumnLayout: props.lab ? undefined : LIVE_DEFAULT_LAYOUT,
+});
+function changeColumnLayout(next: ColumnLayoutState): void {
+  columnState.onLayoutChange(revealHiddenOnPin(columnState.layout.value, next));
+}
 const log = shallowRef("");
 const loading = shallowRef(false);
 const error = shallowRef<Error | null>(null);
@@ -208,14 +226,13 @@ const density = query.get("density") === "compact" ? "compact" : "comfortable";
         :url-adapter="demoUrlAdapter"
         :selectable="enabled('selection', true)"
         :mobile-breakpoint="enabled('mobile') ? Number.MAX_SAFE_INTEGER : 768"
-        :default-column-layout="
-          props.lab ? undefined : { hidden: ['email', 'team'] }
-        "
+        :column-layout="columnState.layout.value"
         :defaults="{ limit: props.lab ? 10 : 5 }"
         :density="density"
         :animate="enabled('motion', true)"
         :summary-row="summary"
         :features="features"
+        @update:column-layout="changeColumnLayout"
       />
     </div>
     <p v-if="log" role="status" class="hint">{{ log }}</p>

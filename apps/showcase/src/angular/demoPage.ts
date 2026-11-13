@@ -54,9 +54,9 @@ import {
   personSkills,
   personStatus,
   SKILLS,
-  strings,
   summaryPerson,
 } from "../people";
+import { revealHiddenOnPin } from "../shared/peopleTable";
 import {
   applyPersonEdit,
   type DemoOrder,
@@ -253,12 +253,8 @@ export class AdaptShowcaseDemoPage {
   });
   /** A new pin reveals the wide arrangement so its stickiness is visible. */
   setColumnLayout(next: ColumnLayoutState): void {
-    const previous = this.columnState.layout();
-    const pinAdded = Object.keys(next.pinned).some(
-      (key) => !(key in previous.pinned)
-    );
     this.columnState.onLayoutChange(
-      pinAdded && next.hidden.length ? { ...next, hidden: [] } : next
+      revealHiddenOnPin(this.columnState.layout(), next)
     );
   }
   readonly reducedMotion = injectPrefersReducedMotion();
@@ -284,13 +280,6 @@ export class AdaptShowcaseDemoPage {
       minWidth: typeof column.width === "number" ? column.width : undefined,
       ...(this.availableEnabled("cell-flash") && flash ? { cell: flash } : {}),
     }));
-    columns.splice(1, 0, {
-      key: "email",
-      header: strings(this.presentation.locale === "ar" ? "ar" : "en").email,
-      accessor: (row: Person) => row.email,
-      width: 280,
-      minWidth: 280,
-    });
     return [
       ...columns,
       ...(this.availableEnabled("formula")
