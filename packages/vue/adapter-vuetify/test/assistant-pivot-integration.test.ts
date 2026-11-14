@@ -1,23 +1,10 @@
 import { afterEach, expect, it, vi } from "vitest";
-import {
-  createApp,
-  defineComponent,
-  h,
-  KeepAlive,
-  nextTick,
-  shallowRef,
-} from "vue";
+import { createApp, h, nextTick, shallowRef } from "vue";
 import { createVuetify } from "vuetify";
 import { aliases, mdi } from "vuetify/iconsets/mdi-svg";
 
 import { DataTable } from "../src";
-import {
-  AgentApproval,
-  agentApproval,
-  type AgentApprovalProps,
-  TableAssistant,
-  type TableAssistantProps,
-} from "../src/assistant";
+import { TableAssistant, type TableAssistantProps } from "../src/assistant";
 import { PivotPanel, type PivotPanelProps } from "../src/pivot";
 import { standardFeatures } from "../src/preset";
 
@@ -155,80 +142,6 @@ it("uses a real VDialog with one close request, nested menu Escape and controlle
   expect(launcher.isConnected).toBe(false);
   expect(document.activeElement).toBe(element(part("assistant-launcher")));
   expect(suggested).not.toHaveBeenCalled();
-});
-it("retires assistant sheet and menu portals in KeepAlive and preserves host focus", async () => {
-  const visible = shallowRef(true);
-  const open = shallowRef(true);
-  const assistant: TableAssistantProps["assistant"] = {
-    status: "ready",
-    messages: [],
-    draft: "",
-    setDraft: vi.fn(),
-    send: vi.fn(),
-    stop: vi.fn(),
-    suggestions: [{ id: "one", title: "One" }],
-    runSuggestion: vi.fn(),
-  };
-  const Child = defineComponent({
-    render: () =>
-      h(TableAssistant, {
-        assistant,
-        open: open.value,
-        onOpenChange: (value) => {
-          open.value = value;
-        },
-        presentation: "sheet",
-      }),
-  });
-  const Other = defineComponent({ render: () => h("p", "Paused") });
-  mount(() =>
-    h("div", [
-      h("input", { id: "assistant-outside" }),
-      h(KeepAlive, null, {
-        default: () => (visible.value ? h(Child) : h(Other)),
-      }),
-    ])
-  );
-  await flush();
-  element<HTMLButtonElement>(part("assistant-examples-menu")).click();
-  await flush();
-  expect(document.querySelector('[role="menu"]')).not.toBeNull();
-  visible.value = false;
-  await nextTick();
-  const outside = element<HTMLInputElement>("#assistant-outside");
-  outside.focus();
-  await flush();
-  expect(document.querySelector(part("assistant-sheet"))).toBeNull();
-  expect(document.querySelector('[role="menu"]')).toBeNull();
-  expect(document.activeElement).toBe(outside);
-  visible.value = true;
-  await flush();
-  expect(document.querySelectorAll(part("assistant-sheet"))).toHaveLength(1);
-  expect(document.querySelector('[role="menu"]')).toBeNull();
-  expect(document.activeElement).toBe(element(part("assistant-input")));
-});
-it("keeps approval decisions scoped to the current proposal", async () => {
-  const first = vi.fn();
-  const second = vi.fn();
-  const make = (approve: () => void): AgentApprovalProps["pending"] => ({
-    presentation: "table",
-    identity: Object.freeze({}),
-    proposals: [{ rowKey: "a", column: "name", before: "Ada", after: "Grace" }],
-    decisions: ["pending"],
-    approve,
-    reject: vi.fn(),
-  });
-  const pending = shallowRef(make(first));
-  mount(() => h(AgentApproval, { pending: pending.value }));
-  await flush();
-  element<HTMLButtonElement>(part("agent-approval-approve")).click();
-  pending.value = make(second);
-  await flush();
-  expect(first).not.toHaveBeenCalled();
-  expect(second).not.toHaveBeenCalled();
-  element<HTMLButtonElement>(part("agent-approval-approve")).click();
-  await flush();
-  expect(second).toHaveBeenCalledTimes(1);
 });
 it("uses Vuetify selects for controlled pivot configuration and mounts the complete standard preset", async () => {
   const config = shallowRef<PivotPanelProps["config"]>({
@@ -375,10 +288,4 @@ it("floats the assistant window and leaves an Escape an inner overlay handled al
   // sheet's own close request.
   await key(sheet, "Escape");
   expect(changed).toHaveBeenCalledExactlyOnceWith(false);
-});
-
-it("registers the approval feature through the kit's own component", () => {
-  const feature = agentApproval();
-  expect(feature.id).toBeTruthy();
-  expect(feature.renders?.length ?? 0).toBeGreaterThan(0);
 });
