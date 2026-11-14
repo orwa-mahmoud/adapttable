@@ -32,7 +32,8 @@ export interface ConformanceIt {
   (name: string, body: ConformanceBody): void;
   /**
    * Register one test per case. `%s`, `%d` and `%i` in the name take the
-   * case's values in order; an array case spreads into the body's arguments.
+   * case's values in order, and `$key` takes an object case's `key` (a
+   * string quoted); an array case spreads into the body's arguments.
    */
   each<TCase>(
     cases: readonly TCase[]
@@ -86,16 +87,44 @@ interface Scope {
 }
 
 const PLACEHOLDER = /%[sdi]/g;
+const KEY_PLACEHOLDER = /\$([A-Za-z_]\w*)/g;
 
 /** A case's values, in the order the body receives them. */
 function caseArgs<TCase>(value: TCase): CaseArgs<TCase> {
   return (Array.isArray(value) ? value : [value]) as CaseArgs<TCase>;
 }
 
+/** An object case's value as a name shows it: a string quoted, an object as JSON. */
+function displayValue(value: unknown): string {
+  if (typeof value === "string") return `'${value}'`;
+  if (typeof value === "object" && value !== null) return JSON.stringify(value);
+  return String(value);
+}
+
+/** A name with each `$key` replaced by that key of an object case. */
+function formatKeys(name: string, value: unknown): string {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return name;
+  }
+  const fields = value as Readonly<Record<string, unknown>>;
+  return name.replace(KEY_PLACEHOLDER, (placeholder, key: string) => {
+    if (!(key in fields)) {
+      throw new Error(
+        `Test name "${name}" names ${placeholder}, which its case does not have.`
+      );
+    }
+    return displayValue(fields[key]);
+  });
+}
+
 /** A name with each placeholder replaced by the next case value. */
-function formatName(name: string, args: readonly unknown[]): string {
+function formatName(
+  name: string,
+  args: readonly unknown[],
+  value: unknown
+): string {
   let index = 0;
-  return name.replace(PLACEHOLDER, (placeholder) => {
+  return formatKeys(name, value).replace(PLACEHOLDER, (placeholder) => {
     if (index >= args.length) {
       throw new Error(
         `Test name "${name}" has more placeholders than its case has values (${args.length}).`
@@ -172,7 +201,7 @@ export function collectConformanceTests(
       (name: string, body: (...args: CaseArgs<TCase>) => unknown) => {
         for (const value of cases) {
           const args = caseArgs(value);
-          register(formatName(name, args), () => body(...args));
+          register(formatName(name, args, value), () => body(...args));
         }
       },
   });
@@ -182,7 +211,7 @@ export function collectConformanceTests(
       (name: string, body: (...args: CaseArgs<TCase>) => void) => {
         for (const value of cases) {
           const args = caseArgs(value);
-          group(formatName(name, args), () => {
+          group(formatName(name, args, value), () => {
             body(...args);
           });
         }

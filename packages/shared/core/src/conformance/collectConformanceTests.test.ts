@@ -106,6 +106,34 @@ describe("collectConformanceTests", () => {
     ]);
   });
 
+  it("names a case by its object keys", () => {
+    const tests = collectConformanceTests(({ describe: group, it: add }) => {
+      group.each([
+        { layout: "desktop rows", mobile: false },
+        { layout: "mobile cards", mobile: true },
+      ])("in $layout", ({ mobile }) => {
+        add.each([{ end: 3 }])(
+          `mobile=${String(mobile)} stops at $end`,
+          () => undefined
+        );
+      });
+    });
+    expect(tests.map((test) => test.name)).toEqual([
+      "in 'desktop rows' > mobile=false stops at 3",
+      "in 'mobile cards' > mobile=true stops at 3",
+    ]);
+  });
+
+  it("refuses a key its case does not have", () => {
+    expect(() =>
+      collectConformanceTests(({ it: add }) => {
+        add.each([{ layout: "rows" }])("in $mode", () => undefined);
+      })
+    ).toThrow(
+      'Test name "in $mode" names $mode, which its case does not have.'
+    );
+  });
+
   it("refuses a name with more placeholders than its case has values", () => {
     expect(() =>
       collectConformanceTests(({ it: add }) => {
