@@ -32,7 +32,7 @@ import { resizableColumns } from "@adapttable/vuetify/resizable-columns";
 import { rowActions } from "@adapttable/vuetify/row-actions";
 import { rowPinning } from "@adapttable/vuetify/row-pinning";
 import { rowReorder } from "@adapttable/vuetify/row-reorder";
-import { savedViews } from "@adapttable/vuetify/saved-views";
+import { savedViews, SavedViewsPanel } from "@adapttable/vuetify/saved-views";
 import { selectionStats } from "@adapttable/vuetify/selection-stats";
 import { statusBar } from "@adapttable/vuetify/status-bar";
 import { tree } from "@adapttable/vuetify/tree";
@@ -150,6 +150,7 @@ export const kit: ShowcaseKit = {
     }),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,

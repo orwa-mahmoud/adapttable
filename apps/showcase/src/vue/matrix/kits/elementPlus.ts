@@ -36,7 +36,10 @@ import { resizableColumns } from "@adapttable/element-plus/resizable-columns";
 import { rowActions } from "@adapttable/element-plus/row-actions";
 import { rowPinning } from "@adapttable/element-plus/row-pinning";
 import { rowReorder } from "@adapttable/element-plus/row-reorder";
-import { savedViews } from "@adapttable/element-plus/saved-views";
+import {
+  savedViews,
+  SavedViewsPanel,
+} from "@adapttable/element-plus/saved-views";
 import { selectionStats } from "@adapttable/element-plus/selection-stats";
 import { statusBar } from "@adapttable/element-plus/status-bar";
 import { tree } from "@adapttable/element-plus/tree";
@@ -152,6 +155,7 @@ export const kit: ShowcaseKit = {
     ),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,

@@ -36,7 +36,10 @@ import { resizableColumns } from "@adapttable/shadcn-vue/resizable-columns";
 import { rowActions } from "@adapttable/shadcn-vue/row-actions";
 import { rowPinning } from "@adapttable/shadcn-vue/row-pinning";
 import { rowReorder } from "@adapttable/shadcn-vue/row-reorder";
-import { savedViews } from "@adapttable/shadcn-vue/saved-views";
+import {
+  savedViews,
+  SavedViewsPanel,
+} from "@adapttable/shadcn-vue/saved-views";
 import { selectionStats } from "@adapttable/shadcn-vue/selection-stats";
 import { statusBar } from "@adapttable/shadcn-vue/status-bar";
 import { tree } from "@adapttable/shadcn-vue/tree";
@@ -151,6 +154,7 @@ export const kit: ShowcaseKit = {
     ),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,

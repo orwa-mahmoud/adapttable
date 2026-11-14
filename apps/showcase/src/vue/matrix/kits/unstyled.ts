@@ -35,7 +35,10 @@ import { resizableColumns } from "@adapttable/vue-unstyled/resizable-columns";
 import { rowActions } from "@adapttable/vue-unstyled/row-actions";
 import { rowPinning } from "@adapttable/vue-unstyled/row-pinning";
 import { rowReorder } from "@adapttable/vue-unstyled/row-reorder";
-import { savedViews } from "@adapttable/vue-unstyled/saved-views";
+import {
+  savedViews,
+  SavedViewsPanel,
+} from "@adapttable/vue-unstyled/saved-views";
 import { selectionStats } from "@adapttable/vue-unstyled/selection-stats";
 import { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import { tree } from "@adapttable/vue-unstyled/tree";
@@ -97,6 +100,7 @@ export const kit: ShowcaseKit = {
     ),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,

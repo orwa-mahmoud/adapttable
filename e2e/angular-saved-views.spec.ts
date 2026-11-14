@@ -22,17 +22,14 @@ for (const kit of ANGULAR_KITS) {
     test("saves a sorted view by name and restores it from the menu", async ({
       page,
     }) => {
+      // The page keeps its views in memory, seeded with a shared view and
+      // one an older table saved; a reload starts from those two again.
       await page.goto(PAGE);
-      await page.evaluate(
-        (key) => localStorage.removeItem(key),
-        `adapttable-angular-${kit.key}-demo-views`
-      );
-      await page.reload();
 
       const sort = part(page, "sort-button").first();
       await sort.click();
       await sort.click();
-      await expect(firstPerson(page)).toHaveText("Yann LeCun");
+      await expect(firstPerson(page)).toHaveText("Yuki Tanaka");
 
       await part(page, "views-button").click();
       await part(page, "views-input").fill("Z to A");
@@ -44,17 +41,17 @@ for (const kit of ANGULAR_KITS) {
               exact: true,
             })
           : part(page, "views-item");
-      await expect(savedItems).toHaveText(["Z to A"]);
+      await expect(savedItems.filter({ hasText: "Z to A" })).toHaveCount(1);
       if (kit.key === "ng-zorro") {
         await expect(
           part(page, "views-panel").getByRole("button", {
-            name: /^Delete view:/,
+            name: /^Delete view: Z to A/,
           })
         ).toHaveCount(1);
       }
 
       await sort.click();
-      await expect(firstPerson(page)).toHaveText("Ada Lovelace");
+      await expect(firstPerson(page)).toHaveText("Priya Nair");
 
       await expect(part(page, "views-button")).toHaveAttribute(
         "aria-expanded",
@@ -71,7 +68,7 @@ for (const kit of ANGULAR_KITS) {
       // animation. Wait until that one is gone so the click has one target.
       await expect(saved).toHaveCount(1);
       await saved.click();
-      await expect(firstPerson(page)).toHaveText("Yann LeCun");
+      await expect(firstPerson(page)).toHaveText("Yuki Tanaka");
     });
   });
 }

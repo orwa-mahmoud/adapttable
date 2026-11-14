@@ -32,7 +32,7 @@ import { resizableColumns } from "@adapttable/quasar/resizable-columns";
 import { rowActions } from "@adapttable/quasar/row-actions";
 import { rowPinning } from "@adapttable/quasar/row-pinning";
 import { rowReorder } from "@adapttable/quasar/row-reorder";
-import { savedViews } from "@adapttable/quasar/saved-views";
+import { savedViews, SavedViewsPanel } from "@adapttable/quasar/saved-views";
 import { selectionStats } from "@adapttable/quasar/selection-stats";
 import { statusBar } from "@adapttable/quasar/status-bar";
 import { tree } from "@adapttable/quasar/tree";
@@ -146,6 +146,7 @@ export const kit: ShowcaseKit = {
     }),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,

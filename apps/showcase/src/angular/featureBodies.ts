@@ -9,6 +9,7 @@
  * received is on the page.
  */
 import {
+  ADAPTTABLE_URL_ADAPTER,
   type AdaptTableFeature,
   aggregate,
   type CellContext,
@@ -16,6 +17,7 @@ import {
   type ColumnLayoutState,
   injectFrontendData,
   injectQuerySource,
+  injectSavedViews,
   injectServerData,
   type NestedTableDefaults,
 } from "@adapttable/angular";
@@ -31,7 +33,7 @@ import {
 } from "@adapttable/angular/pivot";
 import { applyRowPatches, applyRowReorder, updateRow } from "@adapttable/core";
 import { xlsxWriter } from "@adapttable/core/xlsx";
-import { NgTemplateOutlet } from "@angular/common";
+import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
   Component,
@@ -110,6 +112,14 @@ import {
   withDuplicatedPerson,
   withoutPerson,
 } from "../shared/rowsScenario";
+import {
+  createSeededViewStorage,
+  createViewSession,
+  reportingMigration,
+  SAVED_VIEWS_STORAGE_KEY,
+  SAVED_VIEWS_URL_KEY,
+  upgradedFooter,
+} from "../shared/savedViewsScenario";
 import { AiBody } from "./aiBody";
 import {
   applyPersonEdit,
@@ -1032,49 +1042,88 @@ class MobileCardsBody {
   ];
 }
 
-/** Saved views: name the table's state and pick it again from the menu. */
+/**
+ * Saved views: the views menu on the table and the kit's management panel
+ * beside it, over the shared seeded views — one shared and read-only, one
+ * upgraded from an older table.
+ */
 @Component({
   selector: "adapt-showcase-saved-views",
-  imports: [AdaptShowcaseTable],
+  imports: [AdaptShowcaseTable, NgComponentOutlet],
+  // The list and the table both apply a view by writing params into a store
+  // kept for this visit only: refresh starts clean, the URL never changes.
+  providers: [
+    { provide: ADAPTTABLE_URL_ADAPTER, useFactory: createViewSession },
+  ],
   template: `
+    <ng-template #migratedNote
+      ><span data-testid="migrated">{{ footer() }}</span></ng-template
+    >
     <div class="mx-demo">
-      <div class="hint-row">
-        <span class="hint"
-          >Sort or filter, then save the view under a name</span
-        >
-      </div>
-      <div class="mx-demo__body">
-        <adapt-showcase-table
-          [dir]="presentation.tableDir"
-          [labels]="presentation.tableLabels"
-          [attr.lang]="presentation.locale"
-          tableLabel="People"
-          urlKey="views"
-          [urlSync]="false"
-          [data]="rows"
-          [columns]="columns"
-          [rowKey]="rowKey"
-          [defaultColumnLayout]="pageLayout"
-          [features]="features"
-        />
+      <div class="mx-demo__body panel-layout" [attr.dir]="presentation.dir">
+        <div>
+          <ng-container
+            [ngComponentOutlet]="kit.savedViewsPanel"
+            [ngComponentOutletInputs]="panelInputs()"
+          />
+        </div>
+        <div>
+          <adapt-showcase-table
+            [dir]="presentation.tableDir"
+            [labels]="presentation.tableLabels"
+            [attr.lang]="presentation.locale"
+            tableLabel="People"
+            [urlKey]="urlKey"
+            [data]="rows"
+            [columns]="columns"
+            [rowKey]="rowKey"
+            [defaultColumnLayout]="pageLayout"
+            [features]="features"
+          />
+        </div>
       </div>
     </div>
   `,
 })
 class SavedViewsBody {
   readonly pageLayout = pageLayoutFor("saved-views");
-  private readonly kit = inject(SHOWCASE_KIT);
+  protected readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("saved-views");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [
-    this.kit.filters(FILTER_DEFS),
-    this.kit.savedViews({
-      storageKey: `adapttable-angular-${this.kit.key}-demo-views`,
-      urlKey: "views",
+  readonly urlKey = SAVED_VIEWS_URL_KEY;
+  private readonly migrated = signal<readonly string[]>([]);
+  private readonly options = {
+    storageKey: SAVED_VIEWS_STORAGE_KEY,
+    storage: createSeededViewStorage(),
+    urlKey: SAVED_VIEWS_URL_KEY,
+    urlAdapter: inject(ADAPTTABLE_URL_ADAPTER),
+  };
+  readonly views = injectSavedViews({
+    ...this.options,
+    migrate: reportingMigration((upgraded) => {
+      this.migrated.update((seen) =>
+        seen.includes(upgraded) ? seen : [...seen, upgraded]
+      );
     }),
+  });
+  readonly features: readonly AdaptTableFeature[] = [
+    this.kit.savedViews(this.options),
   ];
+  readonly footer = computed(() => upgradedFooter(this.migrated()));
+  private readonly migratedNote =
+    viewChild<TemplateRef<unknown>>("migratedNote");
+  readonly panelInputs = computed(() => ({
+    views: this.views.views(),
+    onApply: this.views.apply,
+    onRename: this.views.rename,
+    onMove: this.views.move,
+    onSetDefault: this.views.setDefault,
+    onRemove: this.views.remove,
+    labels: this.presentation.labels,
+    footer: this.footer() === undefined ? undefined : this.migratedNote(),
+  }));
 }
 
 /** The landing page composes the kit's real controls into a useful workspace. */

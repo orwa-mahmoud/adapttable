@@ -93,6 +93,7 @@ export interface ShowcaseKit {
   readonly setDark?: (dark: boolean) => void;
   readonly DataTable: Component;
   readonly PivotPanel: Component;
+  readonly SavedViewsPanel: Component;
   readonly TableAssistant: Component;
   /** The status column's cell, drawn as the kit's own tag or badge. */
   readonly status: StatusRenderer;

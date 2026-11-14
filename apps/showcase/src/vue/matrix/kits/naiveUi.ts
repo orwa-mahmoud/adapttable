@@ -30,7 +30,7 @@ import { resizableColumns } from "@adapttable/naive-ui/resizable-columns";
 import { rowActions } from "@adapttable/naive-ui/row-actions";
 import { rowPinning } from "@adapttable/naive-ui/row-pinning";
 import { rowReorder } from "@adapttable/naive-ui/row-reorder";
-import { savedViews } from "@adapttable/naive-ui/saved-views";
+import { savedViews, SavedViewsPanel } from "@adapttable/naive-ui/saved-views";
 import { selectionStats } from "@adapttable/naive-ui/selection-stats";
 import { statusBar } from "@adapttable/naive-ui/status-bar";
 import { tree } from "@adapttable/naive-ui/tree";
@@ -174,6 +174,7 @@ export const kit: ShowcaseKit = {
   select: (props) => h(Select, props),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,

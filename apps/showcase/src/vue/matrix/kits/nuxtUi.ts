@@ -32,7 +32,7 @@ import { resizableColumns } from "@adapttable/nuxt-ui/resizable-columns";
 import { rowActions } from "@adapttable/nuxt-ui/row-actions";
 import { rowPinning } from "@adapttable/nuxt-ui/row-pinning";
 import { rowReorder } from "@adapttable/nuxt-ui/row-reorder";
-import { savedViews } from "@adapttable/nuxt-ui/saved-views";
+import { savedViews, SavedViewsPanel } from "@adapttable/nuxt-ui/saved-views";
 import { selectionStats } from "@adapttable/nuxt-ui/selection-stats";
 import { statusBar } from "@adapttable/nuxt-ui/status-bar";
 import { tree } from "@adapttable/nuxt-ui/tree";
@@ -127,6 +127,7 @@ export const kit: ShowcaseKit = {
     }),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,

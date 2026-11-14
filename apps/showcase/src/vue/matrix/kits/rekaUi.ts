@@ -32,7 +32,7 @@ import { resizableColumns } from "@adapttable/reka-ui/resizable-columns";
 import { rowActions } from "@adapttable/reka-ui/row-actions";
 import { rowPinning } from "@adapttable/reka-ui/row-pinning";
 import { rowReorder } from "@adapttable/reka-ui/row-reorder";
-import { savedViews } from "@adapttable/reka-ui/saved-views";
+import { savedViews, SavedViewsPanel } from "@adapttable/reka-ui/saved-views";
 import { selectionStats } from "@adapttable/reka-ui/selection-stats";
 import { statusBar } from "@adapttable/reka-ui/status-bar";
 import { tree } from "@adapttable/reka-ui/tree";
@@ -142,6 +142,7 @@ export const kit: ShowcaseKit = {
     ),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,
