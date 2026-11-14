@@ -92,6 +92,7 @@ import {
   tableFeaturesOf,
 } from "./featureHost";
 import { createFeatureState, type FeatureState } from "./featureState";
+import { withRailRoom } from "./layout/railRoom";
 import { createSearchInput } from "./searchInput";
 import type { RowSelection } from "./selection/selection";
 import type { SlotFills } from "./slotContracts";
@@ -425,14 +426,17 @@ export function injectDataTable<TRow>(
       widths: widths(),
     })
   );
-  // A minimum width that holds every sized column, so the widths hold and the
-  // table scrolls sideways instead of squeezing them; fitted when asked.
+  // A minimum width that holds every sized column and the measured rails, so
+  // the widths hold and the table scrolls sideways instead of squeezing
+  // them; fitted when asked.
   const tableStyle = computed(() =>
-    desktopTableStyle(columns(), {
-      columnWidths: widths(),
-      extraMinWidth: 0,
-      fitColumns: fitColumns(),
-    })
+    withRailRoom(
+      desktopTableStyle(columns(), {
+        columnWidths: widths(),
+        extraMinWidth: 0,
+        fitColumns: fitColumns(),
+      })
+    )
   );
   const sizing = computed(() => ({
     flexShares: flexShares(),

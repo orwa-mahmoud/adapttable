@@ -4,7 +4,9 @@ import {
   type ColumnDef,
   type PaginationMode,
 } from "@adapttable/angular";
+import { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
 import { editing } from "@adapttable/angular-unstyled/editing";
+import { rowActions } from "@adapttable/angular-unstyled/row-actions";
 import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -126,13 +128,67 @@ class SizedColumns {
   readonly rowKey = (row: City) => row.id;
 }
 
+@Component({
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="data"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [urlSync]="false"
+      [forceMobile]="false"
+      [features]="features"
+    />
+  `,
+})
+class SizedColumnsWithRails {
+  readonly data = CITIES;
+  readonly columns: ColumnDef<City>[] = [
+    { key: "name", width: 900, accessor: (row) => row.name },
+    { key: "country", width: 600, accessor: (row) => row.country },
+  ];
+  readonly rowKey = (row: City) => row.id;
+  readonly features: AdaptTableFeature[] = [
+    bulkActions([
+      { key: "archive", label: "Archive", onClick: () => undefined },
+    ]),
+    rowActions<City>([
+      { key: "open", label: "Open", onClick: () => undefined },
+    ]),
+  ];
+}
+
 describe("the unstyled Angular table", () => {
+  it("makes room in its minimum width for the rails it measures", async () => {
+    const widths: Readonly<Record<string, number>> = {
+      "selection-header": 44,
+      "actions-header": 96,
+    };
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: HTMLElement) {
+        const part = this.dataset.adapttablePart ?? "";
+        return DOMRect.fromRect({ width: widths[part] ?? 0, height: 40 });
+      }
+    );
+    const fixture = TestBed.createComponent(SizedColumnsWithRails);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const { part } = queryParts(fixture.nativeElement as HTMLElement);
+    expect(part("selection-header")).not.toBeNull();
+    expect(part("actions-header")).not.toBeNull();
+    const table = part("table")!;
+    expect(table.style.getPropertyValue("--at-rails")).toBe("140px");
+    expect(table.style.minWidth).toBe("calc(1500px + var(--at-rails, 0px))");
+  });
+
   it("scrolls sized columns sideways inside the table, not the page", async () => {
     const fixture = TestBed.createComponent(SizedColumns);
     fixture.autoDetectChanges();
     await fixture.whenStable();
     const { part } = queryParts(fixture.nativeElement as HTMLElement);
-    expect(part("table")?.style.minWidth).toBe("1500px");
+    expect(part("table")?.style.minWidth).toBe(
+      "calc(1500px + var(--at-rails, 0px))"
+    );
     expect(part("scroll-box")?.style.overflowX).toBe("auto");
     fixture.componentInstance.columns.set(COLUMNS);
     await fixture.whenStable();

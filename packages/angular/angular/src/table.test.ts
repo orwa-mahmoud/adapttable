@@ -135,7 +135,8 @@ describe("a headless Angular table", () => {
     const fixture = TestBed.createComponent(SizedTable);
     await fixture.whenStable();
     const table = (fixture.nativeElement as HTMLElement).querySelector("table");
-    expect(table?.style.minWidth).toBe("350px");
+    // The rails' measured width joins the columns' in the browser.
+    expect(table?.style.minWidth).toBe("calc(350px + var(--at-rails, 0px))");
   });
 
   it("leaves a table of unsized columns free to fit its box", async () => {
