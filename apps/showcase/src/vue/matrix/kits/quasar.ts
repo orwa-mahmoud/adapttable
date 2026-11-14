@@ -16,6 +16,7 @@ import {
   undoRedoButtons,
 } from "@adapttable/quasar/editing";
 import { exportCsv } from "@adapttable/quasar/export";
+import { extraRows } from "@adapttable/quasar/extra-rows";
 import { filters } from "@adapttable/quasar/filters";
 import { fullscreen } from "@adapttable/quasar/fullscreen";
 import { groupingPanel } from "@adapttable/quasar/grouping-panel";
@@ -23,6 +24,7 @@ import { headerFilters } from "@adapttable/quasar/header-filters";
 import { nestedTable } from "@adapttable/quasar/nested-table";
 import { pinnedSummaryRows } from "@adapttable/quasar/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/quasar/pivot";
+import { print } from "@adapttable/quasar/print";
 import { resizableColumns } from "@adapttable/quasar/resizable-columns";
 import { rowActions } from "@adapttable/quasar/row-actions";
 import { rowPinning } from "@adapttable/quasar/row-pinning";
@@ -157,6 +159,8 @@ export const kit: ShowcaseKit = {
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

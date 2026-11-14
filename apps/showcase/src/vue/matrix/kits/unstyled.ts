@@ -19,6 +19,7 @@ import {
   undoRedoButtons,
 } from "@adapttable/vue-unstyled/editing";
 import { exportCsv } from "@adapttable/vue-unstyled/export";
+import { extraRows } from "@adapttable/vue-unstyled/extra-rows";
 import { filters } from "@adapttable/vue-unstyled/filters";
 import { fullscreen } from "@adapttable/vue-unstyled/fullscreen";
 import { groupingPanel } from "@adapttable/vue-unstyled/grouping-panel";
@@ -26,6 +27,7 @@ import { headerFilters } from "@adapttable/vue-unstyled/header-filters";
 import { nestedTable } from "@adapttable/vue-unstyled/nested-table";
 import { pinnedSummaryRows } from "@adapttable/vue-unstyled/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/vue-unstyled/pivot";
+import { print } from "@adapttable/vue-unstyled/print";
 import { resizableColumns } from "@adapttable/vue-unstyled/resizable-columns";
 import { rowActions } from "@adapttable/vue-unstyled/row-actions";
 import { rowPinning } from "@adapttable/vue-unstyled/row-pinning";
@@ -108,6 +110,8 @@ export const kit: ShowcaseKit = {
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

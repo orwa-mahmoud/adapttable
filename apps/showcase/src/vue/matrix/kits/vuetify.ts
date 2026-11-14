@@ -16,6 +16,7 @@ import {
   undoRedoButtons,
 } from "@adapttable/vuetify/editing";
 import { exportCsv } from "@adapttable/vuetify/export";
+import { extraRows } from "@adapttable/vuetify/extra-rows";
 import { filters } from "@adapttable/vuetify/filters";
 import { fullscreen } from "@adapttable/vuetify/fullscreen";
 import { groupingPanel } from "@adapttable/vuetify/grouping-panel";
@@ -23,6 +24,7 @@ import { headerFilters } from "@adapttable/vuetify/header-filters";
 import { nestedTable } from "@adapttable/vuetify/nested-table";
 import { pinnedSummaryRows } from "@adapttable/vuetify/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/vuetify/pivot";
+import { print } from "@adapttable/vuetify/print";
 import { resizableColumns } from "@adapttable/vuetify/resizable-columns";
 import { rowActions } from "@adapttable/vuetify/row-actions";
 import { rowPinning } from "@adapttable/vuetify/row-pinning";
@@ -161,6 +163,8 @@ export const kit: ShowcaseKit = {
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

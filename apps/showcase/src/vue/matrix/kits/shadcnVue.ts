@@ -20,6 +20,7 @@ import {
   undoRedoButtons,
 } from "@adapttable/shadcn-vue/editing";
 import { exportCsv } from "@adapttable/shadcn-vue/export";
+import { extraRows } from "@adapttable/shadcn-vue/extra-rows";
 import { filters } from "@adapttable/shadcn-vue/filters";
 import { fullscreen } from "@adapttable/shadcn-vue/fullscreen";
 import { groupingPanel } from "@adapttable/shadcn-vue/grouping-panel";
@@ -27,6 +28,7 @@ import { headerFilters } from "@adapttable/shadcn-vue/header-filters";
 import { nestedTable } from "@adapttable/shadcn-vue/nested-table";
 import { pinnedSummaryRows } from "@adapttable/shadcn-vue/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/shadcn-vue/pivot";
+import { print } from "@adapttable/shadcn-vue/print";
 import { resizableColumns } from "@adapttable/shadcn-vue/resizable-columns";
 import { rowActions } from "@adapttable/shadcn-vue/row-actions";
 import { rowPinning } from "@adapttable/shadcn-vue/row-pinning";
@@ -162,6 +164,8 @@ export const kit: ShowcaseKit = {
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

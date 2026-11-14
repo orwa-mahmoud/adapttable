@@ -14,12 +14,14 @@ import type {
   undoRedoButtons,
 } from "@adapttable/vue-unstyled/editing";
 import type { exportCsv } from "@adapttable/vue-unstyled/export";
+import type { extraRows } from "@adapttable/vue-unstyled/extra-rows";
 import type { filters } from "@adapttable/vue-unstyled/filters";
 import type { fullscreen } from "@adapttable/vue-unstyled/fullscreen";
 import type { groupingPanel } from "@adapttable/vue-unstyled/grouping-panel";
 import type { headerFilters } from "@adapttable/vue-unstyled/header-filters";
 import type { nestedTable } from "@adapttable/vue-unstyled/nested-table";
 import type { pinnedSummaryRows } from "@adapttable/vue-unstyled/pinned-summary-rows";
+import type { print } from "@adapttable/vue-unstyled/print";
 import type { resizableColumns } from "@adapttable/vue-unstyled/resizable-columns";
 import type { rowActions } from "@adapttable/vue-unstyled/row-actions";
 import type { rowPinning } from "@adapttable/vue-unstyled/row-pinning";
@@ -111,6 +113,8 @@ export interface ShowcaseKit {
   readonly filters: typeof filters;
   readonly fullscreen: typeof fullscreen;
   readonly groupingPanel: typeof groupingPanel;
+  readonly print: typeof print;
+  readonly extraRows: typeof extraRows;
   readonly headerFilters: typeof headerFilters;
   readonly nestedTable: typeof nestedTable;
   readonly pinnedSummaryRows: typeof pinnedSummaryRows;

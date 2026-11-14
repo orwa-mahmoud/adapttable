@@ -16,6 +16,7 @@ import {
   undoRedoButtons,
 } from "@adapttable/reka-ui/editing";
 import { exportCsv } from "@adapttable/reka-ui/export";
+import { extraRows } from "@adapttable/reka-ui/extra-rows";
 import { filters } from "@adapttable/reka-ui/filters";
 import { fullscreen } from "@adapttable/reka-ui/fullscreen";
 import { groupingPanel } from "@adapttable/reka-ui/grouping-panel";
@@ -23,6 +24,7 @@ import { headerFilters } from "@adapttable/reka-ui/header-filters";
 import { nestedTable } from "@adapttable/reka-ui/nested-table";
 import { pinnedSummaryRows } from "@adapttable/reka-ui/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/reka-ui/pivot";
+import { print } from "@adapttable/reka-ui/print";
 import { resizableColumns } from "@adapttable/reka-ui/resizable-columns";
 import { rowActions } from "@adapttable/reka-ui/row-actions";
 import { rowPinning } from "@adapttable/reka-ui/row-pinning";
@@ -153,6 +155,8 @@ export const kit: ShowcaseKit = {
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

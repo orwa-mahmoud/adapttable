@@ -2,11 +2,13 @@
  * The Vue pages' table data: the shared people table
  * (`../../shared/peopleTable`) as Vue columns, with the kit's own cells.
  */
+import { aggregate } from "@adapttable/core";
 import type { Direction, getLabels } from "@adapttable/i18n";
 import type { ColumnDef, ColumnInput } from "@adapttable/vue";
 import { h, type VNodeChild } from "vue";
 
 import {
+  formatMoney,
   formatPercent,
   type Person,
   personName,
@@ -14,6 +16,12 @@ import {
   strings,
   utilization,
 } from "../../people";
+import {
+  largestGroupsFirst,
+  PEOPLE_GROUP_TOTALS,
+  PEOPLE_TOTAL_COLUMNS,
+  totalOf,
+} from "../../shared/groupingScenario";
 import {
   applyPersonEdit as applySharedEdit,
   dataLocaleOf,
@@ -45,8 +53,19 @@ export {
 /** One presentation for every table on a Vue page. */
 export const SHOWCASE_PRESENTATION = readShowcasePresentation();
 
-const currentDataLocale = (): "ar" | "en" =>
+/** The language the page's cell data is written in. */
+export const currentDataLocale = (): "ar" | "en" =>
   dataLocaleOf(SHOWCASE_PRESENTATION);
+
+/** How every Vue page groups people: a budget subtotal, footers, largest first. */
+export const PEOPLE_GROUPING = {
+  groupAggregates: aggregate<Person>(PEOPLE_GROUP_TOTALS, {
+    columns: PEOPLE_TOTAL_COLUMNS,
+    format: (value) => formatMoney(totalOf(value), "en"),
+  }),
+  groupFooters: true,
+  groupSort: largestGroupsFirst,
+};
 
 /** The same localized field the matrix's person cells and editors display. */
 export const personDisplayName = (row: Person): string =>

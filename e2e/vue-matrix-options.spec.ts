@@ -179,12 +179,12 @@ for (const kit of builtAdapters("vue")) {
           .toBeGreaterThan(56);
       await team.locator('[data-adapttable-part="column-menu-pin"]').click();
       await expect(team).toHaveAttribute("data-pinned", "start");
-      await team
-        .locator('[data-adapttable-part="column-menu-grip"]')
-        .press("ArrowUp");
-      await expect(
-        team.locator('[data-adapttable-part="column-menu-grip"]')
-      ).toBeFocused();
+      // Team follows Person and Email: two moves up bring it to the top.
+      const grip = team.locator('[data-adapttable-part="column-menu-grip"]');
+      await grip.press("ArrowUp");
+      await expect(grip).toBeFocused();
+      await grip.press("ArrowUp");
+      await expect(grip).toBeFocused();
       await expect(
         panel.locator('[data-adapttable-part="column-menu-item"]').first()
       ).toContainText("Team");

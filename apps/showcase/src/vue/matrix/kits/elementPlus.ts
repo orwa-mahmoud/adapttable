@@ -20,6 +20,7 @@ import {
   undoRedoButtons,
 } from "@adapttable/element-plus/editing";
 import { exportCsv } from "@adapttable/element-plus/export";
+import { extraRows } from "@adapttable/element-plus/extra-rows";
 import { filters } from "@adapttable/element-plus/filters";
 import { fullscreen } from "@adapttable/element-plus/fullscreen";
 import { groupingPanel } from "@adapttable/element-plus/grouping-panel";
@@ -27,6 +28,7 @@ import { headerFilters } from "@adapttable/element-plus/header-filters";
 import { nestedTable } from "@adapttable/element-plus/nested-table";
 import { pinnedSummaryRows } from "@adapttable/element-plus/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/element-plus/pivot";
+import { print } from "@adapttable/element-plus/print";
 import { resizableColumns } from "@adapttable/element-plus/resizable-columns";
 import { rowActions } from "@adapttable/element-plus/row-actions";
 import { rowPinning } from "@adapttable/element-plus/row-pinning";
@@ -163,6 +165,8 @@ export const kit: ShowcaseKit = {
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

@@ -16,6 +16,7 @@ import {
   undoRedoButtons,
 } from "@adapttable/nuxt-ui/editing";
 import { exportCsv } from "@adapttable/nuxt-ui/export";
+import { extraRows } from "@adapttable/nuxt-ui/extra-rows";
 import { filters } from "@adapttable/nuxt-ui/filters";
 import { fullscreen } from "@adapttable/nuxt-ui/fullscreen";
 import { groupingPanel } from "@adapttable/nuxt-ui/grouping-panel";
@@ -23,6 +24,7 @@ import { headerFilters } from "@adapttable/nuxt-ui/header-filters";
 import { nestedTable } from "@adapttable/nuxt-ui/nested-table";
 import { pinnedSummaryRows } from "@adapttable/nuxt-ui/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/nuxt-ui/pivot";
+import { print } from "@adapttable/nuxt-ui/print";
 import { resizableColumns } from "@adapttable/nuxt-ui/resizable-columns";
 import { rowActions } from "@adapttable/nuxt-ui/row-actions";
 import { rowPinning } from "@adapttable/nuxt-ui/row-pinning";
@@ -138,6 +140,8 @@ export const kit: ShowcaseKit = {
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

@@ -14,6 +14,7 @@ import {
   undoRedoButtons,
 } from "@adapttable/naive-ui/editing";
 import { exportCsv } from "@adapttable/naive-ui/export";
+import { extraRows } from "@adapttable/naive-ui/extra-rows";
 import { filters } from "@adapttable/naive-ui/filters";
 import { fullscreen } from "@adapttable/naive-ui/fullscreen";
 import { groupingPanel } from "@adapttable/naive-ui/grouping-panel";
@@ -21,6 +22,7 @@ import { headerFilters } from "@adapttable/naive-ui/header-filters";
 import { nestedTable } from "@adapttable/naive-ui/nested-table";
 import { pinnedSummaryRows } from "@adapttable/naive-ui/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/naive-ui/pivot";
+import { print } from "@adapttable/naive-ui/print";
 import { resizableColumns } from "@adapttable/naive-ui/resizable-columns";
 import { rowActions } from "@adapttable/naive-ui/row-actions";
 import { rowPinning } from "@adapttable/naive-ui/row-pinning";
@@ -185,6 +187,8 @@ export const kit: ShowcaseKit = {
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,
