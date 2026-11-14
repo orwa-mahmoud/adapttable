@@ -13,6 +13,7 @@ import {
   checkAngularCheckbox,
   selectAngularOption,
 } from "./angular-kit";
+import { expectMatchingRows } from "./table-total";
 
 /**
  * Every Angular kit's pages: each boots the Angular entry, mounts the real
@@ -53,7 +54,7 @@ for (const kit of KITS) {
     await page.goto(`/${kit.key}/`);
     const root = page.locator('.mx-demo [data-adapttable-part="root"]');
     await expect(root).toBeVisible();
-    await expect(root.locator('[data-adapttable-part="row"]')).toHaveCount(10);
+    await expect(root.locator('[data-adapttable-part="row"]')).toHaveCount(5);
     await expect(
       root.locator('[data-adapttable-part="row"]').first()
     ).toContainText("Ada Lovelace");
@@ -307,7 +308,7 @@ for (const kit of KITS) {
     const select = part(page, "column-select").first().getByRole("checkbox");
     await checkAngularCheckbox(kit, select);
     await expect(select).toBeChecked();
-    await expect(page.locator(".mx-demo [data-cell-selected]")).toHaveCount(10);
+    await expect(page.locator(".mx-demo [data-cell-selected]")).toHaveCount(5);
   });
 
   for (const width of [1280, 390]) {
@@ -349,18 +350,35 @@ for (const kit of KITS) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(`/${kit.key}/realtime/?live=off`);
       const rows = part(page, width === 390 ? "card" : "row");
-      const ada = rows.filter({ hasText: "Ada Lovelace" });
-      await expect(ada).toContainText("$25,300");
-      await checkAngularCheckbox(kit, ada.getByRole("checkbox"));
+      await expect(rows).toHaveCount(10);
+      // Select the person at the top of the Budget sort; a patch must not
+      // take the selection with it or give it to someone else.
+      const id = await rows.first().getAttribute("data-row-id");
+      const selected = page
+        .locator(`.mx-demo [data-row-id="${String(id)}"]`)
+        .getByRole("checkbox");
+      await checkAngularCheckbox(kit, selected);
       await page
         .getByRole("button", { name: "Apply next update", exact: true })
         .click();
-      await expect(ada).toContainText("$26,300");
-      await expect(ada.getByRole("checkbox")).toBeChecked();
-      await expect(page.getByTestId("patch-feed")).toHaveText(
-        "Ada Lovelace: $25,300 → $26,300"
+      const feed = page.getByTestId("realtime-feed").locator("li");
+      await expect(feed).toHaveCount(1);
+      const moved = (
+        (await feed.first().innerText()).split(" · ")[0] ?? ""
+      ).trim();
+      // The patch parks the row between two people already in rows 2–6.
+      const seat = await rows.evaluateAll(
+        (elements, person) =>
+          elements.findIndex((element) =>
+            element.textContent?.includes(person)
+          ),
+        moved
       );
-      await expect(rows).toHaveCount(10);
+      expect(seat).toBeGreaterThanOrEqual(1);
+      expect(seat).toBeLessThanOrEqual(5);
+      await expect(selected).toBeChecked();
+      // The patch moved a row; none came or went.
+      await expectMatchingRows(page.locator(".mx-demo"), 12);
     });
   }
 }

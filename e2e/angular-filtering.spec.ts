@@ -10,6 +10,7 @@ import {
   openAngularOptions,
   selectAngularOption,
 } from "./angular-kit";
+import { expectMatchingRows } from "./table-total";
 
 for (const kit of ANGULAR_KITS) {
   test.describe(kit.key, () => {
@@ -67,7 +68,7 @@ for (const kit of ANGULAR_KITS) {
         kit,
         part(page, "filters-popover").getByRole("checkbox", { name: "Core" })
       );
-      await expect(part(page, "row")).toHaveCount(6);
+      await expectMatchingRows(page.locator(".mx-demo"), 6);
       expect(new Set(await teams(page))).toEqual(new Set(["Core"]));
       await expect(part(page, "chip").first()).toContainText("Team: Core");
       if (kit.key === "ng-zorro") {
@@ -79,13 +80,13 @@ for (const kit of ANGULAR_KITS) {
 
       await page.keyboard.press("Escape");
       await part(page, "chip-remove").first().click();
-      await expect(part(page, "row")).toHaveCount(25);
+      await expectMatchingRows(page.locator(".mx-demo"), 30);
       await expect(page).not.toHaveURL(/f_team/);
     });
 
     test("restores a filtered view from its link", async ({ page }) => {
       await page.goto(`${PAGE}?flt.f_team=Core&flt.atv=1`);
-      await expect(part(page, "row")).toHaveCount(6);
+      await expectMatchingRows(page.locator(".mx-demo"), 6);
       await expect(part(page, "chip").first()).toContainText("Team: Core");
     });
 
@@ -106,7 +107,7 @@ for (const kit of ANGULAR_KITS) {
       await expectAngularSelection(kit, core, { value: "true", label: "True" });
       if (kit.key === "ng-zorro") await expect(core).toBeFocused();
       await expect(popover).toBeVisible();
-      await expect(part(page, "row")).toHaveCount(6);
+      await expectMatchingRows(page.locator(".mx-demo"), 6);
       expect(new Set(await teams(page))).toEqual(new Set(["Core"]));
       await expect(page).toHaveURL(/flt\.f_core=true/);
       await page.keyboard.press("Escape");
@@ -135,7 +136,7 @@ for (const kit of ANGULAR_KITS) {
         await expect(core).toBeFocused();
         await expect(popover).toBeVisible();
         await expect(trigger).toHaveAttribute("aria-expanded", "true");
-        await expect(part(page, "row")).toHaveCount(25);
+        await expectMatchingRows(page.locator(".mx-demo"), 30);
         await expect(page).not.toHaveURL(/f_core/);
         await core.press("Escape");
         await expect(popover).toHaveCount(0);
@@ -153,7 +154,7 @@ for (const kit of ANGULAR_KITS) {
       await page.getByRole("heading", { level: 1 }).click();
       await expect(part(page, "filters-popover")).toHaveCount(0);
       await expect(trigger).toHaveAttribute("aria-expanded", "false");
-      await expect(part(page, "row")).toHaveCount(25);
+      await expectMatchingRows(page.locator(".mx-demo"), 30);
     });
 
     test("narrows through the AND/OR tree", async ({ page }) => {
@@ -225,7 +226,7 @@ for (const kit of ANGULAR_KITS) {
         kit,
         page.getByRole("checkbox", { name: "Core" })
       );
-      await expect(part(page, "row")).toHaveCount(6);
+      await expectMatchingRows(page.locator(".mx-demo"), 6);
       expect(new Set(await teams(page))).toEqual(new Set(["Core"]));
     });
 
@@ -263,7 +264,7 @@ for (const kit of ANGULAR_KITS) {
         await expect(platform).toBeVisible();
         await checkAngularCheckbox(kit, platform);
         await expect(platform).toBeChecked();
-        await expect(part(page, "row")).toHaveCount(12);
+        await expectMatchingRows(page.locator(".mx-demo"), 12);
         expect(new Set(await teams(page))).toEqual(
           new Set(["Core", "Platform"])
         );
@@ -272,7 +273,7 @@ for (const kit of ANGULAR_KITS) {
         await expect(
           part(page, "filter-header-trigger").nth(1).getByRole("button")
         ).toBeFocused();
-        await expect(part(page, "row")).toHaveCount(12);
+        await expectMatchingRows(page.locator(".mx-demo"), 12);
       });
     }
   });

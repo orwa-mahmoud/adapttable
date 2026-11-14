@@ -16,6 +16,7 @@ import type {
   TableAssistantProps,
   TableDensity,
   TableLabels,
+  TableQueryHandler,
   TableQueryParams,
   TableSource,
 } from "@adapttable/angular";
@@ -57,6 +58,9 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
   readonly data = input<readonly TRow[]>();
   readonly source = input<Signal<TableSource<TRow>> | TableSource<TRow>>();
   readonly mode = input<"frontend" | "server">();
+  readonly onQueryChange = input<TableQueryHandler>();
+  readonly isCellFlashing =
+    input<(rowId: string, columnKey: string) => boolean>();
   readonly loading = input<boolean>();
   readonly error = input<Error | null>();
   readonly skeletonRows = input<number>();
@@ -115,6 +119,8 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         inputBinding("data", this.data),
         inputBinding("source", this.source),
         inputBinding("mode", this.mode),
+        inputBinding("onQueryChange", this.onQueryChange),
+        inputBinding("isCellFlashing", this.isCellFlashing),
         inputBinding("loading", this.loading),
         inputBinding("error", this.error),
         inputBinding("skeletonRows", this.skeletonRows),

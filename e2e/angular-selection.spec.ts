@@ -34,7 +34,7 @@ for (const kit of ANGULAR_KITS) {
         kit,
         part(page, "selection-header").getByRole("checkbox")
       );
-      await expect(part(page, "bulk-bar")).toContainText("12 selected");
+      await expect(part(page, "bulk-bar")).toContainText("7 selected");
 
       await part(page, "page-number").nth(0).click();
       await expect(rowBox(page, 0)).toBeChecked();
@@ -44,7 +44,7 @@ for (const kit of ANGULAR_KITS) {
         .getByRole("button", { name: "Archive" })
         .click();
       await expect(page.locator("[data-demo-log]")).toHaveText(
-        "Archive: 1, 3, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20"
+        "Archive: 1, 3, 6, 7, 8, 9, 10"
       );
     });
 
@@ -57,7 +57,7 @@ for (const kit of ANGULAR_KITS) {
         part(page, "selection-header").getByRole("checkbox")
       );
       const banner = part(page, "select-all-banner");
-      await expect(banner).toContainText("10 on this page");
+      await expect(banner).toContainText("5 on this page");
       await part(page, "select-all-button").click();
       await expect(part(page, "bulk-bar")).toContainText("30");
     });
@@ -77,8 +77,8 @@ for (const kit of ANGULAR_KITS) {
       await expectAngularCheckboxMixed(kit, header, false);
       await expect(
         part(page, "row").getByRole("checkbox", { checked: true })
-      ).toHaveCount(10);
-      await expect(part(page, "bulk-bar")).toContainText("10 selected");
+      ).toHaveCount(5);
+      await expect(part(page, "bulk-bar")).toContainText("5 selected");
       await page.keyboard.press("Space");
       await expect(header).not.toBeChecked();
       await expectAngularCheckboxMixed(kit, header, false);

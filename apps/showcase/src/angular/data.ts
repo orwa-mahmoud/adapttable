@@ -28,7 +28,6 @@ export { fetchPeople, type PeoplePage, type PeopleParams } from "../mockApi";
 export {
   type DemoOrder,
   demoOrders,
-  largePerson,
   makeLargeDirectory,
   PEOPLE,
   type Person,

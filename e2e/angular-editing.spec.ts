@@ -160,7 +160,9 @@ for (const kit of ANGULAR_KITS) {
       await page.goto(`/angular-main/?kit=${kit.key}`);
       await part(page, "row")
         .first()
-        .locator('[data-column-key="timeline"]')
+        .locator(
+          '[data-column-key="timeline"] [data-adapttable-part="edit-cell-activate"]'
+        )
         .dblclick();
       const start = part(page, "edit-cell-editor");
       await expect(start).toHaveAttribute("type", "date");

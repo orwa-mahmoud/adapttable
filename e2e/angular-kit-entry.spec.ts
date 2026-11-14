@@ -16,7 +16,7 @@ for (const kit of ANGULAR_KITS) {
       '.mx-demo--overview [data-adapttable-part="root"]'
     );
     const rows = root.locator('[data-adapttable-part="row"]');
-    await expect(rows).toHaveCount(10);
+    await expect(rows).toHaveCount(5);
     const name = rows.first().locator('[data-column-key="person"]');
     // The native edit button owns activation; the cell also contains row padding.
     const activate = name.getByRole("button", {
@@ -119,7 +119,7 @@ for (const kit of ANGULAR_KITS) {
       "false"
     );
     await search.fill("");
-    await expect(root.locator('[data-adapttable-part="row"]')).toHaveCount(10);
+    await expect(root.locator('[data-adapttable-part="row"]')).toHaveCount(5);
     await angularPart(kit, page, "views-button", root).click();
     await expect(angularPart(kit, page, "views-panel")).toBeVisible();
     await page
@@ -129,7 +129,7 @@ for (const kit of ANGULAR_KITS) {
     await expect(root.locator('[data-adapttable-part="row"]')).toHaveCount(1);
     await page.keyboard.press("Escape");
     await search.fill("");
-    await expect(root.locator('[data-adapttable-part="row"]')).toHaveCount(10);
+    await expect(root.locator('[data-adapttable-part="row"]')).toHaveCount(5);
     await selectAngularOption(angularPart(kit, page, "grouping-add"), {
       value: "team",
       label: "Team",
@@ -184,7 +184,7 @@ for (const kit of ANGULAR_KITS) {
       '.mx-demo--overview [data-adapttable-part="root"]'
     );
     await expect(root).toHaveAttribute("dir", "rtl");
-    await expect(root.locator('[data-adapttable-part="card"]')).toHaveCount(10);
+    await expect(root.locator('[data-adapttable-part="card"]')).toHaveCount(5);
     expect(
       await page.evaluate(
         () =>
@@ -205,6 +205,6 @@ for (const kit of ANGULAR_KITS) {
     await search.fill("no-matching-person");
     await expect(root.locator('[data-adapttable-part="card"]')).toHaveCount(0);
     await search.fill("");
-    await expect(root.locator('[data-adapttable-part="card"]')).toHaveCount(10);
+    await expect(root.locator('[data-adapttable-part="card"]')).toHaveCount(5);
   });
 }

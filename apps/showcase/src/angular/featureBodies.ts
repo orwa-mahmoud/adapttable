@@ -31,7 +31,15 @@ import {
   pivot,
   type PivotRow,
 } from "@adapttable/angular/pivot";
-import { applyRowPatches, applyRowReorder, updateRow } from "@adapttable/core";
+import {
+  injectChangedCellFlash,
+  injectRowPatchStream,
+} from "@adapttable/angular/stream";
+import {
+  applyRowPatchesWithLog,
+  type RowPatchEvent,
+  rowPatchLog,
+} from "@adapttable/core";
 import { xlsxWriter } from "@adapttable/core/xlsx";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
@@ -55,8 +63,14 @@ import {
   QueryClient,
 } from "@tanstack/angular-query-experimental";
 
-import { pageLayoutFor, pivotRoster, rosterFor, seedRoster } from "../casts";
-import { budget, formatMoney } from "../people";
+import {
+  pageDefaultsFor,
+  pageLayoutFor,
+  pivotRoster,
+  rosterFor,
+  seedRoster,
+} from "../casts";
+import { formatMoney } from "../people";
 import {
   attachedNote,
   budgetTotalOf,
@@ -106,11 +120,29 @@ import {
   pivotRowHeader,
 } from "../shared/pivotScenario";
 import {
+  createDemoPatchSource,
+  nextRealtimePatch,
+  PATCH_STREAM_URL,
+  personCellFlashing,
+  REALTIME_FEED_LENGTH,
+  REALTIME_HINTS,
+  REALTIME_TEXT,
+  realtimeStartsLive,
+  streamStatusLabel,
+} from "../shared/realtimeScenario";
+import {
   orderPeopleByTeam,
+  REORDER_HINTS,
+  REORDER_SHAPES,
+  reorderPeople,
+  type ReorderShape,
+  ROWS_PAGE_HEIGHT,
   teamSpan,
   withAddedPerson,
   withDuplicatedPerson,
   withoutPerson,
+  withPersonMovedToGroup,
+  withPersonMovedUnder,
 } from "../shared/rowsScenario";
 import {
   createSeededViewStorage,
@@ -120,6 +152,15 @@ import {
   SAVED_VIEWS_URL_KEY,
   upgradedFooter,
 } from "../shared/savedViewsScenario";
+import {
+  type BigPerson,
+  makeBigList,
+  SCALE_SLICE,
+  scaleParams,
+  scaleRowKey,
+  serverSlice,
+} from "../shared/scaleScenario";
+import { TREE_HINTS, TREE_URL_KEY } from "../shared/treeScenario";
 import { AiBody } from "./aiBody";
 import {
   applyPersonEdit,
@@ -129,8 +170,6 @@ import {
   fetchPeople,
   FILTER_DEFS,
   groupedPeopleColumns,
-  largePerson,
-  makeLargeDirectory,
   PEOPLE,
   PEOPLE_GROUPING,
   peopleColumns,
@@ -144,6 +183,7 @@ import {
 } from "./data";
 import { AdaptShowcasePivotPanel, AdaptShowcaseTable } from "./kitComponents";
 import { pageChromeFeatures } from "./pageChrome";
+import { scaleColumns } from "./scaleColumns";
 import { SHOWCASE_KIT } from "./showcaseKit";
 
 /** The people columns, shared by every page that does not edit them. */
@@ -198,6 +238,7 @@ const ANGULAR_FILTER_FORMS = FILTER_FORMS.filter(({ value }) =>
             [data]="rows"
             [columns]="columns"
             [rowKey]="rowKey"
+            [defaults]="pageDefaults"
             [defaultColumnLayout]="pageLayout"
             [filtersMode]="current.layout === 'drawer' ? 'drawer' : 'popover'"
             [filterFields]="current.fields"
@@ -209,6 +250,7 @@ const ANGULAR_FILTER_FORMS = FILTER_FORMS.filter(({ value }) =>
   `,
 })
 class FilteringBody {
+  readonly pageDefaults = pageDefaultsFor("filtering");
   readonly pageLayout = pageLayoutFor("filtering");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
@@ -290,7 +332,7 @@ class FilteringBody {
           [rowKey]="rowKey"
           [defaultColumnLayout]="pageLayout"
           [selectable]="true"
-          [defaults]="{ limit: 10 }"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
@@ -299,6 +341,7 @@ class FilteringBody {
   `,
 })
 class SelectionBody {
+  readonly pageDefaults = pageDefaultsFor("selection");
   readonly pageLayout = pageLayoutFor("selection");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
@@ -333,49 +376,118 @@ class SelectionBody {
   template: `
     <div class="mx-demo">
       <div class="hint-row">
-        <span class="hint"
-          >Space lifts a row, arrows move it, Space drops it</span
+        <div class="seg" role="group" aria-label="Row shape">
+          @for (option of shapes; track option.value) {
+            <button
+              type="button"
+              class="seg__btn"
+              [class.is-on]="shape() === option.value"
+              [attr.aria-pressed]="shape() === option.value"
+              (click)="shape.set(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
+        <button
+          type="button"
+          class="seg__btn"
+          [class.is-on]="rtl"
+          [attr.aria-pressed]="rtl"
+          (click)="toggleDirection()"
         >
+          RTL
+        </button>
       </div>
       <div class="mx-demo__body">
-        <adapt-showcase-table
-          [dir]="presentation.tableDir"
-          [labels]="presentation.tableLabels"
-          [attr.lang]="presentation.locale"
-          tableLabel="People"
-          [urlSync]="false"
-          [data]="rows()"
-          [columns]="columns"
-          [rowKey]="rowKey"
-          [defaultColumnLayout]="pageLayout"
-          [defaults]="{ limit: 10 }"
-          [features]="features"
-        />
+        @for (current of mounted(); track current.shape) {
+          <adapt-showcase-table
+            [dir]="presentation.tableDir"
+            [labels]="presentation.tableLabels"
+            [attr.lang]="presentation.locale"
+            tableLabel="People"
+            [urlSync]="false"
+            [data]="rows()"
+            [columns]="columns"
+            [rowKey]="rowKey"
+            [defaultColumnLayout]="pageLayout"
+            [defaults]="pageDefaults"
+            [features]="current.features"
+          />
+        }
       </div>
-      <p class="hint" role="status" data-demo-log>{{ log() }}</p>
     </div>
   `,
 })
 class RowReorderingBody {
+  readonly pageDefaults = pageDefaultsFor("row-reordering");
   readonly pageLayout = pageLayoutFor("row-reordering");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = signal<readonly Person[]>(peopleRows());
+  readonly shapes = REORDER_SHAPES;
+  readonly hints = REORDER_HINTS;
+  readonly rtl = SHOWCASE_PRESENTATION.dir === "rtl";
+  readonly shape = signal<ReorderShape>("flat");
+  readonly rows = signal<readonly Person[]>(rosterFor("row-reordering"));
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly log = signal("Drag a grip, or lift a row with Space.");
-  private readonly pageFeatures: readonly AdaptTableFeature[] = [
-    this.kit.rowReorder<Person>((from, to, row) => {
-      this.rows.update((rows) => applyRowReorder(rows, from, to));
-      this.log.set(
-        `Moved ${row.name} from ${String(from + 1)} to ${String(to + 1)}`
-      );
-    }),
-  ];
-  readonly features: readonly AdaptTableFeature[] = [
-    ...this.pageFeatures,
-    ...pageChromeFeatures(this.kit, { urlKey: "reorder" }),
-  ];
+  private readonly chrome = pageChromeFeatures(this.kit, {
+    urlKey: "reorder",
+  });
+
+  /**
+   * The shape the table is mounted for — one entry, replaced when the shape
+   * changes, so switching remounts the table the way React's `key` does.
+   */
+  readonly mounted = computed(() => {
+    const shape = this.shape();
+    return [{ shape, features: this.featuresFor(shape) }];
+  });
+
+  private featuresFor(shape: ReorderShape): readonly AdaptTableFeature[] {
+    return [
+      ...(shape === "grouped"
+        ? [this.kit.groupingPanel([...PEOPLE_GROUP_BY], PEOPLE_GROUPING)]
+        : []),
+      ...(shape === "tree"
+        ? [
+            this.kit.tree<Person>({
+              getParentId: reportsTo,
+              treeColumn: "person",
+            }),
+          ]
+        : []),
+      this.kit.rowReorder<Person>(
+        (from, to, row) => {
+          this.rows.update((rows) => reorderPeople(rows, from, to, row, shape));
+        },
+        {
+          movePolicy: "confirm",
+          onGroupMove: (row, _fromGroup, toGroup, position) => {
+            this.rows.update((rows) =>
+              withPersonMovedToGroup(rows, row, toGroup, position)
+            );
+          },
+          onTreeMove: (row, _fromParent, toParent, position) => {
+            this.rows.update((rows) =>
+              withPersonMovedUnder(rows, row, toParent.id, position)
+            );
+          },
+        }
+      ),
+      ...this.chrome,
+    ];
+  }
+
+  /** The page in the other direction: the same page, re-read in that language. */
+  toggleDirection(): void {
+    const url = new URL(location.href);
+    url.searchParams.set("locale", this.rtl ? "en" : "ar");
+    location.assign(url);
+  }
 }
 
 /** Editing: kit-native editors in the cell; the host writes every change. */
@@ -424,7 +536,7 @@ class RowReorderingBody {
           [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
-          [defaults]="{ limit: 10 }"
+          [defaults]="pageDefaults"
           [features]="features()"
           [defaultColumnLayout]="defaultLayout"
         />
@@ -434,6 +546,7 @@ class RowReorderingBody {
   `,
 })
 class EditingBody {
+  readonly pageDefaults = pageDefaultsFor("editing");
   readonly defaultLayout = EDITING_DEFAULT_LAYOUT;
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
@@ -549,6 +662,7 @@ class EditingBody {
             [data]="rows"
             [columns]="columns"
             [rowKey]="rowKey"
+            [defaults]="pageDefaults"
             [defaultColumnLayout]="pageLayout"
             [forceMobile]="mobile() || undefined"
             [features]="features"
@@ -559,6 +673,7 @@ class EditingBody {
   `,
 })
 class GroupingBody {
+  readonly pageDefaults = pageDefaultsFor("grouping");
   readonly pageLayout = pageLayoutFor("grouping");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
@@ -614,6 +729,7 @@ class GroupingBody {
           [data]="rows"
           [columns]="columns"
           [rowKey]="rowKey"
+          [defaults]="pageDefaults"
           [defaultColumnLayout]="pageLayout"
           [features]="features()"
           [selectable]="selects()"
@@ -623,6 +739,7 @@ class GroupingBody {
   `,
 })
 class ExportBody implements OnInit {
+  readonly pageDefaults = pageDefaultsFor("export");
   readonly pageLayout = pageLayoutFor("export");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
@@ -671,9 +788,6 @@ class ExportBody implements OnInit {
   }
 }
 
-/** How many rows the scale page windows. */
-const SCALE_ROWS = 40_000;
-
 /** Where the scale page's rows come from: `?tier=server` or `?tier=query`. */
 type ScaleTier = "frontend" | "server" | "query";
 
@@ -699,7 +813,7 @@ function scaleTier(): ScaleTier {
       [data]="rows"
       [columns]="columns"
       [rowKey]="rowKey"
-      [defaults]="{ limit: count }"
+      [defaults]="{ limit: limit }"
       [features]="features"
     />
   `,
@@ -707,11 +821,19 @@ function scaleTier(): ScaleTier {
 class ScaleFrontendTable {
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly count = SCALE_ROWS;
-  readonly rows = makeLargeDirectory(SCALE_ROWS);
-  readonly columns = COLUMNS;
-  readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [this.kit.virtualize()];
+  private readonly params = scaleParams();
+  readonly limit = this.params.all ? this.params.total : SCALE_SLICE;
+  readonly rows = makeBigList(this.params.total);
+  readonly columns = scaleColumns(this.params.cols);
+  readonly rowKey = scaleRowKey;
+  readonly features: readonly AdaptTableFeature[] = this.params.virtual
+    ? [
+        this.kit.virtualize({
+          estimateRowSize: 48,
+          virtualizeColumns: this.params.virtualCols,
+        }),
+      ]
+    : [];
 }
 
 /**
@@ -740,19 +862,16 @@ class ScaleFrontendTable {
 class ScaleServerTable {
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  private readonly slice = signal({ from: 0, limit: 500 });
-  readonly source = injectServerData<Person>({
-    rows: computed(() => {
-      const { from, limit } = this.slice();
-      return Array.from(
-        { length: Math.max(0, Math.min(limit, SCALE_ROWS - from)) },
-        (_, index) => largePerson(from + index)
-      );
-    }),
-    total: SCALE_ROWS,
+  private readonly params = scaleParams();
+  private readonly slice = signal({ from: 0, limit: SCALE_SLICE });
+  readonly source = injectServerData<BigPerson>({
+    rows: computed(() =>
+      serverSlice(this.slice().from, this.slice().limit, this.params.total)
+    ),
+    total: this.params.total,
     urlSync: false,
     paginationMode: "infinite",
-    defaults: { limit: 500 },
+    defaults: { limit: SCALE_SLICE },
     onQueryChange: (query) => {
       this.slice.set({
         from: (query.page - 1) * query.limit,
@@ -760,11 +879,16 @@ class ScaleServerTable {
       });
     },
   });
-  readonly columns = COLUMNS;
-  readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [
-    this.kit.virtualize({ estimateRowSize: 48 }),
-  ];
+  readonly columns = scaleColumns(this.params.cols);
+  readonly rowKey = scaleRowKey;
+  readonly features: readonly AdaptTableFeature[] = this.params.virtual
+    ? [
+        this.kit.virtualize({
+          estimateRowSize: 48,
+          virtualizeColumns: this.params.virtualCols,
+        }),
+      ]
+    : [];
 }
 
 /** The people endpoint as an infinite query, keyed on the table's params. */
@@ -873,9 +997,10 @@ class ScaleQueryTable {
 class ScaleBody {
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly tier = scaleTier();
+  private readonly total = scaleParams().total.toLocaleString("en-US");
   readonly hint = {
-    frontend: `${SCALE_ROWS} rows — only the ones in view render`,
-    server: `${SCALE_ROWS} rows on the server — each slice fetched as you scroll`,
+    frontend: `${this.total} rows — only the ones in view render`,
+    server: `${this.total} rows on the server — each slice fetched as you scroll`,
     query: "Every page comes from an Angular Query infinite query",
   }[this.tier];
 }
@@ -986,7 +1111,7 @@ class ScaleBody {
           [columns]="columns"
           [rowKey]="rowKey"
           [defaultColumnLayout]="pageLayout"
-          [defaults]="{ limit: 8 }"
+          [defaults]="pageDefaults"
         />
       </div>
       <p class="hint" role="status" data-demo-log>{{ log() }}</p>
@@ -994,6 +1119,7 @@ class ScaleBody {
   `,
 })
 class MobileCardsBody {
+  readonly pageDefaults = pageDefaultsFor("mobile");
   readonly pageLayout = pageLayoutFor("mobile");
   readonly mobile = signal<boolean | undefined>(true);
   readonly presentation = SHOWCASE_PRESENTATION;
@@ -1143,7 +1269,7 @@ class SavedViewsBody {
           [columns]="columns"
           [rowKey]="rowKey"
           [selectable]="true"
-          [defaults]="{ limit: 10 }"
+          [defaults]="pageDefaults"
           [summaryRow]="summary"
           [features]="features"
         />
@@ -1152,6 +1278,7 @@ class SavedViewsBody {
   `,
 })
 export class AdaptShowcaseLandingTable {
+  readonly pageDefaults = pageDefaultsFor("landing");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = signal<readonly Person[]>(peopleRows());
@@ -1204,7 +1331,9 @@ export class AdaptShowcaseLandingTable {
   template: `
     <div class="mx-demo">
       <div class="hint-row">
-        <span class="hint">Each team lead opens onto their team</span>
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
@@ -1212,12 +1341,13 @@ export class AdaptShowcaseLandingTable {
           [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
+          [urlKey]="urlKey"
           [urlSync]="false"
           [data]="rows"
           [columns]="columns"
           [rowKey]="rowKey"
           [defaultColumnLayout]="pageLayout"
-          [defaults]="{ limit: 30 }"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
@@ -1225,10 +1355,13 @@ export class AdaptShowcaseLandingTable {
   `,
 })
 class TreeBody {
+  readonly pageDefaults = pageDefaultsFor("tree");
   readonly pageLayout = pageLayoutFor("tree");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly hints = TREE_HINTS;
+  readonly urlKey = TREE_URL_KEY;
+  readonly rows = rosterFor("tree");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   private readonly pageFeatures: readonly AdaptTableFeature[] = [
@@ -1236,7 +1369,7 @@ class TreeBody {
   ];
   readonly features: readonly AdaptTableFeature[] = [
     ...this.pageFeatures,
-    ...pageChromeFeatures(this.kit, { urlKey: "tree" }),
+    ...pageChromeFeatures(this.kit, { urlKey: TREE_URL_KEY }),
   ];
 }
 
@@ -1302,7 +1435,7 @@ class OrdersTable {
           [columns]="columns"
           [rowKey]="rowKey"
           [defaultColumnLayout]="pageLayout"
-          [defaults]="{ limit: 10 }"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
@@ -1310,6 +1443,7 @@ class OrdersTable {
   `,
 })
 class NestedTablesBody {
+  readonly pageDefaults = pageDefaultsFor("nested-tables");
   readonly pageLayout = pageLayoutFor("nested-tables");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
@@ -1345,12 +1479,12 @@ class NestedTablesBody {
           [attr.lang]="presentation.locale"
           tableLabel="People"
           urlKey="rows"
-          [maxHeight]="420"
+          [maxHeight]="maxHeight"
           [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
           [defaultColumnLayout]="pageLayout"
-          [defaults]="{ limit: 30 }"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
@@ -1358,6 +1492,8 @@ class NestedTablesBody {
   `,
 })
 class RowsBody {
+  readonly maxHeight = ROWS_PAGE_HEIGHT;
+  readonly pageDefaults = pageDefaultsFor("rows");
   readonly pageLayout = pageLayoutFor("rows");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
@@ -1406,7 +1542,7 @@ class RowsBody {
           [data]="rows"
           [columns]="columns"
           [rowKey]="rowKey"
-          [defaults]="{ limit: 10 }"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
@@ -1414,6 +1550,7 @@ class RowsBody {
   `,
 })
 class ColumnGroupsBody {
+  readonly pageDefaults = pageDefaultsFor("column-groups");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
@@ -1450,7 +1587,7 @@ class ColumnGroupsBody {
           [rowKey]="rowKey"
           [columnLayout]="layout()"
           (columnLayoutChange)="layout.set($event)"
-          [defaults]="{ limit: 10 }"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
@@ -1458,6 +1595,7 @@ class ColumnGroupsBody {
   `,
 })
 class ColumnsBody {
+  readonly pageDefaults = pageDefaultsFor("columns");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
@@ -1524,6 +1662,7 @@ class ColumnsBody {
           [data]="rows"
           [columns]="columns"
           [rowKey]="rowKey"
+          [defaults]="pageDefaults"
           [defaultColumnLayout]="pageLayout"
           [summaryRow]="summary"
           [features]="features"
@@ -1533,6 +1672,7 @@ class ColumnsBody {
   `,
 })
 class AggregationBody {
+  readonly pageDefaults = pageDefaultsFor("aggregation");
   readonly pageLayout = pageLayoutFor("aggregation");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
@@ -1609,6 +1749,7 @@ class PivotBody {
   templateUrl: "./formulasBody.html",
 })
 class FormulasBody {
+  readonly pageDefaults = pageDefaultsFor("formulas");
   readonly pageLayout = pageLayoutFor("formulas");
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = seedRoster("formulas", true);
@@ -1673,7 +1814,8 @@ class FormulasBody {
           [data]="rows"
           [columns]="columns"
           [rowKey]="rowKey"
-          [defaults]="{ limit: 10 }"
+          [defaultColumnLayout]="pageLayout"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
@@ -1681,9 +1823,11 @@ class FormulasBody {
   `,
 })
 class RtlBody {
+  readonly pageDefaults = pageDefaultsFor("rtl");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly pageLayout = pageLayoutFor("rtl");
+  readonly rows = rosterFor("rtl");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   private readonly pageFeatures: readonly AdaptTableFeature[] = [
@@ -1703,25 +1847,16 @@ class RtlBody {
   template: `
     <div class="mx-demo">
       <div class="hint-row">
-        <button
-          type="button"
-          class="seg__btn"
-          [attr.aria-pressed]="running()"
-          (click)="running.set(!running())"
-        >
-          {{ running() ? "Pause updates" : "Resume updates" }}
-        </button>
-        <button type="button" class="seg__btn" (click)="patch()">
-          Apply next update
-        </button>
-        <span class="hint"
-          >Sort or select a row; its identity survives each patch.</span
-        >
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
           tableLabel="Live people"
           [urlSync]="false"
+          mode="frontend"
+          [onQueryChange]="followSort"
           [dir]="presentation.tableDir"
           [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
@@ -1730,60 +1865,118 @@ class RtlBody {
           [rowKey]="rowKey"
           [defaultColumnLayout]="pageLayout"
           [features]="features"
+          [isCellFlashing]="isCellFlashing"
+          density="compact"
           [selectable]="true"
-          [defaults]="{ limit: 10 }"
+          [defaults]="pageDefaults"
         />
       </div>
-      <ol data-testid="patch-feed" aria-label="Live updates">
-        @for (entry of feed(); track entry.id) {
-          <li>{{ entry.text }}</li>
+      <div
+        class="demo-live-update demo-live-update--feed"
+        data-testid="realtime-feed"
+        [attr.data-stream-status]="stream.status()"
+      >
+        <span>{{ text.feed }}</span>
+        <button
+          type="button"
+          class="seg__btn"
+          [attr.aria-pressed]="running()"
+          (click)="running.set(!running())"
+        >
+          {{ running() ? text.pause : text.resume }}
+        </button>
+        <button type="button" class="seg__btn" (click)="applyNext()">
+          {{ text.applyNext }}
+        </button>
+        <span class="visually-hidden" aria-live="polite">{{
+          statusLabel(stream.status())
+        }}</span>
+        <span class="visually-hidden" aria-live="polite">{{
+          feed()[0] ?? ""
+        }}</span>
+        @if (feed().length === 0) {
+          <span>{{ text.waiting }}</span>
+        } @else {
+          <ol>
+            @for (line of feed(); track $index) {
+              <li>{{ line }}</li>
+            }
+          </ol>
         }
-      </ol>
+      </div>
     </div>
   `,
 })
 class RealtimeBody {
+  readonly pageDefaults = pageDefaultsFor("realtime");
   readonly pageLayout = pageLayoutFor("realtime");
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = signal<readonly Person[]>(peopleRows());
+  readonly hints = REALTIME_HINTS;
+  readonly text = REALTIME_TEXT;
+  readonly statusLabel = streamStatusLabel;
+  readonly rows = signal<readonly Person[]>(rosterFor("realtime"));
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   private readonly kit = inject(SHOWCASE_KIT);
   readonly features = pageChromeFeatures(this.kit, { urlKey: "rt" });
-  readonly running = signal(
-    new URLSearchParams(location.search).get("live") !== "off"
-  );
-  readonly feed = signal<readonly { id: number; text: string }[]>([]);
-  private sequence = 0;
+  readonly running = signal(realtimeStartsLive());
+  readonly feed = signal<readonly string[]>([]);
+  private readonly flash = injectChangedCellFlash({ enabled: true });
+  readonly isCellFlashing = personCellFlashing(this.flash.isFlashing);
+  private tick = 0;
+  // The direction the table sorts in now: a patch lands where the reader is
+  // looking, whichever way they have turned the sort.
+  private sortDir: "asc" | "desc" = "desc";
+  private pending: string | undefined;
+  private pendingEvents: readonly RowPatchEvent<Person>[] | undefined;
+  readonly stream = injectRowPatchStream<Person>({
+    eventSource: computed(() =>
+      this.running() ? PATCH_STREAM_URL : undefined
+    ),
+    enabled: this.running,
+    getRowId: rowKey,
+    createEventSource: createDemoPatchSource,
+    onPatch: (update) => {
+      const next = update(this.rows());
+      this.pendingEvents = rowPatchLog(next)?.events;
+      this.rows.set(next);
+    },
+    parse: () => {
+      const next = nextRealtimePatch(this.rows(), this.tick, this.sortDir);
+      if (!next) return [];
+      this.tick += 1;
+      this.pending = next.line;
+      return [next.patch];
+    },
+    onPatches: () => {
+      if (this.pending === undefined) return;
+      this.landed(this.pending, this.pendingEvents ?? []);
+      this.pending = undefined;
+      this.pendingEvents = undefined;
+    },
+  });
 
-  constructor() {
-    const timer = window.setInterval(() => {
-      if (this.running()) this.patch();
-    }, 2500);
-    inject(DestroyRef).onDestroy(() => window.clearInterval(timer));
+  /** Keep the patcher's direction the table's own. */
+  readonly followSort = (query: { readonly sortDir?: string }): void => {
+    this.sortDir = query.sortDir === "asc" ? "asc" : "desc";
+  };
+
+  /** The same update the stream applies, applied once by hand. */
+  applyNext(): void {
+    const next = nextRealtimePatch(this.rows(), this.tick, this.sortDir);
+    if (!next) return;
+    this.tick += 1;
+    const log = applyRowPatchesWithLog(this.rows(), [next.patch], rowKey);
+    this.rows.set(log.rows);
+    this.landed(next.line, log.events);
   }
 
-  /** Apply a core row patch, retaining the update journal and stable ids. */
-  patch(): void {
-    const row = this.rows()[this.sequence % 10];
-    if (!row) return;
-    const nextBudget = budget(row) + 1000;
-    this.rows.update((rows) =>
-      applyRowPatches(
-        rows,
-        [updateRow<Person>(row.id, { budget: nextBudget })],
-        rowKey
-      )
+  /** Record what was applied: the feed's newest line and the cells to flash. */
+  private landed(line: string, events: readonly RowPatchEvent<Person>[]): void {
+    this.feed.update((lines) =>
+      [line, ...lines].slice(0, REALTIME_FEED_LENGTH)
     );
-    this.feed.update((feed) =>
-      [
-        {
-          id: ++this.sequence,
-          text: `${row.name}: ${formatMoney(budget(row))} → ${formatMoney(nextBudget)}`,
-        },
-        ...feed,
-      ].slice(0, 6)
-    );
+    this.flash.mark(events);
   }
 }
 
@@ -1794,6 +1987,7 @@ class RealtimeBody {
   templateUrl: "./accessibilityBody.html",
 })
 class AccessibilityBody {
+  readonly pageDefaults = pageDefaultsFor("accessibility");
   readonly pageLayout = pageLayoutFor("accessibility");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
