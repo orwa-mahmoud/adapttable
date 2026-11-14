@@ -32,6 +32,7 @@ import {
   desktopBodyPinStyle,
   desktopDetailMeasureRef,
   desktopRowMeasureRef,
+  type RailInsets,
   type RowPairMeasurer,
 } from "./chromeModel";
 import {
@@ -148,6 +149,8 @@ export interface DesktopRowWiringContext<TRow> {
   readonly rowHeight: RowHeight<TRow> | undefined;
   /** Injected-column insets. */
   readonly leads: PinLeads;
+  /** Where each rail sticks. */
+  readonly railInsets: RailInsets;
   /** Whether pinned rows can stick. */
   readonly pinRowSticky: boolean;
   /** Where a pinned row sits, clearing a sticky header. */
@@ -347,6 +350,7 @@ export interface DesktopRowWiringModel<
   measureElement: C["measureElement"];
   measureRowPair: C["measureRowPair"];
   leads: PinLeads;
+  railInsets: RailInsets;
   focusIndex: number;
   pinPart: DesktopRowPinPart;
   pinSticky: ReturnType<typeof pinnedRowSticky>;
@@ -581,6 +585,7 @@ export function desktopRowWiring<TRow, C extends DesktopRowWiringContext<TRow>>(
     measureElement: measure ? ctx.measureElement : undefined,
     measureRowPair: measure ? ctx.measureRowPair : undefined,
     leads,
+    railInsets: ctx.railInsets,
     focusIndex,
     pinPart,
     pinSticky,

@@ -2061,6 +2061,7 @@ export function desktopChromeMetrics(options: {
     hasSelection: boolean;
     showActions: boolean;
     widths?: DesktopChromeWidths;
+    measured?: MeasuredRailWidths;
 }): {
     leads: PinLeads;
     extraMinWidth: number;
@@ -2071,6 +2072,8 @@ export function desktopChromeMetrics(options: {
     selection: number;
     actions: number;
     includeExpansionInLeads: boolean;
+    railInsets: RailInsets;
+    railSignature: string;
 };
 
 // @public
@@ -2310,6 +2313,7 @@ export interface DesktopRowWiringContext<TRow> {
     readonly pinRowSticky: boolean;
     readonly pinSignature: string;
     readonly prefetch: ((row: TRow) => void) | undefined;
+    readonly railInsets: RailInsets;
     readonly renderDetail: (row: TRow) => unknown;
     readonly renderRowActions: unknown;
     readonly reorderPinned: boolean;
@@ -2428,6 +2432,8 @@ export interface DesktopRowWiringModel<TRow, C extends DesktopRowWiringContext<T
     pinSignature: string;
     // (undocumented)
     pinSticky: ReturnType<typeof pinnedRowSticky>;
+    // (undocumented)
+    railInsets: RailInsets;
     // (undocumented)
     renderDetail: C["renderDetail"];
     // (undocumented)
@@ -4622,6 +4628,16 @@ export const MATCHED_CELL_STYLE: {
 export function materializeWindowRows<TRow>(rows: readonly TRow[], rowKey: (row: TRow) => string, enabled: boolean, items: readonly VirtualItemMeta[]): readonly VirtualTableRow<TRow>[];
 
 // @public
+export interface MeasuredRailWidths {
+    readonly actions?: number;
+    readonly edgeEnd?: number;
+    readonly edgeStart?: number;
+    readonly expansion?: number;
+    readonly reorder?: number;
+    readonly selection?: number;
+}
+
+// @public
 export function measureRowDetailAsPair(isMobile: boolean, renderRowDetail: unknown): boolean;
 
 // @public
@@ -4749,6 +4765,9 @@ export type NoFeatureState = Readonly<Record<never, never>>;
 
 // @public
 export function notifyLayoutChange(): void;
+
+// @public
+export function observeRailWidths(head: Element, onChange: (widths: MeasuredRailWidths) => void): () => void;
 
 // @public
 export function orderedCardEntries<TRow>(rows: readonly TRow[], getRowId: (row: TRow) => string, rowEntries: readonly VirtualTableRow<TRow>[] | undefined, pinnedTop: readonly TRow[], pinnedBottom: readonly TRow[], summaryTop?: readonly TRow[], summaryBottom?: readonly TRow[]): readonly VirtualTableRow<TRow>[];
@@ -5152,6 +5171,14 @@ export interface QuerySupport {
 }
 
 // @public
+export interface RailInsets {
+    readonly actions: number;
+    readonly expand: number;
+    readonly reorder: number;
+    readonly selection: number;
+}
+
+// @public
 export function readableRowLabel<TRow>(chrome: Pick<RuntimeChromeInput<TRow>, "columnLayout" | "getRowId">, row: TRow): string;
 
 // @public
@@ -5159,6 +5186,9 @@ export function readColumnViewport(element: {
     readonly scrollLeft: number;
     readonly clientWidth: number;
 }): ColumnViewport;
+
+// @public
+export function readRailWidths(head: ParentNode): MeasuredRailWidths;
 
 // @public
 export interface RegisteredFeature<TFeature> {

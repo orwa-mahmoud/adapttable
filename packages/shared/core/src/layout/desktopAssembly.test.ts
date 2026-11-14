@@ -282,6 +282,7 @@ function makeCtx(overrides: Partial<Ctx> = {}): Ctx {
     rowStyle: undefined,
     rowHeight: undefined,
     leads: { start: 48, end: 0 },
+    railInsets: { expand: 0, reorder: 0, selection: 0, actions: 0 },
     pinRowSticky: true,
     rowPinOffset: 40,
     measureRowPair: undefined,

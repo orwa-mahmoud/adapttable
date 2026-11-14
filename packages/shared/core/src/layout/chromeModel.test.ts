@@ -23,9 +23,12 @@ import {
   extraRowCoveredSlots,
   headerCellAttributes,
   headerRowAttributes,
+  type MeasuredRailWidths,
   measureRowDetailAsPair,
   measureWindowScrollMargin,
+  observeRailWidths,
   pinnedRowIds,
+  readRailWidths,
   rowAttributes,
   searchInputAttributes,
   sortButtonAttributes,
@@ -70,6 +73,13 @@ describe("desktop layout", () => {
       selection: DESKTOP_SELECTION_WIDTH,
       actions: DESKTOP_ACTIONS_WIDTH,
       includeExpansionInLeads: true,
+      railInsets: {
+        expand: 0,
+        reorder: DESKTOP_EXPANSION_WIDTH,
+        selection: DESKTOP_EXPANSION_WIDTH + REORDER_COLUMN_WIDTH,
+        actions: 0,
+      },
+      railSignature: "",
     });
     const kit = desktopChromeMetrics({
       expandable: true,
@@ -80,6 +90,229 @@ describe("desktop layout", () => {
     });
     expect(kit.leads).toEqual({ start: 0, end: 0 });
     expect(kit.expansion).toBe(40);
+  });
+
+  it("pins columns past the rails' rendered widths, not their reserved ones", () => {
+    const metrics = desktopChromeMetrics({
+      expandable: true,
+      showReorder: true,
+      hasSelection: true,
+      showActions: true,
+      measured: { expansion: 65.5, reorder: 44, selection: 58, actions: 98 },
+    });
+    expect(metrics.leads).toEqual({ start: 65.5 + 44 + 58, end: 98 });
+    expect(metrics.expansionLead).toBe(65.5);
+    expect(metrics.reorderLead).toBe(44);
+    expect(metrics.selectionLead).toBe(65.5 + 44);
+    expect(metrics.railInsets).toEqual({
+      expand: 0,
+      reorder: 65.5,
+      selection: 65.5 + 44,
+      actions: 0,
+    });
+    expect(metrics.railSignature).toBe("65.5:44:58:98::");
+    // The table's own border sits before the first rail and after the last.
+    const bordered = desktopChromeMetrics({
+      expandable: false,
+      showReorder: false,
+      hasSelection: true,
+      showActions: true,
+      measured: { selection: 52, actions: 90, edgeStart: 1, edgeEnd: 0.5 },
+    });
+    expect(bordered.leads).toEqual({ start: 53, end: 90.5 });
+    expect(bordered.railInsets).toEqual({
+      expand: 1,
+      reorder: 1,
+      selection: 1,
+      actions: 0.5,
+    });
+    // The table's minimum width still reserves the declared widths.
+    expect(metrics.extraMinWidth).toBe(
+      DESKTOP_EXPANSION_WIDTH +
+        REORDER_COLUMN_WIDTH +
+        DESKTOP_SELECTION_WIDTH +
+        DESKTOP_ACTIONS_WIDTH
+    );
+    // A rail that does not render reserves nothing, measured or not.
+    expect(
+      desktopChromeMetrics({
+        expandable: false,
+        showReorder: false,
+        hasSelection: true,
+        showActions: false,
+        measured: { expansion: 65, selection: 52 },
+      }).leads
+    ).toEqual({ start: 52, end: 0 });
+    // A rail measured before it rendered falls back to its reserved width.
+    expect(
+      desktopChromeMetrics({
+        expandable: false,
+        showReorder: false,
+        hasSelection: true,
+        showActions: true,
+        measured: { actions: 90 },
+      }).leads
+    ).toEqual({ start: DESKTOP_SELECTION_WIDTH, end: 90 });
+  });
+
+  it("reads each rail's rendered width from the header", () => {
+    const head = document.createElement("thead");
+    head.innerHTML = `<tr>
+      <th data-adapttable-part="expand-header"></th>
+      <th data-adapttable-part="reorder-header"></th>
+      <th data-adapttable-part="selection-header"></th>
+      <th data-adapttable-part="header-cell"></th>
+      <th data-adapttable-part="actions-header"></th>
+    </tr>`;
+    const widths: Record<string, number> = {
+      "expand-header": 40.25,
+      "selection-header": 52,
+      "actions-header": 133,
+    };
+    for (const cell of head.querySelectorAll<HTMLElement>("th")) {
+      const width = widths[cell.dataset.adapttablePart ?? ""] ?? 0;
+      cell.getBoundingClientRect = () => ({ width }) as DOMRect;
+    }
+    expect(readRailWidths(head)).toEqual({
+      expansion: 40.25,
+      selection: 52,
+      actions: 133,
+    });
+    expect(readRailWidths(document.createElement("thead"))).toEqual({});
+  });
+
+  it("reads how far the header cells sit inside the box they stick to", () => {
+    // A 300 px scroller with a 1 px border; the table inside it has its own
+    // 1 px border at the start and half a collapsed one at the end.
+    const scroller = document.createElement("div");
+    scroller.style.overflowX = "auto";
+    const table = document.createElement("table");
+    table.innerHTML = `<thead><tr>
+      <th data-adapttable-part="selection-header"></th>
+      <th data-adapttable-part="header-cell"></th>
+    </tr></thead>`;
+    scroller.append(table);
+    document.body.append(scroller);
+    const [selection, cell] = [...table.querySelectorAll("th")];
+    const box = (left: number, right: number) => () =>
+      ({ left, right, width: right - left }) as DOMRect;
+    const metrics = (values: Record<string, number>) => {
+      for (const [key, value] of Object.entries(values))
+        Object.defineProperty(scroller, key, { value, configurable: true });
+    };
+    scroller.getBoundingClientRect = box(10, 312);
+    metrics({
+      clientLeft: 1,
+      clientWidth: 300,
+      scrollLeft: 0,
+      scrollWidth: 400,
+    });
+    table.getBoundingClientRect = box(11, 411);
+    selection!.getBoundingClientRect = box(13, 65);
+    cell!.getBoundingClientRect = box(65, 410.5);
+    const head = table.querySelector("thead")!;
+    expect(readRailWidths(head)).toEqual({
+      selection: 52,
+      edgeStart: 2,
+      edgeEnd: 0.5,
+    });
+    // Scrolled: the cells move, their place in the content does not.
+    metrics({ scrollLeft: 50 });
+    selection!.getBoundingClientRect = box(-37, 15);
+    cell!.getBoundingClientRect = box(15, 360.5);
+    expect(readRailWidths(head)).toMatchObject({ edgeStart: 2, edgeEnd: 0.5 });
+    // Right to left: the start edge is the right one; scrolling is negative.
+    table.style.direction = "rtl";
+    metrics({ scrollLeft: 0 });
+    selection!.getBoundingClientRect = box(257, 309);
+    cell!.getBoundingClientRect = box(-88.5, 257);
+    expect(readRailWidths(head)).toMatchObject({ edgeStart: 2, edgeEnd: 0.5 });
+    scroller.remove();
+  });
+
+  it("measures against the page when nothing around the table scrolls", () => {
+    const table = document.createElement("table");
+    table.innerHTML = `<thead><tr><th></th></tr></thead>`;
+    document.body.append(table);
+    table.getBoundingClientRect = () =>
+      ({ left: 8, right: 108, width: 100 }) as DOMRect;
+    table.querySelector("th")!.getBoundingClientRect = () =>
+      ({ left: 9, right: 107, width: 98 }) as DOMRect;
+    expect(readRailWidths(table.querySelector("thead")!)).toEqual({
+      edgeStart: 9,
+    });
+    table.remove();
+  });
+
+  it("reports rail widths when they change, and stops when disposed", () => {
+    const observers: { fire(): void; cells: Element[]; off: boolean }[] = [];
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        readonly entry: { fire(): void; cells: Element[]; off: boolean } = {
+          fire: () => undefined,
+          cells: [],
+          off: false,
+        };
+        constructor(read: () => void) {
+          this.entry.fire = read;
+          observers.push(this.entry);
+        }
+        observe(cell: Element) {
+          this.entry.cells.push(cell);
+        }
+        disconnect() {
+          this.entry.off = true;
+        }
+      }
+    );
+    const head = document.createElement("thead");
+    head.innerHTML = `<tr><th data-adapttable-part="selection-header"></th></tr>`;
+    const cell = head.querySelector("th")!;
+    let width = 40;
+    cell.getBoundingClientRect = () => ({ width }) as DOMRect;
+    const seen: MeasuredRailWidths[] = [];
+    const stop = observeRailWidths(head, (widths) => seen.push(widths));
+    expect(seen).toEqual([{ selection: 40 }]);
+    expect(observers[0]!.cells).toEqual([cell]);
+    observers[0]!.fire();
+    expect(seen).toHaveLength(1);
+    width = 52;
+    observers[0]!.fire();
+    expect(seen).toEqual([{ selection: 40 }, { selection: 52 }]);
+    stop();
+    expect(observers[0]!.off).toBe(true);
+    vi.unstubAllGlobals();
+  });
+
+  it("follows a rail that appears or goes", async () => {
+    const head = document.createElement("thead");
+    head.innerHTML = `<tr><th data-adapttable-part="header-cell"></th></tr>`;
+    const seen: MeasuredRailWidths[] = [];
+    const stop = observeRailWidths(head, (widths) => seen.push(widths));
+    const rail = document.createElement("th");
+    rail.dataset.adapttablePart = "actions-header";
+    rail.getBoundingClientRect = () => ({ width: 90 }) as DOMRect;
+    head.querySelector("tr")!.append(rail);
+    await Promise.resolve();
+    expect(seen).toEqual([{}, { actions: 90 }]);
+    rail.remove();
+    await Promise.resolve();
+    expect(seen).toEqual([{}, { actions: 90 }, {}]);
+    stop();
+    head.querySelector("tr")!.append(rail);
+    await Promise.resolve();
+    expect(seen).toHaveLength(3);
+  });
+
+  it("measures once where nothing observes resizes", () => {
+    vi.stubGlobal("ResizeObserver", undefined);
+    vi.stubGlobal("MutationObserver", undefined);
+    const head = document.createElement("thead");
+    const seen: MeasuredRailWidths[] = [];
+    observeRailWidths(head, (widths) => seen.push(widths))();
+    expect(seen).toEqual([{}]);
+    vi.unstubAllGlobals();
   });
 
   it("says whether anything is pinned", () => {

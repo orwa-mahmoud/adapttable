@@ -17619,6 +17619,14 @@
       "behavior": ""
     },
     {
+      "export": "MeasuredRailWidths",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "measureRowDetailAsPair",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -17740,6 +17748,14 @@
     },
     {
       "export": "notifyLayoutChange",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "observeRailWidths",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -18219,6 +18235,14 @@
       "behavior": ""
     },
     {
+      "export": "RailInsets",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "readableRowLabel",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -18228,6 +18252,14 @@
     },
     {
       "export": "readColumnViewport",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "readRailWidths",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -20475,6 +20507,22 @@
       "behavior": ""
     },
     {
+      "export": "CaseArgs",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "collectConformanceTests",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
       "export": "CONFORMANCE_COLUMNS",
       "currentImport": "@adapttable/core/conformance",
       "kind": "value",
@@ -20491,7 +20539,23 @@
       "behavior": ""
     },
     {
+      "export": "ConformanceBody",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
       "export": "ConformanceColumn",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceDescribe",
       "currentImport": "@adapttable/core/conformance",
       "kind": "type",
       "class": "neutral-model",
@@ -20523,6 +20587,14 @@
       "behavior": ""
     },
     {
+      "export": "ConformanceIt",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
       "export": "ConformanceLabels",
       "currentImport": "@adapttable/core/conformance",
       "kind": "type",
@@ -20532,6 +20604,14 @@
     },
     {
       "export": "ConformanceMount",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceRegistry",
       "currentImport": "@adapttable/core/conformance",
       "kind": "type",
       "class": "neutral-model",
@@ -20607,54 +20687,6 @@
       "currentImport": "@adapttable/core/conformance",
       "kind": "value",
       "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/conformance",
-      "behavior": ""
-    },
-    {
-      "export": "CaseArgs",
-      "currentImport": "@adapttable/core/conformance",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/conformance",
-      "behavior": ""
-    },
-    {
-      "export": "collectConformanceTests",
-      "currentImport": "@adapttable/core/conformance",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/conformance",
-      "behavior": ""
-    },
-    {
-      "export": "ConformanceBody",
-      "currentImport": "@adapttable/core/conformance",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/conformance",
-      "behavior": ""
-    },
-    {
-      "export": "ConformanceDescribe",
-      "currentImport": "@adapttable/core/conformance",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/conformance",
-      "behavior": ""
-    },
-    {
-      "export": "ConformanceIt",
-      "currentImport": "@adapttable/core/conformance",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/conformance",
-      "behavior": ""
-    },
-    {
-      "export": "ConformanceRegistry",
-      "currentImport": "@adapttable/core/conformance",
-      "kind": "type",
-      "class": "neutral-model",
       "proposedImport": "@adapttable/core/conformance",
       "behavior": ""
     },
