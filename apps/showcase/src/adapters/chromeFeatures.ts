@@ -18,6 +18,7 @@ import type {
 
 import { demoSavedViews, type Person } from "../data";
 import type { KitFeatureRequests } from "../Demo";
+import { pageChrome } from "../shared/pageChrome";
 
 /**
  * The kit factories every demo arms the same way.
@@ -188,16 +189,13 @@ function alwaysOn(
   kit: KitChromeFactories,
   flags: KitChromeFlags
 ): readonly TableFeature<Person>[] {
+  const chrome = pageChrome(flags);
   return [
-    ...(flags.statusBar ? [kit.statusBar()] : []),
-    ...(flags.editing ? [kit.selectionStats()] : []),
-    // Find is shareable URL state. The live demo is the page that syncs the
-    // address bar, so the bar is on there even when editing is off.
-    ...(flags.editing || flags.urlKey === "live" || flags.urlKey === "flt"
-      ? [kit.findInTable()]
-      : []),
-    kit.commandPalette(flags.commandPalette ?? true),
-    kit.contextMenu<Person>(flags.contextMenu ?? true),
+    ...(chrome.statusBar ? [kit.statusBar()] : []),
+    ...(chrome.selectionStats ? [kit.selectionStats()] : []),
+    ...(chrome.findInTable ? [kit.findInTable()] : []),
+    kit.commandPalette(chrome.commandPalette),
+    kit.contextMenu<Person>(chrome.contextMenu),
   ];
 }
 

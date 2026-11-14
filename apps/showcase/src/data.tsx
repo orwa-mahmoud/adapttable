@@ -96,7 +96,12 @@ export {
   timelineDays,
   utilization,
 } from "./people";
-export { LIVE_DEFAULT_LAYOUT, SPAN_DEFAULT_LAYOUT } from "./shared/peopleTable";
+export {
+  EDITING_DEFAULT_LAYOUT,
+  LIVE_DEFAULT_LAYOUT,
+  SPAN_DEFAULT_LAYOUT,
+} from "./shared/peopleTable";
+export { consecutiveTeamSpan, orderPeopleByTeam } from "./shared/rowsScenario";
 
 export const DEMO_NOTICE_EVENT = "adapttable-demo-notice";
 export const DEMO_CONFIRM_EVENT = "adapttable-demo-confirm";
@@ -306,33 +311,6 @@ export function statusTone(
   return "gray";
 }
 
-/** Cluster teammates so a Team row-span has a consecutive run to cover. */
-export function orderPeopleByTeam(rows: readonly Person[]): Person[] {
-  return [...rows].sort((a, b) => {
-    const byTeam = a.team.localeCompare(b.team);
-    if (byTeam !== 0) return byTeam;
-    return Number(a.id) - Number(b.id);
-  });
-}
-
-/**
- * How many following rows share this row's team. 1 when this row is not
- * the start of the run in this list — the origin already covers them.
- * Pass visual body order (`sectionRows`), so pinning a teammate keeps
- * one merge instead of splitting Core into two cells.
- */
-export function consecutiveTeamSpan(
-  rows: readonly Person[],
-  index: number
-): number {
-  const current = rows[index];
-  if (!current) return 1;
-  if (rows[index - 1]?.team === current.team) return 1;
-  let span = 1;
-  while (rows[index + span]?.team === current.team) span += 1;
-  return span;
-}
-
 /**
  * Column-groups demo: Team stays visible so Assignment is Team + Status.
  * Groups start open. Actions stays pinned at the end.
@@ -340,15 +318,6 @@ export function consecutiveTeamSpan(
 export const GROUPS_DEFAULT_LAYOUT: Partial<ColumnLayoutState> = {
   hidden: [],
   pinned: { actions: "end" },
-};
-
-/**
- * The editing page's default layout: every editable field stays visible.
- * Timeline is the only display-only column, so hiding it keeps the table
- * compact without making the page borrow the Columns menu from its showcase.
- */
-export const EDITING_DEFAULT_LAYOUT: Partial<ColumnLayoutState> = {
-  hidden: ["timeline"],
 };
 
 function takeColumnKeys(

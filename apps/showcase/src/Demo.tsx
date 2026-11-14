@@ -57,7 +57,6 @@ import {
 import {
   BASE_COLUMNS,
   budget,
-  consecutiveTeamSpan,
   DEMO_FILTER_RUNTIME,
   DEMO_GROUP_AGGREGATES,
   DEMO_GROUPING_EXTRAS,
@@ -68,7 +67,6 @@ import {
   LIVE_DEFAULT_LAYOUT,
   makeLargeDirectory,
   orderPeopleByTeam,
-  PEOPLE,
   type Person,
   personSkills,
   personStatus,
@@ -91,6 +89,7 @@ import {
 } from "./shared/aggregationScenario";
 import { PEOPLE_GROUP_BY } from "./shared/groupingScenario";
 import { revealHiddenOnPin } from "./shared/peopleTable";
+import { blankPerson, nextPersonId, teamSpan } from "./shared/rowsScenario";
 
 /**
  * Where the rows come from.
@@ -188,6 +187,22 @@ const ScenarioContext = createContext<DemoScenario>("live");
 /** Feature pages wrap the table in a scenario; `/` and Feature Lab omit this. */
 export const DemoScenarioProvider = ScenarioContext.Provider;
 
+/**
+ * How the demo's pretend server answers a cell save: the editing page can
+ * ask it to reject the next one, to show the table rolling the edit back.
+ */
+export interface DemoEditPolicy {
+  /** Reject the next save. */
+  readonly rejectNext: boolean;
+  /** Called when a save was rejected, so the page can clear its switch. */
+  readonly onRejected: () => void;
+}
+
+const EditPolicyContext = createContext<DemoEditPolicy | null>(null);
+
+/** Provides the demo's {@link DemoEditPolicy} to the tables below. */
+export const DemoEditPolicyProvider = EditPolicyContext.Provider;
+
 function useDemoScenario(): DemoScenario {
   return useContext(ScenarioContext);
 }
@@ -238,7 +253,11 @@ const LARGE_ROW_ESTIMATE = 48;
  */
 /** The kit-drawn features a page asked for, and what each needs. */
 export interface KitFeatureRequests {
-  editing?: (row: Person, key: string, nextValue: unknown) => void;
+  editing?: (
+    row: Person,
+    key: string,
+    nextValue: unknown
+  ) => void | Promise<void>;
   rowEditing?: (row: Person, patch: Record<string, unknown>) => void;
   batchEditing?: (
     edits: readonly { row: Person; patch: Record<string, unknown> }[]
@@ -288,7 +307,11 @@ export interface DemoColumnProps {
   /** Namespace shared with the data hook (`live.find` beside `live.q`). */
   urlKey?: string;
   collapsibleColumnGroups?: boolean;
-  onCellEdit?: (row: Person, key: string, nextValue: unknown) => void;
+  onCellEdit?: (
+    row: Person,
+    key: string,
+    nextValue: unknown
+  ) => void | Promise<void>;
   onEditStart?: EditEventHandler<Person>;
   onEditCancel?: EditEventHandler<Person>;
   onEditCommit?: EditEventHandler<Person>;
@@ -437,28 +460,6 @@ function paginationFor(
   pageMode: PageMode | undefined
 ): PageMode | undefined {
   return large ? "infinite" : pageMode;
-}
-
-/** The next free id, so an added row never collides with a seeded one. */
-function nextId(rows: readonly Person[]): string {
-  return String(
-    rows.reduce((max, row) => Math.max(max, Number(row.id) || 0), 0) + 1
-  );
-}
-
-/** A blank person to fill in — the row an Add starts from. */
-function blankPerson(rows: readonly Person[]): Person {
-  const id = nextId(rows);
-  return {
-    id,
-    name: "",
-    email: "",
-    role: "",
-    team: PEOPLE[0]?.team ?? "",
-    nameAr: "",
-    roleAr: "",
-    teamAr: "",
-  };
 }
 
 /**
@@ -766,7 +767,11 @@ function frontendColumnProps(
     extraAnchorName: string;
     /** The first row's id, which the row-style demo accents. */
     accentId: string | undefined;
-    onCellEdit: (row: Person, key: string, nextValue: unknown) => void;
+    onCellEdit: (
+      row: Person,
+      key: string,
+      nextValue: unknown
+    ) => void | Promise<void>;
     onEditStart: EditEventHandler<Person>;
     onEditCancel: EditEventHandler<Person>;
     onEditCommit: EditEventHandler<Person>;
@@ -808,19 +813,6 @@ function frontendColumnProps(
   // Team is the same fact on consecutive rows in visual order — merge it,
   // leave Person and Email alone. Reorder can break a run; that is the point.
   // Pin keeps the run: the person moves, Core stays one cell.
-  const teamSpan = ({
-    column,
-    sectionRows,
-    sectionRowIndex,
-  }: {
-    column: { key: string };
-    sectionRows: readonly Person[];
-    sectionRowIndex: number;
-  }) => {
-    if (column.key !== "team") return undefined;
-    const span = consecutiveTeamSpan(sectionRows, sectionRowIndex);
-    return span > 1 ? { rowSpan: span } : undefined;
-  };
   if (flags.cellSpan) {
     Object.assign(next, { getCellSpan: teamSpan });
   }
@@ -991,8 +983,20 @@ function Frontend({
   useEffect(() => {
     latestData.current = data;
   }, [data]);
+  const editPolicy = useContext(EditPolicyContext);
+  const latestEditPolicy = useRef(editPolicy);
+  useEffect(() => {
+    latestEditPolicy.current = editPolicy;
+  }, [editPolicy]);
   const onCellEdit = useCallback(
-    (row: Person, key: string, nextValue: unknown) => {
+    (row: Person, key: string, nextValue: unknown): void | Promise<void> => {
+      const policy = latestEditPolicy.current;
+      if (policy?.rejectNext === true) {
+        policy.onRejected();
+        return Promise.reject(
+          new Error("The demo server rejected this change")
+        );
+      }
       const field = editField(key);
       writePatches([updateRow(row.id, { [field]: nextValue as never })]);
       flashRow(row.id);
@@ -1019,7 +1023,7 @@ function Frontend({
   }, [flashRow, writePatches]);
   const onDuplicateRow = useCallback(
     (row: Person) => {
-      const copy = { ...row, id: nextId(latestData.current) };
+      const copy = { ...row, id: nextPersonId(latestData.current) };
       writePatches([insertRow(copy, 0)]);
       flashRow(copy.id);
     },
