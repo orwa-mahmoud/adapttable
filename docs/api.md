@@ -3147,7 +3147,8 @@ name carries its `describe` path, and each run carries its group's hooks,
 setup outermost first and teardown innermost first, after a failing test too.
 A `ConformanceBody` is any test or hook body; one a `beforeEach` returns runs
 after the test. `it.each` and `describe.each` register one entry per case,
-filling `%s`, `%d` and `%i` in the name and spreading an array case into the
+filling `%s`, `%d` and `%i` in the name from the case's values, and `$key` from
+an object case's field (a string quoted), and spreading an array case into the
 body's arguments (`CaseArgs`).
 
 ## The AI packages

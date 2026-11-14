@@ -20188,6 +20188,18 @@ use. `CONFORMANCE_ROWS`
 scenario data. [Testing an adapter](./building-an-adapter.md#testing) shows a
 React driver.
 
+A shared suite of your own runs the same way.
+`collectConformanceTests(define)` hands `define` a `ConformanceRegistry` —
+`describe` (`ConformanceDescribe`), `it` (`ConformanceIt`), `beforeEach` and
+`afterEach` — and returns the flat `ConformanceTest` list it registered: each
+name carries its `describe` path, and each run carries its group's hooks,
+setup outermost first and teardown innermost first, after a failing test too.
+A `ConformanceBody` is any test or hook body; one a `beforeEach` returns runs
+after the test. `it.each` and `describe.each` register one entry per case,
+filling `%s`, `%d` and `%i` in the name from the case's values, and `$key` from
+an object case's field (a string quoted), and spreading an array case into the
+body's arguments (`CaseArgs`).
+
 ## The AI packages
 
 `@adapttable/ai` is React-free and model-neutral: it turns a live table into a
