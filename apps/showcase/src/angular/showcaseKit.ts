@@ -19,6 +19,7 @@ import type {
 import type { exportCsv } from "@adapttable/angular-unstyled/export";
 import type { extraRows } from "@adapttable/angular-unstyled/extra-rows";
 import type { filters } from "@adapttable/angular-unstyled/filters";
+import type { findInTable } from "@adapttable/angular-unstyled/find-in-table";
 import type { fullscreen } from "@adapttable/angular-unstyled/fullscreen";
 import type { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
 import type { headerFilters } from "@adapttable/angular-unstyled/header-filters";
@@ -32,6 +33,7 @@ import type { rowAppearance } from "@adapttable/angular-unstyled/row-appearance"
 import type { rowPinning } from "@adapttable/angular-unstyled/row-pinning";
 import type { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
 import type { savedViews } from "@adapttable/angular-unstyled/saved-views";
+import type { selectionStats } from "@adapttable/angular-unstyled/selection-stats";
 import type { sidePanel } from "@adapttable/angular-unstyled/side-panel";
 import type { statusBar } from "@adapttable/angular-unstyled/status-bar";
 import type { tree } from "@adapttable/angular-unstyled/tree";
@@ -97,6 +99,8 @@ export interface ShowcaseKit {
   readonly contextMenu: typeof contextMenu;
   readonly commandPalette: typeof commandPalette;
   readonly extraRows: typeof extraRows;
+  readonly findInTable: typeof findInTable;
+  readonly selectionStats: typeof selectionStats;
   readonly rowAppearance: typeof rowAppearance;
   readonly statusBar: typeof statusBar;
   readonly sidePanel: typeof sidePanel;

@@ -218,8 +218,8 @@ for (const kit of ANGULAR_KITS) {
         .getByRole("combobox", { name: "Filter layout", exact: true })
         .selectOption("header");
       const funnels = part(page, "filter-header-trigger");
-      // Person, Team, Status, Timeline, Budget, Load — every column with a filter.
-      await expect(funnels).toHaveCount(6);
+      // Person, Team, Status, Timeline, Budget — every shown column with a filter.
+      await expect(funnels).toHaveCount(5);
       await funnels.nth(1).click();
       await checkAngularCheckbox(
         kit,

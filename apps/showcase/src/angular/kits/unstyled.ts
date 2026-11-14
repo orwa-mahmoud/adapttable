@@ -25,6 +25,7 @@ import {
 import { exportCsv } from "@adapttable/angular-unstyled/export";
 import { extraRows } from "@adapttable/angular-unstyled/extra-rows";
 import { filters } from "@adapttable/angular-unstyled/filters";
+import { findInTable } from "@adapttable/angular-unstyled/find-in-table";
 import { fullscreen } from "@adapttable/angular-unstyled/fullscreen";
 import { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
 import { headerFilters } from "@adapttable/angular-unstyled/header-filters";
@@ -44,6 +45,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/angular-unstyled/saved-views";
+import { selectionStats } from "@adapttable/angular-unstyled/selection-stats";
 import { sidePanel } from "@adapttable/angular-unstyled/side-panel";
 import { statusBar } from "@adapttable/angular-unstyled/status-bar";
 import { tree } from "@adapttable/angular-unstyled/tree";
@@ -97,6 +99,8 @@ export const kit = {
   contextMenu,
   commandPalette,
   extraRows,
+  findInTable,
+  selectionStats,
   rowAppearance,
   statusBar,
   sidePanel,

@@ -100,6 +100,8 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
   readonly summaryRow = input<SummaryRowFn<TRow>>();
   readonly editConflictPolicy = input<EditConflictPolicy>();
   readonly columnLayout = input<ColumnLayoutState>();
+  readonly defaultColumnLayout = input<Partial<ColumnLayoutState>>();
+  readonly filterFields = input(true);
   readonly columnLayoutChange = output<ColumnLayoutState>();
 
   /** Bind before the first render, including initial column-layout emissions. */
@@ -128,6 +130,7 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         inputBinding("maxHeight", this.maxHeight),
         inputBinding("renderCard", this.renderCard),
         inputBinding("filtersMode", this.filtersMode),
+        inputBinding("filterFields", this.filterFields),
         inputBinding("forceMobile", this.forceMobile),
         inputBinding("selectable", this.selectable),
         inputBinding("searchable", this.searchable),
@@ -135,6 +138,7 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         inputBinding("onRowClick", this.onRowClick),
         inputBinding("density", this.density),
         inputBinding("animate", this.animate),
+        inputBinding("defaultColumnLayout", this.defaultColumnLayout),
         outputBinding<TableDensity>("densityChange", (density) =>
           this.densityChange.emit(density)
         ),

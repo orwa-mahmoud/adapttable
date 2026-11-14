@@ -24,13 +24,18 @@ for (const kit of ANGULAR_KITS) {
         .locator('[data-adapttable-part="cell"]')
         .nth(column);
 
+    // Person, Email, Team, Status, Budget, Load: the editing page hides only
+    // Timeline, as every framework's editing page does.
+    const STATUS = 3;
+    const BUDGET = 4;
+
     const log = (page: Page) => page.locator("[data-demo-log]");
 
     test("opens a select on the row's value and saves the new one through the host", async ({
       page,
     }) => {
       await page.goto(PAGE);
-      await cell(page, 0, 2).dblclick();
+      await cell(page, 0, STATUS).dblclick();
       const editor = part(page, "edit-cell-editor");
       await expectAngularSelection(kit, editor, {
         value: "Planned",
@@ -45,7 +50,7 @@ for (const kit of ANGULAR_KITS) {
         label: "Blocked",
       });
       await editor.press("Enter");
-      await expect(cell(page, 0, 2)).toHaveText("Blocked");
+      await expect(cell(page, 0, STATUS)).toHaveText("Blocked");
       await expect(log(page)).toHaveText(
         "Saved status for Ada Lovelace: Blocked"
       );
@@ -92,7 +97,7 @@ for (const kit of ANGULAR_KITS) {
         page,
       }) => {
         await page.goto(PAGE);
-        await cell(page, 0, 2).dblclick();
+        await cell(page, 0, STATUS).dblclick();
         const editor = part(page, "edit-cell-editor");
         await expect(editor).toBeFocused();
         const selector = editor
@@ -129,28 +134,34 @@ for (const kit of ANGULAR_KITS) {
         await page
           .getByRole("heading", { name: "Inline cell editing in NG-ZORRO" })
           .click();
-        await expect(cell(page, 0, 2)).toHaveText("Blocked");
+        await expect(cell(page, 0, STATUS)).toHaveText("Blocked");
         await expect(log(page)).toHaveText(
           "Saved status for Ada Lovelace: Blocked"
         );
       });
     }
 
-    test("edits a number and a date through the kit controls", async ({
-      page,
-    }) => {
+    test("edits a number through the kit controls", async ({ page }) => {
       await page.goto(PAGE);
-      await cell(page, 0, 4).dblclick();
+      await cell(page, 0, BUDGET).dblclick();
       const budget = part(page, "edit-cell-editor");
       await expect(budget).toHaveAttribute("type", "number");
       await budget.fill("12345");
       await budget.press("Enter");
-      await expect(cell(page, 0, 4)).toHaveText("$12,345");
+      await expect(cell(page, 0, BUDGET)).toHaveText("$12,345");
       await expect(log(page)).toHaveText(
         "Saved budget for Ada Lovelace: 12345"
       );
+    });
 
-      await cell(page, 0, 3).dblclick();
+    test("opens the kit's date control on the live demo's Timeline", async ({
+      page,
+    }) => {
+      await page.goto(`/angular-main/?kit=${kit.key}`);
+      await part(page, "row")
+        .first()
+        .locator('[data-column-key="timeline"]')
+        .dblclick();
       const start = part(page, "edit-cell-editor");
       await expect(start).toHaveAttribute("type", "date");
       await expect(start).toHaveValue("2026-03-08");

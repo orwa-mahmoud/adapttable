@@ -7,6 +7,7 @@
         <input
           [value]="name()"
           (input)="name.set($any($event.target).value)"
+          placeholder="Per month"
           data-testid="formula-name"
         />
       </label>
@@ -22,6 +23,19 @@
       </label>
       <button type="submit" data-testid="formula-add">Add column</button>
     </form>
+    <div class="fx__examples">
+      @for (example of examples; track example.label) {
+        <button
+          type="button"
+          [attr.data-testid]="
+            'formula-example-' + (example.specs[0]?.key ?? '')
+          "
+          (click)="addExample(example.specs)"
+        >
+          {{ example.label }}
+        </button>
+      }
+    </div>
     <ul class="fx__chips" data-testid="formula-columns">
       @for (spec of state.formulas(); track spec.key) {
         <li>
@@ -29,19 +43,25 @@
           <button
             type="button"
             [attr.aria-label]="'Remove ' + (spec.header ?? spec.key)"
+            [attr.data-testid]="'formula-remove-' + spec.key"
             (click)="remove(spec.key)"
           >
             ×
           </button>
         </li>
+      } @empty {
+        <li class="fx__empty">{{ noFormulas }}</li>
       }
     </ul>
-    <div data-testid="formula-report" role="status">
-      @for (error of errors(); track error[0]) {
-        <p>{{ error[0] }}: {{ error[1] }}</p>
+    <div class="fx__report" data-testid="formula-report" role="status">
+      @if (errors().length === 0 && cycle() === undefined) {
+        <span class="hint">{{ parses }}</span>
       }
-      @if (derived().cycles.length > 0) {
-        <p>{{ derived().cycles.join(", ") }}: #CYCLE!</p>
+      @for (error of errors(); track error[0]) {
+        <span class="hint">{{ error[0] }}: {{ error[1] }}</span>
+      }
+      @if (cycle(); as sentence) {
+        <span class="hint">{{ sentence }}</span>
       }
     </div>
   </div>
@@ -55,6 +75,8 @@
       [data]="rows"
       [columns]="columns()"
       [rowKey]="rowKey"
+      [defaultColumnLayout]="pageLayout"
+      [features]="features"
       [defaults]="{ limit: 10 }"
     />
   </div>

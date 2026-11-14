@@ -90,7 +90,7 @@ for (const kit of ANGULAR_KITS) {
       const select = part(page, "sort-select");
       await expect(select).toBeVisible();
       await expectAngularSelection(kit, select, { value: "", label: "—" });
-      await selectAngularOption(select, { value: "load", label: "Load" }, 6);
+      await selectAngularOption(select, { value: "load", label: "Load" }, 5);
       await expectAngularSelection(kit, select, {
         value: "load",
         label: "Load",

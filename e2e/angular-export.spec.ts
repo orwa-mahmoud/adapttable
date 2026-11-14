@@ -32,11 +32,9 @@ for (const kit of ANGULAR_KITS) {
         .toString("utf8")
         .trim()
         .split(/\r?\n/);
-      expect(lines[0]).toBe("Person,Email,Team,Status,Timeline,Budget,Load");
+      expect(lines[0]).toBe("Person,Status,Timeline,Budget");
       expect(lines).toHaveLength(7);
-      expect(lines[1]).toBe(
-        "Grace Hopper,grace.hopper@example.com,Data,Archived,2026-07-22,39900,78%"
-      );
+      expect(lines[1]).toBe("Grace Hopper,Archived,2026-07-22,39900");
     });
 
     test("a selected export contains no unchecked rows", async ({ page }) => {

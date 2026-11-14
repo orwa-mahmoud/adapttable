@@ -29,6 +29,7 @@ import {
 import { exportCsv } from "@adapttable/taiga-ui/export";
 import { extraRows } from "@adapttable/taiga-ui/extra-rows";
 import { filters } from "@adapttable/taiga-ui/filters";
+import { findInTable } from "@adapttable/taiga-ui/find-in-table";
 import { fullscreen } from "@adapttable/taiga-ui/fullscreen";
 import { groupingPanel } from "@adapttable/taiga-ui/grouping-panel";
 import { headerFilters } from "@adapttable/taiga-ui/header-filters";
@@ -45,6 +46,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/taiga-ui/saved-views";
+import { selectionStats } from "@adapttable/taiga-ui/selection-stats";
 import { sidePanel } from "@adapttable/taiga-ui/side-panel";
 import { statusBar } from "@adapttable/taiga-ui/status-bar";
 import { tree } from "@adapttable/taiga-ui/tree";
@@ -120,6 +122,8 @@ export const kit = {
   contextMenu,
   commandPalette,
   extraRows,
+  findInTable,
+  selectionStats,
   rowAppearance,
   statusBar,
   sidePanel,
