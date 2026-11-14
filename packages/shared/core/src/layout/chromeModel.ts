@@ -179,10 +179,40 @@ function stickyScroller(from: Element): {
 }
 
 /**
+ * How far a header end cell sits inside the table's own edge. A sticky cell
+ * is pushed along while the table scrolls, so its place says nothing about
+ * the table; the table's border and cell spacing are that gap instead.
+ */
+function cellGap(
+  table: Element,
+  cell: Element,
+  side: "start" | "end",
+  rtl: boolean
+): number {
+  if (getComputedStyle(cell).position !== "sticky") {
+    const outer = table.getBoundingClientRect();
+    const inner = cell.getBoundingClientRect();
+    const fromLeft = inner.left - outer.left;
+    const fromRight = outer.right - inner.right;
+    return (side === "start") !== rtl ? fromLeft : fromRight;
+  }
+  const style = getComputedStyle(table);
+  const border =
+    Number.parseFloat(
+      side === "start"
+        ? style.borderInlineStartWidth
+        : style.borderInlineEndWidth
+    ) || 0;
+  if (style.borderCollapse === "collapse") return border / 2;
+  return border + (Number.parseFloat(style.borderSpacing) || 0);
+}
+
+/**
  * How far the header's first and last cells sit inside the box they stick
  * to: the table's border and anything around the table (a card's border or
  * padding). A pinned cell sticks that far in, so it does not move when the
- * box starts scrolling.
+ * box starts scrolling. The table itself never sticks, so its place in the
+ * scrolled content holds while the box scrolls.
  */
 function readTableEdges(head: ParentNode): {
   edgeStart?: number;
@@ -194,18 +224,19 @@ function readTableEdges(head: ParentNode): {
   const last = row?.lastElementChild;
   if (!table?.getBoundingClientRect().width || !first || !last) return {};
   const box = stickyScroller(table);
-  const start = first.getBoundingClientRect();
-  const end = last.getBoundingClientRect();
+  const outer = table.getBoundingClientRect();
   // Positions inside the scrolled content, from its start edge.
   const innerRight = box.innerLeft + box.clientWidth;
   const rtl = getComputedStyle(table).direction === "rtl";
-  const edgeStart = rtl
-    ? innerRight - start.right - box.scrollLeft
-    : start.left - box.innerLeft + box.scrollLeft;
-  const lastEnd = rtl
-    ? innerRight - end.left - box.scrollLeft
-    : end.right - box.innerLeft + box.scrollLeft;
-  const edgeEnd = box.scrollWidth - lastEnd;
+  const tableStart = rtl
+    ? innerRight - outer.right - box.scrollLeft
+    : outer.left - box.innerLeft + box.scrollLeft;
+  const tableEnd = rtl
+    ? innerRight - outer.left - box.scrollLeft
+    : outer.right - box.innerLeft + box.scrollLeft;
+  const edgeStart = tableStart + cellGap(table, first, "start", rtl);
+  const edgeEnd =
+    box.scrollWidth - (tableEnd - cellGap(table, last, "end", rtl));
   const edges: { edgeStart?: number; edgeEnd?: number } = {};
   if (edgeStart > 0) edges.edgeStart = edgeStart;
   if (edgeEnd > 0) edges.edgeEnd = edgeEnd;

@@ -230,6 +230,64 @@ describe("desktop layout", () => {
     scroller.remove();
   });
 
+  it("reads the table's edges past a sticky rail held in place while scrolled", () => {
+    const scroller = document.createElement("div");
+    scroller.style.overflowX = "auto";
+    const table = document.createElement("table");
+    table.style.borderCollapse = "separate";
+    table.style.borderSpacing = "0px";
+    table.style.setProperty("border-inline-start-width", "1px");
+    table.style.setProperty("border-inline-end-width", "1px");
+    table.innerHTML = `<thead><tr>
+      <th data-adapttable-part="selection-header" style="position: sticky"></th>
+      <th data-adapttable-part="header-cell"></th>
+      <th data-adapttable-part="actions-header" style="position: sticky"></th>
+    </tr></thead>`;
+    scroller.append(table);
+    document.body.append(scroller);
+    const [selection, cell, actions] = [...table.querySelectorAll("th")];
+    const box = (left: number, right: number) => () =>
+      ({ left, right, width: right - left }) as DOMRect;
+    const metrics = (values: Record<string, number>) => {
+      for (const [key, value] of Object.entries(values))
+        Object.defineProperty(scroller, key, { value, configurable: true });
+    };
+    // A 300 px box holding a 1000 px table with a 1 px border, scrolled
+    // 400 px along: the table moved, while both sticky rails stay at the
+    // box's edges, so the table's border is what sits inside the box.
+    scroller.getBoundingClientRect = box(10, 310);
+    metrics({
+      clientLeft: 0,
+      clientWidth: 300,
+      scrollLeft: 400,
+      scrollWidth: 1000,
+    });
+    table.getBoundingClientRect = box(-390, 610);
+    selection!.getBoundingClientRect = box(10, 60);
+    cell!.getBoundingClientRect = box(-340, 560);
+    actions!.getBoundingClientRect = box(250, 310);
+    const head = table.querySelector("thead")!;
+    expect(readRailWidths(head)).toEqual({
+      selection: 50,
+      actions: 60,
+      edgeStart: 1,
+      edgeEnd: 1,
+    });
+    // Right to left: scrolled 400 px towards the end, which is negative.
+    table.style.direction = "rtl";
+    metrics({ scrollLeft: -400 });
+    table.getBoundingClientRect = box(-290, 710);
+    selection!.getBoundingClientRect = box(260, 310);
+    actions!.getBoundingClientRect = box(10, 70);
+    expect(readRailWidths(head)).toEqual({
+      selection: 50,
+      actions: 60,
+      edgeStart: 1,
+      edgeEnd: 1,
+    });
+    scroller.remove();
+  });
+
   it("measures against the page when nothing around the table scrolls", () => {
     const table = document.createElement("table");
     table.innerHTML = `<thead><tr><th></th></tr></thead>`;
