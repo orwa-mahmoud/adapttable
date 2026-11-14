@@ -76,7 +76,8 @@ export function IconButton({
   variant: _variant,
   fullWidth: _fullWidth,
   justify: _justify,
-  busy: _busy,
+  busy,
+  disabled,
   tone,
   ...rest
 }: Readonly<KitIconButtonProps>) {
@@ -88,6 +89,8 @@ export function IconButton({
       type="button"
       size="small"
       color={iconColor(tone)}
+      disabled={disabled === true || busy === true}
+      aria-busy={busy === true ? true : undefined}
       {...rest}
     />
   );
