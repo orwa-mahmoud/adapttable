@@ -6,6 +6,7 @@
  */
 import { shallowRef } from "vue";
 
+import { pageLayoutFor } from "../../../casts";
 import {
   GROUPED_XLSX_EXPORT,
   PEOPLE_GROUP_BY,
@@ -17,18 +18,22 @@ import {
   rowKey,
   TABLE_PRESENTATION,
 } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_LAYOUT = pageLayoutFor("grouping");
 const columns = peopleColumns({ status: kit.status });
 // The toggle forces the phone's selects on a desktop; off, it leaves the
 // breakpoint alone rather than forcing a desktop table onto a phone.
 const mobile = shallowRef(false);
-const features = [
+const pageFeatures = [
   kit.groupingPanel([...PEOPLE_GROUP_BY], PEOPLE_GROUPING),
   kit.columnMenu(),
   kit.exportCsv(GROUPED_XLSX_EXPORT),
 ];
+const chrome = pageChromeFeatures(kit, { urlKey: "grp" });
+const features = [...pageFeatures, ...chrome];
 </script>
 
 <template>
@@ -67,6 +72,7 @@ const features = [
           :data="PEOPLE"
           :columns="columns"
           :row-key="rowKey"
+          :default-column-layout="PAGE_LAYOUT"
           :force-mobile="mobile || undefined"
           :features="features"
         />

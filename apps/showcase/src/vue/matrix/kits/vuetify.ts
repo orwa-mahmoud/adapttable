@@ -8,6 +8,8 @@ import { cellSpan } from "@adapttable/vuetify/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/vuetify/column-groups";
 import { columnMenu } from "@adapttable/vuetify/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/vuetify/column-selection";
+import { commandPalette } from "@adapttable/vuetify/command-palette";
+import { contextMenu } from "@adapttable/vuetify/context-menu";
 import { densityChooser } from "@adapttable/vuetify/density";
 import {
   editHistory,
@@ -18,6 +20,7 @@ import {
 import { exportCsv } from "@adapttable/vuetify/export";
 import { extraRows } from "@adapttable/vuetify/extra-rows";
 import { filters } from "@adapttable/vuetify/filters";
+import { findInTable } from "@adapttable/vuetify/find-in-table";
 import { fullscreen } from "@adapttable/vuetify/fullscreen";
 import { groupingPanel } from "@adapttable/vuetify/grouping-panel";
 import { headerFilters } from "@adapttable/vuetify/header-filters";
@@ -30,6 +33,7 @@ import { rowActions } from "@adapttable/vuetify/row-actions";
 import { rowPinning } from "@adapttable/vuetify/row-pinning";
 import { rowReorder } from "@adapttable/vuetify/row-reorder";
 import { savedViews } from "@adapttable/vuetify/saved-views";
+import { selectionStats } from "@adapttable/vuetify/selection-stats";
 import { statusBar } from "@adapttable/vuetify/status-bar";
 import { tree } from "@adapttable/vuetify/tree";
 import { virtualize } from "@adapttable/vuetify/virtualize";
@@ -165,6 +169,10 @@ export const kit: ShowcaseKit = {
   groupingPanel,
   print,
   extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

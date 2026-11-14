@@ -2,6 +2,7 @@
 /** Editing: kit-native editors in the cell; the host writes every change. */
 import { computed, shallowRef } from "vue";
 
+import { EDITING_DEFAULT_LAYOUT } from "../../../shared/peopleTable";
 import {
   applyPersonEdit,
   peopleColumns,
@@ -11,6 +12,7 @@ import {
   rowKey,
   TABLE_PRESENTATION,
 } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
@@ -55,11 +57,14 @@ const persistentFeatures = [
   kit.editHistory(),
   kit.undoRedoButtons(),
   kit.cellNavigation(),
+  kit.columnSelectionCheckbox(),
 ];
-const features = computed(() => [
+const pageFeatures = computed(() => [
   ...(editingEnabled.value ? [editingFeature] : []),
   ...persistentFeatures,
 ]);
+const chrome = pageChromeFeatures(kit, { editing: true, urlKey: "edit" });
+const features = computed(() => [...pageFeatures.value, ...chrome]);
 </script>
 
 <template>
@@ -103,6 +108,7 @@ const features = computed(() => [
         :columns="columns"
         :row-key="rowKey"
         :defaults="{ limit: 10 }"
+        :default-column-layout="EDITING_DEFAULT_LAYOUT"
         :features="features"
       />
     </div>

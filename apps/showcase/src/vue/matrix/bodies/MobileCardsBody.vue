@@ -2,6 +2,7 @@
 /** Mobile cards: the same table, every row a card, in a phone-width frame. */
 import { computed, h, ref, shallowRef, type VNodeChild } from "vue";
 
+import { pageLayoutFor } from "../../../casts";
 import {
   applyPersonEdit,
   demoOrders,
@@ -13,9 +14,11 @@ import {
   rowKey,
   TABLE_PRESENTATION,
 } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_LAYOUT = pageLayoutFor("mobile");
 const mobile = ref<boolean | undefined>(true);
 const rows = shallowRef<readonly Person[]>(peopleRows());
 const customCard = ref(false);
@@ -32,7 +35,7 @@ const demoError = computed(() =>
 );
 const FieldValue = (props: { value: VNodeChild }) => props.value;
 const log = ref("Choose a person to see the host callback.");
-const features = [
+const pageFeatures = [
   kit.rowEditing<Person>((row, patch) => {
     for (const [key, value] of Object.entries(patch))
       rows.value = applyPersonEdit(rows.value, row, key, value);
@@ -66,6 +69,8 @@ const features = [
     },
   ]),
 ];
+const chrome = pageChromeFeatures(kit, { editing: true, urlKey: "mob" });
+const features = [...pageFeatures, ...chrome];
 const columns = peopleColumns({
   editable: true,
   status: kit.status,
@@ -155,6 +160,7 @@ const columns = peopleColumns({
         :error="demoError"
         :columns="columns"
         :row-key="rowKey"
+        :default-column-layout="PAGE_LAYOUT"
         :defaults="{ limit: 8 }"
       >
         <template v-if="customCard" #card="{ fields }">

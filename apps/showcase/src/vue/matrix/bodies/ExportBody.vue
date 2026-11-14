@@ -6,6 +6,7 @@
  */
 import { computed, onMounted, shallowRef } from "vue";
 
+import { pageLayoutFor } from "../../../casts";
 import {
   EXPORT_GROUP_BY,
   EXPORT_MODES,
@@ -27,9 +28,11 @@ import {
   rowKey,
   TABLE_PRESENTATION,
 } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_LAYOUT = pageLayoutFor("export");
 const columns = peopleColumns({ status: kit.status });
 const locale = currentDataLocale();
 const scope = requestedExportScope() ?? "page";
@@ -47,7 +50,7 @@ onMounted(() => {
     });
 });
 
-const features = computed(() => [
+const pageFeatures = computed(() => [
   ...(exportGroups(mode.value)
     ? [kit.groupingPanel([...EXPORT_GROUP_BY], PEOPLE_GROUPING)]
     : []),
@@ -57,6 +60,8 @@ const features = computed(() => [
     printGroupedPeople(locale, font.value);
   }, true),
 ]);
+const chrome = pageChromeFeatures(kit, { urlKey: "pdf" });
+const features = computed(() => [...pageFeatures.value, ...chrome]);
 </script>
 
 <template>
@@ -85,6 +90,7 @@ const features = computed(() => [
         :data="PEOPLE"
         :columns="columns"
         :row-key="rowKey"
+        :default-column-layout="PAGE_LAYOUT"
         :features="features"
       />
     </div>

@@ -11,6 +11,8 @@ import { cellSpan } from "@adapttable/vue-unstyled/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/vue-unstyled/column-groups";
 import { columnMenu } from "@adapttable/vue-unstyled/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/vue-unstyled/column-selection";
+import { commandPalette } from "@adapttable/vue-unstyled/command-palette";
+import { contextMenu } from "@adapttable/vue-unstyled/context-menu";
 import { densityChooser } from "@adapttable/vue-unstyled/density";
 import {
   editHistory,
@@ -21,6 +23,7 @@ import {
 import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { extraRows } from "@adapttable/vue-unstyled/extra-rows";
 import { filters } from "@adapttable/vue-unstyled/filters";
+import { findInTable } from "@adapttable/vue-unstyled/find-in-table";
 import { fullscreen } from "@adapttable/vue-unstyled/fullscreen";
 import { groupingPanel } from "@adapttable/vue-unstyled/grouping-panel";
 import { headerFilters } from "@adapttable/vue-unstyled/header-filters";
@@ -33,6 +36,7 @@ import { rowActions } from "@adapttable/vue-unstyled/row-actions";
 import { rowPinning } from "@adapttable/vue-unstyled/row-pinning";
 import { rowReorder } from "@adapttable/vue-unstyled/row-reorder";
 import { savedViews } from "@adapttable/vue-unstyled/saved-views";
+import { selectionStats } from "@adapttable/vue-unstyled/selection-stats";
 import { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import { tree } from "@adapttable/vue-unstyled/tree";
 import { virtualize } from "@adapttable/vue-unstyled/virtualize";
@@ -112,6 +116,10 @@ export const kit: ShowcaseKit = {
   groupingPanel,
   print,
   extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

@@ -8,6 +8,8 @@ import { cellSpan } from "@adapttable/reka-ui/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/reka-ui/column-groups";
 import { columnMenu } from "@adapttable/reka-ui/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/reka-ui/column-selection";
+import { commandPalette } from "@adapttable/reka-ui/command-palette";
+import { contextMenu } from "@adapttable/reka-ui/context-menu";
 import { densityChooser } from "@adapttable/reka-ui/density";
 import {
   editHistory,
@@ -18,6 +20,7 @@ import {
 import { exportCsv } from "@adapttable/reka-ui/export";
 import { extraRows } from "@adapttable/reka-ui/extra-rows";
 import { filters } from "@adapttable/reka-ui/filters";
+import { findInTable } from "@adapttable/reka-ui/find-in-table";
 import { fullscreen } from "@adapttable/reka-ui/fullscreen";
 import { groupingPanel } from "@adapttable/reka-ui/grouping-panel";
 import { headerFilters } from "@adapttable/reka-ui/header-filters";
@@ -30,6 +33,7 @@ import { rowActions } from "@adapttable/reka-ui/row-actions";
 import { rowPinning } from "@adapttable/reka-ui/row-pinning";
 import { rowReorder } from "@adapttable/reka-ui/row-reorder";
 import { savedViews } from "@adapttable/reka-ui/saved-views";
+import { selectionStats } from "@adapttable/reka-ui/selection-stats";
 import { statusBar } from "@adapttable/reka-ui/status-bar";
 import { tree } from "@adapttable/reka-ui/tree";
 import { virtualize } from "@adapttable/reka-ui/virtualize";
@@ -157,6 +161,10 @@ export const kit: ShowcaseKit = {
   groupingPanel,
   print,
   extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

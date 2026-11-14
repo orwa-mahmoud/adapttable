@@ -6,11 +6,14 @@ import {
   rowKey,
   TABLE_PRESENTATION,
 } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
 const columns = groupedPeopleColumns(kit.status);
-const features = [kit.collapsibleColumnGroups()];
+const pageFeatures = [kit.collapsibleColumnGroups()];
+const chrome = pageChromeFeatures(kit, { urlKey: "cgrp" });
+const features = [...pageFeatures, ...chrome];
 </script>
 
 <template>

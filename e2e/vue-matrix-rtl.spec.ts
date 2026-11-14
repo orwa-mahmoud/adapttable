@@ -93,10 +93,11 @@ for (const kit of builtAdapters("vue")) {
             .filter({ hasText: copy.team }),
         });
       const grip = team.locator('[data-adapttable-part="column-menu-grip"]');
+      // Team moves up past Role; Person stays first, pinned to the start.
       await grip.press("ArrowUp");
       await expect(grip).toBeFocused();
       await expect(
-        panel.locator('[data-adapttable-part="column-menu-item"]').first()
+        panel.locator('[data-adapttable-part="column-menu-item"]').nth(1)
       ).toContainText(copy.team);
       await page.screenshot({
         path: info.outputPath(`${kit.key}-${width}-rtl-columns.png`),

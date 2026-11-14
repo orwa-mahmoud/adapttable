@@ -6,6 +6,8 @@ import { cellSpan } from "@adapttable/naive-ui/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/naive-ui/column-groups";
 import { columnMenu } from "@adapttable/naive-ui/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/naive-ui/column-selection";
+import { commandPalette } from "@adapttable/naive-ui/command-palette";
+import { contextMenu } from "@adapttable/naive-ui/context-menu";
 import { densityChooser } from "@adapttable/naive-ui/density";
 import {
   editHistory,
@@ -16,6 +18,7 @@ import {
 import { exportCsv } from "@adapttable/naive-ui/export";
 import { extraRows } from "@adapttable/naive-ui/extra-rows";
 import { filters } from "@adapttable/naive-ui/filters";
+import { findInTable } from "@adapttable/naive-ui/find-in-table";
 import { fullscreen } from "@adapttable/naive-ui/fullscreen";
 import { groupingPanel } from "@adapttable/naive-ui/grouping-panel";
 import { headerFilters } from "@adapttable/naive-ui/header-filters";
@@ -28,6 +31,7 @@ import { rowActions } from "@adapttable/naive-ui/row-actions";
 import { rowPinning } from "@adapttable/naive-ui/row-pinning";
 import { rowReorder } from "@adapttable/naive-ui/row-reorder";
 import { savedViews } from "@adapttable/naive-ui/saved-views";
+import { selectionStats } from "@adapttable/naive-ui/selection-stats";
 import { statusBar } from "@adapttable/naive-ui/status-bar";
 import { tree } from "@adapttable/naive-ui/tree";
 import { virtualize } from "@adapttable/naive-ui/virtualize";
@@ -189,6 +193,10 @@ export const kit: ShowcaseKit = {
   groupingPanel,
   print,
   extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

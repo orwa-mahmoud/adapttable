@@ -12,6 +12,8 @@ import { cellSpan } from "@adapttable/element-plus/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/element-plus/column-groups";
 import { columnMenu } from "@adapttable/element-plus/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/element-plus/column-selection";
+import { commandPalette } from "@adapttable/element-plus/command-palette";
+import { contextMenu } from "@adapttable/element-plus/context-menu";
 import { densityChooser } from "@adapttable/element-plus/density";
 import {
   editHistory,
@@ -22,6 +24,7 @@ import {
 import { exportCsv } from "@adapttable/element-plus/export";
 import { extraRows } from "@adapttable/element-plus/extra-rows";
 import { filters } from "@adapttable/element-plus/filters";
+import { findInTable } from "@adapttable/element-plus/find-in-table";
 import { fullscreen } from "@adapttable/element-plus/fullscreen";
 import { groupingPanel } from "@adapttable/element-plus/grouping-panel";
 import { headerFilters } from "@adapttable/element-plus/header-filters";
@@ -34,6 +37,7 @@ import { rowActions } from "@adapttable/element-plus/row-actions";
 import { rowPinning } from "@adapttable/element-plus/row-pinning";
 import { rowReorder } from "@adapttable/element-plus/row-reorder";
 import { savedViews } from "@adapttable/element-plus/saved-views";
+import { selectionStats } from "@adapttable/element-plus/selection-stats";
 import { statusBar } from "@adapttable/element-plus/status-bar";
 import { tree } from "@adapttable/element-plus/tree";
 import { virtualize } from "@adapttable/element-plus/virtualize";
@@ -167,6 +171,10 @@ export const kit: ShowcaseKit = {
   groupingPanel,
   print,
   extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

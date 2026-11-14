@@ -3,6 +3,7 @@
 import { applyRowReorder } from "@adapttable/core";
 import { shallowRef } from "vue";
 
+import { pageLayoutFor } from "../../../casts";
 import {
   peopleColumns,
   peopleRows,
@@ -10,18 +11,22 @@ import {
   rowKey,
   TABLE_PRESENTATION,
 } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_LAYOUT = pageLayoutFor("row-reordering");
 const columns = peopleColumns({ status: kit.status });
 const rows = shallowRef<readonly Person[]>(peopleRows());
 const log = shallowRef("Drag a grip, or lift a row with Space.");
-const features = [
+const pageFeatures = [
   kit.rowReorder<Person>((from, to, row) => {
     rows.value = applyRowReorder(rows.value, from, to);
     log.value = `Moved ${row.name} from ${String(from + 1)} to ${String(to + 1)}`;
   }),
 ];
+const chrome = pageChromeFeatures(kit, { urlKey: "reorder" });
+const features = [...pageFeatures, ...chrome];
 </script>
 
 <template>
@@ -40,6 +45,7 @@ const features = [
         :data="rows"
         :columns="columns"
         :row-key="rowKey"
+        :default-column-layout="PAGE_LAYOUT"
         :defaults="{ limit: 10 }"
         :features="features"
       />

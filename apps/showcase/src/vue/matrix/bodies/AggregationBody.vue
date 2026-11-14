@@ -4,7 +4,7 @@
  * footers with budget subtotals, the footer grand total, and a full-width
  * note attached to a row. Filter the set and every total follows.
  */
-import { rosterFor } from "../../../casts";
+import { pageLayoutFor, rosterFor } from "../../../casts";
 import {
   attachedNote,
   budgetTotalOf,
@@ -19,18 +19,22 @@ import {
   rowKey,
   TABLE_PRESENTATION,
 } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_LAYOUT = pageLayoutFor("aggregation");
 const columns = peopleColumns({ status: kit.status });
 const rows = rosterFor("aggregation");
 const anchor = rows[0];
-const features = [
+const pageFeatures = [
   kit.groupingPanel<Person>([...PEOPLE_GROUP_BY], PEOPLE_GROUPING),
   kit.pinnedSummaryRows<Person>(pinnedTotals(budgetTotalOf(rows))),
   ...(anchor ? [kit.extraRows([attachedNote(anchor.id, anchor.name)])] : []),
   kit.filters(FILTER_DEFS),
 ];
+const chrome = pageChromeFeatures(kit, { urlKey: "agg" });
+const features = [...pageFeatures, ...chrome];
 </script>
 
 <template>
@@ -54,6 +58,7 @@ const features = [
         :data="rows"
         :columns="columns"
         :row-key="rowKey"
+        :default-column-layout="PAGE_LAYOUT"
         :summary-row="PEOPLE_GROUPING.groupAggregates"
         :features="features"
       />

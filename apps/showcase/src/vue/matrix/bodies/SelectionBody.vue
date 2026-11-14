@@ -2,13 +2,16 @@
 /** Selection: row and page checkboxes, and bulk actions over the set. */
 import { shallowRef } from "vue";
 
+import { pageLayoutFor } from "../../../casts";
 import { PEOPLE, peopleColumns, rowKey, TABLE_PRESENTATION } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_LAYOUT = pageLayoutFor("selection");
 const columns = peopleColumns({ status: kit.status });
 const log = shallowRef("Select rows, then run a bulk action.");
-const features = [
+const pageFeatures = [
   kit.bulkActions([
     {
       key: "export",
@@ -26,6 +29,8 @@ const features = [
     },
   ]),
 ];
+const chrome = pageChromeFeatures(kit, { urlKey: "sel" });
+const features = [...pageFeatures, ...chrome];
 </script>
 
 <template>
@@ -39,6 +44,7 @@ const features = [
         :data="PEOPLE"
         :columns="columns"
         :row-key="rowKey"
+        :default-column-layout="PAGE_LAYOUT"
         selectable
         :defaults="{ limit: 10 }"
         :features="features"

@@ -6,6 +6,8 @@ import type { cellSpan } from "@adapttable/vue-unstyled/cell-span";
 import type { collapsibleColumnGroups } from "@adapttable/vue-unstyled/column-groups";
 import type { columnMenu } from "@adapttable/vue-unstyled/column-menu";
 import type { columnSelectionCheckbox } from "@adapttable/vue-unstyled/column-selection";
+import type { commandPalette } from "@adapttable/vue-unstyled/command-palette";
+import type { contextMenu } from "@adapttable/vue-unstyled/context-menu";
 import type { densityChooser } from "@adapttable/vue-unstyled/density";
 import type {
   editHistory,
@@ -16,6 +18,7 @@ import type {
 import type { exportCsv } from "@adapttable/vue-unstyled/export";
 import type { extraRows } from "@adapttable/vue-unstyled/extra-rows";
 import type { filters } from "@adapttable/vue-unstyled/filters";
+import type { findInTable } from "@adapttable/vue-unstyled/find-in-table";
 import type { fullscreen } from "@adapttable/vue-unstyled/fullscreen";
 import type { groupingPanel } from "@adapttable/vue-unstyled/grouping-panel";
 import type { headerFilters } from "@adapttable/vue-unstyled/header-filters";
@@ -27,6 +30,7 @@ import type { rowActions } from "@adapttable/vue-unstyled/row-actions";
 import type { rowPinning } from "@adapttable/vue-unstyled/row-pinning";
 import type { rowReorder } from "@adapttable/vue-unstyled/row-reorder";
 import type { savedViews } from "@adapttable/vue-unstyled/saved-views";
+import type { selectionStats } from "@adapttable/vue-unstyled/selection-stats";
 import type { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import type { tree } from "@adapttable/vue-unstyled/tree";
 import type { virtualize } from "@adapttable/vue-unstyled/virtualize";
@@ -115,6 +119,10 @@ export interface ShowcaseKit {
   readonly groupingPanel: typeof groupingPanel;
   readonly print: typeof print;
   readonly extraRows: typeof extraRows;
+  readonly findInTable: typeof findInTable;
+  readonly selectionStats: typeof selectionStats;
+  readonly commandPalette: typeof commandPalette;
+  readonly contextMenu: typeof contextMenu;
   readonly headerFilters: typeof headerFilters;
   readonly nestedTable: typeof nestedTable;
   readonly pinnedSummaryRows: typeof pinnedSummaryRows;

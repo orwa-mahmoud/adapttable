@@ -1,5 +1,6 @@
 <script setup lang="ts">
 /** Saved views: name the table's state and pick it again from the menu. */
+import { pageLayoutFor } from "../../../casts";
 import {
   FILTER_DEFS,
   PEOPLE,
@@ -10,6 +11,7 @@ import {
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_LAYOUT = pageLayoutFor("saved-views");
 const columns = peopleColumns({ status: kit.status });
 const features = [
   kit.filters(FILTER_DEFS),
@@ -35,6 +37,7 @@ const features = [
         :data="PEOPLE"
         :columns="columns"
         :row-key="rowKey"
+        :default-column-layout="PAGE_LAYOUT"
         :features="features"
       />
     </div>

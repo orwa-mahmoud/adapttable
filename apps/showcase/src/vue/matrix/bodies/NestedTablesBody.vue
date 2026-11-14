@@ -3,6 +3,7 @@
 import type { ColumnDef } from "@adapttable/vue";
 import { h } from "vue";
 
+import { pageLayoutFor } from "../../../casts";
 import {
   type DemoOrder,
   demoOrders,
@@ -12,6 +13,7 @@ import {
   rowKey,
   TABLE_PRESENTATION,
 } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 /** The nested orders table's columns — a different shape from the parent's. */
@@ -28,9 +30,10 @@ const ORDER_COLUMNS: ColumnDef<DemoOrder>[] = [
 const orderKey = (order: DemoOrder) => order.id;
 
 const kit = useShowcaseKit();
+const PAGE_LAYOUT = pageLayoutFor("nested-tables");
 const columns = peopleColumns({ status: kit.status });
 const firstId = PEOPLE[0]?.id;
-const features = [
+const pageFeatures = [
   kit.nestedTable<Person>(
     (row) => ({
       label: `Orders for ${row.name}`,
@@ -47,6 +50,8 @@ const features = [
     firstId ? [firstId] : []
   ),
 ];
+const chrome = pageChromeFeatures(kit, { urlKey: "nest" });
+const features = [...pageFeatures, ...chrome];
 </script>
 
 <template>
@@ -64,6 +69,7 @@ const features = [
         :data="PEOPLE"
         :columns="columns"
         :row-key="rowKey"
+        :default-column-layout="PAGE_LAYOUT"
         :defaults="{ limit: 10 }"
         :features="features"
       />

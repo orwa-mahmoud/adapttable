@@ -8,6 +8,8 @@ import { cellSpan } from "@adapttable/quasar/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/quasar/column-groups";
 import { columnMenu } from "@adapttable/quasar/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/quasar/column-selection";
+import { commandPalette } from "@adapttable/quasar/command-palette";
+import { contextMenu } from "@adapttable/quasar/context-menu";
 import { densityChooser } from "@adapttable/quasar/density";
 import {
   editHistory,
@@ -18,6 +20,7 @@ import {
 import { exportCsv } from "@adapttable/quasar/export";
 import { extraRows } from "@adapttable/quasar/extra-rows";
 import { filters } from "@adapttable/quasar/filters";
+import { findInTable } from "@adapttable/quasar/find-in-table";
 import { fullscreen } from "@adapttable/quasar/fullscreen";
 import { groupingPanel } from "@adapttable/quasar/grouping-panel";
 import { headerFilters } from "@adapttable/quasar/header-filters";
@@ -30,6 +33,7 @@ import { rowActions } from "@adapttable/quasar/row-actions";
 import { rowPinning } from "@adapttable/quasar/row-pinning";
 import { rowReorder } from "@adapttable/quasar/row-reorder";
 import { savedViews } from "@adapttable/quasar/saved-views";
+import { selectionStats } from "@adapttable/quasar/selection-stats";
 import { statusBar } from "@adapttable/quasar/status-bar";
 import { tree } from "@adapttable/quasar/tree";
 import { virtualize } from "@adapttable/quasar/virtualize";
@@ -161,6 +165,10 @@ export const kit: ShowcaseKit = {
   groupingPanel,
   print,
   extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

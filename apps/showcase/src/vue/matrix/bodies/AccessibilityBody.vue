@@ -2,12 +2,17 @@
 /** Keyboard focus and a real live-region transcript, from AccessibilityDemo.tsx. */
 import { onMounted, onScopeDispose, shallowRef, useTemplateRef } from "vue";
 
+import { pageLayoutFor } from "../../../casts";
 import { PEOPLE, peopleColumns, rowKey, TABLE_PRESENTATION } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_LAYOUT = pageLayoutFor("accessibility");
 const columns = peopleColumns({ status: kit.status });
-const features = [kit.cellNavigation(), kit.columnSelectionCheckbox()];
+const pageFeatures = [kit.cellNavigation(), kit.columnSelectionCheckbox()];
+const chrome = pageChromeFeatures(kit, { urlKey: "a11y" });
+const features = [...pageFeatures, ...chrome];
 const tableRoot = useTemplateRef<HTMLElement>("tableRoot");
 const announcements = shallowRef<readonly string[]>([]);
 let observer: MutationObserver | undefined;
@@ -53,6 +58,7 @@ onScopeDispose(() => observer?.disconnect());
         :data="PEOPLE"
         :columns="columns"
         :row-key="rowKey"
+        :default-column-layout="PAGE_LAYOUT"
         :features="features"
         :defaults="{ limit: 10 }"
       />

@@ -4,6 +4,7 @@ import { type ColumnDef, useColumnLayoutUrlState } from "@adapttable/vue";
 import { xlsxWriter } from "@adapttable/vue/xlsx";
 import { shallowRef } from "vue";
 
+import { inWideOrder } from "../../../shared/peopleTable";
 import {
   PEOPLE,
   peopleColumns,
@@ -11,20 +12,22 @@ import {
   rowKey,
   TABLE_PRESENTATION,
 } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
 // This deliberately wide demo needs width floors: automatic table layout
 // may shrink preferred widths until there is no overflow to demonstrate.
-const columns = shallowRef<readonly ColumnDef<Person>[]>([
-  ...peopleColumns({ status: kit.status }).map((column) => ({
-    ...column,
-    renameable: true,
-    minWidth: typeof column.width === "number" ? column.width : undefined,
-  })),
-  { key: "email", header: "Email", width: 280, minWidth: 280 },
-  { key: "role", header: "Role", width: 220, minWidth: 220 },
-]);
+const columns = shallowRef<readonly ColumnDef<Person>[]>(
+  inWideOrder([
+    ...peopleColumns({ status: kit.status }).map((column) => ({
+      ...column,
+      renameable: true,
+      minWidth: typeof column.width === "number" ? column.width : undefined,
+    })),
+    { key: "role", header: "Role", width: 220, minWidth: 220 },
+  ])
+);
 function renameColumn(key: string, name: string): void {
   columns.value = columns.value.map((column) =>
     column.key === key ? { ...column, header: name } : column
@@ -34,7 +37,7 @@ const { layout, onLayoutChange } = useColumnLayoutUrlState({
   urlKey: "cols",
   defaultColumnLayout: { pinned: { person: "start" } },
 });
-const features = [
+const pageFeatures = [
   kit.columnMenu(),
   kit.resizableColumns(),
   kit.densityChooser(),
@@ -45,6 +48,8 @@ const features = [
     filename: "people.xlsx",
   }),
 ];
+const chrome = pageChromeFeatures(kit, { urlKey: "cols" });
+const features = [...pageFeatures, ...chrome];
 </script>
 
 <template>

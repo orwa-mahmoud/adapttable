@@ -8,11 +8,14 @@ import {
   SHOWCASE_PRESENTATION,
   TABLE_PRESENTATION,
 } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
 const columns = peopleColumns({ status: kit.status });
-const features = [kit.filters(FILTER_DEFS), kit.columnMenu()];
+const pageFeatures = [kit.filters(FILTER_DEFS), kit.columnMenu()];
+const chrome = pageChromeFeatures(kit, { urlKey: "rtl" });
+const features = [...pageFeatures, ...chrome];
 </script>
 
 <template>

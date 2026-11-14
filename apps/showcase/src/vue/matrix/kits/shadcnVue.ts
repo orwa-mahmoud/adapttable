@@ -12,6 +12,8 @@ import { cellSpan } from "@adapttable/shadcn-vue/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/shadcn-vue/column-groups";
 import { columnMenu } from "@adapttable/shadcn-vue/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/shadcn-vue/column-selection";
+import { commandPalette } from "@adapttable/shadcn-vue/command-palette";
+import { contextMenu } from "@adapttable/shadcn-vue/context-menu";
 import { densityChooser } from "@adapttable/shadcn-vue/density";
 import {
   editHistory,
@@ -22,6 +24,7 @@ import {
 import { exportCsv } from "@adapttable/shadcn-vue/export";
 import { extraRows } from "@adapttable/shadcn-vue/extra-rows";
 import { filters } from "@adapttable/shadcn-vue/filters";
+import { findInTable } from "@adapttable/shadcn-vue/find-in-table";
 import { fullscreen } from "@adapttable/shadcn-vue/fullscreen";
 import { groupingPanel } from "@adapttable/shadcn-vue/grouping-panel";
 import { headerFilters } from "@adapttable/shadcn-vue/header-filters";
@@ -34,6 +37,7 @@ import { rowActions } from "@adapttable/shadcn-vue/row-actions";
 import { rowPinning } from "@adapttable/shadcn-vue/row-pinning";
 import { rowReorder } from "@adapttable/shadcn-vue/row-reorder";
 import { savedViews } from "@adapttable/shadcn-vue/saved-views";
+import { selectionStats } from "@adapttable/shadcn-vue/selection-stats";
 import { statusBar } from "@adapttable/shadcn-vue/status-bar";
 import { tree } from "@adapttable/shadcn-vue/tree";
 import { virtualize } from "@adapttable/shadcn-vue/virtualize";
@@ -166,6 +170,10 @@ export const kit: ShowcaseKit = {
   groupingPanel,
   print,
   extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

@@ -8,6 +8,8 @@ import { cellSpan } from "@adapttable/nuxt-ui/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/nuxt-ui/column-groups";
 import { columnMenu } from "@adapttable/nuxt-ui/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/nuxt-ui/column-selection";
+import { commandPalette } from "@adapttable/nuxt-ui/command-palette";
+import { contextMenu } from "@adapttable/nuxt-ui/context-menu";
 import { densityChooser } from "@adapttable/nuxt-ui/density";
 import {
   editHistory,
@@ -18,6 +20,7 @@ import {
 import { exportCsv } from "@adapttable/nuxt-ui/export";
 import { extraRows } from "@adapttable/nuxt-ui/extra-rows";
 import { filters } from "@adapttable/nuxt-ui/filters";
+import { findInTable } from "@adapttable/nuxt-ui/find-in-table";
 import { fullscreen } from "@adapttable/nuxt-ui/fullscreen";
 import { groupingPanel } from "@adapttable/nuxt-ui/grouping-panel";
 import { headerFilters } from "@adapttable/nuxt-ui/header-filters";
@@ -30,6 +33,7 @@ import { rowActions } from "@adapttable/nuxt-ui/row-actions";
 import { rowPinning } from "@adapttable/nuxt-ui/row-pinning";
 import { rowReorder } from "@adapttable/nuxt-ui/row-reorder";
 import { savedViews } from "@adapttable/nuxt-ui/saved-views";
+import { selectionStats } from "@adapttable/nuxt-ui/selection-stats";
 import { statusBar } from "@adapttable/nuxt-ui/status-bar";
 import { tree } from "@adapttable/nuxt-ui/tree";
 import { virtualize } from "@adapttable/nuxt-ui/virtualize";
@@ -142,6 +146,10 @@ export const kit: ShowcaseKit = {
   groupingPanel,
   print,
   extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

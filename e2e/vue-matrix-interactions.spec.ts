@@ -241,20 +241,24 @@ for (const kit of builtAdapters("vue")) {
     await expect(trigger).toBeFocused();
   });
 
-  test(`${kit.key}/aggregation: filtering recalculates totals and preserves the pinned portfolio`, async ({
+  test(`${kit.key}/aggregation: filtering recalculates totals and preserves the pinned team total`, async ({
     page,
   }) => {
     await page.goto(`/vue/${pathOf(kit)}/aggregation/?locale=en`);
     const pinned = part(page, "pinned-summary-top");
-    await expect(pinned).toContainText("Portfolio total");
-    const portfolio = await pinned.textContent();
-    await page.locator(".mx-demo").getByRole("searchbox").fill("Ada Lovelace");
-    await expect(
-      page.locator('.mx-demo [data-adapttable-part="row"][data-row-id]')
-    ).toHaveCount(1);
-    await expect(part(page, "summary-cell").last()).toHaveText("$25,300");
-    await expect(part(page, "group-footer-row")).toContainText("25,300");
-    await expect(pinned).toHaveText(portfolio!);
+    await expect(pinned).toContainText("Team total");
+    const teamTotal = await pinned.textContent();
+    await page.locator(".mx-demo").getByRole("searchbox").fill("Sefa Demir");
+    const row = page.locator(
+      '.mx-demo [data-adapttable-part="row"][data-row-id]'
+    );
+    await expect(row).toHaveCount(1);
+    const budget = (
+      await row.locator('[data-column-key="budget"]').innerText()
+    ).trim();
+    await expect(part(page, "summary-cell").last()).toHaveText(budget);
+    await expect(part(page, "group-footer-row").first()).toContainText(budget);
+    await expect(pinned).toHaveText(teamTotal!);
     await expect(pinned.getByRole("checkbox")).toHaveCount(0);
   });
 

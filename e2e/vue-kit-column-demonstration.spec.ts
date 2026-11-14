@@ -45,18 +45,32 @@ for (const [kit, name] of kits) {
         await scroll.evaluate((el) => el.scrollWidth - el.clientWidth)
       ).toBeGreaterThan(100);
       await expect(scroll).toHaveCSS("overflow-x", "auto");
+      // Scrolled sideways, the pinned column sits flush against the sticky
+      // leading rails before it: neither slides over the other.
       await scroll.evaluate((el) => {
         el.scrollLeft = el.scrollWidth;
       });
-      const edge = await scroll.evaluate(
-        (el) => el.getBoundingClientRect().left + el.clientLeft
-      );
-      expect((await customer.boundingBox())!.x).toBeCloseTo(edge, 0);
+      expect(await scroll.evaluate((el) => el.scrollLeft)).toBeGreaterThan(100);
+      const stuck = await customer.evaluate((el) => {
+        const box = el.closest('[data-adapttable-part="scroll-box"]')!;
+        let edge = box.getBoundingClientRect().left + box.clientLeft;
+        for (
+          let before = el.previousElementSibling;
+          before;
+          before = before.previousElementSibling
+        ) {
+          if (getComputedStyle(before).position === "sticky") {
+            edge = Math.max(edge, before.getBoundingClientRect().right);
+          }
+        }
+        return edge;
+      });
+      expect((await customer.boundingBox())!.x).toBeCloseTo(stuck, 0);
       const cell = page
         .locator('[data-adapttable-part="row"]')
         .first()
         .locator('[data-column-key="customer"]');
-      expect((await cell.boundingBox())!.x).toBeCloseTo(edge, 0);
+      expect((await cell.boundingBox())!.x).toBeCloseTo(stuck, 0);
       expect(
         await cell.evaluate((el) => getComputedStyle(el).backgroundColor)
       ).not.toBe("rgba(0, 0, 0, 0)");

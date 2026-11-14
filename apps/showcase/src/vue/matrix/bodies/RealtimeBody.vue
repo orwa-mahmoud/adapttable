@@ -3,6 +3,7 @@
 import { applyRowPatches, updateRow } from "@adapttable/core";
 import { onScopeDispose, shallowRef } from "vue";
 
+import { pageLayoutFor } from "../../../casts";
 import { budget, formatMoney } from "../../../people";
 import {
   peopleColumns,
@@ -11,9 +12,12 @@ import {
   rowKey,
   TABLE_PRESENTATION,
 } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_LAYOUT = pageLayoutFor("realtime");
+const features = pageChromeFeatures(kit, { urlKey: "rt" });
 const columns = peopleColumns({ status: kit.status });
 const rows = shallowRef<readonly Person[]>(peopleRows());
 const running = shallowRef(
@@ -74,6 +78,8 @@ onScopeDispose(() => window.clearInterval(timer));
         :data="rows"
         :columns="columns"
         :row-key="rowKey"
+        :default-column-layout="PAGE_LAYOUT"
+        :features="features"
         selectable
         :defaults="{ limit: 10 }"
       />

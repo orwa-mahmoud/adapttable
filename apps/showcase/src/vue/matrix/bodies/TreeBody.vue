@@ -3,6 +3,7 @@
  * Tree: the seed's org chart — each team's lead first, everyone else on the
  * team under them — one page of thirty so no branch splits across pages.
  */
+import { pageLayoutFor } from "../../../casts";
 import {
   PEOPLE,
   peopleColumns,
@@ -11,13 +12,17 @@ import {
   rowKey,
   TABLE_PRESENTATION,
 } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_LAYOUT = pageLayoutFor("tree");
 const columns = peopleColumns({ status: kit.status });
-const features = [
+const pageFeatures = [
   kit.tree<Person>({ getParentId: reportsTo, treeColumn: "person" }),
 ];
+const chrome = pageChromeFeatures(kit, { urlKey: "tree" });
+const features = [...pageFeatures, ...chrome];
 </script>
 
 <template>
@@ -34,6 +39,7 @@ const features = [
         :data="PEOPLE"
         :columns="columns"
         :row-key="rowKey"
+        :default-column-layout="PAGE_LAYOUT"
         :defaults="{ limit: 30 }"
         :features="features"
       />
