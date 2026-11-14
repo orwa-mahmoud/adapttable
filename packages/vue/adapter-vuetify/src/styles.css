@@ -101,6 +101,11 @@
   white-space: nowrap;
 }
 
+/* Row actions stay on one line, so a row is only as tall as its density. */
+:where(.adapttable-vuetify) [data-adapttable-part="actions-cell"] {
+  white-space: nowrap;
+}
+
 .adapttable-vuetify [data-adapttable-part="header-cell"] {
   font-weight: 600;
 }
