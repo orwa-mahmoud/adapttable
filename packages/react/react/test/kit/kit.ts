@@ -142,7 +142,7 @@ export interface ReactKitDefinition {
   readonly axe: (
     container: Element,
     options: { readonly rules: Readonly<Record<string, { enabled: boolean }>> }
-  ) => Promise<unknown>;
+  ) => Promise<{ readonly violations: readonly unknown[] }>;
 }
 
 /**

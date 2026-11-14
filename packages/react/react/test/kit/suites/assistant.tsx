@@ -232,7 +232,7 @@ export function assistantTests(
           />
         );
 
-        expect(await kit.axe(container, axeOpts)).toHaveNoViolations();
+        expect((await kit.axe(container, axeOpts)).violations).toEqual([]);
       });
 
       it("puts the host's class on the surface, panel and sheet alike", () => {
