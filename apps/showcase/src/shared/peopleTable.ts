@@ -465,6 +465,15 @@ export const SPAN_DEFAULT_LAYOUT: Partial<ColumnLayoutState> = {
 };
 
 /**
+ * The editing page's default layout: Timeline hides so the table stays
+ * compact, and every other column shows its editor without the page
+ * borrowing the Columns menu from its showcase.
+ */
+export const EDITING_DEFAULT_LAYOUT: Partial<ColumnLayoutState> = {
+  hidden: ["timeline"],
+};
+
+/**
  * Pinning a column reveals every hidden column, so the table widens past its
  * frame and the pinned column is seen to stick while the body scrolls
  * sideways. Only a pin that was not there before reveals; an unpin or a
@@ -482,4 +491,33 @@ export function revealHiddenOnPin(
     (key) => !(key in previous.pinned)
   );
   return pinAdded && next.hidden.length > 0 ? { ...next, hidden: [] } : next;
+}
+
+/** The column-management page's wide set, in the order every framework draws it. */
+export const WIDE_COLUMN_ORDER: readonly string[] = [
+  "person",
+  "role",
+  "team",
+  "status",
+  "email",
+  "timeline",
+  "budget",
+  "load",
+];
+
+/**
+ * Columns in the wide page's order; a column the order does not name keeps
+ * its place after the named ones.
+ *
+ * @param columns - The columns to order.
+ * @returns The same columns, ordered.
+ */
+export function inWideOrder<TColumn extends { readonly key: string }>(
+  columns: readonly TColumn[]
+): TColumn[] {
+  const rank = (key: string) => {
+    const at = WIDE_COLUMN_ORDER.indexOf(key);
+    return at === -1 ? WIDE_COLUMN_ORDER.length : at;
+  };
+  return [...columns].sort((a, b) => rank(a.key) - rank(b.key));
 }

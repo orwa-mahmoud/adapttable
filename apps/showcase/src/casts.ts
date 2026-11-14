@@ -435,6 +435,20 @@ export function layoutFor(
   }
 }
 
+/**
+ * The layout a feature page opens with: its scenario's, else the live
+ * demo's (Email and Team hidden), so every framework starts each page with
+ * the same columns.
+ *
+ * @param scenario - The page's scenario.
+ * @returns The page's default column layout.
+ */
+export function pageLayoutFor(
+  scenario: DemoScenario
+): Partial<ColumnLayoutState> {
+  return layoutFor(scenario) ?? LIVE_DEFAULT_LAYOUT;
+}
+
 /** Whole-set pages: a 5-row page would hide the groups / the tree. */
 export function pageLimitFor(scenario: DemoScenario): number | undefined {
   if (
