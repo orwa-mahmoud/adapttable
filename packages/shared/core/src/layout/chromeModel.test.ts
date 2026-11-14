@@ -288,6 +288,54 @@ describe("desktop layout", () => {
     scroller.remove();
   });
 
+  it("keeps the gap a sticky rail showed at rest once the table scrolls", () => {
+    const scroller = document.createElement("div");
+    scroller.style.overflowX = "auto";
+    const table = document.createElement("table");
+    // A collapsed 1px border: the border model would say half a pixel at
+    // each edge; this table's cells sit a whole pixel in.
+    table.style.borderCollapse = "collapse";
+    table.style.setProperty("border-inline-start-width", "1px");
+    table.style.setProperty("border-inline-end-width", "1px");
+    table.innerHTML = `<thead><tr>
+      <th data-adapttable-part="selection-header" style="position: sticky"></th>
+      <th data-adapttable-part="header-cell"></th>
+      <th data-adapttable-part="actions-header" style="position: sticky"></th>
+    </tr></thead>`;
+    scroller.append(table);
+    document.body.append(scroller);
+    const [selection, , actions] = [...table.querySelectorAll("th")];
+    const box = (left: number, right: number) => () =>
+      ({ left, right, width: right - left }) as DOMRect;
+    const metrics = (values: Record<string, number>) => {
+      for (const [key, value] of Object.entries(values))
+        Object.defineProperty(scroller, key, { value, configurable: true });
+    };
+    scroller.getBoundingClientRect = box(10, 310);
+    metrics({ clientLeft: 0, clientWidth: 300, scrollWidth: 1000 });
+    const head = table.querySelector("thead")!;
+    // At rest the start rail stands where the table put it.
+    metrics({ scrollLeft: 0 });
+    table.getBoundingClientRect = box(10, 1010);
+    selection!.getBoundingClientRect = box(11, 61);
+    actions!.getBoundingClientRect = box(250, 310);
+    expect(readRailWidths(head)).toMatchObject({ edgeStart: 1 });
+    // Scrolled to the end, the end rail does too, and the start rail has
+    // been pushed: the gap read at rest still holds.
+    metrics({ scrollLeft: 700 });
+    table.getBoundingClientRect = box(-690, 310);
+    selection!.getBoundingClientRect = box(10, 60);
+    actions!.getBoundingClientRect = box(249, 309);
+    expect(readRailWidths(head)).toMatchObject({ edgeStart: 1, edgeEnd: 1 });
+    // Back in the middle, both pushed: both remembered gaps hold.
+    metrics({ scrollLeft: 300 });
+    table.getBoundingClientRect = box(-290, 710);
+    selection!.getBoundingClientRect = box(10, 60);
+    actions!.getBoundingClientRect = box(250, 310);
+    expect(readRailWidths(head)).toMatchObject({ edgeStart: 1, edgeEnd: 1 });
+    scroller.remove();
+  });
+
   it("measures against the page when nothing around the table scrolls", () => {
     const table = document.createElement("table");
     table.innerHTML = `<thead><tr><th></th></tr></thead>`;

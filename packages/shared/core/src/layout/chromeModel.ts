@@ -178,24 +178,25 @@ function stickyScroller(from: Element): {
   };
 }
 
-/**
- * How far a header end cell sits inside the table's own edge. A sticky cell
- * is pushed along while the table scrolls, so its place says nothing about
- * the table; the table's border and cell spacing are that gap instead.
- */
-function cellGap(
+/** Each table's cell gaps, as last read while its end cells stood still. */
+const settledGaps = new WeakMap<Element, { start?: number; end?: number }>();
+
+/** How far `cell` sits inside the table's `side` edge, read from its place. */
+function measuredGap(
   table: Element,
   cell: Element,
   side: "start" | "end",
   rtl: boolean
 ): number {
-  if (getComputedStyle(cell).position !== "sticky") {
-    const outer = table.getBoundingClientRect();
-    const inner = cell.getBoundingClientRect();
-    const fromLeft = inner.left - outer.left;
-    const fromRight = outer.right - inner.right;
-    return (side === "start") !== rtl ? fromLeft : fromRight;
-  }
+  const outer = table.getBoundingClientRect();
+  const inner = cell.getBoundingClientRect();
+  const fromLeft = inner.left - outer.left;
+  const fromRight = outer.right - inner.right;
+  return (side === "start") !== rtl ? fromLeft : fromRight;
+}
+
+/** The gap a table's border and cell spacing make, for a cell not at rest. */
+function borderGap(table: Element, side: "start" | "end"): number {
   const style = getComputedStyle(table);
   const border =
     Number.parseFloat(
@@ -205,6 +206,31 @@ function cellGap(
     ) || 0;
   if (style.borderCollapse === "collapse") return border / 2;
   return border + (Number.parseFloat(style.borderSpacing) || 0);
+}
+
+/**
+ * How far a header end cell sits inside the table's own edge. A cell that
+ * does not stick, or a sticky cell while the box rests where it does not
+ * push it (the start cell unscrolled, the end cell scrolled to the end),
+ * stands where the table put it, so its place is read and remembered. A
+ * sticky cell the scroll has pushed says nothing about the table: the gap
+ * last read at rest stands in, or the table's border and spacing before
+ * any such reading.
+ */
+function cellGap(
+  table: Element,
+  cell: Element,
+  side: "start" | "end",
+  rtl: boolean,
+  atRest: boolean
+): number {
+  const settled = settledGaps.get(table) ?? {};
+  if (atRest || getComputedStyle(cell).position !== "sticky") {
+    const gap = measuredGap(table, cell, side, rtl);
+    settledGaps.set(table, { ...settled, [side]: gap });
+    return gap;
+  }
+  return settled[side] ?? borderGap(table, side);
 }
 
 /**
@@ -234,9 +260,13 @@ function readTableEdges(head: ParentNode): {
   const tableEnd = rtl
     ? innerRight - outer.left - box.scrollLeft
     : outer.right - box.innerLeft + box.scrollLeft;
-  const edgeStart = tableStart + cellGap(table, first, "start", rtl);
+  // Scrolled by how far from the start, whichever way the direction counts.
+  const scrolled = Math.abs(box.scrollLeft);
+  const edgeStart =
+    tableStart + cellGap(table, first, "start", rtl, scrolled === 0);
+  const atEnd = box.scrollWidth - box.clientWidth - scrolled <= 0.5;
   const edgeEnd =
-    box.scrollWidth - (tableEnd - cellGap(table, last, "end", rtl));
+    box.scrollWidth - (tableEnd - cellGap(table, last, "end", rtl, atEnd));
   const edges: { edgeStart?: number; edgeEnd?: number } = {};
   if (edgeStart > 0) edges.edgeStart = edgeStart;
   if (edgeEnd > 0) edges.edgeEnd = edgeEnd;
