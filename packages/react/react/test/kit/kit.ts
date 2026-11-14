@@ -7,8 +7,30 @@
  * suites assert the behaviour every kit shares, once.
  */
 import type {
+  ActiveFilterChipsSlotProps,
   AdapterFiltersFeature,
+  ChecklistFilterProps,
+  createAdapterAgentApprovalFeature,
+  createAdapterStandardFeatures,
+  createAdapterTableAssistantFeature,
+  createAgentApproval,
+  createColumnHeaderRename,
+  createExportCsvButton,
+  createFullscreenButton,
+  createGroupHeader,
+  createPrintButton,
+  createRowReorderHandle,
+  createUndoRedoButtons,
+  FilterDef,
+  FilterTreeBuilderProps,
+  FilterTypeRegistry,
   KitTableProps,
+  PivotPanelChromeProps,
+  SavedViewsPanelChromeProps,
+  SelectionStatsChromeProps,
+  TableAssistantProps,
+  TableLabels,
+  TableSource,
 } from "@adapttable/react/adapter";
 import type * as bindingFeatures from "@adapttable/react/features";
 import {
@@ -16,7 +38,7 @@ import {
   type StaticTableFeature,
 } from "@adapttable/react/features";
 import type { RenderResult } from "@testing-library/react";
-import type { ReactElement, ReactNode } from "react";
+import type { ComponentType, ReactElement, ReactNode } from "react";
 
 /** The feature factories every React kit exports, by their shipped names. */
 export type KitFeatureFactories = Omit<
@@ -54,9 +76,11 @@ type FactoryName =
   | "fitColumns"
   | "fullscreen"
   | "grouping"
+  | "groupingPanel"
   | "headerFilters"
   | "multiSort"
   | "nestedTable"
+  | "pinnedSummaryRows"
   | "print"
   | "resizableColumns"
   | "rowActions"
@@ -100,10 +124,112 @@ export interface ReactKitDefinition {
   readonly Table: <TRow>(props: Readonly<KitTableProps<TRow>>) => ReactNode;
   /** The kit's feature factories. */
   readonly features: KitFeatureFactories;
+  /**
+   * The kit's own components and factories a shared suite drives directly,
+   * each typed as the reference kit's. A kit lists the ones it ships.
+   */
+  readonly components?: Partial<KitComponents>;
+  /**
+   * The kit's table and body around a lone body row, for suites that render
+   * a row component directly; plain `<table><tbody>` when the kit needs no
+   * table context.
+   */
+  readonly TableBodyFrame?: ComponentType<{ readonly children: ReactNode }>;
+  /** The kit's accessibility audit (`vitest-axe`'s `axe`), for suites that assert no violations. */
+  readonly axe: (
+    container: Element,
+    options: { readonly rules: Readonly<Record<string, { enabled: boolean }>> }
+  ) => Promise<unknown>;
+}
+
+/**
+ * The kit components and factories the shared suites can drive, by their
+ * shipped names, typed as the reference kit's.
+ */
+export interface KitComponents {
+  readonly Chips: ComponentType<
+    ActiveFilterChipsSlotProps & {
+      readonly classNames: Readonly<Record<string, string | undefined>>;
+    }
+  >;
+  readonly AutoFilterForm: <TRow>(
+    props: Readonly<KitAutoFilterFormProps<TRow>>
+  ) => ReactNode;
+  readonly ChecklistFilter: <TRow>(
+    props: Readonly<ChecklistFilterProps<TRow>>
+  ) => ReactNode;
+  readonly ColumnHeaderRename: ReturnType<typeof createColumnHeaderRename>;
+  readonly FilterTreeBuilder: <TRow>(
+    props: Readonly<FilterTreeBuilderProps<TRow>>
+  ) => ReactNode;
+  readonly GroupHeaderCard: ReturnType<
+    typeof createGroupHeader
+  >["GroupHeaderCard"];
+  readonly GroupHeaderRow: ReturnType<
+    typeof createGroupHeader
+  >["GroupHeaderRow"];
+  readonly AgentApproval: ReturnType<typeof createAgentApproval>;
+  readonly RowReorderHandle: ReturnType<typeof createRowReorderHandle>;
+  readonly PivotPanel: ComponentType<Omit<PivotPanelChromeProps, "slots">>;
+  readonly SavedViewsPanel: ComponentType<
+    Omit<SavedViewsPanelChromeProps, "slots">
+  >;
+  readonly SelectionStatsBar: ComponentType<
+    Omit<SelectionStatsChromeProps, "slots">
+  >;
+  readonly ExportCsvButton: ReturnType<typeof createExportCsvButton>;
+  readonly FullscreenButton: ReturnType<typeof createFullscreenButton>;
+  readonly PrintButton: ReturnType<typeof createPrintButton>;
+  readonly UndoRedoButtons: ReturnType<typeof createUndoRedoButtons>;
+  readonly agentApproval: () => ReturnType<
+    typeof createAdapterAgentApprovalFeature
+  >;
+  readonly TableAssistant: ComponentType<TableAssistantProps>;
+  readonly tableAssistant: () => ReturnType<
+    typeof createAdapterTableAssistantFeature
+  >;
+  readonly standardFeatures: ReturnType<typeof createAdapterStandardFeatures>;
+}
+
+/** What every kit's filter form takes. */
+export interface KitAutoFilterFormProps<TRow> {
+  /** The resolved definitions, in render order. */
+  readonly defs: readonly FilterDef<TRow>[];
+  /** The filter bag the widgets read from and write to. */
+  readonly source: Pick<
+    TableSource<TRow>,
+    "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets"
+  >;
+  /** Resolved labels. */
+  readonly labels: Required<TableLabels>;
+  /** Type registry; the built-ins when omitted. */
+  readonly registry?: FilterTypeRegistry;
 }
 
 /** A kit ready for the shared suites: its definition plus its test table. */
 export interface ReactKitUnderTest extends ReactKitDefinition {
   /** The kit's table, composing its features from the enabling props. */
   readonly DataTable: HarnessTable;
+}
+
+/**
+ * One of a kit's own components or factories, for a suite that drives it.
+ * A suite runs only in kits that ship it; a kit that does not list it fails
+ * here, naming the kit and the component.
+ *
+ * @param kit - The kit under test.
+ * @param name - The component's shipped name.
+ * @returns The kit's component.
+ */
+export function kitComponent<TName extends keyof KitComponents>(
+  kit: ReactKitDefinition,
+  name: TName
+): KitComponents[TName] {
+  const component = kit.components?.[name];
+  if (component === undefined) {
+    throw new Error(
+      `The ${kit.name} kit does not list ${name} in its test components.`
+    );
+  }
+  return component;
 }
