@@ -57,7 +57,13 @@ export function kitPrimitivesTests(
         it("hands its element to elementRef", () => {
           const ref = createRef<HTMLButtonElement>();
           render(
-            <Button elementRef={ref} variant="text" tone="danger" fullWidth>
+            <Button
+              elementRef={ref}
+              variant="text"
+              tone="danger"
+              fullWidth
+              justify="start"
+            >
               Remove
             </Button>
           );
@@ -80,7 +86,12 @@ export function kitPrimitivesTests(
           fireEvent.click(screen.getByRole("button", { name: "Close panel" }));
           expect(press).toHaveBeenCalledTimes(1);
           view.rerender(
-            <IconButton aria-label="Close panel" onClick={press} busy>
+            <IconButton
+              aria-label="Close panel"
+              onClick={press}
+              tone="danger"
+              busy
+            >
               ×
             </IconButton>
           );
