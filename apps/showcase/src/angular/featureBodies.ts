@@ -40,6 +40,7 @@ import {
   type ElementRef,
   inject,
   input,
+  type OnInit,
   type Signal,
   signal,
   type TemplateRef,
@@ -52,10 +53,34 @@ import {
   QueryClient,
 } from "@tanstack/angular-query-experimental";
 
+import { rosterFor } from "../casts";
 import { budget, formatMoney, personStatus, utilization } from "../people";
+import {
+  attachedNote,
+  budgetTotalOf,
+  pinnedTotals,
+} from "../shared/aggregationScenario";
+import {
+  EXPORT_GROUP_BY,
+  EXPORT_MODES,
+  exportGroups,
+  type ExportMode,
+  exportNavigatesCells,
+  exportScenarioOptions,
+  exportSelects,
+  initialExportMode,
+  loadArabicFont,
+  printGroupedPeople,
+  requestedExportScope,
+} from "../shared/exportScenario";
+import {
+  GROUPED_XLSX_EXPORT,
+  PEOPLE_GROUP_BY,
+} from "../shared/groupingScenario";
 import { AiBody } from "./aiBody";
 import {
   applyPersonEdit,
+  currentDataLocale,
   type DemoOrder,
   demoOrders,
   fetchPeople,
@@ -64,6 +89,7 @@ import {
   largePerson,
   makeLargeDirectory,
   PEOPLE,
+  PEOPLE_GROUPING,
   peopleColumns,
   type PeoplePage,
   type PeopleParams,
@@ -363,24 +389,59 @@ class EditingBody {
   ]);
 }
 
-/** Grouping: the panel, nested groups, and aggregates in the headers. */
+/**
+ * Grouping: the panel and its drag or select controls, nested groups with
+ * footers and budget subtotals, the column menu, and the grouped sheet
+ * exported as a spreadsheet.
+ */
 @Component({
   selector: "adapt-showcase-grouping",
   imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
+      <div class="hint-row">
+        <div class="seg" role="group" aria-label="Grouping controls">
+          <button
+            type="button"
+            class="seg__btn"
+            [class.is-on]="!mobile()"
+            [attr.aria-pressed]="!mobile()"
+            data-demo-control="grouping-desktop"
+            (click)="mobile.set(false)"
+          >
+            Drag + keyboard
+          </button>
+          <button
+            type="button"
+            class="seg__btn"
+            [class.is-on]="mobile()"
+            [attr.aria-pressed]="mobile()"
+            data-demo-control="grouping-mobile"
+            (click)="mobile.set(true)"
+          >
+            Mobile selects
+          </button>
+        </div>
+        <span class="hint">Drag a column header into the grouping strip</span>
+        <span class="hint"
+          >Focus a chip handle; arrow keys change its level</span
+        >
+      </div>
       <div class="mx-demo__body">
-        <adapt-showcase-table
-          [dir]="presentation.tableDir"
-          [labels]="presentation.tableLabels"
-          [attr.lang]="presentation.locale"
-          tableLabel="People"
-          urlKey="grp"
-          [data]="rows"
-          [columns]="columns"
-          [rowKey]="rowKey"
-          [features]="features"
-        />
+        <div [class.phone-frame]="mobile()">
+          <adapt-showcase-table
+            [dir]="presentation.tableDir"
+            [labels]="presentation.tableLabels"
+            [attr.lang]="presentation.locale"
+            tableLabel="People"
+            urlKey="grp"
+            [data]="rows"
+            [columns]="columns"
+            [rowKey]="rowKey"
+            [forceMobile]="mobile() || undefined"
+            [features]="features"
+          />
+        </div>
       </div>
     </div>
   `,
@@ -391,17 +452,41 @@ class GroupingBody {
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
+  // The toggle forces the phone's selects on a desktop; off, it leaves the
+  // breakpoint alone rather than forcing a desktop table onto a phone.
+  readonly mobile = signal(false);
   readonly features: readonly AdaptTableFeature[] = [
-    this.kit.groupingPanel(["team", "status"]),
+    this.kit.groupingPanel([...PEOPLE_GROUP_BY], PEOPLE_GROUPING),
+    this.kit.columnMenu(),
+    this.kit.exportCsv(GROUPED_XLSX_EXPORT),
   ];
 }
 
-/** Export: a CSV of the current view from the toolbar. */
+/**
+ * Export: the grouped sheet as a PDF or through a host-run server job, the
+ * same view through the browser's print dialog, and a CSV of the flat view
+ * by scope (`?scope=page|selected|range`).
+ */
 @Component({
   selector: "adapt-showcase-export",
   imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
+      <div class="hint-row" role="group" aria-label="Export mode">
+        <span class="hint">Grouped by team, then status</span>
+        @for (option of modes; track option.value) {
+          <button
+            type="button"
+            class="seg__btn"
+            [class.is-on]="mode() === option.value"
+            [attr.aria-pressed]="mode() === option.value"
+            [attr.data-demo-control]="'export-mode-' + option.value"
+            (click)="mode.set(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
           [dir]="presentation.tableDir"
@@ -412,30 +497,54 @@ class GroupingBody {
           [data]="rows"
           [columns]="columns"
           [rowKey]="rowKey"
-          [features]="features"
-          [selectable]="scope === 'selected'"
+          [features]="features()"
+          [selectable]="selects()"
         />
       </div>
     </div>
   `,
 })
-class ExportBody {
+class ExportBody implements OnInit {
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly scope = (() => {
-    const scope =
-      typeof location === "undefined"
-        ? null
-        : new URLSearchParams(location.search).get("scope");
-    return scope === "selected" || scope === "range" ? scope : "page";
-  })();
-  readonly features: readonly AdaptTableFeature[] = [
-    this.kit.exportCsv({ scope: this.scope }),
-    ...(this.scope === "range" ? [this.kit.cellNavigation()] : []),
-  ];
+  readonly modes = EXPORT_MODES;
+  private readonly locale = currentDataLocale();
+  private readonly scope = requestedExportScope() ?? "page";
+  readonly mode = signal<ExportMode>(initialExportMode());
+  private readonly font = signal<ArrayBuffer | undefined>(undefined);
+  readonly selects = computed(() => exportSelects(this.mode(), this.scope));
+  readonly features = computed<readonly AdaptTableFeature[]>(() => {
+    const mode = this.mode();
+    const font = this.font();
+    return [
+      ...(exportGroups(mode)
+        ? [this.kit.groupingPanel([...EXPORT_GROUP_BY], PEOPLE_GROUPING)]
+        : []),
+      this.kit.exportCsv(
+        exportScenarioOptions(mode, this.locale, font, this.scope)
+      ),
+      ...(exportNavigatesCells(mode, this.scope)
+        ? [this.kit.cellNavigation()]
+        : []),
+      this.kit.print(() => {
+        printGroupedPeople(this.locale, font);
+      }, true),
+    ];
+  });
+
+  ngOnInit(): void {
+    if (this.locale !== "ar") return;
+    loadArabicFont()
+      .then((bytes) => {
+        this.font.set(bytes);
+      })
+      .catch((error: unknown) => {
+        console.error("the demo font did not load", error);
+      });
+  }
 }
 
 /** How many rows the scale page windows. */
@@ -1235,21 +1344,30 @@ class ColumnsBody {
   ];
 }
 
-/** Group and footer totals, matching AggregationDemo.tsx's three surfaces. */
+/**
+ * Totals that are not data rows: pinned team and grand totals, group
+ * footers with budget subtotals, the footer grand total, and a full-width
+ * note attached to a row. Filter the set and every total follows.
+ */
 @Component({
   selector: "adapt-showcase-aggregation",
   imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
-      <p class="hint">
-        Search updates the group and footer totals. The pinned portfolio total
-        stays outside the filtered data.
-      </p>
+      <div class="hint-row">
+        <span class="hint"
+          >Pinned team total and grand total are not data rows</span
+        >
+        <span class="hint"
+          >Group footers close each team; the table footer is the grand
+          total</span
+        >
+        <span class="hint">Filter the set and every total follows</span>
+      </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
           tableLabel="People budgets"
           urlKey="agg"
-          [maxHeight]="420"
           [dir]="presentation.tableDir"
           [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
@@ -1266,40 +1384,18 @@ class ColumnsBody {
 class AggregationBody {
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("aggregation");
   readonly rowKey = rowKey;
-  readonly columns = COLUMNS.filter((column) =>
-    ["person", "team", "budget"].includes(column.key)
-  );
-  readonly summary = aggregate<Person>(
-    { budget: "sum" },
-    {
-      columns: this.columns,
-      format: (value) =>
-        typeof value === "number" ? formatMoney(value) : value,
-    }
-  );
+  readonly columns = COLUMNS;
+  readonly summary = PEOPLE_GROUPING.groupAggregates;
+  private readonly anchor = this.rows[0];
   readonly features: readonly AdaptTableFeature[] = [
-    this.kit.groupingPanel<Person>("team", {
-      groupAggregates: aggregate<Person>(
-        { budget: "sum" },
-        { columns: this.columns }
-      ),
-      groupFooters: true,
-    }),
-    this.kit.pinnedSummaryRows<Person>({
-      top: [
-        {
-          ...PEOPLE[0]!,
-          id: "portfolio-total",
-          name: "Portfolio total",
-          nameAr: "إجمالي المحفظة",
-          team: "",
-          teamAr: "",
-          budget: PEOPLE.reduce((total, row) => total + budget(row), 0),
-        },
-      ],
-    }),
+    this.kit.groupingPanel<Person>([...PEOPLE_GROUP_BY], PEOPLE_GROUPING),
+    this.kit.pinnedSummaryRows<Person>(pinnedTotals(budgetTotalOf(this.rows))),
+    ...(this.anchor
+      ? [this.kit.extraRows([attachedNote(this.anchor.id, this.anchor.name)])]
+      : []),
+    this.kit.filters(FILTER_DEFS),
   ];
 }
 

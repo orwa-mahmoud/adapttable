@@ -2,9 +2,19 @@
  * The Angular pages' table data: the shared people table
  * (`../shared/peopleTable`) as Angular columns.
  */
-import type { ColumnDef, ColumnInput } from "@adapttable/angular";
+import {
+  aggregate,
+  type ColumnDef,
+  type ColumnInput,
+} from "@adapttable/angular";
 
-import type { Person } from "../people";
+import { formatMoney, type Person } from "../people";
+import {
+  largestGroupsFirst,
+  PEOPLE_GROUP_TOTALS,
+  PEOPLE_TOTAL_COLUMNS,
+  totalOf,
+} from "../shared/groupingScenario";
 import {
   applyPersonEdit as applySharedEdit,
   dataLocaleOf,
@@ -29,8 +39,19 @@ export { peopleRows, rowKey } from "../shared/peopleTable";
 /** One presentation for every table on an Angular page. */
 export const SHOWCASE_PRESENTATION = readShowcasePresentation();
 
-const currentDataLocale = (): "ar" | "en" =>
+/** The language the page's cell data is written in. */
+export const currentDataLocale = (): "ar" | "en" =>
   dataLocaleOf(SHOWCASE_PRESENTATION);
+
+/** How every Angular page groups people: a budget subtotal, footers, largest first. */
+export const PEOPLE_GROUPING = {
+  groupAggregates: aggregate<Person>(PEOPLE_GROUP_TOTALS, {
+    columns: PEOPLE_TOTAL_COLUMNS,
+    format: (value) => formatMoney(totalOf(value), "en"),
+  }),
+  groupFooters: true,
+  groupSort: largestGroupsFirst,
+};
 
 /** The filters every Angular page that filters declares. */
 export const FILTER_DEFS = localizedFilterDefs(currentDataLocale());

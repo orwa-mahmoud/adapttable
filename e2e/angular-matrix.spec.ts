@@ -249,13 +249,16 @@ for (const kit of KITS) {
     const pinned = page.locator(
       '.mx-demo [data-adapttable-part="pinned-summary-top"]'
     );
-    await expect(pinned).toContainText("Portfolio total");
-    const portfolio = await pinned.textContent();
-    await part(page, "search").fill("Ada Lovelace");
+    await expect(pinned).toContainText("Team total");
+    const teamTotal = await pinned.textContent();
+    await part(page, "search").fill("Sefa Demir");
     await expect(part(page, "row")).toHaveCount(1);
-    await expect(part(page, "summary-cell").last()).toHaveText("$25,300");
-    await expect(part(page, "group-footer-row")).toContainText("25,300");
-    await expect(pinned).toHaveText(portfolio!);
+    const budget = (
+      await part(page, "row").locator('[data-column-key="budget"]').innerText()
+    ).trim();
+    await expect(part(page, "summary")).toContainText(budget);
+    await expect(part(page, "group-footer-row").first()).toContainText(budget);
+    await expect(pinned).toHaveText(teamTotal!);
     await expect(pinned.getByRole("checkbox")).toHaveCount(0);
   });
 
