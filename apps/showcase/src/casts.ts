@@ -396,6 +396,11 @@ const FORMULAS_LAYOUT: Partial<ColumnLayoutState> = {
 const REALTIME_LAYOUT: Partial<ColumnLayoutState> = {
   hidden: ["email", "load", "timeline"],
 };
+/** Person pinned to the start, so the mirrored layout shows where the start is. */
+const RTL_LAYOUT: Partial<ColumnLayoutState> = {
+  hidden: ["email", "team"],
+  pinned: { person: "start" },
+};
 
 /**
  * Compact layouts that keep the feature on screen. `undefined` means the
@@ -427,6 +432,8 @@ export function layoutFor(
       return REALTIME_LAYOUT;
     case "rows":
       return SPAN_DEFAULT_LAYOUT;
+    case "rtl":
+      return RTL_LAYOUT;
     case "nested-tables":
     case "accessibility":
       return FILTER_LAYOUT;
@@ -456,6 +463,7 @@ export function pageLimitFor(scenario: DemoScenario): number | undefined {
     scenario === "grouping" ||
     scenario === "aggregation" ||
     scenario === "row-reordering" ||
+    scenario === "rows" ||
     scenario === "export" ||
     scenario === "pivot"
   ) {
@@ -463,6 +471,39 @@ export function pageLimitFor(scenario: DemoScenario): number | undefined {
   }
   if (scenario === "mobile") return 8;
   return undefined;
+}
+
+/**
+ * Five rows by default: enough to show real data while keeping the whole
+ * table, and often its footer, on one screen.
+ */
+export const DEFAULT_PAGE = { limit: 5 } as const;
+
+/**
+ * The realtime page: ten rows, Budget sorted. The patcher reads the live
+ * direction so a row lands in the first six of what is actually on screen.
+ */
+export const REALTIME_PAGE = {
+  limit: 10,
+  sortBy: "budget",
+  sortDir: "desc",
+} as const;
+
+/**
+ * The page size and opening sort a feature page asks for, the same in every
+ * framework.
+ *
+ * @param scenario - The page's scenario.
+ * @returns The table's defaults.
+ */
+export function pageDefaultsFor(scenario: DemoScenario): {
+  readonly limit: number;
+  readonly sortBy?: string;
+  readonly sortDir?: "asc" | "desc";
+} {
+  if (scenario === "realtime") return REALTIME_PAGE;
+  const limit = pageLimitFor(scenario);
+  return limit === undefined ? DEFAULT_PAGE : { limit };
 }
 
 export function seedRoster(

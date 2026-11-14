@@ -675,7 +675,7 @@ export function makeLargeDirectory(count = LARGE_ROW_COUNT): Person[] {
  * One row of the large directory, addressed by its position — so a paged
  * server can answer any slice without building the rows before it.
  */
-export function largePerson(index: number): Person {
+function largePerson(index: number): Person {
   const area = index % LARGE_AREAS.length;
   const squad = Math.floor(index / LARGE_AREAS.length) % LARGE_SQUADS;
   const first = index % LARGE_FIRST.length;
