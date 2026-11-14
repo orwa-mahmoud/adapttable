@@ -1265,6 +1265,11 @@ table's own props; every binding re-exports them.
   `desktopHeadCellGeometry` (`DesktopHeadCellGeometry`), `desktopEdgeHeadPin`,
   `desktopPinSignature`, `DESKTOP_RESIZE_HANDLE_STYLE` — desktop layout and
   pinning geometry.
+- `readRailWidths` (`MeasuredRailWidths`), `observeRailWidths` — the rendered
+  widths of the expand, reorder, selection and actions rails, read from the
+  header (and kept current as they resize, appear or go), so
+  `desktopChromeMetrics({ measured })` places pinned columns and rails
+  (`RailInsets`) exactly past them.
 - `desktopRowMeasureRef`, `desktopDetailMeasureRef`, `measureRowDetailAsPair`,
   `measureWindowScrollMargin`, `documentOffsetTop`, `virtualListElement`,
   `sourceWindowStart` — measuring rows and the scroll window for
@@ -4627,6 +4632,7 @@ These runtime helpers come from `@adapttable/vue/adapter`.
 | `SelectionCheckboxAttrs`, `SelectionCheckboxControl`, `selectionCheckboxControl`, `selectionCheckboxInputAttrs` | Typed checkbox state and a single toggle action, with safe DOM attributes for widgets that own their model-value event API. See the [Vue control contract](./vue/api.md#adapter-shell-and-structural-chrome). |
 | `TableChromeClassNames`                                                                                         | Semantic table, selection, group, action, resize and card class hooks.                                                                                                                                        |
 | `useDesktopTableModel`, `useMobileCardsModel`                                                                   | Computed desktop/card projections from a headless table.                                                                                                                                                      |
+| `railCellAttrs`, `TableRail`                                                                                    | A rail cell's attributes: sticky past the rails before it while a column is pinned to its edge.                                                                                                               |
 | `DesktopTableModel`, `MobileCardsModel`                                                                         | Complete semantic attributes, rows, header/card layout and optional body-slot projections.                                                                                                                    |
 | `TableHeaderModel`, `TableRowModel`, `TableCellModel`, `TableBodySlot`                                          | Header controls/context, row wiring, cell context/decorations and structural row/group/extra/padding variants.                                                                                                |
 | `toVueAttrs`, `toVueStyle`, `mergeVueAttrs`                                                                     | Translate neutral events/styles and merge complete semantic bindings without losing listeners or class/style composition.                                                                                     |
