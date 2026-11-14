@@ -98,6 +98,8 @@ import {
   TableStatusAnnouncer,
   toolbarShowsFilters,
   type TreeEntry,
+  treeRowAria,
+  treeTableAria,
   undoRedoToolbar,
   type UseColumnLayoutResult,
   useFeatureSlotFilled,
@@ -432,6 +434,8 @@ function antdOnRow<TRow>(options: {
   labels: Required<TableLabels>;
   /** The selected row keys, when rows are selectable. */
   selectedRowKeys: readonly Key[] | undefined;
+  /** The tree's entries by row id, while the rows are a tree. */
+  treeById: ReadonlyMap<string, TreeEntry<TRow>> | undefined;
 }): AntdRowHtmlAttrs {
   const {
     record,
@@ -453,6 +457,7 @@ function antdOnRow<TRow>(options: {
     rowHeight,
     labels,
     selectedRowKeys,
+    treeById,
   } = options;
   const extraOrGroup = antdExtraOrGroupRowAttrs(record);
   if (extraOrGroup) return extraOrGroup;
@@ -519,6 +524,8 @@ function antdOnRow<TRow>(options: {
     // section through this same attribute and has to keep winning it.
     "data-adapttable-part": "row",
     "data-row-id": id,
+    // A tree row's level, open state and place among its siblings.
+    ...treeRowAria(treeById?.get(id)),
     // The rest of core's row identity, which the other kits spread: the row's
     // index, and whether it is selected when rows are selectable.
     "data-index": rowIndex,
@@ -1266,9 +1273,12 @@ function DesktopTableBody<TRow>({
   pinRowSticky,
   labels,
   tableRef,
+  treeEntries,
 }: Readonly<{
   /** Cell-navigation getters; inert unless `cellNavigation` is on. */
   gridFocus?: GridFocusState;
+  /** The tree's entries while the rows are an ungrouped tree. */
+  treeEntries?: readonly TreeEntry<TRow>[];
   /** antd's table handle, for find's scroll to an off-window row. */
   tableRef?: Ref<AntdTableRef>;
   tableLabel: string | undefined;
@@ -1316,6 +1326,20 @@ function DesktopTableBody<TRow>({
   // reach them through the `components` seam. Memoized: a new component
   // identity here would remount the whole table on every render.
   const getGridProps = gridFocus?.getGridProps;
+  const treeById = useMemo(
+    () =>
+      treeEntries
+        ? new Map(treeEntries.map((entry) => [entry.key, entry]))
+        : undefined,
+    [treeEntries]
+  );
+  // A tree's rows are read inside a treegrid, as in every other kit's table.
+  // The attributes travel by context: rebuilding `components` would remount
+  // antd's table.
+  const treeAria = useMemo(
+    () => (treeEntries ? treeTableAria(treeEntries.length) : undefined),
+    [treeEntries]
+  );
   // Depends on the GETTER, not the whole state: the announcement changes on
   // every focus move, and rebuilding `components` would remount antd's table and
   // throw away the focus this just placed.
@@ -1353,11 +1377,11 @@ function DesktopTableBody<TRow>({
       // Core decides what belongs here: the grid role and handlers only with
       // cell navigation, but a windowed table's `aria-rowcount` regardless —
       // so this asks unconditionally rather than gating on the feature.
-      table: tableComponent(inner),
+      table: tableComponent(inner, true),
       header: {
         // Sticky / virtual headers resolve through `header.table`. When the
         // wrapper is the grid, this table is a rowgroup like the body table.
-        table: tableComponent(asGrid ? { role: "rowgroup" } : undefined),
+        table: tableComponent(asGrid ? { role: "rowgroup" } : undefined, false),
         // The header height is measured only for pinned rows, so the ref stays
         // conditional; the name does not.
         wrapper: theadComponent(pinArmed ? theadRef : undefined),
@@ -1424,6 +1448,7 @@ function DesktopTableBody<TRow>({
           rowHeight,
           labels,
           selectedRowKeys: rowSelection?.selectedRowKeys,
+          treeById,
         })
       }
       scroll={resolveScroll(
@@ -1436,11 +1461,18 @@ function DesktopTableBody<TRow>({
     />
   );
   const body = isAccessibleGrid ? (
-    <div {...gridProps} aria-label={tableLabel} data-adapttable-part="grid">
+    <div
+      {...gridProps}
+      {...treeAria}
+      aria-label={tableLabel}
+      data-adapttable-part="grid"
+    >
       {table}
     </div>
   ) : (
-    table
+    <TreeTableAriaContext.Provider value={treeAria}>
+      {table}
+    </TreeTableAriaContext.Provider>
   );
   return rowDropFollow ? (
     <RowDropContext.Provider value={rowDropFollow}>
@@ -1463,13 +1495,27 @@ function DesktopTableBody<TRow>({
  * type on every render, which remounts everything below it — here that would
  * mean losing the cell focus on every keystroke.
  */
-function tableComponent(gridProps: Record<string, unknown> | undefined) {
+function tableComponent(
+  gridProps: Record<string, unknown> | undefined,
+  readsTree: boolean
+) {
   return function AdaptTable(tableProps: Record<string, unknown>) {
+    const tree = useContext(TreeTableAriaContext);
     return (
-      <table data-adapttable-part="table" {...tableProps} {...gridProps} />
+      <table
+        data-adapttable-part="table"
+        {...tableProps}
+        {...gridProps}
+        {...(readsTree ? tree : undefined)}
+      />
     );
   };
 }
+
+/** The tree's table ARIA, for the body table antd draws. */
+const TreeTableAriaContext = createContext<
+  ReturnType<typeof treeTableAria> | undefined
+>(undefined);
 
 function TbodyWrapper(
   props: Readonly<HTMLAttributes<HTMLTableSectionElement>>
@@ -1758,6 +1804,7 @@ function DataTableBodyRegion<TRow>(
         pinnedSummaryBottom={pinnedSummaryBottom}
         pinRowSticky={pinRowSticky}
         labels={labels}
+        treeEntries={grouping ? undefined : tree?.entries}
       />
     );
   }
