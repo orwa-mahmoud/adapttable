@@ -47,6 +47,8 @@ export interface FilterPanelModel<TRow> {
   readonly registry: FilterTypeRegistry;
   readonly source: TableSource<TRow>;
   readonly trigger: FilterTriggerProps;
+  /** Draw the per-field form. Default on; `false` leaves only the tree. */
+  readonly fields?: boolean;
   readonly tree?: FilterTreeBuilderProps<TRow>;
   readonly anchor: HTMLElement | null;
   readonly container?: HTMLElement | null;
@@ -100,25 +102,28 @@ export function FilterPanelChrome<TRow>(props: {
     throw new Error(
       "AdaptTable: FilterPanelChrome requires the Tree control slot."
     );
-  const fields = h(
-    "div",
-    {
-      "data-adapttable-part": "filters-form",
-      class: props.classNames?.filtersForm,
-      style: { display: "grid", gap: "16px" },
-      dir: model.dir,
-    },
-    model.defs.map((def) =>
-      h("div", { key: def.key }, [
-        controls.Field({
-          def,
-          source: model.source,
-          labels: model.labels,
-          registry: model.registry,
-        }),
-      ])
-    )
-  );
+  const fields =
+    model.fields === false
+      ? null
+      : h(
+          "div",
+          {
+            "data-adapttable-part": "filters-form",
+            class: props.classNames?.filtersForm,
+            style: { display: "grid", gap: "16px" },
+            dir: model.dir,
+          },
+          model.defs.map((def) =>
+            h("div", { key: def.key }, [
+              controls.Field({
+                def,
+                source: model.source,
+                labels: model.labels,
+                registry: model.registry,
+              }),
+            ])
+          )
+        );
   const children = h(PanelContent, {
     anchor: model.anchor,
     modal: model.mode === "drawer",

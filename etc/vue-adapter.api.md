@@ -2359,6 +2359,7 @@ export interface FilterPanelModel<TRow> {
     readonly defs: readonly FilterDef<TRow>[];
     // (undocumented)
     readonly dir: Direction;
+    readonly fields?: boolean;
     // (undocumented)
     readonly labels: Required<TableLabels>;
     // (undocumented)

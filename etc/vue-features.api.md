@@ -375,6 +375,7 @@ export function filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: Filte
 
 // @public (undocumented)
 export interface FiltersOptions {
+    readonly fields?: boolean;
     // (undocumented)
     readonly mode?: "popover" | "drawer";
     readonly tree?: boolean;

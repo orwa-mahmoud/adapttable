@@ -123,6 +123,7 @@ function mountFilters<TRow>(context: FeatureMountContext<TRow>): void {
       }),
     ];
     const count = chips.length;
+    const fields = context.options.value.filterFields !== false;
     return {
       open: open.value,
       openPanel: () => {
@@ -137,9 +138,17 @@ function mountFilters<TRow>(context: FeatureMountContext<TRow>): void {
       defs: runtime.defs,
       registry: runtime.registry,
       source,
+      fields,
       tree:
-        context.options.value.filterTreeBuilder === true && source.setFilterTree
-          ? { defs: runtime.defs, source, labels, registry: runtime.registry }
+        (context.options.value.filterTreeBuilder === true || !fields) &&
+        source.setFilterTree
+          ? {
+              defs: runtime.defs,
+              source,
+              labels,
+              registry: runtime.registry,
+              ...(fields ? {} : { defaultExpanded: true }),
+            }
           : undefined,
       anchor: anchor.value,
       container: fullscreen.value?.container,
@@ -174,6 +183,11 @@ export interface FiltersOptions {
   readonly mode?: "popover" | "drawer";
   /** Include the optional advanced AND/OR builder using the adapter's Tree slot. */
   readonly tree?: boolean;
+  /**
+   * Draw the per-field form in the panel. Default on; `false` leaves only
+   * the AND/OR builder there, opened.
+   */
+  readonly fields?: boolean;
 }
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[] = [],
@@ -188,6 +202,7 @@ export function filters<TRow>(
       filterEngine: FILTER_ENGINE_IMPL,
       filtersMode: options.mode,
       filterTreeBuilder: options.tree,
+      filterFields: options.fields,
     }),
     mount: mountFilters,
     requiredSlots: [TOOLBAR_EXTRAS, ACTIVE_FILTER_CHIPS],
