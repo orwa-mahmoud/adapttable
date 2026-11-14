@@ -258,7 +258,7 @@ export function Popover({
       opened={open}
       onChange={onOpenChange}
     >
-      <PopoverTarget>
+      <PopoverTarget popupType={role ?? "dialog"}>
         {trigger({
           elementRef: null,
           onClick: () => onOpenChange?.(open !== true),
@@ -285,13 +285,24 @@ export function Popover({
  * trigger Mantine's ref through `elementRef`, which replaces the trigger's
  * own; passing that one in as the target's `ref` keeps both.
  */
-export function PopoverTarget({ children }: Readonly<{ children: ReactNode }>) {
+export function PopoverTarget({
+  children,
+  popupType = "dialog",
+}: Readonly<{
+  children: ReactNode;
+  /** The popup's role, for the target's `aria-haspopup`. */
+  popupType?: "dialog" | "menu";
+}>) {
   "use no memo";
   const own = isValidElement<{ elementRef?: Ref<HTMLButtonElement> }>(children)
     ? children.props.elementRef
     : undefined;
   return (
-    <MantinePopover.Target refProp="elementRef" ref={own ?? undefined}>
+    <MantinePopover.Target
+      refProp="elementRef"
+      ref={own ?? undefined}
+      popupType={popupType}
+    >
       {children}
     </MantinePopover.Target>
   );
