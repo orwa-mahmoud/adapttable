@@ -712,6 +712,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
    * backdrop, or a drawer that dims the page.
    */
   readonly filtersMode = input<FiltersMode>("popover");
+  /**
+   * Mount the per-field form in the Filters panel. Default on. Pass `false`
+   * to keep only the AND/OR tree there, opened on first paint.
+   */
+  readonly filterFields = input(true);
   /** Close a header filter once a single-control write finishes. */
   readonly closeHeaderFilterOnSelect = input(false);
   /** The host's own chips, shown after the table's filter chips. */
@@ -1239,6 +1244,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
               filtersOn,
               headerOn,
               this.filtersMode(),
+              this.filterFields(),
               this.closeHeaderFilterOnSelect(),
             ],
             () =>
@@ -1249,6 +1255,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
                 mode: this.filtersMode(),
                 button: filtersOn,
                 header: headerOn,
+                fields: this.filterFields(),
                 closeHeaderFilterOnSelect: this.closeHeaderFilterOnSelect(),
                 dir: table.dir,
                 extraChips: this.extraChips,

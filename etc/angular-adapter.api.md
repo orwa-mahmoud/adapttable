@@ -1912,6 +1912,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly facetKeys: InputSignal<readonly string[] | undefined>;
     readonly facets: InputSignal<Readonly<Record<string, FacetCounts>> | undefined>;
     readonly features: InputSignal<readonly AdaptTableFeature[]>;
+    readonly filterFields: InputSignal<boolean>;
     // @internal
     protected readonly filtersIcon: IconDescriptor;
     // @internal
@@ -2276,6 +2277,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         };
         "filtersMode": {
             "alias": "filtersMode";
+            "required": false;
+            "isSignal": true;
+        };
+        "filterFields": {
+            "alias": "filterFields";
             "required": false;
             "isSignal": true;
         };
@@ -5602,6 +5608,7 @@ export interface FiltersViewInput<TRow> {
     readonly dir: Signal<Direction>;
     // (undocumented)
     readonly extraChips: Signal<readonly ActiveFilterChip[]>;
+    readonly fields?: boolean;
     // (undocumented)
     readonly form: Signal<TemplateRef<unknown> | undefined>;
     // (undocumented)

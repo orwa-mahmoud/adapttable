@@ -119,6 +119,7 @@ export function filtersTests(
           [forceMobile]="false"
           [features]="features()"
           [filtersMode]="mode()"
+          [filterFields]="fields()"
           [labels]="labels()"
         />
       `,
@@ -126,6 +127,7 @@ export function filtersTests(
     class Host {
       readonly features = input([filters(DEFS)]);
       readonly mode = input<FiltersMode>("popover");
+      readonly fields = input(true);
       readonly labels = input<Partial<TableLabels> | undefined>(undefined);
       readonly custom =
         viewChild.required<TemplateRef<FilterWidgetRenderProps<Person>>>(
@@ -138,11 +140,13 @@ export function filtersTests(
 
     async function mount(
       features = [filters(DEFS)],
-      mode: FiltersMode = "popover"
+      mode: FiltersMode = "popover",
+      fields = true
     ) {
       const fixture = TestBed.createComponent(Host);
       fixture.componentRef.setInput("features", features);
       fixture.componentRef.setInput("mode", mode);
+      fixture.componentRef.setInput("fields", fields);
       fixture.autoDetectChanges();
       await fixture.whenStable();
       const element = fixture.nativeElement as HTMLElement;
@@ -222,6 +226,24 @@ export function filtersTests(
         await type(part("filter-input", field("Name")), "a");
         await type(part("filter-operator", field("Name")), "startsWith");
         expect(ids()).toEqual(["1"]);
+      });
+
+      it("holds the per-field form beside the AND/OR tree by default", async () => {
+        const { part, field, openFilters } = await mount();
+        await openFilters();
+        expect(field("Name")).toBeDefined();
+        expect(part("filter-tree")).not.toBeNull();
+      });
+
+      it("keeps only the AND/OR tree when the per-field form is off", async () => {
+        const { part, parts, openFilters } = await mount(
+          [filters(DEFS)],
+          "popover",
+          false
+        );
+        await openFilters();
+        expect(parts("filter-field")).toHaveLength(0);
+        expect(part("filter-tree")).not.toBeNull();
       });
 
       it("offers header funnels without the Filters button", async () => {

@@ -61,6 +61,11 @@ export interface FiltersViewInput<TRow> {
   readonly mode: FiltersMode;
   readonly button: boolean;
   readonly header: boolean;
+  /**
+   * Mount the per-field form in the Filters panel. Default on; `false`
+   * keeps only the AND/OR tree there, opened.
+   */
+  readonly fields?: boolean;
   readonly closeHeaderFilterOnSelect: boolean;
   readonly dir: Signal<Direction>;
   readonly extraChips: Signal<readonly ActiveFilterChip[]>;
@@ -85,7 +90,7 @@ export function filtersViewFor<TRow>(
   const close = (): void => {
     open.set(false);
   };
-  const simpleFields = showSimpleFilterFields(input.header);
+  const simpleFields = showSimpleFilterFields(input.header, input.fields);
 
   return {
     button: input.button,
