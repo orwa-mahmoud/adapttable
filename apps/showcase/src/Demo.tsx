@@ -5,7 +5,6 @@ import {
   insertRow,
   type QueryFilterGroup,
   removeRow,
-  type RowGroupRef,
   type RowPatch,
   type RowReorderOptions,
   type TableErrorState,
@@ -13,7 +12,6 @@ import {
   updateRow,
 } from "@adapttable/core";
 import {
-  applyRowReorder,
   type ColumnDef,
   type EditEventHandler,
   type ReactMobileCardModel,
@@ -49,9 +47,11 @@ import {
 } from "react";
 
 import {
+  DEFAULT_PAGE,
   type DemoScenario,
   layoutFor,
-  pageLimitFor,
+  pageDefaultsFor,
+  REALTIME_PAGE,
   seedRoster,
 } from "./casts";
 import {
@@ -89,7 +89,15 @@ import {
 } from "./shared/aggregationScenario";
 import { PEOPLE_GROUP_BY } from "./shared/groupingScenario";
 import { revealHiddenOnPin } from "./shared/peopleTable";
-import { blankPerson, nextPersonId, teamSpan } from "./shared/rowsScenario";
+import {
+  blankPerson,
+  nextPersonId,
+  reorderPeople,
+  reorderShapeOf,
+  teamSpan,
+  withPersonMovedToGroup,
+  withPersonMovedUnder,
+} from "./shared/rowsScenario";
 
 /**
  * Where the rows come from.
@@ -213,19 +221,7 @@ function withoutFilterTree<T>(source: TableSource<T>): TableSource<T> {
 }
 
 /** A small page size so both modes show real pagination over 30 rows. */
-// Five rows by default: enough to show real data while keeping the
-// whole table (and often the footer) on one screen.
-const DEFAULTS = { limit: 5 };
 const TREE_DEFAULTS = { limit: 30 };
-/**
- * The realtime page: ten rows, Budget sorted. The patcher reads the live
- * direction so a row lands in the first six of what is actually on screen.
- */
-const REALTIME_DEFAULTS = {
-  limit: 10,
-  sortBy: "budget",
-  sortDir: "desc" as const,
-};
 /**
  * A page large enough for the row window to be a window.
  *
@@ -438,10 +434,8 @@ function pageDefaults(
 ): { limit: number; sortBy?: string; sortDir?: "asc" | "desc" } {
   if (tree) return TREE_DEFAULTS;
   if (large) return LARGE_DEFAULTS;
-  if (realtime) return REALTIME_DEFAULTS;
-  const limit = pageLimitFor(scenario);
-  if (limit !== undefined) return { limit };
-  return DEFAULTS;
+  if (realtime) return REALTIME_PAGE;
+  return pageDefaultsFor(scenario);
 }
 
 /**
@@ -846,74 +840,6 @@ function frontendColumnProps(
   return next;
 }
 
-function sameReorderScope(
-  candidate: Person,
-  row: Person,
-  grouping: boolean | undefined,
-  tree: boolean | undefined
-): boolean {
-  if (grouping) {
-    return candidate.team === row.team && candidate.status === row.status;
-  }
-  if (tree) return reportsTo(candidate) === reportsTo(row);
-  return true;
-}
-
-function reorderDemoRows(
-  rows: readonly Person[],
-  from: number,
-  to: number,
-  row: Person,
-  grouping: boolean | undefined,
-  tree: boolean | undefined
-): readonly Person[] {
-  const sameScope = (candidate: Person) =>
-    sameReorderScope(candidate, row, grouping, tree);
-  const siblings = rows.filter(sameScope);
-  const source = siblings.findIndex((candidate) => candidate.id === row.id);
-  const reordered = applyRowReorder(siblings, source < 0 ? from : source, to);
-  let siblingIndex = 0;
-  return rows.map((candidate) => {
-    if (!sameScope(candidate)) return candidate;
-    const replacement = reordered[siblingIndex];
-    siblingIndex += 1;
-    return replacement ?? candidate;
-  });
-}
-
-function insertionIndex(
-  destinations: readonly number[],
-  position: number,
-  fallback: number
-): number {
-  if (position >= 0 && position < destinations.length) {
-    return destinations[position];
-  }
-  return (destinations.at(-1) ?? fallback - 1) + 1;
-}
-
-function groupDestinationIndices(
-  rows: readonly Person[],
-  group: RowGroupRef
-): number[] {
-  return rows.flatMap((candidate, index) =>
-    group.levels.every(
-      (level) => Reflect.get(candidate, level.key) === level.value
-    )
-      ? [index]
-      : []
-  );
-}
-
-function treeDestinationIndices(
-  rows: readonly Person[],
-  parentId: string | null
-): number[] {
-  return rows.flatMap((candidate, index) =>
-    (reportsTo(candidate) ?? null) === parentId ? [index] : []
-  );
-}
-
 function Frontend({
   render,
   columns,
@@ -1037,38 +963,21 @@ function Frontend({
   );
   const onRowReorder = useCallback(
     (from: number, to: number, row: Person) => {
-      setData((prev) => reorderDemoRows(prev, from, to, row, grouping, tree));
+      setData((prev) =>
+        reorderPeople(prev, from, to, row, reorderShapeOf(grouping, tree))
+      );
     },
     [grouping, tree]
   );
   const onGroupMove = useCallback<
     NonNullable<RowReorderOptions<Person>["onGroupMove"]>
   >((row, _fromGroup, toGroup, position) => {
-    setData((prev) => {
-      const remaining = prev.filter((candidate) => candidate.id !== row.id);
-      const changes = Object.fromEntries(
-        toGroup.levels.map((level) => [level.key, level.value])
-      );
-      const moved: Person = Object.assign({}, row, changes);
-      const destinations = groupDestinationIndices(remaining, toGroup);
-      const at = insertionIndex(destinations, position, remaining.length);
-      const next = remaining.slice();
-      next.splice(at, 0, moved);
-      return next;
-    });
+    setData((prev) => withPersonMovedToGroup(prev, row, toGroup, position));
   }, []);
   const onTreeMove = useCallback<
     NonNullable<RowReorderOptions<Person>["onTreeMove"]>
   >((row, _fromParent, toParent, position) => {
-    setData((prev) => {
-      const remaining = prev.filter((candidate) => candidate.id !== row.id);
-      const moved: Person = { ...row, managerId: toParent.id };
-      const destinations = treeDestinationIndices(remaining, toParent.id);
-      const at = insertionIndex(destinations, position, remaining.length);
-      const next = remaining.slice();
-      next.splice(at, 0, moved);
-      return next;
-    });
+    setData((prev) => withPersonMovedUnder(prev, row, toParent.id, position));
   }, []);
   const [activeEdit, setActiveEdit] = useState<{
     rowId: string;
@@ -1317,7 +1226,7 @@ function Backend({
     usePaginatedQuery: usePeopleQuery,
     arrayExtraKeys: DEMO_FILTER_RUNTIME.arrayExtraKeys,
     numberExtraKeys: DEMO_FILTER_RUNTIME.numberExtraKeys,
-    defaults: DEFAULTS,
+    defaults: DEFAULT_PAGE,
     paginationMode: pageMode,
     urlKey,
     urlSync,

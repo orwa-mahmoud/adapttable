@@ -22,103 +22,19 @@ import { initialDemoDirection, initialDemoLocale } from "./demoPresentation";
 import { kitClassNames, KitProvider, kitTable } from "./kitProviders";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { useNavHeight } from "./sections";
-
-interface BigPerson {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-  budget: number;
-}
-
-const FIRST = [
-  "Amara",
-  "Diego",
-  "Priya",
-  "Sefa",
-  "Lena",
-  "Marcus",
-  "Yuki",
-  "Fatima",
-  "Tomas",
-  "Chioma",
-  "Henrik",
-  "Sofia",
-  "Omar",
-  "Grace",
-  "Noah",
-  "Aisha",
-  "Lucas",
-  "Mira",
-  "Daniel",
-  "Elena",
-  "Kwame",
-  "Bella",
-  "Rohan",
-  "Hannah",
-];
-const LAST = [
-  "Okafor",
-  "Marchetti",
-  "Nair",
-  "Demir",
-  "Hoffmann",
-  "Bell",
-  "Tanaka",
-  "Al-Sayed",
-  "Novak",
-  "Eze",
-  "Larsson",
-  "Reyes",
-  "Haddad",
-  "Liu",
-  "Schmidt",
-];
-const ROLES = [
-  "Staff Engineer",
-  "Product Designer",
-  "Eng Manager",
-  "Frontend Engineer",
-  "Data Scientist",
-  "Backend Engineer",
-  "DevOps Engineer",
-  "QA Engineer",
-];
-const STATUSES = ["Active", "Paid", "Open", "Blocked", "Archived"];
-
-/** Deterministic 50k-row generator (seeded, no Math.random). */
-function makeBigList(n: number): BigPerson[] {
-  const out: BigPerson[] = new Array<BigPerson>(n);
-  let seed = 1337;
-  const rnd = () => {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    return seed / 0x7fffffff;
-  };
-  for (let i = 0; i < n; i++) {
-    const f = FIRST[(rnd() * FIRST.length) | 0];
-    const l = LAST[(rnd() * LAST.length) | 0];
-    out[i] = {
-      id: i + 1,
-      name: `${f} ${l}`,
-      email:
-        `${f}.${l}`.toLowerCase().replace(/[^a-z.]/g, "") + i + "@northwind.io",
-      role: ROLES[(rnd() * ROLES.length) | 0],
-      status: STATUSES[(rnd() * STATUSES.length) | 0],
-      budget: 40000 + ((rnd() * 180000) | 0),
-    };
-  }
-  return out;
-}
-
-/** Children per parent in the `?tree=1` benchmark shape. */
-const TREE_FANOUT = 10;
-
-const money = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+import {
+  type BigPerson,
+  makeBigList,
+  paddingColumns,
+  SCALE_COLUMNS,
+  SCALE_SLICE,
+  SCALE_TREE_FANOUT,
+  scaleParams,
+  scalePlaceholder,
+  scaleRowKey,
+  serverSlice,
+  variableRowHeight,
+} from "./shared/scaleScenario";
 
 function PersonCell({ row }: Readonly<CellProps<BigPerson>>) {
   return (
@@ -131,79 +47,9 @@ function PersonCell({ row }: Readonly<CellProps<BigPerson>>) {
   );
 }
 
-const COLUMNS: ColumnDef<BigPerson>[] = [
-  {
-    key: "name",
-    header: "Person",
-    sortable: true,
-    sortValue: (r) => r.name,
-    Cell: PersonCell,
-  },
-  { key: "role", header: "Role", accessor: (r) => r.role },
-  { key: "status", header: "Status", accessor: (r) => r.status },
-  {
-    key: "budget",
-    header: "Budget",
-    align: "end",
-    sortable: true,
-    sortValue: (r) => r.budget,
-    accessor: (r) => money.format(r.budget),
-  },
-];
-
-/** Scale-demo knobs from the URL — `?rows=N` (default 50,000), `?virtualize=0`
- *  to turn windowing OFF, `?all=1` to load the whole list up front, `?cols=N`
- *  to pad the table out to N columns, `?tier=server` to answer from a paged
- *  server instead of memory, `?edit=1` to make the cells editable, and
- *  `?patch=N` to apply N row patches after mount, `?rowHeight=1` for a
- *  variable-height virtualizer. They drive the benchmark suite
- *  (`scripts/bench.mjs`); every default is the demo a visitor sees. */
-function scaleParams(): {
-  total: number;
-  virtual: boolean;
-  virtualCols: boolean;
-  all: boolean;
-  cols: number;
-  server: boolean;
-  edit: boolean;
-  patches: number;
-  incremental: boolean;
-  tree: boolean;
-  variableHeight: boolean;
-} {
-  const DEFAULTS = {
-    total: 50000,
-    virtual: true,
-    all: false,
-    cols: 0,
-    server: false,
-    edit: false,
-    patches: 0,
-    incremental: false,
-    virtualCols: false,
-    tree: false,
-    variableHeight: false,
-  };
-  if (typeof window === "undefined") return DEFAULTS;
-  const p = new URLSearchParams(window.location.search);
-  const int = (key: string) => {
-    const value = Number(p.get(key));
-    return Number.isInteger(value) && value > 0 ? value : 0;
-  };
-  return {
-    total: int("rows") || DEFAULTS.total,
-    virtual: p.get("virtualize") !== "0",
-    virtualCols: p.get("virtualizeColumns") === "1",
-    all: p.get("all") === "1",
-    cols: int("cols"),
-    server: p.get("tier") === "server",
-    edit: p.get("edit") === "1",
-    patches: int("patch"),
-    incremental: p.get("incremental") === "1",
-    tree: p.get("tree") === "1",
-    variableHeight: p.get("rowHeight") === "1",
-  };
-}
+const COLUMNS: ColumnDef<BigPerson>[] = SCALE_COLUMNS.map((column) =>
+  column.key === "name" ? { ...column, Cell: PersonCell } : { ...column }
+);
 
 /**
  * Pad the column set out to `cols` for the wide-table benchmark: the real
@@ -227,43 +73,7 @@ function widen(
           : column
       )
     : columns;
-  if (cols <= base.length) return base;
-  const columnsIn = base;
-  const extra: ColumnDef<BigPerson>[] = [];
-  for (let i = columnsIn.length; i < cols; i++) {
-    extra.push({
-      key: `synthetic${i}`,
-      header: `Col ${i}`,
-      accessor: (r) => (i % 2 === 0 ? r.role : r.status),
-      width: 120,
-    });
-  }
-  return [...columnsIn, ...extra];
-}
-
-/**
- * One row of a dataset too big to hold, synthesized on demand.
- *
- * A million-row server tier cannot be faked by generating a million rows in the
- * tab — that measures the generator, not the table. Rows are derived from their
- * index instead, so a page costs a page and the reported total is honest.
- */
-function serverRow(index: number): BigPerson {
-  let seed = (index + 1) * 2654435761;
-  const rnd = () => {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    return seed / 0x7fffffff;
-  };
-  const f = FIRST[(rnd() * FIRST.length) | 0];
-  const l = LAST[(rnd() * LAST.length) | 0];
-  return {
-    id: index + 1,
-    name: `${f} ${l}`,
-    email: `${f}.${l}`.toLowerCase() + index + "@northwind.io",
-    role: ROLES[(rnd() * ROLES.length) | 0],
-    status: STATUSES[(rnd() * STATUSES.length) | 0],
-    budget: 40000 + ((rnd() * 180000) | 0),
-  };
+  return [...base, ...paddingColumns(base.length, cols)];
 }
 
 /**
@@ -271,9 +81,6 @@ function serverRow(index: number): BigPerson {
  * browser never holds the set. `total` is what the pager and the ARIA counts
  * report, so 1,000,000 means 1,000,000.
  */
-function variableRowHeight(row: BigPerson): number {
-  return 40 + (row.id % 4) * 12;
-}
 
 function ServerScaleTable({
   total,
@@ -292,12 +99,9 @@ function ServerScaleTable({
   dark: boolean;
   kit: string;
 }>) {
-  const [page, setPage] = useState({ from: 0, limit: 500 });
+  const [page, setPage] = useState({ from: 0, limit: SCALE_SLICE });
   const rows = useMemo(
-    () =>
-      Array.from({ length: Math.min(page.limit, total - page.from) }, (_, i) =>
-        serverRow(page.from + i)
-      ),
+    () => serverSlice(page.from, page.limit, total),
     [page, total]
   );
   const source = useServerData<BigPerson>({
@@ -306,7 +110,7 @@ function ServerScaleTable({
     urlKey: "scale",
     urlSync: false,
     paginationMode: "infinite",
-    defaults: { limit: 500 },
+    defaults: { limit: SCALE_SLICE },
     onQueryChange: (query) => {
       setPage({ from: (query.page - 1) * query.limit, limit: query.limit });
     },
@@ -319,10 +123,10 @@ function ServerScaleTable({
         dir={initialDemoDirection()}
         source={source}
         columns={columns}
-        rowKey={(r) => String(r.id)}
+        rowKey={scaleRowKey}
         labels={getLabels(initialDemoLocale())}
         urlSync={false}
-        searchPlaceholder={`Filter ${total.toLocaleString("en-US")} rows…`}
+        searchPlaceholder={scalePlaceholder(total)}
         // The window is what this page exists to show, so it is imported —
         // and the import carries its own configuration.
         features={[
@@ -490,12 +294,13 @@ function FrontendScaleTable({
   const treeShape = useMemo(() => {
     if (!tree) return undefined;
     const roots: string[] = [];
-    for (let id = 1; id <= total; id += TREE_FANOUT) roots.push(String(id));
+    for (let id = 1; id <= total; id += SCALE_TREE_FANOUT)
+      roots.push(String(id));
     return {
       getParentId: (row: BigPerson) =>
-        (row.id - 1) % TREE_FANOUT === 0
+        (row.id - 1) % SCALE_TREE_FANOUT === 0
           ? undefined
-          : String(row.id - ((row.id - 1) % TREE_FANOUT)),
+          : String(row.id - ((row.id - 1) % SCALE_TREE_FANOUT)),
       expandedIds: roots,
     };
   }, [tree, total]);
@@ -509,7 +314,7 @@ function FrontendScaleTable({
     // the scroller nears the end (no Load-more button needed). `?all=1` loads
     // the whole list up front so the non-virtualized A/B arm renders every row.
     paginationMode: "infinite",
-    defaults: { limit: all ? total : 500 },
+    defaults: { limit: all ? total : SCALE_SLICE },
   });
   const Table = kitTable<BigPerson>(kit);
   const navHeight = useNavHeight();
@@ -522,7 +327,7 @@ function FrontendScaleTable({
       applyRowPatches(
         current,
         [updateRow<BigPerson>(String(row.id), { budget: Number(nextValue) })],
-        (r) => String(r.id)
+        scaleRowKey
       )
     );
   };
@@ -541,10 +346,10 @@ function FrontendScaleTable({
           dir={initialDemoDirection()}
           source={source}
           columns={columns}
-          rowKey={(r) => String(r.id)}
+          rowKey={scaleRowKey}
           labels={getLabels(initialDemoLocale())}
           urlSync={false}
-          searchPlaceholder={`Filter ${total.toLocaleString("en-US")} rows…`}
+          searchPlaceholder={scalePlaceholder(total)}
           // Imported, not switched on: the window, the tree and the editor
           // each arrive with the feature that draws them.
           features={[

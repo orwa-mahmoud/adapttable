@@ -5,6 +5,7 @@ import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Pin } from "./sectionIcons";
+import { ROWS_PAGE_HEIGHT } from "./shared/rowsScenario";
 
 /**
  * The rows page: pin, merge, act. Movement lives on row-reordering.
@@ -33,6 +34,7 @@ export function RowsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 locale={initialDemoLocale()}
                 dark={dark}
                 urlKey="rows"
+                maxHeight={ROWS_PAGE_HEIGHT}
                 rowMutations
                 rowPinning
                 cellSpan

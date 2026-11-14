@@ -5,6 +5,7 @@ import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Layers } from "./sectionIcons";
+import { TREE_HINTS, TREE_URL_KEY } from "./shared/treeScenario";
 
 /**
  * The tree page: hierarchy in a table, and nothing else.
@@ -19,19 +20,11 @@ export function TreeDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   return (
     <div className="mx-demo">
       <div className="hint-row">
-        <span className="hint">
-          <Layers size={12} /> Maya Chen is the root — chevrons open a branch
-        </span>
-        <span className="hint">
-          <Check size={12} /> arrow keys walk the tree, Enter toggles
-        </span>
-        <span className="hint">
-          <Check size={12} /> expansion is carried in the URL
-        </span>
-        <span className="hint">
-          <Check size={12} /> moving a child under a new parent is on
-          row-reordering
-        </span>
+        {TREE_HINTS.map((hint, index) => (
+          <span className="hint" key={hint}>
+            {index === 0 ? <Layers size={12} /> : <Check size={12} />} {hint}
+          </span>
+        ))}
       </div>
       <div className="mx-demo__body">
         <div key={adapter} data-adapter={adapter}>
@@ -41,7 +34,7 @@ export function TreeDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 mode="frontend"
                 locale={initialDemoLocale()}
                 dark={dark}
-                urlKey="tree"
+                urlKey={TREE_URL_KEY}
                 tree
                 focused
               />
