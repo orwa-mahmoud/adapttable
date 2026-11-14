@@ -9,6 +9,9 @@ import {
   type FocusEvent,
   type KeyboardEvent,
   type ReactNode,
+  useCallback,
+  useLayoutEffect,
+  useRef,
 } from "react";
 
 import { KitPortal } from "./kitPortal";
@@ -59,6 +62,20 @@ export function Checkbox({
   "aria-busy"?: true;
   "data-conflict"?: "";
 }>) {
+  // The mixed state also lives on the real input, so assistive technology
+  // announces it; the root's indeterminate state only draws the dash.
+  const input = useRef<HTMLInputElement | null>(null);
+  const mixed = indeterminate === true;
+  useLayoutEffect(() => {
+    if (input.current) input.current.indeterminate = mixed;
+  });
+  const attachInput = useCallback(
+    (node: HTMLInputElement | null) => {
+      input.current = node;
+      inputRef?.(node);
+    },
+    [inputRef]
+  );
   return (
     <ChakraCheckbox.Root
       style={useMobileTarget()}
@@ -79,7 +96,7 @@ export function Checkbox({
           change-event value tracker, so `onChange` can silently no-op after an
           out-of-band selection change — `onClick` always fires once per click. */}
       <ChakraCheckbox.HiddenInput
-        ref={inputRef}
+        ref={attachInput}
         aria-label={ariaLabel}
         onKeyDown={onKeyDown}
         onClick={onToggle ? () => onToggle() : undefined}

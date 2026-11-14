@@ -67,7 +67,7 @@ export function buttonOfSize(
         colorPalette={tone === "danger" ? "red" : color}
         width={fullWidth ? "100%" : undefined}
         justifyContent={justify ? "flex-start" : undefined}
-        loading={busy}
+        loading={isBusy(busy, rest)}
         {...rest}
       />
     );
@@ -76,6 +76,18 @@ export function buttonOfSize(
 
 /** The kit's compact button. */
 export const Button = /* @__PURE__ */ buttonOfSize("xs");
+
+/**
+ * Chakra's button writes `data-loading` from its own `loading` prop and
+ * drops one passed in, so a control that marks itself loading (a tree branch
+ * fetching its children) shows Chakra's busy state instead.
+ */
+function isBusy(
+  busy: boolean | undefined,
+  data: Readonly<Record<string, unknown>>
+): boolean | undefined {
+  return busy === true || data["data-loading"] !== undefined || undefined;
+}
 
 /** A glyph button: quiet unless the binding asks otherwise. */
 export const IconButton = forwardRef<HTMLButtonElement, KitIconButtonProps>(
@@ -99,7 +111,7 @@ export const IconButton = forwardRef<HTMLButtonElement, KitIconButtonProps>(
         size="xs"
         variant={VARIANT[variant]}
         colorPalette={tone === "danger" ? "red" : undefined}
-        loading={busy}
+        loading={isBusy(busy, rest)}
         {...rest}
       />
     );
