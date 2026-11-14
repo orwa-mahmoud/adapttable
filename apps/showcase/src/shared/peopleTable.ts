@@ -455,6 +455,16 @@ export const LIVE_DEFAULT_LAYOUT: Partial<ColumnLayoutState> = {
 };
 
 /**
+ * Span demo: Team is the merge column — one label down consecutive
+ * teammates who share it. Email stays hidden (same as Baseline) so the
+ * table does not grow a 250px column just to cover it. Load hides so
+ * showing Team does not add a column: same count, no sideways scroll.
+ */
+export const SPAN_DEFAULT_LAYOUT: Partial<ColumnLayoutState> = {
+  hidden: ["email", "load"],
+};
+
+/**
  * Pinning a column reveals every hidden column, so the table widens past its
  * frame and the pinned column is seen to stick while the body scrolls
  * sideways. Only a pin that was not there before reveals; an unpin or a

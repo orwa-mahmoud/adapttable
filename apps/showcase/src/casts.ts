@@ -12,13 +12,12 @@ import type { ColumnLayoutState } from "@adapttable/core";
 
 import {
   budget,
-  LIVE_DEFAULT_LAYOUT,
   PEOPLE,
   type Person,
   personStatus,
-  SPAN_DEFAULT_LAYOUT,
   utilization,
-} from "./data";
+} from "./people";
+import { LIVE_DEFAULT_LAYOUT, SPAN_DEFAULT_LAYOUT } from "./shared/peopleTable";
 
 export type DemoScenario =
   | "live"
