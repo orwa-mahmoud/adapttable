@@ -427,6 +427,7 @@ export function createDesktopTable<TExtra>(
       onToggleExpand,
       renderDetail,
       focusIndex,
+      railInsets,
       edgeRowPin,
       measureRef,
       detailMeasureRef,
@@ -440,14 +441,11 @@ export function createDesktopTable<TExtra>(
     } = props;
     const paint = kit.usePaint(stickyHeader);
     const classOf = usePartClass();
+    const expandable = expanded !== undefined;
     const state: KitDesktopRowState = {
       rowPinned: rowPinSide !== undefined,
       stickyHeader,
     };
-    const expandable = expanded !== undefined;
-    const expansionLead = expandable ? kit.widths.expansion : 0;
-    const selectionLead =
-      expansionLead + (showReorder ? REORDER_COLUMN_WIDTH : 0);
     // A pinned total is the host's figure, not a person: it reads semibold,
     // as the column footer's summary does.
     const summaryRow =
@@ -478,7 +476,7 @@ export function createDesktopTable<TExtra>(
               kind="lead"
               data-adapttable-part="expand-cell"
               data-pinned={pinnedSide("start", hasStartPin)}
-              style={rail("start", hasStartPin)}
+              style={rail("start", hasStartPin, railInsets.expand)}
             >
               <OptionalExpandToggle
                 id={id}
@@ -495,7 +493,11 @@ export function createDesktopTable<TExtra>(
               kind="lead"
               data-adapttable-part="reorder-cell"
               data-pinned={pinnedSide("start", hasStartPin || reorderPinned)}
-              style={rail("start", hasStartPin || reorderPinned, expansionLead)}
+              style={rail(
+                "start",
+                hasStartPin || reorderPinned,
+                railInsets.reorder
+              )}
             >
               <OptionalRowReorderHandle
                 reorder={rowReorder}
@@ -514,7 +516,7 @@ export function createDesktopTable<TExtra>(
               kind="lead"
               data-adapttable-part="selection-cell"
               data-pinned={pinnedSide("start", hasStartPin)}
-              style={rail("start", hasStartPin, selectionLead)}
+              style={rail("start", hasStartPin, railInsets.selection)}
             >
               <Checkbox
                 aria-label={labels.selectRow}
@@ -602,7 +604,11 @@ export function createDesktopTable<TExtra>(
               kind="actions"
               data-adapttable-part="actions-cell"
               data-pinned={pinnedSide("end", hasEndPin || actionsPinned)}
-              style={rail("end", hasEndPin || actionsPinned)}
+              style={rail(
+                "end",
+                hasEndPin || actionsPinned,
+                railInsets.actions
+              )}
             >
               {editing?.rowEditing && (
                 <OptionalRowEditActions
@@ -791,7 +797,12 @@ export function createDesktopTable<TExtra>(
             data-sticky={pin.stickyAttr}
             data-pinned={pinnedSide("start", pin.hasStartPin)}
             rowSpan={span(rowSpan)}
-            style={paint.headRail("start", pin.hasStartPin, 0, pin)}
+            style={paint.headRail(
+              "start",
+              pin.hasStartPin,
+              pin.railInsets.expand,
+              pin
+            )}
           >
             <span style={VISUALLY_HIDDEN}>{labels.expandRow}</span>
           </HeaderCell>
@@ -811,7 +822,7 @@ export function createDesktopTable<TExtra>(
             style={paint.headRail(
               "start",
               pin.hasStartPin || Boolean(props.reorderPinned),
-              pin.expansionLead,
+              pin.railInsets.reorder,
               pin
             )}
           />
@@ -827,7 +838,7 @@ export function createDesktopTable<TExtra>(
             style={paint.headRail(
               "start",
               pin.hasStartPin,
-              pin.selectionLead,
+              pin.railInsets.selection,
               pin
             )}
           >
@@ -865,7 +876,7 @@ export function createDesktopTable<TExtra>(
             style={paint.headRail(
               "end",
               pin.hasEndPin || pin.stickActions,
-              0,
+              pin.railInsets.actions,
               pin
             )}
           >

@@ -42,6 +42,7 @@ import {
   type pinnedRowCellStyle,
   type pinnedRowPart,
   type pinnedRowSticky,
+  type RailInsets,
   REORDER_COLUMN_WIDTH,
 } from "@adapttable/core/binding";
 import {
@@ -52,6 +53,7 @@ import {
   type ReactNode,
   type RefCallback,
   useCallback,
+  useMemo,
   useRef,
   useSyncExternalStore,
 } from "react";
@@ -84,6 +86,7 @@ import type {
 import type { RowPairMeasurer } from "../virtual/measureRowPair";
 import { useHorizontalOverflow } from "./useHorizontalOverflow";
 import { useOffsetHeight } from "./useOffsetHeight";
+import { useRailWidths } from "./useRailWidths";
 
 export type { DesktopChromeWidths } from "@adapttable/core/binding";
 export {
@@ -294,6 +297,8 @@ export interface DesktopRowWiring<TRow> {
   measureRowPair?: RowPairMeasurer;
   /** Width reserved by injected chrome at each edge. */
   leads: PinLeads;
+  /** Where each rail sticks. */
+  railInsets: RailInsets;
   /** Index focus and ARIA address this row by — the source index. */
   focusIndex: number;
   /** Part name for a pinned row. */
@@ -382,6 +387,8 @@ export interface DesktopTablePin {
   signature: string;
   /** Width reserved by injected chrome at each edge. */
   leads: PinLeads;
+  /** Where each rail sticks. */
+  railInsets: RailInsets;
   /** Total width the injected chrome adds: both leads together. */
   extraMinWidth: number;
   /** Width the expansion column reserves, 0 when there is none. */
@@ -806,18 +813,37 @@ export function useDesktopTableAssembly<TRow>(
   const { ref: overflowRef, overflowing } =
     useHorizontalOverflow<HTMLDivElement>();
 
+  const hasPinned = desktopHasPinned(
+    columns,
+    pinOffset,
+    stickActions,
+    showReorder && reorderPinned
+  );
+  const [railRef, measuredRails] = useRailWidths(hasPinned);
+  const bindHead = useCallback(
+    (node: HTMLElement | null) => {
+      theadRef(node);
+      railRef(node);
+    },
+    [theadRef, railRef]
+  );
   const metrics = desktopChromeMetrics({
     expandable,
     showReorder,
     hasSelection: Boolean(selection),
     showActions,
     widths: options.widths,
+    measured: measuredRails,
   });
-  const hasPinned = desktopHasPinned(
-    columns,
-    pinOffset,
-    stickActions,
-    showReorder && reorderPinned
+  const {
+    expand,
+    reorder,
+    selection: selectionInset,
+    actions,
+  } = metrics.railInsets;
+  const railInsets = useMemo(
+    () => ({ expand, reorder, selection: selectionInset, actions }),
+    [expand, reorder, selectionInset, actions]
   );
   const {
     inScrollBox,
@@ -837,8 +863,10 @@ export function useDesktopTableAssembly<TRow>(
   const {
     hasStartPin,
     hasEndPin,
-    signature: pinSignature,
+    signature: columnPinSignature,
   } = desktopPinEdges(columns, pinOffset);
+  // Rows repaint their pinned cells when a rail's width moves the insets.
+  const pinSignature = `${columnPinSignature}|${metrics.railSignature}`;
   const headStyle = (column: { key: string; width?: number | string }) =>
     desktopHeadCellStyle(column, {
       pinOffset,
@@ -880,6 +908,7 @@ export function useDesktopTableAssembly<TRow>(
     rowStyle,
     rowHeight,
     leads: metrics.leads,
+    railInsets,
     pinRowSticky,
     rowPinOffset,
     measureRowPair,
@@ -1018,7 +1047,7 @@ export function useDesktopTableAssembly<TRow>(
         actions: showActions,
       },
       leaf,
-      theadRef,
+      theadRef: bindHead,
       headerRowRef,
       headerRowProps: table.getHeaderRowProps(),
     },
@@ -1029,6 +1058,7 @@ export function useDesktopTableAssembly<TRow>(
       stickActions,
       signature: pinSignature,
       leads: metrics.leads,
+      railInsets,
       extraMinWidth: metrics.extraMinWidth,
       expansionLead: metrics.expansionLead,
       reorderLead: metrics.reorderLead,
