@@ -9,9 +9,13 @@ import { TestBed } from "@angular/core/testing";
 import { within } from "@testing-library/dom";
 import { describe, expect, it, vi } from "vitest";
 
+import { commandPaletteTests } from "../../angular/test/kit/suites/commandPalette";
 import { AdaptCommandPaletteButton } from "../command-palette/palette";
+import { kit } from "../testing/kit";
 import { kitSelector } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
+
+for (const test of commandPaletteTests(kit)) it(test.name, test.run);
 
 interface Row {
   id: string;
@@ -293,26 +297,6 @@ describe("command palette (Angular Material)", () => {
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
     first.destroy();
     second.destroy();
-  });
-
-  it("reports open requests while a plain controlled false keeps the palette closed", async () => {
-    const fixture = TestBed.createComponent(Host);
-    const onOpenChange = vi.fn();
-    fixture.componentInstance.features[0] = commandPalette({
-      button: true,
-      open: false,
-      onOpenChange,
-    });
-    document.body.append(fixture.nativeElement);
-    fixture.autoDetectChanges();
-    await fixture.whenStable();
-    const trigger = part("command-palette-button")!;
-    trigger.click();
-    await fixture.whenStable();
-    expect(onOpenChange.mock.calls).toEqual([[true]]);
-    expect(part("command-palette")).toBeNull();
-    expect(trigger.getAttribute("aria-expanded")).toBe("false");
-    fixture.destroy();
   });
 
   it("omits the toolbar button unless the host asks, and draws nothing without the token", () => {

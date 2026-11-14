@@ -9,8 +9,12 @@ import { Component } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
+import { findInTableTests } from "../../angular/test/kit/suites/findInTable";
+import { kit } from "../testing/kit";
 import { ngBootstrapPart } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
+
+for (const test of findInTableTests(kit)) it(test.name, test.run);
 
 interface Row {
   id: string;
@@ -106,31 +110,5 @@ describe("find in table (unstyled Angular)", () => {
     await fixture.whenStable();
     expect(part("find-bar")).toBeNull();
     expect(document.querySelectorAll("[data-cell-match]")).toHaveLength(0);
-  });
-
-  it("opens on Ctrl+F inside the table when the grid is on", async () => {
-    const fixture = await mount(true);
-    const cell = document.querySelector<HTMLElement>("[data-grid-cell]")!;
-    cell.focus();
-    cell.dispatchEvent(
-      new KeyboardEvent("keydown", {
-        key: "f",
-        ctrlKey: true,
-        bubbles: true,
-        cancelable: true,
-      })
-    );
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(part("find-bar")).not.toBeNull();
-  });
-
-  it("draws no find button unless the feature asks for one", async () => {
-    const fixture = TestBed.createComponent(Host);
-    fixture.componentInstance.features = [findInTable()];
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(part("find-button")).toBeNull();
-    expect(part("find-bar")).toBeNull();
   });
 });

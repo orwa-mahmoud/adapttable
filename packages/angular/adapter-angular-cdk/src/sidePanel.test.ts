@@ -3,19 +3,15 @@
  */
 import type { ColumnDef } from "@adapttable/angular";
 import { sidePanel } from "@adapttable/angular-cdk/side-panel";
-import {
-  Component,
-  computed,
-  input,
-  signal,
-  type TemplateRef,
-  viewChild,
-} from "@angular/core";
+import { Component, computed, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
-import { AdaptSidePanelFrame } from "../side-panel/panel";
+import { sidePanelTests } from "../../angular/test/kit/suites/sidePanel";
+import { kit } from "../testing/kit";
 import { AdaptDataTable } from "./dataTable";
+
+for (const test of sidePanelTests(kit)) it(test.name, test.run);
 
 interface Row {
   id: string;
@@ -94,12 +90,6 @@ async function mount(
 }
 
 describe("sidePanel", () => {
-  it("is a feature", () => {
-    expect(
-      sidePanel({ panels: [], open: null, onOpenChange: () => undefined })
-    ).toBeTruthy();
-  });
-
   it("docks the open panel and answers the tabs and the close control", async () => {
     const absent = await mount(false);
     expect(part("side-panel")).toBeNull();
@@ -133,35 +123,5 @@ describe("sidePanel", () => {
     await fixture.whenStable();
     expect(host.opened).toHaveBeenCalledWith(null);
     expect(part("side-panel")).toBeNull();
-  });
-});
-
-describe("AdaptSidePanelFrame", () => {
-  it("outlets a body without a header, and nothing when both are absent", async () => {
-    @Component({
-      imports: [AdaptSidePanelFrame],
-      template: `
-        <ng-template #body>Only the body</ng-template>
-        <adapt-side-panel-frame [props]="frameProps()" />
-      `,
-    })
-    class FrameHost {
-      readonly body = viewChild<TemplateRef<unknown>>("body");
-      readonly withBody = signal(false);
-      readonly frameProps = computed(() => ({
-        side: "end" as const,
-        body: this.withBody() ? this.body() : undefined,
-      }));
-    }
-    const fixture = TestBed.createComponent(FrameHost);
-    document.body.append(fixture.nativeElement);
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(part("side-panel")?.textContent).not.toContain("Only the body");
-
-    fixture.componentInstance.withBody.set(true);
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(part("side-panel")?.textContent).toContain("Only the body");
   });
 });

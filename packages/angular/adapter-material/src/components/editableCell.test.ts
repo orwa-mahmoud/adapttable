@@ -18,6 +18,8 @@ import { MatInput } from "@angular/material/input";
 import { By } from "@angular/platform-browser";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { editableCellTests } from "../../../angular/test/kit/suites/editableCell";
+import { kit } from "../../testing/kit";
 import { kitSelector } from "../../testUtils";
 import { AdaptDataTable } from "../dataTable";
 import {
@@ -25,6 +27,8 @@ import {
   AdaptEditableCell,
   AdaptMaterialCellEditor,
 } from "./editableCell";
+
+for (const test of editableCellTests(kit)) it(test.name, test.run);
 
 interface Shift {
   id: string;
@@ -152,29 +156,6 @@ describe("AdaptEditableCell", () => {
     expect(document.activeElement).toBe(activates()[0]);
   });
 
-  it("keeps arrow keys on the editor so caret moves without grid focus", async () => {
-    const onCellEdit = vi.fn();
-    const { settle } = await mount(onCellEdit as CellEditHandler<Shift>);
-    activates()[0]!.dispatchEvent(
-      new MouseEvent("dblclick", { bubbles: true })
-    );
-    await settle();
-    const input = editor() as HTMLInputElement;
-    expect(input).not.toBeNull();
-    input.focus();
-    input.setSelectionRange(1, 1);
-    const arrow = new KeyboardEvent("keydown", {
-      key: "ArrowLeft",
-      bubbles: true,
-      cancelable: true,
-    });
-    const stopped = vi.spyOn(arrow, "stopPropagation");
-    input.dispatchEvent(arrow);
-    expect(stopped).toHaveBeenCalled();
-    expect(document.activeElement).toBe(input);
-    expect(onCellEdit).not.toHaveBeenCalled();
-  });
-
   it("offers only the select column's options", async () => {
     const onCellEdit = vi.fn();
     const { settle } = await mount(onCellEdit as CellEditHandler<Shift>);
@@ -222,30 +203,73 @@ describe("AdaptEditableCell", () => {
     await settle();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(ROW, "approved", true);
   });
-
-  it("hands the host the date string for a date editor", async () => {
-    const onCellEdit = vi.fn();
-    const { settle } = await mount(onCellEdit as CellEditHandler<Shift>);
-    activates()[2]!.dispatchEvent(
-      new MouseEvent("dblclick", { bubbles: true })
-    );
-    await settle();
-    const input = editor() as HTMLInputElement;
-    expect(input.type).toBe("date");
-    expect(input.value).toBe("2026-08-13");
-    input.value = "2026-09-01";
-    input.dispatchEvent(new Event("input"));
-    input.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-    );
-    await settle();
-    expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
-      ROW,
-      "day",
-      "2026-09-01"
-    );
-  });
 });
+
+interface TaggedRow {
+  id: string;
+  tags: string[];
+}
+
+@Component({
+  imports: [AdaptEditableCell],
+  template: `
+    @if (checkboxes()) {
+      <adapt-editable-cell [props]="props()" [editor]="editorType" />
+    } @else {
+      <adapt-editable-cell [props]="props()" />
+    }
+  `,
+})
+class CheckboxEditorHost {
+  readonly checkboxes = input(true);
+  readonly editorType = AdaptCheckboxCellEditor;
+  readonly row: TaggedRow = { id: "tagged", tags: ["internal"] };
+  readonly column = {
+    key: "tags",
+    editable: true,
+    editor: {
+      type: "multi-select",
+      options: [
+        { value: "urgent", label: "Urgent" },
+        { value: "internal", label: "Internal" },
+      ],
+    },
+  } satisfies ColumnDef<TaggedRow>;
+  readonly onCellEdit = vi.fn();
+  readonly onEditCancel = vi.fn();
+  readonly state = injectCellEditing<TaggedRow>({
+    onEditCancel: this.onEditCancel,
+  });
+  readonly props = computed((): EditableCellSlotProps<TaggedRow> => ({
+    editing: { state: this.state(), onCellEdit: this.onCellEdit },
+    row: this.row,
+    column: this.column,
+    rowId: this.row.id,
+    rowIndex: 0,
+    rows: [this.row],
+    columns: [this.column],
+    rowKey: (row) => row.id,
+    editLabel: "Edit tags",
+    display: "Internal",
+  }));
+}
+
+async function mountCheckboxEditor() {
+  const fixture = TestBed.createComponent(CheckboxEditorHost);
+  document.body.append(fixture.nativeElement as HTMLElement);
+  fixture.autoDetectChanges();
+  await fixture.whenStable();
+  activates()[0]!.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+  await fixture.whenStable();
+  const root: HTMLElement = fixture.nativeElement;
+  return {
+    fixture,
+    host: fixture.componentInstance,
+    checks: [
+      ...root.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+    ],
+  };
+}
 
 describe("AdaptMaterialCellEditor validation attributes", () => {
   const choices = [
@@ -344,72 +368,6 @@ describe("AdaptMaterialCellEditor validation attributes", () => {
     }
   );
 });
-
-interface TaggedRow {
-  id: string;
-  tags: string[];
-}
-
-@Component({
-  imports: [AdaptEditableCell],
-  template: `
-    @if (checkboxes()) {
-      <adapt-editable-cell [props]="props()" [editor]="editorType" />
-    } @else {
-      <adapt-editable-cell [props]="props()" />
-    }
-  `,
-})
-class CheckboxEditorHost {
-  readonly checkboxes = input(true);
-  readonly editorType = AdaptCheckboxCellEditor;
-  readonly row: TaggedRow = { id: "tagged", tags: ["internal"] };
-  readonly column = {
-    key: "tags",
-    editable: true,
-    editor: {
-      type: "multi-select",
-      options: [
-        { value: "urgent", label: "Urgent" },
-        { value: "internal", label: "Internal" },
-      ],
-    },
-  } satisfies ColumnDef<TaggedRow>;
-  readonly onCellEdit = vi.fn();
-  readonly onEditCancel = vi.fn();
-  readonly state = injectCellEditing<TaggedRow>({
-    onEditCancel: this.onEditCancel,
-  });
-  readonly props = computed((): EditableCellSlotProps<TaggedRow> => ({
-    editing: { state: this.state(), onCellEdit: this.onCellEdit },
-    row: this.row,
-    column: this.column,
-    rowId: this.row.id,
-    rowIndex: 0,
-    rows: [this.row],
-    columns: [this.column],
-    rowKey: (row) => row.id,
-    editLabel: "Edit tags",
-    display: "Internal",
-  }));
-}
-
-async function mountCheckboxEditor() {
-  const fixture = TestBed.createComponent(CheckboxEditorHost);
-  document.body.append(fixture.nativeElement as HTMLElement);
-  fixture.autoDetectChanges();
-  await fixture.whenStable();
-  activates()[0]!.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
-  await fixture.whenStable();
-  const root: HTMLElement = fixture.nativeElement;
-  return {
-    fixture,
-    host: fixture.componentInstance,
-    checks: [
-      ...root.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
-    ],
-  };
-}
 
 describe("AdaptCheckboxCellEditor", () => {
   it("focuses the first choice and commits ordered choices only on leaving the group", async () => {

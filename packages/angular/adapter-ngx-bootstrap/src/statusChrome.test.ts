@@ -2,26 +2,23 @@
  * First-load skeleton, a failed load, a background refresh, the footer slot
  * and a panel beside the body.
  */
-import type { ColumnDef, TableLabels, TableQuery } from "@adapttable/angular";
-import { resolveLabels } from "@adapttable/angular/adapter";
+import type { ColumnDef, TableQuery } from "@adapttable/angular";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it } from "vitest";
 
+import { statusChromeTests } from "../../angular/test/kit/suites/statusChrome";
+import { kit } from "../testing/kit";
 import { ngxBootstrapPart } from "../testUtils";
-import { AdaptTableSkeleton } from "./components/tableSkeleton";
 import { AdaptDataTable } from "./dataTable";
+
+for (const test of statusChromeTests(kit)) it(test.name, test.run);
 
 interface City {
   id: string;
   name: string;
   region: string;
 }
-
-const CITIES: City[] = [
-  { id: "1", name: "Amman", region: "Central" },
-  { id: "2", name: "Aqaba", region: "South" },
-];
 
 const COLUMNS: ColumnDef<City>[] = [
   { key: "name", header: "Name", accessor: (row) => row.name },
@@ -132,100 +129,5 @@ describe("loading, error and status chrome", () => {
     part("retry-button")!.click();
     await fixture.whenStable();
     expect(host.asked.length).toBeGreaterThan(before);
-  });
-
-  it("omits the retry when the rows cannot be fetched again", async () => {
-    @Component({
-      imports: [AdaptDataTable],
-      template: `
-        <adapt-data-table
-          mode="frontend"
-          [data]="rows"
-          [error]="error"
-          [columns]="columns"
-          [rowKey]="rowKey"
-          [urlSync]="false"
-          [forceMobile]="false"
-        />
-      `,
-    })
-    class StaticHost {
-      readonly rows = CITIES;
-      readonly error = new Error("stuck");
-      readonly columns = COLUMNS;
-      readonly rowKey = (row: City) => row.id;
-    }
-
-    const fixture = TestBed.createComponent(StaticHost);
-    document.body.append(fixture.nativeElement as HTMLElement);
-    fixture.autoDetectChanges();
-    await fixture.whenStable();
-    expect(part("error")).not.toBeNull();
-    expect(part("retry-button")).toBeNull();
-  });
-
-  it("marks a background refresh without replacing the rows", async () => {
-    const fixture = await mount();
-    const host = fixture.componentInstance;
-    host.rows.set(CITIES);
-    host.total.set(CITIES.length);
-    host.loading.set(false);
-    await fixture.whenStable();
-    expect(part("row")).not.toBeNull();
-
-    host.loading.set(true);
-    await fixture.whenStable();
-    expect(part("refresh-indicator")).not.toBeNull();
-    expect(part("loading-table")).toBeNull();
-    expect(part("root")?.getAttribute("aria-busy")).toBe("true");
-    expect(part("root")?.getAttribute("data-refreshing")).toBe("");
-  });
-
-  it("renders a footer under the pager and a panel beside the body", async () => {
-    const fixture = await mount();
-    const host = fixture.componentInstance;
-    host.rows.set(CITIES);
-    host.total.set(CITIES.length);
-    host.loading.set(false);
-    host.footer.set(true);
-    host.panel.set(true);
-    host.side.set("start");
-    await fixture.whenStable();
-
-    expect(part("table-footer")?.textContent).toContain("Under the table");
-    expect(part("table-region")).not.toBeNull();
-    expect(part("table-region")?.style.flexDirection).toBe("row-reverse");
-    expect(part("table-region-main")?.textContent).toContain("Amman");
-    expect(part("table-region")?.textContent).toContain("Notes");
-
-    host.side.set("end");
-    await fixture.whenStable();
-    expect(part("table-region")?.style.flexDirection).toBe("row");
-  });
-
-  it("reserves a column for row actions, and at least one when none are declared", async () => {
-    @Component({
-      imports: [AdaptTableSkeleton],
-      template: `
-        <adapt-table-skeleton
-          [rows]="1"
-          [columns]="0"
-          variant="table"
-          [labels]="labels"
-          [hasActions]="true"
-        />
-      `,
-    })
-    class SkeletonHost {
-      readonly labels: Required<TableLabels> = resolveLabels(undefined);
-    }
-
-    const fixture = TestBed.createComponent(SkeletonHost);
-    document.body.append(fixture.nativeElement as HTMLElement);
-    fixture.autoDetectChanges();
-    await fixture.whenStable();
-    expect(all("loading-header-cell")).toHaveLength(2);
-    expect(all("loading-line")[0]?.style.width).toBe("70%");
-    expect(all("loading-line")[1]?.style.width).toBe("42%");
   });
 });

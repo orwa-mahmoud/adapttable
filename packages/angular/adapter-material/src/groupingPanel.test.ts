@@ -9,9 +9,13 @@ import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
+import { groupingPanelTests } from "../../angular/test/kit/suites/groupingPanel";
+import { kit } from "../testing/kit";
 import { kitSelector } from "../testUtils";
 import { AdaptGroupingPanel } from "./components/groupingPanel";
 import { AdaptDataTable } from "./dataTable";
+
+for (const test of groupingPanelTests(kit)) it(test.name, test.run);
 
 interface Row {
   id: string;
@@ -168,37 +172,6 @@ describe("AdaptGroupingPanel", () => {
     add.value = "budget";
     add.dispatchEvent(new Event("change"));
     expect(host.added).toEqual(["budget"]);
-  });
-
-  it("removes a field from its chip", async () => {
-    const { element, host } = await mountPanel();
-    one<HTMLButtonElement>(element, "grouping-chip-remove").click();
-    expect(host.removed).toEqual(["team"]);
-  });
-
-  it("numbers each chip by its grouping level", async () => {
-    const { element } = await mountPanel();
-    expect(one(element, "grouping-chip-handle").textContent).toContain(
-      "1. Team"
-    );
-  });
-
-  it("hands chip keys to the keyboard mover", async () => {
-    const { element, host } = await mountPanel();
-    const handle = one(element, "grouping-chip-handle");
-    expect(handle.getAttribute("aria-label")).toBe("Move Team");
-    handle.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })
-    );
-    expect(host.moved).toEqual(["team:ArrowRight"]);
-  });
-
-  it("ungroups a chip dropped on the remove target", async () => {
-    const { element, host } = await mountPanel();
-    const zone = one(element, "grouping-remove-zone");
-    expect(zone.getAttribute("data-active")).toBe("true");
-    zone.dispatchEvent(new Event("drop", { bubbles: true, cancelable: true }));
-    expect(host.ungrouped).toEqual(["drop"]);
   });
 
   it("adds nothing when the picker's placeholder is chosen", async () => {

@@ -12,6 +12,11 @@ import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
+import { filterHeaderRowTests } from "../../angular/test/kit/suites/filterHeaderRow";
+import { kit } from "../testing/kit";
+
+for (const test of filterHeaderRowTests(kit)) it(test.name, test.run);
+
 interface Row {
   name: string;
   team: string;
@@ -191,34 +196,6 @@ describe("AdaptFilterHeaderRow", () => {
     hired.dispatchEvent(new Event("input"));
     await fixture.whenStable();
     expect(hired.value).toBe("2024-01-01");
-  });
-
-  it("writes the upper bound of a between pair", async () => {
-    const { labeled, fixture } = await mountRow((host) => {
-      host.extra.set({ ageOp: "between", ageMin: "10", ageMax: "40" });
-    });
-    const bounds = labeled("Age") as HTMLInputElement[];
-    expect(bounds).toHaveLength(2);
-    const upper = bounds[1];
-    if (!upper) throw new Error("upper bound is not rendered");
-    upper.value = "50";
-    upper.dispatchEvent(new Event("input"));
-    await fixture.whenStable();
-    expect(upper.value).toBe("50");
-  });
-
-  it("renders nothing when the row is disabled", async () => {
-    const { element, host, fixture } = await mountRow((current) => {
-      current.enabled.set(false);
-    });
-    expect(
-      element.querySelector('[data-adapttable-part="filter-header-row"]')
-    ).toBeNull();
-    host.enabled.set(true);
-    await fixture.whenStable();
-    expect(
-      element.querySelector('[data-adapttable-part="filter-header-row"]')
-    ).not.toBeNull();
   });
 
   it("renders a lone header control", async () => {

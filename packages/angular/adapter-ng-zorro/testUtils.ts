@@ -12,8 +12,6 @@ const KIT_SELECTORS: Readonly<Record<string, string>> = {
   "page-number": "nz-pagination .ant-pagination-item button",
   "page-ellipsis":
     "nz-pagination .ant-pagination-jump-prev button, nz-pagination .ant-pagination-jump-next button",
-  "virtual-spacer":
-    'tbody > tr[inert], [data-adapttable-part="cards"] > li[aria-hidden="true"]',
   "expand-button": "adapt-expand-toggle button",
   "load-more": "adapt-table-region + div",
   "load-more-button": "adapt-table-region + div > button",

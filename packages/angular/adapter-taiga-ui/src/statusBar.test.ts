@@ -1,18 +1,15 @@
-import {
-  type AdaptTableFeature,
-  type ColumnDef,
-  type SelectionStats,
-} from "@adapttable/angular";
-import { cellNavigation } from "@adapttable/taiga-ui/cell-navigation";
-import { grouping } from "@adapttable/taiga-ui/grouping";
-import { selectionStats } from "@adapttable/taiga-ui/selection-stats";
+import { type ColumnDef, type SelectionStats } from "@adapttable/angular";
 import { statusBar } from "@adapttable/taiga-ui/status-bar";
 import { Component, computed, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
+import { statusBarTests } from "../../angular/test/kit/suites/statusBar";
 import { AdaptStatusBarLive } from "../status-bar";
+import { kit } from "../testing/kit";
 import { AdaptDataTable } from "./dataTable";
+
+for (const test of statusBarTests(kit)) it(test.name, test.run);
 
 /**
  * The unstyled status bar: row counts, a selected row, and the figures.
@@ -98,11 +95,6 @@ async function mount(
 }
 
 describe("statusBar", () => {
-  it("is a feature", () => {
-    expect(statusBar()).toBeTruthy();
-    expect(selectionStats()).toBeTruthy();
-  });
-
   it("shows the row count and the selected rows", async () => {
     const absent = await mount(false);
     expect(part("status-bar")).toBeNull();
@@ -117,75 +109,6 @@ describe("statusBar", () => {
     fixture.detectChanges();
     await fixture.whenStable();
     expect(part("status-bar")?.textContent).toContain("1 selected");
-  });
-});
-
-interface Task extends Row {
-  team: string;
-}
-
-const TASKS: Task[] = [
-  { id: "1", name: "Ada", amount: 10, team: "Core" },
-  { id: "2", name: "Zoe", amount: 30, team: "Web" },
-];
-
-const TASK_COLUMNS: ColumnDef<Task>[] = [
-  {
-    key: "name",
-    header: "Name",
-    accessor: (row) => row.name,
-    editable: true,
-  },
-  { key: "amount", header: "Amount", accessor: (row) => row.amount },
-  { key: "team", header: "Team", accessor: (row) => row.team },
-];
-
-@Component({
-  imports: [AdaptDataTable],
-  template: `
-    <adapt-data-table
-      [data]="rows"
-      [columns]="columns"
-      [rowKey]="rowKey"
-      [urlSync]="false"
-      [forceMobile]="false"
-      [features]="features()"
-    />
-  `,
-})
-class StripHost {
-  readonly rows = TASKS;
-  readonly columns = TASK_COLUMNS;
-  readonly rowKey = (row: Task) => row.id;
-  readonly features = input<readonly AdaptTableFeature[]>([]);
-}
-
-describe("status bar notices", () => {
-  it("groups, aggregates a selection, and follows the grid", async () => {
-    const grouped = TestBed.createComponent(StripHost);
-    grouped.componentRef.setInput("features", [
-      statusBar(),
-      selectionStats(),
-      grouping("team", { rowReorder: true } as never),
-    ]);
-    document.body.append(grouped.nativeElement);
-    grouped.detectChanges();
-    await grouped.whenStable();
-    expect(part("status-bar")?.textContent).toContain("Showing");
-    grouped.destroy();
-
-    const ranged = TestBed.createComponent(StripHost);
-    ranged.componentRef.setInput("features", [
-      statusBar(),
-      selectionStats(),
-      grouping(["team"]),
-      cellNavigation(),
-    ]);
-    document.body.append(ranged.nativeElement);
-    ranged.detectChanges();
-    await ranged.whenStable();
-    expect(part("status-bar")).not.toBeNull();
-    ranged.destroy();
   });
 });
 

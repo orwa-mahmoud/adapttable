@@ -58,6 +58,8 @@
     "status-bar",
     "tree",
     "virtualize",
+    "testing",
+    "testUtils.ts",
     "vitest.config.ts",
     "vitest.setup.ts",
     "assistant",

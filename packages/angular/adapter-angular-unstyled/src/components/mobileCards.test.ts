@@ -4,16 +4,12 @@ import {
   type AdaptTableFeature,
   type ColumnDef,
   type ConfirmHandler,
-  type DirtyEdits,
   injectChangedCellFlash,
   type MobileCardField,
   type RowAction,
   type TableLabels,
 } from "@adapttable/angular";
 import { runRowAction } from "@adapttable/angular/adapter";
-import { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
-import { dirtyIndicators, editing } from "@adapttable/angular-unstyled/editing";
-import { pinnedSummaryRows } from "@adapttable/angular-unstyled/pinned-summary-rows";
 import { rowActions } from "@adapttable/angular-unstyled/row-actions";
 import { rowAppearance } from "@adapttable/angular-unstyled/row-appearance";
 import { rowDetail } from "@adapttable/angular-unstyled/row-detail";
@@ -23,8 +19,12 @@ import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { mobileCardsTests } from "../../../angular/test/kit/suites/mobileCards";
+import { kit } from "../../testing/kit";
 import { AdaptDataTable } from "../dataTable";
 import type { DataTableClassNames } from "../types";
+
+for (const test of mobileCardsTests(kit)) it(test.name, test.run);
 
 interface Person {
   id: string;
@@ -242,39 +242,6 @@ function part(name: string, root: ParentNode = document): HTMLElement {
   if (!result) throw new Error(`Missing ${name}`);
   return result;
 }
-function element<T extends HTMLElement>(
-  selector: string,
-  root: ParentNode = document
-): T {
-  const result = root.querySelector<T>(selector);
-  if (!result) throw new Error(`Missing ${selector}`);
-  return result;
-}
-function key(target: HTMLElement, value: string): void {
-  target.dispatchEvent(
-    new KeyboardEvent("keydown", {
-      key: value,
-      bubbles: true,
-      cancelable: true,
-    })
-  );
-}
-async function editBudget(
-  settle: () => Promise<unknown>,
-  value: string
-): Promise<void> {
-  part("edit-cell-activate").dispatchEvent(
-    new MouseEvent("dblclick", { bubbles: true })
-  );
-  await settle();
-  const editor = element<HTMLInputElement>(
-    '[data-adapttable-part="edit-cell-editor"]'
-  );
-  editor.value = value;
-  editor.dispatchEvent(new Event("input"));
-  key(editor, "Enter");
-  await settle();
-}
 
 afterEach(() => {
   document.body.replaceChildren();
@@ -282,72 +249,6 @@ afterEach(() => {
 });
 
 describe("mobile card reach", () => {
-  it("keeps handled row navigation outside the cell grid while cell arrows still navigate", async () => {
-    const activate = vi.fn();
-    const startEdit = vi.fn();
-    const commit = vi.fn();
-    const { settle } = await mount({
-      mobile: false,
-      activate,
-      features: [cellNavigation(), editing(commit, { onEditStart: startEdit })],
-    });
-    const settleFrame = async (): Promise<void> => {
-      await settle();
-      await new Promise<void>((resolve) => {
-        if (typeof requestAnimationFrame === "function") {
-          requestAnimationFrame(() => {
-            resolve();
-          });
-        } else {
-          setTimeout(resolve, 0);
-        }
-      });
-      await settle();
-    };
-    const [first, second] = parts("row");
-    // Give the grid a real editable active cell before moving focus to a row.
-    parts("cell", first)[1]!.focus();
-    await settleFrame();
-    first!.focus();
-    key(first!, "ArrowDown");
-    await settleFrame();
-    expect(document.activeElement).toBe(second);
-    expect(first!.tabIndex).toBe(-1);
-    expect(second!.tabIndex).toBe(0);
-    expect(activate).not.toHaveBeenCalled();
-    key(second!, "Enter");
-    await settleFrame();
-    expect(document.activeElement).toBe(second);
-    expect(activate).toHaveBeenCalledExactlyOnceWith(ROWS[1]);
-    expect(startEdit).not.toHaveBeenCalled();
-    expect(commit).not.toHaveBeenCalled();
-    expect(parts("edit-cell-editor")).toHaveLength(0);
-
-    const firstName = parts("cell", first)[0]!;
-    const secondName = parts("cell", second)[0]!;
-    firstName.focus();
-    await settleFrame();
-    key(firstName, "ArrowDown");
-    await settleFrame();
-    expect(document.activeElement).toBe(secondName);
-    expect(secondName.getAttribute("tabindex")).toBe("0");
-    expect(activate).toHaveBeenCalledExactlyOnceWith(ROWS[1]);
-  });
-
-  it("names the native list and updates its direction and name live", async () => {
-    const { host, settle } = await mount();
-    const list = part("cards");
-    expect(list.tagName).toBe("UL");
-    expect(list.getAttribute("aria-label")).toBe("People on call");
-    expect(list.hasAttribute("role")).toBe(false);
-    expect(list.getAttribute("dir")).toBe("rtl");
-    host.dir.set("ltr");
-    host.tableLabel.set("Available people");
-    await settle();
-    expect(list.getAttribute("dir")).toBe("ltr");
-    expect(list.getAttribute("aria-label")).toBe("Available people");
-  });
-
   it.each([280, "18rem", 0])(
     "makes the bounded native list keyboard-focusable for maxHeight=%s",
     async (maxHeight) => {
@@ -382,190 +283,6 @@ describe("mobile card reach", () => {
     }
   );
 
-  it("activates with Enter, Space and body clicks while roving past pinned summaries", async () => {
-    const activate = vi.fn();
-    const action = vi.fn();
-    await mount({
-      activate,
-      features: [
-        pinnedSummaryRows<Person>({
-          top: [{ id: "total", name: "Total", budget: 30 }],
-        }),
-        rowActions([{ key: "inspect", label: "Inspect", onClick: action }]),
-      ],
-    });
-    const [first, second] = parts("card");
-    const summary = part("pinned-summary-top");
-    expect([first!.tabIndex, second!.tabIndex]).toEqual([0, -1]);
-    expect(summary.hasAttribute("tabindex")).toBe(false);
-    expect(summary.hasAttribute("data-adapttable-row")).toBe(false);
-    first!.focus();
-    key(first!, "Enter");
-    key(first!, " ");
-    part("card-value", first).click();
-    expect(activate.mock.calls).toEqual([[ROWS[0]], [ROWS[0]], [ROWS[0]]]);
-    key(first!, "ArrowDown");
-    expect(document.activeElement).toBe(second);
-    expect([first!.tabIndex, second!.tabIndex]).toEqual([-1, 0]);
-    key(second!, "ArrowUp");
-    expect(document.activeElement).toBe(first);
-    key(first!, "ArrowUp");
-    expect(document.activeElement).toBe(first);
-    part("checkbox", first).click();
-    part("action-button", first).click();
-    key(part("action-button", first), "Enter");
-    summary.click();
-    key(summary, "Enter");
-    expect(activate).toHaveBeenCalledTimes(3);
-    expect(action).toHaveBeenCalledExactlyOnceWith(ROWS[0]);
-  });
-
-  it.each(["template", "component"] as const)(
-    "lays out real editable fields in a %s without losing the card shell",
-    async (bodyKind) => {
-      const save = vi.fn();
-      const moved = vi.fn();
-      const { settle } = await mount({
-        bodyKind,
-        features: [
-          editing(save),
-          rowDetail<Person>(Detail),
-          rowReorder<Person>(moved),
-        ],
-      });
-      const first = part("card");
-      expect(element(".name-cell", first).textContent).toBe("Ada");
-      expect(
-        element(".budget-cell", part("edit-cell-activate", first)).textContent
-      ).toBe("10");
-      expect(element(".custom-field", first).textContent?.trim()).toBe("Ada");
-      expect(parts("card-row", first)).toHaveLength(0);
-      expect(
-        element(
-          `.${bodyKind === "template" ? "custom" : "component"}-state`,
-          first
-        ).textContent
-      ).toBe("0:false:false");
-      part("checkbox", first).click();
-      part("expand-button", first).click();
-      await settle();
-      expect(first.hasAttribute("data-selected")).toBe(true);
-      expect(
-        element(
-          `.${bodyKind === "template" ? "custom" : "component"}-state`,
-          first
-        ).textContent
-      ).toBe("0:true:true");
-      expect(part("card-detail", first).textContent?.trim()).toBe(
-        "Details for Ada"
-      );
-      await editBudget(settle, "37");
-      expect(save).toHaveBeenCalledExactlyOnceWith(ROWS[0], "budget", 37);
-      expect(
-        element(".budget-cell", part("edit-cell-activate", first)).textContent
-      ).toBe("10");
-      part("row-reorder-down", first).click();
-      await settle();
-      expect(moved).toHaveBeenCalledExactlyOnceWith(0, 1, ROWS[0]);
-    }
-  );
-
-  it.each([true, false])(
-    "passes host actions and their confirmation gate through custom renderers (mobile=%s)",
-    async (mobile) => {
-      const acted = vi.fn();
-      const requests: Parameters<ConfirmHandler>[0][] = [];
-      const { host, settle } = await mount({
-        mobile,
-        actionsKind: mobile ? "template" : "component",
-        confirm: (request) => {
-          requests.push(request);
-        },
-        features: [
-          rowActions([
-            {
-              key: "archive",
-              label: "Archive",
-              confirm: {
-                title: "Archive this person?",
-                message: (row) => `Archive ${row.name}?`,
-                confirmLabel: "Archive",
-              },
-              onClick: acted,
-            },
-          ]),
-        ],
-      });
-      const button = element<HTMLButtonElement>(
-        mobile ? ".custom-action" : ".component-action"
-      );
-      expect(button.textContent?.trim()).toBe("Row actions: Ada");
-      button.click();
-      await settle();
-      expect(acted).not.toHaveBeenCalled();
-      expect(requests.map((request) => request.title)).toEqual([
-        "Archive this person?",
-      ]);
-      requests[0]!.onConfirm();
-      expect(acted).toHaveBeenCalledExactlyOnceWith(ROWS[0]);
-      host.labels.set({ rowActionsMenu: "Acciones" });
-      await settle();
-      expect(button.textContent?.trim()).toBe("Acciones: Ada");
-    }
-  );
-
-  it("keeps pinned summary cards outside custom bodies, editors and actions", async () => {
-    await mount({
-      bodyKind: "template",
-      actionsKind: "template",
-      features: [
-        editing(vi.fn()),
-        pinnedSummaryRows<Person>({
-          top: [{ id: "total", name: "Total", budget: 30 }],
-        }),
-        rowDetail<Person>(Detail),
-        rowReorder<Person>(vi.fn()),
-        rowActions([{ key: "inspect", label: "Inspect", onClick: vi.fn() }]),
-      ],
-    });
-    const summary = part("pinned-summary-top");
-    expect(
-      parts("card-value", summary).map((node) => node.textContent?.trim())
-    ).toEqual(["Total", "30"]);
-    expect(
-      summary.querySelectorAll("button,input,.custom-name,.custom-action")
-    ).toHaveLength(0);
-    expect(summary.getAttribute("aria-label")).toBe("Summary row");
-  });
-
-  it("marks exactly the changed card value and clears it through the live flash reader", async () => {
-    const { host, settle, fixture } = await mount();
-    host.flash.mark([
-      {
-        type: "update",
-        id: "2",
-        prev: ROWS[1]!,
-        next: { ...ROWS[1]!, budget: 24 },
-        index: 1,
-      },
-    ]);
-    await settle();
-    expect(
-      [...document.querySelectorAll("[data-flash]")].map((node) =>
-        node.textContent?.trim()
-      )
-    ).toEqual(["20"]);
-    fixture.componentRef.setInput("mobile", false);
-    await settle();
-    const flashed = element("[data-flash]");
-    expect(flashed.getAttribute("data-adapttable-part")).toBe("cell");
-    expect(flashed.getAttribute("data-column-key")).toBe("budget");
-    expect(flashed.textContent?.trim()).toBe("20");
-    host.flash.clear();
-    await settle();
-    expect(document.querySelectorAll("[data-flash]")).toHaveLength(0);
-  });
-
   it("does not flash card values under reduced motion", async () => {
     vi.stubGlobal("matchMedia", (query: string) => ({
       matches: query.includes("reduce"),
@@ -586,191 +303,6 @@ describe("mobile card reach", () => {
     expect(part("card-value").textContent?.trim()).toBe("Ada");
     expect(document.querySelectorAll("[data-flash]")).toHaveLength(0);
   });
-
-  it("keeps dirty card marks until host confirmation and reports the unsaved count", async () => {
-    const seen: DirtyEdits[] = [];
-    // A pending save is unacknowledged; core confirms synchronous saves immediately.
-    const save = vi.fn(() => new Promise<void>(() => undefined));
-    const { settle } = await mount({
-      features: [
-        editing(save, {
-          onDirtyChange: (state) => {
-            seen.push(state);
-          },
-        }),
-        dirtyIndicators(),
-      ],
-    });
-    expect(seen.map((state) => state.count)).toEqual([0]);
-    await editBudget(settle, "41");
-    expect(save).toHaveBeenCalledExactlyOnceWith(ROWS[0], "budget", 41);
-    expect(seen.at(-1)!.count).toBe(1);
-    expect(
-      parts("card").map((node) => node.hasAttribute("data-dirty"))
-    ).toEqual([true, false]);
-    seen.at(-1)!.confirm("1", "budget");
-    await settle();
-    expect(seen.at(-1)!.count).toBe(0);
-    expect(
-      parts("card").map((node) => node.hasAttribute("data-dirty"))
-    ).toEqual([false, false]);
-  });
-
-  it("clears a card's dirty mark only when the host save promise resolves", async () => {
-    let finishSave: (() => void) | undefined;
-    const saving = new Promise<void>((resolve) => {
-      finishSave = resolve;
-    });
-    const save = vi.fn(() => saving);
-    const { settle } = await mount({
-      features: [editing(save), dirtyIndicators()],
-    });
-    await editBudget(settle, "42");
-    expect(save).toHaveBeenCalledExactlyOnceWith(ROWS[0], "budget", 42);
-    expect(part("card").hasAttribute("data-dirty")).toBe(true);
-    if (!finishSave) throw new Error("The host did not start a save");
-    finishSave();
-    await saving;
-    await settle();
-    expect(part("card").hasAttribute("data-dirty")).toBe(false);
-  });
-
-  it("reports unsaved edits without painting marks when only the callback is requested", async () => {
-    const seen: DirtyEdits[] = [];
-    // A pending save is unacknowledged; core confirms synchronous saves immediately.
-    const save = vi.fn(() => new Promise<void>(() => undefined));
-    const { settle } = await mount({
-      features: [
-        editing(save, {
-          onDirtyChange: (state) => {
-            seen.push(state);
-          },
-        }),
-      ],
-    });
-    await editBudget(settle, "43");
-    expect(save).toHaveBeenCalledExactlyOnceWith(ROWS[0], "budget", 43);
-    expect(seen.at(-1)!.count).toBe(1);
-    expect(document.querySelectorAll("[data-dirty]")).toHaveLength(0);
-  });
-
-  it.each([true, false])(
-    "relabels reorder controls without a reorder-state change (mobile=%s)",
-    async (mobile) => {
-      const { host, settle } = await mount({
-        mobile,
-        features: [rowReorder<Person>(vi.fn())],
-      });
-      host.labels.set({
-        reorderRow: "Mover fila",
-        moveRowUp: "Subir fila",
-        moveRowDown: "Bajar fila",
-      });
-      await settle();
-      if (mobile) {
-        expect(
-          parts("row-reorder-up").map((node) => node.getAttribute("aria-label"))
-        ).toEqual(["Subir fila", "Subir fila"]);
-        expect(
-          parts("row-reorder-down").map((node) =>
-            node.getAttribute("aria-label")
-          )
-        ).toEqual(["Bajar fila", "Bajar fila"]);
-      } else {
-        expect(
-          parts("row-reorder-handle").map((node) =>
-            node.getAttribute("aria-label")
-          )
-        ).toEqual(["Mover fila", "Mover fila"]);
-      }
-    }
-  );
-
-  it.each([true, false])(
-    "reorders the immutable replacement row instead of cached fields (mobile=%s)",
-    async (mobile) => {
-      const reordered = vi.fn();
-      const { host, settle } = await mount({
-        mobile,
-        features: [rowReorder<Person>(reordered)],
-      });
-      const replacement: Person = {
-        ...ROWS[0]!,
-        name: "Ada updated",
-        budget: 99,
-      };
-      host.rows.set([replacement, ROWS[1]!]);
-      await settle();
-      expect(part(mobile ? "card" : "row").textContent).toContain(
-        "Ada updated"
-      );
-      if (mobile) {
-        part("row-reorder-down").click();
-      } else {
-        const grip = part("row-reorder-handle");
-        key(grip, " ");
-        key(grip, "ArrowDown");
-        key(grip, " ");
-      }
-      await settle();
-      expect(reordered).toHaveBeenCalledExactlyOnceWith(0, 1, replacement);
-      expect(reordered.mock.calls[0]![2]).toBe(replacement);
-    }
-  );
-
-  it.each(["top", "bottom"] as const)(
-    "does not expose reorder markers or accept drops on a %s summary",
-    async (side) => {
-      const reordered = vi.fn();
-      const { settle } = await mount({
-        mobile: false,
-        features: [
-          rowReorder<Person>(reordered),
-          pinnedSummaryRows<Person>({
-            [side]: [{ id: "total", name: "Total", budget: 30 }],
-          }),
-        ],
-      });
-      const payloads = new Map<string, string>();
-      const transfer = {
-        effectAllowed: "none",
-        dropEffect: "none",
-        setData: (name: string, value: string) => {
-          payloads.set(name, value);
-        },
-        getData: (name: string) => payloads.get(name) ?? "",
-      };
-      const drag = (type: string): MouseEvent => {
-        const event = new MouseEvent(type, { bubbles: true, cancelable: true });
-        Object.defineProperty(event, "dataTransfer", { value: transfer });
-        return event;
-      };
-      const [first, second] = parts("row");
-      const grip = part("row-reorder-handle", second);
-      const summary = part(`pinned-summary-${side}`);
-      grip.dispatchEvent(drag("dragstart"));
-      await settle();
-      expect(second!.hasAttribute("data-dragging")).toBe(true);
-      // Establish a real drop target at the same local index as the summary.
-      first!.dispatchEvent(drag("dragover"));
-      await settle();
-      expect(first!.hasAttribute("data-drop")).toBe(true);
-      expect(summary.hasAttribute("data-drop")).toBe(false);
-      expect(summary.hasAttribute("data-dragging")).toBe(false);
-      const over = drag("dragover");
-      summary.dispatchEvent(over);
-      const drop = drag("drop");
-      summary.dispatchEvent(drop);
-      await settle();
-      expect(over.defaultPrevented).toBe(false);
-      expect(drop.defaultPrevented).toBe(false);
-      expect(reordered).not.toHaveBeenCalled();
-      // The same drag can still finish on an ordinary data row.
-      first!.dispatchEvent(drag("drop"));
-      await settle();
-      expect(reordered).toHaveBeenCalledExactlyOnceWith(1, 0, ROWS[1]);
-    }
-  );
 
   it("applies card classes alongside host appearance and updates them live", async () => {
     const { host, settle } = await mount({
