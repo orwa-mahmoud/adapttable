@@ -13,6 +13,7 @@ import {
   groupedHeaderAlign,
   mergeVueAttrs,
   NO_CLASS_NAMES,
+  railCellAttrs,
   renderContent,
   renderFooter,
   renderHeader,
@@ -89,37 +90,40 @@ export function QuasarDesktop<TRow>({
       : null;
   const utilities = (rowspan: number) => [
     model.expandLabel
-      ? part("header", {
-          scope: "col",
-          rowspan,
-          "aria-label": model.expandLabel,
-          "data-adapttable-part": "expand-header",
-          class: [names.th, names.expandHeader],
-          style: { width: 44 },
-        })
-      : null,
-    model.headerCheckboxAttrs
       ? part(
           "header",
-          {
+          railCellAttrs(model, "expand", true, {
             scope: "col",
             rowspan,
-            "data-adapttable-part": "selection-header",
-            class: names.selectionHeader,
-          },
-          checkbox(model.headerCheckboxAttrs, true)
+            "aria-label": model.expandLabel,
+            "data-adapttable-part": "expand-header",
+            class: [names.th, names.expandHeader],
+            style: { width: 44 },
+          })
         )
       : null,
     model.reorderLabel
       ? part(
           "header",
-          {
+          railCellAttrs(model, "reorder", true, {
             scope: "col",
             rowspan,
             "data-adapttable-part": "reorder-header",
             class: [names.th, names.reorderHeader],
-          },
+          }),
           model.reorderLabel
+        )
+      : null,
+    model.headerCheckboxAttrs
+      ? part(
+          "header",
+          railCellAttrs(model, "selection", true, {
+            scope: "col",
+            rowspan,
+            "data-adapttable-part": "selection-header",
+            class: names.selectionHeader,
+          }),
+          checkbox(model.headerCheckboxAttrs, true)
         )
       : null,
     spacer("header", "start", rowspan),
@@ -129,12 +133,12 @@ export function QuasarDesktop<TRow>({
     model.actionsLabel
       ? part(
           "header",
-          {
+          railCellAttrs(model, "actions", true, {
             scope: "col",
             rowspan,
             "data-adapttable-part": "actions-header",
             class: names.actionsHeader,
-          },
+          }),
           model.actionsLabel
         )
       : null,
@@ -290,31 +294,36 @@ export function QuasarDesktop<TRow>({
           model.expandLabel
             ? part(
                 "cell",
-                paint(item.expandCellAttrs ?? {}, "expand-cell", [
-                  names.td,
-                  names.expandCell,
-                ]),
+                railCellAttrs(
+                  model,
+                  "expand",
+                  false,
+                  paint(item.expandCellAttrs ?? {}, "expand-cell", [
+                    names.td,
+                    names.expandCell,
+                  ])
+                ),
                 rowDisclosure(item)
-              )
-            : null,
-          model.headerCheckboxAttrs
-            ? part(
-                "cell",
-                {
-                  "data-adapttable-part": "selection-cell",
-                  class: names.selectionCell,
-                },
-                rowCheckbox(item)
               )
             : null,
           model.reorderLabel
             ? part(
                 "cell",
-                {
+                railCellAttrs(model, "reorder", false, {
                   "data-adapttable-part": "reorder-cell",
                   class: [names.td, names.reorderCell],
-                },
+                }),
                 item.reorder?.(false)
+              )
+            : null,
+          model.headerCheckboxAttrs
+            ? part(
+                "cell",
+                railCellAttrs(model, "selection", false, {
+                  "data-adapttable-part": "selection-cell",
+                  class: names.selectionCell,
+                }),
+                rowCheckbox(item)
               )
             : null,
           spacer("cell", "start"),
@@ -335,10 +344,10 @@ export function QuasarDesktop<TRow>({
           model.actionsLabel
             ? part(
                 "cell",
-                {
+                railCellAttrs(model, "actions", false, {
                   "data-adapttable-part": "actions-cell",
                   class: names.actionsCell,
-                },
+                }),
                 [
                   item.editActions?.(),
                   item.actionControls?.length
@@ -443,8 +452,8 @@ export function QuasarDesktop<TRow>({
           { "data-adapttable-part": "summary-row", class: names.summaryRow },
           [
             ...(model.expandLabel ? [summaryPad("expand")] : []),
-            ...(model.headerCheckboxAttrs ? [summaryPad("selection")] : []),
             ...(model.reorderLabel ? [summaryPad("reorder")] : []),
+            ...(model.headerCheckboxAttrs ? [summaryPad("selection")] : []),
             spacer("cell", "start"),
             ...model.summary.cells.map((cell) =>
               part(

@@ -1745,6 +1745,7 @@ export interface DesktopTableModel<TRow> {
     readonly headerRowAttrs: Attrs;
     // (undocumented)
     readonly headers: readonly TableHeaderModel<TRow>[];
+    readonly railAttrs?: (rail: TableRail, header: boolean) => Attrs;
     // (undocumented)
     readonly reorderLabel?: string;
     // (undocumented)
@@ -2968,6 +2969,9 @@ export function provideDataTableClassNames(read: () => DataTableClassNames): voi
 // @public (undocumented)
 export function provideFeatureState(state: FeatureState): void;
 
+// @public
+export function railCellAttrs<TRow>(model: Pick<DesktopTableModel<TRow>, "railAttrs">, rail: TableRail, header: boolean, attrs: Attrs): Record<string, unknown>;
+
 export { readMultiDraft }
 
 // @public (undocumented)
@@ -3958,6 +3962,9 @@ export interface TableHeaderModel<TRow> {
     readonly sortAttrs?: Attrs;
 }
 
+// @public
+export type TableRail = "expand" | "reorder" | "selection" | "actions";
+
 // @public (undocumented)
 export interface TableRowDetail<TRow> {
     // (undocumented)
@@ -4239,6 +4246,7 @@ export function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<T
     tableAttrs: () => Record<string, unknown>;
     headerRowAttrs: () => Record<string, unknown>;
     headerCellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
+    railAttrs: (rail: TableRail, header: boolean) => Record<string, unknown>;
     sortButtonAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     rowAttrs: (row: TRow, index: number, state?: {
         readonly selected?: boolean;
@@ -4358,6 +4366,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
         tableAttrs: () => Record<string, unknown>;
         headerRowAttrs: () => Record<string, unknown>;
         headerCellAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
+        railAttrs: (rail: TableRail, header: boolean) => Record<string, unknown>;
         sortButtonAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
         rowAttrs: (row: TRow, index: number, state?: {
             readonly selected?: boolean;
@@ -4417,6 +4426,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
         actionsLabel?: string;
         reorderLabel?: string;
         expandLabel?: string;
+        railAttrs?: (rail: TableRail, header: boolean) => Attrs;
         columnSpacers?: {
             readonly start: number;
             readonly end: number;

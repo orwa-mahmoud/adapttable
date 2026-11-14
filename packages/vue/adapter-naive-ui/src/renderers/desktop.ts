@@ -13,6 +13,7 @@ import {
   groupedHeaderAlign,
   mergeVueAttrs,
   NO_CLASS_NAMES,
+  railCellAttrs,
   renderContent,
   renderFooter,
   renderHeader,
@@ -90,35 +91,37 @@ export const NaiveDesktopTable = /* @__PURE__ */ withProps(
     };
     const leading = (rowspan = 1) => [
       model.expandLabel
-        ? head({
-            scope: "col",
-            rowspan,
-            "aria-label": model.expandLabel,
-            "data-adapttable-part": "expand-header",
-            class: [names.th, names.expandHeader],
-            style: { width: "40px" },
-          })
-        : null,
-      model.headerCheckboxAttrs
         ? head(
-            {
+            railCellAttrs(model, "expand", true, {
               scope: "col",
               rowspan,
-              "data-adapttable-part": "selection-header",
-              class: names.selectionHeader,
-            },
-            () => selection(model.headerCheckboxAttrs!, true)
+              "aria-label": model.expandLabel,
+              "data-adapttable-part": "expand-header",
+              class: [names.th, names.expandHeader],
+              style: { width: "40px" },
+            })
           )
         : null,
       model.reorderLabel
         ? head(
-            {
+            railCellAttrs(model, "reorder", true, {
               scope: "col",
               rowspan,
               "data-adapttable-part": "reorder-header",
               class: [names.th, names.reorderHeader],
-            },
+            }),
             () => model.reorderLabel
+          )
+        : null,
+      model.headerCheckboxAttrs
+        ? head(
+            railCellAttrs(model, "selection", true, {
+              scope: "col",
+              rowspan,
+              "data-adapttable-part": "selection-header",
+              class: names.selectionHeader,
+            }),
+            () => selection(model.headerCheckboxAttrs!, true)
           )
         : null,
       spacer(true, "start", rowspan),
@@ -127,13 +130,13 @@ export const NaiveDesktopTable = /* @__PURE__ */ withProps(
       spacer(true, "end", rowspan),
       model.actionsLabel
         ? head(
-            {
+            railCellAttrs(model, "actions", true, {
               scope: "col",
               role: "columnheader",
               rowspan,
               "data-adapttable-part": "actions-header",
               class: names.actionsHeader,
-            },
+            }),
             () => model.actionsLabel
           )
         : null,
@@ -282,10 +285,15 @@ export const NaiveDesktopTable = /* @__PURE__ */ withProps(
           () => [
             model.expandLabel
               ? cell(
-                  mergeVueAttrs(item.expandCellAttrs ?? {}, {
-                    class: [names.td, names.expandCell],
-                    "data-adapttable-part": "expand-cell",
-                  }),
+                  railCellAttrs(
+                    model,
+                    "expand",
+                    false,
+                    mergeVueAttrs(item.expandCellAttrs ?? {}, {
+                      class: [names.td, names.expandCell],
+                      "data-adapttable-part": "expand-cell",
+                    })
+                  ),
                   () =>
                     item.detail
                       ? requireControl(
@@ -300,25 +308,25 @@ export const NaiveDesktopTable = /* @__PURE__ */ withProps(
                       : null
                 )
               : null,
+            model.reorderLabel
+              ? cell(
+                  railCellAttrs(model, "reorder", false, {
+                    class: [names.td, names.reorderCell],
+                    "data-adapttable-part": "reorder-cell",
+                  }),
+                  () => item.reorder?.(false)
+                )
+              : null,
             model.headerCheckboxAttrs
               ? cell(
-                  {
+                  railCellAttrs(model, "selection", false, {
                     class: names.selectionCell,
                     "data-adapttable-part": "selection-cell",
-                  },
+                  }),
                   () =>
                     item.checkboxAttrs
                       ? selection(item.checkboxAttrs, false)
                       : null
-                )
-              : null,
-            model.reorderLabel
-              ? cell(
-                  {
-                    class: [names.td, names.reorderCell],
-                    "data-adapttable-part": "reorder-cell",
-                  },
-                  () => item.reorder?.(false)
                 )
               : null,
             spacer(false, "start"),
@@ -326,10 +334,10 @@ export const NaiveDesktopTable = /* @__PURE__ */ withProps(
             spacer(false, "end"),
             model.actionsLabel
               ? cell(
-                  {
+                  railCellAttrs(model, "actions", false, {
                     class: names.actionsCell,
                     "data-adapttable-part": "actions-cell",
-                  },
+                  }),
                   () => [
                     item.editActions?.(),
                     item.actionControls?.length
@@ -476,10 +484,10 @@ export const NaiveDesktopTable = /* @__PURE__ */ withProps(
                   },
                   () => [
                     ...(model.expandLabel ? [summaryPad("expand")] : []),
+                    ...(model.reorderLabel ? [summaryPad("reorder")] : []),
                     ...(model.headerCheckboxAttrs
                       ? [summaryPad("selection")]
                       : []),
-                    ...(model.reorderLabel ? [summaryPad("reorder")] : []),
                     spacer(false, "start"),
                     ...summaryCells,
                     spacer(false, "end"),

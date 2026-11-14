@@ -9,6 +9,7 @@ import {
   EXTRA_ROW_PARTS,
   extraUncoveredColSpans,
   mergeVueAttrs,
+  railCellAttrs,
   selectionCheckboxControl,
   type TableChromeSlots,
   tableRowView,
@@ -31,10 +32,15 @@ export function vuetifyBodyRows<TRow>(
       cells.push(
         h(
           "td",
-          mergeVueAttrs(row.expandCellAttrs ?? {}, {
-            "data-adapttable-part": "expand-cell",
-            class: [names.td, names.expandCell],
-          }),
+          railCellAttrs(
+            model,
+            "expand",
+            false,
+            mergeVueAttrs(row.expandCellAttrs ?? {}, {
+              "data-adapttable-part": "expand-cell",
+              class: [names.td, names.expandCell],
+            })
+          ),
           [
             row.detail
               ? requiredControl(
@@ -50,14 +56,25 @@ export function vuetifyBodyRows<TRow>(
           ]
         )
       );
+    if (model.reorderLabel)
+      cells.push(
+        h(
+          "td",
+          railCellAttrs(model, "reorder", false, {
+            "data-adapttable-part": "reorder-cell",
+            class: [names.td, names.reorderCell],
+          }),
+          [row.reorder?.(false)]
+        )
+      );
     if (model.headerCheckboxAttrs)
       cells.push(
         h(
           "td",
-          {
+          railCellAttrs(model, "selection", false, {
             "data-adapttable-part": "selection-cell",
             class: names.selectionCell,
-          },
+          }),
           [
             row.checkboxAttrs
               ? controls.SelectionCheckbox({
@@ -70,17 +87,6 @@ export function vuetifyBodyRows<TRow>(
                 })
               : null,
           ]
-        )
-      );
-    if (model.reorderLabel)
-      cells.push(
-        h(
-          "td",
-          {
-            "data-adapttable-part": "reorder-cell",
-            class: [names.td, names.reorderCell],
-          },
-          [row.reorder?.(false)]
         )
       );
     cells.push(
@@ -104,7 +110,10 @@ export function vuetifyBodyRows<TRow>(
       cells.push(
         h(
           "td",
-          { "data-adapttable-part": "actions-cell", class: names.actionsCell },
+          railCellAttrs(model, "actions", false, {
+            "data-adapttable-part": "actions-cell",
+            class: names.actionsCell,
+          }),
           [
             row.editActions?.(),
             row.actionControls?.length

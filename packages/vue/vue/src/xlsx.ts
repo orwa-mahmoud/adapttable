@@ -64,6 +64,7 @@ export type { UseFrontendDataOptions } from "./source/useFrontendData";
 export type { MaybeRefOrGetterOptional } from "./store";
 export type { UseTableUrlStateOptions } from "./url/useTableUrlState";
 export type {
+  TableRail,
   useDataTable,
   UseDataTableOptions,
   UseDataTableResult,

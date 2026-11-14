@@ -34,10 +34,13 @@ import {
   clearChromeFilters,
   clearSearchAndFilters,
   commitSearchOnBlur,
+  desktopChromeMetrics,
   fetchNextBodyPage,
   headerCellAttributes,
   headerRowAttributes,
   htmlGroupedHeaderPlan,
+  type MeasuredRailWidths,
+  observeRailWidths,
   resolveTableLabels,
   rowAttributes,
   searchInputAttributes,
@@ -47,6 +50,7 @@ import {
 } from "@adapttable/core/binding";
 import {
   computed,
+  type ComputedRef,
   type MaybeRefOrGetter,
   onScopeDispose,
   shallowReadonly,
@@ -341,11 +345,75 @@ export function useDataTable<TRow>(
     const next = nextSort({ key: current.sortBy, dir: current.sortDir }, key);
     current.setSort(next.key, next.dir);
   };
+  // Pinned columns sit past the rails (expand, reorder, selection, actions)
+  // at their rendered widths, read from the header while anything is pinned.
+  const railHead = shallowRef<Element | null>(null);
+  const railWidths = shallowRef<MeasuredRailWidths>({});
+  // Booleans, so a layout rebuilt for another reason redraws no rail.
+  const pinnedSides = {
+    start: computed(() =>
+      Object.values(layout.value.state.pinned).includes("start")
+    ),
+    end: computed(() =>
+      Object.values(layout.value.state.pinned).includes("end")
+    ),
+  };
+  watch(
+    [railHead, () => pinnedSides.start.value || pinnedSides.end.value],
+    ([head, pinned], _previous, onCleanup) => {
+      if (!head || !pinned) {
+        if (Object.keys(railWidths.value).length > 0) railWidths.value = {};
+        return;
+      }
+      onCleanup(
+        observeRailWidths(head, (widths) => {
+          railWidths.value = widths;
+        })
+      );
+    },
+    { flush: "post", immediate: true }
+  );
+  const railMetrics = computed(() => {
+    const measured = railWidths.value;
+    return desktopChromeMetrics({
+      expandable: measured.expansion !== undefined,
+      showReorder: measured.reorder !== undefined,
+      hasSelection: measured.selection !== undefined,
+      showActions: measured.actions !== undefined,
+      measured,
+    });
+  });
+  // Numbers, so a cell or rail redraws only when its own inset moves.
+  const leadStart = computed(() => railMetrics.value.leads.start ?? 0);
+  const leadEnd = computed(() => railMetrics.value.leads.end ?? 0);
+  const railInsets: Readonly<Record<TableRail, ComputedRef<number>>> = {
+    expand: computed(() => railMetrics.value.railInsets.expand),
+    reorder: computed(() => railMetrics.value.railInsets.reorder),
+    selection: computed(() => railMetrics.value.railInsets.selection),
+    actions: computed(() => railMetrics.value.railInsets.actions),
+  };
+  // A kit may draw its rail cell as a component; its root is the cell.
+  const holdRailHead = elementRef<Element>(
+    (cell) => {
+      if (cell) railHead.value = cell.closest("thead") ?? cell.parentElement;
+    },
+    (component) => (component.$el instanceof Element ? component.$el : null)
+  );
   const pinStyle = (key: string, header: boolean) =>
     pinnedCellStyle(
       layout.value.pinOffset(key),
-      header ? PIN_Z.headerPinned : PIN_Z.body
+      header ? PIN_Z.headerPinned : PIN_Z.body,
+      { start: leadStart.value, end: leadEnd.value }
     );
+  /** A header cell's sticky-header style, when the header sticks. */
+  const headerStickyStyle = () =>
+    toValue(options.value.stickyHeader) === true
+      ? {
+          position: "sticky" as const,
+          top: `${toValue(options.value.stickyTop) ?? 0}px`,
+          zIndex: PIN_Z.header,
+        }
+      : undefined;
   /**
    * The row's selected state: what `state` says when it is given, without
    * reading the table's selection; else the table's.
@@ -460,24 +528,41 @@ export function useDataTable<TRow>(
     headerRowAttrs: () => toVueAttrs(headerRowAttributes()),
     headerCellAttrs: (column: ColumnDef<TRow>) => {
       const attrs = headerCellAttributes(column, source.value, sizing.value);
-      const sticky = toValue(options.value.stickyHeader) === true;
-      const stickyStyle = sticky
-        ? {
-            position: "sticky" as const,
-            top: `${toValue(options.value.stickyTop) ?? 0}px`,
-            zIndex: PIN_Z.header,
-          }
-        : undefined;
+      const stickyStyle = headerStickyStyle();
       return toVueAttrs({
         ...attrs,
         "data-pinned": layout.value.pinOffset(column.key)?.side,
-        "data-sticky": sticky ? "" : undefined,
+        "data-sticky": stickyStyle ? "" : undefined,
         style: {
           ...attrs.style,
           ...pinStyle(column.key, true),
           ...stickyStyle,
         },
       });
+    },
+    /**
+     * A rail cell's attributes: sticky past the rails before it while a
+     * column is pinned to its edge. A header rail also reports the header,
+     * so pinned columns can be placed past the rails' rendered widths.
+     */
+    railAttrs: (rail: TableRail, header: boolean) => {
+      const side = rail === "actions" ? "end" : "start";
+      const pinned = pinnedSides[side].value;
+      const inset = railInsets[rail].value;
+      const stickyStyle = header ? headerStickyStyle() : undefined;
+      const pinStyle = pinnedCellStyle(
+        pinned ? { side, inset } : undefined,
+        header ? PIN_Z.headerPinned : PIN_Z.body
+      );
+      // Only what applies, so an unpinned rail renders exactly as the kit
+      // draws it.
+      const attrs: Record<string, unknown> = {};
+      if (header) attrs.ref = holdRailHead;
+      if (pinned) attrs["data-pinned"] = side;
+      if (stickyStyle) attrs["data-sticky"] = "";
+      if (stickyStyle || pinStyle)
+        attrs.style = { ...stickyStyle, ...pinStyle };
+      return attrs;
     },
     sortButtonAttrs: (column: ColumnDef<TRow>) =>
       toVueAttrs(
@@ -556,3 +641,10 @@ export function useDataTable<TRow>(
   }
 }
 export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
+
+/**
+ * A rail the table draws beside the data columns.
+ *
+ * @public
+ */
+export type TableRail = "expand" | "reorder" | "selection" | "actions";

@@ -305,6 +305,7 @@ export {
   NO_CLASS_NAMES,
 } from "./layout/tableChrome";
 export {
+  railCellAttrs,
   useDesktopTableModel,
   useMobileCardsModel,
 } from "./layout/tableModels";
@@ -659,6 +660,7 @@ export type { NestedTable, NestedTableFor } from "./tree/nestedTable";
 export type { UseSavedViewsResult } from "./url/useSavedViews";
 export type { UseTableUrlStateOptions } from "./url/useTableUrlState";
 export type {
+  TableRail,
   useDataTable,
   UseDataTableOptions,
   UseDataTableResult,

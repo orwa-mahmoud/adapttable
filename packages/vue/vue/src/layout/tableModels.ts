@@ -14,7 +14,7 @@ import {
 } from "@adapttable/core/binding";
 import { computed, type ComputedRef, type VNodeChild } from "vue";
 
-import { type Attrs, toVueAttrs } from "../attrs";
+import { type Attrs, mergeVueAttrs, toVueAttrs } from "../attrs";
 import type { CellContext, ColumnDef, HeaderContext } from "../columnDef";
 import type {
   GroupRowModel,
@@ -23,7 +23,7 @@ import type {
 } from "../hierarchy/models";
 import type { SelectionCheckboxAttrs } from "../selection/checkboxControl";
 import type { RowSelection } from "../selection/selection";
-import type { UseDataTableResult } from "../useDataTable";
+import type { TableRail, UseDataTableResult } from "../useDataTable";
 import type { RowActionControl } from "./modelChannels";
 import type { TableSummaryModel } from "./tableSummaryModel";
 export type TableBodySlot<TRow> = (
@@ -84,6 +84,8 @@ export interface DesktopTableModel<TRow> {
   readonly actionsLabel?: string;
   readonly reorderLabel?: string;
   readonly expandLabel?: string;
+  /** A rail cell's pin attributes; see `UseDataTableResult.railAttrs`. */
+  readonly railAttrs?: (rail: TableRail, header: boolean) => Attrs;
   readonly columnSpacers?: { readonly start: number; readonly end: number };
   readonly groupToggleProps: (
     cell: HeaderGroupCell
@@ -268,6 +270,27 @@ function keptRowModels<TRow>(
   };
 }
 
+/**
+ * A rail cell's attributes: the table's pin attributes for that rail under
+ * the kit's own. Every kit draws its rails through this, so a pinned column
+ * sits past them.
+ *
+ * @param model - The desktop table model.
+ * @param rail - Which rail.
+ * @param header - Whether the cell is in the header.
+ * @param attrs - The kit's attributes for the cell.
+ *
+ * @public
+ */
+export function railCellAttrs<TRow>(
+  model: Pick<DesktopTableModel<TRow>, "railAttrs">,
+  rail: TableRail,
+  header: boolean,
+  attrs: Attrs
+): Record<string, unknown> {
+  return mergeVueAttrs(model.railAttrs?.(rail, header) ?? {}, attrs);
+}
+
 export function useDesktopTableModel<TRow>(
   table: UseDataTableResult<TRow>,
   selection?: () => RowSelection | undefined,
@@ -325,6 +348,7 @@ export function useDesktopTableModel<TRow>(
           : undefined,
       headerCheckboxAttrs: selected?.headerCheckboxAttrs(),
       expandLabel: expansion,
+      railAttrs: table.railAttrs,
       columnCount: headers.length + (selected ? 1 : 0) + (expansion ? 1 : 0),
       rows: table.rows.value.map((row, index) => rowModel(row, index)),
     };

@@ -35,14 +35,16 @@ import {
   selectionCheckboxControl,
 } from "../selection/checkboxControl";
 import type { DataTableSlots } from "../tableAdapterContracts";
+import type { TableRail } from "../useDataTable";
 import type { RowActionControl } from "./modelChannels";
 import { keptRowContext, tableRowView } from "./rowView";
-import type {
-  DesktopTableModel,
-  MobileCardsModel,
-  TableBodySlot,
-  TableCellModel,
-  TableRowModel,
+import {
+  type DesktopTableModel,
+  type MobileCardsModel,
+  railCellAttrs,
+  type TableBodySlot,
+  type TableCellModel,
+  type TableRowModel,
 } from "./tableModels";
 import {
   MobileSummaryChrome,
@@ -396,41 +398,65 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
             },
           })
         : null;
+    const rail = (name: TableRail, header: boolean, attrs: Attrs) =>
+      railCellAttrs(model, name, header, attrs);
     const expandHeader = (rowspan = 1): VNodeChild =>
       model.expandLabel
-        ? h("th", {
-            scope: "col",
-            rowspan,
-            "aria-label": model.expandLabel,
-            "data-adapttable-part": "expand-header",
-            class: [classNames.th, classNames.expandHeader],
-            style: { width: "40px" },
-          })
+        ? h(
+            "th",
+            rail("expand", true, {
+              scope: "col",
+              rowspan,
+              "aria-label": model.expandLabel,
+              "data-adapttable-part": "expand-header",
+              class: [classNames.th, classNames.expandHeader],
+              style: { width: "40px" },
+            })
+          )
         : null;
     const reorderHeader = (rowspan = 1): VNodeChild =>
       model.reorderLabel
         ? h(
             "th",
-            {
+            rail("reorder", true, {
               scope: "col",
               rowspan,
               class: [classNames.th, classNames.reorderHeader],
               "data-adapttable-part": "reorder-header",
-            },
+            }),
             model.reorderLabel
+          )
+        : null;
+    const selectionHeader = (rowspan = 1): VNodeChild =>
+      model.headerCheckboxAttrs
+        ? h(
+            "th",
+            rail("selection", true, {
+              scope: "col",
+              class: classNames.selectionHeader,
+              rowspan,
+              "data-adapttable-part": "selection-header",
+              style: {
+                width: "1%",
+                minWidth: "44px",
+                whiteSpace: "nowrap",
+                textAlign: "center",
+              },
+            }),
+            [selection(model.headerCheckboxAttrs, true)]
           )
         : null;
     const actionsHeader = (rowspan = 1): VNodeChild =>
       model.actionsLabel
         ? h(
             "th",
-            {
+            rail("actions", true, {
               scope: "col",
               role: "columnheader",
               rowspan,
               class: classNames.actionsHeader,
               "data-adapttable-part": "actions-header",
-            },
+            }),
             model.actionsLabel
           )
         : null;
@@ -462,25 +488,8 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
             },
             [
               rowIndex === 0 ? expandHeader(model.headerPlan?.length) : null,
-              rowIndex === 0 && model.headerCheckboxAttrs
-                ? h(
-                    "th",
-                    {
-                      scope: "col",
-                      class: classNames.selectionHeader,
-                      rowspan: model.headerPlan?.length,
-                      "data-adapttable-part": "selection-header",
-                      style: {
-                        width: "1%",
-                        minWidth: "44px",
-                        whiteSpace: "nowrap",
-                        textAlign: "center",
-                      },
-                    },
-                    [selection(model.headerCheckboxAttrs, true)]
-                  )
-                : null,
               rowIndex === 0 ? reorderHeader(model.headerPlan?.length) : null,
+              rowIndex === 0 ? selectionHeader(model.headerPlan?.length) : null,
               rowIndex === 0
                 ? columnSpacer("th", "start", model.headerPlan?.length)
                 : null,
@@ -520,24 +529,8 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
             }),
             [
               expandHeader(),
-              model.headerCheckboxAttrs
-                ? h(
-                    "th",
-                    {
-                      scope: "col",
-                      class: classNames.selectionHeader,
-                      "data-adapttable-part": "selection-header",
-                      style: {
-                        width: "1%",
-                        minWidth: "44px",
-                        whiteSpace: "nowrap",
-                        textAlign: "center",
-                      },
-                    },
-                    [selection(model.headerCheckboxAttrs, true)]
-                  )
-                : null,
               reorderHeader(),
+              selectionHeader(),
               columnSpacer("th", "start"),
               ...model.headers.map((leaf) => header(leaf.key)),
               columnSpacer("th", "end"),
@@ -563,10 +556,14 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
           model.expandLabel
             ? h(
                 "td",
-                mergeVueAttrs(row.expandCellAttrs ?? {}, {
-                  class: [classNames.td, classNames.expandCell],
-                  "data-adapttable-part": "expand-cell",
-                }),
+                rail(
+                  "expand",
+                  false,
+                  mergeVueAttrs(row.expandCellAttrs ?? {}, {
+                    class: [classNames.td, classNames.expandCell],
+                    "data-adapttable-part": "expand-cell",
+                  })
+                ),
                 [
                   row.detail
                     ? control(
@@ -586,10 +583,20 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
                 ]
               )
             : null,
+          model.reorderLabel
+            ? h(
+                "td",
+                rail("reorder", false, {
+                  class: [classNames.td, classNames.reorderCell],
+                  "data-adapttable-part": "reorder-cell",
+                }),
+                [row.reorder?.(false)]
+              )
+            : null,
           model.headerCheckboxAttrs
             ? h(
                 "td",
-                {
+                rail("selection", false, {
                   class: classNames.selectionCell,
                   "data-adapttable-part": "selection-cell",
                   style: {
@@ -598,18 +605,8 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
                     whiteSpace: "nowrap",
                     textAlign: "center",
                   },
-                },
+                }),
                 [row.checkboxAttrs ? selection(row.checkboxAttrs, false) : null]
-              )
-            : null,
-          model.reorderLabel
-            ? h(
-                "td",
-                {
-                  class: [classNames.td, classNames.reorderCell],
-                  "data-adapttable-part": "reorder-cell",
-                },
-                [row.reorder?.(false)]
               )
             : null,
           columnSpacer("td", "start"),
@@ -630,10 +627,10 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
           model.actionsLabel
             ? h(
                 "td",
-                {
+                rail("actions", false, {
                   class: classNames.actionsCell,
                   "data-adapttable-part": "actions-cell",
-                },
+                }),
                 actionContent(row)
               )
             : null,
@@ -757,8 +754,8 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
               classNames,
               leading: [
                 ...(model.expandLabel ? ["expand"] : []),
-                ...(model.headerCheckboxAttrs ? ["selection"] : []),
                 ...(model.reorderLabel ? ["reorder"] : []),
+                ...(model.headerCheckboxAttrs ? ["selection"] : []),
               ],
               trailing: model.actionsLabel ? ["actions"] : [],
               startSpacer: () => columnSpacer("td", "start"),

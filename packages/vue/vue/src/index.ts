@@ -192,7 +192,11 @@ export type {
 export { useTableUrlState } from "./url/useTableUrlState";
 export type { UrlSliceOptions } from "./url/useUrlSlice";
 export { useUrlSlice } from "./url/useUrlSlice";
-export type { UseDataTableOptions, UseDataTableResult } from "./useDataTable";
+export type {
+  TableRail,
+  UseDataTableOptions,
+  UseDataTableResult,
+} from "./useDataTable";
 export { useDataTable } from "./useDataTable";
 export type {
   DataTableHandle,

@@ -8,6 +8,7 @@ import {
   type DataTableClassNames,
   groupedHeaderAlign,
   mergeVueAttrs,
+  railCellAttrs,
   renderContent,
   renderHeader,
   selectionCheckboxControl,
@@ -126,23 +127,38 @@ export function vuetifyHeaderRows<TRow>(
   function leading(rowspan: number): VNodeChild[] {
     return [
       model.expandLabel
-        ? h("th", {
-            scope: "col",
-            rowspan,
-            "aria-label": model.expandLabel,
-            "data-adapttable-part": "expand-header",
-            class: [names.th, names.expandHeader],
-          })
+        ? h(
+            "th",
+            railCellAttrs(model, "expand", true, {
+              scope: "col",
+              rowspan,
+              "aria-label": model.expandLabel,
+              "data-adapttable-part": "expand-header",
+              class: [names.th, names.expandHeader],
+            })
+          )
+        : null,
+      model.reorderLabel
+        ? h(
+            "th",
+            railCellAttrs(model, "reorder", true, {
+              scope: "col",
+              rowspan,
+              "data-adapttable-part": "reorder-header",
+              class: [names.th, names.reorderHeader],
+            }),
+            model.reorderLabel
+          )
         : null,
       model.headerCheckboxAttrs
         ? h(
             "th",
-            {
+            railCellAttrs(model, "selection", true, {
               scope: "col",
               rowspan,
               "data-adapttable-part": "selection-header",
               class: names.selectionHeader,
-            },
+            }),
             [
               controls.SelectionCheckbox({
                 ...selectionCheckboxControl(model.headerCheckboxAttrs),
@@ -155,18 +171,6 @@ export function vuetifyHeaderRows<TRow>(
             ]
           )
         : null,
-      model.reorderLabel
-        ? h(
-            "th",
-            {
-              scope: "col",
-              rowspan,
-              "data-adapttable-part": "reorder-header",
-              class: [names.th, names.reorderHeader],
-            },
-            model.reorderLabel
-          )
-        : null,
       vuetifyColumnSpacer(model, "th", "start", rowspan),
     ];
   }
@@ -176,13 +180,13 @@ export function vuetifyHeaderRows<TRow>(
       model.actionsLabel
         ? h(
             "th",
-            {
+            railCellAttrs(model, "actions", true, {
               scope: "col",
               role: "columnheader",
               rowspan,
               "data-adapttable-part": "actions-header",
               class: names.actionsHeader,
-            },
+            }),
             model.actionsLabel
           )
         : null,

@@ -55,8 +55,8 @@ export const VuetifyDesktop = /* @__PURE__ */ withProps(
                       classNames: names,
                       leading: [
                         ...(model.expandLabel ? ["expand"] : []),
-                        ...(model.headerCheckboxAttrs ? ["selection"] : []),
                         ...(model.reorderLabel ? ["reorder"] : []),
+                        ...(model.headerCheckboxAttrs ? ["selection"] : []),
                       ],
                       trailing: model.actionsLabel ? ["actions"] : [],
                       startSpacer: () =>

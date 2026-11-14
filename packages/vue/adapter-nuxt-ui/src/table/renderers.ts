@@ -13,6 +13,7 @@ import {
   groupedHeaderAlign,
   mergeVueAttrs,
   NO_CLASS_NAMES,
+  railCellAttrs,
   renderCell,
   renderContent,
   renderFooter,
@@ -151,37 +152,40 @@ export const NuxtDesktopTable = /* @__PURE__ */ withProps(
         : null;
     const utilityHeaders = (rowspan: number): VNodeChild[] => [
       model.expandLabel
-        ? tablePart("th", {
-            scope: "col",
-            rowspan,
-            "aria-label": model.expandLabel,
-            "data-adapttable-part": "expand-header",
-            class: [names.th, names.expandHeader],
-            style: { width: "40px" },
-          })
-        : null,
-      model.headerCheckboxAttrs
         ? tablePart(
             "th",
-            {
+            railCellAttrs(model, "expand", true, {
               scope: "col",
               rowspan,
-              class: names.selectionHeader,
-              "data-adapttable-part": "selection-header",
-            },
-            select(model.headerCheckboxAttrs, true)
+              "aria-label": model.expandLabel,
+              "data-adapttable-part": "expand-header",
+              class: [names.th, names.expandHeader],
+              style: { width: "40px" },
+            })
           )
         : null,
       model.reorderLabel
         ? tablePart(
             "th",
-            {
+            railCellAttrs(model, "reorder", true, {
               scope: "col",
               rowspan,
               class: [names.th, names.reorderHeader],
               "data-adapttable-part": "reorder-header",
-            },
+            }),
             model.reorderLabel
+          )
+        : null,
+      model.headerCheckboxAttrs
+        ? tablePart(
+            "th",
+            railCellAttrs(model, "selection", true, {
+              scope: "col",
+              rowspan,
+              class: names.selectionHeader,
+              "data-adapttable-part": "selection-header",
+            }),
+            select(model.headerCheckboxAttrs, true)
           )
         : null,
       spacer("th", "start", rowspan),
@@ -191,13 +195,13 @@ export const NuxtDesktopTable = /* @__PURE__ */ withProps(
       model.actionsLabel
         ? tablePart(
             "th",
-            {
+            railCellAttrs(model, "actions", true, {
               scope: "col",
               role: "columnheader",
               rowspan,
               class: names.actionsHeader,
               "data-adapttable-part": "actions-header",
-            },
+            }),
             model.actionsLabel
           )
         : null,
@@ -355,31 +359,36 @@ export const NuxtDesktopTable = /* @__PURE__ */ withProps(
           model.expandLabel
             ? tablePart(
                 "td",
-                mergeVueAttrs(item.expandCellAttrs ?? {}, {
-                  class: [names.td, names.expandCell],
-                  "data-adapttable-part": "expand-cell",
-                }),
+                railCellAttrs(
+                  model,
+                  "expand",
+                  false,
+                  mergeVueAttrs(item.expandCellAttrs ?? {}, {
+                    class: [names.td, names.expandCell],
+                    "data-adapttable-part": "expand-cell",
+                  })
+                ),
                 detailToggle
-              )
-            : null,
-          model.headerCheckboxAttrs
-            ? tablePart(
-                "td",
-                {
-                  class: names.selectionCell,
-                  "data-adapttable-part": "selection-cell",
-                },
-                checkbox
               )
             : null,
           model.reorderLabel
             ? tablePart(
                 "td",
-                {
+                railCellAttrs(model, "reorder", false, {
                   class: [names.td, names.reorderCell],
                   "data-adapttable-part": "reorder-cell",
-                },
+                }),
                 item.reorder?.(false)
+              )
+            : null,
+          model.headerCheckboxAttrs
+            ? tablePart(
+                "td",
+                railCellAttrs(model, "selection", false, {
+                  class: names.selectionCell,
+                  "data-adapttable-part": "selection-cell",
+                }),
+                checkbox
               )
             : null,
           spacer("td", "start"),
@@ -400,10 +409,10 @@ export const NuxtDesktopTable = /* @__PURE__ */ withProps(
           model.actionsLabel
             ? tablePart(
                 "td",
-                {
+                railCellAttrs(model, "actions", false, {
                   class: names.actionsCell,
                   "data-adapttable-part": "actions-cell",
-                },
+                }),
                 [
                   item.editActions?.(),
                   item.actionControls?.length
@@ -521,8 +530,8 @@ export const NuxtDesktopTable = /* @__PURE__ */ withProps(
               },
               [
                 model.expandLabel ? pad("expand") : null,
-                model.headerCheckboxAttrs ? pad("selection") : null,
                 model.reorderLabel ? pad("reorder") : null,
+                model.headerCheckboxAttrs ? pad("selection") : null,
                 spacer("td", "start"),
                 ...model.summary.cells.map((cell) =>
                   tablePart(

@@ -26,6 +26,12 @@
   border: 1px solid var(--adapttable-naive-border);
   border-radius: var(--adapttable-naive-radius);
 }
+/* NTable hides its overflow to round its corners, which would make the table
+   the box pinned cells stick to. Clip keeps the corners without that. */
+.adapttable-naive [data-adapttable-part="table"] {
+  overflow: visible;
+  overflow: clip;
+}
 .adapttable-naive [data-adapttable-part="card"] {
   margin-block: 0.5rem;
 }

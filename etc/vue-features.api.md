@@ -264,6 +264,7 @@ export interface DesktopTableModel<TRow> {
     readonly headerRowAttrs: Attrs;
     // (undocumented)
     readonly headers: readonly TableHeaderModel<TRow>[];
+    readonly railAttrs?: (rail: TableRail, header: boolean) => Attrs;
     // (undocumented)
     readonly reorderLabel?: string;
     // (undocumented)
@@ -961,6 +962,9 @@ export interface TableHeaderModel<TRow> {
     readonly sortAttrs?: Attrs;
 }
 
+// @public
+export type TableRail = "expand" | "reorder" | "selection" | "actions";
+
 // @public (undocumented)
 export interface TableRowDetail<TRow> {
     // (undocumented)
@@ -1129,6 +1133,7 @@ export function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<T
     tableAttrs: () => Record<string, unknown>;
     headerRowAttrs: () => Record<string, unknown>;
     headerCellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
+    railAttrs: (rail: TableRail, header: boolean) => Record<string, unknown>;
     sortButtonAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     rowAttrs: (row: TRow, index: number, state?: {
         readonly selected?: boolean;
