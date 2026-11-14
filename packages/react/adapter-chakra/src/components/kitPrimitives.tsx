@@ -68,6 +68,9 @@ export function buttonOfSize(
         width={fullWidth ? "100%" : undefined}
         justifyContent={justify ? "flex-start" : undefined}
         loading={isBusy(busy, rest)}
+        // While busy the caption stays beside the spinner, so the button
+        // keeps its name; Chakra otherwise hides it.
+        loadingText={rest.children}
         {...rest}
       />
     );
