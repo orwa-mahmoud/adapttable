@@ -7,15 +7,35 @@ import {
   rowActions,
   rowAppearance,
 } from "@adapttable/react/features";
+import { Table as ChakraTable } from "@chakra-ui/react";
+import { axe } from "vitest-axe";
 
 import { reactKitUnderTest } from "../../react/test/kit/harness";
 import type { HarnessProps, ReactKitUnderTest } from "../../react/test/kit/kit";
+import { agentApproval } from "./agent-approval";
+import { TableAssistant, tableAssistant } from "./assistant";
 import { bulkActions } from "./bulk-actions";
 import { cellNavigation } from "./cell-navigation";
 import { collapsibleColumnGroups } from "./column-groups";
 import { columnMenu } from "./column-menu";
 import { columnSelectionCheckbox } from "./column-selection";
 import { commandPalette } from "./command-palette";
+import { Chips } from "./components/ActiveFilterChips";
+import { AutoFilterForm } from "./components/AutoFilterForm";
+import { ChecklistFilter } from "./components/ChecklistFilter";
+import { ColumnHeaderRename } from "./components/ColumnHeaderRename";
+import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
+import { GroupHeaderCard, GroupHeaderRow } from "./components/GroupHeader";
+import { AgentApproval, RowReorderHandle } from "./components/kitControls";
+import { PivotPanel } from "./components/PivotPanel";
+import { SavedViewsPanel } from "./components/SavedViewsPanel";
+import { SelectionStatsBar } from "./components/SelectionStatsBar";
+import {
+  ExportCsvButton,
+  FullscreenButton,
+  PrintButton,
+  UndoRedoButtons,
+} from "./components/toolbarExtras";
 import { contextMenu } from "./context-menu";
 import { DataTable as Table } from "./DataTable";
 import { densityChooser } from "./density";
@@ -32,7 +52,10 @@ import { filters, filterTypes } from "./filters";
 import { findInTable } from "./find-in-table";
 import { fullscreen } from "./fullscreen";
 import { grouping } from "./grouping";
+import { groupingPanel } from "./grouping-panel";
 import { headerFilters } from "./header-filters";
+import { pinnedSummaryRows } from "./pinned-summary-rows";
+import { standardFeatures } from "./preset";
 import { print } from "./print";
 import { nestedTable, rowDetail } from "./row-detail";
 import { rowPinning } from "./row-pinning";
@@ -49,6 +72,12 @@ import { virtualize } from "./virtualize";
 export const kit: ReactKitUnderTest = reactKitUnderTest({
   name: "chakra",
   render: renderChakra,
+  axe,
+  TableBodyFrame: ({ children }) => (
+    <ChakraTable.Root>
+      <ChakraTable.Body>{children}</ChakraTable.Body>
+    </ChakraTable.Root>
+  ),
   Table,
   features: {
     batchEditing,
@@ -72,9 +101,11 @@ export const kit: ReactKitUnderTest = reactKitUnderTest({
     fitColumns,
     fullscreen,
     grouping,
+    groupingPanel,
     headerFilters,
     multiSort,
     nestedTable,
+    pinnedSummaryRows,
     print,
     resizableColumns,
     rowActions,
@@ -90,6 +121,28 @@ export const kit: ReactKitUnderTest = reactKitUnderTest({
     tree,
     undoRedoButtons,
     virtualize,
+  },
+  components: {
+    AgentApproval,
+    AutoFilterForm,
+    ChecklistFilter,
+    Chips,
+    ColumnHeaderRename,
+    ExportCsvButton,
+    FilterTreeBuilder,
+    FullscreenButton,
+    GroupHeaderCard,
+    GroupHeaderRow,
+    PivotPanel,
+    PrintButton,
+    RowReorderHandle,
+    SavedViewsPanel,
+    SelectionStatsBar,
+    TableAssistant,
+    UndoRedoButtons,
+    agentApproval,
+    standardFeatures,
+    tableAssistant,
   },
 });
 

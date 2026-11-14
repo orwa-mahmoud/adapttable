@@ -1,10 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { commandPaletteTests } from "../../react/test/kit/suites/commandPalette";
 import { commandPalette } from "./command-palette";
-import { DataTable } from "./data-table.test-utils";
+import { DataTable, kit } from "./data-table.test-utils";
 import { DataTable as BareDataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
+
+for (const test of commandPaletteTests(kit)) it(test.name, test.run);
 
 interface Row {
   id: string;
@@ -60,14 +63,6 @@ describe("command palette (mui)", () => {
     document.querySelector('[data-adapttable-part="command-palette"]');
   // Scoped by part: a table renders its own comboboxes, so the role alone
   // is ambiguous.
-  const input = () =>
-    document.querySelector('[data-adapttable-part="command-input"]')!;
-
-  it("stays shut until the chord is pressed", () => {
-    table();
-
-    expect(palette()).toBeNull();
-  });
 
   it("names the dialog, not MUI's presentation wrapper", () => {
     table();
@@ -81,65 +76,10 @@ describe("command palette (mui)", () => {
     ).toBeVisible();
   });
 
-  it("opens on Cmd/Ctrl+K and lists the wired commands", () => {
-    table();
-    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
-
-    expect(palette()).not.toBeNull();
-    expect(screen.getByText("Print")).toBeInTheDocument();
-  });
-
-  it("takes focus into its search box", () => {
-    table();
-    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
-
-    expect(document.activeElement).toBe(input());
-  });
-
-  it("runs the highlighted command on Enter", () => {
-    onPrint.mockClear();
-    table();
-    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
-    fireEvent.keyDown(input(), { key: "Enter" });
-
-    expect(onPrint).toHaveBeenCalledTimes(1);
-  });
-
-  it("closes on Escape", () => {
-    table();
-    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
-    fireEvent.keyDown(input(), { key: "Escape" });
-
-    expect(palette()).toBeNull();
-  });
-
   it("binds nothing when the feature is not composed", () => {
     bare({ commandPalette: true });
     fireEvent.keyDown(document, { key: "k", ctrlKey: true });
 
     expect(palette()).toBeNull();
-  });
-
-  it("moves the highlight and greys out a command it cannot run", () => {
-    table({
-      commandPalette: {
-        commands: [
-          { key: "locked", label: "Locked", disabled: true, onSelect: vi.fn() },
-        ],
-      },
-    });
-    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
-    fireEvent.keyDown(input(), { key: "ArrowDown" });
-    const options = document.querySelectorAll(
-      '[data-adapttable-part="command-item"]'
-    );
-
-    expect(options.length).toBeGreaterThan(1);
-    expect(
-      [...options].some((el) => el.getAttribute("aria-disabled") === "true")
-    ).toBe(true);
-    expect(
-      [...options].some((el) => el.getAttribute("aria-selected") === "true")
-    ).toBe(true);
   });
 });

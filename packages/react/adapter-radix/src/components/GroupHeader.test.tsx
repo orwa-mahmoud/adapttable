@@ -4,9 +4,13 @@ import { Table } from "@radix-ui/themes";
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { groupHeaderTests } from "../../../react/test/kit/suites/groupHeader";
+import { kit } from "../data-table.test-utils";
 import { defaultLabels } from "../index";
 import { renderRadix } from "../test-utils";
 import { GroupHeaderCard, GroupHeaderRow } from "./GroupHeader";
+
+for (const test of groupHeaderTests(kit)) it(test.name, test.run);
 
 interface Row {
   id: string;
@@ -15,9 +19,6 @@ interface Row {
 }
 
 type GroupEntry = Extract<GroupedFlatEntry<Row>, { kind: "group" }>;
-
-const LABEL_CELL = '[data-adapttable-part="group-cell"]';
-const CELL_TAG = "td";
 
 const COLUMNS: ColumnDef<Row>[] = [
   { key: "name", header: "Name" },
@@ -93,26 +94,6 @@ function renderRow(
 }
 
 describe("GroupHeaderRow (radix)", () => {
-  it("puts a subtotal in its own column's cell, not the label's", () => {
-    // The defect this replaced: every aggregate lived inside one spanning cell
-    // and was pushed to the row's end, which on a scrolling table is past the
-    // right edge of what the user can see.
-    renderRow({
-      columns: COLUMNS,
-      entry: makeGroupEntry({ aggregateCells: { team: <span>$99</span> } }),
-    });
-    const label = document.querySelector(LABEL_CELL);
-    const cells = [...document.querySelectorAll(CELL_TAG)];
-    const aggregate = document.querySelector(
-      '[data-adapttable-part="group-aggregate"][data-column="team"]'
-    );
-    // The label spans the columns before it; the number sits in a later cell.
-    expect(label).toHaveAttribute("colspan", "1");
-    expect(aggregate).toHaveTextContent("$99");
-    expect(label?.contains(aggregate ?? null)).toBe(false);
-    expect(cells).toHaveLength(2);
-  });
-
   it("renders label, count, aggregates, and group hooks", () => {
     renderRow({
       entry: makeGroupEntry({
@@ -154,13 +135,6 @@ describe("GroupHeaderRow (radix)", () => {
     expect(
       screen.getByRole("button", { name: labels.collapseGroup })
     ).toHaveAttribute("aria-expanded", "true");
-  });
-
-  it("omits the group checkbox without selection", () => {
-    renderRow({ selection: null });
-    expect(
-      document.querySelector('[data-adapttable-part="group-select"]')
-    ).toBeNull();
   });
 
   it("reflects tri-state selection and toggles group leaves", () => {

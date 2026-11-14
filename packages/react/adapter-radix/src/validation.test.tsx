@@ -1,9 +1,12 @@
 import { Theme } from "@radix-ui/themes";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./data-table.test-utils";
+import { validationTests } from "../../react/test/kit/suites/validation";
+import { DataTable, kit } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+
+for (const test of validationTests(kit)) it(test.name, test.run);
 
 interface Task {
   id: string;
@@ -71,19 +74,6 @@ describe("edit validation (radix)", () => {
     });
   };
 
-  it("commits a value that passes, exactly as before", async () => {
-    const { onCellEdit } = table();
-    openFirstEditor();
-    fireEvent.change(editor(), { target: { value: "Ship it" } });
-    await commit();
-    expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
-      TASKS[0],
-      "title",
-      "Ship it"
-    );
-    expect(part("edit-cell-error")).toBeNull();
-  });
-
   it("keeps a rejected value out of the host, and says why", async () => {
     const { onCellEdit } = table();
     openFirstEditor();
@@ -121,57 +111,5 @@ describe("edit validation (radix)", () => {
     expect(part("edit-cell-error")).not.toBeNull();
     fireEvent.keyDown(editor(), { key: "Escape" });
     expect(part("edit-cell-error")).toBeNull();
-  });
-
-  it("marks the cell busy while an async check runs", async () => {
-    let settle: ((message?: string) => void) | undefined;
-    const { onCellEdit } = table({
-      columns: [
-        {
-          key: "title",
-          header: "Title",
-          accessor: (r: Task) => r.title,
-          editable: true,
-          validate: () =>
-            new Promise<string | undefined>((resolve) => {
-              settle = resolve;
-            }),
-        },
-      ],
-    });
-    openFirstEditor();
-    fireEvent.change(editor(), { target: { value: "Taken" } });
-    fireEvent.keyDown(editor(), { key: "Enter" });
-    expect(editor()).toHaveAttribute("aria-busy", "true");
-    expect(onCellEdit).not.toHaveBeenCalled();
-
-    await act(async () => {
-      settle?.(undefined);
-      await Promise.resolve();
-    });
-    expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
-      TASKS[0],
-      "title",
-      "Taken"
-    );
-  });
-
-  it("gates on a rule no single cell can answer", async () => {
-    const { onCellEdit } = table({
-      validateRow: (row: Task) =>
-        row.end <= row.start ? "The end must come after the start" : undefined,
-    });
-    // Edit the END column: a row rule fires on whichever cell was edited.
-    const activates = document.querySelectorAll<HTMLElement>(
-      '[data-adapttable-part="edit-cell-activate"]'
-    );
-    fireEvent.doubleClick(activates[1]!);
-    fireEvent.change(editor(), { target: { value: "1" } });
-    await act(async () => {
-      fireEvent.keyDown(editor(), { key: "Enter" });
-      await Promise.resolve();
-    });
-    expect(onCellEdit).not.toHaveBeenCalled();
-    expect(screen.getByText("The end must come after the start")).toBeVisible();
   });
 });
