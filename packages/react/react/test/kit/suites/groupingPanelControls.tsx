@@ -71,9 +71,7 @@ export function groupingPanelControlsTests(
     /** The grouped columns, in chip order. */
     function grouped(): string[] {
       return [
-        ...document.querySelectorAll(
-          '[data-adapttable-part="grouping-chip"]'
-        ),
+        ...document.querySelectorAll('[data-adapttable-part="grouping-chip"]'),
       ].map((chip) =>
         chip.textContent?.includes("Team") === true ? "team" : "status"
       );
