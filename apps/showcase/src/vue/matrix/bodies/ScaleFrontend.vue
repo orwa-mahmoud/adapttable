@@ -1,18 +1,29 @@
 <script setup lang="ts">
 /** The frontend tier: every row in memory, windowed. */
 import {
-  makeLargeDirectory,
-  peopleColumns,
-  rowKey,
-  SCALE_ROWS,
-  TABLE_PRESENTATION,
-} from "../data";
+  makeBigList,
+  SCALE_SLICE,
+  scaleParams,
+  scalePlaceholder,
+  scaleRowKey,
+} from "../../../shared/scaleScenario";
+import { TABLE_PRESENTATION } from "../data";
+import { scaleColumns } from "../scaleColumns";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
-const columns = peopleColumns({ status: kit.status });
-const rows = makeLargeDirectory(SCALE_ROWS);
-const features = [kit.virtualize({ maxHeight: 480 })];
+const params = scaleParams();
+const columns = scaleColumns(params.cols);
+const rows = makeBigList(params.total);
+const features = params.virtual
+  ? [
+      kit.virtualize({
+        maxHeight: 480,
+        estimateRowSize: 48,
+        virtualizeColumns: params.virtualCols,
+      }),
+    ]
+  : [];
 </script>
 
 <template>
@@ -22,10 +33,11 @@ const features = [kit.virtualize({ maxHeight: 480 })];
     table-label="People"
     :url-sync="false"
     pagination-mode="infinite"
+    :search-placeholder="scalePlaceholder(params.total)"
     :data="rows"
     :columns="columns"
-    :row-key="rowKey"
-    :defaults="{ limit: SCALE_ROWS }"
+    :row-key="scaleRowKey"
+    :defaults="{ limit: params.all ? params.total : SCALE_SLICE }"
     :features="features"
   />
 </template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 /** Column groups: three header groups, each collapsing its own way. */
+import { pageDefaultsFor } from "../../../casts";
 import {
   groupedPeopleColumns,
   PEOPLE,
@@ -10,6 +11,7 @@ import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("column-groups");
 const columns = groupedPeopleColumns(kit.status);
 const pageFeatures = [kit.collapsibleColumnGroups()];
 const chrome = pageChromeFeatures(kit, { urlKey: "cgrp" });
@@ -31,7 +33,7 @@ const features = [...pageFeatures, ...chrome];
         :data="PEOPLE"
         :columns="columns"
         :row-key="rowKey"
-        :defaults="{ limit: 10 }"
+        :defaults="PAGE_DEFAULTS"
         :features="features"
       />
     </div>

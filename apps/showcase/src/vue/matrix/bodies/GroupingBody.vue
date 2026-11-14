@@ -6,7 +6,7 @@
  */
 import { shallowRef } from "vue";
 
-import { pageLayoutFor } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor } from "../../../casts";
 import {
   GROUPED_XLSX_EXPORT,
   PEOPLE_GROUP_BY,
@@ -22,6 +22,7 @@ import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("grouping");
 const PAGE_LAYOUT = pageLayoutFor("grouping");
 const columns = peopleColumns({ status: kit.status });
 // The toggle forces the phone's selects on a desktop; off, it leaves the
@@ -72,6 +73,7 @@ const features = [...pageFeatures, ...chrome];
           :data="PEOPLE"
           :columns="columns"
           :row-key="rowKey"
+          :defaults="PAGE_DEFAULTS"
           :default-column-layout="PAGE_LAYOUT"
           :force-mobile="mobile || undefined"
           :features="features"

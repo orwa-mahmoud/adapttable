@@ -2,7 +2,7 @@
 /** Mobile cards: the same table, every row a card, in a phone-width frame. */
 import { computed, h, ref, shallowRef, type VNodeChild } from "vue";
 
-import { pageLayoutFor } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor } from "../../../casts";
 import {
   applyPersonEdit,
   demoOrders,
@@ -18,6 +18,7 @@ import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("mobile");
 const PAGE_LAYOUT = pageLayoutFor("mobile");
 const mobile = ref<boolean | undefined>(true);
 const rows = shallowRef<readonly Person[]>(peopleRows());
@@ -161,7 +162,7 @@ const columns = peopleColumns({
         :columns="columns"
         :row-key="rowKey"
         :default-column-layout="PAGE_LAYOUT"
-        :defaults="{ limit: 8 }"
+        :defaults="PAGE_DEFAULTS"
       >
         <template v-if="customCard" #card="{ fields }">
           <div class="mx-custom-card" data-demo-custom-card>

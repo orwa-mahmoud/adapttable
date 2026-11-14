@@ -1,6 +1,6 @@
 <script setup lang="ts">
-/** Scale: forty thousand rows, windowed, in a scroll box — or served. */
-import { SCALE_ROWS } from "../data";
+/** Scale: fifty thousand rows, windowed, in a scroll box — or served. */
+import { scaleParams } from "../../../shared/scaleScenario";
 import ScaleFrontend from "./ScaleFrontend.vue";
 import ScaleQuery from "./ScaleQuery.vue";
 import ScaleServer from "./ScaleServer.vue";
@@ -9,9 +9,10 @@ import ScaleServer from "./ScaleServer.vue";
 const requested = new URLSearchParams(window.location.search).get("tier");
 const tier =
   requested === "server" || requested === "query" ? requested : "frontend";
+const total = scaleParams().total.toLocaleString("en-US");
 const hint = {
-  frontend: `${String(SCALE_ROWS)} rows — only the ones in view render`,
-  server: `${String(SCALE_ROWS)} rows on the server — each slice fetched as you scroll`,
+  frontend: `${total} rows — only the ones in view render`,
+  server: `${total} rows on the server — each slice fetched as you scroll`,
   query: "Every page comes from an infinite query composable",
 }[tier];
 </script>

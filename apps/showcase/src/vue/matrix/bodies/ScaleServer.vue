@@ -8,36 +8,43 @@ import { useServerData } from "@adapttable/vue";
 import { computed, shallowRef } from "vue";
 
 import {
-  largePerson,
-  peopleColumns,
-  type Person,
-  rowKey,
-  SCALE_ROWS,
-  TABLE_PRESENTATION,
-} from "../data";
+  type BigPerson,
+  SCALE_SLICE,
+  scaleParams,
+  scalePlaceholder,
+  scaleRowKey,
+  serverSlice,
+} from "../../../shared/scaleScenario";
+import { TABLE_PRESENTATION } from "../data";
+import { scaleColumns } from "../scaleColumns";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
-const columns = peopleColumns({ status: kit.status });
-const slice = shallowRef({ from: 0, limit: 500 });
-const rows = computed(() => {
-  const { from, limit } = slice.value;
-  return Array.from(
-    { length: Math.max(0, Math.min(limit, SCALE_ROWS - from)) },
-    (_, index) => largePerson(from + index)
-  );
-});
-const source = useServerData<Person>({
+const params = scaleParams();
+const columns = scaleColumns(params.cols);
+const slice = shallowRef({ from: 0, limit: SCALE_SLICE });
+const rows = computed(() =>
+  serverSlice(slice.value.from, slice.value.limit, params.total)
+);
+const source = useServerData<BigPerson>({
   rows,
-  total: SCALE_ROWS,
+  total: params.total,
   urlSync: false,
   paginationMode: "infinite",
-  defaults: { limit: 500 },
+  defaults: { limit: SCALE_SLICE },
   onQueryChange: (query) => {
     slice.value = { from: (query.page - 1) * query.limit, limit: query.limit };
   },
 });
-const features = [kit.virtualize({ estimateRowSize: 48, maxHeight: 480 })];
+const features = params.virtual
+  ? [
+      kit.virtualize({
+        estimateRowSize: 48,
+        maxHeight: 480,
+        virtualizeColumns: params.virtualCols,
+      }),
+    ]
+  : [];
 </script>
 
 <template>
@@ -46,9 +53,10 @@ const features = [kit.virtualize({ estimateRowSize: 48, maxHeight: 480 })];
     v-bind="TABLE_PRESENTATION"
     table-label="People"
     :url-sync="false"
+    :search-placeholder="scalePlaceholder(params.total)"
     :source="source"
     :columns="columns"
-    :row-key="rowKey"
+    :row-key="scaleRowKey"
     :features="features"
   />
 </template>

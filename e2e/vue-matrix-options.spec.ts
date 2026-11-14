@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
 import { builtAdapters, pathOf } from "../apps/showcase/matrix.mjs";
+import { expectMatchingRows } from "./table-total";
 
 function part(page: Page, name: string): Locator {
   return page.locator(`.mx-demo [data-adapttable-part="${name}"]`);
@@ -296,7 +297,7 @@ for (const kit of builtAdapters("vue")) {
         surface.locator('[data-adapttable-part="filter-tree-group"]')
       ).toHaveCount(1);
       await surface.locator('[data-adapttable-part="filters-clear"]').click();
-      await expect(rows).toHaveCount(25);
+      await expectMatchingRows(page.locator(".mx-demo"), 30);
       await page.keyboard.press("Escape");
       await expect(trigger).toBeFocused();
       await page.getByLabel("Filter layout").selectOption("header");
@@ -318,7 +319,7 @@ for (const kit of builtAdapters("vue")) {
       await input.press("Escape");
       await expect(person).toBeFocused();
       await part(page, "chip-remove").first().click();
-      await expect(rows).toHaveCount(25);
+      await expectMatchingRows(page.locator(".mx-demo"), 30);
     });
 
     test(`${kit.key}/column-groups: ${width}px each collapse presentation retains its data`, async ({
@@ -503,24 +504,31 @@ for (const kit of builtAdapters("vue")) {
       await page.goto(route("row-reordering"));
       const rows = part(page, rowPart);
       await expect(rows.first()).toContainText("Ada Lovelace");
+      // A pointer drop asks first; confirm when the kit shows the menu. A
+      // row the host moved twice would land two places down, not one.
+      const confirmMove = async () => {
+        const confirmation = page.locator(
+          '[data-adapttable-part="row-move-confirmation"]:visible'
+        );
+        if ((await confirmation.count()) > 0) {
+          await confirmation.getByRole("button", { name: "Move" }).click();
+        }
+      };
       if (width === 390) {
         const down = rows
           .first()
           .locator('[data-adapttable-part="row-reorder-down"]');
         await down.focus();
         await down.press("Enter");
+        await confirmMove();
         await expect(rows.nth(1)).toContainText("Ada Lovelace");
-        await expect(page.locator("[data-demo-log]")).toHaveText(
-          "Moved Ada Lovelace from 1 to 2"
-        );
+        await expect(rows.nth(2)).not.toContainText("Ada Lovelace");
         await rows
           .nth(1)
           .locator('[data-adapttable-part="row-reorder-up"]')
           .press("Enter");
+        await confirmMove();
         await expect(rows.first()).toContainText("Ada Lovelace");
-        await expect(page.locator("[data-demo-log]")).toHaveText(
-          "Moved Ada Lovelace from 2 to 1"
-        );
         return;
       }
       const handle = rows
@@ -530,10 +538,9 @@ for (const kit of builtAdapters("vue")) {
       await handle.press("Space");
       await handle.press("ArrowDown");
       await handle.press("Space");
+      await confirmMove();
       await expect(rows.nth(1)).toContainText("Ada Lovelace");
-      await expect(page.locator("[data-demo-log]")).toHaveText(
-        "Moved Ada Lovelace from 1 to 2"
-      );
+      await expect(rows.nth(2)).not.toContainText("Ada Lovelace");
       const moved = rows
         .nth(1)
         .locator('[data-adapttable-part="row-reorder-handle"]');
@@ -541,9 +548,6 @@ for (const kit of builtAdapters("vue")) {
       await moved.press("ArrowDown");
       await moved.press("Escape");
       await expect(rows.nth(1)).toContainText("Ada Lovelace");
-      await expect(page.locator("[data-demo-log]")).toHaveText(
-        "Moved Ada Lovelace from 1 to 2"
-      );
     });
 
     test(`${kit.key}/rows: ${width}px add, duplicate, pin and delete use native menus`, async ({
@@ -655,13 +659,15 @@ for (const kit of builtAdapters("vue")) {
       await expect(cards.first()).toContainText("Ada Lovelace");
     });
 
-    test(`${kit.key}/saved-views: ${width}px named search persists, applies and deletes`, async ({
+    test(`${kit.key}/saved-views: ${width}px a named search saves, applies and deletes`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(route("saved-views"));
+      // The page keeps its views in memory, seeded with a shared view and
+      // one an older table saved: a reload starts from those two again.
       const search = page.locator(".mx-demo").getByRole("searchbox");
-      await search.fill("Ada Lovelace");
+      await search.fill("Sefa Demir");
       const rows = part(page, rowPart);
       await expect(rows).toHaveCount(1);
       const trigger = part(page, "views-button");
@@ -669,30 +675,31 @@ for (const kit of builtAdapters("vue")) {
       const input = page
         .locator('[data-adapttable-part="views-panel"]')
         .getByRole("textbox");
-      await input.fill("Ada only");
+      await input.fill("Sefa only");
       await input.press("Enter");
-      await expect(
-        page.locator('[data-adapttable-part="views-item"]')
-      ).toHaveText("Ada only");
+      const saved = page
+        .locator('[data-adapttable-part="views-item"]')
+        .filter({ hasText: "Sefa only" });
+      await expect(saved).toHaveCount(1);
       await input.press("Escape");
       await expect(trigger).toBeFocused();
-      await page.reload();
-      await expect(rows).toHaveCount(25);
+      await search.fill("");
+      await expectMatchingRows(page.locator(".mx-demo"), 16);
       await trigger.click();
-      await page.locator('[data-adapttable-part="views-item"]').click();
-      await expect(search).toHaveValue("Ada Lovelace");
+      await saved.click();
+      await expect(search).toHaveValue("Sefa Demir");
       await expect(rows).toHaveCount(1);
       await trigger.click();
-      await page.locator('[data-adapttable-part="views-delete"]').click();
-      await expect(
-        page.locator('[data-adapttable-part="views-item"]')
-      ).toHaveCount(0);
+      await page
+        .getByRole("button", { name: "Delete view: Sefa only", exact: true })
+        .click();
+      await expect(saved).toHaveCount(0);
       await page.keyboard.press("Escape");
       await page.reload();
       await trigger.click();
       await expect(
         page.locator('[data-adapttable-part="views-item"]')
-      ).toHaveCount(0);
+      ).toHaveText(["Team: platform", "Legacy view"]);
     });
 
     for (const scope of ["page", "selected", "range"]) {

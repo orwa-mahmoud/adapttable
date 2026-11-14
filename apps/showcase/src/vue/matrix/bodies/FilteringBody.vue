@@ -2,7 +2,7 @@
 /** Filters: popover, drawer or header funnels, chips, and URL state. */
 import { computed, shallowRef } from "vue";
 
-import { pageLayoutFor } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor } from "../../../casts";
 import {
   FILTER_FORMS,
   type FilterForm,
@@ -23,6 +23,7 @@ import { useShowcaseKit } from "../showcaseKit";
 type FilterLayout = "popover" | "drawer" | "header";
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("filtering");
 const PAGE_LAYOUT = pageLayoutFor("filtering");
 const columns = peopleColumns({ status: kit.status });
 const layouts: readonly { value: FilterLayout; label: string }[] = [
@@ -100,6 +101,7 @@ function changeForm(event: Event): void {
         :data="PEOPLE"
         :columns="columns"
         :row-key="rowKey"
+        :defaults="PAGE_DEFAULTS"
         :default-column-layout="PAGE_LAYOUT"
         :features="features"
       />

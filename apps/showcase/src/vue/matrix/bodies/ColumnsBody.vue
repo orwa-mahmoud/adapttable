@@ -4,6 +4,7 @@ import { type ColumnDef, useColumnLayoutUrlState } from "@adapttable/vue";
 import { xlsxWriter } from "@adapttable/vue/xlsx";
 import { shallowRef } from "vue";
 
+import { pageDefaultsFor } from "../../../casts";
 import { inWideOrder } from "../../../shared/peopleTable";
 import {
   PEOPLE,
@@ -16,6 +17,7 @@ import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("columns");
 // This deliberately wide demo needs width floors: automatic table layout
 // may shrink preferred widths until there is no overflow to demonstrate.
 const columns = shallowRef<readonly ColumnDef<Person>[]>(
@@ -69,7 +71,7 @@ const features = [...pageFeatures, ...chrome];
         :data="PEOPLE"
         :columns="columns"
         :row-key="rowKey"
-        :defaults="{ limit: 10 }"
+        :defaults="PAGE_DEFAULTS"
         :features="features"
         @update:column-layout="onLayoutChange"
       />

@@ -6,7 +6,7 @@
  */
 import { computed, onMounted, shallowRef } from "vue";
 
-import { pageLayoutFor } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor } from "../../../casts";
 import {
   EXPORT_GROUP_BY,
   EXPORT_MODES,
@@ -32,6 +32,7 @@ import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("export");
 const PAGE_LAYOUT = pageLayoutFor("export");
 const columns = peopleColumns({ status: kit.status });
 const locale = currentDataLocale();
@@ -90,6 +91,7 @@ const features = computed(() => [...pageFeatures.value, ...chrome]);
         :data="PEOPLE"
         :columns="columns"
         :row-key="rowKey"
+        :defaults="PAGE_DEFAULTS"
         :default-column-layout="PAGE_LAYOUT"
         :features="features"
       />

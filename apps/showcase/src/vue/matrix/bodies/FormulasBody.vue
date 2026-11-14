@@ -6,7 +6,7 @@ import {
 } from "@adapttable/vue/formula";
 import { computed, shallowRef } from "vue";
 
-import { pageLayoutFor, seedRoster } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor, seedRoster } from "../../../casts";
 import {
   cycleReport,
   FORMULA_EXAMPLES,
@@ -27,6 +27,7 @@ import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("formulas");
 const PAGE_LAYOUT = pageLayoutFor("formulas");
 const features = pageChromeFeatures(kit, { urlKey: "fx" });
 const rows = seedRoster("formulas", true);
@@ -133,7 +134,7 @@ function add(): void {
         :row-key="rowKey"
         :default-column-layout="PAGE_LAYOUT"
         :features="features"
-        :defaults="{ limit: 10 }"
+        :defaults="PAGE_DEFAULTS"
       />
     </div>
   </div>

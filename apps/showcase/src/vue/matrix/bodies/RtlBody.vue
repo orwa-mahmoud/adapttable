@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /** Arabic controls and cell data, through the same filters kit as FilteringBody. */
+import { pageDefaultsFor, pageLayoutFor, rosterFor } from "../../../casts";
 import {
   FILTER_DEFS,
-  PEOPLE,
   peopleColumns,
   rowKey,
   SHOWCASE_PRESENTATION,
@@ -12,6 +12,9 @@ import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("rtl");
+const PAGE_LAYOUT = pageLayoutFor("rtl");
+const rows = rosterFor("rtl");
 const columns = peopleColumns({ status: kit.status });
 const pageFeatures = [kit.filters(FILTER_DEFS), kit.columnMenu()];
 const chrome = pageChromeFeatures(kit, { urlKey: "rtl" });
@@ -28,10 +31,11 @@ const features = [...pageFeatures, ...chrome];
           SHOWCASE_PRESENTATION.locale === 'ar' ? 'الأشخاص' : 'People'
         "
         url-key="rtl"
-        :data="PEOPLE"
+        :data="rows"
         :columns="columns"
         :row-key="rowKey"
-        :defaults="{ limit: 10 }"
+        :default-column-layout="PAGE_LAYOUT"
+        :defaults="PAGE_DEFAULTS"
         :features="features"
       />
     </div>

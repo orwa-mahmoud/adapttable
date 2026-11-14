@@ -3,6 +3,7 @@
 import { aggregate } from "@adapttable/vue";
 import { shallowRef } from "vue";
 
+import { pageDefaultsFor } from "../../../casts";
 import { formatMoney } from "../../../people";
 import {
   applyPersonEdit,
@@ -16,6 +17,7 @@ import {
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("landing");
 const rows = shallowRef<readonly Person[]>(peopleRows());
 const columns = peopleColumns({ editable: true, status: kit.status });
 const summary = aggregate<Person>(
@@ -63,7 +65,7 @@ const features = [
         :columns="columns"
         :row-key="rowKey"
         selectable
-        :defaults="{ limit: 10 }"
+        :defaults="PAGE_DEFAULTS"
         :summary-row="summary"
         :features="features"
       />

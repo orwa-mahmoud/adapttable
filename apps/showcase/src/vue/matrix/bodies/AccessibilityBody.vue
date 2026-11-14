@@ -2,12 +2,13 @@
 /** Keyboard focus and a real live-region transcript, from AccessibilityDemo.tsx. */
 import { onMounted, onScopeDispose, shallowRef, useTemplateRef } from "vue";
 
-import { pageLayoutFor } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor } from "../../../casts";
 import { PEOPLE, peopleColumns, rowKey, TABLE_PRESENTATION } from "../data";
 import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("accessibility");
 const PAGE_LAYOUT = pageLayoutFor("accessibility");
 const columns = peopleColumns({ status: kit.status });
 const pageFeatures = [kit.cellNavigation(), kit.columnSelectionCheckbox()];
@@ -60,7 +61,7 @@ onScopeDispose(() => observer?.disconnect());
         :row-key="rowKey"
         :default-column-layout="PAGE_LAYOUT"
         :features="features"
-        :defaults="{ limit: 10 }"
+        :defaults="PAGE_DEFAULTS"
       />
     </div>
     <div class="mx-demo__body" data-testid="announcements">

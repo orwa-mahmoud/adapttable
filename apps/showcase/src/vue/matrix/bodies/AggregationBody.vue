@@ -4,7 +4,7 @@
  * footers with budget subtotals, the footer grand total, and a full-width
  * note attached to a row. Filter the set and every total follows.
  */
-import { pageLayoutFor, rosterFor } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor, rosterFor } from "../../../casts";
 import {
   attachedNote,
   budgetTotalOf,
@@ -23,6 +23,7 @@ import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("aggregation");
 const PAGE_LAYOUT = pageLayoutFor("aggregation");
 const columns = peopleColumns({ status: kit.status });
 const rows = rosterFor("aggregation");
@@ -58,6 +59,7 @@ const features = [...pageFeatures, ...chrome];
         :data="rows"
         :columns="columns"
         :row-key="rowKey"
+        :defaults="PAGE_DEFAULTS"
         :default-column-layout="PAGE_LAYOUT"
         :summary-row="PEOPLE_GROUPING.groupAggregates"
         :features="features"

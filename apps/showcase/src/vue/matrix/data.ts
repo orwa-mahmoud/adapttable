@@ -37,8 +37,6 @@ export { fetchPeople, type PeoplePage, type PeopleParams } from "../../mockApi";
 export {
   type DemoOrder,
   demoOrders,
-  largePerson,
-  makeLargeDirectory,
   PEOPLE,
   type Person,
   reportsTo,
@@ -205,6 +203,3 @@ export function refreshShowcasePresentation(): void {
   );
   syncTablePresentation();
 }
-
-/** How many rows the scale page windows. */
-export const SCALE_ROWS = 40_000;

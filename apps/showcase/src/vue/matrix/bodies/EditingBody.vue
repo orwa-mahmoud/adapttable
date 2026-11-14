@@ -2,6 +2,7 @@
 /** Editing: kit-native editors in the cell; the host writes every change. */
 import { computed, shallowRef } from "vue";
 
+import { pageDefaultsFor } from "../../../casts";
 import { EDITING_DEFAULT_LAYOUT } from "../../../shared/peopleTable";
 import {
   applyPersonEdit,
@@ -16,6 +17,7 @@ import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("editing");
 const columns = peopleColumns({ editable: true, status: kit.status });
 const rows = shallowRef<readonly Person[]>(peopleRows());
 const log = shallowRef("Every change goes through the host.");
@@ -107,7 +109,7 @@ const features = computed(() => [...pageFeatures.value, ...chrome]);
         :data="rows"
         :columns="columns"
         :row-key="rowKey"
-        :defaults="{ limit: 10 }"
+        :defaults="PAGE_DEFAULTS"
         :default-column-layout="EDITING_DEFAULT_LAYOUT"
         :features="features"
       />

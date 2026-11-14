@@ -2,9 +2,10 @@
 /** Rows: pin from the 3-dot menu, and merge a team that runs down the page. */
 import { shallowRef } from "vue";
 
-import { pageLayoutFor } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor } from "../../../casts";
 import {
   orderPeopleByTeam,
+  ROWS_PAGE_HEIGHT,
   teamSpan,
   withAddedPerson,
   withDuplicatedPerson,
@@ -21,6 +22,7 @@ import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("rows");
 const PAGE_LAYOUT = pageLayoutFor("rows");
 const columns = peopleColumns({ status: kit.status });
 const rows = shallowRef<readonly Person[]>(orderPeopleByTeam(PEOPLE));
@@ -60,7 +62,8 @@ const features = [...pageFeatures, ...chrome];
         :columns="columns"
         :row-key="rowKey"
         :default-column-layout="PAGE_LAYOUT"
-        :defaults="{ limit: 30 }"
+        :defaults="PAGE_DEFAULTS"
+        :max-height="ROWS_PAGE_HEIGHT"
         :features="features"
       />
     </div>

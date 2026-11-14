@@ -3,7 +3,7 @@
 import type { ColumnDef } from "@adapttable/vue";
 import { h } from "vue";
 
-import { pageLayoutFor } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor } from "../../../casts";
 import {
   type DemoOrder,
   demoOrders,
@@ -30,6 +30,7 @@ const ORDER_COLUMNS: ColumnDef<DemoOrder>[] = [
 const orderKey = (order: DemoOrder) => order.id;
 
 const kit = useShowcaseKit();
+const PAGE_DEFAULTS = pageDefaultsFor("nested-tables");
 const PAGE_LAYOUT = pageLayoutFor("nested-tables");
 const columns = peopleColumns({ status: kit.status });
 const firstId = PEOPLE[0]?.id;
@@ -70,7 +71,7 @@ const features = [...pageFeatures, ...chrome];
         :columns="columns"
         :row-key="rowKey"
         :default-column-layout="PAGE_LAYOUT"
-        :defaults="{ limit: 10 }"
+        :defaults="PAGE_DEFAULTS"
         :features="features"
       />
     </div>

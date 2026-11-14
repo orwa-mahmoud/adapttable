@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { builtAdapters, pathOf } from "../apps/showcase/matrix.mjs";
+import { expectMatchingRows } from "./table-total";
 
 for (const kit of builtAdapters("vue")) {
   test(`${kit.key}: active filters are wrapping chips with usable removal controls`, async ({
@@ -25,9 +26,7 @@ for (const kit of builtAdapters("vue")) {
     ).toBeLessThanOrEqual(1);
     await remove.click();
     await expect(chips).toHaveCount(0);
-    await expect(
-      page.locator('.mx-demo [data-adapttable-part="card"]')
-    ).toHaveCount(25);
+    await expectMatchingRows(page.locator(".mx-demo"), 30);
 
     const longValue = "customer-implementation-review-".repeat(6);
     await page.goto(
