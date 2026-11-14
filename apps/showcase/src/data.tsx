@@ -49,6 +49,12 @@ import {
   timelineDays,
   utilization,
 } from "./people";
+import {
+  largestGroupsFirst,
+  PEOPLE_GROUP_TOTALS,
+  PEOPLE_TOTAL_COLUMNS,
+  totalOf,
+} from "./shared/groupingScenario";
 import { peopleColumns } from "./shared/peopleTable";
 
 export {
@@ -90,6 +96,7 @@ export {
   timelineDays,
   utilization,
 } from "./people";
+export { LIVE_DEFAULT_LAYOUT, SPAN_DEFAULT_LAYOUT } from "./shared/peopleTable";
 
 export const DEMO_NOTICE_EVENT = "adapttable-demo-notice";
 export const DEMO_CONFIRM_EVENT = "adapttable-demo-confirm";
@@ -298,27 +305,6 @@ export function statusTone(
   if (status === "Blocked") return "red";
   return "gray";
 }
-
-/**
- * The live-demo's default column layout: `email` and `team` ship as real
- * columns but start hidden, so the table fits its container with no
- * horizontal cell scroll by default. Revealing them (or pinning — see the
- * showcase) widens the table past its container so a pinned column
- * visibly sticks while scrolling.
- */
-export const LIVE_DEFAULT_LAYOUT: Partial<ColumnLayoutState> = {
-  hidden: ["email", "team"],
-};
-
-/**
- * Span demo: Team is the merge column — one label down consecutive
- * teammates who share it. Email stays hidden (same as Baseline) so the
- * table does not grow a 250px column just to cover it. Load hides so
- * showing Team does not add a column: same count, no sideways scroll.
- */
-export const SPAN_DEFAULT_LAYOUT: Partial<ColumnLayoutState> = {
-  hidden: ["email", "load"],
-};
 
 /** Cluster teammates so a Team row-span has a consecutive run to cover. */
 export function orderPeopleByTeam(rows: readonly Person[]): Person[] {
@@ -960,16 +946,26 @@ export function formatTimelineAggregate(
   );
 }
 
+/** A budget subtotal as React draws it: tabular figures, set apart. */
+export function BudgetTotal({ total }: Readonly<{ total: number }>) {
+  return (
+    <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
+      {formatMoney(total, "en")}
+    </span>
+  );
+}
+
 export const DEMO_GROUP_AGGREGATES: SummaryRowFn<Person> = aggregate<Person>(
-  { budget: "sum" },
+  PEOPLE_GROUP_TOTALS,
   {
-    // The same columns the table sorts by, so the subtotal reads the number
-    // behind the formatted cell rather than parsing "$1,240".
-    columns: BASE_COLUMNS,
-    format: (value) => (
-      <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
-        {formatMoney(typeof value === "number" ? value : 0, "en")}
-      </span>
-    ),
+    columns: PEOPLE_TOTAL_COLUMNS,
+    format: (value) => <BudgetTotal total={totalOf(value)} />,
   }
 );
+
+/** The showcase's grouping extras, with React's subtotal. */
+export const DEMO_GROUPING_EXTRAS = {
+  groupAggregates: DEMO_GROUP_AGGREGATES,
+  groupFooters: true,
+  groupSort: largestGroupsFirst,
+};

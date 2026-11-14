@@ -1,4 +1,3 @@
-import { xlsxWriter } from "@adapttable/core/xlsx";
 import { Suspense, useState } from "react";
 
 import { DemoScenarioProvider } from "./Demo";
@@ -6,21 +5,7 @@ import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Monitor, Phone } from "./sectionIcons";
-
-/**
- * Export the grouped sheet, as a spreadsheet.
- *
- * `scope: "all"` takes every filtered row — not just the current page of
- * five — so collapsed groups and later pages still leave the file.
- * `xlsxWriter` writes Excel outline levels for each nest and bolds the
- * group headers and totals. The live demo on the home page stays CSV;
- * only this page opts into the encoder.
- */
-const EXPORT_GROUPED_AS_XLSX = {
-  scope: "all",
-  writer: xlsxWriter({ sheetName: "People" }),
-  filename: "people.xlsx",
-} as const;
+import { GROUPED_XLSX_EXPORT } from "./shared/groupingScenario";
 
 export function GroupingDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [mobile, setMobile] = useState(false);
@@ -81,7 +66,7 @@ export function GroupingDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                   urlKey="grp"
                   grouping
                   columnMenu
-                  exportCsv={EXPORT_GROUPED_AS_XLSX}
+                  exportCsv={GROUPED_XLSX_EXPORT}
                   // The toggle FORCES the mobile selects on a desktop; it must
                   // not force a desktop table onto a phone, which passing
                   // `false` would do. Undefined leaves the breakpoint alone.

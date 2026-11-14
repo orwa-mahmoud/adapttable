@@ -2,7 +2,6 @@ import {
   applyRowPatchesWithLog,
   type ColumnLayoutState,
   evaluateFilterTree,
-  type GroupNode,
   insertRow,
   type QueryFilterGroup,
   removeRow,
@@ -61,6 +60,7 @@ import {
   consecutiveTeamSpan,
   DEMO_FILTER_RUNTIME,
   DEMO_GROUP_AGGREGATES,
+  DEMO_GROUPING_EXTRAS,
   type DemoRowHandlers,
   demoUrlSync,
   GROUPS_DEFAULT_LAYOUT,
@@ -83,8 +83,13 @@ import {
 import { initialDemoLocale } from "./demoPresentation";
 import { fetchPeople, type PeoplePage, type PeopleParams } from "./mockApi";
 import { usePatchSink } from "./patchSink";
-import { summaryPerson } from "./people";
 import { useRealtimeSlot } from "./realtimeSlot";
+import {
+  attachedNote,
+  budgetTotalOf,
+  pinnedTotals,
+} from "./shared/aggregationScenario";
+import { PEOPLE_GROUP_BY } from "./shared/groupingScenario";
 import { revealHiddenOnPin } from "./shared/peopleTable";
 
 /**
@@ -602,25 +607,7 @@ function composeDemoFeatures(
       : []),
     ...(flags.rowPinning ? [rowPinning()] : []),
     ...(flags.pinnedSummaryRows
-      ? [
-          pinnedSummaryRows<Person>({
-            // Numeric ids so showcase derivations (timeline, load count)
-            // stay defined; namespaced feature keys still own the DOM ids.
-            // Host-owned totals: the demo sums the array it already owns.
-            top: [
-              {
-                ...summaryPerson("901", "Team total"),
-                budget: flags.budgetTotal,
-              },
-            ],
-            bottom: [
-              {
-                ...summaryPerson("902", "Grand total"),
-                budget: flags.budgetTotal,
-              },
-            ],
-          }),
-        ]
+      ? [pinnedSummaryRows<Person>(pinnedTotals(flags.budgetTotal))]
       : []),
     ...(flags.rowMutations
       ? [
@@ -724,13 +711,8 @@ function kitRequests(
     ...(flags.grouping
       ? {
           grouping: {
-            groupBy: ["team", "status"],
-            extras: {
-              groupAggregates: DEMO_GROUP_AGGREGATES,
-              groupFooters: true,
-              groupSort: (a: GroupNode<Person>, b: GroupNode<Person>) =>
-                b.leafRows.length - a.leafRows.length,
-            },
+            groupBy: [...PEOPLE_GROUP_BY],
+            extras: DEMO_GROUPING_EXTRAS,
           },
         }
       : {}),
@@ -845,15 +827,7 @@ function frontendColumnProps(
   const { extraAnchorName, accentId } = flags;
   const demoExtraRows =
     flags.extraRows && flags.extraAnchorId
-      ? [
-          {
-            key: "note",
-            kind: "fullWidth" as const,
-            beforeRowId: flags.extraAnchorId,
-            render: () =>
-              `Full-width extra attached to ${extraAnchorName}. Drag or pin them — this note stays in front of them.`,
-          },
-        ]
+      ? [attachedNote(flags.extraAnchorId, extraAnchorName)]
       : undefined;
   if (demoExtraRows) {
     Object.assign(next, { extraRows: demoExtraRows });
@@ -1197,10 +1171,7 @@ function Frontend({
         : undefined,
     [live, patchSink]
   );
-  const budgetTotal = useMemo(
-    () => data.reduce((sum, row) => sum + budget(row), 0),
-    [data]
-  );
+  const budgetTotal = useMemo(() => budgetTotalOf(data), [data]);
   const extraAnchorName =
     data.find((row) => row.id === extraAnchorId)?.name ?? "this person";
   const accentId = data[0]?.id;
