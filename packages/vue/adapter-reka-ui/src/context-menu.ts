@@ -98,9 +98,9 @@ const RekaContextMenuControl = /*#__PURE__*/ defineComponent(
   }
 );
 export function contextMenu<TRow>(
-  options: ContextMenuOptions<TRow> = {}
+  options: boolean | ContextMenuOptions<TRow> = true
 ): TableFeature<TRow> {
-  return extendFeature(bindingContextMenu(options), [
+  return extendFeature(bindingContextMenu<TRow>(options), [
     slotRender(CONTEXT_MENU_CONTROL, (props) =>
       h(RekaContextMenuControl, props)
     ),
