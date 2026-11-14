@@ -2,6 +2,7 @@ import {
   collectConformanceTests,
   type ConformanceTest,
 } from "@adapttable/core/conformance";
+import type { KitTriggerProps } from "@adapttable/react/adapter";
 import { fireEvent, screen } from "@testing-library/react";
 import { createRef } from "react";
 import { expect, vi } from "vitest";
@@ -22,7 +23,7 @@ export function kitPrimitivesTests(
   const { render } = kit;
   const primitives = kit.primitives ?? {};
   return collectConformanceTests(({ describe, it }) => {
-    const { Button, IconButton, TextInput, Checkbox, Text, Divider } =
+    const { Button, IconButton, TextInput, Checkbox, Text, Divider, Popover } =
       primitives;
 
     if (Button) {
@@ -195,6 +196,66 @@ export function kitPrimitivesTests(
           expect(container.querySelector("p")).toHaveTextContent(
             "Three rows hidden"
           );
+        });
+      });
+    }
+
+    if (Popover) {
+      describe(`${kit.name} Popover`, () => {
+        const trigger = (props: KitTriggerProps) => (
+          <button
+            type="button"
+            ref={props.elementRef}
+            onClick={props.onClick}
+            aria-expanded={props["aria-expanded"]}
+            aria-haspopup={props["aria-haspopup"]}
+            aria-controls={props["aria-controls"]}
+          >
+            Filters
+          </button>
+        );
+
+        it("opens and closes on its own, and its trigger says so", async () => {
+          render(
+            <Popover
+              trigger={trigger}
+              part="filters-panel"
+              aria-label="Filter rows"
+            >
+              Panel body
+            </Popover>
+          );
+          const button = screen.getByRole("button", { name: "Filters" });
+          expect(button).toHaveAttribute("aria-expanded", "false");
+          expect(button).toHaveAttribute("aria-haspopup", "dialog");
+          fireEvent.click(button);
+          expect(await screen.findByText("Panel body")).toBeInTheDocument();
+          expect(button).toHaveAttribute("aria-expanded", "true");
+          expect(
+            document.querySelector('[data-adapttable-part="filters-panel"]')
+          ).not.toBeNull();
+        });
+
+        it("asks a controlled owner to open, and names a menu popup", async () => {
+          const openChange = vi.fn();
+          render(
+            <Popover
+              trigger={trigger}
+              open={false}
+              onOpenChange={openChange}
+              role="menu"
+              flush
+            >
+              Menu body
+            </Popover>
+          );
+          const button = screen.getByRole("button", { name: "Filters" });
+          expect(button).toHaveAttribute("aria-haspopup", "menu");
+          fireEvent.click(button);
+          await vi.waitFor(() => {
+            expect(openChange).toHaveBeenCalledWith(true);
+          });
+          expect(button).toHaveAttribute("aria-expanded", "false");
         });
       });
     }

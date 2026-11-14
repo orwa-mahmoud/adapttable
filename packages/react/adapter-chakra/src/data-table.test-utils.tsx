@@ -17,6 +17,7 @@ import {
   Checkbox as KitCheckbox,
   Text as KitText,
   Divider as KitDivider,
+  Popover as KitPopover,
 } from "./components/kitPrimitives";
 
 import { reactKitUnderTest } from "../../react/test/kit/harness";
@@ -90,6 +91,7 @@ export const kit: ReactKitUnderTest = reactKitUnderTest({
     Checkbox: KitCheckbox,
     Text: KitText,
     Divider: KitDivider,
+    Popover: KitPopover,
   },
   TableBodyFrame: ({ children }) => (
     <ChakraTable.Root>
