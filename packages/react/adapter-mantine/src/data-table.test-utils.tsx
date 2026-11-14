@@ -9,6 +9,13 @@ import {
 } from "@adapttable/react/features";
 import { Table as MantineTable } from "@mantine/core";
 import { axe } from "vitest-axe";
+import {
+  TextInput as KitTextInput,
+  Select as KitSelect,
+  Checkbox as KitCheckbox,
+  Text as KitText,
+  Divider as KitDivider,
+} from "./components/primitives";
 
 import { reactKitUnderTest } from "../../react/test/kit/harness";
 import type { HarnessProps, ReactKitUnderTest } from "../../react/test/kit/kit";
@@ -71,6 +78,13 @@ export const kit: ReactKitUnderTest = reactKitUnderTest({
   name: "mantine",
   render: renderMantine,
   axe,
+  primitives: {
+    TextInput: KitTextInput,
+    Select: KitSelect,
+    Checkbox: KitCheckbox,
+    Text: KitText,
+    Divider: KitDivider,
+  },
   TableBodyFrame: ({ children }) => (
     <MantineTable>
       <MantineTable.Tbody>{children}</MantineTable.Tbody>

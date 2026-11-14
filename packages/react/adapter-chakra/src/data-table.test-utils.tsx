@@ -9,6 +9,15 @@ import {
 } from "@adapttable/react/features";
 import { Table as ChakraTable } from "@chakra-ui/react";
 import { axe } from "vitest-axe";
+import {
+  Button as KitButton,
+  IconButton as KitIconButton,
+  TextInput as KitTextInput,
+  Select as KitSelect,
+  Checkbox as KitCheckbox,
+  Text as KitText,
+  Divider as KitDivider,
+} from "./components/kitPrimitives";
 
 import { reactKitUnderTest } from "../../react/test/kit/harness";
 import type { HarnessProps, ReactKitUnderTest } from "../../react/test/kit/kit";
@@ -73,6 +82,15 @@ export const kit: ReactKitUnderTest = reactKitUnderTest({
   name: "chakra",
   render: renderChakra,
   axe,
+  primitives: {
+    Button: KitButton,
+    IconButton: KitIconButton,
+    TextInput: KitTextInput,
+    Select: KitSelect,
+    Checkbox: KitCheckbox,
+    Text: KitText,
+    Divider: KitDivider,
+  },
   TableBodyFrame: ({ children }) => (
     <ChakraTable.Root>
       <ChakraTable.Body>{children}</ChakraTable.Body>

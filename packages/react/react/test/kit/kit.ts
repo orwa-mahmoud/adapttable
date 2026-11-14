@@ -24,6 +24,7 @@ import type {
   FilterDef,
   FilterTreeBuilderProps,
   FilterTypeRegistry,
+  KitPrimitives,
   KitTableProps,
   PivotPanelChromeProps,
   SavedViewsPanelChromeProps,
@@ -135,6 +136,8 @@ export interface ReactKitDefinition {
    * table context.
    */
   readonly TableBodyFrame?: ComponentType<{ readonly children: ReactNode }>;
+  /** The controls the kit supplies to the binding's primitives. */
+  readonly primitives?: Partial<KitPrimitives>;
   /** The kit's accessibility audit (`vitest-axe`'s `axe`), for suites that assert no violations. */
   readonly axe: (
     container: Element,
