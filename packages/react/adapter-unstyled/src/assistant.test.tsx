@@ -238,6 +238,31 @@ describe("the native controls", () => {
     expect(dialog.open).toBe(true);
   });
 
+  it("opens the sheet through the browser's modal dialog where it has one", () => {
+    const showModal = vi.fn(function (this: HTMLDialogElement) {
+      this.open = true;
+    });
+    Object.defineProperty(HTMLDialogElement.prototype, "showModal", {
+      configurable: true,
+      value: showModal,
+    });
+    try {
+      mount(
+        <TableAssistant
+          assistant={view()}
+          labels={defaultLabels}
+          presentation="sheet"
+          open
+          onOpenChange={() => undefined}
+        />
+      );
+      expect(showModal).toHaveBeenCalledTimes(1);
+      expect((part("assistant-sheet") as HTMLDialogElement).open).toBe(true);
+    } finally {
+      Reflect.deleteProperty(HTMLDialogElement.prototype, "showModal");
+    }
+  });
+
   it("closes the dialog when the panel closes", () => {
     const { rerender } = mount(
       <TableAssistant

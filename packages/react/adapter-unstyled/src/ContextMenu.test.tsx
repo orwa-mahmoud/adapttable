@@ -72,6 +72,21 @@ describe("context menu (unstyled)", () => {
     expect(menu()).toBeNull();
   });
 
+  it("moves focus only on the arrow keys and stays open for a click inside", () => {
+    table();
+    fireEvent.contextMenu(
+      document.querySelector('[data-adapttable-part="header-cell"]')!,
+      { clientX: 5, clientY: 5 }
+    );
+    const menuEl = menu()!;
+    const first = menuEl.querySelector<HTMLElement>('[role="menuitem"]')!;
+    first.focus();
+    fireEvent.keyDown(menuEl, { key: "Home" });
+    expect(document.activeElement).toBe(first);
+    fireEvent.mouseDown(first);
+    expect(menu()).not.toBeNull();
+  });
+
   it("hides a column from the menu", () => {
     table();
     fireEvent.contextMenu(

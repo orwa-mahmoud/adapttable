@@ -960,6 +960,23 @@ describe("<DataTable> (unstyled)", () => {
     );
   });
 
+  it("pulls focus that escaped the drawer back inside on Tab", () => {
+    renderHarness({
+      override: { filters: <div>filter body</div>, filtersMode: "drawer" },
+    });
+    const trigger = screen.getByRole("button", { name: /filters/i });
+    fireEvent.click(trigger);
+    const outside = document.createElement("button");
+    document.body.append(outside);
+    act(() => outside.focus());
+    fireEvent.keyDown(document, { key: "Tab" });
+    const panel = document.querySelector(
+      '[data-adapttable-part="filters-panel"]'
+    );
+    expect(panel?.contains(document.activeElement)).toBe(true);
+    outside.remove();
+  });
+
   it("runs column-menu bulk and per-column sort from a live table", () => {
     renderHarness({
       override: {
