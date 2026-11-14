@@ -1,37 +1,31 @@
 <script setup lang="ts">
-/** Pivot axes, measures and folded groups, matching PivotDemo.tsx. */
+/** Pivot axes, measures and folded groups: the shared pivot page. */
 import {
   pivot,
-  type PivotField,
   type PivotRow,
   pivotTableModel,
   usePivotUrlState,
 } from "@adapttable/vue/pivot";
 import { computed, h } from "vue";
 
-import { budget, formatMoney, personStatus } from "../../../people";
-import { PEOPLE, SHOWCASE_PRESENTATION, TABLE_PRESENTATION } from "../data";
+import { pivotRoster } from "../../../casts";
+import {
+  PIVOT_AGGREGATORS,
+  PIVOT_FIELDS,
+  PIVOT_PAGE_SIZE,
+  PIVOT_START,
+  pivotCellFormat,
+  pivotRowHeader,
+} from "../../../shared/pivotScenario";
+import { SHOWCASE_PRESENTATION, TABLE_PRESENTATION } from "../data";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
-const fields: readonly PivotField[] = [
-  { key: "team", label: "Team" },
-  { key: "role", label: "Role" },
-  { key: "status", label: "Status" },
-  { key: "budget", label: "Budget" },
-];
-const rows = PEOPLE.map((row) => ({
-  ...row,
-  budget: budget(row),
-  status: personStatus(row),
-}));
+const fields = PIVOT_FIELDS;
+const rows = pivotRoster();
 const state = usePivotUrlState({
   urlKey: "pivot",
-  defaultConfig: {
-    rows: ["team"],
-    columns: ["status"],
-    measures: [{ key: "budget", agg: "sum" }],
-  },
+  defaultConfig: PIVOT_START,
 });
 
 /** A subtotal's stable key is also the collapse key persisted in the URL. */
@@ -67,16 +61,17 @@ const model = computed(() =>
   pivotTableModel(
     pivot(rows, state.config.value, {
       collapsed: state.collapsed.value,
-      format: (value, measure) =>
-        typeof value === "number" &&
-        measure.key === "budget" &&
-        measure.agg !== "count"
-          ? formatMoney(value)
-          : value,
+      aggregators: PIVOT_AGGREGATORS,
+      format: pivotCellFormat,
     }),
     {
       fields,
       labels: SHOWCASE_PRESENTATION.labels,
+      rowHeader: pivotRowHeader(
+        state.config.value,
+        fields,
+        SHOWCASE_PRESENTATION.labels.pivotTotal
+      ),
       renderRowHeader: caption,
     }
   )
@@ -105,7 +100,7 @@ const features = computed(() => [
         :data="model.rows"
         :columns="model.columns"
         :row-key="model.rowKey"
-        :defaults="{ limit: 100 }"
+        :defaults="{ limit: PIVOT_PAGE_SIZE }"
         :features="features"
       />
     </div>

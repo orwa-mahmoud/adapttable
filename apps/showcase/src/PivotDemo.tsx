@@ -3,18 +3,11 @@ import { usePivotUrlState } from "@adapttable/react/pivot";
 import { Suspense } from "react";
 
 import { pivotRoster } from "./casts";
-import { PIVOT_FIELDS } from "./data";
 import { initialDemoDirection, initialDemoLocale } from "./demoPresentation";
 import { kitPivotPanel, KitProvider } from "./kitProviders";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { PivotTableView } from "./PivotTableView";
-
-/** Where the demo starts: something already pivoted, so the page shows a pivot. */
-const START = {
-  rows: ["team"],
-  columns: ["status"],
-  measures: [{ key: "budget", agg: "sum" as const }],
-};
+import { PIVOT_FIELDS, PIVOT_START } from "./shared/pivotScenario";
 
 /**
  * The pivot page: one dataset, the three zone cards above the table they
@@ -24,7 +17,7 @@ const START = {
 export function PivotDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const { config, onConfigChange, collapsed, onCollapsedChange } =
     usePivotUrlState({
-      defaultConfig: START,
+      defaultConfig: PIVOT_START,
     });
   const onToggleFold = (key: string) => {
     const next = new Set(collapsed);

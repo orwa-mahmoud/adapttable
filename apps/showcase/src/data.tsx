@@ -810,13 +810,7 @@ export function makeBulkActions(locale: Locale): BulkAction[] {
 }
 
 /** The fields this dataset offers a pivot, in the order the panel lists them. */
-export const PIVOT_FIELDS = [
-  { key: "team", label: "Team" },
-  { key: "role", label: "Role" },
-  { key: "status", label: "Status" },
-  { key: "budget", label: "Budget" },
-  { key: "utilization", label: "Utilization" },
-];
+export { PIVOT_FIELDS } from "./shared/pivotScenario";
 
 /**
  * The rows a pivot reads.

@@ -27,7 +27,6 @@ import {
 import {
   injectPivotUrlState,
   pivot,
-  type PivotField,
   type PivotRow,
 } from "@adapttable/angular/pivot";
 import { applyRowPatches, applyRowReorder, updateRow } from "@adapttable/core";
@@ -54,8 +53,8 @@ import {
   QueryClient,
 } from "@tanstack/angular-query-experimental";
 
-import { pageLayoutFor, rosterFor, seedRoster } from "../casts";
-import { budget, formatMoney, personStatus } from "../people";
+import { pageLayoutFor, pivotRoster, rosterFor, seedRoster } from "../casts";
+import { budget, formatMoney } from "../people";
 import {
   attachedNote,
   budgetTotalOf,
@@ -96,6 +95,14 @@ import {
   PEOPLE_GROUP_BY,
 } from "../shared/groupingScenario";
 import { EDITING_DEFAULT_LAYOUT, inWideOrder } from "../shared/peopleTable";
+import {
+  PIVOT_AGGREGATORS,
+  PIVOT_FIELDS,
+  PIVOT_PAGE_SIZE,
+  PIVOT_START,
+  pivotCellFormat,
+  pivotRowHeader,
+} from "../shared/pivotScenario";
 import {
   orderPeopleByTeam,
   teamSpan,
@@ -1508,24 +1515,12 @@ class AggregationBody {
 class PivotBody {
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly fields: readonly PivotField[] = [
-    { key: "team", label: "Team" },
-    { key: "role", label: "Role" },
-    { key: "status", label: "Status" },
-    { key: "budget", label: "Budget" },
-  ];
-  readonly rows = PEOPLE.map((row) => ({
-    ...row,
-    budget: budget(row),
-    status: personStatus(row),
-  }));
+  readonly fields = PIVOT_FIELDS;
+  readonly rows = pivotRoster();
+  readonly pageSize = PIVOT_PAGE_SIZE;
   readonly state = injectPivotUrlState({
     urlKey: "pivot",
-    defaultConfig: {
-      rows: ["team"],
-      columns: ["status"],
-      measures: [{ key: "budget", agg: "sum" }],
-    },
+    defaultConfig: PIVOT_START,
   });
   readonly caption =
     viewChild<TemplateRef<CellContext<PivotRow>>>("pivotCaption");
@@ -1534,16 +1529,17 @@ class PivotBody {
     return this.kit.pivotTableModel(
       pivot(this.rows, this.state.config(), {
         collapsed: this.state.collapsed(),
-        format: (value, measure) =>
-          typeof value === "number" &&
-          measure.key === "budget" &&
-          measure.agg !== "count"
-            ? formatMoney(value)
-            : value,
+        aggregators: PIVOT_AGGREGATORS,
+        format: pivotCellFormat,
       }),
       {
         fields: this.fields,
         labels: this.presentation.labels,
+        rowHeader: pivotRowHeader(
+          this.state.config(),
+          this.fields,
+          this.presentation.labels.pivotTotal
+        ),
         renderRowHeader: (row) => caption ?? row.label,
       }
     );
