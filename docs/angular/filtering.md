@@ -98,8 +98,9 @@ server page locally. See [data tiers](./data-tiers.md) and the shared
 
 `filtersMode="popover"` opens an anchored panel without a backdrop. Escape
 closes it and restores trigger focus; an outside click closes it too.
-`filtersMode="drawer"` uses a backdrop. The toolbar remains available with
-mobile cards. Supply `[labels]` and `dir="rtl"` for translated controls and
+`filtersMode="drawer"` uses a backdrop. `[filterFields]="false"` leaves only
+the AND/OR tree in the panel, opened on first paint. The toolbar remains
+available with mobile cards. Supply `[labels]` and `dir="rtl"` for translated controls and
 direction-aware placement, and `[locale]` so the choices of an `"auto"`
 select filter read the locale's field.
 

@@ -27518,8 +27518,9 @@ server page locally. See [data tiers](./data-tiers.md) and the shared
 
 `filtersMode="popover"` opens an anchored panel without a backdrop. Escape
 closes it and restores trigger focus; an outside click closes it too.
-`filtersMode="drawer"` uses a backdrop. The toolbar remains available with
-mobile cards. Supply `[labels]` and `dir="rtl"` for translated controls and
+`filtersMode="drawer"` uses a backdrop. `[filterFields]="false"` leaves only
+the AND/OR tree in the panel, opened on first paint. The toolbar remains
+available with mobile cards. Supply `[labels]` and `dir="rtl"` for translated controls and
 direction-aware placement, and `[locale]` so the choices of an `"auto"`
 select filter read the locale's field.
 
@@ -34474,8 +34475,9 @@ const features = [
 ```
 
 `filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: FiltersOptions)`
-returns a row-typed feature. `FiltersOptions` accepts `mode: "popover" | "drawer"`
-and `tree: boolean`. The popover is anchored with no backdrop; the drawer uses
+returns a row-typed feature. `FiltersOptions` accepts `mode: "popover" | "drawer"`,
+`tree: boolean` and `fields: boolean`. `fields: false` leaves only the AND/OR
+tree in the panel, opened on first paint. The popover is anchored with no backdrop; the drawer uses
 a native modal dialog. Escape closes an open surface and returns focus to its
 trigger. Header filters are desktop-only; the toolbar filters remain available
 on mobile cards.

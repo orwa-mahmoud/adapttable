@@ -29,8 +29,9 @@ const features = [
 ```
 
 `filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: FiltersOptions)`
-returns a row-typed feature. `FiltersOptions` accepts `mode: "popover" | "drawer"`
-and `tree: boolean`. The popover is anchored with no backdrop; the drawer uses
+returns a row-typed feature. `FiltersOptions` accepts `mode: "popover" | "drawer"`,
+`tree: boolean` and `fields: boolean`. `fields: false` leaves only the AND/OR
+tree in the panel, opened on first paint. The popover is anchored with no backdrop; the drawer uses
 a native modal dialog. Escape closes an open surface and returns focus to its
 trigger. Header filters are desktop-only; the toolbar filters remain available
 on mobile cards.
