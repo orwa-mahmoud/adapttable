@@ -692,7 +692,9 @@ import { treeCardStyle } from '@adapttable/core';
 import { TreeCellProps as TreeCellProps_2 } from '@adapttable/core/binding';
 import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
+import { treeRowAria } from '@adapttable/core';
 import { TreeShape } from '@adapttable/core';
+import { treeTableAria } from '@adapttable/core';
 import { TreeToggleButtonProps } from '@adapttable/core/binding';
 import { TreeToggleProps } from '@adapttable/core/binding';
 import { TreeToggleSlots as TreeToggleSlots_2 } from '@adapttable/core/binding';
@@ -5131,6 +5133,10 @@ export type TreeCellProps<TRow> = TreeCellProps_2<TRow, ReactNode>;
 export { TreeEntry }
 
 export { TreeExpansionState }
+
+export { treeRowAria }
+
+export { treeTableAria }
 
 export { TreeToggleButtonProps }
 

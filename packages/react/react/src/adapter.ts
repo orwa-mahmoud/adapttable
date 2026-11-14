@@ -1380,6 +1380,8 @@ export {
   tableMinWidth,
   toolbarShowsFilters,
   treeCardStyle,
+  treeRowAria,
+  treeTableAria,
   visibleRowActions,
 } from "@adapttable/core";
 export {
