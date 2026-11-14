@@ -135,6 +135,7 @@ export function TextInput({
       size="small"
       value={value}
       status={invalid ? "error" : undefined}
+      aria-invalid={invalid ? "true" : rest["aria-invalid"]}
       data-adapttable-part={rootPart}
       onChange={(event) => onValueChange(event.target.value)}
       {...rest}
@@ -220,13 +221,14 @@ const CAPTION: CSSProperties = { fontSize: 12 };
 export function Text({
   variant = "body",
   tone,
-  as: _as,
+  as: As,
+  htmlFor,
   color: _color,
   style,
   ...rest
 }: Readonly<KitTextProps>): ReactElement {
   "use no memo";
-  return (
+  const text = (
     <Typography.Text
       type={tone ? TEXT_TYPE[tone] : undefined}
       disabled={tone === "disabled"}
@@ -234,6 +236,13 @@ export function Text({
       style={variant === "caption" ? { ...CAPTION, ...style } : style}
       {...rest}
     />
+  );
+  // antd's text is a span; another element the binding asks for wraps it.
+  if (!As || As === "span") return text;
+  return As === "label" ? (
+    <label htmlFor={htmlFor}>{text}</label>
+  ) : (
+    <As>{text}</As>
   );
 }
 
