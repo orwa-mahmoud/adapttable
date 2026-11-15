@@ -52,6 +52,33 @@ standing pattern is **Chrome + slots**:
   `FilterTreeBuilderProps`, from `@adapttable/core/binding`. Vue's macro resolver
   needs these original declarations directly. Their runtime Chrome, models and
   helpers still come from the Vue binding; other core imports remain restricted.
+- One store owns a table's state (`createTableStore` in core): the view state,
+  the column layout, the row state and the derived view are slices of it.
+  Changes go in as named actions, and a reader hears about a change only when
+  the slice it reads moved. URL sync, saved views, undo/redo and the AI
+  session subscribe to the store and dispatch to it; a table that does not use
+  them never calls them. A binding reads slices through one adapter (a hook, a
+  ref, a signal) and never writes to the store while rendering.
+- A feature is declared once with `defineFeature`, typed end to end: the slice
+  and actions it adds, the columns or rows it decorates, the regions it fills,
+  its labels, URL keys and AI commands. `unknown` stays only at real
+  boundaries (user row values, parsed URL input, model JSON), narrowed by a
+  guard there; no `as unknown as` outside tests.
+- The binding draws the table once per framework. A React kit fills
+  `KitPrimitives` and the binding's `createDesktopTable` / `createMobileCards`
+  draw from them; a Vue kit renders through `DesktopTableChrome`, an Angular
+  kit through `AdaptDesktopStructure` / `AdaptMobileStructure`. A kit
+  overrides a region only where its look needs different structure.
+- Each entry point serves one audience. `@adapttable/core`'s main entry and
+  each binding's main entry serve the names a table uses;
+  `@adapttable/core/binding` (internal to AdaptTable packages) serves the
+  bindings, and a binding's `./adapter` entry serves its kits. New machinery
+  goes on those entries, never on a main entry; a name that leaves a main
+  entry stays there as a deprecated alias of the same value or type until the
+  next major. Angular is the exception for state a kit shares with the table
+  (injection tokens, feature registries and the functions that read them):
+  ng-packagr bundles `@adapttable/angular/adapter` with its own copy of every
+  module it reaches, so those stay on `@adapttable/angular`.
 
 ## Framework packages
 
