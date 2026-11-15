@@ -170,6 +170,7 @@ import { ContextMenuSlots as ContextMenuSlots_2 } from '@adapttable/core/binding
 import { ContextMenuSurfaceProps as ContextMenuSurfaceProps_2 } from '@adapttable/core/binding';
 import { ContextMenuTarget } from '@adapttable/core';
 import { createFilterRegistry } from '@adapttable/core';
+import { CreateTableEngineOptions } from '@adapttable/core';
 import { CSSProperties } from 'react';
 import { CustomCellEditorConflict } from '@adapttable/core';
 import { CustomCellEditorCtrl } from '@adapttable/core';
@@ -664,6 +665,7 @@ import { TableAssistantView } from '@adapttable/core/binding';
 import { TableAssistantWindowProps as TableAssistantWindowProps_2 } from '@adapttable/core/binding';
 import { TableCommandOptions } from '@adapttable/core';
 import { TableDensity } from '@adapttable/core';
+import { TableEngine } from '@adapttable/core';
 import { TableErrorState } from '@adapttable/core';
 import { tableErrorState } from '@adapttable/core/binding';
 import { TableLabels } from '@adapttable/core';
@@ -1220,6 +1222,9 @@ export interface ColumnDropProps {
     onDrop: (event: DragEvent_2<HTMLElement>) => void;
 }
 
+// @public
+export function columnDropProps(index: number, move: (key: string, toIndex: number) => void): ColumnDropProps;
+
 export { ColumnFilter }
 
 export { columnFlexShares }
@@ -1270,6 +1275,15 @@ interface ColumnHeaderContext_2<TRow> {
 }
 
 export { ColumnHeaderController }
+
+// @public
+export function columnHeaderController<TRow>(column: ColumnDef<TRow>, extras?: {
+    sortDir?: "asc" | "desc";
+    sortIndex?: number;
+    toggleSort?: (event?: {
+        shiftKey?: boolean;
+    }) => void;
+}): ColumnHeaderController_2;
 
 // @public
 interface ColumnHeaderController_2 {
@@ -1340,6 +1354,9 @@ export interface ColumnReorderKeyProps {
     tabIndex: 0;
 }
 
+// @public
+export function columnReorderKeyProps(key: string, index: number, move: (key: string, toIndex: number) => void, label: string): ColumnReorderKeyProps;
+
 export { ColumnResizeHandleProps }
 
 export { columnResizeHandleProps }
@@ -1349,6 +1366,9 @@ export interface ColumnRowDragProps {
     draggable: true;
     onDragStart: (event: DragEvent_2<HTMLElement>) => void;
 }
+
+// @public
+export function columnRowDragProps(key: string): ColumnRowDragProps;
 
 // @public
 export function ColumnSelectCheckboxChrome(input: Readonly<ColumnSelectCheckboxChromeProps>): JSX.Element;
@@ -1364,6 +1384,9 @@ export { columnSelectLabel }
 
 // @public
 export type ColumnSelectSlots = ColumnSelectSlots_2<ReactNode>;
+
+// @public
+export function columnsHaveFooter<TRow>(columns: readonly ColumnDef<TRow>[]): boolean;
 
 export { columnSizeStyle }
 
@@ -2086,7 +2109,9 @@ export { EDIT_HISTORY_LIVE }
 export const EDITABLE_CELL: FeatureSlotKey<EditableCellSlotProps<unknown>>;
 
 // @public
-export type EditableCellActivateProps = EditableCellActivateProps_2<ReactNode>;
+type EditableCellActivateProps$1 = EditableCellActivateProps_2<ReactNode>;
+export { EditableCellActivateProps$1 as EditableCellActivateControlProps }
+export { EditableCellActivateProps$1 as EditableCellActivateProps }
 
 export { EditableCellButtonProps }
 
@@ -2882,6 +2907,12 @@ export function HistoryLiveGate<TRow>(input: {
     readonly shell: DataTableShellResult<TRow>;
     readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
 }): ReactNode;
+
+// @public
+export interface HorizontalOverflow<E extends HTMLElement> {
+    overflowing: boolean;
+    ref: (node: E | null) => void;
+}
 
 export { HtmlGroupedHeaderCell }
 
@@ -4152,6 +4183,9 @@ export interface ReactUseColumnLayoutResult<TRow> extends Omit<UseColumnLayoutRe
     visibleColumns: ColumnDef<TRow>[];
 }
 
+// @public
+export function readCellValue<TRow>(row: TRow, column: ColumnDef<TRow>): unknown;
+
 export { readMultiDraft }
 
 export { ReconcileLiveBatchEdit }
@@ -4188,6 +4222,12 @@ export interface ResizableVirtualizer {
     resizeItem: (index: number, size: number) => void;
 }
 
+// @public
+export function resolveColumnFooter<TRow>(column: ColumnDef<TRow>, value: ReactNode): ReactNode;
+
+// @public
+export function resolveColumnHeader<TRow>(column: ColumnDef<TRow>, controller: ColumnHeaderController_2): ReactNode;
+
 export { resolveContextTarget }
 
 export { ResolvedContextTarget }
@@ -4205,6 +4245,9 @@ export { resolveFilterRegistry }
 export { resolveLabels }
 
 export { resolveMobileLabel }
+
+// @public
+export function resolveNeutralColumnHeaders<TRow>(columns: readonly ColumnMetadata<TRow>[]): ColumnMetadata<TRow>[];
 
 export { resolveRowEditTrigger }
 
@@ -4965,6 +5008,13 @@ export interface TableContextMenuOptions<TRow> {
 }
 
 // @public
+export interface TableEditHistoryProps<TRow> {
+    columns: readonly ColumnDef<TRow>[];
+    editHistory?: boolean | EditHistoryOptions;
+    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+}
+
+// @public
 export interface TableElementProps extends Props {
     "aria-label": string;
     dir?: Direction;
@@ -5164,6 +5214,16 @@ export { unpinAllColumns }
 export { UrlStateAdapter }
 
 // @public
+export function useActiveFilterChips(input: UseActiveFilterChipsOptions): ActiveFilterChip[];
+
+// @public
+export interface UseActiveFilterChipsOptions {
+    readonly labels: Readonly<Record<string, ChipLabelResolver>>;
+    readonly onChange: (key: string, next: FilterValue) => void;
+    readonly values: Readonly<Record<string, FilterValue>>;
+}
+
+// @public
 export function useBulkBarState(input: Readonly<UseBulkBarStateOptions>): BulkBarState;
 
 // @public
@@ -5173,6 +5233,15 @@ export interface UseBulkBarStateOptions {
     selection: SelectionState;
     total: number;
 }
+
+// @public
+export function useChromeScrollReset<TRow>(ref: RefObject<HTMLElement | null>, chrome: TableChrome<TRow>, props: ComposedTableProps<TRow>): void;
+
+// @public
+export function useColorScheme(preference?: ColorScheme): "light" | "dark";
+
+// @public
+export function useColumnDragState(): ColumnDragState;
 
 export { UseColumnLayoutResult }
 
@@ -5248,6 +5317,9 @@ export interface UseDataTableResult<TRow> {
 export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, renderAutoForm: (defs: readonly FilterDef<TRow>[], source: TableSource<TRow>, registry: FilterTypeRegistry, labels: Required<TableLabels>) => ReactNode): DataTableShellResult<TRow>;
 
 // @public
+export function useDebounce<T>(value: T, delay?: number): T;
+
+// @public
 export function useDesktopTableAssembly<TRow>(props: DesktopAssemblyProps<TRow>, options?: DesktopAssemblyOptions): DesktopTableAssembly<TRow>;
 
 // @public
@@ -5255,6 +5327,16 @@ export function useEscapeClose(open: boolean, close: () => void, options?: Escap
 
 // @public
 export function useExportHandler(handler: ((controls?: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>) | undefined, labels?: TableLabels, format?: string, pageOnly?: boolean, serverBuilt?: boolean): ExportHandlerState;
+
+// @public
+export function useExtraChips(input: UseExtraChipsOptions): ActiveFilterChip[];
+
+// @public
+export interface UseExtraChipsOptions {
+    readonly extra: ExtraFilters;
+    readonly labels: Readonly<Record<string, ChipLabelResolver>>;
+    readonly setExtra: (key: string, value: FilterValue) => void;
+}
 
 // @public
 export function useFeatureHost<TRow = unknown>(): FeatureHostState<TRow> | undefined;
@@ -5266,6 +5348,12 @@ export function useFeatureSlotFilled(slot: {
 
 // @public
 export function useFeatureState<T>(stateKey: FeatureStateKey<T>): T | undefined;
+
+// @public
+export function useFilterTriggerToggle(open: boolean, setOpen: (next: boolean | ((current: boolean) => boolean)) => void): FilterTriggerToggle;
+
+// @public
+export function useFindFocus(current: GridCell | null, focusCell: (cell: GridCell) => void, selectRange: (range: CellRange | null) => void): void;
 
 // @public
 export interface UseFindInTableOptions<TRow> {
@@ -5288,6 +5376,9 @@ export function useFullscreen(element: HTMLElement | null): FullscreenState;
 export interface UseGridFocusOptions<TRow> extends GridFocusControllerOptions<TRow> {
     columns: readonly ColumnDef<TRow>[];
 }
+
+// @public
+export function useHorizontalOverflow<E extends HTMLElement>(): HorizontalOverflow<E>;
 
 // @public
 export function useKeyedVirtualization(options: {
@@ -5339,6 +5430,19 @@ export interface UseSavedViewsOptions extends Omit<SavedViewsControllerOptions, 
 }
 
 // @public
+export function useScrollToTableTop(input: UseScrollToTableTopOptions): void;
+
+// @public
+export interface UseScrollToTableTopOptions {
+    behavior?: ScrollBehavior;
+    deps: readonly unknown[];
+    enabled?: boolean;
+    gap?: number;
+    offset?: number;
+    ref: RefObject<HTMLElement | null>;
+}
+
+// @public
 export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey" | "store"> {
     active?: boolean;
     aggregates?: readonly QueryAggregate[];
@@ -5363,6 +5467,17 @@ export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions
 }
 
 // @public
+export function useShortcuts(options: UseShortcutsOptions): void;
+
+// @public
+export interface UseShortcutsOptions {
+    enabled: boolean;
+    onCommand: (command: string) => void;
+    shortcuts?: readonly Shortcut[];
+    target?: () => EventTarget | null;
+}
+
+// @public
 export function useStickyToolbarLayout(enabled: boolean, stickyTop?: number): {
     toolbarRef: RefCallback<HTMLElement | null>;
     toolbarStyle: CSSProperties | undefined;
@@ -5373,7 +5488,19 @@ export function useStickyToolbarLayout(enabled: boolean, stickyTop?: number): {
 export function useSummaryCells<TRow>(summaryRow: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined, rows: readonly TRow[]): Partial<Record<string, ReactNode>> | undefined;
 
 // @public
+export function useTableChrome<TRow>(props: ComposedTableProps<TRow>): TableChrome<TRow>;
+
+// @public
 export function useTableContextMenu<TRow>(options: TableContextMenuOptions<TRow>): TableContextMenu;
+
+// @public
+export function useTableEditHistory<TRow>(props: TableEditHistoryProps<TRow>): {
+    history: EditHistoryState<TRow>;
+    onCellEdit: ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
+};
+
+// @public
+export function useTableEngine<TRow>(options: CreateTableEngineOptions<TRow>): TableEngine<TRow>;
 
 // @public
 export function useTableFeatures<P extends object>(incoming: P): P & FeatureProps<RowOf<P>>;
@@ -5412,6 +5539,9 @@ export interface UseTableVirtualizationOptions<TRow> {
     rows: readonly TRow[];
     scrollMargin?: number;
 }
+
+// @public
+export function useVirtualChromeBodyData<TRow>(chrome: TableChrome<TRow>, props: ComposedTableProps<TRow>): ChromeBodyData<TRow>;
 
 export { ValidationCheckResult }
 
