@@ -1,10 +1,8 @@
 import {
   type CellElementProps,
   type ColumnDef,
-  columnHeaderController,
   type EditableCellEditing,
   filterDefForColumn,
-  resolveColumnHeader,
 } from "@adapttable/react";
 import {
   ACTIONS_COLUMN_KEY,
@@ -16,6 +14,7 @@ import {
   cellSpanMark,
   columnFlexShares,
   columnGroupHeaderCaption,
+  columnHeaderController,
   columnResizeHandleProps,
   columnSelectLabel,
   columnSizeStyle,
@@ -31,7 +30,6 @@ import {
   groupedHeaderAlign,
   groupedHeaderChildRule,
   groupedHeaderLabelStyle,
-  type GroupingDragProps,
   type GroupingPanelState,
   type HeaderGroupCell,
   headerGroupRows,
@@ -41,6 +39,7 @@ import {
   type PinSide,
   REORDER_COLUMN_KEY,
   REORDER_COLUMN_WIDTH,
+  resolveColumnHeader,
   resolveRowEditTrigger,
   type RowAction,
   type RowActionsLayout,
@@ -811,11 +810,11 @@ export function buildColumns<TRow>({
             <SortIndexBadge index={sortIndex} />
             {setWidth && (
               <span
-                {...(columnResizeHandleProps(
+                {...columnResizeHandleProps(
                   column.key,
                   setWidth,
                   `${resizeLabel}: ${columnLabel(column)}`
-                ) as unknown as HTMLAttributes<HTMLSpanElement>)}
+                )}
                 data-adapttable-part="resize-handle"
                 style={RESIZE_HANDLE_STYLE}
               />
@@ -922,8 +921,7 @@ export function buildColumns<TRow>({
           // adapter's own props: the kit's values still win where they
           // overlap, but nothing core adds is silently dropped.
           const core = getHeaderCellProps?.(column);
-          const groupingDrag = groupingPanel?.headerDragProps(column.key) as
-            GroupingDragProps | undefined;
+          const groupingDrag = groupingPanel?.headerDragProps(column.key);
           return {
             ...core,
             ...groupingDrag,
