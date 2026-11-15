@@ -4,13 +4,9 @@
  * framework-neutral; each binding re-exports what its adapters need.
  */
 
-export { resolveDisabledReason } from "./actions/confirm";
 export { contextMenuItems } from "./actions/contextMenuModel";
 export type { ResolvedContextTarget } from "./actions/contextMenuRegion";
-export {
-  resolveContextTarget,
-  ROW_ID_ATTRIBUTE,
-} from "./actions/contextMenuRegion";
+export { resolveContextTarget } from "./actions/contextMenuRegion";
 export type {
   ColumnLayoutState,
   PinLeads,
@@ -20,9 +16,7 @@ export type {
   UseColumnLayoutResult,
 } from "./columns/columnLayoutModel";
 export {
-  applyColumnOrder,
   edgePinStyle,
-  EMPTY_COLUMN_LAYOUT,
   PIN_Z,
   pinnedCellStyle,
 } from "./columns/columnLayoutModel";
@@ -34,27 +28,15 @@ export {
   columnMenuActions,
   filterColumnMenuRows,
   hideAllColumns,
-  nextPinSide,
-  pinActionLabel,
   REORDER_COLUMN_KEY,
   resetColumnLayout,
   showAllColumns,
   unpinAllColumns,
 } from "./columns/columnMenuModel";
-export { applyColumnNames, declaredColumnName } from "./columns/columnNames";
-export { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "./columns/columnResize";
-export type { ColumnSizingOptions } from "./columns/columnSizing";
-export {
-  columnFlexShares,
-  columnSizeStyle,
-  fittedTableStyle,
-} from "./columns/columnSizing";
 export {
   applyCollapsedColumnGroups,
   flattenColumnTree,
 } from "./columns/columnTree";
-export { FALLBACK_PIN_WIDTH, pinnedColumnWidth } from "./columns/columnWidths";
-export { declaredColumnLayout } from "./columns/declaredColumnLayout";
 export type {
   HeaderGroupCell,
   HtmlGroupedHeaderCell,
@@ -80,31 +62,10 @@ export {
   isColumnGroupSummaryKey,
   toggleCollapsedColumnGroup,
 } from "./columns/headerGroups";
-export { responsiveColumns } from "./columns/responsiveColumns";
-export {
-  DEFAULT_CARD_SIZE_PX,
-  DEFAULT_ROW_SIZE_PX,
-  MOBILE_BREAKPOINT_PX,
-  VIRTUAL_OVERSCAN,
-} from "./constants";
-export {
-  readEditableCellValue,
-  resolveCommitValue,
-  stepEditableCell,
-} from "./editing/cellEditing";
-export { exportButtonLabel } from "./export/exportLabel";
-export { columnLetter, safeSheetName } from "./export/xlsx";
+export { resolveCommitValue } from "./editing/cellEditing";
 export type { FeatureHostState } from "./features/currentHost";
-export {
-  appendByKey,
-  applyFilterExtends,
-  bindFeatureHostFn,
-  currentFeatureHost,
-  runWithFeatureHost,
-} from "./features/currentHost";
+export { bindFeatureHostFn } from "./features/currentHost";
 export type { FilterEngine } from "./filters/filterEngine";
-export { FILTER_ENGINE_IMPL } from "./filters/filterEngine";
-export { withFilterType } from "./filters/filterRegistry";
 export type { DateOp, NumberOp, TextOp } from "./filters/operators";
 export {
   type BinaryOp,
@@ -134,23 +95,8 @@ export {
   toFormulaValue,
 } from "./formula";
 export {
-  GROUPING_COLUMN_DND_MIME,
-  groupingDragKey,
-  hasGroupingColumnDrag,
-  moveGroupingKey,
-  moveGroupingKeyBy,
-  removeGroupingKey,
-} from "./grouping/groupingPanelModel";
-export {
-  groupedEntriesForStrategy,
-  groupingComputationKind,
-} from "./grouping/groupingStrategy";
-export { applyGroupLeafSelection } from "./grouping/groupSelection";
-export type { AssemblyFns } from "./layout/leanAssembly";
-export {
   bodyCellsHaveRowSpan,
   cellsForRow,
-  columnSelectLabel,
   extraHostFillStyle,
   filterDefForColumn,
   isExtraEntry,
@@ -158,10 +104,7 @@ export {
   pinnedRowPart,
   pinnedRowSticky,
   REORDER_COLUMN_WIDTH,
-  resolveAssembly,
   resolveRowStyle,
-  rowEditingSignature,
-  rowFlashSignature,
   rowIsDirty,
   rowPinSignature,
   rowReorderDropStyle,
@@ -169,12 +112,11 @@ export {
   rowSpanSignature,
   rowStyleSignature,
 } from "./layout/leanAssembly";
-export { isRtlElement } from "./layout/writingDirection";
 export type {
   PaginationItem,
   PaginationSlot,
 } from "./pagination/paginationMath";
-export { paginationItems, paginationSlots } from "./pagination/paginationMath";
+export { paginationSlots } from "./pagination/paginationMath";
 export {
   assignField,
   availableFields,
@@ -186,8 +128,6 @@ export {
   moveField,
   pivot,
   PIVOT_BLANK,
-  PIVOT_GRAND_TOTAL_KEY,
-  PIVOT_ZONES,
   type PivotColumnLeaf,
   type PivotColumnNode,
   type PivotConfig,
@@ -208,7 +148,6 @@ export {
   serverPivotResult,
   setMeasureAgg,
 } from "./pivot";
-export { cellFlashAttr } from "./rows/cellFlashPaint";
 export { type BodyCell, cellSpanMark } from "./rows/cellSpan";
 export {
   EXTRA_OVER_SPAN_ROW_STYLE,
@@ -228,19 +167,10 @@ export {
   PINNED_TOP_PART,
   pinnedRowStickyStyle,
 } from "./rows/pinnedRowChrome";
-export type { RowClickProps } from "./rows/rowClickProps";
-export { rowClickProps } from "./rows/rowClickProps";
 export { partitionPinnedRows, resolveRowHeight } from "./rows/rowPresentation";
-export { deriveSortByOptions } from "./sort/sortByOptions";
 export { isDeclarativeFilters } from "./source/isDeclarativeFilters";
-export { applyQuerySupport } from "./source/queryContract";
 export type { TableQuery } from "./source/tableQuery";
-export { fillSlot, tableErrorState } from "./state/errorState";
 export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
-export {
-  collectFeatureNotices,
-  type CollectFeatureNoticesInput,
-} from "./state/featureNotices";
 export {
   isStreamLive,
   isStreamSettled,
@@ -253,7 +183,6 @@ export {
   type StreamSocket,
   type StreamSocketEvent,
 } from "./stream";
-export { FakeSocket } from "./stream/fakes";
 export {
   FILTER_PREFIX,
   isEmptyFilterValue,
@@ -269,7 +198,6 @@ export {
   PARAM_PAGE,
   PARAM_PIVOT,
   PARAM_SEARCH,
-  PARAM_SORT,
   PARAM_SORT_BY,
   PARAM_SORT_DIR,
   readCollapsedGroups,
@@ -294,21 +222,11 @@ export {
   parseTableUrlState,
   updateTableUrlState,
 } from "./url/urlStateCodec";
-export { devWarn, resetDevWarnings } from "./utils/devWarn";
-export { safeLocalStorage } from "./utils/env";
-export {
-  bindMobileCardList,
-  type ElementRef,
-  mobileCardListStyle,
-} from "./virtual/mobileCardList";
+export { devWarn } from "./utils/devWarn";
+export { type ElementRef } from "./virtual/mobileCardList";
 export type { RowPairMeasurer } from "./virtual/rowPairModel";
 export type { KeyedVirtualization } from "./virtual/virtualTableModel";
-export {
-  resolveVirtualRows,
-  rowSourceIndex,
-  virtualColumnSpan,
-  virtualItemMeta,
-} from "./virtual/virtualTableModel";
+export { rowSourceIndex, virtualItemMeta } from "./virtual/virtualTableModel";
 export { buildTableXlsx, xlsxWriter } from "./xlsx";
 
 /**
@@ -317,16 +235,7 @@ export { buildTableXlsx, xlsxWriter } from "./xlsx";
  */
 export type { ContextMenuModelOptions } from "./actions/contextMenuModel";
 export type { ColumnModelEditor, ColumnModelFilter } from "./columnModel";
-export type {
-  ResponsiveColumns,
-  ResponsiveFit,
-} from "./columns/responsiveColumns";
 export type { SidePanelEntry } from "./features/currentHost";
-export type {
-  GroupedEntriesForStrategyOptions,
-  GroupingComputationKind,
-} from "./grouping/groupingStrategy";
 export type { EditableCellEditing } from "./rows/rowEditingDigest";
-export type { RowPinLookup, RowPinSide, RowPinState } from "./rows/rowPinModel";
-export type { RowReorderDigest } from "./rows/rowReorderModel";
+export type { RowPinSide, RowPinState } from "./rows/rowPinModel";
 export type { HeaderSelectionState } from "./selection/selectionState";

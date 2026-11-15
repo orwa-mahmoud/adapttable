@@ -31,6 +31,7 @@ describe("@adapttable/core/conformance", () => {
     expect(conformance.CONFORMANCE_COLUMNS.length).toBeGreaterThan(0);
     expect(Object.keys(conformance).sort((a, b) => a.localeCompare(b))).toEqual(
       [
+        "collectConformanceTests",
         "CONFORMANCE_COLUMNS",
         "CONFORMANCE_ROWS",
         "featureLifecycleConformanceTests",
@@ -87,7 +88,7 @@ describe("the export writers", () => {
 
 describe("the binding barrel", () => {
   it("forwards the engine machinery a binding assembles a table from", () => {
-    expect(typeof bindingExports.resolveDisabledReason).toBe("function");
+    expect(typeof bindingExports.resolveContextTarget).toBe("function");
     expect(typeof bindingExports.contextMenuItems).toBe("function");
   });
 
