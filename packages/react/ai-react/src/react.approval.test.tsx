@@ -1399,7 +1399,7 @@ describe("what the reader sees is not what the model is told", () => {
     });
     return render(
       <FeatureProviders props={props}>
-        <Publisher view={{ ...STAFF_VIEW, rows: visible } as never} />
+        <Publisher view={{ ...STAFF_VIEW, rows: visible }} />
         <Reader onReady={() => undefined} />
       </FeatureProviders>
     );

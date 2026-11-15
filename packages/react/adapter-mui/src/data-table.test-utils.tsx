@@ -8,16 +8,6 @@ import {
   rowAppearance,
 } from "@adapttable/react/features";
 import { axe } from "vitest-axe";
-import {
-  Button as KitButton,
-  IconButton as KitIconButton,
-  TextInput as KitTextInput,
-  Select as KitSelect,
-  Checkbox as KitCheckbox,
-  Text as KitText,
-  Divider as KitDivider,
-  Popover as KitPopover,
-} from "./components/primitives";
 
 import { reactKitUnderTest } from "../../react/test/kit/harness";
 import type { HarnessProps, ReactKitUnderTest } from "../../react/test/kit/kit";
@@ -38,6 +28,16 @@ import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
 import { GroupHeaderCard, GroupHeaderRow } from "./components/GroupHeader";
 import { AgentApproval, RowReorderHandle } from "./components/kitControls";
 import { PivotPanel } from "./components/PivotPanel";
+import {
+  Button as KitButton,
+  Checkbox as KitCheckbox,
+  Divider as KitDivider,
+  IconButton as KitIconButton,
+  Popover as KitPopover,
+  Select as KitSelect,
+  Text as KitText,
+  TextInput as KitTextInput,
+} from "./components/primitives";
 import { SavedViewsPanel } from "./components/SavedViewsPanel";
 import { SelectionStatsBar } from "./components/SelectionStatsBar";
 import {

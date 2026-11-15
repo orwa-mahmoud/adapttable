@@ -1373,7 +1373,7 @@ describe("what the reader sees is not what the model is told", () => {
     };
     return mountRuntime({
       ...props,
-      view: { ...STAFF_VIEW, rows: visible } as never,
+      view: { ...STAFF_VIEW, rows: visible },
       onState: recordState,
     });
   }

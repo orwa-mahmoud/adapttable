@@ -171,11 +171,10 @@ export function useDataTableShell<TRow>(
     runtime.defs.length > 0
       ? renderAutoForm(runtime.defs, source, runtime.registry, formLabels)
       : undefined;
-  const filtersNode = (
+  const filtersNode =
     isDeclarativeFilters(props.filters) || props.filters === undefined
       ? autoForm
-      : props.filters
-  ) as ReactNode;
+      : props.filters;
   const chromeProps: DataTableShellChromeProps<TRow> = {
     ...props,
     density,

@@ -145,7 +145,7 @@ export function usePublishTableRuntime<TRow>(
     cell.current = {
       rows,
       labels,
-      view: view as TableRuntimeView,
+      view: view,
       featureIds: cell.current.featureIds,
     };
   }

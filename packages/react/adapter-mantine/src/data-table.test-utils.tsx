@@ -9,14 +9,6 @@ import {
 } from "@adapttable/react/features";
 import { Table as MantineTable } from "@mantine/core";
 import { axe } from "vitest-axe";
-import {
-  TextInput as KitTextInput,
-  Select as KitSelect,
-  Checkbox as KitCheckbox,
-  Text as KitText,
-  Divider as KitDivider,
-  Popover as KitPopover,
-} from "./components/primitives";
 
 import { reactKitUnderTest } from "../../react/test/kit/harness";
 import type { HarnessProps, ReactKitUnderTest } from "../../react/test/kit/kit";
@@ -34,6 +26,14 @@ import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
 import { GroupHeaderCard, GroupHeaderRow } from "./components/GroupHeader";
 import { AgentApproval, RowReorderHandle } from "./components/kitControls";
 import { PivotPanel } from "./components/PivotPanel";
+import {
+  Checkbox as KitCheckbox,
+  Divider as KitDivider,
+  Popover as KitPopover,
+  Select as KitSelect,
+  Text as KitText,
+  TextInput as KitTextInput,
+} from "./components/primitives";
 import { SavedViewsPanel } from "./components/SavedViewsPanel";
 import { SelectionStatsBar } from "./components/SelectionStatsBar";
 import {
