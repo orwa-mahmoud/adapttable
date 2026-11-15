@@ -1,6 +1,9 @@
 /** Resize interaction ownership belongs to the feature's mounted Vue scope. */
-import { columnResizeHandleProps } from "@adapttable/core";
-import { DESKTOP_RESIZE_HANDLE_STYLE } from "@adapttable/core/binding";
+
+import {
+  columnResizeHandleProps,
+  DESKTOP_RESIZE_HANDLE_STYLE,
+} from "@adapttable/core/binding";
 import type { FeatureMountContext } from "@adapttable/vue";
 import { watch } from "vue";
 

@@ -1,10 +1,12 @@
 import {
-  MOBILE_BREAKPOINT_PX,
   type PaginationMode,
   type ResolvedPaginationMode,
-  resolvePaginationMode,
 } from "@adapttable/core";
-import { notifyLayoutChange } from "@adapttable/core/binding";
+import {
+  MOBILE_BREAKPOINT_PX,
+  notifyLayoutChange,
+  resolvePaginationMode,
+} from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,

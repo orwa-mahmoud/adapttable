@@ -1,14 +1,14 @@
 import {
-  composeContextMenuExtra,
   type ContextMenuItem,
   contextMenuItems,
   type ContextMenuTarget,
-  copyContextMenuSelection,
-  copyContextMenuTargetCell,
-  createContextMenuOpenController,
 } from "@adapttable/core";
 import {
+  composeContextMenuExtra,
+  copyContextMenuSelection,
+  copyContextMenuTargetCell,
   coreContextMenu,
+  createContextMenuOpenController,
   featureStateKey,
   type GridFocusState,
 } from "@adapttable/core/binding";

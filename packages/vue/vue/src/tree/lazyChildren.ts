@@ -1,9 +1,9 @@
 /** Each active loader epoch owns its controller; late promises cannot cross it. */
+import { type LazyChildrenOptions } from "@adapttable/core";
 import {
   createLazyChildrenController,
-  type LazyChildrenOptions,
-} from "@adapttable/core";
-import type { LazyChildrenState } from "@adapttable/core/binding";
+  type LazyChildrenState,
+} from "@adapttable/core/binding";
 import {
   computed,
   type ComputedRef,

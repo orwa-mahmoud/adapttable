@@ -1,11 +1,11 @@
+import { type BulkAction } from "@adapttable/core";
 import {
-  type BulkAction,
   bulkActionErrorMessage,
   bulkBarModel,
+  coreBulkActions,
   createBulkActionRunner,
   resolveDisabledReason,
-} from "@adapttable/core";
-import { coreBulkActions } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { computed, watch } from "vue";
 

@@ -1,9 +1,8 @@
+import { type ColumnLayoutState, resolveLabels } from "@adapttable/core";
 import {
   type ColumnDragEvent,
-  type ColumnLayoutState,
-  resolveLabels,
-} from "@adapttable/core";
-import { LiveFeatureHost } from "@adapttable/core/binding";
+  LiveFeatureHost,
+} from "@adapttable/core/binding";
 import { describe, expect, it, vi } from "vitest";
 import { effectScope, nextTick, shallowRef } from "vue";
 

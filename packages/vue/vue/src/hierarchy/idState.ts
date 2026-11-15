@@ -1,5 +1,6 @@
 /** Vue ownership around core's controllable id store. */
-import { createControllableStore } from "@adapttable/core";
+
+import { createControllableStore } from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,
@@ -15,6 +16,7 @@ import {
   useScopeActivity,
 } from "../store";
 import { injectTableStore } from "../tableStore";
+
 export interface HierarchyIdsOptions {
   readonly ids?: MaybeRefOrGetterOptional<readonly string[]>;
   readonly defaultIds?: readonly string[];

@@ -5,4 +5,4 @@ export * from "./columns/useColumnMenu";
 export * from "./columns/useColumnRenameEditor";
 export { columnMenu } from "./features/columnMenu";
 export type { StaticTableFeature } from "./features/tableFeature";
-export type { ColumnRenameEditorOptions } from "@adapttable/core";
+export type { ColumnRenameEditorOptions } from "@adapttable/core/binding";

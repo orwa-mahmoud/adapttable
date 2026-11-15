@@ -1,7 +1,8 @@
 /**
  * The plain source uses the basic evaluator until grouping supplies the full one.
  */
-import { incrementalViewOf } from "@adapttable/core";
+
+import { incrementalViewOf } from "@adapttable/core/binding";
 import { createTableEngine } from "@adapttable/core/engine";
 import { describe, expect, it, vi } from "vitest";
 import { effectScope, nextTick, shallowRef } from "vue";

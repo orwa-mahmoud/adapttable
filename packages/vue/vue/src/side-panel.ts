@@ -1,5 +1,4 @@
-import { appendByKey } from "@adapttable/core";
-import { coreSidePanel } from "@adapttable/core/binding";
+import { appendByKey, coreSidePanel } from "@adapttable/core/binding";
 import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { computed, toValue, watch } from "vue";
 

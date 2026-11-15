@@ -1,6 +1,5 @@
 /** Optional body assembly shared by data-row features, never adapter orchestration. */
 import {
-  buildBodyCells,
   type CellSpanAppearance,
   type CssProperties,
   type ExtraRow as NeutralExtraRow,
@@ -11,10 +10,10 @@ import {
   resolvePinnedRows,
   type RowHeight,
   type RowStyle,
-  treeTableAria,
 } from "@adapttable/core";
 import {
   type BodyCell,
+  buildBodyCells,
   cellSpanMark,
   desktopBodySlots,
   type DesktopRowWiringArgs,
@@ -28,6 +27,7 @@ import {
   pinnedRowPart,
   resolveCellSpan,
   resolveRowStyle,
+  treeTableAria,
 } from "@adapttable/core/binding";
 import { toValue, type VNodeChild } from "vue";
 

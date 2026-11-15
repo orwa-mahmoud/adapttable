@@ -1,13 +1,11 @@
-import {
-  CHECKLIST_LIST_HEIGHT,
-  checklistSlice,
-  type ChecklistWindow,
-} from "@adapttable/core";
+import { CHECKLIST_LIST_HEIGHT } from "@adapttable/core";
 import {
   type ChecklistClassNames,
   type ChecklistFilterProps,
   type ChecklistFilterState,
+  checklistSlice,
   type ChecklistSlots,
+  type ChecklistWindow,
   FILTER_LABELS,
   type FilterStrings,
   resolveFeatureLabels,

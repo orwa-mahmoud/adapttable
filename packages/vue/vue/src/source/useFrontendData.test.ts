@@ -1,8 +1,8 @@
 import {
   type FrontendEngineFactory,
-  INACTIVE_TIER_ROWS,
   type TableCallbackRefresh,
 } from "@adapttable/core";
+import { INACTIVE_TIER_ROWS } from "@adapttable/core/binding";
 import { createBasicTableEngine } from "@adapttable/core/engine";
 import { describe, expect, it, vi } from "vitest";
 import {

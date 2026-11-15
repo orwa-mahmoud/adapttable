@@ -2,12 +2,14 @@
 import {
   type ColumnGroupRecord,
   type ColumnLayoutState,
+  type UseColumnLayoutResult,
+} from "@adapttable/core";
+import {
   columnLayoutVisibleColumns,
   columnPinInsets,
   createColumnLayoutController,
-  type UseColumnLayoutResult,
-} from "@adapttable/core";
-import type { TableStore } from "@adapttable/core/binding";
+  type TableStore,
+} from "@adapttable/core/binding";
 import {
   computed,
   type ComputedRef,
@@ -21,6 +23,7 @@ import type { ColumnDef } from "../columnDef";
 import { scheduleTick } from "../scheduleTick";
 import { type MaybeRefOrGetterOptional, useExternalStore } from "../store";
 import { injectTableStore } from "../tableStore";
+
 export interface ColumnLayoutOptions {
   /**
    * The table's store to keep the layout in; the store of the table this

@@ -1,14 +1,7 @@
 /** Accessible SVG sparklines reuse the neutral geometry and numeric output. */
 import {
   finiteSparklineValues,
-  SPARKLINE_DEFAULT_HEIGHT,
-  SPARKLINE_DEFAULT_WIDTH,
-  sparklineAreaPath,
-  sparklineBars,
   sparklineExportValue,
-  type SparklineKind,
-  sparklineLinePath,
-  sparklineSortValue,
   sparklineSummary,
 } from "@adapttable/core";
 import { h, type VNodeChild } from "vue";
@@ -17,7 +10,6 @@ import type { ColumnDef } from "./columnDef";
 export {
   finiteSparklineValues,
   sparklineExportValue,
-  type SparklineKind,
   sparklineSummary,
 } from "@adapttable/core";
 export interface SparklineProps {
@@ -118,3 +110,15 @@ export type {
   Renderer,
   RenderFunction,
 } from "./columnDef";
+
+import {
+  SPARKLINE_DEFAULT_HEIGHT,
+  SPARKLINE_DEFAULT_WIDTH,
+  sparklineAreaPath,
+  sparklineBars,
+  type SparklineKind,
+  sparklineLinePath,
+  sparklineSortValue,
+} from "@adapttable/core/binding";
+
+export { type SparklineKind } from "@adapttable/core/binding";

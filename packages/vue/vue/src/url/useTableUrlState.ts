@@ -1,13 +1,16 @@
 import {
   createMemoryAdapter,
-  createTableViewStore,
-  resolveUrlAdapter,
   type TableViewState,
   type TableViewStateConfig,
   type TableViewStore,
   type UrlStateAdapter,
 } from "@adapttable/core";
-import { retainItems, type TableStore } from "@adapttable/core/binding";
+import {
+  createTableViewStore,
+  resolveUrlAdapter,
+  retainItems,
+  type TableStore,
+} from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,

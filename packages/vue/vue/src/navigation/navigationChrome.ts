@@ -1,11 +1,5 @@
 /** Navigation structure and localized text; every visible control is required. */
-import {
-  findMatchCountText,
-  handleFindBarKey,
-  sameGridCell,
-  selectionStatParts,
-  statusBarItems,
-} from "@adapttable/core";
+import { sameGridCell } from "@adapttable/core";
 import {
   type ColumnSelectCheckboxChromeProps as NeutralColumnSelectCheckboxChromeProps,
   type ColumnSelectSlots as NeutralColumnSelectSlots,
@@ -13,11 +7,15 @@ import {
   FIND_LABELS,
   type FindBarProps,
   type FindBarSlots as NeutralFindBarSlots,
+  findMatchCountText,
   type GridFocusState,
+  handleFindBarKey,
   resolveFeatureLabels,
+  selectionStatParts,
   type SelectionStatsChromeProps as NeutralSelectionStatsChromeProps,
   type SelectionStatsSlots as NeutralSelectionStatsSlots,
   type StatusBarChromeProps as NeutralStatusBarChromeProps,
+  statusBarItems,
   type StatusBarSlotProps as NeutralStatusBarSlotProps,
   type StatusBarSlots as NeutralStatusBarSlots,
 } from "@adapttable/core/binding";

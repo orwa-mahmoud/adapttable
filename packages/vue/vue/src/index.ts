@@ -217,7 +217,6 @@ export type {
   BatchEditingState,
   BatchEditStoreOptions,
   BatchRowEdit,
-  BodyCell,
   BulkAction,
   BulkActionContext,
   CellConflictAsk,
@@ -359,6 +358,7 @@ export {
 export type {
   AgentApprovalPending,
   AgentProgress,
+  BodyCell,
   ChromeBodySlot,
   ColumnGroupToggleProps,
   FeatureApplyInput,

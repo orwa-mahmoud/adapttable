@@ -1,14 +1,12 @@
-import {
-  createMemoryAdapter,
-  EMPTY_COLUMN_LAYOUT,
-  type LayoutStorage,
-} from "@adapttable/core";
+import { createMemoryAdapter, type LayoutStorage } from "@adapttable/core";
+import { EMPTY_COLUMN_LAYOUT } from "@adapttable/core/binding";
 import { afterEach, expect, it, vi } from "vitest";
 import { effectScope, shallowRef, watch } from "vue";
 
 import { useColumnLayoutStorageState } from "../columns/useColumnLayoutStorageState";
 import { useColumnLayoutUrlState } from "./useColumnLayoutUrlState";
 import { useSavedViews } from "./useSavedViews";
+
 const scopes: ReturnType<typeof effectScope>[] = [];
 function run<T>(fn: () => T): T {
   const scope = effectScope();

@@ -4,20 +4,20 @@
  * counted over what the active tier searched.
  */
 import {
-  activeTierValue,
-  createTableData,
   type ExtraFilters,
   type FrontendEngineFactory,
-  INACTIVE_TIER_ROWS,
   type QueryFilterGroup,
   type TableSource,
-  tierRows,
   type UrlStateAdapter,
 } from "@adapttable/core";
 import {
+  activeTierValue,
+  createTableData,
   type FeatureHostState,
+  INACTIVE_TIER_ROWS,
   retainItems,
   type TableStore,
+  tierRows,
 } from "@adapttable/core/binding";
 import {
   computed,

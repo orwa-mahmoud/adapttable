@@ -1,16 +1,15 @@
 /** Structural combobox and focus wiring; all visible controls are required slots. */
-import {
-  commandListKeyAction,
-  commandListView,
-  createCommandList,
-  runCommand,
-  tabTrapTarget,
-} from "@adapttable/core";
+
 import {
   ACTION_LABELS,
+  commandListKeyAction,
+  commandListView,
   type CommandPaletteChromeProps as NeutralProps,
   type CommandPaletteSlots as NeutralSlots,
+  createCommandList,
   resolveFeatureLabels,
+  runCommand,
+  tabTrapTarget,
 } from "@adapttable/core/binding";
 import {
   computed,

@@ -1,5 +1,5 @@
 /** A Vue mount adapter for the unchanged framework-neutral behavioral suite. */
-import { defaultLabels, type TableLabels } from "@adapttable/core";
+import { type TableLabels } from "@adapttable/core";
 import {
   CONFORMANCE_COLUMNS,
   CONFORMANCE_ROWS,
@@ -191,6 +191,8 @@ export const nativeConformanceHarness = {
 
 /** Additional rendered range checks over the same real native mount. */
 export type { ConformanceRow } from "@adapttable/core/conformance";
+
+import { defaultLabels } from "@adapttable/core/binding";
 
 /**
  * The neutral table conformance tests, mounted through a Vue kit's driver.

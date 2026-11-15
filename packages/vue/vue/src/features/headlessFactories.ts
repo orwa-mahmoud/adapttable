@@ -25,7 +25,6 @@ import { projectHeadlessRows } from "../rows/headlessRowsModel";
 
 export type { ExtraEntry, ExtraRow, ExtraRowKind } from "../rows/extraRows";
 export type {
-  BodyCell,
   CellSpanAppearance,
   CellSpanRequest,
   GetCellSpan,
@@ -121,3 +120,4 @@ export function rowAppearance<TRow>(
   };
 }
 export type { ColumnMetadata, CssProperties } from "@adapttable/core";
+export type { BodyCell } from "@adapttable/core/binding";

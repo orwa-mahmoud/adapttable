@@ -1,18 +1,15 @@
-import {
-  activeFilterChips,
-  FILTER_ENGINE_IMPL,
-  type FilterDef,
-  filterTreeConditionChips,
-  type FilterTypeSpec,
-  removeFilterTreeNode,
-} from "@adapttable/core";
+import { type FilterDef, type FilterTypeSpec } from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
+  activeFilterChips,
   coreFilters,
   coreFilterTypes,
   featureStateKey,
+  FILTER_ENGINE_IMPL,
+  filterTreeConditionChips,
   filterTreeSnapshot,
   FilterTriggerToggleState,
+  removeFilterTreeNode,
   sameFilterTree,
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/binding";

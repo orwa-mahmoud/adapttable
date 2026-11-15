@@ -1,8 +1,5 @@
-import {
-  type ColumnLayoutState,
-  createMemoryAdapter,
-  EMPTY_COLUMN_LAYOUT,
-} from "@adapttable/core";
+import { type ColumnLayoutState, createMemoryAdapter } from "@adapttable/core";
+import { EMPTY_COLUMN_LAYOUT } from "@adapttable/core/binding";
 import { expect, it, vi } from "vitest";
 import {
   createApp,

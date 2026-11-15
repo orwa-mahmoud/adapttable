@@ -2,11 +2,11 @@
 import {
   type AgentApprovalPending,
   approvalArgumentPairs,
-  approvalProposalText,
   approvalReview,
   type TableLabels,
 } from "@adapttable/core";
 import {
+  approvalProposalText,
   ASSISTANT_LABELS,
   resolveFeatureLabels,
 } from "@adapttable/core/binding";

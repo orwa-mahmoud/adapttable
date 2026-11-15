@@ -1,5 +1,4 @@
-import { toggleId } from "@adapttable/core";
-import type { RowExpansionState } from "@adapttable/core/binding";
+import { type RowExpansionState, toggleId } from "@adapttable/core/binding";
 import {
   computed,
   type ComputedRef,

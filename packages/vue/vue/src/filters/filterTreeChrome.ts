@@ -1,16 +1,16 @@
 /** Recursive AND/OR structure, using only required adapter-native controls. */
 import {
   defaultFilterRegistry,
-  emptyFilterTree,
-  filterTreeCombinatorOptions,
-  filterTreeConditionModel,
   isFilterGroup,
   type QueryCondition,
   type QueryFilterGroup,
 } from "@adapttable/core";
 import {
+  emptyFilterTree,
   FILTER_LABELS,
   type FilterTreeBuilderProps,
+  filterTreeCombinatorOptions,
+  filterTreeConditionModel,
   type FilterTreeInputProps,
   type FilterTreeSelectProps,
   type FilterTreeSlots,

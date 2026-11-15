@@ -1,8 +1,6 @@
 /** Host-owned row updates, with resource ownership tied to the Vue scope. */
 import {
   applyRowPatches,
-  CHANGED_CELL_FLASH_MS,
-  createChangedCellFlashStore,
   openRowPatchStream,
   parseRowPatchFrame,
   type RowPatch,
@@ -11,7 +9,11 @@ import {
   type RowPatchStreamStatus,
   type StreamSocket,
 } from "@adapttable/core";
-import type { ChangedCellFlashState } from "@adapttable/core/binding";
+import {
+  CHANGED_CELL_FLASH_MS,
+  type ChangedCellFlashState,
+  createChangedCellFlashStore,
+} from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,
@@ -45,6 +47,7 @@ export {
   openRowPatchStream,
   parseRowPatchFrame,
 } from "@adapttable/core/stream";
+
 export interface UseRowPatchStreamOptions<TRow> {
   readonly websocket?: string;
   readonly eventSource?: string;

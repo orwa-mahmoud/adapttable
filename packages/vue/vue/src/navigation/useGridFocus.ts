@@ -1,19 +1,22 @@
 /** Vue lifetime and DOM attributes over the authoritative neutral grid controller. */
 import {
   type CellRange,
+  type GridCell,
+  type GridFocusControllerOptions,
+} from "@adapttable/core";
+import {
   cellRangeKey,
   createGridFocusController,
-  type GridCell,
+  GRID_LABELS,
   gridCellAttributes,
   gridColumnHeaderAttributes,
   gridContainerAttributes,
   gridFillHandleCell,
-  type GridFocusControllerOptions,
+  type GridFocusState,
   gridRowAttributes,
   isGridColumnSelected,
   reportedCellRange,
-} from "@adapttable/core";
-import { GRID_LABELS, type GridFocusState } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import {
   computed,
   type ComputedRef,

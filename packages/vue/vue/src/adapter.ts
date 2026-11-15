@@ -437,13 +437,11 @@ export {
   FullscreenButtonChrome,
 } from "./viewControls/viewControlsChrome";
 export type {
-  ColumnRenameEditorOptions,
   ColumnResizeHandleOptions,
   ColumnResizeHandleProps,
   RowActionsLayout,
 } from "@adapttable/core";
 export {
-  defaultConfirm,
   defaultFilterRegistry,
   filterLabel,
   filterWidgetKind,
@@ -462,6 +460,7 @@ export type {
   ChromeRowSlot,
   ChromeVirtualPadSlot,
   ColumnGroupToggleButtonProps,
+  ColumnRenameEditorOptions,
   ColumnSelectCheckboxProps,
   CommandPaletteSurfaceProps,
   ContextMenuSurfaceProps,
@@ -521,6 +520,7 @@ export {
   columnGroupPath,
   columnGroupStubStyle,
   columnMenuActions,
+  defaultConfirm,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
   EXTRA_ROW_PARTS,

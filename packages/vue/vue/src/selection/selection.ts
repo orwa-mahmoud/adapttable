@@ -1,14 +1,12 @@
 /** Selection remains a host-controlled value when selectedIds is supplied. */
+import { type TableLabels } from "@adapttable/core";
 import {
   headerSelectionOf,
-  type TableLabels,
-  toggleId,
-  toggleIds,
-} from "@adapttable/core";
-import {
   type HeaderSelectionState,
   resolveTableLabels,
   type SelectionState,
+  toggleId,
+  toggleIds,
 } from "@adapttable/core/binding";
 import { createAllMatchingScope } from "@adapttable/core/selection";
 import {

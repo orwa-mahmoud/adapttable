@@ -1,11 +1,7 @@
 /** Row pin URL state uses the same neutral codec and namespace as Saved Views. */
 import {
   createMemoryAdapter,
-  createUrlSliceStore,
-  resolveUrlAdapter,
-  rowPinningSlice,
   type RowPinState,
-  type UrlSliceStore,
   type UrlStateAdapter,
 } from "@adapttable/core";
 import {
@@ -23,6 +19,13 @@ import {
   useScopeActivity,
 } from "../store";
 export type { RowPinState, UrlStateAdapter } from "@adapttable/core";
+import {
+  createUrlSliceStore,
+  resolveUrlAdapter,
+  rowPinningSlice,
+  type UrlSliceStore,
+} from "@adapttable/core/binding";
+
 export interface UseRowPinningUrlStateOptions {
   readonly enabled?: MaybeRefOrGetter<boolean>;
   readonly urlAdapter?: MaybeRefOrGetterOptional<UrlStateAdapter>;

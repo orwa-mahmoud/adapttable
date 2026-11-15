@@ -1,9 +1,11 @@
-import { FILTER_ENGINE_IMPL, type FilterDef } from "@adapttable/core";
+import { type FilterDef } from "@adapttable/core";
+import { FILTER_ENGINE_IMPL } from "@adapttable/core/binding";
 import { describe, expect, it, vi } from "vitest";
 import { effectScope, nextTick, shallowRef } from "vue";
 
 import type { TableFeature } from "../src/features/tableFeature";
 import { useDataTableShell } from "../src/useDataTableShell";
+
 interface Row {
   id: string;
   name: string;

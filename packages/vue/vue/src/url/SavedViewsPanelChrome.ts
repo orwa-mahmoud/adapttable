@@ -1,13 +1,11 @@
 /** The management panel owns rename state and structure; kits own controls. */
+import { type SavedView } from "@adapttable/core";
 import {
   createSavedViewRenameController,
-  type SavedView,
-  type SavedViewGlyph,
-  savedViewRowControls,
-} from "@adapttable/core";
-import {
   resolveFeatureLabels,
   SAVED_VIEW_LABELS,
+  type SavedViewGlyph,
+  savedViewRowControls,
   type SavedViewsPanelChromeProps as NeutralPanelProps,
   type SavedViewsPanelSlots as NeutralPanelSlots,
 } from "@adapttable/core/binding";

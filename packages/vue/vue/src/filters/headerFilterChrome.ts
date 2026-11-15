@@ -1,12 +1,14 @@
 import {
   bindHeaderFilterDismiss,
-  createHeaderFilterOverlay,
   defaultFilterRegistry,
   filterLabel,
+} from "@adapttable/core";
+import {
+  createHeaderFilterOverlay,
+  type FilterHeaderControlProps,
   hasActiveHeaderFilter,
   isHeaderFilterOpen,
-} from "@adapttable/core";
-import type { FilterHeaderControlProps } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import {
   computed,
   h,

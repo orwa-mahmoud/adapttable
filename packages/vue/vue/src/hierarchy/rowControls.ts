@@ -5,8 +5,8 @@ import {
   treeCardStyle,
   type TreeEntry,
   treeIndentStyle,
-  treeRowAria,
 } from "@adapttable/core";
+import { treeRowAria } from "@adapttable/core/binding";
 
 import type { Attrs } from "../attrs";
 import type {
@@ -15,6 +15,7 @@ import type {
   TableTree,
   TreeCellModel,
 } from "./models";
+
 export function hierarchyRowAttrs<TRow>(
   entry: TreeEntry<TRow> | undefined,
   card: boolean

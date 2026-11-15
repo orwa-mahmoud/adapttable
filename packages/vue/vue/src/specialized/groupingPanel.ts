@@ -2,20 +2,20 @@
 import {
   createGroupingPanelController,
   declaredAggregates,
+  groupingPanelAggregations,
+} from "@adapttable/core";
+import {
+  coreGroupingPanel,
   deferGroupingDropToInner,
   focusAfterAggregationRemoval,
   groupingAggregationOptions,
   groupingAvailableColumns,
   groupingColumnName,
   groupingDropPlan,
-  groupingPanelAggregations,
-  INERT_GROUPING_DROP_HANDLERS,
-} from "@adapttable/core";
-import {
-  coreGroupingPanel,
   type GroupingPanelSlotProps as NeutralGroupingPanelSlotProps,
   type GroupingPanelSlots as NeutralGroupingPanelSlots,
   groupingPanelState,
+  INERT_GROUPING_DROP_HANDLERS,
 } from "@adapttable/core/binding";
 import { createTableEngine } from "@adapttable/core/engine";
 import { parseGroupBy } from "@adapttable/core/grouping";

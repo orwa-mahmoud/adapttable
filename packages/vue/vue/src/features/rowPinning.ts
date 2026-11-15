@@ -1,12 +1,10 @@
 /** Lift data rows through the shared row-pin state machine. */
+import { devWarn, rowPinningControl, type RowPinState } from "@adapttable/core";
 import {
-  devWarn,
+  coreRowPinning,
   rowPinningBlockedWarning,
-  rowPinningControl,
   rowPinningUrlSync,
-  type RowPinState,
-} from "@adapttable/core";
-import { coreRowPinning } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { computed, toValue, watchEffect } from "vue";
 

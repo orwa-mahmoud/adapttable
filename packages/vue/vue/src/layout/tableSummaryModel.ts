@@ -1,5 +1,6 @@
 /** Footer values and effective columns, shared by every Vue adapter. */
-import { incrementalViewOf } from "@adapttable/core";
+
+import { incrementalViewOf } from "@adapttable/core/binding";
 import { computed, type ComputedRef } from "vue";
 
 import type { SummaryRowFn } from "../aggregate/aggregate";

@@ -1,5 +1,7 @@
-import { createGroupPagingController } from "@adapttable/core";
-import type { GroupPagingState } from "@adapttable/core/binding";
+import {
+  createGroupPagingController,
+  type GroupPagingState,
+} from "@adapttable/core/binding";
 import {
   computed,
   type ComputedRef,
@@ -9,6 +11,7 @@ import {
 } from "vue";
 
 import { useExternalStore, useScopeActivity } from "../store";
+
 export function useGroupPaging(
   enabled: MaybeRefOrGetter<boolean> = true
 ): ComputedRef<GroupPagingState> {

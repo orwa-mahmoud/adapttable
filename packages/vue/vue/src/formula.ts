@@ -3,7 +3,6 @@ import {
   buildFormulaColumns as buildNeutralFormulaColumns,
   type FormulaColumnSpec,
   type FormulaColumnsResult,
-  formulaSlice,
 } from "@adapttable/core";
 import { type MaybeRefOrGetter, toValue } from "vue";
 
@@ -91,3 +90,5 @@ export type {
 } from "./columnDef";
 export type { MaybeRefOrGetterOptional } from "./store";
 export type { UrlSliceOptions } from "./url/useUrlSlice";
+
+import { formulaSlice } from "@adapttable/core/binding";

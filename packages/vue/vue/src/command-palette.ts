@@ -1,11 +1,11 @@
+import { DEFAULT_SHORTCUTS } from "@adapttable/core";
 import {
   commandPaletteCommands,
+  coreCommandPalette,
   createCommandPaletteController,
   createShortcutHandler,
-  DEFAULT_SHORTCUTS,
   OPEN_PALETTE_COMMAND,
-} from "@adapttable/core";
-import { coreCommandPalette } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { computed, toValue, watch } from "vue";
 

@@ -1,12 +1,8 @@
 /** Browser preference persistence using core's column-layout storage codec. */
 import {
   type ColumnLayoutState,
-  initialColumnLayout,
   type LayoutStorage,
-  readStoredColumnLayout,
-  safeLocalStorage,
   stableKey,
-  writeStoredColumnLayout,
 } from "@adapttable/core";
 import {
   computed,
@@ -26,6 +22,13 @@ import {
 } from "../store";
 
 export type { LayoutStorage } from "@adapttable/core";
+
+import {
+  initialColumnLayout,
+  readStoredColumnLayout,
+  safeLocalStorage,
+  writeStoredColumnLayout,
+} from "@adapttable/core/binding";
 
 /** Reactive storage destination and fallback layout. @public */
 export interface UseColumnLayoutStorageStateOptions {
