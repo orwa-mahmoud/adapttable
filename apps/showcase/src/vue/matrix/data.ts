@@ -43,6 +43,8 @@ export {
   reportsTo,
 } from "../../people";
 export {
+  ORDER_COLUMNS,
+  orderKey,
   peopleRows,
   rowKey,
   type StatusTone,

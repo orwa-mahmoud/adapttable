@@ -1,13 +1,13 @@
 <script setup lang="ts">
 /** Nested tables: each person's recent orders, in a table under the row. */
-import type { ColumnDef } from "@adapttable/vue";
 import { h } from "vue";
 
 import { pageDefaultsFor, pageLayoutFor, rosterFor } from "../../../casts";
 import { NESTED_HINTS } from "../../../shared/pageHints";
 import {
-  type DemoOrder,
   demoOrders,
+  ORDER_COLUMNS,
+  orderKey,
   peopleColumns,
   type Person,
   rowKey,
@@ -15,19 +15,6 @@ import {
 } from "../data";
 import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
-
-/** The nested orders table's columns — a different shape from the parent's. */
-const ORDER_COLUMNS: ColumnDef<DemoOrder>[] = [
-  { key: "item", header: "Item", accessor: (row) => row.item },
-  { key: "qty", header: "Qty", accessor: (row) => row.qty, align: "end" },
-  {
-    key: "amount",
-    header: "Amount",
-    accessor: (row) => `$${row.amount.toLocaleString("en-US")}`,
-    align: "end",
-  },
-];
-const orderKey = (order: DemoOrder) => order.id;
 
 const kit = useShowcaseKit();
 const ROWS = rosterFor("nested-tables");
@@ -45,7 +32,7 @@ const pageFeatures = [
           ...TABLE_PRESENTATION,
           ...defaults,
           data: demoOrders(row),
-          columns: ORDER_COLUMNS,
+          columns: [...ORDER_COLUMNS],
           rowKey: orderKey,
         }),
     }),

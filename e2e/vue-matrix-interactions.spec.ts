@@ -223,12 +223,16 @@ for (const kit of builtAdapters("vue")) {
       await toggleCheckbox(first);
       await expect(first).toBeChecked();
       await page.getByRole("button", { name: "Export", exact: true }).click();
-      await expect(page.locator("[data-demo-log]")).toHaveText("Export: 501");
+      await expect(
+        page.getByRole("status").filter({ hasText: /^Export: / })
+      ).toHaveText("Export: 501");
       await expect(first).not.toBeChecked();
       await toggleCheckbox(first);
       await expect(first).toBeChecked();
       await page.getByRole("button", { name: "Archive", exact: true }).click();
-      await expect(page.locator("[data-demo-log]")).toHaveText("Archive: 501");
+      await expect(
+        page.getByRole("status").filter({ hasText: /^Archive: / })
+      ).toHaveText("Archive: 501");
       await expect(first).not.toBeChecked();
       await expect(
         page.getByRole("button", { name: "Archive", exact: true })

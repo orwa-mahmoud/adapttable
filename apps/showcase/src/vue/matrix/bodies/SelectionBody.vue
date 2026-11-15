@@ -4,33 +4,33 @@ import { shallowRef } from "vue";
 
 import { pageDefaultsFor, pageLayoutFor, rosterFor } from "../../../casts";
 import { SELECTION_HINTS } from "../../../shared/pageHints";
-import { peopleColumns, rowKey, TABLE_PRESENTATION } from "../data";
+import {
+  archivePeople,
+  peopleBulkActions,
+} from "../../../shared/peopleActions";
+import {
+  currentDataLocale,
+  peopleColumns,
+  type Person,
+  rowKey,
+  TABLE_PRESENTATION,
+} from "../data";
 import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
-const ROWS = rosterFor("selection");
+const rows = shallowRef<readonly Person[]>(rosterFor("selection"));
 const PAGE_DEFAULTS = pageDefaultsFor("selection");
 const PAGE_LAYOUT = pageLayoutFor("selection");
 const columns = peopleColumns(kit);
-const log = shallowRef("Select rows, then run a bulk action.");
 const pageFeatures = [
-  kit.bulkActions([
-    {
-      key: "export",
-      label: "Export",
-      onClick: (ids) => {
-        log.value = `Export: ${ids.join(", ")}`;
+  kit.bulkActions(
+    peopleBulkActions(currentDataLocale(), {
+      onArchive: (ids) => {
+        rows.value = archivePeople(rows.value, ids);
       },
-    },
-    {
-      key: "archive",
-      label: "Archive",
-      onClick: (ids) => {
-        log.value = `Archive: ${ids.join(", ")}`;
-      },
-    },
-  ]),
+    })
+  ),
 ];
 const chrome = pageChromeFeatures(kit, { urlKey: "sel" });
 const features = [...pageFeatures, ...chrome];
@@ -49,7 +49,7 @@ const features = [...pageFeatures, ...chrome];
         v-bind="TABLE_PRESENTATION"
         table-label="People"
         :url-sync="false"
-        :data="ROWS"
+        :data="rows"
         :columns="columns"
         :row-key="rowKey"
         :default-column-layout="PAGE_LAYOUT"
@@ -58,6 +58,5 @@ const features = [...pageFeatures, ...chrome];
         :features="features"
       />
     </div>
-    <p class="hint" role="status" data-demo-log>{{ log }}</p>
   </div>
 </template>

@@ -13,6 +13,7 @@ import {
   landingArrangement,
 } from "../../../shared/landingScenario";
 import {
+  archivePeople,
   peopleBulkActions,
   peopleRowActions,
 } from "../../../shared/peopleActions";
@@ -70,7 +71,13 @@ const baseFeatures = [
   kit.editHistory(),
   kit.undoRedoButtons(),
   kit.cellNavigation(),
-  kit.bulkActions(peopleBulkActions(currentDataLocale())),
+  kit.bulkActions(
+    peopleBulkActions(currentDataLocale(), {
+      onArchive: (ids) => {
+        rows.value = archivePeople(rows.value, ids);
+      },
+    })
+  ),
   kit.rowActions(
     peopleRowActions(currentDataLocale(), {
       onDelete: (row) => {

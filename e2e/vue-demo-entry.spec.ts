@@ -24,8 +24,8 @@ for (const kit of builtAdapters("vue")) {
     await page.getByRole("button", { name: "Archive", exact: true }).click();
     await expect(row.getByText("Archived", { exact: true })).toBeVisible();
     await expect(
-      page.getByRole("status").filter({ hasText: "Archived 1 row" })
-    ).toBeVisible();
+      page.getByRole("status").filter({ hasText: /^Archive: / })
+    ).toHaveText(`Archive: ${(await row.getAttribute("data-row-id")) ?? ""}`);
   });
   for (const mode of ["vue-main", "vue-all-options"]) {
     for (const variant of [

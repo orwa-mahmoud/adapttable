@@ -22,7 +22,10 @@ import {
   type MobilePaging,
   rowsFor,
 } from "../../../shared/mobileScenario";
-import { peopleBulkActions } from "../../../shared/peopleActions";
+import {
+  archivePeople,
+  peopleBulkActions,
+} from "../../../shared/peopleActions";
 import { applyPersonRowEdit } from "../../../shared/peopleTable";
 import {
   applyPersonEdit,
@@ -61,7 +64,13 @@ const features = [
     );
   }),
   // Selection and the shared bulk bar over it, as on every page that selects.
-  kit.bulkActions(peopleBulkActions(currentDataLocale())),
+  kit.bulkActions(
+    peopleBulkActions(currentDataLocale(), {
+      onArchive: (ids) => {
+        rows.value = archivePeople(rows.value, ids);
+      },
+    })
+  ),
   ...pageChromeFeatures(kit, { editing: true, urlKey: "mob" }),
 ];
 const columns = peopleColumns(kit, { editable: true });
