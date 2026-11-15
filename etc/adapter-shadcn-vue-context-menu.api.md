@@ -10,7 +10,7 @@ import { ContextMenuTarget } from '@adapttable/vue';
 import { TableFeature } from '@adapttable/vue';
 
 // @public (undocumented)
-export function contextMenu<TRow>(options?: ContextMenuOptions<TRow>): TableFeature<TRow>;
+export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>): TableFeature<TRow>;
 
 export { ContextMenuItem }
 

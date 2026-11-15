@@ -15110,6 +15110,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "observeRailWidths",
+      "kind": "runtime",
+      "module": "layout/chromeModel.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/chromeModel.ts#observeRailWidths",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "orderedCardEntries",
       "kind": "runtime",
       "module": "rows/pinnedRowChrome.ts",
@@ -15426,6 +15437,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "virtual/rowMeasurement.ts#readColumnViewport",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "readRailWidths",
+      "kind": "runtime",
+      "module": "layout/chromeModel.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/chromeModel.ts#readRailWidths",
       "subpaths": ["./binding"]
     },
     {
@@ -18476,6 +18498,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "MeasuredRailWidths",
+      "kind": "type",
+      "module": "layout/chromeModel.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/chromeModel.ts#MeasuredRailWidths",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "MenuNavigationAction",
       "kind": "type",
       "module": "actions/menuNavigation.ts",
@@ -18693,6 +18726,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/featureKeys.ts#PlainSlotKey",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "RailInsets",
+      "kind": "type",
+      "module": "layout/chromeModel.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/chromeModel.ts#RailInsets",
       "subpaths": ["./binding"]
     },
     {
@@ -19873,6 +19917,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "collectConformanceTests",
+      "kind": "runtime",
+      "module": "conformance/collectConformanceTests.ts",
+      "audience": "app",
+      "path": "./conformance",
+      "forward": true,
+      "deprecated": false,
+      "identity": "conformance/collectConformanceTests.ts#collectConformanceTests",
+      "subpaths": ["./conformance"]
+    },
+    {
       "name": "CONFORMANCE_COLUMNS",
       "kind": "runtime",
       "module": "conformance/tableConformance.ts",
@@ -19917,6 +19972,28 @@
       "subpaths": ["./conformance"]
     },
     {
+      "name": "CaseArgs",
+      "kind": "type",
+      "module": "conformance/collectConformanceTests.ts",
+      "audience": "app",
+      "path": "./conformance",
+      "forward": true,
+      "deprecated": false,
+      "identity": "conformance/collectConformanceTests.ts#CaseArgs",
+      "subpaths": ["./conformance"]
+    },
+    {
+      "name": "ConformanceBody",
+      "kind": "type",
+      "module": "conformance/collectConformanceTests.ts",
+      "audience": "app",
+      "path": "./conformance",
+      "forward": true,
+      "deprecated": false,
+      "identity": "conformance/collectConformanceTests.ts#ConformanceBody",
+      "subpaths": ["./conformance"]
+    },
+    {
       "name": "ConformanceColumn",
       "kind": "type",
       "module": "conformance/tableConformance.ts",
@@ -19925,6 +20002,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "conformance/tableConformance.ts#ConformanceColumn",
+      "subpaths": ["./conformance"]
+    },
+    {
+      "name": "ConformanceDescribe",
+      "kind": "type",
+      "module": "conformance/collectConformanceTests.ts",
+      "audience": "app",
+      "path": "./conformance",
+      "forward": true,
+      "deprecated": false,
+      "identity": "conformance/collectConformanceTests.ts#ConformanceDescribe",
       "subpaths": ["./conformance"]
     },
     {
@@ -19961,6 +20049,17 @@
       "subpaths": ["./conformance"]
     },
     {
+      "name": "ConformanceIt",
+      "kind": "type",
+      "module": "conformance/collectConformanceTests.ts",
+      "audience": "app",
+      "path": "./conformance",
+      "forward": true,
+      "deprecated": false,
+      "identity": "conformance/collectConformanceTests.ts#ConformanceIt",
+      "subpaths": ["./conformance"]
+    },
+    {
       "name": "ConformanceLabels",
       "kind": "type",
       "module": "conformance/tableConformance.ts",
@@ -19980,6 +20079,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "conformance/tableConformance.ts#ConformanceMount",
+      "subpaths": ["./conformance"]
+    },
+    {
+      "name": "ConformanceRegistry",
+      "kind": "type",
+      "module": "conformance/collectConformanceTests.ts",
+      "audience": "app",
+      "path": "./conformance",
+      "forward": true,
+      "deprecated": false,
+      "identity": "conformance/collectConformanceTests.ts#ConformanceRegistry",
       "subpaths": ["./conformance"]
     },
     {

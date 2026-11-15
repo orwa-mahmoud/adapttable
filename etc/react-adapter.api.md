@@ -494,6 +494,7 @@ import { QueryExtensions } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
 import { QueryGroupRow } from '@adapttable/core';
 import { QuerySupport } from '@adapttable/core';
+import { RailInsets } from '@adapttable/core/binding';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { readMultiDraft } from '@adapttable/core/editing';
@@ -1897,6 +1898,7 @@ export interface DesktopRowWiring<TRow> {
     pinRowSticky: boolean;
     pinSignature: string;
     pinSticky: ReturnType<typeof pinnedRowSticky>;
+    railInsets: RailInsets;
     renderDetail: (row: TRow) => ReactNode;
     renderRowActions: SharedTableRenderProps<TRow>["renderRowActions"];
     reorderPinned: boolean;
@@ -2042,6 +2044,7 @@ export interface DesktopTablePin {
     inScrollBox: boolean;
     leads: PinLeads;
     pinRowSticky: boolean;
+    railInsets: RailInsets;
     reorderLead: number;
     rowPinOffset: number;
     selectionLead: number;
