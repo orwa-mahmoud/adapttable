@@ -1409,3 +1409,39 @@ export type {
   FlattenedColumns,
   WidthColumn,
 } from "@adapttable/core/binding";
+
+/* ── Kit machinery the main entry serves only as deprecated aliases ── */
+export type { UseShortcutsOptions } from "./actions/useShortcuts";
+export { useShortcuts } from "./actions/useShortcuts";
+export { useChromeScrollReset } from "./chrome/scrollReset";
+export { useFilterTriggerToggle } from "./chrome/toolbarChrome";
+export {
+  columnHeaderController,
+  columnsHaveFooter,
+  resolveColumnFooter,
+  resolveColumnHeader,
+} from "./columns/columnHeader";
+export {
+  columnDropProps,
+  columnReorderKeyProps,
+  columnRowDragProps,
+  useColumnDragState,
+} from "./columns/columnReorder";
+export { resolveNeutralColumnHeaders } from "./columns/resolveColumns";
+export type { EditableCellActivateProps as EditableCellActivateControlProps } from "./editing/EditableCellGate";
+export type { TableEditHistoryProps } from "./editing/editHistory";
+export { readCellValue, useTableEditHistory } from "./editing/editHistory";
+export { useTableEngine } from "./engine/useTableEngine";
+export type { UseActiveFilterChipsOptions } from "./filters/useActiveFilterChips";
+export { useActiveFilterChips } from "./filters/useActiveFilterChips";
+export type { UseExtraChipsOptions } from "./filters/useExtraChips";
+export { useExtraChips } from "./filters/useExtraChips";
+export { useFindFocus } from "./find/useFindInTable";
+export { useColorScheme } from "./hooks/useColorScheme";
+export { useDebounce } from "./hooks/useDebounce";
+export type { UseScrollToTableTopOptions } from "./hooks/useScrollToTableTop";
+export { useScrollToTableTop } from "./hooks/useScrollToTableTop";
+export type { HorizontalOverflow } from "./layout/useHorizontalOverflow";
+export { useHorizontalOverflow } from "./layout/useHorizontalOverflow";
+export { useTableChrome } from "./useTableChrome";
+export { useVirtualChromeBodyData } from "./virtual/useVirtualChromeBodyData";
