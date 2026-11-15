@@ -1225,6 +1225,15 @@ ChangedCellFlashStore` (`changedRowFields`, `patchTouchedKeys`,
 
 ### `@adapttable/core/binding` — the Chrome model
 
+`@adapttable/core/binding` is internal to AdaptTable packages: the framework
+bindings, the AI packages, the server and the CLI build on it, and its names
+may change in any minor release. A table imports from its framework binding
+or from `@adapttable/core`. The main entry of `@adapttable/core` serves only
+the names a table reaches for; the machinery a binding uses, and helpers no
+table, guide or example reaches for, are on this entry, and the main entry
+keeps each of them as a deprecated alias of the same value or type until the
+next major.
+
 A binding also finds here what its hooks share with every other binding: the
 state shapes they return (`SelectionState`, `GridFocusState`,
 `ChecklistWindowState`, `TreeExpansionState`, `RowPinningState`, the URL-state
