@@ -88,6 +88,11 @@ import {
   pinnedTotals,
 } from "./shared/aggregationScenario";
 import { PEOPLE_GROUP_BY } from "./shared/groupingScenario";
+import {
+  MOBILE_LOAD_ERROR,
+  type MobileDataState,
+  rowsFor,
+} from "./shared/mobileScenario";
 import { revealHiddenOnPin } from "./shared/peopleTable";
 import {
   addedPerson,
@@ -372,6 +377,10 @@ interface DataProps {
   highlight?: boolean;
   /** Fail the load, so the error chrome is on screen. */
   failure?: Failure;
+  /** Which data state the table shows: rows, none, a load, a failure. */
+  dataState?: MobileDataState;
+  /** The host callback when a row or card is activated. */
+  onRowActivate?: (row: Person) => void;
   /** Lay the mobile cards out with the demo's own `renderCard`. */
   customCard?: boolean;
   /** What the error state's retry does — here, clear the simulated failure. */
@@ -864,6 +873,8 @@ function Frontend({
   highlight,
   failure,
   onRecover,
+  dataState,
+  onRowActivate,
   customCard,
   realtime,
   advancedFilters,
@@ -1030,8 +1041,10 @@ function Frontend({
     [formulaColumns]
   );
   const source = useFrontendData<Person>({
-    data,
-    error: demoError(failure),
+    data: rowsFor(data, dataState ?? "ready"),
+    isLoading: dataState === "loading",
+    error:
+      demoError(failure) ?? (dataState === "error" ? MOBILE_LOAD_ERROR : null),
     // A retry that actually recovers: the demo's "server" answers on the
     // second ask, so the button is worth pressing.
     refetch: onRecover,
@@ -1169,8 +1182,13 @@ function Frontend({
     ]
   );
   const tableProps = useMemo(
-    () => ({ ...composed, rowClassName: flashClass, isCellFlashing }),
-    [composed, flashClass, isCellFlashing]
+    () => ({
+      ...composed,
+      rowClassName: flashClass,
+      isCellFlashing,
+      ...(onRowActivate ? { onRowClick: onRowActivate } : {}),
+    }),
+    [composed, flashClass, isCellFlashing, onRowActivate]
   );
   // Every editing mode gets the incoming-change control: a row form and a
   // batch have something open to disagree with, the same as a cell.
@@ -1298,6 +1316,8 @@ export function DemoBody({
   highlight,
   failure,
   onRecover,
+  dataState,
+  onRowActivate,
   customCard,
   realtime,
   columnGroups,
@@ -1326,6 +1346,10 @@ export function DemoBody({
   rowStyle?: boolean;
   highlight?: boolean;
   failure?: Failure;
+  /** Which data state the table shows: rows, none, a load, a failure. */
+  dataState?: MobileDataState;
+  /** The host callback when a row or card is activated. */
+  onRowActivate?: (row: Person) => void;
   onRecover?: () => void;
   customCard?: boolean;
   realtime?: boolean;
@@ -1423,6 +1447,8 @@ export function DemoBody({
       rowStyle={rowStyle}
       highlight={highlight}
       failure={failure}
+      dataState={dataState}
+      onRowActivate={onRowActivate}
       onRecover={onRecover}
       customCard={customCard}
       realtime={realtime}

@@ -1,10 +1,23 @@
 import { Suspense, useState } from "react";
 
-import { DemoScenarioProvider, type PageMode } from "./Demo";
+import { DemoScenarioProvider } from "./Demo";
 import { initialDemoLocale } from "./demoPresentation";
-import { ADAPTERS, DemoFallback } from "./kitDemos";
+import { ADAPTERS, DemoFallback, Segmented } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
-import { Check, Monitor, Phone } from "./sectionIcons";
+import { Check } from "./sectionIcons";
+import {
+  forceMobileFor,
+  MOBILE_BOUNDED_HEIGHT,
+  MOBILE_CARDS,
+  MOBILE_DATA_STATES,
+  MOBILE_LAYOUTS,
+  MOBILE_PAGING,
+  MOBILE_START,
+  MOBILE_TEXT,
+  type MobileDataState,
+  type MobileLayout,
+  type MobilePaging,
+} from "./shared/mobileScenario";
 
 /**
  * The mobile-cards page: the SAME table, flipped between its desktop layout
@@ -17,86 +30,60 @@ import { Check, Monitor, Phone } from "./sectionIcons";
  * A bounded list demonstrates the table's own keyboard-scrollable body.
  */
 export function MobileDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
-  const [phone, setPhone] = useState<boolean | undefined>(true);
-  const [pageMode, setPageMode] = useState<PageMode>("infinite");
-  const [customCard, setCustomCard] = useState(false);
-  const [bounded, setBounded] = useState(false);
+  const [layout, setLayout] = useState<MobileLayout>(MOBILE_START.layout);
+  const [paging, setPaging] = useState<MobilePaging>(MOBILE_START.paging);
+  const [customCard, setCustomCard] = useState(MOBILE_START.customCard);
+  const [bounded, setBounded] = useState(MOBILE_START.bounded);
+  const [dataState, setDataState] = useState<MobileDataState>(
+    MOBILE_START.dataState
+  );
+  const [log, setLog] = useState<string>(MOBILE_TEXT.waiting);
   const Demo = ADAPTERS[adapter] ?? ADAPTERS.mantine;
+  const phone = forceMobileFor(layout);
   return (
     <div className="mx-demo">
       <div className="hint-row">
-        <div className="seg" role="group" aria-label="Layout">
-          <button
-            type="button"
-            className={`seg__btn${phone === undefined ? " is-on" : ""}`}
-            aria-pressed={phone === undefined}
-            onClick={() => setPhone(undefined)}
-          >
-            Automatic
-          </button>
-          <button
-            type="button"
-            className={`seg__btn${phone ? " is-on" : ""}`}
-            aria-pressed={phone}
-            onClick={() => setPhone(true)}
-          >
-            <Phone size={12} /> Phone cards
-          </button>
-          <button
-            type="button"
-            className={`seg__btn${phone === false ? " is-on" : ""}`}
-            aria-pressed={phone === false}
-            onClick={() => setPhone(false)}
-          >
-            <Monitor size={12} /> Scrollable table
-          </button>
-        </div>
-        <div className="seg" role="group" aria-label="Pagination">
-          <button
-            type="button"
-            className={`seg__btn${pageMode === "infinite" ? " is-on" : ""}`}
-            aria-pressed={pageMode === "infinite"}
-            onClick={() => setPageMode("infinite")}
-          >
-            Infinite scroll
-          </button>
-          <button
-            type="button"
-            className={`seg__btn${pageMode === "paged" ? " is-on" : ""}`}
-            aria-pressed={pageMode === "paged"}
-            onClick={() => setPageMode("paged")}
-          >
-            Paged
-          </button>
-        </div>
-        <div className="seg" role="group" aria-label="Card layout">
-          <button
-            type="button"
-            className={`seg__btn${customCard ? "" : " is-on"}`}
-            aria-pressed={!customCard}
-            onClick={() => setCustomCard(false)}
-          >
-            Built-in card
-          </button>
-          <button
-            type="button"
-            className={`seg__btn${customCard ? " is-on" : ""}`}
-            aria-pressed={customCard}
-            onClick={() => setCustomCard(true)}
-          >
-            Custom card
-          </button>
-        </div>
+        <Segmented
+          label={MOBILE_TEXT.layout}
+          value={layout}
+          onChange={setLayout}
+          options={MOBILE_LAYOUTS.map((option) => ({ ...option }))}
+        />
+        <Segmented
+          label={MOBILE_TEXT.paging}
+          value={paging}
+          onChange={setPaging}
+          options={MOBILE_PAGING.map((option) => ({ ...option }))}
+        />
+        <Segmented
+          label={MOBILE_TEXT.card}
+          value={customCard ? "custom" : "builtin"}
+          onChange={(next) => {
+            setCustomCard(next === "custom");
+          }}
+          options={MOBILE_CARDS.map((option) => ({
+            value: option.value ? "custom" : "builtin",
+            label: option.label,
+          }))}
+        />
         <button
           type="button"
           className={`seg__btn${bounded ? " is-on" : ""}`}
           aria-pressed={bounded}
-          onClick={() => setBounded((value) => !value)}
+          onClick={() => {
+            setBounded((value) => !value);
+          }}
         >
-          Bounded list
+          {MOBILE_TEXT.bounded}
         </button>
+        <Segmented
+          label={MOBILE_TEXT.data}
+          value={dataState}
+          onChange={setDataState}
+          options={MOBILE_DATA_STATES.map((option) => ({ ...option }))}
+        />
         <span className="hint">
-          <Check size={12} /> search and pagination stay identical
+          <Check size={12} /> {MOBILE_TEXT.hint}
         </span>
       </div>
       <div className="mx-demo__body">
@@ -111,11 +98,16 @@ export function MobileDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                   dark={dark}
                   urlKey="mob"
                   forceMobile={phone}
-                  maxHeight={bounded ? 240 : undefined}
-                  pageMode={pageMode}
+                  maxHeight={bounded ? MOBILE_BOUNDED_HEIGHT : undefined}
+                  pageMode={paging}
                   customCard={customCard}
+                  dataState={dataState}
+                  onRowActivate={(row) => {
+                    setLog(MOBILE_TEXT.activated(row.name));
+                  }}
                   rowMode
                   editing
+                  bulkActions
                   columnMenu={false}
                   filterControls={false}
                 />
@@ -124,6 +116,9 @@ export function MobileDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           </div>
         </div>
       </div>
+      <p className="hint" role="status" data-demo-log>
+        {log}
+      </p>
     </div>
   );
 }

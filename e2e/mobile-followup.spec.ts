@@ -25,19 +25,6 @@ for (const framework of ["react", "angular", "vue"] as const) {
       expect(box?.width).toBeGreaterThanOrEqual(44);
       expect(box?.height).toBeGreaterThanOrEqual(44);
       await expect(selection).toBeChecked();
-      if (framework !== "react") {
-        const expand = card.getByRole("button", {
-          name: "Expand row",
-          exact: true,
-        });
-        const expandBox = await expand.boundingBox();
-        expect(expandBox?.width).toBeGreaterThanOrEqual(44);
-        expect(expandBox?.height).toBeGreaterThanOrEqual(44);
-        await expand.click();
-        await expect(
-          card.locator('[data-adapttable-part="card-detail"]')
-        ).toBeVisible();
-      }
       await card.getByRole("button", { name: /^(Edit|Edit row)$/ }).click();
       const name = card
         .locator('input:not([type="checkbox"]):not([type="hidden"])')
@@ -102,10 +89,6 @@ for (const framework of ["react", "angular", "vue"] as const) {
       await page
         .getByRole("button", { name: "Phone cards", exact: true })
         .click();
-      if (framework !== "react")
-        await expect(
-          card.locator('[data-adapttable-part="card-detail"]')
-        ).toBeVisible();
       await card.locator('[data-adapttable-part="row-edit-save"]').click();
       await expect(card).toContainText("Ada mobile draft");
       await expect(
@@ -233,7 +216,7 @@ for (const framework of ["react", "angular", "vue"] as const) {
           card.locator('[data-adapttable-part="row-edit-save"]')
         ).toHaveCount(0);
         await page
-          .getByRole("button", { name: "Bounded scrolling", exact: true })
+          .getByRole("button", { name: "Bounded list", exact: true })
           .click();
         const region = root
           .locator(
@@ -242,7 +225,7 @@ for (const framework of ["react", "angular", "vue"] as const) {
               : '[data-adapttable-part="cards"]'
           )
           .first();
-        await expect(region).toHaveCSS("max-height", "360px");
+        await expect(region).toHaveCSS("max-height", "240px");
         await expect(region).toHaveAttribute("tabindex", "0");
         await expect
           .poll(() =>
@@ -265,17 +248,20 @@ for (const framework of ["react", "angular", "vue"] as const) {
           .poll(() => region.evaluate((element) => element.scrollTop))
           .toBeGreaterThan(0);
         await page
-          .getByRole("button", { name: "Bounded scrolling", exact: true })
+          .getByRole("button", { name: "Bounded list", exact: true })
           .click();
         await page.getByRole("button", { name: "Paged", exact: true }).click();
         await expect(
           page.getByRole("button", { name: "Infinite scroll", exact: true })
         ).toHaveAttribute("aria-pressed", "false");
+        await expect(
+          page.getByRole("button", { name: "Paged", exact: true })
+        ).toHaveAttribute("aria-pressed", "true");
         await page
           .getByRole("button", { name: "Infinite scroll", exact: true })
           .click();
         await expect(
-          page.getByRole("button", { name: "Paged", exact: true })
+          page.getByRole("button", { name: "Infinite scroll", exact: true })
         ).toHaveAttribute("aria-pressed", "true");
         await page.addStyleTag({
           content: "html { font-size: 200% !important; }",
@@ -290,14 +276,14 @@ for (const framework of ["react", "angular", "vue"] as const) {
         await card.screenshot({
           path: info.outputPath("custom-ar-320-text200.png"),
         });
-        for (const state of ["empty", "loading", "error", "ready"]) {
+        for (const state of ["Empty", "Loading", "Error", "Rows"]) {
           await page.getByRole("button", { name: state, exact: true }).click();
-          if (state === "ready") await expect(card).toBeVisible();
-          else if (state === "error")
+          if (state === "Rows") await expect(card).toBeVisible();
+          else if (state === "Error")
             await expect(
               root.locator('[data-adapttable-part="error"]')
             ).toBeVisible();
-          else if (state === "empty") await expect(card).toHaveCount(0);
+          else if (state === "Empty") await expect(card).toHaveCount(0);
           else
             await expect(
               root

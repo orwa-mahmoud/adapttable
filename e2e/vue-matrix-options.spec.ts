@@ -637,7 +637,7 @@ for (const kit of builtAdapters("vue")) {
     }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(route("mobile-cards"));
-      await page.getByRole("button", { name: "Paged", exact: true }).click();
+      // The page opens scrolling infinitely: five cards, then more.
       const cards = part(page, "card");
       await expect(cards).toHaveCount(5);
       await toggle(cards.first().getByRole("checkbox"));

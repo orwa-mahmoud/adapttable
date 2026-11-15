@@ -117,6 +117,21 @@ import {
   landingArrangement,
 } from "../shared/landingScenario";
 import {
+  forceMobileFor,
+  MOBILE_BOUNDED_HEIGHT,
+  MOBILE_CARDS,
+  MOBILE_DATA_STATES,
+  MOBILE_LAYOUTS,
+  MOBILE_LOAD_ERROR,
+  MOBILE_PAGING,
+  MOBILE_START,
+  MOBILE_TEXT,
+  type MobileDataState,
+  type MobileLayout,
+  type MobilePaging,
+  rowsFor,
+} from "../shared/mobileScenario";
+import {
   ACCESSIBILITY_HINTS,
   COLUMN_GROUP_HINTS,
   NESTED_HINTS,
@@ -1032,73 +1047,79 @@ class ScaleBody {
   }[this.tier];
 }
 
-/** Mobile cards: the same table, every row a card, in a phone-width frame. */
+/**
+ * Mobile cards: the same table flipped between its desktop layout and phone
+ * cards, both pagination styles, the built-in or a custom card, a bounded
+ * list, the table's data states, and a host callback on activation.
+ */
 @Component({
   selector: "adapt-showcase-mobile-cards",
   imports: [AdaptShowcaseTable, NgTemplateOutlet],
   template: `
     <div class="mx-demo">
-      <div class="hint-row" role="group" aria-label="Layout">
+      <div class="hint-row">
+        <div class="seg" role="group" [attr.aria-label]="text.layout">
+          @for (option of layouts; track option.value) {
+            <button
+              type="button"
+              class="seg__btn"
+              [class.is-on]="layout() === option.value"
+              [attr.aria-pressed]="layout() === option.value"
+              (click)="layout.set(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+        <div class="seg" role="group" [attr.aria-label]="text.paging">
+          @for (option of pagingOptions; track option.value) {
+            <button
+              type="button"
+              class="seg__btn"
+              [class.is-on]="paging() === option.value"
+              [attr.aria-pressed]="paging() === option.value"
+              (click)="paging.set(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+        <div class="seg" role="group" [attr.aria-label]="text.card">
+          @for (option of cards; track option.label) {
+            <button
+              type="button"
+              class="seg__btn"
+              [class.is-on]="customCard() === option.value"
+              [attr.aria-pressed]="customCard() === option.value"
+              (click)="customCard.set(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
         <button
           type="button"
           class="seg__btn"
-          [attr.aria-pressed]="mobile() === undefined"
-          (click)="mobile.set(undefined)"
-        >
-          Automatic
-        </button>
-        <button
-          type="button"
-          class="seg__btn"
-          [attr.aria-pressed]="mobile() === true"
-          (click)="mobile.set(true)"
-        >
-          Phone cards
-        </button>
-        <button
-          type="button"
-          class="seg__btn"
-          [attr.aria-pressed]="mobile() === false"
-          (click)="mobile.set(false)"
-        >
-          Scrollable table
-        </button>
-      </div>
-      <div class="hint-row" role="group" aria-label="Card options">
-        <button
-          type="button"
-          class="seg__btn"
-          [attr.aria-pressed]="customCard()"
-          (click)="customCard.set(!customCard())"
-        >
-          Custom card
-        </button>
-        <button
-          type="button"
-          class="seg__btn"
+          [class.is-on]="bounded()"
           [attr.aria-pressed]="bounded()"
           (click)="bounded.set(!bounded())"
         >
-          Bounded scrolling
+          {{ text.bounded }}
         </button>
-        <button
-          type="button"
-          class="seg__btn"
-          [attr.aria-pressed]="paged()"
-          (click)="paged.set(!paged())"
-        >
-          {{ paged() ? "Paged" : "Infinite scroll" }}
-        </button>
-        @for (state of scenarios; track state) {
-          <button
-            type="button"
-            class="seg__btn"
-            [attr.aria-pressed]="scenario() === state"
-            (click)="scenario.set(state)"
-          >
-            {{ state }}
-          </button>
-        }
+        <div class="seg" role="group" [attr.aria-label]="text.data">
+          @for (option of dataStates; track option.value) {
+            <button
+              type="button"
+              class="seg__btn"
+              [class.is-on]="dataState() === option.value"
+              [attr.aria-pressed]="dataState() === option.value"
+              (click)="dataState.set(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+        <span class="hint">{{ text.hint }}</span>
       </div>
       <ng-template #cardBody let-fields="fields">
         <div class="mx-custom-card" data-demo-custom-card>
@@ -1115,53 +1136,58 @@ class ScaleBody {
           }
         </div>
       </ng-template>
-      <div class="mx-demo__body" [class.mx-phone]="mobile() === true">
-        <adapt-showcase-table
-          [dir]="presentation.tableDir"
-          [labels]="presentation.tableLabels"
-          [attr.lang]="presentation.locale"
-          tableLabel="People"
-          mode="frontend"
-          [urlSync]="false"
-          [forceMobile]="mobile()"
-          [selectable]="true"
-          [features]="features"
-          [onRowClick]="activateRow"
-          [data]="
-            scenario() === 'empty' || scenario() === 'loading' ? [] : rows()
-          "
-          [renderCard]="customCard() ? cardBody : undefined"
-          [maxHeight]="bounded() ? 360 : undefined"
-          [paginationMode]="paged() ? 'paged' : 'infinite'"
-          [loading]="scenario() === 'loading'"
-          [error]="scenario() === 'error' ? demoError : null"
-          [columns]="columns"
-          [rowKey]="rowKey"
-          [defaultColumnLayout]="pageLayout"
-          [defaults]="pageDefaults"
-        />
+      <div class="mx-demo__body">
+        <div [class.phone-frame]="forceMobile() === true">
+          <adapt-showcase-table
+            [dir]="presentation.tableDir"
+            [labels]="presentation.tableLabels"
+            [attr.lang]="presentation.locale"
+            tableLabel="People"
+            mode="frontend"
+            [urlSync]="false"
+            [forceMobile]="forceMobile()"
+            [features]="features"
+            [onRowClick]="activate"
+            [data]="shownRows()"
+            [renderCard]="customCard() ? cardBody : undefined"
+            [maxHeight]="bounded() ? boundedHeight : undefined"
+            [paginationMode]="paging()"
+            [loading]="dataState() === 'loading'"
+            [error]="dataState() === 'error' ? loadError : null"
+            [columns]="columns"
+            [rowKey]="rowKey"
+            [defaultColumnLayout]="pageLayout"
+            [defaults]="pageDefaults"
+          />
+        </div>
       </div>
       <p class="hint" role="status" data-demo-log>{{ log() }}</p>
     </div>
   `,
 })
 class MobileCardsBody {
+  readonly text = MOBILE_TEXT;
+  readonly layouts = MOBILE_LAYOUTS;
+  readonly pagingOptions = MOBILE_PAGING;
+  readonly cards = MOBILE_CARDS;
+  readonly dataStates = MOBILE_DATA_STATES;
+  readonly boundedHeight = MOBILE_BOUNDED_HEIGHT;
+  readonly loadError = MOBILE_LOAD_ERROR;
   readonly pageDefaults = pageDefaultsFor("mobile");
   readonly pageLayout = pageLayoutFor("mobile");
-  readonly mobile = signal<boolean | undefined>(true);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly log = signal("Activate a person to see the host callback.");
-  readonly activateRow = (row: Person): void =>
-    this.log.set(`Activated ${row.name}`);
+  readonly layout = signal<MobileLayout>(MOBILE_START.layout);
+  readonly paging = signal<MobilePaging>(MOBILE_START.paging);
+  readonly customCard = signal(MOBILE_START.customCard);
+  readonly bounded = signal(MOBILE_START.bounded);
+  readonly dataState = signal<MobileDataState>(MOBILE_START.dataState);
+  readonly forceMobile = computed(() => forceMobileFor(this.layout()));
   readonly rows = signal<readonly Person[]>(seedRoster("mobile", false));
-  readonly customCard = signal(false);
-  readonly bounded = signal(false);
-  readonly paged = signal(true);
-  readonly scenarios = ["ready", "empty", "loading", "error"];
-  readonly scenario = signal("ready");
-  readonly demoError = new Error(
-    "The directory could not be loaded. Try again."
-  );
+  readonly shownRows = computed(() => rowsFor(this.rows(), this.dataState()));
+  readonly log = signal<string>(MOBILE_TEXT.waiting);
+  readonly activate = (row: Person): void => {
+    this.log.set(MOBILE_TEXT.activated(row.name));
+  };
   private readonly kit = inject(SHOWCASE_KIT);
   readonly columns = peopleColumns({ editable: true }).map((column) => {
     if (column.key === "person")
@@ -1170,27 +1196,17 @@ class MobileCardsBody {
     return column;
   });
   readonly rowKey = rowKey;
-  private readonly pageFeatures: readonly AdaptTableFeature[] = [
+  readonly features: readonly AdaptTableFeature[] = [
+    this.kit.editing<Person>((row, key, value) => {
+      this.rows.update((rows) => applyPersonEdit(rows, row, key, value));
+    }),
     this.kit.rowEditing<Person>((row, patch) => {
       this.rows.update((rows) =>
-        Object.entries(patch).reduce(
-          (next, [key, value]) => applyPersonEdit(next, row, key, value),
-          rows
-        )
+        applyPersonRowEdit(rows, row, patch, currentDataLocale())
       );
-      this.log.set(`Saved ${row.name}`);
     }),
-    this.kit.filters(FILTER_DEFS),
-    this.kit.nestedTable<Person>((row) => ({
-      label: `Orders for ${row.name}`,
-      table: OrdersTable,
-    })),
-    this.kit.rowActions<Person>([
-      { key: "profile", label: "View profile", onClick: this.activateRow },
-    ]),
-  ];
-  readonly features: readonly AdaptTableFeature[] = [
-    ...this.pageFeatures,
+    // Selection and the shared bulk bar over it, as on every page that selects.
+    this.kit.bulkActions(peopleBulkActions(currentDataLocale())),
     ...pageChromeFeatures(this.kit, { editing: true, urlKey: "mob" }),
   ];
 }

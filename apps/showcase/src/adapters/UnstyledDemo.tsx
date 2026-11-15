@@ -11,6 +11,7 @@ import {
   type FiltersUi,
   type PageMode,
 } from "../Demo";
+import type { MobileDataState } from "../shared/mobileScenario";
 import { tailwindClassNames } from "./tailwindClassNames";
 import { UnstyledLike } from "./UnstyledLike";
 
@@ -37,6 +38,8 @@ export function UnstyledDemo({
   rowStyle,
   highlight,
   failure,
+  dataState,
+  onRowActivate,
   onRecover,
   customCard,
   realtime,
@@ -92,6 +95,10 @@ export function UnstyledDemo({
   rowStyle?: boolean;
   highlight?: boolean;
   failure?: Failure;
+  /** Which data state the table shows. */
+  dataState?: MobileDataState;
+  /** The host callback when a row or card is activated. */
+  onRowActivate?: (row: Person) => void;
   onRecover?: () => void;
   customCard?: boolean;
   realtime?: boolean;
@@ -153,6 +160,8 @@ export function UnstyledDemo({
       rowStyle={rowStyle}
       highlight={highlight}
       failure={failure}
+      dataState={dataState}
+      onRowActivate={onRowActivate}
       onRecover={onRecover}
       customCard={customCard}
       realtime={realtime}

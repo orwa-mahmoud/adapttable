@@ -54,10 +54,11 @@ export class ShowcasePerson extends ShowcaseMobileCellModel {}
   selector: "adapt-demo-material-load",
   imports: [MatProgressBarModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<mat-progress-bar
-      [value]="load()"
-      [attr.aria-label]="value()"
-    /><small>{{ value() }}</small>`,
+  // The percentage is written beside the bar, so the bar is decoration.
+  // Inert keeps Material's focusable progressbar out of an editable cell's
+  // activator, where it would nest a widget in a button.
+  template: `<div inert><mat-progress-bar [value]="load()" /></div>
+    <small>{{ value() }}</small>`,
   styles: `
     :host {
       display: grid;
