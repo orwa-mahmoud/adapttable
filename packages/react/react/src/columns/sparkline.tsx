@@ -7,14 +7,7 @@
  */
 import {
   finiteSparklineValues,
-  SPARKLINE_DEFAULT_HEIGHT,
-  SPARKLINE_DEFAULT_WIDTH,
-  sparklineAreaPath,
-  sparklineBars,
   sparklineExportValue,
-  type SparklineKind,
-  sparklineLinePath,
-  sparklineSortValue,
   sparklineSummary,
 } from "@adapttable/core";
 import { createElement, type ReactElement, type ReactNode } from "react";
@@ -25,7 +18,6 @@ export type { ColumnDef };
 export {
   finiteSparklineValues,
   sparklineExportValue,
-  type SparklineKind,
   sparklineSummary,
 } from "@adapttable/core";
 
@@ -191,3 +183,15 @@ export type {
   ColumnHeaderContext,
   SortableValue,
 } from "@adapttable/core";
+
+import {
+  SPARKLINE_DEFAULT_HEIGHT,
+  SPARKLINE_DEFAULT_WIDTH,
+  sparklineAreaPath,
+  sparklineBars,
+  type SparklineKind,
+  sparklineLinePath,
+  sparklineSortValue,
+} from "@adapttable/core/binding";
+
+export { type SparklineKind } from "@adapttable/core/binding";

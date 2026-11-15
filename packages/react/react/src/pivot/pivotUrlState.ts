@@ -15,8 +15,11 @@
  * and writes through: a browser is only one end of a shared link, and the
  * other end is a server that never renders.
  */
-import { type PivotConfig, pivotSlice } from "@adapttable/core";
-import type { UsePivotUrlStateResult } from "@adapttable/core/binding";
+import { type PivotConfig } from "@adapttable/core";
+import {
+  pivotSlice,
+  type UsePivotUrlStateResult,
+} from "@adapttable/core/binding";
 import { useCallback, useMemo } from "react";
 
 import type { UrlStateAdapter } from "../url/adapter";

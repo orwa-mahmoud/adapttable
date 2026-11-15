@@ -14,12 +14,11 @@
  * hideable and end-pinnable with the actions column, and confirmable through
  * the same dialog a host's own destructive action uses.
  */
+import { type RowAction, type TableLabels } from "@adapttable/core";
 import {
-  type RowAction,
   rowMutationActions,
-  type TableLabels,
-} from "@adapttable/core";
-import type { RowMutationsState } from "@adapttable/core/binding";
+  type RowMutationsState,
+} from "@adapttable/core/binding";
 import { useMemo } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";

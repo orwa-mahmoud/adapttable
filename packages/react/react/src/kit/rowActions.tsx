@@ -8,14 +8,16 @@
  */
 import {
   type ConfirmHandler,
-  resolveDisabledReason,
   type RowAction,
   type RowActionsLayout,
   type RowActionsRenderer,
   runRowAction,
   type TableLabels,
-  visibleRowActions,
 } from "@adapttable/core";
+import {
+  resolveDisabledReason,
+  visibleRowActions,
+} from "@adapttable/core/binding";
 import type { ComponentType, MouseEvent, ReactElement, ReactNode } from "react";
 
 /**

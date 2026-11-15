@@ -3,8 +3,11 @@
  * lazy-children controller, which owns the loading and failed sets and the
  * fetch-once rule.
  */
-import { createLazyChildrenController } from "@adapttable/core";
-import type { LazyChildrenState } from "@adapttable/core/binding";
+
+import {
+  createLazyChildrenController,
+  type LazyChildrenState,
+} from "@adapttable/core/binding";
 import { useEffect, useState, useSyncExternalStore } from "react";
 export type { LazyChildrenState } from "@adapttable/core/binding";
 

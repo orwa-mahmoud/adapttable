@@ -8,7 +8,6 @@
 import {
   type KeyedVirtualization,
   type TableVirtualization,
-  VIRTUAL_OVERSCAN,
   type VirtualTableRow,
 } from "@adapttable/core";
 import {
@@ -17,6 +16,7 @@ import {
   keyedWindow,
   materializeWindowRows,
   rowWindow,
+  VIRTUAL_OVERSCAN,
   virtualItemMeta,
 } from "@adapttable/core/binding";
 import { useVirtualizer, useWindowVirtualizer } from "@tanstack/react-virtual";
@@ -30,12 +30,12 @@ export type {
   VirtualItemMeta,
   VirtualTableRow,
 } from "@adapttable/core";
+export { windowGroupedEntries } from "@adapttable/core";
 export {
   resolveVirtualRows,
+  rowSourceIndex,
   virtualColumnSpan,
-  windowGroupedEntries,
-} from "@adapttable/core";
-export { rowSourceIndex } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 
 /**
  * Options for `useTableVirtualization`.

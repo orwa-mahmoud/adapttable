@@ -6,7 +6,6 @@
  * through {@link GROUPING_LIVE}.
  */
 import {
-  computePagination,
   devWarn,
   type GroupByInput,
   groupingIgnoredWarning,
@@ -15,10 +14,13 @@ import {
   groupingSourceOf,
   type GroupNode,
   type GroupSort,
-  projectedGroupingSource,
   projectGrouping,
 } from "@adapttable/core";
-import { coreGrouping } from "@adapttable/core/binding";
+import {
+  computePagination,
+  coreGrouping,
+  projectedGroupingSource,
+} from "@adapttable/core/binding";
 import { createTableEngine } from "@adapttable/core/engine";
 import { formatGroupBy, parseGroupBy } from "@adapttable/core/grouping";
 import { type ReactNode, useCallback, useEffect, useMemo } from "react";

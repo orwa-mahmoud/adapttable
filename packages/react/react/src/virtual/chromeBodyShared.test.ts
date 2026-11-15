@@ -5,7 +5,8 @@
  * different list than the page of rows, so a per-row height has to ask the
  * walked entry — otherwise a folder's children inherit the wrong estimate.
  */
-import { DEFAULT_ROW_SIZE_PX } from "@adapttable/core";
+
+import { DEFAULT_ROW_SIZE_PX } from "@adapttable/core/binding";
 import { describe, expect, it } from "vitest";
 
 import type { TableChrome } from "../chrome/tableChromeContract";

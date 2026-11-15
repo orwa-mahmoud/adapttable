@@ -5,8 +5,8 @@
  * never imports it never carries the find walk. The hook mounts in-tree
  * through {@link FIND_LIVE}.
  */
-import { findMatchRow, type GridCell } from "@adapttable/core";
-import { coreFindInTable } from "@adapttable/core/binding";
+import { type GridCell } from "@adapttable/core";
+import { coreFindInTable, findMatchRow } from "@adapttable/core/binding";
 import { type ReactNode, useContext, useEffect, useRef } from "react";
 
 import {

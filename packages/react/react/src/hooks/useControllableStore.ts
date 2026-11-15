@@ -3,12 +3,13 @@
  * component, hand it the host's value and callback every render, and read
  * the value it resolves.
  */
+
 import {
   type ControllableControl,
   type ControllableStore,
   type ControllableStoreOptions,
   createControllableStore,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import { useContext, useState, useSyncExternalStore } from "react";
 
 import { TableStoreContext } from "../state/tableStoreContext";

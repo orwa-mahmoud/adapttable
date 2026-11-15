@@ -14,15 +14,13 @@
  * The parser and matcher live in core (`createShortcutHandler`); this hook
  * binds them to a DOM target for the life of the component.
  */
-import {
-  createShortcutHandler,
-  DEFAULT_SHORTCUTS,
-  type Shortcut,
-} from "@adapttable/core";
+import { DEFAULT_SHORTCUTS, type Shortcut } from "@adapttable/core";
 import { useEffect } from "react";
 
 export type { Shortcut } from "@adapttable/core";
 export { DEFAULT_SHORTCUTS } from "@adapttable/core";
+
+import { createShortcutHandler } from "@adapttable/core/binding";
 
 /**
  * What {@link useShortcuts} needs.

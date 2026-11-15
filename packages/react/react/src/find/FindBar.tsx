@@ -2,12 +2,14 @@
  * Find-bar layout. Structure only — adapters pass the search field and
  * the previous / next / close buttons the end user clicks.
  */
-import { findMatchCountText, handleFindBarKey } from "@adapttable/core";
+
 import {
   FIND_LABELS,
   type FindBarProps,
   type FindBarSlots as NeutralFindBarSlots,
+  findMatchCountText,
   type FindSearchProps as NeutralFindSearchProps,
+  handleFindBarKey,
   resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";

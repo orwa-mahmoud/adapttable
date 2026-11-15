@@ -5,10 +5,6 @@
 import {
   defaultFilterRegistry,
   type FilterDef,
-  filterTreeCombinatorOptions,
-  type FilterTreeConditionModel,
-  filterTreeConditionModel,
-  filterTreeEditorActions,
   type FilterTypeRegistry,
   isFilterGroup,
   type QueryCondition,
@@ -19,7 +15,11 @@ import {
   FILTER_LABELS,
   type FilterTreeBuilderProps,
   type FilterTreeClassNames,
+  filterTreeCombinatorOptions,
+  type FilterTreeConditionModel,
+  filterTreeConditionModel,
   type FilterTreeDisclosureProps as NeutralFilterTreeDisclosureProps,
+  filterTreeEditorActions,
   type FilterTreeSlots as NeutralFilterTreeSlots,
   resolveFeatureLabels,
 } from "@adapttable/core/binding";

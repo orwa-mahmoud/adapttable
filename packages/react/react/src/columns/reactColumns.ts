@@ -1,9 +1,8 @@
+import { type TableLayout, visibleColumns } from "@adapttable/core";
 import {
   applyColumnNames,
   declaredColumnLayout,
-  type TableLayout,
-  visibleColumns,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 
 import type { ColumnDef } from "../columnDef";
 import type { ReactUseColumnLayoutResult } from "./useColumnLayout";

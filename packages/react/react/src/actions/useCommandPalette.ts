@@ -9,15 +9,17 @@
  */
 import {
   type Command,
-  commandPaletteCommands,
-  type CommandPaletteControllerOptions,
-  createCommandPaletteController,
   type FeatureHostState,
-  isCommandPaletteArmed,
-  OPEN_PALETTE_COMMAND,
   type TableCommandOptions,
   type TableLabels,
 } from "@adapttable/core";
+import {
+  commandPaletteCommands,
+  type CommandPaletteControllerOptions,
+  createCommandPaletteController,
+  isCommandPaletteArmed,
+  OPEN_PALETTE_COMMAND,
+} from "@adapttable/core/binding";
 import {
   createContext,
   useCallback,
@@ -30,7 +32,7 @@ import {
 import { useFeatureHost } from "../features/featureHostContext";
 import { type Shortcut, useShortcuts } from "./useShortcuts";
 
-export { OPEN_PALETTE_COMMAND } from "@adapttable/core";
+export { OPEN_PALETTE_COMMAND } from "@adapttable/core/binding";
 
 /**
  * How a host arms the palette.

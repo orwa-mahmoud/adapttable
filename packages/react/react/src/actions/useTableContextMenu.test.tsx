@@ -7,7 +7,8 @@
  * deserves. That is the part an adapter would otherwise have to get right
  * eight times.
  */
-import { defaultLabels } from "@adapttable/core";
+
+import { defaultLabels } from "@adapttable/core/binding";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 

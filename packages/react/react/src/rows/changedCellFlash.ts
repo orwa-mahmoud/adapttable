@@ -11,11 +11,12 @@
  * already works. And it never animates against
  * `prefers-reduced-motion` — a flash nobody asked for is a bug, not a feature.
  */
+
 import {
   CHANGED_CELL_FLASH_MS,
+  type ChangedCellFlashState,
   createChangedCellFlashStore,
-} from "@adapttable/core";
-import type { ChangedCellFlashState } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import {
   useCallback,
   useDebugValue,

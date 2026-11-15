@@ -4,7 +4,8 @@
  * Every visible control here is a plain-HTML test slot, so a failure is the
  * chrome's behaviour and never a kit's styling.
  */
-import { defaultLabels } from "@adapttable/core";
+
+import { defaultLabels } from "@adapttable/core/binding";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

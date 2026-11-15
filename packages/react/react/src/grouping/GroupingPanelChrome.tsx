@@ -4,27 +4,26 @@
  * Every visible control is a required slot. Core owns ordering, state
  * transitions, part names, and the invisible live region only.
  */
+
 import {
   deferGroupingDropToInner,
   focusAfterAggregationRemoval,
   groupingAggregationOptions,
   groupingAvailableColumns,
+  type GroupingChipKeyboardProps as NeutralGroupingChipKeyboardProps,
   groupingColumnName,
+  type GroupingDragProps as NeutralGroupingDragProps,
   groupingDropPlan,
+  type GroupingDropProps as NeutralGroupingDropProps,
+  type GroupingPanelAggregationItemProps as NeutralGroupingPanelAggregationItemProps,
+  type GroupingPanelChipProps as NeutralGroupingPanelChipProps,
+  type GroupingPanelDropZoneProps as NeutralGroupingPanelDropZoneProps,
+  type GroupingPanelRemoveZoneProps as NeutralGroupingPanelRemoveZoneProps,
+  type GroupingPanelSlotProps as NeutralGroupingPanelSlotProps,
+  type GroupingPanelSlots as NeutralGroupingPanelSlots,
+  type GroupingPanelState,
+  type GroupingPanelSurfaceProps as NeutralGroupingPanelSurfaceProps,
   INERT_GROUPING_DROP_HANDLERS,
-} from "@adapttable/core";
-import type {
-  GroupingChipKeyboardProps as NeutralGroupingChipKeyboardProps,
-  GroupingDragProps as NeutralGroupingDragProps,
-  GroupingDropProps as NeutralGroupingDropProps,
-  GroupingPanelAggregationItemProps as NeutralGroupingPanelAggregationItemProps,
-  GroupingPanelChipProps as NeutralGroupingPanelChipProps,
-  GroupingPanelDropZoneProps as NeutralGroupingPanelDropZoneProps,
-  GroupingPanelRemoveZoneProps as NeutralGroupingPanelRemoveZoneProps,
-  GroupingPanelSlotProps as NeutralGroupingPanelSlotProps,
-  GroupingPanelSlots as NeutralGroupingPanelSlots,
-  GroupingPanelState,
-  GroupingPanelSurfaceProps as NeutralGroupingPanelSurfaceProps,
 } from "@adapttable/core/binding";
 import {
   type DragEvent,

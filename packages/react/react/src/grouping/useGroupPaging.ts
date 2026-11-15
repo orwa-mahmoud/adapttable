@@ -2,8 +2,11 @@
  * How much of a paged group model has been asked for — the React side of
  * core's group paging controller.
  */
-import { createGroupPagingController } from "@adapttable/core";
-import type { GroupPagingState } from "@adapttable/core/binding";
+
+import {
+  createGroupPagingController,
+  type GroupPagingState,
+} from "@adapttable/core/binding";
 import { useMemo, useState, useSyncExternalStore } from "react";
 export type { GroupPagingState } from "@adapttable/core/binding";
 

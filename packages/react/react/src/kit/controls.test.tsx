@@ -4,7 +4,8 @@
  * meets: the part names, the accessible names, and every control reaching
  * the state it belongs to.
  */
-import { defaultLabels } from "@adapttable/core";
+
+import { defaultLabels } from "@adapttable/core/binding";
 import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

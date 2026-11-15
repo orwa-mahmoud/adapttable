@@ -4,11 +4,8 @@
  * a column, hide it, pin it, move it, rename it, and manage the columns the
  * table injects.
  */
-import {
-  ACTIONS_COLUMN_KEY,
-  defaultLabels,
-  REORDER_COLUMN_KEY,
-} from "@adapttable/core";
+import { ACTIONS_COLUMN_KEY, REORDER_COLUMN_KEY } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core/binding";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

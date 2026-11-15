@@ -8,12 +8,11 @@
  * ({@link KitTable}) and one frame that lays the finished regions out in its
  * library's surface and spacing.
  */
+import { type TableErrorState, type TableLabels } from "@adapttable/core";
 import {
+  type FiltersFormSlotProps,
   showSimpleFilterFields,
-  type TableErrorState,
-  type TableLabels,
-} from "@adapttable/core";
-import type { FiltersFormSlotProps } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import type { CSSProperties, ReactNode, RefCallback, RefObject } from "react";
 
 import { TableStatusAnnouncer } from "../a11y/TableStatusAnnouncer";

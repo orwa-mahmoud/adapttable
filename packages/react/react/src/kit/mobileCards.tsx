@@ -8,7 +8,8 @@
  * control, its card and summary elements, and the spacing that keeps the
  * list in its library's rhythm.
  */
-import { cellFlashAttr, mobileCardListStyle } from "@adapttable/core";
+
+import { cellFlashAttr, mobileCardListStyle } from "@adapttable/core/binding";
 import {
   type ComponentType,
   type CSSProperties,

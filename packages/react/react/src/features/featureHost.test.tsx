@@ -1,20 +1,22 @@
 import {
   aggregate,
   type AggregateSpec,
-  applyFilterExtends,
   bindFeatureHostFn,
-  currentFeatureHost,
   defaultFilterRegistry,
-  defaultLabels,
   type FeatureHostState,
   filterTypeDefaultOp,
   type FilterTypeSpec,
   pivot,
   resolveExportCsv,
   resolveFilterRegistry,
-  runWithFeatureHost,
 } from "@adapttable/core";
-import { columnMenuActions } from "@adapttable/core/binding";
+import {
+  applyFilterExtends,
+  columnMenuActions,
+  currentFeatureHost,
+  defaultLabels,
+  runWithFeatureHost,
+} from "@adapttable/core/binding";
 import { resolveCellEditor } from "@adapttable/core/editing";
 import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { StrictMode } from "react";

@@ -1,13 +1,15 @@
 import {
   type ColumnMenuChoice,
   type ColumnMenuRow,
-  defaultLabels,
   type GroupAggregateOverrides,
-  GROUPING_COLUMN_DND_MIME,
   type GroupingPanelInteractions,
   type GroupingPanelState,
 } from "@adapttable/core";
-import { columnMenuActions } from "@adapttable/core/binding";
+import {
+  columnMenuActions,
+  defaultLabels,
+  GROUPING_COLUMN_DND_MIME,
+} from "@adapttable/core/binding";
 import {
   act,
   fireEvent,

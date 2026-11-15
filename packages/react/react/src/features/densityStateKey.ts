@@ -4,8 +4,13 @@
  * The key lives outside the feature implementation so the shell can read a
  * composed chooser without importing its provider or state hook.
  */
-import { requestDensityChange, resolveDensity } from "@adapttable/core";
-import { DENSITY_STATE, type ResolvedDensity } from "@adapttable/core/binding";
+
+import {
+  DENSITY_STATE,
+  requestDensityChange,
+  type ResolvedDensity,
+  resolveDensity,
+} from "@adapttable/core/binding";
 import { useCallback } from "react";
 
 import type { Density } from "../url/useDensityUrlState";

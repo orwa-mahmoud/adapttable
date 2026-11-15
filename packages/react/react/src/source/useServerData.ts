@@ -4,13 +4,13 @@ import {
   type PaginationMode,
   type QueryAggregate,
   type QuerySupport,
-  resolvePaginationMode,
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
 import {
   createLazyServerSource,
   type LazyServerSource,
+  resolvePaginationMode,
 } from "@adapttable/core/binding";
 import {
   useEffect,

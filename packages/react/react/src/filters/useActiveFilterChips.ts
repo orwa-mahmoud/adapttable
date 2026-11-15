@@ -1,6 +1,5 @@
 import {
   type ActiveFilterChip,
-  activeFilterChips,
   type ChipLabelResolver,
   type FilterValue,
 } from "@adapttable/core";
@@ -15,7 +14,13 @@ export type { ActiveFilterChipsSlotProps } from "@adapttable/core/binding";
  * @public
  */
 export type { ChipLabelResolver } from "@adapttable/core";
-export { mergeFilterChips, resolveActiveFilterCount } from "@adapttable/core";
+
+import { activeFilterChips } from "@adapttable/core/binding";
+
+export {
+  mergeFilterChips,
+  resolveActiveFilterCount,
+} from "@adapttable/core/binding";
 
 /**
  * Options for {@link useActiveFilterChips}.

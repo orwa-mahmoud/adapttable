@@ -2,8 +2,12 @@
  * The window behind a long checklist: track the list's scroll position and
  * width, and derive the window core's `checklistWindow` computes.
  */
-import { checklistSlice, nextChecklistViewport } from "@adapttable/core";
-import type { ChecklistWindowState } from "@adapttable/core/binding";
+
+import {
+  checklistSlice,
+  type ChecklistWindowState,
+  nextChecklistViewport,
+} from "@adapttable/core/binding";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 export type { ChecklistWindowState } from "@adapttable/core/binding";
 

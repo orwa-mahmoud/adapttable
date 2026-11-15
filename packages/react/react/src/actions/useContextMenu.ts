@@ -8,14 +8,17 @@
  * adapter to spread onto a header, row or cell.
  */
 import {
-  type ContextMenuOpenController,
   type ContextMenuState,
   type ContextMenuTarget,
-  createContextMenuOpenController,
 } from "@adapttable/core";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 export type { ContextMenuPoint, ContextMenuState } from "@adapttable/core";
+
+import {
+  type ContextMenuOpenController,
+  createContextMenuOpenController,
+} from "@adapttable/core/binding";
 
 /** What {@link useContextMenu} returns. */
 export interface ContextMenuController<TRow> {

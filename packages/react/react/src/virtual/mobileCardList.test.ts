@@ -1,4 +1,7 @@
-import { bindMobileCardList, mobileCardListStyle } from "@adapttable/core";
+import {
+  bindMobileCardList,
+  mobileCardListStyle,
+} from "@adapttable/core/binding";
 import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 

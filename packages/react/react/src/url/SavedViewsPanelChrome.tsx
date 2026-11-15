@@ -27,15 +27,14 @@
  * here. Every visible control is a required slot the adapter fills with its
  * own kit's component.
  */
+
 import {
   createSavedViewRenameController,
-  type SavedViewGlyph,
-  savedViewRowControls,
-} from "@adapttable/core";
-import {
   resolveFeatureLabels,
   SAVED_VIEW_LABELS,
+  type SavedViewGlyph,
   type SavedViewRowControl as NeutralSavedViewRowControl,
+  savedViewRowControls,
   type SavedViewsPanelChromeProps as NeutralSavedViewsPanelChromeProps,
   type SavedViewsPanelRowProps as NeutralSavedViewsPanelRowProps,
   type SavedViewsPanelSlots as NeutralSavedViewsPanelSlots,

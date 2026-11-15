@@ -33,16 +33,19 @@
  */
 import {
   PIVOT_ROW_COLUMN_KEY,
-  PIVOT_ROW_INDENT,
   type PivotField,
   type PivotResult,
   type PivotRow,
   pivotRowCaption,
-  pivotRowIndentStyle,
-  pivotTableLayout,
   type TableLabels,
 } from "@adapttable/core";
-import { PIVOT_LABELS, resolveFeatureLabels } from "@adapttable/core/binding";
+import {
+  PIVOT_LABELS,
+  PIVOT_ROW_INDENT,
+  pivotRowIndentStyle,
+  pivotTableLayout,
+  resolveFeatureLabels,
+} from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import type { ColumnDef } from "../columnDef";

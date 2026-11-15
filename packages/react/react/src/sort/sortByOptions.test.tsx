@@ -1,4 +1,4 @@
-import { deriveSortByOptions } from "@adapttable/core";
+import { deriveSortByOptions } from "@adapttable/core/binding";
 import { describe, expect, it } from "vitest";
 
 import type { ColumnDef } from "../columnDef";

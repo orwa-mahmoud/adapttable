@@ -1,4 +1,5 @@
-import { type FilterDef, resetDevWarnings } from "@adapttable/core";
+import { type FilterDef } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core/binding";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 

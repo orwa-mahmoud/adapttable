@@ -1,11 +1,8 @@
 import {
   type BulkAction,
   type ConfirmHandler,
-  defaultConfirm,
   type GroupingPanelState,
   resolvePinnedRows,
-  responsiveColumns,
-  tableErrorState,
 } from "@adapttable/core";
 import {
   applyFeatureNoticesAttribute,
@@ -16,8 +13,11 @@ import {
   chromeShowFooter,
   clearChromeFilters,
   clearSearchAndFilters as clearSearchAndFiltersOf,
+  defaultConfirm,
+  responsiveColumns,
   rowReorderEnablement,
   selectionObserverIds,
+  tableErrorState,
 } from "@adapttable/core/binding";
 import { parseGroupBy } from "@adapttable/core/grouping";
 import { useCallback, useEffect, useMemo, useRef } from "react";

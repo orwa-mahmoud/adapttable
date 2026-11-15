@@ -1,11 +1,13 @@
 import {
-  bulkActionErrorMessage,
   type BulkActionOutcome,
-  bulkBarModel,
   type ConfirmHandler,
   type TableLabels,
 } from "@adapttable/core";
-import type { BulkBarState } from "@adapttable/core/binding";
+import {
+  bulkActionErrorMessage,
+  bulkBarModel,
+  type BulkBarState,
+} from "@adapttable/core/binding";
 
 import type { SelectionState } from "../selection/useSelection";
 import { useBulkActionRunner } from "./useBulkActionRunner";

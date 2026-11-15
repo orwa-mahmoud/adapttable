@@ -1,15 +1,9 @@
 import {
   type BulkAction,
-  columnFlexShares,
-  computePagination,
-  deriveSortByOptions,
   devWarn,
   type Direction,
-  mergeProps,
-  nextSort,
   type PaginationInfo,
   type Props,
-  SEARCH_DEBOUNCE_MS,
   type SortByOption,
   type SortDirection,
   stableKey,
@@ -18,10 +12,16 @@ import {
 } from "@adapttable/core";
 import {
   cellAttributes,
+  columnFlexShares,
+  computePagination,
+  deriveSortByOptions,
   headerCellAttributes,
   headerRowAttributes,
+  mergeProps,
+  nextSort,
   resolveTableLabels,
   rowAttributes,
+  SEARCH_DEBOUNCE_MS,
   searchInputAttributes,
   sortButtonAttributes,
   tableAttributes,
@@ -45,6 +45,8 @@ import {
 import { useExtraChips } from "../filters/useExtraChips";
 import { type SelectionState, useSelection } from "../selection/useSelection";
 import { useSearchInput } from "./useSearchInput";
+
+export { defaultLabels } from "@adapttable/core/binding";
 
 const EMPTY_LABELS: Readonly<Record<string, ChipLabelResolver>> = {};
 
@@ -521,5 +523,3 @@ export function useDataTable<TRow>(
     getCellContent,
   };
 }
-
-export { defaultLabels } from "@adapttable/core";

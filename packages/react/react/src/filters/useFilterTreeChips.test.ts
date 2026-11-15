@@ -1,4 +1,5 @@
-import { defaultLabels, type FilterDef } from "@adapttable/core";
+import { type FilterDef } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core/binding";
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

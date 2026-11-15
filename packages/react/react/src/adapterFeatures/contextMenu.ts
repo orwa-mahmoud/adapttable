@@ -1,4 +1,4 @@
-import { withContextMenuCellCopy } from "@adapttable/core";
+import { withContextMenuCellCopy } from "@adapttable/core/binding";
 import { createElement, Fragment, type ReactNode } from "react";
 
 import type { ContextMenuChromeProps } from "../actions/ContextMenuChrome";

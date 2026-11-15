@@ -3,10 +3,8 @@
  */
 import {
   type FilterDef,
-  filterTreeConditionChips,
   type FilterTypeRegistry,
   type QueryFilterGroup,
-  removeFilterTreeNode,
   type TableLabels,
 } from "@adapttable/core";
 import { useMemo } from "react";
@@ -14,6 +12,11 @@ import { useMemo } from "react";
 import type { ActiveFilterChip } from "./useActiveFilterChips";
 
 export { filterTreeChipLabel } from "@adapttable/core";
+
+import {
+  filterTreeConditionChips,
+  removeFilterTreeNode,
+} from "@adapttable/core/binding";
 
 /**
  * Options for {@link useFilterTreeChips}.

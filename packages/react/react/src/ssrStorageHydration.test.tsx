@@ -4,7 +4,7 @@
  * markup even when the store is populated — persisted layouts and saved
  * views hydrate in an effect after mount, never in an initializer.
  */
-import * as env from "@adapttable/core";
+import * as env from "@adapttable/core/binding";
 import { act } from "@testing-library/react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";

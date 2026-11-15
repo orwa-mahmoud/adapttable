@@ -5,8 +5,8 @@
  * imports it never walks the tree. The hook mounts in-tree through
  * {@link FILTER_CHIPS_LIVE}.
  */
-import { FILTER_ENGINE_IMPL, type FilterDef } from "@adapttable/core";
-import { coreFilters } from "@adapttable/core/binding";
+import { type FilterDef } from "@adapttable/core";
+import { coreFilters, FILTER_ENGINE_IMPL } from "@adapttable/core/binding";
 import { type ReactNode, useMemo } from "react";
 
 import {

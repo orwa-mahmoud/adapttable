@@ -26,18 +26,17 @@
  * the same chrome hold a filter form, a column list, or a pivot builder
  * without knowing what any of them are.
  */
+
 import {
   DEFAULT_SIDE_PANEL_ID_PREFIX,
   handleSidePanelBodyKey,
   handleSidePanelTabKey,
+  type SidePanelChromeProps as NeutralSidePanelChromeProps,
+  type SidePanelFrameProps as NeutralSidePanelFrameProps,
   sidePanelModel,
+  type SidePanelSlots as NeutralSidePanelSlots,
   sidePanelTabId,
-} from "@adapttable/core";
-import type {
-  SidePanelChromeProps as NeutralSidePanelChromeProps,
-  SidePanelFrameProps as NeutralSidePanelFrameProps,
-  SidePanelSlots as NeutralSidePanelSlots,
-  SidePanelTabProps as NeutralSidePanelTabProps,
+  type SidePanelTabProps as NeutralSidePanelTabProps,
 } from "@adapttable/core/binding";
 import { type KeyboardEvent, type ReactNode, useCallback, useRef } from "react";
 

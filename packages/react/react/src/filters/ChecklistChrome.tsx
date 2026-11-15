@@ -9,13 +9,10 @@
  * here rather than in any adapter — the slots still render whatever their
  * kit renders, there are just fewer of them at a time.
  */
+import { CHECKLIST_LIST_HEIGHT, filterLabel } from "@adapttable/core";
 import {
   CHECKLIST_ITEM_WIDTH,
-  CHECKLIST_LIST_HEIGHT,
   CHECKLIST_OPTION_GAP,
-  filterLabel,
-} from "@adapttable/core";
-import {
   type ChecklistFilterProps,
   type ChecklistSlots as NeutralChecklistSlots,
   FILTER_LABELS,

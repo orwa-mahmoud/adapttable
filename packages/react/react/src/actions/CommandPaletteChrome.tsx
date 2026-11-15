@@ -24,21 +24,19 @@
  * What the kit owns is every visible piece: the dialog surface, the input,
  * the rows.
  */
-import {
-  type Command,
-  commandListKeyAction,
-  commandListView,
-  createCommandList,
-  runCommand,
-  tabTrapTarget,
-} from "@adapttable/core";
+import { type Command } from "@adapttable/core";
 import {
   ACTION_LABELS,
+  commandListKeyAction,
+  commandListView,
   type CommandPaletteChromeProps as NeutralCommandPaletteChromeProps,
   type CommandPaletteInputProps as NeutralCommandPaletteInputProps,
   type CommandPaletteSlots as NeutralCommandPaletteSlots,
   type CommandPaletteSurfaceProps as NeutralCommandPaletteSurfaceProps,
+  createCommandList,
   resolveFeatureLabels,
+  runCommand,
+  tabTrapTarget,
 } from "@adapttable/core/binding";
 import {
   type KeyboardEvent,

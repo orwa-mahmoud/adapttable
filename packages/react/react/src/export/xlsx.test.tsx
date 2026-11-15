@@ -7,11 +7,8 @@
  * arriving as a number is a data-loss bug the user cannot undo.
  */
 
-import {
-  buildExportTable,
-  columnLetter,
-  safeSheetName,
-} from "@adapttable/core";
+import { buildExportTable } from "@adapttable/core";
+import { columnLetter, safeSheetName } from "@adapttable/core/binding";
 import { buildTableXlsx, xlsxWriter } from "@adapttable/core/xlsx";
 import { describe, expect, it } from "vitest";
 

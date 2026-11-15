@@ -44,7 +44,6 @@ export {
   isPivotReady,
   measureLabel,
   moveField,
-  PIVOT_ZONES,
   type PivotField,
   type PivotZone,
   removeField,
@@ -53,7 +52,6 @@ export {
 export {
   pivot,
   PIVOT_BLANK,
-  PIVOT_GRAND_TOTAL_KEY,
   type PivotColumnLeaf,
   type PivotColumnNode,
   type PivotConfig,
@@ -133,3 +131,4 @@ export type { FilterOptionsSource } from "@adapttable/core";
  * from the entry that returns it.
  */
 export type { FilterOption } from "@adapttable/core";
+export { PIVOT_GRAND_TOTAL_KEY, PIVOT_ZONES } from "@adapttable/core/binding";

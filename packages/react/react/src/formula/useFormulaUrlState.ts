@@ -9,7 +9,7 @@
  * encoding is in {@link ./formulaUrlCodec}, which reads specs and nothing else;
  * evaluation happens later, in the engine, on purpose.
  */
-import { type FormulaColumnSpec, formulaSlice } from "@adapttable/core";
+import { type FormulaColumnSpec } from "@adapttable/core";
 import type { UseFormulaUrlStateResult } from "@adapttable/core/formula";
 
 import type { UrlStateAdapter } from "../url/adapter";
@@ -19,6 +19,8 @@ export type { UseFormulaUrlStateResult } from "@adapttable/core/formula";
 export type { UrlStateAdapter };
 
 export { URL_SLICE_WRITE_DEBOUNCE_MS as FORMULA_URL_WRITE_DEBOUNCE_MS } from "@adapttable/core";
+
+import { formulaSlice } from "@adapttable/core/binding";
 
 /**
  * What {@link useFormulaUrlState} needs.

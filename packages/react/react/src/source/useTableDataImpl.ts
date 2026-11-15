@@ -1,6 +1,4 @@
 import {
-  activeTierValue,
-  createTableData,
   type ExtraFilters,
   type FacetMap,
   type FeatureHostState,
@@ -8,19 +6,23 @@ import {
   type FilterEngine,
   type FilterRuntime,
   type FilterTypeSpec,
-  INACTIVE_TIER_ROWS,
   isDeclarativeFilters,
   type PaginationMode,
   type QueryAggregate,
   type QueryFilterGroup,
   type QuerySupport,
   type SortableValue,
+  type TableSource,
+} from "@adapttable/core";
+import {
+  activeTierValue,
+  createTableData,
+  INACTIVE_TIER_ROWS,
   type TableData,
   type TableDataPlan,
-  type TableSource,
   tierRows,
-} from "@adapttable/core";
-import type { UseTableDataResult } from "@adapttable/core/binding";
+  type UseTableDataResult,
+} from "@adapttable/core/binding";
 import {
   type ReactNode,
   useCallback,

@@ -1,5 +1,4 @@
-import { resetDevWarnings } from "@adapttable/core";
-import { GROUPING_LABELS } from "@adapttable/core/binding";
+import { GROUPING_LABELS, resetDevWarnings } from "@adapttable/core/binding";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { feature } from "./factories";

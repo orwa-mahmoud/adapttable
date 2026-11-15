@@ -1,13 +1,13 @@
 import {
-  createTableViewStore,
   type ExtraFilters,
   type TableQueryParams,
   type TableViewState,
   type TableViewStateConfig,
 } from "@adapttable/core";
-import type {
-  TableStore,
-  UseTableUrlStateResult,
+import {
+  createTableViewStore,
+  type TableStore,
+  type UseTableUrlStateResult,
 } from "@adapttable/core/binding";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 

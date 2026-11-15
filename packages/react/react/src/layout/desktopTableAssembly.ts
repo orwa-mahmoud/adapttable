@@ -5,10 +5,8 @@ import {
   type PinLeads,
   type pinnedSummaryPart,
   type PinOffset,
-  resolveAssembly,
   type TableLabels,
   type TreeEntry,
-  treeTableAria,
 } from "@adapttable/core";
 import {
   absoluteColumnIndex,
@@ -44,6 +42,8 @@ import {
   type pinnedRowSticky,
   type RailInsets,
   REORDER_COLUMN_WIDTH,
+  resolveAssembly,
+  treeTableAria,
 } from "@adapttable/core/binding";
 import {
   createElement,

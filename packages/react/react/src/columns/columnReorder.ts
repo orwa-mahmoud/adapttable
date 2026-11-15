@@ -1,13 +1,4 @@
-import {
-  acceptColumnDrag,
-  type ColumnDragRowAttrs,
-  columnDragRowAttrs,
-  columnReorderKeyDown,
-  createColumnDragController,
-  dropColumn,
-  isRtlElement,
-  startColumnDrag,
-} from "@adapttable/core";
+import { type ColumnDragRowAttrs } from "@adapttable/core";
 import {
   type DragEvent,
   type KeyboardEvent,
@@ -17,7 +8,18 @@ import {
 } from "react";
 
 export type { ColumnDragRowAttrs } from "@adapttable/core";
-export { COLUMN_DND_MIME } from "@adapttable/core";
+
+import {
+  acceptColumnDrag,
+  columnDragRowAttrs,
+  columnReorderKeyDown,
+  createColumnDragController,
+  dropColumn,
+  isRtlElement,
+  startColumnDrag,
+} from "@adapttable/core/binding";
+
+export { COLUMN_DND_MIME } from "@adapttable/core/binding";
 
 /**
  * Props that make a whole menu ROW draggable (so the browser's drag image is

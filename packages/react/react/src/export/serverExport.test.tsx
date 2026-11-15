@@ -14,10 +14,10 @@ import {
   type ExportRequest,
   fetchAllExportRows,
   makeExportCsvHandler,
-  resetDevWarnings,
   type TableSource,
   type TableSourceCapabilities,
 } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core/binding";
 import {
   act,
   fireEvent,

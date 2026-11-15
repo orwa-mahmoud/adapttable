@@ -1,10 +1,10 @@
+import { type LayoutStorage } from "@adapttable/core";
 import {
-  type LayoutStorage,
   readStoredColumnLayout,
   safeLocalStorage,
+  type UseColumnLayoutStorageStateResult,
   writeStoredColumnLayout,
-} from "@adapttable/core";
-import type { UseColumnLayoutStorageStateResult } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { type ColumnLayoutState, EMPTY_COLUMN_LAYOUT } from "./useColumnLayout";

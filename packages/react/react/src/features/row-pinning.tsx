@@ -8,13 +8,15 @@
 import {
   ACTIONS_COLUMN_KEY,
   devWarn,
-  rowPinningBlockedWarning,
   rowPinningControl,
+} from "@adapttable/core";
+import {
+  coreRowPinning,
+  rowPinningBlockedWarning,
   rowPinningRequested,
   rowPinningUrlSync,
   withRowPinActions,
-} from "@adapttable/core";
-import { coreRowPinning } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import { type ReactNode, useEffect } from "react";
 
 import {

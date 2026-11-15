@@ -1,4 +1,4 @@
-import { resetDevWarnings } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core/binding";
 import { act, render, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 

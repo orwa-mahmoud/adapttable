@@ -7,7 +7,8 @@
  * endpoint written before these fields existed has started receiving
  * something new — which is the one outcome this design exists to prevent.
  */
-import { type QuerySupport, resetDevWarnings } from "@adapttable/core";
+import { type QuerySupport } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core/binding";
 import { act, render, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 

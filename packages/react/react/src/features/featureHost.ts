@@ -5,8 +5,9 @@
  * {@link FeatureHostProvider}. Chrome that runs in the same render receives
  * it as an argument; it is not left on a module stack.
  */
-import { appendByKey, type FeatureHostState } from "@adapttable/core";
+import { type FeatureHostState } from "@adapttable/core";
 import {
+  appendByKey,
   createFeatureHost,
   disposeFeatureHost,
   EMPTY_FEATURE_HOST,

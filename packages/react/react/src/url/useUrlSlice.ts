@@ -4,7 +4,8 @@
  * layout, density, collapsed groups, pinned rows, pivot, formulas — is this
  * with its own slice spec.
  */
-import { createUrlSliceStore, type UrlSliceSpec } from "@adapttable/core";
+import { type UrlSliceSpec } from "@adapttable/core";
+import { createUrlSliceStore } from "@adapttable/core/binding";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";

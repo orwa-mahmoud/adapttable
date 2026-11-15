@@ -1,11 +1,8 @@
 import {
-  createFrontendSourceWith,
   type ExtraFilters,
   type FrontendEngineFactory,
-  type FrontendSource,
   type PaginationMode,
   type QueryFilterGroup,
-  resolvePaginationMode,
   type SortableValue,
   type TableSource,
 } from "@adapttable/core";
@@ -28,6 +25,12 @@ import {
 } from "./retainedFrame";
 
 export { defaultFrontendRowId, defaultSearchText } from "@adapttable/core";
+
+import {
+  createFrontendSourceWith,
+  type FrontendSource,
+  resolvePaginationMode,
+} from "@adapttable/core/binding";
 
 /**
  * Options for {@link useFrontendData}.

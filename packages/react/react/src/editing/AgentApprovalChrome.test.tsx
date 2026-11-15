@@ -5,7 +5,8 @@
  * the shared review model — so these tests cover the framing and the
  * exclusivity, and `approvalReview.test.ts` covers the counting.
  */
-import { defaultLabels } from "@adapttable/core";
+
+import { defaultLabels } from "@adapttable/core/binding";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

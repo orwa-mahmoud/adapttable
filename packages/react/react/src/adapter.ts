@@ -898,8 +898,7 @@ export type { Command } from "@adapttable/core";
 export type { ConfirmHandler } from "@adapttable/core";
 export type { ContextMenuItem, ContextMenuTarget } from "@adapttable/core";
 export type { AggregateName, Aggregator } from "@adapttable/core";
-export type { ColumnGroupRecord, FlattenedColumns } from "@adapttable/core";
-export type { WidthColumn } from "@adapttable/core";
+export type { ColumnGroupRecord } from "@adapttable/core";
 export type { GroupedHeaderAlign } from "@adapttable/core";
 export type {
   CustomCellEditorRender,
@@ -914,7 +913,6 @@ export type { SelectionStats } from "@adapttable/core";
 export type { GroupByInput } from "@adapttable/core";
 export type { GroupAggregatesFn, GroupedFlatEntry } from "@adapttable/core";
 export type { RowGroupLevel, RowGroupRef } from "@adapttable/core";
-export type { AssemblyFns } from "@adapttable/core";
 export type { PivotField, PivotZone } from "@adapttable/core";
 export type { PivotConfig } from "@adapttable/core";
 export type { GetCellSpan } from "@adapttable/core";
@@ -959,16 +957,13 @@ export type {
 } from "@adapttable/core";
 export type { Props } from "@adapttable/core";
 export {
-  APPROVAL_PREVIEW_LIMIT,
   type ApprovalReview,
   approvalReview,
   type ApprovalReviewItem,
 } from "@adapttable/core";
-export { resolveDisabledReason } from "@adapttable/core";
 export {
   resolveContextTarget,
   type ResolvedContextTarget,
-  ROW_ID_ATTRIBUTE,
 } from "@adapttable/core";
 export {
   type ColumnMenuAction,
@@ -980,32 +975,18 @@ export {
   type ColumnMenuLabels,
   type ColumnMenuRow,
   type ColumnMenuSlotProps,
-  nextPinSide,
-  pinActionLabel,
   type PinnedSide,
 } from "@adapttable/core";
 export { type ColumnResizeHandleProps } from "@adapttable/core";
-export {
-  columnFlexShares,
-  columnSizeStyle,
-  type ColumnSizingOptions,
-  fittedTableStyle,
-} from "@adapttable/core";
 export { type ColumnGroupDef, type ColumnInput } from "@adapttable/core";
-export { pinnedColumnWidth } from "@adapttable/core";
-export { DEFAULT_CARD_SIZE_PX } from "@adapttable/core";
-export { exportButtonLabel } from "@adapttable/core";
 export { bindFeatureHostFn } from "@adapttable/core";
 export {
   type PaginationItem,
-  paginationItems,
   type PaginationSlot,
   paginationSlots,
 } from "@adapttable/core";
-export { cellFlashAttr, rowFlashSignature } from "@adapttable/core";
 export {
   type TableBodyCell as BodyCell,
-  buildBodyCells,
   type CellSpanAppearance,
 } from "@adapttable/core";
 export { type ExtraRow } from "@adapttable/core";
@@ -1018,14 +999,9 @@ export {
   pinnedSummarySideFromId,
 } from "@adapttable/core";
 export { type RowHeight, type RowStyle } from "@adapttable/core";
-export { deriveSortByOptions } from "@adapttable/core";
-export { tableErrorState } from "@adapttable/core";
-export { bindMobileCardList, mobileCardListStyle } from "@adapttable/core";
 export {
   type KeyedVirtualization,
-  resolveVirtualRows,
   type TableVirtualization,
-  virtualColumnSpan,
   type VirtualItemMeta,
   type VirtualTableRow,
   windowGroupedEntries,
@@ -1279,18 +1255,32 @@ export type { ExportRowRole } from "@adapttable/core";
 export type { AggregateFn } from "@adapttable/core";
 export {
   applyCollapsedColumnGroups,
+  APPROVAL_PREVIEW_LIMIT,
+  bindMobileCardList,
   bodyCellsHaveRowSpan,
+  buildBodyCells,
+  cellFlashAttr,
   cellsForRow,
   cellSpanMark,
   COLUMN_GROUP_ID_SEP,
   COLUMN_GROUP_RENDER_PREFIX,
   COLUMN_GROUP_STUB_PREFIX,
   COLUMN_GROUP_STUB_WIDTH,
+  columnFlexShares,
   columnGroupHeaderCaption,
   columnGroupId,
   columnGroupPath,
   columnGroupStubStyle,
   columnMenuActions,
+  columnMenuRows,
+  columnResizeHandleProps,
+  columnSizeStyle,
+  type ColumnSizingOptions,
+  DEFAULT_CARD_SIZE_PX,
+  defaultConfirm,
+  defaultLabels,
+  deriveSortByOptions,
+  exportButtonLabel,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
   EXTRA_ROW_PARTS,
@@ -1301,6 +1291,7 @@ export {
   extraUncoveredColSpans,
   FILTER_LABELS,
   filterColumnMenuRows,
+  fittedTableStyle,
   flattenColumnTree,
   groupedHeaderAlign,
   groupedHeaderCellStyle,
@@ -1320,24 +1311,40 @@ export {
   isColumnGroupStubKey,
   isColumnGroupSummaryKey,
   isExtraEntry,
+  mobileCardListStyle,
+  nextPinSide,
   orderedCardEntries,
+  paginationItems,
+  pinActionLabel,
   PINNED_BOTTOM_PART,
   PINNED_TOP_PART,
+  pinnedColumnWidth,
   pinnedRowCellStyle,
   pinnedRowPart,
   pinnedRowSticky,
   pinnedRowStickyStyle,
   renderedRowsOf,
   resetColumnLayout,
+  resolveDisabledReason,
   resolveRowHeight,
   resolveRowStyle,
   resolveTableLabels,
+  resolveVirtualRows,
+  ROW_ID_ATTRIBUTE,
+  rowFlashSignature,
   rowSourceIndex,
   rowSpanSignature,
   rowStyleSignature,
   showAllColumns,
+  showSimpleFilterFields,
+  tableErrorState,
+  tableMinWidth,
   toggleCollapsedColumnGroup,
+  treeRowAria,
+  treeTableAria,
   unpinAllColumns,
+  virtualColumnSpan,
+  visibleRowActions,
 } from "@adapttable/core/binding";
 export { normalizeEditorOptions } from "@adapttable/core/editing";
 
@@ -1348,12 +1355,8 @@ export {
   autoSizeColumns,
   bodyRowEntries,
   type ColorScheme,
-  columnMenuRows,
-  columnResizeHandleProps,
   createFilterRegistry,
-  defaultConfirm,
   defaultFilterRegistry,
-  defaultLabels,
   edgePinStyle,
   FILTER_TYPES,
   filterLabel,
@@ -1375,14 +1378,9 @@ export {
   resolveFilterRegistry,
   resolveLabels,
   runRowAction,
-  showSimpleFilterFields,
   splitRelativeToken,
-  tableMinWidth,
   toolbarShowsFilters,
   treeCardStyle,
-  treeRowAria,
-  treeTableAria,
-  visibleRowActions,
 } from "@adapttable/core";
 export {
   editorInputType,
@@ -1406,3 +1404,8 @@ export {
 // `@adapttable/ai`'s `agentObservation`.
 export { deriveRuntimeOperations } from "./agent/deriveRuntimeOperations";
 export { mobileCardRegionProps } from "./virtual/mobileCardRegion";
+export type {
+  AssemblyFns,
+  FlattenedColumns,
+  WidthColumn,
+} from "@adapttable/core/binding";

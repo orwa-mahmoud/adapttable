@@ -12,18 +12,21 @@
  * builders into prop getters carrying React's event handlers.
  */
 import {
-  createGridFocusController,
   type GridCell,
+  type GridFocusControllerOptions,
+} from "@adapttable/core";
+import {
+  createGridFocusController,
+  GRID_LABELS,
   gridCellAttributes,
   gridColumnHeaderAttributes,
   gridContainerAttributes,
   gridFillHandleCell,
-  type GridFocusControllerOptions,
+  type GridFocusState,
   gridRowAttributes,
   gridRowFocusSignature,
   isGridColumnSelected,
-} from "@adapttable/core";
-import { GRID_LABELS, type GridFocusState } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import {
   useCallback,
   useContext,

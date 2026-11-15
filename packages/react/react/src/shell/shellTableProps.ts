@@ -5,13 +5,16 @@
  */
 import {
   ACTIONS_COLUMN_KEY,
-  type AssemblyFns,
   type FilterRuntime,
   REORDER_COLUMN_KEY,
   resolveFilterMode,
   type VirtualTableRow,
 } from "@adapttable/core";
-import { cardSetSize, sourceWindowStart } from "@adapttable/core/binding";
+import {
+  type AssemblyFns,
+  cardSetSize,
+  sourceWindowStart,
+} from "@adapttable/core/binding";
 import type { RefCallback } from "react";
 
 import type { TableChrome } from "../chrome/tableChromeContract";

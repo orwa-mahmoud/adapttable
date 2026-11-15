@@ -18,11 +18,12 @@
  * a row of text is still that kit's text — its muted colour, its numeric
  * font, its spacing — so core supplies no markup for it.
  */
-import { statusBarItems } from "@adapttable/core";
-import type {
-  StatusBarChromeProps as NeutralStatusBarChromeProps,
-  StatusBarSlotProps as NeutralStatusBarSlotProps,
-  StatusBarSlots as NeutralStatusBarSlots,
+
+import {
+  type StatusBarChromeProps as NeutralStatusBarChromeProps,
+  statusBarItems,
+  type StatusBarSlotProps as NeutralStatusBarSlotProps,
+  type StatusBarSlots as NeutralStatusBarSlots,
 } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 

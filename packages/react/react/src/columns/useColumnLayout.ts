@@ -1,9 +1,6 @@
 import {
   type ColumnGroupRecord,
   type ColumnLayoutState,
-  columnLayoutVisibleColumns,
-  columnPinInsets,
-  createColumnLayoutController,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
 import {
@@ -33,13 +30,18 @@ export interface ReactUseColumnLayoutResult<TRow> extends Omit<
 > {
   visibleColumns: ColumnDef<TRow>[];
 }
+export { edgePinStyle, PIN_Z, pinnedCellStyle } from "@adapttable/core";
+
+import {
+  columnLayoutVisibleColumns,
+  columnPinInsets,
+  createColumnLayoutController,
+} from "@adapttable/core/binding";
+
 export {
   applyColumnOrder,
-  edgePinStyle,
   EMPTY_COLUMN_LAYOUT,
-  PIN_Z,
-  pinnedCellStyle,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 
 /**
  * Options for `useColumnLayout`.

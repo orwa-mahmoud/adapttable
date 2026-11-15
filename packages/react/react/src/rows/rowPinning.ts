@@ -12,17 +12,19 @@
  * first and bottom pins last.
  */
 import {
-  commitRowPin,
   EMPTY_ROW_PIN_STATE,
-  ROW_PIN_STORE_OPTIONS,
   type RowAction,
-  rowPinActions,
   type RowPinLabels,
   type RowPinSide,
-  rowPinSideOf,
   type RowPinState,
 } from "@adapttable/core";
-import type { RowPinningState } from "@adapttable/core/binding";
+import {
+  commitRowPin,
+  ROW_PIN_STORE_OPTIONS,
+  rowPinActions,
+  type RowPinningState,
+  rowPinSideOf,
+} from "@adapttable/core/binding";
 import { useCallback, useMemo } from "react";
 
 import { useControllableStore } from "../hooks/useControllableStore";

@@ -9,15 +9,11 @@
  */
 import {
   bindHeaderFilterDismiss as bindNeutralDismiss,
-  createHeaderFilterOverlay,
   type FilterDef,
   type FilterTypeRegistry,
   HEADER_FILTER_SESSION_ATTR,
-  headerFilterInsideSelector,
   type HeaderFilterOpenHost,
-  isHeaderFilterOpen,
   type OverlayDismissOptions,
-  watchOverlayDismiss,
 } from "@adapttable/core";
 import {
   createContext,
@@ -40,6 +36,13 @@ export {
   type HeaderFilterOpenHost,
   HEADER_FILTER_SESSION_ATTR as SESSION_ATTR,
 } from "@adapttable/core";
+
+import {
+  createHeaderFilterOverlay,
+  headerFilterInsideSelector,
+  isHeaderFilterOpen,
+  watchOverlayDismiss,
+} from "@adapttable/core/binding";
 
 /**
  * Props that keep one header filter's overlay session together.

@@ -1,9 +1,7 @@
+import { createIncrementalView } from "@adapttable/core";
 import {
   buildBodyCells,
   columnResizeHandleProps,
-  createIncrementalView,
-} from "@adapttable/core";
-import {
   extraCoveredTableSlots,
   extraHostFillStyle,
   inflateBodyCellRowSpans,

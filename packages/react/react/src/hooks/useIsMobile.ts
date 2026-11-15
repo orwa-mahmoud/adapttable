@@ -1,4 +1,4 @@
-import { MOBILE_BREAKPOINT_PX } from "@adapttable/core";
+import { MOBILE_BREAKPOINT_PX } from "@adapttable/core/binding";
 
 import { useMediaQuery } from "./useMediaQuery";
 

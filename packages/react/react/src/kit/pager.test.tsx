@@ -1,4 +1,4 @@
-import { computePagination, defaultLabels } from "@adapttable/core";
+import { computePagination, defaultLabels } from "@adapttable/core/binding";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";

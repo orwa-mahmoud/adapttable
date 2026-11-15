@@ -5,13 +5,13 @@
  * imports it never carries keyboard-grid state. The hook mounts in-tree
  * through {@link CELL_NAV_LIVE}.
  */
+import { type CellRange } from "@adapttable/core";
 import {
   cellNavigationChannels,
-  type CellRange,
   cellRangeKey,
+  coreCellNavigation,
   reportedCellRange,
-} from "@adapttable/core";
-import { coreCellNavigation } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import { beginCellEdit } from "@adapttable/core/editing";
 import {
   type ReactNode,

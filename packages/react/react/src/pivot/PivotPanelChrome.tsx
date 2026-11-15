@@ -18,17 +18,17 @@
 import {
   assignField,
   moveField,
-  PIVOT_AGGREGATIONS,
-  pivotPanelZones,
   removeField,
   setMeasureAgg,
 } from "@adapttable/core";
 import {
+  PIVOT_AGGREGATIONS,
   PIVOT_LABELS,
   type PivotFieldProps as NeutralPivotFieldProps,
   type PivotPanelChromeProps as NeutralPivotPanelChromeProps,
   type PivotPanelSlots as NeutralPivotPanelSlots,
   type PivotPanelSurfaceProps as NeutralPivotPanelSurfaceProps,
+  pivotPanelZones,
   type PivotZoneProps as NeutralPivotZoneProps,
   resolveFeatureLabels,
 } from "@adapttable/core/binding";

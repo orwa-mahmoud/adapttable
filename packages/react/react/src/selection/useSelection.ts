@@ -1,11 +1,11 @@
+import { offersAllMatching as neutralOffersAllMatching } from "@adapttable/core";
 import {
   headerSelectionOf,
   idSetReader,
-  offersAllMatching as neutralOffersAllMatching,
+  type SelectionState,
   toggleId,
   toggleIds,
-} from "@adapttable/core";
-import type { SelectionState } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import { createAllMatchingScope } from "@adapttable/core/selection";
 import {
   useCallback,

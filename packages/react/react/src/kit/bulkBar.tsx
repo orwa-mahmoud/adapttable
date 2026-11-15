@@ -7,7 +7,8 @@
  * and the error after a failed run. A kit hands over its text, its buttons,
  * and a frame that lays the regions out.
  */
-import { type BulkAction, resolveDisabledReason } from "@adapttable/core";
+import { type BulkAction } from "@adapttable/core";
+import { resolveDisabledReason } from "@adapttable/core/binding";
 import type { ComponentType, ReactElement, ReactNode } from "react";
 
 import { useBulkBarState } from "../actions/useBulkBarState";

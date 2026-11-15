@@ -7,9 +7,9 @@
  */
 import {
   type CustomCellEditorCtrl,
-  defaultLabels,
   type EditableColumnLike,
 } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core/binding";
 import {
   cleanup,
   fireEvent,

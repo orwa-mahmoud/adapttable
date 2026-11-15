@@ -10,11 +10,11 @@
  * colours.
  */
 import {
-  cellFlashAttr,
   PINNED_SUMMARY_BOTTOM_PART,
   PINNED_SUMMARY_TOP_PART,
 } from "@adapttable/core";
 import {
+  cellFlashAttr,
   cellSpanMark,
   columnGroupHeaderCaption,
   EXTRA_OVER_SPAN_ROW_STYLE,

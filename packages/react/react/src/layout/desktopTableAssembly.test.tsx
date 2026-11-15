@@ -1,5 +1,6 @@
-import { columnResizeHandleProps, defaultConfirm } from "@adapttable/core";
 import {
+  columnResizeHandleProps,
+  defaultConfirm,
   insertExtraRows,
   insertExtrasBeforeRows,
 } from "@adapttable/core/binding";

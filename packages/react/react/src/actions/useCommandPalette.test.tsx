@@ -4,7 +4,8 @@
  * The failure this guards against is quiet: a palette whose shortcut was
  * never bound simply never appears, and nothing on screen is missing.
  */
-import { defaultLabels } from "@adapttable/core";
+
+import { defaultLabels } from "@adapttable/core/binding";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

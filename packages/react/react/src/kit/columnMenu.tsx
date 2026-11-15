@@ -11,16 +11,16 @@ import {
   type ColumnMenuItem,
   type ColumnMenuLabels,
   type ColumnMenuRow,
-  columnMenuRows,
   type ColumnMenuSlotProps,
-  nextPinSide,
-  pinActionLabel,
   REORDER_COLUMN_KEY,
 } from "@adapttable/core";
 import {
   columnMenuActions,
+  columnMenuRows,
   filterColumnMenuRows,
   hideAllColumns,
+  nextPinSide,
+  pinActionLabel,
   showAllColumns,
   unpinAllColumns,
 } from "@adapttable/core/binding";
