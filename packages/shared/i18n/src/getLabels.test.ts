@@ -1,4 +1,4 @@
-import { localizedColumnPath } from "@adapttable/core";
+import { localizedColumnPath } from "@adapttable/core/binding";
 import { describe, expect, it } from "vitest";
 
 import { getDirection } from "./direction";

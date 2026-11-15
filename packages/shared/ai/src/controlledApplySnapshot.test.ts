@@ -1,14 +1,16 @@
 import {
   createNeutralTable,
   createTableEngine,
-  initialColumnLayout,
   type TableRevisionAxis,
+} from "@adapttable/core";
+import {
+  initialColumnLayout,
+  type TableRuntimeView,
   withColumnHidden,
   withColumnMoved,
   withColumnOrder,
   withColumnPinned,
-} from "@adapttable/core";
-import type { TableRuntimeView } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {

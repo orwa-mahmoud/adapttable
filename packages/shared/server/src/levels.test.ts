@@ -10,7 +10,6 @@ import {
   defaultFilterRegistry,
   type ExtraFilters,
   type FilterDef,
-  filterPredicate,
   type PivotUrlState,
   type QueryFilterGroup,
   serializePivotState,
@@ -19,6 +18,7 @@ import {
   writeFilterTreeParam,
   writeSortLevels,
 } from "@adapttable/core";
+import { filterPredicate } from "@adapttable/core/binding";
 import { describe, expect, it } from "vitest";
 
 import {

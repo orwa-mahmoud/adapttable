@@ -6,7 +6,6 @@ import {
   conditionToExtra,
   DATE_OP_LABEL_KEYS,
   defaultFilterRegistry,
-  defaultLabels,
   FILTER_AI_OPTIONS_LIMIT,
   type FilterAiOptions,
   type FilterDef,
@@ -20,6 +19,7 @@ import {
   type TableLabels,
   TEXT_OP_LABEL_KEYS,
 } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core/binding";
 
 import type { AgentFilter, AgentFilterOption } from "./types";
 

@@ -1,11 +1,11 @@
 import {
   initialColumnLayout,
+  type TableRuntimeView,
   withColumnHidden,
   withColumnMoved,
   withColumnOrder,
   withColumnPinned,
-} from "@adapttable/core";
-import type { TableRuntimeView } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 
 import {
   revisionStampWithOverlays,

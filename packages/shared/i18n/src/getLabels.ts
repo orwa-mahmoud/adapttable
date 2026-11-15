@@ -1,4 +1,5 @@
-import { resolveLocaleTag, type TableLabels } from "@adapttable/core";
+import { type TableLabels } from "@adapttable/core";
+import { resolveLocaleTag } from "@adapttable/core/binding";
 
 import { ar } from "./locales/ar";
 import { cs } from "./locales/cs";

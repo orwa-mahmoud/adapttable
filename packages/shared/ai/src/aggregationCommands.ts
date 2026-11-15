@@ -16,18 +16,20 @@
  * goes through core's helpers, so a rule changed there changes here too.
  */
 import {
-  addAggregation,
-  BUILTIN_AGGREGATE_LABELS,
   type ColumnMetadata,
-  declaredByDeveloper,
   type GroupAggregateOverrides,
-  offerableOperations,
   type QueryAggregate,
-  readerControlAllowed,
-  removeAggregation,
   resolveAggregatable,
   restoreAggregationDefaults,
 } from "@adapttable/core";
+import {
+  addAggregation,
+  BUILTIN_AGGREGATE_LABELS,
+  declaredByDeveloper,
+  offerableOperations,
+  readerControlAllowed,
+  removeAggregation,
+} from "@adapttable/core/binding";
 
 import type {
   AgentAggregationColumn,

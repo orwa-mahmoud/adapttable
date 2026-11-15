@@ -11,8 +11,6 @@
 import {
   buildFilterRuntime,
   createMemoryAdapter,
-  createTableViewStore,
-  createUrlSliceStore,
   DATE_OPS,
   defaultFilterRegistry,
   type ExtraFilters,
@@ -20,7 +18,6 @@ import {
   type GroupAggregateOverrides,
   MAX_LIMIT,
   NUMBER_OPS,
-  pivotSlice,
   type PivotUrlState,
   type QueryCondition,
   type QueryFilterGroup,
@@ -28,6 +25,11 @@ import {
   type TableViewStore,
   TEXT_OPS,
 } from "@adapttable/core";
+import {
+  createTableViewStore,
+  createUrlSliceStore,
+  pivotSlice,
+} from "@adapttable/core/binding";
 import { describe, expect, it } from "vitest";
 
 import {
