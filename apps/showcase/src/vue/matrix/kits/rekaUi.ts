@@ -2,6 +2,7 @@
 import "../../kits/reka-theme.css";
 
 import { agentApproval, TableAssistant } from "@adapttable/reka-ui/assistant";
+import { batchEditing } from "@adapttable/reka-ui/batch-editing";
 import { bulkActions } from "@adapttable/reka-ui/bulk-actions";
 import { cellNavigation } from "@adapttable/reka-ui/cell-navigation";
 import { cellSpan } from "@adapttable/reka-ui/cell-span";
@@ -154,6 +155,7 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,

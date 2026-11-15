@@ -1,5 +1,6 @@
 /** The real Naive UI kit used by every Vue page that boots it. */
 import { agentApproval, TableAssistant } from "@adapttable/naive-ui/assistant";
+import { batchEditing } from "@adapttable/naive-ui/batch-editing";
 import { bulkActions } from "@adapttable/naive-ui/bulk-actions";
 import { cellNavigation } from "@adapttable/naive-ui/cell-navigation";
 import { cellSpan } from "@adapttable/naive-ui/cell-span";
@@ -186,6 +187,7 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,

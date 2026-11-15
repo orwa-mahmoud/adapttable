@@ -6,6 +6,7 @@ import {
   agentApproval,
   TableAssistant,
 } from "@adapttable/element-plus/assistant";
+import { batchEditing } from "@adapttable/element-plus/batch-editing";
 import { bulkActions } from "@adapttable/element-plus/bulk-actions";
 import { cellNavigation } from "@adapttable/element-plus/cell-navigation";
 import { cellSpan } from "@adapttable/element-plus/cell-span";
@@ -167,6 +168,7 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,

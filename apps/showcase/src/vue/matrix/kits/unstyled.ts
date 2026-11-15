@@ -5,6 +5,7 @@ import {
   agentApproval,
   TableAssistant,
 } from "@adapttable/vue-unstyled/assistant";
+import { batchEditing } from "@adapttable/vue-unstyled/batch-editing";
 import { bulkActions } from "@adapttable/vue-unstyled/bulk-actions";
 import { cellNavigation } from "@adapttable/vue-unstyled/cell-navigation";
 import { cellSpan } from "@adapttable/vue-unstyled/cell-span";
@@ -112,6 +113,7 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,

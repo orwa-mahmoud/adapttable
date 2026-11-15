@@ -2,6 +2,7 @@
 import "vuetify/styles";
 
 import { agentApproval, TableAssistant } from "@adapttable/vuetify/assistant";
+import { batchEditing } from "@adapttable/vuetify/batch-editing";
 import { bulkActions } from "@adapttable/vuetify/bulk-actions";
 import { cellNavigation } from "@adapttable/vuetify/cell-navigation";
 import { cellSpan } from "@adapttable/vuetify/cell-span";
@@ -162,6 +163,7 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,

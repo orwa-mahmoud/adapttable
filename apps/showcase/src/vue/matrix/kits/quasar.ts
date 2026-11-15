@@ -2,6 +2,7 @@
 import "@adapttable/quasar/styles.css";
 
 import { agentApproval, TableAssistant } from "@adapttable/quasar/assistant";
+import { batchEditing } from "@adapttable/quasar/batch-editing";
 import { bulkActions } from "@adapttable/quasar/bulk-actions";
 import { cellNavigation } from "@adapttable/quasar/cell-navigation";
 import { cellSpan } from "@adapttable/quasar/cell-span";
@@ -158,6 +159,7 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,

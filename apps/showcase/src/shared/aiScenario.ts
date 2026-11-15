@@ -18,6 +18,8 @@
  */
 import type {
   AgentSession,
+  AssistantAnswer,
+  AssistantQuestion,
   AssistantReceiptSubject,
   AssistantTransport,
   AssistantTransportReply,
@@ -44,8 +46,16 @@ export interface DemoScenario {
   readonly reply: string;
   /** The capability to run, and the arguments to run it with. */
   readonly capabilityKey: string;
-  /** Built at send time, so ids and revisions are the live ones. */
-  readonly args: (context: DemoContext) => unknown;
+  /**
+   * Built at send time, so ids and revisions are the live ones; a scenario
+   * that asks first is handed the reader's answer.
+   */
+  readonly args: (context: DemoContext, answer?: DemoAnswer) => unknown;
+  /**
+   * A question the reader answers before the call runs, from fixed choices.
+   * Without an answer the turn ends and nothing changes.
+   */
+  readonly ask?: DemoQuestion;
   /**
    * Calls that run first, in order, before the scenario's own call.
    *
@@ -80,6 +90,24 @@ export interface DemoScenario {
   };
 }
 
+/** A question a scenario asks before it runs. @internal */
+export interface DemoQuestion {
+  readonly question: string;
+  readonly ar: string;
+  /** The choices, read from the live rows. */
+  readonly options: (
+    context: DemoContext
+  ) => readonly { readonly id: string; readonly label: string }[];
+}
+
+/** The reader's answer to a {@link DemoQuestion}. @internal */
+export interface DemoAnswer {
+  /** The chosen option's id. */
+  readonly id: string;
+  /** The chosen option's label. */
+  readonly label: string;
+}
+
 /** What the page knows when a scenario runs. @internal */
 export interface DemoContext {
   /** The language this demo is being read in. */
@@ -105,6 +133,8 @@ export interface DemoContext {
   readonly removableRow?: { readonly rowKey: string; readonly person: string };
   /** The people the bulk example selects and marks on leave. */
   readonly leaveRows: readonly { rowKey: string; person: string }[];
+  /** The people the question example offers, first on page 1. */
+  readonly askRows: readonly { rowKey: string; person: string }[];
 }
 
 /** What the demo says when it does not know a request. @internal */
@@ -403,6 +433,26 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
     requires: ["view.setPage"],
   },
   {
+    prompt: "Show one person.",
+    ar: {
+      prompt: "أظهر شخصًا واحدًا.",
+      title: "اختر شخصًا",
+      reply: "يظهر الشخص الذي اخترته.",
+    },
+    title: "Choose a person",
+    kind: "filter",
+    reply: "Showing the person you chose.",
+    ask: {
+      question: "Which person should I show?",
+      ar: "أي شخص أعرض؟",
+      options: (context) =>
+        context.askRows.map((row) => ({ id: row.rowKey, label: row.person })),
+    },
+    capabilityKey: "view.setSearch",
+    args: (_context, answer) => ({ search: answer?.label ?? "" }),
+    requires: ["view.setSearch"],
+  },
+  {
     prompt: "What can you do with this table?",
     ar: {
       prompt: "ما الذي يمكنك فعله بهذا الجدول؟",
@@ -453,6 +503,34 @@ function describeCatalog(session: AgentSession): string {
   return `This table currently offers: ${keys.join(", ")}.`;
 }
 
+/** What the demo says when a question goes unanswered. */
+const NOTHING_CHANGED: Readonly<Record<"en" | "ar", string>> = {
+  en: "Nothing changed.",
+  ar: "لم يتغير شيء.",
+};
+
+let questionSequence = 0;
+
+/** Ask the reader a scenario's question; the choice they picked, if any. */
+async function askFor(
+  question: DemoQuestion,
+  arabic: boolean,
+  context: DemoContext,
+  askUser:
+    | ((question: AssistantQuestion) => Promise<AssistantAnswer | undefined>)
+    | undefined
+): Promise<DemoAnswer | undefined> {
+  const options = question.options(context);
+  questionSequence += 1;
+  const reply = await askUser?.({
+    id: `demo-question-${String(questionSequence)}`,
+    question: arabic ? question.ar : question.question,
+    options,
+    allowFreeText: false,
+  });
+  return options.find((option) => option.id === reply?.optionId);
+}
+
 /**
  * A transport that runs the examples and admits it knows nothing else.
  *
@@ -463,7 +541,11 @@ function describeCatalog(session: AgentSession): string {
  */
 export function demoTransport(context: () => DemoContext): AssistantTransport {
   return {
-    send: async ({ session, text }): Promise<AssistantTransportReply> => {
+    send: async ({
+      session,
+      text,
+      askUser,
+    }): Promise<AssistantTransportReply> => {
       const found = scenarioFor(text);
       if (!found) {
         return {
@@ -476,17 +558,26 @@ export function demoTransport(context: () => DemoContext): AssistantTransport {
         return { text: describeCatalog(session) };
       }
 
+      const offered = new Set(session.catalog().map((entry) => entry.key));
+      const missing = [
+        ...(scenario.before ?? []).map((call) => call.capabilityKey),
+        scenario.capabilityKey,
+      ].find((key) => !offered.has(key));
+      if (missing) {
+        return { text: `This table does not currently offer ${missing}.` };
+      }
+      let answer: DemoAnswer | undefined;
+      if (scenario.ask) {
+        answer = await askFor(scenario.ask, arabic, context(), askUser);
+        if (!answer) return { text: NOTHING_CHANGED[arabic ? "ar" : "en"] };
+      }
       const calls: readonly DemoCall[] = [
         ...(scenario.before ?? []),
-        { capabilityKey: scenario.capabilityKey, args: scenario.args },
+        {
+          capabilityKey: scenario.capabilityKey,
+          args: (current) => scenario.args(current, answer),
+        },
       ];
-      const offered = new Set(session.catalog().map((entry) => entry.key));
-      const missing = calls.find((call) => !offered.has(call.capabilityKey));
-      if (missing) {
-        return {
-          text: `This table does not currently offer ${missing.capabilityKey}.`,
-        };
-      }
 
       const results: ExecuteResult[] = [];
       for (const call of calls) {

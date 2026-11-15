@@ -157,11 +157,7 @@ for (const framework of ["react", "angular", "vue"] as const) {
         await page.keyboard.press("Escape");
         await expect(surface).toBeVisible();
         await expect(part("assistant-examples-item").first()).toBeHidden();
-        await input.fill(
-          framework === "react"
-            ? "Sort by salary, highest first."
-            : "Sort salaries highest first"
-        );
+        await input.fill("Sort by salary, highest first.");
         await input.press("Enter");
         await expect(
           part("assistant-receipts-toggle-button").last()

@@ -300,6 +300,8 @@ function copy(which: "code" | "install", text: string): void {
               >
             </div>
           </div>
+          <!-- Where the AI page's developer inspector lands, below Reference. -->
+          <div id="mx-inspector-slot" />
         </div>
       </div>
 

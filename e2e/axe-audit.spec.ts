@@ -5,11 +5,8 @@ import {
   featuresOf,
   MATRIX_FEATURES,
 } from "../apps/showcase/matrix.mjs";
-import {
-  angularOverlaySelector,
-  angularPart,
-  selectAngularOption,
-} from "./angular-kit";
+import { chooseApprovalLocation, staffRow } from "./ai-page";
+import { angularOverlaySelector, angularPart } from "./angular-kit";
 import { expectNoBlockingAxe } from "./axe";
 
 /**
@@ -46,7 +43,9 @@ for (const slug of AXE_FEATURES) {
   }
 }
 
-const demo = (page: Page) => page.locator(".mx-demo");
+/** A feature page's demo; the AI page's is the AI workspace. */
+const DEMO = ".mx-demo, .ai-demo";
+const demo = (page: Page) => page.locator(DEMO);
 
 async function openKitPage(page: Page, path: string): Promise<void> {
   await page.goto(path);
@@ -90,7 +89,7 @@ for (const kit of builtAdapters("angular")) {
       }) => {
         await page.setViewportSize(viewport);
         await openKitPage(page, `/${path}/`);
-        await expectNoBlockingAxe(page, ".mx-demo");
+        await expectNoBlockingAxe(page, DEMO);
       });
     }
   }
@@ -166,21 +165,16 @@ for (const kit of builtAdapters("angular")) {
     page,
   }) => {
     await openKitPage(page, `/${kit.key}/ai/`);
-    await selectAngularOption(
-      page.getByRole("combobox", { name: "Approval surface", exact: true }),
-      { value: "modal", label: "Dialog" }
-    );
+    await chooseApprovalLocation(page, "modal");
     await page.locator('[data-adapttable-part="assistant-launcher"]').click();
     const input = page.locator('[data-adapttable-part="assistant-input"]');
-    await input.fill("Propose Grace's salary as 150");
+    await input.fill("Raise Priya Nair's salary to 185.");
     await input.press("Enter");
     const modal = page.locator(
       '[data-adapttable-part="assistant-approval-modal"]'
     );
     await expect(modal).toBeVisible();
-    await expect(page.locator("[data-demo-log]")).toHaveText(
-      "No host writes yet"
-    );
+    await expect(staffRow(page, "Priya Nair")).toContainText("$170k");
     await expectNoBlockingAxe(
       page,
       '[data-adapttable-part="assistant-approval-modal"]'

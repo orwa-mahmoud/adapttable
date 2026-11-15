@@ -1,5 +1,6 @@
 /** One kit selected at boot, shared by every demo and nested table. */
 import type { agentApproval } from "@adapttable/vue-unstyled/assistant";
+import type { batchEditing } from "@adapttable/vue-unstyled/batch-editing";
 import type { bulkActions } from "@adapttable/vue-unstyled/bulk-actions";
 import type { cellNavigation } from "@adapttable/vue-unstyled/cell-navigation";
 import type { cellSpan } from "@adapttable/vue-unstyled/cell-span";
@@ -113,6 +114,7 @@ export interface ShowcaseKit {
   readonly editHistory: typeof editHistory;
   readonly editing: typeof editing;
   readonly rowEditing: typeof rowEditing;
+  readonly batchEditing: typeof batchEditing;
   readonly undoRedoButtons: typeof undoRedoButtons;
   readonly exportCsv: typeof exportCsv;
   readonly filters: typeof filters;

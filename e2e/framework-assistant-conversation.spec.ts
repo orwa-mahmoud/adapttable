@@ -47,9 +47,9 @@ for (const framework of ["angular", "vue"] as const) {
             await pane.evaluate((e) => e.scrollWidth - e.clientWidth)
           ).toBeLessThanOrEqual(1);
         };
-        await ask("Sort salaries highest first");
+        await ask("Sort by salary, highest first.");
         await expect(part("assistant-message-text").last()).toContainText(
-          "Highest salary first"
+          "Sorted by salary"
         );
         await part("assistant-receipts-toggle-button").last().click();
         await expect(part("assistant-receipt").last()).toHaveAttribute(
@@ -58,20 +58,26 @@ for (const framework of ["angular", "vue"] as const) {
         );
         await readable();
         await part("assistant-receipt-undo-button").last().click();
-        await ask("Choose a person");
-        await part("assistant-question-option")
-          .filter({ hasText: "Grace Hopper" })
-          .click();
-        await expect(part("assistant-message-text").last()).toContainText(
-          "Showing Grace Hopper"
-        );
-        await readable();
-        await ask("Propose Grace's salary as 150");
+        await ask("Raise Priya Nair's salary to 185.");
         await part("agent-approval-reject").click();
         await expect(part("assistant-approval")).toHaveCount(0);
-        await ask("Propose Grace's salary as 150");
+        await ask("Raise Priya Nair's salary to 185.");
         await part("agent-approval-approve").click();
-        await expect(page.locator("[data-demo-log]")).toContainText("150");
+        await expect(
+          page
+            .locator(
+              `.ai-demo ${selector("row")}, .ai-demo ${selector("card")}`
+            )
+            .filter({ hasText: "Priya Nair" })
+        ).toContainText("$185k");
+        await readable();
+        await ask("Show one person.");
+        await part("assistant-question-option")
+          .filter({ hasText: "Chioma Eze" })
+          .click();
+        await expect(part("assistant-message-text").last()).toContainText(
+          "Showing the person you chose."
+        );
         await readable();
         await part("assistant-close").click();
         await part("assistant-launcher").click();

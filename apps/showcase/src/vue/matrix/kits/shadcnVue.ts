@@ -6,6 +6,7 @@ import {
   agentApproval,
   TableAssistant,
 } from "@adapttable/shadcn-vue/assistant";
+import { batchEditing } from "@adapttable/shadcn-vue/batch-editing";
 import { bulkActions } from "@adapttable/shadcn-vue/bulk-actions";
 import { cellNavigation } from "@adapttable/shadcn-vue/cell-navigation";
 import { cellSpan } from "@adapttable/shadcn-vue/cell-span";
@@ -166,6 +167,7 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,

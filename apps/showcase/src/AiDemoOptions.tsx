@@ -12,8 +12,18 @@ import type { ApprovalPresentation } from "@adapttable/core";
 import { type ReactNode, useEffect, useRef } from "react";
 
 import { Segmented } from "./kitDemos";
-
-export type DemoEditingMode = "off" | "cell" | "row" | "batch";
+import {
+  APPROVAL_CHOICES,
+  type ApprovalOverride,
+  type DemoActionApproval,
+  type DemoContextProfile,
+  type DemoEditingMode,
+  EDITING_MODES,
+  OPTIONS_TEXT,
+  PRESENTATIONS,
+  PROFILES,
+  SAVING,
+} from "./shared/aiDemo";
 
 /** One feature switch. */
 export interface DemoFeature {
@@ -24,17 +34,9 @@ export interface DemoFeature {
   readonly onChange: () => void;
 }
 
-/** One action whose approval the reader can override. */
-export interface DemoActionApproval {
-  /** Capability key — stable, and never shown as the label. */
-  readonly key: string;
-  /** Reader-facing name, from the capability's own presentation. */
-  readonly label: string;
-  /** What it resolves to right now. */
-  readonly policy: "required" | "automatic";
-  /** True when the table's shared default is what produced that. */
-  readonly inherited: boolean;
-  readonly onChange: (policy: "required" | "automatic" | "inherit") => void;
+/** One write whose approval the reader can override, with its control. */
+export interface DemoActionApprovalControl extends DemoActionApproval {
+  readonly onChange: (policy: ApprovalOverride | "inherit") => void;
 }
 
 /** One capability the reader can take away from the agent. */
@@ -50,9 +52,6 @@ export interface DemoExclusion {
   readonly onChange: () => void;
 }
 
-/** How much of the contract a turn carries. */
-export type DemoContextProfile = "compact" | "full";
-
 /** Props for {@link AiDemoOptions}. */
 export interface AiDemoOptionsProps {
   readonly open: boolean;
@@ -60,7 +59,7 @@ export interface AiDemoOptionsProps {
   readonly editingMode: DemoEditingMode;
   readonly onEditingMode: (next: DemoEditingMode) => void;
   readonly features: readonly DemoFeature[];
-  readonly actions: readonly DemoActionApproval[];
+  readonly actions: readonly DemoActionApprovalControl[];
   readonly presentation: ApprovalPresentation;
   readonly onPresentation: (next: ApprovalPresentation) => void;
   readonly commit: "stage" | "immediate";
@@ -78,70 +77,6 @@ export interface AiDemoOptionsProps {
   readonly onWebmcp: (next: boolean) => void;
   /** Whether this browser has the API at all. */
   readonly webmcpAvailable: boolean;
-}
-
-const PRESENTATIONS: readonly {
-  readonly value: ApprovalPresentation;
-  readonly label: string;
-  readonly help: string;
-}[] = [
-  {
-    value: "widget",
-    label: "In the assistant",
-    help: "Reviewed in the conversation where the change was asked for.",
-  },
-  {
-    value: "table",
-    label: "Above the table",
-    help: "Reviewed in a strip over the rows it changes.",
-  },
-  {
-    value: "modal",
-    label: "In a dialog",
-    help: "Reviewed in a dialog over the page. Nothing else is reachable until you answer.",
-  },
-];
-
-const PROFILES: readonly {
-  readonly value: DemoContextProfile;
-  readonly label: string;
-  readonly help: string;
-}[] = [
-  {
-    value: "compact",
-    label: "Compact",
-    help: "Every capability by name, with the full instructions only for the ones this turn is likely to need. The rest are asked for when they are.",
-  },
-  {
-    value: "full",
-    label: "Full",
-    help: "Every capability with its whole guide, up front. Larger, and nothing is deferred.",
-  },
-];
-
-const SAVING: readonly {
-  readonly value: "stage" | "immediate";
-  readonly label: string;
-  readonly help: string;
-}[] = [
-  {
-    value: "stage",
-    label: "Stage changes",
-    help: "An approved change becomes an unsaved edit. You still press Save.",
-  },
-  {
-    value: "immediate",
-    label: "Save immediately",
-    help: "An approved change goes straight to the save path and reports what came back.",
-  },
-];
-
-/** What an action's approval resolves to, and whether it was inherited. */
-function describe(action: DemoActionApproval): string {
-  if (!action.inherited) return "Overridden for this action";
-  return action.policy === "required"
-    ? "Inherited: asks first"
-    : "Inherited: runs without asking";
 }
 
 function Section({
@@ -223,7 +158,7 @@ export function AiDemoOptions({
     <dialog
       ref={ref}
       className="ai-opts"
-      aria-label="Demo options"
+      aria-label={OPTIONS_TEXT.title}
       data-testid="ai-demo-options-drawer"
       onCancel={(event) => {
         event.preventDefault();
@@ -231,11 +166,11 @@ export function AiDemoOptions({
       }}
     >
       <header className="ai-opts__head">
-        <h3>Demo options</h3>
+        <h3>{OPTIONS_TEXT.title}</h3>
         <button
           type="button"
           className="ai-opts__close"
-          aria-label="Close"
+          aria-label={OPTIONS_TEXT.close}
           onClick={onClose}
         >
           ✕
@@ -243,29 +178,23 @@ export function AiDemoOptions({
       </header>
 
       <div className="ai-opts__body">
-        <Section title="Table features">
-          <p className="ai-opts__help">
-            Turn one off and the assistant offers less: it only ever suggests
-            what this table currently wires.
-          </p>
+        <Section title={OPTIONS_TEXT.features}>
+          <p className="ai-opts__help">{OPTIONS_TEXT.featuresHelp}</p>
           <div className="ai-opts__row ai-opts__row--mode">
             <span>
-              <span className="ai-opts__label">Editing mode</span>
+              <span className="ai-opts__label">{OPTIONS_TEXT.editingMode}</span>
               <span className="ai-opts__hint">
-                Cell and row stay ordinary fields until you open them. Batch
-                keeps every editable cell as an input.
+                {OPTIONS_TEXT.editingModeHelp}
               </span>
             </span>
             <Segmented
-              label="Editing mode"
+              label={OPTIONS_TEXT.editingMode}
               value={editingMode}
               onChange={onEditingMode}
-              options={[
-                { value: "off", label: "Off", testId: "ai-editing-off" },
-                { value: "cell", label: "Cell", testId: "ai-editing-cell" },
-                { value: "row", label: "Row", testId: "ai-editing-row" },
-                { value: "batch", label: "Batch", testId: "ai-editing-batch" },
-              ]}
+              options={EDITING_MODES.map((mode) => ({
+                ...mode,
+                testId: `ai-editing-${mode.value}`,
+              }))}
             />
           </div>
           {features.map((feature) => (
@@ -285,37 +214,34 @@ export function AiDemoOptions({
           ))}
         </Section>
 
-        <Section title="Action approvals">
-          <p className="ai-opts__help">
-            Whether the assistant has to ask before it runs an action. This is
-            not where the question appears — that is below.
-          </p>
+        <Section title={OPTIONS_TEXT.approvals}>
+          <p className="ai-opts__help">{OPTIONS_TEXT.approvalsHelp}</p>
           {actions.length === 0 ? (
-            <p className="ai-opts__hint">
-              This table wires no actions the assistant may run.
-            </p>
+            <p className="ai-opts__hint">{OPTIONS_TEXT.noApprovals}</p>
           ) : (
             actions.map((action) => (
               <div key={action.key} className="ai-opts__row">
                 <span>
                   <span className="ai-opts__label">{action.label}</span>
-                  <span className="ai-opts__hint">{describe(action)}</span>
+                  <span className="ai-opts__hint">{action.description}</span>
                 </span>
                 <span className="ai-opts__choices">
                   <select
-                    aria-label={`Approval for ${action.label}`}
+                    aria-label={OPTIONS_TEXT.approvalFor(action.label)}
                     data-testid={`ai-approval-${action.key}`}
                     value={action.inherited ? "inherit" : action.policy}
                     onChange={(event) => {
-                      action.onChange(
-                        event.target.value as
-                          "required" | "automatic" | "inherit"
+                      const next = APPROVAL_CHOICES.find(
+                        (choice) => choice.value === event.target.value
                       );
+                      if (next) action.onChange(next.value);
                     }}
                   >
-                    <option value="inherit">Use the default</option>
-                    <option value="required">Always ask</option>
-                    <option value="automatic">Never ask</option>
+                    {APPROVAL_CHOICES.map((choice) => (
+                      <option key={choice.value} value={choice.value}>
+                        {choice.label}
+                      </option>
+                    ))}
                   </select>
                 </span>
               </div>
@@ -323,11 +249,8 @@ export function AiDemoOptions({
           )}
         </Section>
 
-        <Section title="Approval location">
-          <p className="ai-opts__help">
-            Where a waiting change is reviewed. One place at a time — the others
-            say a change is waiting, and never repeat the buttons.
-          </p>
+        <Section title={OPTIONS_TEXT.location}>
+          <p className="ai-opts__help">{OPTIONS_TEXT.locationHelp}</p>
           {PRESENTATIONS.map((option) => (
             <label key={option.value} className="ai-opts__row">
               <input
@@ -349,7 +272,7 @@ export function AiDemoOptions({
           ))}
         </Section>
 
-        <Section title="Saving">
+        <Section title={OPTIONS_TEXT.saving}>
           {SAVING.map((option) => (
             <label key={option.value} className="ai-opts__row">
               <input
@@ -372,11 +295,8 @@ export function AiDemoOptions({
           ))}
         </Section>
 
-        <Section title="What the agent is told">
-          <p className="ai-opts__help">
-            The contract each turn carries. Compact names everything and
-            explains what this turn needs; the rest is asked for on demand.
-          </p>
+        <Section title={OPTIONS_TEXT.told}>
+          <p className="ai-opts__help">{OPTIONS_TEXT.toldHelp}</p>
           {PROFILES.map((option) => (
             <label key={option.value} className="ai-opts__row">
               <input
@@ -398,12 +318,8 @@ export function AiDemoOptions({
           ))}
         </Section>
 
-        <Section title="What the agent may do">
-          <p className="ai-opts__help">
-            Taking one away removes it from the contract and from the
-            suggestions — and leaves the table&apos;s own control exactly where
-            it was, for the person using it.
-          </p>
+        <Section title={OPTIONS_TEXT.may}>
+          <p className="ai-opts__help">{OPTIONS_TEXT.mayHelp}</p>
           {exclusions.map((exclusion) => (
             <label key={exclusion.key} className="ai-opts__row">
               <input
@@ -421,11 +337,11 @@ export function AiDemoOptions({
           ))}
         </Section>
 
-        <Section title="Browser tools">
+        <Section title={OPTIONS_TEXT.browser}>
           <label className="ai-opts__row">
             <input
               type="checkbox"
-              aria-label="Offer this table to a browser agent"
+              aria-label={OPTIONS_TEXT.webmcp}
               checked={webmcp && webmcpAvailable}
               disabled={!webmcpAvailable}
               data-testid="ai-toggle-webmcp"
@@ -434,23 +350,21 @@ export function AiDemoOptions({
               }}
             />
             <span>
-              <span className="ai-opts__label">
-                Offer this table to a browser agent
-              </span>
+              <span className="ai-opts__label">{OPTIONS_TEXT.webmcp}</span>
               <span className="ai-opts__hint">
                 {webmcpAvailable
-                  ? "Registers the permitted contract as WebMCP tools. The same executor, the same approvals — a browser agent gets no more than this page's assistant does."
-                  : "This browser has no model-context API, so there is nothing to register. The page works exactly the same without it."}
+                  ? OPTIONS_TEXT.webmcpHelp
+                  : OPTIONS_TEXT.webmcpMissing}
               </span>
             </span>
           </label>
         </Section>
 
-        <Section title="Language and direction">
+        <Section title={OPTIONS_TEXT.direction}>
           <label className="ai-opts__row">
             <input
               type="checkbox"
-              aria-label="Right-to-left table"
+              aria-label={OPTIONS_TEXT.rtl}
               checked={rtl}
               data-testid="ai-toggle-rtl"
               onChange={() => {
@@ -458,11 +372,8 @@ export function AiDemoOptions({
               }}
             />
             <span>
-              <span className="ai-opts__label">Right-to-left table</span>
-              <span className="ai-opts__hint">
-                Mirrors the table and its overlays, and reads it in Arabic. The
-                page around it stays as it is.
-              </span>
+              <span className="ai-opts__label">{OPTIONS_TEXT.rtl}</span>
+              <span className="ai-opts__hint">{OPTIONS_TEXT.rtlHelp}</span>
             </span>
           </label>
         </Section>
@@ -475,7 +386,7 @@ export function AiDemoOptions({
           data-testid="ai-reset"
           onClick={onReset}
         >
-          Reset demo
+          {OPTIONS_TEXT.reset}
         </button>
         {/* Clicking outside closes the panel and Escape closes it, and
             neither is something a reader can see. Done is where a reader
@@ -486,7 +397,7 @@ export function AiDemoOptions({
           data-testid="ai-demo-options-done"
           onClick={onClose}
         >
-          Done
+          {OPTIONS_TEXT.done}
         </button>
       </footer>
     </dialog>

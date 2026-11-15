@@ -4,6 +4,12 @@ import { builtAdapters, pathOf } from "../apps/showcase/matrix.mjs";
 import { angularPart } from "./angular-kit";
 
 const part = (name: string) => `[data-adapttable-part="${name}"]`;
+
+/** The staff table's headings, in each language the page reads in. */
+const HEADERS = {
+  en: ["Person", "Team", "Status", "Salary", "Started"],
+  ar: ["الشخص", "الفريق", "الحالة", "الراتب", "تاريخ البدء"],
+} as const;
 for (const framework of ["angular", "vue"] as const) {
   for (const kit of builtAdapters(framework)) {
     for (const locale of ["en", "ar"] as const) {
@@ -16,16 +22,13 @@ for (const framework of ["angular", "vue"] as const) {
         await page.goto(`${route}?locale=${locale}`, {
           waitUntil: "domcontentloaded",
         });
-        const demo = page.locator(".ai-demo");
+        const demo = page.locator(".ai-demo__stage");
         await expect(demo.locator(part("row"))).toHaveCount(5);
-        await expect(demo.getByRole("columnheader")).toHaveCount(7);
-        for (const name of [
-          "column-menu-button",
-          "views-button",
-          "export-csv-button",
-          "filters-button",
-          "fullscreen-toggle",
-        ]) {
+        for (const header of HEADERS[locale])
+          await expect(
+            demo.getByRole("columnheader").filter({ hasText: header })
+          ).toHaveCount(1);
+        for (const name of ["column-menu-button", "filters-button"]) {
           // The selected kit owns the actual toolbar controls.
           await expect(
             framework === "angular"

@@ -2,6 +2,7 @@
 import "../../kits/nuxt-ui.css";
 
 import { agentApproval, TableAssistant } from "@adapttable/nuxt-ui/assistant";
+import { batchEditing } from "@adapttable/nuxt-ui/batch-editing";
 import { bulkActions } from "@adapttable/nuxt-ui/bulk-actions";
 import { cellNavigation } from "@adapttable/nuxt-ui/cell-navigation";
 import { cellSpan } from "@adapttable/nuxt-ui/cell-span";
@@ -139,6 +140,7 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,
