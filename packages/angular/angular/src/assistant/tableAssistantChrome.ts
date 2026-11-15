@@ -482,6 +482,9 @@ export class AdaptTableAssistantChrome {
   }
   protected onKeyDown(event: KeyboardEvent): void {
     if (event.key !== "Escape" || event.defaultPrevented) return;
+    // An approval dialog open above the panel owns Escape, even before it
+    // has taken focus from the composer.
+    if (this.modalReview()) return;
     event.preventDefault();
     this.close();
   }
