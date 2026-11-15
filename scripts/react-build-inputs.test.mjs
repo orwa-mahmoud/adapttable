@@ -45,9 +45,12 @@ for (const name of packages)
     assert.deepEqual(build.options.types, ["node"]);
     assert.deepEqual(build.options.paths, {});
     for (const file of tests) assert.ok(!build.fileNames.includes(file), file);
+    // A kit's `*.test-utils` fixtures serve the shared suites, never the build.
+    const testSupport = (file) => /\.test(?:-utils)?\.tsx?$/.test(file);
+    for (const file of normal.fileNames.filter(testSupport))
+      assert.ok(!build.fileNames.includes(file), file);
     const production = normal.fileNames.filter(
-      (file) =>
-        file.startsWith(join(root, "src")) && !/\.test\.tsx?$/.test(file)
+      (file) => file.startsWith(join(root, "src")) && !testSupport(file)
     );
     assert.deepEqual([...build.fileNames].sort(), production.sort());
     const manifest = JSON.parse(

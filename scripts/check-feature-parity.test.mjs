@@ -552,3 +552,38 @@ describe("check-feature-parity --report", () => {
     assert.equal(result.stdout, "");
   });
 });
+
+describe("React kits drawn by the binding's desktop table", () => {
+  /** The React kit draws through `createDesktopTable`; the binding draws the header. */
+  function drawnRoot(bindingHeader) {
+    const root = contractRoot();
+    writePackage(
+      root,
+      "react",
+      "adapter-plain",
+      ["filters", "tree", "preset"],
+      {
+        "src/DataTable.tsx":
+          'import { createDesktopTable } from "@adapttable/react/adapter";\nexport const DesktopTable = createDesktopTable({});\n',
+      }
+    );
+    writePackage(root, "react", "react", [], {
+      "src/kit/desktopTable.tsx": `export const Header = (leaf) => <th ${bindingHeader} />;\n`,
+    });
+    return root;
+  }
+  const MISSING_PLAIN =
+    "@adapttable/plain: never passes core's header-cell props to its header element";
+
+  it("accepts a kit whose header the binding draws with the props spread whole", () => {
+    const problems = parity(drawnRoot("{...leaf.headerProps}")).problems;
+    assert.ok(!problems.includes(MISSING_PLAIN));
+  });
+
+  it("rejects a kit whose binding header copies named fields", () => {
+    const problems = parity(
+      drawnRoot('role={leaf.headerProps["role"]}')
+    ).problems;
+    assert.ok(problems.includes(MISSING_PLAIN));
+  });
+});

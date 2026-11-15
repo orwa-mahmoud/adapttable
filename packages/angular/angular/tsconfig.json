@@ -10,7 +10,9 @@
       "@adapttable/angular": ["./src/index.ts"],
       "@adapttable/angular/*": ["./*/index.ts"],
       "@adapttable/angular/features": ["./src/features.ts"],
-      "@adapttable/angular/adapter": ["./src/adapter.ts"]
+      "@adapttable/angular/adapter": ["./src/adapter.ts"],
+      "@adapttable/angular/pdf": ["./src/pdf.ts"],
+      "@adapttable/angular/xlsx": ["./src/xlsx.ts"]
     }
   },
   "angularCompilerOptions": {

@@ -332,7 +332,10 @@
     "RowReorderImplementation",
     "TreeImplementation",
     "EDIT_HISTORY_IMPLEMENTATION",
-    "FIND_IN_TABLE_IMPLEMENTATION"
+    "FIND_IN_TABLE_IMPLEMENTATION",
+    "applyRowPatches",
+    "createMemoryAdapter",
+    "updateRow"
   ],
   "features": [
     "CellNavigationOptions",
@@ -360,8 +363,6 @@
     "dirtyIndicators",
     "editHistory",
     "editing",
-    "exportPdf",
-    "exportXlsx",
     "extraRows",
     "feature",
     "filterTypes",
@@ -865,6 +866,11 @@
     "scrollBoxStyle",
     "TableSurfaceView",
     "injectTableSurfaceHost",
-    "TableSurfaceHostOptions"
+    "TableSurfaceHostOptions",
+    "ExportProgressState",
+    "ExportRequest",
+    "ExportTable",
+    "resolveLabels",
+    "defaultLabels"
   ]
 }

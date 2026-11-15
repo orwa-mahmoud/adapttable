@@ -24,7 +24,7 @@ const EVIDENCE = [
   ["docs/ssr-rsc.md", "forceMobile"],
   ["docs/getting-started.md", "22.12.0"],
   ["docs/accessibility.md", "forced-colors"],
-  [`${packageRel("ai")}/src/session.ts`, "readMaxOf"],
+  [`${packageRel("ai")}/src/commands/rowAddress.ts`, "readMaxOf"],
   [`${packageRel("ai")}/src/session.governed.test.ts`, "readMax"],
   [`${packageRel("core")}/src/export/tableCsv.ts`, "EXPORT_FETCH_ALL_MAX_ROWS"],
   ["scripts/consumer-fixtures.mjs", "PLAIN_ADAPTER_CEILING_KB"],
