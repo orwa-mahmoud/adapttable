@@ -7,9 +7,9 @@ for (const kit of builtAdapters("vue")) {
   test(`${kit.key}: active filters are wrapping chips with usable removal controls`, async ({
     page,
   }) => {
-    await page.goto(`/vue/${pathOf(kit)}/filtering/?locale=en&flt.f_name=Ada`);
+    await page.goto(`/vue/${pathOf(kit)}/filtering/?locale=en&flt.f_name=Sefa`);
     const chips = page.locator('.mx-demo [data-adapttable-part="chips"]');
-    await expect(chips).toContainText("Ada");
+    await expect(chips).toContainText("Sefa");
     await expect(chips).toHaveCSS("list-style-type", "none");
     await expect(chips).toHaveCSS("display", "flex");
     const remove = chips.getByRole("button", { name: /Remove filter/ }).first();
@@ -26,7 +26,7 @@ for (const kit of builtAdapters("vue")) {
     ).toBeLessThanOrEqual(1);
     await remove.click();
     await expect(chips).toHaveCount(0);
-    await expectMatchingRows(page.locator(".mx-demo"), 30);
+    await expectMatchingRows(page.locator(".mx-demo"), 16);
 
     const longValue = "customer-implementation-review-".repeat(6);
     await page.goto(

@@ -110,7 +110,28 @@ import {
   GROUPED_XLSX_EXPORT,
   PEOPLE_GROUP_BY,
 } from "../shared/groupingScenario";
-import { EDITING_DEFAULT_LAYOUT, inWideOrder } from "../shared/peopleTable";
+import {
+  LANDING_ARRANGEMENTS,
+  LANDING_URL_KEY,
+  type LandingArrangement,
+  landingArrangement,
+} from "../shared/landingScenario";
+import {
+  ACCESSIBILITY_HINTS,
+  COLUMN_GROUP_HINTS,
+  NESTED_HINTS,
+  readAnnouncements,
+  SELECTION_HINTS,
+  TRANSCRIPT_LENGTH,
+  TRANSCRIPT_TEXT,
+} from "../shared/pageHints";
+import { peopleBulkActions, peopleRowActions } from "../shared/peopleActions";
+import {
+  applyPersonRowEdit,
+  EDITING_DEFAULT_LAYOUT,
+  inWideOrder,
+  liveNameUpdate,
+} from "../shared/peopleTable";
 import {
   PIVOT_AGGREGATORS,
   PIVOT_FIELDS,
@@ -170,7 +191,6 @@ import {
   fetchPeople,
   FILTER_DEFS,
   groupedPeopleColumns,
-  PEOPLE,
   PEOPLE_GROUPING,
   peopleColumns,
   type PeoplePage,
@@ -254,7 +274,7 @@ class FilteringBody {
   readonly pageLayout = pageLayoutFor("filtering");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("filtering");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly layouts: readonly { value: FilterLayout; label: string }[] = [
@@ -320,6 +340,11 @@ class FilteringBody {
   imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
+      <div class="hint-row">
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
+      </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
           [dir]="presentation.tableDir"
@@ -341,11 +366,12 @@ class FilteringBody {
   `,
 })
 class SelectionBody {
+  readonly hints = SELECTION_HINTS;
   readonly pageDefaults = pageDefaultsFor("selection");
   readonly pageLayout = pageLayoutFor("selection");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("selection");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly log = signal("Select rows, then run a bulk action.");
@@ -539,6 +565,7 @@ class RowReorderingBody {
           [defaults]="pageDefaults"
           [features]="features()"
           [defaultColumnLayout]="defaultLayout"
+          [selectable]="true"
         />
       </div>
       <p class="hint" role="status" data-demo-log>{{ log() }}</p>
@@ -550,7 +577,7 @@ class EditingBody {
   readonly defaultLayout = EDITING_DEFAULT_LAYOUT;
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = signal<readonly Person[]>(peopleRows());
+  readonly rows = signal<readonly Person[]>(seedRoster("editing", false));
   readonly columns = peopleColumns({ editable: true });
   readonly rowKey = rowKey;
   readonly log = signal("Every change goes through the host.");
@@ -561,10 +588,9 @@ class EditingBody {
   receiveLiveUpdate(): void {
     const row = this.rows()[0];
     if (!row) return;
-    this.rows.update((rows) =>
-      applyPersonEdit(rows, row, "person", "Ada Live")
-    );
-    this.log.set("Received live name update: Ada Live");
+    const name = liveNameUpdate(row);
+    this.rows.update((rows) => applyPersonEdit(rows, row, "person", name));
+    this.log.set(`Received live name update: ${name}`);
   }
 
   private readonly editingFeature = this.kit.editing<Person>(
@@ -677,7 +703,7 @@ class GroupingBody {
   readonly pageLayout = pageLayoutFor("grouping");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("grouping");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   // The toggle forces the phone's selects on a desktop; off, it leaves the
@@ -743,7 +769,7 @@ class ExportBody implements OnInit {
   readonly pageLayout = pageLayoutFor("export");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("export");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly modes = EXPORT_MODES;
@@ -1126,7 +1152,7 @@ class MobileCardsBody {
   readonly log = signal("Activate a person to see the host callback.");
   readonly activateRow = (row: Person): void =>
     this.log.set(`Activated ${row.name}`);
-  readonly rows = signal<readonly Person[]>(peopleRows());
+  readonly rows = signal<readonly Person[]>(seedRoster("mobile", false));
   readonly customCard = signal(false);
   readonly bounded = signal(false);
   readonly paged = signal(true);
@@ -1258,20 +1284,35 @@ class SavedViewsBody {
   imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo mx-demo--overview">
+      <div class="hint-row">
+        <div class="seg" role="group" aria-label="Row arrangement">
+          @for (option of arrangements; track option.value) {
+            <button
+              type="button"
+              class="seg__btn"
+              [class.is-on]="arrangement() === option.value"
+              [attr.aria-pressed]="arrangement() === option.value"
+              (click)="arrangement.set(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+      </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
           [dir]="presentation.tableDir"
           [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
-          urlKey="overview"
+          [urlKey]="urlKey"
           [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
           [selectable]="true"
           [defaults]="pageDefaults"
           [summaryRow]="summary"
-          [features]="features"
+          [features]="features()"
         />
       </div>
     </div>
@@ -1281,7 +1322,7 @@ export class AdaptShowcaseLandingTable {
   readonly pageDefaults = pageDefaultsFor("landing");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = signal<readonly Person[]>(peopleRows());
+  readonly rows = signal<readonly Person[]>(seedRoster("landing", false));
   readonly columns = peopleColumns({ editable: true });
   readonly rowKey = rowKey;
   readonly summary = aggregate<Person>(
@@ -1292,32 +1333,53 @@ export class AdaptShowcaseLandingTable {
         typeof value === "number" ? formatMoney(value) : value,
     }
   );
-  readonly features: readonly AdaptTableFeature[] = [
+  readonly urlKey = LANDING_URL_KEY;
+  readonly arrangements = LANDING_ARRANGEMENTS;
+  readonly arrangement = signal<LandingArrangement>(landingArrangement());
+  private readonly chrome = pageChromeFeatures(this.kit, {
+    editing: true,
+    statusBar: true,
+    urlKey: LANDING_URL_KEY,
+  });
+  private readonly grouping = this.kit.groupingPanel<Person>(
+    [...PEOPLE_GROUP_BY],
+    PEOPLE_GROUPING
+  );
+  readonly features = computed((): readonly AdaptTableFeature[] => [
+    ...this.baseFeatures,
+    ...(this.arrangement() === "grouped" ? [this.grouping] : []),
+    ...this.chrome,
+  ]);
+  private readonly baseFeatures: readonly AdaptTableFeature[] = [
     this.kit.filters(FILTER_DEFS),
     this.kit.columnMenu(),
-    this.kit.resizableColumns(),
     this.kit.savedViews({
-      storageKey: `adapttable-angular-${this.kit.key}-overview-views`,
-      urlKey: "overview",
-    }),
-    this.kit.groupingPanel<Person>([], {
-      groupAggregates: aggregate<Person>(
-        { budget: "sum" },
-        { columns: this.columns }
-      ),
-      groupFooters: true,
+      storageKey: `adapttable-angular-${this.kit.key}-${LANDING_URL_KEY}-views`,
+      urlKey: LANDING_URL_KEY,
     }),
     this.kit.editing<Person>((row, key, value) => {
       this.rows.update((rows) => applyPersonEdit(rows, row, key, value));
     }),
+    // The row actions' pencil opens the row's own form beside cell editing.
+    this.kit.rowEditing<Person>((row, patch) => {
+      this.rows.update((rows) =>
+        applyPersonRowEdit(rows, row, patch, currentDataLocale())
+      );
+    }),
     this.kit.editHistory(),
     this.kit.undoRedoButtons(),
     this.kit.cellNavigation(),
-    this.kit.bulkActions([]),
+    this.kit.bulkActions(peopleBulkActions(currentDataLocale())),
+    this.kit.rowActions<Person>(
+      peopleRowActions(currentDataLocale(), {
+        onDelete: (row) => {
+          this.rows.update((rows) => withoutPerson(rows, row));
+        },
+      })
+    ),
     this.kit.exportCsv<Person>({ filename: "people-workspace.csv" }),
     this.kit.densityChooser(),
     this.kit.fullscreen(),
-    this.kit.statusBar(),
   ];
 }
 
@@ -1421,8 +1483,9 @@ class OrdersTable {
   template: `
     <div class="mx-demo">
       <div class="hint-row">
-        <span class="hint">Open a row to see that person's orders</span>
-        <span class="hint">The orders have their own columns and row keys</span>
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
@@ -1443,17 +1506,18 @@ class OrdersTable {
   `,
 })
 class NestedTablesBody {
+  readonly hints = NESTED_HINTS;
   readonly pageDefaults = pageDefaultsFor("nested-tables");
   readonly pageLayout = pageLayoutFor("nested-tables");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("nested-tables");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   private readonly pageFeatures: readonly AdaptTableFeature[] = [
     this.kit.nestedTable<Person>(
       (row) => ({ label: `Orders for ${row.name}`, table: OrdersTable }),
-      [PEOPLE[0]!.id]
+      [this.rows[0]!.id]
     ),
   ];
   readonly features: readonly AdaptTableFeature[] = [
@@ -1497,7 +1561,7 @@ class RowsBody {
   readonly pageLayout = pageLayoutFor("rows");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = signal(orderPeopleByTeam(PEOPLE));
+  readonly rows = signal(orderPeopleByTeam(seedRoster("rows", false)));
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   private readonly pageFeatures: readonly AdaptTableFeature[] = [
@@ -1529,8 +1593,9 @@ class RowsBody {
   template: `
     <div class="mx-demo">
       <div class="hint-row">
-        <span class="hint">Each group header has its own ▼</span>
-        <span class="hint">Collapse one to see how it folds</span>
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
@@ -1539,9 +1604,10 @@ class RowsBody {
           [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
-          [data]="rows"
+          [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
+          [defaultColumnLayout]="pageLayout"
           [defaults]="pageDefaults"
           [features]="features"
         />
@@ -1550,14 +1616,23 @@ class RowsBody {
   `,
 })
 class ColumnGroupsBody {
+  readonly hints = COLUMN_GROUP_HINTS;
   readonly pageDefaults = pageDefaultsFor("column-groups");
+  readonly pageLayout = pageLayoutFor("column-groups");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = signal<readonly Person[]>(rosterFor("column-groups"));
   readonly columns = groupedPeopleColumns();
   readonly rowKey = rowKey;
   private readonly pageFeatures: readonly AdaptTableFeature[] = [
     this.kit.collapsibleColumnGroups(),
+    this.kit.rowActions<Person>(
+      peopleRowActions(currentDataLocale(), {
+        onDelete: (row) => {
+          this.rows.update((rows) => withoutPerson(rows, row));
+        },
+      })
+    ),
   ];
   readonly features: readonly AdaptTableFeature[] = [
     ...this.pageFeatures,
@@ -1598,7 +1673,7 @@ class ColumnsBody {
   readonly pageDefaults = pageDefaultsFor("columns");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("columns");
   readonly rowKey = rowKey;
   // This deliberately wide demo needs width floors: automatic table layout
   // may shrink preferred widths until there is no overflow to demonstrate.
@@ -1617,7 +1692,6 @@ class ColumnsBody {
   });
   private readonly pageFeatures: readonly AdaptTableFeature[] = [
     this.kit.columnMenu(),
-    this.kit.resizableColumns(),
     this.kit.densityChooser(),
     this.kit.cellNavigation(),
     this.kit.exportCsv({
@@ -1987,11 +2061,13 @@ class RealtimeBody {
   templateUrl: "./accessibilityBody.html",
 })
 class AccessibilityBody {
+  readonly hints = ACCESSIBILITY_HINTS;
+  readonly transcript = TRANSCRIPT_TEXT;
   readonly pageDefaults = pageDefaultsFor("accessibility");
   readonly pageLayout = pageLayoutFor("accessibility");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("accessibility");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   private readonly pageFeatures: readonly AdaptTableFeature[] = [
@@ -2010,17 +2086,14 @@ class AccessibilityBody {
     afterNextRender(() => {
       const root = this.tableRoot()?.nativeElement;
       if (!root) return;
-      const previous = new WeakMap<Element, string>();
+      let last = "";
       const read = (): void => {
-        for (const region of root.querySelectorAll(
-          '[aria-live], [role="status"], [role="alert"]'
-        )) {
-          const text = region.textContent?.trim() ?? "";
-          if (text === previous.get(region)) continue;
-          previous.set(region, text);
-          if (text)
-            this.announcements.update((lines) => [text, ...lines].slice(0, 6));
-        }
+        const next = readAnnouncements(root, last);
+        last = next.last;
+        if (next.lines.length === 0) return;
+        this.announcements.update((lines) =>
+          [...next.lines, ...lines].slice(0, TRANSCRIPT_LENGTH)
+        );
       };
       observer = new MutationObserver(read);
       observer.observe(root, {

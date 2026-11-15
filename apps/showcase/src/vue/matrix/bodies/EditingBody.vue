@@ -2,12 +2,14 @@
 /** Editing: kit-native editors in the cell; the host writes every change. */
 import { computed, shallowRef } from "vue";
 
-import { pageDefaultsFor } from "../../../casts";
-import { EDITING_DEFAULT_LAYOUT } from "../../../shared/peopleTable";
+import { pageDefaultsFor, seedRoster } from "../../../casts";
+import {
+  EDITING_DEFAULT_LAYOUT,
+  liveNameUpdate,
+} from "../../../shared/peopleTable";
 import {
   applyPersonEdit,
   peopleColumns,
-  peopleRows,
   type Person,
   personDisplayName,
   rowKey,
@@ -19,7 +21,7 @@ import { useShowcaseKit } from "../showcaseKit";
 const kit = useShowcaseKit();
 const PAGE_DEFAULTS = pageDefaultsFor("editing");
 const columns = peopleColumns({ editable: true, status: kit.status });
-const rows = shallowRef<readonly Person[]>(peopleRows());
+const rows = shallowRef<readonly Person[]>(seedRoster("editing", false));
 const log = shallowRef("Every change goes through the host.");
 const rejectNext = shallowRef(false);
 const editingEnabled = shallowRef(true);
@@ -28,8 +30,9 @@ const editingEnabled = shallowRef(true);
 function receiveLiveUpdate(): void {
   const row = rows.value[0];
   if (!row) return;
-  rows.value = applyPersonEdit(rows.value, row, "person", "Ada Live");
-  log.value = "Received live name update: Ada Live";
+  const name = liveNameUpdate(row);
+  rows.value = applyPersonEdit(rows.value, row, "person", name);
+  log.value = `Received live name update: ${name}`;
 }
 
 const editingFeature = kit.editing<Person>(
@@ -103,6 +106,7 @@ const features = computed(() => [...pageFeatures.value, ...chrome]);
     <div class="mx-demo__body">
       <component
         :is="kit.DataTable"
+        selectable
         v-bind="TABLE_PRESENTATION"
         table-label="People"
         :url-sync="false"

@@ -3,11 +3,11 @@
 import type { ColumnDef } from "@adapttable/vue";
 import { h } from "vue";
 
-import { pageDefaultsFor, pageLayoutFor } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor, rosterFor } from "../../../casts";
+import { NESTED_HINTS } from "../../../shared/pageHints";
 import {
   type DemoOrder,
   demoOrders,
-  PEOPLE,
   peopleColumns,
   type Person,
   rowKey,
@@ -30,10 +30,11 @@ const ORDER_COLUMNS: ColumnDef<DemoOrder>[] = [
 const orderKey = (order: DemoOrder) => order.id;
 
 const kit = useShowcaseKit();
+const ROWS = rosterFor("nested-tables");
 const PAGE_DEFAULTS = pageDefaultsFor("nested-tables");
 const PAGE_LAYOUT = pageLayoutFor("nested-tables");
 const columns = peopleColumns({ status: kit.status });
-const firstId = PEOPLE[0]?.id;
+const firstId = ROWS[0]?.id;
 const pageFeatures = [
   kit.nestedTable<Person>(
     (row) => ({
@@ -58,8 +59,9 @@ const features = [...pageFeatures, ...chrome];
 <template>
   <div class="mx-demo">
     <div class="hint-row">
-      <span class="hint">Open a row to see that person's orders</span>
-      <span class="hint">The orders have their own columns and row keys</span>
+      <span v-for="hint in NESTED_HINTS" :key="hint" class="hint">{{
+        hint
+      }}</span>
     </div>
     <div class="mx-demo__body">
       <component
@@ -67,7 +69,7 @@ const features = [...pageFeatures, ...chrome];
         v-bind="TABLE_PRESENTATION"
         table-label="People"
         :url-sync="false"
-        :data="PEOPLE"
+        :data="ROWS"
         :columns="columns"
         :row-key="rowKey"
         :default-column-layout="PAGE_LAYOUT"

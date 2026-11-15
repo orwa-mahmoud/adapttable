@@ -19,7 +19,7 @@ for (const kit of ANGULAR_KITS) {
     }) => {
       await page.goto(`${PAGE}?scope=page`);
       await part(page, "search").fill("Data");
-      await expect(part(page, "row")).toHaveCount(6);
+      await expect(part(page, "row")).toHaveCount(5);
       const [download] = await Promise.all([
         page.waitForEvent("download"),
         part(page, "export-csv-button").click(),
@@ -33,8 +33,8 @@ for (const kit of ANGULAR_KITS) {
         .trim()
         .split(/\r?\n/);
       expect(lines[0]).toBe("Person,Status,Timeline,Budget");
-      expect(lines).toHaveLength(7);
-      expect(lines[1]).toBe("Grace Hopper,Archived,2026-07-22,39900");
+      expect(lines).toHaveLength(6);
+      expect(lines[1]).toBe("Sefa Demir,Active,2026-01-01,110600");
     });
 
     test("a selected export contains no unchecked rows", async ({ page }) => {
@@ -55,7 +55,7 @@ for (const kit of ANGULAR_KITS) {
         .trim()
         .split(/\r?\n/);
       expect(lines).toHaveLength(2);
-      expect(lines[1]?.split(",")[0]).toBe("Ada Lovelace");
+      expect(lines[1]?.split(",")[0]).toBe("Priya Nair");
     });
 
     test("a range export writes only the selected cells", async ({ page }) => {
@@ -75,7 +75,7 @@ for (const kit of ANGULAR_KITS) {
       for await (const chunk of stream) chunks.push(chunk as Buffer);
       expect(
         Buffer.concat(chunks).toString("utf8").trim().split(/\r?\n/)
-      ).toEqual(["Person", "Ada Lovelace", "Alan Turing"]);
+      ).toEqual(["Person", "Priya Nair", "Jonah Okonkwo"]);
     });
   });
 }

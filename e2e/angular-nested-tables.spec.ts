@@ -24,7 +24,7 @@ for (const kit of ANGULAR_KITS) {
         "aria-label",
         "Expand row"
       );
-      const toggle = angularPart(kit, page, "expand-button", row(page, "1"));
+      const toggle = angularPart(kit, page, "expand-button", row(page, "101"));
       await expect(toggle).toHaveAttribute("aria-expanded", "true");
 
       const region = part(page, "nested-table");
@@ -38,7 +38,7 @@ for (const kit of ANGULAR_KITS) {
       ).toHaveText([/Item/, /Qty/, /Amount/]);
       await expect(
         inner.locator('[data-adapttable-part="row"]').first()
-      ).toHaveAttribute("data-row-id", "1-1");
+      ).toHaveAttribute("data-row-id", "101-1");
       // The nested table has no search box of its own.
       await expect(
         region.locator('[data-adapttable-part="search"]')
@@ -50,8 +50,8 @@ for (const kit of ANGULAR_KITS) {
     }) => {
       await page.goto(PAGE);
       const url = page.url();
-      const first = angularPart(kit, page, "expand-button", row(page, "1"));
-      const second = angularPart(kit, page, "expand-button", row(page, "2"));
+      const first = angularPart(kit, page, "expand-button", row(page, "101"));
+      const second = angularPart(kit, page, "expand-button", row(page, "102"));
       await second.click();
       await expect(part(page, "nested-table")).toHaveCount(2);
       await first.click();
@@ -67,7 +67,7 @@ for (const kit of ANGULAR_KITS) {
       test("opens a card's orders inside the card", async ({ page }) => {
         await page.goto(PAGE);
         const card = demo(page)
-          .locator('[data-adapttable-part="card"][data-row-id="2"]')
+          .locator('[data-adapttable-part="card"][data-row-id="102"]')
           .first();
         await angularPart(kit, page, "expand-button", card).first().click();
         await expect(

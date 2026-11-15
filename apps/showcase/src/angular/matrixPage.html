@@ -233,6 +233,10 @@
   </div>
 </main>
 
+@if (notice(); as current) {
+  <div role="status" [style]="noticeStyle(current)">{{ current.message }}</div>
+}
+
 <footer class="foot">
   <div class="foot__inner shell">
     <div class="foot__lead">

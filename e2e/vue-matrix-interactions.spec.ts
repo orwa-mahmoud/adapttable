@@ -84,16 +84,16 @@ for (const kit of builtAdapters("vue")) {
           .toBe(true);
         await surface
           .getByRole("textbox", { name: "Person", exact: true })
-          .fill("Ada Lovelace");
+          .fill("Sefa Demir");
         const rows = part(page, width === 390 ? "card" : "row");
         await expect(rows).toHaveCount(1);
-        await expect(rows).toContainText("Ada Lovelace");
+        await expect(rows).toContainText("Sefa Demir");
         await surface.locator('[data-adapttable-part="filters-done"]').click();
         await expect(surface).toBeHidden();
         await expect(trigger).toBeFocused();
         await expect
           .poll(() => new URL(page.url()).searchParams.get("flt.f_name"))
-          .toBe("Ada Lovelace");
+          .toBe("Sefa Demir");
         await page.reload();
         await expect(rows).toHaveCount(1);
         await page.evaluate(() => document.fonts.ready.then(() => undefined));
@@ -106,7 +106,7 @@ for (const kit of builtAdapters("vue")) {
         await trigger.click();
         await expect(
           surface.getByRole("textbox", { name: "Person", exact: true })
-        ).toHaveValue("Ada Lovelace");
+        ).toHaveValue("Sefa Demir");
         const screenshot = info.outputPath(
           `${kit.key}-filtering-${width}-${layout}.png`
         );
@@ -118,7 +118,7 @@ for (const kit of builtAdapters("vue")) {
         await surface
           .getByRole("button", { name: "Clear all", exact: true })
           .click();
-        await expectMatchingRows(page.locator(".mx-demo"), 30);
+        await expectMatchingRows(page.locator(".mx-demo"), 16);
         await page.keyboard.press("Escape");
         await expect(surface).toBeHidden();
         await expect(trigger).toBeFocused();
@@ -223,12 +223,12 @@ for (const kit of builtAdapters("vue")) {
       await toggleCheckbox(first);
       await expect(first).toBeChecked();
       await page.getByRole("button", { name: "Export", exact: true }).click();
-      await expect(page.locator("[data-demo-log]")).toHaveText("Export: 1");
+      await expect(page.locator("[data-demo-log]")).toHaveText("Export: 501");
       await expect(first).not.toBeChecked();
       await toggleCheckbox(first);
       await expect(first).toBeChecked();
       await page.getByRole("button", { name: "Archive", exact: true }).click();
-      await expect(page.locator("[data-demo-log]")).toHaveText("Archive: 1");
+      await expect(page.locator("[data-demo-log]")).toHaveText("Archive: 501");
       await expect(first).not.toBeChecked();
       await expect(
         page.getByRole("button", { name: "Archive", exact: true })

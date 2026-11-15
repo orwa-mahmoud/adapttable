@@ -4,10 +4,9 @@ import { type ColumnDef, useColumnLayoutUrlState } from "@adapttable/vue";
 import { xlsxWriter } from "@adapttable/vue/xlsx";
 import { shallowRef } from "vue";
 
-import { pageDefaultsFor } from "../../../casts";
+import { pageDefaultsFor, rosterFor } from "../../../casts";
 import { inWideOrder } from "../../../shared/peopleTable";
 import {
-  PEOPLE,
   peopleColumns,
   type Person,
   rowKey,
@@ -17,6 +16,7 @@ import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const ROWS = rosterFor("columns");
 const PAGE_DEFAULTS = pageDefaultsFor("columns");
 // This deliberately wide demo needs width floors: automatic table layout
 // may shrink preferred widths until there is no overflow to demonstrate.
@@ -41,7 +41,6 @@ const { layout, onLayoutChange } = useColumnLayoutUrlState({
 });
 const pageFeatures = [
   kit.columnMenu(),
-  kit.resizableColumns(),
   kit.densityChooser(),
   kit.cellNavigation(),
   kit.exportCsv({
@@ -68,7 +67,7 @@ const features = [...pageFeatures, ...chrome];
         :on-column-rename="renameColumn"
         table-label="People"
         url-key="cols"
-        :data="PEOPLE"
+        :data="ROWS"
         :columns="columns"
         :row-key="rowKey"
         :defaults="PAGE_DEFAULTS"

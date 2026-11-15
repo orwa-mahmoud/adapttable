@@ -83,20 +83,20 @@ for (const kit of ANGULAR_KITS) {
       page,
     }) => {
       await page.goto(PAGE);
-      await choose(page, "5", "Pin to top");
-      const pinned = row(page, "5");
+      await choose(page, "313", "Pin to top");
+      const pinned = row(page, "313");
       await expect(pinned).toHaveAttribute(
         "data-adapttable-part",
         "pinned-top"
       );
       await expect(demo(page).locator("tbody tr").first()).toHaveAttribute(
         "data-row-id",
-        "5"
+        "313"
       );
       await expect(page).toHaveURL(/rowPin/);
 
       await page.reload();
-      await expect(row(page, "5")).toHaveAttribute(
+      await expect(row(page, "313")).toHaveAttribute(
         "data-adapttable-part",
         "pinned-top"
       );
@@ -104,8 +104,8 @@ for (const kit of ANGULAR_KITS) {
 
     test("keeps a top pin in view while the rest scroll", async ({ page }) => {
       await page.goto(PAGE);
-      await choose(page, "5", "Pin to top");
-      await expect(row(page, "5")).toHaveAttribute(
+      await choose(page, "313", "Pin to top");
+      await expect(row(page, "313")).toHaveAttribute(
         "data-adapttable-part",
         "pinned-top"
       );
@@ -121,7 +121,7 @@ for (const kit of ANGULAR_KITS) {
         (element) => element.getBoundingClientRect().top + element.clientTop
       );
       await expect
-        .poll(async () => Math.round((await row(page, "5").boundingBox())!.y))
+        .poll(async () => Math.round((await row(page, "313").boundingBox())!.y))
         .toBe(Math.round(boxTop));
     });
 
@@ -139,17 +139,17 @@ for (const kit of ANGULAR_KITS) {
 
     test("pins to the bottom, and unpins", async ({ page }) => {
       await page.goto(PAGE);
-      await choose(page, "2", "Pin to bottom");
-      await expect(row(page, "2")).toHaveAttribute(
+      await choose(page, "310", "Pin to bottom");
+      await expect(row(page, "310")).toHaveAttribute(
         "data-adapttable-part",
         "pinned-bottom"
       );
       await expect(demo(page).locator("tbody tr").last()).toHaveAttribute(
         "data-row-id",
-        "2"
+        "310"
       );
-      await choose(page, "2", "Unpin row");
-      await expect(row(page, "2")).toHaveAttribute(
+      await choose(page, "310", "Unpin row");
+      await expect(row(page, "310")).toHaveAttribute(
         "data-adapttable-part",
         "row"
       );
@@ -160,16 +160,16 @@ for (const kit of ANGULAR_KITS) {
     }) => {
       await page.goto(PAGE);
       await demo(page).locator('[data-adapttable-part="add-row"]').click();
-      await expect(row(page, "31")).toContainText("New person");
-      await choose(page, "31", "Duplicate row");
-      await expect(row(page, "32")).toContainText("New person");
+      await expect(row(page, "325")).toContainText("New person");
+      await choose(page, "325", "Duplicate row");
+      await expect(row(page, "326")).toContainText("New person");
       page.once("dialog", (dialog) => dialog.dismiss());
-      await choose(page, "31", "Delete row");
-      await expect(row(page, "31")).toContainText("New person");
+      await choose(page, "325", "Delete row");
+      await expect(row(page, "325")).toContainText("New person");
       page.once("dialog", (dialog) => dialog.accept());
-      await choose(page, "31", "Delete row");
-      await expect(row(page, "31")).toHaveCount(0);
-      await expect(row(page, "32")).toContainText("New person");
+      await choose(page, "325", "Delete row");
+      await expect(row(page, "325")).toHaveCount(0);
+      await expect(row(page, "326")).toContainText("New person");
     });
   });
 }

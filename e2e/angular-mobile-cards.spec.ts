@@ -24,15 +24,15 @@ for (const kit of ANGULAR_KITS) {
     }) => {
       await page.goto(PAGE);
       await expect(part(page, "table")).toHaveCount(0);
-      await expect(part(page, "card")).toHaveCount(8);
+      await expect(part(page, "card")).toHaveCount(5);
       const rows = part(page, "card")
         .first()
         .locator('[data-adapttable-part="card-row"]');
-      await expect(rows.first().locator("strong")).toHaveText("Ada Lovelace");
+      await expect(rows.first().locator("strong")).toHaveText("Priya Nair");
       await expect(
         rows.first().locator('[data-adapttable-part="card-label"]')
       ).toHaveCount(0);
-      await expect(rows.nth(1)).toHaveText(/Team\s*Core/);
+      await expect(rows.nth(1)).toHaveText(/Team\s*Platform/);
       await expect(
         page.getByRole("list", { name: "People", exact: true })
       ).toHaveAttribute("data-adapttable-part", "cards");
@@ -55,14 +55,14 @@ for (const kit of ANGULAR_KITS) {
       );
       await cards.first().focus();
       await page.keyboard.press("Enter");
-      await expect(log).toHaveText("Activated Ada Lovelace");
+      await expect(log).toHaveText("Activated Priya Nair");
       await page.keyboard.press("ArrowDown");
       await expect(cards.nth(1)).toBeFocused();
       await expect(cards.first()).toHaveAttribute("tabindex", "-1");
       await expect(cards.nth(1)).toHaveAttribute("tabindex", "0");
-      await expect(cards.nth(1)).toContainText("Alan Turing");
+      await expect(cards.nth(1)).toContainText("Jonah Okonkwo");
       await page.keyboard.press("Space");
-      await expect(log).toHaveText("Activated Alan Turing");
+      await expect(log).toHaveText("Activated Jonah Okonkwo");
       await page.keyboard.press("ArrowUp");
       await expect(cards.first()).toBeFocused();
     });
@@ -74,7 +74,7 @@ for (const kit of ANGULAR_KITS) {
       const list = page.getByRole("list", { name: "People", exact: true });
       await expect(list).toHaveAttribute("dir", "rtl");
       await expect(list).not.toHaveAttribute("role", "table");
-      await expect(part(page, "card").first()).toContainText("آدا لوفليس");
+      await expect(part(page, "card").first()).toContainText("بريا نير");
       const checkbox = part(page, "card").first().getByRole("checkbox");
       await expect(checkbox).toHaveAccessibleName(/.+/);
       await expect(checkbox).not.toHaveAccessibleName("Select row");
@@ -97,7 +97,7 @@ for (const kit of ANGULAR_KITS) {
       });
       await expect(part(page, "card").first()).toHaveAttribute(
         "data-row-id",
-        "5"
+        "805"
       );
     });
 
@@ -107,10 +107,10 @@ for (const kit of ANGULAR_KITS) {
       await page.goto(PAGE);
       await page.getByRole("button", { name: "Paged", exact: true }).click();
       await expect(part(page, "pager")).toHaveCount(0);
-      await expect(part(page, "card")).toHaveCount(8);
+      await expect(part(page, "card")).toHaveCount(5);
       await part(page, "card").last().scrollIntoViewIfNeeded();
       await page.mouse.wheel(0, 2000);
-      await expect.poll(() => part(page, "card").count()).toBeGreaterThan(8);
+      await expect.poll(() => part(page, "card").count()).toBeGreaterThan(5);
     });
   });
 }

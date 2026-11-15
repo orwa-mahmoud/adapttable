@@ -6,13 +6,12 @@
  */
 import { shallowRef } from "vue";
 
-import { pageDefaultsFor, pageLayoutFor } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor, rosterFor } from "../../../casts";
 import {
   GROUPED_XLSX_EXPORT,
   PEOPLE_GROUP_BY,
 } from "../../../shared/groupingScenario";
 import {
-  PEOPLE,
   PEOPLE_GROUPING,
   peopleColumns,
   rowKey,
@@ -22,6 +21,7 @@ import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const ROWS = rosterFor("grouping");
 const PAGE_DEFAULTS = pageDefaultsFor("grouping");
 const PAGE_LAYOUT = pageLayoutFor("grouping");
 const columns = peopleColumns({ status: kit.status });
@@ -70,7 +70,7 @@ const features = [...pageFeatures, ...chrome];
           v-bind="TABLE_PRESENTATION"
           table-label="People"
           url-key="grp"
-          :data="PEOPLE"
+          :data="ROWS"
           :columns="columns"
           :row-key="rowKey"
           :defaults="PAGE_DEFAULTS"

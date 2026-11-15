@@ -1,9 +1,9 @@
 /**
  * The chrome every showcase page carries, decided once for React, Vue and
- * Angular: the two menus a keystroke opens are always there, selection
- * statistics and find join an editing page, and find is on wherever its
- * state is worth sharing in the address bar. A framework maps each switch
- * to its kit's factory.
+ * Angular: column resizing and the two menus a keystroke opens are always
+ * there, selection statistics and find join an editing page, and find is on
+ * wherever its state is worth sharing in the address bar. A framework maps
+ * each switch to its kit's factory.
  */
 
 /**
@@ -25,6 +25,8 @@ export interface PageChromeFlags<TPalette = never, TMenu = never> {
 
 /** Which chrome a page composes, and the options a menu carries. */
 export interface PageChrome<TPalette = never, TMenu = never> {
+  /** Column edges drag to resize, on every page. */
+  readonly resizableColumns: true;
   readonly statusBar: boolean;
   readonly selectionStats: boolean;
   readonly findInTable: boolean;
@@ -46,6 +48,7 @@ export function pageChrome<TPalette = never, TMenu = never>(
 ): PageChrome<TPalette, TMenu> {
   const editing = flags.editing === true;
   return {
+    resizableColumns: true,
     statusBar: flags.statusBar === true,
     selectionStats: editing,
     findInTable:

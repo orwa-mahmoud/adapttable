@@ -77,9 +77,7 @@ for (const framework of ["react", "angular", "vue"] as const) {
           .getByRole("button", { name: "View profile", exact: true })
           .click();
         await expect(root).toContainText(
-          framework === "angular"
-            ? "Activated Ada Lovelace"
-            : "Opened Ada Lovelace"
+          framework === "angular" ? "Activated Priya Nair" : "Opened Priya Nair"
         );
       }
 

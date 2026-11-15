@@ -1,11 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import {
-  ANGULAR_KITS,
-  angularPart,
-  checkAngularCheckbox,
-  selectAngularOption,
-} from "./angular-kit";
+import { ANGULAR_KITS, angularPart, checkAngularCheckbox } from "./angular-kit";
 
 for (const kit of ANGULAR_KITS) {
   test(`${kit.key}: the overview edits, exports and restores real people`, async ({
@@ -20,7 +15,7 @@ for (const kit of ANGULAR_KITS) {
     const name = rows.first().locator('[data-column-key="person"]');
     // The native edit button owns activation; the cell also contains row padding.
     const activate = name.getByRole("button", {
-      name: "Ada Lovelace",
+      name: "Priya Nair",
       exact: true,
     });
     await expect(activate).toHaveAttribute(
@@ -64,9 +59,9 @@ for (const kit of ANGULAR_KITS) {
     const editor = angularPart(kit, page, "edit-cell-editor");
     await expect(editor).toBeVisible();
     await expect(editor).toBeFocused();
-    await editor.fill("Ada Workspace");
+    await editor.fill("Priya Workspace");
     await editor.press("Enter");
-    await expect(name).toContainText("Ada Workspace");
+    await expect(name).toContainText("Priya Workspace");
 
     const downloaded = page.waitForEvent("download");
     await root.getByRole("button", { name: "Export CSV", exact: true }).click();
@@ -76,24 +71,24 @@ for (const kit of ANGULAR_KITS) {
     if (!stream) throw new Error("The CSV download has no readable content");
     const chunks: Buffer[] = [];
     for await (const chunk of stream) chunks.push(Buffer.from(chunk));
-    expect(Buffer.concat(chunks).toString("utf8")).toContain("Ada Workspace");
+    expect(Buffer.concat(chunks).toString("utf8")).toContain("Priya Workspace");
 
     await root.getByRole("button", { name: "Undo", exact: true }).click();
-    await expect(name).toContainText("Ada Lovelace");
+    await expect(name).toContainText("Priya Nair");
     await root.getByRole("button", { name: "Redo", exact: true }).click();
-    await expect(name).toContainText("Ada Workspace");
+    await expect(name).toContainText("Priya Workspace");
     await checkAngularCheckbox(
       kit,
       rows.first().getByRole("checkbox", { name: "Select row", exact: true })
     );
     await expect(rows.first()).toHaveAttribute("aria-selected", "true");
     await page.getByRole("button", { name: "Next page", exact: true }).click();
-    await expect(rows.first()).not.toContainText("Ada Workspace");
+    await expect(rows.first()).not.toContainText("Priya Workspace");
     await page
       .getByRole("button", { name: "Previous page", exact: true })
       .click();
     await expect(rows.first()).toHaveAttribute("aria-selected", "true");
-    await expect(name).toContainText("Ada Workspace");
+    await expect(name).toContainText("Priya Workspace");
   });
 
   test(`${kit.key}: overview views restore search and grouping persists`, async ({
@@ -104,13 +99,13 @@ for (const kit of ANGULAR_KITS) {
       '.mx-demo--overview [data-adapttable-part="root"]'
     );
     const search = root.getByRole("searchbox", { name: "Search", exact: true });
-    await search.fill("Ada");
+    await search.fill("Sefa");
     await expect(root.locator('[data-adapttable-part="row"]')).toHaveCount(1);
     await angularPart(kit, page, "views-button", root).click();
-    await angularPart(kit, page, "views-input").fill("Ada overview");
+    await angularPart(kit, page, "views-input").fill("Sefa overview");
     await angularPart(kit, page, "views-save").click();
     await expect(
-      page.getByRole("button", { name: "Ada overview", exact: true })
+      page.getByRole("button", { name: "Sefa overview", exact: true })
     ).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(angularPart(kit, page, "views-panel")).toBeHidden();
@@ -123,19 +118,16 @@ for (const kit of ANGULAR_KITS) {
     await angularPart(kit, page, "views-button", root).click();
     await expect(angularPart(kit, page, "views-panel")).toBeVisible();
     await page
-      .getByRole("button", { name: "Ada overview", exact: true })
+      .getByRole("button", { name: "Sefa overview", exact: true })
       .click();
-    await expect(search).toHaveValue("Ada");
+    await expect(search).toHaveValue("Sefa");
     await expect(root.locator('[data-adapttable-part="row"]')).toHaveCount(1);
     await page.keyboard.press("Escape");
     await search.fill("");
     await expect(root.locator('[data-adapttable-part="row"]')).toHaveCount(5);
-    await selectAngularOption(angularPart(kit, page, "grouping-add"), {
-      value: "team",
-      label: "Team",
-    });
+    await page.getByRole("button", { name: "Grouped", exact: true }).click();
     await expect(angularPart(kit, page, "group-row", root)).not.toHaveCount(0);
-    await expect(page).toHaveURL(/overview\.groupBy=team/);
+    await expect(page).toHaveURL(/live\.groupBy=team/);
     await page.reload();
     await expect(angularPart(kit, page, "group-row", root)).not.toHaveCount(0);
   });

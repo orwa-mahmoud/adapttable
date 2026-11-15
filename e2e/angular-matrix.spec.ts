@@ -57,7 +57,7 @@ for (const kit of KITS) {
     await expect(root.locator('[data-adapttable-part="row"]')).toHaveCount(5);
     await expect(
       root.locator('[data-adapttable-part="row"]').first()
-    ).toContainText("Ada Lovelace");
+    ).toContainText("Priya Nair");
     if (kit.key === "ng-zorro") {
       await expect(
         root.locator('nz-table table[data-adapttable-part="table"]')

@@ -166,7 +166,6 @@ export function kitChromeFeatures(
     ...(flags.nested
       ? [kit.nestedTable<Person>(flags.nested, flags.nestedOpenIds)]
       : []),
-    kit.resizableColumns(),
     // Only when the page actually shows the trailing actions column: composing
     // it always would add a column, and every column index with it.
     ...(flags.rowActions ? [kit.rowActions<Person>(flags.rowActions)] : []),
@@ -191,6 +190,7 @@ function alwaysOn(
 ): readonly TableFeature<Person>[] {
   const chrome = pageChrome(flags);
   return [
+    ...(chrome.resizableColumns ? [kit.resizableColumns()] : []),
     ...(chrome.statusBar ? [kit.statusBar()] : []),
     ...(chrome.selectionStats ? [kit.selectionStats()] : []),
     ...(chrome.findInTable ? [kit.findInTable()] : []),

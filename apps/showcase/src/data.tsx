@@ -1,6 +1,4 @@
 import {
-  type BulkAction,
-  type ColumnLayoutState,
   type ConfirmHandler,
   type ConfirmRequest,
   formatMultiDraft,
@@ -43,10 +41,8 @@ import {
   startDate,
   STATUS_LABELS,
   STATUSES,
-  type Strings,
   strings,
   TEAMS,
-  timelineDays,
   utilization,
 } from "./people";
 import {
@@ -55,7 +51,12 @@ import {
   PEOPLE_TOTAL_COLUMNS,
   totalOf,
 } from "./shared/groupingScenario";
-import { peopleColumns } from "./shared/peopleTable";
+import {
+  peopleBulkActions,
+  peopleRowActions,
+  type PeopleRowHandlers,
+} from "./shared/peopleActions";
+import { groupPeopleColumns, peopleColumns } from "./shared/peopleTable";
 
 export {
   allocationCount,
@@ -96,20 +97,16 @@ export {
   timelineDays,
   utilization,
 } from "./people";
+export { notifyDemo } from "./shared/demoNotice";
 export {
   EDITING_DEFAULT_LAYOUT,
+  GROUPS_DEFAULT_LAYOUT,
   LIVE_DEFAULT_LAYOUT,
   SPAN_DEFAULT_LAYOUT,
 } from "./shared/peopleTable";
 export { consecutiveTeamSpan, orderPeopleByTeam } from "./shared/rowsScenario";
 
-export const DEMO_NOTICE_EVENT = "adapttable-demo-notice";
 export const DEMO_CONFIRM_EVENT = "adapttable-demo-confirm";
-
-export interface DemoNotice {
-  message: string;
-  tone?: "info" | "danger";
-}
 
 /**
  * Nested-tables starts with the first row on screen open. The dedicated
@@ -135,12 +132,6 @@ export const DEMO_ORDER_COLUMNS: ColumnDef<DemoOrder>[] = [
     align: "end",
   },
 ];
-
-export function notifyDemo(notice: DemoNotice): void {
-  window.dispatchEvent(
-    new CustomEvent<DemoNotice>(DEMO_NOTICE_EVENT, { detail: notice })
-  );
-}
 
 export const demoConfirm: ConfirmHandler = (request: ConfirmRequest) => {
   window.dispatchEvent(
@@ -311,110 +302,6 @@ export function statusTone(
   return "gray";
 }
 
-/**
- * Column-groups demo: Team stays visible so Assignment is Team + Status.
- * Groups start open. Actions stays pinned at the end.
- */
-export const GROUPS_DEFAULT_LAYOUT: Partial<ColumnLayoutState> = {
-  hidden: [],
-  pinned: { actions: "end" },
-};
-
-function takeColumnKeys(
-  byKey: Map<string, ColumnDef<Person>>,
-  keys: readonly string[]
-): ColumnDef<Person>[] {
-  const taken: ColumnDef<Person>[] = [];
-  for (const key of keys) {
-    const column = byKey.get(key);
-    if (!column) continue;
-    byKey.delete(key);
-    taken.push(column);
-  }
-  return taken;
-}
-
-/**
- * Compact leaves for the column-groups table: Name + Role, then the four
- * grouped children. Person, Email and Load stay off this page so the three
- * groups plus Actions fit without sideways scroll. Sparkline / editors /
- * formulas from the Feature Lab still pass through.
- */
-function columnGroupsDemoLeaves(
-  leaves: ColumnDef<Person>[],
-  locale: Locale,
-  s: Strings
-): ColumnDef<Person>[] {
-  const byKey = new Map(leaves.map((column) => [column.key, column]));
-  const name: ColumnDef<Person> = {
-    key: "name",
-    header: s.name,
-    i18n: { ar: "nameAr" },
-    sortable: true,
-    sortValue: (row) => personName(row, locale),
-    width: 140,
-    mobileLabel: s.name,
-  };
-  const role: ColumnDef<Person> = {
-    key: "role",
-    header: s.role,
-    i18n: { ar: "roleAr" },
-    width: 110,
-    mobileLabel: s.role,
-  };
-  const core = takeColumnKeys(byKey, ["team", "status", "timeline", "budget"]);
-  byKey.delete("person");
-  byKey.delete("email");
-  byKey.delete("load");
-  return [name, role, ...core, ...byKey.values()];
-}
-
-/**
- * Tree groups for the column-groups demo. Actions stays ungrouped at the
- * end (full header height). Three parents, two children each, one collapse
- * result apiece: Contact is the arrow stub, Assignment keeps Team,
- * Delivery draws a money-for-days brief.
- */
-function nestDemoColumnGroups(
-  leaves: ColumnDef<Person>[],
-  locale: Locale,
-  s: Strings
-): ColumnInput<Person>[] {
-  const byKey = new Map(leaves.map((column) => [column.key, column]));
-  const out: ColumnInput<Person>[] = [];
-  for (const leaf of leaves) {
-    if (!byKey.has(leaf.key)) continue;
-    if (leaf.key === "name" || leaf.key === "role") {
-      out.push({
-        header: s.groupContact,
-        children: takeColumnKeys(byKey, ["name", "role"]),
-      });
-      continue;
-    }
-    if (leaf.key === "team" || leaf.key === "status") {
-      out.push({
-        header: s.groupAssignment,
-        collapsedKey: "team",
-        children: takeColumnKeys(byKey, ["team", "status"]),
-      });
-      continue;
-    }
-    if (leaf.key === "timeline" || leaf.key === "budget") {
-      out.push({
-        header: s.groupDelivery,
-        align: "start",
-        collapsedRender: (row) =>
-          s.deliveryBrief(formatMoney(budget(row), locale), timelineDays(row)),
-        children: takeColumnKeys(byKey, ["timeline", "budget"]),
-      });
-      continue;
-    }
-    byKey.delete(leaf.key);
-    out.push(leaf);
-  }
-  return out;
-}
-
 export function makeColumns(
   locale: Locale,
   cells: DemoCells,
@@ -577,9 +464,7 @@ export function makeColumns(
     // rather than in the middle of the set they already know.
     ...(options?.formulas ?? []),
   ];
-  return grouped
-    ? nestDemoColumnGroups(columnGroupsDemoLeaves(leaves, locale, s), locale, s)
-    : leaves;
+  return grouped ? groupPeopleColumns(leaves, locale) : leaves;
 }
 
 /**
@@ -735,79 +620,27 @@ export function makeWideColumns(
   return leaves;
 }
 
-/**
- * What the demo's row actions actually do.
- *
- * Supplied by whoever owns the rows. Without them the actions can only say
- * they were clicked, which is what they used to do — and a Delete that
- * announces a deletion without performing one teaches the wrong thing about
- * the table.
- */
-export interface DemoRowHandlers {
-  /** Remove the row from the data. */
-  readonly onDelete: (row: Person) => void;
-}
+/** What the demo's row actions actually do: the host owns the rows. */
+export type DemoRowHandlers = PeopleRowHandlers;
+
+/** The row actions every kit draws, with this kit set's icons. */
+const ROW_ACTION_ICONS: Readonly<Record<string, ReactNode>> = {
+  edit: <EditIcon />,
+  delete: <TrashIcon />,
+};
 
 export function makeActions(
   locale: Locale,
   handlers?: DemoRowHandlers
 ): RowAction<Person>[] {
-  const s = strings(locale);
-  return [
-    {
-      key: "edit",
-      label: s.edit,
-      icon: <EditIcon />,
-      // The pencil opens the row's own fields rather than writing anything of
-      // its own, so the table's built-in "Edit row" control stands down and
-      // save and cancel come from the open row. Where a table has no row form
-      // the action does not render at all.
-      editsRow: true,
-    },
-    {
-      key: "delete",
-      label: s.remove,
-      icon: <TrashIcon />,
-      color: "red",
-      confirm: {
-        title: s.confirmTitle,
-        message: (row) => s.confirmMessage(row.name),
-        confirmLabel: s.remove,
-        danger: true,
-      },
-      onClick: (row) => {
-        if (!handlers) {
-          notifyDemo({ message: `${s.remove}: ${row.name}`, tone: "danger" });
-          return;
-        }
-        handlers.onDelete(row);
-        notifyDemo({ message: `${s.remove}: ${row.name}`, tone: "danger" });
-      },
-      ai: { approval: { policy: "required" } },
-    },
-  ];
+  return peopleRowActions(locale, handlers).map((action) => ({
+    ...action,
+    icon: ROW_ACTION_ICONS[action.key],
+  }));
 }
 
 /** Bulk actions — passing these turns on row selection + the bulk bar. */
-export function makeBulkActions(locale: Locale): BulkAction[] {
-  const t =
-    locale === "ar"
-      ? { export: "تصدير", archive: "أرشفة", done: "تم" }
-      : { export: "Export", archive: "Archive", done: "Done" };
-  return [
-    {
-      key: "export",
-      label: t.export,
-      onClick: (ids) => notifyDemo({ message: `${t.export}: ${ids.length}` }),
-    },
-    {
-      key: "archive",
-      label: t.archive,
-      onClick: (ids) =>
-        notifyDemo({ message: `${t.archive}: ${ids.length}`, tone: "danger" }),
-    },
-  ];
-}
+export const makeBulkActions = peopleBulkActions;
 
 /** The fields this dataset offers a pivot, in the order the panel lists them. */
 export { PIVOT_FIELDS } from "./shared/pivotScenario";

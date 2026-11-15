@@ -2,7 +2,7 @@
 /** Filters: popover, drawer or header funnels, chips, and URL state. */
 import { computed, shallowRef } from "vue";
 
-import { pageDefaultsFor, pageLayoutFor } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor, rosterFor } from "../../../casts";
 import {
   FILTER_FORMS,
   type FilterForm,
@@ -12,7 +12,6 @@ import {
 } from "../../../shared/filterForm";
 import {
   FILTER_DEFS,
-  PEOPLE,
   peopleColumns,
   rowKey,
   TABLE_PRESENTATION,
@@ -23,6 +22,7 @@ import { useShowcaseKit } from "../showcaseKit";
 type FilterLayout = "popover" | "drawer" | "header";
 
 const kit = useShowcaseKit();
+const ROWS = rosterFor("filtering");
 const PAGE_DEFAULTS = pageDefaultsFor("filtering");
 const PAGE_LAYOUT = pageLayoutFor("filtering");
 const columns = peopleColumns({ status: kit.status });
@@ -98,7 +98,7 @@ function changeForm(event: Event): void {
         v-bind="TABLE_PRESENTATION"
         table-label="People"
         url-key="flt"
-        :data="PEOPLE"
+        :data="ROWS"
         :columns="columns"
         :row-key="rowKey"
         :defaults="PAGE_DEFAULTS"

@@ -202,7 +202,7 @@ for (const kit of builtAdapters("vue")) {
           .poll(async () => (await header.boundingBox())?.width ?? 0)
           .toBeGreaterThan(previous + 10);
       } else {
-        await expect(part(page, "card").first()).toContainText("Ada Lovelace");
+        await expect(part(page, "card").first()).toContainText("Priya Nair");
       }
       await expect
         .poll(() => new URL(page.url()).searchParams.get("cols.colName"))
@@ -258,7 +258,7 @@ for (const kit of builtAdapters("vue")) {
       await conditions
         .first()
         .getByRole("textbox", { name: "Value", exact: true })
-        .fill("Ada Lovelace");
+        .fill("Sefa Demir");
       await expect(rows).toHaveCount(1);
       await surface
         .getByRole("button", { name: "Add condition", exact: true })
@@ -266,7 +266,7 @@ for (const kit of builtAdapters("vue")) {
       await conditions
         .last()
         .getByRole("textbox", { name: "Value", exact: true })
-        .fill("Grace Hopper");
+        .fill("Priya Nair");
       await expect(rows).toHaveCount(0);
       await choose(
         page,
@@ -297,7 +297,7 @@ for (const kit of builtAdapters("vue")) {
         surface.locator('[data-adapttable-part="filter-tree-group"]')
       ).toHaveCount(1);
       await surface.locator('[data-adapttable-part="filters-clear"]').click();
-      await expectMatchingRows(page.locator(".mx-demo"), 30);
+      await expectMatchingRows(page.locator(".mx-demo"), 16);
       await page.keyboard.press("Escape");
       await expect(trigger).toBeFocused();
       await page.getByLabel("Filter layout").selectOption("header");
@@ -314,12 +314,12 @@ for (const kit of builtAdapters("vue")) {
       await person.focus();
       await person.press("Enter");
       const input = page.getByRole("textbox", { name: "Person", exact: true });
-      await input.fill("Ada Lovelace");
+      await input.fill("Sefa Demir");
       await expect(rows).toHaveCount(1);
       await input.press("Escape");
       await expect(person).toBeFocused();
       await part(page, "chip-remove").first().click();
-      await expectMatchingRows(page.locator(".mx-demo"), 30);
+      await expectMatchingRows(page.locator(".mx-demo"), 16);
     });
 
     test(`${kit.key}/column-groups: ${width}px each collapse presentation retains its data`, async ({
@@ -328,7 +328,7 @@ for (const kit of builtAdapters("vue")) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(route("column-groups"));
       const rows = part(page, rowPart);
-      await expect(rows.first()).toContainText("Ada Lovelace");
+      await expect(rows.first()).toContainText("Priya Nair");
       const toggles = part(page, "column-group-toggle");
       if (width === 390) {
         // Card labels expose the leaves; grouped headers belong to the desktop table.
@@ -346,14 +346,15 @@ for (const kit of builtAdapters("vue")) {
         await toggle.focus();
         await toggle.press("Enter");
         await expect(toggle).toHaveAttribute("aria-expanded", "false");
-        await expect(rows.first()).toContainText("Ada Lovelace");
-        await expect(cells).toHaveCount(group < 2 ? 5 : 6);
+        await expect(cells).toHaveCount(5);
         if (group === 0)
+          await expect(rows.first()).not.toContainText("Priya Nair");
+        if (group === 1)
           await expect(
             rows.first().locator('[data-column-key="status"]')
           ).toHaveCount(0);
-        if (group === 1)
-          await expect(rows.first()).toContainText("$25,300 budget");
+        if (group === 2)
+          await expect(rows.first()).toContainText("$35,300 for 35 days");
         await toggle.press("Enter");
         await expect(toggle).toHaveAttribute("aria-expanded", "true");
         await expect(cells).toHaveCount(6);
@@ -468,7 +469,7 @@ for (const kit of builtAdapters("vue")) {
       await expect(nested).toHaveCount(1);
       await expect(nested).toHaveAttribute(
         "aria-label",
-        "Orders for Ada Lovelace"
+        "Orders for Priya Nair"
       );
       await expect(
         nested.getByText("Item", { exact: true }).first()
@@ -485,7 +486,7 @@ for (const kit of builtAdapters("vue")) {
       await first.press("Enter");
       await expect(nested).toHaveCount(1);
       const second = parent
-        .locator(`[data-adapttable-part="${rowPart}"][data-row-id="2"]`)
+        .locator(`[data-adapttable-part="${rowPart}"][data-row-id="102"]`)
         .locator('[data-adapttable-part="expand-button"]');
       await second.click();
       await expect(nested).toHaveCount(2);
@@ -493,7 +494,7 @@ for (const kit of builtAdapters("vue")) {
       await expect(nested).toHaveCount(1);
       await expect(nested).not.toHaveAttribute(
         "aria-label",
-        "Orders for Ada Lovelace"
+        "Orders for Priya Nair"
       );
     });
 
@@ -638,7 +639,7 @@ for (const kit of builtAdapters("vue")) {
       await page.goto(route("mobile-cards"));
       await page.getByRole("button", { name: "Paged", exact: true }).click();
       const cards = part(page, "card");
-      await expect(cards).toHaveCount(8);
+      await expect(cards).toHaveCount(5);
       await toggle(cards.first().getByRole("checkbox"));
       await expect(cards.first().getByRole("checkbox")).toBeChecked();
       await page.evaluate(() => document.fonts.ready.then(() => undefined));
@@ -648,15 +649,12 @@ for (const kit of builtAdapters("vue")) {
           behavior: "instant",
         })
       );
-      await expect.poll(() => cards.count()).toBeGreaterThan(8);
-      await expect(cards.first()).toContainText("Ada Lovelace");
+      await expect.poll(() => cards.count()).toBeGreaterThan(5);
+      await expect(cards.first()).toContainText("Priya Nair");
       await expect(cards.first().getByRole("checkbox")).toBeChecked();
-      await page
-        .locator(".mx-demo")
-        .getByRole("searchbox")
-        .fill("Ada Lovelace");
+      await page.locator(".mx-demo").getByRole("searchbox").fill("Priya Nair");
       await expect(cards).toHaveCount(1);
-      await expect(cards.first()).toContainText("Ada Lovelace");
+      await expect(cards.first()).toContainText("Priya Nair");
     });
 
     test(`${kit.key}/saved-views: ${width}px a named search saves, applies and deletes`, async ({
@@ -709,7 +707,7 @@ for (const kit of builtAdapters("vue")) {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(route("export", `&scope=${scope}`));
         const rows = part(page, rowPart);
-        await expect(rows.first()).toContainText("Ada Lovelace");
+        await expect(rows.first()).toContainText("Priya Nair");
         const button = part(page, "export-csv-button");
         if (scope === "selected")
           await toggle(rows.first().getByRole("checkbox"));
@@ -730,7 +728,7 @@ for (const kit of builtAdapters("vue")) {
         const path = await download.path();
         expect(path).not.toBeNull();
         const csv = await readFile(path, "utf8");
-        expect(csv).toContain("Ada Lovelace");
+        expect(csv).toContain("Priya Nair");
         const lines = csv.trim().split(/\r?\n/);
         let expectedLines = scope === "selected" ? 2 : 3;
         if (scope === "page" || (scope === "range" && width === 390))

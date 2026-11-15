@@ -5,9 +5,12 @@ import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Keyboard } from "./sectionIcons";
-
-/** How many past announcements the transcript keeps on screen. */
-const TRANSCRIPT_LENGTH = 6;
+import {
+  ACCESSIBILITY_HINTS,
+  readAnnouncements,
+  TRANSCRIPT_LENGTH,
+  TRANSCRIPT_TEXT,
+} from "./shared/pageHints";
 
 /**
  * Mirror what the table announces, as visible text.
@@ -24,15 +27,10 @@ function useAnnouncements(root: HTMLElement | null): string[] {
   useEffect(() => {
     if (!root) return undefined;
     const read = () => {
-      const regions = root.querySelectorAll<HTMLElement>(
-        '[aria-live="polite"], [aria-live="assertive"], [role="status"]:not([aria-live="off"]), [role="alert"]:not([aria-live="off"])'
-      );
-      for (const region of regions) {
-        const text = region.textContent?.trim() ?? "";
-        if (text === "" || text === last.current) continue;
-        last.current = text;
-        setLines((prev) => [text, ...prev].slice(0, TRANSCRIPT_LENGTH));
-      }
+      const next = readAnnouncements(root, last.current);
+      last.current = next.last;
+      if (next.lines.length === 0) return;
+      setLines((prev) => [...next.lines, ...prev].slice(0, TRANSCRIPT_LENGTH));
     };
     const observer = new MutationObserver(read);
     observer.observe(root, {
@@ -58,22 +56,11 @@ export function AccessibilityDemo({
   return (
     <div className="mx-demo">
       <div className="hint-row">
-        <span className="hint">
-          <Keyboard size={12} /> Tab into the grid, then arrow between cells
-        </span>
-        <span className="hint">
-          <Keyboard size={12} /> Home / End jump to the row&apos;s edges
-        </span>
-        <span className="hint">
-          <Check size={12} /> every announcement appears in the transcript
-        </span>
-        <span className="hint">
-          <Check size={12} /> hover a header to select its whole column
-        </span>
-        <span className="hint">
-          <Check size={12} /> focus, selection and disabled stay visible in
-          forced-colors — nothing is color-only
-        </span>
+        {ACCESSIBILITY_HINTS.map((hint, index) => (
+          <span className="hint" key={hint}>
+            {index < 2 ? <Keyboard size={12} /> : <Check size={12} />} {hint}
+          </span>
+        ))}
       </div>
       <div className="mx-demo__body">
         <div key={adapter} data-adapter={adapter} ref={setRoot}>
@@ -93,12 +80,9 @@ export function AccessibilityDemo({
         </div>
       </div>
       <div className="mx-demo__body" data-testid="announcements">
-        <strong>Announced to a screen reader</strong>
+        <strong>{TRANSCRIPT_TEXT.title}</strong>
         {announcements.length === 0 ? (
-          <p>
-            Nothing yet — move through the grid and each announcement appears
-            here as it is made.
-          </p>
+          <p>{TRANSCRIPT_TEXT.empty}</p>
         ) : (
           <ol>
             {announcements.map((line, index) => (

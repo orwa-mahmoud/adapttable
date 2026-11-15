@@ -2,15 +2,13 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
 import { builtAdapters, pathOf } from "../apps/showcase/matrix.mjs";
-import people from "../apps/showcase/src/people.json" with { type: "json" };
 import { getLabels } from "../packages/shared/i18n/src/index";
 
 const part = (page: Page, name: string) =>
   page.locator(`[data-adapttable-part="${name}"]`);
 const copy = { person: "الشخص", team: "الفريق" };
-const ada = people[0];
-if (!ada) throw new Error("Missing Ada fixture");
-const arabicName = ada.nameAr;
+/** The filtering page's first consultant, in Arabic. */
+const arabicName = "بريا نير";
 async function open(page: Page, trigger: Locator) {
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await trigger.evaluate((element) =>

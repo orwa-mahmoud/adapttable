@@ -156,7 +156,7 @@ for (const kit of ANGULAR_KITS) {
       }) => {
         await page.goto(PAGE);
         await expect(part(page, "row")).toHaveCount(5);
-        await expectMatchingRows(page.locator(".mx-demo"), 30);
+        await expectMatchingRows(page.locator(".mx-demo"), 16);
 
         // A new sort starts over at page one, so it comes first.
         const person = part(page, "header-cell").first();
@@ -175,12 +175,12 @@ for (const kit of ANGULAR_KITS) {
         );
         await expect(part(page, "row")).toHaveCount(5);
 
-        await part(page, "search").fill("Grace");
+        await part(page, "search").fill("Sefa");
         await expect(part(page, "row")).toHaveCount(1);
         await page.reload();
-        await expect(part(page, "search")).toHaveValue("Grace");
+        await expect(part(page, "search")).toHaveValue("Sefa");
         await expect(part(page, "row")).toHaveCount(1);
-        await expect(part(page, "row").first()).toContainText("Grace Hopper");
+        await expect(part(page, "row").first()).toContainText("Sefa Demir");
       });
     });
   });

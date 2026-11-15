@@ -41,6 +41,11 @@ import {
   readShowcaseTheme as readStoredTheme,
   storeShowcaseTheme as storeTheme,
 } from "../matrix/theme";
+import {
+  type DemoNotice,
+  listenForNotices,
+  noticeStyle,
+} from "../shared/demoNotice";
 import { SHOWCASE_PRESENTATION } from "./data";
 import { AdaptShowcaseLandingTable, FEATURE_BODIES } from "./featureBodies";
 import { AdaptShowcaseNav } from "./nav";
@@ -109,6 +114,9 @@ export class AdaptShowcaseMatrixPage {
   readonly presentation = SHOWCASE_PRESENTATION;
   /** Which copy button last copied, for its "Copied" state. */
   readonly copied = signal<"code" | "install" | null>(null);
+  /** The notice a demo action raised, while it is on screen. */
+  readonly notice = signal<DemoNotice | null>(null);
+  readonly noticeStyle = noticeStyle;
 
   readonly siteHome = SITE_HOME;
   readonly unavailable = new URLSearchParams(window.location.search).get(
@@ -202,8 +210,12 @@ export class AdaptShowcaseMatrixPage {
       document.documentElement.style.colorScheme = dark ? "dark" : "light";
       storeTheme(dark);
     });
+    const stopNotices = listenForNotices((next) => {
+      this.notice.set(next);
+    });
     inject(DestroyRef).onDestroy(() => {
       window.clearTimeout(this.copyTimer);
+      stopNotices();
     });
   }
 

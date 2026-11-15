@@ -17,7 +17,11 @@ import {
   personStatus,
   utilization,
 } from "./people";
-import { LIVE_DEFAULT_LAYOUT, SPAN_DEFAULT_LAYOUT } from "./shared/peopleTable";
+import {
+  GROUPS_DEFAULT_LAYOUT,
+  LIVE_DEFAULT_LAYOUT,
+  SPAN_DEFAULT_LAYOUT,
+} from "./shared/peopleTable";
 
 export type DemoScenario =
   | "live"
@@ -432,6 +436,8 @@ export function layoutFor(
       return REALTIME_LAYOUT;
     case "rows":
       return SPAN_DEFAULT_LAYOUT;
+    case "column-groups":
+      return GROUPS_DEFAULT_LAYOUT;
     case "rtl":
       return RTL_LAYOUT;
     case "nested-tables":
@@ -469,7 +475,6 @@ export function pageLimitFor(scenario: DemoScenario): number | undefined {
   ) {
     return 30;
   }
-  if (scenario === "mobile") return 8;
   return undefined;
 }
 

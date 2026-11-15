@@ -6,7 +6,7 @@
  */
 import { computed, onMounted, shallowRef } from "vue";
 
-import { pageDefaultsFor, pageLayoutFor } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor, rosterFor } from "../../../casts";
 import {
   EXPORT_GROUP_BY,
   EXPORT_MODES,
@@ -22,7 +22,6 @@ import {
 } from "../../../shared/exportScenario";
 import {
   currentDataLocale,
-  PEOPLE,
   PEOPLE_GROUPING,
   peopleColumns,
   rowKey,
@@ -32,6 +31,7 @@ import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
+const ROWS = rosterFor("export");
 const PAGE_DEFAULTS = pageDefaultsFor("export");
 const PAGE_LAYOUT = pageLayoutFor("export");
 const columns = peopleColumns({ status: kit.status });
@@ -88,7 +88,7 @@ const features = computed(() => [...pageFeatures.value, ...chrome]);
         table-label="People"
         :url-sync="false"
         :selectable="exportSelects(mode, scope)"
-        :data="PEOPLE"
+        :data="ROWS"
         :columns="columns"
         :row-key="rowKey"
         :defaults="PAGE_DEFAULTS"

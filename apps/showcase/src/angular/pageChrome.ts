@@ -18,6 +18,7 @@ export function pageChromeFeatures(
 ): readonly AdaptTableFeature[] {
   const chrome = pageChrome(flags);
   return [
+    ...(chrome.resizableColumns ? [kit.resizableColumns()] : []),
     ...(chrome.statusBar ? [kit.statusBar()] : []),
     ...(chrome.selectionStats ? [kit.selectionStats()] : []),
     ...(chrome.findInTable ? [kit.findInTable()] : []),

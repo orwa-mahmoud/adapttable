@@ -28,6 +28,7 @@ import {
   PEOPLE,
   type Person,
   personName,
+  personRole,
   personStatus,
   startDate,
   STATUS_LABELS,
@@ -36,6 +37,7 @@ import {
   TEAM_LABELS,
   TEAMS,
   timelineAggregateText,
+  timelineDays,
   utilization,
 } from "../people";
 
@@ -334,10 +336,53 @@ export function peopleColumns(
   ];
 }
 
+/** A plain text column of the Contact group: what it reads and how wide. */
+export type ContactColumn = Pick<
+  PeopleColumn,
+  | "key"
+  | "header"
+  | "accessor"
+  | "sortable"
+  | "sortValue"
+  | "width"
+  | "mobileLabel"
+>;
+
 /**
- * The people columns under three header groups, one per collapse mode:
- * Assignment keeps its Team column, Delivery draws the budget in one cell,
- * and Workload folds to a stub.
+ * The Contact group's two compact columns: the name and the role, in the
+ * language the cells read.
+ *
+ * @param dataLocale - The language of the cell data.
+ * @returns The Name and Role columns.
+ */
+function contactColumns(dataLocale: "ar" | "en"): ContactColumn[] {
+  const s = strings(dataLocale);
+  return [
+    {
+      key: "name",
+      header: s.name,
+      accessor: (row) => personName(row, dataLocale),
+      sortable: true,
+      sortValue: (row) => personName(row, dataLocale),
+      width: 140,
+      mobileLabel: s.name,
+    },
+    {
+      key: "role",
+      header: s.role,
+      accessor: (row) => personRole(row, dataLocale),
+      width: 110,
+      mobileLabel: s.role,
+    },
+  ];
+}
+
+/**
+ * The column-groups table: three header groups with one collapse result
+ * apiece. Contact (Name + Role) folds to the arrow stub, Assignment keeps
+ * Team, and Delivery draws a money-for-days brief. Person, Email and Load
+ * stay off the page so the groups and the row actions fit without sideways
+ * scroll; any other column a page adds follows the groups, ungrouped.
  *
  * @param columns - A framework's people columns, keyed like {@link peopleColumns}.
  * @param dataLocale - The language of the cell data.
@@ -347,27 +392,36 @@ export function groupPeopleColumns<TColumn extends { readonly key: string }>(
   columns: readonly TColumn[],
   dataLocale: "ar" | "en"
 ) {
+  const s = strings(dataLocale);
   const byKey = new Map(columns.map((column) => [column.key, column]));
-  const column = (key: string): TColumn => {
-    const found = byKey.get(key);
-    if (!found) throw new Error(`no people column "${key}"`);
-    return found;
-  };
+  const take = (keys: readonly string[]): TColumn[] =>
+    keys.map((key) => {
+      const found = byKey.get(key);
+      if (!found) throw new Error(`no people column "${key}"`);
+      byKey.delete(key);
+      return found;
+    });
+  const assignment = take(["team", "status"]);
+  const delivery = take(["timeline", "budget"]);
+  for (const key of ["person", "email", "load"]) byKey.delete(key);
   return [
-    column("person"),
+    { header: s.groupContact, children: contactColumns(dataLocale) },
     {
-      header: "Assignment",
+      header: s.groupAssignment,
       collapsedKey: "team",
-      children: [column("team"), column("status")],
+      children: assignment,
     },
     {
-      header: "Delivery",
+      header: s.groupDelivery,
       align: "start" as const,
       collapsedRender: (row: Person) =>
-        `${formatMoney(budget(row), dataLocale)} budget`,
-      children: [column("timeline"), column("budget")],
+        s.deliveryBrief(
+          formatMoney(budget(row), dataLocale),
+          timelineDays(row)
+        ),
+      children: delivery,
     },
-    { header: "Workload", children: [column("load")] },
+    ...byKey.values(),
   ];
 }
 
@@ -442,6 +496,32 @@ export function applyPersonEdit(
   );
 }
 
+/**
+ * The rows after a row form saves: every field it changed, written as one
+ * row patch.
+ *
+ * @param rows - The rows before the save.
+ * @param row - The saved row.
+ * @param patch - The changed values, by column key.
+ * @param dataLocale - The language of the cell data.
+ * @returns The rows after it.
+ */
+export function applyPersonRowEdit(
+  rows: readonly Person[],
+  row: Person,
+  patch: Readonly<Record<string, unknown>>,
+  dataLocale: "ar" | "en"
+): readonly Person[] {
+  const changes = Object.entries(patch).reduce<Partial<Person>>(
+    (all, [key, value]) => ({
+      ...all,
+      ...personChanges(key, value, dataLocale),
+    }),
+    {}
+  );
+  return applyRowPatches(rows, [updateRow(row.id, changes)], rowKey);
+}
+
 /** A fresh copy of the people, for a page that edits or reorders them. */
 export const peopleRows = (): Person[] =>
   PEOPLE.map((person) => ({ ...person }));
@@ -452,6 +532,15 @@ export const peopleRows = (): Person[] =>
  */
 export const LIVE_DEFAULT_LAYOUT: Partial<ColumnLayoutState> = {
   hidden: ["email", "team"],
+};
+
+/**
+ * The column-groups page: every group starts open with Team in view, and
+ * the row actions stay pinned at the end.
+ */
+export const GROUPS_DEFAULT_LAYOUT: Partial<ColumnLayoutState> = {
+  hidden: [],
+  pinned: { actions: "end" },
 };
 
 /**
@@ -520,4 +609,15 @@ export function inWideOrder<TColumn extends { readonly key: string }>(
     return at === -1 ? WIDE_COLUMN_ORDER.length : at;
   };
   return [...columns].sort((a, b) => rank(a.key) - rank(b.key));
+}
+
+/**
+ * The name a live update gives a row on the editing page: the person's first
+ * name, marked as the incoming value.
+ *
+ * @param row - The row the update arrives for.
+ * @returns The incoming name.
+ */
+export function liveNameUpdate(row: Person): string {
+  return `${row.name.split(" ")[0] ?? row.name} Live`;
 }

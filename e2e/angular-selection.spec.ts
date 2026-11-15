@@ -44,7 +44,7 @@ for (const kit of ANGULAR_KITS) {
         .getByRole("button", { name: "Archive" })
         .click();
       await expect(page.locator("[data-demo-log]")).toHaveText(
-        "Archive: 1, 3, 6, 7, 8, 9, 10"
+        "Archive: 501, 503, 506, 507, 508, 509, 510"
       );
     });
 
@@ -59,7 +59,7 @@ for (const kit of ANGULAR_KITS) {
       const banner = part(page, "select-all-banner");
       await expect(banner).toContainText("5 on this page");
       await part(page, "select-all-button").click();
-      await expect(part(page, "bulk-bar")).toContainText("30");
+      await expect(part(page, "bulk-bar")).toContainText("16");
     });
 
     test("the mixed header checkbox selects and clears the page from the keyboard", async ({

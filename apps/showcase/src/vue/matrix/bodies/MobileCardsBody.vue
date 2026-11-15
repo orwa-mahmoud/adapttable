@@ -2,14 +2,14 @@
 /** Mobile cards: the same table, every row a card, in a phone-width frame. */
 import { computed, h, ref, shallowRef, type VNodeChild } from "vue";
 
-import { pageDefaultsFor, pageLayoutFor } from "../../../casts";
+import { pageDefaultsFor, pageLayoutFor, seedRoster } from "../../../casts";
+import { applyPersonRowEdit } from "../../../shared/peopleTable";
 import {
-  applyPersonEdit,
+  currentDataLocale,
   demoOrders,
   FILTER_DEFS,
   type PEOPLE,
   peopleColumns,
-  peopleRows,
   type Person,
   rowKey,
   TABLE_PRESENTATION,
@@ -21,7 +21,7 @@ const kit = useShowcaseKit();
 const PAGE_DEFAULTS = pageDefaultsFor("mobile");
 const PAGE_LAYOUT = pageLayoutFor("mobile");
 const mobile = ref<boolean | undefined>(true);
-const rows = shallowRef<readonly Person[]>(peopleRows());
+const rows = shallowRef<readonly Person[]>(seedRoster("mobile", false));
 const customCard = ref(false);
 const bounded = ref(false);
 const paged = ref(true);
@@ -38,8 +38,12 @@ const FieldValue = (props: { value: VNodeChild }) => props.value;
 const log = ref("Choose a person to see the host callback.");
 const pageFeatures = [
   kit.rowEditing<Person>((row, patch) => {
-    for (const [key, value] of Object.entries(patch))
-      rows.value = applyPersonEdit(rows.value, row, key, value);
+    rows.value = applyPersonRowEdit(
+      rows.value,
+      row,
+      patch,
+      currentDataLocale()
+    );
     log.value = `Saved ${row.name}`;
   }),
   kit.filters(FILTER_DEFS),
