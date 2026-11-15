@@ -46,11 +46,14 @@ function useRowActions<TRow>(context: FeatureMountContext<TRow>): void {
   };
   // The declared actions alone: the options object is rebuilt with the data.
   const declaredActions = computed(() => options.value.rowActions);
+  // An action without a handler (one that opens the row form) stays without
+  // one, so the table can tell it apart and drop it where there is no form.
   const hostActions = computed(() =>
-    declaredActions.value?.map((action) => ({
-      ...action,
-      onClick: (row: TRow) => invokeHost(action.key, row),
-    }))
+    declaredActions.value?.map((action) =>
+      action.onClick === undefined
+        ? action
+        : { ...action, onClick: (row: TRow) => invokeHost(action.key, row) }
+    )
   );
   watchEffect(
     () => {
