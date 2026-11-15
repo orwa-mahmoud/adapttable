@@ -9,16 +9,42 @@ import { describe, expect, it } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import { FeatureProviders, slotRender } from "../features/providers";
-import { EDITABLE_CELL, EXPAND_TOGGLE, TREE_CELL } from "../features/slotKeys";
+import {
+  COLUMN_GROUP_TOGGLE,
+  COLUMN_HEADER_RENAME,
+  COLUMN_SELECT,
+  EDITABLE_CELL,
+  EXPAND_TOGGLE,
+  FILL_HANDLE,
+  FILTER_HEADER,
+  GROUP_HEADER_CARD,
+  GROUP_HEADER_ROW,
+  ROW_EDIT_ACTIONS,
+  ROW_REORDER_BUTTONS,
+  ROW_REORDER_HANDLE,
+  TREE_CELL,
+  TREE_TOGGLE,
+} from "../features/slotKeys";
 import {
   applyTableFeatures,
   type TableFeature,
 } from "../features/tableFeature";
 import {
   cellDisplay,
+  OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
+  OptionalColumnSelect,
   OptionalEditableCell,
   OptionalExpandToggle,
+  OptionalFillHandle,
+  OptionalFilterHeader,
+  OptionalGroupHeaderCard,
+  OptionalGroupHeaderRow,
+  OptionalRowEditActions,
+  OptionalRowReorderButtons,
+  OptionalRowReorderHandle,
   OptionalTreeCell,
+  OptionalTreeToggle,
 } from "./featureSlots";
 
 interface Row {
@@ -156,4 +182,135 @@ describe("optional cell chrome", () => {
       "true"
     );
   });
+});
+
+describe("optional control slots", () => {
+  /** A wrapper's props carrying only a marker the composed fill reads back. */
+  const marked = <TProps,>(marker: string) => ({ marker }) as unknown as TProps;
+  /** Each wrapper with the slot it hands to a composed feature. */
+  const WRAPPERS: readonly [
+    name: string,
+    slot: unknown,
+    draw: (marker: string) => ReactNode,
+  ][] = [
+    [
+      "TreeToggle",
+      TREE_TOGGLE,
+      (m) => (
+        <OptionalTreeToggle
+          {...marked<Parameters<typeof OptionalTreeToggle>[0]>(m)}
+        />
+      ),
+    ],
+    [
+      "FillHandle",
+      FILL_HANDLE,
+      (m) => (
+        <OptionalFillHandle
+          {...marked<Parameters<typeof OptionalFillHandle>[0]>(m)}
+        />
+      ),
+    ],
+    [
+      "FilterHeader",
+      FILTER_HEADER,
+      (m) => (
+        <OptionalFilterHeader
+          {...marked<Parameters<typeof OptionalFilterHeader>[0]>(m)}
+        />
+      ),
+    ],
+    [
+      "RowEditActions",
+      ROW_EDIT_ACTIONS,
+      (m) => (
+        <OptionalRowEditActions
+          {...marked<Parameters<typeof OptionalRowEditActions>[0]>(m)}
+        />
+      ),
+    ],
+    [
+      "RowReorderHandle",
+      ROW_REORDER_HANDLE,
+      (m) => (
+        <OptionalRowReorderHandle
+          {...marked<Parameters<typeof OptionalRowReorderHandle>[0]>(m)}
+        />
+      ),
+    ],
+    [
+      "RowReorderButtons",
+      ROW_REORDER_BUTTONS,
+      (m) => (
+        <OptionalRowReorderButtons
+          {...marked<Parameters<typeof OptionalRowReorderButtons>[0]>(m)}
+        />
+      ),
+    ],
+    [
+      "ColumnGroupToggle",
+      COLUMN_GROUP_TOGGLE,
+      (m) => (
+        <OptionalColumnGroupToggle
+          {...marked<Parameters<typeof OptionalColumnGroupToggle>[0]>(m)}
+        />
+      ),
+    ],
+    [
+      "ColumnHeaderRename",
+      COLUMN_HEADER_RENAME,
+      (m) => (
+        <OptionalColumnHeaderRename
+          {...marked<Parameters<typeof OptionalColumnHeaderRename>[0]>(m)}
+        />
+      ),
+    ],
+    [
+      "ColumnSelect",
+      COLUMN_SELECT,
+      (m) => (
+        <OptionalColumnSelect
+          {...marked<Parameters<typeof OptionalColumnSelect>[0]>(m)}
+        />
+      ),
+    ],
+    [
+      "GroupHeaderRow",
+      GROUP_HEADER_ROW,
+      (m) => (
+        <OptionalGroupHeaderRow
+          {...marked<Parameters<typeof OptionalGroupHeaderRow>[0]>(m)}
+        />
+      ),
+    ],
+    [
+      "GroupHeaderCard",
+      GROUP_HEADER_CARD,
+      (m) => (
+        <OptionalGroupHeaderCard
+          {...marked<Parameters<typeof OptionalGroupHeaderCard>[0]>(m)}
+        />
+      ),
+    ],
+  ];
+
+  for (const [name, slot, draw] of WRAPPERS) {
+    it(`${name}: draws nothing alone, and the composed feature with the props it was given`, () => {
+      const alone = mount([], draw(name));
+      expect(alone.container).toBeEmptyDOMElement();
+      alone.unmount();
+      const feature: TableFeature = {
+        id: name,
+        renders: [
+          slotRender(slot as never, (props: unknown) => (
+            <span data-testid="fill">
+              {(props as { marker: string }).marker}
+            </span>
+          )),
+        ],
+      };
+      mount([feature], draw(name));
+      expect(screen.getByTestId("fill")).toHaveTextContent(name);
+    });
+  }
 });

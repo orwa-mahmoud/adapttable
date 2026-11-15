@@ -4,13 +4,15 @@
  * state the data is in, where each region lands, and that the kit's pieces
  * receive the table's own state.
  */
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { type ReactNode, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import { useTableFeatures } from "../features/featureHost";
-import { FeatureProviders } from "../features/providers";
+import { FeatureProviders, slotRender } from "../features/providers";
+import { COLUMN_MENU, CONTEXT_MENU_LIVE } from "../features/slotKeys";
+import type { TableFeature } from "../features/tableFeature";
 import { useFrontendData } from "../source/useFrontendData";
 import { createMemoryAdapter } from "../url/adapter";
 import {
@@ -89,9 +91,16 @@ function Frame({
 const kit: KitTable = {
   Frame,
   toolbar: (props) => (
-    <span data-testid="kit-toolbar" data-filters-mode={props.filtersMode}>
+    <span
+      data-testid="kit-toolbar"
+      data-filters-mode={props.filtersMode}
+      data-filters-open={String(props.filtersOpen)}
+    >
       {props.savedViewsMenu}
       {props.columnMenu}
+      <button type="button" onClick={props.onCloseFilters}>
+        Close filters
+      </button>
     </span>
   ),
   body: (view, headerOffset, props) => (
@@ -310,5 +319,57 @@ describe("TableComposition", () => {
       status!.compareDocumentPosition(screen.getByTestId("toolbar")) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
+  });
+
+  it("hands the column and context menus actions that reach the table", () => {
+    interface MenuProps {
+      readonly onSortColumn: (key: string, dir: "asc" | "desc") => void;
+      readonly onFilterColumn: () => void;
+    }
+    interface ContextProps {
+      readonly rowFor: (rowId: string) => Row | undefined;
+      readonly actions: {
+        readonly onSort: (key: string, dir: "asc" | "desc") => void;
+        readonly onHide: (key: string) => void;
+        readonly onFilter: () => void;
+        readonly onCopy: (target: unknown) => void;
+      };
+      readonly children: (regionProps: Record<string, unknown>) => ReactNode;
+    }
+    let menu: MenuProps | undefined;
+    let context: ContextProps | undefined;
+    const probe: TableFeature<Row> = {
+      id: "menus",
+      renders: [
+        slotRender(COLUMN_MENU, (props: unknown) => {
+          menu = props as MenuProps;
+          return null;
+        }),
+        slotRender(CONTEXT_MENU_LIVE, (props: unknown) => {
+          context = props as ContextProps;
+          return <>{context.children({})}</>;
+        }),
+      ],
+    };
+    mount({ override: { features: [probe], enableColumnMenu: true } });
+    const body = () => screen.getByTestId("kit-body").textContent;
+    const toolbar = () => screen.getByTestId("kit-toolbar");
+
+    act(() => menu!.onSortColumn("name", "desc"));
+    expect(body()).toBe("cba");
+    act(() => context!.actions.onSort("name", "asc"));
+    expect(body()).toBe("abc");
+    expect(context!.rowFor("b")).toEqual(ROWS[1]);
+
+    act(() => menu!.onFilterColumn());
+    expect(toolbar()).toHaveAttribute("data-filters-open", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Close filters" }));
+    expect(toolbar()).toHaveAttribute("data-filters-open", "false");
+    act(() => context!.actions.onFilter());
+    expect(toolbar()).toHaveAttribute("data-filters-open", "true");
+
+    act(() => context!.actions.onHide("name"));
+    act(() => context!.actions.onCopy({ rowId: "a", columnKey: "name" }));
+    expect(body()).toBe("abc");
   });
 });
