@@ -43,9 +43,13 @@ for (const kit of ANGULAR_KITS) {
       await part(page, "bulk-bar")
         .getByRole("button", { name: "Archive" })
         .click();
-      await expect(page.locator("[data-demo-log]")).toHaveText(
-        "Archive: 501, 503, 506, 507, 508, 509, 510"
-      );
+      await expect(
+        page.getByRole("status").filter({ hasText: /^Archive: / })
+      ).toHaveText("Archive: 501, 503, 506, 507, 508, 509, 510");
+      await expect(rowBox(page, 0)).not.toBeChecked();
+      await expect(
+        part(page, "row").first().getByText("Archived", { exact: true })
+      ).toBeVisible();
     });
 
     test("offers every matching row once the page is selected", async ({

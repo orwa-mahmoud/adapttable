@@ -141,12 +141,18 @@ import {
   TRANSCRIPT_LENGTH,
   TRANSCRIPT_TEXT,
 } from "../shared/pageHints";
-import { peopleBulkActions, peopleRowActions } from "../shared/peopleActions";
+import {
+  archivePeople,
+  peopleBulkActions,
+  peopleRowActions,
+} from "../shared/peopleActions";
 import {
   applyPersonRowEdit,
   EDITING_DEFAULT_LAYOUT,
   inWideOrder,
   liveNameUpdate,
+  ORDER_COLUMNS,
+  orderKey,
 } from "../shared/peopleTable";
 import {
   PIVOT_AGGREGATORS,
@@ -368,7 +374,7 @@ class FilteringBody {
           [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
-          [data]="rows"
+          [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
           [defaultColumnLayout]="pageLayout"
@@ -377,7 +383,6 @@ class FilteringBody {
           [features]="features"
         />
       </div>
-      <p class="hint" role="status" data-demo-log>{{ log() }}</p>
     </div>
   `,
 })
@@ -387,23 +392,16 @@ class SelectionBody {
   readonly pageLayout = pageLayoutFor("selection");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = rosterFor("selection");
+  readonly rows = signal<readonly Person[]>(rosterFor("selection"));
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly log = signal("Select rows, then run a bulk action.");
   private readonly pageFeatures: readonly AdaptTableFeature[] = [
-    this.kit.bulkActions([
-      {
-        key: "export",
-        label: "Export",
-        onClick: (ids) => this.log.set(`Export: ${ids.join(", ")}`),
-      },
-      {
-        key: "archive",
-        label: "Archive",
-        onClick: (ids) => this.log.set(`Archive: ${ids.join(", ")}`),
-      },
-    ]),
+    this.kit.bulkActions(
+      peopleBulkActions(currentDataLocale(), {
+        onArchive: (ids) =>
+          this.rows.update((rows) => archivePeople(rows, ids)),
+      })
+    ),
   ];
   readonly features: readonly AdaptTableFeature[] = [
     ...this.pageFeatures,
@@ -1201,7 +1199,12 @@ class MobileCardsBody {
       );
     }),
     // Selection and the shared bulk bar over it, as on every page that selects.
-    this.kit.bulkActions(peopleBulkActions(currentDataLocale())),
+    this.kit.bulkActions(
+      peopleBulkActions(currentDataLocale(), {
+        onArchive: (ids) =>
+          this.rows.update((rows) => archivePeople(rows, ids)),
+      })
+    ),
     ...pageChromeFeatures(this.kit, { editing: true, urlKey: "mob" }),
   ];
 }
@@ -1381,7 +1384,12 @@ export class AdaptShowcaseLandingTable {
     this.kit.editHistory(),
     this.kit.undoRedoButtons(),
     this.kit.cellNavigation(),
-    this.kit.bulkActions(peopleBulkActions(currentDataLocale())),
+    this.kit.bulkActions(
+      peopleBulkActions(currentDataLocale(), {
+        onArchive: (ids) =>
+          this.rows.update((rows) => archivePeople(rows, ids)),
+      })
+    ),
     this.kit.rowActions<Person>(
       peopleRowActions(currentDataLocale(), {
         onDelete: (row) => {
@@ -1447,18 +1455,6 @@ class TreeBody {
   ];
 }
 
-/** The nested orders table's columns — a different shape from the parent's. */
-const ORDER_COLUMNS: ColumnDef<DemoOrder>[] = [
-  { key: "item", header: "Item", accessor: (row) => row.item },
-  { key: "qty", header: "Qty", accessor: (row) => row.qty, align: "end" },
-  {
-    key: "amount",
-    header: "Amount",
-    accessor: (row) => `$${row.amount.toLocaleString("en-US")}`,
-    align: "end",
-  },
-];
-
 /** One person's orders: this kit's own table, mounted with the defaults. */
 @Component({
   selector: "adapt-showcase-orders",
@@ -1484,8 +1480,8 @@ class OrdersTable {
   readonly row = input.required<Person>();
   readonly defaults = input.required<NestedTableDefaults>();
   readonly orders = computed(() => demoOrders(this.row()));
-  readonly columns = ORDER_COLUMNS;
-  readonly orderKey = (order: DemoOrder) => order.id;
+  readonly columns: ColumnDef<DemoOrder>[] = [...ORDER_COLUMNS];
+  readonly orderKey = orderKey;
 }
 
 /** Nested tables: each person's recent orders, in a table under the row. */
