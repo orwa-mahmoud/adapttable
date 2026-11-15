@@ -20,6 +20,7 @@ import {
 import { createTableEngine } from "@adapttable/core/engine";
 import { parseGroupBy } from "@adapttable/core/grouping";
 import {
+  type Component,
   computed,
   defineComponent,
   h,
@@ -308,12 +309,16 @@ const GroupingPanelSurface = /*#__PURE__*/ defineComponent(
   },
   { props: ["model"] }
 );
+/**
+ * The surface as `h` takes it at every supported Vue: below 3.5's later
+ * patches a setup component's row type cannot be instantiated, so the row
+ * type is held by {@link GroupingPanelChrome}'s signature instead.
+ */
+const GROUPING_PANEL_SURFACE: Component = GroupingPanelSurface;
 export function GroupingPanelChrome<TRow>(
   props: GroupingPanelChromeProps<TRow>
 ): VNodeChild {
-  return h(GroupingPanelSurface<TRow>, {
-    model: props,
-  });
+  return h(GROUPING_PANEL_SURFACE, { model: props });
 }
 export function groupingPanel(
   initialGroupBy?: string | readonly string[],
