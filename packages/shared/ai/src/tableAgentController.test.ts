@@ -1073,10 +1073,7 @@ describe("sync", () => {
     });
     h.setView(
       viewOf({
-        neutralTable: createNeutralTable(
-          plain,
-          "staff"
-        ) as NeutralTable<unknown>,
+        neutralTable: createNeutralTable(plain, "staff"),
       })
     );
     h.controller.sync();

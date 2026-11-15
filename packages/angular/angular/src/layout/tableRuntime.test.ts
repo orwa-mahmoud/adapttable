@@ -341,7 +341,7 @@ describe("tableRuntimeFor", () => {
 
     // A second reconcile must not resurrect the developer's declaration.
     const controller = createGroupingPanelController({
-      runtime: runtime as never,
+      runtime: runtime,
     });
     controller.reconcile();
     expect(source().groupAggregateOverrides).toEqual({ budget: "none" });

@@ -66,7 +66,7 @@ export function groupingPanel<TRow = unknown>(
       ...coreGroupingPanel<TRow>(groupBy, extras),
       initialGroupBy: groupBy,
       extras,
-    } as GroupingPanelFeature<TRow>,
+    },
     createTableEngine
   );
   return withFeatureImplementation(
