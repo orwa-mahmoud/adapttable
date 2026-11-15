@@ -2,19 +2,21 @@ import { fromStore } from "@adapttable/angular";
 import type { ContextMenuOptions } from "@adapttable/angular/features";
 import {
   type ColumnMetadata,
-  composeContextMenuExtra,
   type ContextMenuActions,
   type ContextMenuItem,
   contextMenuItems,
   type ContextMenuPoint,
   type ContextMenuRegionHandlers,
-  createContextMenuOpenController,
   type FeatureHostState,
-  isContextMenuArmed,
   type RowAction,
   type TableLabels,
-  withContextMenuCellCopy,
 } from "@adapttable/core";
+import {
+  composeContextMenuExtra,
+  createContextMenuOpenController,
+  isContextMenuArmed,
+  withContextMenuCellCopy,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

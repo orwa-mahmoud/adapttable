@@ -3,8 +3,8 @@ import {
   type BulkActionContext,
   type BulkActionOutcome,
   type ConfirmHandler,
-  createBulkActionRunner,
 } from "@adapttable/core";
+import { createBulkActionRunner } from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

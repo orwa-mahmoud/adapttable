@@ -6,17 +6,15 @@
  * shows exactly those ids and reports every change through
  * `onSelectionChange`, leaving the host to decide.
  */
+import { type TableLabels } from "@adapttable/core";
 import {
   createControllableStore,
   headerSelectionOf,
-  type TableLabels,
-  toggleId,
-  toggleIds,
-} from "@adapttable/core";
-import {
   type HeaderSelectionState,
   resolveTableLabels,
   type SelectionState,
+  toggleId,
+  toggleIds,
 } from "@adapttable/core/binding";
 import { createAllMatchingScope } from "@adapttable/core/selection";
 import {

@@ -3,8 +3,12 @@
  * open at once, keyed by row id, so an open panel survives sorting and
  * paging: a row that leaves the page re-opens when it returns.
  */
-import { createControllableStore, toggleId } from "@adapttable/core";
-import type { RowExpansionState } from "@adapttable/core/binding";
+
+import {
+  createControllableStore,
+  type RowExpansionState,
+  toggleId,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

@@ -1,7 +1,8 @@
 /**
  * Row density kept in the URL.
  */
-import { densitySlice, type TableDensity } from "@adapttable/core";
+import { type TableDensity } from "@adapttable/core";
+import { densitySlice } from "@adapttable/core/binding";
 import { computed, type Signal } from "@angular/core";
 
 import { type MaybeSignalOptional, readMaybe } from "../store";

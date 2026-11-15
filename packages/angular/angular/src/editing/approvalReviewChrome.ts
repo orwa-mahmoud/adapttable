@@ -4,7 +4,6 @@
  */
 import {
   approvalArgumentPairs,
-  approvalProposalText,
   type ApprovalReview,
   type ApprovalReviewItem,
   type TableLabels,
@@ -12,6 +11,7 @@ import {
 import {
   type AgentApprovalButtonProps,
   type AgentApprovalListProps as NeutralAgentApprovalListProps,
+  approvalProposalText,
   ASSISTANT_LABELS,
   type AssistantStrings,
   resolveFeatureLabels,

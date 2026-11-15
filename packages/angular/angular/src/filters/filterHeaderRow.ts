@@ -6,13 +6,23 @@
 import { filterOptionsFor } from "@adapttable/angular";
 import {
   type BooleanChoice,
-  booleanFilterWidget,
   defaultFilterRegistry,
   type FilterDef,
   filterDefForColumn,
   type FilterFormSource,
   type FilterOption,
   type FilterTypeRegistry,
+  renderRegisteredFilter,
+  type TableLabels,
+  type TextOp,
+} from "@adapttable/core";
+import {
+  booleanFilterWidget,
+  type FilterHeaderClassNames,
+  type FilterHeaderMultiProps,
+  type FilterHeaderRangeProps,
+  type FilterHeaderSearchProps,
+  type FilterHeaderSelectProps,
   headerFilterBooleanOptions,
   headerFilterCellKind,
   headerFilterMultiModel,
@@ -21,17 +31,7 @@ import {
   initialRangeFilterOp,
   initialTextFilterOp,
   rangeFilterWidget,
-  renderRegisteredFilter,
-  type TableLabels,
   textFilterWidget,
-  type TextOp,
-} from "@adapttable/core";
-import type {
-  FilterHeaderClassNames,
-  FilterHeaderMultiProps,
-  FilterHeaderRangeProps,
-  FilterHeaderSearchProps,
-  FilterHeaderSelectProps,
 } from "@adapttable/core/binding";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {

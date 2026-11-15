@@ -8,10 +8,9 @@
 import {
   type FeatureNotice,
   type SelectionStats,
-  type StatusBarItem,
-  statusBarItems,
   type TableLabels,
 } from "@adapttable/core";
+import { type StatusBarItem, statusBarItems } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
   Component,

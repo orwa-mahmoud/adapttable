@@ -2,12 +2,8 @@
  * The toolbar's optional controls, as signals: row density kept in the URL,
  * the fullscreen toggle, and CSV export — each over core's model.
  */
-import {
-  densitySlice,
-  type TableDensity,
-  type UrlStateAdapter,
-} from "@adapttable/core";
-import type { FullscreenState } from "@adapttable/core/binding";
+import { type TableDensity, type UrlStateAdapter } from "@adapttable/core";
+import { densitySlice, type FullscreenState } from "@adapttable/core/binding";
 import { DOCUMENT } from "@angular/common";
 import {
   assertInInjectionContext,

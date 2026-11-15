@@ -21,12 +21,10 @@
 import type { CellContext, ColumnDef, Renderer } from "@adapttable/angular";
 import {
   PIVOT_ROW_COLUMN_KEY,
-  PIVOT_ROW_INDENT,
   type PivotField,
   type PivotResult,
   type PivotRow,
   pivotRowCaption,
-  pivotTableLayout,
   resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
@@ -34,6 +32,8 @@ import {
 import { AdaptPivotRowHeader } from "./rowHeader";
 
 export { PIVOT_ROW_COLUMN_KEY } from "@adapttable/core";
+
+import { PIVOT_ROW_INDENT, pivotTableLayout } from "@adapttable/core/binding";
 
 /**
  * Options for {@link pivotTableModel}.

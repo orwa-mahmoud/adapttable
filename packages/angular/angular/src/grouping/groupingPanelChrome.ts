@@ -6,27 +6,27 @@
  */
 import type { ColumnDef } from "@adapttable/angular";
 import {
-  deferGroupingDropToInner,
   type Direction,
+  type GroupingDropProps,
+  type GroupingPanelState,
+  type TableLabels,
+} from "@adapttable/core";
+import {
+  deferGroupingDropToInner,
   focusAfterAggregationRemoval,
   groupingAggregationOptions,
   groupingAvailableColumns,
   groupingColumnName,
   groupingDropPlan,
-  type GroupingDropProps,
-  type GroupingPanelState,
+  type GroupingPanelAggregationRemoveProps,
+  type GroupingPanelChecklistProps,
+  type GroupingPanelChipProps,
+  type GroupingPanelDropZoneProps,
+  type GroupingPanelRemoveZoneProps,
+  type GroupingPanelRestoreProps,
+  type GroupingPanelSelectProps,
+  type GroupingPanelSurfaceProps,
   INERT_GROUPING_DROP_HANDLERS,
-  type TableLabels,
-} from "@adapttable/core";
-import type {
-  GroupingPanelAggregationRemoveProps,
-  GroupingPanelChecklistProps,
-  GroupingPanelChipProps,
-  GroupingPanelDropZoneProps,
-  GroupingPanelRemoveZoneProps,
-  GroupingPanelRestoreProps,
-  GroupingPanelSelectProps,
-  GroupingPanelSurfaceProps,
 } from "@adapttable/core/binding";
 import {
   afterRenderEffect,

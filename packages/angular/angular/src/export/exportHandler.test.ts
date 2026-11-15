@@ -1,10 +1,10 @@
 /** Exports preserve selected data, column scope and current source capabilities. */
 import {
-  defaultLabels,
   type ExportCsvOptions,
   sourceCapabilities,
   type TableSource,
 } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core/binding";
 import { signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

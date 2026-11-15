@@ -5,11 +5,13 @@
 import {
   type ColumnGroupRecord,
   type ColumnLayoutState,
+  type UseColumnLayoutResult,
+} from "@adapttable/core";
+import {
   columnLayoutVisibleColumns,
   columnPinInsets,
   createColumnLayoutController,
-  type UseColumnLayoutResult,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import {
   computed,
   effect,

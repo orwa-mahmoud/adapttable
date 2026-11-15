@@ -3,14 +3,16 @@
  */
 import {
   type ActiveFilterChip,
-  activeFilterChips,
-  chipValuesOf,
   type FilterRuntime,
   type FilterValue,
-  mergeFilterChips,
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
+import {
+  activeFilterChips,
+  chipValuesOf,
+  mergeFilterChips,
+} from "@adapttable/core/binding";
 import { computed, type Signal } from "@angular/core";
 
 import { type MaybeSignal, readMaybe } from "../store";

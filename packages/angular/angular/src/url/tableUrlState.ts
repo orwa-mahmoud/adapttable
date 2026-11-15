@@ -4,15 +4,17 @@
  */
 import {
   createMemoryAdapter,
-  createTableViewStore,
   type ExtraFilters,
-  resolveUrlAdapter,
   type TableQueryParams,
   type TableViewState,
   type TableViewStateConfig,
   type TableViewStore,
   type UrlStateAdapter,
 } from "@adapttable/core";
+import {
+  createTableViewStore,
+  resolveUrlAdapter,
+} from "@adapttable/core/binding";
 import { PlatformLocation } from "@angular/common";
 import {
   assertInInjectionContext,

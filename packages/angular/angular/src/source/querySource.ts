@@ -8,17 +8,19 @@
  */
 import {
   type ColumnMetadata,
-  createQuerySource,
   type InfiniteQueryLike,
   type PageSelector,
   type PaginatedResponse,
   type PaginationMode,
   type QueryAggregate,
   type QuerySupport,
-  resolvePaginationMode,
   type TableQueryParams,
   type TableSource,
 } from "@adapttable/core";
+import {
+  createQuerySource,
+  resolvePaginationMode,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

@@ -1,5 +1,4 @@
-import { FILTER_ENGINE_IMPL } from "@adapttable/core";
-import { FILTER_ENGINE } from "@adapttable/core/binding";
+import { FILTER_ENGINE, FILTER_ENGINE_IMPL } from "@adapttable/core/binding";
 
 import { injectExportCsv } from "./export/exportHandler";
 import {

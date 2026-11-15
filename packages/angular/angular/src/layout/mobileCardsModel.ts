@@ -6,16 +6,13 @@ import {
   type MobileCardContext,
   type MobileCardField,
 } from "@adapttable/angular";
-import {
-  mobileCardListStyle,
-  type TableLabels,
-  treeCardStyle,
-} from "@adapttable/core";
+import { type TableLabels, treeCardStyle } from "@adapttable/core";
 import {
   EDITABLE_CELL,
   EXPAND_TOGGLE,
   EXTRA_ROW_PARTS,
   GROUP_HEADER_CARD,
+  mobileCardListStyle,
   resolveMobileLabel,
   ROW_EDIT_ACTIONS,
   ROW_REORDER_BUTTONS,

@@ -1,5 +1,5 @@
 import { type Attrs } from "@adapttable/angular";
-import { treeTableAria } from "@adapttable/core";
+import { treeTableAria } from "@adapttable/core/binding";
 import {
   computed,
   Directive,

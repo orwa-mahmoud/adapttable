@@ -7,13 +7,15 @@
  * to the table.
  */
 import {
-  clampMatchIndex,
-  createFindController,
   findMatches,
   matchKeySet,
   type UrlStateAdapter,
 } from "@adapttable/core";
-import type { FindInTableState } from "@adapttable/core/binding";
+import {
+  clampMatchIndex,
+  createFindController,
+  type FindInTableState,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,
@@ -31,6 +33,7 @@ import { urlAdapterFor } from "../url/tableUrlState";
 import { ADAPTTABLE_FIND_STATE } from "./findState";
 
 export { FIND_URL_WRITE_DEBOUNCE_MS } from "@adapttable/core";
+
 export type { FindInTableState };
 
 /**

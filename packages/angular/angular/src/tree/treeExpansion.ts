@@ -7,12 +7,13 @@
  * than collapsed, unlike groups: a tree starts folded, so the open set is the
  * small one.
  */
+
 import {
   createControllableStore,
   idSetReader,
   treeExpansionActions,
-} from "@adapttable/core";
-import type { TreeExpansionState } from "@adapttable/core/binding";
+  type TreeExpansionState,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

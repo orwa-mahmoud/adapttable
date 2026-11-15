@@ -4,12 +4,14 @@
 import {
   type ActiveFilterChip,
   type FilterDef,
-  filterTreeConditionChips,
   type FilterTypeRegistry,
   type QueryFilterGroup,
-  removeFilterTreeNode,
   type TableLabels,
 } from "@adapttable/core";
+import {
+  filterTreeConditionChips,
+  removeFilterTreeNode,
+} from "@adapttable/core/binding";
 
 /**
  * One chip per condition in the tree, each removing its own node.

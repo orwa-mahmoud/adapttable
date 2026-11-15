@@ -11,11 +11,13 @@ import {
   type PaginationMode,
   type QueryAggregate,
   type QuerySupport,
-  resolvePaginationMode,
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
-import { createLazyServerSource } from "@adapttable/core/binding";
+import {
+  createLazyServerSource,
+  resolvePaginationMode,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

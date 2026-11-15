@@ -4,12 +4,11 @@
  * Nothing is drawn until at least two cells are selected. The kit draws the
  * strip; the wording stays here.
  */
+import { type SelectionStats, type TableLabels } from "@adapttable/core";
 import {
   type SelectionStatPart,
   selectionStatParts,
-  type SelectionStats,
-  type TableLabels,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
   Component,

@@ -11,17 +11,14 @@
  * template, because an Angular slot cannot project children through the
  * control outlet.
  */
+import { type SavedView, type TableLabels } from "@adapttable/core";
 import {
   createSavedViewRenameController,
-  type SavedView,
-  type SavedViewRowControlModel,
-  savedViewRowControls,
-  type TableLabels,
-} from "@adapttable/core";
-import {
   type FeatureStrings,
   resolveFeatureLabels,
   SAVED_VIEW_LABELS,
+  type SavedViewRowControlModel,
+  savedViewRowControls,
 } from "@adapttable/core/binding";
 import { NgTemplateOutlet } from "@angular/common";
 import {

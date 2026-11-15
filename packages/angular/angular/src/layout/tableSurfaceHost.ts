@@ -44,9 +44,7 @@ import {
   type NestedTableParent,
   type PinnedRows,
   pinnedSummaryPart,
-  resolveDensity,
   type RowAction,
-  rowClickProps,
   type RowHeight,
   type RowStyle,
   type TableDensity,
@@ -54,7 +52,6 @@ import {
   type TableSource,
   type TableVirtualization,
   type TreeEntry,
-  treeRowAria,
   windowGroupedEntries,
 } from "@adapttable/core";
 import {
@@ -81,7 +78,10 @@ import {
   pinnedRowPart,
   pinnedRowSticky,
   resolveBodyVirtualization,
+  resolveDensity,
   resolveRowStyle,
+  rowClickProps,
+  treeRowAria,
   virtualizeIgnoredOnPage,
 } from "@adapttable/core/binding";
 import {

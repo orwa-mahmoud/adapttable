@@ -8,11 +8,7 @@ import {
   injectExportCsv,
   withFeatureImplementation,
 } from "@adapttable/angular";
-import {
-  type ExportWriter,
-  FILTER_ENGINE_IMPL,
-  type FilterDef,
-} from "@adapttable/core";
+import { type ExportWriter, type FilterDef } from "@adapttable/core";
 import {
   coreExportCsv as neutralExportCsv,
   type CoreFeature,
@@ -20,6 +16,7 @@ import {
   coreFindInTable as neutralFindInTable,
   coreHeaderFilters as neutralHeaderFilters,
   FILTER_ENGINE,
+  FILTER_ENGINE_IMPL,
 } from "@adapttable/core/binding";
 
 /**

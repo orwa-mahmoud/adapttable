@@ -2,12 +2,13 @@
  * Which row groups are closed, as a signal — core's collapse actions over a
  * controllable id set.
  */
+
 import {
   createControllableStore,
   groupCollapseActions,
+  type GroupCollapseState,
   idSetReader,
-} from "@adapttable/core";
-import type { GroupCollapseState } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

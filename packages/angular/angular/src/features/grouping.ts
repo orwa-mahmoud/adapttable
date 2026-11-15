@@ -13,10 +13,12 @@ import {
   groupingIgnoredWarning,
   groupingProjectionBundle,
   groupingSourceOf,
-  projectedGroupingSource,
   projectGrouping,
 } from "@adapttable/core";
-import { coreGrouping } from "@adapttable/core/binding";
+import {
+  coreGrouping,
+  projectedGroupingSource,
+} from "@adapttable/core/binding";
 import { createTableEngine } from "@adapttable/core/engine";
 
 import { withFrontendRowModel } from "../source/rowModel";

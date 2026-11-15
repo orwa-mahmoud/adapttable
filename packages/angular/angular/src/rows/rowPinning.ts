@@ -5,17 +5,19 @@
  * refuse it: a nested list is not a flat pin stack.
  */
 import {
-  commitRowPin,
-  createControllableStore,
   EMPTY_ROW_PIN_STATE,
-  ROW_PIN_STORE_OPTIONS,
-  rowPinActions,
   type RowPinLabels,
   type RowPinSide,
-  rowPinSideOf,
   type RowPinState,
 } from "@adapttable/core";
-import type { RowPinningState } from "@adapttable/core/binding";
+import {
+  commitRowPin,
+  createControllableStore,
+  ROW_PIN_STORE_OPTIONS,
+  rowPinActions,
+  type RowPinningState,
+  rowPinSideOf,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

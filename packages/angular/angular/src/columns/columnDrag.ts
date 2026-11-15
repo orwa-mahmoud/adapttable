@@ -2,7 +2,7 @@ import {
   columnReorderKeyDown,
   createColumnDragController,
   isRtlElement,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import { assertInInjectionContext, inject, Injector } from "@angular/core";
 
 import type { Attrs } from "../attrContracts";

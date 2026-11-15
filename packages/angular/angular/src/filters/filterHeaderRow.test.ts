@@ -4,7 +4,6 @@
  */
 import {
   defaultFilterRegistry,
-  defaultLabels,
   type ExtraFilters,
   type FilterDef,
   type FilterFormSource,
@@ -13,12 +12,13 @@ import {
   type FilterWidgetRenderProps,
   type TableLabels,
 } from "@adapttable/core";
-import type {
-  FilterHeaderClassNames,
-  FilterHeaderMultiProps,
-  FilterHeaderRangeProps,
-  FilterHeaderSearchProps,
-  FilterHeaderSelectProps,
+import {
+  defaultLabels,
+  type FilterHeaderClassNames,
+  type FilterHeaderMultiProps,
+  type FilterHeaderRangeProps,
+  type FilterHeaderSearchProps,
+  type FilterHeaderSelectProps,
 } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,

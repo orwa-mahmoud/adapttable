@@ -1,10 +1,9 @@
 import { type MaybeSignalOptional, readMaybe } from "@adapttable/angular";
+import { type RowAction, type TableLabels } from "@adapttable/core";
 import {
-  type RowAction,
   rowMutationActions,
-  type TableLabels,
   withRowMutationActions,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import { computed, type Signal } from "@angular/core";
 
 /**

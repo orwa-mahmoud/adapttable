@@ -2,8 +2,11 @@
  * How much of a paged group model is showing — core's group paging
  * controller as a signal.
  */
-import { createGroupPagingController } from "@adapttable/core";
-import type { GroupPagingState } from "@adapttable/core/binding";
+
+import {
+  createGroupPagingController,
+  type GroupPagingState,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

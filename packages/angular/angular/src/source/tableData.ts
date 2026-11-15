@@ -6,7 +6,6 @@
  * table's `onQueryChange` are `@adapttable/core`'s table data controller.
  */
 import {
-  createTableData,
   type ExtraFilters,
   type FacetMap,
   type FilterDef,
@@ -14,15 +13,18 @@ import {
   type FilterRuntime,
   type FilterTypeSpec,
   type FrontendEngineFactory,
-  INACTIVE_TIER_ROWS,
   type PaginationMode,
   type QueryAggregate,
   type QuerySupport,
   type SortableValue,
   type TableSource,
-  tierRows,
 } from "@adapttable/core";
-import type { FeatureHostState } from "@adapttable/core/binding";
+import {
+  createTableData,
+  type FeatureHostState,
+  INACTIVE_TIER_ROWS,
+  tierRows,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

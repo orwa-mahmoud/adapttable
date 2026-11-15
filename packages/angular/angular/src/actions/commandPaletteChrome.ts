@@ -7,19 +7,19 @@
 import { fromStore } from "@adapttable/angular";
 import {
   type Command,
-  commandListKeyAction,
-  commandListView,
-  createCommandList,
   type Direction,
-  runCommand,
   type TableLabels,
-  tabTrapTarget,
 } from "@adapttable/core";
 import {
   ACTION_LABELS,
   type ActionStrings,
+  commandListKeyAction,
+  commandListView,
   type CommandPaletteSurfaceProps as NeutralCommandPaletteSurfaceProps,
+  createCommandList,
   resolveFeatureLabels,
+  runCommand,
+  tabTrapTarget,
 } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,

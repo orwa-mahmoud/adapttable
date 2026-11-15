@@ -3,11 +3,8 @@
  * the column layout, the density, the collapsed groups, the pinned rows —
  * read and written through `@adapttable/core`'s URL slice store.
  */
-import {
-  createUrlSliceStore,
-  type UrlSliceSpec,
-  type UrlStateAdapter,
-} from "@adapttable/core";
+import { type UrlSliceSpec, type UrlStateAdapter } from "@adapttable/core";
+import { createUrlSliceStore } from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

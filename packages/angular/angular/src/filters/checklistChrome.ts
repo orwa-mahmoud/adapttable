@@ -5,26 +5,26 @@
  * components in `slots`.
  */
 import {
-  CHECKLIST_ITEM_WIDTH,
   CHECKLIST_LIST_HEIGHT,
-  CHECKLIST_OPTION_GAP,
   CHECKLIST_VIRTUALIZE_AT,
-  checklistActions,
-  checklistItems,
-  checklistSlice,
   type FilterDef,
   filterLabel,
   listFilterValues,
-  nextChecklistViewport,
-  searchChecklistItems,
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
 import {
+  CHECKLIST_ITEM_WIDTH,
+  CHECKLIST_OPTION_GAP,
+  checklistActions,
   type ChecklistButtonProps,
+  checklistItems,
   type ChecklistSearchProps,
+  checklistSlice,
   FILTER_LABELS,
+  nextChecklistViewport,
   resolveFeatureLabels,
+  searchChecklistItems,
 } from "@adapttable/core/binding";
 import {
   afterRenderEffect,

@@ -17,15 +17,13 @@ import {
   readMaybe,
   type UrlSliceOptions,
 } from "@adapttable/angular";
-import {
-  type PivotConfig,
-  pivotSlice,
-  type PivotUrlState,
-} from "@adapttable/core";
+import { type PivotConfig, type PivotUrlState } from "@adapttable/core";
 import { computed, type Signal } from "@angular/core";
 
 export type { PivotUrlState } from "@adapttable/core";
 export { URL_SLICE_WRITE_DEBOUNCE_MS as PIVOT_URL_WRITE_DEBOUNCE_MS } from "@adapttable/core";
+
+import { pivotSlice } from "@adapttable/core/binding";
 
 /**
  * What {@link injectPivotUrlState} needs.

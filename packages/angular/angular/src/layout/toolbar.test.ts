@@ -1,10 +1,10 @@
 import {
   type BulkAction,
   createMemoryAdapter,
-  defaultLabels,
   type ExportCsvOptions,
   type RowAction,
 } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core/binding";
 import { Injector, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 

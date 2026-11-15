@@ -3,12 +3,14 @@
  * paging and layout — kept in storage, as signals over core's controller.
  */
 import {
-  createSavedViewsController,
-  safeLocalStorage,
   type SavedView,
   type SavedViewsControllerOptions,
 } from "@adapttable/core";
-import type { UseSavedViewsResult } from "@adapttable/core/binding";
+import {
+  createSavedViewsController,
+  safeLocalStorage,
+  type UseSavedViewsResult,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

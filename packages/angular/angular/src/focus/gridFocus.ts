@@ -10,21 +10,23 @@
  */
 import {
   type CellEdit,
-  cellNavigationChannels,
   type CellNavigationChannelsOptions,
   type CellRange,
+  type GridCell,
+  type GridFocusControllerOptions,
+} from "@adapttable/core";
+import {
+  cellNavigationChannels,
   cellRangeKey,
   createGridFocusController,
-  type GridCell,
   gridCellAttributes,
   gridColumnHeaderAttributes,
   gridContainerAttributes,
   gridFillHandleCell,
-  type GridFocusControllerOptions,
   gridRowAttributes,
   isGridColumnSelected,
   reportedCellRange,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import {
   afterEveryRender,
   assertInInjectionContext,

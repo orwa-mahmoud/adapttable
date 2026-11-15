@@ -4,11 +4,8 @@ import {
   type Renderer,
   type RowDetailContext,
 } from "@adapttable/angular";
-import {
-  nestedTableDefaults,
-  nestedTableLabel,
-  type NestedTableParent,
-} from "@adapttable/core";
+import { nestedTableDefaults, type NestedTableParent } from "@adapttable/core";
+import { nestedTableLabel } from "@adapttable/core/binding";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,

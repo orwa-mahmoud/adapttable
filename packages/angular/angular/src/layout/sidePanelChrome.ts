@@ -6,15 +6,15 @@
  * header, the strip and the body stay here so every kit shares them.
  */
 import type { SidePanelPanel } from "@adapttable/angular/features";
+import { type TableLabels } from "@adapttable/core";
 import {
   DEFAULT_SIDE_PANEL_ID_PREFIX,
   handleSidePanelBodyKey,
   handleSidePanelTabKey,
   sidePanelModel,
+  type SidePanelSide,
   sidePanelTabId,
-  type TableLabels,
-} from "@adapttable/core";
-import type { SidePanelSide } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,

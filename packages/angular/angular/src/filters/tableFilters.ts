@@ -4,7 +4,6 @@ import {
   type Direction,
   filterDefForColumn,
   type FilterRuntime,
-  showSimpleFilterFields,
   type TableSource,
 } from "@adapttable/core";
 import {
@@ -13,6 +12,7 @@ import {
   type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
   FilterTriggerToggleState,
+  showSimpleFilterFields,
 } from "@adapttable/core/binding";
 import { computed, type Signal, signal, type TemplateRef } from "@angular/core";
 

@@ -4,11 +4,8 @@
  * The parser lives in core. This binds a list of chords to a DOM target for
  * as long as the caller is alive.
  */
-import {
-  createShortcutHandler,
-  DEFAULT_SHORTCUTS,
-  type Shortcut,
-} from "@adapttable/core";
+import { DEFAULT_SHORTCUTS, type Shortcut } from "@adapttable/core";
+import { createShortcutHandler } from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   effect,

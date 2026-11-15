@@ -2,17 +2,15 @@
  * Find-bar layout. Structure only — adapters pass the search field and
  * the previous / next / close buttons the reader clicks.
  */
-import {
-  findMatchCountText,
-  handleFindBarKey,
-  type TableLabels,
-} from "@adapttable/core";
+import { type TableLabels } from "@adapttable/core";
 import {
   FIND_LABELS,
   type FindButtonProps,
   type FindInTableState,
+  findMatchCountText,
   type FindSearchProps,
   type FindStrings,
+  handleFindBarKey,
   resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import { focusEditorOnMount } from "@adapttable/core/editing";
