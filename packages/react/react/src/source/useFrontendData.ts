@@ -234,9 +234,10 @@ export function useFrontendData<TRow>(
   });
 
   const { page: safePage, total, hasNextPage } = frame;
+  const setStatePage = state.setPage;
   const fetchNextPage = useCallback(() => {
-    if (hasNextPage) state.setPage(safePage + 1);
-  }, [hasNextPage, safePage, state]);
+    if (hasNextPage) setStatePage(safePage + 1);
+  }, [hasNextPage, safePage, setStatePage]);
 
   const { rows, allFilteredRows, allSearchedRows } = frame;
   const {
