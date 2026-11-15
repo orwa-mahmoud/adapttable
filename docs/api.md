@@ -493,7 +493,9 @@ import path covers everything.
 
 ## Headless hooks
 
-All from `@adapttable/react` unless marked `@adapttable/react/adapter`.
+All from `@adapttable/react` unless marked `@adapttable/react/adapter`. The
+kit machinery marked there is also still on `@adapttable/react` as a
+deprecated alias until the next major.
 
 ### Data sources
 
@@ -552,10 +554,11 @@ All from `@adapttable/react` unless marked `@adapttable/react/adapter`.
   prop-getters: `getTableProps`, `getHeaderRowProps`, `getHeaderCellProps`,
   `getSortButtonProps`, `getRowProps`, `getCellProps`,
   `getSearchInputProps`.
-- `useTableChrome<TRow>(props): TableChrome<TRow>` — shared adapter
+- `useTableChrome<TRow>(props): TableChrome<TRow>` (`@adapttable/react/adapter`) — shared adapter
   orchestration: layout, confirm, chips, body region (`emptyVariant`,
   `isRefreshing`), `clearFilters`, footer.
-- `useVirtualChromeBodyData(chrome, props): ChromeBodyData<TRow>` — body
+- `useVirtualChromeBodyData(chrome, props): ChromeBodyData<TRow>`
+  (`@adapttable/react/adapter`) — body
   data-flow wiring: window virtualization + the infinite-scroll sentinel.
   `usePlainChromeBodyData` is the same shape without the virtualizer, for a
   table that never composed `virtualize`; `VirtualItemMeta` is one windowed
@@ -581,16 +584,20 @@ All from `@adapttable/react` unless marked `@adapttable/react/adapter`.
   select-all and cross-page "all matching".
 - `useRowExpansion(): RowExpansionState` — multi-open row expansion keyed by
   row id.
-- `useActiveFilterChips(options)` / `useExtraChips(options)` — removable
+- `useActiveFilterChips(options)` / `useExtraChips(options)`
+  (`@adapttable/react/adapter`) — removable
   chips from URL filter state / from non-URL state.
 - `useFilterOptions(def): { options, loading }` — resolves static, `"auto"`,
   and async filter-option sources for custom forms.
 - `useBulkActionRunner(options): BulkActionRunner` — runs bulk actions
   through the confirm handler.
-- `useColumnDragState()` — drag-reorder state for custom column menus.
-- `useHorizontalOverflow()` — scroll-overflow detection for pinned-column
+- `useColumnDragState()` (`@adapttable/react/adapter`) — drag-reorder state
+  for custom column menus.
+- `useHorizontalOverflow()` (`@adapttable/react/adapter`) — scroll-overflow
+  detection for pinned-column
   affordances.
-- `useFilterTriggerToggle()` / `useChromeScrollReset()` — filter-trigger
+- `useFilterTriggerToggle()` / `useChromeScrollReset()`
+  (`@adapttable/react/adapter`) — filter-trigger
   open state / scroll reset on query change.
 
 ### The neutral engine
