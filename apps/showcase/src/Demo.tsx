@@ -90,7 +90,7 @@ import {
 import { PEOPLE_GROUP_BY } from "./shared/groupingScenario";
 import { revealHiddenOnPin } from "./shared/peopleTable";
 import {
-  blankPerson,
+  addedPerson,
   nextPersonId,
   reorderPeople,
   reorderShapeOf,
@@ -942,11 +942,12 @@ function Frontend({
   // the same one-way flow a real app's mutation would follow.
   // The new row is built before the update rather than inside it: a state
   // updater must stay pure, and the flash needs the id it produced.
+  const addEditable = editing === true || rowMode === true || batch === true;
   const onAddRow = useCallback(() => {
-    const added = blankPerson(latestData.current);
+    const added = addedPerson(latestData.current, addEditable);
     writePatches([insertRow(added, 0)]);
     flashRow(added.id);
-  }, [flashRow, writePatches]);
+  }, [addEditable, flashRow, writePatches]);
   const onDuplicateRow = useCallback(
     (row: Person) => {
       const copy = { ...row, id: nextPersonId(latestData.current) };

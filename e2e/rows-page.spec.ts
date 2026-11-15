@@ -60,5 +60,11 @@ for (const kit of KITS) {
       .first();
     await expect(team).toBeVisible();
     await expect(team).toHaveAttribute("rowspan", /^[2-9]/);
+
+    // The page does not edit, so an added row is named to be found.
+    await root.locator('[data-adapttable-part="add-row"]').first().click();
+    await expect(
+      root.locator('[data-adapttable-part="row"]').first()
+    ).toContainText("New person");
   });
 }

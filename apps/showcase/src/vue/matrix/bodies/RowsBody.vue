@@ -3,6 +3,7 @@
 import { shallowRef } from "vue";
 
 import { pageDefaultsFor, pageLayoutFor, seedRoster } from "../../../casts";
+import { ROWS_HINTS } from "../../../shared/pageHints";
 import {
   orderPeopleByTeam,
   ROWS_PAGE_HEIGHT,
@@ -49,8 +50,9 @@ const features = [...pageFeatures, ...chrome];
 <template>
   <div class="mx-demo">
     <div class="hint-row">
-      <span class="hint">Open a row's ⋯ menu to pin it</span>
-      <span class="hint">A team that runs down the page is one cell</span>
+      <span v-for="hint in ROWS_HINTS" :key="hint" class="hint">{{
+        hint
+      }}</span>
     </div>
     <div class="mx-demo__body mx-scroll">
       <component

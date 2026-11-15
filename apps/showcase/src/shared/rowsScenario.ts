@@ -86,11 +86,27 @@ export function blankPerson(rows: readonly Person[]): Person {
 }
 
 /**
- * The rows after an Add on a page without editing: a blank person on top,
- * named so the reader can find it.
+ * The person an Add puts on top. Where the table edits, a blank row the
+ * reader fills in at once; where it does not, a blank person named so the
+ * reader can find it.
+ *
+ * @param rows - The rows before the Add.
+ * @param editable - Whether the table can edit the new row.
+ * @returns The added person.
  */
+export function addedPerson(
+  rows: readonly Person[],
+  editable: boolean
+): Person {
+  const blank = blankPerson(rows);
+  return editable
+    ? blank
+    : { ...blank, name: "New person", nameAr: "شخص جديد" };
+}
+
+/** The rows after an Add on a page without editing. */
 export const withAddedPerson = (rows: readonly Person[]): Person[] => [
-  { ...blankPerson(rows), name: "New person", nameAr: "شخص جديد" },
+  addedPerson(rows, false),
   ...rows,
 ];
 

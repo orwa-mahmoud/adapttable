@@ -121,6 +121,7 @@ import {
   COLUMN_GROUP_HINTS,
   NESTED_HINTS,
   readAnnouncements,
+  ROWS_HINTS,
   SELECTION_HINTS,
   TRANSCRIPT_LENGTH,
   TRANSCRIPT_TEXT,
@@ -1533,8 +1534,9 @@ class NestedTablesBody {
   template: `
     <div class="mx-demo">
       <div class="hint-row">
-        <span class="hint">Open a row's ⋯ menu to pin it</span>
-        <span class="hint">A team that runs down the page is one cell</span>
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
@@ -1556,6 +1558,7 @@ class NestedTablesBody {
   `,
 })
 class RowsBody {
+  readonly hints = ROWS_HINTS;
   readonly maxHeight = ROWS_PAGE_HEIGHT;
   readonly pageDefaults = pageDefaultsFor("rows");
   readonly pageLayout = pageLayoutFor("rows");

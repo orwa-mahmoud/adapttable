@@ -1,6 +1,6 @@
 /**
- * What the selection, column-group, nested-table and accessibility pages
- * tell the reader,
+ * What the selection, rows, column-group, nested-table and accessibility
+ * pages tell the reader,
  * and the accessibility page's transcript, written once for React, Vue and
  * Angular.
  */
@@ -10,6 +10,13 @@ export const SELECTION_HINTS: readonly string[] = [
   "the header box takes the whole page",
   "selection survives paging — it is a set of ids",
   "bulk actions run over the selection",
+];
+
+/** The rows page's hints, in order. */
+export const ROWS_HINTS: readonly string[] = [
+  "pin a row to the top or the floor of the scroll box",
+  "Team is written once down consecutive teammates",
+  "the 3-dot menu is add, duplicate, delete, pin",
 ];
 
 /** The column-groups page's hints, in order. */

@@ -5,6 +5,7 @@ import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Pin } from "./sectionIcons";
+import { ROWS_HINTS } from "./shared/pageHints";
 import { ROWS_PAGE_HEIGHT } from "./shared/rowsScenario";
 
 /**
@@ -15,15 +16,11 @@ export function RowsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   return (
     <div className="mx-demo">
       <div className="hint-row">
-        <span className="hint">
-          <Pin size={12} /> pin a row to the top or the floor of the scroll box
-        </span>
-        <span className="hint">
-          <Check size={12} /> Team is written once down consecutive teammates
-        </span>
-        <span className="hint">
-          <Check size={12} /> the 3-dot menu is add, duplicate, delete, pin
-        </span>
+        {ROWS_HINTS.map((hint, index) => (
+          <span className="hint" key={hint}>
+            {index === 0 ? <Pin size={12} /> : <Check size={12} />} {hint}
+          </span>
+        ))}
       </div>
       <div className="mx-demo__body">
         <div key={adapter} data-adapter={adapter}>
