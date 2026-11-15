@@ -341,6 +341,53 @@ describe("native parts contracts before publication", () => {
       "table — adapter-verdant: not named",
     ]);
   });
+
+  /** A kit that names no `table` and runs the binding's shared suite. */
+  function sharedSuiteRoot(assertion) {
+    const root = contractRoot();
+    writePackage(root, "angular", "adapter-verdant", {
+      "src/data-table.component.html": VERDANT.replace(
+        'data-adapttable-part="table"',
+        ""
+      ),
+      "src/structural-parts.test.ts": [
+        'import { structuralPartsTests } from "../../angular/test/kit/suites/structuralParts";',
+        'import { kit } from "../testing/kit";',
+        "for (const test of structuralPartsTests(kit)) it(test.name, test.run);",
+        "",
+      ].join("\n"),
+    });
+    writePackage(root, "angular", "angular", {
+      "test/kit/suites/structuralParts.ts": [
+        "export function structuralPartsTests(kit) {",
+        '  const STRUCTURAL_PARTS = ["table", "cell"] as const;',
+        "  const rendered = STRUCTURAL_PARTS.filter((part) => kit.has(part));",
+        `  ${assertion}`,
+        "}",
+        "",
+      ].join("\n"),
+    });
+    return root;
+  }
+
+  const contractLines = (root) =>
+    parity(root).failures.flatMap((failure) => failure.lines);
+
+  it("accepts a structural part the kit's shared suite renders and asserts", () => {
+    const root = sharedSuiteRoot(
+      "expect(rendered).toEqual([...STRUCTURAL_PARTS]);"
+    );
+    assert.ok(
+      !contractLines(root).includes("table — adapter-verdant: not named")
+    );
+  });
+
+  it("rejects a shared suite that lists the parts without asserting them", () => {
+    const root = sharedSuiteRoot("return rendered;");
+    assert.ok(
+      contractLines(root).includes("table — adapter-verdant: not named")
+    );
+  });
 });
 
 const SCROLL_BOX_REF = `export const nameScrollBox = (node) => {
