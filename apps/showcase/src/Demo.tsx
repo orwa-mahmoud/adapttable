@@ -784,6 +784,7 @@ function frontendColumnProps(
     onAddRow: () => void;
     onDuplicateRow: (row: Person) => void;
     onDeleteRow: (row: Person) => void;
+    onArchiveRows: (ids: readonly string[]) => void;
     onRowReorder: (from: number, to: number, row: Person) => void;
     onGroupMove: NonNullable<RowReorderOptions<Person>["onGroupMove"]>;
     onTreeMove: NonNullable<RowReorderOptions<Person>["onTreeMove"]>;
@@ -795,9 +796,13 @@ function frontendColumnProps(
     ...columns,
     slots: errorSlots(flags.failure),
     renderCard: cardRenderer(flags.customCard),
-    // Delete removes the row. The pencil is a row-edit trigger and needs no
-    // handler: it opens the row's own fields, which save through `onRowEdit`.
-    demoRowHandlers: { onDelete: flags.onDeleteRow },
+    // Delete removes the row and Archive marks the selected rows. The pencil is
+    // a row-edit trigger and needs no handler: it opens the row's own fields,
+    // which save through `onRowEdit`.
+    demoRowHandlers: {
+      onDelete: flags.onDeleteRow,
+      onArchive: flags.onArchiveRows,
+    },
   };
   const onRowEdit = (row: Person, patch: Record<string, unknown>) => {
     flags.writePatches([updateRow(row.id, columnChanges(patch))]);
@@ -973,6 +978,14 @@ function Frontend({
     },
     [writePatches]
   );
+  const onArchiveRows = useCallback(
+    (ids: readonly string[]) => {
+      writePatches(
+        ids.map((id) => updateRow<Person>(id, { status: "Archived" }))
+      );
+    },
+    [writePatches]
+  );
   const onRowReorder = useCallback(
     (from: number, to: number, row: Person) => {
       setData((prev) =>
@@ -1136,6 +1149,7 @@ function Frontend({
         onAddRow,
         onDuplicateRow,
         onDeleteRow,
+        onArchiveRows,
         onRowReorder,
         onGroupMove,
         onTreeMove,
@@ -1173,6 +1187,7 @@ function Frontend({
       onAddRow,
       onDuplicateRow,
       onDeleteRow,
+      onArchiveRows,
       onRowReorder,
       onGroupMove,
       onTreeMove,

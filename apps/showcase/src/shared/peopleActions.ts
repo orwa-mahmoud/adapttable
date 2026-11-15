@@ -15,6 +15,44 @@ export interface PeopleRowHandlers {
   readonly onDelete: (row: Person) => void;
 }
 
+/** What the bulk actions change: the host owns the rows. */
+export interface PeopleBulkHandlers {
+  /** Mark the rows with these ids as archived. */
+  readonly onArchive: (ids: readonly string[]) => void;
+}
+
+/** How many ids a notice names before it counts the rest. */
+const NOTICE_ID_LIMIT = 10;
+
+/**
+ * The ids an action received, as a notice names them.
+ *
+ * @param ids - The selected row ids, in selection order.
+ * @returns `"501, 503"`, or the first ten and `"+N"` for the rest.
+ */
+export function noticeIds(ids: readonly string[]): string {
+  const named = ids.slice(0, NOTICE_ID_LIMIT).join(", ");
+  const rest = ids.length - NOTICE_ID_LIMIT;
+  return rest > 0 ? `${named} +${String(rest)}` : named;
+}
+
+/**
+ * The rows with these ids marked archived; every other row is returned as is.
+ *
+ * @param rows - The host's rows.
+ * @param ids - The ids to archive.
+ * @returns The next rows.
+ */
+export function archivePeople<Row extends Person>(
+  rows: readonly Row[],
+  ids: readonly string[]
+): Row[] {
+  const archived = new Set(ids);
+  return rows.map((row) =>
+    archived.has(row.id) ? { ...row, status: "Archived" } : row
+  );
+}
+
 /**
  * Edit and Delete, the actions on every row of the pages that show them.
  *
@@ -66,25 +104,31 @@ const BULK_TEXT = {
  * selection and the bulk bar.
  *
  * @param dataLocale - The language of the labels.
- * @returns The bulk actions.
+ * @param handlers - The host's writes; without them Archive only reports.
+ * @returns The bulk actions; each notice names the ids it received.
  */
-export function peopleBulkActions(dataLocale: "ar" | "en"): BulkAction[] {
+export function peopleBulkActions(
+  dataLocale: "ar" | "en",
+  handlers?: PeopleBulkHandlers
+): BulkAction[] {
   const t = BULK_TEXT[dataLocale];
   return [
     {
       key: "export",
       label: t.export,
       onClick: (ids) =>
-        notifyDemo({ message: `${t.export}: ${String(ids.length)}` }),
+        notifyDemo({ message: `${t.export}: ${noticeIds(ids)}` }),
     },
     {
       key: "archive",
       label: t.archive,
-      onClick: (ids) =>
+      onClick: (ids) => {
+        handlers?.onArchive(ids);
         notifyDemo({
-          message: `${t.archive}: ${String(ids.length)}`,
+          message: `${t.archive}: ${noticeIds(ids)}`,
           tone: "danger",
-        }),
+        });
+      },
     },
   ];
 }

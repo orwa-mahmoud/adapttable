@@ -52,12 +52,14 @@ import {
 } from "./shared/groupingScenario";
 import {
   peopleBulkActions,
+  type PeopleBulkHandlers,
   peopleRowActions,
   type PeopleRowHandlers,
 } from "./shared/peopleActions";
 import {
   groupPeopleColumns,
   loadCaption,
+  ORDER_COLUMNS,
   peopleColumns,
   personInitials,
 } from "./shared/peopleTable";
@@ -126,16 +128,7 @@ export function nestedOpenIds(
 }
 
 /** Columns for the nested orders table — a different shape from the parent's. */
-export const DEMO_ORDER_COLUMNS: ColumnDef<DemoOrder>[] = [
-  { key: "item", header: "Item", accessor: (row) => row.item },
-  { key: "qty", header: "Qty", accessor: (row) => row.qty, align: "end" },
-  {
-    key: "amount",
-    header: "Amount",
-    accessor: (row) => `$${row.amount.toLocaleString("en-US")}`,
-    align: "end",
-  },
-];
+export const DEMO_ORDER_COLUMNS: ColumnDef<DemoOrder>[] = [...ORDER_COLUMNS];
 
 export const demoConfirm: ConfirmHandler = (request: ConfirmRequest) => {
   window.dispatchEvent(
@@ -617,8 +610,8 @@ export function makeWideColumns(
   return leaves;
 }
 
-/** What the demo's row actions actually do: the host owns the rows. */
-export type DemoRowHandlers = PeopleRowHandlers;
+/** What the demo's row and bulk actions actually do: the host owns the rows. */
+export type DemoRowHandlers = PeopleRowHandlers & PeopleBulkHandlers;
 
 /** The row actions every kit draws, with this kit set's icons. */
 const ROW_ACTION_ICONS: Readonly<Record<string, ReactNode>> = {

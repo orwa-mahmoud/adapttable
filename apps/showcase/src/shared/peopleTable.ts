@@ -20,6 +20,7 @@ import {
   budget,
   budgetAggregateText,
   demoFilterDefs,
+  type DemoOrder,
   dueDate,
   formatDate,
   formatMoney,
@@ -557,6 +558,29 @@ export function loadCaption(row: Person, dataLocale: "ar" | "en"): string {
 /** A fresh copy of the people, for a page that edits or reorders them. */
 export const peopleRows = (): Person[] =>
   PEOPLE.map((person) => ({ ...person }));
+
+/** One column of a person's nested orders table. */
+export interface OrderColumn {
+  readonly key: string;
+  readonly header: string;
+  readonly accessor: (row: DemoOrder) => string | number;
+  readonly align?: "end";
+}
+
+/** The nested orders table's columns — a different shape from the parent's. */
+export const ORDER_COLUMNS: readonly OrderColumn[] = [
+  { key: "item", header: "Item", accessor: (row) => row.item },
+  { key: "qty", header: "Qty", accessor: (row) => row.qty, align: "end" },
+  {
+    key: "amount",
+    header: "Amount",
+    accessor: (row) => `$${row.amount.toLocaleString("en-US")}`,
+    align: "end",
+  },
+];
+
+/** The key of one order row. */
+export const orderKey = (order: DemoOrder): string => order.id;
 
 /**
  * The live demo hides Email and Team, so the people fit the frame with no

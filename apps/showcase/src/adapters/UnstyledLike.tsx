@@ -592,7 +592,7 @@ function UnstyledLikeTable({
           undoRedoButtons: o.undoRedoButtons,
           urlKey: o.urlKey,
           bulkActions: o.bulkActions,
-          bulkActionList: makeBulkActions(o.locale),
+          bulkActionList: makeBulkActions(o.locale, demoRowHandlers),
           collapsibleColumnGroups,
           columnMenu: o.columnMenu,
           rowActions: o.rowActionsShown

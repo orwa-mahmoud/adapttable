@@ -421,7 +421,7 @@ export function AntdDemo({
                 undoRedoButtons,
                 urlKey,
                 bulkActions,
-                bulkActionList: makeBulkActions(locale),
+                bulkActionList: makeBulkActions(locale, demoRowHandlers),
                 collapsibleColumnGroups: columns.collapsibleColumnGroups,
                 columnMenu,
                 rowActions: rowActionsShown

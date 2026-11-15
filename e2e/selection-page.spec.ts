@@ -123,8 +123,18 @@ for (const kit of KITS) {
     // the cell's control rather than requiring the input itself to be visible.
     await cell.getByRole("checkbox").first().click({ force: true });
     // Ticking a row has to offer something that acts on it.
+    const bar = page.locator('[data-adapttable-part="bulk-bar"]').first();
+    await expect(bar).toBeVisible();
+
+    // The action receives the ticked ids and the host writes the rows.
+    const row = root
+      .locator('[data-adapttable-part="row"][data-row-id]')
+      .first();
+    const id = (await row.getAttribute("data-row-id")) ?? "";
+    await bar.getByRole("button", { name: "Archive", exact: true }).click();
     await expect(
-      page.locator('[data-adapttable-part="bulk-bar"]').first()
-    ).toBeVisible();
+      page.getByRole("status").filter({ hasText: /^Archive: / })
+    ).toHaveText(`Archive: ${id}`);
+    await expect(row.getByText("Archived", { exact: true })).toBeVisible();
   });
 }
