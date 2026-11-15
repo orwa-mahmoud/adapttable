@@ -7,10 +7,8 @@ for (const kit of builtAdapters("vue")) {
     page,
   }) => {
     await page.goto(`/vue-main/?kit=${kit.key}`);
-    const value = page.getByRole("button", {
-      name: "Ada Lovelace",
-      exact: true,
-    });
+    // The Person value reads the name, then the role the kit draws under it.
+    const value = page.getByRole("button", { name: /^Ada Lovelace/ });
     await expect(value).toBeVisible();
     await expect(value).toHaveAccessibleDescription("Edit cell");
     await value.press("F2");
@@ -54,10 +52,7 @@ for (const kit of [
     page,
   }) => {
     await page.goto(`/angular-main/?kit=${kit}`);
-    const value = page.getByRole("button", {
-      name: "Ada Lovelace",
-      exact: true,
-    });
+    const value = page.getByRole("button", { name: /^Ada Lovelace/ });
     await value.press("Escape");
     await expect(value).toBeFocused();
     const outline = await value.evaluate((element) => {
@@ -76,7 +71,7 @@ test("Vue switches kits and options without navigation or losing committed edits
   page,
 }) => {
   await page.goto("/vue-main/?kit=vue-unstyled");
-  const value = page.getByRole("button", { name: "Ada Lovelace", exact: true });
+  const value = page.getByRole("button", { name: /^Ada Lovelace/ });
   await value.press("F2");
   const editor = page.getByRole("textbox", { name: "Edit cell", exact: true });
   await editor.fill("Ada updated");
@@ -94,7 +89,7 @@ test("Vue switches kits and options without navigation or losing committed edits
     })
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Ada updated", exact: true })
+    page.getByRole("button", { name: /^Ada updated/ })
   ).toBeVisible();
   await page.getByRole("radio", { name: "Compact", exact: true }).check();
   await expect(
@@ -106,7 +101,7 @@ test("Vue switches kits and options without navigation or losing committed edits
     page.locator('.mx-demo [data-adapttable-part="root"]')
   ).toHaveAttribute("data-density", "comfortable");
   await expect(
-    page.getByRole("button", { name: "Ada updated", exact: true })
+    page.getByRole("button", { name: /^Ada updated/ })
   ).toBeVisible();
 });
 
@@ -118,14 +113,12 @@ test("Vue same-document locale changes refresh labels and direction", async ({
   await expect(
     page.locator('.mx-demo [data-adapttable-part="root"]')
   ).toHaveAttribute("dir", "rtl");
-  await expect(
-    page.getByRole("button", { name: "آدا لوفليس", exact: true })
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /^آدا لوفليس/ })).toBeVisible();
   await page.getByRole("radio", { name: "English", exact: true }).check();
   await expect(
     page.locator('.mx-demo [data-adapttable-part="root"]')
   ).toHaveAttribute("dir", "ltr");
   await expect(
-    page.getByRole("button", { name: "Ada Lovelace", exact: true })
+    page.getByRole("button", { name: /^Ada Lovelace/ })
   ).toBeVisible();
 });

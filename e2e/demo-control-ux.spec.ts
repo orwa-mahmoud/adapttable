@@ -141,7 +141,7 @@ test("shadcn-vue editable cells have a flat ghost appearance and retain keyboard
   page,
 }) => {
   await page.goto("/vue-main/?kit=shadcn-vue");
-  const value = page.getByRole("button", { name: "Ada Lovelace", exact: true });
+  const value = page.getByRole("button", { name: /^Ada Lovelace/ });
   await expect(value).toBeVisible();
   await expect(value).toHaveCSS("border-top-width", "0px");
   const columns = page.getByRole("button", { name: "Columns", exact: true });

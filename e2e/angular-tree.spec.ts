@@ -100,7 +100,7 @@ for (const kit of ANGULAR_KITS) {
       const child = (await outline(page))[1]!.id!;
       const name = (
         await row(page, child)
-          .locator('[data-adapttable-part="cell"]')
+          .locator('[data-column-key="person"] strong')
           .first()
           .innerText()
       ).trim();

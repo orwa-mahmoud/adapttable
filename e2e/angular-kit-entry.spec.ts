@@ -14,10 +14,8 @@ for (const kit of ANGULAR_KITS) {
     await expect(rows).toHaveCount(5);
     const name = rows.first().locator('[data-column-key="person"]');
     // The native edit button owns activation; the cell also contains row padding.
-    const activate = name.getByRole("button", {
-      name: "Priya Nair",
-      exact: true,
-    });
+    // The value reads the name, then the role the kit draws under it.
+    const activate = name.getByRole("button", { name: /^Priya Nair/ });
     await expect(activate).toHaveAttribute(
       "data-adapttable-part",
       "edit-cell-activate"

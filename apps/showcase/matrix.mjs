@@ -4227,7 +4227,7 @@ export const isIndexable = (adapter) => adapter.indexable !== false;
 /**
  * The URL segment an adapter's pages live under in its framework's demo root.
  *
- * @param {ShowcaseAdapter} adapter
+ * @param {Pick<ShowcaseAdapter, "path" | "key">} adapter
  * @returns {string}
  */
 export const pathOf = (adapter) => adapter.path ?? adapter.key;

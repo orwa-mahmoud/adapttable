@@ -22,9 +22,9 @@ for (const kit of ANGULAR_KITS) {
             .slice(0, n)
             .map(
               (row) =>
-                [...row.querySelectorAll('[data-adapttable-part="cell"]')]
-                  .map((cell) => cell.textContent?.trim() ?? "")
-                  .find((text) => /^[A-Z][a-z]+ /.test(text)) ?? ""
+                row
+                  .querySelector('[data-column-key="person"] strong')
+                  ?.textContent?.trim() ?? ""
             ),
         count
       );

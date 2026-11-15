@@ -13,13 +13,13 @@ for (const kit of ANGULAR_KITS) {
 
     const part = (page: Page, name: string) => angularPart(kit, page, name);
 
-    /** The first cell's text in every rendered row. */
+    /** The name in every rendered row's Person cell, drawn above the role. */
     const names = (page: Page) =>
       part(page, "row").evaluateAll((rows) =>
         rows.map(
           (row) =>
             row
-              .querySelector('[data-adapttable-part="cell"]')
+              .querySelector('[data-column-key="person"] strong')
               ?.textContent?.trim() ?? ""
         )
       );

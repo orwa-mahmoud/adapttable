@@ -103,7 +103,11 @@ for (const kit of KITS) {
       await expect(page.locator("adapt-showcase-matrix-page")).toBeVisible();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(heading);
       await expect(
-        page.locator('.mx-demo [data-adapttable-part="root"]').first()
+        page
+          .locator(
+            '.mx-demo [data-adapttable-part="root"], .ai-demo__stage [data-adapttable-part="root"]'
+          )
+          .first()
       ).toBeVisible();
       await expect(page.locator(".mx-seam")).toContainText(kit.pkg);
       expect(errors).toEqual([]);

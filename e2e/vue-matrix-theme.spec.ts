@@ -13,7 +13,11 @@ for (const slug of ["pivot", "ai"]) {
             .locator('.mx-demo [data-zone="rows"]')
             .getByRole("combobox", { name: "Add field", exact: true })
         : page.locator('[data-adapttable-part="assistant-launcher"]');
-    const table = page.locator('.mx-demo [data-adapttable-part="root"]');
+    const table = page
+      .locator(
+        '.mx-demo [data-adapttable-part="root"], .ai-demo__stage [data-adapttable-part="root"]'
+      )
+      .first();
     await expect(control).toBeVisible();
     for (const mode of ["light", "dark", "light"]) {
       if ((await page.locator("html").getAttribute("data-theme")) !== mode) {

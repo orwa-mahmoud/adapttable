@@ -13,10 +13,11 @@ for (const kit of ANGULAR_KITS) {
 
     const part = (page: Page, name: string) => angularPart(kit, page, name);
 
+    /** The name in the first row's Person cell, drawn above the role. */
     const firstPerson = (page: Page) =>
       part(page, "row")
         .first()
-        .locator('[data-adapttable-part="cell"]')
+        .locator('[data-column-key="person"] strong')
         .first();
 
     test("saves a sorted view by name and restores it from the menu", async ({
