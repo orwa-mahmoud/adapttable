@@ -49,7 +49,11 @@
   let-onDrop="onDrop"
 >
   @if (part === "virtual-spacer") {
-    <tr inert class="adapt-material-virtual-spacer">
+    <tr
+      inert
+      class="adapt-material-virtual-spacer"
+      data-adapttable-part="virtual-spacer"
+    >
       <ng-container *ngTemplateOutlet="content" />
     </tr>
   } @else if (part) {

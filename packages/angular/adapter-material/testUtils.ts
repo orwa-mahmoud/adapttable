@@ -66,7 +66,6 @@ const MATERIAL_INTERNALS = new Set([
   "sort-button",
   "sort-index",
   "sort-select",
-  "virtual-spacer",
 ]);
 
 export function kitSelector(name: string): string {

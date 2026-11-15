@@ -176,9 +176,10 @@ export function virtualizeTests(
       ].map((row) => row.getAttribute("data-row-id")!);
     }
 
+    /** The spacer row's height, read through the documented public part. */
     function spacerHeight(): string {
       const cell = document.querySelector<HTMLElement>(
-        `${kitSelector("virtual-spacer")} td`
+        '[data-adapttable-part="virtual-spacer"] td'
       );
       expect(cell).not.toBeNull();
       return cell!.style.height;

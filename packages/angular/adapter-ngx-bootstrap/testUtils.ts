@@ -68,7 +68,6 @@ const INTERNAL_PARTS = new Set([
   "sort-button",
   "sort-index",
   "sort-select",
-  "virtual-spacer",
 ]);
 
 /** Never accept a private marker as a substitute for a public contract part. */
