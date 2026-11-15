@@ -27,7 +27,7 @@ import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { SortableValue } from '@adapttable/core';
 import { sparklineExportValue } from '@adapttable/core';
-import { SparklineKind } from '@adapttable/core';
+import { SparklineKind } from '@adapttable/core/binding';
 import { sparklineSummary } from '@adapttable/core';
 
 export { CellEditor }

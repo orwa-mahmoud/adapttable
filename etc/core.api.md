@@ -4,8 +4,11 @@
 
 ```ts
 
+// @public @deprecated
+export const acceptColumnDrag: typeof acceptColumnDrag_2;
+
 // @public
-export function acceptColumnDrag(event: ColumnDragEvent): void;
+function acceptColumnDrag_2(event: ColumnDragEvent_2): void;
 
 // @public
 export interface ActionAiOptions {
@@ -36,30 +39,51 @@ export interface ActiveFilterChip {
     onRemove: () => void;
 }
 
-// @public
-export function activeFilterChips(input: ActiveFilterChipsOptions): ActiveFilterChip[];
+// @public @deprecated
+export const activeFilterChips: typeof activeFilterChips_2;
 
 // @public
-export interface ActiveFilterChipsOptions {
+function activeFilterChips_2(input: ActiveFilterChipsOptions_2): ActiveFilterChip[];
+
+// @public @deprecated
+export type ActiveFilterChipsOptions = ActiveFilterChipsOptions_2;
+
+// @public
+interface ActiveFilterChipsOptions_2 {
     readonly labels: Readonly<Record<string, ChipLabelResolver>>;
     readonly onChange: (key: string, next: FilterValue) => void;
     readonly values: Readonly<Record<string, FilterValue>>;
 }
 
-// @public
-export function activeTierValue<T>(active: boolean, value: T, idle: T): T;
+// @public @deprecated
+export const activeTierValue: typeof activeTierValue_2;
 
 // @public
-export function addAggregation(overrides: Readonly<Partial<Record<string, string>>>, columnKey: string, operationId: string): Readonly<Partial<Record<string, string>>>;
+function activeTierValue_2<T>(active: boolean, value: T, idle: T): T;
+
+// @public @deprecated
+export const addAggregation: typeof addAggregation_2;
 
 // @public
-export function addFilterTreeCondition(tree: QueryFilterGroup | undefined, path: readonly number[], condition: QueryCondition): QueryFilterGroup;
+function addAggregation_2(overrides: Readonly<Partial<Record<string, string>>>, columnKey: string, operationId: string): Readonly<Partial<Record<string, string>>>;
+
+// @public @deprecated
+export const addFilterTreeCondition: typeof addFilterTreeCondition_2;
 
 // @public
-export function addFilterTreeGroup(tree: QueryFilterGroup | undefined, path: readonly number[]): QueryFilterGroup;
+function addFilterTreeCondition_2(tree: QueryFilterGroup | undefined, path: readonly number[], condition: QueryCondition): QueryFilterGroup;
+
+// @public @deprecated
+export const addFilterTreeGroup: typeof addFilterTreeGroup_2;
 
 // @public
-export function advanceGroupPaging(current: GroupPaging, pageSize: number, groupKey?: string): GroupPaging;
+function addFilterTreeGroup_2(tree: QueryFilterGroup | undefined, path: readonly number[]): QueryFilterGroup;
+
+// @public @deprecated
+export const advanceGroupPaging: typeof advanceGroupPaging_2;
+
+// @public
+function advanceGroupPaging_2(current: GroupPaging, pageSize: number, groupKey?: string): GroupPaging;
 
 // @public
 export type AgentApprovalDecision = "pending" | "approved" | "rejected";
@@ -118,8 +142,11 @@ export interface AggregatableConfig<TValue = AggregateOrderedValue> {
 // @public
 export function aggregate<TRow>(spec: AggregateSpec, options?: AggregateOptions<TRow>): GroupAggregatesMapper<TRow>;
 
+// @public @deprecated
+export const AGGREGATE_NAMES: typeof AGGREGATE_NAMES_2;
+
 // @public
-export const AGGREGATE_NAMES: AggregateName[];
+const AGGREGATE_NAMES_2: AggregateName[];
 
 // @public
 export const AGGREGATE_SUPPRESSED = "none";
@@ -195,8 +222,11 @@ export interface AggregationModelInput<TRow> {
 // @public
 export type AggregationOrigin = "reader" | "declared" | "host";
 
+// @public @deprecated
+export const aggregationRemovalFocusSelectors: typeof aggregationRemovalFocusSelectors_2;
+
 // @public
-export function aggregationRemovalFocusSelectors(remainingKeys: readonly string[], removedIndex: number): string[];
+function aggregationRemovalFocusSelectors_2(remainingKeys: readonly string[], removedIndex: number): string[];
 
 // @public
 export interface AggregationSourceSupport {
@@ -215,17 +245,26 @@ export interface AllMatchingScope {
     readonly subscribe: (listener: () => void) => () => void;
 }
 
-// @public
-export function allowsOperation(resolved: ResolvedAggregatable | undefined, operationId: string): boolean;
+// @public @deprecated
+export const allowsOperation: typeof allowsOperation_2;
 
 // @public
-export function allowsReaderOperation(resolved: ResolvedAggregatable | undefined, operationId: string, source?: AggregationSourceSupport): boolean;
+function allowsOperation_2(resolved: ResolvedAggregatable | undefined, operationId: string): boolean;
+
+// @public @deprecated
+export const allowsReaderOperation: typeof allowsReaderOperation_2;
+
+// @public
+function allowsReaderOperation_2(resolved: ResolvedAggregatable | undefined, operationId: string, source?: AggregationSourceSupport): boolean;
 
 // @public
 export function allPinnedSummaryEntries<TRow>(pinnedRows: PinnedRows<TRow> | undefined): readonly PinnedSummaryEntry<TRow>[];
 
+// @public @deprecated
+export const appendBaseKey: typeof appendBaseKey_2;
+
 // @public
-export function appendBaseKey(query: {
+function appendBaseKey_2(query: {
     readonly limit: number;
     readonly search: string;
     readonly sortBy: string | undefined;
@@ -234,18 +273,27 @@ export function appendBaseKey(query: {
     readonly filters: ExtraFilters;
 }): string;
 
-// @public
-export function appendByKey<T>(first: readonly T[], second: readonly T[], keyOf: (item: T) => string): T[];
+// @public @deprecated
+export const appendByKey: typeof appendByKey_2;
 
 // @public
-export function appendedRows<TRow>(stash: AppendStash<TRow> | null, baseKey: string, page: number, rows: readonly TRow[]): {
+function appendByKey_2<T>(first: readonly T[], second: readonly T[], keyOf: (item: T) => string): T[];
+
+// @public @deprecated
+export const appendedRows: typeof appendedRows_2;
+
+// @public
+function appendedRows_2<TRow>(stash: AppendStash_2<TRow> | null, baseKey: string, page: number, rows: readonly TRow[]): {
     readonly rows: readonly TRow[];
     readonly appending: boolean;
     readonly pending: boolean;
 };
 
+// @public @deprecated
+export type AppendStash<TRow> = AppendStash_2<TRow>;
+
 // @public
-export interface AppendStash<TRow> {
+interface AppendStash_2<TRow> {
     readonly key: string;
     readonly page: number;
     readonly prevProp: readonly TRow[];
@@ -258,20 +306,35 @@ export const applyCollapsedColumnGroups: typeof applyCollapsedColumnGroups_2;
 // @public
 function applyCollapsedColumnGroups_2<TRow>(columns: readonly ColumnMetadata<TRow>[], collapsedIds: readonly string[], groups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>): readonly ColumnMetadata<TRow>[];
 
-// @public
-export function applyColumnNames<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], names: Readonly<Record<string, string>> | undefined): TCol[];
+// @public @deprecated
+export const applyColumnNames: typeof applyColumnNames_2;
 
 // @public
-export function applyColumnOrder<TRow>(columns: readonly ColumnMetadata<TRow>[], order: readonly string[]): ColumnMetadata<TRow>[];
+function applyColumnNames_2<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], names: Readonly<Record<string, string>> | undefined): TCol[];
+
+// @public @deprecated
+export const applyColumnOrder: typeof applyColumnOrder_2;
 
 // @public
-export function applyFilterExtends(registry: FilterTypeRegistry, host: FeatureHostState | undefined): FilterTypeRegistry;
+function applyColumnOrder_2<TRow>(columns: readonly ColumnMetadata<TRow>[], order: readonly string[]): ColumnMetadata<TRow>[];
+
+// @public @deprecated
+export const applyFilterExtends: typeof applyFilterExtends_2;
 
 // @public
-export function applyGroupLeafSelection(leafIds: readonly string[], selectedIds: ReadonlySet<string>): Set<string>;
+function applyFilterExtends_2(registry: FilterTypeRegistry, host: FeatureHostState | undefined): FilterTypeRegistry;
+
+// @public @deprecated
+export const applyGroupLeafSelection: typeof applyGroupLeafSelection_2;
 
 // @public
-export function applyQuerySupport(extensions: QueryExtensions, support: QuerySupport | undefined, input?: {
+function applyGroupLeafSelection_2(leafIds: readonly string[], selectedIds: ReadonlySet<string>): Set<string>;
+
+// @public @deprecated
+export const applyQuerySupport: typeof applyQuerySupport_2;
+
+// @public
+function applyQuerySupport_2(extensions: QueryExtensions, support: QuerySupport | undefined, input?: {
     warn?: boolean;
 }): QueryExtensions;
 
@@ -296,8 +359,11 @@ export function applyRowReorder<T>(rows: readonly T[], from: number, to: number)
 // @public
 export function applyTableUrlState(search: string, savedSearch: string, namespace: string): string;
 
+// @public @deprecated
+export const APPROVAL_PREVIEW_LIMIT: typeof APPROVAL_PREVIEW_LIMIT_2;
+
 // @public
-export const APPROVAL_PREVIEW_LIMIT = 3;
+const APPROVAL_PREVIEW_LIMIT_2 = 3;
 
 // @public
 export interface ApprovalArgumentPair {
@@ -311,8 +377,11 @@ export function approvalArgumentPairs(args: unknown): readonly ApprovalArgumentP
 // @public
 export type ApprovalPresentation = "widget" | "table" | "modal";
 
+// @public @deprecated
+export const approvalProposalText: typeof approvalProposalText_2;
+
 // @public
-export function approvalProposalText(proposal: AgentApprovalProposal, labels: TableLabels | undefined): string;
+function approvalProposalText_2(proposal: AgentApprovalProposal, labels: TableLabels | undefined): string;
 
 // @public
 export interface ApprovalReview {
@@ -354,8 +423,11 @@ export function asBatchGesture<TRow>(apply: ((edits: readonly BatchRowEdit<TRow>
 // @public
 export function asGesture<TRow>(apply: ((edits: CellEdit<TRow>[]) => unknown) | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): ((edits: CellEdit<TRow>[]) => unknown) | undefined;
 
+// @public @deprecated
+export type AssemblyFns<TRow = unknown> = AssemblyFns_2<TRow>;
+
 // @public
-export interface AssemblyFns<TRow = unknown> {
+interface AssemblyFns_2<TRow = unknown> {
     buildBodyCells: (options: {
         rows: readonly TRow[];
         columns: readonly ColumnMetadata<TRow>[];
@@ -390,8 +462,11 @@ export interface AssemblyFns<TRow = unknown> {
 // @public
 export function assignField(config: PivotConfig, key: string, zone: PivotZone, index?: number): PivotConfig;
 
+// @public @deprecated
+export const attachIncrementalView: typeof attachIncrementalView_2;
+
 // @public
-export function attachIncrementalView<TRow>(rows: readonly TRow[], view: IncrementalView<TRow>): void;
+function attachIncrementalView_2<TRow>(rows: readonly TRow[], view: IncrementalView<TRow>): void;
 
 // @public
 export const AUTO_OPTIONS_LIMIT = 50;
@@ -402,11 +477,20 @@ export function autoSizeColumns(root: Element | null, keys: readonly string[], s
 // @public
 export function availableFields(fields: readonly PivotField[], config: PivotConfig): PivotField[];
 
-// @public
-export const BASE_LABELS: Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed">;
+// @public @deprecated
+export const BASE_LABELS: typeof BASE_LABELS_2;
 
 // @public
-export interface BatchEditBarModel {
+const BASE_LABELS_2: Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed">;
+
+// @public @deprecated
+export type BatchEditBarModel = BatchEditBarModel_2;
+
+// @public @deprecated
+export const batchEditBarModel: typeof batchEditBarModel_2;
+
+// @public
+interface BatchEditBarModel_2 {
     readonly cancelLabel: string;
     readonly conflictMessage: string | undefined;
     readonly count: string;
@@ -414,7 +498,7 @@ export interface BatchEditBarModel {
 }
 
 // @public
-export function batchEditBarModel<TRow>(batch: Pick<BatchEditingState<TRow>, "pending" | "count">, contested: boolean | undefined, labels: TableLabels | undefined): BatchEditBarModel | null;
+function batchEditBarModel_2<TRow>(batch: Pick<BatchEditingState<TRow>, "pending" | "count">, contested: boolean | undefined, labels: TableLabels | undefined): BatchEditBarModel_2 | null;
 
 // @public
 export interface BatchEditEntry {
@@ -424,14 +508,20 @@ export interface BatchEditEntry {
     readonly seeds: Readonly<Record<string, string>>;
 }
 
+// @public @deprecated
+export const batchEditErrorId: typeof batchEditErrorId_2;
+
 // @public
-export function batchEditErrorId(rowId: string, columnKey: string): string;
+function batchEditErrorId_2(rowId: string, columnKey: string): string;
 
 // @public
 export type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => unknown;
 
+// @public @deprecated
+export const batchEditHandler: typeof batchEditHandler_2;
+
 // @public
-export function batchEditHandler<TRow>(batch: ((edits: CellEdit<TRow>[]) => unknown) | undefined, onCellEdit: ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined): ((edits: CellEdit<TRow>[]) => unknown) | undefined;
+function batchEditHandler_2<TRow>(batch: ((edits: CellEdit<TRow>[]) => unknown) | undefined, onCellEdit: ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined): ((edits: CellEdit<TRow>[]) => unknown) | undefined;
 
 // @public
 export interface BatchEditingState<TRow> {
@@ -452,11 +542,17 @@ export interface BatchEditingState<TRow> {
     takeSeeds: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]], void>;
 }
 
-// @public
-export function batchEditingView<TRow>(store: BatchEditStore<TRow>, snapshot: BatchEditSnapshot, options: Pick<BatchEditStoreOptions<TRow>, "columns" | "featureHost">): BatchEditingState<TRow>;
+// @public @deprecated
+export const batchEditingView: typeof batchEditingView_2;
 
 // @public
-export function batchEditorControl<TRow>(batch: Pick<BatchEditingState<TRow>, "draftFor" | "setDraft" | "commit">, row: TRow, rowId: string, columnKey: string, editor: CellEditor): EditorDraftControl;
+function batchEditingView_2<TRow>(store: BatchEditStore<TRow>, snapshot: BatchEditSnapshot, options: Pick<BatchEditStoreOptions<TRow>, "columns" | "featureHost">): BatchEditingState<TRow>;
+
+// @public @deprecated
+export const batchEditorControl: typeof batchEditorControl_2;
+
+// @public
+function batchEditorControl_2<TRow>(batch: Pick<BatchEditingState<TRow>, "draftFor" | "setDraft" | "commit">, row: TRow, rowId: string, columnKey: string, editor: CellEditor): EditorDraftControl;
 
 // @public
 export interface BatchEditSnapshot {
@@ -508,8 +604,11 @@ export interface BatchRowEdit<TRow> {
     rowId: string;
 }
 
+// @public @deprecated
+export const beginCellEdit: typeof beginCellEdit_2;
+
 // @public
-export function beginCellEdit<TRow>(editing: Pick<CellEditingState, "begin">, row: TRow, column: EditableColumnLike<TRow>, rowKey: (row: TRow) => string): boolean;
+function beginCellEdit_2<TRow>(editing: Pick<CellEditingState, "begin">, row: TRow, column: EditableColumnLike<TRow>, rowKey: (row: TRow) => string): boolean;
 
 // @public
 export type BinaryOp = "+" | "-" | "*" | "/" | "&" | "=" | "<>" | "<" | "<=" | ">" | ">=";
@@ -525,8 +624,11 @@ export function bindHeaderFilterDismiss<TRow, TSource extends HeaderFilterWrites
     readonly registry?: FilterTypeRegistry;
 }): TSource;
 
+// @public @deprecated
+export const bindMobileCardList: typeof bindMobileCardList_2;
+
 // @public
-export function bindMobileCardList(virtualScrollRef: ((node: HTMLElement | null) => void) | undefined, extra?: ElementRef<HTMLElement>): (node: HTMLElement | null) => void;
+function bindMobileCardList_2(virtualScrollRef: ((node: HTMLElement | null) => void) | undefined, extra?: ElementRef<HTMLElement>): (node: HTMLElement | null) => void;
 
 // @public @deprecated
 export type BodyCell<TRow> = TableBodyCell<TRow>;
@@ -561,8 +663,11 @@ export interface BodyRowEntry<TRow> {
 // @public
 export type BooleanChoice = "" | "true" | "false";
 
+// @public @deprecated
+export const booleanDraft: typeof booleanDraft_2;
+
 // @public
-export function booleanDraft(checked: boolean): string;
+function booleanDraft_2(checked: boolean): string;
 
 // @public
 export interface BooleanFieldWidget {
@@ -571,11 +676,17 @@ export interface BooleanFieldWidget {
     write: (next: BooleanChoice) => void;
 }
 
-// @public
-export function booleanFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtra">): BooleanFieldWidget;
+// @public @deprecated
+export const booleanFilterWidget: typeof booleanFilterWidget_2;
 
 // @public
-export function buildBodyCells<TRow>(options: {
+function booleanFilterWidget_2<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtra">): BooleanFieldWidget;
+
+// @public @deprecated
+export const buildBodyCells: typeof buildBodyCells_2;
+
+// @public
+function buildBodyCells_2<TRow>(options: {
     rows: readonly TRow[];
     columns: readonly ColumnMetadata<TRow>[];
     getRowId: (row: TRow) => string;
@@ -631,8 +742,11 @@ export function buildTableCsv<TRow>(options: {
     context?: ExportContext<TRow>;
 }): string;
 
+// @public @deprecated
+export const buildTableQuery: typeof buildTableQuery_2;
+
 // @public
-export function buildTableQuery(input: TableQueryInput): TableQuery;
+function buildTableQuery_2(input: TableQueryInput_2): TableQuery;
 
 // @public @deprecated
 export const buildTableXlsx: typeof buildTableXlsx_2;
@@ -657,8 +771,11 @@ export interface BuildTreeEntriesOptions<TRow> extends TreeShape<TRow> {
     rows: readonly TRow[];
 }
 
+// @public @deprecated
+export const BUILTIN_AGGREGATE_LABELS: typeof BUILTIN_AGGREGATE_LABELS_2;
+
 // @public
-export const BUILTIN_AGGREGATE_LABELS: Readonly<Record<string, string>>;
+const BUILTIN_AGGREGATE_LABELS_2: Readonly<Record<string, string>>;
 
 // @public
 export const builtInFilterSpecs: readonly FilterTypeSpec[];
@@ -681,8 +798,11 @@ export interface BulkActionContext {
     total: number;
 }
 
+// @public @deprecated
+export const bulkActionErrorMessage: typeof bulkActionErrorMessage_2;
+
 // @public
-export function bulkActionErrorMessage(error: unknown): string | null;
+function bulkActionErrorMessage_2(error: unknown): string | null;
 
 // @public
 export type BulkActionOutcome = {
@@ -692,10 +812,13 @@ export type BulkActionOutcome = {
     error: unknown;
 };
 
+// @public @deprecated
+export type BulkActionRunnerController = BulkActionRunnerController_2;
+
 // @public
-export interface BulkActionRunnerController {
+interface BulkActionRunnerController_2 {
     readonly configure: (options: BulkActionRunnerOptions) => void;
-    readonly getSnapshot: () => BulkActionRunnerSnapshot;
+    readonly getSnapshot: () => BulkActionRunnerSnapshot_2;
     readonly run: (action: BulkAction, ids: string[], context?: BulkActionContext) => void;
     readonly subscribe: (listener: () => void) => () => void;
 }
@@ -707,14 +830,23 @@ export interface BulkActionRunnerOptions {
     onComplete?: (outcome: BulkActionOutcome) => void;
 }
 
+// @public @deprecated
+export type BulkActionRunnerSnapshot = BulkActionRunnerSnapshot_2;
+
 // @public
-export interface BulkActionRunnerSnapshot {
+interface BulkActionRunnerSnapshot_2 {
     readonly error: unknown;
     readonly pending: string | null;
 }
 
+// @public @deprecated
+export type BulkBarModel = BulkBarModel_2;
+
+// @public @deprecated
+export const bulkBarModel: typeof bulkBarModel_2;
+
 // @public
-export interface BulkBarModel {
+interface BulkBarModel_2 {
     readonly banner: {
         readonly text: string;
         readonly action: string;
@@ -725,18 +857,24 @@ export interface BulkBarModel {
 }
 
 // @public
-export function bulkBarModel(selection: BulkBarSelection, total: number, labels: Pick<Required<TableLabels>, "allMatchingSelected" | "clearAll" | "pageSelected" | "selectAllMatching">): BulkBarModel;
+function bulkBarModel_2(selection: BulkBarSelection_2, total: number, labels: Pick<Required<TableLabels>, "allMatchingSelected" | "clearAll" | "pageSelected" | "selectAllMatching">): BulkBarModel_2;
+
+// @public @deprecated
+export type BulkBarSelection = BulkBarSelection_2;
 
 // @public
-export interface BulkBarSelection {
+interface BulkBarSelection_2 {
     readonly acrossPages: boolean;
     readonly allMatching: boolean;
     readonly headerState: HeaderSelectionState;
     readonly visibleIds: readonly string[];
 }
 
+// @public @deprecated
+export const canRequestCursorPage: typeof canRequestCursorPage_2;
+
 // @public
-export function canRequestCursorPage(trail: CursorTrail, page: number): boolean;
+function canRequestCursorPage_2(trail: CursorTrail_2, page: number): boolean;
 
 // @public
 export function capabilityReason(capability: keyof TableSourceCapabilities): string;
@@ -759,8 +897,11 @@ export interface CellConflictAsk {
     readonly take: () => void;
 }
 
+// @public @deprecated
+export const cellConflictAsk: typeof cellConflictAsk_2;
+
 // @public
-export function cellConflictAsk<TRow>(editing: Pick<EditingBundle<TRow>, "conflict"> | undefined, rowId: string, columnKey: string): CellConflictAsk | undefined;
+function cellConflictAsk_2<TRow>(editing: Pick<EditingBundle<TRow>, "conflict"> | undefined, rowId: string, columnKey: string): CellConflictAsk | undefined;
 
 // @public
 export interface CellEdit<TRow> {
@@ -800,8 +941,11 @@ export interface CellEditingState {
     takeLive: (row: unknown, value: string) => void;
 }
 
+// @public @deprecated
+export const cellEditingView: typeof cellEditingView_2;
+
 // @public
-export function cellEditingView<TRow>(session: CellEditSession<TRow>, snapshot: CellEditSnapshot): CellEditingState;
+function cellEditingView_2<TRow>(session: CellEditSession<TRow>, snapshot: CellEditSnapshot): CellEditingState;
 
 // @public
 export type CellEditKeyAction = "commit" | "cancel" | "commit-advance";
@@ -885,8 +1029,11 @@ export interface CellEditTarget {
     rowId: string;
 }
 
+// @public @deprecated
+export const cellFillHandler: typeof cellFillHandler_2;
+
 // @public
-export function cellFillHandler<TRow>(options: CellFillHandlerOptions<TRow>): ((edits: CellEdit<TRow>[]) => unknown) | undefined;
+function cellFillHandler_2<TRow>(options: CellFillHandlerOptions<TRow>): ((edits: CellEdit<TRow>[]) => unknown) | undefined;
 
 // @public
 export interface CellFillHandlerOptions<TRow> {
@@ -894,11 +1041,17 @@ export interface CellFillHandlerOptions<TRow> {
     onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
 }
 
-// @public
-export function cellFlashAttr(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columnKey: string): "" | undefined;
+// @public @deprecated
+export const cellFlashAttr: typeof cellFlashAttr_2;
 
 // @public
-export function cellNavigationChannels<TRow>(options: CellNavigationChannelsOptions<TRow>): Pick<GridFocusControllerOptions<TRow>, "isCoveredCell" | "onPaste" | "onFill" | "onUndo" | "onRedo">;
+function cellFlashAttr_2(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columnKey: string): "" | undefined;
+
+// @public @deprecated
+export const cellNavigationChannels: typeof cellNavigationChannels_2;
+
+// @public
+function cellNavigationChannels_2<TRow>(options: CellNavigationChannelsOptions<TRow>): Pick<GridFocusControllerOptions<TRow>, "isCoveredCell" | "onPaste" | "onFill" | "onUndo" | "onRedo">;
 
 // @public
 export interface CellNavigationChannelsOptions<TRow> {
@@ -914,8 +1067,11 @@ export interface CellNavigationChannelsOptions<TRow> {
     readonly undo: () => number;
 }
 
+// @public @deprecated
+export const cellPasteHandler: typeof cellPasteHandler_2;
+
 // @public
-export function cellPasteHandler<TRow>(options: CellPasteHandlerOptions<TRow>): ((edits: CellEdit<TRow>[]) => unknown) | undefined;
+function cellPasteHandler_2<TRow>(options: CellPasteHandlerOptions<TRow>): ((edits: CellEdit<TRow>[]) => unknown) | undefined;
 
 // @public
 export interface CellPasteHandlerOptions<TRow> {
@@ -952,23 +1108,38 @@ export function cellRangeIndices(range: CellRange): {
     cols: number[];
 };
 
+// @public @deprecated
+export const cellRangeKey: typeof cellRangeKey_2;
+
 // @public
-export function cellRangeKey(range: CellRange | null): string;
+function cellRangeKey_2(range: CellRange | null): string;
 
 // @public
 export function cellRangeSize(range: CellRange | null): number;
 
-// @public
-export function cellSaveFailure<TRow>(snapshot: CellSaveSnapshot<TRow>, rowId: string, columnKey: string): FailedCellSave<TRow> | undefined;
+// @public @deprecated
+export const cellSaveFailure: typeof cellSaveFailure_2;
 
 // @public
-export function cellSaveKey(rowId: string, columnKey: string): string;
+function cellSaveFailure_2<TRow>(snapshot: CellSaveSnapshot_2<TRow>, rowId: string, columnKey: string): FailedCellSave<TRow> | undefined;
+
+// @public @deprecated
+export const cellSaveKey: typeof cellSaveKey_2;
 
 // @public
-export function cellSaveSignature<TRow>(snapshot: CellSaveSnapshot<TRow>): string;
+function cellSaveKey_2(rowId: string, columnKey: string): string;
+
+// @public @deprecated
+export const cellSaveSignature: typeof cellSaveSignature_2;
 
 // @public
-export interface CellSaveSnapshot<TRow> {
+function cellSaveSignature_2<TRow>(snapshot: CellSaveSnapshot_2<TRow>): string;
+
+// @public @deprecated
+export type CellSaveSnapshot<TRow> = CellSaveSnapshot_2<TRow>;
+
+// @public
+interface CellSaveSnapshot_2<TRow> {
     readonly failures: ReadonlyMap<string, FailedCellSave<TRow>>;
     readonly saving: ReadonlySet<string>;
 }
@@ -994,15 +1165,21 @@ export interface CellSaveState<TRow> {
 // @public
 export type CellSaveStatus = "saving" | "failed";
 
-// @public
-export function cellSaveStatus<TRow>(snapshot: CellSaveSnapshot<TRow>, rowId: string, columnKey: string): CellSaveStatus | undefined;
+// @public @deprecated
+export const cellSaveStatus: typeof cellSaveStatus_2;
 
 // @public
-export interface CellSaveStore<TRow> {
+function cellSaveStatus_2<TRow>(snapshot: CellSaveSnapshot_2<TRow>, rowId: string, columnKey: string): CellSaveStatus | undefined;
+
+// @public @deprecated
+export type CellSaveStore<TRow> = CellSaveStore_2<TRow>;
+
+// @public
+interface CellSaveStore_2<TRow> {
     readonly canRollback: () => boolean;
     readonly clear: (rowId: string, columnKey: string) => void;
     readonly configure: (options: CellSaveStoreOptions<TRow>) => void;
-    readonly getSnapshot: () => CellSaveSnapshot<TRow>;
+    readonly getSnapshot: () => CellSaveSnapshot_2<TRow>;
     readonly rollback: (rowId: string, columnKey: string) => void;
     readonly subscribe: (listener: () => void) => () => void;
     readonly track: (input: {
@@ -1022,8 +1199,11 @@ export interface CellSaveStoreOptions<TRow> {
     readonly onRollback?: (previous: TRow, columnKey: string) => void;
 }
 
+// @public @deprecated
+export const cellSaveView: typeof cellSaveView_2;
+
 // @public
-export function cellSaveView<TRow>(store: CellSaveStore<TRow>, snapshot: CellSaveSnapshot<TRow>, canRollback: boolean): CellSaveState<TRow>;
+function cellSaveView_2<TRow>(store: CellSaveStore_2<TRow>, snapshot: CellSaveSnapshot_2<TRow>, canRollback: boolean): CellSaveState<TRow>;
 
 // @public @deprecated
 export const cellsForRow: typeof cellsForRow_2;
@@ -1031,11 +1211,17 @@ export const cellsForRow: typeof cellsForRow_2;
 // @public
 function cellsForRow_2<TRow>(cellsByRow: ReadonlyMap<string, readonly TableBodyCell<TRow>[]> | undefined, rowKey: string): readonly TableBodyCell<TRow>[];
 
-// @public
-export function cellsOfBatch<TRow>(edits: readonly BatchRowEdit<TRow>[]): CellEdit<TRow>[];
+// @public @deprecated
+export const cellsOfBatch: typeof cellsOfBatch_2;
 
 // @public
-export function cellSortValue<TRow>(row: TRow, column: ColumnMetadata<TRow>, locale?: string): SortableValue;
+function cellsOfBatch_2<TRow>(edits: readonly BatchRowEdit<TRow>[]): CellEdit<TRow>[];
+
+// @public @deprecated
+export const cellSortValue: typeof cellSortValue_2;
+
+// @public
+function cellSortValue_2<TRow>(row: TRow, column: ColumnMetadata<TRow>, locale?: string): SortableValue;
 
 // @public
 export type CellSpanAppearance = "merged" | "plain";
@@ -1058,8 +1244,11 @@ export type CellValidator<TRow> = (value: unknown, row: TRow) => string | undefi
 // @public
 export function cellValue<TRow>(row: TRow, column: ColumnMetadata<TRow>, locale?: string): unknown;
 
+// @public @deprecated
+export const CHANGED_CELL_FLASH_MS: typeof CHANGED_CELL_FLASH_MS_2;
+
 // @public
-export const CHANGED_CELL_FLASH_MS = 1200;
+const CHANGED_CELL_FLASH_MS_2 = 1200;
 
 // @public
 export interface ChangedCellFlashOptions {
@@ -1067,8 +1256,11 @@ export interface ChangedCellFlashOptions {
     readonly live: boolean;
 }
 
+// @public @deprecated
+export type ChangedCellFlashStore = ChangedCellFlashStore_2;
+
 // @public
-export interface ChangedCellFlashStore {
+interface ChangedCellFlashStore_2 {
     readonly clear: () => void;
     readonly configure: (options: ChangedCellFlashOptions) => void;
     readonly getSnapshot: () => number;
@@ -1078,48 +1270,75 @@ export interface ChangedCellFlashStore {
     readonly subscribe: (listener: () => void) => () => void;
 }
 
+// @public @deprecated
+export const changedRowFields: typeof changedRowFields_2;
+
 // @public
-export function changedRowFields(prev: unknown, next: unknown): readonly string[];
+function changedRowFields_2(prev: unknown, next: unknown): readonly string[];
 
 // @public
 export const CHECKLIST_ITEM_HEIGHT = 28;
 
+// @public @deprecated
+export const CHECKLIST_ITEM_WIDTH: typeof CHECKLIST_ITEM_WIDTH_2;
+
 // @public
-export const CHECKLIST_ITEM_WIDTH = 200;
+const CHECKLIST_ITEM_WIDTH_2 = 200;
 
 // @public
 export const CHECKLIST_LIST_HEIGHT = 240;
 
+// @public @deprecated
+export const CHECKLIST_OPTION_GAP: typeof CHECKLIST_OPTION_GAP_2;
+
 // @public
-export const CHECKLIST_OPTION_GAP = 8;
+const CHECKLIST_OPTION_GAP_2 = 8;
 
 // @public
 export const CHECKLIST_VIRTUALIZE_AT = 40;
 
+// @public @deprecated
+export type ChecklistActions = ChecklistActions_2;
+
+// @public @deprecated
+export const checklistActions: typeof checklistActions_2;
+
 // @public
-export interface ChecklistActions {
+interface ChecklistActions_2 {
     readonly clear: () => void;
     readonly selectAllVisible: () => void;
     readonly toggle: (value: string, on: boolean) => void;
 }
 
 // @public
-export function checklistActions<TRow>(def: FilterDef<TRow>, source: Pick<ChecklistSource<TRow>, "extra" | "setExtra">, visible: readonly ChecklistValue[]): ChecklistActions;
+function checklistActions_2<TRow>(def: FilterDef<TRow>, source: Pick<ChecklistSource<TRow>, "extra" | "setExtra">, visible: readonly ChecklistValue[]): ChecklistActions_2;
+
+// @public @deprecated
+export const checklistColumnsAcross: typeof checklistColumnsAcross_2;
 
 // @public
-export function checklistColumnsAcross(width: number): number;
+function checklistColumnsAcross_2(width: number): number;
+
+// @public @deprecated
+export type ChecklistItems = ChecklistItems_2;
+
+// @public @deprecated
+export const checklistItems: typeof checklistItems_2;
 
 // @public
-export interface ChecklistItems {
+interface ChecklistItems_2 {
     readonly available: boolean;
     readonly items: readonly ChecklistValue[];
 }
 
 // @public
-export function checklistItems<TRow>(def: FilterDef<TRow>, source: Pick<ChecklistSource<TRow>, "allFilteredRows" | "extra" | "facets">): ChecklistItems;
+function checklistItems_2<TRow>(def: FilterDef<TRow>, source: Pick<ChecklistSource<TRow>, "allFilteredRows" | "extra" | "facets">): ChecklistItems_2;
+
+// @public @deprecated
+export const checklistSlice: typeof checklistSlice_2;
 
 // @public
-export function checklistSlice(count: number, virtualize: boolean, scrollTop: number, width: number): ChecklistWindow;
+function checklistSlice_2(count: number, virtualize: boolean, scrollTop: number, width: number): ChecklistWindow_2;
 
 // @public
 export type ChecklistSource<TRow> = Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "facets">;
@@ -1131,8 +1350,14 @@ export interface ChecklistValue {
     value: string;
 }
 
+// @public @deprecated
+export type ChecklistWindow = ChecklistWindow_2;
+
+// @public @deprecated
+export const checklistWindow: typeof checklistWindow_2;
+
 // @public
-export interface ChecklistWindow {
+interface ChecklistWindow_2 {
     end: number;
     padBottom: number;
     padTop: number;
@@ -1140,19 +1365,28 @@ export interface ChecklistWindow {
 }
 
 // @public
-export function checklistWindow(count: number, scrollTop: number, width: number): ChecklistWindow;
+function checklistWindow_2(count: number, scrollTop: number, width: number): ChecklistWindow_2;
 
 // @public
 export type ChipLabelResolver = (value: string, extra?: ExtraFilters) => string;
 
-// @public
-export function chipValuesOf(extra: ExtraFilters, labels: Readonly<Record<string, ChipLabelResolver>>): Record<string, FilterValue>;
+// @public @deprecated
+export const chipValuesOf: typeof chipValuesOf_2;
 
 // @public
-export function chordHasCommandModifier(chord: ParsedChord): boolean;
+function chipValuesOf_2(extra: ExtraFilters, labels: Readonly<Record<string, ChipLabelResolver>>): Record<string, FilterValue>;
+
+// @public @deprecated
+export const chordHasCommandModifier: typeof chordHasCommandModifier_2;
 
 // @public
-export interface ChordKeyEvent {
+function chordHasCommandModifier_2(chord: ParsedChord_2): boolean;
+
+// @public @deprecated
+export type ChordKeyEvent = ChordKeyEvent_2;
+
+// @public
+interface ChordKeyEvent_2 {
     readonly altKey: boolean;
     readonly ctrlKey: boolean;
     readonly key: string;
@@ -1160,20 +1394,32 @@ export interface ChordKeyEvent {
     readonly shiftKey: boolean;
 }
 
-// @public
-export function chordMatches(chord: ParsedChord, event: ChordKeyEvent): boolean;
+// @public @deprecated
+export const chordMatches: typeof chordMatches_2;
 
 // @public
-export function clampedPage(page: number, limit: number, total: number): number | undefined;
+function chordMatches_2(chord: ParsedChord_2, event: ChordKeyEvent_2): boolean;
+
+// @public @deprecated
+export const clampedPage: typeof clampedPage_2;
 
 // @public
-export function clampMatchIndex(index: number, total: number): number;
+function clampedPage_2(page: number, limit: number, total: number): number | undefined;
+
+// @public @deprecated
+export const clampMatchIndex: typeof clampMatchIndex_2;
+
+// @public
+function clampMatchIndex_2(index: number, total: number): number;
 
 // @public
 export function clearCountFilterExtra(bucket: string): ExtraFilters;
 
+// @public @deprecated
+export const clearedFilterExtras: typeof clearedFilterExtras_2;
+
 // @public
-export function clearedFilterExtras<TRow>(defs: readonly FilterDef<TRow>[], registry?: FilterTypeRegistry): ExtraFilters;
+function clearedFilterExtras_2<TRow>(defs: readonly FilterDef<TRow>[], registry?: FilterTypeRegistry): ExtraFilters;
 
 // @public
 export interface ClipboardRangeOptions<TRow> {
@@ -1193,17 +1439,26 @@ export function closeFailedTreeNode(expansion: {
     readonly toggle: (id: string) => void;
 }, id: string): void;
 
+// @public @deprecated
+export const coerceBooleanValue: typeof coerceBooleanValue_2;
+
 // @public
-export function coerceBooleanValue(value: unknown): boolean | undefined;
+function coerceBooleanValue_2(value: unknown): boolean | undefined;
 
 // @public
 export function collectChecklistValues<TRow>(def: FilterDef<TRow>, rows: readonly TRow[], selected?: readonly string[]): ChecklistValue[];
 
-// @public
-export function collectFeatureNotices<TRow>(input: CollectFeatureNoticesInput<TRow>): readonly FeatureNotice[];
+// @public @deprecated
+export const collectFeatureNotices: typeof collectFeatureNotices_2;
 
 // @public
-export interface CollectFeatureNoticesInput<TRow = unknown> {
+function collectFeatureNotices_2<TRow>(input: CollectFeatureNoticesInput_2<TRow>): readonly FeatureNotice[];
+
+// @public @deprecated
+export type CollectFeatureNoticesInput<TRow = unknown> = CollectFeatureNoticesInput_2<TRow>;
+
+// @public
+interface CollectFeatureNoticesInput_2<TRow = unknown> {
     allFilteredRows?: readonly TRow[];
     batchEditing?: boolean;
     capabilities?: TableSourceCapabilities;
@@ -1227,8 +1482,11 @@ export interface CollectFeatureNoticesInput<TRow = unknown> {
 // @public
 export type ColorScheme = "light" | "dark" | "auto";
 
+// @public @deprecated
+export const COLUMN_DND_MIME: typeof COLUMN_DND_MIME_2;
+
 // @public
-export const COLUMN_DND_MIME = "application/x-adapttable-column";
+const COLUMN_DND_MIME_2 = "application/x-adapttable-column";
 
 // @public @deprecated
 export const COLUMN_GROUP_ID_SEP: typeof COLUMN_GROUP_ID_SEP_2;
@@ -1254,11 +1512,17 @@ export const COLUMN_GROUP_STUB_WIDTH: typeof COLUMN_GROUP_STUB_WIDTH_2;
 // @public
 const COLUMN_GROUP_STUB_WIDTH_2 = 36;
 
-// @public
-export const COLUMN_LAYOUT_STORE_OPTIONS: ControllableStoreOptions<ColumnLayoutState>;
+// @public @deprecated
+export const COLUMN_LAYOUT_STORE_OPTIONS: typeof COLUMN_LAYOUT_STORE_OPTIONS_2;
 
 // @public
-export function columnAggregationSignature<TRow>(column: ColumnMetadata<TRow>): string;
+const COLUMN_LAYOUT_STORE_OPTIONS_2: ControllableStoreOptions_2<ColumnLayoutState>;
+
+// @public @deprecated
+export const columnAggregationSignature: typeof columnAggregationSignature_2;
+
+// @public
+function columnAggregationSignature_2<TRow>(column: ColumnMetadata<TRow>): string;
 
 // @public
 export interface ColumnAiOptions {
@@ -1267,8 +1531,11 @@ export interface ColumnAiOptions {
     sample?: boolean;
 }
 
+// @public @deprecated
+export type ColumnDataTransfer = ColumnDataTransfer_2;
+
 // @public
-export interface ColumnDataTransfer {
+interface ColumnDataTransfer_2 {
     dropEffect: string;
     effectAllowed: string;
     getData: (format: string) => string;
@@ -1276,23 +1543,32 @@ export interface ColumnDataTransfer {
     readonly types: readonly string[];
 }
 
-// @public
-export function columnDragAllowed(target: ColumnDragTarget | null): boolean;
+// @public @deprecated
+export const columnDragAllowed: typeof columnDragAllowed_2;
 
 // @public
-export interface ColumnDragController {
-    readonly dragOver: (event: ColumnDragEvent, index: number) => void;
-    readonly dragStart: (event: ColumnDragEvent, key: string, index: number) => void;
-    readonly drop: (event: ColumnDragEvent, index: number, move: (key: string, toIndex: number) => void) => void;
+function columnDragAllowed_2(target: ColumnDragTarget_2 | null): boolean;
+
+// @public @deprecated
+export type ColumnDragController = ColumnDragController_2;
+
+// @public
+interface ColumnDragController_2 {
+    readonly dragOver: (event: ColumnDragEvent_2, index: number) => void;
+    readonly dragStart: (event: ColumnDragEvent_2, key: string, index: number) => void;
+    readonly drop: (event: ColumnDragEvent_2, index: number, move: (key: string, toIndex: number) => void) => void;
     readonly end: () => void;
-    readonly getSnapshot: () => ColumnDragSnapshot;
+    readonly getSnapshot: () => ColumnDragSnapshot_2;
     readonly rowAttrs: (key: string, index: number) => ColumnDragRowAttrs;
     readonly subscribe: (listener: () => void) => () => void;
 }
 
+// @public @deprecated
+export type ColumnDragEvent = ColumnDragEvent_2;
+
 // @public
-export interface ColumnDragEvent {
-    readonly dataTransfer: ColumnDataTransfer | null;
+interface ColumnDragEvent_2 {
+    readonly dataTransfer: ColumnDataTransfer_2 | null;
     readonly defaultPrevented: boolean;
     preventDefault: () => void;
     readonly target: EventTarget | null;
@@ -1304,23 +1580,35 @@ export interface ColumnDragRowAttrs {
     "data-drop"?: "before" | "after";
 }
 
-// @public
-export function columnDragRowAttrs(drag: ColumnDragSource | null, overIndex: number | null, key: string, index: number): ColumnDragRowAttrs;
+// @public @deprecated
+export const columnDragRowAttrs: typeof columnDragRowAttrs_2;
 
 // @public
-export interface ColumnDragSnapshot {
-    readonly drag: ColumnDragSource | null;
+function columnDragRowAttrs_2(drag: ColumnDragSource_2 | null, overIndex: number | null, key: string, index: number): ColumnDragRowAttrs;
+
+// @public @deprecated
+export type ColumnDragSnapshot = ColumnDragSnapshot_2;
+
+// @public
+interface ColumnDragSnapshot_2 {
+    readonly drag: ColumnDragSource_2 | null;
     readonly overIndex: number | null;
 }
 
+// @public @deprecated
+export type ColumnDragSource = ColumnDragSource_2;
+
 // @public
-export interface ColumnDragSource {
+interface ColumnDragSource_2 {
     readonly from: number;
     readonly key: string;
 }
 
+// @public @deprecated
+export type ColumnDragTarget = ColumnDragTarget_2;
+
 // @public
-export interface ColumnDragTarget {
+interface ColumnDragTarget_2 {
     closest: (selector: string) => unknown;
 }
 
@@ -1329,8 +1617,11 @@ export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "
     label?: string;
 });
 
+// @public @deprecated
+export const columnFlexShares: typeof columnFlexShares_2;
+
 // @public
-export function columnFlexShares<TRow>(options: ColumnSizingOptions<TRow>): Readonly<Record<string, number>>;
+function columnFlexShares_2<TRow>(options: ColumnSizingOptions_2<TRow>): Readonly<Record<string, number>>;
 
 // @public
 export interface ColumnFooterContext<TRow> {
@@ -1404,8 +1695,11 @@ export interface ColumnHeaderController {
     }) => void;
 }
 
+// @public @deprecated
+export const columnHeaderLabel: typeof columnHeaderLabel_2;
+
 // @public
-export function columnHeaderLabel<TRow>(column: ColumnMetadata<TRow>): string;
+function columnHeaderLabel_2<TRow>(column: ColumnMetadata<TRow>): string;
 
 // @public
 export type ColumnInput<TRow> = ColumnModel<TRow> | ColumnGroupDef<TRow>;
@@ -1422,9 +1716,12 @@ export interface ColumnLayoutContribution {
     readonly setOrder?: (order: readonly string[]) => void;
 }
 
+// @public @deprecated
+export type ColumnLayoutController<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> = ColumnLayoutController_2<TRow, TColumn>;
+
 // @public
-export interface ColumnLayoutController<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> {
-    readonly configure: (options: ColumnLayoutControllerOptions<TRow, TColumn>) => void;
+interface ColumnLayoutController_2<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> {
+    readonly configure: (options: ColumnLayoutControllerOptions_2<TRow, TColumn>) => void;
     readonly move: (key: string, toIndex: number) => void;
     readonly reset: () => void;
     readonly resetName: (key: string) => void;
@@ -1433,21 +1730,27 @@ export interface ColumnLayoutController<TRow, TColumn extends ColumnMetadata<TRo
     readonly setOrder: (order: readonly string[]) => void;
     readonly setPinned: (key: string, side: PinSide | undefined) => void;
     readonly setWidth: (key: string, width: number | undefined) => void;
-    readonly store: ControllableStore<ColumnLayoutState>;
+    readonly store: ControllableStore_2<ColumnLayoutState>;
     readonly toggleColumnGroup: (id: string) => void;
     readonly toggleVisible: (key: string) => void;
 }
 
+// @public @deprecated
+export type ColumnLayoutControllerOptions<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> = ColumnLayoutControllerOptions_2<TRow, TColumn>;
+
 // @public
-export interface ColumnLayoutControllerOptions<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> {
+interface ColumnLayoutControllerOptions_2<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> {
     readonly collapsibleColumnGroups?: boolean;
     readonly columnGroups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
     readonly columns: readonly TColumn[];
     readonly onColumnRename?: (key: string, name: string) => void;
 }
 
+// @public @deprecated
+export const columnLayoutSlice: typeof columnLayoutSlice_2;
+
 // @public
-export const columnLayoutSlice: UrlSliceSpec<ColumnLayoutState, {
+const columnLayoutSlice_2: UrlSliceSpec<ColumnLayoutState, {
     readonly defaultColumnLayout?: Partial<ColumnLayoutState>;
 }>;
 
@@ -1461,11 +1764,17 @@ export interface ColumnLayoutState {
     widths: Readonly<Record<string, number>>;
 }
 
-// @public
-export function columnLayoutVisibleColumns<TColumn extends ColumnMetadata<never>>(columns: readonly TColumn[], state: Pick<ColumnLayoutState, "names" | "order" | "hidden" | "collapsedGroups">, options?: Pick<ColumnLayoutControllerOptions<never>, "collapsibleColumnGroups" | "columnGroups">): TColumn[];
+// @public @deprecated
+export const columnLayoutVisibleColumns: typeof columnLayoutVisibleColumns_2;
 
 // @public
-export function columnLetter(index: number): string;
+function columnLayoutVisibleColumns_2<TColumn extends ColumnMetadata<never>>(columns: readonly TColumn[], state: Pick<ColumnLayoutState, "names" | "order" | "hidden" | "collapsedGroups">, options?: Pick<ColumnLayoutControllerOptions_2<never>, "collapsibleColumnGroups" | "columnGroups">): TColumn[];
+
+// @public @deprecated
+export const columnLetter: typeof columnLetter_2;
+
+// @public
+function columnLetter_2(index: number): string;
 
 // @public
 export interface ColumnMenuAction {
@@ -1588,8 +1897,11 @@ export interface ColumnMenuRow<TRow> {
     pinned: PinnedSide;
 }
 
+// @public @deprecated
+export const columnMenuRows: typeof columnMenuRows_2;
+
 // @public
-export function columnMenuRows<TRow>(allColumns: readonly ColumnMetadata<TRow>[], layout: UseColumnLayoutResult<TRow>): ColumnMenuRow<TRow>[];
+function columnMenuRows_2<TRow>(allColumns: readonly ColumnMetadata<TRow>[], layout: UseColumnLayoutResult<TRow>): ColumnMenuRow<TRow>[];
 
 // @public
 export interface ColumnMenuSlotProps<TRow> extends ColumnMenuChromeProps<TRow> {
@@ -1665,23 +1977,32 @@ export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
 // @public
 export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
 
-// @public
-export function columnPinInsets(visibleColumns: readonly ColumnMetadata<never>[], state: Pick<ColumnLayoutState, "pinned" | "widths">): ReadonlyMap<string, PinOffset>;
+// @public @deprecated
+export const columnPinInsets: typeof columnPinInsets_2;
 
 // @public
-export interface ColumnRenameEditor {
+function columnPinInsets_2(visibleColumns: readonly ColumnMetadata<never>[], state: Pick<ColumnLayoutState, "pinned" | "widths">): ReadonlyMap<string, PinOffset>;
+
+// @public @deprecated
+export type ColumnRenameEditor = ColumnRenameEditor_2;
+
+// @public
+interface ColumnRenameEditor_2 {
     readonly begin: () => void;
     readonly blur: () => void;
     readonly cancel: () => void;
-    readonly configure: (options: ColumnRenameEditorOptions) => void;
-    readonly getSnapshot: () => ColumnRenameEditorSnapshot;
+    readonly configure: (options: ColumnRenameEditorOptions_2) => void;
+    readonly getSnapshot: () => ColumnRenameEditorSnapshot_2;
     readonly setDraft: (value: string) => void;
-    readonly submit: () => ColumnRenameSubmit;
+    readonly submit: () => ColumnRenameSubmit_2;
     readonly subscribe: (listener: () => void) => () => void;
 }
 
+// @public @deprecated
+export type ColumnRenameEditorOptions = ColumnRenameEditorOptions_2;
+
 // @public
-export interface ColumnRenameEditorOptions {
+interface ColumnRenameEditorOptions_2 {
     readonly key: string;
     readonly name: string;
     readonly onRename: (key: string, name: string) => void;
@@ -1692,29 +2013,44 @@ export interface ColumnRenameEditorOptions {
     readonly requiredMessage: string;
 }
 
+// @public @deprecated
+export type ColumnRenameEditorSnapshot = ColumnRenameEditorSnapshot_2;
+
 // @public
-export interface ColumnRenameEditorSnapshot {
+interface ColumnRenameEditorSnapshot_2 {
     readonly announcement: string;
     readonly draft: string;
     readonly editing: boolean;
     readonly error?: string;
 }
 
-// @public
-export type ColumnRenameSubmit = "invalid" | "unchanged" | "renamed";
+// @public @deprecated
+export type ColumnRenameSubmit = ColumnRenameSubmit_2;
 
 // @public
-export function columnReorderKeyDown(event: ColumnReorderKeyEvent, key: string, index: number, move: (key: string, toIndex: number) => void, isRtl: (element: EventTarget | null) => boolean): void;
+type ColumnRenameSubmit_2 = "invalid" | "unchanged" | "renamed";
+
+// @public @deprecated
+export const columnReorderKeyDown: typeof columnReorderKeyDown_2;
 
 // @public
-export interface ColumnReorderKeyEvent {
+function columnReorderKeyDown_2(event: ColumnReorderKeyEvent_2, key: string, index: number, move: (key: string, toIndex: number) => void, isRtl: (element: EventTarget | null) => boolean): void;
+
+// @public @deprecated
+export type ColumnReorderKeyEvent = ColumnReorderKeyEvent_2;
+
+// @public
+interface ColumnReorderKeyEvent_2 {
     readonly currentTarget: EventTarget | null;
     readonly key: string;
     preventDefault: () => void;
 }
 
+// @public @deprecated
+export const columnReorderKeyStep: typeof columnReorderKeyStep_2;
+
 // @public
-export function columnReorderKeyStep(key: string, rtl: boolean): -1 | 1 | undefined;
+function columnReorderKeyStep_2(key: string, rtl: boolean): -1 | 1 | undefined;
 
 // @public
 export interface ColumnResizeHandleOptions {
@@ -1731,20 +2067,32 @@ export interface ColumnResizeHandleProps {
     tabIndex: 0;
 }
 
-// @public
-export function columnResizeHandleProps(key: string, setWidth: (key: string, width: number) => void, label: string, options?: ColumnResizeHandleOptions): ColumnResizeHandleProps;
+// @public @deprecated
+export const columnResizeHandleProps: typeof columnResizeHandleProps_2;
 
 // @public
-export function columnSelectLabel(label: string | undefined, column: {
+function columnResizeHandleProps_2(key: string, setWidth: (key: string, width: number) => void, label: string, options?: ColumnResizeHandleOptions): ColumnResizeHandleProps;
+
+// @public @deprecated
+export const columnSelectLabel: typeof columnSelectLabel_2;
+
+// @public
+function columnSelectLabel_2(label: string | undefined, column: {
     header?: DisplayValue;
     key: string;
 }): string;
 
-// @public
-export function columnSizeStyle<TRow>(column: ColumnMetadata<TRow>, shares?: Readonly<Record<string, number>>, userWidth?: number): CssProperties | undefined;
+// @public @deprecated
+export const columnSizeStyle: typeof columnSizeStyle_2;
 
 // @public
-export interface ColumnSizingOptions<TRow> {
+function columnSizeStyle_2<TRow>(column: ColumnMetadata<TRow>, shares?: Readonly<Record<string, number>>, userWidth?: number): CssProperties | undefined;
+
+// @public @deprecated
+export type ColumnSizingOptions<TRow> = ColumnSizingOptions_2<TRow>;
+
+// @public
+interface ColumnSizingOptions_2<TRow> {
     columns: readonly ColumnMetadata<TRow>[];
     fitColumns?: boolean;
     widths?: Readonly<Record<string, number>>;
@@ -1756,17 +2104,26 @@ export function columnText<TRow>(column: ColumnMetadata<TRow>, row: TRow): strin
 // @public
 export type Command = ContextMenuItem;
 
+// @public @deprecated
+export type CommandListController = CommandListController_2;
+
 // @public
-export interface CommandListController {
-    readonly getSnapshot: () => CommandListSnapshot;
+interface CommandListController_2 {
+    readonly getSnapshot: () => CommandListSnapshot_2;
     readonly reset: () => void;
     readonly setActive: (index: number) => void;
     readonly setQuery: (query: string) => void;
     readonly subscribe: (listener: () => void) => () => void;
 }
 
+// @public @deprecated
+export type CommandListKeyAction = CommandListKeyAction_2;
+
+// @public @deprecated
+export const commandListKeyAction: typeof commandListKeyAction_2;
+
 // @public
-export type CommandListKeyAction = {
+type CommandListKeyAction_2 = {
     readonly kind: "close";
 } | {
     readonly kind: "run";
@@ -1777,28 +2134,43 @@ export type CommandListKeyAction = {
 };
 
 // @public
-export function commandListKeyAction(key: string, view: CommandListView): CommandListKeyAction | null;
+function commandListKeyAction_2(key: string, view: CommandListView_2): CommandListKeyAction_2 | null;
+
+// @public @deprecated
+export type CommandListSnapshot = CommandListSnapshot_2;
 
 // @public
-export interface CommandListSnapshot {
+interface CommandListSnapshot_2 {
     readonly active: number;
     readonly query: string;
 }
 
+// @public @deprecated
+export type CommandListView = CommandListView_2;
+
+// @public @deprecated
+export const commandListView: typeof commandListView_2;
+
 // @public
-export interface CommandListView {
+interface CommandListView_2 {
     readonly active: number;
     readonly matches: readonly Command[];
 }
 
 // @public
-export function commandListView(commands: readonly Command[], snapshot: CommandListSnapshot): CommandListView;
+function commandListView_2(commands: readonly Command[], snapshot: CommandListSnapshot_2): CommandListView_2;
+
+// @public @deprecated
+export const commandPaletteCommands: typeof commandPaletteCommands_2;
 
 // @public
-export function commandPaletteCommands(options: CommandPaletteCommandsOptions): Command[];
+function commandPaletteCommands_2(options: CommandPaletteCommandsOptions_2): Command[];
+
+// @public @deprecated
+export type CommandPaletteCommandsOptions = CommandPaletteCommandsOptions_2;
 
 // @public
-export interface CommandPaletteCommandsOptions extends TableCommandOptions {
+interface CommandPaletteCommandsOptions_2 extends TableCommandOptions {
     commands?: readonly Command[];
     enabled: boolean;
     registered?: readonly Command[];
@@ -1811,33 +2183,51 @@ export interface CommandPaletteContribution {
     readonly open?: () => void;
 }
 
+// @public @deprecated
+export type CommandPaletteController = CommandPaletteController_2;
+
 // @public
-export interface CommandPaletteController {
-    readonly configure: (options: CommandPaletteControllerOptions) => void;
-    readonly getSnapshot: () => CommandPaletteSnapshot;
+interface CommandPaletteController_2 {
+    readonly configure: (options: CommandPaletteControllerOptions_2) => void;
+    readonly getSnapshot: () => CommandPaletteSnapshot_2;
     readonly setOpen: (open: boolean) => void;
     readonly subscribe: (listener: () => void) => () => void;
 }
 
+// @public @deprecated
+export type CommandPaletteControllerOptions = CommandPaletteControllerOptions_2;
+
 // @public
-export interface CommandPaletteControllerOptions {
+interface CommandPaletteControllerOptions_2 {
     onOpenChange?: (open: boolean) => void;
     open?: boolean;
 }
 
+// @public @deprecated
+export type CommandPaletteSnapshot = CommandPaletteSnapshot_2;
+
 // @public
-export interface CommandPaletteSnapshot {
+interface CommandPaletteSnapshot_2 {
     readonly open: boolean;
 }
 
-// @public
-export function commitRowPin(store: ControllableStore<RowPinState>, enabled: boolean, rowId: string, side: RowPinSide | undefined): void;
+// @public @deprecated
+export const commitRowPin: typeof commitRowPin_2;
 
 // @public
-export function compareValues(a: SortableValue, b: SortableValue): number;
+function commitRowPin_2(store: ControllableStore_2<RowPinState>, enabled: boolean, rowId: string, side: RowPinSide | undefined): void;
+
+// @public @deprecated
+export const compareValues: typeof compareValues_2;
 
 // @public
-export function composeContextMenuExtra<TRow>(extra: ContextMenuItemsFactory<TRow> | undefined, registered: readonly ContextMenuItemsFactory<TRow>[] | undefined): ContextMenuItemsFactory<TRow> | undefined;
+function compareValues_2(a: SortableValue, b: SortableValue): number;
+
+// @public @deprecated
+export const composeContextMenuExtra: typeof composeContextMenuExtra_2;
+
+// @public
+function composeContextMenuExtra_2<TRow>(extra: ContextMenuItemsFactory<TRow> | undefined, registered: readonly ContextMenuItemsFactory<TRow>[] | undefined): ContextMenuItemsFactory<TRow> | undefined;
 
 // @public
 export function computed<TRow extends object, TValue = SortableValue>(spec: ComputedColumnSpec<TRow, TValue>): ColumnModel<TRow>;
@@ -1861,8 +2251,11 @@ export interface ComputedColumnSpec<TRow, TValue> {
 // @public
 export function computeFilterFacets<TRow>(defs: readonly FilterDef<TRow>[], rows: readonly TRow[], extra: ExtraFilters, filterFn: (row: TRow, extra: ExtraFilters) => boolean, registry?: FilterTypeRegistry): FacetMap;
 
+// @public @deprecated
+export const computePagination: typeof computePagination_2;
+
 // @public
-export function computePagination(input: {
+function computePagination_2(input: {
     page: number;
     limit: number;
     total: number;
@@ -1871,8 +2264,11 @@ export function computePagination(input: {
 // @public
 export function conditionToExtra<TRow>(def: FilterDef<TRow>, condition: QueryCondition, registry?: FilterTypeRegistry): ExtraFilters;
 
+// @public @deprecated
+export const configureIncrementalView: typeof configureIncrementalView_2;
+
 // @public
-export function configureIncrementalView<TRow>(view: IncrementalView<TRow>, patch: Partial<IncrementalViewConfig<TRow>>): IncrementalView<TRow>;
+function configureIncrementalView_2<TRow>(view: IncrementalView<TRow>, patch: Partial<IncrementalViewConfig<TRow>>): IncrementalView<TRow>;
 
 // @public
 export type ConfirmHandler = (request: ConfirmRequest) => void;
@@ -1887,8 +2283,11 @@ export interface ConfirmRequest {
     title: string;
 }
 
+// @public @deprecated
+export const contestedCellKey: typeof contestedCellKey_2;
+
 // @public
-export function contestedCellKey(rowId: string, columnKey: string): string;
+function contestedCellKey_2(rowId: string, columnKey: string): string;
 
 // @public
 export interface ContestedEditCell<TRow> {
@@ -1898,8 +2297,11 @@ export interface ContestedEditCell<TRow> {
     readonly take: (row: TRow, columnKeys: readonly string[]) => void;
 }
 
+// @public @deprecated
+export const contestedRowSignature: typeof contestedRowSignature_2;
+
 // @public
-export function contestedRowSignature<TRow>(snapshot: EditConflictSnapshot<TRow>, rowId: string): string;
+function contestedRowSignature_2<TRow>(snapshot: EditConflictSnapshot<TRow>, rowId: string): string;
 
 // @public
 export interface ContextMenuActions<TRow> {
@@ -1980,24 +2382,33 @@ export interface ContextMenuMoveEvent {
     readonly clientY: number;
 }
 
+// @public @deprecated
+export type ContextMenuOpenController<TRow> = ContextMenuOpenController_2<TRow>;
+
 // @public
-export interface ContextMenuOpenController<TRow> {
+interface ContextMenuOpenController_2<TRow> {
     readonly close: () => void;
-    readonly configure: (options: ContextMenuOpenControllerOptions) => void;
+    readonly configure: (options: ContextMenuOpenControllerOptions_2) => void;
     readonly connect: () => () => void;
-    readonly getSnapshot: () => ContextMenuOpenSnapshot<TRow>;
+    readonly getSnapshot: () => ContextMenuOpenSnapshot_2<TRow>;
     readonly regionHandlers: (rowFor: (rowId: string) => TRow | undefined) => ContextMenuRegionHandlers;
     readonly subscribe: (listener: () => void) => () => void;
     readonly triggerHandlers: (target: ContextMenuTarget<TRow>) => ContextMenuTriggerHandlers;
 }
 
+// @public @deprecated
+export type ContextMenuOpenControllerOptions = ContextMenuOpenControllerOptions_2;
+
 // @public
-export interface ContextMenuOpenControllerOptions {
+interface ContextMenuOpenControllerOptions_2 {
     enabled: boolean;
 }
 
+// @public @deprecated
+export type ContextMenuOpenSnapshot<TRow> = ContextMenuOpenSnapshot_2<TRow>;
+
 // @public
-export interface ContextMenuOpenSnapshot<TRow> {
+interface ContextMenuOpenSnapshot_2<TRow> {
     readonly open: ContextMenuState<TRow> | null;
 }
 
@@ -2079,16 +2490,22 @@ export interface ContextMenuTriggerHandlers {
     readonly onPointerUp: () => void;
 }
 
+// @public @deprecated
+export type ControllableControl<T> = ControllableControl_2<T>;
+
 // @public
-export interface ControllableControl<T> {
+interface ControllableControl_2<T> {
     readonly onChange?: (next: T) => void;
     readonly value: T | undefined;
 }
 
+// @public @deprecated
+export type ControllableStore<T> = ControllableStore_2<T>;
+
 // @public
-export interface ControllableStore<T> {
+interface ControllableStore_2<T> {
     readonly commit: (next: T) => void;
-    readonly control: (control: ControllableControl<T>) => void;
+    readonly control: (control: ControllableControl_2<T>) => void;
     readonly current: () => T;
     readonly getSnapshot: () => T;
     readonly isControlled: () => boolean;
@@ -2096,19 +2513,28 @@ export interface ControllableStore<T> {
     readonly update: (recipe: (current: T) => T) => void;
 }
 
+// @public @deprecated
+export type ControllableStoreOptions<T> = ControllableStoreOptions_2<T>;
+
 // @public
-export interface ControllableStoreOptions<T> {
+interface ControllableStoreOptions_2<T> {
     readonly equals?: (current: T, next: T) => boolean;
     readonly observeUncontrolled?: boolean;
     readonly readsOwnCommits?: boolean;
     readonly store?: TableStore;
 }
 
-// @public
-export function controllerConflictAsk<TRow>(controller: Pick<EditableCellController<TRow>, "conflict" | "keepConflict" | "takeConflict">): CellConflictAsk | undefined;
+// @public @deprecated
+export const controllerConflictAsk: typeof controllerConflictAsk_2;
 
 // @public
-export function copyContextMenuSelection(focus: ContextMenuCopyFocus & {
+function controllerConflictAsk_2<TRow>(controller: Pick<EditableCellController<TRow>, "conflict" | "keepConflict" | "takeConflict">): CellConflictAsk | undefined;
+
+// @public @deprecated
+export const copyContextMenuSelection: typeof copyContextMenuSelection_2;
+
+// @public
+function copyContextMenuSelection_2(focus: ContextMenuCopyFocus & {
     readonly copyCells: (cell?: GridCell, cut?: boolean) => void;
 }, target: {
     kind: string;
@@ -2116,8 +2542,11 @@ export function copyContextMenuSelection(focus: ContextMenuCopyFocus & {
     columnKey?: string;
 }, cut?: boolean): void;
 
+// @public @deprecated
+export const copyContextMenuTargetCell: typeof copyContextMenuTargetCell_2;
+
 // @public
-export function copyContextMenuTargetCell<TRow>(columns: readonly ColumnMetadata<TRow>[], target: ContextMenuTarget<TRow>): void;
+function copyContextMenuTargetCell_2<TRow>(columns: readonly ColumnMetadata<TRow>[], target: ContextMenuTarget<TRow>): void;
 
 // @public
 export const COUNT_OPERATOR_SYMBOL: Record<CountOperator, string>;
@@ -2148,8 +2577,11 @@ export function countFilterStateFromExtra(bucket: string, extra: Readonly<Record
 // @public
 export type CountOperator = (typeof COUNT_OPERATORS)[number];
 
+// @public @deprecated
+export const coveredAddressSet: typeof coveredAddressSet_2;
+
 // @public
-export function coveredAddressSet<TRow>(options: {
+function coveredAddressSet_2<TRow>(options: {
     rows: readonly TRow[];
     columns: readonly ColumnMetadata<TRow>[];
     getCellSpan?: GetCellSpan<TRow>;
@@ -2168,115 +2600,193 @@ export function createBatchEditStore<TRow>(options: BatchEditStoreOptions<TRow>,
     readonly store?: TableStore;
 }): BatchEditStore<TRow>;
 
+// @public @deprecated
+export const createBulkActionRunner: typeof createBulkActionRunner_2;
+
 // @public
-export function createBulkActionRunner(initial: BulkActionRunnerOptions): BulkActionRunnerController;
+function createBulkActionRunner_2(initial: BulkActionRunnerOptions): BulkActionRunnerController_2;
 
 // @public
 export function createCellEditSession<TRow = unknown>(options?: CellEditSessionOptions<TRow>, within?: {
     readonly store?: TableStore;
 }): CellEditSession<TRow>;
 
+// @public @deprecated
+export const createCellSaveStore: typeof createCellSaveStore_2;
+
 // @public
-export function createCellSaveStore<TRow>(options?: CellSaveStoreOptions<TRow>, within?: {
+function createCellSaveStore_2<TRow>(options?: CellSaveStoreOptions<TRow>, within?: {
     readonly store?: TableStore;
-}): CellSaveStore<TRow>;
+}): CellSaveStore_2<TRow>;
+
+// @public @deprecated
+export const createChangedCellFlashStore: typeof createChangedCellFlashStore_2;
 
 // @public
-export function createChangedCellFlashStore(initial: ChangedCellFlashOptions): ChangedCellFlashStore;
+function createChangedCellFlashStore_2(initial: ChangedCellFlashOptions): ChangedCellFlashStore_2;
+
+// @public @deprecated
+export const createColumnDragController: typeof createColumnDragController_2;
 
 // @public
-export function createColumnDragController(): ColumnDragController;
+function createColumnDragController_2(): ColumnDragController_2;
+
+// @public @deprecated
+export const createColumnLayoutController: typeof createColumnLayoutController_2;
 
 // @public
-export function createColumnLayoutController<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(defaultColumnLayout?: Partial<ColumnLayoutState>, within?: {
+function createColumnLayoutController_2<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(defaultColumnLayout?: Partial<ColumnLayoutState>, within?: {
     readonly store?: TableStore;
-}): ColumnLayoutController<TRow, TColumn>;
+}): ColumnLayoutController_2<TRow, TColumn>;
+
+// @public @deprecated
+export const createColumnRenameEditor: typeof createColumnRenameEditor_2;
 
 // @public
-export function createColumnRenameEditor(options: ColumnRenameEditorOptions): ColumnRenameEditor;
+function createColumnRenameEditor_2(options: ColumnRenameEditorOptions_2): ColumnRenameEditor_2;
+
+// @public @deprecated
+export const createCommandList: typeof createCommandList_2;
 
 // @public
-export function createCommandList(): CommandListController;
+function createCommandList_2(): CommandListController_2;
+
+// @public @deprecated
+export const createCommandPaletteController: typeof createCommandPaletteController_2;
 
 // @public
-export function createCommandPaletteController(initial: CommandPaletteControllerOptions): CommandPaletteController;
+function createCommandPaletteController_2(initial: CommandPaletteControllerOptions_2): CommandPaletteController_2;
+
+// @public @deprecated
+export const createContextMenuOpenController: typeof createContextMenuOpenController_2;
 
 // @public
-export function createContextMenuOpenController<TRow>(initial: ContextMenuOpenControllerOptions): ContextMenuOpenController<TRow>;
+function createContextMenuOpenController_2<TRow>(initial: ContextMenuOpenControllerOptions_2): ContextMenuOpenController_2<TRow>;
+
+// @public @deprecated
+export const createControllableStore: typeof createControllableStore_2;
 
 // @public
-export function createControllableStore<T>(initial: T, options?: ControllableStoreOptions<T>): ControllableStore<T>;
+function createControllableStore_2<T>(initial: T, options?: ControllableStoreOptions_2<T>): ControllableStore_2<T>;
+
+// @public @deprecated
+export const createDirtyCellStore: typeof createDirtyCellStore_2;
 
 // @public
-export function createDirtyCellStore(options?: DirtyCellStoreOptions, within?: {
+function createDirtyCellStore_2(options?: DirtyCellStoreOptions, within?: {
     readonly store?: TableStore;
-}): DirtyCellStore;
+}): DirtyCellStore_2;
+
+// @public @deprecated
+export const createEditConflictStore: typeof createEditConflictStore_2;
 
 // @public
-export function createEditConflictStore<TRow>(within?: {
+function createEditConflictStore_2<TRow>(within?: {
     readonly store?: TableStore;
-}): EditConflictStore<TRow>;
+}): EditConflictStore_2<TRow>;
 
 // @public
 export function createEditHistory<TRow>(options: EditHistoryControllerOptions<TRow>, within?: {
     readonly store?: TableStore;
 }): EditHistoryController<TRow>;
 
+// @public @deprecated
+export const createEditHistoryStack: typeof createEditHistoryStack_2;
+
 // @public
-export function createEditHistoryStack<TRow>(within?: {
+function createEditHistoryStack_2<TRow>(within?: {
     readonly store?: TableStore;
-}): EditHistoryStack<TRow>;
+}): EditHistoryStack_2<TRow>;
+
+// @public @deprecated
+export const createEditValidationStore: typeof createEditValidationStore_2;
 
 // @public
-export function createEditValidationStore<TRow>(options?: EditValidationStoreOptions<TRow>, within?: {
+function createEditValidationStore_2<TRow>(options?: EditValidationStoreOptions<TRow>, within?: {
     readonly store?: TableStore;
-}): EditValidationStore<TRow>;
+}): EditValidationStore_2<TRow>;
+
+// @public @deprecated
+export const createExportController: typeof createExportController_2;
 
 // @public
-export function createExportController(initial: ExportControllerOptions): ExportController;
+function createExportController_2(initial: ExportControllerOptions_2): ExportController_2;
+
+// @public @deprecated
+export const createFilterOptionsLoader: typeof createFilterOptionsLoader_2;
 
 // @public
-export function createFilterOptionsLoader(): FilterOptionsLoader;
+function createFilterOptionsLoader_2(): FilterOptionsLoader_2;
 
 // @public
 export function createFilterRegistry(specs: readonly FilterTypeSpec[]): FilterTypeRegistry;
 
-// @public
-export function createFindController(initial: FindControllerOptions): FindController;
+// @public @deprecated
+export const createFindController: typeof createFindController_2;
 
 // @public
-export function createFindShortcutScope(options: FindShortcutScopeOptions): FindShortcutScope;
+function createFindController_2(initial: FindControllerOptions_2): FindController_2;
+
+// @public @deprecated
+export const createFindShortcutScope: typeof createFindShortcutScope_2;
 
 // @public
-export function createFirstLoadLatch(): FirstLoadLatch;
+function createFindShortcutScope_2(options: FindShortcutScopeOptions_2): FindShortcutScope_2;
+
+// @public @deprecated
+export const createFirstLoadLatch: typeof createFirstLoadLatch_2;
 
 // @public
-export function createFrontendSource<TRow>(): FrontendSource<TRow>;
+function createFirstLoadLatch_2(): FirstLoadLatch_2;
+
+// @public @deprecated
+export const createFrontendSource: typeof createFrontendSource_2;
 
 // @public
-export function createFrontendSourceWith<TRow>(initialEngine: FrontendEngineFactory<TRow>): FrontendSource<TRow>;
+function createFrontendSource_2<TRow>(): FrontendSource_2<TRow>;
+
+// @public @deprecated
+export const createFrontendSourceWith: typeof createFrontendSourceWith_2;
 
 // @public
-export function createGridFocusController<TRow>(initial: GridFocusControllerOptions<TRow>, within?: {
+function createFrontendSourceWith_2<TRow>(initialEngine: FrontendEngineFactory<TRow>): FrontendSource_2<TRow>;
+
+// @public @deprecated
+export const createGridFocusController: typeof createGridFocusController_2;
+
+// @public
+function createGridFocusController_2<TRow>(initial: GridFocusControllerOptions<TRow>, within?: {
     readonly store?: TableStore;
-}): GridFocusController<TRow>;
+}): GridFocusController_2<TRow>;
+
+// @public @deprecated
+export const createGridNavigation: typeof createGridNavigation_2;
 
 // @public
-export function createGridNavigation<TRow>(initial: GridFocusControllerOptions<TRow>, within?: {
+function createGridNavigation_2<TRow>(initial: GridFocusControllerOptions<TRow>, within?: {
     readonly store?: TableStore;
-}): GridFocusController<TRow>;
+}): GridFocusController_2<TRow>;
 
 // @public
 export function createGroupingPanelController<TRow = unknown>(initial: GroupingPanelControllerOptions<TRow>): GroupingPanelController<TRow>;
 
-// @public
-export function createGroupPagingController(): GroupPagingController;
+// @public @deprecated
+export const createGroupPagingController: typeof createGroupPagingController_2;
 
 // @public
-export function createHeaderFilterOverlay(initial: HeaderFilterOverlayOptions): HeaderFilterOverlayController;
+function createGroupPagingController_2(): GroupPagingController_2;
+
+// @public @deprecated
+export const createHeaderFilterOverlay: typeof createHeaderFilterOverlay_2;
 
 // @public
-export function createHighlightStore(initial: HighlightStoreOptions): HighlightStore;
+function createHeaderFilterOverlay_2(initial: HeaderFilterOverlayOptions_2): HeaderFilterOverlayController_2;
+
+// @public @deprecated
+export const createHighlightStore: typeof createHighlightStore_2;
+
+// @public
+function createHighlightStore_2(initial: HighlightStoreOptions_2): HighlightStore_2;
 
 // @public
 export function createHistoryAdapter(): UrlStateAdapter;
@@ -2284,8 +2794,11 @@ export function createHistoryAdapter(): UrlStateAdapter;
 // @public
 export function createIncrementalView<TRow>(rows: readonly TRow[], config: IncrementalViewConfig<TRow>): IncrementalView<TRow>;
 
+// @public @deprecated
+export const createLazyChildrenController: typeof createLazyChildrenController_2;
+
 // @public
-export function createLazyChildrenController<TRow>(initial: LazyChildrenOptions<TRow>): LazyChildrenController<TRow>;
+function createLazyChildrenController_2<TRow>(initial: LazyChildrenOptions<TRow>): LazyChildrenController_2<TRow>;
 
 // @public
 export function createMemoryAdapter(initialSearch?: string): UrlStateAdapter;
@@ -2293,14 +2806,23 @@ export function createMemoryAdapter(initialSearch?: string): UrlStateAdapter;
 // @public
 export function createNeutralTable<TRow>(engine: TableEngine<TRow>, tableId: string, binding?: NeutralTableBinding<TRow>): NeutralTable<TRow>;
 
-// @public
-export function createQueryEmitter(seenKey?: string): QueryEmitter;
+// @public @deprecated
+export const createQueryEmitter: typeof createQueryEmitter_2;
 
 // @public
-export function createQuerySource<TRow, TParams extends TableQueryParams = TableQueryParams, TPage = PaginatedResponse<TRow>>(): QuerySource<TRow, TParams, TPage>;
+function createQueryEmitter_2(seenKey?: string): QueryEmitter_2;
+
+// @public @deprecated
+export const createQuerySource: typeof createQuerySource_2;
 
 // @public
-export function createResponseAggregateOps(): ResponseAggregateOps;
+function createQuerySource_2<TRow, TParams extends TableQueryParams = TableQueryParams, TPage = PaginatedResponse<TRow>>(): QuerySource_2<TRow, TParams, TPage>;
+
+// @public @deprecated
+export const createResponseAggregateOps: typeof createResponseAggregateOps_2;
+
+// @public
+function createResponseAggregateOps_2(): ResponseAggregateOps_2;
 
 // @public
 export function createRowEditStore<TRow>(options: RowEditStoreOptions<TRow>, within?: {
@@ -2310,20 +2832,35 @@ export function createRowEditStore<TRow>(options: RowEditStoreOptions<TRow>, wit
 // @public
 export function createRowReorderController<TRow>(initial: RowReorderControllerOptions<TRow>): RowReorderController<TRow>;
 
-// @public
-export function createSavedViewRenameController(): SavedViewRenameController;
+// @public @deprecated
+export const createSavedViewRenameController: typeof createSavedViewRenameController_2;
 
 // @public
-export function createSavedViewsController(initial: SavedViewsControllerOptions): SavedViewsController;
+function createSavedViewRenameController_2(): SavedViewRenameController_2;
+
+// @public @deprecated
+export const createSavedViewsController: typeof createSavedViewsController_2;
 
 // @public
-export function createServerSource<TRow>(): ServerSource<TRow>;
+function createSavedViewsController_2(initial: SavedViewsControllerOptions): SavedViewsController_2;
+
+// @public @deprecated
+export const createServerSource: typeof createServerSource_2;
 
 // @public
-export function createShortcutHandler(shortcuts: readonly Shortcut[], onCommand: (command: string) => void): (event: ShortcutKeyEvent) => boolean;
+function createServerSource_2<TRow>(): ServerSource_2<TRow>;
+
+// @public @deprecated
+export const createShortcutHandler: typeof createShortcutHandler_2;
 
 // @public
-export function createTableData<TRow>(): TableData<TRow>;
+function createShortcutHandler_2(shortcuts: readonly Shortcut[], onCommand: (command: string) => void): (event: ShortcutKeyEvent_2) => boolean;
+
+// @public @deprecated
+export const createTableData: typeof createTableData_2;
+
+// @public
+function createTableData_2<TRow>(): TableData_2<TRow>;
 
 // @public
 export function createTableEngine<TRow>(options: CreateTableEngineOptions<TRow>): TableEngine<TRow>;
@@ -2349,13 +2886,19 @@ export interface CreateTableEngineOptions<TRow> {
     readonly tableId?: string;
 }
 
+// @public @deprecated
+export const createTableViewStore: typeof createTableViewStore_2;
+
 // @public
-export function createTableViewStore(source: ViewStateSource, config?: TableViewStateConfig, options?: {
+function createTableViewStore_2(source: ViewStateSource_2, config?: TableViewStateConfig, options?: {
     readonly store?: TableStore;
 }): TableViewStore;
 
+// @public @deprecated
+export const createUrlSliceStore: typeof createUrlSliceStore_2;
+
 // @public
-export function createUrlSliceStore<T, TConfig extends object>(source: ViewStateSource, spec: UrlSliceSpec<T, TConfig>, config: TConfig): UrlSliceStore<T, TConfig>;
+function createUrlSliceStore_2<T, TConfig extends object>(source: ViewStateSource_2, spec: UrlSliceSpec<T, TConfig>, config: TConfig): UrlSliceStore_2<T, TConfig>;
 
 // @public
 export type CssProperties = Record<string, string | number | undefined>;
@@ -2363,17 +2906,29 @@ export type CssProperties = Record<string, string | number | undefined>;
 // @public
 export const csvWriter: ExportWriter;
 
-// @public
-export function currentFeatureHost<TRow = unknown>(): FeatureHostState<TRow> | undefined;
+// @public @deprecated
+export const currentFeatureHost: typeof currentFeatureHost_2;
 
 // @public
-export function cursorHasMore(trail: CursorTrail, page: number): boolean;
+function currentFeatureHost_2<TRow = unknown>(): FeatureHostState<TRow> | undefined;
+
+// @public @deprecated
+export const cursorHasMore: typeof cursorHasMore_2;
 
 // @public
-export type CursorTrail = readonly (string | undefined)[];
+function cursorHasMore_2(trail: CursorTrail_2, page: number): boolean;
+
+// @public @deprecated
+export type CursorTrail = CursorTrail_2;
 
 // @public
-export function cursorTrailKey(query: {
+type CursorTrail_2 = readonly (string | undefined)[];
+
+// @public @deprecated
+export const cursorTrailKey: typeof cursorTrailKey_2;
+
+// @public
+function cursorTrailKey_2(query: {
     readonly limit: number;
     readonly search: string;
     readonly sortBy: string | undefined;
@@ -2385,8 +2940,11 @@ export function cursorTrailKey(query: {
     readonly filterTree: QueryFilterGroup | undefined;
 }): string;
 
+// @public @deprecated
+export const CUSTOM_AGGREGATE: typeof CUSTOM_AGGREGATE_2;
+
 // @public
-export const CUSTOM_AGGREGATE = "custom";
+const CUSTOM_AGGREGATE_2 = "custom";
 
 // @public
 export interface CustomAggregateOperation<TValue = AggregateOrderedValue> {
@@ -2428,14 +2986,20 @@ export interface CustomCellEditorCtrl {
 // @public
 export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => DisplayValue;
 
+// @public @deprecated
+export const customEditorConflict: typeof customEditorConflict_2;
+
 // @public
-export function customEditorConflict(ask: CellConflictAsk | undefined): CustomCellEditorConflict | undefined;
+function customEditorConflict_2(ask: CellConflictAsk | undefined): CustomCellEditorConflict | undefined;
 
 // @public
 export function datasetIndex(localIndex: number, windowStart: number): number;
 
+// @public @deprecated
+export type DataTier = DataTier_2;
+
 // @public
-export type DataTier = "frontend" | "server" | "source";
+type DataTier_2 = "frontend" | "server" | "source";
 
 // @public
 export const DATE_OP_LABEL_KEYS: {
@@ -2464,69 +3028,114 @@ export type DeclaredAggregates = Readonly<Record<string, string>>;
 // @public
 export function declaredAggregates(mapper: unknown): DeclaredAggregates | undefined;
 
-// @public
-export function declaredByDeveloper<TRow>(column: ColumnMetadata<TRow>, input: AggregationModelInput<TRow>): boolean;
+// @public @deprecated
+export const declaredByDeveloper: typeof declaredByDeveloper_2;
 
 // @public
-export function declaredColumnLayout<TCol extends ColumnMetadata<never>>(columns: readonly TCol[]): Omit<UseColumnLayoutResult<never>, "visibleColumns"> & {
+function declaredByDeveloper_2<TRow>(column: ColumnMetadata<TRow>, input: AggregationModelInput<TRow>): boolean;
+
+// @public @deprecated
+export const declaredColumnLayout: typeof declaredColumnLayout_2;
+
+// @public
+function declaredColumnLayout_2<TCol extends ColumnMetadata<never>>(columns: readonly TCol[]): Omit<UseColumnLayoutResult<never>, "visibleColumns"> & {
     visibleColumns: TCol[];
 };
 
-// @public
-export function declaredColumnName<TRow>(column: ColumnMetadata<TRow>): string;
+// @public @deprecated
+export const declaredColumnName: typeof declaredColumnName_2;
 
 // @public
-export const DEFAULT_CARD_SIZE_PX = 132;
+function declaredColumnName_2<TRow>(column: ColumnMetadata<TRow>): string;
+
+// @public @deprecated
+export const DEFAULT_CARD_SIZE_PX: typeof DEFAULT_CARD_SIZE_PX_2;
 
 // @public
-export const DEFAULT_DENSITY: TableDensity;
+const DEFAULT_CARD_SIZE_PX_2 = 132;
+
+// @public @deprecated
+export const DEFAULT_DENSITY: typeof DEFAULT_DENSITY_2;
 
 // @public
-export const DEFAULT_EDIT_HISTORY_DEPTH = 50;
+const DEFAULT_DENSITY_2: TableDensity;
+
+// @public @deprecated
+export const DEFAULT_EDIT_HISTORY_DEPTH: typeof DEFAULT_EDIT_HISTORY_DEPTH_2;
+
+// @public
+const DEFAULT_EDIT_HISTORY_DEPTH_2 = 50;
 
 // @public
 export const DEFAULT_LIMIT = 25;
 
+// @public @deprecated
+export const DEFAULT_ROW_SIZE_PX: typeof DEFAULT_ROW_SIZE_PX_2;
+
 // @public
-export const DEFAULT_ROW_SIZE_PX = 56;
+const DEFAULT_ROW_SIZE_PX_2 = 56;
 
 // @public
 export const DEFAULT_SHORTCUTS: readonly Shortcut[];
 
-// @public
-export const DEFAULT_SIDE_PANEL_ID_PREFIX = "adapttable-side-panel";
+// @public @deprecated
+export const DEFAULT_SIDE_PANEL_ID_PREFIX: typeof DEFAULT_SIDE_PANEL_ID_PREFIX_2;
 
 // @public
-export const defaultConfirm: ConfirmHandler;
+const DEFAULT_SIDE_PANEL_ID_PREFIX_2 = "adapttable-side-panel";
+
+// @public @deprecated
+export const defaultConfirm: typeof defaultConfirm_2;
+
+// @public
+const defaultConfirm_2: ConfirmHandler;
 
 // @public
 export const defaultFilterRegistry: FilterTypeRegistry;
 
+// @public @deprecated
+export const defaultFindMatchCount: typeof defaultFindMatchCount_2;
+
 // @public
-export function defaultFindMatchCount(current: number, total: number): string;
+function defaultFindMatchCount_2(current: number, total: number): string;
 
 // @public
 export function defaultFrontendRowId<TRow>(row: TRow): string;
 
-// @public
-export const defaultLabels: Required<TableLabels>;
+// @public @deprecated
+export const defaultLabels: typeof defaultLabels_2;
 
 // @public
-export function defaultPendingRows(count: number): string;
+const defaultLabels_2: Required<TableLabels>;
+
+// @public @deprecated
+export const defaultPendingRows: typeof defaultPendingRows_2;
 
 // @public
-export const defaultRowReorderAnnouncements: RowReorderAnnouncements;
+function defaultPendingRows_2(count: number): string;
+
+// @public @deprecated
+export const defaultRowReorderAnnouncements: typeof defaultRowReorderAnnouncements_2;
 
 // @public
-export function defaultSaveErrorMessage(error: unknown): string;
+const defaultRowReorderAnnouncements_2: RowReorderAnnouncements_2;
+
+// @public @deprecated
+export const defaultSaveErrorMessage: typeof defaultSaveErrorMessage_2;
+
+// @public
+function defaultSaveErrorMessage_2(error: unknown): string;
 
 // @public
 export function defaultSearchText<TRow>(row: TRow): string;
 
+// @public @deprecated
+export const deferGroupingDropToInner: typeof deferGroupingDropToInner_2;
+
 // @public
-export function deferGroupingDropToInner<TEvent extends {
+function deferGroupingDropToInner_2<TEvent extends {
     readonly defaultPrevented: boolean;
-}>(props: GroupingDropHandlers<TEvent>): GroupingDropHandlers<TEvent>;
+}>(props: GroupingDropHandlers_2<TEvent>): GroupingDropHandlers_2<TEvent>;
 
 // @public
 export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
@@ -2537,13 +3146,19 @@ export interface DensityContribution {
     readonly onDensityChange: (next: TableDensity) => void;
 }
 
+// @public @deprecated
+export const densitySlice: typeof densitySlice_2;
+
 // @public
-export const densitySlice: UrlSliceSpec<TableDensity, {
+const densitySlice_2: UrlSliceSpec<TableDensity, {
     readonly defaultDensity?: TableDensity;
 }>;
 
+// @public @deprecated
+export const deriveSortByOptions: typeof deriveSortByOptions_2;
+
 // @public
-export function deriveSortByOptions<TRow>(columns: readonly ColumnMetadata<TRow>[]): SortByOption[];
+function deriveSortByOptions_2<TRow>(columns: readonly ColumnMetadata<TRow>[]): SortByOption[];
 
 // @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
@@ -2560,11 +3175,17 @@ export function devWarn(message: string): void;
 // @public
 export type Direction = "ltr" | "rtl";
 
-// @public
-export function dirtyCellKey(rowId: string, columnKey: string): string;
+// @public @deprecated
+export const dirtyCellKey: typeof dirtyCellKey_2;
 
 // @public
-export interface DirtyCellSnapshot {
+function dirtyCellKey_2(rowId: string, columnKey: string): string;
+
+// @public @deprecated
+export type DirtyCellSnapshot = DirtyCellSnapshot_2;
+
+// @public
+interface DirtyCellSnapshot_2 {
     readonly cells: ReadonlySet<string>;
 }
 
@@ -2580,13 +3201,16 @@ export interface DirtyCellState {
     signature: string;
 }
 
+// @public @deprecated
+export type DirtyCellStore = DirtyCellStore_2;
+
 // @public
-export interface DirtyCellStore {
+interface DirtyCellStore_2 {
     readonly configure: (options: DirtyCellStoreOptions) => void;
     readonly confirm: (rowId: string, columnKey: string) => void;
     readonly confirmAll: () => void;
     readonly confirmRow: (rowId: string) => void;
-    readonly getSnapshot: () => DirtyCellSnapshot;
+    readonly getSnapshot: () => DirtyCellSnapshot_2;
     readonly mark: (rowId: string, columnKey: string) => void;
     readonly subscribe: (listener: () => void) => () => void;
 }
@@ -2596,14 +3220,23 @@ export interface DirtyCellStoreOptions {
     readonly enabled?: boolean;
 }
 
-// @public
-export function dirtyCellView(store: DirtyCellStore, snapshot: DirtyCellSnapshot): DirtyCellState;
+// @public @deprecated
+export const dirtyCellView: typeof dirtyCellView_2;
 
 // @public
-export function dirtyMarkerView(tracked: DirtyCellState, markers: boolean): DirtyCellState;
+function dirtyCellView_2(store: DirtyCellStore_2, snapshot: DirtyCellSnapshot_2): DirtyCellState;
+
+// @public @deprecated
+export const dirtyMarkerView: typeof dirtyMarkerView_2;
 
 // @public
-export function dispatchRowMove<TRow>(request: RowMoveRequest<TRow>, options: RowReorderOptions<TRow> | undefined): void;
+function dirtyMarkerView_2(tracked: DirtyCellState, markers: boolean): DirtyCellState;
+
+// @public @deprecated
+export const dispatchRowMove: typeof dispatchRowMove_2;
+
+// @public
+function dispatchRowMove_2<TRow>(request: RowMoveRequest<TRow>, options: RowReorderOptions<TRow> | undefined): void;
 
 // @public
 export type DisplayValue = string | number | boolean | bigint | object | null;
@@ -2628,8 +3261,11 @@ export function downloadTableCsv<TRow>(options: {
     onAfterExport?: NonNullable<ExportCsvOptions<TRow>["onAfterExport"]>;
 }): void;
 
+// @public @deprecated
+export const dropColumn: typeof dropColumn_2;
+
 // @public
-export function dropColumn(event: ColumnDragEvent, index: number, move: (key: string, toIndex: number) => void): void;
+function dropColumn_2(event: ColumnDragEvent_2, index: number, move: (key: string, toIndex: number) => void): void;
 
 // @public
 export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
@@ -2732,17 +3368,26 @@ export interface EditableCellEditorCtrl extends EditorDraftControl {
     } | null) => void;
 }
 
+// @public @deprecated
+export const editableCellErrorId: typeof editableCellErrorId_2;
+
 // @public
-export function editableCellErrorId(rowId: string, columnKey: string): string;
+function editableCellErrorId_2(rowId: string, columnKey: string): string;
 
 // @public
 export type EditableCellMode = "display" | "activatable" | "editing";
 
-// @public
-export type EditableCellPresentation = "batch" | "row" | "display" | "custom-editor" | "editor" | "activatable";
+// @public @deprecated
+export type EditableCellPresentation = EditableCellPresentation_2;
+
+// @public @deprecated
+export const editableCellPresentation: typeof editableCellPresentation_2;
 
 // @public
-export function editableCellPresentation<TRow>(editing: EditingBundle<TRow> | undefined, rowId: string, controller: Pick<EditableCellController<TRow>, "mode" | "editor">): EditableCellPresentation;
+type EditableCellPresentation_2 = "batch" | "row" | "display" | "custom-editor" | "editor" | "activatable";
+
+// @public
+function editableCellPresentation_2<TRow>(editing: EditingBundle<TRow> | undefined, rowId: string, controller: Pick<EditableCellController<TRow>, "mode" | "editor">): EditableCellPresentation_2;
 
 // @public
 export interface EditableColumnLike<TRow = unknown> {
@@ -2852,8 +3497,11 @@ export interface EditConflictState<TRow> {
     takeCell: (rowId: string, columnKey: string) => void;
 }
 
+// @public @deprecated
+export type EditConflictStore<TRow> = EditConflictStore_2<TRow>;
+
 // @public
-export interface EditConflictStore<TRow> {
+interface EditConflictStore_2<TRow> {
     readonly clear: () => void;
     readonly getSnapshot: () => EditConflictSnapshot<TRow>;
     readonly keep: () => void;
@@ -2866,8 +3514,11 @@ export interface EditConflictStore<TRow> {
     readonly takeCell: (rowId: string, columnKey: string) => void;
 }
 
+// @public @deprecated
+export const editConflictView: typeof editConflictView_2;
+
 // @public
-export function editConflictView<TRow>(store: EditConflictStore<TRow>, snapshot: EditConflictSnapshot<TRow>): EditConflictState<TRow>;
+function editConflictView_2<TRow>(store: EditConflictStore_2<TRow>, snapshot: EditConflictSnapshot<TRow>): EditConflictState<TRow>;
 
 // @public
 export interface EditEvent<TRow> {
@@ -2912,13 +3563,19 @@ export interface EditHistoryEntry<TRow> {
     undo: readonly CellEdit<TRow>[];
 }
 
+// @public @deprecated
+export const editHistoryEntry: typeof editHistoryEntry_2;
+
 // @public
-export function editHistoryEntry<TRow>(edits: readonly CellEdit<TRow>[], readValue: (edit: CellEdit<TRow>) => {
+function editHistoryEntry_2<TRow>(edits: readonly CellEdit<TRow>[], readValue: (edit: CellEdit<TRow>) => {
     value: unknown;
 } | undefined): EditHistoryEntry<TRow>;
 
+// @public @deprecated
+export type EditHistoryInput = EditHistoryInput_2;
+
 // @public
-export type EditHistoryInput = boolean | {
+type EditHistoryInput_2 = boolean | {
     readonly depth?: number;
 };
 
@@ -2928,8 +3585,11 @@ export interface EditHistorySnapshot {
     readonly past: number;
 }
 
+// @public @deprecated
+export type EditHistoryStack<TRow> = EditHistoryStack_2<TRow>;
+
 // @public
-export interface EditHistoryStack<TRow> {
+interface EditHistoryStack_2<TRow> {
     readonly clear: () => void;
     readonly getSnapshot: () => EditHistorySnapshot;
     readonly record: (entry: EditHistoryEntry<TRow>, depth: number) => void;
@@ -2949,11 +3609,17 @@ export interface EditHistoryState<TRow> {
     undo: () => number;
 }
 
-// @public
-export function editHistoryView<TRow>(history: EditHistoryController<TRow>, snapshot: EditHistorySnapshot, enabled: boolean): EditHistoryState<TRow>;
+// @public @deprecated
+export const editHistoryView: typeof editHistoryView_2;
 
 // @public
-export interface EditingArming {
+function editHistoryView_2<TRow>(history: EditHistoryController<TRow>, snapshot: EditHistorySnapshot, enabled: boolean): EditHistoryState<TRow>;
+
+// @public @deprecated
+export type EditingArming = EditingArming_2;
+
+// @public
+interface EditingArming_2 {
     readonly any: boolean;
     readonly batch: boolean;
     readonly cell: boolean;
@@ -2962,8 +3628,11 @@ export interface EditingArming {
     readonly trackDirty: boolean;
 }
 
+// @public @deprecated
+export type EditingArmingProps = EditingArmingProps_2;
+
 // @public
-export interface EditingArmingProps {
+interface EditingArmingProps_2 {
     readonly batchEditing?: boolean;
     readonly dirtyIndicators?: boolean;
     readonly onBatchEdit?: unknown;
@@ -3012,8 +3681,11 @@ export interface EditorAriaState {
     readonly validating: boolean;
 }
 
+// @public @deprecated
+export const editorBusyProps: typeof editorBusyProps_2;
+
 // @public
-export function editorBusyProps(ctrl: EditorAriaState): {
+function editorBusyProps_2(ctrl: EditorAriaState): {
     "aria-busy"?: true;
     "aria-describedby"?: string;
     "data-conflict"?: "";
@@ -3038,8 +3710,11 @@ export interface EditorDraftControl {
 // @public
 export function editorInputType(editor: CellEditor | null): "text" | "number" | "date" | "datetime-local" | "time";
 
+// @public @deprecated
+export const editorKeyRestoresFocus: typeof editorKeyRestoresFocus_2;
+
 // @public
-export function editorKeyRestoresFocus(key: string): boolean;
+function editorKeyRestoresFocus_2(key: string): boolean;
 
 // @public
 export function editorSelectOptions(editor: CellEditor): ReturnType<typeof normalizeEditorOptions>;
@@ -3055,8 +3730,11 @@ export function editorValidationProps(ctrl: EditorAriaState): {
 // @public
 export type EditUnit = "cell" | "row" | "batch";
 
+// @public @deprecated
+export type EditValidationSnapshot = EditValidationSnapshot_2;
+
 // @public
-export interface EditValidationSnapshot {
+interface EditValidationSnapshot_2 {
     readonly cellErrors: ReadonlyMap<string, string>;
     readonly rowErrors: ReadonlyMap<string, string>;
     readonly validating: ReadonlySet<string>;
@@ -3080,8 +3758,11 @@ export interface EditValidationState<TRow> {
     signature: string;
 }
 
+// @public @deprecated
+export type EditValidationStore<TRow> = EditValidationStore_2<TRow>;
+
 // @public
-export interface EditValidationStore<TRow> {
+interface EditValidationStore_2<TRow> {
     readonly check: (input: {
         target: ValidationTarget;
         value: unknown;
@@ -3091,7 +3772,7 @@ export interface EditValidationStore<TRow> {
     readonly clear: (rowId: string, columnKey: string) => void;
     readonly clearAll: () => void;
     readonly configure: (options: EditValidationStoreOptions<TRow>) => void;
-    readonly getSnapshot: () => EditValidationSnapshot;
+    readonly getSnapshot: () => EditValidationSnapshot_2;
     readonly hasRowValidator: () => boolean;
     readonly subscribe: (listener: () => void) => () => void;
 }
@@ -3102,11 +3783,17 @@ export interface EditValidationStoreOptions<TRow> {
     readonly validateRow?: RowValidator<TRow>;
 }
 
-// @public
-export function editValidationView<TRow>(store: EditValidationStore<TRow>, snapshot: EditValidationSnapshot, hasRowValidator: boolean): EditValidationState<TRow>;
+// @public @deprecated
+export const editValidationView: typeof editValidationView_2;
 
 // @public
-export function effectiveAggregateOps<TRow>(input: AggregationModelInput<TRow>): Readonly<Record<string, string>> | undefined;
+function editValidationView_2<TRow>(store: EditValidationStore_2<TRow>, snapshot: EditValidationSnapshot_2, hasRowValidator: boolean): EditValidationState<TRow>;
+
+// @public @deprecated
+export const effectiveAggregateOps: typeof effectiveAggregateOps_2;
+
+// @public
+function effectiveAggregateOps_2<TRow>(input: AggregationModelInput<TRow>): Readonly<Record<string, string>> | undefined;
 
 // @public
 export interface EffectiveAggregation {
@@ -3128,22 +3815,34 @@ export interface EffectiveAggregationInput<TRow> {
 // @public
 export type EffectiveAggregationKind = "override" | "suppressed" | "default" | "host" | "inactive";
 
+// @public @deprecated
+export const effectiveQueryAggregates: typeof effectiveQueryAggregates_2;
+
 // @public
-export function effectiveQueryAggregates<TRow>(aggregates: readonly QueryAggregate[] | undefined, overrides: GroupAggregateOverrides, columns: readonly ColumnMetadata<TRow>[] | undefined, supports: QuerySupport | undefined): readonly QueryAggregate[] | undefined;
+function effectiveQueryAggregates_2<TRow>(aggregates: readonly QueryAggregate[] | undefined, overrides: GroupAggregateOverrides, columns: readonly ColumnMetadata<TRow>[] | undefined, supports: QuerySupport | undefined): readonly QueryAggregate[] | undefined;
 
 // @public
 export type ElementRef<T> = ((node: T | null) => void) | {
     current: T | null;
 } | null | undefined;
 
-// @public
-export const EMPTY_COLUMN_LAYOUT: ColumnLayoutState;
+// @public @deprecated
+export const EMPTY_COLUMN_LAYOUT: typeof EMPTY_COLUMN_LAYOUT_2;
 
 // @public
-export const EMPTY_CURSOR_TRAIL: CursorTrail;
+const EMPTY_COLUMN_LAYOUT_2: ColumnLayoutState;
+
+// @public @deprecated
+export const EMPTY_CURSOR_TRAIL: typeof EMPTY_CURSOR_TRAIL_2;
 
 // @public
-export const EMPTY_PINNED_ROWS: PinnedRows<never>;
+const EMPTY_CURSOR_TRAIL_2: CursorTrail_2;
+
+// @public @deprecated
+export const EMPTY_PINNED_ROWS: typeof EMPTY_PINNED_ROWS_2;
+
+// @public
+const EMPTY_PINNED_ROWS_2: PinnedRows<never>;
 
 // @public
 export const EMPTY_PIVOT_CONFIG: PivotConfig;
@@ -3154,14 +3853,23 @@ export const EMPTY_ROW_PIN_STATE: RowPinState;
 // @public
 export function emptyFilterRegistry(): FilterTypeRegistry;
 
-// @public
-export function emptyFilterTree(): QueryFilterGroup;
+// @public @deprecated
+export const emptyFilterTree: typeof emptyFilterTree_2;
 
 // @public
-export function engineSearchText<TRow>(row: TRow): string;
+function emptyFilterTree_2(): QueryFilterGroup;
+
+// @public @deprecated
+export const engineSearchText: typeof engineSearchText_2;
 
 // @public
-export function estimateFromRowHeight<TRow>(rowHeight: RowHeight<TRow> | undefined, fallback: number, rowAt: (index: number) => {
+function engineSearchText_2<TRow>(row: TRow): string;
+
+// @public @deprecated
+export const estimateFromRowHeight: typeof estimateFromRowHeight_2;
+
+// @public
+function estimateFromRowHeight_2<TRow>(rowHeight: RowHeight<TRow> | undefined, fallback: number, rowAt: (index: number) => {
     row: TRow;
     index: number;
 } | undefined): (index: number) => number;
@@ -3205,8 +3913,11 @@ export type ExportAllResult = {
     readonly url: string;
 } | void;
 
+// @public @deprecated
+export const exportButtonLabel: typeof exportButtonLabel_2;
+
 // @public
-export function exportButtonLabel(labels: TableLabels | undefined, format: string): string;
+function exportButtonLabel_2(labels: TableLabels | undefined, format: string): string;
 
 // @public
 export type ExportColumnScope = "visible" | "all" | readonly string[];
@@ -3233,20 +3944,26 @@ export interface ExportContext<TRow> {
     };
 }
 
+// @public @deprecated
+export type ExportController = ExportController_2;
+
 // @public
-export interface ExportController {
+interface ExportController_2 {
     readonly cancel: () => void;
-    readonly configure: (options: ExportControllerOptions) => void;
+    readonly configure: (options: ExportControllerOptions_2) => void;
     readonly connect: () => () => void;
     readonly dismiss: () => void;
-    readonly getSnapshot: () => ExportSnapshot;
+    readonly getSnapshot: () => ExportSnapshot_2;
     readonly start: () => void;
     readonly subscribe: (listener: () => void) => () => void;
 }
 
+// @public @deprecated
+export type ExportControllerOptions = ExportControllerOptions_2;
+
 // @public
-export interface ExportControllerOptions {
-    readonly handler: ExportRunHandler | undefined;
+interface ExportControllerOptions_2 {
+    readonly handler: ExportRunHandler_2 | undefined;
     readonly pageOnly?: boolean;
     readonly serverBuilt?: boolean;
 }
@@ -3287,20 +4004,29 @@ export interface ExportPayload {
     text: string;
 }
 
+// @public @deprecated
+export type ExportProgressAction = ExportProgressAction_2;
+
 // @public
-export interface ExportProgressAction {
+interface ExportProgressAction_2 {
     readonly label: string;
     readonly onAction: () => void;
 }
 
+// @public @deprecated
+export type ExportProgressDownload = ExportProgressDownload_2;
+
 // @public
-export interface ExportProgressDownload {
+interface ExportProgressDownload_2 {
     readonly label: string;
     readonly url: string;
 }
 
+// @public @deprecated
+export const exportProgressHeading: typeof exportProgressHeading_2;
+
 // @public
-export function exportProgressHeading(status: Exclude<ExportStatus, "idle">, labels: TableLabels): string;
+function exportProgressHeading_2(status: Exclude<ExportStatus, "idle">, labels: TableLabels): string;
 
 // @public
 export interface ExportProgressState {
@@ -3314,22 +4040,28 @@ export interface ExportProgressState {
     readonly value: number | undefined;
 }
 
+// @public @deprecated
+export type ExportProgressView = ExportProgressView_2;
+
+// @public @deprecated
+export const exportProgressView: typeof exportProgressView_2;
+
 // @public
-export interface ExportProgressView {
-    readonly cancel: ExportProgressAction | undefined;
-    readonly dismiss: ExportProgressAction | undefined;
-    readonly download: ExportProgressDownload | undefined;
+interface ExportProgressView_2 {
+    readonly cancel: ExportProgressAction_2 | undefined;
+    readonly dismiss: ExportProgressAction_2 | undefined;
+    readonly download: ExportProgressDownload_2 | undefined;
     readonly error: string;
     readonly heading: string;
     readonly message: string;
     readonly progress: number | undefined;
     readonly progressLabel: string;
-    readonly retry: ExportProgressAction | undefined;
+    readonly retry: ExportProgressAction_2 | undefined;
     readonly status: Exclude<ExportStatus, "idle">;
 }
 
 // @public
-export function exportProgressView(progress: ExportProgressState, labels: TableLabels): ExportProgressView;
+function exportProgressView_2(progress: ExportProgressState, labels: TableLabels): ExportProgressView_2;
 
 // @public
 export interface ExportQuery {
@@ -3361,14 +4093,20 @@ export type ExportRowRole = "data" | "group" | "aggregate";
 // @public
 export type ExportRowScope = "page" | "all" | "selected" | "range";
 
+// @public @deprecated
+export type ExportRunHandler = ExportRunHandler_2;
+
 // @public
-export type ExportRunHandler = (controls?: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>;
+type ExportRunHandler_2 = (controls?: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>;
 
 // @public
 export type ExportScopeCapability = "all" | "page";
 
+// @public @deprecated
+export type ExportSnapshot = ExportSnapshot_2;
+
 // @public
-export interface ExportSnapshot {
+interface ExportSnapshot_2 {
     readonly downloadUrl: string | undefined;
     readonly error: string;
     readonly message: string;
@@ -3402,8 +4140,11 @@ export type ExportViewEntry<TRow> = {
     values?: Readonly<Partial<Record<string, unknown>>>;
 };
 
+// @public @deprecated
+export const exportViewFromChrome: typeof exportViewFromChrome_2;
+
 // @public
-export function exportViewFromChrome<TRow>(options: {
+function exportViewFromChrome_2<TRow>(options: {
     grouping?: {
         entries: readonly GroupedFlatEntry<TRow>[];
     };
@@ -3499,8 +4240,11 @@ export interface ExtraRow {
 // @public
 export type ExtraRowKind = "separator" | "fullWidth";
 
+// @public @deprecated
+export const extraRowsArmed: typeof extraRowsArmed_2;
+
 // @public
-export function extraRowsArmed(extraRows: readonly ExtraRow[] | undefined): boolean;
+function extraRowsArmed_2(extraRows: readonly ExtraRow[] | undefined): boolean;
 
 // @public @deprecated
 export const extraRowsForSection: typeof extraRowsForSection_2;
@@ -3527,8 +4271,14 @@ export interface FailedCellSave<TRow> {
     previous: TRow;
 }
 
+// @public @deprecated
+export const FakeSocket: typeof FakeSocket_2;
+
+// @public @deprecated
+export type FakeSocket = FakeSocket_2;
+
 // @public
-export class FakeSocket implements StreamSocket {
+class FakeSocket_2 implements StreamSocket {
     constructor(url: string, protocols?: string | string[]);
     // (undocumented)
     addEventListener(type: string, listener: (event: StreamSocketEvent) => void): void;
@@ -3550,8 +4300,11 @@ export class FakeSocket implements StreamSocket {
     readonly url: string;
 }
 
+// @public @deprecated
+export const FALLBACK_PIN_WIDTH: typeof FALLBACK_PIN_WIDTH_2;
+
 // @public
-export const FALLBACK_PIN_WIDTH = 150;
+const FALLBACK_PIN_WIDTH_2 = 150;
 
 // @public
 export interface FeatureHostState<TRow = unknown> {
@@ -3579,14 +4332,20 @@ export type FeatureNoticeAppearance = "off" | "disabled" | "one-page";
 // @public
 export type FeatureNoticeKind = "virtualize-paged" | "pin-nested" | "grouping-unavailable" | "export-all-page" | "edit-without-writer";
 
+// @public @deprecated
+export type FeatureRegistration<TRow = unknown> = FeatureRegistration_2<TRow>;
+
 // @public
-export interface FeatureRegistration<TRow = unknown> {
+interface FeatureRegistration_2<TRow = unknown> {
     readonly __row?: (row: TRow) => void;
     readonly id: string;
 }
 
+// @public @deprecated
+export type FeatureStrings<TGroups extends readonly Partial<TableLabels>[]> = FeatureStrings_2<TGroups>;
+
 // @public
-export type FeatureStrings<TGroups extends readonly Partial<TableLabels>[]> = Readonly<Pick<Required<TableLabels>, keyof typeof BASE_LABELS | GroupKeys<TGroups>>>;
+type FeatureStrings_2<TGroups extends readonly Partial<TableLabels>[]> = Readonly<Pick<Required<TableLabels>, keyof typeof BASE_LABELS_2 | GroupKeys_2<TGroups>>>;
 
 // @public
 export interface FetchAllExport<TRow> {
@@ -3620,8 +4379,11 @@ export interface FillRangeOptions<TRow> {
     to: GridCell;
 }
 
+// @public @deprecated
+export const fillSlot: typeof fillSlot_2;
+
 // @public
-export function fillSlot<TState>(slot: Slot<TState> | undefined, state: TState): DisplayValue | undefined;
+function fillSlot_2<TState>(slot: Slot<TState> | undefined, state: TState): DisplayValue | undefined;
 
 // @public
 export function fillTargetRange(source: CellRange, to: GridCell): CellRange;
@@ -3629,11 +4391,17 @@ export function fillTargetRange(source: CellRange, to: GridCell): CellRange;
 // @public
 export const FILTER_AI_OPTIONS_LIMIT = 50;
 
-// @public
-export const FILTER_ENGINE_IMPL: FilterEngine;
+// @public @deprecated
+export const FILTER_ENGINE_IMPL: typeof FILTER_ENGINE_IMPL_2;
 
 // @public
-export const FILTER_LABELS: Pick<Required<TableLabels>, "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "boolAny" | "boolTrue" | "boolFalse" | "removeFilter" | "filtersDone" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters">;
+const FILTER_ENGINE_IMPL_2: FilterEngine;
+
+// @public @deprecated
+export const FILTER_LABELS: typeof FILTER_LABELS_2;
+
+// @public
+const FILTER_LABELS_2: Pick<Required<TableLabels>, "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "boolAny" | "boolTrue" | "boolFalse" | "removeFilter" | "filtersDone" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters">;
 
 // @public
 export const FILTER_OP_SUFFIX = "Op";
@@ -3647,8 +4415,11 @@ export const FILTER_TREE_PARAM = "ft";
 // @public
 export const FILTER_TREE_VERSION = 1;
 
+// @public @deprecated
+export const FILTER_TYPE_OPS: typeof FILTER_TYPE_OPS_2;
+
 // @public
-export const FILTER_TYPE_OPS: Readonly<Record<FilterType, FilterTypeOps>>;
+const FILTER_TYPE_OPS_2: Readonly<Record<FilterType, FilterTypeOps_2>>;
 
 // @public
 export const FILTER_TYPES: readonly ["text", "select", "multiSelect", "checklist", "boolean", "dateRange", "numberRange"];
@@ -3710,8 +4481,11 @@ export interface FilterEngine {
     evaluateTree<TRow>(tree: QueryFilterGroup, row: TRow, defs: readonly FilterDef<TRow>[], registry: FilterTypeRegistry): boolean;
 }
 
+// @public @deprecated
+export const filterExportView: typeof filterExportView_2;
+
 // @public
-export function filterExportView<TRow>(view: readonly ExportViewEntry<TRow>[], scopedIds: ReadonlySet<string>, getRowId: (row: TRow) => string): ExportViewEntry<TRow>[];
+function filterExportView_2<TRow>(view: readonly ExportViewEntry<TRow>[], scopedIds: ReadonlySet<string>, getRowId: (row: TRow) => string): ExportViewEntry<TRow>[];
 
 // @public
 export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">;
@@ -3740,16 +4514,22 @@ export interface FilterOption {
     value: string;
 }
 
+// @public @deprecated
+export type FilterOptionsLoader = FilterOptionsLoader_2;
+
 // @public
-export interface FilterOptionsLoader {
-    readonly load: (defs: readonly FilterDef<never>[], onLoaded: (key: string, options: readonly LoadedFilterOption[]) => void) => () => void;
+interface FilterOptionsLoader_2 {
+    readonly load: (defs: readonly FilterDef<never>[], onLoaded: (key: string, options: readonly LoadedFilterOption_2[]) => void) => () => void;
 }
 
 // @public
 export type FilterOptionsSource = readonly FilterOption[] | "auto" | (() => Promise<readonly FilterOption[]>);
 
+// @public @deprecated
+export const filterPredicate: typeof filterPredicate_2;
+
 // @public
-export function filterPredicate<TRow>(def: FilterDef<TRow>, registry: FilterTypeRegistry): (row: TRow, extra: ExtraFilters) => boolean;
+function filterPredicate_2<TRow>(def: FilterDef<TRow>, registry: FilterTypeRegistry): (row: TRow, extra: ExtraFilters) => boolean;
 
 // @public
 export interface FilterRuntime<TRow> {
@@ -3765,17 +4545,26 @@ export interface FilterRuntime<TRow> {
 // @public
 export function filterStateKeys(def: Pick<FilterDef, "key" | "type">, registry?: FilterTypeRegistry): string[];
 
+// @public @deprecated
+export type FilterStrings = FilterStrings_2;
+
 // @public
-export type FilterStrings = FeatureStrings<readonly [typeof FILTER_LABELS]>;
+type FilterStrings_2 = FeatureStrings_2<readonly [typeof FILTER_LABELS_2]>;
 
 // @public
 export function filterTreeChipLabel<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], labels: Required<TableLabels>, registry?: FilterTypeRegistry): string;
 
-// @public
-export function filterTreeCombinatorOptions(labels: FilterStrings): readonly FilterTreeOption[];
+// @public @deprecated
+export const filterTreeCombinatorOptions: typeof filterTreeCombinatorOptions_2;
 
 // @public
-export function filterTreeConditionChips<TRow>(input: {
+function filterTreeCombinatorOptions_2(labels: FilterStrings_2): readonly FilterTreeOption_2[];
+
+// @public @deprecated
+export const filterTreeConditionChips: typeof filterTreeConditionChips_2;
+
+// @public
+function filterTreeConditionChips_2<TRow>(input: {
     readonly tree: QueryFilterGroup | undefined;
     readonly defs: readonly FilterDef<TRow>[];
     readonly labels: Required<TableLabels>;
@@ -3783,22 +4572,34 @@ export function filterTreeConditionChips<TRow>(input: {
     readonly onRemove: ((path: readonly number[]) => void) | undefined;
 }): readonly ActiveFilterChip[];
 
+// @public @deprecated
+export type FilterTreeConditionModel<TRow> = FilterTreeConditionModel_2<TRow>;
+
+// @public @deprecated
+export const filterTreeConditionModel: typeof filterTreeConditionModel_2;
+
 // @public
-export interface FilterTreeConditionModel<TRow> {
+interface FilterTreeConditionModel_2<TRow> {
     readonly def: FilterDef<TRow>;
-    readonly fieldOptions: readonly FilterTreeOption[];
-    readonly opOptions: readonly FilterTreeOption[];
-    readonly value: FilterTreeValueEditor;
+    readonly fieldOptions: readonly FilterTreeOption_2[];
+    readonly opOptions: readonly FilterTreeOption_2[];
+    readonly value: FilterTreeValueEditor_2;
     readonly withField: (key: string) => QueryCondition | undefined;
     readonly withOp: (op: string) => QueryCondition;
     readonly withValue: (value: unknown) => QueryCondition;
 }
 
 // @public
-export function filterTreeConditionModel<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], registry: FilterTypeRegistry, labels: FilterStrings): FilterTreeConditionModel<TRow> | undefined;
+function filterTreeConditionModel_2<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], registry: FilterTypeRegistry, labels: FilterStrings_2): FilterTreeConditionModel_2<TRow> | undefined;
+
+// @public @deprecated
+export type FilterTreeEditorActions = FilterTreeEditorActions_2;
+
+// @public @deprecated
+export const filterTreeEditorActions: typeof filterTreeEditorActions_2;
 
 // @public
-export interface FilterTreeEditorActions {
+interface FilterTreeEditorActions_2 {
     readonly addCondition: (path: readonly number[]) => void;
     readonly addGroup: (path: readonly number[]) => void;
     readonly remove: (path: readonly number[]) => void;
@@ -3807,16 +4608,25 @@ export interface FilterTreeEditorActions {
 }
 
 // @public
-export function filterTreeEditorActions<TRow>(tree: QueryFilterGroup | undefined, commit: (tree: QueryFilterGroup | undefined) => void, first: FilterDef<TRow>, registry: FilterTypeRegistry): FilterTreeEditorActions;
+function filterTreeEditorActions_2<TRow>(tree: QueryFilterGroup | undefined, commit: (tree: QueryFilterGroup | undefined) => void, first: FilterDef<TRow>, registry: FilterTypeRegistry): FilterTreeEditorActions_2;
+
+// @public @deprecated
+export type FilterTreeNode = FilterTreeNode_2;
 
 // @public
-export type FilterTreeNode = QueryCondition | QueryFilterGroup;
+type FilterTreeNode_2 = QueryCondition | QueryFilterGroup;
+
+// @public @deprecated
+export const filterTreeOpLabel: typeof filterTreeOpLabel_2;
 
 // @public
-export function filterTreeOpLabel(widget: string | undefined, op: string, labels: FilterStrings): string;
+function filterTreeOpLabel_2(widget: string | undefined, op: string, labels: FilterStrings_2): string;
+
+// @public @deprecated
+export type FilterTreeOption = FilterTreeOption_2;
 
 // @public
-export interface FilterTreeOption {
+interface FilterTreeOption_2 {
     readonly label: string;
     readonly value: string;
 }
@@ -3829,20 +4639,26 @@ export function filterTreeRows<TRow>(options: {
     match: (row: TRow) => boolean;
 }): TRow[];
 
+// @public @deprecated
+export type FilterTreeValueEditor = FilterTreeValueEditor_2;
+
+// @public @deprecated
+export const filterTreeValueEditor: typeof filterTreeValueEditor_2;
+
 // @public
-export type FilterTreeValueEditor = {
+type FilterTreeValueEditor_2 = {
     readonly kind: "none";
 } | {
     readonly kind: "boolean";
     readonly choice: "true" | "false";
-    readonly options: readonly FilterTreeOption[];
+    readonly options: readonly FilterTreeOption_2[];
     readonly write: (choice: string) => unknown;
 } | {
     readonly kind: "relative";
     readonly preset: RelativePreset;
     readonly n: number;
     readonly counted: boolean;
-    readonly options: readonly FilterTreeOption[];
+    readonly options: readonly FilterTreeOption_2[];
     readonly writePreset: (preset: string) => unknown;
     readonly writeCount: (n: string) => unknown;
 } | {
@@ -3860,7 +4676,7 @@ export type FilterTreeValueEditor = {
 };
 
 // @public
-export function filterTreeValueEditor<TRow>(def: FilterDef<TRow>, condition: QueryCondition, registry: FilterTypeRegistry, labels: FilterStrings): FilterTreeValueEditor;
+function filterTreeValueEditor_2<TRow>(def: FilterDef<TRow>, condition: QueryCondition, registry: FilterTypeRegistry, labels: FilterStrings_2): FilterTreeValueEditor_2;
 
 // @public
 export type FilterType = (typeof FILTER_TYPES)[number];
@@ -3874,14 +4690,17 @@ export interface FilterTypeExtend {
     readonly type: string;
 }
 
-// @public
-export interface FilterTypeOps {
-    readonly defaultOp: string;
-    readonly ops: readonly string[];
-}
+// @public @deprecated
+export type FilterTypeOps = FilterTypeOps_2;
 
 // @public
 export function filterTypeOps(def: Pick<FilterDef, "type">, registry: FilterTypeRegistry): readonly string[];
+
+// @public
+interface FilterTypeOps_2 {
+    readonly defaultOp: string;
+    readonly ops: readonly string[];
+}
 
 // @public
 export interface FilterTypeRegistry {
@@ -3925,21 +4744,30 @@ export interface FilterWidgetRenderProps<TRow = unknown> {
     readonly source: FilterFormSource<TRow>;
 }
 
+// @public @deprecated
+export const FIND_CURRENT_MATCH_SELECTOR: typeof FIND_CURRENT_MATCH_SELECTOR_2;
+
 // @public
-export const FIND_CURRENT_MATCH_SELECTOR = "[data-cell-match-current]";
+const FIND_CURRENT_MATCH_SELECTOR_2 = "[data-cell-match-current]";
 
 // @public
 export const FIND_URL_WRITE_DEBOUNCE_MS = 150;
 
+// @public @deprecated
+export type FindBarKeyEvent = FindBarKeyEvent_2;
+
 // @public
-export interface FindBarKeyEvent {
+interface FindBarKeyEvent_2 {
     readonly key: string;
     preventDefault(): void;
     readonly shiftKey: boolean;
 }
 
+// @public @deprecated
+export type FindBarKeyTarget = FindBarKeyTarget_2;
+
 // @public
-export interface FindBarKeyTarget {
+interface FindBarKeyTarget_2 {
     readonly next: () => void;
     readonly previous: () => void;
     readonly setOpen: (open: boolean) => void;
@@ -3954,12 +4782,15 @@ export interface FindContribution {
     readonly setQuery: (query: string) => void;
 }
 
+// @public @deprecated
+export type FindController = FindController_2;
+
 // @public
-export interface FindController {
-    readonly configure: (options: FindControllerOptions) => void;
+interface FindController_2 {
+    readonly configure: (options: FindControllerOptions_2) => void;
     readonly connect: () => () => void;
     readonly flush: () => void;
-    readonly getSnapshot: () => FindSnapshot;
+    readonly getSnapshot: () => FindSnapshot_2;
     readonly openBar: () => void;
     readonly setOpen: (open: boolean) => void;
     readonly setQuery: (query: string) => void;
@@ -3968,15 +4799,21 @@ export interface FindController {
     readonly syncFromUrl: () => void;
 }
 
+// @public @deprecated
+export type FindControllerOptions = FindControllerOptions_2;
+
 // @public
-export interface FindControllerOptions {
+interface FindControllerOptions_2 {
     adapter: UrlStateAdapter;
     enabled: boolean;
     urlKey?: string;
 }
 
+// @public @deprecated
+export const findMatchCountText: typeof findMatchCountText_2;
+
 // @public
-export function findMatchCountText(labels: Pick<TableLabels, "findMatchCount"> | undefined, index: number, total: number): string;
+function findMatchCountText_2(labels: Pick<TableLabels, "findMatchCount"> | undefined, index: number, total: number): string;
 
 // @public
 export function findMatches<TRow>(options: FindMatchesOptions<TRow>): GridCell[];
@@ -3989,27 +4826,39 @@ export interface FindMatchesOptions<TRow> {
     rows: readonly TRow[];
 }
 
-// @public
-export function findMatchRow<TRow>(rows: readonly TRow[], firstRowIndex: number | undefined, current: GridCell | null): TRow | undefined;
+// @public @deprecated
+export const findMatchRow: typeof findMatchRow_2;
 
 // @public
-export interface FindShortcutScope {
+function findMatchRow_2<TRow>(rows: readonly TRow[], firstRowIndex: number | undefined, current: GridCell | null): TRow | undefined;
+
+// @public @deprecated
+export type FindShortcutScope = FindShortcutScope_2;
+
+// @public
+interface FindShortcutScope_2 {
     readonly focusIn: (target: unknown) => void;
-    readonly keyDown: (event: ChordKeyEvent & {
+    readonly keyDown: (event: ChordKeyEvent_2 & {
         readonly target: unknown;
         preventDefault(): void;
     }) => void;
     readonly pointerDown: (target: unknown) => void;
 }
 
+// @public @deprecated
+export type FindShortcutScopeOptions = FindShortcutScopeOptions_2;
+
 // @public
-export interface FindShortcutScopeOptions {
+interface FindShortcutScopeOptions_2 {
     readonly contains: (target: unknown) => boolean;
     readonly openBar: () => void;
 }
 
+// @public @deprecated
+export type FindSnapshot = FindSnapshot_2;
+
 // @public
-export interface FindSnapshot {
+interface FindSnapshot_2 {
     readonly index: number;
     readonly open: boolean;
     readonly pending: string | null;
@@ -4019,46 +4868,70 @@ export interface FindSnapshot {
 // @public
 export function finiteSparklineValues(values: readonly number[]): number[];
 
+// @public @deprecated
+export type FirstLoadLatch = FirstLoadLatch_2;
+
 // @public
-export interface FirstLoadLatch {
+interface FirstLoadLatch_2 {
     readonly isLoading: (loading: boolean, rowsPresent: boolean) => boolean;
     readonly observe: (loading: boolean, rowsPresent: boolean) => void;
 }
 
+// @public @deprecated
+export const fittedTableStyle: typeof fittedTableStyle_2;
+
 // @public
-export function fittedTableStyle(fitColumns?: boolean): CssProperties | undefined;
+function fittedTableStyle_2(fitColumns?: boolean): CssProperties | undefined;
 
 // @public @deprecated
 export const flattenColumnTree: typeof flattenColumnTree_2;
 
 // @public
-function flattenColumnTree_2<TRow>(columns: readonly ColumnInput<TRow>[]): FlattenedColumns<TRow>;
+function flattenColumnTree_2<TRow>(columns: readonly ColumnInput<TRow>[]): FlattenedColumns_2<TRow>;
+
+// @public @deprecated
+export type FlattenedColumns<TRow> = FlattenedColumns_2<TRow>;
 
 // @public
-export interface FlattenedColumns<TRow> {
+interface FlattenedColumns_2<TRow> {
     readonly groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
     readonly leaves: ColumnMetadata<TRow>[];
 }
 
-// @public
-export function focusAfterAggregationRemoval(root: ParentNode | null, remainingKeys: readonly string[], removedIndex: number): void;
+// @public @deprecated
+export const focusAfterAggregationRemoval: typeof focusAfterAggregationRemoval_2;
 
 // @public
-export function focusEditorOnMount(node: {
+function focusAfterAggregationRemoval_2(root: ParentNode | null, remainingKeys: readonly string[], removedIndex: number): void;
+
+// @public @deprecated
+export const focusEditorOnMount: typeof focusEditorOnMount_2;
+
+// @public
+function focusEditorOnMount_2(node: {
     focus: () => void;
 } | null): void;
 
-// @public
-export function focusExportTrigger(root?: Pick<ParentNode, "querySelector"> | undefined): boolean;
+// @public @deprecated
+export const focusExportTrigger: typeof focusExportTrigger_2;
 
 // @public
-export function focusWasDropped(trigger: HTMLElement): boolean;
+function focusExportTrigger_2(root?: Pick<ParentNode, "querySelector"> | undefined): boolean;
+
+// @public @deprecated
+export const focusWasDropped: typeof focusWasDropped_2;
+
+// @public
+function focusWasDropped_2(trigger: HTMLElement): boolean;
 
 // @public
 export function formatFilterChip(fieldLabel: string, opWord: string, value?: string): string;
 
+// @public @deprecated
+export const formatGroupBy: typeof formatGroupBy_2;
+
 // @public
-export function formatGroupBy(value: GroupByInput): string | undefined;
+function formatGroupBy_2(value: GroupByInput): string | undefined;
 
 // @public
 export function formatGroupLabel(value: unknown, blankLabel?: string): string;
@@ -4141,8 +5014,11 @@ export function formulaRefs(node: FormulaNode): string[];
 // @public
 export type FormulaScope = (key: string) => FormulaValue | undefined;
 
+// @public @deprecated
+export const formulaSlice: typeof formulaSlice_2;
+
 // @public
-export const formulaSlice: UrlSliceSpec<readonly FormulaColumnSpec[], {
+const formulaSlice_2: UrlSliceSpec<readonly FormulaColumnSpec[], {
     readonly defaultFormulas?: readonly FormulaColumnSpec[];
 }>;
 
@@ -4172,17 +5048,23 @@ export type FormulaValue = {
 // @public
 export type FrontendEngineFactory<TRow> = (options: CreateTableEngineOptions<TRow>) => TableEngine<TRow>;
 
+// @public @deprecated
+export type FrontendSource<TRow> = FrontendSource_2<TRow>;
+
 // @public
-export interface FrontendSource<TRow> {
+interface FrontendSource_2<TRow> {
     readonly commit: () => void;
     readonly engine: TableEngine<TRow>;
     readonly engineFactory: FrontendEngineFactory<TRow>;
     readonly replaceEngine: (createEngine: FrontendEngineFactory<TRow>) => void;
-    readonly update: (config: FrontendSourceConfig<TRow>, view: FrontendSourceViewState) => FrontendSourceFrame<TRow>;
+    readonly update: (config: FrontendSourceConfig_2<TRow>, view: FrontendSourceViewState_2) => FrontendSourceFrame_2<TRow>;
 }
 
+// @public @deprecated
+export type FrontendSourceConfig<TRow> = FrontendSourceConfig_2<TRow>;
+
 // @public
-export interface FrontendSourceConfig<TRow> {
+interface FrontendSourceConfig_2<TRow> {
     readonly columns?: readonly ColumnMetadata<TRow>[];
     readonly data: readonly TRow[];
     readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
@@ -4195,8 +5077,11 @@ export interface FrontendSourceConfig<TRow> {
     readonly paginationMode: ResolvedPaginationMode;
 }
 
+// @public @deprecated
+export type FrontendSourceFrame<TRow> = FrontendSourceFrame_2<TRow>;
+
 // @public
-export interface FrontendSourceFrame<TRow> {
+interface FrontendSourceFrame_2<TRow> {
     readonly allFilteredRows: readonly TRow[];
     readonly allSearchedRows: readonly TRow[];
     readonly hasNextPage: boolean;
@@ -4205,8 +5090,11 @@ export interface FrontendSourceFrame<TRow> {
     readonly total: number;
 }
 
+// @public @deprecated
+export type FrontendSourceViewState = FrontendSourceViewState_2;
+
 // @public
-export interface FrontendSourceViewState {
+interface FrontendSourceViewState_2 {
     readonly extra: ExtraFilters;
     readonly filterTree: QueryFilterGroup | undefined;
     readonly groupBy: string | undefined;
@@ -4263,8 +5151,14 @@ export interface GridCell {
 // @public
 export function gridCellAttr(cell: GridCell): string;
 
+// @public @deprecated
+export type GridCellAttributes = GridCellAttributes_2;
+
+// @public @deprecated
+export const gridCellAttributes: typeof gridCellAttributes_2;
+
 // @public
-export interface GridCellAttributes {
+interface GridCellAttributes_2 {
     "aria-colindex"?: number;
     "aria-selected"?: boolean;
     "data-cell-match"?: "";
@@ -4276,10 +5170,13 @@ export interface GridCellAttributes {
 }
 
 // @public
-export function gridCellAttributes(input: GridCellAttributesInput, cell: GridCell): GridCellAttributes;
+function gridCellAttributes_2(input: GridCellAttributesInput_2, cell: GridCell): GridCellAttributes_2;
+
+// @public @deprecated
+export type GridCellAttributesInput = GridCellAttributesInput_2;
 
 // @public
-export interface GridCellAttributesInput {
+interface GridCellAttributesInput_2 {
     readonly active: GridCell | null;
     readonly columnsWindowed: boolean;
     readonly currentMatch?: GridCell | null;
@@ -4290,39 +5187,54 @@ export interface GridCellAttributesInput {
     readonly range: CellRange | null;
 }
 
+// @public @deprecated
+export const gridColumnHeaderAttributes: typeof gridColumnHeaderAttributes_2;
+
 // @public
-export function gridColumnHeaderAttributes(input: {
+function gridColumnHeaderAttributes_2(input: {
     readonly enabled: boolean;
     readonly columnsWindowed: boolean;
 }, col: number): {
     "aria-colindex"?: number;
 };
 
+// @public @deprecated
+export type GridContainerAttributes = GridContainerAttributes_2;
+
+// @public @deprecated
+export const gridContainerAttributes: typeof gridContainerAttributes_2;
+
 // @public
-export interface GridContainerAttributes {
+interface GridContainerAttributes_2 {
     "aria-colcount"?: number;
     "aria-rowcount"?: number;
     role?: "grid";
 }
 
 // @public
-export function gridContainerAttributes(input: {
+function gridContainerAttributes_2(input: {
     readonly enabled: boolean;
     readonly windowed: boolean;
     readonly columnsWindowed: boolean;
     readonly rowCount: number;
     readonly colCount: number;
-}): GridContainerAttributes;
+}): GridContainerAttributes_2;
+
+// @public @deprecated
+export const gridFillHandleCell: typeof gridFillHandleCell_2;
 
 // @public
-export function gridFillHandleCell(input: {
+function gridFillHandleCell_2(input: {
     readonly enabled: boolean;
     readonly range: CellRange | null;
     readonly canFill: boolean;
 }): GridCell | null;
 
+// @public @deprecated
+export type GridFocusController<TRow> = GridFocusController_2<TRow>;
+
 // @public
-export interface GridFocusController<TRow> {
+interface GridFocusController_2<TRow> {
     readonly attach: (container: HTMLElement | null) => void;
     readonly cellAt: (rowId: string, columnKey: string) => GridCell | undefined;
     readonly clickHeader: (col: number, event: {
@@ -4333,8 +5245,8 @@ export interface GridFocusController<TRow> {
     readonly copyCells: (cell?: GridCell, cut?: boolean) => void;
     readonly enterCell: (cell: GridCell) => void;
     readonly focusCell: (cell: GridCell) => void;
-    readonly getSnapshot: () => GridFocusSnapshot;
-    readonly keyDown: (event: GridKeyEvent) => void;
+    readonly getSnapshot: () => GridFocusSnapshot_2;
+    readonly keyDown: (event: GridKeyEvent_2) => void;
     readonly pressCell: (cell: GridCell, event: {
         shiftKey?: boolean;
     }) => void;
@@ -4350,7 +5262,7 @@ export interface GridFocusController<TRow> {
     readonly syncFocus: () => void;
     readonly toggleColumn: (col: number) => void;
     readonly trackFocus: (cell: GridCell) => void;
-    readonly watchPointerRelease: (target: PointerReleaseTarget) => () => void;
+    readonly watchPointerRelease: (target: PointerReleaseTarget_2) => () => void;
 }
 
 // @public
@@ -4386,16 +5298,22 @@ export type GridFocusMove = "up" | "down" | "left" | "right" | "rowStart" | "row
 // @public
 export function gridFocusMoveForKey(press: GridKeyPress, dir?: Direction): GridFocusMove | null;
 
+// @public @deprecated
+export type GridFocusSnapshot = GridFocusSnapshot_2;
+
 // @public
-export interface GridFocusSnapshot {
+interface GridFocusSnapshot_2 {
     readonly active: GridCell | null;
     readonly announcement: string;
     readonly fillPreview: CellRange | null;
     readonly range: CellRange | null;
 }
 
+// @public @deprecated
+export type GridKeyEvent = GridKeyEvent_2;
+
 // @public
-export interface GridKeyEvent extends GridKeyPress {
+interface GridKeyEvent_2 extends GridKeyPress {
     preventDefault: () => void;
     shiftKey?: boolean;
     target?: unknown;
@@ -4408,22 +5326,31 @@ export interface GridKeyPress {
     metaKey?: boolean;
 }
 
+// @public @deprecated
+export const gridRowAttributes: typeof gridRowAttributes_2;
+
 // @public
-export function gridRowAttributes(input: {
+function gridRowAttributes_2(input: {
     readonly enabled: boolean;
     readonly windowed: boolean;
 }, rowIndex: number): {
     "aria-rowindex"?: number;
 };
 
+// @public @deprecated
+export const gridRowFocusSignature: typeof gridRowFocusSignature_2;
+
 // @public
-export function gridRowFocusSignature(input: GridCellAttributesInput, rowIndex: number, colCount: number): string;
+function gridRowFocusSignature_2(input: GridCellAttributesInput_2, rowIndex: number, colCount: number): string;
 
 // @public
 export function groupAggregateEntries<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(columns: readonly TCol[], aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined, aggregation?: GroupAggregateOps): GroupRowCell<TRow, TCol>[];
 
+// @public @deprecated
+export const groupAggregateNode: typeof groupAggregateNode_2;
+
 // @public
-export function groupAggregateNode<TCol extends {
+function groupAggregateNode_2<TCol extends {
     key: string;
 } & Pick<ColumnMetadata<never>, "formatAggregate">>(column: TCol, node: DisplayValue | undefined, aggregation: GroupAggregateOps | undefined): DisplayValue | undefined;
 
@@ -4460,19 +5387,31 @@ export interface GroupCollapseActions {
     readonly toggle: (groupKey: string) => void;
 }
 
-// @public
-export function groupCollapseActions(store: ControllableStore<ReadonlySet<string>>): GroupCollapseActions;
+// @public @deprecated
+export const groupCollapseActions: typeof groupCollapseActions_2;
 
 // @public
-export const groupCollapseSlice: UrlSliceSpec<string[], {
+function groupCollapseActions_2(store: ControllableStore_2<ReadonlySet<string>>): GroupCollapseActions;
+
+// @public @deprecated
+export const groupCollapseSlice: typeof groupCollapseSlice_2;
+
+// @public
+const groupCollapseSlice_2: UrlSliceSpec<string[], {
     readonly defaultCollapsedGroupIds?: readonly string[];
 }>;
 
-// @public
-export function groupedEntriesForStrategy<TRow>(options: GroupedEntriesForStrategyOptions<TRow>): GroupedFlatEntry<TRow>[];
+// @public @deprecated
+export const groupedEntriesForStrategy: typeof groupedEntriesForStrategy_2;
 
 // @public
-export interface GroupedEntriesForStrategyOptions<TRow> {
+function groupedEntriesForStrategy_2<TRow>(options: GroupedEntriesForStrategyOptions_2<TRow>): GroupedFlatEntry<TRow>[];
+
+// @public @deprecated
+export type GroupedEntriesForStrategyOptions<TRow> = GroupedEntriesForStrategyOptions_2<TRow>;
+
+// @public
+interface GroupedEntriesForStrategyOptions_2<TRow> {
     aggregateOps?: GroupAggregateOps;
     // (undocumented)
     aggregates?: (rows: readonly TRow[]) => unknown;
@@ -4494,7 +5433,7 @@ export interface GroupedEntriesForStrategyOptions<TRow> {
     // (undocumented)
     groupPageSize?: number;
     // (undocumented)
-    kind: GroupingComputationKind;
+    kind: GroupingComputationKind_2;
     locale?: string;
     // (undocumented)
     paging?: GroupPaging;
@@ -4598,11 +5537,17 @@ export interface GroupedRowModel<TRow> {
     }[];
 }
 
-// @public
-export function groupedRowModel<TRow>(options: GroupedRowModelOptions<TRow>): GroupedRowModel<TRow> | undefined;
+// @public @deprecated
+export const groupedRowModel: typeof groupedRowModel_2;
 
 // @public
-export interface GroupedRowModelOptions<TRow> {
+function groupedRowModel_2<TRow>(options: GroupedRowModelOptions_2<TRow>): GroupedRowModel<TRow> | undefined;
+
+// @public @deprecated
+export type GroupedRowModelOptions<TRow> = GroupedRowModelOptions_2<TRow>;
+
+// @public
+interface GroupedRowModelOptions_2<TRow> {
     readonly aggregates: GroupingAggregates<TRow>;
     readonly collapsedGroupIds: ReadonlySet<string>;
     readonly columns: readonly ColumnMetadata<TRow>[];
@@ -4619,13 +5564,19 @@ export interface GroupedRowModelOptions<TRow> {
     readonly source: GroupingRuntimeSource<TRow>;
 }
 
+// @public @deprecated
+export const groupedViewSource: typeof groupedViewSource_2;
+
 // @public
-export function groupedViewSource<TSource extends {
+function groupedViewSource_2<TSource extends {
     readonly allFilteredRows?: readonly unknown[];
 }>(source: TSource): TSource;
 
+// @public @deprecated
+export const GROUPING_COLUMN_DND_MIME: typeof GROUPING_COLUMN_DND_MIME_2;
+
 // @public
-export const GROUPING_COLUMN_DND_MIME = "application/x-adapttable-grouping-column";
+const GROUPING_COLUMN_DND_MIME_2 = "application/x-adapttable-grouping-column";
 
 // @public
 export interface GroupingAggregates<TRow> {
@@ -4635,28 +5586,43 @@ export interface GroupingAggregates<TRow> {
     readonly source: AggregationSourceSupport;
 }
 
-// @public
-export function groupingAggregates<TRow>(options: GroupingAggregatesOptions<TRow>): GroupingAggregates<TRow>;
+// @public @deprecated
+export const groupingAggregates: typeof groupingAggregates_2;
 
 // @public
-export interface GroupingAggregatesOptions<TRow> {
+function groupingAggregates_2<TRow>(options: GroupingAggregatesOptions_2<TRow>): GroupingAggregates<TRow>;
+
+// @public @deprecated
+export type GroupingAggregatesOptions<TRow> = GroupingAggregatesOptions_2<TRow>;
+
+// @public
+interface GroupingAggregatesOptions_2<TRow> {
     readonly columns: readonly ColumnMetadata<TRow>[];
     readonly groupAggregates?: (rows: readonly TRow[]) => unknown;
     readonly panelDeclared?: DeclaredAggregates;
     readonly source: GroupingRuntimeSource<TRow>;
 }
 
+// @public @deprecated
+export const groupingAggregationOptions: typeof groupingAggregationOptions_2;
+
 // @public
-export function groupingAggregationOptions(item: AggregationItem, labels: Required<TableLabels>): {
+function groupingAggregationOptions_2(item: AggregationItem, labels: Required<TableLabels>): {
     value: string;
     label: string;
 }[];
 
-// @public
-export function groupingAggregationSource<TRow>(source: GroupingRuntimeSource<TRow>): AggregationSourceSupport;
+// @public @deprecated
+export const groupingAggregationSource: typeof groupingAggregationSource_2;
 
 // @public
-export function groupingAvailableColumns(columns: readonly {
+function groupingAggregationSource_2<TRow>(source: GroupingRuntimeSource<TRow>): AggregationSourceSupport;
+
+// @public @deprecated
+export const groupingAvailableColumns: typeof groupingAvailableColumns_2;
+
+// @public
+function groupingAvailableColumns_2(columns: readonly {
     readonly key: string;
     readonly header?: unknown;
     readonly mobileLabel?: string;
@@ -4677,8 +5643,11 @@ export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
     tabIndex: 0;
 }
 
+// @public @deprecated
+export const groupingCollapseCommands: typeof groupingCollapseCommands_2;
+
 // @public
-export function groupingCollapseCommands(openGroups: readonly {
+function groupingCollapseCommands_2(openGroups: readonly {
     readonly key: string;
     readonly level: number;
 }[], collapse: Pick<GroupCollapseActions, "expandAll" | "collapseToDepth">): {
@@ -4687,23 +5656,32 @@ export function groupingCollapseCommands(openGroups: readonly {
     readonly collapseToDepth: (depth: number) => void;
 };
 
+// @public @deprecated
+export const groupingColumnName: typeof groupingColumnName_2;
+
 // @public
-export function groupingColumnName(column: {
+function groupingColumnName_2(column: {
     readonly key: string;
     readonly header?: unknown;
     readonly mobileLabel?: string;
 }): string;
 
-// @public
-export type GroupingComputationKind = "source" | "client" | "none";
+// @public @deprecated
+export type GroupingComputationKind = GroupingComputationKind_2;
+
+// @public @deprecated
+export const groupingComputationKind: typeof groupingComputationKind_2;
 
 // @public
-export function groupingComputationKind(input: {
+type GroupingComputationKind_2 = "source" | "client" | "none";
+
+// @public
+function groupingComputationKind_2(input: {
     groupByKeys: readonly string[];
     sourceGroups?: readonly QueryGroupRow[];
     allFilteredRows?: readonly unknown[];
     capabilities?: TableSourceCapabilities;
-}): GroupingComputationKind;
+}): GroupingComputationKind_2;
 
 // @public
 export interface GroupingContribution<TRow> {
@@ -4720,8 +5698,11 @@ export interface GroupingDragEventLike {
     readonly target: EventTarget | null;
 }
 
+// @public @deprecated
+export const groupingDragKey: typeof groupingDragKey_2;
+
 // @public
-export function groupingDragKey(event: Pick<DragEvent, "dataTransfer">): string | undefined;
+function groupingDragKey_2(event: Pick<DragEvent, "dataTransfer">): string | undefined;
 
 // @public
 export interface GroupingDragProps<TDragEvent = DragEvent> {
@@ -4742,23 +5723,32 @@ export interface GroupingDragState {
     source: GroupingDragSource;
 }
 
+// @public @deprecated
+export type GroupingDropHandlers<TEvent> = GroupingDropHandlers_2<TEvent>;
+
 // @public
-export interface GroupingDropHandlers<TEvent> {
+interface GroupingDropHandlers_2<TEvent> {
     onDragEnter?: (event: TEvent) => void;
     onDragLeave?: (event: TEvent) => void;
     onDragOver?: (event: TEvent) => void;
     onDrop?: (event: TEvent) => void;
 }
 
+// @public @deprecated
+export type GroupingDropPlan = GroupingDropPlan_2;
+
+// @public @deprecated
+export const groupingDropPlan: typeof groupingDropPlan_2;
+
 // @public
-export interface GroupingDropPlan {
+interface GroupingDropPlan_2 {
     readonly chipTarget: (index: number) => number | undefined;
     readonly inert: (index: number) => boolean;
     readonly panelTarget: number | undefined;
 }
 
 // @public
-export function groupingDropPlan(groupBy: readonly string[], drag: GroupingDragState | undefined): GroupingDropPlan;
+function groupingDropPlan_2(groupBy: readonly string[], drag: GroupingDragState | undefined): GroupingDropPlan_2;
 
 // @public
 export interface GroupingDropProps<TDragEvent = DragEvent> {
@@ -4779,8 +5769,11 @@ export interface GroupingKeyEventLike {
     preventDefault(): void;
 }
 
+// @public @deprecated
+export const groupingOperationLabel: typeof groupingOperationLabel_2;
+
 // @public
-export function groupingOperationLabel(operation: Pick<ResolvedAggregateOperation, "id" | "builtIn" | "label">, labels: Required<TableLabels>): string;
+function groupingOperationLabel_2(operation: Pick<ResolvedAggregateOperation, "id" | "builtIn" | "label">, labels: Required<TableLabels>): string;
 
 // @public
 export function groupingPanelAggregations<TRow>(options: {
@@ -4945,8 +5938,11 @@ export interface GroupingProjectionInput<TRow> {
 // @public
 export type GroupingRuntimeSource<TRow> = Pick<TableSource<TRow>, "allFilteredRows" | "groups" | "capabilities" | "honorsAggregates" | "aggregateOperations" | "groupAggregateOverrides" | "queryAggregates" | "groupAggregations">;
 
+// @public @deprecated
+export const groupingShowMoreAction: typeof groupingShowMoreAction_2;
+
 // @public
-export function groupingShowMoreAction(entry: {
+function groupingShowMoreAction_2(entry: {
     readonly scope: "groups" | "rows";
     readonly groupKey?: string;
 }, sizes: {
@@ -4962,11 +5958,17 @@ export interface GroupingShowMoreTarget {
 // @public
 export function groupingSourceOf<TRow>(source: GroupingRuntimeSource<TRow>): GroupingRuntimeSource<TRow>;
 
-// @public
-export type GroupKeys<TGroups extends readonly Partial<TableLabels>[]> = Extract<{ [I in keyof TGroups]: keyof TGroups[I]; }[number], keyof TableLabels>;
+// @public @deprecated
+export type GroupKeys<TGroups extends readonly Partial<TableLabels>[]> = GroupKeys_2<TGroups>;
 
 // @public
-export function groupLeafCount(entry: {
+type GroupKeys_2<TGroups extends readonly Partial<TableLabels>[]> = Extract<{ [I in keyof TGroups]: keyof TGroups[I]; }[number], keyof TableLabels>;
+
+// @public @deprecated
+export const groupLeafCount: typeof groupLeafCount_2;
+
+// @public
+function groupLeafCount_2(entry: {
     leafIds: readonly string[];
     serverCount?: number;
 }): number;
@@ -4986,8 +5988,11 @@ export interface GroupPaging {
     rows?: Readonly<Record<string, number>>;
 }
 
+// @public @deprecated
+export type GroupPagingController = GroupPagingController_2;
+
 // @public
-export interface GroupPagingController {
+interface GroupPagingController_2 {
     readonly getSnapshot: () => GroupPaging;
     readonly reset: () => void;
     readonly showMore: (pageSize: number, groupKey?: string) => void;
@@ -5010,8 +6015,11 @@ export interface GroupRowLayout<TRow, TCol extends ColumnMetadata<TRow> = Column
 // @public
 export function groupRowLayout<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(columns: readonly TCol[], aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined, aggregation?: GroupAggregateOps): GroupRowLayout<TRow, TCol>;
 
+// @public @deprecated
+export const groupsCollapsedToDepth: typeof groupsCollapsedToDepth_2;
+
 // @public
-export function groupsCollapsedToDepth(groups: readonly {
+function groupsCollapsedToDepth_2(groups: readonly {
     readonly key: string;
     readonly level: number;
 }[], depth: number): Set<string>;
@@ -5019,21 +6027,27 @@ export function groupsCollapsedToDepth(groups: readonly {
 // @public
 export function groupSelectionState(leafIds: readonly string[], selectedIds: ReadonlySet<string>): HeaderSelectionState;
 
+// @public @deprecated
+export type GroupShowMoreRequest = GroupShowMoreRequest_2;
+
+// @public @deprecated
+export const groupShowMoreRequest: typeof groupShowMoreRequest_2;
+
 // @public
-export interface GroupShowMoreRequest {
+interface GroupShowMoreRequest_2 {
     readonly groupKey?: string;
     readonly loadMoreKey?: string;
     readonly pageSize: number;
 }
 
 // @public
-export function groupShowMoreRequest(entry: {
+function groupShowMoreRequest_2(entry: {
     readonly scope: "groups" | "rows";
     readonly groupKey?: string;
 }, sizes: {
     readonly groupPageSize?: number;
     readonly groupRowPageSize?: number;
-}): GroupShowMoreRequest;
+}): GroupShowMoreRequest_2;
 
 // @public
 export type GroupSort<TRow> = "label" | "label-desc" | "count" | "count-desc" | ((a: GroupNode<TRow>, b: GroupNode<TRow>) => number);
@@ -5041,20 +6055,32 @@ export type GroupSort<TRow> = "label" | "label-desc" | "count" | "count-desc" | 
 // @public
 export function groupValueKey(value: unknown): string;
 
-// @public
-export function handleFindBarKey(event: FindBarKeyEvent, find: FindBarKeyTarget): boolean;
+// @public @deprecated
+export const handleFindBarKey: typeof handleFindBarKey_2;
 
 // @public
-export function handleRowEditorKey<TRow>(event: {
+function handleFindBarKey_2(event: FindBarKeyEvent_2, find: FindBarKeyTarget_2): boolean;
+
+// @public @deprecated
+export const handleRowEditorKey: typeof handleRowEditorKey_2;
+
+// @public
+function handleRowEditorKey_2<TRow>(event: {
     key: string;
     preventDefault: () => void;
 }, rowEditing: Pick<RowEditingState<TRow>, "save" | "cancel">, saveBlocked: boolean): void;
 
-// @public
-export function handleSidePanelBodyKey(event: Pick<SidePanelKeyEvent, "key" | "stopPropagation">, onClose: () => void): boolean;
+// @public @deprecated
+export const handleSidePanelBodyKey: typeof handleSidePanelBodyKey_2;
 
 // @public
-export function handleSidePanelTabKey(event: SidePanelKeyEvent, input: {
+function handleSidePanelBodyKey_2(event: Pick<SidePanelKeyEvent_2, "key" | "stopPropagation">, onClose: () => void): boolean;
+
+// @public @deprecated
+export const handleSidePanelTabKey: typeof handleSidePanelTabKey_2;
+
+// @public
+function handleSidePanelTabKey_2(event: SidePanelKeyEvent_2, input: {
     readonly panels: readonly {
         readonly key: string;
     }[];
@@ -5063,8 +6089,11 @@ export function handleSidePanelTabKey(event: SidePanelKeyEvent, input: {
     readonly onClose: () => void;
 }): string | undefined;
 
+// @public @deprecated
+export const hasActiveHeaderFilter: typeof hasActiveHeaderFilter_2;
+
 // @public
-export function hasActiveHeaderFilter<TRow>(props: Readonly<{
+function hasActiveHeaderFilter_2<TRow>(props: Readonly<{
     def: FilterDef<TRow>;
     source: FilterFormSource<TRow>;
     registry?: FilterTypeRegistry;
@@ -5073,42 +6102,63 @@ export function hasActiveHeaderFilter<TRow>(props: Readonly<{
 // @public
 export function hasEditableColumns(columns: readonly EditableColumnLike[]): boolean;
 
+// @public @deprecated
+export const hasGroupingColumnDrag: typeof hasGroupingColumnDrag_2;
+
 // @public
-export function hasGroupingColumnDrag(event: Pick<DragEvent, "dataTransfer">): boolean;
+function hasGroupingColumnDrag_2(event: Pick<DragEvent, "dataTransfer">): boolean;
 
 // @public
 export const HEADER_FILTER_SESSION_ATTR = "data-adapttable-header-filter";
 
-// @public
-export function headerFilterBooleanOptions(labels: Required<TableLabels>): readonly HeaderFilterOption[];
+// @public @deprecated
+export const headerFilterBooleanOptions: typeof headerFilterBooleanOptions_2;
 
 // @public
-export type HeaderFilterCellKind = "text" | "select" | "multi" | "boolean" | "range";
+function headerFilterBooleanOptions_2(labels: Required<TableLabels>): readonly HeaderFilterOption_2[];
+
+// @public @deprecated
+export type HeaderFilterCellKind = HeaderFilterCellKind_2;
+
+// @public @deprecated
+export const headerFilterCellKind: typeof headerFilterCellKind_2;
 
 // @public
-export function headerFilterCellKind<TRow>(def: FilterDef<TRow>, registry: FilterTypeRegistry): HeaderFilterCellKind | undefined;
+type HeaderFilterCellKind_2 = "text" | "select" | "multi" | "boolean" | "range";
+
+// @public
+function headerFilterCellKind_2<TRow>(def: FilterDef<TRow>, registry: FilterTypeRegistry): HeaderFilterCellKind_2 | undefined;
 
 // @public
 export function headerFilterFieldIsComplete<TRow>(def: FilterDef<TRow>, extra: ExtraFilters, registry?: FilterTypeRegistry): boolean;
 
+// @public @deprecated
+export const headerFilterInsideSelector: typeof headerFilterInsideSelector_2;
+
 // @public
-export function headerFilterInsideSelector(input: {
+function headerFilterInsideSelector_2(input: {
     readonly sessionId: string;
     readonly sharedHost: boolean;
     readonly nestedSelector?: string;
 }): string;
 
+// @public @deprecated
+export type HeaderFilterMultiModel = HeaderFilterMultiModel_2;
+
+// @public @deprecated
+export const headerFilterMultiModel: typeof headerFilterMultiModel_2;
+
 // @public
-export interface HeaderFilterMultiModel {
+interface HeaderFilterMultiModel_2 {
     readonly label: string;
-    readonly options: readonly HeaderFilterOption[];
+    readonly options: readonly HeaderFilterOption_2[];
     readonly selected: readonly string[];
     readonly summary: string;
     readonly toggle: (value: string, checked: boolean) => void;
 }
 
 // @public
-export function headerFilterMultiModel<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtra">, options: readonly HeaderFilterOption[], labels: Required<TableLabels>): HeaderFilterMultiModel;
+function headerFilterMultiModel_2<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtra">, options: readonly HeaderFilterOption_2[], labels: Required<TableLabels>): HeaderFilterMultiModel_2;
 
 // @public
 export interface HeaderFilterOpenHost {
@@ -5116,53 +6166,77 @@ export interface HeaderFilterOpenHost {
     readonly setOpenKey: (key: string | null) => void;
 }
 
+// @public @deprecated
+export type HeaderFilterOption = HeaderFilterOption_2;
+
 // @public
-export interface HeaderFilterOption {
+interface HeaderFilterOption_2 {
     readonly label: string;
     readonly value: string;
 }
 
+// @public @deprecated
+export type HeaderFilterOverlayController = HeaderFilterOverlayController_2;
+
 // @public
-export interface HeaderFilterOverlayController {
-    readonly configure: (options: HeaderFilterOverlayOptions) => void;
+interface HeaderFilterOverlayController_2 {
+    readonly configure: (options: HeaderFilterOverlayOptions_2) => void;
     readonly dismiss: () => void;
-    readonly getSnapshot: () => HeaderFilterOverlaySnapshot;
+    readonly getSnapshot: () => HeaderFilterOverlaySnapshot_2;
     readonly setOpen: (open: boolean) => void;
     readonly subscribe: (listener: () => void) => () => void;
 }
 
+// @public @deprecated
+export type HeaderFilterOverlayOptions = HeaderFilterOverlayOptions_2;
+
 // @public
-export interface HeaderFilterOverlayOptions {
+interface HeaderFilterOverlayOptions_2 {
     host?: HeaderFilterOpenHost | null;
     key: string;
 }
 
+// @public @deprecated
+export type HeaderFilterOverlaySnapshot = HeaderFilterOverlaySnapshot_2;
+
 // @public
-export interface HeaderFilterOverlaySnapshot {
+interface HeaderFilterOverlaySnapshot_2 {
     readonly localOpen: boolean;
     readonly resetKey: number;
 }
 
+// @public @deprecated
+export type HeaderFilterRangeModel = HeaderFilterRangeModel_2;
+
+// @public @deprecated
+export const headerFilterRangeModel: typeof headerFilterRangeModel_2;
+
 // @public
-export interface HeaderFilterRangeModel {
+interface HeaderFilterRangeModel_2 {
     readonly showUpper: boolean;
     readonly writeLower: (value: string) => void;
     readonly writeUpper: (value: string) => void;
 }
 
 // @public
-export function headerFilterRangeModel(widget: Pick<RangeFieldWidget, "op" | "a" | "b" | "arity" | "write">): HeaderFilterRangeModel;
+function headerFilterRangeModel_2(widget: Pick<RangeFieldWidget, "op" | "a" | "b" | "arity" | "write">): HeaderFilterRangeModel_2;
+
+// @public @deprecated
+export type HeaderFilterSelectModel = HeaderFilterSelectModel_2;
+
+// @public @deprecated
+export const headerFilterSelectModel: typeof headerFilterSelectModel_2;
 
 // @public
-export interface HeaderFilterSelectModel {
+interface HeaderFilterSelectModel_2 {
     readonly label: string;
-    readonly options: readonly HeaderFilterOption[];
+    readonly options: readonly HeaderFilterOption_2[];
     readonly value: string;
     readonly write: (value: string) => void;
 }
 
 // @public
-export function headerFilterSelectModel<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtra">, options: readonly HeaderFilterOption[], labels: Required<TableLabels>): HeaderFilterSelectModel;
+function headerFilterSelectModel_2<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtra">, options: readonly HeaderFilterOption_2[], labels: Required<TableLabels>): HeaderFilterSelectModel_2;
 
 // @public
 export type HeaderFilterWrites<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras">;
@@ -5196,8 +6270,11 @@ function headerGroupRows_2<TRow>(columns: readonly ColumnMetadata<TRow>[], colla
     readonly align?: GroupedHeaderAlign;
 }>): HeaderGroupCell_2[][] | null;
 
+// @public @deprecated
+export const headerSelectionOf: typeof headerSelectionOf_2;
+
 // @public
-export function headerSelectionOf(visibleIds: readonly string[], selected: ReadonlySet<string>): HeaderSelectionState;
+function headerSelectionOf_2(visibleIds: readonly string[], selected: ReadonlySet<string>): HeaderSelectionState;
 
 // @public
 export type HeaderSelectionState = "all" | "some" | "none";
@@ -5208,17 +6285,29 @@ export const hideAllColumns: typeof hideAllColumns_2;
 // @public
 function hideAllColumns_2<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
 
-// @public
-export const HIGHLIGHT_FADE_MS = 1500;
+// @public @deprecated
+export const HIGHLIGHT_FADE_MS: typeof HIGHLIGHT_FADE_MS_2;
 
 // @public
-export const HIGHLIGHT_STEADY_MS = 2500;
+const HIGHLIGHT_FADE_MS_2 = 1500;
+
+// @public @deprecated
+export const HIGHLIGHT_STEADY_MS: typeof HIGHLIGHT_STEADY_MS_2;
 
 // @public
-export function highlightCellKey(rowId: string, columnKey: string): string;
+const HIGHLIGHT_STEADY_MS_2 = 2500;
+
+// @public @deprecated
+export const highlightCellKey: typeof highlightCellKey_2;
 
 // @public
-export function highlightDuration(reducedMotion: boolean): number;
+function highlightCellKey_2(rowId: string, columnKey: string): string;
+
+// @public @deprecated
+export const highlightDuration: typeof highlightDuration_2;
+
+// @public
+function highlightDuration_2(reducedMotion: boolean): number;
 
 // @public
 export interface HighlightedCell {
@@ -5226,25 +6315,34 @@ export interface HighlightedCell {
     rowId: string;
 }
 
+// @public @deprecated
+export type HighlightSnapshot = HighlightSnapshot_2;
+
 // @public
-export interface HighlightSnapshot {
+interface HighlightSnapshot_2 {
     readonly cells: ReadonlySet<string>;
     readonly rows: ReadonlySet<string>;
 }
 
+// @public @deprecated
+export type HighlightStore = HighlightStore_2;
+
 // @public
-export interface HighlightStore {
+interface HighlightStore_2 {
     readonly clear: () => void;
-    readonly configure: (options: HighlightStoreOptions) => void;
+    readonly configure: (options: HighlightStoreOptions_2) => void;
     readonly dispose: () => void;
     readonly flashCell: (cell: HighlightedCell) => void;
     readonly flashRow: (rowId: string) => void;
-    readonly getSnapshot: () => HighlightSnapshot;
+    readonly getSnapshot: () => HighlightSnapshot_2;
     readonly subscribe: (listener: () => void) => () => void;
 }
 
+// @public @deprecated
+export type HighlightStoreOptions = HighlightStoreOptions_2;
+
 // @public
-export interface HighlightStoreOptions {
+interface HighlightStoreOptions_2 {
     readonly durationMs: number;
     readonly enabled: boolean;
 }
@@ -5277,17 +6375,26 @@ function htmlGroupedHeaderPlan_2<TRow>(columns: readonly ColumnMetadata<TRow>[],
 // @public
 export function humanizeKey(key: string): string;
 
+// @public @deprecated
+export const idSetReader: typeof idSetReader_2;
+
 // @public
-export function idSetReader(): (ids: readonly string[] | undefined) => ReadonlySet<string> | undefined;
+function idSetReader_2(): (ids: readonly string[] | undefined) => ReadonlySet<string> | undefined;
 
 // @public
 export function impliedOperations<TRow>(column: ColumnMetadata<TRow>): readonly AggregateName[];
 
-// @public
-export const INACTIVE_TIER_ROWS: readonly never[];
+// @public @deprecated
+export const INACTIVE_TIER_ROWS: typeof INACTIVE_TIER_ROWS_2;
 
 // @public
-export function incrementalSearchText<TRow>(row: TRow): string;
+const INACTIVE_TIER_ROWS_2: readonly never[];
+
+// @public @deprecated
+export const incrementalSearchText: typeof incrementalSearchText_2;
+
+// @public
+function incrementalSearchText_2<TRow>(row: TRow): string;
 
 // @public
 export interface IncrementalView<TRow> {
@@ -5330,14 +6437,23 @@ export interface IncrementalViewConfig<TRow> {
     summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
 }
 
-// @public
-export function incrementalViewConfig<TRow>(view: IncrementalView<TRow>): IncrementalViewConfig<TRow> | undefined;
+// @public @deprecated
+export const incrementalViewConfig: typeof incrementalViewConfig_2;
 
 // @public
-export function incrementalViewOf<TRow>(rows: readonly TRow[]): IncrementalView<TRow> | undefined;
+function incrementalViewConfig_2<TRow>(view: IncrementalView<TRow>): IncrementalViewConfig<TRow> | undefined;
+
+// @public @deprecated
+export const incrementalViewOf: typeof incrementalViewOf_2;
 
 // @public
-export const INERT_GROUPING_DROP_HANDLERS: Readonly<GroupingDropHandlers<{
+function incrementalViewOf_2<TRow>(rows: readonly TRow[]): IncrementalView<TRow> | undefined;
+
+// @public @deprecated
+export const INERT_GROUPING_DROP_HANDLERS: typeof INERT_GROUPING_DROP_HANDLERS_2;
+
+// @public
+const INERT_GROUPING_DROP_HANDLERS_2: Readonly<GroupingDropHandlers_2<{
     stopPropagation(): void;
 }>>;
 
@@ -5367,17 +6483,29 @@ function inflateBodyCellRowSpans_2<TCell extends {
     rowSpan: number;
 }>(cellsByRow: ReadonlyMap<string, readonly TCell[]>, visualIds: readonly string[], extraRows: readonly ExtraRow[] | undefined): ReadonlyMap<string, readonly TCell[]>;
 
-// @public
-export function initialColumnLayout(defaultColumnLayout: Partial<ColumnLayoutState> | undefined): ColumnLayoutState;
+// @public @deprecated
+export const initialColumnLayout: typeof initialColumnLayout_2;
 
 // @public
-export function initialOperation(resolved: ResolvedAggregatable, source?: AggregationSourceSupport): string;
+function initialColumnLayout_2(defaultColumnLayout: Partial<ColumnLayoutState> | undefined): ColumnLayoutState;
+
+// @public @deprecated
+export const initialOperation: typeof initialOperation_2;
 
 // @public
-export function initialRangeFilterOp<TRow>(def: FilterDef<TRow>, extra: FilterFormSource<TRow>["extra"]): RangeOp | undefined;
+function initialOperation_2(resolved: ResolvedAggregatable, source?: AggregationSourceSupport): string;
+
+// @public @deprecated
+export const initialRangeFilterOp: typeof initialRangeFilterOp_2;
 
 // @public
-export function initialTextFilterOp<TRow>(def: FilterDef<TRow>, extra: FilterFormSource<TRow>["extra"]): TextOp;
+function initialRangeFilterOp_2<TRow>(def: FilterDef<TRow>, extra: FilterFormSource<TRow>["extra"]): RangeOp | undefined;
+
+// @public @deprecated
+export const initialTextFilterOp: typeof initialTextFilterOp_2;
+
+// @public
+function initialTextFilterOp_2<TRow>(def: FilterDef<TRow>, extra: FilterFormSource<TRow>["extra"]): TextOp;
 
 // @public @deprecated
 export const insertExtraRows: typeof insertExtraRows_2;
@@ -5412,20 +6540,32 @@ export function isActiveFilterTree(tree: QueryFilterGroup | undefined): tree is 
 // @public
 export function isBetweenFilterOp(op: string): boolean;
 
-// @public
-export function isBooleanEditor(editor: CellEditor | null): boolean;
+// @public @deprecated
+export const isBooleanEditor: typeof isBooleanEditor_2;
 
 // @public
-export function isBrowser(): boolean;
+function isBooleanEditor_2(editor: CellEditor | null): boolean;
+
+// @public @deprecated
+export const isBrowser: typeof isBrowser_2;
+
+// @public
+function isBrowser_2(): boolean;
 
 // @public
 export function isCellEditable<TRow>(column: EditableColumnLike<TRow>, row: TRow): boolean;
 
-// @public
-export function isCellEditActive(snapshot: CellEditSnapshot, rowId: string, columnKey: string): boolean;
+// @public @deprecated
+export const isCellEditActive: typeof isCellEditActive_2;
 
 // @public
-export function isCellInConflict<TRow>(snapshot: EditConflictSnapshot<TRow>, rowId: string, columnKey: string): boolean;
+function isCellEditActive_2(snapshot: CellEditSnapshot, rowId: string, columnKey: string): boolean;
+
+// @public @deprecated
+export const isCellInConflict: typeof isCellInConflict_2;
+
+// @public
+function isCellInConflict_2<TRow>(snapshot: EditConflictSnapshot<TRow>, rowId: string, columnKey: string): boolean;
 
 // @public
 export function isColumnGroup<TRow>(column: ColumnInput<TRow>): column is ColumnGroupDef<TRow>;
@@ -5448,14 +6588,23 @@ export const isColumnGroupSummaryKey: typeof isColumnGroupSummaryKey_2;
 // @public
 function isColumnGroupSummaryKey_2(key: string): boolean;
 
-// @public
-export function isCommandPaletteArmed(commandPalette: boolean | object | undefined, registered: readonly unknown[] | undefined): boolean;
+// @public @deprecated
+export const isCommandPaletteArmed: typeof isCommandPaletteArmed_2;
 
 // @public
-export function isContextMenuArmed(contextMenu: boolean | object | undefined, registered: readonly unknown[] | undefined): boolean;
+function isCommandPaletteArmed_2(commandPalette: boolean | object | undefined, registered: readonly unknown[] | undefined): boolean;
+
+// @public @deprecated
+export const isContextMenuArmed: typeof isContextMenuArmed_2;
 
 // @public
-export function isContextMenuKey(event: {
+function isContextMenuArmed_2(contextMenu: boolean | object | undefined, registered: readonly unknown[] | undefined): boolean;
+
+// @public @deprecated
+export const isContextMenuKey: typeof isContextMenuKey_2;
+
+// @public
+function isContextMenuKey_2(event: {
     readonly key: string;
     readonly shiftKey: boolean;
 }): boolean;
@@ -5463,8 +6612,11 @@ export function isContextMenuKey(event: {
 // @public
 export function isCountFilterComplete(state: CountFilterState): boolean;
 
+// @public @deprecated
+export const isCustomEditor: typeof isCustomEditor_2;
+
 // @public
-export function isCustomEditor(editor: CellEditor | null): editor is {
+function isCustomEditor_2(editor: CellEditor | null): editor is {
     type: "custom";
     render: CustomCellEditorRender;
 };
@@ -5472,14 +6624,23 @@ export function isCustomEditor(editor: CellEditor | null): editor is {
 // @public
 export function isDeclarativeFilters<TRow>(filters: DisplayValue | undefined): filters is readonly FilterDef<TRow>[];
 
-// @public
-export function isDraftChecked(draft: string): boolean;
+// @public @deprecated
+export const isDraftChecked: typeof isDraftChecked_2;
 
 // @public
-export function isEditActivateKey(key: string): boolean;
+function isDraftChecked_2(draft: string): boolean;
+
+// @public @deprecated
+export const isEditActivateKey: typeof isEditActivateKey_2;
 
 // @public
-export function isElementShowing(element: Element): boolean;
+function isEditActivateKey_2(key: string): boolean;
+
+// @public @deprecated
+export const isElementShowing: typeof isElementShowing_2;
+
+// @public
+function isElementShowing_2(element: Element): boolean;
 
 // @public
 export function isEmptyFilterValue(value: FilterValue): boolean;
@@ -5499,14 +6660,23 @@ export function isFilterGroup(node: QueryCondition | QueryFilterGroup): node is 
 // @public
 export function isFilterOpKey(key: string): boolean;
 
-// @public
-export function isFilterTreeConditionSet(condition: QueryCondition): boolean;
+// @public @deprecated
+export const isFilterTreeConditionSet: typeof isFilterTreeConditionSet_2;
 
 // @public
-export function isFindShortcut(event: ChordKeyEvent): boolean;
+function isFilterTreeConditionSet_2(condition: QueryCondition): boolean;
+
+// @public @deprecated
+export const isFindShortcut: typeof isFindShortcut_2;
 
 // @public
-export function isFirstEditableColumn(columns: readonly {
+function isFindShortcut_2(event: ChordKeyEvent_2): boolean;
+
+// @public @deprecated
+export const isFirstEditableColumn: typeof isFirstEditableColumn_2;
+
+// @public
+function isFirstEditableColumn_2(columns: readonly {
     key: string;
     editable?: unknown;
 }[], key: string): boolean;
@@ -5514,16 +6684,22 @@ export function isFirstEditableColumn(columns: readonly {
 // @public
 export function isFormulaError(value: FormulaValue): boolean;
 
+// @public @deprecated
+export const isGridColumnSelected: typeof isGridColumnSelected_2;
+
 // @public
-export function isGridColumnSelected(input: {
+function isGridColumnSelected_2(input: {
     readonly enabled: boolean;
     readonly range: CellRange | null;
     readonly firstRowIndex: number;
     readonly loadedRows: number;
 }, col: number): boolean;
 
+// @public @deprecated
+export const isHeaderFilterOpen: typeof isHeaderFilterOpen_2;
+
 // @public
-export function isHeaderFilterOpen(host: HeaderFilterOpenHost | null | undefined, key: string, localOpen: boolean): boolean;
+function isHeaderFilterOpen_2(host: HeaderFilterOpenHost | null | undefined, key: string, localOpen: boolean): boolean;
 
 // @public
 export function isInCellRange(range: CellRange | null, cell: GridCell): boolean;
@@ -5531,8 +6707,11 @@ export function isInCellRange(range: CellRange | null, cell: GridCell): boolean;
 // @public
 export function isListFilterOp(op: string): boolean;
 
+// @public @deprecated
+export const isMultiSelectEditor: typeof isMultiSelectEditor_2;
+
 // @public
-export function isMultiSelectEditor(editor: CellEditor | null): editor is {
+function isMultiSelectEditor_2(editor: CellEditor | null): editor is {
     type: "multi-select";
     options: readonly CellEditorOption[];
 };
@@ -5552,11 +6731,17 @@ export function isRowContested<TRow>(snapshot: EditConflictSnapshot<TRow>, rowId
 // @public
 export function isRowMovePending<TRow>(pendingMove: RowMoveRequest<TRow> | null, row: TRow, getRowId?: (row: TRow) => string): boolean;
 
-// @public
-export function isRtlElement(element: HTMLElement | null): boolean;
+// @public @deprecated
+export const isRtlElement: typeof isRtlElement_2;
 
 // @public
-export function isSelectEditor(editor: CellEditor | null): editor is {
+function isRtlElement_2(element: HTMLElement | null): boolean;
+
+// @public @deprecated
+export const isSelectEditor: typeof isSelectEditor_2;
+
+// @public
+function isSelectEditor_2(editor: CellEditor | null): editor is {
     type: "select";
     options: readonly CellEditorOption[];
 };
@@ -5570,8 +6755,11 @@ export function isStreamLive(status: RowPatchStreamStatus): boolean;
 // @public
 export function isStreamSettled(status: RowPatchStreamStatus): boolean;
 
+// @public @deprecated
+export const isTextEntryTarget: typeof isTextEntryTarget_2;
+
 // @public
-export function isTextEntryTarget(target: unknown): boolean;
+function isTextEntryTarget_2(target: unknown): boolean;
 
 // @public
 export function isValuelessFilterOp(op: string): boolean;
@@ -5591,11 +6779,14 @@ export interface KeyedVirtualization {
 // @public
 export type LayoutStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
+// @public @deprecated
+export type LazyChildrenController<TRow> = LazyChildrenController_2<TRow>;
+
 // @public
-export interface LazyChildrenController<TRow> {
+interface LazyChildrenController_2<TRow> {
     readonly configure: (options: LazyChildrenOptions<TRow>) => void;
     readonly connect: () => () => void;
-    readonly getSnapshot: () => LazyChildrenSnapshot;
+    readonly getSnapshot: () => LazyChildrenSnapshot_2;
     readonly loadIfNeeded: (row: TRow) => void;
     readonly subscribe: (listener: () => void) => () => void;
 }
@@ -5608,8 +6799,11 @@ export interface LazyChildrenOptions<TRow> {
     onLoadFailed?: (row: TRow, id: string) => void;
 }
 
+// @public @deprecated
+export type LazyChildrenSnapshot = LazyChildrenSnapshot_2;
+
 // @public
-export interface LazyChildrenSnapshot {
+interface LazyChildrenSnapshot_2 {
     readonly failedIds: ReadonlySet<string>;
     readonly loadingIds: ReadonlySet<string>;
 }
@@ -5625,14 +6819,20 @@ export function liveRowChanged<TRow>(input: {
     rowVersion?: (row: TRow) => string | number;
 }): boolean;
 
+// @public @deprecated
+export type LoadedFilterOption = LoadedFilterOption_2;
+
 // @public
-export interface LoadedFilterOption {
+interface LoadedFilterOption_2 {
     label: string;
     value: string;
 }
 
+// @public @deprecated
+export const localizedColumnPath: typeof localizedColumnPath_2;
+
 // @public
-export function localizedColumnPath(column: Pick<ColumnModel<unknown>, "key" | "i18n">, locale: string | undefined): string;
+function localizedColumnPath_2(column: Pick<ColumnModel<unknown>, "key" | "i18n">, locale: string | undefined): string;
 
 // @public
 export function makeExportCsvHandler<TRow>(exportCsv: boolean | ExportCsvOptions<TRow> | undefined, source: TableSource<TRow>, columns: readonly ColumnMetadata<TRow>[], context?: ExportContext<TRow>, host?: FeatureHostState): ((controls?: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>) | undefined;
@@ -5640,14 +6840,20 @@ export function makeExportCsvHandler<TRow>(exportCsv: boolean | ExportCsvOptions
 // @public
 export function marriedOrderHolds<TRow>(nextOrder: readonly string[], groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>): boolean;
 
+// @public @deprecated
+export const matchKey: typeof matchKey_2;
+
 // @public
-export function matchKey(cell: GridCell): string;
+function matchKey_2(cell: GridCell): string;
 
 // @public
 export function matchKeySet(matches: readonly GridCell[]): ReadonlySet<string>;
 
+// @public @deprecated
+export const materializeAutoOptions: typeof materializeAutoOptions_2;
+
 // @public
-export function materializeAutoOptions<TRow>(defs: readonly FilterDef<TRow>[], rows: readonly TRow[]): FilterDef<TRow>[];
+function materializeAutoOptions_2<TRow>(defs: readonly FilterDef<TRow>[], rows: readonly TRow[]): FilterDef<TRow>[];
 
 // @public
 export function matrixToCsv(table: {
@@ -5658,8 +6864,11 @@ export function matrixToCsv(table: {
     escapeFormulas?: boolean;
 }): string;
 
+// @public @deprecated
+export const MAX_COLUMN_WIDTH: typeof MAX_COLUMN_WIDTH_2;
+
 // @public
-export const MAX_COLUMN_WIDTH = 4000;
+const MAX_COLUMN_WIDTH_2 = 4000;
 
 // @public
 export const MAX_LIMIT = 500;
@@ -5667,32 +6876,53 @@ export const MAX_LIMIT = 500;
 // @public
 export function measureColumnWidth(root: Element | null, key: string): number | null;
 
+// @public @deprecated
+export const measuredToolbarHeight: typeof measuredToolbarHeight_2;
+
 // @public
-export function measuredToolbarHeight(element: Pick<Element, "getBoundingClientRect">): number;
+function measuredToolbarHeight_2(element: Pick<Element, "getBoundingClientRect">): number;
 
 // @public
 export function measureLabel(measure: PivotMeasure, fields: readonly PivotField[], aggregationLabels?: Readonly<Record<string, string | undefined>>): string;
 
+// @public @deprecated
+export type MergedRowActions<TRow> = MergedRowActions_2<TRow>;
+
 // @public
-export interface MergedRowActions<TRow> {
+interface MergedRowActions_2<TRow> {
     readonly hasRowActions: boolean;
     readonly rowActions: RowAction<TRow>[] | undefined;
 }
 
-// @public
-export function mergeFilterChips(filterChips: readonly ActiveFilterChip[], extraChips: readonly ActiveFilterChip[] | undefined): readonly ActiveFilterChip[];
+// @public @deprecated
+export const mergeFilterChips: typeof mergeFilterChips_2;
 
 // @public
-export function mergeGroupingContributions<TRow>(contributions: readonly (GroupingContribution<TRow> | undefined)[]): GroupingContribution<TRow> | undefined;
+function mergeFilterChips_2(filterChips: readonly ActiveFilterChip[], extraChips: readonly ActiveFilterChip[] | undefined): readonly ActiveFilterChip[];
+
+// @public @deprecated
+export const mergeGroupingContributions: typeof mergeGroupingContributions_2;
+
+// @public
+function mergeGroupingContributions_2<TRow>(contributions: readonly (GroupingContribution<TRow> | undefined)[]): GroupingContribution<TRow> | undefined;
+
+// @public @deprecated
+export const mergeProps: typeof mergeProps_2;
 
 // @internal
-export function mergeProps<T extends Props>(base: T, overrides?: Props): T;
+function mergeProps_2<T extends Props>(base: T, overrides?: Props): T;
+
+// @public @deprecated
+export const MIN_COLUMN_WIDTH: typeof MIN_COLUMN_WIDTH_2;
 
 // @public
-export const MIN_COLUMN_WIDTH = 60;
+const MIN_COLUMN_WIDTH_2 = 60;
+
+// @public @deprecated
+export const MOBILE_BREAKPOINT_PX: typeof MOBILE_BREAKPOINT_PX_2;
 
 // @public
-export const MOBILE_BREAKPOINT_PX = 768;
+const MOBILE_BREAKPOINT_PX_2 = 768;
 
 // @public
 export interface MobileCardField<TRow> {
@@ -5701,8 +6931,11 @@ export interface MobileCardField<TRow> {
     value: DisplayValue;
 }
 
+// @public @deprecated
+export const mobileCardListStyle: typeof mobileCardListStyle_2;
+
 // @public
-export function mobileCardListStyle(maxHeight: number | undefined): CssProperties | undefined;
+function mobileCardListStyle_2(maxHeight: number | undefined): CssProperties | undefined;
 
 // @public
 export interface MobileCardModel<TRow> {
@@ -5721,17 +6954,29 @@ export function moveField(config: PivotConfig, zone: PivotZone, index: number, d
 // @public
 export function moveGridFocus(from: GridCell, move: GridFocusMove, bounds: GridBounds, covered?: (cell: GridCell) => boolean): GridCell;
 
-// @public
-export function moveGroupingKey(keys: readonly string[], key: string, insertionIndex: number): string[];
+// @public @deprecated
+export const moveGroupingKey: typeof moveGroupingKey_2;
 
 // @public
-export function moveGroupingKeyBy(keys: readonly string[], key: string, delta: -1 | 1): string[];
+function moveGroupingKey_2(keys: readonly string[], key: string, insertionIndex: number): string[];
+
+// @public @deprecated
+export const moveGroupingKeyBy: typeof moveGroupingKeyBy_2;
 
 // @public
-export const MULTI_SEPARATOR = "";
+function moveGroupingKeyBy_2(keys: readonly string[], key: string, delta: -1 | 1): string[];
+
+// @public @deprecated
+export const MULTI_SEPARATOR: typeof MULTI_SEPARATOR_2;
 
 // @public
-export const NESTED_TABLE_DEFAULT_LABEL = "Row details";
+const MULTI_SEPARATOR_2 = "";
+
+// @public @deprecated
+export const NESTED_TABLE_DEFAULT_LABEL: typeof NESTED_TABLE_DEFAULT_LABEL_2;
+
+// @public
+const NESTED_TABLE_DEFAULT_LABEL_2 = "Row details";
 
 // @public
 export interface NestedTableDefaults {
@@ -5745,8 +6990,11 @@ export interface NestedTableDefaults {
 // @public
 export function nestedTableDefaults(label: string, parent?: NestedTableParent): NestedTableDefaults;
 
+// @public @deprecated
+export const nestedTableLabel: typeof nestedTableLabel_2;
+
 // @public
-export function nestedTableLabel(label: string | undefined): string;
+function nestedTableLabel_2(label: string | undefined): string;
 
 // @public
 export interface NestedTableParent {
@@ -5792,11 +7040,17 @@ export interface NeutralTableBinding<TRow = unknown> {
     readonly visibleRows?: () => readonly TRow[];
 }
 
-// @public
-export function newFilterTreeCondition<TRow>(def: FilterDef<TRow>, registry: FilterTypeRegistry): QueryCondition;
+// @public @deprecated
+export const newFilterTreeCondition: typeof newFilterTreeCondition_2;
 
 // @public
-export function nextChecklistViewport(current: {
+function newFilterTreeCondition_2<TRow>(def: FilterDef<TRow>, registry: FilterTypeRegistry): QueryCondition;
+
+// @public @deprecated
+export const nextChecklistViewport: typeof nextChecklistViewport_2;
+
+// @public
+function nextChecklistViewport_2(current: {
     readonly scrollTop: number;
     readonly width: number;
 }, node: {
@@ -5807,20 +7061,32 @@ export function nextChecklistViewport(current: {
     readonly width: number;
 };
 
-// @public
-export function nextCommandIndex(key: string, at: number, count: number): number | undefined;
+// @public @deprecated
+export const nextCommandIndex: typeof nextCommandIndex_2;
 
 // @public
-export function nextPinSide(current: PinnedSide): PinnedSide;
+function nextCommandIndex_2(key: string, at: number, count: number): number | undefined;
+
+// @public @deprecated
+export const nextPinSide: typeof nextPinSide_2;
 
 // @public
-export function nextSort(current: Partial<SortLevel>, key: string): Partial<SortLevel>;
+function nextPinSide_2(current: PinnedSide): PinnedSide;
+
+// @public @deprecated
+export const nextSort: typeof nextSort_2;
+
+// @public
+function nextSort_2(current: Partial<SortLevel>, key: string): Partial<SortLevel>;
 
 // @public
 export function normalizeEditorOptions(options: readonly CellEditorOption[] | readonly string[]): CellEditorOption[];
 
+// @public @deprecated
+export const normalizeLocaleTag: typeof normalizeLocaleTag_2;
+
 // @public
-export function normalizeLocaleTag(locale: string): string;
+function normalizeLocaleTag_2(locale: string): string;
 
 // @public
 export const NUMBER_OP_LABEL_KEYS: {
@@ -5841,11 +7107,17 @@ export const NUMBER_OPS: readonly ["eq", "neq", "gt", "gte", "lt", "lte", "betwe
 // @public
 export type NumberOp = (typeof NUMBER_OPS)[number];
 
-// @public
-export function observeEdit<TRow>(handler: EditEventHandler<TRow> | undefined, event: EditEvent<TRow>): void;
+// @public @deprecated
+export const observeEdit: typeof observeEdit_2;
 
 // @public
-export function offerableOperations(resolved: ResolvedAggregatable | undefined, source?: AggregationSourceSupport): readonly ResolvedAggregateOperation[];
+function observeEdit_2<TRow>(handler: EditEventHandler<TRow> | undefined, event: EditEvent<TRow>): void;
+
+// @public @deprecated
+export const offerableOperations: typeof offerableOperations_2;
+
+// @public
+function offerableOperations_2(resolved: ResolvedAggregatable | undefined, source?: AggregationSourceSupport): readonly ResolvedAggregateOperation[];
 
 // @public
 export function offersAllMatching(selection: {
@@ -5854,8 +7126,11 @@ export function offersAllMatching(selection: {
     readonly visibleIds: readonly string[];
 }, total: number): boolean;
 
+// @public @deprecated
+export const OPEN_PALETTE_COMMAND: typeof OPEN_PALETTE_COMMAND_2;
+
 // @public
-export const OPEN_PALETTE_COMMAND = "command-palette";
+const OPEN_PALETTE_COMMAND_2 = "command-palette";
 
 // @public
 export function openRowPatchStream(options: OpenRowPatchStreamOptions): RowPatchStreamHandle;
@@ -5920,8 +7195,11 @@ export interface PaginationInfo {
 // @public
 export type PaginationItem = number | "ellipsis";
 
+// @public @deprecated
+export const paginationItems: typeof paginationItems_2;
+
 // @public
-export function paginationItems(page: number, totalPages: number, siblings?: number): PaginationItem[];
+function paginationItems_2(page: number, totalPages: number, siblings?: number): PaginationItem[];
 
 // @public
 export type PaginationMode = "infinite" | "paged" | "auto";
@@ -5968,8 +7246,11 @@ export const PARAM_PIVOT = "pivot";
 // @public (undocumented)
 export const PARAM_SEARCH = "q";
 
+// @public @deprecated
+export const PARAM_SORT: typeof PARAM_SORT_2;
+
 // @public
-export const PARAM_SORT = "sort";
+const PARAM_SORT_2 = "sort";
 
 // @public (undocumented)
 export const PARAM_SORT_BY = "sortBy";
@@ -5983,20 +7264,29 @@ export function parseBooleanChoice(value: FilterValue): BooleanChoice;
 // @public
 export function parseCellEditValue(editor: CellEditor, draft: string): unknown;
 
+// @public @deprecated
+export const parseChord: typeof parseChord_2;
+
 // @public
-export function parseChord(chord: string): ParsedChord;
+function parseChord_2(chord: string): ParsedChord_2;
 
 // @public
 export function parseClipboardTable(text: string): string[][];
 
+// @public @deprecated
+export const parseColumnDraft: typeof parseColumnDraft_2;
+
 // @public
-export function parseColumnDraft<TRow>(column: EditableColumnLike<TRow>, draft: string, row: TRow, featureHost?: FeatureHostState): unknown;
+function parseColumnDraft_2<TRow>(column: EditableColumnLike<TRow>, draft: string, row: TRow, featureHost?: FeatureHostState): unknown;
 
 // @public
 export function parseDateOp(raw: FilterValue | undefined): DateOp | undefined;
 
+// @public @deprecated
+export type ParsedChord = ParsedChord_2;
+
 // @public
-export interface ParsedChord {
+interface ParsedChord_2 {
     readonly alt: boolean;
     readonly ctrl: boolean;
     readonly key: string;
@@ -6014,8 +7304,11 @@ export function parseFormula(text: string): ParseResult;
 // @public
 export function parseGroupAggregateOverrides(value: string | null | undefined): GroupAggregateOverrides;
 
+// @public @deprecated
+export const parseGroupBy: typeof parseGroupBy_2;
+
 // @public
-export function parseGroupBy(value: GroupByInput): string[];
+function parseGroupBy_2(value: GroupByInput): string[];
 
 // @public
 export function parseListOperand(value: FilterValue | undefined): string[];
@@ -6026,8 +7319,11 @@ export function parseNumberList(value: FilterValue | undefined): number[];
 // @public
 export function parseNumberOp(raw: FilterValue | undefined): NumberOp | undefined;
 
+// @public @deprecated
+export const parsePxWidth: typeof parsePxWidth_2;
+
 // @public
-export function parsePxWidth(width: number | string | undefined): number | undefined;
+function parsePxWidth_2(width: number | string | undefined): number | undefined;
 
 // @public
 export function parseRelativeToken(raw: string | undefined): RelativeDateToken | undefined;
@@ -6067,8 +7363,11 @@ export interface PasteRangeOptions<TRow> {
     text: string;
 }
 
+// @public @deprecated
+export const patchTouchedKeys: typeof patchTouchedKeys_2;
+
 // @public
-export function patchTouchedKeys(event: RowPatchEvent<unknown>): readonly string[] | null;
+function patchTouchedKeys_2(event: RowPatchEvent<unknown>): readonly string[] | null;
 
 // @public
 export const PIN_BOTTOM_ACTION_KEY = "adapttable:pin-row-bottom";
@@ -6085,8 +7384,11 @@ export const PIN_Z: {
     readonly headerPinned: 5;
 };
 
+// @public @deprecated
+export const pinActionLabel: typeof pinActionLabel_2;
+
 // @public
-export function pinActionLabel(current: PinnedSide, labels: {
+function pinActionLabel_2(current: PinnedSide, labels: {
     pinStart: string;
     unpin: string;
 }): string;
@@ -6106,8 +7408,11 @@ const PINNED_BOTTOM_PART_2 = "pinned-bottom";
 // @public
 export const PINNED_SUMMARY_BOTTOM_PART = "pinned-summary-bottom";
 
+// @public @deprecated
+export const PINNED_SUMMARY_KEY_PREFIX: typeof PINNED_SUMMARY_KEY_PREFIX_2;
+
 // @public
-export const PINNED_SUMMARY_KEY_PREFIX = "adapttable:pinned-summary";
+const PINNED_SUMMARY_KEY_PREFIX_2 = "adapttable:pinned-summary";
 
 // @public
 export const PINNED_SUMMARY_TOP_PART = "pinned-summary-top";
@@ -6129,8 +7434,11 @@ export interface PinnedCellStyle {
 // @public
 export function pinnedCellStyle(offset: PinOffset | undefined, zIndex?: number, leads?: PinLeads): PinnedCellStyle | undefined;
 
+// @public @deprecated
+export const pinnedColumnWidth: typeof pinnedColumnWidth_2;
+
 // @public
-export function pinnedColumnWidth(column: WidthColumn, widths?: Readonly<Record<string, number>>): number;
+function pinnedColumnWidth_2(column: WidthColumn_2, widths?: Readonly<Record<string, number>>): number;
 
 // @public @deprecated
 export const pinnedRowCellStyle: typeof pinnedRowCellStyle_2;
@@ -6215,23 +7523,35 @@ export type PinSide = "start" | "end";
 // @public
 export function pivot<TRow>(rows: readonly TRow[], config: PivotConfig, options?: PivotOptions<TRow>): PivotResult;
 
+// @public @deprecated
+export const PIVOT_AGGREGATIONS: typeof PIVOT_AGGREGATIONS_2;
+
 // @public
-export const PIVOT_AGGREGATIONS: readonly AggregateName[];
+const PIVOT_AGGREGATIONS_2: readonly AggregateName[];
 
 // @public
 export const PIVOT_BLANK = "—";
 
+// @public @deprecated
+export const PIVOT_GRAND_TOTAL_KEY: typeof PIVOT_GRAND_TOTAL_KEY_2;
+
 // @public
-export const PIVOT_GRAND_TOTAL_KEY = "grand";
+const PIVOT_GRAND_TOTAL_KEY_2 = "grand";
 
 // @public
 export const PIVOT_ROW_COLUMN_KEY = "pivot-row";
 
-// @public
-export const PIVOT_ROW_INDENT = 16;
+// @public @deprecated
+export const PIVOT_ROW_INDENT: typeof PIVOT_ROW_INDENT_2;
 
 // @public
-export const PIVOT_ZONES: readonly PivotZone[];
+const PIVOT_ROW_INDENT_2 = 16;
+
+// @public @deprecated
+export const PIVOT_ZONES: typeof PIVOT_ZONES_2;
+
+// @public
+const PIVOT_ZONES_2: readonly PivotZone[];
 
 // @public
 export interface PivotColumnLeaf {
@@ -6267,8 +7587,11 @@ export interface PivotField {
 // @public
 export function pivotLeafColumnKey(index: number): string;
 
+// @public @deprecated
+export type PivotLeafColumnLayout = PivotLeafColumnLayout_2;
+
 // @public
-export interface PivotLeafColumnLayout {
+interface PivotLeafColumnLayout_2 {
     readonly group: readonly string[] | undefined;
     readonly header: string;
     readonly index: number;
@@ -6276,8 +7599,11 @@ export interface PivotLeafColumnLayout {
     readonly leaf: PivotColumnLeaf;
 }
 
+// @public @deprecated
+export const pivotLeafGroup: typeof pivotLeafGroup_2;
+
 // @public
-export function pivotLeafGroup(leaf: PivotColumnLeaf, totalLabel: string): readonly string[] | undefined;
+function pivotLeafGroup_2(leaf: PivotColumnLeaf, totalLabel: string): readonly string[] | undefined;
 
 // @public
 export interface PivotMeasure {
@@ -6286,8 +7612,11 @@ export interface PivotMeasure {
     label?: string;
 }
 
+// @public @deprecated
+export const pivotMeasureAggName: typeof pivotMeasureAggName_2;
+
 // @public
-export function pivotMeasureAggName(config: PivotConfig, index: number): AggregateName;
+function pivotMeasureAggName_2(config: PivotConfig, index: number): AggregateName;
 
 // @public
 export interface PivotOptions<TRow> {
@@ -6297,8 +7626,11 @@ export interface PivotOptions<TRow> {
     format?: (value: DisplayValue | undefined, measure: PivotMeasure) => DisplayValue | undefined;
 }
 
+// @public @deprecated
+export const pivotPanelZones: typeof pivotPanelZones_2;
+
 // @public
-export function pivotPanelZones(fields: readonly PivotField[], config: PivotConfig, labels: Pick<Required<TableLabels>, "pivotRows" | "pivotColumns" | "pivotMeasures">, aggregationLabels?: Readonly<Record<string, string | undefined>>): PivotZoneModel[];
+function pivotPanelZones_2(fields: readonly PivotField[], config: PivotConfig, labels: Pick<Required<TableLabels>, "pivotRows" | "pivotColumns" | "pivotMeasures">, aggregationLabels?: Readonly<Record<string, string | undefined>>): PivotZoneModel_2[];
 
 // @public
 export interface PivotResult {
@@ -6322,33 +7654,45 @@ export interface PivotRow {
 // @public
 export function pivotRowCaption(row: PivotRow, labels: Pick<Required<TableLabels>, "pivotGrandTotal">): string;
 
+// @public @deprecated
+export const pivotRowIndentStyle: typeof pivotRowIndentStyle_2;
+
 // @public
-export function pivotRowIndentStyle(row: PivotRow, indent: number): {
+function pivotRowIndentStyle_2(row: PivotRow, indent: number): {
     paddingInlineStart: string;
 } | undefined;
 
 // @public
 export type PivotRowKind = "leaf" | "subtotal" | "grandTotal";
 
+// @public @deprecated
+export const pivotSlice: typeof pivotSlice_2;
+
 // @public
-export const pivotSlice: UrlSliceSpec<PivotUrlState, {
+const pivotSlice_2: UrlSliceSpec<PivotUrlState, {
     readonly defaultConfig?: PivotConfig;
 }>;
 
+// @public @deprecated
+export type PivotTableLayout = PivotTableLayout_2;
+
+// @public @deprecated
+export const pivotTableLayout: typeof pivotTableLayout_2;
+
 // @public
-export interface PivotTableLayout {
+interface PivotTableLayout_2 {
     readonly grandTotal: PivotRow | undefined;
-    readonly leafColumns: readonly PivotLeafColumnLayout[];
+    readonly leafColumns: readonly PivotLeafColumnLayout_2[];
     readonly rowHeaderLabel: string;
     readonly rows: readonly PivotRow[];
     readonly summaryCells: Readonly<Record<string, DisplayValue | undefined>> | undefined;
 }
 
 // @public
-export function pivotTableLayout(result: PivotResult, options?: {
+function pivotTableLayout_2(result: PivotResult, options?: {
     readonly fields?: readonly PivotField[];
     readonly labels?: TableLabels;
-}): PivotTableLayout;
+}): PivotTableLayout_2;
 
 // @public
 export interface PivotUrlState {
@@ -6359,8 +7703,11 @@ export interface PivotUrlState {
 // @public
 export type PivotZone = "rows" | "columns" | "measures";
 
+// @public @deprecated
+export type PivotZoneEntry = PivotZoneEntry_2;
+
 // @public
-export interface PivotZoneEntry {
+interface PivotZoneEntry_2 {
     readonly aggregation?: AggregateName;
     readonly canMoveDown: boolean;
     readonly canMoveUp: boolean;
@@ -6369,19 +7716,28 @@ export interface PivotZoneEntry {
     readonly label: string;
 }
 
-// @public
-export function pivotZoneLabel(zone: PivotZone, labels: Pick<Required<TableLabels>, "pivotRows" | "pivotColumns" | "pivotMeasures">): string;
+// @public @deprecated
+export const pivotZoneLabel: typeof pivotZoneLabel_2;
 
 // @public
-export interface PivotZoneModel {
+function pivotZoneLabel_2(zone: PivotZone, labels: Pick<Required<TableLabels>, "pivotRows" | "pivotColumns" | "pivotMeasures">): string;
+
+// @public @deprecated
+export type PivotZoneModel = PivotZoneModel_2;
+
+// @public
+interface PivotZoneModel_2 {
     readonly addOptions: readonly PivotField[];
-    readonly entries: readonly PivotZoneEntry[];
+    readonly entries: readonly PivotZoneEntry_2[];
     readonly label: string;
     readonly zone: PivotZone;
 }
 
+// @public @deprecated
+export type PointerReleaseTarget = PointerReleaseTarget_2;
+
 // @public
-export interface PointerReleaseTarget {
+interface PointerReleaseTarget_2 {
     addEventListener: (type: "mouseup", listener: () => void) => void;
     removeEventListener: (type: "mouseup", listener: () => void) => void;
 }
@@ -6391,8 +7747,11 @@ export interface PrintContribution {
     readonly onPrint: () => void;
 }
 
+// @public @deprecated
+export const projectedGroupingSource: typeof projectedGroupingSource_2;
+
 // @public
-export function projectedGroupingSource<TSource extends {
+function projectedGroupingSource_2<TSource extends {
     readonly allFilteredRows?: readonly unknown[];
 }>(source: TSource, projection: {
     readonly model: unknown;
@@ -6401,14 +7760,20 @@ export function projectedGroupingSource<TSource extends {
 // @public
 export function projectGrouping<TRow>(input: GroupingProjectionInput<TRow>): GroupingProjection<TRow>;
 
+// @public @deprecated
+export const projectGroupingContribution: typeof projectGroupingContribution_2;
+
 // @public
-export function projectGroupingContribution<TRow>(input: {
+function projectGroupingContribution_2<TRow>(input: {
     readonly host: GroupingContribution<TRow> | undefined;
     readonly feature: GroupingContribution<TRow> | undefined;
 }): GroupingContribution<TRow> | undefined;
 
+// @public @deprecated
+export const projectShellOperations: typeof projectShellOperations_2;
+
 // @public
-export function projectShellOperations<TRow>(input: ShellOperationInput<TRow>): ShellOperationInput<TRow>;
+function projectShellOperations_2<TRow>(input: ShellOperationInput_2<TRow>): ShellOperationInput_2<TRow>;
 
 // @public
 export type Props = Record<string, unknown>;
@@ -6419,11 +7784,17 @@ export interface QueryAggregate {
     key: string;
 }
 
-// @public
-export function queryAggregateOps(aggregates: readonly QueryAggregate[] | undefined): GroupAggregateOps | undefined;
+// @public @deprecated
+export const queryAggregateOps: typeof queryAggregateOps_2;
 
 // @public
-export function queryAggregationSource(supports: QuerySupport | undefined): {
+function queryAggregateOps_2(aggregates: readonly QueryAggregate[] | undefined): GroupAggregateOps | undefined;
+
+// @public @deprecated
+export const queryAggregationSource: typeof queryAggregationSource_2;
+
+// @public
+function queryAggregationSource_2(supports: QuerySupport | undefined): {
     readonly grouping: "server";
     readonly aggregateOperations: readonly string[] | undefined;
 } | undefined;
@@ -6453,8 +7824,11 @@ export interface QueryContribution {
     readonly total?: number;
 }
 
+// @public @deprecated
+export type QueryEmitter = QueryEmitter_2;
+
 // @public
-export interface QueryEmitter {
+interface QueryEmitter_2 {
     readonly emit: (listener: TableQueryListener, query: TableQuery, key: string) => () => void;
     readonly emitIfChanged: (listener: TableQueryListener | undefined, query: TableQuery, key: string) => (() => void) | undefined;
 }
@@ -6475,8 +7849,11 @@ export interface QueryFilterGroup {
     conditions: readonly (QueryCondition | QueryFilterGroup)[];
 }
 
+// @public @deprecated
+export const queryGroupBy: typeof queryGroupBy_2;
+
 // @public
-export function queryGroupBy(groupBy: string | undefined): string[] | undefined;
+function queryGroupBy_2(groupBy: string | undefined): string[] | undefined;
 
 // @public
 export interface QueryGroupRow<TRow = unknown> {
@@ -6487,8 +7864,11 @@ export interface QueryGroupRow<TRow = unknown> {
     value: unknown;
 }
 
+// @public @deprecated
+export type QueryGroupsPage<TRow = unknown> = QueryGroupsPage_2<TRow>;
+
 // @public
-export interface QueryGroupsPage<TRow = unknown> {
+interface QueryGroupsPage_2<TRow = unknown> {
     groups: readonly QueryGroupRow<TRow>[];
     total?: number;
 }
@@ -6509,26 +7889,35 @@ export interface QueryPivotRow {
     totals?: readonly unknown[];
 }
 
+// @public @deprecated
+export type QuerySource<TRow, TParams extends TableQueryParams, TPage> = QuerySource_2<TRow, TParams, TPage>;
+
 // @public
-export interface QuerySource<TRow, TParams extends TableQueryParams, TPage> {
+interface QuerySource_2<TRow, TParams extends TableQueryParams, TPage> {
     readonly commit: () => void;
     readonly fetchNextPage: () => void;
-    readonly params: (config: QuerySourceConfig<TRow, TParams, TPage>, view: ServerSourceViewState) => Partial<TParams>;
+    readonly params: (config: QuerySourceConfig_2<TRow, TParams, TPage>, view: ServerSourceViewState_2) => Partial<TParams>;
     readonly refetch: () => Promise<unknown> | void;
     readonly revision: () => number;
     readonly subscribe: (listener: () => void) => () => void;
-    readonly update: (answer: QuerySourceAnswer<TRow, TPage>) => QuerySourceFrame<TRow>;
+    readonly update: (answer: QuerySourceAnswer_2<TRow, TPage>) => QuerySourceFrame_2<TRow>;
 }
 
+// @public @deprecated
+export type QuerySourceAnswer<TRow, TPage> = QuerySourceAnswer_2<TRow, TPage>;
+
 // @public
-export interface QuerySourceAnswer<TRow, TPage> {
+interface QuerySourceAnswer_2<TRow, TPage> {
     readonly query: InfiniteQueryLike<TPage>;
     readonly selectorKey?: string | number;
     readonly selectPage?: PageSelector<TRow, TPage>;
 }
 
+// @public @deprecated
+export type QuerySourceConfig<TRow, TParams extends TableQueryParams, TPage> = QuerySourceConfig_2<TRow, TParams, TPage>;
+
 // @public
-export interface QuerySourceConfig<TRow, TParams extends TableQueryParams, TPage> {
+interface QuerySourceConfig_2<TRow, TParams extends TableQueryParams, TPage> {
     readonly aggregates?: readonly QueryAggregate[];
     readonly baseParams?: Partial<TParams>;
     readonly columns?: readonly ColumnMetadata<TRow>[];
@@ -6540,8 +7929,11 @@ export interface QuerySourceConfig<TRow, TParams extends TableQueryParams, TPage
     readonly supports?: QuerySupport;
 }
 
+// @public @deprecated
+export type QuerySourceFrame<TRow> = QuerySourceFrame_2<TRow>;
+
 // @public
-export interface QuerySourceFrame<TRow> {
+interface QuerySourceFrame_2<TRow> {
     readonly facets: FacetMap | undefined;
     readonly groupAggregations: GroupAggregateOps | undefined;
     readonly hasNextPage: boolean;
@@ -6616,8 +8008,11 @@ export interface RangeFieldWidget {
     write: (nextOp: RangeOp | undefined, nextA: string, nextB: string) => void;
 }
 
+// @public @deprecated
+export const rangeFilterWidget: typeof rangeFilterWidget_2;
+
 // @public
-export function rangeFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtras">, op: RangeOp | undefined): Omit<RangeFieldWidget, "setOp">;
+function rangeFilterWidget_2<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtras">, op: RangeOp | undefined): Omit<RangeFieldWidget, "setOp">;
 
 // @public
 export type RangeOp = NumberOp | DateOp;
@@ -6653,11 +8048,17 @@ export function readCollapsedGroups(params: URLSearchParams, prefix?: string): s
 // @public
 export function readColumnLayout(params: URLSearchParams, prefix?: string): ColumnLayoutState | undefined;
 
-// @public
-export function readEditableCellValue<TRow>(row: TRow, column: EditableColumnLike<TRow>, host?: FeatureHostState): string;
+// @public @deprecated
+export const readEditableCellValue: typeof readEditableCellValue_2;
 
 // @public
-export function readerControlAllowed(resolved: ResolvedAggregatable | undefined, source?: AggregationSourceSupport): boolean;
+function readEditableCellValue_2<TRow>(row: TRow, column: EditableColumnLike<TRow>, host?: FeatureHostState): string;
+
+// @public @deprecated
+export const readerControlAllowed: typeof readerControlAllowed_2;
+
+// @public
+function readerControlAllowed_2(resolved: ResolvedAggregatable | undefined, source?: AggregationSourceSupport): boolean;
 
 // @public
 export function readExtra(params: URLSearchParams, numberKeys: readonly string[], arrayKeys: readonly string[], prefix?: string): ExtraFilters;
@@ -6668,20 +8069,29 @@ export function readFilterOp(extra: ExtraFilters, key: string): FilterValue | un
 // @public
 export function readFilterTreeParam(params: URLSearchParams, prefix?: string): QueryFilterGroup | undefined;
 
+// @public @deprecated
+export const readFindQuery: typeof readFindQuery_2;
+
 // @public
-export function readFindQuery(search: string, urlKey?: string): string;
+function readFindQuery_2(search: string, urlKey?: string): string;
 
 // @public
 export function readLimit(params: URLSearchParams, fallback: number, prefix?: string): number;
 
+// @public @deprecated
+export const readMultiDraft: typeof readMultiDraft_2;
+
 // @public
-export function readMultiDraft(draft: string): string[];
+function readMultiDraft_2(draft: string): string[];
 
 // @public
 export function readPage(params: URLSearchParams, fallback: number, prefix?: string): number;
 
+// @public @deprecated
+export const readRangeWidget: typeof readRangeWidget_2;
+
 // @public
-export function readRangeWidget(extra: ExtraFilters, lowKey: string, highKey: string, opKey?: string, listKey?: string, flavour?: "number" | "date"): RangeWidgetState;
+function readRangeWidget_2(extra: ExtraFilters, lowKey: string, highKey: string, opKey?: string, listKey?: string, flavour?: "number" | "date"): RangeWidgetState;
 
 // @public
 export function readRowPins(params: URLSearchParams, prefix?: string): RowPinState | undefined;
@@ -6695,11 +8105,17 @@ export function readSortLevels(params: URLSearchParams, prefix?: string): {
     dir: SortDirection;
 }[];
 
-// @public
-export function readStoredColumnLayout(storage: LayoutStorage | undefined, storageKey: string): ColumnLayoutState | null;
+// @public @deprecated
+export const readStoredColumnLayout: typeof readStoredColumnLayout_2;
 
 // @public
-export function reconcileAggregations<TRow>(overrides: Readonly<Partial<Record<string, string>>>, columns: readonly ColumnMetadata<TRow>[], source?: AggregationSourceSupport): Readonly<Partial<Record<string, string>>>;
+function readStoredColumnLayout_2(storage: LayoutStorage | undefined, storageKey: string): ColumnLayoutState | null;
+
+// @public @deprecated
+export const reconcileAggregations: typeof reconcileAggregations_2;
+
+// @public
+function reconcileAggregations_2<TRow>(overrides: Readonly<Partial<Record<string, string>>>, columns: readonly ColumnMetadata<TRow>[], source?: AggregationSourceSupport): Readonly<Partial<Record<string, string>>>;
 
 // @public
 export interface ReconcileLiveBatchEdit<TRow> {
@@ -6751,11 +8167,17 @@ export interface ReconcileLiveRowEdit<TRow> {
     take: (row: TRow, columnKeys: readonly string[]) => void;
 }
 
-// @public
-export function recordCursor(trail: CursorTrail, page: number, token: string): CursorTrail;
+// @public @deprecated
+export const recordCursor: typeof recordCursor_2;
 
 // @public
-export function recordingCellEdit<TRow>(onCellEdit: CellEditHandler<TRow> | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): CellEditHandler<TRow> | undefined;
+function recordCursor_2(trail: CursorTrail_2, page: number, token: string): CursorTrail_2;
+
+// @public @deprecated
+export const recordingCellEdit: typeof recordingCellEdit_2;
+
+// @public
+function recordingCellEdit_2<TRow>(onCellEdit: CellEditHandler<TRow> | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): CellEditHandler<TRow> | undefined;
 
 // @public
 export const RELATIVE_NAMED: readonly ["today", "yesterday", "tomorrow", "thisWeek", "thisMonth", "previousMonth"];
@@ -6799,23 +8221,38 @@ export function relativeTokenLabel(raw: string, labels: {
     relNextN: string;
 }): string;
 
-// @public
-export const REMAINING_FEATURE_OWNERSHIP: {};
+// @public @deprecated
+export const REMAINING_FEATURE_OWNERSHIP: typeof REMAINING_FEATURE_OWNERSHIP_2;
 
 // @public
-export type RemainingFeatureDomain = keyof typeof REMAINING_FEATURE_OWNERSHIP;
+const REMAINING_FEATURE_OWNERSHIP_2: {};
+
+// @public @deprecated
+export type RemainingFeatureDomain = RemainingFeatureDomain_2;
 
 // @public
-export function removeAggregation(overrides: Readonly<Partial<Record<string, string>>>, columnKey: string, declaredByDeveloper: boolean): Readonly<Partial<Record<string, string>>>;
+type RemainingFeatureDomain_2 = keyof typeof REMAINING_FEATURE_OWNERSHIP_2;
+
+// @public @deprecated
+export const removeAggregation: typeof removeAggregation_2;
+
+// @public
+function removeAggregation_2(overrides: Readonly<Partial<Record<string, string>>>, columnKey: string, declaredByDeveloper: boolean): Readonly<Partial<Record<string, string>>>;
 
 // @public
 export function removeField(config: PivotConfig, zone: PivotZone, index: number): PivotConfig;
 
-// @public
-export function removeFilterTreeNode(tree: QueryFilterGroup, path: readonly number[]): QueryFilterGroup | undefined;
+// @public @deprecated
+export const removeFilterTreeNode: typeof removeFilterTreeNode_2;
 
 // @public
-export function removeGroupingKey(keys: readonly string[], key: string): string[];
+function removeFilterTreeNode_2(tree: QueryFilterGroup, path: readonly number[]): QueryFilterGroup | undefined;
+
+// @public @deprecated
+export const removeGroupingKey: typeof removeGroupingKey_2;
+
+// @public
+function removeGroupingKey_2(keys: readonly string[], key: string): string[];
 
 // @public
 export interface RemovePatch {
@@ -6838,14 +8275,23 @@ export const REORDER_COLUMN_WIDTH: typeof REORDER_COLUMN_WIDTH_2;
 // @public
 const REORDER_COLUMN_WIDTH_2 = 64;
 
-// @public
-export function replaceFilterTreeNode(tree: QueryFilterGroup, path: readonly number[], next: FilterTreeNode): QueryFilterGroup;
+// @public @deprecated
+export const replaceFilterTreeNode: typeof replaceFilterTreeNode_2;
 
 // @public
-export function reportedCellRange(range: CellRange | null): CellRange | null;
+function replaceFilterTreeNode_2(tree: QueryFilterGroup, path: readonly number[], next: FilterTreeNode_2): QueryFilterGroup;
+
+// @public @deprecated
+export const reportedCellRange: typeof reportedCellRange_2;
 
 // @public
-export function requestDensityChange(next: TableDensity, route: {
+function reportedCellRange_2(range: CellRange | null): CellRange | null;
+
+// @public @deprecated
+export const requestDensityChange: typeof requestDensityChange_2;
+
+// @public
+function requestDensityChange_2(next: TableDensity, route: {
     readonly controlled: boolean;
     readonly setFeatureDensity?: (next: TableDensity) => void;
     readonly onDensityChange?: (next: TableDensity) => void;
@@ -6857,11 +8303,17 @@ export const resetColumnLayout: typeof resetColumnLayout_2;
 // @public
 function resetColumnLayout_2<TRow>(row: ColumnMenuRow<TRow>, layout: UseColumnLayoutResult<TRow>): void;
 
+// @public @deprecated
+export const resetDevWarnings: typeof resetDevWarnings_2;
+
 // @public
-export function resetDevWarnings(): void;
+function resetDevWarnings_2(): void;
+
+// @public @deprecated
+export const resetHistoryAdapter: typeof resetHistoryAdapter_2;
 
 // @internal
-export function resetHistoryAdapter(): void;
+function resetHistoryAdapter_2(): void;
 
 // @public
 export interface ResizeHandleEventLike {
@@ -6881,8 +8333,11 @@ export interface ResizePointerEventLike extends ResizeHandleEventLike {
     stopPropagation(): void;
 }
 
+// @public @deprecated
+export const resolveActiveFilterCount: typeof resolveActiveFilterCount_2;
+
 // @public
-export function resolveActiveFilterCount(override: number | undefined, chipCount: number): number;
+function resolveActiveFilterCount_2(override: number | undefined, chipCount: number): number;
 
 // @public
 export function resolveAggregatable<TRow>(column: ColumnMetadata<TRow>): ResolvedAggregatable | undefined;
@@ -6890,17 +8345,26 @@ export function resolveAggregatable<TRow>(column: ColumnMetadata<TRow>): Resolve
 // @public
 export function resolveAggregatableColumns<TRow>(columns: readonly ColumnMetadata<TRow>[]): ReadonlyMap<string, ResolvedAggregatable>;
 
+// @public @deprecated
+export const resolveAssembly: typeof resolveAssembly_2;
+
 // @public
-export function resolveAssembly<TRow>(partial?: Partial<AssemblyFns<TRow>>): AssemblyFns<TRow>;
+function resolveAssembly_2<TRow>(partial?: Partial<AssemblyFns_2<TRow>>): AssemblyFns_2<TRow>;
 
 // @public
 export function resolveCellEditor(column: EditableColumnLike, host?: FeatureHostState): CellEditor | null;
 
-// @public
-export function resolveColumnPath<TRow>(column: ColumnMetadata<TRow>, locale?: string): string;
+// @public @deprecated
+export const resolveColumnPath: typeof resolveColumnPath_2;
 
 // @public
-export function resolveColumnWidth(column: WidthColumn, widths?: Readonly<Record<string, number>>): number | undefined;
+function resolveColumnPath_2<TRow>(column: ColumnMetadata<TRow>, locale?: string): string;
+
+// @public @deprecated
+export const resolveColumnWidth: typeof resolveColumnWidth_2;
+
+// @public
+function resolveColumnWidth_2(column: WidthColumn_2, widths?: Readonly<Record<string, number>>): number | undefined;
 
 // @public
 export function resolveCommitValue<TRow>(options: {
@@ -6915,8 +8379,11 @@ export function resolveCommitValue<TRow>(options: {
     value: unknown;
 } | null;
 
+// @public @deprecated
+export const resolveConflictChoice: typeof resolveConflictChoice_2;
+
 // @public
-export function resolveConflictChoice<TRow>(handler: EditConflictHandler<TRow> | undefined, conflict: EditConflict<TRow>, policy: EditConflictPolicy): EditConflictChoice | "ask";
+function resolveConflictChoice_2<TRow>(handler: EditConflictHandler<TRow> | undefined, conflict: EditConflict<TRow>, policy: EditConflictPolicy): EditConflictChoice | "ask";
 
 // @public
 export function resolveContextTarget<TRow>(from: Element, rowFor: (rowId: string) => TRow | undefined): ResolvedContextTarget<TRow> | null;
@@ -6937,8 +8404,11 @@ export interface ResolvedAggregateOperation {
     readonly label?: string;
 }
 
+// @public @deprecated
+export const resolveDataTier: typeof resolveDataTier_2;
+
 // @public
-export function resolveDataTier(source: unknown, mode: "frontend" | "server" | undefined, onQueryChange: unknown): DataTier;
+function resolveDataTier_2(source: unknown, mode: "frontend" | "server" | undefined, onQueryChange: unknown): DataTier_2;
 
 // @public
 export interface ResolvedContextTarget<TRow> {
@@ -6946,35 +8416,53 @@ export interface ResolvedContextTarget<TRow> {
     target: ContextMenuTarget<TRow>;
 }
 
-// @public
-export function resolveDensity(controlled: TableDensity | undefined, featureOwned: TableDensity | undefined): TableDensity;
+// @public @deprecated
+export const resolveDensity: typeof resolveDensity_2;
 
 // @public
-export function resolveDisabledReason(reason: string | undefined): string | undefined;
+function resolveDensity_2(controlled: TableDensity | undefined, featureOwned: TableDensity | undefined): TableDensity;
+
+// @public @deprecated
+export const resolveDisabledReason: typeof resolveDisabledReason_2;
+
+// @public
+function resolveDisabledReason_2(reason: string | undefined): string | undefined;
 
 // @public
 export type ResolvedPaginationMode = "infinite" | "paged";
 
+// @public @deprecated
+export const resolveEditableCellDisplay: typeof resolveEditableCellDisplay_2;
+
 // @public
-export function resolveEditableCellDisplay<TRow, TNode, TCell>(display: TNode | null | undefined, column: {
+function resolveEditableCellDisplay_2<TRow, TNode, TCell>(display: TNode | null | undefined, column: {
     readonly Cell?: TCell;
     readonly accessor?: (row: TRow) => TNode;
 }, renderCell: (Cell: TCell) => TNode, row: TRow): TNode | undefined;
 
+// @public @deprecated
+export const resolveEditHistory: typeof resolveEditHistory_2;
+
 // @public
-export function resolveEditHistory(editHistory: EditHistoryInput | undefined): {
+function resolveEditHistory_2(editHistory: EditHistoryInput_2 | undefined): {
     readonly enabled: boolean;
     readonly depth: number | undefined;
 };
 
+// @public @deprecated
+export const resolveEditingArming: typeof resolveEditingArming_2;
+
 // @public
-export function resolveEditingArming(props: EditingArmingProps): EditingArming;
+function resolveEditingArming_2(props: EditingArmingProps_2): EditingArming_2;
 
 // @public
 export function resolveEffectiveAggregation<TRow>(input: EffectiveAggregationInput<TRow>): EffectiveAggregation;
 
+// @public @deprecated
+export const resolveExportAnnouncement: typeof resolveExportAnnouncement_2;
+
 // @public
-export function resolveExportAnnouncement(input: {
+function resolveExportAnnouncement_2(input: {
     readonly status: ExportStatus;
     readonly run: number;
     readonly labels: TableLabels | undefined;
@@ -6988,11 +8476,17 @@ export function resolveExportColumns<TRow>(scope: ExportColumnScope | undefined,
 // @public
 export function resolveExportCsv<TRow = unknown>(value: ExportCsvProp<TRow>, host?: FeatureHostState): ExportCsvOptions<TRow> | null;
 
-// @public
-export function resolveExportDisabledReason(labels: TableLabels | undefined, pageOnly: boolean): string;
+// @public @deprecated
+export const resolveExportDisabledReason: typeof resolveExportDisabledReason_2;
 
 // @public
-export function resolveExportProgressState(input: {
+function resolveExportDisabledReason_2(labels: TableLabels | undefined, pageOnly: boolean): string;
+
+// @public @deprecated
+export const resolveExportProgressState: typeof resolveExportProgressState_2;
+
+// @public
+function resolveExportProgressState_2(input: {
     readonly serverBuilt: boolean;
     readonly status: ExportStatus;
     readonly progress: number | undefined;
@@ -7016,11 +8510,17 @@ export function resolveFilterRegistry(extras?: readonly FilterTypeSpec[]): Filte
 // @public
 export function resolveLabels(overrides: TableLabels | undefined): Required<TableLabels>;
 
-// @public
-export function resolveLocaleTag(available: Iterable<string>, locale: string): string | undefined;
+// @public @deprecated
+export const resolveLocaleTag: typeof resolveLocaleTag_2;
 
 // @public
-export function resolvePaginationMode(mode: PaginationMode, isMobile: boolean): ResolvedPaginationMode;
+function resolveLocaleTag_2(available: Iterable<string>, locale: string): string | undefined;
+
+// @public @deprecated
+export const resolvePaginationMode: typeof resolvePaginationMode_2;
+
+// @public
+function resolvePaginationMode_2(mode: PaginationMode, isMobile: boolean): ResolvedPaginationMode;
 
 // @public
 export function resolvePinnedRows<TRow>(pinnedRows: PinnedRows<TRow> | undefined): {
@@ -7040,8 +8540,11 @@ export const resolveRowHeight: typeof resolveRowHeight_2;
 // @public
 function resolveRowHeight_2<TRow>(rowHeight: RowHeight<TRow> | undefined, row: TRow, index: number): number | undefined;
 
+// @public @deprecated
+export const resolveRowMove: typeof resolveRowMove_2;
+
 // @public
-export function resolveRowMove<TRow>(view: RowMoveView<TRow>, drop: RowMoveDrop<TRow>, options: RowReorderOptions<TRow> | undefined, labels: RowReorderAnnouncements): RowReorderDecision<TRow> | undefined;
+function resolveRowMove_2<TRow>(view: RowMoveView_2<TRow>, drop: RowMoveDrop_2<TRow>, options: RowReorderOptions<TRow> | undefined, labels: RowReorderAnnouncements_2): RowReorderDecision<TRow> | undefined;
 
 // @public @deprecated
 export const resolveRowStyle: typeof resolveRowStyle_2;
@@ -7049,30 +8552,48 @@ export const resolveRowStyle: typeof resolveRowStyle_2;
 // @public
 function resolveRowStyle_2<TRow>(rowStyle: RowStyle<TRow> | undefined, rowHeight: RowHeight<TRow> | undefined, row: TRow, index: number): CssProperties | undefined;
 
-// @public
-export function resolveStickyToolbar(stickyHeader?: boolean, stickyToolbar?: boolean, inScrollBox?: boolean): boolean;
+// @public @deprecated
+export const resolveStickyToolbar: typeof resolveStickyToolbar_2;
 
 // @public
-export function resolveTableStatus(options: TableStatusAnnouncementOptions, previous: TableStatusSignature | undefined): {
+function resolveStickyToolbar_2(stickyHeader?: boolean, stickyToolbar?: boolean, inScrollBox?: boolean): boolean;
+
+// @public @deprecated
+export const resolveTableStatus: typeof resolveTableStatus_2;
+
+// @public
+function resolveTableStatus_2(options: TableStatusAnnouncementOptions_2, previous: TableStatusSignature_2 | undefined): {
     announcement: string;
-    signature: TableStatusSignature;
+    signature: TableStatusSignature_2;
 };
 
-// @public
-export function resolveUrlAdapter(adapter: UrlStateAdapter | undefined, enabled: boolean, local: UrlStateAdapter): UrlStateAdapter;
+// @public @deprecated
+export const resolveUrlAdapter: typeof resolveUrlAdapter_2;
 
 // @public
-export function resolveVirtualRows<TRow>(rows: readonly TRow[], rowKey: (row: TRow) => string, rowEntries?: readonly VirtualTableRow<TRow>[]): readonly VirtualTableRow<TRow>[];
+function resolveUrlAdapter_2(adapter: UrlStateAdapter | undefined, enabled: boolean, local: UrlStateAdapter): UrlStateAdapter;
+
+// @public @deprecated
+export const resolveVirtualRows: typeof resolveVirtualRows_2;
 
 // @public
-export interface ResponseAggregateOps {
+function resolveVirtualRows_2<TRow>(rows: readonly TRow[], rowKey: (row: TRow) => string, rowEntries?: readonly VirtualTableRow<TRow>[]): readonly VirtualTableRow<TRow>[];
+
+// @public @deprecated
+export type ResponseAggregateOps = ResponseAggregateOps_2;
+
+// @public
+interface ResponseAggregateOps_2 {
     readonly current: () => GroupAggregateOps | undefined;
     readonly remember: (requestKey: string, requested: GroupAggregateOps | undefined) => void;
-    readonly settle: (input: ResponseAggregateOpsInput) => boolean;
+    readonly settle: (input: ResponseAggregateOpsInput_2) => boolean;
 }
 
+// @public @deprecated
+export type ResponseAggregateOpsInput = ResponseAggregateOpsInput_2;
+
 // @public
-export interface ResponseAggregateOpsInput {
+interface ResponseAggregateOpsInput_2 {
     readonly failed: boolean;
     readonly fetching: boolean;
     readonly hasData: boolean;
@@ -7082,17 +8603,26 @@ export interface ResponseAggregateOpsInput {
     readonly responseKey?: string;
 }
 
+// @public @deprecated
+export type ResponsiveColumns<TCol extends ColumnMetadata<never> = ColumnMetadata<never>> = ResponsiveColumns_2<TCol>;
+
+// @public @deprecated
+export const responsiveColumns: typeof responsiveColumns_2;
+
 // @public
-export interface ResponsiveColumns<TCol extends ColumnMetadata<never> = ColumnMetadata<never>> {
+interface ResponsiveColumns_2<TCol extends ColumnMetadata<never> = ColumnMetadata<never>> {
     columns: TCol[];
     dropped: readonly string[];
 }
 
 // @public
-export function responsiveColumns<TCol extends ColumnMetadata<never>>(input: ResponsiveFit<TCol>): ResponsiveColumns<TCol>;
+function responsiveColumns_2<TCol extends ColumnMetadata<never>>(input: ResponsiveFit_2<TCol>): ResponsiveColumns_2<TCol>;
+
+// @public @deprecated
+export type ResponsiveFit<TCol extends ColumnMetadata<never> = ColumnMetadata<never>> = ResponsiveFit_2<TCol>;
 
 // @public
-export interface ResponsiveFit<TCol extends ColumnMetadata<never> = ColumnMetadata<never>> {
+interface ResponsiveFit_2<TCol extends ColumnMetadata<never> = ColumnMetadata<never>> {
     available: number | undefined;
     columns: TCol[];
     extra?: number;
@@ -7102,8 +8632,11 @@ export interface ResponsiveFit<TCol extends ColumnMetadata<never> = ColumnMetada
 // @public
 export function restoreAggregationDefaults(): Readonly<Partial<Record<string, string>>>;
 
+// @public @deprecated
+export const restoreFocusSoon: typeof restoreFocusSoon_2;
+
 // @public
-export function restoreFocusSoon(element: HTMLElement | null): () => void;
+function restoreFocusSoon_2(element: HTMLElement | null): () => void;
 
 // @public
 export function revisionToken(revisions: TableRevisions): string;
@@ -7119,11 +8652,17 @@ export interface RouterUrlAdapterOptions {
     search: string;
 }
 
-// @public
-export const ROW_ID_ATTRIBUTE = "data-row-id";
+// @public @deprecated
+export const ROW_ID_ATTRIBUTE: typeof ROW_ID_ATTRIBUTE_2;
 
 // @public
-export const ROW_PIN_STORE_OPTIONS: ControllableStoreOptions<RowPinState>;
+const ROW_ID_ATTRIBUTE_2 = "data-row-id";
+
+// @public @deprecated
+export const ROW_PIN_STORE_OPTIONS: typeof ROW_PIN_STORE_OPTIONS_2;
+
+// @public
+const ROW_PIN_STORE_OPTIONS_2: ControllableStoreOptions_2<RowPinState>;
 
 // @public
 export interface RowAction<TRow> {
@@ -7159,8 +8698,14 @@ export type RowCallback<TArgs extends readonly unknown[], TResult> = {
     bivarianceHack(...args: TArgs): TResult;
 }["bivarianceHack"];
 
+// @public @deprecated
+export type RowClickProps = RowClickProps_2;
+
+// @public @deprecated
+export const rowClickProps: typeof rowClickProps_2;
+
 // @public
-export interface RowClickProps {
+interface RowClickProps_2 {
     "data-adapttable-row": "";
     onClick: (event: MouseEvent & {
         currentTarget: HTMLElement;
@@ -7175,7 +8720,7 @@ export interface RowClickProps {
 }
 
 // @public
-export function rowClickProps<TRow>(row: TRow, onRowClick: ((row: TRow) => void) | undefined, index?: number): RowClickProps | undefined;
+function rowClickProps_2<TRow>(row: TRow, onRowClick: ((row: TRow) => void) | undefined, index?: number): RowClickProps_2 | undefined;
 
 // @public
 export interface RowDragEvent {
@@ -7193,8 +8738,14 @@ export type RowDropPosition = "before" | "inside" | "after";
 // @public
 export function rowDropPosition(clientY: number, bounds: Pick<DOMRect, "top" | "height">): RowDropPosition;
 
+// @public @deprecated
+export type RowEditActionsLayout = RowEditActionsLayout_2;
+
+// @public @deprecated
+export const rowEditActionsLayout: typeof rowEditActionsLayout_2;
+
 // @public
-export type RowEditActionsLayout = {
+type RowEditActionsLayout_2 = {
     readonly kind: "none";
 } | {
     readonly kind: "begin";
@@ -7204,7 +8755,7 @@ export type RowEditActionsLayout = {
 };
 
 // @public
-export function rowEditActionsLayout(controls: Pick<RowEditControls, "editing">, conflict: RowEditConflict | undefined, showBegin: boolean | undefined): RowEditActionsLayout;
+function rowEditActionsLayout_2(controls: Pick<RowEditControls, "editing">, conflict: RowEditConflict | undefined, showBegin: boolean | undefined): RowEditActionsLayout_2;
 
 // @public
 export interface RowEditConflict {
@@ -7240,14 +8791,20 @@ export interface RowEditControlsOptions<TRow> {
 // @public
 export type RowEditDrafts = Readonly<Record<string, string>>;
 
+// @public @deprecated
+export const rowEditErrorId: typeof rowEditErrorId_2;
+
 // @public
-export function rowEditErrorId(columnKey: string): string;
+function rowEditErrorId_2(columnKey: string): string;
 
 // @public
 export type RowEditHandler<TRow> = (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
 
+// @public @deprecated
+export const rowEditingSignature: typeof rowEditingSignature_2;
+
 // @public
-export function rowEditingSignature<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): string | null;
+function rowEditingSignature_2<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): string | null;
 
 // @public
 export interface RowEditingState<TRow> {
@@ -7269,17 +8826,29 @@ export interface RowEditingState<TRow> {
     takeSeeds: RowCallback<[row: NoInfer<TRow>, columnKeys: readonly string[]], void>;
 }
 
-// @public
-export function rowEditingView<TRow>(store: RowEditStore<TRow>, snapshot: RowEditSnapshot, featureHost?: FeatureHostState): RowEditingState<TRow>;
+// @public @deprecated
+export const rowEditingView: typeof rowEditingView_2;
 
 // @public
-export function rowEditorControl<TRow>(rowEditing: Pick<RowEditingState<TRow>, "draftFor" | "setDraft" | "save" | "cancel" | "commit" | "activeRowId">, columnKey: string, editor: CellEditor, saveBlocked: boolean): EditorDraftControl;
+function rowEditingView_2<TRow>(store: RowEditStore<TRow>, snapshot: RowEditSnapshot, featureHost?: FeatureHostState): RowEditingState<TRow>;
+
+// @public @deprecated
+export const rowEditorControl: typeof rowEditorControl_2;
 
 // @public
-export function rowEditSaveBlocked(ask: CellConflictAsk | undefined, rowAsking: boolean | undefined): boolean;
+function rowEditorControl_2<TRow>(rowEditing: Pick<RowEditingState<TRow>, "draftFor" | "setDraft" | "save" | "cancel" | "commit" | "activeRowId">, columnKey: string, editor: CellEditor, saveBlocked: boolean): EditorDraftControl;
+
+// @public @deprecated
+export const rowEditSaveBlocked: typeof rowEditSaveBlocked_2;
 
 // @public
-export function rowEditSignature(snapshot: RowEditSnapshot): string;
+function rowEditSaveBlocked_2(ask: CellConflictAsk | undefined, rowAsking: boolean | undefined): boolean;
+
+// @public @deprecated
+export const rowEditSignature: typeof rowEditSignature_2;
+
+// @public
+function rowEditSignature_2(snapshot: RowEditSnapshot): string;
 
 // @public
 export interface RowEditSnapshot {
@@ -7325,8 +8894,11 @@ export interface RowEditTrigger<TRow> {
     readonly showBegin: boolean;
 }
 
+// @public @deprecated
+export const rowFlashSignature: typeof rowFlashSignature_2;
+
 // @public
-export function rowFlashSignature(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columns: readonly {
+function rowFlashSignature_2(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columns: readonly {
     readonly key: string;
 }[]): string;
 
@@ -7347,8 +8919,11 @@ export interface RowGroupRef {
     readonly levels: readonly RowGroupLevel[];
 }
 
+// @public @deprecated
+export const rowHasValidationError: typeof rowHasValidationError_2;
+
 // @public
-export function rowHasValidationError(snapshot: EditValidationSnapshot, rowId: string): boolean;
+function rowHasValidationError_2(snapshot: EditValidationSnapshot_2, rowId: string): boolean;
 
 // @public
 export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
@@ -7366,15 +8941,21 @@ export interface RowKeyEvent {
 // @public
 export type RowMoveConfirmHandler<TRow> = (request: RowMoveRequest<TRow>) => Promise<boolean>;
 
+// @public @deprecated
+export type RowMoveDrop<TRow> = RowMoveDrop_2<TRow>;
+
 // @public
-export interface RowMoveDrop<TRow> {
+interface RowMoveDrop_2<TRow> {
     readonly position: RowDropPosition;
     readonly row: TRow;
     readonly target: TRow;
 }
 
+// @public @deprecated
+export const rowMoveMenu: typeof rowMoveMenu_2;
+
 // @public
-export function rowMoveMenu<TRow>(view: RowMoveView<TRow>, row: TRow, options: RowReorderOptions<TRow> | undefined, labels: RowReorderAnnouncements): RowMoveMenuModel<TRow> | undefined;
+function rowMoveMenu_2<TRow>(view: RowMoveView_2<TRow>, row: TRow, options: RowReorderOptions<TRow> | undefined, labels: RowReorderAnnouncements_2): RowMoveMenuModel<TRow> | undefined;
 
 // @public
 export interface RowMoveMenuModel<TRow> {
@@ -7411,8 +8992,14 @@ export interface RowMoveTarget<TRow> {
     readonly request?: RowMoveRequest<TRow>;
 }
 
+// @public @deprecated
+export type RowMoveView<TRow> = RowMoveView_2<TRow>;
+
+// @public @deprecated
+export const rowMoveView: typeof rowMoveView_2;
+
 // @public
-export interface RowMoveView<TRow> {
+interface RowMoveView_2<TRow> {
     readonly getRowId: (row: TRow) => string;
     readonly grouping?: {
         readonly entries: readonly GroupedFlatEntry<TRow>[];
@@ -7423,10 +9010,13 @@ export interface RowMoveView<TRow> {
 }
 
 // @public
-export function rowMoveView<TRow>(view: TableRuntimeView<TRow>): RowMoveView<TRow>;
+function rowMoveView_2<TRow>(view: TableRuntimeView<TRow>): RowMoveView_2<TRow>;
+
+// @public @deprecated
+export const rowMutationActions: typeof rowMutationActions_2;
 
 // @public
-export function rowMutationActions<TRow>(options: {
+function rowMutationActions_2<TRow>(options: {
     readonly duplicate?: (row: TRow) => void;
     readonly remove?: (row: TRow) => void;
     readonly confirmDelete: boolean;
@@ -7497,8 +9087,11 @@ export type RowPatchStreamStatus =
 /** The host closed it. Final: nothing reopens on its own. */
 "closed";
 
+// @public @deprecated
+export const rowPinActions: typeof rowPinActions_2;
+
 // @public
-export function rowPinActions<TRow>(options: {
+function rowPinActions_2<TRow>(options: {
     readonly labels: RowPinLabels;
     readonly getRowId: (row: TRow) => string;
     readonly sideOf: (rowId: string) => RowPinSide | undefined;
@@ -7513,13 +9106,19 @@ export interface RowPinLabels {
     unpinRow: string;
 }
 
+// @public @deprecated
+export type RowPinLookup = RowPinLookup_2;
+
 // @public
-export interface RowPinLookup {
+interface RowPinLookup_2 {
     sideOf: (rowId: string) => RowPinSide | undefined;
 }
 
+// @public @deprecated
+export const rowPinningBlockedWarning: typeof rowPinningBlockedWarning_2;
+
 // @public
-export function rowPinningBlockedWarning(requested: boolean, blocked: boolean): string | undefined;
+function rowPinningBlockedWarning_2(requested: boolean, blocked: boolean): string | undefined;
 
 // @public
 export function rowPinningControl(options: {
@@ -7533,18 +9132,27 @@ export function rowPinningControl(options: {
     readonly onPinnedRowIdsChange: ((next: RowPinState) => void) | undefined;
 };
 
+// @public @deprecated
+export const rowPinningRequested: typeof rowPinningRequested_2;
+
 // @public
-export function rowPinningRequested(props: {
+function rowPinningRequested_2(props: {
     readonly rowPinningArmed?: boolean;
     readonly pinnedRowIds?: RowPinState;
     readonly onPinnedRowIdsChange?: (next: RowPinState) => void;
 }): boolean;
 
-// @public
-export const rowPinningSlice: UrlSliceSpec<RowPinState, object>;
+// @public @deprecated
+export const rowPinningSlice: typeof rowPinningSlice_2;
 
 // @public
-export function rowPinningUrlSync(options: {
+const rowPinningSlice_2: UrlSliceSpec<RowPinState, object>;
+
+// @public @deprecated
+export const rowPinningUrlSync: typeof rowPinningUrlSync_2;
+
+// @public
+function rowPinningUrlSync_2(options: {
     readonly urlSync?: boolean;
     readonly requested: boolean;
     readonly pinnedRowIds?: RowPinState;
@@ -7553,14 +9161,17 @@ export function rowPinningUrlSync(options: {
 // @public
 export type RowPinSide = "top" | "bottom";
 
+// @public @deprecated
+export const rowPinSideOf: typeof rowPinSideOf_2;
+
 // @public
-export function rowPinSideOf(state: RowPinState, rowId: string): RowPinSide | undefined;
+function rowPinSideOf_2(state: RowPinState, rowId: string): RowPinSide | undefined;
 
 // @public @deprecated
 export const rowPinSignature: typeof rowPinSignature_2;
 
 // @public
-function rowPinSignature_2(pinning: RowPinLookup | undefined, rowId: string): string | null;
+function rowPinSignature_2(pinning: RowPinLookup_2 | undefined, rowId: string): string | null;
 
 // @public
 export interface RowPinState {
@@ -7571,11 +9182,17 @@ export interface RowPinState {
 // @public
 export type RowReorderActions<TRow> = Pick<RowReorderController<TRow>, "dragStart" | "dragEnd" | "dragOver" | "drop" | "keyDown" | "moveBy" | "moveMenu" | "selectMoveTarget" | "confirmMove" | "cancelMove">;
 
-// @public
-export type RowReorderAnnouncements = Required<Pick<RowReorderLabels, "rowLifted" | "rowMoved" | "rowReorderCancelled" | "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever" | "moveRejectedSorted" | "moveRejectedCycle" | "moveUnavailable" | "rootLevel" | "moveToGroup" | "moveUnder">>;
+// @public @deprecated
+export type RowReorderAnnouncements = RowReorderAnnouncements_2;
+
+// @public @deprecated
+export const rowReorderAnnouncements: typeof rowReorderAnnouncements_2;
 
 // @public
-export function rowReorderAnnouncements(read: () => Readonly<Record<string, unknown>> | undefined): RowReorderAnnouncements;
+type RowReorderAnnouncements_2 = Required<Pick<RowReorderLabels, "rowLifted" | "rowMoved" | "rowReorderCancelled" | "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever" | "moveRejectedSorted" | "moveRejectedCycle" | "moveUnavailable" | "rootLevel" | "moveToGroup" | "moveUnder">>;
+
+// @public
+function rowReorderAnnouncements_2(read: () => Readonly<Record<string, unknown>> | undefined): RowReorderAnnouncements_2;
 
 // @public
 export interface RowReorderController<TRow> {
@@ -7628,8 +9245,11 @@ export type RowReorderDecision<TRow> = {
     readonly message: string;
 };
 
+// @public @deprecated
+export type RowReorderDigest = RowReorderDigest_2;
+
 // @public
-export interface RowReorderDigest {
+interface RowReorderDigest_2 {
     hostConfirmPending?: boolean;
     isLifted: (rowId: string) => boolean;
     lifted: unknown;
@@ -7694,7 +9314,7 @@ export function rowReorderRuntimeOptions<TRow>(runtime: TableRuntime<TRow>, onRo
 export const rowReorderSignature: typeof rowReorderSignature_2;
 
 // @public
-function rowReorderSignature_2(reorder: RowReorderDigest | undefined, rowId: string, localIndex: number): string | null;
+function rowReorderSignature_2(reorder: RowReorderDigest_2 | undefined, rowId: string, localIndex: number): string | null;
 
 // @public
 export interface RowReorderSlot<TRow> {
@@ -7746,8 +9366,11 @@ export interface RowsToCsvOptions<TRow> {
 // @public
 export type RowStyle<TRow> = (row: TRow, index: number) => CssProperties | undefined;
 
+// @public @deprecated
+export const rowStyleArmed: typeof rowStyleArmed_2;
+
 // @public
-export function rowStyleArmed(rowStyle: RowStyle<unknown> | undefined, rowHeight: RowHeight<unknown> | undefined): boolean;
+function rowStyleArmed_2(rowStyle: RowStyle<unknown> | undefined, rowHeight: RowHeight<unknown> | undefined): boolean;
 
 // @public @deprecated
 export const rowStyleSignature: typeof rowStyleSignature_2;
@@ -7768,38 +9391,62 @@ export interface RowTreeParentRef<TRow> {
 // @public
 export type RowValidator<TRow> = (row: TRow) => string | Record<string, string> | undefined | Promise<string | Record<string, string> | undefined>;
 
+// @public @deprecated
+export const runCommand: typeof runCommand_2;
+
 // @public
-export function runCommand(command: Command | undefined, close: () => void): void;
+function runCommand_2(command: Command | undefined, close: () => void): void;
 
 // @public
 export function runRowAction<TRow>(action: RowAction<TRow>, row: TRow, confirm: ConfirmHandler, cancelLabel: string): void;
 
-// @public
-export function runWithFeatureHost<T>(host: FeatureHostState | undefined, fn: () => T): T;
+// @public @deprecated
+export const runWithFeatureHost: typeof runWithFeatureHost_2;
 
 // @public
-export function safeDecode(value: string): string;
+function runWithFeatureHost_2<T>(host: FeatureHostState | undefined, fn: () => T): T;
+
+// @public @deprecated
+export const safeDecode: typeof safeDecode_2;
 
 // @public
-export function safeLocalStorage(): Pick<Storage, "getItem" | "setItem" | "removeItem"> | undefined;
+function safeDecode_2(value: string): string;
+
+// @public @deprecated
+export const safeLocalStorage: typeof safeLocalStorage_2;
 
 // @public
-export function safeSheetName(name: string): string;
+function safeLocalStorage_2(): Pick<Storage, "getItem" | "setItem" | "removeItem"> | undefined;
+
+// @public @deprecated
+export const safeSheetName: typeof safeSheetName_2;
+
+// @public
+function safeSheetName_2(name: string): string;
 
 // @public
 export function sameGridCell(a: GridCell | null, b: GridCell | null): boolean;
 
+// @public @deprecated
+export const sameRowPins: typeof sameRowPins_2;
+
 // @public
-export function sameRowPins(left: RowPinState, right: RowPinState): boolean;
+function sameRowPins_2(left: RowPinState, right: RowPinState): boolean;
 
 // @public
 export function sanitizeCountFilterParams<P extends Record<string, unknown>>(params: P, buckets: readonly string[]): P;
 
-// @public
-export function sanitizeStoredLayout(parsed: unknown): ColumnLayoutState | null;
+// @public @deprecated
+export const sanitizeStoredLayout: typeof sanitizeStoredLayout_2;
 
 // @public
-export const SAVED_VIEW_GLYPH_PATHS: Readonly<Record<SavedViewControlKey, readonly string[]>>;
+function sanitizeStoredLayout_2(parsed: unknown): ColumnLayoutState | null;
+
+// @public @deprecated
+export const SAVED_VIEW_GLYPH_PATHS: typeof SAVED_VIEW_GLYPH_PATHS_2;
+
+// @public
+const SAVED_VIEW_GLYPH_PATHS_2: Readonly<Record<SavedViewControlKey, readonly string[]>>;
 
 // @public
 export const SAVED_VIEW_VERSION = 2;
@@ -7817,8 +9464,11 @@ export interface SavedView {
 // @public
 export type SavedViewControlKey = "rename" | "moveUp" | "moveDown" | "default" | "remove";
 
+// @public @deprecated
+export type SavedViewGlyph = SavedViewGlyph_2;
+
 // @public
-export interface SavedViewGlyph {
+interface SavedViewGlyph_2 {
     readonly filled: boolean;
     readonly paths: readonly string[];
 }
@@ -7826,37 +9476,52 @@ export interface SavedViewGlyph {
 // @public
 export type SavedViewMigration = (view: SavedView, from: number) => SavedView | null;
 
+// @public @deprecated
+export type SavedViewRenameController = SavedViewRenameController_2;
+
 // @public
-export interface SavedViewRenameController {
+interface SavedViewRenameController_2 {
     readonly begin: (name: string) => void;
     readonly cancel: () => void;
     readonly commit: (onRename: (from: string, to: string) => void) => void;
-    readonly getSnapshot: () => SavedViewRenameSnapshot;
+    readonly getSnapshot: () => SavedViewRenameSnapshot_2;
     readonly setDraft: (draft: string) => void;
     readonly subscribe: (listener: () => void) => () => void;
 }
 
+// @public @deprecated
+export type SavedViewRenameSnapshot = SavedViewRenameSnapshot_2;
+
 // @public
-export interface SavedViewRenameSnapshot {
+interface SavedViewRenameSnapshot_2 {
     readonly draft: string;
     readonly editing: string | null;
 }
 
+// @public @deprecated
+export type SavedViewRowControlModel = SavedViewRowControlModel_2;
+
 // @public
-export interface SavedViewRowControlModel {
+interface SavedViewRowControlModel_2 {
     readonly danger?: boolean;
-    readonly glyph: SavedViewGlyph;
+    readonly glyph: SavedViewGlyph_2;
     readonly key: SavedViewControlKey;
     readonly label: string;
     readonly onPress?: () => void;
     readonly pressed?: boolean;
 }
 
-// @public
-export function savedViewRowControls(input: SavedViewRowControlsInput): readonly SavedViewRowControlModel[];
+// @public @deprecated
+export const savedViewRowControls: typeof savedViewRowControls_2;
 
 // @public
-export interface SavedViewRowControlsInput {
+function savedViewRowControls_2(input: SavedViewRowControlsInput_2): readonly SavedViewRowControlModel_2[];
+
+// @public @deprecated
+export type SavedViewRowControlsInput = SavedViewRowControlsInput_2;
+
+// @public
+interface SavedViewRowControlsInput_2 {
     readonly count: number;
     readonly editing: boolean;
     readonly index: number;
@@ -7868,12 +9533,15 @@ export interface SavedViewRowControlsInput {
     readonly view: SavedView;
 }
 
+// @public @deprecated
+export type SavedViewsController = SavedViewsController_2;
+
 // @public
-export interface SavedViewsController {
+interface SavedViewsController_2 {
     readonly apply: (name: string) => void;
     readonly configure: (options: SavedViewsControllerOptions) => void;
     readonly connect: () => () => void;
-    readonly getSnapshot: () => SavedViewsSnapshot;
+    readonly getSnapshot: () => SavedViewsSnapshot_2;
     readonly move: (name: string, delta: -1 | 1) => void;
     readonly reload: () => void;
     readonly remove: (name: string) => void;
@@ -7895,8 +9563,11 @@ export interface SavedViewsControllerOptions {
     visibility?: SavedViewVisibility;
 }
 
+// @public @deprecated
+export type SavedViewsSnapshot = SavedViewsSnapshot_2;
+
 // @public
-export interface SavedViewsSnapshot {
+interface SavedViewsSnapshot_2 {
     readonly defaultView: SavedView | undefined;
     readonly views: readonly SavedView[];
 }
@@ -7915,14 +9586,23 @@ export type SavedViewVisibility = "private" | "team";
 // @public
 export function scalarFilterText(value: FilterValue): string;
 
-// @public
-export function scrollCurrentMatchIntoView(root: Pick<ParentNode, "querySelector"> | null): boolean;
+// @public @deprecated
+export const scrollCurrentMatchIntoView: typeof scrollCurrentMatchIntoView_2;
 
 // @public
-export const SEARCH_DEBOUNCE_MS = 300;
+function scrollCurrentMatchIntoView_2(root: Pick<ParentNode, "querySelector"> | null): boolean;
+
+// @public @deprecated
+export const SEARCH_DEBOUNCE_MS: typeof SEARCH_DEBOUNCE_MS_2;
 
 // @public
-export function searchChecklistItems(items: readonly ChecklistValue[], query: string): readonly ChecklistValue[];
+const SEARCH_DEBOUNCE_MS_2 = 300;
+
+// @public @deprecated
+export const searchChecklistItems: typeof searchChecklistItems_2;
+
+// @public
+function searchChecklistItems_2(items: readonly ChecklistValue[], query: string): readonly ChecklistValue[];
 
 // @public
 export interface SelectionContribution {
@@ -7932,14 +9612,20 @@ export interface SelectionContribution {
     readonly selectedIds: ReadonlySet<string>;
 }
 
+// @public @deprecated
+export type SelectionStatPart = SelectionStatPart_2;
+
 // @public
-export interface SelectionStatPart {
+interface SelectionStatPart_2 {
     readonly key: "count" | "sum" | "average" | "min" | "max";
     readonly text: string;
 }
 
+// @public @deprecated
+export const selectionStatParts: typeof selectionStatParts_2;
+
 // @public
-export function selectionStatParts(stats: SelectionStats | null, labels?: TableLabels, locale?: string): SelectionStatPart[] | null;
+function selectionStatParts_2(stats: SelectionStats | null, labels?: TableLabels, locale?: string): SelectionStatPart_2[] | null;
 
 // @public
 export interface SelectionStats {
@@ -7981,11 +9667,17 @@ export function serializePivot(config: PivotConfig): string;
 // @public
 export function serializePivotState(state: PivotUrlState): string;
 
-// @public
-export function serverGroupEntries<TRow>(options: ServerGroupEntriesOptions<TRow>): GroupedFlatEntry<TRow>[];
+// @public @deprecated
+export const serverGroupEntries: typeof serverGroupEntries_2;
 
 // @public
-export interface ServerGroupEntriesOptions<TRow> {
+function serverGroupEntries_2<TRow>(options: ServerGroupEntriesOptions_2<TRow>): GroupedFlatEntry<TRow>[];
+
+// @public @deprecated
+export type ServerGroupEntriesOptions<TRow> = ServerGroupEntriesOptions_2<TRow>;
+
+// @public
+interface ServerGroupEntriesOptions_2<TRow> {
     aggregateOps?: GroupAggregateOps;
     blankLabel?: string;
     collapsedGroupIds: ReadonlySet<string>;
@@ -8004,8 +9696,11 @@ export interface ServerPivotOptions {
 // @public
 export function serverPivotResult(page: QueryPivotPage, input: ServerPivotOptions): PivotResult;
 
+// @public @deprecated
+export type ServerSource<TRow> = ServerSource_2<TRow>;
+
 // @public
-export interface ServerSource<TRow> {
+interface ServerSource_2<TRow> {
     readonly commit: () => void;
     readonly dispose: () => void;
     readonly fetchNextPage: () => void;
@@ -8013,11 +9708,14 @@ export interface ServerSource<TRow> {
     readonly revision: () => number;
     readonly setPage: (page: number) => void;
     readonly subscribe: (listener: () => void) => () => void;
-    readonly update: (config: ServerSourceConfig<TRow>, view: ServerSourceViewState) => ServerSourceFrame<TRow>;
+    readonly update: (config: ServerSourceConfig_2<TRow>, view: ServerSourceViewState_2) => ServerSourceFrame_2<TRow>;
 }
 
+// @public @deprecated
+export type ServerSourceConfig<TRow> = ServerSourceConfig_2<TRow>;
+
 // @public
-export interface ServerSourceConfig<TRow> {
+interface ServerSourceConfig_2<TRow> {
     readonly aggregates?: readonly QueryAggregate[];
     readonly columns?: readonly ColumnMetadata<TRow>[];
     readonly error?: unknown;
@@ -8033,8 +9731,11 @@ export interface ServerSourceConfig<TRow> {
     readonly total: number;
 }
 
+// @public @deprecated
+export type ServerSourceFrame<TRow> = ServerSourceFrame_2<TRow>;
+
 // @public
-export interface ServerSourceFrame<TRow> {
+interface ServerSourceFrame_2<TRow> {
     readonly groupAggregations: GroupAggregateOps | undefined;
     readonly hasNextPage: boolean;
     readonly isFetchingNextPage: boolean;
@@ -8044,8 +9745,11 @@ export interface ServerSourceFrame<TRow> {
     readonly rows: readonly TRow[];
 }
 
+// @public @deprecated
+export type ServerSourceViewState = ServerSourceViewState_2;
+
 // @public
-export interface ServerSourceViewState {
+interface ServerSourceViewState_2 {
     readonly extra: ExtraFilters;
     readonly filterTree: QueryFilterGroup | undefined;
     readonly groupAggregateOverrides: GroupAggregateOverrides;
@@ -8059,17 +9763,26 @@ export interface ServerSourceViewState {
     readonly sortLevels: readonly SortLevel[];
 }
 
+// @public @deprecated
+export const setFilterTreeCombinator: typeof setFilterTreeCombinator_2;
+
 // @public
-export function setFilterTreeCombinator(tree: QueryFilterGroup, path: readonly number[], combinator: QueryFilterGroup["combinator"]): QueryFilterGroup;
+function setFilterTreeCombinator_2(tree: QueryFilterGroup, path: readonly number[], combinator: QueryFilterGroup["combinator"]): QueryFilterGroup;
 
 // @public
 export function setMeasureAgg(config: PivotConfig, index: number, agg: AggregateName): PivotConfig;
 
-// @public
-export function settledFilterTree(tree: QueryFilterGroup | undefined): QueryFilterGroup | undefined;
+// @public @deprecated
+export const settledFilterTree: typeof settledFilterTree_2;
 
 // @public
-export const SHELL_OPERATION_OWNERS: {
+function settledFilterTree_2(tree: QueryFilterGroup | undefined): QueryFilterGroup | undefined;
+
+// @public @deprecated
+export const SHELL_OPERATION_OWNERS: typeof SHELL_OPERATION_OWNERS_2;
+
+// @public
+const SHELL_OPERATION_OWNERS_2: {
     readonly find: "find/findController.ts";
     readonly density: "layout/densityContract.ts";
     readonly fullscreen: "layout/layoutBindingState.ts";
@@ -8078,11 +9791,17 @@ export const SHELL_OPERATION_OWNERS: {
     readonly print: "layout/shellPipeline.ts";
 };
 
-// @public
-export type ShellOperation = keyof typeof SHELL_OPERATION_OWNERS;
+// @public @deprecated
+export type ShellOperation = ShellOperation_2;
 
 // @public
-export interface ShellOperationInput<TRow = unknown> {
+type ShellOperation_2 = keyof typeof SHELL_OPERATION_OWNERS_2;
+
+// @public @deprecated
+export type ShellOperationInput<TRow = unknown> = ShellOperationInput_2<TRow>;
+
+// @public
+interface ShellOperationInput_2<TRow = unknown> {
     // (undocumented)
     readonly commandPalette?: CommandPaletteContribution;
     // (undocumented)
@@ -8103,14 +9822,20 @@ export interface Shortcut {
     command: string;
 }
 
+// @public @deprecated
+export type ShortcutKeyEvent = ShortcutKeyEvent_2;
+
 // @public
-export interface ShortcutKeyEvent extends ChordKeyEvent {
+interface ShortcutKeyEvent_2 extends ChordKeyEvent_2 {
     preventDefault(): void;
     readonly target: unknown;
 }
 
+// @public @deprecated
+export const shouldEscapeClose: typeof shouldEscapeClose_2;
+
 // @public
-export function shouldEscapeClose(event: {
+function shouldEscapeClose_2(event: {
     readonly key: string;
     readonly target: unknown;
 }, ignoreWithin?: string): boolean;
@@ -8121,23 +9846,35 @@ export const showAllColumns: typeof showAllColumns_2;
 // @public
 function showAllColumns_2<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
 
+// @public @deprecated
+export const showSimpleFilterFields: typeof showSimpleFilterFields_2;
+
 // @public
-export function showSimpleFilterFields(headerFiltersOn: boolean, filterFields?: boolean): boolean;
+function showSimpleFilterFields_2(headerFiltersOn: boolean, filterFields?: boolean): boolean;
 
 // @public
 export interface SidePanelEntry {
     key: string;
 }
 
+// @public @deprecated
+export type SidePanelKeyEvent = SidePanelKeyEvent_2;
+
 // @public
-export interface SidePanelKeyEvent {
+interface SidePanelKeyEvent_2 {
     readonly key: string;
     preventDefault(): void;
     stopPropagation(): void;
 }
 
+// @public @deprecated
+export type SidePanelModel<TPanel extends SidePanelModelPanel_2 = SidePanelModelPanel_2> = SidePanelModel_2<TPanel>;
+
+// @public @deprecated
+export const sidePanelModel: typeof sidePanelModel_2;
+
 // @public
-export interface SidePanelModel<TPanel extends SidePanelModelPanel = SidePanelModelPanel> {
+interface SidePanelModel_2<TPanel extends SidePanelModelPanel_2 = SidePanelModelPanel_2> {
     readonly bodyId: string;
     readonly bodyLabel: string | undefined;
     readonly bodyLabelledBy: string | undefined;
@@ -8147,31 +9884,43 @@ export interface SidePanelModel<TPanel extends SidePanelModelPanel = SidePanelMo
     readonly selectedIndex: number;
     readonly tabbed: boolean;
     readonly tablistLabel: string;
-    readonly tabs: readonly SidePanelTabModel<TPanel>[];
+    readonly tabs: readonly SidePanelTabModel_2<TPanel>[];
 }
 
 // @public
-export function sidePanelModel<TPanel extends SidePanelModelPanel>(input: {
+function sidePanelModel_2<TPanel extends SidePanelModelPanel_2>(input: {
     readonly panels: readonly TPanel[];
     readonly openPanel: string;
     readonly idPrefix?: string;
     readonly labels?: TableLabels;
-}): SidePanelModel<TPanel> | null;
+}): SidePanelModel_2<TPanel> | null;
+
+// @public @deprecated
+export type SidePanelModelPanel = SidePanelModelPanel_2;
 
 // @public
-export interface SidePanelModelPanel {
+interface SidePanelModelPanel_2 {
     readonly key: string;
     readonly label: string;
 }
 
-// @public
-export function sidePanelTabId(prefix: string, key: string): string;
+// @public @deprecated
+export const sidePanelTabId: typeof sidePanelTabId_2;
 
 // @public
-export function sidePanelTabIndex(key: string, at: number, count: number): number | undefined;
+function sidePanelTabId_2(prefix: string, key: string): string;
+
+// @public @deprecated
+export const sidePanelTabIndex: typeof sidePanelTabIndex_2;
 
 // @public
-export interface SidePanelTabModel<TPanel extends SidePanelModelPanel = SidePanelModelPanel> {
+function sidePanelTabIndex_2(key: string, at: number, count: number): number | undefined;
+
+// @public @deprecated
+export type SidePanelTabModel<TPanel extends SidePanelModelPanel_2 = SidePanelModelPanel_2> = SidePanelTabModel_2<TPanel>;
+
+// @public
+interface SidePanelTabModel_2<TPanel extends SidePanelModelPanel_2 = SidePanelModelPanel_2> {
     readonly controls: string;
     readonly id: string;
     readonly key: string;
@@ -8227,58 +9976,97 @@ export interface SortLevel {
     key: string;
 }
 
-// @public
-export function sortRows<TRow>(rows: readonly TRow[], getValue: (row: TRow) => SortableValue, direction: SortDirection): TRow[];
+// @public @deprecated
+export const sortRows: typeof sortRows_2;
 
 // @public
-export function sortRowsMulti<TRow>(rows: readonly TRow[], levels: readonly SortLevel[], getValue: (row: TRow, key: string) => SortableValue): TRow[];
+function sortRows_2<TRow>(rows: readonly TRow[], getValue: (row: TRow) => SortableValue, direction: SortDirection): TRow[];
+
+// @public @deprecated
+export const sortRowsMulti: typeof sortRowsMulti_2;
+
+// @public
+function sortRowsMulti_2<TRow>(rows: readonly TRow[], levels: readonly SortLevel[], getValue: (row: TRow, key: string) => SortableValue): TRow[];
 
 // @public
 export function sourceCapabilities(source: CapabilitySource, support?: QuerySupport): TableSourceCapabilities;
 
-// @public
-export function spanningArmed<TRow>(columns: readonly ColumnMetadata<TRow>[], getCellSpan: GetCellSpan<TRow> | undefined): boolean;
+// @public @deprecated
+export const spanningArmed: typeof spanningArmed_2;
 
 // @public
-export const SPARKLINE_DEFAULT_HEIGHT = 28;
+function spanningArmed_2<TRow>(columns: readonly ColumnMetadata<TRow>[], getCellSpan: GetCellSpan<TRow> | undefined): boolean;
+
+// @public @deprecated
+export const SPARKLINE_DEFAULT_HEIGHT: typeof SPARKLINE_DEFAULT_HEIGHT_2;
 
 // @public
-export const SPARKLINE_DEFAULT_WIDTH = 80;
+const SPARKLINE_DEFAULT_HEIGHT_2 = 28;
+
+// @public @deprecated
+export const SPARKLINE_DEFAULT_WIDTH: typeof SPARKLINE_DEFAULT_WIDTH_2;
 
 // @public
-export function sparklineAreaPath(series: readonly number[], width: number, height: number): string;
+const SPARKLINE_DEFAULT_WIDTH_2 = 80;
+
+// @public @deprecated
+export const sparklineAreaPath: typeof sparklineAreaPath_2;
 
 // @public
-export interface SparklineBar {
+function sparklineAreaPath_2(series: readonly number[], width: number, height: number): string;
+
+// @public @deprecated
+export type SparklineBar = SparklineBar_2;
+
+// @public
+interface SparklineBar_2 {
     readonly height: number;
     readonly width: number;
     readonly x: number;
     readonly y: number;
 }
 
+// @public @deprecated
+export const sparklineBars: typeof sparklineBars_2;
+
 // @public
-export function sparklineBars(series: readonly number[], width: number, height: number): SparklineBar[];
+function sparklineBars_2(series: readonly number[], width: number, height: number): SparklineBar_2[];
 
 // @public
 export function sparklineExportValue(values: readonly number[]): string;
 
-// @public
-export type SparklineKind = "bar" | "line" | "area";
+// @public @deprecated
+export type SparklineKind = SparklineKind_2;
 
 // @public
-export function sparklineLinePath(series: readonly number[], width: number, height: number): string;
+type SparklineKind_2 = "bar" | "line" | "area";
+
+// @public @deprecated
+export const sparklineLinePath: typeof sparklineLinePath_2;
 
 // @public
-export interface SparklinePoint {
+function sparklineLinePath_2(series: readonly number[], width: number, height: number): string;
+
+// @public @deprecated
+export type SparklinePoint = SparklinePoint_2;
+
+// @public
+interface SparklinePoint_2 {
     readonly x: number;
     readonly y: number;
 }
 
-// @public
-export function sparklinePoints(series: readonly number[], width: number, height: number): SparklinePoint[];
+// @public @deprecated
+export const sparklinePoints: typeof sparklinePoints_2;
 
 // @public
-export function sparklineSortValue(values: readonly number[]): number | undefined;
+function sparklinePoints_2(series: readonly number[], width: number, height: number): SparklinePoint_2[];
+
+// @public @deprecated
+export const sparklineSortValue: typeof sparklineSortValue_2;
+
+// @public
+function sparklineSortValue_2(values: readonly number[]): number | undefined;
 
 // @public
 export function sparklineSummary(values: readonly number[]): string;
@@ -8295,24 +10083,39 @@ export function splitRelativeToken(raw: string): {
 // @public
 export function stableKey(input: unknown): string;
 
-// @public
-export function staleAppendStash<TRow>(stash: AppendStash<TRow> | null, baseKey: string, failed: boolean): boolean;
+// @public @deprecated
+export const staleAppendStash: typeof staleAppendStash_2;
 
 // @public
-export function startColumnDrag(event: ColumnDragEvent, key: string): void;
+function staleAppendStash_2<TRow>(stash: AppendStash_2<TRow> | null, baseKey: string, failed: boolean): boolean;
+
+// @public @deprecated
+export const startColumnDrag: typeof startColumnDrag_2;
 
 // @public
-export interface StatusBarItem {
+function startColumnDrag_2(event: ColumnDragEvent_2, key: string): void;
+
+// @public @deprecated
+export type StatusBarItem = StatusBarItem_2;
+
+// @public
+interface StatusBarItem_2 {
     readonly appearance?: FeatureNotice["appearance"];
     readonly key: "rows" | "selected" | FeatureNoticeKind;
     readonly text: string;
 }
 
-// @public
-export function statusBarItems(input: StatusBarItemsInput): StatusBarItem[];
+// @public @deprecated
+export const statusBarItems: typeof statusBarItems_2;
 
 // @public
-export interface StatusBarItemsInput {
+function statusBarItems_2(input: StatusBarItemsInput_2): StatusBarItem_2[];
+
+// @public @deprecated
+export type StatusBarItemsInput = StatusBarItemsInput_2;
+
+// @public
+interface StatusBarItemsInput_2 {
     readonly enabled: boolean;
     readonly labels?: TableLabels;
     readonly limit?: number;
@@ -8323,8 +10126,11 @@ export interface StatusBarItemsInput {
     readonly total?: number;
 }
 
+// @public @deprecated
+export const stepEditableCell: typeof stepEditableCell_2;
+
 // @public
-export function stepEditableCell<TRow>(options: {
+function stepEditableCell_2<TRow>(options: {
     rows: readonly TRow[];
     columns: readonly EditableColumnLike<TRow>[];
     rowKey: (row: TRow) => string;
@@ -8335,11 +10141,20 @@ export function stepEditableCell<TRow>(options: {
 // @public
 export function stepMatch(index: number, total: number, step: number): number;
 
-// @public
-export function stickyHeaderOffset(enabled: boolean, stickyTop: number, toolbarHeight: number): number;
+// @public @deprecated
+export const stickyHeaderOffset: typeof stickyHeaderOffset_2;
 
 // @public
-export interface StickyToolbarStyle {
+function stickyHeaderOffset_2(enabled: boolean, stickyTop: number, toolbarHeight: number): number;
+
+// @public @deprecated
+export type StickyToolbarStyle = StickyToolbarStyle_2;
+
+// @public @deprecated
+export const stickyToolbarStyle: typeof stickyToolbarStyle_2;
+
+// @public
+interface StickyToolbarStyle_2 {
     readonly background: string;
     readonly position: "sticky";
     readonly top: number;
@@ -8347,15 +10162,21 @@ export interface StickyToolbarStyle {
 }
 
 // @public
-export function stickyToolbarStyle(enabled: boolean, stickyTop?: number): StickyToolbarStyle | undefined;
+function stickyToolbarStyle_2(enabled: boolean, stickyTop?: number): StickyToolbarStyle_2 | undefined;
+
+// @public @deprecated
+export const stopCellEditKeyboard: typeof stopCellEditKeyboard_2;
 
 // @public
-export function stopCellEditKeyboard(event: {
+function stopCellEditKeyboard_2(event: {
     stopPropagation: () => void;
 }): void;
 
+// @public @deprecated
+export const stopEditKeys: typeof stopEditKeys_2;
+
 // @public
-export function stopEditKeys(event: Readonly<{
+function stopEditKeys_2(event: Readonly<{
     key: string;
     stopPropagation: () => void;
 }>): void;
@@ -8391,8 +10212,11 @@ export interface StreamSocketEvent {
     data?: unknown;
 }
 
+// @public @deprecated
+export const summaryExportValues: typeof summaryExportValues_2;
+
 // @public
-export function summaryExportValues(cells: Readonly<Partial<Record<string, unknown>>> | undefined): Partial<Record<string, unknown>> | undefined;
+function summaryExportValues_2(cells: Readonly<Partial<Record<string, unknown>>> | undefined): Partial<Record<string, unknown>> | undefined;
 
 // @public
 export type SummaryRowFn<TRow, TNode = unknown> = (rows: readonly TRow[]) => Partial<Record<string, TNode>>;
@@ -8442,8 +10266,11 @@ export interface TableCommandOptions {
 // @public
 export function tableCommands(options: TableCommandOptions): Command[];
 
+// @public @deprecated
+export type TableData<TRow> = TableData_2<TRow>;
+
 // @public
-export interface TableData<TRow> {
+interface TableData_2<TRow> {
     readonly commit: () => void;
     readonly dispose: () => void;
     readonly finish: (sources: {
@@ -8451,13 +10278,16 @@ export interface TableData<TRow> {
         readonly frontend: TableSource<TRow>;
     }) => TableSource<TRow>;
     readonly loadOptions: () => () => void;
-    readonly plan: (config: TableDataConfig<TRow>) => TableDataPlan<TRow>;
+    readonly plan: (config: TableDataConfig_2<TRow>) => TableDataPlan_2<TRow>;
     readonly revision: () => number;
     readonly subscribe: (listener: () => void) => () => void;
 }
 
+// @public @deprecated
+export type TableDataConfig<TRow> = TableDataConfig_2<TRow>;
+
 // @public
-export interface TableDataConfig<TRow> {
+interface TableDataConfig_2<TRow> {
     readonly columns: readonly ColumnMetadata<TRow>[];
     readonly data?: readonly TRow[];
     readonly declaredFilters?: readonly FilterDef<TRow>[];
@@ -8472,14 +10302,17 @@ export interface TableDataConfig<TRow> {
     readonly source?: TableSource<TRow>;
 }
 
+// @public @deprecated
+export type TableDataPlan<TRow> = TableDataPlan_2<TRow>;
+
 // @public
-export interface TableDataPlan<TRow> {
+interface TableDataPlan_2<TRow> {
     readonly facetKeys: readonly string[] | undefined;
     readonly filterFn: (row: TRow, extra: ExtraFilters) => boolean;
     readonly filterKey: string;
     readonly filterTreeFn: ((row: TRow, tree: QueryFilterGroup) => boolean) | undefined;
     readonly runtime: FilterRuntime<TRow>;
-    readonly tier: DataTier;
+    readonly tier: DataTier_2;
 }
 
 // @public
@@ -8535,8 +10368,11 @@ export interface TableErrorState {
     retrying: boolean;
 }
 
+// @public @deprecated
+export const tableErrorState: typeof tableErrorState_2;
+
 // @public
-export function tableErrorState<TRow>(source: TableSource<TRow>): TableErrorState | undefined;
+function tableErrorState_2<TRow>(source: TableSource<TRow>): TableErrorState | undefined;
 
 // @public
 export type TableExtraEntry = {
@@ -8926,8 +10762,11 @@ export interface TableLabels {
 // @public
 export type TableLayout = "desktop" | "mobile";
 
+// @public @deprecated
+export const tableMinWidth: typeof tableMinWidth_2;
+
 // @public
-export function tableMinWidth<TRow>(columns: readonly ColumnMetadata<TRow>[], options?: {
+function tableMinWidth_2<TRow>(columns: readonly ColumnMetadata<TRow>[], options?: {
     widths?: Readonly<Record<string, number>>;
     extra?: number;
 }): number;
@@ -9062,8 +10901,11 @@ export interface TableQuery extends QueryExtensions {
 // @public
 export function tableQueryBaseKey(query: TableQuery, options?: TableQueryKeyOptions): readonly unknown[];
 
+// @public @deprecated
+export type TableQueryInput = TableQueryInput_2;
+
 // @public
-export interface TableQueryInput {
+interface TableQueryInput_2 {
     readonly aggregates?: readonly QueryAggregate[];
     readonly cursor?: string;
     readonly expandedIds?: readonly string[];
@@ -9252,8 +11094,11 @@ export interface TableStateMutators {
     toggleSortLevel: (key: string) => void;
 }
 
+// @public @deprecated
+export type TableStatusAnnouncementOptions = TableStatusAnnouncementOptions_2;
+
 // @public
-export interface TableStatusAnnouncementOptions {
+interface TableStatusAnnouncementOptions_2 {
     labels: Required<TableLabels>;
     limit: number;
     page: number;
@@ -9265,8 +11110,11 @@ export interface TableStatusAnnouncementOptions {
     total: number;
 }
 
+// @public @deprecated
+export type TableStatusSignature = TableStatusSignature_2;
+
 // @public
-export interface TableStatusSignature {
+interface TableStatusSignature_2 {
     readonly result: string;
     readonly sort: string;
 }
@@ -9329,8 +11177,11 @@ export interface TableVirtualization<TRow> {
     rows: readonly VirtualTableRow<TRow>[];
 }
 
+// @public @deprecated
+export const tabTrapTarget: typeof tabTrapTarget_2;
+
 // @public
-export function tabTrapTarget<T>(focusables: readonly T[], current: T | null, backwards: boolean): T | undefined;
+function tabTrapTarget_2<T>(focusables: readonly T[], current: T | null, backwards: boolean): T | undefined;
 
 // @public
 export const TEXT_OP_LABEL_KEYS: {
@@ -9359,20 +11210,32 @@ export interface TextFieldWidget {
     write: (nextOp: TextOp, nextValue: string) => void;
 }
 
+// @public @deprecated
+export const textFilterWidget: typeof textFilterWidget_2;
+
 // @public
-export function textFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtras">, localOp: TextOp, setLocalOp: (op: TextOp) => void): TextFieldWidget;
+function textFilterWidget_2<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtras">, localOp: TextOp, setLocalOp: (op: TextOp) => void): TextFieldWidget;
 
 // @public
 export type TextOp = (typeof TEXT_OPS)[number];
 
-// @public
-export function tierRows<TRow>(active: boolean, data: readonly TRow[] | undefined): readonly TRow[];
+// @public @deprecated
+export const tierRows: typeof tierRows_2;
 
 // @public
-export function toAggregateInstant(value: AggregateOrderedValue): number | undefined;
+function tierRows_2<TRow>(active: boolean, data: readonly TRow[] | undefined): readonly TRow[];
+
+// @public @deprecated
+export const toAggregateInstant: typeof toAggregateInstant_2;
 
 // @public
-export function toAggregateOrdered(value: AggregateOrderedValue): {
+function toAggregateInstant_2(value: AggregateOrderedValue): number | undefined;
+
+// @public @deprecated
+export const toAggregateOrdered: typeof toAggregateOrdered_2;
+
+// @public
+function toAggregateOrdered_2(value: AggregateOrderedValue): {
     rank: number;
     result: AggregateOrderedValue;
 } | undefined;
@@ -9386,11 +11249,17 @@ export const toggleCollapsedColumnGroup: typeof toggleCollapsedColumnGroup_2;
 // @public
 function toggleCollapsedColumnGroup_2(collapsedIds: readonly string[], id: string): string[];
 
-// @public
-export function toggleId(set: ReadonlySet<string>, id: string): Set<string>;
+// @public @deprecated
+export const toggleId: typeof toggleId_2;
 
 // @public
-export function toggleIds(set: ReadonlySet<string>, ids: readonly string[]): Set<string>;
+function toggleId_2(set: ReadonlySet<string>, id: string): Set<string>;
+
+// @public @deprecated
+export const toggleIds: typeof toggleIds_2;
+
+// @public
+function toggleIds_2(set: ReadonlySet<string>, ids: readonly string[]): Set<string>;
 
 // @public
 export function toggleTreeNode<TRow>(entries: readonly TreeEntry<TRow>[], id: string, actions: {
@@ -9432,8 +11301,14 @@ export interface TreeEntry<TRow> {
     siblingIndex?: number;
 }
 
+// @public @deprecated
+export type TreeExpansionActions = TreeExpansionActions_2;
+
+// @public @deprecated
+export const treeExpansionActions: typeof treeExpansionActions_2;
+
 // @public
-export interface TreeExpansionActions {
+interface TreeExpansionActions_2 {
     readonly collapseAll: () => void;
     readonly expand: (id: string) => void;
     readonly expandAll: (ids: readonly string[]) => void;
@@ -9441,7 +11316,7 @@ export interface TreeExpansionActions {
 }
 
 // @public
-export function treeExpansionActions(store: ControllableStore<ReadonlySet<string>>): TreeExpansionActions;
+function treeExpansionActions_2(store: ControllableStore_2<ReadonlySet<string>>): TreeExpansionActions_2;
 
 // @public
 export function treeExportExpandedIds<TRow>(entries: readonly TreeEntry<TRow>[]): Set<string>;
@@ -9454,8 +11329,11 @@ export function treeIndentStyle(level: number): {
 // @public
 export function treeMoveCreatesCycle(rowId: string, descendantIds: readonly string[], targetParentId: string | null): boolean;
 
+// @public @deprecated
+export const treeRowAria: typeof treeRowAria_2;
+
 // @public
-export function treeRowAria<TRow>(entry: TreeEntry<TRow> | undefined): {
+function treeRowAria_2<TRow>(entry: TreeEntry<TRow> | undefined): {
     readonly "aria-level"?: number;
     readonly "aria-expanded"?: boolean;
     readonly "aria-posinset"?: number;
@@ -9468,8 +11346,11 @@ export interface TreeShape<TRow> {
     hasChildren?: (row: TRow) => boolean;
 }
 
+// @public @deprecated
+export const treeTableAria: typeof treeTableAria_2;
+
 // @public
-export function treeTableAria(entryCount: number | undefined): {
+function treeTableAria_2(entryCount: number | undefined): {
     readonly role?: "treegrid";
     readonly "aria-rowcount"?: number;
 };
@@ -9515,8 +11396,11 @@ export interface UrlSliceSpec<T, TConfig extends object> {
     readonly writeDebounceMs?: number;
 }
 
+// @public @deprecated
+export type UrlSliceStore<T, TConfig extends object> = UrlSliceStore_2<T, TConfig>;
+
 // @public
-export interface UrlSliceStore<T, TConfig extends object> extends ViewStateSubscription<T> {
+interface UrlSliceStore_2<T, TConfig extends object> extends ViewStateSubscription<T> {
     readonly configure: (config: TConfig) => void;
     readonly flush: () => void;
     readonly set: (value: T) => void;
@@ -9555,14 +11439,23 @@ export interface ValidationCheckResult {
     error?: string;
 }
 
-// @public
-export function validationErrorFor(snapshot: EditValidationSnapshot, rowId: string, columnKey: string): string | undefined;
+// @public @deprecated
+export const validationErrorFor: typeof validationErrorFor_2;
 
 // @public
-export function validationKey(rowId: string, columnKey: string): string;
+function validationErrorFor_2(snapshot: EditValidationSnapshot_2, rowId: string, columnKey: string): string | undefined;
+
+// @public @deprecated
+export const validationKey: typeof validationKey_2;
 
 // @public
-export function validationSignature(snapshot: EditValidationSnapshot): string;
+function validationKey_2(rowId: string, columnKey: string): string;
+
+// @public @deprecated
+export const validationSignature: typeof validationSignature_2;
+
+// @public
+function validationSignature_2(snapshot: EditValidationSnapshot_2): string;
 
 // @public
 export interface ValidationTarget {
@@ -9573,11 +11466,17 @@ export interface ValidationTarget {
 // @public
 export function viewFromGroupedEntries<TRow>(entries: readonly GroupedFlatEntry<TRow>[], groupTotal?: (label: string) => string, includeHiddenLeaves?: boolean): ExportViewEntry<TRow>[];
 
-// @public
-export function viewFromTreeEntries<TRow>(entries: readonly TreeEntry<TRow>[]): ExportViewEntry<TRow>[];
+// @public @deprecated
+export const viewFromTreeEntries: typeof viewFromTreeEntries_2;
 
 // @public
-export interface ViewStateSource {
+function viewFromTreeEntries_2<TRow>(entries: readonly TreeEntry<TRow>[]): ExportViewEntry<TRow>[];
+
+// @public @deprecated
+export type ViewStateSource = ViewStateSource_2;
+
+// @public
+interface ViewStateSource_2 {
     readonly adapter: UrlStateAdapter;
     readonly serverSearch?: () => string;
     readonly urlKey?: string;
@@ -9590,11 +11489,17 @@ export interface ViewStateSubscription<TSnapshot> {
     readonly subscribe: (listener: () => void) => () => void;
 }
 
-// @public
-export const VIRTUAL_OVERSCAN = 8;
+// @public @deprecated
+export const VIRTUAL_OVERSCAN: typeof VIRTUAL_OVERSCAN_2;
 
 // @public
-export function virtualColumnSpan(columnCount: number, hasSelection: boolean, hasActions: boolean, hasExpansion?: boolean, hasReorder?: boolean): number;
+const VIRTUAL_OVERSCAN_2 = 8;
+
+// @public @deprecated
+export const virtualColumnSpan: typeof virtualColumnSpan_2;
+
+// @public
+function virtualColumnSpan_2(columnCount: number, hasSelection: boolean, hasActions: boolean, hasExpansion?: boolean, hasReorder?: boolean): number;
 
 // @public
 export interface VirtualItemMeta {
@@ -9624,50 +11529,89 @@ export function visibleColumns<TCol extends ColumnMetadata<never>>(columns: read
 // @public @deprecated
 export function visibleColumns<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], layout: TableLayout, mobileIdentityColumns: number): TCol[];
 
-// @public
-export function visibleRowActions<TRow>(actions: readonly RowAction<TRow>[], row: TRow): RowAction<TRow>[];
+// @public @deprecated
+export const visibleRowActions: typeof visibleRowActions_2;
 
 // @public
-export function walkFilterTreeConditions(tree: QueryFilterGroup | undefined, path?: readonly number[]): {
+function visibleRowActions_2<TRow>(actions: readonly RowAction<TRow>[], row: TRow): RowAction<TRow>[];
+
+// @public @deprecated
+export const walkFilterTreeConditions: typeof walkFilterTreeConditions_2;
+
+// @public
+function walkFilterTreeConditions_2(tree: QueryFilterGroup | undefined, path?: readonly number[]): {
     condition: QueryCondition;
     path: readonly number[];
 }[];
 
-// @public
-export function warnDataTierMisuse(source: unknown, mode: "frontend" | "server" | undefined, data: unknown, onQueryChange: unknown): void;
+// @public @deprecated
+export const warnDataTierMisuse: typeof warnDataTierMisuse_2;
 
 // @public
-export function watchOverlayDismiss(doc: Document, insideSelector: string, dismiss: () => void, options?: OverlayDismissOptions): () => void;
+function warnDataTierMisuse_2(source: unknown, mode: "frontend" | "server" | undefined, data: unknown, onQueryChange: unknown): void;
+
+// @public @deprecated
+export const watchOverlayDismiss: typeof watchOverlayDismiss_2;
 
 // @public
-export type WidthColumn = Pick<ColumnModel<unknown>, "key" | "width">;
+function watchOverlayDismiss_2(doc: Document, insideSelector: string, dismiss: () => void, options?: OverlayDismissOptions): () => void;
+
+// @public @deprecated
+export type WidthColumn = WidthColumn_2;
+
+// @public
+type WidthColumn_2 = Pick<ColumnModel<unknown>, "key" | "width">;
 
 // @public
 export function windowGroupedEntries<TEntry>(entries: readonly TEntry[], indices: readonly number[]): readonly TEntry[];
 
-// @public
-export function withColumnHidden(state: ColumnLayoutState, key: string, hidden: boolean): ColumnLayoutState;
+// @public @deprecated
+export const withColumnHidden: typeof withColumnHidden_2;
 
 // @public
-export function withColumnMoved(state: ColumnLayoutState, order: readonly string[], key: string, toIndex: number, holds?: (order: readonly string[]) => boolean): ColumnLayoutState | undefined;
+function withColumnHidden_2(state: ColumnLayoutState, key: string, hidden: boolean): ColumnLayoutState;
+
+// @public @deprecated
+export const withColumnMoved: typeof withColumnMoved_2;
 
 // @public
-export function withColumnOrder(state: ColumnLayoutState, current: readonly string[], order: readonly string[], holds?: (order: readonly string[]) => boolean): ColumnLayoutState | undefined;
+function withColumnMoved_2(state: ColumnLayoutState, order: readonly string[], key: string, toIndex: number, holds?: (order: readonly string[]) => boolean): ColumnLayoutState | undefined;
+
+// @public @deprecated
+export const withColumnOrder: typeof withColumnOrder_2;
 
 // @public
-export function withColumnPinned(state: ColumnLayoutState, key: string, side: PinSide | undefined): ColumnLayoutState;
+function withColumnOrder_2(state: ColumnLayoutState, current: readonly string[], order: readonly string[], holds?: (order: readonly string[]) => boolean): ColumnLayoutState | undefined;
+
+// @public @deprecated
+export const withColumnPinned: typeof withColumnPinned_2;
 
 // @public
-export function withColumnWidth(state: ColumnLayoutState, key: string, width: number | undefined): ColumnLayoutState;
+function withColumnPinned_2(state: ColumnLayoutState, key: string, side: PinSide | undefined): ColumnLayoutState;
+
+// @public @deprecated
+export const withColumnWidth: typeof withColumnWidth_2;
 
 // @public
-export function withContextMenuCellCopy<TRow, TActions extends ContextMenuActions<TRow>>(actions: TActions, columns: readonly ColumnMetadata<TRow>[], gridNavigation: boolean): TActions;
+function withColumnWidth_2(state: ColumnLayoutState, key: string, width: number | undefined): ColumnLayoutState;
+
+// @public @deprecated
+export const withContextMenuCellCopy: typeof withContextMenuCellCopy_2;
 
 // @public
-export function withDeclaredAggregates<TRow>(mapper: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>, declared: DeclaredAggregates): GroupAggregatesMapper<TRow>;
+function withContextMenuCellCopy_2<TRow, TActions extends ContextMenuActions<TRow>>(actions: TActions, columns: readonly ColumnMetadata<TRow>[], gridNavigation: boolean): TActions;
+
+// @public @deprecated
+export const withDeclaredAggregates: typeof withDeclaredAggregates_2;
 
 // @public
-export function withFilterType(registry: FilterTypeRegistry, spec: FilterTypeSpec): FilterTypeRegistry;
+function withDeclaredAggregates_2<TRow>(mapper: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>, declared: DeclaredAggregates): GroupAggregatesMapper<TRow>;
+
+// @public @deprecated
+export const withFilterType: typeof withFilterType_2;
+
+// @public
+function withFilterType_2(registry: FilterTypeRegistry, spec: FilterTypeSpec): FilterTypeRegistry;
 
 // @public
 export function withGroupAggregateOverrides<TRow>(base: GroupAggregatesFn<TRow> | undefined, overrides: GroupAggregateOverrides, columns: readonly ColumnMetadata<TRow>[], source?: AggregationSourceSupport): GroupAggregatesFn<TRow> | undefined;
@@ -9675,21 +11619,27 @@ export function withGroupAggregateOverrides<TRow>(base: GroupAggregatesFn<TRow> 
 // @public
 export function withQueryAggregateOverrides<TRow = unknown>(base: readonly QueryAggregate[] | undefined, overrides: GroupAggregateOverrides, columns?: readonly ColumnMetadata<TRow>[], source?: AggregationSourceSupport): readonly QueryAggregate[] | undefined;
 
+// @public @deprecated
+export const withRowMutationActions: typeof withRowMutationActions_2;
+
 // @public
-export function withRowMutationActions<TRow>(options: {
+function withRowMutationActions_2<TRow>(options: {
     readonly host?: RowAction<TRow>[];
     readonly mutations: readonly RowAction<TRow>[];
     readonly actionsHidden: boolean;
-}): MergedRowActions<TRow>;
+}): MergedRowActions_2<TRow>;
+
+// @public @deprecated
+export const withRowPinActions: typeof withRowPinActions_2;
 
 // @public
-export function withRowPinActions<TRow>(options: {
+function withRowPinActions_2<TRow>(options: {
     readonly rowActions?: RowAction<TRow>[];
     readonly hasRowActions: boolean;
     readonly pinning: boolean;
     readonly pins: readonly RowAction<TRow>[];
     readonly actionsHidden: boolean;
-}): MergedRowActions<TRow>;
+}): MergedRowActions_2<TRow>;
 
 // @public
 export function writeClipboardText(text: string): Promise<boolean>;
@@ -9709,8 +11659,11 @@ export function writeFilterTreeParam(params: URLSearchParams, tree: QueryFilterG
 // @public
 export function writeRangeFilter(op: RangeOp | undefined, a: string, b: string, lowKey: string, highKey: string, key: string): ExtraFilters;
 
+// @public @deprecated
+export const writeRangeWidget: typeof writeRangeWidget_2;
+
 // @public
-export function writeRangeWidget(op: RangeOp | undefined, a: string, b: string, lowKey: string, highKey: string): ExtraFilters;
+function writeRangeWidget_2(op: RangeOp | undefined, a: string, b: string, lowKey: string, highKey: string): ExtraFilters;
 
 // @public
 export function writeRowPins(params: URLSearchParams, state: RowPinState, prefix?: string): void;
@@ -9721,8 +11674,11 @@ export function writeSortLevels(params: URLSearchParams, levels: readonly {
     dir: SortDirection;
 }[], prefix?: string): void;
 
+// @public @deprecated
+export const writeStoredColumnLayout: typeof writeStoredColumnLayout_2;
+
 // @public
-export function writeStoredColumnLayout(storage: LayoutStorage | undefined, storageKey: string, next: ColumnLayoutState, fallback: ColumnLayoutState): void;
+function writeStoredColumnLayout_2(storage: LayoutStorage | undefined, storageKey: string, next: ColumnLayoutState, fallback: ColumnLayoutState): void;
 
 // @public @deprecated
 export const xlsxWriter: typeof xlsxWriter_2;

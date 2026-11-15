@@ -20,7 +20,7 @@ import { applyRowPin } from '@adapttable/core';
 import { BatchEditingState } from '@adapttable/core';
 import { BatchEditStoreOptions } from '@adapttable/core';
 import { BatchRowEdit } from '@adapttable/core';
-import { BodyCell } from '@adapttable/core';
+import { BodyCell } from '@adapttable/core/binding';
 import { BooleanFieldWidget } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
