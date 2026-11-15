@@ -27,7 +27,7 @@ import { useShowcaseKit } from "../showcaseKit";
 const kit = useShowcaseKit();
 const PAGE_LAYOUT = pageLayoutFor("saved-views");
 const rows = rosterFor("saved-views");
-const columns = peopleColumns({ status: kit.status });
+const columns = peopleColumns(kit);
 const storage = createSeededViewStorage();
 // The list and the table both apply a view by writing params into a store
 // kept for this visit only: refresh starts clean, the URL never changes.

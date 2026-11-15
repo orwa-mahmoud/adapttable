@@ -9,7 +9,6 @@ import { h, type VNodeChild } from "vue";
 
 import {
   formatMoney,
-  formatPercent,
   type Person,
   personName,
   personRole,
@@ -26,8 +25,10 @@ import {
   applyPersonEdit as applySharedEdit,
   dataLocaleOf,
   groupPeopleColumns,
+  loadCaption,
   localizedFilterDefs,
   peopleColumns as sharedPeopleColumns,
+  personInitials,
   readShowcasePresentation,
   type StatusTone,
   statusTone,
@@ -85,35 +86,31 @@ export interface PeopleCells {
   readonly progress?: (value: number, label: string) => VNodeChild;
 }
 
-const initialsOf = (name: string): string =>
-  name
-    .split(/\s+/u)
-    .slice(0, 2)
-    .map((part) => [...part][0] ?? "")
-    .join("");
-
 /**
- * The people columns, drawn with the kit's own cells where it hands them.
- * With `editable`, name, team, status, timeline and budget open an editor.
+ * The people columns, drawn with the kit's own cells: the person with an
+ * avatar over their role, the status as the kit's tag, the load as its
+ * progress bar over the caption. With `editable`, the columns open editors.
  *
- * @param options - `editable`, and the kit's status, avatar and progress cells.
+ * @param cells - The kit's status, avatar and progress cells.
+ * @param options - `editable`.
  * @returns The columns.
  */
 export function peopleColumns(
-  options: { readonly editable?: boolean } & PeopleCells = {}
+  cells: PeopleCells,
+  options: { readonly editable?: boolean } = {}
 ): ColumnDef<Person>[] {
   const dataLocale = currentDataLocale();
   const s = strings(dataLocale);
   return sharedPeopleColumns(dataLocale, options).map(
     (column): ColumnDef<Person> => {
-      if (column.key === "person" && options.avatar) {
-        const avatar = options.avatar;
+      if (column.key === "person" && cells.avatar) {
+        const avatar = cells.avatar;
         return {
           ...column,
           cell: ({ row }: { row: Person }) => {
             const name = personName(row, dataLocale);
             return h("div", { class: "demo-mobile-person" }, [
-              avatar(initialsOf(name)),
+              avatar(personInitials(name)),
               h("div", { style: { minWidth: 0 } }, [
                 h("strong", name),
                 h("small", personRole(row, dataLocale)),
@@ -122,22 +119,22 @@ export function peopleColumns(
           },
         };
       }
-      if (column.key === "status" && options.status) {
-        const status = options.status;
+      if (column.key === "status" && cells.status) {
+        const status = cells.status;
         return {
           ...column,
           cell: ({ row, value }: { row: Person; value: unknown }) =>
             status(statusTone(row), String(value)),
         };
       }
-      if (column.key === "load" && options.progress) {
-        const progress = options.progress;
+      if (column.key === "load" && cells.progress) {
+        const progress = cells.progress;
         return {
           ...column,
           cell: ({ row }: { row: Person }) =>
             h("div", { class: "demo-mobile-load" }, [
               progress(utilization(row), s.load),
-              h("small", formatPercent(utilization(row), dataLocale)),
+              h("small", loadCaption(row, dataLocale)),
             ]),
         };
       }
@@ -166,9 +163,9 @@ export function applyPersonEdit(
 
 /** The people columns under three header groups, one per collapse mode. */
 export function groupedPeopleColumns(
-  status?: StatusRenderer
+  cells: PeopleCells
 ): ColumnInput<Person>[] {
-  return groupPeopleColumns(peopleColumns({ status }), currentDataLocale());
+  return groupPeopleColumns(peopleColumns(cells), currentDataLocale());
 }
 
 /** The direction, labels and language every table on the page shares. */

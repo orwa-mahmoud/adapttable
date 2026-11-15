@@ -20,7 +20,7 @@ import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
 const PAGE_DEFAULTS = pageDefaultsFor("editing");
-const columns = peopleColumns({ editable: true, status: kit.status });
+const columns = peopleColumns(kit, { editable: true });
 const rows = shallowRef<readonly Person[]>(seedRoster("editing", false));
 const log = shallowRef("Every change goes through the host.");
 const rejectNext = shallowRef(false);

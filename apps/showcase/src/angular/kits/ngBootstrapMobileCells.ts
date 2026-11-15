@@ -57,7 +57,7 @@ export class ShowcasePerson extends ShowcaseMobileCellModel {}
   template: `<ngb-progressbar
       [value]="load()"
       [attr.aria-label]="value()"
-    /><small>{{ value() }}</small>`,
+    /><small>{{ caption() }}</small>`,
   styles: `
     :host {
       display: grid;

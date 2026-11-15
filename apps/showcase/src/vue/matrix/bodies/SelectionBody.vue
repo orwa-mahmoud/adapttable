@@ -12,7 +12,7 @@ const kit = useShowcaseKit();
 const ROWS = rosterFor("selection");
 const PAGE_DEFAULTS = pageDefaultsFor("selection");
 const PAGE_LAYOUT = pageLayoutFor("selection");
-const columns = peopleColumns({ status: kit.status });
+const columns = peopleColumns(kit);
 const log = shallowRef("Select rows, then run a bulk action.");
 const pageFeatures = [
   kit.bulkActions([

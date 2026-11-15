@@ -58,7 +58,7 @@ export class ShowcasePerson extends ShowcaseMobileCellModel {}
   // Inert keeps Material's focusable progressbar out of an editable cell's
   // activator, where it would nest a widget in a button.
   template: `<div inert><mat-progress-bar [value]="load()" /></div>
-    <small>{{ value() }}</small>`,
+    <small>{{ caption() }}</small>`,
   styles: `
     :host {
       display: grid;

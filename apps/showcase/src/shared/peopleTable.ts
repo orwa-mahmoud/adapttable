@@ -16,6 +16,7 @@ import {
 import { type Direction, getDirection, getLabels } from "@adapttable/i18n";
 
 import {
+  allocationCount,
   budget,
   budgetAggregateText,
   demoFilterDefs,
@@ -520,6 +521,37 @@ export function applyPersonRowEdit(
     {}
   );
   return applyRowPatches(rows, [updateRow(row.id, changes)], rowKey);
+}
+
+/**
+ * The first letters of a name's first two words, for an avatar:
+ * "Priya Nair" → "PN".
+ *
+ * @param name - The name as the cell reads it.
+ * @returns The initials.
+ */
+export function personInitials(name: string): string {
+  return name
+    .split(/\s+/u)
+    .slice(0, 2)
+    .map((part) => [...part][0] ?? "")
+    .join("")
+    .toUpperCase();
+}
+
+/**
+ * What the Load cell writes under its bar: the utilization and how many
+ * allocations make it up, "56% · 7"; a summary row writes the percentage.
+ *
+ * @param row - The person.
+ * @param dataLocale - The language of the cell data.
+ * @returns The caption.
+ */
+export function loadCaption(row: Person, dataLocale: "ar" | "en"): string {
+  const percent = formatPercent(utilization(row), dataLocale);
+  // A summary row stands for many people and has no allocations of its own.
+  const count = allocationCount(row);
+  return Number.isFinite(count) ? `${percent} · ${String(count)}` : percent;
 }
 
 /** A fresh copy of the people, for a page that edits or reorders them. */

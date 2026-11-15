@@ -91,6 +91,7 @@ import {
   demoFilterTypes,
   type DemoOrder,
   demoOrders,
+  initials,
   LIVE_DEFAULT_LAYOUT,
   type LoadCellProps,
   type Locale,
@@ -118,16 +119,6 @@ import {
   nestedInnerFeatures,
   nestedOuterFeatures,
 } from "../nestedTablePlugins";
-
-/** Two-letter initials for the avatar fallback. */
-function initials(name: string): string {
-  return name
-    .split(" ")
-    .map((part) => part[0] ?? "")
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 /** Radix-native cell visuals (Avatar · Badge · Progress). */
 const RADIX_CELLS: DemoCells = {

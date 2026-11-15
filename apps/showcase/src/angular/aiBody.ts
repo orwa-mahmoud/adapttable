@@ -68,7 +68,7 @@ import { demoTransport, UNSUPPORTED_REPLIES } from "../shared/aiScenario";
 import { AiSalaryCell, AiTextCell } from "./aiCells";
 import { AiConnectDialog } from "./aiConnectDialog";
 import { AiContextInspector } from "./aiContextInspector";
-import { AiDemoOptions,type ApprovalAnswer } from "./aiDemoOptions";
+import { AiDemoOptions, type ApprovalAnswer } from "./aiDemoOptions";
 import { AdaptShowcaseAssistant, AdaptShowcaseTable } from "./kitComponents";
 import { SHOWCASE_KIT } from "./showcaseKit";
 
@@ -124,7 +124,9 @@ export class AiBody {
   readonly columns = computed((): ColumnDef<StaffRow>[] =>
     staffColumns(this.locale()).map((column) => {
       if (column.key === "salary") return { ...column, cell: AiSalaryCell };
-      if (column.key === "status") return { ...column, cell: AiTextCell };
+      // Staff read as text: the showcase's people cells read a different row.
+      if (column.key === "person" || column.key === "status")
+        return { ...column, cell: AiTextCell };
       return column;
     })
   );

@@ -20,7 +20,7 @@ const kit = useShowcaseKit();
 const rows = shallowRef<readonly Person[]>(rosterFor("column-groups"));
 const PAGE_DEFAULTS = pageDefaultsFor("column-groups");
 const PAGE_LAYOUT = pageLayoutFor("column-groups");
-const columns = groupedPeopleColumns(kit.status);
+const columns = groupedPeopleColumns(kit);
 const pageFeatures = [
   kit.collapsibleColumnGroups(),
   kit.rowActions(

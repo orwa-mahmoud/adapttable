@@ -64,12 +64,7 @@ const features = [
   kit.bulkActions(peopleBulkActions(currentDataLocale())),
   ...pageChromeFeatures(kit, { editing: true, urlKey: "mob" }),
 ];
-const columns = peopleColumns({
-  editable: true,
-  status: kit.status,
-  avatar: kit.avatar,
-  progress: kit.progress,
-});
+const columns = peopleColumns(kit, { editable: true });
 
 /** The host callback when a card or row is activated. */
 function activate(row: Person): void {

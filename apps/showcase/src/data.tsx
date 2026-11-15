@@ -17,7 +17,6 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { EditIcon, TrashIcon } from "./icons";
 import {
-  allocationCount,
   budget,
   budgetAggregateText,
   type DemoOrder,
@@ -56,7 +55,12 @@ import {
   peopleRowActions,
   type PeopleRowHandlers,
 } from "./shared/peopleActions";
-import { groupPeopleColumns, peopleColumns } from "./shared/peopleTable";
+import {
+  groupPeopleColumns,
+  loadCaption,
+  peopleColumns,
+  personInitials,
+} from "./shared/peopleTable";
 
 export {
   allocationCount,
@@ -273,15 +277,8 @@ const cellStack: CSSProperties = {
   lineHeight: 1.35,
 };
 
-/** First-letters of (up to) the first two name words, e.g. "Ada Lovelace" → "AL". */
-export function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part.charAt(0))
-    .join("")
-    .toUpperCase();
-}
+/** An avatar's initials: the shared rule every framework draws. */
+export const initials = personInitials;
 
 /** Deterministic 0–359 hue from a name, for adapters whose avatar needs a colour. */
 export function nameHue(name: string): number {
@@ -456,7 +453,7 @@ export function makeColumns(
         <Load
           label={s.load}
           value={utilization(row)}
-          meta={`${formatPercent(utilization(row), locale)} · ${allocationCount(row)}`}
+          meta={loadCaption(row, locale)}
         />
       ),
     },
@@ -612,7 +609,7 @@ export function makeWideColumns(
         <Load
           label={s.load}
           value={utilization(row)}
-          meta={`${formatPercent(utilization(row), locale)} · ${allocationCount(row)}`}
+          meta={loadCaption(row, locale)}
         />
       ),
     },

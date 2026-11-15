@@ -34,7 +34,7 @@ import { useShowcaseKit } from "../showcaseKit";
 const kit = useShowcaseKit();
 const PAGE_DEFAULTS = pageDefaultsFor("landing");
 const rows = shallowRef<readonly Person[]>(seedRoster("landing", false));
-const columns = peopleColumns({ editable: true, status: kit.status });
+const columns = peopleColumns(kit, { editable: true });
 const summary = aggregate<Person>(
   { budget: "sum" },
   {

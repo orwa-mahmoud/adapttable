@@ -33,7 +33,7 @@ const kit = useShowcaseKit();
 const ROWS = rosterFor("nested-tables");
 const PAGE_DEFAULTS = pageDefaultsFor("nested-tables");
 const PAGE_LAYOUT = pageLayoutFor("nested-tables");
-const columns = peopleColumns({ status: kit.status });
+const columns = peopleColumns(kit);
 const firstId = ROWS[0]?.id;
 const pageFeatures = [
   kit.nestedTable<Person>(

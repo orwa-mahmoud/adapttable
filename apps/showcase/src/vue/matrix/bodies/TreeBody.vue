@@ -19,7 +19,7 @@ const kit = useShowcaseKit();
 const PAGE_DEFAULTS = pageDefaultsFor("tree");
 const PAGE_LAYOUT = pageLayoutFor("tree");
 const rows = rosterFor("tree");
-const columns = peopleColumns({ status: kit.status });
+const columns = peopleColumns(kit);
 const pageFeatures = [
   kit.tree<Person>({ getParentId: reportsTo, treeColumn: "person" }),
 ];

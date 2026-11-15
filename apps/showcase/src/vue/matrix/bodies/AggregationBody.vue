@@ -25,7 +25,7 @@ import { useShowcaseKit } from "../showcaseKit";
 const kit = useShowcaseKit();
 const PAGE_DEFAULTS = pageDefaultsFor("aggregation");
 const PAGE_LAYOUT = pageLayoutFor("aggregation");
-const columns = peopleColumns({ status: kit.status });
+const columns = peopleColumns(kit);
 const rows = rosterFor("aggregation");
 const anchor = rows[0];
 const pageFeatures = [

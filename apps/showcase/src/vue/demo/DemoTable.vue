@@ -44,7 +44,7 @@ const rows = shallowRef<readonly Person[]>(
 onScopeDispose(
   registerDemoCapture(() => demoSession.write("vue-people", rows.value))
 );
-const columns = peopleColumns({ editable: editing, status: kit.status });
+const columns = peopleColumns(kit, { editable: editing });
 const urlKey = props.lab ? "vue-lab" : "vue-live";
 // The live demo controls its layout so a new pin reveals the hidden columns:
 // the table widens past its frame and the pinned column is seen to stick.

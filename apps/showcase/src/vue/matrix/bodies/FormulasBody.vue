@@ -41,7 +41,7 @@ const derived = computed(() =>
   buildFormulaColumns<Person>(state.formulas.value)
 );
 const columns = computed(() => [
-  ...peopleColumns({ status: kit.status }),
+  ...peopleColumns(kit),
   // Size derived fields alongside the base columns so an unsized formula
   // does not absorb all remaining table width and squeeze the other fields.
   ...derived.value.columns.map((column) => ({ ...column, width: 160 })),

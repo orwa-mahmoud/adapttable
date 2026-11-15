@@ -24,7 +24,7 @@ const kit = useShowcaseKit();
 const ROWS = rosterFor("grouping");
 const PAGE_DEFAULTS = pageDefaultsFor("grouping");
 const PAGE_LAYOUT = pageLayoutFor("grouping");
-const columns = peopleColumns({ status: kit.status });
+const columns = peopleColumns(kit);
 // The toggle forces the phone's selects on a desktop; off, it leaves the
 // breakpoint alone rather than forcing a desktop table onto a phone.
 const mobile = shallowRef(false);

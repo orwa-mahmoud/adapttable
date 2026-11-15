@@ -37,7 +37,7 @@ const kit = useShowcaseKit();
 const PAGE_DEFAULTS = pageDefaultsFor("realtime");
 const PAGE_LAYOUT = pageLayoutFor("realtime");
 const features = pageChromeFeatures(kit, { urlKey: "rt" });
-const columns = peopleColumns({ status: kit.status });
+const columns = peopleColumns(kit);
 // The direction the table sorts in now: a patch lands where the reader is
 // looking, whichever way they have turned the sort.
 let sortDir: "asc" | "desc" = "desc";

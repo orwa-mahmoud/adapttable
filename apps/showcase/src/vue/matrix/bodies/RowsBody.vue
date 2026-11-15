@@ -24,7 +24,7 @@ import { useShowcaseKit } from "../showcaseKit";
 const kit = useShowcaseKit();
 const PAGE_DEFAULTS = pageDefaultsFor("rows");
 const PAGE_LAYOUT = pageLayoutFor("rows");
-const columns = peopleColumns({ status: kit.status });
+const columns = peopleColumns(kit);
 const rows = shallowRef<readonly Person[]>(
   orderPeopleByTeam(seedRoster("rows", false))
 );

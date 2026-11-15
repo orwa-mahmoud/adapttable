@@ -1189,12 +1189,7 @@ class MobileCardsBody {
     this.log.set(MOBILE_TEXT.activated(row.name));
   };
   private readonly kit = inject(SHOWCASE_KIT);
-  readonly columns = peopleColumns({ editable: true }).map((column) => {
-    if (column.key === "person")
-      return { ...column, cell: this.kit.personCell };
-    if (column.key === "load") return { ...column, cell: this.kit.loadCell };
-    return column;
-  });
+  readonly columns = peopleColumns({ editable: true });
   readonly rowKey = rowKey;
   readonly features: readonly AdaptTableFeature[] = [
     this.kit.editing<Person>((row, key, value) => {

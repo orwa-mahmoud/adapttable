@@ -22,7 +22,7 @@ const PAGE_DEFAULTS = pageDefaultsFor("columns");
 // may shrink preferred widths until there is no overflow to demonstrate.
 const columns = shallowRef<readonly ColumnDef<Person>[]>(
   inWideOrder([
-    ...peopleColumns({ status: kit.status }).map((column) => ({
+    ...peopleColumns(kit).map((column) => ({
       ...column,
       renameable: true,
       minWidth: typeof column.width === "number" ? column.width : undefined,

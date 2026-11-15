@@ -2,6 +2,7 @@
 import { computed, Directive, input } from "@angular/core";
 
 import { type Person, personName, personRole, utilization } from "../people";
+import { loadCaption, personInitials } from "../shared/peopleTable";
 import { SHOWCASE_PRESENTATION } from "./data";
 
 @Directive()
@@ -14,13 +15,7 @@ export abstract class ShowcaseMobileCellModel {
       SHOWCASE_PRESENTATION.locale.startsWith("ar") ? "ar" : "en"
     )
   );
-  readonly initials = computed(() =>
-    this.name()
-      .split(/\s+/u)
-      .slice(0, 2)
-      .map((part) => [...part][0] ?? "")
-      .join("")
-  );
+  readonly initials = computed(() => personInitials(this.name()));
   readonly role = computed(() =>
     personRole(
       this.row(),
@@ -28,4 +23,11 @@ export abstract class ShowcaseMobileCellModel {
     )
   );
   readonly load = computed(() => utilization(this.row()));
+  /** What the load cell writes under its bar, "56% · 7". */
+  readonly caption = computed(() =>
+    loadCaption(
+      this.row(),
+      SHOWCASE_PRESENTATION.locale.startsWith("ar") ? "ar" : "en"
+    )
+  );
 }

@@ -30,7 +30,7 @@ import { useShowcaseKit } from "../showcaseKit";
 const kit = useShowcaseKit();
 const PAGE_DEFAULTS = pageDefaultsFor("row-reordering");
 const PAGE_LAYOUT = pageLayoutFor("row-reordering");
-const columns = peopleColumns({ status: kit.status });
+const columns = peopleColumns(kit);
 const shape = shallowRef<ReorderShape>("flat");
 const rows = shallowRef<readonly Person[]>(rosterFor("row-reordering"));
 const rtl = SHOWCASE_PRESENTATION.dir === "rtl";

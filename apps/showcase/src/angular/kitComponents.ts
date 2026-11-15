@@ -74,9 +74,15 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         if ("children" in column) {
           return { ...column, children: decorate(column.children) };
         }
-        if (column.key === "status" && !column.cell) {
+        if (column.cell) return column;
+        // The people columns read as the kit draws them on every page: the
+        // person over their role, the status as a tag, the load as a bar.
+        if (column.key === "person")
+          return { ...column, cell: this.kit.personCell };
+        if (column.key === "status")
           return { ...column, cell: this.kit.statusCell };
-        }
+        if (column.key === "load")
+          return { ...column, cell: this.kit.loadCell };
         return column;
       });
     return decorate(this.columns());

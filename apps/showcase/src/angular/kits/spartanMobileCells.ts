@@ -61,7 +61,7 @@ export class ShowcasePerson extends ShowcaseMobileCellModel {}
       max="100"
       [attr.aria-label]="value()"
     ></progress
-    ><small>{{ value() }}</small>`,
+    ><small>{{ caption() }}</small>`,
   styles: `
     :host {
       display: grid;

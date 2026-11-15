@@ -25,7 +25,7 @@ const kit = useShowcaseKit();
 const ROWS = rosterFor("filtering");
 const PAGE_DEFAULTS = pageDefaultsFor("filtering");
 const PAGE_LAYOUT = pageLayoutFor("filtering");
-const columns = peopleColumns({ status: kit.status });
+const columns = peopleColumns(kit);
 const layouts: readonly { value: FilterLayout; label: string }[] = [
   { value: "popover", label: "Popover" },
   { value: "drawer", label: "Drawer" },

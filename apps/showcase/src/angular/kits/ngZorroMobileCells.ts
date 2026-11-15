@@ -63,7 +63,7 @@ export class ShowcasePerson extends ShowcaseMobileCellModel {}
       [nzPercent]="load()"
       [nzShowInfo]="false"
       [attr.aria-label]="value()"
-    /><small>{{ value() }}</small>`,
+    /><small>{{ caption() }}</small>`,
   styles: `
     :host {
       display: grid;

@@ -62,7 +62,7 @@ export class ShowcasePerson extends ShowcaseMobileCellModel {}
         [attr.aria-label]="value()"
       />
     </div>
-    <small>{{ value() }}</small>`,
+    <small>{{ caption() }}</small>`,
   styles: `
     :host {
       display: grid;
