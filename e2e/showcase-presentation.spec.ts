@@ -155,10 +155,22 @@ for (const kit of VUE_KIT_PAGES) {
       await expect(header).toHaveAttribute("data-pinned", "start");
       const before = await customer.boundingBox();
       expect(before).not.toBeNull();
-      const geometry = await scroll.evaluate((element) => ({
-        edge: element.getBoundingClientRect().left + element.clientLeft,
-        available: element.scrollWidth - element.clientWidth,
-      }));
+      const geometry = await scroll.evaluate((element) => {
+        const edge = element.getBoundingClientRect().left + element.clientLeft;
+        // A pinned column sticks past the leading rails, not over them.
+        const lead = [
+          ...element.querySelectorAll<HTMLElement>(
+            '[data-adapttable-part="selection-header"], [data-adapttable-part="expand-header"], [data-adapttable-part="reorder-header"]'
+          ),
+        ].reduce((right, rail) => {
+          const cell = rail.closest("th, td") ?? rail;
+          return Math.max(right, cell.getBoundingClientRect().right);
+        }, edge);
+        return {
+          edge: lead,
+          available: element.scrollWidth - element.clientWidth,
+        };
+      });
       // Customer follows Order, so it moves normally until it reaches the edge.
       const threshold = before!.x - geometry.edge;
       expect(threshold).toBeGreaterThan(0);
