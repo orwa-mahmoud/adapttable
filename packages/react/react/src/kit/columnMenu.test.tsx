@@ -97,7 +97,7 @@ describe("createColumnMenu", () => {
     const { button } = open(fakeLayout());
     expect(button).toHaveTextContent(labels.columns);
     expect(button).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("group", { name: labels.columns })).toBeVisible();
+    expect(screen.getByRole("dialog", { name: labels.columns })).toBeVisible();
     expect(items()).toHaveLength(3);
   });
 
@@ -310,9 +310,8 @@ describe("createColumnMenu", () => {
 
   it("hands the text direction to the panel", () => {
     open(fakeLayout(), { dir: "rtl" });
-    expect(screen.getByRole("group", { name: labels.columns })).toHaveAttribute(
-      "dir",
-      "rtl"
-    );
+    expect(
+      screen.getByRole("dialog", { name: labels.columns })
+    ).toHaveAttribute("dir", "rtl");
   });
 });

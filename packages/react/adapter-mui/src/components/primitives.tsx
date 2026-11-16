@@ -258,6 +258,8 @@ export function Popover({
   style,
   placement,
   flush,
+  dir,
+  "aria-label": label,
 }: Readonly<KitPopoverProps>) {
   const anchorRef = useRef<HTMLButtonElement | null>(null);
   const [own, setOwn] = useState(false);
@@ -286,6 +288,9 @@ export function Popover({
           paper: paperWith(part, {
             className,
             style,
+            role,
+            dir,
+            "aria-label": label,
             sx: flush ? undefined : POPOVER_PAPER,
           }),
         }}

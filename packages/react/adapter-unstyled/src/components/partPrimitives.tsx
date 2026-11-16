@@ -213,6 +213,7 @@ export function anchoredPopover(
     onOpenChange,
     part,
     dir,
+    "aria-label": label,
   }) {
     "use no memo";
     const classOf = usePartClass();
@@ -239,6 +240,7 @@ export function anchoredPopover(
             <Panel
               ref={panelRef}
               dir={dir}
+              aria-label={label}
               data-adapttable-part={part}
               className={part && classOf(part)}
               style={MENU_PANEL_STYLE}

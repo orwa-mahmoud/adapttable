@@ -152,6 +152,8 @@ function Popover({
   part,
   className,
   style,
+  dir,
+  "aria-label": label,
 }: Readonly<KitPopoverProps>) {
   const id = useId();
   const [shown, set] = usePopoverState(open, onOpenChange);
@@ -167,6 +169,9 @@ function Popover({
       {shown ? (
         <div
           id={id}
+          role={role}
+          aria-label={label}
+          dir={dir}
           data-adapttable-part={part}
           className={className}
           style={style}

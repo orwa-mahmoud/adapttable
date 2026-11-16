@@ -570,8 +570,6 @@ export function createColumnMenu(
         )}
       >
         <div
-          role="group"
-          aria-label={labels.columns}
           dir={dir}
           style={{
             ...look.panel,

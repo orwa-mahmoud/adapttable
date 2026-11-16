@@ -292,7 +292,14 @@ export function panelPopover(
     adjustX: 1,
     adjustY: flips ? 1 : 0,
   };
-  return function Popover({ trigger, children, open, onOpenChange, dir }) {
+  return function Popover({
+    trigger,
+    children,
+    open,
+    onOpenChange,
+    dir,
+    "aria-label": label,
+  }) {
     "use no memo";
     return (
       <AntPopover
@@ -301,7 +308,11 @@ export function panelPopover(
         onOpenChange={onOpenChange}
         placement={dir === "rtl" ? "bottomLeft" : "bottomRight"}
         autoAdjustOverflow={overflow}
-        content={children}
+        content={
+          <div role="dialog" aria-label={label} dir={dir}>
+            {children}
+          </div>
+        }
         styles={NO_PADDING}
       >
         {/* antd toggles from its own trigger props. */}
