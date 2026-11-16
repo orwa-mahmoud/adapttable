@@ -158,16 +158,18 @@ export function rowMutationsTests(
               ),
             ],
           });
-          expect(buttonsNamed(/duplicate row/i)).toHaveLength(ROWS.length);
-          expect(buttonsNamed(/delete row/i)).toHaveLength(ROWS.length);
+          const duplicates = buttonsNamed(/duplicate row/i);
+          const deletes = buttonsNamed(/delete row/i);
+          expect(duplicates).toHaveLength(ROWS.length);
+          expect(deletes).toHaveLength(ROWS.length);
           const first = screen.getAllByRole("row")[1]!;
           const names = [...first.querySelectorAll("button")].map(
             (b) => b.getAttribute("aria-label") ?? b.textContent
           );
           expect(names).toEqual(["Open", "Duplicate row", "Delete row"]);
-          fireEvent.click(buttonsNamed(/duplicate row/i)[1]!);
+          fireEvent.click(duplicates[1]!);
           expect(onDuplicateRow).toHaveBeenCalledWith(ROWS[1]);
-          fireEvent.click(buttonsNamed(/delete row/i)[0]!);
+          fireEvent.click(deletes[0]!);
           expect(confirm).toHaveBeenCalledTimes(1);
           expect(onDeleteRow).toHaveBeenCalledWith(ROWS[0]);
           confirm.mockRestore();
