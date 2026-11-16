@@ -203,7 +203,7 @@ describe("built native packages at the minimum Vue runtime", () => {
   });
 });
 
-it("keeps equivalent selection owners live and retires replaced rows and disposed scopes", () => {
+it("keeps a drawn row's selection control across a data write and freezes it when the scope stops", () => {
   const scope = effectScope();
   const row = { id: "1", name: "Ada" };
   const rows = shallowRef([row]);
@@ -219,6 +219,8 @@ it("keeps equivalent selection owners live and retires replaced rows and dispose
     original.onChange();
     expect([...selected.selectedIds.value]).toEqual([]);
     rows.value = [{ ...row }];
+    original.onChange();
+    expect([...selected.selectedIds.value]).toEqual(["1"]);
     original.onChange();
     expect([...selected.selectedIds.value]).toEqual([]);
     const live = selected.rowCheckboxAttrs("1");

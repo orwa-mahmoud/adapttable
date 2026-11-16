@@ -13,6 +13,7 @@ import {
   shallowReadonly,
   type ShallowRef,
   shallowRef,
+  toRaw,
   toValue,
   watch,
 } from "vue";
@@ -40,10 +41,12 @@ export function useOptionFields<T extends object>(
   watch(
     source,
     (next) => {
-      for (const key of Object.keys(fields))
+      // The raw record, so this sync watch does not subscribe to the fields it writes.
+      const current = toRaw(fields);
+      for (const key of Object.keys(current))
         if (!Object.hasOwn(next, key)) Reflect.deleteProperty(fields, key);
       for (const [key, value] of Object.entries(next))
-        if (!Object.is(Reflect.get(fields, key), value))
+        if (!Object.is(Reflect.get(current, key), value))
           Reflect.set(fields, key, value);
     },
     { flush: "sync" }
