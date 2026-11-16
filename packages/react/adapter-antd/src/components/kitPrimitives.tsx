@@ -263,6 +263,75 @@ const PANEL: CSSProperties = {
   borderRadius: 8,
 };
 
+/**
+ * The platform's own non-modal dialog element, with its default box reset so
+ * the kit's popup draws it as before.
+ */
+export const INLINE_DIALOG: CSSProperties = {
+  position: "static",
+  inset: "auto",
+  width: "auto",
+  height: "auto",
+  maxWidth: "none",
+  maxHeight: "none",
+  margin: 0,
+  padding: 0,
+  border: 0,
+  background: "transparent",
+  color: "inherit",
+};
+
+/** What a dropdown panel draws around its content. */
+interface PanelOptions extends Pick<
+  KitPopoverProps,
+  "role" | "dir" | "className" | "part" | "style" | "flush" | "children"
+> {
+  readonly ariaLabel: string | undefined;
+}
+
+/**
+ * The dropdown's popup: a menu's list as it is, any other panel as a dialog.
+ *
+ * @param options - The panel's role, direction, label, class, part and look.
+ * @returns The dropdown's `popupRender`.
+ */
+function panelOf({
+  role,
+  dir,
+  ariaLabel,
+  className,
+  part,
+  style,
+  flush,
+  children,
+}: PanelOptions): () => ReactElement {
+  const box: CSSProperties = { ...PANEL, padding: flush ? 0 : 8, ...style };
+  return function Panel() {
+    return role === "menu" ? (
+      <div
+        dir={dir}
+        aria-label={ariaLabel}
+        className={className}
+        data-adapttable-part={part}
+        style={box}
+      >
+        {children}
+      </div>
+    ) : (
+      <dialog
+        open
+        dir={dir}
+        aria-label={ariaLabel}
+        className={className}
+        data-adapttable-part={part}
+        style={{ ...INLINE_DIALOG, ...box }}
+      >
+        {children}
+      </dialog>
+    );
+  };
+}
+
 /** A panel opened from its trigger, as antd's dropdown. */
 export function Popover({
   trigger,
@@ -288,18 +357,16 @@ export function Popover({
       trigger={["click"]}
       open={shown}
       onOpenChange={setShown}
-      popupRender={() => (
-        <div
-          role={role === "menu" ? undefined : "dialog"}
-          dir={dir}
-          aria-label={ariaLabel}
-          className={className}
-          data-adapttable-part={part}
-          style={{ ...PANEL, padding: flush ? 0 : 8, ...style }}
-        >
-          {children}
-        </div>
-      )}
+      popupRender={panelOf({
+        role,
+        dir,
+        ariaLabel,
+        className,
+        part,
+        style,
+        flush,
+        children,
+      })}
     >
       {/* antd toggles from its own trigger props; the binding's click
           handler has nothing left to do. */}

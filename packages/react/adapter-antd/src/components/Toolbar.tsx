@@ -19,7 +19,7 @@ import {
   Select,
   Spin,
 } from "antd";
-import { createContext, forwardRef, useContext } from "react";
+import { createContext, forwardRef, useContext, useMemo } from "react";
 
 import { FiltersIcon, SearchIcon } from "../icons";
 
@@ -201,10 +201,13 @@ export function Toolbar<TRow>({
   isRefreshing,
   ...props
 }: Readonly<ToolbarProps<TRow>>) {
+  const label = props.table.labels.loading;
+  const refreshing = useMemo(
+    () => ({ busy: isRefreshing, label }),
+    [isRefreshing, label]
+  );
   return (
-    <Refreshing.Provider
-      value={{ busy: isRefreshing, label: props.table.labels.loading }}
-    >
+    <Refreshing.Provider value={refreshing}>
       <KitToolbar {...props} />
     </Refreshing.Provider>
   );

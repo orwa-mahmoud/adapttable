@@ -33,7 +33,7 @@ import {
   type ReactElement,
 } from "react";
 
-import { Text as KitText, TextInput } from "./kitPrimitives";
+import { INLINE_DIALOG, Text as KitText, TextInput } from "./kitPrimitives";
 
 /** The shared Columns-menu contract, declared once in core. */
 export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow>;
@@ -309,9 +309,9 @@ export function panelPopover(
         placement={dir === "rtl" ? "bottomLeft" : "bottomRight"}
         autoAdjustOverflow={overflow}
         content={
-          <div role="dialog" aria-label={label} dir={dir}>
+          <dialog open aria-label={label} dir={dir} style={INLINE_DIALOG}>
             {children}
-          </div>
+          </dialog>
         }
         styles={NO_PADDING}
       >

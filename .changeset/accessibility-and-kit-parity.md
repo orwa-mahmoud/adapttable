@@ -36,3 +36,4 @@ Every kit exposes the same structure and accessibility.
 - Closing a dialog or the filters drawer returns focus to the control that opened it in every Angular kit, including after the browser drops focus onto the page; `watchClickedOpener` on `@adapttable/core/binding` and `@adapttable/angular/adapter` records that control.
 - The Filters button carries `data-adapttable-part="filters-button"` and `data-active` while open in every kit.
 - Escape closes a native row actions menu and returns focus to its trigger in the React unstyled, Angular unstyled and Angular Aria kits, as it does in Vue.
+- Ant Design's dropdown panels and column menu draw as the platform's non-modal dialog element.
