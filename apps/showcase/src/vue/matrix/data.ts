@@ -101,8 +101,8 @@ const CELL_STACK = {
 /**
  * The people columns, drawn with the kit's own cells: the person with an
  * avatar over their role, the status as the kit's tag, the load as its
- * progress bar over the caption; the timeline's start over its due date and
- * the budget in tabular figures, as every framework draws them. With `editable`, the columns open editors.
+ * progress bar over the caption; the email muted, the timeline's start over its
+ * due date and the budget in tabular figures, as every framework draws them. With `editable`, the columns open editors.
  *
  * @param cells - The kit's status, avatar and progress cells.
  * @param options - `editable`.
@@ -161,6 +161,17 @@ export function peopleColumns(
               h("small", { style: { opacity: 0.6, fontSize: "0.82em" } }, end),
             ]);
           },
+        };
+      }
+      if (column.key === "email") {
+        return {
+          ...column,
+          cell: ({ value }: { value: unknown }) =>
+            h(
+              "span",
+              { style: { opacity: 0.7, fontSize: "0.9em" } },
+              String(value)
+            ),
         };
       }
       if (column.key === "budget") {

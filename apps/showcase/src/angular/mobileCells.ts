@@ -1,7 +1,7 @@
 /**
- * Shared data, plus the two cells no kit draws differently: the timeline's
- * start over its due date, and the budget in tabular figures. Each selected kit
- * owns its avatar, tag and progress markup.
+ * Shared data, plus the cells no kit draws differently: the email muted, the
+ * timeline's start over its due date, and the budget in tabular figures. Each
+ * selected kit owns its avatar, tag and progress markup.
  */
 import {
   ChangeDetectionStrategy,
@@ -18,6 +18,46 @@ import {
   timelineLines,
 } from "../shared/peopleTable";
 import { SHOWCASE_PRESENTATION } from "./data";
+
+/**
+ * The person cell's layout every kit shares: the avatar beside the name over
+ * the role, on one line in a table column and in a card. A long name wraps
+ * inside its own block.
+ */
+export const PERSON_CELL_STYLES = `
+    :host {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+    }
+    :host > :first-child {
+      flex-shrink: 0;
+    }
+    .identity {
+      min-width: 0;
+      flex: 1 1 auto;
+      overflow-wrap: anywhere;
+    }
+    small {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 400;
+      margin-top: 0.125rem;
+    }
+    .avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 40px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: color-mix(in srgb, currentColor 8%, transparent);
+      font-size: 0.875rem;
+    }
+  `;
 
 @Directive()
 export abstract class ShowcaseMobileCellModel {
@@ -91,3 +131,17 @@ export class ShowcaseTimeline extends ShowcaseMobileCellModel {}
   `,
 })
 export class ShowcaseBudget extends ShowcaseMobileCellModel {}
+
+/** The email cell, muted beside the person it belongs to. */
+@Component({
+  selector: "adapt-demo-email",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `{{ value() }}`,
+  styles: `
+    :host {
+      opacity: 0.7;
+      font-size: 0.9em;
+    }
+  `,
+})
+export class ShowcaseEmail extends ShowcaseMobileCellModel {}

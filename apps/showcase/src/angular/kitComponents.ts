@@ -41,7 +41,7 @@ import {
 } from "@angular/core";
 
 import type { ConnectionFieldProps } from "./connectionField";
-import { ShowcaseBudget, ShowcaseTimeline } from "./mobileCells";
+import { ShowcaseBudget, ShowcaseEmail, ShowcaseTimeline } from "./mobileCells";
 import { SHOWCASE_DARK, SHOWCASE_KIT } from "./showcaseKit";
 
 /** The demo's table inputs, forwarded reactively to its actual kit table. */
@@ -78,7 +78,8 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         if (column.cell) return column;
         // The people columns read as the kit draws them on every page: the
         // person over their role, the status as a tag, the load as a bar,
-        // the timeline's start over its due date, the budget in tabular figures.
+        // the email muted, the timeline's start over its due date, the budget in
+        // tabular figures.
         if (column.key === "person")
           return { ...column, cell: this.kit.personCell };
         if (column.key === "status")
@@ -88,6 +89,7 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         if (column.key === "timeline")
           return { ...column, cell: ShowcaseTimeline };
         if (column.key === "budget") return { ...column, cell: ShowcaseBudget };
+        if (column.key === "email") return { ...column, cell: ShowcaseEmail };
         return column;
       });
     return decorate(this.columns());

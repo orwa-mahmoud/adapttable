@@ -2,7 +2,7 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core";
 import { ProgressbarModule } from "ngx-bootstrap/progressbar";
 
-import { ShowcaseMobileCellModel } from "../mobileCells";
+import { PERSON_CELL_STYLES, ShowcaseMobileCellModel } from "../mobileCells";
 
 @Component({
   selector: "adapt-demo-ngxbootstrap-person",
@@ -13,40 +13,7 @@ import { ShowcaseMobileCellModel } from "../mobileCells";
       ><strong>{{ name() }}</strong
       ><small>{{ role() }}</small></span
     >`,
-  styles: `
-    :host {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.75rem;
-      min-width: 0;
-    }
-    :host > :first-child {
-      flex-shrink: 0;
-    }
-    .identity {
-      min-width: 0;
-      flex: 1 1 8rem;
-      overflow-wrap: anywhere;
-    }
-    small {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 400;
-      margin-top: 0.125rem;
-    }
-    .avatar {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex: 0 0 40px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: color-mix(in srgb, currentColor 8%, transparent);
-      font-size: 0.875rem;
-    }
-  `,
+  styles: PERSON_CELL_STYLES,
 })
 export class ShowcasePerson extends ShowcaseMobileCellModel {}
 
