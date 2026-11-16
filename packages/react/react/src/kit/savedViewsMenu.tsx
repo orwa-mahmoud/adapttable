@@ -17,9 +17,10 @@ import {
 import type { SavedViewsSlotProps } from "../features/slotKeys";
 import { useEscapeClose } from "../overlays/useEscapeClose";
 import { useSavedViews } from "../url/useSavedViews";
+import { anchoredTrigger } from "./anchoredTrigger";
 import { spaceBelow } from "./panelHeight";
 import { type KitUsePartClass, noPartClass } from "./partClass";
-import type { KitPrimitivesOf, KitTriggerProps } from "./primitives";
+import type { KitPrimitivesOf } from "./primitives";
 
 /**
  * The spacing that keeps the saved-views menu in a kit's own rhythm.
@@ -106,22 +107,13 @@ export function createSavedViewsMenu(
         placement="bottom-start"
         flush
         aria-label={labels.savedViews}
-        trigger={({ elementRef, ...trigger }: KitTriggerProps) => (
-          <Button
-            {...trigger}
-            elementRef={(node: HTMLButtonElement | null) => {
-              anchorRef.current = node;
-              if (typeof elementRef === "function") elementRef(node);
-              else if (elementRef) elementRef.current = node;
-            }}
-            variant="outlined"
-            aria-haspopup="true"
-            data-adapttable-part={VIEWS_PARTS.button}
-            data-active={open ? "" : undefined}
-          >
-            {labels.savedViews}
-          </Button>
-        )}
+        trigger={anchoredTrigger({
+          Button,
+          anchorRef,
+          part: VIEWS_PARTS.button,
+          open,
+          children: labels.savedViews,
+        })}
       >
         <div
           data-adapttable-part={VIEWS_PARTS.panel}

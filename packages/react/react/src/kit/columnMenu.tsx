@@ -40,10 +40,11 @@ import {
 } from "../columns/useColumnRenameEditor";
 import { useFeatureHost } from "../features/featureHostContext";
 import { useEscapeClose } from "../overlays/useEscapeClose";
+import { anchoredTrigger } from "./anchoredTrigger";
 import { type KitRenameFieldProps, RenameForm } from "./columnRename";
 import { spaceBelow } from "./panelHeight";
 import { type KitUsePartClass, noPartClass } from "./partClass";
-import type { KitPrimitivesOf, KitTriggerProps } from "./primitives";
+import type { KitPrimitivesOf } from "./primitives";
 
 /**
  * The spacing and colours that keep the Columns menu in a kit's own rhythm.
@@ -552,22 +553,13 @@ export function createColumnMenu(
         flush
         dir={dir}
         aria-label={labels.columns}
-        trigger={({ elementRef, ...trigger }: KitTriggerProps) => (
-          <Button
-            {...trigger}
-            elementRef={(node: HTMLButtonElement | null) => {
-              anchorRef.current = node;
-              if (typeof elementRef === "function") elementRef(node);
-              else if (elementRef) elementRef.current = node;
-            }}
-            variant="outlined"
-            aria-haspopup="true"
-            data-adapttable-part="column-menu-button"
-            data-active={open ? "" : undefined}
-          >
-            {labels.columns}
-          </Button>
-        )}
+        trigger={anchoredTrigger({
+          Button,
+          anchorRef,
+          part: "column-menu-button",
+          open,
+          children: labels.columns,
+        })}
       >
         <div
           dir={dir}

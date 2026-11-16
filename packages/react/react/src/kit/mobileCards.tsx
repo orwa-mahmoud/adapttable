@@ -25,6 +25,7 @@ import {
   resolveRowEditTrigger,
   rowEditConflict,
 } from "../editing/rowEditTrigger";
+import type { GroupHeaderCardSlotProps } from "../features/slotKeys";
 import {
   MobileCardsChrome,
   type MobileCardsChromeProps,
@@ -52,6 +53,28 @@ import {
 import { MobileTarget } from "./mobileTarget";
 import { type KitUsePartClass, noPartClass } from "./partClass";
 import type { KitDataAttributes } from "./primitives";
+
+/**
+ * The list's group header, footer and show-more card, drawn by the
+ * `GroupHeaderCard` feature slot with the table's grouping.
+ */
+function groupCardOf<TRow>(
+  shared: Pick<
+    GroupHeaderCardSlotProps<TRow>,
+    "columns" | "selection" | "labels" | "compact"
+  >
+): MobileCardSlotKit<TRow>["groupCard"] {
+  return function GroupCard(entry, grouping) {
+    return (
+      <OptionalGroupHeaderCard
+        entry={entry}
+        {...shared}
+        onToggleCollapse={(groupKey) => grouping.collapsed.toggle(groupKey)}
+        onShowMore={grouping.showMore}
+      />
+    );
+  };
+}
 
 /**
  * The regions of one card, built; the kit's frame places them.
@@ -476,17 +499,7 @@ export function createMobileCards<TExtra>(
       extraCell: kit.extraCell,
       extraProps: kit.extraProps,
       groupProps: kit.groupProps,
-      groupCard: (entry, grouping) => (
-        <OptionalGroupHeaderCard
-          entry={entry}
-          columns={columns}
-          selection={selection}
-          labels={labels}
-          compact={compact}
-          onToggleCollapse={(groupKey) => grouping.collapsed.toggle(groupKey)}
-          onShowMore={grouping.showMore}
-        />
-      ),
+      groupCard: groupCardOf<TRow>({ columns, selection, labels, compact }),
     });
     // Unlike the desktop footer, a card has no columns to keep aligned, so
     // columns without a summary are skipped.

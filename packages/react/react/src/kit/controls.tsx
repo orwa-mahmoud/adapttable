@@ -727,6 +727,31 @@ function headerSlots(kit: KitFilterHeader): FilterHeaderSlots {
   };
 }
 
+/** The header's multiple-choice trigger: the summary of what is chosen. */
+function multiTrigger(
+  Button: KitPrimitivesOf<"Button">["Button"],
+  label: string,
+  summary: string,
+  className: string | undefined
+): (trigger: KitTriggerProps) => ReactElement {
+  return function MultiTrigger(trigger) {
+    return (
+      <Button
+        {...trigger}
+        variant="outlined"
+        fullWidth
+        aria-label={label}
+        data-adapttable-part="filter-header-input"
+        className={className}
+        style={MULTI_TRIGGER}
+      >
+        <span style={ELLIPSIS}>{summary}</span>
+        <span aria-hidden>▾</span>
+      </Button>
+    );
+  };
+}
+
 /** The multiple choice as a list of checkboxes in the kit's popover. */
 function multiOf(
   Popover: KitPrimitivesOf<"Popover">["Popover"],
@@ -747,20 +772,7 @@ function multiOf(
         role="menu"
         part="filter-header-menu"
         className={menuClassName}
-        trigger={(trigger) => (
-          <Button
-            {...trigger}
-            variant="outlined"
-            fullWidth
-            aria-label={label}
-            data-adapttable-part="filter-header-input"
-            className={className}
-            style={MULTI_TRIGGER}
-          >
-            <span style={ELLIPSIS}>{summary}</span>
-            <span aria-hidden>▾</span>
-          </Button>
-        )}
+        trigger={multiTrigger(Button, label, summary, className)}
       >
         <div style={MULTI_LIST}>
           {options.map((option) => (
