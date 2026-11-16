@@ -25,6 +25,7 @@ import {
   defineComponent,
   h,
   onScopeDispose,
+  type PropType,
   shallowRef,
   type VNodeChild,
   watch,
@@ -307,7 +308,14 @@ const GroupingPanelSurface = /*#__PURE__*/ defineComponent(
       });
     };
   },
-  { props: ["model"] }
+  {
+    props: {
+      model: {
+        type: Object as PropType<GroupingPanelChromeProps<unknown>>,
+        required: true,
+      },
+    },
+  }
 );
 /**
  * The surface as `h` takes it at every supported Vue: below 3.5's later
