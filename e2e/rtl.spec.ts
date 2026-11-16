@@ -85,7 +85,9 @@ for (const kit of builtAdapters("angular")) {
       }) => {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(`/${path}/?locale=ar&dir=rtl`);
-        const roots = demo(page).locator('[data-adapttable-part="root"]');
+        // Matrix pages draw in `.mx-demo`; the assistant page draws in its stage.
+        const stage = page.locator(".mx-demo, .ai-demo__stage");
+        const roots = stage.locator('[data-adapttable-part="root"]');
         await expect(roots.first()).toBeVisible();
         // The nested destination opens its first child by default: assert both
         // roots so removing the child's presentation binding cannot go green.
@@ -96,7 +98,7 @@ for (const kit of builtAdapters("angular")) {
           await expect(roots.nth(index)).toHaveAttribute("dir", "rtl");
           await expect(roots.nth(index)).toHaveCSS("direction", "rtl");
         }
-        const search = demo(page).locator('[data-adapttable-part="search"]');
+        const search = stage.locator('[data-adapttable-part="search"]');
         if (!path.endsWith("/pivot")) {
           await expect(search.first()).toHaveAccessibleName(locales.ar.search);
           await expect(search.first()).toHaveAttribute(
