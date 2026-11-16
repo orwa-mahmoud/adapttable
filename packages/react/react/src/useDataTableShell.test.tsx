@@ -16,6 +16,7 @@ import { columnMenu, resizableColumns, savedViews } from "./features/factories";
 import { useTableFeatures } from "./features/featureHost";
 import { filters } from "./features/filters";
 import { grouping } from "./features/grouping";
+import { groupingPanel } from "./features/grouping-panel";
 import { FeatureProviders } from "./features/providers";
 import { rowActions } from "./features/row-actions";
 import { rowPinning } from "./features/row-pinning";
@@ -900,5 +901,27 @@ describe("a render that changes nothing about the columns", () => {
     );
     expect(seen.length).toBeGreaterThan(1);
     expect(seen.at(-1)).toBe(first);
+  });
+});
+
+describe("grouping panel on the finished shell", () => {
+  it("shows a plain groupAggregates mapper as set by the app", () => {
+    const { current } = renderLiveShell([grouping("name"), groupingPanel()], {
+      columns: [
+        { key: "name", header: "Name" },
+        { key: "id", header: "Id" },
+      ],
+      groupBy: "name",
+      groupAggregates: (rows) => ({ id: rows.length }),
+    });
+    expect(current.groupingPanelProps?.state.aggregations.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          columnKey: "id",
+          origin: "host",
+          editable: false,
+        }),
+      ])
+    );
   });
 });

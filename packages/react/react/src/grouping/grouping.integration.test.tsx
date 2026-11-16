@@ -315,6 +315,42 @@ describe("grouping panel integration", () => {
     });
     expect(result.current.groupingPanel?.canSetAggregates).toBe(true);
   });
+
+  it("shows a plain groupAggregates mapper as owned by the app", () => {
+    const { result } = renderLiveChrome(
+      [grouping("team"), groupingPanel()],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          columns: [
+            { key: "team", header: "Team" },
+            { key: "name", header: "Name" },
+          ],
+          urlAdapter: createMemoryAdapter(""),
+          defaults: { limit: 10 },
+        });
+        return {
+          source,
+          columns: [
+            { key: "team", header: "Team" },
+            { key: "name", header: "Name" },
+          ],
+          rowKey: (row) => row.id,
+          groupBy: "team",
+          groupAggregates: (rows) => ({ name: rows.length }),
+        };
+      }
+    );
+    expect(result.current.groupingPanel?.aggregations.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          columnKey: "name",
+          origin: "host",
+          editable: false,
+        }),
+      ])
+    );
+  });
 });
 
 describe("incremental totals follow effective aggregation config", () => {

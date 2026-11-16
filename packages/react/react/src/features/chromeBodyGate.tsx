@@ -68,6 +68,19 @@ function PlainChromeBody<TRow>({
 }
 
 /**
+ * The shell snapshots the panel before grouping has computed its cells.
+ * The extras overlay is the panel those cells belong on.
+ */
+function withGroupingPanel<TRow>(
+  shell: DataTableShellResult<TRow>,
+  panel: DataTableShellResult<TRow>["chrome"]["groupingPanel"]
+): DataTableShellResult<TRow> {
+  const props = shell.groupingPanelProps;
+  if (!props || !panel || props.state === panel) return shell;
+  return { ...shell, groupingPanelProps: { ...props, state: panel } };
+}
+
+/**
  * Finish a shell with extras, the in-tree chrome-body path, and live
  * interaction hooks.
  *
@@ -95,7 +108,10 @@ export function DataTableShellView<TRow>({
             props={withHistory.chromeProps}
           >
             {(chrome) => {
-              const withExtras = overlayChromeExtras(withHistory, chrome);
+              const withExtras = withGroupingPanel(
+                overlayChromeExtras(withHistory, chrome),
+                chrome.groupingPanel
+              );
               const afterBody = (view: DataTableShellResult<TRow>) => (
                 <ShellLiveGate shell={view}>{children}</ShellLiveGate>
               );
