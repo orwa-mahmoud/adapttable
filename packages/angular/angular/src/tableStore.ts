@@ -1,6 +1,6 @@
 /** The table's one store, for every part of an Angular table that keeps state. */
 import type { TableStore } from "@adapttable/core/binding";
-import { InjectionToken,type Injector } from "@angular/core";
+import { InjectionToken, type Injector } from "@angular/core";
 
 /**
  * The store of the table being rendered: its URL view state, selection,
