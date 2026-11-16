@@ -5,6 +5,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   waitForElementToBeRemoved,
 } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
@@ -170,9 +171,15 @@ describe("<DataTable> (Chakra) coverage-fill", () => {
       timeout: 5000,
     });
     // Escape runs the drawer's `onOpenChange({ open: false })` → `onClose`
-    // (distinct from the Cancel button, which calls `onClose` directly).
-    fireEvent.keyDown(document.body, { key: "Escape" });
-    await waitForElementToBeRemoved(body);
+    // (distinct from the Cancel button, which calls `onClose` directly). The
+    // drawer starts listening for Escape a frame after it opens.
+    await waitFor(
+      () => {
+        fireEvent.keyDown(document.body, { key: "Escape" });
+        expect(body).not.toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
     expect(screen.queryByText("filter body")).toBeNull();
   });
 
