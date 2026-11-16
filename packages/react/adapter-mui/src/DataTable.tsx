@@ -122,8 +122,13 @@ const kit: KitTable = {
       </Box>
     );
   },
-  skeleton: (rows, columns, labels) => (
-    <LoadingState rows={rows} columns={columns} loadingLabel={labels.loading} />
+  skeleton: (rows, columns, labels, shape) => (
+    <LoadingState
+      rows={rows}
+      columns={columns}
+      loadingLabel={labels.loading}
+      mobile={shape.mobile}
+    />
   ),
   empty: (labels, onClear) => (
     <Stack

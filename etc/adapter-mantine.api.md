@@ -454,6 +454,7 @@ export function TableSkeleton(input: Readonly<TableSkeletonProps>): JSX.Element;
 export interface TableSkeletonProps {
     columns: number;
     loadingLabel?: string;
+    mobile?: boolean;
     rows?: number;
 }
 

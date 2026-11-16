@@ -142,8 +142,13 @@ const kit: KitTable = {
   body: (view, headerOffset, props) => (
     <Body view={view} headerOffset={headerOffset} props={props} />
   ),
-  skeleton: (rows, columns, labels) => (
-    <LoadingState rows={rows} columns={columns} loadingLabel={labels.loading} />
+  skeleton: (rows, columns, labels, shape) => (
+    <LoadingState
+      rows={rows}
+      columns={columns}
+      loadingLabel={labels.loading}
+      mobile={shape.mobile}
+    />
   ),
   empty: (labels, onClear) =>
     onClear ? (

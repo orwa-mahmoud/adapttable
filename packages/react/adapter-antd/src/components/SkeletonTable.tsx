@@ -21,6 +21,7 @@ export function SkeletonTable({
   size,
   bordered,
   hasActions,
+  mobile = false,
 }: Readonly<{
   columnCount: number;
   rowCount: number;
@@ -28,6 +29,7 @@ export function SkeletonTable({
   size: "small" | "middle" | "large";
   bordered: boolean;
   hasActions?: boolean;
+  mobile?: boolean;
 }>) {
   const dataColumns = Math.max(columnCount, 1);
   const totalColumns = dataColumns + (hasActions ? 1 : 0);
@@ -49,15 +51,35 @@ export function SkeletonTable({
   const rows = Array.from({ length: rowCount }, (_, i) => ({
     key: `row-${i}`,
   }));
+  const cards = Array.from({ length: rowCount }, (_, row) => row);
   return (
-    <div role="status" aria-busy="true" aria-live="polite">
-      <Table
-        columns={skeletonColumns}
-        dataSource={rows}
-        pagination={false}
-        size={size}
-        bordered={bordered}
-      />
+    <div
+      role="status"
+      aria-busy="true"
+      aria-live="polite"
+      data-adapttable-part="loading"
+    >
+      {mobile ? (
+        <div data-adapttable-part="loading-cards">
+          {cards.map((row) => (
+            <div key={row} data-adapttable-part="loading-card">
+              {skeletonColumns.slice(0, 4).map((column) => (
+                <div key={column.key}>{column.render()}</div>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div data-adapttable-part="loading-table">
+          <Table
+            columns={skeletonColumns}
+            dataSource={rows}
+            pagination={false}
+            size={size}
+            bordered={bordered}
+          />
+        </div>
+      )}
       <span style={SR_ONLY}>{loadingLabel}</span>
     </div>
   );

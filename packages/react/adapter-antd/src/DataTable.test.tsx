@@ -190,6 +190,23 @@ describe("<DataTable> (Ant Design)", () => {
       override: { skeletonRows: 3 },
     });
     expect(container.querySelector(".ant-skeleton")).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-adapttable-part="loading-table"]')
+    ).not.toBeNull();
+  });
+
+  it("marks the loading cards when the table is in the card layout", () => {
+    const { container } = renderHarness({
+      rows: [],
+      isLoading: true,
+      override: { forceMobile: true, skeletonRows: 2 },
+    });
+    expect(
+      container.querySelector('[data-adapttable-part="loading-cards"]')
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-adapttable-part="loading-table"]')
+    ).toBeNull();
   });
 
   it("maps density='compact' to the small antd table", () => {

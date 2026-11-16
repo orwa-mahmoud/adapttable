@@ -471,12 +471,15 @@ describe("MUI coverage gaps", () => {
   it("renders the loading skeleton without a screen-reader label", () => {
     // DataTable always forwards labels.loading; render LoadingState directly to
     // exercise the `loadingLabel ? … : null` falsy branch in chrome.tsx.
-    const { rerender } = render(
+    const { container, rerender } = render(
       <ThemeProvider theme={theme}>
         <LoadingState rows={2} columns={3} loadingLabel="Loading…" />
       </ThemeProvider>
     );
     expect(screen.getByText("Loading…")).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-adapttable-part="loading-table"]')
+    ).not.toBeNull();
     rerender(
       <ThemeProvider theme={theme}>
         <LoadingState rows={2} columns={3} />
@@ -484,6 +487,17 @@ describe("MUI coverage gaps", () => {
     );
     expect(screen.getByTestId("adapttable-loading")).toBeInTheDocument();
     expect(screen.queryByText("Loading…")).toBeNull();
+    rerender(
+      <ThemeProvider theme={theme}>
+        <LoadingState rows={2} columns={3} mobile />
+      </ThemeProvider>
+    );
+    expect(
+      container.querySelector('[data-adapttable-part="loading-cards"]')
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-adapttable-part="loading-table"]')
+    ).toBeNull();
   });
 });
 

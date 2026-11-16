@@ -13,6 +13,7 @@
 "@adapttable/ng-bootstrap": patch
 "@adapttable/ng-zorro": patch
 "@adapttable/ngx-bootstrap": patch
+"@adapttable/radix": patch
 "@adapttable/react": minor
 "@adapttable/reka-ui": patch
 "@adapttable/shadcn": patch
@@ -31,3 +32,4 @@ Every kit exposes the same structure and accessibility.
 - `watchOverlayDismiss` and `usePointerDismiss` take `OverlayDismissOptions`; an Escape an input method is composing with, or that an earlier handler took, no longer closes an overlay. The MUI, Mantine and Ant Design filters popovers ignore the press that opened them, close on touch, and hand focus back to the Filters button after Escape.
 - Ctrl/Cmd+F opens Ant Design's find bar only when `findInTable` is set; Spartan's fill handle is outside the tab order; Reka UI's and shadcn-vue's `contextMenu()` take `true` or `false`; ng-zorro's saved-views menu types its direction as `Direction`.
 - The columns menu has one accessible name in the React kits.
+- The loading placeholder exposes `loading` with `loading-table` or `loading-cards` in MUI, Chakra, Ant Design, Radix, Base UI and Mantine.

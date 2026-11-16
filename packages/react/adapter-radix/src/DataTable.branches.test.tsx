@@ -209,6 +209,26 @@ describe("chrome.tsx branches", () => {
     expect(screen.getByRole("status")).toBeInTheDocument();
     // No loadingLabel → the VisuallyHidden node is not rendered.
     expect(container.textContent).toBe("");
+    expect(
+      container.querySelector('[data-adapttable-part="loading-table"]')
+    ).not.toBeNull();
+  });
+
+  it("LoadingState marks cards when the table is in the card layout", () => {
+    const { container } = render(
+      <Theme>
+        <LoadingState rows={2} columns={2} mobile />
+      </Theme>
+    );
+    expect(
+      container.querySelector('[data-adapttable-part="loading-cards"]')
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-adapttable-part="loading-card"]')
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-adapttable-part="loading-table"]')
+    ).toBeNull();
   });
 
   it("opens the filter drawer in RTL drawer mode (dir 'rtl' arm)", async () => {

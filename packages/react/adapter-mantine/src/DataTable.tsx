@@ -150,11 +150,12 @@ const kit: KitTable = {
   body: (view, headerOffset, props) => (
     <Body view={view} headerOffset={headerOffset} props={props} />
   ),
-  skeleton: (rows, columns, labels) => (
+  skeleton: (rows, columns, labels, shape) => (
     <TableSkeleton
       columns={columns || 1}
       rows={rows}
       loadingLabel={labels.loading}
+      mobile={shape.mobile}
     />
   ),
   empty: (labels, onClear) =>

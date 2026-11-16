@@ -250,10 +250,25 @@ describe("TableSkeleton", () => {
   });
 
   it("renders the loading label when asked", () => {
-    renderMantine(
+    const { container } = renderMantine(
       <TableSkeleton columns={2} rows={2} loadingLabel={labels.loading} />
     );
     expect(screen.getByText(labels.loading)).toBeVisible();
+    expect(
+      container.querySelector('[data-adapttable-part="loading-table"]')
+    ).toBeInTheDocument();
+  });
+
+  it("renders card placeholders when the body will be cards", () => {
+    const { container } = renderMantine(
+      <TableSkeleton columns={2} rows={2} mobile />
+    );
+    expect(
+      container.querySelector('[data-adapttable-part="loading-cards"]')
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-adapttable-part="loading-table"]')
+    ).toBeNull();
   });
 });
 

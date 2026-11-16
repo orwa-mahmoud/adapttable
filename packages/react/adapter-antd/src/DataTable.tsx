@@ -1172,6 +1172,8 @@ function AntdGroupingWindow<TRow>({
 /** Props shared by mobile and desktop body regions. */
 interface DataTableBodyRegionProps<TRow> {
   chromeBody: string;
+  /** The placeholder is cards when the table itself is in the card layout. */
+  mobile: boolean;
   /** The load failure to show instead of the body, when there is one. */
   errorState?: TableErrorState;
   source: TableSource<TRow>;
@@ -1650,6 +1652,7 @@ function DataTableBodyRegion<TRow>(
     gridFocus,
     tableRef,
     chromeBody,
+    mobile,
     errorState,
     source,
     editingRows,
@@ -1726,6 +1729,7 @@ function DataTableBodyRegion<TRow>(
         size={size}
         bordered={bordered}
         hasActions={hasRowActions}
+        mobile={mobile}
       />
     );
   } else if (chromeBody === "empty") {
@@ -2559,6 +2563,7 @@ function AntdTableBody<TRow>({
                 gridFocus={gridFocus}
                 tableRef={rowScroll.table}
                 chromeBody={c.body}
+                mobile={c.isMobile}
                 errorState={c.errorState}
                 source={source}
                 editingRows={c.editingRows}
