@@ -237,7 +237,7 @@ export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>,
 // @public
 export interface DataTableSlots {
     empty?: ReactNode;
-    error?: Slot<TableErrorState>;
+    error?: Exclude<Slot<TableErrorState>, undefined>;
     noResults?: ReactNode;
     skeleton?: ReactNode;
 }

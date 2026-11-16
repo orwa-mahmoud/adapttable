@@ -4765,7 +4765,9 @@ export { splitRelativeToken }
 // @public
 export interface StandardFeatureOptions<TRow> {
     readonly bulkActions?: readonly BulkAction[];
-    readonly filters?: readonly FilterDef<TRow>[];
+    readonly filters?: readonly (FilterDef<TRow> & {
+        readonly getValue?: (row: TRow) => unknown;
+    })[];
     readonly findButton?: boolean;
     readonly grouping?: string | readonly string[];
     readonly savedViews?: UseSavedViewsOptions;
