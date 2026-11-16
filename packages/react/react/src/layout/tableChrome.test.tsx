@@ -66,7 +66,7 @@ function Desktop({
       renderLeaf={(leaf) => <th key={leaf.column.key}>{leaf.caption}</th>}
       renderRow={(slot) =>
         slot.kind === "row" ? (
-          <tr {...slot.wiring.rowDomProps}>
+          <tr key={slot.key} {...slot.wiring.rowDomProps}>
             <td>{slot.wiring.row.name}</td>
           </tr>
         ) : null
