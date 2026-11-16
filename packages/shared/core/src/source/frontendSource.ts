@@ -326,7 +326,7 @@ export function createFrontendSourceWith<TRow>(
    * changes, so the other entries stay; any other new array may carry rows
    * the host changed in place, so the cache starts again.
    */
-  function useSearchCacheFor(rows: readonly TRow[]): void {
+  function pointSearchCacheAt(rows: readonly TRow[]): void {
     if (rows === searchCacheData) return;
     const log = rowPatchLog(rows);
     const patched =
@@ -446,7 +446,7 @@ export function createFrontendSourceWith<TRow>(
   ): FrontendSourceFrame<TRow> {
     getRowId = config.getRowId ?? defaultFrontendRowId;
     getSearchText = config.getSearchText ?? defaultSearchText;
-    useSearchCacheFor(config.data);
+    pointSearchCacheAt(config.data);
     const table = engineOf(config, view);
     const held = heldFrame(table);
 
