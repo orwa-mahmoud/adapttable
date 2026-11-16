@@ -13,6 +13,7 @@
 "@adapttable/nuxt-ui": patch
 "@adapttable/quasar": patch
 "@adapttable/react": patch
+"@adapttable/shadcn-vue": patch
 "@adapttable/spartan": patch
 "@adapttable/taiga-ui": patch
 "@adapttable/vue": minor
@@ -28,3 +29,4 @@ Editing, filtering and layout behave the same in every framework.
 - In Vue, Ctrl or Cmd+Z on a control inside a cell undoes the last committed edit; an open editor keeps its own keys.
 - React's grouping panel shows a group total the app computes as the app set it.
 - ngx-bootstrap's edit activator fills its cell, so a double-click anywhere in a wrapped row opens the editor.
+- An editable cell taller than one line grows its edit button instead of spilling past it in Angular Material, Vuetify and shadcn-vue.

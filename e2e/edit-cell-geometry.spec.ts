@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
-import { builtAdapters } from "../apps/showcase/matrix.mjs";
+import { builtAdapters, pageDirOf } from "../apps/showcase/matrix.mjs";
 
 /**
  * Opening a cell editor keeps the table's geometry: every column keeps its
@@ -121,5 +121,59 @@ for (const framework of ["react", "angular", "vue"] as const) {
         }
       });
     }
+  }
+}
+
+/**
+ * An editable cell's content stays inside its activator and its row: a person
+ * with an avatar over two lines grows the row instead of spilling onto the
+ * next one. Every kit's editing page, whose people cells are the tallest.
+ */
+for (const framework of ["react", "angular", "vue"] as const) {
+  for (const kit of builtAdapters(framework)) {
+    test(`${framework}/${kit.key} editing: an editable cell holds its whole content`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto(`/${pageDirOf(kit, "editing")}/`);
+      const first = page.locator(ACTIVATE).first();
+      await expect(first).toBeVisible();
+      const spills = await page.evaluate((selector) => {
+        const rows = [...document.querySelectorAll("tr")]
+          .filter((row) => row.querySelector(selector))
+          .slice(0, 3);
+        return rows.flatMap((row) =>
+          [...row.querySelectorAll<HTMLElement>(selector)].flatMap(
+            (activate) => {
+              const box = activate.getBoundingClientRect();
+              const frame = row.getBoundingClientRect();
+              // In-flow content only: a kit's touch target or ripple is an
+              // absolutely positioned layer, not something the cell shows.
+              const content = [...activate.querySelectorAll("*")]
+                .filter((node) => {
+                  const position = getComputedStyle(node).position;
+                  return position !== "absolute" && position !== "fixed";
+                })
+                .reduce(
+                  (bottom, node) =>
+                    Math.max(bottom, node.getBoundingClientRect().bottom),
+                  box.bottom
+                );
+              const key =
+                activate.closest("td")?.getAttribute("data-column-key") ?? "?";
+              return [
+                ...(content > box.bottom + 0.5
+                  ? [`${key}: content below its activator`]
+                  : []),
+                ...(content > frame.bottom + 0.5
+                  ? [`${key}: content below its row`]
+                  : []),
+              ];
+            }
+          )
+        );
+      }, ACTIVATE);
+      expect(spills).toEqual([]);
+    });
   }
 }

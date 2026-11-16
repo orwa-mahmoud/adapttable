@@ -50,6 +50,11 @@
 .adapttable-shadcn-vue :is(button, input, select, textarea) {
   font-family: inherit;
 }
+/* The button height is a floor: a cell taller than one line grows it. */
+.adapttable-shadcn-vue [data-adapttable-part="edit-cell-activate"] {
+  height: auto;
+  min-block-size: 2.25rem;
+}
 .adapttable-shadcn-vue [data-adapttable-part="scroll-box"]:focus-visible {
   outline: 2px solid var(--ring, #a1a1aa);
   outline-offset: 2px;
