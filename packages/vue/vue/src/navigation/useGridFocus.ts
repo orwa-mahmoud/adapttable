@@ -128,12 +128,13 @@ export function useGridFocus<TRow>(
   const keyDown = (event: KeyboardEvent): void => {
     if (event.defaultPrevented || event.isComposing || event.altKey) return;
     const target = event.target;
-    if (
-      target instanceof Element &&
-      target !== event.currentTarget &&
-      !target.matches("[data-grid-cell]")
-    )
-      return;
+    if (target instanceof Element && target !== event.currentTarget) {
+      // An open editor keeps its own keys. A control inside the cell — the
+      // activator a committed edit hands focus back to — is still the grid.
+      if (target.closest("input, textarea, select, [contenteditable='true']"))
+        return;
+      if (!target.closest("[data-grid-cell]")) return;
+    }
     run(() => controller.keyDown(event));
   };
   const syncFocus = (): void => {
