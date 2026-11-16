@@ -241,11 +241,11 @@ describe("native DataTable", () => {
       fixture.element.querySelector('[data-adapttable-part="empty-clear"]')
     ).toBeNull();
   });
-  it("only offers retry when the source has a real retry callback and preserves stale rows", async () => {
+  it("only offers retry when the source has a real retry callback and replaces the rows", async () => {
     const refetch = vi.fn();
     const fixture = mount({ error: new Error("network"), refetch });
     expect(fixture.element.querySelector('[role="alert"]')).not.toBeNull();
-    expect(fixture.element.querySelector("table")).not.toBeNull();
+    expect(fixture.element.querySelector("table")).toBeNull();
     await click(fixture.element, '[data-adapttable-part="retry-button"]');
     expect(refetch).toHaveBeenCalledTimes(1);
     fixture.props.value = { ...fixture.props.value, isFetching: true };

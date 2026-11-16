@@ -64,7 +64,7 @@ describe("server-rendered native states", () => {
     expect(html).toContain('data-adapttable-part="retry-button"');
     expect(html).toContain('data-adapttable-part="refresh-indicator"');
     expect(html).not.toContain('data-adapttable-part="load-more"');
-    expect(html).toContain("card-value");
+    expect(html).not.toContain("card-value");
     const ready = await renderToString(
       createSSRApp({
         render: () =>

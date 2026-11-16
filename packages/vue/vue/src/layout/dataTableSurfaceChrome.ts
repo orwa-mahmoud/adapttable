@@ -440,7 +440,9 @@ export const DataTableSurfaceChrome = /* @__PURE__ */ Object.assign(
             mobile: table.isMobile.value,
             panel: () => shell.renderSidePanel({ ...names }),
           },
-          { default: scroll }
+          {
+            default: table.errorState.value ? () => null : scroll,
+          }
         ),
         shell.renderActionOverlays({ ...names }),
         content.tableFooter

@@ -22,3 +22,5 @@ The Filters panel can hold only the AND/OR tree, opened on first paint: `[filter
 `scheduleTick` from `@adapttable/vue/adapter` runs work after Vue commits the DOM and rethrows its failure; every Vue kit and `@adapttable/ai-vue` use it.
 
 A custom mobile card supplied after a Vue table has mounted is drawn.
+
+A Vue table in an error state shows the alert and its retry action in place of the rows.

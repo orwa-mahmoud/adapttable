@@ -172,7 +172,8 @@ describe("native canonical semantic parts", () => {
         "role"
       )
     ).toBe("status");
-    expect(view.root.querySelector("tbody")?.textContent).toContain("Ada");
+    expect(view.root.querySelector("tbody")).toBeNull();
+    expect(view.root.querySelector('[role="alert"]')).not.toBeNull();
     const button = part(view.root, "retry-button", "BUTTON", "retry-class");
     expect(button.getAttribute("type")).toBe("button");
     expect(button.hasAttribute("disabled")).toBe(true);
