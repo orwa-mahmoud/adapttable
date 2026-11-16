@@ -82,6 +82,8 @@ function projectConfig(files) {
         "@adapttable/angular": [join(angular, "src", "index.ts")],
         "@adapttable/angular/features": [join(angular, "src", "features.ts")],
         "@adapttable/angular/adapter": [join(angular, "src", "adapter.ts")],
+        "@adapttable/angular/pdf": [join(angular, "src", "pdf.ts")],
+        "@adapttable/angular/xlsx": [join(angular, "src", "xlsx.ts")],
         "@adapttable/angular/*": [join(angular, "*", "index.ts")],
         ...angularKitSourcePaths(),
         "@adapttable/core": [join(core, "src", "index.ts")],

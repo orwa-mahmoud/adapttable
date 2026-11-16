@@ -163,6 +163,8 @@ describe("Angular showcase snippets compile", () => {
           "@adapttable/angular": [join(angular, "src", "index.ts")],
           "@adapttable/angular/features": [join(angular, "src", "features.ts")],
           "@adapttable/angular/adapter": [join(angular, "src", "adapter.ts")],
+          "@adapttable/angular/pdf": [join(angular, "src", "pdf.ts")],
+          "@adapttable/angular/xlsx": [join(angular, "src", "xlsx.ts")],
           "@adapttable/angular/*": [join(angular, "*", "index.ts")],
           ...angularKitSourcePaths(),
           "@adapttable/i18n": [join(i18n, "src", "index.ts")],

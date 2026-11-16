@@ -12,7 +12,13 @@
       "@adapttable/angular/features": ["./src/features.ts"],
       "@adapttable/angular/adapter": ["./src/adapter.ts"],
       "@adapttable/angular/pdf": ["./src/pdf.ts"],
-      "@adapttable/angular/xlsx": ["./src/xlsx.ts"]
+      "@adapttable/angular/xlsx": ["./src/xlsx.ts"],
+      "@adapttable/angular-unstyled": [
+        "../adapter-angular-unstyled/src/index.ts"
+      ],
+      "@adapttable/angular-unstyled/*": [
+        "../adapter-angular-unstyled/*/index.ts"
+      ]
     }
   },
   "angularCompilerOptions": {
