@@ -34,3 +34,4 @@ Every kit exposes the same structure and accessibility.
 - The columns menu has one accessible name in the React kits.
 - The loading placeholder exposes `loading` with `loading-table` or `loading-cards` in MUI, Chakra, Ant Design, Radix, Base UI and Mantine.
 - Closing a dialog or the filters drawer returns focus to the control that opened it in every Angular kit, including after the browser drops focus onto the page; `watchClickedOpener` on `@adapttable/core/binding` and `@adapttable/angular/adapter` records that control.
+- The Filters button carries `data-adapttable-part="filters-button"` and `data-active` while open in every kit.

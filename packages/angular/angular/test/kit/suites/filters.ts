@@ -247,8 +247,15 @@ export function filtersTests(
       });
 
       it("offers header funnels without the Filters button", async () => {
-        const { part, parts } = await mount([filters(), headerFilters()]);
+        const { element, part, parts } = await mount([
+          filters(),
+          headerFilters(),
+        ]);
         expect(part("filters-button")).not.toBeNull();
+        // The shared part name, beside any part name the kit keeps for itself.
+        expect(
+          element.querySelector('[data-adapttable-part="filters-button"]')
+        ).toBe(part("filters-button"));
         const headerOnly = await mount([headerFilters()]);
         expect(headerOnly.part("filters-button")).toBeNull();
         expect(parts("filter-header-trigger")).toHaveLength(0);

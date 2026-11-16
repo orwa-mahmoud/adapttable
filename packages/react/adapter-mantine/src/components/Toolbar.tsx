@@ -135,6 +135,7 @@ const FiltersButton = forwardRef(function FiltersButton(
       variant="default"
       size="sm"
       aria-expanded={expanded}
+      data-adapttable-part="filters-button"
       data-active={open || undefined}
       leftSection={<FiltersIcon size={16} />}
       rightSection={

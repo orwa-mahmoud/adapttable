@@ -107,6 +107,7 @@
               [attr.aria-expanded]="f.mode === 'popover' ? f.open() : null"
               [attr.data-active]="f.open() ? '' : null"
               (pointerdown)="f.pointerDown()"
+              data-adapttable-part="filters-button"
               (click)="f.click()"
             >
               <span data-taiga-part="filters-icon" style="display: inline-flex"

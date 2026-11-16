@@ -18,8 +18,6 @@ const KIT_SELECTORS: Readonly<Record<string, string>> = {
   "refresh-indicator": '[data-adapttable-part="root"] > nz-spin',
   "empty-clear": '[data-adapttable-part="empty"] button',
   "retry-button": "adapt-error-state button",
-  "filters-button":
-    'adapt-filter-popover > span > button, [data-adapttable-part="toolbar"] > button:not([data-adapttable-part])',
   "filters-icon": "adapt-filter-popover > span > button > span",
   "filters-count": "adapt-filter-popover nz-badge",
   "filters-anchor": "adapt-filter-popover > span",

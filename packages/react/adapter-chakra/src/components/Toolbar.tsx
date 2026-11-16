@@ -127,6 +127,7 @@ const FiltersButton = forwardRef<HTMLButtonElement, KitFiltersButtonProps>(
         variant="outline"
         colorPalette={accent}
         aria-expanded={expanded}
+        data-adapttable-part="filters-button"
         data-active={open || undefined}
         onPointerDown={onPointerDown}
         onClick={onClick}

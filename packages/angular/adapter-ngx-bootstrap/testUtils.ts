@@ -6,7 +6,6 @@ const INTERNAL_PARTS = new Set([
   "filters-anchor",
   "filters-backdrop",
   "filters-body",
-  "filters-button",
   "filters-clear",
   "filters-close",
   "filters-count",

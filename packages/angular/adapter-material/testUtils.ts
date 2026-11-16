@@ -4,7 +4,6 @@ const MATERIAL_INTERNALS = new Set([
   "filters-anchor",
   "filters-backdrop",
   "filters-body",
-  "filters-button",
   "filters-clear",
   "filters-close",
   "filters-count",

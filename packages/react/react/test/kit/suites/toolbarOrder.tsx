@@ -3,7 +3,7 @@ import {
   type ConformanceTest,
 } from "@adapttable/core/conformance";
 import { type ColumnDef } from "@adapttable/react";
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { expect, vi } from "vitest";
 
 import type { ReactKitUnderTest } from "../kit";
@@ -72,6 +72,30 @@ export function toolbarOrderTests(
           .filter((text) => wanted.includes(text));
 
         expect(seen).toEqual(wanted);
+      });
+      it("names the Filters button by its part and marks it while open", () => {
+        render(
+          <DataTable
+            data={rows}
+            columns={columns}
+            rowKey={(r) => r.id}
+            urlSync={false}
+            features={[filtersFeature<Row>([{ key: "name", type: "text" }])]}
+          />
+        );
+
+        const button = document.querySelector<HTMLElement>(
+          '[data-adapttable-part="filters-button"]'
+        );
+        expect(button).not.toBeNull();
+        expect(button?.textContent).toContain("Filters");
+        expect(button?.hasAttribute("data-active")).toBe(false);
+        fireEvent.click(button!);
+        expect(
+          document
+            .querySelector('[data-adapttable-part="filters-button"]')
+            ?.hasAttribute("data-active")
+        ).toBe(true);
       });
       it("draws Undo and Redo after Export and Print, like every kit", () => {
         render(
