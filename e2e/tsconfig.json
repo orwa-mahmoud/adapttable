@@ -5,7 +5,8 @@
     "allowJs": true,
     "checkJs": false,
     "paths": {
-      "@adapttable/core": ["../packages/shared/core/src/index.ts"]
+      "@adapttable/core": ["../packages/shared/core/src/index.ts"],
+      "@adapttable/core/*": ["../packages/shared/core/src/*.ts"]
     },
     "types": ["node"]
   },
