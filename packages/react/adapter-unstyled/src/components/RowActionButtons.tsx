@@ -4,7 +4,13 @@ import {
   type KitRowActionMenuProps,
   type KitRowActionProps,
 } from "@adapttable/react/adapter";
-import { type MouseEvent, type ReactNode, useRef } from "react";
+import {
+  type MouseEvent,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { useClassNames } from "./classNamesContext";
 import { iconForRowAction, MoreVerticalIcon } from "./icons";
@@ -47,7 +53,7 @@ function Strip({ children }: Readonly<{ children: ReactNode }>) {
   return children;
 }
 
-/** The actions in a native disclosure that closes once one is chosen. */
+/** The actions in a native disclosure that closes once one is chosen, or on Escape. */
 function Menu({
   label,
   minTargetSize,
@@ -56,12 +62,28 @@ function Menu({
   "use no memo";
   const classNames = useClassNames();
   const detailsRef = useRef<HTMLDetailsElement>(null);
+  const [open, setOpen] = useState(false);
+  // Escape closes the open menu wherever focus sits inside it, and hands focus
+  // back to the trigger, as this kit's other disclosures do.
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKeyDown = (event: KeyboardEvent) => {
+      const menu = detailsRef.current;
+      if (event.key !== "Escape" || !menu?.open) return;
+      event.preventDefault();
+      menu.open = false;
+      menu.querySelector("summary")?.focus();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
   return (
     <details
       ref={detailsRef}
       data-adapttable-part="row-actions-menu"
       className={classNames.rowActionsMenu}
       onPointerDown={(event) => event.stopPropagation()}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
     >
       <summary
         style={targetOf(minTargetSize)}

@@ -21,6 +21,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   type ElementRef,
   input,
   viewChild,
@@ -73,6 +74,20 @@ export class AdaptRowActions<TRow> {
 
   private readonly menu = viewChild<ElementRef<HTMLDetailsElement>>("menu");
 
+  constructor() {
+    // Captured: the Angular Aria menu inside the disclosure stops Escape
+    // before it bubbles to the disclosure.
+    effect((onCleanup) => {
+      const menu = this.menu()?.nativeElement;
+      if (!menu) return;
+      const onKey = (event: KeyboardEvent): void => {
+        if (event.key === "Escape") this.closeMenu(event, menu);
+      };
+      menu.addEventListener("keydown", onKey, true);
+      onCleanup(() => menu.removeEventListener("keydown", onKey, true));
+    });
+  }
+
   protected readonly items = computed(() =>
     visibleRowActions(this.actions(), this.row()).map((action) => {
       const reason = resolveDisabledReason(action.disabledReason?.(this.row()));
@@ -89,5 +104,14 @@ export class AdaptRowActions<TRow> {
     event.stopPropagation();
     this.menu()?.nativeElement.removeAttribute("open");
     runRowAction(action, this.row(), this.confirm(), this.labels().cancel);
+  }
+
+  /** Escape closes an open menu and hands focus back to its trigger. */
+  private closeMenu(event: Event, menu: HTMLDetailsElement): void {
+    if (!menu.open) return;
+    event.preventDefault();
+    event.stopPropagation();
+    menu.open = false;
+    menu.querySelector("summary")?.focus();
   }
 }

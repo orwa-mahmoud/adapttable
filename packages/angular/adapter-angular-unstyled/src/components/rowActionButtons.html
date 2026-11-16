@@ -16,6 +16,7 @@
       data-adapttable-part="row-actions-menu"
       [class]="classNames().rowActionsMenu"
       (pointerdown)="$event.stopPropagation()"
+      (keydown.escape)="closeMenu($event, menu)"
     >
       <summary
         data-adapttable-part="row-actions-trigger"

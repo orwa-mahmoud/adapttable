@@ -180,6 +180,24 @@ describe("the Angular Aria Angular row actions", () => {
     expect(menu.open).toBe(false);
   });
 
+  it("closes the menu on Escape and returns focus to its trigger", async () => {
+    const { part, settle } = await mount([
+      rowActions(actions, { layout: "menu" }),
+    ]);
+    const menu = part<HTMLDetailsElement>("row-actions-menu");
+    if (!menu) throw new Error("menu is not rendered");
+    menu.open = true;
+    const action = menu.querySelector("button");
+    if (!action) throw new Error("action is not rendered");
+    action.focus();
+    action.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+    );
+    await settle();
+    expect(menu.open).toBe(false);
+    expect(document.activeElement).toBe(menu.querySelector("summary"));
+  });
+
   it("lists the actions column in the Columns menu, and hides it", async () => {
     const { part, parts, settle } = await mount([
       rowActions(actions),
