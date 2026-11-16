@@ -143,5 +143,54 @@ export function mobileCardSlotTests(
         root.remove();
       }
     });
+
+    it("draws a custom mobile body that arrives after the table mounted", async () => {
+      const custom = shallowRef(false);
+      const root = document.createElement("div");
+      document.body.append(root);
+      const app = createApp({
+        setup() {
+          return () =>
+            h(
+              kit.DataTable,
+              {
+                data: [{ id: "a", name: "Ada", team: "Core" }],
+                columns: [
+                  { key: "name", header: "Full name" },
+                  { key: "team", header: "Team" },
+                ],
+                rowKey: (row: Row) => row.id,
+                forceMobile: true,
+                urlSync: false,
+              },
+              custom.value
+                ? {
+                    card: ({ fields }: CardContext) =>
+                      h(
+                        "section",
+                        { "data-custom-body": "" },
+                        fields.map((field) => field.label)
+                      ),
+                  }
+                : {}
+            );
+        },
+      });
+      kit.install?.(app);
+      try {
+        app.mount(root);
+        await nextTick();
+        expect(root.querySelector("[data-custom-body]")).toBeNull();
+        expect(root.textContent).toContain("Ada");
+        custom.value = true;
+        await nextTick();
+        expect(root.querySelector("[data-custom-body]")?.textContent).toContain(
+          "Full name"
+        );
+      } finally {
+        app.unmount();
+        root.remove();
+      }
+    });
   });
 }

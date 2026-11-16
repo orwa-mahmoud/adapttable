@@ -49,8 +49,10 @@ const emit = defineEmits<{
   "update:density": [density: TableDensity];
 }>();
 const slots = defineSlots<DataTableSlots<TRow>>();
+const card = shallowRef(slots.card);
 const footer = shallowRef(slots.footer);
 onBeforeUpdate(() => {
+  card.value = slots.card;
   footer.value = slots.footer;
 });
 const kit = useQuasarLibrary();
@@ -113,7 +115,7 @@ function controls(): TableChromeSlots<TRow> {
         );
       return renderFeatureSlot(GROUP_ROW, shell.slotFills.value, props);
     },
-    card: slots.card,
+    card: card.value,
     cell: slots.cell,
     header: slots.header,
     headerActions: slots.headerActions,

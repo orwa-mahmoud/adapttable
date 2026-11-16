@@ -62,8 +62,10 @@ const emit = defineEmits<{
   "update:density": [density: TableDensity];
 }>();
 const content = defineSlots<DataTableSlots<TRow>>();
+const card = shallowRef(content.card);
 const footer = shallowRef(content.footer);
 onBeforeUpdate(() => {
+  card.value = content.card;
   footer.value = content.footer;
 });
 const kit = useRekaLibrary();
@@ -164,7 +166,7 @@ function controls(): TableChromeSlots<TRow> {
         );
       return renderFeatureSlot(GROUP_ROW, shell.slotFills.value, control);
     },
-    card: content.card,
+    card: card.value,
     cell: content.cell,
     header: content.header,
     headerActions: content.headerActions,
