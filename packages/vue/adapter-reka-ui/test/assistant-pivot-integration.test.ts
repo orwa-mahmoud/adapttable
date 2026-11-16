@@ -109,7 +109,9 @@ it("uses a real assistant Dialog with one close request, nested menu Escape and 
   expect(close).toHaveBeenCalledTimes(3);
   expect(open.value).toBe(false);
   expect(launcher.isConnected).toBe(false);
-  expect(document.activeElement).toBe(element(part("assistant-launcher")));
+  await vi.waitFor(() =>
+    expect(document.activeElement).toBe(element(part("assistant-launcher")))
+  );
   expect(suggested).not.toHaveBeenCalled();
 });
 it("uses Reka Select for controlled pivot configuration and mounts the complete standard preset", async () => {

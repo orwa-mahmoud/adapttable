@@ -96,7 +96,7 @@ it("uses a real ElDrawer with one close request, nested dropdown Escape and cont
   expect(sheet.contains(item)).toBe(false);
   await key(item, "Escape");
   expect(open.value).toBe(true);
-  expect(document.activeElement).toBe(menu);
+  await vi.waitFor(() => expect(document.activeElement).toBe(menu));
   expect(close).toHaveBeenCalledTimes(1);
   await key(input, "Escape");
   expect(open.value).toBe(true);
@@ -106,7 +106,9 @@ it("uses a real ElDrawer with one close request, nested dropdown Escape and cont
   expect(close).toHaveBeenCalledTimes(3);
   expect(open.value).toBe(false);
   expect(launcher.isConnected).toBe(false);
-  expect(document.activeElement).toBe(element(part("assistant-launcher")));
+  await vi.waitFor(() =>
+    expect(document.activeElement).toBe(element(part("assistant-launcher")))
+  );
   expect(suggested).not.toHaveBeenCalled();
 });
 it("uses Element Plus selects for controlled pivot configuration and mounts the complete standard preset", async () => {
