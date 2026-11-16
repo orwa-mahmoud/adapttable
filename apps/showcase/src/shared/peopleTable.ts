@@ -282,8 +282,10 @@ export function peopleColumns(
     {
       key: "timeline",
       header: s.timeline,
-      accessor: (row) =>
-        `${formatDate(startDate(row), dataLocale)} → ${formatDate(dueDate(row), dataLocale)}`,
+      accessor: (row) => {
+        const { start, end } = timelineLines(row, dataLocale);
+        return `${start} ${end}`;
+      },
       sortValue: (row) => startDate(row).getTime(),
       // The month is the bucket a reader means when they group a timeline.
       groupValue: (row) => formatMonth(startDate(row), dataLocale),
@@ -553,6 +555,24 @@ export function loadCaption(row: Person, dataLocale: "ar" | "en"): string {
   // A summary row stands for many people and has no allocations of its own.
   const count = allocationCount(row);
   return Number.isFinite(count) ? `${percent} · ${String(count)}` : percent;
+}
+
+/**
+ * The Timeline cell's two lines: the start date, then the due date after an
+ * arrow, "Mar 8, 2026" over "→ Apr 12, 2026".
+ *
+ * @param row - The person.
+ * @param dataLocale - The language of the cell data.
+ * @returns The two lines.
+ */
+export function timelineLines(
+  row: Person,
+  dataLocale: "ar" | "en"
+): { readonly start: string; readonly end: string } {
+  return {
+    start: formatDate(startDate(row), dataLocale),
+    end: `→ ${formatDate(dueDate(row), dataLocale)}`,
+  };
 }
 
 /** A fresh copy of the people, for a page that edits or reorders them. */

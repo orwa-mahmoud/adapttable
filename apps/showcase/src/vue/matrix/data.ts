@@ -32,6 +32,7 @@ import {
   readShowcasePresentation,
   type StatusTone,
   statusTone,
+  timelineLines,
 } from "../../shared/peopleTable";
 
 export { fetchPeople, type PeoplePage, type PeopleParams } from "../../mockApi";
@@ -88,10 +89,20 @@ export interface PeopleCells {
   readonly progress?: (value: number, label: string) => VNodeChild;
 }
 
+/** Two lines stacked in one cell, as the React pages stack them. */
+const CELL_STACK = {
+  display: "inline-flex",
+  flexDirection: "column",
+  gap: "2px",
+  minWidth: 0,
+  lineHeight: 1.35,
+} as const;
+
 /**
  * The people columns, drawn with the kit's own cells: the person with an
  * avatar over their role, the status as the kit's tag, the load as its
- * progress bar over the caption. With `editable`, the columns open editors.
+ * progress bar over the caption; the timeline's start over its due date and
+ * the budget in tabular figures, as every framework draws them. With `editable`, the columns open editors.
  *
  * @param cells - The kit's status, avatar and progress cells.
  * @param options - `editable`.
@@ -138,6 +149,31 @@ export function peopleColumns(
               progress(utilization(row), s.load),
               h("small", loadCaption(row, dataLocale)),
             ]),
+        };
+      }
+      if (column.key === "timeline") {
+        return {
+          ...column,
+          cell: ({ row }: { row: Person }) => {
+            const { start, end } = timelineLines(row, dataLocale);
+            return h("span", { style: CELL_STACK }, [
+              h("strong", { style: { fontWeight: 550 } }, start),
+              h("small", { style: { opacity: 0.6, fontSize: "0.82em" } }, end),
+            ]);
+          },
+        };
+      }
+      if (column.key === "budget") {
+        return {
+          ...column,
+          cell: ({ value }: { value: unknown }) =>
+            h(
+              "span",
+              {
+                style: { fontVariantNumeric: "tabular-nums", fontWeight: 600 },
+              },
+              String(value)
+            ),
         };
       }
       return column;

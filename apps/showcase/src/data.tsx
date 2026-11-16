@@ -62,6 +62,7 @@ import {
   ORDER_COLUMNS,
   peopleColumns,
   personInitials,
+  timelineLines,
 } from "./shared/peopleTable";
 
 export {
@@ -417,16 +418,15 @@ export function makeColumns(
       ...sharedColumn("timeline"),
       formatAggregate: (value, context) =>
         formatTimelineAggregate(value, context, locale),
-      accessor: (row) => (
-        <span className="demo-person-identity__details" style={cellStack}>
-          <strong style={{ fontWeight: 550 }}>
-            {formatDate(startDate(row), locale)}
-          </strong>
-          <small style={{ opacity: 0.6, fontSize: "0.82em" }}>
-            → {formatDate(dueDate(row), locale)}
-          </small>
-        </span>
-      ),
+      accessor: (row) => {
+        const { start, end } = timelineLines(row, locale);
+        return (
+          <span className="demo-person-identity__details" style={cellStack}>
+            <strong style={{ fontWeight: 550 }}>{start}</strong>
+            <small style={{ opacity: 0.6, fontSize: "0.82em" }}>{end}</small>
+          </span>
+        );
+      },
     },
     {
       ...sharedColumn("budget"),
