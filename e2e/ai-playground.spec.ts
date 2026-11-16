@@ -432,6 +432,8 @@ for (const kit of AI_KITS.filter(
       await connectMockBackend(page);
       await page.locator(part("assistant-settings")).click();
       await page.getByRole("button", { name: "Disconnect" }).click();
+      // The modal leaves first; until then the page behind it takes no typing.
+      await expect(page.locator("dialog.ai-conn-dialog")).toBeHidden();
 
       await ask(page, "anything at all, the mock answers everything");
       expect(await lastReply(page)).toContain(
