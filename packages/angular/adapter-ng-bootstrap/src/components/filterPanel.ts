@@ -5,8 +5,10 @@ import {
   AdaptFilterTreeChrome,
   type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
+  restoreFocusSoon,
+  watchClickedOpener,
 } from "@adapttable/angular/adapter";
-import { NgTemplateOutlet } from "@angular/common";
+import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
@@ -146,9 +148,12 @@ export class AdaptFilterDrawer {
   private readonly offcanvas = inject(NgbOffcanvas);
   private ref: NgbOffcanvasRef | undefined;
   private direction: "ltr" | "rtl" | undefined;
+  private opener: HTMLElement | null = null;
+  private readonly openers = watchClickedOpener(inject(DOCUMENT));
 
   constructor() {
     inject(DestroyRef).onDestroy(() => {
+      this.openers.stop();
       const ref = this.ref;
       this.ref = undefined;
       ref?.close();
@@ -158,6 +163,7 @@ export class AdaptFilterDrawer {
       if (!p.open) {
         this.ref?.close();
         this.ref = undefined;
+        this.returnFocus();
         return;
       }
       const container = this.element.nativeElement;
@@ -166,6 +172,7 @@ export class AdaptFilterDrawer {
       if (this.ref && this.direction === (p.dir ?? "ltr")) return;
       this.ref?.close();
       this.direction = p.dir ?? "ltr";
+      this.opener = this.openers.current();
       const ref = this.offcanvas.open(this.content(), {
         container,
         animation: false,
@@ -191,6 +198,13 @@ export class AdaptFilterDrawer {
       };
       void ref.result.then(closed, closed);
     });
+  }
+
+  private returnFocus(): void {
+    const opener = this.opener;
+    this.opener = null;
+    if (opener?.isConnected) opener.focus();
+    restoreFocusSoon(opener);
   }
 }
 

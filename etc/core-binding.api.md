@@ -1630,6 +1630,12 @@ export function clearSearchAndFilters(source: Pick<TableSource<unknown>, "clearE
 export const clearSelection: ActionDefinition<void>;
 
 // @public
+export interface ClickedOpener {
+    current(ignore?: HTMLElement | null): HTMLElement | null;
+    stop(): void;
+}
+
+// @public
 export function coerceBooleanValue(value: unknown): boolean | undefined;
 
 // @public
@@ -12348,6 +12354,9 @@ export function walkFilterTreeConditions(tree: QueryFilterGroup | undefined, pat
 
 // @public
 export function warnDataTierMisuse(source: unknown, mode: "frontend" | "server" | undefined, data: unknown, onQueryChange: unknown): void;
+
+// @public
+export function watchClickedOpener(doc: Document): ClickedOpener;
 
 // @public
 export function watchOverlayDismiss(doc: Document, insideSelector: string, dismiss: () => void, options?: OverlayDismissOptions): () => void;

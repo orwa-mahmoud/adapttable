@@ -21688,6 +21688,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "watchClickedOpener",
+      "kind": "runtime",
+      "module": "overlays/clickedOpener.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "overlays/clickedOpener.ts#watchClickedOpener",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "watchOverlayDismiss",
       "kind": "runtime",
       "module": "filters/headerFilterOverlay.ts",
@@ -22532,6 +22543,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "layout/chromeModel.ts#ChromeVirtualPadSlot",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "ClickedOpener",
+      "kind": "type",
+      "module": "overlays/clickedOpener.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "overlays/clickedOpener.ts#ClickedOpener",
       "subpaths": ["./binding"]
     },
     {

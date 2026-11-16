@@ -457,6 +457,7 @@ describe("the Angular Material filters", () => {
     );
     await settle();
     expect(part("filters-panel")).toBeNull();
+    expect(document.activeElement).toBe(part("filters-button"));
   });
 
   it("puts a funnel on each filterable header", async () => {

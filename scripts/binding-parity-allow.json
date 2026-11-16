@@ -2473,6 +2473,7 @@
         "CellConflictAsk": "pending: shared-surface decision",
         "CellConflictNoticeProps": "pending: shared-surface decision",
         "CellContext": "pending: shared-surface decision",
+        "ClickedOpener": "Angular kits record the button that opened a dialog or drawer; React and Vue kits return focus through their overlay primitives.",
         "ColumnDrag": "pending: shared-surface decision",
         "ColumnGroup": "pending: shared-surface decision",
         "ColumnInput": "pending: shared-surface decision",
@@ -2654,6 +2655,7 @@
         "tableRuntimeFor": "pending: shared-surface decision",
         "undoRedoToolbarProps": "pending: shared-surface decision",
         "virtualizeIgnoredOnPage": "pending: shared-surface decision",
+        "watchClickedOpener": "Angular kits record the button that opened a dialog or drawer; React and Vue kits return focus through their overlay primitives.",
         "withRowMutationActions": "pending: shared-surface decision"
       },
       "features": {

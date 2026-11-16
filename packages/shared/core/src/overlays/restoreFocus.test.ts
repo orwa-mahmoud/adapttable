@@ -80,6 +80,17 @@ describe("restoreFocusSoon", () => {
     cleanup();
   });
 
+  it("reclaims a drop that lands after the first two frames", async () => {
+    const { trigger, cleanup } = scene();
+    restoreFocusSoon(trigger);
+    await frames();
+    expect(document.activeElement).toBe(trigger);
+    document.body.focus();
+    await new Promise((resolve) => setTimeout(resolve, 450));
+    expect(document.activeElement).toBe(trigger);
+    cleanup();
+  });
+
   it("leaves focus that was deliberately moved elsewhere", async () => {
     const { trigger, elsewhere, cleanup } = scene();
     restoreFocusSoon(trigger);

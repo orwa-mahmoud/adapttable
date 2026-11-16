@@ -14667,6 +14667,14 @@
       "behavior": ""
     },
     {
+      "export": "ClickedOpener",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "coerceBooleanValue",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -26668,6 +26676,14 @@
     },
     {
       "export": "warnDataTierMisuse",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "watchClickedOpener",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",

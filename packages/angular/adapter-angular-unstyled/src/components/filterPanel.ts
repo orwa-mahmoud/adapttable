@@ -5,6 +5,7 @@ import {
   AdaptFilterTreeChrome,
   type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
+  restoreFocusSoon,
 } from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -158,11 +159,16 @@ export class AdaptFilterDrawer {
       const panel = this.panel()?.nativeElement;
       const { open, onClose } = this.props();
       if (!open || !panel) return;
+      const root = panel.closest("[data-adapttable-part='root']");
+      const openedFrom = root?.querySelector<HTMLElement>(
+        "[data-adapttable-part='filters-button']"
+      );
       const trigger =
-        document.activeElement instanceof HTMLElement &&
+        openedFrom ??
+        (document.activeElement instanceof HTMLElement &&
         !panel.contains(document.activeElement)
           ? document.activeElement
-          : null;
+          : null);
       panel.focus();
       const onKey = (event: KeyboardEvent): void => {
         if (event.key === "Escape") {
@@ -174,7 +180,11 @@ export class AdaptFilterDrawer {
       document.addEventListener("keydown", onKey);
       onCleanup(() => {
         document.removeEventListener("keydown", onKey);
-        trigger?.focus();
+        // The dialog's removal drops focus onto the document. Put it back
+        // now, then again on the next frame: WebKit moves it to the body
+        // a step after this cleanup.
+        if (trigger?.isConnected) trigger.focus();
+        restoreFocusSoon(trigger);
       });
     });
   }

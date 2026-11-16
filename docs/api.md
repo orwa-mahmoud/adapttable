@@ -1209,7 +1209,9 @@ BulkActionRunnerController` (`BulkActionRunnerSnapshot`) and
 - `stickyToolbarStyle` (`StickyToolbarStyle`), `stickyHeaderOffset` and
   `measuredToolbarHeight` — the sticky toolbar rule. `shouldEscapeClose`
   and `isElementShowing` — the Escape-close rule. `restoreFocusSoon` and
-  `focusWasDropped` — restore-focus timing. `resolveDensity`,
+  `focusWasDropped` — restore-focus timing. `watchClickedOpener`
+  (`ClickedOpener`) — the button a click pressed, so an overlay that opens
+  with focus on the document can return focus there. `resolveDensity`,
   `requestDensityChange` and `DEFAULT_DENSITY` — density.
 - `createAllMatchingScope(): AllMatchingScope` — selection's "all matching"
   scope. `createHighlightStore(options: HighlightStoreOptions):
@@ -3681,6 +3683,8 @@ order and start/end pins. The kit owns buttons and native popup integration.
 room below an open origin, updating on resize and scroll; it does not position
 or draw the overlay. `injectBulkBarRunner(props)` reads live bulk-action labels
 and confirmation options when invoked and clears selection only on success.
+`watchClickedOpener(document)` (`ClickedOpener`) records the button a click
+pressed, so a kit dialog or drawer hands focus back to it on close.
 See [building an Angular adapter](./angular/building-an-adapter.md).
 
 - `AdaptTableFeature.mount` receives a `FeatureMountContext`: the live runtime,

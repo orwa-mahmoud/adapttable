@@ -483,6 +483,7 @@ export class AdaptFilterChips {
 
 // @internal
 export class AdaptFilterDrawer {
+    constructor();
     // (undocumented)
     protected keydown(event: KeyboardEvent): void;
     // (undocumented)

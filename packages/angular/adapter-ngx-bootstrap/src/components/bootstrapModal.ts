@@ -1,4 +1,8 @@
 /** Scoped lifecycle bridge for ngx-bootstrap's native modal directive. */
+import {
+  restoreFocusSoon,
+  watchClickedOpener,
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
@@ -174,15 +178,22 @@ export function bootstrapModal(options: {
   readonly dir?: () => "ltr" | "rtl";
 }): void {
   const view = inject(ViewContainerRef);
+  const openers = watchClickedOpener(options.container().ownerDocument);
   let ref: ComponentRef<AdaptBootstrapModal> | undefined;
-  let focus: HTMLElement | undefined;
+  let focus: HTMLElement | null = null;
   const remove = (): void => {
     const current = ref;
+    const opener = focus;
     ref = undefined;
+    focus = null;
     current?.destroy();
-    if (focus?.isConnected) focus.focus();
+    if (opener?.isConnected) opener.focus();
+    restoreFocusSoon(opener);
   };
-  inject(DestroyRef).onDestroy(remove);
+  inject(DestroyRef).onDestroy(() => {
+    openers.stop();
+    remove();
+  });
   afterRenderEffect(() => {
     if (!options.open()) {
       remove();
@@ -194,8 +205,7 @@ export function bootstrapModal(options: {
       return;
     }
     const container = options.container();
-    const active = container.ownerDocument.activeElement;
-    focus = active instanceof HTMLElement ? active : undefined;
+    focus = openers.current();
     const current = view.createComponent(AdaptBootstrapModal);
     ref = current;
     // ViewContainerRef inserts next to its host; move inside to preserve CSS isolation.

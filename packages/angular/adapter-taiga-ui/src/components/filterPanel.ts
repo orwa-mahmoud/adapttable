@@ -2,13 +2,17 @@ import {
   AdaptFilterTreeChrome,
   type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
+  restoreFocusSoon,
+  watchClickedOpener,
 } from "@adapttable/angular/adapter";
-import { NgTemplateOutlet } from "@angular/common";
+import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
+  inject,
   input,
   type TemplateRef,
   viewChild,
@@ -163,6 +167,7 @@ export class AdaptFilterDrawer {
       read: ElementRef,
     }
   );
+  private readonly openers = watchClickedOpener(inject(DOCUMENT));
 
   protected onBackdrop(event: MouseEvent): void {
     const target = event.target;
@@ -175,15 +180,12 @@ export class AdaptFilterDrawer {
   }
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.openers.stop());
     afterRenderEffect((onCleanup) => {
       const panel = this.panel()?.nativeElement;
       const { open, onClose } = this.props();
       if (!open || !panel) return;
-      const trigger =
-        document.activeElement instanceof HTMLElement &&
-        !panel.contains(document.activeElement)
-          ? document.activeElement
-          : null;
+      const trigger = this.openers.current(panel);
       panel.focus();
       const onKey = (event: KeyboardEvent): void => {
         if (
@@ -201,7 +203,8 @@ export class AdaptFilterDrawer {
       document.addEventListener("keydown", onKey);
       onCleanup(() => {
         document.removeEventListener("keydown", onKey);
-        trigger?.focus();
+        if (trigger?.isConnected) trigger.focus();
+        restoreFocusSoon(trigger);
       });
     });
   }

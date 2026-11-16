@@ -1802,6 +1802,8 @@ export {
   stickyToolbarStyle,
 } from "./layout/stickyToolbar";
 export { isRtlElement } from "./layout/writingDirection";
+export type { ClickedOpener } from "./overlays/clickedOpener";
+export { watchClickedOpener } from "./overlays/clickedOpener";
 export { isElementShowing, shouldEscapeClose } from "./overlays/escapeClose";
 export { focusWasDropped, restoreFocusSoon } from "./overlays/restoreFocus";
 export {

@@ -5,6 +5,8 @@ import {
   AdaptFilterTreeChrome,
   type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
+  restoreFocusSoon,
+  watchClickedOpener,
 } from "@adapttable/angular/adapter";
 import { Overlay } from "@angular/cdk/overlay";
 import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
@@ -13,6 +15,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   input,
   type TemplateRef,
@@ -159,8 +162,21 @@ export class AdaptFilterDrawer {
   });
   private readonly dialog = viewChild(BrnDialog);
   private readonly document = inject(DOCUMENT);
+  private opener: HTMLElement | null = null;
+  private readonly openers = watchClickedOpener(this.document);
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.openers.stop());
+    afterRenderEffect(() => {
+      if (!this.props().open) {
+        const opener = this.opener;
+        this.opener = null;
+        if (opener?.isConnected) opener.focus();
+        restoreFocusSoon(opener);
+        return;
+      }
+      this.opener ??= this.openers.current();
+    });
     afterRenderEffect(() => {
       if (this.dialog()?.stateComputed() !== "open") return;
       for (const backdrop of this.document.querySelectorAll<HTMLElement>(

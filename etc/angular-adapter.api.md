@@ -62,6 +62,7 @@ import { ChromeBodySlot } from '@adapttable/core/binding';
 import { chromeColumnPlan } from '@adapttable/core/binding';
 import { chromeFeatureNotices } from '@adapttable/core/binding';
 import { chromeRenderModel } from '@adapttable/core/binding';
+import { ClickedOpener } from '@adapttable/core/binding';
 import { COLUMN_GROUP_TOGGLE } from '@adapttable/core/binding';
 import { COLUMN_MENU } from '@adapttable/core/binding';
 import { COLUMN_SELECT } from '@adapttable/core/binding';
@@ -441,6 +442,7 @@ import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
 import { virtualizeIgnoredOnPage } from '@adapttable/core/binding';
 import { visibleRowActions } from '@adapttable/core/binding';
+import { watchClickedOpener } from '@adapttable/core/binding';
 import { watchOverlayDismiss } from '@adapttable/core/binding';
 import { windowGroupedEntries } from '@adapttable/core';
 import { withRowMutationActions } from '@adapttable/core/binding';
@@ -5074,6 +5076,8 @@ export { chromeFeatureNotices }
 
 export { chromeRenderModel }
 
+export { ClickedOpener }
+
 export { COLUMN_GROUP_TOGGLE }
 
 export { COLUMN_MENU }
@@ -6562,6 +6566,8 @@ export { unpinAllColumns }
 export { virtualizeIgnoredOnPage }
 
 export { visibleRowActions }
+
+export { watchClickedOpener }
 
 export { watchOverlayDismiss }
 

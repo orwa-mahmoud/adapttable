@@ -1,4 +1,8 @@
 /** Material dialog lifecycle shared by this kit's modal surfaces. */
+import {
+  restoreFocusSoon,
+  watchClickedOpener,
+} from "@adapttable/angular/adapter";
 import { DOCUMENT } from "@angular/common";
 import {
   afterRenderEffect,
@@ -42,6 +46,9 @@ export class AdaptMaterialDialog {
     viewChild.required<TemplateRef<unknown>>("content");
   private current: MatDialogRef<unknown> | undefined;
   private closed: Subscription | undefined;
+  private opener: HTMLElement | null = null;
+  /** The button whose click asked for the dialog, before focus has moved. */
+  private readonly openers = watchClickedOpener(this.document);
 
   constructor() {
     afterRenderEffect(() => {
@@ -66,6 +73,7 @@ export class AdaptMaterialDialog {
         container?.closest(".cdk-overlay-pane")?.setAttribute("dir", dir);
         this.current.updatePosition(position).updateSize(width, height);
       } else {
+        this.opener = this.openers.current();
         const ref = this.dialog.open(this.content(), {
           ariaLabel: label,
           direction: dir,
@@ -88,6 +96,7 @@ export class AdaptMaterialDialog {
           this.current = undefined;
           this.closed = undefined;
           this.dismiss.emit();
+          this.returnFocus();
         });
       }
       const backdrop = this.document.querySelector<HTMLElement>(
@@ -98,7 +107,10 @@ export class AdaptMaterialDialog {
         backdrop.dataset.state = "open";
       }
     });
-    inject(DestroyRef).onDestroy(() => this.close());
+    inject(DestroyRef).onDestroy(() => {
+      this.openers.stop();
+      this.close();
+    });
   }
 
   private close(): void {
@@ -107,5 +119,33 @@ export class AdaptMaterialDialog {
     this.closed?.unsubscribe();
     this.closed = undefined;
     if (ref && ref.getState() !== MatDialogState.CLOSED) ref.close();
+    this.returnFocus();
+  }
+
+  /**
+   * The opener recorded at open time. A rebuild of the toolbar can detach
+   * that node while a button with the same kit class is still on the page.
+   */
+  private liveOpener(): HTMLElement | null {
+    const opener = this.opener;
+    if (!opener) return null;
+    if (opener.isConnected) return opener;
+    for (const name of opener.classList) {
+      if (!name.startsWith("adapt-")) continue;
+      const found = this.document.querySelector<HTMLElement>(
+        `button.${CSS.escape(name)}`
+      );
+      if (found) return found;
+    }
+    return null;
+  }
+
+  /** Put focus back on the opener, including after the overlay finishes leaving. */
+  private returnFocus(): void {
+    const opener = this.liveOpener();
+    this.opener = null;
+    if (!opener?.isConnected) return;
+    opener.focus();
+    restoreFocusSoon(opener);
   }
 }

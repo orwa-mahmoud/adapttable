@@ -10,6 +10,8 @@ import {
 } from "@adapttable/angular";
 import {
   defaultFilterRegistry,
+  defaultLabels,
+  type FilterOverlaySlotProps,
   type FilterWidgetRenderProps,
 } from "@adapttable/angular/adapter";
 import { filters, filterTypes } from "@adapttable/angular-unstyled/filters";
@@ -31,6 +33,7 @@ import { By } from "@angular/platform-browser";
 import { filtersTests } from "../../angular/test/kit/suites/filters";
 import { kit } from "../testing/kit";
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
+import { AdaptFilterDrawer } from "./components/filterPanel";
 import { AdaptFilterPopover } from "./components/filterPopover";
 import { AdaptDataTable } from "./dataTable";
 import type { FiltersMode } from "./tableFilters";
@@ -351,7 +354,11 @@ describe("the unstyled Angular filters", () => {
     await openFilters();
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     await settle();
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve(null)));
+    });
     expect(part("filters-panel")).toBeNull();
+    expect(document.activeElement).toBe(button);
   });
 
   it("puts a funnel on each filterable header", async () => {
@@ -737,5 +744,96 @@ describe("filter card viewport space", () => {
     } finally {
       measurement.mockRestore();
     }
+  });
+});
+
+@Component({
+  imports: [AdaptFilterDrawer],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div data-adapttable-part="root">
+      <adapt-filter-drawer [props]="overlay()" />
+    </div>
+    <ng-template #filters />
+  `,
+})
+class DrawerFocusHost {
+  readonly open = signal(false);
+  readonly count = signal(0);
+  private readonly filters =
+    viewChild.required<TemplateRef<unknown>>("filters");
+  readonly overlay = computed(
+    (): FilterOverlaySlotProps<TemplateRef<unknown>> => ({
+      open: this.open(),
+      onClose: () => this.open.set(false),
+      onClearFilters: () => undefined,
+      activeFilterCount: this.count(),
+      filters: this.filters(),
+      labels: defaultLabels,
+      dir: "ltr",
+    })
+  );
+}
+
+async function mountDrawer() {
+  const fixture = TestBed.createComponent(DrawerFocusHost);
+  fixture.autoDetectChanges();
+  document.body.append(fixture.nativeElement as HTMLElement);
+  await fixture.whenStable();
+  return fixture;
+}
+
+async function frames() {
+  await new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve(null)));
+  });
+}
+
+describe("drawer focus when the filters button is absent", () => {
+  it("returns focus to the control that was active outside the panel", async () => {
+    const fixture = await mountDrawer();
+    const opener = document.createElement("button");
+    document.body.append(opener);
+    opener.focus();
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+    expect(document.activeElement?.getAttribute("data-adapttable-part")).toBe(
+      "filters-panel"
+    );
+    fixture.componentInstance.open.set(false);
+    await fixture.whenStable();
+    await frames();
+    expect(document.activeElement).toBe(opener);
+  });
+
+  it("leaves focus where it is when that control has left the document", async () => {
+    const fixture = await mountDrawer();
+    const opener = document.createElement("button");
+    document.body.append(opener);
+    opener.focus();
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+    opener.remove();
+    fixture.componentInstance.open.set(false);
+    await fixture.whenStable();
+    await frames();
+    expect(opener.isConnected).toBe(false);
+    expect(document.activeElement).not.toBe(opener);
+  });
+
+  it("does not restore focus from an element that is not an HTML control", async () => {
+    const fixture = await mountDrawer();
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("tabindex", "0");
+    document.body.append(svg);
+    svg.focus();
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+    fixture.componentInstance.count.set(1);
+    await fixture.whenStable();
+    fixture.componentInstance.open.set(false);
+    await fixture.whenStable();
+    await frames();
+    expect(document.activeElement).not.toBe(svg);
   });
 });
