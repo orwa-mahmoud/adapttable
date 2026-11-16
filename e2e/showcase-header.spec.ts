@@ -237,7 +237,42 @@ for (const kit of ["material", "angular-cdk"]) {
     const rows = page.locator('[data-adapttable-part="row"]');
     await expect(rows.first()).toBeVisible();
     const comfortable = (await rows.first().boundingBox())!.height;
-    expect(comfortable).toBeLessThanOrEqual(56);
+    // Comfortable is padding around the content, not a fixed height: a cell
+    // that draws a person over their role is taller than one line of text.
+    const fit = await rows.first().evaluate((row) => {
+      const cells = [...row.querySelectorAll("td")];
+      const padding = cells.map((cell) => {
+        const style = getComputedStyle(cell);
+        return Math.max(
+          parseFloat(style.paddingTop),
+          parseFloat(style.paddingBottom)
+        );
+      });
+      const content = cells.map((cell) => {
+        const style = getComputedStyle(cell);
+        return (
+          cell.getBoundingClientRect().height -
+          parseFloat(style.paddingTop) -
+          parseFloat(style.paddingBottom)
+        );
+      });
+      const tallest = cells.reduce(
+        (most, cell) =>
+          Math.max(
+            most,
+            ...[...cell.querySelectorAll("*")].map(
+              (node) => node.getBoundingClientRect().height
+            )
+          ),
+        0
+      );
+      return {
+        padding: Math.max(...padding),
+        slack: Math.min(...content) - tallest,
+      };
+    });
+    expect(fit.padding).toBeLessThanOrEqual(10);
+    expect(fit.slack).toBeLessThanOrEqual(1);
     const compact = page.getByRole("radio", { name: "Compact", exact: true });
     await compact.focus();
     await expect(compact).toBeFocused();
