@@ -42,5 +42,5 @@ describe("actual combined Vue showcase fixture", () => {
     ).toBe("rtl");
     expect(find(host, "#union-edit-count").textContent).toBe("0");
     expect(find(host, "#union-move-count").textContent).toBe("0");
-  }, 10_000);
+  });
 });

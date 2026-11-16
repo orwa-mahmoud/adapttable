@@ -93,5 +93,5 @@ describe("actual combined Find selection contract", () => {
     expect(find(host, "#union-range").textContent).toBe("null");
     expect(find(host, "#union-edit-count").textContent).toBe("0");
     expect(find(host, "#union-move-count").textContent).toBe("0");
-  }, 10_000);
+  });
 });

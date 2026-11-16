@@ -41,7 +41,7 @@ async function setup() {
 }
 
 describe("combined showcase host move confirmation", () => {
-  // Coverage instrumentation adds work to this full showcase interaction.
+  // Coverage of this showcase interaction uses the suite's time budget.
   it("keeps approval live when a pending label rerenders an equivalent inline row key", async () => {
     const view = await setup();
     await view.requestMove();
@@ -55,7 +55,7 @@ describe("combined showcase host move confirmation", () => {
     ).toEqual(["leaf-0"]);
     expect(find(view.host, "#union-source-version").textContent).toBe("1");
     expect(find(view.host, "#union-pending").textContent).toBe("");
-  }, 10_000);
+  });
 
   it("retires host approval after same-ID source replacement and admits a new decision", async () => {
     const view = await setup();
@@ -74,5 +74,5 @@ describe("combined showcase host move confirmation", () => {
     await tick();
     expect(find(view.host, "#union-move-count").textContent).toBe("1");
     expect(find(view.host, "#union-accepted-moves").textContent).toBe("1");
-  }, 10_000);
+  });
 });

@@ -5,6 +5,7 @@ import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vitest/config";
 
 import {
+  VITEST_TEST_TIMEOUT,
   vitestFileParallelism,
   vitestMaxWorkers,
 } from "../../../scripts/vitest-workers.mjs";
@@ -60,6 +61,7 @@ export default defineConfig({
     pool: "threads",
     fileParallelism: vitestFileParallelism(),
     maxWorkers: vitestMaxWorkers(),
+    testTimeout: VITEST_TEST_TIMEOUT,
     server: { deps: { inline: [/@nuxt\/ui/] } },
     coverage: {
       provider: "v8",

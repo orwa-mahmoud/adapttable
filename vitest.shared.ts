@@ -4,6 +4,7 @@ import { createInstrumenter } from "istanbul-lib-instrument";
 import { defineConfig, type Plugin } from "vitest/config";
 
 import {
+  VITEST_TEST_TIMEOUT,
   vitestFileParallelism,
   vitestMaxWorkers,
 } from "./scripts/vitest-workers.mjs";
@@ -161,9 +162,7 @@ export const sharedConfig = defineConfig({
     pool: "threads",
     fileParallelism: vitestFileParallelism(),
     maxWorkers: vitestMaxWorkers(),
-    // Generous per-test budget for Ant Design's cold cssinjs first paint.
-    // This only widens the time limit — assertions are unchanged.
-    testTimeout: 30000,
+    testTimeout: VITEST_TEST_TIMEOUT,
     coverage: {
       provider: "istanbul",
       instrumenter: passthroughInstrumenter,
