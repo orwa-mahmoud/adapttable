@@ -5,8 +5,6 @@
 import {
   type BatchEditHandler,
   type BatchEditingState,
-  type BatchRowEdit,
-  type CellEditHandler,
   type CellEditingState,
   type EditableColumnLike,
   type EditEventHandler,
@@ -36,11 +34,10 @@ import {
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
 import { tableStoreOf } from "../tableStore";
 
+export type { BatchRowEdit, CellEditHandler } from "@adapttable/core";
 export type {
   BatchEditHandler,
   BatchEditingState,
-  BatchRowEdit,
-  CellEditHandler,
   CellEditingState,
   RowEditHandler,
   RowEditingState,

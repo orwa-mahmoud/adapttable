@@ -1,9 +1,4 @@
-import {
-  type BulkAction,
-  type ConfirmHandler,
-  type GroupingPanelState,
-  resolvePinnedRows,
-} from "@adapttable/core";
+import { type GroupingPanelState, resolvePinnedRows } from "@adapttable/core";
 import {
   applyFeatureNoticesAttribute,
   chromeBodyRegion,
@@ -30,28 +25,23 @@ import {
   declaredReactColumnLayout,
 } from "./columns/reactColumns";
 import { resolveColumns } from "./columns/resolveColumns";
-import type { EditHistoryState } from "./editing/editHistory";
 import { GROUPING_PANEL_STATE } from "./features/groupingPanelKey";
 import { useFeatureState } from "./features/providers";
 import { ROW_REORDER } from "./features/rowReorderKey";
 import { useEventCallback } from "./hooks/useEventCallback";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useElementWidth } from "./layout/useElementWidth";
-import type { ComposedTableProps, ToolbarSlots } from "./props";
+import type { ComposedTableProps } from "./props";
 import type { RowMutationsState } from "./rows/rowMutations";
 import type { RowReorderState } from "./rows/rowReorder";
-import type { SelectionState } from "./selection/useSelection";
 import { useDataTable } from "./useDataTable/useDataTable";
 
+export type { EditHistoryState } from "./editing/editHistory";
+export type { ToolbarSlots } from "./props";
+export type { SelectionState } from "./selection/useSelection";
+export type { BulkAction, ConfirmHandler } from "@adapttable/core";
 export type { FeatureNotice, FeatureNoticeKind } from "@adapttable/core";
 
-export type {
-  BulkAction,
-  ConfirmHandler,
-  EditHistoryState,
-  SelectionState,
-  ToolbarSlots,
-};
 const NO_ROW_MUTATIONS: RowMutationsState<never> = {
   canAdd: false,
   addRow: () => {

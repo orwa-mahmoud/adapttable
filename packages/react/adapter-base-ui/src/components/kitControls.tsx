@@ -5,9 +5,6 @@
  */
 import { useHeaderFilterOverlay } from "@adapttable/react";
 import {
-  type AgentApprovalProps,
-  type BatchEditBarProps,
-  type ColumnGroupToggleProps,
   createAgentApproval,
   createBatchEditBar,
   createColumnGroupToggle,
@@ -23,18 +20,10 @@ import {
   createTreeToggle,
   type EditableCellSlots,
   type FilterHeaderControlProps,
-  type FilterHeaderRowProps,
   filterLabel,
-  type FindBarProps,
-  type GroupMoreButtonProps,
   hasActiveHeaderFilter,
   restoreFocusSoon,
-  type RowEditActionsProps,
   type RowMoveMenuSlotProps,
-  type RowReorderButtonsProps,
-  type RowReorderHandleProps,
-  type TreeCellProps,
-  type TreeToggleProps,
 } from "@adapttable/react/adapter";
 import { Menu } from "@base-ui/react/menu";
 import { Popover as BasePopover } from "@base-ui/react/popover";
@@ -57,7 +46,6 @@ export type {
   AgentApprovalProps,
   BatchEditBarProps,
   ColumnGroupToggleProps,
-  FilterHeaderControlProps,
   FilterHeaderRowProps,
   FindBarProps,
   GroupMoreButtonProps,
@@ -66,7 +54,8 @@ export type {
   RowReorderHandleProps,
   TreeCellProps,
   TreeToggleProps,
-};
+} from "@adapttable/react/adapter";
+export type { FilterHeaderControlProps };
 
 const headerKit = { TextInput, Select, Button, Checkbox, Popover };
 

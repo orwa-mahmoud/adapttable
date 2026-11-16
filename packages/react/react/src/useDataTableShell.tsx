@@ -1,10 +1,8 @@
 import {
   bindFeatureHostFn,
-  type FacetMap,
   type FilterDef,
   type FilterTypeRegistry,
   isDeclarativeFilters,
-  type QuerySupport,
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
@@ -56,9 +54,10 @@ import {
   shellToolbarProps,
 } from "./shell/shellToolbarProps";
 import { useTableDataLean } from "./source/useTableDataLean";
-import { type UrlStateAdapter, useResolvedAdapter } from "./url/adapter";
+import { useResolvedAdapter } from "./url/adapter";
 import { useTableChrome } from "./useTableChrome";
 import type { ChromeBodyData } from "./virtual/chromeBodyShared";
+
 export {
   type DataTableShellChromeProps,
   type DataTableShellGroupingPanelProps,
@@ -67,8 +66,8 @@ export {
   type DataTableShellTableProps,
   type DataTableShellToolbarProps,
 } from "./shell/shellContract";
-
-export type { FacetMap, QuerySupport, UrlStateAdapter };
+export type { UrlStateAdapter } from "./url/adapter";
+export type { FacetMap, QuerySupport } from "@adapttable/core";
 
 /**
  * The whole shared orchestration behind a batteries-included `<DataTable>`:

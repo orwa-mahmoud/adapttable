@@ -1,12 +1,8 @@
-import {
-  type ChecklistFilterProps,
-  createChecklistFilter,
-} from "@adapttable/react/adapter";
+import { createChecklistFilter } from "@adapttable/react/adapter";
 
 import { Button, Checkbox, TextInput } from "./primitives";
 
-export type { ChecklistFilterProps };
-
+export type { ChecklistFilterProps } from "@adapttable/react/adapter";
 /**
  * MUI checklist — wrapping kit checkboxes, not one value per row.
  *

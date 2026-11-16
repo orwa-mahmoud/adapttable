@@ -5,9 +5,6 @@
  */
 import { useHeaderFilterOverlay } from "@adapttable/react";
 import {
-  type AgentApprovalProps,
-  type BatchEditBarProps,
-  type ColumnGroupToggleProps,
   createAgentApproval,
   createBatchEditBar,
   createColumnGroupToggle,
@@ -24,19 +21,11 @@ import {
   type EditableCellSlots,
   type FilterHeaderControlProps,
   type FilterHeaderMultiProps,
-  type FilterHeaderRowProps,
   filterLabel,
-  type FindBarProps,
-  type GroupMoreButtonProps,
   hasActiveHeaderFilter,
   restoreFocusSoon,
-  type RowEditActionsProps,
   type RowMoveMenuSlotProps,
-  type RowReorderButtonsProps,
-  type RowReorderHandleProps,
   type TableSource,
-  type TreeCellProps,
-  type TreeToggleProps,
 } from "@adapttable/react/adapter";
 import { type ChangeEvent, useEffect, useRef } from "react";
 
@@ -61,7 +50,6 @@ export type {
   AgentApprovalProps,
   BatchEditBarProps,
   ColumnGroupToggleProps,
-  FilterHeaderControlProps,
   FilterHeaderRowProps,
   FindBarProps,
   GroupMoreButtonProps,
@@ -70,7 +58,8 @@ export type {
   RowReorderHandleProps,
   TreeCellProps,
   TreeToggleProps,
-};
+} from "@adapttable/react/adapter";
+export type { FilterHeaderControlProps };
 
 function HeaderMulti({
   label,

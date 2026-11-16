@@ -4,9 +4,6 @@
  */
 import { useHeaderFilterOverlay } from "@adapttable/react";
 import {
-  type AgentApprovalProps,
-  type BatchEditBarProps,
-  type ColumnGroupToggleProps,
   createAgentApproval,
   createBatchEditBar,
   createColumnGroupToggle,
@@ -22,20 +19,12 @@ import {
   createTreeToggle,
   type EditableCellSlots,
   type FilterHeaderControlProps,
-  type FilterHeaderRowProps,
   filterLabel,
-  type FindBarProps,
-  type GroupMoreButtonProps,
   hasActiveHeaderFilter,
   type KitButtonProps,
   restoreFocusSoon,
-  type RowEditActionsProps,
   type RowMoveMenuSlotProps,
-  type RowReorderButtonsProps,
-  type RowReorderHandleProps,
   type TableSource,
-  type TreeCellProps,
-  type TreeToggleProps,
 } from "@adapttable/react/adapter";
 import {
   ActionIcon,
@@ -65,7 +54,6 @@ export type {
   AgentApprovalProps,
   BatchEditBarProps,
   ColumnGroupToggleProps,
-  FilterHeaderControlProps,
   FilterHeaderRowProps,
   FindBarProps,
   GroupMoreButtonProps,
@@ -74,7 +62,8 @@ export type {
   RowReorderHandleProps,
   TreeCellProps,
   TreeToggleProps,
-};
+} from "@adapttable/react/adapter";
+export type { FilterHeaderControlProps };
 
 const Button = /* @__PURE__ */ button("xs");
 const IconButton = /* @__PURE__ */ iconButton("sm");

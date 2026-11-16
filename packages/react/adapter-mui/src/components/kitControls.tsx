@@ -3,9 +3,6 @@
  * structure, glyphs and wiring; this file only picks the primitives.
  */
 import {
-  type AgentApprovalProps,
-  type BatchEditBarProps,
-  type ColumnGroupToggleProps,
   createAgentApproval,
   createBatchEditBar,
   createColumnGroupToggle,
@@ -20,16 +17,7 @@ import {
   createTreeCell,
   createTreeToggle,
   type EditableCellSlots,
-  type FilterHeaderControlProps,
-  type FilterHeaderRowProps,
-  type FindBarProps,
-  type GroupMoreButtonProps,
   type KitPopoverProps,
-  type RowEditActionsProps,
-  type RowReorderButtonsProps,
-  type RowReorderHandleProps,
-  type TreeCellProps,
-  type TreeToggleProps,
 } from "@adapttable/react/adapter";
 
 import { iconForRowEditPart } from "../icons";
@@ -57,8 +45,7 @@ export type {
   RowReorderHandleProps,
   TreeCellProps,
   TreeToggleProps,
-};
-
+} from "@adapttable/react/adapter";
 /** The header filter's list of choices is at least a comfortable 160 px. */
 function HeaderPopover(props: Readonly<KitPopoverProps>) {
   "use no memo";
