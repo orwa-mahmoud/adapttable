@@ -27,3 +27,4 @@ Editing, filtering and layout behave the same in every framework.
 - A Vue row action that opens the row form (`editsRow`) renders only where row-mode editing gives it a form. Material's fill handle stays above a cell's content, and its saved-views panel fits a 320px screen with icon buttons. Vuetify's compact rows are 36px, with row actions on one line. Angular CDK cells take 6px of block padding when comfortable and 4px when compact.
 - In Vue, Ctrl or Cmd+Z on a control inside a cell undoes the last committed edit; an open editor keeps its own keys.
 - React's grouping panel shows a group total the app computes as the app set it.
+- ngx-bootstrap's edit activator fills its cell, so a double-click anywhere in a wrapped row opens the editor.

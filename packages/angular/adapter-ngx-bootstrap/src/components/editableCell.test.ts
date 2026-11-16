@@ -135,6 +135,7 @@ describe("AdaptEditableCell", () => {
     const onCellEdit = vi.fn();
     const { settle } = await mount(onCellEdit as CellEditHandler<Shift>);
     const activate = activates()[0]!;
+    expect(activate.style.height).toBe("100%");
     activate.focus();
     expect(document.activeElement).toBe(activate);
     activate.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));

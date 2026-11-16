@@ -64,7 +64,7 @@ import {
       [attr.data-save]="p.saveStatus ?? null"
       [attr.aria-busy]="p.saveStatus === 'saving' ? true : null"
       [class]="p.className"
-      style="appearance: none; box-sizing: border-box; display: block; width: 100%; min-width: 0; padding: 0; border: 0; border-radius: 2px; background: transparent; color: inherit; font: inherit; cursor: text; text-align: inherit; white-space: normal; overflow-wrap: anywhere"
+      style="appearance: none; box-sizing: border-box; display: block; width: 100%; height: 100%; min-width: 0; min-height: 100%; padding: 0; border: 0; border-radius: 2px; background: transparent; color: inherit; font: inherit; cursor: text; text-align: inherit; white-space: normal; overflow-wrap: anywhere"
       (dblclick)="p.onDoubleClick($event)"
       (click)="p.onClick($event)"
       (keydown)="p.onKeyDown($event)"

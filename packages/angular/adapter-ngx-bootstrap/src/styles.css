@@ -66,6 +66,14 @@
 .adapttable-ngx-bootstrap [data-adapttable-part="table"] :is(th, td) {
   padding: var(--adapt-cell-padding);
 }
+/* A wrapped neighbour makes the row taller than one line. A percentage
+   height only resolves once the cell has a definite height, and `1px`
+   is the value a row then stretches to its own content. */
+.adapttable-ngx-bootstrap
+  [data-adapttable-part="table"]
+  td:has(> [data-adapttable-part="edit-cell-activate"]) {
+  height: 1px;
+}
 .adapttable-ngx-bootstrap [data-adapttable-part="header-cell"] {
   white-space: nowrap;
   background: var(--bs-tertiary-bg);
