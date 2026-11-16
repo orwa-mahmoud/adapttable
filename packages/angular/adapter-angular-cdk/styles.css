@@ -64,7 +64,7 @@
   :is(th, td)[data-adapttable-part]:not(
     [data-adapttable-part^="column-spacer-"]
   ) {
-  padding: 0.625rem 0.75rem;
+  padding: 0.375rem 0.75rem;
   border-block-end: 1px solid
     var(--adapt-cdk-border, color-mix(in srgb, CanvasText 16%, Canvas));
   vertical-align: middle;
@@ -74,7 +74,7 @@
   :is(th, td)[data-adapttable-part]:not(
     [data-adapttable-part^="column-spacer-"]
   ) {
-  padding: 0.375rem 0.75rem;
+  padding: 0.25rem 0.75rem;
 }
 [data-adapttable-kit="angular-cdk"] [data-adapttable-part="table"] th {
   text-align: start;

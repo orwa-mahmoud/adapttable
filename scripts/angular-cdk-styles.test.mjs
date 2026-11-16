@@ -146,7 +146,7 @@ for (const density of ["comfortable", "compact"]) {
         assert.notEqual(style("pager").marginRight, "auto");
         assert.notEqual(style("pager", "outside").marginInlineStart, "auto");
         assert.equal(style("header-cell").textAlign, "start");
-        const padding = density === "compact" ? "6px" : "10px";
+        const padding = density === "compact" ? "4px" : "6px";
         for (const part of [
           "header-cell",
           "selection-header",
