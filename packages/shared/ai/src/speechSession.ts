@@ -126,7 +126,10 @@ export function createSpeechSession(
 
   const notify = (): void => {
     view = undefined;
-    for (const listener of [...listeners]) listener();
+    // The listeners as they stand now: one a listener adds hears the next
+    // change, not this one.
+    const current = Array.from(listeners);
+    for (const listener of current) listener();
   };
 
   const release = (): void => {

@@ -304,7 +304,10 @@ export function selectFrom<T>(
     if (fresh && equals(value, next)) return;
     value = next;
     fresh = true;
-    for (const listener of [...listeners]) listener();
+    // The listeners as they stand now: one a listener adds hears the next
+    // change, not this one.
+    const current = Array.from(listeners);
+    for (const listener of current) listener();
   };
   // Listen to exactly the slices the last evaluation read. One listener for
   // every slice, so a change to several in one action is heard once.
