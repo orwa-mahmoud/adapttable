@@ -17,15 +17,30 @@
   gap: 0.5rem;
   padding-block: 0.75rem;
 }
+/* The search icon sits inside the field, as every kit draws it, and the
+ * field pushes the toolbar controls to the end of the row. */
 .adapttable-quasar [data-adapttable-part="search-field"] {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  flex: 1 1 15rem;
+  max-inline-size: 24rem;
   min-inline-size: 0;
+  margin-inline-end: auto;
+}
+.adapttable-quasar [data-adapttable-part="search-field"] > * {
+  flex: 1 1 auto;
 }
 .adapttable-quasar [data-adapttable-part="search-icon"] {
+  position: absolute;
+  inset-inline-start: 0.75rem;
+  z-index: 1;
   flex: none;
   opacity: 0.7;
+  pointer-events: none;
+}
+.adapttable-quasar [data-adapttable-part="search-field"] .q-field__control {
+  padding-inline-start: 2.5rem;
 }
 .adapttable-quasar .q-btn {
   min-block-size: 44px;
@@ -481,4 +496,11 @@
 .adapttable-quasar [data-adapttable-part="card"] .q-checkbox {
   min-width: 44px;
   min-height: 44px;
+}
+
+/* A pinned column's pin button fills with the primary colour. */
+.adapttable-quasar-column-panel
+  .q-btn[data-adapttable-part="column-menu-pin"][aria-pressed="true"] {
+  background: var(--q-primary);
+  color: #fff;
 }

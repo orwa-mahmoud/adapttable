@@ -94,7 +94,7 @@ import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
       <button
         tuiButton
         size="s"
-        appearance="secondary"
+        [appearance]="r.pinned !== undefined ? 'primary' : 'secondary'"
         type="button"
         data-taiga-part="column-menu-pin"
         [attr.data-active]="r.pinned !== undefined ? '' : null"
@@ -260,7 +260,7 @@ export class AdaptColumnMenuRow extends AdaptColumnMenuRowModel {}
       <button
         tuiButton
         size="s"
-        appearance="secondary"
+        [appearance]="pinned ? 'primary' : 'secondary'"
         type="button"
         data-taiga-part="column-menu-pin"
         [attr.data-active]="pinned ? '' : null"

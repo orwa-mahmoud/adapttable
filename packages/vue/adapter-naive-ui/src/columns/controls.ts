@@ -24,8 +24,17 @@ function button({ attrs, label, icon }: ColumnMenuButtonProps) {
     attrs,
     icon
       ? h(NIcon, { "aria-hidden": true }, { default: () => icons[icon] })
-      : label
+      : label,
+    pinnedPin(icon, attrs) ? { type: "primary" } : {}
   );
+}
+
+/** A pin button whose column is pinned takes the kit's primary emphasis. */
+function pinnedPin(
+  icon: ColumnMenuButtonProps["icon"],
+  attrs: ColumnMenuButtonProps["attrs"]
+): boolean {
+  return icon === "pin" && attrs["aria-pressed"] === true;
 }
 
 export const naiveColumnMenuSlots: ColumnMenuSlots = {

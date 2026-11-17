@@ -105,6 +105,7 @@ import { AdaptOverlayOrigin, OVERLAY_Z } from "./overlayPlacement";
       <button
         nz-button
         type="button"
+        [nzType]="r.pinned !== undefined ? 'primary' : 'default'"
         [attr.data-active]="r.pinned !== undefined ? '' : null"
         [attr.aria-pressed]="r.pinned !== undefined"
         [attr.aria-label]="pinLabel(r, p) + ': ' + r.name"
@@ -246,6 +247,7 @@ export class AdaptColumnMenuRow extends AdaptColumnMenuRowModel {}
       <button
         nz-button
         type="button"
+        [nzType]="pinned ? 'primary' : 'default'"
         [attr.data-active]="pinned ? '' : null"
         [attr.aria-pressed]="pinned"
         [attr.aria-label]="(pinned ? unpinLabel() : pinLabel()) + ': ' + name()"

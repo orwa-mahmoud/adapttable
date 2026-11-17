@@ -254,6 +254,14 @@ function scrollRef(element: HTMLElement | null): void {
   .adapttable-nuxt [data-adapttable-part="scroll-box"] {
     overflow-x: auto;
   }
+  /* The field pushes the toolbar controls to the end of the row. */
+  .adapttable-nuxt
+    > [data-adapttable-part="toolbar"]
+    > [data-adapttable-part="search-field"] {
+    flex: 1 1 15rem;
+    max-inline-size: 24rem;
+    margin-inline-end: auto;
+  }
   .adapttable-nuxt [data-adapttable-part="pager"] {
     display: flex;
     gap: 0.25rem;
@@ -318,6 +326,14 @@ function scrollRef(element: HTMLElement | null): void {
     text-align: start;
   }
   .adapttable-nuxt-table tbody tr:hover {
+    background: var(--ui-bg-muted);
+  }
+  /* Pinned cells stick over the cells scrolling beneath them, so they paint
+   * the table surface, and the row's hover surface while it is hovered. */
+  .adapttable-nuxt-table [data-pinned] {
+    background: var(--ui-bg);
+  }
+  .adapttable-nuxt-table tbody tr:hover > [data-pinned] {
     background: var(--ui-bg-muted);
   }
   .adapttable-nuxt-table [data-adapttable-part="sort-button"] {

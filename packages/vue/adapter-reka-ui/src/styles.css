@@ -272,13 +272,22 @@
   padding: 16px;
   border-block-end: 1px solid var(--at-reka-border);
 }
+/* The search icon sits inside the field, as every kit draws it. */
 .at-reka-search {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
   min-inline-size: 10rem;
   margin-inline-end: auto;
   color: var(--at-reka-muted);
+}
+.at-reka-search [data-adapttable-part="search-icon"] {
+  position: absolute;
+  inset-inline-start: 10px;
+  pointer-events: none;
+}
+.at-reka-search .at-reka-input {
+  padding-inline-start: 32px;
 }
 .at-reka-search .at-reka-input {
   inline-size: min(22rem, 100%);
@@ -912,4 +921,11 @@
   min-width: 44px;
   min-height: 44px;
   flex-shrink: 0;
+}
+
+/* A pinned column's pin button fills with the accent colour. */
+.at-reka-button[data-adapttable-part="column-menu-pin"][aria-pressed="true"] {
+  border-color: var(--at-reka-accent);
+  background: var(--at-reka-accent);
+  color: var(--at-reka-background);
 }

@@ -422,37 +422,65 @@ export function useDataTableShell<TRow>(
       classNames,
       container: fullscreen.value?.container,
     };
-    return [
-      ...(featureDensity.value
-        ? renderFeatureSlot(DENSITY_CONTROL, slotFills.value, {
-            ...presentation,
-            density: density.value,
-            onDensityChange: setDensity,
-          })
-        : []),
-      ...(fullscreen.value
-        ? renderFeatureSlot(FULLSCREEN_CONTROL, slotFills.value, {
-            ...presentation,
-            fullscreen: fullscreen.value,
-          })
-        : []),
-      ...(savedViewsState.value
+    return {
+      savedViews: savedViewsState.value
         ? renderFeatureSlot(SAVED_VIEWS_CONTROL, slotFills.value, {
             ...presentation,
             savedViews: savedViewsState.value,
           })
-        : []),
-    ];
+        : [],
+      display: [
+        ...(featureDensity.value
+          ? renderFeatureSlot(DENSITY_CONTROL, slotFills.value, {
+              ...presentation,
+              density: density.value,
+              onDensityChange: setDensity,
+            })
+          : []),
+        ...(fullscreen.value
+          ? renderFeatureSlot(FULLSCREEN_CONTROL, slotFills.value, {
+              ...presentation,
+              fullscreen: fullscreen.value,
+            })
+          : []),
+      ],
+    };
   };
+  /**
+   * The toolbar's controls in the order every binding draws them: the
+   * filters, saved views and columns first, then undo and redo, find, the
+   * display controls and the actions that export, print or open the
+   * palette.
+   */
   const renderToolbarExtras = (
     classNames?: Readonly<Record<string, string | undefined>>
+  ) => {
+    const view = renderViewControls(classNames);
+    return [
+      ...renderFeatureSlot(TOOLBAR_EXTRAS, slotFills.value, {
+        ...toolbarExtrasProps.value,
+        classNames,
+      }),
+      ...view.savedViews,
+      ...renderColumnMenu(classNames),
+      ...renderFeatureSlot(UNDO_REDO_CONTROL, slotFills.value, {
+        ...toolbarExtrasProps.value,
+        classNames,
+      }),
+      ...(find.value?.openBar
+        ? renderFeatureSlot(FIND_BUTTON, slotFills.value, {
+            label: table.labels.value.findInTable,
+            onClick: find.value.openBar,
+            className: classNames?.findButton,
+          })
+        : []),
+      ...view.display,
+      ...renderActionToolbar(classNames),
+    ];
+  };
+  const renderColumnMenu = (
+    classNames?: Readonly<Record<string, string | undefined>>
   ) => [
-    ...renderViewControls(classNames),
-    ...renderActionToolbar(classNames),
-    ...renderFeatureSlot(UNDO_REDO_CONTROL, slotFills.value, {
-      ...toolbarExtrasProps.value,
-      classNames,
-    }),
     ...(resolved.value.enableColumnMenu
       ? renderFeatureSlot(columnMenuSlotKey<TRow>(), slotFills.value, {
           allColumns: table.allColumns.value,
@@ -475,17 +503,6 @@ export function useDataTableShell<TRow>(
           sortDir: table.sortDir.value,
         })
       : []),
-    ...(find.value?.openBar
-      ? renderFeatureSlot(FIND_BUTTON, slotFills.value, {
-          label: table.labels.value.findInTable,
-          onClick: find.value.openBar,
-          className: classNames?.findButton,
-        })
-      : []),
-    ...renderFeatureSlot(TOOLBAR_EXTRAS, slotFills.value, {
-      ...toolbarExtrasProps.value,
-      classNames,
-    }),
   ];
   const publishedReorder = state.get(rowReorderModelKey<TRow>());
   const rowReorder = computed(() =>

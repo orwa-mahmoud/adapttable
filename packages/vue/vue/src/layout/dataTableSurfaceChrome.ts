@@ -271,6 +271,7 @@ function toolbarContent<TRow>(
               ),
             ]
           : null,
+        contentSlot(content.toolbar, {}),
         shell.renderToolbarExtras({ ...names }),
         shell.rowActions.value?.canAdd
           ? button(
@@ -283,7 +284,6 @@ function toolbarContent<TRow>(
               labels.addRow
             )
           : null,
-        contentSlot(content.toolbar, {}),
       ])
     : null;
 }

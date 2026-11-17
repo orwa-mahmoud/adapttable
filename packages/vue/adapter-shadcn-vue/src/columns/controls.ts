@@ -17,10 +17,19 @@ const icons = {
   more: Ellipsis,
   rename: Pencil,
 };
+/** A pinned column's pin fills; other glyphs are ghost, captions outlined. */
+function columnButtonVariant(
+  icon: ColumnMenuButtonProps["icon"],
+  attrs: ColumnMenuButtonProps["attrs"]
+): "default" | "ghost" | "outline" {
+  if (icon === "pin" && attrs["aria-pressed"] === true) return "default";
+  return icon ? "ghost" : "outline";
+}
+
 export function columnButton({ attrs, label, icon }: ColumnMenuButtonProps) {
   return shadcnAction(
     {
-      variant: icon ? "ghost" : "outline",
+      variant: columnButtonVariant(icon, attrs),
       size: icon ? "icon-sm" : "sm",
       ...attrs,
     },

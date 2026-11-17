@@ -249,6 +249,22 @@ select[data-adapttable-cdk-control][data-adapttable-part="edit-cell-editor"] {
     var(--adapt-cdk-background, Canvas)
   );
 }
+/* Pinned cells stick over the cells scrolling beneath them, so they paint the
+ * table surface, and the row's hover surface while it is hovered. */
+[data-adapttable-kit="angular-cdk"]
+  [data-adapttable-part="row"]
+  > td[data-pinned] {
+  background: var(--adapt-cdk-background, Canvas);
+}
+[data-adapttable-kit="angular-cdk"]
+  [data-adapttable-part="row"]:hover
+  > td[data-pinned] {
+  background: color-mix(
+    in srgb,
+    var(--adapt-cdk-color, CanvasText) 3%,
+    var(--adapt-cdk-background, Canvas)
+  );
+}
 button[data-adapttable-cdk-control] {
   cursor: pointer;
   transition: background-color 0.15s;
@@ -322,4 +338,11 @@ button[data-adapttable-cdk-control]:hover:not(:disabled) {
   [data-adapttable-part="resize-handle"]:focus-visible {
   outline: 2px solid var(--adapt-cdk-accent, Highlight);
   outline-offset: -2px;
+}
+
+/* A pinned column's pin button fills with the accent colour. */
+button[data-adapttable-cdk-control][data-adapttable-part="column-menu-pin"][aria-pressed="true"] {
+  border-color: var(--adapt-cdk-accent, #3158b6);
+  background: var(--adapt-cdk-accent, #3158b6);
+  color: var(--adapt-cdk-on-accent, #fff);
 }
