@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="TRow">
-import type { FilterTreeBuilderProps } from "@adapttable/core/binding";
 import {
+  type FilterTreeBuilderProps,
   FilterTreeChrome,
   type FilterTreeSlots,
   useFilterTreeModel,
@@ -9,9 +9,35 @@ import { h, type VNodeChild } from "vue";
 
 /** The binding owns recursive layout and tree writes; this kit supplies native controls. */
 defineOptions({ name: "NativeFilterTree" });
-const { defaultExpanded = undefined, ...props } =
-  defineProps<FilterTreeBuilderProps<TRow>>();
-const model = useFilterTreeModel(() => ({ ...props, defaultExpanded }));
+// Vue's props compiler reads the keys from this literal; each type is the
+// binding's own, and `defaultExpanded` stays a Boolean prop.
+const {
+  labels = undefined,
+  classNames = undefined,
+  registry = undefined,
+  defaultExpanded = undefined,
+  ...props
+} = defineProps<{
+  readonly defs: FilterTreeBuilderProps<TRow>["defs"];
+  readonly source: FilterTreeBuilderProps<TRow>["source"];
+  readonly labels?: Exclude<FilterTreeBuilderProps<TRow>["labels"], undefined>;
+  readonly classNames?: Exclude<
+    FilterTreeBuilderProps<TRow>["classNames"],
+    undefined
+  >;
+  readonly registry?: Exclude<
+    FilterTreeBuilderProps<TRow>["registry"],
+    undefined
+  >;
+  readonly defaultExpanded?: boolean;
+}>();
+const model = useFilterTreeModel(() => ({
+  ...props,
+  labels,
+  classNames,
+  registry,
+  defaultExpanded,
+}));
 const controls: FilterTreeSlots<VNodeChild> = {
   Select: (control) =>
     h(

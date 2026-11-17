@@ -1818,9 +1818,6 @@ importers:
 
   packages/vue/adapter-vue-unstyled:
     dependencies:
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       '@adapttable/vue':
         specifier: 0.5.0
         version: link:../vue
