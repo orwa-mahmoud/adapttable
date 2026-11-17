@@ -7,7 +7,11 @@
  * alone, so it is driven here the way the approval strip drives it.
  */
 import type { AgentApply, AgentSession, ExecuteResult } from "@adapttable/ai";
-import { type ActionAiOptions,type FeatureState, type TableRuntimeView  } from "@adapttable/angular";
+import {
+  type ActionAiOptions,
+  type FeatureState,
+  type TableRuntimeView,
+} from "@adapttable/angular";
 import {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
