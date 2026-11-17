@@ -1,5 +1,9 @@
 import type { RowActionControl } from "@adapttable/vue";
-import { type RowActionsLayout, withProps } from "@adapttable/vue/adapter";
+import {
+  rowActionContent,
+  type RowActionsLayout,
+  withProps,
+} from "@adapttable/vue/adapter";
 import { Ellipsis } from "@lucide/vue";
 import {
   DropdownMenuContent,
@@ -42,7 +46,7 @@ export const ShadcnRowActions = /* @__PURE__ */ withProps(
         Fragment,
         null,
         props.controls.map((action) =>
-          shadcnAction(attrs(action), action.label)
+          shadcnAction(attrs(action), rowActionContent(action))
         )
       );
     const item = (action: RowActionControl<TRow>) =>

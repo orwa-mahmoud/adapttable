@@ -1,5 +1,9 @@
 import type { RowActionControl } from "@adapttable/vue";
-import { type RowActionsLayout, withProps } from "@adapttable/vue/adapter";
+import {
+  rowActionContent,
+  type RowActionsLayout,
+  withProps,
+} from "@adapttable/vue/adapter";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -42,7 +46,7 @@ export const RekaRowActions = /* @__PURE__ */ withProps(
         Fragment,
         null,
         props.controls.map((action) =>
-          rekaButton(actionAttrs(action), action.label)
+          rekaButton(actionAttrs(action), rowActionContent(action))
         )
       );
     const item = (action: RowActionControl<TRow>) =>

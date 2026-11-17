@@ -1,8 +1,9 @@
 <script setup lang="ts" generic="TRow">
 import type { Attrs, RowActionControl } from "@adapttable/vue";
-import type {
-  DataTableClassNames,
-  RowActionsLayout,
+import {
+  type DataTableClassNames,
+  RowActionContent,
+  type RowActionsLayout,
 } from "@adapttable/vue/adapter";
 import {
   type ButtonHTMLAttributes,
@@ -85,7 +86,7 @@ function actionAttrs(action: RowActionControl<TRow>, menu: boolean): Attrs {
       :key="action.key"
       :component="VBtn"
       :attrs="actionAttrs(action, false)"
-      >{{ action.label }}</VuetifySurface
-    >
+      ><RowActionContent :control="action"
+    /></VuetifySurface>
   </template>
 </template>

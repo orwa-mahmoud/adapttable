@@ -89,7 +89,15 @@
       [disabled]="item.disabled"
       (click)="run($event, item.action)"
     >
-      <span>{{ item.action.label }} </span>
+      @if (actionIcon(item.action); as icon) {
+        @if (icon.template; as template) {
+          <ng-container [ngTemplateOutlet]="template" />
+        } @else if (icon.component; as component) {
+          <ng-container [ngComponentOutlet]="component" />
+        }
+      } @else {
+        <span>{{ item.action.label }} </span>
+      }
     </button>
   }
 }

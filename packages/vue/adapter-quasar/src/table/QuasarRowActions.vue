@@ -3,6 +3,8 @@ import type { RowActionControl } from "@adapttable/vue";
 import {
   type DataTableClassNames,
   mergeVueAttrs,
+  RowActionContent,
+  rowActionIconOnly,
   type RowActionsLayout,
 } from "@adapttable/vue/adapter";
 import { QMenu } from "quasar";
@@ -88,7 +90,8 @@ function actionAttrs(action: RowActionControl<TRow>) {
       v-for="action in controls"
       :key="action.key"
       :attrs="actionAttrs(action)"
-      :label="action.label"
-    />
+      :label="rowActionIconOnly(action) ? undefined : action.label"
+      ><RowActionContent v-if="rowActionIconOnly(action)" :control="action"
+    /></QuasarButton>
   </template>
 </template>

@@ -2,6 +2,7 @@ import type { RowActionControl } from "@adapttable/vue";
 import {
   createMenuNavigation,
   mergeVueAttrs,
+  rowActionContent,
   scheduleTick,
   useScopeActivity,
   withProps,
@@ -99,10 +100,8 @@ const NuxtRowActionsPresentation = /*#__PURE__*/ defineComponent(
           Fragment,
           null,
           props.controls.map((action) =>
-            h(
-              NuxtButton,
-              { key: action.key, attrs: actionAttrs(action) },
-              () => action.label
+            h(NuxtButton, { key: action.key, attrs: actionAttrs(action) }, () =>
+              rowActionContent(action)
             )
           )
         );

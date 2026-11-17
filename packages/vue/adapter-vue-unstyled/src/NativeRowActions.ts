@@ -1,5 +1,9 @@
 import type { RowActionControl } from "@adapttable/vue";
-import { type RowActionsLayout, withProps } from "@adapttable/vue/adapter";
+import {
+  rowActionContent,
+  type RowActionsLayout,
+  withProps,
+} from "@adapttable/vue/adapter";
 import { Fragment, h, mergeProps, type VNodeChild } from "vue";
 
 import type { DataTableClassNames } from "./types";
@@ -31,7 +35,7 @@ export const NativeRowActions = /* @__PURE__ */ withProps(
           },
           action.attrs
         ),
-        action.label
+        props.layout === "menu" ? action.label : [rowActionContent(action)]
       )
     );
     if (props.layout !== "menu" || actions.length === 0)

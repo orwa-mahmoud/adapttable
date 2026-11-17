@@ -284,6 +284,7 @@ export {
   type TableSurfaceView,
 } from "./layout/tableSurfaceHost";
 export { AdaptExtraRowContent } from "./rows/extraRowContent";
+export { type RowActionIcon, rowActionIcon } from "./rows/rowActionIcon";
 export {
   injectRowReorder,
   type RowReorderState,
