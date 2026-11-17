@@ -5,13 +5,11 @@
 ```ts
 
 import { ChecklistFilterProps } from '@adapttable/vue/adapter';
-import { ChecklistFilterProps as ChecklistFilterProps_2 } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/vue';
 import { FilterFieldOptions } from '@adapttable/vue/adapter';
 import { FilterOption } from '@adapttable/vue';
 import { FiltersOptions } from '@adapttable/vue/features';
 import { FilterTreeBuilderProps } from '@adapttable/vue/adapter';
-import { FilterTreeBuilderProps as FilterTreeBuilderProps_2 } from '@adapttable/core/binding';
 import { filterTypes } from '@adapttable/vue/features';
 import { FilterTypeSpec } from '@adapttable/vue';
 import { PublicProps } from 'vue';
@@ -33,7 +31,12 @@ const __VLS_export$1: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup
 
 // @public (undocumented)
 const __VLS_export$2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$2<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
-    props: PublicProps & __VLS_PrettifyLocal$2<ChecklistFilterProps_2<TRow>> & (typeof globalThis extends {
+    props: PublicProps & __VLS_PrettifyLocal$2<{
+        readonly def: ChecklistFilterProps<TRow>["def"];
+        readonly source: ChecklistFilterProps<TRow>["source"];
+        readonly labels?: Exclude<ChecklistFilterProps<TRow>["labels"], undefined>;
+        readonly classNames?: Exclude<ChecklistFilterProps<TRow>["classNames"], undefined>;
+    }> & (typeof globalThis extends {
         __VLS_PROPS_FALLBACK: infer P;
     } ? P : {});
     expose: (exposed: {}) => void;
@@ -46,7 +49,14 @@ const __VLS_export$2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup
 
 // @public (undocumented)
 const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
-    props: PublicProps & __VLS_PrettifyLocal<FilterTreeBuilderProps_2<TRow>> & (typeof globalThis extends {
+    props: PublicProps & __VLS_PrettifyLocal<{
+        readonly defs: FilterTreeBuilderProps<TRow>["defs"];
+        readonly source: FilterTreeBuilderProps<TRow>["source"];
+        readonly labels?: Exclude<FilterTreeBuilderProps<TRow>["labels"], undefined>;
+        readonly classNames?: Exclude<FilterTreeBuilderProps<TRow>["classNames"], undefined>;
+        readonly registry?: Exclude<FilterTreeBuilderProps<TRow>["registry"], undefined>;
+        readonly defaultExpanded?: boolean;
+    }> & (typeof globalThis extends {
         __VLS_PROPS_FALLBACK: infer P;
     } ? P : {});
     expose: (exposed: {}) => void;
