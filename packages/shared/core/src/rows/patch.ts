@@ -100,13 +100,74 @@ function insertIndex(at: number | undefined, length: number): number {
   return Math.min(Math.max(resolved, 0), length);
 }
 
-/** Where a row with this id sits, or -1. */
-function indexOfId<TRow>(
+/**
+ * Row lookup by id for one batch. The first lookup walks the list as a
+ * single patch always has. Later ones read each row's id at most once: the
+ * ids read so far are kept in list order, following every splice the batch
+ * makes, and a map of first positions answers in constant time until a
+ * splice inside the read prefix moves them.
+ */
+interface RowIds<TRow> {
+  /** Where the first row with this id sits, or -1. */
+  find(id: string): number;
+  /** A row with this id now sits at `index`. */
+  inserted(index: number, id: string): void;
+  /** The row at `index` left the list. */
+  removed(index: number): void;
+  /** The row at `index` was replaced by `row`. */
+  replaced(index: number, row: TRow): void;
+}
+
+function rowIds<TRow>(
   list: readonly TRow[],
-  id: string,
   getRowId: (row: TRow) => string
-): number {
-  return list.findIndex((row) => getRowId(row) === id);
+): RowIds<TRow> {
+  const ids: string[] = [];
+  let firstAt: Map<string, number> | undefined = new Map();
+  let lookups = 0;
+  const record = (id: string): void => {
+    if (firstAt && !firstAt.has(id)) firstAt.set(id, ids.length);
+    ids.push(id);
+  };
+  const cached = (id: string): number =>
+    firstAt ? (firstAt.get(id) ?? -1) : ids.indexOf(id);
+  return {
+    find(id) {
+      lookups += 1;
+      if (lookups === 1) return list.findIndex((row) => getRowId(row) === id);
+      const known = cached(id);
+      if (known !== -1) return known;
+      while (ids.length < list.length) {
+        const next = getRowId(list[ids.length]!);
+        record(next);
+        if (next === id) return ids.length - 1;
+      }
+      return -1;
+    },
+    inserted(index, id) {
+      if (index === ids.length) record(id);
+      else if (index < ids.length) {
+        ids.splice(index, 0, id);
+        firstAt = undefined;
+      }
+    },
+    removed(index) {
+      if (index === ids.length - 1) {
+        const id = ids.pop()!;
+        if (firstAt?.get(id) === index) firstAt.delete(id);
+      } else if (index < ids.length) {
+        ids.splice(index, 1);
+        firstAt = undefined;
+      }
+    },
+    replaced(index, row) {
+      if (index >= ids.length) return;
+      const id = getRowId(row);
+      if (ids[index] === id) return;
+      ids[index] = id;
+      firstAt = undefined;
+    },
+  };
 }
 
 const PATCH_LOGS = /* @__PURE__ */ new WeakMap<WeakKey, RowPatchLog<unknown>>();
@@ -159,27 +220,32 @@ function rememberLog<TRow>(
 function applyOne<TRow>(
   list: TRow[],
   patch: RowPatch<TRow>,
-  getRowId: (row: TRow) => string
+  getRowId: (row: TRow) => string,
+  ids: RowIds<TRow>
 ): RowPatchEvent<TRow> | undefined {
   if (patch.type === "insert") {
     const index = insertIndex(patch.at, list.length);
+    const id = getRowId(patch.row);
     list.splice(index, 0, patch.row);
-    return { type: "insert", id: getRowId(patch.row), row: patch.row, index };
+    ids.inserted(index, id);
+    return { type: "insert", id, row: patch.row, index };
   }
 
   if (patch.type === "remove") {
-    const index = indexOfId(list, patch.id, getRowId);
+    const index = ids.find(patch.id);
     if (index === -1) return undefined;
     const row = list[index]!;
     list.splice(index, 1);
+    ids.removed(index);
     return { type: "remove", id: patch.id, row, index };
   }
 
   if (patch.type === "upsert") {
     const id = getRowId(patch.row);
-    const index = indexOfId(list, id, getRowId);
+    const index = ids.find(id);
     if (index === -1) {
       list.push(patch.row);
+      ids.inserted(list.length - 1, id);
       return { type: "insert", id, row: patch.row, index: list.length - 1 };
     }
     // Re-upserting the row already in place is not a change, and replacing it
@@ -190,7 +256,7 @@ function applyOne<TRow>(
     return { type: "update", id, prev, next: patch.row, index };
   }
 
-  const index = indexOfId(list, patch.id, getRowId);
+  const index = ids.find(patch.id);
   const existing = list[index];
   if (!existing) return undefined;
   // An update that changes nothing must not replace the row object, or every
@@ -198,6 +264,8 @@ function applyOne<TRow>(
   if (alreadyApplied(existing, patch.changes)) return undefined;
   const next = { ...existing, ...patch.changes };
   list[index] = next;
+  // The changes may hold a new id; a later patch looks the row up by it.
+  ids.replaced(index, next);
   return { type: "update", id: patch.id, prev: existing, next, index };
 }
 
@@ -242,10 +310,11 @@ export function applyRowPatchesWithLog<TRow>(
   getRowId: (row: TRow) => string
 ): RowPatchLog<TRow> {
   const working = [...rows];
+  const ids = rowIds(working, getRowId);
   const events: RowPatchEvent<TRow>[] = [];
   for (const patch of patches) {
     // Every patch runs, so a later one acts on what an earlier one did.
-    const event = applyOne(working, patch, getRowId);
+    const event = applyOne(working, patch, getRowId, ids);
     if (event) events.push(event);
   }
   const log: RowPatchLog<TRow> = {
