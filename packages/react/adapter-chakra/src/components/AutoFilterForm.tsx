@@ -51,6 +51,7 @@ function GroupField({
   id,
   children,
 }: Readonly<{ label: ReactNode; id: string; children: ReactNode }>) {
+  "use no memo";
   return (
     <Stack gap={4} data-adapttable-part="filter-field">
       <Text id={id} as="span" fontSize="sm">
@@ -87,6 +88,7 @@ function RelativeTokenField({
   value: string;
   onValue: (next: string) => void;
 }>) {
+  "use no memo";
   const { preset, n } = splitRelativeToken(value);
   const counted = preset === "last" || preset === "next";
   return (
@@ -141,6 +143,7 @@ function RangeField<TRow>({
   source: FilterFormSource<TRow>;
   labels: Required<TableLabels>;
 }>) {
+  "use no memo";
   const id = useId();
   const { label, ops, opLabelKeys, inputType, arity, op, setOp, a, b, write } =
     useRangeFilterWidget(def, source);
@@ -238,6 +241,7 @@ function TextFilterField<TRow>({
   source: FilterFormSource<TRow>;
   labels: Required<TableLabels>;
 }>) {
+  "use no memo";
   const { label, ops, opLabelKeys, op, value, needsValue, write } =
     useTextFilterWidget(def, source);
   return (
@@ -288,6 +292,7 @@ function BooleanFilterField<TRow>({
   source: FilterFormSource<TRow>;
   labels: Required<TableLabels>;
 }>) {
+  "use no memo";
   const { label, choice, write } = useBooleanFilterWidget(def, source);
   return (
     <FormField label={label} data-adapttable-part="filter-field">
@@ -323,6 +328,7 @@ function AutoFilterField<TRow>({
   accentColor?: string;
   registry: FilterTypeRegistry;
 }>): ReactElement | null {
+  "use no memo";
   const id = useId();
   const { extra, setExtra } = source;
   const label = filterLabel(def);
@@ -429,6 +435,8 @@ export function AutoFilterForm<TRow>({
   labels,
   registry = defaultFilterRegistry,
 }: Readonly<AutoFilterFormProps<TRow>>) {
+  // Every field reads the live source, so a cache would miss on each change.
+  "use no memo";
   const resolved = resolveTableLabels(labels, FORM_LABELS);
   return (
     <Stack gap={6}>

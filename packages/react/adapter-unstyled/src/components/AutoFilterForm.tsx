@@ -81,6 +81,7 @@ function GroupField({
   classNames,
   children,
 }: Readonly<GroupFieldProps>) {
+  "use no memo";
   const id = useId();
   return (
     <fieldset
@@ -107,6 +108,7 @@ function TextField<TRow>({
   classNames,
   labels,
 }: Readonly<DefFieldProps<TRow> & { labels: Required<TableLabels> }>) {
+  "use no memo";
   const { label, ops, opLabelKeys, op, value, needsValue, write } =
     useTextFilterWidget(def, source);
   return (
@@ -151,6 +153,7 @@ function BooleanField<TRow>({
   classNames,
   labels,
 }: Readonly<DefFieldProps<TRow> & { labels: Required<TableLabels> }>) {
+  "use no memo";
   const { label, choice, write } = useBooleanFilterWidget(def, source);
   return (
     <label
@@ -188,6 +191,7 @@ function SelectField<TRow>({
   classNames,
   labels,
 }: Readonly<DefFieldProps<TRow> & { labels: Required<TableLabels> }>) {
+  "use no memo";
   // `def.options` may be a static array, an async loader, or a leftover
   // "auto" — never map it directly; the hook resolves all three shapes.
   const { options, loading } = useFilterOptions(def);
@@ -233,6 +237,7 @@ function MultiSelectField<TRow>({
   source,
   classNames,
 }: Readonly<DefFieldProps<TRow>>) {
+  "use no memo";
   const selected = selectedValues(source.extra[def.key]);
   // Same contract as SelectField: the hook resolves arrays / loaders / "auto".
   const { options, loading } = useFilterOptions(def);
@@ -301,6 +306,7 @@ function RangeValueInput({
   onValue,
   classNames,
 }: Readonly<RangeValueInputProps>) {
+  "use no memo";
   return (
     <input
       type={type}
@@ -329,6 +335,7 @@ function RelativeTokenField({
   onValue,
   classNames,
 }: Readonly<RelativeTokenFieldProps>) {
+  "use no memo";
   const { preset, n } = splitRelativeToken(value);
   const counted = preset === "last" || preset === "next";
   return (
@@ -385,6 +392,7 @@ function RangeField<TRow>({
   classNames,
   labels,
 }: Readonly<RangeFieldProps<TRow>>) {
+  "use no memo";
   const { label, ops, opLabelKeys, inputType, arity, op, setOp, a, b, write } =
     useRangeFilterWidget(def, source);
   const boundType = inputType === "text" ? "text" : inputType;
@@ -472,6 +480,7 @@ function FilterField<TRow>({
   labels,
   registry,
 }: Readonly<FilterFieldProps<TRow>>): ReactElement | null {
+  "use no memo";
   const spec = registry.get(def.type);
   const custom = renderRegisteredFilter(def, source, labels, registry);
   if (custom) return custom as ReactElement;
@@ -571,6 +580,8 @@ export function AutoFilterForm<TRow>({
   labels,
   registry = defaultFilterRegistry,
 }: Readonly<AutoFilterFormProps<TRow>>) {
+  // Every field reads the live source, so a cache would miss on each change.
+  "use no memo";
   const resolvedLabels = resolveTableLabels(labels, FORM_LABELS);
   return (
     <>
