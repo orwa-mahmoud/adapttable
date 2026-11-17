@@ -8,7 +8,13 @@
     "types": ["node", "vitest/globals"],
     "paths": {
       "@adapttable/ngx-bootstrap": ["./src/index.ts"],
-      "@adapttable/ngx-bootstrap/*": ["./*/index.ts"]
+      "@adapttable/ngx-bootstrap/*": ["./*/index.ts"],
+      "@adapttable/angular-unstyled": [
+        "../adapter-angular-unstyled/src/index.ts"
+      ],
+      "@adapttable/angular-unstyled/*": [
+        "../adapter-angular-unstyled/*/index.ts"
+      ]
     },
     "allowJs": true,
     "checkJs": true

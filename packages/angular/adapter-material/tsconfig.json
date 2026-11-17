@@ -8,7 +8,13 @@
     "types": ["node", "vitest/globals"],
     "paths": {
       "@adapttable/angular-material": ["./src/index.ts"],
-      "@adapttable/angular-material/*": ["./*/index.ts"]
+      "@adapttable/angular-material/*": ["./*/index.ts"],
+      "@adapttable/angular-unstyled": [
+        "../adapter-angular-unstyled/src/index.ts"
+      ],
+      "@adapttable/angular-unstyled/*": [
+        "../adapter-angular-unstyled/*/index.ts"
+      ]
     }
   },
   "angularCompilerOptions": {
