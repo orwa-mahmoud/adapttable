@@ -75,6 +75,24 @@ describe("useFrontendData", () => {
     expect(result.current.rows.map((r) => r.id)).toEqual(["b"]);
   });
 
+  it("searches the new field when getSearchText changes on the same rows", () => {
+    const adapter = createMemoryAdapter("q=7");
+    const { result, rerender } = renderHook(
+      ({ read }: { read: (row: Row) => string }) =>
+        useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: adapter,
+          paginationMode: "paged",
+          getSearchText: read,
+        }),
+      { initialProps: { read: (row: Row) => row.name } }
+    );
+    expect(result.current.rows).toEqual([]);
+    rerender({ read: (row: Row) => String(row.count) });
+    expect(result.current.rows.map((r) => r.id)).toEqual(["b"]);
+    expect(result.current.total).toBe(1);
+  });
+
   it("filters with a custom getSearchText", () => {
     const { result } = render("q=3", {
       getSearchText: (r) => String(r.count),

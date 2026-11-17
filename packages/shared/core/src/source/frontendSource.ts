@@ -30,7 +30,12 @@ import {
   sessionEvaluator,
   stageSessionEvaluator,
 } from "../engine/tableSession";
-import { rowPatchLog, rowPatchLogStartsAt } from "../rows/patch";
+import {
+  type RowPatchEvent,
+  type RowPatchLog,
+  rowPatchLog,
+  rowPatchLogStartsAt,
+} from "../rows/patch";
 import type { PaginationMode, ResolvedPaginationMode } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { stableKey } from "../utils/stableKey";
@@ -230,11 +235,20 @@ interface HeldFrame<TRow> {
   readonly data: readonly TRow[] | undefined;
   readonly fingerprint: string | undefined;
   readonly filterKey: string | number | undefined;
+  /** The search reader the view was evaluated with, when known. */
+  readonly read: ((row: TRow) => string) | undefined;
 }
 
 /** What one complete update staged, and the engine view it left behind. */
 interface StagedFrame<TRow> extends HeldFrame<TRow> {
   readonly view: object | undefined;
+}
+
+/** The row a patch event took out of the dataset, if it took one out. */
+function replacedRow<TRow>(event: RowPatchEvent<TRow>): TRow | undefined {
+  if (event.type === "remove") return event.row;
+  if (event.type === "update") return event.prev;
+  return undefined;
 }
 
 /** Narrows an accessor's value to a sortable primitive, else `null`. */
@@ -306,18 +320,23 @@ export function createFrontendSourceWith<TRow>(
   let getSearchText: (row: TRow) => string = defaultSearchText;
   /**
    * Search text by row id, for the rows of {@link searchCacheData}. An entry
-   * answers only for the row object it was read from, so text read from
-   * rows another dataset held — a patch, an update that threw, a candidate
-   * that was dropped — is read again rather than reused.
+   * answers only for the row object it was read from and the reader that
+   * read it, so text read from rows another dataset held — a patch, an
+   * update that threw, a candidate that was dropped — or by a reader the
+   * host has since replaced is read again rather than reused.
    */
-  const searchCache = new Map<string, { row: TRow; text: string }>();
+  const searchCache = new Map<
+    string,
+    { row: TRow; read: (row: TRow) => string; text: string }
+  >();
   let searchCacheData: readonly TRow[] | undefined;
   const projectSearchText = (row: TRow): string => {
     const id = getRowId(row);
     const cached = searchCache.get(id);
-    if (cached?.row === row) return cached.text;
+    if (cached?.row === row && cached.read === getSearchText)
+      return cached.text;
     const text = getSearchText(row);
-    searchCache.set(id, { row, text });
+    searchCache.set(id, { row, read: getSearchText, text });
     return text;
   };
 
@@ -329,16 +348,35 @@ export function createFrontendSourceWith<TRow>(
   function pointSearchCacheAt(rows: readonly TRow[]): void {
     if (rows === searchCacheData) return;
     const log = rowPatchLog(rows);
-    const patched =
-      log && searchCacheData && rowPatchLogStartsAt(log, searchCacheData);
-    if (!patched) searchCache.clear();
+    if (log && searchCacheData && rowPatchLogStartsAt(log, searchCacheData)) {
+      forgetPatchedRows(log);
+    } else {
+      searchCache.clear();
+    }
     searchCacheData = rows;
   }
+
+  /** Drop the text of every row a patch removed or replaced. */
+  function forgetPatchedRows(log: RowPatchLog<TRow>): void {
+    for (const event of log.events) {
+      const gone = replacedRow(event);
+      if (gone !== undefined && searchCache.get(event.id)?.row === gone) {
+        searchCache.delete(event.id);
+      }
+    }
+  }
+
   /** Stages since creation: revisions move once per candidate, not per stage. */
   let stages = 0;
   let searched:
-    | { data: readonly TRow[]; search: string; rows: readonly TRow[] }
+    | {
+        data: readonly TRow[];
+        search: string;
+        read: (row: TRow) => string;
+        rows: readonly TRow[];
+      }
     | undefined;
+
   let page:
     | { reader: TableEngineReader<TRow>; key: string; rows: readonly TRow[] }
     | undefined;
@@ -420,6 +458,7 @@ export function createFrontendSourceWith<TRow>(
       data: base.data as readonly TRow[],
       fingerprint: current?.fingerprint,
       filterKey: current?.filterKey,
+      read: current?.read,
     };
   }
 
@@ -427,7 +466,11 @@ export function createFrontendSourceWith<TRow>(
     rows: readonly TRow[],
     search: string
   ): readonly TRow[] {
-    if (searched?.data === rows && searched.search === search) {
+    if (
+      searched?.data === rows &&
+      searched.search === search &&
+      searched.read === getSearchText
+    ) {
       return searched.rows;
     }
     const term = search.trim().toLowerCase();
@@ -436,7 +479,7 @@ export function createFrontendSourceWith<TRow>(
           projectSearchText(row).toLowerCase().includes(term)
         )
       : rows;
-    searched = { data: rows, search, rows: next };
+    searched = { data: rows, search, read: getSearchText, rows: next };
     return next;
   }
 
@@ -476,9 +519,16 @@ export function createFrontendSourceWith<TRow>(
     // strategy and the page window — so the engine can never describe a
     // different window than the rows this frame returns.
     const nextFingerprint = viewFingerprint(config, view);
+    // A new reader changes which rows a search keeps, without changing the
+    // query, so an active search is evaluated again against it.
+    const searchReaderChanged =
+      held !== undefined &&
+      held.read !== getSearchText &&
+      view.search.trim() !== "";
     const filtersChanged =
-      held?.fingerprint !== undefined &&
-      !Object.is(held.filterKey, config.filterKey);
+      (held?.fingerprint !== undefined &&
+        !Object.is(held.filterKey, config.filterKey)) ||
+      searchReaderChanged;
     if (held?.fingerprint !== nextFingerprint || filtersChanged) {
       table.stageCandidate({
         ...viewConfig,
@@ -538,6 +588,7 @@ export function createFrontendSourceWith<TRow>(
       data: config.data,
       fingerprint: nextFingerprint,
       filterKey: config.filterKey,
+      read: getSearchText,
     };
 
     return {
