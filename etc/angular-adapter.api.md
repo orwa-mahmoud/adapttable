@@ -2355,6 +2355,7 @@ export class AdaptDesktopStructure<TRow> extends AdaptDesktopTableModel<TRow> {
     readonly embedded: InputSignal<boolean>;
     readonly railMin: InputSignal<number>;
     protected railOffset(rail: "expand" | "reorder" | "selection"): string;
+    protected railPin(): "start" | null;
     protected railStyle(selection: boolean, offset: string, header: boolean): string;
     protected rowBox(content: TemplateRef<unknown>, part: string | null, attrs: Attrs, wiring?: {
         readonly inert?: boolean;
@@ -6061,6 +6062,18 @@ export { ROW_REORDER_ANNOUNCER }
 export { ROW_REORDER_BUTTONS }
 
 export { ROW_REORDER_HANDLE }
+
+// @public
+export type RowActionIcon = {
+    readonly template: TemplateRef<unknown>;
+    readonly component?: never;
+} | {
+    readonly component: Type<unknown>;
+    readonly template?: never;
+};
+
+// @public
+export function rowActionIcon(action: Pick<RowAction<never>, "icon">): RowActionIcon | null;
 
 // @public
 export interface RowActionsCell<TRow> {

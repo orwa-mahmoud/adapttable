@@ -365,7 +365,12 @@ export type {
   HeadlessBodySlot,
   HeadlessRowsOptions,
 } from "./rows/headlessRowsModel";
-export { rowActionControls } from "./rows/rowActionControls";
+export {
+  RowActionContent,
+  rowActionContent,
+  rowActionControls,
+  rowActionIconOnly,
+} from "./rows/rowActionControls";
 export { scheduleTick } from "./scheduleTick";
 export type { SelectionCheckboxControl } from "./selection/checkboxControl";
 export {

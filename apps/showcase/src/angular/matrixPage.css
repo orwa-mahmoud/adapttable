@@ -257,8 +257,14 @@ adapt-showcase-matrix-page *::after {
   padding-block: var(--sp-1);
 }
 
-.mx-ng--unstyled [data-adapttable-part="cell"][data-pinned] {
+.mx-ng--unstyled [data-adapttable-part="row"] > [data-pinned] {
   background: var(--ng-row-surface, var(--ng-surface));
+}
+
+.mx-ng--unstyled [data-adapttable-part="column-menu-pin"][aria-pressed="true"] {
+  border-color: var(--ng-accent);
+  background: var(--ng-accent);
+  color: var(--ng-surface);
 }
 
 .mx-ng--unstyled [data-adapttable-part="row"]:hover {

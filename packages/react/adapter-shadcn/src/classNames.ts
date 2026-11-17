@@ -204,7 +204,7 @@ export const shadcnClassNames = {
   columnMenuVisibility:
     "inline-grid place-items-center rounded p-[3px] text-muted-foreground hover:bg-muted hover:text-foreground",
   columnMenuPin:
-    "inline-grid place-items-center rounded p-[3px] text-muted-foreground hover:bg-muted data-[active]:text-primary",
+    "inline-grid place-items-center rounded p-[3px] text-muted-foreground hover:bg-muted data-[active]:bg-primary data-[active]:text-primary-foreground data-[active]:hover:bg-primary/90",
   columnMenuReset:
     "mt-1.5 w-full border-t border-border px-2 pb-1 pt-2 text-start text-[13px] font-medium text-primary hover:opacity-80",
   columnMenuAutoSize:

@@ -74,7 +74,7 @@
   transform: translateY(-1px);
 }
 .demo-kit-cards .adtab:focus-visible,
-.demo-kit-cards .adtab:focus-within {
+.demo-kit-cards .adtab:has(:focus-visible) {
   outline: 2px solid var(--c);
   outline-offset: 3px;
 }
@@ -85,205 +85,291 @@
     0 4px 14px color-mix(in srgb, var(--c) 15%, transparent);
   background: var(--page-surface);
 }
+/* Setup: one slim bar, the command and its docs side by side. */
 .demo-setup {
-  padding: 16px 18px;
-  margin-block: 16px;
-  border: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--page-border);
   border-radius: 12px;
-  background: color-mix(in srgb, var(--brand) 7%, var(--page-surface));
+  background: color-mix(in srgb, var(--page-surface) 88%, var(--brand) 12%);
 }
 .demo-setup__main {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
+  align-items: center;
+  gap: 10px 14px;
+  min-inline-size: 0;
 }
 .demo-setup__command {
   direction: ltr;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-inline-size: 0;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  min-block-size: 46px;
+  padding: 0 8px 0 16px;
+  border: 1px solid var(--page-border);
+  border-radius: 11px;
   background: var(--page-surface);
+  box-shadow: var(--shadow-card);
+  font-family: "JetBrains Mono", monospace;
 }
 .demo-setup__command > span {
   color: var(--brand);
   font-weight: 700;
 }
 .demo-setup code {
-  font-size: 13px;
+  font-size: 14px;
+  color: var(--ink);
   overflow-wrap: anywhere;
 }
 .demo-setup__command code {
   min-inline-size: 0;
 }
-.demo-setup__command button,
+.demo-setup__command button {
+  display: inline-grid;
+  place-items: center;
+  min-block-size: 30px;
+  padding: 0 10px;
+  flex: none;
+  border: 0;
+  border-radius: 7px;
+  background: var(--page-surface-2);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.demo-setup__command button:hover {
+  color: var(--ink);
+}
 .demo-setup__docs {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-block-size: 40px;
-  padding: 8px 12px;
-  flex: none;
-  border: 1px solid var(--line);
+  min-block-size: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--page-border);
   border-radius: 8px;
   background: var(--page-surface);
   color: var(--ink);
-  font: inherit;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
-  cursor: pointer;
+}
+.demo-setup__docs:hover {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--page-border));
 }
 .demo-setup :is(button, a, summary):focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 3px;
 }
+/* The copy result is announced; the button already shows it. */
 .demo-setup__feedback {
-  font-size: 12px;
-  color: var(--ink-2);
-  margin: 8px 0 0;
-}
-.demo-setup__feedback:empty {
-  display: none;
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .demo-setup__direct {
-  margin-block-start: 12px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ink-2);
+}
+.demo-setup__direct[open] {
+  flex-basis: 100%;
 }
 .demo-setup__direct summary {
   cursor: pointer;
-  padding-block: 4px;
   inline-size: fit-content;
+  padding-block: 4px;
 }
 .demo-setup__direct code {
   display: block;
-  margin-block: 10px 6px;
-  color: var(--ink);
+  margin-block: 8px 6px;
 }
 .demo-setup__direct p {
   margin: 0;
   max-inline-size: 80ch;
 }
+
+/* Preferences: one bar joined to the table below it, each choice a small
+ * label beside a segmented control. */
 :is(.angular-demo, .vue-demo) .demo-preferences {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  align-items: start;
-  gap: 20px 24px;
-  padding: 20px 22px;
-  margin-block: 16px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px 10px;
+  margin: 0 0 -1px;
+  padding: 16px 18px;
+  border: 1px solid var(--page-border);
+  border-radius: 14px 14px 0 0;
   background: var(--page-surface-2);
 }
+:is(.angular-demo, .vue-demo) .demo-preferences ~ :is(.demo-surface, .mx-demo) {
+  margin-block-start: 0;
+  border-radius: 0 0 14px 14px;
+}
 .demo-preferences .angular-choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
+  inline-size: auto;
   margin: 0;
-  min-inline-size: 0;
-  inline-size: 100%;
+  padding: 0;
+  border: 0;
 }
-.demo-preferences .angular-choice legend,
-.demo-preferences .angular-select {
+/* A floated legend joins the flex row instead of sitting on the border. */
+.demo-preferences .angular-choice legend {
+  float: inline-start;
+  padding: 0;
+}
+.demo-preferences :is(.angular-choice legend, .angular-select, .demo-toggle) {
   font-size: 12px;
-  color: var(--ink-2);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-3);
 }
-.demo-preferences .angular-choice__options {
-  inline-size: 100%;
-  min-block-size: 40px;
+.demo-preferences :is(.angular-choice__options, .demo-toggle__seg) {
+  display: inline-flex;
+  inline-size: auto;
+  min-block-size: 0;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--page-border);
+  border-radius: 9px;
+  background: var(--page-surface);
 }
-.demo-preferences .angular-choice__options label {
+.demo-preferences .angular-choice__options > label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: none;
   min-inline-size: 0;
-  min-block-size: 36px;
-}
-.demo-preferences .angular-choice__options span {
+  min-block-size: 0;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink-2);
   font-size: 13px;
-  padding-inline: 6px;
-  white-space: normal;
-  text-align: center;
+  font-weight: 550;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: pointer;
+  box-shadow: none;
+}
+.demo-preferences .angular-choice__options > label:hover {
+  color: var(--ink);
+}
+.demo-preferences .angular-choice__options > label > span,
+.demo-preferences .angular-choice__options input:checked + span {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  white-space: nowrap;
+}
+.demo-preferences .angular-choice__options input,
+.demo-preferences .demo-toggle input {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  opacity: 0;
+  appearance: none;
+  cursor: pointer;
+}
+.demo-preferences .demo-toggle input::before {
+  display: none;
+}
+.demo-preferences .angular-choice__options > label:has(input:checked),
+.demo-preferences .demo-toggle:has(input:not(:checked)) .demo-toggle__off,
+.demo-preferences .demo-toggle:has(input:checked) .demo-toggle__on {
+  border-color: transparent;
+  background: var(--ink);
+  color: var(--page-bg);
+}
+.demo-preferences .angular-choice__options > label:has(input:focus-visible),
+.demo-preferences .demo-toggle:has(input:focus-visible) .demo-toggle__seg {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
 }
 .demo-preferences label.angular-select {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  inline-size: auto;
   max-inline-size: none;
-  max-width: none;
-  inline-size: 100%;
-  align-items: stretch;
   min-block-size: 0;
 }
 .demo-preferences .angular-select select {
-  min-block-size: 44px;
+  min-block-size: 34px;
+  padding-block: 0;
+  padding-inline: 10px 28px;
+  border: 1px solid var(--page-border);
+  border-radius: 9px;
+  background-color: var(--page-surface);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 550;
+  text-transform: none;
+  letter-spacing: normal;
 }
+/* The feature toggles always take the second row. */
 .demo-preferences .angular-options-switches {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-column: 1/-1;
-  gap: 16px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  flex-basis: 100%;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px 10px;
+  min-block-size: 0;
+  margin: 0;
   padding: 0;
   border: 0;
-  inline-size: 100%;
 }
-.demo-preferences
-  .angular-options-switches
-  label:nth-child(n):has(input[type="checkbox"]) {
+.demo-preferences .angular-options-switches .demo-toggle {
+  position: relative;
+  display: flex;
   flex-direction: row;
-  justify-content: flex-start;
-  min-block-size: 44px;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+.demo-toggle__seg > span {
+  padding: 5px 9px;
+  border-radius: 7px;
+  color: var(--ink-2);
   font-size: 13px;
+  font-weight: 550;
+  text-transform: none;
+  letter-spacing: normal;
 }
-.demo-preferences
-  .angular-options-switches
-  label:nth-child(2):has(input[type="checkbox"]) {
-  justify-content: center;
-}
-.demo-preferences
-  .angular-options-switches
-  label:last-child:has(input[type="checkbox"]) {
-  justify-content: flex-end;
-}
-.demo-preferences .angular-options-switches input {
-  order: 1;
-}
-.demo-preferences input[type="checkbox"] {
-  transition: none;
-}
-.demo-preferences input[type="checkbox"]::before {
-  inset-inline-start: 2px;
-  transform: translateX(0);
-  transition: transform 0.15s ease;
-}
-.demo-preferences input[type="checkbox"]:checked::before {
-  inset-inline-start: 2px;
-  transform: translateX(18px);
-}
-[dir="rtl"] .demo-preferences input[type="checkbox"]:checked::before {
-  transform: translateX(-18px);
+.demo-preferences .demo-toggle:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.42;
 }
 @media (max-width: 1100px) {
   :is(.angular-demo, .vue-demo) .demo-kit-cards {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  :is(.angular-demo, .vue-demo) .demo-preferences {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-  .demo-preferences > :is(fieldset, label) {
-    grid-column: span 2;
-  }
-  .demo-preferences > :is(fieldset, label):nth-child(n + 4) {
-    grid-column: span 3;
-  }
-}
-@media (max-width: 700px) {
-  :is(.angular-demo, .vue-demo) .demo-preferences {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .demo-preferences > :is(fieldset, label),
-  .demo-preferences > :is(fieldset, label):nth-child(n + 4) {
-    grid-column: span 1;
-  }
-  .demo-preferences > label:nth-child(5) {
-    grid-column: 1 / -1;
   }
 }
 @media (max-width: 600px) {
@@ -291,32 +377,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   :is(.angular-demo, .vue-demo) .demo-preferences {
-    grid-template-columns: 1fr;
-    padding: 16px;
-    gap: 16px;
-  }
-  .demo-preferences > :is(fieldset, label),
-  .demo-preferences > :is(fieldset, label):nth-child(n + 4) {
-    grid-column: span 1;
-  }
-  .demo-preferences > label:nth-child(5) {
-    grid-column: 1 / -1;
-  }
-  .demo-preferences .angular-options-switches {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  .demo-preferences
-    .angular-options-switches
-    label:nth-child(n):has(input[type="checkbox"]) {
-    justify-content: space-between;
-  }
-  .demo-setup {
     padding: 14px;
   }
   .demo-setup__command {
     inline-size: 100%;
-    gap: 8px;
   }
   .demo-setup__command button {
     margin-inline-start: auto;
@@ -326,8 +390,5 @@
   .demo-kit-cards .adtab {
     transition: none;
     transform: none;
-  }
-  .demo-preferences input[type="checkbox"]::before {
-    transition: none;
   }
 }

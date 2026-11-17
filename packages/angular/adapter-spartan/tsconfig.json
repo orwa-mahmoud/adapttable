@@ -8,7 +8,13 @@
     "types": ["node", "vitest/globals"],
     "paths": {
       "@adapttable/spartan": ["./src/index.ts"],
-      "@adapttable/spartan/*": ["./*/index.ts"]
+      "@adapttable/spartan/*": ["./*/index.ts"],
+      "@adapttable/angular-unstyled": [
+        "../adapter-angular-unstyled/src/index.ts"
+      ],
+      "@adapttable/angular-unstyled/*": [
+        "../adapter-angular-unstyled/*/index.ts"
+      ]
     }
   },
   "angularCompilerOptions": {

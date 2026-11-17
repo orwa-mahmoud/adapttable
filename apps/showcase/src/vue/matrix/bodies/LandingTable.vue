@@ -19,6 +19,7 @@ import {
 } from "../../../shared/peopleActions";
 import { applyPersonRowEdit } from "../../../shared/peopleTable";
 import { withoutPerson } from "../../../shared/rowsScenario";
+import { withRowActionIcons } from "../../shared/rowActionIcons";
 import {
   applyPersonEdit,
   currentDataLocale,
@@ -79,11 +80,13 @@ const baseFeatures = [
     })
   ),
   kit.rowActions(
-    peopleRowActions(currentDataLocale(), {
-      onDelete: (row) => {
-        rows.value = withoutPerson(rows.value, row);
-      },
-    })
+    withRowActionIcons(
+      peopleRowActions(currentDataLocale(), {
+        onDelete: (row) => {
+          rows.value = withoutPerson(rows.value, row);
+        },
+      })
+    )
   ),
   kit.exportCsv<Person>({ filename: "people-workspace.csv" }),
   kit.densityChooser(),

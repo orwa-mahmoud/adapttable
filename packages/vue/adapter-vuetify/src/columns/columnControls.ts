@@ -22,8 +22,13 @@ const icons = {
   rename: "m17 3 4 4-12 12H5v-4zm-10 13v1h1L18 7l-1-1z",
 };
 function button({ attrs, label, icon }: ColumnMenuButtonProps) {
+  const pinned = icon === "pin" && attrs["aria-pressed"] === true;
   return h(VuetifyButton, {
-    attrs: { ...attrs, icon: icon ? true : undefined },
+    attrs: {
+      ...attrs,
+      icon: icon ? true : undefined,
+      ...(pinned ? { variant: "flat", color: "primary" } : {}),
+    },
     content: icon
       ? h(VIcon, { icon: icons[icon], size: 18, "aria-hidden": true })
       : label,

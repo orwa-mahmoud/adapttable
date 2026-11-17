@@ -1,6 +1,7 @@
 import type { RowActionControl } from "@adapttable/vue";
 import {
   type DataTableClassNames,
+  rowActionContent,
   type RowActionsLayout,
   withProps,
 } from "@adapttable/vue/adapter";
@@ -64,7 +65,7 @@ const ElementRowActionsPresentation = defineComponent(
           Fragment,
           null,
           props.controls.map((action) =>
-            elementButton(attrs(action), action.label)
+            elementButton(attrs(action), rowActionContent(action))
           )
         );
       return h(

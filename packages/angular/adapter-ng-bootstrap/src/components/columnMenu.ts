@@ -88,7 +88,9 @@ import {
         >{{ r.name }}</span
       >
       <button
-        class="btn btn-outline-secondary btn-sm"
+        class="btn btn-sm"
+        [class.btn-primary]="r.pinned !== undefined"
+        [class.btn-outline-secondary]="!(r.pinned !== undefined)"
         type="button"
         data-ng-bootstrap-part="column-menu-pin"
         [attr.data-active]="r.pinned !== undefined ? '' : null"
@@ -234,7 +236,9 @@ export class AdaptColumnMenuRow extends AdaptColumnMenuRowModel {}
         >{{ name() }}</span
       >
       <button
-        class="btn btn-outline-secondary btn-sm"
+        class="btn btn-sm"
+        [class.btn-primary]="pinned"
+        [class.btn-outline-secondary]="!pinned"
         type="button"
         data-ng-bootstrap-part="column-menu-pin"
         [attr.data-active]="pinned ? '' : null"

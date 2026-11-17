@@ -42,6 +42,12 @@
   min-inline-size: 0;
 }
 
+/* Pinned cells stick over the cells scrolling beneath them, so they paint the
+ * table surface. */
+.adapttable-vuetify table :is(th, td)[data-pinned] {
+  background: rgb(var(--v-theme-surface));
+}
+
 .adapttable-vuetify [data-adapttable-part="toolbar"],
 .adapttable-vuetify [data-adapttable-part="footer"],
 .adapttable-vuetify [data-adapttable-part="pager"] {
@@ -56,12 +62,25 @@
   padding: 16px;
 }
 
+/* The search icon sits inside the field, as every kit draws it, and the
+ * field pushes the toolbar controls to the end of the row. */
 .adapttable-vuetify [data-adapttable-part="search-field"] {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
   flex: 1 1 240px;
   max-inline-size: 420px;
+  margin-inline-end: auto;
+}
+.adapttable-vuetify [data-adapttable-part="search-icon"] {
+  position: absolute;
+  inset-inline-start: 12px;
+  z-index: 1;
+  opacity: var(--v-medium-emphasis-opacity);
+  pointer-events: none;
+}
+.adapttable-vuetify [data-adapttable-part="search-field"] .v-field {
+  --v-field-padding-start: 40px;
 }
 
 .adapttable-vuetify [data-adapttable-part="search-field"] .v-input {

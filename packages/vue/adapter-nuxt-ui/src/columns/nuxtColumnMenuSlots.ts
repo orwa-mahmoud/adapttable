@@ -24,7 +24,13 @@ function button(control: ColumnMenuButtonProps) {
     NuxtButton,
     {
       attrs: mergeVueAttrs(
-        { "aria-label": control.label, title: control.label },
+        {
+          "aria-label": control.label,
+          title: control.label,
+          ...(control.icon === "pin" && control.attrs["aria-pressed"] === true
+            ? { color: "primary", variant: "solid" }
+            : {}),
+        },
         control.attrs
       ),
     },

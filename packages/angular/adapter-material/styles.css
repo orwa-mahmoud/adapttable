@@ -296,3 +296,11 @@
 .cdk-overlay-pane:has(> mat-card.adapt-material-filter-card) {
   max-width: calc(100% - 16px);
 }
+
+/* A pinned column's pin button fills with the primary colour. */
+.adapt-material-overlay
+  button.adapt-material-column-menu-pin[aria-pressed="true"] {
+  --mat-button-text-label-text-color: var(--mat-sys-on-primary);
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}

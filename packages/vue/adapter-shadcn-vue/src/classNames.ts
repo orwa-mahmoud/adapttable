@@ -6,7 +6,7 @@ import { cn } from "./lib/utils";
 export const shadcnClassNames: DataTableClassNames = {
   root: "adapttable-shadcn-vue min-w-0 space-y-4 text-foreground text-sm",
   toolbar: "flex flex-wrap items-center gap-3",
-  searchWrapper: "relative min-w-40 flex-1 sm:max-w-sm",
+  searchWrapper: "relative me-auto min-w-40 flex-1 sm:max-w-sm",
   searchInput: "ps-9",
   searchIcon:
     "pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground",

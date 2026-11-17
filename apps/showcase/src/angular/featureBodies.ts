@@ -225,6 +225,7 @@ import {
 } from "./data";
 import { AdaptShowcasePivotPanel, AdaptShowcaseTable } from "./kitComponents";
 import { pageChromeFeatures } from "./pageChrome";
+import { withRowActionIcons } from "./rowActionIcons";
 import { scaleColumns } from "./scaleColumns";
 import { SHOWCASE_KIT } from "./showcaseKit";
 
@@ -1391,11 +1392,13 @@ export class AdaptShowcaseLandingTable {
       })
     ),
     this.kit.rowActions<Person>(
-      peopleRowActions(currentDataLocale(), {
-        onDelete: (row) => {
-          this.rows.update((rows) => withoutPerson(rows, row));
-        },
-      })
+      withRowActionIcons(
+        peopleRowActions(currentDataLocale(), {
+          onDelete: (row) => {
+            this.rows.update((rows) => withoutPerson(rows, row));
+          },
+        })
+      )
     ),
     this.kit.exportCsv<Person>({ filename: "people-workspace.csv" }),
     this.kit.densityChooser(),
@@ -1637,11 +1640,13 @@ class ColumnGroupsBody {
   private readonly pageFeatures: readonly AdaptTableFeature[] = [
     this.kit.collapsibleColumnGroups(),
     this.kit.rowActions<Person>(
-      peopleRowActions(currentDataLocale(), {
-        onDelete: (row) => {
-          this.rows.update((rows) => withoutPerson(rows, row));
-        },
-      })
+      withRowActionIcons(
+        peopleRowActions(currentDataLocale(), {
+          onDelete: (row) => {
+            this.rows.update((rows) => withoutPerson(rows, row));
+          },
+        })
+      )
     ),
   ];
   readonly features: readonly AdaptTableFeature[] = [

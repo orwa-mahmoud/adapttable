@@ -361,3 +361,10 @@
   outline: 2px solid var(--adapt-aria-accent);
   outline-offset: -2px;
 }
+
+/* A pinned column's pin button fills with the accent colour. */
+.adapt-aria [data-adapttable-part="column-menu-pin"][aria-pressed="true"] {
+  border-color: var(--adapt-aria-accent);
+  background: var(--adapt-aria-accent);
+  color: var(--adapt-aria-surface);
+}

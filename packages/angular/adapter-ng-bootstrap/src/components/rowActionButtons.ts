@@ -12,6 +12,7 @@ import type {
 import {
   resolveDisabledReason,
   resolveRenderer,
+  rowActionIcon,
   runRowAction,
   visibleRowActions,
 } from "@adapttable/angular/adapter";
@@ -57,6 +58,8 @@ let nextRowActionsId = 0;
   templateUrl: "./rowActionButtons.html",
 })
 export class AdaptRowActions<TRow> {
+  /** The host's icon for an action, drawn in place of its label. */
+  protected readonly actionIcon = rowActionIcon;
   /** Minimum native control size for the mobile card surface. */
   readonly minTargetSize = input<number>();
   protected readonly menuId = `adapt-ng-bootstrap-row-actions-${nextRowActionsId++}`;

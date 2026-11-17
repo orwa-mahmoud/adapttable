@@ -17,9 +17,11 @@
 .adapttable-naive [data-adapttable-part="footer"] {
   padding-block: 0.75rem;
 }
+/* The field pushes the toolbar controls to the end of the row. */
 .adapttable-naive [data-adapttable-part="search-field"] {
   flex: 1 1 15rem;
   max-inline-size: 24rem;
+  margin-inline-end: auto;
 }
 .adapttable-naive [data-adapttable-part="scroll-box"] {
   overflow: auto;

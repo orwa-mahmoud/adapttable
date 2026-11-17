@@ -3057,6 +3057,16 @@ export const ROW_ACTIONS_MODEL: FeatureStateKey<RowActionsModel<unknown>>;
 // @public (undocumented)
 export const ROW_PINNING_MODEL: FeatureStateKey<RowPinningState<unknown>>;
 
+// @public
+export const RowActionContent: ((props: {
+    readonly control: RowActionControl<unknown>;
+}) => VNodeChild) & {
+    props: string[];
+};
+
+// @public
+export function rowActionContent<TRow>(control: RowActionControl<TRow>): VNodeChild;
+
 // @public (undocumented)
 export interface RowActionControl<TRow> {
     // (undocumented)
@@ -3088,6 +3098,9 @@ export interface RowActionControlsInput<TRow> {
 
 // @public (undocumented)
 export type RowActionControlsProjector<TRow> = (input: RowActionControlsInput<TRow>) => readonly RowActionControl<TRow>[];
+
+// @public
+export function rowActionIconOnly<TRow>(control: RowActionControl<TRow>): boolean;
 
 export { RowActionsLayout }
 

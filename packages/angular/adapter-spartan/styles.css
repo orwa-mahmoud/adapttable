@@ -355,3 +355,10 @@
 [data-adapttable-kit="spartan"] [data-adapttable-part="toolbar"] {
   padding: 0.75rem;
 }
+
+/* A pinned column's pin button fills with the primary colour. */
+.at-spartan-button[data-spartan-part="column-menu-pin"][aria-pressed="true"] {
+  border-color: var(--at-spartan-primary);
+  background: var(--at-spartan-primary);
+  color: var(--at-spartan-primary-foreground);
+}

@@ -323,6 +323,11 @@ export class AdaptDesktopStructure<TRow> extends AdaptDesktopTableModel<TRow> {
     return `${base}; position: sticky; inset-inline-start: ${offset}; z-index: ${String(z)}`;
   }
 
+  /** A leading rail sticks with the start-pinned columns, and says so. */
+  protected railPin(): "start" | null {
+    return this.hasStartPin() ? "start" : null;
+  }
+
   private hasStartPin(): boolean {
     const pinned = this.view().table.layout().state.pinned;
     return Object.values(pinned).includes("start");

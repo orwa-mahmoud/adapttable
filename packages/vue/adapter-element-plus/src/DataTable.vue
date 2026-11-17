@@ -271,6 +271,12 @@ function setScrollElement(element: HTMLElement | null): void {
   font-weight: 600;
 }
 
+/* Pinned cells stick over the cells scrolling beneath them, so they paint the
+ * table surface; a hovered row's tint still wins. */
+.adapttable-element-plus tbody td[data-pinned] {
+  background: var(--el-bg-color);
+}
+
 .adapttable-element-plus tbody tr:hover > td {
   background: var(--el-fill-color-light);
 }
@@ -401,13 +407,28 @@ function setScrollElement(element: HTMLElement | null): void {
   white-space: normal;
 }
 
+/* The search icon sits inside the field, as every kit draws it, and the
+ * field pushes the toolbar controls to the end of the row. */
 .adapttable-element-plus [data-adapttable-part="search-field"] {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   flex: 1 1 14rem;
   max-inline-size: 28rem;
   min-inline-size: 0;
+  margin-inline-end: auto;
+}
+.adapttable-element-plus [data-adapttable-part="search-icon"] {
+  position: absolute;
+  inset-inline-start: 0.625rem;
+  z-index: 1;
+  color: var(--el-text-color-placeholder);
+  pointer-events: none;
+}
+.adapttable-element-plus
+  [data-adapttable-part="search-field"]
+  .el-input__wrapper {
+  padding-inline-start: 2rem;
 }
 
 .adapttable-element-plus[data-density="compact"] :is(th, td),
@@ -622,6 +643,13 @@ function setScrollElement(element: HTMLElement | null): void {
     [data-adapttable-part="header-rename-error"]
   ) {
   color: var(--el-color-danger);
+}
+/* A pinned column's pin button fills with the primary colour. */
+.adapttable-element-plus-column-panel
+  [data-adapttable-part="column-menu-pin"][aria-pressed="true"] {
+  border-color: var(--el-color-primary);
+  background-color: var(--el-color-primary);
+  color: var(--el-color-white);
 }
 .adapttable-element-plus-column-panel [data-active] {
   color: var(--el-color-primary);

@@ -38,7 +38,8 @@ nz-table [data-adapttable-part="header-caption-control"] > button {
   font-weight: 600;
 }
 /* Sticky cells must paint an opaque surface over the cells scrolling beneath
- * them: a pinned column's cells and every cell of a pinned row. Unless the
+ * them: a pinned column's cells, the rails pinned with it, and every cell
+ * of a pinned row. Unless the
  * host names a surface, they take the table's own, which NG-ZORRO's light or
  * dark theme sets on .ant-table and the wrappers below pass down. A hovered
  * row's pinned cells take NG-ZORRO's own row hover. */
@@ -47,11 +48,11 @@ nz-table
   :is(.ant-table-container, .ant-table-content, table, tbody, tr) {
   background-color: inherit;
 }
-nz-table [data-adapttable-part="cell"][data-pinned],
+nz-table td[data-pinned],
 nz-table tr[data-row-pin] > td {
   background-color: var(--adapttable-ng-zorro-surface, inherit);
 }
-nz-table tr[data-selected] > [data-adapttable-part="cell"][data-pinned] {
+nz-table tr[data-selected] > td[data-pinned] {
   background: var(--adapttable-ng-zorro-selected, #e6f7ff);
 }
 nz-table [data-adapttable-part="cell"][data-pinned][data-cell-selected] {

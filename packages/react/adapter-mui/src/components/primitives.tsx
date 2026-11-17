@@ -73,7 +73,7 @@ export function Button({
 /** A glyph button. @public */
 export function IconButton({
   elementRef,
-  variant: _variant,
+  variant,
   fullWidth: _fullWidth,
   justify: _justify,
   busy,
@@ -89,12 +89,20 @@ export function IconButton({
       type="button"
       size="small"
       color={iconColor(tone)}
+      sx={variant === "filled" ? FILLED_ICON_BUTTON : undefined}
       disabled={disabled === true || busy === true}
       aria-busy={busy === true ? true : undefined}
       {...rest}
     />
   );
 }
+
+/** A filled glyph button: the primary surface, the way MUI fills an icon. */
+const FILLED_ICON_BUTTON = {
+  bgcolor: "primary.main",
+  color: "primary.contrastText",
+  "&:hover": { bgcolor: "primary.dark" },
+} as const;
 
 /** A text field; `data-*` land on the input, `rootPart` on the field. @public */
 export function TextInput({

@@ -27,6 +27,16 @@
   font-weight: 600;
   background: var(--tui-background-neutral-1);
 }
+/* The header tint is translucent; a pinned header lays it over the base
+ * surface so the headers scrolling beneath it stay hidden. */
+[data-adapttable-kit="taiga-ui"] th[data-pinned] {
+  background:
+    linear-gradient(
+      var(--tui-background-neutral-1),
+      var(--tui-background-neutral-1)
+    ),
+    var(--tui-background-base);
+}
 [data-adapttable-kit="taiga-ui"]
   :is(
     [data-adapttable-part="toolbar"],

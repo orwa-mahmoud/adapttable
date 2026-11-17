@@ -8,7 +8,7 @@ import { naiveElement } from "../renderers/nativeElement";
 export function naiveButton(
   attrs: Attrs,
   content: VNodeChild,
-  appearance: Pick<ButtonProps, "tag" | "text" | "size"> = {}
+  appearance: Pick<ButtonProps, "tag" | "text" | "size" | "type"> = {}
 ): VNode {
   const { type, ...nativeAttrs } = attrs;
   return naiveElement(

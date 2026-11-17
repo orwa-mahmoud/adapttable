@@ -1,6 +1,10 @@
 <script setup lang="ts" generic="TRow">
 import type { Direction, RowActionControl } from "@adapttable/vue";
-import { type RowActionsLayout, scheduleTick } from "@adapttable/vue/adapter";
+import {
+  rowActionContent,
+  type RowActionsLayout,
+  scheduleTick,
+} from "@adapttable/vue/adapter";
 import { NPopover } from "naive-ui";
 import {
   computed,
@@ -59,7 +63,7 @@ const Actions = () =>
             open.value = false;
           },
         }),
-        control.label
+        rowActionContent(control)
       )
     )
   );

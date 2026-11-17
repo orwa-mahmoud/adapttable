@@ -8,6 +8,7 @@
           data-adapttable-part="expand-header"
           adaptRail="expand"
           [style]="railStyle(false, railOffset('expand'), true)"
+          [attr.data-pinned]="railPin()"
           scope="col"
           [attr.rowspan]="band > 1 ? band : null"
           [attr.aria-label]="v.table.labels().expandRow"
@@ -18,6 +19,7 @@
           data-adapttable-part="reorder-header"
           adaptRail="reorder"
           [style]="railStyle(false, railOffset('reorder'), true)"
+          [attr.data-pinned]="railPin()"
           scope="col"
           [attr.rowspan]="band > 1 ? band : null"
           [attr.aria-label]="v.table.labels().reorderRow"
@@ -28,6 +30,7 @@
           data-adapttable-part="selection-header"
           adaptRail="selection"
           [style]="railStyle(true, railOffset('selection'), true)"
+          [attr.data-pinned]="railPin()"
           scope="col"
           [attr.rowspan]="band > 1 ? band : null"
         >
@@ -322,6 +325,7 @@
               <td
                 data-adapttable-part="expand-cell"
                 [style]="railStyle(false, railOffset('expand'), false)"
+                [attr.data-pinned]="railPin()"
               >
                 @if (!summary) {
                   <ng-container
@@ -336,6 +340,7 @@
               <td
                 data-adapttable-part="reorder-cell"
                 [style]="railStyle(false, railOffset('reorder'), false)"
+                [attr.data-pinned]="railPin()"
               >
                 @if (!summary) {
                   <ng-container
@@ -352,6 +357,7 @@
               <td
                 data-adapttable-part="selection-cell"
                 [style]="railStyle(true, railOffset('selection'), false)"
+                [attr.data-pinned]="railPin()"
               >
                 @if (!summary) {
                   <ng-container
