@@ -6,8 +6,12 @@ import { type ReactNode, useRef } from "react";
 import { spaceBelow } from "./spaceBelow";
 
 /** The panel's height limit, kept current by {@link FIT_BELOW_TRIGGER}. */
-/** MUI's select list and menus, which portal outside the panel. */
-const NESTED = '[role="listbox"], .MuiPopover-root';
+/**
+ * MUI's select list and menus, which portal outside the panel. An
+ * Autocomplete's popup also holds its "No options" and loading text beside
+ * the listbox, so the whole popup counts.
+ */
+const NESTED = '[role="listbox"], .MuiPopover-root, .MuiAutocomplete-popper';
 
 const PANEL_HEIGHT_VAR = "--adapttable-filters-max-height";
 

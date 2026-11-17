@@ -148,6 +148,13 @@ function openSelect(name: string, root?: HTMLElement) {
   return within(menu);
 }
 
+/** The z-index of the MUI Popper an overlay's content is drawn in. */
+function popperLayer(content: HTMLElement): number {
+  const popper = content.closest(".MuiPopper-root");
+  if (!popper) throw new Error("Expected the content to sit in an MUI Popper");
+  return Number(getComputedStyle(popper).zIndex);
+}
+
 function pickSelect(
   name: string,
   optionLabel: string | null,
@@ -329,6 +336,33 @@ describe("declarative DataTable (MUI)", () => {
       )
     );
     expect(param(adapter, "f_department.name")).toBeNull();
+  });
+
+  it("multiSelect options open above the Filters popover", () => {
+    mountTable();
+    openFilters();
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Department" }));
+    // Both are portalled to the body, so only z-index decides which one a
+    // pointer reaches. jsdom's `fireEvent.click` skips hit-testing, so the
+    // tests above pass even when the list is painted under the panel.
+    expect(
+      popperLayer(screen.getByRole("listbox", { name: "Department" }))
+    ).toBeGreaterThan(
+      popperLayer(screen.getByRole("dialog", { name: "Filters" }))
+    );
+  });
+
+  it("a press on the multiSelect's no-options text keeps the Filters popover open", async () => {
+    mountTable();
+    openFilters();
+    const field = screen.getByRole("combobox", { name: "Department" });
+    fireEvent.mouseDown(field);
+    field.focus();
+    fireEvent.change(field, { target: { value: "zzz" } });
+    // "No options" sits in the Autocomplete's popper beside its listbox, not
+    // inside it, and now draws above the panel where a pointer can reach it.
+    fireEvent.mouseDown(await screen.findByText("No options"));
+    expect(screen.getByRole("dialog", { name: "Filters" })).toBeInTheDocument();
   });
 
   it("range widgets are operator-first with per-flavour localized operators", () => {
