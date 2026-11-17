@@ -76,7 +76,7 @@ export class AdaptSidePanelLive {
 /**
  * A panel docked beside the table, drawn with native controls.
  *
- * @param options - See {@link SidePanelOptions}. `open` is the panel that is
+ * @param options - See `SidePanelOptions`. `open` is the panel that is
  *   showing, or `null` while the dock is closed.
  * @returns The feature.
  *
