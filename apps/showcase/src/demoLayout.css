@@ -73,16 +73,17 @@
   border-color: var(--c);
   transform: translateY(-1px);
 }
-.demo-kit-cards .adtab:focus-visible,
-.demo-kit-cards .adtab:has(:focus-visible) {
-  outline: 2px solid var(--c);
-  outline-offset: 3px;
+/* One border per card: the selected card and the keyboard-focused card draw
+ * their own border in the kit colour, never a ring or outline stacked on it. */
+.demo-kit-cards .adtab,
+.demo-kit-cards .adtab:focus-within {
+  outline: none;
 }
+.demo-kit-cards .adtab:focus-visible,
+.demo-kit-cards .adtab:has(:focus-visible),
 .demo-kit-cards .adtab.is-on {
   border-color: var(--c);
-  box-shadow:
-    0 0 0 1px var(--c),
-    0 4px 14px color-mix(in srgb, var(--c) 15%, transparent);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--c) 15%, transparent);
   background: var(--page-surface);
 }
 /* Setup: one slim bar, the command and its docs side by side. */
@@ -295,11 +296,12 @@
 .demo-preferences .demo-toggle input::before {
   display: none;
 }
+/* The chosen segment takes the framework's own brand colour. */
 .demo-preferences .angular-choice__options > label:has(input:checked),
 .demo-preferences .demo-toggle:has(input:not(:checked)) .demo-toggle__off,
 .demo-preferences .demo-toggle:has(input:checked) .demo-toggle__on {
   border-color: transparent;
-  background: var(--ink);
+  background: var(--brand);
   color: var(--page-bg);
 }
 .demo-preferences .angular-choice__options > label:has(input:focus-visible),

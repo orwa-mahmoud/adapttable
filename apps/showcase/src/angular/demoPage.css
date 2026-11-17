@@ -21,10 +21,6 @@ adapt-showcase-demo-page *::after {
   width: 1px;
   height: 1px;
 }
-.angular-kit:focus-within {
-  outline: 2px solid var(--brand);
-  outline-offset: -3px;
-}
 .angular-options {
   display: flex;
   flex-wrap: wrap;
