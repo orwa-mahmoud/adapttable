@@ -6,6 +6,7 @@ import { pageDefaultsFor, pageLayoutFor, rosterFor } from "../../../casts";
 import { COLUMN_GROUP_HINTS } from "../../../shared/pageHints";
 import { peopleRowActions } from "../../../shared/peopleActions";
 import { withoutPerson } from "../../../shared/rowsScenario";
+import { withRowActionIcons } from "../../shared/rowActionIcons";
 import {
   currentDataLocale,
   groupedPeopleColumns,
@@ -24,11 +25,13 @@ const columns = groupedPeopleColumns(kit);
 const pageFeatures = [
   kit.collapsibleColumnGroups(),
   kit.rowActions(
-    peopleRowActions(currentDataLocale(), {
-      onDelete: (row) => {
-        rows.value = withoutPerson(rows.value, row);
-      },
-    })
+    withRowActionIcons(
+      peopleRowActions(currentDataLocale(), {
+        onDelete: (row) => {
+          rows.value = withoutPerson(rows.value, row);
+        },
+      })
+    )
   ),
 ];
 const chrome = pageChromeFeatures(kit, { urlKey: "cgrp" });

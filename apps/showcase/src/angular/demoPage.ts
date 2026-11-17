@@ -94,6 +94,7 @@ import {
 } from "./demoTransitions.mjs";
 import { AdaptShowcasePivotPanel, AdaptShowcaseTable } from "./kitComponents";
 import { AdaptShowcaseNav } from "./nav";
+import { withRowActionIcons } from "./rowActionIcons";
 import { SHOWCASE_DARK, SHOWCASE_KIT } from "./showcaseKit";
 
 export const SHOWCASE_LAB = new InjectionToken<boolean>("showcase feature lab");
@@ -519,12 +520,14 @@ export class AdaptShowcaseDemoPage {
     ...(this.canWrite && !this.availableEnabled("row-mutations")
       ? [
           this.kit.rowActions<Person>(
-            peopleRowActions(this.dataLocale, {
-              onDelete: (row) =>
-                this.rows.update((rows) =>
-                  rows.filter((item) => item.id !== row.id)
-                ),
-            })
+            withRowActionIcons(
+              peopleRowActions(this.dataLocale, {
+                onDelete: (row) =>
+                  this.rows.update((rows) =>
+                    rows.filter((item) => item.id !== row.id)
+                  ),
+              })
+            )
           ),
         ]
       : []),

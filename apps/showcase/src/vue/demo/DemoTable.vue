@@ -40,6 +40,7 @@ import {
   TABLE_PRESENTATION,
 } from "../matrix/data";
 import { useShowcaseKit } from "../matrix/showcaseKit";
+import { withRowActionIcons } from "../shared/rowActionIcons";
 
 const props = defineProps<{ lab: boolean }>();
 const kit = useShowcaseKit();
@@ -172,11 +173,13 @@ const features = [
   ...(!server && !props.lab
     ? [
         kit.rowActions<Person>(
-          peopleRowActions(currentDataLocale(), {
-            onDelete: (row) => {
-              rows.value = rows.value.filter((item) => item.id !== row.id);
-            },
-          })
+          withRowActionIcons(
+            peopleRowActions(currentDataLocale(), {
+              onDelete: (row) => {
+                rows.value = rows.value.filter((item) => item.id !== row.id);
+              },
+            })
+          )
         ),
       ]
     : []),

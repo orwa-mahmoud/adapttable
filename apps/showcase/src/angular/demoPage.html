@@ -232,33 +232,39 @@
       >
       <div class="angular-options-switches">
         @if (!lab) {
-          <label
+          <label class="demo-toggle"
+            >Grouping<span class="demo-toggle__seg" aria-hidden="true"
+              ><span class="demo-toggle__off">Off</span
+              ><span class="demo-toggle__on">On</span></span
             ><input
               type="checkbox"
               [checked]="grouping"
               [disabled]="!canWrite"
               (change)="change('grouping', $event)"
               data-demo-control="grouping"
-            />Grouping</label
-          >
-          <label
+          /></label>
+          <label class="demo-toggle"
+            >Editing<span class="demo-toggle__seg" aria-hidden="true"
+              ><span class="demo-toggle__off">Off</span
+              ><span class="demo-toggle__on">On</span></span
             ><input
               type="checkbox"
               [checked]="editing"
               [disabled]="!canWrite"
               (change)="change('editing', $event)"
               data-demo-control="editing"
-            />Editing</label
-          >
+          /></label>
         }
-        <label
+        <label class="demo-toggle"
+          >Motion<span class="demo-toggle__seg" aria-hidden="true"
+            ><span class="demo-toggle__off">Off</span
+            ><span class="demo-toggle__on">On</span></span
           ><input
             type="checkbox"
             [checked]="motion"
             (change)="change('motion', $event)"
             data-demo-control="motion"
-          />Motion</label
-        >
+        /></label>
       </div>
     </section>
     @if (server) {

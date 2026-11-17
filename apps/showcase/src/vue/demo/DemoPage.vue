@@ -308,7 +308,11 @@ function reset(): void {
         <label
           v-for="toggle in toggles.slice(0, 4)"
           :key="toggle.key"
-          class="vue-demo__toggle"
+          class="vue-demo__toggle demo-toggle"
+          >{{ toggle.label
+          }}<span class="demo-toggle__seg" aria-hidden="true"
+            ><span class="demo-toggle__off">Off</span
+            ><span class="demo-toggle__on">On</span></span
           ><input
             type="checkbox"
             :name="toggle.key"
@@ -321,8 +325,7 @@ function reset(): void {
               ['grouping', 'editing', 'selection'].includes(toggle.key)
             "
             @change="change"
-          />{{ toggle.label }}</label
-        >
+        /></label>
       </div>
     </section>
     <div v-if="lab" class="vue-demo__options">

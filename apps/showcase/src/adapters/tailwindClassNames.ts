@@ -110,7 +110,7 @@ export const tailwindClassNames: DataTableClassNames = {
   columnMenuVisibility:
     "inline-grid place-items-center rounded p-[3px] text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300",
   columnMenuPin:
-    "inline-grid place-items-center rounded p-[3px] text-gray-400 hover:bg-gray-100 data-[active]:text-indigo-600 dark:hover:bg-zinc-800 dark:data-[active]:text-indigo-400",
+    "inline-grid place-items-center rounded p-[3px] text-gray-400 hover:bg-gray-100 data-[active]:bg-indigo-600 data-[active]:text-white data-[active]:hover:bg-indigo-500 dark:hover:bg-zinc-800 dark:data-[active]:bg-indigo-500 dark:data-[active]:text-white",
   columnMenuReset:
     "mt-1.5 w-full border-t border-gray-100 px-2 pb-1 pt-2 text-start text-[13px] font-medium text-indigo-600 hover:text-indigo-700 dark:border-zinc-800 dark:text-indigo-400",
   columnMenuAutoSize:
