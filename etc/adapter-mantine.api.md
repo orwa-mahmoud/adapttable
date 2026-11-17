@@ -7,8 +7,10 @@
 import { ActionConfirm } from '@adapttable/react/adapter';
 import { ActiveFilterChip } from '@adapttable/react';
 import { AgentApprovalProps } from '@adapttable/react/adapter';
+import { AgentApprovalProps as AgentApprovalProps_2 } from '@adapttable/core/binding';
 import { BaseDataTableProps } from '@adapttable/react';
 import { BatchEditBarProps } from '@adapttable/react/adapter';
+import { BatchEditBarProps as BatchEditBarProps_2 } from '@adapttable/core/binding';
 import { BulkAction } from '@adapttable/react/adapter';
 import { BulkActionContext } from '@adapttable/react/adapter';
 import { CellEditor } from '@adapttable/react/adapter';
@@ -21,6 +23,7 @@ import { ColumnFilter } from '@adapttable/react/adapter';
 import { ColumnGroupDef } from '@adapttable/react/adapter';
 import { ColumnGroupShow } from '@adapttable/react/adapter';
 import { ColumnGroupToggleProps } from '@adapttable/react/adapter';
+import { ColumnGroupToggleProps as ColumnGroupToggleProps_2 } from '@adapttable/core/binding';
 import { ColumnInput } from '@adapttable/react';
 import { ColumnLayoutState } from '@adapttable/react';
 import { ConfirmHandler } from '@adapttable/react/adapter';
@@ -59,9 +62,11 @@ import { FilterTypeRegistry } from '@adapttable/react/adapter';
 import { FilterTypeSpec } from '@adapttable/react/adapter';
 import { FilterValue } from '@adapttable/react/adapter';
 import { FindBarProps } from '@adapttable/react/adapter';
+import { FindBarProps as FindBarProps_2 } from '@adapttable/core/binding';
 import { getHistoryAdapter } from '@adapttable/react';
 import { GroupingPanelChromeProps } from '@adapttable/react/adapter';
 import { GroupMoreButtonProps } from '@adapttable/react/adapter';
+import { GroupMoreButtonProps as GroupMoreButtonProps_2 } from '@adapttable/core/binding';
 import { InfiniteQueryLike } from '@adapttable/react';
 import { JSX } from 'react';
 import { MobileCardRenderer } from '@adapttable/react/adapter';
@@ -76,6 +81,7 @@ import { resolveFilterRegistry } from '@adapttable/react/adapter';
 import { RowAction } from '@adapttable/react/adapter';
 import { RowActionsRenderer } from '@adapttable/react/adapter';
 import { RowEditActionsProps } from '@adapttable/react/adapter';
+import { RowEditActionsProps as RowEditActionsProps_2 } from '@adapttable/core/binding';
 import { RowReorderButtonsProps } from '@adapttable/react/adapter';
 import { RowReorderHandleProps } from '@adapttable/react/adapter';
 import { SavedView } from '@adapttable/react';
@@ -95,6 +101,7 @@ import { TableSource } from '@adapttable/react/adapter';
 import { ToolbarSlots } from '@adapttable/react';
 import { TreeCellProps } from '@adapttable/react/adapter';
 import { TreeToggleProps } from '@adapttable/react/adapter';
+import { TreeToggleProps as TreeToggleProps_2 } from '@adapttable/core/binding';
 import { UrlStateAdapter } from '@adapttable/react';
 import { useDataTable } from '@adapttable/react';
 import { UseDataTableResult } from '@adapttable/react';
@@ -129,7 +136,7 @@ export interface ActiveFilterChipsProps {
 }
 
 // @public
-export const AgentApproval: (props: Readonly<AgentApprovalProps>) => ReactElement;
+export const AgentApproval: (props: Readonly<AgentApprovalProps_2>) => ReactElement;
 
 // @public
 export function agentApproval(): StaticTableFeature;
@@ -150,7 +157,7 @@ export interface AutoFilterFormProps<TRow> {
 export { BaseDataTableProps }
 
 // @public
-export const BatchEditBar: <TRow>(props: Readonly<BatchEditBarProps<TRow>>) => ReactElement;
+export const BatchEditBar: <TRow>(props: Readonly<BatchEditBarProps_2<TRow>>) => ReactElement;
 
 export { BatchEditBarProps }
 
@@ -180,7 +187,7 @@ export { ColumnGroupDef }
 export { ColumnGroupShow }
 
 // @public
-export const ColumnGroupToggle: (props: Readonly<ColumnGroupToggleProps>) => ReactElement;
+export const ColumnGroupToggle: (props: Readonly<ColumnGroupToggleProps_2>) => ReactElement;
 
 export { ColumnGroupToggleProps }
 
@@ -345,7 +352,7 @@ export { FilterTypeSpec }
 export { FilterValue }
 
 // @public
-export const FindBar: (props: Readonly<FindBarProps>) => ReactElement;
+export const FindBar: (props: Readonly<FindBarProps_2>) => ReactElement;
 
 export { FindBarProps }
 
@@ -355,7 +362,7 @@ export { getHistoryAdapter }
 export function GroupingPanel<TRow>(props: Readonly<Omit<GroupingPanelChromeProps<TRow>, "slots">>): JSX.Element;
 
 // @public
-export const GroupMoreButton: (props: Readonly<GroupMoreButtonProps>) => ReactElement | null;
+export const GroupMoreButton: (props: Readonly<GroupMoreButtonProps_2>) => ReactElement | null;
 
 export { GroupMoreButtonProps }
 
@@ -399,7 +406,7 @@ export { RowAction }
 export { RowActionsRenderer }
 
 // @public
-export const RowEditActions: <TRow>(props: Readonly<RowEditActionsProps<TRow>>) => ReactElement;
+export const RowEditActions: <TRow>(props: Readonly<RowEditActionsProps_2<TRow>>) => ReactElement;
 
 export { RowEditActionsProps }
 
@@ -468,7 +475,7 @@ export const TreeCell: <TRow>(props: Readonly<TreeCellProps<TRow>>) => ReactElem
 export { TreeCellProps }
 
 // @public
-export const TreeToggle: <TRow>(props: Readonly<TreeToggleProps<TRow>>) => ReactElement | null;
+export const TreeToggle: <TRow>(props: Readonly<TreeToggleProps_2<TRow>>) => ReactElement | null;
 
 export { TreeToggleProps }
 
