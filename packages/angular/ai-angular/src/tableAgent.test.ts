@@ -4,8 +4,7 @@ import type {
   AgentManifest,
   AgentSession,
 } from "@adapttable/ai";
-import { type TableRuntimeView } from "@adapttable/angular";
-import { createNeutralTable, createTableEngine } from "@adapttable/core";
+import { type ColumnDef, type TableRuntimeView } from "@adapttable/angular";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -1430,45 +1429,32 @@ describe("publishing the table as in-page tools", () => {
 describe("the values a column's author asked to show", () => {
   /** Reads the live inputs the context builder would send, as they settle. */
 
-  /** A table whose `team` column asks for live values, and whose `name` does not. */
-  function sampledTable(patch: { readonly sample?: boolean } = {}) {
-    const engine = createTableEngine({
-      data: [
-        { id: "1", name: "Ada", team: "Core" },
-        { id: "2", name: "Grace", team: "Platform" },
-        { id: "3", name: "Katherine", team: "Core" },
-      ],
-      columns: [
-        { key: "name", header: "Name" },
-        {
-          key: "team",
-          header: "Team",
-          // The author's opt-in, written where the column is defined. It is
-          // theirs, which is why the agent's own column patch cannot set it.
-          ...(patch.sample === false ? {} : { ai: { sample: true } }),
-        },
-      ],
-      rowKey: (row) => (row as { id: string }).id,
-    });
-    return createNeutralTable(
-      engine as ReturnType<typeof createTableEngine>,
-      "test",
-      {}
-    );
+  const SAMPLED_ROWS = [
+    { id: "1", name: "Ada", team: "Core" },
+    { id: "2", name: "Grace", team: "Platform" },
+    { id: "3", name: "Katherine", team: "Core" },
+  ];
+
+  /** Columns whose `team` asks for live values, and whose `name` does not. */
+  function sampledColumns(sample = true): ColumnDef<unknown>[] {
+    return [
+      { key: "name", header: "Name" },
+      {
+        key: "team",
+        header: "Team",
+        // The author's opt-in, written where the column is defined. It is
+        // theirs, which is why the agent's own column patch cannot set it.
+        ...(sample ? { ai: { sample: true } } : {}),
+      },
+    ];
   }
 
-  function view(neutralTable: ReturnType<typeof createNeutralTable>) {
-    return {
-      rows: [
-        { id: "1", name: "Ada", team: "Core" },
-        { id: "2", name: "Grace", team: "Platform" },
-        { id: "3", name: "Katherine", team: "Core" },
-      ],
-      getRowId: (row: unknown) => String((row as { id: string }).id),
-      rowLabel: (row: unknown) => String((row as { name: string }).name),
-      neutralTable,
-    } as unknown as TableRuntimeView;
-  }
+  /** The real table's rows; its own neutral surface comes from the fixture. */
+  const view: TableRuntimeView = {
+    rows: SAMPLED_ROWS,
+    getRowId: (row: unknown) => String((row as { id: string }).id),
+    rowLabel: (row: unknown) => String((row as { name: string }).name),
+  };
 
   it("carries live values for a column that opted in", async () => {
     let seen: { samples?: Record<string, readonly unknown[]> } | undefined;
@@ -1477,7 +1463,8 @@ describe("the values a column's author asked to show", () => {
         features: [tableAgent({ tableId: "one" })],
       },
       frontend: true,
-      view: view(sampledTable()),
+      view,
+      columns: sampledColumns(),
       onRead: (value) => (seen = value as typeof seen),
     });
 
@@ -1504,7 +1491,8 @@ describe("the values a column's author asked to show", () => {
         ],
       },
       frontend: true,
-      view: view(sampledTable()),
+      view,
+      columns: sampledColumns(),
       onRead: (value) => (seen = value as typeof seen),
     });
 
@@ -1520,7 +1508,8 @@ describe("the values a column's author asked to show", () => {
         features: [tableAgent({ tableId: "one" })],
       },
       frontend: true,
-      view: view(sampledTable({ sample: false })),
+      view,
+      columns: sampledColumns(false),
       onRead: (value) => (seen = value as typeof seen),
     });
 
@@ -1535,7 +1524,8 @@ describe("the values a column's author asked to show", () => {
         features: [tableAgent({ tableId: "gone" })],
       },
       frontend: true,
-      view: view(sampledTable()),
+      view,
+      columns: sampledColumns(),
     });
     // Leaving the page mid-read must not throw into the next table.
     expect(() => {

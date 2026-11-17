@@ -1,9 +1,12 @@
 /** HTTP execution over committed Angular frontend and server-tier sources. */
 import type { AgentSession } from "@adapttable/ai";
 import { AGENT_SCHEMA_VERSION, runAgentHttpTurn } from "@adapttable/ai/http";
-import { injectFrontendData, type TableRuntimeView } from "@adapttable/angular";
+import {
+  type AdaptTableFeature,
+  type TableRuntime,
+  type TableRuntimeView,
+} from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/angular-unstyled";
-import { createNeutralTable, createTableEngine } from "@adapttable/core";
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
@@ -17,6 +20,7 @@ import {
 } from "./tableAgent.fixture";
 
 type TurnResult = Awaited<ReturnType<typeof runAgentHttpTurn>>;
+type Query = NonNullable<TableRuntimeView["query"]>;
 interface Row {
   id: string;
   name: string;
@@ -30,134 +34,90 @@ const COLUMNS = [
   { key: "name", header: "Name", sortable: true },
   { key: "salary", header: "Salary", sortable: true },
 ];
-const WIRED = {
-  setPage: true,
-  setLimit: true,
-  setSearch: true,
-  setSort: true,
-  setFilters: true,
-};
-function makeTable() {
-  const engine = createTableEngine<Row>({
-    data: ROWS,
-    columns: COLUMNS,
-    rowKey: (row) => row.id,
-  });
-  const neutral = createNeutralTable(engine, "http-binding", {
-    operations: () => WIRED,
-  });
-  return { engine, neutral };
-}
-async function mounted() {
-  const { engine, neutral } = makeTable();
-  let session: AgentSession | undefined;
-  mountRuntime({
-    features: [
-      tableAgent({
-        tableId: "http-binding",
-        writePolicy: "allow",
-        approval: "never",
-        bridge: {
-          attach: (live) => {
-            session = live;
-          },
-        },
-      }),
-    ],
-    view: {
-      rows: ROWS,
-      visibleRows: ROWS,
-      neutralTable: neutral,
-      getRowId: (row: Row) => row.id,
-      rowLabel: (row: Row) => row.name,
-      query: {
-        page: 1,
-        limit: 1,
-        search: "",
-        setPage: (page) => engine.dispatch({ type: "setPage", page }),
-        setLimit: (limit) => engine.dispatch({ type: "setLimit", limit }),
-        setSearch: (search) => engine.dispatch({ type: "setSearch", search }),
-        setSort: (key, dir) => engine.dispatch({ type: "setSort", key, dir }),
-        setExtras: (filters) =>
-          engine.dispatch({ type: "setFilters", filters }),
-        clearExtras: () => engine.dispatch({ type: "setFilters", filters: {} }),
-      },
-    },
-  });
-  await waitFor(() => expect(session).toBeDefined());
-  if (!session) throw new Error("No Angular session attached");
-  return { engine, session };
-}
 interface HostState {
   search: string;
   sortBy?: string;
   setSearch?: (search: string) => void;
 }
-async function mountedFrontend() {
-  const state: HostState = { search: "" };
-  let session: AgentSession | undefined;
-  mountRuntime<Row>({
-    features: [
-      tableAgent({
-        tableId: "http-frontend-binding",
-        writePolicy: "allow",
-        approval: "never",
-        columns: {
-          name: { type: "string", sortable: true },
-          salary: { type: "number", sortable: true },
-        },
-        bridge: {
-          attach: (live) => {
-            session = live;
-          },
-        },
-      }),
-    ],
-    createView: () => {
-      const source = injectFrontendData({
-        data: ROWS,
-        columns: COLUMNS,
-        getRowId: (row) => row.id,
-        urlSync: false,
-      });
-      const engine = source().tableEngine;
-      if (!engine)
-        throw new Error("Angular frontend did not publish its engine");
-      const neutral = createNeutralTable(engine, "http-frontend-binding", {
-        operations: () => WIRED,
-      });
-      return computed(() => {
-        const value = source();
-        state.search = value.search;
-        state.sortBy = value.sortBy;
-        state.setSearch = value.setSearch;
-        return {
-          rows: value.rows,
-          visibleRows: value.rows,
-          neutralTable: neutral,
-          getRowId: (row: Row) => row.id,
-          rowLabel: (row: Row) => row.name,
-          query: {
-            page: value.page,
-            limit: value.limit,
-            search: value.search,
-            sortBy: value.sortBy,
-            sortDir: value.sortDir,
-            setPage: value.setPage,
-            setLimit: value.setLimit,
-            setSearch: value.setSearch,
-            setSort: value.setSort,
-            setExtras: value.setExtras,
-            clearExtras: value.clearExtras,
-          },
-        } satisfies TableRuntimeView<Row>;
-      });
-    },
-  });
-  await waitFor(() => expect(session).toBeDefined());
-  if (!session) throw new Error("No Angular frontend session attached");
-  return { session, state };
+
+/** The mounted table's runtime, for the reader's side of a test. */
+interface LiveTable {
+  runtime?: TableRuntime;
 }
+
+function runtimeProbe(live: LiveTable): AdaptTableFeature {
+  return {
+    id: "runtime-probe",
+    mount: (context) => {
+      live.runtime = context.runtime;
+    },
+  };
+}
+
+/** The query the table last published; throws when it has published none. */
+function readerQuery(live: LiveTable): Query {
+  const query = live.runtime?.view()?.query;
+  if (!query) throw new Error("The table published no query");
+  return query;
+}
+
+@Component({
+  standalone: true,
+  imports: [AdaptDataTable],
+  template: `<adapt-data-table
+    [data]="rows"
+    [columns]="columns"
+    [rowKey]="rowKey"
+    [urlSync]="false"
+    [defaults]="defaults()"
+    [features]="features()"
+  />`,
+})
+class AgentHost {
+  readonly rows = ROWS;
+  readonly columns = COLUMNS;
+  readonly rowKey = (row: Row) => row.id;
+  readonly defaults = signal<{ limit: number } | undefined>(undefined);
+  readonly features = signal<readonly AdaptTableFeature[]>([]);
+}
+
+/** A mounted unstyled table whose features include the agent under test. */
+async function mounted(
+  tableId: string,
+  limit?: number
+): Promise<{ session: AgentSession; live: LiveTable }> {
+  const live: LiveTable = {};
+  let session: AgentSession | undefined;
+  const fixture = TestBed.createComponent(AgentHost);
+  const host = fixture.componentInstance;
+  host.defaults.set(limit === undefined ? undefined : { limit });
+  host.features.set([
+    mountedTableAgent({
+      tableId,
+      writePolicy: "allow",
+      approval: "never",
+      columns: {
+        name: { type: "string", sortable: true },
+        salary: { type: "number", sortable: true },
+      },
+      bridge: {
+        attach: (next) => {
+          session = next;
+        },
+      },
+    }),
+    runtimeProbe(live),
+  ]);
+  fixture.autoDetectChanges();
+  await fixture.whenStable();
+  await waitFor(() => {
+    expect(session).toBeDefined();
+    expect(live.runtime?.view()?.query).toBeDefined();
+  });
+  if (!session) throw new Error("The mounted table attached no agent");
+  return { session, live };
+}
+
 async function mountedServer() {
   const state: HostState = { search: "" };
   let session: AgentSession | undefined;
@@ -211,7 +171,7 @@ async function mountedServer() {
 
 describe("an HTTP turn over the live Angular binding", () => {
   it("runs filter then sort in one reply, following the table it moved", async () => {
-    const { engine, session } = await mounted();
+    const { session, live } = await mounted("http-binding", 1);
     const opening = session.manifest().viewRevision;
 
     let result!: TurnResult;
@@ -247,13 +207,15 @@ describe("an HTTP turn over the live Angular binding", () => {
       opening + 1,
       opening + 2,
     ]);
-    expect(engine.snapshot().search).toBe("ada");
-    expect(engine.snapshot().sortBy).toBe("salary");
-    expect(engine.snapshot().sortDir).toBe("desc");
+    expect(readerQuery(live)).toMatchObject({
+      search: "ada",
+      sortBy: "salary",
+      sortDir: "desc",
+    });
   });
 
   it("keeps injectFrontendData search then sort in one reply", async () => {
-    const { session, state } = await mountedFrontend();
+    const { session, live } = await mounted("http-frontend-binding");
 
     let result!: TurnResult;
     await act(async () => {
@@ -280,11 +242,14 @@ describe("an HTTP turn over the live Angular binding", () => {
     });
 
     expect(result.results.map((entry) => entry.ok)).toEqual([true, true]);
-    expect(state).toMatchObject({ search: "ada", sortBy: "salary" });
+    expect(readerQuery(live)).toMatchObject({
+      search: "ada",
+      sortBy: "salary",
+    });
   });
 
   it("flushes a pending reader change before admitting injectFrontendData work", async () => {
-    const { session, state } = await mountedFrontend();
+    const { session, live } = await mounted("http-frontend-binding");
 
     let result!: TurnResult;
     await act(async () => {
@@ -294,7 +259,7 @@ describe("an HTTP turn over the live Angular binding", () => {
           // Angular has accepted the reader's update but has not committed the
           // frontend engine yet. Admission flushes it before checking the
           // revision; the agent may not claim it as part of its own sort.
-          state.setSearch?.("grace");
+          readerQuery(live).setSearch("grace");
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
             toolCalls: [
@@ -310,8 +275,8 @@ describe("an HTTP turn over the live Angular binding", () => {
     });
 
     expect(result.results[0]?.error?.code).toBe("revision-mismatch");
-    expect(state.search).toBe("grace");
-    expect(state.sortBy).toBeUndefined();
+    expect(readerQuery(live).search).toBe("grace");
+    expect(readerQuery(live).sortBy).toBeUndefined();
   });
 
   it("bumps and checks a server query revision with no neutral engine", async () => {
@@ -345,7 +310,7 @@ describe("an HTTP turn over the live Angular binding", () => {
   });
 
   it("refuses the reply when the table was edited during the model call", async () => {
-    const { engine, session } = await mounted();
+    const { session, live } = await mounted("http-binding", 1);
 
     let result!: TurnResult;
     await act(async () => {
@@ -353,7 +318,7 @@ describe("an HTTP turn over the live Angular binding", () => {
         endpoint: "https://agent.example/turn",
         request: () => {
           // A person searches the table while the backend is still thinking.
-          engine.dispatch({ type: "setSearch", search: "grace" });
+          readerQuery(live).setSearch("grace");
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
             text: "Sorted.",
@@ -372,21 +337,21 @@ describe("an HTTP turn over the live Angular binding", () => {
     expect(result.results[0]?.ok).toBe(false);
     expect(result.results[0]?.error?.code).toBe("revision-mismatch");
     // The person's search stands, and nothing was written over it.
-    expect(engine.snapshot().search).toBe("grace");
-    expect(engine.snapshot().sortBy).toBeUndefined();
+    expect(readerQuery(live).search).toBe("grace");
+    expect(readerQuery(live).sortBy).toBeUndefined();
   });
 
   it("leaves a rerender that changed nothing out of the way", async () => {
-    const { engine, session } = await mounted();
+    const { session, live } = await mounted("http-binding", 1);
 
     let result!: TurnResult;
     await act(async () => {
       result = await runAgentHttpTurn(session, "Page 2", {
         endpoint: "https://agent.example/turn",
         request: () => {
-          // Re-dispatching the search the table already has produces no
-          // change, so the engine publishes no revision and the action runs.
-          engine.dispatch({ type: "setSearch", search: "" });
+          // Re-sending the search the table already has produces no change,
+          // so the engine publishes no revision and the action runs.
+          readerQuery(live).setSearch("");
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
             text: "Paged.",
@@ -399,7 +364,7 @@ describe("an HTTP turn over the live Angular binding", () => {
     });
 
     expect(result.results[0]?.ok).toBe(true);
-    expect(engine.snapshot().requestedPage).toBe(2);
+    expect(readerQuery(live).page).toBe(2);
   });
 });
 
