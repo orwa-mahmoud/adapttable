@@ -40,6 +40,9 @@ const FILTER_SELECT_SLOTS = {
   MenuProps: { sx: { zIndex: 10051 } },
 } as const;
 
+/** Above the filter popover too, so an Autocomplete option is clickable. */
+const FILTER_POPPER_SLOT = { sx: { zIndex: 10051 } } as const;
+
 /** Keep the select control hook inside the labelled field root. */
 const FILTER_SELECT_DISPLAY_PROPS: HTMLAttributes<HTMLDivElement> & {
   "data-adapttable-part": string;
@@ -233,6 +236,7 @@ function MultiSelectFilter<TRow>({ def, source }: Readonly<FieldProps<TRow>>) {
         loading={loading}
         slotProps={{
           listbox: { style: { maxHeight: 240, overflow: "auto" } },
+          popper: FILTER_POPPER_SLOT,
         }}
         renderInput={(params) => (
           <TextField {...params} size="small" label={label} />
