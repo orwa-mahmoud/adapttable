@@ -161,7 +161,7 @@ const SLOTS: CommandPaletteSlots = {
 };
 
 /**
- * The live palette: it follows {@link injectCommandPalette} and draws the
+ * The live palette: it follows `injectCommandPalette` and draws the
  * chrome. A feature fills the command-palette slot with this component.
  */
 @Component({
