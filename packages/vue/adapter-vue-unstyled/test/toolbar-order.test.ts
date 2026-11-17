@@ -15,6 +15,7 @@ import { savedViews } from "../src/saved-views";
 
 const rows = [{ id: "a", name: "Ada", team: "Core" }];
 const columns = [{ key: "name" }, { key: "team" }];
+type Row = (typeof rows)[number];
 
 describe("toolbar order", () => {
   it("draws Filters, Saved views, Columns and Export in that order", async () => {
@@ -22,16 +23,16 @@ describe("toolbar order", () => {
     root.innerHTML = await renderToString(
       createSSRApp({
         render: () =>
-          h(DataTable<(typeof rows)[number]>, {
+          h(DataTable<Row>, {
             data: rows,
             columns,
             rowKey: (row) => row.id,
             urlSync: false,
             features: [
-              exportCsv(),
+              exportCsv<Row>(),
               columnMenu(),
               savedViews({ storageKey: "order", storage: null }),
-              filters([{ key: "team", type: "text" }]),
+              filters<Row>([{ key: "team", type: "text" }]),
             ],
           }),
       })

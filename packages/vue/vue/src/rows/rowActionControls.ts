@@ -1,13 +1,6 @@
 /** Shared action semantics; confirmation and controls must come from the kit. */
 import { runRowAction } from "@adapttable/core";
-import {
-  type Component,
-  defineComponent,
-  h,
-  isVNode,
-  type PropType,
-  type VNodeChild,
-} from "vue";
+import { type Component, h, isVNode, type VNodeChild } from "vue";
 
 export type {
   RowActionControl,
@@ -24,6 +17,7 @@ import {
   visibleRowActions,
 } from "@adapttable/core/binding";
 
+import { withProps } from "../functionalProps";
 import type {
   RowActionControl,
   RowActionControlsInput,
@@ -121,15 +115,11 @@ export function rowActionIconOnly<TRow>(
  *
  * @public
  */
-export const RowActionContent = /* @__PURE__ */ defineComponent({
-  name: "RowActionContent",
-  props: {
-    control: {
-      type: Object as PropType<RowActionControl<unknown>>,
-      required: true,
-    },
+export const RowActionContent = /* @__PURE__ */ withProps(
+  function RowActionContent(props: {
+    readonly control: RowActionControl<unknown>;
+  }): VNodeChild {
+    return rowActionContent(props.control);
   },
-  setup(props) {
-    return () => rowActionContent(props.control);
-  },
-});
+  ["control"]
+);

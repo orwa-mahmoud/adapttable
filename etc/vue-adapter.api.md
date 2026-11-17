@@ -77,8 +77,6 @@ import { CommandPaletteChromeProps as CommandPaletteChromeProps_2 } from '@adapt
 import { CommandPaletteSlots as CommandPaletteSlots_2 } from '@adapttable/core/binding';
 import { CommandPaletteSurfaceProps } from '@adapttable/core/binding';
 import { Component } from 'vue';
-import { ComponentOptionsMixin } from 'vue';
-import { ComponentProvideOptions } from 'vue';
 import { ComponentPublicInstance } from 'vue';
 import { ComputedRef } from 'vue';
 import { ConfirmHandler } from '@adapttable/core';
@@ -94,7 +92,6 @@ import { CssProperties as CssProperties_2 } from '@adapttable/core';
 import { CustomCellEditorCtrl } from '@adapttable/core';
 import { defaultConfirm } from '@adapttable/core/binding';
 import { defaultFilterRegistry } from '@adapttable/core';
-import { DefineComponent } from 'vue';
 import { DefineSetupFnComponent } from 'vue';
 import { Direction } from '@adapttable/core';
 import { DirtyCellState } from '@adapttable/core';
@@ -122,7 +119,6 @@ import { EXTRA_OVER_SPAN_STYLE } from '@adapttable/core/binding';
 import { EXTRA_ROW_PARTS } from '@adapttable/core/binding';
 import { extraCountBeforeRowIds } from '@adapttable/core/binding';
 import { extraCoveredTableSlots } from '@adapttable/core/binding';
-import { ExtractPropTypes } from 'vue';
 import { ExtraFilters } from '@adapttable/core';
 import { extraHostFillStyle } from '@adapttable/core/binding';
 import { ExtraRow as ExtraRow_2 } from '@adapttable/core';
@@ -230,7 +226,6 @@ import { PivotAggProps } from '@adapttable/core/binding';
 import { PivotPanelChromeProps as PivotPanelChromeProps_2 } from '@adapttable/core/binding';
 import { PivotPanelSlots as PivotPanelSlots_2 } from '@adapttable/core/binding';
 import { PlainSlotKey } from '@adapttable/core/binding';
-import { PropType } from 'vue';
 import { PublicProps } from 'vue';
 import { QueryAggregate } from '@adapttable/core';
 import { QueryCondition } from '@adapttable/core';
@@ -3063,17 +3058,11 @@ export const ROW_ACTIONS_MODEL: FeatureStateKey<RowActionsModel<unknown>>;
 export const ROW_PINNING_MODEL: FeatureStateKey<RowPinningState<unknown>>;
 
 // @public
-export const RowActionContent: DefineComponent<ExtractPropTypes<    {
-control: {
-type: PropType<RowActionControl<unknown>>;
-required: true;
+export const RowActionContent: ((props: {
+    readonly control: RowActionControl<unknown>;
+}) => VNodeChild) & {
+    props: string[];
 };
-}>, () => VNodeChild, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, string, PublicProps, Readonly<ExtractPropTypes<    {
-control: {
-type: PropType<RowActionControl<unknown>>;
-required: true;
-};
-}>> & Readonly<{}>, {}, {}, {}, {}, string, ComponentProvideOptions, true, {}, any>;
 
 // @public
 export function rowActionContent<TRow>(control: RowActionControl<TRow>): VNodeChild;

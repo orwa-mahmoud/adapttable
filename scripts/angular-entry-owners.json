@@ -431,6 +431,8 @@
     "AdaptExportAnnouncer",
     "AdaptExportProgressChrome",
     "AdaptExtraRowContent",
+    "rowActionIcon",
+    "RowActionIcon",
     "AdaptFillHandleChrome",
     "AdaptFilterHeaderChrome",
     "AdaptFilterHeaderControlChrome",
