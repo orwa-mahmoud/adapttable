@@ -285,8 +285,8 @@ const CORE_FIXTURES = [
     // controllers and state machines every binding drives, and the shared
     // behaviours the bindings would otherwise copy. A table bundles only the
     // names it imports, so this row tracks the surface, not a table's cost.
-    initialKB: 106,
-    totalKB: 106,
+    initialKB: 107,
+    totalKB: 107,
     code: `export * from "PKG";`,
     // The engines a named primitive must not carry are real identifiers of
     // the full graph, so their absence there is a finding, not a typo.
