@@ -26,7 +26,7 @@ export {
 /**
  * Right-click menus on cells, rows and headers, with a native menu.
  *
- * @param options - `true`, or {@link ContextMenuOptions}. `items` appends the
+ * @param options - `true`, or `ContextMenuOptions`. `items` appends the
  *   host's own entries behind a divider.
  * @returns The feature.
  *

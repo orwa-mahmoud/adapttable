@@ -14,7 +14,7 @@ import { AdaptRowActions } from "./rowActionButtons";
 import { AdaptSelectionCheckbox } from "./selectionCheckbox";
 
 /**
- * The phone card list. Layout comes from {@link AdaptMobileStructure}; this
+ * The phone card list. Layout comes from `AdaptMobileStructure`; this
  * kit fills the slots and keeps its own card styles.
  *
  * @internal
