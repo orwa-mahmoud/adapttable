@@ -228,7 +228,7 @@ const SLOTS: ContextMenuSlots = {
 };
 
 /**
- * The live menu: it follows {@link injectTableContextMenu}, publishes the
+ * The live menu: it follows `injectTableContextMenu`, publishes the
  * region handlers, and draws the chrome.
  */
 @Component({
