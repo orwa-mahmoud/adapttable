@@ -8,7 +8,7 @@ import type { TreeEntry } from "./treeRows";
 /**
  * The tree a table already walked, as the runtime view publishes it.
  *
- * Expansion stays {@link TreeExpansionState}. This aliases the host's
+ * Expansion stays `TreeExpansionState`. This aliases the host's
  * entries. It does not build another tree.
  *
  * @typeParam TRow - The row type.

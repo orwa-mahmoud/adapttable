@@ -77,7 +77,7 @@ export interface GroupRowLayout<
  * anything comparing numbers, keep seeing that. A column's `formatAggregate`
  * decides what the reader sees, and is applied here — where the cell is drawn
  * — exactly once, whichever surface draws it. A kit that lays out its own
- * group rows rather than using {@link groupRowLayout} calls this for each
+ * group rows rather than using `groupRowLayout` calls this for each
  * cell, so every kit shows the same thing.
  *
  * @public

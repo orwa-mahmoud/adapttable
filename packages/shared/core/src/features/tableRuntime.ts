@@ -48,7 +48,7 @@ export interface TableRuntimeView<TRow = unknown> {
   readonly rows: readonly TRow[];
   /**
    * Rendered data-row order after grouping/tree expansion. When set, differs
-   * from {@link rows} under grouping or tree chrome.
+   * from `rows` under grouping or tree chrome.
    */
   readonly visibleRows?: readonly TRow[];
   /** Live neutral binding when the source published an engine. */
@@ -110,7 +110,7 @@ export interface TableRuntimeView<TRow = unknown> {
   /**
    * The filter catalog the host published.
    *
-   * {@link filterDefs} and {@link filterRegistry} are this contribution's
+   * `filterDefs` and `filterRegistry` are this contribution's
    * fields, projected so existing readers keep those names. Applied values
    * stay on {@link TableRuntimeView.query}.
    */

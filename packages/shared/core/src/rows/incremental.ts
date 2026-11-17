@@ -1,14 +1,14 @@
 /**
  * Incremental re-evaluation of a patched row set.
  *
- * {@link applyRowPatches} is the data path — it still owns the rows. This
+ * `applyRowPatches` is the data path — it still owns the rows. This
  * module sits on the patch log and re-runs search, filters, sort, grouping
  * and aggregates for the rows a patch touched, instead of walking the
  * whole set again.
  *
- * Build a snapshot with {@link createIncrementalView}, then feed patches
- * through {@link applyRowPatchesToView}. A host that already called
- * `applyRowPatches` can pass {@link rowPatchLog} into
+ * Build a snapshot with `createIncrementalView`, then feed patches
+ * through `applyRowPatchesToView`. A host that already called
+ * `applyRowPatches` can pass `rowPatchLog` into
  * {@link applyRowPatchLogToView} so the same patches are not applied twice.
  * Every snapshot stays valid: a patch returns a new one and leaves the one
  * it started from as it was.
@@ -138,13 +138,13 @@ export interface IncrementalViewConfig<TRow> {
 
 /**
  * A derived snapshot of a row set. The latest snapshot is the only one
- * {@link applyRowPatchesToView} may be called on — applying to a stale
+ * `applyRowPatchesToView` may be called on — applying to a stale
  * snapshot rebuilds from its `rows` instead of continuing incrementally.
  *
  * @public
  */
 export interface IncrementalView<TRow> {
-  /** Source rows after patches — same contract as {@link applyRowPatches}. */
+  /** Source rows after patches — same contract as `applyRowPatches`. */
   readonly rows: readonly TRow[];
   /** After search, extra filters and the filter tree. */
   readonly filtered: readonly TRow[];
@@ -157,10 +157,10 @@ export interface IncrementalView<TRow> {
 }
 
 /**
- * The snapshot {@link createIncrementalView} attached to a derived row
+ * The snapshot `createIncrementalView` attached to a derived row
  * array (`rows` / `filtered` / `sorted`, or a page slice the host
  * attached). Spreading that array drops the link, same as
- * {@link rowPatchLog}.
+ * `rowPatchLog`.
  *
  * @public
  */
@@ -232,7 +232,7 @@ export function incrementalSearchText<TRow>(row: TRow): string {
 
 /**
  * Build a snapshot by fully evaluating `rows`. Patches after this go
- * through {@link applyRowPatchesToView} so only touched rows are
+ * through `applyRowPatchesToView` so only touched rows are
  * re-evaluated.
  *
  * @typeParam TRow - The row type.
@@ -249,7 +249,7 @@ export function createIncrementalView<TRow>(
 }
 
 /**
- * Apply patches to a snapshot: {@link applyRowPatches} for the rows, then
+ * Apply patches to a snapshot: `applyRowPatches` for the rows, then
  * incremental re-evaluation of every derived stage.
  *
  * @typeParam TRow - The row type.
@@ -270,7 +270,7 @@ export function applyRowPatchesToView<TRow>(
 }
 
 /**
- * Continue a snapshot from a log {@link applyRowPatches} already produced.
+ * Continue a snapshot from a log `applyRowPatches` already produced.
  * Use this when the host applied the patches itself and the incremental
  * view must not apply them a second time.
  *
@@ -310,7 +310,7 @@ export function sameIncrementalResults(
 
 /**
  * Whether `view` was built with groups and totals, as
- * {@link createIncrementalView} builds it. A basic-engine row array carries
+ * `createIncrementalView` builds it. A basic-engine row array carries
  * a snapshot without them, and grouping must not reconfigure that.
  */
 export function hasIncrementalSnapshot<TRow>(

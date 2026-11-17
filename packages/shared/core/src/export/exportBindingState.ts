@@ -6,7 +6,7 @@
 import type { ExportProgressState, ExportStatus } from "./exportController";
 
 /**
- * What {@link useExportHandler} returns.
+ * What `useExportHandler` returns.
  *
  * @public
  */

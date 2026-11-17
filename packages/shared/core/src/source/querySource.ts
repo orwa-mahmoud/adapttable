@@ -198,8 +198,8 @@ function project<TRow, TPage>(
 /**
  * Create one table's query-library tier.
  *
- * @returns The source; call {@link QuerySource.params} and
- * {@link QuerySource.update} before the rest.
+ * @returns The source; call `QuerySource.params` and
+ * `QuerySource.update` before the rest.
  *
  * @public
  */

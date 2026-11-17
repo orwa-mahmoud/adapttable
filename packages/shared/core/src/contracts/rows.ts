@@ -86,7 +86,7 @@ export type RowPatchEvent<TRow> =
  * @public
  */
 export interface RowPatchLog<TRow> {
-  /** The row set after the patches — same contract as {@link applyRowPatches}. */
+  /** The row set after the patches — same contract as `applyRowPatches`. */
   rows: readonly TRow[];
   /** Empty when nothing changed; the original array is then on `rows`. */
   events: readonly RowPatchEvent<TRow>[];

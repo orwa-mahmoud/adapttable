@@ -167,7 +167,7 @@ function instantFromIsoString(text: string): number | undefined {
  * Accepts a `Date`, a finite number (including an epoch), a numeric string,
  * or a strict ISO date / datetime / time string. Locale-dependent forms
  * (`"9 Sep 2026"`, `"09/09/2026"`) are invalid and skipped — the same way a
- * non-numeric string is skipped by {@link toAggregateNumber}.
+ * non-numeric string is skipped by `toAggregateNumber`.
  *
  * @param value - The resolved cell value, already through `sortValue` when
  *   the column has one.

@@ -172,7 +172,7 @@ export function windowGroupedEntries<TEntry>(
 }
 
 /**
- * Result of {@link useKeyedVirtualization} — index window over a keyed list.
+ * Result of `useKeyedVirtualization` — index window over a keyed list.
  *
  * @public
  */

@@ -109,7 +109,7 @@ export interface QueryEmitter {
  * Create a query emitter.
  *
  * @param seenKey - A key already seen, so a query with it is not sent by
- * {@link QueryEmitter.emitIfChanged}.
+ * `QueryEmitter.emitIfChanged`.
  *
  * @public
  */

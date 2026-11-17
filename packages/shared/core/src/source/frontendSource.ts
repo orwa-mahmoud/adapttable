@@ -85,9 +85,9 @@ export function defaultFrontendRowId<TRow>(row: TRow): string {
 export interface FrontendSourceConfig<TRow> {
   /** Every row. The host still owns this array. */
   readonly data: readonly TRow[];
-  /** Stable row identity. Defaults to {@link defaultFrontendRowId}. */
+  /** Stable row identity. Defaults to `defaultFrontendRowId`. */
   readonly getRowId?: (row: TRow) => string;
-  /** Searchable text for a row. Defaults to {@link defaultSearchText}. */
+  /** Searchable text for a row. Defaults to `defaultSearchText`. */
   readonly getSearchText?: (row: TRow) => string;
   /** Sort value for a cell, overriding each column's own. */
   readonly getSortValue?: (row: TRow, columnKey: string) => SortableValue;
@@ -158,7 +158,7 @@ export interface FrontendSourceFrame<TRow> {
  * Builds the engine a frontend source drives.
  *
  * {@link createFrontendSource} passes the full evaluator. A plain table
- * passes {@link createBasicTableEngine} so grouping stays out of that graph.
+ * passes `createBasicTableEngine` so grouping stays out of that graph.
  *
  * @public
  */
@@ -179,7 +179,7 @@ export interface FrontendSource<TRow> {
   /**
    * Stage the host's data and view on the engine's candidate and read what
    * the table shows from it. Nothing outside the caller sees the change until
-   * {@link FrontendSource.commit}.
+   * `FrontendSource.commit`.
    */
   readonly update: (
     config: FrontendSourceConfig<TRow>,
@@ -191,7 +191,7 @@ export interface FrontendSource<TRow> {
    * Evaluate with `createEngine`'s evaluator from the next update on. The
    * engine keeps its id, selection, subscribers and revisions: the next
    * update stages the new evaluator on its candidate, and
-   * {@link FrontendSource.commit} publishes it. An engine built outside
+   * `FrontendSource.commit` publishes it. An engine built outside
    * `createTableEngine` and `createBasicTableEngine` cannot take another
    * evaluator, so the next update replaces it. The same factory is a no-op.
    */
@@ -286,7 +286,7 @@ function warnUnresolvableSort<TRow>(
  * {@link createFrontendSource} is the convenience form that supplies the
  * full evaluator.
  *
- * @returns The source; call {@link FrontendSource.update} before reading.
+ * @returns The source; call `FrontendSource.update` before reading.
  *
  * @public
  */
@@ -579,9 +579,9 @@ export function createFrontendSourceWith<TRow>(
  *
  * Filter, sort, search, grouping, and aggregates all run in the engine.
  * A table that only filters, sorts, and searches uses
- * {@link createFrontendSourceWith} with {@link createBasicTableEngine}.
+ * {@link createFrontendSourceWith} with `createBasicTableEngine`.
  *
- * @returns The source; call {@link FrontendSource.update} before reading.
+ * @returns The source; call `FrontendSource.update` before reading.
  *
  * @public
  */

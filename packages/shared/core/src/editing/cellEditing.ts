@@ -354,7 +354,7 @@ function resolveEditorValue(
  * `onCellEdit` handler.
  *
  * A string that is not a built-in name is a plugin type registered with
- * {@link TableFeatureHost.registerEditor}; it resolves to
+ * `TableFeatureHost.registerEditor`; it resolves to
  * `{ type: "custom", render }` so adapters stay on one path.
  *
  * @public
@@ -470,7 +470,7 @@ function parseMultiDraft(draft: string): string[] {
 }
 
 /**
- * The separator {@link formatMultiDraft} joins a multi-select's values with.
+ * The separator `formatMultiDraft` joins a multi-select's values with.
  *
  * @public
  */

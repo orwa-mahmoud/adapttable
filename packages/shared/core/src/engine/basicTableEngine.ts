@@ -1,7 +1,7 @@
 /**
  * A table that filters, sorts, and searches, and does not group or aggregate.
  *
- * The session is the same one {@link createTableEngine} uses. The evaluator
+ * The session is the same one `createTableEngine` uses. The evaluator
  * is the basic row model, so grouping and aggregate code is not in this graph.
  */
 import { createBasicRowModel } from "./basicRowModel";

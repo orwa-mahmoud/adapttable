@@ -19,7 +19,7 @@ export interface SearchInputState {
 }
 
 /**
- * Result of {@link useTableData}.
+ * Result of `useTableData`.
  *
  * @public
  */

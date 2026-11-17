@@ -3,7 +3,7 @@
  * hooks subscribe. Host callbacks remain the persistence boundary.
  *
  * This module injects the full row model. A table that only filters, sorts,
- * and searches uses {@link createBasicTableEngine}.
+ * and searches uses `createBasicTableEngine`.
  */
 import type {
   ColumnMetadata,
@@ -72,7 +72,7 @@ export interface TableSnapshot<TRow = unknown> {
 }
 
 /**
- * Options for {@link createTableEngine}.
+ * Options for `createTableEngine`.
  *
  * @public
  */

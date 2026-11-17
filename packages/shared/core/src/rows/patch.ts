@@ -123,7 +123,7 @@ export function rowPatchLogStartsAt<TRow>(
 }
 
 /**
- * The log {@link applyRowPatches} attached to a result array, when the
+ * The log `applyRowPatches` attached to a result array, when the
  * patches actually changed something. A host that already called
  * `applyRowPatches` (the Scale demo, a socket handler) can hand this to
  * the incremental view instead of applying the same patches twice.
@@ -132,7 +132,7 @@ export function rowPatchLogStartsAt<TRow>(
  * copy is a different array.
  *
  * @typeParam TRow - The row type.
- * @param rows - An array returned by {@link applyRowPatches}.
+ * @param rows - An array returned by `applyRowPatches`.
  * @returns The log, or `undefined` when this array was not produced by a
  *   changing patch (or was copied).
  *
@@ -225,7 +225,7 @@ export function applyRowPatches<TRow>(
 /**
  * Apply patches and return the events each real mutation produced.
  *
- * {@link applyRowPatches} is this without the log. Incremental re-evaluation
+ * `applyRowPatches` is this without the log. Incremental re-evaluation
  * sits on the log so a 200-update burst does not walk 20k rows looking for
  * what changed.
  *

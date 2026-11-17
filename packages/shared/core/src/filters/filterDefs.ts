@@ -908,8 +908,8 @@ export function clearedFilterExtras<TRow>(
 /**
  * Materialize `"auto"` option sources from the data: the distinct values of
  * each such definition's row projection, sorted, capped at
- * {@link AUTO_OPTIONS_LIMIT}. Static arrays and async loaders pass through
- * untouched. Run BEFORE {@link buildFilterRuntime} so chips can label the
+ * `AUTO_OPTIONS_LIMIT`. Static arrays and async loaders pass through
+ * untouched. Run BEFORE `buildFilterRuntime` so chips can label the
  * derived values.
  *
  * @public

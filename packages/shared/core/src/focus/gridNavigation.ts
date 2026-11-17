@@ -93,7 +93,7 @@ export interface GridFocusControllerOptions<TRow> {
   /**
    * Stable row identity, so a caller holding a row key — a context menu, an
    * agent — can ask for the cell's grid address instead of counting rows
-   * itself. Without it {@link GridFocusController.cellAt} answers nothing.
+   * itself. Without it `GridFocusController.cellAt` answers nothing.
    */
   getRowId?: (row: TRow) => string;
   /**
@@ -415,7 +415,7 @@ const EMPTY: GridFocusSnapshot = {
  *
  * Arrow keys, Home, End, PageUp and PageDown move the active cell. Enter and
  * F2 activate it. A move onto a row that is not mounted yet is remembered
- * until {@link GridFocusController.syncFocus} sees the cell.
+ * until `GridFocusController.syncFocus` sees the cell.
  *
  * @typeParam TRow - The row type.
  * @param initial - The first configuration.

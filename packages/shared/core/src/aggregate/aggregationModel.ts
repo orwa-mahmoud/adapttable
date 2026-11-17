@@ -302,7 +302,7 @@ export function resolveEffectiveAggregation<TRow>(
  * stay unnamed.
  *
  * @typeParam TRow - The row type.
- * @param input - The same input {@link aggregationModel} reads.
+ * @param input - The same input `aggregationModel` reads.
  * @returns Named operations by column, or `undefined` when none are known.
  *
  * @public
@@ -594,7 +594,7 @@ export function removeAggregation(
  *
  * @typeParam TRow - The row type.
  * @param column - The column to check.
- * @param input - The same input {@link aggregationModel} reads.
+ * @param input - The same input `aggregationModel` reads.
  * @returns Whether removing it needs an explicit suppression.
  *
  * @public

@@ -7,7 +7,7 @@
  * the rename bookkeeping: a host commonly writes an accepted name back into
  * its column declarations, and a reset must then restore the name declared
  * BEFORE the rename rather than that echo. The controller remembers those
- * baselines between renders; {@link ColumnLayoutController.configure} hands
+ * baselines between renders; `ColumnLayoutController.configure` hands
  * it the current columns each time.
  */
 
@@ -234,7 +234,7 @@ function namesWithout(
  * @param defaultColumnLayout - The uncontrolled layout to start from.
  * @param within - The table's store to hold the layout in; one of its own
  *   when absent.
- * @returns The controller; call {@link ColumnLayoutController.configure}
+ * @returns The controller; call `ColumnLayoutController.configure`
  *   before the first mutation.
  *
  * @public
