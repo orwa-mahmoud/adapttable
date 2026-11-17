@@ -14,20 +14,20 @@
  */
 import type { AgentManifest } from "@adapttable/ai";
 import {
-  createNeutralTable,
-  createTableEngine,
-  type NeutralTable,
-} from "@adapttable/core";
-import {
   applyTableFeatures,
   FeatureProviders,
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
 import { act, render, waitFor } from "@testing-library/react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { tableAgent } from "./react";
+import {
+  type NeutralTable,
+  type PublishedTable,
+  RealTable,
+} from "./realTable.test-utils";
 
 interface Row {
   id: string;
@@ -39,19 +39,7 @@ const ROWS: Row[] = [
   { id: "2", name: "Grace" },
 ];
 
-function makeTable() {
-  const engine = createTableEngine<Row>({
-    data: ROWS,
-    columns: [{ key: "name", header: "Name", sortable: true }],
-    rowKey: (row) => row.id,
-  });
-  return {
-    engine,
-    neutral: createNeutralTable(engine, "sync") as NeutralTable<unknown>,
-  };
-}
-
-function Publisher({ neutral }: { neutral: NeutralTable<unknown> }) {
+function Publisher({ neutral }: { neutral: NeutralTable }) {
   const rows = useRef<readonly unknown[]>(ROWS);
   usePublishTableRuntime(rows.current, undefined, {
     rows: rows.current,
@@ -63,43 +51,67 @@ function Publisher({ neutral }: { neutral: NeutralTable<unknown> }) {
   return null;
 }
 
+/**
+ * The agent over a real table. `wrap` may replace the neutral surface the
+ * agent reads (to watch it subscribe); `onTable` hears every publish.
+ */
 function Harness({
-  neutral,
   onPublish,
+  onTable,
+  wrap = (neutral) => neutral,
 }: {
-  neutral: NeutralTable<unknown>;
   onPublish: (manifest: AgentManifest) => void;
+  onTable?: (table: PublishedTable) => void;
+  wrap?: (neutral: NeutralTable, table: PublishedTable) => NeutralTable;
 }) {
+  const [neutral, setNeutral] = useState<NeutralTable>();
   const props = applyTableFeatures({
     features: [tableAgent({ tableId: "sync", bridge: { publish: onPublish } })],
   });
   return (
-    <FeatureProviders props={props}>
-      <Publisher neutral={neutral} />
-    </FeatureProviders>
+    <>
+      <RealTable
+        rows={ROWS}
+        onPublish={(table) => {
+          onTable?.(table);
+          setNeutral((current) => current ?? wrap(table.neutral, table));
+        }}
+      />
+      {neutral ? (
+        <FeatureProviders props={props}>
+          <Publisher neutral={neutral} />
+        </FeatureProviders>
+      ) : null}
+    </>
   );
+}
+
+/** Search the real table the way a reader does. */
+function search(table: PublishedTable | undefined, text: string): void {
+  const setSearch = table?.view.query?.setSearch;
+  if (!setSearch) throw new Error("The table publishes no search");
+  setSearch(text);
 }
 
 describe("the agent provider follows the table", () => {
   it("catches a revision that moved before the subscription attached", async () => {
-    const { engine, neutral } = makeTable();
     const published: AgentManifest[] = [];
+    const subscribe = vi.fn();
 
     // The table moves while React is still rendering the tree that will
     // subscribe to it — the window a hand-rolled subscription drops.
-    const original = neutral.subscribe.bind(neutral);
-    const subscribe = vi.fn(
-      (
-        axes: Parameters<typeof original>[0],
-        listener: Parameters<typeof original>[1]
-      ) => {
-        engine.dispatch({ type: "setSearch", search: "ada" });
-        return original(axes, listener);
-      }
-    );
-    Object.defineProperty(neutral, "subscribe", { value: subscribe });
+    const wrap = (neutral: NeutralTable, table: PublishedTable) =>
+      Object.create(neutral, {
+        subscribe: {
+          value: (...args: Parameters<NeutralTable["subscribe"]>) => {
+            subscribe();
+            search(table, "ada");
+            return neutral.subscribe(...args);
+          },
+        },
+      }) as NeutralTable;
 
-    render(<Harness neutral={neutral} onPublish={(m) => published.push(m)} />);
+    render(<Harness onPublish={(m) => published.push(m)} wrap={wrap} />);
     await waitFor(() => {
       expect(published.length).toBeGreaterThan(0);
     });
@@ -107,32 +119,19 @@ describe("the agent provider follows the table", () => {
     const first = published[0]?.viewRevision ?? 0;
     // The move that happened during subscribe is reflected, not lost.
     await waitFor(() => {
-      expect(published.at(-1)?.viewRevision).toBeGreaterThan(first - 1);
+      expect(published.at(-1)?.viewRevision).toBeGreaterThan(first);
     });
     expect(published.at(-1)?.tableId).toBe("sync");
   });
 
   it("republishes when the table moves after mount", async () => {
-    const { engine, neutral } = makeTable();
     const published: AgentManifest[] = [];
-    render(<Harness neutral={neutral} onPublish={(m) => published.push(m)} />);
-    await waitFor(() => {
-      expect(published.length).toBeGreaterThan(0);
-    });
-    const before = published.length;
-
-    await act(async () => {
-      engine.dispatch({ type: "setSearch", search: "grace" });
-      await Promise.resolve();
-    });
-    expect(published.length).toBeGreaterThan(before);
-  });
-
-  it("publishes nothing when a rerender changes nothing", async () => {
-    const { neutral } = makeTable();
-    const published: AgentManifest[] = [];
-    const view = render(
-      <Harness neutral={neutral} onPublish={(m) => published.push(m)} />
+    let table: PublishedTable | undefined;
+    render(
+      <Harness
+        onPublish={(m) => published.push(m)}
+        onTable={(next) => (table = next)}
+      />
     );
     await waitFor(() => {
       expect(published.length).toBeGreaterThan(0);
@@ -140,9 +139,26 @@ describe("the agent provider follows the table", () => {
     const before = published.length;
 
     await act(async () => {
-      view.rerender(
-        <Harness neutral={neutral} onPublish={(m) => published.push(m)} />
-      );
+      search(table, "grace");
+      await Promise.resolve();
+    });
+    await waitFor(() => {
+      expect(published.length).toBeGreaterThan(before);
+    });
+  });
+
+  it("publishes nothing when a rerender changes nothing", async () => {
+    const published: AgentManifest[] = [];
+    const onPublish = (m: AgentManifest) => published.push(m);
+    const view = render(<Harness onPublish={onPublish} />);
+    await waitFor(() => {
+      expect(published.length).toBeGreaterThan(0);
+    });
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const before = published.length;
+
+    await act(async () => {
+      view.rerender(<Harness onPublish={onPublish} />);
       await Promise.resolve();
     });
     expect(published).toHaveLength(before);
