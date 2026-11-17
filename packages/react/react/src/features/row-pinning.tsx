@@ -3,7 +3,7 @@
  *
  * The pin state machine and its URL lists live on this entry. A table
  * that never imports it never carries those hooks. They mount in-tree
- * through {@link PINNING_LIVE}.
+ * through `PINNING_LIVE`.
  */
 import {
   ACTIONS_COLUMN_KEY,

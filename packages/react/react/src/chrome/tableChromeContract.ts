@@ -242,7 +242,7 @@ export interface TableChrome<TRow> {
   /** All declared columns (pre layout/device filtering) for the column menu. */
   allColumns: ColumnDef<TRow>[];
   /**
-   * Whether hide / order / pin setters on {@link columnLayout} actually
+   * Whether hide / order / pin setters on `columnLayout` actually
    * write. The three-prop table publishes no-ops; a layout-owning feature
    * replaces them.
    */

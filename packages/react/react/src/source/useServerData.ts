@@ -35,7 +35,7 @@ import {
 /**
  * One consolidated snapshot of everything a server query needs.
  *
- * The fields below the baseline come from {@link QueryExtensions} and are all
+ * The fields below the baseline come from `QueryExtensions` and are all
  * optional: a source receives one only after declaring it can answer it
  * (`supports`), so an endpoint written before a capability existed keeps
  * receiving exactly the query it was written against.
@@ -96,7 +96,7 @@ export interface UseServerDataOptions<TRow> extends Pick<
    * What this endpoint can answer beyond the baseline query. Declare a
    * capability and the matching field starts arriving in `onQueryChange`;
    * leave it out and the field is never sent, with a development warning if
-   * the UI wanted it. See {@link QuerySupport}.
+   * the UI wanted it. See `QuerySupport`.
    */
   supports?: QuerySupport;
   /** Aggregate requests to send when the endpoint supports them. */
@@ -142,7 +142,7 @@ export interface UseServerDataOptions<TRow> extends Pick<
    */
   facets?: FacetMap;
   /**
-   * Fired with the consolidated {@link TableQuery} whenever it changes —
+   * Fired with the consolidated `TableQuery` whenever it changes —
    * including once on mount with the URL-restored values. The previous
    * call's `signal` is aborted when a newer query supersedes it; forward it
    * to `fetch` and out-of-order responses die at the source.

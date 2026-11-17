@@ -47,7 +47,7 @@ export type {
  * @typeParam TRow - The row type.
  * @param def - The range filter definition.
  * @param source - The filter-bag slice (extra + setters).
- * @returns The {@link RangeFieldWidget} state and writers.
+ * @returns The `RangeFieldWidget` state and writers.
  *
  * @public
  */
@@ -74,7 +74,7 @@ export function useRangeFilterWidget<TRow>(
  * @typeParam TRow - The row type.
  * @param def - The text filter definition.
  * @param source - The filter-bag slice (extra + setters).
- * @returns The {@link TextFieldWidget} state and writers.
+ * @returns The `TextFieldWidget` state and writers.
  *
  * @public
  */

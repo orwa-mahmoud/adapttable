@@ -221,7 +221,7 @@ export type ChromeBodySlotProps<TRow = never> = NeutralChromeBodySlotProps<
 >;
 
 /**
- * What fills {@link CHROME_BODY}: one body for any row type.
+ * What fills `CHROME_BODY`: one body for any row type.
  *
  * @public
  */
@@ -245,7 +245,7 @@ export interface KeyedWindow extends KeyedVirtualization {
  * A window over an opaque keyed list, for a kit that assembles its own body —
  * `@adapttable/core`'s `KeyedWindowSlotProps` with React's window and nodes.
  *
- * antd renders through its own `<Table>`, so it cannot take {@link CHROME_BODY}
+ * antd renders through its own `<Table>`, so it cannot take `CHROME_BODY`
  * — but it still has a grouped flat list to window, and windowing it means the
  * TanStack hooks. Asking for them here keeps them where every other kit keeps
  * them: behind `virtualize()`, out of the plain table's graph.
@@ -324,7 +324,7 @@ export const CONTEXT_MENU_LIVE: FeatureSlotKey<
  * Find-in-table plus the hook that arms it.
  *
  * Kits that still call `useFindInTable` in the root fill
- * {@link FIND_BAR} with finished UI props. A kit that has moved the hook
+ * `FIND_BAR` with finished UI props. A kit that has moved the hook
  * fills this slot; the renderer calls the hook and hands the state down.
  *
  * @public
@@ -342,7 +342,7 @@ export interface FindLiveSlotProps<
 }
 
 /**
- * What fills {@link FIND_LIVE}: the find hook for any row type.
+ * What fills `FIND_LIVE`: the find hook for any row type.
  *
  * @public
  */
@@ -364,7 +364,7 @@ export type EditHistoryLiveSlotProps<TRow = never> =
   >;
 
 /**
- * What fills {@link EDIT_HISTORY_LIVE}: the undo/redo hook for any row type.
+ * What fills `EDIT_HISTORY_LIVE`: the undo/redo hook for any row type.
  *
  * @public
  */
@@ -396,7 +396,7 @@ export type CellNavLiveSlotProps<TRow = never> = NeutralCellNavLiveSlotProps<
 };
 
 /**
- * What fills {@link CELL_NAV_LIVE}: the grid hook for any row type.
+ * What fills `CELL_NAV_LIVE`: the grid hook for any row type.
  *
  * @public
  */
@@ -418,7 +418,7 @@ export type ExportLiveSlotProps<TRow = never> = NeutralExportLiveSlotProps<
 >;
 
 /**
- * What fills {@link EXPORT_LIVE}: the export hook for any row type.
+ * What fills `EXPORT_LIVE`: the export hook for any row type.
  *
  * @public
  */
@@ -438,7 +438,7 @@ export type FullscreenLiveSlotProps = NeutralFullscreenLiveSlotProps<
 >;
 
 /**
- * What fills {@link FULLSCREEN_LIVE}: the fullscreen hook.
+ * What fills `FULLSCREEN_LIVE`: the fullscreen hook.
  *
  * @public
  */
@@ -486,7 +486,7 @@ export type SelectionStatsLiveSlotProps<TRow = never> =
   NeutralSelectionStatsLiveSlotProps<TRow, ColumnDef<TRow>, ReactNode>;
 
 /**
- * What fills {@link SELECTION_STATS_LIVE}: the figures for any row type.
+ * What fills `SELECTION_STATS_LIVE`: the figures for any row type.
  *
  * @public
  */

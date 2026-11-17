@@ -2,7 +2,7 @@
  * Edit history — `@adapttable/<kit>/editing`.
  *
  * The undo stack lives on this entry. A table that never imports it never
- * records gestures. The hook mounts in-tree through {@link EDIT_HISTORY_LIVE}.
+ * records gestures. The hook mounts in-tree through `EDIT_HISTORY_LIVE`.
  */
 import { coreEditHistory } from "@adapttable/core/binding";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";

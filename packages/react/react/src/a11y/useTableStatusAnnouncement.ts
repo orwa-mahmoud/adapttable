@@ -26,7 +26,7 @@ export {
 /**
  * Track the table's row set and sort, and return what to announce.
  *
- * @param options - See {@link TableStatusAnnouncementOptions}.
+ * @param options - See `TableStatusAnnouncementOptions`.
  * @returns The current announcement — `""` until something changes.
  *
  * @public

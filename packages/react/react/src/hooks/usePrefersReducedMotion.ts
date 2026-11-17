@@ -14,7 +14,7 @@ const KitMotionOff = createContext(false);
 
 /**
  * Marks a table whose UI library has turned motion off. Descendants that
- * call {@link usePrefersReducedMotion} then stay still, the same way they
+ * call `usePrefersReducedMotion` then stay still, the same way they
  * do for the operating-system preference. The scope sits above the table
  * body so overlays mounted under it see the flag.
  *

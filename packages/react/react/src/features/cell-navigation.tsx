@@ -3,7 +3,7 @@
  *
  * The factory and the grid hook live together, so a table that never
  * imports it never carries keyboard-grid state. The hook mounts in-tree
- * through {@link CELL_NAV_LIVE}.
+ * through `CELL_NAV_LIVE`.
  */
 import { type CellRange } from "@adapttable/core";
 import {

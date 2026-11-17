@@ -1,7 +1,7 @@
 /**
  * Excel-style checklist filter — distinct values, counts, search,
- * select-all. Prefers {@link TableSource.facets} (own-filter excluded);
- * falls back to {@link TableSource.allFilteredRows}. A server page that
+ * select-all. Prefers `TableSource.facets` (own-filter excluded);
+ * falls back to `TableSource.allFilteredRows`. A server page that
  * omits both does not offer the widget.
  */
 import {

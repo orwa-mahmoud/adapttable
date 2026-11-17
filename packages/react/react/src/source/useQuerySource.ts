@@ -46,20 +46,20 @@ export interface UseQuerySourceOptions<
 > {
   /**
    * The caller's paginated-query hook, built on `useInfiniteQuery`. It
-   * receives the merged params and must return an {@link InfiniteQueryLike}.
+   * receives the merged params and must return an `InfiniteQueryLike`.
    */
   usePaginatedQuery: (params: Partial<TParams>) => InfiniteQueryLike<TPage>;
   /**
-   * Page → `{ rows, total? }` selector. Defaults to reading {@link PaginatedResponse}.
+   * Page → `{ rows, total? }` selector. Defaults to reading `PaginatedResponse`.
    *
    * The selector is read through a ref so the rows memo only refires when
-   * upstream query data, pagination mode, or {@link UseQuerySourceOptions.selectorKey}
+   * upstream query data, pagination mode, or `UseQuerySourceOptions.selectorKey`
    * changes. An unmemoized inline selector that changes identity — or
    * closed-over values — without a data or key change will not re-project.
    */
   selectPage?: PageSelector<TRow, TPage>;
   /**
-   * Explicit invalidation for {@link UseQuerySourceOptions.selectPage}.
+   * Explicit invalidation for `UseQuerySourceOptions.selectPage`.
    * Omitting it preserves today's behavior: the latest selector is used on
    * the next fetch, not on the next render. Pass a stable string or number
    * (never an object or function) when a memoized selector closes over a
@@ -132,12 +132,12 @@ export interface UseQuerySourceOptions<
 }
 
 /**
- * Server-paginated {@link TableSource}. Wraps a caller's
+ * Server-paginated `TableSource`. Wraps a caller's
  * `useInfiniteQuery` hook and exposes the uniform contract: flattening
  * pages in infinite mode, returning the latest page in paged mode, and
  * keeping query params in sync with URL state.
  *
- * @returns A {@link TableSource} backed by the server query.
+ * @returns A `TableSource` backed by the server query.
  *
  * @public
  */

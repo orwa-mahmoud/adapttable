@@ -2,7 +2,7 @@
  * Row detail / nested table — expansion chrome.
  *
  * The expansion hook and the nested-table renderer live on this entry.
- * Both {@link rowDetail} and {@link nestedTable} fill {@link EXPANSION_LIVE}.
+ * Both {@link rowDetail} and {@link nestedTable} fill `EXPANSION_LIVE`.
  */
 import { coreNestedTable, coreRowDetail } from "@adapttable/core/binding";
 import { type ReactNode, useMemo } from "react";

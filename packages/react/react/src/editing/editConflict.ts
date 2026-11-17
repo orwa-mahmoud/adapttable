@@ -29,7 +29,7 @@ export {
 } from "@adapttable/core/editing";
 
 /**
- * Headless conflict state. Inert until {@link EditConflictState.reconcile}
+ * Headless conflict state. Inert until `EditConflictState.reconcile`
  * sees a live row that disagrees with the open editor.
  *
  * @public

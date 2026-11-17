@@ -16,7 +16,7 @@ import type { ReactElement } from "react";
 import { LiveRegion } from "./LiveRegion";
 
 /**
- * Props for {@link TableStatusAnnouncer}.
+ * Props for `TableStatusAnnouncer`.
  *
  * @public
  */
@@ -28,7 +28,7 @@ export interface TableStatusAnnouncerProps {
 /**
  * Announce a change to the table's rows politely.
  *
- * @param props - See {@link TableStatusAnnouncerProps}.
+ * @param props - See `TableStatusAnnouncerProps`.
  *
  * @public
  */

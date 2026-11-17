@@ -3,7 +3,7 @@
  *
  * Collapse, paging and the flat grouped model live on this entry. A table
  * that never imports it never carries that math. The hooks mount in-tree
- * through {@link GROUPING_LIVE}.
+ * through `GROUPING_LIVE`.
  */
 import {
   devWarn,

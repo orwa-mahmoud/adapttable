@@ -38,7 +38,7 @@ export interface UseInfiniteScrollOptions {
 
 /**
  * Auto-loads the next page when a sentinel element scrolls near the viewport,
- * turning a paginated {@link TableSource} into true infinite scroll. Attach
+ * turning a paginated `TableSource` into true infinite scroll. Attach
  * the returned ref to a small element rendered after the last row.
  *
  * SSR- and jsdom-safe: when `IntersectionObserver` is unavailable it no-ops,

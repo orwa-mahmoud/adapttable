@@ -3,7 +3,7 @@
  *
  * The filter-tree chip hook lives on this entry. A table that never
  * imports it never walks the tree. The hook mounts in-tree through
- * {@link FILTER_CHIPS_LIVE}.
+ * `FILTER_CHIPS_LIVE`.
  */
 import { type FilterDef } from "@adapttable/core";
 import { coreFilters, FILTER_ENGINE_IMPL } from "@adapttable/core/binding";

@@ -3,7 +3,7 @@
  *
  * The factory, the writer and the single-flight hook live together, so a
  * table that never imports it never carries export. The hook mounts in-tree
- * through {@link EXPORT_LIVE}.
+ * through `EXPORT_LIVE`.
  */
 import {
   type ExportCsvOptions,

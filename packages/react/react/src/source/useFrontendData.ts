@@ -50,7 +50,7 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
   /** The source array. Filtered / sorted / sliced internally by state. */
   data: readonly TRow[];
   /**
-   * How a row's id is derived — the same function {@link applyRowPatches}
+   * How a row's id is derived — the same function `applyRowPatches`
    * used. Defaults to `String(row.id)` when the row has an `id`.
    */
   getRowId?: (row: TRow) => string;
@@ -120,7 +120,7 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
 }
 
 /**
- * In-memory {@link TableSource}: reads URL/local state and filters, sorts,
+ * In-memory `TableSource`: reads URL/local state and filters, sorts,
  * and slices a caller-supplied array. The mirror of `useQuerySource` —
  * the table cannot tell which produced it.
  *
@@ -130,7 +130,7 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
  *
  * @typeParam TRow - The row item type.
  * @param options - See {@link UseFrontendDataOptions}.
- * @returns A {@link TableSource} over the in-memory data.
+ * @returns A `TableSource` over the in-memory data.
  *
  * @public
  */

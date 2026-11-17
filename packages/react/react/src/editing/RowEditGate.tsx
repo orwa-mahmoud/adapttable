@@ -246,12 +246,12 @@ export interface RowEditActionsChromeProps<
 /**
  * The row's edit / save / cancel controls.
  *
- * Layout and the shared {@link rowEditControls} contract — adapters pass the
+ * Layout and the shared `rowEditControls` contract — adapters pass the
  * buttons the end user clicks. A kit with a strong opinion about its buttons
- * can still use {@link rowEditControls} directly instead.
+ * can still use `rowEditControls` directly instead.
  *
  * @typeParam TRow - The row type.
- * @param props - See {@link RowEditActionsChromeProps}.
+ * @param props - See `RowEditActionsChromeProps`.
  * @returns The controls for this row, or nothing when a host action owns the
  *   trigger and the row is not open.
  *

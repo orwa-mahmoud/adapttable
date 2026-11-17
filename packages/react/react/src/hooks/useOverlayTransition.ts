@@ -45,7 +45,7 @@ export interface OverlayTransition {
  *
  * @param open - Whether the overlay should be showing.
  * @param exitMs - How long the exit takes. Defaults to
- * {@link OVERLAY_MOTION.exitMs}; pass the real duration if the caller animates
+ * `OVERLAY_MOTION.exitMs`; pass the real duration if the caller animates
  * for longer, or the node is removed mid-slide.
  * @returns Whether to render, and which end of the transition to render at.
  *
