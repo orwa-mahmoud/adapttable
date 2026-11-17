@@ -223,13 +223,16 @@ export default defineConfig(
     },
   },
   {
-    // A kit talks only to its framework binding: a React kit imports
-    // `@adapttable/react/…`, a Vue or Angular kit its own binding. Only a
-    // binding imports `@adapttable/core`, and it re-exports what its kits
-    // need, so it can adapt any of it to its framework without touching a kit.
-    // The rule covers a kit's tests and test helpers too: they take their
-    // fixtures and the conformance suites from the binding as well.
-    files: ["packages/*/adapter-*/**/*.{ts,tsx,vue}"],
+    // A kit or an AI binding talks only to its framework binding: a React kit
+    // imports `@adapttable/react/…`, a Vue or Angular kit its own binding.
+    // Only a binding imports `@adapttable/core`, and it re-exports what the
+    // packages above it need, so it can adapt any of it to its framework
+    // without touching them. The rule covers their tests and test helpers
+    // too: those mount real tables through the binding as well.
+    files: [
+      "packages/*/adapter-*/**/*.{ts,tsx,vue}",
+      "packages/*/ai-{react,vue,angular}/**/*.{ts,tsx,vue}",
+    ],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -238,48 +241,12 @@ export default defineConfig(
             {
               group: ["@adapttable/core", "@adapttable/core/*"],
               message:
-                "A kit imports only from its framework binding (for a React kit, @adapttable/react/…); only a binding imports @adapttable/core.",
+                "A kit or AI binding imports only from its framework binding (for React, @adapttable/react/…); only a binding imports @adapttable/core.",
             },
           ],
         },
       ],
     },
   },
-  // Vue's SFC macro resolver cannot follow renamed imported types in shared
-  // declaration chunks. These two original neutral prop contracts stay type-only.
-  ...[
-    ["NativeChecklistFilter.vue", "ChecklistFilterProps"],
-    ["NativeFilterTree.vue", "FilterTreeBuilderProps"],
-  ].flatMap(([file, propType]) =>
-    defineConfig({
-      files: [`packages/vue/adapter-vue-unstyled/src/filters/${file}`],
-      rules: {
-        "no-restricted-imports": [
-          "error",
-          {
-            paths: [
-              {
-                name: "@adapttable/core/binding",
-                allowTypeImports: true,
-                message: "Runtime imports must use the Vue binding.",
-              },
-              {
-                name: "@adapttable/core/binding",
-                allowImportNames: [propType],
-                message:
-                  "Only this SFC's original generic prop contract may come directly from core.",
-              },
-            ],
-            patterns: [
-              {
-                regex: "^@adapttable/core(?:$|/(?!binding$))",
-                message: "Other core imports must use the Vue binding.",
-              },
-            ],
-          },
-        ],
-      },
-    })
-  ),
   prettier
 );
