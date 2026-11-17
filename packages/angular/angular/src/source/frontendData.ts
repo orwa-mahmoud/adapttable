@@ -35,6 +35,7 @@ import {
 } from "../store";
 import {
   injectTableUrlState,
+  type TableUrlState,
   type TableUrlStateOptions,
 } from "../url/tableUrlState";
 
@@ -111,7 +112,30 @@ export function injectFrontendData<TRow>(
 ): Signal<TableSource<TRow>> {
   if (!options.injector) assertInInjectionContext(injectFrontendData);
   const injector = options.injector ?? inject(Injector);
-  const url = injectTableUrlState({ ...options, injector });
+  return frontendDataWith(
+    options,
+    injectTableUrlState({ ...options, injector }),
+    injector
+  );
+}
+
+/**
+ * The frontend source over a given view state, so a table that keeps its
+ * view in memory carries no URL code.
+ *
+ * @param options - The rows and how they are read.
+ * @param url - The view state the source reads and writes.
+ * @param injector - The injector the source runs in.
+ * @returns The source signal.
+ */
+export function frontendDataWith<TRow>(
+  options: Omit<
+    FrontendDataOptions<TRow>,
+    keyof TableUrlStateOptions | "injector"
+  >,
+  url: TableUrlState,
+  injector: Injector
+): Signal<TableSource<TRow>> {
   const viewportMobile = injectIsMobile({
     breakpoint: options.mobileBreakpoint,
     injector,

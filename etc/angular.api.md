@@ -1165,6 +1165,12 @@ export function injectLazyChildren<TRow>(options: LazyChildrenInjectOptions<TRow
 export function injectLiveEditConflict<TRow>(options: LiveEditConflictOptions<TRow>): Signal<EditConflictState<TRow>>;
 
 // @public
+export function injectLocalFrontendData<TRow>(options: LocalFrontendDataOptions<TRow>): Signal<TableSource<TRow>>;
+
+// @public
+export function injectLocalTableViewState(options?: LocalTableViewStateOptions): TableUrlState;
+
+// @public
 export function injectMediaQuery(query: string, injector?: Injector): Signal<boolean>;
 
 // @public
@@ -1274,6 +1280,12 @@ export interface LiveEditConflictOptions<TRow> extends FromStoreOptions {
     readonly input: MaybeSignal<LiveEditConflictInput<TRow>>;
     readonly row?: Signal<RowEditingState<TRow>>;
 }
+
+// @public
+export type LocalFrontendDataOptions<TRow> = Omit<FrontendDataOptions<TRow>, "urlAdapter" | "urlSync" | "urlKey">;
+
+// @public
+export type LocalTableViewStateOptions = Pick<TableUrlStateOptions, "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "injector">;
 
 // @public
 export type MaybeSignal<T> = T | Signal<T>;

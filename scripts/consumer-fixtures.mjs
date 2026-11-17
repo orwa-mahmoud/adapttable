@@ -182,6 +182,28 @@ const CORE_FIXTURES = [
     ],
   },
   {
+    // The same table with its view state in memory: no URL code at all.
+    name: "react · local table",
+    kind: "react",
+    pkg: "react",
+    // 17.4 KiB on 2026-11-17, against 19.7 KiB for the URL-synced table.
+    initialKB: 20,
+    totalKB: 20,
+    code: `export { useLocalFrontendData, useDataTable } from "PKG";`,
+    present: [
+      "useDataTable",
+      "useLocalFrontendData",
+      "createLocalTableViewStore",
+    ],
+    absent: [
+      "defaultLabels",
+      "createTableViewStore",
+      "parseTableUrlState",
+      "updateTableUrlState",
+      "createHistoryAdapter",
+    ],
+  },
+  {
     name: "core · basic table",
     kind: "core",
     pkg: "core",

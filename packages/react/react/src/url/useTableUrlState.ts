@@ -12,6 +12,7 @@ import {
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
+import { viewStateResult } from "./viewStateResult";
 export type { UseTableUrlStateResult } from "@adapttable/core/binding";
 
 /**
@@ -122,20 +123,5 @@ export function useTableUrlState(
   // other's params — the store warns in development.
   useEffect(() => store.claimNamespace(), [store]);
 
-  return {
-    ...state,
-    setPage: store.setPage,
-    setLimit: store.setLimit,
-    setSort: store.setSort,
-    setGroupBy: store.setGroupBy,
-    initializeGroupBy: store.initializeGroupBy,
-    setGroupAggregateOverrides: store.setGroupAggregateOverrides,
-    toggleSortLevel: store.toggleSortLevel,
-    setSearch: store.setSearch,
-    setExtra: store.setExtra,
-    setExtras: store.setExtras,
-    setFilterTree: store.setFilterTree,
-    clearExtras: store.clearExtras,
-    clearAll: store.clearAll,
-  };
+  return viewStateResult(state, store);
 }

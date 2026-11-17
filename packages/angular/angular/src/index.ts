@@ -250,6 +250,10 @@ export {
   injectFrontendData,
 } from "./source/frontendData";
 export {
+  injectLocalFrontendData,
+  type LocalFrontendDataOptions,
+} from "./source/localFrontendData";
+export {
   type InfiniteQuerySignals,
   injectQuerySource,
   type QuerySourceOptions,
@@ -303,6 +307,10 @@ export {
   type GroupCollapseUrlStateOptions,
   injectGroupCollapseUrlState,
 } from "./url/groupCollapseUrlState";
+export {
+  injectLocalTableViewState,
+  type LocalTableViewStateOptions,
+} from "./url/localTableViewState";
 export {
   injectRowPinningUrlState,
   type RowPinningUrlState,

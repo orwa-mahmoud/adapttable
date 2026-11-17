@@ -298,6 +298,11 @@ export class ConsumerApp {
 }
 `;
 
+const LOCAL_HEADLESS = HEADLESS.replaceAll(
+  "injectFrontendData",
+  "injectLocalFrontendData"
+);
+
 /**
  * Ceilings in KiB, taken from the first linked measurement on 2026-11-05
  * (Angular 22.2.3) and rounded up by about 15%. `own` is AdaptTable's share;
@@ -308,6 +313,7 @@ export class ConsumerApp {
  */
 const CEILINGS = {
   "angular · headless table": { own: 37, app: 120 },
+  "angular · local headless table": { own: 28, app: 71 },
   "angular · angular-unstyled table": { own: 140, app: 250 },
   "angular · angular-material table": { own: 141, app: 252 },
   "angular · ng-bootstrap table": { own: 141, app: 252 },
@@ -378,6 +384,32 @@ export function angularConsumerFixtures(kits = angularKits()) {
       absent: ["AdaptDataTable", "coreGrouping", "xlsxWriter", "defaultLabels"],
       ...ceilings("angular · headless table"),
       code: HEADLESS,
+    },
+    {
+      name: "angular · local headless table",
+      kind: "angular-consumer",
+      framework: "angular",
+      pkg: "angular",
+      rendered: true,
+      peerPolicy: "own-share",
+      functionality: "Headless table with its view state in memory, no URL",
+      present: [
+        "injectDataTable",
+        "injectLocalFrontendData",
+        "createLocalTableViewStore",
+      ],
+      absent: [
+        "AdaptDataTable",
+        "coreGrouping",
+        "xlsxWriter",
+        "defaultLabels",
+        "createTableViewStore",
+        "parseTableUrlState",
+        "updateTableUrlState",
+        "createHistoryAdapter",
+      ],
+      ...ceilings("angular · local headless table"),
+      code: LOCAL_HEADLESS,
     },
     {
       name: "angular · lean table",

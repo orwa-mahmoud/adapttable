@@ -21,6 +21,7 @@ import {
   useScopeActivity,
 } from "../store";
 import {
+  type TableUrlState,
   useTableUrlState,
   type UseTableUrlStateOptions,
 } from "../url/useTableUrlState";
@@ -73,8 +74,26 @@ export function useFrontendData<TRow>(
   input: MaybeRefOrGetter<UseFrontendDataOptions<TRow>>
 ): FrontendDataState<TRow> {
   requireScope("useFrontendData");
+  return useFrontendDataWith(input, useTableUrlState);
+}
+
+/**
+ * The frontend tier over whichever view state `useViewState` holds: the URL
+ * for `useFrontendData`, memory for `useLocalFrontendData`.
+ *
+ * @param input - The data and its view options.
+ * @param useViewState - The composable that holds the page, sort, search and
+ *   filters.
+ * @returns The table source state and its actions.
+ */
+export function useFrontendDataWith<TRow>(
+  input: MaybeRefOrGetter<UseFrontendDataOptions<TRow>>,
+  useViewState: (
+    options: MaybeRefOrGetter<UseTableUrlStateOptions>
+  ) => TableUrlState
+): FrontendDataState<TRow> {
   const options = computed(() => toValue(input));
-  const { state, ...actions } = useTableUrlState(options);
+  const { state, ...actions } = useViewState(options);
   const mode = useSourceMode(options);
   const active = useScopeActivity();
   const factoryOf = (): FrontendEngineFactory<TRow> =>

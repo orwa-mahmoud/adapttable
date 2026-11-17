@@ -37,7 +37,7 @@ Prefer zero install first? Open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 67–75 kB min+gzip (measured 2026-11-17 from
+A plain adapter `DataTable` is 67–74 kB min+gzip (measured 2026-11-17 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
@@ -10987,6 +10987,19 @@ changes, and any `urlAdapter` is ignored.
 Headless equivalent: `useTableUrlState({ urlSync: false })` — handy inside
 modals or drawers where the address bar shouldn't change.
 
+A headless table that never syncs with the URL can leave the URL code out of
+its bundle: `useLocalFrontendData` takes the options of `useFrontendData`
+without `urlAdapter`, `urlSync` and `urlKey` (`UseLocalFrontendDataOptions`)
+and keeps the view state in the table's store. `useLocalTableViewState`
+(`UseLocalTableViewStateOptions`: `defaults`, `numberExtraKeys`,
+`arrayExtraKeys`, `store`) returns the same state and setters as
+`useTableUrlState` from memory alone.
+
+```tsx
+const source = useLocalFrontendData({ data, columns });
+const table = useDataTable({ source, columns, rowKey: (r) => r.id });
+```
+
 ## Param reference
 
 | Param                       | Example                        | Meaning                                                                                                                                                                                                                                |
@@ -17586,6 +17599,13 @@ deprecated alias until the next major.
   `setExtras`, `setFilterTree`, `setGroupBy`,
   `setGroupAggregateOverrides`, `initializeGroupBy`, `clearExtras`, `clearAll`). Group keys use
   `groupBy`; overrides use `groupAgg`.
+- `useLocalTableViewState(options?): UseTableUrlStateResult` — the same state
+  and setters held in memory, with no URL code; `UseLocalTableViewStateOptions`
+  takes `defaults`, `numberExtraKeys`, `arrayExtraKeys` and `store`. In Vue the
+  same composable returns the readonly `state` ref.
+- `useLocalFrontendData(options)` — `useFrontendData` over
+  `useLocalTableViewState`: `UseLocalFrontendDataOptions` omits `urlAdapter`,
+  `urlSync` and `urlKey`, and the bundle carries no URL code.
 - `useColumnLayoutUrlState(options?): { layout, onLayoutChange }` —
   URL-persisted column layout (hidden / order / pinned / widths / names).
 - `useColumnLayoutStorageState(options): { layout, onLayoutChange }` — the
@@ -17783,6 +17803,9 @@ explains which import a program changes. This list is the reference.
   configured by `TableViewStateConfig`: `getSnapshot()`, `subscribe()` and the
   mutators. `TableViewStore` is the store, `TableViewState` its snapshot, and
   `ViewStateSubscription` how a binding listens.
+- `createLocalTableViewStore(config?, options?)` — the same `TableViewStore`
+  held in memory, optionally scoped into the table's store (`options.store`),
+  with no URL adapter and no URL code.
 - `createUrlSliceStore(source, spec, config)` — one debounced URL slice
   (`URL_SLICE_WRITE_DEBOUNCE_MS`) described by a `UrlSliceSpec`, as a
   `UrlSliceStore`. The slices the table ships: `columnLayoutSlice`,
@@ -20783,6 +20806,9 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   options, and `isLoading`, `isFetching`, `error` and `refetch` to show when
   the rows came from a request) and returns a signal of the core
   `TableSource`.
+- `injectLocalFrontendData(options)` is the in-memory tier with its view
+  state in the table's store and no URL code: `LocalFrontendDataOptions` is
+  `FrontendDataOptions` without `urlAdapter`, `urlSync` and `urlKey`.
 - `injectServerData(options)` is the server tier: it takes
   `ServerDataOptions` — the page the host fetched (`rows`, `total`, and
   `loading`, `error`, `nextCursor` as values or signals), what the endpoint
@@ -20820,6 +20846,9 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   `arrayExtraKeys` may be signals the state follows. `ADAPTTABLE_URL_ADAPTER`
   is the injection token that sets the URL adapter every table under an
   injector uses.
+- `injectLocalTableViewState(options)` is the same `TableUrlState` held in
+  memory, configured by `LocalTableViewStateOptions` (`defaults`,
+  `numberExtraKeys`, `arrayExtraKeys`, `injector`).
 - The other pieces of view state keep to the URL the same way:
   `injectColumnLayoutUrlState` (`ColumnLayoutUrlStateOptions`, returning a
   `ColumnLayoutUrlState` with the `layout` signal and `onLayoutChange`),
@@ -22211,7 +22240,7 @@ React and the UI kit external because your app already ships those):
 | ------------------------------------------ | --------- |
 | `useFrontendData` + `useDataTable` (react) | ~20 kB    |
 | every core export                          | ~106 kB   |
-| `DataTable` from an adapter                | ~67–75 kB |
+| `DataTable` from an adapter                | ~67–74 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. The every-export
@@ -22503,7 +22532,7 @@ libraries.
 
 <sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation()`, and paste and fill write through editable columns and the composed `editing()` handler — the channel inline editing uses — unless `onCellPaste` / `onCellFill` take the batch whole; cut reports its range to `onCellCut`. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
-A plain AdaptTable adapter `DataTable` is 67–75 kB min+gzip (measured
+A plain AdaptTable adapter `DataTable` is 67–74 kB min+gzip (measured
 2026-11-17 from packed fixtures; React and the kit stay external). Competitor
 bundle sizes are not listed here — they depend on which paid modules you
 licence and are not produced by this repo's fixtures. Method and the rest of
@@ -31069,6 +31098,14 @@ claim. The table data controller similarly transfers URL ownership when its
 active frontend/server tier changes, so an inactive tier cannot rewrite the
 reader's query.
 
+A table that never syncs with the URL can leave the URL code out of its
+bundle: `injectLocalFrontendData` takes the options of `injectFrontendData`
+without `urlAdapter`, `urlSync` and `urlKey` (`LocalFrontendDataOptions`) and
+keeps the view state in the table's store. `injectLocalTableViewState`
+(`LocalTableViewStateOptions`: `defaults`, `numberExtraKeys`,
+`arrayExtraKeys`, `injector`) returns the same `state()` signal and setters as
+`injectTableUrlState` from memory alone.
+
 Use `injectColumnLayoutUrlState`, `injectDensityUrlState`,
 `injectGroupCollapseUrlState` and `injectRowPinningUrlState` from the binding
 when building a custom shell. Pivot and formula slices come from
@@ -35664,6 +35701,13 @@ memory adapter from the request and supply matching state during hydration.
 the neutral store signatures. It omits subscription/configuration methods.
 Actions remain stable when the options or namespace changes; after scope
 disposal they no longer mutate state. Install the native filter/grouping features to add their controls.
+`useLocalFrontendData(input: MaybeRefOrGetter<UseLocalFrontendDataOptions<TRow>>)`
+is `useFrontendData` with its view state in the table's store and no URL code:
+`UseLocalFrontendDataOptions` omits `urlAdapter`, `urlSync` and `urlKey`.
+`useLocalTableViewState(input?: MaybeRefOrGetter<UseLocalTableViewStateOptions>)`
+returns the same `UseTableUrlStateResult` from memory; its options are
+`defaults`, `numberExtraKeys`, `arrayExtraKeys` and `store`.
+
 [Additional slices and Saved Views](./saved-views.md#what-a-view-restores) document
 density, pins, explicit group collapse and the state that is not captured.
 

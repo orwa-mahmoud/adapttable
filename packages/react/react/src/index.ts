@@ -156,6 +156,10 @@ export {
   type UseFrontendDataOptions,
 } from "./source/useFrontendData";
 export {
+  useLocalFrontendData,
+  type UseLocalFrontendDataOptions,
+} from "./source/useLocalFrontendData";
+export {
   type InfiniteQueryLike,
   type PageSelector,
   useQuerySource,
@@ -172,6 +176,10 @@ export {
   type UseColumnLayoutUrlStateOptions,
   type UseColumnLayoutUrlStateResult,
 } from "./url/useColumnLayoutUrlState";
+export {
+  useLocalTableViewState,
+  type UseLocalTableViewStateOptions,
+} from "./url/useLocalTableViewState";
 export {
   SAVED_VIEW_VERSION,
   type SavedView,

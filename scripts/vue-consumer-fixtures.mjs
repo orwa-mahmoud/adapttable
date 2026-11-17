@@ -91,6 +91,27 @@ export const VUE_CONSUMER_SPECS = [
     absent: [...writers, "DataTableSurfaceChrome", "defaultLabels"],
   },
   {
+    name: "vue · local table",
+    pkg: "vue",
+    comparable: "react · simple table",
+    code: 'export { useLocalFrontendData, useDataTable } from "PKG";',
+    functionality: "In-memory source composable without URL sync",
+    present: [
+      "useLocalFrontendData",
+      "useDataTable",
+      "createLocalTableViewStore",
+    ],
+    absent: [
+      ...writers,
+      "DataTableSurfaceChrome",
+      "defaultLabels",
+      "createTableViewStore",
+      "parseTableUrlState",
+      "updateTableUrlState",
+      "createHistoryAdapter",
+    ],
+  },
+  {
     name: "vue-unstyled · table",
     pkg: "adapter-vue-unstyled",
     hardBaseCeiling: true,

@@ -16,6 +16,7 @@ import { useIsMobile } from "../hooks/useIsMobile";
 import {
   useTableUrlState,
   type UseTableUrlStateOptions,
+  type UseTableUrlStateResult,
 } from "../url/useTableUrlState";
 import {
   type FrameHold,
@@ -137,6 +138,24 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
 export function useFrontendData<TRow>(
   options: UseFrontendDataOptions<TRow>
 ): TableSource<TRow> {
+  // A pass-through: the compiler's cache would outweigh the call it saves.
+  "use no memo";
+  return useFrontendDataWith(options, useTableUrlState);
+}
+
+/**
+ * The frontend tier over whichever view state `useViewState` holds: the URL
+ * for `useFrontendData`, memory for `useLocalFrontendData`.
+ *
+ * @param options - The data and its view options.
+ * @param useViewState - The hook that holds the page, sort, search and
+ *   filters.
+ * @returns A `TableSource` over the in-memory data.
+ */
+export function useFrontendDataWith<TRow>(
+  options: UseFrontendDataOptions<TRow>,
+  useViewState: (options: UseTableUrlStateOptions) => UseTableUrlStateResult
+): TableSource<TRow> {
   // The source is created once. An active render, and the first inactive
   // render, apply this render's inputs; a later render of those same inputs
   // does not. The compiler's cache would skip a real refresh and add weight,
@@ -172,7 +191,7 @@ export function useFrontendData<TRow>(
   const isMobile = forceMobile ?? mediaMobile;
   const resolvedMode = resolvePaginationMode(paginationMode, isMobile);
 
-  const state = useTableUrlState(urlOptions);
+  const state = useViewState(urlOptions);
   const { limit, search, sortBy, sortDir, groupBy } = state;
 
   const [source] = useState<FrontendSource<TRow>>(() =>

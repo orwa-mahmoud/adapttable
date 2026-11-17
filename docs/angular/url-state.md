@@ -72,6 +72,14 @@ claim. The table data controller similarly transfers URL ownership when its
 active frontend/server tier changes, so an inactive tier cannot rewrite the
 reader's query.
 
+A table that never syncs with the URL can leave the URL code out of its
+bundle: `injectLocalFrontendData` takes the options of `injectFrontendData`
+without `urlAdapter`, `urlSync` and `urlKey` (`LocalFrontendDataOptions`) and
+keeps the view state in the table's store. `injectLocalTableViewState`
+(`LocalTableViewStateOptions`: `defaults`, `numberExtraKeys`,
+`arrayExtraKeys`, `injector`) returns the same `state()` signal and setters as
+`injectTableUrlState` from memory alone.
+
 Use `injectColumnLayoutUrlState`, `injectDensityUrlState`,
 `injectGroupCollapseUrlState` and `injectRowPinningUrlState` from the binding
 when building a custom shell. Pivot and formula slices come from
