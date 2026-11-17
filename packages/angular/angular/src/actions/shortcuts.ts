@@ -27,7 +27,7 @@ export { DEFAULT_SHORTCUTS };
 export interface UseShortcutsOptions {
   /** Off unless the host armed it; nothing is bound when false. */
   readonly enabled: boolean;
-  /** The shortcuts. Defaults to {@link DEFAULT_SHORTCUTS}. */
+  /** The shortcuts. Defaults to `DEFAULT_SHORTCUTS`. */
   readonly shortcuts?: readonly Shortcut[];
   /** Run a command by key. */
   readonly onCommand: (command: string) => void;

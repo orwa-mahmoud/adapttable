@@ -134,7 +134,7 @@ export interface GridFocus<TRow> {
     index: number,
     col: number
   ) => Attrs;
-  /** Copy the selection, or one cell. A cut also tells {@link GridFocusOptions.onCut}. */
+  /** Copy the selection, or one cell. A cut also tells `GridFocusOptions.onCut`. */
   readonly copyCells: (cell?: GridCell, cut?: boolean) => void;
   /** The grid address of a rendered cell, for a menu opened on it. */
   readonly cellAt: (rowId: string, columnKey: string) => GridCell | undefined;
@@ -143,7 +143,7 @@ export interface GridFocus<TRow> {
 /**
  * Keyboard focus over a table's cells.
  *
- * @param options - See {@link GridFocusOptions}.
+ * @param options - See `GridFocusOptions`.
  * @returns The grid; see {@link GridFocus}.
  *
  * @public

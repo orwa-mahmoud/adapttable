@@ -100,7 +100,7 @@ function toRowKey(event: KeyboardEvent): RowKeyEvent {
 }
 
 /**
- * The live reorder state when {@link rowReorder} is composed. Absent
+ * The live reorder state when `rowReorder` is composed. Absent
  * otherwise — the grip draws nothing.
  *
  * @param options - See {@link RowReorderStateOptions}.

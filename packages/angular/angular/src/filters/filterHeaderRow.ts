@@ -55,9 +55,9 @@ import { AdaptColumnSpacer } from "../virtual/columnSpacer";
 
 /**
  * The kit's controls for one header-filter cell. Each is a standalone
- * component with one `props` input: {@link FilterHeaderSearchProps},
- * {@link FilterHeaderSelectProps}, {@link FilterHeaderRangeProps} or
- * {@link FilterHeaderMultiProps}.
+ * component with one `props` input: `FilterHeaderSearchProps`,
+ * `FilterHeaderSelectProps`, `FilterHeaderRangeProps` or
+ * `FilterHeaderMultiProps`.
  *
  * @public
  */

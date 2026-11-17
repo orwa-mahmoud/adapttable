@@ -86,7 +86,7 @@ export function angularRouterAdapter(injector?: Injector): UrlStateAdapter {
 
 /**
  * Keep every table under this injector in the Angular Router's URL: the
- * provider for {@link ADAPTTABLE_URL_ADAPTER}.
+ * provider for `ADAPTTABLE_URL_ADAPTER`.
  *
  * @returns The provider, for `bootstrapApplication` or a route's `providers`.
  *

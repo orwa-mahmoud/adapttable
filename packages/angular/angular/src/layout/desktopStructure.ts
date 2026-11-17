@@ -187,7 +187,7 @@ export class AdaptDesktopStructure<TRow> extends AdaptDesktopTableModel<TRow> {
   readonly slots = input.required<AdaptDesktopSlots>();
   /**
    * The kit draws the scroll box and the table, and stamps
-   * {@link bodyTemplate} inside that table. The structure's own host stays
+   * `bodyTemplate` inside that table. The structure's own host stays
    * outside it: a custom element between a table and its sections is moved
    * out by the HTML parser.
    */

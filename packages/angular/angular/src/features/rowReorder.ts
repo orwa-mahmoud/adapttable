@@ -19,7 +19,7 @@ import { ROW_LABELS } from "@adapttable/core/binding";
 
 import type { RowReorderFeature } from "./rowReorderContracts";
 
-/** The reorder state machine and its row helpers, filed by {@link rowReorder}. */
+/** The reorder state machine and its row helpers, filed by `rowReorder`. */
 const ROW_REORDER_IMPLEMENTATION: RowReorderImplementation = {
   controller: createRowReorderController,
   runtimeOptions: rowReorderRuntimeOptions,

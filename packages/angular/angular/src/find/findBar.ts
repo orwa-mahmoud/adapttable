@@ -28,9 +28,9 @@ import { AdaptControl } from "../control";
 const FIND_GROUPS = [FIND_LABELS] as const;
 
 /**
- * The kit's controls for {@link AdaptFindBarChrome}. Each is a standalone
- * component with one `props` input: {@link FindSearchProps} or
- * {@link FindButtonProps}.
+ * The kit's controls for `AdaptFindBarChrome`. Each is a standalone
+ * component with one `props` input: `FindSearchProps` or
+ * `FindButtonProps`.
  *
  * @public
  */

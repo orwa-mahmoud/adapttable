@@ -46,13 +46,13 @@ export const ADAPTTABLE_URL_ADAPTER = new InjectionToken<UrlStateAdapter>(
 );
 
 /**
- * Options for {@link injectTableUrlState}.
+ * Options for `injectTableUrlState`.
  *
  * @public
  */
 export interface TableUrlStateOptions {
   /**
-   * URL-state backend. Defaults to {@link ADAPTTABLE_URL_ADAPTER}, then the
+   * URL-state backend. Defaults to `ADAPTTABLE_URL_ADAPTER`, then the
    * browser History API — on the server, the request's query string.
    * A signal selects a different backend while retaining inactive stores.
    */
@@ -235,7 +235,7 @@ export function injectTableUrlState(
  * URL.
  *
  * @param options - The table's URL options.
- * @param injector - Where {@link ADAPTTABLE_URL_ADAPTER} is looked up.
+ * @param injector - Where `ADAPTTABLE_URL_ADAPTER` is looked up.
  * @returns The adapter.
  *
  * @public

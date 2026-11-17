@@ -70,7 +70,7 @@ function coreContext<TRow>(
 }
 
 /**
- * Options for {@link injectExportHandler}.
+ * Options for `injectExportHandler`.
  *
  * @public
  */
@@ -181,7 +181,7 @@ export function injectExportHandler<TRow>(
 }
 
 /**
- * CSV export of the current view. {@link injectExportHandler} is the run.
+ * CSV export of the current view. `injectExportHandler` is the run.
  *
  * @param options - See {@link ExportCsvHandlerOptions}.
  * @returns The state a toolbar's Export button reads.

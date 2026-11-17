@@ -335,7 +335,7 @@ interface BodyWindow<TRow> {
 }
 
 /**
- * The body window for a composed {@link virtualize} feature, or every row
+ * The body window for a composed `virtualize` feature, or every row
  * and entry when the feature is absent. A grouped body windows over its
  * entries — headers, footers and leaves — and a tree over its open nodes,
  * rather than over the rows.
