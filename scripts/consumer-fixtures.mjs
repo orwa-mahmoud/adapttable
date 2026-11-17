@@ -635,10 +635,15 @@ function combinationFixtures() {
   ];
 }
 
-function allFeatureFixture() {
+/**
+ * The table and the kit's features barrel: every feature factory the binding
+ * exports through the kit. It names the factories, not each feature's native
+ * UI, which loads from the feature's own entry.
+ */
+function featuresBarrelFixture() {
   const { pkg } = adapterOf(DELTA_KIT);
   return {
-    name: `${DELTA_KIT} · all features`,
+    name: `${DELTA_KIT} · features barrel`,
     kind: "all-features",
     kit: DELTA_KIT,
     pkg,
@@ -649,6 +654,39 @@ function allFeatureFixture() {
   };
 }
 
+/**
+ * The export ceiling of the kit's native feature entries: the table and a
+ * namespace of every feature entry in the catalog, so each entry keeps its
+ * whole surface and no two entries' names collide. React and the kit's UI
+ * library stay external. It bounds what importing everything costs; it is
+ * not a representative application.
+ */
+function nativeEntriesFixture() {
+  const { pkg } = adapterOf(DELTA_KIT);
+  const subpaths = uniqueFeatureSubpaths();
+  const present = [
+    ...new Set(
+      subpaths.map((subpath) => FEATURE_MARKERS[subpath]).filter(Boolean)
+    ),
+  ];
+  return {
+    name: `${DELTA_KIT} · native feature entries`,
+    kind: "all-features",
+    kit: DELTA_KIT,
+    pkg,
+    alsoFiles: subpaths.map((subpath) => `${subpath}.js`),
+    initialKB: 210,
+    totalKB: 210,
+    code: [
+      `export { DataTable } from "PKG";`,
+      ...subpaths.map(
+        (_, index) => `export * as entry${index} from "ALSO${index}";`
+      ),
+    ].join("\n"),
+    present,
+  };
+}
+
 const existingFixtures = [
   ...CORE_FIXTURES,
   ...REACT_FIXTURES,
@@ -656,7 +694,8 @@ const existingFixtures = [
   ...presetFixtures(),
   ...featureDeltaFixtures(),
   ...combinationFixtures(),
-  allFeatureFixture(),
+  featuresBarrelFixture(),
+  nativeEntriesFixture(),
 ];
 
 /**

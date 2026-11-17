@@ -173,7 +173,7 @@ export const VUE_CONSUMER_SPECS = [
     name: "vue-unstyled · features barrel",
     pkg: "adapter-vue-unstyled",
     alsoEntryFile: "features.js",
-    comparable: "mui · all features",
+    comparable: "mui · features barrel",
     code: 'export { DataTable } from "PKG";\nexport * from "ALSO";\nimport "STYLE";',
     styleEntryFile: "styles.css",
     presentCss: drawerStyles,
