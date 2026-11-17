@@ -5,6 +5,7 @@
 ```ts
 
 import { ColumnMetadata } from '@adapttable/core';
+import { ColumnModelFilter } from '@adapttable/core';
 import { ExtraFilters } from '@adapttable/core';
 import * as i0 from '@angular/core';
 import { Injector } from '@angular/core';
@@ -115,8 +116,9 @@ export interface CellContext<TRow> {
 }
 
 // @public
-export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
+export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header" | "filter"> {
     cell?: Renderer<CellContext<TRow>>;
+    filter?: ColumnModelFilter;
     footer?: Renderer<FooterContext<TRow>>;
     header?: string;
     headerActions?: string | Renderer<HeaderContext<TRow>>;

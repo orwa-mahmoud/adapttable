@@ -6,6 +6,7 @@
  * helper consume these results; they do not reimplement them.
  */
 import type { GroupedFlatEntry } from "../grouping/groupRows";
+import { ROW_LABELS } from "../labelGroups/rowLabels";
 import type { TreeContribution } from "../tree/treeBindingState";
 import type { TreeEntry } from "../tree/treeRows";
 import {
@@ -159,21 +160,33 @@ export type RowReorderAnnouncements = Required<
  *
  * @public
  */
-export const defaultRowReorderAnnouncements: RowReorderAnnouncements = {
-  rowLifted: (position) => `Row lifted, position ${String(position)}`,
-  rowMoved: (from, to) => `Row moved from ${String(from)} to ${String(to)}`,
-  rowReorderCancelled: "Reorder cancelled",
-  rowMovedToGroup: (group) => `Row moved to ${group}`,
-  rowMovedUnder: (parent) => `Row moved under ${parent}`,
-  moveRejectedPolicyNever: "Cross-boundary row moves are disabled",
-  moveRejectedSorted: "Clear sorting before changing row order",
-  moveRejectedCycle: "A row cannot move inside itself or its descendant",
-  moveUnavailable: "This row move is not available",
-  rootLevel: "Top level",
-  moveToGroup: "Move to group…",
-  moveUnder: "Move under…",
-};
+export const defaultRowReorderAnnouncements: RowReorderAnnouncements =
+  /* @__PURE__ */ announcementsOf(ROW_LABELS);
 
+/**
+ * The announcements a row label set holds. A call rather than property reads
+ * at module scope, so a graph that never announces a reorder drops the row
+ * strings.
+ */
+/* @__NO_SIDE_EFFECTS__ */
+function announcementsOf(
+  labels: RowReorderAnnouncements
+): RowReorderAnnouncements {
+  return {
+    rowLifted: labels.rowLifted,
+    rowMoved: labels.rowMoved,
+    rowReorderCancelled: labels.rowReorderCancelled,
+    rowMovedToGroup: labels.rowMovedToGroup,
+    rowMovedUnder: labels.rowMovedUnder,
+    moveRejectedPolicyNever: labels.moveRejectedPolicyNever,
+    moveRejectedSorted: labels.moveRejectedSorted,
+    moveRejectedCycle: labels.moveRejectedCycle,
+    moveUnavailable: labels.moveUnavailable,
+    rootLevel: labels.rootLevel,
+    moveToGroup: labels.moveToGroup,
+    moveUnder: labels.moveUnder,
+  };
+}
 /**
  * Read the announcements off whatever labels the table resolved, falling back
  * to the built-in English per label.

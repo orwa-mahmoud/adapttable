@@ -14,14 +14,6 @@ for (const kit of builtAdapters("vue")) {
           localStorage.setItem("adapttable-demo-theme", "dark")
         );
         await page.goto(`/vue/${pathOf(kit)}/ai/?locale=${locale}`);
-        if (kit.key === "quasar") {
-          const approvalSurface = page.locator(
-            '[data-adapttable-part="demo-approval-surface"]'
-          );
-          const nativeField = approvalSurface.locator("xpath=ancestor::label");
-          await expect(nativeField.locator(".q-icon svg")).toBeVisible();
-          await expect(nativeField).not.toContainText("arrow_drop_down");
-        }
         const launcher = page.locator(
           '[data-adapttable-part="assistant-launcher"]'
         );
@@ -64,7 +56,7 @@ for (const kit of builtAdapters("vue")) {
           await expect(composer).toHaveCount(0);
           await expect(launcher).toBeFocused();
         }
-        await page.locator(".mx-demo").evaluate((element) =>
+        await page.locator(".ai-demo").evaluate((element) =>
           window.scrollBy({
             top: element.getBoundingClientRect().top - 80,
             behavior: "instant",

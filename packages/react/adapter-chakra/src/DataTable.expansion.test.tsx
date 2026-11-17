@@ -63,7 +63,7 @@ describe("<DataTable> (Chakra) row expansion — desktop", () => {
     // One extra (narrow, labelled) header cell leads the data columns.
     const headerCells = screen.getAllByRole("columnheader");
     expect(headerCells).toHaveLength(columns.length + 1);
-    expect(headerCells[0]).toHaveAttribute("aria-label", "Expand row");
+    expect(headerCells[0]).toHaveAccessibleName("Expand row");
 
     const toggles = screen.getAllByRole("button", { name: "Expand row" });
     expect(toggles).toHaveLength(2);

@@ -3,6 +3,7 @@ import {
   type ChecklistFilterProps,
   type ChecklistSlots,
   useChecklistModel,
+  withProps,
 } from "@adapttable/vue/adapter";
 import {
   createVNode,
@@ -87,13 +88,15 @@ const VuetifyChecklistFilterPresentation = defineComponent(
 );
 
 /** Keep the canonical generic props stable across supported Vue versions. */
-export function VuetifyChecklistFilter<TRow>(
-  props: ChecklistFilterProps<TRow>,
-  context: Pick<SetupContext, "attrs">
-) {
-  return createVNode(VuetifyChecklistFilterPresentation, {
-    ...context.attrs,
-    ...props,
-  });
-}
-VuetifyChecklistFilter.props = Object.keys(checklistRuntimeProps);
+export const VuetifyChecklistFilter = /* @__PURE__ */ withProps(
+  function VuetifyChecklistFilter<TRow>(
+    props: ChecklistFilterProps<TRow>,
+    context: Pick<SetupContext, "attrs">
+  ) {
+    return createVNode(VuetifyChecklistFilterPresentation, {
+      ...context.attrs,
+      ...props,
+    });
+  },
+  Object.keys(checklistRuntimeProps)
+);

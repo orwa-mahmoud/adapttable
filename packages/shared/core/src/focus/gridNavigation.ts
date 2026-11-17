@@ -6,8 +6,9 @@
  */
 import { columnText } from "../columns/columnText";
 import type { ColumnMetadata } from "../contracts/columns";
-import { isThenable } from "../editing/storePlumbing";
-import { defaultLabels } from "../labels";
+import { isThenable, stateCell } from "../editing/storePlumbing";
+import { GRID_LABELS } from "../labelGroups/gridLabels";
+import type { TableStore } from "../state/tableStore";
 import type { Direction, TableLabels } from "../types";
 import type { CellEdit } from "./cellEdits";
 import type { CellRange } from "./cellRange";
@@ -318,7 +319,7 @@ interface ClipboardColumn<TRow> {
  */
 export interface GridNavSession<TRow> {
   options: GridFocusControllerOptions<TRow>;
-  snapshot: GridFocusSnapshot;
+  readonly snapshot: GridFocusSnapshot;
   pending: GridCell | null;
   container: HTMLElement | null;
   dragging: boolean;
@@ -423,9 +424,10 @@ const EMPTY: GridFocusSnapshot = {
  * @public
  */
 export function createGridNavigation<TRow>(
-  initial: GridFocusControllerOptions<TRow>
+  initial: GridFocusControllerOptions<TRow>,
+  within: { readonly store?: TableStore } = {}
 ): GridFocusController<TRow> {
-  return composeGridNavigation(initial);
+  return composeGridNavigation(initial, undefined, within);
 }
 
 /**
@@ -436,7 +438,8 @@ export function createGridNavigation<TRow>(
  */
 export function composeGridNavigation<TRow>(
   initial: GridFocusControllerOptions<TRow>,
-  parts?: GridNavigationParts<TRow>
+  parts?: GridNavigationParts<TRow>,
+  within: { readonly store?: TableStore } = {}
 ): GridFocusController<TRow> {
   const columnIdentity = (
     column: ColumnMetadata<TRow>
@@ -446,12 +449,14 @@ export function composeGridNavigation<TRow>(
     parseValue: column.parseValue,
     editable: column.editable,
   });
-  let batchDepth = 0;
-  let changed = false;
-  const listeners = new Set<() => void>();
-  const session = {
+  // The focus lives in the table's store: a change made inside a batch, or
+  // inside the table's own change, reaches readers once, when it ends.
+  const state = stateCell<GridFocusSnapshot>("grid-focus", EMPTY, within.store);
+  const session: GridNavSession<TRow> = {
     options: { ...initial },
-    snapshot: EMPTY,
+    get snapshot() {
+      return state.get();
+    },
     pending: null,
     container: null,
     dragging: false,
@@ -465,97 +470,79 @@ export function composeGridNavigation<TRow>(
     clipboardColumns: initial.columns.map(columnIdentity),
     previewOf: { range: null, to: null },
     columnIdentity,
-  } as unknown as GridNavSession<TRow>;
-
-  const flush = (): void => {
-    if (batchDepth > 0 || !changed) return;
-    changed = false;
-    for (const listener of listeners) listener();
+    firstRow: () => session.options.firstRowIndex ?? 0,
+    labels: () => session.options.labels,
+    bounds: () => {
+      const loaded = session.options.rows.length;
+      return {
+        rowCount: lastLoadedRow(session.firstRow(), loaded) + 1,
+        colCount: session.options.columns.length,
+        pageSize: session.options.pageSize ?? Math.max(1, loaded),
+      };
+    },
+    write: (patch) => {
+      const merged = { ...session.snapshot, ...patch };
+      const fillPreview = parts?.previewFor?.(session, merged.range) ?? null;
+      const next = { ...merged, fillPreview };
+      if (
+        next.active === session.snapshot.active &&
+        next.range === session.snapshot.range &&
+        next.announcement === session.snapshot.announcement &&
+        next.fillPreview === session.snapshot.fillPreview
+      ) {
+        return;
+      }
+      state.set(next);
+    },
+    batch: state.batch,
+    say: (announcement) => {
+      session.write({ announcement });
+    },
+    announce: (cell) => {
+      const column = session.options.columns[cell.col];
+      if (!column) return;
+      const row = session.options.rows[cell.row - session.firstRow()];
+      const header =
+        typeof column.header === "string" ? column.header : column.key;
+      const value = row === undefined ? "" : columnText(column, row);
+      const position = (
+        session.labels()?.gridCellPosition ?? GRID_LABELS.gridCellPosition
+      )(cell.row + 1, session.options.rowCount);
+      session.say(
+        value ? `${header}, ${value}, ${position}` : `${header}, ${position}`
+      );
+    },
+    focusCell: (cell) => {
+      session.batch(() => {
+        session.write({ active: cell });
+        session.pending = cell;
+        session.options.scrollToRow?.(cell.row);
+        session.announce(cell);
+      });
+    },
+    setFillTo: (to) => {
+      session.fillTo = to;
+      session.write({});
+    },
+    applyGesture: (apply, done, failed) => {
+      const version = ++session.gestureVersion;
+      const complete = (callback: () => void): void => {
+        if (session.options.enabled && version === session.gestureVersion)
+          callback();
+      };
+      try {
+        const result = apply();
+        if (isThenable(result)) {
+          void Promise.resolve(result).then(
+            () => complete(done),
+            () => complete(() => session.say(failed))
+          );
+        } else complete(done);
+      } catch {
+        complete(() => session.say(failed));
+      }
+    },
   };
-
-  session.firstRow = () => session.options.firstRowIndex ?? 0;
-  session.labels = () => session.options.labels;
-  session.bounds = () => {
-    const loaded = session.options.rows.length;
-    return {
-      rowCount: lastLoadedRow(session.firstRow(), loaded) + 1,
-      colCount: session.options.columns.length,
-      pageSize: session.options.pageSize ?? Math.max(1, loaded),
-    };
-  };
-  session.write = (patch) => {
-    const merged = { ...session.snapshot, ...patch };
-    const fillPreview = parts?.previewFor?.(session, merged.range) ?? null;
-    const next = { ...merged, fillPreview };
-    if (
-      next.active === session.snapshot.active &&
-      next.range === session.snapshot.range &&
-      next.announcement === session.snapshot.announcement &&
-      next.fillPreview === session.snapshot.fillPreview
-    ) {
-      return;
-    }
-    session.snapshot = next;
-    changed = true;
-    flush();
-  };
-  session.batch = (run) => {
-    batchDepth += 1;
-    try {
-      run();
-    } finally {
-      batchDepth -= 1;
-      flush();
-    }
-  };
-  session.say = (announcement) => {
-    session.write({ announcement });
-  };
-  session.announce = (cell) => {
-    const column = session.options.columns[cell.col];
-    if (!column) return;
-    const row = session.options.rows[cell.row - session.firstRow()];
-    const header =
-      typeof column.header === "string" ? column.header : column.key;
-    const value = row === undefined ? "" : columnText(column, row);
-    const position = (
-      session.labels()?.gridCellPosition ?? defaultLabels.gridCellPosition
-    )(cell.row + 1, session.options.rowCount);
-    session.say(
-      value ? `${header}, ${value}, ${position}` : `${header}, ${position}`
-    );
-  };
-  session.focusCell = (cell) => {
-    session.batch(() => {
-      session.write({ active: cell });
-      session.pending = cell;
-      session.options.scrollToRow?.(cell.row);
-      session.announce(cell);
-    });
-  };
-  session.setFillTo = (to) => {
-    session.fillTo = to;
-    session.write({});
-  };
-  session.applyGesture = (apply, done, failed) => {
-    const version = ++session.gestureVersion;
-    const complete = (callback: () => void): void => {
-      if (session.options.enabled && version === session.gestureVersion)
-        callback();
-    };
-    try {
-      const result = apply();
-      if (isThenable(result)) {
-        void Promise.resolve(result).then(
-          () => complete(done),
-          () => complete(() => session.say(failed))
-        );
-      } else complete(done);
-    } catch {
-      complete(() => session.say(failed));
-    }
-  };
-
   const selectRange = (next: CellRange | null): void => {
     if (parts?.selectRange) parts.selectRange(session, next);
     else session.write({ range: next });
@@ -616,13 +603,8 @@ export function composeGridNavigation<TRow>(
   };
 
   return {
-    getSnapshot: () => session.snapshot,
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
+    getSnapshot: state.get,
+    subscribe: state.subscribe,
     configure(next) {
       if (
         next.enabled !== session.options.enabled ||

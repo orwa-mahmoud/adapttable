@@ -72,33 +72,40 @@ function useEditing<TRow>(context: FeatureMountContext<TRow>): void {
     },
     { active: context.active }
   );
+  // The row factory is one function for the table's life: a row hands it the
+  // editing view it draws with, so the factory does not change with every
+  // edit and every row is not handed new props.
+  const rowEditIcons = computed(
+    () => context.options.value.rowEditIcons as RowEditIcons | undefined
+  );
+  const rowFactory: NonNullable<EditingChromeModel<TRow>["row"]> = (
+    row,
+    rowId,
+    actions,
+    editing = model.bundle.value
+  ) => {
+    const rowEditing = editing.rowEditing!;
+    const trigger = resolveRowEditTrigger(actions, rowEditing, row, rowId);
+    return {
+      actions: trigger.actions,
+      props: {
+        rowEditing,
+        row,
+        rowId,
+        labels: context.table.labels.value,
+        conflict: rowEditConflict(editing, rowId),
+        showBegin: trigger.showBegin,
+        icons: rowEditIcons.value,
+      },
+    };
+  };
+  const rowEditingOn = computed(
+    () => model.bundle.value.rowEditing !== undefined
+  );
   const chrome = computed<EditingChromeModel<TRow>>(() => {
     const bundle = model.bundle.value;
-    const rowEditing = bundle.rowEditing;
     return {
-      row: rowEditing
-        ? (row, rowId, actions) => {
-            const trigger = resolveRowEditTrigger(
-              actions,
-              rowEditing,
-              row,
-              rowId
-            );
-            return {
-              actions: trigger.actions,
-              props: {
-                rowEditing,
-                row,
-                rowId,
-                labels: context.table.labels.value,
-                conflict: rowEditConflict(bundle, rowId),
-                showBegin: trigger.showBegin,
-                icons: context.options.value.rowEditIcons as
-                  RowEditIcons | undefined,
-              },
-            };
-          }
-        : undefined,
+      row: rowEditingOn.value ? rowFactory : undefined,
       batch: bundle.batch
         ? {
             batch: bundle.batch,
@@ -131,6 +138,7 @@ export function editing<TRow>(
   const base = coreEditing<TRow>(onCellEdit, extras);
   return {
     id: base.id,
+    labels: base.labels,
     apply: (input) => ({ ...base.apply?.(input), editingModel: useEditing }),
     requiredSlots: [EDITABLE_CELL],
   };
@@ -142,6 +150,7 @@ export function rowEditing<TRow>(
   const base = coreRowEditing<TRow>(onRowEdit, extras);
   return {
     id: base.id,
+    labels: base.labels,
     apply: (input) => ({ ...base.apply?.(input), editingModel: useEditing }),
     requiredSlots: [EDITABLE_CELL, ROW_EDIT_ACTIONS],
   };
@@ -153,6 +162,7 @@ export function batchEditing<TRow>(
   const base = coreBatchEditing<TRow>(onBatchEdit, extras);
   return {
     id: base.id,
+    labels: base.labels,
     apply: (input) => ({ ...base.apply?.(input), editingModel: useEditing }),
     requiredSlots: [EDITABLE_CELL, BATCH_EDIT_BAR],
   };

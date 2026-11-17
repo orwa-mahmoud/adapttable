@@ -125,6 +125,53 @@ describe("integrated optional feature seams", () => {
     expect(shell.state.get(filterViewKey<Row>()).value).toBeUndefined();
     scope.stop();
   });
+  it("keeps only the opened AND/OR tree when the per-field form is off", () => {
+    const panel = (options: { fields?: boolean }) => {
+      const scope = effectScope();
+      const shell = required(
+        scope.run(() =>
+          useDataTableShell({
+            data: [row],
+            columns,
+            rowKey: (value: Row) => value.id,
+            features: [
+              extendFeature(
+                filters<Row>([{ key: "name", type: "text" }], options),
+                [
+                  slotRender(TOOLBAR_EXTRAS, () => null),
+                  slotRender(ACTIVE_FILTER_CHIPS, () => null),
+                ]
+              ),
+            ],
+            urlSync: false,
+          })
+        )
+      );
+      const field = vi.fn(() => null);
+      const tree = vi.fn(() => null);
+      FilterPanelChrome({
+        model: required(shell.state.get(filterViewKey<Row>()).value),
+        controls: {
+          Trigger: () => null,
+          Button: () => null,
+          Field: field,
+          Tree: tree,
+          Popover: () => null,
+          Drawer: () => null,
+        },
+      });
+      scope.stop();
+      return { field, tree };
+    };
+    const both = panel({});
+    expect(both.field).toHaveBeenCalledOnce();
+    expect(both.tree).not.toHaveBeenCalled();
+    const treeOnly = panel({ fields: false });
+    expect(treeOnly.field).not.toHaveBeenCalled();
+    expect(treeOnly.tree).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultExpanded: true })
+    );
+  });
   it("shares grouped row editing, summary selection geometry and open details", async () => {
     const scope = effectScope();
     const save = vi.fn();

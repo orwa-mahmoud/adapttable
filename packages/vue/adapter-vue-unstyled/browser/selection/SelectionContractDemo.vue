@@ -29,7 +29,16 @@ const selectedIds = shallowRef<readonly string[] | undefined>(
 const nativeIds = shallowRef<readonly string[]>(["a", "off-page"]);
 const requests = shallowRef<readonly string[][]>([]);
 const nativeRequests = shallowRef<readonly string[][]>([]);
-const lastCheckbox = shallowRef<HTMLInputElement | null>(null);
+// Rows draw in their own components, so the order their checkboxes report
+// in is not the page's order: keep every one and focus the last on the page.
+const rowCheckboxes = new Set<HTMLInputElement>();
+const focusLastCheckbox = (): void => {
+  const onPage = [...rowCheckboxes].filter((input) => input.isConnected);
+  onPage.sort((a, b) =>
+    a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+  );
+  onPage.at(-1)?.focus();
+};
 const shell = useDataTableShell<Row>(() => ({
   data: rows,
   columns: [{ key: "name", sortable: true }],
@@ -55,7 +64,7 @@ const slots: TableChromeSlots<Row> = {
       "aria-describedby": "selection-hint",
       ref: elementRef<HTMLInputElement>(
         (target) => {
-          if (!control.header && target) lastCheckbox.value = target;
+          if (!control.header && target) rowCheckboxes.add(target);
         },
         (instance) => {
           const value = (instance as { input?: unknown }).input;
@@ -78,7 +87,7 @@ const ContractTable = () =>
     <p id="selection-hint">Each action requests one selection toggle.</p>
     <section data-selection-table="model">
       <ContractTable />
-      <button type="button" @click="lastCheckbox?.focus()">
+      <button type="button" @click="focusLastCheckbox">
         Focus last model checkbox
       </button>
       <output id="requests">{{ JSON.stringify(requests) }}</output>

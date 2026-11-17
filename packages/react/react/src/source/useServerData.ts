@@ -1,16 +1,24 @@
 import {
   type ColumnMetadata,
-  createServerSource,
   type FacetMap,
   type PaginationMode,
   type QueryAggregate,
   type QuerySupport,
-  resolvePaginationMode,
-  type ServerSource,
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  createLazyServerSource,
+  type LazyServerSource,
+  resolvePaginationMode,
+} from "@adapttable/core/binding";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { useIsMobile } from "../hooks/useIsMobile";
 import {
@@ -49,6 +57,7 @@ export interface UseServerDataOptions<TRow> extends Pick<
   | "numberExtraKeys"
   | "arrayExtraKeys"
   | "urlKey"
+  | "store"
 > {
   /** The current page of rows, exactly as the server returned them. */
   rows: readonly TRow[];
@@ -202,7 +211,10 @@ export function useServerData<TRow>(
   const resolvedMode = resolvePaginationMode(paginationMode, isMobile);
 
   const state = useTableUrlState(urlOptions);
-  const [source] = useState<ServerSource<TRow>>(createServerSource);
+  const [source] = useState<LazyServerSource<TRow>>(createLazyServerSource);
+  // The engine loads the first time this table is on the server tier; the
+  // request starts during this render, before anything below it mounts.
+  if (activeOption) source.load();
   // The source's own state — an append, the cursor trail, a refetch, the
   // aggregate operations — re-renders through its subscription.
   const revision = useSyncExternalStore(
@@ -211,7 +223,7 @@ export function useServerData<TRow>(
     source.revision
   );
   const held = useRef<FrameHold<
-    ReturnType<ServerSource<TRow>["update"]>
+    ReturnType<LazyServerSource<TRow>["update"]>
   > | null>(null);
   const seenRevision = useRef<number | null>(null);
   // A repeat of inputs already committed skips the refresh. The first
@@ -222,6 +234,8 @@ export function useServerData<TRow>(
     held,
     [
       activeOption,
+      // The engine landing, or failing to, replaces the pending frame.
+      source.phase(),
       rows,
       total,
       nextCursor,
@@ -270,46 +284,126 @@ export function useServerData<TRow>(
   // sends it again.
   useEffect(() => source.dispose, [source]);
 
-  return {
-    rows: frame.rows,
-    total,
-    page: state.page,
-    limit: state.limit,
-    defaultLimit: state.defaultLimit,
-    search: state.search,
-    sortBy: state.sortBy,
-    sortDir: state.sortDir,
-    groupBy: state.groupBy,
-    groupAggregateOverrides: state.groupAggregateOverrides,
-    groupAggregations: frame.groupAggregations,
-    queryAggregates: aggregates,
-    aggregateOperations: supports?.aggregateOperations,
-    honorsAggregates:
-      Boolean(supports?.aggregates) || Boolean(supports?.aggregateOperations),
-    extra: state.extra,
-    facets,
-    filterTree: state.filterTree,
-    isLoading: frame.isLoading,
-    isFetching: loading,
-    isFetchingNextPage: frame.isFetchingNextPage,
-    hasNextPage: frame.hasNextPage,
-    error,
-    paginationMode: resolvedMode,
-    setPage: source.setPage,
-    setLimit: state.setLimit,
-    setSort: state.setSort,
-    setGroupBy: state.setGroupBy,
-    initializeGroupBy: state.initializeGroupBy,
-    setGroupAggregateOverrides: state.setGroupAggregateOverrides,
-    sortLevels: state.sortLevels,
-    toggleSortLevel: state.toggleSortLevel,
-    setSearch: state.setSearch,
-    setExtra: state.setExtra,
-    setExtras: state.setExtras,
-    setFilterTree: state.setFilterTree,
-    clearExtras: state.clearExtras,
-    clearAll: state.clearAll,
-    fetchNextPage: source.fetchNextPage,
-    refetch: source.refetch,
-  };
+  const honorsAggregates =
+    Boolean(supports?.aggregates) || Boolean(supports?.aggregateOperations);
+  const aggregateOperations = supports?.aggregateOperations;
+  const {
+    page,
+    limit,
+    defaultLimit,
+    search,
+    sortBy,
+    sortDir,
+    groupBy,
+    groupAggregateOverrides,
+    extra,
+    filterTree,
+    setLimit,
+    setSort,
+    setGroupBy,
+    initializeGroupBy,
+    setGroupAggregateOverrides,
+    sortLevels,
+    toggleSortLevel,
+    setSearch,
+    setExtra,
+    setExtras,
+    setFilterTree,
+    clearExtras,
+    clearAll,
+  } = state;
+  const {
+    rows: frameRows,
+    groupAggregations,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+  } = frame;
+  const { setPage, fetchNextPage, refetch } = source;
+  // One object while nothing in it changes, so a host that re-renders for
+  // its own state hands the table the same source.
+  return useMemo(
+    () => ({
+      rows: frameRows,
+      total,
+      page,
+      limit,
+      defaultLimit,
+      search,
+      sortBy,
+      sortDir,
+      groupBy,
+      groupAggregateOverrides,
+      groupAggregations,
+      queryAggregates: aggregates,
+      aggregateOperations,
+      honorsAggregates,
+      extra,
+      facets,
+      filterTree,
+      isLoading,
+      isFetching: loading,
+      isFetchingNextPage,
+      hasNextPage,
+      error,
+      paginationMode: resolvedMode,
+      setPage,
+      setLimit,
+      setSort,
+      setGroupBy,
+      initializeGroupBy,
+      setGroupAggregateOverrides,
+      sortLevels,
+      toggleSortLevel,
+      setSearch,
+      setExtra,
+      setExtras,
+      setFilterTree,
+      clearExtras,
+      clearAll,
+      fetchNextPage,
+      refetch,
+    }),
+    [
+      frameRows,
+      total,
+      page,
+      limit,
+      defaultLimit,
+      search,
+      sortBy,
+      sortDir,
+      groupBy,
+      groupAggregateOverrides,
+      groupAggregations,
+      aggregates,
+      aggregateOperations,
+      honorsAggregates,
+      extra,
+      facets,
+      filterTree,
+      isLoading,
+      loading,
+      isFetchingNextPage,
+      hasNextPage,
+      error,
+      resolvedMode,
+      setPage,
+      setLimit,
+      setSort,
+      setGroupBy,
+      initializeGroupBy,
+      setGroupAggregateOverrides,
+      sortLevels,
+      toggleSortLevel,
+      setSearch,
+      setExtra,
+      setExtras,
+      setFilterTree,
+      clearExtras,
+      clearAll,
+      fetchNextPage,
+      refetch,
+    ]
+  );
 }

@@ -14,16 +14,18 @@
  * chrome needs. There is no third thing to remember.
  */
 import {
-  composeContextMenuExtra,
   type ContextMenuActions,
   type ContextMenuItem,
   contextMenuItems,
   type ContextMenuTarget,
   type FeatureHostState,
-  isContextMenuArmed,
   type RowAction,
   type TableLabels,
 } from "@adapttable/core";
+import {
+  composeContextMenuExtra,
+  isContextMenuArmed,
+} from "@adapttable/core/binding";
 import { useMemo } from "react";
 
 import type { ColumnDef } from "../columnDef";

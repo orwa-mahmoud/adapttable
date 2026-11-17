@@ -15,3 +15,4 @@ export type {
   SortableValue,
   SortDirection,
 } from "./contracts/columns";
+export type { RowCallback } from "./contracts/rowCallback";

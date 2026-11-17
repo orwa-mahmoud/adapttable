@@ -5,6 +5,8 @@
  * A newer save of the same cell supersedes an older one. A late answer is
  * ignored, including a success, so it cannot clear the save the cell is in now.
  */
+import { runBeforeLayoutChange } from "../layout/layoutChange";
+import type { TableStore } from "../state/tableStore";
 import { devWarn } from "../utils/devWarn";
 import {
   type CellEditCommit,
@@ -13,7 +15,8 @@ import {
   stepEditableCell,
 } from "./cellEditing";
 import type { EditEvent, EditEventHandler } from "./editContracts";
-import { isThenable, listenerSet } from "./storePlumbing";
+import { preserveEditorFocusOnLayoutChange } from "./layoutFocus";
+import { isThenable, stateCell } from "./storePlumbing";
 
 /* ── Observers ─────────────────────────────────────────────────────── */
 
@@ -168,24 +171,28 @@ export function isCellEditActive(
  * @public
  */
 export function createCellEditSession<TRow = unknown>(
-  options: CellEditSessionOptions<TRow> = {}
+  options: CellEditSessionOptions<TRow> = {},
+  within: { readonly store?: TableStore } = {}
 ): CellEditSession<TRow> {
+  // An editor this table opens keeps its focus across a responsive relayout.
+  runBeforeLayoutChange(preserveEditorFocusOnLayoutChange);
   let observers = options;
-  let snapshot = NO_EDIT;
+  const state = stateCell("cell-edit", NO_EDIT, within.store);
   let opened: {
     rowId: string;
     columnKey: string;
     initial: string;
     row: TRow | undefined;
   } | null = null;
-  const { subscribe, notify } = listenerSet();
 
   const write = (next: CellEditSnapshot): void => {
-    if (next.active === snapshot.active && next.draft === snapshot.draft) {
+    if (
+      next.active === state.get().active &&
+      next.draft === state.get().draft
+    ) {
       return;
     }
-    snapshot = next;
-    notify();
+    state.set(next);
   };
 
   const fireCancel = (): void => {
@@ -194,7 +201,7 @@ export function createCellEditSession<TRow = unknown>(
       row: opened.row,
       rowId: opened.rowId,
       columnKey: opened.columnKey,
-      value: snapshot.draft,
+      value: state.get().draft,
       previousValue: opened.initial,
       unit: "cell",
     });
@@ -206,7 +213,7 @@ export function createCellEditSession<TRow = unknown>(
   };
 
   const commit = (): CellEditCommit | null => {
-    const { active, draft } = snapshot;
+    const { active, draft } = state.get();
     if (!active) return null;
     clear();
     return { rowId: active.rowId, columnKey: active.columnKey, draft };
@@ -218,14 +225,14 @@ export function createCellEditSession<TRow = unknown>(
   };
 
   return {
-    getSnapshot: () => snapshot,
-    subscribe,
+    getSnapshot: state.get,
+    subscribe: state.subscribe,
     configure(next) {
       observers = next;
     },
     begin(rowId, columnKey, initialValue, row) {
-      if (isCellEditActive(snapshot, rowId, columnKey)) return;
-      if (snapshot.active) fireCancel();
+      if (isCellEditActive(state.get(), rowId, columnKey)) return;
+      if (state.get().active) fireCancel();
       const typed = row as TRow | undefined;
       opened = { rowId, columnKey, initial: initialValue, row: typed };
       write({ active: { rowId, columnKey }, draft: initialValue });
@@ -241,13 +248,13 @@ export function createCellEditSession<TRow = unknown>(
       }
     },
     setDraft(value) {
-      write({ active: snapshot.active, draft: value });
+      write({ active: state.get().active, draft: value });
     },
     commit,
     cancel,
     close: clear,
     discardIfRowMissing(rows, rowKey) {
-      const { active } = snapshot;
+      const { active } = state.get();
       if (!active) return;
       if (rows.some((row) => rowKey(row) === active.rowId)) return;
       clear();
@@ -260,10 +267,10 @@ export function createCellEditSession<TRow = unknown>(
     takeLive(row, value) {
       if (!opened) return;
       opened = { ...opened, row: row as TRow, initial: value };
-      write({ active: snapshot.active, draft: value });
+      write({ active: state.get().active, draft: value });
     },
     handleKeyDown(event, navigation) {
-      if (!snapshot.active) return null;
+      if (!state.get().active) return null;
       if (event.key === "Escape") {
         event.preventDefault();
         cancel();
@@ -444,40 +451,42 @@ export function cellSaveSignature<TRow>(
  * @public
  */
 export function createCellSaveStore<TRow>(
-  options: CellSaveStoreOptions<TRow> = {}
+  options: CellSaveStoreOptions<TRow> = {},
+  within: { readonly store?: TableStore } = {}
 ): CellSaveStore<TRow> {
   let current = options;
-  let snapshot: CellSaveSnapshot<TRow> = {
-    saving: new Set(),
-    failures: new Map(),
-  };
+  const state = stateCell<CellSaveSnapshot<TRow>>(
+    "cell-save",
+    {
+      saving: new Set(),
+      failures: new Map(),
+    },
+    within.store
+  );
   const tokens = new Map<string, symbol>();
-  const { subscribe, notify } = listenerSet();
 
   const markSaving = (key: string, busy: boolean): void => {
-    if (snapshot.saving.has(key) === busy) return;
-    const saving = new Set(snapshot.saving);
+    if (state.get().saving.has(key) === busy) return;
+    const saving = new Set(state.get().saving);
     if (busy) saving.add(key);
     else saving.delete(key);
-    snapshot = { ...snapshot, saving };
-    notify();
+    state.set({ ...state.get(), saving });
   };
 
   const setFailure = (
     key: string,
     failure: FailedCellSave<TRow> | undefined
   ): void => {
-    if (failure === undefined && !snapshot.failures.has(key)) return;
-    const failures = new Map(snapshot.failures);
+    if (failure === undefined && !state.get().failures.has(key)) return;
+    const failures = new Map(state.get().failures);
     if (failure === undefined) failures.delete(key);
     else failures.set(key, failure);
-    snapshot = { ...snapshot, failures };
-    notify();
+    state.set({ ...state.get(), failures });
   };
 
   return {
-    getSnapshot: () => snapshot,
-    subscribe,
+    getSnapshot: state.get,
+    subscribe: state.subscribe,
     configure(next) {
       current = next;
     },
@@ -529,7 +538,7 @@ export function createCellSaveStore<TRow>(
     },
     rollback(rowId, columnKey) {
       const key = cellSaveKey(rowId, columnKey);
-      const failure = snapshot.failures.get(key);
+      const failure = state.get().failures.get(key);
       if (!failure) return;
       setFailure(key, undefined);
       current.onRollback?.(failure.previous, columnKey);

@@ -1,18 +1,13 @@
 import {
   type ColumnDef,
-  columnsHaveFooter,
   type EditHistoryState,
   HeaderFilterOpenProvider,
-  resolveColumnFooter,
   type RowExpansionState,
   type SelectionState,
   type UrlStateAdapter,
-  useChromeScrollReset,
   type UseDataTableResult,
-  useFilterTriggerToggle,
   useInfiniteScroll,
   type UseSavedViewsOptions,
-  useTableChrome,
   useTableData,
 } from "@adapttable/react";
 import {
@@ -27,6 +22,7 @@ import {
   ChromeExtrasGate,
   COLUMN_HEADER_RENAME,
   COLUMN_MENU,
+  columnsHaveFooter,
   COMMAND_PALETTE_LIVE,
   type ConfirmHandler,
   contextMenuCopyTarget,
@@ -37,6 +33,7 @@ import {
   EXTRA_ROW_PARTS,
   featureHostOf,
   FeatureHostProvider,
+  featureLabelsFor,
   type FeatureProps,
   FeatureProviders,
   FeatureSlot,
@@ -64,7 +61,6 @@ import {
   type KeyedWindowSlotProps,
   mobileCardListStyle,
   OptionalSidePanel,
-  pageSizeOptions,
   partitionPinnedRows,
   pinnedRowPart,
   pinnedRowStickyStyle,
@@ -75,10 +71,11 @@ import {
   rememberFeatureHost,
   renderedRowsOf,
   REORDER_COLUMN_WIDTH,
+  resolveColumnFooter,
   resolveFilterMode,
-  resolveLabels,
   resolveRowStyle,
   resolveStickyToolbar,
+  resolveTableLabels,
   ROW_REORDER_ANNOUNCER,
   rowClickProps,
   rowIsDirty,
@@ -98,10 +95,14 @@ import {
   TableStatusAnnouncer,
   toolbarShowsFilters,
   type TreeEntry,
+  treeRowAria,
+  treeTableAria,
   undoRedoToolbar,
+  useChromeScrollReset,
   type UseColumnLayoutResult,
   useFeatureSlotFilled,
   useFeatureState,
+  useFilterTriggerToggle,
   useFullscreen,
   useLocaleLabels,
   useMountStagger,
@@ -109,6 +110,7 @@ import {
   useResolvedAdapter,
   useResolvedDensity,
   useStickyToolbarLayout,
+  useTableChrome,
   useTableFeatures,
   useTableStatusAnnouncement,
   viewControlsToolbar,
@@ -123,21 +125,15 @@ import {
   ConfigProvider,
   Empty,
   Flex,
-  Pagination,
-  Select,
   Space,
   Table,
   type TableProps,
-  Typography,
 } from "antd";
 import {
-  cloneElement,
   createContext,
   type CSSProperties,
   type HTMLAttributes,
-  isValidElement,
   type Key,
-  type ReactElement,
   type ReactNode,
   type Ref,
   type TdHTMLAttributes,
@@ -177,6 +173,7 @@ import {
   isAdaptTableGroupRow,
 } from "./components/grouping";
 import { MobileCards } from "./components/MobileCards";
+import { footer } from "./components/PaginationFooter";
 import { SkeletonTable } from "./components/SkeletonTable";
 import { Toolbar } from "./components/Toolbar";
 import { useAntdLibrary } from "./libraryEnvironment";
@@ -437,6 +434,8 @@ function antdOnRow<TRow>(options: {
   labels: Required<TableLabels>;
   /** The selected row keys, when rows are selectable. */
   selectedRowKeys: readonly Key[] | undefined;
+  /** The tree's entries by row id, while the rows are a tree. */
+  treeById: ReadonlyMap<string, TreeEntry<TRow>> | undefined;
 }): AntdRowHtmlAttrs {
   const {
     record,
@@ -458,6 +457,7 @@ function antdOnRow<TRow>(options: {
     rowHeight,
     labels,
     selectedRowKeys,
+    treeById,
   } = options;
   const extraOrGroup = antdExtraOrGroupRowAttrs(record);
   if (extraOrGroup) return extraOrGroup;
@@ -524,6 +524,8 @@ function antdOnRow<TRow>(options: {
     // section through this same attribute and has to keep winning it.
     "data-adapttable-part": "row",
     "data-row-id": id,
+    // A tree row's level, open state and place among its siblings.
+    ...treeRowAria(treeById?.get(id)),
     // The rest of core's row identity, which the other kits spread: the row's
     // index, and whether it is selected when rows are selectable.
     "data-index": rowIndex,
@@ -935,89 +937,6 @@ function chainToggler<TRow>(
 }
 
 /**
- * The split footer every kit shares — rows-per-page + showing on the start
- * side, the pager on the end side — built from antd's own Select and
- * Pagination instead of the table-internal pagination (which crams
- * everything, size changer included, onto one end).
- */
-function PagedFooter<TRow>({
-  table,
-  source,
-  labels,
-  showRowsPerPage = true,
-}: Readonly<{
-  table: UseDataTableResult<TRow>;
-  source: TableSource<TRow>;
-  labels: Required<TableLabels>;
-  /** Hidden in the grouped full-set view, where page size has no effect. */
-  showRowsPerPage?: boolean;
-}>) {
-  const from = (table.pagination.safePage - 1) * source.limit + 1;
-  const to = Math.min(table.pagination.safePage * source.limit, source.total);
-  return (
-    <Flex justify="space-between" align="center" wrap gap={8}>
-      <Flex align="center" gap={8}>
-        {showRowsPerPage && (
-          <>
-            <Typography.Text type="secondary">
-              {labels.rowsPerPage}
-            </Typography.Text>
-            <Select
-              size="small"
-              aria-label={labels.rowsPerPage}
-              value={source.limit}
-              onChange={(value: number) => source.setLimit(value)}
-              options={pageSizeOptions([source.limit, source.defaultLimit]).map(
-                (n) => ({
-                  value: n,
-                  label: n,
-                })
-              )}
-            />
-          </>
-        )}
-        {source.total > 0 && (
-          <Typography.Text type="secondary">
-            {labels.showing({ from, to, total: source.total })}
-          </Typography.Text>
-        )}
-      </Flex>
-      <Pagination
-        current={table.pagination.safePage}
-        pageSize={source.limit}
-        total={source.total}
-        showSizeChanger={false}
-        onChange={(page: number) => source.setPage(page)}
-        // antd's pager exposes neither aria-current nor per-arrow names by
-        // default — clone its own items with the missing attributes.
-        itemRender={(page, type, original) => {
-          let extra: Record<string, unknown> | null = null;
-          if (isValidElement(original)) {
-            if (type === "page") {
-              extra = {
-                "aria-current":
-                  page === table.pagination.safePage ? "page" : undefined,
-              };
-            } else if (type === "prev" || type === "next") {
-              extra = {
-                "aria-label":
-                  type === "prev" ? labels.previousPage : labels.nextPage,
-              };
-            }
-          }
-          return extra
-            ? cloneElement(
-                original as ReactElement<Record<string, unknown>>,
-                extra
-              )
-            : original;
-        }}
-      />
-    </Flex>
-  );
-}
-
-/**
  * The auto-built form for a declarative `filters` array — nothing when the
  * runtime resolved zero definitions (no column shorthands, empty array).
  */
@@ -1037,7 +956,7 @@ function autoFilterForm<TRow>(
     labels,
     defaultExpanded: !simpleFiltersOn,
     showSimpleFields: simpleFiltersOn,
-  } as unknown as FiltersFormSlotProps<never>;
+  } as unknown as FiltersFormSlotProps<unknown>;
   return <FeatureSlot slot={FILTERS_FORM} props={formProps} />;
 }
 
@@ -1253,6 +1172,8 @@ function AntdGroupingWindow<TRow>({
 /** Props shared by mobile and desktop body regions. */
 interface DataTableBodyRegionProps<TRow> {
   chromeBody: string;
+  /** The placeholder is cards when the table itself is in the card layout. */
+  mobile: boolean;
   /** The load failure to show instead of the body, when there is one. */
   errorState?: TableErrorState;
   source: TableSource<TRow>;
@@ -1354,9 +1275,12 @@ function DesktopTableBody<TRow>({
   pinRowSticky,
   labels,
   tableRef,
+  treeEntries,
 }: Readonly<{
   /** Cell-navigation getters; inert unless `cellNavigation` is on. */
   gridFocus?: GridFocusState;
+  /** The tree's entries while the rows are an ungrouped tree. */
+  treeEntries?: readonly TreeEntry<TRow>[];
   /** antd's table handle, for find's scroll to an off-window row. */
   tableRef?: Ref<AntdTableRef>;
   tableLabel: string | undefined;
@@ -1404,6 +1328,20 @@ function DesktopTableBody<TRow>({
   // reach them through the `components` seam. Memoized: a new component
   // identity here would remount the whole table on every render.
   const getGridProps = gridFocus?.getGridProps;
+  const treeById = useMemo(
+    () =>
+      treeEntries
+        ? new Map(treeEntries.map((entry) => [entry.key, entry]))
+        : undefined,
+    [treeEntries]
+  );
+  // A tree's rows are read inside a treegrid, as in every other kit's table.
+  // The attributes travel by context: rebuilding `components` would remount
+  // antd's table.
+  const treeAria = useMemo(
+    () => (treeEntries ? treeTableAria(treeEntries.length) : undefined),
+    [treeEntries]
+  );
   // Depends on the GETTER, not the whole state: the announcement changes on
   // every focus move, and rebuilding `components` would remount antd's table and
   // throw away the focus this just placed.
@@ -1441,11 +1379,11 @@ function DesktopTableBody<TRow>({
       // Core decides what belongs here: the grid role and handlers only with
       // cell navigation, but a windowed table's `aria-rowcount` regardless —
       // so this asks unconditionally rather than gating on the feature.
-      table: tableComponent(inner),
+      table: tableComponent(inner, true),
       header: {
         // Sticky / virtual headers resolve through `header.table`. When the
         // wrapper is the grid, this table is a rowgroup like the body table.
-        table: tableComponent(asGrid ? { role: "rowgroup" } : undefined),
+        table: tableComponent(asGrid ? { role: "rowgroup" } : undefined, false),
         // The header height is measured only for pinned rows, so the ref stays
         // conditional; the name does not.
         wrapper: theadComponent(pinArmed ? theadRef : undefined),
@@ -1512,6 +1450,7 @@ function DesktopTableBody<TRow>({
           rowHeight,
           labels,
           selectedRowKeys: rowSelection?.selectedRowKeys,
+          treeById,
         })
       }
       scroll={resolveScroll(
@@ -1524,11 +1463,18 @@ function DesktopTableBody<TRow>({
     />
   );
   const body = isAccessibleGrid ? (
-    <div {...gridProps} aria-label={tableLabel} data-adapttable-part="grid">
+    <div
+      {...gridProps}
+      {...treeAria}
+      aria-label={tableLabel}
+      data-adapttable-part="grid"
+    >
       {table}
     </div>
   ) : (
-    table
+    <TreeTableAriaContext.Provider value={treeAria}>
+      {table}
+    </TreeTableAriaContext.Provider>
   );
   return rowDropFollow ? (
     <RowDropContext.Provider value={rowDropFollow}>
@@ -1551,13 +1497,27 @@ function DesktopTableBody<TRow>({
  * type on every render, which remounts everything below it — here that would
  * mean losing the cell focus on every keystroke.
  */
-function tableComponent(gridProps: Record<string, unknown> | undefined) {
+function tableComponent(
+  gridProps: Record<string, unknown> | undefined,
+  readsTree: boolean
+) {
   return function AdaptTable(tableProps: Record<string, unknown>) {
+    const tree = useContext(TreeTableAriaContext);
     return (
-      <table data-adapttable-part="table" {...tableProps} {...gridProps} />
+      <table
+        data-adapttable-part="table"
+        {...tableProps}
+        {...gridProps}
+        {...(readsTree ? tree : undefined)}
+      />
     );
   };
 }
+
+/** The tree's table ARIA, for the body table antd draws. */
+const TreeTableAriaContext = createContext<
+  ReturnType<typeof treeTableAria> | undefined
+>(undefined);
 
 function TbodyWrapper(
   props: Readonly<HTMLAttributes<HTMLTableSectionElement>>
@@ -1692,6 +1652,7 @@ function DataTableBodyRegion<TRow>(
     gridFocus,
     tableRef,
     chromeBody,
+    mobile,
     errorState,
     source,
     editingRows,
@@ -1768,6 +1729,7 @@ function DataTableBodyRegion<TRow>(
         size={size}
         bordered={bordered}
         hasActions={hasRowActions}
+        mobile={mobile}
       />
     );
   } else if (chromeBody === "empty") {
@@ -1846,6 +1808,7 @@ function DataTableBodyRegion<TRow>(
         pinnedSummaryBottom={pinnedSummaryBottom}
         pinRowSticky={pinRowSticky}
         labels={labels}
+        treeEntries={grouping ? undefined : tree?.entries}
       />
     );
   }
@@ -1994,7 +1957,11 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   // prop) must still render the form — only explicit JSX takes over. The
   // form needs the resolved labels before `useTableChrome` resolves its own
   // (the chrome consumes the form node), so resolve the same prop here.
-  const formLabels = useMemo(() => resolveLabels(props.labels), [props.labels]);
+  const featureLabels = featureLabelsFor(props);
+  const formLabels = useMemo(
+    () => resolveTableLabels(props.labels, featureLabels),
+    [props.labels, featureLabels]
+  );
   const filtersNode = resolveFiltersNode(
     props.filters,
     runtime,
@@ -2211,7 +2178,13 @@ function AntdGroupingPanel<TRow>({
     <FeatureSlot
       slot={GROUPING_PANEL}
       props={
-        { state, columns, labels, mobile, dir } as GroupingPanelSlotProps<never>
+        {
+          state,
+          columns,
+          labels,
+          mobile,
+          dir,
+        } as GroupingPanelSlotProps<unknown>
       }
     />
   );
@@ -2567,7 +2540,7 @@ function AntdTableBody<TRow>({
           <EmptyState
             variant={c.emptyVariant}
             labels={labels}
-            onClearFilters={c.clearFilters}
+            onClearFilters={c.clearSearchAndFilters}
           />
         );
 
@@ -2590,6 +2563,7 @@ function AntdTableBody<TRow>({
                 gridFocus={gridFocus}
                 tableRef={rowScroll.table}
                 chromeBody={c.body}
+                mobile={c.isMobile}
                 errorState={c.errorState}
                 source={source}
                 editingRows={c.editingRows}
@@ -2689,7 +2663,7 @@ function AntdTableBody<TRow>({
           rowPins: c.rowPinning?.actions,
           featureHost,
           container: fullscreen.container,
-        } as Omit<ContextMenuLiveSlotProps<never>, "children">;
+        } as Omit<ContextMenuLiveSlotProps<unknown>, "children">;
 
         return (
           <FeatureHostProvider host={featureHost}>
@@ -2813,6 +2787,7 @@ function AntdTableBody<TRow>({
                             />
                           }
                           showRowsPerPage={!c.isPaged}
+                          loadsMore={!c.isPaged}
                         />
                       </div>
                       <FeatureSlot
@@ -2890,12 +2865,7 @@ function AntdTableBody<TRow>({
                           data-adapttable-part="footer"
                           className={classNames?.footer}
                         >
-                          <PagedFooter
-                            table={table}
-                            source={source}
-                            labels={labels}
-                            showRowsPerPage={!c.grouping}
-                          />
+                          {footer({ table, source, labels, chrome: c })}
                         </div>
                       )}
                       {!c.isPaged && !source.error && source.hasNextPage && (

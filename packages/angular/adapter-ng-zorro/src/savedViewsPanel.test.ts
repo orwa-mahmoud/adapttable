@@ -1,13 +1,17 @@
 /**
  * The NG-ZORRO saved-views panel: the parts, and the actions each row offers.
  */
-import type { SavedView, TableLabels } from "@adapttable/core";
+import { type SavedView, type TableLabels } from "@adapttable/angular";
 import { Component, signal, type TemplateRef, viewChild } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
+import { savedViewsPanelTests } from "../../angular/test/kit/suites/savedViewsPanel";
+import { kit } from "../testing/kit";
 import { kitSelector } from "../testUtils";
 import { AdaptSavedViewsPanel } from "./components/savedViewsPanel";
+
+for (const test of savedViewsPanelTests(kit)) it(test.name, test.run);
 
 const VIEWS: readonly SavedView[] = [
   { name: "Mine", search: "t.q=a" },
@@ -173,22 +177,5 @@ describe("AdaptSavedViewsPanel", () => {
     detect();
     expect(host.onRename).toHaveBeenCalledTimes(1);
     expect(root.textContent).toContain("Mine");
-  });
-
-  it("shows the empty message, a template footer, and a custom title", () => {
-    const { root, host, detect } = mount();
-    host.views.set([]);
-    host.labels.set({ savedViews: "Library" });
-    host.footer.set(undefined);
-    detect();
-    expect(part(root, "saved-view-row")).toBeNull();
-    expect(part(root, "saved-views-footer")).toBeNull();
-    expect(root.textContent?.match(/Library/g)?.length).toBeGreaterThan(1);
-
-    host.useNote();
-    detect();
-    expect(part(root, "saved-views-footer")?.textContent).toContain(
-      "Kept from last year."
-    );
   });
 });

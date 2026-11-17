@@ -8,7 +8,7 @@ import { ExportCsvOptions } from '@adapttable/vue/features';
 import { StaticTableFeature } from '@adapttable/vue';
 import { TableFeature } from '@adapttable/vue';
 
-// @public (undocumented)
+// @public
 export function exportCsv(options?: boolean): StaticTableFeature;
 
 // @public (undocumented)

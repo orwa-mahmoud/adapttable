@@ -29,6 +29,7 @@ import {
 import { exportCsv } from "@adapttable/angular-aria/export";
 import { extraRows } from "@adapttable/angular-aria/extra-rows";
 import { filters } from "@adapttable/angular-aria/filters";
+import { findInTable } from "@adapttable/angular-aria/find-in-table";
 import { fullscreen } from "@adapttable/angular-aria/fullscreen";
 import { groupingPanel } from "@adapttable/angular-aria/grouping-panel";
 import { headerFilters } from "@adapttable/angular-aria/header-filters";
@@ -48,6 +49,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/angular-aria/saved-views";
+import { selectionStats } from "@adapttable/angular-aria/selection-stats";
 import { sidePanel } from "@adapttable/angular-aria/side-panel";
 import { statusBar } from "@adapttable/angular-aria/status-bar";
 import { tree } from "@adapttable/angular-aria/tree";
@@ -101,6 +103,8 @@ export const kit = {
   contextMenu,
   commandPalette,
   extraRows,
+  findInTable,
+  selectionStats,
   rowAppearance,
   statusBar,
   sidePanel,

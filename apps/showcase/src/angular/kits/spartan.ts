@@ -28,6 +28,7 @@ import {
 import { exportCsv } from "@adapttable/spartan/export";
 import { extraRows } from "@adapttable/spartan/extra-rows";
 import { filters } from "@adapttable/spartan/filters";
+import { findInTable } from "@adapttable/spartan/find-in-table";
 import { fullscreen } from "@adapttable/spartan/fullscreen";
 import { groupingPanel } from "@adapttable/spartan/grouping-panel";
 import { headerFilters } from "@adapttable/spartan/header-filters";
@@ -44,6 +45,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/spartan/saved-views";
+import { selectionStats } from "@adapttable/spartan/selection-stats";
 import { sidePanel } from "@adapttable/spartan/side-panel";
 import { statusBar } from "@adapttable/spartan/status-bar";
 import { tree } from "@adapttable/spartan/tree";
@@ -97,6 +99,8 @@ export const kit = {
   contextMenu,
   commandPalette,
   extraRows,
+  findInTable,
+  selectionStats,
   rowAppearance,
   statusBar,
   sidePanel,

@@ -60,7 +60,7 @@ export interface FilterEngine {
 
 // Callback identities belong to the optional engine, so plain tables do not
 // carry the authored-filter encoder. Weak keys never keep a callback alive.
-const references = new WeakMap<object, number>();
+const references = /* @__PURE__ */ new WeakMap<object, number>();
 let nextReference = 0;
 
 function reference(value: object): number {

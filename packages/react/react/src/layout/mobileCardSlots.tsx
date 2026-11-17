@@ -14,7 +14,6 @@ import {
   type RowAction,
   type RowActionsLayout,
   type RowActionsRenderer,
-  rowFlashSignature,
   type TableLabels,
   treeCardStyle,
   type TreeEntry,
@@ -25,6 +24,7 @@ import {
   isExtraEntry,
   orderedCardEntries,
   resolveRowStyle,
+  rowFlashSignature,
   rowStyleSignature,
 } from "@adapttable/core/binding";
 import type { CSSProperties, ReactNode } from "react";

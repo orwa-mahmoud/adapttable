@@ -6,13 +6,23 @@
 import { filterOptionsFor } from "@adapttable/angular";
 import {
   type BooleanChoice,
-  booleanFilterWidget,
   defaultFilterRegistry,
   type FilterDef,
   filterDefForColumn,
   type FilterFormSource,
   type FilterOption,
   type FilterTypeRegistry,
+  renderRegisteredFilter,
+  type TableLabels,
+  type TextOp,
+} from "@adapttable/core";
+import {
+  booleanFilterWidget,
+  type FilterHeaderClassNames,
+  type FilterHeaderMultiProps,
+  type FilterHeaderRangeProps,
+  type FilterHeaderSearchProps,
+  type FilterHeaderSelectProps,
   headerFilterBooleanOptions,
   headerFilterCellKind,
   headerFilterMultiModel,
@@ -21,17 +31,7 @@ import {
   initialRangeFilterOp,
   initialTextFilterOp,
   rangeFilterWidget,
-  renderRegisteredFilter,
-  type TableLabels,
   textFilterWidget,
-  type TextOp,
-} from "@adapttable/core";
-import type {
-  FilterHeaderClassNames,
-  FilterHeaderMultiProps,
-  FilterHeaderRangeProps,
-  FilterHeaderSearchProps,
-  FilterHeaderSelectProps,
 } from "@adapttable/core/binding";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
@@ -49,6 +49,7 @@ import {
 } from "@angular/core";
 
 import { resolveRenderer } from "../cell";
+import { isComponentType } from "../componentType";
 import { AdaptControl } from "../control";
 import { AdaptColumnSpacer } from "../virtual/columnSpacer";
 
@@ -196,12 +197,10 @@ export class AdaptFilterHeaderControlChrome<TRow> implements OnInit {
       props.className
     );
     const context = { ...props, $implicit: props };
-    let renderer: TemplateRef<typeof context> | Type<unknown> | undefined;
-    if (value instanceof TemplateRef) {
-      renderer = value;
-    } else if (typeof value === "function" && "ɵcmp" in value) {
-      renderer = value as unknown as Type<unknown>;
-    }
+    const renderer: TemplateRef<typeof context> | Type<unknown> | undefined =
+      value instanceof TemplateRef || isComponentType(value)
+        ? value
+        : undefined;
     return {
       context,
       renderer: resolveRenderer(renderer, context),

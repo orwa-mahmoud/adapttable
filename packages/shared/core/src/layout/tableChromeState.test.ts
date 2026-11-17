@@ -20,6 +20,7 @@ import {
   chromeIsRefreshing,
   chromeShowFooter,
   clearChromeFilters,
+  clearSearchAndFilters,
   featureNoticesAttribute,
   FilterTriggerToggleState,
   groupingPanelState,
@@ -151,6 +152,21 @@ describe("chromeShowFooter", () => {
     expect(
       chromeShowFooter({ ...base, total: 12, paginationMode: "infinite" })
     ).toBe(false);
+  });
+});
+
+describe("clearSearchAndFilters", () => {
+  it("clears the search, the extras and the filter tree, then notifies the host", () => {
+    const order: string[] = [];
+    const source = {
+      clearExtras: vi.fn(() => order.push("extras")),
+      setFilterTree: vi.fn(() => order.push("tree")),
+    };
+    const setSearch = vi.fn(() => order.push("search"));
+    const onClearFilters = vi.fn(() => order.push("host"));
+    clearSearchAndFilters(source, setSearch, onClearFilters);
+    expect(setSearch).toHaveBeenCalledWith("");
+    expect(order).toEqual(["search", "extras", "tree", "host"]);
   });
 });
 

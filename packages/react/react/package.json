@@ -102,6 +102,26 @@
         "default": "./dist/sparkline.cjs"
       }
     },
+    "./pdf": {
+      "import": {
+        "types": "./dist/pdf.d.ts",
+        "default": "./dist/pdf.js"
+      },
+      "require": {
+        "types": "./dist/pdf.d.cts",
+        "default": "./dist/pdf.cjs"
+      }
+    },
+    "./xlsx": {
+      "import": {
+        "types": "./dist/xlsx.d.ts",
+        "default": "./dist/xlsx.js"
+      },
+      "require": {
+        "types": "./dist/xlsx.d.cts",
+        "default": "./dist/xlsx.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

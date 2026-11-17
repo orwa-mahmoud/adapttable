@@ -197,9 +197,11 @@ describe("createServerSource", () => {
     store.set({ page: 2 });
     render(source, config(), store);
     expect(listener.mock.calls[0]?.[1].signal.aborted).toBe(true);
-    // Coming back does not resend a key already seen.
+    // Page 2 was never asked for, so coming back asks for it, once.
     render(source, config({ onQueryChange: listener }), store);
-    expect(listener).toHaveBeenCalledTimes(1);
+    render(source, config({ onQueryChange: listener }), store);
+    expect(listener).toHaveBeenCalledTimes(2);
+    expect(listener.mock.calls[1]?.[0]).toMatchObject({ page: 2 });
   });
 
   it("refetches by sending the same query again", () => {
@@ -504,5 +506,18 @@ describe("createServerSource", () => {
     render(source, config({ onQueryChange: vi.fn() }), viewStore());
     source.refetch();
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+describe("a tier that becomes the server tier", () => {
+  it("sends the query once a handler arrives, though the view did not move", () => {
+    const source = createServerSource<Row>();
+    const store = viewStore();
+    render(source, config(), store);
+    const listener = vi.fn<TableQueryListener>();
+    render(source, config({ onQueryChange: listener }), store);
+    expect(listener).toHaveBeenCalledTimes(1);
+    render(source, config({ onQueryChange: listener }), store);
+    expect(listener).toHaveBeenCalledTimes(1);
   });
 });

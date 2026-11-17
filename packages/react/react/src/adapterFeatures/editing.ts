@@ -55,12 +55,14 @@ export type EditableCellRenderProps<TRow = never> =
 export interface AdapterEditingComponents {
   /** In-place cell editor. */
   readonly EditableCell: AdapterFeatureComponent<
-    EditableCellRenderProps<never>
+    EditableCellRenderProps<unknown>
   >;
   /** Save/cancel actions for row editing. */
-  readonly RowEditActions: AdapterFeatureComponent<RowEditActionsProps<never>>;
+  readonly RowEditActions: AdapterFeatureComponent<
+    RowEditActionsProps<unknown>
+  >;
   /** Save/discard bar for batch editing. */
-  readonly BatchEditBar: AdapterFeatureComponent<BatchEditBarProps<never>>;
+  readonly BatchEditBar: AdapterFeatureComponent<BatchEditBarProps<unknown>>;
   /** Undo and redo controls contributed to the toolbar. */
   readonly UndoRedoButtons: AdapterFeatureComponent<ToolbarExtrasSlotProps>;
   /**
@@ -113,8 +115,8 @@ export interface AdapterEditingFeatures {
  * for selection or expansion must not re-run its data accessors.
  */
 function withResolvedDisplay(
-  Cell: AdapterFeatureComponent<EditableCellRenderProps<never>>
-): AdapterFeatureComponent<EditableCellSlotProps<never>> {
+  Cell: AdapterFeatureComponent<EditableCellRenderProps<unknown>>
+): AdapterFeatureComponent<EditableCellSlotProps<unknown>> {
   return function EditableCellWithDisplay(props) {
     const display = resolveEditableCellDisplay(
       props.display,

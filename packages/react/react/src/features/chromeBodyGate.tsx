@@ -6,25 +6,23 @@
  * paint already knows which child to mount — features are static — so SSR
  * and hydration see the same tree.
  */
-import {
-  CHROME_BODY,
-  type ChromeBodySlotProps,
-  overlayChromeExtras,
-} from "@adapttable/core/binding";
+import { overlayChromeExtras } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { ForcedColorsStyle } from "../a11y/forcedColors";
+import type { TableChrome } from "../chrome/tableChromeContract";
 import type { ComposedTableProps } from "../props";
+import { TableStoreContext } from "../state/tableStoreContext";
 import {
   type DataTableShellResult,
   finishDataTableShell,
 } from "../useDataTableShell";
-import type { TableChrome } from "../useTableChrome";
 import type { ChromeBodyData } from "../virtual/chromeBodyShared";
 import { usePlainChromeBodyData } from "../virtual/usePlainChromeBodyData";
 import { ChromeExtrasGate } from "./chromeExtrasGate";
 import { FeatureSlot, useFeatureSlotFilled } from "./providers";
 import { HistoryLiveGate, ShellLiveGate } from "./shellLiveGate";
+import { CHROME_BODY, type ChromeBodySlotProps } from "./slotKeys";
 
 /**
  * Resolve chrome-body data, then finish the table.
@@ -46,7 +44,7 @@ export function ChromeBodyGate<TRow>({
       chrome,
       props,
       children,
-    } as unknown as ChromeBodySlotProps;
+    } satisfies ChromeBodySlotProps<TRow>;
     return <FeatureSlot slot={CHROME_BODY} props={slotProps} />;
   }
   return (
@@ -70,6 +68,19 @@ function PlainChromeBody<TRow>({
 }
 
 /**
+ * The shell snapshots the panel before grouping has computed its cells.
+ * The extras overlay is the panel those cells belong on.
+ */
+function withGroupingPanel<TRow>(
+  shell: DataTableShellResult<TRow>,
+  panel: DataTableShellResult<TRow>["chrome"]["groupingPanel"]
+): DataTableShellResult<TRow> {
+  const props = shell.groupingPanelProps;
+  if (!props || !panel || props.state === panel) return shell;
+  return { ...shell, groupingPanelProps: { ...props, state: panel } };
+}
+
+/**
  * Finish a shell with extras, the in-tree chrome-body path, and live
  * interaction hooks.
  *
@@ -88,7 +99,7 @@ export function DataTableShellView<TRow>({
   readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
 }): ReactNode {
   return (
-    <>
+    <TableStoreContext.Provider value={shell.tableStore}>
       <ForcedColorsStyle />
       <HistoryLiveGate shell={shell}>
         {(withHistory) => (
@@ -97,7 +108,10 @@ export function DataTableShellView<TRow>({
             props={withHistory.chromeProps}
           >
             {(chrome) => {
-              const withExtras = overlayChromeExtras(withHistory, chrome);
+              const withExtras = withGroupingPanel(
+                overlayChromeExtras(withHistory, chrome),
+                chrome.groupingPanel
+              );
               const afterBody = (view: DataTableShellResult<TRow>) => (
                 <ShellLiveGate shell={view}>{children}</ShellLiveGate>
               );
@@ -113,6 +127,6 @@ export function DataTableShellView<TRow>({
           </ChromeExtrasGate>
         )}
       </HistoryLiveGate>
-    </>
+    </TableStoreContext.Provider>
   );
 }

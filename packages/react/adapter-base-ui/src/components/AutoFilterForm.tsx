@@ -11,6 +11,7 @@ import {
 import {
   defaultFilterRegistry,
   type Direction,
+  FILTER_LABELS,
   type FilterDef,
   type FilterFormSource,
   filterLabel,
@@ -20,7 +21,7 @@ import {
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
   renderRegisteredFilter,
-  resolveLabels,
+  resolveTableLabels,
   splitRelativeToken,
   type TableLabels,
 } from "@adapttable/react/adapter";
@@ -35,6 +36,8 @@ import {
   NativeSelect,
   type SelectOption,
 } from "./primitives";
+
+const FORM_LABELS = [FILTER_LABELS];
 
 /**
  * A labelled GROUP wrapper for multi-control fields (the multiSelect chip
@@ -415,7 +418,7 @@ export function AutoFilterForm<TRow>({
   labels,
   registry = defaultFilterRegistry,
 }: Readonly<AutoFilterFormProps<TRow>>) {
-  const resolved = resolveLabels(labels);
+  const resolved = resolveTableLabels(labels, FORM_LABELS);
   return (
     <Flex direction="column" gap="5">
       {defs.map((def) => (

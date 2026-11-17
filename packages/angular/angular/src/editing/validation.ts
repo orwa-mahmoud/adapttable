@@ -46,10 +46,10 @@ export function injectEditValidation<TRow>(
 ): Signal<EditValidationState<TRow>> {
   if (!options.injector) assertInInjectionContext(injectEditValidation);
   const injector = options.injector ?? inject(Injector);
-  const store = createEditValidationStore<TRow>({
-    validateRow: options.validateRow,
-    applyEdit: options.applyEdit,
-  });
+  const store = createEditValidationStore<TRow>(
+    { validateRow: options.validateRow, applyEdit: options.applyEdit },
+    { store: tableStoreOf(injector) }
+  );
   effect(
     () => {
       store.configure({
@@ -72,3 +72,4 @@ export type {
   ValidationCheckResult,
   ValidationTarget,
 } from "@adapttable/core";
+import { tableStoreOf } from "../tableStore";

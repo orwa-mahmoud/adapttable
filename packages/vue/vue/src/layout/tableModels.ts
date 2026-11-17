@@ -14,7 +14,7 @@ import {
 } from "@adapttable/core/binding";
 import { computed, type ComputedRef, type VNodeChild } from "vue";
 
-import { type Attrs, toVueAttrs } from "../attrs";
+import { type Attrs, mergeVueAttrs, toVueAttrs } from "../attrs";
 import type { CellContext, ColumnDef, HeaderContext } from "../columnDef";
 import type {
   GroupRowModel,
@@ -23,7 +23,7 @@ import type {
 } from "../hierarchy/models";
 import type { SelectionCheckboxAttrs } from "../selection/checkboxControl";
 import type { RowSelection } from "../selection/selection";
-import type { UseDataTableResult } from "../useDataTable";
+import type { TableRail, UseDataTableResult } from "../useDataTable";
 import type { RowActionControl } from "./modelChannels";
 import type { TableSummaryModel } from "./tableSummaryModel";
 export type TableBodySlot<TRow> = (
@@ -84,6 +84,8 @@ export interface DesktopTableModel<TRow> {
   readonly actionsLabel?: string;
   readonly reorderLabel?: string;
   readonly expandLabel?: string;
+  /** A rail cell's pin attributes; see `UseDataTableResult.railAttrs`. */
+  readonly railAttrs?: (rail: TableRail, header: boolean) => Attrs;
   readonly columnSpacers?: { readonly start: number; readonly end: number };
   readonly groupToggleProps: (
     cell: HeaderGroupCell
@@ -148,12 +150,154 @@ function cardCells<TRow>(
     },
   }));
 }
+/**
+ * A desktop row's model, kept while its row object, position and selection
+ * are unchanged: a change to other rows' data, or a recompute of the table
+ * model, hands an unchanged row the same model, so it does not redraw. What
+ * the row draws from the table's state (attributes, checkbox, cells) is read
+ * when the row is drawn, so a kept model stays current.
+ */
+/**
+ * A computed whose value keeps the previous object while the next one has
+ * the same entries: attributes are rebuilt as new objects on every read.
+ */
+export function keptAttrs<T extends object | undefined>(
+  read: () => T
+): ComputedRef<T> {
+  return computed<T>((previous) => {
+    const next = read();
+    if (!previous || !next) return next;
+    return sameAttrs(
+      previous as Readonly<Record<string, unknown>>,
+      next as Readonly<Record<string, unknown>>
+    )
+      ? previous
+      : next;
+  });
+}
+
+/**
+ * Whether two attribute objects draw the same: the same keys, each value the
+ * same, and a `style` object compared by its entries, since styles are
+ * rebuilt as new objects.
+ */
+export function sameAttrs(
+  previous: Readonly<Record<string, unknown>>,
+  next: Readonly<Record<string, unknown>>
+): boolean {
+  const keys = Object.keys(next);
+  return (
+    keys.length === Object.keys(previous).length &&
+    keys.every((key) =>
+      key === "style"
+        ? sameEntries(previous[key], next[key])
+        : Object.is(previous[key], next[key])
+    )
+  );
+}
+
+/**
+ * Whether two style values are the same: styles are plain data (objects,
+ * arrays of them, strings, numbers), so they compare by their contents.
+ */
+function sameEntries(previous: unknown, next: unknown): boolean {
+  if (Object.is(previous, next)) return true;
+  if (!isKeyable(previous) || !isKeyable(next)) return false;
+  if (Array.isArray(previous) || Array.isArray(next)) {
+    return (
+      Array.isArray(previous) &&
+      Array.isArray(next) &&
+      previous.length === next.length &&
+      previous.every((item, index) => sameEntries(item, next[index]))
+    );
+  }
+  const before = previous as Record<string, unknown>;
+  const after = next as Record<string, unknown>;
+  const keys = Object.keys(after);
+  return (
+    keys.length === Object.keys(before).length &&
+    keys.every((key) => sameEntries(before[key], after[key]))
+  );
+}
+
+/** Whether a value can key a weak map. */
+function isKeyable(value: unknown): value is object {
+  return typeof value === "object" && value !== null;
+}
+
+/**
+ * A desktop row's model, kept while its row object and position are
+ * unchanged: a change to other rows' data, or a recompute of the table model,
+ * hands an unchanged row the same model, so it does not redraw. What the row
+ * draws from the table's state (attributes, checkbox, cells) is read when the
+ * row is drawn, through the current selection, so a kept model stays current.
+ */
+function keptRowModels<TRow>(
+  table: UseDataTableResult<TRow>,
+  selection: () => RowSelection | undefined
+): (row: TRow, index: number) => TableRowModel<TRow> {
+  const kept = new WeakMap<
+    object,
+    { readonly index: number; readonly model: TableRowModel<TRow> }
+  >();
+  const build = (row: TRow, index: number): TableRowModel<TRow> => {
+    const key = table.rowKey(row);
+    const cells = lazyCells(() => desktopCells(table, row, index));
+    const attrs = keptAttrs(() => table.rowAttrs(row, index, {}));
+    const checkboxAttrs = keptAttrs(() => selection()?.rowCheckboxAttrs(key));
+    return {
+      key,
+      row,
+      index,
+      get attrs() {
+        return attrs.value;
+      },
+      get checkboxAttrs() {
+        return checkboxAttrs.value;
+      },
+      get cells() {
+        return cells();
+      },
+    };
+  };
+  return (row, index) => {
+    if (!isKeyable(row)) return build(row, index);
+    const previous = kept.get(row);
+    if (previous?.index === index) return previous.model;
+    const model = build(row, index);
+    kept.set(row, { index, model });
+    return model;
+  };
+}
+
+/**
+ * A rail cell's attributes: the table's pin attributes for that rail under
+ * the kit's own. Every kit draws its rails through this, so a pinned column
+ * sits past them.
+ *
+ * @param model - The desktop table model.
+ * @param rail - Which rail.
+ * @param header - Whether the cell is in the header.
+ * @param attrs - The kit's attributes for the cell.
+ *
+ * @public
+ */
+export function railCellAttrs<TRow>(
+  model: Pick<DesktopTableModel<TRow>, "railAttrs">,
+  rail: TableRail,
+  header: boolean,
+  attrs: Attrs
+): Record<string, unknown> {
+  return mergeVueAttrs(model.railAttrs?.(rail, header) ?? {}, attrs);
+}
+
 export function useDesktopTableModel<TRow>(
   table: UseDataTableResult<TRow>,
   selection?: () => RowSelection | undefined,
   fitColumns?: () => boolean,
   expandLabel?: () => string | undefined
 ): ComputedRef<DesktopTableModel<TRow>> {
+  const rowModel = keptRowModels(table, () => selection?.());
   return computed(() => {
     const selected = selection?.();
     const expansion = expandLabel?.();
@@ -204,20 +348,9 @@ export function useDesktopTableModel<TRow>(
           : undefined,
       headerCheckboxAttrs: selected?.headerCheckboxAttrs(),
       expandLabel: expansion,
+      railAttrs: table.railAttrs,
       columnCount: headers.length + (selected ? 1 : 0) + (expansion ? 1 : 0),
-      rows: table.rows.value.map((row, index) => {
-        const cells = lazyCells(() => desktopCells(table, row, index));
-        return {
-          key: table.rowKey(row),
-          row,
-          index,
-          attrs: table.rowAttrs(row, index),
-          checkboxAttrs: selected?.rowCheckboxAttrs(table.rowKey(row)),
-          get cells() {
-            return cells();
-          },
-        };
-      }),
+      rows: table.rows.value.map((row, index) => rowModel(row, index)),
     };
   });
 }
@@ -240,7 +373,7 @@ export function useMobileCardsModel<TRow>(
         row: row.row,
         index: row.index,
         checkboxAttrs: row.checkboxAttrs,
-        attrs: { ...table.cardAttrs(row.row, row.index), role: "listitem" },
+        attrs: { ...table.cardAttrs(row.row, row.index, {}), role: "listitem" },
         get cells() {
           return cells();
         },

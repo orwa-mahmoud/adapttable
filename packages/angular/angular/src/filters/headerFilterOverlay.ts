@@ -7,15 +7,17 @@
  */
 import {
   bindHeaderFilterDismiss,
-  createHeaderFilterOverlay,
   type FilterDef,
   type FilterFormSource,
   type FilterTypeRegistry,
-  headerFilterInsideSelector,
   type HeaderFilterOpenHost,
+} from "@adapttable/core";
+import {
+  createHeaderFilterOverlay,
+  headerFilterInsideSelector,
   isHeaderFilterOpen,
   watchOverlayDismiss,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import { computed, effect, inject, Injector, type Signal } from "@angular/core";
 
 import { onBrowser } from "../hooks/platform";

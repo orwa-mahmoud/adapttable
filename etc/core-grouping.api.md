@@ -110,23 +110,23 @@ export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | 
 
 // @public
 export interface ColumnModel<TRow = unknown> {
-    accessor?: (row: TRow) => unknown;
+    accessor?: RowCallback<[row: NoInfer<TRow>], unknown>;
     aggregatable?: Aggregatable;
     ai?: ColumnAiOptions;
     align?: "start" | "center" | "end";
-    colSpan?: number | ((row: TRow) => number);
-    editable?: boolean | ((row: TRow) => boolean);
+    colSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
+    editable?: boolean | RowCallback<[row: NoInfer<TRow>], boolean>;
     editor?: ColumnModelEditor;
-    editValue?: (row: TRow) => string;
-    exportValue?: (row: TRow) => unknown;
+    editValue?: RowCallback<[row: NoInfer<TRow>], string>;
+    exportValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     filter?: ColumnModelFilter;
     flex?: number;
     formatAggregate?: (value: DisplayValue | undefined, context: AggregateFormatContext) => DisplayValue | undefined;
-    formatValue?: (row: TRow) => string;
+    formatValue?: RowCallback<[row: NoInfer<TRow>], string>;
     group?: string | readonly string[];
     groupable?: boolean;
     groupShow?: ColumnGroupShow;
-    groupValue?: (row: TRow) => unknown;
+    groupValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     header?: string;
     headerTooltip?: string;
     hideOnDesktop?: boolean;
@@ -141,13 +141,13 @@ export interface ColumnModel<TRow = unknown> {
     meta?: Record<string, unknown>;
     minWidth?: number;
     mobileLabel?: string;
-    parseValue?: (draft: string, row: TRow) => unknown;
+    parseValue?: RowCallback<[draft: string, row: NoInfer<TRow>], unknown>;
     renameable?: boolean;
     responsivePriority?: number;
-    rowSpan?: number | ((row: TRow) => number);
+    rowSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
     sortable?: boolean;
-    sortValue?: (row: TRow) => SortableValue;
-    validate?: (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
+    sortValue?: RowCallback<[row: NoInfer<TRow>], SortableValue>;
+    validate?: RowCallback<[value: unknown, row: NoInfer<TRow>], string | undefined | Promise<string | undefined>>;
     width?: number | string;
 }
 
@@ -170,6 +170,9 @@ export type DeclaredAggregates = Readonly<Record<string, string>>;
 
 // @public
 export type DisplayValue = string | number | boolean | bigint | object | null;
+
+// @public
+export type ExportScopeCapability = "all" | "page";
 
 // @public
 export type ExtraEntry = {
@@ -274,17 +277,26 @@ export type GroupingCapability = "client" | "server" | false;
 // @public
 export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
     "aria-label": string;
-    onKeyDown: (event: TKeyboardEvent) => void;
+    onKeyDown(event: TKeyboardEvent): void;
     role: "button";
     tabIndex: 0;
+}
+
+// @public
+export interface GroupingDragEventLike {
+    readonly currentTarget: EventTarget | null;
+    readonly dataTransfer: DataTransfer | null;
+    readonly defaultPrevented: boolean;
+    preventDefault(): void;
+    readonly target: EventTarget | null;
 }
 
 // @public
 export interface GroupingDragProps<TDragEvent = DragEvent> {
     "data-grouping-dragging"?: boolean;
     draggable?: boolean;
-    onDragEnd?: (event: TDragEvent) => void;
-    onDragStart?: (event: TDragEvent) => void;
+    onDragEnd?(event: TDragEvent): void;
+    onDragStart?(event: TDragEvent): void;
 }
 
 // @public
@@ -301,10 +313,17 @@ export interface GroupingDragState {
 // @public
 export interface GroupingDropProps<TDragEvent = DragEvent> {
     "data-drop-active"?: boolean;
-    onDragEnter?: (event: TDragEvent) => void;
-    onDragLeave?: (event: TDragEvent) => void;
-    onDragOver?: (event: TDragEvent) => void;
-    onDrop?: (event: TDragEvent) => void;
+    onDragEnter?(event: TDragEvent): void;
+    onDragLeave?(event: TDragEvent): void;
+    onDragOver?(event: TDragEvent): void;
+    onDrop?(event: TDragEvent): void;
+}
+
+// @public
+export interface GroupingKeyEventLike {
+    readonly currentTarget: EventTarget | null;
+    readonly key: string;
+    preventDefault(): void;
 }
 
 // @public
@@ -312,12 +331,12 @@ export interface GroupingPanelInteractions {
     add: (key: string) => void;
     addAggregate: (key: string) => void;
     announcement: string;
-    chipDragProps: (key: string) => GroupingDragProps;
-    chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps;
+    chipDragProps: (key: string) => GroupingDragProps<GroupingDragEventLike>;
+    chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps<GroupingKeyEventLike>;
     declaredAggregates?: DeclaredAggregates;
     drag?: GroupingDragState;
-    dropProps: (index: number) => GroupingDropProps;
-    headerDragProps: (key: string) => GroupingDragProps;
+    dropProps: (index: number) => GroupingDropProps<GroupingDragEventLike>;
+    headerDragProps: (key: string) => GroupingDragProps<GroupingDragEventLike>;
     live?: {
         readonly subscribe: (listener: () => void) => () => void;
         readonly getSnapshot: () => {
@@ -326,12 +345,25 @@ export interface GroupingPanelInteractions {
         };
     };
     moveBy: (key: string, delta: -1 | 1) => void;
+    panelState?<TRow>(input: GroupingPanelStateInput<TRow>): GroupingPanelState;
     remove: (key: string) => void;
     removeAggregate: (key: string) => void;
-    removeDropProps: () => GroupingDropProps;
+    removeDropProps: () => GroupingDropProps<GroupingDragEventLike>;
     restoreAggregateDefaults: () => void;
     setAggregate: (key: string, value: GroupAggregateOverride | undefined) => void;
     setAggregateOperation: (key: string, operationId: string) => void;
+}
+
+// @public
+export interface GroupingPanelSource<TRow> {
+    readonly aggregateOperations?: readonly string[];
+    readonly allFilteredRows?: readonly TRow[];
+    readonly capabilities?: TableSourceCapabilities;
+    readonly groupAggregateOverrides?: GroupAggregateOverrides;
+    readonly groups?: readonly QueryGroupRow<TRow>[];
+    readonly honorsAggregates?: boolean;
+    readonly queryAggregates?: readonly QueryAggregate[];
+    readonly setGroupAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
 }
 
 // @public
@@ -340,6 +372,13 @@ export interface GroupingPanelState extends GroupingPanelInteractions {
     aggregations: AggregationModel;
     canSetAggregates: boolean;
     groupBy: readonly string[];
+}
+
+// @public
+export interface GroupingPanelStateInput<TRow> {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly groupBy: readonly string[];
+    readonly source: GroupingPanelSource<TRow>;
 }
 
 // @public
@@ -407,6 +446,15 @@ export interface QueryAggregate {
 export function queryAggregateOps(aggregates: readonly QueryAggregate[] | undefined): GroupAggregateOps | undefined;
 
 // @public
+export interface QueryGroupRow<TRow = unknown> {
+    aggregates?: Readonly<Record<string, unknown>>;
+    count: number;
+    groups?: readonly QueryGroupRow<TRow>[];
+    rows?: readonly TRow[];
+    value: unknown;
+}
+
+// @public
 export interface ResolvedAggregateOperation {
     readonly builtIn: boolean;
     readonly calculate?: Aggregator;
@@ -414,6 +462,11 @@ export interface ResolvedAggregateOperation {
     readonly id: string;
     readonly label?: string;
 }
+
+// @public
+export type RowCallback<TArgs extends readonly unknown[], TResult> = {
+    bivarianceHack(...args: TArgs): TResult;
+}["bivarianceHack"];
 
 // @public
 export interface RowGroupLevel {
@@ -434,6 +487,19 @@ export function serializeGroupAggregateOverrides(overrides: GroupAggregateOverri
 
 // @public
 export type SortableValue = string | number | boolean | null | undefined;
+
+// @public
+export interface TableSourceCapabilities {
+    readonly aggregateOperations?: readonly string[];
+    readonly exportScope: ExportScopeCapability;
+    readonly fullDataset: boolean;
+    readonly grouping: GroupingCapability;
+    readonly selectAcrossPages: boolean;
+    readonly totalCount: TotalCountCapability;
+}
+
+// @public
+export type TotalCountCapability = "exact" | "loaded";
 
 // @public
 export function withGroupAggregateOverrides<TRow>(base: GroupAggregatesFn<TRow> | undefined, overrides: GroupAggregateOverrides, columns: readonly ColumnMetadata<TRow>[], source?: AggregationSourceSupport): GroupAggregatesFn<TRow> | undefined;

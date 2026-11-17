@@ -4,15 +4,17 @@
  */
 import {
   createMemoryAdapter,
-  createTableViewStore,
   type ExtraFilters,
-  resolveUrlAdapter,
   type TableQueryParams,
   type TableViewState,
   type TableViewStateConfig,
   type TableViewStore,
   type UrlStateAdapter,
 } from "@adapttable/core";
+import {
+  createTableViewStore,
+  resolveUrlAdapter,
+} from "@adapttable/core/binding";
 import { PlatformLocation } from "@angular/common";
 import {
   assertInInjectionContext,
@@ -29,6 +31,7 @@ import {
 
 import { onBrowser } from "../hooks/platform";
 import { type MaybeSignalOptional, readMaybe } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 /**
  * The URL adapter every table in this injector reads and writes, when the
@@ -164,7 +167,9 @@ export function injectTableUrlState(
       }
       let store = namespaces.get(urlKey);
       if (!store) {
-        store = createTableViewStore({ adapter, urlKey }, config());
+        store = createTableViewStore({ adapter, urlKey }, config(), {
+          store: tableStoreOf(injector),
+        });
         namespaces.set(urlKey, store);
       }
       active = {

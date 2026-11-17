@@ -403,7 +403,7 @@ const SURFACES = [
   {
     framework: "react",
     directory: "packages/react/react",
-    props: "src/useDataTableShell.tsx",
+    props: "src/shell/shellContract.ts",
     propsType: "DataTableShellProps",
     features: "src/features.ts",
     kit: "packages/react/adapter-unstyled",

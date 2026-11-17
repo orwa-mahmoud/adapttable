@@ -5,16 +5,18 @@ import {
   type PaginationMode,
 } from "@adapttable/angular";
 import { editing } from "@adapttable/taiga-ui/editing";
-import { rowReorder } from "@adapttable/taiga-ui/row-reorder";
-import { virtualize } from "@adapttable/taiga-ui/virtualize";
 import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { TuiCheckbox } from "@taiga-ui/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { dataTableTests } from "../../angular/test/kit/suites/dataTable";
+import { kit } from "../testing/kit";
 import { AdaptDataTable } from "./dataTable";
 import { chooseTaigaOption, taigaCleaner } from "./taigaTestHelpers";
+
+for (const test of dataTableTests(kit)) it(test.name, test.run);
 
 interface City {
   id: string;
@@ -139,11 +141,6 @@ describe("the Taiga UI Angular table", () => {
     expect(ids()).toEqual(["1", "2", "3", "4", "5"]);
   });
 
-  it("fills a column from the host's cell template", async () => {
-    const { element } = await mount();
-    expect(element.querySelector(".country")?.textContent?.trim()).toBe("UAE");
-  });
-
   it("pages from the numbered pager and the page-size select", async () => {
     const { fixture, part, parts, ids, settle } = await mount();
     const numbers = parts<HTMLButtonElement>("page-number");
@@ -197,8 +194,9 @@ describe("the Taiga UI Angular table", () => {
     expect(part("footer")).toBeNull();
     part<HTMLButtonElement>("empty-clear")!.click();
     await settle();
-    // Clearing filters leaves the search: the host typed it.
-    expect(part("empty")).not.toBeNull();
+    // A search alone matched nothing, so the clear takes the search too.
+    expect(part<HTMLInputElement>("search")?.value).toBe("");
+    expect(part("empty")).toBeNull();
   });
 
   it("reports selection changes and shows the ids the host controls", async () => {
@@ -223,19 +221,6 @@ describe("the Taiga UI Angular table", () => {
     expect(
       parts("row").map((row) => row.getAttribute("aria-selected"))
     ).toEqual(["false", "false", "true", "false", "false"]);
-  });
-
-  it("loads more rows on a phone instead of paging", async () => {
-    const { fixture, part, parts, settle } = await mount();
-    fixture.componentInstance.mobile.set(true);
-    await settle();
-    expect(part("footer")).toBeNull();
-    expect(parts("card")).toHaveLength(5);
-    const button = part<HTMLButtonElement>("load-more-button");
-    expect(button?.textContent?.trim()).toBe("Load more");
-    button!.click();
-    await settle();
-    expect(parts("card")).toHaveLength(10);
   });
 
   it("gives every card its label and a checkbox on a phone", async () => {
@@ -324,16 +309,6 @@ afterEach(() => {
 });
 
 describe("Taiga UI Angular editing and virtualize", () => {
-  it("ignores a double-click when editing is not composed", async () => {
-    const { part, parts, settle } = await mountFeatures({ features: [] });
-    const cell = parts("cell")[0];
-    expect(cell).not.toBeUndefined();
-    cell!.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
-    await settle();
-    expect(part("edit-cell-editor")).toBeNull();
-    expect(part("edit-cell-activate")).toBeNull();
-  });
-
   it("opens, commits and cancels an in-place cell editor", async () => {
     const onCellEdit = vi.fn();
     const { part, parts, settle } = await mountFeatures({
@@ -367,180 +342,5 @@ describe("Taiga UI Angular editing and virtualize", () => {
     );
     await settle();
     expect(part("edit-cell-editor")).toBeNull();
-  });
-
-  it("edits a field on a phone card and hands the host the parsed value", async () => {
-    const onCellEdit = vi.fn();
-    const { part, parts, settle, element } = await mountFeatures({
-      features: [editing(onCellEdit)],
-      forceMobile: true,
-    });
-    expect(parts("card").length).toBeGreaterThan(0);
-    expect(part("table")).toBeNull();
-    const activate = element.querySelector<HTMLElement>(
-      '[data-adapttable-part="card-value"] [data-adapttable-part="edit-cell-activate"]'
-    );
-    expect(activate).not.toBeNull();
-    activate!.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
-    await settle();
-    const editor = part<HTMLInputElement>("edit-cell-editor");
-    expect(editor).not.toBeNull();
-    editor!.value = "Card edit";
-    editor!.dispatchEvent(new Event("input"));
-    editor!.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
-    );
-    await settle();
-    expect(onCellEdit).toHaveBeenCalledOnce();
-    expect(onCellEdit.mock.calls[0]?.[1]).toBe("name");
-    expect(onCellEdit.mock.calls[0]?.[2]).toBe("Card edit");
-  });
-
-  it("warns when virtualize is composed on a paged table", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    await mountFeatures({
-      features: [virtualize()],
-      paginationMode: "paged",
-    });
-    expect(warn).toHaveBeenCalled();
-    warn.mockRestore();
-  });
-
-  it("windows an infinite body and sizes the scroll box", async () => {
-    const { part, parts } = await mountFeatures({
-      features: [
-        virtualize({
-          estimateRowSize: 40,
-          estimateCardSize: 120,
-          virtualOverscan: 2,
-          virtualScrollMargin: 0,
-        }),
-        rowReorder(vi.fn()),
-      ],
-      paginationMode: "infinite",
-      maxHeight: 240,
-    });
-    const box = part("scroll-box");
-    expect(box?.style.maxHeight).toBe("240px");
-    expect(box?.style.overflow).toBe("auto");
-    // jsdom has no measured viewport: the window is armed with a spacer
-    // rather than mounted rows (same as the headless virtualize tests).
-    const spacer = part("virtual-spacer");
-    expect(spacer).not.toBeNull();
-    expect(spacer!.querySelector("td")!.style.height).toMatch(/^[1-9]\d*px$/);
-    // The reorder column is drawn and the spacer spans it with the data.
-    const [reorderHeader] = parts("reorder-header");
-    expect(reorderHeader!.getAttribute("aria-label")).toBe("Reorder row");
-    expect(spacer!.querySelector("td")!.colSpan).toBe(COLUMNS.length + 1);
-  });
-
-  it("accepts a string maxHeight on the scroll box", async () => {
-    const { part } = await mountFeatures({
-      features: [virtualize()],
-      paginationMode: "infinite",
-      maxHeight: "50vh",
-    });
-    expect(part("scroll-box")?.style.maxHeight).toBe("50vh");
-  });
-
-  it("windows phone cards inside the capped card list, and scrolling moves the window", async () => {
-    // jsdom lays nothing out: give the card list the height its cap sets and
-    // a scroll position the test controls.
-    let scrollTop = 0;
-    const height = Object.getOwnPropertyDescriptor(
-      HTMLElement.prototype,
-      "offsetHeight"
-    );
-    Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
-      configurable: true,
-      get(this: HTMLElement) {
-        const part = this.dataset.adapttablePart;
-        if (part === "cards") return 320;
-        return part === "card" ? 160 : 0;
-      },
-    });
-    const top = Object.getOwnPropertyDescriptor(Element.prototype, "scrollTop");
-    Object.defineProperty(Element.prototype, "scrollTop", {
-      configurable: true,
-      get(this: Element) {
-        return this.getAttribute("data-adapttable-part") === "cards"
-          ? scrollTop
-          : 0;
-      },
-      set() {
-        // The virtualizer's own scrolls are not what this test moves.
-      },
-    });
-    try {
-      const { part, parts, settle } = await mountFeatures({
-        features: [virtualize({ estimateCardSize: 160, virtualOverscan: 0 })],
-        paginationMode: "infinite",
-        maxHeight: 320,
-        forceMobile: true,
-      });
-      const list = part("cards")!;
-      expect(list.style.maxHeight).toBe("320px");
-      expect(list.style.overflowY).toBe("auto");
-      const titles = () =>
-        parts("card").map((card) =>
-          card
-            .querySelector('[data-adapttable-part="card-value"]')!
-            .textContent.trim()
-        );
-      expect(titles()).toEqual(["City 01", "City 02"]);
-
-      scrollTop = 1600;
-      list.dispatchEvent(new Event("scroll"));
-      await settle();
-      expect(titles()).toEqual(["City 11", "City 12"]);
-    } finally {
-      if (height)
-        Object.defineProperty(HTMLElement.prototype, "offsetHeight", height);
-      if (top) Object.defineProperty(Element.prototype, "scrollTop", top);
-    }
-  });
-});
-
-describe("Taiga UI Angular phone card captions", () => {
-  @Component({
-    imports: [AdaptDataTable],
-    template: `
-      <adapt-data-table
-        [data]="rows"
-        [columns]="columns"
-        [rowKey]="rowKey"
-        [urlSync]="false"
-        [forceMobile]="true"
-      />
-    `,
-  })
-  class CaptionHost {
-    readonly rows: City[] = CITIES.slice(0, 1);
-    readonly rowKey = (row: City) => row.id;
-    readonly columns: ColumnDef<City>[] = [
-      {
-        key: "name",
-        header: "City",
-        mobileLabel: "",
-        accessor: (row) => row.name,
-      },
-      { key: "country", header: "Country", accessor: (row) => row.country },
-    ];
-  }
-
-  it("captions a field by its header and drops the caption an empty mobileLabel asks to", async () => {
-    const fixture = TestBed.createComponent(CaptionHost);
-    fixture.autoDetectChanges();
-    await fixture.whenStable();
-    const { parts } = queryParts(fixture.nativeElement as HTMLElement);
-    const rows = parts("card-row");
-    expect(rows).toHaveLength(2);
-    expect(
-      rows[0]!.querySelector('[data-adapttable-part="card-label"]')
-    ).toBeNull();
-    expect(rows[0]!.textContent.trim()).toBe("City 01");
-    expect(
-      parts("card-label").map((label) => label.textContent.trim())
-    ).toEqual(["Country"]);
   });
 });

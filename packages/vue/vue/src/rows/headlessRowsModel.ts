@@ -1,6 +1,5 @@
 /** Optional body assembly shared by data-row features, never adapter orchestration. */
 import {
-  buildBodyCells,
   type CellSpanAppearance,
   type CssProperties,
   type ExtraRow as NeutralExtraRow,
@@ -14,6 +13,7 @@ import {
 } from "@adapttable/core";
 import {
   type BodyCell,
+  buildBodyCells,
   cellSpanMark,
   desktopBodySlots,
   type DesktopRowWiringArgs,
@@ -27,6 +27,7 @@ import {
   pinnedRowPart,
   resolveCellSpan,
   resolveRowStyle,
+  treeTableAria,
 } from "@adapttable/core/binding";
 import { toValue, type VNodeChild } from "vue";
 
@@ -163,8 +164,8 @@ export function projectHeadlessRows<TRow>(
       ? pinnedSummaryPart(rowPinSide ?? "top")
       : pinnedRowPart(rowPinSide);
     let rowAttrs = card
-      ? { ...table.cardAttrs(row, args.index), role: "listitem" }
-      : (prior?.attrs ?? table.rowAttrs(row, args.index));
+      ? { ...table.cardAttrs(row, args.index, {}), role: "listitem" }
+      : (prior?.attrs ?? table.rowAttrs(row, args.index, {}));
     if (isSummary)
       rowAttrs = {
         "data-adapttable-part": part,
@@ -299,7 +300,11 @@ export function projectHeadlessRows<TRow>(
             labels: table.labels.value,
             leadingColumns,
             trailingColumns: desktop.actionsLabel ? 1 : 0,
-            selection: selection?.state.value,
+            // Read when the group row is drawn, so a selection change
+            // redraws that row and leaves the body model as it is.
+            get selection() {
+              return selection?.state.value;
+            },
             onToggle: grouping.collapsed.toggle,
             onShowMore: grouping.showMore,
           },
@@ -325,11 +330,7 @@ export function projectHeadlessRows<TRow>(
       ...desktop,
       attrs:
         tree && !grouping
-          ? {
-              ...desktop.attrs,
-              role: "treegrid",
-              "aria-rowcount": tree.entries.length + 1,
-            }
+          ? { ...desktop.attrs, ...treeTableAria(tree.entries.length) }
           : desktop.attrs,
       bodySlots: slots(false),
     },

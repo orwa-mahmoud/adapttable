@@ -7,7 +7,7 @@ import {
 import { GroupHeaderCard, GroupHeaderCell } from "./components/grouping";
 import { GroupingPanel } from "./components/GroupingPanel";
 
-function GroupRowSlot(props: Readonly<GroupHeaderRowSlotProps<never>>) {
+function GroupRowSlot(props: Readonly<GroupHeaderRowSlotProps<unknown>>) {
   return (
     <GroupHeaderCell
       {...(props as unknown as Parameters<typeof GroupHeaderCell>[0])}
@@ -15,7 +15,7 @@ function GroupRowSlot(props: Readonly<GroupHeaderRowSlotProps<never>>) {
   );
 }
 
-function GroupCardSlot(props: Readonly<GroupHeaderCardSlotProps<never>>) {
+function GroupCardSlot(props: Readonly<GroupHeaderCardSlotProps<unknown>>) {
   return (
     <GroupHeaderCard
       {...(props as unknown as Parameters<typeof GroupHeaderCard>[0])}

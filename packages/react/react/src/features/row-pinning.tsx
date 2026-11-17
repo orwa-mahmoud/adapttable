@@ -8,13 +8,15 @@
 import {
   ACTIONS_COLUMN_KEY,
   devWarn,
-  rowPinningBlockedWarning,
   rowPinningControl,
+} from "@adapttable/core";
+import {
+  coreRowPinning,
+  rowPinningBlockedWarning,
   rowPinningRequested,
   rowPinningUrlSync,
   withRowPinActions,
-} from "@adapttable/core";
-import { coreRowPinning } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import { type ReactNode, useEffect } from "react";
 
 import {
@@ -25,7 +27,11 @@ import {
 } from "../rows/rowPinning";
 import { useRowPinningUrlState } from "../url/useRowPinningUrlState";
 import { slotRender } from "./providers";
-import { type ChromeExtraSlotProps, PINNING_LIVE } from "./slotKeys";
+import {
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  PINNING_LIVE,
+} from "./slotKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
 function useLiveRowPinning<TRow>(options: {
@@ -52,11 +58,11 @@ function useLiveRowPinning<TRow>(options: {
   return enabled ? state : undefined;
 }
 
-function LivePinning({
+function LivePinning<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<never>): ReactNode {
+}: ChromeExtraSlotProps<TRow>): ReactNode {
   const requested = rowPinningRequested(props);
   const pinUrl = useRowPinningUrlState({
     urlAdapter: props.urlAdapter,
@@ -121,6 +127,10 @@ export function rowPinning(
 ): StaticTableFeature {
   return {
     ...coreRowPinning(options),
-    renders: [slotRender(PINNING_LIVE, (props) => <LivePinning {...props} />)],
+    renders: [
+      slotRender<ChromeExtraDraw>(PINNING_LIVE, (props) => (
+        <LivePinning {...props} />
+      )),
+    ],
   };
 }

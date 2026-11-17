@@ -1,13 +1,11 @@
 import {
+  createMemoryAdapter,
   type FilterDef,
+  type FilterOption,
   injectFrontendData,
   type SavedViewsControllerOptions,
 } from "@adapttable/angular";
-import {
-  createMemoryAdapter,
-  defaultLabels,
-  type FilterOption,
-} from "@adapttable/core";
+import { defaultLabels } from "@adapttable/angular/adapter";
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 

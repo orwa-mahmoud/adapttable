@@ -19,7 +19,7 @@ export type ActionApprovalPolicy = "required" | "automatic";
 export interface ActionConfirm<TArg> {
     confirmLabel: string;
     danger?: boolean;
-    message: (arg: TArg) => string;
+    message: RowCallback<[arg: TArg], string>;
     title: string;
 }
 
@@ -125,26 +125,32 @@ export interface BatchEditEntry {
 export function batchEditErrorId(rowId: string, columnKey: string): string;
 
 // @public
+export type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => unknown;
+
+// @public
 export interface BatchEditingState<TRow> {
-    acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    acceptSeeds: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]], void>;
     cancelAll: () => void;
     cancelRow: (rowId: string) => void;
     readonly commit?: EditCommitSnapshot;
     count: number;
-    draftFor: (row: TRow, rowId: string, columnKey: string) => string;
+    draftFor: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string], string>;
     entries: readonly BatchEditEntry[];
     featureHost?: FeatureHostState;
     isChanged: (rowId: string, columnKey: string) => boolean;
     isPending: (rowId: string) => boolean;
     pending: boolean;
     saveAll: () => void;
-    setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
+    setDraft: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string, value: string], void>;
     signature: string;
-    takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    takeSeeds: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]], void>;
 }
 
 // @public
 export function batchEditingView<TRow>(store: BatchEditStore<TRow>, snapshot: BatchEditSnapshot, options: Pick<BatchEditStoreOptions<TRow>, "columns" | "featureHost">): BatchEditingState<TRow>;
+
+// @public
+export function batchEditorControl<TRow>(batch: Pick<BatchEditingState<TRow>, "draftFor" | "setDraft" | "commit">, row: TRow, rowId: string, columnKey: string, editor: CellEditor): EditorDraftControl;
 
 // @public
 export interface BatchEditSnapshot {
@@ -156,16 +162,16 @@ export interface BatchEditSnapshot {
 
 // @public
 export interface BatchEditStore<TRow> {
-    readonly acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    readonly acceptSeeds: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]], void>;
     readonly cancelAll: () => void;
     readonly cancelRow: (rowId: string) => void;
-    readonly configure: (options: BatchEditStoreOptions<TRow>) => void;
+    readonly configure: RowCallback<[options: BatchEditStoreOptions<TRow>], void>;
     readonly dispose?: () => void;
     readonly getSnapshot: () => BatchEditSnapshot;
     readonly saveAll: () => void;
-    readonly setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
+    readonly setDraft: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string, value: string], void>;
     readonly subscribe: (listener: () => void) => () => void;
-    readonly takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    readonly takeSeeds: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]], void>;
 }
 
 // @public
@@ -174,7 +180,7 @@ export interface BatchEditStoreOptions<TRow> extends EditCommitValidationOptions
     readonly enabled?: boolean;
     readonly featureHost?: FeatureHostState;
     readonly formatEditError?: (error: unknown) => string;
-    readonly onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
+    readonly onBatchEdit?: BatchEditHandler<TRow>;
     readonly onEditCancel?: EditEventHandler<TRow>;
     readonly onEditCommit?: EditEventHandler<TRow>;
     readonly onEditError?: EditEventHandler<TRow>;
@@ -551,23 +557,23 @@ export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | 
 
 // @public
 export interface ColumnModel<TRow = unknown> {
-    accessor?: (row: TRow) => unknown;
+    accessor?: RowCallback<[row: NoInfer<TRow>], unknown>;
     aggregatable?: Aggregatable;
     ai?: ColumnAiOptions;
     align?: "start" | "center" | "end";
-    colSpan?: number | ((row: TRow) => number);
-    editable?: boolean | ((row: TRow) => boolean);
+    colSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
+    editable?: boolean | RowCallback<[row: NoInfer<TRow>], boolean>;
     editor?: ColumnModelEditor;
-    editValue?: (row: TRow) => string;
-    exportValue?: (row: TRow) => unknown;
+    editValue?: RowCallback<[row: NoInfer<TRow>], string>;
+    exportValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     filter?: ColumnModelFilter;
     flex?: number;
     formatAggregate?: (value: DisplayValue | undefined, context: AggregateFormatContext) => DisplayValue | undefined;
-    formatValue?: (row: TRow) => string;
+    formatValue?: RowCallback<[row: NoInfer<TRow>], string>;
     group?: string | readonly string[];
     groupable?: boolean;
     groupShow?: ColumnGroupShow;
-    groupValue?: (row: TRow) => unknown;
+    groupValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     header?: string;
     headerTooltip?: string;
     hideOnDesktop?: boolean;
@@ -582,13 +588,13 @@ export interface ColumnModel<TRow = unknown> {
     meta?: Record<string, unknown>;
     minWidth?: number;
     mobileLabel?: string;
-    parseValue?: (draft: string, row: TRow) => unknown;
+    parseValue?: RowCallback<[draft: string, row: NoInfer<TRow>], unknown>;
     renameable?: boolean;
     responsivePriority?: number;
-    rowSpan?: number | ((row: TRow) => number);
+    rowSpan?: number | RowCallback<[row: NoInfer<TRow>], number>;
     sortable?: boolean;
-    sortValue?: (row: TRow) => SortableValue;
-    validate?: (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
+    sortValue?: RowCallback<[row: NoInfer<TRow>], SortableValue>;
+    validate?: RowCallback<[value: unknown, row: NoInfer<TRow>], string | undefined | Promise<string | undefined>>;
     width?: number | string;
 }
 
@@ -626,7 +632,7 @@ export interface ContextMenuItem {
 }
 
 // @public
-export type ContextMenuItemsFactory<TRow = unknown> = (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
+export type ContextMenuItemsFactory<TRow = unknown> = RowCallback<[target: ContextMenuTarget<TRow>], readonly ContextMenuItem[]>;
 
 // @public
 export type ContextMenuTarget<TRow> = {
@@ -647,31 +653,49 @@ export type ContextMenuTarget<TRow> = {
 export function controllerConflictAsk<TRow>(controller: Pick<EditableCellController<TRow>, "conflict" | "keepConflict" | "takeConflict">): CellConflictAsk | undefined;
 
 // @public
-export function createBatchEditStore<TRow>(options: BatchEditStoreOptions<TRow>): BatchEditStore<TRow>;
+export function createBatchEditStore<TRow>(options: BatchEditStoreOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): BatchEditStore<TRow>;
 
 // @public
-export function createCellEditSession<TRow = unknown>(options?: CellEditSessionOptions<TRow>): CellEditSession<TRow>;
+export function createCellEditSession<TRow = unknown>(options?: CellEditSessionOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): CellEditSession<TRow>;
 
 // @public
-export function createCellSaveStore<TRow>(options?: CellSaveStoreOptions<TRow>): CellSaveStore<TRow>;
+export function createCellSaveStore<TRow>(options?: CellSaveStoreOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): CellSaveStore<TRow>;
 
 // @public
-export function createDirtyCellStore(options?: DirtyCellStoreOptions): DirtyCellStore;
+export function createDirtyCellStore(options?: DirtyCellStoreOptions, within?: {
+    readonly store?: TableStore;
+}): DirtyCellStore;
 
 // @public
-export function createEditConflictStore<TRow>(): EditConflictStore<TRow>;
+export function createEditConflictStore<TRow>(within?: {
+    readonly store?: TableStore;
+}): EditConflictStore<TRow>;
 
 // @public
-export function createEditHistory<TRow>(options: EditHistoryControllerOptions<TRow>): EditHistoryController<TRow>;
+export function createEditHistory<TRow>(options: EditHistoryControllerOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): EditHistoryController<TRow>;
 
 // @public
-export function createEditHistoryStack<TRow>(): EditHistoryStack<TRow>;
+export function createEditHistoryStack<TRow>(within?: {
+    readonly store?: TableStore;
+}): EditHistoryStack<TRow>;
 
 // @public
-export function createEditValidationStore<TRow>(options?: EditValidationStoreOptions<TRow>): EditValidationStore<TRow>;
+export function createEditValidationStore<TRow>(options?: EditValidationStoreOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): EditValidationStore<TRow>;
 
 // @public
-export function createRowEditStore<TRow>(options: RowEditStoreOptions<TRow>): RowEditStore<TRow>;
+export function createRowEditStore<TRow>(options: RowEditStoreOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): RowEditStore<TRow>;
 
 // @public
 export interface CustomAggregateOperation<TValue = AggregateOrderedValue> {
@@ -815,6 +839,15 @@ export function editableCellController<TRow>(options: {
 }): EditableCellController<TRow>;
 
 // @public
+export interface EditableCellEditorCtrl extends EditorDraftControl {
+    conflict?: boolean;
+    errorId: string;
+    focusRef: (node: {
+        focus: () => void;
+    } | null) => void;
+}
+
+// @public
 export function editableCellErrorId(rowId: string, columnKey: string): string;
 
 // @public
@@ -828,24 +861,17 @@ export function editableCellPresentation<TRow>(editing: EditingBundle<TRow> | un
 
 // @public
 export interface EditableColumnLike<TRow = unknown> {
-    editable?: boolean | {
-        bivarianceHack(row: TRow): boolean;
-    }["bivarianceHack"];
+    editable?: boolean | RowCallback<[row: NoInfer<TRow>], boolean>;
     editor?: ColumnModelEditor;
-    editValue?: {
-        bivarianceHack(row: TRow): string;
-    }["bivarianceHack"];
+    editValue?: RowCallback<[row: NoInfer<TRow>], string>;
     key: string;
-    parseValue?: {
-        bivarianceHack(draft: string, row: TRow): unknown;
-    }["bivarianceHack"];
-    sortValue?: {
-        bivarianceHack(row: TRow): SortableValue;
-    }["bivarianceHack"];
-    validate?: {
-        bivarianceHack(value: unknown, row: TRow): string | undefined | Promise<string | undefined>;
-    }["bivarianceHack"];
+    parseValue?: RowCallback<[draft: string, row: NoInfer<TRow>], unknown>;
+    sortValue?: RowCallback<[row: NoInfer<TRow>], SortableValue>;
+    validate?: RowCallback<[value: unknown, row: NoInfer<TRow>], string | undefined | Promise<string | undefined>>;
 }
+
+// @public
+export type EditActivation = "doubleClick" | "click";
 
 // @public
 export interface EditCommitSnapshot {
@@ -1007,6 +1033,11 @@ export function editHistoryEntry<TRow>(edits: readonly CellEdit<TRow>[], readVal
 } | undefined): EditHistoryEntry<TRow>;
 
 // @public
+export type EditHistoryInput = boolean | {
+    readonly depth?: number;
+};
+
+// @public
 export interface EditHistorySnapshot {
     readonly future: number;
     readonly past: number;
@@ -1059,7 +1090,7 @@ export interface EditingArmingProps {
 
 // @public
 export interface EditingBundle<TRow> {
-    activation?: "doubleClick" | "click";
+    activation?: EditActivation;
     batch?: BatchEditingState<TRow>;
     conflict?: EditConflictState<TRow>;
     conflictLabels?: EditConflictLabels;
@@ -1096,6 +1127,22 @@ export function editorBusyProps(ctrl: EditorAriaState): {
     "aria-describedby"?: string;
     "data-conflict"?: "";
 };
+
+// @public
+export interface EditorDraftControl {
+    commitOnBlur: () => void;
+    draft: string;
+    editor: CellEditor;
+    error?: string;
+    onEditorKeyDown: (event: {
+        key: string;
+        preventDefault: () => void;
+        shiftKey?: boolean;
+    }) => void;
+    selectOptions: ReturnType<typeof editorSelectOptions>;
+    setDraft: (value: string) => void;
+    validating: boolean;
+}
 
 // @public
 export function editorInputType(editor: CellEditor | null): "text" | "number" | "date" | "datetime-local" | "time";
@@ -1249,7 +1296,7 @@ export interface FilterAiOptions {
 export interface FilterDef<TRow = unknown> {
     ai?: false | FilterAiOptions;
     column?: string;
-    getValue?: (row: TRow) => unknown;
+    getValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
     key: string;
     label?: string;
     options?: FilterOptionsSource;
@@ -1333,17 +1380,26 @@ export type GroupingCapability = "client" | "server" | false;
 // @public
 export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
     "aria-label": string;
-    onKeyDown: (event: TKeyboardEvent) => void;
+    onKeyDown(event: TKeyboardEvent): void;
     role: "button";
     tabIndex: 0;
+}
+
+// @public
+export interface GroupingDragEventLike {
+    readonly currentTarget: EventTarget | null;
+    readonly dataTransfer: DataTransfer | null;
+    readonly defaultPrevented: boolean;
+    preventDefault(): void;
+    readonly target: EventTarget | null;
 }
 
 // @public
 export interface GroupingDragProps<TDragEvent = DragEvent> {
     "data-grouping-dragging"?: boolean;
     draggable?: boolean;
-    onDragEnd?: (event: TDragEvent) => void;
-    onDragStart?: (event: TDragEvent) => void;
+    onDragEnd?(event: TDragEvent): void;
+    onDragStart?(event: TDragEvent): void;
 }
 
 // @public
@@ -1360,10 +1416,17 @@ export interface GroupingDragState {
 // @public
 export interface GroupingDropProps<TDragEvent = DragEvent> {
     "data-drop-active"?: boolean;
-    onDragEnter?: (event: TDragEvent) => void;
-    onDragLeave?: (event: TDragEvent) => void;
-    onDragOver?: (event: TDragEvent) => void;
-    onDrop?: (event: TDragEvent) => void;
+    onDragEnter?(event: TDragEvent): void;
+    onDragLeave?(event: TDragEvent): void;
+    onDragOver?(event: TDragEvent): void;
+    onDrop?(event: TDragEvent): void;
+}
+
+// @public
+export interface GroupingKeyEventLike {
+    readonly currentTarget: EventTarget | null;
+    readonly key: string;
+    preventDefault(): void;
 }
 
 // @public
@@ -1371,12 +1434,12 @@ export interface GroupingPanelInteractions {
     add: (key: string) => void;
     addAggregate: (key: string) => void;
     announcement: string;
-    chipDragProps: (key: string) => GroupingDragProps;
-    chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps;
+    chipDragProps: (key: string) => GroupingDragProps<GroupingDragEventLike>;
+    chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps<GroupingKeyEventLike>;
     declaredAggregates?: DeclaredAggregates;
     drag?: GroupingDragState;
-    dropProps: (index: number) => GroupingDropProps;
-    headerDragProps: (key: string) => GroupingDragProps;
+    dropProps: (index: number) => GroupingDropProps<GroupingDragEventLike>;
+    headerDragProps: (key: string) => GroupingDragProps<GroupingDragEventLike>;
     live?: {
         readonly subscribe: (listener: () => void) => () => void;
         readonly getSnapshot: () => {
@@ -1385,12 +1448,25 @@ export interface GroupingPanelInteractions {
         };
     };
     moveBy: (key: string, delta: -1 | 1) => void;
+    panelState?<TRow>(input: GroupingPanelStateInput<TRow>): GroupingPanelState;
     remove: (key: string) => void;
     removeAggregate: (key: string) => void;
-    removeDropProps: () => GroupingDropProps;
+    removeDropProps: () => GroupingDropProps<GroupingDragEventLike>;
     restoreAggregateDefaults: () => void;
     setAggregate: (key: string, value: GroupAggregateOverride | undefined) => void;
     setAggregateOperation: (key: string, operationId: string) => void;
+}
+
+// @public
+export interface GroupingPanelSource<TRow> {
+    readonly aggregateOperations?: readonly string[];
+    readonly allFilteredRows?: readonly TRow[];
+    readonly capabilities?: TableSourceCapabilities;
+    readonly groupAggregateOverrides?: GroupAggregateOverrides;
+    readonly groups?: readonly QueryGroupRow<TRow>[];
+    readonly honorsAggregates?: boolean;
+    readonly queryAggregates?: readonly QueryAggregate[];
+    readonly setGroupAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
 }
 
 // @public
@@ -1399,6 +1475,13 @@ export interface GroupingPanelState extends GroupingPanelInteractions {
     aggregations: AggregationModel;
     canSetAggregates: boolean;
     groupBy: readonly string[];
+}
+
+// @public
+export interface GroupingPanelStateInput<TRow> {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly groupBy: readonly string[];
+    readonly source: GroupingPanelSource<TRow>;
 }
 
 // @public
@@ -1656,9 +1739,7 @@ export function resolveEditableCellDisplay<TRow, TNode, TCell>(display: TNode | 
 }, renderCell: (Cell: TCell) => TNode, row: TRow): TNode | undefined;
 
 // @public
-export function resolveEditHistory(editHistory: boolean | {
-    readonly depth?: number;
-} | undefined): {
+export function resolveEditHistory(editHistory: EditHistoryInput | undefined): {
     readonly enabled: boolean;
     readonly depth: number | undefined;
 };
@@ -1674,15 +1755,20 @@ export interface RowAction<TRow> {
     ai?: ActionAiOptions | false;
     color?: string;
     confirm?: ActionConfirm<TRow>;
-    disabledReason?: (row: TRow) => string | undefined;
+    disabledReason?: RowCallback<[row: TRow], string | undefined>;
     editsRow?: boolean;
     icon?: DisplayValue;
-    isDisabled?: (row: TRow) => boolean;
-    isHidden?: (row: TRow) => boolean;
+    isDisabled?: RowCallback<[row: TRow], boolean>;
+    isHidden?: RowCallback<[row: TRow], boolean>;
     key: string;
     label: string;
-    onClick?: (row: TRow) => void;
+    onClick?: RowCallback<[row: TRow], void>;
 }
+
+// @public
+export type RowCallback<TArgs extends readonly unknown[], TResult> = {
+    bivarianceHack(...args: TArgs): TResult;
+}["bivarianceHack"];
 
 // @public
 export type RowEditActionsLayout = {
@@ -1735,10 +1821,13 @@ export type RowEditDrafts = Readonly<Record<string, string>>;
 export function rowEditErrorId(columnKey: string): string;
 
 // @public
+export type RowEditHandler<TRow> = (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
+
+// @public
 export interface RowEditingState<TRow> {
-    acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+    acceptSeeds: RowCallback<[row: NoInfer<TRow>, columnKeys: readonly string[]], void>;
     activeRowId: string | null;
-    begin: (row: TRow, rowId: string) => void;
+    begin: RowCallback<[row: NoInfer<TRow>, rowId: string], void>;
     cancel: () => void;
     readonly commit?: EditCommitSnapshot;
     draftFor: (columnKey: string) => string;
@@ -1751,11 +1840,14 @@ export interface RowEditingState<TRow> {
     seeds: () => RowEditDrafts | undefined;
     setDraft: (columnKey: string, value: string) => void;
     signature: string;
-    takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+    takeSeeds: RowCallback<[row: NoInfer<TRow>, columnKeys: readonly string[]], void>;
 }
 
 // @public
 export function rowEditingView<TRow>(store: RowEditStore<TRow>, snapshot: RowEditSnapshot, featureHost?: FeatureHostState): RowEditingState<TRow>;
+
+// @public
+export function rowEditorControl<TRow>(rowEditing: Pick<RowEditingState<TRow>, "draftFor" | "setDraft" | "save" | "cancel" | "commit" | "activeRowId">, columnKey: string, editor: CellEditor, saveBlocked: boolean): EditorDraftControl;
 
 // @public
 export function rowEditSaveBlocked(ask: CellConflictAsk | undefined, rowAsking: boolean | undefined): boolean;
@@ -1773,8 +1865,8 @@ export interface RowEditSnapshot {
 
 // @public
 export interface RowEditStore<TRow> {
-    readonly acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
-    readonly begin: (row: TRow, rowId: string) => void;
+    readonly acceptSeeds: RowCallback<[row: NoInfer<TRow>, columnKeys: readonly string[]], void>;
+    readonly begin: RowCallback<[row: NoInfer<TRow>, rowId: string], void>;
     readonly cancel: () => void;
     readonly configure: (options: RowEditStoreOptions<TRow>) => void;
     readonly dispose?: () => void;
@@ -1784,7 +1876,7 @@ export interface RowEditStore<TRow> {
     readonly seeds: () => RowEditDrafts | undefined;
     readonly setDraft: (columnKey: string, value: string) => void;
     readonly subscribe: (listener: () => void) => () => void;
-    readonly takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+    readonly takeSeeds: RowCallback<[row: NoInfer<TRow>, columnKeys: readonly string[]], void>;
 }
 
 // @public
@@ -1797,7 +1889,7 @@ export interface RowEditStoreOptions<TRow> extends EditCommitValidationOptions<T
     readonly onEditCommit?: EditEventHandler<TRow>;
     readonly onEditError?: EditEventHandler<TRow>;
     readonly onEditStart?: EditEventHandler<TRow>;
-    readonly onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
+    readonly onRowEdit?: RowEditHandler<TRow>;
     readonly onValidationFail?: EditEventHandler<TRow>;
 }
 
@@ -1817,6 +1909,29 @@ export type RowValidator<TRow> = (row: TRow) => string | Record<string, string> 
 export interface SidePanelEntry {
     key: string;
 }
+
+// @public
+export interface SliceCell<T> {
+    // (undocumented)
+    readonly listeners: Set<() => void>;
+    staged: {
+        value: T;
+    } | undefined;
+    // (undocumented)
+    value: T;
+}
+
+// @public
+export interface SliceKey<T> {
+    readonly cells: WeakMap<object, SliceCell<T>>;
+    equals(a: T, b: T): boolean;
+    readonly initial: () => T;
+    // (undocumented)
+    readonly name: string;
+}
+
+// @public
+export type SliceRead = <T>(key: SliceKey<T>) => T;
 
 // @public
 export type SortableValue = string | number | boolean | null | undefined;
@@ -1842,12 +1957,40 @@ export function stopEditKeys(event: Readonly<{
 }>): void;
 
 // @public
+export interface StoreReader<T> {
+    // (undocumented)
+    readonly getSnapshot: () => T;
+    // (undocumented)
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface StoreWriter {
+    // (undocumented)
+    readonly read: SliceRead;
+    // (undocumented)
+    readonly update: <T>(key: SliceKey<T>, recipe: (current: T) => T) => void;
+    // (undocumented)
+    readonly write: <T>(key: SliceKey<T>, value: T) => void;
+}
+
+// @public
+export interface TableAction<TPayload> {
+    // (undocumented)
+    readonly payload: TPayload;
+    // (undocumented)
+    readonly reduce: (store: StoreWriter, payload: TPayload) => void;
+    // (undocumented)
+    readonly type: string;
+}
+
+// @public
 export interface TableCallbackRefresh<TRow> {
     readonly columns?: NonNullable<IncrementalViewConfig<TRow>["columns"]>;
     readonly filterFn?: NonNullable<IncrementalViewConfig<TRow>["filterFn"]>;
     readonly filterTreeFn?: NonNullable<IncrementalViewConfig<TRow>["filterTreeFn"]>;
-    readonly getRowId?: (row: TRow) => string;
-    readonly getSearchText?: (row: TRow) => string;
+    readonly getRowId?: RowCallback<[row: NoInfer<TRow>], string>;
+    readonly getSearchText?: RowCallback<[row: NoInfer<TRow>], string>;
     readonly getSortValue?: NonNullable<IncrementalViewConfig<TRow>["getSortValue"]>;
 }
 
@@ -1855,24 +1998,24 @@ export interface TableCallbackRefresh<TRow> {
 export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
     readonly candidate: TableEngineReader<TRow>;
     readonly commitCandidate: () => void;
-    readonly configure: (patch: TableEngineConfigPatch<TRow>, options?: {
+    readonly configure: RowCallback<[patch: TableEngineConfigPatch<TRow>, options?: {
         silent?: boolean;
-    }) => void;
+    }], void>;
     readonly discardCandidate: () => void;
     readonly dispatch: (operation: TableOperation) => void;
     readonly dispose: () => void;
-    readonly invalidate: (axes: readonly TableRevisionAxis[], next?: {
+    readonly invalidate: RowCallback<[axes: readonly TableRevisionAxis[], next?: {
         readonly data?: readonly TRow[];
         readonly columns?: readonly ColumnMetadata<TRow>[];
     }, options?: {
         silent?: boolean;
-    }) => void;
-    readonly refreshCallbacks: (patch: TableCallbackRefresh<TRow>) => void;
-    readonly rowKey: (row: TRow) => string;
-    readonly stageCandidate: (patch: TableEngineConfigPatch<TRow>, next?: {
+    }], void>;
+    readonly refreshCallbacks: RowCallback<[patch: TableCallbackRefresh<TRow>], void>;
+    readonly rowKey: RowCallback<[row: NoInfer<TRow>], string>;
+    readonly stageCandidate: RowCallback<[patch: TableEngineConfigPatch<TRow>, next?: {
         readonly data?: readonly TRow[];
         readonly columns?: readonly ColumnMetadata<TRow>[];
-    }) => void;
+    }], void>;
     readonly subscribe: (axes: readonly TableRevisionAxis[] | "all", listener: (revisions: TableRevisions) => void) => () => void;
     readonly tableId: string;
 }
@@ -1887,7 +2030,7 @@ export interface TableEngineConfigPatch<TRow> extends Partial<IncrementalViewCon
 
 // @public
 export interface TableEngineReader<TRow = unknown> {
-    readonly cellValue: (row: TRow, columnKey: string) => unknown;
+    readonly cellValue: RowCallback<[row: NoInfer<TRow>, columnKey: string], unknown>;
     readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
     readonly rowByKey: (rowKey: string) => TRow | undefined;
     readonly rows: (scope: TableRowScope) => readonly TRow[];
@@ -2386,6 +2529,15 @@ export interface TableStateMutators {
     setSort: (key: string | undefined, dir?: SortDirection) => void;
     sortLevels: readonly SortLevel[];
     toggleSortLevel: (key: string) => void;
+}
+
+// @public
+export interface TableStore {
+    readonly batch: (run: (store: StoreWriter) => void) => void;
+    readonly dispatch: <TPayload>(action: TableAction<TPayload>) => void;
+    readonly read: SliceRead;
+    readonly scope: (seed?: (store: StoreWriter) => void) => TableStore;
+    readonly slice: <T>(key: SliceKey<T>) => StoreReader<T>;
 }
 
 // @public

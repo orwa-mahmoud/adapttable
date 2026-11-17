@@ -9,9 +9,12 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./data-table.test-utils";
+import { contextMenuPinCutTests } from "../../react/test/kit/suites/contextMenuPinCut";
+import { DataTable, kit } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { renderMantine as renderKit } from "./test-utils";
+
+for (const test of contextMenuPinCutTests(kit)) it(test.name, test.run);
 
 interface Row {
   id: string;
@@ -33,29 +36,6 @@ afterEach(() => {
 });
 
 describe("context menu pin and cut (mantine)", () => {
-  it("pins a row to the top from its menu", () => {
-    const onPinnedRowIdsChange = vi.fn();
-    renderKit(
-      <DataTable
-        data={ROWS}
-        columns={COLS}
-        rowKey={(r) => r.id}
-        urlSync={false}
-        forceMobile={false}
-        contextMenu
-        onPinnedRowIdsChange={onPinnedRowIdsChange}
-      />
-    );
-
-    fireEvent.contextMenu(cellOf("Ada"), { clientX: 5, clientY: 5 });
-    expect(screen.getByText("Pin to bottom")).toBeInTheDocument();
-    fireEvent.click(screen.getByText("Pin to top"));
-
-    expect(onPinnedRowIdsChange).toHaveBeenLastCalledWith(
-      expect.objectContaining({ top: ["2"] })
-    );
-  });
-
   it("pins a row to the bottom from its menu", () => {
     const onPinnedRowIdsChange = vi.fn();
     renderKit(
@@ -128,66 +108,5 @@ describe("context menu pin and cut (mantine)", () => {
     expect(
       document.querySelector('[data-adapttable-part="pinned-top"]')
     ).toHaveTextContent("Ada");
-  });
-
-  it("offers no pin entries without row pinning", () => {
-    renderKit(
-      <DataTable
-        data={ROWS}
-        columns={COLS}
-        rowKey={(r) => r.id}
-        urlSync={false}
-        forceMobile={false}
-        contextMenu
-      />
-    );
-
-    fireEvent.contextMenu(cellOf("Ada"), { clientX: 5, clientY: 5 });
-    expect(screen.queryByText("Pin to top")).toBeNull();
-  });
-
-  it("cuts the right-clicked cell, then asks the host to clear it", async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    vi.stubGlobal("navigator", { clipboard: { writeText } });
-    const onCellCut = vi.fn();
-    renderKit(
-      <DataTable
-        data={ROWS}
-        columns={COLS}
-        rowKey={(r) => r.id}
-        urlSync={false}
-        forceMobile={false}
-        contextMenu
-        cellNavigation
-        onCellCut={onCellCut}
-      />
-    );
-
-    fireEvent.contextMenu(cellOf("Ada"), { clientX: 5, clientY: 5 });
-    fireEvent.click(screen.getByText("Cut"));
-
-    await waitFor(() => {
-      expect(writeText).toHaveBeenCalledExactlyOnceWith("Ada");
-    });
-    await waitFor(() => {
-      expect(onCellCut).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it("offers no Cut without onCellCut", () => {
-    renderKit(
-      <DataTable
-        data={ROWS}
-        columns={COLS}
-        rowKey={(r) => r.id}
-        urlSync={false}
-        forceMobile={false}
-        contextMenu
-        cellNavigation
-      />
-    );
-
-    fireEvent.contextMenu(cellOf("Ada"), { clientX: 5, clientY: 5 });
-    expect(screen.queryByText("Cut")).toBeNull();
   });
 });

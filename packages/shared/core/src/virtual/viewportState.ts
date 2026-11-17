@@ -539,6 +539,13 @@ export interface ColumnViewport {
 }
 
 /**
+ * The side of the horizontal window a column spacer holds open.
+ *
+ * @public
+ */
+export type ColumnSpacerSide = "start" | "end";
+
+/**
  * The windowed columns and the space the rest occupies.
  *
  * @public

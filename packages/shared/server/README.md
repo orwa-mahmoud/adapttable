@@ -19,7 +19,7 @@ Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 
   simpler table instead of an error page, and everything refused is reported
   in `rejected` so a route that would rather answer 400 can.
 - **The whole query** — page, limit and offset, search, the multi-sort chain,
-  grouping, column filters, the advanced filter tree, the pivot
+  grouping and its per-column aggregation, column filters, the advanced filter tree, the pivot
   configuration, and the cursor.
 - **All-or-nothing filter trees** — dropping one condition out of an AND
   quietly widens the result set, so an unknown field discards the tree rather
@@ -31,7 +31,7 @@ Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 
   what you do with it is yours.
 - **No React** — the codecs come from `@adapttable/core/query`, the entry with
   no hooks and no client boundary, so an Express or Fastify service installs a
-  4.2 KB parser and not a UI library.
+  4.3 KB parser and not a UI library.
 
 ## Install
 

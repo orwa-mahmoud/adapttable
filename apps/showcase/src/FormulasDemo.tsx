@@ -11,83 +11,16 @@ import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Warning } from "./sectionIcons";
-
-/**
- * Where the page starts: two columns nobody wrote code for.
- */
-const START: readonly FormulaColumnSpec[] = [
-  { key: "margin", header: "Margin", formula: "=ROUND(budget * 0.15, 0)" },
-  { key: "tag", header: "Tag", formula: '=UPPER(team) & " · " & role' },
-];
-
-/**
- * One click each, including the two that go wrong on purpose: an error belongs
- * in the cell that caused it, and a cycle has to be reported rather than
- * recursed into.
- */
-const EXAMPLES: readonly {
-  readonly label: string;
-  readonly specs: readonly FormulaColumnSpec[];
-}[] = [
-  {
-    label: "=ROUND(budget / 12, 0)",
-    specs: [
-      {
-        key: "monthly",
-        header: "Per month",
-        formula: "=ROUND(budget / 12, 0)",
-      },
-    ],
-  },
-  {
-    label: '=IF(utilization > 80, "over", "ok")',
-    specs: [
-      {
-        key: "capacity",
-        header: "Capacity",
-        formula: '=IF(utilization > 80, "over", "ok")',
-      },
-    ],
-  },
-  {
-    label: "=UPPER(name)",
-    specs: [{ key: "shout", header: "Shouted", formula: "=UPPER(name)" }],
-  },
-  {
-    label: "=POWER(2, 3)",
-    specs: [{ key: "power", header: "Power", formula: "=POWER(2, 3)" }],
-  },
-  {
-    label: "=SQRT(budget)",
-    specs: [
-      {
-        key: "root",
-        header: "Root",
-        formula: "=ROUND(SQRT(budget), 0)",
-      },
-    ],
-  },
-  {
-    label: "=budget / 0 → #DIV/0!",
-    specs: [{ key: "broken", header: "Broken", formula: "=budget / 0" }],
-  },
-  {
-    label: "two formulas in a loop → #CYCLE!",
-    specs: [
-      { key: "loop", header: "Loop", formula: "=knot + 1" },
-      { key: "knot", header: "Knot", formula: "=loop + 1" },
-    ],
-  },
-];
-
-/** A column key a formula can reference: a bare name, as the grammar takes it. */
-function keyFrom(name: string, taken: readonly FormulaColumnSpec[]): string {
-  const slug = name.replaceAll(/\W/g, "");
-  if (slug !== "" && !taken.some((spec) => spec.key === slug)) return slug;
-  let n = taken.length + 1;
-  while (taken.some((spec) => spec.key === `fx${String(n)}`)) n++;
-  return `fx${String(n)}`;
-}
+import {
+  cycleReport,
+  FORMULA_EXAMPLES,
+  FORMULA_START,
+  FORMULAS_PARSE,
+  NO_FORMULAS,
+  withFormulas,
+  withoutFormula,
+  withTypedFormula,
+} from "./shared/formulaScenario";
 
 /**
  * The page's own formula bar — host chrome, not table chrome: the table renders
@@ -107,13 +40,11 @@ function FormulaBar({
 }>) {
   const [name, setName] = useState("");
   const [formula, setFormula] = useState("");
-  const add = (specs: readonly FormulaColumnSpec[]) => {
-    const fresh = specs.filter(
-      (spec) => !formulas.some((existing) => existing.key === spec.key)
-    );
-    if (fresh.length > 0) onChange([...formulas, ...fresh]);
+  const change = (next: readonly FormulaColumnSpec[]) => {
+    if (next !== formulas) onChange(next);
   };
   const broken = Object.entries(errors);
+  const cycle = cycleReport(cycles);
   return (
     <div className="fx" data-testid="formula-bar">
       <form
@@ -121,9 +52,7 @@ function FormulaBar({
         onSubmit={(event) => {
           event.preventDefault();
           if (formula.trim() === "") return;
-          const header = name.trim();
-          const key = keyFrom(header, formulas);
-          add([{ key, formula, ...(header === "" ? {} : { header }) }]);
+          change(withTypedFormula(formulas, name, formula));
           setName("");
           setFormula("");
         }}
@@ -153,12 +82,12 @@ function FormulaBar({
       </form>
 
       <div className="fx__examples">
-        {EXAMPLES.map((example) => (
+        {FORMULA_EXAMPLES.map((example) => (
           <button
             key={example.label}
             type="button"
             data-testid={`formula-example-${example.specs[0]?.key ?? ""}`}
-            onClick={() => add(example.specs)}
+            onClick={() => change(withFormulas(formulas, example.specs))}
           >
             {example.label}
           </button>
@@ -177,21 +106,19 @@ function FormulaBar({
               type="button"
               aria-label={`Remove ${spec.header ?? spec.key}`}
               data-testid={`formula-remove-${spec.key}`}
-              onClick={() =>
-                onChange(formulas.filter((other) => other.key !== spec.key))
-              }
+              onClick={() => change(withoutFormula(formulas, spec.key))}
             >
               ×
             </button>
           </li>
         ))}
-        {formulas.length === 0 && <li className="fx__empty">No formulas.</li>}
+        {formulas.length === 0 && <li className="fx__empty">{NO_FORMULAS}</li>}
       </ul>
 
       <div className="fx__report" data-testid="formula-report" role="status">
-        {broken.length === 0 && cycles.length === 0 ? (
+        {broken.length === 0 && cycle === undefined ? (
           <span className="hint">
-            <Check size={12} /> every formula parses
+            <Check size={12} /> {FORMULAS_PARSE}
           </span>
         ) : null}
         {broken.map(([key, message]) => (
@@ -199,11 +126,9 @@ function FormulaBar({
             <Warning size={12} /> {key}: {message}
           </span>
         ))}
-        {cycles.length > 0 && (
+        {cycle !== undefined && (
           <span className="hint">
-            <Warning size={12} />{" "}
-            {[...cycles].sort((a, b) => a.localeCompare(b)).join(" and ")}{" "}
-            reference each other — every cell reads #CYCLE! instead of recursing
+            <Warning size={12} /> {cycle}
           </span>
         )}
       </div>
@@ -220,7 +145,7 @@ export function FormulasDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const Demo = ADAPTERS[adapter] ?? ADAPTERS.mantine;
   const { formulas, onFormulasChange } = useFormulaUrlState({
     urlSync: false,
-    defaultFormulas: START,
+    defaultFormulas: FORMULA_START,
   });
   // Rebuilt only when the list changes: the build carries the per-row cache the
   // cells, the comparator and the export all read through.

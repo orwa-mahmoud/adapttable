@@ -11,6 +11,7 @@
 import type { ConfirmHandler } from "./actions/confirm";
 import type { ColumnLayoutState } from "./columns/columnLayoutModel";
 import type { ExtraFilters } from "./contracts/columns";
+import type { EditActivation } from "./editing/editableCell";
 import type {
   EditConflictHandler,
   EditConflictPolicy,
@@ -264,7 +265,7 @@ export interface TableOptions<TRow, TNode = unknown> {
    * the first click, the way a form field does. Enter and F2 open it either
    * way.
    */
-  editActivation?: "doubleClick" | "click";
+  editActivation?: EditActivation;
   /**
    * Host version of a row. When set, any version change under an open editor
    * is a conflict, not only a change to the edited column.

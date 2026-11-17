@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
 import { resetDevWarnings } from "../utils/devWarn";
 import {
@@ -6,6 +6,9 @@ import {
   featureSlotKey,
   featureStateKey,
   orderedContributions,
+  type PlainSlotKey,
+  type RowSlotKey,
+  rowSlotKey,
   slotFillsOf,
   slotRender,
 } from "./featureKeys";
@@ -142,5 +145,59 @@ describe("orderedContributions", () => {
         'Two features share the id "dup" and both contribute a provider.'
       )
     );
+  });
+});
+
+interface ListSlotProps<TRow> {
+  readonly rows: readonly TRow[];
+  readonly rowId: (row: TRow) => string;
+  readonly children: (first: TRow | undefined) => string;
+}
+type ListDraw = <TRow>(props: ListSlotProps<TRow>) => string;
+interface Person {
+  readonly id: string;
+  readonly name: string;
+}
+
+describe("rowSlotKey", () => {
+  it("is the id and the single flag it was declared with", () => {
+    expect(rowSlotKey<ListDraw>("list")).toEqual({ id: "list" });
+    expect(rowSlotKey<ListDraw>("list", { single: true })).toEqual({
+      id: "list",
+      single: true,
+    });
+  });
+
+  it("takes a fill written for any row, and draws it with a table's props", () => {
+    const LIST = rowSlotKey<ListDraw>("list");
+    const fill = slotRender(LIST, (props) => props.children(props.rows[0]));
+    expect(fill.slot).toBe(LIST);
+    const people: readonly Person[] = [{ id: "1", name: "Ada" }];
+    const props: ListSlotProps<Person> = {
+      rows: people,
+      rowId: (row) => row.id,
+      children: (first) => first?.name ?? "",
+    };
+    const draw: ListDraw = (slotProps) => slotProps.children(slotProps.rows[0]);
+    expect(draw(props)).toBe("Ada");
+  });
+
+  it("types the fill as generic over the row and the ask as one table's", () => {
+    expectTypeOf<RowSlotKey<ListDraw>>().toExtend<
+      RowSlotKey<(props: ListSlotProps<Person>) => unknown>
+    >();
+    expectTypeOf<
+      (props: ListSlotProps<Person>) => string
+    >().not.toExtend<ListDraw>();
+    expectTypeOf<RowSlotKey<ListDraw>>().not.toExtend<
+      PlainSlotKey<ListSlotProps<Person>>
+    >();
+    expectTypeOf<ListDraw>().not.toExtend<
+      (props: {
+        readonly rows: readonly Person[];
+        readonly rowId: (row: Person) => string;
+        readonly children: (first: number | undefined) => string;
+      }) => unknown
+    >();
   });
 });

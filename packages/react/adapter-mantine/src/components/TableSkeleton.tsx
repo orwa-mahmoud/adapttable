@@ -12,6 +12,8 @@ export interface TableSkeletonProps {
   rows?: number;
   /** Screen-reader text announcing the loading state. */
   loadingLabel?: string;
+  /** The body will be the mobile cards, so the placeholder is cards too. */
+  mobile?: boolean;
 }
 
 /**
@@ -23,41 +25,65 @@ export function TableSkeleton({
   columns,
   rows = 5,
   loadingLabel,
+  mobile = false,
 }: Readonly<TableSkeletonProps>) {
   const colKeys = Array.from({ length: Math.max(columns, 1) }, (_, i) => i);
   const rowKeys = Array.from({ length: rows }, (_, i) => i);
+  const lines = Math.min(4, colKeys.length);
   return (
-    <div role="status" aria-busy="true" aria-live="polite">
-      <Table>
-        <Table.Thead>
-          <Table.Tr>
-            {colKeys.map((c) => (
-              <Table.Th key={c}>
-                <Skeleton
-                  height={12}
-                  radius="sm"
-                  width={c === 0 ? "55%" : "40%"}
-                />
-              </Table.Th>
-            ))}
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
+    <div
+      role="status"
+      aria-busy="true"
+      aria-live="polite"
+      data-adapttable-part="loading"
+    >
+      {mobile ? (
+        <div data-adapttable-part="loading-cards">
           {rowKeys.map((r) => (
-            <Table.Tr key={r}>
+            <div key={r} data-adapttable-part="loading-card">
+              {colKeys.slice(0, lines).map((c) => (
+                <Skeleton
+                  key={c}
+                  height={14}
+                  radius="sm"
+                  width={c === 0 ? "70%" : "55%"}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Table data-adapttable-part="loading-table">
+          <Table.Thead>
+            <Table.Tr>
               {colKeys.map((c) => (
-                <Table.Td key={c}>
+                <Table.Th key={c}>
                   <Skeleton
-                    height={14}
+                    height={12}
                     radius="sm"
-                    width={c === 0 ? "70%" : "55%"}
+                    width={c === 0 ? "55%" : "40%"}
                   />
-                </Table.Td>
+                </Table.Th>
               ))}
             </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
+          </Table.Thead>
+          <Table.Tbody>
+            {rowKeys.map((r) => (
+              <Table.Tr key={r}>
+                {colKeys.map((c) => (
+                  <Table.Td key={c}>
+                    <Skeleton
+                      height={14}
+                      radius="sm"
+                      width={c === 0 ? "70%" : "55%"}
+                    />
+                  </Table.Td>
+                ))}
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      )}
       {loadingLabel ? <VisuallyHidden>{loadingLabel}</VisuallyHidden> : null}
     </div>
   );

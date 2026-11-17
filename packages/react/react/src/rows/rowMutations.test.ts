@@ -1,4 +1,5 @@
-import { defaultLabels, type RowAction } from "@adapttable/core";
+import { type RowAction } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core/binding";
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

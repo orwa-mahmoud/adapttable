@@ -10,8 +10,11 @@
  * Pair it with `<DataTable collapsedGroupIds onCollapsedGroupIdsChange>` and
  * grouping's state travels with the link.
  */
-import { groupCollapseSlice } from "@adapttable/core";
-import type { UseGroupCollapseUrlStateResult } from "@adapttable/core/binding";
+
+import {
+  groupCollapseSlice,
+  type UseGroupCollapseUrlStateResult,
+} from "@adapttable/core/binding";
 
 import type { UrlStateAdapter } from "./adapter";
 import { useUrlSlice } from "./useUrlSlice";

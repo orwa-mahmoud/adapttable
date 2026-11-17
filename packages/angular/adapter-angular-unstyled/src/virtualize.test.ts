@@ -10,7 +10,11 @@ import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { virtualizeTests } from "../../angular/test/kit/suites/virtualize";
+import { kit } from "../testing/kit";
 import { AdaptDataTable } from "./dataTable";
+
+for (const test of virtualizeTests(kit)) it(test.name, test.run);
 
 interface Item {
   id: string;
@@ -147,28 +151,7 @@ function renderedRowIds(): string[] {
   ].map((row) => row.getAttribute("data-row-id")!);
 }
 
-function spacerHeight(): string {
-  const cell = document.querySelector<HTMLElement>(
-    '[data-adapttable-part="virtual-spacer"] td'
-  );
-  expect(cell).not.toBeNull();
-  return cell!.style.height;
-}
-
 describe("virtualize (unstyled Angular)", () => {
-  it("windows the rows in view below a table that starts down the page", async () => {
-    // jsdom's window is 768px tall and the list starts 400px down, so 368px
-    // of it shows: ten 40px rows. Measured from the page, not from zero —
-    // which would show twenty.
-    layout.listTop = 400;
-    await mount({
-      features: [virtualize({ estimateRowSize: 40, virtualOverscan: 0 })],
-    });
-    expect(renderedRowIds()).toEqual(
-      Array.from({ length: 10 }, (_, index) => String(index))
-    );
-  });
-
   it("measures newly attached rows after their cell content is rendered", async () => {
     const measured = vi.fn((index: number) => {
       const row = document.querySelector(
@@ -302,18 +285,6 @@ describe("virtualize (unstyled Angular)", () => {
     expect(fixture.componentInstance.data()).toBe(ITEMS);
     fixture.destroy();
     expect(disposed).toHaveBeenCalledOnce();
-  });
-
-  it("keeps the true height below the window when rows measure taller", async () => {
-    layout.row = (index) => (index === 0 ? 100 : 40);
-    await mount({
-      features: [virtualize({ estimateRowSize: 40, virtualOverscan: 0 })],
-      maxHeight: 200,
-    });
-    // 100 + 40 + 40 + 40 reaches past the 200px box: four rows render, and
-    // the other twenty-one stand in below at their estimate.
-    expect(renderedRowIds()).toEqual(["0", "1", "2", "3"]);
-    expect(spacerHeight()).toBe(`${String(21 * 40)}px`);
   });
 
   it("renders only the columns scrolled into view, with spacers for the rest", async () => {

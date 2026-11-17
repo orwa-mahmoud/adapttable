@@ -1,5 +1,5 @@
-import { defaultLabels } from "@adapttable/core";
 import type { SelectionState } from "@adapttable/react";
+import { defaultLabels } from "@adapttable/react/adapter";
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

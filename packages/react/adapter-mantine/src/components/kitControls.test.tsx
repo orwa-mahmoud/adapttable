@@ -1,6 +1,6 @@
-import type { QueryFilterGroup } from "@adapttable/core";
 import {
   type BatchEditingState,
+  type QueryFilterGroup,
   type RowEditingState,
   type RowReorderState,
 } from "@adapttable/react/adapter";

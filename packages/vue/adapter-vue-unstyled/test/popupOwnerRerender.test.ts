@@ -1,8 +1,8 @@
-import { resolveLabels } from "@adapttable/core";
 import {
   CONTEXT_MENU_CONTROL,
   ContextMenuChrome,
   type ContextMenuModel,
+  resolveLabels,
 } from "@adapttable/vue/adapter";
 import { mount } from "@vue/test-utils";
 import { afterEach, expect, it, vi } from "vitest";

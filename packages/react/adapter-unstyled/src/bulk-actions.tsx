@@ -10,13 +10,9 @@ import {
 } from "@adapttable/react/features";
 
 import { BulkBar } from "./components/BulkActionBar";
-import { useClassNames } from "./components/classNamesContext";
 
-function BulkSlot(
-  props: Readonly<Omit<Parameters<typeof BulkBar>[0], "classNames">>
-) {
-  const classNames = useClassNames();
-  return <BulkBar {...props} classNames={classNames} />;
+function BulkSlot(props: Parameters<typeof BulkBar>[0]) {
+  return <BulkBar {...props} />;
 }
 
 /**

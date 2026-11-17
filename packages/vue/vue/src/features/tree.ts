@@ -107,6 +107,7 @@ export function tree<TRow>(
   const base = coreTree<TRow>({ ...options });
   return {
     id: base.id,
+    labels: base.labels,
     apply: (input) => ({
       ...base.apply?.(input),
       bodyModel: projectHeadlessRows,

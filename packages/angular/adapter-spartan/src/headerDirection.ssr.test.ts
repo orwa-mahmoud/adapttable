@@ -1,7 +1,9 @@
 import "@angular/compiler";
 
-import type { FilterHeaderControlProps } from "@adapttable/angular/adapter";
-import { defaultLabels } from "@adapttable/core";
+import {
+  defaultLabels,
+  type FilterHeaderControlProps,
+} from "@adapttable/angular/adapter";
 import {
   Component,
   Directive,
@@ -40,7 +42,7 @@ class ServerDirectionProbe {
   </div>`,
 })
 class App {
-  readonly props: FilterHeaderControlProps<never> = {
+  readonly props: FilterHeaderControlProps<unknown> = {
     def: { key: "team", type: "select", label: "Team", options: [] },
     source: {
       extra: {},

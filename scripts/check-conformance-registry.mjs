@@ -8,15 +8,18 @@
  *   node scripts/check-conformance-registry.mjs
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import ts from "typescript";
 
 import { kitDir, participatingKits } from "./kits.mjs";
 import { REPO_ROOT } from "./packages.mjs";
 
-const SUITE = /tableConformanceTests\s*\(/;
-const SKIPPED = /describe\.skip\s*\([\s\S]*tableConformanceTests\s*\(/;
-const FULL_LOOP = /for\s*\(\s*const\s+test\s+of\s+tableConformanceTests\s*\(/;
+const SUITE_NAME = "tableConformanceTests";
+
+/** @param {readonly string[]} names */
+const suiteCall = (names) => `(?:${names.join("|")})\\s*\\(`;
 
 /** Cases every kit runs by iterating the shared suite, not by naming them. */
 export const REQUIRED_CONFORMANCE_CASES = [
@@ -86,12 +89,92 @@ function kitProblem(label, dir) {
   if (files.length === 0)
     return `${label}: conformance suite is not registered`;
   const text = files.map((file) => readFileSync(file, "utf8")).join("\n");
-  if (!SUITE.test(text)) return `${label}: conformance suite is not registered`;
-  if (SKIPPED.test(text)) return `${label}: conformance suite is skipped`;
-  if (!FULL_LOOP.test(text)) {
+  const names = suiteCall([SUITE_NAME, ...files.flatMap(suiteWrappers)]);
+  if (!new RegExp(names).test(text)) {
+    return `${label}: conformance suite is not registered`;
+  }
+  if (new RegExp(String.raw`describe\.skip\s*\([\s\S]*${names}`).test(text)) {
+    return `${label}: conformance suite is skipped`;
+  }
+  if (
+    !new RegExp(String.raw`for\s*\(\s*const\s+test\s+of\s+${names}`).test(text)
+  ) {
     return `${label}: conformance suite does not run every case`;
   }
   return undefined;
+}
+
+/**
+ * The binding wrappers a kit's test imports by relative path that return the
+ * whole shared suite: an exported function whose only statement is
+ * `return tableConformanceTests(...)`.
+ *
+ * @param {string} file
+ * @returns {string[]}
+ */
+function suiteWrappers(file) {
+  const source = parse(file);
+  return source.statements
+    .filter(ts.isImportDeclaration)
+    .flatMap((statement) => {
+      const specifier = statement.moduleSpecifier;
+      if (!ts.isStringLiteral(specifier) || !specifier.text.startsWith(".")) {
+        return [];
+      }
+      const imported = [".ts", ".tsx"]
+        .map((extension) =>
+          join(dirname(file), `${specifier.text}${extension}`)
+        )
+        .find((path) => existsSync(path));
+      if (imported === undefined) return [];
+      const returnsSuite = new Set(wholeSuiteFunctions(parse(imported)));
+      const bindings = statement.importClause?.namedBindings;
+      return bindings && ts.isNamedImports(bindings)
+        ? bindings.elements
+            .filter((element) =>
+              returnsSuite.has((element.propertyName ?? element.name).text)
+            )
+            .map((element) => element.name.text)
+        : [];
+    });
+}
+
+/**
+ * @param {ts.SourceFile} source
+ * @returns {string[]}
+ */
+function wholeSuiteFunctions(source) {
+  return source.statements
+    .filter(ts.isFunctionDeclaration)
+    .filter((declaration) =>
+      declaration.modifiers?.some(
+        (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword
+      )
+    )
+    .filter((declaration) => {
+      const body = declaration.body?.statements ?? [];
+      if (body.length !== 1 || !ts.isReturnStatement(body[0])) return false;
+      const value = body[0].expression;
+      return (
+        value !== undefined &&
+        ts.isCallExpression(value) &&
+        ts.isIdentifier(value.expression) &&
+        value.expression.text === SUITE_NAME
+      );
+    })
+    .flatMap((declaration) =>
+      declaration.name ? [declaration.name.text] : []
+    );
+}
+
+/** @param {string} file */
+function parse(file) {
+  return ts.createSourceFile(
+    file,
+    readFileSync(file, "utf8"),
+    ts.ScriptTarget.Latest,
+    true
+  );
 }
 
 /**

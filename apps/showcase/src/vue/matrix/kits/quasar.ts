@@ -2,12 +2,15 @@
 import "@adapttable/quasar/styles.css";
 
 import { agentApproval, TableAssistant } from "@adapttable/quasar/assistant";
+import { batchEditing } from "@adapttable/quasar/batch-editing";
 import { bulkActions } from "@adapttable/quasar/bulk-actions";
 import { cellNavigation } from "@adapttable/quasar/cell-navigation";
 import { cellSpan } from "@adapttable/quasar/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/quasar/column-groups";
 import { columnMenu } from "@adapttable/quasar/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/quasar/column-selection";
+import { commandPalette } from "@adapttable/quasar/command-palette";
+import { contextMenu } from "@adapttable/quasar/context-menu";
 import { densityChooser } from "@adapttable/quasar/density";
 import {
   editHistory,
@@ -16,18 +19,22 @@ import {
   undoRedoButtons,
 } from "@adapttable/quasar/editing";
 import { exportCsv } from "@adapttable/quasar/export";
+import { extraRows } from "@adapttable/quasar/extra-rows";
 import { filters } from "@adapttable/quasar/filters";
+import { findInTable } from "@adapttable/quasar/find-in-table";
 import { fullscreen } from "@adapttable/quasar/fullscreen";
 import { groupingPanel } from "@adapttable/quasar/grouping-panel";
 import { headerFilters } from "@adapttable/quasar/header-filters";
 import { nestedTable } from "@adapttable/quasar/nested-table";
 import { pinnedSummaryRows } from "@adapttable/quasar/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/quasar/pivot";
+import { print } from "@adapttable/quasar/print";
 import { resizableColumns } from "@adapttable/quasar/resizable-columns";
 import { rowActions } from "@adapttable/quasar/row-actions";
 import { rowPinning } from "@adapttable/quasar/row-pinning";
 import { rowReorder } from "@adapttable/quasar/row-reorder";
-import { savedViews } from "@adapttable/quasar/saved-views";
+import { savedViews, SavedViewsPanel } from "@adapttable/quasar/saved-views";
+import { selectionStats } from "@adapttable/quasar/selection-stats";
 import { statusBar } from "@adapttable/quasar/status-bar";
 import { tree } from "@adapttable/quasar/tree";
 import { virtualize } from "@adapttable/quasar/virtualize";
@@ -140,6 +147,7 @@ export const kit: ShowcaseKit = {
     }),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,
@@ -151,12 +159,19 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

@@ -6,14 +6,16 @@
  */
 import {
   CHECKLIST_VIRTUALIZE_AT,
-  checklistActions,
-  checklistItems,
   type FilterDef,
   listFilterValues,
-  searchChecklistItems,
   type TableSource,
 } from "@adapttable/core";
-import type { ChecklistFilterState } from "@adapttable/core/binding";
+import {
+  checklistActions,
+  type ChecklistFilterState,
+  checklistItems,
+  searchChecklistItems,
+} from "@adapttable/core/binding";
 import { useMemo, useState } from "react";
 export type { ChecklistValue } from "@adapttable/core";
 export {

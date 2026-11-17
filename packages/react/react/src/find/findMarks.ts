@@ -7,12 +7,11 @@
  * view itself — the same `data-cell-match` attributes, so a kit's styling and
  * a host's tests read one contract either way.
  */
+import { type GridCell, sameGridCell } from "@adapttable/core";
 import {
   createFindShortcutScope,
-  type GridCell,
-  sameGridCell,
   scrollCurrentMatchIntoView,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import { createContext, type RefObject, useContext, useEffect } from "react";
 
 import { gridCellAttr, type GridFocusState } from "../focus/useGridFocus";

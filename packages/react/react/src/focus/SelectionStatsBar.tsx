@@ -1,8 +1,9 @@
 /** Headless selection-stat formatting; adapters own the visible status bar. */
-import { selectionStatParts } from "@adapttable/core";
-import type {
-  SelectionStatsChromeProps as NeutralSelectionStatsChromeProps,
-  SelectionStatsSlots as NeutralSelectionStatsSlots,
+
+import {
+  selectionStatParts,
+  type SelectionStatsChromeProps as NeutralSelectionStatsChromeProps,
+  type SelectionStatsSlots as NeutralSelectionStatsSlots,
 } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 

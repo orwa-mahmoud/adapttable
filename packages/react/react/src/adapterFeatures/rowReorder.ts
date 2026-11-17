@@ -25,11 +25,11 @@ import type { AdapterFeatureComponent } from "./component";
 export interface AdapterRowReorderComponents {
   /** Desktop drag handle. */
   readonly RowReorderHandle: AdapterFeatureComponent<
-    RowReorderHandleProps<never>
+    RowReorderHandleProps<unknown>
   >;
   /** Mobile move-up and move-down controls. */
   readonly RowReorderButtons: AdapterFeatureComponent<
-    RowReorderButtonsProps<never>
+    RowReorderButtonsProps<unknown>
   >;
 }
 

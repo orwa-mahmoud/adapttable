@@ -1,16 +1,18 @@
 /** Vue lifetime and reactivity for the neutral controllable pin store. */
 import {
-  commitRowPin,
-  createControllableStore,
   EMPTY_ROW_PIN_STATE,
-  ROW_PIN_STORE_OPTIONS,
-  rowPinActions,
   type RowPinLabels,
   type RowPinSide,
-  rowPinSideOf,
   type RowPinState,
 } from "@adapttable/core";
-import type { RowPinningState } from "@adapttable/core/binding";
+import {
+  commitRowPin,
+  createControllableStore,
+  ROW_PIN_STORE_OPTIONS,
+  rowPinActions,
+  type RowPinningState,
+  rowPinSideOf,
+} from "@adapttable/core/binding";
 import {
   computed,
   type ComputedRef,
@@ -39,6 +41,7 @@ export {
   PIN_TOP_ACTION_KEY,
   UNPIN_ROW_ACTION_KEY,
 } from "@adapttable/core";
+import { injectTableStore } from "../tableStore";
 export type { RowPinningState } from "@adapttable/core/binding";
 export { rowPinSignature } from "@adapttable/core/binding";
 
@@ -64,6 +67,7 @@ export function useRowPinning<TRow>(
   const store = createControllableStore<RowPinState>(EMPTY_ROW_PIN_STATE, {
     ...ROW_PIN_STORE_OPTIONS,
     observeUncontrolled: true,
+    store: injectTableStore(),
   });
   const own = useExternalStore(store);
   const enabled = computed(

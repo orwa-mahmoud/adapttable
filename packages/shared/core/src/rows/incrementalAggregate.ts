@@ -134,20 +134,26 @@ export function removeAggregateRow<TRow>(
 }
 
 /**
- * Replace one row's contribution with another's.
+ * The totals after `left` rows left the set and `entered` rows entered it,
+ * as a new accumulator: `state` is never written.
  *
  * @typeParam TRow - The row type.
- * @param state - The running total.
- * @param prev - The row that left.
- * @param next - The row that entered.
+ * @param state - The accumulator to continue.
+ * @param left - Rows that left the set.
+ * @param entered - Rows that entered it.
  */
-export function replaceAggregateRow<TRow>(
+export function movedIncrementalAggregate<TRow>(
   state: IncrementalAggregate<TRow>,
-  prev: TRow,
-  next: TRow
-): void {
-  removeAggregateRow(state, prev);
-  addAggregateRow(state, next);
+  left: readonly TRow[],
+  entered: readonly TRow[]
+): IncrementalAggregate<TRow> {
+  const next: IncrementalAggregate<TRow> = {
+    ...state,
+    bindings: state.bindings.map(({ key, acc }) => ({ key, acc: { ...acc } })),
+  };
+  for (const row of left) removeAggregateRow(next, row);
+  for (const row of entered) addAggregateRow(next, row);
+  return next;
 }
 
 /**

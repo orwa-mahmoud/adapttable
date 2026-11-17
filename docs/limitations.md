@@ -172,7 +172,7 @@ a fix was attempted and failed. None is listed.
 | Formula grammar and refused tokens          | [formulas](./formulas.md), `parseFormula`                                                                     |
 | Move policy, cycle guard, sort block        | [row-reordering](./row-reordering.md)                                                                         |
 | `fullDataset` / export-all / `rows.read`    | [data-tiers](./data-tiers.md), [agent-capabilities](./agent-capabilities.md), `session.governed.test.ts`      |
-| `readMax` default 50                        | `packages/shared/ai/src/session.ts` `readMaxOf`                                                               |
+| `readMax` default 50                        | `packages/shared/ai/src/commands/rowAddress.ts` `readMaxOf`                                                   |
 | Virtualize DOM count                        | [virtualization](./virtualization.md)                                                                         |
 | Export 50,000 cap                           | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                       |
 | URL-state 8,192 cap, `limit` 1–500          | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`                  |

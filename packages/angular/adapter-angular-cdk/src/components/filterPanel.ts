@@ -5,6 +5,8 @@ import {
   AdaptFilterTreeChrome,
   type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
+  restoreFocusSoon,
+  watchClickedOpener,
 } from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import {
@@ -12,10 +14,12 @@ import {
   Overlay,
   OverlayModule,
 } from "@angular/cdk/overlay";
-import { NgTemplateOutlet } from "@angular/common";
+import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   input,
   type TemplateRef,
@@ -65,7 +69,7 @@ import { TREE_SLOTS } from "./filterTreeBuilder";
 })
 export class AdaptFiltersForm {
   /** The slot's props. */
-  readonly props = input.required<FiltersFormSlotProps<never>>();
+  readonly props = input.required<FiltersFormSlotProps<unknown>>();
 
   protected readonly treeSlots = TREE_SLOTS;
 }
@@ -160,7 +164,27 @@ export class AdaptFiltersForm {
 export class AdaptFilterDrawer {
   readonly props =
     input.required<FilterOverlaySlotProps<TemplateRef<unknown>>>();
+  private opener: HTMLElement | null = null;
+  private readonly document = inject(DOCUMENT);
+  private readonly openers = watchClickedOpener(this.document);
   protected readonly scrollStrategy = inject(Overlay).scrollStrategies.block();
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.openers.stop());
+    afterRenderEffect(() => {
+      const panel = this.document.querySelector<HTMLElement>(
+        "[data-adapttable-part='filters-panel']"
+      );
+      if (this.props().open) {
+        this.opener ??= this.openers.current(panel);
+        return;
+      }
+      const opener = this.opener;
+      this.opener = null;
+      if (opener?.isConnected) opener.focus();
+      restoreFocusSoon(opener);
+    });
+  }
   protected markBackdrop(overlay: CdkConnectedOverlay): void {
     const backdrop = overlay.overlayRef.backdropElement;
     backdrop?.setAttribute("data-adapttable-part", "filters-backdrop");

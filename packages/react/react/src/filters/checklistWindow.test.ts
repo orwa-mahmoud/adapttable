@@ -1,4 +1,7 @@
-import { CHECKLIST_ITEM_WIDTH, CHECKLIST_OPTION_GAP } from "@adapttable/core";
+import {
+  CHECKLIST_ITEM_WIDTH,
+  CHECKLIST_OPTION_GAP,
+} from "@adapttable/core/binding";
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

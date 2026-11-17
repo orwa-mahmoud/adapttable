@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Hindi (`hi`) label preset.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "हो गया",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "निर्यात करना",
 };
 
+/**
+ * Hindi (`hi`) label preset.
+ *
+ * @public
+ */
 export const hi: Required<TableLabels> = {
   table: "डेटा तालिका",
   search: "खोजें",

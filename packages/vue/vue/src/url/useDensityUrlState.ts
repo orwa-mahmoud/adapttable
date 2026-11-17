@@ -1,4 +1,4 @@
-import { densitySlice, type TableDensity } from "@adapttable/core";
+import { type TableDensity } from "@adapttable/core";
 import { type MaybeRefOrGetter, toValue } from "vue";
 
 import type { MaybeRefOrGetterOptional } from "../store";
@@ -6,6 +6,8 @@ import { type UrlSliceOptions, useUrlSlice } from "./useUrlSlice";
 
 export type Density = TableDensity;
 export { URL_SLICE_WRITE_DEBOUNCE_MS as DENSITY_URL_WRITE_DEBOUNCE_MS } from "@adapttable/core";
+import { densitySlice } from "@adapttable/core/binding";
+
 export interface UseDensityUrlStateOptions extends UrlSliceOptions {
   readonly defaultDensity?: MaybeRefOrGetterOptional<TableDensity>;
 }

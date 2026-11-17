@@ -1,93 +1,35 @@
-/**
- * Row actions collapsed into their own menu.
- *
- * The inline strip and the overflow menu are separate components in every
- * kit, so a kit can pass the strip's tests while its menu never runs an
- * action, never states why one is unavailable, and never keeps the click off
- * the row underneath.
- */
-import { fireEvent, render as renderKit, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { act, fireEvent } from "@testing-library/react";
+import { expect, it } from "vitest";
 
-import { DataTable } from "./data-table.test-utils";
-import type { ColumnDef } from "./index";
+import { rowActionsMenuTests } from "../../react/test/kit/suites/rowActionsMenu";
+import { kit } from "./data-table.test-utils";
 
-interface Row {
-  id: string;
-  name: string;
-}
+for (const test of rowActionsMenuTests(kit)) it(test.name, test.run);
 
-const ROWS: Row[] = [{ id: "1", name: "Ada" }];
-const COLS: ColumnDef<Row>[] = [
-  { key: "name", header: "Name", accessor: (r) => r.name },
-];
-
-const part = (name: string) =>
-  document.querySelector<HTMLElement>(`[data-adapttable-part="${name}"]`);
-
-interface Options {
-  readonly onEdit?: () => void;
-  readonly onRowClick?: () => void;
-  readonly blockDelete?: boolean;
-}
-
-function table({ onEdit, onRowClick, blockDelete }: Options = {}): void {
-  renderKit(
+it("closes the native row actions menu on Escape and returns focus to its trigger", () => {
+  const { DataTable, render } = kit;
+  render(
     <DataTable
-      data={ROWS}
-      columns={COLS}
-      rowKey={(r) => r.id}
+      data={[{ id: "1", name: "Ada" }]}
+      columns={[{ key: "name", header: "Name" }]}
+      rowKey={(row: { id: string }) => row.id}
       urlSync={false}
-      onRowClick={onRowClick}
       rowActionsLayout="menu"
-      rowActions={[
-        { key: "edit", label: "Edit", onClick: onEdit ?? (() => undefined) },
-        {
-          key: "delete",
-          label: "Delete",
-          onClick: () => undefined,
-          disabledReason: () =>
-            blockDelete === true
-              ? "Archived rows cannot be deleted"
-              : undefined,
-        },
-      ]}
+      rowActions={[{ key: "edit", label: "Edit", onClick: () => undefined }]}
     />
   );
-}
-
-async function openActions(): Promise<void> {
-  const trigger = part("row-actions-trigger");
-  expect(trigger).not.toBeNull();
-  fireEvent.pointerDown(trigger!, { button: 0 });
-  fireEvent.click(trigger!);
-  await screen.findByText("Edit");
-}
-
-describe("row actions menu (unstyled)", () => {
-  it("names itself and runs the action it was opened for", async () => {
-    const onEdit = vi.fn();
-    table({ onEdit });
-    expect(part("row-actions-trigger")).toHaveAccessibleName("Row actions");
-    await openActions();
-    fireEvent.click(screen.getByText("Edit"));
-    expect(onEdit).toHaveBeenCalledTimes(1);
+  const menu = document.querySelector<HTMLDetailsElement>(
+    '[data-adapttable-part="row-actions-menu"]'
+  )!;
+  const trigger = menu.querySelector("summary")!;
+  act(() => {
+    menu.open = true;
+    fireEvent(menu, new Event("toggle"));
   });
-
-  it("says why an action is unavailable instead of hiding it", async () => {
-    table({ blockDelete: true });
-    await openActions();
-    const entry = screen.getByText("Delete").closest("[title]");
-    expect(entry).toHaveAttribute("title", "Archived rows cannot be deleted");
-  });
-
-  it("keeps the row's own click handler out of it", async () => {
-    const onRowClick = vi.fn();
-    const onEdit = vi.fn();
-    table({ onEdit, onRowClick });
-    await openActions();
-    fireEvent.click(screen.getByText("Edit"));
-    expect(onEdit).toHaveBeenCalledTimes(1);
-    expect(onRowClick).not.toHaveBeenCalled();
-  });
+  menu.querySelector("button")!.focus();
+  fireEvent.keyDown(menu.querySelector("button")!, { key: "Escape" });
+  expect(menu.open).toBe(false);
+  expect(document.activeElement).toBe(trigger);
+  fireEvent.keyDown(menu, { key: "Escape" });
+  expect(menu.open).toBe(false);
 });

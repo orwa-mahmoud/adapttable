@@ -1,10 +1,9 @@
+import { type TableLabels, type TableSource } from "@adapttable/core";
 import {
   resolveTableStatus,
-  type TableLabels,
-  type TableSource,
+  sortedColumnName,
   type TableStatusSignature,
-} from "@adapttable/core";
-import { sortedColumnName } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import {
   computed,
   effect,

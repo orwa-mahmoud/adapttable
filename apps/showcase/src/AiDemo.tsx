@@ -14,20 +14,13 @@
 import "./assistantShowcase.css";
 
 import type {
-  AgentCapabilityDefinition,
   AgentContextInputs,
   AgentManifest,
   AgentSession,
   AlwaysAllowedState,
-  AssistantSuggestion,
 } from "@adapttable/ai";
 import { tableAgent, useTableAssistant } from "@adapttable/ai-react";
-import {
-  type ApprovalPresentation,
-  type BulkAction,
-  type FilterDef,
-  type RowPinState,
-} from "@adapttable/core";
+import type { ApprovalPresentation, RowPinState } from "@adapttable/core";
 import { getLabels } from "@adapttable/i18n";
 import type { BatchRowEdit, CellProps, ColumnDef } from "@adapttable/react";
 import {
@@ -48,271 +41,60 @@ import {
 import { createPortal } from "react-dom";
 
 import { AiConnectDialog, type AiConnection } from "./AiBackendConnect";
+import { scriptedConnection } from "./aiBackendConnection";
 import { AiContextInspector } from "./AiContextInspector";
 import {
   AiDemoOptions,
-  type DemoActionApproval,
-  type DemoContextProfile,
-  type DemoEditingMode,
+  type DemoActionApprovalControl,
   type DemoExclusion,
 } from "./AiDemoOptions";
 import { AI_KIT_FEATURES, type AiKitKey } from "./aiKitFeatures";
-import {
-  DEMO_SCENARIOS,
-  type DemoContext,
-  demoTransport,
-  UNSUPPORTED_REPLIES,
-} from "./aiScenario";
 import { setAssistantActive } from "./assistantActivity";
 import type { Locale } from "./data";
 import { DemoFallback, Segmented } from "./kitDemos";
 import { kitClassNames, KitProvider, kitTable } from "./kitProviders";
-import { builtAdapters, docsUrl, siteAsset } from "./matrix/content";
+import { builtAdapters, docsUrl } from "./matrix/content";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
-
-interface StaffRow {
-  id: string;
-  person: string;
-  team: string;
-  status: string;
-  salary: number;
-  started: string;
-}
-
-/** What the raise capability takes, once the session has validated it. */
-interface RaiseArgs {
-  readonly team: string;
-  readonly percent: number;
-}
-
-/**
- * A write the host performs whole, rather than a list of rows.
- *
- * Every other write here enumerates the rows it touches, and the reader
- * decides them one by one. This one names an operation — a team and a
- * percentage — so the approval shows what was asked rather than a list, and
- * it is the shape a reader may reasonably agree to once and stop being asked
- * about. Reset puts the salaries back.
- */
-function raiseTeamCapability(
-  apply: (args: RaiseArgs) => number
-): AgentCapabilityDefinition {
-  return {
-    key: "staff.raiseTeam",
-    summary: "Raise every salary on one team by a percentage.",
-    kind: "write",
-    presentation: {
-      title: "Raise a team",
-      description: "Raises every salary on one team by a percentage.",
-      suggestions: [
-        {
-          id: "raise-platform",
-          title: "Give the Platform team a raise",
-          prompt: "Give everyone on the Platform team a 5% raise.",
-          requires: ["staff.raiseTeam"],
-        },
-      ],
-    },
-    guide: {
-      guide:
-        "Raise every salary on one team by a percentage. The host applies it " +
-        "to the whole team at once, so this names no rows: send the team " +
-        "exactly as the Team column spells it, and a percentage between 1 " +
-        "and 20.",
-      input: {
-        $schema: "https://json-schema.org/draft/2020-12/schema",
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          team: { type: "string", minLength: 1 },
-          percent: { type: "number", minimum: 1, maximum: 20 },
-        },
-        required: ["team", "percent"],
-      },
-      output: {
-        $schema: "https://json-schema.org/draft/2020-12/schema",
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          ok: { type: "boolean" },
-          changed: { type: "integer", minimum: 0 },
-        },
-      },
-    },
-    isEnabled: (observation) => observation.writePolicy === "allow",
-    // No proposals: the reader is asked about the operation, not about rows.
-    plan: () => ({ proposals: [] }),
-    execute: (_context, args) => ({
-      ok: true,
-      changed: apply(args as RaiseArgs),
-    }),
-  };
-}
-
-/**
- * Fifteen people at five a page is three pages. The named examples stay on
- * page 1 so a scripted prompt still finds the row it talks about.
- */
-const SEED: readonly StaffRow[] = [
-  {
-    id: "p1",
-    person: "Priya Nair",
-    team: "Platform",
-    status: "Active",
-    salary: 170,
-    started: "2021-03-15",
-  },
-  {
-    id: "j1",
-    person: "Jonah Okonkwo",
-    team: "Platform",
-    status: "Active",
-    salary: 155,
-    started: "2020-11-02",
-  },
-  {
-    id: "c1",
-    person: "Chioma Eze",
-    team: "Core",
-    status: "Active",
-    salary: 148,
-    started: "2022-01-10",
-  },
-  {
-    id: "f1",
-    person: "Fatima Bell",
-    team: "Core",
-    status: "On leave",
-    salary: 132,
-    started: "2019-06-24",
-  },
-  {
-    id: "s1",
-    person: "Sefa Demir",
-    team: "Data",
-    status: "Active",
-    salary: 160,
-    started: "2023-04-03",
-  },
-  {
-    id: "m1",
-    person: "Marta Kowalski",
-    team: "Core",
-    status: "Active",
-    salary: 141,
-    started: "2022-09-19",
-  },
-  {
-    id: "t1",
-    person: "Tobias Lind",
-    team: "Data",
-    status: "Active",
-    salary: 152,
-    started: "2021-08-30",
-  },
-  {
-    id: "a1",
-    person: "Amara Diallo",
-    team: "Platform",
-    status: "On leave",
-    salary: 165,
-    started: "2020-02-17",
-  },
-  {
-    id: "k1",
-    person: "Kenji Sato",
-    team: "Platform",
-    status: "Active",
-    salary: 158,
-    started: "2023-07-11",
-  },
-  {
-    id: "l1",
-    person: "Leila Haddad",
-    team: "Core",
-    status: "Active",
-    salary: 139,
-    started: "2021-11-08",
-  },
-  {
-    id: "n1",
-    person: "Noah Berg",
-    team: "Data",
-    status: "On leave",
-    salary: 147,
-    started: "2020-05-21",
-  },
-  {
-    id: "y1",
-    person: "Yara Mensah",
-    team: "Platform",
-    status: "Active",
-    salary: 163,
-    started: "2022-03-04",
-  },
-  {
-    id: "i1",
-    person: "Ivan Petrov",
-    team: "Core",
-    status: "Active",
-    salary: 144,
-    started: "2019-12-16",
-  },
-  {
-    id: "r1",
-    person: "Sofia Reyes",
-    team: "Data",
-    status: "Active",
-    salary: 151,
-    started: "2024-01-22",
-  },
-  {
-    id: "h1",
-    person: "Aisha Rahman",
-    team: "Platform",
-    status: "Active",
-    salary: 168,
-    started: "2021-06-09",
-  },
-];
-
-/**
- * The column headings, in the demo's two languages.
- *
- * Switching to RTL switches the language with it, the way the Feature Lab
- * does: a mirrored table still labelled in English shows the layout but not
- * what a reader in Arabic actually sees.
- */
-/** The capabilities that write, and therefore have an approval to set. */
-const WRITE_CAPABILITIES = new Set([
-  "edit.cells",
-  "rows.add",
-  "rows.delete",
-  "rows.reorder",
-]);
-
-/** Reader-facing names for the built-in writes. */
-const CAPABILITY_LABELS: Record<string, string> = {
-  "edit.cells": "Edit a cell",
-  "rows.add": "Add rows",
-  "rows.delete": "Delete rows",
-  "rows.reorder": "Move a row",
-};
-
-/** Set or clear one action's approval override. */
-function overrideFor(
-  key: string,
-  next: "required" | "automatic" | "inherit"
-): (
-  current: Readonly<Record<string, "required" | "automatic">>
-) => Readonly<Record<string, "required" | "automatic">> {
-  return (current) => {
-    if (next !== "inherit") return { ...current, [key]: next };
-    const rest = { ...current };
-    delete rest[key];
-    return rest;
-  };
-}
+import {
+  actionApprovals,
+  AI_DEMO_MEDIA,
+  AI_PAGE_TEXT,
+  type ApprovalOverride,
+  capabilityApproval,
+  CONNECT_ACTION,
+  DEMO_EXCLUSIONS,
+  DEMO_FEATURES,
+  type DemoContextProfile,
+  type DemoFeatureKey,
+  type DemoToggles,
+  INITIAL_TOGGLES,
+  markOnLeaveAction,
+  raiseTeamCapability,
+  salaryText,
+  STAFF,
+  STAFF_FILTERS,
+  STAFF_PAGE_LIMIT,
+  staffAgentColumns,
+  staffColumns,
+  staffContext,
+  staffOnLeave,
+  staffRaised,
+  type StaffRow,
+  staffStartsRtl,
+  staffSuggestions,
+  staffWithBatch,
+  staffWithCell,
+  staffWithout,
+  staffWithRow,
+  WATCH_TEXT,
+  webmcpAvailable,
+  withApprovalOverride,
+} from "./shared/aiDemo";
+import {
+  type DemoContext,
+  demoTransport,
+  UNSUPPORTED_REPLIES,
+} from "./shared/aiScenario";
 
 /**
  * Put the inspector in the documentation column, where a reader looking at
@@ -331,47 +113,6 @@ function InspectorPortal({ children }: Readonly<{ children: ReactNode }>) {
   return slot ? createPortal(children, slot) : <>{children}</>;
 }
 
-const COLUMN_HEADERS: Record<Locale, Record<string, string>> = {
-  en: {
-    person: "Person",
-    team: "Team",
-    status: "Status",
-    salary: "Salary",
-    started: "Started",
-  },
-  ar: {
-    person: "الشخص",
-    team: "الفريق",
-    status: "الحالة",
-    salary: "الراتب",
-    started: "تاريخ البدء",
-  },
-};
-
-/** The action offered beside a reply the demo could not carry out. */
-const CONNECT_ACTION: Record<Locale, string> = {
-  en: "Connect a backend",
-  ar: "اربط خادمًا",
-};
-
-/** Salaries are stored in thousands; nothing on screen shows a bare number. */
-function salaryText(value: number): string {
-  const rounded = Math.round(value * 10) / 10;
-  return `$${String(rounded)}k`;
-}
-
-/**
- * A group's salary aggregate, in the same money the cells use. A count is
- * people rather than an amount, so it stays a plain number.
- */
-function salaryAggregateText(
-  value: unknown,
-  context: { readonly aggregation?: string }
-): ReactNode {
-  if (typeof value !== "number") return undefined;
-  return context.aggregation === "count" ? value : salaryText(value);
-}
-
 /**
  * Display only. `accessor` stays the number, so sorting, grouping and the
  * average still work on the value rather than on the text around it.
@@ -380,307 +121,12 @@ function SalaryCell({ row }: CellProps<StaffRow>): ReactElement {
   return <>{salaryText(row.salary)}</>;
 }
 
+/** The staff columns, with this page's money cell. */
 function columnsFor(locale: Locale): ColumnDef<StaffRow>[] {
-  const header = COLUMN_HEADERS[locale];
-  return [
-    {
-      key: "person",
-      sortable: true,
-      header: header.person,
-      accessor: (row) => row.person,
-      editable: true,
-    },
-    {
-      key: "team",
-      sortable: true,
-      header: header.team,
-      accessor: (row) => row.team,
-      editable: true,
-    },
-    {
-      key: "status",
-      sortable: true,
-      header: header.status,
-      accessor: (row) => row.status,
-      editable: true,
-    },
-    {
-      key: "salary",
-      sortable: true,
-      header: header.salary,
-      accessor: (row) => row.salary,
-      editable: true,
-      editor: "number",
-      aggregatable: true,
-      editValue: (row) => String(row.salary),
-      // The column stores thousands, so the cell says so. A bare 170 under a
-      // header called Salary is a number nobody can act on. `formatValue` is
-      // the same fact for every surface that cannot render a node — exports,
-      // mobile cards, the announcer.
-      Cell: SalaryCell,
-      formatValue: (row) => salaryText(row.salary),
-      // A number under a money column reads as money — and an average of
-      // three salaries is not 163.33333333333334. A count is people, not an
-      // amount, so it stays a plain number.
-      formatAggregate: (value, context) => salaryAggregateText(value, context),
-      // A bare 170 is not a salary until something says what it counts. Left
-      // unsaid, a model reports whatever unit reads naturally to it and the
-      // reader has no way to tell the guess from the data.
-      ai: {
-        description:
-          "Annual salary in thousands of US dollars. 170 means $170,000.",
-      },
-    },
-    {
-      key: "started",
-      sortable: true,
-      header: header.started,
-      accessor: (row) => row.started,
-      editable: true,
-      ai: { description: "The date this person joined, as YYYY-MM-DD." },
-    },
-  ];
-}
-
-const TEAM_FILTER: FilterDef<StaffRow> = {
-  key: "team",
-  type: "multiSelect",
-  label: "Team",
-  options: ["Core", "Platform", "Data"].map((team) => ({
-    value: team,
-    label: team,
-  })),
-  getValue: (row) => row.team,
-};
-
-const STATUS_FILTER: FilterDef<StaffRow> = {
-  key: "status",
-  type: "multiSelect",
-  label: "Status",
-  options: ["Active", "On leave"].map((status) => ({
-    value: status,
-    label: status,
-  })),
-  getValue: (row) => row.status,
-};
-
-const STARTED_FILTER: FilterDef<StaffRow> = {
-  key: "started",
-  type: "dateRange",
-  label: "Started",
-  getValue: (row) => row.started,
-};
-
-/** The row and column the scripted examples name. */
-
-/**
- * The suggestions, built from the scenarios so a chip can never offer a
- * prompt the resolver does not know.
- */
-/**
- * The example cards, in the reader's language.
- *
- * The id stays the English prompt so a card keeps its identity across a
- * language change, while the text it shows and the text it SENDS are both
- * the locale's — and the scenario matcher recognises either, deliberately.
- */
-function suggestionsFor(locale: Locale): AssistantSuggestion[] {
-  return DEMO_SCENARIOS.map((scenario) => {
-    const text =
-      locale === "ar" && scenario.ar
-        ? { title: scenario.ar.title, prompt: scenario.ar.prompt }
-        : { title: scenario.title, prompt: scenario.prompt };
-    return {
-      id: scenario.prompt,
-      // The card leads with what it does; the prompt it will send reads as
-      // the supporting line, so a reader knows exactly what is about to be
-      // asked.
-      title: text.title,
-      description: text.prompt,
-      kind: scenario.kind,
-      prompt: text.prompt,
-      requires: scenario.requires,
-    };
-  });
-}
-
-function readRtl(): boolean {
-  if (typeof window === "undefined") return false;
-  const params = new URLSearchParams(window.location.search);
-  return params.has("dir")
-    ? params.get("dir") === "rtl"
-    : params.get("locale") === "ar";
-}
-
-function applyField(row: StaffRow, key: string, value: unknown): StaffRow {
-  if (key === "salary") {
-    // The host decides what it will hold. `Number("185 thousand")` is NaN,
-    // and a row carrying NaN is worse than a write that did not land.
-    const next = Number(value);
-    return Number.isFinite(next) ? { ...row, salary: next } : row;
-  }
-  if (
-    key === "person" ||
-    key === "team" ||
-    key === "status" ||
-    key === "started"
-  ) {
-    return { ...row, [key]: String(value) };
-  }
-  return row;
-}
-
-function applyPatch(
-  row: StaffRow,
-  patch: Readonly<Record<string, unknown>>
-): StaffRow {
-  return Object.entries(patch).reduce(
-    (current, [key, value]) => applyField(current, key, value),
-    row
+  return staffColumns(locale).map((column) =>
+    column.key === "salary" ? { ...column, Cell: SalaryCell } : column
   );
 }
-
-function applyCell(
-  rows: readonly StaffRow[],
-  row: StaffRow,
-  key: string,
-  value: unknown
-): StaffRow[] {
-  return rows.map((current) =>
-    current.id === row.id ? applyField(current, key, value) : current
-  );
-}
-
-function applyRow(
-  rows: readonly StaffRow[],
-  row: StaffRow,
-  patch: Readonly<Record<string, unknown>>
-): StaffRow[] {
-  return rows.map((current) =>
-    current.id === row.id ? applyPatch(current, patch) : current
-  );
-}
-
-/** Every row on one team, raised by a percentage. Pure: React may call it twice. */
-function raisedRows(
-  rows: readonly StaffRow[],
-  team: string,
-  percent: number
-): StaffRow[] {
-  return rows.map((row) =>
-    row.team === team
-      ? { ...row, salary: Math.round(row.salary * (1 + percent / 100)) }
-      : row
-  );
-}
-
-/** The named rows, marked on leave. Pure: React may call it twice. */
-function onLeaveRows(
-  rows: readonly StaffRow[],
-  keys: readonly string[]
-): StaffRow[] {
-  const chosen = new Set(keys);
-  return rows.map((row) =>
-    chosen.has(row.id) ? { ...row, status: "On leave" } : row
-  );
-}
-
-/** The bulk action's words, in the demo's two languages. */
-const ON_LEAVE_TEXT: Record<
-  Locale,
-  { label: string; title: string; message: (count: number) => string }
-> = {
-  en: {
-    label: "Mark on leave",
-    title: "Mark on leave",
-    message: (count) =>
-      `Mark ${String(count)} ${count === 1 ? "person" : "people"} as on leave?`,
-  },
-  ar: {
-    label: "تسجيل إجازة",
-    title: "تسجيل إجازة",
-    message: (count) => `تسجيل ${String(count)} في إجازة؟`,
-  },
-};
-
-/**
- * One bulk action over the selection, with a confirmation.
- *
- * The confirmation is what a person clicking the bar is asked, and it is also
- * what makes the assistant ask before it runs the action — the same question,
- * in the approval rather than a dialog. The handler writes the page's own rows:
- * the table hands over the selected keys and changes nothing itself.
- *
- * A host handler cannot be staged, so on a staged table the action stays the
- * reader's alone (`ai: false`) rather than being offered to an agent that
- * would be refused on every attempt.
- */
-function markOnLeaveAction(
-  locale: Locale,
-  agentMayRun: boolean,
-  apply: (keys: readonly string[]) => void
-): BulkAction {
-  const text = ON_LEAVE_TEXT[locale];
-  return {
-    key: "markOnLeave",
-    label: text.label,
-    onClick: (ids) => {
-      apply(ids);
-    },
-    confirm: {
-      title: text.title,
-      message: text.message,
-      confirmLabel: text.label,
-    },
-    ...(agentMayRun ? {} : { ai: false as const }),
-  };
-}
-
-/** Remove the named rows. The seed is restored by Reset and by a refresh. */
-function removeRows(
-  rows: readonly StaffRow[],
-  keys: readonly string[]
-): StaffRow[] {
-  const gone = new Set(keys);
-  return rows.filter((row) => !gone.has(row.id));
-}
-
-function applyBatch(
-  rows: readonly StaffRow[],
-  edits: readonly BatchRowEdit<StaffRow>[]
-): StaffRow[] {
-  return rows.map((current) => {
-    const hit = edits.find((edit) => edit.rowId === current.id);
-    return hit ? applyPatch(current, hit.patch) : current;
-  });
-}
-
-/** Which optional capabilities the reader has turned on. */
-interface DemoToggles {
-  readonly editingMode: DemoEditingMode;
-  readonly grouping: boolean;
-  readonly rowPinning: boolean;
-  readonly columnPinning: boolean;
-  readonly paging: boolean;
-}
-
-const INITIAL_TOGGLES: DemoToggles = {
-  editingMode: "cell",
-  grouping: false,
-  rowPinning: true,
-  columnPinning: true,
-  paging: true,
-};
-
-/** The people the bulk example selects: Jonah Okonkwo and Sefa Demir. */
-const LEAVE_EXAMPLE_KEYS: ReadonlySet<string> = new Set(["j1", "s1"]);
-
-/** Five of fifteen: three pages, and 10 stays a real size the assistant can set. */
-const PAGE_LIMIT = 5;
-
-const AI_DEMO_MEDIA = import.meta.env.DEV
-  ? "/media/ai"
-  : siteAsset("/media/ai");
 
 /**
  * Visible player, no autoload: the poster is what paints, and the file
@@ -689,7 +135,7 @@ const AI_DEMO_MEDIA = import.meta.env.DEV
 function AiDemoWatch(): ReactElement {
   return (
     <figure className="ai-demo__watch">
-      <figcaption>Watch demo</figcaption>
+      <figcaption>{WATCH_TEXT.caption}</figcaption>
       <video
         className="ai-demo__watch-video"
         src={`${AI_DEMO_MEDIA}/demo.mp4`}
@@ -707,17 +153,15 @@ function AiDemoWatch(): ReactElement {
           label="English"
         />
       </video>
-      <p className="ai-demo__watch-note">
-        Recorded on the Mantine page. The same assistant runs on every kit.
-      </p>
+      <p className="ai-demo__watch-note">{WATCH_TEXT.note}</p>
     </figure>
   );
 }
 
 export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
-  const [rtl, setRtl] = useState(readRtl);
+  const [rtl, setRtl] = useState(staffStartsRtl);
   const [toggles, setToggles] = useState<DemoToggles>(INITIAL_TOGGLES);
-  const [rows, setRows] = useState<StaffRow[]>(() => [...SEED]);
+  const [rows, setRows] = useState<StaffRow[]>(() => [...STAFF]);
   // What the custom capability counts against. The updater below has to stay
   // pure — React may call it twice — so the count is read from here instead.
   const rowsRef = useRef(rows);
@@ -750,7 +194,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const locale: Locale = rtl ? "ar" : "en";
   const labels = useMemo(() => getLabels(locale), [locale]);
   const columns = useMemo(() => columnsFor(locale), [locale]);
-  const suggestions = useMemo(() => suggestionsFor(locale), [locale]);
+  const suggestions = useMemo(() => staffSuggestions(locale), [locale]);
   // The live approval, handed over by the bridge. The panel sits beside the
   // table rather than inside it, so this is how it reaches the conversation.
   const [pendingApproval, setPendingApproval] =
@@ -766,19 +210,13 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [commit, setCommit] = useState<"stage" | "immediate">("stage");
   // Per-action overrides, keyed by capability. Absent means inherited.
   const [actionPolicy, setActionPolicy] = useState<
-    Readonly<Record<string, "required" | "automatic">>
+    Readonly<Record<string, ApprovalOverride>>
   >({});
   // The drawer's per-action answers in the shape the table takes them: one
   // entry per key the reader actually decided, so "use the default" is an
   // absence rather than a third policy the table has to interpret.
   const actionApproval = useMemo(
-    () =>
-      Object.fromEntries(
-        Object.entries(actionPolicy).map(([key, policy]) => [
-          key,
-          { approval: { policy } },
-        ])
-      ),
+    () => capabilityApproval(actionPolicy),
     [actionPolicy]
   );
 
@@ -796,39 +234,16 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   // Rebuilt from the live rows every render, so the bulk example proposes
   // the salaries actually on screen rather than the ones it was written
   // against.
-  const contextRef = useRef<DemoContext>({
-    locale: "en",
-    namedRowKey: "p1",
-    pinnedColumnKey: "person",
-    coreTeam: [],
-    leaveRows: [],
-  });
+  const contextRef = useRef<DemoContext>(staffContext(STAFF, "en"));
   // Deliberately not one of the rows the edit examples name, and read from the
   // live rows: once it has been deleted the example stops being offered rather
   // than proposing a row the table no longer has.
-  const removable = rows.find((row) => row.id === "t1");
-  contextRef.current = {
-    locale,
-    namedRowKey: "p1",
-    pinnedColumnKey: "person",
-    coreTeam: rows
-      .filter((row) => row.team === "Core")
-      .map((row) => ({ rowKey: row.id, salary: row.salary })),
-    // Both on page 1 and both Active, so the change is one a reader sees.
-    leaveRows: rows
-      .filter((row) => LEAVE_EXAMPLE_KEYS.has(row.id))
-      .map((row) => ({ rowKey: row.id, person: row.person })),
-    ...(removable
-      ? { removableRow: { rowKey: removable.id, person: removable.person } }
-      : {}),
-  };
+  contextRef.current = staffContext(rows, locale);
 
   const scripted = useMemo(() => demoTransport(() => contextRef.current), []);
-  const [connection, setConnection] = useState<AiConnection>(() => ({
-    mode: "simulated",
-    transport: scripted,
-    key: "demo",
-  }));
+  const [connection, setConnection] = useState<AiConnection>(() =>
+    scriptedConnection(scripted)
+  );
 
   const Table = kitTable<StaffRow>(adapter);
   const factories =
@@ -840,7 +255,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const raiseTeam = useMemo(
     () =>
       raiseTeamCapability(({ team, percent }) => {
-        setRows((current) => raisedRows(current, team, percent));
+        setRows((current) => staffRaised(current, team, percent));
         return rowsRef.current.filter((row) => row.team === team).length;
       }),
     []
@@ -853,12 +268,12 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     const effectiveCommit =
       toggles.editingMode === "batch" ? commit : "immediate";
     const next: TableFeature<StaffRow>[] = [
-      factories.filters([TEAM_FILTER, STATUS_FILTER, STARTED_FILTER]),
+      factories.filters([...STAFF_FILTERS]),
       // Selection and one bulk action over it, through the kit's own bar. The
       // agent reaches it as `bulkAction.markOnLeave` after `view.setSelection`.
       factories.bulkActions([
         markOnLeaveAction(locale, effectiveCommit === "immediate", (keys) => {
-          setRows((current) => onLeaveRows(current, keys));
+          setRows((current) => staffOnLeave(current, keys));
         }),
       ]),
       tableAgent({
@@ -892,33 +307,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         commit: effectiveCommit,
         // Labels in the reader's language: a column id is a developer key,
         // and the approval review shows this name rather than that key.
-        columns: {
-          person: {
-            type: "string",
-            writable: canWrite,
-            label: COLUMN_HEADERS[locale].person,
-          },
-          team: {
-            type: "string",
-            writable: canWrite,
-            label: COLUMN_HEADERS[locale].team,
-          },
-          status: {
-            type: "string",
-            writable: canWrite,
-            label: COLUMN_HEADERS[locale].status,
-          },
-          salary: {
-            type: "number",
-            writable: canWrite,
-            label: COLUMN_HEADERS[locale].salary,
-          },
-          started: {
-            type: "string",
-            writable: canWrite,
-            label: COLUMN_HEADERS[locale].started,
-          },
-        },
+        columns: staffAgentColumns(locale, canWrite),
         apply: {
           // `setFilters` is deliberately NOT overridden. Filtering is view
           // state the table already owns — team, status and started are
@@ -934,7 +323,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           // refuses to let `alwaysAllow` wave through, so the reader is asked
           // every time however the drawer is set.
           deleteRows: (keys) => {
-            setRows((current) => removeRows(current, keys));
+            setRows((current) => staffWithout(current, keys));
           },
         },
         bridge: {
@@ -979,21 +368,21 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     if (toggles.editingMode === "cell") {
       editing.push(
         factories.editing((row: StaffRow, key: string, value: unknown) => {
-          setRows((current) => applyCell(current, row, key, value));
+          setRows((current) => staffWithCell(current, row, key, value));
         })
       );
     }
     if (toggles.editingMode === "row") {
       editing.push(
         factories.rowEditing((row: StaffRow, patch) => {
-          setRows((current) => applyRow(current, row, patch));
+          setRows((current) => staffWithRow(current, row, patch));
         })
       );
     }
     if (toggles.editingMode === "batch") {
       editing.push(
         factories.batch((edits: readonly BatchRowEdit<StaffRow>[]) => {
-          setRows((current) => applyBatch(current, edits));
+          setRows((current) => staffWithBatch(current, edits));
         })
       );
     }
@@ -1062,7 +451,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     assistant.stop();
     assistant.clear();
     setToggles(INITIAL_TOGGLES);
-    setRows([...SEED]);
+    setRows([...STAFF]);
     setPinnedRowIds({ top: [], bottom: [] });
     // The view belongs to the table, so Reset puts the table back rather than
     // reaching in to unset filter, sort, search and grouping one at a time —
@@ -1083,28 +472,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   // and the table's own control keeps working exactly as it did.
   const exclusions: readonly DemoExclusion[] = useMemo(
     () =>
-      [
-        {
-          key: "view.setFilters",
-          label: "Filter the table",
-          help: "Off: the filter suggestions go, and you can still filter it yourself.",
-        },
-        {
-          key: "rows.read",
-          label: "Read rows",
-          help: "Off: it can change the view but can no longer answer questions about what is in it.",
-        },
-        {
-          key: "edit.cells",
-          label: "Edit cells",
-          help: "Off: no write ever reaches the approval, because none is ever proposed.",
-        },
-        {
-          key: "rows.delete",
-          label: "Delete rows",
-          help: "Off: the assistant cannot remove a row. On, it always asks first — deleting is never waved through, and Reset brings the data back.",
-        },
-      ].map((entry) => ({
+      DEMO_EXCLUSIONS.map((entry) => ({
         ...entry,
         offered: !excluded.includes(entry.key),
         onChange: () => {
@@ -1116,40 +484,34 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
 
   // Read once: whether this browser has the API at all decides whether the
   // switch is a choice or an explanation.
-  const webmcpAvailable = useMemo(
-    () =>
-      typeof document !== "undefined" &&
-      "modelContext" in (document as { modelContext?: unknown }),
-    []
-  );
+  const webmcpOffered = useMemo(webmcpAvailable, []);
 
   // Generated from what the table actually wires right now, so turning a
   // feature off removes its row rather than leaving a dead switch behind.
   // Labels come from each capability's own presentation; the key is never
   // shown to a reader.
-  const actionApprovals: readonly DemoActionApproval[] = useMemo(() => {
-    const writes = (manifest?.capabilities ?? []).filter((key) =>
-      WRITE_CAPABILITIES.has(key)
-    );
-    return writes.map((key) => {
-      const override = Object.hasOwn(actionPolicy, key)
-        ? actionPolicy[key]
-        : undefined;
-      return {
-        key,
-        label: CAPABILITY_LABELS[key] ?? key,
-        policy: override ?? ("required" as const),
-        inherited: override === undefined,
-        onChange: (next: "required" | "automatic" | "inherit") =>
-          setActionPolicy(overrideFor(key, next)),
-      };
-    });
-  }, [manifest, actionPolicy]);
+  const answerApproval = useCallback(
+    (key: string, next: ApprovalOverride | "inherit") => {
+      setActionPolicy((current) => withApprovalOverride(current, key, next));
+    },
+    []
+  );
+  const approvals: readonly DemoActionApprovalControl[] = useMemo(
+    () =>
+      actionApprovals(manifest?.capabilities ?? [], actionPolicy).map(
+        (action) => ({
+          ...action,
+          onChange: (next: ApprovalOverride | "inherit") => {
+            answerApproval(action.key, next);
+          },
+        })
+      ),
+    [manifest, actionPolicy, answerApproval]
+  );
 
-  const toggle =
-    (key: "grouping" | "rowPinning" | "columnPinning" | "paging") => () => {
-      setToggles((current) => ({ ...current, [key]: !current[key] }));
-    };
+  const toggle = (key: DemoFeatureKey) => () => {
+    setToggles((current) => ({ ...current, [key]: !current[key] }));
+  };
 
   return (
     <div id="ai-demo" className="ai-demo" data-adapter={adapter}>
@@ -1158,16 +520,10 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           prose leaves its punctuation on the wrong side. Only the table and
           the assistant follow the RTL switch. */}
       <header className="ai-demo__hero">
-        <p className="ai-demo__lede">
-          The application decides what the assistant may do and what it may save
-          — the table asks, your code answers.
-        </p>
+        <p className="ai-demo__lede">{AI_PAGE_TEXT.lede}</p>
         <AiDemoWatch />
         <div className="ai-demo__controls">
-          <nav
-            className="ai-demo__kits"
-            aria-label="Same demo in another adapter"
-          >
+          <nav className="ai-demo__kits" aria-label={AI_PAGE_TEXT.otherKits}>
             {builtAdapters().map((kit) => (
               <a
                 key={kit.key}
@@ -1180,7 +536,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           </nav>
           <div className="ai-demo__toolbar">
             <Segmented
-              label="Conversation source"
+              label={AI_PAGE_TEXT.source}
               value={
                 connection.mode !== "simulated" || settingsOpen
                   ? "backend"
@@ -1190,11 +546,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 if (next === "simulated") {
                   setSettingsOpen(false);
                   if (connection.mode !== "simulated") {
-                    setConnection({
-                      mode: "simulated",
-                      transport: scripted,
-                      key: "demo",
-                    });
+                    setConnection(scriptedConnection(scripted));
                   }
                   return;
                 }
@@ -1203,15 +555,15 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
               options={[
                 {
                   value: "simulated",
-                  label: "Simulated demo",
+                  label: AI_PAGE_TEXT.simulated,
                   testId: "ai-demo-mode",
                 },
                 {
                   value: "backend",
                   label:
                     connection.mode === "simulated"
-                      ? "Try it for real"
-                      : "Connected",
+                      ? AI_PAGE_TEXT.tryReal
+                      : AI_PAGE_TEXT.connected,
                   testId: "ai-demo-try-real",
                 },
               ]}
@@ -1225,7 +577,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 setDemoOpen((current) => !current);
               }}
             >
-              Demo options
+              {AI_PAGE_TEXT.options}
             </button>
           </div>
         </div>
@@ -1238,37 +590,12 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           onEditingMode={(next) => {
             setToggles((current) => ({ ...current, editingMode: next }));
           }}
-          features={[
-            {
-              key: "grouping",
-              label: "Grouping",
-              help: "Offers grouping and aggregates to the assistant. The table stays flat until something actually groups it — that is the capability the model is meant to show.",
-              on: toggles.grouping,
-              onChange: toggle("grouping"),
-            },
-            {
-              key: "rowPinning",
-              label: "Row pinning",
-              help: "Lets the assistant pin a row above the scrolled body.",
-              on: toggles.rowPinning,
-              onChange: toggle("rowPinning"),
-            },
-            {
-              key: "columnPinning",
-              label: "Column pinning",
-              help: "Lets the assistant pin a column to either edge.",
-              on: toggles.columnPinning,
-              onChange: toggle("columnPinning"),
-            },
-            {
-              key: "paging",
-              label: "Pages of five",
-              help: "Fifteen people at five a page — three pages, so the assistant has somewhere to page to and a size of 10 is a real change.",
-              on: toggles.paging,
-              onChange: toggle("paging"),
-            },
-          ]}
-          actions={actionApprovals}
+          features={DEMO_FEATURES.map((feature) => ({
+            ...feature,
+            on: toggles[feature.key],
+            onChange: toggle(feature.key),
+          }))}
+          actions={approvals}
           presentation={presentation}
           onPresentation={setPresentation}
           commit={commit}
@@ -1281,7 +608,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           exclusions={exclusions}
           webmcp={webmcp}
           onWebmcp={setWebmcp}
-          webmcpAvailable={webmcpAvailable}
+          webmcpAvailable={webmcpOffered}
         />
       </header>
 
@@ -1302,7 +629,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
               urlSync={false}
               {...(toggles.paging
                 ? {
-                    defaults: { limit: PAGE_LIMIT },
+                    defaults: { limit: STAFF_PAGE_LIMIT },
                     paginationMode: "paged" as const,
                   }
                 : {})}

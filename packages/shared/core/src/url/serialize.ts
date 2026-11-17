@@ -11,26 +11,33 @@
  */
 import type { ColumnLayoutState } from "../columns/columnLayoutModel";
 import { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "../columns/columnResize";
-import type {
-  ExtraFilters,
-  FilterValue,
-  SortDirection,
-} from "../contracts/columns";
+import { MAX_LIMIT } from "../constants";
+import type { ExtraFilters, SortDirection } from "../contracts/columns";
 import type { QueryFilterGroup } from "../contracts/query";
 import {
   parseFilterTree,
   serializeFilterTree,
 } from "../filters/filterTreeCodec";
+import { isEmptyFilterValue } from "../filters/isEmptyFilterValue";
 import { type RowPinSide, type RowPinState } from "../rows/rowPinModel";
-
-/** Decode a URI component, tolerating malformed input from hand-edited URLs. */
-function safeDecode(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
+import { joinListParam, splitListParam } from "../utils/listParam";
+import { safeDecode } from "../utils/safeDecode";
+import {
+  FILTER_PREFIX,
+  PARAM_COL_GROUPS,
+  PARAM_COL_HIDDEN,
+  PARAM_COL_NAMES,
+  PARAM_COL_ORDER,
+  PARAM_COL_PINNED,
+  PARAM_COL_WIDTHS,
+  PARAM_FILTER_TREE,
+  PARAM_GROUP_CLOSED,
+  PARAM_LIMIT,
+  PARAM_PAGE,
+  PARAM_ROW_PIN,
+  PARAM_SORT,
+  PARAM_SORT_DIR,
+} from "./urlParams";
 
 /** Split a comma list into trimmed, non-empty raw (still-encoded) parts. */
 function splitRaw(raw: string | null): string[] {
@@ -41,43 +48,30 @@ function splitRaw(raw: string | null): string[] {
     .filter(Boolean);
 }
 
-export const PARAM_PAGE = "page";
-export const PARAM_LIMIT = "limit";
-export const PARAM_SEARCH = "q";
-/** Find-bar query — the in-table walk, not the filter search term. */
-export const PARAM_FIND = "find";
-export const PARAM_SORT_BY = "sortBy";
-export const PARAM_SORT_DIR = "sortDir";
-/** Multi-sort chain: `sort=name:asc,age:desc` (keys percent-encoded). */
-export const PARAM_SORT = "sort";
-/** Row grouping keys, comma-separated — outermost first. */
-export const PARAM_GROUP_BY = "groupBy";
-/** Per-column group aggregate overrides. */
-export const PARAM_GROUP_AGGREGATES = "groupAgg";
-/** Keys under this prefix flow through as-is into the `extra` bag. */
-export const FILTER_PREFIX = "f_";
-/** Versioned AND/OR filter tree (`ft=1.{…}`). */
-export const PARAM_FILTER_TREE = "ft";
-/** Column-layout params (hidden / pinned / order / widths). */
-/** Collapsed group keys, comma-separated. */
-export const PARAM_GROUP_CLOSED = "groupClosed";
-export const PARAM_COL_HIDDEN = "colHide";
-export const PARAM_COL_PINNED = "colPin";
-export const PARAM_COL_ORDER = "colOrder";
-export const PARAM_COL_WIDTHS = "colW";
-export const PARAM_COL_NAMES = "colName";
-export const PARAM_COL_GROUPS = "colGroupCollapse";
-/** Pinned rows: `rowPin=id1:top,id2:bottom`. */
-export const PARAM_ROW_PIN = "rowPin";
-
-/** Row density — a display choice, captured by saved views like the rest. */
-export const PARAM_DENSITY = "density";
-
-/** The pivot configuration. See `@adapttable/core/pivot`. */
-export const PARAM_PIVOT = "pivot";
-
-/** The user-typed formula columns. See `@adapttable/core/formula`. */
-export const PARAM_FORMULA = "formula";
+export {
+  FILTER_PREFIX,
+  PARAM_COL_GROUPS,
+  PARAM_COL_HIDDEN,
+  PARAM_COL_NAMES,
+  PARAM_COL_ORDER,
+  PARAM_COL_PINNED,
+  PARAM_COL_WIDTHS,
+  PARAM_DENSITY,
+  PARAM_FILTER_TREE,
+  PARAM_FIND,
+  PARAM_FORMULA,
+  PARAM_GROUP_AGGREGATES,
+  PARAM_GROUP_BY,
+  PARAM_GROUP_CLOSED,
+  PARAM_LIMIT,
+  PARAM_PAGE,
+  PARAM_PIVOT,
+  PARAM_ROW_PIN,
+  PARAM_SEARCH,
+  PARAM_SORT,
+  PARAM_SORT_BY,
+  PARAM_SORT_DIR,
+} from "./urlParams";
 
 /** Read a 1-based page number, falling back when absent/invalid. */
 export function readPage(
@@ -90,8 +84,7 @@ export function readPage(
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
-/** Largest accepted page size — shared by the reader and the setter. */
-export const MAX_LIMIT = 500;
+export { MAX_LIMIT } from "../constants";
 
 /** Read a page size, clamped to a sane range, falling back when invalid. */
 export function readLimit(
@@ -129,10 +122,7 @@ export function readExtra(
     if (!key.startsWith(filterPrefix) || raw === "") return;
     const bare = key.slice(filterPrefix.length);
     if (arrayKeys.includes(bare)) {
-      const arr = raw
-        .split(",")
-        .map((v) => safeDecode(v).trim())
-        .filter(Boolean);
+      const arr = splitListParam(raw);
       if (arr.length > 0) out[bare] = arr;
     } else if (numberKeys.includes(bare)) {
       const n = Number(raw);
@@ -144,11 +134,7 @@ export function readExtra(
   return out;
 }
 
-/** True when a filter value should remove its param (empty/cleared). */
-export function isEmptyFilterValue(value: FilterValue): boolean {
-  if (value == null || value === "") return true;
-  return Array.isArray(value) && value.length === 0;
-}
+export { isEmptyFilterValue } from "../filters/isEmptyFilterValue";
 
 /**
  * Write the full extra-filter bag into `params`, stripping any existing
@@ -171,12 +157,10 @@ export function writeExtra(
     if (isEmptyFilterValue(value)) continue;
     const param = `${filterPrefix}${key}`;
     if (Array.isArray(value)) {
-      // Trim entries the same way the read side does, so values round-trip
-      // byte-identical; percent-encode each element so a value may contain
-      // the comma delimiter (and survives a URLSearchParams decode).
-      const entries = value.map((v) => String(v).trim()).filter(Boolean);
-      if (entries.length === 0) continue;
-      params.set(param, entries.map((v) => encodeURIComponent(v)).join(","));
+      // Entries are trimmed and encoded the way the read side splits them,
+      // so values round-trip byte-identical.
+      const joined = joinListParam(value);
+      if (joined !== "") params.set(param, joined);
     } else {
       params.set(param, String(value));
     }

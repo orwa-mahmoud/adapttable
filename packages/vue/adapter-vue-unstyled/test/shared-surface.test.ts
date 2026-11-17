@@ -1,7 +1,6 @@
 import { type ComposedFeature } from "@adapttable/vue";
 import {
   GROUP_ROW,
-  groupRowSlotKey,
   provideDataTableClassNames,
   slotRender,
   TOOLBAR_EXTRAS,
@@ -20,10 +19,7 @@ import {
 
 import { DataTable, type DataTableProps } from "../src";
 import { provideClassNames, useClassNames } from "../src/classNamesContext";
-import {
-  NATIVE_GROUP_ROW,
-  nativeGroupRowSlotKey,
-} from "../src/nativeHierarchyControlSlots";
+import { NATIVE_GROUP_ROW } from "../src/nativeHierarchyControlSlots";
 
 const cleanup: (() => void)[] = [];
 afterEach(() => cleanup.splice(0).forEach((run) => run()));
@@ -31,8 +27,6 @@ it("retains the native context and lazy grouping identities", () => {
   expect(provideClassNames).toBe(provideDataTableClassNames);
   expect(useClassNames).toBe(useDataTableClassNames);
   expect(NATIVE_GROUP_ROW).toBe(GROUP_ROW);
-  expect(nativeGroupRowSlotKey).toBe(groupRowSlotKey);
-  expect(nativeGroupRowSlotKey<{ id: string }>()).toBe(GROUP_ROW);
 });
 it("preserves feature component lifetime, input focus and native parts across pagination and mobile updates", async () => {
   const mounted = vi.fn();

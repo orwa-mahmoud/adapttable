@@ -87,13 +87,8 @@ export const VUE_CONSUMER_SPECS = [
     comparable: "react · simple table",
     code: 'export { useFrontendData, useDataTable } from "PKG";',
     functionality: "Source composable and headless table model",
-    present: [
-      "useFrontendData",
-      "useDataTable",
-      "defaultLabels",
-      "resolveLabels",
-    ],
-    absent: [...writers, "DataTableSurfaceChrome"],
+    present: ["useFrontendData", "useDataTable", "resolveTableLabels"],
+    absent: [...writers, "DataTableSurfaceChrome", "defaultLabels"],
   },
   {
     name: "vue-unstyled · table",

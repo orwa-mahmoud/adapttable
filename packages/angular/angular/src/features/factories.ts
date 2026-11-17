@@ -16,7 +16,6 @@ import {
   type ContextMenuItem,
   type ContextMenuTarget,
   type ExtraRow,
-  FILTER_ENGINE_IMPL,
   type GetCellSpan,
   type PinnedRows,
   type RowHeight,
@@ -47,6 +46,7 @@ import {
   coreUndoRedoButtons,
   type FeaturePatch,
   FILTER_ENGINE,
+  FILTER_ENGINE_IMPL,
   type SidePanelEntry,
 } from "@adapttable/core/binding";
 import type { Signal, TemplateRef } from "@angular/core";

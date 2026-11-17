@@ -165,6 +165,39 @@ describe("AdaptAttrs", () => {
     expect(button.value).toBe("");
   });
 
+  it("writes only what a new record changes", async () => {
+    const record = (selected: boolean): Attrs => ({
+      role: "row",
+      "aria-selected": selected,
+      tabIndex: -1,
+      style: { height: 36, opacity: 1 },
+    });
+    const { button, update } = await mount(record(false));
+    const changed: (string | null)[] = [];
+    const observer = new MutationObserver((records) => {
+      for (const entry of records) changed.push(entry.attributeName);
+    });
+    observer.observe(button, { attributes: true });
+
+    await update(record(false));
+    await update(record(true));
+    await Promise.resolve();
+    observer.disconnect();
+    expect(changed).toEqual(["aria-selected"]);
+    expect(button.getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("puts a controlled property back when the element changed it", async () => {
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    const { update } = await mount({ checked: false, value: "a" }, input);
+    input.checked = true;
+    input.value = "typed";
+    await update({ checked: false, value: "a" });
+    expect(input.checked).toBe(false);
+    expect(input.value).toBe("a");
+  });
+
   it("calls the newest click handler and drops a removed one", async () => {
     const first = vi.fn();
     const second = vi.fn();

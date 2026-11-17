@@ -1,7 +1,8 @@
-import { resetDevWarnings } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core/binding";
 import { act, render, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { type TableChrome } from "../chrome/tableChromeContract";
 import { ChromeExtrasGate } from "../features/chromeExtrasGate";
 import { editing } from "../features/editing";
 import { grouping } from "../features/grouping";
@@ -14,7 +15,7 @@ import {
 import { useFrontendData } from "../source/useFrontendData";
 import { createMemoryAdapter } from "../url/adapter";
 import { useTableUrlState } from "../url/useTableUrlState";
-import { type TableChrome, useTableChrome } from "../useTableChrome";
+import { useTableChrome } from "../useTableChrome";
 
 function renderLiveChrome<TRow>(
   features: readonly TableFeature<TRow>[],
@@ -313,6 +314,42 @@ describe("grouping panel integration", () => {
       name: "count",
     });
     expect(result.current.groupingPanel?.canSetAggregates).toBe(true);
+  });
+
+  it("shows a plain groupAggregates mapper as owned by the app", () => {
+    const { result } = renderLiveChrome(
+      [grouping("team"), groupingPanel()],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          columns: [
+            { key: "team", header: "Team" },
+            { key: "name", header: "Name" },
+          ],
+          urlAdapter: createMemoryAdapter(""),
+          defaults: { limit: 10 },
+        });
+        return {
+          source,
+          columns: [
+            { key: "team", header: "Team" },
+            { key: "name", header: "Name" },
+          ],
+          rowKey: (row) => row.id,
+          groupBy: "team",
+          groupAggregates: (rows) => ({ name: rows.length }),
+        };
+      }
+    );
+    expect(result.current.groupingPanel?.aggregations.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          columnKey: "name",
+          origin: "host",
+          editable: false,
+        }),
+      ])
+    );
   });
 });
 

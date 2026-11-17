@@ -1,5 +1,6 @@
-import { columnResizeHandleProps, defaultConfirm } from "@adapttable/core";
 import {
+  columnResizeHandleProps,
+  defaultConfirm,
   insertExtraRows,
   insertExtrasBeforeRows,
 } from "@adapttable/core/binding";
@@ -802,6 +803,11 @@ describe("useDesktopTableAssembly coverage paths", () => {
       expect(row.wiring.detailMeasureRef).toBe(detailRef);
       expect(row.wiring.treeColumnKey).toBe("name");
     }
+    // Rows that carry a level and an open state need a treegrid around them.
+    expect(result.current.gridProps).toMatchObject({
+      role: "treegrid",
+      "aria-rowcount": 2,
+    });
   });
 
   it("invokes live callbacks when selection and expansion are absent", () => {

@@ -323,17 +323,41 @@ export const KITS: readonly KitInfo[] = [
   },
 ];
 
-const UNSTYLED = KITS.find((k) => k.kit === "unstyled")!;
-const ANGULAR_UNSTYLED = KITS.find((k) => k.kit === "angular-unstyled")!;
-const VUE_UNSTYLED = KITS.find((k) => k.kit === "vue-unstyled")!;
-const SHADCN_VUE = KITS.find((k) => k.kit === "shadcn-vue")!;
+/** A kit by its identifier; every identifier names one entry in {@link KITS}. */
+export function kitInfo(kit: Kit): KitInfo {
+  const info = KITS.find((entry) => entry.kit === kit);
+  if (!info) throw new Error(`No entry in KITS for kit "${kit}"`);
+  return info;
+}
+
+/**
+ * The kits detection falls back on, per framework: the one a project with no
+ * kit signal gets, and the kit of copied components a `components.json`
+ * selects — which wins over the kit those components are built on.
+ */
+const FRAMEWORK_KITS: Readonly<
+  Record<
+    Framework,
+    { readonly fallback: Kit; readonly copied?: { kit: Kit; builtOn: Kit } }
+  >
+> = {
+  react: {
+    fallback: "unstyled",
+    copied: { kit: "shadcn", builtOn: "unstyled" },
+  },
+  angular: { fallback: "angular-unstyled" },
+  vue: {
+    fallback: "vue-unstyled",
+    copied: { kit: "shadcn-vue", builtOn: "reka-ui" },
+  },
+};
 
 /**
  * The shadcn/ui kit — selected by `runInit` when a `components.json` is found.
  *
  * @public
  */
-export const SHADCN = KITS.find((k) => k.kit === "shadcn")!;
+export const SHADCN = kitInfo("shadcn");
 
 /**
  * Detect Angular only when both its dependency and workspace file are present.
@@ -377,27 +401,15 @@ export function detectKit(
   options?: { hasComponentsJson?: boolean; framework?: Framework }
 ): KitInfo {
   const framework = options?.framework ?? "react";
-  if (framework === "vue" && options?.hasComponentsJson) {
-    // Copied shadcn-vue components depend on Reka, which must not win first.
-    const concreteKit = KITS.find(
-      (info) =>
-        info.framework === "vue" &&
-        info.kit !== "reka-ui" &&
-        info.signals.some((pkg) => Object.hasOwn(dependencies, pkg))
-    );
-    return concreteKit ?? SHADCN_VUE;
-  }
+  const { fallback, copied } = FRAMEWORK_KITS[framework];
+  const copiedKit = options?.hasComponentsJson && copied ? copied : undefined;
   for (const info of KITS) {
     if ((info.framework ?? "react") !== framework) continue;
     if (info.signals.some((pkg) => Object.hasOwn(dependencies, pkg))) {
-      return info.kit === "unstyled" && options?.hasComponentsJson
-        ? SHADCN
-        : info;
+      return info.kit === copiedKit?.builtOn ? kitInfo(copiedKit.kit) : info;
     }
   }
-  if (framework === "angular") return ANGULAR_UNSTYLED;
-  if (framework === "vue") return VUE_UNSTYLED;
-  return options?.hasComponentsJson ? SHADCN : UNSTYLED;
+  return kitInfo(copiedKit?.kit ?? fallback);
 }
 
 /**

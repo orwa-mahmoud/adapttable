@@ -21,13 +21,14 @@ import {
   recordingCellEdit,
   resolveEditHistory,
 } from "@adapttable/core/editing";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useContext, useMemo, useState, useSyncExternalStore } from "react";
 
 export { type EditHistoryEntry, type EditHistoryState } from "@adapttable/core";
 export { asBatchGesture, asGesture } from "@adapttable/core/editing";
 
 import type { ColumnDef } from "../columnDef";
 import type { EditHistoryOptions } from "../props";
+import { TableStoreContext } from "../state/tableStoreContext";
 
 /**
  * A cell's current value as an undo would restore it: the column's
@@ -71,7 +72,10 @@ export interface UseEditHistoryOptions<TRow> {
 export function useEditHistory<TRow>(
   options: UseEditHistoryOptions<TRow>
 ): EditHistoryState<TRow> {
-  const [history] = useState(() => createEditHistory<TRow>(options));
+  const table = useContext(TableStoreContext);
+  const [history] = useState(() =>
+    createEditHistory<TRow>(options, { store: table })
+  );
   history.configure(options);
   const counts = useSyncExternalStore(
     history.subscribe,

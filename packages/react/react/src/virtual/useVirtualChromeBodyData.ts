@@ -19,8 +19,8 @@ import {
 } from "@adapttable/core/binding";
 import { useCallback, useMemo, useRef } from "react";
 
+import type { TableChrome } from "../chrome/tableChromeContract";
 import type { ComposedTableProps } from "../props";
-import type { TableChrome } from "../useTableChrome";
 import {
   type ChromeBodyData,
   entryKeys,

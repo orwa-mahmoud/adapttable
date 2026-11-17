@@ -1,10 +1,9 @@
 /** Row actions remain host requests; a kit supplies every visible control. */
+import { ACTIONS_COLUMN_KEY, type RowAction } from "@adapttable/core";
 import {
-  ACTIONS_COLUMN_KEY,
-  type RowAction,
+  coreRowActions,
   withRowMutationActions,
-} from "@adapttable/core";
-import { coreRowActions } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 import { computed, onScopeDispose, watchEffect } from "vue";
 
@@ -44,11 +43,16 @@ function useRowActions<TRow>(context: FeatureMountContext<TRow>): void {
     const current = options.value.rowActions?.find((item) => item.key === key);
     return current?.onClick?.(row);
   };
+  // The declared actions alone: the options object is rebuilt with the data.
+  const declaredActions = computed(() => options.value.rowActions);
+  // An action without a handler (one that opens the row form) stays without
+  // one, so the table can tell it apart and drop it where there is no form.
   const hostActions = computed(() =>
-    options.value.rowActions?.map((action) => ({
-      ...action,
-      onClick: (row: TRow) => invokeHost(action.key, row),
-    }))
+    declaredActions.value?.map((action) =>
+      action.onClick === undefined
+        ? action
+        : { ...action, onClick: (row: TRow) => invokeHost(action.key, row) }
+    )
   );
   watchEffect(
     () => {
@@ -79,6 +83,7 @@ export function rowActions<TRow>(
   const base = coreRowActions<TRow>(actions, handlers);
   return {
     id: base.id,
+    labels: base.labels,
     dependencies: [
       actions,
       handlers?.onAddRow,

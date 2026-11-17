@@ -16,6 +16,7 @@ import type {
   TableRevisions,
   TableRowScope,
 } from "../contracts/lifecycle";
+import type { RowCallback } from "../contracts/rowCallback";
 import type { TableSourceCapabilities } from "../contracts/source";
 import type { IncrementalViewConfig } from "../rows/incremental";
 import { createFullRowModel } from "./fullRowModel";
@@ -81,7 +82,7 @@ export interface CreateTableEngineOptions<TRow> {
   /** Neutral columns. */
   readonly columns: readonly ColumnMetadata<TRow>[];
   /** Stable row identity. */
-  readonly rowKey: (row: TRow) => string;
+  readonly rowKey: RowCallback<[row: NoInfer<TRow>], string>;
   /** `"paged"` slices one page; `"infinite"` grows the window. */
   readonly paginationMode?: "paged" | "infinite";
   /** Initial view values. */
@@ -95,9 +96,12 @@ export interface CreateTableEngineOptions<TRow> {
     readonly groupBy?: string;
   };
   /** Client filter over the extra bag. Omit and extras are stored only. */
-  readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
+  readonly filterFn?: RowCallback<
+    [row: NoInfer<TRow>, extra: ExtraFilters],
+    boolean
+  >;
   /** Override searchable text. Defaults to flattened own values. */
-  readonly getSearchText?: (row: TRow) => string;
+  readonly getSearchText?: RowCallback<[row: NoInfer<TRow>], string>;
   /** Active locale for `i18n` column paths. */
   readonly locale?: string;
   /** Stable id for {@link NeutralTable}. Generated when omitted. */
@@ -145,9 +149,9 @@ export interface TableEngineConfigPatch<TRow> extends Partial<
  */
 export interface TableCallbackRefresh<TRow> {
   /** Stable row identity. */
-  readonly getRowId?: (row: TRow) => string;
+  readonly getRowId?: RowCallback<[row: NoInfer<TRow>], string>;
   /** Searchable text for one row. */
-  readonly getSearchText?: (row: TRow) => string;
+  readonly getSearchText?: RowCallback<[row: NoInfer<TRow>], string>;
   /** Client filter over the extra bag. */
   readonly filterFn?: NonNullable<IncrementalViewConfig<TRow>["filterFn"]>;
   /** Predicate for a filter tree. */
@@ -177,7 +181,10 @@ export interface TableEngineReader<TRow = unknown> {
   /** One declared column, by key. */
   readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
   /** The neutral value of one cell. */
-  readonly cellValue: (row: TRow, columnKey: string) => unknown;
+  readonly cellValue: RowCallback<
+    [row: NoInfer<TRow>, columnKey: string],
+    unknown
+  >;
   /** The rows of a named window. */
   readonly rows: (scope: TableRowScope) => readonly TRow[];
   /** The row behind a key, or `undefined` when it is not loaded. */
@@ -193,7 +200,7 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
   /** Stable id for this table. */
   readonly tableId: string;
   /** Stable row identity. */
-  readonly rowKey: (row: TRow) => string;
+  readonly rowKey: RowCallback<[row: NoInfer<TRow>], string>;
   /**
    * What the render in progress staged, or the committed state when nothing
    * is pending. Read this to render the state about to be published; read the
@@ -211,23 +218,26 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
    * Align incremental query options (filter tree, sort levels, grouping
    * chrome) without a second derivation path.
    */
-  readonly configure: (
-    patch: TableEngineConfigPatch<TRow>,
-    options?: { silent?: boolean }
-  ) => void;
+  readonly configure: RowCallback<
+    [patch: TableEngineConfigPatch<TRow>, options?: { silent?: boolean }],
+    void
+  >;
   /**
    * Mark axes stale. Invalidating `"data"` without a new array re-derives
    * from the array the engine already holds, so a host that mutated its rows
    * in place gets fresh results and not merely a new revision token.
    */
-  readonly invalidate: (
-    axes: readonly TableRevisionAxis[],
-    next?: {
-      readonly data?: readonly TRow[];
-      readonly columns?: readonly ColumnMetadata<TRow>[];
-    },
-    options?: { silent?: boolean }
-  ) => void;
+  readonly invalidate: RowCallback<
+    [
+      axes: readonly TableRevisionAxis[],
+      next?: {
+        readonly data?: readonly TRow[];
+        readonly columns?: readonly ColumnMetadata<TRow>[];
+      },
+      options?: { silent?: boolean },
+    ],
+    void
+  >;
   /**
    * Apply configuration and data to a private candidate.
    *
@@ -242,13 +252,16 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
    * A dropped candidate — discarded, or replaced by a `configure`, `dispatch`
    * or `invalidate` — leaves the committed state exactly as it was.
    */
-  readonly stageCandidate: (
-    patch: TableEngineConfigPatch<TRow>,
-    next?: {
-      readonly data?: readonly TRow[];
-      readonly columns?: readonly ColumnMetadata<TRow>[];
-    }
-  ) => void;
+  readonly stageCandidate: RowCallback<
+    [
+      patch: TableEngineConfigPatch<TRow>,
+      next?: {
+        readonly data?: readonly TRow[];
+        readonly columns?: readonly ColumnMetadata<TRow>[];
+      },
+    ],
+    void
+  >;
   /** Publish the candidate as the committed state and notify subscribers. */
   readonly commitCandidate: () => void;
   /** Drop the candidate; the committed state is already what it was. */
@@ -261,7 +274,10 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
    * Clearing a callback, or adding one that was absent, re-derives the
    * affected rows and notifies when that write is the committed model.
    */
-  readonly refreshCallbacks: (patch: TableCallbackRefresh<TRow>) => void;
+  readonly refreshCallbacks: RowCallback<
+    [patch: TableCallbackRefresh<TRow>],
+    void
+  >;
   /** Stop every subscription and release the engine. */
   readonly dispose: () => void;
 }

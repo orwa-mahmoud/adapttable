@@ -35,5 +35,5 @@ export function FeatureHostProvider({
  */
 export function useFeatureHost<TRow = unknown>():
   FeatureHostState<TRow> | undefined {
-  return useContext(FeatureHostContext) as FeatureHostState<TRow> | undefined;
+  return useContext(FeatureHostContext);
 }

@@ -2,12 +2,15 @@
 import "../../kits/nuxt-ui.css";
 
 import { agentApproval, TableAssistant } from "@adapttable/nuxt-ui/assistant";
+import { batchEditing } from "@adapttable/nuxt-ui/batch-editing";
 import { bulkActions } from "@adapttable/nuxt-ui/bulk-actions";
 import { cellNavigation } from "@adapttable/nuxt-ui/cell-navigation";
 import { cellSpan } from "@adapttable/nuxt-ui/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/nuxt-ui/column-groups";
 import { columnMenu } from "@adapttable/nuxt-ui/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/nuxt-ui/column-selection";
+import { commandPalette } from "@adapttable/nuxt-ui/command-palette";
+import { contextMenu } from "@adapttable/nuxt-ui/context-menu";
 import { densityChooser } from "@adapttable/nuxt-ui/density";
 import {
   editHistory,
@@ -16,18 +19,22 @@ import {
   undoRedoButtons,
 } from "@adapttable/nuxt-ui/editing";
 import { exportCsv } from "@adapttable/nuxt-ui/export";
+import { extraRows } from "@adapttable/nuxt-ui/extra-rows";
 import { filters } from "@adapttable/nuxt-ui/filters";
+import { findInTable } from "@adapttable/nuxt-ui/find-in-table";
 import { fullscreen } from "@adapttable/nuxt-ui/fullscreen";
 import { groupingPanel } from "@adapttable/nuxt-ui/grouping-panel";
 import { headerFilters } from "@adapttable/nuxt-ui/header-filters";
 import { nestedTable } from "@adapttable/nuxt-ui/nested-table";
 import { pinnedSummaryRows } from "@adapttable/nuxt-ui/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/nuxt-ui/pivot";
+import { print } from "@adapttable/nuxt-ui/print";
 import { resizableColumns } from "@adapttable/nuxt-ui/resizable-columns";
 import { rowActions } from "@adapttable/nuxt-ui/row-actions";
 import { rowPinning } from "@adapttable/nuxt-ui/row-pinning";
 import { rowReorder } from "@adapttable/nuxt-ui/row-reorder";
-import { savedViews } from "@adapttable/nuxt-ui/saved-views";
+import { savedViews, SavedViewsPanel } from "@adapttable/nuxt-ui/saved-views";
+import { selectionStats } from "@adapttable/nuxt-ui/selection-stats";
 import { statusBar } from "@adapttable/nuxt-ui/status-bar";
 import { tree } from "@adapttable/nuxt-ui/tree";
 import { virtualize } from "@adapttable/nuxt-ui/virtualize";
@@ -121,6 +128,7 @@ export const kit: ShowcaseKit = {
     }),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,
@@ -132,12 +140,19 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

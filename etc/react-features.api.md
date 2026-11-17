@@ -9,7 +9,7 @@ import { AggregateFormatContext } from '@adapttable/core';
 import { AggregateName } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
 import { applyTableFeatures } from '@adapttable/core/binding';
-import { BatchRowEdit } from '@adapttable/core';
+import { BatchRowEdit as BatchRowEdit_2 } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { CellEditor } from '@adapttable/core';
@@ -153,7 +153,8 @@ export { applyTableFeatures }
 // @public
 export function batchEditing<TRow>(onBatchEdit: (edits: readonly BatchRowEdit<TRow>[]) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
 
-export { BatchRowEdit }
+// @public
+export type BatchRowEdit<TRow> = BatchRowEdit_2<TRow>;
 
 export { BulkAction }
 
@@ -410,6 +411,7 @@ export interface FeatureProps<TRow> {
     enableColumnMenu?: boolean;
     exportCsv?: boolean | ExportCsvOptions<TRow>;
     extraRows?: readonly ExtraRow[];
+    featureLabels?: readonly Partial<TableLabels>[];
     filters?: readonly FilterDef<TRow>[] | ReactNode;
     filterTypes?: readonly FilterTypeSpec[];
     findInTable?: boolean;
@@ -486,6 +488,9 @@ export function filters(form: ReactNode): StaticTableFeature;
 
 // @public
 export function filters<TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
+
+// @public
+export function filters<TRow>(defs: readonly FilterDef<TRow>[] | ReactNode): TableFeature<TRow>;
 
 export { FilterType }
 

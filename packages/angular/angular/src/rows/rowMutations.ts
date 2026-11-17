@@ -1,6 +1,9 @@
 /** Adding, duplicating and deleting rows asks the host; core builds the actions. */
-import { rowMutationActions, type TableLabels } from "@adapttable/core";
-import type { RowMutationsState } from "@adapttable/core/binding";
+import { type TableLabels } from "@adapttable/core";
+import {
+  rowMutationActions,
+  type RowMutationsState,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

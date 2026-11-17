@@ -122,7 +122,7 @@ describe("columnResizeHandleProps", () => {
       key: "ArrowLeft",
     };
     // computed direction rtl → ArrowLeft widens: 150 + 16 = 166.
-    props.onKeyDown(event as never);
+    props.onKeyDown(event);
     expect(setWidth).toHaveBeenLastCalledWith("a", 166);
   });
 
@@ -140,7 +140,7 @@ describe("columnResizeHandleProps", () => {
       } as unknown as HTMLElement,
       key: "ArrowRight",
     };
-    props.onKeyDown(event as never);
+    props.onKeyDown(event);
     expect(setWidth).toHaveBeenLastCalledWith("a", 76);
   });
 });
@@ -186,7 +186,7 @@ describe("columnResizeHandleProps — double-click sizes to content", () => {
     const props = columnResizeHandleProps("name", setWidth, "Resize column");
     props.onDoubleClick({
       currentTarget: handle,
-    } as unknown as Parameters<typeof props.onDoubleClick>[0]);
+    });
     expect(setWidth).toHaveBeenCalledExactlyOnceWith("name", 324);
   });
 
@@ -198,7 +198,7 @@ describe("columnResizeHandleProps — double-click sizes to content", () => {
     const props = columnResizeHandleProps("name", setWidth, "Resize column");
     props.onDoubleClick({
       currentTarget: handle,
-    } as unknown as Parameters<typeof props.onDoubleClick>[0]);
+    });
     expect(setWidth).not.toHaveBeenCalled();
   });
 });

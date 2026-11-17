@@ -8,7 +8,6 @@
 import {
   type KeyedVirtualization,
   type TableVirtualization,
-  VIRTUAL_OVERSCAN,
 } from "@adapttable/core";
 import {
   asSizeEstimator,
@@ -16,6 +15,7 @@ import {
   keyedWindow,
   materializeWindowRows,
   rowWindow,
+  VIRTUAL_OVERSCAN,
   virtualItemMeta,
 } from "@adapttable/core/binding";
 import {

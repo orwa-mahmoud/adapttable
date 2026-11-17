@@ -6,7 +6,8 @@ for (const kit of ANGULAR_KITS) {
   test.describe(kit.key, () => {
     /**
      * Each Angular kit's row-reordering page: a grip that lifts, moves
-     * and drops from the keyboard, announcements, and the host writing the move.
+     * and drops from the keyboard, announcements, a confirm before the move,
+     * and the host writing it.
      */
 
     const PAGE = `/${kit.key}/row-reordering/`;
@@ -21,9 +22,9 @@ for (const kit of ANGULAR_KITS) {
             .slice(0, n)
             .map(
               (row) =>
-                [...row.querySelectorAll('[data-adapttable-part="cell"]')]
-                  .map((cell) => cell.textContent?.trim() ?? "")
-                  .find((text) => /^[A-Z][a-z]+ /.test(text)) ?? ""
+                row
+                  .querySelector('[data-column-key="person"] strong')
+                  ?.textContent?.trim() ?? ""
             ),
         count
       );
@@ -44,6 +45,13 @@ for (const kit of ANGULAR_KITS) {
       await page.keyboard.press("ArrowDown");
       await page.keyboard.press("ArrowDown");
       await page.keyboard.press("Space");
+      // A pointer drop asks first; confirm when the kit shows the menu.
+      const confirmation = page.locator(
+        '[data-adapttable-part="row-move-confirmation"]:visible'
+      );
+      if ((await confirmation.count()) > 0) {
+        await confirmation.getByRole("button", { name: "Move" }).click();
+      }
 
       await expect
         .poll(() => people(page, 3))
@@ -51,9 +59,6 @@ for (const kit of ANGULAR_KITS) {
       await expect(
         page.locator(".mx-demo [aria-live]").filter({ hasText: "moved" })
       ).toHaveText("Row moved from 1 to 3");
-      await expect(page.locator("[data-demo-log]")).toHaveText(
-        "Moved Ada Lovelace from 1 to 3"
-      );
     });
 
     test("cancels a lift on Escape without asking the host to write", async ({
@@ -65,12 +70,10 @@ for (const kit of ANGULAR_KITS) {
       await page.keyboard.press("Space");
       await page.keyboard.press("ArrowDown");
       await page.keyboard.press("Escape");
+      await expect(part(page, "row").first()).toContainText("Ada Lovelace");
       await expect
         .poll(() => people(page, 2))
         .toEqual(["Ada Lovelace", "Alan Turing"]);
-      await expect(page.locator("[data-demo-log]")).toHaveText(
-        "Drag a grip, or lift a row with Space."
-      );
     });
   });
 }

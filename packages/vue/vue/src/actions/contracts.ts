@@ -1,7 +1,6 @@
 /** Lightweight control channels. Importing the shell does not install actions. */
 import type {
   BulkAction,
-  BulkBarModel,
   Command,
   ContextMenuItem,
   ContextMenuPoint,
@@ -10,6 +9,7 @@ import type {
   TableLabels,
 } from "@adapttable/core";
 import {
+  type BulkBarModel,
   type ExportHandlerState,
   featureSlotKey,
   featureStateKey,
@@ -18,6 +18,7 @@ import {
 import type { MaybeRefOrGetter, VNodeChild } from "vue";
 
 import type { Attrs } from "../attrs";
+
 export interface ActionPresentation {
   readonly labels: Required<TableLabels>;
   readonly dir: Direction;

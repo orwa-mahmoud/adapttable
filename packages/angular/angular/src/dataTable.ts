@@ -6,28 +6,17 @@
  */
 import {
   autoSizeColumns,
-  columnFlexShares,
   type ColumnGroupRecord,
-  computePagination,
-  deriveSortByOptions,
   devWarn,
   type Direction,
-  gridCellAttributes,
-  gridColumnHeaderAttributes,
-  gridContainerAttributes,
-  gridRowAttributes,
-  nextSort,
   pageSizeOptions,
   type PaginationInfo,
   type PaginationSlot,
   paginationSlots,
   PIN_Z,
   pinnedCellStyle,
-  resolveLabels,
-  SEARCH_DEBOUNCE_MS,
   type SortByOption,
   type SortDirection,
-  tableErrorState,
   type TableLabels,
   type TableSource,
   visibleColumns,
@@ -42,19 +31,32 @@ import {
   chromeIsRefreshing,
   chromeShowFooter,
   clearChromeFilters,
+  clearSearchAndFilters,
+  columnFlexShares,
+  computePagination,
   type CssProperties,
+  deriveSortByOptions,
   desktopTableStyle,
   type FeatureHostState,
+  featureLabelsOf,
   fetchNextBodyPage,
+  gridCellAttributes,
+  gridColumnHeaderAttributes,
+  gridContainerAttributes,
+  gridRowAttributes,
   headerCellAttributes,
   headerRowAttributes,
   type HtmlGroupedHeaderCell,
   htmlGroupedHeaderPlan,
+  nextSort,
+  resolveTableLabels,
   rowAttributes,
+  SEARCH_DEBOUNCE_MS,
   searchInputAttributes,
   sortButtonAttributes,
   sourceWindowStart,
   tableAttributes,
+  tableErrorState,
 } from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
@@ -90,6 +92,7 @@ import {
   tableFeaturesOf,
 } from "./featureHost";
 import { createFeatureState, type FeatureState } from "./featureState";
+import { withRailRoom } from "./layout/railRoom";
 import { createSearchInput } from "./searchInput";
 import type { RowSelection } from "./selection/selection";
 import type { SlotFills } from "./slotContracts";
@@ -271,6 +274,11 @@ export interface DataTable<TRow> {
   /** Clear every filter, then call `onClearFilters`. */
   readonly clearFilters: () => void;
   /**
+   * Clear the search as well as every filter, then call `onClearFilters`:
+   * what the no-results view offers.
+   */
+  readonly clearSearchAndFilters: () => void;
+  /**
    * Size every visible column to its rendered content, measured under
    * `root`, and keep the widths in the layout.
    */
@@ -327,9 +335,6 @@ export function injectDataTable<TRow>(
   const injector = options.injector ?? inject(Injector);
   const { source, rowKey } = options;
 
-  const labels = computed(() =>
-    resolveLabels(options.labels && readMaybe(options.labels))
-  );
   const dir = computed(() => readMaybe(options.dir ?? "ltr"));
   const isMobile = computed(() => readMaybe(options.forceMobile ?? false));
   const columnWidths = computed(
@@ -340,6 +345,12 @@ export function injectDataTable<TRow>(
     tableFeaturesOf(injector, readMaybe(options.features))
   );
   const featureOptions = computed(() => featureOptionsOf(features()));
+  const labels = computed(() =>
+    resolveTableLabels(
+      options.labels && readMaybe(options.labels),
+      featureLabelsOf(features())
+    )
+  );
   const featureHost = featureHostFor(injector, options.features);
   const tree = computed(() => flattenColumns(readMaybe(options.columns)));
   const columnGroups = computed(() => tree().groups);
@@ -415,14 +426,17 @@ export function injectDataTable<TRow>(
       widths: widths(),
     })
   );
-  // A minimum width that holds every sized column, so the widths hold and the
-  // table scrolls sideways instead of squeezing them; fitted when asked.
+  // A minimum width that holds every sized column and the measured rails, so
+  // the widths hold and the table scrolls sideways instead of squeezing
+  // them; fitted when asked.
   const tableStyle = computed(() =>
-    desktopTableStyle(columns(), {
-      columnWidths: widths(),
-      extraMinWidth: 0,
-      fitColumns: fitColumns(),
-    })
+    withRailRoom(
+      desktopTableStyle(columns(), {
+        columnWidths: widths(),
+        extraMinWidth: 0,
+        fitColumns: fitColumns(),
+      })
+    )
   );
   const sizing = computed(() => ({
     flexShares: flexShares(),
@@ -579,6 +593,13 @@ export function injectDataTable<TRow>(
     },
     clearFilters: () => {
       clearChromeFilters(source(), options.onClearFilters);
+    },
+    clearSearchAndFilters: () => {
+      clearSearchAndFilters(
+        source(),
+        searchInput.commit,
+        options.onClearFilters
+      );
     },
     rowKey,
     cellValue: (column, row) => column.accessor?.(row) ?? null,

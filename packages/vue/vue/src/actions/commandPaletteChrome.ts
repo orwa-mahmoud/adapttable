@@ -1,15 +1,15 @@
 /** Structural combobox and focus wiring; all visible controls are required slots. */
+
 import {
+  ACTION_LABELS,
   commandListKeyAction,
   commandListView,
+  type CommandPaletteChromeProps as NeutralProps,
+  type CommandPaletteSlots as NeutralSlots,
   createCommandList,
-  resolveLabels,
+  resolveFeatureLabels,
   runCommand,
   tabTrapTarget,
-} from "@adapttable/core";
-import type {
-  CommandPaletteChromeProps as NeutralProps,
-  CommandPaletteSlots as NeutralSlots,
 } from "@adapttable/core/binding";
 import {
   computed,
@@ -26,6 +26,8 @@ import {
 import { elementRef } from "../attrs";
 import { scheduleTick } from "../scheduleTick";
 import { useExternalStore, useScopeActivity } from "../store";
+
+const ACTION_GROUPS = [ACTION_LABELS] as const;
 export type CommandPaletteSurfaceSlotProps = Parameters<
   NeutralSlots<VNodeChild, KeyboardEvent>["Surface"]
 >[0] & {
@@ -267,7 +269,7 @@ export const CommandPaletteChrome = /*#__PURE__*/ defineComponent(
         snapshot.value
       );
       const slots = props.slots;
-      const labels = resolveLabels(props.labels);
+      const labels = resolveFeatureLabels(props.labels, ACTION_GROUPS);
       const isCurrent = lifetime();
       const close = () => {
         if (isCurrent() && props.open) props.onClose();

@@ -1,10 +1,10 @@
-import type { TableSource } from "@adapttable/core";
 import {
   createMemoryAdapter,
   type TableErrorState,
   useColumnLayoutUrlState,
   useFrontendData,
 } from "@adapttable/react";
+import { type TableSource } from "@adapttable/react/adapter";
 import { sparklineColumn } from "@adapttable/react/sparkline";
 import { MantineProvider } from "@mantine/core";
 import {
@@ -343,7 +343,10 @@ describe("<DataTable> (Mantine)", () => {
   it("shows the loading skeleton on first load", () => {
     const { container } = renderHarness({ rows: [], isLoading: true });
     expect(
-      container.querySelector('[class*="mantine-Skeleton"]')
+      container.querySelector('[data-adapttable-part="loading"]')
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-adapttable-part="loading-table"]')
     ).toBeInTheDocument();
   });
 

@@ -16,6 +16,8 @@ import { createVuetify } from "vuetify/framework";
 
 import { DataTable } from "../src";
 import { exportCsv } from "../src/export";
+import { exportPdf } from "../src/export-pdf";
+import { exportXlsx } from "../src/export-xlsx";
 
 interface Row {
   id: string;
@@ -80,7 +82,11 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 
-it.each([{ format: "CSV", factory: exportCsv }])(
+it.each([
+  { format: "CSV", factory: exportCsv },
+  { format: "PDF", factory: exportPdf },
+  { format: "XLSX", factory: exportXlsx },
+])(
   "keeps $format selection exports host-owned and blocks duplicate admission",
   async ({ format, factory }) => {
     const pending = deferred<void>();

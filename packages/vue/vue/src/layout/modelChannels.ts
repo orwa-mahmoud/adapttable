@@ -160,7 +160,8 @@ export interface EditingChromeModel<TRow> {
   readonly row?: (
     row: TRow,
     rowId: string,
-    actions: readonly RowAction<TRow>[] | undefined
+    actions: readonly RowAction<TRow>[] | undefined,
+    editing?: EditingBundle<TRow>
   ) => {
     readonly props: RowEditActionsProps<TRow>;
     readonly actions: readonly RowAction<TRow>[];

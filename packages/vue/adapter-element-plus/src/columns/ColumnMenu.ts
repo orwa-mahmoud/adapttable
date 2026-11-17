@@ -2,6 +2,7 @@ import {
   ColumnMenuChrome,
   type ColumnMenuSlotProps,
   useColumnMenu,
+  withProps,
 } from "@adapttable/vue/adapter";
 import { createVNode, defineComponent, h, type SetupContext } from "vue";
 
@@ -33,7 +34,7 @@ const ElementColumnMenuPresentation = defineComponent(
   },
   { name: "ElementColumnMenuPresentation", props: menuProps }
 );
-export function ColumnMenu<TRow>(
+export const ColumnMenu = /* @__PURE__ */ withProps(function ColumnMenu<TRow>(
   props: ColumnMenuSlotProps<TRow>,
   context: Pick<SetupContext, "attrs">
 ) {
@@ -41,5 +42,4 @@ export function ColumnMenu<TRow>(
     ...context.attrs,
     ...props,
   });
-}
-ColumnMenu.props = menuProps;
+}, menuProps);

@@ -1,11 +1,14 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./data-table.test-utils";
+import { densityFullscreenTests } from "../../react/test/kit/suites/densityFullscreen";
+import { DataTable, kit } from "./data-table.test-utils";
 import { densityChooser } from "./density";
 import { fullscreen } from "./fullscreen";
 import type { ColumnDef } from "./index";
 import { savedViews } from "./saved-views";
+
+for (const test of densityFullscreenTests(kit)) it(test.name, test.run);
 
 interface Row {
   id: string;
@@ -59,20 +62,6 @@ describe("density and fullscreen (mui)", () => {
   const part = (name: string) =>
     document.querySelector(`[data-adapttable-part="${name}"]`);
 
-  it("shows neither control until asked", () => {
-    table();
-
-    expect(part("density-toggle")).toBeNull();
-    expect(part("fullscreen-toggle")).toBeNull();
-  });
-
-  it("offers the density chooser and reports the choice", () => {
-    table({ densityChooser: true, onDensityChange });
-    fireEvent.click(part("density-toggle")!);
-
-    expect(onDensityChange).toHaveBeenCalledWith("compact");
-  });
-
   it("applies an uncontrolled choice to the rendered cells", () => {
     table({ densityChooser: true });
     const header = document.querySelector("th")!;
@@ -80,19 +69,6 @@ describe("density and fullscreen (mui)", () => {
     expect(header).toHaveClass("MuiTableCell-sizeMedium");
     fireEvent.click(part("density-toggle")!);
     expect(header).toHaveClass("MuiTableCell-sizeSmall");
-  });
-
-  it("goes back the other way from compact", () => {
-    table({ densityChooser: true, density: "compact", onDensityChange });
-    fireEvent.click(part("density-toggle")!);
-
-    expect(onDensityChange).toHaveBeenCalledWith("comfortable");
-  });
-
-  it("offers a fullscreen toggle when the browser allows it", () => {
-    table({ fullscreen: true });
-
-    expect(part("fullscreen-toggle")).not.toBeNull();
   });
 
   it("opens the table's overlays inside it while fullscreen", async () => {
@@ -135,15 +111,5 @@ describe("density and fullscreen (mui)", () => {
         configurable: true,
       });
     }
-  });
-
-  it("hides the toggle where fullscreen is not allowed at all", () => {
-    Object.defineProperty(document, "fullscreenEnabled", {
-      value: false,
-      configurable: true,
-    });
-    table({ fullscreen: true });
-
-    expect(part("fullscreen-toggle")).toBeNull();
   });
 });

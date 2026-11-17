@@ -7,6 +7,7 @@ import {
   AdaptTreeCellChrome,
   AdaptTreeToggleChrome,
   expandChevronIcon,
+  type IconDescriptor,
   type TreeCellProps,
   type TreeToggleButtonProps,
   type TreeToggleProps,
@@ -18,6 +19,7 @@ import {
   Component,
   computed,
   input,
+  type Signal,
   type TemplateRef,
 } from "@angular/core";
 
@@ -79,7 +81,7 @@ export class AdaptTreeButton {
   readonly props = input.required<TreeToggleButtonProps>();
 
   /** The descriptor supplies shape and expansion; CSS follows inherited RTL. */
-  protected readonly chevron = computed(() =>
+  protected readonly chevron: Signal<IconDescriptor> = computed(() =>
     expandChevronIcon({ open: this.props().expanded })
   );
 }

@@ -269,9 +269,9 @@ describe("semantic selection control projection", () => {
       await nextTick();
       expect(view.updates).toEqual([["a"]]);
       expect(view.firstRow().checked).toBe(true);
-      expect(view.controls().find((control) => !control.header)?.checked).toBe(
-        true
-      );
+      // Only the clicked row redraws, so its newest control is the last.
+      const rowControls = view.controls().filter((control) => !control.header);
+      expect(rowControls.at(-1)?.checked).toBe(true);
       expect(view.firstRow().getAttribute("data-adapttable-part")).toBe(
         "checkbox"
       );

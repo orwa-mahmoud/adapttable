@@ -22,25 +22,19 @@ import { Suspense, useMemo } from "react";
 import { initialDemoLocale } from "./demoPresentation";
 import { kitClassNames, kitTable } from "./kitProviders";
 import type { Locale } from "./people";
-
-/** Max minus min — a named aggregator the URL can carry as `range:budget`. */
-function rangeOf(values: readonly unknown[]): number | undefined {
-  const numbers = values.filter(
-    (value): value is number =>
-      typeof value === "number" && Number.isFinite(value)
-  );
-  if (numbers.length === 0) return undefined;
-  return Math.max(...numbers) - Math.min(...numbers);
-}
+import {
+  PIVOT_AGGREGATORS,
+  pivotCellFormat,
+  pivotRowHeader,
+} from "./shared/pivotScenario";
 
 const RANGE_FEATURE: TableFeature<PivotRow> = {
   id: "range",
   setup(host) {
-    host.registerAggregator("range", rangeOf);
+    for (const [name, aggregate] of PIVOT_AGGREGATORS)
+      host.registerAggregator(name, aggregate);
   },
 };
-
-const RANGE_BY_NAME = new Map([["range", rangeOf]]);
 
 /**
  * A pivot, rendered by whichever kit the reader picked.
@@ -59,13 +53,6 @@ const RANGE_BY_NAME = new Map([["range", rangeOf]]);
  * host's. It is wired to the same collapse set the engine reads, which is what
  * makes a folded group survive a shared link.
  */
-
-/** Cells are money on this dataset; the format belongs to the host. */
-const money = new Intl.NumberFormat("en", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
 
 export interface PivotTableViewProps<TRow> {
   /**
@@ -162,23 +149,15 @@ export function PivotTableView<TRow>({
   const model = useMemo(() => {
     const result = pivot(rows, config, {
       collapsed,
-      aggregators: RANGE_BY_NAME,
-      format: (value, measure) =>
-        typeof value === "number" &&
-        measure.key === "budget" &&
-        measure.agg !== "count"
-          ? money.format(value)
-          : value,
+      aggregators: PIVOT_AGGREGATORS,
+      format: pivotCellFormat,
     });
     return pivotTableModel(result, {
       fields,
       labels,
       // The corner cell names what is down the side, which is the question the
       // rows answer — "Team / Role", not the generic word "Rows".
-      rowHeader:
-        config.rows
-          .map((key) => fields.find((field) => field.key === key)?.label ?? key)
-          .join(" / ") || labels.pivotTotal,
+      rowHeader: pivotRowHeader(config, fields, labels.pivotTotal),
       renderRowHeader: (row) => (
         <RowHeader
           row={row}

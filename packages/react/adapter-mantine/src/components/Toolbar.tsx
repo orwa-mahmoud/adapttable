@@ -1,245 +1,200 @@
+/** The toolbar, drawn by the binding with Mantine's controls. */
 import {
-  FeatureSlot,
-  FILTER_POPOVER,
-  pageSizeOptions,
-  TOOLBAR_EXTRAS,
-  type ToolbarChromeProps,
+  createToolbar,
+  type KitButtonProps,
+  type KitFiltersButtonProps,
+  type KitRowsPerPageProps,
+  type KitToolbarFrameProps,
+  type KitToolbarSearchProps,
+  type KitToolbarSortProps,
 } from "@adapttable/react/adapter";
-import { Badge, Button, Group, Select, Text, TextInput } from "@mantine/core";
-import type { ReactNode } from "react";
+import {
+  Badge,
+  Button as MantineButton,
+  Group,
+  Select,
+  Text,
+  TextInput,
+} from "@mantine/core";
+import { type ButtonHTMLAttributes, forwardRef, type Ref } from "react";
 
 import { FiltersIcon, SearchIcon } from "../icons";
 
-/**
- * Props for {@link Toolbar}: the shared chrome surface from core plus the
- * Mantine-specific filter-container wiring.
- */
-export interface ToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
-  /** Close the filter container. */
-  onCloseFilters: () => void;
-  /** Filter content + how to render its container. */
-  filtersMode: "popover" | "drawer" | "header";
-  /** The filter fields to render. */
-  filters?: ReactNode;
-  /** Clear-filters handler used by the popover's clear-all button. */
-  onClearFilters: () => void;
-  /** Class for the element. */
-  className?: string;
-}
-
-/** Sticky toolbar: search, optional sort select, custom slot, filters, size. */
-export function Toolbar<TRow>({
-  table,
-  searchable,
-  searchPlaceholder,
-  sortByOptions,
-  toolbar,
-  toolbarSlots,
-  onUndo,
-  onRedo,
-  canUndo,
-  canRedo,
-  undoLabel,
-  redoLabel,
-  onPrint,
-  printLabel,
-  density,
-  onDensityChange,
-  onToggleFullscreen,
-  isFullscreen,
-  hasFilters,
-  activeFilterCount,
-  onToggleFilters,
-  onFiltersTriggerPointerDown,
-  onCloseFilters,
-  filtersOpen,
-  filtersMode,
-  filters,
-  onClearFilters,
-  dir,
-  savedViewsMenu,
-  columnMenu,
-  onAddRow,
-  addRowLabel,
-  onExportCsv,
-  exportBusy,
-  exportAnnouncement = "",
-  exportProgressState,
-  exportDisabled = false,
-  exportDisabledReason = "",
-  exportLabel,
-  showRowsPerPage,
-  className,
-}: Readonly<ToolbarProps<TRow>>) {
-  const { labels, source } = table;
-  const searchProps = table.getSearchInputProps(
-    searchPlaceholder ? { placeholder: searchPlaceholder } : undefined
-  );
-  // Explicit options win; otherwise auto-derive on mobile, where the card
-  // layout has no clickable headers to sort by.
-  const sortOptions =
-    sortByOptions ?? (table.isMobile ? table.sortByOptions : undefined);
-
-  const filtersButton = (
-    <Button
-      variant="default"
-      size="sm"
-      aria-expanded={filtersMode === "popover" ? filtersOpen : undefined}
-      data-active={filtersOpen || undefined}
-      leftSection={<FiltersIcon size={16} />}
-      rightSection={
-        activeFilterCount > 0 ? (
-          <Badge size="sm" circle>
-            {activeFilterCount}
-          </Badge>
-        ) : undefined
-      }
-      onPointerDown={onFiltersTriggerPointerDown}
-      onClick={onToggleFilters}
-    >
-      {labels.filters}
-    </Button>
-  );
-
+/** Search on one side, the controls on the other. */
+function Frame({ start, search, controls }: Readonly<KitToolbarFrameProps>) {
+  "use no memo";
   return (
-    <Group
-      gap="sm"
-      justify="space-between"
-      align="center"
-      className={className}
-    >
-      {toolbarSlots?.start}
-      {searchable !== false && (
-        <TextInput
-          {...searchProps}
-          data-adapttable-part="search"
-          wrapperProps={{ "data-adapttable-part": "search-field" }}
-          attributes={{ section: { "data-adapttable-part": "search-icon" } }}
-          leftSection={<SearchIcon size={14} />}
-          size="sm"
-          style={{ flex: 1, minWidth: 160, maxWidth: 360 }}
-        />
-      )}
+    <Group gap="sm" justify="space-between" align="center">
+      {start}
+      {search}
       <Group gap="xs" align="center">
-        {sortOptions && sortOptions.length > 0 && (
-          <Select
-            aria-label={labels.sortBy}
-            placeholder={labels.sortBy}
-            data={sortOptions}
-            value={source.sortBy ?? null}
-            onChange={(v) =>
-              source.setSort(v ?? undefined, source.sortDir ?? "asc")
-            }
-            clearable
-            size="sm"
-            w={160}
-            comboboxProps={{ withinPortal: false }}
-          />
-        )}
-        {table.isMobile && sortOptions && sortOptions.length > 0 && (
-          <Button
-            variant="default"
-            size="sm"
-            type="button"
-            data-adapttable-part="sort-direction"
-            disabled={!source.sortBy}
-            aria-label={
-              source.sortDir === "desc"
-                ? labels.sortAscending
-                : labels.sortDescending
-            }
-            onClick={() =>
-              source.setSort(
-                source.sortBy,
-                source.sortDir === "desc" ? "asc" : "desc"
-              )
-            }
-          >
-            {source.sortDir === "desc"
-              ? labels.sortDescending
-              : labels.sortAscending}
-          </Button>
-        )}
-        {toolbar}
-        {hasFilters && filtersMode === "popover" ? (
-          <FeatureSlot
-            slot={FILTER_POPOVER}
-            props={{
-              open: filtersOpen,
-              onClose: onCloseFilters,
-              filters,
-              activeFilterCount,
-              onClearFilters,
-              labels,
-              dir,
-              children: filtersButton,
-            }}
-          />
-        ) : (
-          hasFilters && filtersButton
-        )}
-        {savedViewsMenu}
-        {columnMenu}
-        <FeatureSlot
-          slot={TOOLBAR_EXTRAS}
-          props={{
-            onUndo,
-            onRedo,
-            canUndo,
-            canRedo,
-            undoLabel,
-            redoLabel,
-            onPrint,
-            printLabel,
-            density,
-            onDensityChange,
-            onToggleFullscreen,
-            isFullscreen,
-            onExportCsv,
-            exportBusy,
-            exportAnnouncement,
-            exportProgressState,
-            exportLabel,
-            exportDisabled,
-            exportDisabledReason,
-            labels,
-          }}
-        />
-        {onAddRow && (
-          <Button
-            variant="light"
-            size="sm"
-            data-adapttable-part="add-row"
-            onClick={onAddRow}
-          >
-            {addRowLabel}
-          </Button>
-        )}
-        {toolbarSlots?.end}
-        {showRowsPerPage && (
-          <Group gap="xs" align="center">
-            <Text fz="xs" c="dimmed">
-              {labels.rowsPerPage}
-            </Text>
-            <Select
-              aria-label={labels.rowsPerPage}
-              data={pageSizeOptions([source.limit, source.defaultLimit]).map(
-                (n) => ({
-                  value: String(n),
-                  label: String(n),
-                })
-              )}
-              value={String(source.limit)}
-              // `allowDeselect={false}` keeps the value non-null.
-              onChange={(v) => source.setLimit(Number(v!))}
-              size="sm"
-              w={80}
-              allowDeselect={false}
-              comboboxProps={{ withinPortal: false }}
-            />
-          </Group>
-        )}
+        {controls}
       </Group>
     </Group>
   );
 }
+
+const SEARCH_WIDTH = { flex: 1, minWidth: 160, maxWidth: 360 } as const;
+const SEARCH_ICON_PART = {
+  section: { "data-adapttable-part": "search-icon" },
+} as const;
+const SEARCH_FIELD_PART = { "data-adapttable-part": "search-field" } as const;
+const NO_PORTAL = { withinPortal: false } as const;
+
+function Search({ input }: Readonly<KitToolbarSearchProps>) {
+  "use no memo";
+  return (
+    <TextInput
+      {...input}
+      data-adapttable-part="search"
+      wrapperProps={SEARCH_FIELD_PART}
+      attributes={SEARCH_ICON_PART}
+      leftSection={<SearchIcon size={14} />}
+      size="sm"
+      style={SEARCH_WIDTH}
+    />
+  );
+}
+
+function SortSelect({
+  label,
+  value,
+  options,
+  onValueChange,
+}: Readonly<KitToolbarSortProps>) {
+  "use no memo";
+  return (
+    <Select
+      aria-label={label}
+      placeholder={label}
+      data={options}
+      value={value || null}
+      onChange={(next) => onValueChange(next ?? undefined)}
+      clearable
+      size="sm"
+      w={160}
+      comboboxProps={NO_PORTAL}
+    />
+  );
+}
+
+/**
+ * The toolbar's button: default, or light for add-row. While busy it shows
+ * Mantine's own loader, which reads as "working" rather than as switched off.
+ */
+export function Button({
+  elementRef,
+  variant,
+  tone: _tone,
+  justify: _justify,
+  fullWidth: _fullWidth,
+  busy,
+  ...rest
+}: Readonly<KitButtonProps>) {
+  "use no memo";
+  return (
+    <MantineButton
+      ref={elementRef}
+      type="button"
+      size="sm"
+      variant={variant === "filled" ? "light" : "default"}
+      loading={busy}
+      {...rest}
+    />
+  );
+}
+
+/**
+ * The filters button, with the active count in a badge. The popover wraps it:
+ * it anchors through the forwarded ref and adds its own ARIA (popup, controls,
+ * id) on top of the button's.
+ */
+const FiltersButton = forwardRef(function FiltersButton(
+  {
+    elementRef,
+    label,
+    count,
+    expanded,
+    open,
+    onPointerDown,
+    onClick,
+    ...target
+  }: Readonly<
+    KitFiltersButtonProps &
+      Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof KitFiltersButtonProps>
+  >,
+  ref: Ref<HTMLButtonElement>
+) {
+  "use no memo";
+  return (
+    <MantineButton
+      ref={(node: HTMLButtonElement | null) => {
+        assign(elementRef, node);
+        assign(ref, node);
+      }}
+      variant="default"
+      size="sm"
+      aria-expanded={expanded}
+      data-adapttable-part="filters-button"
+      data-active={open || undefined}
+      leftSection={<FiltersIcon size={16} />}
+      rightSection={
+        count > 0 ? (
+          <Badge size="sm" circle>
+            {count}
+          </Badge>
+        ) : undefined
+      }
+      onPointerDown={onPointerDown}
+      onClick={onClick}
+      {...target}
+    >
+      {label}
+    </MantineButton>
+  );
+});
+
+function assign<T>(ref: Ref<T> | undefined, node: T | null): void {
+  if (typeof ref === "function") ref(node);
+  else if (ref) (ref as { current: T | null }).current = node;
+}
+
+function RowsPerPage({
+  label,
+  value,
+  options,
+  onValueChange,
+}: Readonly<KitRowsPerPageProps>) {
+  "use no memo";
+  return (
+    <Group gap="xs" align="center">
+      <Text fz="xs" c="dimmed">
+        {label}
+      </Text>
+      <Select
+        aria-label={label}
+        data={options.map((size) => ({
+          value: String(size),
+          label: String(size),
+        }))}
+        value={String(value)}
+        onChange={(next) => onValueChange(Number(next))}
+        size="sm"
+        w={80}
+        allowDeselect={false}
+        comboboxProps={NO_PORTAL}
+      />
+    </Group>
+  );
+}
+
+/** The toolbar: search, sort, filters, menus, extras and page size. */
+export const Toolbar = /* @__PURE__ */ createToolbar({
+  Frame,
+  Search,
+  SortSelect,
+  Button,
+  FiltersButton,
+  filtersPopover: "wrap",
+  RowsPerPage,
+});

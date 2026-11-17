@@ -1,8 +1,5 @@
-import {
-  type ColumnLayoutState,
-  EMPTY_COLUMN_LAYOUT,
-  type LayoutStorage,
-} from "@adapttable/core";
+import { type ColumnLayoutState, type LayoutStorage } from "@adapttable/core";
+import { EMPTY_COLUMN_LAYOUT } from "@adapttable/core/binding";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createApp,

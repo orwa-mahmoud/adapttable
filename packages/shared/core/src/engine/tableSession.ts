@@ -67,6 +67,8 @@ function observableAxes<TRow>(
   const b = after.view;
   if (
     !sameItems(before.derived.sorted, after.derived.sorted) ||
+    before.derived.groups !== after.derived.groups ||
+    before.derived.aggregates !== after.derived.aggregates ||
     a.page !== b.page ||
     a.limit !== b.limit ||
     a.search !== b.search ||
@@ -95,8 +97,6 @@ interface SessionState<TRow> {
   readonly model: RowModel<TRow>;
   /** Who staged the evaluator; `undefined` for the one the table began with. */
   readonly evaluator: unknown;
-  /** Whether `derived` is this state's own, so a write may change it in place. */
-  readonly owned: boolean;
 }
 
 /** A write in progress: the next state, before it is published. */
@@ -105,7 +105,6 @@ interface Draft<TRow> {
   derived: IncrementalView<TRow>;
   model: RowModel<TRow>;
   evaluator: unknown;
-  owned: boolean;
 }
 
 interface EngineView<TRow> {
@@ -195,7 +194,7 @@ const PASS_THROUGH_KEYS = [
 ] as const satisfies readonly (keyof EngineView<never>)[];
 
 /** The engine fields the incremental view reads under the same name. */
-const INCREMENTAL_KEYS = new Set<string>([
+const INCREMENTAL_KEYS = /* @__PURE__ */ new Set<string>([
   ...PASS_THROUGH_KEYS,
   "search",
   "groupBy",
@@ -255,17 +254,37 @@ function axesForChange(
   return axes;
 }
 
+/** What a source reads of one session state, whatever its row type. */
+interface ControlledState {
+  readonly view: { readonly data: readonly unknown[] };
+  readonly model: unknown;
+  readonly evaluator: unknown;
+}
+
 /** Session internals a frontend source reaches through the engine handle. */
 interface SessionControls {
-  /** The row model the committed state evaluates with. */
-  committedModel(): unknown;
-  /** The evaluator the next commit leaves live. */
-  evaluator(): unknown;
+  /** The committed table. */
+  committed(): ControlledState;
+  /** The state the next stage builds on: the candidate, else the committed table. */
+  base(): ControlledState;
   /** Stage `model` as the evaluator, published with the next commit. */
   stageModel(model: unknown, evaluator: unknown): void;
 }
 
-const SESSIONS = new WeakMap<object, SessionControls>();
+/**
+ * The state a stage builds on, as a source compares it. `view` is replaced
+ * by every write that changes the view or the data and survives a commit
+ * unchanged, so a source can tell whether the engine still holds what it
+ * staged.
+ *
+ * @internal
+ */
+export interface SessionBase {
+  readonly view: object;
+  readonly data: readonly unknown[];
+}
+
+const SESSIONS = /* @__PURE__ */ new WeakMap<object, SessionControls>();
 
 /**
  * The evaluator `engine` will run once its pending candidate commits: the
@@ -275,7 +294,18 @@ const SESSIONS = new WeakMap<object, SessionControls>();
  * @internal
  */
 export function sessionEvaluator(engine: object): unknown {
-  return SESSIONS.get(engine)?.evaluator();
+  return SESSIONS.get(engine)?.base().evaluator;
+}
+
+/**
+ * The state `engine`'s next stage builds on, or `undefined` for an engine
+ * this module did not build.
+ *
+ * @internal
+ */
+export function sessionBase(engine: object): SessionBase | undefined {
+  const view = SESSIONS.get(engine)?.base().view;
+  return view && { view, data: view.data };
 }
 
 /**
@@ -299,7 +329,7 @@ export function stageSessionEvaluator(
   const target = SESSIONS.get(engine);
   const source = SESSIONS.get(carrier);
   if (!target || !source) return false;
-  target.stageModel(source.committedModel(), evaluator);
+  target.stageModel(source.committed().model, evaluator);
   return true;
 }
 
@@ -382,7 +412,6 @@ export function createTableSession<TRow>(
     revisions: { data: 1, view: 1, schema: 1, policy: 1 },
     model,
     evaluator: undefined,
-    owned: false,
   };
   /** A render's private next table, published by commit. */
   let candidate: SessionState<TRow> | undefined;
@@ -413,8 +442,8 @@ export function createTableSession<TRow>(
   }
 
   /**
-   * A write in progress over `base`. Only a candidate may own its
-   * derivation: the committed one is never written in place.
+   * A write in progress over `base`. The row model never writes a record,
+   * so the draft shares `base`'s derivation until a write replaces it.
    */
   function draftOf(base: SessionState<TRow>): Draft<TRow> {
     return {
@@ -422,25 +451,12 @@ export function createTableSession<TRow>(
       derived: base.derived,
       model: base.model,
       evaluator: base.evaluator,
-      owned: base === candidate && base.owned,
     };
   }
 
-  /**
-   * Give the draft its own copy of the derivation before a write that
-   * changes it in place. The committed table, and a candidate a failed
-   * write abandons, keep theirs.
-   */
-  function ownDerived(draft: Draft<TRow>): void {
-    if (draft.owned) return;
-    draft.derived = draft.model.fork(draft.derived);
-    draft.owned = true;
-  }
-
-  /** Re-derive with a fresh evaluation: the result shares nothing. */
+  /** Re-derive from nothing. */
   function rebuild(draft: Draft<TRow>): void {
     draft.derived = draft.model.create(draft.view.data, configOf(draft.view));
-    draft.owned = true;
   }
 
   /**
@@ -465,7 +481,6 @@ export function createTableSession<TRow>(
     // A binding can coalesce several host patches into one update. The last
     // log describes only its own base, not every change since our snapshot.
     if (log && rowPatchLogStartsAt(log, draft.derived.rows)) {
-      ownDerived(draft);
       draft.derived = draft.model.applyPatch(draft.derived, log);
     } else {
       rebuild(draft);
@@ -476,14 +491,12 @@ export function createTableSession<TRow>(
     draft: Draft<TRow>,
     revisions: TableRevisions
   ): SessionState<TRow> {
-    attachIncrementalView(draft.derived.sorted, draft.derived);
     return {
       view: draft.view,
       derived: draft.derived,
       revisions,
       model: draft.model,
       evaluator: draft.evaluator,
-      owned: draft.owned,
     };
   }
 
@@ -610,10 +623,8 @@ export function createTableSession<TRow>(
     dropCandidate();
     const draft = draftOf(committed);
     const changed = write(draft);
-    committed = {
-      ...stateOf(draft, bump(committed.revisions, changed)),
-      owned: false,
-    };
+    committed = stateOf(draft, bump(committed.revisions, changed));
+    attachIncrementalView(committed.derived.sorted, committed.derived);
     if (!silent && changed.length > 0) notifyListeners(changed);
   }
 
@@ -632,6 +643,11 @@ export function createTableSession<TRow>(
       throw error;
     }
     const next = stateOf(draft, committed.revisions);
+    // Rows the committed table still shows keep pointing at its snapshot;
+    // the candidate's snapshot reaches them when it commits.
+    if (next.derived.sorted !== committed.derived.sorted) {
+      attachIncrementalView(next.derived.sorted, next.derived);
+    }
     // The tokens follow what the candidate actually reads differently, so a
     // render sees a coherent snapshot and an unchanged table stays still.
     pendingAxes = observableAxes(committed, next);
@@ -872,7 +888,8 @@ export function createTableSession<TRow>(
       assertLive();
       if (!candidate) return;
       const changed = pendingAxes;
-      committed = { ...candidate, owned: false };
+      committed = candidate;
+      attachIncrementalView(committed.derived.sorted, committed.derived);
       dropCandidate();
       if (changed.length === 0) return;
       // The revisions already moved with the candidate; publishing is what
@@ -927,8 +944,8 @@ export function createTableSession<TRow>(
   };
 
   SESSIONS.set(engine, {
-    committedModel: () => committed.model,
-    evaluator: () => (candidate ?? committed).evaluator,
+    committed: () => committed,
+    base: () => candidate ?? committed,
     stageModel(nextModel: unknown, evaluator: unknown) {
       assertLive();
       writeCandidate((draft) => {

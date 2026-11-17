@@ -25,7 +25,7 @@ import type { AdapterFeatureComponent } from "./component";
  */
 export interface AdapterFiltersComponents {
   /** Declarative tree and optional simple fields. */
-  readonly FiltersForm: AdapterFeatureComponent<FiltersFormSlotProps<never>>;
+  readonly FiltersForm: AdapterFeatureComponent<FiltersFormSlotProps<unknown>>;
   /** Removable active-filter chips. */
   readonly ActiveFilterChips: AdapterFeatureComponent<ActiveFilterChipsSlotProps>;
   /** Drawer or sheet used on constrained layouts. */
@@ -71,6 +71,5 @@ export function createAdapterFiltersFeature(
 
   return <TRow>(
     defs: readonly FilterDef<TRow>[] | ReactNode
-  ): TableFeature<TRow> =>
-    extendFeature(coreFilters(defs as readonly FilterDef<TRow>[]), renders);
+  ): TableFeature<TRow> => extendFeature(coreFilters<TRow>(defs), renders);
 }

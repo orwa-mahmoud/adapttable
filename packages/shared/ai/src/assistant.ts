@@ -12,6 +12,15 @@
  *
  * @packageDocumentation
  */
+export {
+  type AssistantBindingOptions,
+  type AssistantTableState,
+  type AssistantUndoView,
+  assistantUndoView,
+  type TableAssistantFields,
+  tableAssistantFields,
+  tableAssistantInputs,
+} from "./assistantBinding";
 export type {
   AssistantAnswer,
   AssistantAudio,
@@ -54,6 +63,7 @@ export {
   undoBlocked,
   type UndoCall,
 } from "./assistantUndo";
+export type { AlwaysAllowedState } from "./binding";
 
 // Named by the signatures above: a transport's reply carries an
 // `ExecuteResult`, the store is built from a session and the context inputs it

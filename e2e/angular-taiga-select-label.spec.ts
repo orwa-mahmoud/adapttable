@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-for (const slug of ["grouping", "aggregation", "ai"]) {
+for (const slug of ["grouping", "aggregation"]) {
   for (const locale of ["en", "ar"]) {
     for (const width of [390, 1440]) {
       test(`taiga-ui: ${slug} selected label fits at ${locale}/${width}`, async ({
@@ -14,14 +14,10 @@ for (const slug of ["grouping", "aggregation", "ai"]) {
         await page.goto(`/taiga-ui/${slug}/?locale=${locale}&live=off`);
         await page.evaluate(() => document.fonts.ready);
         const select = page
-          .locator(
-            `[data-adapttable-part="${slug === "ai" ? "demo-approval-surface" : "grouping-aggregation-operation"}"]`
-          )
+          .locator('[data-adapttable-part="grouping-aggregation-operation"]')
           .first();
         const sumLabel = locale === "ar" ? "المجموع" : "Sum";
-        await expect(select).toHaveValue(
-          slug === "ai" ? "Assistant" : sumLabel
-        );
+        await expect(select).toHaveValue(sumLabel);
         const sizing = await select.evaluate((node) => {
           const input = node as HTMLInputElement;
           const style = getComputedStyle(input);

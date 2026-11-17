@@ -29,7 +29,7 @@ import { MatButtonModule } from "@angular/material/button";
         aria-hidden="true"
         [title]="props().label"
         [class]="props().className ?? ''"
-        style="position: absolute; inset-inline-end: -3px; bottom: -3px; width: 8px; height: 8px; border-radius: 1px; background: var(--adapttable-fill-handle, currentColor); cursor: crosshair"
+        style="position: absolute; z-index: 2; inset-inline-end: -3px; bottom: -3px; width: 8px; height: 8px; border-radius: 1px; background: var(--adapttable-fill-handle, currentColor); cursor: crosshair"
       ></button>
     </span>
   `,

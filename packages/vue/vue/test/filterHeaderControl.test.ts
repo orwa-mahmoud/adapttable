@@ -4,8 +4,8 @@ import {
   type FilterFormSource,
   type FilterWidgetRenderProps,
   resolveLabels,
-  withFilterType,
 } from "@adapttable/core";
+import { withFilterType } from "@adapttable/core/binding";
 import { describe, expect, it, vi } from "vitest";
 import { computed, createSSRApp, effectScope, h, shallowRef } from "vue";
 import { renderToString } from "vue/server-renderer";

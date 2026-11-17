@@ -130,6 +130,60 @@ async function expectUrlSuffix(
     .toMatch(new RegExp(`[?&][^&]*${suffix}=${value.source}`));
 }
 
+/** The header cell of one column. */
+function headerOf(page: Page, key: string) {
+  return root(page)
+    .getByRole("columnheader")
+    .and(page.locator(`[data-column-key="${key}"]`));
+}
+
+/**
+ * Pinning a column reveals the hidden columns, so the table widens past its
+ * frame; scrolling the body sideways leaves the pinned column where it was.
+ */
+async function assertPinnedColumnSticks(
+  page: Page,
+  framework: Framework,
+  kit: string
+): Promise<void> {
+  await open(page, framework, kit);
+  await page.setViewportSize({ width: 1200, height: 814 });
+  await expect(headerOf(page, "person")).toBeVisible();
+  await expect(headerOf(page, "email")).toHaveCount(0);
+  await root(page)
+    .locator('[data-adapttable-part="column-menu-button"]')
+    .first()
+    .click();
+  await page
+    .getByRole("button", { name: "Pin to start: Person", exact: true })
+    .click();
+  await expect(headerOf(page, "email")).toHaveCount(1);
+  await expect(headerOf(page, "team")).toHaveCount(1);
+  await page.keyboard.press("Escape");
+  await expect(headerOf(page, "person")).toHaveAttribute(
+    "data-pinned",
+    "start"
+  );
+  const before = await headerOf(page, "person").boundingBox();
+  // The table's own scroller: inside the table, scrolling sideways.
+  const scrolled = await headerOf(page, "person").evaluate((cell) => {
+    const table = cell.closest('[data-adapttable-part="root"]');
+    let box: HTMLElement | null = cell.parentElement;
+    while (box && box !== table) {
+      const overflow = getComputedStyle(box).overflowX;
+      const scrolls = overflow === "auto" || overflow === "scroll";
+      if (scrolls && box.scrollWidth > box.clientWidth) break;
+      box = box.parentElement;
+    }
+    if (!box || box === table) return false;
+    box.scrollLeft = 120;
+    return box.scrollLeft > 0;
+  });
+  expect(scrolled).toBe(true);
+  const after = await headerOf(page, "person").boundingBox();
+  expect(after?.x).toBeCloseTo(before?.x ?? Number.NaN, 0);
+}
+
 export async function assertLiveDemo(
   page: Page,
   framework: Framework,
@@ -358,4 +412,6 @@ export async function assertLiveDemo(
     await expect(page.locator('[data-demo-control="grouping"]')).toBeDisabled();
     await expect(page.locator('[data-demo-control="editing"]')).toBeDisabled();
   }
+
+  await assertPinnedColumnSticks(page, framework, kit);
 }

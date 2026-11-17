@@ -2,24 +2,25 @@
 import {
   createGroupingPanelController,
   declaredAggregates,
+  groupingPanelAggregations,
+} from "@adapttable/core";
+import {
+  coreGroupingPanel,
   deferGroupingDropToInner,
   focusAfterAggregationRemoval,
   groupingAggregationOptions,
   groupingAvailableColumns,
   groupingColumnName,
   groupingDropPlan,
-  groupingPanelAggregations,
-  INERT_GROUPING_DROP_HANDLERS,
-} from "@adapttable/core";
-import {
-  coreGroupingPanel,
   type GroupingPanelSlotProps as NeutralGroupingPanelSlotProps,
   type GroupingPanelSlots as NeutralGroupingPanelSlots,
   groupingPanelState,
+  INERT_GROUPING_DROP_HANDLERS,
 } from "@adapttable/core/binding";
 import { createTableEngine } from "@adapttable/core/engine";
 import { parseGroupBy } from "@adapttable/core/grouping";
 import {
+  type Component,
   computed,
   defineComponent,
   h,
@@ -39,7 +40,6 @@ import {
   type StaticGroupingExtras,
 } from "../features/grouping";
 import {
-  eraseTableRuntime,
   type FeatureMountContext,
   type StaticTableFeature,
   type TableFeature,
@@ -65,14 +65,8 @@ export interface GroupingPanelChromeProps<
   };
 }
 /** DOM refs are per rendered panel; nothing is retained across tables. */
-const GroupingPanelSurface = /*#__PURE__*/ defineComponent({
-  props: {
-    model: {
-      type: Object as PropType<GroupingPanelChromeProps<unknown>>,
-      required: true,
-    },
-  },
-  setup(props) {
+const GroupingPanelSurface = /*#__PURE__*/ defineComponent(
+  <TRow>(props: { readonly model: GroupingPanelChromeProps<TRow> }) => {
     const fieldset = shallowRef<HTMLElement | null>(null);
     let pendingRemoval: number | undefined;
     let live = true;
@@ -314,13 +308,25 @@ const GroupingPanelSurface = /*#__PURE__*/ defineComponent({
       });
     };
   },
-});
+  {
+    props: {
+      model: {
+        type: Object as PropType<GroupingPanelChromeProps<unknown>>,
+        required: true,
+      },
+    },
+  }
+);
+/**
+ * The surface as `h` takes it at every supported Vue: below 3.5's later
+ * patches a setup component's row type cannot be instantiated, so the row
+ * type is held by {@link GroupingPanelChrome}'s signature instead.
+ */
+const GROUPING_PANEL_SURFACE: Component = GroupingPanelSurface;
 export function GroupingPanelChrome<TRow>(
   props: GroupingPanelChromeProps<TRow>
 ): VNodeChild {
-  return h(GroupingPanelSurface, {
-    model: props as unknown as GroupingPanelChromeProps<unknown>,
-  });
+  return h(GROUPING_PANEL_SURFACE, { model: props });
 }
 export function groupingPanel(
   initialGroupBy?: string | readonly string[],
@@ -341,10 +347,10 @@ export function groupingPanel<TRow>(
     onScopeDispose(() => {
       disposed = true;
     });
-    const neutralRuntime = eraseTableRuntime(context.runtime);
+    const tableRuntime = context.runtime;
     const setGroupBy: typeof context.source.value.setGroupBy = (value) => {
       if (disposed || !context.active.value) return;
-      const state = neutralRuntime.view()?.groupingState;
+      const state = tableRuntime.view()?.groupingState;
       if (!state) return;
       state.setGroupBy(value);
       if (disposed || !context.active.value) return;
@@ -353,10 +359,10 @@ export function groupingPanel<TRow>(
       );
     };
     const runtime = {
-      ...neutralRuntime,
+      ...tableRuntime,
       view: () => {
         if (disposed || !context.active.value) return undefined;
-        const view = neutralRuntime.view();
+        const view = tableRuntime.view();
         return view?.groupingState
           ? {
               ...view,
@@ -420,6 +426,7 @@ export function groupingPanel<TRow>(
   return withFrontendRowModel(
     {
       id: base.id,
+      labels: base.labels,
       requiredSlots: [groupingPanelControlKey<never>()],
       apply: (input) => ({
         ...base.apply?.(input),

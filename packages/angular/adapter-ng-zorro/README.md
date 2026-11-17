@@ -11,7 +11,7 @@ Available on npm as `@adapttable/ng-zorro`. The kit participates in the
 shell-kit contracts.
 
 ```bash
-pnpm add @adapttable/ng-zorro @adapttable/angular @adapttable/core
+pnpm add @adapttable/ng-zorro @adapttable/angular
 ```
 
 Install the Angular and NG-ZORRO peers listed below in the host application.

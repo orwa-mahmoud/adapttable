@@ -11,14 +11,15 @@
  * template, because an Angular slot cannot project children through the
  * control outlet.
  */
+import { type SavedView, type TableLabels } from "@adapttable/core";
 import {
   createSavedViewRenameController,
-  resolveLabels,
-  type SavedView,
+  type FeatureStrings,
+  resolveFeatureLabels,
+  SAVED_VIEW_LABELS,
   type SavedViewRowControlModel,
   savedViewRowControls,
-  type TableLabels,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
@@ -34,6 +35,8 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
+
+const SAVED_VIEW_GROUPS = [SAVED_VIEW_LABELS] as const;
 
 /**
  * Inline styles for one row. Held once so every row shares the object.
@@ -285,7 +288,9 @@ export class AdaptSavedViewsPanelChrome {
   }
 
   /** Resolved copy, English where the host passed nothing. */
-  private readonly resolved = computed(() => resolveLabels(this.labels()));
+  private readonly resolved = computed(() =>
+    resolveFeatureLabels(this.labels(), SAVED_VIEW_GROUPS)
+  );
 
   /**
    * The list, one model per view. Private so the row model stays inside
@@ -354,7 +359,7 @@ export class AdaptSavedViewsPanelChrome {
     view: SavedView,
     index: number,
     count: number,
-    labels: ReturnType<typeof resolveLabels>,
+    labels: FeatureStrings<typeof SAVED_VIEW_GROUPS>,
     editing: string | null,
     draft: string
   ): SavedViewsRowModel {

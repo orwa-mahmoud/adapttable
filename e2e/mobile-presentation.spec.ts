@@ -31,11 +31,7 @@ for (const framework of ["react", "angular", "vue"] as const) {
       ).toEqual([]);
       const actions = cards
         .first()
-        .locator(
-          framework === "react"
-            ? '[data-adapttable-part="row-edit-begin"]'
-            : '[data-adapttable-part="action-button"]'
-        );
+        .locator('[data-adapttable-part="row-edit-begin"]');
       await expect(actions.first()).toBeVisible();
       expect(
         await actions.evaluateAll((buttons) =>
@@ -56,32 +52,20 @@ for (const framework of ["react", "angular", "vue"] as const) {
         )
       ).toBeLessThanOrEqual(1);
 
-      if (framework === "react") {
-        await cards
-          .first()
-          .locator('[data-adapttable-part="row-edit-begin"]')
-          .click();
-        await expect(
-          cards.first().locator('[data-adapttable-part="row-edit-save"]')
-        ).toBeVisible();
-        await cards
-          .first()
-          .locator('[data-adapttable-part="row-edit-cancel"]')
-          .click();
-        await expect(
-          cards.first().locator('[data-adapttable-part="row-edit-begin"]')
-        ).toBeVisible();
-      } else {
-        await cards
-          .first()
-          .getByRole("button", { name: "View profile", exact: true })
-          .click();
-        await expect(root).toContainText(
-          framework === "angular"
-            ? "Activated Ada Lovelace"
-            : "Opened Ada Lovelace"
-        );
-      }
+      await cards
+        .first()
+        .locator('[data-adapttable-part="row-edit-begin"]')
+        .click();
+      await expect(
+        cards.first().locator('[data-adapttable-part="row-edit-save"]')
+      ).toBeVisible();
+      await cards
+        .first()
+        .locator('[data-adapttable-part="row-edit-cancel"]')
+        .click();
+      await expect(
+        cards.first().locator('[data-adapttable-part="row-edit-begin"]')
+      ).toBeVisible();
 
       await page
         .getByRole("button", { name: "Automatic", exact: true })

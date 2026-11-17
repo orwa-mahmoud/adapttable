@@ -4,6 +4,7 @@
  * current state under a name.
  */
 import {
+  type Direction,
   injectSavedViews,
   type SavedViewsControllerOptions,
   type SavedViewsState,
@@ -123,7 +124,7 @@ export class AdaptSavedViewsMenu implements OnInit {
 
   protected readonly panelStyle = MENU_PANEL_STYLE;
   protected readonly overlayStyle = { zIndex: String(OVERLAY_Z) };
-  protected readonly direction = signal<"ltr" | "rtl">("ltr");
+  protected readonly direction = signal<Direction>("ltr");
   protected readonly rowStyle = {
     display: "flex",
     "align-items": "center",

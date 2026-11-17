@@ -1,5 +1,8 @@
-import { groupCollapseActions, idSetReader } from "@adapttable/core";
-import type { GroupCollapseState } from "@adapttable/core/binding";
+import {
+  groupCollapseActions,
+  type GroupCollapseState,
+  idSetReader,
+} from "@adapttable/core/binding";
 import { useCallback, useMemo, useState } from "react";
 
 import { useControllableStore } from "../hooks/useControllableStore";

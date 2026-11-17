@@ -9,6 +9,7 @@ import {
   type DataTableSlots,
   DataTableSurfaceChrome,
   defaultConfirm,
+  keepTableControls,
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
@@ -26,10 +27,7 @@ import { provideClassNames } from "./classNamesContext";
 import { nativeCheckbox } from "./nativeCheckbox";
 import { nativeColumnGroupToggle } from "./nativeColumnGroupToggle";
 import { nativeHierarchyControls } from "./nativeHierarchyControls";
-import {
-  NATIVE_GROUP_ROW,
-  nativeGroupRowSlotKey,
-} from "./nativeHierarchyControlSlots";
+import { NATIVE_GROUP_ROW } from "./nativeHierarchyControlSlots";
 import { NativeRowActions } from "./NativeRowActions";
 import { nativeSurfaceControls } from "./nativeSurfaceControls";
 
@@ -52,8 +50,10 @@ const emit = defineEmits<{
   "update:density": [density: TableDensity];
 }>();
 const slots = defineSlots<DataTableSlots<TRow>>();
+const cardSlot = shallowRef(slots.card);
 const footerSlot = shallowRef(slots.footer);
 onBeforeUpdate(() => {
+  cardSlot.value = slots.card;
   footerSlot.value = slots.footer;
 });
 const shell = useDataTableShell<TRow>(() => ({
@@ -119,19 +119,23 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable: native grouping rows require grouping() from @adapttable/vue-unstyled/grouping."
         );
-      return renderFeatureSlot(
-        nativeGroupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        props
-      );
+      return renderFeatureSlot(NATIVE_GROUP_ROW, shell.slotFills.value, props);
     },
-    card: slots.card,
+    card: cardSlot.value,
     cell: slots.cell,
     header: slots.header,
     headerActions: slots.headerActions,
     footer: slots.footer,
   };
 }
+/** One controls object while the host's slots stay the same. */
+const tableControls = keepTableControls(controls, (kept) => [
+  kept.card,
+  kept.cell,
+  kept.header,
+  kept.headerActions,
+  kept.footer,
+]);
 const rootElement = shallowRef<HTMLElement | null>(null);
 const scrollElement = shallowRef<HTMLElement | null>(null);
 const surface = {
@@ -163,7 +167,7 @@ function setScrollElement(element: HTMLElement | null): void {
       ...props,
       searchable,
     }"
-    :slots="nativeSurfaceControls(controls())"
+    :slots="nativeSurfaceControls(tableControls())"
     :content="slots"
     :root-ref="setRootElement"
     :scroll-ref="setScrollElement"

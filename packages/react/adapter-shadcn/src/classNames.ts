@@ -155,6 +155,7 @@ export const shadcnClassNames = {
   // foreground and no box of its own.
   columnSelect:
     "ms-1 inline-flex items-center align-middle text-muted-foreground",
+  headerCaptionControl: "inline",
   sortButton:
     "inline-flex items-center gap-1 font-medium hover:text-foreground",
   row: "border-b border-border last:border-0 hover:bg-muted/50 data-[selected]:bg-accent data-[dragging]:opacity-60 data-[drop=before]:shadow-[inset_0_2px_0_0_hsl(var(--primary))] data-[drop=after]:shadow-[inset_0_-2px_0_0_hsl(var(--primary))]",

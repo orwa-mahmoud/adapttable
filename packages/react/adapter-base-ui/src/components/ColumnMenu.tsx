@@ -1,555 +1,202 @@
-import { columnReorderKeyProps, useColumnDragState } from "@adapttable/react";
+/**
+ * Base UI's Columns menu: the binding's composition, drawn with Base UI's
+ * controls on Base UI's spacing.
+ */
 import {
-  ACTIONS_COLUMN_KEY,
-  columnMenuActions,
-  type ColumnMenuChoice,
-  type ColumnMenuItem,
-  type ColumnMenuLabels,
-  type ColumnMenuRow,
-  columnMenuRows,
   type ColumnMenuSlotProps,
-  type ColumnRenameEditorState,
-  EyeIcon,
-  filterColumnMenuRows,
-  GripIcon,
-  hideAllColumns,
-  LiveRegion,
-  nextPinSide,
-  pinActionLabel,
-  PinIcon,
-  REORDER_COLUMN_KEY,
-  showAllColumns,
-  unpinAllColumns,
-  type UseColumnLayoutResult,
-  useColumnRenameEditor,
-  useFeatureHost,
+  createColumnMenu,
+  type KitButtonProps,
+  type KitColumnMenuLook,
+  type KitIconButtonProps,
+  type KitPopoverProps,
+  mergeRefs,
 } from "@adapttable/react/adapter";
-import { Popover } from "@base-ui/react/popover";
-import { useState } from "react";
+import { Popover as BasePopover } from "@base-ui/react/popover";
+import { type CSSProperties, forwardRef, type ReactElement } from "react";
 
-import { Button, Flex, IconButton, Separator, Text, TextField } from "../ui";
+import { Button as UiButton, IconButton as UiIconButton } from "../ui";
+import { Divider, Select, Text, TextInput } from "./kitPrimitives";
 import { usePortalContainer } from "./portalContainer";
-import { NativeSelect } from "./primitives";
-
-const NOOP_RENAME = () => undefined;
-
-function isChoice(item: ColumnMenuItem): item is ColumnMenuChoice {
-  return "kind" in item && item.kind === "choice";
-}
-
-function focusRenameInput(input: HTMLInputElement | null): void {
-  input?.focus();
-}
-
-function ColumnRenameEditor({
-  editor,
-  labels,
-}: Readonly<{
-  editor: ColumnRenameEditorState;
-  labels: ColumnMenuLabels;
-}>) {
-  if (!editor.editing) return null;
-  return (
-    <form
-      data-adapttable-part="column-rename-form"
-      style={{ display: "flex", flexDirection: "column", gap: 4 }}
-      onSubmit={(event) => {
-        event.preventDefault();
-        editor.submit();
-      }}
-    >
-      <label
-        htmlFor={editor.inputId}
-        className="adapttable-text"
-        data-size="1"
-        data-adapttable-part="column-rename-label"
-      >
-        {labels.columnName}
-      </label>
-      <TextField.Root
-        ref={focusRenameInput}
-        id={editor.inputId}
-        size="1"
-        value={editor.draft}
-        aria-invalid={editor.error ? true : undefined}
-        aria-describedby={editor.error ? editor.errorId : undefined}
-        data-adapttable-part="column-rename-input"
-        onChange={(event) => editor.setDraft(event.currentTarget.value)}
-        onBlur={editor.blur}
-        onKeyDown={editor.onKeyDown}
-      />
-      {editor.error ? (
-        <span
-          id={editor.errorId}
-          role="alert"
-          className="adapttable-text"
-          data-size="1"
-          data-color="red"
-          data-adapttable-part="column-rename-error"
-        >
-          {editor.error}
-        </span>
-      ) : null}
-      <Flex gap="1">
-        <Button
-          type="submit"
-          size="1"
-          data-adapttable-part="column-rename-save"
-        >
-          {labels.saveColumnName}
-        </Button>
-        <Button
-          type="button"
-          size="1"
-          variant="soft"
-          color="gray"
-          data-adapttable-part="column-rename-cancel"
-          onClick={editor.cancel}
-        >
-          {labels.cancelColumnRename}
-        </Button>
-      </Flex>
-    </form>
-  );
-}
 
 /** The shared Columns-menu contract, declared once in core. */
 export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow>;
 
-/** Eye toggle for one menu row (a data column or the actions entry). */
-function VisibilityToggle({
-  hidden,
-  name,
-  labels,
-  onToggle,
-  disabled = false,
-}: Readonly<{
-  hidden: boolean;
-  name: string;
-  labels: ColumnMenuLabels;
-  onToggle: () => void;
-  disabled?: boolean;
-}>) {
-  return (
-    <IconButton
-      size="1"
-      variant="ghost"
-      color="gray"
-      aria-label={`${hidden ? labels.showColumn : labels.hideColumn}: ${name}`}
-      aria-pressed={!hidden}
-      disabled={disabled}
-      onClick={onToggle}
-    >
-      <EyeIcon off={hidden} />
-    </IconButton>
-  );
-}
-
-/** Menu-row label, struck through while its column is hidden. */
-function RowName({
-  hidden,
-  name,
-}: Readonly<{ hidden: boolean; name: string }>) {
-  return (
-    <Text
-      size="2"
-      color={hidden ? "gray" : undefined}
-      style={{
-        flex: 1,
-        textDecoration: hidden ? "line-through" : undefined,
-      }}
-    >
-      {name}
-    </Text>
-  );
-}
-
-/** Pin toggle for one menu row; `label` names the action it performs next. */
-function PinToggle({
-  pinned,
-  label,
-  onClick,
-  disabled = false,
-}: Readonly<{
-  pinned: boolean;
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-}>) {
-  return (
-    <IconButton
-      size="1"
-      variant={pinned ? "solid" : "ghost"}
-      color={pinned ? "teal" : "gray"}
-      aria-label={label}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      <PinIcon />
-    </IconButton>
-  );
-}
-
-function ColumnMenuRowItem<TRow>({
-  row,
-  layout,
-  labels,
-  drag,
-  sortBy,
-  sortDir,
-  onSortColumn,
-  onAutoSizeColumn,
-  onFilterColumn,
-  onRenameColumn,
-  groupingPanel,
-}: Readonly<{
-  row: ColumnMenuRow<TRow>;
-  layout: UseColumnLayoutResult<TRow>;
-  labels: ColumnMenuLabels;
-  drag: ReturnType<typeof useColumnDragState>;
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  onSortColumn?: (key: string, dir: "asc" | "desc") => void;
-  onAutoSizeColumn?: (key: string) => void;
-  onFilterColumn?: (key: string) => void;
-  onRenameColumn?: (key: string, name: string) => void;
-  groupingPanel: ColumnMenuProps<TRow>["groupingPanel"];
-}>) {
-  const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
-  const [open, setOpen] = useState(false);
-  const featureHost = useFeatureHost<TRow>();
-  const rename = useColumnRenameEditor({
-    key,
-    name,
-    onRename: onRenameColumn ?? NOOP_RENAME,
-    requiredMessage: labels.columnNameRequired,
-    renamedMessage: labels.columnRenamed,
-  });
-  const actions = columnMenuActions(row, {
-    featureHost,
-    labels,
-    layout,
-    sortBy,
-    sortDir,
-    onSortColumn,
-    onAutoSizeColumn,
-    onFilterColumn,
-    onBeginRename: onRenameColumn ? rename.begin : undefined,
-    groupingPanel,
-  });
-  const indicator = canMove ? drag.rowAttrs(key, index) : {};
-  const edge = indicator["data-drop"];
-  const edgeOffset = edge === "before" ? "2px" : "-2px";
-  return (
-    <div
-      data-adapttable-part="column-menu-item"
-      data-hidden={hidden || undefined}
-      data-pinned={pinned}
-    >
-      <Flex
-        gap="1"
-        align="center"
-        style={{
-          cursor: canMove ? "grab" : "default",
-          padding: "2px 0",
-          opacity: "data-dragging" in indicator ? 0.4 : undefined,
-          boxShadow: edge
-            ? `inset 0 ${edgeOffset} 0 0 var(--adapttable-accent)`
-            : undefined,
-        }}
-        {...(canMove
-          ? {
-              ...drag.rowDragProps(key, index),
-              ...drag.dropProps(index, layout.move),
-              ...indicator,
-            }
-          : {})}
-      >
-        <IconButton
-          size="1"
-          variant="ghost"
-          color="gray"
-          disabled={!canMove}
-          style={{ cursor: canMove ? "grab" : "default" }}
-          {...(canMove
-            ? columnReorderKeyProps(
-                key,
-                index,
-                layout.move,
-                `${labels.moveStart} / ${labels.moveEnd}: ${name}`
-              )
-            : {})}
-        >
-          <GripIcon />
-        </IconButton>
-        <VisibilityToggle
-          hidden={hidden}
-          name={name}
-          labels={labels}
-          disabled={!canHide}
-          onToggle={() => layout.toggleVisible(key)}
-        />
-        <RowName hidden={hidden} name={name} />
-        <PinToggle
-          pinned={Boolean(pinned)}
-          label={`${pinActionLabel(pinned, labels)}: ${name}`}
-          disabled={!canPin}
-          onClick={() => layout.setPinned(key, nextPinSide(pinned))}
-        />
-        <IconButton
-          size="1"
-          variant="ghost"
-          color="gray"
-          data-adapttable-part="column-menu-more"
-          aria-expanded={open}
-          aria-label={`${labels.columnActions}: ${name}`}
-          onClick={() => setOpen((value) => !value)}
-        >
-          ⋯
-        </IconButton>
-      </Flex>
-      {open ? (
-        <Flex
-          direction="column"
-          data-adapttable-part="column-menu-submenu"
-          gap="1"
-        >
-          {actions.map((action) =>
-            isChoice(action) ? (
-              <NativeSelect
-                key={action.id}
-                size="1"
-                aria-label={action.label}
-                data-adapttable-part="column-menu-choice"
-                value={action.value}
-                options={action.options}
-                disabled={action.disabled}
-                onValueChange={action.onChange}
-              />
-            ) : (
-              <Button
-                key={action.id}
-                size="1"
-                variant="ghost"
-                color="gray"
-                data-adapttable-part="column-menu-action"
-                disabled={
-                  action.disabled || (action.id === "rename" && rename.editing)
-                }
-                style={{ alignSelf: "flex-start" }}
-                onClick={() => {
-                  action.run();
-                  if (action.id !== "rename") setOpen(false);
-                }}
-              >
-                {action.label}
-              </Button>
-            )
-          )}
-          <ColumnRenameEditor editor={rename} labels={labels} />
-        </Flex>
-      ) : null}
-      <LiveRegion part="column-rename-announcer" statusRole={false}>
-        {rename.announcement}
-      </LiveRegion>
-    </div>
-  );
-}
+/** The rename forms' cancel buttons, soft rather than quiet. */
+const CANCEL_PARTS = new Set(["column-rename-cancel", "header-rename-cancel"]);
 
 /**
- * Base UI column-management popover: per-column drag grip (reorder), eye
- * (show/hide), and pin toggle — plus, when the table has row actions, a
- * trailing entry that hides or end-pins the injected actions column.
+ * The menu's buttons: the trigger outlined at the toolbar's size, the rest
+ * compact, quiet and grey, each at its own width; save is outlined and cancel
+ * soft.
  */
-export function ColumnMenu<TRow>({
-  allColumns,
-  layout,
-  labels,
-  hasRowActions = false,
-  hasRowReorder = false,
-  onAutoSize,
-  onAutoSizeColumn,
-  onSortColumn,
-  onFilterColumn,
-  onRenameColumn,
-  sortBy,
-  sortDir,
-  dir,
-  groupingPanel,
-}: Readonly<ColumnMenuProps<TRow>>) {
-  const portalContainer = usePortalContainer();
-  const drag = useColumnDragState();
-  const [query, setQuery] = useState("");
-  const rows = filterColumnMenuRows(columnMenuRows(allColumns, layout), query);
-  const actionsHidden = layout.isHidden(ACTIONS_COLUMN_KEY);
-  const actionsPinned = layout.state.pinned[ACTIONS_COLUMN_KEY] === "end";
-  const reorderHidden = layout.isHidden(REORDER_COLUMN_KEY);
-  const reorderPinned = layout.state.pinned[REORDER_COLUMN_KEY] !== undefined;
+export const Button = forwardRef<HTMLButtonElement, KitButtonProps>(
+  function Button(
+    {
+      elementRef,
+      variant,
+      tone: _tone,
+      fullWidth,
+      justify: _justify,
+      busy,
+      style,
+      ...rest
+    },
+    ref
+  ) {
+    "use no memo";
+    const trigger = variant === "outlined";
+    let look: "ghost" | "outline" | "soft" = "ghost";
+    if (trigger || variant === "filled") look = "outline";
+    else if (CANCEL_PARTS.has(rest["data-adapttable-part"] ?? ""))
+      look = "soft";
+    return (
+      <UiButton
+        ref={mergeRefs(ref, elementRef)}
+        type="button"
+        size={trigger ? "2" : "1"}
+        variant={look}
+        color={look === "outline" ? undefined : "gray"}
+        loading={busy}
+        style={fullWidth ? { alignSelf: "flex-start", ...style } : style}
+        {...rest}
+      />
+    );
+  }
+);
+
+/** Quiet and grey; a pinned column's pin is solid teal. */
+export function IconButton({
+  elementRef,
+  variant,
+  tone: _tone,
+  fullWidth: _fullWidth,
+  justify: _justify,
+  busy: _busy,
+  ...rest
+}: Readonly<KitIconButtonProps>) {
+  "use no memo";
+  const filled = variant === "filled";
   return (
-    <Popover.Root>
-      <Popover.Trigger
-        className="adapttable-btn"
-        data-size="2"
-        data-variant="outline"
-        data-adapttable-part="column-menu-button"
-      >
-        {labels.columns}
-      </Popover.Trigger>
-      <Popover.Portal container={portalContainer}>
-        <Popover.Positioner
-          className="adapttable-popup-positioner"
-          side="bottom"
-          align="end"
-          sideOffset={8}
-          collisionAvoidance={{
-            side: "none",
-            align: "shift",
-            fallbackAxisSide: "none",
-          }}
-        >
-          <Popover.Popup
-            aria-label={labels.columns}
-            className="adapttable-popup"
-            dir={dir}
-            style={{
-              minWidth: "min(260px, calc(100vw - 48px))",
-              maxHeight: "min(var(--available-height), 70vh, 480px)",
-              overflowY: "auto",
-            }}
-          >
-            <Flex direction="column" gap="1">
-              <Text
-                size="1"
-                weight="bold"
-                color="gray"
-                style={{ textTransform: "uppercase", letterSpacing: "0.06em" }}
-              >
-                {labels.columns}
-              </Text>
-              <TextField.Root
-                type="search"
-                size="1"
-                data-adapttable-part="column-menu-search"
-                placeholder={labels.searchColumns}
-                aria-label={labels.searchColumns}
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-              <Flex gap="1" wrap="wrap" data-adapttable-part="column-menu-bulk">
-                <Button
-                  size="1"
-                  variant="ghost"
-                  color="gray"
-                  data-adapttable-part="column-menu-bulk-button"
-                  onClick={() => showAllColumns(rows, layout)}
-                >
-                  {labels.showAllColumns}
-                </Button>
-                <Button
-                  size="1"
-                  variant="ghost"
-                  color="gray"
-                  data-adapttable-part="column-menu-bulk-button"
-                  onClick={() => hideAllColumns(rows, layout)}
-                >
-                  {labels.hideAllColumns}
-                </Button>
-                <Button
-                  size="1"
-                  variant="ghost"
-                  color="gray"
-                  data-adapttable-part="column-menu-bulk-button"
-                  onClick={() => unpinAllColumns(rows, layout)}
-                >
-                  {labels.unpinAllColumns}
-                </Button>
-              </Flex>
-              {rows.map((row) => (
-                <ColumnMenuRowItem
-                  key={row.key}
-                  row={row}
-                  layout={layout}
-                  labels={labels}
-                  drag={drag}
-                  sortBy={sortBy}
-                  sortDir={sortDir}
-                  onSortColumn={onSortColumn}
-                  onAutoSizeColumn={onAutoSizeColumn}
-                  onFilterColumn={onFilterColumn}
-                  onRenameColumn={onRenameColumn}
-                  groupingPanel={groupingPanel}
-                />
-              ))}
-              {(hasRowReorder || hasRowActions) && (
-                <Separator my="1" size="4" />
-              )}
-              {hasRowReorder && (
-                <div data-adapttable-part="column-menu-item" data-reorder="">
-                  <Flex gap="1" align="center">
-                    <VisibilityToggle
-                      hidden={reorderHidden}
-                      name={labels.reorderRow}
-                      labels={labels}
-                      onToggle={() => layout.toggleVisible(REORDER_COLUMN_KEY)}
-                    />
-                    <RowName hidden={reorderHidden} name={labels.reorderRow} />
-                    <PinToggle
-                      pinned={reorderPinned}
-                      label={`${reorderPinned ? labels.unpin : labels.pinStart}: ${labels.reorderRow}`}
-                      onClick={() =>
-                        layout.setPinned(
-                          REORDER_COLUMN_KEY,
-                          reorderPinned ? undefined : "start"
-                        )
-                      }
-                    />
-                  </Flex>
-                </div>
-              )}
-              {hasRowActions && (
-                <Flex gap="1" align="center">
-                  <VisibilityToggle
-                    hidden={actionsHidden}
-                    name={labels.actions}
-                    labels={labels}
-                    onToggle={() => layout.toggleVisible(ACTIONS_COLUMN_KEY)}
-                  />
-                  <RowName hidden={actionsHidden} name={labels.actions} />
-                  <PinToggle
-                    pinned={actionsPinned}
-                    label={`${actionsPinned ? labels.unpin : labels.pinEnd}: ${labels.actions}`}
-                    onClick={() =>
-                      layout.setPinned(
-                        ACTIONS_COLUMN_KEY,
-                        actionsPinned ? undefined : "end"
-                      )
-                    }
-                  />
-                </Flex>
-              )}
-              <Separator my="1" size="4" />
-              <Button
-                size="1"
-                variant="ghost"
-                color="gray"
-                style={{ alignSelf: "flex-start" }}
-                onClick={onAutoSize}
-              >
-                {labels.autoSizeColumns}
-              </Button>
-              <Button
-                size="1"
-                variant="ghost"
-                color="gray"
-                style={{ alignSelf: "flex-start" }}
-                onClick={() => layout.reset()}
-              >
-                {labels.resetColumns}
-              </Button>
-            </Flex>
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
-    </Popover.Root>
+    <UiIconButton
+      ref={elementRef}
+      type="button"
+      size="1"
+      variant={filled ? "solid" : "ghost"}
+      color={filled ? "teal" : "gray"}
+      {...rest}
+    />
   );
 }
+
+const noop = (): void => undefined;
+
+/**
+ * A panel under its button's end edge, never flipped, sized by `style`. The
+ * binding owns Escape, so Escape inside a field in it never closes the whole
+ * panel.
+ */
+export function panelPopover(
+  style: CSSProperties
+): (props: Readonly<KitPopoverProps>) => ReactElement {
+  return function Popover({
+    trigger,
+    children,
+    open,
+    onOpenChange,
+    dir,
+    "aria-label": label,
+  }) {
+    const portalContainer = usePortalContainer();
+    return (
+      <BasePopover.Root
+        open={open}
+        onOpenChange={(next, details) => {
+          if (!next && details.reason === "escape-key") return;
+          onOpenChange?.(next);
+        }}
+      >
+        <BasePopover.Trigger
+          render={
+            trigger({
+              elementRef: noop,
+              onClick: noop,
+              "aria-expanded": open === true,
+              "aria-haspopup": "dialog",
+            }) as ReactElement
+          }
+        />
+        <BasePopover.Portal container={portalContainer}>
+          <BasePopover.Positioner
+            className="adapttable-popup-positioner"
+            side="bottom"
+            align="end"
+            sideOffset={8}
+            collisionAvoidance={{
+              side: "none",
+              align: "shift",
+              fallbackAxisSide: "none",
+            }}
+          >
+            <BasePopover.Popup
+              aria-label={label}
+              className="adapttable-popup"
+              dir={dir}
+              style={style}
+            >
+              {children}
+            </BasePopover.Popup>
+          </BasePopover.Positioner>
+        </BasePopover.Portal>
+      </BasePopover.Root>
+    );
+  };
+}
+
+const Popover = /* @__PURE__ */ panelPopover({
+  minWidth: "min(260px, calc(100vw - 48px))",
+  maxHeight: "min(var(--available-height), 70vh, 480px)",
+  overflowY: "auto",
+});
+
+/** Base UI's step of 0.25rem between the menu's controls. */
+const STEP = "0.25rem";
+
+const ROW = { display: "flex", alignItems: "center", gap: STEP } as const;
+
+const LOOK: KitColumnMenuLook = {
+  // The popup scrolls and pads; the panel only stacks.
+  panel: {
+    display: "flex",
+    flexDirection: "column",
+    gap: STEP,
+    maxHeight: "none",
+  },
+  heading: {
+    fontWeight: 650,
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+  },
+  search: {},
+  bulk: { display: "flex", flexWrap: "wrap", gap: STEP },
+  row: { ...ROW, padding: "2px 0" },
+  fixedRow: ROW,
+  rowSpacer: { display: "none" },
+  grip: {},
+  divider: {},
+  submenu: { display: "flex", flexDirection: "column", gap: STEP },
+  choice: {},
+  renameForm: { display: "flex", flexDirection: "column", gap: 4 },
+  renameActions: { display: "flex", gap: STEP },
+  accent: "var(--adapttable-accent)",
+};
+
+const useLook = (): KitColumnMenuLook => LOOK;
+
+/**
+ * Column-management popover: per-column drag grip (reorder), eye
+ * (show/hide), pin toggle and a list of column actions.
+ */
+export const ColumnMenu = /* @__PURE__ */ createColumnMenu(
+  { Button, IconButton, TextInput, Select, Popover, Text, Divider },
+  useLook
+);

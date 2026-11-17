@@ -14,6 +14,8 @@
  */
 import type { ReactElement } from "react";
 
+import { VISUALLY_HIDDEN } from "./visuallyHidden";
+
 /**
  * Props for {@link LiveRegion}.
  *
@@ -34,23 +36,6 @@ export interface LiveRegionProps {
    */
   statusRole?: boolean;
 }
-
-/**
- * Clipped rather than hidden: a screen reader ignores `display: none` and
- * `visibility: hidden`, so the region has to remain in the layout while taking
- * no visible space.
- */
-const VISUALLY_HIDDEN = {
-  position: "absolute",
-  width: "1px",
-  height: "1px",
-  margin: "-1px",
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0, 0, 0, 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-} as const;
 
 /**
  * Announce a message politely, showing nothing.

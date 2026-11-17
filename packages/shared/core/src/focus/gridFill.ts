@@ -4,7 +4,7 @@
  * The filled rectangle is ordinary cell edits. The host writes them. A fill
  * that never leaves the selection writes nothing.
  */
-import { defaultLabels } from "../labels";
+import { GRID_LABELS } from "../labelGroups/gridLabels";
 import { type CellRange, cellRangeBounds } from "./cellRange";
 import { fillRangeEdits, fillTargetRange } from "./fillRange";
 import type { GridCell } from "./gridFocus";
@@ -83,12 +83,12 @@ export function commitGridFill<TRow>(
           session.write({ range: fillTargetRange(range, to) });
         }
         session.say(
-          (session.labels()?.gridRangeFilled ?? defaultLabels.gridRangeFilled)(
+          (session.labels()?.gridRangeFilled ?? GRID_LABELS.gridRangeFilled)(
             count
           )
         );
       }),
-    session.labels()?.gridRangeFillFailed ?? defaultLabels.gridRangeFillFailed
+    session.labels()?.gridRangeFillFailed ?? GRID_LABELS.gridRangeFillFailed
   );
 }
 
@@ -117,11 +117,11 @@ export function fillGridDown<TRow>(
     },
     () =>
       session.say(
-        (session.labels()?.gridRangeFilled ?? defaultLabels.gridRangeFilled)(
+        (session.labels()?.gridRangeFilled ?? GRID_LABELS.gridRangeFilled)(
           count
         )
       ),
-    session.labels()?.gridRangeFillFailed ?? defaultLabels.gridRangeFillFailed
+    session.labels()?.gridRangeFillFailed ?? GRID_LABELS.gridRangeFillFailed
   );
 }
 

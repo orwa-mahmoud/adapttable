@@ -1,13 +1,15 @@
 import {
   type ColumnMenuChoice,
   type ColumnMenuRow,
-  defaultLabels,
   type GroupAggregateOverrides,
-  GROUPING_COLUMN_DND_MIME,
   type GroupingPanelInteractions,
   type GroupingPanelState,
 } from "@adapttable/core";
-import { columnMenuActions } from "@adapttable/core/binding";
+import {
+  columnMenuActions,
+  defaultLabels,
+  GROUPING_COLUMN_DND_MIME,
+} from "@adapttable/core/binding";
 import {
   act,
   fireEvent,
@@ -15,11 +17,7 @@ import {
   renderHook,
   screen,
 } from "@testing-library/react";
-import {
-  type ButtonHTMLAttributes,
-  type HTMLAttributes,
-  useSyncExternalStore,
-} from "react";
+import { useSyncExternalStore } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { UseColumnLayoutResult } from "../columns/useColumnLayout";
@@ -273,9 +271,7 @@ function Chrome({
       <button
         type="button"
         data-testid="header-team"
-        {...(panel.headerDragProps(
-          "team"
-        ) as ButtonHTMLAttributes<HTMLButtonElement>)}
+        {...panel.headerDragProps("team")}
       >
         {"Team header"}
       </button>
@@ -289,24 +285,13 @@ function Chrome({
       <button
         type="button"
         data-testid="chip-team"
-        {...(panel.chipDragProps(
-          "team"
-        ) as ButtonHTMLAttributes<HTMLButtonElement>)}
-        {...(panel.chipKeyboardProps(
-          "team",
-          "Team"
-        ) as unknown as ButtonHTMLAttributes<HTMLButtonElement>)}
+        {...panel.chipDragProps("team")}
+        {...panel.chipKeyboardProps("team", "Team")}
       >
         {"Team chip"}
       </button>
-      <div
-        data-testid="drop-1"
-        {...(panel.dropProps(1) as HTMLAttributes<HTMLDivElement>)}
-      />
-      <div
-        data-testid="remove-zone"
-        {...(panel.removeDropProps() as HTMLAttributes<HTMLDivElement>)}
-      />
+      <div data-testid="drop-1" {...panel.dropProps(1)} />
+      <div data-testid="remove-zone" {...panel.removeDropProps()} />
     </div>
   );
 }

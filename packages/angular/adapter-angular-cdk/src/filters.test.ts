@@ -31,7 +31,9 @@ import {
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 
+import { filtersTests } from "../../angular/test/kit/suites/filters";
 import { AdaptHeaderFilterTrigger } from "../header-filters/headerFilterTrigger";
+import { kit } from "../testing/kit";
 import {
   fixtureOverlayProviders,
   focusTrapAnchor,
@@ -40,6 +42,8 @@ import { AdaptAutoFilterForm } from "./components/autoFilterForm";
 import { AdaptFilterPopover } from "./components/filterPopover";
 import { AdaptDataTable } from "./dataTable";
 import type { FiltersMode } from "./tableFilters";
+
+for (const test of filtersTests(kit)) it(test.name, test.run);
 
 interface Person {
   id: string;
@@ -330,14 +334,6 @@ describe("the unstyled Angular filters", () => {
     expect(part("filters-count")?.textContent).toBe("1");
     expect(parts("chip")[0]?.textContent).toContain("Name");
     expect(part("filters-title")?.textContent).toContain("(1)");
-  });
-
-  it("changes a text filter's operator", async () => {
-    const { part, ids, field, type, openFilters } = await mount();
-    await openFilters();
-    await type(part("filter-input", field("Name")), "a");
-    await type(part("filter-operator", field("Name")), "startsWith");
-    expect(ids()).toEqual(["1"]);
   });
 
   it("filters by a select, a yes/no and a group of checkboxes", async () => {
@@ -638,14 +634,6 @@ describe("the unstyled Angular filters", () => {
     expect(document.activeElement).toBe(part("filters-button"));
   });
 
-  it("offers header funnels without the Filters button", async () => {
-    const { part, parts } = await mount([filters(), headerFilters()]);
-    expect(part("filters-button")).not.toBeNull();
-    const headerOnly = await mount([headerFilters()]);
-    expect(headerOnly.part("filters-button")).toBeNull();
-    expect(parts("filter-header-trigger")).toHaveLength(0);
-  });
-
   it("filters by a checklist of every value, with counts and search", async () => {
     const { part, parts, ids, settle, openFilters } = await mount([
       filters<Person>([{ key: "city", type: "checklist" }]),
@@ -673,13 +661,6 @@ describe("the unstyled Angular filters", () => {
     clear!.click();
     await settle();
     expect(ids()).toHaveLength(3);
-  });
-
-  it("says nothing matched when a filter leaves no rows", async () => {
-    const { part, field, type, openFilters } = await mount();
-    await openFilters();
-    await type(part("filter-input", field("Name")), "nobody");
-    expect(part("empty")?.textContent).toContain("No results");
   });
 });
 
@@ -923,37 +904,6 @@ describe("registered Angular form renderers", () => {
     expect(field().value).toBe("Amman");
     expect(ids()).toEqual(["2"]);
   });
-
-  it.each([
-    { value: "Custom caption", text: "Custom caption" },
-    { value: 7, text: "7" },
-    { value: undefined, text: null },
-    { value: 0, text: null },
-    { value: {}, text: null },
-  ])(
-    "renders text or uses the kit widget for $value",
-    async ({ value, text }) => {
-      const { part, openFilters } = await mount([
-        filters(CUSTOM_DEFS),
-        filterTypes([
-          customSpec(value === undefined ? undefined : () => value),
-        ]),
-      ]);
-      await openFilters();
-      if (text) {
-        expect(part("filters-form")?.textContent).toContain(text);
-        expect(part("filter-input")).toBeNull();
-      } else {
-        expect(part("filter-input")).not.toBeNull();
-        expect(part("filter-input")?.classList.contains("ant-input")).toBe(
-          false
-        );
-        expect(part("filters-form")?.textContent).not.toContain(
-          "[object Object]"
-        );
-      }
-    }
-  );
 });
 
 describe("filter card viewport space", () => {

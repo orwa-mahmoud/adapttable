@@ -6,7 +6,6 @@
 import { describe, expect, it } from "vitest";
 
 import type { ColumnModel } from "../contracts/columns";
-import { partitionGroupedRows } from "../grouping/groupRows";
 import {
   applyRowPatchesToView,
   applyRowPatchLogToView,
@@ -20,13 +19,6 @@ import {
   readIncrementalAggregate,
   removeAggregateRow,
 } from "./incrementalAggregate";
-import {
-  addGroupedRow,
-  incrementalGroupTree,
-  removeGroupedRow,
-  rowGroupPath,
-  snapshotPartitions,
-} from "./incrementalGroup";
 import {
   applyRowPatchesWithLog,
   insertRow,
@@ -295,70 +287,5 @@ describe("incremental aggregates — built-ins and rescans", () => {
     expect(
       readIncrementalAggregate(state, [...rows, { id: "c", team: "Core" }])
     ).toEqual({ team: 2 });
-  });
-});
-
-describe("incremental group tree — misses and empty buckets", () => {
-  it("is a no-op when the path is not in the tree", () => {
-    const columns = [{ key: "team" }];
-    const tree = incrementalGroupTree(
-      partitionGroupedRows(ROWS, "team", columns),
-      "team",
-      columns
-    );
-    const before = snapshotPartitions(tree);
-    removeGroupedRow(
-      tree,
-      "missing",
-      [{ valueKey: "s:Nowhere" }],
-      new Map(),
-      byId
-    );
-    expect(snapshotPartitions(tree)).toEqual(before);
-  });
-
-  it("places a new group by first-seen when the sorted index is missing", () => {
-    const columns = [{ key: "team" }];
-    const tree = incrementalGroupTree(
-      partitionGroupedRows(ROWS, "team", columns),
-      "team",
-      columns
-    );
-    const row = {
-      id: "9",
-      name: "New",
-      team: "Labs",
-      budget: 1,
-      status: "active",
-    };
-    addGroupedRow(
-      tree,
-      row,
-      rowGroupPath(row, ["team"], columns),
-      new Map(),
-      byId
-    );
-    expect(snapshotPartitions(tree).map((part) => part.valueKey)).toContain(
-      "s:Labs"
-    );
-  });
-
-  it("drops a leaf that is not in the bucket without throwing", () => {
-    const columns = [{ key: "team" }];
-    const tree = incrementalGroupTree(
-      partitionGroupedRows(ROWS, "team", columns),
-      "team",
-      columns
-    );
-    removeGroupedRow(
-      tree,
-      "missing",
-      [{ valueKey: "s:Core" }],
-      new Map([["1", 0]]),
-      byId
-    );
-    expect(
-      snapshotPartitions(tree).find((part) => part.valueKey === "s:Core")?.rows
-    ).toHaveLength(2);
   });
 });

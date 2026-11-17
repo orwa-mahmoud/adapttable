@@ -48,6 +48,7 @@
       @if (v.showActions()) {
         <th
           data-adapttable-part="actions-header"
+          adaptRail="actions"
           scope="col"
           [attr.rowspan]="band > 1 ? band : null"
         >
@@ -559,7 +560,7 @@
       [ngTemplateOutlet]="kit.table!"
       [ngTemplateOutletContext]="{
         content: insideTable,
-        attrs: v.grid ? v.grid.tableAttrs() : v.table.tableAttrs(),
+        attrs: tableElementAttrs(),
       }"
     />
   </ng-template>

@@ -1,7 +1,8 @@
 /**
  * Which groups are folded, kept in the URL.
  */
-import { groupCollapseSlice } from "@adapttable/core";
+
+import { groupCollapseSlice } from "@adapttable/core/binding";
 import { computed, type Signal } from "@angular/core";
 
 import { type MaybeSignalOptional, readMaybe } from "../store";

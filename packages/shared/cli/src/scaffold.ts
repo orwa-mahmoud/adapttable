@@ -1,16 +1,32 @@
-import type { KitInfo } from "./detect";
-import { vueScaffoldFiles, vueStarterComponent } from "./scaffoldVue";
+import type { Framework, KitInfo } from "./detect";
+import { type FrameworkTemplate, type ScaffoldFile } from "./starter";
+import { ANGULAR_TEMPLATE } from "./templates/angular";
+import { REACT_TEMPLATE } from "./templates/react";
+import { VUE_TEMPLATE } from "./templates/vue";
+
+export type { ScaffoldFile } from "./starter";
+export { STARTER_PATH } from "./templates/react";
+
+/** Every framework's template; one scaffold core writes them all. */
+const TEMPLATES: Readonly<Record<Framework, FrameworkTemplate>> = {
+  react: REACT_TEMPLATE,
+  angular: ANGULAR_TEMPLATE,
+  vue: VUE_TEMPLATE,
+};
 
 /**
- * A file the scaffolder will write.
+ * The template for a framework.
  *
- * @public
+ * @param framework - The framework to scaffold.
+ * @returns Its template.
  */
-export interface ScaffoldFile {
-  /** Path relative to the project root. */
-  path: string;
-  /** File contents. */
-  contents: string;
+export function templateFor(framework: Framework): FrameworkTemplate {
+  return TEMPLATES[framework];
+}
+
+/** The template for a kit's framework; a kit naming none is React. */
+function templateOf(info: KitInfo): FrameworkTemplate {
+  return templateFor(info.framework ?? "react");
 }
 
 /**
@@ -22,113 +38,27 @@ export interface ScaffoldFile {
  * @public
  */
 export function starterComponent(info: KitInfo): string {
-  if (info.framework === "angular") return angularStarterComponent(info);
-  if (info.framework === "vue") return vueStarterComponent(info);
-  return `"use client";
-import { DataTable, type ColumnDef } from "${info.adapter}";
-
-interface Person {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
-const PEOPLE: Person[] = [
-  { id: "1", name: "Ada Lovelace", email: "ada@example.com", role: "Engineer" },
-  { id: "2", name: "Alan Turing", email: "alan@example.com", role: "Founder" },
-  { id: "3", name: "Grace Hopper", email: "grace@example.com", role: "Admiral" },
-];
-
-const columns: ColumnDef<Person>[] = [
-  { key: "name", header: "Name", accessor: (r) => r.name, sortable: true },
-  { key: "email", header: "Email", accessor: (r) => r.email },
-  { key: "role", header: "Role", accessor: (r) => r.role, sortable: true },
-];
-
-/**
- * Starter table scaffolded by \`npx @adapttable/cli init\` (${info.label}).
- * \`data\` is the zero-ceremony frontend tier; add \`onQueryChange\` for
- * server pagination, or a \`source\` from \`useQuerySource\` for a query
- * library — the component stays the same.
- */
-export function PeopleTable() {
-  return <DataTable data={PEOPLE} columns={columns} rowKey={(r) => r.id} />;
-}
-`;
-}
-
-/** The standalone Angular counterpart of the React starter. */
-function angularStarterComponent(info: KitInfo): string {
-  return `/** Starter table scaffolded by \`npx @adapttable/cli init\` (${info.label}). */
-import { Component } from "@angular/core";
-import type { ColumnDef } from "@adapttable/angular";
-import { AdaptDataTable } from "${info.adapter}";
-
-interface Person {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
-@Component({
-  selector: "people-table",
-  standalone: true,
-  imports: [AdaptDataTable],
-  template: \`
-    <adapt-data-table
-      [data]="people"
-      [columns]="columns"
-      [rowKey]="rowKey"
-    />
-  \`,
-})
-export class PeopleTable {
-  readonly people: Person[] = [
-    { id: "1", name: "Ada Lovelace", email: "ada@example.com", role: "Engineer" },
-    { id: "2", name: "Alan Turing", email: "alan@example.com", role: "Founder" },
-    { id: "3", name: "Grace Hopper", email: "grace@example.com", role: "Admiral" },
-  ];
-
-  readonly columns: ColumnDef<Person>[] = [
-    { key: "name", header: "Name", accessor: (r) => r.name, sortable: true },
-    { key: "email", header: "Email", accessor: (r) => r.email },
-    { key: "role", header: "Role", accessor: (r) => r.role, sortable: true },
-  ];
-
-  readonly rowKey = (row: Person) => row.id;
-}
-`;
+  return templateOf(info).component(info);
 }
 
 /**
- * Default path the React starter component is written to.
- *
- * @public
- */
-export const STARTER_PATH = "src/PeopleTable.tsx";
-
-/**
- * Compute the scaffold file(s) for a kit.
+ * Compute the scaffold file(s) for a kit: the starter component first, then
+ * the host setup its kit needs.
  *
  * @param info - The chosen kit.
  * @returns The files to write.
  * @public
  */
 export function scaffoldFiles(info: KitInfo): ScaffoldFile[] {
-  if (info.framework === "vue") return vueScaffoldFiles(info);
+  const template = templateOf(info);
   return [
-    {
-      path:
-        info.framework === "angular" ? "src/app/peopleTable.ts" : STARTER_PATH,
-      contents: starterComponent(info),
-    },
+    { path: template.componentPath, contents: template.component(info) },
+    ...template.setupFiles(info),
   ];
 }
 
 /**
- * The package list for a kit (core + Angular binding when needed + adapter +
+ * The package list for a kit (core + its framework's binding + adapter +
  * extras). This list does not check package availability in a registry.
  *
  * @param info - The chosen kit.
@@ -138,8 +68,7 @@ export function scaffoldFiles(info: KitInfo): ScaffoldFile[] {
 export function packagesFor(info: KitInfo): string[] {
   return [
     "@adapttable/core",
-    ...(info.framework === "angular" ? ["@adapttable/angular"] : []),
-    ...(info.framework === "vue" ? ["@adapttable/vue", "vue@^3.5.18"] : []),
+    ...templateOf(info).bindings,
     info.adapter,
     ...info.extras,
   ];

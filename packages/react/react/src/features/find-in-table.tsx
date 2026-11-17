@@ -5,8 +5,8 @@
  * never imports it never carries the find walk. The hook mounts in-tree
  * through {@link FIND_LIVE}.
  */
-import { findMatchRow, type GridCell } from "@adapttable/core";
-import { coreFindInTable } from "@adapttable/core/binding";
+import { type GridCell } from "@adapttable/core";
+import { coreFindInTable, findMatchRow } from "@adapttable/core/binding";
 import { type ReactNode, useContext, useEffect, useRef } from "react";
 
 import {
@@ -17,7 +17,12 @@ import {
 import { useFindInTable } from "../find/useFindInTable";
 import { RowScrollContext } from "../virtual/rowScroll";
 import { slotRender, useFeatureSlotFilled } from "./providers";
-import { CELL_NAV_LIVE, FIND_LIVE, type FindLiveSlotProps } from "./slotKeys";
+import {
+  CELL_NAV_LIVE,
+  FIND_LIVE,
+  type FindLiveDraw,
+  type FindLiveSlotProps,
+} from "./slotKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
 /**
@@ -25,12 +30,15 @@ import type { StaticTableFeature } from "./tableFeature";
  * scroll into view and the grid's focus all need the row's element, and a row
  * outside the window has none until the window reaches it.
  */
-function useScrollMatchIntoWindow(
-  rows: readonly never[],
+function useScrollMatchIntoWindow<TRow>(
+  rows: readonly TRow[],
   firstRowIndex: number | undefined,
   current: GridCell | null
 ): void {
-  const scrollToRow = useContext(RowScrollContext);
+  // The virtual body above belongs to this table, so it scrolls this table's
+  // rows; the context is one module-level value and cannot carry the type.
+  const scrollToRow = useContext(RowScrollContext) as
+    ((row: TRow) => void) | null;
   // Keyed on the walk alone: rows arriving must not pull the reader back to a
   // match they scrolled away from, so the rest is read through a ref.
   const latest = useRef({ rows, firstRowIndex, scrollToRow });
@@ -47,11 +55,11 @@ function useScrollMatchIntoWindow(
   }, [current]);
 }
 
-function LiveFind({
+function LiveFind<TRow>({
   children,
   root,
   ...options
-}: Readonly<FindLiveSlotProps<never>>): ReactNode {
+}: Readonly<FindLiveSlotProps<TRow>>): ReactNode {
   const find = useFindInTable(options);
   // With cell navigation the grid owns the walk's focus; without it, find
   // brings the current match into view itself.
@@ -76,6 +84,8 @@ function LiveFind({
 export function findInTable(): StaticTableFeature {
   return {
     ...coreFindInTable(),
-    renders: [slotRender(FIND_LIVE, (props) => <LiveFind {...props} />)],
+    renders: [
+      slotRender<FindLiveDraw>(FIND_LIVE, (props) => <LiveFind {...props} />),
+    ],
   };
 }

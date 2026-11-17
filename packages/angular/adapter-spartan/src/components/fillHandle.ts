@@ -8,12 +8,10 @@ import {
 } from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
-import { HlmButton } from "../helm/controls";
-
 /** The Spartan kit's visible drag handle. @public */
 @Component({
   selector: "adapt-fill-handle-control",
-  imports: [AdaptAttrs, HlmButton],
+  imports: [AdaptAttrs],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
@@ -21,17 +19,16 @@ import { HlmButton } from "../helm/controls";
       data-adapttable-part="fill-handle-anchor"
       style="position: relative; display: block; height: 0"
     >
-      <button
-        adaptHlmButton
-        type="button"
-        tabindex="-1"
+      <!-- A drag point, not a control: Spartan's button look on an element
+        that stays out of the tab order. -->
+      <span
         data-adapttable-part="fill-handle"
         [adaptAttrs]="props().handleProps"
         aria-hidden="true"
         [title]="props().label"
-        [class]="props().className ?? ''"
+        [class]="'at-spartan-button ' + (props().className ?? '')"
         style="position: absolute; inset-inline-end: -3px; bottom: -3px; width: 8px; height: 8px; min-height: 0; padding: 0; border-radius: 1px; background: var(--adapttable-fill-handle, currentColor); cursor: crosshair"
-      ></button>
+      ></span>
     </span>
   `,
 })

@@ -3,11 +3,11 @@
  * controller as a signal. The controller owns the loading and failed sets
  * and the fetch-once rule.
  */
+import { type LazyChildrenOptions } from "@adapttable/core";
 import {
   createLazyChildrenController,
-  type LazyChildrenOptions,
-} from "@adapttable/core";
-import type { LazyChildrenState } from "@adapttable/core/binding";
+  type LazyChildrenState,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

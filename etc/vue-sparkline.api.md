@@ -9,7 +9,7 @@ import { Component } from 'vue';
 import { finiteSparklineValues } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
 import { sparklineExportValue } from '@adapttable/core';
-import { SparklineKind } from '@adapttable/core';
+import { SparklineKind } from '@adapttable/core/binding';
 import { sparklineSummary } from '@adapttable/core';
 import { VNodeChild } from 'vue';
 

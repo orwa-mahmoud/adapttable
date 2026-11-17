@@ -33,6 +33,7 @@ import {
   computed,
   type ElementRef,
   input,
+  type InputSignal,
   TemplateRef,
   type Type,
   viewChild,
@@ -63,7 +64,7 @@ import {
       [attr.data-save]="p.saveStatus ?? null"
       [attr.aria-busy]="p.saveStatus === 'saving' ? true : null"
       [class]="p.className"
-      style="appearance: none; box-sizing: border-box; display: block; width: 100%; min-width: 0; padding: 0; border: 0; border-radius: 2px; background: transparent; color: inherit; font: inherit; cursor: text; text-align: inherit; white-space: normal; overflow-wrap: anywhere"
+      style="appearance: none; box-sizing: border-box; display: block; width: 100%; height: 100%; min-width: 0; min-height: 100%; padding: 0; border: 0; border-radius: 2px; background: transparent; color: inherit; font: inherit; cursor: text; text-align: inherit; white-space: normal; overflow-wrap: anywhere"
       (dblclick)="p.onDoubleClick($event)"
       (click)="p.onClick($event)"
       (keydown)="p.onKeyDown($event)"
@@ -352,7 +353,8 @@ const SLOTS: EditableCellSlots = {
 })
 export class AdaptEditableCell<TRow> {
   /** Slot props from the table's editable-cell fill. */
-  readonly props = input.required<EditableCellSlotProps<TRow>>();
+  readonly props: InputSignal<EditableCellSlotProps<TRow>> =
+    input.required<EditableCellSlotProps<TRow>>();
 
   /** Editor component override; native controls remain the default. */
   readonly editor = input<Type<unknown>>(AdaptNativeCellEditor);

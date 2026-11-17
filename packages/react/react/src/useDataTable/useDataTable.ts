@@ -1,16 +1,9 @@
 import {
   type BulkAction,
-  columnFlexShares,
-  computePagination,
-  deriveSortByOptions,
   devWarn,
   type Direction,
-  mergeProps,
-  nextSort,
   type PaginationInfo,
   type Props,
-  resolveLabels,
-  SEARCH_DEBOUNCE_MS,
   type SortByOption,
   type SortDirection,
   stableKey,
@@ -19,9 +12,16 @@ import {
 } from "@adapttable/core";
 import {
   cellAttributes,
+  columnFlexShares,
+  computePagination,
+  deriveSortByOptions,
   headerCellAttributes,
   headerRowAttributes,
+  mergeProps,
+  nextSort,
+  resolveTableLabels,
   rowAttributes,
+  SEARCH_DEBOUNCE_MS,
   searchInputAttributes,
   sortButtonAttributes,
   tableAttributes,
@@ -45,6 +45,8 @@ import {
 import { useExtraChips } from "../filters/useExtraChips";
 import { type SelectionState, useSelection } from "../selection/useSelection";
 import { useSearchInput } from "./useSearchInput";
+
+export { defaultLabels } from "@adapttable/core/binding";
 
 const EMPTY_LABELS: Readonly<Record<string, ChipLabelResolver>> = {};
 
@@ -71,6 +73,11 @@ export interface UseDataTableOptions<TRow> {
   tableLabel?: string;
   /** Pre-translated label overrides (merged over English defaults). */
   labels?: TableLabels;
+  /**
+   * The strings the composed features draw, merged over the base strings and
+   * under `labels`.
+   */
+  featureLabels?: readonly Partial<TableLabels>[];
   /** Text direction. Defaults to `"ltr"`. */
   dir?: Direction;
   /** Render the mobile (card) layout. Defaults to `false`. */
@@ -300,6 +307,7 @@ export function useDataTable<TRow>(
     rowKey,
     tableLabel,
     labels: labelOverrides,
+    featureLabels,
     dir = "ltr",
     forceMobile: isMobile = false,
     searchDebounceMs = SEARCH_DEBOUNCE_MS,
@@ -314,7 +322,10 @@ export function useDataTable<TRow>(
     columnWidths,
   } = options;
 
-  const labels = useMemo(() => resolveLabels(labelOverrides), [labelOverrides]);
+  const labels = useMemo(
+    () => resolveTableLabels(labelOverrides, featureLabels),
+    [labelOverrides, featureLabels]
+  );
 
   // Bare-key columns auto-derive their header and accessor here, exactly
   // as they do under `<DataTable>` — headless callers get real headers and
@@ -512,5 +523,3 @@ export function useDataTable<TRow>(
     getCellContent,
   };
 }
-
-export { defaultLabels } from "@adapttable/core";

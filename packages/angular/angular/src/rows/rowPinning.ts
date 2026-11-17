@@ -5,17 +5,19 @@
  * refuse it: a nested list is not a flat pin stack.
  */
 import {
-  commitRowPin,
-  createControllableStore,
   EMPTY_ROW_PIN_STATE,
-  ROW_PIN_STORE_OPTIONS,
-  rowPinActions,
   type RowPinLabels,
   type RowPinSide,
-  rowPinSideOf,
   type RowPinState,
 } from "@adapttable/core";
-import type { RowPinningState } from "@adapttable/core/binding";
+import {
+  commitRowPin,
+  createControllableStore,
+  ROW_PIN_STORE_OPTIONS,
+  rowPinActions,
+  type RowPinningState,
+  rowPinSideOf,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,
@@ -31,6 +33,7 @@ import {
   type MaybeSignalOptional,
   readMaybe,
 } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 export type { RowPinLabels, RowPinSide } from "@adapttable/core";
 export type { RowPinningState } from "@adapttable/core/binding";
@@ -69,10 +72,10 @@ export function injectRowPinning<TRow>(
 ): Signal<RowPinningState<TRow>> {
   if (!options.injector) assertInInjectionContext(injectRowPinning);
   const injector = options.injector ?? inject(Injector);
-  const store = createControllableStore<RowPinState>(
-    EMPTY_ROW_PIN_STATE,
-    ROW_PIN_STORE_OPTIONS
-  );
+  const store = createControllableStore<RowPinState>(EMPTY_ROW_PIN_STATE, {
+    ...ROW_PIN_STORE_OPTIONS,
+    store: tableStoreOf(injector),
+  });
   const own = fromStore(store, { injector });
   const controlled = computed(() =>
     options.pinnedRowIds === undefined

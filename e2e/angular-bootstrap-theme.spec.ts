@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 
 import { expect, test } from "@playwright/test";
 
+import { getLabels } from "../packages/shared/i18n/src/index";
+
 for (const kit of ["ng-bootstrap", "ngx-bootstrap"] as const) {
   for (const theme of ["light", "dark"] as const) {
     test(`${kit}: nested controls inherit ${theme} while explicit light stays light`, async ({
@@ -35,31 +37,34 @@ for (const kit of ["ng-bootstrap", "ngx-bootstrap"] as const) {
 
   for (const locale of ["en", "ar"] as const) {
     for (const width of [390, 1440]) {
-      test(`${kit}: ${locale} dark AI controls keep readable native colors at ${width}px`, async ({
+      test(`${kit}: ${locale} dark AI table controls keep readable native colors at ${width}px`, async ({
         page,
       }, info) => {
         await page.setViewportSize({ width, height: 844 });
         await page.addInitScript(() =>
           localStorage.setItem("adapttable-demo-theme", "dark")
         );
-        await page.goto(`/${kit}/ai/?locale=${locale}&live=off`);
-        const action = page.getByRole("button", {
-          name: "Show everyone",
-          exact: true,
-        });
-        await expect(action).toBeVisible();
-        await expect(action).toHaveCSS("color", "rgb(222, 226, 230)");
-        await expect(page.locator(".angular-ai-choice select")).toHaveCSS(
+        await page.goto(`/${kit}/ai/?locale=${locale}`);
+        const stage = page.locator(".ai-demo__stage");
+        const part = width < 600 ? "card" : "row";
+        await expect(
+          stage.locator(`[data-adapttable-part="${part}"]`)
+        ).toHaveCount(5);
+        // The kit draws the table's own controls: the filters trigger and
+        // the pager's page-size select read light on the dark surface.
+        const filters = stage
+          .locator('[data-adapttable-part="toolbar"]')
+          .getByRole("button", {
+            name: new RegExp(`^${getLabels(locale).filters}`),
+          });
+        await expect(filters).toBeVisible();
+        await expect(filters).toHaveCSS("color", "rgb(222, 226, 230)");
+        await expect(stage.locator("select.form-select").first()).toHaveCSS(
           "background-color",
           "rgb(33, 37, 41)"
         );
-        await action.focus();
-        await expect(action).toBeFocused();
-        await action.press("Enter");
-        const part = width < 600 ? "card" : "row";
-        await expect(
-          page.locator(`.ai-demo [data-adapttable-part="${part}"]`)
-        ).toHaveCount(5);
+        await filters.focus();
+        await expect(filters).toBeFocused();
         await page
           .locator(".ai-demo")
           .evaluate((demo) =>

@@ -4,7 +4,6 @@ import {
   type Direction,
   filterDefForColumn,
   type FilterRuntime,
-  showSimpleFilterFields,
   type TableSource,
 } from "@adapttable/core";
 import {
@@ -13,6 +12,7 @@ import {
   type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
   FilterTriggerToggleState,
+  showSimpleFilterFields,
 } from "@adapttable/core/binding";
 import { computed, type Signal, signal, type TemplateRef } from "@angular/core";
 
@@ -40,7 +40,7 @@ export interface FiltersView {
   /** Open the panel. A context-menu Filter uses this. */
   readonly show: () => void;
   /** The form's props. */
-  readonly form: Signal<FiltersFormSlotProps<never>>;
+  readonly form: Signal<FiltersFormSlotProps<unknown>>;
   /** The popover's or the drawer's props. */
   readonly overlay: Signal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
   /** The chips' props. */
@@ -49,7 +49,7 @@ export interface FiltersView {
   readonly header: boolean;
   /** A column's header funnel props, when the column has a filter. */
   readonly headerProps: Signal<
-    ReadonlyMap<string, FilterHeaderControlProps<never>>
+    ReadonlyMap<string, FilterHeaderControlProps<unknown>>
   >;
 }
 
@@ -61,6 +61,11 @@ export interface FiltersViewInput<TRow> {
   readonly mode: FiltersMode;
   readonly button: boolean;
   readonly header: boolean;
+  /**
+   * Mount the per-field form in the Filters panel. Default on; `false`
+   * keeps only the AND/OR tree there, opened.
+   */
+  readonly fields?: boolean;
   readonly closeHeaderFilterOnSelect: boolean;
   readonly dir: Signal<Direction>;
   readonly extraChips: Signal<readonly ActiveFilterChip[]>;
@@ -85,7 +90,7 @@ export function filtersViewFor<TRow>(
   const close = (): void => {
     open.set(false);
   };
-  const simpleFields = showSimpleFilterFields(input.header);
+  const simpleFields = showSimpleFilterFields(input.header, input.fields);
 
   return {
     button: input.button,
@@ -126,14 +131,14 @@ export function filtersViewFor<TRow>(
     })),
     header: input.header,
     headerProps: computed(() => {
-      const byColumn = new Map<string, FilterHeaderControlProps<never>>();
+      const byColumn = new Map<string, FilterHeaderControlProps<unknown>>();
       const { defs, registry } = runtime();
       for (const column of table.columns()) {
         const def = filterDefForColumn(defs, column.key);
         if (!def) continue;
         byColumn.set(column.key, {
           def: def,
-          source: source() as never,
+          source: source(),
           labels: table.labels(),
           registry,
           closeOnSelect: input.closeHeaderFilterOnSelect,

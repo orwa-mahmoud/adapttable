@@ -269,7 +269,11 @@ it("preserves controlled rejection and nested Escape ownership after moving the 
   expect(document.querySelector('[role="menu"]')).toBeNull();
   expect(element(part("assistant-sheet"))).toBe(sheet);
   expect(state.close.mock.calls).toEqual([[true]]);
-  expect(document.activeElement).toBe(element(part("assistant-examples-menu")));
+  await vi.waitFor(() =>
+    expect(document.activeElement).toBe(
+      element(part("assistant-examples-menu"))
+    )
+  );
   await key(element(part("assistant-input")), "Escape");
   expect(state.close.mock.calls).toEqual([[true], [false]]);
   expect(element(part("assistant-sheet"))).toBe(sheet);

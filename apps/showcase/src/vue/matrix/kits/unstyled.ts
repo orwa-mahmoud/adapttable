@@ -5,12 +5,15 @@ import {
   agentApproval,
   TableAssistant,
 } from "@adapttable/vue-unstyled/assistant";
+import { batchEditing } from "@adapttable/vue-unstyled/batch-editing";
 import { bulkActions } from "@adapttable/vue-unstyled/bulk-actions";
 import { cellNavigation } from "@adapttable/vue-unstyled/cell-navigation";
 import { cellSpan } from "@adapttable/vue-unstyled/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/vue-unstyled/column-groups";
 import { columnMenu } from "@adapttable/vue-unstyled/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/vue-unstyled/column-selection";
+import { commandPalette } from "@adapttable/vue-unstyled/command-palette";
+import { contextMenu } from "@adapttable/vue-unstyled/context-menu";
 import { densityChooser } from "@adapttable/vue-unstyled/density";
 import {
   editHistory,
@@ -19,18 +22,25 @@ import {
   undoRedoButtons,
 } from "@adapttable/vue-unstyled/editing";
 import { exportCsv } from "@adapttable/vue-unstyled/export";
+import { extraRows } from "@adapttable/vue-unstyled/extra-rows";
 import { filters } from "@adapttable/vue-unstyled/filters";
+import { findInTable } from "@adapttable/vue-unstyled/find-in-table";
 import { fullscreen } from "@adapttable/vue-unstyled/fullscreen";
 import { groupingPanel } from "@adapttable/vue-unstyled/grouping-panel";
 import { headerFilters } from "@adapttable/vue-unstyled/header-filters";
 import { nestedTable } from "@adapttable/vue-unstyled/nested-table";
 import { pinnedSummaryRows } from "@adapttable/vue-unstyled/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/vue-unstyled/pivot";
+import { print } from "@adapttable/vue-unstyled/print";
 import { resizableColumns } from "@adapttable/vue-unstyled/resizable-columns";
 import { rowActions } from "@adapttable/vue-unstyled/row-actions";
 import { rowPinning } from "@adapttable/vue-unstyled/row-pinning";
 import { rowReorder } from "@adapttable/vue-unstyled/row-reorder";
-import { savedViews } from "@adapttable/vue-unstyled/saved-views";
+import {
+  savedViews,
+  SavedViewsPanel,
+} from "@adapttable/vue-unstyled/saved-views";
+import { selectionStats } from "@adapttable/vue-unstyled/selection-stats";
 import { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import { tree } from "@adapttable/vue-unstyled/tree";
 import { virtualize } from "@adapttable/vue-unstyled/virtualize";
@@ -91,6 +101,7 @@ export const kit: ShowcaseKit = {
     ),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,
@@ -102,12 +113,19 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

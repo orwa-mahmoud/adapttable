@@ -20,12 +20,13 @@
  * would light up whatever landed there. These are keyed by row id and cell
  * address, so the mark travels with the data.
  */
+
 import {
   createHighlightStore,
   highlightCellKey,
   highlightDuration,
-} from "@adapttable/core";
-import type { HighlightState } from "@adapttable/core/binding";
+  type HighlightState,
+} from "@adapttable/core/binding";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";

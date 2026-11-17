@@ -6,16 +6,13 @@ import {
   type MobileCardContext,
   type MobileCardField,
 } from "@adapttable/angular";
-import {
-  mobileCardListStyle,
-  type TableLabels,
-  treeCardStyle,
-} from "@adapttable/core";
+import { type TableLabels, treeCardStyle } from "@adapttable/core";
 import {
   EDITABLE_CELL,
   EXPAND_TOGGLE,
   EXTRA_ROW_PARTS,
   GROUP_HEADER_CARD,
+  mobileCardListStyle,
   resolveMobileLabel,
   ROW_EDIT_ACTIONS,
   ROW_REORDER_BUTTONS,
@@ -52,7 +49,7 @@ export abstract class AdaptMobileCardsModel<
     const cards = new Map<
       string,
       {
-        readonly toggle: TreeToggleProps<never>;
+        readonly toggle: TreeToggleProps<unknown>;
         readonly indent: string | null;
       }
     >();
@@ -69,7 +66,7 @@ export abstract class AdaptMobileCardsModel<
           onToggle: tree.expansion.toggle,
           toggleClassName: classes.treeToggle,
           spacerClassName: classes.treeSpacer,
-        } as unknown as TreeToggleProps<never>,
+        },
         indent: treeCardStyle(entry.level).marginInlineStart ?? null,
       });
     }
@@ -175,7 +172,7 @@ export abstract class AdaptMobileCardsModel<
     reorder: RowReorderState<TRow>,
     row: TRow,
     localIndex: number
-  ): RowReorderButtonsProps<never> {
+  ): RowReorderButtonsProps<unknown> {
     const view = this.view();
     const windowStart = view.table.windowStart();
     const rowCount = view.table.source().rows.length;
@@ -204,7 +201,7 @@ export abstract class AdaptMobileCardsModel<
     const key = `${this.rowId(row)}:${String(localIndex)}`;
     const cached = this.buttonsPropsCache.get(key);
     if (cached?.reorder === reorder && cached.row === row) {
-      return cached as unknown as RowReorderButtonsProps<never>;
+      return cached;
     }
     const props: RowReorderButtonsProps<TRow> = {
       reorder,
@@ -218,6 +215,6 @@ export abstract class AdaptMobileCardsModel<
       downClassName: classes.rowReorderDown,
     };
     this.buttonsPropsCache.set(key, props);
-    return props as unknown as RowReorderButtonsProps<never>;
+    return props;
   }
 }

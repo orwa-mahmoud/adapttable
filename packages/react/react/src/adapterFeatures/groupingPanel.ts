@@ -23,11 +23,11 @@ import type { AdapterFeatureComponent } from "./component";
 /** Kit renderers needed by the interactive grouping feature. @public */
 export interface AdapterGroupingPanelComponents {
   /** Desktop grouped-row renderer. */
-  GroupHeaderRow: AdapterFeatureComponent<GroupHeaderRowSlotProps<never>>;
+  GroupHeaderRow: AdapterFeatureComponent<GroupHeaderRowSlotProps<unknown>>;
   /** Mobile grouped-card renderer. */
-  GroupHeaderCard: AdapterFeatureComponent<GroupHeaderCardSlotProps<never>>;
+  GroupHeaderCard: AdapterFeatureComponent<GroupHeaderCardSlotProps<unknown>>;
   /** Interactive grouping strip renderer. */
-  GroupingPanel: AdapterFeatureComponent<GroupingPanelSlotProps<never>>;
+  GroupingPanel: AdapterFeatureComponent<GroupingPanelSlotProps<unknown>>;
 }
 
 /**

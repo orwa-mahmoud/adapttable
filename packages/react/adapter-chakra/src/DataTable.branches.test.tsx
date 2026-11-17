@@ -3,10 +3,15 @@
  * branches in DataTable.tsx, components/chrome.tsx and components/tables.tsx
  * that the existing suites only hit on one side.
  */
-import { defaultLabels } from "@adapttable/core";
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import type * as AdapterModule from "@adapttable/react/adapter";
-import { useDataTableShell } from "@adapttable/react/adapter";
+import {
+  defaultLabels,
+  type KitTable,
+  type KitTableFrameProps,
+  TableComposition,
+  type VirtualTableRow,
+} from "@adapttable/react/adapter";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -35,7 +40,7 @@ vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
   return {
     ...actual,
-    useDataTableShell: vi.fn(actual.useDataTableShell),
+    TableComposition: vi.fn(actual.TableComposition),
   };
 });
 
@@ -44,24 +49,54 @@ const actualCore = await vi.importActual<typeof AdapterModule>(
 );
 
 /**
- * Run the real shell, then patch its output (the windowed `tableProps` or the
- * `canLoadMore` flag) — the way the body data would arrive from a real
- * virtualizer / pager, so the adapter's render branches stay under test.
+ * Run the real composition, then patch what the kit receives: the finished
+ * view its body draws (the windowed `tableProps`, as from a real virtualizer)
+ * or the regions its frame lays out (no next page to load).
  */
-type Shell = ReturnType<typeof actualCore.useDataTableShell>;
-
-function mockShell(patch: (real: Shell) => Shell) {
-  vi.mocked(useDataTableShell).mockImplementation((props, render) => ({
-    ...patch(actualCore.useDataTableShell(props, render)),
-    skipChromeBody: true,
-  }));
+function mockComposition(edit: {
+  readonly window?: {
+    readonly rows: VirtualTableRow<Row>[];
+    readonly paddingTop: number;
+    readonly paddingBottom: number;
+  };
+  readonly frame?: (props: KitTableFrameProps) => KitTableFrameProps;
+}) {
+  let Frame: KitTable["Frame"] | undefined;
+  vi.mocked(TableComposition).mockImplementation(({ props, kit }) => {
+    Frame ??= (frame) => kit.Frame(edit.frame ? edit.frame(frame) : frame);
+    const { window } = edit;
+    return actualCore.TableComposition({
+      props,
+      kit: {
+        ...kit,
+        Frame,
+        body: (view, headerOffset, tableProps) =>
+          kit.body(
+            window
+              ? {
+                  ...view,
+                  tableProps: {
+                    ...view.tableProps,
+                    rowEntries: window.rows as never,
+                    paddingTop: window.paddingTop,
+                    paddingBottom: window.paddingBottom,
+                    measureElement: vi.fn(),
+                  },
+                }
+              : view,
+            headerOffset,
+            tableProps
+          ),
+      },
+    });
+  });
 }
 
 let adapter: ReturnType<typeof createMemoryAdapter>;
 
 beforeEach(() => {
-  // Default: delegate to the real shell so the normal render path runs.
-  vi.mocked(useDataTableShell).mockImplementation(actualCore.useDataTableShell);
+  // Default: the real composition, so the normal render path runs.
+  vi.mocked(TableComposition).mockImplementation(actualCore.TableComposition);
 });
 
 function mount(
@@ -165,6 +200,26 @@ describe("chrome.tsx branches", () => {
     expect(screen.getByRole("status")).toBeInTheDocument();
     // No loadingLabel → the VisuallyHidden node is not rendered.
     expect(container.textContent).toBe("");
+    expect(
+      container.querySelector('[data-adapttable-part="loading-table"]')
+    ).not.toBeNull();
+  });
+
+  it("LoadingState marks cards when the table is in the card layout", () => {
+    const { container } = render(
+      <ChakraProvider value={defaultSystem}>
+        <LoadingState rows={2} columns={2} mobile />
+      </ChakraProvider>
+    );
+    expect(
+      container.querySelector('[data-adapttable-part="loading-cards"]')
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-adapttable-part="loading-card"]')
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-adapttable-part="loading-table"]')
+    ).toBeNull();
   });
 
   it("opens the filter drawer in RTL drawer mode (placement 'start' arm)", async () => {
@@ -320,16 +375,13 @@ describe("tables.tsx branches", () => {
   });
 
   it("renders trailing padding in virtualized mobile cards (paddingBottom > 0 true branch)", () => {
-    mockShell((real) => ({
-      ...real,
-      tableProps: {
-        ...real.tableProps,
-        rowEntries: [{ row: ROWS[1]!, index: 1, key: "b" }],
+    mockComposition({
+      window: {
+        rows: [{ row: ROWS[1]!, index: 1, key: "b" }],
         paddingTop: 0,
         paddingBottom: 40,
-        measureElement: vi.fn(),
       },
-    }));
+    });
     mount({ virtualize: true, estimateCardSize: 40 }, "", {
       mode: "infinite",
       isMobile: true,
@@ -394,9 +446,9 @@ describe("DataTable.tsx branches", () => {
   });
 
   it("hides the load-more affordance when the body data says it cannot load more", () => {
-    // canLoadMore=false (paged mode / error in core) must suppress the
-    // load-more sentinel + button even when the source reports a next page.
-    mockShell((real) => ({ ...real, canLoadMore: false }));
+    // canLoadMore=false (paged mode / error in core) reaches the frame as no
+    // load-more region, even when the source reports a next page.
+    mockComposition({ frame: (frame) => ({ ...frame, loadMore: undefined }) });
     mount({}, "limit=1", { mode: "infinite" });
     expect(
       screen.queryByRole("button", { name: defaultLabels.loadMore })

@@ -16,7 +16,8 @@
  * Escape are named explicitly by `ignoreWithin`. Cancelling a column rename
  * closes the editor; the Escape after it closes the menu.
  */
-import { shouldEscapeClose } from "@adapttable/core";
+
+import { shouldEscapeClose } from "@adapttable/core/binding";
 import { useEffect, useRef } from "react";
 
 /** Tuning for {@link useEscapeClose}. @public */

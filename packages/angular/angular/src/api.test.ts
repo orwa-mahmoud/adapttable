@@ -1,8 +1,5 @@
-import {
-  createMemoryAdapter,
-  createTableViewStore,
-  type TableSource,
-} from "@adapttable/core";
+import { createMemoryAdapter, type TableSource } from "@adapttable/core";
+import { createTableViewStore } from "@adapttable/core/binding";
 import { ApplicationRef, Injector, type Signal, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 

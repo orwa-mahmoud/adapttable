@@ -5,6 +5,7 @@ import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Nested } from "./sectionIcons";
+import { NESTED_HINTS } from "./shared/pageHints";
 
 /**
  * The nested-tables page: a real table under a row, not a blank panel.
@@ -21,16 +22,11 @@ export function NestedTablesDemo({
   return (
     <div className="mx-demo">
       <div className="hint-row">
-        <span className="hint">
-          <Nested size={12} /> first row is open — the panel is another table,
-          same kit
-        </span>
-        <span className="hint">
-          <Check size={12} /> orders have their own columns and row keys
-        </span>
-        <span className="hint">
-          <Check size={12} /> the inner table does not write the URL
-        </span>
+        {NESTED_HINTS.map((hint, index) => (
+          <span className="hint" key={hint}>
+            {index === 0 ? <Nested size={12} /> : <Check size={12} />} {hint}
+          </span>
+        ))}
       </div>
       <div className="mx-demo__body">
         <div key={adapter} data-adapter={adapter}>

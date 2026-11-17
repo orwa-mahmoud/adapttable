@@ -93,7 +93,7 @@ const STYLE = {
 } as const;
 
 /** Excel's day-zero, including the 1900 leap-year bug it still ships. */
-const EXCEL_EPOCH_MS = Date.UTC(1899, 11, 30);
+const EXCEL_EPOCH_MS = /* @__PURE__ */ Date.UTC(1899, 11, 30);
 
 /** A date with no clock is a day; anything else is a day-and-time. */
 function isDateOnly(date: Date): boolean {

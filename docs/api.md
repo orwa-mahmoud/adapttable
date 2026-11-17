@@ -113,7 +113,7 @@ per-column aggregation choices.
 | `onEditError`               | `EditEventHandler<TRow>`                                        | —               | Observe a save promise rejecting.                                                                                                                                                                                                 |
 | `onEditConflict`            | `EditConflictHandler<TRow>`                                     | —               | A row changed under an open editor. Return `"keep"` or `"take"`; omit and `editConflictPolicy` decides.                                                                                                                           |
 | `editConflictPolicy`        | `"keep" \| "take" \| "ask"`                                     | `"ask"`         | What to do when the host does not choose. `"ask"` surfaces Keep mine / Take theirs.                                                                                                                                               |
-| `editActivation`            | `"doubleClick" \| "click"`                                      | `"doubleClick"` | The pointer gesture that opens a cell's editor. `"click"` opens it on the first click; Enter and F2 open it either way.                                                                                                           |
+| `editActivation`            | `"doubleClick" \| "click"`                                      | `"doubleClick"` | The pointer gesture that opens a cell's editor (an `EditActivation`). `"click"` opens it on the first click; Enter and F2 open it either way.                                                                                     |
 | `rowVersion`                | `(row: TRow) => string \| number`                               | —               | Host version of a row. Any change under an open editor is a conflict, not only the edited column.                                                                                                                                 |
 | `validateRow`               | `RowValidator<TRow>`                                            | —               | Gate a commit on a row-level rule. Receives the row the edit would produce; return a message, a column key → message map, or nothing. May be async.                                                                               |
 | `applyEdit`                 | `(row: TRow, columnKey: string, value: unknown) => TRow`        | shallow spread  | How an edit is applied to a row for `validateRow` to judge; pass it when a column reads a nested path.                                                                                                                            |
@@ -195,8 +195,12 @@ and labels through `useTableRuntime` (`TableRuntime`, `TableRuntimeView`) rather
 them (`featureIds()`, optional `query` for page/search/sort); chrome offers them with `usePublishTableRuntime`. A feature also fills
 named positions: `renders` is a list of `FeatureRender` entries, each pairing a
 `FeatureSlotKey` from `featureSlotKey` with what to draw — built with
-`slotRender`, which keeps the props typed — chrome asks through `FeatureSlot`,
-and the positions themselves are named constants: `STATUS_BAR` (the footer
+`slotRender`, which keeps the props typed — chrome asks through `FeatureSlot`.
+A position whose props carry types each table supplies (its rows, a
+binding's state) is a `RowSlotKey` from `rowSlotKey`: its fill is one
+function generic over those types, and each table asks with its own props.
+Every other key is a `PlainSlotKey`. The positions themselves are named
+constants: `STATUS_BAR` (the footer
 strip, filled by `statusBar` or `selectionStats` from
 `@adapttable/<kit>/status-bar` — a single slot, so the pair share one element
 and it draws once), `FIND_BAR` (`findInTable` from
@@ -287,7 +291,11 @@ state arrives through `ChromeExtrasGate` (`ChromeExtraSlotProps`) —
 (`FullscreenLiveSlotProps`), `SELECTION_STATS_LIVE`
 (`SelectionStatsLiveSlotProps`), `COMMAND_PALETTE_LIVE` and
 `CONTEXT_MENU_LIVE` (`ContextMenuLiveSlotProps`). An unfilled live slot passes
-an inert stand-in through, so the same chrome renders either way.
+an inert stand-in through, so the same chrome renders either way. Every live
+slot above but the command palette and context menu is a row slot key, each
+with its fill's type, which a fill names when it fills the slot: `ChromeExtraDraw`, `ChromeBodyDraw`,
+`EditHistoryLiveDraw`, `FindLiveDraw`, `CellNavLiveDraw`, `ExportLiveDraw`,
+`FullscreenLiveDraw` and `SelectionStatsLiveDraw`.
 
 Factories: `feature` (ad-hoc) · `rowReorder` · `rowPinning` · `cellSpan` ·
 `extraRows` · `rowAppearance` · `rowDetail` · `nestedTable` · `editing` ·
@@ -349,6 +357,13 @@ Kit `/pivot` re-exports `PivotPanel` plus the `@adapttable/core/pivot` engine.
 | `formatAggregate`    | `(value: DisplayValue \| undefined, context: AggregateFormatContext) => ReactNode`   | —             | How an aggregate of this column reads. Presentation only.                                                                                                                                                                                                                |
 | `ai`                 | `ColumnAiOptions`                                                                    | —             | What an agent is told about this column. Ignored on a table with no agent. See [the pieces in core and react](#the-pieces-in-core-and-react).                                                                                                                            |
 | `meta`               | `Record<string, unknown>`                                                            | —             | Arbitrary metadata adapters (or your own code) may read back.                                                                                                                                                                                                            |
+
+Core's column, filter, editing, reorder and runtime contracts type their row
+functions as `RowCallback<[row: TRow, …], Result>`: an ordinary function whose
+parameters are compared the way TypeScript compares methods, so a column typed
+over your row type is accepted where a slot reads rows as `unknown`. The row
+type itself comes from the rows a table is given (`data`, `rows`), never from a
+callback's annotation.
 
 ## ColumnGroupDef
 
@@ -478,7 +493,9 @@ import path covers everything.
 
 ## Headless hooks
 
-All from `@adapttable/react` unless marked `@adapttable/react/adapter`.
+All from `@adapttable/react` unless marked `@adapttable/react/adapter`. The
+kit machinery marked there is also still on `@adapttable/react` as a
+deprecated alias until the next major.
 
 ### Data sources
 
@@ -504,12 +521,15 @@ All from `@adapttable/react` unless marked `@adapttable/react/adapter`.
   `updateTableUrlState(search, namespace, mutate)` returns the next one;
   `applyTableUrlState` / `captureTableUrlState` move that state on and off a
   live table. Per param: `PARAM_PAGE`, `PARAM_LIMIT`, `PARAM_SEARCH`,
-  `PARAM_FIND`, `PARAM_SORT_BY`, `PARAM_SORT_DIR`, `PARAM_GROUP_BY`,
+  `PARAM_FIND`, `PARAM_SORT`, `PARAM_SORT_BY`, `PARAM_SORT_DIR`, `PARAM_GROUP_BY`,
   `PARAM_GROUP_AGGREGATES`, `PARAM_COL_HIDDEN`, `PARAM_DENSITY`,
   `PARAM_FORMULA`, `PARAM_PIVOT`, with `readPage`, `readLimit`, `readSortDir`,
   `readSortLevels` / `writeSortLevels`, `readColumnLayout` /
   `writeColumnLayout`, `readExtra` / `writeExtra`, `readFilterTreeParam` /
-  `writeFilterTreeParam`, and `readRowPins` / `writeRowPins`.
+  `writeFilterTreeParam`, and `readRowPins` / `writeRowPins`. A
+  multi-value param reads back with `splitListParam(raw)`, and
+  `safeDecode(part)` decodes one encoded part, keeping text that is not
+  valid percent-encoding as it arrived.
 - `useTableUrlState(options?): UseTableUrlStateResult` — page / limit /
   search / sort / grouping / group-aggregation overrides / extra-filter bag in
   the query string, with setters
@@ -534,10 +554,11 @@ All from `@adapttable/react` unless marked `@adapttable/react/adapter`.
   prop-getters: `getTableProps`, `getHeaderRowProps`, `getHeaderCellProps`,
   `getSortButtonProps`, `getRowProps`, `getCellProps`,
   `getSearchInputProps`.
-- `useTableChrome<TRow>(props): TableChrome<TRow>` — shared adapter
+- `useTableChrome<TRow>(props): TableChrome<TRow>` (`@adapttable/react/adapter`) — shared adapter
   orchestration: layout, confirm, chips, body region (`emptyVariant`,
   `isRefreshing`), `clearFilters`, footer.
-- `useVirtualChromeBodyData(chrome, props): ChromeBodyData<TRow>` — body
+- `useVirtualChromeBodyData(chrome, props): ChromeBodyData<TRow>`
+  (`@adapttable/react/adapter`) — body
   data-flow wiring: window virtualization + the infinite-scroll sentinel.
   `usePlainChromeBodyData` is the same shape without the virtualizer, for a
   table that never composed `virtualize`; `VirtualItemMeta` is one windowed
@@ -563,16 +584,20 @@ All from `@adapttable/react` unless marked `@adapttable/react/adapter`.
   select-all and cross-page "all matching".
 - `useRowExpansion(): RowExpansionState` — multi-open row expansion keyed by
   row id.
-- `useActiveFilterChips(options)` / `useExtraChips(options)` — removable
+- `useActiveFilterChips(options)` / `useExtraChips(options)`
+  (`@adapttable/react/adapter`) — removable
   chips from URL filter state / from non-URL state.
 - `useFilterOptions(def): { options, loading }` — resolves static, `"auto"`,
   and async filter-option sources for custom forms.
 - `useBulkActionRunner(options): BulkActionRunner` — runs bulk actions
   through the confirm handler.
-- `useColumnDragState()` — drag-reorder state for custom column menus.
-- `useHorizontalOverflow()` — scroll-overflow detection for pinned-column
+- `useColumnDragState()` (`@adapttable/react/adapter`) — drag-reorder state
+  for custom column menus.
+- `useHorizontalOverflow()` (`@adapttable/react/adapter`) — scroll-overflow
+  detection for pinned-column
   affordances.
-- `useFilterTriggerToggle()` / `useChromeScrollReset()` — filter-trigger
+- `useFilterTriggerToggle()` / `useChromeScrollReset()`
+  (`@adapttable/react/adapter`) — filter-trigger
   open state / scroll reset on query change.
 
 ### The neutral engine
@@ -615,7 +640,13 @@ Framework-free — see [concepts](./concepts.md#the-framework-neutral-engine).
   engine as the shape `@adapttable/ai` reads: rows, revisions, and an
   `operations` map of what is wired right now. `NeutralTableBinding` is how a
   host supplies the visible rows and that map.
-- `devWarn(message)` — development-only warning, printed once per message.
+- `devWarn(message)` — development-only warning, printed once per message
+  outside a `NODE_ENV=production` run. The package's own warnings live only in
+  its development build: `@adapttable/core` publishes a production build as
+  the default export condition, with every one of them and their text
+  compiled out, and the warning build under the `development` condition that
+  Vite, webpack and other bundlers select in development (Node needs
+  `--conditions=development`).
 
 ### Composed ownership
 
@@ -753,7 +784,24 @@ explains which import a program changes. This list is the reference.
   records the cursor the host returned; `setPage`, `fetchNextPage` and
   `refetch` are the source's own actions, `subscribe` / `revision` report when
   its state moved, and `dispose()` aborts the request in flight.
-  `useServerData` runs on it.
+- `createLazyServerSource()` — the server tier a binding holds for every
+  table, as a `LazyServerSource`, with its engine loaded on demand from
+  `@adapttable/core/binding`: `load()` starts fetching the engine the first
+  time a table is on the server tier, and every later table creates it at
+  once. Until it lands, `update` returns a `ServerTierFrame` — the engine's
+  first frame without the query: the host's rows, `isLoading`,
+  `hasNextPage` — and `commit()` sends the first query itself, so the
+  request travels beside the engine. A query that asks for aggregates needs
+  the engine and follows it. `refetch` resends that first query; `setPage`
+  and `fetchNextPage` wait for the engine, which takes over the request
+  already sent without sending it again.
+  `phase()` (`ServerEnginePhase`) says whether the engine is `"pending"`,
+  `"ready"` or `"failed"`; a failed load is thrown from `update` and from
+  `throwIfFailed()`. The entry also names the types its signature uses:
+  `ServerSource`, `ServerSourceConfig`, `ServerSourceFrame`,
+  `ServerSourceViewState`, `TableQueryListener`, `TableQuery`,
+  `QueryExtensions` and `QuerySupport`. `useServerData`, Vue's
+  `useServerData` and Angular's `injectServerData` run on it.
 - `createQuerySource()` — the query-library tier as a `QuerySource`: call
   `params(config, view)` with the host's `QuerySourceConfig` and the
   view-state store's snapshot for the params to hand the library (the same
@@ -789,6 +837,42 @@ explains which import a program changes. This list is the reference.
   operations the rows on screen were computed with: `remember` each request's
   operations, `settle` from the response's provenance, read `current()`.
 
+### Defining a feature
+
+These come from `@adapttable/core/binding`.
+
+- `defineFeature(contract)` — one contract per feature (`FeatureContract`): its
+  `id`, the table `options` it sets, the store `slices` and named `actions` it
+  adds, the `labels` it needs and the `urlKeys` it owns. The result
+  (`DefinedFeature`) composes into `features` like any patch feature.
+- `featureState(features)` — the slices and actions of a table's features,
+  typed as `FeatureSlices<TFeatures>` and `FeatureActions<TFeatures>`: exactly
+  the installed features' entries and no other feature's.
+  `isDefinedFeature` tells a defined feature from a plain patch feature;
+  `FeatureSliceMap`, `FeatureActionMap`, `ActionPayload`, `FeatureSlicesOf`,
+  `FeatureActionsOf`, `IntersectionOf` and `NoFeatureState` name the parts.
+
+### Table store
+
+These come from `@adapttable/core/binding`.
+
+- `createTableStore(): TableStore` — one table's state. Each piece is a slice
+  under a typed key (`defineSlice(name, initial, equals?)`, `SliceKey`,
+  `SliceCell`); changes go in as named actions (`defineAction(type, reduce)`,
+  `ActionDefinition`, `TableAction`) through `dispatch`, or as one change
+  through `batch`, and reach readers together when the action ends.
+  `slice(key)` and `selectFrom(store, selector, equals?)` return a
+  `StoreReader` that is told only when what it reads changed; `SliceRead` and
+  `StoreWriter` are what selectors and reducers see. A seed passed to
+  `createTableStore` writes the starting state before anything can listen.
+- Selection as a slice: `SELECTED_IDS`, the actions `toggleRowSelected`,
+  `toggleRowsSelected`, `replaceSelection` and `clearSelection`, and
+  `rowSelectedReader(store, id)`, which is told only when that row's state
+  changes.
+- `controllableSlice(store, key, options?)` — a `ControllableStore` whose own
+  value is a slice of the table's store, so view state and row state share
+  one store.
+
 ### Controllable stores
 
 - `createControllableStore(initial, options?)` — a value that is the host's
@@ -823,7 +907,8 @@ EditValidationStore` — cell then row validation, with superseded checks
 EditHistoryController` — the history a table runs: records a gesture with
   each cell's value before it changed and replays undo and redo through the
   host's `CellEditHandler`. `editHistoryView` (`EditHistoryState`),
-  `resolveEditHistory` reads the `editHistory` prop, and `recordingCellEdit`
+  `resolveEditHistory` reads the `editHistory` prop (`EditHistoryInput`: `true`
+  or `{ depth }`), and `recordingCellEdit`
   wraps the channel so each inline commit is one gesture.
 - `createEditConflictStore(): EditConflictStore` — the live-update
   reconciler for the open cell, an open row form and a batch
@@ -871,6 +956,12 @@ EditHistoryController` — the history a table runs: records a gesture with
   `editableCellErrorId`, `rowEditErrorId`, `batchEditErrorId`,
   `editorValidationProps` and `editorBusyProps` (`EditorAriaState`) — ids and
   ARIA; `editorSelectOptions`, `resolveEditableCellDisplay`;
+  `rowEditorControl(rowEditing, columnKey, editor, saveBlocked)` and
+  `batchEditorControl(batch, row, rowId, columnKey, editor)` — one field's
+  `EditorDraftControl` (its draft, keys, editor, choices and the validation
+  it reports) in a row form or a batch; `EditableCellEditorCtrl` adds the
+  message's `errorId`, the `focusRef` and the live-row `conflict` a kit's
+  editor reads;
   `cellConflictAsk`, `controllerConflictAsk`, `customEditorConflict`
   (`CellConflictAsk`) and `rowEditConflict` (`RowEditConflict`) — the
   conflict questions; `resolveRowEditTrigger` (`RowEditTrigger`),
@@ -934,7 +1025,10 @@ RowReorderController` — the keyboard grab, drag and drop, the mobile swap and
 HeaderFilterOverlayController` — one header filter's open state and reset
   key. `HeaderFilterOverlaySnapshot`, `isHeaderFilterOpen`,
   `HEADER_FILTER_SESSION_ATTR`, `headerFilterInsideSelector`,
-  `watchOverlayDismiss`, `HeaderFilterWrites`.
+  `watchOverlayDismiss` (an Escape a nested dropdown, an input method or an
+  earlier handler took is left to them; `OverlayDismissOptions` adds nodes no
+  selector names, a nested dropdown's selector and what follows an Escape),
+  `HeaderFilterWrites`.
 - `createSavedViewsController(options: SavedViewsControllerOptions):
 SavedViewsController` — the saved views list, its storage and every
   operation on it. `SavedViewsSnapshot`.
@@ -1003,6 +1097,11 @@ ColumnRenameEditor` — the inline rename form. `ColumnRenameEditorSnapshot`;
   `RangeOpLabelKeys`), `TextFieldWidget`, `BooleanFieldWidget`
   (`BooleanChoice`, `parseBooleanChoice`). `scalarFilterText`,
   `filterOpLabel`.
+- `filterTreeSnapshot(tree)` records a filter tree as a `FilterTreeSnapshot`
+  (its `FilterTreeSnapshotNode`s, each operand a `FilterOperandSnapshot` of
+  `FilterOperandPrimitive` values or kept by identity), and
+  `sameFilterTree(tree, snapshot)` says whether a tree a host passes still
+  filters the same way, even after the host mutated it in place.
 - `filterTreeConditionModel(condition, defs, registry, labels):
 FilterTreeConditionModel` — one AND/OR builder row: its field and operator
   choices (`FilterTreeOption`) and its value editor
@@ -1014,12 +1113,18 @@ FilterTreeEditorActions`, `filterTreeCombinatorOptions`,
   operators through the same registry widget the builder does.
 - `activeFilterChips(options: ActiveFilterChipsOptions)`,
   `chipValuesOf(extra, labels)`, `mergeFilterChips` and
-  `resolveActiveFilterCount` — the chip strip and the filters count.
+  `resolveActiveFilterCount` — the chip strip and the filters count;
+  `filterTreeConditionChips({ tree, defs, labels, registry, onRemove })` adds
+  one chip per AND/OR-tree condition that filters, keyed by its path, and
+  hands that path to `onRemove`.
 - `checklistItems(def, source: ChecklistSource): ChecklistItems`,
   `searchChecklistItems(items, query)` and
   `checklistActions(def, source, visible): ChecklistActions` — the checklist
   filter. `checklistWindow(count, scrollTop, width): ChecklistWindow` and
-  `checklistColumnsAcross(width)` window a long list;
+  `checklistColumnsAcross(width)` window a long list,
+  `checklistSlice(count, virtualize, scrollTop, width)` returns the window or
+  the whole list, and `nextChecklistViewport(current, node)` reads a scroll
+  without a new object when nothing moved;
   `CHECKLIST_VIRTUALIZE_AT`, `CHECKLIST_ITEM_HEIGHT`, `CHECKLIST_ITEM_WIDTH`,
   `CHECKLIST_OPTION_GAP`, `CHECKLIST_LIST_HEIGHT`.
 - `headerFilterCellKind(def, registry): HeaderFilterCellKind` — the compact
@@ -1104,7 +1209,9 @@ BulkActionRunnerController` (`BulkActionRunnerSnapshot`) and
 - `stickyToolbarStyle` (`StickyToolbarStyle`), `stickyHeaderOffset` and
   `measuredToolbarHeight` — the sticky toolbar rule. `shouldEscapeClose`
   and `isElementShowing` — the Escape-close rule. `restoreFocusSoon` and
-  `focusWasDropped` — restore-focus timing. `resolveDensity`,
+  `focusWasDropped` — restore-focus timing. `watchClickedOpener`
+  (`ClickedOpener`) — the button a click pressed, so an overlay that opens
+  with focus on the document can return focus there. `resolveDensity`,
   `requestDensityChange` and `DEFAULT_DENSITY` — density.
 - `createAllMatchingScope(): AllMatchingScope` — selection's "all matching"
   scope. `createHighlightStore(options: HighlightStoreOptions):
@@ -1126,6 +1233,15 @@ ChangedCellFlashStore` (`changedRowFields`, `patchTouchedKeys`,
   `pivotMeasureAggName` and `PIVOT_AGGREGATIONS` model its panel.
 
 ### `@adapttable/core/binding` — the Chrome model
+
+`@adapttable/core/binding` is internal to AdaptTable packages: the framework
+bindings, the AI packages, the server and the CLI build on it, and its names
+may change in any minor release. A table imports from its framework binding
+or from `@adapttable/core`. The main entry of `@adapttable/core` serves only
+the names a table reaches for; the machinery a binding uses, and helpers no
+table, guide or example reaches for, are on this entry, and the main entry
+keeps each of them as a deprecated alias of the same value or type until the
+next major.
 
 A binding also finds here what its hooks share with every other binding: the
 state shapes they return (`SelectionState`, `GridFocusState`,
@@ -1167,6 +1283,11 @@ table's own props; every binding re-exports them.
   `desktopHeadCellGeometry` (`DesktopHeadCellGeometry`), `desktopEdgeHeadPin`,
   `desktopPinSignature`, `DESKTOP_RESIZE_HANDLE_STYLE` — desktop layout and
   pinning geometry.
+- `readRailWidths` (`MeasuredRailWidths`), `observeRailWidths` — the rendered
+  widths of the expand, reorder, selection and actions rails, read from the
+  header (and kept current as they resize, appear or go), so
+  `desktopChromeMetrics({ measured })` places pinned columns and rails
+  (`RailInsets`) exactly past them.
 - `desktopRowMeasureRef`, `desktopDetailMeasureRef`, `measureRowDetailAsPair`,
   `measureWindowScrollMargin`, `documentOffsetTop`, `virtualListElement`,
   `sourceWindowStart` — measuring rows and the scroll window for
@@ -1211,8 +1332,9 @@ shares, so a new binding calls them rather than re-deriving them.
 - **Feature patch layer.** `applyTableFeatures` merges each feature's `apply`
   patch into the table's props: later features win, `assembly` is merged one
   level deep, host props win, and a second call is a no-op.
-  `mergeFeaturePatches`, `getAppliedFeatures` and `rememberAppliedFeatures`
-  are its parts. `FeaturePatch`, `PatchFeature`, `CoreFeature`,
+  `mergeFeaturePatches`, `overlayFeatureOptions` (a table's defined options
+  over its features' patches, with the features' strings as `featureLabels`),
+  `getAppliedFeatures` and `rememberAppliedFeatures` are its parts. `FeaturePatch`, `PatchFeature`, `CoreFeature`,
   `CoreFeatureRegistrar`, `CoreRowFeatureRegistrar` and `VirtualizeInput` are
   the types. Each built-in factory's id and option normalization is its own export, named `core` plus the factory: `coreFeature`, `coreCellSpan`, `coreExtraRows`, `corePinnedSummaryRows`, `coreRowAppearance`, `coreColumnMenu`, `coreResizableColumns`, `coreCollapsibleColumnGroups`, `coreCommandPalette`, `coreContextMenu`, `coreSidePanel`, `coreBulkActions`, `coreFilterTypes`, `coreHeaderFilters`, `coreSavedViews`, `corePrint`, `coreStatusBar`, `coreUndoRedoButtons`, `coreMultiSort`, `coreFitColumns`, `coreColumnSelectionCheckbox`, `coreCellNavigation`, `coreDensityChooser`, `coreEditHistory`, `coreEditing`, `coreRowEditing`, `coreBatchEditing`, `coreDirtyIndicators`, `coreExportCsv`, `coreFilters`, `coreFindInTable`, `coreFullscreen`, `coreGrouping`, `coreGroupingPanel`, `coreRowActions`, `coreRowDetail`, `coreNestedTable`, `coreRowPinning`, `coreSelectionStats`, `coreTree`, `coreVirtualize`. They are separate functions so a table bundles only the features it uses; a binding spreads one and adds what it draws.
 - **Standard preset.** `standardFeatureList` (`CoreStandardFeatureFactories`,
@@ -1230,7 +1352,8 @@ shares, so a new binding calls them rather than re-deriving them.
   finish the shell.
 - **Table chrome state.** `chromeBodyRegion` (`ChromeBodyRegion`),
   `chromeEmptyVariant`, `chromeIsRefreshing`, `chromeShowFooter`,
-  `clearChromeFilters`, `selectionObserverIds`, `rowReorderEnablement`,
+  `clearChromeFilters`, `clearSearchAndFilters` (the no-results view's clear,
+  which takes the search too), `selectionObserverIds`, `rowReorderEnablement`,
   `groupingPanelState`, `chromeFeatureNotices` (`ChromeFeatureNoticesInput`),
   `featureNoticesAttribute`, `applyFeatureNoticesAttribute`,
   `FilterTriggerToggleState`, `scrollResetKeys`, `cardSetSize` and
@@ -1258,7 +1381,8 @@ shares, so a new binding calls them rather than re-deriving them.
   `pendingListSize`, `materializeWindowRows`, `rowWindow`, `keyedWindow` and
   `EndReachedLatch` are the window math over any virtualizer.
   `readColumnViewport` and `columnWindowPlan` (`ColumnViewport`,
-  `ColumnWindowPlan`) window the columns; `RowPairMeasureController`
+  `ColumnWindowPlan`) window the columns, and a `ColumnSpacerSide` names the
+  side of the window a spacer cell holds open; `RowPairMeasureController`
   measures a row with its open detail panel.
   `columnScrollTarget({ columns, columnKey, viewport, widths, pinnedKeys,
 leadingWidth, trailingWidth })` returns a logical scroll offset that reveals
@@ -1649,7 +1773,9 @@ confirmation, success, policy, sort, and cycle labels extend
 
 **Pinned summary rows.** `pinnedSummaryRows({ top, bottom })` (`PinnedRows`) sticks host-owned objects outside the row model — sort, filter, grouping, pagination and selection never see them, so they coexist with grouped and tree tables. Identities are `pinnedSummaryRowId(side, index)` (`PINNED_SUMMARY_KEY_PREFIX` + `:side:index`); `PinnedSummaryEntry` / `isPinnedSummaryRowId` / `pinnedSummarySideFromId` / `pinnedSummaryEntries` / `allPinnedSummaryEntries` / `resolvePinnedRows` / `EMPTY_PINNED_ROWS` are the helpers. Parts: `PINNED_SUMMARY_TOP_PART` / `PINNED_SUMMARY_BOTTOM_PART` via `pinnedSummaryPart`. Labels: `pinnedSummaryRow`, `pinnedSummaryTop`, `pinnedSummaryBottom`. Not URL or Saved Views — the objects are host data. See [pinned summary rows](./pinned-summary-rows.md).
 
-**Filter internals.** `FILTER_TYPES` lists the built-in types, `filterLabel`
+**Filter internals.** `FILTER_TYPES` lists the built-in types and
+`FILTER_TYPE_OPS` the operators each one offers (a `FilterTypeOps`: its `ops`
+and its `defaultOp`), `filterLabel`
 resolves a filter's caption, `filterStateKeys` names the URL keys one filter
 owns, `hasActiveHeaderFilter` says whether any of them holds a value worth
 marking the column with — a cleared text field leaves `""` and a cleared
@@ -1895,7 +2021,10 @@ pieces receive `GroupingPanelSurfaceProps`, `GroupingPanelDropZoneProps`,
 `GroupingPanelChecklistOption`, and
 `GroupingPanelRestoreProps`; select entries are `GroupingPanelOption`s and
 native event wiring uses `GroupingDragProps` / `GroupingDropProps`.
-`GroupingPanelInteractions` carries those callbacks,
+`GroupingPanelInteractions` carries those callbacks and builds the panel's
+state with `panelState(input)`, where a `GroupingPanelStateInput` names the
+render's `groupBy`, its columns and the `GroupingPanelSource` (the grouping and
+aggregate fields of the table's source),
 `GroupingChipKeyboardProps` defines the equal keyboard path, and
 `GroupingDragState` describes the active drag while `GroupingDragSource` names
 its header-or-chip origin. Every kit exports its kit-owned `GroupingPanel`;
@@ -1915,7 +2044,8 @@ much has been revealed (`GroupPagingState`, whose `paging` is a `GroupPaging`),
 the model emits a `groupMore` entry for the rest, and each adapter mounts
 `GroupMoreButton` / `GroupMoreButtonProps` over `GroupMoreButtonChrome` /
 `GroupMoreButtonChromeProps` / `GroupMoreButtonSlots` /
-`GroupMoreButtonSlotProps`.
+`GroupMoreButtonSlotProps`. An offer's `GroupMoreScope` says whether it reveals
+more groups or more rows inside one.
 `groupRowParts(kind)` names the `data-adapttable-part` values for each of the
 three rows a grouped body renders (`GroupRowKind`), and `GroupToggleSpacer`
 holds the chevron's width on the two rows that have no chevron, so a footer
@@ -1938,7 +2068,10 @@ adapters render, each entry carrying its `level`, `path`, `descendantIds` and
 (`TreeExpansionState`), `treeColumnKey(columns, declared?)` picks the column
 that carries the chevron, and `filterTreeRows(options)` keeps a match together
 with every ancestor that leads to it. `treeIndentStyle(level)` indents a cell
-and `treeCardStyle(level)` a mobile card; `bodyRowEntries(rows, tree)` returns
+and `treeCardStyle(level)` a mobile card; `treeRowAria(entry)` gives a tree
+row its `aria-level`, `aria-expanded` and `aria-posinset`, which every
+binding's desktop row carries; `treeTableAria(entryCount)` gives the table
+its `treegrid` role and `aria-rowcount` while its rows are a tree; `bodyRowEntries(rows, tree)` returns
 the `BodyRowEntry<TRow>` list a body maps over, tree or flat. Each adapter
 mounts `TreeCell` / `TreeCellProps` and `TreeToggle` / `TreeToggleProps`
 over `TreeCellChrome` / `TreeCellChromeProps` / `TreeToggleChrome` /
@@ -2155,8 +2288,9 @@ and [connect a backend](./ai-http.md).
 
 **Server queries.** `parseTableQuery(input, schema)` from
 `@adapttable/server` validates a request against a `QuerySchema` and returns a
-`ServerTableQuery` — page, limit, offset, search, sort chain, grouping,
-filters, filter tree, pivot, the folded pivot groups in `pivotCollapsed`, and
+`ServerTableQuery` — page, limit, offset, search, sort chain, grouping, the
+reader's group aggregation per column in `groupAggregates`, filters, filter
+tree, pivot, the folded pivot groups in `pivotCollapsed`, and
 cursor, plus a `QueryRejection[]` naming everything it refused. The schema
 picks the level of checking: `columns: "any"` shapes every filter
 (`shapedFilters`, one `ShapedFilter` per key), a column list checks names,
@@ -2167,13 +2301,21 @@ and `filters` — a shorthand record or the table's own `FilterDef[]`, read as
 `CustomTypedFilter`), with `filterTypes` (`ServerFilterType`s) for registered
 types. `groupByKeys: true`
 lists every grouping key. `pickFilters(defs, keys)` scopes the declared
-filters per caller, and `splitFilterValues(raw)` inverts the table's
-multi-value encoding. `QueryInput` is a `Request`, `URL`, query string or
-`URLSearchParams`; `ServerFilterValue` is one filter's value. See
+filters per caller, and `splitListParam(raw)` inverts the table's
+multi-value encoding (`splitFilterValues` is its deprecated name).
+`QueryInput` is a `Request`, `URL`, query string or `URLSearchParams`;
+`ServerFilterValue` is one filter's value. See
 [server queries](./server-queries.md).
 
 **The query model without React.** `@adapttable/core/query` is the half of the
-model a backend needs and no more: the `ft=1.{…}` codec (`parseFilterTree`,
+model a backend needs and no more: the parameter names (`PARAM_PAGE`,
+`PARAM_LIMIT`, `PARAM_SEARCH`, `PARAM_SORT`, `PARAM_SORT_BY`,
+`PARAM_SORT_DIR`, `PARAM_GROUP_BY`, `PARAM_GROUP_AGGREGATES`, `PARAM_PIVOT`,
+`FILTER_PREFIX`), the page-size defaults (`DEFAULT_LIMIT`, `MAX_LIMIT`), the
+operators (`FILTER_TYPE_OPS`, `TEXT_OPS`, `NUMBER_OPS`, `DATE_OPS`,
+`parseDateOp`, `isListFilterOp`, `isValuelessFilterOp`), the list and
+group-aggregate codecs (`splitListParam`, `safeDecode`,
+`parseGroupAggregateOverrides`), the `ft=1.{…}` codec (`parseFilterTree`,
 `serializeFilterTree`, `isActiveFilterTree`, `FILTER_TREE_PARAM`,
 `FILTER_TREE_VERSION`, and `isFilterTreeConditionSet` / `settledFilterTree` for
 the tree that actually filters), the `pivot=rows:…` codec (`serializePivot`,
@@ -2387,7 +2529,8 @@ cell is a row target.
 
 **Side panel.** `sidePanel` docks table settings beside the table instead of
 in a popover over them. `SidePanelOptions` types it — `panels`, `open`,
-`onOpenChange`, `side` — and `SidePanelEntry` is one panel (`key`, `label`,
+`onOpenChange`, `side` (a `SidePanelSide`, `"start"` or `"end"`) — and
+`SidePanelEntry` is one panel (`key`, `label`,
 `content`). It is controlled, because the control that opens it is the
 host's. Adapters build theirs over `SidePanelChrome` / `SidePanelChromeProps`
 / `SidePanelSlots` / `SidePanelFrameProps` / `SidePanelTabProps` /
@@ -2482,7 +2625,7 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 `filterWidgetKind` / `filterTypeOps` / `filterTypeDefaultOp` /
 `renderRegisteredFilter`,
 `mergeProps`, `stableKey`, `getPath`, `humanizeKey`, `resolveLabels` /
-`defaultLabels`, `pageSizeOptions`, and the constants `DEFAULT_LIMIT` (25),
+`defaultLabels` (every string), `pageSizeOptions`, and the constants `DEFAULT_LIMIT` (25),
 `PAGE_SIZE_OPTIONS`, `SEARCH_DEBOUNCE_MS` (300), `AUTO_OPTIONS_LIMIT` (50),
 `FILTER_AI_OPTIONS_LIMIT` (same 50, the assistant option cutoff),
 `ACTIONS_COLUMN_KEY` (`"actions"`).
@@ -2504,6 +2647,32 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 | `ComposedTableProps<TRow>`     | `BaseDataTableProps` plus `FeatureProps`: the shape the table works with once features have applied, which is what an adapter's internals read.                                                |
 
 See [feature composition](./features.md).
+
+### A table's strings
+
+A table carries the strings it draws and no others. `BASE_LABELS` holds
+the strings every table draws (its name, paging, sorting, the empty, loading
+and error states, and the announcements). Each feature declares its own
+strings in `labels`: `FILTER_LABELS`, `SAVED_VIEW_LABELS`, `EXPORT_LABELS`,
+`EDITING_LABELS`, `ASSISTANT_LABELS`, `ROW_LABELS`, `GRID_LABELS`,
+`FIND_LABELS`, `PIVOT_LABELS`, `GROUPING_LABELS`, `COLUMN_MENU_LABELS`,
+`ACTION_LABELS` and `VIEW_CONTROL_LABELS`, all from
+`@adapttable/core/binding`. `featureLabelsOf(features)` lists the composed
+features' strings and `resolveTableLabels(labels, featureLabels)` resolves a
+table's strings: the base strings, then each feature's, then the host's
+`labels`. Resolved options carry the composed features' strings as
+`featureLabels`; `featureLabelsFor(props)` on `@adapttable/react/adapter`
+reads them for a kit.
+
+A feature's own chrome resolves with `resolveFeatureLabels(labels, groups)`:
+the base strings, then its groups, then the labels it was handed. Its result
+is typed `FeatureStrings<groups>`, the base keys plus `GroupKeys<groups>`, so
+a chrome cannot read a string its groups do not hold. `FilterStrings` is that
+type for the filters' chrome and the filter-tree helpers, `AssistantStrings`
+for the assistant and approval chromes, `ActionStrings` for the context menu
+and command palette, and `FindStrings` for the find bar. `BASE_LABELS` and
+`FILTER_LABELS` are also on the main entry, and `BASE_LABELS` on
+`@adapttable/vue/adapter`.
 
 ## Source capabilities
 
@@ -2732,11 +2901,16 @@ reorder/resize/pin rows. `columnResizeHandleProps(columnKey, onResize, label,
 options?)` accepts `ColumnResizeHandleOptions`, whose optional `signal` ties a
 custom handle to its owner. Aborting cancels pending drag frames, removes the
 handle's document listeners, and makes retained pointer, keyboard and autosize
-callbacks inert. Existing callers can omit the options. Toolbar glue: `SearchInputState` (debounced
+callbacks inert. Existing callers can omit the options. The handlers read
+`ResizePointerEventLike`, `ResizeKeyEventLike` and `ResizeHandleEventLike`, which
+a DOM event and every framework's event satisfy. Toolbar glue: `SearchInputState` (debounced
 search binding), `FilterTriggerToggle` (popover/drawer trigger
 handlers). Editing/grouping glue: `focusEditorOnMount`,
-`preserveEditorFocusOnLayoutChange` (capture the active editor before a responsive
-DOM replacement and restore its focus and caret after paint),
+`notifyLayoutChange` (announce a responsive layout change right before
+publishing it; once the table edits, it keeps the active editor's focus and
+caret across the change), `preserveEditorFocusOnLayoutChange` (capture the
+active editor before a DOM replacement and restore its focus and caret after
+paint),
 `rowEditingSignature`, `HeaderGroupCell`, `HtmlGroupedHeaderCell`, `headerGroupRow` /
 `headerGroupRows` / `htmlGroupedHeaderPlan` / `groupedHeaderChildRule` /
 `groupedHeaderCellStyle` / `groupedHeaderLabelStyle` / `groupedHeaderAlign` / `columnGroupStubStyle` / `COLUMN_GROUP_STUB_WIDTH`, `columnGroupHeaderCaption`. Each adapter mounts `ColumnGroupToggle` /
@@ -2791,6 +2965,171 @@ leaving focus a reader moved elsewhere alone), and the inline icon set
 `bindMobileCardList`, `mobileCardListStyle`,
 `useOffsetHeight`, `PINNED_TOP_PART`, `PINNED_BOTTOM_PART`.
 
+A kit hands the binding one typed set of primitives and the binding draws each
+feature's controls from them. `KitPrimitives` is the whole set (`Button`,
+`IconButton`, `TextInput`, `Select`, `Checkbox`, `Popover`, `Menu`, `Text`) and
+`KitPrimitivesOf<...>` the subset one factory needs; their props are
+`KitButtonProps`, `KitIconButtonProps`, `KitTextInputProps`, `KitSelectProps`
+(`KitOption`), `KitCheckboxProps`, `KitPopoverProps` (its trigger receives
+`KitTriggerProps`), `KitMenuProps` (`KitMenuItem`) and `KitTextProps`, with
+`KitButtonVariant`, `KitTone` and `KitDataAttributes` shared between them. One
+factory per feature control returns the component the kit exports:
+`createFindBar`, `createRowEditActions`, `createBatchEditBar`,
+`createAgentApproval`, `createTreeToggle`, `createTreeCell`,
+`createColumnGroupToggle`, `createGroupMoreButton`, `createRowReorderHandle`,
+`createRowReorderButtons`, `createEditableCellSlots`, `createFilterHeaderRow`
+and `createFilterHeaderControl`. `createRowReorderHandle` and `createRowReorderButtons` take
+either the primitives the shared keyboard move menu draws with or the kit's
+own `MoveMenu`; `createFilterHeaderRow` and `createFilterHeaderControl` take a `KitFilterHeader`: the primitives, with either a popover for the shared multiple choice or the kit's own `Multi`. `MobileTarget` is the context a mobile card list sets, and `useMobileTarget`
+returns the 44 px touch-target style inside it.
+
+`TableComposition` draws one table from a kit's pieces: it builds the
+announcers, the toolbar with its saved-views and columns menus, the bars
+under it, the body for the state the data is in, the side panel, the footers
+and the overlays, and hands them to the kit as `KitTableFrameProps`. A kit
+passes a `KitTable` (its `Frame`, toolbar, body, skeleton, empty, error and
+pager renderers) and props shaped as `KitTableProps`, which adds
+`KitTableSlots` and `KitTableClassNames` (root, toolbar, table, card, footer
+and the host's `tableFooter`) to the shell's props; its toolbar receives
+`KitToolbarProps`, whose `loadsMore` says the table loads its next page as it
+scrolls. The frame receives the table's `density`, and the skeleton renderer a
+`KitSkeletonShape`: whether the body will be cards and whether rows have
+actions.
+
+A kit's desktop table and mobile cards name each optional control through
+its slot wrapper, so a table that omits the feature omits the component:
+`OptionalEditableCell` (which shows `cellDisplay(column, row, rowIndex)` when
+no feature edits cells), `OptionalTreeCell`, `OptionalTreeToggle`,
+`OptionalFillHandle`, `OptionalExpandToggle`, `OptionalFilterHeader`,
+`OptionalRowEditActions`, `OptionalRowReorderHandle`,
+`OptionalRowReorderButtons`, `OptionalColumnGroupToggle`,
+`OptionalColumnHeaderRename`, `OptionalColumnSelect`, `OptionalGroupHeaderRow`
+and `OptionalGroupHeaderCard`.
+
+`createColumnMenu(kit, useLook)` returns the Columns menu drawn with a kit's
+button, icon button, text input, select, popover, text and divider
+(`KitDividerProps`). `useLook` is the kit's hook for `KitColumnMenuLook`: the
+spacing of the panel, heading, search, bulk row, column rows, submenu and
+rename form, and the colour of the drop line; `fixedRow`, when given, spaces the rows of the columns the table injects (row reorder, actions) apart from column rows. A kit whose text input draws its own label and
+error passes a `RenameField` (`KitRenameFieldProps`) for the rename form; the
+field receives the part names its label, input and error carry
+(`KitRenameFieldParts`). `flatItem` puts each column's controls straight in its
+`column-menu-item`, which then takes the row's style and drag wiring, and
+`footerDivider: false` drops the rule above the size and reset buttons. `panelInset` is the height the kit's popover adds around the panel (its padding, border and gap from the trigger), kept clear of the window's edge when the panel's height is set by the room below the trigger. An
+optional `usePartClass` (`KitUsePartClass`) gives the host's class to the
+elements the menu draws itself. Every kit's menu names the panel
+`column-menu-panel`, its title, search, bulk row, each item (the injected
+reorder and actions rows too, marked `data-reorder` and `data-actions`) with
+its grip, visibility, label, pin and more controls, the submenu, the rule
+`column-menu-separator`, and the `column-menu-auto-size` and
+`column-menu-reset` buttons; visibility and pin carry `data-active` while on,
+and the label `data-hidden` while its column is hidden.
+
+`createColumnHeaderRename(kit, useLook)` returns a column header's rename
+control: a button beside the caption that swaps the caption for the same
+rename form, and the announcer that reports the new name. The kit gives its
+button, icon button, text input and text, an optional `RenameField`, and the
+button's `editIcon`; `useLook` returns `KitHeaderRenameLook`, the spacing of
+the control, the form and its buttons, and `buttonFirst` to put the button before the caption; it also takes `usePartClass`. Enter in the field saves.
+
+`createSavedViewsMenu(kit, useLook)` returns the saved-views menu: a button
+that opens a panel listing the saved views — a click applies one and closes
+the panel, the trailing button deletes it — above a row that saves the
+table's current state under a typed name and keeps the name field focused for
+the next one. A rule separates the list from that row while there is a list.
+The kit gives its button, icon button, text input, popover and divider, and
+the delete button's `deleteIcon`; `useLook` returns `KitSavedViewsLook`, the
+spacing of the panel, the rows, the rule, the save row and the name field. An optional `usePartClass` gives the host's class to the panel, rows and save row; the rule is `views-divider`, and the button carries `data-active` while the panel is open.
+
+`createPager(kit)` takes a `KitPager` and returns the table's footer (`KitTable.footer`): the
+page-size choice (none in a grouped table, where every row is on one page),
+the range shown (none while there are no rows), "page n of m" and the page
+controls, laid out by the kit's `Frame` (`KitPagerFrameProps`). The kit gives
+its `RowsPerPage` (`KitRowsPerPageProps`), a `Caption` and its `Pages`
+(`KitPagesProps`); the pager reads only what `KitPagerView` names from the
+finished table. A kit without its own pagination component builds `Pages`
+with `createPageButtons(kit, look)`: previous, the first, last and nearby page
+numbers with an ellipsis where pages are skipped, and next, the current page
+filled and marked `aria-current="page"`, spaced by `KitPageButtonsLook`.
+
+`createChecklistFilter(kit, look)` returns a kit's checklist filter
+(`KitChecklistFilter`): the search field, the "select all" and "clear"
+buttons and one labelled checkbox per value with its count, from the kit's
+text input, button and checkbox. A checkbox with a label puts `rootPart` and
+`style` on its labelled root. `KitChecklistLook` gives the buttons' variant
+and each checkbox's layout in the wrapping list.
+
+`createDesktopTable(kit)` builds the desktop table: every row with its
+leading rails, column-window spacers, data cells and actions rail, the
+detail row, the header leaves and groups, the virtual spacers and the column
+summary. A `KitDesktopTable` gives the kit's `Row` (`KitDesktopRowProps`),
+`Cell` (`KitDesktopCellProps`, by `KitDesktopCellKind`), `HeaderCell`
+(`KitDesktopHeaderCellProps`, by `KitDesktopHeaderCellKind`), summary `Foot`,
+selection `Checkbox`, `SortLabel` (`KitSortLabelProps`) and `RowActions`, the
+rail `widths`, a `usePaint` hook returning `KitDesktopPaint` (from
+`KitDesktopRowState` and `KitDesktopLeafState`), and a `useChrome` hook for the
+table elements around the rows; the component takes `KitDesktopTableProps`. A paint may set `summaryCell`, the type of a pinned total row's cells (semibold when absent), `captionRow`, the row that holds a heading's caption, and `classHighlight`, when the kit marks selected and matched cells by class alone. An optional `usePartClass` hook (`KitUsePartClass`, which `createMobileCards` also takes for each field's row, the actions and detail boxes, and the tree and reorder controls) gives the host's class for the parts the binding draws itself (caption control, header actions, resize handle, tree, reorder, column-select and column-group controls). Rails and headers carry `data-pinned` while they stick, header cells `data-sticky` while the header sticks, leaf headers `data-sorted`, and virtual spacer rows `virtual-spacer`.
+
+`createMobileCards(kit)` builds the card list the same way: each card's
+regions (`KitCardRegions`: tree, select, expand, the fields or the host's
+card, reorder, row editor, actions, detail) and the field grid. A
+`KitMobileCards` gives the kit's `CardFrame`, `FieldLabel` and `FieldValue`
+(`KitCardTextProps`), card `Select` (`KitCardSelectProps`), `RowActions`,
+`SummaryCard` (fields as `KitSummaryField`) and where it goes, a `useLook`
+hook returning `KitCardsLook`, the card element's props and the list
+elements; the component takes `KitMobileCardsProps`.
+
+`createToolbar(kit)` builds the toolbar in its fixed order: the host's start
+slot, search, the phone's sort controls, the host's toolbar content, the
+filters button and its popover, the saved-views and columns menus, the
+features' extras, add-row, the host's end slot and rows-per-page. A
+`KitToolbar` gives the kit's `Frame` (`KitToolbarFrameProps`), `Search`
+(`KitToolbarSearchProps`), `SortSelect` (`KitToolbarSortProps`), `Button`,
+`FiltersButton` (`KitFiltersButtonProps`), `RowsPerPage`
+(`KitRowsPerPageProps`), and whether its filters popover anchors to the
+button or wraps it.
+
+`createGroupHeader(kit)` returns `GroupHeaderRow` and `GroupHeaderCard`: a
+group's toggle (none on a footer or "show more"), select-all, label, count,
+and its subtotals under their columns on a row (`KitGroupRowProps`) or
+captioned on a card (`KitGroupHeaderProps`). A `KitGroupHeader` gives the
+kit's desktop `Row` and `Cell`, `Checkbox`, `Toggle` (`KitGroupToggleProps`),
+`Text` (`KitGroupTextProps`, by `KitGroupTextKind`), `Card`
+(`KitGroupCardProps`), `MoreButton` and a `useLook` hook returning
+`KitGroupLook`.
+
+One factory per toolbar control a feature adds, so a table carries only the
+controls of the features it composes: `createUndoRedoButtons(Button, Group?)`,
+`createExportCsvButton(Button, Surface)` (with the kit's surface for a long
+export's progress), `createPrintButton`, `createDensityButton`,
+`createFullscreenButton`, `createCommandPaletteButton` and `createFindButton`,
+each from the kit's toolbar button. A primitive button marked `busy` shows the
+kit's working state and takes no presses.
+
+`createRowActionButtons(kit)` returns a row's actions
+(`RowActionButtonsProps`): which show, why one is disabled, the confirm
+before a destructive one, keeping the press off the row, and a strip of
+buttons or one menu. A `KitRowActions` gives the kit's `Action`
+(`KitRowActionProps`), `Strip`, `Menu` (`KitRowActionMenuProps`, items as
+`KitRowActionItem`) and `iconFor`.
+
+`createCellEditor(kit)` returns the editor of the cell being edited
+(`CellEditorProps`): it picks a checkbox, multi-select, select or input for
+the column, keeps Enter, Escape and Tab in the editor, commits a tick at
+once, and hides the validation message while the cell is in conflict. A
+`KitCellEditors` gives `Checkbox` (`KitCellCheckboxProps`), `MultiSelect`,
+`Select` (`KitCellEditorProps`), `Input` (`KitCellInputProps`) and
+`rendersError`, true when the kit's inputs draw the message.
+`createEditableCell({ Editor, slots, rendersError })` returns the cell that
+shows its value until editing starts (`EditableDataCellProps`).
+
+`createBulkBar(kit)` returns the bulk action bar: hidden with nothing
+selected, the count, the offer to extend a full page to every matching row
+(and to clear it), each action's confirm, scope and unavailable reason, and
+the error after a failed run. A `KitBulkBar` gives `Frame`
+(`KitBulkBarFrameProps`), `Text` (`KitBulkTextProps`, `KitBulkTextKind`) and
+`Button` (`KitBulkButtonProps`, `KitBulkButtonKind`). `mergeRefs(...refs)` hands one element to several refs, for a kit control that takes a ref from its overlay and the binding's `elementRef`.
+
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
 (selected ids, in-flight action, the "select all matching" banner);
@@ -2822,6 +3161,18 @@ use. `CONFORMANCE_ROWS`
 (`ConformanceRow`) and `CONFORMANCE_COLUMNS` (`ConformanceColumn`) are the
 scenario data. [Testing an adapter](./building-an-adapter.md#testing) shows a
 React driver.
+
+A shared suite of your own runs the same way.
+`collectConformanceTests(define)` hands `define` a `ConformanceRegistry` —
+`describe` (`ConformanceDescribe`), `it` (`ConformanceIt`), `beforeEach` and
+`afterEach` — and returns the flat `ConformanceTest` list it registered: each
+name carries its `describe` path, and each run carries its group's hooks,
+setup outermost first and teardown innermost first, after a failing test too.
+A `ConformanceBody` is any test or hook body; one a `beforeEach` returns runs
+after the test. `it.each` and `describe.each` register one entry per case,
+filling `%s`, `%d` and `%i` in the name from the case's values, and `$key` from
+an object case's field (a string quoted), and spreading an array case into the
+body's arguments (`CaseArgs`).
 
 ## The AI packages
 
@@ -2935,6 +3286,15 @@ call and passes it on as `AgentProgress`. Receipts come from
 `AssistantReceiptStatus` and `AssistantReceiptSubject` — `subjectFor` builds
 one for a built-in capability, as `AssistantReceiptTerm` pairs of column label
 and formatted value — and `turnStatus` reads the `AssistantTurnStatus`.
+
+**Assistant bindings.** A framework binding of the assistant maps its own
+options and the table's feature state with `tableAssistantInputs(options,
+table)`: `AssistantBindingOptions` are the options it reads, where a panel
+outside the table passes `approval`, `progress` and an `AlwaysAllowedState`,
+and `AssistantTableState` is what a panel inside the table reads from feature
+state. `tableAssistantFields(snapshot, store)` is the `TableAssistantFields` a
+panel renders, its undo offer an `AssistantUndoView` — `assistantUndoView`
+builds one from an `AssistantUndoOffer`.
 
 **Undo.** `planUndo` turns a finished turn into an `AssistantUndo` of
 `UndoCall`s, or an `UndoBlock` saying why not (`isUndoBlock` narrows it,
@@ -3133,6 +3493,13 @@ back as `AiSdkToolOutput`s and approvals as `AiSdkApprovalResponse`s;
 recording an audio `SpeechClip` for a backend to transcribe;
 `SpeechInputOptions` and `VoiceOptions` configure it, and `rememberLanguage` /
 `readRememberedLanguage` keep the reader's dictation language between visits.
+`createSpeechSession(read)` is dictation for one composer across the options it
+lives through: a `SpeechSession` keeps one controller while the mode and the
+offered languages stand, `sync`s to new ones and `release`s the microphone, and
+its snapshot is the `SpeechSessionView` a composer draws, read from
+`SpeechSessionOptions`. `speechLanguages` is what a composer offers,
+`speechSessionKey` what identifies the controller it needs, and
+`SPEECH_UNSUPPORTED` the state of a composer with no microphone.
 
 ### `@adapttable/ai-react` — the React binding
 
@@ -3316,6 +3683,8 @@ order and start/end pins. The kit owns buttons and native popup integration.
 room below an open origin, updating on resize and scroll; it does not position
 or draw the overlay. `injectBulkBarRunner(props)` reads live bulk-action labels
 and confirmation options when invoked and clears selection only on success.
+`watchClickedOpener(document)` (`ClickedOpener`) records the button a click
+pressed, so a kit dialog or drawer hands focus back to it on close.
 See [building an Angular adapter](./angular/building-an-adapter.md).
 
 - `AdaptTableFeature.mount` receives a `FeatureMountContext`: the live runtime,
@@ -4277,10 +4646,13 @@ These runtime helpers come from `@adapttable/vue/adapter`.
 | Export                                                                                                          | Role                                                                                                                                                                                                          |
 | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DesktopTableChrome`, `MobileCardsChrome`                                                                       | Structural Vue renderers taking a model, required control slots and optional class names.                                                                                                                     |
+| `tableRowView`, `TableRowViewContext`                                                                           | Draws one body row or card in a component of its own, so it redraws for its own changes: a new row model, table model, controls or class names, or state it read.                                             |
+| `keepTableControls`, `NO_CLASS_NAMES`                                                                           | One controls object while the host's slots stay the same, and one shared empty class-name set, so rows keep their props across redraws of the table.                                                          |
 | `TableChromeSlots`, `SortButtonProps`, `SelectionCheckboxProps`                                                 | Typed adapter-control contracts; missing controls throw rather than rendering a native fallback.                                                                                                              |
 | `SelectionCheckboxAttrs`, `SelectionCheckboxControl`, `selectionCheckboxControl`, `selectionCheckboxInputAttrs` | Typed checkbox state and a single toggle action, with safe DOM attributes for widgets that own their model-value event API. See the [Vue control contract](./vue/api.md#adapter-shell-and-structural-chrome). |
 | `TableChromeClassNames`                                                                                         | Semantic table, selection, group, action, resize and card class hooks.                                                                                                                                        |
 | `useDesktopTableModel`, `useMobileCardsModel`                                                                   | Computed desktop/card projections from a headless table.                                                                                                                                                      |
+| `railCellAttrs`, `TableRail`                                                                                    | A rail cell's attributes: sticky past the rails before it while a column is pinned to its edge.                                                                                                               |
 | `DesktopTableModel`, `MobileCardsModel`                                                                         | Complete semantic attributes, rows, header/card layout and optional body-slot projections.                                                                                                                    |
 | `TableHeaderModel`, `TableRowModel`, `TableCellModel`, `TableBodySlot`                                          | Header controls/context, row wiring, cell context/decorations and structural row/group/extra/padding variants.                                                                                                |
 | `toVueAttrs`, `toVueStyle`, `mergeVueAttrs`                                                                     | Translate neutral events/styles and merge complete semantic bindings without losing listeners or class/style composition.                                                                                     |
@@ -4459,12 +4831,13 @@ These optional construction helpers belong to `@adapttable/vue/adapter`.
 Root composables remain usable with completely custom UI; see
 [the optional layout contract](./vue/api.md#optional-adapter-layout).
 
-| Export                                                            | Purpose                                                                                                                |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `DataTableSurfaceChrome`, `DataTableSurfaceChromeProps<TRow>`     | Shared outer layout over an existing shell model, with explicit application slots and real root/scroll refs.           |
-| `DataTableSurfaceSlots<TRow>`                                     | Required kit Search, Select, Button, Loading, Desktop and Mobile renderers; no implicit native controls or table body. |
-| `provideDataTableClassNames`, `useDataTableClassNames`            | Reactive presentation hooks shared between an adapter and its feature controls.                                        |
-| `GROUP_ROW`, `groupRowSlotKey<TRow>()`, `GroupRowSlotProps<TRow>` | Typed lazy grouping-row contribution, independent of a specific kit renderer.                                          |
+| Export                                                        | Purpose                                                                                                                                                                                           |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DataTableSurfaceChrome`, `DataTableSurfaceChromeProps<TRow>` | Shared outer layout over an existing shell model, with explicit application slots and real root/scroll refs.                                                                                      |
+| `DataTableSurfaceSlots<TRow>`                                 | Required kit Search, Select, Button, Loading, Desktop and Mobile renderers; no implicit native controls or table body.                                                                            |
+| `provideDataTableClassNames`, `useDataTableClassNames`        | Reactive presentation hooks shared between an adapter and its feature controls.                                                                                                                   |
+| `GROUP_ROW`, `GroupRowDraw`, `GroupRowSlotProps<TRow>`        | Lazy grouping-row contribution, independent of a specific kit renderer: a row slot key whose fill (`GroupRowDraw`) draws any row type. `groupRowSlotKey()` is deprecated; it returns `GROUP_ROW`. |
+| `withProps(component, props, options?)`                       | A functional component with its declared props (and options such as `inheritAttrs`) attached by a call, so a bundle that never draws it drops it.                                                 |
 
 ### Vue column menu contracts
 

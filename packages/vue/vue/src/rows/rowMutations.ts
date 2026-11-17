@@ -1,9 +1,5 @@
 /** Add, duplicate and delete requests never mutate host-owned rows. */
-import {
-  type RowAction,
-  rowMutationActions,
-  type TableLabels,
-} from "@adapttable/core";
+import { type RowAction, type TableLabels } from "@adapttable/core";
 import {
   computed,
   type ComputedRef,
@@ -18,6 +14,8 @@ export {
   DELETE_ROW_ACTION_KEY,
   DUPLICATE_ROW_ACTION_KEY,
 } from "@adapttable/core";
+import { rowMutationActions } from "@adapttable/core/binding";
+
 /** Authoritative host persistence callbacks. @public */
 export interface RowMutationHandlers<TRow> {
   readonly onAddRow?: () => unknown;

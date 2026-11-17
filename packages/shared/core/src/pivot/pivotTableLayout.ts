@@ -8,10 +8,13 @@
  * becomes the footer — is decided here once.
  */
 import type { DisplayValue } from "../display";
-import { resolveLabels } from "../labels";
+import { PIVOT_LABELS } from "../labelGroups/pivotLabels";
+import { resolveFeatureLabels } from "../labelGroups/tableLabels";
 import type { TableLabels } from "../types";
 import { measureLabel, type PivotField } from "./pivotConfigModel";
 import type { PivotColumnLeaf, PivotResult, PivotRow } from "./pivotModel";
+
+const PIVOT_GROUPS = [PIVOT_LABELS] as const;
 
 /**
  * The key of the row-header column — the one down the side, holding each
@@ -152,7 +155,7 @@ export function pivotTableLayout(
   } = {}
 ): PivotTableLayout {
   const fields = options.fields ?? [];
-  const labels = resolveLabels(options.labels);
+  const labels = resolveFeatureLabels(options.labels, PIVOT_GROUPS);
   const grandTotal = result.rows.find((row) => row.kind === "grandTotal");
   return {
     rowHeaderLabel: labels.pivotRows,

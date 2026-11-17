@@ -1,397 +1,226 @@
-/** The card list rendered in place of the table on narrow screens. */
+/** The card list, drawn by the binding with native list items. */
 import {
-  cellFlashAttr,
-  type MobileCardBodyProps,
-  mobileCardListStyle,
-  mobileCardPropsEqual,
-  mobileCardRegionProps,
-  MobileCardsChrome,
-  type MobileCardSlotKit,
-  mobileCardSlots,
-  resolveMobileLabel,
-  resolveRowEditTrigger,
-  rowEditConflict,
-  type UseDataTableResult,
-  useSummaryCells,
+  createMobileCards,
+  type KitCardRegions,
+  type KitCardSelectProps,
+  type KitCardsLook,
+  type KitCardTextProps,
+  type KitSummaryField,
 } from "@adapttable/react/adapter";
-import { type ComponentType, memo, useMemo } from "react";
+import type { CSSProperties, LiHTMLAttributes, ReactNode } from "react";
 
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";
-import { type SharedProps } from "./DesktopTable";
 import {
-  OptionalEditableCell,
-  OptionalExpandToggle,
-  OptionalGroupHeaderCard,
-  OptionalRowEditActions,
-  OptionalRowReorderButtons,
-  OptionalTreeToggle,
-} from "./featureSlots";
-import { MobileTarget } from "./mobileTarget";
+  useClassNames,
+  useClassOfPart,
+  usePartClass,
+} from "./classNamesContext";
 import { RowActionButtons } from "./RowActionButtons";
 
-/** An unstyled card body: the list's inputs, plus its class hooks. */
-interface MobileCardProps<TRow> extends MobileCardBodyProps<TRow> {
-  classNames: DataTableClassNames;
-  /** The card answers a click. */
-  clickable: boolean;
-}
-
-/** One card. Memoized by {@link mobileCardPropsEqual} at the call site. */
-function MobileCardBase<TRow>({
-  row,
-  index,
-  id,
-  columns,
-  labels,
-  confirm,
-  rowActions,
-  rowActionsLayout,
-  renderRowActions,
-  classNames,
-  isCellFlashing,
-  selected,
-  expanded,
-  onToggleSelect,
-  onToggleExpand,
-  renderDetail,
-  editing,
-  rows,
-  getRowId,
-  treeEntry,
-  onToggleTree,
-  rowReorder,
-  windowStart,
-  rowCount,
-  renderCard,
-}: Readonly<MobileCardProps<TRow>>) {
-  // Built once and used by both paths, so a custom card shows the very same
-  // value node the built-in would have — cell renderers and editors included.
-  const fields = columns.map((column) => ({
-    column,
-    label: resolveMobileLabel(column),
-    value: (
-      <OptionalEditableCell
-        // Built inside the map, so it needs its own key: React reads these
-        // as a list even though a card renders them one at a time.
-        key={column.key}
-        editing={editing}
-        row={row}
-        column={column}
-        rowId={id}
-        rowIndex={index}
-        rows={rows}
-        columns={columns}
-        rowKey={getRowId}
-        editLabel={labels.editCell}
-        undoLabel={labels.undoEdit}
-      />
-    ),
-  }));
-
-  const rowEdit = resolveRowEditTrigger(
-    rowActions,
-    editing?.rowEditing,
-    row,
-    id
-  );
-  const rowConflict = rowEditConflict(editing, id);
+/** A card's regions in reading order, straight inside the list item. */
+function CardFrame({
+  tree,
+  select,
+  expand,
+  body,
+  reorder,
+  rowEdit,
+  actions,
+  detail,
+}: Readonly<KitCardRegions>) {
+  "use no memo";
   return (
-    <MobileTarget.Provider value={true}>
-      {treeEntry && (
-        <OptionalTreeToggle
-          toggleClassName={classNames.treeToggle}
-          spacerClassName={classNames.treeSpacer}
-          entry={treeEntry}
-          labels={labels}
-          onToggle={onToggleTree ?? (() => undefined)}
-        />
-      )}
-      {onToggleSelect && (
-        <label
-          style={{
-            display: "inline-flex",
-            minWidth: 44,
-            minHeight: 44,
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-          }}
-        >
-          <input
-            type="checkbox"
-            data-adapttable-part="checkbox"
-            aria-label={labels.selectRow}
-            checked={selected}
-            onChange={() => onToggleSelect(id)}
-            className={classNames.checkbox}
-          />
-        </label>
-      )}
-      {onToggleExpand && (
-        <OptionalExpandToggle
-          id={id}
-          expanded={Boolean(expanded)}
-          onToggle={onToggleExpand}
-          expandLabel={labels.expandRow}
-          collapseLabel={labels.collapseRow}
-        />
-      )}
-      {renderCard ? (
-        renderCard(row, { index, fields, selected, expanded })
-      ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(min(100%, 7rem), 1fr))",
-            gap: "0.75rem",
-            minWidth: 0,
-          }}
-        >
-          {fields.map(({ column, label, value }) => (
-            <div
-              key={column.key}
-              data-adapttable-part="card-row"
-              style={{
-                minWidth: 0,
-                overflowWrap: "anywhere",
-                gridColumn: label ? undefined : "1 / -1",
-              }}
-              className={classNames.cardRow}
-            >
-              {label && (
-                <span
-                  data-adapttable-part="card-label"
-                  className={classNames.cardLabel}
-                >
-                  {label}
-                </span>
-              )}
-              <span
-                data-adapttable-part="card-value"
-                data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
-                className={classNames.cardValue}
-              >
-                {value}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-      {rowReorder && (
-        <OptionalRowReorderButtons
-          reorder={rowReorder}
-          labels={labels}
-          localIndex={index}
-          row={row}
-          windowStart={windowStart}
-          rowCount={rowCount}
-          className={classNames.rowReorderButtons}
-          upClassName={classNames.rowReorderUp}
-          downClassName={classNames.rowReorderDown}
-        />
-      )}
-      {editing?.rowEditing && (
-        <OptionalRowEditActions
-          rowEditing={editing.rowEditing}
-          row={row}
-          rowId={id}
-          showBegin={rowEdit.showBegin}
-          icons={editing.rowEditIcons}
-          conflict={rowConflict}
-          labels={labels}
-        />
-      )}
-      {rowEdit.actions.length > 0 && (
-        <div
-          data-adapttable-part="card-actions"
-          className={classNames.cardActions}
-        >
-          <RowActionButtons
-            minTargetSize={44}
-            row={row}
-            actions={rowEdit.actions}
-            confirm={confirm}
-            labels={labels}
-            classNames={classNames}
-            layout={rowActionsLayout}
-            render={renderRowActions}
-          />
-        </div>
-      )}
-      {expanded && renderDetail && (
-        <div
-          data-adapttable-part="card-detail"
-          className={classNames.cardDetail}
-        >
-          {renderDetail(row)}
-        </div>
-      )}
-    </MobileTarget.Provider>
+    <>
+      {tree}
+      {select}
+      {expand}
+      {body}
+      {reorder}
+      {rowEdit}
+      {actions}
+      {detail}
+    </>
   );
 }
 
-/** What the card list's callbacks read beside each card's entry. */
-interface CardSlotInputs<TRow> extends Pick<SharedProps<TRow>, "classNames"> {
-  readonly table: UseDataTableResult<TRow>;
-  readonly CardItem: ComponentType<MobileCardProps<TRow>>;
+function FieldLabel({
+  labelled: _labelled,
+  ...rest
+}: Readonly<KitCardTextProps>) {
+  "use no memo";
+  return <span className={useClassNames().cardLabel} {...rest} />;
 }
 
-/** This kit's card host, body, extra-row cell and group card. */
-function cardSlotKit<TRow>({
-  table,
-  CardItem,
-  classNames,
-}: CardSlotInputs<TRow>): MobileCardSlotKit<TRow> {
-  const { columns, selection, labels } = table;
-  return {
-    card: (entry) => {
-      const clickable = entry.body.onRowClick !== undefined;
-      return {
-        key: entry.key,
-        part: entry.body.part ?? "card",
-        props: {
-          ...entry.itemProps,
-          // The native list item is already a list item.
-          role: undefined,
-          style: { display: "block", ...entry.itemProps.style },
-          "data-clickable": clickable ? "" : undefined,
-          className: cx(classNames.card, entry.rowClass),
-        },
-        content: (
-          <CardItem
-            {...entry.body}
-            classNames={classNames}
-            clickable={clickable}
-          />
-        ),
-      };
-    },
-    extraProps: (kind) => ({
-      role: kind === "separator" ? "separator" : undefined,
-      className:
-        kind === "separator"
-          ? classNames.separatorRow
-          : classNames.fullWidthRow,
-      style: { display: "block" },
-    }),
-    extraCell: (part, content, kind) => (
-      <div
-        data-adapttable-part={part}
-        className={
-          kind === "separator"
-            ? classNames.separatorCell
-            : classNames.fullWidthCell
-        }
-      >
-        {content}
-      </div>
-    ),
-    groupProps: {
-      "data-adapttable-part": undefined,
-      className: undefined,
-      style: { display: "block" },
-    },
-    groupCard: (entry, grouping) => (
-      <OptionalGroupHeaderCard
-        entry={entry}
-        columns={columns}
-        selection={selection}
-        labels={labels}
-        compact={false}
-        onToggleCollapse={(key) => grouping.collapsed.toggle(key)}
-        onShowMore={grouping.showMore}
+function FieldValue({
+  labelled: _labelled,
+  ...rest
+}: Readonly<KitCardTextProps>) {
+  "use no memo";
+  return <span className={useClassNames().cardValue} {...rest} />;
+}
+
+const SELECT_TARGET: CSSProperties = {
+  display: "inline-flex",
+  minWidth: 44,
+  minHeight: 44,
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+};
+
+/** The row's checkbox inside a 44 px label, so the whole target toggles it. */
+function Select({
+  checked,
+  onToggle,
+  "aria-label": label,
+}: Readonly<KitCardSelectProps>) {
+  "use no memo";
+  return (
+    <label style={SELECT_TARGET}>
+      <input
+        type="checkbox"
+        data-adapttable-part="checkbox"
+        aria-label={label}
+        checked={checked}
+        onChange={onToggle}
+        className={useClassNames().checkbox}
       />
-    ),
-  };
+    </label>
+  );
+}
+
+const BLOCK: CSSProperties = { display: "block" };
+
+/** The totals, after the cards, with a row for each column that has one. */
+function SummaryCard({
+  fields,
+}: Readonly<{ fields: readonly KitSummaryField[]; compact: boolean }>) {
+  "use no memo";
+  const classNames = useClassNames();
+  return (
+    <li
+      data-adapttable-part="summary-card"
+      className={cx(classNames.card, classNames.summaryCard)}
+      style={BLOCK}
+    >
+      {fields.map(({ key, label, value }) =>
+        value == null ? null : (
+          <div
+            key={key}
+            data-adapttable-part="card-row"
+            className={classNames.cardRow}
+          >
+            {label && (
+              <span
+                data-adapttable-part="card-label"
+                className={classNames.cardLabel}
+              >
+                {label}
+              </span>
+            )}
+            <span
+              data-adapttable-part="card-value"
+              className={classNames.cardValue}
+            >
+              {value}
+            </span>
+          </div>
+        )
+      )}
+    </li>
+  );
+}
+
+const LOOK: KitCardsLook = {
+  grid: () => ({
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 7rem), 1fr))",
+    gap: "0.75rem",
+    minWidth: 0,
+  }),
+  field: (labelled) => ({
+    minWidth: 0,
+    overflowWrap: "anywhere",
+    gridColumn: labelled ? undefined : "1 / -1",
+  }),
+  actions: {},
+  detail: {},
+};
+
+const useLook = (): KitCardsLook => LOOK;
+
+/** The cell of an extra row, with the class of its part. */
+function ExtraCell({
+  part,
+  children,
+}: Readonly<{ part: string; children: ReactNode }>) {
+  "use no memo";
+  return (
+    <div data-adapttable-part={part} className={useClassOfPart(part)}>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * A list item; one the binding gave no class (an extra row) takes the class
+ * of its part.
+ */
+function CardHost({
+  className,
+  ...rest
+}: Readonly<
+  LiHTMLAttributes<HTMLLIElement> & { "data-adapttable-part"?: string }
+>) {
+  "use no memo";
+  const own = useClassOfPart(rest["data-adapttable-part"]);
+  return <li className={className ?? own} {...rest} />;
+}
+
+const HOSTS = { Card: CardHost };
+
+/** The kit's own card props: the class map rides with the table. */
+interface UnstyledCardsProps {
+  readonly classNames: DataTableClassNames;
 }
 
 /** Mobile card-list rendering. */
-export function MobileCards<TRow>(props: Readonly<SharedProps<TRow>>) {
-  // The compiler's cache around these slots is larger than the slots.
-  "use no memo";
-  const {
-    table,
-    rows,
-    classNames,
-    summaryRow,
-    paddingTop = 0,
-    paddingBottom = 0,
-    maxHeight,
-    virtualScrollRef,
-  } = props;
-  const { columns, labels } = table;
-  const summary = useSummaryCells(summaryRow, rows);
-
-  // `memo` erases generics at module level, so the memoized card is
-  // instantiated here (once — the identity is stable for the list's life).
-  const CardItem = useMemo(
-    () =>
-      memo(
-        MobileCardBase<TRow>,
-        mobileCardPropsEqual<TRow, MobileCardProps<TRow>>([
-          "classNames",
-          "clickable",
-        ])
-      ),
-    []
-  );
-
-  const cards = mobileCardSlots(
-    props,
-    cardSlotKit({ table, CardItem, classNames })
-  );
-
-  return (
-    <MobileCardsChrome
-      regionProps={mobileCardRegionProps(
-        table.getTableProps()["aria-label"],
-        labels.table,
-        maxHeight
-      )}
-      dir={table.getTableProps().dir}
-      scrollRef={virtualScrollRef}
-      classNames={classNames}
-      style={mobileCardListStyle(maxHeight)}
-      listProps={table.getTableProps({ role: undefined })}
-      paddingTop={paddingTop}
-      paddingBottom={paddingBottom}
-      cards={cards}
-      summary={
-        summary ? (
-          <li
-            data-adapttable-part="summary-card"
-            className={cx(classNames.card, classNames.summaryCard)}
-            style={{ display: "block" }}
-          >
-            {columns.map((column) =>
-              summary[column.key] == null ? null : (
-                <div
-                  key={column.key}
-                  data-adapttable-part="card-row"
-                  className={classNames.cardRow}
-                >
-                  {resolveMobileLabel(column) && (
-                    <span
-                      data-adapttable-part="card-label"
-                      className={classNames.cardLabel}
-                    >
-                      {resolveMobileLabel(column)}
-                    </span>
-                  )}
-                  <span
-                    data-adapttable-part="card-value"
-                    className={classNames.cardValue}
-                  >
-                    {summary[column.key]}
-                  </span>
-                </div>
-              )
-            )}
-          </li>
-        ) : undefined
-      }
-    />
-  );
-}
+export const MobileCards =
+  /* @__PURE__ */ createMobileCards<UnstyledCardsProps>({
+    CardFrame,
+    FieldLabel,
+    FieldValue,
+    Select,
+    RowActions: RowActionButtons,
+    SummaryCard,
+    summaryPlacement: "after-list",
+    useLook,
+    usePartClass,
+    compact: () => false,
+    cardProps: (entry, { classNames }) => ({
+      // The native list item is already a list item.
+      role: undefined,
+      style: { display: "block", ...entry.itemProps.style },
+      "data-clickable": entry.body.onRowClick === undefined ? undefined : "",
+      className: cx(classNames.card, entry.rowClass),
+    }),
+    extraCell: (part, content) => <ExtraCell part={part}>{content}</ExtraCell>,
+    extraProps: (kind) => ({
+      // A full-width row is a native list item already.
+      role: kind === "separator" ? "separator" : undefined,
+      className: undefined,
+      style: BLOCK,
+    }),
+    groupProps: {
+      "data-adapttable-part": undefined,
+      className: undefined,
+      style: BLOCK,
+    },
+    useChrome: (props) => ({
+      hosts: HOSTS,
+      classNames: { ...props.classNames },
+      dir: props.table.getTableProps().dir,
+      listProps: props.table.getTableProps({ role: undefined }),
+    }),
+  });

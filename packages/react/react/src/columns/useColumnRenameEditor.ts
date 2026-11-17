@@ -1,4 +1,4 @@
-import { createColumnRenameEditor } from "@adapttable/core";
+import { createColumnRenameEditor } from "@adapttable/core/binding";
 import {
   type KeyboardEvent,
   useCallback,

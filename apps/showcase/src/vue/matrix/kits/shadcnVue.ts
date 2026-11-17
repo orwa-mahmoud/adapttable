@@ -6,12 +6,15 @@ import {
   agentApproval,
   TableAssistant,
 } from "@adapttable/shadcn-vue/assistant";
+import { batchEditing } from "@adapttable/shadcn-vue/batch-editing";
 import { bulkActions } from "@adapttable/shadcn-vue/bulk-actions";
 import { cellNavigation } from "@adapttable/shadcn-vue/cell-navigation";
 import { cellSpan } from "@adapttable/shadcn-vue/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/shadcn-vue/column-groups";
 import { columnMenu } from "@adapttable/shadcn-vue/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/shadcn-vue/column-selection";
+import { commandPalette } from "@adapttable/shadcn-vue/command-palette";
+import { contextMenu } from "@adapttable/shadcn-vue/context-menu";
 import { densityChooser } from "@adapttable/shadcn-vue/density";
 import {
   editHistory,
@@ -20,18 +23,25 @@ import {
   undoRedoButtons,
 } from "@adapttable/shadcn-vue/editing";
 import { exportCsv } from "@adapttable/shadcn-vue/export";
+import { extraRows } from "@adapttable/shadcn-vue/extra-rows";
 import { filters } from "@adapttable/shadcn-vue/filters";
+import { findInTable } from "@adapttable/shadcn-vue/find-in-table";
 import { fullscreen } from "@adapttable/shadcn-vue/fullscreen";
 import { groupingPanel } from "@adapttable/shadcn-vue/grouping-panel";
 import { headerFilters } from "@adapttable/shadcn-vue/header-filters";
 import { nestedTable } from "@adapttable/shadcn-vue/nested-table";
 import { pinnedSummaryRows } from "@adapttable/shadcn-vue/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/shadcn-vue/pivot";
+import { print } from "@adapttable/shadcn-vue/print";
 import { resizableColumns } from "@adapttable/shadcn-vue/resizable-columns";
 import { rowActions } from "@adapttable/shadcn-vue/row-actions";
 import { rowPinning } from "@adapttable/shadcn-vue/row-pinning";
 import { rowReorder } from "@adapttable/shadcn-vue/row-reorder";
-import { savedViews } from "@adapttable/shadcn-vue/saved-views";
+import {
+  savedViews,
+  SavedViewsPanel,
+} from "@adapttable/shadcn-vue/saved-views";
+import { selectionStats } from "@adapttable/shadcn-vue/selection-stats";
 import { statusBar } from "@adapttable/shadcn-vue/status-bar";
 import { tree } from "@adapttable/shadcn-vue/tree";
 import { virtualize } from "@adapttable/shadcn-vue/virtualize";
@@ -145,6 +155,7 @@ export const kit: ShowcaseKit = {
     ),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,
@@ -156,12 +167,19 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

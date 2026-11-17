@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { applyRowReorder } from "@adapttable/core";
-import { aggregate, useServerData } from "@adapttable/vue";
+import { applyRowReorder, type ColumnLayoutState } from "@adapttable/core";
+import {
+  aggregate,
+  useColumnLayoutUrlState,
+  useServerData,
+} from "@adapttable/vue";
 import { onScopeDispose, shallowRef } from "vue";
 
 import {
@@ -10,7 +14,23 @@ import {
 } from "../../angular/demoTransitions.mjs";
 import { formatMoney } from "../../people";
 import {
+  type DemoNotice,
+  listenForNotices,
+  noticeStyle,
+  notifyDemo,
+} from "../../shared/demoNotice";
+import {
+  archivePeople,
+  peopleBulkActions,
+  peopleRowActions,
+} from "../../shared/peopleActions";
+import {
+  LIVE_DEFAULT_LAYOUT,
+  revealHiddenOnPin,
+} from "../../shared/peopleTable";
+import {
   applyPersonEdit,
+  currentDataLocale,
   fetchPeople,
   FILTER_DEFS,
   peopleColumns,
@@ -36,9 +56,25 @@ const rows = shallowRef<readonly Person[]>(
 onScopeDispose(
   registerDemoCapture(() => demoSession.write("vue-people", rows.value))
 );
-const columns = peopleColumns({ editable: editing, status: kit.status });
+const columns = peopleColumns(kit, { editable: editing });
 const urlKey = props.lab ? "vue-lab" : "vue-live";
-const log = shallowRef("");
+// The live demo controls its layout so a new pin reveals the hidden columns:
+// the table widens past its frame and the pinned column is seen to stick.
+const columnState = useColumnLayoutUrlState({
+  urlKey,
+  urlAdapter: demoUrlAdapter,
+  defaultColumnLayout: props.lab ? undefined : LIVE_DEFAULT_LAYOUT,
+});
+function changeColumnLayout(next: ColumnLayoutState): void {
+  columnState.onLayoutChange(revealHiddenOnPin(columnState.layout.value, next));
+}
+/** The notice a demo action raised, while it is on screen. */
+const notice = shallowRef<DemoNotice | null>(null);
+onScopeDispose(
+  listenForNotices((next) => {
+    notice.value = next;
+  })
+);
 const loading = shallowRef(false);
 const error = shallowRef<Error | null>(null);
 const serverRows = shallowRef<readonly Person[]>([]);
@@ -117,26 +153,13 @@ const features = [
     : []),
   ...(enabled("selection", true) && !server
     ? [
-        kit.bulkActions([
-          {
-            key: "export",
-            label: "Export",
-            onClick: (ids) => {
-              log.value = `Export: ${ids.length}`;
+        kit.bulkActions(
+          peopleBulkActions(currentDataLocale(), {
+            onArchive: (ids) => {
+              rows.value = archivePeople(rows.value, ids);
             },
-          },
-          {
-            key: "archive",
-            label: "Archive",
-            onClick: (ids) => {
-              const selected = new Set(ids);
-              rows.value = rows.value.map((row) =>
-                selected.has(row.id) ? { ...row, status: "Archived" } : row
-              );
-              log.value = `Archived ${ids.length} ${ids.length === 1 ? "row" : "rows"}`;
-            },
-          },
-        ]),
+          })
+        ),
       ]
     : []),
   ...(enabled("row-reorder") && !server
@@ -148,17 +171,13 @@ const features = [
     : []),
   ...(!server && !props.lab
     ? [
-        kit.rowActions<Person>([
-          { key: "edit", label: "Edit", editsRow: true },
-          {
-            key: "delete",
-            label: "Delete",
-            color: "red",
-            onClick: (row) => {
+        kit.rowActions<Person>(
+          peopleRowActions(currentDataLocale(), {
+            onDelete: (row) => {
               rows.value = rows.value.filter((item) => item.id !== row.id);
             },
-          },
-        ]),
+          })
+        ),
       ]
     : []),
   ...(enabled("row-actions") && !server
@@ -168,7 +187,7 @@ const features = [
             key: "inspect",
             label: "Inspect",
             onClick: (row) => {
-              log.value = `Inspect ${row.name}`;
+              notifyDemo({ message: `Inspect ${row.name}` });
             },
           },
         ]),
@@ -208,16 +227,17 @@ const density = query.get("density") === "compact" ? "compact" : "comfortable";
         :url-adapter="demoUrlAdapter"
         :selectable="enabled('selection', true)"
         :mobile-breakpoint="enabled('mobile') ? Number.MAX_SAFE_INTEGER : 768"
-        :default-column-layout="
-          props.lab ? undefined : { hidden: ['email', 'team'] }
-        "
+        :column-layout="columnState.layout.value"
         :defaults="{ limit: props.lab ? 10 : 5 }"
         :density="density"
         :animate="enabled('motion', true)"
         :summary-row="summary"
         :features="features"
+        @update:column-layout="changeColumnLayout"
       />
     </div>
-    <p v-if="log" role="status" class="hint">{{ log }}</p>
+    <div v-if="notice" role="status" :style="noticeStyle(notice)">
+      {{ notice.message }}
+    </div>
   </div>
 </template>

@@ -10,13 +10,10 @@ export {
   type UseBulkActionRunnerOptions,
 } from "./actions/useBulkActionRunner";
 export type { CommandPaletteOptions } from "./actions/useCommandPalette";
-export {
-  DEFAULT_SHORTCUTS,
-  type Shortcut,
-  useShortcuts,
-} from "./actions/useShortcuts";
+export { DEFAULT_SHORTCUTS, type Shortcut } from "./actions/useShortcuts";
 export type { ContextMenuOptions } from "./actions/useTableContextMenu";
 export { aggregate } from "./aggregate/aggregate";
+export { type TableChrome } from "./chrome/tableChromeContract";
 export type {
   CellProps,
   ColumnDef,
@@ -26,18 +23,8 @@ export type {
   ColumnInput,
   ReactColumnGroupDef,
 } from "./columnDef";
-export {
-  columnHeaderController,
-  columnsHaveFooter,
-  resolveColumnFooter,
-  resolveColumnHeader,
-} from "./columns/columnHeader";
 export { computed, type ReactComputedColumnSpec } from "./columns/computed";
-export {
-  resolveColumns,
-  resolveNeutralColumnHeaders,
-} from "./columns/resolveColumns";
-export { useTableEngine } from "./engine/useTableEngine";
+export { resolveColumns } from "./columns/resolveColumns";
 export type {
   FeatureProviderContribution,
   FeatureProviderProps,
@@ -106,7 +93,6 @@ export {
 export {
   FIND_URL_WRITE_DEBOUNCE_MS,
   type FindInTableState,
-  useFindFocus,
   useFindInTable,
   type UseFindInTableOptions,
 } from "./find/useFindInTable";
@@ -120,7 +106,6 @@ export {
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
 export type {
   BaseDataTableProps,
-  ComposedTableProps,
   DirtyEdits,
   EditHistoryHandle,
   EditHistoryOptions,
@@ -156,29 +141,14 @@ export {
   type UseDensityUrlStateOptions,
   type UseDensityUrlStateResult,
 } from "./url/useDensityUrlState";
-export {
-  type FeatureNotice,
-  type FeatureNoticeKind,
-  type TableChrome,
-  useChromeScrollReset,
-  useFilterTriggerToggle,
-  useTableChrome,
-} from "./useTableChrome";
-export type { ChromeBodyData } from "./virtual/chromeBodyShared";
-export { usePlainChromeBodyData } from "./virtual/usePlainChromeBodyData";
-export { useVirtualChromeBodyData } from "./virtual/useVirtualChromeBodyData";
+export { type FeatureNotice, type FeatureNoticeKind } from "./useTableChrome";
+export type { OverlayDismissOptions } from "@adapttable/core";
 /* ── URL state ─────────────────────────────────────────────────────── */
 
 export {
   type ActiveFilterChip,
   type ChipLabelResolver,
-  useActiveFilterChips,
-  type UseActiveFilterChipsOptions,
 } from "./filters/useActiveFilterChips";
-export {
-  useExtraChips,
-  type UseExtraChipsOptions,
-} from "./filters/useExtraChips";
 export {
   defaultFrontendRowId,
   defaultSearchText,
@@ -219,12 +189,6 @@ export {
 } from "./url/useTableUrlState";
 /* ── Selection ─────────────────────────────────────────────────────── */
 export {
-  columnDropProps,
-  columnReorderKeyProps,
-  columnRowDragProps,
-  useColumnDragState,
-} from "./columns/columnReorder";
-export {
   type ColumnLayoutState,
   edgePinStyle,
   PIN_Z,
@@ -241,10 +205,8 @@ export {
   type UseColumnLayoutStorageStateOptions,
   type UseColumnLayoutStorageStateResult,
 } from "./columns/useColumnLayoutStorageState";
-export { useHorizontalOverflow } from "./layout/useHorizontalOverflow";
 export {
   type HeaderSelectionState,
-  offersAllMatching,
   type SelectionState,
   useSelection,
   type UseSelectionOptions,
@@ -254,22 +216,13 @@ export {
   type KitEnvironment,
   withKitEnvironment,
 } from "./hooks/kitEnvironment";
-export { useColorScheme } from "./hooks/useColorScheme";
-export { useDebounce } from "./hooks/useDebounce";
 export {
   useInfiniteScroll,
   type UseInfiniteScrollOptions,
 } from "./hooks/useInfiniteScroll";
 export { useIsMobile } from "./hooks/useIsMobile";
 export { useMediaQuery } from "./hooks/useMediaQuery";
-export {
-  ReducedMotionScope,
-  usePrefersReducedMotion,
-} from "./hooks/usePrefersReducedMotion";
-export {
-  useScrollToTableTop,
-  type UseScrollToTableTopOptions,
-} from "./hooks/useScrollToTableTop";
+export { usePrefersReducedMotion } from "./hooks/usePrefersReducedMotion";
 /* ── Orchestrator ──────────────────────────────────────────────────── */
 export {
   type CellElementProps,
@@ -351,13 +304,7 @@ export {
   useTreeExpansion,
 } from "./tree/useTreeExpansion";
 /* ── Inline cell editing ───────────────────────────────────────────── */
-export type { UseShortcutsOptions } from "./actions/useShortcuts";
-export type {
-  ColumnDragState,
-  ColumnDropProps,
-  ColumnReorderKeyProps,
-  ColumnRowDragProps,
-} from "./columns/columnReorder";
+export type { TableBodyRegion } from "./chrome/tableChromeContract";
 export type { ColumnDragRowAttrs } from "./columns/columnReorder";
 export type {
   PinLeads,
@@ -404,11 +351,8 @@ export {
   asGesture,
   type EditHistoryEntry,
   type EditHistoryState,
-  readCellValue,
-  type TableEditHistoryProps,
   useEditHistory,
   type UseEditHistoryOptions,
-  useTableEditHistory,
 } from "./editing/editHistory";
 export {
   type EditEvent,
@@ -459,7 +403,7 @@ export {
   type GroupPagingState,
   useGroupPaging,
 } from "./grouping/useGroupPaging";
-export type { HorizontalOverflow } from "./layout/useHorizontalOverflow";
+export * from "./mainEntryAliases";
 export type { Slot } from "./state/slots";
 export {
   useGroupCollapseUrlState,
@@ -472,7 +416,5 @@ export {
   type UseRowPinningUrlStateResult,
 } from "./url/useRowPinningUrlState";
 export type { SearchInputState } from "./useDataTable/useSearchInput";
-export type { FilterTriggerToggle, TableBodyRegion } from "./useTableChrome";
 export type { RowPairMeasurer } from "./virtual/measureRowPair";
-export type { ColumnWindow } from "./virtual/useColumnWindow";
 export type { TableErrorState } from "@adapttable/core";

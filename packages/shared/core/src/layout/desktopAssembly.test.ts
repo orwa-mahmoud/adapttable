@@ -145,6 +145,28 @@ describe("desktopRowDomProps", () => {
     });
   });
 
+  it("names a tree row's depth, open state and place for assistive tech", () => {
+    const props = desktopRowDomProps(
+      domArgs({
+        treeEntry: {
+          row: { id: "b", name: "Bea" },
+          key: "b",
+          level: 1,
+          hasChildren: true,
+          expanded: false,
+          path: ["a"],
+          descendantIds: [],
+          siblingIndex: 2,
+        },
+      })
+    );
+    expect(props).toMatchObject({
+      "aria-level": 2,
+      "aria-expanded": false,
+      "aria-posinset": 3,
+    });
+  });
+
   it("wires selection, focus, click, reorder, pin, dirt and prefetch", () => {
     const handleRowClick = vi.fn();
     const handlePrefetch = vi.fn();
@@ -260,6 +282,7 @@ function makeCtx(overrides: Partial<Ctx> = {}): Ctx {
     rowStyle: undefined,
     rowHeight: undefined,
     leads: { start: 48, end: 0 },
+    railInsets: { expand: 0, reorder: 0, selection: 0, actions: 0 },
     pinRowSticky: true,
     rowPinOffset: 40,
     measureRowPair: undefined,

@@ -9,21 +9,21 @@
  * here rather than in any adapter — the slots still render whatever their
  * kit renders, there are just fewer of them at a time.
  */
+import { CHECKLIST_LIST_HEIGHT, filterLabel } from "@adapttable/core";
 import {
   CHECKLIST_ITEM_WIDTH,
-  CHECKLIST_LIST_HEIGHT,
   CHECKLIST_OPTION_GAP,
-  filterLabel,
-  resolveLabels,
-} from "@adapttable/core";
-import type {
-  ChecklistFilterProps,
-  ChecklistSlots as NeutralChecklistSlots,
+  type ChecklistFilterProps,
+  type ChecklistSlots as NeutralChecklistSlots,
+  FILTER_LABELS,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import { type CSSProperties, type ReactNode } from "react";
 
 import { useChecklistFilter } from "./checklist";
 import { useChecklistWindow } from "./checklistWindow";
+
+const FILTER_GROUPS = [FILTER_LABELS] as const;
 
 export type { FilterDef, TableSource } from "@adapttable/core";
 export type {
@@ -109,7 +109,7 @@ export function ChecklistChrome<TRow>({
   classNames = {},
   slots,
 }: Readonly<ChecklistChromeProps<TRow>>) {
-  const labels = resolveLabels(labelOverrides);
+  const labels = resolveFeatureLabels(labelOverrides, FILTER_GROUPS);
   const state = useChecklistFilter(def, source);
   const window = useChecklistWindow(state.visible.length, state.virtualize);
   if (!state.available) return null;

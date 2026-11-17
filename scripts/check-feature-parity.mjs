@@ -74,6 +74,7 @@ const HEADER_RULES = {
   react: {
     spread: /\.\.\.leaf\.headerProps(?!\s*\[)/,
     handoff: /getHeaderCellProps/,
+    assembly: (files, _kit, root) => reactDesktopTableHandoff(files, root),
   },
   vue: {
     spread: /v-bind=["']leaf\.headerProps["']|\.\.\.leaf\.headerProps(?!\s*\[)/,
@@ -87,6 +88,22 @@ const HEADER_RULES = {
   },
 };
 const HEADER_NAMED = /leaf\.headerProps\s*\[/;
+
+/**
+ * A React kit drawn by the binding's `createDesktopTable` hands its header
+ * cells to the binding, so the binding's desktop table must spread the props.
+ */
+function reactDesktopTableHandoff(files, root) {
+  const drawn = [...files.values()].some((text) =>
+    /\bcreateDesktopTable\s*(?:<[\s\S]*?>\s*)?\(/.test(text)
+  );
+  if (!drawn) return false;
+  const binding = join(root, "packages/react/react/src/kit/desktopTable.tsx");
+  return (
+    existsSync(binding) &&
+    HEADER_RULES.react.spread.test(readFileSync(binding, "utf8"))
+  );
+}
 
 /**
  * The Angular desktop header's two halves must agree: a call to the getter

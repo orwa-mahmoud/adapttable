@@ -1,22 +1,22 @@
 import {
-  createExportController,
-  exportButtonLabel,
   type ExportContext,
   type ExportCsvOptions,
   makeExportCsvHandler,
-  resolveExportAnnouncement,
   resolveExportCsv,
-  resolveExportDisabledReason,
-  resolveExportProgressState,
   type TreeShape,
 } from "@adapttable/core";
 import {
   chromeFeatureNotices,
   coreExportCsv,
+  createExportController,
+  exportButtonLabel,
   type ExportHandlerState,
   exportPageOnly,
   featureStateKey,
   type GridFocusState,
+  resolveExportAnnouncement,
+  resolveExportDisabledReason,
+  resolveExportProgressState,
 } from "@adapttable/core/binding";
 import type {
   FeatureMountContext,
@@ -245,6 +245,7 @@ export function exportCsv<TRow>(
   const core = coreExportCsv<TRow>(options);
   return {
     id: core.id,
+    labels: core.labels,
     apply: (input) => core.apply?.(input) ?? {},
     setup: (host) => core.setup?.(host),
     mount: useExportMount,

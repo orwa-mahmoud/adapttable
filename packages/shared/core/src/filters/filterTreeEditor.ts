@@ -10,6 +10,7 @@
  */
 
 import type { QueryCondition, QueryFilterGroup } from "../contracts/query";
+import type { FilterStrings } from "../labelGroups/filterLabels";
 import type { TableLabels } from "../types";
 import { type FilterDef, filterLabel } from "./filterDefs";
 import {
@@ -71,7 +72,7 @@ export interface FilterTreeOption {
 export function filterTreeOpLabel(
   widget: string | undefined,
   op: string,
-  labels: Required<TableLabels>
+  labels: FilterStrings
 ): string {
   if (widget === "text" && op in TEXT_OP_LABEL_KEYS) {
     return filterOpLabel(
@@ -105,7 +106,7 @@ export function filterTreeOpLabel(
 }
 
 /** Widgets whose value is picked from a set rather than typed. */
-const CHOICE_WIDGETS: ReadonlySet<string> = new Set([
+const CHOICE_WIDGETS: ReadonlySet<string> = /* @__PURE__ */ new Set([
   "select",
   "multiSelect",
   "checklist",
@@ -214,7 +215,7 @@ export function filterTreeValueEditor<TRow>(
   def: FilterDef<TRow>,
   condition: QueryCondition,
   registry: FilterTypeRegistry,
-  labels: Required<TableLabels>
+  labels: FilterStrings
 ): FilterTreeValueEditor {
   if (isValuelessFilterOp(condition.op)) return { kind: "none" };
   const widget = filterWidgetKind(def, registry);
@@ -311,7 +312,7 @@ export function filterTreeConditionModel<TRow>(
   condition: QueryCondition,
   defs: readonly FilterDef<TRow>[],
   registry: FilterTypeRegistry,
-  labels: Required<TableLabels>
+  labels: FilterStrings
 ): FilterTreeConditionModel<TRow> | undefined {
   const def = defs.find((item) => item.key === condition.key) ?? defs[0];
   if (!def) return undefined;
@@ -349,7 +350,7 @@ export function filterTreeConditionModel<TRow>(
  * @public
  */
 export function filterTreeCombinatorOptions(
-  labels: Required<TableLabels>
+  labels: FilterStrings
 ): readonly FilterTreeOption[] {
   return [
     { value: "and", label: labels.filterCombinatorAnd },

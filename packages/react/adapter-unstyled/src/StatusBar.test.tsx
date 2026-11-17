@@ -1,4 +1,4 @@
-import { defaultLabels } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/react/adapter";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

@@ -31,7 +31,6 @@
     "vue": "^3.5.0"
   },
   "devDependencies": {
-    "@adapttable/core": "workspace:*",
     "quasar": "2.34.0",
     "vue": "3.5.43",
     "@quasar/vite-plugin": "2.0.2",
@@ -219,6 +218,16 @@
       "require": {
         "types": "./dist/export.d.cts",
         "default": "./dist/export.cjs"
+      }
+    },
+    "./export-csv": {
+      "import": {
+        "types": "./dist/export-csv.d.ts",
+        "default": "./dist/export-csv.js"
+      },
+      "require": {
+        "types": "./dist/export-csv.d.cts",
+        "default": "./dist/export-csv.cjs"
       }
     },
     "./pivot": {
@@ -451,6 +460,16 @@
         "default": "./dist/row-reorder.cjs"
       }
     },
+    "./rows": {
+      "import": {
+        "types": "./dist/rows.d.ts",
+        "default": "./dist/rows.js"
+      },
+      "require": {
+        "types": "./dist/rows.d.cts",
+        "default": "./dist/rows.cjs"
+      }
+    },
     "./column-selection": {
       "import": {
         "types": "./dist/column-selection.d.ts",
@@ -459,6 +478,16 @@
       "require": {
         "types": "./dist/column-selection.d.cts",
         "default": "./dist/column-selection.cjs"
+      }
+    },
+    "./columns": {
+      "import": {
+        "types": "./dist/columns.d.ts",
+        "default": "./dist/columns.js"
+      },
+      "require": {
+        "types": "./dist/columns.d.cts",
+        "default": "./dist/columns.cjs"
       }
     },
     "./nested-table": {

@@ -1,10 +1,10 @@
-import type { TableSource } from "@adapttable/core";
 import {
   type ColumnLayoutState,
   createMemoryAdapter,
   type TableErrorState,
   useFrontendData,
 } from "@adapttable/react";
+import { type TableSource } from "@adapttable/react/adapter";
 import { sparklineColumn } from "@adapttable/react/sparkline";
 import {
   act,
@@ -190,6 +190,23 @@ describe("<DataTable> (Ant Design)", () => {
       override: { skeletonRows: 3 },
     });
     expect(container.querySelector(".ant-skeleton")).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-adapttable-part="loading-table"]')
+    ).not.toBeNull();
+  });
+
+  it("marks the loading cards when the table is in the card layout", () => {
+    const { container } = renderHarness({
+      rows: [],
+      isLoading: true,
+      override: { forceMobile: true, skeletonRows: 2 },
+    });
+    expect(
+      container.querySelector('[data-adapttable-part="loading-cards"]')
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-adapttable-part="loading-table"]')
+    ).toBeNull();
   });
 
   it("maps density='compact' to the small antd table", () => {
@@ -494,7 +511,12 @@ describe("<DataTable> (Ant Design)", () => {
     // No backdrop/scrim is rendered — the background stays interactive.
     expect(screen.queryByTestId("filter-scrim")).toBeNull();
     // A mousedown anywhere outside the popover hides it (antd toggles the
-    // `ant-popover-hidden` class rather than unmounting the content).
+    // `ant-popover-hidden` class rather than unmounting the content). The
+    // dismissal arms a microtask after opening, so the opening press never
+    // closes it.
+    await act(async () => {
+      await Promise.resolve();
+    });
     fireEvent.mouseDown(document.body);
     // The popover closes (its logical state flips); jsdom does not run antd's
     // leave animation to the `ant-popover-hidden` class, so assert the state

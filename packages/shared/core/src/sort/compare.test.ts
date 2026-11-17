@@ -4,7 +4,6 @@ import {
   compareSortEntries,
   compareSortLevel,
   compareValues,
-  sortedInsertIndex,
   sortRows,
   sortRowsMulti,
 } from "./compare";
@@ -41,7 +40,7 @@ describe("compareValues — booleans", () => {
   });
 });
 
-describe("compareSortEntries / sortedInsertIndex", () => {
+describe("compareSortEntries", () => {
   it("keeps nulls last in both directions and ties by index", () => {
     expect(
       compareSortEntries(
@@ -60,18 +59,6 @@ describe("compareSortEntries / sortedInsertIndex", () => {
     expect(
       compareSortEntries({ value: 2, index: 3 }, { value: 2, index: 1 }, "asc")
     ).toBeGreaterThan(0);
-  });
-
-  it("inserts where a full sort would, including after an equal key", () => {
-    const items = [
-      { value: 1, index: 0 },
-      { value: 3, index: 1 },
-    ];
-    const target = { value: 3, index: 2 };
-    const at = sortedInsertIndex(items, (item) =>
-      compareSortEntries(item, target, "asc")
-    );
-    expect(at).toBe(2);
   });
 });
 

@@ -1,106 +1,82 @@
-/** Selection bar with the bulk actions and cross-page banner. */
+/** The bulk action bar, decided by the binding and drawn with Radix. */
 import {
-  type BulkBarChromeProps,
-  resolveDisabledReason,
-  useBulkBarState,
+  createBulkBar,
+  type KitBulkBarFrameProps,
+  type KitBulkButtonProps,
+  type KitBulkTextProps,
 } from "@adapttable/react/adapter";
-import { Button, Flex, Text } from "@radix-ui/themes";
+import { Button as UiButton, Flex, Text as UiText } from "@radix-ui/themes";
 import { isValidElement } from "react";
 
-import type { RadixAccentColor } from "../types";
+import { radixColor } from "./accent";
 import { Tooltip } from "./primitives";
 
-/** Selection toolbar. */
-export function BulkBar({
-  selection,
-  total,
-  bulkActions,
-  confirm,
-  labels,
-  accentColor,
-}: Readonly<BulkBarChromeProps & { accentColor?: RadixAccentColor }>) {
-  const {
-    selectedCount,
-    ids,
-    pending,
-    errorMessage,
-    run,
-    clear,
-    expandable,
-    scope,
-    banner,
-  } = useBulkBarState({ selection, total, confirm, labels });
-  if (selectedCount === 0) return null;
+function Frame({
+  count,
+  scope,
+  clear,
+  actions,
+  error,
+  ...rest
+}: Readonly<KitBulkBarFrameProps>) {
+  "use no memo";
   return (
-    <Flex
-      data-adapttable-part="bulk-bar"
-      gap="2"
-      justify="between"
-      wrap="wrap"
-      align="center"
-    >
-      {expandable ? (
-        <Flex
-          data-adapttable-part="select-all-banner"
-          gap="2"
-          wrap="wrap"
-          align="center"
-        >
-          <Text data-adapttable-part="select-all-text" size="2">
-            {banner.text}
-          </Text>
-          <Button
-            data-adapttable-part="select-all-button"
-            size="1"
-            variant="ghost"
-            color={accentColor}
-            disabled={pending !== null}
-            onClick={banner.onClick}
-          >
-            {banner.action}
-          </Button>
+    <Flex gap="2" justify="between" wrap="wrap" align="center" {...rest}>
+      {scope ? (
+        <Flex gap="2" wrap="wrap" align="center" {...scope.attributes}>
+          {scope.text}
+          {scope.button}
         </Flex>
       ) : (
-        <Text size="2">{labels.selectedCount(selectedCount)}</Text>
+        count
       )}
       <Flex gap="2" wrap="wrap" align="center">
-        <Button
-          size="1"
-          variant="ghost"
-          color="gray"
-          onClick={clear}
-          disabled={pending !== null}
-        >
-          {labels.clearAll}
-        </Button>
-        {bulkActions.map((action) => {
-          const reason = resolveDisabledReason(action.disabledReason?.(ids));
-          return (
-            <Tooltip key={action.key} label={reason ?? ""} disabled={!reason}>
-              <Button
-                data-adapttable-part="bulk-button"
-                size="1"
-                color={(action.color as RadixAccentColor) ?? accentColor}
-                disabled={reason !== undefined || pending !== null}
-                onClick={() => run(action, ids, scope)}
-              >
-                {isValidElement(action.icon) ? action.icon : null}
-                {action.label}
-              </Button>
-            </Tooltip>
-          );
-        })}
-        {errorMessage !== null && (
-          <Text
-            data-adapttable-part="bulk-error"
-            size="2"
-            color="red"
-            role="alert"
-          >
-            {`${labels.errorTitle}: ${errorMessage}`}
-          </Text>
-        )}
+        {clear}
+        {actions}
+        {error}
       </Flex>
     </Flex>
   );
 }
+
+function Text({ kind, ...rest }: Readonly<KitBulkTextProps>) {
+  "use no memo";
+  return (
+    <UiText size="2" color={kind === "error" ? "red" : undefined} {...rest} />
+  );
+}
+
+function Button({
+  kind,
+  busy: _busy,
+  icon,
+  color,
+  reason,
+  children,
+  ...rest
+}: Readonly<KitBulkButtonProps>) {
+  "use no memo";
+  if (kind !== "action") {
+    return (
+      <UiButton
+        size="1"
+        variant="ghost"
+        color={kind === "clear" ? "gray" : undefined}
+        {...rest}
+      >
+        {children}
+      </UiButton>
+    );
+  }
+  return (
+    <Tooltip label={reason ?? ""} disabled={!reason}>
+      <UiButton size="1" color={radixColor(color)} {...rest}>
+        {isValidElement(icon) ? icon : null}
+        {children}
+      </UiButton>
+    </Tooltip>
+  );
+}
+
+/** The bulk action bar, with Radix's text and buttons. */
+export const BulkBar = /* @__PURE__ */ createBulkBar({ Frame, Text, Button });

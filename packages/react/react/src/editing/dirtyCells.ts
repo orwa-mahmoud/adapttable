@@ -5,7 +5,9 @@
  */
 import { type DirtyCellState } from "@adapttable/core";
 import { createDirtyCellStore, dirtyCellView } from "@adapttable/core/editing";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useContext, useMemo, useState, useSyncExternalStore } from "react";
+
+import { TableStoreContext } from "../state/tableStoreContext";
 
 export type { DirtyCellState } from "@adapttable/core";
 
@@ -33,7 +35,10 @@ export interface UseDirtyCellsOptions {
 export function useDirtyCells(
   options: UseDirtyCellsOptions = {}
 ): DirtyCellState {
-  const [store] = useState(() => createDirtyCellStore(options));
+  const table = useContext(TableStoreContext);
+  const [store] = useState(() =>
+    createDirtyCellStore(options, { store: table })
+  );
   store.configure(options);
   const snapshot = useSyncExternalStore(
     store.subscribe,

@@ -1,7 +1,7 @@
-import { exportProgressView } from "@adapttable/core";
-import type {
-  ExportProgressChromeProps as NeutralExportProgressChromeProps,
-  ExportProgressSlots as NeutralExportProgressSlots,
+import {
+  type ExportProgressChromeProps as NeutralExportProgressChromeProps,
+  type ExportProgressSlots as NeutralExportProgressSlots,
+  exportProgressView,
 } from "@adapttable/core/binding";
 import type { ReactElement, ReactNode } from "react";
 

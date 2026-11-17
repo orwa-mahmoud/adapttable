@@ -8,7 +8,11 @@ import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { cellNavigationTests } from "../../angular/test/kit/suites/cellNavigation";
+import { kit } from "../testing/kit";
 import { AdaptDataTable } from "./dataTable";
+
+for (const test of cellNavigationTests(kit)) it(test.name, test.run);
 
 interface City {
   id: string;
@@ -118,36 +122,5 @@ describe("cellNavigation() (NG-ZORRO Angular)", () => {
     expect(table.getAttribute("data-adapttable-part")).toBe("table");
     expect(table.getAttribute("role")).not.toBe("grid");
     expect(document.querySelector('[role="grid"]')).toBeNull();
-  });
-});
-
-describe("cellNavigation({ onRangeChange }) (NG-ZORRO Angular)", () => {
-  it("tells the host each rectangle the reader selects, and null when it collapses", async () => {
-    const { onRangeChange, settle } = await mount();
-    expect(onRangeChange).toHaveBeenLastCalledWith(null);
-    onRangeChange.mockClear();
-
-    cells()[0]!.focus();
-    await settle();
-    expect(onRangeChange).not.toHaveBeenCalled();
-
-    press("ArrowDown", true);
-    await settle();
-    expect(onRangeChange).toHaveBeenLastCalledWith({
-      anchor: { row: 0, col: 0 },
-      head: { row: 1, col: 0 },
-    });
-
-    press("ArrowRight", true);
-    await settle();
-    expect(onRangeChange).toHaveBeenLastCalledWith({
-      anchor: { row: 0, col: 0 },
-      head: { row: 1, col: 1 },
-    });
-
-    press("ArrowUp");
-    await settle();
-    expect(onRangeChange).toHaveBeenLastCalledWith(null);
-    expect(onRangeChange).toHaveBeenCalledTimes(3);
   });
 });

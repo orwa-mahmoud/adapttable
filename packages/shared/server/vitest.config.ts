@@ -1,6 +1,7 @@
 import { defineConfig } from "vitest/config";
 
 import {
+  VITEST_TEST_TIMEOUT,
   vitestFileParallelism,
   vitestMaxWorkers,
 } from "../../../scripts/vitest-workers.mjs";
@@ -20,6 +21,7 @@ export default defineConfig({
     restoreMocks: true,
     fileParallelism: vitestFileParallelism(),
     maxWorkers: vitestMaxWorkers(),
+    testTimeout: VITEST_TEST_TIMEOUT,
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov", "html"],

@@ -236,8 +236,11 @@ describe("<DataTable> (unstyled)", () => {
     const clear = screen.getByRole("button", { name: "Clear all" });
     expect(clear).toHaveAttribute("data-adapttable-part", "empty-clear");
     expect(clear).toHaveClass("my-clear");
+    expect(screen.getByRole("searchbox")).toHaveValue("zzz");
     fireEvent.click(clear);
     expect(onClearFilters).toHaveBeenCalledTimes(1);
+    // A search alone matched nothing, so the clear takes the search too.
+    expect(screen.getByRole("searchbox")).toHaveValue("");
   });
 
   it("renders a custom empty state", () => {
@@ -743,6 +746,36 @@ describe("<DataTable> (unstyled)", () => {
     expect((selCell as HTMLElement).style.insetInlineStart).toBe("0px");
   });
 
+  it("pins a data column past the selection rail's rendered width", () => {
+    // The rail renders wider than its reserved width (its checkbox and
+    // padding, or spare table width); the pinned column starts where the
+    // rail really ends.
+    const measure = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: HTMLElement) {
+        const width =
+          this.dataset.adapttablePart === "selection-header" ? 52.5 : 0;
+        return { width, height: 0 } as DOMRect;
+      });
+    const { container } = renderHarness({
+      override: {
+        bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }],
+        defaultColumnLayout: { pinned: { name: "start" } },
+      },
+    });
+    const nameHeader = [
+      ...container.querySelectorAll<HTMLElement>(
+        '[data-adapttable-part="header-cell"]'
+      ),
+    ].find((cell) => cell.textContent?.includes("Name"));
+    expect(nameHeader?.style.insetInlineStart).toBe("52.5px");
+    const nameCell = container.querySelector<HTMLElement>(
+      '[data-adapttable-part="cell"][data-pinned="start"]'
+    );
+    expect(nameCell?.style.insetInlineStart).toBe("52.5px");
+    measure.mockRestore();
+  });
+
   it("leaves the selection column unpinned when nothing is pinned", () => {
     const { container } = renderHarness({
       override: {
@@ -955,6 +988,23 @@ describe("<DataTable> (unstyled)", () => {
       document.querySelector('[data-adapttable-part="filters-close"]') ??
         document.querySelector('[data-adapttable-part="filters-clear"]')
     );
+  });
+
+  it("pulls focus that escaped the drawer back inside on Tab", () => {
+    renderHarness({
+      override: { filters: <div>filter body</div>, filtersMode: "drawer" },
+    });
+    const trigger = screen.getByRole("button", { name: /filters/i });
+    fireEvent.click(trigger);
+    const outside = document.createElement("button");
+    document.body.append(outside);
+    act(() => outside.focus());
+    fireEvent.keyDown(document, { key: "Tab" });
+    const panel = document.querySelector(
+      '[data-adapttable-part="filters-panel"]'
+    );
+    expect(panel?.contains(document.activeElement)).toBe(true);
+    outside.remove();
   });
 
   it("runs column-menu bulk and per-column sort from a live table", () => {

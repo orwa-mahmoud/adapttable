@@ -11,8 +11,11 @@
  * controlled table's density is the host's business, and a URL that
  * silently overrode it would be a second source of truth.
  */
-import { densitySlice, type TableDensity } from "@adapttable/core";
-import type { UseDensityUrlStateResult } from "@adapttable/core/binding";
+import { type TableDensity } from "@adapttable/core";
+import {
+  densitySlice,
+  type UseDensityUrlStateResult,
+} from "@adapttable/core/binding";
 
 import type { UrlStateAdapter } from "./adapter";
 import { useUrlSlice } from "./useUrlSlice";

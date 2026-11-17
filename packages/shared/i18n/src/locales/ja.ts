@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Japanese (`ja`) label preset.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "完了",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "エクスポート",
 };
 
+/**
+ * Japanese (`ja`) label preset.
+ *
+ * @public
+ */
 export const ja: Required<TableLabels> = {
   table: "データテーブル",
   search: "検索",

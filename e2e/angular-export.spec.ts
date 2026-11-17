@@ -5,8 +5,9 @@ import { ANGULAR_KITS, angularPart, checkAngularCheckbox } from "./angular-kit";
 for (const kit of ANGULAR_KITS) {
   test.describe(kit.key, () => {
     /**
-     * Each Angular kit's export page: the toolbar button writes the page
-     * on screen, searched as it is, with each column's export value.
+     * Each Angular kit's export page in CSV mode (`?scope=…`): the toolbar
+     * button writes the page on screen, searched as it is, with each
+     * column's export value.
      */
 
     const PAGE = `/${kit.key}/export/`;
@@ -16,9 +17,9 @@ for (const kit of ANGULAR_KITS) {
     test("downloads a CSV of the searched rows with plain dates and numbers", async ({
       page,
     }) => {
-      await page.goto(PAGE);
+      await page.goto(`${PAGE}?scope=page`);
       await part(page, "search").fill("Data");
-      await expect(part(page, "row")).toHaveCount(6);
+      await expect(part(page, "row")).toHaveCount(5);
       const [download] = await Promise.all([
         page.waitForEvent("download"),
         part(page, "export-csv-button").click(),
@@ -31,9 +32,9 @@ for (const kit of ANGULAR_KITS) {
         .toString("utf8")
         .trim()
         .split(/\r?\n/);
-      expect(lines[0]).toBe("Person,Team,Status,Timeline,Budget,Load");
-      expect(lines).toHaveLength(7);
-      expect(lines[1]).toBe("Grace Hopper,Data,Archived,2026-07-22,39900,78%");
+      expect(lines[0]).toBe("Person,Status,Timeline,Budget");
+      expect(lines).toHaveLength(6);
+      expect(lines[1]).toBe("Sefa Demir,Active,2026-01-01,110600");
     });
 
     test("a selected export contains no unchecked rows", async ({ page }) => {
@@ -54,7 +55,7 @@ for (const kit of ANGULAR_KITS) {
         .trim()
         .split(/\r?\n/);
       expect(lines).toHaveLength(2);
-      expect(lines[1]?.split(",")[0]).toBe("Ada Lovelace");
+      expect(lines[1]?.split(",")[0]).toBe("Priya Nair");
     });
 
     test("a range export writes only the selected cells", async ({ page }) => {
@@ -74,7 +75,7 @@ for (const kit of ANGULAR_KITS) {
       for await (const chunk of stream) chunks.push(chunk as Buffer);
       expect(
         Buffer.concat(chunks).toString("utf8").trim().split(/\r?\n/)
-      ).toEqual(["Person", "Ada Lovelace", "Alan Turing"]);
+      ).toEqual(["Person", "Priya Nair", "Jonah Okonkwo"]);
     });
   });
 }

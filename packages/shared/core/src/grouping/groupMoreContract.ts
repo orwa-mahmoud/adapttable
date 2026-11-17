@@ -9,13 +9,20 @@
 import type { TableLabels } from "../types";
 
 /**
+ * What a "show more" offer reveals: more groups, or more rows inside one.
+ *
+ * @public
+ */
+export type GroupMoreScope = "groups" | "rows";
+
+/**
  * Props for a kit's `GroupMoreButton` — no slots on the public API.
  *
  * @public
  */
 export interface GroupMoreButtonProps {
   /** Whether this offers more groups or more rows inside one. */
-  scope: "groups" | "rows";
+  scope: GroupMoreScope;
   /** How many are still hidden. */
   remaining: number;
   /** The group whose rows are being revealed, for a `"rows"` offer. */
@@ -23,7 +30,7 @@ export interface GroupMoreButtonProps {
   /** Labels; falls back to the built-in English. */
   labels: Required<TableLabels>;
   /** Reveal the next page. */
-  onShowMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => void;
+  onShowMore: (entry: { scope: GroupMoreScope; groupKey?: string }) => void;
 }
 
 /**

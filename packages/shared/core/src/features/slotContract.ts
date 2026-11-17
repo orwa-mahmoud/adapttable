@@ -21,6 +21,8 @@ import type {
   ColumnMenuSlotProps,
 } from "../columns/columnMenuModel";
 import type { ColumnModel } from "../contracts/columns";
+import type { RowCallback } from "../contracts/rowCallback";
+import type { BatchEditHandler } from "../editing/batchEditing";
 import type {
   BatchEditBarProps,
   RowEditActionsProps,
@@ -50,7 +52,7 @@ import type {
 } from "../tree/treeToggleContract";
 import type { BulkAction, Direction, TableLabels } from "../types";
 import type { FeatureHostState } from "./currentHost";
-import { featureSlotKey } from "./featureKeys";
+import { featureSlotKey, type RowSlotKey } from "./featureKeys";
 
 /**
  * The Columns menu in the toolbar.
@@ -61,7 +63,7 @@ import { featureSlotKey } from "./featureKeys";
  *
  * @public
  */
-export const COLUMN_MENU = featureSlotKey<ColumnMenuSlotProps<never>>(
+export const COLUMN_MENU = featureSlotKey<ColumnMenuSlotProps<unknown>>(
   "column-menu",
   { single: true }
 );
@@ -233,7 +235,7 @@ export const FIND_BAR = featureSlotKey<FindBarProps>("find-bar", {
  *
  * @public
  */
-export const BATCH_EDIT_BAR = featureSlotKey<BatchEditBarProps<never>>(
+export const BATCH_EDIT_BAR = featureSlotKey<BatchEditBarProps<unknown>>(
   "batch-edit-bar",
   { single: true }
 );
@@ -327,7 +329,7 @@ export const BULK_BAR = featureSlotKey<BulkBarSlotProps>("bulk-bar", {
  *
  * @public
  */
-export const FILTERS_FORM = featureSlotKey<FiltersFormSlotProps<never>>(
+export const FILTERS_FORM = featureSlotKey<FiltersFormSlotProps<unknown>>(
   "filters-form",
   { single: true }
 );
@@ -357,14 +359,23 @@ export interface ChromeBodySlotProps<
 }
 
 /**
+ * What fills the scroll-window body: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type ChromeBodyDraw = <TChrome, TProps, TBody, TNode>(
+  props: ChromeBodySlotProps<TChrome, TProps, TBody, TNode>
+) => TNode;
+
+/**
  * The scroll-window body. Filled only by `virtualize()`; the plain path
  * never loads the window math.
  *
  * @public
  */
-export const CHROME_BODY = featureSlotKey<ChromeBodySlotProps>("chrome-body", {
+export const CHROME_BODY = featureSlotKey<never>("chrome-body", {
   single: true,
-});
+}) as RowSlotKey<ChromeBodyDraw>;
 
 /**
  * A window over an opaque keyed list, for a kit that assembles its own body.
@@ -497,13 +508,22 @@ export type FindLiveSlotProps<
 };
 
 /**
+ * What fills the find stage: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type FindLiveDraw = <TOptions, TNode>(
+  props: FindLiveSlotProps<TOptions, TNode>
+) => TNode;
+
+/**
  * Find state. Filled only by `findInTable()`.
  *
  * @public
  */
-export const FIND_LIVE = featureSlotKey<FindLiveSlotProps>("find-live", {
+export const FIND_LIVE = featureSlotKey<never>("find-live", {
   single: true,
-});
+}) as RowSlotKey<FindLiveDraw>;
 
 /**
  * Edit history plus the state that records gestures.
@@ -517,7 +537,7 @@ export const FIND_LIVE = featureSlotKey<FindLiveSlotProps>("find-live", {
  * @public
  */
 export interface EditHistoryLiveSlotProps<
-  TRow = never,
+  TRow = unknown,
   THistory = unknown,
   TOptions = unknown,
   TColumn = ColumnModel<TRow>,
@@ -528,24 +548,38 @@ export interface EditHistoryLiveSlotProps<
   /** Columns, for reading a cell's value before it changes. */
   columns: readonly TColumn[];
   /** The host's commit channel. */
-  onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
-  /** The table; receives history and the recording commit channel. */
+  onCellEdit?: RowCallback<
+    [row: NoInfer<TRow>, key: string, nextValue: unknown],
+    unknown
+  >;
+  /** The host's batch channel, recorded as one gesture per batch. */
+  onBatchEdit?: BatchEditHandler<TRow>;
+  /** The table; receives history and the recording commit channels. */
   children: (result: {
     history: THistory;
     onCellEdit:
       ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
+    onBatchEdit?: BatchEditHandler<TRow>;
   }) => TNode;
 }
+
+/**
+ * What fills the edit-history stage: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type EditHistoryLiveDraw = <TRow, THistory, TOptions, TColumn, TNode>(
+  props: EditHistoryLiveSlotProps<TRow, THistory, TOptions, TColumn, TNode>
+) => TNode;
 
 /**
  * Undo and redo.
  *
  * @public
  */
-export const EDIT_HISTORY_LIVE = featureSlotKey<EditHistoryLiveSlotProps>(
-  "edit-history-live",
-  { single: true }
-);
+export const EDIT_HISTORY_LIVE = featureSlotKey<never>("edit-history-live", {
+  single: true,
+}) as RowSlotKey<EditHistoryLiveDraw>;
 
 /**
  * Cell navigation plus the state that arms the grid.
@@ -554,6 +588,7 @@ export const EDIT_HISTORY_LIVE = featureSlotKey<EditHistoryLiveSlotProps>(
  * @typeParam THostProps - The host props the paste and fill channels read.
  * @typeParam TFocus - The binding's grid-focus state.
  * @typeParam TNode - The binding's render node.
+ * @typeParam TEdit - One recorded cell edit.
  *
  * @public
  */
@@ -562,13 +597,14 @@ export interface CellNavLiveSlotProps<
   THostProps = unknown,
   TFocus = unknown,
   TNode = unknown,
+  TEdit = unknown,
 > {
   /** Inputs the grid needs after chrome has run. `enabled` is implied. */
   options: TOptions;
   /** Host props the paste/fill channels read. */
   hostProps: THostProps;
   /** Record a paste/fill as one undo gesture. */
-  record: (edits: readonly unknown[]) => void;
+  record: (edits: readonly TEdit[]) => void;
   /** Undo the last paste/fill gesture. */
   undo: () => number;
   /** Redo the last undone gesture. */
@@ -586,14 +622,22 @@ export interface CellNavLiveSlotProps<
 }
 
 /**
+ * What fills the cell-navigation stage: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type CellNavLiveDraw = <TOptions, THostProps, TFocus, TNode, TEdit>(
+  props: CellNavLiveSlotProps<TOptions, THostProps, TFocus, TNode, TEdit>
+) => TNode;
+
+/**
  * Cell navigation.
  *
  * @public
  */
-export const CELL_NAV_LIVE = featureSlotKey<CellNavLiveSlotProps>(
-  "cell-nav-live",
-  { single: true }
-);
+export const CELL_NAV_LIVE = featureSlotKey<never>("cell-nav-live", {
+  single: true,
+}) as RowSlotKey<CellNavLiveDraw>;
 
 /**
  * Export plus the state that single-flights the write.
@@ -606,7 +650,7 @@ export const CELL_NAV_LIVE = featureSlotKey<CellNavLiveSlotProps>(
  * @public
  */
 export interface ExportLiveSlotProps<
-  TRow = never,
+  TRow = unknown,
   TExport = unknown,
   TColumn = ColumnModel<TRow>,
   TNode = unknown,
@@ -630,13 +674,22 @@ export interface ExportLiveSlotProps<
 }
 
 /**
+ * What fills the export stage: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type ExportLiveDraw = <TRow, TExport, TColumn, TNode>(
+  props: ExportLiveSlotProps<TRow, TExport, TColumn, TNode>
+) => TNode;
+
+/**
  * Export.
  *
  * @public
  */
-export const EXPORT_LIVE = featureSlotKey<ExportLiveSlotProps>("export-live", {
+export const EXPORT_LIVE = featureSlotKey<never>("export-live", {
   single: true,
-});
+}) as RowSlotKey<ExportLiveDraw>;
 
 /**
  * Fullscreen plus the state that names the portal container.
@@ -657,14 +710,22 @@ export interface FullscreenLiveSlotProps<
 }
 
 /**
+ * What fills the fullscreen stage: one function for any binding's state.
+ *
+ * @public
+ */
+export type FullscreenLiveDraw = <TFullscreen, TNode>(
+  props: FullscreenLiveSlotProps<TFullscreen, TNode>
+) => TNode;
+
+/**
  * Fullscreen.
  *
  * @public
  */
-export const FULLSCREEN_LIVE = featureSlotKey<FullscreenLiveSlotProps>(
-  "fullscreen-live",
-  { single: true }
-);
+export const FULLSCREEN_LIVE = featureSlotKey<never>("fullscreen-live", {
+  single: true,
+}) as RowSlotKey<FullscreenLiveDraw>;
 
 /**
  * Optional chrome that transforms the row model or editing bundle.
@@ -695,14 +756,22 @@ export interface ChromeExtraSlotProps<
 }
 
 /**
+ * What fills a chrome-extra stage: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type ChromeExtraDraw = <TChrome, TProps, TNode>(
+  props: ChromeExtraSlotProps<TChrome, TProps, TNode>
+) => TNode;
+
+/**
  * Grouping row model, collapse and paging.
  *
  * @public
  */
-export const GROUPING_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "grouping-live",
-  { single: true }
-);
+export const GROUPING_LIVE = featureSlotKey<never>("grouping-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Kit-owned interactive grouping strip above the table body.
@@ -719,79 +788,72 @@ export const GROUPING_PANEL = featureSlotKey<GroupingPanelSlotProps>(
  *
  * @public
  */
-export const TREE_LIVE = featureSlotKey<ChromeExtraSlotProps>("tree-live", {
+export const TREE_LIVE = featureSlotKey<never>("tree-live", {
   single: true,
-});
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Row-detail / nested-table expansion.
  *
  * @public
  */
-export const EXPANSION_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "expansion-live",
-  { single: true }
-);
+export const EXPANSION_LIVE = featureSlotKey<never>("expansion-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Cell, row and batch editing.
  *
  * @public
  */
-export const EDITING_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "editing-live",
-  { single: true }
-);
+export const EDITING_LIVE = featureSlotKey<never>("editing-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Row-pin state machine.
  *
  * @public
  */
-export const PINNING_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "pinning-live",
-  { single: true }
-);
+export const PINNING_LIVE = featureSlotKey<never>("pinning-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Filter-tree chips merged onto chrome.
  *
  * @public
  */
-export const FILTER_CHIPS_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "filter-chips-live",
-  { single: true }
-);
+export const FILTER_CHIPS_LIVE = featureSlotKey<never>("filter-chips-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * User column layout (hide / order / pin / resize).
  *
  * @public
  */
-export const COLUMN_LAYOUT_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "column-layout-live",
-  { single: true }
-);
+export const COLUMN_LAYOUT_LIVE = featureSlotKey<never>("column-layout-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Add / duplicate / delete and host row actions.
  *
  * @public
  */
-export const ROW_ACTIONS_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "row-actions-live",
-  { single: true }
-);
+export const ROW_ACTIONS_LIVE = featureSlotKey<never>("row-actions-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Row selection state machine.
  *
  * @public
  */
-export const SELECTION_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "selection-live",
-  { single: true }
-);
+export const SELECTION_LIVE = featureSlotKey<never>("selection-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Selection aggregates. Computed only when the feature is composed.
@@ -803,7 +865,7 @@ export const SELECTION_LIVE = featureSlotKey<ChromeExtraSlotProps>(
  * @public
  */
 export interface SelectionStatsLiveSlotProps<
-  TRow = never,
+  TRow = unknown,
   TColumn = ColumnModel<TRow>,
   TNode = unknown,
 > {
@@ -820,14 +882,23 @@ export interface SelectionStatsLiveSlotProps<
 }
 
 /**
+ * What fills the selection-figures stage: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type SelectionStatsLiveDraw = <TRow, TColumn, TNode>(
+  props: SelectionStatsLiveSlotProps<TRow, TColumn, TNode>
+) => TNode;
+
+/**
  * Selection-stats compute.
  *
  * @public
  */
-export const SELECTION_STATS_LIVE = featureSlotKey<SelectionStatsLiveSlotProps>(
+export const SELECTION_STATS_LIVE = featureSlotKey<never>(
   "selection-stats-live",
   { single: true }
-);
+) as RowSlotKey<SelectionStatsLiveDraw>;
 
 /**
  * Header checkbox that selects a column.
@@ -864,7 +935,7 @@ export const GRID_FOCUS_ANNOUNCER = featureSlotKey<GridFocusAnnouncerSlotProps>(
  *
  * @public
  */
-export const FILTER_HEADER = featureSlotKey<FilterHeaderControlProps<never>>(
+export const FILTER_HEADER = featureSlotKey<FilterHeaderControlProps<unknown>>(
   "filter-header",
   { single: true }
 );
@@ -880,7 +951,7 @@ export const FILTER_HEADER = featureSlotKey<FilterHeaderControlProps<never>>(
  * @public
  */
 export interface EditableCellSlotProps<
-  TRow = never,
+  TRow = unknown,
   TEditing = unknown,
   TColumn = ColumnModel<TRow>,
   TNode = unknown,
@@ -900,7 +971,7 @@ export interface EditableCellSlotProps<
   /** Visible columns in the current view. */
   columns: readonly TColumn[];
   /** Resolve a row's stable key. */
-  rowKey: (row: TRow) => string;
+  rowKey: RowCallback<[row: NoInfer<TRow>], string>;
   /** Accessible label for the editor. */
   editLabel: string;
   /** Accessible undo label. */
@@ -1019,7 +1090,7 @@ export const TOOLBAR_EXTRAS =
  *
  * @public
  */
-export const TREE_CELL = featureSlotKey<TreeCellProps<never>>("tree-cell");
+export const TREE_CELL = featureSlotKey<TreeCellProps<unknown>>("tree-cell");
 
 /**
  * Mobile tree disclosure control.
@@ -1027,7 +1098,7 @@ export const TREE_CELL = featureSlotKey<TreeCellProps<never>>("tree-cell");
  * @public
  */
 export const TREE_TOGGLE =
-  featureSlotKey<TreeToggleProps<never>>("tree-toggle");
+  featureSlotKey<TreeToggleProps<unknown>>("tree-toggle");
 
 /**
  * Save / cancel for a row being edited. One renderer: `editing()` and
@@ -1036,7 +1107,7 @@ export const TREE_TOGGLE =
  *
  * @public
  */
-export const ROW_EDIT_ACTIONS = featureSlotKey<RowEditActionsProps<never>>(
+export const ROW_EDIT_ACTIONS = featureSlotKey<RowEditActionsProps<unknown>>(
   "row-edit-actions",
   { single: true }
 );
@@ -1047,7 +1118,7 @@ export const ROW_EDIT_ACTIONS = featureSlotKey<RowEditActionsProps<never>>(
  * @public
  */
 export const ROW_REORDER_HANDLE =
-  featureSlotKey<RowReorderHandleProps<never>>("row-reorder-handle");
+  featureSlotKey<RowReorderHandleProps<unknown>>("row-reorder-handle");
 
 /**
  * Mobile row-reorder buttons.
@@ -1055,7 +1126,7 @@ export const ROW_REORDER_HANDLE =
  * @public
  */
 export const ROW_REORDER_BUTTONS = featureSlotKey<
-  RowReorderButtonsProps<never>
+  RowReorderButtonsProps<unknown>
 >("row-reorder-buttons");
 
 /**
@@ -1077,7 +1148,7 @@ export const COLUMN_GROUP_TOGGLE = featureSlotKey<ColumnGroupToggleProps>(
  * @public
  */
 export interface GroupHeaderRowSlotProps<
-  TRow = never,
+  TRow = unknown,
   TSelection = unknown,
   TColumn = ColumnModel<TRow>,
 > {
@@ -1122,7 +1193,7 @@ export const GROUP_HEADER_ROW =
  * @public
  */
 export interface GroupHeaderCardSlotProps<
-  TRow = never,
+  TRow = unknown,
   TSelection = unknown,
   TColumn = ColumnModel<TRow>,
 > {

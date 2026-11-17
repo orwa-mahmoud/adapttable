@@ -131,6 +131,22 @@ describe("createTableViewStore — snapshots", () => {
     expect(second.extra).toBe(first.extra);
   });
 
+  it("reads a new configuration at once and tells no reader about it", () => {
+    const { store } = tableStore("", { defaults: { limit: 10 } });
+    const heard = vi.fn();
+    store.subscribe(heard);
+
+    store.configure({ defaults: { limit: 20, sortBy: "name" } });
+
+    expect(heard).not.toHaveBeenCalled();
+    expect(store.getSnapshot()).toMatchObject({ limit: 20, sortBy: "name" });
+    // The next action works from the new defaults: clearing the defaulted
+    // sort keeps it cleared.
+    store.setSort(undefined);
+    expect(heard).toHaveBeenCalledTimes(1);
+    expect(store.getSnapshot().sortBy).toBeUndefined();
+  });
+
   it("serves the hydration search on the server, empty by default", () => {
     const adapter = createMemoryAdapter("page=5");
     expect(createTableViewStore({ adapter }).getServerSnapshot().page).toBe(1);

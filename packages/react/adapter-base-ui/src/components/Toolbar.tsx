@@ -1,122 +1,34 @@
-/** Search field, sort select, filters trigger, menus and rows-per-page. */
+/** The toolbar, laid out by the binding and drawn with Base UI's controls. */
 import {
-  FeatureSlot,
-  FILTER_POPOVER,
-  pageSizeOptions,
+  createToolbar,
+  type KitButtonProps,
+  type KitFiltersButtonProps,
+  type KitRowsPerPageProps,
+  type KitToolbarFrameProps,
+  type KitToolbarSearchProps,
+  type KitToolbarSortProps,
+  mergeRefs,
   SearchIcon,
-  TOOLBAR_EXTRAS,
-  type ToolbarChromeProps,
 } from "@adapttable/react/adapter";
-import { type ReactNode } from "react";
+import { createContext, forwardRef, useContext } from "react";
 
 import { FiltersIcon } from "../icons";
-import type { BaseUiAccentColor } from "../types";
-import { Badge, Box, Button, Flex, TextField } from "../ui";
-import { NativeSelect, type SelectOption } from "./primitives";
+import { Badge, Box, Button as UiButton, Flex, TextField } from "../ui";
+import { useAccentColor } from "./accent";
+import { NativeSelect } from "./primitives";
 
 /** Name the actual input wrapper owned by the kit. */
 function nameSearchField(input: HTMLInputElement | null): void {
   input?.parentElement?.setAttribute("data-adapttable-part", "search-field");
 }
 
-export function pageSizeSelectOptions(
-  limit: number,
-  defaultLimit: number = limit
-): SelectOption[] {
-  return pageSizeOptions([limit, defaultLimit]).map((n) => ({
-    value: String(n),
-    label: String(n),
-  }));
-}
+/** The host's class for the toolbar, handed to its frame. */
+export const ToolbarClassName = /* @__PURE__ */ createContext<
+  string | undefined
+>(undefined);
 
-/** Props for {@link Toolbar}: the shared chrome surface + Base UI extras. */
-export interface ToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
-  /** Which filter container opens from the Filters button. */
-  filtersMode: "popover" | "drawer" | "header";
-  /** Filter widgets rendered inside the popover container. */
-  filters?: ReactNode;
-  /** Close the filter popover (Escape / outside click). */
-  onCloseFilters: () => void;
-  /** Clear-filters handler for the popover header. */
-  onClearFilters: () => void;
-  /** Accent color for primary accents. */
-  accentColor?: BaseUiAccentColor;
-  /** Class hook for the toolbar row. */
-  className?: string;
-}
-
-/** Search + sort select + filters button + columns menu + rows-per-page. */
-export function Toolbar<TRow>({
-  table,
-  searchable,
-  searchPlaceholder,
-  sortByOptions,
-  toolbar,
-  toolbarSlots,
-  onUndo,
-  onRedo,
-  canUndo,
-  canRedo,
-  undoLabel,
-  redoLabel,
-  onPrint,
-  printLabel,
-  density,
-  onDensityChange,
-  onToggleFullscreen,
-  isFullscreen,
-  hasFilters,
-  activeFilterCount,
-  filtersMode,
-  filters,
-  filtersOpen,
-  onToggleFilters,
-  onFiltersTriggerPointerDown,
-  onCloseFilters,
-  onClearFilters,
-  savedViewsMenu,
-  columnMenu,
-  onAddRow,
-  addRowLabel,
-  onExportCsv,
-  exportBusy,
-  exportAnnouncement = "",
-  exportProgressState,
-  exportDisabled = false,
-  exportDisabledReason = "",
-  exportLabel,
-  showRowsPerPage,
-  accentColor,
-  dir,
-  className,
-}: Readonly<ToolbarProps<TRow>>) {
-  const { labels, source } = table;
-  const sortOptions =
-    sortByOptions ?? (table.isMobile ? table.sortByOptions : undefined);
-  const searchProps = table.getSearchInputProps(
-    searchPlaceholder ? { placeholder: searchPlaceholder } : undefined
-  );
-
-  const filtersButton = (
-    <Button
-      size="2"
-      variant="outline"
-      color={accentColor}
-      aria-expanded={filtersMode === "popover" ? filtersOpen : undefined}
-      data-active={filtersOpen || undefined}
-      onPointerDown={onFiltersTriggerPointerDown}
-      onClick={onToggleFilters}
-    >
-      <FiltersIcon />
-      {labels.filters}
-      {activeFilterCount > 0 && (
-        <Badge color={accentColor} radius="full">
-          {activeFilterCount}
-        </Badge>
-      )}
-    </Button>
-  );
-
+function Frame({ start, search, controls }: Readonly<KitToolbarFrameProps>) {
+  const className = useContext(ToolbarClassName);
   return (
     <Flex
       data-adapttable-part="toolbar"
@@ -126,134 +38,158 @@ export function Toolbar<TRow>({
       align="center"
       className={className}
     >
-      {toolbarSlots?.start}
-      {searchable !== false && (
-        <Box style={{ flex: 1, minWidth: 160, maxWidth: 360 }}>
-          <TextField.Root
-            data-adapttable-part="search"
-            ref={nameSearchField}
-            size="2"
-            aria-label={labels.search}
-            type="search"
-            value={searchProps.value}
-            placeholder={searchProps.placeholder}
-            onChange={searchProps.onChange}
-          >
-            <TextField.Slot side="left" data-adapttable-part="search-icon">
-              <SearchIcon />
-            </TextField.Slot>
-          </TextField.Root>
-        </Box>
-      )}
+      {start}
+      {search}
       <Flex gap="2" wrap="wrap" align="center">
-        {sortOptions && sortOptions.length > 0 && (
-          <NativeSelect
-            size="2"
-            width="160px"
-            aria-label={labels.sortBy}
-            placeholder={labels.sortBy}
-            value={source.sortBy ?? ""}
-            options={[
-              { value: "", label: labels.sortBy },
-              ...sortOptions.map((o) => ({ value: o.value, label: o.label })),
-            ]}
-            onValueChange={(value) =>
-              source.setSort(value || undefined, source.sortDir ?? "asc")
-            }
-          />
-        )}
-        {table.isMobile && sortOptions && sortOptions.length > 0 && (
-          <Button
-            variant="outline"
-            size="2"
-            type="button"
-            data-adapttable-part="sort-direction"
-            disabled={!source.sortBy}
-            aria-label={
-              source.sortDir === "desc"
-                ? labels.sortAscending
-                : labels.sortDescending
-            }
-            onClick={() =>
-              source.setSort(
-                source.sortBy,
-                source.sortDir === "desc" ? "asc" : "desc"
-              )
-            }
-          >
-            {source.sortDir === "desc"
-              ? labels.sortDescending
-              : labels.sortAscending}
-          </Button>
-        )}
-        {toolbar}
-        {hasFilters && filtersMode === "popover" ? (
-          <FeatureSlot
-            slot={FILTER_POPOVER}
-            props={{
-              open: filtersOpen,
-              onClose: onCloseFilters,
-              filters,
-              activeFilterCount,
-              onClearFilters,
-              labels,
-              dir,
-              children: filtersButton,
-            }}
-          />
-        ) : (
-          hasFilters && filtersButton
-        )}
-        {savedViewsMenu}
-        {columnMenu}
-        <FeatureSlot
-          slot={TOOLBAR_EXTRAS}
-          props={{
-            onUndo,
-            onRedo,
-            canUndo,
-            canRedo,
-            undoLabel,
-            redoLabel,
-            onPrint,
-            printLabel,
-            density,
-            onDensityChange,
-            onToggleFullscreen,
-            isFullscreen,
-            onExportCsv,
-            exportBusy,
-            exportAnnouncement,
-            exportProgressState,
-            exportLabel,
-            exportDisabled,
-            exportDisabledReason,
-            accentColor,
-            labels,
-          }}
-        />
-        {onAddRow && (
-          <Button
-            size="2"
-            color={accentColor}
-            data-adapttable-part="add-row"
-            onClick={onAddRow}
-          >
-            {addRowLabel}
-          </Button>
-        )}
-        {toolbarSlots?.end}
-        {showRowsPerPage && (
-          <NativeSelect
-            size="2"
-            width="90px"
-            aria-label={labels.rowsPerPage}
-            value={String(source.limit)}
-            options={pageSizeSelectOptions(source.limit, source.defaultLimit)}
-            onValueChange={(value) => source.setLimit(Number(value))}
-          />
-        )}
+        {controls}
       </Flex>
     </Flex>
   );
 }
+
+const SEARCH_BOX = { flex: 1, minWidth: 160, maxWidth: 360 } as const;
+
+function Search({ input }: Readonly<KitToolbarSearchProps>) {
+  "use no memo";
+  return (
+    <Box style={SEARCH_BOX}>
+      <TextField.Root
+        data-adapttable-part="search"
+        ref={nameSearchField}
+        size="2"
+        aria-label={input["aria-label"]}
+        type="search"
+        value={input.value}
+        placeholder={input.placeholder}
+        onChange={input.onChange}
+      >
+        <TextField.Slot side="left" data-adapttable-part="search-icon">
+          <SearchIcon />
+        </TextField.Slot>
+      </TextField.Root>
+    </Box>
+  );
+}
+
+function SortSelect({
+  label,
+  value,
+  options,
+  onValueChange,
+}: Readonly<KitToolbarSortProps>) {
+  "use no memo";
+  return (
+    <NativeSelect
+      size="2"
+      width="160px"
+      aria-label={label}
+      placeholder={label}
+      value={value}
+      // The kit's select has no empty option of its own; this one clears
+      // the sort.
+      options={[{ value: "", label }, ...options]}
+      onValueChange={(next) => onValueChange(next || undefined)}
+    />
+  );
+}
+
+/** The toolbar's buttons: outlined; add-row (filled) in the table's accent. */
+const Button = forwardRef<HTMLButtonElement, KitButtonProps>(function Button(
+  {
+    elementRef,
+    variant,
+    tone: _tone,
+    fullWidth: _fullWidth,
+    justify: _justify,
+    busy,
+    ...rest
+  },
+  ref
+) {
+  "use no memo";
+  const accent = useAccentColor();
+  return (
+    <UiButton
+      ref={mergeRefs(ref, elementRef)}
+      type="button"
+      size="2"
+      variant="outline"
+      color={variant === "filled" ? accent : undefined}
+      loading={busy}
+      {...rest}
+    />
+  );
+});
+
+const FiltersButton = forwardRef<HTMLButtonElement, KitFiltersButtonProps>(
+  function FiltersButton(
+    {
+      elementRef,
+      label,
+      count,
+      expanded,
+      open,
+      onPointerDown,
+      onClick,
+      ...target
+    },
+    ref
+  ) {
+    const accent = useAccentColor();
+    return (
+      <UiButton
+        ref={mergeRefs(ref, elementRef)}
+        size="2"
+        variant="outline"
+        color={accent}
+        aria-expanded={expanded}
+        data-adapttable-part="filters-button"
+        data-active={open || undefined}
+        onPointerDown={onPointerDown}
+        onClick={onClick}
+        {...target}
+      >
+        <FiltersIcon />
+        {label}
+        {count > 0 && (
+          <Badge color={accent} radius="full">
+            {count}
+          </Badge>
+        )}
+      </UiButton>
+    );
+  }
+);
+
+function RowsPerPage({
+  label,
+  value,
+  options,
+  onValueChange,
+}: Readonly<KitRowsPerPageProps>) {
+  "use no memo";
+  return (
+    <NativeSelect
+      size="2"
+      width="90px"
+      aria-label={label}
+      value={String(value)}
+      options={options.map((size) => ({
+        value: String(size),
+        label: String(size),
+      }))}
+      onValueChange={(next) => onValueChange(Number(next))}
+    />
+  );
+}
+
+/** The toolbar; its frame takes the host's class from `ToolbarClassName`. */
+export const Toolbar = /* @__PURE__ */ createToolbar({
+  Frame,
+  Search,
+  SortSelect,
+  Button,
+  FiltersButton,
+  filtersPopover: "wrap",
+  RowsPerPage,
+});

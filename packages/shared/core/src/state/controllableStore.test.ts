@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createControllableStore } from "./controllableStore";
+import {
+  controllableSlice,
+  createControllableStore,
+} from "./controllableStore";
+import { SELECTED_IDS, toggleRowSelected } from "./selectionState";
+import { createTableStore } from "./tableStore";
+import { VIEW_OVERRIDES } from "./viewState";
 
 describe("createControllableStore", () => {
   it("holds its own value until a host takes control, and tells subscribers", () => {
@@ -70,5 +76,40 @@ describe("createControllableStore", () => {
     expect(onChange).not.toHaveBeenCalled();
     store.commit({ n: 6 });
     expect(onChange).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("controllableSlice", () => {
+  it("keeps the table's own value in a slice of the table's store", () => {
+    const store = createTableStore();
+    const selected = controllableSlice(store, SELECTED_IDS);
+    const heard = vi.fn();
+    const viewHeard = vi.fn();
+    selected.subscribe(heard);
+    store.slice(VIEW_OVERRIDES).subscribe(viewHeard);
+
+    selected.commit(new Set(["a"]));
+
+    expect(store.read(SELECTED_IDS)).toEqual(new Set(["a"]));
+    expect(selected.getSnapshot()).toBe(store.read(SELECTED_IDS));
+    expect(heard).toHaveBeenCalledTimes(1);
+    expect(viewHeard).not.toHaveBeenCalled();
+
+    store.dispatch(toggleRowSelected("b"));
+    expect(selected.getSnapshot()).toEqual(new Set(["a", "b"]));
+    expect(heard).toHaveBeenCalledTimes(2);
+  });
+
+  it("sends changes to the host and leaves the slice while controlled", () => {
+    const store = createTableStore();
+    const selected = controllableSlice(store, SELECTED_IDS);
+    const onChange = vi.fn();
+    selected.control({ value: new Set(["x"]), onChange });
+
+    selected.update((ids) => new Set([...ids, "y"]));
+
+    expect(onChange).toHaveBeenCalledWith(new Set(["x", "y"]));
+    expect(store.read(SELECTED_IDS).size).toBe(0);
+    expect(selected.getSnapshot()).toEqual(new Set(["x"]));
   });
 });

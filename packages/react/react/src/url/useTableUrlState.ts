@@ -1,11 +1,14 @@
 import {
-  createTableViewStore,
   type ExtraFilters,
   type TableQueryParams,
   type TableViewState,
   type TableViewStateConfig,
 } from "@adapttable/core";
-import type { UseTableUrlStateResult } from "@adapttable/core/binding";
+import {
+  createTableViewStore,
+  type TableStore,
+  type UseTableUrlStateResult,
+} from "@adapttable/core/binding";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
@@ -35,6 +38,11 @@ export interface UseTableUrlStateOptions {
   numberExtraKeys?: readonly string[];
   /** Extra-filter keys whose values are comma-separated arrays. */
   arrayExtraKeys?: readonly string[];
+  /**
+   * The table's store to keep the view state in, beside the table's other
+   * state; a store of its own when absent.
+   */
+  store?: TableStore;
   /**
    * Namespace for this table's URL params, so multiple tables can share one
    * URL without colliding. With `urlKey="left"` the params become
@@ -74,6 +82,7 @@ export function useTableUrlState(
     numberExtraKeys,
     arrayExtraKeys,
     urlKey,
+    store: tableStore,
   } = options;
   const resolved = useResolvedAdapter(urlAdapter, urlSync ?? true);
   const config: TableViewStateConfig = {
@@ -97,9 +106,10 @@ export function useTableUrlState(
           // that knows the request URL).
           serverSearch: () => (urlAdapter ? urlAdapter.getSearch() : ""),
         },
-        initialConfig
+        initialConfig,
+        { store: tableStore }
       ),
-    [resolved, urlKey, urlAdapter, initialConfig]
+    [resolved, urlKey, urlAdapter, initialConfig, tableStore]
   );
   store.configure(config);
   const state: TableViewState = useSyncExternalStore(

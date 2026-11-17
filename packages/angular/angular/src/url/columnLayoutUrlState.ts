@@ -1,7 +1,8 @@
 /**
  * The column layout — order, visibility, widths, pins — kept in the URL.
  */
-import { columnLayoutSlice, type ColumnLayoutState } from "@adapttable/core";
+import { type ColumnLayoutState } from "@adapttable/core";
+import { columnLayoutSlice } from "@adapttable/core/binding";
 import { computed, type Signal } from "@angular/core";
 
 import { type MaybeSignalOptional, readMaybe } from "../store";

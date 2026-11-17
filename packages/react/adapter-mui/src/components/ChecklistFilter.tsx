@@ -1,95 +1,14 @@
-import {
-  type ChecklistButtonProps,
-  type ChecklistCheckboxProps,
-  ChecklistChrome,
-  type ChecklistFilterProps,
-  type ChecklistSearchProps,
-  type ChecklistSlots,
-} from "@adapttable/react/adapter";
-import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
+import { createChecklistFilter } from "@adapttable/react/adapter";
 
-export type { ChecklistFilterProps };
+import { Button, Checkbox, TextInput } from "./primitives";
 
-function ChecklistSearch({
-  label,
-  value,
-  className,
-  onChange,
-}: Readonly<ChecklistSearchProps>) {
-  return (
-    <TextField
-      size="small"
-      type="search"
-      placeholder={label}
-      className={className}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      slotProps={{
-        htmlInput: {
-          "aria-label": label,
-          "data-adapttable-part": "filter-checklist-search",
-        },
-      }}
-    />
-  );
-}
-
-function ChecklistButton({ label, onClick }: ChecklistButtonProps) {
-  return (
-    <Button type="button" size="small" onClick={onClick}>
-      {label}
-    </Button>
-  );
-}
-
-function ChecklistBox({
-  label,
-  count,
-  checked,
-  className,
-  countClassName,
-  onChange,
-}: Readonly<ChecklistCheckboxProps>) {
-  return (
-    <FormControlLabel
-      data-adapttable-part="filter-checkbox"
-      className={className}
-      sx={{ flex: "0 0 auto", mr: 0, width: "auto" }}
-      label={
-        <span>
-          {label}{" "}
-          <span
-            data-adapttable-part="filter-checklist-count"
-            className={countClassName}
-          >
-            {count}
-          </span>
-        </span>
-      }
-      control={
-        <Checkbox
-          size="small"
-          checked={checked}
-          onChange={(_, on) => onChange(on)}
-        />
-      }
-    />
-  );
-}
-
-const slots: ChecklistSlots = {
-  Search: ChecklistSearch,
-  Button: ChecklistButton,
-  Checkbox: ChecklistBox,
-};
-
+export type { ChecklistFilterProps } from "@adapttable/react/adapter";
 /**
  * MUI checklist — wrapping kit checkboxes, not one value per row.
  *
  * @public
  */
-export function ChecklistFilter<TRow>(
-  props: Readonly<ChecklistFilterProps<TRow>>
-) {
-  return <ChecklistChrome {...props} slots={slots} />;
-}
+export const ChecklistFilter = /* @__PURE__ */ createChecklistFilter(
+  { TextInput, Button, Checkbox },
+  { checkbox: { flex: "0 0 auto", marginRight: 0, width: "auto" } }
+);

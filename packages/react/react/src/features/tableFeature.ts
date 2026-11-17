@@ -24,6 +24,7 @@ import {
   type ExportWriter,
   type FilterTypeSpec,
   type NeutralFeatureHost,
+  type TableLabels,
 } from "@adapttable/core";
 import {
   type FeatureApplyInput,
@@ -195,6 +196,22 @@ export function getAppliedFeatures(
 ): readonly TableFeature[] | undefined {
   return coreGetAppliedFeatures<TableFeature>(props);
 }
+
+/**
+ * The strings a table's composed features draw, in composition order.
+ *
+ * @param props - Props the table's features were applied to.
+ * @returns Each composed feature's strings.
+ *
+ * @public
+ */
+export function featureLabelsFor(props: {
+  readonly featureLabels?: readonly Partial<TableLabels>[];
+}): readonly Partial<TableLabels>[] {
+  return props.featureLabels ?? NO_FEATURE_LABELS;
+}
+
+const NO_FEATURE_LABELS: readonly Partial<TableLabels>[] = [];
 
 export {
   applyTableFeatures,

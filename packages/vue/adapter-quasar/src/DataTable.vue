@@ -10,7 +10,7 @@ import {
   DataTableSurfaceChrome,
   defaultConfirm,
   GROUP_ROW,
-  groupRowSlotKey,
+  keepTableControls,
   provideDataTableClassNames,
   renderFeatureSlot,
   type TableChromeSlots,
@@ -49,8 +49,10 @@ const emit = defineEmits<{
   "update:density": [density: TableDensity];
 }>();
 const slots = defineSlots<DataTableSlots<TRow>>();
+const card = shallowRef(slots.card);
 const footer = shallowRef(slots.footer);
 onBeforeUpdate(() => {
+  card.value = slots.card;
   footer.value = slots.footer;
 });
 const kit = useQuasarLibrary();
@@ -111,19 +113,23 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable: Quasar group rows require grouping() from @adapttable/quasar/grouping."
         );
-      return renderFeatureSlot(
-        groupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        props
-      );
+      return renderFeatureSlot(GROUP_ROW, shell.slotFills.value, props);
     },
-    card: slots.card,
+    card: card.value,
     cell: slots.cell,
     header: slots.header,
     headerActions: slots.headerActions,
     footer: slots.footer,
   };
 }
+/** One controls object while the host's slots stay the same. */
+const tableControls = keepTableControls(controls, (kept) => [
+  kept.card,
+  kept.cell,
+  kept.header,
+  kept.headerActions,
+  kept.footer,
+]);
 const root = shallowRef<HTMLElement | null>(null);
 const scroll = shallowRef<HTMLElement | null>(null);
 const surface = {
@@ -153,7 +159,7 @@ function setScroll(element: HTMLElement | null): void {
       ...props,
       searchable,
     }"
-    :slots="quasarSurfaceControls(controls())"
+    :slots="quasarSurfaceControls(tableControls())"
     :content="slots"
     :root-ref="setRoot"
     :scroll-ref="setScroll"

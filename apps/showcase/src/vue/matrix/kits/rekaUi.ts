@@ -2,12 +2,15 @@
 import "../../kits/reka-theme.css";
 
 import { agentApproval, TableAssistant } from "@adapttable/reka-ui/assistant";
+import { batchEditing } from "@adapttable/reka-ui/batch-editing";
 import { bulkActions } from "@adapttable/reka-ui/bulk-actions";
 import { cellNavigation } from "@adapttable/reka-ui/cell-navigation";
 import { cellSpan } from "@adapttable/reka-ui/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/reka-ui/column-groups";
 import { columnMenu } from "@adapttable/reka-ui/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/reka-ui/column-selection";
+import { commandPalette } from "@adapttable/reka-ui/command-palette";
+import { contextMenu } from "@adapttable/reka-ui/context-menu";
 import { densityChooser } from "@adapttable/reka-ui/density";
 import {
   editHistory,
@@ -16,18 +19,22 @@ import {
   undoRedoButtons,
 } from "@adapttable/reka-ui/editing";
 import { exportCsv } from "@adapttable/reka-ui/export";
+import { extraRows } from "@adapttable/reka-ui/extra-rows";
 import { filters } from "@adapttable/reka-ui/filters";
+import { findInTable } from "@adapttable/reka-ui/find-in-table";
 import { fullscreen } from "@adapttable/reka-ui/fullscreen";
 import { groupingPanel } from "@adapttable/reka-ui/grouping-panel";
 import { headerFilters } from "@adapttable/reka-ui/header-filters";
 import { nestedTable } from "@adapttable/reka-ui/nested-table";
 import { pinnedSummaryRows } from "@adapttable/reka-ui/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/reka-ui/pivot";
+import { print } from "@adapttable/reka-ui/print";
 import { resizableColumns } from "@adapttable/reka-ui/resizable-columns";
 import { rowActions } from "@adapttable/reka-ui/row-actions";
 import { rowPinning } from "@adapttable/reka-ui/row-pinning";
 import { rowReorder } from "@adapttable/reka-ui/row-reorder";
-import { savedViews } from "@adapttable/reka-ui/saved-views";
+import { savedViews, SavedViewsPanel } from "@adapttable/reka-ui/saved-views";
+import { selectionStats } from "@adapttable/reka-ui/selection-stats";
 import { statusBar } from "@adapttable/reka-ui/status-bar";
 import { tree } from "@adapttable/reka-ui/tree";
 import { virtualize } from "@adapttable/reka-ui/virtualize";
@@ -136,6 +143,7 @@ export const kit: ShowcaseKit = {
     ),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,
@@ -147,12 +155,19 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

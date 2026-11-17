@@ -1,4 +1,5 @@
-import { type FilterDef, resetDevWarnings } from "@adapttable/core";
+import { type FilterDef } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core/binding";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
@@ -29,6 +30,28 @@ const columns: ColumnDef<Row>[] = [
 beforeEach(() => resetDevWarnings());
 
 describe("useTableData — frontend tier", () => {
+  it("returns the same source while nothing in it changes", () => {
+    const adapter = createMemoryAdapter("");
+    // A host that re-renders for its own state passes fresh option objects
+    // with the same values in them.
+    const { result, rerender } = renderHook(() =>
+      useTableData<Row>({
+        data: ROWS,
+        columns,
+        urlAdapter: adapter,
+        paginationMode: "paged",
+      })
+    );
+    const first = result.current;
+    rerender();
+    expect(result.current).toBe(first);
+    expect(result.current.source).toBe(first.source);
+
+    act(() => result.current.source.setSearch("bob"));
+    expect(result.current.source).not.toBe(first.source);
+    expect(result.current.source.rows.map((row) => row.id)).toEqual(["2"]);
+  });
+
   it("asks no server for a column's default aggregate", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     renderHook(() =>

@@ -5,13 +5,17 @@ import {
   AdaptFilterTreeChrome,
   type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
+  restoreFocusSoon,
+  watchClickedOpener,
 } from "@adapttable/angular/adapter";
-import { NgTemplateOutlet } from "@angular/common";
+import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   effect,
+  inject,
   input,
   type TemplateRef,
   viewChild,
@@ -65,7 +69,7 @@ import { OVERLAY_Z, overlayEscapeHandled } from "./overlayPlacement";
 })
 export class AdaptFiltersForm {
   /** The slot's props. */
-  readonly props = input.required<FiltersFormSlotProps<never>>();
+  readonly props = input.required<FiltersFormSlotProps<unknown>>();
 
   protected readonly treeSlots = TREE_SLOTS;
 }
@@ -141,8 +145,11 @@ export class AdaptFilterDrawer {
     input.required<FilterOverlaySlotProps<TemplateRef<unknown>>>();
   protected readonly zIndex = OVERLAY_Z;
   private readonly drawer = viewChild(NzDrawerComponent);
+  private opener: HTMLElement | null = null;
+  private readonly openers = watchClickedOpener(inject(DOCUMENT));
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.openers.stop());
     // NG-ZORRO restores focus on close(), but template destruction only
     // disposes its overlay. Each open uses a fresh native trap; release it
     // and restore its own captured opener when Angular removes the view.
@@ -151,7 +158,10 @@ export class AdaptFilterDrawer {
       if (!drawer) return;
       onCleanup(() => {
         drawer.focusTrap?.destroy();
-        drawer.previouslyFocusedElement?.focus();
+        const opener = this.opener ?? drawer.previouslyFocusedElement ?? null;
+        this.opener = null;
+        if (opener?.isConnected) opener.focus();
+        restoreFocusSoon(opener);
       });
     });
     afterRenderEffect(() => {
@@ -159,6 +169,7 @@ export class AdaptFilterDrawer {
       const overlay = this.drawer()?.overlayRef?.overlayElement;
       if (!p.open || !overlay) return;
       const panel = overlay.querySelector<HTMLElement>(".ant-drawer-content");
+      this.opener ??= this.openers.current(panel);
       if (panel) {
         panel.dataset.state = "open";
         panel.setAttribute("role", "dialog");

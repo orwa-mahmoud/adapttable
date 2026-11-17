@@ -2,19 +2,21 @@
  * Find-bar layout. Structure only — adapters pass the search field and
  * the previous / next / close buttons the end user clicks.
  */
+
 import {
+  FIND_LABELS,
+  type FindBarProps,
+  type FindBarSlots as NeutralFindBarSlots,
   findMatchCountText,
+  type FindSearchProps as NeutralFindSearchProps,
   handleFindBarKey,
-  resolveLabels,
-} from "@adapttable/core";
-import type {
-  FindBarProps,
-  FindBarSlots as NeutralFindBarSlots,
-  FindSearchProps as NeutralFindSearchProps,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
 import { focusEditorOnMount } from "../editing/editableCellController";
+
+const FIND_GROUPS = [FIND_LABELS] as const;
 
 export type { FindInTableState } from "./useFindInTable";
 export type {
@@ -77,7 +79,7 @@ export function FindBarChrome({
 
   const Search = slots.Search;
   const Button = slots.Button;
-  const copy = resolveLabels(labels);
+  const copy = resolveFeatureLabels(labels, FIND_GROUPS);
   return (
     <div
       data-adapttable-part="find-bar"

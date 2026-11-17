@@ -6,6 +6,7 @@ import {
   type TreeEntry,
   treeIndentStyle,
 } from "@adapttable/core";
+import { treeRowAria } from "@adapttable/core/binding";
 
 import type { Attrs } from "../attrs";
 import type {
@@ -14,16 +15,14 @@ import type {
   TableTree,
   TreeCellModel,
 } from "./models";
+
 export function hierarchyRowAttrs<TRow>(
   entry: TreeEntry<TRow> | undefined,
   card: boolean
 ): Attrs {
   if (!entry) return {};
   return {
-    "aria-level": entry.level + 1,
-    "aria-expanded": entry.hasChildren ? entry.expanded : undefined,
-    "aria-posinset":
-      entry.siblingIndex === undefined ? undefined : entry.siblingIndex + 1,
+    ...treeRowAria(entry),
     style: card ? treeCardStyle(entry.level) : undefined,
   };
 }

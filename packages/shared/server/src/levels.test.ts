@@ -10,7 +10,6 @@ import {
   defaultFilterRegistry,
   type ExtraFilters,
   type FilterDef,
-  filterPredicate,
   type PivotUrlState,
   type QueryFilterGroup,
   serializePivotState,
@@ -19,13 +18,14 @@ import {
   writeFilterTreeParam,
   writeSortLevels,
 } from "@adapttable/core";
+import { filterPredicate } from "@adapttable/core/binding";
 import { describe, expect, it } from "vitest";
 
 import {
   parseTableQuery,
   pickFilters,
   type QuerySchema,
-  splitFilterValues,
+  splitListParam,
   type TypedFilter,
 } from "./index";
 
@@ -92,14 +92,14 @@ const EVERY_TYPE_TYPED: Record<string, TypedFilter> = {
 
 const COLUMNS = Object.keys(EVERY_TYPE_SHORTHAND);
 
-describe("splitFilterValues", () => {
+describe("splitListParam", () => {
   it("inverts the table's multi-value encoding, commas and ampersands included", () => {
     const url = tableUrl({ team: ["Core", "R&D", "Sales, EMEA"] });
     const raw = new URLSearchParams(url.slice(1)).get("f_team");
 
-    expect(splitFilterValues(raw)).toEqual(["Core", "R&D", "Sales, EMEA"]);
-    expect(splitFilterValues("")).toEqual([]);
-    expect(splitFilterValues(null)).toEqual([]);
+    expect(splitListParam(raw)).toEqual(["Core", "R&D", "Sales, EMEA"]);
+    expect(splitListParam("")).toEqual([]);
+    expect(splitListParam(null)).toEqual([]);
   });
 });
 
@@ -233,7 +233,7 @@ describe("level 1 — a column list, exactly as before", () => {
       hiredAtTo: "2024-12-31",
       hiredAtOp: "between",
     });
-    expect(splitFilterValues(String(query.filters.tags))).toEqual([
+    expect(splitListParam(String(query.filters.tags))).toEqual([
       "urgent",
       "Sales, EMEA",
     ]);
@@ -511,7 +511,7 @@ describe('level 0 — columns: "any"', () => {
       budget: { min: "1000", max: "5000", op: "between" },
       hiredAt: { from: "2024-01-01", to: "2024-12-31", op: "between" },
     });
-    expect(splitFilterValues(query.shapedFilters?.tags?.value)).toEqual([
+    expect(splitListParam(query.shapedFilters?.tags?.value)).toEqual([
       "urgent",
       "Sales, EMEA",
     ]);
@@ -1017,6 +1017,19 @@ describe("the sort chain, read the way the table writes it", () => {
     expect(query.sort).toEqual([
       { key: "50%", dir: "asc" },
       { key: "bad%zz", dir: "desc" },
+    ]);
+  });
+
+  it("keeps a key whose escape is no UTF-8 as it arrived", () => {
+    const query = parseTableQuery(
+      "?sort=name:asc,%25ff:desc,%25E0%25A4:asc",
+      anyColumn
+    );
+
+    expect(query.sort).toEqual([
+      { key: "name", dir: "asc" },
+      { key: "%ff", dir: "desc" },
+      { key: "%E0%A4", dir: "asc" },
     ]);
   });
 });

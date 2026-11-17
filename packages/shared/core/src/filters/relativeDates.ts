@@ -41,7 +41,7 @@ export interface RelativeDateRange {
   endMs: number;
 }
 
-const NAMED = new Set<string>(RELATIVE_NAMED);
+const NAMED = /* @__PURE__ */ new Set<string>(RELATIVE_NAMED);
 
 function startOfDay(now: Date): Date {
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());

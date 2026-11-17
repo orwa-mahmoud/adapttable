@@ -30,6 +30,7 @@ import {
 import { exportCsv } from "@adapttable/ng-zorro/export";
 import { extraRows } from "@adapttable/ng-zorro/extra-rows";
 import { filters } from "@adapttable/ng-zorro/filters";
+import { findInTable } from "@adapttable/ng-zorro/find-in-table";
 import { fullscreen } from "@adapttable/ng-zorro/fullscreen";
 import { groupingPanel } from "@adapttable/ng-zorro/grouping-panel";
 import { headerFilters } from "@adapttable/ng-zorro/header-filters";
@@ -46,6 +47,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/ng-zorro/saved-views";
+import { selectionStats } from "@adapttable/ng-zorro/selection-stats";
 import { sidePanel } from "@adapttable/ng-zorro/side-panel";
 import { statusBar } from "@adapttable/ng-zorro/status-bar";
 import { tree } from "@adapttable/ng-zorro/tree";
@@ -195,6 +197,8 @@ export const kit = {
   contextMenu,
   commandPalette,
   extraRows,
+  findInTable,
+  selectionStats,
   rowAppearance,
   statusBar,
   sidePanel,

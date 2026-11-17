@@ -5,12 +5,14 @@ import {
   type ColumnGroupToggleProps,
   type ColumnGroupToggleSlots,
   expandChevronIcon,
+  type IconDescriptor,
 } from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   input,
+  type Signal,
 } from "@angular/core";
 
 import { TAIGA_CONTROLS } from "../taigaControls";
@@ -76,7 +78,7 @@ export class AdaptColumnGroupButton {
   readonly props = input.required<ColumnGroupToggleButtonProps>();
 
   /** Shape and open state come from core; direction follows the host. */
-  protected readonly chevron = computed(() =>
+  protected readonly chevron: Signal<IconDescriptor> = computed(() =>
     expandChevronIcon({ open: this.props().expanded })
   );
 }

@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Spanish (`es`) label preset.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "hecho",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "exportar",
 };
 
+/**
+ * Spanish (`es`) label preset.
+ *
+ * @public
+ */
 export const es: Required<TableLabels> = {
   table: "Tabla de datos",
   search: "Buscar",

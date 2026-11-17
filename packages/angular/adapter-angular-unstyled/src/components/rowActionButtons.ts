@@ -89,4 +89,13 @@ export class AdaptRowActions<TRow> {
     this.menu()?.nativeElement.removeAttribute("open");
     runRowAction(action, this.row(), this.confirm(), this.labels().cancel);
   }
+
+  /** Escape closes an open menu and hands focus back to its trigger. */
+  protected closeMenu(event: Event, menu: HTMLDetailsElement): void {
+    if (!menu.open) return;
+    event.preventDefault();
+    event.stopPropagation();
+    menu.open = false;
+    menu.querySelector("summary")?.focus();
+  }
 }

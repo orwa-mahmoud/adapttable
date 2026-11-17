@@ -260,6 +260,9 @@
   --mat-button-text-label-text-weight: 400;
   --mat-button-text-label-text-tracking: normal;
   min-inline-size: 0;
+  /* The container height is a floor: a cell taller than one line grows it. */
+  height: auto;
+  min-block-size: var(--mat-button-text-container-height);
 }
 .adapt-material
   [data-adapttable-part="cards"]

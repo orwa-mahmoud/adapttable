@@ -12,6 +12,7 @@ import {
   DataTableSurfaceChrome,
   type DataTableSurfaceSlots,
   defaultConfirm,
+  keepTableControls,
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
@@ -32,7 +33,7 @@ import { provideClassNames } from "./classNamesContext";
 import { vuetifyButton } from "./controls";
 import VuetifyInput from "./controls/VuetifyInput.vue";
 import VuetifySelect from "./controls/VuetifySelect.vue";
-import { VUETIFY_GROUP_ROW, vuetifyGroupRowSlotKey } from "./groupRowSlot";
+import { VUETIFY_GROUP_ROW } from "./groupRowSlot";
 import { useVuetifyLibrary } from "./libraryEnvironment";
 import LoadingState from "./LoadingState.vue";
 import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
@@ -59,8 +60,10 @@ const emit = defineEmits<{
   "update:density": [density: TableDensity];
 }>();
 const slots = defineSlots<DataTableSlots<TRow>>();
+const card = shallowRef(slots.card);
 const footer = shallowRef(slots.footer);
 onBeforeUpdate(() => {
+  card.value = slots.card;
   footer.value = slots.footer;
 });
 const kit = useVuetifyLibrary();
@@ -135,19 +138,23 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable: Vuetify grouping rows require grouping() from @adapttable/vuetify/grouping."
         );
-      return renderFeatureSlot(
-        vuetifyGroupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        group
-      );
+      return renderFeatureSlot(VUETIFY_GROUP_ROW, shell.slotFills.value, group);
     },
-    card: slots.card,
+    card: card.value,
     cell: slots.cell,
     header: slots.header,
     headerActions: slots.headerActions,
     footer: slots.footer,
   };
 }
+/** One controls object while the host's slots stay the same. */
+const tableControls = keepTableControls(controls, (kept) => [
+  kept.card,
+  kept.cell,
+  kept.header,
+  kept.headerActions,
+  kept.footer,
+]);
 function surfaceControls(): DataTableSurfaceSlots<TRow> {
   return {
     Search: ({ attrs, value, onChange, classNames }) =>
@@ -177,11 +184,15 @@ function surfaceControls(): DataTableSurfaceSlots<TRow> {
       h(VuetifyDesktop<TRow>, {
         model,
         classNames,
-        controls: controls(),
+        controls: tableControls(),
         density: shell.density.value,
       }),
     Mobile: ({ model, classNames }) =>
-      h(VuetifyMobile<TRow>, { model, classNames, controls: controls() }),
+      h(VuetifyMobile<TRow>, {
+        model,
+        classNames,
+        controls: tableControls(),
+      }),
   };
 }
 function setRootElement(element: HTMLElement | null): void {

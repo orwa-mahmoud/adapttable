@@ -1,15 +1,14 @@
 import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
-import { densityChooser } from "@adapttable/ng-zorro/density";
-import { exportCsv, exportPdf, exportXlsx } from "@adapttable/ng-zorro/export";
-import { fullscreen } from "@adapttable/ng-zorro/fullscreen";
-import { print } from "@adapttable/ng-zorro/print";
-import { rowActions } from "@adapttable/ng-zorro/row-actions";
 import { savedViews } from "@adapttable/ng-zorro/saved-views";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { toolbarTests } from "../../angular/test/kit/suites/toolbar";
+import { kit } from "../testing/kit";
 import { kitSelector } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
+
+for (const test of toolbarTests(kit)) it(test.name, test.run);
 
 interface City {
   id: string;
@@ -85,90 +84,6 @@ afterEach(() => {
 });
 
 describe("the NG-ZORRO Angular toolbar controls", () => {
-  it("states comfortable rows, and switches to compact", async () => {
-    const { part, settle } = await mount([densityChooser()]);
-    expect(part("root")?.getAttribute("data-density")).toBe("comfortable");
-    const toggle = part<HTMLButtonElement>("density-toggle");
-    expect(toggle?.getAttribute("aria-label")).toBe("Density");
-    toggle!.click();
-    await settle();
-    expect(part("root")?.getAttribute("data-density")).toBe("compact");
-    expect(toggle?.textContent?.trim()).toBe("Compact");
-    toggle!.click();
-    await settle();
-    expect(part("root")?.getAttribute("data-density")).toBe("comfortable");
-  });
-
-  it("offers no density control without the feature", async () => {
-    const { part } = await mount([]);
-    expect(part("density-toggle")).toBeNull();
-    expect(part("root")?.getAttribute("data-density")).toBe("comfortable");
-  });
-
-  it("takes the table fullscreen where the browser allows it", async () => {
-    Object.defineProperty(document, "fullscreenEnabled", {
-      configurable: true,
-      value: true,
-    });
-    let current: Element | null = null;
-    Object.defineProperty(document, "fullscreenElement", {
-      configurable: true,
-      get: () => current,
-    });
-    const requests: Element[] = [];
-    HTMLElement.prototype.requestFullscreen = function request(this: Element) {
-      requests.push(this);
-      current = requests.at(-1) ?? null;
-      document.dispatchEvent(new Event("fullscreenchange"));
-      return Promise.resolve();
-    };
-    document.exitFullscreen = () => {
-      current = null;
-      document.dispatchEvent(new Event("fullscreenchange"));
-      return Promise.resolve();
-    };
-    const { part, settle } = await mount([fullscreen()]);
-    const toggle = part<HTMLButtonElement>("fullscreen-toggle");
-    expect(toggle?.getAttribute("aria-label")).toBe("Enter fullscreen");
-    toggle!.click();
-    await settle();
-    expect(requests).toEqual([part("root")]);
-    expect(part("fullscreen-toggle")?.getAttribute("aria-label")).toBe(
-      "Exit fullscreen"
-    );
-    part<HTMLButtonElement>("fullscreen-toggle")!.click();
-    await settle();
-    expect(part("fullscreen-toggle")?.getAttribute("aria-label")).toBe(
-      "Enter fullscreen"
-    );
-  });
-
-  it("exports the current view as a CSV file, and says so", async () => {
-    const files: { name: string; csv: string }[] = [];
-    const { part, settle } = await mount([
-      exportCsv<City>({
-        filename: "cities.csv",
-        onAfterExport: ({ filename, csv }) => {
-          files.push({ name: filename, csv });
-        },
-      }),
-    ]);
-    vi.stubGlobal("URL", {
-      ...URL,
-      createObjectURL: () => "blob:x",
-      revokeObjectURL: () => undefined,
-    });
-    const button = part<HTMLButtonElement>("export-csv-button");
-    expect(button?.textContent?.trim()).toBe("Export CSV");
-    button!.click();
-    await settle();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    await settle();
-    expect(files[0]?.name).toBe("cities.csv");
-    expect(files[0]?.csv).toContain("Dubai");
-    expect(part("export-announcer")?.textContent).not.toBe("");
-  });
-
   it("closes the views on Escape, back on its button", async () => {
     const { part, settle } = await mount([
       savedViews({ storageKey: "esc-views", storage: null }),
@@ -179,39 +94,6 @@ describe("the NG-ZORRO Angular toolbar controls", () => {
     await settle();
     expect(part("views-panel")).toBeNull();
     expect(document.activeElement).toBe(part("views-button"));
-  });
-
-  it("labels XLSX and PDF buttons, and prints from the toolbar", async () => {
-    expect(exportXlsx(false)).toBeTruthy();
-    expect(exportXlsx({ filename: "cities.xlsx" })).toBeTruthy();
-    expect(exportPdf(false)).toBeTruthy();
-    expect(print(() => undefined)).toBeTruthy();
-
-    const printed: string[] = [];
-    const workbook = await mount([exportXlsx()]);
-    expect(workbook.part("export-csv-button")?.textContent).toContain("XLSX");
-    workbook.fixture.destroy();
-
-    const pdf = await mount([exportPdf()]);
-    expect(pdf.part("export-csv-button")?.textContent).toContain("PDF");
-    pdf.fixture.destroy();
-
-    const { part, settle } = await mount([
-      print(() => {
-        printed.push("print");
-      }, true),
-    ]);
-    const button = part<HTMLButtonElement>("print-button");
-    expect(button?.textContent?.trim()).toBe("Print");
-    button!.click();
-    await settle();
-    expect(printed).toEqual(["print"]);
-  });
-
-  it("exports with the defaults, beside an empty actions list", async () => {
-    const { part } = await mount([exportCsv(), rowActions()]);
-    expect(part("export-csv-button")).not.toBeNull();
-    expect(part("actions-header")).toBeNull();
   });
 
   it("saves the current view under a name, and applies it later", async () => {

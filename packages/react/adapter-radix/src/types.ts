@@ -38,7 +38,7 @@ export interface DataTableSlots {
    * and the retry the source can actually perform, so a replacement can offer
    * both. Pass a plain node when the message is fixed.
    */
-  error?: Slot<TableErrorState>;
+  error?: Exclude<Slot<TableErrorState>, undefined>;
 }
 
 /**

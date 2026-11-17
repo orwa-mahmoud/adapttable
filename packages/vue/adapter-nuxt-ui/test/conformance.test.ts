@@ -1,18 +1,15 @@
-import {
-  type ConformanceRow,
-  tableConformanceTests,
-} from "@adapttable/core/conformance";
 import ui from "@nuxt/ui/vue-plugin";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { h } from "vue";
 
 import {
+  type ConformanceRow,
   nativeConformanceDriver,
-  nativeConformanceHarness,
   nativeRangeConformanceTests,
   nativeRowConformanceTests,
   nativeSearchConformanceTests,
   nativeServerConformanceTests,
+  nativeTableConformanceTests,
 } from "../../vue/test/nativeConformanceDriver";
 import { DataTable } from "../src";
 import { cellNavigation } from "../src/cell-navigation";
@@ -35,12 +32,8 @@ const driver = nativeConformanceDriver({
 });
 
 describe(`table conformance — ${driver.name}`, () => {
-  for (const test of tableConformanceTests(driver, {
-    expect,
-    ...nativeConformanceHarness,
-  })) {
+  for (const test of nativeTableConformanceTests(driver))
     it(test.name, test.run);
-  }
 });
 
 describe(`native cell ranges — ${driver.name}`, () => {

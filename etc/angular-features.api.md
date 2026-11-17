@@ -4,8 +4,9 @@
 
 ```ts
 
-import { BatchRowEdit } from '@adapttable/core';
+import { BatchEditHandler } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
+import { CellEditHandler } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
 import { Command } from '@adapttable/core';
@@ -29,6 +30,7 @@ import { GroupSort } from '@adapttable/core';
 import { Injector } from '@angular/core';
 import { NestedTableDefaults } from '@adapttable/core';
 import { PinnedRows } from '@adapttable/core';
+import { RowEditHandler } from '@adapttable/core';
 import { RowHeight } from '@adapttable/core';
 import { RowPinState } from '@adapttable/core';
 import { RowReorderHandler } from '@adapttable/core';
@@ -40,6 +42,7 @@ import { SelectionStatsOptions } from '@adapttable/core';
 import { Shortcut } from '@adapttable/core';
 import { SidePanelEntry } from '@adapttable/core/binding';
 import { Signal } from '@angular/core';
+import { TableLabels } from '@adapttable/core';
 import { TableRuntime } from '@adapttable/core';
 import { TemplateRef } from '@angular/core';
 import { Type } from '@angular/core';
@@ -47,15 +50,15 @@ import { VirtualizeInput } from '@adapttable/core/binding';
 
 // @public
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
-    apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
+    readonly labels?: Partial<TableLabels>;
     mount?(context: FeatureMountContext): void | (() => void);
     readonly renders?: readonly FeatureRender<never, SlotComponent>[];
 }
 
-// @public
-export type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => void | Promise<void>;
+export { BatchEditHandler }
 
 // @public
 export function batchEditing<TRow>(onBatchEdit: BatchEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
@@ -63,8 +66,7 @@ export function batchEditing<TRow>(onBatchEdit: BatchEditHandler<TRow>, extras?:
 // @public
 export function bulkActions(actions: readonly BulkAction[]): AdaptTableFeature;
 
-// @public
-export type CellEditHandler<TRow> = (row: TRow, columnKey: string, value: unknown) => void | Promise<void>;
+export { CellEditHandler }
 
 // @public
 export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeature;
@@ -153,10 +155,16 @@ export interface EditingLifecycleExtras<TRow = unknown> {
 }
 
 // @public
-export function exportPdf<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+function exportPdf$1<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+
+// @public @deprecated
+export const exportPdf: typeof exportPdf$1;
 
 // @public
-export function exportXlsx<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+function exportXlsx$1<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+
+// @public @deprecated
+export const exportXlsx: typeof exportXlsx$1;
 
 // @public
 export function extraRows(rows: readonly ExtraRow[]): AdaptTableFeature;
@@ -271,8 +279,7 @@ export interface RowDetailContext<TRow> {
     readonly row: TRow;
 }
 
-// @public
-export type RowEditHandler<TRow> = (row: TRow, patch: Readonly<Record<string, unknown>>) => void | Promise<void>;
+export { RowEditHandler }
 
 // @public
 export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;

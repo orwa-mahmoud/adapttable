@@ -25,7 +25,6 @@ import { projectHeadlessRows } from "../rows/headlessRowsModel";
 
 export type { ExtraEntry, ExtraRow, ExtraRowKind } from "../rows/extraRows";
 export type {
-  BodyCell,
   CellSpanAppearance,
   CellSpanRequest,
   GetCellSpan,
@@ -47,6 +46,7 @@ export interface RowAppearanceOptions<TRow> {
 function rowAware<TRow>(feature: CoreFeature<TRow>): TableFeature<TRow> {
   return {
     id: feature.id,
+    labels: feature.labels,
     apply: (input) => feature.apply?.(input) ?? {},
     setup: feature.setup ? (host) => feature.setup?.(host) : undefined,
   };
@@ -120,3 +120,4 @@ export function rowAppearance<TRow>(
   };
 }
 export type { ColumnMetadata, CssProperties } from "@adapttable/core";
+export type { BodyCell } from "@adapttable/core/binding";

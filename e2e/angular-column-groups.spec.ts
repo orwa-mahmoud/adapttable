@@ -25,9 +25,9 @@ for (const kit of ANGULAR_KITS) {
     test("spans each group's caption over its columns", async ({ page }) => {
       await page.goto(PAGE);
       await expect(part(page, "header-group-cell")).toHaveText([
+        /Contact/,
         /Assignment/,
         /Delivery/,
-        /Workload/,
       ]);
       await expect(
         part(page, "header-group-cell").filter({ hasText: "Assignment" })
@@ -57,35 +57,38 @@ for (const kit of ANGULAR_KITS) {
       await expect.poll(() => leafHeaders(page)).toEqual(before);
     });
 
-    test("draws Delivery's budget in one cell when it collapses", async ({
+    test("draws Delivery's budget and span in one cell when it collapses", async ({
       page,
     }) => {
       await page.goto(PAGE);
       await toggle(page, "Delivery").click();
       const firstRow = part(page, "row").first();
-      await expect(firstRow).toContainText(/\$[\d,]+ budget/);
+      await expect(firstRow).toContainText(/\$[\d,]+ for \d+ days/);
       expect(await leafHeaders(page)).not.toContain("Budget");
     });
 
-    test("folds Workload to a narrow stub", async ({ page }) => {
+    test("folds Contact to a narrow stub", async ({ page }) => {
       await page.goto(PAGE);
       await expect(part(page, "row").first()).toBeVisible();
-      const cellsBefore = await part(page, "row")
+      const leaves = part(page, "row")
         .first()
-        .locator('[data-adapttable-part="cell"]')
-        .count();
-      await toggle(page, "Workload").click();
-      await expect(toggle(page, "Workload")).toHaveAttribute(
+        .locator('[data-adapttable-part="cell"]');
+      const cellsBefore = await leaves.count();
+      const nameWidth = (await leaves.first().boundingBox())!.width;
+      await toggle(page, "Contact").click();
+      await expect(toggle(page, "Contact")).toHaveAttribute(
         "aria-expanded",
         "false"
       );
       const cells = part(page, "row")
         .first()
         .locator('[data-adapttable-part="cell"]');
-      await expect(cells).toHaveCount(cellsBefore);
-      const stub = cells.last();
+      // Name and Role fold into the one stub.
+      await expect(cells).toHaveCount(cellsBefore - 1);
+      const stub = cells.first();
       await expect(stub).toHaveText("");
-      expect((await stub.boundingBox())!.width).toBeLessThan(60);
+      // The stub takes less room than the Name column alone did.
+      expect((await stub.boundingBox())!.width).toBeLessThan(nameWidth);
     });
   });
 }

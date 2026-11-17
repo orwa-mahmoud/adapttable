@@ -1,16 +1,13 @@
 import {
-  createFrontendSourceWith,
   type ExtraFilters,
   type FrontendEngineFactory,
-  type FrontendSource,
   type PaginationMode,
   type QueryFilterGroup,
-  resolvePaginationMode,
   type SortableValue,
   type TableSource,
 } from "@adapttable/core";
 import { createBasicTableEngine } from "@adapttable/core/engine";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import type { ColumnDef } from "../columnDef";
 import { useFeatureState } from "../features/featureState";
@@ -29,6 +26,12 @@ import {
 
 export { defaultFrontendRowId, defaultSearchText } from "@adapttable/core";
 
+import {
+  createFrontendSourceWith,
+  type FrontendSource,
+  resolvePaginationMode,
+} from "@adapttable/core/binding";
+
 /**
  * Options for {@link useFrontendData}.
  *
@@ -42,6 +45,7 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
   | "numberExtraKeys"
   | "arrayExtraKeys"
   | "urlKey"
+  | "store"
 > {
   /** The source array. Filtered / sorted / sliced internally by state. */
   data: readonly TRow[];
@@ -230,47 +234,112 @@ export function useFrontendData<TRow>(
   });
 
   const { page: safePage, total, hasNextPage } = frame;
+  const setStatePage = state.setPage;
   const fetchNextPage = useCallback(() => {
-    if (hasNextPage) state.setPage(safePage + 1);
-  }, [hasNextPage, safePage, state]);
+    if (hasNextPage) setStatePage(safePage + 1);
+  }, [hasNextPage, safePage, setStatePage]);
 
-  return {
-    rows: frame.rows,
-    allFilteredRows: frame.allFilteredRows,
-    allSearchedRows: frame.allSearchedRows,
-    total,
-    isLoading,
-    isFetching,
-    isFetchingNextPage: false,
-    hasNextPage,
-    fetchNextPage,
-    error,
-    refetch,
-    paginationMode: resolvedMode,
-    page: safePage,
-    limit,
-    defaultLimit: state.defaultLimit,
-    search,
-    sortBy,
-    sortDir,
-    groupBy,
-    groupAggregateOverrides: state.groupAggregateOverrides,
-    extra: state.extra,
-    filterTree: state.filterTree,
-    setPage: state.setPage,
-    setLimit: state.setLimit,
-    setSort: state.setSort,
-    setGroupBy: state.setGroupBy,
-    initializeGroupBy: state.initializeGroupBy,
-    setGroupAggregateOverrides: state.setGroupAggregateOverrides,
-    sortLevels: state.sortLevels,
-    toggleSortLevel: state.toggleSortLevel,
-    setSearch: state.setSearch,
-    setExtra: state.setExtra,
-    setExtras: state.setExtras,
-    setFilterTree: state.setFilterTree,
-    clearExtras: state.clearExtras,
-    clearAll: state.clearAll,
-    tableEngine: source.engine,
-  };
+  const { rows, allFilteredRows, allSearchedRows } = frame;
+  const {
+    defaultLimit,
+    groupAggregateOverrides,
+    extra,
+    filterTree,
+    setPage,
+    setLimit,
+    setSort,
+    setGroupBy,
+    initializeGroupBy,
+    setGroupAggregateOverrides,
+    sortLevels,
+    toggleSortLevel,
+    setSearch,
+    setExtra,
+    setExtras,
+    setFilterTree,
+    clearExtras,
+    clearAll,
+  } = state;
+  const tableEngine = source.engine;
+  // One object while nothing in it changes, so a host that re-renders for
+  // its own state hands the table the same source.
+  return useMemo(
+    () => ({
+      rows,
+      allFilteredRows,
+      allSearchedRows,
+      total,
+      isLoading,
+      isFetching,
+      isFetchingNextPage: false,
+      hasNextPage,
+      fetchNextPage,
+      error,
+      refetch,
+      paginationMode: resolvedMode,
+      page: safePage,
+      limit,
+      defaultLimit,
+      search,
+      sortBy,
+      sortDir,
+      groupBy,
+      groupAggregateOverrides,
+      extra,
+      filterTree,
+      setPage,
+      setLimit,
+      setSort,
+      setGroupBy,
+      initializeGroupBy,
+      setGroupAggregateOverrides,
+      sortLevels,
+      toggleSortLevel,
+      setSearch,
+      setExtra,
+      setExtras,
+      setFilterTree,
+      clearExtras,
+      clearAll,
+      tableEngine,
+    }),
+    [
+      rows,
+      allFilteredRows,
+      allSearchedRows,
+      total,
+      isLoading,
+      isFetching,
+      hasNextPage,
+      fetchNextPage,
+      error,
+      refetch,
+      resolvedMode,
+      safePage,
+      limit,
+      defaultLimit,
+      search,
+      sortBy,
+      sortDir,
+      groupBy,
+      groupAggregateOverrides,
+      extra,
+      filterTree,
+      setPage,
+      setLimit,
+      setSort,
+      setGroupBy,
+      initializeGroupBy,
+      setGroupAggregateOverrides,
+      sortLevels,
+      toggleSortLevel,
+      setSearch,
+      setExtra,
+      setExtras,
+      setFilterTree,
+      clearExtras,
+      clearAll,
+      tableEngine,
+    ]
+  );
 }

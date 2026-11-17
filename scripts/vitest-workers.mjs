@@ -10,6 +10,13 @@
 import { availableParallelism } from "node:os";
 
 /**
+ * The per-test time budget every suite shares. A test under local turbo load
+ * runs several times slower than alone, and cold CSS-in-JS first paint can
+ * take tens of seconds; this widens only the time limit, never an assertion.
+ */
+export const VITEST_TEST_TIMEOUT = 30_000;
+
+/**
  * @param {{ ci?: boolean, turbo?: boolean, cores?: number, forced?: string }} [env]
  */
 export function vitestMaxWorkers({

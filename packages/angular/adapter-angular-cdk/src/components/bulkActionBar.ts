@@ -16,6 +16,7 @@ import {
   Component,
   computed,
   input,
+  type Signal,
 } from "@angular/core";
 
 /**
@@ -106,7 +107,12 @@ export class AdaptBulkBar {
   protected readonly errorMessage = computed(() =>
     bulkActionErrorMessage(this.runner.error())
   );
-  protected readonly actions = computed(() =>
+  protected readonly actions: Signal<
+    {
+      action: BulkBarSlotProps<SelectionState>["bulkActions"][number];
+      reason: string | undefined;
+    }[]
+  > = computed(() =>
     this.props().bulkActions.map((action) => ({
       action,
       reason: resolveDisabledReason(action.disabledReason?.(this.ids())),

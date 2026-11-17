@@ -5,6 +5,7 @@ import angular from "@analogjs/vite-plugin-angular";
 import { defineConfig } from "vitest/config";
 
 import {
+  VITEST_TEST_TIMEOUT,
   vitestFileParallelism,
   vitestMaxWorkers,
 } from "../../../scripts/vitest-workers.mjs";
@@ -23,7 +24,7 @@ export default defineConfig({
         replacement: path.resolve(packageDir, "../angular/src/index.ts"),
       },
       {
-        find: /^@adapttable\/angular\/(features|adapter)$/,
+        find: /^@adapttable\/angular\/(features|adapter|pdf|xlsx)$/,
         replacement: path.resolve(packageDir, "../angular/src/$1.ts"),
       },
       {
@@ -65,6 +66,7 @@ export default defineConfig({
     pool: "threads",
     fileParallelism: vitestFileParallelism(),
     maxWorkers: vitestMaxWorkers(),
+    testTimeout: VITEST_TEST_TIMEOUT,
     coverage: {
       provider: "istanbul",
       reporter: ["text", "lcov", "html"],

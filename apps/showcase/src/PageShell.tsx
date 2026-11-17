@@ -2,13 +2,18 @@ import type { ConfirmRequest } from "@adapttable/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, startTransition, useEffect, useState } from "react";
 
-import { DEMO_CONFIRM_EVENT, DEMO_NOTICE_EVENT, type DemoNotice } from "./data";
+import { DEMO_CONFIRM_EVENT } from "./data";
 import {
   readShowcaseTheme,
   storeShowcaseTheme,
   updateShowcaseThemeUrl,
 } from "./matrix/theme";
 import { AppNav, Footer } from "./sections";
+import {
+  type DemoNotice,
+  listenForNotices,
+  noticeStyle,
+} from "./shared/demoNotice";
 import { StarTheRepo } from "./StarTheRepo";
 
 const queryClient = new QueryClient();
@@ -44,17 +49,13 @@ export function PageShell({
   }, [dark]);
 
   useEffect(() => {
-    const onNotice = (event: Event) => {
-      setNotice((event as CustomEvent<DemoNotice>).detail);
-      window.setTimeout(() => setNotice(null), 2600);
-    };
     const onConfirm = (event: Event) => {
       setConfirmRequest((event as CustomEvent<ConfirmRequest>).detail);
     };
-    window.addEventListener(DEMO_NOTICE_EVENT, onNotice);
+    const stopNotices = listenForNotices(setNotice);
     window.addEventListener(DEMO_CONFIRM_EVENT, onConfirm);
     return () => {
-      window.removeEventListener(DEMO_NOTICE_EVENT, onNotice);
+      stopNotices();
       window.removeEventListener(DEMO_CONFIRM_EVENT, onConfirm);
     };
   }, []);
@@ -76,21 +77,7 @@ export function PageShell({
       <Footer root={root} />
 
       {notice && (
-        <div
-          role="status"
-          style={{
-            position: "fixed",
-            insetInlineEnd: 20,
-            bottom: 20,
-            zIndex: 100,
-            padding: "10px 16px",
-            borderRadius: 10,
-            background: notice.tone === "danger" ? "#b91c1c" : "#111827",
-            color: "#fff",
-            fontSize: 14,
-            boxShadow: "0 8px 24px rgba(0,0,0,.25)",
-          }}
-        >
+        <div role="status" style={noticeStyle(notice)}>
           {notice.message}
         </div>
       )}

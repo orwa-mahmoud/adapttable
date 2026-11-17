@@ -3,7 +3,8 @@
  * attribute, read reactively, and never lit for a reader who asked for
  * reduced motion.
  */
-import { CHANGED_CELL_FLASH_MS, type RowPatchEvent } from "@adapttable/core";
+import { type RowPatchEvent } from "@adapttable/core";
+import { CHANGED_CELL_FLASH_MS } from "@adapttable/core/binding";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { computed, effectScope, nextTick, shallowRef } from "vue";
 

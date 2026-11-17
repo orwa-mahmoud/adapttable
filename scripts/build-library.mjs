@@ -80,6 +80,19 @@ export function declarationConfig(
   };
 }
 
+/**
+ * The declaration bundles of a package's configs: one per config that ships
+ * declarations. A config with `dts: false` builds JavaScript only.
+ */
+export function declarationConfigs(original, options) {
+  const configs = Array.isArray(original) ? original : [original];
+  const typed = configs.filter((config) => config.dts !== false);
+  if (typed.length === 0) {
+    throw new Error("No library config ships declarations");
+  }
+  return typed.map((config) => declarationConfig(config, options));
+}
+
 /** Resolve each map's paths before composing maps from different directories. */
 function absoluteMap(map, filename) {
   const base = pathToFileURL(`${dirname(filename)}${sep}`);
@@ -218,7 +231,7 @@ export function buildLibrary({
       const config = join(scratch, `bundle${extension}.mts`);
       writeFileSync(
         config,
-        `import original from ${JSON.stringify(pathToFileURL(join(packageDir, "tsdown.config.ts")).href)};\nimport { declarationConfig } from ${JSON.stringify(import.meta.url)};\nexport default declarationConfig(original, ${JSON.stringify({ packageDir, typesDir, extension })});\n`
+        `import original from ${JSON.stringify(pathToFileURL(join(packageDir, "tsdown.config.ts")).href)};\nimport { declarationConfigs } from ${JSON.stringify(import.meta.url)};\nexport default declarationConfigs(original, ${JSON.stringify({ packageDir, typesDir, extension })});\n`
       );
       phase(`${extension} bundle`, executables.tsdown, [
         "--config",

@@ -259,7 +259,7 @@ export type {
   DataTableSurfaceSlots,
 } from "./layout/dataTableSurfaceChrome";
 export { DataTableSurfaceChrome } from "./layout/dataTableSurfaceChrome";
-export type { GroupRowSlotProps } from "./layout/groupRowSlot";
+export type { GroupRowDraw, GroupRowSlotProps } from "./layout/groupRowSlot";
 export { GROUP_ROW, groupRowSlotKey } from "./layout/groupRowSlot";
 export type {
   ColumnResizeModel,
@@ -288,14 +288,24 @@ export {
   rowEditActionsSlotKey,
   rowPinningModelKey,
 } from "./layout/modelChannels";
+export {
+  keepTableControls,
+  tableRowView,
+  type TableRowViewContext,
+} from "./layout/rowView";
 export type {
   SelectionCheckboxProps,
   SortButtonProps,
   TableChromeClassNames,
   TableChromeSlots,
 } from "./layout/tableChrome";
-export { DesktopTableChrome, MobileCardsChrome } from "./layout/tableChrome";
 export {
+  DesktopTableChrome,
+  MobileCardsChrome,
+  NO_CLASS_NAMES,
+} from "./layout/tableChrome";
+export {
+  railCellAttrs,
   useDesktopTableModel,
   useMobileCardsModel,
 } from "./layout/tableModels";
@@ -427,13 +437,11 @@ export {
   FullscreenButtonChrome,
 } from "./viewControls/viewControlsChrome";
 export type {
-  ColumnRenameEditorOptions,
   ColumnResizeHandleOptions,
   ColumnResizeHandleProps,
   RowActionsLayout,
 } from "@adapttable/core";
 export {
-  defaultConfirm,
   defaultFilterRegistry,
   filterLabel,
   filterWidgetKind,
@@ -452,6 +460,7 @@ export type {
   ChromeRowSlot,
   ChromeVirtualPadSlot,
   ColumnGroupToggleButtonProps,
+  ColumnRenameEditorOptions,
   ColumnSelectCheckboxProps,
   CommandPaletteSurfaceProps,
   ContextMenuSurfaceProps,
@@ -511,6 +520,7 @@ export {
   columnGroupPath,
   columnGroupStubStyle,
   columnMenuActions,
+  defaultConfirm,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
   EXTRA_ROW_PARTS,
@@ -553,6 +563,8 @@ export {
   rowPinSignature,
   rowReorderDropStyle,
   rowReorderSignature,
+  type RowSlotKey,
+  rowSlotKey,
   rowSourceIndex,
   rowSpanSignature,
   rowStyleSignature,
@@ -564,7 +576,7 @@ export {
   TOOLBAR_EXTRAS,
   unpinAllColumns,
 } from "@adapttable/core/binding";
-export { resolveCellSpan } from "@adapttable/core/binding";
+export { BASE_LABELS, resolveCellSpan } from "@adapttable/core/binding";
 export {
   createMenuNavigation,
   type MenuNavigationAction,
@@ -604,6 +616,7 @@ export type {
   TableFeatureHost,
 } from "./features/tableFeature";
 export type { FeatureState } from "./featureState";
+export { withProps } from "./functionalProps";
 export type {
   GroupRowModel,
   RowDetailModel,
@@ -647,6 +660,7 @@ export type { NestedTable, NestedTableFor } from "./tree/nestedTable";
 export type { UseSavedViewsResult } from "./url/useSavedViews";
 export type { UseTableUrlStateOptions } from "./url/useTableUrlState";
 export type {
+  TableRail,
   useDataTable,
   UseDataTableOptions,
   UseDataTableResult,

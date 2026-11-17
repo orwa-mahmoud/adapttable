@@ -1,153 +1,84 @@
-/** Selection bar with the bulk actions and cross-page banner. */
-import { useBulkActionRunner } from "@adapttable/react";
+/** The bulk action bar, decided by the binding and drawn with MUI. */
 import {
-  bulkActionErrorMessage,
-  type BulkBarChromeProps,
-  offersAllMatching,
-  resolveDisabledReason,
+  createBulkBar,
+  type KitBulkBarFrameProps,
+  type KitBulkButtonProps,
+  type KitBulkTextProps,
 } from "@adapttable/react/adapter";
-import { Button, Stack, Tooltip, Typography } from "@mui/material";
-import type { ReactNode } from "react";
+import { Button as MuiButton, Stack, Tooltip, Typography } from "@mui/material";
 
-/** Selection toolbar. */
-export function BulkBar({
-  selection,
-  total,
-  bulkActions,
-  confirm,
-  labels,
-}: Readonly<BulkBarChromeProps>) {
-  const {
-    selectedIds,
-    selectedCount,
-    visibleIds,
-    allMatching,
-    selectAllMatching,
-    clear,
-  } = selection;
-  const { pending, error, run } = useBulkActionRunner({
-    confirm,
-    cancelLabel: labels.cancel,
-    // Clear only on success — a failed run keeps the selection for retry.
-    onComplete: (outcome) => {
-      if (outcome.status === "success") clear();
-    },
-  });
-  if (selectedCount === 0) return null;
-  const errorMessage = bulkActionErrorMessage(error);
-  const ids = [...selectedIds];
-  // Offer "select all N matching" only when the whole page is selected and
-  // more rows match beyond it; once active, show the cross-page scope.
-  const showBanner = offersAllMatching(selection, total);
+const ROW = { alignItems: "center", flexWrap: "wrap" } as const;
+const BAR = { ...ROW, justifyContent: "space-between" } as const;
+const WRAP = { flexWrap: "wrap" } as const;
+
+function Frame({
+  count,
+  scope,
+  clear,
+  actions,
+  error,
+  ...rest
+}: Readonly<KitBulkBarFrameProps>) {
+  "use no memo";
   return (
-    <Stack
-      data-adapttable-part="bulk-bar"
-      direction="row"
-      spacing={1}
-      useFlexGap
-      sx={{
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexWrap: "wrap",
-      }}
-    >
+    <Stack direction="row" spacing={1} useFlexGap sx={BAR} {...rest}>
       <Stack
         direction="row"
         spacing={1}
         useFlexGap
-        data-adapttable-part="select-all-banner"
-        sx={{ alignItems: "center", flexWrap: "wrap" }}
+        sx={ROW}
+        {...scope?.attributes}
       >
-        <Typography variant="body2">
-          {labels.selectedCount(selectedCount)}
-        </Typography>
-        {showBanner &&
-          (allMatching ? (
-            <>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                data-adapttable-part="select-all-text"
-              >
-                {labels.allMatchingSelected(total)}
-              </Typography>
-              <Button
-                size="small"
-                variant="text"
-                data-adapttable-part="select-all-button"
-                onClick={clear}
-                disabled={pending !== null}
-              >
-                {labels.clearAll}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                data-adapttable-part="select-all-text"
-              >
-                {labels.pageSelected(visibleIds.length)}
-              </Typography>
-              <Button
-                size="small"
-                variant="text"
-                data-adapttable-part="select-all-button"
-                onClick={selectAllMatching}
-                disabled={pending !== null}
-              >
-                {labels.selectAllMatching(total)}
-              </Button>
-            </>
-          ))}
+        {count}
+        {scope?.text}
+        {scope?.button}
       </Stack>
-      <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
-        <Button
-          size="small"
-          variant="text"
-          onClick={clear}
-          disabled={pending !== null}
-        >
-          {labels.clearAll}
-        </Button>
-        {bulkActions.map((action) => {
-          const reason = resolveDisabledReason(action.disabledReason?.(ids));
-          return (
-            <Tooltip key={action.key} title={reason ?? ""}>
-              <span>
-                <Button
-                  data-adapttable-part="bulk-button"
-                  size="small"
-                  variant="contained"
-                  color={action.color as "primary" | undefined}
-                  startIcon={action.icon as ReactNode}
-                  disabled={reason !== undefined || pending !== null}
-                  onClick={() =>
-                    run(
-                      action,
-                      ids,
-                      allMatching ? { allMatching: true, total } : undefined
-                    )
-                  }
-                >
-                  {action.label}
-                </Button>
-              </span>
-            </Tooltip>
-          );
-        })}
-        {errorMessage !== null && (
-          <Typography
-            data-adapttable-part="bulk-error"
-            variant="body2"
-            color="error"
-            role="alert"
-          >
-            {`${labels.errorTitle}: ${errorMessage}`}
-          </Typography>
-        )}
+      <Stack direction="row" spacing={1} useFlexGap sx={WRAP}>
+        {clear}
+        {actions}
+        {error}
       </Stack>
     </Stack>
   );
 }
+
+const TEXT_COLOR = {
+  count: undefined,
+  scope: "text.secondary",
+  error: "error",
+} as const;
+
+function Text({ kind, ...rest }: Readonly<KitBulkTextProps>) {
+  "use no memo";
+  return <Typography variant="body2" color={TEXT_COLOR[kind]} {...rest} />;
+}
+
+function Button({
+  kind,
+  busy: _busy,
+  icon,
+  color,
+  reason,
+  ...rest
+}: Readonly<KitBulkButtonProps>) {
+  "use no memo";
+  if (kind !== "action") {
+    return <MuiButton size="small" variant="text" {...rest} />;
+  }
+  return (
+    <Tooltip title={reason ?? ""}>
+      <span>
+        <MuiButton
+          size="small"
+          variant="contained"
+          color={color as "primary" | undefined}
+          startIcon={icon}
+          {...rest}
+        />
+      </span>
+    </Tooltip>
+  );
+}
+
+/** The bulk action bar, with MUI's text and buttons. */
+export const BulkBar = /* @__PURE__ */ createBulkBar({ Frame, Text, Button });

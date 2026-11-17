@@ -30,16 +30,19 @@ import {
   restoreAggregationDefaults,
 } from "../aggregate/aggregationModel";
 import type { TableRuntime } from "../features/tableRuntime";
+import { panelStateOf } from "../layout/tableChromeState";
 import { isRtlElement } from "../layout/writingDirection";
 import type { GroupAggregateOverride } from "./groupAggregateOverrides";
 import {
   GROUPING_COLUMN_DND_MIME,
   type GroupingChipKeyboardProps,
+  type GroupingDragEventLike,
   groupingDragKey,
   type GroupingDragProps,
   type GroupingDragSource,
   type GroupingDragState,
   type GroupingDropProps,
+  type GroupingKeyEventLike,
   type GroupingPanelInteractions,
   hasGroupingColumnDrag,
   moveGroupingKey,
@@ -48,45 +51,16 @@ import {
 } from "./groupingPanelModel";
 import { formatGroupBy, parseGroupBy } from "./groupKeys";
 
-/**
- * As much of a native drag event as the grouping panel reads. A DOM
- * `DragEvent` and every framework's wrapper around one satisfy it.
- *
- * @public
- */
-export interface GroupingDragEventLike {
-  /** The drag's payload; `null` only on a synthetic event. */
-  readonly dataTransfer: DataTransfer | null;
-  /** Where the event started. */
-  readonly target: EventTarget | null;
-  /** The element the handler is bound to. */
-  readonly currentTarget: EventTarget | null;
-  /** Accept the drop, or refuse the drag start. */
-  preventDefault(): void;
-}
-
-/**
- * As much of a key press on a grouping chip as the panel reads.
- *
- * @public
- */
-export interface GroupingKeyEventLike {
-  /** The key pressed, as `KeyboardEvent.key` names it. */
-  readonly key: string;
-  /** The chip the handler is bound to, for its writing direction. */
-  readonly currentTarget: EventTarget | null;
-  /** Keep the arrow from scrolling the page. */
-  preventDefault(): void;
-}
+export type { GroupingDragEventLike, GroupingKeyEventLike };
 
 /**
  * What a grouping panel controller reads.
  *
  * @public
  */
-export interface GroupingPanelControllerOptions {
+export interface GroupingPanelControllerOptions<TRow = unknown> {
   /** The live table, read from event handlers. */
-  readonly runtime: TableRuntime;
+  readonly runtime: TableRuntime<TRow>;
   /**
    * The developer's `groupAggregates` mapper, when the panel was composed
    * with one — the only place its declared aggregates can be read from.
@@ -111,7 +85,7 @@ export interface GroupingPanelSnapshot {
  *
  * @public
  */
-export interface GroupingPanelController {
+export interface GroupingPanelController<TRow = unknown> {
   /** The current state. A new object whenever anything in it changes. */
   readonly getSnapshot: () => GroupingPanelSnapshot;
   /**
@@ -124,7 +98,7 @@ export interface GroupingPanelController {
   /** Listen for state changes. Returns the unsubscribe. */
   readonly subscribe: (listener: () => void) => () => void;
   /** Replace the configuration — a binding calls this on every render. */
-  readonly configure: (options: GroupingPanelControllerOptions) => void;
+  readonly configure: (options: GroupingPanelControllerOptions<TRow>) => void;
   /**
    * Seed the table's grouping from the panel's initial keys, once. A table
    * whose URL already carries a grouping keeps it.
@@ -252,9 +226,9 @@ function asElement(target: EventTarget | null): HTMLElement | null {
  *
  * @public
  */
-export function createGroupingPanelController(
-  initial: GroupingPanelControllerOptions
-): GroupingPanelController {
+export function createGroupingPanelController<TRow = unknown>(
+  initial: GroupingPanelControllerOptions<TRow>
+): GroupingPanelController<TRow> {
   let options = initial;
   let snapshot: GroupingPanelSnapshot = {
     drag: undefined,
@@ -394,7 +368,7 @@ export function createGroupingPanelController(
     if (grouping === undefined && listed === undefined) return undefined;
     return { grouping, aggregateOperations: listed };
   };
-  const aggregationInput = (): AggregationModelInput<unknown> => {
+  const aggregationInput = (): AggregationModelInput<TRow> => {
     const state = groupingState();
     return {
       columns: state?.columns ?? [],
@@ -405,7 +379,7 @@ export function createGroupingPanelController(
       source: aggregationSource(),
     };
   };
-  const columnOf = (input: AggregationModelInput<unknown>, key: string) =>
+  const columnOf = (input: AggregationModelInput<TRow>, key: string) =>
     input.columns.find((candidate) => candidate.key === key);
 
   const add = (key: string): void => {
@@ -651,7 +625,7 @@ export function createGroupingPanelController(
   const dragProps = (
     key: string,
     source: GroupingDragSource
-  ): GroupingDragProps => ({
+  ): GroupingDragProps<GroupingDragEventLike> => ({
     draggable: true,
     onDragStart: (event) => {
       startDrag(key, source, event);
@@ -659,7 +633,9 @@ export function createGroupingPanelController(
     onDragEnd: finishDrag,
     "data-grouping-dragging": dragFlag(key, source),
   });
-  const dropProps = (index: number): GroupingDropProps => ({
+  const dropProps = (
+    index: number
+  ): GroupingDropProps<GroupingDragEventLike> => ({
     onDragEnter: (event) => {
       dragEnter(index, event);
     },
@@ -675,7 +651,7 @@ export function createGroupingPanelController(
         ? true
         : undefined,
   });
-  const removeDropProps = (): GroupingDropProps => ({
+  const removeDropProps = (): GroupingDropProps<GroupingDragEventLike> => ({
     onDragEnter: removeDragEnter,
     onDragOver: removeDragOver,
     onDragLeave: () => undefined,
@@ -685,7 +661,7 @@ export function createGroupingPanelController(
   const chipKeyboardProps = (
     key: string,
     label: string
-  ): GroupingChipKeyboardProps => ({
+  ): GroupingChipKeyboardProps<GroupingKeyEventLike> => ({
     tabIndex: 0,
     role: "button",
     "aria-label": chipLabel(label),
@@ -756,6 +732,7 @@ export function createGroupingPanelController(
         addAggregate,
         removeAggregate,
         restoreAggregateDefaults,
+        panelState: (input) => panelStateOf(value, input),
       };
       built = { snapshot: rendered, declared, value };
       return value;

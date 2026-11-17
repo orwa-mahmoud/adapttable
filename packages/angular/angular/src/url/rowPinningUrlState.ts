@@ -1,8 +1,8 @@
 /**
  * Which rows are pinned, kept in the URL.
  */
-import { rowPinningSlice } from "@adapttable/core";
-import type { RowPinState } from "@adapttable/core/binding";
+
+import { rowPinningSlice, type RowPinState } from "@adapttable/core/binding";
 import type { Signal } from "@angular/core";
 
 import { injectUrlSlice, type UrlSliceOptions } from "./urlSlice";

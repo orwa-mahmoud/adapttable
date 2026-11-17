@@ -4,7 +4,8 @@
  * Kits fill the element slots. These tests check the nesting, the part
  * names and that a kit element is the one that actually renders.
  */
-import { defaultConfirm } from "@adapttable/core";
+
+import { defaultConfirm } from "@adapttable/core/binding";
 import { render, screen } from "@testing-library/react";
 import { type ElementType, type ReactNode } from "react";
 import { describe, expect, it } from "vitest";
@@ -65,7 +66,7 @@ function Desktop({
       renderLeaf={(leaf) => <th key={leaf.column.key}>{leaf.caption}</th>}
       renderRow={(slot) =>
         slot.kind === "row" ? (
-          <tr {...slot.wiring.rowDomProps}>
+          <tr key={slot.key} {...slot.wiring.rowDomProps}>
             <td>{slot.wiring.row.name}</td>
           </tr>
         ) : null

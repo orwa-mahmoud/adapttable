@@ -2,12 +2,13 @@
  * Which row groups are closed, as a signal — core's collapse actions over a
  * controllable id set.
  */
+
 import {
   createControllableStore,
   groupCollapseActions,
+  type GroupCollapseState,
   idSetReader,
-} from "@adapttable/core";
-import type { GroupCollapseState } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,
@@ -18,6 +19,7 @@ import {
 } from "@angular/core";
 
 import { fromStore, type MaybeSignalOptional, readMaybe } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 export type { GroupCollapseState } from "@adapttable/core/binding";
 
@@ -53,7 +55,9 @@ export function injectGroupCollapse(
   if (!options.injector) assertInInjectionContext(injectGroupCollapse);
   const injector = options.injector ?? inject(Injector);
   const readIds = idSetReader();
-  const store = createControllableStore<ReadonlySet<string>>(new Set());
+  const store = createControllableStore<ReadonlySet<string>>(new Set(), {
+    store: tableStoreOf(injector),
+  });
   const own = fromStore(store, { injector });
   const controlled = computed(() =>
     readIds(

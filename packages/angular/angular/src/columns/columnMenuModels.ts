@@ -9,19 +9,20 @@ import {
   type ColumnMenuChoice,
   type ColumnMenuItem,
   type ColumnMenuRow,
-  columnMenuRows,
-  nextPinSide,
-  pinActionLabel,
   REORDER_COLUMN_KEY,
 } from "@adapttable/core";
 import {
   columnMenuActions,
+  columnMenuRows,
   type ColumnMenuSlotProps,
   eyeIcon,
   filterColumnMenuRows,
   GRIP_ICON,
   hideAllColumns,
+  nextPinSide,
   PIN_ICON,
+  pinActionLabel,
+  type PinSide,
   showAllColumns,
   unpinAllColumns,
 } from "@adapttable/core/binding";
@@ -35,8 +36,8 @@ function isChoice(item: ColumnMenuItem): item is ColumnMenuChoice {
 /** Shared AdaptColumnMenuRow signals; adapters supply native templates and controls. @public */
 @Directive({})
 export abstract class AdaptColumnMenuRowModel {
-  readonly row = input.required<ColumnMenuRow<never>>();
-  readonly props = input.required<ColumnMenuSlotProps<never>>();
+  readonly row = input.required<ColumnMenuRow<unknown>>();
+  readonly props = input.required<ColumnMenuSlotProps<unknown>>();
   readonly drag = input.required<ColumnDrag>();
   protected readonly open = signal(false);
   protected readonly gripIcon = GRIP_ICON;
@@ -56,7 +57,7 @@ export abstract class AdaptColumnMenuRowModel {
   protected readonly actions = computed(() => {
     const props = this.props();
     return columnMenuActions(this.row(), {
-      featureHost: this.table.featureHost as never,
+      featureHost: this.table.featureHost,
       labels: props.labels,
       layout: props.layout,
       sortBy: props.sortBy,
@@ -69,12 +70,14 @@ export abstract class AdaptColumnMenuRowModel {
     });
   });
   protected pinLabel(
-    row: ColumnMenuRow<never>,
-    props: ColumnMenuSlotProps<never>
+    row: ColumnMenuRow<unknown>,
+    props: ColumnMenuSlotProps<unknown>
   ): string {
     return pinActionLabel(row.pinned, props.labels);
   }
-  protected nextPin(row: ColumnMenuRow<never>): ReturnType<typeof nextPinSide> {
+  protected nextPin(
+    row: ColumnMenuRow<unknown>
+  ): ReturnType<typeof nextPinSide> {
     return nextPinSide(row.pinned);
   }
   protected asChoice(item: ColumnMenuItem): ColumnMenuChoice | undefined {
@@ -92,9 +95,9 @@ export abstract class AdaptColumnMenuRowModel {
 /** Shared AdaptColumnMenuEdgeRow signals; adapters supply native templates and controls. @public */
 @Directive({})
 export abstract class AdaptColumnMenuEdgeRowModel {
-  readonly layout = input.required<ColumnLayout<never>>();
+  readonly layout = input.required<ColumnLayout<unknown>>();
   readonly columnKey = input.required<string>();
-  readonly side = input.required<"start" | "end">();
+  readonly side = input.required<PinSide>();
   readonly name = input.required<string>();
   readonly showLabel = input.required<string>();
   readonly hideLabel = input.required<string>();
@@ -107,7 +110,7 @@ export abstract class AdaptColumnMenuEdgeRowModel {
 /** Shared AdaptColumnMenu signals; adapters supply native templates and controls. @public */
 @Directive({})
 export abstract class AdaptColumnMenuModel {
-  readonly props = input.required<ColumnMenuSlotProps<never>>();
+  readonly props = input.required<ColumnMenuSlotProps<unknown>>();
   protected readonly query = signal("");
   protected readonly reorderKey = REORDER_COLUMN_KEY;
   protected readonly actionsKey = ACTIONS_COLUMN_KEY;

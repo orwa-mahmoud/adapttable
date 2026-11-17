@@ -1,4 +1,4 @@
-import * as env from "@adapttable/core";
+import * as env from "@adapttable/core/binding";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

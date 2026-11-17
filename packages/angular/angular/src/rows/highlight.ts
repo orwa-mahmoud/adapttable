@@ -2,12 +2,12 @@
  * Marking a row or a cell for a moment — after an edit, a patch, a jump to
  * it — over `@adapttable/core`'s highlight store.
  */
+import { type HighlightedCell } from "@adapttable/core";
 import {
   createHighlightStore,
   highlightCellKey,
   highlightDuration,
-  type HighlightedCell,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

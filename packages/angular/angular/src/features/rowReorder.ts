@@ -15,6 +15,7 @@ import {
   rowReorderRowAttributes,
   rowReorderRuntimeOptions,
 } from "@adapttable/core";
+import { ROW_LABELS } from "@adapttable/core/binding";
 
 import type { RowReorderFeature } from "./rowReorderContracts";
 
@@ -51,6 +52,7 @@ export function rowReorder<TRow>(
   return withFeatureImplementation(
     {
       id: "row-reorder",
+      labels: ROW_LABELS,
       onRowReorder,
       options,
     } satisfies RowReorderFeature<TRow>,

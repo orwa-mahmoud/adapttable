@@ -36,6 +36,7 @@ const ROWS: Person[] = [
   { id: "3", name: "Alan", age: 41, status: "active", salary: 95_000 },
 ];
 
+const NO_ROWS: readonly Person[] = [];
 const COLS: ColumnModel<Person>[] = [
   { key: "name", editable: true },
   { key: "age", editable: true, editor: "number", sortValue: (r) => r.age },
@@ -159,7 +160,7 @@ describe("stepEditableCell", () => {
   it("returns null when there is nowhere to go", () => {
     expect(
       nextEditableCell({
-        rows: [],
+        rows: NO_ROWS,
         columns: COLS,
         rowKey: (r) => r.id,
         from: { rowId: "1", columnKey: "name" },

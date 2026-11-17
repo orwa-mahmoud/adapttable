@@ -13,7 +13,7 @@ import { h, type MaybeRefOrGetter } from "vue";
 import { VIcon } from "vuetify/components/VIcon";
 
 import { vuetifyButton, vuetifySelectionCheckbox } from "./controls";
-import { vuetifyGroupRowSlotKey } from "./groupRowSlot";
+import { VUETIFY_GROUP_ROW } from "./groupRowSlot";
 
 export function grouping(
   groupBy: MaybeRefOrGetter<string | readonly string[]>,
@@ -28,7 +28,7 @@ export function grouping<TRow>(
   extras: GroupingExtras<TRow> = {}
 ): TableFeature<TRow> {
   return extendFeature(bindingGrouping<TRow>(groupBy, extras), [
-    slotRender(vuetifyGroupRowSlotKey<TRow>(), (props) =>
+    slotRender(VUETIFY_GROUP_ROW, (props) =>
       GroupRowChrome({
         ...props,
         slots: {

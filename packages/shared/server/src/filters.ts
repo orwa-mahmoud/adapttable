@@ -11,46 +11,33 @@
  * checked when it declares the filters ({@link typeFilters}).
  */
 import {
-  DATE_OPS,
   FILTER_OP_SUFFIX,
+  FILTER_PREFIX,
+  FILTER_TYPE_OPS,
+  type FilterDef,
+  type FilterType,
+  type FilterTypeOps,
+  type FilterTypeSpec,
   isFilterGroup,
-  NUMBER_OPS,
+  isListFilterOp,
+  isValuelessFilterOp,
+  parseDateOp,
   parseRelativeToken,
   type QueryCondition,
   type QueryFilterGroup,
   RANGE_SUFFIXES,
-  TEXT_OPS,
+  splitListParam,
 } from "@adapttable/core/query";
 
-/** Prefix for a column filter, as the table writes it. */
-export const FILTER_PREFIX = "f_";
-
 /**
- * Split a multi-value filter parameter into its values — the exact inverse of
- * how the table writes a checklist or multi-select: entries joined with
- * commas, each one percent-encoded, so a value holding a comma or an `&`
- * survives.
+ * Split a multi-value filter parameter into its values.
  *
- * @param raw - The parameter's value, as `URLSearchParams.get` returns it.
- * @returns The values, trimmed, empty entries dropped.
+ * @deprecated Use `splitListParam`, exported here and from
+ * `@adapttable/core/query`; this name forwards to it.
  *
  * @public
  */
-export function splitFilterValues(raw: string | null | undefined): string[] {
-  if (raw == null || raw === "") return [];
-  return raw
-    .split(",")
-    .map((part) => {
-      try {
-        return decodeURIComponent(part).trim();
-      } catch {
-        // A hand-edited link with a stray `%` keeps the entry as it arrived
-        // rather than losing it.
-        return part.trim();
-      }
-    })
-    .filter((part) => part.length > 0);
-}
+export const splitFilterValues: typeof splitListParam = splitListParam;
 
 /**
  * One filter as the URL carried it, with no type to check it against: its
@@ -170,15 +157,14 @@ export type TypedFilter =
 /**
  * A filter declaration the server checks a request against — the same
  * definition object the browser passes to `filters(…)`, or the parts of it a
- * server needs.
+ * server needs: its `key` (the `f_<key>` parameter) and its `type` (a
+ * built-in filter type, or one listed in `filterTypes`).
  *
  * @public
  */
-export interface ServerFilterDef {
-  /** State key: the `f_<key>` parameter. */
-  readonly key: string;
-  /** A built-in filter type, or one listed in `filterTypes`. */
-  readonly type: string;
+export interface ServerFilterDef extends Readonly<
+  Pick<FilterDef, "key" | "type">
+> {
   /**
    * Choices for `select` / `multiSelect`. A static list is enforced; `"auto"`
    * and a loader are accepted as they are, since the server cannot know them.
@@ -192,16 +178,12 @@ export interface ServerFilterDef {
  *
  * @public
  */
-export interface ServerFilterType {
-  /** The type name filter definitions refer to. */
-  readonly type: string;
-  /** Every operator the type accepts. */
-  readonly ops: readonly string[];
-  /** The operator used when the link names none. */
-  readonly defaultOp: string;
-}
+export type ServerFilterType = Pick<
+  FilterTypeSpec,
+  "type" | "ops" | "defaultOp"
+>;
 
-/** What `refuse` looks like to the readers below. */
+/** How a parser reports one thing it refused. */
 export type Refuse = (param: string, value: string, reason: string) => void;
 
 /**
@@ -287,11 +269,25 @@ function filterParams(
   return out;
 }
 
+/** A range type's bound parameters, each with the part it fills. */
+const RANGE_PARTS = {
+  numberRange: [
+    ["min", RANGE_SUFFIXES.numberRange.start],
+    ["max", RANGE_SUFFIXES.numberRange.end],
+  ],
+  dateRange: [
+    ["from", RANGE_SUFFIXES.dateRange.start],
+    ["to", RANGE_SUFFIXES.dateRange.end],
+  ],
+} as const satisfies Record<
+  keyof typeof RANGE_SUFFIXES,
+  readonly (readonly [keyof ShapedFilter, string])[]
+>;
+
+/** Every suffixed part a filter parameter can carry. */
 const SUFFIXES = [
-  ["min", RANGE_SUFFIXES.numberRange.start],
-  ["max", RANGE_SUFFIXES.numberRange.end],
-  ["from", RANGE_SUFFIXES.dateRange.start],
-  ["to", RANGE_SUFFIXES.dateRange.end],
+  ...RANGE_PARTS.numberRange,
+  ...RANGE_PARTS.dateRange,
   ["op", FILTER_OP_SUFFIX],
 ] as const;
 
@@ -333,19 +329,32 @@ function boundsOp(
   return high === undefined ? undefined : "lte";
 }
 
-/** `eq` is the table's other spelling of the date operator `on`. */
-const DATE_OP_ALIASES: ReadonlyMap<string, string> = new Map([["eq", "on"]]);
-
-/** What a type allows, and how it reads a link that names no operator. */
-interface Operators {
-  /** Every operator the type accepts. */
-  readonly ops: readonly string[];
-  /** The operator used when the link names none and implies none. */
-  readonly defaultOp: string;
-  /** Other spellings the table accepts, each to its operator. */
-  readonly aliases?: ReadonlyMap<string, string>;
+/** How a type reads a link beyond its operator list. */
+interface OperatorReading {
+  /** The operator in the type's own spelling. */
+  readonly spell?: (op: string) => string;
   /** The operator the parameters imply when the link names none. */
   readonly implied?: (raw: ShapedFilter) => string | undefined;
+}
+
+/** What a type allows, and how it reads a link that names no operator. */
+type Operators = FilterTypeOps & OperatorReading;
+
+/**
+ * The range types' readings: a date operator in its own spelling (`eq` reads
+ * as `on`), and a link without `f_<key>Op` matched by its bounds.
+ */
+const RANGE_READINGS: Readonly<Partial<Record<FilterType, OperatorReading>>> = {
+  numberRange: { implied: (raw) => boundsOp(raw.min, raw.max) },
+  dateRange: {
+    spell: (op) => parseDateOp(op) ?? op,
+    implied: (raw) => boundsOp(raw.from, raw.to),
+  },
+};
+
+/** Whether a type name is one of the table's built-in filter types. */
+function isBuiltInType(type: string): type is FilterType {
+  return Object.hasOwn(FILTER_TYPE_OPS, type);
 }
 
 /** The operators a type allows, and the one it uses when none is named. */
@@ -355,36 +364,13 @@ function operatorsOf(
 ): Operators | undefined {
   const registered = custom.find((spec) => spec.type === type);
   if (registered) return registered;
-  switch (type) {
-    case "text":
-      return { ops: TEXT_OPS, defaultOp: "contains" };
-    case "select":
-    case "boolean":
-      return { ops: ["eq"], defaultOp: "eq" };
-    case "multiSelect":
-    case "checklist":
-      return { ops: ["in"], defaultOp: "in" };
-    case "numberRange":
-      return {
-        ops: NUMBER_OPS,
-        defaultOp: "gte",
-        implied: (raw) => boundsOp(raw.min, raw.max),
-      };
-    case "dateRange":
-      return {
-        ops: DATE_OPS,
-        defaultOp: "on",
-        aliases: DATE_OP_ALIASES,
-        implied: (raw) => boundsOp(raw.from, raw.to),
-      };
-    default:
-      return undefined;
-  }
+  if (!isBuiltInType(type)) return undefined;
+  return { ...FILTER_TYPE_OPS[type], ...RANGE_READINGS[type] };
 }
 
 /** An operator in the type's own spelling. */
 function spelled(operators: Operators, op: string): string {
-  return operators.aliases?.get(op) ?? op;
+  return operators.spell?.(op) ?? op;
 }
 
 /** The operator a filter is matched by: named, implied, or the default. */
@@ -449,7 +435,7 @@ function typedText(
   op: string,
   value: string | undefined
 ): TextFilter | undefined {
-  if (op === "empty" || op === "notEmpty") return { type: "text", op };
+  if (isValuelessFilterOp(op)) return { type: "text", op };
   if (value === undefined || value === "") return undefined;
   return { type: "text", op, value };
 }
@@ -471,7 +457,7 @@ function typedList(
   raw: string | undefined,
   reader: Reader
 ): ListFilter | undefined {
-  const values = splitFilterValues(raw);
+  const values = splitListParam(raw);
   if (values.length === 0) return undefined;
   const outside = outsideChoices(values, reader);
   if (outside.length > 0) {
@@ -503,9 +489,9 @@ function typedNumberRange(
   reader: Reader
 ): NumberRangeFilter | undefined {
   const { start, end } = RANGE_SUFFIXES.numberRange;
-  if (op === "in" || op === "notIn") {
+  if (isListFilterOp(op)) {
     const text = raw.value ?? "";
-    const values = splitFilterValues(text).map(Number);
+    const values = splitListParam(text).map(Number);
     if (values.some((n) => !Number.isFinite(n))) {
       reader.refuse(reader.param(), text, "not a list of numbers");
       return undefined;
@@ -539,7 +525,7 @@ function typedDateRange(
   reader: Reader
 ): DateRangeFilter | undefined {
   const { start, end } = RANGE_SUFFIXES.dateRange;
-  if (op === "empty") return { type: "dateRange", op };
+  if (isValuelessFilterOp(op)) return { type: "dateRange", op };
   if (op === "relative") {
     const token = parseRelativeToken(raw.from);
     if (!token) {
@@ -617,19 +603,15 @@ function typeOne(
 function ownedKeys(
   def: ServerFilterDef
 ): (readonly [string, keyof ShapedFilter])[] {
-  const own: (readonly [string, keyof ShapedFilter])[] = [
+  const range =
+    def.type === "numberRange" || def.type === "dateRange"
+      ? RANGE_PARTS[def.type]
+      : [];
+  return [
     [def.key, "value"],
     [def.key + FILTER_OP_SUFFIX, "op"],
+    ...range.map(([part, suffix]) => [def.key + suffix, part] as const),
   ];
-  if (def.type === "numberRange") {
-    const { start, end } = RANGE_SUFFIXES.numberRange;
-    own.push([def.key + start, "min"], [def.key + end, "max"]);
-  }
-  if (def.type === "dateRange") {
-    const { start, end } = RANGE_SUFFIXES.dateRange;
-    own.push([def.key + start, "from"], [def.key + end, "to"]);
-  }
-  return own;
 }
 
 /**
@@ -787,7 +769,7 @@ function valueProblem(
   condition: QueryCondition
 ): string | undefined {
   const { value, op } = condition;
-  if (op === "empty" || op === "notEmpty") return undefined;
+  if (isValuelessFilterOp(op)) return undefined;
   const check = VALUE_CHECKS[def.type];
   return check?.(condition, Array.isArray(value) ? value : [value], def);
 }

@@ -4,8 +4,8 @@
  * The provider owns the chooser's uncontrolled value. A table that never
  * imports this feature never mounts or bundles that state.
  */
-import { DEFAULT_DENSITY } from "@adapttable/core";
-import { coreDensityChooser } from "@adapttable/core/binding";
+
+import { coreDensityChooser, DEFAULT_DENSITY } from "@adapttable/core/binding";
 import { type ReactNode, useMemo, useState } from "react";
 
 import type { Density } from "../url/useDensityUrlState";

@@ -2,11 +2,14 @@
 import {
   type ColumnGroupRecord,
   type ColumnLayoutState,
+  type UseColumnLayoutResult,
+} from "@adapttable/core";
+import {
   columnLayoutVisibleColumns,
   columnPinInsets,
   createColumnLayoutController,
-  type UseColumnLayoutResult,
-} from "@adapttable/core";
+  type TableStore,
+} from "@adapttable/core/binding";
 import {
   computed,
   type ComputedRef,
@@ -19,7 +22,14 @@ import {
 import type { ColumnDef } from "../columnDef";
 import { scheduleTick } from "../scheduleTick";
 import { type MaybeRefOrGetterOptional, useExternalStore } from "../store";
+import { injectTableStore } from "../tableStore";
+
 export interface ColumnLayoutOptions {
+  /**
+   * The table's store to keep the layout in; the store of the table this
+   * component is inside, or one of its own, when absent.
+   */
+  readonly store?: TableStore;
   readonly columnLayout?: MaybeRefOrGetterOptional<ColumnLayoutState>;
   readonly defaultColumnLayout?: Partial<ColumnLayoutState>;
   readonly onColumnLayoutChange?: (next: ColumnLayoutState) => void;
@@ -38,7 +48,8 @@ export function useColumnLayout<TRow>(
   collapsible?: MaybeRefOrGetter<boolean>
 ): ComputedRef<ColumnLayout<TRow>> {
   const controller = createColumnLayoutController<TRow, ColumnDef<TRow>>(
-    toValue(options).defaultColumnLayout
+    toValue(options).defaultColumnLayout,
+    { store: toValue(options).store ?? injectTableStore() }
   );
   let disposed = false;
   onScopeDispose(() => {

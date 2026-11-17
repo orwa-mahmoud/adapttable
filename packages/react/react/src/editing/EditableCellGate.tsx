@@ -7,6 +7,7 @@ import {
   booleanDraft,
   cellConflictAsk,
   controllerConflictAsk,
+  type EditableCellEditorCtrl,
   editableCellErrorId,
   editableCellPresentation,
   editorKeyRestoresFocus,
@@ -33,6 +34,7 @@ import { EditingCellFrame } from "./EditingCellFrame";
 import { BatchEditCell, RowEditCell } from "./RowEditGate";
 
 export type { EditableCellButtonProps } from "@adapttable/core/binding";
+export type { EditableCellEditorCtrl } from "@adapttable/core/editing";
 
 /**
  * Kit activate control the gate calls while the cell is idle —
@@ -50,55 +52,6 @@ export type EditableCellActivateProps =
  * @public
  */
 export type EditableCellSlots = NeutralEditableCellSlots<ReactNode>;
-
-/**
- * Props for a kit-native editor while a cell is active.
- *
- * @public
- */
-export interface EditableCellEditorCtrl {
-  /** The value being edited, as text. */
-  draft: string;
-  /** Replaces the draft on every keystroke. */
-  setDraft: (value: string) => void;
-  /** Handles Enter, Escape and Tab for the editor. */
-  onEditorKeyDown: (event: {
-    key: string;
-    preventDefault: () => void;
-    shiftKey?: boolean;
-  }) => void;
-  /** Commits the draft when focus leaves the editor. */
-  commitOnBlur: () => void;
-  /** The editor shape this column declared. */
-  editor: NonNullable<ReturnType<typeof editableCellController>["editor"]>;
-  /** Choices for a select editor, empty for other shapes. */
-  selectOptions: ReturnType<typeof editableCellController>["selectOptions"];
-  /**
-   * A validator's message for this cell, when the last commit was rejected.
-   * Wire it to the kit's own error surface (Mantine's `error`, MUI's
-   * `helperText`, …) — and it is on the DOM either way, see `errorId`.
-   */
-  error?: string;
-  /** Whether an async validator is still deciding. */
-  validating: boolean;
-  /**
-   * `id` of the element holding the message. Put it on the editor's
-   * `aria-describedby` so the message is announced with the field, and set
-   * `aria-invalid` when `error` is set.
-   */
-  errorId: string;
-  /**
-   * Attach as the editor's `ref` so the table decides what takes focus.
-   *
-   * In cell mode that is this editor, every time. In row mode a whole row opens
-   * at once, and only the FIRST field should take focus — nine editors each
-   * calling focus on mount would leave the reader at the last column of the row
-   * they just opened.
-   */
-  focusRef: (node: { focus: () => void } | null) => void;
-  /** A live row changed under this editor. */
-  conflict?: boolean;
-}
 
 /**
  * Opt-in cell wrapper: plain display when editing is off; double-click /

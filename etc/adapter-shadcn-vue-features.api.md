@@ -125,15 +125,11 @@ export function agentApproval(): StaticTableFeature;
 export { AgentApprovalProps }
 
 // @public
-export function BasicFilterField<TRow>(props: BasicFilterFieldProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const BasicFilterField: (<TRow>(props: BasicFilterFieldProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace BasicFilterField {
-    var // (undocumented)
+}>) & {
     props: (keyof BasicFilterFieldProps<unknown>)[];
-}
+};
 
 // @public (undocumented)
 export interface BasicFilterFieldProps<TRow> extends FilterFieldOptions<TRow> {
@@ -146,15 +142,11 @@ export interface BasicFilterFieldProps<TRow> extends FilterFieldOptions<TRow> {
 }
 
 // @public (undocumented)
-export function BatchEditBar<TRow>(props: BatchEditBarProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const BatchEditBar: (<TRow>(props: BatchEditBarProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace BatchEditBar {
-    var // (undocumented)
+}>) & {
     props: ("labels" | "className" | "buttonClassName" | "batch" | "contested")[];
-}
+};
 
 // @public (undocumented)
 export function batchEditing<TRow>(onBatchEdit: NonNullable<TableEditingOptions<TRow>["onBatchEdit"]>, extras?: EditingLifecycleExtras<TRow>): TableFeature<TRow>;
@@ -184,15 +176,11 @@ export { CellSpanAppearance }
 export { CellSpanRequest }
 
 // @public
-export function ChecklistFilter<TRow>(props: ChecklistFilterProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const ChecklistFilter: (<TRow>(props: ChecklistFilterProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace ChecklistFilter {
-    var // (undocumented)
+}>) & {
     props: string[];
-}
+};
 
 export { ChecklistFilterProps }
 
@@ -218,7 +206,7 @@ export { ConfirmHandler }
 export { ConfirmRequest }
 
 // @public (undocumented)
-export function contextMenu<TRow>(options?: ContextMenuOptions<TRow>): TableFeature<TRow>;
+export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>): TableFeature<TRow>;
 
 export { DataTableClassNames }
 
@@ -228,15 +216,11 @@ export function densityChooser(): StaticTableFeature;
 export { dirtyIndicators }
 
 // @public
-export function EditableCell<TRow>(props: VueEditableCellProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const EditableCell: (<TRow>(props: VueEditableCellProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace EditableCell {
-    var // (undocumented)
+}>) & {
     props: ["editing", "row", "column", "rowId", "rowIndex", "rows", "columns", "rowKey", "editLabel", "undoLabel", "display"];
-}
+};
 
 export { editHistory }
 
@@ -287,26 +271,18 @@ export interface FilterChipsProps extends ActiveFilterChipsSlotProps {
 export { FilterDef }
 
 // @public
-export function FilterField<TRow>(props: BasicFilterFieldProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const FilterField: (<TRow>(props: BasicFilterFieldProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace FilterField {
-    var // (undocumented)
+}>) & {
     props: (keyof BasicFilterFieldProps<unknown>)[];
-}
+};
 
 // @public (undocumented)
-export function FilterHeaderControl<TRow>(props: FilterHeaderControlOptions<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const FilterHeaderControl: (<TRow>(props: FilterHeaderControlOptions<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace FilterHeaderControl {
-    var // (undocumented)
+}>) & {
     props: (keyof FilterHeaderControlOptions<unknown>)[];
-}
+};
 
 export { FilterHeaderControlOptions }
 
@@ -318,15 +294,11 @@ export { FilterHeaderRowProps }
 export { FilterOption }
 
 // @public (undocumented)
-export function FilterPanel<TRow>(props: FilterPanelProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const FilterPanel: (<TRow>(props: FilterPanelProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace FilterPanel {
-    var // (undocumented)
+}>) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface FilterPanelProps<TRow> {
@@ -343,15 +315,11 @@ export function filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: Filte
 export type FiltersOptions = NonNullable<Parameters<typeof filters_2>[1]>;
 
 // @public (undocumented)
-export function FilterTree<TRow>(props: FilterTreeBuilderProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const FilterTree: (<TRow>(props: FilterTreeBuilderProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace FilterTree {
-    var // (undocumented)
+}>) & {
     props: (keyof FilterTreeBuilderProps<unknown>)[];
-}
+};
 
 export { FilterTreeBuilderProps }
 
@@ -398,15 +366,11 @@ export { GroupNode }
 export { GroupSort }
 
 // @public (undocumented)
-export function HeaderFilter<TRow>(props: HeaderFilterProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const HeaderFilter: (<TRow>(props: HeaderFilterProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace HeaderFilter {
-    var // (undocumented)
+}>) & {
     props: (keyof HeaderFilterProps<unknown>)[];
-}
+};
 
 // @public (undocumented)
 export interface HeaderFilterProps<TRow> extends HeaderFilterOptions<TRow> {
@@ -451,15 +415,11 @@ export { RowAppearanceOptions }
 export { rowDetail }
 
 // @public (undocumented)
-export function RowEditActions<TRow>(props: RowEditActionsProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const RowEditActions: (<TRow>(props: RowEditActionsProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace RowEditActions {
-    var // (undocumented)
+}>) & {
     props: ["rowEditing", "row", "rowId", "labels", "className", "buttonClassName", "icons", "conflict", "showBegin"];
-}
+};
 
 export { RowEditIcons }
 

@@ -1,20 +1,22 @@
 /** Vue lifetime and DOM attributes over the authoritative neutral grid controller. */
 import {
   type CellRange,
+  type GridCell,
+  type GridFocusControllerOptions,
+} from "@adapttable/core";
+import {
   cellRangeKey,
   createGridFocusController,
-  defaultLabels,
-  type GridCell,
+  GRID_LABELS,
   gridCellAttributes,
   gridColumnHeaderAttributes,
   gridContainerAttributes,
   gridFillHandleCell,
-  type GridFocusControllerOptions,
+  type GridFocusState,
   gridRowAttributes,
   isGridColumnSelected,
   reportedCellRange,
-} from "@adapttable/core";
-import type { GridFocusState } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import {
   computed,
   type ComputedRef,
@@ -30,8 +32,10 @@ import {
   type ExternalStoreOptions,
   requireScope,
   useExternalStore,
+  useOptionFields,
   useScopeActivity,
 } from "../store";
+import { injectTableStore } from "../tableStore";
 export interface GridFocusOptions<
   TRow,
 > extends GridFocusControllerOptions<TRow> {
@@ -40,6 +44,9 @@ export interface GridFocusOptions<
   /** Multi-cell range changes, including the initial null. */
   readonly reportRange?: (range: CellRange | null) => void;
 }
+/** How many cell addresses keep their handlers before the set starts over. */
+const CELL_HANDLER_LIMIT = 4096;
+
 export function useGridFocus<TRow>(
   input: MaybeRefOrGetter<GridFocusOptions<TRow>>,
   activity: ExternalStoreOptions = {}
@@ -47,7 +54,16 @@ export function useGridFocus<TRow>(
   requireScope("useGridFocus");
   const owner = useScopeActivity();
   let disposed = false;
-  const options = computed(() => toValue(input));
+  // Read option by option: a host that writes a new rows array back after an
+  // edit changes the rows field alone, and the focus state below reads only
+  // what the rows array decides (how many rows are loaded).
+  const options = useOptionFields(() => toValue(input));
+  const loadedRows = computed(() => options.value.rows.length);
+  const columnCount = computed(() => options.value.columns.length);
+  const canFill = computed(() => options.value.onFill !== undefined);
+  const fillHandleLabel = computed(
+    () => options.value.labels?.gridFillHandle ?? GRID_LABELS.gridFillHandle
+  );
   const active = computed(
     () =>
       !disposed &&
@@ -59,7 +75,9 @@ export function useGridFocus<TRow>(
     ...options.value,
     enabled: active.value,
   }));
-  const controller = createGridFocusController(configuration.value);
+  const controller = createGridFocusController(configuration.value, {
+    store: injectTableStore(),
+  });
   watch(configuration, (next) => controller.configure(next), { flush: "sync" });
   const snapshot = useExternalStore(controller, { active });
   watch(
@@ -110,12 +128,13 @@ export function useGridFocus<TRow>(
   const keyDown = (event: KeyboardEvent): void => {
     if (event.defaultPrevented || event.isComposing || event.altKey) return;
     const target = event.target;
-    if (
-      target instanceof Element &&
-      target !== event.currentTarget &&
-      !target.matches("[data-grid-cell]")
-    )
-      return;
+    if (target instanceof Element && target !== event.currentTarget) {
+      // An open editor keeps its own keys. A control inside the cell — the
+      // activator a committed edit hands focus back to — is still the grid.
+      if (target.closest("input, textarea, select, [contenteditable='true']"))
+        return;
+      if (!target.closest("[data-grid-cell]")) return;
+    }
     run(() => controller.keyDown(event));
   };
   const syncFocus = (): void => {
@@ -170,6 +189,36 @@ export function useGridFocus<TRow>(
     controller.releasePointer();
     controller.attach(null);
   });
+  // A cell's handlers depend only on its address, so they are kept: a focus
+  // move changes the attributes of the cells it moves between, not every
+  // cell's handlers, and so redraws only those rows. Kept for at most
+  // CELL_HANDLER_LIMIT addresses, so a long scroll does not grow it unbounded.
+  const cellHandlers = new Map<string, Record<string, unknown>>();
+  const handlersFor = (cell: GridCell): Record<string, unknown> => {
+    const key = `${String(cell.row)}:${String(cell.col)}`;
+    let handlers = cellHandlers.get(key);
+    if (!handlers) {
+      if (cellHandlers.size >= CELL_HANDLER_LIMIT) cellHandlers.clear();
+      handlers = {
+        onMouseDown: (event: MouseEvent) => {
+          if (
+            !(event.target instanceof Element) ||
+            !event.target.closest(
+              "button,input,select,textarea,summary,label,a[href],[contenteditable=true],[role=button]"
+            )
+          )
+            pressCell(cell, event);
+        },
+        onMouseEnter: () => enterCell(cell),
+        onMouseUp: () => run(controller.releaseCell),
+        onFocus: (event: FocusEvent) => {
+          if (event.target === event.currentTarget) trackFocus(cell);
+        },
+      };
+      cellHandlers.set(key, handlers);
+    }
+    return handlers;
+  };
   return computed(() => {
     const current = options.value;
     const enabled = active.value;
@@ -180,7 +229,7 @@ export function useGridFocus<TRow>(
       fillPreview,
       announcement,
     } = snapshot.value;
-    const windowed = current.rowCount > current.rows.length;
+    const windowed = current.rowCount > loadedRows.value;
     const getCellProps = (cell: GridCell): Record<string, unknown> =>
       toVueAttrs({
         ...gridCellAttributes(
@@ -196,24 +245,7 @@ export function useGridFocus<TRow>(
           },
           cell
         ),
-        ...(enabled
-          ? {
-              onMouseDown: (event: MouseEvent) => {
-                if (
-                  !(event.target instanceof Element) ||
-                  !event.target.closest(
-                    "button,input,select,textarea,summary,label,a[href],[contenteditable=true],[role=button]"
-                  )
-                )
-                  pressCell(cell, event);
-              },
-              onMouseEnter: () => enterCell(cell),
-              onMouseUp: () => run(controller.releaseCell),
-              onFocus: (event: FocusEvent) => {
-                if (event.target === event.currentTarget) trackFocus(cell);
-              },
-            }
-          : {}),
+        ...(enabled ? handlersFor(cell) : {}),
       });
     const getRowProps = (index: number) =>
       gridRowAttributes({ enabled, windowed }, index);
@@ -226,10 +258,9 @@ export function useGridFocus<TRow>(
       fillHandleCell: gridFillHandleCell({
         enabled,
         range,
-        canFill: current.onFill !== undefined,
+        canFill: canFill.value,
       }),
-      fillHandleLabel:
-        current.labels?.gridFillHandle ?? defaultLabels.gridFillHandle,
+      fillHandleLabel: fillHandleLabel.value,
       getFillHandleProps: () =>
         toVueAttrs({
           onMouseDown: pressFill,
@@ -241,7 +272,7 @@ export function useGridFocus<TRow>(
             windowed,
             columnsWindowed: current.columnsWindowed === true,
             rowCount: current.rowCount,
-            colCount: current.columns.length,
+            colCount: columnCount.value,
           }),
           ...(enabled
             ? {
@@ -279,7 +310,7 @@ export function useGridFocus<TRow>(
             enabled,
             range,
             firstRowIndex: first,
-            loadedRows: current.rows.length,
+            loadedRows: loadedRows.value,
           },
           col
         ),

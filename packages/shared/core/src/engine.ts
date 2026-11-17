@@ -78,6 +78,7 @@ export type {
   ColumnModelFilter,
   ExtraFilters,
   FilterValue,
+  RowCallback,
   SortableValue,
   SortDirection,
 } from "./columnModel";
@@ -141,10 +142,12 @@ export type {
 } from "./grouping/groupAggregateOverrides";
 export type {
   GroupingChipKeyboardProps,
+  GroupingDragEventLike,
   GroupingDragProps,
   GroupingDragSource,
   GroupingDragState,
   GroupingDropProps,
+  GroupingKeyEventLike,
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "./grouping/groupingPanelModel";
@@ -155,6 +158,10 @@ export type {
   GroupPaging,
   GroupSort,
 } from "./grouping/groupRows";
+export type {
+  GroupingPanelSource,
+  GroupingPanelStateInput,
+} from "./layout/tableChromeState";
 export type { IncrementalViewConfig } from "./rows/incremental";
 export type { SortLevel } from "./sort/compare";
 export type {

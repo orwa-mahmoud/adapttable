@@ -5,6 +5,7 @@
  * table's scroll width matches the columns it claims. Aria-hidden: it is
  * scaffolding, not data.
  */
+import type { ColumnSpacerSide } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -43,7 +44,7 @@ export class AdaptColumnSpacer {
   /** Pixel width of the columns this cell stands in for. */
   readonly width = input.required<number>();
   /** Which side of the window it sits on, for the part name. */
-  readonly side = input.required<"start" | "end">();
+  readonly side = input.required<ColumnSpacerSide>();
   /** A header cell or a body cell. */
   readonly as = input<"td" | "th">("td");
 

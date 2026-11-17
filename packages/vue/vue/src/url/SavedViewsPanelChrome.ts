@@ -1,14 +1,13 @@
 /** The management panel owns rename state and structure; kits own controls. */
+import { type SavedView } from "@adapttable/core";
 import {
   createSavedViewRenameController,
-  resolveLabels,
-  type SavedView,
+  resolveFeatureLabels,
+  SAVED_VIEW_LABELS,
   type SavedViewGlyph,
   savedViewRowControls,
-} from "@adapttable/core";
-import type {
-  SavedViewsPanelChromeProps as NeutralPanelProps,
-  SavedViewsPanelSlots as NeutralPanelSlots,
+  type SavedViewsPanelChromeProps as NeutralPanelProps,
+  type SavedViewsPanelSlots as NeutralPanelSlots,
 } from "@adapttable/core/binding";
 import {
   defineComponent,
@@ -20,6 +19,8 @@ import {
 } from "vue";
 
 import { useExternalStore, useScopeActivity } from "../store";
+
+const SAVED_VIEW_GROUPS = [SAVED_VIEW_LABELS] as const;
 export type SavedViewsPanelSlots = NeutralPanelSlots<VNodeChild>;
 export type SavedViewsPanelChromeProps = NeutralPanelProps<VNodeChild>;
 export type {
@@ -120,7 +121,7 @@ export const SavedViewsPanelChrome = /*#__PURE__*/ defineComponent(
       generation++;
     });
     const rowFor = (view: SavedView, index: number): VNodeChild => {
-      const labels = resolveLabels(props.labels);
+      const labels = resolveFeatureLabels(props.labels, SAVED_VIEW_GROUPS);
       const controls = props.slots;
       const { Surface, Row, Input, Empty } = controls;
       const isEditing = state.value.editing === view.name;
@@ -182,7 +183,7 @@ export const SavedViewsPanelChrome = /*#__PURE__*/ defineComponent(
       });
     };
     return () => {
-      const labels = resolveLabels(props.labels);
+      const labels = resolveFeatureLabels(props.labels, SAVED_VIEW_GROUPS);
       const controls = props.slots;
       for (const key of ["Surface", "Row", "Input", "Empty"] as const)
         if (!controls[key])

@@ -28,6 +28,12 @@ scopes (`page`, `all`, `selected`, `range`) and the same column subset.
 The button relabels itself **Export PDF** from `labels.exportFile("pdf")`.
 `buildTablePdf` is the same file, for a host assembling rows by hand.
 
+Every binding ships the same writer as a feature on the same subpath:
+`exportPdf()` from `@adapttable/react/pdf`, `@adapttable/vue/pdf` or
+`@adapttable/angular/pdf` is the export with `pdfWriter()`, and each of those
+entries re-exports core's print and PDF helpers. A kit's export entry adds the
+toolbar button.
+
 Print is a different verb. `downloadExportFile` cannot open a dialog, so
 `openPrintLayout` (an `ExportTable`) and `printTable` (rows and columns)
 load `buildPrintDocument` into a hidden iframe and call `window.print()`.

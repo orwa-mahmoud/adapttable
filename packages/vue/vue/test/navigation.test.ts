@@ -487,3 +487,40 @@ it("reveals column checkboxes for hover, focus and selection and disposes its me
   await nextTick();
   expect(removed).toHaveBeenCalled();
 });
+it("undoes a committed edit from a control inside the cell", async () => {
+  const undo = vi.fn(() => 1);
+  const scope = effectScope();
+  stops.push(() => scope.stop());
+  const root = document.createElement("div");
+  document.body.append(root);
+  stops.push(() => root.remove());
+  const app = createApp(
+    defineComponent({
+      setup() {
+        const focus = useGridFocus(() => ({
+          enabled: true,
+          rows,
+          columns,
+          rowCount: rows.length,
+          onUndo: undo,
+        }));
+        return () =>
+          h("div", focus.value.getGridProps(), [
+            h("div", { "data-grid-cell": "0:1" }, [
+              h("button", { type: "button" }, "Budget"),
+            ]),
+            h("input"),
+          ]);
+      },
+    })
+  );
+  app.mount(root);
+  stops.push(() => app.unmount());
+  await nextTick();
+  const button = element<HTMLButtonElement>(root, "button");
+  await key(button, "z", { ctrlKey: true });
+  expect(undo).toHaveBeenCalledOnce();
+  const field = element<HTMLInputElement>(root, "input");
+  await key(field, "z", { ctrlKey: true });
+  expect(undo).toHaveBeenCalledOnce();
+});

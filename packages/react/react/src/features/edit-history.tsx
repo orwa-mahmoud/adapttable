@@ -10,22 +10,20 @@ import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { asBatchGesture, useTableEditHistory } from "../editing/editHistory";
 import type { EditHistoryHandle, EditHistoryOptions } from "../props";
 import { slotRender } from "./providers";
-import { EDIT_HISTORY_LIVE, type EditHistoryLiveSlotProps } from "./slotKeys";
+import {
+  EDIT_HISTORY_LIVE,
+  type EditHistoryLiveDraw,
+  type EditHistoryLiveSlotProps,
+} from "./slotKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
-function LiveEditHistory({
+function LiveEditHistory<TRow>({
   children,
   editHistory,
   columns,
   onCellEdit,
   onBatchEdit,
-}: EditHistoryLiveSlotProps<never> & {
-  /**
-   * The host's batch callback. Recorded here, inside the editing entry, so a
-   * table that never imports editing does not carry the gesture wrapper.
-   */
-  readonly onBatchEdit?: NonNullable<Parameters<typeof asBatchGesture>[0]>;
-}): ReactNode {
+}: EditHistoryLiveSlotProps<TRow>): ReactNode {
   const result = useTableEditHistory({
     editHistory,
     columns,
@@ -35,10 +33,12 @@ function LiveEditHistory({
     typeof editHistory === "object" ? editHistory.onChange : undefined,
     result.history
   );
+  // The host's batch callback is recorded here, inside the editing entry, so
+  // a table that never imports editing does not carry the gesture wrapper.
   return children({
     ...result,
     onBatchEdit: asBatchGesture(onBatchEdit, result.history.record),
-  } as Parameters<typeof children>[0]);
+  });
 }
 
 /**
@@ -94,7 +94,9 @@ export function editHistory(
   return {
     ...coreEditHistory(options),
     renders: [
-      slotRender(EDIT_HISTORY_LIVE, (props) => <LiveEditHistory {...props} />),
+      slotRender<EditHistoryLiveDraw>(EDIT_HISTORY_LIVE, (props) => (
+        <LiveEditHistory {...props} />
+      )),
     ],
   };
 }

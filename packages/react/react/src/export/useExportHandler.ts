@@ -10,16 +10,18 @@
  * kits.
  */
 import {
-  createExportController,
   type ExportAllControls,
   type ExportAllResult,
+  type TableLabels,
+} from "@adapttable/core";
+import {
+  createExportController,
   exportButtonLabel,
+  type ExportHandlerState,
   resolveExportAnnouncement,
   resolveExportDisabledReason,
   resolveExportProgressState,
-  type TableLabels,
-} from "@adapttable/core";
-import type { ExportHandlerState } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 export type { ExportProgressState, ExportStatus } from "@adapttable/core";
 export type { ExportHandlerState } from "@adapttable/core/binding";

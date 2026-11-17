@@ -3,21 +3,24 @@
  * signals.
  */
 import {
+  type BatchEditHandler,
   type BatchEditingState,
-  type BatchRowEdit,
   type CellEditingState,
   type EditableColumnLike,
   type EditEventHandler,
   type FeatureHostState,
+  type RowEditHandler,
   type RowEditingState,
 } from "@adapttable/core";
 import {
   batchEditingView,
+  type BatchEditStoreOptions,
   cellEditingView,
   createBatchEditStore,
   createCellEditSession,
   createRowEditStore,
   rowEditingView,
+  type RowEditStoreOptions,
 } from "@adapttable/core/editing";
 import {
   assertInInjectionContext,
@@ -29,43 +32,16 @@ import {
 } from "@angular/core";
 
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
+import { tableStoreOf } from "../tableStore";
 
+export type { BatchRowEdit, CellEditHandler } from "@adapttable/core";
 export type {
+  BatchEditHandler,
   BatchEditingState,
-  BatchRowEdit,
   CellEditingState,
+  RowEditHandler,
   RowEditingState,
 };
-
-/**
- * A cell-edit write the host applies.
- *
- * @public
- */
-export type CellEditHandler<TRow> = (
-  row: TRow,
-  columnKey: string,
-  value: unknown
-) => void | Promise<void>;
-
-/**
- * A row-edit write the host applies — one patch for every changed field.
- *
- * @public
- */
-export type RowEditHandler<TRow> = (
-  row: TRow,
-  patch: Readonly<Record<string, unknown>>
-) => void | Promise<void>;
-
-/**
- * A batch-edit write the host applies — every pending row at once.
- *
- * @public
- */
-export type BatchEditHandler<TRow> = (
-  edits: readonly BatchRowEdit<TRow>[]
-) => void | Promise<void>;
 
 /**
  * Lifecycle observers for {@link injectCellEditing}.
@@ -92,7 +68,14 @@ export interface CellEditingOptions<TRow = unknown> {
  *
  * @public
  */
-export interface RowEditingInjectOptions<TRow> {
+export interface RowEditingInjectOptions<TRow> extends Pick<
+  RowEditStoreOptions<TRow>,
+  | "validateRow"
+  | "applyEdit"
+  | "formatEditError"
+  | "onEditError"
+  | "onValidationFail"
+> {
   /** Whether row editing is armed. */
   readonly enabled?: MaybeSignal<boolean>;
   /** The columns, for seeding drafts and parsing them back. */
@@ -116,7 +99,14 @@ export interface RowEditingInjectOptions<TRow> {
  *
  * @public
  */
-export interface BatchEditingInjectOptions<TRow> {
+export interface BatchEditingInjectOptions<TRow> extends Pick<
+  BatchEditStoreOptions<TRow>,
+  | "validateRow"
+  | "applyEdit"
+  | "formatEditError"
+  | "onEditError"
+  | "onValidationFail"
+> {
   /** Whether batch editing is armed. */
   readonly enabled?: MaybeSignal<boolean>;
   /** The columns, for seeding drafts and parsing them back. */
@@ -149,10 +139,10 @@ export function injectCellEditing<TRow = unknown>(
 ): Signal<CellEditingState> {
   if (!options.injector) assertInInjectionContext(injectCellEditing);
   const injector = options.injector ?? inject(Injector);
-  const session = createCellEditSession<TRow>({
-    onEditStart: options.onEditStart,
-    onEditCancel: options.onEditCancel,
-  });
+  const session = createCellEditSession<TRow>(
+    { onEditStart: options.onEditStart, onEditCancel: options.onEditCancel },
+    { store: tableStoreOf(injector) }
+  );
   effect(
     () => {
       session.configure({
@@ -179,7 +169,7 @@ export function injectRowEditing<TRow>(
 ): Signal<RowEditingState<TRow>> {
   if (!options.injector) assertInInjectionContext(injectRowEditing);
   const injector = options.injector ?? inject(Injector);
-  const store = createRowEditStore<TRow>({
+  const storeOptions = () => ({
     enabled: readMaybe(options.enabled) ?? false,
     columns: readMaybe(options.columns),
     onRowEdit: options.onRowEdit,
@@ -187,18 +177,18 @@ export function injectRowEditing<TRow>(
     onEditCancel: options.onEditCancel,
     onEditCommit: options.onEditCommit,
     featureHost: options.featureHost,
+    validateRow: options.validateRow,
+    applyEdit: options.applyEdit,
+    formatEditError: options.formatEditError,
+    onEditError: options.onEditError,
+    onValidationFail: options.onValidationFail,
+  });
+  const store = createRowEditStore<TRow>(storeOptions(), {
+    store: tableStoreOf(injector),
   });
   effect(
     () => {
-      store.configure({
-        enabled: readMaybe(options.enabled) ?? false,
-        columns: readMaybe(options.columns),
-        onRowEdit: options.onRowEdit,
-        onEditStart: options.onEditStart,
-        onEditCancel: options.onEditCancel,
-        onEditCommit: options.onEditCommit,
-        featureHost: options.featureHost,
-      });
+      store.configure(storeOptions());
     },
     { injector }
   );
@@ -219,7 +209,7 @@ export function injectBatchEditing<TRow>(
 ): Signal<BatchEditingState<TRow>> {
   if (!options.injector) assertInInjectionContext(injectBatchEditing);
   const injector = options.injector ?? inject(Injector);
-  const store = createBatchEditStore<TRow>({
+  const storeOptions = () => ({
     enabled: readMaybe(options.enabled) ?? false,
     columns: readMaybe(options.columns),
     onBatchEdit: options.onBatchEdit,
@@ -227,18 +217,18 @@ export function injectBatchEditing<TRow>(
     onEditCancel: options.onEditCancel,
     onEditCommit: options.onEditCommit,
     featureHost: options.featureHost,
+    validateRow: options.validateRow,
+    applyEdit: options.applyEdit,
+    formatEditError: options.formatEditError,
+    onEditError: options.onEditError,
+    onValidationFail: options.onValidationFail,
+  });
+  const store = createBatchEditStore<TRow>(storeOptions(), {
+    store: tableStoreOf(injector),
   });
   effect(
     () => {
-      store.configure({
-        enabled: readMaybe(options.enabled) ?? false,
-        columns: readMaybe(options.columns),
-        onBatchEdit: options.onBatchEdit,
-        onEditStart: options.onEditStart,
-        onEditCancel: options.onEditCancel,
-        onEditCommit: options.onEditCommit,
-        featureHost: options.featureHost,
-      });
+      store.configure(storeOptions());
     },
     { injector }
   );

@@ -73,7 +73,7 @@ describe("rowReorderAnnouncements", () => {
   it("reads each label at use, falling back per label", () => {
     const table: { labels?: Record<string, unknown> } = {};
     const said = rowReorderAnnouncements(() => table.labels);
-    expect(said.rowLifted(2)).toBe("Row lifted, position 2");
+    expect(said.rowLifted(2)).toBe("Row 2 lifted");
     expect(said.rowMoved(1, 3)).toBe("Row moved from 1 to 3");
     expect(said.rowMovedToGroup("West")).toBe("Row moved to West");
     expect(said.rowMovedUnder("Root")).toBe("Row moved under Root");
@@ -703,7 +703,7 @@ describe("keyboard grab", () => {
       lifted: { rowId: "a", from: 0 },
       overIndex: 0,
       overPosition: "before",
-      announcement: "Row lifted, position 11",
+      announcement: "Row 11 lifted",
     });
     reorder.keyDown(keyEvent("ArrowDown"), slot(0, 10));
     reorder.keyDown(keyEvent("ArrowRight"), slot(0, 10));

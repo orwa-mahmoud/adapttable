@@ -1,6 +1,5 @@
 import {
   type ColumnMetadata,
-  createFrontendSourceWith,
   type ExtraFilters,
   type FrontendEngineFactory,
   type QueryFilterGroup,
@@ -10,6 +9,7 @@ import {
 import {
   type CachedSnapshot,
   cachedSnapshot,
+  createFrontendSourceWith,
   sourceViewKey,
 } from "@adapttable/core/binding";
 import { createBasicTableEngine } from "@adapttable/core/engine";

@@ -167,6 +167,8 @@ const CONTRACT = [
  * `row` has two such routes in React. A kit that lays out its own body spreads
  * `getRowProps` directly; a kit thinned onto the shared desktop assembly
  * receives the same props already merged, through `createDesktopRow`.
+ * A kit drawn by `createDesktopTable` receives `row`, `cell`, `table`,
+ * `thead`, `tbody` and `header-cell` from the binding's own rows and cells.
  * Vue renders its imported Chrome with complete model attrs and calls the
  * neutral `rowAttributes` API through its binding; both sides are checked.
  * Angular assembles each body entry from `table.rowAttrs` (or the grid's
@@ -177,10 +179,12 @@ const CONTRACT = [
  */
 export const CORE_GETTER_PARTS = {
   react: {
-    row: ["getRowProps", "createDesktopRow"],
-    table: ["DesktopTableChrome"],
-    thead: ["DesktopTableChrome"],
-    tbody: ["DesktopTableChrome"],
+    row: ["getRowProps", "createDesktopRow", "createDesktopTable"],
+    table: ["DesktopTableChrome", "createDesktopTable"],
+    thead: ["DesktopTableChrome", "createDesktopTable"],
+    tbody: ["DesktopTableChrome", "createDesktopTable"],
+    cell: ["createDesktopTable"],
+    "header-cell": ["createDesktopTable"],
   },
   angular: { row: ["rowAttrs"] },
   vue: { row: ["rowAttributes"] },
@@ -256,7 +260,7 @@ const KIT_PART_PATTERNS = [
  */
 const CHROME_PART_PATTERNS = [
   ...KIT_PART_PATTERNS,
-  /\bpart[=:]\s*["'](?<part>[a-z0-9-]+)["']/g,
+  /\b(?:part|[a-z][A-Za-z]*Part)[=:]\s*["'](?<part>[a-z0-9-]+)["']/g,
   /\bpart\]?\s*=\s*(["'])\s*(["'])(?<part>[a-z0-9-]+)\2\s*\1/g,
 ];
 
@@ -1174,26 +1178,60 @@ function renderedContractParts(kit, root) {
   if (test === undefined) return new Set();
   const file = join(kitDir(kit, root), test);
   if (!existsSync(file)) return new Set();
-  const source = ts.createSourceFile(
+  const source = parseTestSource(file);
+  const own = assertedStructuralParts(source);
+  if (own.size > 0) return own;
+  // A kit that runs its binding's shared suite proves the parts that suite
+  // lists and asserts on the kit's own rendered table.
+  return new Set(
+    relativeImports(source, dirname(file)).flatMap((imported) => [
+      ...assertedStructuralParts(parseTestSource(imported)),
+    ])
+  );
+}
+
+function parseTestSource(file) {
+  return ts.createSourceFile(
     file,
     readFileSync(file, "utf8"),
     ts.ScriptTarget.Latest,
     true
   );
-  const listed = source.statements
-    .filter(ts.isVariableStatement)
-    .flatMap((statement) => statement.declarationList.declarations)
-    .filter((declaration) => declaration.name.getText() === "STRUCTURAL_PARTS")
-    .flatMap((declaration) => {
-      let value = declaration.initializer;
+}
+
+/** The `STRUCTURAL_PARTS` a source lists, when it asserts the rendered list. */
+function assertedStructuralParts(source) {
+  if (!source.text.includes("toEqual([...STRUCTURAL_PARTS])")) return new Set();
+  const listed = [];
+  const visit = (node) => {
+    if (
+      ts.isVariableDeclaration(node) &&
+      node.name.getText(source) === "STRUCTURAL_PARTS"
+    ) {
+      let value = node.initializer;
       while (value && ts.isAsExpression(value)) value = value.expression;
-      return value && ts.isArrayLiteralExpression(value)
-        ? value.elements.filter(ts.isStringLiteral).map((item) => item.text)
-        : [];
-    });
-  return source.text.includes("toEqual([...STRUCTURAL_PARTS])")
-    ? new Set(listed)
-    : new Set();
+      if (value && ts.isArrayLiteralExpression(value)) {
+        listed.push(
+          ...value.elements.filter(ts.isStringLiteral).map((item) => item.text)
+        );
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  return new Set(listed);
+}
+
+/** The TypeScript files a source imports by relative path, that exist. */
+function relativeImports(source, dir) {
+  return source.statements
+    .filter(ts.isImportDeclaration)
+    .map((statement) => statement.moduleSpecifier)
+    .filter(ts.isStringLiteral)
+    .map((specifier) => specifier.text)
+    .filter((specifier) => specifier.startsWith("."))
+    .map((specifier) => join(dir, `${specifier}.ts`))
+    .filter((path) => existsSync(path));
 }
 
 function contractAccount(kit, part, parts, context) {

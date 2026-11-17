@@ -2,10 +2,8 @@
  * A column's resize handle, over core's pointer, keyboard and double-click
  * sizing. The kit stamps these props on the handle in the header cell.
  */
-import {
-  type ColumnResizeHandleProps,
-  columnResizeHandleProps,
-} from "@adapttable/core";
+import { type ColumnResizeHandleProps } from "@adapttable/core";
+import { columnResizeHandleProps } from "@adapttable/core/binding";
 
 export type { ColumnResizeHandleProps };
 

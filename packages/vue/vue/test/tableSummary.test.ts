@@ -1,4 +1,4 @@
-import { attachIncrementalView } from "@adapttable/core";
+import { attachIncrementalView } from "@adapttable/core/binding";
 import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, effectScope, h, shallowRef } from "vue";
 import { renderToString } from "vue/server-renderer";

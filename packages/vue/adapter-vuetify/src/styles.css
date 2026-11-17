@@ -101,6 +101,11 @@
   white-space: nowrap;
 }
 
+/* Row actions stay on one line, so a row is only as tall as its density. */
+:where(.adapttable-vuetify) [data-adapttable-part="actions-cell"] {
+  white-space: nowrap;
+}
+
 .adapttable-vuetify [data-adapttable-part="header-cell"] {
   font-weight: 600;
 }
@@ -191,6 +196,10 @@
   min-inline-size: 0;
   inline-size: 100%;
   text-transform: none;
+  text-align: start;
+  /* The button height is a floor: a cell taller than one line grows it. */
+  height: auto;
+  min-block-size: var(--v-btn-height);
 }
 
 .adapttable-vuetify [data-adapttable-part="row-edit-actions"],

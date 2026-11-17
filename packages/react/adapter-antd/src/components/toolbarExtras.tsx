@@ -1,88 +1,24 @@
 /**
- * The optional toolbar controls, each drawn with antd's own components.
- *
- * They render through `TOOLBAR_EXTRAS`, so the button and the feature that
- * makes it work arrive together: a table that never imports `/export` carries
- * neither the handler nor this button.
+ * The toolbar controls the features add, built by the binding from antd's
+ * buttons; the export keeps antd's own progress surface.
  */
 import {
-  type AdapterCommandPaletteTriggerProps,
-  type AdapterFindButtonProps,
-  ExportAnnouncer,
-  ExportProgressChrome,
+  createCommandPaletteButton,
+  createDensityButton,
+  createExportCsvButton,
+  createFindButton,
+  createFullscreenButton,
+  createPrintButton,
+  createUndoRedoButtons,
   type ExportProgressSurfaceSlotProps,
-  type ToolbarExtrasSlotProps,
 } from "@adapttable/react/adapter";
 import { Button, Card, Flex, Progress, Spin, Typography } from "antd";
 import type { ReactNode } from "react";
 
-export function UndoRedoButtons({
-  onUndo,
-  onRedo,
-  canUndo,
-  canRedo,
-  undoLabel,
-  redoLabel,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
-  if (!onUndo || !onRedo) return null;
-  return (
-    <>
-      <Button
-        data-adapttable-part="undo-button"
-        disabled={canUndo !== true}
-        onClick={onUndo}
-      >
-        {undoLabel}
-      </Button>
-      <Button
-        data-adapttable-part="redo-button"
-        disabled={canRedo !== true}
-        onClick={onRedo}
-      >
-        {redoLabel}
-      </Button>
-    </>
-  );
-}
+import { Button as ToolbarButton, buttonOfType } from "./kitPrimitives";
 
-export function ExportCsvButton(
-  props: Readonly<ToolbarExtrasSlotProps>
-): ReactNode {
-  const {
-    onExportCsv,
-    exportBusy,
-    exportAnnouncement = "",
-    exportProgressState = null,
-    exportLabel,
-    exportDisabled = false,
-    exportDisabledReason = "",
-    labels,
-  } = props;
-  if (!onExportCsv) return null;
-  return (
-    <>
-      {/* antd's own loading Button: the spinner replaces its icon slot and the
-          button disables itself, which is the kit's language for "working"
-          rather than a bare greyed-out control. */}
-      <Button
-        data-adapttable-part="export-csv-button"
-        onClick={onExportCsv}
-        loading={exportBusy}
-        aria-busy={exportBusy}
-        disabled={exportDisabled}
-        title={exportDisabled ? exportDisabledReason : undefined}
-      >
-        {exportLabel}
-      </Button>
-      <ExportProgressChrome
-        progress={exportProgressState}
-        labels={labels}
-        slots={{ Surface: ExportProgressSurface }}
-      />
-      <ExportAnnouncer announcement={exportAnnouncement} />
-    </>
-  );
-}
+/** Undo, redo and export: antd's default-size buttons. */
+const WideButton = /* @__PURE__ */ buttonOfType("link", "middle");
 
 function ExportProgressSurface({
   status,
@@ -201,90 +137,29 @@ function ExportProgressSurface({
   );
 }
 
-export function PrintButton({
-  onPrint,
-  printLabel,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
-  if (!onPrint) return null;
-  return (
-    <Button size="small" data-adapttable-part="print-button" onClick={onPrint}>
-      {printLabel}
-    </Button>
-  );
-}
+/** Undo and redo. */
+export const UndoRedoButtons =
+  /* @__PURE__ */ createUndoRedoButtons(WideButton);
 
-export function DensityButton({
-  density,
-  onDensityChange,
-  labels,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
-  return (
-    <Button
-      size="small"
-      aria-label={labels.density}
-      data-adapttable-part="density-toggle"
-      onClick={() => {
-        onDensityChange(density === "compact" ? "comfortable" : "compact");
-      }}
-    >
-      {density === "compact"
-        ? labels.densityCompact
-        : labels.densityComfortable}
-    </Button>
-  );
-}
+/** Export to CSV, with antd's progress surface for a long export. */
+export const ExportCsvButton = /* @__PURE__ */ createExportCsvButton(
+  WideButton,
+  ExportProgressSurface
+);
 
-export function FullscreenButton({
-  onToggleFullscreen,
-  isFullscreen,
-  labels,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
-  if (!onToggleFullscreen) return null;
-  return (
-    <Button
-      size="small"
-      aria-label={
-        isFullscreen === true ? labels.exitFullscreen : labels.enterFullscreen
-      }
-      data-adapttable-part="fullscreen-toggle"
-      onClick={onToggleFullscreen}
-    >
-      {isFullscreen === true ? "✕" : "⛶"}
-    </Button>
-  );
-}
+/** Print the table. */
+export const PrintButton = /* @__PURE__ */ createPrintButton(ToolbarButton);
 
-export function CommandPaletteButton({
-  labels,
-  onOpenPalette,
-  paletteOpen,
-}: Readonly<AdapterCommandPaletteTriggerProps>): ReactNode {
-  return (
-    <Button
-      size="small"
-      data-adapttable-part="command-palette-button"
-      aria-haspopup="dialog"
-      aria-expanded={paletteOpen}
-      onClick={onOpenPalette}
-    >
-      {labels.commandPalette}
-    </Button>
-  );
-}
+/** Switch between comfortable and compact rows. */
+export const DensityButton = /* @__PURE__ */ createDensityButton(ToolbarButton);
 
-export function FindButton({
-  labels,
-  onOpenFind,
-  findOpen,
-}: Readonly<AdapterFindButtonProps>): ReactNode {
-  return (
-    <Button
-      size="small"
-      data-adapttable-part="find-button"
-      aria-expanded={findOpen}
-      onClick={onOpenFind}
-    >
-      {labels.findInTable}
-    </Button>
-  );
-}
+/** Enter or leave fullscreen. */
+export const FullscreenButton =
+  /* @__PURE__ */ createFullscreenButton(ToolbarButton);
+
+/** Open the command palette. */
+export const CommandPaletteButton =
+  /* @__PURE__ */ createCommandPaletteButton(ToolbarButton);
+
+/** Open find in the table. */
+export const FindButton = /* @__PURE__ */ createFindButton(ToolbarButton);

@@ -1,110 +1,119 @@
+/** The in-place cell editor and editable cell, drawn with native inputs. */
 import {
-  type ColumnDef,
-  type EditableCellEditing,
-  type EditableCellEditorCtrl,
-  EditableCellGate,
-} from "@adapttable/react";
-import {
-  commitBooleanDraft,
-  editorInputType,
-  editorValidationProps,
-  isBooleanEditor,
-  isDraftChecked,
-  isMultiSelectEditor,
-  isSelectEditor,
+  createCellEditor,
+  createEditableCell,
+  type KitCellCheckboxProps,
+  type KitCellEditorProps,
+  type KitCellInputProps,
   multiDraftFromSelect,
   readMultiDraft,
-  stopEditKeys,
 } from "@adapttable/react/adapter";
-import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
 import { editableCellSlots } from "./kitControls";
 
-/** Native text / number / select editor for the unstyled adapter. */
-export function NativeCellEditor({
+function Checkbox({
   ctrl,
   label,
   className,
-}: Readonly<{
-  ctrl: EditableCellEditorCtrl;
-  label: string;
-  className?: string;
-}>): ReactElement {
-  const onKeyDown = (event: KeyboardEvent) => {
-    ctrl.onEditorKeyDown(event);
-    stopEditKeys(event);
-  };
-
-  if (isBooleanEditor(ctrl.editor)) {
-    return (
-      <input
-        ref={ctrl.focusRef}
-        data-adapttable-part="edit-cell-editor"
-        {...editorValidationProps(ctrl)}
-        className={className}
-        aria-label={label}
-        type="checkbox"
-        checked={isDraftChecked(ctrl.draft)}
-        // One gesture: a ticked box that changed nothing is a bug, not a draft.
-        onChange={(event) => commitBooleanDraft(ctrl, event.target.checked)}
-        onKeyDown={onKeyDown}
-      />
-    );
-  }
-
-  if (isMultiSelectEditor(ctrl.editor)) {
-    return (
-      <select
-        ref={ctrl.focusRef}
-        data-adapttable-part="edit-cell-editor"
-        {...editorValidationProps(ctrl)}
-        className={className}
-        aria-label={label}
-        multiple
-        value={readMultiDraft(ctrl.draft)}
-        onChange={(event) => ctrl.setDraft(multiDraftFromSelect(event.target))}
-        onKeyDown={onKeyDown}
-        onBlur={ctrl.commitOnBlur}
-      >
-        {ctrl.selectOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    );
-  }
-
-  if (isSelectEditor(ctrl.editor)) {
-    return (
-      <select
-        ref={ctrl.focusRef}
-        data-adapttable-part="edit-cell-editor"
-        {...editorValidationProps(ctrl)}
-        className={className}
-        aria-label={label}
-        value={ctrl.draft}
-        onChange={(event) => ctrl.setDraft(event.target.value)}
-        onKeyDown={onKeyDown}
-        onBlur={ctrl.commitOnBlur}
-      >
-        {ctrl.selectOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    );
-  }
-
+  aria,
+  checked,
+  onCheckedChange,
+  onKeyDown,
+}: Readonly<KitCellCheckboxProps>) {
+  "use no memo";
   return (
     <input
       ref={ctrl.focusRef}
       data-adapttable-part="edit-cell-editor"
-      {...editorValidationProps(ctrl)}
+      {...aria}
       className={className}
       aria-label={label}
-      type={editorInputType(ctrl.editor)}
+      type="checkbox"
+      checked={checked}
+      onChange={(event) => onCheckedChange(event.target.checked)}
+      onKeyDown={onKeyDown}
+    />
+  );
+}
+
+/** Several choices, as a native multiple select. */
+function MultiSelect({
+  ctrl,
+  label,
+  className,
+  aria,
+  onKeyDown,
+}: Readonly<KitCellEditorProps>) {
+  "use no memo";
+  return (
+    <select
+      ref={ctrl.focusRef}
+      data-adapttable-part="edit-cell-editor"
+      {...aria}
+      className={className}
+      aria-label={label}
+      multiple
+      value={readMultiDraft(ctrl.draft)}
+      onChange={(event) => ctrl.setDraft(multiDraftFromSelect(event.target))}
+      onKeyDown={onKeyDown}
+      onBlur={ctrl.commitOnBlur}
+    >
+      {ctrl.selectOptions.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+/** One choice, as a native select. */
+function Select({
+  ctrl,
+  label,
+  className,
+  aria,
+  onKeyDown,
+}: Readonly<KitCellEditorProps>) {
+  "use no memo";
+  return (
+    <select
+      ref={ctrl.focusRef}
+      data-adapttable-part="edit-cell-editor"
+      {...aria}
+      className={className}
+      aria-label={label}
+      value={ctrl.draft}
+      onChange={(event) => ctrl.setDraft(event.target.value)}
+      onKeyDown={onKeyDown}
+      onBlur={ctrl.commitOnBlur}
+    >
+      {ctrl.selectOptions.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function Input({
+  ctrl,
+  label,
+  className,
+  aria,
+  type,
+  onKeyDown,
+}: Readonly<KitCellInputProps>) {
+  "use no memo";
+  return (
+    <input
+      ref={ctrl.focusRef}
+      data-adapttable-part="edit-cell-editor"
+      {...aria}
+      className={className}
+      aria-label={label}
+      type={type}
       value={ctrl.draft}
       onChange={(event) => ctrl.setDraft(event.target.value)}
       onKeyDown={onKeyDown}
@@ -113,55 +122,18 @@ export function NativeCellEditor({
   );
 }
 
-/**
- * Opt-in editable cell — pass-through when `editing` is omitted.
- * Callers must precompute `display` in the row so memoized rows still
- * re-invoke accessors when selection/expansion changes.
- */
-export function EditableDataCell<TRow>(props: {
-  readonly editing: EditableCellEditing<TRow> | undefined;
-  readonly row: TRow;
-  readonly column: ColumnDef<TRow>;
-  readonly rowId: string;
-  readonly rows: readonly TRow[];
-  readonly columns: readonly ColumnDef<TRow>[];
-  readonly rowKey: (row: TRow) => string;
-  readonly editLabel: string;
-  /** `labels.undoEdit` — the control a failed save offers. */
-  readonly undoLabel?: string;
-  readonly display: ReactNode;
-  /** Class for the invisible activate button. */
-  readonly activateClassName?: string;
-  readonly errorClassName?: string;
-  readonly saveErrorClassName?: string;
-  readonly rollbackClassName?: string;
-  /** Class for the active inline editor. */
-  readonly editorClassName?: string;
-}): ReactElement {
-  return (
-    <EditableCellGate
-      activateClassName={props.activateClassName}
-      errorClassName={props.errorClassName}
-      saveErrorClassName={props.saveErrorClassName}
-      rollbackClassName={props.rollbackClassName}
-      editing={props.editing}
-      row={props.row}
-      column={props.column}
-      rowId={props.rowId}
-      rows={props.rows}
-      columns={props.columns}
-      rowKey={props.rowKey}
-      editLabel={props.editLabel}
-      undoLabel={props.undoLabel}
-      display={props.display}
-      slots={editableCellSlots}
-      renderEditor={(ctrl) => (
-        <NativeCellEditor
-          ctrl={ctrl}
-          label={props.editLabel}
-          className={props.editorClassName}
-        />
-      )}
-    />
-  );
-}
+/** The editor for the active cell, with native inputs. */
+export const NativeCellEditor = /* @__PURE__ */ createCellEditor({
+  Checkbox,
+  MultiSelect,
+  Select,
+  Input,
+  rendersError: false,
+});
+
+/** A cell that edits in place; shows its value until editing starts. */
+export const EditableDataCell = /* @__PURE__ */ createEditableCell({
+  Editor: NativeCellEditor,
+  slots: editableCellSlots,
+  rendersError: false,
+});

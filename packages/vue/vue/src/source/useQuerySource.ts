@@ -1,6 +1,5 @@
 import {
   type ColumnMetadata,
-  createQuerySource,
   type InfiniteQueryLike,
   type PageSelector,
   type PaginatedResponse,
@@ -9,6 +8,7 @@ import {
   type TableQueryParams,
   type TableSource,
 } from "@adapttable/core";
+import { createQuerySource } from "@adapttable/core/binding";
 import { computed, type MaybeRefOrGetter, type ShallowRef, toValue } from "vue";
 
 import {

@@ -10,6 +10,7 @@ import {
   type IncrementalView,
   type IncrementalViewConfig,
   incrementalViewOf,
+  sameIncrementalResults,
 } from "./incremental";
 
 /**
@@ -17,9 +18,9 @@ import {
  * `source` is the engine snapshot it was built from. `view` is the grouped
  * snapshot. Either one may be the view currently attached to the rows.
  */
-const groupedSnapshots = new WeakMap<
+const groupedSnapshots = /* @__PURE__ */ new WeakMap<
   object,
-  { source: object; view: IncrementalView<unknown> }
+  { source: IncrementalView<unknown>; view: IncrementalView<unknown> }
 >();
 
 /**
@@ -36,13 +37,15 @@ export function configuredIncrementalGroups<TRow>(
 ): IncrementalView<TRow>["groups"] {
   const incremental = incrementalViewOf<TRow>(rows);
   if (!incremental || !hasIncrementalSnapshot(incremental)) return undefined;
-  // The engine reattaches its own snapshot to these rows on every callback
-  // refresh. Grouping's derived snapshot has to survive that, or a formatter
-  // change recomputes every group aggregate.
+  // The engine reattaches its snapshot to these rows on every callback
+  // refresh, as a new record over the same results. Grouping's derived
+  // snapshot has to survive that, or a formatter change recomputes every
+  // group aggregate.
   const cached = groupedSnapshots.get(rows);
   if (
     cached &&
-    (cached.source === incremental || cached.view === incremental)
+    (sameIncrementalResults(cached.source, incremental) ||
+      cached.view === incremental)
   ) {
     const next = configureIncrementalView(
       cached.view as IncrementalView<TRow>,

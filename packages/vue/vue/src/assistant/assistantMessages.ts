@@ -1,8 +1,9 @@
 /** Transcript and execution receipts. Backend text is always escaped Vue text. */
-import { resolveLabels, type TableLabels } from "@adapttable/core";
+import { type TableLabels } from "@adapttable/core";
 import {
   ASSISTANT_ACTIONS_ICON,
   ASSISTANT_AVATAR_ICON,
+  ASSISTANT_LABELS,
   assistantActionsName,
   assistantInitials,
   assistantReceiptDetail,
@@ -15,6 +16,7 @@ import {
   assistantUndoTurnLabel,
   assistantVoicePlaceholder,
   PERSON_AVATAR_ICON,
+  resolveFeatureLabels,
   type TableAssistantMessageView,
   type TableAssistantReceiptView,
   type TableAssistantUndoView,
@@ -33,6 +35,8 @@ import {
 import { useAssistantActionOwnership } from "./assistantActionOwnership";
 import { assistantIcon } from "./assistantIcon";
 import type { TableAssistantAvatars, TableAssistantSlots } from "./contracts";
+
+const ASSISTANT_GROUPS = [ASSISTANT_LABELS] as const;
 
 export function speakerMark(
   face: VNodeChild,
@@ -100,7 +104,7 @@ export const AssistantReceipt = /*#__PURE__*/ defineComponent(
     return () => {
       const receipt = props.receipt;
       const onUndo = props.onUndo;
-      const copy = resolveLabels(props.labels);
+      const copy = resolveFeatureLabels(props.labels, ASSISTANT_GROUPS);
       const before = receipt.subject?.before;
       const after = receipt.subject?.after;
       const detail = assistantReceiptDetail(receipt, copy);
@@ -303,7 +307,7 @@ function receiptGroup(
   receipts: readonly TableAssistantReceiptView[],
   state: ReceiptGroupState
 ): VNodeChild {
-  const copy = resolveLabels(props.labels);
+  const copy = resolveFeatureLabels(props.labels, ASSISTANT_GROUPS);
   const perRow = props.onUndoAction
     ? receipts.filter((receipt) => receipt.undoable).length
     : 0;
@@ -455,7 +459,7 @@ export const AssistantMessage = /*#__PURE__*/ defineComponent(
       { flush: "post" }
     );
     return () => {
-      const copy = resolveLabels(props.labels);
+      const copy = resolveFeatureLabels(props.labels, ASSISTANT_GROUPS);
       const source = props.message;
       const onUndo = props.onUndo;
       const onUndoAction = props.onUndoAction;

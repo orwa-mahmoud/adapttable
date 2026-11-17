@@ -1,43 +1,136 @@
-<div class="mx-demo ai-demo" [attr.dir]="direction">
-  <p class="hint">
-    {{
-      connection()
-        ? "Connected to your backend for free-form requests."
-        : "The scripted demo needs no model or API key. Connect a backend for free-form requests."
-    }}
-    Sort salaries, choose a person, or propose Grace's salary as 150. Writes
-    wait for your decision.
-  </p>
-  <div class="angular-ai-controls">
-    <adapt-showcase-action [props]="showEveryone()" />
-    <adapt-showcase-action [props]="backendSettings()" />
-    <div class="angular-ai-choice">
-      <span>Approval surface</span>
-      <adapt-showcase-choice [props]="surfaceChoice()" />
+<div id="ai-demo" class="ai-demo" [attr.data-adapter]="kit.key">
+  <header class="ai-demo__hero">
+    <p class="ai-demo__lede">{{ text.lede }}</p>
+    <figure class="ai-demo__watch">
+      <figcaption>{{ watch.caption }}</figcaption>
+      <video
+        class="ai-demo__watch-video"
+        [src]="media + '/demo.mp4'"
+        [poster]="media + '/poster.png'"
+        controls
+        playsinline
+        preload="none"
+        width="960"
+        height="474"
+      >
+        <track
+          kind="captions"
+          [src]="media + '/captions.vtt'"
+          srclang="en"
+          label="English"
+        />
+      </video>
+      <p class="ai-demo__watch-note">{{ watch.note }}</p>
+    </figure>
+    <div class="ai-demo__controls">
+      <nav class="ai-demo__kits" [attr.aria-label]="text.otherKits">
+        @for (other of otherKits; track other.key) {
+          <a
+            [href]="other.href"
+            [attr.aria-current]="other.key === kit.key ? 'page' : null"
+            >{{ other.label }}</a
+          >
+        }
+      </nav>
+      <div class="ai-demo__toolbar">
+        <div class="seg" role="group" [attr.aria-label]="text.source">
+          <button
+            type="button"
+            class="seg__btn"
+            [class.is-on]="!sourceIsBackend()"
+            [attr.aria-pressed]="!sourceIsBackend()"
+            data-testid="ai-demo-mode"
+            (click)="chooseSource('simulated')"
+          >
+            {{ text.simulated }}
+          </button>
+          <button
+            type="button"
+            class="seg__btn"
+            [class.is-on]="sourceIsBackend()"
+            [attr.aria-pressed]="sourceIsBackend()"
+            data-testid="ai-demo-try-real"
+            (click)="chooseSource('backend')"
+          >
+            {{
+              connection().mode === "simulated" ? text.tryReal : text.connected
+            }}
+          </button>
+        </div>
+        <button
+          type="button"
+          class="ai-demo__options-trigger"
+          data-testid="ai-demo-options"
+          [attr.aria-expanded]="demoOpen()"
+          (click)="demoOpen.set(!demoOpen())"
+        >
+          {{ text.options }}
+        </button>
+      </div>
+    </div>
+    <adapt-ai-demo-options
+      [open]="demoOpen()"
+      [toggles]="toggles()"
+      [actions]="approvals()"
+      [presentation]="presentation()"
+      [commit]="commit()"
+      [rtl]="rtl()"
+      [contextProfile]="contextProfile()"
+      [excluded]="excluded()"
+      [webmcp]="webmcp()"
+      [webmcpAvailable]="webmcpOffered"
+      (closed)="demoOpen.set(false)"
+      (editingMode)="editingMode($event)"
+      (toggle)="toggle($event)"
+      (approval)="answerApproval($event)"
+      (presentationChange)="presentation.set($event)"
+      (commitChange)="commit.set($event)"
+      (rtlChange)="rtl.set($event)"
+      (contextProfileChange)="contextProfile.set($event)"
+      (offer)="toggleOffer($event)"
+      (webmcpChange)="webmcp.set($event)"
+      (reset)="reset()"
+    />
+  </header>
+
+  <!-- The direction lives on the table and the overlays it owns; the page
+       around it stays as it is. -->
+  <div class="ai-demo__stage" [attr.dir]="dir()">
+    <!-- A new generation remounts the table, which is how Reset returns it
+         to its defaults. -->
+    @for (generation of [tableGeneration()]; track generation) {
+      <adapt-showcase-table
+        [data]="rows()"
+        [columns]="columns()"
+        [labels]="labels()"
+        [dir]="dir()"
+        [attr.lang]="locale()"
+        [rowKey]="rowKey"
+        [urlSync]="false"
+        [selectable]="true"
+        [defaults]="toggles().paging ? { limit: pageLimit } : undefined"
+        [paginationMode]="toggles().paging ? 'paged' : undefined"
+        [features]="features()"
+      />
+    }
+    <div class="ai-demo__assistant">
+      <adapt-showcase-assistant [props]="assistantProps()" />
+      <adapt-ai-connect-dialog
+        [open]="settingsOpen()"
+        [session]="session()"
+        [connection]="connection()"
+        [demoTransport]="scripted"
+        (changed)="connection.set($event)"
+        (closed)="settingsOpen.set(false)"
+      />
     </div>
   </div>
-  @if (settingsOpen()) {
-    <adapt-ai-backend-settings
-      [session]="session()"
-      [connection]="connection()"
-      [disabled]="assistant().busy"
-      (connected)="connection.set($event)"
-      (disconnected)="connection.set(undefined)"
-    />
-  }
-  <adapt-showcase-table
-    [dir]="presentation.tableDir"
-    [labels]="presentation.tableLabels"
-    [attr.lang]="presentation.locale"
-    tableLabel="AI people"
-    [data]="rows()"
-    [columns]="columns"
-    [rowKey]="rowKey"
-    [urlSync]="false"
-    [selectable]="true"
-    [defaults]="{ limit: 5 }"
-    [features]="features"
+
+  <adapt-ai-context-inspector
+    [session]="session()"
+    [manifest]="manifest()"
+    [contextInputs]="liveViewInputs"
+    [profile]="contextProfile()"
+    [webmcpNames]="webmcpNames()"
   />
-  <p class="hint" role="status" data-demo-log>{{ log() }}</p>
-  <adapt-showcase-assistant [props]="assistantProps()" />
 </div>

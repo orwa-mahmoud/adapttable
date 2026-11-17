@@ -3,6 +3,7 @@ import {
   type ChecklistFilterProps,
   type ChecklistSlots,
   useChecklistModel,
+  withProps,
 } from "@adapttable/vue/adapter";
 import { ElText } from "element-plus";
 import {
@@ -76,13 +77,15 @@ const ElementChecklistFilterPresentation = defineComponent(
 );
 
 /** Preserve the canonical row contract without exposing versioned instance helpers. */
-export function ElementChecklistFilter<TRow>(
-  props: ChecklistFilterProps<TRow>,
-  context: Pick<SetupContext, "attrs">
-) {
-  return createVNode(ElementChecklistFilterPresentation, {
-    ...context.attrs,
-    ...props,
-  });
-}
-ElementChecklistFilter.props = Object.keys(checklistRuntimeProps);
+export const ElementChecklistFilter = /* @__PURE__ */ withProps(
+  function ElementChecklistFilter<TRow>(
+    props: ChecklistFilterProps<TRow>,
+    context: Pick<SetupContext, "attrs">
+  ) {
+    return createVNode(ElementChecklistFilterPresentation, {
+      ...context.attrs,
+      ...props,
+    });
+  },
+  Object.keys(checklistRuntimeProps)
+);

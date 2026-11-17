@@ -19,6 +19,7 @@ import { AssistantResumeHandle } from '@adapttable/ai';
 import { AssistantStatus } from '@adapttable/ai';
 import { AssistantSuggestion } from '@adapttable/ai';
 import { AssistantTransport } from '@adapttable/ai';
+import { AssistantUndoView } from '@adapttable/ai';
 import { SharedApproval } from '@adapttable/ai';
 import { SpeechClip } from '@adapttable/ai/voice';
 import { SpeechInputHandle } from '@adapttable/react/adapter';
@@ -114,11 +115,7 @@ export interface TableAssistantState {
     readonly status: AssistantStatus;
     readonly stop: () => void;
     readonly suggestions: readonly AssistantSuggestion[];
-    readonly undo: {
-        readonly messageId: string;
-        readonly available: boolean;
-        readonly blockedCode?: string;
-    } | null;
+    readonly undo: AssistantUndoView | null;
     readonly undoAction: (idempotencyKey: string) => Promise<void>;
     readonly undoTurn: () => Promise<void>;
 }

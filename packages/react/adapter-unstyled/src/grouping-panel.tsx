@@ -1,28 +1,12 @@
 import {
   createAdapterGroupingPanelFeature,
-  type GroupHeaderCardSlotProps,
-  type GroupHeaderRowSlotProps,
   type GroupingPanelSlotProps,
 } from "@adapttable/react/adapter";
 
-import { useClassNames } from "./components/classNamesContext";
 import { GroupHeaderCard, GroupHeaderRow } from "./components/GroupHeader";
 import { GroupingPanel } from "./components/GroupingPanel";
 
-function GroupRowSlot(props: Readonly<GroupHeaderRowSlotProps<never>>) {
-  const classNames = useClassNames();
-  return <GroupHeaderRow<never> {...props} classNames={classNames} />;
-}
-
-function GroupCardSlot({
-  compact: _compact,
-  ...props
-}: Readonly<GroupHeaderCardSlotProps<never>>) {
-  const classNames = useClassNames();
-  return <GroupHeaderCard<never> {...props} classNames={classNames} />;
-}
-
-function GroupingPanelSlot(props: Readonly<GroupingPanelSlotProps<never>>) {
+function GroupingPanelSlot(props: Readonly<GroupingPanelSlotProps<unknown>>) {
   return <GroupingPanel {...props} />;
 }
 
@@ -32,8 +16,8 @@ function GroupingPanelSlot(props: Readonly<GroupingPanelSlotProps<never>>) {
  * @public
  */
 export const groupingPanel = createAdapterGroupingPanelFeature({
-  GroupHeaderRow: GroupRowSlot,
-  GroupHeaderCard: GroupCardSlot,
+  GroupHeaderRow,
+  GroupHeaderCard,
   GroupingPanel: GroupingPanelSlot,
 });
 

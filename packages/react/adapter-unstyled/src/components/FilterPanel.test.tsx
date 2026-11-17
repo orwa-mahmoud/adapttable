@@ -1,4 +1,4 @@
-import { defaultLabels } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/react/adapter";
 import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 

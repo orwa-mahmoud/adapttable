@@ -14,6 +14,7 @@ import {
 } from "@angular/core";
 
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 export type { DirtyCellState } from "@adapttable/core";
 
@@ -53,7 +54,9 @@ export function injectDirtyCells(
   const config = computed(() => ({
     enabled: readMaybe(options.enabled ?? false),
   }));
-  const store = createDirtyCellStore(config());
+  const store = createDirtyCellStore(config(), {
+    store: tableStoreOf(injector),
+  });
   effect(
     () => {
       store.configure(config());

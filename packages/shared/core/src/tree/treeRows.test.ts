@@ -15,6 +15,8 @@ import {
   treeCardStyle,
   treeColumnKey,
   treeIndentStyle,
+  treeRowAria,
+  treeTableAria,
 } from "./treeRows";
 
 interface Node {
@@ -240,5 +242,40 @@ describe("bodyRowEntries", () => {
     );
     expect(body.map((entry) => entry.index)).toEqual([0, 1, 2, 3]);
     expect(body[1]?.treeEntry?.level).toBe(1);
+  });
+});
+
+describe("treeTableAria", () => {
+  it("makes the table a treegrid that counts its header and every entry", () => {
+    expect(treeTableAria(4)).toEqual({ role: "treegrid", "aria-rowcount": 5 });
+  });
+
+  it("leaves a table whose rows are not a tree alone", () => {
+    expect(treeTableAria(undefined)).toEqual({});
+  });
+});
+
+describe("treeRowAria", () => {
+  it("names a tree row's depth, open state and place among its siblings", () => {
+    const [src, index, lib] = build(["src"]);
+    expect(treeRowAria(src)).toEqual({
+      "aria-level": 1,
+      "aria-expanded": true,
+      "aria-posinset": 1,
+    });
+    expect(treeRowAria(index)).toEqual({
+      "aria-level": 2,
+      "aria-expanded": undefined,
+      "aria-posinset": 1,
+    });
+    expect(treeRowAria(lib)).toEqual({
+      "aria-level": 2,
+      "aria-expanded": false,
+      "aria-posinset": 2,
+    });
+  });
+
+  it("gives a row outside a tree nothing", () => {
+    expect(treeRowAria(undefined)).toEqual({});
   });
 });

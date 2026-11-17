@@ -16,6 +16,7 @@ import type {
   TableAssistantProps,
   TableDensity,
   TableLabels,
+  TableQueryHandler,
   TableQueryParams,
   TableSource,
 } from "@adapttable/angular";
@@ -40,6 +41,7 @@ import {
 } from "@angular/core";
 
 import type { ConnectionFieldProps } from "./connectionField";
+import { ShowcaseBudget, ShowcaseEmail, ShowcaseTimeline } from "./mobileCells";
 import { SHOWCASE_DARK, SHOWCASE_KIT } from "./showcaseKit";
 
 /** The demo's table inputs, forwarded reactively to its actual kit table. */
@@ -57,6 +59,9 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
   readonly data = input<readonly TRow[]>();
   readonly source = input<Signal<TableSource<TRow>> | TableSource<TRow>>();
   readonly mode = input<"frontend" | "server">();
+  readonly onQueryChange = input<TableQueryHandler>();
+  readonly isCellFlashing =
+    input<(rowId: string, columnKey: string) => boolean>();
   readonly loading = input<boolean>();
   readonly error = input<Error | null>();
   readonly skeletonRows = input<number>();
@@ -70,9 +75,21 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         if ("children" in column) {
           return { ...column, children: decorate(column.children) };
         }
-        if (column.key === "status" && !column.cell) {
+        if (column.cell) return column;
+        // The people columns read as the kit draws them on every page: the
+        // person over their role, the status as a tag, the load as a bar,
+        // the email muted, the timeline's start over its due date, the budget in
+        // tabular figures.
+        if (column.key === "person")
+          return { ...column, cell: this.kit.personCell };
+        if (column.key === "status")
           return { ...column, cell: this.kit.statusCell };
-        }
+        if (column.key === "load")
+          return { ...column, cell: this.kit.loadCell };
+        if (column.key === "timeline")
+          return { ...column, cell: ShowcaseTimeline };
+        if (column.key === "budget") return { ...column, cell: ShowcaseBudget };
+        if (column.key === "email") return { ...column, cell: ShowcaseEmail };
         return column;
       });
     return decorate(this.columns());
@@ -100,6 +117,8 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
   readonly summaryRow = input<SummaryRowFn<TRow>>();
   readonly editConflictPolicy = input<EditConflictPolicy>();
   readonly columnLayout = input<ColumnLayoutState>();
+  readonly defaultColumnLayout = input<Partial<ColumnLayoutState>>();
+  readonly filterFields = input(true);
   readonly columnLayoutChange = output<ColumnLayoutState>();
 
   /** Bind before the first render, including initial column-layout emissions. */
@@ -113,6 +132,8 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         inputBinding("data", this.data),
         inputBinding("source", this.source),
         inputBinding("mode", this.mode),
+        inputBinding("onQueryChange", this.onQueryChange),
+        inputBinding("isCellFlashing", this.isCellFlashing),
         inputBinding("loading", this.loading),
         inputBinding("error", this.error),
         inputBinding("skeletonRows", this.skeletonRows),
@@ -128,6 +149,7 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         inputBinding("maxHeight", this.maxHeight),
         inputBinding("renderCard", this.renderCard),
         inputBinding("filtersMode", this.filtersMode),
+        inputBinding("filterFields", this.filterFields),
         inputBinding("forceMobile", this.forceMobile),
         inputBinding("selectable", this.selectable),
         inputBinding("searchable", this.searchable),
@@ -135,6 +157,7 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         inputBinding("onRowClick", this.onRowClick),
         inputBinding("density", this.density),
         inputBinding("animate", this.animate),
+        inputBinding("defaultColumnLayout", this.defaultColumnLayout),
         outputBinding<TableDensity>("densityChange", (density) =>
           this.densityChange.emit(density)
         ),

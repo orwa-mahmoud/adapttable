@@ -6,7 +6,6 @@
  * through {@link GROUPING_LIVE}.
  */
 import {
-  computePagination,
   devWarn,
   type GroupByInput,
   groupingIgnoredWarning,
@@ -15,10 +14,13 @@ import {
   groupingSourceOf,
   type GroupNode,
   type GroupSort,
-  projectedGroupingSource,
   projectGrouping,
 } from "@adapttable/core";
-import { coreGrouping } from "@adapttable/core/binding";
+import {
+  computePagination,
+  coreGrouping,
+  projectedGroupingSource,
+} from "@adapttable/core/binding";
 import { createTableEngine } from "@adapttable/core/engine";
 import { formatGroupBy, parseGroupBy } from "@adapttable/core/grouping";
 import { type ReactNode, useCallback, useEffect, useMemo } from "react";
@@ -31,7 +33,11 @@ import {
   slotRender,
 } from "./providers";
 import { FRONTEND_ROW_MODEL } from "./rowModelKey";
-import { type ChromeExtraSlotProps, GROUPING_LIVE } from "./slotKeys";
+import {
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  GROUPING_LIVE,
+} from "./slotKeys";
 import type { StaticTableFeature, TableFeature } from "./tableFeature";
 
 function GroupingModelProvider({
@@ -44,11 +50,11 @@ function GroupingModelProvider({
   );
 }
 
-function LiveGrouping({
+function LiveGrouping<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<never>): ReactNode {
+}: ChromeExtraSlotProps<TRow>): ReactNode {
   const source = chrome.source;
   const requestedGroupBy =
     props.groupBy === undefined ? source.groupBy : props.groupBy;
@@ -310,7 +316,9 @@ export function grouping<TRow>(
     ...coreGrouping<TRow>(groupBy, extras),
     provider: { Provider: GroupingModelProvider },
     renders: [
-      slotRender(GROUPING_LIVE, (props) => <LiveGrouping {...props} />),
+      slotRender<ChromeExtraDraw>(GROUPING_LIVE, (props) => (
+        <LiveGrouping {...props} />
+      )),
     ],
   };
 }

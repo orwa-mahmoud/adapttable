@@ -5,6 +5,7 @@ import {
   detectFramework,
   detectKit,
   type KitInfo,
+  kitInfo,
   KITS,
   mergeDependencies,
 } from "./detect";
@@ -105,6 +106,43 @@ describe("detectKit", () => {
         { framework: "angular", hasComponentsJson: true }
       ).kit
     ).toBe("ng-zorro");
+  });
+});
+
+describe("kitInfo", () => {
+  it("names the kit it cannot find instead of handing back nothing", () => {
+    expect(kitInfo("vuetify").adapter).toBe("@adapttable/vuetify");
+    const unknown = JSON.parse('"no-such-kit"') as Parameters<
+      typeof kitInfo
+    >[0];
+    expect(() => kitInfo(unknown)).toThrow(
+      'No entry in KITS for kit "no-such-kit"'
+    );
+  });
+});
+
+describe("every framework's starter", () => {
+  const starters = (["react", "angular", "vue"] as const).map((framework) =>
+    starterComponent(detectKit({}, { framework }))
+  );
+
+  it.each(starters)("shows the same people and columns", (source) => {
+    for (const person of [
+      'id: "1", name: "Ada Lovelace", email: "ada@example.com", role: "Engineer"',
+      'id: "2", name: "Alan Turing", email: "alan@example.com", role: "Founder"',
+      'id: "3", name: "Grace Hopper", email: "grace@example.com", role: "Admiral"',
+    ]) {
+      expect(source).toContain(person);
+    }
+    expect(source).toMatch(
+      /key: "name", header: "Name", accessor: \((\w+)\) => \1\.name, sortable: true/
+    );
+    expect(source).toMatch(
+      /key: "email", header: "Email", accessor: \((\w+)\) => \1\.email \}/
+    );
+    expect(source).toMatch(
+      /key: "role", header: "Role", accessor: \((\w+)\) => \1\.role, sortable: true/
+    );
   });
 });
 

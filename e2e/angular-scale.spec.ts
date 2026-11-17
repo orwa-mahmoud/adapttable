@@ -5,7 +5,7 @@ import { ANGULAR_KITS, angularPart } from "./angular-kit";
 for (const kit of ANGULAR_KITS) {
   test.describe(kit.key, () => {
     /**
-     * Each Angular kit's scale page: forty thousand rows, a few dozen of
+     * Each Angular kit's scale page: fifty thousand rows, a few dozen of
      * them in the page, and sorting over the whole set.
      */
 
@@ -25,13 +25,17 @@ for (const kit of ANGULAR_KITS) {
       expect(rendered).toBeGreaterThan(5);
       expect(rendered).toBeLessThan(80);
 
-      await part(page, "scroll-box").evaluate((box) => {
-        box.scrollTop = 400_000;
-      });
+      // The window starts with five hundred rows and grows as the reader
+      // nears its end: keep scrolling to the bottom until it has.
       await expect
-        .poll(async () =>
-          Number(await part(page, "row").first().getAttribute("data-row-id"))
-        )
+        .poll(async () => {
+          await part(page, "scroll-box").evaluate((box) => {
+            box.scrollTop = box.scrollHeight;
+          });
+          return Number(
+            await part(page, "row").first().getAttribute("data-row-id")
+          );
+        })
         .toBeGreaterThan(1000);
       expect(await part(page, "row").count()).toBeLessThan(80);
     });
@@ -43,7 +47,7 @@ for (const kit of ANGULAR_KITS) {
         .first()
         .locator('[data-adapttable-part="cell"]')
         .first();
-      // Every name in the forty thousand starts with one of the directory's
+      // Every name in the fifty thousand starts with one of the dataset's
       // first names; ascending order puts the alphabetically first one on top.
       await expect(first).toHaveText(/^\s*A/);
       await expect(part(page, "row").first()).not.toHaveAttribute(

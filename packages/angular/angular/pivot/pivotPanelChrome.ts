@@ -21,16 +21,15 @@ import {
   type AggregateName,
   assignField,
   moveField,
-  PIVOT_AGGREGATIONS,
   type PivotConfig,
   type PivotField,
-  pivotPanelZones,
   type PivotZone,
   removeField,
   resolveLabels,
   setMeasureAgg,
   type TableLabels,
 } from "@adapttable/core";
+import { PIVOT_AGGREGATIONS, pivotPanelZones } from "@adapttable/core/binding";
 import type { PivotZoneModel } from "@adapttable/core/pivot";
 import {
   ChangeDetectionStrategy,

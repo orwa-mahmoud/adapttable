@@ -1,12 +1,14 @@
 /** One neutral URL slice, with a table-owned subscription and lifecycle. */
 import {
   createMemoryAdapter,
-  createUrlSliceStore,
-  resolveUrlAdapter,
   type UrlSliceSpec,
-  type UrlSliceStore,
   type UrlStateAdapter,
 } from "@adapttable/core";
+import {
+  createUrlSliceStore,
+  resolveUrlAdapter,
+  type UrlSliceStore,
+} from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,

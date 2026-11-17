@@ -1,6 +1,6 @@
 import {
+  BASE_LABELS,
   type FilterPanelSurfaceProps,
-  resolveLabels,
   scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
@@ -260,7 +260,7 @@ export const NativeFilterSurface = defineComponent(
         active: active.value,
         dir: props.dir,
         label: props.label,
-        backdropLabel: props.backdropLabel ?? resolveLabels(undefined).cancel,
+        backdropLabel: props.backdropLabel ?? BASE_LABELS.cancel,
         part: partName(),
         panelClassName: props.className ?? names.value.filtersPanel,
         drawerClassName: names.value.filtersDrawer,

@@ -13,7 +13,7 @@
  * different maps on one page from sharing whichever rendered last — the exact
  * failure a module-level binding would have.
  */
-import { createContext, type ReactNode, useContext } from "react";
+import { createContext, type ReactNode, useContext, useMemo } from "react";
 
 import type { DataTableClassNames } from "../types";
 
@@ -21,6 +21,11 @@ import type { DataTableClassNames } from "../types";
 const NO_CLASSES: DataTableClassNames = {};
 
 const ClassNamesContext = createContext<DataTableClassNames>(NO_CLASSES);
+
+/** The same map, readable by any key. */
+type ClassesByKey = Readonly<Partial<Record<string, string>>>;
+
+const ClassesByKeyContext = createContext<ClassesByKey>({});
 
 /** Publish one component's class map to the slots beneath it. */
 export function ClassNamesProvider({
@@ -30,9 +35,15 @@ export function ClassNamesProvider({
   classNames?: DataTableClassNames;
   children: ReactNode;
 }>) {
+  const map = classNames ?? NO_CLASSES;
+  // A plain object, because the class map is an interface and an interface
+  // is not readable by an arbitrary key.
+  const byKey = useMemo<ClassesByKey>(() => ({ ...map }), [map]);
   return (
-    <ClassNamesContext.Provider value={classNames ?? NO_CLASSES}>
-      {children}
+    <ClassNamesContext.Provider value={map}>
+      <ClassesByKeyContext.Provider value={byKey}>
+        {children}
+      </ClassesByKeyContext.Provider>
     </ClassNamesContext.Provider>
   );
 }
@@ -40,4 +51,32 @@ export function ClassNamesProvider({
 /** The class map of the nearest enclosing component. Empty outside one. */
 export function useClassNames(): DataTableClassNames {
   return useContext(ClassNamesContext);
+}
+
+/** A part's `classNames` key: the part name, camelCased. */
+const keyOfPart = (part: string): string =>
+  part.replaceAll(/-([a-z])/g, (_match, letter: string) =>
+    letter.toUpperCase()
+  );
+
+/**
+ * The host's class for the element carrying `part`: every part takes the
+ * class of its camelCased key, so a control the binding names needs no table
+ * of its own here.
+ */
+export function useClassOfPart(part: string | undefined): string | undefined {
+  return classOfPartIn(useContext(ClassesByKeyContext), part);
+}
+
+/** The host's class for any part, for code that names parts in a loop. */
+export function usePartClass(): (part: string) => string | undefined {
+  const byKey = useContext(ClassesByKeyContext);
+  return (part) => classOfPartIn(byKey, part);
+}
+
+function classOfPartIn(
+  byKey: ClassesByKey,
+  part: string | undefined
+): string | undefined {
+  return part === undefined ? undefined : byKey[keyOfPart(part)];
 }

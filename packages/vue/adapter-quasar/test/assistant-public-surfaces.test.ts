@@ -2,12 +2,7 @@ import { Quasar } from "quasar";
 import { afterEach, expect, it, vi } from "vitest";
 import { createApp, h, nextTick, shallowRef } from "vue";
 
-import { DataTable } from "../src";
-import {
-  TableAssistant,
-  tableAssistant,
-  type TableAssistantProps,
-} from "../src/assistant";
+import { TableAssistant, type TableAssistantProps } from "../src/assistant";
 import { quasarAssistantControls } from "../src/assistant/controls";
 import { QuasarExamplesMenu } from "../src/assistant/ExamplesMenu";
 
@@ -310,31 +305,4 @@ it("routes the drawer overlay dismissal once and honors rejected then accepted h
   await dismiss();
   expect(changed).toHaveBeenCalledTimes(2);
   expect(document.querySelector(part("assistant-sheet"))).toBeNull();
-});
-it("renders the registered assistant feature with the table's class context and host draft", async () => {
-  const assistant = view();
-  const changed = vi.fn();
-  const host = mount(() =>
-    h(DataTable<{ id: string; name: string }>, {
-      data: [{ id: "a", name: "Ada" }],
-      columns: [{ key: "name" }],
-      rowKey: (row) => row.id,
-      forceMobile: false,
-      urlSync: false,
-      features: [tableAssistant()],
-      assistant: {
-        assistant,
-        open: true,
-        onOpenChange: changed,
-        presentation: "panel",
-      },
-    })
-  );
-  await flush();
-  expect(host.textContent).toContain("Ada");
-  expect(host.querySelector(part("assistant-panel"))).not.toBeNull();
-  element<HTMLButtonElement>(part("assistant-close")).click();
-  await flush();
-  expect(changed).toHaveBeenCalledExactlyOnceWith(false);
-  expect(host.querySelector(part("assistant-panel"))).not.toBeNull();
 });

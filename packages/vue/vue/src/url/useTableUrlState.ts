@@ -1,13 +1,16 @@
 import {
   createMemoryAdapter,
-  createTableViewStore,
-  resolveUrlAdapter,
   type TableViewState,
   type TableViewStateConfig,
   type TableViewStore,
   type UrlStateAdapter,
 } from "@adapttable/core";
-import { retainItems } from "@adapttable/core/binding";
+import {
+  createTableViewStore,
+  resolveUrlAdapter,
+  retainItems,
+  type TableStore,
+} from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,
@@ -25,9 +28,15 @@ import {
   useExternalStore,
   useScopeActivity,
 } from "../store";
+import { injectTableStore } from "../tableStore";
 
 /** Reactive URL configuration. Callback fields are never getter inputs. @public */
 export interface UseTableUrlStateOptions {
+  /**
+   * The table's store to keep the view state in; the store of the table
+   * this component is inside, or one of its own, when absent.
+   */
+  readonly store?: TableStore;
   readonly urlAdapter?: MaybeRefOrGetterOptional<UrlStateAdapter>;
   readonly urlSync?: MaybeRefOrGetterOptional<boolean>;
   readonly defaults?: MaybeRefOrGetter<TableViewStateConfig["defaults"]>;
@@ -62,32 +71,55 @@ export function useTableUrlState(
 ): TableUrlState {
   requireScope("useTableUrlState");
   const options = computed(() => toValue(input));
+  const enclosing = injectTableStore();
   const local = createMemoryAdapter();
   const stores = new Map<
     UrlStateAdapter,
     Map<string | undefined, TableViewStore>
   >();
-  const current = computed(() => {
-    const value = options.value;
-    const adapter = resolveUrlAdapter(
-      toValue(value.urlAdapter),
-      toValue(value.urlSync) ?? true,
+  /** Which URL and namespace the state lives in. */
+  const adapter = computed(() =>
+    resolveUrlAdapter(
+      toValue(options.value.urlAdapter),
+      toValue(options.value.urlSync) ?? true,
       local
-    );
-    const requestedKey = toValue(value.urlKey);
-    const key = requestedKey === "" ? undefined : requestedKey;
-    let namespaces = stores.get(adapter);
+    )
+  );
+  const namespace = computed(() => {
+    const requestedKey = toValue(options.value.urlKey);
+    return requestedKey === "" ? undefined : requestedKey;
+  });
+  /** The store for a URL and namespace, created the first time it is asked for. */
+  const storeFor = (
+    url: UrlStateAdapter,
+    key: string | undefined
+  ): TableViewStore => {
+    let namespaces = stores.get(url);
     if (!namespaces) {
       namespaces = new Map();
-      stores.set(adapter, namespaces);
+      stores.set(url, namespaces);
     }
     let store = namespaces.get(key);
     if (!store) {
-      store = createTableViewStore({ adapter, urlKey: key }, {});
+      store = createTableViewStore(
+        { adapter: url, urlKey: key },
+        {},
+        { store: options.value.store ?? enclosing }
+      );
       namespaces.set(key, store);
     }
     return store;
-  });
+  };
+  // A store is created where state may change, never while a computed is
+  // evaluated: creating one sets up its state.
+  const current = shallowRef(storeFor(adapter.value, namespace.value));
+  watch(
+    [adapter, namespace],
+    ([url, key]) => {
+      current.value = storeFor(url, key);
+    },
+    { flush: "sync" }
+  );
   let numberExtraKeys: readonly string[] | undefined;
   let arrayExtraKeys: readonly string[] | undefined;
   const config = computed((): TableViewStateConfig => {
@@ -137,10 +169,14 @@ export function useTableUrlState(
   onScopeDispose(() => {
     disposed = true;
   });
+  // While active, the new state reaches `state` when the store publishes it:
+  // at the end of this action, or of the table's batch the action runs
+  // inside. Without a subscription (on the server, or while inactive) it is
+  // read here.
   function mutate(run: () => void): void {
     if (disposed) return;
     run();
-    state.value = current.value.getSnapshot();
+    if (!active.value) state.value = current.value.getSnapshot();
   }
   return {
     state: shallowReadonly(state),

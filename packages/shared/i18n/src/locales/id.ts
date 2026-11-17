@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Indonesian (`id`) label preset.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "selesai",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "mengekspor",
 };
 
+/**
+ * Indonesian (`id`) label preset.
+ *
+ * @public
+ */
 export const id: Required<TableLabels> = {
   table: "Tabel data",
   search: "Cari",

@@ -1,17 +1,13 @@
-import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
-import type { TableLabels } from "@adapttable/react/adapter";
+/** The saved-views menu, drawn by the binding with MUI's controls. */
+import type { UseSavedViewsOptions } from "@adapttable/react";
 import {
-  Box,
-  Button,
-  Divider,
-  IconButton,
-  Popover,
-  Stack,
-  TextField,
-} from "@mui/material";
-import { useRef, useState } from "react";
+  createSavedViewsMenu,
+  type KitSavedViewsLook,
+  type TableLabels,
+} from "@adapttable/react/adapter";
+import type { ReactElement } from "react";
 
-import { spaceBelow } from "./spaceBelow";
+import { Button, Divider, IconButton, Popover, TextInput } from "./primitives";
 
 /**
  * The label strings the saved-views menu renders.
@@ -35,6 +31,21 @@ export interface SavedViewsMenuProps {
   labels: SavedViewsLabels;
 }
 
+/** MUI's half spacing step between the menu's controls. */
+const STEP = 4;
+
+const ROW = { display: "flex", alignItems: "center", gap: STEP } as const;
+
+const LOOK: KitSavedViewsLook = {
+  panel: { padding: 6, minWidth: 250 },
+  row: ROW,
+  divider: { margin: `${STEP}px 0` },
+  saveRow: ROW,
+  nameInput: {},
+};
+
+const useLook = (): KitSavedViewsLook => LOOK;
+
 /**
  * MUI saved-views menu: a toolbar button opening a popover that lists the
  * saved views — click applies one and closes, the trailing × deletes it —
@@ -43,96 +54,9 @@ export interface SavedViewsMenuProps {
  *
  * @public
  */
-export function SavedViewsMenu({
-  options,
-  labels,
-}: Readonly<SavedViewsMenuProps>) {
-  const { views, save, apply, remove } = useSavedViews(options);
-  const [anchor, setAnchor] = useState<null | HTMLElement>(null);
-  const [name, setName] = useState("");
-  const nameInput = useRef<HTMLInputElement>(null);
-  const trimmed = name.trim();
-  return (
-    <>
-      <Button
-        size="small"
-        variant="outlined"
-        aria-expanded={anchor !== null}
-        aria-haspopup="true"
-        onClick={(e) => setAnchor(e.currentTarget)}
-      >
-        {labels.savedViews}
-      </Button>
-      <Popover
-        anchorEl={anchor}
-        open={anchor !== null}
-        onClose={() => setAnchor(null)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "left" }}
-        marginThreshold={0}
-      >
-        <Box
-          sx={{
-            p: 0.75,
-            minWidth: 250,
-            maxHeight: anchor ? spaceBelow(anchor, 360) : 360,
-            overflowY: "auto",
-          }}
-        >
-          {views.map((view) => (
-            <Stack
-              key={view.name}
-              direction="row"
-              spacing={0.5}
-              sx={{ alignItems: "center" }}
-            >
-              <Button
-                size="small"
-                fullWidth
-                sx={{ justifyContent: "flex-start" }}
-                onClick={() => {
-                  apply(view.name);
-                  setAnchor(null);
-                }}
-              >
-                {view.name}
-              </Button>
-              <IconButton
-                size="small"
-                aria-label={`${labels.deleteView}: ${view.name}`}
-                onClick={() => remove(view.name)}
-              >
-                ×
-              </IconButton>
-            </Stack>
-          ))}
-          {views.length > 0 && <Divider sx={{ my: 0.5 }} />}
-          <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-            <TextField
-              inputRef={nameInput}
-              size="small"
-              value={name}
-              placeholder={labels.viewName}
-              slotProps={{ htmlInput: { "aria-label": labels.viewName } }}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <Button
-              size="small"
-              variant="contained"
-              disabled={trimmed === ""}
-              onClick={() => {
-                save(trimmed);
-                setName("");
-                // The save button becomes disabled. Keep keyboard focus in
-                // the native popover so Escape still reaches its handler.
-                nameInput.current?.focus();
-              }}
-            >
-              {labels.saveView}
-            </Button>
-          </Stack>
-        </Box>
-      </Popover>
-    </>
-  );
-}
+export const SavedViewsMenu: (
+  props: Readonly<SavedViewsMenuProps>
+) => ReactElement = /* @__PURE__ */ createSavedViewsMenu(
+  { Button, IconButton, TextInput, Popover, Divider, deleteIcon: "×" },
+  useLook
+);

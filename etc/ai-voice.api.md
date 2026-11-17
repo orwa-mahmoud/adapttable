@@ -8,10 +8,16 @@
 export function createSpeechInput(options?: SpeechInputOptions): SpeechInput;
 
 // @public
+export function createSpeechSession(read: () => SpeechSessionOptions): SpeechSession;
+
+// @public
 export function readRememberedLanguage(key?: string): string | undefined;
 
 // @public
 export function rememberLanguage(language: string, key?: string): void;
+
+// @public
+export const SPEECH_UNSUPPORTED: SpeechState;
 
 // @public
 export interface SpeechClip {
@@ -46,7 +52,39 @@ export interface SpeechInputOptions {
 }
 
 // @public
+export function speechLanguages(options: SpeechSessionOptions): readonly string[];
+
+// @public
 export type SpeechMode = "browser" | "backend";
+
+// @public
+export interface SpeechSession {
+    readonly getSnapshot: () => SpeechSessionView;
+    readonly release: () => void;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly sync: () => void;
+}
+
+// @public
+export function speechSessionKey(options: SpeechSessionOptions): string | undefined;
+
+// @public
+export interface SpeechSessionOptions {
+    readonly locale?: string;
+    readonly onClip?: (clip: SpeechClip) => void;
+    readonly setDraft: (text: string) => void;
+    readonly voice?: VoiceOptions;
+}
+
+// @public
+export interface SpeechSessionView {
+    readonly available: boolean;
+    readonly languages: readonly string[];
+    readonly setLanguage: (language: string) => void;
+    readonly start: () => void;
+    readonly state: SpeechState;
+    readonly stop: () => void;
+}
 
 // @public
 export interface SpeechState {
@@ -65,5 +103,7 @@ export interface VoiceOptions {
     readonly languages?: readonly string[];
     readonly mode?: SpeechMode;
 }
+
+// (No @packageDocumentation comment for this package)
 
 ```

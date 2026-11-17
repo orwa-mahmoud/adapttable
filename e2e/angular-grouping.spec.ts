@@ -19,18 +19,18 @@ for (const kit of ANGULAR_KITS) {
       await page.goto(PAGE);
       await expect(page).toHaveURL(/grp\.groupBy=team%2Cstatus/);
       await expect(part(page, "group-row").first()).toHaveText(
-        /Core\s*\(6\)\s*\$414,300/
+        /Platform\s*\(8\)\s*\$446,800/
       );
       await expect(part(page, "grouping-chip")).toHaveText([/Team/, /Status/]);
     });
 
     test("folds a group's rows away", async ({ page }) => {
       await page.goto(PAGE);
-      await expect(part(page, "row")).toHaveCount(30);
+      await expect(part(page, "row")).toHaveCount(24);
       const toggle = part(page, "group-toggle").first();
       await toggle.click();
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
-      await expect(part(page, "row")).toHaveCount(24);
+      await expect(part(page, "row")).toHaveCount(16);
     });
 
     test("moves a level with the arrow keys and announces it", async ({

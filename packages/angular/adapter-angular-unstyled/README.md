@@ -12,7 +12,7 @@ Available on npm as `@adapttable/angular-unstyled`. The native kit
 participates in the kit contracts.
 
 ```bash
-pnpm add @adapttable/angular-unstyled @adapttable/angular @adapttable/core
+pnpm add @adapttable/angular-unstyled @adapttable/angular
 ```
 
 [Angular demo](https://adapttable.orwamahmoud.com/angular/demo/unstyled/) ·

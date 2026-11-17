@@ -2,8 +2,12 @@
  * The window behind a long checklist: track the list's scroll position and
  * width, and derive the window core's `checklistWindow` computes.
  */
-import { checklistWindow } from "@adapttable/core";
-import type { ChecklistWindowState } from "@adapttable/core/binding";
+
+import {
+  checklistSlice,
+  type ChecklistWindowState,
+  nextChecklistViewport,
+} from "@adapttable/core/binding";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 export type { ChecklistWindowState } from "@adapttable/core/binding";
 
@@ -25,14 +29,9 @@ export function useChecklistWindow(
   const read = useCallback(() => {
     const node = element.current;
     if (!node) return;
-    const next = { scrollTop: node.scrollTop, width: node.clientWidth };
     // Same numbers, same object: a fresh one per scroll event would re-render
     // every checkbox at 60fps for nothing.
-    setViewport((current) =>
-      current.scrollTop === next.scrollTop && current.width === next.width
-        ? current
-        : next
-    );
+    setViewport((current) => nextChecklistViewport(current, node));
   }, []);
 
   const ref = useCallback(
@@ -59,10 +58,7 @@ export function useChecklistWindow(
   }, [enabled, read]);
 
   const window = useMemo(
-    () =>
-      enabled
-        ? checklistWindow(count, viewport.scrollTop, viewport.width)
-        : { start: 0, end: count, padTop: 0, padBottom: 0 },
+    () => checklistSlice(count, enabled, viewport.scrollTop, viewport.width),
     [enabled, count, viewport]
   );
 

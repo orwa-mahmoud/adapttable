@@ -6,7 +6,6 @@ const INTERNAL_PARTS = new Set([
   "filters-anchor",
   "filters-backdrop",
   "filters-body",
-  "filters-button",
   "filters-clear",
   "filters-close",
   "filters-count",
@@ -68,7 +67,6 @@ const INTERNAL_PARTS = new Set([
   "sort-button",
   "sort-index",
   "sort-select",
-  "virtual-spacer",
 ]);
 
 /** Never accept a private marker as a substitute for a public contract part. */

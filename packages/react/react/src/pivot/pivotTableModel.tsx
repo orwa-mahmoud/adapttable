@@ -33,19 +33,24 @@
  */
 import {
   PIVOT_ROW_COLUMN_KEY,
-  PIVOT_ROW_INDENT,
   type PivotField,
   type PivotResult,
   type PivotRow,
   pivotRowCaption,
-  pivotRowIndentStyle,
-  pivotTableLayout,
-  resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
+import {
+  PIVOT_LABELS,
+  PIVOT_ROW_INDENT,
+  pivotRowIndentStyle,
+  pivotTableLayout,
+  resolveFeatureLabels,
+} from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import type { ColumnDef } from "../columnDef";
+
+const PIVOT_GROUPS = [PIVOT_LABELS] as const;
 
 export type { TableLabels };
 
@@ -155,7 +160,7 @@ export function pivotTableModel(
     indent = PIVOT_ROW_INDENT,
     rowHeader,
   } = options;
-  const labels = resolveLabels(options.labels);
+  const labels = resolveFeatureLabels(options.labels, PIVOT_GROUPS);
   const layout = pivotTableLayout(result, { fields, labels });
   // The host's row-header renderer, or the line's own caption when it has none.
   const caption =

@@ -13,7 +13,7 @@ import { h, type MaybeRefOrGetter } from "vue";
 
 import { elementButton } from "./controls/button";
 import { elementSelectionCheckbox } from "./controls/checkbox";
-import { elementGroupRowSlotKey } from "./elementHierarchyControlSlots";
+import { ELEMENT_GROUP_ROW } from "./elementHierarchyControlSlots";
 
 /** Element Plus group paint is loaded only with the grouping contribution. */
 export function grouping(
@@ -29,7 +29,7 @@ export function grouping<TRow>(
   extras: GroupingExtras<TRow> = {}
 ): TableFeature<TRow> {
   return extendFeature(bindingGrouping<TRow>(groupBy, extras), [
-    slotRender(elementGroupRowSlotKey<TRow>(), (props) =>
+    slotRender(ELEMENT_GROUP_ROW, (props) =>
       GroupRowChrome({
         ...props,
         slots: {

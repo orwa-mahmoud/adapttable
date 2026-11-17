@@ -2,11 +2,11 @@
  * The cells a live patch changed, marked briefly — and not at all when the
  * reader asked for reduced motion — over `@adapttable/core`'s flash store.
  */
+import { type RowPatchEvent } from "@adapttable/core";
 import {
   CHANGED_CELL_FLASH_MS,
   createChangedCellFlashStore,
-  type RowPatchEvent,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

@@ -1,10 +1,9 @@
-/** Vue refs over the neutral, optional dictation controller. */
+/** Vue refs over the neutral, optional speech session. */
 import {
-  createSpeechInput,
-  readRememberedLanguage,
-  rememberLanguage,
+  createSpeechSession,
   type SpeechClip,
-  type SpeechInput,
+  speechLanguages,
+  speechSessionKey,
   type SpeechState,
   type VoiceOptions,
 } from "@adapttable/ai/voice";
@@ -20,7 +19,6 @@ import {
   onScopeDispose,
   proxyRefs,
   type ShallowRef,
-  shallowRef,
   toValue,
   watch,
 } from "vue";
@@ -42,73 +40,33 @@ export interface SpeechInputState {
   readonly stop: () => void;
   readonly setLanguage: (language: string) => void;
 }
-const UNSUPPORTED: SpeechState = {
-  status: "unsupported",
-  language: "",
-  interim: "",
-};
-const EMPTY_STORE = {
-  getSnapshot: () => UNSUPPORTED,
-  subscribe: () => () => undefined,
-};
 
 /** Microphones and storage remain untouched during SSR. @public */
 export function useSpeechInput(
   options: MaybeRefOrGetter<UseSpeechInputOptions>
 ): SpeechInputState {
   const active = useScopeActivity();
-  const input = shallowRef<SpeechInput>();
-  const languages = computed(() => {
-    const current = toValue(options);
-    return current.voice?.languages?.length
-      ? current.voice.languages
-      : [current.locale ?? "en-US"];
-  });
-  const state = useExternalStore(() => {
-    const current = input.value;
-    return current
-      ? { getSnapshot: current.getState, subscribe: current.subscribe }
-      : EMPTY_STORE;
-  });
-  const release = () => {
-    const previous = input.value;
-    input.value = undefined;
-    previous?.dispose();
-  };
+  const session = createSpeechSession(() => toValue(options));
+  const snapshot = useExternalStore(session);
+  // An inactive scope holds no microphone; the session decides when an
+  // active one has to be replaced.
   watch(
-    () => {
-      const current = toValue(options);
-      return active.value && current.voice
-        ? JSON.stringify([current.voice.mode ?? "browser", languages.value])
-        : undefined;
-    },
+    () => (active.value ? speechSessionKey(toValue(options)) : undefined),
     (key) => {
-      release();
-      if (key === undefined) return;
-      const current = toValue(options);
-      const remembered = readRememberedLanguage();
-      input.value = createSpeechInput({
-        mode: current.voice?.mode ?? "browser",
-        languages: languages.value,
-        ...(remembered ? { initialLanguage: remembered } : {}),
-        onDraft: (text) => toValue(options).setDraft(text),
-        onClip: (clip) => toValue(options).onClip?.(clip),
-      });
+      if (key === undefined) session.release();
+      else session.sync();
     },
     { immediate: true, flush: "sync" }
   );
-  onScopeDispose(release);
+  onScopeDispose(session.release);
+  const { start, stop, setLanguage } = session.getSnapshot();
   const handle: Omit<SpeechInputState, "view"> = {
-    available: computed(() => Boolean(input.value?.supported())),
-    state,
-    languages,
-    start: () => input.value?.start(),
-    stop: () => input.value?.stop(),
-    setLanguage: (language) => {
-      if (!input.value) return;
-      input.value.setLanguage(language);
-      rememberLanguage(language);
-    },
+    available: computed(() => snapshot.value.available),
+    state: computed(() => snapshot.value.state),
+    languages: computed(() => speechLanguages(toValue(options))),
+    start,
+    stop,
+    setLanguage,
   };
   return { ...handle, view: computed(() => ({ ...proxyRefs(handle) })) };
 }

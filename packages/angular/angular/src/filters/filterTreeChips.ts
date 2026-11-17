@@ -4,14 +4,14 @@
 import {
   type ActiveFilterChip,
   type FilterDef,
-  filterTreeChipLabel,
   type FilterTypeRegistry,
-  isFilterTreeConditionSet,
   type QueryFilterGroup,
-  removeFilterTreeNode,
   type TableLabels,
-  walkFilterTreeConditions,
 } from "@adapttable/core";
+import {
+  filterTreeConditionChips,
+  removeFilterTreeNode,
+} from "@adapttable/core/binding";
 
 /**
  * One chip per condition in the tree, each removing its own node.
@@ -32,15 +32,16 @@ export function filterTreeChips<TRow>(
   labels: Required<TableLabels>,
   registry: FilterTypeRegistry | undefined
 ): readonly ActiveFilterChip[] {
-  if (!tree || !setTree) return [];
-  // A condition still waiting for a value filters nothing, so it is no chip.
-  return walkFilterTreeConditions(tree)
-    .filter(({ condition }) => isFilterTreeConditionSet(condition))
-    .map(({ condition, path }) => ({
-      key: `ft:${path.join(".")}:${condition.key}:${condition.op}`,
-      label: filterTreeChipLabel(condition, defs, labels, registry),
-      onRemove: () => {
-        setTree(removeFilterTreeNode(tree, path));
-      },
-    }));
+  return filterTreeConditionChips({
+    tree,
+    defs,
+    labels,
+    registry,
+    onRemove:
+      tree && setTree
+        ? (path) => {
+            setTree(removeFilterTreeNode(tree, path));
+          }
+        : undefined,
+  });
 }

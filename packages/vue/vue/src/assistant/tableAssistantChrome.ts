@@ -1,7 +1,7 @@
 /** Conversation structure, focus, placement and announcements with required kit controls. */
-import { resolveLabels } from "@adapttable/core";
 import {
   ASSISTANT_CLOSE_ICON,
+  ASSISTANT_LABELS,
   ASSISTANT_SETTINGS_ICON,
   assistantBadgeTone,
   assistantFloatingFits,
@@ -13,6 +13,7 @@ import {
   assistantRejoinable,
   assistantWithGreeting,
   assistantWorkingText,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import {
   defineComponent,
@@ -47,6 +48,8 @@ import {
   captureQuestionOwner,
   type QuestionAdmission,
 } from "./questionAdmission";
+
+const ASSISTANT_GROUPS = [ASSISTANT_LABELS] as const;
 
 /** @public */
 export interface TableAssistantChromeProps extends TableAssistantProps {
@@ -175,7 +178,7 @@ function modal(
 ): VNodeChild {
   const pending = props.approval;
   if (pending?.presentation !== "modal") return null;
-  const copy = resolveLabels(props.labels);
+  const copy = resolveFeatureLabels(props.labels, ASSISTANT_GROUPS);
   const owner = state.generation.value;
   const close = () => {
     void Promise.resolve().then(() =>
@@ -210,7 +213,7 @@ function launcher(
   mode: Mode,
   contained: boolean
 ) {
-  const copy = resolveLabels(props.labels);
+  const copy = resolveFeatureLabels(props.labels, ASSISTANT_GROUPS);
   const pending = props.approval;
   const control =
     !props.open && props.launcher !== false
@@ -255,7 +258,7 @@ function launcher(
   );
 }
 function header(props: TableAssistantChromeProps, state: ChromeState) {
-  const copy = resolveLabels(props.labels);
+  const copy = resolveFeatureLabels(props.labels, ASSISTANT_GROUPS);
   return h(
     "header",
     {
@@ -347,7 +350,7 @@ function answerDraft(
   };
 }
 function messages(props: TableAssistantChromeProps, state: ChromeState) {
-  const copy = resolveLabels(props.labels);
+  const copy = resolveFeatureLabels(props.labels, ASSISTANT_GROUPS);
   const assistant = props.assistant;
   const rows = assistantWithGreeting(
     assistant.messages,
@@ -432,7 +435,7 @@ function allowances(props: TableAssistantChromeProps) {
   const assistant = props.assistant;
   if (!assistant.alwaysAllowed?.length || !assistant.revokeAlwaysAllow)
     return null;
-  const copy = resolveLabels(props.labels);
+  const copy = resolveFeatureLabels(props.labels, ASSISTANT_GROUPS);
   return h("div", { "data-adapttable-part": "assistant-always-allowed" }, [
     h(
       "span",
@@ -464,7 +467,7 @@ function allowances(props: TableAssistantChromeProps) {
 }
 function status(props: TableAssistantChromeProps) {
   const assistant = props.assistant;
-  const copy = resolveLabels(props.labels);
+  const copy = resolveFeatureLabels(props.labels, ASSISTANT_GROUPS);
   if (assistant.error !== undefined) {
     const localized =
       assistant.errorCode === undefined
@@ -502,7 +505,8 @@ function approval(props: TableAssistantChromeProps, state: ChromeState) {
   return h(
     "p",
     { "data-adapttable-part": "assistant-approval-elsewhere" },
-    resolveLabels(props.labels).approvalWaitingElsewhere
+    resolveFeatureLabels(props.labels, ASSISTANT_GROUPS)
+      .approvalWaitingElsewhere
   );
 }
 function contents(
@@ -510,7 +514,7 @@ function contents(
   state: ChromeState,
   mode: Mode
 ) {
-  const copy = resolveLabels(props.labels);
+  const copy = resolveFeatureLabels(props.labels, ASSISTANT_GROUPS);
   const fullReview =
     props.approval?.presentation === "widget" && state.reviewExpanded.value;
   return h(
@@ -636,7 +640,7 @@ function surface(
 ): VNodeChild {
   if (!props.open) return null;
   const common = {
-    label: resolveLabels(props.labels).assistantTitle,
+    label: resolveFeatureLabels(props.labels, ASSISTANT_GROUPS).assistantTitle,
     className: props.className,
     children: contents(props, state, mode),
   };

@@ -38,6 +38,7 @@ import {
 } from "@angular/core";
 
 import { resolveRenderer } from "../cell";
+import { isComponentType } from "../componentType";
 let nextFieldId = 0;
 /** Allocate a caption ID shared by adapter-native filter controls. @public */
 export function createFilterFieldId(): string {
@@ -187,12 +188,10 @@ export abstract class AdaptAutoFilterFormModel<TRow> {
       };
       const value = renderRegisteredFilter(def, source, labels, registry);
       const context = { ...props, $implicit: props };
-      let renderer: TemplateRef<typeof context> | Type<unknown> | undefined;
-      if (value instanceof TemplateRef) {
-        renderer = value;
-      } else if (typeof value === "function" && "ɵcmp" in value) {
-        renderer = value as unknown as Type<unknown>;
-      }
+      const renderer: TemplateRef<typeof context> | Type<unknown> | undefined =
+        value instanceof TemplateRef || isComponentType(value)
+          ? value
+          : undefined;
       return {
         def,
         context,

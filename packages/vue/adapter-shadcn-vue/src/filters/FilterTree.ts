@@ -3,6 +3,7 @@ import {
   FilterTreeChrome,
   type FilterTreeSlots,
   useFilterTreeModel,
+  withProps,
 } from "@adapttable/vue/adapter";
 import {
   createVNode,
@@ -125,12 +126,12 @@ const FilterTreePresentation = defineComponent(
   { name: "ShadcnFilterTree", props: propNames }
 );
 
-export function FilterTree<TRow>(
-  props: FilterTreeBuilderProps<TRow>,
-  context: Pick<SetupContext, "attrs">
-) {
-  return createVNode(FilterTreePresentation, { ...context.attrs, ...props });
-}
-FilterTree.props = Object.keys(
-  propNames
-) as (keyof FilterTreeBuilderProps<unknown>)[];
+export const FilterTree = /* @__PURE__ */ withProps(
+  function FilterTree<TRow>(
+    props: FilterTreeBuilderProps<TRow>,
+    context: Pick<SetupContext, "attrs">
+  ) {
+    return createVNode(FilterTreePresentation, { ...context.attrs, ...props });
+  },
+  Object.keys(propNames) as (keyof FilterTreeBuilderProps<unknown>)[]
+);

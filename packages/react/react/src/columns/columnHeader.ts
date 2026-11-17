@@ -1,4 +1,4 @@
-import { columnHeaderLabel } from "@adapttable/core";
+import { columnHeaderLabel } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import type {

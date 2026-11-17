@@ -1,9 +1,9 @@
 import {
   buildTableCsv,
   type FilterDef,
-  resetDevWarnings,
   type RowAction,
 } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core/binding";
 import { act, render, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -16,6 +16,7 @@ import { columnMenu, resizableColumns, savedViews } from "./features/factories";
 import { useTableFeatures } from "./features/featureHost";
 import { filters } from "./features/filters";
 import { grouping } from "./features/grouping";
+import { groupingPanel } from "./features/grouping-panel";
 import { FeatureProviders } from "./features/providers";
 import { rowActions } from "./features/row-actions";
 import { rowPinning } from "./features/row-pinning";
@@ -862,5 +863,65 @@ describe("savedViews owns the column layout it restores", () => {
     expect(
       view.current.chrome.columnLayout.visibleColumns.map((c) => c.key)
     ).toEqual(["name"]);
+  });
+});
+
+describe("a render that changes nothing about the columns", () => {
+  it("keeps the table's columns, so no row redraws for it", () => {
+    const props = applyTableFeatures({
+      features: [columnMenu()],
+      data: ROWS,
+      columns,
+      rowKey,
+      urlSync: false,
+    });
+    const seen: unknown[] = [];
+    function Probe() {
+      const shell = useDataTableShell(props as never, noForm as never);
+      return (
+        <DataTableShellView shell={shell}>
+          {(next) => {
+            seen.push(next.table.columns);
+            return null;
+          }}
+        </DataTableShellView>
+      );
+    }
+    const tree = (
+      <FeatureProviders props={props}>
+        <Probe />
+      </FeatureProviders>
+    );
+    const { rerender } = render(tree);
+    const first = seen.at(-1);
+    rerender(
+      <FeatureProviders props={props}>
+        <Probe />
+      </FeatureProviders>
+    );
+    expect(seen.length).toBeGreaterThan(1);
+    expect(seen.at(-1)).toBe(first);
+  });
+});
+
+describe("grouping panel on the finished shell", () => {
+  it("shows a plain groupAggregates mapper as set by the app", () => {
+    const { current } = renderLiveShell([grouping("name"), groupingPanel()], {
+      columns: [
+        { key: "name", header: "Name" },
+        { key: "id", header: "Id" },
+      ],
+      groupBy: "name",
+      groupAggregates: (rows) => ({ id: rows.length }),
+    });
+    expect(current.groupingPanelProps?.state.aggregations.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          columnKey: "id",
+          origin: "host",
+          editable: false,
+        }),
+      ])
+    );
   });
 });

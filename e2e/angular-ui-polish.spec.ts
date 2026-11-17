@@ -127,7 +127,7 @@ test("NG-ZORRO pinned body cells paint over horizontally scrolling text", async 
   expect(before).not.toBeNull();
   expect(after).not.toBeNull();
   expect(Math.abs(before!.x - after!.x)).toBeLessThanOrEqual(1);
-  await expect(pinned).toContainText("Ada Lovelace");
+  await expect(pinned).toContainText("Priya Nair");
 });
 
 for (const key of [

@@ -8,7 +8,7 @@ import { EditableDataCell } from "./components/EditableCell";
 import { BatchEditBar, RowEditActions } from "./components/kitControls";
 import { UndoRedoButtons } from "./components/toolbarExtras";
 
-function EditableSlot(props: Readonly<EditableCellRenderProps<never>>) {
+function EditableSlot(props: Readonly<EditableCellRenderProps<unknown>>) {
   const classNames = useClassNames();
   return (
     <EditableDataCell

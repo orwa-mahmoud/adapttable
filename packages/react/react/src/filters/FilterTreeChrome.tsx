@@ -5,24 +5,27 @@
 import {
   defaultFilterRegistry,
   type FilterDef,
-  filterTreeCombinatorOptions,
-  type FilterTreeConditionModel,
-  filterTreeConditionModel,
-  filterTreeEditorActions,
   type FilterTypeRegistry,
   isFilterGroup,
   type QueryCondition,
   type QueryFilterGroup,
-  resolveLabels,
-  type TableLabels,
 } from "@adapttable/core";
-import type {
-  FilterTreeBuilderProps,
-  FilterTreeClassNames,
-  FilterTreeDisclosureProps as NeutralFilterTreeDisclosureProps,
-  FilterTreeSlots as NeutralFilterTreeSlots,
+import {
+  type FeatureStrings,
+  FILTER_LABELS,
+  type FilterTreeBuilderProps,
+  type FilterTreeClassNames,
+  filterTreeCombinatorOptions,
+  type FilterTreeConditionModel,
+  filterTreeConditionModel,
+  type FilterTreeDisclosureProps as NeutralFilterTreeDisclosureProps,
+  filterTreeEditorActions,
+  type FilterTreeSlots as NeutralFilterTreeSlots,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import { type CSSProperties, type ReactNode, useState } from "react";
+
+const FILTER_GROUPS = [FILTER_LABELS] as const;
 
 export type {
   FilterTreeBuilderProps,
@@ -32,6 +35,7 @@ export type {
   FilterTreeOption,
   FilterTreeSelectProps,
 } from "@adapttable/core/binding";
+import { VISUALLY_HIDDEN } from "../a11y/visuallyHidden";
 
 /**
  * Kit disclosure that owns the Advanced section's visible chrome —
@@ -92,18 +96,6 @@ const TREE_GROUP_NESTED: CSSProperties = {
   minInlineSize: 0,
 };
 
-const TREE_LEGEND_HIDDEN: CSSProperties = {
-  position: "absolute",
-  width: "1px",
-  height: "1px",
-  margin: "-1px",
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0, 0, 0, 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-};
-
 /**
  * Props for {@link FilterTreeChrome}.
  *
@@ -124,7 +116,7 @@ function ConditionValue<TRow>({
   onChange,
 }: Readonly<{
   model: FilterTreeConditionModel<TRow>;
-  labels: Required<TableLabels>;
+  labels: FeatureStrings<typeof FILTER_GROUPS>;
   classNames: FilterTreeClassNames;
   slots: FilterTreeSlots;
   onChange: (value: unknown) => void;
@@ -226,7 +218,7 @@ function ConditionRow<TRow>({
   condition: QueryCondition;
   path: readonly number[];
   defs: readonly FilterDef<TRow>[];
-  labels: Required<TableLabels>;
+  labels: FeatureStrings<typeof FILTER_GROUPS>;
   classNames: FilterTreeClassNames;
   registry: FilterTypeRegistry;
   slots: FilterTreeSlots;
@@ -292,7 +284,7 @@ function GroupActions({
   onAddCondition,
   onAddGroup,
 }: Readonly<{
-  labels: Required<TableLabels>;
+  labels: FeatureStrings<typeof FILTER_GROUPS>;
   classNames: FilterTreeClassNames;
   slots: FilterTreeSlots;
   onAddCondition: () => void;
@@ -328,7 +320,7 @@ function GroupView<TRow>({
   group: QueryFilterGroup;
   path: readonly number[];
   defs: readonly FilterDef<TRow>[];
-  labels: Required<TableLabels>;
+  labels: FeatureStrings<typeof FILTER_GROUPS>;
   classNames: FilterTreeClassNames;
   registry: FilterTypeRegistry;
   slots: FilterTreeSlots;
@@ -347,7 +339,7 @@ function GroupView<TRow>({
       className={classNames.filterTreeGroup}
       style={path.length > 0 ? TREE_GROUP_NESTED : TREE_GROUP_ROOT}
     >
-      <legend style={TREE_LEGEND_HIDDEN}>
+      <legend style={VISUALLY_HIDDEN}>
         {group.combinator === "or"
           ? labels.filterCombinatorOr
           : labels.filterCombinatorAnd}
@@ -435,7 +427,7 @@ export function FilterTreeChrome<TRow>({
   slots,
   defaultExpanded,
 }: Readonly<FilterTreeChromeProps<TRow>>) {
-  const labels = resolveLabels(labelOverrides);
+  const labels = resolveFeatureLabels(labelOverrides, FILTER_GROUPS);
   const tree = source.filterTree;
   const commit = source.setFilterTree;
   const first = defs[0];

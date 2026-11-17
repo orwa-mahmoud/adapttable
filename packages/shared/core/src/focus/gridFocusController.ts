@@ -14,7 +14,7 @@
  * the row and holds the address; {@link GridFocusController.syncFocus} focuses
  * the cell once a render produces its element.
  */
-import { defaultLabels } from "../labels";
+import { GRID_LABELS } from "../labelGroups/gridLabels";
 import { singleCellRange } from "./cellRange";
 import {
   copyGridCells,
@@ -69,6 +69,7 @@ export {
   type GridKeyEvent,
   type PointerReleaseTarget,
 } from "./gridNavigation";
+import type { TableStore } from "../state/tableStore";
 export { isGridColumnSelected } from "./gridRange";
 
 /**
@@ -86,11 +87,11 @@ function handleHistoryKey<TRow>(
   if (!run) return false;
   const cells = run();
   const done = redo
-    ? (session.labels()?.editRedone ?? defaultLabels.editRedone)
-    : (session.labels()?.editUndone ?? defaultLabels.editUndone);
+    ? (session.labels()?.editRedone ?? GRID_LABELS.editRedone)
+    : (session.labels()?.editUndone ?? GRID_LABELS.editUndone);
   session.say(
     cells === 0
-      ? (session.labels()?.editNothingToUndo ?? defaultLabels.editNothingToUndo)
+      ? (session.labels()?.editNothingToUndo ?? GRID_LABELS.editNothingToUndo)
       : done(cells)
   );
   return true;
@@ -165,7 +166,8 @@ function fullParts<TRow>(): GridNavigationParts<TRow> {
  * @public
  */
 export function createGridFocusController<TRow>(
-  initial: GridFocusControllerOptions<TRow>
+  initial: GridFocusControllerOptions<TRow>,
+  within: { readonly store?: TableStore } = {}
 ): GridFocusController<TRow> {
-  return composeGridNavigation(initial, fullParts());
+  return composeGridNavigation(initial, fullParts(), within);
 }

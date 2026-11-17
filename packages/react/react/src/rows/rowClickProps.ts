@@ -1,4 +1,4 @@
-import { rowClickProps as coreRowClickProps } from "@adapttable/core";
+import { rowClickProps as coreRowClickProps } from "@adapttable/core/binding";
 import type { HTMLAttributes } from "react";
 
 /**

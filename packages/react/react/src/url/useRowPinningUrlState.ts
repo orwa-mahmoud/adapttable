@@ -7,8 +7,11 @@
  * batteries-included shell also writes this when pinning is armed and the
  * host has not taken control.
  */
-import { rowPinningSlice } from "@adapttable/core";
-import type { UseRowPinningUrlStateResult } from "@adapttable/core/binding";
+
+import {
+  rowPinningSlice,
+  type UseRowPinningUrlStateResult,
+} from "@adapttable/core/binding";
 
 import type { UrlStateAdapter } from "./adapter";
 import { useUrlSlice } from "./useUrlSlice";

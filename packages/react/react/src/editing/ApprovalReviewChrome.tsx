@@ -12,17 +12,20 @@
 import {
   type ApprovalReview,
   type ApprovalReviewItem,
-  resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
 import {
   approvalArgumentPairs,
   approvalProposalText,
   type ApprovalReviewSlots as NeutralApprovalReviewSlots,
+  ASSISTANT_LABELS,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import { Fragment, type ReactElement, type ReactNode, useId } from "react";
 
 import type { AgentApprovalButtonProps } from "./AgentApprovalChrome";
+
+const APPROVAL_GROUPS = [ASSISTANT_LABELS] as const;
 
 /**
  * Controls a kit supplies to the shared review body — `@adapttable/core`'s
@@ -98,7 +101,7 @@ export function ApprovalReviewChrome({
   const buttonClass: { className?: string } = buttonClassName
     ? { className: buttonClassName }
     : {};
-  const copy = resolveLabels(labels);
+  const copy = resolveFeatureLabels(labels, APPROVAL_GROUPS);
 
   return (
     <div
@@ -256,7 +259,7 @@ function ReviewRow({
   readonly buttonClassName?: string;
 }): ReactElement {
   const text = approvalProposalText(item.proposal, labels);
-  const copy = resolveLabels(labels);
+  const copy = resolveFeatureLabels(labels, APPROVAL_GROUPS);
   const buttonClass: { className?: string } = buttonClassName
     ? { className: buttonClassName }
     : {};

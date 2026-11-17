@@ -275,7 +275,9 @@ function extreme(
  *
  * @public
  */
-export const AGGREGATE_NAMES = Object.keys(BUILT_INS) as AggregateName[];
+export const AGGREGATE_NAMES = /* @__PURE__ */ Object.keys(
+  BUILT_INS
+) as AggregateName[];
 
 /** Whether an id is one of the built-in names. */
 function isAggregateName(id: string): id is AggregateName {
@@ -376,7 +378,7 @@ export type DeclaredAggregates = Readonly<Record<string, string>>;
 export const CUSTOM_AGGREGATE = "custom";
 
 /** Where the declaration rides on the mapper, out of reach of JSON. */
-const DECLARED = Symbol.for("adapttable.declaredAggregates");
+const DECLARED = /* @__PURE__ */ Symbol.for("adapttable.declaredAggregates");
 
 /**
  * A `groupAggregates` / `summaryRow` mapper, optionally carrying what it was

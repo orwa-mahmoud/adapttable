@@ -22,7 +22,7 @@ function FiltersForm({
   labels,
   defaultExpanded,
   showSimpleFields,
-}: Readonly<FiltersFormSlotProps<never>>) {
+}: Readonly<FiltersFormSlotProps<unknown>>) {
   return (
     <Stack spacing={3} data-adapttable-part="filters-form">
       <FilterTreeBuilder

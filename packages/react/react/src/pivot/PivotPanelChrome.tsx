@@ -18,20 +18,23 @@
 import {
   assignField,
   moveField,
-  PIVOT_AGGREGATIONS,
-  pivotPanelZones,
   removeField,
-  resolveLabels,
   setMeasureAgg,
 } from "@adapttable/core";
-import type {
-  PivotFieldProps as NeutralPivotFieldProps,
-  PivotPanelChromeProps as NeutralPivotPanelChromeProps,
-  PivotPanelSlots as NeutralPivotPanelSlots,
-  PivotPanelSurfaceProps as NeutralPivotPanelSurfaceProps,
-  PivotZoneProps as NeutralPivotZoneProps,
+import {
+  PIVOT_AGGREGATIONS,
+  PIVOT_LABELS,
+  type PivotFieldProps as NeutralPivotFieldProps,
+  type PivotPanelChromeProps as NeutralPivotPanelChromeProps,
+  type PivotPanelSlots as NeutralPivotPanelSlots,
+  type PivotPanelSurfaceProps as NeutralPivotPanelSurfaceProps,
+  pivotPanelZones,
+  type PivotZoneProps as NeutralPivotZoneProps,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
+
+const PIVOT_GROUPS = [PIVOT_LABELS] as const;
 
 export type {
   AggregateName,
@@ -97,7 +100,7 @@ export function PivotPanelChrome({
   slots,
   className,
 }: Readonly<PivotPanelChromeProps>) {
-  const labels = resolveLabels(labelsProp);
+  const labels = resolveFeatureLabels(labelsProp, PIVOT_GROUPS);
   const { Surface, Zone, Field, Add, Agg } = slots;
 
   return (

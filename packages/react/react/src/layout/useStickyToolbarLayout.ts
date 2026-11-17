@@ -2,7 +2,7 @@ import {
   measuredToolbarHeight,
   stickyHeaderOffset,
   stickyToolbarStyle,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import {
   type CSSProperties,
   type RefCallback,
@@ -12,7 +12,7 @@ import {
   useState,
 } from "react";
 
-export { resolveStickyToolbar } from "@adapttable/core";
+export { resolveStickyToolbar } from "@adapttable/core/binding";
 
 /**
  * Measure the toolbar and return the styles that park it at `stickyTop`,

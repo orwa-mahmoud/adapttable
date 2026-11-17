@@ -1,16 +1,18 @@
-import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
-import type { TableLabels } from "@adapttable/react/adapter";
+/** The saved-views menu, drawn by the binding with Chakra's controls. */
+import type { UseSavedViewsOptions } from "@adapttable/react";
 import {
-  Button,
-  HStack,
-  IconButton,
-  Input,
-  Popover,
-  Separator,
-} from "@chakra-ui/react";
-import { useState } from "react";
+  createSavedViewsMenu,
+  type KitButtonProps,
+  type KitSavedViewsLook,
+  mergeRefs,
+  type TableLabels,
+} from "@adapttable/react/adapter";
+import { Button as ChakraButton } from "@chakra-ui/react";
+import { forwardRef, type ReactElement } from "react";
 
-import { KitPortal } from "./kitPortal";
+import { AccentColor, useAccentColor } from "./accent";
+import { Button as MenuButton, Popover } from "./ColumnMenu";
+import { Divider, IconButton, TextInput } from "./kitPrimitives";
 
 /** Small × glyph for the per-view delete button. */
 function CrossIcon() {
@@ -57,6 +59,77 @@ export interface SavedViewsMenuProps {
 }
 
 /**
+ * The menu's buttons: the trigger as the toolbar's, each view a quiet compact
+ * button that fills its row, the save button solid in the table's accent.
+ */
+const Button = forwardRef<HTMLButtonElement, KitButtonProps>(function Button(
+  {
+    elementRef,
+    variant,
+    tone: _tone,
+    fullWidth,
+    justify,
+    busy: _busy,
+    ...rest
+  },
+  ref
+) {
+  "use no memo";
+  const accent = useAccentColor();
+  if (variant === "outlined")
+    return (
+      <MenuButton
+        ref={ref}
+        elementRef={elementRef}
+        variant={variant}
+        {...rest}
+      />
+    );
+  const quiet = variant === "text";
+  return (
+    <ChakraButton
+      ref={mergeRefs(ref, elementRef)}
+      type="button"
+      size="xs"
+      variant={quiet ? "ghost" : "solid"}
+      colorPalette={quiet ? undefined : accent}
+      fontWeight={quiet ? "normal" : undefined}
+      flex={fullWidth ? 1 : undefined}
+      flexShrink={quiet ? undefined : 0}
+      justifyContent={justify ? "flex-start" : undefined}
+      {...rest}
+    />
+  );
+});
+
+/** Chakra's step of 4 px between the menu's controls. */
+const STEP = 4;
+
+const ROW = { display: "flex", alignItems: "center", gap: STEP } as const;
+
+const LOOK: KitSavedViewsLook = {
+  panel: { padding: 2 * STEP, minWidth: 240, maxHeight: "min(70vh, 360px)" },
+  row: { ...ROW, paddingBlock: STEP / 2 },
+  divider: { marginBlock: STEP },
+  saveRow: ROW,
+  nameInput: {},
+};
+
+const useLook = (): KitSavedViewsLook => LOOK;
+
+const Menu = /* @__PURE__ */ createSavedViewsMenu(
+  {
+    Button,
+    IconButton,
+    TextInput,
+    Popover,
+    Divider,
+    deleteIcon: <CrossIcon />,
+  },
+  useLook
+);
+
+/**
  * Saved-views toolbar menu on core's `useSavedViews`: a popover listing the
  * captured views (click applies and closes; the trailing × deletes) above a
  * save row that snapshots the table's CURRENT URL state under a typed name.
@@ -64,87 +137,14 @@ export interface SavedViewsMenuProps {
  * @public
  */
 export function SavedViewsMenu({
-  options,
-  labels,
   accentColor,
-}: Readonly<SavedViewsMenuProps>) {
-  const { views, save, apply, remove } = useSavedViews(options);
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const trimmed = name.trim();
-  const saveCurrent = () => {
-    save(trimmed);
-    setName("");
-  };
+  ...props
+}: Readonly<SavedViewsMenuProps>): ReactElement {
+  "use no memo";
+  // The save button takes the accent given here, not the table's.
   return (
-    <Popover.Root
-      open={open}
-      onOpenChange={(e) => setOpen(e.open)}
-      positioning={{ placement: "bottom-end", flip: false }}
-      lazyMount
-    >
-      <Popover.Trigger asChild>
-        <Button size="sm" variant="outline">
-          {labels.savedViews}
-        </Button>
-      </Popover.Trigger>
-      <KitPortal>
-        <Popover.Positioner>
-          <Popover.Content
-            minW="240px"
-            w="auto"
-            maxH="min(70vh, 360px)"
-            overflowY="auto"
-          >
-            <Popover.Body px={2} py={2}>
-              {views.map((view) => (
-                <HStack key={view.name} gap={1} py={0.5}>
-                  <Button
-                    size="xs"
-                    variant="ghost"
-                    fontWeight="normal"
-                    flex={1}
-                    justifyContent="flex-start"
-                    onClick={() => {
-                      apply(view.name);
-                      setOpen(false);
-                    }}
-                  >
-                    {view.name}
-                  </Button>
-                  <IconButton
-                    size="xs"
-                    variant="ghost"
-                    aria-label={`${labels.deleteView}: ${view.name}`}
-                    onClick={() => remove(view.name)}
-                  >
-                    <CrossIcon />
-                  </IconButton>
-                </HStack>
-              ))}
-              <Separator my={1} />
-              <HStack gap={1}>
-                <Input
-                  size="xs"
-                  aria-label={labels.viewName}
-                  placeholder={labels.viewName}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-                <Button
-                  size="xs"
-                  flexShrink={0}
-                  colorPalette={accentColor}
-                  disabled={trimmed === ""}
-                  onClick={saveCurrent}
-                >
-                  {labels.saveView}
-                </Button>
-              </HStack>
-            </Popover.Body>
-          </Popover.Content>
-        </Popover.Positioner>
-      </KitPortal>
-    </Popover.Root>
+    <AccentColor.Provider value={accentColor}>
+      <Menu {...props} />
+    </AccentColor.Provider>
   );
 }

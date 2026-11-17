@@ -84,6 +84,26 @@ describe("parseTableQuery", () => {
       expect(query.rejected[0]?.param).toBe("f_password");
     });
 
+    it("drops an aggregate on a column that is not in the schema", () => {
+      const query = parseTableQuery("?groupAgg=budget:sum,salary:max", schema);
+
+      expect(query.groupAggregates).toEqual({ budget: "sum" });
+      expect(query.rejected).toEqual([
+        {
+          param: "groupAgg",
+          value: "salary",
+          reason: "not an aggregatable column",
+        },
+      ]);
+    });
+
+    it("reports no aggregates when none is left", () => {
+      const query = parseTableQuery("?groupAgg=salary:max", schema);
+
+      expect(query.groupAggregates).toBeUndefined();
+      expect(query.rejected).toHaveLength(1);
+    });
+
     it("drops a groupBy the schema does not allow", () => {
       const query = parseTableQuery("?groupBy=salary", schema);
 

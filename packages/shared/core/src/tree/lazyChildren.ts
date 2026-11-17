@@ -77,7 +77,7 @@ export interface LazyChildrenController<TRow> {
   readonly loadIfNeeded: (row: TRow) => void;
 }
 
-const EMPTY: ReadonlySet<string> = new Set();
+const EMPTY: ReadonlySet<string> = /* @__PURE__ */ new Set();
 
 /**
  * Create the lazy-children controller; inert while no `onLoadChildren` is

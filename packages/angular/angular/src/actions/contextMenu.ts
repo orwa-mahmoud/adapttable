@@ -2,8 +2,8 @@ import {
   type ContextMenuState,
   type ContextMenuTarget,
   type ContextMenuTriggerHandlers,
-  createContextMenuOpenController,
 } from "@adapttable/core";
+import { createContextMenuOpenController } from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

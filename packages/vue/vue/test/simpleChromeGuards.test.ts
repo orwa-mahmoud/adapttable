@@ -1,5 +1,6 @@
 import { resolveLabels } from "@adapttable/core";
-import { describe, expect, it, vi } from "vitest";
+import type { RowSlotKey } from "@adapttable/core/binding";
+import { describe, expect, expectTypeOf, it, vi } from "vitest";
 import { h, isVNode } from "vue";
 
 import {
@@ -8,7 +9,7 @@ import {
   type HistoryButtonsChromeProps,
   PrintChrome,
 } from "../src/actions/simpleChrome";
-import { GROUP_ROW, groupRowSlotKey } from "../src/layout/groupRowSlot";
+import { GROUP_ROW, type GroupRowDraw } from "../src/layout/groupRowSlot";
 
 const labels = resolveLabels(undefined);
 const missing = {} as unknown as ActionButtonSlots;
@@ -59,6 +60,7 @@ describe("simple action Chrome", () => {
   });
 
   it("keeps one neutral group-row slot key for every row type", () => {
-    expect(groupRowSlotKey<{ id: string }>()).toBe(GROUP_ROW);
+    expect(GROUP_ROW).toEqual({ id: "vue-unstyled-group-row" });
+    expectTypeOf(GROUP_ROW).toEqualTypeOf<RowSlotKey<GroupRowDraw>>();
   });
 });

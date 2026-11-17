@@ -174,7 +174,9 @@ column's compact control) and `FilterHeaderRow` (a filter row for a custom
 header) over `FilterHeaderControlChrome` / `FilterHeaderChrome`. The overlay
 logic is headless in `@adapttable/react`: `useHeaderFilterOverlay`,
 `bindHeaderFilterDismiss`, `headerFilterFieldIsComplete` and
-`usePointerDismiss`.
+`usePointerDismiss`, which the filters popovers use too, with
+`OverlayDismissOptions` naming the trigger and panel as inside and handing
+focus back to the trigger after Escape.
 
 ## Notes
 

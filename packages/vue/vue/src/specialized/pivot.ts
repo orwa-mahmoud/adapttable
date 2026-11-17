@@ -3,27 +3,28 @@ import {
   type AggregateName,
   assignField,
   moveField,
-  PIVOT_AGGREGATIONS,
   PIVOT_ROW_COLUMN_KEY,
-  PIVOT_ROW_INDENT,
   type PivotConfig,
   type PivotField,
-  pivotPanelZones,
   type PivotResult,
   type PivotRow,
   pivotRowCaption,
-  pivotRowIndentStyle,
-  pivotSlice,
-  pivotTableLayout,
   removeField,
-  resolveLabels,
   setMeasureAgg,
   type TableLabels,
 } from "@adapttable/core";
 import {
+  PIVOT_AGGREGATIONS,
+  PIVOT_LABELS,
+  PIVOT_ROW_INDENT,
   type PivotAggProps,
   type PivotPanelChromeProps as NeutralPivotPanelChromeProps,
   type PivotPanelSlots as NeutralPivotPanelSlots,
+  pivotPanelZones,
+  pivotRowIndentStyle,
+  pivotSlice,
+  pivotTableLayout,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import {
   computed,
@@ -34,8 +35,11 @@ import {
 } from "vue";
 
 import type { ColumnDef } from "../columnDef";
+import { withProps } from "../functionalProps";
 import type { MaybeRefOrGetterOptional } from "../store";
 import { type UrlSliceOptions, useUrlSlice } from "../url/useUrlSlice";
+
+const PIVOT_GROUPS = [PIVOT_LABELS] as const;
 export type { ColumnDef } from "../columnDef";
 export type {
   PivotAddProps,
@@ -56,100 +60,103 @@ export type PivotPanelChromeProps = Omit<
   NeutralPivotPanelChromeProps<VNodeChild>,
   "slots"
 > & { readonly slots: PivotPanelSlots };
-export function PivotPanelChrome(props: PivotPanelChromeProps): VNodeChild {
-  const { fields, config, onChange, slots, className } = props;
-  const labels = resolveLabels(props.labels);
-  const aggregationLabels = {
-    sum: labels.selectionSum,
-    avg: labels.groupingAverage,
-    count: labels.selectionCount,
-    min: labels.selectionMin,
-    max: labels.selectionMax,
-  };
-  for (const key of ["Surface", "Zone", "Field", "Add", "Agg"] as const)
-    if (typeof slots[key] !== "function")
-      throw new Error(
-        `AdaptTable: required pivot control slot "${key}" is missing.`
-      );
-  return slots.Surface({
-    className,
-    "data-adapttable-part": "pivot-panel",
-    children: h(
-      "div",
-      {
-        "data-adapttable-part": "pivot-zones",
-        style: {
-          display: "grid",
-          gridTemplateColumns:
-            "repeat(auto-fit, minmax(min(100%, max(20rem, calc((100% - 0.75rem) / 2))), 1fr))",
-          gap: "0.75rem",
-          width: "100%",
-          minWidth: 0,
+export const PivotPanelChrome = /* @__PURE__ */ withProps(
+  function PivotPanelChrome(props: PivotPanelChromeProps): VNodeChild {
+    const { fields, config, onChange, slots, className } = props;
+    const labels = resolveFeatureLabels(props.labels, PIVOT_GROUPS);
+    const aggregationLabels = {
+      sum: labels.selectionSum,
+      avg: labels.groupingAverage,
+      count: labels.selectionCount,
+      min: labels.selectionMin,
+      max: labels.selectionMax,
+    };
+    for (const key of ["Surface", "Zone", "Field", "Add", "Agg"] as const)
+      if (typeof slots[key] !== "function")
+        throw new Error(
+          `AdaptTable: required pivot control slot "${key}" is missing.`
+        );
+    return slots.Surface({
+      className,
+      "data-adapttable-part": "pivot-panel",
+      children: h(
+        "div",
+        {
+          "data-adapttable-part": "pivot-zones",
+          style: {
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(min(100%, max(20rem, calc((100% - 0.75rem) / 2))), 1fr))",
+            gap: "0.75rem",
+            width: "100%",
+            minWidth: 0,
+          },
         },
-      },
-      pivotPanelZones(fields, config, labels, aggregationLabels).map(
-        ({ zone, label, entries, addOptions }) =>
-          h(
-            "div",
-            {
-              "data-adapttable-part": "pivot-zone-layout",
-              style: {
-                display: "grid",
-                minWidth: 0,
-                gridColumn: zone === "measures" ? "1 / -1" : undefined,
+        pivotPanelZones(fields, config, labels, aggregationLabels).map(
+          ({ zone, label, entries, addOptions }) =>
+            h(
+              "div",
+              {
+                "data-adapttable-part": "pivot-zone-layout",
+                style: {
+                  display: "grid",
+                  minWidth: 0,
+                  gridColumn: zone === "measures" ? "1 / -1" : undefined,
+                },
               },
-            },
-            [
-              slots.Zone({
-                zone,
-                label,
-                "data-adapttable-part": "pivot-zone",
-                children: [
-                  ...entries.map((entry) =>
-                    slots.Field({
-                      label: entry.label,
-                      "data-adapttable-part": "pivot-field",
-                      moveUpLabel: labels.pivotMoveUp,
-                      moveDownLabel: labels.pivotMoveDown,
-                      removeLabel: labels.pivotRemove,
-                      onMoveUp: entry.canMoveUp
-                        ? () =>
-                            onChange(moveField(config, zone, entry.index, -1))
-                        : undefined,
-                      onMoveDown: entry.canMoveDown
-                        ? () =>
-                            onChange(moveField(config, zone, entry.index, 1))
-                        : undefined,
-                      onRemove: () =>
-                        onChange(removeField(config, zone, entry.index)),
-                      aggregation:
-                        entry.aggregation === undefined
-                          ? undefined
-                          : slots.Agg({
-                              label: labels.pivotAggregation,
-                              value: entry.aggregation,
-                              options: PIVOT_AGGREGATIONS,
-                              optionLabels: aggregationLabels,
-                              onChange: (next) =>
-                                onChange(
-                                  setMeasureAgg(config, entry.index, next)
-                                ),
-                            }),
-                    })
-                  ),
-                  slots.Add({
-                    label: labels.pivotAdd,
-                    options: addOptions,
-                    onAdd: (key) => onChange(assignField(config, key, zone)),
-                  }),
-                ],
-              }),
-            ]
-          )
-      )
-    ),
-  });
-}
+              [
+                slots.Zone({
+                  zone,
+                  label,
+                  "data-adapttable-part": "pivot-zone",
+                  children: [
+                    ...entries.map((entry) =>
+                      slots.Field({
+                        label: entry.label,
+                        "data-adapttable-part": "pivot-field",
+                        moveUpLabel: labels.pivotMoveUp,
+                        moveDownLabel: labels.pivotMoveDown,
+                        removeLabel: labels.pivotRemove,
+                        onMoveUp: entry.canMoveUp
+                          ? () =>
+                              onChange(moveField(config, zone, entry.index, -1))
+                          : undefined,
+                        onMoveDown: entry.canMoveDown
+                          ? () =>
+                              onChange(moveField(config, zone, entry.index, 1))
+                          : undefined,
+                        onRemove: () =>
+                          onChange(removeField(config, zone, entry.index)),
+                        aggregation:
+                          entry.aggregation === undefined
+                            ? undefined
+                            : slots.Agg({
+                                label: labels.pivotAggregation,
+                                value: entry.aggregation,
+                                options: PIVOT_AGGREGATIONS,
+                                optionLabels: aggregationLabels,
+                                onChange: (next) =>
+                                  onChange(
+                                    setMeasureAgg(config, entry.index, next)
+                                  ),
+                              }),
+                      })
+                    ),
+                    slots.Add({
+                      label: labels.pivotAdd,
+                      options: addOptions,
+                      onAdd: (key) => onChange(assignField(config, key, zone)),
+                    }),
+                  ],
+                }),
+              ]
+            )
+        )
+      ),
+    });
+  },
+  ["fields", "config", "onChange", "labels", "slots", "className"]
+);
 export interface PivotTableModelOptions {
   readonly fields?: readonly PivotField[];
   readonly labels?: TableLabels;
@@ -167,7 +174,7 @@ export function pivotTableModel(
   result: PivotResult,
   options: PivotTableModelOptions = {}
 ): PivotTableModel {
-  const labels = resolveLabels(options.labels);
+  const labels = resolveFeatureLabels(options.labels, PIVOT_GROUPS);
   const layout = pivotTableLayout(result, { fields: options.fields, labels });
   const columns: ColumnDef<PivotRow>[] = [
     {
@@ -228,15 +235,6 @@ export function usePivotUrlState(
   };
 }
 export type UsePivotUrlStateResult = ReturnType<typeof usePivotUrlState>;
-
-PivotPanelChrome.props = [
-  "fields",
-  "config",
-  "onChange",
-  "labels",
-  "slots",
-  "className",
-];
 
 export type * from "../columnDef";
 export type { MaybeRefOrGetterOptional } from "../store";

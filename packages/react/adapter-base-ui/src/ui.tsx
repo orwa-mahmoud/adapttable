@@ -340,8 +340,14 @@ export function Separator({
   my: _my,
   size: _size,
   className,
-}: Readonly<{ my?: string; size?: string; className?: string }>) {
-  return <hr className={cx("adapttable-separator", className)} />;
+  ...rest
+}: Readonly<
+  {
+    my?: string;
+    size?: string;
+  } & HTMLAttributes<HTMLHRElement>
+>) {
+  return <hr className={cx("adapttable-separator", className)} {...rest} />;
 }
 
 /** Loading skeleton bar. */

@@ -8,14 +8,7 @@
 import type { ColumnDef } from "@adapttable/angular";
 import {
   finiteSparklineValues,
-  SPARKLINE_DEFAULT_HEIGHT,
-  SPARKLINE_DEFAULT_WIDTH,
-  sparklineAreaPath,
-  sparklineBars,
   sparklineExportValue,
-  type SparklineKind,
-  sparklineLinePath,
-  sparklineSortValue,
   sparklineSummary,
 } from "@adapttable/core";
 import { Component, computed, input } from "@angular/core";
@@ -24,9 +17,20 @@ export type { ColumnDef };
 export {
   finiteSparklineValues,
   sparklineExportValue,
-  type SparklineKind,
   sparklineSummary,
 } from "@adapttable/core";
+
+import {
+  SPARKLINE_DEFAULT_HEIGHT,
+  SPARKLINE_DEFAULT_WIDTH,
+  sparklineAreaPath,
+  sparklineBars,
+  type SparklineKind,
+  sparklineLinePath,
+  sparklineSortValue,
+} from "@adapttable/core/binding";
+
+export { type SparklineKind } from "@adapttable/core/binding";
 
 /** How a sparkline column draws, kept beside the column object. */
 interface SparklineDraw<TRow> {

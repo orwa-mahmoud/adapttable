@@ -152,6 +152,16 @@ export function editingBundleFor<TRow>(options: {
         get featureHost() {
           return options.featureHost;
         },
+        validateRow: options.featureOptions
+          .validateRow as EditValidationInjectOptions<TRow>["validateRow"],
+        applyEdit: options.featureOptions
+          .applyEdit as EditValidationInjectOptions<TRow>["applyEdit"],
+        formatEditError: options.featureOptions
+          .formatEditError as CellSaveStateInjectOptions<TRow>["formatError"],
+        onEditError: options.featureOptions.onEditError as
+          EditEventHandler<TRow> | undefined,
+        onValidationFail: options.featureOptions.onValidationFail as
+          EditEventHandler<TRow> | undefined,
         injector: options.injector,
       })
     : undefined;
@@ -166,6 +176,16 @@ export function editingBundleFor<TRow>(options: {
         get featureHost() {
           return options.featureHost;
         },
+        validateRow: options.featureOptions
+          .validateRow as EditValidationInjectOptions<TRow>["validateRow"],
+        applyEdit: options.featureOptions
+          .applyEdit as EditValidationInjectOptions<TRow>["applyEdit"],
+        formatEditError: options.featureOptions
+          .formatEditError as CellSaveStateInjectOptions<TRow>["formatError"],
+        onEditError: options.featureOptions.onEditError as
+          EditEventHandler<TRow> | undefined,
+        onValidationFail: options.featureOptions.onValidationFail as
+          EditEventHandler<TRow> | undefined,
         injector: options.injector,
       })
     : undefined;

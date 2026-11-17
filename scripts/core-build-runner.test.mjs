@@ -20,6 +20,7 @@ import ts from "typescript";
 import {
   buildLibrary,
   declarationConfig,
+  declarationConfigs,
   inlineDeclarationSources,
 } from "./build-library.mjs";
 
@@ -64,6 +65,30 @@ it("keeps every core entry and bundler option while selecting the declaration mo
         { packageDir, typesDir, extension: ".d.ts" }
       ),
     /not TypeScript/
+  );
+});
+
+it("bundles declarations for every config that ships them, and only those", () => {
+  const options = {
+    packageDir: join(tmpdir(), "core-runner-package"),
+    typesDir: join(tmpdir(), "core-runner-types"),
+    extension: ".d.ts",
+  };
+  const library = { entry: ["src/index.ts"], dts: { eager: true } };
+  const engine = { entry: { engine: "src/engine.ts" }, dts: false };
+  const single = declarationConfigs(library, options);
+  assert.equal(single.length, 1);
+  assert.deepEqual(single[0].entry, {
+    index: join(options.typesDir, "index.d.ts"),
+  });
+  const both = declarationConfigs([library, engine], options);
+  assert.deepEqual(
+    both.map((config) => config.entry),
+    [{ index: join(options.typesDir, "index.d.ts") }]
+  );
+  assert.throws(
+    () => declarationConfigs([engine], options),
+    /No library config ships declarations/
   );
 });
 

@@ -6,7 +6,7 @@ import type { FindInTableState } from "../find/useFindInTable";
 import { RowScrollContext } from "../virtual/rowScroll";
 import { findInTable } from "./find-in-table";
 import { FeatureProviders, FeatureSlot } from "./providers";
-import { FIND_LIVE } from "./slotKeys";
+import { FIND_LIVE, type FindLiveSlotProps } from "./slotKeys";
 import { applyTableFeatures } from "./tableFeature";
 
 interface Row {
@@ -26,7 +26,7 @@ const columns: ColumnDef<Row>[] = [
  * can bring it into view: the body is mounted above find, and this context is
  * the only way down.
  */
-function mount(scrollToRow: ((row: never) => void) | null) {
+function mount(scrollToRow: ((row: Row) => void) | null) {
   const props = applyTableFeatures({ features: [findInTable()] });
   let find: FindInTableState | undefined;
   render(
@@ -34,16 +34,18 @@ function mount(scrollToRow: ((row: never) => void) | null) {
       <RowScrollContext.Provider value={scrollToRow}>
         <FeatureSlot
           slot={FIND_LIVE}
-          props={{
-            enabled: true,
-            rows: ROWS as never[],
-            columns: columns as never[],
-            urlSync: false,
-            children: (state) => {
-              find = state;
-              return null;
-            },
-          }}
+          props={
+            {
+              enabled: true,
+              rows: ROWS,
+              columns,
+              urlSync: false,
+              children: (state) => {
+                find = state;
+                return null;
+              },
+            } satisfies FindLiveSlotProps<Row>
+          }
         />
       </RowScrollContext.Provider>
     </FeatureProviders>

@@ -88,9 +88,277 @@ export interface DesktopChromeWidths {
 }
 
 /**
+ * The rendered widths of the injected rails, read from the header. A rail
+ * the table did not draw is absent.
+ *
+ * @public
+ */
+export interface MeasuredRailWidths {
+  /** Leading expand-chevron rail. */
+  readonly expansion?: number;
+  /** Leading row-reorder rail. */
+  readonly reorder?: number;
+  /** Leading selection rail. */
+  readonly selection?: number;
+  /** Trailing actions rail. */
+  readonly actions?: number;
+  /**
+   * How far the first cell sits inside the box it sticks to (the table's
+   * border, a card around it): a pinned cell sits that far in as well.
+   */
+  readonly edgeStart?: number;
+  /** How far the last cell sits inside the box it sticks to. */
+  readonly edgeEnd?: number;
+}
+
+/**
+ * Where each rail sticks: past the table's edge and the rails before it.
+ *
+ * @public
+ */
+export interface RailInsets {
+  /** Inset of the expand rail. */
+  readonly expand: number;
+  /** Inset of the reorder rail. */
+  readonly reorder: number;
+  /** Inset of the selection rail. */
+  readonly selection: number;
+  /** Inset of the actions rail, from the trailing edge. */
+  readonly actions: number;
+}
+
+/** Each rail, keyed by the part name of its header cell. */
+const RAIL_HEADER_PARTS = [
+  ["expansion", "expand-header"],
+  ["reorder", "reorder-header"],
+  ["selection", "selection-header"],
+  ["actions", "actions-header"],
+] as const;
+
+/** Every measured width, in a fixed order, for signatures. */
+const MEASURED_KEYS = [
+  "expansion",
+  "reorder",
+  "selection",
+  "actions",
+  "edgeStart",
+  "edgeEnd",
+] as const;
+
+/**
+ * The box a sticky cell sticks inside: the nearest ancestor that scrolls or
+ * hides its overflow, else the page.
+ */
+function stickyScroller(from: Element): {
+  readonly innerLeft: number;
+  readonly clientWidth: number;
+  readonly scrollLeft: number;
+  readonly scrollWidth: number;
+} {
+  for (
+    let box: Element | null = from;
+    box && box !== document.documentElement;
+    box = box.parentElement
+  ) {
+    const overflow = getComputedStyle(box).overflowX;
+    if (overflow !== "visible" && overflow !== "clip")
+      return {
+        innerLeft: box.getBoundingClientRect().left + box.clientLeft,
+        clientWidth: box.clientWidth,
+        scrollLeft: box.scrollLeft,
+        scrollWidth: box.scrollWidth,
+      };
+  }
+  const page = document.documentElement;
+  return {
+    innerLeft: 0,
+    clientWidth: page.clientWidth,
+    scrollLeft: window.scrollX,
+    scrollWidth: page.scrollWidth,
+  };
+}
+
+/** Each table's cell gaps, as last read while its end cells stood still. */
+const settledGaps = new WeakMap<Element, { start?: number; end?: number }>();
+
+/** How far `cell` sits inside the table's `side` edge, read from its place. */
+function measuredGap(
+  table: Element,
+  cell: Element,
+  side: "start" | "end",
+  rtl: boolean
+): number {
+  const outer = table.getBoundingClientRect();
+  const inner = cell.getBoundingClientRect();
+  const fromLeft = inner.left - outer.left;
+  const fromRight = outer.right - inner.right;
+  return (side === "start") !== rtl ? fromLeft : fromRight;
+}
+
+/** The gap a table's border and cell spacing make, for a cell not at rest. */
+function borderGap(table: Element, side: "start" | "end"): number {
+  const style = getComputedStyle(table);
+  const border =
+    Number.parseFloat(
+      side === "start"
+        ? style.borderInlineStartWidth
+        : style.borderInlineEndWidth
+    ) || 0;
+  if (style.borderCollapse === "collapse") return border / 2;
+  return border + (Number.parseFloat(style.borderSpacing) || 0);
+}
+
+/**
+ * How far a header end cell sits inside the table's own edge. A cell that
+ * does not stick, or a sticky cell while the box rests where it does not
+ * push it (the start cell unscrolled, the end cell scrolled to the end),
+ * stands where the table put it, so its place is read and remembered. A
+ * sticky cell the scroll has pushed says nothing about the table: the gap
+ * last read at rest stands in, or the table's border and spacing before
+ * any such reading.
+ */
+function cellGap(
+  table: Element,
+  cell: Element,
+  side: "start" | "end",
+  rtl: boolean,
+  atRest: boolean
+): number {
+  const settled = settledGaps.get(table) ?? {};
+  if (atRest || getComputedStyle(cell).position !== "sticky") {
+    const gap = measuredGap(table, cell, side, rtl);
+    settledGaps.set(table, { ...settled, [side]: gap });
+    return gap;
+  }
+  return settled[side] ?? borderGap(table, side);
+}
+
+/**
+ * How far the header's first and last cells sit inside the box they stick
+ * to: the table's border and anything around the table (a card's border or
+ * padding). A pinned cell sticks that far in, so it does not move when the
+ * box starts scrolling. The table itself never sticks, so its place in the
+ * scrolled content holds while the box scrolls.
+ */
+function readTableEdges(head: ParentNode): {
+  edgeStart?: number;
+  edgeEnd?: number;
+} {
+  const row = head.querySelector("tr");
+  const table = row?.closest("table");
+  const first = row?.firstElementChild;
+  const last = row?.lastElementChild;
+  if (!table?.getBoundingClientRect().width || !first || !last) return {};
+  const box = stickyScroller(table);
+  const outer = table.getBoundingClientRect();
+  // Positions inside the scrolled content, from its start edge.
+  const innerRight = box.innerLeft + box.clientWidth;
+  const rtl = getComputedStyle(table).direction === "rtl";
+  const tableStart = rtl
+    ? innerRight - outer.right - box.scrollLeft
+    : outer.left - box.innerLeft + box.scrollLeft;
+  const tableEnd = rtl
+    ? innerRight - outer.left - box.scrollLeft
+    : outer.right - box.innerLeft + box.scrollLeft;
+  // Scrolled by how far from the start, whichever way the direction counts.
+  const scrolled = Math.abs(box.scrollLeft);
+  const edgeStart =
+    tableStart + cellGap(table, first, "start", rtl, scrolled === 0);
+  const atEnd = box.scrollWidth - box.clientWidth - scrolled <= 0.5;
+  const edgeEnd =
+    box.scrollWidth - (tableEnd - cellGap(table, last, "end", rtl, atEnd));
+  const edges: { edgeStart?: number; edgeEnd?: number } = {};
+  if (edgeStart > 0) edges.edgeStart = edgeStart;
+  if (edgeEnd > 0) edges.edgeEnd = edgeEnd;
+  return edges;
+}
+
+/**
+ * Reads the rendered width of each rail's header cell. Pinned columns sit
+ * past the rails, so their insets follow what the rails actually take up:
+ * a rail is as wide as its content and whatever spare width the table hands
+ * it, which a reserved width cannot know. A header that is not laid out
+ * reports no widths.
+ *
+ * @param head - The table header, or any element holding its rail cells.
+ *
+ * @public
+ */
+export function readRailWidths(head: ParentNode): MeasuredRailWidths {
+  const widths: { -readonly [K in keyof MeasuredRailWidths]: number } =
+    readTableEdges(head);
+  for (const [rail, part] of RAIL_HEADER_PARTS) {
+    const width = head
+      .querySelector(`[data-adapttable-part="${part}"]`)
+      ?.getBoundingClientRect().width;
+    // Zero is a header not laid out (a hidden table): keep the reserved width.
+    if (width) widths[rail] = width;
+  }
+  return widths;
+}
+
+/**
+ * Reports the rails' rendered widths now, whenever one resizes, and whenever
+ * a rail appears or goes, skipping reports that change nothing.
+ *
+ * @param head - The table header.
+ * @param onChange - Receives the widths.
+ * @returns Stops observing.
+ *
+ * @public
+ */
+export function observeRailWidths(
+  head: Element,
+  onChange: (widths: MeasuredRailWidths) => void
+): () => void {
+  let last: string | undefined;
+  const read = () => {
+    const widths = readRailWidths(head);
+    const signature = railWidthsSignature(widths);
+    if (signature === last) return;
+    last = signature;
+    onChange(widths);
+  };
+  const resize =
+    typeof ResizeObserver === "undefined"
+      ? undefined
+      : new ResizeObserver(read);
+  const watchRails = () => {
+    if (!resize) return;
+    resize.disconnect();
+    for (const [, part] of RAIL_HEADER_PARTS) {
+      const cell = head.querySelector(`[data-adapttable-part="${part}"]`);
+      if (cell) resize.observe(cell);
+    }
+  };
+  const rails =
+    typeof MutationObserver === "undefined"
+      ? undefined
+      : new MutationObserver(() => {
+          watchRails();
+          read();
+        });
+  read();
+  watchRails();
+  rails?.observe(head, { childList: true, subtree: true });
+  return () => {
+    resize?.disconnect();
+    rails?.disconnect();
+  };
+}
+
+/** The measured widths as one string, empty when nothing was measured. */
+function railWidthsSignature(widths: MeasuredRailWidths): string {
+  return MEASURED_KEYS.some((key) => widths[key] !== undefined)
+    ? MEASURED_KEYS.map((key) => widths[key] ?? "").join(":")
+    : "";
+}
+
+/**
  * Chrome column widths and pin leads.
  *
- * @param options - Which injected columns render, and their widths.
+ * @param options - Which injected columns render, their reserved widths,
+ *   and their rendered widths once the header has been measured.
  *
  * @public
  */
@@ -100,6 +368,7 @@ export function desktopChromeMetrics(options: {
   hasSelection: boolean;
   showActions: boolean;
   widths?: DesktopChromeWidths;
+  measured?: MeasuredRailWidths;
 }): {
   leads: PinLeads;
   extraMinWidth: number;
@@ -110,21 +379,36 @@ export function desktopChromeMetrics(options: {
   selection: number;
   actions: number;
   includeExpansionInLeads: boolean;
+  /** Where each rail sticks. */
+  railInsets: RailInsets;
+  /** The measured widths the leads use, as a memo key; empty when none. */
+  railSignature: string;
 } {
   const expansion = options.widths?.expansion ?? DESKTOP_EXPANSION_WIDTH;
   const selection = options.widths?.selection ?? DESKTOP_SELECTION_WIDTH;
   const actions = options.widths?.actions ?? DESKTOP_ACTIONS_WIDTH;
   const includeExpansionInLeads =
     options.widths?.includeExpansionInLeads ?? true;
-  const expansionLead =
-    options.expandable && includeExpansionInLeads ? expansion : 0;
-  const reorderLead = options.showReorder ? REORDER_COLUMN_WIDTH : 0;
-  const selectionWidth = options.hasSelection ? selection : 0;
-  const actionsLead = options.showActions ? actions : 0;
-  const start = expansionLead + reorderLead + selectionWidth;
+  const measured = options.measured ?? {};
+  const expansionShown = options.expandable && includeExpansionInLeads;
+  const expansionLead = expansionShown ? (measured.expansion ?? expansion) : 0;
+  const reorderLead = options.showReorder
+    ? (measured.reorder ?? REORDER_COLUMN_WIDTH)
+    : 0;
+  const selectionWidth = options.hasSelection
+    ? (measured.selection ?? selection)
+    : 0;
+  const actionsLead = options.showActions ? (measured.actions ?? actions) : 0;
+  const edgeStart = measured.edgeStart ?? 0;
+  const edgeEnd = measured.edgeEnd ?? 0;
+  const start = edgeStart + expansionLead + reorderLead + selectionWidth;
   return {
-    leads: { start, end: actionsLead },
-    extraMinWidth: start + actionsLead,
+    leads: { start, end: edgeEnd + actionsLead },
+    extraMinWidth:
+      (expansionShown ? expansion : 0) +
+      (options.showReorder ? REORDER_COLUMN_WIDTH : 0) +
+      (options.hasSelection ? selection : 0) +
+      (options.showActions ? actions : 0),
     expansionLead,
     reorderLead,
     selectionLead: expansionLead + reorderLead,
@@ -132,6 +416,13 @@ export function desktopChromeMetrics(options: {
     selection,
     actions,
     includeExpansionInLeads,
+    railInsets: {
+      expand: edgeStart,
+      reorder: edgeStart + expansionLead,
+      selection: edgeStart + expansionLead + reorderLead,
+      actions: edgeEnd,
+    },
+    railSignature: railWidthsSignature(measured),
   };
 }
 

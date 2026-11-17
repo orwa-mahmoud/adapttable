@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Czech (`cs`) label preset.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "provedeno",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "exportovat",
 };
 
+/**
+ * Czech (`cs`) label preset.
+ *
+ * @public
+ */
 export const cs: Required<TableLabels> = {
   table: "Datová tabulka",
   search: "Hledat",

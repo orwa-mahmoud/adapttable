@@ -2,7 +2,9 @@
 import { expect, test } from "@playwright/test";
 
 import { builtAdapters, pathOf } from "../apps/showcase/matrix.mjs";
-import people from "../apps/showcase/src/people.json" with { type: "json" };
+
+/** The editing page's first person, as each language writes the name. */
+const FIRST_PERSON = { en: "Priya Nair", ar: "بريا نير" } as const;
 
 for (const kit of builtAdapters("vue")) {
   for (const { width, locale, theme } of [
@@ -30,10 +32,13 @@ for (const kit of builtAdapters("vue")) {
           '[data-column-key="person"] [data-adapttable-part="edit-cell-activate"]'
         )
         .first();
+      /** The name the Person value shows above the person's role. */
+      const shownName = name.locator("strong").first();
       const editor = row.getByRole("textbox");
-      const ada = people[0];
-      if (!ada) throw new Error("Missing Ada fixture");
-      const originalName = locale === "ar" ? ada.nameAr : ada.name;
+      const originalName = locale === "ar" ? FIRST_PERSON.ar : FIRST_PERSON.en;
+      // The live update renames from the English name, which the Arabic
+      // editor leaves as it was.
+      const liveName = locale === "ar" ? "Priya Live" : "Ada Live";
       const begin = async (draft: string) => {
         await page.evaluate(() => document.fonts.ready.then(() => undefined));
         await name.evaluate((element) =>
@@ -49,12 +54,12 @@ for (const kit of builtAdapters("vue")) {
       };
       await begin("Ada Saved");
       await editor.press("Enter");
-      await expect(name).toHaveText("Ada Saved");
+      await expect(shownName).toHaveText("Ada Saved");
       await expect(name).toBeFocused();
       await page.locator('[data-adapttable-part="undo-button"]').click();
-      await expect(name).toHaveText(originalName);
+      await expect(shownName).toHaveText(originalName);
       await page.locator('[data-adapttable-part="redo-button"]').click();
-      await expect(name).toHaveText("Ada Saved");
+      await expect(shownName).toHaveText("Ada Saved");
 
       await begin("Ada Draft");
       await page
@@ -67,9 +72,9 @@ for (const kit of builtAdapters("vue")) {
       await row
         .locator('[data-adapttable-part="edit-cell-take-theirs"]')
         .click();
-      await expect(editor).toHaveValue("Ada Live");
+      await expect(editor).toHaveValue(liveName);
       await editor.press("Enter");
-      await expect(name).toHaveText("Ada Live");
+      await expect(shownName).toHaveText(liveName);
       await page
         .getByRole("button", { name: "Reject next save", exact: true })
         .click();
@@ -79,9 +84,9 @@ for (const kit of builtAdapters("vue")) {
         row.locator('[data-adapttable-part="edit-cell-save-error"]')
       ).toContainText("The demo server rejected this change");
       await row.locator('[data-adapttable-part="edit-cell-rollback"]').click();
-      await expect(name).toHaveText("Ada Live");
+      await expect(shownName).toHaveText(liveName);
       await expect(page.locator("[data-demo-log]")).toHaveText(
-        "Restored Ada Live after the rejected save."
+        `Restored ${liveName} after the rejected save.`
       );
 
       await begin("Detached draft");
@@ -92,14 +97,14 @@ for (const kit of builtAdapters("vue")) {
       await expect(
         row.locator('[data-adapttable-part="edit-cell-activate"]')
       ).toHaveCount(0);
-      await expect(row).toContainText("Ada Live");
+      await expect(row).toContainText(liveName);
       await page
         .getByRole("button", { name: "Allow editing", exact: true })
         .click();
-      await expect(name).toHaveText("Ada Live");
+      await expect(shownName).toHaveText(liveName);
       await begin("Cancelled second draft");
       await editor.press("Escape");
-      await expect(name).toHaveText("Ada Live");
+      await expect(shownName).toHaveText(liveName);
     });
   }
   for (const locale of ["en", "ar"]) {

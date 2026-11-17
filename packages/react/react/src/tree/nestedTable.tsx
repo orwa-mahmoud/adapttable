@@ -17,7 +17,6 @@
 import {
   type NestedTableDefaults,
   nestedTableDefaults,
-  nestedTableLabel,
   type NestedTableParent,
 } from "@adapttable/core";
 import type { ReactElement, ReactNode } from "react";
@@ -37,6 +36,8 @@ export {
   nestedTableDefaults,
   type NestedTableParent,
 } from "@adapttable/core";
+
+import { nestedTableLabel } from "@adapttable/core/binding";
 
 /**
  * A row's nested table.

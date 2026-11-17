@@ -1,8 +1,63 @@
-/** Shared data only; each selected kit owns its avatar and progress markup. */
-import { computed, Directive, input } from "@angular/core";
+/**
+ * Shared data, plus the cells no kit draws differently: the email muted, the
+ * timeline's start over its due date, and the budget in tabular figures. Each
+ * selected kit owns its avatar, tag and progress markup.
+ */
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  Directive,
+  input,
+} from "@angular/core";
 
 import { type Person, personName, personRole, utilization } from "../people";
+import {
+  loadCaption,
+  personInitials,
+  timelineLines,
+} from "../shared/peopleTable";
 import { SHOWCASE_PRESENTATION } from "./data";
+
+/**
+ * The person cell's layout every kit shares: the avatar beside the name over
+ * the role, on one line in a table column and in a card. A long name wraps
+ * inside its own block.
+ */
+export const PERSON_CELL_STYLES = `
+    :host {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+    }
+    :host > :first-child {
+      flex-shrink: 0;
+    }
+    .identity {
+      min-width: 0;
+      flex: 1 1 auto;
+      overflow-wrap: anywhere;
+    }
+    small {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 400;
+      margin-top: 0.125rem;
+    }
+    .avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 40px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: color-mix(in srgb, currentColor 8%, transparent);
+      font-size: 0.875rem;
+    }
+  `;
 
 @Directive()
 export abstract class ShowcaseMobileCellModel {
@@ -14,13 +69,7 @@ export abstract class ShowcaseMobileCellModel {
       SHOWCASE_PRESENTATION.locale.startsWith("ar") ? "ar" : "en"
     )
   );
-  readonly initials = computed(() =>
-    this.name()
-      .split(/\s+/u)
-      .slice(0, 2)
-      .map((part) => [...part][0] ?? "")
-      .join("")
-  );
+  readonly initials = computed(() => personInitials(this.name()));
   readonly role = computed(() =>
     personRole(
       this.row(),
@@ -28,4 +77,71 @@ export abstract class ShowcaseMobileCellModel {
     )
   );
   readonly load = computed(() => utilization(this.row()));
+  /** The timeline's two lines, "Mar 8, 2026" over "→ Apr 12, 2026". */
+  readonly timeline = computed(() =>
+    timelineLines(
+      this.row(),
+      SHOWCASE_PRESENTATION.locale.startsWith("ar") ? "ar" : "en"
+    )
+  );
+  /** What the load cell writes under its bar, "56% · 7". */
+  readonly caption = computed(() =>
+    loadCaption(
+      this.row(),
+      SHOWCASE_PRESENTATION.locale.startsWith("ar") ? "ar" : "en"
+    )
+  );
 }
+
+/** The timeline cell, as every framework draws it. */
+@Component({
+  selector: "adapt-demo-timeline",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<strong>{{ timeline().start }}</strong
+    ><small>{{ timeline().end }}</small>`,
+  styles: `
+    :host {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      line-height: 1.35;
+    }
+    strong {
+      font-weight: 550;
+    }
+    small {
+      opacity: 0.6;
+      font-size: 0.82em;
+    }
+  `,
+})
+export class ShowcaseTimeline extends ShowcaseMobileCellModel {}
+
+/** The budget cell, in tabular figures. */
+@Component({
+  selector: "adapt-demo-budget",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `{{ value() }}`,
+  styles: `
+    :host {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+  `,
+})
+export class ShowcaseBudget extends ShowcaseMobileCellModel {}
+
+/** The email cell, muted beside the person it belongs to. */
+@Component({
+  selector: "adapt-demo-email",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `{{ value() }}`,
+  styles: `
+    :host {
+      opacity: 0.7;
+      font-size: 0.9em;
+    }
+  `,
+})
+export class ShowcaseEmail extends ShowcaseMobileCellModel {}

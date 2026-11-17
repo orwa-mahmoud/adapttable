@@ -10,12 +10,14 @@ import {
   fromStore,
 } from "@adapttable/angular";
 import {
-  isRtlElement,
   type RowDragEvent,
   type RowKeyEvent,
   type TableSource,
 } from "@adapttable/core";
-import { type RowReorderState as NeutralRowReorderState } from "@adapttable/core/binding";
+import {
+  isRtlElement,
+  type RowReorderState as NeutralRowReorderState,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

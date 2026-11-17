@@ -10,11 +10,7 @@
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 export { createBasicTableEngine } from "./engine/basicTableEngine";
-export {
-  cellSortValue,
-  cellValue,
-  resolveColumnPath,
-} from "./engine/cellValue";
+export { cellValue } from "./engine/cellValue";
 export {
   createTableEngine,
   type CreateTableEngineOptions,
@@ -34,14 +30,8 @@ export {
   type NeutralTableBinding,
   revisionToken,
 } from "./engine/neutralTable";
-export { engineSearchText } from "./engine/searchText";
 // Presentation contracts for an agent write awaiting a human. Type-only: an
 // adapter names them without any AI runtime reaching its graph.
-export {
-  resolveTableStatus,
-  type TableStatusAnnouncementOptions,
-  type TableStatusSignature,
-} from "./a11y/statusAnnouncement";
 export type {
   AgentApprovalDecision,
   AgentApprovalOperation,
@@ -72,6 +62,7 @@ export type {
   PaginationMode,
   ResolvedPaginationMode,
   RowAction,
+  RowCallback,
   SortableValue,
   SortByOption,
   SortDirection,
@@ -82,33 +73,10 @@ export type {
 export {
   type ConfirmHandler,
   type ConfirmRequest,
-  defaultConfirm,
   runRowAction,
 } from "./actions/confirm";
 /* ── Shared prop surface + orchestration ───────────────────────────── */
 /* ── Declarative filters & data tiers ──────────────────────────────── */
-export {
-  type CommandListController,
-  type CommandListKeyAction,
-  commandListKeyAction,
-  type CommandListSnapshot,
-  type CommandListView,
-  commandListView,
-  createCommandList,
-  nextCommandIndex,
-  runCommand,
-  tabTrapTarget,
-} from "./actions/commandListModel";
-export {
-  commandPaletteCommands,
-  type CommandPaletteCommandsOptions,
-  type CommandPaletteController,
-  type CommandPaletteControllerOptions,
-  type CommandPaletteSnapshot,
-  createCommandPaletteController,
-  isCommandPaletteArmed,
-  OPEN_PALETTE_COMMAND,
-} from "./actions/commandPaletteController";
 export type { Command } from "./actions/commandRegistry";
 export { filterCommands, tableCommands } from "./actions/commandRegistry";
 export type {
@@ -117,32 +85,22 @@ export type {
   ContextMenuTarget,
 } from "./actions/contextMenuModel";
 export {
-  composeContextMenuExtra,
   type ContextMenuKeyEvent,
   type ContextMenuMoveEvent,
-  type ContextMenuOpenController,
-  type ContextMenuOpenControllerOptions,
-  type ContextMenuOpenSnapshot,
   type ContextMenuPoint,
   type ContextMenuPointerEvent,
   type ContextMenuPressEvent,
   type ContextMenuRegionHandlers,
   type ContextMenuState,
   type ContextMenuTriggerHandlers,
-  createContextMenuOpenController,
-  isContextMenuArmed,
-  isContextMenuKey,
 } from "./actions/contextMenuOpenController";
 export {
   type Aggregatable,
   type AggregatableConfig,
   type AggregateOperation,
   type AggregationSourceSupport,
-  allowsOperation,
-  allowsReaderOperation,
   type CustomAggregateOperation,
   impliedOperations,
-  offerableOperations,
   resolveAggregatable,
   resolveAggregatableColumns,
   type ResolvedAggregatable,
@@ -150,7 +108,6 @@ export {
 } from "./aggregate/aggregatable";
 export {
   aggregate,
-  AGGREGATE_NAMES,
   type AggregateFormatContext,
   type AggregateName,
   type AggregateOperationId,
@@ -158,16 +115,11 @@ export {
   type AggregateOrderedValue,
   type AggregateSpec,
   type Aggregator,
-  CUSTOM_AGGREGATE,
   type DeclaredAggregates,
   declaredAggregates,
   type GroupAggregatesMapper,
-  toAggregateInstant,
-  toAggregateOrdered,
-  withDeclaredAggregates,
 } from "./aggregate/aggregate";
 export {
-  addAggregation,
   AGGREGATE_SUPPRESSED,
   type AggregationCandidate,
   type AggregationItem,
@@ -175,27 +127,17 @@ export {
   aggregationModel,
   type AggregationModelInput,
   type AggregationOrigin,
-  BUILTIN_AGGREGATE_LABELS,
-  columnAggregationSignature,
   computedAggregateKeys,
-  declaredByDeveloper,
-  effectiveAggregateOps,
   type EffectiveAggregation,
   type EffectiveAggregationInput,
   type EffectiveAggregationKind,
-  initialOperation,
-  readerControlAllowed,
-  reconcileAggregations,
-  removeAggregation,
   resolveEffectiveAggregation,
   restoreAggregationDefaults,
   serializeAggregationDerivedKey,
 } from "./aggregate/aggregationModel";
 export {
-  APPROVAL_PREVIEW_LIMIT,
   type ApprovalArgumentPair,
   approvalArgumentPairs,
-  approvalProposalText,
   type ApprovalReview,
   approvalReview,
   type ApprovalReviewItem,
@@ -203,11 +145,10 @@ export {
 } from "./approval/approvalReview";
 export { columnText } from "./columns/columnText";
 export { computed, type ComputedColumnSpec } from "./columns/computed";
-export { localizedColumnPath } from "./columns/resolveColumns";
 export {
   type BatchEditEntry,
+  type BatchEditHandler,
   type BatchEditingState,
-  batchEditingView,
   type BatchEditSnapshot,
   type BatchEditStore,
   type BatchEditStoreOptions,
@@ -215,47 +156,29 @@ export {
   createBatchEditStore,
 } from "./editing/batchEditing";
 export {
-  createDirtyCellStore,
-  dirtyCellKey,
-  type DirtyCellSnapshot,
   type DirtyCellState,
-  type DirtyCellStore,
   type DirtyCellStoreOptions,
-  dirtyCellView,
-  dirtyMarkerView,
 } from "./editing/dirtyCells";
 export {
-  beginCellEdit,
   type CellEditingState,
-  cellEditingView,
   type CellSaveState,
-  cellSaveView,
   type EditableCellController,
   editableCellController,
   type EditableCellMode,
+  type EditActivation,
   type EditConflictLabels,
   type EditingBundle,
   type EditValidationState,
-  editValidationView,
-  focusEditorOnMount,
-  stopCellEditKeyboard,
 } from "./editing/editableCell";
 export {
-  contestedCellKey,
   type ContestedEditCell,
-  contestedRowSignature,
-  createEditConflictStore,
   type EditConflictSnapshot,
   type EditConflictState,
-  type EditConflictStore,
-  editConflictView,
-  isCellInConflict,
   isRowContested,
   liveRowChanged,
   type ReconcileLiveBatchEdit,
   type ReconcileLiveEdit,
   type ReconcileLiveRowEdit,
-  resolveConflictChoice,
 } from "./editing/editConflict";
 export type {
   BatchRowEdit,
@@ -278,9 +201,6 @@ export {
   type EditHistoryController,
   type EditHistoryControllerOptions,
   type EditHistoryState,
-  editHistoryView,
-  recordingCellEdit,
-  resolveEditHistory,
 } from "./editing/editHistory";
 export {
   asBatchGesture,
@@ -291,90 +211,41 @@ export {
   type CellEditSession,
   type CellEditSessionOptions,
   type CellEditSnapshot,
-  cellSaveFailure,
-  cellSaveKey,
-  cellSaveSignature,
-  type CellSaveSnapshot,
   type CellSaveStatus,
-  cellSaveStatus,
-  type CellSaveStore,
   type CellSaveStoreOptions,
-  cellsOfBatch,
   createCellEditSession,
-  createCellSaveStore,
-  createEditHistoryStack,
-  createEditValidationStore,
-  DEFAULT_EDIT_HISTORY_DEPTH,
-  defaultSaveErrorMessage,
   type EditHistoryEntry,
-  editHistoryEntry,
   type EditHistorySnapshot,
-  type EditHistoryStack,
-  type EditValidationSnapshot,
-  type EditValidationStore,
   type EditValidationStoreOptions,
   type FailedCellSave,
-  isCellEditActive,
-  observeEdit,
   readCellValue,
-  rowHasValidationError,
   type ValidationCheckResult,
-  validationErrorFor,
-  validationKey,
-  validationSignature,
 } from "./editing/editingController";
 export {
-  type BatchEditBarModel,
-  batchEditBarModel,
-  batchEditErrorId,
   type CellConflictAsk,
-  cellConflictAsk,
-  controllerConflictAsk,
-  customEditorConflict,
-  defaultPendingRows,
-  editableCellErrorId,
-  type EditableCellPresentation,
-  editableCellPresentation,
-  type EditingArming,
-  type EditingArmingProps,
+  type EditableCellEditorCtrl,
   type EditorAriaState,
-  editorBusyProps,
-  editorKeyRestoresFocus,
+  type EditorDraftControl,
   editorSelectOptions,
   editorValidationProps,
-  handleRowEditorKey,
-  isEditActivateKey,
-  isFirstEditableColumn,
-  resolveEditableCellDisplay,
-  resolveEditingArming,
   resolveRowEditTrigger,
-  type RowEditActionsLayout,
-  rowEditActionsLayout,
   type RowEditConflict,
   rowEditConflict,
   type RowEditControls,
   rowEditControls,
   type RowEditControlsOptions,
-  rowEditErrorId,
-  rowEditSaveBlocked,
   type RowEditTrigger,
-  stopEditKeys,
 } from "./editing/editingGate";
 export {
   createRowEditStore,
-  parseColumnDraft,
   type RowEditDrafts,
+  type RowEditHandler,
   type RowEditingState,
-  rowEditingView,
-  rowEditSignature,
   type RowEditSnapshot,
   type RowEditStore,
   type RowEditStoreOptions,
 } from "./editing/rowEditing";
-export type {
-  FeatureRegistration,
-  NeutralFeatureHost,
-} from "./features/featureRegistration";
+export type { NeutralFeatureHost } from "./features/featureRegistration";
 export type { ActiveFilterChip } from "./filters/activeFilterChips";
 export {
   computeFilterFacets,
@@ -390,14 +261,11 @@ export {
 export {
   type FilterChromeMode,
   resolveFilterMode,
-  showSimpleFilterFields,
   toolbarShowsFilters,
 } from "./filters/filterChrome";
 export {
   AUTO_OPTIONS_LIMIT,
   buildFilterRuntime,
-  clearedFilterExtras,
-  coerceBooleanValue,
   type ColumnFilter,
   FILTER_AI_OPTIONS_LIMIT,
   FILTER_TYPES,
@@ -406,11 +274,9 @@ export {
   filterLabel,
   type FilterOption,
   type FilterOptionsSource,
-  filterPredicate,
   type FilterRuntime,
   filterStateKeys,
   type FilterType,
-  materializeAutoOptions,
   RANGE_SUFFIXES,
   resolveFilterDefs,
 } from "./filters/filterDefs";
@@ -433,34 +299,16 @@ export {
   FILTER_TREE_PARAM,
   FILTER_TREE_VERSION,
   isActiveFilterTree,
-  isFilterTreeConditionSet,
   parseFilterTree,
   serializeFilterTree,
-  settledFilterTree,
 } from "./filters/filterTree";
 export {
-  addFilterTreeCondition,
-  addFilterTreeGroup,
-  emptyFilterTree,
-  type FilterTreeNode,
-  removeFilterTreeNode,
-  replaceFilterTreeNode,
-  setFilterTreeCombinator,
-  walkFilterTreeConditions,
-} from "./filters/filterTreeMutations";
-export {
   bindHeaderFilterDismiss,
-  createHeaderFilterOverlay,
   HEADER_FILTER_SESSION_ATTR,
   headerFilterFieldIsComplete,
-  headerFilterInsideSelector,
   type HeaderFilterOpenHost,
-  type HeaderFilterOverlayController,
-  type HeaderFilterOverlayOptions,
-  type HeaderFilterOverlaySnapshot,
   type HeaderFilterWrites,
-  isHeaderFilterOpen,
-  watchOverlayDismiss,
+  type OverlayDismissOptions,
 } from "./filters/headerFilterOverlay";
 export {
   DATE_OP_LABEL_KEYS,
@@ -490,9 +338,7 @@ export {
   RANGE_OPS,
   type RangeOp,
   type RangeWidgetState,
-  readRangeWidget,
   writeRangeFilter,
-  writeRangeWidget,
 } from "./filters/rangeWidget";
 export {
   countedRelativeToken,
@@ -509,23 +355,14 @@ export {
   resolveRelativeRange,
   splitRelativeToken,
 } from "./filters/relativeDates";
-export {
-  clampMatchIndex,
-  createFindController,
-  FIND_URL_WRITE_DEBOUNCE_MS,
-  type FindController,
-  type FindControllerOptions,
-  type FindSnapshot,
-  readFindQuery,
-} from "./find/findController";
+export { FIND_URL_WRITE_DEBOUNCE_MS } from "./find/findController";
 export {
   findMatches,
   type FindMatchesOptions,
-  matchKey,
   matchKeySet,
   stepMatch,
 } from "./find/findMatches";
-export { batchEditHandler, type CellEdit } from "./focus/cellEdits";
+export { type CellEdit } from "./focus/cellEdits";
 export {
   type CellRange,
   type CellRangeBounds,
@@ -560,30 +397,12 @@ export {
   sameGridCell,
 } from "./focus/gridFocus";
 export {
-  createGridFocusController,
   GRID_CELL_ATTR,
   gridCellAttr,
-  type GridCellAttributes,
-  gridCellAttributes,
-  type GridCellAttributesInput,
-  gridColumnHeaderAttributes,
-  type GridContainerAttributes,
-  gridContainerAttributes,
-  gridFillHandleCell,
-  type GridFocusController,
   type GridFocusControllerOptions,
-  type GridFocusSnapshot,
-  type GridKeyEvent,
-  gridRowAttributes,
-  gridRowFocusSignature,
-  isGridColumnSelected,
-  type PointerReleaseTarget,
 } from "./focus/gridFocusController";
-export { createGridNavigation } from "./focus/gridNavigation";
 export {
-  cellFillHandler,
   type CellFillHandlerOptions,
-  cellPasteHandler,
   type CellPasteHandlerOptions,
   parseClipboardTable,
   pasteRangeEdits,
@@ -614,50 +433,28 @@ export {
   tableQueryKey,
   type TableQueryKeyOptions,
 } from "./source/queryKey";
-export {
-  type ControllableControl,
-  type ControllableStore,
-  type ControllableStoreOptions,
-  createControllableStore,
-} from "./state/controllableStore";
 export type { Slot, TableErrorState } from "./state/errorState";
+export type {
+  SliceCell,
+  SliceKey,
+  SliceRead,
+  StoreReader,
+  StoreWriter,
+  TableAction,
+  TableStore,
+} from "./state/tableStore";
 export {
   applyRowPin,
-  groupsCollapsedToDepth,
-  headerSelectionOf,
-  idSetReader,
-  initialColumnLayout,
   type LayoutStorage,
   offersAllMatching,
-  readStoredColumnLayout,
-  rowPinSideOf,
-  sameRowPins,
-  sanitizeStoredLayout,
-  toggleId,
-  toggleIds,
-  withColumnHidden,
-  withColumnMoved,
-  withColumnOrder,
-  withColumnPinned,
-  withColumnWidth,
 } from "./state/tableStores";
-export { isBrowser } from "./utils/env";
 export { humanizeKey } from "./utils/humanizeKey";
-export { normalizeLocaleTag, resolveLocaleTag } from "./utils/localeTag";
+export { splitListParam } from "./utils/listParam";
 export { getPath } from "./utils/path";
 /* ── Labels ────────────────────────────────────────────────────────── */
-export { defaultLabels, resolveLabels } from "./labels";
+export { resolveLabels } from "./labels";
 /* ── Constants ─────────────────────────────────────────────────────── */
-export {
-  DEFAULT_CARD_SIZE_PX,
-  DEFAULT_LIMIT,
-  DEFAULT_ROW_SIZE_PX,
-  MOBILE_BREAKPOINT_PX,
-  PAGE_SIZE_OPTIONS,
-  pageSizeOptions,
-  SEARCH_DEBOUNCE_MS,
-  VIRTUAL_OVERSCAN,
-} from "./constants";
+export { DEFAULT_LIMIT, PAGE_SIZE_OPTIONS, pageSizeOptions } from "./constants";
 export type { DisplayValue } from "./display";
 export {
   type ChecklistValue,
@@ -669,49 +466,34 @@ export {
   type FilteringContribution,
   listFilterValues,
 } from "./filters/filterFormModel";
-export { formulaSlice } from "./formula/formulaUrlSlice";
-export { pivotSlice } from "./pivot/pivotUrlSlice";
 export type { CssProperties } from "./style/cssProperties";
 export {
   createHistoryAdapter,
   createMemoryAdapter,
   getHistoryAdapter,
-  resetHistoryAdapter,
-  resolveUrlAdapter,
 } from "./url/historyAdapter";
 export {
   routerUrlAdapter,
   type RouterUrlAdapterOptions,
 } from "./url/routerAdapter";
 export {
-  createSavedViewsController,
   SAVED_VIEW_VERSION,
   type SavedView,
   type SavedViewMigration,
-  type SavedViewsController,
   type SavedViewsControllerOptions,
-  type SavedViewsSnapshot,
   type SavedViewsStore,
   type SavedViewVisibility,
 } from "./url/savedViewsController";
 export type { UrlStateAdapter } from "./url/urlStateAdapter";
 export {
-  columnLayoutSlice,
-  densitySlice,
-  groupCollapseSlice,
-  rowPinningSlice,
   type TableDensity,
   URL_SLICE_WRITE_DEBOUNCE_MS,
 } from "./url/viewStateSlices";
 export {
-  createTableViewStore,
-  createUrlSliceStore,
   type TableViewState,
   type TableViewStateConfig,
   type TableViewStore,
   type UrlSliceSpec,
-  type UrlSliceStore,
-  type ViewStateSource,
   type ViewStateSubscription,
 } from "./url/viewStateStore";
 /* ── Shared render contracts ───────────────────────────────────────── */
@@ -726,76 +508,15 @@ export type {
 } from "./source/capabilities";
 export { capabilityReason, sourceCapabilities } from "./source/capabilities";
 export {
-  appendBaseKey,
-  appendedRows,
-  type AppendStash,
-  buildTableQuery,
-  canRequestCursorPage,
-  clampedPage,
-  createFilterOptionsLoader,
-  createFirstLoadLatch,
-  createQueryEmitter,
-  cursorHasMore,
-  type CursorTrail,
-  cursorTrailKey,
-  type DataTier,
-  effectiveQueryAggregates,
-  EMPTY_CURSOR_TRAIL,
-  type FilterOptionsLoader,
-  type FirstLoadLatch,
   type InfiniteQueryLike,
-  type LoadedFilterOption,
   type PageSelector,
-  queryAggregationSource,
-  type QueryEmitter,
-  queryGroupBy,
-  recordCursor,
-  resolveDataTier,
-  staleAppendStash,
-  type TableQueryInput,
   type TableQueryListener,
-  warnDataTierMisuse,
 } from "./source/dataTier";
 export {
-  createFrontendSource,
-  createFrontendSourceWith,
   defaultFrontendRowId,
   defaultSearchText,
   type FrontendEngineFactory,
-  type FrontendSource,
-  type FrontendSourceConfig,
-  type FrontendSourceFrame,
-  type FrontendSourceViewState,
-  resolvePaginationMode,
 } from "./source/frontendSource";
-export {
-  createQuerySource,
-  type QuerySource,
-  type QuerySourceAnswer,
-  type QuerySourceConfig,
-  type QuerySourceFrame,
-} from "./source/querySource";
-export {
-  createResponseAggregateOps,
-  type ResponseAggregateOps,
-  type ResponseAggregateOpsInput,
-} from "./source/responseAggregateOps";
-export {
-  createServerSource,
-  type ServerSource,
-  type ServerSourceConfig,
-  type ServerSourceFrame,
-  type ServerSourceViewState,
-} from "./source/serverSource";
-export {
-  activeTierValue,
-  createTableData,
-  INACTIVE_TIER_ROWS,
-  type TableData,
-  type TableDataConfig,
-  type TableDataPlan,
-  tierRows,
-} from "./source/tableData";
 export type { TableSource } from "./source/TableSource";
 export type {
   SummaryRowFn,
@@ -817,48 +538,33 @@ export {
   sanitizeCountFilterParams,
 } from "./filters/countFilters";
 /* ── Sorting ───────────────────────────────────────────────────────── */
-export {
-  compareValues,
-  type SortLevel,
-  sortRows,
-  sortRowsMulti,
-} from "./sort/compare";
-export { nextSort } from "./sort/cycleSort";
+export { type SortLevel } from "./sort/compare";
 /* ── Columns ───────────────────────────────────────────────────────── */
 export { autoSizeColumns, measureColumnWidth } from "./columns/autoSizeColumns";
-export { columnHeaderLabel } from "./columns/columnHeader";
 export {
   ACTIONS_COLUMN_KEY,
   type ColumnMenuAction,
   type ColumnMenuActionContext,
   columnMenuLabel,
-  columnMenuRows,
   REORDER_COLUMN_KEY,
 } from "./columns/columnMenuModel";
 export {
   type ColumnResizeHandleOptions,
   type ColumnResizeHandleProps,
-  columnResizeHandleProps,
+  type ResizeHandleEventLike,
+  type ResizeKeyEventLike,
+  type ResizePointerEventLike,
 } from "./columns/columnResize";
 export {
   type ColumnGroupDef,
   type ColumnGroupRecord,
   type ColumnInput,
-  type FlattenedColumns,
   isColumnGroup,
   marriedOrderHolds,
 } from "./columns/columnTree";
-export {
-  parsePxWidth,
-  resolveColumnWidth,
-  tableMinWidth,
-} from "./columns/columnWidths";
 export { type TableLayout, visibleColumns } from "./columns/visibleColumns";
 /* ── Pagination ────────────────────────────────────────────────────── */
-export {
-  computePagination,
-  type PaginationInfo,
-} from "./pagination/paginationMath";
+export { type PaginationInfo } from "./pagination/paginationMath";
 export type { ExtraEntry as TableExtraEntry } from "./rows/extraRows";
 export {
   type TableVirtualization,
@@ -867,12 +573,11 @@ export {
   windowGroupedEntries,
 } from "./virtual/virtualTableModel";
 /* ── Utils ─────────────────────────────────────────────────────────── */
-export { mergeProps, type Props } from "./utils/mergeProps";
+export { type Props } from "./utils/mergeProps";
 export { stableKey } from "./utils/stableKey";
 /* ── Rows ──────────────────────────────────────────────────────────── */
 
 export {
-  booleanDraft,
   type CellEditCommit,
   type CellEditor,
   type CellEditorOption,
@@ -884,44 +589,25 @@ export {
   editorInputType,
   formatMultiDraft,
   hasEditableColumns,
-  isBooleanEditor,
   isCellEditable,
-  isCustomEditor,
-  isDraftChecked,
-  isMultiSelectEditor,
-  isSelectEditor,
-  MULTI_SEPARATOR,
   normalizeEditorOptions,
   parseCellEditValue,
-  readMultiDraft,
   resolveCellEditor,
 } from "./editing/cellEditing";
 export {
-  buildBodyCells,
   type CellSpanAppearance,
   type CellSpanRequest,
-  coveredAddressSet,
   type GetCellSpan,
   type GetCellSpanArgs,
-  spanningArmed,
   type BodyCell as TableBodyCell,
 } from "./rows/cellSpan";
-export {
-  type ExtraRow,
-  type ExtraRowKind,
-  extraRowsArmed,
-} from "./rows/extraRows";
+export { type ExtraRow, type ExtraRowKind } from "./rows/extraRows";
 export {
   applyRowPatchesToView,
   applyRowPatchLogToView,
-  attachIncrementalView,
-  configureIncrementalView,
   createIncrementalView,
-  incrementalSearchText,
   type IncrementalView,
   type IncrementalViewConfig,
-  incrementalViewConfig,
-  incrementalViewOf,
 } from "./rows/incremental";
 export {
   applyRowPatches,
@@ -941,10 +627,8 @@ export {
 } from "./rows/patch";
 export {
   allPinnedSummaryEntries,
-  EMPTY_PINNED_ROWS,
   isPinnedSummaryRowId,
   PINNED_SUMMARY_BOTTOM_PART,
-  PINNED_SUMMARY_KEY_PREFIX,
   PINNED_SUMMARY_TOP_PART,
   type PinnedRows,
   pinnedSummaryEntries,
@@ -958,7 +642,6 @@ export {
   type RowActionsLayout,
   type RowActionsRenderContext,
   type RowActionsRenderer,
-  visibleRowActions,
 } from "./rows/rowActions";
 export {
   type RowDropPosition,
@@ -978,17 +661,10 @@ export {
   applyRowReorder,
   createRowReorderController,
   datasetIndex,
-  defaultRowReorderAnnouncements,
   isRowMovePending,
-  resolveRowMove,
   type RowDragEvent,
   type RowKeyEvent,
-  type RowMoveDrop,
-  rowMoveMenu,
-  type RowMoveView,
   type RowReorderActions,
-  type RowReorderAnnouncements,
-  rowReorderAnnouncements,
   type RowReorderController,
   type RowReorderControllerOptions,
   type RowReorderDecision,
@@ -998,12 +674,7 @@ export {
   type RowReorderSlot,
   type RowReorderSnapshot,
 } from "./rows/rowReorderEngine";
-export {
-  estimateFromRowHeight,
-  type RowHeight,
-  type RowStyle,
-  rowStyleArmed,
-} from "./rows/rowStyle";
+export { type RowHeight, type RowStyle } from "./rows/rowStyle";
 export {
   bodyRowEntries,
   type BodyRowEntry,
@@ -1021,7 +692,6 @@ export {
   type GroupAggregateOverride,
   type GroupAggregateOverrides,
   parseGroupAggregateOverrides,
-  queryAggregateOps,
   serializeGroupAggregateOverrides,
   withGroupAggregateOverrides,
   withQueryAggregateOverrides,
@@ -1035,16 +705,10 @@ export type {
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "./grouping/groupingPanelModel";
-export {
-  formatGroupBy,
-  type GroupByInput,
-  parseGroupBy,
-} from "./grouping/groupKeys";
+export { type GroupByInput } from "./grouping/groupKeys";
 export {
   groupAggregateEntries,
-  groupAggregateNode,
   type GroupAggregateOps,
-  groupLeafCount,
   type GroupRowCell,
   type GroupRowLayout,
   groupRowLayout,
@@ -1062,13 +726,12 @@ export {
   type RowGroupRef,
 } from "./grouping/groupRows";
 export { groupSelectionState } from "./grouping/groupSelection";
+export type {
+  GroupingPanelSource,
+  GroupingPanelStateInput,
+} from "./layout/tableChromeState";
 export type { SelectionContribution } from "./selection/selectionBindingState";
-export {
-  type QueryGroupRow,
-  type QueryGroupsPage,
-  serverGroupEntries,
-  type ServerGroupEntriesOptions,
-} from "./source/queryGroups";
+export { type QueryGroupRow } from "./source/queryGroups";
 /* ── Export (CSV, and any format a writer adds) ────────────────────── */
 export {
   downloadCsv,
@@ -1077,24 +740,10 @@ export {
   type RowsToCsvOptions,
 } from "./export/csv";
 export {
-  createExportController,
-  type ExportController,
-  type ExportControllerOptions,
   type ExportProgressState,
-  type ExportRunHandler,
-  type ExportSnapshot,
   type ExportStatus,
-  resolveExportAnnouncement,
-  resolveExportDisabledReason,
-  resolveExportProgressState,
 } from "./export/exportController";
-export {
-  exportViewFromChrome,
-  filterExportView,
-  summaryExportValues,
-  viewFromGroupedEntries,
-  viewFromTreeEntries,
-} from "./export/exportView";
+export { viewFromGroupedEntries } from "./export/exportView";
 export {
   buildExportTable,
   csvWriter,
@@ -1144,7 +793,6 @@ export type {
   ColumnMenuRow,
 } from "./columns/columnMenuModel";
 export type { PinnedSide } from "./columns/columnMenuModel";
-export type { WidthColumn } from "./columns/columnWidths";
 export type { GroupedHeaderAlign } from "./columns/headerGroups";
 export type { ExportCsvProp } from "./export/tableCsv";
 export type { FeatureHostState } from "./features/currentHost";
@@ -1160,10 +808,6 @@ export {
   type FindContribution,
   type FullscreenContribution,
   type PrintContribution,
-  projectShellOperations,
-  SHELL_OPERATION_OWNERS,
-  type ShellOperation,
-  type ShellOperationInput,
 } from "./features/shellOperations";
 export type { BuildGroupedFlatModelOptions } from "./grouping/groupRows";
 export * from "./rowFeatureExports";
@@ -1245,4 +889,5 @@ export type {
   EditCommitValidationFailure,
   EditCommitValidationOptions,
 } from "./editing/editCommitLifecycle";
+export * from "./mainEntryAliases";
 export * from "./panelFeatureExports";

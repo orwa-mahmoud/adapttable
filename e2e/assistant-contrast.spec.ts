@@ -49,20 +49,12 @@ for (const framework of ["react", "angular", "vue"] as const) {
             ? angularPart(kit, page, name)
             : page.locator(`[data-adapttable-part="${name}"]`);
         await part("assistant-launcher").click();
-        await part("assistant-input").fill(
-          framework === "react"
-            ? "Sort by salary, highest first."
-            : "Sort salaries highest first"
-        );
+        await part("assistant-input").fill("Sort by salary, highest first.");
         await part("assistant-input").press("Enter");
         await part("assistant-receipts-toggle-button").last().click();
         await expect(part("assistant-receipt").last()).toBeVisible();
         await settledContrast(page);
-        await part("assistant-input").fill(
-          framework === "react"
-            ? "Raise Priya Nair's salary to 185."
-            : "Propose Grace's salary as 150"
-        );
+        await part("assistant-input").fill("Raise Priya Nair's salary to 185.");
         await part("assistant-input").press("Enter");
         await expect(part("agent-approval-approve")).toBeVisible();
 

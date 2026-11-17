@@ -133,6 +133,7 @@ export type {
   UseFrontendDataOptions,
 } from "./source/useFrontendData";
 export { useFrontendData } from "./source/useFrontendData";
+/** The full frontend evaluator, for `useFrontendData`'s `createEngine`. */
 export type {
   InfiniteQueryState,
   QuerySourceState,
@@ -191,7 +192,11 @@ export type {
 export { useTableUrlState } from "./url/useTableUrlState";
 export type { UrlSliceOptions } from "./url/useUrlSlice";
 export { useUrlSlice } from "./url/useUrlSlice";
-export type { UseDataTableOptions, UseDataTableResult } from "./useDataTable";
+export type {
+  TableRail,
+  UseDataTableOptions,
+  UseDataTableResult,
+} from "./useDataTable";
 export { useDataTable } from "./useDataTable";
 export type {
   DataTableHandle,
@@ -212,7 +217,6 @@ export type {
   BatchEditingState,
   BatchEditStoreOptions,
   BatchRowEdit,
-  BodyCell,
   BulkAction,
   BulkActionContext,
   CellConflictAsk,
@@ -354,6 +358,7 @@ export {
 export type {
   AgentApprovalPending,
   AgentProgress,
+  BodyCell,
   ChromeBodySlot,
   ColumnGroupToggleProps,
   FeatureApplyInput,
@@ -375,3 +380,4 @@ export type {
   TableRuntime,
   TableRuntimeView,
 } from "@adapttable/core/binding";
+export { createTableEngine } from "@adapttable/core/engine";

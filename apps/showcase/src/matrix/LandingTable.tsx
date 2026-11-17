@@ -10,31 +10,34 @@ import { Suspense, useState } from "react";
 import { DemoScenarioProvider } from "../Demo";
 import { initialDemoLocale } from "../demoPresentation";
 import { ADAPTERS, DemoFallback } from "../kitDemos";
+import {
+  LANDING_ARRANGEMENTS,
+  LANDING_URL_KEY,
+  type LandingArrangement,
+  landingArrangement,
+} from "../shared/landingScenario";
 import type { FeatureBodyProps } from "./featureBodies";
 
 export function LandingTable({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const Demo = ADAPTERS[adapter] ?? ADAPTERS.mantine;
-  const [grouped, setGrouped] = useState(false);
+  const [arrangement, setArrangement] =
+    useState<LandingArrangement>(landingArrangement);
+  const grouped = arrangement === "grouped";
   return (
     <div className="mx-demo">
       <div className="hint-row">
         <div className="seg" role="group" aria-label="Row arrangement">
-          <button
-            type="button"
-            className={`seg__btn${grouped ? "" : " is-on"}`}
-            aria-pressed={!grouped}
-            onClick={() => setGrouped(false)}
-          >
-            Flat
-          </button>
-          <button
-            type="button"
-            className={`seg__btn${grouped ? " is-on" : ""}`}
-            aria-pressed={grouped}
-            onClick={() => setGrouped(true)}
-          >
-            Grouped
-          </button>
+          {LANDING_ARRANGEMENTS.map(({ value, label }) => (
+            <button
+              key={value}
+              type="button"
+              className={`seg__btn${arrangement === value ? " is-on" : ""}`}
+              aria-pressed={arrangement === value}
+              onClick={() => setArrangement(value)}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
       <div className="mx-demo__body" data-adapter={adapter}>
@@ -44,7 +47,7 @@ export function LandingTable({ dark, adapter }: Readonly<FeatureBodyProps>) {
               mode="frontend"
               locale={initialDemoLocale()}
               dark={dark}
-              urlKey="live"
+              urlKey={LANDING_URL_KEY}
               filterControls
               columnMenu
               bulkActions

@@ -56,7 +56,7 @@ export interface TableQueryKeyOptions {
  * Position rather than identity. These belong to the full key only, so that
  * the base key can stand for every page of a view at once.
  */
-const POSITION_FIELDS = new Set(["page", "cursor"]);
+const POSITION_FIELDS = /* @__PURE__ */ new Set(["page", "cursor"]);
 
 /** The fields that decide WHICH rows, as opposed to where in them. */
 function identityOf(query: TableQuery): Record<string, unknown> {

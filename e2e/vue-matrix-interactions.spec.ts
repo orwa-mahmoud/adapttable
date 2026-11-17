@@ -2,6 +2,7 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
 import { builtAdapters, pathOf } from "../apps/showcase/matrix.mjs";
+import { expectMatchingRows } from "./table-total";
 
 function part(page: Page, name: string): Locator {
   return page.locator(`.mx-demo [data-adapttable-part="${name}"]`);
@@ -83,16 +84,16 @@ for (const kit of builtAdapters("vue")) {
           .toBe(true);
         await surface
           .getByRole("textbox", { name: "Person", exact: true })
-          .fill("Ada Lovelace");
+          .fill("Sefa Demir");
         const rows = part(page, width === 390 ? "card" : "row");
         await expect(rows).toHaveCount(1);
-        await expect(rows).toContainText("Ada Lovelace");
+        await expect(rows).toContainText("Sefa Demir");
         await surface.locator('[data-adapttable-part="filters-done"]').click();
         await expect(surface).toBeHidden();
         await expect(trigger).toBeFocused();
         await expect
           .poll(() => new URL(page.url()).searchParams.get("flt.f_name"))
-          .toBe("Ada Lovelace");
+          .toBe("Sefa Demir");
         await page.reload();
         await expect(rows).toHaveCount(1);
         await page.evaluate(() => document.fonts.ready.then(() => undefined));
@@ -105,7 +106,7 @@ for (const kit of builtAdapters("vue")) {
         await trigger.click();
         await expect(
           surface.getByRole("textbox", { name: "Person", exact: true })
-        ).toHaveValue("Ada Lovelace");
+        ).toHaveValue("Sefa Demir");
         const screenshot = info.outputPath(
           `${kit.key}-filtering-${width}-${layout}.png`
         );
@@ -117,7 +118,7 @@ for (const kit of builtAdapters("vue")) {
         await surface
           .getByRole("button", { name: "Clear all", exact: true })
           .click();
-        await expect(rows).toHaveCount(25);
+        await expectMatchingRows(page.locator(".mx-demo"), 16);
         await page.keyboard.press("Escape");
         await expect(surface).toBeHidden();
         await expect(trigger).toBeFocused();
@@ -168,20 +169,36 @@ for (const kit of builtAdapters("vue")) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(`/vue/${pathOf(kit)}/realtime/?locale=en&live=off`);
       const rows = part(page, width === 390 ? "card" : "row");
-      const ada = rows.filter({ hasText: "Ada Lovelace" });
-      await expect(ada).toContainText("$25,300");
-      const selected = ada.getByRole("checkbox");
+      await expect(rows).toHaveCount(10);
+      // Select the person at the top of the Budget sort; a patch must not
+      // take the selection with it or give it to someone else.
+      const id = await rows.first().getAttribute("data-row-id");
+      const selected = page
+        .locator(`.mx-demo [data-row-id="${String(id)}"]`)
+        .getByRole("checkbox");
       await toggleCheckbox(selected);
       await expect(selected).toBeChecked();
       await page
         .getByRole("button", { name: "Apply next update", exact: true })
         .click();
-      await expect(ada).toContainText("$26,300");
-      await expect(selected).toBeChecked();
-      await expect(page.getByTestId("patch-feed")).toHaveText(
-        "Ada Lovelace: $25,300 → $26,300"
+      const feed = page.getByTestId("realtime-feed").locator("li");
+      await expect(feed).toHaveCount(1);
+      const moved = (
+        (await feed.first().innerText()).split(" · ")[0] ?? ""
+      ).trim();
+      // The patch parks the row between two people already in rows 2–6.
+      const seat = await rows.evaluateAll(
+        (elements, person) =>
+          elements.findIndex((element) =>
+            element.textContent?.includes(person)
+          ),
+        moved
       );
-      await expect(rows).toHaveCount(10);
+      expect(seat).toBeGreaterThanOrEqual(1);
+      expect(seat).toBeLessThanOrEqual(5);
+      await expect(selected).toBeChecked();
+      // The patch moved a row; none came or went.
+      await expectMatchingRows(page.locator(".mx-demo"), 12);
       await page
         .getByRole("button", { name: "Resume updates", exact: true })
         .click();
@@ -206,12 +223,16 @@ for (const kit of builtAdapters("vue")) {
       await toggleCheckbox(first);
       await expect(first).toBeChecked();
       await page.getByRole("button", { name: "Export", exact: true }).click();
-      await expect(page.locator("[data-demo-log]")).toHaveText("Export: 1");
+      await expect(
+        page.getByRole("status").filter({ hasText: /^Export: / })
+      ).toHaveText("Export: 501");
       await expect(first).not.toBeChecked();
       await toggleCheckbox(first);
       await expect(first).toBeChecked();
       await page.getByRole("button", { name: "Archive", exact: true }).click();
-      await expect(page.locator("[data-demo-log]")).toHaveText("Archive: 1");
+      await expect(
+        page.getByRole("status").filter({ hasText: /^Archive: / })
+      ).toHaveText("Archive: 501");
       await expect(first).not.toBeChecked();
       await expect(
         page.getByRole("button", { name: "Archive", exact: true })
@@ -241,20 +262,24 @@ for (const kit of builtAdapters("vue")) {
     await expect(trigger).toBeFocused();
   });
 
-  test(`${kit.key}/aggregation: filtering recalculates totals and preserves the pinned portfolio`, async ({
+  test(`${kit.key}/aggregation: filtering recalculates totals and preserves the pinned team total`, async ({
     page,
   }) => {
     await page.goto(`/vue/${pathOf(kit)}/aggregation/?locale=en`);
     const pinned = part(page, "pinned-summary-top");
-    await expect(pinned).toContainText("Portfolio total");
-    const portfolio = await pinned.textContent();
-    await page.locator(".mx-demo").getByRole("searchbox").fill("Ada Lovelace");
-    await expect(
-      page.locator('.mx-demo [data-adapttable-part="row"][data-row-id]')
-    ).toHaveCount(1);
-    await expect(part(page, "summary-cell").last()).toHaveText("$25,300");
-    await expect(part(page, "group-footer-row")).toContainText("25,300");
-    await expect(pinned).toHaveText(portfolio!);
+    await expect(pinned).toContainText("Team total");
+    const teamTotal = await pinned.textContent();
+    await page.locator(".mx-demo").getByRole("searchbox").fill("Sefa Demir");
+    const row = page.locator(
+      '.mx-demo [data-adapttable-part="row"][data-row-id]'
+    );
+    await expect(row).toHaveCount(1);
+    const budget = (
+      await row.locator('[data-column-key="budget"]').innerText()
+    ).trim();
+    await expect(part(page, "summary-cell").last()).toHaveText(budget);
+    await expect(part(page, "group-footer-row").first()).toContainText(budget);
+    await expect(pinned).toHaveText(teamTotal!);
     await expect(pinned.getByRole("checkbox")).toHaveCount(0);
   });
 
@@ -315,6 +340,6 @@ for (const kit of builtAdapters("vue")) {
     const select = part(page, "column-select").first().getByRole("checkbox");
     await toggleCheckbox(select);
     await expect(select).toBeChecked();
-    await expect(page.locator(".mx-demo [data-cell-selected]")).toHaveCount(10);
+    await expect(page.locator(".mx-demo [data-cell-selected]")).toHaveCount(5);
   });
 }

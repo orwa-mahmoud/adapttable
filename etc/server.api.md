@@ -4,9 +4,13 @@
 
 ```ts
 
+import { FilterDef } from '@adapttable/core/query';
+import { FilterTypeSpec } from '@adapttable/core/query';
+import { GroupAggregateOverrides } from '@adapttable/core/query';
 import { PivotConfig } from '@adapttable/core/query';
 import { QueryFilterGroup } from '@adapttable/core/query';
 import { SortLevel } from '@adapttable/core/query';
+import { splitListParam } from '@adapttable/core/query';
 
 // @public
 export interface BooleanFilter {
@@ -90,18 +94,12 @@ export interface SelectFilter {
 }
 
 // @public
-export interface ServerFilterDef {
-    readonly key: string;
+export interface ServerFilterDef extends Readonly<Pick<FilterDef, "key" | "type">> {
     readonly options?: unknown;
-    readonly type: string;
 }
 
 // @public
-export interface ServerFilterType {
-    readonly defaultOp: string;
-    readonly ops: readonly string[];
-    readonly type: string;
-}
+export type ServerFilterType = Pick<FilterTypeSpec, "type" | "ops" | "defaultOp">;
 
 // @public
 export type ServerFilterValue = string | readonly string[];
@@ -111,6 +109,7 @@ export interface ServerTableQuery {
     cursor?: string;
     filters: Readonly<Record<string, ServerFilterValue>>;
     filterTree?: QueryFilterGroup;
+    groupAggregates?: GroupAggregateOverrides;
     groupBy?: string;
     groupByKeys?: readonly string[];
     limit: number;
@@ -135,8 +134,10 @@ export interface ShapedFilter {
     readonly value?: string;
 }
 
-// @public
-export function splitFilterValues(raw: string | null | undefined): string[];
+// @public @deprecated
+export const splitFilterValues: typeof splitListParam;
+
+export { splitListParam }
 
 // @public
 export interface TextFilter {

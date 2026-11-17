@@ -305,7 +305,12 @@ for (const kit of ANGULAR_KITS) {
       );
       await expect(cards.first()).toBeVisible();
       await expect(
-        cards.first().locator('[data-adapttable-part="card-value"]').first()
+        cards
+          .first()
+          .locator('[data-adapttable-part="card-value"]')
+          .first()
+          .locator("strong")
+          .first()
       ).toHaveText("Ada Lovelace");
       const cardLabels = cards
         .first()
@@ -389,7 +394,12 @@ for (const kit of ANGULAR_KITS) {
       ).toBeChecked();
       await expect(cards).toHaveCount(5);
       await expect(
-        cards.first().locator('[data-adapttable-part="card-value"]').first()
+        cards
+          .first()
+          .locator('[data-adapttable-part="card-value"]')
+          .first()
+          .locator("strong")
+          .first()
       ).toHaveText("Ada Lovelace");
       await expect(cardLabels).toHaveText([
         "Team",

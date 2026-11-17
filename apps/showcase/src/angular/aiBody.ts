@@ -1,59 +1,76 @@
-/** Scripted and connected conversations over the real Angular table. */
-import {
-  type AgentContextInputs,
-  type AgentSession,
-  type AssistantSuggestion,
-  type AssistantTransport,
-  receiptFromResult,
+/**
+ * A table you talk to: the kit's own assistant panel over the shipped
+ * controller, the same staff, scripted examples, options, connection and
+ * developer inspector as every other framework's AI page. What this page
+ * adds is a transport: the fixed script, or the reader's own endpoint.
+ */
+import type {
+  AgentContextInputs,
+  AgentManifest,
+  AgentSession,
+  AlwaysAllowedState,
 } from "@adapttable/ai";
 import { injectTableAssistant, tableAgent } from "@adapttable/ai-angular";
-import type { ColumnDef, TableAssistantProps } from "@adapttable/angular";
 import type {
-  AgentApprovalPending,
-  TableAssistantButtonProps,
-  TableAssistantLanguageChipProps,
-} from "@adapttable/angular/adapter";
+  AdaptTableFeature,
+  ColumnDef,
+  TableAssistantProps,
+} from "@adapttable/angular";
+import type { AgentApprovalPending } from "@adapttable/angular/adapter";
+import type {
+  ApprovalPresentation,
+  BatchRowEdit,
+  RowPinState,
+} from "@adapttable/core";
+import { getLabels } from "@adapttable/i18n";
 import { Component, computed, inject, signal } from "@angular/core";
 
-import type { ShowcaseBackendConnection } from "../aiBackendConnection";
 import {
-  AGENT_FILTERS,
-  AGENT_PEOPLE as INITIAL,
-  type AgentPerson,
-} from "../aiPeople";
-import { AiBackendSettings } from "./aiBackendSettings";
-import { SHOWCASE_PRESENTATION } from "./data";
+  scriptedConnection,
+  type ShowcaseConnection,
+} from "../aiBackendConnection";
+import { builtAdapters } from "../matrix/content";
 import {
-  AdaptShowcaseAction,
-  AdaptShowcaseAssistant,
-  AdaptShowcaseChoice,
-  AdaptShowcaseTable,
-} from "./kitComponents";
+  actionApprovals,
+  AI_DEMO_MEDIA,
+  AI_PAGE_TEXT,
+  type ApprovalOverride,
+  capabilityApproval,
+  CONNECT_ACTION,
+  type DemoContextProfile,
+  type DemoEditingMode,
+  type DemoFeatureKey,
+  type DemoToggles,
+  INITIAL_TOGGLES,
+  markOnLeaveAction,
+  raiseTeamCapability,
+  STAFF,
+  STAFF_FILTERS,
+  STAFF_PAGE_LIMIT,
+  staffAgentColumns,
+  staffColumns,
+  staffContext,
+  staffKey,
+  staffOnLeave,
+  staffRaised,
+  type StaffRow,
+  staffStartsRtl,
+  staffSuggestions,
+  staffWithBatch,
+  staffWithCell,
+  staffWithout,
+  staffWithRow,
+  WATCH_TEXT,
+  webmcpAvailable,
+  withApprovalOverride,
+} from "../shared/aiDemo";
+import { demoTransport, UNSUPPORTED_REPLIES } from "../shared/aiScenario";
+import { AiSalaryCell, AiTextCell } from "./aiCells";
+import { AiConnectDialog } from "./aiConnectDialog";
+import { AiContextInspector } from "./aiContextInspector";
+import { AiDemoOptions, type ApprovalAnswer } from "./aiDemoOptions";
+import { AdaptShowcaseAssistant, AdaptShowcaseTable } from "./kitComponents";
 import { SHOWCASE_KIT } from "./showcaseKit";
-
-const SUGGESTIONS: readonly AssistantSuggestion[] = [
-  {
-    id: "sort",
-    title: "Sort salaries",
-    prompt: "Sort salaries highest first",
-    kind: "sort",
-    requires: ["view.setSort"],
-  },
-  {
-    id: "choose",
-    title: "Choose a person",
-    prompt: "Choose a person",
-    kind: "filter",
-    requires: ["view.setSearch"],
-  },
-  {
-    id: "edit",
-    title: "Propose salary",
-    prompt: "Propose Grace's salary as 150",
-    kind: "edit",
-    requires: ["edit.cells"],
-  },
-];
 
 /** The feature body mounted by the Angular matrix's AI page. */
 @Component({
@@ -61,238 +78,288 @@ const SUGGESTIONS: readonly AssistantSuggestion[] = [
   imports: [
     AdaptShowcaseTable,
     AdaptShowcaseAssistant,
-    AdaptShowcaseAction,
-    AdaptShowcaseChoice,
-    AiBackendSettings,
+    AiConnectDialog,
+    AiContextInspector,
+    AiDemoOptions,
   ],
-  styleUrl: "./aiBody.css",
   templateUrl: "./aiBody.html",
 })
 export class AiBody {
-  private readonly kit = inject(SHOWCASE_KIT);
-  readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = signal(INITIAL);
-  readonly rowKey = (row: AgentPerson) => row.id;
-  readonly columns: readonly ColumnDef<AgentPerson>[] = [
-    { key: "name", header: "Person", sortable: true },
-    {
-      key: "salary",
-      header: "Salary",
-      sortable: true,
-      editable: true,
-      editor: "number",
-    },
-    { key: "team", header: "Team", sortable: true },
-    { key: "status", header: "Status", sortable: true },
-    { key: "started", header: "Started", sortable: true },
-  ];
+  readonly kit = inject(SHOWCASE_KIT);
+  readonly text = AI_PAGE_TEXT;
+  readonly watch = WATCH_TEXT;
+  readonly media = AI_DEMO_MEDIA;
+  readonly pageLimit = STAFF_PAGE_LIMIT;
+  readonly rtl = signal(staffStartsRtl());
+  readonly locale = computed(() => (this.rtl() ? "ar" : "en"));
+  readonly dir = computed(() => (this.rtl() ? "rtl" : "ltr"));
+  readonly labels = computed(() => getLabels(this.locale()));
+  readonly toggles = signal<DemoToggles>(INITIAL_TOGGLES);
+  readonly rows = signal<readonly StaffRow[]>([...STAFF]);
+  readonly rowKey = staffKey;
+  readonly pinnedRowIds = signal<RowPinState>({ top: [], bottom: [] });
   readonly session = signal<AgentSession | undefined>(undefined);
-  readonly pending = signal<AgentApprovalPending | null>(null);
-  readonly open = signal(false);
-  readonly connection = signal<ShowcaseBackendConnection | undefined>(
+  readonly manifest = signal<AgentManifest | undefined>(undefined);
+  private readonly alwaysAllowed = signal<AlwaysAllowedState | undefined>(
     undefined
   );
+  readonly pending = signal<AgentApprovalPending | null>(null);
+  /** Bumped by Reset: remounting is how the table returns to its defaults. */
+  readonly tableGeneration = signal(0);
+  readonly panelOpen = signal(false);
   readonly settingsOpen = signal(false);
-  readonly approvalSurface = signal<"widget" | "table" | "modal">("widget");
-  readonly log = signal("No host writes yet");
-  readonly direction = this.presentation.dir;
+  readonly demoOpen = signal(false);
+  readonly presentation = signal<ApprovalPresentation>("widget");
+  readonly commit = signal<"stage" | "immediate">("stage");
+  private readonly actionPolicy = signal<
+    Readonly<Record<string, ApprovalOverride>>
+  >({});
+  readonly excluded = signal<readonly string[]>([]);
+  readonly contextProfile = signal<DemoContextProfile>("full");
+  readonly webmcp = signal(false);
+  readonly webmcpNames = signal<readonly string[]>([]);
+  readonly webmcpOffered = webmcpAvailable();
   private readView: (() => AgentContextInputs) | undefined;
-  private turn = 0;
 
-  private readonly transport: AssistantTransport = {
-    send: async ({ session, text, signal: abort, askUser, onPartialText }) => {
-      const request = text.toLowerCase();
-      let key: string;
-      let args: unknown;
-      let success: string;
-      if (request.includes("choose")) {
-        const answer = await askUser?.({
-          id: `person-${String(++this.turn)}`,
-          question: "Which person should I show?",
-          options: INITIAL.slice(0, 3).map((row) => ({
-            id: row.id,
-            label: row.name,
-          })),
-          allowFreeText: true,
-        });
-        if (!answer || abort?.aborted) return { text: "No filter applied." };
-        const person = INITIAL.find((row) => row.id === answer.optionId);
-        const search = person?.name ?? answer.text?.trim();
-        if (!search) return { text: "No filter applied." };
-        key = "view.setSearch";
-        args = { search };
-        success = `Showing ${search}.`;
-      } else if (request.includes("propose")) {
-        key = "edit.cells";
-        args = { edits: [{ rowKey: "grace", column: "salary", value: 150 }] };
-        success = "Grace's salary is now 150.";
-      } else if (request.includes("everyone") || request.includes("reset")) {
-        key = "view.setSearch";
-        args = { search: "" };
-        success = "Showing everyone.";
-      } else if (request.includes("sort")) {
-        key = "view.setSort";
-        args = { key: "salary", dir: "desc" };
-        success = "Highest salary first.";
-      } else if (request.includes("wait")) {
-        onPartialText?.("Waiting. Press Stop to cancel this local turn.");
-        await new Promise<void>((resolve) => {
-          if (!abort || abort.aborted) resolve();
-          else abort.addEventListener("abort", () => resolve(), { once: true });
-        });
-        return { text: "Cancelled without changing the table." };
-      } else {
-        return {
-          text: "Try: sort salaries, choose a person, propose Grace's salary as 150, or show everyone.",
-        };
-      }
-      if (abort?.aborted)
-        return { text: "Cancelled without changing the table." };
-      const result = await session.execute(
-        key,
-        args,
-        session.manifest().viewRevision,
-        `angular-demo-${String(++this.turn)}`,
-        abort
+  readonly columns = computed((): ColumnDef<StaffRow>[] =>
+    staffColumns(this.locale()).map((column) => {
+      if (column.key === "salary") return { ...column, cell: AiSalaryCell };
+      // Staff read as text: the showcase's people cells read a different row.
+      if (column.key === "person" || column.key === "status")
+        return { ...column, cell: AiTextCell };
+      return column;
+    })
+  );
+  readonly scripted = demoTransport(() =>
+    staffContext(this.rows(), this.locale())
+  );
+  readonly connection = signal<ShowcaseConnection>(
+    scriptedConnection(this.scripted)
+  );
+
+  // Stable for the page's life, so the session is not rebuilt on every edit.
+  private readonly raiseTeam = raiseTeamCapability(({ team, percent }) => {
+    this.rows.update((rows) => staffRaised(rows, team, percent));
+    return this.rows().filter((row) => row.team === team).length;
+  });
+
+  readonly features = computed((): readonly AdaptTableFeature[] => {
+    const current = this.toggles();
+    const canWrite = current.editingMode !== "off";
+    // Staging needs the batch save path; cell and row modes apply on approve.
+    const effectiveCommit =
+      current.editingMode === "batch" ? this.commit() : "immediate";
+    const next: AdaptTableFeature[] = [
+      this.kit.filters<StaffRow>([...STAFF_FILTERS]),
+      // Selection and one bulk action over it, through the kit's own bar.
+      this.kit.bulkActions([
+        markOnLeaveAction(
+          this.locale(),
+          effectiveCommit === "immediate",
+          (keys) => {
+            this.rows.update((rows) => staffOnLeave(rows, keys));
+          }
+        ),
+      ]),
+      tableAgent({
+        tableId: "ai-assistant-demo",
+        writePolicy: "allow",
+        approval: {
+          policy: "writes",
+          presentation: this.presentation(),
+          // Only the one write a reader can reasonably agree to once;
+          // deleting is never on this list, and the neutral rule refuses it.
+          alwaysAllow: ["staff.raiseTeam"],
+        },
+        excludeCapabilities: this.excluded(),
+        capabilityApproval: capabilityApproval(this.actionPolicy()),
+        capabilities: [this.raiseTeam],
+        ...(this.webmcp()
+          ? {
+              webmcp: {
+                onRegister: (names: readonly string[]) => {
+                  this.webmcpNames.set(names);
+                },
+              },
+            }
+          : {}),
+        commit: effectiveCommit,
+        columns: staffAgentColumns(this.locale(), canWrite),
+        apply: {
+          // Disposable data, and the one destructive capability on the page:
+          // Reset and a refresh bring the rows back, and it always asks first.
+          deleteRows: (keys: readonly string[]) => {
+            this.rows.update((rows) => staffWithout(rows, keys));
+          },
+        },
+        bridge: {
+          attach: (session: AgentSession) => {
+            this.session.set(session);
+          },
+          publish: (manifest: AgentManifest) => {
+            this.manifest.set(manifest);
+          },
+          viewInputs: (read: () => AgentContextInputs) => {
+            this.readView = read;
+          },
+          approvals: (pending: AgentApprovalPending | null) => {
+            this.pending.set(pending);
+          },
+          alwaysAllowed: (state: AlwaysAllowedState) => {
+            this.alwaysAllowed.set(state);
+          },
+        },
+      }),
+    ];
+    // Off by default so this is a normal table until something groups it.
+    if (current.grouping) next.push(this.kit.groupingPanel<StaffRow>());
+    if (current.rowPinning)
+      next.push(
+        this.kit.rowPinning({
+          pinnedRowIds: this.pinnedRowIds,
+          onPinnedRowIdsChange: (value: RowPinState) => {
+            this.pinnedRowIds.set(value);
+          },
+        })
       );
-      const receipt = receiptFromResult(
-        result,
-        key,
-        session.manifest().policy.commit
+    if (current.columnPinning) next.push(this.kit.columnMenu());
+    if (current.editingMode === "off") return next;
+    const editing: AdaptTableFeature[] = [
+      this.kit.agentApproval(),
+      this.kit.editHistory(),
+      this.kit.undoRedoButtons(),
+    ];
+    if (current.editingMode === "cell")
+      editing.push(
+        this.kit.editing<StaffRow>((row, key, value) => {
+          this.rows.update((rows) => staffWithCell(rows, row, key, value));
+        })
       );
-      return {
-        text:
-          receipt.status === "executed"
-            ? success
-            : `No change applied: ${result.error?.message ?? "the request was refused"}.`,
-        keys: [key],
-        results: [result],
-      };
-    },
-  };
+    if (current.editingMode === "row")
+      editing.push(
+        this.kit.rowEditing<StaffRow>((row, patch) => {
+          this.rows.update((rows) => staffWithRow(rows, row, patch));
+        })
+      );
+    if (current.editingMode === "batch")
+      editing.push(
+        this.kit.batchEditing<StaffRow>(
+          (edits: readonly BatchRowEdit<StaffRow>[]) => {
+            this.rows.update((rows) => staffWithBatch(rows, edits));
+          }
+        )
+      );
+    return [...editing, ...next];
+  });
+
+  /** The live view a turn is judged against, as the table publishes it. */
+  readonly liveViewInputs = (): AgentContextInputs => this.readView?.() ?? {};
 
   readonly assistant = injectTableAssistant(
-    computed(() => ({
-      session: this.session(),
-      transport: this.connection()?.transport ?? this.transport,
-      transportKey: this.connection()?.key ?? "angular-local-script",
-      suggestions: SUGGESTIONS,
-      open: this.open(),
-      onOpenChange: (open: boolean) => this.open.set(open),
-      awaitingApproval: this.pending() !== null,
-      contextInputs: () => this.readView?.() ?? {},
-    }))
+    computed(() => {
+      const alwaysAllowed = this.alwaysAllowed();
+      return {
+        session: this.session(),
+        contextInputs: this.liveViewInputs,
+        transport: this.connection().transport,
+        // Only a genuine transport swap re-establishes the conversation.
+        transportKey: this.connection().key,
+        // The backend keeps the thread; a turn carries the reader's message.
+        conversation: 0,
+        suggestions: staffSuggestions(this.locale()),
+        awaitingApproval: this.pending() !== null,
+        ...(alwaysAllowed ? { alwaysAllow: alwaysAllowed } : {}),
+        open: this.panelOpen(),
+        onOpenChange: (open: boolean) => {
+          this.panelOpen.set(open);
+        },
+      };
+    })
   );
 
   readonly assistantProps = computed((): TableAssistantProps => ({
     assistant: this.assistant(),
     approval: this.pending(),
-    open: this.open(),
-    onOpenChange: (open) => this.open.set(open),
+    open: this.panelOpen(),
+    onOpenChange: (open) => {
+      this.panelOpen.set(open);
+    },
     presentation: "floating",
     className: ["unstyled", "aria"].includes(this.kit.key)
       ? "mx-assistant-layout mx-native-assistant"
       : "mx-assistant-layout",
-    dir: this.direction,
-    labels: this.presentation.labels,
+    dir: this.dir(),
+    labels: this.labels(),
     greeting: "",
-    onSettings: () => this.settingsOpen.set(true),
+    onSettings: () => {
+      this.settingsOpen.set(true);
+    },
+    // A reply the script could not carry out offers the way past it.
+    messageAction: (message) =>
+      Object.values(UNSUPPORTED_REPLIES).includes(message.text)
+        ? {
+            label: CONNECT_ACTION[this.locale()],
+            onRun: () => {
+              this.settingsOpen.set(true);
+            },
+          }
+        : undefined,
   }));
 
-  readonly features = [
-    this.kit.filters<AgentPerson>(AGENT_FILTERS),
-    this.kit.columnMenu(),
-    this.kit.resizableColumns(),
-    this.kit.savedViews({
-      storageKey: `adapttable-angular-${this.kit.key}-ai-views`,
-      urlKey: "ai",
-    }),
-    this.kit.editHistory(),
-    this.kit.undoRedoButtons(),
-    this.kit.cellNavigation(),
-    this.kit.exportCsv<AgentPerson>({ filename: "ai-people.csv" }),
-    this.kit.fullscreen(),
-    this.kit.rowPinning(),
-    this.kit.bulkActions([]),
+  readonly approvals = computed(() =>
+    actionApprovals(this.manifest()?.capabilities ?? [], this.actionPolicy())
+  );
 
-    this.kit.editing<AgentPerson>((row, column, value) => {
-      if (column !== "salary") throw new Error("This demo only edits salary");
-      const salary = Number(value);
-      this.rows.update((rows) =>
-        rows.map((person) =>
-          person.id === row.id ? { ...person, salary } : person
-        )
-      );
-      this.log.set(`${row.name} salary saved: ${String(salary)}`);
-    }),
-    this.kit.agentApproval(),
-    tableAgent(
-      computed(() => ({
-        tableId: "angular-ai-people",
-        writePolicy: "allow" as const,
-        commit: "immediate" as const,
-        approval: {
-          policy: "writes" as const,
-          presentation: this.approvalSurface(),
-        },
-        columns: {
-          name: { type: "string" as const, readable: true, sortable: true },
-          salary: {
-            type: "number" as const,
-            readable: true,
-            writable: true,
-            sortable: true,
-          },
-        },
-        bridge: {
-          attach: (session: AgentSession) => this.session.set(session),
-          approvals: (pending: AgentApprovalPending | null) =>
-            this.pending.set(pending),
-          viewInputs: (read: () => AgentContextInputs) => {
-            this.readView = read;
-          },
-        },
-      }))
-    ),
-  ];
+  readonly sourceIsBackend = computed(
+    () => this.connection().mode !== "simulated" || this.settingsOpen()
+  );
 
-  readonly showEveryone = computed((): TableAssistantButtonProps => ({
-    label: "Show everyone",
-    part: "demo-show-everyone",
-    variant: "secondary",
-    disabled: this.assistant().busy || !this.session(),
-    onClick: () => this.send("Show everyone"),
+  readonly otherKits = builtAdapters("angular").map((other) => ({
+    key: other.key,
+    label: other.label,
+    href: `../../${other.key}/ai/#ai-demo`,
   }));
 
-  readonly backendSettings = computed((): TableAssistantButtonProps => ({
-    label: this.settingsOpen()
-      ? "Hide connection settings"
-      : "Connect a backend",
-    part: "demo-ai-settings",
-    variant: "secondary",
-    onClick: () => this.settingsOpen.update((open) => !open),
-  }));
-
-  readonly surfaceChoice = computed((): TableAssistantLanguageChipProps => ({
-    label: "Approval surface",
-    part: "demo-approval-surface",
-    value: this.approvalSurface(),
-    disabled: this.assistant().busy,
-    options: [
-      { value: "widget", label: "Assistant" },
-      { value: "table", label: "Table" },
-      { value: "modal", label: "Dialog" },
-    ],
-    onChange: (value) => this.changeSurface(value),
-  }));
-
-  send(text: string): void {
-    this.open.set(true);
-    void this.assistant().send(text);
+  answerApproval(answer: ApprovalAnswer): void {
+    this.actionPolicy.update((current) =>
+      withApprovalOverride(current, answer.key, answer.next)
+    );
   }
 
-  changeSurface(value: string): void {
-    if (value === "widget" || value === "table" || value === "modal")
-      this.approvalSurface.set(value);
+  toggle(key: DemoFeatureKey): void {
+    this.toggles.update((current) => ({ ...current, [key]: !current[key] }));
+  }
+
+  editingMode(mode: DemoEditingMode): void {
+    this.toggles.update((current) => ({ ...current, editingMode: mode }));
+  }
+
+  toggleOffer(key: string): void {
+    this.excluded.update((current) =>
+      current.includes(key)
+        ? current.filter((entry) => entry !== key)
+        : [...current, key]
+    );
+  }
+
+  /** Cancel work in flight and put the data, settings and table back. */
+  reset(): void {
+    const assistant = this.assistant();
+    assistant.stop();
+    assistant.clear();
+    this.toggles.set(INITIAL_TOGGLES);
+    this.rows.set([...STAFF]);
+    this.pinnedRowIds.set({ top: [], bottom: [] });
+    this.tableGeneration.update((current) => current + 1);
+  }
+
+  chooseSource(next: "simulated" | "backend"): void {
+    if (next === "backend") {
+      this.settingsOpen.set(true);
+      return;
+    }
+    this.settingsOpen.set(false);
+    if (this.connection().mode !== "simulated")
+      this.connection.set(scriptedConnection(this.scripted));
   }
 }

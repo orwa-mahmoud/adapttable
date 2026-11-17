@@ -12,16 +12,12 @@ const KIT_SELECTORS: Readonly<Record<string, string>> = {
   "page-number": "nz-pagination .ant-pagination-item button",
   "page-ellipsis":
     "nz-pagination .ant-pagination-jump-prev button, nz-pagination .ant-pagination-jump-next button",
-  "virtual-spacer":
-    'tbody > tr[inert], [data-adapttable-part="cards"] > li[aria-hidden="true"]',
   "expand-button": "adapt-expand-toggle button",
   "load-more": "adapt-table-region + div",
   "load-more-button": "adapt-table-region + div > button",
   "refresh-indicator": '[data-adapttable-part="root"] > nz-spin',
   "empty-clear": '[data-adapttable-part="empty"] button',
   "retry-button": "adapt-error-state button",
-  "filters-button":
-    'adapt-filter-popover > span > button, [data-adapttable-part="toolbar"] > button:not([data-adapttable-part])',
   "filters-icon": "adapt-filter-popover > span > button > span",
   "filters-count": "adapt-filter-popover nz-badge",
   "filters-anchor": "adapt-filter-popover > span",

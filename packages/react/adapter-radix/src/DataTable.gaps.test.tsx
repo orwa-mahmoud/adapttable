@@ -2,7 +2,7 @@
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import type * as AdapterModule from "@adapttable/react/adapter";
 import {
-  useDataTableShell,
+  TableComposition,
   type VirtualTableRow,
 } from "@adapttable/react/adapter";
 import { Theme } from "@radix-ui/themes";
@@ -28,7 +28,7 @@ vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
   return {
     ...actual,
-    useDataTableShell: vi.fn(actual.useDataTableShell),
+    TableComposition: vi.fn(actual.TableComposition),
   };
 });
 
@@ -40,29 +40,38 @@ let adapter: ReturnType<typeof createMemoryAdapter>;
 
 beforeEach(() => {
   // Default: delegate to the real shell so non-virtual tests run untouched.
-  vi.mocked(useDataTableShell).mockImplementation(actualCore.useDataTableShell);
+  vi.mocked(TableComposition).mockImplementation(actualCore.TableComposition);
 });
 
 /**
- * Force a controlled virtual window for the virtualization render tests by
- * overriding the shell's `tableProps` — the body renderers read `rowEntries`
- * (the windowed subset) just as they would from a real virtualizer.
+ * Force a controlled virtual window by overriding the `tableProps` the kit's
+ * body receives — the body renderers read `rowEntries` exactly as from a real
+ * virtualizer.
  */
 function mockBodyData(rows: VirtualTableRow<Row>[], padding: number) {
-  vi.mocked(useDataTableShell).mockImplementation((props, render) => {
-    const real = actualCore.useDataTableShell(props, render);
-    return {
-      ...real,
-      skipChromeBody: true,
-      tableProps: {
-        ...real.tableProps,
-        rowEntries: rows,
-        paddingTop: padding,
-        paddingBottom: padding,
-        measureElement: vi.fn(),
+  vi.mocked(TableComposition).mockImplementation(({ props, kit }) =>
+    actualCore.TableComposition({
+      props,
+      kit: {
+        ...kit,
+        body: (view, headerOffset, tableProps) =>
+          kit.body(
+            {
+              ...view,
+              tableProps: {
+                ...view.tableProps,
+                rowEntries: rows as never,
+                paddingTop: padding,
+                paddingBottom: padding,
+                measureElement: vi.fn(),
+              },
+            },
+            headerOffset,
+            tableProps
+          ),
       },
-    };
-  });
+    })
+  );
 }
 
 function mount(

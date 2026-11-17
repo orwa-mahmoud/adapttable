@@ -1,9 +1,9 @@
-import type { TableLabels } from "@adapttable/core";
 import {
   createMemoryAdapter,
   type UrlStateAdapter,
   useFrontendData,
 } from "@adapttable/react";
+import { type TableLabels } from "@adapttable/react/adapter";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

@@ -155,7 +155,9 @@ const IDLE: ExportSnapshot = {
   run: 0,
 };
 
-const SNAPSHOT_KEYS = Object.keys(IDLE) as readonly (keyof ExportSnapshot)[];
+const SNAPSHOT_KEYS = /* @__PURE__ */ Object.keys(
+  IDLE
+) as readonly (keyof ExportSnapshot)[];
 
 /** What a fresh run, a cancel and a dismiss all clear. */
 const CLEARED = {

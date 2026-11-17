@@ -13,7 +13,7 @@ import {
   defaultConfirm,
   FULLSCREEN_MODEL,
   GROUP_ROW,
-  groupRowSlotKey,
+  keepTableControls,
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
@@ -62,8 +62,10 @@ const emit = defineEmits<{
   "update:density": [density: TableDensity];
 }>();
 const content = defineSlots<DataTableSlots<TRow>>();
+const card = shallowRef(content.card);
 const footer = shallowRef(content.footer);
 onBeforeUpdate(() => {
+  card.value = content.card;
   footer.value = content.footer;
 });
 const kit = useRekaLibrary();
@@ -162,19 +164,23 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable: Reka group rows require grouping() from @adapttable/reka-ui/grouping."
         );
-      return renderFeatureSlot(
-        groupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        control
-      );
+      return renderFeatureSlot(GROUP_ROW, shell.slotFills.value, control);
     },
-    card: content.card,
+    card: card.value,
     cell: content.cell,
     header: content.header,
     headerActions: content.headerActions,
     footer: content.footer,
   };
 }
+/** One controls object while the host's slots stay the same. */
+const tableControls = keepTableControls(controls, (kept) => [
+  kept.card,
+  kept.cell,
+  kept.header,
+  kept.headerActions,
+  kept.footer,
+]);
 const rootElement = shallowRef<HTMLElement | null>(null);
 const scrollElement = shallowRef<HTMLElement | null>(null);
 const surface = {
@@ -202,7 +208,7 @@ defineExpose<DataTableHandle<TRow>>(shell.handle);
       data-adapttable-kit="reka-ui"
       :model="shell"
       :options="options"
-      :slots="rekaSurfaceControls(controls())"
+      :slots="rekaSurfaceControls(tableControls())"
       :content="content"
       :root-ref="rootRef"
       :scroll-ref="scrollRef"

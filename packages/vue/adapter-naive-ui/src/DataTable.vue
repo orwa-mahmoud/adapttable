@@ -10,7 +10,7 @@ import {
   DataTableSurfaceChrome,
   defaultConfirm,
   GROUP_ROW,
-  groupRowSlotKey,
+  keepTableControls,
   provideDataTableClassNames,
   renderFeatureSlot,
   type TableChromeSlots,
@@ -56,8 +56,10 @@ const emit = defineEmits<{
 }>();
 const attrs = useAttrs();
 const slots = defineSlots<DataTableSlots<TRow>>();
+const card = shallowRef(slots.card);
 const footer = shallowRef(slots.footer);
 onBeforeUpdate(() => {
+  card.value = slots.card;
   footer.value = slots.footer;
 });
 const names = computed(() => naiveClassNames(props.classNames));
@@ -133,19 +135,23 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable Naive UI: grouped rows require the kit grouping contribution."
         );
-      return renderFeatureSlot(
-        groupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        group
-      );
+      return renderFeatureSlot(GROUP_ROW, shell.slotFills.value, group);
     },
-    card: slots.card,
+    card: card.value,
     cell: slots.cell,
     header: slots.header,
     headerActions: slots.headerActions,
     footer: slots.footer,
   };
 }
+/** One controls object while the host's slots stay the same. */
+const tableControls = keepTableControls(controls, (kept) => [
+  kept.card,
+  kept.cell,
+  kept.header,
+  kept.headerActions,
+  kept.footer,
+]);
 const Render = () =>
   naiveDirection(shell.table.dir.value, () =>
     h(DataTableSurfaceChrome<TRow>, {
@@ -164,7 +170,7 @@ const Render = () =>
         isFetching,
         classNames: names.value,
       },
-      slots: naiveSurfaceControls(controls(), shell.density.value),
+      slots: naiveSurfaceControls(tableControls(), shell.density.value),
       content: slots,
       rootRef: (element: HTMLElement | null) => {
         root.value = element;

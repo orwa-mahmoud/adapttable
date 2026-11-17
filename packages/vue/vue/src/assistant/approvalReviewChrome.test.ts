@@ -41,6 +41,38 @@ function mount(pending?: AgentApprovalPending) {
   return { root, input, find, click };
 }
 describe("approval review", () => {
+  it("takes focus to Reject when a change arrives above the table, and Escape rejects it", async () => {
+    const reject = vi.fn();
+    const pending: AgentApprovalPending = {
+      presentation: "table",
+      proposals: [
+        {
+          rowKey: "1",
+          rowLabel: "Ada",
+          column: "x",
+          columnLabel: "Salary",
+          before: 10,
+          after: 20,
+        },
+      ],
+      decisions: ["pending"],
+      approve: vi.fn(),
+      reject,
+    };
+    const view = mount();
+    document.body.append(view.root);
+    stops.push(() => view.root.remove());
+    view.input.value = { ...view.input.value, pending };
+    await nextTick();
+    await nextTick();
+    expect(document.activeElement).toBe(view.find("agent-approval-reject"));
+    view
+      .find("agent-approval")
+      ?.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+      );
+    expect(reject).toHaveBeenCalledTimes(1);
+  });
   it("only owns table approvals, renders exact values, expands and settles per-item and all decisions", async () => {
     const approve = vi.fn();
     const reject = vi.fn();

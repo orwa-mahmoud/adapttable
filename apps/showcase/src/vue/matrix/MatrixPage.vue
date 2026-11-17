@@ -30,6 +30,12 @@ import {
   storeShowcaseTheme as storeTheme,
   updateShowcaseThemeUrl,
 } from "../../matrix/theme";
+import { codeSpans } from "../../shared/codeSpans";
+import {
+  type DemoNotice,
+  listenForNotices,
+  noticeStyle,
+} from "../../shared/demoNotice";
 import AccessibilityBody from "./bodies/AccessibilityBody.vue";
 import AggregationBody from "./bodies/AggregationBody.vue";
 import AiBody from "./bodies/AiBody.vue";
@@ -84,20 +90,6 @@ const FEATURE_BODIES: Readonly<Record<string, Component>> = {
   "column-groups": ColumnGroupsBody,
 };
 
-/**
- * A paragraph of matrix copy as runs of text and code: `backticked` spans are
- * code — the convention the served HTML uses.
- */
-const leadParts = (text: string): { code: boolean; text: string }[] =>
-  text
-    .split(/(`[^`]+`)/)
-    .filter(Boolean)
-    .map((part) =>
-      part.startsWith("`") && part.endsWith("`")
-        ? { code: true, text: part.slice(1, -1) }
-        : { code: false, text: part }
-    );
-
 const props = defineProps<{ route: MatrixRoute }>();
 
 const kit = useShowcaseKit();
@@ -108,6 +100,13 @@ const active = feature ? `${path}/${feature.slug}` : path;
 const presentation = SHOWCASE_PRESENTATION;
 const dark = shallowRef(readStoredTheme());
 const copied = shallowRef<"code" | "install" | null>(null);
+/** The notice a demo action raised, while it is on screen. */
+const notice = shallowRef<DemoNotice | null>(null);
+onScopeDispose(
+  listenForNotices((next) => {
+    notice.value = next;
+  })
+);
 const gettingStarted = docsUrl("getting-started", "vue");
 const unavailable = new URLSearchParams(window.location.search).get(
   "unavailable"
@@ -226,7 +225,7 @@ function copy(which: "code" | "install", text: string): void {
             >{{ heading.after }}
           </h1>
           <p v-for="(line, index) in intro" :key="index" class="mx-lead">
-            <template v-for="(part, at) in leadParts(line)" :key="at">
+            <template v-for="(part, at) in codeSpans(line)" :key="at">
               <code v-if="part.code">{{ part.text }}</code>
               <template v-else>{{ part.text }}</template>
             </template>
@@ -301,6 +300,8 @@ function copy(which: "code" | "install", text: string): void {
               >
             </div>
           </div>
+          <!-- Where the AI page's developer inspector lands, below Reference. -->
+          <div id="mx-inspector-slot" />
         </div>
       </div>
 
@@ -404,6 +405,10 @@ function copy(which: "code" | "install", text: string): void {
       <MoreExamples :kit-key="adapter.key" />
     </div>
   </main>
+
+  <div v-if="notice" role="status" :style="noticeStyle(notice)">
+    {{ notice.message }}
+  </div>
 
   <footer class="foot">
     <div class="foot__inner shell">

@@ -1,7 +1,8 @@
 import type { RowActionControl } from "@adapttable/vue";
-import type {
-  DataTableClassNames,
-  RowActionsLayout,
+import {
+  type DataTableClassNames,
+  type RowActionsLayout,
+  withProps,
 } from "@adapttable/vue/adapter";
 import { ElDropdown, ElDropdownItem, ElDropdownMenu } from "element-plus";
 import {
@@ -101,9 +102,9 @@ const ElementRowActionsPresentation = defineComponent(
 );
 
 /** A menu returns focus to its native trigger before an action opens another surface. */
-export function ElementRowActions<TRow>(
-  props: ElementRowActionsProps<TRow>
-): VNode {
-  return createVNode(ElementRowActionsPresentation, { ...props });
-}
-ElementRowActions.props = actionProps;
+export const ElementRowActions = /* @__PURE__ */ withProps(
+  function ElementRowActions<TRow>(props: ElementRowActionsProps<TRow>): VNode {
+    return createVNode(ElementRowActionsPresentation, { ...props });
+  },
+  actionProps
+);

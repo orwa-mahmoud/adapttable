@@ -158,14 +158,32 @@ export function headerFilterInsideSelector(input: {
 }
 
 /**
+ * What else an overlay's dismissal needs to know.
+ *
+ * @public
+ */
+export interface OverlayDismissOptions {
+  /** Inside too: nodes no selector names, such as the trigger or the panel. */
+  readonly contains?: (node: Node) => boolean;
+  /** A nested dropdown that an Escape closes first. */
+  readonly nestedSelector?: string;
+  /** Runs after Escape closed the overlay, such as handing focus back. */
+  readonly afterEscape?: () => void;
+}
+
+/**
  * Dismiss on a true outside press or on Escape. A press inside the selector —
  * or anywhere while a native `<select>` inside it is focused with its OS list
  * open — is not outside. Presses are ignored until a microtask after arming,
  * so the press that opened the overlay does not close it.
  *
+ * An Escape that a nested dropdown, an input method composing text, or an
+ * earlier handler took is left to them.
+ *
  * @param doc - The document to listen on.
  * @param insideSelector - What counts as inside.
  * @param dismiss - Close the overlay.
+ * @param options - What else is inside, and what follows an Escape.
  * @returns The teardown.
  *
  * @public
@@ -173,11 +191,15 @@ export function headerFilterInsideSelector(input: {
 export function watchOverlayDismiss(
   doc: Document,
   insideSelector: string,
-  dismiss: () => void
+  dismiss: () => void,
+  options: OverlayDismissOptions = {}
 ): () => void {
   let armed = false;
   const isInside = (target: EventTarget | null): boolean => {
     if (target instanceof Element && target.closest(insideSelector)) {
+      return true;
+    }
+    if (target instanceof Node && options.contains?.(target) === true) {
       return true;
     }
     // Native <select> lists live outside the DOM. While that list is open the
@@ -194,7 +216,19 @@ export function watchOverlayDismiss(
     dismiss();
   };
   const onKey = (event: KeyboardEvent): void => {
-    if (event.key === "Escape") dismiss();
+    if (event.key !== "Escape" || event.defaultPrevented || event.isComposing) {
+      return;
+    }
+    const nested = options.nestedSelector;
+    if (
+      nested !== undefined &&
+      event.target instanceof Element &&
+      event.target.closest(nested)
+    ) {
+      return;
+    }
+    dismiss();
+    options.afterEscape?.();
   };
   doc.addEventListener("mousedown", onPointer);
   doc.addEventListener("touchstart", onPointer);

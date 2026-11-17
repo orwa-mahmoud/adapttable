@@ -122,7 +122,9 @@
   <span data-adapttable-part="resize-handle" [adaptAttrs]="attrs"></span>
 </ng-template>
 <ng-template #headerCaption let-content="content">
-  <ng-container *ngTemplateOutlet="content" />
+  <span data-adapttable-part="header-caption-control">
+    <ng-container *ngTemplateOutlet="content" />
+  </span>
 </ng-template>
 <ng-template
   #headerRename

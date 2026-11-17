@@ -43,7 +43,9 @@ export function injectCellSaveState<TRow>(
 ): Signal<CellSaveState<TRow>> {
   if (!options.injector) assertInInjectionContext(injectCellSaveState);
   const injector = options.injector ?? inject(Injector);
-  const store = createCellSaveStore<TRow>(options);
+  const store = createCellSaveStore<TRow>(options, {
+    store: tableStoreOf(injector),
+  });
   effect(
     () => {
       store.configure(options);
@@ -60,3 +62,4 @@ export type {
   CellSaveStatus,
   FailedCellSave,
 } from "@adapttable/core";
+import { tableStoreOf } from "../tableStore";

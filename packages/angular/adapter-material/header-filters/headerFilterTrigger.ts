@@ -92,7 +92,7 @@ import { MatButtonModule } from "@angular/material/button";
 })
 export class AdaptHeaderFilterTrigger {
   /** The slot's props. */
-  readonly props = input.required<FilterHeaderControlProps<never>>();
+  readonly props = input.required<FilterHeaderControlProps<unknown>>();
 
   protected readonly triggerElement = viewChild<
     unknown,

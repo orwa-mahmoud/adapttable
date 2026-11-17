@@ -1,8 +1,11 @@
 import { fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./data-table.test-utils";
+import { densityFullscreenTests } from "../../react/test/kit/suites/densityFullscreen";
+import { DataTable, kit } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+
+for (const test of densityFullscreenTests(kit)) it(test.name, test.run);
 
 interface Row {
   id: string;
@@ -52,20 +55,6 @@ describe("density and fullscreen (shadcn)", () => {
   const part = (name: string) =>
     document.querySelector(`[data-adapttable-part="${name}"]`);
 
-  it("shows neither control until asked", () => {
-    table();
-
-    expect(part("density-toggle")).toBeNull();
-    expect(part("fullscreen-toggle")).toBeNull();
-  });
-
-  it("offers the density chooser and reports the choice", () => {
-    table({ densityChooser: true, onDensityChange });
-    fireEvent.click(part("density-toggle")!);
-
-    expect(onDensityChange).toHaveBeenCalledWith("compact");
-  });
-
   it("applies an uncontrolled choice to the rendered density hook", () => {
     const { container } = table({ densityChooser: true });
     const root = container.querySelector('[data-adapttable-part="root"]')!;
@@ -73,28 +62,5 @@ describe("density and fullscreen (shadcn)", () => {
     expect(root).toHaveAttribute("data-density", "comfortable");
     fireEvent.click(part("density-toggle")!);
     expect(root).toHaveAttribute("data-density", "compact");
-  });
-
-  it("goes back the other way from compact", () => {
-    table({ densityChooser: true, density: "compact", onDensityChange });
-    fireEvent.click(part("density-toggle")!);
-
-    expect(onDensityChange).toHaveBeenCalledWith("comfortable");
-  });
-
-  it("offers a fullscreen toggle when the browser allows it", () => {
-    table({ fullscreen: true });
-
-    expect(part("fullscreen-toggle")).not.toBeNull();
-  });
-
-  it("hides the toggle where fullscreen is not allowed at all", () => {
-    Object.defineProperty(document, "fullscreenEnabled", {
-      value: false,
-      configurable: true,
-    });
-    table({ fullscreen: true });
-
-    expect(part("fullscreen-toggle")).toBeNull();
   });
 });

@@ -1,5 +1,8 @@
 import { type Attrs, fromStore } from "@adapttable/angular";
-import { createColumnRenameEditor, restoreFocusSoon } from "@adapttable/core";
+import {
+  createColumnRenameEditor,
+  restoreFocusSoon,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

@@ -8,7 +8,6 @@
 import {
   type EditableCellController,
   type EditingBundle,
-  rowEditingSignature as coreRowEditingSignature,
   rowIsDirty as coreRowIsDirty,
 } from "@adapttable/core";
 import { editableCellController as coreEditableCellController } from "@adapttable/core/editing";
@@ -24,6 +23,8 @@ export {
   focusEditorOnMount,
   stopCellEditKeyboard,
 } from "@adapttable/core/editing";
+
+import { rowEditingSignature as coreRowEditingSignature } from "@adapttable/core/binding";
 
 /**
  * Opt-in editing bundle from {@link TableChrome.editing}.

@@ -1,14 +1,11 @@
 import {
   type ColumnMetadata,
-  createQuerySource,
   type InfiniteQueryLike,
   type PageSelector,
   type PaginatedResponse,
   type PaginationMode,
   type QueryAggregate,
-  type QuerySource,
   type QuerySupport,
-  resolvePaginationMode,
   type TableQueryParams,
   type TableSource,
 } from "@adapttable/core";
@@ -21,6 +18,12 @@ import {
 } from "../url/useTableUrlState";
 
 export type { InfiniteQueryLike, PageSelector } from "@adapttable/core";
+
+import {
+  createQuerySource,
+  type QuerySource,
+  resolvePaginationMode,
+} from "@adapttable/core/binding";
 
 /**
  * Options for {@link useQuerySource}.
@@ -39,6 +42,7 @@ export interface UseQuerySourceOptions<
   | "numberExtraKeys"
   | "arrayExtraKeys"
   | "urlKey"
+  | "store"
 > {
   /**
    * The caller's paginated-query hook, built on `useInfiniteQuery`. It

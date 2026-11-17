@@ -6,12 +6,15 @@ import {
   agentApproval,
   TableAssistant,
 } from "@adapttable/element-plus/assistant";
+import { batchEditing } from "@adapttable/element-plus/batch-editing";
 import { bulkActions } from "@adapttable/element-plus/bulk-actions";
 import { cellNavigation } from "@adapttable/element-plus/cell-navigation";
 import { cellSpan } from "@adapttable/element-plus/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/element-plus/column-groups";
 import { columnMenu } from "@adapttable/element-plus/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/element-plus/column-selection";
+import { commandPalette } from "@adapttable/element-plus/command-palette";
+import { contextMenu } from "@adapttable/element-plus/context-menu";
 import { densityChooser } from "@adapttable/element-plus/density";
 import {
   editHistory,
@@ -20,18 +23,25 @@ import {
   undoRedoButtons,
 } from "@adapttable/element-plus/editing";
 import { exportCsv } from "@adapttable/element-plus/export";
+import { extraRows } from "@adapttable/element-plus/extra-rows";
 import { filters } from "@adapttable/element-plus/filters";
+import { findInTable } from "@adapttable/element-plus/find-in-table";
 import { fullscreen } from "@adapttable/element-plus/fullscreen";
 import { groupingPanel } from "@adapttable/element-plus/grouping-panel";
 import { headerFilters } from "@adapttable/element-plus/header-filters";
 import { nestedTable } from "@adapttable/element-plus/nested-table";
 import { pinnedSummaryRows } from "@adapttable/element-plus/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/element-plus/pivot";
+import { print } from "@adapttable/element-plus/print";
 import { resizableColumns } from "@adapttable/element-plus/resizable-columns";
 import { rowActions } from "@adapttable/element-plus/row-actions";
 import { rowPinning } from "@adapttable/element-plus/row-pinning";
 import { rowReorder } from "@adapttable/element-plus/row-reorder";
-import { savedViews } from "@adapttable/element-plus/saved-views";
+import {
+  savedViews,
+  SavedViewsPanel,
+} from "@adapttable/element-plus/saved-views";
+import { selectionStats } from "@adapttable/element-plus/selection-stats";
 import { statusBar } from "@adapttable/element-plus/status-bar";
 import { tree } from "@adapttable/element-plus/tree";
 import { virtualize } from "@adapttable/element-plus/virtualize";
@@ -146,6 +156,7 @@ export const kit: ShowcaseKit = {
     ),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,
@@ -157,12 +168,19 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

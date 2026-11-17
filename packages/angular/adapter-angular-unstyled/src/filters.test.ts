@@ -10,6 +10,8 @@ import {
 } from "@adapttable/angular";
 import {
   defaultFilterRegistry,
+  defaultLabels,
+  type FilterOverlaySlotProps,
   type FilterWidgetRenderProps,
 } from "@adapttable/angular/adapter";
 import { filters, filterTypes } from "@adapttable/angular-unstyled/filters";
@@ -28,10 +30,15 @@ import {
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 
+import { filtersTests } from "../../angular/test/kit/suites/filters";
+import { kit } from "../testing/kit";
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
+import { AdaptFilterDrawer } from "./components/filterPanel";
 import { AdaptFilterPopover } from "./components/filterPopover";
 import { AdaptDataTable } from "./dataTable";
 import type { FiltersMode } from "./tableFilters";
+
+for (const test of filtersTests(kit)) it(test.name, test.run);
 
 interface Person {
   id: string;
@@ -222,14 +229,6 @@ describe("the unstyled Angular filters", () => {
     expect(part("filters-title")?.textContent).toContain("(1)");
   });
 
-  it("changes a text filter's operator", async () => {
-    const { part, ids, field, type, openFilters } = await mount();
-    await openFilters();
-    await type(part("filter-input", field("Name")), "a");
-    await type(part("filter-operator", field("Name")), "startsWith");
-    expect(ids()).toEqual(["1"]);
-  });
-
   it("filters by a select, a yes/no and a group of checkboxes", async () => {
     const { part, parts, ids, field, type, openFilters, settle } =
       await mount();
@@ -355,7 +354,11 @@ describe("the unstyled Angular filters", () => {
     await openFilters();
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     await settle();
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve(null)));
+    });
     expect(part("filters-panel")).toBeNull();
+    expect(document.activeElement).toBe(button);
   });
 
   it("puts a funnel on each filterable header", async () => {
@@ -447,14 +450,6 @@ describe("the unstyled Angular filters", () => {
     expect(part("filters-panel")).not.toBeNull();
   });
 
-  it("offers header funnels without the Filters button", async () => {
-    const { part, parts } = await mount([filters(), headerFilters()]);
-    expect(part("filters-button")).not.toBeNull();
-    const headerOnly = await mount([headerFilters()]);
-    expect(headerOnly.part("filters-button")).toBeNull();
-    expect(parts("filter-header-trigger")).toHaveLength(0);
-  });
-
   it("filters by a checklist of every value, with counts and search", async () => {
     const { part, parts, ids, settle, openFilters } = await mount([
       filters<Person>([{ key: "city", type: "checklist" }]),
@@ -482,13 +477,6 @@ describe("the unstyled Angular filters", () => {
     clear!.click();
     await settle();
     expect(ids()).toHaveLength(3);
-  });
-
-  it("says nothing matched when a filter leaves no rows", async () => {
-    const { part, field, type, openFilters } = await mount();
-    await openFilters();
-    await type(part("filter-input", field("Name")), "nobody");
-    expect(part("empty")?.textContent).toContain("No results");
   });
 });
 
@@ -723,37 +711,6 @@ describe("registered Angular form renderers", () => {
     expect(field().value).toBe("Amman");
     expect(ids()).toEqual(["2"]);
   });
-
-  it.each([
-    { value: "Custom caption", text: "Custom caption" },
-    { value: 7, text: "7" },
-    { value: undefined, text: null },
-    { value: 0, text: null },
-    { value: {}, text: null },
-  ])(
-    "renders text or uses the kit widget for $value",
-    async ({ value, text }) => {
-      const { part, openFilters } = await mount([
-        filters(CUSTOM_DEFS),
-        filterTypes([
-          customSpec(value === undefined ? undefined : () => value),
-        ]),
-      ]);
-      await openFilters();
-      if (text) {
-        expect(part("filters-form")?.textContent).toContain(text);
-        expect(part("filter-input")).toBeNull();
-      } else {
-        expect(part("filter-input")).not.toBeNull();
-        expect(part("filter-input")?.classList.contains("ant-input")).toBe(
-          false
-        );
-        expect(part("filters-form")?.textContent).not.toContain(
-          "[object Object]"
-        );
-      }
-    }
-  );
 });
 
 describe("filter card viewport space", () => {
@@ -787,5 +744,96 @@ describe("filter card viewport space", () => {
     } finally {
       measurement.mockRestore();
     }
+  });
+});
+
+@Component({
+  imports: [AdaptFilterDrawer],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div data-adapttable-part="root">
+      <adapt-filter-drawer [props]="overlay()" />
+    </div>
+    <ng-template #filters />
+  `,
+})
+class DrawerFocusHost {
+  readonly open = signal(false);
+  readonly count = signal(0);
+  private readonly filters =
+    viewChild.required<TemplateRef<unknown>>("filters");
+  readonly overlay = computed(
+    (): FilterOverlaySlotProps<TemplateRef<unknown>> => ({
+      open: this.open(),
+      onClose: () => this.open.set(false),
+      onClearFilters: () => undefined,
+      activeFilterCount: this.count(),
+      filters: this.filters(),
+      labels: defaultLabels,
+      dir: "ltr",
+    })
+  );
+}
+
+async function mountDrawer() {
+  const fixture = TestBed.createComponent(DrawerFocusHost);
+  fixture.autoDetectChanges();
+  document.body.append(fixture.nativeElement as HTMLElement);
+  await fixture.whenStable();
+  return fixture;
+}
+
+async function frames() {
+  await new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve(null)));
+  });
+}
+
+describe("drawer focus when the filters button is absent", () => {
+  it("returns focus to the control that was active outside the panel", async () => {
+    const fixture = await mountDrawer();
+    const opener = document.createElement("button");
+    document.body.append(opener);
+    opener.focus();
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+    expect(document.activeElement?.getAttribute("data-adapttable-part")).toBe(
+      "filters-panel"
+    );
+    fixture.componentInstance.open.set(false);
+    await fixture.whenStable();
+    await frames();
+    expect(document.activeElement).toBe(opener);
+  });
+
+  it("leaves focus where it is when that control has left the document", async () => {
+    const fixture = await mountDrawer();
+    const opener = document.createElement("button");
+    document.body.append(opener);
+    opener.focus();
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+    opener.remove();
+    fixture.componentInstance.open.set(false);
+    await fixture.whenStable();
+    await frames();
+    expect(opener.isConnected).toBe(false);
+    expect(document.activeElement).not.toBe(opener);
+  });
+
+  it("does not restore focus from an element that is not an HTML control", async () => {
+    const fixture = await mountDrawer();
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("tabindex", "0");
+    document.body.append(svg);
+    svg.focus();
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+    fixture.componentInstance.count.set(1);
+    await fixture.whenStable();
+    fixture.componentInstance.open.set(false);
+    await fixture.whenStable();
+    await frames();
+    expect(document.activeElement).not.toBe(svg);
   });
 });

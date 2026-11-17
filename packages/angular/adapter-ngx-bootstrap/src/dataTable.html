@@ -96,6 +96,7 @@
             [attr.aria-expanded]="f.mode === 'popover' ? f.open() : null"
             [attr.data-active]="f.open() ? '' : null"
             (pointerdown)="f.pointerDown()"
+            data-adapttable-part="filters-button"
             (click)="f.click()"
           >
             <span
@@ -254,7 +255,7 @@
                   class="btn btn-outline-secondary btn-sm"
                   type="button"
                   data-ngx-bootstrap-part="empty-clear"
-                  (click)="v.table.clearFilters()"
+                  (click)="v.table.clearSearchAndFilters()"
                 >
                   {{ v.table.labels().clearAll }}
                 </button>

@@ -12,11 +12,7 @@ import {
   fromStore,
 } from "@adapttable/angular";
 import type { GroupingPanelExtras } from "@adapttable/angular/features";
-import {
-  declaredAggregates,
-  type TableRuntime,
-  type TableSource,
-} from "@adapttable/core";
+import { declaredAggregates, type TableSource } from "@adapttable/core";
 import { type GroupingPanelSlotProps } from "@adapttable/core/binding";
 import { parseGroupBy } from "@adapttable/core/grouping";
 import {
@@ -97,7 +93,7 @@ export function injectGroupingPanelState<TRow>(
   );
   const extras = feature.extras ?? {};
   const controller = code.controller({
-    runtime: runtime as TableRuntime,
+    runtime: runtime,
     groupAggregates: extras.groupAggregates,
   });
 

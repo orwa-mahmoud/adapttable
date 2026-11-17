@@ -1,9 +1,7 @@
 /** Optional factories adapt shared controllers; the shell projects their models. */
+import { selectionStats as computeSelectionStats } from "@adapttable/core";
 import {
   cellNavigationChannels,
-  selectionStats as computeSelectionStats,
-} from "@adapttable/core";
-import {
   COLUMN_SELECT,
   coreCellNavigation,
   coreColumnSelectionCheckbox,

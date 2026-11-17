@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * German (`de`) label preset.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "erledigt",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "Exportieren",
 };
 
+/**
+ * German (`de`) label preset.
+ *
+ * @public
+ */
 export const de: Required<TableLabels> = {
   table: "Datentabelle",
   search: "Suchen",

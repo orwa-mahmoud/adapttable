@@ -1,27 +1,14 @@
 /** Destructurable readonly projections and stable actions, with no rendered UI. */
 import {
   autoSizeColumns,
-  columnFlexShares,
-  columnPinInsets,
-  computePagination,
-  deriveSortByOptions,
   devWarn,
   type Direction,
-  gridContainerAttributes,
-  gridRowAttributes,
-  nextSort,
   pageSizeOptions,
   paginationSlots,
   PIN_Z,
   pinnedCellStyle,
-  resolveLabels,
-  resolveTableStatus,
-  rowClickProps,
-  SEARCH_DEBOUNCE_MS,
-  tableErrorState,
   type TableLabels,
   type TableSource,
-  type TableStatusSignature,
   visibleColumns,
 } from "@adapttable/core";
 import {
@@ -33,19 +20,37 @@ import {
   chromeIsRefreshing,
   chromeShowFooter,
   clearChromeFilters,
+  clearSearchAndFilters,
+  columnFlexShares,
+  columnPinInsets,
   commitSearchOnBlur,
+  computePagination,
+  deriveSortByOptions,
+  desktopChromeMetrics,
   fetchNextBodyPage,
+  gridContainerAttributes,
+  gridRowAttributes,
   headerCellAttributes,
   headerRowAttributes,
   htmlGroupedHeaderPlan,
+  type MeasuredRailWidths,
+  nextSort,
+  observeRailWidths,
+  resolveTableLabels,
+  resolveTableStatus,
   rowAttributes,
+  rowClickProps,
+  SEARCH_DEBOUNCE_MS,
   searchInputAttributes,
   sortButtonAttributes,
   sourceWindowStart,
   tableAttributes,
+  tableErrorState,
+  type TableStatusSignature,
 } from "@adapttable/core/binding";
 import {
   computed,
+  type ComputedRef,
   type MaybeRefOrGetter,
   onScopeDispose,
   shallowReadonly,
@@ -73,6 +78,7 @@ import { useViewportMobile } from "./source/sourceLifecycle";
 import {
   type MaybeRefOrGetterOptional,
   requireScope,
+  useOptionFields,
   useScopeActivity,
 } from "./store";
 export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
@@ -81,6 +87,8 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
   readonly rowKey: (row: TRow) => string;
   readonly tableLabel?: MaybeRefOrGetterOptional<string>;
   readonly labels?: MaybeRefOrGetterOptional<TableLabels>;
+  /** The strings the composed features draw, merged over the base strings. */
+  readonly featureLabels?: readonly Partial<TableLabels>[];
   readonly dir?: MaybeRefOrGetter<Direction>;
   readonly forceMobile?: MaybeRefOrGetter<boolean>;
   readonly mobileBreakpoint?: MaybeRefOrGetterOptional<number>;
@@ -110,17 +118,19 @@ export function useDataTable<TRow>(
   input: MaybeRefOrGetter<UseDataTableOptions<TRow>>
 ) {
   requireScope("useDataTable");
-  const options = computed(() => toValue(input));
+  // Read option by option: a change to one option reaches its readers only.
+  const options = useOptionFields(() => toValue(input));
   const active = useScopeActivity();
   const source = computed(() => toValue(options.value.source));
   const rows = computed(() => source.value.rows);
   const labels = computed(() => {
     const host = toValue<TableLabels | undefined>(options.value.labels);
     const placeholder = toValue(options.value.searchPlaceholder);
-    return resolveLabels(
+    return resolveTableLabels(
       placeholder === undefined
         ? host
-        : { ...host, searchPlaceholder: placeholder }
+        : { ...host, searchPlaceholder: placeholder },
+      options.value.featureLabels
     );
   });
   const dir = computed(() => toValue(options.value.dir) ?? "ltr");
@@ -335,11 +345,84 @@ export function useDataTable<TRow>(
     const next = nextSort({ key: current.sortBy, dir: current.sortDir }, key);
     current.setSort(next.key, next.dir);
   };
+  // Pinned columns sit past the rails (expand, reorder, selection, actions)
+  // at their rendered widths, read from the header while anything is pinned.
+  const railHead = shallowRef<Element | null>(null);
+  const railWidths = shallowRef<MeasuredRailWidths>({});
+  // Booleans, so a layout rebuilt for another reason redraws no rail.
+  const pinnedSides = {
+    start: computed(() =>
+      Object.values(layout.value.state.pinned).includes("start")
+    ),
+    end: computed(() =>
+      Object.values(layout.value.state.pinned).includes("end")
+    ),
+  };
+  watch(
+    [railHead, () => pinnedSides.start.value || pinnedSides.end.value],
+    ([head, pinned], _previous, onCleanup) => {
+      if (!head || !pinned) {
+        if (Object.keys(railWidths.value).length > 0) railWidths.value = {};
+        return;
+      }
+      onCleanup(
+        observeRailWidths(head, (widths) => {
+          railWidths.value = widths;
+        })
+      );
+    },
+    { flush: "post", immediate: true }
+  );
+  const railMetrics = computed(() => {
+    const measured = railWidths.value;
+    return desktopChromeMetrics({
+      expandable: measured.expansion !== undefined,
+      showReorder: measured.reorder !== undefined,
+      hasSelection: measured.selection !== undefined,
+      showActions: measured.actions !== undefined,
+      measured,
+    });
+  });
+  // Numbers, so a cell or rail redraws only when its own inset moves.
+  const leadStart = computed(() => railMetrics.value.leads.start ?? 0);
+  const leadEnd = computed(() => railMetrics.value.leads.end ?? 0);
+  const railInsets: Readonly<Record<TableRail, ComputedRef<number>>> = {
+    expand: computed(() => railMetrics.value.railInsets.expand),
+    reorder: computed(() => railMetrics.value.railInsets.reorder),
+    selection: computed(() => railMetrics.value.railInsets.selection),
+    actions: computed(() => railMetrics.value.railInsets.actions),
+  };
+  // A kit may draw its rail cell as a component; its root is the cell.
+  const holdRailHead = elementRef<Element>(
+    (cell) => {
+      if (cell) railHead.value = cell.closest("thead") ?? cell.parentElement;
+    },
+    (component) => (component.$el instanceof Element ? component.$el : null)
+  );
   const pinStyle = (key: string, header: boolean) =>
     pinnedCellStyle(
       layout.value.pinOffset(key),
-      header ? PIN_Z.headerPinned : PIN_Z.body
+      header ? PIN_Z.headerPinned : PIN_Z.body,
+      { start: leadStart.value, end: leadEnd.value }
     );
+  /** A header cell's sticky-header style, when the header sticks. */
+  const headerStickyStyle = () =>
+    toValue(options.value.stickyHeader) === true
+      ? {
+          position: "sticky" as const,
+          top: `${toValue(options.value.stickyTop) ?? 0}px`,
+          zIndex: PIN_Z.header,
+        }
+      : undefined;
+  /**
+   * The row's selected state: what `state` says when it is given, without
+   * reading the table's selection; else the table's.
+   */
+  const rowSelected = (
+    row: TRow,
+    state: { readonly selected?: boolean } | undefined
+  ): boolean | undefined =>
+    state ? state.selected : options.value.selection?.isSelected(rowKey(row));
   const readonlySearchValue: Readonly<ShallowRef<string>> =
     shallowReadonly(searchValue);
   const readonlyStatusAnnouncement: Readonly<ShallowRef<string>> =
@@ -413,10 +496,12 @@ export function useDataTable<TRow>(
     setLimit: (limit: number): void => source.value.setLimit(limit),
     clearFilters: (): void =>
       clearChromeFilters(source.value, options.value.onClearFilters),
-    clearSearchAndFilters: (): void => {
-      setSearch("");
-      clearChromeFilters(source.value, options.value.onClearFilters);
-    },
+    clearSearchAndFilters: (): void =>
+      clearSearchAndFilters(
+        source.value,
+        setSearch,
+        options.value.onClearFilters
+      ),
     loadMore,
     autoSizeColumns: (root: HTMLElement | null): void => {
       if (root)
@@ -443,24 +528,41 @@ export function useDataTable<TRow>(
     headerRowAttrs: () => toVueAttrs(headerRowAttributes()),
     headerCellAttrs: (column: ColumnDef<TRow>) => {
       const attrs = headerCellAttributes(column, source.value, sizing.value);
-      const sticky = toValue(options.value.stickyHeader) === true;
-      const stickyStyle = sticky
-        ? {
-            position: "sticky" as const,
-            top: `${toValue(options.value.stickyTop) ?? 0}px`,
-            zIndex: PIN_Z.header,
-          }
-        : undefined;
+      const stickyStyle = headerStickyStyle();
       return toVueAttrs({
         ...attrs,
         "data-pinned": layout.value.pinOffset(column.key)?.side,
-        "data-sticky": sticky ? "" : undefined,
+        "data-sticky": stickyStyle ? "" : undefined,
         style: {
           ...attrs.style,
           ...pinStyle(column.key, true),
           ...stickyStyle,
         },
       });
+    },
+    /**
+     * A rail cell's attributes: sticky past the rails before it while a
+     * column is pinned to its edge. A header rail also reports the header,
+     * so pinned columns can be placed past the rails' rendered widths.
+     */
+    railAttrs: (rail: TableRail, header: boolean) => {
+      const side = rail === "actions" ? "end" : "start";
+      const pinned = pinnedSides[side].value;
+      const inset = railInsets[rail].value;
+      const stickyStyle = header ? headerStickyStyle() : undefined;
+      const pinStyle = pinnedCellStyle(
+        pinned ? { side, inset } : undefined,
+        header ? PIN_Z.headerPinned : PIN_Z.body
+      );
+      // Only what applies, so an unpinned rail renders exactly as the kit
+      // draws it.
+      const attrs: Record<string, unknown> = {};
+      if (header) attrs.ref = holdRailHead;
+      if (pinned) attrs["data-pinned"] = side;
+      if (stickyStyle) attrs["data-sticky"] = "";
+      if (stickyStyle || pinStyle)
+        attrs.style = { ...stickyStyle, ...pinStyle };
+      return attrs;
     },
     sortButtonAttrs: (column: ColumnDef<TRow>) =>
       toVueAttrs(
@@ -472,14 +574,14 @@ export function useDataTable<TRow>(
           toggleSortLevel: (key) => source.value.toggleSortLevel(key),
         })
       ),
-    rowAttrs: (row: TRow, index: number) => {
+    rowAttrs: (
+      row: TRow,
+      index: number,
+      state?: { readonly selected?: boolean }
+    ) => {
       const click = rowClickProps(row, options.value.onRowClick, index);
       return toVueAttrs({
-        ...rowAttributes(
-          rowKey(row),
-          index,
-          options.value.selection?.isSelected(rowKey(row))
-        ),
+        ...rowAttributes(rowKey(row), index, rowSelected(row, state)),
         ...gridRowAttributes(
           { enabled: false, windowed: windowed.value },
           windowStart.value + index
@@ -500,7 +602,11 @@ export function useDataTable<TRow>(
         style: { ...attrs.style, ...pinStyle(column.key, false) },
       });
     },
-    cardAttrs: (row: TRow, index: number) => {
+    cardAttrs: (
+      row: TRow,
+      index: number,
+      state?: { readonly selected?: boolean }
+    ) => {
       const size = cardSetSize(source.value, windowStart.value);
       const click = rowClickProps(row, options.value.onRowClick, index);
       return toVueAttrs({
@@ -509,9 +615,7 @@ export function useDataTable<TRow>(
         "data-adapttable-part": "card",
         "data-row-id": rowKey(row),
         "data-index": index,
-        "data-selected": options.value.selection?.isSelected(rowKey(row))
-          ? ""
-          : undefined,
+        "data-selected": rowSelected(row, state) ? "" : undefined,
         "data-stagger": "",
         "aria-posinset":
           size > rows.value.length ? windowStart.value + index + 1 : undefined,
@@ -537,3 +641,10 @@ export function useDataTable<TRow>(
   }
 }
 export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
+
+/**
+ * A rail the table draws beside the data columns.
+ *
+ * @public
+ */
+export type TableRail = "expand" | "reorder" | "selection" | "actions";

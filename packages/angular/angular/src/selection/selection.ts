@@ -6,18 +6,15 @@
  * shows exactly those ids and reports every change through
  * `onSelectionChange`, leaving the host to decide.
  */
+import { type TableLabels } from "@adapttable/core";
 import {
-  applyGroupLeafSelection,
   createControllableStore,
   headerSelectionOf,
-  resolveLabels,
-  type TableLabels,
+  type HeaderSelectionState,
+  resolveTableLabels,
+  type SelectionState,
   toggleId,
   toggleIds,
-} from "@adapttable/core";
-import type {
-  HeaderSelectionState,
-  SelectionState,
 } from "@adapttable/core/binding";
 import { createAllMatchingScope } from "@adapttable/core/selection";
 import {
@@ -38,6 +35,7 @@ import {
   type MaybeSignalOptional,
   readMaybe,
 } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 /**
  * Options for {@link injectRowSelection}.
@@ -122,6 +120,7 @@ export function injectRowSelection<TRow>(
   const destroyRef = injector.get(DestroyRef);
   const store = createControllableStore<ReadonlySet<string>>(new Set(), {
     observeUncontrolled: true,
+    store: tableStoreOf(injector),
   });
   const own = fromStore(store, { injector });
   const controlled = computed(() => {
@@ -134,7 +133,7 @@ export function injectRowSelection<TRow>(
     headerSelectionOf(visibleIds(), selectedIds())
   );
   const labels = computed(() =>
-    resolveLabels(options.labels && readMaybe(options.labels))
+    resolveTableLabels(options.labels && readMaybe(options.labels))
   );
 
   const scope = createAllMatchingScope();
@@ -193,7 +192,7 @@ export function injectRowSelection<TRow>(
     commit(new Set(ids));
   };
   const toggleGroupLeaves = (ids: readonly string[]): void => {
-    commit(applyGroupLeafSelection(ids, selectedIds()));
+    commit(toggleIds(selectedIds(), ids));
   };
   const selectAllMatching = (): void => {
     if (!destroyRef.destroyed) scope.select(acrossPages());

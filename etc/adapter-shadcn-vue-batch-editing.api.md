@@ -16,15 +16,11 @@ import { TableFeature } from '@adapttable/vue';
 import { VNode } from 'vue';
 
 // @public (undocumented)
-export function BatchEditBar<TRow>(props: BatchEditBarProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const BatchEditBar: (<TRow>(props: BatchEditBarProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace BatchEditBar {
-    var // (undocumented)
+}>) & {
     props: ("labels" | "className" | "buttonClassName" | "batch" | "contested")[];
-}
+};
 
 // @public (undocumented)
 export function batchEditing<TRow>(onBatchEdit: NonNullable<TableEditingOptions<TRow>["onBatchEdit"]>, extras?: EditingLifecycleExtras<TRow>): TableFeature<TRow>;

@@ -28,6 +28,7 @@ import {
 import { exportCsv } from "@adapttable/angular-cdk/export";
 import { extraRows } from "@adapttable/angular-cdk/extra-rows";
 import { filters } from "@adapttable/angular-cdk/filters";
+import { findInTable } from "@adapttable/angular-cdk/find-in-table";
 import { fullscreen } from "@adapttable/angular-cdk/fullscreen";
 import { groupingPanel } from "@adapttable/angular-cdk/grouping-panel";
 import { headerFilters } from "@adapttable/angular-cdk/header-filters";
@@ -47,6 +48,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/angular-cdk/saved-views";
+import { selectionStats } from "@adapttable/angular-cdk/selection-stats";
 import { sidePanel } from "@adapttable/angular-cdk/side-panel";
 import { statusBar } from "@adapttable/angular-cdk/status-bar";
 import { tree } from "@adapttable/angular-cdk/tree";
@@ -100,6 +102,8 @@ export const kit = {
   contextMenu,
   commandPalette,
   extraRows,
+  findInTable,
+  selectionStats,
   rowAppearance,
   statusBar,
   sidePanel,

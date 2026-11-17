@@ -1,9 +1,11 @@
 /** The same neutral collapsed-group codec that URL links and Saved Views use. */
-import { groupCollapseSlice } from "@adapttable/core";
+
+import { groupCollapseSlice } from "@adapttable/core/binding";
 import { computed, type MaybeRefOrGetter, type ShallowRef, toValue } from "vue";
 
 import type { MaybeRefOrGetterOptional } from "../store";
 import { type UrlSliceOptions, useUrlSlice } from "./useUrlSlice";
+
 export interface UseGroupCollapseUrlStateOptions extends UrlSliceOptions {
   readonly defaultCollapsedGroupIds?: MaybeRefOrGetterOptional<
     readonly string[]

@@ -1,6 +1,6 @@
 /** Core owns every assistant glyph; Angular only draws its descriptor. */
 import type { TableAssistantNode } from "@adapttable/angular";
-import type { IconDescriptor } from "@adapttable/core/binding";
+import { type IconDescriptor } from "@adapttable/core/binding";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,

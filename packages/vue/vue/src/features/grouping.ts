@@ -135,6 +135,7 @@ export function grouping<TRow>(
   return withFrontendRowModel(
     {
       id: base.id,
+      labels: base.labels,
       apply: (input) => ({
         ...base.apply?.(input),
         groupBy,

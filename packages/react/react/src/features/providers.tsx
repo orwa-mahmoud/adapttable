@@ -32,6 +32,8 @@ import {
   type FeatureRender as NeutralFeatureRender,
   type FeatureSlotKey,
   orderedContributions,
+  type PlainSlotKey,
+  type RowSlotKey,
   type SlotFill,
   slotFillsOf,
   slotRender as neutralSlotRender,
@@ -143,7 +145,7 @@ export function usePublishTableRuntime<TRow>(
     cell.current = {
       rows,
       labels,
-      view: view as TableRuntimeView,
+      view: view,
       featureIds: cell.current.featureIds,
     };
   }
@@ -186,12 +188,28 @@ export type FeatureRender<TProps> = NeutralFeatureRender<TProps, ReactNode>;
  *
  * @public
  */
-/* @__NO_SIDE_EFFECTS__ */
 export function slotRender<TProps>(
-  slot: FeatureSlotKey<TProps>,
+  slot: PlainSlotKey<TProps>,
   render: (props: TProps) => ReactNode,
+  options?: { readonly orderAs?: string }
+): FeatureRender<TProps>;
+/**
+ * Fill a slot whose props carry the row type: the fill is one function
+ * generic over the row.
+ *
+ * @public
+ */
+export function slotRender<TDraw extends (props: never) => ReactNode>(
+  slot: RowSlotKey<TDraw>,
+  render: NoInfer<TDraw>,
+  options?: { readonly orderAs?: string }
+): FeatureRender<never>;
+/* @__NO_SIDE_EFFECTS__ */
+export function slotRender(
+  slot: FeatureSlotKey<never>,
+  render: (props: never) => ReactNode,
   options: { readonly orderAs?: string } = {}
-): FeatureRender<TProps> {
+): FeatureRender<never> {
   return neutralSlotRender(slot, render, options);
 }
 
@@ -244,17 +262,30 @@ const FeatureRenderContext = createContext<RenderMap>(new Map());
  *
  * @public
  */
-export function FeatureSlot<TProps>({
+export function FeatureSlot<TProps>(props: {
+  readonly slot: PlainSlotKey<TProps>;
+  readonly props: TProps;
+}): ReactNode;
+/**
+ * Draw every fill of a row-typed slot with this table's props.
+ *
+ * @public
+ */
+export function FeatureSlot<TProps>(props: {
+  readonly slot: RowSlotKey<(props: NoInfer<TProps>) => ReactNode>;
+  readonly props: TProps;
+}): ReactNode;
+export function FeatureSlot({
   slot,
   props,
 }: {
-  readonly slot: FeatureSlotKey<TProps>;
-  readonly props: TProps;
+  readonly slot: FeatureSlotKey<never>;
+  readonly props: unknown;
 }): ReactNode {
   const filled = useContext(FeatureRenderContext).get(slot.id);
   if (!filled) return null;
   return drawnSlotFills(slot, filled).map(({ id, render }) => (
-    <Fragment key={id}>{(render as (p: TProps) => ReactNode)(props)}</Fragment>
+    <Fragment key={id}>{(render as (p: unknown) => ReactNode)(props)}</Fragment>
   ));
 }
 

@@ -2,7 +2,8 @@
  * One message as the transcript draws it: a voice clip's placeholder while
  * its words are still on the way, and the words once they land.
  */
-import { defaultLabels, type TableLabels } from "@adapttable/core";
+import { type TableLabels } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core/binding";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

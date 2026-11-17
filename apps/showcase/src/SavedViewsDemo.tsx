@@ -5,12 +5,7 @@ import { getLabels } from "@adapttable/i18n";
 import { savedViews as mantineSavedViews } from "@adapttable/mantine/saved-views";
 import { savedViews as muiSavedViews } from "@adapttable/mui/saved-views";
 import { savedViews as radixSavedViews } from "@adapttable/radix/saved-views";
-import {
-  createMemoryAdapter,
-  type SavedView,
-  useSavedViews,
-  type UseSavedViewsOptions,
-} from "@adapttable/react";
+import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
 import type { TableFeature } from "@adapttable/react/features";
 import { savedViews as shadcnSavedViews } from "@adapttable/shadcn/saved-views";
 import { savedViews as unstyledSavedViews } from "@adapttable/unstyled/saved-views";
@@ -26,41 +21,14 @@ import {
   kitTable,
 } from "./kitProviders";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
-
-/**
- * A view this reader did not create, to show what a shared one looks like.
- * Its controls are disabled and it says why — the case a demo usually skips
- * and the one that matters most.
- */
-const SHARED: SavedView = {
-  name: "Team: platform",
-  search: "sv.q=Platform",
-  visibility: "team",
-  readOnly: true,
-  version: 2,
-};
-
-/** Views saved by an older table, so the migration path is on screen too. */
-const SEED = JSON.stringify([
-  SHARED,
-  { name: "Legacy view", search: "sv.q=a" },
-]);
-
-/** In-memory storage seeded for the demo, so a visitor sees a populated list. */
-function useDemoStorage() {
-  return useMemo(() => {
-    const store = new Map<string, string>([["showcase-views", SEED]]);
-    return {
-      getItem: (key: string) => store.get(key) ?? null,
-      setItem: (key: string, value: string) => {
-        store.set(key, value);
-      },
-      removeItem: (key: string) => {
-        store.delete(key);
-      },
-    };
-  }, []);
-}
+import {
+  createSeededViewStorage,
+  createViewSession,
+  reportingMigration,
+  SAVED_VIEWS_STORAGE_KEY,
+  SAVED_VIEWS_URL_KEY,
+  upgradedFooter,
+} from "./shared/savedViewsScenario";
 
 /**
  * `kit`'s saved-views feature, by kit key.
@@ -100,37 +68,38 @@ function kitSavedViewsFeature(
  * page is what a view is worth, not the rest of the table.
  */
 export function SavedViewsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
-  const storage = useDemoStorage();
+  const storage = useMemo(() => createSeededViewStorage(), []);
   const [migrated, setMigrated] = useState<string[]>([]);
-  // The list and the table both apply a view by writing params into a store.
-  // The address bar used to be that store. This one is the same pipe for this
-  // visit only — refresh starts clean, the URL never changes.
-  const session = useMemo(() => createMemoryAdapter(), []);
+  // The list and the table both apply a view by writing params into a store
+  // kept for this visit only: refresh starts clean, the URL never changes.
+  const session = useMemo(() => createViewSession(), []);
+  // One line per view, however many times the load runs: under StrictMode it
+  // runs twice, and a note naming the same view twice reads as two views.
+  const migrate = useMemo(
+    () =>
+      reportingMigration((upgraded) => {
+        setMigrated((seen) =>
+          seen.includes(upgraded) ? seen : [...seen, upgraded]
+        );
+      }),
+    []
+  );
   const views = useSavedViews({
-    storageKey: "showcase-views",
+    storageKey: SAVED_VIEWS_STORAGE_KEY,
     storage,
-    urlKey: "sv",
+    urlKey: SAVED_VIEWS_URL_KEY,
     urlAdapter: session,
-    migrate: (view, from) => {
-      // One line per view, however many times the load runs — under
-      // StrictMode it runs twice, and a note that names the same view twice
-      // reads as two upgraded views. The guard compares what is stored, not
-      // the bare name it is built from.
-      const upgraded = `${view.name} (v${from})`;
-      setMigrated((seen) =>
-        seen.includes(upgraded) ? seen : [...seen, upgraded]
-      );
-      return view;
-    },
+    migrate,
   });
   const SavedViewsPanel = kitSavedViewsPanel(adapter);
   const Table = kitTable<Person>(adapter);
   const savedViewsOptions = {
-    storageKey: "showcase-views",
+    storageKey: SAVED_VIEWS_STORAGE_KEY,
     storage,
     urlAdapter: session,
-    urlKey: "sv",
+    urlKey: SAVED_VIEWS_URL_KEY,
   };
+  const footer = upgradedFooter(migrated);
   // The panel and the table take the same map: this page mounts both directly,
   // so the Tailwind tab's look has to come from here.
   const classNames = kitClassNames(adapter);
@@ -158,11 +127,9 @@ export function SavedViewsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 labels={getLabels(initialDemoLocale())}
                 classNames={classNames}
                 footer={
-                  migrated.length > 0 ? (
-                    <span data-testid="migrated">
-                      Upgraded on load: {migrated.join(", ")}
-                    </span>
-                  ) : undefined
+                  footer === undefined ? undefined : (
+                    <span data-testid="migrated">{footer}</span>
+                  )
                 }
               />
             </Suspense>
@@ -174,7 +141,7 @@ export function SavedViewsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 data={rosterFor("saved-views")}
                 columns={BASE_COLUMNS}
                 rowKey={(row) => row.id}
-                urlKey="sv"
+                urlKey={SAVED_VIEWS_URL_KEY}
                 urlAdapter={session}
                 defaultColumnLayout={layoutFor("saved-views")}
                 // The feature owns both the views menu and its runtime state.

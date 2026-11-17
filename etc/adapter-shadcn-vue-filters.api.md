@@ -24,15 +24,11 @@ import { TableFeature } from '@adapttable/vue';
 import { VNode } from 'vue';
 
 // @public
-export function BasicFilterField<TRow>(props: BasicFilterFieldProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const BasicFilterField: (<TRow>(props: BasicFilterFieldProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace BasicFilterField {
-    var // (undocumented)
+}>) & {
     props: (keyof BasicFilterFieldProps<unknown>)[];
-}
+};
 
 // @public (undocumented)
 export interface BasicFilterFieldProps<TRow> extends FilterFieldOptions<TRow> {
@@ -45,15 +41,11 @@ export interface BasicFilterFieldProps<TRow> extends FilterFieldOptions<TRow> {
 }
 
 // @public
-export function ChecklistFilter<TRow>(props: ChecklistFilterProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const ChecklistFilter: (<TRow>(props: ChecklistFilterProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace ChecklistFilter {
-    var // (undocumented)
+}>) & {
     props: string[];
-}
+};
 
 export { ChecklistFilterProps }
 
@@ -69,28 +61,20 @@ export interface FilterChipsProps extends ActiveFilterChipsSlotProps {
 export { FilterDef }
 
 // @public
-export function FilterField<TRow>(props: BasicFilterFieldProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const FilterField: (<TRow>(props: BasicFilterFieldProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace FilterField {
-    var // (undocumented)
+}>) & {
     props: (keyof BasicFilterFieldProps<unknown>)[];
-}
+};
 
 export { FilterOption }
 
 // @public (undocumented)
-export function FilterPanel<TRow>(props: FilterPanelProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const FilterPanel: (<TRow>(props: FilterPanelProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace FilterPanel {
-    var // (undocumented)
+}>) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface FilterPanelProps<TRow> {
@@ -107,15 +91,11 @@ export function filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: Filte
 export type FiltersOptions = NonNullable<Parameters<typeof filters_2>[1]>;
 
 // @public (undocumented)
-export function FilterTree<TRow>(props: FilterTreeBuilderProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const FilterTree: (<TRow>(props: FilterTreeBuilderProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace FilterTree {
-    var // (undocumented)
+}>) & {
     props: (keyof FilterTreeBuilderProps<unknown>)[];
-}
+};
 
 export { FilterTreeBuilderProps }
 

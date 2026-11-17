@@ -1,15 +1,17 @@
 /** Scope-owned find state. Core owns query, URL debounce and match walking. */
 import {
-  clampMatchIndex,
   type ColumnMetadata,
-  createFindController,
-  createFindShortcutScope,
   findMatches,
   matchKeySet,
-  scrollCurrentMatchIntoView,
   type UrlStateAdapter,
 } from "@adapttable/core";
-import type { FindInTableState } from "@adapttable/core/binding";
+import {
+  clampMatchIndex,
+  createFindController,
+  createFindShortcutScope,
+  type FindInTableState,
+  scrollCurrentMatchIntoView,
+} from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,
@@ -24,6 +26,7 @@ import {
   useExternalStore,
   useScopeActivity,
 } from "../store";
+
 export interface FindInTableOptions<TRow> {
   readonly enabled?: boolean;
   readonly rows: readonly TRow[];

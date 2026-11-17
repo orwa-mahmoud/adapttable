@@ -9,6 +9,7 @@
  */
 export {
   type BatchEditEntry,
+  type BatchEditHandler,
   type BatchEditingState,
   batchEditingView,
   type BatchEditSnapshot,
@@ -61,6 +62,7 @@ export {
   type EditableCellController,
   editableCellController,
   type EditableCellMode,
+  type EditActivation,
   type EditConflictLabels,
   type EditingBundle,
   type EditValidationState,
@@ -110,6 +112,7 @@ export {
   createEditHistory,
   type EditHistoryController,
   type EditHistoryControllerOptions,
+  type EditHistoryInput,
   type EditHistoryState,
   editHistoryView,
   recordingCellEdit,
@@ -160,11 +163,13 @@ export {
   type BatchEditBarModel,
   batchEditBarModel,
   batchEditErrorId,
+  batchEditorControl,
   type CellConflictAsk,
   cellConflictAsk,
   controllerConflictAsk,
   customEditorConflict,
   defaultPendingRows,
+  type EditableCellEditorCtrl,
   editableCellErrorId,
   type EditableCellPresentation,
   editableCellPresentation,
@@ -172,6 +177,7 @@ export {
   type EditingArmingProps,
   type EditorAriaState,
   editorBusyProps,
+  type EditorDraftControl,
   editorKeyRestoresFocus,
   editorSelectOptions,
   editorValidationProps,
@@ -189,6 +195,7 @@ export {
   rowEditControls,
   type RowEditControlsOptions,
   rowEditErrorId,
+  rowEditorControl,
   rowEditSaveBlocked,
   type RowEditTrigger,
   stopEditKeys,
@@ -197,6 +204,7 @@ export {
   createRowEditStore,
   parseColumnDraft,
   type RowEditDrafts,
+  type RowEditHandler,
   type RowEditingState,
   rowEditingView,
   rowEditSignature,
@@ -246,6 +254,7 @@ export type {
   ColumnModelFilter,
   ExtraFilters,
   FilterValue,
+  RowCallback,
   SortableValue,
   SortDirection,
 } from "./columnModel";
@@ -316,10 +325,12 @@ export type {
 } from "./grouping/groupAggregateOverrides";
 export type {
   GroupingChipKeyboardProps,
+  GroupingDragEventLike,
   GroupingDragProps,
   GroupingDragSource,
   GroupingDragState,
   GroupingDropProps,
+  GroupingKeyEventLike,
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "./grouping/groupingPanelModel";
@@ -330,6 +341,10 @@ export type {
   GroupPaging,
   GroupSort,
 } from "./grouping/groupRows";
+export type {
+  GroupingPanelSource,
+  GroupingPanelStateInput,
+} from "./layout/tableChromeState";
 export type { IncrementalViewConfig } from "./rows/incremental";
 export type { SortLevel } from "./sort/compare";
 export type {
@@ -346,6 +361,15 @@ export type {
 } from "./source/queryContract";
 export type { QueryGroupRow } from "./source/queryGroups";
 export type { TableSource } from "./source/TableSource";
+export type {
+  SliceCell,
+  SliceKey,
+  SliceRead,
+  StoreReader,
+  StoreWriter,
+  TableAction,
+  TableStore,
+} from "./state/tableStore";
 export type { TableStateMutators } from "./tableStateMutators";
 export type { ResolvedPaginationMode } from "./types";
 export type {

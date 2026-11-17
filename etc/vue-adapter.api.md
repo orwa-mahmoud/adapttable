@@ -18,11 +18,12 @@ import { AgentApprovalProps } from '@adapttable/core/binding';
 import { AggregateName } from '@adapttable/core';
 import { applyCollapsedColumnGroups } from '@adapttable/core/binding';
 import { ApprovalReviewSlots as ApprovalReviewSlots_2 } from '@adapttable/core/binding';
+import { BASE_LABELS } from '@adapttable/core/binding';
 import { BatchEditBarProps as BatchEditBarProps_2 } from '@adapttable/core/binding';
 import { BatchEditStoreOptions } from '@adapttable/core';
 import { bodyCellsHaveRowSpan } from '@adapttable/core/binding';
 import { BulkAction } from '@adapttable/core';
-import { BulkBarModel } from '@adapttable/core';
+import { BulkBarModel } from '@adapttable/core/binding';
 import { CellConflictAsk } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
 import { CellEditHandler } from '@adapttable/core';
@@ -36,7 +37,7 @@ import { ChecklistFilterProps } from '@adapttable/core/binding';
 import { ChecklistFilterState } from '@adapttable/core/binding';
 import { ChecklistSlots } from '@adapttable/core/binding';
 import { ChecklistValue } from '@adapttable/core';
-import { ChecklistWindow } from '@adapttable/core';
+import { ChecklistWindow } from '@adapttable/core/binding';
 import { ChromeBodyRegion } from '@adapttable/core/binding';
 import { ChromeBodySlot } from '@adapttable/core/binding';
 import { ChromeExtraSlot } from '@adapttable/core/binding';
@@ -64,8 +65,8 @@ import { ColumnMenuItem } from '@adapttable/core';
 import { ColumnMenuLabels } from '@adapttable/core';
 import { ColumnMenuSlotProps as ColumnMenuSlotProps_2 } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
-import { ColumnRenameEditorOptions } from '@adapttable/core';
-import { ColumnRenameEditorSnapshot } from '@adapttable/core';
+import { ColumnRenameEditorOptions } from '@adapttable/core/binding';
+import { ColumnRenameEditorSnapshot } from '@adapttable/core/binding';
 import { ColumnResizeHandleOptions } from '@adapttable/core';
 import { ColumnResizeHandleProps } from '@adapttable/core';
 import { ColumnSelectCheckboxChromeProps as ColumnSelectCheckboxChromeProps_2 } from '@adapttable/core/binding';
@@ -89,7 +90,7 @@ import { CSSProperties } from 'vue';
 import { CssProperties } from '@adapttable/core/binding';
 import { CssProperties as CssProperties_2 } from '@adapttable/core';
 import { CustomCellEditorCtrl } from '@adapttable/core';
-import { defaultConfirm } from '@adapttable/core';
+import { defaultConfirm } from '@adapttable/core/binding';
 import { defaultFilterRegistry } from '@adapttable/core';
 import { DefineSetupFnComponent } from 'vue';
 import { Direction } from '@adapttable/core';
@@ -104,6 +105,7 @@ import { EditConflictHandler } from '@adapttable/core';
 import { EditConflictPolicy } from '@adapttable/core';
 import { EditHistoryState } from '@adapttable/core';
 import { EditingBundle } from '@adapttable/core';
+import { EditingBundle as EditingBundle_2 } from '@adapttable/core/editing';
 import { EditLifecycle } from '@adapttable/core';
 import { editorInputType } from '@adapttable/core/editing';
 import { EditValidationStoreOptions } from '@adapttable/core';
@@ -151,6 +153,7 @@ import { FilterHeaderSlots as FilterHeaderSlots_2 } from '@adapttable/core/bindi
 import { filterLabel } from '@adapttable/core';
 import { FilterRuntime } from '@adapttable/core/binding';
 import { FilterRuntime as FilterRuntime_2 } from '@adapttable/core';
+import { FilterStrings } from '@adapttable/core/binding';
 import { FilterTreeBuilderProps } from '@adapttable/core/binding';
 import { FilterTreeButtonProps } from '@adapttable/core/binding';
 import { FilterTreeClassNames } from '@adapttable/core/binding';
@@ -222,6 +225,7 @@ import { PinnedSide } from '@adapttable/core';
 import { PivotAggProps } from '@adapttable/core/binding';
 import { PivotPanelChromeProps as PivotPanelChromeProps_2 } from '@adapttable/core/binding';
 import { PivotPanelSlots as PivotPanelSlots_2 } from '@adapttable/core/binding';
+import { PlainSlotKey } from '@adapttable/core/binding';
 import { PublicProps } from 'vue';
 import { QueryAggregate } from '@adapttable/core';
 import { QueryCondition } from '@adapttable/core';
@@ -255,6 +259,8 @@ import { RowReorderMoveButtonProps } from '@adapttable/core/binding';
 import { rowReorderSignature } from '@adapttable/core/binding';
 import { RowReorderSlot } from '@adapttable/core';
 import { RowReorderSnapshot } from '@adapttable/core';
+import { RowSlotKey } from '@adapttable/core/binding';
+import { rowSlotKey } from '@adapttable/core/binding';
 import { rowSourceIndex } from '@adapttable/core/binding';
 import { rowSpanSignature } from '@adapttable/core/binding';
 import { RowStyle } from '@adapttable/core';
@@ -275,7 +281,7 @@ import { SelectionStatsSlots as SelectionStatsSlots_2 } from '@adapttable/core/b
 import { SetupContext } from 'vue';
 import { ShallowRef } from 'vue';
 import { showAllColumns } from '@adapttable/core/binding';
-import { SidePanelModel } from '@adapttable/core';
+import { SidePanelModel } from '@adapttable/core/binding';
 import { SidePanelSlots as SidePanelSlots_2 } from '@adapttable/core/binding';
 import { SlotFill } from '@adapttable/core/binding';
 import { slotRender } from '@adapttable/core/binding';
@@ -309,6 +315,7 @@ import { TableQueryListener } from '@adapttable/core';
 import { TableRuntime } from '@adapttable/core/binding';
 import { TableRuntimeView } from '@adapttable/core/binding';
 import { TableSource } from '@adapttable/core';
+import { TableStore } from '@adapttable/core/binding';
 import { TableViewStateConfig } from '@adapttable/core';
 import { toggleCollapsedColumnGroup } from '@adapttable/core/binding';
 import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
@@ -412,6 +419,8 @@ export function assertRequiredSlots<TRow>(features: readonly ComposedFeature<TRo
 // @public (undocumented)
 export type Attrs = Readonly<Record<string, unknown>>;
 
+export { BASE_LABELS }
+
 // @public
 export function BatchEditBarChrome<TRow>(props: BatchEditBarProps<TRow> & {
     readonly controls: EditingActionSlots;
@@ -513,7 +522,7 @@ export interface ChecklistChromeModel {
     // (undocumented)
     readonly classNames?: ChecklistClassNames;
     // (undocumented)
-    readonly labels: ReturnType<typeof resolveLabels>;
+    readonly labels: FilterStrings;
     // (undocumented)
     readonly onScroll: () => void;
     // (undocumented)
@@ -591,13 +600,9 @@ export { columnGroupStubStyle }
 export { ColumnGroupToggleButtonProps }
 
 // @public (undocumented)
-export function ColumnGroupToggleChrome(props: ColumnGroupToggleChromeProps): VNode;
-
-// @public (undocumented)
-export namespace ColumnGroupToggleChrome {
-    var // (undocumented)
+export const ColumnGroupToggleChrome: ((props: ColumnGroupToggleChromeProps) => VNode) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface ColumnGroupToggleChromeProps extends ColumnGroupToggleProps {
@@ -639,6 +644,7 @@ export interface ColumnLayoutOptions {
     readonly onColumnLayoutChange?: (next: ColumnLayoutState) => void;
     // (undocumented)
     readonly onColumnRename?: (key: string, name: string) => void;
+    readonly store?: TableStore;
 }
 
 export { columnMenuActions }
@@ -1251,6 +1257,8 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly headerActions?: string;
     // (undocumented)
+    readonly headerCaptionControl?: string;
+    // (undocumented)
     readonly headerCell?: string;
     // (undocumented)
     readonly headerRenameAnnouncer?: string;
@@ -1702,17 +1710,13 @@ export interface DensityControlProps extends ViewControlPresentation {
 }
 
 // @public (undocumented)
-export function DesktopTableChrome<TRow>(props: {
+export const DesktopTableChrome: (<TRow>(props: {
     readonly model: DesktopTableModel<TRow>;
     readonly slots: TableChromeSlots<TRow>;
     readonly classNames?: TableChromeClassNames;
-}): VNodeChild;
-
-// @public (undocumented)
-export namespace DesktopTableChrome {
-    var // (undocumented)
+}) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface DesktopTableModel<TRow> {
@@ -1741,6 +1745,7 @@ export interface DesktopTableModel<TRow> {
     readonly headerRowAttrs: Attrs;
     // (undocumented)
     readonly headers: readonly TableHeaderModel<TRow>[];
+    readonly railAttrs?: (rail: TableRail, header: boolean) => Attrs;
     // (undocumented)
     readonly reorderLabel?: string;
     // (undocumented)
@@ -1868,7 +1873,7 @@ export interface EditingChromeModel<TRow> {
     // (undocumented)
     readonly batch?: BatchEditBarProps_2<TRow>;
     // (undocumented)
-    readonly row?: (row: TRow, rowId: string, actions: readonly RowAction<TRow>[] | undefined) => {
+    readonly row?: (row: TRow, rowId: string, actions: readonly RowAction<TRow>[] | undefined, editing?: EditingBundle<TRow>) => {
         readonly props: RowEditActionsProps_2<TRow>;
         readonly actions: readonly RowAction<TRow>[];
     };
@@ -2354,6 +2359,7 @@ export interface FilterPanelModel<TRow> {
     readonly defs: readonly FilterDef<TRow>[];
     // (undocumented)
     readonly dir: Direction;
+    readonly fields?: boolean;
     // (undocumented)
     readonly labels: Required<TableLabels>;
     // (undocumented)
@@ -2556,7 +2562,7 @@ export function GridFocusAnnouncer(props: {
 }): VNodeChild;
 
 // @public (undocumented)
-export const GROUP_ROW: FeatureSlotKey<GroupRowSlotProps<unknown>>;
+export const GROUP_ROW: RowSlotKey<GroupRowDraw>;
 
 export { groupedHeaderAlign }
 
@@ -2596,13 +2602,9 @@ export type GroupingPanelProps<TRow> = GroupingPanelSlotProps<ColumnDef<TRow>>;
 export type GroupingPanelSlots = GroupingPanelSlots_2<VNodeChild>;
 
 // @public
-export function GroupRowChrome<TRow>(props: GroupRowChromeProps<TRow>): VNodeChild;
-
-// @public (undocumented)
-export namespace GroupRowChrome {
-    var // (undocumented)
+export const GroupRowChrome: (<TRow>(props: GroupRowChromeProps<TRow>) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface GroupRowChromeProps<TRow> {
@@ -2643,6 +2645,9 @@ export interface GroupRowChromeProps<TRow> {
     };
 }
 
+// @public
+export type GroupRowDraw = <TRow>(props: GroupRowSlotProps<TRow>) => VNodeChild;
+
 // @public (undocumented)
 export interface GroupRowModel<TRow> {
     // (undocumented)
@@ -2661,8 +2666,8 @@ export interface GroupRowModel<TRow> {
     readonly trailingColumns: number;
 }
 
-// @public (undocumented)
-export function groupRowSlotKey<TRow>(): FeatureSlotKey<GroupRowSlotProps<TRow>>;
+// @public @deprecated
+export function groupRowSlotKey<_TRow = unknown>(): RowSlotKey<GroupRowDraw>;
 
 // @public
 export type GroupRowSlotProps<TRow> = Parameters<NonNullable<TableChromeSlots<TRow>["GroupRow"]>>[0];
@@ -2776,6 +2781,9 @@ export { isColumnGroupSummaryKey }
 
 export { isExtraEntry }
 
+// @public
+export function keepTableControls<TControls extends object>(build: () => TControls, hostSlots: (controls: TControls) => readonly unknown[]): () => TControls;
+
 export { KitEnvironment }
 
 // @public
@@ -2818,17 +2826,13 @@ export { MenuNavigationKey }
 export function mergeVueAttrs(binding: Attrs, host: Attrs): Record<string, unknown>;
 
 // @public (undocumented)
-export function MobileCardsChrome<TRow>(props: {
+export const MobileCardsChrome: (<TRow>(props: {
     readonly model: MobileCardsModel<TRow>;
     readonly slots: TableChromeSlots<TRow>;
     readonly classNames?: TableChromeClassNames;
-}): VNodeChild;
-
-// @public (undocumented)
-export namespace MobileCardsChrome {
-    var // (undocumented)
+}) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface MobileCardsModel<TRow> {
@@ -2843,13 +2847,9 @@ export interface MobileCardsModel<TRow> {
 }
 
 // @public
-export function MobileSummaryChrome<TRow>(props: TableSummaryChromeProps<TRow>): VNodeChild;
-
-// @public (undocumented)
-export namespace MobileSummaryChrome {
-    var // (undocumented)
+export const MobileSummaryChrome: (<TRow>(props: TableSummaryChromeProps<TRow>) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public
 export function mountForcedColorsStyles(): void;
@@ -2874,6 +2874,9 @@ export function nestedTableDetail<TRow>(options: {
 
 // @public (undocumented)
 export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
+
+// @public
+export const NO_CLASS_NAMES: Readonly<Record<string, undefined>>;
 
 // @public (undocumented)
 export function normalizeFeatures<TRow>(features: readonly ComposedFeature<TRow>[]): readonly ComposedFeature<TRow>[];
@@ -2928,13 +2931,9 @@ export { pinnedRowSticky }
 export { pinnedRowStickyStyle }
 
 // @public (undocumented)
-export function PivotPanelChrome(props: PivotPanelChromeProps): VNodeChild;
-
-// @public (undocumented)
-export namespace PivotPanelChrome {
-    var // (undocumented)
+export const PivotPanelChrome: ((props: PivotPanelChromeProps) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export type PivotPanelChromeProps = Omit<PivotPanelChromeProps_2<VNodeChild>, "slots"> & {
@@ -2971,6 +2970,9 @@ export function provideDataTableClassNames(read: () => DataTableClassNames): voi
 // @public (undocumented)
 export function provideFeatureState(state: FeatureState): void;
 
+// @public
+export function railCellAttrs<TRow>(model: Pick<DesktopTableModel<TRow>, "railAttrs">, rail: TableRail, header: boolean, attrs: Attrs): Record<string, unknown>;
+
 export { readMultiDraft }
 
 // @public (undocumented)
@@ -2983,7 +2985,10 @@ export function renderContent<TContext>(renderer: Renderer<TContext>, context: T
 export type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
 
 // @public (undocumented)
-export function renderFeatureSlot<TProps>(slot: FeatureSlotKey<TProps>, fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>, props: TProps): VNodeChild[];
+export function renderFeatureSlot<TProps>(slot: PlainSlotKey<TProps>, fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>, props: TProps): VNodeChild[];
+
+// @public
+export function renderFeatureSlot<TProps>(slot: RowSlotKey<(props: NoInfer<TProps>) => VNodeChild>, fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>, props: TProps): VNodeChild[];
 
 // @public (undocumented)
 export function renderFooter<TRow, TValue>(context: FooterContext<TRow, TValue>, slot?: RenderFunction<FooterContext<TRow, TValue>>): VNodeChild;
@@ -3212,6 +3217,10 @@ export interface RowSelection {
     // (undocumented)
     toggleGroupLeaves(ids: readonly string[]): void;
 }
+
+export { RowSlotKey }
+
+export { rowSlotKey }
 
 export { rowSourceIndex }
 
@@ -3447,6 +3456,7 @@ export interface StaticTableFeature {
     readonly dependencies?: readonly unknown[];
     // (undocumented)
     readonly id: string;
+    readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: <TRow>(context: FeatureMountContext<TRow>) => void | (() => void);
     // (undocumented)
@@ -3718,6 +3728,8 @@ export interface TableChromeClassNames extends TableSummaryClassNames {
     // (undocumented)
     readonly headerActions?: string;
     // (undocumented)
+    readonly headerCaptionControl?: string;
+    // (undocumented)
     readonly headerRenameAnnouncer?: string;
     // (undocumented)
     readonly headerRenameButton?: string;
@@ -3874,6 +3886,7 @@ export interface TableFeature<TRow> {
     readonly dependencies?: readonly unknown[];
     // (undocumented)
     readonly id: string;
+    readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
     // (undocumented)
@@ -3896,16 +3909,12 @@ export interface TableFeatureState extends FeatureState {
 }
 
 // @public
-export function TableFooterChrome(props: {
+export const TableFooterChrome: ((props: {
     readonly content: () => VNodeChild;
     readonly className?: string;
-}): VNodeChild;
-
-// @public (undocumented)
-export namespace TableFooterChrome {
-    var // (undocumented)
+}) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface TableGrouping<TRow> {
@@ -3954,6 +3963,9 @@ export interface TableHeaderModel<TRow> {
     readonly sortAttrs?: Attrs;
 }
 
+// @public
+export type TableRail = "expand" | "reorder" | "selection" | "actions";
+
 // @public (undocumented)
 export interface TableRowDetail<TRow> {
     // (undocumented)
@@ -3999,6 +4011,16 @@ export interface TableRowModel<TRow> {
 }
 
 // @public
+export function tableRowView<TRow>(row: TableRowModel<TRow>, context: TableRowViewContext, draw: () => VNodeChild): VNode;
+
+// @public
+export interface TableRowViewContext {
+    readonly classNames?: object;
+    readonly controls?: object;
+    readonly model: object;
+}
+
+// @public
 export interface TableSummaryCellModel<TRow> {
     // (undocumented)
     readonly attrs: Attrs;
@@ -4011,18 +4033,14 @@ export interface TableSummaryCellModel<TRow> {
 }
 
 // @public
-export function TableSummaryChrome<TRow>(props: TableSummaryChromeProps<TRow> & {
+export const TableSummaryChrome: (<TRow>(props: TableSummaryChromeProps<TRow> & {
     readonly leading?: readonly string[];
     readonly trailing?: readonly string[];
     readonly startSpacer?: () => VNodeChild;
     readonly endSpacer?: () => VNodeChild;
-}): VNodeChild;
-
-// @public (undocumented)
-export namespace TableSummaryChrome {
-    var // (undocumented)
+}) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface TableSummaryChromeProps<TRow> {
@@ -4127,7 +4145,7 @@ setQuery: (value: string) => void;
 window: ChecklistWindow;
 ref: (value: HTMLElement | null) => void;
 onScroll: () => void;
-labels: Required<TableLabels>;
+labels: Readonly<Pick<Required<TableLabels>, "value" | "columns" | "searchPlaceholder" | "search" | "filterTree" | "sortBy" | "table" | "noData" | "noResults" | "expandRow" | "collapseRow" | "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "filterAll" | "boolAny" | "boolTrue" | "boolFalse" | "applyView" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "loading" | "loadMore" | "filters" | "clearAll" | "removeFilter" | "filtersDone" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "expandColumnGroup" | "collapseColumnGroup" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter">>;
 classNames: ChecklistClassNames | undefined;
 }>;
 
@@ -4229,11 +4247,16 @@ export function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<T
     tableAttrs: () => Record<string, unknown>;
     headerRowAttrs: () => Record<string, unknown>;
     headerCellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
+    railAttrs: (rail: TableRail, header: boolean) => Record<string, unknown>;
     sortButtonAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
-    rowAttrs: (row: TRow, index: number) => Record<string, unknown>;
+    rowAttrs: (row: TRow, index: number, state?: {
+        readonly selected?: boolean;
+    }) => Record<string, unknown>;
     isCellFlashing: (row: TRow, columnKey: string) => boolean;
     cellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
-    cardAttrs: (row: TRow, index: number) => Record<string, unknown>;
+    cardAttrs: (row: TRow, index: number, state?: {
+        readonly selected?: boolean;
+    }) => Record<string, unknown>;
     searchInputAttrs: () => Record<string, unknown>;
     loadMoreAttrs: () => {
         ref: VNodeRef | undefined;
@@ -4260,6 +4283,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly columnWidths?: MaybeRefOrGetterOptional<Readonly<Record<string, number>>>;
     // (undocumented)
     readonly dir?: MaybeRefOrGetter<Direction>;
+    readonly featureLabels?: readonly Partial<TableLabels>[];
     // (undocumented)
     readonly fitColumns?: MaybeRefOrGetter<boolean>;
     // (undocumented)
@@ -4294,7 +4318,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
 // @public (undocumented)
 export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
 
-// @public (undocumented)
+// @public
 export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShellOptions<TRow>>): {
     table: {
         source: ComputedRef<TableSource<TRow>>;
@@ -4343,11 +4367,16 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
         tableAttrs: () => Record<string, unknown>;
         headerRowAttrs: () => Record<string, unknown>;
         headerCellAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
+        railAttrs: (rail: TableRail, header: boolean) => Record<string, unknown>;
         sortButtonAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
-        rowAttrs: (row: TRow, index: number) => Record<string, unknown>;
+        rowAttrs: (row: TRow, index: number, state?: {
+            readonly selected?: boolean;
+        } | undefined) => Record<string, unknown>;
         isCellFlashing: (row: TRow, columnKey: string) => boolean;
         cellAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
-        cardAttrs: (row: TRow, index: number) => Record<string, unknown>;
+        cardAttrs: (row: TRow, index: number, state?: {
+            readonly selected?: boolean;
+        } | undefined) => Record<string, unknown>;
         searchInputAttrs: () => Record<string, unknown>;
         loadMoreAttrs: () => {
             ref: VNodeRef | undefined;
@@ -4361,70 +4390,71 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     rowInventory: ComputedRef<TableRowInventory<TRow>>;
     source: ComputedRef<TableSource<TRow>>;
     selection: ComputedRef<RowSelection | undefined>;
-    desktop: ComputedRef<    {
-    summary: TableSummaryModel<TRow> | undefined;
-    attrs: Record<string, unknown>;
-    headers: {
-    attrs: Record<string, unknown>;
-    selection: ((className?: string) => VNodeChild[]) | undefined;
-    rename: ((children: VNodeChild, classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[]) | undefined;
-    filter: ((className?: string) => VNodeChild[] | null) | undefined;
-    resizeAttrs: Readonly<Record<string, unknown>> | undefined;
-    key: string;
-    column: ColumnDef<TRow, unknown>;
-    sortAttrs?: Attrs;
-    context: HeaderContext<TRow, unknown>;
-    }[];
-    rows: TableRowModel<TRow>[];
-    bodySlots: ((ChromeVirtualPadSlot & {
-    readonly attrs?: Attrs;
-    }) | (ChromeExtraSlot<VNodeChild, CssProperties_2> & {
-    readonly coveredSlots?: ReadonlySet<number>;
-    } & {
-    readonly attrs?: Attrs;
-    }) | (ChromeGroupSlot<TRow> & {
-    readonly model?: GroupRowModel<TRow> | undefined;
-    } & {
-    readonly attrs?: Attrs;
-    }) | {
-    wiring: TableRowModel<TRow>;
-    kind: "row";
-    key: string;
-    attrs?: Attrs;
-    })[] | undefined;
-    headerRowAttrs: Attrs;
-    headerCheckboxAttrs?: SelectionCheckboxAttrs;
-    columnCount: number;
-    actionsLabel?: string;
-    reorderLabel?: string;
-    expandLabel?: string;
-    columnSpacers?: {
-    readonly start: number;
-    readonly end: number;
-    };
-    groupToggleProps: (cell: HeaderGroupCell) => ColumnGroupToggleProps | undefined;
-    headerPlan: HtmlGroupedHeaderCell[][] | null;
+    desktop: ComputedRef<{
+        summary: TableSummaryModel<TRow> | undefined;
+        attrs: Record<string, unknown>;
+        headers: {
+            attrs: Record<string, unknown>;
+            selection: ((className?: string) => VNodeChild[]) | undefined;
+            rename: ((children: VNodeChild, classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[]) | undefined;
+            filter: ((className?: string) => VNodeChild[] | null) | undefined;
+            resizeAttrs: Readonly<Record<string, unknown>> | undefined;
+            key: string;
+            column: ColumnDef<TRow, unknown>;
+            sortAttrs?: Attrs;
+            context: HeaderContext<TRow, unknown>;
+        }[];
+        rows: TableRowModel<TRow>[];
+        bodySlots: ((ChromeVirtualPadSlot & {
+            readonly attrs?: Attrs;
+        }) | (ChromeExtraSlot<VNodeChild, CssProperties_2> & {
+            readonly coveredSlots?: ReadonlySet<number>;
+        } & {
+            readonly attrs?: Attrs;
+        }) | (ChromeGroupSlot<TRow> & {
+            readonly model?: GroupRowModel<TRow> | undefined;
+        } & {
+            readonly attrs?: Attrs;
+        }) | {
+            wiring: TableRowModel<TRow>;
+            kind: "row";
+            key: string;
+            attrs?: Attrs;
+        })[] | undefined;
+        headerRowAttrs: Attrs;
+        headerCheckboxAttrs?: SelectionCheckboxAttrs;
+        columnCount: number;
+        actionsLabel?: string;
+        reorderLabel?: string;
+        expandLabel?: string;
+        railAttrs?: (rail: TableRail, header: boolean) => Attrs;
+        columnSpacers?: {
+            readonly start: number;
+            readonly end: number;
+        };
+        groupToggleProps: (cell: HeaderGroupCell) => ColumnGroupToggleProps | undefined;
+        headerPlan: HtmlGroupedHeaderCell[][] | null;
     }>;
-    mobile: ComputedRef<    {
-    summary: TableSummaryModel<TRow> | undefined;
-    rows: TableRowModel<TRow>[];
-    bodySlots: ((ChromeVirtualPadSlot & {
-    readonly attrs?: Attrs;
-    }) | (ChromeExtraSlot<VNodeChild, CssProperties_2> & {
-    readonly coveredSlots?: ReadonlySet<number>;
-    } & {
-    readonly attrs?: Attrs;
-    }) | (ChromeGroupSlot<TRow> & {
-    readonly model?: GroupRowModel<TRow> | undefined;
-    } & {
-    readonly attrs?: Attrs;
-    }) | {
-    wiring: TableRowModel<TRow>;
-    kind: "row";
-    key: string;
-    attrs?: Attrs;
-    })[] | undefined;
-    attrs: Attrs;
+    mobile: ComputedRef<{
+        summary: TableSummaryModel<TRow> | undefined;
+        rows: TableRowModel<TRow>[];
+        bodySlots: ((ChromeVirtualPadSlot & {
+            readonly attrs?: Attrs;
+        }) | (ChromeExtraSlot<VNodeChild, CssProperties_2> & {
+            readonly coveredSlots?: ReadonlySet<number>;
+        } & {
+            readonly attrs?: Attrs;
+        }) | (ChromeGroupSlot<TRow> & {
+            readonly model?: GroupRowModel<TRow> | undefined;
+        } & {
+            readonly attrs?: Attrs;
+        }) | {
+            wiring: TableRowModel<TRow>;
+            kind: "row";
+            key: string;
+            attrs?: Attrs;
+        })[] | undefined;
+        attrs: Attrs;
     }>;
     bodyProjection: ComputedRef<TableBodyProjection<TRow>>;
     bodyWindow: Readonly<ShallowRef<BodyWindowModel<TRow> | undefined>>;
@@ -4437,7 +4467,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     grouping: Readonly<ShallowRef<TableGrouping<TRow> | undefined>>;
     tree: Readonly<ShallowRef<TableTree<TRow> | undefined>>;
     detail: Readonly<ShallowRef<TableRowDetail<TRow> | undefined>>;
-    editing: Readonly<ShallowRef<EditingBundle<TRow> | undefined>>;
+    editing: Readonly<ShallowRef<EditingBundle_2<TRow> | undefined>>;
     filterRuntime: ComputedRef<FilterRuntime_2<TRow> | undefined>;
     featureOptions: ComputedRef<Readonly<Record<string, unknown>>>;
     density: ComputedRef<TableDensity>;
@@ -4571,7 +4601,7 @@ export function useFilterHeaderControl<TRow>(input: MaybeRefOrGetter<FilterHeade
 
 // @public (undocumented)
 export function useFilterTreeModel<TRow>(input: MaybeRefOrGetter<FilterTreeBuilderProps<TRow>>): ComputedRef<    {
-labels: Required<TableLabels>;
+labels: Readonly<Pick<Required<TableLabels>, "value" | "columns" | "searchPlaceholder" | "search" | "filterTree" | "sortBy" | "table" | "noData" | "noResults" | "expandRow" | "collapseRow" | "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "filterAll" | "boolAny" | "boolTrue" | "boolFalse" | "applyView" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "loading" | "loadMore" | "filters" | "clearAll" | "removeFilter" | "filtersDone" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "expandColumnGroup" | "collapseColumnGroup" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter">>;
 registry: FilterTypeRegistry;
 expanded: boolean;
 setExpanded: (value: boolean) => void;
@@ -4679,6 +4709,7 @@ export interface UseTableUrlStateOptions {
     readonly defaults?: MaybeRefOrGetter<TableViewStateConfig["defaults"]>;
     // (undocumented)
     readonly numberExtraKeys?: MaybeRefOrGetterOptional<readonly string[]>;
+    readonly store?: TableStore;
     // (undocumented)
     readonly urlAdapter?: MaybeRefOrGetterOptional<UrlStateAdapter>;
     // (undocumented)
@@ -4738,6 +4769,18 @@ export interface VueRowReorderModel<TRow> {
 }
 
 export { withKitEnvironment }
+
+// @public
+export function withProps<TComponent extends object, TProps>(component: TComponent, props: TProps): TComponent & {
+    props: TProps;
+};
+
+// @public (undocumented)
+export function withProps<TComponent extends object, TProps, TOptions extends {
+    readonly inheritAttrs?: boolean;
+}>(component: TComponent, props: TProps, options: TOptions): TComponent & {
+    props: TProps;
+} & TOptions;
 
 // (No @packageDocumentation comment for this package)
 

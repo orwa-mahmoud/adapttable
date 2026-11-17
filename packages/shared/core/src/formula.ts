@@ -58,7 +58,7 @@ export type {
   AggregateOrderedValue,
   Aggregator,
 } from "./aggregate/aggregate";
-export type { ColumnMetadata, SortableValue } from "./columnModel";
+export type { ColumnMetadata, RowCallback, SortableValue } from "./columnModel";
 export type { ColumnModel } from "./columnModel";
 export type {
   ColumnGroupShow,

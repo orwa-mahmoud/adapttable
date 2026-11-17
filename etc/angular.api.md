@@ -10,10 +10,13 @@ import { AgentApprovalOperation } from '@adapttable/core';
 import { AgentApprovalProposal } from '@adapttable/core';
 import { AggregateOptions } from '@adapttable/core';
 import { AggregateSpec } from '@adapttable/core';
+import { applyRowPatches } from '@adapttable/core';
 import { ApprovalReview } from '@adapttable/core';
 import { ApprovalReviewItem } from '@adapttable/core';
 import { asBatchGesture } from '@adapttable/core/editing';
+import { BatchEditHandler } from '@adapttable/core';
 import { BatchEditingState } from '@adapttable/core';
+import { BatchEditStoreOptions } from '@adapttable/core/editing';
 import { BatchRowEdit } from '@adapttable/core';
 import { BooleanFieldWidget } from '@adapttable/core';
 import { buildTreeEntries } from '@adapttable/core';
@@ -21,6 +24,7 @@ import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { BulkActionOutcome } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
+import { CellEditHandler } from '@adapttable/core';
 import { CellEditingState } from '@adapttable/core';
 import { CellNavigationChannelsOptions } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
@@ -32,6 +36,7 @@ import { ColumnGroupDef } from '@adapttable/core';
 import { ColumnGroupRecord } from '@adapttable/core';
 import { ColumnLayoutState } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
+import { ColumnModelFilter } from '@adapttable/core';
 import { Command } from '@adapttable/core';
 import { ConfirmHandler } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
@@ -40,6 +45,7 @@ import { ContextMenuState } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
 import { ContextMenuTriggerHandlers } from '@adapttable/core';
 import { createGroupingPanelController } from '@adapttable/core';
+import { createMemoryAdapter } from '@adapttable/core';
 import { createRowReorderController } from '@adapttable/core';
 import { DEFAULT_SHORTCUTS } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
@@ -136,8 +142,10 @@ import { RelativePreset } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
 import { RowActionsLayout } from '@adapttable/core';
 import { RowActionsRenderContext } from '@adapttable/core';
+import { RowEditHandler } from '@adapttable/core';
 import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
+import { RowEditStoreOptions } from '@adapttable/core/editing';
 import { RowExpansionState } from '@adapttable/core/binding';
 import { RowHeight } from '@adapttable/core';
 import { RowMutationsState } from '@adapttable/core/binding';
@@ -192,6 +200,7 @@ import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
 import { treeExportExpandedIds } from '@adapttable/core';
 import { Type } from '@angular/core';
+import { updateRow } from '@adapttable/core';
 import { UrlSliceSpec } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
@@ -244,9 +253,10 @@ export const ADAPTTABLE_URL_ADAPTER: InjectionToken<UrlStateAdapter>;
 
 // @public
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
-    apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
+    readonly labels?: Partial<TableLabels>;
     mount?(context: FeatureMountContext): void | (() => void);
     readonly renders?: readonly FeatureRender<never, SlotComponent>[];
 }
@@ -264,6 +274,8 @@ export { AggregateOptions }
 
 export { AggregateSpec }
 
+export { applyRowPatches }
+
 export { ApprovalReview }
 
 export { ApprovalReviewItem }
@@ -271,11 +283,10 @@ export { ApprovalReviewItem }
 // @public
 export type Attrs = Readonly<Record<string, unknown>>;
 
-// @public
-export type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => void | Promise<void>;
+export { BatchEditHandler }
 
 // @public
-export interface BatchEditingInjectOptions<TRow> {
+export interface BatchEditingInjectOptions<TRow> extends Pick<BatchEditStoreOptions<TRow>, "validateRow" | "applyEdit" | "formatEditError" | "onEditError" | "onValidationFail"> {
     readonly columns: MaybeSignal<readonly EditableColumnLike<TRow>[]>;
     readonly enabled?: MaybeSignal<boolean>;
     readonly featureHost?: FeatureHostState_2;
@@ -319,8 +330,7 @@ export interface CellContext<TRow> {
     readonly value: unknown;
 }
 
-// @public
-export type CellEditHandler<TRow> = (row: TRow, columnKey: string, value: unknown) => void | Promise<void>;
+export { CellEditHandler }
 
 // @public
 export interface CellEditingOptions<TRow = unknown> {
@@ -365,8 +375,9 @@ export interface ChangedCellFlashOptions {
 export { ChromeBodyRegion }
 
 // @public
-export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
+export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header" | "filter"> {
     cell?: Renderer<CellContext<TRow>>;
+    filter?: ColumnModelFilter;
     footer?: Renderer<FooterContext<TRow>>;
     header?: string;
     headerActions?: string | Renderer<HeaderContext<TRow>>;
@@ -436,6 +447,8 @@ export function createFeatureResources(parent: Injector): FeatureResources;
 // @public
 export function createFeatureState(): FeatureState;
 
+export { createMemoryAdapter }
+
 // @public
 export interface DataTable<TRow> {
     readonly allColumns: Signal<readonly ColumnDef<TRow>[]>;
@@ -448,6 +461,7 @@ export interface DataTable<TRow> {
     readonly cellAttrs: (column: ColumnDef<TRow>) => Attrs;
     readonly cellValue: (column: ColumnDef<TRow>, row: TRow) => unknown;
     readonly clearFilters: () => void;
+    readonly clearSearchAndFilters: () => void;
     readonly columnGroups: Signal<ReadonlyMap<string, ColumnGroupRecord<TRow>>>;
     readonly columns: Signal<readonly ColumnDef<TRow>[]>;
     readonly dir: Signal<Direction>;
@@ -1397,13 +1411,12 @@ export interface RowDetailContext<TRow> {
     readonly row: TRow;
 }
 
-// @public
-export type RowEditHandler<TRow> = (row: TRow, patch: Readonly<Record<string, unknown>>) => void | Promise<void>;
+export { RowEditHandler }
 
 export { RowEditIcons }
 
 // @public
-export interface RowEditingInjectOptions<TRow> {
+export interface RowEditingInjectOptions<TRow> extends Pick<RowEditStoreOptions<TRow>, "validateRow" | "applyEdit" | "formatEditError" | "onEditError" | "onValidationFail"> {
     readonly columns: MaybeSignal<readonly EditableColumnLike<TRow>[]>;
     readonly enabled?: MaybeSignal<boolean>;
     readonly featureHost?: FeatureHostState_2;
@@ -1776,6 +1789,8 @@ export interface TreeImplementation {
     readonly lazyChildren: typeof injectLazyChildren;
     readonly toggle: typeof toggleTreeNode;
 }
+
+export { updateRow }
 
 // @public
 export function urlAdapterFor(options: Pick<TableUrlStateOptions, "urlAdapter" | "urlSync">, injector: Injector): UrlStateAdapter;

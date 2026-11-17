@@ -17,8 +17,13 @@ export interface StandardFeatureOptions<TRow> {
   readonly grouping?: string | readonly string[];
   /** Actions offered by the selection toolbar. */
   readonly bulkActions?: readonly BulkAction[];
-  /** Declarative filter definitions. */
-  readonly filters?: readonly FilterDef<TRow>[];
+  /**
+   * Declarative filter definitions. A definition's `getValue` names the
+   * preset's row type, as no table is there to supply it.
+   */
+  readonly filters?: readonly (FilterDef<TRow> & {
+    readonly getValue?: (row: TRow) => unknown;
+  })[];
   /** Saved-view persistence and naming. */
   readonly savedViews?: UseSavedViewsOptions;
   /**

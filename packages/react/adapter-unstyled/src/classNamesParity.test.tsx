@@ -3,10 +3,9 @@
  * class of its camelCased key, and every key's class shows up in at least
  * one rendered state — the two surfaces can never drift apart again.
  */
-import type { FilterDef } from "@adapttable/core";
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import type * as AdapterModule from "@adapttable/react/adapter";
-import { useDataTableShell } from "@adapttable/react/adapter";
+import { type FilterDef, useDataTableShell } from "@adapttable/react/adapter";
 import { act, fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -829,6 +828,7 @@ const KEYS = [
   "headerGroupRow",
   "headerGroupCell",
   "columnGroupToggle",
+  "headerCaptionControl",
   "sortButton",
   "sortIndex",
   "tbody",

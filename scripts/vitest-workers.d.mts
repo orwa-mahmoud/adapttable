@@ -1,3 +1,5 @@
+export const VITEST_TEST_TIMEOUT: number;
+
 export function vitestMaxWorkers(env?: {
   ci?: boolean;
   turbo?: boolean;

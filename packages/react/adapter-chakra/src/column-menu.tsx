@@ -12,7 +12,7 @@ import { columnMenu as core } from "@adapttable/react/features";
 import { ColumnHeaderRename } from "./components/ColumnHeaderRename";
 import { ColumnMenu } from "./components/ColumnMenu";
 
-function ColumnMenuSlot(props: Readonly<ColumnMenuSlotProps<never>>) {
+function ColumnMenuSlot(props: Readonly<ColumnMenuSlotProps<unknown>>) {
   return <ColumnMenu {...props} />;
 }
 

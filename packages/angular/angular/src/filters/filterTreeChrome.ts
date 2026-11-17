@@ -7,22 +7,24 @@
 import {
   defaultFilterRegistry,
   type FilterDef,
-  filterTreeCombinatorOptions,
-  filterTreeConditionModel,
-  filterTreeEditorActions,
   type FilterTypeRegistry,
   isFilterGroup,
   type QueryCondition,
   type QueryFilterGroup,
-  resolveLabels,
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
-import type {
-  FilterTreeButtonProps,
-  FilterTreeDisclosureProps,
-  FilterTreeInputProps,
-  FilterTreeSelectProps,
+import {
+  FILTER_LABELS,
+  type FilterStrings,
+  type FilterTreeButtonProps,
+  filterTreeCombinatorOptions,
+  filterTreeConditionModel,
+  type FilterTreeDisclosureProps,
+  filterTreeEditorActions,
+  type FilterTreeInputProps,
+  type FilterTreeSelectProps,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
@@ -36,6 +38,8 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
+
+const FILTER_GROUPS = [FILTER_LABELS] as const;
 
 /**
  * The kit's controls for the filter tree. Each is a standalone component
@@ -103,7 +107,7 @@ interface TreeView {
 /** The value controls for one condition's editor. */
 function valueControls(
   editor: NonNullable<ReturnType<typeof filterTreeConditionModel>>["value"],
-  labels: Required<TableLabels>,
+  labels: FilterStrings,
   onChange: (value: unknown) => void
 ): ValueControl[] {
   switch (editor.kind) {
@@ -198,7 +202,7 @@ function valueControls(
 /** Everything a view builder needs. */
 interface BuildContext<TRow> {
   readonly defs: readonly FilterDef<TRow>[];
-  readonly labels: Required<TableLabels>;
+  readonly labels: FilterStrings;
   readonly registry: FilterTypeRegistry;
   readonly actions: ReturnType<typeof filterTreeEditorActions>;
 }
@@ -491,7 +495,9 @@ export class AdaptFilterTreeView<TRow> {
   private readonly content =
     viewChild.required<TemplateRef<unknown>>("content");
   private readonly toggled = signal<boolean | undefined>(undefined);
-  private readonly resolved = computed(() => resolveLabels(this.labels()));
+  private readonly resolved = computed(() =>
+    resolveFeatureLabels(this.labels(), FILTER_GROUPS)
+  );
 
   protected readonly view = computed((): TreeView => {
     const defs = this.defs();

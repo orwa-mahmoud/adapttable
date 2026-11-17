@@ -1,10 +1,12 @@
 /** Vue lifecycle and readonly refs over the neutral conversation controller. */
 import {
-  type AgentContextInputs,
   type AgentSession,
   type AlwaysAllowedState,
+  type AssistantUndoView,
+  assistantUndoView,
   createTableAssistant,
   type TableAssistantInputs,
+  tableAssistantInputs,
   type TableAssistantSnapshot,
   type TableAssistantStore,
 } from "@adapttable/ai";
@@ -79,11 +81,7 @@ export type TableAssistantState = {
     readonly approval: ComputedRef<AgentApprovalPending | null>;
     readonly open: ComputedRef<boolean>;
     readonly setOpen: (open: boolean) => void;
-    readonly undo: ComputedRef<{
-      readonly messageId: string;
-      readonly available: boolean;
-      readonly blockedCode?: string;
-    } | null>;
+    readonly undo: ComputedRef<AssistantUndoView | null>;
   };
 
 /** Construct inside setup or a caller-owned effect scope. @public */
@@ -95,36 +93,23 @@ export function useTableAssistant(
   const alwaysAllow = useFeatureState(AGENT_ALWAYS_ALLOW_STATE);
   const view = useFeatureState(AGENT_VIEW_STATE);
   const progress = useFeatureState(AGENT_PROGRESS_STATE);
-  const inputs = (): TableAssistantInputs => {
-    const current = toValue(options);
-    const allow = current.alwaysAllow ?? alwaysAllow.value;
-    const reader = view.value;
-    const contextInputs =
-      current.contextInputs ??
-      (reader ? () => reader.read() as AgentContextInputs : undefined);
-    return {
-      ...current,
-      approval:
-        current.approval !== undefined
-          ? current.approval
-          : (approval.value ?? null),
-      awaitingApproval:
-        current.awaitingApproval ??
-        Boolean(
-          current.approval !== undefined ? current.approval : approval.value
-        ),
-      progress:
-        current.progress !== undefined
-          ? current.progress
-          : (progress.value ?? null),
-      contextInputs,
-      alwaysAllowed: allow?.capabilities,
-      onRevokeAlwaysAllow: allow?.revoke,
-      onMessagesChange: (messages) =>
-        toValue(options).onMessagesChange?.(messages),
-      onDetach: (handle) => toValue(options).onDetach?.(handle),
-    };
-  };
+  // Callbacks read the options live, so a parent's new handler is the one
+  // the controller calls.
+  const inputs = (): TableAssistantInputs =>
+    tableAssistantInputs(
+      {
+        ...toValue(options),
+        onMessagesChange: (messages) =>
+          toValue(options).onMessagesChange?.(messages),
+        onDetach: (handle) => toValue(options).onDetach?.(handle),
+      },
+      {
+        approval: approval.value,
+        alwaysAllow: alwaysAllow.value,
+        viewState: view.value,
+        progress: progress.value,
+      }
+    );
   const store = createTableAssistant(inputs());
   const snapshot = useExternalStore({
     getSnapshot: store.getState,
@@ -192,16 +177,7 @@ export function useTableAssistant(
       if (current.open === undefined) uncontrolledOpen.value = open;
       current.onOpenChange?.(open);
     },
-    undo: computed(() => {
-      const value = snapshot.value.undo;
-      return value
-        ? {
-            messageId: value.messageId,
-            available: value.available,
-            ...(value.blocked ? { blockedCode: value.blocked.code } : {}),
-          }
-        : null;
-    }),
+    undo: computed(() => assistantUndoView(snapshot.value.undo)),
     setDraft: store.setDraft,
     send: (text) => admitted(() => store.send(text)),
     sendClip: (clip) => admitted(() => store.sendClip(clip)),

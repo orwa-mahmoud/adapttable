@@ -1,58 +1,6 @@
-import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
-import { createTheme, ThemeProvider } from "@mui/material";
-import { act, render } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { it } from "vitest";
 
-import { DataTable } from "./data-table.test-utils";
-import type { ColumnDef } from "./index";
+import { dataTableAnimateTests } from "../../react/test/kit/suites/dataTableAnimate";
+import { kit } from "./data-table.test-utils";
 
-interface Row {
-  id: string;
-  name: string;
-}
-const ROWS: Row[] = [
-  { id: "a", name: "Alice" },
-  { id: "b", name: "Bob" },
-];
-const columns: ColumnDef<Row>[] = [{ key: "name", accessor: (r) => r.name }];
-const theme = createTheme();
-
-function Harness({ animate }: { animate?: boolean }) {
-  const source = useFrontendData<Row>({
-    data: ROWS,
-    urlAdapter: createMemoryAdapter(),
-    columns,
-  });
-  return (
-    <ThemeProvider theme={theme}>
-      <DataTable
-        source={source}
-        columns={columns}
-        rowKey={(r) => r.id}
-        animate={animate}
-      />
-    </ThemeProvider>
-  );
-}
-
-describe("MUI DataTable — animate", () => {
-  afterEach(() => {
-    delete (Element.prototype as { animate?: unknown }).animate;
-  });
-
-  it("tags every row with data-stagger regardless of the animate flag", () => {
-    const { container } = render(<Harness />);
-    expect(container.querySelectorAll("[data-stagger]")).toHaveLength(
-      ROWS.length
-    );
-  });
-
-  it("runs the entrance stagger when animate is on", () => {
-    const animate = vi.fn();
-    (Element.prototype as { animate?: unknown }).animate = animate;
-    act(() => {
-      render(<Harness animate />);
-    });
-    expect(animate).toHaveBeenCalledTimes(ROWS.length);
-  });
-});
+for (const test of dataTableAnimateTests(kit)) it(test.name, test.run);

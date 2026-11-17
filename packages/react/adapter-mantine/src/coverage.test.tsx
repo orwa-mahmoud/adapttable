@@ -6,13 +6,13 @@
  * drawer clear-all button, the toolbar/pagination onChange handlers, the
  * search placeholder branch, and the mount-stagger null-ref guard.
  */
-import type { UseColumnLayoutResult } from "@adapttable/core";
 import {
   type ColumnDef,
   createMemoryAdapter,
   useFrontendData,
   usePrefersReducedMotion,
 } from "@adapttable/react";
+import { type UseColumnLayoutResult } from "@adapttable/react/adapter";
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

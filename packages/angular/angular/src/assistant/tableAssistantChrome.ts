@@ -1,18 +1,17 @@
 /** The assistant's structure, keyboard behavior and announcements; controls belong to the kit. */
 import type { TableAssistantProps } from "@adapttable/angular";
-import {
-  type AgentApprovalPending,
-  approvalReview,
-  resolveLabels,
-} from "@adapttable/core";
+import { type AgentApprovalPending, approvalReview } from "@adapttable/core";
 import {
   type AgentApprovalButtonProps,
+  ASSISTANT_LABELS,
   assistantBadgeTone,
   assistantComposerState,
   assistantLauncherName,
   assistantQuestion,
   assistantRejoinable,
+  type AssistantStrings,
   assistantWithGreeting,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -64,6 +63,8 @@ import type {
   TableAssistantSlots,
 } from "./assistantSlots";
 import { injectConversationScroll } from "./conversationScroll";
+
+const ASSISTANT_GROUPS = [ASSISTANT_LABELS] as const;
 
 export type { TableAssistantProps } from "@adapttable/angular";
 export type { TableAssistantBoundary } from "@adapttable/core/binding";
@@ -171,7 +172,9 @@ export class AdaptTableAssistantChrome {
     computed(() => this.props().assistant.messages.length),
     computed(() => this.conversation()?.nativeElement)
   );
-  protected readonly copy = computed(() => resolveLabels(this.props().labels));
+  protected readonly copy: Signal<AssistantStrings> = computed(() =>
+    resolveFeatureLabels(this.props().labels, ASSISTANT_GROUPS)
+  );
   protected readonly title = computed(() => this.copy().assistantTitle);
   protected readonly resolved = computed(() => {
     const mode = this.props().presentation ?? "panel";
@@ -479,6 +482,9 @@ export class AdaptTableAssistantChrome {
   }
   protected onKeyDown(event: KeyboardEvent): void {
     if (event.key !== "Escape" || event.defaultPrevented) return;
+    // An approval dialog open above the panel owns Escape, even before it
+    // has taken focus from the composer.
+    if (this.modalReview()) return;
     event.preventDefault();
     this.close();
   }

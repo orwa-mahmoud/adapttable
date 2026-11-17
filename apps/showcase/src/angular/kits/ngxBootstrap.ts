@@ -27,6 +27,7 @@ import {
 import { exportCsv } from "@adapttable/ngx-bootstrap/export";
 import { extraRows } from "@adapttable/ngx-bootstrap/extra-rows";
 import { filters } from "@adapttable/ngx-bootstrap/filters";
+import { findInTable } from "@adapttable/ngx-bootstrap/find-in-table";
 import { fullscreen } from "@adapttable/ngx-bootstrap/fullscreen";
 import { groupingPanel } from "@adapttable/ngx-bootstrap/grouping-panel";
 import { headerFilters } from "@adapttable/ngx-bootstrap/header-filters";
@@ -46,6 +47,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/ngx-bootstrap/saved-views";
+import { selectionStats } from "@adapttable/ngx-bootstrap/selection-stats";
 import { sidePanel } from "@adapttable/ngx-bootstrap/side-panel";
 import { statusBar } from "@adapttable/ngx-bootstrap/status-bar";
 import { tree } from "@adapttable/ngx-bootstrap/tree";
@@ -99,6 +101,8 @@ export const kit = {
   contextMenu,
   commandPalette,
   extraRows,
+  findInTable,
+  selectionStats,
   rowAppearance,
   statusBar,
   sidePanel,

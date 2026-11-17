@@ -5,12 +5,14 @@ import {
   AdaptAttrs,
   AdaptIcon,
   expandChevronIcon,
+  type IconDescriptor,
 } from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   input,
+  type Signal,
 } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -125,13 +127,13 @@ export class AdaptPaginationFooter<TRow> {
   readonly view = input.required<TableView<TRow>>();
 
   /** Pagination follows reading order, including live direction changes. */
-  protected readonly previousIcon = computed(() =>
+  protected readonly previousIcon: Signal<IconDescriptor> = computed(() =>
     expandChevronIcon({
       open: false,
       dir: this.view().table.dir() === "rtl" ? "ltr" : "rtl",
     })
   );
-  protected readonly nextIcon = computed(() =>
+  protected readonly nextIcon: Signal<IconDescriptor> = computed(() =>
     expandChevronIcon({ open: false, dir: this.view().table.dir() })
   );
 }

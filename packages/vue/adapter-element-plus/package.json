@@ -34,7 +34,6 @@
     "vue": "^3.5.0"
   },
   "devDependencies": {
-    "@adapttable/core": "workspace:*",
     "element-plus": "2.14.7",
     "vue": "^3.5.43",
     "@adapttable/i18n": "workspace:*"
@@ -451,6 +450,36 @@
       "require": {
         "types": "./dist/export.d.cts",
         "default": "./dist/export.cjs"
+      }
+    },
+    "./export-csv": {
+      "import": {
+        "types": "./dist/export-csv.d.ts",
+        "default": "./dist/export-csv.js"
+      },
+      "require": {
+        "types": "./dist/export-csv.d.cts",
+        "default": "./dist/export-csv.cjs"
+      }
+    },
+    "./export-pdf": {
+      "import": {
+        "types": "./dist/export-pdf.d.ts",
+        "default": "./dist/export-pdf.js"
+      },
+      "require": {
+        "types": "./dist/export-pdf.d.cts",
+        "default": "./dist/export-pdf.cjs"
+      }
+    },
+    "./export-xlsx": {
+      "import": {
+        "types": "./dist/export-xlsx.d.ts",
+        "default": "./dist/export-xlsx.js"
+      },
+      "require": {
+        "types": "./dist/export-xlsx.d.cts",
+        "default": "./dist/export-xlsx.cjs"
       }
     },
     "./pivot": {

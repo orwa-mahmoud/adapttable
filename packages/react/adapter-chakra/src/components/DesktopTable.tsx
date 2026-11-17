@@ -1,450 +1,188 @@
-/** The desktop `<table>`: header, pinned columns, rows and summary. */
-import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
+/** The desktop `<table>`, drawn by the binding with Chakra's table elements. */
 import {
-  cellFlashAttr,
-  cellHighlightStyle,
-  cellSpanMark,
-  columnFlexShares,
-  columnGroupHeaderCaption,
-  columnSizeStyle,
-  ColumnSpacer,
-  createDesktopRow,
-  type DesktopHeaderLeaf,
-  type DesktopRowWiring,
-  DesktopTableChrome,
-  type Direction,
-  EXTRA_OVER_SPAN_ROW_STYLE,
-  EXTRA_OVER_SPAN_STYLE,
-  EXTRA_ROW_PARTS,
+  createDesktopTable,
   groupedHeaderAlign,
   groupedHeaderCellStyle,
-  groupedHeaderLabelStyle,
-  type HtmlGroupedHeaderCell,
-  logicalAlign,
-  mergedCellStyle,
+  type KitDesktopCellProps,
+  type KitDesktopHeaderCellProps,
+  type KitDesktopPaint,
+  type KitDesktopRowProps,
+  type KitSortLabelProps,
   PIN_Z,
-  PINNED_SUMMARY_BOTTOM_PART,
-  PINNED_SUMMARY_TOP_PART,
   pinnedEdgeCellStyle,
-  type PinSide,
-  REORDER_COLUMN_WIDTH,
-  resolveRowEditTrigger,
-  rowEditConflict,
-  type SharedTableRenderProps,
   sortArrow,
-  type TableLabels,
-  useDesktopTableAssembly,
 } from "@adapttable/react/adapter";
-import { Box, chakra, Flex, Table, Text } from "@chakra-ui/react";
-import {
-  type ComponentProps,
-  type CSSProperties,
-  type ReactElement,
-  type ReactNode,
-  useMemo,
+import { Box, chakra, Table, Text } from "@chakra-ui/react";
+import type {
+  ComponentProps,
+  CSSProperties,
+  ReactElement,
+  ReactNode,
 } from "react";
 
-import {
-  OptionalColumnGroupToggle,
-  OptionalColumnHeaderRename,
-  OptionalColumnSelect,
-  OptionalEditableCell,
-  OptionalExpandToggle,
-  OptionalFillHandle,
-  OptionalFilterHeader,
-  OptionalGroupHeaderRow,
-  OptionalRowEditActions,
-  OptionalRowReorderHandle,
-  OptionalTreeCell,
-} from "./featureSlots";
-import { Checkbox } from "./primitives";
+import { Checkbox } from "./kitPrimitives";
 import { RowActionButtons } from "./RowActionButtons";
 
-function ExtraSlotRow({
-  kind,
-  colSpan,
-  render,
-  labels,
-  fillStyle,
-}: Readonly<{
-  kind: "separator" | "fullWidth";
-  colSpan: number;
-  render?: () => ReactNode;
-  labels: TableLabels;
-  fillStyle?: CSSProperties;
-}>) {
-  const parts = EXTRA_ROW_PARTS[kind];
-  return (
-    <Table.Row
-      data-adapttable-part={parts.row}
-      style={EXTRA_OVER_SPAN_ROW_STYLE}
-    >
-      <Table.Cell
-        colSpan={colSpan}
-        data-adapttable-part={parts.cell}
-        role={kind === "separator" ? "separator" : undefined}
-        aria-label={kind === "separator" ? labels.rowSeparator : undefined}
-        style={{ ...EXTRA_OVER_SPAN_STYLE, ...fillStyle }}
-      >
-        {kind === "fullWidth" ? render?.() : null}
-      </Table.Cell>
-    </Table.Row>
-  );
-}
-
-const EXPANSION_WIDTH = 32;
-const SELECTION_WIDTH = 48;
-const ACTIONS_WIDTH = 120;
-const KIT_WIDTHS = {
-  expansion: EXPANSION_WIDTH,
-  selection: SELECTION_WIDTH,
-  actions: ACTIONS_WIDTH,
-} as const;
-
-function When({
-  show,
-  children,
-}: Readonly<{ show: boolean; children: ReactNode }>) {
-  if (!show) return null;
-  return children;
-}
-
 /**
- * Opaque background for sticky/pinned cells — the Chakra v3 body-background
- * token (`--chakra-colors-bg`). The old v2 `chakra-body-bg` token does not
- * exist in v3, so it resolved to transparent and scrolled columns bled through
- * the pinned ones.
+ * Opaque background for sticky and pinned cells: Chakra's body background, so
+ * scrolled columns never show through the pinned ones.
  */
 const PIN_BG = "var(--chakra-colors-bg)";
 
-export interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
-  /** Class hook for the table (desktop) / each card (mobile). */
-  className?: string;
-  /** The kit's size token for the table. */
-  size: "sm" | "md" | "lg";
-  /** The kit's accent, so chrome matches the table. */
-  accentColor?: string;
-  /** Text direction — flips the expand chevron for RTL. */
-  dir?: Direction;
-  /**
-   * The injected actions column is end-pinned (via the Columns menu), so
-   * its cells stick to the inline end even with zero data columns pinned.
-   */
-  actionsPinned?: boolean;
+/**
+ * A heading's caption row: a block of its own, so the column checkbox sits
+ * under it, justified like the column's values.
+ */
+const CAPTION_ROW: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 4,
+  flexWrap: "wrap",
+};
+
+const JUSTIFY = {
+  start: "flex-start",
+  center: "center",
+  end: "flex-end",
+} as const;
+
+/** A header that sticks over the rows, on the body background. */
+function stickyHead(
+  stickyHeader: boolean,
+  top: number
+): CSSProperties | undefined {
+  if (!stickyHeader) return undefined;
+  return { position: "sticky", top, zIndex: PIN_Z.header, background: PIN_BG };
 }
 
-const sortGlyph = sortArrow;
-
-const edgeCellStyle = (side: PinSide, active: boolean, z: number, shift = 0) =>
-  pinnedEdgeCellStyle(side, active, z, PIN_BG, shift);
-
-interface DesktopRowProps<TRow> extends DesktopRowWiring<TRow> {
-  size: "sm" | "md" | "lg";
-  accentColor?: string;
-  dir?: Direction;
-}
-
-function rowExtrasEqual<TRow>(
-  prev: Readonly<DesktopRowProps<TRow>>,
-  next: Readonly<DesktopRowProps<TRow>>
-): boolean {
-  return (
-    prev.size === next.size &&
-    prev.dir === next.dir &&
-    prev.accentColor === next.accentColor
-  );
-}
-
-function DesktopRowBase<TRow>(
-  props: Readonly<DesktopRowProps<TRow>>
-): ReactElement {
-  const {
-    row,
-    index,
-    id,
-    gridFocus,
-    columns,
-    bodyCells,
-    labels,
-    selected,
-    expanded,
-    showActions,
-    showReorder,
-    rowReorder,
-    windowStart,
-    rowCount,
-    reorderPinned,
-    rowActions,
-    rowActionsLayout,
-    cellSpanAppearance,
-    renderRowActions,
-    confirm,
-    columnSpan,
-    columnSpacers,
-    treeEntry,
-    treeColumnKey: treeKey,
-    onToggleTree,
-    hasStartPin,
-    hasEndPin,
-    actionsPinned,
-    rowClass,
-    isCellFlashing,
-    hasPrefetch,
-    editing,
-    rows,
-    getRowId,
-    onPrefetch,
-    onToggleSelect,
-    onToggleExpand,
-    renderDetail,
-    focusIndex,
-    edgeRowPin,
-    measureRef,
-    detailMeasureRef,
-    rowDomProps,
-    bodyPinStyle,
-    bodyPinSide,
-    accentColor,
-    dir,
-    rowPinSide,
-    pinPart,
-  } = props;
-  // A pinned total is the host's figure, not a person: it reads semibold.
-  const summaryRow =
-    pinPart === PINNED_SUMMARY_TOP_PART ||
-    pinPart === PINNED_SUMMARY_BOTTOM_PART;
-  const expandable = expanded !== undefined;
-  // A pinned row sticks, so its leading and trailing cells need the surface
-  // too: the rows scrolling beneath must not show through them.
-  const edgeRowPaint =
-    rowPinSide === undefined
-      ? edgeRowPin
-      : { ...edgeRowPin, background: PIN_BG };
-  const dataPinStyle = (key: string) => {
-    const pin = bodyPinStyle(key);
-    if (!pin) return undefined;
-    return { ...pin, background: pin.background ?? PIN_BG };
+/**
+ * The paint: the body background behind every rail, pinned cell and pinned
+ * row's rail, and Chakra's subtle background on a selected cell.
+ */
+function usePaint(stickyHeader: boolean): KitDesktopPaint {
+  return {
+    rail: (side, pinned, inset, row) => ({
+      ...pinnedEdgeCellStyle(side, pinned, PIN_Z.body, PIN_BG, inset),
+      ...(row.rowPinned ? { background: PIN_BG } : undefined),
+    }),
+    cell: (pin) =>
+      pin ? { ...pin, background: pin.background ?? PIN_BG } : undefined,
+    selectedCell: { background: "var(--chakra-colors-bg-subtle)" },
+    headRail: (side, pinned, inset, pin) => ({
+      ...stickyHead(stickyHeader, pin.headerStickTop),
+      ...pinnedEdgeCellStyle(side, pinned, PIN_Z.headerPinned, PIN_BG, inset),
+    }),
+    leaf: (leaf, pin) => ({
+      ...stickyHead(stickyHeader, pin.headerStickTop),
+      textAlign: leaf.size.textAlign,
+      ...leaf.style,
+      ...leaf.size,
+    }),
+    group: (cell) => ({
+      textAlign: groupedHeaderAlign(cell.cell.align),
+      fontWeight: 600,
+      textTransform: "none",
+      ...groupedHeaderCellStyle(
+        cell,
+        "var(--chakra-colors-border, color-mix(in srgb, currentColor 22%, transparent))"
+      ),
+    }),
+    resizeHandle: (style) => style,
+    captionRow: (align) => ({
+      ...CAPTION_ROW,
+      justifyContent: JUSTIFY[align ?? "start"],
+    }),
   };
-  const rowEdit = resolveRowEditTrigger(
-    rowActions,
-    editing?.rowEditing,
-    row,
-    id
-  );
-  const rowConflict = rowEditConflict(editing, id);
+}
+
+/** A body row: a selected one takes Chakra's alpha tint. */
+export function Row({
+  kind,
+  elementRef,
+  selected,
+  ...rest
+}: Readonly<KitDesktopRowProps>) {
+  "use no memo";
+  if (kind !== "body") return <Table.Row ref={elementRef} {...rest} />;
   return (
-    <>
-      <Table.Row
-        {...rowDomProps}
-        ref={measureRef}
-        className={rowClass}
-        bg={selected ? "blackAlpha.100" : undefined}
-        _dark={{ bg: selected ? "whiteAlpha.200" : undefined }}
-        onMouseEnter={hasPrefetch ? () => onPrefetch(row) : undefined}
-      >
-        {expandable && (
-          <Table.Cell
-            data-adapttable-part="expand-cell"
-            px={1}
-            style={{
-              ...edgeCellStyle("start", hasStartPin, PIN_Z.body),
-              ...edgeRowPaint,
-            }}
-          >
-            <OptionalExpandToggle
-              id={id}
-              expanded={Boolean(expanded)}
-              onToggle={onToggleExpand}
-              dir={dir}
-              expandLabel={labels.expandRow}
-              collapseLabel={labels.collapseRow}
-            />
-          </Table.Cell>
-        )}
-        {showReorder && rowReorder && (
-          <Table.Cell
-            data-adapttable-part="reorder-cell"
-            px={1}
-            style={{
-              ...edgeCellStyle(
-                "start",
-                hasStartPin || reorderPinned,
-                PIN_Z.body,
-                expandable ? EXPANSION_WIDTH : 0
-              ),
-              ...edgeRowPaint,
-            }}
-          >
-            <OptionalRowReorderHandle
-              reorder={rowReorder}
-              labels={labels}
-              rowId={id}
-              localIndex={index}
-              row={row}
-              windowStart={windowStart}
-              rowCount={rowCount}
-            />
-          </Table.Cell>
-        )}
-        {selected !== undefined && (
-          <Table.Cell
-            data-adapttable-part="selection-cell"
-            style={{
-              ...edgeCellStyle(
-                "start",
-                hasStartPin,
-                PIN_Z.body,
-                (expandable ? EXPANSION_WIDTH : 0) +
-                  (showReorder ? REORDER_COLUMN_WIDTH : 0)
-              ),
-              ...edgeRowPaint,
-            }}
-          >
-            <Checkbox
-              aria-label={labels.selectRow}
-              checked={selected}
-              onToggle={() => onToggleSelect(id)}
-            />
-          </Table.Cell>
-        )}
-        {columnSpacers && (
-          <ColumnSpacer width={columnSpacers.start} side="start" />
-        )}
-        {bodyCells.map((cell) => {
-          const { column, columnIndex, colSpan, rowSpan } = cell;
-          const focusProps = gridFocus?.getCellPropsAt(focusIndex, columnIndex);
-          return (
-            <Table.Cell
-              key={column.key}
-              colSpan={colSpan > 1 ? colSpan : undefined}
-              rowSpan={rowSpan > 1 ? rowSpan : undefined}
-              data-column-key={column.key}
-              data-pinned={bodyPinSide(column.key)}
-              data-adapttable-part="cell"
-              data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
-              data-cell-span={cellSpanMark(colSpan, rowSpan)}
-              {...focusProps}
-              textAlign={
-                mergedCellStyle(colSpan, rowSpan, cellSpanAppearance)
-                  ? "center"
-                  : logicalAlign(column.align)
-              }
-              fontWeight={summaryRow ? "semibold" : undefined}
-              style={cellHighlightStyle(
-                focusProps,
-                {
-                  ...dataPinStyle(column.key),
-                  ...mergedCellStyle(colSpan, rowSpan, cellSpanAppearance),
-                },
-                {
-                  background: "var(--chakra-colors-bg-subtle)",
-                }
-              )}
-            >
-              <OptionalTreeCell
-                entry={treeEntry}
-                columnKey={column.key}
-                treeColumnKey={treeKey}
-                labels={labels}
-                onToggle={onToggleTree}
-              >
-                <OptionalEditableCell
-                  editing={editing}
-                  row={row}
-                  column={column as ColumnDef<TRow>}
-                  rowId={id}
-                  rowIndex={focusIndex}
-                  rows={rows}
-                  columns={columns}
-                  rowKey={getRowId}
-                  editLabel={labels.editCell}
-                  undoLabel={labels.undoEdit}
-                />
-              </OptionalTreeCell>
-              <OptionalFillHandle
-                focus={gridFocus}
-                windowIndex={focusIndex}
-                col={columnIndex}
-              />
-            </Table.Cell>
-          );
-        })}
-        {columnSpacers && <ColumnSpacer width={columnSpacers.end} side="end" />}
-        {showActions && (
-          <Table.Cell
-            data-adapttable-part="actions-cell"
-            textAlign="end"
-            style={{
-              ...edgeCellStyle("end", hasEndPin || actionsPinned, PIN_Z.body),
-              ...edgeRowPaint,
-            }}
-          >
-            {editing?.rowEditing && (
-              <OptionalRowEditActions
-                rowEditing={editing.rowEditing}
-                row={row}
-                rowId={id}
-                showBegin={rowEdit.showBegin}
-                icons={editing.rowEditIcons}
-                conflict={rowConflict}
-                labels={labels}
-              />
-            )}
-            {rowEdit.actions.length > 0 && (
-              <RowActionButtons
-                row={row}
-                actions={rowEdit.actions}
-                confirm={confirm}
-                labels={labels}
-                layout={rowActionsLayout}
-                render={renderRowActions}
-                accentColor={accentColor}
-              />
-            )}
-          </Table.Cell>
-        )}
-      </Table.Row>
-      {expandable && expanded && (
-        <Table.Row ref={detailMeasureRef} data-adapttable-part="detail-row">
-          <Table.Cell colSpan={columnSpan} data-adapttable-part="detail-cell">
-            {renderDetail(row)}
-          </Table.Cell>
-        </Table.Row>
-      )}
-    </>
+    <Table.Row
+      ref={elementRef}
+      bg={selected ? "blackAlpha.100" : undefined}
+      _dark={{ bg: selected ? "whiteAlpha.200" : undefined }}
+      {...rest}
+    />
   );
 }
 
-function NormalHeaderCaption<TRow>({
-  leaf,
-  labels,
-}: Readonly<{
-  leaf: DesktopHeaderLeaf<TRow>;
-  labels: Required<TableLabels>;
-}>) {
-  const { column } = leaf;
-  const ariaSort = leaf.headerProps["aria-sort"] as
-    "ascending" | "descending" | "none" | undefined;
-  if (!column.sortable) {
-    return <span title={column.headerTooltip}>{leaf.caption}</span>;
-  }
+/** The parts of the rails that sit tight around their control. */
+const TIGHT_RAILS = new Set([
+  "expand-cell",
+  "reorder-cell",
+  "summary-cell",
+  "expand-header",
+  "reorder-header",
+]);
+
+/** A body or summary cell: tight rails, actions at the end. */
+export function Cell({ kind, ...rest }: Readonly<KitDesktopCellProps>) {
+  "use no memo";
+  if (kind === "lead" && TIGHT_RAILS.has(rest["data-adapttable-part"] ?? ""))
+    return <Table.Cell px={1} {...rest} />;
+  if (kind === "actions" && rest["data-adapttable-part"] === "actions-cell")
+    return <Table.Cell textAlign="end" {...rest} />;
+  return <Table.Cell {...rest} />;
+}
+
+/** A header cell: the tight rails take their reserved width. */
+function HeaderCell({
+  kind,
+  railWidth,
+  ...rest
+}: Readonly<KitDesktopHeaderCellProps>) {
+  "use no memo";
+  if (kind === "lead" && TIGHT_RAILS.has(rest["data-adapttable-part"] ?? ""))
+    return <Table.ColumnHeader width={`${railWidth}px`} px={1} {...rest} />;
+  if (kind === "actions")
+    return <Table.ColumnHeader textAlign="end" {...rest} />;
+  return <Table.ColumnHeader {...rest} />;
+}
+
+function Foot(
+  props: Readonly<{ "data-adapttable-part": string; children: ReactNode }>
+) {
+  "use no memo";
+  return <Table.Footer {...props} />;
+}
+
+const ARIA_SORT = { asc: "ascending", desc: "descending" } as const;
+
+/** The caption as a bare button with an arrow and a level badge. */
+function SortLabel({
+  active,
+  dir,
+  index,
+  title,
+  buttonProps,
+  children,
+}: Readonly<KitSortLabelProps>) {
+  "use no memo";
   return (
     <chakra.button
       type="button"
       cursor="pointer"
-      aria-label={`${labels.sortBy}: ${leaf.columnName}`}
-      onClick={leaf.sortButtonProps.onClick}
-      title={column.headerTooltip}
+      aria-label={buttonProps["aria-label"]}
+      onClick={buttonProps.onClick}
+      title={title}
     >
-      {leaf.caption}
+      {children}
       <Text as="span" aria-hidden>
-        {sortGlyph(ariaSort)}
+        {sortArrow(active && dir ? ARIA_SORT[dir] : "none")}
       </Text>
-      {leaf.sortIndex !== undefined && (
+      {index !== undefined && (
         <Text
           as="span"
           aria-hidden
-          data-sort-index={leaf.sortIndex}
+          data-sort-index={index}
           fontSize="0.7em"
           fontWeight="bold"
           borderRadius="full"
@@ -453,121 +191,10 @@ function NormalHeaderCaption<TRow>({
           bg="blackAlpha.200"
           _dark={{ bg: "whiteAlpha.300" }}
         >
-          {leaf.sortIndex}
+          {index}
         </Text>
       )}
     </chakra.button>
-  );
-}
-
-/**
- * The caption row is a flex box, which ignores the cell's `textAlign`; it is
- * justified the same way so an end-aligned column's heading sits over its
- * values. `flex-end` follows the writing direction, so RTL needs nothing more.
- */
-function headerJustify(
-  align: ColumnDef<unknown>["align"]
-): "flex-start" | "center" | "flex-end" {
-  if (align === "end") return "flex-end";
-  if (align === "center") return "center";
-  return "flex-start";
-}
-
-function LeafHeader<TRow>({
-  leaf,
-  stickyTh,
-  flexShares,
-  columnWidths,
-  filterRegistry,
-  closeHeaderFilterOnSelect,
-  source,
-  labels,
-  resizeHandleStyle,
-  onRenameColumn,
-}: Readonly<{
-  leaf: DesktopHeaderLeaf<TRow>;
-  stickyTh: Record<string, unknown>;
-  flexShares: ReturnType<typeof columnFlexShares>;
-  columnWidths: SharedTableRenderProps<TRow>["columnWidths"];
-  filterRegistry: SharedTableRenderProps<TRow>["filterRegistry"];
-  closeHeaderFilterOnSelect: boolean | undefined;
-  source: SharedTableRenderProps<TRow>["table"]["source"];
-  labels: Required<TableLabels>;
-  resizeHandleStyle: CSSProperties;
-  onRenameColumn?: (key: string, name: string) => void;
-}>): ReactElement {
-  const { column } = leaf;
-  const leafStyle = {
-    ...leaf.style,
-    ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),
-  };
-  return (
-    <Table.ColumnHeader
-      key={column.key}
-      data-adapttable-part="header-cell"
-      // Every header prop core states, in full. Cherry-picking named fields
-      // meant a prop core added reached only the kits that happened to name
-      // it; the kit's own props below still win where they overlap.
-      {...leaf.headerProps}
-      {...leaf.columnHeaderProps}
-      textAlign={logicalAlign(column.align)}
-      width={column.width}
-      rowSpan={leaf.rowSpan > 1 ? leaf.rowSpan : undefined}
-      {...stickyTh}
-      style={leafStyle}
-    >
-      <Flex
-        align="center"
-        gap={1}
-        flexWrap="wrap"
-        justify={headerJustify(column.align)}
-      >
-        {column.renameable === true && onRenameColumn ? (
-          <OptionalColumnHeaderRename
-            columnKey={column.key}
-            name={leaf.columnName}
-            labels={labels}
-            onRenameColumn={onRenameColumn}
-          >
-            <Box as="span" data-adapttable-part="header-caption">
-              <Box as="span" data-adapttable-part="header-caption-control">
-                <NormalHeaderCaption leaf={leaf} labels={labels} />
-              </Box>
-            </Box>
-          </OptionalColumnHeaderRename>
-        ) : (
-          <Box as="span" data-adapttable-part="header-caption">
-            <Box as="span" data-adapttable-part="header-caption-control">
-              <NormalHeaderCaption leaf={leaf} labels={labels} />
-            </Box>
-          </Box>
-        )}
-      </Flex>
-      {leaf.showColumnCheckbox && leaf.onToggleColumn ? (
-        <OptionalColumnSelect
-          label={leaf.columnSelectAriaLabel}
-          checked={leaf.columnCheckboxChecked}
-          onToggle={leaf.onToggleColumn}
-        />
-      ) : null}
-      {column.headerActions ? (
-        <span data-adapttable-part="header-actions">
-          {column.headerActions}
-        </span>
-      ) : null}
-      {leaf.headerDef ? (
-        <OptionalFilterHeader
-          def={leaf.headerDef}
-          source={source}
-          labels={labels}
-          registry={filterRegistry}
-          closeOnSelect={closeHeaderFilterOnSelect}
-        />
-      ) : null}
-      {leaf.resizeHandleProps && (
-        <Box as="span" style={resizeHandleStyle} {...leaf.resizeHandleProps} />
-      )}
-    </Table.ColumnHeader>
   );
 }
 
@@ -600,7 +227,15 @@ function ChakraRowHost(props: ComponentProps<typeof Table.Row>) {
   return <Table.Row {...props} />;
 }
 
-function chakraGridFrame(scrollBox: ReactNode, role: unknown): ReactElement {
+const HOSTS = {
+  ScrollBox: ChakraScrollHost,
+  Table: ChakraTableHost,
+  Head: ChakraHeadHost,
+  Body: ChakraBodyHost,
+  Row: ChakraRowHost,
+};
+
+function gridFrame(scrollBox: ReactNode, role: unknown): ReactElement {
   return (
     <Box
       data-adapttable-part={role === "grid" ? "grid" : undefined}
@@ -612,214 +247,30 @@ function chakraGridFrame(scrollBox: ReactNode, role: unknown): ReactElement {
 }
 
 /** Desktop Chakra table. */
-export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
-  // The compiler's cache around these slots is larger than the slots.
-  "use no memo";
-  const {
-    size,
-    accentColor,
-    dir,
-    className,
-    filterRegistry,
-    closeHeaderFilterOnSelect,
-    columnWidths,
-    fitColumns,
-    stickyHeader = false,
-    maxHeight,
-  } = props;
-  const assembly = useDesktopTableAssembly(props, { widths: KIT_WIDTHS });
-  const Row = useMemo(
-    () =>
-      createDesktopRow<TRow, DesktopRowProps<TRow>>(
-        DesktopRowBase,
-        rowExtrasEqual
-      ),
-    []
-  );
-  const {
-    model,
-    summary,
-    showColumnFooter,
-    header,
-    pin,
-    scroll,
-    tableStyle,
-    tableProps,
-    gridProps,
-    callbacks,
-    resizeHandleStyle,
-  } = assembly;
-  const {
-    columns,
-    selection,
-    labels,
-    showActions,
-    showReorder,
-    leadingCells,
-    columnSpacers,
-  } = model;
-
-  const flexShares = columnFlexShares({
-    columns,
-    fitColumns,
-    widths: columnWidths,
-  });
-  const stickyTh = stickyHeader
-    ? {
-        position: "sticky" as const,
-        top: pin.inScrollBox ? "0px" : `${pin.headerStickTop}px`,
-        zIndex: PIN_Z.header,
-        bg: "bg",
-      }
-    : {};
-  const leafProps = {
-    stickyTh,
-    flexShares,
-    columnWidths,
-    filterRegistry,
-    closeHeaderFilterOnSelect,
-    source: props.table.source,
-    labels,
-    resizeHandleStyle,
-    onRenameColumn: props.onRenameColumn,
-  };
-
-  const renderPlanCell = (cell: HtmlGroupedHeaderCell): ReactElement => {
-    if (cell.kind === "leaf") {
-      return (
-        <LeafHeader
-          key={cell.key}
-          leaf={header.leaf(
-            columns[cell.columnIndex]!,
-            cell.columnIndex,
-            cell.rowSpan
-          )}
-          {...leafProps}
-        />
-      );
-    }
-    return (
-      <Table.ColumnHeader
-        key={cell.key}
-        colSpan={cell.colSpan}
-        rowSpan={cell.rowSpan > 1 ? cell.rowSpan : undefined}
-        textAlign={groupedHeaderAlign(cell.cell.align)}
-        fontWeight="semibold"
-        textTransform="none"
-        data-adapttable-part="header-group-cell"
-        style={groupedHeaderCellStyle(
-          cell,
-          "var(--chakra-colors-border, color-mix(in srgb, currentColor 22%, transparent))"
-        )}
-      >
-        <span style={groupedHeaderLabelStyle()}>
-          {props.onToggleColumnGroup ? (
-            <OptionalColumnGroupToggle
-              cell={cell.cell}
-              labels={labels}
-              onToggle={props.onToggleColumnGroup}
-            />
-          ) : null}
-          {columnGroupHeaderCaption(cell.cell)}
-        </span>
-      </Table.ColumnHeader>
-    );
-  };
-
-  const leadingHeaders = (rowSpan: number): ReactElement => (
-    <>
-      {header.leading.expand && (
-        <Table.ColumnHeader
-          data-adapttable-part="expand-header"
-          {...stickyTh}
-          aria-label={labels.expandRow}
-          width={`${EXPANSION_WIDTH}px`}
-          px={1}
-          rowSpan={rowSpan > 1 ? rowSpan : undefined}
-          style={edgeCellStyle("start", pin.hasStartPin, PIN_Z.headerPinned)}
-        />
-      )}
-      <When show={header.leading.reorder}>
-        <Table.ColumnHeader
-          {...stickyTh}
-          aria-label={labels.reorderRow}
-          data-adapttable-part="reorder-header"
-          width={`${REORDER_COLUMN_WIDTH}px`}
-          px={1}
-          rowSpan={rowSpan > 1 ? rowSpan : undefined}
-          style={edgeCellStyle(
-            "start",
-            pin.hasStartPin || Boolean(props.reorderPinned),
-            PIN_Z.headerPinned,
-            pin.expansionLead
-          )}
-        />
-      </When>
-      {header.leading.selection && selection && (
-        <Table.ColumnHeader
-          data-adapttable-part="selection-header"
-          {...stickyTh}
-          rowSpan={rowSpan > 1 ? rowSpan : undefined}
-          style={edgeCellStyle(
-            "start",
-            pin.hasStartPin,
-            PIN_Z.headerPinned,
-            pin.selectionLead
-          )}
-        >
-          <Checkbox
-            aria-label={labels.selectAll}
-            checked={selection.headerState === "all"}
-            indeterminate={selection.headerState === "some"}
-            onToggle={selection.toggleAll}
-          />
-        </Table.ColumnHeader>
-      )}
-      {header.leading.spacerStart && columnSpacers && (
-        <ColumnSpacer width={columnSpacers.start} side="start" as="th" />
-      )}
-    </>
-  );
-
-  const trailingHeaders = (rowSpan: number): ReactElement => (
-    <>
-      {header.trailing.spacerEnd && columnSpacers && (
-        <ColumnSpacer width={columnSpacers.end} side="end" as="th" />
-      )}
-      {header.trailing.actions && (
-        <Table.ColumnHeader
-          data-adapttable-part="actions-header"
-          textAlign="end"
-          {...stickyTh}
-          rowSpan={rowSpan > 1 ? rowSpan : undefined}
-          style={edgeCellStyle(
-            "end",
-            pin.hasEndPin || pin.stickActions,
-            PIN_Z.headerPinned
-          )}
-        >
-          {labels.actions}
-        </Table.ColumnHeader>
-      )}
-    </>
-  );
-
-  const minWidth =
-    typeof tableStyle?.minWidth === "number" ? tableStyle.minWidth : 0;
-
-  return (
-    <DesktopTableChrome
-      assembly={assembly}
-      hosts={{
-        ScrollBox: ChakraScrollHost,
-        Table: ChakraTableHost,
-        Head: ChakraHeadHost,
-        Body: ChakraBodyHost,
-        Row: ChakraRowHost,
-      }}
-      applyHeaderRowProps={false}
-      frame={(scrollBox) => chakraGridFrame(scrollBox, gridProps?.role)}
-      scrollBoxProps={{
+export const DesktopTable = /* @__PURE__ */ createDesktopTable<{
+  readonly size: "sm" | "md" | "lg";
+  readonly className?: string;
+}>({
+  widths: { expansion: 32, selection: 48, actions: 120 },
+  Row,
+  Cell,
+  HeaderCell,
+  Foot,
+  Checkbox,
+  SortLabel,
+  RowActions: RowActionButtons,
+  usePaint,
+  useChrome: (
+    { size, className, maxHeight },
+    { tableProps, gridProps, tableStyle, pin, scroll }
+  ) => {
+    const minWidth =
+      typeof tableStyle?.minWidth === "number" ? tableStyle.minWidth : 0;
+    return {
+      hosts: HOSTS,
+      applyHeaderRowProps: false,
+      frame: (scrollBox) => gridFrame(scrollBox, gridProps?.role),
+      scrollBoxProps: {
         maxH: maxHeight == null ? undefined : `${maxHeight}px`,
         overflowX:
           maxHeight != null || pin.hasPinned || scroll.overflowing
@@ -827,8 +278,8 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
             : undefined,
         overflowY: maxHeight == null ? undefined : "auto",
         style: undefined,
-      }}
-      tableProps={{
+      },
+      tableProps: {
         size,
         "data-size": size,
         className,
@@ -839,81 +290,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
         style: tableStyle
           ? { tableLayout: tableStyle.tableLayout, width: tableStyle.width }
           : undefined,
-      }}
-      renderLeading={leadingHeaders}
-      renderTrailing={trailingHeaders}
-      renderPlanCell={renderPlanCell}
-      renderLeaf={(leaf, column) => (
-        <LeafHeader key={column.key} leaf={leaf} {...leafProps} />
-      )}
-      renderRow={(slot) => (
-        <Row
-          key={slot.key}
-          {...slot.wiring}
-          size={size}
-          accentColor={accentColor}
-          dir={dir}
-        />
-      )}
-      renderGroup={(slot) => (
-        <OptionalGroupHeaderRow
-          key={slot.key}
-          entry={slot.entry}
-          columns={columns}
-          leadingCells={leadingCells}
-          showActions={showActions}
-          getCellProps={props.table.getCellProps}
-          selection={selection}
-          labels={labels}
-          onToggleCollapse={callbacks.onToggleGroup}
-          onShowMore={props.grouping?.showMore ?? (() => undefined)}
-        />
-      )}
-      renderExtra={(slot) => (
-        <ExtraSlotRow
-          key={slot.key}
-          kind={slot.extraKind}
-          colSpan={slot.colSpan}
-          render={slot.render}
-          labels={labels}
-          fillStyle={slot.fillStyle}
-        />
-      )}
-      renderVirtualPad={(slot) => (
-        <Table.Row key={slot.key} aria-hidden>
-          <Table.Cell
-            colSpan={slot.colSpan}
-            style={{ height: slot.height, padding: 0 }}
-          />
-        </Table.Row>
-      )}
-      renderSummary={() =>
-        showColumnFooter ? (
-          <Table.Footer data-adapttable-part="summary">
-            <Table.Row data-adapttable-part="summary-row">
-              {header.leading.expand && (
-                <Table.Cell data-adapttable-part="summary-cell" px={1} />
-              )}
-              <When show={showReorder}>
-                <Table.Cell data-adapttable-part="summary-cell" px={1} />
-              </When>
-              {selection && <Table.Cell data-adapttable-part="summary-cell" />}
-              {columns.map((column) => (
-                <Table.Cell
-                  data-adapttable-part="summary-cell"
-                  key={column.key}
-                  textAlign={logicalAlign(column.align)}
-                >
-                  {resolveColumnFooter(column, summary?.[column.key])}
-                </Table.Cell>
-              ))}
-              {showActions && (
-                <Table.Cell data-adapttable-part="summary-cell" />
-              )}
-            </Table.Row>
-          </Table.Footer>
-        ) : null
-      }
-    />
-  );
-}
+      },
+    };
+  },
+});

@@ -10,6 +10,7 @@ import {
 import type { DataTableProps } from "@adapttable/vue/adapter";
 import { computed, shallowRef, type VNodeChild, watch } from "vue";
 
+import { revealHiddenOnPin } from "../../shared/peopleTable";
 import { workspaceCopy } from "../workspace/copy";
 import {
   date,
@@ -114,6 +115,8 @@ const columns = computed<readonly ColumnDef<Order>[]>(() => {
       }))
     : values;
 });
+// One defaults object, so a selection change leaves it as it is.
+const defaults = { limit: 5 };
 const tableProps = computed(
   () =>
     ({
@@ -124,7 +127,7 @@ const tableProps = computed(
       dir: locale.value === "ar" ? "rtl" : "ltr",
       tableLabel: text.value.orders,
       searchDebounceMs: 0,
-      defaults: { limit: 5 },
+      defaults,
       selectedIds: selected.value,
       selectable: true,
       forceMobile:
@@ -137,13 +140,7 @@ function changeSelection(ids: string[]): void {
   selected.value = ids;
 }
 function changeColumnLayout(next: ColumnLayoutState): void {
-  const previous = columnState.layout.value;
-  const pinAdded = Object.keys(next.pinned).some(
-    (key) => !(key in previous.pinned)
-  );
-  columnState.onLayoutChange(
-    pinAdded && next.hidden.length ? { ...next, hidden: [] } : next
-  );
+  columnState.onLayoutChange(revealHiddenOnPin(columnState.layout.value, next));
 }
 const presentationControls = computed(() => [
   {

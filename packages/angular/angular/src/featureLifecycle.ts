@@ -81,7 +81,7 @@ function mountFeaturesOnce<TRow>(
     }
   };
   const context: FeatureMountContext = {
-    runtime: options.runtime as unknown as TableRuntime,
+    runtime: options.runtime,
     injector,
     state: options.state,
     flush: <T>(run: () => T): T => {

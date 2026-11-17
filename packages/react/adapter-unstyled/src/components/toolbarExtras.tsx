@@ -1,109 +1,68 @@
 /**
- * The optional toolbar controls, as semantic HTML with class hooks.
- *
- * They render through `TOOLBAR_EXTRAS`, so the button and the feature that
- * makes it work arrive together: a table that never imports `/export` carries
- * neither the handler nor this button. There is no kit to borrow components
- * from here — native elements ARE this kit — so each control keeps its
- * `data-adapttable-part` name and its `classNames` key.
+ * The toolbar controls the features add, built by the binding from native
+ * buttons; each carries its part name and the class of its `classNames` key.
  */
 import {
-  type AdapterCommandPaletteTriggerProps,
-  type AdapterFindButtonProps,
-  ExportAnnouncer,
-  ExportProgressChrome,
+  createCommandPaletteButton,
+  createDensityButton,
+  createExportCsvButton,
+  createFindButton,
+  createFullscreenButton,
+  createPrintButton,
+  createUndoRedoButtons,
   type ExportProgressSurfaceSlotProps,
-  type ToolbarExtrasSlotProps,
+  type KitButtonProps,
 } from "@adapttable/react/adapter";
-import type { ReactNode } from "react";
+import { type CSSProperties, forwardRef, type ReactNode } from "react";
 
-import type { DataTableClassNames } from "../types";
-import { useClassNames } from "./classNamesContext";
+import { useClassNames, useClassOfPart } from "./classNamesContext";
+import { Button } from "./kitPrimitives";
 
-/** The class map the unstyled kit styles its controls through. */
-const classesOf = (props: Readonly<ToolbarExtrasSlotProps>) =>
-  (props.classNames ?? {}) as DataTableClassNames;
+/** A toolbar button: native, with the class of its part. */
+const ToolbarButton = forwardRef<HTMLButtonElement, KitButtonProps>(
+  function ToolbarButton(props, ref) {
+    "use no memo";
+    return (
+      <Button
+        ref={ref}
+        className={useClassOfPart(props["data-adapttable-part"])}
+        {...props}
+      />
+    );
+  }
+);
 
-export function UndoRedoButtons(
-  props: Readonly<ToolbarExtrasSlotProps>
-): ReactNode {
-  const { onUndo, onRedo, canUndo, canRedo, undoLabel, redoLabel } = props;
-  const classNames = classesOf(props);
-  if (!onUndo || !onRedo) return null;
-  return (
-    <>
-      <button
-        type="button"
-        data-adapttable-part="undo-button"
-        className={classNames.undoButton}
-        disabled={canUndo !== true}
-        onClick={onUndo}
-      >
-        {undoLabel}
-      </button>
-      <button
-        type="button"
-        data-adapttable-part="redo-button"
-        className={classNames.redoButton}
-        disabled={canRedo !== true}
-        onClick={onRedo}
-      >
-        {redoLabel}
-      </button>
-    </>
-  );
-}
+const NO_WRAP: CSSProperties = { flexShrink: 0, whiteSpace: "nowrap" };
 
-export function ExportCsvButton(
-  props: Readonly<ToolbarExtrasSlotProps>
-): ReactNode {
-  const {
-    onExportCsv,
-    exportBusy,
-    exportAnnouncement = "",
-    exportProgressState = null,
-    exportLabel,
-    exportDisabled = false,
-    exportDisabledReason = "",
-    labels,
-  } = props;
-  const classNames = classesOf(props);
-  if (!onExportCsv) return null;
-  return (
-    <>
-      <button
-        type="button"
-        data-adapttable-part="export-csv-button"
+/**
+ * The export button: it keeps its caption on one line and, while busy, shows
+ * a spinner element the host styles; `aria-hidden`, because the announcement
+ * is what a screen reader should hear.
+ */
+const ExportButton = forwardRef<HTMLButtonElement, KitButtonProps>(
+  function ExportButton({ busy, children, ...rest }, ref) {
+    "use no memo";
+    const classNames = useClassNames();
+    return (
+      <Button
+        ref={ref}
+        busy={busy}
         className={classNames.exportCsvButton}
-        style={{ flexShrink: 0, whiteSpace: "nowrap" }}
-        onClick={onExportCsv}
-        disabled={exportBusy === true || exportDisabled}
-        aria-busy={exportBusy}
-        title={exportDisabled ? exportDisabledReason : undefined}
+        style={NO_WRAP}
+        {...rest}
       >
-        {/* No kit to borrow a loading button from, so the affordance is an
-            element the host can style — `aria-hidden` because the announcement
-            below is what a screen reader should hear, not a decoration. */}
-        {exportBusy && (
+        {busy === true && (
           <span
             aria-hidden="true"
             data-adapttable-part="export-spinner"
             className={classNames.exportSpinner}
           />
         )}
-        {exportLabel}
-      </button>
-      <ExportProgressChrome
-        progress={exportProgressState}
-        labels={labels}
-        slots={{
-          Surface: ExportProgressSurface,
-        }}
-      />
-      <ExportAnnouncer announcement={exportAnnouncement} />
-    </>
-  );
-}
+        {children}
+      </Button>
+    );
+  }
+);
 
 function ExportProgressSurface({
   status,
@@ -223,98 +182,29 @@ function ExportProgressSurface({
   );
 }
 
-export function PrintButton(
-  props: Readonly<ToolbarExtrasSlotProps>
-): ReactNode {
-  const { onPrint, printLabel } = props;
-  const classNames = classesOf(props);
-  if (!onPrint) return null;
-  return (
-    <button
-      type="button"
-      data-adapttable-part="print-button"
-      className={classNames.printButton}
-      onClick={onPrint}
-    >
-      {printLabel}
-    </button>
-  );
-}
+/** Undo and redo. */
+export const UndoRedoButtons =
+  /* @__PURE__ */ createUndoRedoButtons(ToolbarButton);
 
-export function DensityButton(
-  props: Readonly<ToolbarExtrasSlotProps>
-): ReactNode {
-  const { density, onDensityChange, labels } = props;
-  const classNames = classesOf(props);
-  return (
-    <button
-      type="button"
-      aria-label={labels.density}
-      data-adapttable-part="density-toggle"
-      className={classNames.densityToggle}
-      onClick={() => {
-        onDensityChange(density === "compact" ? "comfortable" : "compact");
-      }}
-    >
-      {density === "compact"
-        ? labels.densityCompact
-        : labels.densityComfortable}
-    </button>
-  );
-}
+/** Export to CSV, with a native surface for a long export's progress. */
+export const ExportCsvButton = /* @__PURE__ */ createExportCsvButton(
+  ExportButton,
+  ExportProgressSurface
+);
 
-export function FullscreenButton(
-  props: Readonly<ToolbarExtrasSlotProps>
-): ReactNode {
-  const { onToggleFullscreen, isFullscreen, labels } = props;
-  const classNames = classesOf(props);
-  if (!onToggleFullscreen) return null;
-  return (
-    <button
-      type="button"
-      aria-label={
-        isFullscreen === true ? labels.exitFullscreen : labels.enterFullscreen
-      }
-      data-adapttable-part="fullscreen-toggle"
-      className={classNames.fullscreenToggle}
-      onClick={onToggleFullscreen}
-    >
-      {isFullscreen === true ? "✕" : "⛶"}
-    </button>
-  );
-}
+/** Print the table. */
+export const PrintButton = /* @__PURE__ */ createPrintButton(ToolbarButton);
 
-export function CommandPaletteButton(
-  props: Readonly<AdapterCommandPaletteTriggerProps>
-): ReactNode {
-  const { labels, onOpenPalette, paletteOpen } = props;
-  const classNames = classesOf(props);
-  return (
-    <button
-      type="button"
-      data-adapttable-part="command-palette-button"
-      className={classNames.commandPaletteButton}
-      aria-haspopup="dialog"
-      aria-expanded={paletteOpen}
-      onClick={onOpenPalette}
-    >
-      {labels.commandPalette}
-    </button>
-  );
-}
+/** Switch between comfortable and compact rows. */
+export const DensityButton = /* @__PURE__ */ createDensityButton(ToolbarButton);
 
-export function FindButton(props: Readonly<AdapterFindButtonProps>): ReactNode {
-  const { labels, onOpenFind, findOpen } = props;
-  const classNames = classesOf(props);
-  return (
-    <button
-      type="button"
-      data-adapttable-part="find-button"
-      className={classNames.findButton}
-      aria-expanded={findOpen}
-      onClick={onOpenFind}
-    >
-      {labels.findInTable}
-    </button>
-  );
-}
+/** Enter or leave fullscreen. */
+export const FullscreenButton =
+  /* @__PURE__ */ createFullscreenButton(ToolbarButton);
+
+/** Open the command palette. */
+export const CommandPaletteButton =
+  /* @__PURE__ */ createCommandPaletteButton(ToolbarButton);
+
+/** Open find in the table. */
+export const FindButton = /* @__PURE__ */ createFindButton(ToolbarButton);

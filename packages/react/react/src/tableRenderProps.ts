@@ -13,7 +13,6 @@
  * @typeParam TRow - The row type.
  */
 import {
-  type AssemblyFns,
   type CellSpanAppearance,
   type ColumnGroupRecord,
   type ConfirmHandler,
@@ -34,6 +33,7 @@ import {
   type VirtualTableRow,
 } from "@adapttable/core";
 import {
+  type AssemblyFns,
   type BodyCell,
   chromeRenderModel,
   SummaryCellsCache,

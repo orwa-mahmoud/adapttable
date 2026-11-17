@@ -15,11 +15,13 @@ import {
   readMaybe,
   type UrlSliceOptions,
 } from "@adapttable/angular";
-import { type FormulaColumnSpec, formulaSlice } from "@adapttable/core";
+import { type FormulaColumnSpec } from "@adapttable/core";
 import { computed, type Signal } from "@angular/core";
 
 export type { FormulaColumnSpec } from "@adapttable/core";
 export { URL_SLICE_WRITE_DEBOUNCE_MS as FORMULA_URL_WRITE_DEBOUNCE_MS } from "@adapttable/core";
+
+import { formulaSlice } from "@adapttable/core/binding";
 
 /**
  * What {@link injectFormulaUrlState} needs.

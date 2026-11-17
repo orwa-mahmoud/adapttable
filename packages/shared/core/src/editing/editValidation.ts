@@ -4,12 +4,13 @@
  * A newer check of the same cell supersedes an older one. A late answer is
  * ignored, so it cannot replace the message or the draft the cell holds now.
  */
+import type { TableStore } from "../state/tableStore";
 import type {
   CellValidator,
   RowValidator,
   ValidationTarget,
 } from "./editContracts";
-import { listenerSet } from "./storePlumbing";
+import { stateCell } from "./storePlumbing";
 
 /* ── Validation ────────────────────────────────────────────────────── */
 
@@ -154,32 +155,35 @@ function shallowApplyEdit<TRow>(
  * @public
  */
 export function createEditValidationStore<TRow>(
-  options: EditValidationStoreOptions<TRow> = {}
+  options: EditValidationStoreOptions<TRow> = {},
+  within: { readonly store?: TableStore } = {}
 ): EditValidationStore<TRow> {
   let current = options;
-  let snapshot: EditValidationSnapshot = {
-    cellErrors: new Map(),
-    rowErrors: new Map(),
-    validating: new Set(),
-  };
+  const state = stateCell<EditValidationSnapshot>(
+    "edit-validation",
+    {
+      cellErrors: new Map(),
+      rowErrors: new Map(),
+      validating: new Set(),
+    },
+    within.store
+  );
   const cellMessages = new Map<string, string>();
   const rowFieldMessages = new Map<string, string>();
   const rowFields = new Map<string, Set<string>>();
   const tokens = new Map<string, symbol>();
-  const { subscribe, notify } = listenerSet();
 
   const setMap = (
     field: "cellErrors" | "rowErrors",
     key: string,
     message: string | undefined
   ): void => {
-    const map = snapshot[field];
+    const map = state.get()[field];
     if (map.get(key) === message) return;
     const next = new Map(map);
     if (message === undefined) next.delete(key);
     else next.set(key, message);
-    snapshot = { ...snapshot, [field]: next };
-    notify();
+    state.set({ ...state.get(), [field]: next });
   };
   const publishCellError = (key: string): void =>
     setMap(
@@ -213,12 +217,11 @@ export function createEditValidationStore<TRow>(
   };
 
   const markValidating = (key: string, busy: boolean): void => {
-    if (snapshot.validating.has(key) === busy) return;
-    const validating = new Set(snapshot.validating);
+    if (state.get().validating.has(key) === busy) return;
+    const validating = new Set(state.get().validating);
     if (busy) validating.add(key);
     else validating.delete(key);
-    snapshot = { ...snapshot, validating };
-    notify();
+    state.set({ ...state.get(), validating });
   };
 
   const settle = (
@@ -249,8 +252,8 @@ export function createEditValidationStore<TRow>(
   };
 
   return {
-    getSnapshot: () => snapshot,
-    subscribe,
+    getSnapshot: state.get,
+    subscribe: state.subscribe,
     configure(next) {
       current = next;
     },
@@ -303,12 +306,11 @@ export function createEditValidationStore<TRow>(
       cellMessages.clear();
       rowFieldMessages.clear();
       rowFields.clear();
-      snapshot = {
+      state.set({
         cellErrors: new Map(),
         rowErrors: new Map(),
         validating: new Set(),
-      };
-      notify();
+      });
     },
     hasRowValidator: () => current.validateRow !== undefined,
   };

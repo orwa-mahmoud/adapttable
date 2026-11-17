@@ -1,19 +1,16 @@
-import {
-  activeFilterChips,
-  FILTER_ENGINE_IMPL,
-  type FilterDef,
-  filterTreeChipLabel,
-  type FilterTypeSpec,
-  isFilterTreeConditionSet,
-  removeFilterTreeNode,
-  walkFilterTreeConditions,
-} from "@adapttable/core";
+import { type FilterDef, type FilterTypeSpec } from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
+  activeFilterChips,
   coreFilters,
   coreFilterTypes,
   featureStateKey,
+  FILTER_ENGINE_IMPL,
+  filterTreeConditionChips,
+  filterTreeSnapshot,
   FilterTriggerToggleState,
+  removeFilterTreeNode,
+  sameFilterTree,
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/binding";
 import type {
@@ -24,10 +21,6 @@ import type {
 import { computed, onScopeDispose, shallowRef, toValue, watch } from "vue";
 
 import type { FilterPanelModel } from "./filters/filterPanelChrome";
-import {
-  filterTreeSnapshot,
-  sameFilterTree,
-} from "./filters/filterTreeSnapshot";
 import { FULLSCREEN_MODEL } from "./viewControls/contracts";
 export const FILTER_VIEW =
   featureStateKey<FilterPanelModel<unknown>>("vue-filter-view");
@@ -106,33 +99,28 @@ function mountFilters<TRow>(context: FeatureMountContext<TRow>): void {
           removeFieldChip(chip.key);
         },
       })),
-      ...(tree && source.setFilterTree
-        ? walkFilterTreeConditions(tree)
-            // A condition still waiting for a value filters nothing.
-            .filter(({ condition }) => isFilterTreeConditionSet(condition))
-            .map(({ condition, path }) => ({
-              key: `ft:${path.join(".")}:${condition.key}:${condition.op}`,
-              label: filterTreeChipLabel(
-                condition,
-                runtime.defs,
-                labels,
-                runtime.registry
-              ),
-              onRemove: () => {
-                const current = context.table.source.value;
-                if (
-                  owns() &&
-                  current.filterTree &&
-                  sameFilterTree(current.filterTree, treeKey)
-                )
-                  current.setFilterTree?.(
-                    removeFilterTreeNode(current.filterTree, path)
-                  );
-              },
-            }))
-        : []),
+      ...filterTreeConditionChips({
+        tree,
+        defs: runtime.defs,
+        labels,
+        registry: runtime.registry,
+        onRemove: source.setFilterTree
+          ? (path) => {
+              const current = context.table.source.value;
+              if (
+                owns() &&
+                current.filterTree &&
+                sameFilterTree(current.filterTree, treeKey)
+              )
+                current.setFilterTree?.(
+                  removeFilterTreeNode(current.filterTree, path)
+                );
+            }
+          : undefined,
+      }),
     ];
     const count = chips.length;
+    const fields = context.options.value.filterFields !== false;
     return {
       open: open.value,
       openPanel: () => {
@@ -147,9 +135,17 @@ function mountFilters<TRow>(context: FeatureMountContext<TRow>): void {
       defs: runtime.defs,
       registry: runtime.registry,
       source,
+      fields,
       tree:
-        context.options.value.filterTreeBuilder === true && source.setFilterTree
-          ? { defs: runtime.defs, source, labels, registry: runtime.registry }
+        (context.options.value.filterTreeBuilder === true || !fields) &&
+        source.setFilterTree
+          ? {
+              defs: runtime.defs,
+              source,
+              labels,
+              registry: runtime.registry,
+              ...(fields ? {} : { defaultExpanded: true }),
+            }
           : undefined,
       anchor: anchor.value,
       container: fullscreen.value?.container,
@@ -184,6 +180,11 @@ export interface FiltersOptions {
   readonly mode?: "popover" | "drawer";
   /** Include the optional advanced AND/OR builder using the adapter's Tree slot. */
   readonly tree?: boolean;
+  /**
+   * Draw the per-field form in the panel. Default on; `false` leaves only
+   * the AND/OR builder there, opened.
+   */
+  readonly fields?: boolean;
 }
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[] = [],
@@ -192,11 +193,13 @@ export function filters<TRow>(
   const base = coreFilters<TRow>(defs);
   return {
     id: base.id,
+    labels: base.labels,
     apply: () => ({
       filters: defs,
       filterEngine: FILTER_ENGINE_IMPL,
       filtersMode: options.mode,
       filterTreeBuilder: options.tree,
+      filterFields: options.fields,
     }),
     mount: mountFilters,
     requiredSlots: [TOOLBAR_EXTRAS, ACTIVE_FILTER_CHIPS],

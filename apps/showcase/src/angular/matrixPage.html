@@ -113,6 +113,8 @@
               }
             </div>
           </div>
+          <!-- Where the AI page's developer inspector lands, below Reference. -->
+          <div id="mx-inspector-slot"></div>
         </div>
       </div>
     }
@@ -232,6 +234,10 @@
     }
   </div>
 </main>
+
+@if (notice(); as current) {
+  <div role="status" [style]="noticeStyle(current)">{{ current.message }}</div>
+}
 
 <footer class="foot">
   <div class="foot__inner shell">

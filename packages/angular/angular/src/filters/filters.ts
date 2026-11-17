@@ -9,26 +9,28 @@
 import {
   type ActiveFilterChip,
   type BooleanFieldWidget,
-  booleanFilterWidget,
   type ColumnMetadata,
   type ExtraFilters,
-  FILTER_ENGINE_IMPL,
   type FilterDef,
   type FilterRuntime,
   type FilterTypeSpec,
-  initialRangeFilterOp,
-  initialTextFilterOp,
   type QueryFilterGroup,
   type RangeFieldWidget,
-  rangeFilterWidget,
   type RangeOp,
   type TableLabels,
   type TableSource,
   type TextFieldWidget,
-  textFilterWidget,
   type TextOp,
 } from "@adapttable/core";
-import type { FeatureHostState } from "@adapttable/core/binding";
+import {
+  booleanFilterWidget,
+  type FeatureHostState,
+  FILTER_ENGINE_IMPL,
+  initialRangeFilterOp,
+  initialTextFilterOp,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/core/binding";
 import {
   computed,
   linkedSignal,

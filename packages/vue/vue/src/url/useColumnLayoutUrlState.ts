@@ -1,11 +1,13 @@
 /** Explicit URL persistence for the host-controlled column layout. */
-import { columnLayoutSlice, type ColumnLayoutState } from "@adapttable/core";
+import { type ColumnLayoutState } from "@adapttable/core";
 import { type MaybeRefOrGetter, toValue } from "vue";
 
 import type { MaybeRefOrGetterOptional } from "../store";
 import { type UrlSliceOptions, useUrlSlice } from "./useUrlSlice";
 
 export { URL_SLICE_WRITE_DEBOUNCE_MS as LAYOUT_URL_WRITE_DEBOUNCE_MS } from "@adapttable/core";
+
+import { columnLayoutSlice } from "@adapttable/core/binding";
 
 /** Reactive destination and default for a table's column layout. @public */
 export interface UseColumnLayoutUrlStateOptions extends UrlSliceOptions {

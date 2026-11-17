@@ -1,14 +1,14 @@
 import {
-  composeContextMenuExtra,
   type ContextMenuItem,
   contextMenuItems,
   type ContextMenuTarget,
-  copyContextMenuSelection,
-  copyContextMenuTargetCell,
-  createContextMenuOpenController,
 } from "@adapttable/core";
 import {
+  composeContextMenuExtra,
+  copyContextMenuSelection,
+  copyContextMenuTargetCell,
   coreContextMenu,
+  createContextMenuOpenController,
   featureStateKey,
   type GridFocusState,
 } from "@adapttable/core/binding";
@@ -186,6 +186,7 @@ export function contextMenu<TRow>(
   const core = coreContextMenu<TRow>(options);
   return {
     id: core.id,
+    labels: core.labels,
     apply: (input) => core.apply?.(input) ?? {},
     setup: (host) => core.setup?.(host),
     mount: useContextMenuMount,

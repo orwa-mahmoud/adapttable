@@ -54,9 +54,19 @@ import {
   personSkills,
   personStatus,
   SKILLS,
-  strings,
   summaryPerson,
 } from "../people";
+import {
+  type DemoNotice,
+  listenForNotices,
+  noticeStyle,
+} from "../shared/demoNotice";
+import {
+  archivePeople,
+  peopleBulkActions,
+  peopleRowActions,
+} from "../shared/peopleActions";
+import { revealHiddenOnPin } from "../shared/peopleTable";
 import {
   applyPersonEdit,
   type DemoOrder,
@@ -253,12 +263,8 @@ export class AdaptShowcaseDemoPage {
   });
   /** A new pin reveals the wide arrangement so its stickiness is visible. */
   setColumnLayout(next: ColumnLayoutState): void {
-    const previous = this.columnState.layout();
-    const pinAdded = Object.keys(next.pinned).some(
-      (key) => !(key in previous.pinned)
-    );
     this.columnState.onLayoutChange(
-      pinAdded && next.hidden.length ? { ...next, hidden: [] } : next
+      revealHiddenOnPin(this.columnState.layout(), next)
     );
   }
   readonly reducedMotion = injectPrefersReducedMotion();
@@ -284,13 +290,6 @@ export class AdaptShowcaseDemoPage {
       minWidth: typeof column.width === "number" ? column.width : undefined,
       ...(this.availableEnabled("cell-flash") && flash ? { cell: flash } : {}),
     }));
-    columns.splice(1, 0, {
-      key: "email",
-      header: strings(this.presentation.locale === "ar" ? "ar" : "en").email,
-      accessor: (row: Person) => row.email,
-      width: 280,
-      minWidth: 280,
-    });
     return [
       ...columns,
       ...(this.availableEnabled("formula")
@@ -364,7 +363,9 @@ export class AdaptShowcaseDemoPage {
     return result;
   });
   readonly rowKey = rowKey;
-  readonly log = signal("Changes are written by this demo's host callbacks.");
+  /** The notice a demo action raised, while it is on screen. */
+  readonly notice = signal<DemoNotice | null>(null);
+  readonly noticeStyle = noticeStyle;
   readonly loading = signal(false);
   readonly failure = signal(option("failure", "off"));
   readonly error = signal<Error | null>(
@@ -507,36 +508,24 @@ export class AdaptShowcaseDemoPage {
       : []),
     ...(this.selectable && this.canWrite
       ? [
-          this.kit.bulkActions([
-            {
-              key: "export",
-              label: "Export",
-              onClick: (ids) => this.log.set(`Export: ${ids.length}`),
-            },
-            {
-              key: "archive",
-              label: "Archive",
-              onClick: (ids) => this.log.set(`Archive: ${ids.length}`),
-            },
-          ]),
+          this.kit.bulkActions(
+            peopleBulkActions(this.dataLocale, {
+              onArchive: (ids) =>
+                this.rows.update((rows) => archivePeople(rows, ids)),
+            })
+          ),
         ]
       : []),
     ...(this.canWrite && !this.availableEnabled("row-mutations")
       ? [
-          this.kit.rowActions<Person>([
-            { key: "edit", label: "Edit", editsRow: true },
-            {
-              key: "delete",
-              label: "Delete",
-              color: "red",
-              onClick: (row) => {
+          this.kit.rowActions<Person>(
+            peopleRowActions(this.dataLocale, {
+              onDelete: (row) =>
                 this.rows.update((rows) =>
                   rows.filter((item) => item.id !== row.id)
-                );
-                this.log.set(`Deleted ${row.name}`);
-              },
-            },
-          ]),
+                ),
+            })
+          ),
         ]
       : []),
     ...(this.availableEnabled("row-pinning") &&
@@ -586,7 +575,6 @@ export class AdaptShowcaseDemoPage {
               this.rows.update((rows) =>
                 rows.filter((item) => item.id !== row.id)
               );
-              this.log.set(`Deleted ${row.name}`);
             },
           }),
         ]
@@ -611,7 +599,6 @@ export class AdaptShowcaseDemoPage {
                 );
               });
               this.highlight.flashRow(row.id);
-              this.log.set(`Moved ${row.name}`);
             },
             {
               movePolicy: "confirm",
@@ -809,7 +796,6 @@ export class AdaptShowcaseDemoPage {
       return next;
     });
     this.highlight.flashRow(row.id);
-    this.log.set(`Saved ${Object.keys(patch).join(", ")} for ${row.name}`);
   }
   private sameReorderScope(item: Person, row: Person): boolean {
     if (this.grouping)
@@ -834,7 +820,6 @@ export class AdaptShowcaseDemoPage {
       return next;
     });
     this.highlight.flashRow(row.id);
-    this.log.set(`Moved ${row.name} to the requested group or parent`);
   }
   private nextId = demoSession.read("nextId", () => 100000);
   add(original?: Person): void {
@@ -845,7 +830,6 @@ export class AdaptShowcaseDemoPage {
     };
     this.rows.update((rows) => [row, ...rows]);
     this.highlight.flashRow(row.id);
-    this.log.set(`Added ${row.name}`);
   }
   readonly summary = this.availableEnabled("summary")
     ? aggregate<Person>({ budget: "sum" }, { columns: peopleColumns() })
@@ -986,6 +970,11 @@ export class AdaptShowcaseDemoPage {
       demoSession.write("dark", this.dark());
     });
     inject(DestroyRef).onDestroy(unregister);
+    inject(DestroyRef).onDestroy(
+      listenForNotices((next) => {
+        this.notice.set(next);
+      })
+    );
     afterNextRender(() => {
       if (this.lab && option("options", "") === "open")
         this.optionsDialog()?.nativeElement.showModal();

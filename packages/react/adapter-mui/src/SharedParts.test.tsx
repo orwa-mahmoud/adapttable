@@ -273,9 +273,8 @@ describe("shared styling parts (mui)", () => {
       })
     );
     expect(onClearFilters).toHaveBeenCalledTimes(1);
-    // Clearing filter extras intentionally preserves the independent search.
-    expect(search).toHaveValue("Nobody");
-    fireEvent.change(search, { target: { value: "" } });
+    // A search alone matched nothing, so the clear takes the search too.
+    expect(search).toHaveValue("");
     await waitFor(() => expect(screen.getByText("Ada")).toBeInTheDocument());
   });
 

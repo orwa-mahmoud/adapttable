@@ -5,15 +5,17 @@
  */
 import {
   type ColumnMetadata,
-  createFrontendSourceWith,
   type ExtraFilters,
   type FrontendEngineFactory,
   type PaginationMode,
   type QueryFilterGroup,
-  resolvePaginationMode,
   type SortableValue,
   type TableSource,
 } from "@adapttable/core";
+import {
+  createFrontendSourceWith,
+  resolvePaginationMode,
+} from "@adapttable/core/binding";
 import { createBasicTableEngine } from "@adapttable/core/engine";
 import {
   assertInInjectionContext,

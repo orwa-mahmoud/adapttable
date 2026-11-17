@@ -11,6 +11,8 @@ export default defineConfig({
     "src/pivot.ts",
     "src/stream.ts",
     "src/sparkline.ts",
+    "src/pdf.ts",
+    "src/xlsx.ts",
   ],
   format: ["esm", "cjs"],
   tsconfig: "./tsconfig.build.json",

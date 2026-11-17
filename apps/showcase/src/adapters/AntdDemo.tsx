@@ -43,6 +43,7 @@ import type {
   NestedTableDefaults,
 } from "@adapttable/react";
 
+import type { MobileDataState } from "../shared/mobileScenario";
 import { kitChromeFeatures } from "./chromeFeatures";
 
 /** This kit's factories, handed to the shared builder. */
@@ -207,6 +208,8 @@ export function AntdDemo({
   rowStyle,
   highlight,
   failure,
+  dataState,
+  onRowActivate,
   onRecover,
   customCard,
   realtime,
@@ -263,6 +266,10 @@ export function AntdDemo({
   rowStyle?: boolean;
   highlight?: boolean;
   failure?: Failure;
+  /** Which data state the table shows. */
+  dataState?: MobileDataState;
+  /** The host callback when a row or card is activated. */
+  onRowActivate?: (row: Person) => void;
   onRecover?: () => void;
   customCard?: boolean;
   /** Apply live row patches on a timer, the way a socket feed would. */
@@ -357,6 +364,8 @@ export function AntdDemo({
         rowStyle={rowStyle}
         highlight={highlight}
         failure={failure}
+        dataState={dataState}
+        onRowActivate={onRowActivate}
         onRecover={onRecover}
         customCard={customCard}
         realtime={realtime}
@@ -412,7 +421,7 @@ export function AntdDemo({
                 undoRedoButtons,
                 urlKey,
                 bulkActions,
-                bulkActionList: makeBulkActions(locale),
+                bulkActionList: makeBulkActions(locale, demoRowHandlers),
                 collapsibleColumnGroups: columns.collapsibleColumnGroups,
                 columnMenu,
                 rowActions: rowActionsShown

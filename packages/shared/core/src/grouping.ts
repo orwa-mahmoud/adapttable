@@ -7,6 +7,11 @@
  *
  * @packageDocumentation
  */
+export type {
+  ExportScopeCapability,
+  TableSourceCapabilities,
+  TotalCountCapability,
+} from "./contracts/source";
 export {
   type GroupAggregateOverride,
   type GroupAggregateOverrides,
@@ -18,10 +23,12 @@ export {
 } from "./grouping/groupAggregateOverrides";
 export type {
   GroupingChipKeyboardProps,
+  GroupingDragEventLike,
   GroupingDragProps,
   GroupingDragSource,
   GroupingDragState,
   GroupingDropProps,
+  GroupingKeyEventLike,
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "./grouping/groupingPanelModel";
@@ -53,6 +60,11 @@ export {
   type RowGroupRef,
 } from "./grouping/groupRows";
 export { groupSelectionState } from "./grouping/groupSelection";
+export type {
+  GroupingPanelSource,
+  GroupingPanelStateInput,
+} from "./layout/tableChromeState";
+export type { QueryGroupRow } from "./source/queryGroups";
 
 /**
  * Member types the signatures above hand back. Already public on
@@ -87,6 +99,7 @@ export type {
   ColumnModel,
   ColumnModelEditor,
   ColumnModelFilter,
+  RowCallback,
   SortableValue,
 } from "./columnModel";
 export type { DisplayValue } from "./display";

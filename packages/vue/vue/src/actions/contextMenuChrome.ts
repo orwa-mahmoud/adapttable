@@ -1,7 +1,8 @@
-import { resolveLabels } from "@adapttable/core";
-import type {
-  ContextMenuChromeProps as NeutralProps,
-  ContextMenuSlots as NeutralSlots,
+import {
+  ACTION_LABELS,
+  type ContextMenuChromeProps as NeutralProps,
+  type ContextMenuSlots as NeutralSlots,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import {
   type ComponentObjectPropsOptions,
@@ -18,6 +19,8 @@ import {
 import { elementRef } from "../attrs";
 import { scheduleTick } from "../scheduleTick";
 import { useScopeActivity } from "../store";
+
+const ACTION_GROUPS = [ACTION_LABELS] as const;
 export type ContextMenuSlots = NeutralSlots<VNodeChild>;
 /** A complete native menu presentation with binding-owned selection lifetimes. */
 export interface ContextMenuPresentationProps extends Omit<
@@ -153,7 +156,7 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
         surface = props.presentation({
           at: props.at,
           anchorRef,
-          label: resolveLabels(props.labels).contextMenu,
+          label: resolveFeatureLabels(props.labels, ACTION_GROUPS).contextMenu,
           onClose: close,
           container: props.container,
           className: props.className,
@@ -168,7 +171,7 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
         surface = slots.Surface({
           at: props.at,
           anchorRef,
-          label: resolveLabels(props.labels).contextMenu,
+          label: resolveFeatureLabels(props.labels, ACTION_GROUPS).contextMenu,
           onClose: close,
           container: props.container,
           className: props.className,

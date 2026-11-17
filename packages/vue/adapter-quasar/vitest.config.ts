@@ -4,6 +4,8 @@ import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
 import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vitest/config";
 
+import { VITEST_TEST_TIMEOUT } from "../../../scripts/vitest-workers.mjs";
+
 const ssr = process.env.ADAPTTABLE_QUASAR_SSR === "1";
 
 export default defineConfig({
@@ -37,6 +39,7 @@ export default defineConfig({
     pool: "threads",
     fileParallelism: false,
     maxWorkers: 1,
+    testTimeout: VITEST_TEST_TIMEOUT,
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov", "html"],

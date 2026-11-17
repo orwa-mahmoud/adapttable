@@ -1,0 +1,155 @@
+import {
+  collectConformanceTests,
+  type ConformanceTest,
+} from "@adapttable/core/conformance";
+import {
+  type ColumnDef,
+  createMemoryAdapter,
+  useFrontendData,
+} from "@adapttable/react";
+import { fireEvent, screen } from "@testing-library/react";
+import { expect, vi } from "vitest";
+
+import type { ReactKitUnderTest } from "../kit";
+
+/**
+ * The shared `MobileCards.memo.test.tsx` suite: behaviour every React kit shows.
+ *
+ * @param kit - The kit under test.
+ * @returns The tests, for the kit's runner to register.
+ */
+export function mobileCardsMemoTests(
+  kit: ReactKitUnderTest
+): readonly ConformanceTest[] {
+  const { DataTable, render } = kit;
+  return collectConformanceTests(({ describe, it }) => {
+    /**
+     * Mobile card memoization + summary aggregation acceptance: unchanged cards
+     * must NOT re-render on unrelated table state changes, and the `summaryRow`
+     * aggregate must run only when its input rows change.
+     */
+
+    interface Row {
+      id: string;
+      name: string;
+      city: string;
+    }
+    const ROWS: Row[] = [
+      { id: "a", name: "Alice", city: "Dubai" },
+      { id: "b", name: "Bob", city: "Riyadh" },
+      { id: "c", name: "Cara", city: "Doha" },
+    ];
+
+    // One spy accessor on every column: a card render costs exactly
+    // `columns.length` calls, so call-count deltas measure card re-renders.
+    const accessor = vi.fn((row: Row) => row.name);
+    const columns: ColumnDef<Row>[] = [
+      { key: "name", header: "Name", accessor },
+      { key: "city", header: "City", accessor },
+    ];
+
+    // Hoisted (identity-stable) props — inline equivalents would defeat the memo.
+    const rowKey = (row: Row) => row.id;
+    const bulkActions = [
+      { key: "export", label: "Export", onClick: () => undefined },
+    ];
+
+    function mount(
+      override: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">> = {}
+    ) {
+      const adapter = createMemoryAdapter("");
+      function Harness() {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: adapter,
+          columns,
+          paginationMode: "paged",
+        });
+        return (
+          <DataTable
+            source={source}
+            columns={columns}
+            rowKey={rowKey}
+            forceMobile
+            bulkActions={bulkActions}
+            {...override}
+          />
+        );
+      }
+      return render(<Harness />);
+    }
+
+    describe(`mobile card memoization (${kit.name})`, () => {
+      it("a search keystroke re-renders the chrome but no card", () => {
+        mount();
+        const search = screen.getByPlaceholderText("Search…");
+        const before = accessor.mock.calls.length;
+
+        fireEvent.change(search, { target: { value: "a" } });
+
+        expect(search).toHaveValue("a");
+        expect(accessor.mock.calls).toHaveLength(before);
+      });
+
+      it("toggling one card's checkbox re-renders only that card", () => {
+        mount();
+        const boxes = screen.getAllByLabelText("Select row");
+        const before = accessor.mock.calls.length;
+
+        fireEvent.click(boxes[0]!);
+
+        // At most the toggled card re-rendered (the compiler may even skip its
+        // accessor work) — an unmemoized list would re-run every card here.
+        expect(accessor.mock.calls.length - before).toBeLessThanOrEqual(
+          columns.length
+        );
+      });
+    });
+
+    describe(`summary aggregation (${kit.name})`, () => {
+      it("runs only when its input rows change", () => {
+        const summaryRow = vi.fn(() => ({ name: "3 people" }));
+        mount({ summaryRow });
+        expect(screen.getByText("3 people")).toBeInTheDocument();
+        const before = summaryRow.mock.calls.length;
+
+        // Keystrokes re-render the table; the aggregate must not re-run until
+        // the debounced term commits and actually changes the rows.
+        const search = screen.getByPlaceholderText("Search…");
+        fireEvent.change(search, { target: { value: "ali" } });
+        expect(summaryRow.mock.calls).toHaveLength(before);
+      });
+    });
+
+    describe(`selected state on mobile cards (${kit.name})`, () => {
+      it("marks the selected card with data-selected", () => {
+        const { container } = mount();
+        const selected = () => container.querySelectorAll("[data-selected]");
+        expect(selected()).toHaveLength(0);
+
+        fireEvent.click(screen.getAllByLabelText("Select row")[0]!);
+
+        // a consumer styles the selected card from CSS through this attribute;
+        // the checkbox already carries the state for assistive tech. The
+        // attribute is on the first card, or on the card its list item holds.
+        expect(selected()).toHaveLength(1);
+        expect(selected()[0]!.closest("[data-index='0']")).not.toBeNull();
+      });
+    });
+
+    describe(`an empty mobileLabel (${kit.name})`, () => {
+      it("renders no label element at all", () => {
+        const { container } = mount({
+          columns: [
+            { key: "name", header: "Name", accessor, mobileLabel: "" },
+            { key: "city", header: "City", accessor },
+          ],
+        });
+        // the consumer asked for the value with no label — neither an empty
+        // element nor the header substituted back in
+        expect(screen.queryByText("Name")).toBeNull();
+        expect(container.textContent).toContain("City");
+      });
+    });
+  });
+}

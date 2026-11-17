@@ -17,6 +17,11 @@ import {
   DataTableSurfaceChrome,
   type DataTableSurfaceSlots,
 } from "../src/layout/dataTableSurfaceChrome";
+import {
+  DesktopTableChrome,
+  MobileCardsChrome,
+  type TableChromeSlots,
+} from "../src/layout/tableChrome";
 import { useFrontendData } from "../src/source/useFrontendData";
 import type { DataTableProps } from "../src/tableAdapterContracts";
 import { useDataTableShell } from "../src/useDataTableShell";
@@ -483,3 +488,61 @@ describe("paged footer", () => {
     ).toHaveLength(Math.ceil(data.length / larger));
   });
 });
+
+it.each([false, true])(
+  "redraws only the selected row through the surface (mobile=%s)",
+  async (forceMobile) => {
+    const drawn: string[] = [];
+    const rows: TableChromeSlots<Row> = {
+      SortButton: ({ attrs, content }) => h("button", attrs, [content]),
+      SelectionCheckbox: (control) => {
+        if (!control.header) drawn.push(String(control.checked));
+        return h("input", { ...control.attrs, checked: control.checked });
+      },
+    };
+    const slots: DataTableSurfaceSlots<Row> = {
+      ...paint(),
+      Desktop: ({ model, classNames }) =>
+        DesktopTableChrome({ model, slots: rows, classNames }),
+      Mobile: ({ model, classNames }) =>
+        MobileCardsChrome({ model, slots: rows, classNames }),
+    };
+    let shell: ReturnType<typeof useDataTableShell<Row>> | undefined;
+    // No class names: the surface still hands the rows the same object.
+    const props: DataTableProps<Row> = {
+      ...options,
+      defaults: { limit: 10 },
+      selectable: true,
+      forceMobile,
+    };
+    const Table = defineComponent({
+      setup() {
+        shell = useDataTableShell(() => props);
+        return () =>
+          h(DataTableSurfaceChrome<Row>, {
+            model: shell!,
+            options: { ...props },
+            slots,
+            content: {},
+            rootRef: () => undefined,
+            scrollRef: () => undefined,
+          });
+      },
+    });
+    const root = document.createElement("div");
+    document.body.append(root);
+    const app = createApp(Table);
+    app.mount(root);
+    cleanup.push(() => {
+      app.unmount();
+      root.remove();
+    });
+    expect(drawn).toEqual(["false", "false"]);
+    drawn.length = 0;
+
+    shell!.selection.value!.toggle("b");
+    await nextTick();
+
+    expect(drawn).toEqual(["true"]);
+  }
+);

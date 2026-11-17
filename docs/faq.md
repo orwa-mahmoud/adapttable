@@ -173,19 +173,20 @@ Every package declares its side effects — none, or only its stylesheet in
 `@adapttable/base-ui` — and ships ESM, so unused code is tree-shaken. You only install the one adapter you use; the headless core has
 zero UI-kit dependencies.
 
-Measured 2026-11-09 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
+Measured 2026-11-10 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
 | What you import                            | min+gzip  |
 | ------------------------------------------ | --------- |
-| `useFrontendData` + `useDataTable` (react) | ~22 kB    |
-| every core export                          | ~104 kB   |
-| `DataTable` from an adapter                | ~71–78 kB |
+| `useFrontendData` + `useDataTable` (react) | ~20 kB    |
+| every core export                          | ~106 kB   |
+| `DataTable` from an adapter                | ~67–74 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. The every-export
-row is the whole public surface imported at once, measured 2026-11-09 at
-104.28 KiB (106,778 bytes). Its ceiling is that measurement: the composed
+row is the whole public surface imported at once, measured 2026-11-16 at
+105.9 KiB. Its ceiling is that measurement: the deprecated aliases the main
+entry keeps for names that moved to `@adapttable/core/binding`, the composed
 session with one committed state and a staged row-model evaluator, the
 grouping projection, and the shell operations, plus the snapshot guard, the
 grouped-snapshot cache, and the shared behaviours the bindings used to copy. It is not the download of a table. All eight React adapters

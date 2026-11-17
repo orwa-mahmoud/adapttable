@@ -5,14 +5,18 @@ import {
   AdaptFilterTreeChrome,
   type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
+  restoreFocusSoon,
+  watchClickedOpener,
 } from "@adapttable/angular/adapter";
 import { CdkTrapFocus } from "@angular/cdk/a11y";
-import { NgTemplateOutlet } from "@angular/common";
+import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   type ElementRef,
+  inject,
   input,
   type TemplateRef,
   viewChild,
@@ -63,7 +67,7 @@ import { TREE_SLOTS } from "./filterTreeBuilder";
 })
 export class AdaptFiltersForm {
   /** The slot's props. */
-  readonly props = input.required<FiltersFormSlotProps<never>>();
+  readonly props = input.required<FiltersFormSlotProps<unknown>>();
 
   protected readonly treeSlots = TREE_SLOTS;
 }
@@ -152,17 +156,15 @@ export class AdaptFilterDrawer {
     input.required<FilterOverlaySlotProps<TemplateRef<unknown>>>();
 
   private readonly panel = viewChild<ElementRef<HTMLElement>>("panel");
+  private readonly openers = watchClickedOpener(inject(DOCUMENT));
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.openers.stop());
     afterRenderEffect((onCleanup) => {
       const panel = this.panel()?.nativeElement;
       const { open, onClose } = this.props();
       if (!open || !panel) return;
-      const trigger =
-        document.activeElement instanceof HTMLElement &&
-        !panel.contains(document.activeElement)
-          ? document.activeElement
-          : null;
+      const trigger = this.openers.current(panel);
       panel.focus();
       const onKey = (event: KeyboardEvent): void => {
         if (event.key === "Escape") {
@@ -172,7 +174,8 @@ export class AdaptFilterDrawer {
       document.addEventListener("keydown", onKey);
       onCleanup(() => {
         document.removeEventListener("keydown", onKey);
-        trigger?.focus();
+        if (trigger?.isConnected) trigger.focus();
+        restoreFocusSoon(trigger);
       });
     });
   }

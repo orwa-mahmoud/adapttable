@@ -12,6 +12,7 @@ import {
   type RowHeight,
   type RowStyle,
   type SummaryRowFn as NeutralSummaryRowFn,
+  type TableLabels,
   type TableOptions,
   type TableToolbarSlots,
 } from "@adapttable/core";
@@ -138,6 +139,8 @@ export interface DirtyEdits {
  * @public
  */
 export interface FeatureProps<TRow> {
+  /** The strings the composed features draw, set by the features. */
+  featureLabels?: readonly Partial<TableLabels>[];
   /**
    * Saved views: capture the table's current URL state under a name and
    * re-apply it on demand. Setting this renders a Saved-views menu in the

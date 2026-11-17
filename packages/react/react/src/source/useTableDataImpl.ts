@@ -1,6 +1,4 @@
 import {
-  activeTierValue,
-  createTableData,
   type ExtraFilters,
   type FacetMap,
   type FeatureHostState,
@@ -8,19 +6,23 @@ import {
   type FilterEngine,
   type FilterRuntime,
   type FilterTypeSpec,
-  INACTIVE_TIER_ROWS,
   isDeclarativeFilters,
   type PaginationMode,
   type QueryAggregate,
   type QueryFilterGroup,
   type QuerySupport,
   type SortableValue,
+  type TableSource,
+} from "@adapttable/core";
+import {
+  activeTierValue,
+  createTableData,
+  INACTIVE_TIER_ROWS,
   type TableData,
   type TableDataPlan,
-  type TableSource,
   tierRows,
-} from "@adapttable/core";
-import type { UseTableDataResult } from "@adapttable/core/binding";
+  type UseTableDataResult,
+} from "@adapttable/core/binding";
 import {
   type ReactNode,
   useCallback,
@@ -51,7 +53,7 @@ export type { UseServerDataOptions };
  */
 export interface UseTableDataOptions<TRow> extends Pick<
   UseTableUrlStateOptions,
-  "urlAdapter" | "urlSync" | "defaults" | "urlKey"
+  "urlAdapter" | "urlSync" | "defaults" | "urlKey" | "store"
 > {
   /** Full-control tier: a prebuilt source (e.g. `useQuerySource`). */
   source?: TableSource<TRow>;
@@ -263,6 +265,7 @@ export function useTableDataWithEngine<TRow>(
     facetKeys,
     facets: serverFacets,
     featureHost,
+    store,
     ...urlOptions
   } = options;
 
@@ -305,6 +308,9 @@ export function useTableDataWithEngine<TRow>(
   }, []);
   const frontend = useFrontendData<TRow>({
     ...urlOptions,
+    // Only the active tier keeps its view state in the table's store; the
+    // idle one keeps its own.
+    store: tier === "frontend" ? store : undefined,
     ...frontendTierInput<TRow>({
       active: tier === "frontend",
       urlSync: urlOptions.urlSync,
@@ -327,6 +333,7 @@ export function useTableDataWithEngine<TRow>(
   });
   const server = useServerData<TRow>({
     ...urlOptions,
+    store: tier === "server" ? store : undefined,
     ...serverTierInput<TRow>({
       active: tier === "server",
       urlSync: urlOptions.urlSync,
@@ -363,5 +370,5 @@ export function useTableDataWithEngine<TRow>(
   });
   useEffect(() => controller.dispose, [controller]);
 
-  return { source: sourced, runtime };
+  return useMemo(() => ({ source: sourced, runtime }), [sourced, runtime]);
 }

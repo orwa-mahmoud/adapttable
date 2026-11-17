@@ -1,8 +1,9 @@
 /** Lifecycle-aware Vue projection of the neutral rename controller. */
+
 import {
   type ColumnRenameEditorOptions,
   createColumnRenameEditor,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,

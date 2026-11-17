@@ -1,7 +1,5 @@
 /** Vue lifetime over the neutral saved-views controller. */
 import {
-  createSavedViewsController,
-  safeLocalStorage,
   type SavedView,
   type SavedViewsControllerOptions,
 } from "@adapttable/core";
@@ -23,6 +21,11 @@ export type {
   SavedViewVisibility,
 } from "@adapttable/core";
 export { SAVED_VIEW_VERSION } from "@adapttable/core";
+import {
+  createSavedViewsController,
+  safeLocalStorage,
+} from "@adapttable/core/binding";
+
 /** Options for the neutral view list and any host-owned pending URL slices. @public */
 export interface UseSavedViewsOptions extends SavedViewsControllerOptions {
   /** Synchronously commit pending host URL state before saving or applying a view. */

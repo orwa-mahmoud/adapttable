@@ -1,5 +1,7 @@
-import { columnLayoutSlice } from "@adapttable/core";
-import type { UseColumnLayoutUrlStateResult } from "@adapttable/core/binding";
+import {
+  columnLayoutSlice,
+  type UseColumnLayoutUrlStateResult,
+} from "@adapttable/core/binding";
 
 import type { ColumnLayoutState } from "../columns/useColumnLayout";
 import type { UrlStateAdapter } from "./adapter";

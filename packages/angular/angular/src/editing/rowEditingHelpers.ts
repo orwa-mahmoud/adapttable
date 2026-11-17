@@ -1,8 +1,6 @@
 import type { EditableCellEditing } from "@adapttable/angular";
-import {
-  rowEditingSignature as coreRowEditingSignature,
-  rowIsDirty as coreRowIsDirty,
-} from "@adapttable/core";
+import { rowIsDirty as coreRowIsDirty } from "@adapttable/core";
+import { rowEditingSignature as coreRowEditingSignature } from "@adapttable/core/binding";
 
 /**
  * Whether a row holds any dirty cell mark.

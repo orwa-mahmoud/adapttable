@@ -3,18 +3,19 @@
  */
 import {
   EMPTY_PIVOT_CONFIG,
-  pivot,
   type PivotConfig,
   type PivotField,
-} from "@adapttable/core";
+} from "@adapttable/angular/pivot";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
-import { pivotTableModel } from "../pivot/pivotTableModel";
+import { pivotTests } from "../../angular/test/kit/suites/pivot";
+import { kit } from "../testing/kit";
 import { kitSelector } from "../testUtils";
 import { AdaptPivotPanel } from "./components/pivotPanel";
-import { AdaptPivotRowHeader } from "./components/pivotRowHeader";
+
+for (const test of pivotTests(kit)) it(test.name, test.run);
 
 const FIELDS: PivotField[] = [
   { key: "region", label: "Region" },
@@ -105,51 +106,5 @@ describe("AdaptPivotPanel", () => {
     fixture.detectChanges();
     expect(adds()[0]!.disabled).toBe(true);
     expect(adds().at(-1)!.disabled).toBe(false);
-  });
-});
-
-describe("pivot row header", () => {
-  it("names the part and indents a nested line", () => {
-    const result = pivot(
-      [
-        { team: "Alpha", region: "EU", amount: 10 },
-        { team: "Beta", region: "US", amount: 30 },
-      ],
-      {
-        rows: ["region", "team"],
-        columns: [],
-        measures: [{ key: "amount", agg: "sum" }],
-      }
-    );
-    const model = pivotTableModel(result, { fields: FIELDS });
-    const leaf = model.rows.find((row) => row.depth === 1)!;
-
-    expect(model.columns[0]?.cell).toBe(AdaptPivotRowHeader);
-    TestBed.resetTestingModule();
-    TestBed.configureTestingModule({ imports: [AdaptPivotRowHeader] });
-    const fixture = TestBed.createComponent(AdaptPivotRowHeader);
-    fixture.componentRef.setInput("row", leaf);
-    fixture.componentRef.setInput("column", model.columns[0]);
-    fixture.detectChanges();
-    const cell = part("pivot-row-header");
-
-    expect(cell?.getAttribute("data-pivot-kind")).toBe("leaf");
-    expect(cell?.style.paddingInlineStart).toBe("16px");
-  });
-
-  it("uses the label when there is no caption, and skips a bad indent", () => {
-    TestBed.resetTestingModule();
-    TestBed.configureTestingModule({ imports: [AdaptPivotRowHeader] });
-    const fixture = TestBed.createComponent(AdaptPivotRowHeader);
-    fixture.componentRef.setInput("row", {
-      kind: "subtotal",
-      label: "EU",
-      depth: 0,
-    });
-    fixture.componentRef.setInput("column", { meta: { pivotIndent: "wide" } });
-    fixture.detectChanges();
-
-    expect(part("pivot-row-header")?.textContent).toBe("EU");
-    expect(part("pivot-row-header")?.style.paddingInlineStart).toBe("");
   });
 });

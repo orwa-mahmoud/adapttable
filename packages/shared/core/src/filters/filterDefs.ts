@@ -13,7 +13,8 @@ import type {
   FilterValue,
 } from "../contracts/columns";
 import type { QueryCondition } from "../contracts/query";
-import { defaultLabels } from "../labels";
+import type { RowCallback } from "../contracts/rowCallback";
+import { FILTER_LABELS } from "../labelGroups/filterLabels";
 import type { TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { humanizeKey } from "../utils/humanizeKey";
@@ -150,7 +151,7 @@ export interface FilterDef<TRow = unknown> {
   /** Choices for `select` / `multiSelect` — see {@link FilterOptionsSource}. */
   options?: FilterOptionsSource;
   /** Row-value extractor for the client-side predicate; defaults to `key` as a path. */
-  getValue?: (row: TRow) => unknown;
+  getValue?: RowCallback<[row: NoInfer<TRow>], unknown>;
   /** Placeholder for text-like inputs. */
   placeholder?: string;
   /**
@@ -654,7 +655,7 @@ function booleanSpec(): FilterTypeSpec {
     chips: (def) => ({
       [def.key]: (v: string) =>
         `${filterLabel(def)}: ${
-          booleanChoiceOn(v) ? defaultLabels.boolTrue : defaultLabels.boolFalse
+          booleanChoiceOn(v) ? FILTER_LABELS.boolTrue : FILTER_LABELS.boolFalse
         }`,
     }),
     conditionToExtra: scalarConditionToExtra,
@@ -787,7 +788,10 @@ const optionLabel = (
   return options.find((o) => o.value === value)?.label ?? value;
 };
 
-function opWord(labels: Required<TableLabels>, key: keyof TableLabels): string {
+function opWord(
+  labels: Readonly<Partial<TableLabels>>,
+  key: keyof TableLabels
+): string {
   const value = labels[key];
   return typeof value === "string" ? value : key;
 }
@@ -801,7 +805,7 @@ function textChipLabel(
   const op = parseTextOp(extra?.[filterOpKey(key)]);
   return formatFilterChip(
     field,
-    opWord(defaultLabels, TEXT_OP_LABEL_KEYS[op]),
+    opWord(FILTER_LABELS, TEXT_OP_LABEL_KEYS[op]),
     value
   );
 }
@@ -820,19 +824,19 @@ function rangeChipLabel(
     if (op && op !== "between") {
       return formatFilterChip(
         field,
-        opWord(defaultLabels, NUMBER_OP_LABEL_KEYS[op]),
+        opWord(FILTER_LABELS, NUMBER_OP_LABEL_KEYS[op]),
         value
       );
     }
   } else {
     const op = parseDateOp(raw);
     if (op === "relative") {
-      return formatFilterChip(field, relativeTokenLabel(value, defaultLabels));
+      return formatFilterChip(field, relativeTokenLabel(value, FILTER_LABELS));
     }
     if (op && op !== "between") {
       return formatFilterChip(
         field,
-        opWord(defaultLabels, DATE_OP_LABEL_KEYS[op]),
+        opWord(FILTER_LABELS, DATE_OP_LABEL_KEYS[op]),
         value
       );
     }
@@ -842,10 +846,10 @@ function rangeChipLabel(
 
 function emptyOpChip(field: string, token: string): string {
   if (token === "empty") {
-    return formatFilterChip(field, defaultLabels.opEmpty);
+    return formatFilterChip(field, FILTER_LABELS.opEmpty);
   }
   if (token === "notEmpty") {
-    return formatFilterChip(field, defaultLabels.opNotEmpty);
+    return formatFilterChip(field, FILTER_LABELS.opNotEmpty);
   }
   return "";
 }

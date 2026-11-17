@@ -2,16 +2,16 @@
  * Find-bar layout. Structure only — adapters pass the search field and
  * the previous / next / close buttons the reader clicks.
  */
+import { type TableLabels } from "@adapttable/core";
 import {
+  FIND_LABELS,
+  type FindButtonProps,
+  type FindInTableState,
   findMatchCountText,
+  type FindSearchProps,
+  type FindStrings,
   handleFindBarKey,
-  resolveLabels,
-  type TableLabels,
-} from "@adapttable/core";
-import type {
-  FindButtonProps,
-  FindInTableState,
-  FindSearchProps,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import { focusEditorOnMount } from "@adapttable/core/editing";
 import {
@@ -19,10 +19,13 @@ import {
   Component,
   computed,
   input,
+  type Signal,
   type Type,
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
+
+const FIND_GROUPS = [FIND_LABELS] as const;
 
 /**
  * The kit's controls for {@link AdaptFindBarChrome}. Each is a standalone
@@ -85,7 +88,9 @@ export class AdaptFindBarChrome {
   readonly find = input.required<FindInTableState>();
   /** Labels; falls back to the built-in English. */
   readonly labels = input<TableLabels>();
-  protected readonly copy = computed(() => resolveLabels(this.labels()));
+  protected readonly copy: Signal<FindStrings> = computed(() =>
+    resolveFeatureLabels(this.labels(), FIND_GROUPS)
+  );
   /** A kit's own class for the bar. */
   readonly className = input<string>();
   /** The kit's search field and buttons. */

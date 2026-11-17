@@ -12,11 +12,15 @@
 import { aggregationModel } from "../aggregate/aggregationModel";
 import { REORDER_COLUMN_KEY } from "../columns/columnMenuModel";
 import type { ColumnMetadata } from "../contracts/columns";
+import type { TableSourceCapabilities } from "../contracts/source";
+import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type {
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "../grouping/groupingPanelModel";
 import { sourceCapabilities } from "../source/capabilities";
+import type { QueryAggregate } from "../source/queryContract";
+import type { QueryGroupRow } from "../source/queryGroups";
 import type { TableSource } from "../source/TableSource";
 import {
   collectFeatureNotices,
@@ -119,6 +123,26 @@ export function clearChromeFilters(
 }
 
 /**
+ * Clear everything that narrows the rows — the search, the filter extras and
+ * the filter tree — then tell the host. This is what an empty "no results"
+ * view offers: a search alone can be what matched nothing.
+ *
+ * @param source - The source whose filters are cleared.
+ * @param setSearch - The binding's search setter, so its search box follows.
+ * @param onClearFilters - Host notification, called after the clear.
+ *
+ * @public
+ */
+export function clearSearchAndFilters(
+  source: Pick<TableSource<unknown>, "clearExtras" | "setFilterTree">,
+  setSearch: (term: string) => void,
+  onClearFilters?: () => void
+): void {
+  setSearch("");
+  clearChromeFilters(source, onClearFilters);
+}
+
+/**
  * The ids to hand an uncontrolled selection observer, or `undefined` when it
  * must stay quiet: a controlled selection already reports every change
  * synchronously, and echoing it would double-fire.
@@ -165,24 +189,61 @@ export function rowReorderEnablement<TState>(
  *
  * @public
  */
-export function groupingPanelState<TRow>(input: {
-  readonly interactions: GroupingPanelInteractions | undefined;
-  readonly groupBy: readonly string[];
-  readonly columns: readonly ColumnMetadata<TRow>[];
-  readonly source: Pick<
-    TableSource<TRow>,
-    | "groupAggregateOverrides"
-    | "setGroupAggregateOverrides"
-    | "allFilteredRows"
-    | "groups"
-    | "capabilities"
-    | "honorsAggregates"
-    | "queryAggregates"
-    | "aggregateOperations"
-  >;
-}): GroupingPanelState | undefined {
-  const { interactions, source } = input;
+export function groupingPanelState<TRow>(
+  input: GroupingPanelStateInput<TRow> & {
+    readonly interactions: GroupingPanelInteractions | undefined;
+  }
+): GroupingPanelState | undefined {
+  const { interactions } = input;
   if (!interactions) return undefined;
+  return panelStateOf(interactions, input);
+}
+
+/**
+ * What a grouping panel's state is built from, beside its interactions.
+ *
+ * @public
+ */
+export interface GroupingPanelStateInput<TRow> {
+  /** The keys the table groups by in this render. */
+  readonly groupBy: readonly string[];
+  /** The table's columns. */
+  readonly columns: readonly ColumnMetadata<TRow>[];
+  /** What the source says about grouping and aggregates. */
+  readonly source: GroupingPanelSource<TRow>;
+}
+
+/**
+ * The part of a table's source a grouping panel reads.
+ *
+ * @public
+ */
+export interface GroupingPanelSource<TRow> {
+  /** The aggregate the user chose per column, when the source keeps them. */
+  readonly groupAggregateOverrides?: GroupAggregateOverrides;
+  /** Writes the user's aggregate choices back to the source. */
+  readonly setGroupAggregateOverrides?: (
+    overrides: GroupAggregateOverrides
+  ) => void;
+  /** Every row after filtering, when the source holds the full dataset. */
+  readonly allFilteredRows?: readonly TRow[];
+  /** Groups the server computed. */
+  readonly groups?: readonly QueryGroupRow<TRow>[];
+  /** What the source can do. */
+  readonly capabilities?: TableSourceCapabilities;
+  /** Whether the source honours the aggregates it is asked for. */
+  readonly honorsAggregates?: boolean;
+  /** The aggregates the current query asks for. */
+  readonly queryAggregates?: readonly QueryAggregate[];
+  /** Operation ids the backend can compute. */
+  readonly aggregateOperations?: readonly string[];
+}
+
+/** The grouping strip's state from its interactions and this render's inputs. */
+export function panelStateOf<TRow>(
+  interactions: GroupingPanelInteractions,
+  { groupBy, columns, source }: GroupingPanelStateInput<TRow>
+): GroupingPanelState {
   const grouping = sourceCapabilities({
     allFilteredRows: source.allFilteredRows,
     groups: source.groups,
@@ -191,13 +252,13 @@ export function groupingPanelState<TRow>(input: {
   const overrides = source.groupAggregateOverrides ?? {};
   return {
     ...interactions,
-    groupBy: input.groupBy,
+    groupBy,
     aggregateOverrides: overrides,
     canSetAggregates:
       source.setGroupAggregateOverrides !== undefined &&
       (grouping !== "server" || source.honorsAggregates === true),
     aggregations: aggregationModel({
-      columns: input.columns,
+      columns,
       overrides,
       declared: interactions.declaredAggregates,
       queryAggregates: source.queryAggregates,

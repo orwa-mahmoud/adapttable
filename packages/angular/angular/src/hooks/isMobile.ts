@@ -1,7 +1,8 @@
 /**
  * Whether the viewport is at or below the mobile breakpoint, as a signal.
  */
-import { MOBILE_BREAKPOINT_PX } from "@adapttable/core";
+
+import { MOBILE_BREAKPOINT_PX } from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   inject,

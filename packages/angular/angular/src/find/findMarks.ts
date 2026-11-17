@@ -9,15 +9,17 @@
  */
 import {
   type CellRange,
-  createFindShortcutScope,
-  findMatchRow,
   type GridCell,
   gridCellAttr,
   sameGridCell,
-  scrollCurrentMatchIntoView,
   singleCellRange,
 } from "@adapttable/core";
-import type { FindInTableState } from "@adapttable/core/binding";
+import {
+  createFindShortcutScope,
+  type FindInTableState,
+  findMatchRow,
+  scrollCurrentMatchIntoView,
+} from "@adapttable/core/binding";
 import {
   afterRenderEffect,
   assertInInjectionContext,

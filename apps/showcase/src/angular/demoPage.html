@@ -568,7 +568,11 @@
         Retry failed request
       </button>
     }
-    <p class="hint" role="status">{{ log() }}</p>
+    @if (notice(); as current) {
+      <div role="status" [style]="noticeStyle(current)">
+        {{ current.message }}
+      </div>
+    }
     <p class="hint">
       Save or cancel active edits before switching adapters or options.
       Committed changes and URL state stay with you; switching resets undo

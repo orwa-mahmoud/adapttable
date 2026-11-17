@@ -6,6 +6,7 @@ import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { RealtimeBoundary } from "./realtimeFeed";
 import { Bolt, Check } from "./sectionIcons";
+import { REALTIME_HINTS } from "./shared/realtimeScenario";
 
 /**
  * The realtime page: rows changing under the reader while they work.
@@ -20,16 +21,11 @@ export function RealtimeDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   return (
     <div className="mx-demo">
       <div className="hint-row">
-        <span className="hint">
-          <Bolt size={12} /> a patch sits between two people already in rows 2–6
-        </span>
-        <span className="hint">
-          <Check size={12} /> same Budget sort the table is using — it stays on
-          page 1
-        </span>
-        <span className="hint">
-          <Check size={12} /> the feed names the row that just moved
-        </span>
+        {REALTIME_HINTS.map((hint, index) => (
+          <span className="hint" key={hint}>
+            {index === 0 ? <Bolt size={12} /> : <Check size={12} />} {hint}
+          </span>
+        ))}
       </div>
       <div className="mx-demo__body">
         <div key={adapter} data-adapter={adapter}>

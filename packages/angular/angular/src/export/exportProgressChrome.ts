@@ -4,11 +4,8 @@
  * Core decides when the surface exists, which actions are legal, and every
  * localized string. The kit draws the one surface this chrome hands those to.
  */
-import {
-  type ExportProgressState,
-  exportProgressView,
-  type TableLabels,
-} from "@adapttable/core";
+import { type ExportProgressState, type TableLabels } from "@adapttable/core";
+import { exportProgressView } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
   Component,

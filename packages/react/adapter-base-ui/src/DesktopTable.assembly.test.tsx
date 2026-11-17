@@ -3,7 +3,7 @@
  * native thead/tbody, the footer summary row, and expansion/reorder/selection
  * leads against a start pin.
  */
-import { resolveLabels } from "@adapttable/core";
+import { resolveLabels } from "@adapttable/react/adapter";
 import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

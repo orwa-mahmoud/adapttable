@@ -14,10 +14,19 @@
  * than each cell recording itself.
  */
 import type { CellEdit } from "../focus/cellEdits";
+import type { TableStore } from "../state/tableStore";
 import { getPath } from "../utils/path";
 import type { BatchRowEdit } from "./editContracts";
 import { PREPARE_RECORDING, recordedGesture } from "./recordedGesture";
-import { listenerSet } from "./storePlumbing";
+import { stateCell } from "./storePlumbing";
+
+/**
+ * Whether a table keeps an edit history, and how deep: `true` for the
+ * default depth, or the number of edits to keep.
+ *
+ * @public
+ */
+export type EditHistoryInput = boolean | { readonly depth?: number };
 
 /**
  * The host's commit channel — what an undo replays through.
@@ -124,10 +133,11 @@ export interface EditHistoryController<TRow> {
  * @public
  */
 export function createEditHistory<TRow>(
-  options: EditHistoryControllerOptions<TRow>
+  options: EditHistoryControllerOptions<TRow>,
+  within: { readonly store?: TableStore } = {}
 ): EditHistoryController<TRow> {
   let current = options;
-  const stack = createEditHistoryStack<TRow>();
+  const stack = createEditHistoryStack<TRow>(within);
   let generation = 0;
   const prepare = (edits: readonly CellEdit<TRow>[]): (() => void) => {
     if (!current.enabled || edits.length === 0) return () => undefined;
@@ -217,9 +227,10 @@ export function editHistoryView<TRow>(
  *
  * @public
  */
-export function resolveEditHistory(
-  editHistory: boolean | { readonly depth?: number } | undefined
-): { readonly enabled: boolean; readonly depth: number | undefined } {
+export function resolveEditHistory(editHistory: EditHistoryInput | undefined): {
+  readonly enabled: boolean;
+  readonly depth: number | undefined;
+} {
   return {
     enabled: editHistory !== undefined && editHistory !== false,
     depth: typeof editHistory === "object" ? editHistory.depth : undefined,
@@ -309,18 +320,22 @@ export const DEFAULT_EDIT_HISTORY_DEPTH = 50;
  *
  * @public
  */
-export function createEditHistoryStack<TRow>(): EditHistoryStack<TRow> {
+export function createEditHistoryStack<TRow>(
+  within: { readonly store?: TableStore } = {}
+): EditHistoryStack<TRow> {
   let past: EditHistoryEntry<TRow>[] = [];
   let future: EditHistoryEntry<TRow>[] = [];
-  let snapshot: EditHistorySnapshot = { past: 0, future: 0 };
-  const { subscribe, notify } = listenerSet();
+  const state = stateCell<EditHistorySnapshot>(
+    "edit-history",
+    { past: 0, future: 0 },
+    within.store
+  );
   const sync = (): void => {
-    snapshot = { past: past.length, future: future.length };
-    notify();
+    state.set({ past: past.length, future: future.length });
   };
   return {
-    getSnapshot: () => snapshot,
-    subscribe,
+    getSnapshot: state.get,
+    subscribe: state.subscribe,
     record(entry, depth) {
       const limit = Math.max(0, Math.trunc(depth));
       past = limit > 0 ? [...past, entry].slice(-limit) : [];

@@ -2,12 +2,25 @@
 /** Keyboard focus and a real live-region transcript, from AccessibilityDemo.tsx. */
 import { onMounted, onScopeDispose, shallowRef, useTemplateRef } from "vue";
 
-import { PEOPLE, peopleColumns, rowKey, TABLE_PRESENTATION } from "../data";
+import { pageDefaultsFor, pageLayoutFor, rosterFor } from "../../../casts";
+import {
+  ACCESSIBILITY_HINTS,
+  readAnnouncements,
+  TRANSCRIPT_LENGTH,
+  TRANSCRIPT_TEXT,
+} from "../../../shared/pageHints";
+import { peopleColumns, rowKey, TABLE_PRESENTATION } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
-const columns = peopleColumns({ status: kit.status });
-const features = [kit.cellNavigation(), kit.columnSelectionCheckbox()];
+const ROWS = rosterFor("accessibility");
+const PAGE_DEFAULTS = pageDefaultsFor("accessibility");
+const PAGE_LAYOUT = pageLayoutFor("accessibility");
+const columns = peopleColumns(kit);
+const pageFeatures = [kit.cellNavigation(), kit.columnSelectionCheckbox()];
+const chrome = pageChromeFeatures(kit, { urlKey: "a11y" });
+const features = [...pageFeatures, ...chrome];
 const tableRoot = useTemplateRef<HTMLElement>("tableRoot");
 const announcements = shallowRef<readonly string[]>([]);
 let observer: MutationObserver | undefined;
@@ -15,17 +28,15 @@ let observer: MutationObserver | undefined;
 onMounted(() => {
   const root = tableRoot.value;
   if (!root) return;
-  const previous = new WeakMap<Element, string>();
+  let last = "";
   const read = (): void => {
-    for (const region of root.querySelectorAll(
-      '[aria-live], [role="status"], [role="alert"]'
-    )) {
-      const text = region.textContent?.trim() ?? "";
-      if (text === previous.get(region)) continue;
-      previous.set(region, text);
-      if (text)
-        announcements.value = [text, ...announcements.value].slice(0, 6);
-    }
+    const next = readAnnouncements(root, last);
+    last = next.last;
+    if (next.lines.length === 0) return;
+    announcements.value = [...next.lines, ...announcements.value].slice(
+      0,
+      TRANSCRIPT_LENGTH
+    );
   };
   observer = new MutationObserver(read);
   observer.observe(root, {
@@ -40,28 +51,29 @@ onScopeDispose(() => observer?.disconnect());
 
 <template>
   <div class="mx-demo">
-    <p class="hint">
-      Tab into the grid, then use arrows, Home and End. A checkbox selects a
-      whole column.
-    </p>
+    <div class="hint-row">
+      <span v-for="hint in ACCESSIBILITY_HINTS" :key="hint" class="hint">{{
+        hint
+      }}</span>
+    </div>
     <div ref="tableRoot" class="mx-demo__body">
       <component
         :is="kit.DataTable"
         v-bind="TABLE_PRESENTATION"
         table-label="People keyboard grid"
         :url-sync="false"
-        :data="PEOPLE"
+        :data="ROWS"
         :columns="columns"
         :row-key="rowKey"
+        :default-column-layout="PAGE_LAYOUT"
+        selectable
         :features="features"
-        :defaults="{ limit: 10 }"
+        :defaults="PAGE_DEFAULTS"
       />
     </div>
     <div class="mx-demo__body" data-testid="announcements">
-      <strong>Announced to a screen reader</strong>
-      <p v-if="announcements.length === 0">
-        Move through the grid to hear its position and column.
-      </p>
+      <strong>{{ TRANSCRIPT_TEXT.title }}</strong>
+      <p v-if="announcements.length === 0">{{ TRANSCRIPT_TEXT.empty }}</p>
       <ol v-else>
         <li v-for="(line, index) in announcements" :key="index">{{ line }}</li>
       </ol>

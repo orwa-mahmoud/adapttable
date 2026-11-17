@@ -3,16 +3,18 @@ import {
   type CellConflictAsk,
   type EditableCellController,
   type EditableColumnLike,
+  type EditConflictLabels,
   type EditingBundle,
 } from "@adapttable/core";
 import {
+  batchEditorControl,
   cellConflictAsk,
   controllerConflictAsk,
-  editorSelectOptions,
-  handleRowEditorKey,
+  editableCellController,
   isCellEditable,
   isFirstEditableColumn,
   resolveCellEditor,
+  rowEditorControl,
 } from "@adapttable/core/editing";
 export interface EditableUnitModel<TRow> {
   readonly controller: EditableCellController<TRow>;
@@ -50,22 +52,18 @@ export function editableUnitModel<TRow>(input: {
     };
   const ask = cellConflictAsk(editing, rowId, column.key);
   const commit = batch?.commit ?? rowEditing?.commit;
-  const invalid = commit?.validation?.find(
-    (failure) =>
-      failure.rowId === rowId &&
-      (failure.columnKey === undefined || failure.columnKey === column.key)
-  );
   const blocked = editing?.conflict?.isRowContested(rowId) ?? false;
+  const control = batch
+    ? batchEditorControl(batch, row, rowId, column.key, editor)
+    : rowEditorControl(rowEditing!, column.key, editor, blocked);
   const ctrl: EditableCellController<TRow> = {
     ...controller,
     mode: "editing",
-    editor,
-    selectOptions: editorSelectOptions(editor),
-    draft: batch
-      ? batch.draftFor(row, rowId, column.key)
-      : rowEditing!.draftFor(column.key),
-    error: ask ? editing?.conflictLabels?.message : invalid?.message,
-    validating: commit?.phase === "validating",
+    editor: control.editor,
+    selectOptions: control.selectOptions,
+    draft: control.draft,
+    error: ask ? editing?.conflictLabels?.message : control.error,
+    validating: control.validating,
     saveStatus:
       commit?.phase === "saving" || commit?.phase === "failed"
         ? commit.phase
@@ -74,10 +72,7 @@ export function editableUnitModel<TRow>(input: {
     canRollback: false,
     isDirty: editing?.dirty?.isDirty(rowId, column.key) ?? false,
     begin: () => undefined,
-    setDraft: (value) => {
-      if (batch) batch.setDraft(row, rowId, column.key, value);
-      else rowEditing!.setDraft(column.key, value);
-    },
+    setDraft: control.setDraft,
     commit: () => {
       if (!batch && !blocked) rowEditing!.save();
     },
@@ -85,10 +80,8 @@ export function editableUnitModel<TRow>(input: {
       if (batch) batch.cancelRow(rowId);
       else rowEditing!.cancel();
     },
-    onEditorKeyDown: (event) => {
-      if (!batch) handleRowEditorKey(event, rowEditing!, blocked);
-    },
-    commitOnBlur: () => undefined,
+    onEditorKeyDown: control.onEditorKeyDown,
+    commitOnBlur: control.commitOnBlur,
     keepConflict: () => ask?.keep(),
     takeConflict: () => ask?.take(),
     conflictLabels: ask ? editing?.conflictLabels : undefined,
@@ -99,4 +92,102 @@ export function editableUnitModel<TRow>(input: {
     ask,
     takesFocus: !batch && isFirstEditableColumn(input.columns, column.key),
   };
+}
+
+/** What a cell draws from its controller: every field but its actions. */
+const DRAWN_FIELDS = [
+  "mode",
+  "error",
+  "validating",
+  "saveStatus",
+  "saveFailure",
+  "isDirty",
+  "canRollback",
+  "editor",
+  "draft",
+  "conflict",
+] as const satisfies readonly (keyof EditableCellController<unknown>)[];
+
+/**
+ * What a row's editable cells draw from `editing`, as plain values read now:
+ * the same controller and unit each cell draws with, its batch mark, and
+ * its conflict's incoming value. A row keeps the bundle it last drew with
+ * while this is unchanged item by item ({@link sameDrawnView}), so an edit
+ * redraws only the rows it changes.
+ */
+export function drawnRowEditing<TRow>(
+  editing: EditingBundle<TRow>,
+  target: {
+    readonly row: TRow;
+    readonly rowId: string;
+    readonly rows: readonly TRow[];
+    readonly columns: readonly EditableColumnLike<TRow>[];
+    readonly rowKey: (row: TRow) => string;
+  }
+): readonly unknown[] {
+  const drawn: unknown[] = [
+    editing.onCellEdit !== undefined,
+    editing.featureHost,
+    ...labelValues(editing.conflictLabels),
+    editing.activation,
+    ...rowEditValues(editing, target.rowId),
+  ];
+  for (const column of target.columns) {
+    const unit = editableUnitModel({
+      editing,
+      controller: editableCellController({ ...target, column, editing }),
+      row: target.row,
+      rowId: target.rowId,
+      column,
+      columns: target.columns,
+    });
+    drawn.push(
+      unit.unit,
+      unit.takesFocus,
+      unit.ask?.incomingValue,
+      editing.batch?.isChanged(target.rowId, column.key)
+    );
+    for (const field of DRAWN_FIELDS) drawn.push(unit.controller[field]);
+    drawn.push(...labelValues(unit.controller.conflictLabels));
+  }
+  return drawn;
+}
+
+/** What a row's edit controls draw: whether it is open, and then its commit. */
+function rowEditValues<TRow>(
+  editing: EditingBundle<TRow>,
+  rowId: string
+): readonly unknown[] {
+  const rowEditing = editing.rowEditing;
+  const open = rowEditing?.isEditing(rowId) ?? false;
+  return [
+    rowEditing !== undefined,
+    open,
+    open ? rowEditing?.commit : undefined,
+    open ? rowEditing?.isDirty : undefined,
+    editing.conflict?.isRowConflict(rowId),
+  ];
+}
+
+/** The conflict labels as the values a cell shows: rebuilt with the options. */
+function labelValues(
+  labels: EditConflictLabels | undefined
+): readonly unknown[] {
+  return [
+    labels?.message,
+    labels?.keepMine,
+    labels?.takeTheirs,
+    labels?.theirsValue,
+  ];
+}
+
+/** Whether two views from {@link drawnRowEditing} draw the same row. */
+export function sameDrawnView(
+  previous: readonly unknown[],
+  next: readonly unknown[]
+): boolean {
+  return (
+    previous.length === next.length &&
+    previous.every((item, index) => Object.is(item, next[index]))
+  );
 }

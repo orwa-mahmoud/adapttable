@@ -15,11 +15,12 @@ import {
 } from "@adapttable/core";
 import { describe, expect, it } from "vitest";
 
+import * as server from "./index";
 import {
   parseTableQuery,
   pickFilters,
   type QuerySchema,
-  splitFilterValues,
+  splitListParam,
 } from "./index";
 
 /** A query string from the table's filter bag, as the table writes it. */
@@ -57,13 +58,18 @@ const schema: QuerySchema = {
 const read = (extra: ExtraFilters, over: QuerySchema = schema) =>
   parseTableQuery(filterUrl(extra), over);
 
-describe("splitFilterValues", () => {
+describe("splitListParam", () => {
   it("keeps an entry with a stray percent sign as it arrived", () => {
-    expect(splitFilterValues("100%,Core")).toEqual(["100%", "Core"]);
+    expect(splitListParam("100%,Core")).toEqual(["100%", "Core"]);
   });
 
   it("trims entries and drops empty ones", () => {
-    expect(splitFilterValues(" Core , ,Data,")).toEqual(["Core", "Data"]);
+    expect(splitListParam(" Core , ,Data,")).toEqual(["Core", "Data"]);
+  });
+
+  it("is what the splitFilterValues name still serves", () => {
+    // Read by name: the old name carries the deprecation notice.
+    expect(Reflect.get(server, "splitFilterValues")).toBe(splitListParam);
   });
 });
 

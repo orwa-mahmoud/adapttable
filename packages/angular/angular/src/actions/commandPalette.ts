@@ -6,15 +6,17 @@ import { fromStore, injectShortcuts, readMaybe } from "@adapttable/angular";
 import type { CommandPaletteOptions } from "@adapttable/angular/features";
 import {
   type Command,
-  commandPaletteCommands,
-  createCommandPaletteController,
   type Direction,
   type FeatureHostState,
-  isCommandPaletteArmed,
-  OPEN_PALETTE_COMMAND,
   type TableCommandOptions,
   type TableLabels,
 } from "@adapttable/core";
+import {
+  commandPaletteCommands,
+  createCommandPaletteController,
+  isCommandPaletteArmed,
+  OPEN_PALETTE_COMMAND,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,

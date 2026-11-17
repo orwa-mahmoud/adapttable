@@ -5,13 +5,13 @@
  * imports it never carries keyboard-grid state. The hook mounts in-tree
  * through {@link CELL_NAV_LIVE}.
  */
+import { type CellRange } from "@adapttable/core";
 import {
   cellNavigationChannels,
-  type CellRange,
   cellRangeKey,
+  coreCellNavigation,
   reportedCellRange,
-} from "@adapttable/core";
-import { coreCellNavigation } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import { beginCellEdit } from "@adapttable/core/editing";
 import {
   type ReactNode,
@@ -21,7 +21,6 @@ import {
   useRef,
 } from "react";
 
-import type { EditableCellEditing } from "../editing/editableCellController";
 import { useFindFocus } from "../find/useFindInTable";
 import { GridFocusAnnouncer } from "../focus/GridFocusAnnouncer";
 import { useGridFocus } from "../focus/useGridFocus";
@@ -29,12 +28,13 @@ import { RowScrollContext } from "../virtual/rowScroll";
 import { slotRender } from "./providers";
 import {
   CELL_NAV_LIVE,
+  type CellNavLiveDraw,
   type CellNavLiveSlotProps,
   GRID_FOCUS_ANNOUNCER,
 } from "./slotKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
-function LiveCellNav({
+function LiveCellNav<TRow>({
   options,
   hostProps,
   pinOffset,
@@ -46,14 +46,11 @@ function LiveCellNav({
   currentMatch,
   editing,
   children,
-}: CellNavLiveSlotProps<never> & {
-  /**
-   * Present when the table composed editing. Enter and F2 open the focused
-   * cell from here so the shell does not import the editing session.
-   */
-  readonly editing?: EditableCellEditing<never>;
-}): ReactNode {
-  const scrollToRow = useContext(RowScrollContext);
+}: CellNavLiveSlotProps<TRow>): ReactNode {
+  // The virtual body above belongs to this table, so it scrolls this table's
+  // rows; the context is one module-level value and cannot carry the type.
+  const scrollToRow = useContext(RowScrollContext) as
+    ((row: TRow) => void) | null;
   const scrollToIndex = useCallback(
     (index: number) => {
       const row = options.rows[index - (options.firstRowIndex ?? 0)];
@@ -136,7 +133,9 @@ export function cellNavigation(
   return {
     ...coreCellNavigation(options),
     renders: [
-      slotRender(CELL_NAV_LIVE, (props) => <LiveCellNav {...props} />),
+      slotRender<CellNavLiveDraw>(CELL_NAV_LIVE, (props) => (
+        <LiveCellNav {...props} />
+      )),
       slotRender(GRID_FOCUS_ANNOUNCER, (props) => (
         <GridFocusAnnouncer focus={props.focus} />
       )),

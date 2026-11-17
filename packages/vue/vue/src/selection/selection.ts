@@ -1,21 +1,19 @@
 /** Selection remains a host-controlled value when selectedIds is supplied. */
+import { type TableLabels } from "@adapttable/core";
 import {
-  applyGroupLeafSelection,
   headerSelectionOf,
-  resolveLabels,
-  type TableLabels,
+  type HeaderSelectionState,
+  resolveTableLabels,
+  type SelectionState,
   toggleId,
   toggleIds,
-} from "@adapttable/core";
-import type {
-  HeaderSelectionState,
-  SelectionState,
 } from "@adapttable/core/binding";
 import { createAllMatchingScope } from "@adapttable/core/selection";
 import {
   computed,
   type ComputedRef,
   type MaybeRefOrGetter,
+  shallowReactive,
   shallowRef,
   toValue,
   watch,
@@ -113,11 +111,27 @@ export function useRowSelection<TRow>(
         action(...args);
     };
   };
+  // A row's control acts while its row is drawn and the selection lives; it
+  // does not hold the visible-rows array, so a data write that replaces the
+  // array leaves every other row's control, and its drawing, as it is.
+  const ownedRowAction = (id: string, action: () => void) => {
+    const version = lifetime.value;
+    const admitted = enabled.value;
+    return (): void => {
+      if (
+        admitted &&
+        available.value &&
+        version === lifetime.value &&
+        visibleIds.value.includes(id)
+      )
+        action();
+    };
+  };
   const headerState = computed(() =>
     headerSelectionOf(visibleIds.value, selectedIds.value)
   );
   const labels = computed(() =>
-    resolveLabels(toValue<TableLabels | undefined>(options.value.labels))
+    resolveTableLabels(toValue<TableLabels | undefined>(options.value.labels))
   );
   const scope = createAllMatchingScope();
   const allMatching = useExternalStore(scope);
@@ -140,7 +154,18 @@ export function useRowSelection<TRow>(
     if (controlled.value === undefined) own.value = next;
     options.value.onSelectionChange?.([...next]);
   };
-  const isSelected = (id: string): boolean => selectedIds.value.has(id);
+  // Each row reads its own membership, so a change to one row's selection
+  // re-runs that row's readers and no other row's.
+  const membership = shallowReactive(new Set<string>());
+  watch(
+    selectedIds,
+    (next) => {
+      for (const id of membership) if (!next.has(id)) membership.delete(id);
+      for (const id of next) membership.add(id);
+    },
+    { flush: "sync", immediate: true }
+  );
+  const isSelected = (id: string): boolean => membership.has(id);
   const toggle = (id: string): void => commit(toggleId(selectedIds.value, id));
   const toggleAll = (): void =>
     commit(toggleIds(selectedIds.value, visibleIds.value));
@@ -148,7 +173,7 @@ export function useRowSelection<TRow>(
   const replace = (ids: readonly string[] | undefined): void =>
     commit(new Set(ids));
   const toggleGroupLeaves = (ids: readonly string[]): void =>
-    commit(applyGroupLeafSelection(ids, selectedIds.value));
+    commit(toggleIds(selectedIds.value, ids));
   const selectAllMatching = (): void => {
     if (available.value) scope.select(acrossPages.value);
   };
@@ -179,18 +204,26 @@ export function useRowSelection<TRow>(
       toggleGroupLeaves: ownedAction(toggleGroupLeaves),
       selectAllMatching: ownedAction(selectAllMatching),
     })),
+    // `checked` and `indeterminate` are read when a control draws them, so a
+    // model that holds these attributes does not follow the selection.
     rowCheckboxAttrs: (id) => ({
       type: "checkbox",
       "aria-label": labels.value.selectRow,
-      checked: isSelected(id),
+      get checked() {
+        return isSelected(id);
+      },
       ...(!enabled.value ? { disabled: true } : {}),
-      onChange: ownedAction(() => toggle(id)),
+      onChange: ownedRowAction(id, () => toggle(id)),
     }),
     headerCheckboxAttrs: () => ({
       type: "checkbox",
       "aria-label": labels.value.selectAll,
-      checked: headerState.value === "all",
-      indeterminate: headerState.value === "some",
+      get checked() {
+        return headerState.value === "all";
+      },
+      get indeterminate() {
+        return headerState.value === "some";
+      },
       ...(!enabled.value ? { disabled: true } : {}),
       onChange: ownedAction(toggleAll),
     }),

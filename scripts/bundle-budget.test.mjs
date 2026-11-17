@@ -209,6 +209,54 @@ describe("emitted-file accounting", () => {
     assert.equal(accounted.lazy.gzipBytes, arabic.gzipBytes);
   });
 
+  it("counts a preset's chunk as that preset, with the strings it spreads", () => {
+    const presetDir = "/app/node_modules/@adapttable/i18n/dist";
+    const output = [
+      {
+        type: "chunk",
+        fileName: "entry.js",
+        isEntry: true,
+        imports: [],
+        dynamicImports: ["en-1.js", "ar-1.js"],
+        moduleIds: ["/app/entry.js"],
+        code: "export const a = 1;",
+      },
+      {
+        type: "chunk",
+        fileName: "en-1.js",
+        isEntry: false,
+        imports: [],
+        dynamicImports: [],
+        facadeModuleId: `${presetDir}/en-1.js`,
+        moduleIds: [
+          "/app/node_modules/@adapttable/core/dist/labels-filterLabels-1.js",
+          `${presetDir}/en-1.js`,
+        ],
+        code: `export const en = ${JSON.stringify("en ".repeat(200))};`,
+      },
+      {
+        type: "chunk",
+        fileName: "ar-1.js",
+        isEntry: false,
+        imports: [],
+        dynamicImports: [],
+        facadeModuleId: `${presetDir}/ar-1.js`,
+        moduleIds: [`${presetDir}/ar-1.js`],
+        code: `export const ar = ${JSON.stringify("ar ".repeat(400))};`,
+      },
+    ];
+    const ledger = emittedLedger(output);
+    const english = ledger.find((file) => file.fileName === "en-1.js");
+    const arabic = ledger.find((file) => file.fileName === "ar-1.js");
+    assert.equal(english.alternative, "locale preset");
+    const accounted = accountOutputs(output, output);
+    assert.equal(accounted.lazy.files, 1);
+    assert.equal(
+      accounted.lazy.gzipBytes,
+      Math.max(english.gzipBytes, arabic.gzipBytes)
+    );
+  });
+
   it("counts an unclaimed stylesheet as initial and never counts sourcemaps", () => {
     const ledger = emittedLedger([
       {
@@ -230,6 +278,38 @@ describe("emitted-file accounting", () => {
       ]
     );
     assert.deepEqual(ledger[0].externalImports, ["vue"]);
+  });
+
+  it("lists each chunk's rendered modules by package path when asked", () => {
+    const chunk = {
+      type: "chunk",
+      fileName: "entry.js",
+      isEntry: true,
+      imports: [],
+      dynamicImports: [],
+      code: "const a=1;const b=2;",
+      modules: {
+        "/work/consumer/node_modules/@adapttable/core/dist/index.js": {
+          code: "const a=1;",
+          renderedLength: 10,
+        },
+        "/work/consumer/node_modules/@adapttable/core/dist/unused.js": {
+          code: null,
+          renderedLength: 0,
+        },
+        "/work/consumer/entry.js": { code: "const b=2;", renderedLength: 10 },
+      },
+    };
+    assert.equal(emittedLedger([chunk])[0].modules, undefined);
+    const [entry] = emittedLedger([chunk], { modules: true });
+    assert.deepEqual(
+      entry.modules.map(({ id, bytes }) => [id, bytes]),
+      [
+        ["@adapttable/core/dist/index.js", 10],
+        ["/work/consumer/entry.js", 10],
+      ]
+    );
+    assert.ok(entry.modules.every((module) => module.gzipBytes > 0));
   });
 
   it("gives the same totals and ledger whatever order files are emitted in", async () => {

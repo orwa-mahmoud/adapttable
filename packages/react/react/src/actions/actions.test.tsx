@@ -1,12 +1,14 @@
 import {
   type BulkAction,
   type ConfirmHandler,
-  defaultConfirm,
-  resetDevWarnings,
-  resolveDisabledReason,
   type RowAction,
   runRowAction,
 } from "@adapttable/core";
+import {
+  defaultConfirm,
+  resetDevWarnings,
+  resolveDisabledReason,
+} from "@adapttable/core/binding";
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 

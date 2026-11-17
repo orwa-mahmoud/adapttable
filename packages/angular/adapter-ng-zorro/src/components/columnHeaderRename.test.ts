@@ -1,5 +1,5 @@
 /** Real NG-ZORRO rename controls retain validation, announcements and focus. */
-import { defaultLabels } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/angular/adapter";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 

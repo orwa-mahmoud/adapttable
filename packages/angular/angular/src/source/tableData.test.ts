@@ -4,12 +4,12 @@
  */
 import {
   createMemoryAdapter,
-  FILTER_ENGINE_IMPL,
   type FilterDef,
   type TableCallbackRefresh,
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
+import { FILTER_ENGINE_IMPL } from "@adapttable/core/binding";
 import { createBasicTableEngine } from "@adapttable/core/engine";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";

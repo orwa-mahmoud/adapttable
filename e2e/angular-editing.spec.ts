@@ -24,17 +24,26 @@ for (const kit of ANGULAR_KITS) {
         .locator('[data-adapttable-part="cell"]')
         .nth(column);
 
+    /** The name in a row's Person cell, drawn above the person's role. */
+    const personName = (page: Page, row: number) =>
+      cell(page, row, 0).locator("strong").first();
+
+    // Person, Email, Team, Status, Budget, Load: the editing page hides only
+    // Timeline, as every framework's editing page does.
+    const STATUS = 3;
+    const BUDGET = 4;
+
     const log = (page: Page) => page.locator("[data-demo-log]");
 
     test("opens a select on the row's value and saves the new one through the host", async ({
       page,
     }) => {
       await page.goto(PAGE);
-      await cell(page, 0, 2).dblclick();
+      await cell(page, 0, STATUS).dblclick();
       const editor = part(page, "edit-cell-editor");
       await expectAngularSelection(kit, editor, {
-        value: "Planned",
-        label: "Planned",
+        value: "Active",
+        label: "Active",
       });
       await selectAngularOption(editor, {
         value: "Blocked",
@@ -45,9 +54,9 @@ for (const kit of ANGULAR_KITS) {
         label: "Blocked",
       });
       await editor.press("Enter");
-      await expect(cell(page, 0, 2)).toHaveText("Blocked");
+      await expect(cell(page, 0, STATUS)).toHaveText("Blocked");
       await expect(log(page)).toHaveText(
-        "Saved status for Ada Lovelace: Blocked"
+        "Saved status for Priya Nair: Blocked"
       );
     });
 
@@ -64,14 +73,14 @@ for (const kit of ANGULAR_KITS) {
       await cell(page, 0, 0).dblclick();
       await part(page, "edit-cell-editor").fill("Ada Approved");
       await part(page, "edit-cell-editor").press("Enter");
-      await expect(cell(page, 0, 0)).toHaveText("Ada Approved");
+      await expect(personName(page, 0)).toHaveText("Ada Approved");
       const saved = await log(page).innerText();
 
       await permission.click();
       await expect(permission).toHaveAttribute("aria-pressed", "false");
       await cell(page, 0, 0).dblclick();
       await expect(part(page, "edit-cell-editor")).toHaveCount(0);
-      await expect(cell(page, 0, 0)).toHaveText("Ada Approved");
+      await expect(personName(page, 0)).toHaveText("Ada Approved");
       await expect(log(page)).toHaveText(saved);
       expect(await table.evaluate((element) => element.isConnected)).toBe(true);
 
@@ -80,7 +89,7 @@ for (const kit of ANGULAR_KITS) {
       await cell(page, 0, 0).dblclick();
       await part(page, "edit-cell-editor").fill("Ada Restored");
       await part(page, "edit-cell-editor").press("Enter");
-      await expect(cell(page, 0, 0)).toHaveText("Ada Restored");
+      await expect(personName(page, 0)).toHaveText("Ada Restored");
       await expect(log(page)).toHaveText(
         "Saved person for Ada Approved: Ada Restored"
       );
@@ -92,7 +101,7 @@ for (const kit of ANGULAR_KITS) {
         page,
       }) => {
         await page.goto(PAGE);
-        await cell(page, 0, 2).dblclick();
+        await cell(page, 0, STATUS).dblclick();
         const editor = part(page, "edit-cell-editor");
         await expect(editor).toBeFocused();
         const selector = editor
@@ -129,28 +138,34 @@ for (const kit of ANGULAR_KITS) {
         await page
           .getByRole("heading", { name: "Inline cell editing in NG-ZORRO" })
           .click();
-        await expect(cell(page, 0, 2)).toHaveText("Blocked");
+        await expect(cell(page, 0, STATUS)).toHaveText("Blocked");
         await expect(log(page)).toHaveText(
-          "Saved status for Ada Lovelace: Blocked"
+          "Saved status for Priya Nair: Blocked"
         );
       });
     }
 
-    test("edits a number and a date through the kit controls", async ({
-      page,
-    }) => {
+    test("edits a number through the kit controls", async ({ page }) => {
       await page.goto(PAGE);
-      await cell(page, 0, 4).dblclick();
+      await cell(page, 0, BUDGET).dblclick();
       const budget = part(page, "edit-cell-editor");
       await expect(budget).toHaveAttribute("type", "number");
       await budget.fill("12345");
       await budget.press("Enter");
-      await expect(cell(page, 0, 4)).toHaveText("$12,345");
-      await expect(log(page)).toHaveText(
-        "Saved budget for Ada Lovelace: 12345"
-      );
+      await expect(cell(page, 0, BUDGET)).toHaveText("$12,345");
+      await expect(log(page)).toHaveText("Saved budget for Priya Nair: 12345");
+    });
 
-      await cell(page, 0, 3).dblclick();
+    test("opens the kit's date control on the live demo's Timeline", async ({
+      page,
+    }) => {
+      await page.goto(`/angular-main/?kit=${kit.key}`);
+      await part(page, "row")
+        .first()
+        .locator(
+          '[data-column-key="timeline"] [data-adapttable-part="edit-cell-activate"]'
+        )
+        .dblclick();
       const start = part(page, "edit-cell-editor");
       await expect(start).toHaveAttribute("type", "date");
       await expect(start).toHaveValue("2026-03-08");
@@ -193,22 +208,22 @@ for (const kit of ANGULAR_KITS) {
       await cell(page, 0, 0).dblclick();
       await part(page, "edit-cell-editor").fill("Ada Updated");
       await part(page, "edit-cell-editor").press("Enter");
-      await expect(cell(page, 0, 0)).toHaveText("Ada Updated");
+      await expect(personName(page, 0)).toHaveText("Ada Updated");
       await part(page, "undo-button").click();
-      await expect(cell(page, 0, 0)).toHaveText("Ada Lovelace");
+      await expect(personName(page, 0)).toHaveText("Priya Nair");
       await part(page, "redo-button").click();
-      await expect(cell(page, 0, 0)).toHaveText("Ada Updated");
+      await expect(personName(page, 0)).toHaveText("Ada Updated");
       await cell(page, 0, 0).focus();
       await page.keyboard.press("Control+z");
-      await expect(cell(page, 0, 0)).toHaveText("Ada Lovelace");
+      await expect(personName(page, 0)).toHaveText("Priya Nair");
       await page.keyboard.press("Control+Shift+z");
-      await expect(cell(page, 0, 0)).toHaveText("Ada Updated");
+      await expect(personName(page, 0)).toHaveText("Ada Updated");
       await cell(page, 0, 0).dblclick();
       const savedMessage = await log(page).textContent();
       await part(page, "edit-cell-editor").press("Control+z");
       await expect(log(page)).toHaveText(savedMessage!);
       await part(page, "edit-cell-editor").press("Escape");
-      await expect(cell(page, 0, 0)).toHaveText("Ada Updated");
+      await expect(personName(page, 0)).toHaveText("Ada Updated");
     });
 
     test("asks about a live value and keeps the draft when requested", async ({
@@ -221,12 +236,14 @@ for (const kit of ANGULAR_KITS) {
         .getByRole("button", { name: "Receive live name update" })
         .click();
       await expect(part(page, "edit-cell-conflict")).toBeVisible();
-      await expect(part(page, "edit-cell-incoming")).toContainText("Ada Live");
+      await expect(part(page, "edit-cell-incoming")).toContainText(
+        "Priya Live"
+      );
       await part(page, "edit-cell-keep-mine").click();
       await expect(part(page, "edit-cell-conflict")).toHaveCount(0);
       await expect(part(page, "edit-cell-editor")).toHaveValue("Ada Local");
       await part(page, "edit-cell-editor").press("Enter");
-      await expect(cell(page, 0, 0)).toHaveText("Ada Local");
+      await expect(personName(page, 0)).toHaveText("Ada Local");
     });
 
     test("takes the incoming live value without saving the abandoned draft", async ({
@@ -241,12 +258,16 @@ for (const kit of ANGULAR_KITS) {
       await expect(part(page, "edit-cell-conflict")).toBeVisible();
       await part(page, "edit-cell-take-theirs").click();
       await expect(part(page, "edit-cell-conflict")).toHaveCount(0);
-      await expect(part(page, "edit-cell-editor")).toHaveValue("Ada Live");
-      await expect(log(page)).toHaveText("Received live name update: Ada Live");
+      await expect(part(page, "edit-cell-editor")).toHaveValue("Priya Live");
+      await expect(log(page)).toHaveText(
+        "Received live name update: Priya Live"
+      );
       await part(page, "edit-cell-editor").press("Escape");
       await expect(part(page, "edit-cell-editor")).toHaveCount(0);
-      await expect(cell(page, 0, 0)).toHaveText("Ada Live");
-      await expect(log(page)).toHaveText("Received live name update: Ada Live");
+      await expect(personName(page, 0)).toHaveText("Priya Live");
+      await expect(log(page)).toHaveText(
+        "Received live name update: Priya Live"
+      );
     });
 
     test("shows the host's save failure and rolls its optimistic change back", async ({
@@ -262,9 +283,9 @@ for (const kit of ANGULAR_KITS) {
       );
       await part(page, "edit-cell-rollback").click();
       await expect(part(page, "edit-cell-save-error")).toHaveCount(0);
-      await expect(cell(page, 0, 0)).toHaveText("Ada Lovelace");
+      await expect(personName(page, 0)).toHaveText("Priya Nair");
       await expect(log(page)).toHaveText(
-        "Restored Ada Lovelace after the rejected save."
+        "Restored Priya Nair after the rejected save."
       );
     });
 
@@ -275,23 +296,23 @@ for (const kit of ANGULAR_KITS) {
       await context.grantPermissions(["clipboard-read", "clipboard-write"]);
       await page.goto(PAGE);
       const before = [
-        await cell(page, 0, 0).textContent(),
-        await cell(page, 1, 0).textContent(),
+        await personName(page, 0).textContent(),
+        await personName(page, 1).textContent(),
       ];
       await page.evaluate(async () => {
         await navigator.clipboard.writeText("Pasted Ada\nPasted Grace");
       });
       await cell(page, 0, 0).focus();
       await page.keyboard.press("Control+v");
-      await expect(cell(page, 0, 0)).toHaveText("Pasted Ada");
-      await expect(cell(page, 1, 0)).toHaveText("Pasted Grace");
+      await expect(personName(page, 0)).toHaveText("Pasted Ada");
+      await expect(personName(page, 1)).toHaveText("Pasted Grace");
       await part(page, "undo-button").click();
-      await expect(cell(page, 0, 0)).toHaveText(before[0]!);
-      await expect(cell(page, 1, 0)).toHaveText(before[1]!);
+      await expect(personName(page, 0)).toHaveText(before[0]!);
+      await expect(personName(page, 1)).toHaveText(before[1]!);
       await expect(part(page, "undo-button")).toBeDisabled();
       await part(page, "redo-button").click();
-      await expect(cell(page, 0, 0)).toHaveText("Pasted Ada");
-      await expect(cell(page, 1, 0)).toHaveText("Pasted Grace");
+      await expect(personName(page, 0)).toHaveText("Pasted Ada");
+      await expect(personName(page, 1)).toHaveText("Pasted Grace");
     });
 
     test("drags the fill handle across rows and undoes one fill gesture", async ({
@@ -299,8 +320,8 @@ for (const kit of ANGULAR_KITS) {
     }) => {
       await page.goto(PAGE);
       const before = [
-        await cell(page, 1, 0).textContent(),
-        await cell(page, 2, 0).textContent(),
+        await personName(page, 1).textContent(),
+        await personName(page, 2).textContent(),
       ];
       await cell(page, 0, 0).click();
       const handle = part(page, "fill-handle");
@@ -310,11 +331,11 @@ for (const kit of ANGULAR_KITS) {
       await page.mouse.down();
       await cell(page, 2, 0).hover();
       await page.mouse.up();
-      await expect(cell(page, 1, 0)).toHaveText("Ada Lovelace");
-      await expect(cell(page, 2, 0)).toHaveText("Ada Lovelace");
+      await expect(personName(page, 1)).toHaveText("Priya Nair");
+      await expect(personName(page, 2)).toHaveText("Priya Nair");
       await part(page, "undo-button").click();
-      await expect(cell(page, 1, 0)).toHaveText(before[0]!);
-      await expect(cell(page, 2, 0)).toHaveText(before[1]!);
+      await expect(personName(page, 1)).toHaveText(before[0]!);
+      await expect(personName(page, 2)).toHaveText(before[1]!);
       await expect(part(page, "undo-button")).toBeDisabled();
     });
 
@@ -326,6 +347,8 @@ for (const kit of ANGULAR_KITS) {
           .locator(
             `[data-adapttable-part="${width === 390 ? "card-value" : "cell"}"]`
           )
+          .first()
+          .locator("strong")
           .first();
 
       test(`Arabic name edits save, undo and redo the displayed value at ${String(width)}px`, async ({
@@ -333,18 +356,18 @@ for (const kit of ANGULAR_KITS) {
       }) => {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(`${PAGE}?locale=ar&dir=rtl`);
-        await expect(nameCell(page)).toHaveText("آدا لوفليس");
+        await expect(nameCell(page)).toHaveText("بريا نير");
         await part(page, "edit-cell-activate").first().dblclick();
         const editor = part(page, "edit-cell-editor");
-        await expect(editor).toHaveValue("آدا لوفليس");
+        await expect(editor).toHaveValue("بريا نير");
         await editor.fill("آدا المعدلة");
         await editor.press("Enter");
         await expect(nameCell(page)).toHaveText("آدا المعدلة");
         await expect(log(page)).toHaveText(
-          "Saved person for Ada Lovelace: آدا المعدلة"
+          "Saved person for Priya Nair: آدا المعدلة"
         );
         await part(page, "undo-button").click();
-        await expect(nameCell(page)).toHaveText("آدا لوفليس");
+        await expect(nameCell(page)).toHaveText("بريا نير");
         await part(page, "redo-button").click();
         await expect(nameCell(page)).toHaveText("آدا المعدلة");
       });
@@ -354,7 +377,7 @@ for (const kit of ANGULAR_KITS) {
       }) => {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(`${PAGE}?locale=ar&dir=rtl`);
-        await expect(nameCell(page)).toHaveText("آدا لوفليس");
+        await expect(nameCell(page)).toHaveText("بريا نير");
         await part(page, "edit-cell-activate").first().dblclick();
         await part(page, "edit-cell-editor").fill("آدا المحلية");
         await page
@@ -362,7 +385,7 @@ for (const kit of ANGULAR_KITS) {
           .click();
         await expect(part(page, "edit-cell-conflict")).toBeVisible();
         await expect(part(page, "edit-cell-incoming")).toContainText(
-          "Ada Live"
+          "Priya Live"
         );
         await part(page, "edit-cell-keep-mine").click();
         await expect(part(page, "edit-cell-conflict")).toHaveCount(0);
@@ -370,7 +393,7 @@ for (const kit of ANGULAR_KITS) {
         await part(page, "edit-cell-editor").press("Enter");
         await expect(nameCell(page)).toHaveText("آدا المحلية");
         await expect(log(page)).toHaveText(
-          "Saved person for Ada Lovelace: آدا المحلية"
+          "Saved person for Priya Nair: آدا المحلية"
         );
       });
 
@@ -379,7 +402,7 @@ for (const kit of ANGULAR_KITS) {
       }) => {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(`${PAGE}?locale=ar&dir=rtl`);
-        await expect(nameCell(page)).toHaveText("آدا لوفليس");
+        await expect(nameCell(page)).toHaveText("بريا نير");
         await part(page, "edit-cell-activate").first().dblclick();
         await part(page, "edit-cell-editor").fill("مسودة مهملة");
         await page
@@ -387,16 +410,16 @@ for (const kit of ANGULAR_KITS) {
           .click();
         await expect(part(page, "edit-cell-conflict")).toBeVisible();
         await expect(part(page, "edit-cell-incoming")).toContainText(
-          "Ada Live"
+          "Priya Live"
         );
         await part(page, "edit-cell-take-theirs").click();
         await expect(part(page, "edit-cell-conflict")).toHaveCount(0);
-        await expect(part(page, "edit-cell-editor")).toHaveValue("Ada Live");
+        await expect(part(page, "edit-cell-editor")).toHaveValue("Priya Live");
         await part(page, "edit-cell-editor").press("Escape");
         await expect(part(page, "edit-cell-editor")).toHaveCount(0);
-        await expect(nameCell(page)).toHaveText("Ada Live");
+        await expect(nameCell(page)).toHaveText("Priya Live");
         await expect(log(page)).toHaveText(
-          "Received live name update: Ada Live"
+          "Received live name update: Priya Live"
         );
       });
     }

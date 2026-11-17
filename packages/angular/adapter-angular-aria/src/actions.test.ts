@@ -11,7 +11,11 @@ import { rowActions } from "@adapttable/angular-aria/row-actions";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { actionsTests } from "../../angular/test/kit/suites/actions";
+import { kit } from "../testing/kit";
 import { AdaptDataTable } from "./dataTable";
+
+for (const test of actionsTests(kit)) it(test.name, test.run);
 
 interface Person {
   id: string;
@@ -111,56 +115,6 @@ describe("the Angular Aria Angular bulk actions", () => {
     expect(part("bulk-bar")).toBeNull();
   });
 
-  it("offers every matching row once the page is selected", async () => {
-    const seen: unknown[] = [];
-    const { part, parts, settle } = await mount([
-      bulkActions([
-        {
-          key: "export",
-          label: "Export",
-          onClick: (ids, context) => {
-            seen.push(ids.length, context);
-          },
-        },
-      ]),
-    ]);
-    part<HTMLInputElement>("checkbox")!.click();
-    await settle();
-    expect(part("select-all-text")?.textContent).toContain("5");
-    part<HTMLButtonElement>("select-all-button")!.click();
-    await settle();
-    expect(part("select-all-text")?.textContent).toContain("12");
-    parts<HTMLButtonElement>("bulk-button")[0]!.click();
-    await settle();
-    expect(seen).toEqual([5, { allMatching: true, total: 12 }]);
-  });
-
-  it("asks before an action that declares a confirmation", async () => {
-    const ran: number[] = [];
-    const { part, parts, settle } = await mount([
-      bulkActions([
-        {
-          key: "purge",
-          label: "Purge",
-          confirm: {
-            title: "Purge?",
-            message: (count) => `Purge ${String(count)}?`,
-            confirmLabel: "Purge",
-          },
-          onClick: (ids) => {
-            ran.push(ids.length);
-          },
-        },
-      ]),
-    ]);
-    parts<HTMLInputElement>("checkbox")[1]!.click();
-    await settle();
-    parts<HTMLButtonElement>("bulk-button")[0]!.click();
-    await settle();
-    expect(ran).toEqual([1]);
-    expect(part("bulk-bar")).toBeNull();
-  });
-
   it("clears the selection from the bar, and says when an action fails", async () => {
     const { part, parts, settle } = await mount([
       bulkActions([
@@ -212,36 +166,6 @@ describe("the Angular Aria Angular row actions", () => {
     edits.length = 0;
   });
 
-  it("adds an actions column with the host's actions, then Duplicate and Delete", async () => {
-    const duplicated: string[] = [];
-    const deleted: string[] = [];
-    const { part, parts, settle } = await mount([
-      rowActions(actions, {
-        onDuplicateRow: (row) => duplicated.push(row.id),
-        onDeleteRow: (row) => deleted.push(row.id),
-      }),
-    ]);
-    expect(part("actions-header")?.textContent?.trim()).toBe("Actions");
-    const buttons = parts<HTMLButtonElement>(
-      "action-button",
-      part("actions-cell") ?? undefined
-    );
-    expect(buttons.map((button) => button.textContent?.trim())).toEqual([
-      "Edit",
-      "Blocked",
-      "Duplicate row",
-      "Delete row",
-    ]);
-    expect(buttons[1]?.disabled).toBe(true);
-    buttons[0]!.click();
-    buttons[2]!.click();
-    buttons[3]!.click();
-    await settle();
-    expect(edits).toEqual(["1"]);
-    expect(duplicated).toEqual(["1"]);
-    expect(deleted).toEqual(["1"]);
-  });
-
   it("puts the actions behind one button in the menu layout", async () => {
     const { part, parts, settle } = await mount([
       rowActions(actions, { layout: "menu" }),
@@ -256,9 +180,22 @@ describe("the Angular Aria Angular row actions", () => {
     expect(menu.open).toBe(false);
   });
 
-  it("puts the actions on each phone card", async () => {
-    const { parts } = await mount([rowActions(actions)], true);
-    expect(parts("card-actions")).toHaveLength(5);
+  it("closes the menu on Escape and returns focus to its trigger", async () => {
+    const { part, settle } = await mount([
+      rowActions(actions, { layout: "menu" }),
+    ]);
+    const menu = part<HTMLDetailsElement>("row-actions-menu");
+    if (!menu) throw new Error("menu is not rendered");
+    menu.open = true;
+    const action = menu.querySelector("button");
+    if (!action) throw new Error("action is not rendered");
+    action.focus();
+    action.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+    );
+    await settle();
+    expect(menu.open).toBe(false);
+    expect(document.activeElement).toBe(menu.querySelector("summary"));
   });
 
   it("lists the actions column in the Columns menu, and hides it", async () => {
@@ -283,22 +220,4 @@ describe("the Angular Aria Angular row actions", () => {
     await settle();
     expect(part("actions-header")).toBeNull();
   });
-});
-
-describe("host-owned additions", () => {
-  it.each([false, true])(
-    "adds rows from the toolbar with mobile=%s",
-    async (mobile) => {
-      const add = vi.fn();
-      const { part, settle } = await mount(
-        [rowActions([], { onAddRow: add })],
-        mobile
-      );
-      const button = part<HTMLButtonElement>("add-row")!;
-      expect(button.textContent?.trim()).toBe("Add row");
-      button.click();
-      await settle();
-      expect(add).toHaveBeenCalledOnce();
-    }
-  );
 });

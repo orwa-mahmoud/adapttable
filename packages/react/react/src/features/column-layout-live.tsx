@@ -6,22 +6,35 @@
  * is composed.
  */
 import { autoSizeColumns as autoSizeAllColumns } from "@adapttable/core";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 
 import { flattenReactColumnTree } from "../columns/flattenColumnTree";
 import { applyReactColumnNames } from "../columns/reactColumns";
 import { resolveColumns } from "../columns/resolveColumns";
 import { useColumnLayout } from "../columns/useColumnLayout";
 import { slotRender } from "./providers";
-import { type ChromeExtraSlotProps, COLUMN_LAYOUT_LIVE } from "./slotKeys";
+import {
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  COLUMN_LAYOUT_LIVE,
+} from "./slotKeys";
 
-function LiveColumnLayout({
+function LiveColumnLayout<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<never>): ReactNode {
-  const flattened = flattenReactColumnTree(props.columns);
-  const declaredColumns = resolveColumns(flattened.leaves, props.locale);
+}: ChromeExtraSlotProps<TRow>): ReactNode {
+  // Kept across renders explicitly: the values flow into a hook, and the
+  // compiler does not memoize across one, so a render would otherwise hand
+  // every row new columns.
+  const flattened = useMemo(
+    () => flattenReactColumnTree(props.columns),
+    [props.columns]
+  );
+  const declaredColumns = useMemo(
+    () => resolveColumns(flattened.leaves, props.locale),
+    [flattened.leaves, props.locale]
+  );
   const columnLayout = useColumnLayout({
     columns: declaredColumns,
     layout: props.columnLayout,
@@ -62,7 +75,7 @@ function LiveColumnLayout({
 }
 
 /** Shared live render for every feature that owns user column layout. */
-export const COLUMN_LAYOUT_LIVE_RENDER = slotRender(
+export const COLUMN_LAYOUT_LIVE_RENDER = slotRender<ChromeExtraDraw>(
   COLUMN_LAYOUT_LIVE,
   (props) => <LiveColumnLayout {...props} />
 );

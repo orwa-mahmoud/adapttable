@@ -368,7 +368,7 @@ export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Editin
 
 export { EditingLifecycleExtras }
 
-// @public (undocumented)
+// @public
 export function exportCsv(options?: boolean): StaticTableFeature;
 
 // @public (undocumented)

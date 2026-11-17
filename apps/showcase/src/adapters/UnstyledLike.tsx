@@ -1,4 +1,4 @@
-import type { ColumnLayoutState } from "@adapttable/core";
+import type { ColumnLayoutState, TableSource } from "@adapttable/core";
 import type {
   ColumnDef,
   FeatureProps,
@@ -42,6 +42,7 @@ import {
 import { tree as tree_ } from "@adapttable/unstyled/tree";
 
 import { pageTablePresentation } from "../demoPresentation";
+import type { MobileDataState } from "../shared/mobileScenario";
 import { type KitChromeFactories, kitChromeFeatures } from "./chromeFeatures";
 
 /** This kit's factories, handed to the shared builder. */
@@ -76,7 +77,7 @@ const KIT_CHROME = {
   sidePanel: sidePanel_,
   statusBar: statusBar_,
 };
-import type { CSSProperties } from "react";
+import { type CSSProperties, useMemo } from "react";
 
 import {
   type AvatarCellProps,
@@ -104,6 +105,7 @@ import {
 import {
   type DataMode,
   DemoBody,
+  type DemoColumnProps,
   type Density,
   type Failure,
   type FiltersUi,
@@ -236,6 +238,8 @@ export function UnstyledLike({
   rowStyle,
   highlight,
   failure,
+  dataState,
+  onRowActivate,
   onRecover,
   customCard,
   realtime,
@@ -293,6 +297,10 @@ export function UnstyledLike({
   rowStyle?: boolean;
   highlight?: boolean;
   failure?: Failure;
+  /** Which data state the table shows. */
+  dataState?: MobileDataState;
+  /** The host callback when a row or card is activated. */
+  onRowActivate?: (row: Person) => void;
   onRecover?: () => void;
   customCard?: boolean;
   /** Apply live row patches on a timer, the way a socket feed would. */
@@ -340,12 +348,106 @@ export function UnstyledLike({
 }>) {
   const s = strings(locale);
   const filters = useDemoFilterDefs(locale);
-  const styled = withDensity(classNames, density);
+  const styled = useMemo(
+    () => withDensity(classNames, density),
+    [classNames, density]
+  );
   const rowActionsShown = showsRowActions({
     rowMutations,
     focused,
     columnGroups,
   });
+  const editable =
+    editing === true ||
+    rowMode === true ||
+    batch === true ||
+    editorShowcase === true;
+  const options = useMemo<UnstyledLikeTableOptions>(
+    () => ({
+      locale,
+      search: s.search,
+      filters,
+      styled,
+      groupingPanelFactory,
+      wide,
+      editable,
+      columnGroups,
+      sparkline,
+      editorShowcase,
+      formulaColumns,
+      nested,
+      editing,
+      cellNavigation,
+      columnSelectionCheckbox,
+      densityChooser,
+      exportCsv,
+      focused,
+      fullscreen,
+      headerFilters,
+      onPrint,
+      printButton,
+      undoRedoButtons,
+      urlKey,
+      bulkActions,
+      columnMenu,
+      commandPalette,
+      contextMenu,
+      filterControls,
+      sidePanel,
+      statusBar,
+      rowActionsShown,
+      onDensityChange,
+      forceMobile,
+      maxHeight,
+      density,
+      filtersUi,
+      rowMutations,
+      animate,
+      filterFields,
+    }),
+    [
+      locale,
+      s.search,
+      filters,
+      styled,
+      groupingPanelFactory,
+      wide,
+      editable,
+      columnGroups,
+      sparkline,
+      editorShowcase,
+      formulaColumns,
+      nested,
+      editing,
+      cellNavigation,
+      columnSelectionCheckbox,
+      densityChooser,
+      exportCsv,
+      focused,
+      fullscreen,
+      headerFilters,
+      onPrint,
+      printButton,
+      undoRedoButtons,
+      urlKey,
+      bulkActions,
+      columnMenu,
+      commandPalette,
+      contextMenu,
+      filterControls,
+      sidePanel,
+      statusBar,
+      rowActionsShown,
+      onDensityChange,
+      forceMobile,
+      maxHeight,
+      density,
+      filtersUi,
+      rowMutations,
+      animate,
+      filterFields,
+    ]
+  );
   return (
     <DemoBody
       rowActionsShown={rowActionsShown}
@@ -377,6 +479,8 @@ export function UnstyledLike({
       rowStyle={rowStyle}
       highlight={highlight}
       failure={failure}
+      dataState={dataState}
+      onRowActivate={onRowActivate}
       onRecover={onRecover}
       customCard={customCard}
       realtime={realtime}
@@ -384,91 +488,160 @@ export function UnstyledLike({
       derivedFields={derivedFields}
       formulaColumns={formulaColumns}
       columnGroups={columnGroups}
-      render={(
-        source,
-        { features: demoFeatures, demoRowHandlers, ...columns }
-      ) => {
-        return (
-          <DataTable
-            source={source}
-            columns={
-              wide
-                ? makeWideColumns(locale, TAILWIND_CELLS, {
-                    editable: Boolean(
-                      editing === true ||
-                      rowMode === true ||
-                      batch === true ||
-                      editorShowcase === true
-                    ),
-                  })
-                : makeColumns(locale, TAILWIND_CELLS, {
-                    groups: columnGroups,
-                    sparkline,
-                    editors: editorShowcase,
-                    formulas: formulaColumns,
-                    editable: Boolean(
-                      editing === true ||
-                      rowMode === true ||
-                      batch === true ||
-                      editorShowcase === true
-                    ),
-                  })
-            }
-            rowKey={(r) => r.id}
-            features={[
-              ...(nested ? nestedOuterFeatures<Person>() : []),
-              ...kitChromeFeatures(
-                { ...KIT_CHROME, groupingPanel: groupingPanelFactory },
-                {
-                  cellNavigation,
-                  columnSelectionCheckbox,
-                  densityChooser,
-                  editing,
-                  exportCsv,
-                  focused,
-                  fullscreen,
-                  headerFilters,
-                  nested: nested ? nestedOrders : undefined,
-                  nestedOpenIds: nestedOpenIds(nested, source.rows),
-                  onPrint,
-                  printButton,
-                  undoRedoButtons,
-                  urlKey,
-                  bulkActions,
-                  bulkActionList: makeBulkActions(locale),
-                  collapsibleColumnGroups: columns.collapsibleColumnGroups,
-                  columnMenu,
-                  rowActions: rowActionsShown
-                    ? makeActions(locale, demoRowHandlers)
-                    : undefined,
-                  commandPalette,
-                  contextMenu,
-                  filterControls,
-                  filterDefs: filters,
-                  filterTypeSpecs: demoFilterTypes(),
-                  sidePanel,
-                  statusBar,
-                  kitFeatures: columns.kitFeatures,
-                }
-              ),
-              ...(demoFeatures ?? []),
-            ]}
-            onDensityChange={onDensityChange}
-            {...columns}
-            forceMobile={forceMobile}
-            maxHeight={maxHeight}
-            density={density}
-            filtersMode={filtersUi}
-            {...pageTablePresentation(locale, s.search)}
-            rowActionsLayout={rowMutations ? "menu" : undefined}
-            confirm={demoConfirm}
-            animate={animate}
-            stickyHeader
-            filterFields={filterFields}
-            classNames={styled}
-          />
-        );
-      }}
+      render={(source, demo) => (
+        <UnstyledLikeTable source={source} demo={demo} options={options} />
+      )}
+    />
+  );
+}
+
+/** What the table half of an unstyled-like demo reads from its page. */
+interface UnstyledLikeTableOptions {
+  readonly locale: Locale;
+  readonly search: string;
+  readonly filters: ReturnType<typeof useDemoFilterDefs>;
+  readonly styled: DataTableClassNames;
+  readonly groupingPanelFactory: KitChromeFactories["groupingPanel"];
+  readonly wide?: boolean;
+  readonly editable: boolean;
+  readonly columnGroups?: boolean;
+  readonly sparkline?: boolean;
+  readonly editorShowcase?: boolean;
+  readonly formulaColumns?: readonly ColumnDef<Person>[];
+  readonly nested?: boolean;
+  readonly editing?: boolean;
+  readonly cellNavigation?: boolean;
+  readonly columnSelectionCheckbox?: boolean;
+  readonly densityChooser?: boolean;
+  readonly exportCsv?: NonNullable<FeatureProps<Person>["exportCsv"]>;
+  readonly focused?: boolean;
+  readonly fullscreen?: boolean;
+  readonly headerFilters?: boolean;
+  readonly onPrint?: () => void;
+  readonly printButton?: boolean;
+  readonly undoRedoButtons?: boolean;
+  readonly urlKey?: string;
+  readonly bulkActions?: boolean;
+  readonly columnMenu?: boolean;
+  readonly commandPalette?: boolean;
+  readonly contextMenu?: boolean;
+  readonly filterControls?: boolean;
+  readonly sidePanel?: NonNullable<FeatureProps<Person>["sidePanel"]>;
+  readonly statusBar?: boolean;
+  readonly rowActionsShown: boolean;
+  readonly onDensityChange?: (next: "comfortable" | "compact") => void;
+  readonly forceMobile?: boolean;
+  readonly maxHeight?: number;
+  readonly density?: Density;
+  readonly filtersUi?: FiltersUi;
+  readonly rowMutations?: boolean;
+  readonly animate?: boolean;
+  readonly filterFields?: boolean;
+}
+
+const personId = (row: Person): string => row.id;
+
+/**
+ * The table of an unstyled-like demo. Its columns, features and presentation
+ * are built once per change of what they read, so the table keeps them across
+ * an edit, a selection or a streamed patch, the way a host's table would.
+ */
+function UnstyledLikeTable({
+  source,
+  demo,
+  options: o,
+}: Readonly<{
+  source: TableSource<Person>;
+  demo: DemoColumnProps;
+  options: UnstyledLikeTableOptions;
+}>) {
+  const { features: demoFeatures, demoRowHandlers, ...columns } = demo;
+  const tableColumns = useMemo(
+    () =>
+      o.wide
+        ? makeWideColumns(o.locale, TAILWIND_CELLS, { editable: o.editable })
+        : makeColumns(o.locale, TAILWIND_CELLS, {
+            groups: o.columnGroups,
+            sparkline: o.sparkline,
+            editors: o.editorShowcase,
+            formulas: o.formulaColumns,
+            editable: o.editable,
+          }),
+    [o]
+  );
+  const nestedRows = o.nested ? source.rows : undefined;
+  const { kitFeatures, collapsibleColumnGroups } = columns;
+  const features = useMemo(
+    () => [
+      ...(o.nested ? nestedOuterFeatures<Person>() : []),
+      ...kitChromeFeatures(
+        { ...KIT_CHROME, groupingPanel: o.groupingPanelFactory },
+        {
+          cellNavigation: o.cellNavigation,
+          columnSelectionCheckbox: o.columnSelectionCheckbox,
+          densityChooser: o.densityChooser,
+          editing: o.editing,
+          exportCsv: o.exportCsv,
+          focused: o.focused,
+          fullscreen: o.fullscreen,
+          headerFilters: o.headerFilters,
+          nested: o.nested ? nestedOrders : undefined,
+          nestedOpenIds: nestedOpenIds(o.nested, nestedRows ?? []),
+          onPrint: o.onPrint,
+          printButton: o.printButton,
+          undoRedoButtons: o.undoRedoButtons,
+          urlKey: o.urlKey,
+          bulkActions: o.bulkActions,
+          bulkActionList: makeBulkActions(o.locale, demoRowHandlers),
+          collapsibleColumnGroups,
+          columnMenu: o.columnMenu,
+          rowActions: o.rowActionsShown
+            ? makeActions(o.locale, demoRowHandlers)
+            : undefined,
+          commandPalette: o.commandPalette,
+          contextMenu: o.contextMenu,
+          filterControls: o.filterControls,
+          filterDefs: o.filters,
+          filterTypeSpecs: demoFilterTypes(),
+          sidePanel: o.sidePanel,
+          statusBar: o.statusBar,
+          kitFeatures,
+        }
+      ),
+      ...(demoFeatures ?? []),
+    ],
+    [
+      o,
+      nestedRows,
+      collapsibleColumnGroups,
+      demoRowHandlers,
+      kitFeatures,
+      demoFeatures,
+    ]
+  );
+  const presentation = useMemo(
+    () => pageTablePresentation(o.locale, o.search),
+    [o.locale, o.search]
+  );
+  return (
+    <DataTable
+      source={source}
+      columns={tableColumns}
+      rowKey={personId}
+      features={features}
+      onDensityChange={o.onDensityChange}
+      {...columns}
+      forceMobile={o.forceMobile}
+      maxHeight={o.maxHeight}
+      density={o.density}
+      filtersMode={o.filtersUi}
+      {...presentation}
+      rowActionsLayout={o.rowMutations ? "menu" : undefined}
+      confirm={demoConfirm}
+      animate={o.animate}
+      stickyHeader
+      filterFields={o.filterFields}
+      classNames={o.styled}
     />
   );
 }

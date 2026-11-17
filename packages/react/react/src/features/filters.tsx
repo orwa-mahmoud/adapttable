@@ -5,8 +5,8 @@
  * imports it never walks the tree. The hook mounts in-tree through
  * {@link FILTER_CHIPS_LIVE}.
  */
-import { FILTER_ENGINE_IMPL, type FilterDef } from "@adapttable/core";
-import { coreFilters } from "@adapttable/core/binding";
+import { type FilterDef } from "@adapttable/core";
+import { coreFilters, FILTER_ENGINE_IMPL } from "@adapttable/core/binding";
 import { type ReactNode, useMemo } from "react";
 
 import {
@@ -21,7 +21,11 @@ import {
   FeatureStateScope,
   slotRender,
 } from "./providers";
-import { type ChromeExtraSlotProps, FILTER_CHIPS_LIVE } from "./slotKeys";
+import {
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  FILTER_CHIPS_LIVE,
+} from "./slotKeys";
 import type { StaticTableFeature, TableFeature } from "./tableFeature";
 
 function FiltersEngineProvider({
@@ -34,11 +38,11 @@ function FiltersEngineProvider({
   );
 }
 
-function LiveFilterChips({
+function LiveFilterChips<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<never>): ReactNode {
+}: ChromeExtraSlotProps<TRow>): ReactNode {
   const extraChips = useExtraChips({
     extra: chrome.source.extra,
     setExtra: chrome.source.setExtra,
@@ -91,12 +95,17 @@ export function filters<TRow>(
  */
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[] | ReactNode
+): TableFeature<TRow>;
+export function filters<TRow>(
+  defs: readonly FilterDef<TRow>[] | ReactNode
 ): TableFeature<TRow> {
   return {
-    ...coreFilters<TRow>(defs),
+    ...coreFilters<TRow, ReactNode>(defs),
     provider: { Provider: FiltersEngineProvider },
     renders: [
-      slotRender(FILTER_CHIPS_LIVE, (props) => <LiveFilterChips {...props} />),
+      slotRender<ChromeExtraDraw>(FILTER_CHIPS_LIVE, (props) => (
+        <LiveFilterChips {...props} />
+      )),
     ],
   };
 }

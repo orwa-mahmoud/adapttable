@@ -5,23 +5,26 @@
  * components in `slots`.
  */
 import {
-  CHECKLIST_ITEM_WIDTH,
   CHECKLIST_LIST_HEIGHT,
-  CHECKLIST_OPTION_GAP,
   CHECKLIST_VIRTUALIZE_AT,
-  checklistActions,
-  checklistItems,
   type FilterDef,
   filterLabel,
   listFilterValues,
-  resolveLabels,
-  searchChecklistItems,
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
-import type {
-  ChecklistButtonProps,
-  ChecklistSearchProps,
+import {
+  CHECKLIST_ITEM_WIDTH,
+  CHECKLIST_OPTION_GAP,
+  checklistActions,
+  type ChecklistButtonProps,
+  checklistItems,
+  type ChecklistSearchProps,
+  checklistSlice,
+  FILTER_LABELS,
+  nextChecklistViewport,
+  resolveFeatureLabels,
+  searchChecklistItems,
 } from "@adapttable/core/binding";
 import {
   afterRenderEffect,
@@ -36,7 +39,8 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
-import { checklistSlice, nextChecklistViewport } from "./checklistWindow";
+
+const FILTER_GROUPS = [FILTER_LABELS] as const;
 
 /**
  * The kit's controls for the checklist. Each is a standalone component with
@@ -166,7 +170,9 @@ export class AdaptChecklistChrome<TRow> {
   private readonly list = viewChild<ElementRef<HTMLElement>>("list");
   private readonly query = signal("");
   private readonly viewport = signal({ scrollTop: 0, width: 0 });
-  private readonly resolved = computed(() => resolveLabels(this.labels()));
+  private readonly resolved = computed(() =>
+    resolveFeatureLabels(this.labels(), FILTER_GROUPS)
+  );
 
   protected readonly model = computed(() => {
     const def = this.def();

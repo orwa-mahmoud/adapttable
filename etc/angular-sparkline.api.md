@@ -5,13 +5,14 @@
 ```ts
 
 import { ColumnMetadata } from '@adapttable/core';
+import { ColumnModelFilter } from '@adapttable/core';
 import { finiteSparklineValues } from '@adapttable/core';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';
 import { Signal } from '@angular/core';
-import { SparklineBar } from '@adapttable/core';
+import { SparklineBar } from '@adapttable/core/binding';
 import { sparklineExportValue } from '@adapttable/core';
-import { SparklineKind } from '@adapttable/core';
+import { SparklineKind } from '@adapttable/core/binding';
 import { sparklineSummary } from '@adapttable/core';
 import { TemplateRef } from '@angular/core';
 import { Type } from '@angular/core';
@@ -97,8 +98,9 @@ export interface CellContext<TRow> {
 }
 
 // @public
-export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
+export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header" | "filter"> {
     cell?: Renderer<CellContext<TRow>>;
+    filter?: ColumnModelFilter;
     footer?: Renderer<FooterContext<TRow>>;
     header?: string;
     headerActions?: string | Renderer<HeaderContext<TRow>>;

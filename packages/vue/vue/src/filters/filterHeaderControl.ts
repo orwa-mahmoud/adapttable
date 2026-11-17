@@ -1,19 +1,19 @@
 import {
   defaultFilterRegistry,
+  renderRegisteredFilter,
+} from "@adapttable/core";
+import {
+  type FilterHeaderControlProps,
+  type FilterHeaderMultiProps,
+  type FilterHeaderRangeProps,
+  type FilterHeaderSearchProps,
+  type FilterHeaderSelectProps,
+  type FilterHeaderSlots as NeutralFilterHeaderSlots,
   headerFilterBooleanOptions,
   headerFilterCellKind,
   headerFilterMultiModel,
   headerFilterRangeModel,
   headerFilterSelectModel,
-  renderRegisteredFilter,
-} from "@adapttable/core";
-import type {
-  FilterHeaderControlProps,
-  FilterHeaderMultiProps,
-  FilterHeaderRangeProps,
-  FilterHeaderSearchProps,
-  FilterHeaderSelectProps,
-  FilterHeaderSlots as NeutralFilterHeaderSlots,
 } from "@adapttable/core/binding";
 import {
   computed,

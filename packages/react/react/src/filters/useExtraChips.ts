@@ -1,8 +1,5 @@
-import {
-  chipValuesOf,
-  type ExtraFilters,
-  type FilterValue,
-} from "@adapttable/core";
+import { type ExtraFilters, type FilterValue } from "@adapttable/core";
+import { chipValuesOf } from "@adapttable/core/binding";
 import { useCallback, useMemo } from "react";
 
 import {

@@ -11,12 +11,12 @@
 import {
   createRowReorderController,
   isRowMovePending,
-  isRtlElement,
   type RowDropPosition,
   type RowReorderControllerOptions,
   rowReorderRowAttributes,
 } from "@adapttable/core";
 import {
+  isRtlElement,
   rowReorderDropStyle as coreRowReorderDropStyle,
   rowReorderSignature as coreRowReorderSignature,
   type RowReorderState as NeutralRowReorderState,

@@ -569,6 +569,25 @@ describe("suspended feature resources", () => {
 });
 
 describe("current commands and boundaries", () => {
+  it("drops an action that opens the row form when the table has none", () => {
+    const test = shell([
+      rowActions<Row>([
+        { key: "edit", label: "Edit", editsRow: true },
+        { key: "remove", label: "Remove", onClick: vi.fn() },
+      ]),
+    ]);
+    const model = test.table.state.get(rowActionsModelKey<Row>()).value!;
+    const controls = rowActionControls<Row>({
+      row: required(rows[0]),
+      actions: model.rowActions ?? [],
+      confirm: vi.fn(),
+      cancelLabel: "Cancel",
+      enabled: () => true,
+    });
+    expect(controls.map((control) => control.key)).toEqual(["remove"]);
+    test.scope.stop();
+  });
+
   it("host action commands stay distinct from built-in row mutation actions", () => {
     const old = vi.fn();
     const latest = vi.fn();

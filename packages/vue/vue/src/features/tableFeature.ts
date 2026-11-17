@@ -2,6 +2,7 @@
 import {
   devWarn,
   type TableDensity,
+  type TableLabels,
   type TableSource,
   type UrlStateAdapter,
 } from "@adapttable/core";
@@ -15,7 +16,9 @@ import {
   type FilterRuntime,
   type LiveFeatureHost,
   mergeFeaturePatches,
+  type PlainSlotKey,
   preferLastById,
+  type RowSlotKey,
   type SlotFill,
   slotFillsOf,
   type TableRuntime,
@@ -59,6 +62,8 @@ export interface TableFeature<TRow> {
   readonly id: string;
   readonly dependencies?: readonly unknown[];
   apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+  /** The strings the feature draws, with their English defaults. */
+  readonly labels?: Partial<TableLabels>;
   readonly setup?: (host: TableFeatureHost<TRow>) => void | (() => void);
   readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
   readonly renders?: readonly FeatureRender<never, VNodeChild>[];
@@ -77,6 +82,8 @@ export interface StaticTableFeature {
   readonly id: string;
   readonly dependencies?: readonly unknown[];
   apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+  /** The strings the feature draws, with their English defaults. */
+  readonly labels?: Partial<TableLabels>;
   readonly setup?: (host: StaticFeatureHost) => void | (() => void);
   readonly mount?: <TRow>(
     context: FeatureMountContext<TRow>
@@ -118,7 +125,7 @@ export function normalizeFeatures<TRow>(
 export function featureOptionsOf<TRow>(
   features: readonly ComposedFeature<TRow>[]
 ): Readonly<Record<string, unknown>> {
-  return mergeFeaturePatches(features as readonly TableFeature<unknown>[]);
+  return mergeFeaturePatches(features);
 }
 export function featureSlotFillsOf<TRow>(
   features: readonly ComposedFeature<TRow>[]
@@ -126,12 +133,23 @@ export function featureSlotFillsOf<TRow>(
   return slotFillsOf(features);
 }
 export function renderFeatureSlot<TProps>(
-  slot: FeatureSlotKey<TProps>,
+  slot: PlainSlotKey<TProps>,
   fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>,
   props: TProps
+): VNodeChild[];
+/** Draw a row-typed slot's fills with this table's props. @public */
+export function renderFeatureSlot<TProps>(
+  slot: RowSlotKey<(props: NoInfer<TProps>) => VNodeChild>,
+  fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>,
+  props: TProps
+): VNodeChild[];
+export function renderFeatureSlot(
+  slot: FeatureSlotKey<never>,
+  fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>,
+  props: unknown
 ): VNodeChild[] {
   return drawnSlotFills(slot, fills.get(slot.id) ?? []).map((fill) =>
-    (fill.render as (props: TProps) => VNodeChild)(props)
+    (fill.render as (props: unknown) => VNodeChild)(props)
   );
 }
 export function assertRequiredSlots<TRow>(
@@ -168,5 +186,5 @@ export function extendFeature<
 export function eraseTableRuntime<TRow>(
   runtime: TableRuntime<TRow>
 ): TableRuntime<unknown> {
-  return runtime as unknown as TableRuntime<unknown>;
+  return runtime;
 }

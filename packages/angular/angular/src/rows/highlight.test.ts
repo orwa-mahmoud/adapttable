@@ -2,7 +2,8 @@
  * Row and cell marks: they appear, fade on their own, stay still for a
  * reader who asked for reduced motion, and are not made while disabled.
  */
-import { highlightDuration } from "@adapttable/core";
+
+import { highlightDuration } from "@adapttable/core/binding";
 import {
   computed,
   createEnvironmentInjector,

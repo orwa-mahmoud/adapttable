@@ -14,6 +14,7 @@ import type {
   SortDirection,
 } from "./contracts/columns";
 import type { FacetMap } from "./contracts/query";
+import type { RowCallback } from "./contracts/rowCallback";
 import type { DisplayValue } from "./display";
 
 export type {
@@ -23,6 +24,7 @@ export type {
   ColumnModel,
   ExtraFilters,
   FilterValue,
+  RowCallback,
   SortableValue,
   SortDirection,
 } from "./columnModel";
@@ -166,7 +168,7 @@ export interface ActionConfirm<TArg> {
   /** Dialog title (pre-translated). */
   title: string;
   /** Builds the dialog message from the action argument. */
-  message: (arg: TArg) => string;
+  message: RowCallback<[arg: TArg], string>;
   /** Confirm button label (pre-translated). */
   confirmLabel: string;
   /** Marks the action destructive (adapters style it accordingly). */
@@ -193,7 +195,7 @@ export interface RowAction<TRow> {
    * Click handler; fires after confirmation when `confirm` is set. Omit it
    * only on an `editsRow` action, where the row's own form does the writing.
    */
-  onClick?: (row: TRow) => void;
+  onClick?: RowCallback<[row: TRow], void>;
   /**
    * This action opens the row's fields as one form instead of writing
    * anything itself. Row-mode editing hands it the trigger and the table's
@@ -209,14 +211,14 @@ export interface RowAction<TRow> {
   /** Adapter-defined colour token (e.g. `"red"` for destructive). */
   color?: string;
   /** Disable conditionally — e.g. delete when the row is referenced. */
-  isDisabled?: (row: TRow) => boolean;
+  isDisabled?: RowCallback<[row: TRow], boolean>;
   /**
    * Disable conditionally and explain why. A non-empty string disables the
    * action and adapters surface it as tooltip/title copy where possible.
    */
-  disabledReason?: (row: TRow) => string | undefined;
+  disabledReason?: RowCallback<[row: TRow], string | undefined>;
   /** Hide entirely when the action is structurally inapplicable. */
-  isHidden?: (row: TRow) => boolean;
+  isHidden?: RowCallback<[row: TRow], boolean>;
   /** Optional confirmation dialog wiring. */
   confirm?: ActionConfirm<TRow>;
   /**

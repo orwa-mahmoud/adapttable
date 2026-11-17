@@ -2,20 +2,26 @@
 /** Editing: kit-native editors in the cell; the host writes every change. */
 import { computed, shallowRef } from "vue";
 
+import { pageDefaultsFor, seedRoster } from "../../../casts";
+import {
+  EDITING_DEFAULT_LAYOUT,
+  liveNameUpdate,
+} from "../../../shared/peopleTable";
 import {
   applyPersonEdit,
   peopleColumns,
-  peopleRows,
   type Person,
   personDisplayName,
   rowKey,
   TABLE_PRESENTATION,
 } from "../data";
+import { pageChromeFeatures } from "../pageChrome";
 import { useShowcaseKit } from "../showcaseKit";
 
 const kit = useShowcaseKit();
-const columns = peopleColumns({ editable: true, status: kit.status });
-const rows = shallowRef<readonly Person[]>(peopleRows());
+const PAGE_DEFAULTS = pageDefaultsFor("editing");
+const columns = peopleColumns(kit, { editable: true });
+const rows = shallowRef<readonly Person[]>(seedRoster("editing", false));
 const log = shallowRef("Every change goes through the host.");
 const rejectNext = shallowRef(false);
 const editingEnabled = shallowRef(true);
@@ -24,8 +30,9 @@ const editingEnabled = shallowRef(true);
 function receiveLiveUpdate(): void {
   const row = rows.value[0];
   if (!row) return;
-  rows.value = applyPersonEdit(rows.value, row, "person", "Ada Live");
-  log.value = "Received live name update: Ada Live";
+  const name = liveNameUpdate(row);
+  rows.value = applyPersonEdit(rows.value, row, "person", name);
+  log.value = `Received live name update: ${name}`;
 }
 
 const editingFeature = kit.editing<Person>(
@@ -55,11 +62,14 @@ const persistentFeatures = [
   kit.editHistory(),
   kit.undoRedoButtons(),
   kit.cellNavigation(),
+  kit.columnSelectionCheckbox(),
 ];
-const features = computed(() => [
+const pageFeatures = computed(() => [
   ...(editingEnabled.value ? [editingFeature] : []),
   ...persistentFeatures,
 ]);
+const chrome = pageChromeFeatures(kit, { editing: true, urlKey: "edit" });
+const features = computed(() => [...pageFeatures.value, ...chrome]);
 </script>
 
 <template>
@@ -96,13 +106,15 @@ const features = computed(() => [
     <div class="mx-demo__body">
       <component
         :is="kit.DataTable"
+        selectable
         v-bind="TABLE_PRESENTATION"
         table-label="People"
         :url-sync="false"
         :data="rows"
         :columns="columns"
         :row-key="rowKey"
-        :defaults="{ limit: 10 }"
+        :defaults="PAGE_DEFAULTS"
+        :default-column-layout="EDITING_DEFAULT_LAYOUT"
         :features="features"
       />
     </div>

@@ -1,192 +1,127 @@
-/** The trailing row-action buttons, shared by rows and cards. */
+/** A row's actions, decided by the binding and drawn as native buttons. */
 import {
-  type ConfirmHandler,
-  resolveDisabledReason,
-  type RowAction,
-  type RowActionsLayout,
-  type RowActionsRenderer,
-  runRowAction,
-  type TableLabels,
-  visibleRowActions,
+  createRowActionButtons,
+  type KitRowActionMenuProps,
+  type KitRowActionProps,
 } from "@adapttable/react/adapter";
-import { type MouseEvent, type ReactNode, type RefObject, useRef } from "react";
+import {
+  type MouseEvent,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
-import type { DataTableClassNames } from "../types";
+import { useClassNames } from "./classNamesContext";
 import { iconForRowAction, MoreVerticalIcon } from "./icons";
 
-interface RowActionButtonsProps<TRow> {
-  row: TRow;
-  minTargetSize?: number;
-  actions: readonly RowAction<TRow>[];
-  confirm: ConfirmHandler;
-  labels: Required<TableLabels>;
-  classNames: DataTableClassNames;
-  layout?: RowActionsLayout;
-  render?: RowActionsRenderer<TRow>;
-}
+const targetOf = (size: number | undefined) => ({
+  minWidth: size,
+  minHeight: size,
+});
 
-interface ActionItemProps<TRow> {
-  action: RowAction<TRow>;
-  row: TRow;
-  minTargetSize?: number;
-  confirm: ConfirmHandler;
-  cancelLabel: string;
-  className: string | undefined;
-  /** Close a parent `<details>` after the click (menu layout). */
-  detailsRef?: RefObject<HTMLDetailsElement | null>;
-}
-
-function ActionItem<TRow>({
-  action,
-  row,
+/** One action: its glyph (named in a tooltip) or its caption. */
+function Action({
+  label,
+  icon,
+  color,
+  disabled,
+  reason,
   minTargetSize,
-  confirm,
-  cancelLabel,
-  className,
-  detailsRef,
-}: Readonly<ActionItemProps<TRow>>) {
-  const reason = resolveDisabledReason(action.disabledReason?.(row));
-  const disabled = reason !== undefined || (action.isDisabled?.(row) ?? false);
-  const handleClick = disabled
-    ? undefined
-    : (e: MouseEvent) => {
-        e.stopPropagation();
-        detailsRef?.current?.removeAttribute("open");
-        runRowAction(action, row, confirm, cancelLabel);
-      };
-  const icon = iconForRowAction(action);
+  onClick,
+}: Readonly<KitRowActionProps>) {
+  "use no memo";
   return (
     <button
       type="button"
       disabled={disabled}
-      title={reason ?? (icon ? action.label : undefined)}
-      aria-label={action.label}
-      style={{ minWidth: minTargetSize, minHeight: minTargetSize }}
+      title={reason ?? (icon ? label : undefined)}
+      aria-label={label}
+      style={targetOf(minTargetSize)}
       data-adapttable-part="action-button"
-      data-color={action.color}
-      className={className}
-      onClick={handleClick}
+      data-color={color}
+      className={useClassNames().actionButton}
+      onClick={onClick}
     >
-      {icon ?? action.label}
+      {icon ?? label}
     </button>
   );
 }
 
-function ActionStrip<TRow>({
-  row,
-  minTargetSize,
-  actions,
-  confirm,
-  cancelLabel,
-  className,
-}: Readonly<{
-  row: TRow;
-  minTargetSize?: number;
-  actions: readonly RowAction<TRow>[];
-  confirm: ConfirmHandler;
-  cancelLabel: string;
-  className: string | undefined;
-}>): ReactNode {
-  return (
-    <>
-      {actions.map((action) => (
-        <ActionItem
-          key={action.key}
-          action={action}
-          row={row}
-          minTargetSize={minTargetSize}
-          confirm={confirm}
-          cancelLabel={cancelLabel}
-          className={className}
-        />
-      ))}
-    </>
-  );
+function Strip({ children }: Readonly<{ children: ReactNode }>) {
+  "use no memo";
+  return children;
 }
 
-function ActionMenu<TRow>({
-  row,
+/** The actions in a native disclosure that closes once one is chosen, or on Escape. */
+function Menu({
+  label,
   minTargetSize,
-  actions,
-  confirm,
-  labels,
-  classNames,
-}: Readonly<{
-  row: TRow;
-  minTargetSize?: number;
-  actions: readonly RowAction<TRow>[];
-  confirm: ConfirmHandler;
-  labels: Required<TableLabels>;
-  classNames: DataTableClassNames;
-}>): ReactNode {
+  items,
+}: Readonly<KitRowActionMenuProps>) {
+  "use no memo";
+  const classNames = useClassNames();
   const detailsRef = useRef<HTMLDetailsElement>(null);
+  const [open, setOpen] = useState(false);
+  // Escape closes the open menu wherever focus sits inside it, and hands focus
+  // back to the trigger, as this kit's other disclosures do.
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKeyDown = (event: KeyboardEvent) => {
+      const menu = detailsRef.current;
+      if (event.key !== "Escape" || !menu?.open) return;
+      event.preventDefault();
+      menu.open = false;
+      menu.querySelector("summary")?.focus();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
   return (
     <details
       ref={detailsRef}
       data-adapttable-part="row-actions-menu"
       className={classNames.rowActionsMenu}
       onPointerDown={(event) => event.stopPropagation()}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
     >
       <summary
-        style={{ minWidth: minTargetSize, minHeight: minTargetSize }}
+        style={targetOf(minTargetSize)}
         data-adapttable-part="row-actions-trigger"
         className={classNames.rowActionsTrigger}
-        aria-label={labels.rowActionsMenu}
+        aria-label={label}
         onClick={(event) => event.stopPropagation()}
       >
         <MoreVerticalIcon />
       </summary>
-      {actions.map((action) => (
-        <ActionItem
-          key={action.key}
-          action={action}
-          row={row}
-          minTargetSize={minTargetSize}
-          confirm={confirm}
-          cancelLabel={labels.cancel}
+      {items.map((item) => (
+        <button
+          key={item.key}
+          type="button"
+          disabled={item.disabled}
+          title={item.reason ?? (item.icon ? item.label : undefined)}
+          aria-label={item.label}
+          style={targetOf(item.minTargetSize)}
+          data-adapttable-part="action-button"
+          data-color={item.color}
           className={classNames.actionButton}
-          detailsRef={detailsRef}
-        />
+          onClick={(event: MouseEvent) => {
+            event.stopPropagation();
+            detailsRef.current?.removeAttribute("open");
+            item.onSelect();
+          }}
+        >
+          {item.icon ?? item.label}
+        </button>
       ))}
     </details>
   );
 }
 
-export function RowActionButtons<TRow>({
-  row,
-  minTargetSize,
-  actions,
-  confirm,
-  labels,
-  classNames,
-  layout,
-  render,
-}: Readonly<RowActionButtonsProps<TRow>>): ReactNode {
-  const visible = visibleRowActions(actions, row);
-  let content: ReactNode = null;
-  if (render) {
-    content = render({ row, actions, confirm, labels }) as ReactNode;
-  } else if (visible.length > 0) {
-    content =
-      layout === "menu" ? (
-        <ActionMenu
-          row={row}
-          minTargetSize={minTargetSize}
-          actions={visible}
-          confirm={confirm}
-          labels={labels}
-          classNames={classNames}
-        />
-      ) : (
-        <ActionStrip
-          row={row}
-          minTargetSize={minTargetSize}
-          actions={visible}
-          confirm={confirm}
-          cancelLabel={labels.cancel}
-          className={classNames.actionButton}
-        />
-      );
-  }
-  return content;
-}
+/** A row's actions as native buttons or one disclosure. */
+export const RowActionButtons = /* @__PURE__ */ createRowActionButtons({
+  Action,
+  Strip,
+  Menu,
+  iconFor: iconForRowAction,
+});

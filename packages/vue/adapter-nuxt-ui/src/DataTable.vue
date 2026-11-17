@@ -12,7 +12,7 @@ import {
   defaultConfirm,
   FULLSCREEN_MODEL,
   GROUP_ROW,
-  groupRowSlotKey,
+  keepTableControls,
   provideDataTableClassNames,
   renderFeatureSlot,
   type TableChromeSlots,
@@ -174,11 +174,7 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable: Nuxt UI grouping rows require the Nuxt UI grouping feature."
         );
-      return renderFeatureSlot(
-        groupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        control
-      );
+      return renderFeatureSlot(GROUP_ROW, shell.slotFills.value, control);
     },
     card: cardSlot.value,
     cell: slots.cell,
@@ -187,6 +183,14 @@ function controls(): TableChromeSlots<TRow> {
     footer: slots.footer,
   };
 }
+/** One controls object while the host's slots stay the same. */
+const tableControls = keepTableControls(controls, (kept) => [
+  kept.card,
+  kept.cell,
+  kept.header,
+  kept.headerActions,
+  kept.footer,
+]);
 const root = shallowRef<HTMLElement | null>(null);
 const scroll = shallowRef<HTMLElement | null>(null);
 const surface = {
@@ -221,7 +225,7 @@ function scrollRef(element: HTMLElement | null): void {
         ...props,
         searchable,
       }"
-      :slots="nuxtSurface(controls())"
+      :slots="nuxtSurface(tableControls())"
       :content="slots"
       :root-ref="rootRef"
       :scroll-ref="scrollRef"

@@ -1,17 +1,19 @@
 import {
   type BooleanFieldWidget,
-  booleanFilterWidget,
   type FilterDef,
-  initialRangeFilterOp,
-  initialTextFilterOp,
   type RangeFieldWidget,
-  rangeFilterWidget,
   type RangeOp,
   type TextFieldWidget,
-  textFilterWidget,
   type TextOp,
 } from "@adapttable/core";
-import type { FilterFormSource } from "@adapttable/core/binding";
+import {
+  booleanFilterWidget,
+  type FilterFormSource,
+  initialRangeFilterOp,
+  initialTextFilterOp,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/core/binding";
 import { useEffect, useState } from "react";
 
 export type {

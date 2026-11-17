@@ -3,11 +3,11 @@
  * bodySlots, pin-edge attributes, extra rows beside chrome columns, and the
  * tfoot summary pads.
  */
-import { resolveLabels } from "@adapttable/core";
 import {
   DELETE_ROW_ACTION_KEY,
   DUPLICATE_ROW_ACTION_KEY,
 } from "@adapttable/react";
+import { resolveLabels } from "@adapttable/react/adapter";
 import {
   fireEvent,
   render,

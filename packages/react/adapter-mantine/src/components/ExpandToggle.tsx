@@ -1,7 +1,7 @@
+import { useMobileTarget } from "@adapttable/react/adapter";
 import { ActionIcon } from "@mantine/core";
 
 import { ChevronRightIcon } from "../icons";
-import { useMobileTarget } from "./mobileTarget";
 
 /** Props for {@link ExpandToggle}. */
 export interface ExpandToggleProps {

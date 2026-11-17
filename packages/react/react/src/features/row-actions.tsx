@@ -4,13 +4,12 @@
  * The mutation hook lives on this entry. A table that never imports it
  * never carries add / duplicate / delete.
  */
+import { ACTIONS_COLUMN_KEY, type RowAction } from "@adapttable/core";
 import {
-  ACTIONS_COLUMN_KEY,
-  type RowAction,
+  coreRowActions,
   withRowMutationActions,
   withRowPinActions,
-} from "@adapttable/core";
-import { coreRowActions } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import { type ReactNode, useMemo } from "react";
 
 import {
@@ -18,14 +17,18 @@ import {
   useRowMutations,
 } from "../rows/rowMutations";
 import { slotRender } from "./providers";
-import { type ChromeExtraSlotProps, ROW_ACTIONS_LIVE } from "./slotKeys";
+import {
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  ROW_ACTIONS_LIVE,
+} from "./slotKeys";
 import type { TableFeature } from "./tableFeature";
 
-function LiveRowActions({
+function LiveRowActions<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<never>): ReactNode {
+}: ChromeExtraSlotProps<TRow>): ReactNode {
   const rowMutations = useRowMutations({
     labels: chrome.table.labels,
     onAddRow: props.onAddRow,
@@ -92,7 +95,9 @@ export function rowActions<TRow>(
   return {
     ...coreRowActions<TRow>(actions, handlers),
     renders: [
-      slotRender(ROW_ACTIONS_LIVE, (props) => <LiveRowActions {...props} />),
+      slotRender<ChromeExtraDraw>(ROW_ACTIONS_LIVE, (props) => (
+        <LiveRowActions {...props} />
+      )),
     ],
   };
 }

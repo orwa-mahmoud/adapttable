@@ -4,12 +4,15 @@
  */
 import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
 import { rowEditing } from "@adapttable/angular-aria/editing";
-import { rowActions } from "@adapttable/angular-aria/row-actions";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { rowEditingTests } from "../../angular/test/kit/suites/rowEditing";
+import { kit } from "../testing/kit";
 import { AdaptDataTable } from "./dataTable";
+
+for (const test of rowEditingTests(kit)) it(test.name, test.run);
 
 interface Task {
   id: string;
@@ -106,17 +109,6 @@ describe("row editing (unstyled Angular)", () => {
     expect(editors()).toHaveLength(0);
   });
 
-  it("opens every editable field of the row and focuses the first", async () => {
-    const settle = await mount([rowEditing(vi.fn())]);
-    all("row-edit-begin")[0]!.click();
-    await settle();
-    expect(editors().map((field) => field.value)).toEqual(["Ship", "3"]);
-    expect(document.activeElement).toBe(editors()[0]);
-    expect(all("row-edit-begin")).toHaveLength(1);
-    expect(one("row-edit-save").getAttribute("aria-label")).toBe("Save row");
-    expect(one("row-edit-cancel").getAttribute("aria-label")).toBe("Cancel");
-  });
-
   it("hands the host the row and one parsed patch on save", async () => {
     const onRowEdit = vi.fn();
     const settle = await mount([rowEditing(onRowEdit)]);
@@ -155,78 +147,5 @@ describe("row editing (unstyled Angular)", () => {
     await settle();
     expect(onRowEdit).toHaveBeenCalledOnce();
     expect(editors()).toHaveLength(0);
-  });
-
-  it("throws the drafts away on cancel", async () => {
-    const onRowEdit = vi.fn();
-    const settle = await mount([rowEditing(onRowEdit)]);
-    all("row-edit-begin")[0]!.click();
-    await settle();
-    type(editors()[0]!, "Ship it");
-    await settle();
-    one("row-edit-cancel").click();
-    await settle();
-    expect(onRowEdit).not.toHaveBeenCalled();
-    expect(editors()).toHaveLength(0);
-
-    all("row-edit-begin")[0]!.click();
-    await settle();
-    expect(editors()[0]!.value).toBe("Ship");
-  });
-
-  it("draws the label as text when the host turns the glyph off", async () => {
-    await mount([rowEditing(vi.fn(), { rowEditIcons: { begin: false } })]);
-    const begin = all("row-edit-begin")[0]!;
-    expect(begin.querySelector("svg")).toBeNull();
-    expect(begin.textContent.trim()).toBe("Edit row");
-    expect(begin.hasAttribute("title")).toBe(false);
-  });
-
-  it("lets a host action that opens the row replace the begin control", async () => {
-    const onRowEdit = vi.fn();
-    const settle = await mount([
-      rowEditing(onRowEdit),
-      rowActions<Task>([{ key: "edit", label: "Change", editsRow: true }]),
-    ]);
-    expect(all("row-edit-begin")).toHaveLength(0);
-    const change = [...document.querySelectorAll("button")].filter(
-      (button) => button.textContent.trim() === "Change"
-    );
-    expect(change).toHaveLength(2);
-    change[1]!.click();
-    await settle();
-    expect(editors().map((field) => field.value)).toEqual(["Test", "5"]);
-    type(editors()[0]!, "Tested");
-    await settle();
-    one("row-edit-save").click();
-    await settle();
-    expect(onRowEdit).toHaveBeenCalledExactlyOnceWith(ROWS[1], {
-      title: "Tested",
-    });
-  });
-
-  it("edits a row from its phone card", async () => {
-    const onRowEdit = vi.fn();
-    const settle = await mount([rowEditing(onRowEdit)], true);
-    expect(all("card")).toHaveLength(2);
-    const begin = all("card")[0]!.querySelector<HTMLElement>(
-      '[data-adapttable-part="row-edit-begin"]'
-    );
-    expect(begin).not.toBeNull();
-    begin!.click();
-    await settle();
-    type(editors()[0]!, "Ship it");
-    await settle();
-    one("row-edit-save").click();
-    await settle();
-    expect(onRowEdit).toHaveBeenCalledExactlyOnceWith(ROWS[0], {
-      title: "Ship it",
-    });
-  });
-
-  it("draws no row controls without the feature", async () => {
-    await mount([]);
-    expect(all("row-edit-begin")).toHaveLength(0);
-    expect(all("actions-header")).toHaveLength(0);
   });
 });

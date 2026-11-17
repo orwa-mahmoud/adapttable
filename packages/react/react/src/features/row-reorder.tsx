@@ -10,6 +10,7 @@ import {
   type RowReorderOptions,
   rowReorderRuntimeOptions,
 } from "@adapttable/core";
+import { ROW_LABELS } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { type RowReorderHandler, useRowReorder } from "../rows/rowReorder";
@@ -67,6 +68,7 @@ export function rowReorder<TRow>(
 ): TableFeature<TRow> {
   return {
     id: "row-reorder",
+    labels: ROW_LABELS,
     onRowReorder,
     options,
     provider: { Provider: RowReorderProvider },

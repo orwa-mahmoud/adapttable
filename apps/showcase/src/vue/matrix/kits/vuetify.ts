@@ -2,12 +2,15 @@
 import "vuetify/styles";
 
 import { agentApproval, TableAssistant } from "@adapttable/vuetify/assistant";
+import { batchEditing } from "@adapttable/vuetify/batch-editing";
 import { bulkActions } from "@adapttable/vuetify/bulk-actions";
 import { cellNavigation } from "@adapttable/vuetify/cell-navigation";
 import { cellSpan } from "@adapttable/vuetify/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/vuetify/column-groups";
 import { columnMenu } from "@adapttable/vuetify/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/vuetify/column-selection";
+import { commandPalette } from "@adapttable/vuetify/command-palette";
+import { contextMenu } from "@adapttable/vuetify/context-menu";
 import { densityChooser } from "@adapttable/vuetify/density";
 import {
   editHistory,
@@ -16,18 +19,22 @@ import {
   undoRedoButtons,
 } from "@adapttable/vuetify/editing";
 import { exportCsv } from "@adapttable/vuetify/export";
+import { extraRows } from "@adapttable/vuetify/extra-rows";
 import { filters } from "@adapttable/vuetify/filters";
+import { findInTable } from "@adapttable/vuetify/find-in-table";
 import { fullscreen } from "@adapttable/vuetify/fullscreen";
 import { groupingPanel } from "@adapttable/vuetify/grouping-panel";
 import { headerFilters } from "@adapttable/vuetify/header-filters";
 import { nestedTable } from "@adapttable/vuetify/nested-table";
 import { pinnedSummaryRows } from "@adapttable/vuetify/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/vuetify/pivot";
+import { print } from "@adapttable/vuetify/print";
 import { resizableColumns } from "@adapttable/vuetify/resizable-columns";
 import { rowActions } from "@adapttable/vuetify/row-actions";
 import { rowPinning } from "@adapttable/vuetify/row-pinning";
 import { rowReorder } from "@adapttable/vuetify/row-reorder";
-import { savedViews } from "@adapttable/vuetify/saved-views";
+import { savedViews, SavedViewsPanel } from "@adapttable/vuetify/saved-views";
+import { selectionStats } from "@adapttable/vuetify/selection-stats";
 import { statusBar } from "@adapttable/vuetify/status-bar";
 import { tree } from "@adapttable/vuetify/tree";
 import { virtualize } from "@adapttable/vuetify/virtualize";
@@ -144,6 +151,7 @@ export const kit: ShowcaseKit = {
     }),
   DataTable,
   PivotPanel,
+  SavedViewsPanel,
   TableAssistant,
   agentApproval,
   bulkActions,
@@ -155,12 +163,19 @@ export const kit: ShowcaseKit = {
   densityChooser,
   editHistory,
   editing,
+  batchEditing,
   rowEditing,
   undoRedoButtons,
   exportCsv,
   filters,
   fullscreen,
   groupingPanel,
+  print,
+  extraRows,
+  findInTable,
+  selectionStats,
+  commandPalette,
+  contextMenu,
   headerFilters,
   nestedTable,
   pinnedSummaryRows,

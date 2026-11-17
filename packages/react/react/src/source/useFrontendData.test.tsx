@@ -1,9 +1,5 @@
-import {
-  applyRowPatches,
-  resetDevWarnings,
-  rowPatchLog,
-  updateRow,
-} from "@adapttable/core";
+import { applyRowPatches, rowPatchLog, updateRow } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core/binding";
 import { createTableEngine } from "@adapttable/core/engine";
 import { act, renderHook } from "@testing-library/react";
 import { useEffect, useState } from "react";
@@ -51,6 +47,27 @@ describe("useFrontendData", () => {
     const { result } = render();
     expect(result.current.rows.map((r) => r.id)).toEqual(["a", "b", "c"]);
     expect(result.current.total).toBe(3);
+  });
+
+  it("returns the same source while nothing in it changes", () => {
+    const adapter = createMemoryAdapter("");
+    // A host that re-renders for its own state passes fresh option objects
+    // with the same values in them.
+    const { result, rerender } = renderHook(() =>
+      useFrontendData<Row>({
+        data: ROWS,
+        columns: cols,
+        urlAdapter: adapter,
+        paginationMode: "paged",
+      })
+    );
+    const first = result.current;
+    rerender();
+    expect(result.current).toBe(first);
+
+    act(() => result.current.setSearch("bob"));
+    expect(result.current).not.toBe(first);
+    expect(result.current.rows.map((row) => row.id)).toEqual(["b"]);
   });
 
   it("filters by the search term using the default projector", () => {

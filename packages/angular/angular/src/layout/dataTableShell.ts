@@ -55,9 +55,8 @@ import {
   type ColumnLayoutState,
   type ConfirmHandler,
   type ContextMenuTarget,
-  copyContextMenuSelection,
-  defaultConfirm,
   type Direction,
+  type EditActivation,
   type ExportCsvOptions,
   type ExtraFilters,
   type ExtraRow,
@@ -68,11 +67,8 @@ import {
   type GetCellSpan,
   type PaginationMode,
   type PinnedRows,
-  projectedGroupingSource,
   type QueryAggregate,
   type QuerySupport,
-  requestDensityChange,
-  resolveDensity,
   type RowAction,
   type RowActionsLayout,
   type RowHeight,
@@ -85,8 +81,6 @@ import {
   type TableQueryParams,
   type TableSource,
   type TreeShape,
-  withRowMutationActions,
-  withRowPinActions,
 } from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
@@ -102,6 +96,9 @@ import {
   type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
   CONTEXT_MENU_LIVE,
+  copyContextMenuSelection,
+  createTableStore,
+  defaultConfirm,
   FILTER_DRAWER,
   FILTER_ENGINE,
   FILTER_HEADER,
@@ -113,7 +110,10 @@ import {
   type FindInTableState,
   GROUPING_PANEL,
   printToolbarProps,
+  projectedGroupingSource,
   renderedRowsOf,
+  requestDensityChange,
+  resolveDensity,
   ROW_REORDER_ANNOUNCER,
   type RowMutationsState,
   sameItems,
@@ -122,12 +122,15 @@ import {
   SEARCH_ICON,
   type SelectionState,
   SIDE_PANEL,
+  type SidePanelSide,
   STATUS_BAR,
   TABLE_ASSISTANT,
   TOOLBAR_EXTRAS,
   type ToolbarExtrasSlotProps,
   TREE_CELL,
   undoRedoToolbarProps,
+  withRowMutationActions,
+  withRowPinActions,
 } from "@adapttable/core/binding";
 import { loadLabels } from "@adapttable/i18n/load";
 import {
@@ -135,6 +138,7 @@ import {
   computed,
   contentChild,
   contentChildren,
+  DestroyRef,
   Directive,
   effect,
   type ElementRef,
@@ -182,6 +186,7 @@ import { injectGrouping, type TableGrouping } from "../grouping/tableGrouping";
 import { injectRowReorder } from "../rows/rowReorder";
 import { injectTableRowPinning } from "../rows/tableRowPinning";
 import { frontendRowModelOf } from "../source/rowModel";
+import { TABLE_STORE } from "../tableStore";
 import { injectRowDetail } from "../tree/tableRowDetail";
 import { injectTree } from "../tree/tableTree";
 import { injectColumnWindow } from "../virtual/columnWindow";
@@ -504,7 +509,7 @@ export interface TableView<TRow> extends TableSurfaceView<TRow> {
   /** Whether the Columns menu is composed. */
   readonly columnMenu: boolean;
   /** The Columns menu's props. */
-  readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
+  readonly columnMenuProps: Signal<ColumnMenuSlotProps<unknown>>;
   /** The filters, when a filters feature is composed. */
   readonly filters: FiltersView | undefined;
   /** The selection bar's props, when bulk actions are composed. */
@@ -658,7 +663,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
    */
   readonly skeletonRows = input<number>();
   /** Which edge a projected side panel sits on. */
-  readonly sidePanelSide = input<"start" | "end">("end");
+  readonly sidePanelSide = input<SidePanelSide>("end");
   /** Offer a checkbox on every row. */
   readonly selectable = input(false);
   /** The selected row ids, to control the selection. */
@@ -692,7 +697,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
    * keeps a single click for selecting the cell; `"click"` opens the editor on
    * the first click. Enter and F2 open it either way.
    */
-  readonly editActivation = input<"doubleClick" | "click">();
+  readonly editActivation = input<EditActivation>();
   /** The column layout, to control it. */
   readonly columnLayout = input<ColumnLayoutState>();
   /** The layout an uncontrolled table starts from. Read once. */
@@ -707,6 +712,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
    * backdrop, or a drawer that dims the page.
    */
   readonly filtersMode = input<FiltersMode>("popover");
+  /**
+   * Mount the per-field form in the Filters panel. Default on. Pass `false`
+   * to keep only the AND/OR tree there, opened on first paint.
+   */
+  readonly filterFields = input(true);
   /** Close a header filter once a single-control write finishes. */
   readonly closeHeaderFilterOnSelect = input(false);
   /** The host's own chips, shown after the table's filter chips. */
@@ -768,7 +778,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         .sidePanel as SidePanelOptions | undefined
   );
   /** Which edge the docked panel sits on. */
-  protected readonly dockedSide = computed(
+  protected readonly dockedSide: Signal<SidePanelSide> = computed(
     () => this.liveSidePanel()?.side ?? this.sidePanelSide()
   );
   /**
@@ -972,7 +982,15 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   }
 
   ngOnInit(): void {
-    const resources = createFeatureResources(this.injector);
+    // One store per table: every part created below keeps its state in it.
+    const tableInjector = Injector.create({
+      providers: [{ provide: TABLE_STORE, useValue: createTableStore() }],
+      parent: this.injector,
+    });
+    // It lives as long as the table, so what its parts register to run on
+    // destroy runs when the table goes.
+    this.injector.get(DestroyRef).onDestroy(() => tableInjector.destroy());
+    const resources = createFeatureResources(tableInjector);
     const features = computed(
       () => tableFeaturesOf(this.injector, this.features()),
       {
@@ -1226,6 +1244,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
               filtersOn,
               headerOn,
               this.filtersMode(),
+              this.filterFields(),
               this.closeHeaderFilterOnSelect(),
             ],
             () =>
@@ -1236,6 +1255,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
                 mode: this.filtersMode(),
                 button: filtersOn,
                 header: headerOn,
+                fields: this.filterFields(),
                 closeHeaderFilterOnSelect: this.closeHeaderFilterOnSelect(),
                 dir: table.dir,
                 extraChips: this.extraChips,
@@ -1425,7 +1445,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
           labels: table.labels(),
         }))
       : undefined;
-    const columnMenuProps = computed((): ColumnMenuSlotProps<never> => ({
+    const columnMenuProps = computed((): ColumnMenuSlotProps<unknown> => ({
       allColumns: table.allColumns() as never,
       layout: table.layout(),
       labels: table.labels(),

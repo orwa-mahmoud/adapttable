@@ -67,7 +67,9 @@ for (const kit of builtAdapters("angular")) {
           presentation.theme
         );
         const root = page
-          .locator('.mx-demo [data-adapttable-part="root"]')
+          .locator(
+            '.mx-demo [data-adapttable-part="root"], .ai-demo__stage [data-adapttable-part="root"]'
+          )
           .first();
         await expect(root).toBeVisible();
         await expect(root).toHaveAttribute(
@@ -111,12 +113,15 @@ for (const kit of builtAdapters("angular")) {
             )
           ).toBe(true);
         }
-        await page.locator(".mx-demo").evaluate((element) =>
-          window.scrollBy({
-            top: element.getBoundingClientRect().top - 80,
-            behavior: "instant",
-          })
-        );
+        await page
+          .locator(".mx-demo, .ai-demo")
+          .first()
+          .evaluate((element) =>
+            window.scrollBy({
+              top: element.getBoundingClientRect().top - 80,
+              behavior: "instant",
+            })
+          );
         const path = info.outputPath(
           `${kit.key}-${slug || "entry"}-${presentation.name}.png`
         );

@@ -1,8 +1,8 @@
 import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
 import {
   extendFeature,
+  GROUP_ROW,
   GroupRowChrome,
-  groupRowSlotKey,
   slotRender,
 } from "@adapttable/vue/adapter";
 import {
@@ -28,7 +28,7 @@ export function grouping<TRow>(
   extras: GroupingExtras<TRow> = {}
 ): TableFeature<TRow> {
   return extendFeature(bindingGrouping<TRow>(groupBy, extras), [
-    slotRender(groupRowSlotKey<TRow>(), (props) =>
+    slotRender(GROUP_ROW, (props) =>
       GroupRowChrome({
         ...props,
         slots: {

@@ -1,5 +1,8 @@
-import type { FilterHeaderControlProps } from "@adapttable/angular/adapter";
-import { defaultLabels, type ExtraFilters } from "@adapttable/core";
+import { type ExtraFilters } from "@adapttable/angular";
+import {
+  defaultLabels,
+  type FilterHeaderControlProps,
+} from "@adapttable/angular/adapter";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
@@ -33,7 +36,7 @@ function source(extra: ReturnType<typeof signal<ExtraFilters>>) {
 class Host {
   readonly dir = signal<"ltr" | "rtl">("rtl");
   readonly extra = signal<ExtraFilters>({});
-  readonly props: FilterHeaderControlProps<never> = {
+  readonly props: FilterHeaderControlProps<unknown> = {
     def: {
       key: "team",
       type: "select",

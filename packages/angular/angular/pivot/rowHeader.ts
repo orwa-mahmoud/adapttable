@@ -11,7 +11,8 @@ import {
   type Renderer,
 } from "@adapttable/angular";
 import { AdaptCell } from "@adapttable/angular/adapter";
-import { type PivotRow, pivotRowIndentStyle } from "@adapttable/core";
+import { type PivotRow } from "@adapttable/core";
+import { pivotRowIndentStyle } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
   Component,

@@ -1,7 +1,8 @@
-import { type DisplayValue, resolveLabels } from "@adapttable/core";
-import type {
-  BatchEditBarProps as CoreBatchEditBarProps,
-  RowEditActionsProps as CoreRowEditActionsProps,
+import { type DisplayValue } from "@adapttable/core";
+import {
+  type BatchEditBarProps as CoreBatchEditBarProps,
+  resolveFeatureLabels,
+  type RowEditActionsProps as CoreRowEditActionsProps,
 } from "@adapttable/core/binding";
 import {
   batchEditBarModel,
@@ -9,6 +10,8 @@ import {
   rowEditControls,
 } from "@adapttable/core/editing";
 import { h, type VNodeChild } from "vue";
+
+const ROW_EDIT_GROUPS = [] as const;
 
 // Named aliases remain visible to Vue's SFC prop resolver after declaration bundling.
 export type BatchEditBarProps<TRow> = CoreBatchEditBarProps<TRow>;
@@ -119,7 +122,7 @@ export function BatchEditBarChrome<TRow>(
     throw new Error(
       "AdaptTable: BatchEditBarChrome requires the Button control slot."
     );
-  const labels = resolveLabels(props.labels);
+  const labels = resolveFeatureLabels(props.labels, ROW_EDIT_GROUPS);
   const pending =
     props.batch.commit?.phase === "saving" ||
     props.batch.commit?.phase === "validating";

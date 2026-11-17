@@ -117,6 +117,18 @@ export {
   type StandardFeaturesFactory,
 } from "./adapterFeatures/standardPreset";
 export { createAdapterTableAssistantFeature } from "./adapterFeatures/tableAssistant";
+export { type BulkBarChromeProps } from "./chrome/bulkBarChrome";
+export type { TableChrome } from "./chrome/tableChromeContract";
+export { type TableBodyRegion } from "./chrome/tableChromeContract";
+export type { PrintToolbar } from "./chrome/toolbarChrome";
+export {
+  type FilterTriggerToggle,
+  printToolbar,
+  type ToolbarChromeProps,
+  undoRedoToolbar,
+  type ViewControlsToolbar,
+  viewControlsToolbar,
+} from "./chrome/toolbarChrome";
 export type { ColumnDef, ReactColumnGroupDef } from "./columnDef";
 export {
   type ColumnGroupToggleButtonProps,
@@ -299,22 +311,30 @@ export {
   windowedTableAria,
 } from "./features/shellLiveStubs";
 export type {
+  CellNavLiveDraw,
   CellNavLiveSlotProps,
+  ChromeBodyDraw,
   ChromeBodySlotProps,
+  ChromeExtraDraw,
   ChromeExtraSlotProps,
   ColumnHeaderRenameSlotProps,
   ContextMenuLiveSlotProps,
   EditableCellSlotProps,
+  EditHistoryLiveDraw,
   EditHistoryLiveSlotProps,
   ExpandToggleSlotProps,
+  ExportLiveDraw,
   ExportLiveSlotProps,
   FillHandleCellSlotProps,
   FilterOverlaySlotProps,
+  FindLiveDraw,
   FindLiveSlotProps,
+  FullscreenLiveDraw,
   FullscreenLiveSlotProps,
   GroupHeaderCardSlotProps,
   GroupHeaderRowSlotProps,
   SavedViewsSlotProps,
+  SelectionStatsLiveDraw,
   SelectionStatsLiveSlotProps,
   ToolbarExtrasSlotProps,
 } from "./features/slotKeys";
@@ -381,7 +401,7 @@ export type {
   TableFeatureHost,
 } from "./features/tableFeature";
 export type { FeatureApplyInput, FeaturePatch } from "./features/tableFeature";
-export { applyTableFeatures } from "./features/tableFeature";
+export { applyTableFeatures, featureLabelsFor } from "./features/tableFeature";
 export {
   type ChecklistButtonProps,
   type ChecklistCheckboxProps,
@@ -502,6 +522,176 @@ export {
 } from "./hooks/useOverlayTransition";
 export { ReducedMotionScope } from "./hooks/usePrefersReducedMotion";
 export { ExpandChevron, FiltersIcon, SearchIcon } from "./icons";
+export {
+  createBulkBar,
+  type KitBulkBar,
+  type KitBulkBarFrameProps,
+  type KitBulkButtonKind,
+  type KitBulkButtonProps,
+  type KitBulkTextKind,
+  type KitBulkTextProps,
+} from "./kit/bulkBar";
+export {
+  type CellEditorProps,
+  createCellEditor,
+  createEditableCell,
+  type EditableDataCellProps,
+  type KitCellCheckboxProps,
+  type KitCellEditorProps,
+  type KitCellEditors,
+  type KitCellInputProps,
+} from "./kit/cellEditor";
+export {
+  createChecklistFilter,
+  type KitChecklistFilter,
+  type KitChecklistLook,
+} from "./kit/checklist";
+export { createColumnMenu, type KitColumnMenuLook } from "./kit/columnMenu";
+export {
+  createColumnHeaderRename,
+  type KitHeaderRenameLook,
+  type KitRenameFieldParts,
+  type KitRenameFieldProps,
+} from "./kit/columnRename";
+export {
+  createAgentApproval,
+  createBatchEditBar,
+  createColumnGroupToggle,
+  createEditableCellSlots,
+  createFilterHeaderControl,
+  createFilterHeaderRow,
+  createFindBar,
+  createGroupMoreButton,
+  createRowEditActions,
+  createRowReorderButtons,
+  createRowReorderHandle,
+  createTreeCell,
+  createTreeToggle,
+  type KitFilterHeader,
+} from "./kit/controls";
+export {
+  createDesktopTable,
+  type KitDesktopCellKind,
+  type KitDesktopCellProps,
+  type KitDesktopHeaderCellKind,
+  type KitDesktopHeaderCellProps,
+  type KitDesktopLeafState,
+  type KitDesktopPaint,
+  type KitDesktopRowProps,
+  type KitDesktopRowState,
+  type KitDesktopTable,
+  type KitDesktopTableProps,
+  type KitSortLabelProps,
+} from "./kit/desktopTable";
+export {
+  cellDisplay,
+  OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
+  OptionalColumnSelect,
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalFillHandle,
+  OptionalFilterHeader,
+  OptionalGroupHeaderCard,
+  OptionalGroupHeaderRow,
+  OptionalRowEditActions,
+  OptionalRowReorderButtons,
+  OptionalRowReorderHandle,
+  OptionalTreeCell,
+  OptionalTreeToggle,
+} from "./kit/featureSlots";
+export {
+  createGroupHeader,
+  type KitGroupCardProps,
+  type KitGroupHeader,
+  type KitGroupHeaderProps,
+  type KitGroupLook,
+  type KitGroupRowProps,
+  type KitGroupTextKind,
+  type KitGroupTextProps,
+  type KitGroupToggleProps,
+} from "./kit/groupHeader";
+export {
+  createMobileCards,
+  type KitCardRegions,
+  type KitCardSelectProps,
+  type KitCardsLook,
+  type KitCardTextProps,
+  type KitMobileCards,
+  type KitMobileCardsProps,
+  type KitSummaryField,
+} from "./kit/mobileCards";
+export { MobileTarget, useMobileTarget } from "./kit/mobileTarget";
+export {
+  createPageButtons,
+  createPager,
+  type KitPageButtonsLook,
+  type KitPager,
+  type KitPagerFrameProps,
+  type KitPagerView,
+  type KitPagesProps,
+} from "./kit/pager";
+export type { KitUsePartClass } from "./kit/partClass";
+export type {
+  KitButtonProps,
+  KitButtonVariant,
+  KitCheckboxProps,
+  KitDataAttributes,
+  KitDividerProps,
+  KitIconButtonProps,
+  KitMenuItem,
+  KitMenuProps,
+  KitOption,
+  KitPopoverProps,
+  KitPrimitives,
+  KitPrimitivesOf,
+  KitSelectProps,
+  KitTextInputProps,
+  KitTextProps,
+  KitTone,
+  KitTriggerProps,
+} from "./kit/primitives";
+export { mergeRefs } from "./kit/refs";
+export {
+  createRowActionButtons,
+  type KitRowActionItem,
+  type KitRowActionMenuProps,
+  type KitRowActionProps,
+  type KitRowActions,
+  type RowActionButtonsProps,
+} from "./kit/rowActions";
+export {
+  createSavedViewsMenu,
+  type KitSavedViewsLook,
+} from "./kit/savedViewsMenu";
+export {
+  type KitSkeletonShape,
+  type KitTable,
+  type KitTableClassNames,
+  type KitTableFrameProps,
+  type KitTableProps,
+  type KitTableSlots,
+  type KitToolbarProps,
+  TableComposition,
+} from "./kit/tableComposition";
+export {
+  createToolbar,
+  type KitFiltersButtonProps,
+  type KitRowsPerPageProps,
+  type KitToolbar,
+  type KitToolbarFrameProps,
+  type KitToolbarSearchProps,
+  type KitToolbarSortProps,
+} from "./kit/toolbar";
+export {
+  createCommandPaletteButton,
+  createDensityButton,
+  createExportCsvButton,
+  createFindButton,
+  createFullscreenButton,
+  createPrintButton,
+  createUndoRedoButtons,
+} from "./kit/toolbarExtras";
 export {
   createDesktopRow,
   DESKTOP_ACTIONS_WIDTH,
@@ -685,17 +875,6 @@ export type {
   DataTableShellToolbarProps,
 } from "./useDataTableShell";
 export { finishDataTableShell, useDataTableShell } from "./useDataTableShell";
-export type { PrintToolbar, TableChrome } from "./useTableChrome";
-export {
-  type BulkBarChromeProps,
-  type FilterTriggerToggle,
-  printToolbar,
-  type TableBodyRegion,
-  type ToolbarChromeProps,
-  undoRedoToolbar,
-  type ViewControlsToolbar,
-  viewControlsToolbar,
-} from "./useTableChrome";
 export type { ChromeBodyData } from "./virtual/chromeBodyShared";
 export { ColumnSpacer, type ColumnSpacerProps } from "./virtual/ColumnSpacer";
 export {
@@ -719,8 +898,7 @@ export type { Command } from "@adapttable/core";
 export type { ConfirmHandler } from "@adapttable/core";
 export type { ContextMenuItem, ContextMenuTarget } from "@adapttable/core";
 export type { AggregateName, Aggregator } from "@adapttable/core";
-export type { ColumnGroupRecord, FlattenedColumns } from "@adapttable/core";
-export type { WidthColumn } from "@adapttable/core";
+export type { ColumnGroupRecord } from "@adapttable/core";
 export type { GroupedHeaderAlign } from "@adapttable/core";
 export type {
   CustomCellEditorRender,
@@ -735,7 +913,6 @@ export type { SelectionStats } from "@adapttable/core";
 export type { GroupByInput } from "@adapttable/core";
 export type { GroupAggregatesFn, GroupedFlatEntry } from "@adapttable/core";
 export type { RowGroupLevel, RowGroupRef } from "@adapttable/core";
-export type { AssemblyFns } from "@adapttable/core";
 export type { PivotField, PivotZone } from "@adapttable/core";
 export type { PivotConfig } from "@adapttable/core";
 export type { GetCellSpan } from "@adapttable/core";
@@ -780,16 +957,13 @@ export type {
 } from "@adapttable/core";
 export type { Props } from "@adapttable/core";
 export {
-  APPROVAL_PREVIEW_LIMIT,
   type ApprovalReview,
   approvalReview,
   type ApprovalReviewItem,
 } from "@adapttable/core";
-export { resolveDisabledReason } from "@adapttable/core";
 export {
   resolveContextTarget,
   type ResolvedContextTarget,
-  ROW_ID_ATTRIBUTE,
 } from "@adapttable/core";
 export {
   type ColumnMenuAction,
@@ -801,32 +975,18 @@ export {
   type ColumnMenuLabels,
   type ColumnMenuRow,
   type ColumnMenuSlotProps,
-  nextPinSide,
-  pinActionLabel,
   type PinnedSide,
 } from "@adapttable/core";
 export { type ColumnResizeHandleProps } from "@adapttable/core";
-export {
-  columnFlexShares,
-  columnSizeStyle,
-  type ColumnSizingOptions,
-  fittedTableStyle,
-} from "@adapttable/core";
 export { type ColumnGroupDef, type ColumnInput } from "@adapttable/core";
-export { pinnedColumnWidth } from "@adapttable/core";
-export { DEFAULT_CARD_SIZE_PX } from "@adapttable/core";
-export { exportButtonLabel } from "@adapttable/core";
 export { bindFeatureHostFn } from "@adapttable/core";
 export {
   type PaginationItem,
-  paginationItems,
   type PaginationSlot,
   paginationSlots,
 } from "@adapttable/core";
-export { cellFlashAttr, rowFlashSignature } from "@adapttable/core";
 export {
   type TableBodyCell as BodyCell,
-  buildBodyCells,
   type CellSpanAppearance,
 } from "@adapttable/core";
 export { type ExtraRow } from "@adapttable/core";
@@ -839,14 +999,9 @@ export {
   pinnedSummarySideFromId,
 } from "@adapttable/core";
 export { type RowHeight, type RowStyle } from "@adapttable/core";
-export { deriveSortByOptions } from "@adapttable/core";
-export { tableErrorState } from "@adapttable/core";
-export { bindMobileCardList, mobileCardListStyle } from "@adapttable/core";
 export {
   type KeyedVirtualization,
-  resolveVirtualRows,
   type TableVirtualization,
-  virtualColumnSpan,
   type VirtualItemMeta,
   type VirtualTableRow,
   windowGroupedEntries,
@@ -1100,18 +1255,32 @@ export type { ExportRowRole } from "@adapttable/core";
 export type { AggregateFn } from "@adapttable/core";
 export {
   applyCollapsedColumnGroups,
+  APPROVAL_PREVIEW_LIMIT,
+  bindMobileCardList,
   bodyCellsHaveRowSpan,
+  buildBodyCells,
+  cellFlashAttr,
   cellsForRow,
   cellSpanMark,
   COLUMN_GROUP_ID_SEP,
   COLUMN_GROUP_RENDER_PREFIX,
   COLUMN_GROUP_STUB_PREFIX,
   COLUMN_GROUP_STUB_WIDTH,
+  columnFlexShares,
   columnGroupHeaderCaption,
   columnGroupId,
   columnGroupPath,
   columnGroupStubStyle,
   columnMenuActions,
+  columnMenuRows,
+  columnResizeHandleProps,
+  columnSizeStyle,
+  type ColumnSizingOptions,
+  DEFAULT_CARD_SIZE_PX,
+  defaultConfirm,
+  defaultLabels,
+  deriveSortByOptions,
+  exportButtonLabel,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
   EXTRA_ROW_PARTS,
@@ -1120,7 +1289,9 @@ export {
   extraHostFillStyle,
   extraRowsForSection,
   extraUncoveredColSpans,
+  FILTER_LABELS,
   filterColumnMenuRows,
+  fittedTableStyle,
   flattenColumnTree,
   groupedHeaderAlign,
   groupedHeaderCellStyle,
@@ -1140,23 +1311,40 @@ export {
   isColumnGroupStubKey,
   isColumnGroupSummaryKey,
   isExtraEntry,
+  mobileCardListStyle,
+  nextPinSide,
   orderedCardEntries,
+  paginationItems,
+  pinActionLabel,
   PINNED_BOTTOM_PART,
   PINNED_TOP_PART,
+  pinnedColumnWidth,
   pinnedRowCellStyle,
   pinnedRowPart,
   pinnedRowSticky,
   pinnedRowStickyStyle,
   renderedRowsOf,
   resetColumnLayout,
+  resolveDisabledReason,
   resolveRowHeight,
   resolveRowStyle,
+  resolveTableLabels,
+  resolveVirtualRows,
+  ROW_ID_ATTRIBUTE,
+  rowFlashSignature,
   rowSourceIndex,
   rowSpanSignature,
   rowStyleSignature,
   showAllColumns,
+  showSimpleFilterFields,
+  tableErrorState,
+  tableMinWidth,
   toggleCollapsedColumnGroup,
+  treeRowAria,
+  treeTableAria,
   unpinAllColumns,
+  virtualColumnSpan,
+  visibleRowActions,
 } from "@adapttable/core/binding";
 export { normalizeEditorOptions } from "@adapttable/core/editing";
 
@@ -1167,12 +1355,8 @@ export {
   autoSizeColumns,
   bodyRowEntries,
   type ColorScheme,
-  columnMenuRows,
-  columnResizeHandleProps,
   createFilterRegistry,
-  defaultConfirm,
   defaultFilterRegistry,
-  defaultLabels,
   edgePinStyle,
   FILTER_TYPES,
   filterLabel,
@@ -1194,12 +1378,9 @@ export {
   resolveFilterRegistry,
   resolveLabels,
   runRowAction,
-  showSimpleFilterFields,
   splitRelativeToken,
-  tableMinWidth,
   toolbarShowsFilters,
   treeCardStyle,
-  visibleRowActions,
 } from "@adapttable/core";
 export {
   editorInputType,
@@ -1223,3 +1404,44 @@ export {
 // `@adapttable/ai`'s `agentObservation`.
 export { deriveRuntimeOperations } from "./agent/deriveRuntimeOperations";
 export { mobileCardRegionProps } from "./virtual/mobileCardRegion";
+export type {
+  AssemblyFns,
+  FlattenedColumns,
+  WidthColumn,
+} from "@adapttable/core/binding";
+
+/* ── Kit machinery the main entry serves only as deprecated aliases ── */
+export type { UseShortcutsOptions } from "./actions/useShortcuts";
+export { useShortcuts } from "./actions/useShortcuts";
+export { useChromeScrollReset } from "./chrome/scrollReset";
+export { useFilterTriggerToggle } from "./chrome/toolbarChrome";
+export {
+  columnHeaderController,
+  columnsHaveFooter,
+  resolveColumnFooter,
+  resolveColumnHeader,
+} from "./columns/columnHeader";
+export {
+  columnDropProps,
+  columnReorderKeyProps,
+  columnRowDragProps,
+  useColumnDragState,
+} from "./columns/columnReorder";
+export { resolveNeutralColumnHeaders } from "./columns/resolveColumns";
+export type { EditableCellActivateProps as EditableCellActivateControlProps } from "./editing/EditableCellGate";
+export type { TableEditHistoryProps } from "./editing/editHistory";
+export { readCellValue, useTableEditHistory } from "./editing/editHistory";
+export { useTableEngine } from "./engine/useTableEngine";
+export type { UseActiveFilterChipsOptions } from "./filters/useActiveFilterChips";
+export { useActiveFilterChips } from "./filters/useActiveFilterChips";
+export type { UseExtraChipsOptions } from "./filters/useExtraChips";
+export { useExtraChips } from "./filters/useExtraChips";
+export { useFindFocus } from "./find/useFindInTable";
+export { useColorScheme } from "./hooks/useColorScheme";
+export { useDebounce } from "./hooks/useDebounce";
+export type { UseScrollToTableTopOptions } from "./hooks/useScrollToTableTop";
+export { useScrollToTableTop } from "./hooks/useScrollToTableTop";
+export type { HorizontalOverflow } from "./layout/useHorizontalOverflow";
+export { useHorizontalOverflow } from "./layout/useHorizontalOverflow";
+export { useTableChrome } from "./useTableChrome";
+export { useVirtualChromeBodyData } from "./virtual/useVirtualChromeBodyData";

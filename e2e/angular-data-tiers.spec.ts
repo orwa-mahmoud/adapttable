@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
 import { ANGULAR_KITS, angularPart } from "./angular-kit";
+import { expectMatchingRows } from "./table-total";
 
 for (const kit of ANGULAR_KITS) {
   test.describe(kit.key, () => {
@@ -12,13 +13,13 @@ for (const kit of ANGULAR_KITS) {
 
     const part = (page: Page, name: string) => angularPart(kit, page, name);
 
-    /** The first cell's text in every rendered row. */
+    /** The name in every rendered row's Person cell, drawn above the role. */
     const names = (page: Page) =>
       part(page, "row").evaluateAll((rows) =>
         rows.map(
           (row) =>
             row
-              .querySelector('[data-adapttable-part="cell"]')
+              .querySelector('[data-column-key="person"] strong')
               ?.textContent?.trim() ?? ""
         )
       );
@@ -36,7 +37,7 @@ for (const kit of ANGULAR_KITS) {
         );
         await expect(part(page, "table")).toHaveAttribute(
           "aria-rowcount",
-          "40000"
+          "50000"
         );
         expect(await part(page, "row").count()).toBeLessThan(80);
 
@@ -54,7 +55,7 @@ for (const kit of ANGULAR_KITS) {
           )
           .toBeGreaterThan(500);
         // Only the slices fetched are in the list: the bottom is the second
-        // slice's end, not the forty-thousandth row.
+        // slice's end, not the fifty-thousandth row.
         expect(
           Number(await part(page, "row").last().getAttribute("data-row-id"))
         ).toBeLessThanOrEqual(1000);
@@ -154,7 +155,8 @@ for (const kit of ANGULAR_KITS) {
         page,
       }) => {
         await page.goto(PAGE);
-        await expect(part(page, "row")).toHaveCount(25);
+        await expect(part(page, "row")).toHaveCount(5);
+        await expectMatchingRows(page.locator(".mx-demo"), 16);
 
         // A new sort starts over at page one, so it comes first.
         const person = part(page, "header-cell").first();
@@ -173,12 +175,12 @@ for (const kit of ANGULAR_KITS) {
         );
         await expect(part(page, "row")).toHaveCount(5);
 
-        await part(page, "search").fill("Grace");
+        await part(page, "search").fill("Sefa");
         await expect(part(page, "row")).toHaveCount(1);
         await page.reload();
-        await expect(part(page, "search")).toHaveValue("Grace");
+        await expect(part(page, "search")).toHaveValue("Sefa");
         await expect(part(page, "row")).toHaveCount(1);
-        await expect(part(page, "row").first()).toContainText("Grace Hopper");
+        await expect(part(page, "row").first()).toContainText("Sefa Demir");
       });
     });
   });

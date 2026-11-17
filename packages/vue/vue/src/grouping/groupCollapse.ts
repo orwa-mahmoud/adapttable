@@ -1,5 +1,7 @@
-import { groupCollapseActions } from "@adapttable/core";
-import type { GroupCollapseState } from "@adapttable/core/binding";
+import {
+  groupCollapseActions,
+  type GroupCollapseState,
+} from "@adapttable/core/binding";
 import {
   computed,
   type ComputedRef,

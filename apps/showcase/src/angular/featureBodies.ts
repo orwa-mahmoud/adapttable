@@ -9,6 +9,7 @@
  * received is on the page.
  */
 import {
+  ADAPTTABLE_URL_ADAPTER,
   type AdaptTableFeature,
   aggregate,
   type CellContext,
@@ -16,22 +17,31 @@ import {
   type ColumnLayoutState,
   injectFrontendData,
   injectQuerySource,
+  injectSavedViews,
   injectServerData,
   type NestedTableDefaults,
 } from "@adapttable/angular";
 import {
   buildFormulaColumns,
+  type FormulaColumnSpec,
   injectFormulaUrlState,
 } from "@adapttable/angular/formula";
 import {
   injectPivotUrlState,
   pivot,
-  type PivotField,
   type PivotRow,
 } from "@adapttable/angular/pivot";
-import { applyRowPatches, applyRowReorder, updateRow } from "@adapttable/core";
+import {
+  injectChangedCellFlash,
+  injectRowPatchStream,
+} from "@adapttable/angular/stream";
+import {
+  applyRowPatchesWithLog,
+  type RowPatchEvent,
+  rowPatchLog,
+} from "@adapttable/core";
 import { xlsxWriter } from "@adapttable/core/xlsx";
-import { NgTemplateOutlet } from "@angular/common";
+import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
   Component,
@@ -40,6 +50,7 @@ import {
   type ElementRef,
   inject,
   input,
+  type OnInit,
   type Signal,
   signal,
   type TemplateRef,
@@ -52,18 +63,157 @@ import {
   QueryClient,
 } from "@tanstack/angular-query-experimental";
 
-import { budget, formatMoney, personStatus, utilization } from "../people";
+import {
+  pageDefaultsFor,
+  pageLayoutFor,
+  pivotRoster,
+  rosterFor,
+  seedRoster,
+} from "../casts";
+import { formatMoney } from "../people";
+import {
+  attachedNote,
+  budgetTotalOf,
+  pinnedTotals,
+} from "../shared/aggregationScenario";
+import {
+  EXPORT_GROUP_BY,
+  EXPORT_MODES,
+  exportGroups,
+  type ExportMode,
+  exportNavigatesCells,
+  exportScenarioOptions,
+  exportSelects,
+  initialExportMode,
+  loadArabicFont,
+  printGroupedPeople,
+  requestedExportScope,
+} from "../shared/exportScenario";
+import {
+  FILTER_FORMS,
+  type FilterForm,
+  formShowsFields,
+  formShowsHeaderFunnels,
+  formShowsTree,
+} from "../shared/filterForm";
+import {
+  cycleReport,
+  FORMULA_EXAMPLES,
+  FORMULA_START,
+  FORMULAS_PARSE,
+  NO_FORMULAS,
+  withFormulas,
+  withoutFormula,
+  withTypedFormula,
+} from "../shared/formulaScenario";
+import {
+  GROUPED_XLSX_EXPORT,
+  PEOPLE_GROUP_BY,
+} from "../shared/groupingScenario";
+import {
+  LANDING_ARRANGEMENTS,
+  LANDING_URL_KEY,
+  type LandingArrangement,
+  landingArrangement,
+} from "../shared/landingScenario";
+import {
+  forceMobileFor,
+  MOBILE_BOUNDED_HEIGHT,
+  MOBILE_CARDS,
+  MOBILE_DATA_STATES,
+  MOBILE_LAYOUTS,
+  MOBILE_LOAD_ERROR,
+  MOBILE_PAGING,
+  MOBILE_START,
+  MOBILE_TEXT,
+  type MobileDataState,
+  type MobileLayout,
+  type MobilePaging,
+  rowsFor,
+} from "../shared/mobileScenario";
+import {
+  ACCESSIBILITY_HINTS,
+  COLUMN_GROUP_HINTS,
+  NESTED_HINTS,
+  readAnnouncements,
+  ROWS_HINTS,
+  SELECTION_HINTS,
+  TRANSCRIPT_LENGTH,
+  TRANSCRIPT_TEXT,
+} from "../shared/pageHints";
+import {
+  archivePeople,
+  peopleBulkActions,
+  peopleRowActions,
+} from "../shared/peopleActions";
+import {
+  applyPersonRowEdit,
+  EDITING_DEFAULT_LAYOUT,
+  inWideOrder,
+  liveNameUpdate,
+  ORDER_COLUMNS,
+  orderKey,
+} from "../shared/peopleTable";
+import {
+  PIVOT_AGGREGATORS,
+  PIVOT_FIELDS,
+  PIVOT_PAGE_SIZE,
+  PIVOT_START,
+  pivotCellFormat,
+  pivotRowHeader,
+} from "../shared/pivotScenario";
+import {
+  createDemoPatchSource,
+  nextRealtimePatch,
+  PATCH_STREAM_URL,
+  personCellFlashing,
+  REALTIME_FEED_LENGTH,
+  REALTIME_HINTS,
+  REALTIME_TEXT,
+  realtimeStartsLive,
+  streamStatusLabel,
+} from "../shared/realtimeScenario";
+import {
+  orderPeopleByTeam,
+  REORDER_HINTS,
+  REORDER_SHAPES,
+  reorderPeople,
+  type ReorderShape,
+  ROWS_PAGE_HEIGHT,
+  teamSpan,
+  withAddedPerson,
+  withDuplicatedPerson,
+  withoutPerson,
+  withPersonMovedToGroup,
+  withPersonMovedUnder,
+} from "../shared/rowsScenario";
+import {
+  createSeededViewStorage,
+  createViewSession,
+  reportingMigration,
+  SAVED_VIEWS_STORAGE_KEY,
+  SAVED_VIEWS_URL_KEY,
+  upgradedFooter,
+} from "../shared/savedViewsScenario";
+import {
+  type BigPerson,
+  makeBigList,
+  SCALE_SLICE,
+  scaleParams,
+  scaleRowKey,
+  serverSlice,
+} from "../shared/scaleScenario";
+import { TREE_HINTS, TREE_URL_KEY } from "../shared/treeScenario";
 import { AiBody } from "./aiBody";
 import {
   applyPersonEdit,
+  currentDataLocale,
   type DemoOrder,
   demoOrders,
   fetchPeople,
   FILTER_DEFS,
   groupedPeopleColumns,
-  largePerson,
-  makeLargeDirectory,
-  PEOPLE,
+  PEOPLE_GROUPING,
   peopleColumns,
   type PeoplePage,
   type PeopleParams,
@@ -74,6 +224,8 @@ import {
   SHOWCASE_PRESENTATION,
 } from "./data";
 import { AdaptShowcasePivotPanel, AdaptShowcaseTable } from "./kitComponents";
+import { pageChromeFeatures } from "./pageChrome";
+import { scaleColumns } from "./scaleColumns";
 import { SHOWCASE_KIT } from "./showcaseKit";
 
 /** The people columns, shared by every page that does not edit them. */
@@ -81,6 +233,14 @@ const COLUMNS = peopleColumns();
 
 /** The three ways the filtering page lays its filters out. */
 type FilterLayout = "popover" | "drawer" | "header";
+
+/**
+ * What the Angular Filters panel can hold: its AND/OR tree is part of every
+ * kit's panel, so the choices are the tree alone or the tree with the fields.
+ */
+const ANGULAR_FILTER_FORMS = FILTER_FORMS.filter(({ value }) =>
+  formShowsTree(value)
+);
 
 /** Filters: popover, drawer or header funnels, chips, and URL state. */
 @Component({
@@ -100,9 +260,17 @@ type FilterLayout = "popover" | "drawer" | "header";
             }
           </select>
         </label>
+        <label class="angular-select">
+          Filter form
+          <select [value]="form()" (change)="changeForm($event)">
+            @for (option of forms; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
       </div>
       <div class="mx-demo__body">
-        @for (current of mounted(); track current) {
+        @for (current of mounted(); track current.key) {
           <adapt-showcase-table
             [dir]="presentation.tableDir"
             [labels]="presentation.tableLabels"
@@ -112,8 +280,11 @@ type FilterLayout = "popover" | "drawer" | "header";
             [data]="rows"
             [columns]="columns"
             [rowKey]="rowKey"
-            [filtersMode]="current === 'drawer' ? 'drawer' : 'popover'"
-            [features]="featuresFor(current)"
+            [defaults]="pageDefaults"
+            [defaultColumnLayout]="pageLayout"
+            [filtersMode]="current.layout === 'drawer' ? 'drawer' : 'popover'"
+            [filterFields]="current.fields"
+            [features]="current.features"
           />
         }
       </div>
@@ -121,9 +292,11 @@ type FilterLayout = "popover" | "drawer" | "header";
   `,
 })
 class FilteringBody {
+  readonly pageDefaults = pageDefaultsFor("filtering");
+  readonly pageLayout = pageLayoutFor("filtering");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("filtering");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly layouts: readonly { value: FilterLayout; label: string }[] = [
@@ -132,29 +305,54 @@ class FilteringBody {
     { value: "header", label: "Header" },
   ];
   readonly layout = signal<FilterLayout>("popover");
+  readonly forms = ANGULAR_FILTER_FORMS;
+  readonly form = signal<FilterForm>("both");
   changeLayout(event: Event): void {
     if (!(event.target instanceof HTMLSelectElement)) return;
     const value = event.target.value;
     const option = this.layouts.find((layout) => layout.value === value);
     if (option) this.layout.set(option.value);
   }
+  changeForm(event: Event): void {
+    if (!(event.target instanceof HTMLSelectElement)) return;
+    const value = event.target.value;
+    const option = this.forms.find((form) => form.value === value);
+    if (option) this.form.set(option.value);
+  }
 
   /**
-   * The layout the table is mounted for — one entry, replaced when the layout
-   * changes, so switching remounts the table the way React's `key` does.
+   * The layout and form the table is mounted for — one entry, replaced when
+   * either changes, so switching remounts the table the way React's `key`
+   * does.
    */
-  readonly mounted = computed(() => [this.layout()]);
+  readonly mounted = computed(() => {
+    const layout = this.layout();
+    const form = this.form();
+    return [
+      {
+        key: `${layout}-${form}`,
+        layout,
+        fields: formShowsFields(form),
+        features: this.featuresFor(
+          formShowsHeaderFunnels(layout === "header", form)
+        ),
+      },
+    ];
+  });
+  private readonly chrome = pageChromeFeatures(this.kit, { urlKey: "flt" });
   private readonly panel: readonly AdaptTableFeature[] = [
     this.kit.filters(FILTER_DEFS),
+    ...this.chrome,
   ];
   private readonly header: readonly AdaptTableFeature[] = [
     this.kit.filters(FILTER_DEFS),
     this.kit.headerFilters(),
+    ...this.chrome,
   ];
 
-  /** The header layout adds the funnels; the others keep the panel's fields. */
-  featuresFor(layout: FilterLayout): readonly AdaptTableFeature[] {
-    return layout === "header" ? this.header : this.panel;
+  /** Header funnels join the panel while the form keeps its fields. */
+  private featuresFor(funnels: boolean): readonly AdaptTableFeature[] {
+    return funnels ? this.header : this.panel;
   }
 }
 
@@ -164,58 +362,10 @@ class FilteringBody {
   imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
-      <div class="mx-demo__body">
-        <adapt-showcase-table
-          [dir]="presentation.tableDir"
-          [labels]="presentation.tableLabels"
-          [attr.lang]="presentation.locale"
-          tableLabel="People"
-          [urlSync]="false"
-          [data]="rows"
-          [columns]="columns"
-          [rowKey]="rowKey"
-          [selectable]="true"
-          [defaults]="{ limit: 10 }"
-          [features]="features"
-        />
-      </div>
-      <p class="hint" role="status" data-demo-log>{{ log() }}</p>
-    </div>
-  `,
-})
-class SelectionBody {
-  private readonly kit = inject(SHOWCASE_KIT);
-  readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
-  readonly columns = COLUMNS;
-  readonly rowKey = rowKey;
-  readonly log = signal("Select rows, then run a bulk action.");
-  readonly features: readonly AdaptTableFeature[] = [
-    this.kit.bulkActions([
-      {
-        key: "export",
-        label: "Export",
-        onClick: (ids) => this.log.set(`Export: ${ids.join(", ")}`),
-      },
-      {
-        key: "archive",
-        label: "Archive",
-        onClick: (ids) => this.log.set(`Archive: ${ids.join(", ")}`),
-      },
-    ]),
-  ];
-}
-
-/** Row reordering: a grip, keyboard moves, and the host writing each move. */
-@Component({
-  selector: "adapt-showcase-row-reordering",
-  imports: [AdaptShowcaseTable],
-  template: `
-    <div class="mx-demo">
       <div class="hint-row">
-        <span class="hint"
-          >Space lifts a row, arrows move it, Space drops it</span
-        >
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
@@ -227,29 +377,157 @@ class SelectionBody {
           [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
-          [defaults]="{ limit: 10 }"
+          [defaultColumnLayout]="pageLayout"
+          [selectable]="true"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
-      <p class="hint" role="status" data-demo-log>{{ log() }}</p>
+    </div>
+  `,
+})
+class SelectionBody {
+  readonly hints = SELECTION_HINTS;
+  readonly pageDefaults = pageDefaultsFor("selection");
+  readonly pageLayout = pageLayoutFor("selection");
+  private readonly kit = inject(SHOWCASE_KIT);
+  readonly presentation = SHOWCASE_PRESENTATION;
+  readonly rows = signal<readonly Person[]>(rosterFor("selection"));
+  readonly columns = COLUMNS;
+  readonly rowKey = rowKey;
+  private readonly pageFeatures: readonly AdaptTableFeature[] = [
+    this.kit.bulkActions(
+      peopleBulkActions(currentDataLocale(), {
+        onArchive: (ids) =>
+          this.rows.update((rows) => archivePeople(rows, ids)),
+      })
+    ),
+  ];
+  readonly features: readonly AdaptTableFeature[] = [
+    ...this.pageFeatures,
+    ...pageChromeFeatures(this.kit, { urlKey: "sel" }),
+  ];
+}
+
+/** Row reordering: a grip, keyboard moves, and the host writing each move. */
+@Component({
+  selector: "adapt-showcase-row-reordering",
+  imports: [AdaptShowcaseTable],
+  template: `
+    <div class="mx-demo">
+      <div class="hint-row">
+        <div class="seg" role="group" aria-label="Row shape">
+          @for (option of shapes; track option.value) {
+            <button
+              type="button"
+              class="seg__btn"
+              [class.is-on]="shape() === option.value"
+              [attr.aria-pressed]="shape() === option.value"
+              (click)="shape.set(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
+        <button
+          type="button"
+          class="seg__btn"
+          [class.is-on]="rtl"
+          [attr.aria-pressed]="rtl"
+          (click)="toggleDirection()"
+        >
+          RTL
+        </button>
+      </div>
+      <div class="mx-demo__body">
+        @for (current of mounted(); track current.shape) {
+          <adapt-showcase-table
+            [dir]="presentation.tableDir"
+            [labels]="presentation.tableLabels"
+            [attr.lang]="presentation.locale"
+            tableLabel="People"
+            [urlSync]="false"
+            [data]="rows()"
+            [columns]="columns"
+            [rowKey]="rowKey"
+            [defaultColumnLayout]="pageLayout"
+            [defaults]="pageDefaults"
+            [features]="current.features"
+          />
+        }
+      </div>
     </div>
   `,
 })
 class RowReorderingBody {
+  readonly pageDefaults = pageDefaultsFor("row-reordering");
+  readonly pageLayout = pageLayoutFor("row-reordering");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = signal<readonly Person[]>(peopleRows());
+  readonly shapes = REORDER_SHAPES;
+  readonly hints = REORDER_HINTS;
+  readonly rtl = SHOWCASE_PRESENTATION.dir === "rtl";
+  readonly shape = signal<ReorderShape>("flat");
+  readonly rows = signal<readonly Person[]>(rosterFor("row-reordering"));
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly log = signal("Drag a grip, or lift a row with Space.");
-  readonly features: readonly AdaptTableFeature[] = [
-    this.kit.rowReorder<Person>((from, to, row) => {
-      this.rows.update((rows) => applyRowReorder(rows, from, to));
-      this.log.set(
-        `Moved ${row.name} from ${String(from + 1)} to ${String(to + 1)}`
-      );
-    }),
-  ];
+  private readonly chrome = pageChromeFeatures(this.kit, {
+    urlKey: "reorder",
+  });
+
+  /**
+   * The shape the table is mounted for — one entry, replaced when the shape
+   * changes, so switching remounts the table the way React's `key` does.
+   */
+  readonly mounted = computed(() => {
+    const shape = this.shape();
+    return [{ shape, features: this.featuresFor(shape) }];
+  });
+
+  private featuresFor(shape: ReorderShape): readonly AdaptTableFeature[] {
+    return [
+      ...(shape === "grouped"
+        ? [this.kit.groupingPanel([...PEOPLE_GROUP_BY], PEOPLE_GROUPING)]
+        : []),
+      ...(shape === "tree"
+        ? [
+            this.kit.tree<Person>({
+              getParentId: reportsTo,
+              treeColumn: "person",
+            }),
+          ]
+        : []),
+      this.kit.rowReorder<Person>(
+        (from, to, row) => {
+          this.rows.update((rows) => reorderPeople(rows, from, to, row, shape));
+        },
+        {
+          movePolicy: "confirm",
+          onGroupMove: (row, _fromGroup, toGroup, position) => {
+            this.rows.update((rows) =>
+              withPersonMovedToGroup(rows, row, toGroup, position)
+            );
+          },
+          onTreeMove: (row, _fromParent, toParent, position) => {
+            this.rows.update((rows) =>
+              withPersonMovedUnder(rows, row, toParent.id, position)
+            );
+          },
+        }
+      ),
+      ...this.chrome,
+    ];
+  }
+
+  /** The page in the other direction: the same page, re-read in that language. */
+  toggleDirection(): void {
+    const url = new URL(location.href);
+    url.searchParams.set("locale", this.rtl ? "en" : "ar");
+    location.assign(url);
+  }
 }
 
 /** Editing: kit-native editors in the cell; the host writes every change. */
@@ -298,8 +576,10 @@ class RowReorderingBody {
           [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
-          [defaults]="{ limit: 10 }"
+          [defaults]="pageDefaults"
           [features]="features()"
+          [defaultColumnLayout]="defaultLayout"
+          [selectable]="true"
         />
       </div>
       <p class="hint" role="status" data-demo-log>{{ log() }}</p>
@@ -307,9 +587,11 @@ class RowReorderingBody {
   `,
 })
 class EditingBody {
+  readonly pageDefaults = pageDefaultsFor("editing");
+  readonly defaultLayout = EDITING_DEFAULT_LAYOUT;
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = signal<readonly Person[]>(peopleRows());
+  readonly rows = signal<readonly Person[]>(seedRoster("editing", false));
   readonly columns = peopleColumns({ editable: true });
   readonly rowKey = rowKey;
   readonly log = signal("Every change goes through the host.");
@@ -320,10 +602,9 @@ class EditingBody {
   receiveLiveUpdate(): void {
     const row = this.rows()[0];
     if (!row) return;
-    this.rows.update((rows) =>
-      applyPersonEdit(rows, row, "person", "Ada Live")
-    );
-    this.log.set("Received live name update: Ada Live");
+    const name = liveNameUpdate(row);
+    this.rows.update((rows) => applyPersonEdit(rows, row, "person", name));
+    this.log.set(`Received live name update: ${name}`);
   }
 
   private readonly editingFeature = this.kit.editing<Person>(
@@ -356,52 +637,128 @@ class EditingBody {
     this.kit.editHistory(),
     this.kit.undoRedoButtons(),
     this.kit.cellNavigation(),
+    this.kit.columnSelectionCheckbox(),
   ];
-  readonly features = computed<readonly AdaptTableFeature[]>(() => [
+  private readonly pageFeatures = computed<readonly AdaptTableFeature[]>(() => [
     ...(this.editingEnabled() ? [this.editingFeature] : []),
     ...this.persistentFeatures,
   ]);
+  private readonly chrome = pageChromeFeatures(this.kit, {
+    editing: true,
+    urlKey: "edit",
+  });
+  readonly features = computed<readonly AdaptTableFeature[]>(() => [
+    ...this.pageFeatures(),
+    ...this.chrome,
+  ]);
 }
 
-/** Grouping: the panel, nested groups, and aggregates in the headers. */
+/**
+ * Grouping: the panel and its drag or select controls, nested groups with
+ * footers and budget subtotals, the column menu, and the grouped sheet
+ * exported as a spreadsheet.
+ */
 @Component({
   selector: "adapt-showcase-grouping",
   imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
+      <div class="hint-row">
+        <div class="seg" role="group" aria-label="Grouping controls">
+          <button
+            type="button"
+            class="seg__btn"
+            [class.is-on]="!mobile()"
+            [attr.aria-pressed]="!mobile()"
+            data-demo-control="grouping-desktop"
+            (click)="mobile.set(false)"
+          >
+            Drag + keyboard
+          </button>
+          <button
+            type="button"
+            class="seg__btn"
+            [class.is-on]="mobile()"
+            [attr.aria-pressed]="mobile()"
+            data-demo-control="grouping-mobile"
+            (click)="mobile.set(true)"
+          >
+            Mobile selects
+          </button>
+        </div>
+        <span class="hint">Drag a column header into the grouping strip</span>
+        <span class="hint"
+          >Focus a chip handle; arrow keys change its level</span
+        >
+      </div>
       <div class="mx-demo__body">
-        <adapt-showcase-table
-          [dir]="presentation.tableDir"
-          [labels]="presentation.tableLabels"
-          [attr.lang]="presentation.locale"
-          tableLabel="People"
-          urlKey="grp"
-          [data]="rows"
-          [columns]="columns"
-          [rowKey]="rowKey"
-          [features]="features"
-        />
+        <div [class.phone-frame]="mobile()">
+          <adapt-showcase-table
+            [dir]="presentation.tableDir"
+            [labels]="presentation.tableLabels"
+            [attr.lang]="presentation.locale"
+            tableLabel="People"
+            urlKey="grp"
+            [data]="rows"
+            [columns]="columns"
+            [rowKey]="rowKey"
+            [defaults]="pageDefaults"
+            [defaultColumnLayout]="pageLayout"
+            [forceMobile]="mobile() || undefined"
+            [features]="features"
+          />
+        </div>
       </div>
     </div>
   `,
 })
 class GroupingBody {
+  readonly pageDefaults = pageDefaultsFor("grouping");
+  readonly pageLayout = pageLayoutFor("grouping");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("grouping");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
+  // The toggle forces the phone's selects on a desktop; off, it leaves the
+  // breakpoint alone rather than forcing a desktop table onto a phone.
+  readonly mobile = signal(false);
+  private readonly pageFeatures: readonly AdaptTableFeature[] = [
+    this.kit.groupingPanel([...PEOPLE_GROUP_BY], PEOPLE_GROUPING),
+    this.kit.columnMenu(),
+    this.kit.exportCsv(GROUPED_XLSX_EXPORT),
+  ];
   readonly features: readonly AdaptTableFeature[] = [
-    this.kit.groupingPanel(["team", "status"]),
+    ...this.pageFeatures,
+    ...pageChromeFeatures(this.kit, { urlKey: "grp" }),
   ];
 }
 
-/** Export: a CSV of the current view from the toolbar. */
+/**
+ * Export: the grouped sheet as a PDF or through a host-run server job, the
+ * same view through the browser's print dialog, and a CSV of the flat view
+ * by scope (`?scope=page|selected|range`).
+ */
 @Component({
   selector: "adapt-showcase-export",
   imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
+      <div class="hint-row" role="group" aria-label="Export mode">
+        <span class="hint">Grouped by team, then status</span>
+        @for (option of modes; track option.value) {
+          <button
+            type="button"
+            class="seg__btn"
+            [class.is-on]="mode() === option.value"
+            [attr.aria-pressed]="mode() === option.value"
+            [attr.data-demo-control]="'export-mode-' + option.value"
+            (click)="mode.set(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
           [dir]="presentation.tableDir"
@@ -412,34 +769,64 @@ class GroupingBody {
           [data]="rows"
           [columns]="columns"
           [rowKey]="rowKey"
-          [features]="features"
-          [selectable]="scope === 'selected'"
+          [defaults]="pageDefaults"
+          [defaultColumnLayout]="pageLayout"
+          [features]="features()"
+          [selectable]="selects()"
         />
       </div>
     </div>
   `,
 })
-class ExportBody {
+class ExportBody implements OnInit {
+  readonly pageDefaults = pageDefaultsFor("export");
+  readonly pageLayout = pageLayoutFor("export");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("export");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly scope = (() => {
-    const scope =
-      typeof location === "undefined"
-        ? null
-        : new URLSearchParams(location.search).get("scope");
-    return scope === "selected" || scope === "range" ? scope : "page";
-  })();
-  readonly features: readonly AdaptTableFeature[] = [
-    this.kit.exportCsv({ scope: this.scope }),
-    ...(this.scope === "range" ? [this.kit.cellNavigation()] : []),
-  ];
-}
+  readonly modes = EXPORT_MODES;
+  private readonly locale = currentDataLocale();
+  private readonly scope = requestedExportScope() ?? "page";
+  readonly mode = signal<ExportMode>(initialExportMode());
+  private readonly font = signal<ArrayBuffer | undefined>(undefined);
+  readonly selects = computed(() => exportSelects(this.mode(), this.scope));
+  private readonly pageFeatures = computed<readonly AdaptTableFeature[]>(() => {
+    const mode = this.mode();
+    const font = this.font();
+    return [
+      ...(exportGroups(mode)
+        ? [this.kit.groupingPanel([...EXPORT_GROUP_BY], PEOPLE_GROUPING)]
+        : []),
+      this.kit.exportCsv(
+        exportScenarioOptions(mode, this.locale, font, this.scope)
+      ),
+      ...(exportNavigatesCells(mode, this.scope)
+        ? [this.kit.cellNavigation()]
+        : []),
+      this.kit.print(() => {
+        printGroupedPeople(this.locale, font);
+      }, true),
+    ];
+  });
+  private readonly chrome = pageChromeFeatures(this.kit, { urlKey: "pdf" });
+  readonly features = computed<readonly AdaptTableFeature[]>(() => [
+    ...this.pageFeatures(),
+    ...this.chrome,
+  ]);
 
-/** How many rows the scale page windows. */
-const SCALE_ROWS = 40_000;
+  ngOnInit(): void {
+    if (this.locale !== "ar") return;
+    loadArabicFont()
+      .then((bytes) => {
+        this.font.set(bytes);
+      })
+      .catch((error: unknown) => {
+        console.error("the demo font did not load", error);
+      });
+  }
+}
 
 /** Where the scale page's rows come from: `?tier=server` or `?tier=query`. */
 type ScaleTier = "frontend" | "server" | "query";
@@ -466,7 +853,7 @@ function scaleTier(): ScaleTier {
       [data]="rows"
       [columns]="columns"
       [rowKey]="rowKey"
-      [defaults]="{ limit: count }"
+      [defaults]="{ limit: limit }"
       [features]="features"
     />
   `,
@@ -474,11 +861,19 @@ function scaleTier(): ScaleTier {
 class ScaleFrontendTable {
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly count = SCALE_ROWS;
-  readonly rows = makeLargeDirectory(SCALE_ROWS);
-  readonly columns = COLUMNS;
-  readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [this.kit.virtualize()];
+  private readonly params = scaleParams();
+  readonly limit = this.params.all ? this.params.total : SCALE_SLICE;
+  readonly rows = makeBigList(this.params.total);
+  readonly columns = scaleColumns(this.params.cols);
+  readonly rowKey = scaleRowKey;
+  readonly features: readonly AdaptTableFeature[] = this.params.virtual
+    ? [
+        this.kit.virtualize({
+          estimateRowSize: 48,
+          virtualizeColumns: this.params.virtualCols,
+        }),
+      ]
+    : [];
 }
 
 /**
@@ -507,19 +902,16 @@ class ScaleFrontendTable {
 class ScaleServerTable {
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  private readonly slice = signal({ from: 0, limit: 500 });
-  readonly source = injectServerData<Person>({
-    rows: computed(() => {
-      const { from, limit } = this.slice();
-      return Array.from(
-        { length: Math.max(0, Math.min(limit, SCALE_ROWS - from)) },
-        (_, index) => largePerson(from + index)
-      );
-    }),
-    total: SCALE_ROWS,
+  private readonly params = scaleParams();
+  private readonly slice = signal({ from: 0, limit: SCALE_SLICE });
+  readonly source = injectServerData<BigPerson>({
+    rows: computed(() =>
+      serverSlice(this.slice().from, this.slice().limit, this.params.total)
+    ),
+    total: this.params.total,
     urlSync: false,
     paginationMode: "infinite",
-    defaults: { limit: 500 },
+    defaults: { limit: SCALE_SLICE },
     onQueryChange: (query) => {
       this.slice.set({
         from: (query.page - 1) * query.limit,
@@ -527,11 +919,16 @@ class ScaleServerTable {
       });
     },
   });
-  readonly columns = COLUMNS;
-  readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [
-    this.kit.virtualize({ estimateRowSize: 48 }),
-  ];
+  readonly columns = scaleColumns(this.params.cols);
+  readonly rowKey = scaleRowKey;
+  readonly features: readonly AdaptTableFeature[] = this.params.virtual
+    ? [
+        this.kit.virtualize({
+          estimateRowSize: 48,
+          virtualizeColumns: this.params.virtualCols,
+        }),
+      ]
+    : [];
 }
 
 /** The people endpoint as an infinite query, keyed on the table's params. */
@@ -640,80 +1037,87 @@ class ScaleQueryTable {
 class ScaleBody {
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly tier = scaleTier();
+  private readonly total = scaleParams().total.toLocaleString("en-US");
   readonly hint = {
-    frontend: `${SCALE_ROWS} rows — only the ones in view render`,
-    server: `${SCALE_ROWS} rows on the server — each slice fetched as you scroll`,
+    frontend: `${this.total} rows — only the ones in view render`,
+    server: `${this.total} rows on the server — each slice fetched as you scroll`,
     query: "Every page comes from an Angular Query infinite query",
   }[this.tier];
 }
 
-/** Mobile cards: the same table, every row a card, in a phone-width frame. */
+/**
+ * Mobile cards: the same table flipped between its desktop layout and phone
+ * cards, both pagination styles, the built-in or a custom card, a bounded
+ * list, the table's data states, and a host callback on activation.
+ */
 @Component({
   selector: "adapt-showcase-mobile-cards",
   imports: [AdaptShowcaseTable, NgTemplateOutlet],
   template: `
     <div class="mx-demo">
-      <div class="hint-row" role="group" aria-label="Layout">
+      <div class="hint-row">
+        <div class="seg" role="group" [attr.aria-label]="text.layout">
+          @for (option of layouts; track option.value) {
+            <button
+              type="button"
+              class="seg__btn"
+              [class.is-on]="layout() === option.value"
+              [attr.aria-pressed]="layout() === option.value"
+              (click)="layout.set(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+        <div class="seg" role="group" [attr.aria-label]="text.paging">
+          @for (option of pagingOptions; track option.value) {
+            <button
+              type="button"
+              class="seg__btn"
+              [class.is-on]="paging() === option.value"
+              [attr.aria-pressed]="paging() === option.value"
+              (click)="paging.set(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+        <div class="seg" role="group" [attr.aria-label]="text.card">
+          @for (option of cards; track option.label) {
+            <button
+              type="button"
+              class="seg__btn"
+              [class.is-on]="customCard() === option.value"
+              [attr.aria-pressed]="customCard() === option.value"
+              (click)="customCard.set(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
         <button
           type="button"
           class="seg__btn"
-          [attr.aria-pressed]="mobile() === undefined"
-          (click)="mobile.set(undefined)"
-        >
-          Automatic
-        </button>
-        <button
-          type="button"
-          class="seg__btn"
-          [attr.aria-pressed]="mobile() === true"
-          (click)="mobile.set(true)"
-        >
-          Phone cards
-        </button>
-        <button
-          type="button"
-          class="seg__btn"
-          [attr.aria-pressed]="mobile() === false"
-          (click)="mobile.set(false)"
-        >
-          Scrollable table
-        </button>
-      </div>
-      <div class="hint-row" role="group" aria-label="Card options">
-        <button
-          type="button"
-          class="seg__btn"
-          [attr.aria-pressed]="customCard()"
-          (click)="customCard.set(!customCard())"
-        >
-          Custom card
-        </button>
-        <button
-          type="button"
-          class="seg__btn"
+          [class.is-on]="bounded()"
           [attr.aria-pressed]="bounded()"
           (click)="bounded.set(!bounded())"
         >
-          Bounded scrolling
+          {{ text.bounded }}
         </button>
-        <button
-          type="button"
-          class="seg__btn"
-          [attr.aria-pressed]="paged()"
-          (click)="paged.set(!paged())"
-        >
-          {{ paged() ? "Paged" : "Infinite scroll" }}
-        </button>
-        @for (state of scenarios; track state) {
-          <button
-            type="button"
-            class="seg__btn"
-            [attr.aria-pressed]="scenario() === state"
-            (click)="scenario.set(state)"
-          >
-            {{ state }}
-          </button>
-        }
+        <div class="seg" role="group" [attr.aria-label]="text.data">
+          @for (option of dataStates; track option.value) {
+            <button
+              type="button"
+              class="seg__btn"
+              [class.is-on]="dataState() === option.value"
+              [attr.aria-pressed]="dataState() === option.value"
+              (click)="dataState.set(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+        <span class="hint">{{ text.hint }}</span>
       </div>
       <ng-template #cardBody let-fields="fields">
         <div class="mx-custom-card" data-demo-custom-card>
@@ -730,120 +1134,163 @@ class ScaleBody {
           }
         </div>
       </ng-template>
-      <div class="mx-demo__body" [class.mx-phone]="mobile() === true">
-        <adapt-showcase-table
-          [dir]="presentation.tableDir"
-          [labels]="presentation.tableLabels"
-          [attr.lang]="presentation.locale"
-          tableLabel="People"
-          mode="frontend"
-          [urlSync]="false"
-          [forceMobile]="mobile()"
-          [selectable]="true"
-          [features]="features"
-          [onRowClick]="activateRow"
-          [data]="
-            scenario() === 'empty' || scenario() === 'loading' ? [] : rows()
-          "
-          [renderCard]="customCard() ? cardBody : undefined"
-          [maxHeight]="bounded() ? 360 : undefined"
-          [paginationMode]="paged() ? 'paged' : 'infinite'"
-          [loading]="scenario() === 'loading'"
-          [error]="scenario() === 'error' ? demoError : null"
-          [columns]="columns"
-          [rowKey]="rowKey"
-          [defaults]="{ limit: 8 }"
-        />
+      <div class="mx-demo__body">
+        <div [class.phone-frame]="forceMobile() === true">
+          <adapt-showcase-table
+            [dir]="presentation.tableDir"
+            [labels]="presentation.tableLabels"
+            [attr.lang]="presentation.locale"
+            tableLabel="People"
+            mode="frontend"
+            [urlSync]="false"
+            [forceMobile]="forceMobile()"
+            [features]="features"
+            [onRowClick]="activate"
+            [data]="shownRows()"
+            [renderCard]="customCard() ? cardBody : undefined"
+            [maxHeight]="bounded() ? boundedHeight : undefined"
+            [paginationMode]="paging()"
+            [loading]="dataState() === 'loading'"
+            [error]="dataState() === 'error' ? loadError : null"
+            [columns]="columns"
+            [rowKey]="rowKey"
+            [defaultColumnLayout]="pageLayout"
+            [defaults]="pageDefaults"
+          />
+        </div>
       </div>
       <p class="hint" role="status" data-demo-log>{{ log() }}</p>
     </div>
   `,
 })
 class MobileCardsBody {
-  readonly mobile = signal<boolean | undefined>(true);
+  readonly text = MOBILE_TEXT;
+  readonly layouts = MOBILE_LAYOUTS;
+  readonly pagingOptions = MOBILE_PAGING;
+  readonly cards = MOBILE_CARDS;
+  readonly dataStates = MOBILE_DATA_STATES;
+  readonly boundedHeight = MOBILE_BOUNDED_HEIGHT;
+  readonly loadError = MOBILE_LOAD_ERROR;
+  readonly pageDefaults = pageDefaultsFor("mobile");
+  readonly pageLayout = pageLayoutFor("mobile");
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly log = signal("Activate a person to see the host callback.");
-  readonly activateRow = (row: Person): void =>
-    this.log.set(`Activated ${row.name}`);
-  readonly rows = signal<readonly Person[]>(peopleRows());
-  readonly customCard = signal(false);
-  readonly bounded = signal(false);
-  readonly paged = signal(true);
-  readonly scenarios = ["ready", "empty", "loading", "error"];
-  readonly scenario = signal("ready");
-  readonly demoError = new Error(
-    "The directory could not be loaded. Try again."
-  );
+  readonly layout = signal<MobileLayout>(MOBILE_START.layout);
+  readonly paging = signal<MobilePaging>(MOBILE_START.paging);
+  readonly customCard = signal(MOBILE_START.customCard);
+  readonly bounded = signal(MOBILE_START.bounded);
+  readonly dataState = signal<MobileDataState>(MOBILE_START.dataState);
+  readonly forceMobile = computed(() => forceMobileFor(this.layout()));
+  readonly rows = signal<readonly Person[]>(seedRoster("mobile", false));
+  readonly shownRows = computed(() => rowsFor(this.rows(), this.dataState()));
+  readonly log = signal<string>(MOBILE_TEXT.waiting);
+  readonly activate = (row: Person): void => {
+    this.log.set(MOBILE_TEXT.activated(row.name));
+  };
   private readonly kit = inject(SHOWCASE_KIT);
-  readonly columns = peopleColumns({ editable: true }).map((column) => {
-    if (column.key === "person")
-      return { ...column, cell: this.kit.personCell };
-    if (column.key === "load") return { ...column, cell: this.kit.loadCell };
-    return column;
-  });
+  readonly columns = peopleColumns({ editable: true });
   readonly rowKey = rowKey;
-  readonly features = [
+  readonly features: readonly AdaptTableFeature[] = [
+    this.kit.editing<Person>((row, key, value) => {
+      this.rows.update((rows) => applyPersonEdit(rows, row, key, value));
+    }),
     this.kit.rowEditing<Person>((row, patch) => {
       this.rows.update((rows) =>
-        Object.entries(patch).reduce(
-          (next, [key, value]) => applyPersonEdit(next, row, key, value),
-          rows
-        )
+        applyPersonRowEdit(rows, row, patch, currentDataLocale())
       );
-      this.log.set(`Saved ${row.name}`);
     }),
-    this.kit.filters(FILTER_DEFS),
-    this.kit.nestedTable<Person>((row) => ({
-      label: `Orders for ${row.name}`,
-      table: OrdersTable,
-    })),
-    this.kit.rowActions<Person>([
-      { key: "profile", label: "View profile", onClick: this.activateRow },
-    ]),
+    // Selection and the shared bulk bar over it, as on every page that selects.
+    this.kit.bulkActions(
+      peopleBulkActions(currentDataLocale(), {
+        onArchive: (ids) =>
+          this.rows.update((rows) => archivePeople(rows, ids)),
+      })
+    ),
+    ...pageChromeFeatures(this.kit, { editing: true, urlKey: "mob" }),
   ];
 }
 
-/** Saved views: name the table's state and pick it again from the menu. */
+/**
+ * Saved views: the views menu on the table and the kit's management panel
+ * beside it, over the shared seeded views — one shared and read-only, one
+ * upgraded from an older table.
+ */
 @Component({
   selector: "adapt-showcase-saved-views",
-  imports: [AdaptShowcaseTable],
+  imports: [AdaptShowcaseTable, NgComponentOutlet],
+  // The list and the table both apply a view by writing params into a store
+  // kept for this visit only: refresh starts clean, the URL never changes.
+  providers: [
+    { provide: ADAPTTABLE_URL_ADAPTER, useFactory: createViewSession },
+  ],
   template: `
+    <ng-template #migratedNote
+      ><span data-testid="migrated">{{ footer() }}</span></ng-template
+    >
     <div class="mx-demo">
-      <div class="hint-row">
-        <span class="hint"
-          >Sort or filter, then save the view under a name</span
-        >
-      </div>
-      <div class="mx-demo__body">
-        <adapt-showcase-table
-          [dir]="presentation.tableDir"
-          [labels]="presentation.tableLabels"
-          [attr.lang]="presentation.locale"
-          tableLabel="People"
-          urlKey="views"
-          [urlSync]="false"
-          [data]="rows"
-          [columns]="columns"
-          [rowKey]="rowKey"
-          [features]="features"
-        />
+      <div class="mx-demo__body panel-layout" [attr.dir]="presentation.dir">
+        <div>
+          <ng-container
+            [ngComponentOutlet]="kit.savedViewsPanel"
+            [ngComponentOutletInputs]="panelInputs()"
+          />
+        </div>
+        <div>
+          <adapt-showcase-table
+            [dir]="presentation.tableDir"
+            [labels]="presentation.tableLabels"
+            [attr.lang]="presentation.locale"
+            tableLabel="People"
+            [urlKey]="urlKey"
+            [data]="rows"
+            [columns]="columns"
+            [rowKey]="rowKey"
+            [defaultColumnLayout]="pageLayout"
+            [features]="features"
+          />
+        </div>
       </div>
     </div>
   `,
 })
 class SavedViewsBody {
-  private readonly kit = inject(SHOWCASE_KIT);
+  readonly pageLayout = pageLayoutFor("saved-views");
+  protected readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("saved-views");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [
-    this.kit.filters(FILTER_DEFS),
-    this.kit.savedViews({
-      storageKey: `adapttable-angular-${this.kit.key}-demo-views`,
-      urlKey: "views",
+  readonly urlKey = SAVED_VIEWS_URL_KEY;
+  private readonly migrated = signal<readonly string[]>([]);
+  private readonly options = {
+    storageKey: SAVED_VIEWS_STORAGE_KEY,
+    storage: createSeededViewStorage(),
+    urlKey: SAVED_VIEWS_URL_KEY,
+    urlAdapter: inject(ADAPTTABLE_URL_ADAPTER),
+  };
+  readonly views = injectSavedViews({
+    ...this.options,
+    migrate: reportingMigration((upgraded) => {
+      this.migrated.update((seen) =>
+        seen.includes(upgraded) ? seen : [...seen, upgraded]
+      );
     }),
+  });
+  readonly features: readonly AdaptTableFeature[] = [
+    this.kit.savedViews(this.options),
   ];
+  readonly footer = computed(() => upgradedFooter(this.migrated()));
+  private readonly migratedNote =
+    viewChild<TemplateRef<unknown>>("migratedNote");
+  readonly panelInputs = computed(() => ({
+    views: this.views.views(),
+    onApply: this.views.apply,
+    onRename: this.views.rename,
+    onMove: this.views.move,
+    onSetDefault: this.views.setDefault,
+    onRemove: this.views.remove,
+    labels: this.presentation.labels,
+    footer: this.footer() === undefined ? undefined : this.migratedNote(),
+  }));
 }
 
 /** The landing page composes the kit's real controls into a useful workspace. */
@@ -852,29 +1299,45 @@ class SavedViewsBody {
   imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo mx-demo--overview">
+      <div class="hint-row">
+        <div class="seg" role="group" aria-label="Row arrangement">
+          @for (option of arrangements; track option.value) {
+            <button
+              type="button"
+              class="seg__btn"
+              [class.is-on]="arrangement() === option.value"
+              [attr.aria-pressed]="arrangement() === option.value"
+              (click)="arrangement.set(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+      </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
           [dir]="presentation.tableDir"
           [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
-          urlKey="overview"
+          [urlKey]="urlKey"
           [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
           [selectable]="true"
-          [defaults]="{ limit: 10 }"
+          [defaults]="pageDefaults"
           [summaryRow]="summary"
-          [features]="features"
+          [features]="features()"
         />
       </div>
     </div>
   `,
 })
 export class AdaptShowcaseLandingTable {
+  readonly pageDefaults = pageDefaultsFor("landing");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = signal<readonly Person[]>(peopleRows());
+  readonly rows = signal<readonly Person[]>(seedRoster("landing", false));
   readonly columns = peopleColumns({ editable: true });
   readonly rowKey = rowKey;
   readonly summary = aggregate<Person>(
@@ -885,32 +1348,58 @@ export class AdaptShowcaseLandingTable {
         typeof value === "number" ? formatMoney(value) : value,
     }
   );
-  readonly features: readonly AdaptTableFeature[] = [
+  readonly urlKey = LANDING_URL_KEY;
+  readonly arrangements = LANDING_ARRANGEMENTS;
+  readonly arrangement = signal<LandingArrangement>(landingArrangement());
+  private readonly chrome = pageChromeFeatures(this.kit, {
+    editing: true,
+    statusBar: true,
+    urlKey: LANDING_URL_KEY,
+  });
+  private readonly grouping = this.kit.groupingPanel<Person>(
+    [...PEOPLE_GROUP_BY],
+    PEOPLE_GROUPING
+  );
+  readonly features = computed((): readonly AdaptTableFeature[] => [
+    ...this.baseFeatures,
+    ...(this.arrangement() === "grouped" ? [this.grouping] : []),
+    ...this.chrome,
+  ]);
+  private readonly baseFeatures: readonly AdaptTableFeature[] = [
     this.kit.filters(FILTER_DEFS),
     this.kit.columnMenu(),
-    this.kit.resizableColumns(),
     this.kit.savedViews({
-      storageKey: `adapttable-angular-${this.kit.key}-overview-views`,
-      urlKey: "overview",
-    }),
-    this.kit.groupingPanel<Person>([], {
-      groupAggregates: aggregate<Person>(
-        { budget: "sum" },
-        { columns: this.columns }
-      ),
-      groupFooters: true,
+      storageKey: `adapttable-angular-${this.kit.key}-${LANDING_URL_KEY}-views`,
+      urlKey: LANDING_URL_KEY,
     }),
     this.kit.editing<Person>((row, key, value) => {
       this.rows.update((rows) => applyPersonEdit(rows, row, key, value));
     }),
+    // The row actions' pencil opens the row's own form beside cell editing.
+    this.kit.rowEditing<Person>((row, patch) => {
+      this.rows.update((rows) =>
+        applyPersonRowEdit(rows, row, patch, currentDataLocale())
+      );
+    }),
     this.kit.editHistory(),
     this.kit.undoRedoButtons(),
     this.kit.cellNavigation(),
-    this.kit.bulkActions([]),
+    this.kit.bulkActions(
+      peopleBulkActions(currentDataLocale(), {
+        onArchive: (ids) =>
+          this.rows.update((rows) => archivePeople(rows, ids)),
+      })
+    ),
+    this.kit.rowActions<Person>(
+      peopleRowActions(currentDataLocale(), {
+        onDelete: (row) => {
+          this.rows.update((rows) => withoutPerson(rows, row));
+        },
+      })
+    ),
     this.kit.exportCsv<Person>({ filename: "people-workspace.csv" }),
     this.kit.densityChooser(),
     this.kit.fullscreen(),
-    this.kit.statusBar(),
   ];
 }
 
@@ -924,7 +1413,9 @@ export class AdaptShowcaseLandingTable {
   template: `
     <div class="mx-demo">
       <div class="hint-row">
-        <span class="hint">Each team lead opens onto their team</span>
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
@@ -932,11 +1423,13 @@ export class AdaptShowcaseLandingTable {
           [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
+          [urlKey]="urlKey"
           [urlSync]="false"
           [data]="rows"
           [columns]="columns"
           [rowKey]="rowKey"
-          [defaults]="{ limit: 30 }"
+          [defaultColumnLayout]="pageLayout"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
@@ -944,27 +1437,23 @@ export class AdaptShowcaseLandingTable {
   `,
 })
 class TreeBody {
+  readonly pageDefaults = pageDefaultsFor("tree");
+  readonly pageLayout = pageLayoutFor("tree");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly hints = TREE_HINTS;
+  readonly urlKey = TREE_URL_KEY;
+  readonly rows = rosterFor("tree");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [
+  private readonly pageFeatures: readonly AdaptTableFeature[] = [
     this.kit.tree<Person>({ getParentId: reportsTo, treeColumn: "person" }),
   ];
+  readonly features: readonly AdaptTableFeature[] = [
+    ...this.pageFeatures,
+    ...pageChromeFeatures(this.kit, { urlKey: TREE_URL_KEY }),
+  ];
 }
-
-/** The nested orders table's columns — a different shape from the parent's. */
-const ORDER_COLUMNS: ColumnDef<DemoOrder>[] = [
-  { key: "item", header: "Item", accessor: (row) => row.item },
-  { key: "qty", header: "Qty", accessor: (row) => row.qty, align: "end" },
-  {
-    key: "amount",
-    header: "Amount",
-    accessor: (row) => `$${row.amount.toLocaleString("en-US")}`,
-    align: "end",
-  },
-];
 
 /** One person's orders: this kit's own table, mounted with the defaults. */
 @Component({
@@ -991,8 +1480,8 @@ class OrdersTable {
   readonly row = input.required<Person>();
   readonly defaults = input.required<NestedTableDefaults>();
   readonly orders = computed(() => demoOrders(this.row()));
-  readonly columns = ORDER_COLUMNS;
-  readonly orderKey = (order: DemoOrder) => order.id;
+  readonly columns: ColumnDef<DemoOrder>[] = [...ORDER_COLUMNS];
+  readonly orderKey = orderKey;
 }
 
 /** Nested tables: each person's recent orders, in a table under the row. */
@@ -1002,8 +1491,9 @@ class OrdersTable {
   template: `
     <div class="mx-demo">
       <div class="hint-row">
-        <span class="hint">Open a row to see that person's orders</span>
-        <span class="hint">The orders have their own columns and row keys</span>
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
@@ -1015,7 +1505,8 @@ class OrdersTable {
           [data]="rows"
           [columns]="columns"
           [rowKey]="rowKey"
-          [defaults]="{ limit: 10 }"
+          [defaultColumnLayout]="pageLayout"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
@@ -1023,50 +1514,24 @@ class OrdersTable {
   `,
 })
 class NestedTablesBody {
+  readonly hints = NESTED_HINTS;
+  readonly pageDefaults = pageDefaultsFor("nested-tables");
+  readonly pageLayout = pageLayoutFor("nested-tables");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("nested-tables");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [
+  private readonly pageFeatures: readonly AdaptTableFeature[] = [
     this.kit.nestedTable<Person>(
       (row) => ({ label: `Orders for ${row.name}`, table: OrdersTable }),
-      [PEOPLE[0]!.id]
+      [this.rows[0]!.id]
     ),
   ];
-}
-
-/** Cluster teammates so a Team span has a consecutive run to cover. */
-function orderPeopleByTeam(rows: readonly Person[]): Person[] {
-  return [...rows].sort((a, b) => {
-    const byTeam = a.team.localeCompare(b.team);
-    if (byTeam !== 0) return byTeam;
-    return Number(a.id) - Number(b.id);
-  });
-}
-
-/**
- * Merge a team that runs down consecutive rows. The origin of the run owns
- * the cell; the rows under it draw nothing there.
- */
-function teamSpan({
-  column,
-  sectionRows,
-  sectionRowIndex,
-}: {
-  column: { key: string };
-  sectionRows: readonly Person[];
-  sectionRowIndex: number;
-}) {
-  if (column.key !== "team") return undefined;
-  const current = sectionRows[sectionRowIndex];
-  if (current === undefined) return undefined;
-  if (sectionRows[sectionRowIndex - 1]?.team === current.team) return undefined;
-  let rowSpan = 1;
-  while (sectionRows[sectionRowIndex + rowSpan]?.team === current.team) {
-    rowSpan += 1;
-  }
-  return rowSpan > 1 ? { rowSpan } : undefined;
+  readonly features: readonly AdaptTableFeature[] = [
+    ...this.pageFeatures,
+    ...pageChromeFeatures(this.kit, { urlKey: "nest" }),
+  ];
 }
 
 /** Rows: pin from the 3-dot menu, and merge a team that runs down the page. */
@@ -1076,8 +1541,9 @@ function teamSpan({
   template: `
     <div class="mx-demo">
       <div class="hint-row">
-        <span class="hint">Open a row's ⋯ menu to pin it</span>
-        <span class="hint">A team that runs down the page is one cell</span>
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
@@ -1086,11 +1552,12 @@ function teamSpan({
           [attr.lang]="presentation.locale"
           tableLabel="People"
           urlKey="rows"
-          [maxHeight]="420"
+          [maxHeight]="maxHeight"
           [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
-          [defaults]="{ limit: 30 }"
+          [defaultColumnLayout]="pageLayout"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
@@ -1098,39 +1565,34 @@ function teamSpan({
   `,
 })
 class RowsBody {
+  readonly hints = ROWS_HINTS;
+  readonly maxHeight = ROWS_PAGE_HEIGHT;
+  readonly pageDefaults = pageDefaultsFor("rows");
+  readonly pageLayout = pageLayoutFor("rows");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = signal(orderPeopleByTeam(PEOPLE));
-  private nextId = Math.max(...PEOPLE.map((row) => Number(row.id)));
+  readonly rows = signal(orderPeopleByTeam(seedRoster("rows", false)));
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [
+  private readonly pageFeatures: readonly AdaptTableFeature[] = [
     this.kit.rowPinning(),
     this.kit.cellSpan(teamSpan),
     this.kit.rowActions<Person>([], {
       layout: "menu",
       onAddRow: () => {
-        this.rows.update((rows) => [
-          {
-            ...PEOPLE[0]!,
-            id: String(++this.nextId),
-            name: "New person",
-          },
-          ...rows,
-        ]);
+        this.rows.update(withAddedPerson);
       },
       onDuplicateRow: (row) => {
-        this.rows.update((rows) => [
-          { ...row, id: String(++this.nextId) },
-          ...rows,
-        ]);
+        this.rows.update((rows) => withDuplicatedPerson(rows, row));
       },
       onDeleteRow: (row) => {
-        this.rows.update((rows) =>
-          rows.filter((current) => current.id !== row.id)
-        );
+        this.rows.update((rows) => withoutPerson(rows, row));
       },
     }),
+  ];
+  readonly features: readonly AdaptTableFeature[] = [
+    ...this.pageFeatures,
+    ...pageChromeFeatures(this.kit, { urlKey: "rows" }),
   ];
 }
 
@@ -1141,8 +1603,9 @@ class RowsBody {
   template: `
     <div class="mx-demo">
       <div class="hint-row">
-        <span class="hint">Each group header has its own ▼</span>
-        <span class="hint">Collapse one to see how it folds</span>
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
@@ -1151,10 +1614,11 @@ class RowsBody {
           [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
-          [data]="rows"
+          [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
-          [defaults]="{ limit: 10 }"
+          [defaultColumnLayout]="pageLayout"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
@@ -1162,13 +1626,27 @@ class RowsBody {
   `,
 })
 class ColumnGroupsBody {
+  readonly hints = COLUMN_GROUP_HINTS;
+  readonly pageDefaults = pageDefaultsFor("column-groups");
+  readonly pageLayout = pageLayoutFor("column-groups");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = signal<readonly Person[]>(rosterFor("column-groups"));
   readonly columns = groupedPeopleColumns();
   readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [
+  private readonly pageFeatures: readonly AdaptTableFeature[] = [
     this.kit.collapsibleColumnGroups(),
+    this.kit.rowActions<Person>(
+      peopleRowActions(currentDataLocale(), {
+        onDelete: (row) => {
+          this.rows.update((rows) => withoutPerson(rows, row));
+        },
+      })
+    ),
+  ];
+  readonly features: readonly AdaptTableFeature[] = [
+    ...this.pageFeatures,
+    ...pageChromeFeatures(this.kit, { urlKey: "cgrp" }),
   ];
 }
 
@@ -1194,7 +1672,7 @@ class ColumnGroupsBody {
           [rowKey]="rowKey"
           [columnLayout]="layout()"
           (columnLayoutChange)="layout.set($event)"
-          [defaults]="{ limit: 10 }"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
@@ -1202,29 +1680,28 @@ class ColumnGroupsBody {
   `,
 })
 class ColumnsBody {
+  readonly pageDefaults = pageDefaultsFor("columns");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("columns");
   readonly rowKey = rowKey;
   // This deliberately wide demo needs width floors: automatic table layout
   // may shrink preferred widths until there is no overflow to demonstrate.
-  readonly columns: readonly ColumnDef<Person>[] = [
+  readonly columns: readonly ColumnDef<Person>[] = inWideOrder([
     ...COLUMNS.map((column) => ({
       ...column,
       minWidth: typeof column.width === "number" ? column.width : undefined,
     })),
-    { key: "email", header: "Email", width: 280, minWidth: 280 },
     { key: "role", header: "Role", width: 220, minWidth: 220 },
-  ];
+  ]);
   readonly layout = signal<ColumnLayoutState>({
     hidden: [],
     order: [],
     widths: {},
     pinned: { person: "start" },
   });
-  readonly features: readonly AdaptTableFeature[] = [
+  private readonly pageFeatures: readonly AdaptTableFeature[] = [
     this.kit.columnMenu(),
-    this.kit.resizableColumns(),
     this.kit.densityChooser(),
     this.kit.cellNavigation(),
     this.kit.exportCsv({
@@ -1233,29 +1710,44 @@ class ColumnsBody {
       filename: "people.xlsx",
     }),
   ];
+  readonly features: readonly AdaptTableFeature[] = [
+    ...this.pageFeatures,
+    ...pageChromeFeatures(this.kit, { urlKey: "cols" }),
+  ];
 }
 
-/** Group and footer totals, matching AggregationDemo.tsx's three surfaces. */
+/**
+ * Totals that are not data rows: pinned team and grand totals, group
+ * footers with budget subtotals, the footer grand total, and a full-width
+ * note attached to a row. Filter the set and every total follows.
+ */
 @Component({
   selector: "adapt-showcase-aggregation",
   imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
-      <p class="hint">
-        Search updates the group and footer totals. The pinned portfolio total
-        stays outside the filtered data.
-      </p>
+      <div class="hint-row">
+        <span class="hint"
+          >Pinned team total and grand total are not data rows</span
+        >
+        <span class="hint"
+          >Group footers close each team; the table footer is the grand
+          total</span
+        >
+        <span class="hint">Filter the set and every total follows</span>
+      </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
           tableLabel="People budgets"
           urlKey="agg"
-          [maxHeight]="420"
           [dir]="presentation.tableDir"
           [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           [data]="rows"
           [columns]="columns"
           [rowKey]="rowKey"
+          [defaults]="pageDefaults"
+          [defaultColumnLayout]="pageLayout"
           [summaryRow]="summary"
           [features]="features"
         />
@@ -1264,42 +1756,26 @@ class ColumnsBody {
   `,
 })
 class AggregationBody {
+  readonly pageDefaults = pageDefaultsFor("aggregation");
+  readonly pageLayout = pageLayoutFor("aggregation");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("aggregation");
   readonly rowKey = rowKey;
-  readonly columns = COLUMNS.filter((column) =>
-    ["person", "team", "budget"].includes(column.key)
-  );
-  readonly summary = aggregate<Person>(
-    { budget: "sum" },
-    {
-      columns: this.columns,
-      format: (value) =>
-        typeof value === "number" ? formatMoney(value) : value,
-    }
-  );
+  readonly columns = COLUMNS;
+  readonly summary = PEOPLE_GROUPING.groupAggregates;
+  private readonly anchor = this.rows[0];
+  private readonly pageFeatures: readonly AdaptTableFeature[] = [
+    this.kit.groupingPanel<Person>([...PEOPLE_GROUP_BY], PEOPLE_GROUPING),
+    this.kit.pinnedSummaryRows<Person>(pinnedTotals(budgetTotalOf(this.rows))),
+    ...(this.anchor
+      ? [this.kit.extraRows([attachedNote(this.anchor.id, this.anchor.name)])]
+      : []),
+    this.kit.filters(FILTER_DEFS),
+  ];
   readonly features: readonly AdaptTableFeature[] = [
-    this.kit.groupingPanel<Person>("team", {
-      groupAggregates: aggregate<Person>(
-        { budget: "sum" },
-        { columns: this.columns }
-      ),
-      groupFooters: true,
-    }),
-    this.kit.pinnedSummaryRows<Person>({
-      top: [
-        {
-          ...PEOPLE[0]!,
-          id: "portfolio-total",
-          name: "Portfolio total",
-          nameAr: "إجمالي المحفظة",
-          team: "",
-          teamAr: "",
-          budget: PEOPLE.reduce((total, row) => total + budget(row), 0),
-        },
-      ],
-    }),
+    ...this.pageFeatures,
+    ...pageChromeFeatures(this.kit, { urlKey: "agg" }),
   ];
 }
 
@@ -1312,24 +1788,12 @@ class AggregationBody {
 class PivotBody {
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly fields: readonly PivotField[] = [
-    { key: "team", label: "Team" },
-    { key: "role", label: "Role" },
-    { key: "status", label: "Status" },
-    { key: "budget", label: "Budget" },
-  ];
-  readonly rows = PEOPLE.map((row) => ({
-    ...row,
-    budget: budget(row),
-    status: personStatus(row),
-  }));
+  readonly fields = PIVOT_FIELDS;
+  readonly rows = pivotRoster();
+  readonly pageSize = PIVOT_PAGE_SIZE;
   readonly state = injectPivotUrlState({
     urlKey: "pivot",
-    defaultConfig: {
-      rows: ["team"],
-      columns: ["status"],
-      measures: [{ key: "budget", agg: "sum" }],
-    },
+    defaultConfig: PIVOT_START,
   });
   readonly caption =
     viewChild<TemplateRef<CellContext<PivotRow>>>("pivotCaption");
@@ -1338,16 +1802,17 @@ class PivotBody {
     return this.kit.pivotTableModel(
       pivot(this.rows, this.state.config(), {
         collapsed: this.state.collapsed(),
-        format: (value, measure) =>
-          typeof value === "number" &&
-          measure.key === "budget" &&
-          measure.agg !== "count"
-            ? formatMoney(value)
-            : value,
+        aggregators: PIVOT_AGGREGATORS,
+        format: pivotCellFormat,
       }),
       {
         fields: this.fields,
         labels: this.presentation.labels,
+        rowHeader: pivotRowHeader(
+          this.state.config(),
+          this.fields,
+          this.presentation.labels.pivotTotal
+        ),
         renderRowHeader: (row) => caption ?? row.label,
       }
     );
@@ -1368,56 +1833,52 @@ class PivotBody {
   templateUrl: "./formulasBody.html",
 })
 class FormulasBody {
+  readonly pageDefaults = pageDefaultsFor("formulas");
+  readonly pageLayout = pageLayoutFor("formulas");
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE.map((row) => ({
-    ...row,
-    budget: budget(row),
-    utilization: utilization(row),
-  }));
+  readonly rows = seedRoster("formulas", true);
   readonly rowKey = rowKey;
+  private readonly kit = inject(SHOWCASE_KIT);
+  readonly features = pageChromeFeatures(this.kit, { urlKey: "fx" });
+  readonly examples = FORMULA_EXAMPLES;
+  readonly parses = FORMULAS_PARSE;
+  readonly noFormulas = NO_FORMULAS;
   readonly name = signal("");
   readonly formula = signal("");
   readonly state = injectFormulaUrlState({
     urlKey: "fx",
-    defaultFormulas: [
-      { key: "margin", header: "Margin", formula: "=ROUND(budget * 0.15, 0)" },
-      { key: "tag", header: "Tag", formula: '=UPPER(team) & " · " & role' },
-    ],
+    defaultFormulas: FORMULA_START,
   });
   readonly derived = computed(() =>
     buildFormulaColumns<Person>(this.state.formulas())
   );
-  readonly columns = computed(() => [
-    ...COLUMNS.filter((column) =>
-      ["person", "team", "budget"].includes(column.key)
-    ),
-    ...this.derived().columns,
-  ]);
+  readonly columns = computed(() => [...COLUMNS, ...this.derived().columns]);
   readonly errors = computed(() => Object.entries(this.derived().errors));
+  readonly cycle = computed(() => cycleReport(this.derived().cycles));
 
-  /** Build one new column through the binding; evaluation stays in core. */
+  /** Apply a new list; one that changed nothing writes nothing. */
+  private change(next: readonly FormulaColumnSpec[]): void {
+    if (next !== this.state.formulas()) this.state.onFormulasChange(next);
+  }
+
+  /** Add the typed formula through the binding; evaluation stays in core. */
   add(): void {
-    const formula = this.formula().trim();
-    if (!formula) return;
-    const header = this.name().trim();
-    const stem = header.replaceAll(/\W/g, "") || "formula";
-    let key = stem;
-    let suffix = 1;
-    while (this.columns().some((column) => column.key === key))
-      key = `${stem}${String(++suffix)}`;
-    this.state.onFormulasChange([
-      ...this.state.formulas(),
-      { key, header: header || key, formula },
-    ]);
+    if (this.formula().trim() === "") return;
+    this.change(
+      withTypedFormula(this.state.formulas(), this.name(), this.formula())
+    );
     this.name.set("");
     this.formula.set("");
   }
 
+  /** Add an example's columns, skipping any already on the page. */
+  addExample(specs: readonly FormulaColumnSpec[]): void {
+    this.change(withFormulas(this.state.formulas(), specs));
+  }
+
   /** Removing a formula also removes it from a copied or reloaded URL. */
   remove(key: string): void {
-    this.state.onFormulasChange(
-      this.state.formulas().filter((formula) => formula.key !== key)
-    );
+    this.change(withoutFormula(this.state.formulas(), key));
   }
 }
 
@@ -1437,7 +1898,8 @@ class FormulasBody {
           [data]="rows"
           [columns]="columns"
           [rowKey]="rowKey"
-          [defaults]="{ limit: 10 }"
+          [defaultColumnLayout]="pageLayout"
+          [defaults]="pageDefaults"
           [features]="features"
         />
       </div>
@@ -1445,14 +1907,20 @@ class FormulasBody {
   `,
 })
 class RtlBody {
+  readonly pageDefaults = pageDefaultsFor("rtl");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly pageLayout = pageLayoutFor("rtl");
+  readonly rows = rosterFor("rtl");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [
+  private readonly pageFeatures: readonly AdaptTableFeature[] = [
     this.kit.filters(FILTER_DEFS),
     this.kit.columnMenu(),
+  ];
+  readonly features: readonly AdaptTableFeature[] = [
+    ...this.pageFeatures,
+    ...pageChromeFeatures(this.kit, { urlKey: "rtl" }),
   ];
 }
 
@@ -1463,82 +1931,136 @@ class RtlBody {
   template: `
     <div class="mx-demo">
       <div class="hint-row">
-        <button
-          type="button"
-          class="seg__btn"
-          [attr.aria-pressed]="running()"
-          (click)="running.set(!running())"
-        >
-          {{ running() ? "Pause updates" : "Resume updates" }}
-        </button>
-        <button type="button" class="seg__btn" (click)="patch()">
-          Apply next update
-        </button>
-        <span class="hint"
-          >Sort or select a row; its identity survives each patch.</span
-        >
+        @for (hint of hints; track hint) {
+          <span class="hint">{{ hint }}</span>
+        }
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
           tableLabel="Live people"
           [urlSync]="false"
+          mode="frontend"
+          [onQueryChange]="followSort"
           [dir]="presentation.tableDir"
           [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
+          [defaultColumnLayout]="pageLayout"
+          [features]="features"
+          [isCellFlashing]="isCellFlashing"
+          density="compact"
           [selectable]="true"
-          [defaults]="{ limit: 10 }"
+          [defaults]="pageDefaults"
         />
       </div>
-      <ol data-testid="patch-feed" aria-label="Live updates">
-        @for (entry of feed(); track entry.id) {
-          <li>{{ entry.text }}</li>
+      <div
+        class="demo-live-update demo-live-update--feed"
+        data-testid="realtime-feed"
+        [attr.data-stream-status]="stream.status()"
+      >
+        <span>{{ text.feed }}</span>
+        <button
+          type="button"
+          class="seg__btn"
+          [attr.aria-pressed]="running()"
+          (click)="running.set(!running())"
+        >
+          {{ running() ? text.pause : text.resume }}
+        </button>
+        <button type="button" class="seg__btn" (click)="applyNext()">
+          {{ text.applyNext }}
+        </button>
+        <span class="visually-hidden" aria-live="polite">{{
+          statusLabel(stream.status())
+        }}</span>
+        <span class="visually-hidden" aria-live="polite">{{
+          feed()[0] ?? ""
+        }}</span>
+        @if (feed().length === 0) {
+          <span>{{ text.waiting }}</span>
+        } @else {
+          <ol>
+            @for (line of feed(); track $index) {
+              <li>{{ line }}</li>
+            }
+          </ol>
         }
-      </ol>
+      </div>
     </div>
   `,
 })
 class RealtimeBody {
+  readonly pageDefaults = pageDefaultsFor("realtime");
+  readonly pageLayout = pageLayoutFor("realtime");
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = signal<readonly Person[]>(peopleRows());
+  readonly hints = REALTIME_HINTS;
+  readonly text = REALTIME_TEXT;
+  readonly statusLabel = streamStatusLabel;
+  readonly rows = signal<readonly Person[]>(rosterFor("realtime"));
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly running = signal(
-    new URLSearchParams(location.search).get("live") !== "off"
-  );
-  readonly feed = signal<readonly { id: number; text: string }[]>([]);
-  private sequence = 0;
+  private readonly kit = inject(SHOWCASE_KIT);
+  readonly features = pageChromeFeatures(this.kit, { urlKey: "rt" });
+  readonly running = signal(realtimeStartsLive());
+  readonly feed = signal<readonly string[]>([]);
+  private readonly flash = injectChangedCellFlash({ enabled: true });
+  readonly isCellFlashing = personCellFlashing(this.flash.isFlashing);
+  private tick = 0;
+  // The direction the table sorts in now: a patch lands where the reader is
+  // looking, whichever way they have turned the sort.
+  private sortDir: "asc" | "desc" = "desc";
+  private pending: string | undefined;
+  private pendingEvents: readonly RowPatchEvent<Person>[] | undefined;
+  readonly stream = injectRowPatchStream<Person>({
+    eventSource: computed(() =>
+      this.running() ? PATCH_STREAM_URL : undefined
+    ),
+    enabled: this.running,
+    getRowId: rowKey,
+    createEventSource: createDemoPatchSource,
+    onPatch: (update) => {
+      const next = update(this.rows());
+      this.pendingEvents = rowPatchLog(next)?.events;
+      this.rows.set(next);
+    },
+    parse: () => {
+      const next = nextRealtimePatch(this.rows(), this.tick, this.sortDir);
+      if (!next) return [];
+      this.tick += 1;
+      this.pending = next.line;
+      return [next.patch];
+    },
+    onPatches: () => {
+      if (this.pending === undefined) return;
+      this.landed(this.pending, this.pendingEvents ?? []);
+      this.pending = undefined;
+      this.pendingEvents = undefined;
+    },
+  });
 
-  constructor() {
-    const timer = window.setInterval(() => {
-      if (this.running()) this.patch();
-    }, 2500);
-    inject(DestroyRef).onDestroy(() => window.clearInterval(timer));
+  /** Keep the patcher's direction the table's own. */
+  readonly followSort = (query: { readonly sortDir?: string }): void => {
+    this.sortDir = query.sortDir === "asc" ? "asc" : "desc";
+  };
+
+  /** The same update the stream applies, applied once by hand. */
+  applyNext(): void {
+    const next = nextRealtimePatch(this.rows(), this.tick, this.sortDir);
+    if (!next) return;
+    this.tick += 1;
+    const log = applyRowPatchesWithLog(this.rows(), [next.patch], rowKey);
+    this.rows.set(log.rows);
+    this.landed(next.line, log.events);
   }
 
-  /** Apply a core row patch, retaining the update journal and stable ids. */
-  patch(): void {
-    const row = this.rows()[this.sequence % 10];
-    if (!row) return;
-    const nextBudget = budget(row) + 1000;
-    this.rows.update((rows) =>
-      applyRowPatches(
-        rows,
-        [updateRow<Person>(row.id, { budget: nextBudget })],
-        rowKey
-      )
+  /** Record what was applied: the feed's newest line and the cells to flash. */
+  private landed(line: string, events: readonly RowPatchEvent<Person>[]): void {
+    this.feed.update((lines) =>
+      [line, ...lines].slice(0, REALTIME_FEED_LENGTH)
     );
-    this.feed.update((feed) =>
-      [
-        {
-          id: ++this.sequence,
-          text: `${row.name}: ${formatMoney(budget(row))} → ${formatMoney(nextBudget)}`,
-        },
-        ...feed,
-      ].slice(0, 6)
-    );
+    this.flash.mark(events);
   }
 }
 
@@ -1549,14 +2071,22 @@ class RealtimeBody {
   templateUrl: "./accessibilityBody.html",
 })
 class AccessibilityBody {
+  readonly hints = ACCESSIBILITY_HINTS;
+  readonly transcript = TRANSCRIPT_TEXT;
+  readonly pageDefaults = pageDefaultsFor("accessibility");
+  readonly pageLayout = pageLayoutFor("accessibility");
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
+  readonly rows = rosterFor("accessibility");
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [
+  private readonly pageFeatures: readonly AdaptTableFeature[] = [
     this.kit.cellNavigation(),
     this.kit.columnSelectionCheckbox(),
+  ];
+  readonly features: readonly AdaptTableFeature[] = [
+    ...this.pageFeatures,
+    ...pageChromeFeatures(this.kit, { urlKey: "a11y" }),
   ];
   readonly tableRoot = viewChild<ElementRef<HTMLElement>>("tableRoot");
   readonly announcements = signal<readonly string[]>([]);
@@ -1566,17 +2096,14 @@ class AccessibilityBody {
     afterNextRender(() => {
       const root = this.tableRoot()?.nativeElement;
       if (!root) return;
-      const previous = new WeakMap<Element, string>();
+      let last = "";
       const read = (): void => {
-        for (const region of root.querySelectorAll(
-          '[aria-live], [role="status"], [role="alert"]'
-        )) {
-          const text = region.textContent?.trim() ?? "";
-          if (text === previous.get(region)) continue;
-          previous.set(region, text);
-          if (text)
-            this.announcements.update((lines) => [text, ...lines].slice(0, 6));
-        }
+        const next = readAnnouncements(root, last);
+        last = next.last;
+        if (next.lines.length === 0) return;
+        this.announcements.update((lines) =>
+          [...next.lines, ...lines].slice(0, TRANSCRIPT_LENGTH)
+        );
       };
       observer = new MutationObserver(read);
       observer.observe(root, {

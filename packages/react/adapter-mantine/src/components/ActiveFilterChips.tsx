@@ -1,5 +1,5 @@
 import type { ActiveFilterChip } from "@adapttable/react";
-import { defaultLabels } from "@adapttable/react/adapter";
+import { FILTER_LABELS } from "@adapttable/react/adapter";
 import { Anchor, Group, Pill } from "@mantine/core";
 
 /**
@@ -30,7 +30,7 @@ export function ActiveFilterChips({
   onClearAll,
   label,
   clearAllLabel,
-  removeLabel = defaultLabels.removeFilter,
+  removeLabel = FILTER_LABELS.removeFilter,
 }: Readonly<ActiveFilterChipsProps>) {
   if (chips.length === 0) return null;
   return (

@@ -87,7 +87,7 @@ function mountServer(
 }
 
 describe("what useServerData publishes about a server's aggregates", () => {
-  it("names what the HOST declared, before any reader touches it", () => {
+  it("names what the HOST declared, before any reader touches it", async () => {
     const { result } = mountServer(
       [
         { key: "budget", fn: "count" },
@@ -95,10 +95,13 @@ describe("what useServerData publishes about a server's aggregates", () => {
       ],
       []
     );
-    expect(result.current.groupAggregations).toEqual({
-      budget: "count",
-      load: "sum",
-    });
+    // The first server table names them once its engine is in place.
+    await waitFor(() =>
+      expect(result.current.groupAggregations).toEqual({
+        budget: "count",
+        load: "sum",
+      })
+    );
   });
 
   it("follows a reader's override, and drops a column set to none", async () => {

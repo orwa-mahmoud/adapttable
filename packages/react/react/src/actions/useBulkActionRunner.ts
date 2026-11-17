@@ -3,14 +3,14 @@ import {
   type BulkActionContext,
   type BulkActionOutcome,
   type ConfirmHandler,
-  createBulkActionRunner,
 } from "@adapttable/core";
 import { useState, useSyncExternalStore } from "react";
 
-export {
-  bulkActionErrorMessage,
-  type BulkActionOutcome,
-} from "@adapttable/core";
+export { type BulkActionOutcome } from "@adapttable/core";
+
+import { createBulkActionRunner } from "@adapttable/core/binding";
+
+export { bulkActionErrorMessage } from "@adapttable/core/binding";
 
 /**
  * Options for {@link useBulkActionRunner}.

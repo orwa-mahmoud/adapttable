@@ -1,12 +1,11 @@
+import { offersAllMatching as neutralOffersAllMatching } from "@adapttable/core";
 import {
-  applyGroupLeafSelection,
   headerSelectionOf,
   idSetReader,
-  offersAllMatching as neutralOffersAllMatching,
+  type SelectionState,
   toggleId,
   toggleIds,
-} from "@adapttable/core";
-import type { SelectionState } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import { createAllMatchingScope } from "@adapttable/core/selection";
 import {
   useCallback,
@@ -172,7 +171,8 @@ export function useSelection<TRow>(
 
   const toggleGroupLeaves = useCallback(
     (leafIds: readonly string[]) => {
-      commit((prev) => applyGroupLeafSelection(leafIds, prev));
+      // A group checkbox selects every leaf unless all are selected already.
+      commit((prev) => toggleIds(prev, leafIds));
     },
     [commit]
   );

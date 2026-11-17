@@ -239,7 +239,7 @@ export const VUE_TYPE_EXPECTATIONS = {
       },
       {
         code: 2322,
-        message: /different: boolean.*row: Row/,
+        message: /different: boolean.*row: (NoInfer<)?Row/,
       },
     ],
     "MissingColumnMenuControls.ts": [
@@ -412,7 +412,7 @@ export const VUE_TYPE_EXPECTATIONS = {
       },
       {
         code: 2345,
-        message: /row: Person, patch:/,
+        message: /RowEditHandler<Person>/,
       },
       {
         code: 2345,
@@ -465,7 +465,7 @@ export const VUE_TYPE_EXPECTATIONS = {
       {
         code: 2739,
         message:
-          /missing the following properties from type 'SavedViewsPanelProps': onApply, onRename, onMove, onSetDefault, onRemove/,
+          /missing the following properties from type 'SavedViewsPanelProps': (?=[^\n]*onApply)(?=[^\n]*onRename)(?=[^\n]*onMove)(?=[^\n]*onSetDefault)(?=[^\n]*onRemove)/,
       },
     ],
     "view-controls/InvalidSavedViewCallbacks.vue": [

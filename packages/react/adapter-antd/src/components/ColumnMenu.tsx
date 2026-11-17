@@ -1,651 +1,389 @@
-import { columnReorderKeyProps, useColumnDragState } from "@adapttable/react";
+/**
+ * antd's Columns menu: the binding's composition, drawn with antd's small
+ * buttons, input and select in antd's popover, on antd's spacing.
+ */
 import {
-  ACTIONS_COLUMN_KEY,
-  type ColumnMenuAction,
-  columnMenuActions,
-  type ColumnMenuChoice,
-  type ColumnMenuItem,
-  type ColumnMenuLabels,
-  type ColumnMenuRow,
-  columnMenuRows,
   type ColumnMenuSlotProps,
-  type ColumnRenameEditorState,
-  EyeIcon,
-  filterColumnMenuRows,
-  GripIcon,
-  hideAllColumns,
-  LiveRegion,
-  nextPinSide,
-  pinActionLabel,
-  PinIcon,
-  REORDER_COLUMN_KEY,
-  showAllColumns,
-  unpinAllColumns,
-  type UseColumnLayoutResult,
-  useColumnRenameEditor,
-  useFeatureHost,
+  createColumnMenu,
+  type KitButtonProps,
+  type KitColumnMenuLook,
+  type KitDividerProps,
+  type KitIconButtonProps,
+  type KitPopoverProps,
+  type KitRenameFieldProps,
+  type KitSelectProps,
+  type KitTextProps,
+  mergeRefs,
 } from "@adapttable/react/adapter";
-import { Button, Divider, Flex, Input, Popover, Select, theme } from "antd";
-import { type ComponentRef, useEffect, useRef, useState } from "react";
+import {
+  Button as AntButton,
+  Divider as AntDivider,
+  Flex,
+  Input,
+  type InputRef,
+  Popover as AntPopover,
+  Select as AntSelect,
+  theme,
+} from "antd";
+import {
+  type CSSProperties,
+  forwardRef,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactElement,
+} from "react";
 
-import { usePopoverHeight } from "./usePopoverHeight";
-
-/** Menu labels plus the actions-column display name. */
-type MenuLabels = ColumnMenuLabels & { actions: string; reorderRow: string };
+import { INLINE_DIALOG, Text as KitText, TextInput } from "./kitPrimitives";
 
 /** The shared Columns-menu contract, declared once in core. */
 export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow>;
 
-const ignoreColumnRename = () => undefined;
+/** The parts whose button is antd's default type at its middle size. */
+const TRIGGER_PARTS = new Set(["column-menu-button", "views-button"]);
 
-function useAdapterColumnRename<TRow>(
-  row: ColumnMenuRow<TRow>,
-  labels: ColumnMenuLabels,
-  onRenameColumn: ((key: string, name: string) => void) | undefined
-) {
-  const rename = useColumnRenameEditor({
-    key: row.key,
-    name: row.name,
-    onRename: onRenameColumn ?? ignoreColumnRename,
-    requiredMessage: labels.columnNameRequired,
-    renamedMessage: labels.columnRenamed,
-  });
-  return {
-    rename,
-    onBeginRename: onRenameColumn ? rename.begin : undefined,
-  };
-}
+/** The parts whose button is antd's default type at the small size. */
+const DEFAULT_PARTS = new Set(["views-save"]);
 
-function runColumnMenuAction(
-  action: ColumnMenuAction,
-  setOpen: (open: boolean) => void
-): void {
-  action.run();
-  if (action.id !== "rename") setOpen(false);
-}
+/**
+ * The menus' buttons: a trigger antd's default button, a saved view's save
+ * small and default, a rename's save primary, the rest small text buttons at
+ * their own width (a saved view fills its row, starting at its edge).
+ */
+export const Button = forwardRef<HTMLButtonElement, KitButtonProps>(
+  function Button(
+    {
+      elementRef,
+      variant,
+      tone: _tone,
+      fullWidth: _fullWidth,
+      justify: _justify,
+      busy,
+      style,
+      type: htmlType = "button",
+      ...rest
+    },
+    ref
+  ) {
+    "use no memo";
+    const part = rest["data-adapttable-part"] ?? "";
+    const trigger = TRIGGER_PARTS.has(part);
+    let type: "default" | "primary" | "text" = "text";
+    if (trigger || DEFAULT_PARTS.has(part)) type = "default";
+    else if (variant === "filled") type = "primary";
+    return (
+      <AntButton
+        ref={mergeRefs(ref, elementRef)}
+        htmlType={htmlType}
+        size={trigger ? undefined : "small"}
+        type={type}
+        loading={busy}
+        style={part === "views-item" ? { ...VIEW_ITEM, ...style } : style}
+        {...rest}
+      />
+    );
+  }
+);
 
-function columnMenuActionDisabled(
-  action: ColumnMenuAction,
-  editing: boolean
-): boolean {
-  return action.disabled || (action.id === "rename" && editing);
-}
+const VIEW_ITEM: CSSProperties = { flex: 1, justifyContent: "flex-start" };
 
-function isColumnMenuChoice(item: ColumnMenuItem): item is ColumnMenuChoice {
-  return "kind" in item && item.kind === "choice";
-}
+const GRIP: CSSProperties = { display: "inline-flex" };
 
-/** A plugin-owned choice stays inside the open submenu while it changes. */
-function ColumnMenuChoiceControl({
-  choice,
-}: Readonly<{ choice: ColumnMenuChoice }>) {
+/** The toggles whose glyph is antd's icon; the others carry a caption. */
+const ICON_PARTS = new Set(["column-menu-visibility", "column-menu-pin"]);
+
+/**
+ * A row's glyph buttons: the eye a link while its column shows, the pin
+ * primary while pinned, the rest text. The grip is a handle, faded while its
+ * column can move and more while it cannot.
+ */
+export function IconButton({
+  elementRef,
+  variant,
+  tone,
+  fullWidth: _fullWidth,
+  justify: _justify,
+  busy: _busy,
+  style,
+  disabled,
+  children,
+  type: htmlType = "button",
+  ...rest
+}: Readonly<KitIconButtonProps>) {
+  "use no memo";
+  if (rest["data-adapttable-part"] === "column-menu-grip") {
+    return (
+      <span
+        aria-disabled={disabled === true || undefined}
+        style={{ ...GRIP, ...style, opacity: disabled ? 0.3 : 0.55 }}
+        {...rest}
+      >
+        {children}
+      </span>
+    );
+  }
+  const icon = ICON_PARTS.has(rest["data-adapttable-part"] ?? "");
+  let type: "link" | "primary" | "text" = "text";
+  if (variant === "filled") type = "primary";
+  else if (tone === "primary") type = "link";
   return (
-    <Flex
-      vertical
-      gap={4}
-      data-adapttable-part="column-menu-choice"
-      style={{ padding: "4px 7px" }}
+    <AntButton
+      ref={elementRef}
+      htmlType={htmlType}
+      size="small"
+      type={type}
+      disabled={disabled}
+      icon={icon ? children : undefined}
+      style={style}
+      {...rest}
     >
-      <span style={{ fontSize: 12 }}>{choice.label}</span>
-      <Select
+      {icon ? undefined : children}
+    </AntButton>
+  );
+}
+
+const LABEL: CSSProperties = { flex: 1, fontSize: 14 };
+
+/** A row's name, faded and struck through while its column is hidden. */
+function Text(props: Readonly<KitTextProps>) {
+  "use no memo";
+  const { tone, style, ...rest } = props;
+  if (rest["data-adapttable-part"] === "column-menu-label") {
+    return (
+      <span
+        style={{ ...LABEL, ...style, opacity: tone === "disabled" ? 0.5 : 1 }}
+        {...rest}
+      />
+    );
+  }
+  return <KitText {...props} />;
+}
+
+/** A plugin-owned choice: its caption over antd's small select. */
+function Select({
+  value,
+  options,
+  onValueChange,
+  rootPart,
+  label,
+  disabled,
+  fullWidth: _fullWidth,
+  style,
+  "aria-label": ariaLabel,
+}: Readonly<KitSelectProps>) {
+  "use no memo";
+  return (
+    <Flex vertical gap={4} data-adapttable-part={rootPart} style={style}>
+      <span style={{ fontSize: 12 }}>{label}</span>
+      <AntSelect
         size="small"
-        aria-label={choice.label}
-        value={choice.value}
-        disabled={choice.disabled}
-        options={choice.options.map((option) => ({ ...option }))}
+        aria-label={ariaLabel}
+        value={value}
+        disabled={disabled}
+        options={options.map((option) => ({ ...option }))}
         getPopupContainer={(trigger: HTMLElement) =>
           trigger.parentElement ?? document.body
         }
-        onClick={(event) => event.stopPropagation()}
-        onChange={choice.onChange}
+        onClick={(event: MouseEvent) => event.stopPropagation()}
+        onChange={onValueChange}
       />
     </Flex>
   );
 }
 
-function ColumnRenameForm({
-  rename,
-  labels,
-  errorColor,
-}: Readonly<{
-  rename: ColumnRenameEditorState;
-  labels: ColumnMenuLabels;
-  errorColor: string;
-}>) {
-  const inputRef = useRef<ComponentRef<typeof Input>>(null);
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+/** The rule above the injected rows, and a wider one above the footer. */
+export function Divider({ style, ...data }: Readonly<KitDividerProps>) {
+  "use no memo";
+  const injected = data["data-adapttable-part"] === "column-menu-separator";
   return (
-    <form
-      data-adapttable-part="column-rename-form"
-      style={{ padding: "4px 7px" }}
-      onSubmit={(event) => {
-        event.preventDefault();
-        rename.submit();
-      }}
-    >
-      <label
-        htmlFor={rename.inputId}
-        data-adapttable-part="column-rename-label"
-        style={{ display: "block", fontSize: 12, marginBottom: 4 }}
-      >
-        {labels.columnName}
-      </label>
-      <Input
-        ref={inputRef}
-        id={rename.inputId}
-        value={rename.draft}
-        aria-invalid={rename.error ? true : undefined}
-        aria-describedby={rename.error ? rename.errorId : undefined}
-        data-adapttable-part="column-rename-input"
-        size="small"
-        onChange={(event) => rename.setDraft(event.target.value)}
-        onBlur={rename.blur}
-        onKeyDown={rename.onKeyDown}
-      />
-      {rename.error ? (
-        <div
-          id={rename.errorId}
-          role="alert"
-          data-adapttable-part="column-rename-error"
-          style={{
-            color: errorColor,
-            fontSize: 12,
-            marginTop: 4,
+    <AntDivider
+      style={{ margin: injected ? "6px 0" : "8px 0", ...style }}
+      {...data}
+    />
+  );
+}
+
+/**
+ * The rename field: a small caption, antd's input and the error under it.
+ * Inside antd's table header, whose cell sorts on a click and moves focus on
+ * its keys, the input keeps its clicks and keys to itself.
+ */
+export function renameFieldOf(
+  containEvents: boolean
+): (props: Readonly<KitRenameFieldProps>) => ReactElement {
+  return function RenameField({
+    id,
+    elementRef,
+    label,
+    value,
+    error,
+    errorId,
+    parts,
+    onValueChange,
+    onBlur,
+    onKeyDown,
+  }) {
+    "use no memo";
+    const { token } = theme.useToken();
+    return (
+      <>
+        <label
+          htmlFor={id}
+          data-adapttable-part={parts.label}
+          style={{ display: "block", fontSize: 12, marginBottom: 4 }}
+        >
+          {label}
+        </label>
+        <Input
+          ref={(input: InputRef | null) => {
+            const node = input?.input ?? null;
+            if (typeof elementRef === "function") elementRef(node);
+            else if (elementRef) elementRef.current = node;
           }}
-        >
-          {rename.error}
-        </div>
-      ) : null}
-      <Flex gap={4} style={{ marginTop: 4 }}>
-        <Button
-          type="primary"
-          htmlType="submit"
+          id={id}
           size="small"
-          data-adapttable-part="column-rename-save"
-        >
-          {labels.saveColumnName}
-        </Button>
-        <Button
-          htmlType="button"
-          size="small"
-          type="text"
-          data-adapttable-part="column-rename-cancel"
-          onClick={rename.cancel}
-        >
-          {labels.cancelColumnRename}
-        </Button>
-      </Flex>
-    </form>
-  );
-}
-
-/** The eye toggle shared by data rows and the trailing actions row. */
-function VisibilityToggle({
-  name,
-  hidden,
-  labels,
-  onToggle,
-  disabled = false,
-}: Readonly<{
-  name: string;
-  hidden: boolean;
-  labels: MenuLabels;
-  onToggle: () => void;
-  disabled?: boolean;
-}>) {
-  return (
-    <Button
-      size="small"
-      type={hidden ? "text" : "link"}
-      aria-label={`${hidden ? labels.showColumn : labels.hideColumn}: ${name}`}
-      aria-pressed={!hidden}
-      disabled={disabled}
-      icon={<EyeIcon off={hidden} />}
-      onClick={onToggle}
-    />
-  );
-}
-
-/** The row's name, struck through while its column is hidden. */
-function RowName({
-  name,
-  hidden,
-}: Readonly<{ name: string; hidden: boolean }>) {
-  return (
-    <span
-      style={{
-        flex: 1,
-        fontSize: 14,
-        opacity: hidden ? 0.5 : 1,
-        textDecoration: hidden ? "line-through" : "none",
-      }}
-    >
-      {name}
-    </span>
-  );
-}
-
-/** The pin toggle; its accessible name says what the NEXT click does. */
-function PinToggle({
-  pinned,
-  actionLabel,
-  onPin,
-  disabled = false,
-}: Readonly<{
-  pinned: boolean;
-  actionLabel: string;
-  onPin: () => void;
-  disabled?: boolean;
-}>) {
-  return (
-    <Button
-      size="small"
-      type={pinned ? "primary" : "text"}
-      aria-label={actionLabel}
-      disabled={disabled}
-      icon={<PinIcon />}
-      onClick={onPin}
-    />
-  );
-}
-
-function ReorderRow<TRow>({
-  layout,
-  labels,
-}: Readonly<{ layout: UseColumnLayoutResult<TRow>; labels: MenuLabels }>) {
-  const hidden = layout.isHidden(REORDER_COLUMN_KEY);
-  const pinned = layout.state.pinned[REORDER_COLUMN_KEY] !== undefined;
-  return (
-    <div data-adapttable-part="column-menu-item" data-reorder="">
-      <Flex align="center" gap={6} style={{ padding: "2px 0" }}>
-        <span
-          aria-hidden="true"
-          style={{ display: "inline-flex", visibility: "hidden" }}
-        >
-          <GripIcon />
-        </span>
-        <VisibilityToggle
-          name={labels.reorderRow}
-          hidden={hidden}
-          labels={labels}
-          onToggle={() => layout.toggleVisible(REORDER_COLUMN_KEY)}
-        />
-        <RowName name={labels.reorderRow} hidden={hidden} />
-        <PinToggle
-          pinned={pinned}
-          actionLabel={`${pinned ? labels.unpin : labels.pinStart}: ${labels.reorderRow}`}
-          onPin={() =>
-            layout.setPinned(REORDER_COLUMN_KEY, pinned ? undefined : "start")
+          value={value}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
+          data-adapttable-part={parts.input}
+          onClick={
+            containEvents
+              ? (event: MouseEvent) => event.stopPropagation()
+              : undefined
           }
-        />
-      </Flex>
-    </div>
-  );
-}
-
-/**
- * The injected row-actions column's management row. Separated from the data
- * columns and stripped to the two controls that apply: the eye and a
- * ONE-CLICK end pin (right ↔ unpinned — the actions column never moves or
- * pins left, so there is no grip and no three-way pin cycle). An invisible
- * grip keeps its controls aligned with the data rows above.
- */
-function ActionsRow<TRow>({
-  layout,
-  labels,
-}: Readonly<{ layout: UseColumnLayoutResult<TRow>; labels: MenuLabels }>) {
-  const hidden = layout.isHidden(ACTIONS_COLUMN_KEY);
-  const pinned = layout.state.pinned[ACTIONS_COLUMN_KEY] === "end";
-  return (
-    <Flex align="center" gap={6} style={{ padding: "2px 0" }}>
-      <span
-        aria-hidden="true"
-        style={{ display: "inline-flex", visibility: "hidden" }}
-      >
-        <GripIcon />
-      </span>
-      <VisibilityToggle
-        name={labels.actions}
-        hidden={hidden}
-        labels={labels}
-        onToggle={() => layout.toggleVisible(ACTIONS_COLUMN_KEY)}
-      />
-      <RowName name={labels.actions} hidden={hidden} />
-      <PinToggle
-        pinned={pinned}
-        actionLabel={`${pinned ? labels.unpin : labels.pinEnd}: ${labels.actions}`}
-        onPin={() =>
-          layout.setPinned(ACTIONS_COLUMN_KEY, pinned ? undefined : "end")
-        }
-      />
-    </Flex>
-  );
-}
-
-function ColumnMenuRowItem<TRow>({
-  row,
-  layout,
-  labels,
-  drag,
-  token,
-  sortBy,
-  sortDir,
-  onSortColumn,
-  onAutoSizeColumn,
-  onFilterColumn,
-  onRenameColumn,
-  groupingPanel,
-}: Readonly<{
-  row: ColumnMenuRow<TRow>;
-  layout: UseColumnLayoutResult<TRow>;
-  labels: MenuLabels;
-  drag: ReturnType<typeof useColumnDragState>;
-  token: { colorError: string; colorPrimary: string };
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  onSortColumn?: (key: string, dir: "asc" | "desc") => void;
-  onAutoSizeColumn?: (key: string) => void;
-  onFilterColumn?: (key: string) => void;
-  onRenameColumn?: (key: string, name: string) => void;
-  groupingPanel: ColumnMenuProps<TRow>["groupingPanel"];
-}>) {
-  const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
-  const [open, setOpen] = useState(false);
-  const featureHost = useFeatureHost<TRow>();
-  const { rename, onBeginRename } = useAdapterColumnRename(
-    row,
-    labels,
-    onRenameColumn
-  );
-  const actions = columnMenuActions(row, {
-    featureHost,
-    labels,
-    layout,
-    sortBy,
-    sortDir,
-    onSortColumn,
-    onAutoSizeColumn,
-    onFilterColumn,
-    onBeginRename,
-    groupingPanel,
-  });
-  const indicator = canMove ? drag.rowAttrs(key, index) : {};
-  const edge = indicator["data-drop"];
-  const edgeOffset = edge === "before" ? "2px" : "-2px";
-  return (
-    <div
-      data-adapttable-part="column-menu-item"
-      data-hidden={hidden || undefined}
-      data-pinned={pinned}
-    >
-      <Flex
-        align="center"
-        gap={6}
-        style={{
-          padding: "2px 0",
-          cursor: canMove ? "grab" : "default",
-          opacity: "data-dragging" in indicator ? 0.4 : undefined,
-          boxShadow: edge
-            ? `inset 0 ${edgeOffset} 0 0 ${token.colorPrimary}`
-            : undefined,
-        }}
-        {...(canMove
-          ? {
-              ...drag.rowDragProps(key, index),
-              ...drag.dropProps(index, layout.move),
-              ...indicator,
-            }
-          : {})}
-      >
-        <span
-          aria-disabled={!canMove || undefined}
-          style={{
-            display: "inline-flex",
-            cursor: canMove ? "grab" : "default",
-            opacity: canMove ? 0.55 : 0.3,
+          onChange={(event) => onValueChange(event.target.value)}
+          onBlur={onBlur}
+          onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
+            if (containEvents) event.stopPropagation();
+            onKeyDown(event);
           }}
-          {...(canMove
-            ? columnReorderKeyProps(
-                key,
-                index,
-                layout.move,
-                `${labels.moveStart} / ${labels.moveEnd}: ${name}`
-              )
-            : {})}
-        >
-          <GripIcon />
-        </span>
-        <VisibilityToggle
-          name={name}
-          hidden={hidden}
-          labels={labels}
-          disabled={!canHide}
-          onToggle={() => layout.toggleVisible(key)}
         />
-        <RowName name={name} hidden={hidden} />
-        <PinToggle
-          pinned={Boolean(pinned)}
-          actionLabel={`${pinActionLabel(pinned, labels)}: ${name}`}
-          disabled={!canPin}
-          onPin={() => layout.setPinned(key, nextPinSide(pinned))}
-        />
-        <Button
-          size="small"
-          type="text"
-          data-adapttable-part="column-menu-more"
-          aria-expanded={open}
-          aria-label={`${labels.columnActions}: ${name}`}
-          onClick={() => setOpen((value) => !value)}
-        >
-          ⋯
-        </Button>
-      </Flex>
-      {open ? (
-        <div data-adapttable-part="column-menu-submenu">
-          {actions.map((action) =>
-            isColumnMenuChoice(action) ? (
-              <ColumnMenuChoiceControl key={action.id} choice={action} />
-            ) : (
-              <Button
-                key={action.id}
-                size="small"
-                type="text"
-                data-adapttable-part="column-menu-action"
-                disabled={columnMenuActionDisabled(action, rename.editing)}
-                onClick={() => runColumnMenuAction(action, setOpen)}
-              >
-                {action.label}
-              </Button>
-            )
-          )}
-          {rename.editing ? (
-            <ColumnRenameForm
-              rename={rename}
-              labels={labels}
-              errorColor={token.colorError}
-            />
-          ) : null}
-        </div>
-      ) : null}
-      <LiveRegion part="column-rename-announcer" statusRole={false}>
-        {rename.announcement}
-      </LiveRegion>
-    </div>
-  );
+        {error ? (
+          <div
+            id={errorId}
+            role="alert"
+            data-adapttable-part={parts.error}
+            style={{ color: token.colorError, fontSize: 12, marginTop: 4 }}
+          >
+            {error}
+          </div>
+        ) : null}
+      </>
+    );
+  };
 }
 
+/** The Columns menu's rename field. */
+export const RenameField = /* @__PURE__ */ renameFieldOf(false);
+
+const noop = (): void => undefined;
+
+/** antd's own panel padding goes: the menu's panel brings its spacing. */
+const NO_PADDING = { content: { padding: 0 } } as const;
+
 /**
- * AntD column-management popover: per-column drag grip (reorder), eye
- * (show/hide), and pin toggle — plus a separated trailing row for the
- * injected actions column when the table has row actions. Controlled open
- * state so Escape dismisses it (antd's Popover has no built-in Escape
- * handling) and the trigger reports `aria-expanded` like the Filters button
- * beside it.
+ * antd's popover under its trigger's end edge, mirrored in a right-to-left
+ * page, flipping above it only where `flips`. antd has no Escape of its own;
+ * the binding's closes it.
  */
-export function ColumnMenu<TRow>({
-  allColumns,
-  layout,
-  labels,
-  dir,
-  hasRowActions = false,
-  hasRowReorder = false,
-  onAutoSize,
-  onAutoSizeColumn,
-  onSortColumn,
-  onFilterColumn,
-  onRenameColumn,
-  sortBy,
-  sortDir,
-  groupingPanel,
-}: Readonly<ColumnMenuProps<TRow>>) {
-  const drag = useColumnDragState();
-  const { token } = theme.useToken();
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const rows = filterColumnMenuRows(columnMenuRows(allColumns, layout), query);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const height = usePopoverHeight(open, () => triggerRef.current, 0);
-  useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-        triggerRef.current?.focus();
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open]);
-  // antd's Popover already paints the elevated surface (background, radius,
-  // shadow) on `.ant-popover-container`. Repeating it here stacked a second
-  // card inside the first — a visible card-in-a-card. Only the inner spacing
-  // and width belong to us; `styles.content` below zeroes antd's own padding
-  // so this is the single source of it.
-  const content = (
-    // antd's own popover wrapper is a tooltip, which is the wrong thing for a
-    // panel of controls, so the panel names itself inside it. A fieldset is the
-    // element form of the group role — the same choice the unstyled adapter
-    // makes for this panel — so the semantics come from the markup rather than
-    // from an attribute.
-    <fieldset
-      aria-label={labels.columns}
-      dir={dir}
-      style={{
-        border: 0,
-        margin: 0,
-        // Without it a fieldset sizes to min-content and ignores minWidth.
-        minInlineSize: 0,
-        padding: 8,
-        minWidth: "min(260px, calc(100vw - 48px))",
-        maxHeight: height,
-        boxSizing: "border-box",
-        overflowY: "auto",
-      }}
-    >
-      <div
-        style={{
-          fontSize: 11,
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          opacity: 0.6,
-          padding: "0 4px 6px",
-        }}
+export function panelPopover(
+  flips: boolean
+): (props: Readonly<KitPopoverProps>) => ReactElement {
+  const overflow: { readonly adjustX: 1; readonly adjustY: 0 | 1 } = {
+    adjustX: 1,
+    adjustY: flips ? 1 : 0,
+  };
+  return function Popover({
+    trigger,
+    children,
+    open,
+    onOpenChange,
+    dir,
+    "aria-label": label,
+  }) {
+    "use no memo";
+    return (
+      <AntPopover
+        trigger="click"
+        open={open}
+        onOpenChange={onOpenChange}
+        placement={dir === "rtl" ? "bottomLeft" : "bottomRight"}
+        autoAdjustOverflow={overflow}
+        content={
+          <dialog open aria-label={label} dir={dir} style={INLINE_DIALOG}>
+            {children}
+          </dialog>
+        }
+        styles={NO_PADDING}
       >
-        {labels.columns}
-      </div>
-      <Input
-        type="search"
-        size="small"
-        data-adapttable-part="column-menu-search"
-        placeholder={labels.searchColumns}
-        aria-label={labels.searchColumns}
-        value={query}
-        style={{ marginBottom: 8 }}
-        onChange={(event) => setQuery(event.target.value)}
-      />
-      <Flex
-        gap={4}
-        wrap="wrap"
-        data-adapttable-part="column-menu-bulk"
-        style={{ marginBottom: 8 }}
-      >
-        <Button
-          size="small"
-          type="text"
-          data-adapttable-part="column-menu-bulk-button"
-          onClick={() => showAllColumns(rows, layout)}
-        >
-          {labels.showAllColumns}
-        </Button>
-        <Button
-          size="small"
-          type="text"
-          data-adapttable-part="column-menu-bulk-button"
-          onClick={() => hideAllColumns(rows, layout)}
-        >
-          {labels.hideAllColumns}
-        </Button>
-        <Button
-          size="small"
-          type="text"
-          data-adapttable-part="column-menu-bulk-button"
-          onClick={() => unpinAllColumns(rows, layout)}
-        >
-          {labels.unpinAllColumns}
-        </Button>
-      </Flex>
-      {rows.map((row) => (
-        <ColumnMenuRowItem
-          key={row.key}
-          row={row}
-          layout={layout}
-          labels={labels}
-          drag={drag}
-          token={token}
-          sortBy={sortBy}
-          sortDir={sortDir}
-          onSortColumn={onSortColumn}
-          onAutoSizeColumn={onAutoSizeColumn}
-          onFilterColumn={onFilterColumn}
-          onRenameColumn={onRenameColumn}
-          groupingPanel={groupingPanel}
-        />
-      ))}
-      {(hasRowReorder || hasRowActions) && (
-        <Divider style={{ margin: "6px 0" }} />
-      )}
-      {hasRowReorder && <ReorderRow layout={layout} labels={labels} />}
-      {hasRowActions && <ActionsRow layout={layout} labels={labels} />}
-      <Divider style={{ margin: "8px 0" }} />
-      <Button size="small" type="text" onClick={onAutoSize}>
-        {labels.autoSizeColumns}
-      </Button>
-      <Button size="small" type="text" onClick={() => layout.reset()}>
-        {labels.resetColumns}
-      </Button>
-    </fieldset>
-  );
-  return (
-    <Popover
-      trigger="click"
-      open={open}
-      onOpenChange={setOpen}
-      placement={dir === "rtl" ? "bottomLeft" : "bottomRight"}
-      autoAdjustOverflow={{ adjustX: 1, adjustY: 1 }}
-      content={content}
-      styles={{ content: { padding: 0 } }}
-    >
-      <Button
-        ref={triggerRef}
-        aria-expanded={open}
-        aria-haspopup="true"
-        data-adapttable-part="column-menu-button"
-      >
-        {labels.columns}
-      </Button>
-    </Popover>
-  );
+        {/* antd toggles from its own trigger props. */}
+        {trigger({
+          elementRef: noop,
+          onClick: noop,
+          "aria-expanded": open === true,
+          "aria-haspopup": "dialog",
+        })}
+      </AntPopover>
+    );
+  };
 }
+
+const Popover = /* @__PURE__ */ panelPopover(true);
+
+const ROW: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 6,
+  padding: "2px 0",
+};
+
+const useLook = (): KitColumnMenuLook => {
+  const { token } = theme.useToken();
+  return {
+    panel: {
+      padding: 8,
+      minWidth: "min(260px, calc(100vw - 48px))",
+      boxSizing: "border-box",
+    },
+    heading: {
+      display: "block",
+      fontSize: 11,
+      fontWeight: 600,
+      textTransform: "uppercase",
+      letterSpacing: "0.06em",
+      opacity: 0.6,
+      padding: "0 4px 6px",
+    },
+    search: { marginBottom: 8 },
+    bulk: { display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 },
+    row: ROW,
+    // The width of the grip the row has none of, so its controls line up.
+    rowSpacer: { display: "inline-flex", width: 14, flexShrink: 0 },
+    grip: {},
+    divider: {},
+    submenu: {},
+    choice: { padding: "4px 7px" },
+    renameForm: { padding: "4px 7px" },
+    renameActions: { display: "flex", gap: 4, marginTop: 4 },
+    accent: token.colorPrimary,
+    // antd's popover pads the panel 12px a side and stands off its trigger.
+    panelInset: 40,
+  };
+};
+
+/**
+ * Column-management popover: per-column drag grip (reorder), eye
+ * (show/hide), pin toggle and a list of column actions.
+ */
+export const ColumnMenu = /* @__PURE__ */ createColumnMenu(
+  {
+    Button,
+    IconButton,
+    TextInput,
+    Select,
+    Popover,
+    Text,
+    Divider,
+    RenameField,
+  },
+  useLook
+);

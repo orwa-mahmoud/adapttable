@@ -19,7 +19,8 @@ for (const kit of ANGULAR_KITS) {
           .locator('.mx-demo [data-adapttable-part="root"]')
           .first();
         const search = root.getByRole("searchbox");
-        const query = locale === "ar" ? "آدا" : "Ada";
+        // One consultant on the saved-views page answers to this name.
+        const query = locale === "ar" ? "سيفا" : "Sefa";
         const row = root.locator(
           `[data-adapttable-part="${width === 390 ? "card" : "row"}"]`
         );

@@ -1,13 +1,14 @@
-import { exportProgressView } from "@adapttable/core";
-import type {
-  ExportHandlerState,
-  ExportProgressChromeProps as NeutralProps,
-  ExportProgressSlots as NeutralSlots,
+import {
+  type ExportHandlerState,
+  type ExportProgressChromeProps as NeutralProps,
+  type ExportProgressSlots as NeutralSlots,
+  exportProgressView,
 } from "@adapttable/core/binding";
 import { h, type VNodeChild } from "vue";
 
 import type { ActionPresentation } from "../actions/contracts";
 import type { ActionButtonSlots } from "../actions/simpleChrome";
+
 export type ExportProgressSlots = NeutralSlots<VNodeChild>;
 export type ExportProgressChromeProps = NeutralProps<VNodeChild>;
 export function ExportProgressChrome(

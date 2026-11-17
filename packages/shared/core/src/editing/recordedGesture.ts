@@ -2,7 +2,9 @@ import type { CellEdit } from "../focus/cellEdits";
 import { isThenable } from "./storePlumbing";
 
 /** Internal channel: capture undo values now, publish them after host success. */
-export const PREPARE_RECORDING = Symbol("prepare edit history recording");
+export const PREPARE_RECORDING = /* @__PURE__ */ Symbol(
+  "prepare edit history recording"
+);
 
 type Recorder<TRow> = ((edits: readonly CellEdit<TRow>[]) => void) & {
   [PREPARE_RECORDING]?: (edits: readonly CellEdit<TRow>[]) => () => void;

@@ -1,40 +1,20 @@
-/** The desktop `<table>`: header, pinned columns, rows and summary. */
-import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
+/** The desktop `<table>`, drawn by the binding with MUI's table elements. */
 import {
-  cellFlashAttr,
-  cellHighlightStyle,
-  cellSpanMark,
-  columnFlexShares,
-  columnGroupHeaderCaption,
-  columnSizeStyle,
-  ColumnSpacer,
-  createDesktopRow,
-  type DesktopHeaderLeaf,
-  type DesktopRowWiring,
-  DesktopTableChrome,
-  EXTRA_OVER_SPAN_ROW_STYLE,
-  EXTRA_OVER_SPAN_STYLE,
-  EXTRA_ROW_PARTS,
+  createDesktopTable,
   groupedHeaderCellStyle,
-  groupedHeaderLabelStyle,
-  type HtmlGroupedHeaderCell,
-  logicalAlign,
-  mergedCellStyle,
+  type KitCheckboxProps,
+  type KitDesktopCellProps,
+  type KitDesktopHeaderCellProps,
+  type KitDesktopPaint,
+  type KitDesktopRowProps,
+  type KitSortLabelProps,
   PIN_Z,
-  PINNED_SUMMARY_BOTTOM_PART,
-  PINNED_SUMMARY_TOP_PART,
   pinnedEdgeCellStyle,
-  REORDER_COLUMN_WIDTH,
-  resolveRowEditTrigger,
-  rowEditConflict,
   type SharedTableRenderProps,
-  type TableLabels,
-  useDesktopTableAssembly,
 } from "@adapttable/react/adapter";
 import {
   Box,
-  Checkbox,
-  type SxProps,
+  Checkbox as MuiCheckbox,
   Table,
   TableBody,
   TableCell,
@@ -42,65 +22,17 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
-  type Theme,
   useTheme,
 } from "@mui/material";
 import {
   type ComponentProps,
   type CSSProperties,
-  type ReactElement,
   type ReactNode,
   useCallback,
-  useMemo,
   useRef,
 } from "react";
 
-import {
-  OptionalColumnGroupToggle,
-  OptionalColumnHeaderRename,
-  OptionalColumnSelect,
-  OptionalEditableCell,
-  OptionalExpandToggle,
-  OptionalFillHandle,
-  OptionalFilterHeader,
-  OptionalGroupHeaderRow,
-  OptionalRowEditActions,
-  OptionalRowReorderHandle,
-  OptionalTreeCell,
-} from "./featureSlots";
 import { RowActionButtons } from "./RowActionButtons";
-
-function ExtraSlotRow({
-  kind,
-  colSpan,
-  render,
-  labels,
-  fillStyle,
-}: Readonly<{
-  kind: "separator" | "fullWidth";
-  colSpan: number;
-  render?: () => ReactNode;
-  labels: TableLabels;
-  fillStyle?: CSSProperties;
-}>) {
-  const parts = EXTRA_ROW_PARTS[kind];
-  return (
-    <TableRow
-      data-adapttable-part={parts.row}
-      style={EXTRA_OVER_SPAN_ROW_STYLE}
-    >
-      <TableCell
-        colSpan={colSpan}
-        data-adapttable-part={parts.cell}
-        role={kind === "separator" ? "separator" : undefined}
-        aria-label={kind === "separator" ? labels.rowSeparator : undefined}
-        style={{ ...EXTRA_OVER_SPAN_STYLE, ...fillStyle }}
-      >
-        {kind === "fullWidth" ? render?.() : null}
-      </TableCell>
-    </TableRow>
-  );
-}
 
 /** Map a destructive colour token to MUI's `"error"` palette, else default. */
 export function muiColor(color: string | undefined): "default" | "error" {
@@ -124,46 +56,6 @@ export interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
   actionsPinned?: boolean;
 }
 
-/** Width (px) of the leading expand-chevron column (MUI's checkbox cell). */
-const EXPAND_WIDTH = 48;
-const SELECTION_WIDTH = 48;
-const ACTIONS_WIDTH = 120;
-const MUI_WIDTHS = {
-  expansion: EXPAND_WIDTH,
-  selection: SELECTION_WIDTH,
-  actions: ACTIONS_WIDTH,
-} as const;
-/**
- * The palette as values a style can use: CSS variables when the theme declares
- * them, the theme's own colours when it does not. A bare `var(--mui-palette-…)`
- * is undefined under a plain `createTheme`, and an undefined variable in an
- * inline background leaves a pinned cell transparent.
- */
-function useMuiPalette() {
-  const theme = useTheme();
-  return (theme.vars ?? theme).palette;
-}
-
-/**
- * A pinned body cell: the paper surface, with the row's hover or selected tint
- * laid over it through `--adapttable-pin-tint`, so the cell lights up with the
- * rest of its row.
- */
-function pinnedBodyPaint(paper: string): string {
-  return `linear-gradient(var(--adapttable-pin-tint, transparent), var(--adapttable-pin-tint, transparent)), ${paper}`;
-}
-const PAPER_SX = { bgcolor: "background.paper" } as const;
-const RESIZE_HANDLE_SX = {
-  position: "absolute",
-  insetInlineEnd: 0,
-  top: 0,
-  height: "100%",
-  width: 8,
-  cursor: "col-resize",
-  touchAction: "none",
-  userSelect: "none",
-} as const;
-
 /**
  * Identity-stable dispatcher for `selection.toggle` / `expansion.toggle`.
  * `selection.toggle` is recreated whenever the selection changes, so handing
@@ -180,387 +72,191 @@ export function useStableToggle(
   return useCallback((id: string) => ref.current?.toggle(id), []);
 }
 
-function muiAlign(
-  align: "start" | "center" | "end" | undefined
-): "start" | "center" | "end" {
-  return logicalAlign(align);
+/**
+ * A pinned body cell: the paper surface, with the row's hover or selected tint
+ * laid over it through `--adapttable-pin-tint`, so the cell lights up with the
+ * rest of its row.
+ */
+function pinnedBodyPaint(paper: string): string {
+  return `linear-gradient(var(--adapttable-pin-tint, transparent), var(--adapttable-pin-tint, transparent)), ${paper}`;
 }
 
-interface DesktopRowProps<TRow> extends DesktopRowWiring<TRow> {
-  size: "small" | "medium";
-  dir?: "ltr" | "rtl";
+const RESIZE_HANDLE: CSSProperties = {
+  position: "absolute",
+  insetInlineEnd: 0,
+  top: 0,
+  height: "100%",
+  width: 8,
+  cursor: "col-resize",
+  touchAction: "none",
+  userSelect: "none",
+};
+
+/**
+ * The palette as values a style can use: CSS variables when the theme declares
+ * them, the theme's own colours when it does not. A bare `var(--mui-palette-…)`
+ * is undefined under a plain `createTheme`, and an undefined variable in an
+ * inline background leaves a pinned cell transparent.
+ */
+function usePaint(stickyHeader: boolean): KitDesktopPaint {
+  const theme = useTheme();
+  const palette = (theme.vars ?? theme).palette;
+  const paper = palette.background.paper;
+  const pinBg = pinnedBodyPaint(paper);
+  return {
+    // The rails always sit on paper; a pinned one also sticks.
+    rail: (side, pinned, inset) =>
+      pinnedEdgeCellStyle(side, pinned, PIN_Z.body, pinBg, inset) ?? {
+        backgroundColor: paper,
+      },
+    cell: (pin) => (pin ? { ...pin, background: pinBg } : undefined),
+    selectedCell: { backgroundColor: palette.action.selected },
+    headRail: (side, pinned, inset, pin) => ({
+      ...(stickyHeader
+        ? {
+            position: "sticky",
+            top: pin.headerStickTop,
+            zIndex: PIN_Z.header,
+            backgroundColor: paper,
+          }
+        : undefined),
+      ...(pinned ? { backgroundColor: paper } : undefined),
+      ...pinnedEdgeCellStyle(side, pinned, PIN_Z.headerPinned, paper, inset),
+    }),
+    leaf: (leaf, pin) => ({
+      ...(stickyHeader
+        ? {
+            position: "sticky",
+            top: pin.headerStickTop,
+            zIndex: PIN_Z.header,
+            backgroundColor: paper,
+          }
+        : undefined),
+      ...(leaf.pinned ? { backgroundColor: paper } : undefined),
+      textAlign: leaf.size.textAlign,
+      ...(leaf.rowSpan > 1 ? { verticalAlign: "middle" } : undefined),
+      ...leaf.style,
+      ...leaf.size,
+    }),
+    group: (cell) => ({
+      fontWeight: 600,
+      ...groupedHeaderCellStyle(cell, palette.divider),
+    }),
+    resizeHandle: () => RESIZE_HANDLE,
+  };
 }
 
-function rowExtrasEqual<TRow>(
-  prev: Readonly<DesktopRowProps<TRow>>,
-  next: Readonly<DesktopRowProps<TRow>>
-): boolean {
-  return prev.size === next.size && prev.dir === next.dir;
-}
-
-function DesktopRowBase<TRow>(
-  props: Readonly<DesktopRowProps<TRow>>
-): ReactElement {
-  const {
-    row,
-    index,
-    id,
-    gridFocus,
-    columns,
-    bodyCells,
-    labels,
-    selected,
-    expanded,
-    showActions,
-    showReorder,
-    rowReorder,
-    windowStart,
-    rowCount,
-    reorderPinned,
-    rowActions,
-    rowActionsLayout,
-    cellSpanAppearance,
-    renderRowActions,
-    confirm,
-    columnSpan,
-    columnSpacers,
-    treeEntry,
-    treeColumnKey: treeKey,
-    onToggleTree,
-    hasStartPin,
-    hasEndPin,
-    actionsPinned,
-    rowClass,
-    isCellFlashing,
-    hasPrefetch,
-    editing,
-    rows,
-    getRowId,
-    onPrefetch,
-    onToggleSelect,
-    onToggleExpand,
-    renderDetail,
-    focusIndex,
-    edgeRowPin,
-    measureRef,
-    detailMeasureRef,
-    rowDomProps,
-    bodyPinStyle,
-    bodyPinSide,
-    dir,
-    pinPart,
-  } = props;
-  const expandable = expanded !== undefined;
-  const expansionLead = expandable ? EXPAND_WIDTH : 0;
-  const selectionLead =
-    expansionLead + (showReorder ? REORDER_COLUMN_WIDTH : 0);
-  const palette = useMuiPalette();
-  const pinBg = pinnedBodyPaint(palette.background.paper);
-  // A pinned total is the host's figure, not a person: it reads semibold, as
-  // the column footer's summary does.
-  const summaryRow =
-    pinPart === PINNED_SUMMARY_TOP_PART ||
-    pinPart === PINNED_SUMMARY_BOTTOM_PART;
-  const edge = (active: boolean, lead = 0) =>
-    pinnedEdgeCellStyle("start", active, PIN_Z.body, pinBg, lead);
-  const rowEdit = resolveRowEditTrigger(
-    rowActions,
-    editing?.rowEditing,
-    row,
-    id
-  );
-  const rowConflict = rowEditConflict(editing, id);
+/** A body row: MUI's hover tint and selected colour, carried onto pinned cells. */
+export function Row({
+  kind,
+  elementRef,
+  selected,
+  ...rest
+}: Readonly<KitDesktopRowProps>) {
+  "use no memo";
+  const palette = useTheme().palette;
+  if (kind !== "body") return <TableRow ref={elementRef} {...rest} />;
   return (
-    <>
-      <TableRow
-        {...rowDomProps}
-        ref={measureRef}
-        className={rowClass}
-        hover
-        selected={Boolean(selected)}
-        sx={{
-          "&.Mui-selected > td": {
-            "--adapttable-pin-tint": palette.action.selected,
-          },
-          "&:hover > td": { "--adapttable-pin-tint": palette.action.hover },
-        }}
-        onMouseEnter={hasPrefetch ? () => onPrefetch(row) : undefined}
-      >
-        {expandable && (
-          <TableCell
-            data-adapttable-part="expand-cell"
-            padding="checkbox"
-            sx={PAPER_SX}
-            style={{ ...edge(hasStartPin), ...edgeRowPin }}
-          >
-            <OptionalExpandToggle
-              id={id}
-              expanded={Boolean(expanded)}
-              onToggle={onToggleExpand}
-              dir={dir}
-              expandLabel={labels.expandRow}
-              collapseLabel={labels.collapseRow}
-            />
-          </TableCell>
-        )}
-        {showReorder && rowReorder && (
-          <TableCell
-            padding="checkbox"
-            data-adapttable-part="reorder-cell"
-            sx={PAPER_SX}
-            style={{
-              ...edge(hasStartPin || reorderPinned, expansionLead),
-              ...edgeRowPin,
-            }}
-          >
-            <OptionalRowReorderHandle
-              reorder={rowReorder}
-              labels={labels}
-              rowId={id}
-              localIndex={index}
-              row={row}
-              windowStart={windowStart}
-              rowCount={rowCount}
-            />
-          </TableCell>
-        )}
-        {selected !== undefined && (
-          <TableCell
-            data-adapttable-part="selection-cell"
-            padding="checkbox"
-            sx={PAPER_SX}
-            style={{ ...edge(hasStartPin, selectionLead), ...edgeRowPin }}
-          >
-            <Checkbox
-              slotProps={{ input: { "aria-label": labels.selectRow } }}
-              checked={selected}
-              onChange={() => onToggleSelect(id)}
-            />
-          </TableCell>
-        )}
-        {columnSpacers && (
-          <ColumnSpacer width={columnSpacers.start} side="start" />
-        )}
-        {bodyCells.map((cell) => {
-          const { column, columnIndex, colSpan, rowSpan } = cell;
-          const focusProps = gridFocus?.getCellPropsAt(focusIndex, columnIndex);
-          const pin = bodyPinStyle(column.key);
-          return (
-            <TableCell
-              key={column.key}
-              colSpan={colSpan > 1 ? colSpan : undefined}
-              rowSpan={rowSpan > 1 ? rowSpan : undefined}
-              data-column-key={column.key}
-              data-pinned={bodyPinSide(column.key)}
-              data-adapttable-part="cell"
-              data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
-              data-cell-span={cellSpanMark(colSpan, rowSpan)}
-              sx={{
-                textAlign: muiAlign(column.align),
-                ...(summaryRow ? { fontWeight: 600 } : {}),
-                ...(pin ? PAPER_SX : {}),
-              }}
-              style={cellHighlightStyle(
-                focusProps,
-                {
-                  ...(pin ? { ...pin, background: pinBg } : {}),
-                  ...mergedCellStyle(colSpan, rowSpan, cellSpanAppearance),
-                },
-                { backgroundColor: palette.action.selected }
-              )}
-              {...focusProps}
-            >
-              <OptionalTreeCell
-                entry={treeEntry}
-                columnKey={column.key}
-                treeColumnKey={treeKey}
-                labels={{
-                  expandRow: labels.expandRow,
-                  collapseRow: labels.collapseRow,
-                }}
-                onToggle={onToggleTree}
-              >
-                <OptionalEditableCell
-                  editing={editing}
-                  row={row}
-                  column={column as ColumnDef<TRow>}
-                  rowId={id}
-                  rowIndex={focusIndex}
-                  rows={rows}
-                  columns={columns}
-                  rowKey={getRowId}
-                  editLabel={labels.editCell}
-                  undoLabel={labels.undoEdit}
-                />
-              </OptionalTreeCell>
-              <OptionalFillHandle
-                focus={gridFocus}
-                windowIndex={focusIndex}
-                col={columnIndex}
-              />
-            </TableCell>
-          );
-        })}
-        {columnSpacers && <ColumnSpacer width={columnSpacers.end} side="end" />}
-        {showActions && (
-          <TableCell
-            data-adapttable-part="actions-cell"
-            sx={{ ...PAPER_SX, textAlign: "end" }}
-            style={{
-              ...pinnedEdgeCellStyle(
-                "end",
-                hasEndPin || actionsPinned,
-                PIN_Z.body,
-                pinBg
-              ),
-              ...edgeRowPin,
-            }}
-          >
-            {editing?.rowEditing && (
-              <OptionalRowEditActions
-                rowEditing={editing.rowEditing}
-                row={row}
-                rowId={id}
-                showBegin={rowEdit.showBegin}
-                icons={editing.rowEditIcons}
-                conflict={rowConflict}
-                labels={{
-                  editRow: labels.editRow,
-                  saveRow: labels.saveRow,
-                  cancel: labels.cancel,
-                }}
-              />
-            )}
-            {rowEdit.actions.length > 0 && (
-              <RowActionButtons
-                row={row}
-                actions={rowEdit.actions}
-                confirm={confirm}
-                labels={labels}
-                layout={rowActionsLayout}
-                render={renderRowActions}
-              />
-            )}
-          </TableCell>
-        )}
-      </TableRow>
-      {expandable && expanded && (
-        <TableRow ref={detailMeasureRef} data-adapttable-part="detail-row">
-          <TableCell data-adapttable-part="detail-cell" colSpan={columnSpan}>
-            {renderDetail(row)}
-          </TableCell>
-        </TableRow>
-      )}
-    </>
+    <TableRow
+      ref={elementRef}
+      hover
+      selected={selected === true}
+      sx={{
+        "&.Mui-selected > td": {
+          "--adapttable-pin-tint": palette.action.selected,
+        },
+        "&:hover > td": { "--adapttable-pin-tint": palette.action.hover },
+      }}
+      {...rest}
+    />
   );
 }
 
-function LeafHeader<TRow>({
-  leaf,
-  headSx,
-  flexShares,
-  columnWidths,
-  filterRegistry,
-  closeHeaderFilterOnSelect,
-  source,
-  labels,
-  onRenameColumn,
-}: Readonly<{
-  leaf: DesktopHeaderLeaf<TRow>;
-  headSx: SxProps<Theme>;
-  flexShares: ReturnType<typeof columnFlexShares>;
-  columnWidths: SharedTableRenderProps<TRow>["columnWidths"];
-  filterRegistry: SharedTableRenderProps<TRow>["filterRegistry"];
-  closeHeaderFilterOnSelect: boolean | undefined;
-  source: SharedTableRenderProps<TRow>["table"]["source"];
-  labels: Required<TableLabels>;
-  onRenameColumn: SharedTableRenderProps<TRow>["onRenameColumn"];
-}>): ReactElement {
-  const { column } = leaf;
-  const caption = column.sortable ? (
+/** A table cell: the rails take MUI's checkbox padding, actions end-align. */
+function tableCell(
+  kind: KitDesktopCellProps["kind"] | KitDesktopHeaderCellProps["kind"],
+  props: Omit<KitDesktopCellProps, "kind">
+): ReactNode {
+  if (kind === "lead") return <TableCell padding="checkbox" {...props} />;
+  if (kind === "actions")
+    return (
+      <TableCell {...props} style={{ textAlign: "end", ...props.style }} />
+    );
+  return <TableCell {...props} />;
+}
+
+/** A body or summary cell. */
+export function Cell({ kind, ...rest }: Readonly<KitDesktopCellProps>) {
+  "use no memo";
+  return tableCell(kind, rest);
+}
+
+/** A header cell; MUI sizes its rails through their padding. */
+function HeaderCell({
+  kind,
+  railWidth: _railWidth,
+  ...rest
+}: Readonly<KitDesktopHeaderCellProps>) {
+  "use no memo";
+  return tableCell(kind, rest);
+}
+
+function Foot(
+  props: Readonly<{ "data-adapttable-part": string; children: ReactNode }>
+) {
+  "use no memo";
+  return <TableFooter {...props} />;
+}
+
+/** The selection checkbox at MUI's table size. */
+export function Checkbox({
+  checked,
+  onCheckedChange,
+  indeterminate,
+  "aria-label": label,
+  label: _label,
+  disabled,
+  className,
+  ...data
+}: Readonly<KitCheckboxProps>) {
+  "use no memo";
+  return (
+    <MuiCheckbox
+      {...data}
+      className={className}
+      disabled={disabled}
+      slotProps={{ input: { "aria-label": label } }}
+      checked={checked}
+      indeterminate={indeterminate}
+      onChange={(_, next) => onCheckedChange(next)}
+    />
+  );
+}
+
+function SortLabel({
+  active,
+  dir,
+  index,
+  title,
+  buttonProps,
+  children,
+}: Readonly<KitSortLabelProps>) {
+  "use no memo";
+  return (
     <TableSortLabel
-      active={leaf.sortActive}
-      direction={leaf.sortDir === "desc" ? "desc" : "asc"}
-      aria-label={leaf.sortButtonProps["aria-label"]}
-      onClick={leaf.sortButtonProps.onClick}
-      title={column.headerTooltip}
+      active={active}
+      direction={dir === "desc" ? "desc" : "asc"}
+      aria-label={buttonProps["aria-label"]}
+      onClick={buttonProps.onClick}
+      title={title}
     >
-      {leaf.caption}
-      {leaf.sortIndex !== undefined && (
+      {children}
+      {index !== undefined && (
         <Box component="span" sx={{ fontSize: 10, ml: 0.5 }}>
-          {leaf.sortIndex}
+          {index}
         </Box>
       )}
     </TableSortLabel>
-  ) : (
-    <span title={column.headerTooltip}>{leaf.caption}</span>
-  );
-  return (
-    <TableCell
-      key={column.key}
-      data-adapttable-part="header-cell"
-      // Every header prop core states, in full. Cherry-picking named fields
-      // meant a prop core added reached only the kits that happened to name
-      // it; the kit's own props below still win where they overlap.
-      {...leaf.headerProps}
-      {...leaf.columnHeaderProps}
-      rowSpan={leaf.rowSpan > 1 ? leaf.rowSpan : undefined}
-      sx={headSx}
-      style={{
-        ...leaf.style,
-        ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),
-      }}
-    >
-      <Box
-        component="div"
-        sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
-      >
-        {column.renameable === true && onRenameColumn ? (
-          <OptionalColumnHeaderRename
-            columnKey={column.key}
-            name={leaf.columnName}
-            labels={labels}
-            onRenameColumn={onRenameColumn}
-          >
-            <Box component="span" data-adapttable-part="header-caption-control">
-              {caption}
-            </Box>
-          </OptionalColumnHeaderRename>
-        ) : (
-          <Box component="span" data-adapttable-part="header-caption-control">
-            {caption}
-          </Box>
-        )}
-      </Box>
-      {leaf.showColumnCheckbox && leaf.onToggleColumn ? (
-        <OptionalColumnSelect
-          label={leaf.columnSelectAriaLabel}
-          checked={leaf.columnCheckboxChecked}
-          onToggle={leaf.onToggleColumn}
-        />
-      ) : null}
-      {column.headerActions ? (
-        <span data-adapttable-part="header-actions">
-          {column.headerActions}
-        </span>
-      ) : null}
-      {leaf.headerDef ? (
-        <OptionalFilterHeader
-          def={leaf.headerDef}
-          source={source}
-          labels={labels}
-          registry={filterRegistry}
-          closeOnSelect={closeHeaderFilterOnSelect}
-        />
-      ) : null}
-      {leaf.resizeHandleProps && (
-        <Box
-          component="span"
-          sx={RESIZE_HANDLE_SX}
-          {...leaf.resizeHandleProps}
-        />
-      )}
-    </TableCell>
   );
 }
 
@@ -593,314 +289,43 @@ function MuiRowHost(props: ComponentProps<typeof TableRow>) {
   return <TableRow {...props} />;
 }
 
+const HOSTS = {
+  ScrollBox: MuiScrollHost,
+  Table: MuiTableHost,
+  Head: MuiHeadHost,
+  Body: MuiBodyHost,
+  Row: MuiRowHost,
+};
+
 /** Desktop MUI table. */
-export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
-  // The compiler's cache around these slots is larger than the slots.
-  "use no memo";
-  const {
-    size,
-    dir,
-    filterRegistry,
-    closeHeaderFilterOnSelect,
-    columnWidths,
-    fitColumns,
-    stickyHeader = false,
-  } = props;
-  const assembly = useDesktopTableAssembly(props, { widths: MUI_WIDTHS });
-  const Row = useMemo(
-    () =>
-      createDesktopRow<TRow, DesktopRowProps<TRow>>(
-        DesktopRowBase,
-        rowExtrasEqual
-      ),
-    []
-  );
-  const {
-    model,
-    summary,
-    showColumnFooter,
-    header,
-    pin,
-    tableStyle,
-    tableProps,
-    gridProps,
-    callbacks,
-  } = assembly;
-  const {
-    columns,
-    selection,
-    labels,
-    showActions,
-    showReorder,
-    leadingCells,
-    columnSpacers,
-  } = model;
-
-  const flexShares = columnFlexShares({
-    columns,
-    fitColumns,
-    widths: columnWidths,
-  });
-  const palette = useMuiPalette();
-  const headPaint: SxProps<Theme> | undefined = stickyHeader
-    ? {
-        position: "sticky",
-        top: pin.headerStickTop,
-        zIndex: PIN_Z.header,
-        bgcolor: "background.paper",
-      }
-    : undefined;
-  const edgeHeadSx = (active: boolean): SxProps<Theme> => ({
-    ...headPaint,
-    ...(active ? { ...PAPER_SX } : {}),
-  });
-  const edgeHeadStyle = (active: boolean, lead = 0) =>
-    pinnedEdgeCellStyle(
-      "start",
-      active,
-      PIN_Z.headerPinned,
-      palette.background.paper,
-      lead
-    );
-
-  const leafProps = {
-    flexShares,
-    columnWidths,
-    filterRegistry,
-    closeHeaderFilterOnSelect,
-    source: props.table.source,
-    labels,
-    onRenameColumn: props.onRenameColumn,
-  };
-
-  const renderPlanCell = (cell: HtmlGroupedHeaderCell): ReactElement => {
-    if (cell.kind === "leaf") {
-      const column = columns[cell.columnIndex]!;
-      const leaf = header.leaf(column, cell.columnIndex, cell.rowSpan);
-      return (
-        <LeafHeader
-          key={cell.key}
-          leaf={leaf}
-          headSx={{
-            ...headPaint,
-            ...(leaf.pinSide ? PAPER_SX : {}),
-            textAlign: muiAlign(column.align),
-            ...(leaf.rowSpan > 1 ? { verticalAlign: "middle" } : {}),
-          }}
-          {...leafProps}
-        />
-      );
-    }
-    return (
-      <TableCell
-        key={cell.key}
-        colSpan={cell.colSpan}
-        rowSpan={cell.rowSpan > 1 ? cell.rowSpan : undefined}
-        data-adapttable-part="header-group-cell"
-        sx={{
-          fontWeight: 600,
-          ...groupedHeaderCellStyle(cell, palette.divider),
-        }}
-      >
-        <span style={groupedHeaderLabelStyle()}>
-          {props.onToggleColumnGroup ? (
-            <OptionalColumnGroupToggle
-              cell={cell.cell}
-              labels={labels}
-              onToggle={props.onToggleColumnGroup}
-            />
-          ) : null}
-          {columnGroupHeaderCaption(cell.cell)}
-        </span>
-      </TableCell>
-    );
-  };
-
-  const leadingHeaders = (rowSpan: number): ReactElement => (
-    <>
-      {header.leading.expand && (
-        <TableCell
-          data-adapttable-part="expand-header"
-          padding="checkbox"
-          rowSpan={rowSpan > 1 ? rowSpan : undefined}
-          sx={edgeHeadSx(pin.hasStartPin)}
-          style={edgeHeadStyle(pin.hasStartPin)}
-        />
-      )}
-      {header.leading.reorder && (
-        <TableCell
-          padding="checkbox"
-          aria-label={labels.reorderRow}
-          data-adapttable-part="reorder-header"
-          rowSpan={rowSpan > 1 ? rowSpan : undefined}
-          sx={edgeHeadSx(pin.hasStartPin || Boolean(props.reorderPinned))}
-          style={edgeHeadStyle(
-            pin.hasStartPin || Boolean(props.reorderPinned),
-            pin.expansionLead
-          )}
-        />
-      )}
-      {header.leading.selection && selection && (
-        <TableCell
-          data-adapttable-part="selection-header"
-          padding="checkbox"
-          rowSpan={rowSpan > 1 ? rowSpan : undefined}
-          sx={edgeHeadSx(pin.hasStartPin)}
-          style={edgeHeadStyle(pin.hasStartPin, pin.selectionLead)}
-        >
-          <Checkbox
-            slotProps={{ input: { "aria-label": labels.selectAll } }}
-            checked={selection.headerState === "all"}
-            indeterminate={selection.headerState === "some"}
-            onChange={selection.toggleAll}
-          />
-        </TableCell>
-      )}
-      {header.leading.spacerStart && columnSpacers && (
-        <ColumnSpacer width={columnSpacers.start} side="start" as="th" />
-      )}
-    </>
-  );
-
-  const trailingHeaders = (rowSpan: number): ReactElement => (
-    <>
-      {header.trailing.spacerEnd && columnSpacers && (
-        <ColumnSpacer width={columnSpacers.end} side="end" as="th" />
-      )}
-      {header.trailing.actions && (
-        <TableCell
-          data-adapttable-part="actions-header"
-          rowSpan={rowSpan > 1 ? rowSpan : undefined}
-          sx={{
-            ...edgeHeadSx(pin.hasEndPin || pin.stickActions),
-            textAlign: "end",
-          }}
-          style={pinnedEdgeCellStyle(
-            "end",
-            pin.hasEndPin || pin.stickActions,
-            PIN_Z.headerPinned,
-            palette.background.paper
-          )}
-        >
-          {labels.actions}
-        </TableCell>
-      )}
-    </>
-  );
-
-  const minWidth =
-    typeof tableStyle?.minWidth === "number" ? tableStyle.minWidth : 0;
-
-  return (
-    <DesktopTableChrome
-      assembly={assembly}
-      hosts={{
-        ScrollBox: MuiScrollHost,
-        Table: MuiTableHost,
-        Head: MuiHeadHost,
-        Body: MuiBodyHost,
-        Row: MuiRowHost,
-      }}
-      applyHeaderRowProps={false}
-      tableProps={{
+export const DesktopTable = /* @__PURE__ */ createDesktopTable<{
+  readonly size: "small" | "medium";
+}>({
+  widths: { expansion: 48, selection: 48, actions: 120 },
+  Row,
+  Cell,
+  HeaderCell,
+  Foot,
+  Checkbox,
+  SortLabel,
+  RowActions: RowActionButtons,
+  usePaint,
+  useChrome: ({ size }, { tableProps, gridProps, tableStyle }) => {
+    const minWidth =
+      typeof tableStyle?.minWidth === "number" ? tableStyle.minWidth : 0;
+    return {
+      hosts: HOSTS,
+      applyHeaderRowProps: false,
+      tableProps: {
         size,
         "aria-label": tableProps["aria-label"],
         role: gridProps?.role,
         dir: undefined,
         sx: minWidth > 0 ? { minWidth } : undefined,
         style: tableStyle
-          ? {
-              tableLayout: tableStyle.tableLayout,
-              width: tableStyle.width,
-            }
+          ? { tableLayout: tableStyle.tableLayout, width: tableStyle.width }
           : undefined,
-      }}
-      renderLeading={leadingHeaders}
-      renderTrailing={trailingHeaders}
-      renderPlanCell={renderPlanCell}
-      renderLeaf={(leaf, column) => (
-        <LeafHeader
-          key={column.key}
-          leaf={leaf}
-          headSx={{
-            ...headPaint,
-            ...(leaf.pinSide ? PAPER_SX : {}),
-            textAlign: muiAlign(column.align),
-          }}
-          {...leafProps}
-        />
-      )}
-      renderRow={(slot) => (
-        <Row key={slot.key} {...slot.wiring} size={size} dir={dir} />
-      )}
-      renderGroup={(slot) => (
-        <OptionalGroupHeaderRow
-          key={slot.key}
-          entry={slot.entry}
-          columns={columns}
-          leadingCells={leadingCells}
-          showActions={showActions}
-          getCellProps={props.table.getCellProps}
-          selection={selection}
-          labels={labels}
-          onToggleCollapse={callbacks.onToggleGroup}
-          onShowMore={props.grouping?.showMore ?? (() => undefined)}
-        />
-      )}
-      renderExtra={(slot) => (
-        <ExtraSlotRow
-          key={slot.key}
-          kind={slot.extraKind}
-          colSpan={slot.colSpan}
-          render={slot.render}
-          labels={labels}
-          fillStyle={slot.fillStyle}
-        />
-      )}
-      renderVirtualPad={(slot) => (
-        <TableRow key={slot.key} aria-hidden>
-          <TableCell
-            colSpan={slot.colSpan}
-            sx={{ height: slot.height, p: 0 }}
-          />
-        </TableRow>
-      )}
-      renderSummary={() =>
-        showColumnFooter ? (
-          <TableFooter data-adapttable-part="summary">
-            <TableRow data-adapttable-part="summary-row">
-              {header.leading.expand && (
-                <TableCell
-                  data-adapttable-part="summary-cell"
-                  padding="checkbox"
-                />
-              )}
-              {showReorder && (
-                <TableCell
-                  data-adapttable-part="summary-cell"
-                  padding="checkbox"
-                />
-              )}
-              {selection && (
-                <TableCell
-                  data-adapttable-part="summary-cell"
-                  padding="checkbox"
-                />
-              )}
-              {columns.map((column) => (
-                <TableCell
-                  key={column.key}
-                  data-adapttable-part="summary-cell"
-                  sx={{ textAlign: muiAlign(column.align) }}
-                >
-                  {resolveColumnFooter(column, summary?.[column.key])}
-                </TableCell>
-              ))}
-              {showActions && <TableCell data-adapttable-part="summary-cell" />}
-            </TableRow>
-          </TableFooter>
-        ) : null
-      }
-    />
-  );
-}
+      },
+    };
+  },
+});

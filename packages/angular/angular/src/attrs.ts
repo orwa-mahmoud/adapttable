@@ -155,8 +155,10 @@ export class AdaptAttrs implements AfterViewChecked {
   private afterRender: AfterRenderRef | undefined;
   private target: HTMLElement | null = null;
   private attrs: Attrs | undefined;
-  private attributes = new Set<string>();
-  private styles = new Set<string>();
+  /** The text of each attribute this directive set on the target. */
+  private attributes = new Map<string, string>();
+  /** The value of each style property this directive set on the target. */
+  private styles = new Map<string, unknown>();
   private readonly properties = new Set<string>();
   private readonly handlers = new Map<string, (event: Event) => void>();
   private readonly listening = new Map<string, () => void>();
@@ -203,8 +205,8 @@ export class AdaptAttrs implements AfterViewChecked {
       this.target = target;
     }
     if (target === null) return;
-    const attributes = new Set<string>();
-    let styles = new Set<string>();
+    const attributes = new Map<string, string>();
+    let styles = new Map<string, unknown>();
     for (const [name, value] of Object.entries(attrs)) {
       const event = EVENTS[name];
       if (event) this.handle(target, name, event, value);
@@ -214,10 +216,7 @@ export class AdaptAttrs implements AfterViewChecked {
       else if (PROPERTIES.has(name)) {
         this.setProperty(target, name, value === true);
       } else {
-        const attribute = ATTRIBUTE_NAMES[name] ?? name;
-        if (this.applyAttribute(target, attribute, value)) {
-          attributes.add(attribute);
-        }
+        this.applyAttribute(target, name, value, attributes);
       }
     }
     this.prune(target, attrs, attributes, styles);
@@ -231,7 +230,7 @@ export class AdaptAttrs implements AfterViewChecked {
     this.handlers.clear();
     this.ref?.(null);
     this.ref = undefined;
-    if (this.target) this.prune(this.target, {}, new Set(), new Set());
+    if (this.target) this.prune(this.target, {}, new Map(), new Map());
     this.target = null;
   }
 
@@ -247,35 +246,58 @@ export class AdaptAttrs implements AfterViewChecked {
     ref?.(target);
   }
 
+  /**
+   * Set a controlled property when the element's own value differs, so a
+   * click or keystroke the record did not accept is put back.
+   */
   private setProperty(target: HTMLElement, name: string, value: unknown): void {
-    this.renderer.setProperty(target, name, value);
+    if (!Object.is(Reflect.get(target, name), value)) {
+      this.renderer.setProperty(target, name, value);
+    }
     this.properties.add(name);
   }
 
-  /** Set one attribute; `false` when the value removes it. */
+  /**
+   * Write one attribute unless the target already has that text from this
+   * directive; record what it holds in `applied`.
+   */
   private applyAttribute(
     target: HTMLElement,
     name: string,
-    value: unknown
-  ): boolean {
-    const text = attributeText(name, value);
-    if (text === null) return false;
-    this.renderer.setAttribute(target, name, text);
-    return true;
+    value: unknown,
+    applied: Map<string, string>
+  ): void {
+    const attribute = ATTRIBUTE_NAMES[name] ?? name;
+    const text = attributeText(attribute, value);
+    if (text === null) return;
+    if (this.attributes.get(attribute) !== text) {
+      this.renderer.setAttribute(target, attribute, text);
+    }
+    applied.set(attribute, text);
   }
 
   /** Set a style object's properties; returns the ones it set. */
-  private applyStyle(target: HTMLElement, style: unknown): Set<string> {
-    const set = new Set<string>();
+  private applyStyle(
+    target: HTMLElement,
+    style: unknown
+  ): Map<string, unknown> {
+    const set = new Map<string, unknown>();
     const entries = Object.entries((style ?? {}) as Record<string, unknown>);
     for (const [key, value] of entries) {
       if (value === undefined || value === null) continue;
       const property = cssProperty(key);
-      set.add(property);
+      const css = cssValue(key, value);
+      set.set(property, css);
+      if (
+        this.styles.has(property) &&
+        Object.is(this.styles.get(property), css)
+      ) {
+        continue;
+      }
       this.renderer.setStyle(
         target,
         property,
-        cssValue(key, value),
+        css,
         RendererStyleFlags2.DashCase
       );
     }
@@ -286,13 +308,13 @@ export class AdaptAttrs implements AfterViewChecked {
   private prune(
     target: HTMLElement,
     attrs: Attrs,
-    attributes: Set<string>,
-    styles: Set<string>
+    attributes: Map<string, string>,
+    styles: Map<string, unknown>
   ): void {
-    for (const name of this.attributes) {
+    for (const name of this.attributes.keys()) {
       if (!attributes.has(name)) this.renderer.removeAttribute(target, name);
     }
-    for (const property of this.styles) {
+    for (const property of this.styles.keys()) {
       if (!styles.has(property)) {
         this.renderer.removeStyle(
           target,

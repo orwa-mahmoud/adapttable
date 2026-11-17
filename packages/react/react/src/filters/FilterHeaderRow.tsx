@@ -9,18 +9,18 @@ import {
   filterDefForColumn,
   type FilterFormSource,
   type FilterTypeRegistry,
+  renderRegisteredFilter,
+  type TableLabels,
+} from "@adapttable/core";
+import {
+  type FilterHeaderControlProps,
+  type FilterHeaderRowProps as NeutralFilterHeaderRowProps,
+  type FilterHeaderSlots as NeutralFilterHeaderSlots,
   headerFilterBooleanOptions,
   headerFilterCellKind,
   headerFilterMultiModel,
   headerFilterRangeModel,
   headerFilterSelectModel,
-  renderRegisteredFilter,
-  type TableLabels,
-} from "@adapttable/core";
-import type {
-  FilterHeaderControlProps,
-  FilterHeaderRowProps as NeutralFilterHeaderRowProps,
-  FilterHeaderSlots as NeutralFilterHeaderSlots,
 } from "@adapttable/core/binding";
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 
@@ -34,7 +34,7 @@ import {
 import { useFilterOptions } from "./useFilterOptions";
 
 export type { FilterFormSource, FilterTypeRegistry };
-export { filterDefForColumn, hasActiveHeaderFilter } from "@adapttable/core";
+export { filterDefForColumn } from "@adapttable/core";
 export type {
   FilterHeaderClassNames,
   FilterHeaderControlProps,
@@ -44,6 +44,7 @@ export type {
   FilterHeaderSearchProps,
   FilterHeaderSelectProps,
 } from "@adapttable/core/binding";
+export { hasActiveHeaderFilter } from "@adapttable/core/binding";
 
 /**
  * Overlay a sticky `top` on a cell or pad style.

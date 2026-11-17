@@ -42,6 +42,7 @@ export type {
   ReconcileLiveEdit,
   ReconcileLiveRowEdit,
 } from "@adapttable/core";
+import { tableStoreOf } from "../tableStore";
 
 /**
  * Subscribe to core's conflict store until the injection context is destroyed.
@@ -55,7 +56,9 @@ export function injectEditConflict<TRow>(
 ): Signal<EditConflictState<TRow>> {
   if (!options.injector) assertInInjectionContext(injectEditConflict);
   const injector = options.injector ?? inject(Injector);
-  const store = createEditConflictStore<TRow>();
+  const store = createEditConflictStore<TRow>({
+    store: tableStoreOf(injector),
+  });
   const snapshot = fromStore(store, { injector });
   return computed(() => editConflictView(store, snapshot()));
 }

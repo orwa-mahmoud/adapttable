@@ -1,10 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 
-/**
- * Polish (`pl`) label preset.
- *
- * @public
- */
 /** How this language names what became of one action. */
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "wykonano",
@@ -26,6 +21,11 @@ const CAPABILITY: Readonly<Record<string, string>> = {
   "export.run": "eksportuj",
 };
 
+/**
+ * Polish (`pl`) label preset.
+ *
+ * @public
+ */
 export const pl: Required<TableLabels> = {
   table: "Tabela danych",
   search: "Szukaj",

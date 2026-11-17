@@ -34,9 +34,8 @@ describe("card move controls (chakra)", () => {
       '[data-adapttable-part="row-reorder-up"]'
     )!;
     expect(up).toBeInTheDocument();
-    // The `11` size token is 2.75rem (44 px).
     const style = getComputedStyle(up);
-    expect(style.minWidth).toContain("sizes-11");
-    expect(style.minHeight).toContain("sizes-11");
+    expect(style.minWidth).toBe("44px");
+    expect(style.minHeight).toBe("44px");
   });
 });

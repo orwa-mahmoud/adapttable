@@ -23,7 +23,7 @@ import {
 } from "../rows/rowReorderModel";
 import type { RowHeight, RowStyle } from "../rows/rowStyle";
 import type { CssProperties } from "../style/cssProperties";
-import type { TreeEntry } from "../tree/treeRows";
+import { type TreeEntry, treeRowAria } from "../tree/treeRows";
 import type { VirtualTableRow } from "../virtual/virtualTableModel";
 import {
   type ChromeBodySlot,
@@ -32,6 +32,7 @@ import {
   desktopBodyPinStyle,
   desktopDetailMeasureRef,
   desktopRowMeasureRef,
+  type RailInsets,
   type RowPairMeasurer,
 } from "./chromeModel";
 import {
@@ -148,6 +149,8 @@ export interface DesktopRowWiringContext<TRow> {
   readonly rowHeight: RowHeight<TRow> | undefined;
   /** Injected-column insets. */
   readonly leads: PinLeads;
+  /** Where each rail sticks. */
+  readonly railInsets: RailInsets;
   /** Whether pinned rows can stick. */
   readonly pinRowSticky: boolean;
   /** Where a pinned row sits, clearing a sticky header. */
@@ -347,6 +350,7 @@ export interface DesktopRowWiringModel<
   measureElement: C["measureElement"];
   measureRowPair: C["measureRowPair"];
   leads: PinLeads;
+  railInsets: RailInsets;
   focusIndex: number;
   pinPart: DesktopRowPinPart;
   pinSticky: ReturnType<typeof pinnedRowSticky>;
@@ -434,6 +438,8 @@ export function desktopRowDomProps<TRow>(args: {
   readonly pinSticky: object | undefined;
   readonly prefetch: ((row: TRow) => void) | undefined;
   readonly handlePrefetch: (row: TRow) => void;
+  /** The row's tree entry, when rows are a tree. */
+  readonly treeEntry?: TreeEntry<TRow>;
 }): Record<string, unknown> {
   const click =
     args.summary || !args.onRowClick ? undefined : args.handleRowClick;
@@ -453,6 +459,7 @@ export function desktopRowDomProps<TRow>(args: {
   return {
     ...args.table.getRowProps(args.row, args.focusIndex),
     "aria-selected": ariaSelected,
+    ...treeRowAria(args.treeEntry),
     ...args.gridFocus?.getRowPropsAt(args.focusIndex),
     ...rowClickProps(args.row, click, args.focusIndex),
     ...dropProps,
@@ -578,6 +585,7 @@ export function desktopRowWiring<TRow, C extends DesktopRowWiringContext<TRow>>(
     measureElement: measure ? ctx.measureElement : undefined,
     measureRowPair: measure ? ctx.measureRowPair : undefined,
     leads,
+    railInsets: ctx.railInsets,
     focusIndex,
     pinPart,
     pinSticky,
@@ -615,6 +623,7 @@ export function desktopRowWiring<TRow, C extends DesktopRowWiringContext<TRow>>(
       pinSticky,
       prefetch: ctx.prefetch,
       handlePrefetch: ctx.handlePrefetch,
+      treeEntry: summary ? undefined : treeEntry,
     }),
     bodyPinStyle: (key: string) =>
       desktopBodyPinStyle(key, pinOffset, leads, rowPinSide, rowPinOffset),

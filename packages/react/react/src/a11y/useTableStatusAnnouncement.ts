@@ -7,18 +7,21 @@
  * the sort, the count, the page, the page size or the rendered row count
  * moves, and hands the result to the table's one status region.
  */
+
+import { useEffect, useRef, useState } from "react";
+
+export type { SortDirection } from "@adapttable/core";
+
 import {
   resolveTableStatus,
   type TableStatusAnnouncementOptions,
   type TableStatusSignature,
-} from "@adapttable/core";
-import { useEffect, useRef, useState } from "react";
+} from "@adapttable/core/binding";
 
-export type { SortDirection } from "@adapttable/core";
 export {
   resolveTableStatus,
   type TableStatusAnnouncementOptions,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 
 /**
  * Track the table's row set and sort, and return what to announce.

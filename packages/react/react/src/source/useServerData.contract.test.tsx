@@ -7,8 +7,9 @@
  * endpoint written before these fields existed has started receiving
  * something new — which is the one outcome this design exists to prevent.
  */
-import { type QuerySupport, resetDevWarnings } from "@adapttable/core";
-import { render, waitFor } from "@testing-library/react";
+import { type QuerySupport } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core/binding";
+import { act, render, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createMemoryAdapter } from "../url/adapter";
@@ -112,5 +113,31 @@ describe("the query a server receives", () => {
     const { seen } = mount(undefined, "", undefined, ["team"]);
     await waitFor(() => expect(seen.length).toBeGreaterThan(0));
     expect(seen[0]).not.toHaveProperty("facets");
+  });
+});
+
+describe("the source a table receives", () => {
+  it("is the same object while nothing in it changes", () => {
+    const rows: readonly Row[] = [{ id: "a" }, { id: "b" }];
+    const adapter = createMemoryAdapter("");
+    const onQueryChange = vi.fn();
+    // A host that re-renders for its own state passes fresh option objects
+    // with the same values in them.
+    const { result, rerender } = renderHook(() =>
+      useServerData<Row>({
+        rows,
+        total: 2,
+        urlAdapter: adapter,
+        forceMobile: false,
+        onQueryChange,
+      })
+    );
+    const first = result.current;
+    rerender();
+    expect(result.current).toBe(first);
+
+    act(() => result.current.setSearch("b"));
+    expect(result.current).not.toBe(first);
+    expect(result.current.search).toBe("b");
   });
 });

@@ -12,21 +12,24 @@
  * builders into prop getters carrying React's event handlers.
  */
 import {
-  createGridFocusController,
-  defaultLabels,
   type GridCell,
+  type GridFocusControllerOptions,
+} from "@adapttable/core";
+import {
+  createGridFocusController,
+  GRID_LABELS,
   gridCellAttributes,
   gridColumnHeaderAttributes,
   gridContainerAttributes,
   gridFillHandleCell,
-  type GridFocusControllerOptions,
+  type GridFocusState,
   gridRowAttributes,
   gridRowFocusSignature,
   isGridColumnSelected,
-} from "@adapttable/core";
-import type { GridFocusState } from "@adapttable/core/binding";
+} from "@adapttable/core/binding";
 import {
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useState,
@@ -34,6 +37,7 @@ import {
 } from "react";
 
 import type { ColumnDef } from "../columnDef";
+import { TableStoreContext } from "../state/tableStoreContext";
 export { GRID_CELL_ATTR, gridCellAttr } from "@adapttable/core";
 export type { GridFocusState } from "@adapttable/core/binding";
 
@@ -77,7 +81,10 @@ export function useGridFocus<TRow>(
     currentMatch,
   } = options;
 
-  const [controller] = useState(() => createGridFocusController(options));
+  const table = useContext(TableStoreContext);
+  const [controller] = useState(() =>
+    createGridFocusController(options, { store: table })
+  );
   controller.configure(options);
   const { active, range, announcement, fillPreview } = useSyncExternalStore(
     controller.subscribe,
@@ -290,7 +297,7 @@ export function useGridFocus<TRow>(
       focusCell: controller.focusCell,
       fillHandleCell,
       getFillHandleProps,
-      fillHandleLabel: labels?.gridFillHandle ?? defaultLabels.gridFillHandle,
+      fillHandleLabel: labels?.gridFillHandle ?? GRID_LABELS.gridFillHandle,
       fillPreview: enabled ? fillPreview : null,
       copyCells: controller.copyCells,
       cellAt: controller.cellAt,

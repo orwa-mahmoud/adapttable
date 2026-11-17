@@ -3,8 +3,8 @@ import {
   handleSidePanelTabKey,
   type SidePanelModel,
   sidePanelModel,
-} from "@adapttable/core";
-import type { SidePanelSlots as NeutralSlots } from "@adapttable/core/binding";
+  type SidePanelSlots as NeutralSlots,
+} from "@adapttable/core/binding";
 import {
   type ComponentObjectPropsOptions,
   defineComponent,
@@ -25,6 +25,7 @@ import type {
   SidePanelControlModel,
   SidePanelPanel,
 } from "./contracts";
+
 export type SidePanelSlots = NeutralSlots<
   VNodeChild,
   SidePanelPanel,

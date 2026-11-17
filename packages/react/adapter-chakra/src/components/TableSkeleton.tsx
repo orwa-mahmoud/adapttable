@@ -6,21 +6,45 @@ export function LoadingState({
   rows,
   columns,
   loadingLabel,
-}: Readonly<{ rows: number; columns: number; loadingLabel?: string }>) {
+  mobile = false,
+}: Readonly<{
+  rows: number;
+  columns: number;
+  loadingLabel?: string;
+  mobile?: boolean;
+}>) {
+  const lineCount = mobile
+    ? Math.min(4, Math.max(columns, 1))
+    : Math.max(columns, 1);
+  const bars = () =>
+    Array.from({ length: lineCount }, (_, c) => (
+      <Skeleton key={c} height="14px" width={c === 0 ? "30%" : "20%"} />
+    ));
   return (
     <Stack
       role="status"
       aria-busy="true"
       aria-live="polite"
+      data-adapttable-part="loading"
       data-testid="adapttable-loading"
     >
-      {Array.from({ length: rows }, (_, r) => (
-        <HStack key={r} gap={4}>
-          {Array.from({ length: Math.max(columns, 1) }, (_, c) => (
-            <Skeleton key={c} height="14px" width={c === 0 ? "30%" : "20%"} />
+      {mobile ? (
+        <Stack data-adapttable-part="loading-cards">
+          {Array.from({ length: rows }, (_, r) => (
+            <Stack key={r} data-adapttable-part="loading-card">
+              {bars()}
+            </Stack>
           ))}
-        </HStack>
-      ))}
+        </Stack>
+      ) : (
+        <Stack data-adapttable-part="loading-table">
+          {Array.from({ length: rows }, (_, r) => (
+            <HStack key={r} gap={4}>
+              {bars()}
+            </HStack>
+          ))}
+        </Stack>
+      )}
       {loadingLabel ? <VisuallyHidden>{loadingLabel}</VisuallyHidden> : null}
     </Stack>
   );

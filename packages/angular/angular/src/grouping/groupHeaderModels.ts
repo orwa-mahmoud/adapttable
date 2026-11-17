@@ -17,9 +17,9 @@ import {
 } from "@adapttable/core/grouping";
 import { computed, Directive, input, type Signal } from "@angular/core";
 type Entry = GroupHeaderRowSlotProps<
-  never,
+  unknown,
   SelectionState,
-  ColumnDef<never>
+  ColumnDef<unknown>
 >["entry"];
 function groupEntryView(
   entry: () => Entry,
@@ -72,7 +72,7 @@ function groupEntryView(
 export abstract class AdaptGroupHeaderRowModel {
   readonly props =
     input.required<
-      GroupHeaderRowSlotProps<never, SelectionState, ColumnDef<never>>
+      GroupHeaderRowSlotProps<unknown, SelectionState, ColumnDef<unknown>>
     >();
   protected readonly chevron: Signal<IconDescriptor> = computed(() => ({
     ...expandChevronIcon({ open: this.view.expanded() }),
@@ -90,7 +90,7 @@ export abstract class AdaptGroupHeaderRowModel {
     () => this.props().selection
   );
   protected readonly layout = computed(() =>
-    groupRowLayout<never, ColumnDef<never>>(
+    groupRowLayout<unknown, ColumnDef<unknown>>(
       this.props().columns,
       this.view.aggregateCells(),
       this.aggregateOps()
@@ -106,7 +106,7 @@ export abstract class AdaptGroupHeaderRowModel {
 export abstract class AdaptGroupHeaderCardModel {
   readonly props =
     input.required<
-      GroupHeaderCardSlotProps<never, SelectionState, ColumnDef<never>>
+      GroupHeaderCardSlotProps<unknown, SelectionState, ColumnDef<unknown>>
     >();
   protected readonly chevron: Signal<IconDescriptor> = computed(() => ({
     ...expandChevronIcon({ open: this.view.expanded() }),
@@ -124,13 +124,13 @@ export abstract class AdaptGroupHeaderCardModel {
     () => this.props().selection
   );
   protected readonly aggregates = computed(() =>
-    groupAggregateEntries<never, ColumnDef<never>>(
+    groupAggregateEntries<unknown, ColumnDef<unknown>>(
       this.props().columns,
       this.view.aggregateCells(),
       this.aggregateOps()
     )
   );
-  protected caption(column: ColumnDef<never>): string | undefined {
+  protected caption(column: ColumnDef<unknown>): string | undefined {
     return resolveMobileLabel(column);
   }
 }

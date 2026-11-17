@@ -122,31 +122,26 @@ describe("consumer fixtures", () => {
     ]);
   });
 
-  it("requires the full label resolver on the consumers a narrow split grows", () => {
-    const markers = ["defaultLabels", "resolveLabels"];
+  it("keeps every string in every export and the base strings alone in a table", () => {
+    const everything = FIXTURES.find(
+      (entry) => entry.name === "core · every export"
+    );
+    assert.ok(everything);
+    for (const marker of ["defaultLabels", "resolveLabels"])
+      assert.ok(everything.present.includes(marker), marker);
     for (const name of [
-      "core · every export",
       "react · simple table",
-      "mui · table",
       "angular · headless table",
       "vue · simple table",
     ]) {
       const fixture = FIXTURES.find((entry) => entry.name === name);
       assert.ok(fixture, name);
-      for (const marker of markers) {
-        assert.ok(
-          fixture.present.includes(marker),
-          `${name} must keep ${marker}`
-        );
-      }
+      assert.ok(fixture.present.includes("resolveTableLabels"), name);
+      assert.ok(fixture.absent.includes("defaultLabels"), name);
     }
-    const others = FIXTURES.filter(
-      (entry) => entry.kind === "adapter-base" && entry.kit !== "mui"
-    );
-    assert.ok(others.length > 0);
-    for (const fixture of others) {
-      assert.equal(fixture.present, undefined, fixture.name);
-    }
+    const mui = FIXTURES.find((entry) => entry.name === "mui · table");
+    assert.ok(mui);
+    assert.ok(mui.absent.includes("defaultLabels"));
   });
 
   it("measures named primitives against engines the full graph really holds", () => {

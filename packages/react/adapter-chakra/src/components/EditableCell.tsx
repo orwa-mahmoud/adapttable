@@ -1,110 +1,117 @@
+/** The in-place cell editor and editable cell, drawn with Chakra's inputs. */
 import {
-  type ColumnDef,
-  type EditableCellEditing,
-  type EditableCellEditorCtrl,
-  EditableCellGate,
-} from "@adapttable/react";
-import {
-  commitBooleanDraft,
-  editorInputType,
-  editorValidationProps,
-  isBooleanEditor,
-  isDraftChecked,
-  isMultiSelectEditor,
-  isSelectEditor,
+  createCellEditor,
+  createEditableCell,
+  type KitCellCheckboxProps,
+  type KitCellEditorProps,
+  type KitCellInputProps,
   multiDraftFromSelect,
   readMultiDraft,
-  stopEditKeys,
 } from "@adapttable/react/adapter";
-import { Input } from "@chakra-ui/react";
-import type { KeyboardEvent, ReactElement, ReactNode } from "react";
+import { Input as ChakraInput } from "@chakra-ui/react";
 
 import { editableCellSlots } from "./kitControls";
-import { Checkbox, NativeSelect } from "./primitives";
+import { Checkbox as ChakraCheckbox, NativeSelect } from "./primitives";
 
-/** Chakra text / number / select editor for the active cell. */
-export function ChakraCellEditor({
+function Checkbox({
   ctrl,
   label,
-}: Readonly<{
-  ctrl: EditableCellEditorCtrl;
-  label: string;
-}>): ReactElement {
-  const onKeyDown = (event: KeyboardEvent) => {
-    ctrl.onEditorKeyDown(event);
-    stopEditKeys(event);
-  };
-
-  if (isBooleanEditor(ctrl.editor)) {
-    return (
-      <Checkbox
-        size="sm"
-        aria-label={label}
-        data-adapttable-part="edit-cell-editor"
-        {...editorValidationProps(ctrl)}
-        inputRef={ctrl.focusRef}
-        checked={isDraftChecked(ctrl.draft)}
-        onKeyDown={onKeyDown}
-        onToggle={() => commitBooleanDraft(ctrl, !isDraftChecked(ctrl.draft))}
-      />
-    );
-  }
-
-  if (isMultiSelectEditor(ctrl.editor)) {
-    return (
-      <NativeSelect
-        multiple
-        size="sm"
-        w="100%"
-        aria-label={label}
-        data-adapttable-part="edit-cell-editor"
-        {...editorValidationProps(ctrl)}
-        value={readMultiDraft(ctrl.draft)}
-        onChange={(event) => ctrl.setDraft(multiDraftFromSelect(event.target))}
-        onKeyDown={onKeyDown}
-        onBlur={ctrl.commitOnBlur}
-        fieldRef={ctrl.focusRef}
-      >
-        {ctrl.selectOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </NativeSelect>
-    );
-  }
-
-  if (isSelectEditor(ctrl.editor)) {
-    return (
-      <NativeSelect
-        size="sm"
-        w="100%"
-        aria-label={label}
-        data-adapttable-part="edit-cell-editor"
-        {...editorValidationProps(ctrl)}
-        value={ctrl.draft}
-        onChange={(event) => ctrl.setDraft(event.target.value)}
-        onKeyDown={onKeyDown}
-        onBlur={ctrl.commitOnBlur}
-        fieldRef={ctrl.focusRef}
-      >
-        {ctrl.selectOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </NativeSelect>
-    );
-  }
-
+  aria,
+  checked,
+  onCheckedChange,
+  onKeyDown,
+}: Readonly<KitCellCheckboxProps>) {
+  "use no memo";
   return (
-    <Input
+    <ChakraCheckbox
+      size="sm"
+      aria-label={label}
+      data-adapttable-part="edit-cell-editor"
+      {...aria}
+      inputRef={ctrl.focusRef}
+      checked={checked}
+      onKeyDown={onKeyDown}
+      onToggle={() => onCheckedChange(!checked)}
+    />
+  );
+}
+
+function Options({ ctrl }: Readonly<Pick<KitCellEditorProps, "ctrl">>) {
+  "use no memo";
+  return ctrl.selectOptions.map((option) => (
+    <option key={option.value} value={option.value}>
+      {option.label}
+    </option>
+  ));
+}
+
+function MultiSelect({
+  ctrl,
+  label,
+  aria,
+  onKeyDown,
+}: Readonly<KitCellEditorProps>) {
+  "use no memo";
+  return (
+    <NativeSelect
+      multiple
+      size="sm"
+      w="100%"
+      aria-label={label}
+      data-adapttable-part="edit-cell-editor"
+      {...aria}
+      value={readMultiDraft(ctrl.draft)}
+      onChange={(event) => ctrl.setDraft(multiDraftFromSelect(event.target))}
+      onKeyDown={onKeyDown}
+      onBlur={ctrl.commitOnBlur}
+      fieldRef={ctrl.focusRef}
+    >
+      <Options ctrl={ctrl} />
+    </NativeSelect>
+  );
+}
+
+function Select({
+  ctrl,
+  label,
+  aria,
+  onKeyDown,
+}: Readonly<KitCellEditorProps>) {
+  "use no memo";
+  return (
+    <NativeSelect
+      size="sm"
+      w="100%"
+      aria-label={label}
+      data-adapttable-part="edit-cell-editor"
+      {...aria}
+      value={ctrl.draft}
+      onChange={(event) => ctrl.setDraft(event.target.value)}
+      onKeyDown={onKeyDown}
+      onBlur={ctrl.commitOnBlur}
+      fieldRef={ctrl.focusRef}
+    >
+      <Options ctrl={ctrl} />
+    </NativeSelect>
+  );
+}
+
+function Input({
+  ctrl,
+  label,
+  aria,
+  type,
+  onKeyDown,
+}: Readonly<KitCellInputProps>) {
+  "use no memo";
+  return (
+    <ChakraInput
       ref={ctrl.focusRef}
       data-adapttable-part="edit-cell-editor"
-      {...editorValidationProps(ctrl)}
+      {...aria}
       aria-label={label}
       size="sm"
-      type={editorInputType(ctrl.editor)}
+      type={type}
       value={ctrl.draft}
       onChange={(event) => ctrl.setDraft(event.target.value)}
       onKeyDown={onKeyDown}
@@ -113,39 +120,18 @@ export function ChakraCellEditor({
   );
 }
 
-/** Opt-in editable cell — pass-through when `editing` is omitted.
- * Callers precompute `display` in the row so memoized rows still re-invoke
- * accessors when selection/expansion changes.
- */
-export function EditableDataCell<TRow>(props: {
-  readonly editing: EditableCellEditing<TRow> | undefined;
-  readonly row: TRow;
-  readonly column: ColumnDef<TRow>;
-  readonly rowId: string;
-  readonly rows: readonly TRow[];
-  readonly columns: readonly ColumnDef<TRow>[];
-  readonly rowKey: (row: TRow) => string;
-  readonly editLabel: string;
-  /** `labels.undoEdit` — the control a failed save offers. */
-  readonly undoLabel?: string;
-  readonly display: ReactNode;
-}): ReactElement {
-  return (
-    <EditableCellGate
-      editing={props.editing}
-      row={props.row}
-      column={props.column}
-      rowId={props.rowId}
-      rows={props.rows}
-      columns={props.columns}
-      rowKey={props.rowKey}
-      editLabel={props.editLabel}
-      undoLabel={props.undoLabel}
-      display={props.display}
-      slots={editableCellSlots}
-      renderEditor={(ctrl) => (
-        <ChakraCellEditor ctrl={ctrl} label={props.editLabel} />
-      )}
-    />
-  );
-}
+/** The editor for the active cell, with Chakra's inputs. */
+export const ChakraCellEditor = /* @__PURE__ */ createCellEditor({
+  Checkbox,
+  MultiSelect,
+  Select,
+  Input,
+  rendersError: false,
+});
+
+/** A cell that edits in place; shows its value until editing starts. */
+export const EditableDataCell = /* @__PURE__ */ createEditableCell({
+  Editor: ChakraCellEditor,
+  slots: editableCellSlots,
+  rendersError: false,
+});

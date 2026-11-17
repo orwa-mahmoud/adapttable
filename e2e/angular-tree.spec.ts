@@ -5,8 +5,8 @@ import { ANGULAR_KITS, angularPart } from "./angular-kit";
 for (const kit of ANGULAR_KITS) {
   test.describe(kit.key, () => {
     /**
-     * Each Angular kit's tree page: the seed's org chart, each team lead
-     * over their team, on desktop and on phone cards.
+     * Each Angular kit's tree page: the seed's org chart, Maya Chen at the root,
+     * each lead over their team, on desktop and on phone cards.
      */
 
     const PAGE = `/${kit.key}/tree/`;
@@ -32,17 +32,16 @@ for (const kit of ANGULAR_KITS) {
         })
       );
 
-    test("starts with the leads folded and opens a branch in place", async ({
+    test("starts with the root folded and opens its branch in place", async ({
       page,
     }) => {
       await page.goto(PAGE);
       await expect(part(page, "row").first()).toBeVisible();
-      const leads = await outline(page);
-      expect(leads.length).toBeGreaterThan(1);
-      expect(leads.every((entry) => !entry.nested)).toBe(true);
+      const roots = await outline(page);
+      expect(roots.map((entry) => entry.id)).toEqual(["201"]);
+      expect(roots[0]!.nested).toBe(false);
 
-      const first = leads[0]!.id!;
-      const toggle = row(page, first).locator(
+      const toggle = row(page, "201").locator(
         '[data-adapttable-part="tree-toggle"]'
       );
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
@@ -51,17 +50,13 @@ for (const kit of ANGULAR_KITS) {
       await expect(toggle).toHaveAttribute("aria-expanded", "true");
 
       const opened = await outline(page);
-      expect(opened.length).toBeGreaterThan(leads.length);
-      expect(opened[0]!.id).toBe(first);
-      expect(opened[1]!.nested).toBe(true);
-      // Children sit between their lead and the next lead.
-      const nextLead = opened.findIndex(
-        (entry, index) => index > 0 && !entry.nested
-      );
-      expect(opened[nextLead]!.id).toBe(leads[1]!.id);
+      expect(opened.length).toBeGreaterThan(1);
+      expect(opened[0]!.id).toBe("201");
+      // Every row under the root sits indented beneath it.
+      expect(opened.slice(1).every((entry) => entry.nested)).toBe(true);
 
       await toggle.click();
-      await expect(part(page, "row")).toHaveCount(leads.length);
+      await expect(part(page, "row")).toHaveCount(1);
     });
 
     test("keeps children under their lead when the table sorts", async ({
@@ -105,7 +100,7 @@ for (const kit of ANGULAR_KITS) {
       const child = (await outline(page))[1]!.id!;
       const name = (
         await row(page, child)
-          .locator('[data-adapttable-part="cell"]')
+          .locator('[data-column-key="person"] strong')
           .first()
           .innerText()
       ).trim();

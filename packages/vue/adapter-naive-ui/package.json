@@ -19,7 +19,6 @@
     "naive-ui": "^2.45.3"
   },
   "devDependencies": {
-    "@adapttable/core": "workspace:*",
     "vue": "^3.5.43",
     "@adapttable/i18n": "workspace:*",
     "naive-ui": "2.45.3",
@@ -324,6 +323,36 @@
         "default": "./dist/export.cjs"
       }
     },
+    "./export-csv": {
+      "import": {
+        "types": "./dist/export-csv.d.ts",
+        "default": "./dist/export-csv.js"
+      },
+      "require": {
+        "types": "./dist/export-csv.d.cts",
+        "default": "./dist/export-csv.cjs"
+      }
+    },
+    "./export-pdf": {
+      "import": {
+        "types": "./dist/export-pdf.d.ts",
+        "default": "./dist/export-pdf.js"
+      },
+      "require": {
+        "types": "./dist/export-pdf.d.cts",
+        "default": "./dist/export-pdf.cjs"
+      }
+    },
+    "./export-xlsx": {
+      "import": {
+        "types": "./dist/export-xlsx.d.ts",
+        "default": "./dist/export-xlsx.js"
+      },
+      "require": {
+        "types": "./dist/export-xlsx.d.cts",
+        "default": "./dist/export-xlsx.cjs"
+      }
+    },
     "./pivot": {
       "import": {
         "types": "./dist/pivot.d.ts",
@@ -434,6 +463,16 @@
         "default": "./dist/row-reorder.cjs"
       }
     },
+    "./rows": {
+      "import": {
+        "types": "./dist/rows.d.ts",
+        "default": "./dist/rows.js"
+      },
+      "require": {
+        "types": "./dist/rows.d.cts",
+        "default": "./dist/rows.cjs"
+      }
+    },
     "./saved-views": {
       "import": {
         "types": "./dist/saved-views.d.ts",
@@ -462,6 +501,16 @@
       "require": {
         "types": "./dist/column-selection.d.cts",
         "default": "./dist/column-selection.cjs"
+      }
+    },
+    "./columns": {
+      "import": {
+        "types": "./dist/columns.d.ts",
+        "default": "./dist/columns.js"
+      },
+      "require": {
+        "types": "./dist/columns.d.cts",
+        "default": "./dist/columns.cjs"
       }
     },
     "./features": {

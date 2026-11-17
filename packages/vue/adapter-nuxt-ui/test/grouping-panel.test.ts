@@ -1,5 +1,8 @@
-import { createTableEngine } from "@adapttable/core";
-import { type ColumnDef, useFrontendData } from "@adapttable/vue";
+import {
+  type ColumnDef,
+  createTableEngine,
+  useFrontendData,
+} from "@adapttable/vue";
 import ui from "@nuxt/ui/vue-plugin";
 import { afterEach, expect, it, vi } from "vitest";
 import {

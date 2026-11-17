@@ -2,11 +2,14 @@
 import {
   type AgentApprovalPending,
   approvalArgumentPairs,
-  approvalProposalText,
   approvalReview,
-  resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
+import {
+  approvalProposalText,
+  ASSISTANT_LABELS,
+  resolveFeatureLabels,
+} from "@adapttable/core/binding";
 import {
   defineComponent,
   h,
@@ -20,6 +23,8 @@ import {
 import { useScopeActivity } from "../store";
 import { approvalIdentity } from "./approvalIdentity";
 import type { AgentApprovalProps, ApprovalReviewSlots } from "./contracts";
+
+const APPROVAL_GROUPS = [ASSISTANT_LABELS] as const;
 
 /** @public */
 export interface ApprovalReviewChromeProps {
@@ -84,7 +89,7 @@ export const ApprovalReviewChrome = /*#__PURE__*/ defineComponent(
       const pending = props.pending;
       const review = approvalReview(pending, props.labels);
       if (!review) return null;
-      const copy = resolveLabels(props.labels);
+      const copy = resolveFeatureLabels(props.labels, APPROVAL_GROUPS);
       const full = props.expanded ?? expanded.value;
       const uncontrolled = props.expanded === undefined;
       const controls = props.slots;
@@ -298,40 +303,71 @@ export interface AgentApprovalChromeProps extends AgentApprovalProps {
 }
 /** @public */
 export const AgentApprovalChrome = /*#__PURE__*/ defineComponent(
-  (props: AgentApprovalChromeProps) => () => {
-    const pending =
+  (props: AgentApprovalChromeProps) => {
+    const active = useScopeActivity();
+    const region = shallowRef<HTMLElement>();
+    const tableOwned = (): AgentApprovalPending | null =>
       props.pending?.presentation === "table" ? props.pending : null;
-    const summary = approvalReview(pending, props.labels)?.summary ?? "";
-    return [
-      h(
-        "div",
-        {
-          "data-adapttable-part": "agent-approval-status",
-          "aria-live": "polite",
-          "aria-atomic": "true",
-          style: {
-            position: "absolute",
-            width: "1px",
-            height: "1px",
-            overflow: "hidden",
-            clipPath: "inset(50%)",
-            whiteSpace: "nowrap",
-          },
-        },
-        summary
-      ),
-      pending
-        ? h(
-            "section",
-            {
-              "data-adapttable-part": "agent-approval",
-              class: props.className,
-              "aria-label": summary,
-            },
-            [h(ApprovalReviewChrome, { ...props, pending })]
+    // A proposal arriving above the table takes focus to Reject, the safe
+    // answer, so a keyboard reader lands on the decision.
+    watch(
+      () => approvalIdentity(tableOwned()),
+      async (identity) => {
+        if (identity === undefined) return;
+        await nextTick();
+        region.value
+          ?.querySelector<HTMLElement>(
+            '[data-adapttable-part="agent-approval-reject"]'
           )
-        : null,
-    ];
+          ?.focus();
+      }
+    );
+    /** Escape belongs to this review, including when a kit button has focus. */
+    const onKeydown = (event: KeyboardEvent): void => {
+      if (event.key !== "Escape") return;
+      const pending = tableOwned();
+      if (!pending || !active.value) return;
+      event.preventDefault();
+      event.stopPropagation();
+      pending.reject();
+    };
+    return () => {
+      const pending = tableOwned();
+      const summary = approvalReview(pending, props.labels)?.summary ?? "";
+      return [
+        h(
+          "div",
+          {
+            "data-adapttable-part": "agent-approval-status",
+            "aria-live": "polite",
+            "aria-atomic": "true",
+            style: {
+              position: "absolute",
+              width: "1px",
+              height: "1px",
+              overflow: "hidden",
+              clipPath: "inset(50%)",
+              whiteSpace: "nowrap",
+            },
+          },
+          summary
+        ),
+        pending
+          ? h(
+              "section",
+              {
+                ref: region,
+                "data-adapttable-part": "agent-approval",
+                class: props.className,
+                "aria-label": summary,
+                tabindex: -1,
+                onKeydown,
+              },
+              [h(ApprovalReviewChrome, { ...props, pending })]
+            )
+          : null,
+      ];
+    };
   },
   {
     name: "AgentApprovalChrome",

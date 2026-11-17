@@ -1,9 +1,5 @@
 /** Shared action semantics; confirmation and controls must come from the kit. */
-import {
-  resolveDisabledReason,
-  runRowAction,
-  visibleRowActions,
-} from "@adapttable/core";
+import { runRowAction } from "@adapttable/core";
 
 export type {
   RowActionControl,
@@ -15,10 +11,16 @@ export type {
   ConfirmRequest,
   RowAction,
 } from "@adapttable/core";
+import {
+  resolveDisabledReason,
+  visibleRowActions,
+} from "@adapttable/core/binding";
+
 import type {
   RowActionControl,
   RowActionControlsInput,
 } from "../layout/modelChannels";
+
 /** Resolve once for display and recheck permission/disabled state at invocation. @public */
 export function rowActionControls<TRow>(
   options: RowActionControlsInput<TRow>

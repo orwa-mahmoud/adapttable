@@ -17,6 +17,7 @@ import {
   type ControllableStoreOptions,
   createControllableStore,
 } from "../state/controllableStore";
+import type { TableStore } from "../state/tableStore";
 import {
   initialColumnLayout,
   withColumnHidden,
@@ -231,6 +232,8 @@ function namesWithout(
  * Create a column-layout controller.
  *
  * @param defaultColumnLayout - The uncontrolled layout to start from.
+ * @param within - The table's store to hold the layout in; one of its own
+ *   when absent.
  * @returns The controller; call {@link ColumnLayoutController.configure}
  *   before the first mutation.
  *
@@ -240,11 +243,12 @@ export function createColumnLayoutController<
   TRow,
   TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>,
 >(
-  defaultColumnLayout?: Partial<ColumnLayoutState>
+  defaultColumnLayout?: Partial<ColumnLayoutState>,
+  within: { readonly store?: TableStore } = {}
 ): ColumnLayoutController<TRow, TColumn> {
   const store = createControllableStore(
     initialColumnLayout(defaultColumnLayout),
-    COLUMN_LAYOUT_STORE_OPTIONS
+    { ...COLUMN_LAYOUT_STORE_OPTIONS, store: within.store }
   );
   const baselines: RenameBaselines = {
     declared: new Map(),

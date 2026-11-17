@@ -1,5 +1,7 @@
-import { treeExpansionActions } from "@adapttable/core";
-import type { TreeExpansionState } from "@adapttable/core/binding";
+import {
+  treeExpansionActions,
+  type TreeExpansionState,
+} from "@adapttable/core/binding";
 import {
   computed,
   type ComputedRef,

@@ -99,6 +99,7 @@ import { TableLabels } from '@adapttable/core';
 import { TableQueryListener } from '@adapttable/core';
 import { TableRuntime } from '@adapttable/core/binding';
 import { TableSource } from '@adapttable/core';
+import { TableStore } from '@adapttable/core/binding';
 import { TableViewStateConfig } from '@adapttable/core';
 import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
@@ -183,6 +184,7 @@ export interface ColumnLayoutOptions {
     readonly onColumnLayoutChange?: (next: ColumnLayoutState) => void;
     // (undocumented)
     readonly onColumnRename?: (key: string, name: string) => void;
+    readonly store?: TableStore;
 }
 
 // @public
@@ -262,6 +264,7 @@ export interface DesktopTableModel<TRow> {
     readonly headerRowAttrs: Attrs;
     // (undocumented)
     readonly headers: readonly TableHeaderModel<TRow>[];
+    readonly railAttrs?: (rail: TableRail, header: boolean) => Attrs;
     // (undocumented)
     readonly reorderLabel?: string;
     // (undocumented)
@@ -372,6 +375,7 @@ export function filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: Filte
 
 // @public (undocumented)
 export interface FiltersOptions {
+    readonly fields?: boolean;
     // (undocumented)
     readonly mode?: "popover" | "drawer";
     readonly tree?: boolean;
@@ -768,6 +772,7 @@ export interface StaticTableFeature {
     readonly dependencies?: readonly unknown[];
     // (undocumented)
     readonly id: string;
+    readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: <TRow>(context: FeatureMountContext<TRow>) => void | (() => void);
     // (undocumented)
@@ -897,6 +902,7 @@ export interface TableFeature<TRow> {
     readonly dependencies?: readonly unknown[];
     // (undocumented)
     readonly id: string;
+    readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
     // (undocumented)
@@ -956,6 +962,9 @@ export interface TableHeaderModel<TRow> {
     // (undocumented)
     readonly sortAttrs?: Attrs;
 }
+
+// @public
+export type TableRail = "expand" | "reorder" | "selection" | "actions";
 
 // @public (undocumented)
 export interface TableRowDetail<TRow> {
@@ -1125,11 +1134,16 @@ export function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<T
     tableAttrs: () => Record<string, unknown>;
     headerRowAttrs: () => Record<string, unknown>;
     headerCellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
+    railAttrs: (rail: TableRail, header: boolean) => Record<string, unknown>;
     sortButtonAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
-    rowAttrs: (row: TRow, index: number) => Record<string, unknown>;
+    rowAttrs: (row: TRow, index: number, state?: {
+        readonly selected?: boolean;
+    }) => Record<string, unknown>;
     isCellFlashing: (row: TRow, columnKey: string) => boolean;
     cellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
-    cardAttrs: (row: TRow, index: number) => Record<string, unknown>;
+    cardAttrs: (row: TRow, index: number, state?: {
+        readonly selected?: boolean;
+    }) => Record<string, unknown>;
     searchInputAttrs: () => Record<string, unknown>;
     loadMoreAttrs: () => {
         ref: VNodeRef | undefined;
@@ -1153,6 +1167,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly columnWidths?: MaybeRefOrGetterOptional<Readonly<Record<string, number>>>;
     // (undocumented)
     readonly dir?: MaybeRefOrGetter<Direction>;
+    readonly featureLabels?: readonly Partial<TableLabels>[];
     // (undocumented)
     readonly fitColumns?: MaybeRefOrGetter<boolean>;
     // (undocumented)
@@ -1279,6 +1294,7 @@ export interface UseTableUrlStateOptions {
     readonly defaults?: MaybeRefOrGetter<TableViewStateConfig["defaults"]>;
     // (undocumented)
     readonly numberExtraKeys?: MaybeRefOrGetterOptional<readonly string[]>;
+    readonly store?: TableStore;
     // (undocumented)
     readonly urlAdapter?: MaybeRefOrGetterOptional<UrlStateAdapter>;
     // (undocumented)

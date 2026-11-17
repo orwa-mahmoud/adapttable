@@ -1,9 +1,9 @@
 /** Mounted contract coverage: neutral Chrome renders only kit-supplied controls. */
 import type { AgentApprovalPending, TableLabels } from "@adapttable/core";
-import type {
-  TableAssistantMessageView,
-  TableAssistantReceiptView,
-  TableAssistantView,
+import {
+  type TableAssistantMessageView,
+  type TableAssistantReceiptView,
+  type TableAssistantView,
 } from "@adapttable/core/binding";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -433,6 +433,29 @@ describe("AdaptTableAssistantChrome", () => {
     } finally {
       fixture.destroy();
     }
+  });
+  it("leaves Escape to an approval dialog open above the panel", async () => {
+    const approval: AgentApprovalPending = {
+      decisions: ["pending"],
+      proposals: [{ rowKey: "one", column: "name", before: "A", after: "B" }],
+      approve: vi.fn(),
+      reject: vi.fn(),
+      presentation: "modal",
+    };
+    const fixture = await mounted(
+      { approval },
+      { busy: true, status: "awaiting-approval" }
+    );
+    expect(part("assistant-approval-modal")).not.toBeNull();
+    part("assistant-input")?.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await settle(fixture);
+    expect(fixture.componentInstance.open()).toBe(true);
   });
   it("preserves nested-overlay Escape and non-Escape keys", async () => {
     const fixture = await mounted();

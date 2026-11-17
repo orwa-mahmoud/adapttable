@@ -5,6 +5,7 @@ import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Layers } from "./sectionIcons";
+import { SELECTION_HINTS } from "./shared/pageHints";
 
 /**
  * The selection page: choosing rows, and doing something with them.
@@ -18,15 +19,11 @@ export function SelectionDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   return (
     <div className="mx-demo">
       <div className="hint-row">
-        <span className="hint">
-          <Check size={12} /> the header box takes the whole page
-        </span>
-        <span className="hint">
-          <Layers size={12} /> selection survives paging — it is a set of ids
-        </span>
-        <span className="hint">
-          <Check size={12} /> bulk actions run over the selection
-        </span>
+        {SELECTION_HINTS.map((hint, index) => (
+          <span className="hint" key={hint}>
+            {index === 1 ? <Layers size={12} /> : <Check size={12} />} {hint}
+          </span>
+        ))}
       </div>
       <div className="mx-demo__body">
         <div key={adapter} data-adapter={adapter}>

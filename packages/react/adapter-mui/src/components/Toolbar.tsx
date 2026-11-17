@@ -1,24 +1,24 @@
-/** Search field, sort select, filters trigger, menus and rows-per-page. */
+/** The toolbar, drawn by the binding with MUI's controls. */
 import {
-  FeatureSlot,
-  FILTER_POPOVER,
-  pageSizeOptions,
-  TOOLBAR_EXTRAS,
-  type ToolbarChromeProps,
+  createToolbar,
+  type KitFiltersButtonProps,
+  type KitRowsPerPageProps,
+  type KitToolbarFrameProps,
+  type KitToolbarSearchProps,
+  type KitToolbarSortProps,
 } from "@adapttable/react/adapter";
 import {
   Badge,
-  Button,
+  Button as MuiButton,
   InputAdornment,
   MenuItem,
   Stack,
   TextField,
 } from "@mui/material";
-import { type ReactNode, useRef } from "react";
 
 import { FiltersIcon } from "../icons";
+import { Button } from "./primitives";
 
-/** Magnifying-glass glyph for the search field (currentColor, no icon-lib). */
 function SearchIcon() {
   return (
     <svg
@@ -38,252 +38,145 @@ function SearchIcon() {
   );
 }
 
-/**
- * Toolbar props: the shared {@link ToolbarChromeProps} plus the filter-container
- * wiring (mode + open/close handlers) so the Filters button can act as either
- * the popover anchor (default) or the drawer trigger.
- */
-export interface MuiToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
-  /** Which filter container the Filters button drives. */
-  filtersMode: "popover" | "drawer" | "header";
-  /** Filter content (rendered inside the popover when in popover mode). */
-  filters?: ReactNode;
-  /** Close the filter container (popover mode). */
-  onCloseFilters: () => void;
-  /** Clear all active filters. */
-  onClearFilters: () => void;
-}
+const ROW = {
+  flexWrap: "wrap",
+  alignItems: "center",
+  justifyContent: "space-between",
+} as const;
+const CONTROLS = { alignItems: "center", flexWrap: "wrap" } as const;
 
-/** Search field + sort select + filters button + rows-per-page. */
-export function Toolbar<TRow>({
-  table,
-  searchable,
-  searchPlaceholder,
-  sortByOptions,
-  toolbar,
-  toolbarSlots,
-  onUndo,
-  onRedo,
-  canUndo,
-  canRedo,
-  undoLabel,
-  redoLabel,
-  onPrint,
-  printLabel,
-  density,
-  onDensityChange,
-  onToggleFullscreen,
-  isFullscreen,
-  hasFilters,
-  activeFilterCount,
-  showRowsPerPage,
-  filtersMode,
-  filters,
-  filtersOpen,
-  onToggleFilters,
-  onFiltersTriggerPointerDown,
-  onCloseFilters,
-  onClearFilters,
-  dir,
-  savedViewsMenu,
-  columnMenu,
-  onAddRow,
-  addRowLabel,
-  onExportCsv,
-  exportBusy,
-  exportAnnouncement = "",
-  exportProgressState,
-  exportLabel,
-  exportDisabled,
-  exportDisabledReason,
-}: Readonly<MuiToolbarProps<TRow>>) {
-  const { labels, source } = table;
-  const sortOptions =
-    sortByOptions ?? (table.isMobile ? table.sortByOptions : undefined);
-  const searchProps = table.getSearchInputProps(
-    searchPlaceholder ? { placeholder: searchPlaceholder } : undefined
-  );
-  const filtersAnchorRef = useRef<HTMLButtonElement>(null);
-
-  const filtersButton = hasFilters ? (
-    <Badge color="primary" badgeContent={activeFilterCount}>
-      <Button
-        ref={filtersAnchorRef}
-        variant="outlined"
-        size="small"
-        startIcon={<FiltersIcon />}
-        aria-expanded={filtersMode === "popover" ? filtersOpen : undefined}
-        onPointerDown={onFiltersTriggerPointerDown}
-        onClick={onToggleFilters}
-      >
-        {labels.filters}
-      </Button>
-    </Badge>
-  ) : null;
-
+/** Search on one side, the controls on the other, wrapping when narrow. */
+function Frame({ start, search, controls }: Readonly<KitToolbarFrameProps>) {
+  "use no memo";
   return (
-    <Stack
-      direction="row"
-      spacing={1}
-      useFlexGap
-      sx={{
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
-    >
-      {toolbarSlots?.start}
-      {searchable !== false && (
-        <TextField
-          data-adapttable-part="search-field"
-          size="small"
-          value={searchProps.value}
-          placeholder={searchProps.placeholder}
-          slotProps={{
-            htmlInput: {
-              "aria-label": labels.search,
-              type: "search",
-              "data-adapttable-part": "search",
-            },
-            input: {
-              startAdornment: (
-                <InputAdornment
-                  position="start"
-                  data-adapttable-part="search-icon"
-                >
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            },
-          }}
-          onChange={searchProps.onChange}
-          sx={{ flex: 1, minWidth: 160, maxWidth: 360 }}
-        />
-      )}
-      <Stack
-        direction="row"
-        spacing={1}
-        useFlexGap
-        sx={{ alignItems: "center", flexWrap: "wrap" }}
-      >
-        {sortOptions && sortOptions.length > 0 && (
-          <TextField
-            select
-            size="small"
-            label={labels.sortBy}
-            value={source.sortBy ?? ""}
-            onChange={(e) =>
-              source.setSort(
-                e.target.value || undefined,
-                source.sortDir ?? "asc"
-              )
-            }
-            sx={{ minWidth: 160 }}
-          >
-            <MenuItem value="">—</MenuItem>
-            {sortOptions.map((o) => (
-              <MenuItem key={o.value} value={o.value}>
-                {o.label}
-              </MenuItem>
-            ))}
-          </TextField>
-        )}
-        {table.isMobile && sortOptions && sortOptions.length > 0 && (
-          <Button
-            variant="outlined"
-            size="small"
-            type="button"
-            data-adapttable-part="sort-direction"
-            disabled={!source.sortBy}
-            aria-label={
-              source.sortDir === "desc"
-                ? labels.sortAscending
-                : labels.sortDescending
-            }
-            onClick={() =>
-              source.setSort(
-                source.sortBy,
-                source.sortDir === "desc" ? "asc" : "desc"
-              )
-            }
-          >
-            {source.sortDir === "desc"
-              ? labels.sortDescending
-              : labels.sortAscending}
-          </Button>
-        )}
-        {toolbar}
-        {filtersButton}
-        {hasFilters && filtersMode === "popover" && (
-          <FeatureSlot
-            slot={FILTER_POPOVER}
-            props={{
-              open: filtersOpen,
-              onClose: onCloseFilters,
-              anchorEl: filtersAnchorRef.current,
-              filters,
-              activeFilterCount,
-              onClearFilters,
-              labels,
-              dir,
-            }}
-          />
-        )}
-        {savedViewsMenu}
-        {columnMenu}
-        <FeatureSlot
-          slot={TOOLBAR_EXTRAS}
-          props={{
-            onUndo,
-            onRedo,
-            canUndo,
-            canRedo,
-            undoLabel,
-            redoLabel,
-            onPrint,
-            printLabel,
-            density,
-            onDensityChange,
-            onToggleFullscreen,
-            isFullscreen,
-            onExportCsv,
-            exportBusy,
-            exportAnnouncement,
-            exportProgressState,
-            exportLabel,
-            exportDisabled,
-            exportDisabledReason,
-            labels,
-          }}
-        />
-        {onAddRow && (
-          <Button
-            variant="contained"
-            size="small"
-            data-adapttable-part="add-row"
-            onClick={onAddRow}
-          >
-            {addRowLabel}
-          </Button>
-        )}
-        {toolbarSlots?.end}
-        {showRowsPerPage && (
-          <TextField
-            select
-            size="small"
-            label={labels.rowsPerPage}
-            value={source.limit}
-            onChange={(e) => source.setLimit(Number(e.target.value))}
-            sx={{ minWidth: 132 }}
-          >
-            {pageSizeOptions([source.limit, source.defaultLimit]).map((n) => (
-              <MenuItem key={n} value={n}>
-                {n}
-              </MenuItem>
-            ))}
-          </TextField>
-        )}
+    <Stack direction="row" spacing={1} useFlexGap sx={ROW}>
+      {start}
+      {search}
+      <Stack direction="row" spacing={1} useFlexGap sx={CONTROLS}>
+        {controls}
       </Stack>
     </Stack>
   );
 }
+
+const SEARCH_WIDTH = { flex: 1, minWidth: 160, maxWidth: 360 } as const;
+
+function Search({ input }: Readonly<KitToolbarSearchProps>) {
+  "use no memo";
+  return (
+    <TextField
+      data-adapttable-part="search-field"
+      size="small"
+      value={input.value}
+      placeholder={input.placeholder}
+      slotProps={{
+        htmlInput: {
+          "aria-label": input["aria-label"],
+          type: "search",
+          "data-adapttable-part": "search",
+        },
+        input: {
+          startAdornment: (
+            <InputAdornment position="start" data-adapttable-part="search-icon">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        },
+      }}
+      onChange={input.onChange}
+      sx={SEARCH_WIDTH}
+    />
+  );
+}
+
+function SortSelect({
+  label,
+  value,
+  options,
+  onValueChange,
+}: Readonly<KitToolbarSortProps>) {
+  "use no memo";
+  return (
+    <TextField
+      select
+      size="small"
+      label={label}
+      value={value}
+      onChange={(event) => onValueChange(event.target.value || undefined)}
+      sx={{ minWidth: 160 }}
+    >
+      <MenuItem value="">—</MenuItem>
+      {options.map((option) => (
+        <MenuItem key={option.value} value={option.value}>
+          {option.label}
+        </MenuItem>
+      ))}
+    </TextField>
+  );
+}
+
+/** The filters button, with the active count as MUI's badge. */
+function FiltersButton({
+  elementRef,
+  label,
+  count,
+  expanded,
+  open,
+  onPointerDown,
+  onClick,
+}: Readonly<KitFiltersButtonProps>) {
+  "use no memo";
+  return (
+    <Badge color="primary" badgeContent={count}>
+      <MuiButton
+        ref={elementRef}
+        variant="outlined"
+        size="small"
+        startIcon={<FiltersIcon />}
+        aria-expanded={expanded}
+        data-adapttable-part="filters-button"
+        data-active={open || undefined}
+        onPointerDown={onPointerDown}
+        onClick={onClick}
+      >
+        {label}
+      </MuiButton>
+    </Badge>
+  );
+}
+
+function RowsPerPage({
+  label,
+  value,
+  options,
+  onValueChange,
+}: Readonly<KitRowsPerPageProps>) {
+  "use no memo";
+  return (
+    <TextField
+      select
+      size="small"
+      label={label}
+      value={value}
+      onChange={(event) => onValueChange(Number(event.target.value))}
+      sx={{ minWidth: 132 }}
+    >
+      {options.map((size) => (
+        <MenuItem key={size} value={size}>
+          {size}
+        </MenuItem>
+      ))}
+    </TextField>
+  );
+}
+
+/** The toolbar: search, sort, filters, menus, extras and page size. */
+export const Toolbar = /* @__PURE__ */ createToolbar({
+  Frame,
+  Search,
+  SortSelect,
+  Button,
+  FiltersButton,
+  filtersPopover: "anchor",
+  RowsPerPage,
+});

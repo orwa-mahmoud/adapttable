@@ -4,13 +4,14 @@
  * Kept separate so {@link AdaptEditableCellGate} and the row/batch cells do
  * not import each other at runtime.
  */
-import {
-  type editableCellController,
-  type EditableCellEditing,
-} from "@adapttable/angular";
+import { type EditableCellEditing } from "@adapttable/angular";
 import { type CellConflictAsk } from "@adapttable/core";
 import type { EditableCellButtonProps } from "@adapttable/core/binding";
-import { booleanDraft, formatMultiDraft } from "@adapttable/core/editing";
+import {
+  booleanDraft,
+  type EditableCellEditorCtrl as CoreEditableCellEditorCtrl,
+  formatMultiDraft,
+} from "@adapttable/core/editing";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
@@ -47,35 +48,9 @@ export interface EditableCellSlots {
  *
  * @public
  */
-export interface EditableCellEditorCtrl {
-  /** The value being edited, as text. */
-  draft: string;
-  /** Replaces the draft on every keystroke. */
-  setDraft: (value: string) => void;
-  /** Handles Enter, Escape and Tab for the editor. */
-  onEditorKeyDown: (event: {
-    key: string;
-    preventDefault: () => void;
-    shiftKey?: boolean;
-  }) => void;
-  /** Commits the draft when focus leaves the editor. */
-  commitOnBlur: () => void;
-  /** The editor shape this column declared. */
-  editor: NonNullable<ReturnType<typeof editableCellController>["editor"]>;
-  /** Choices for a select editor, empty for other shapes. */
-  selectOptions: ReturnType<typeof editableCellController>["selectOptions"];
-  /** Accessible name for the editor control. */
+export interface EditableCellEditorCtrl extends CoreEditableCellEditorCtrl {
+  /** The field's accessible name. */
   label: string;
-  /** A validator's message for this cell, when the last commit was rejected. */
-  error?: string;
-  /** Whether an async validator is still deciding. */
-  validating: boolean;
-  /** `id` of the element holding the message. */
-  errorId: string;
-  /** Attach as the editor's focus callback so the table decides focus. */
-  focusRef: (node: { focus: () => void } | null) => void;
-  /** A live row changed under this editor. */
-  conflict?: boolean;
 }
 
 /**

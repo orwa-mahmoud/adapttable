@@ -4,7 +4,6 @@ export { rowReorderControlKey, rowReorderModelKey } from "./contracts";
 import {
   createRowReorderController,
   isRowMovePending,
-  isRtlElement,
   type RowDragEvent,
   type RowKeyEvent,
   type RowReorderActions,
@@ -20,6 +19,8 @@ import {
   type TableSource,
 } from "@adapttable/core";
 import {
+  isRtlElement,
+  ROW_LABELS,
   type RowMoveMenuSlotProps,
   type RowReorderHandleSlotProps,
   type RowReorderMoveButtonProps,
@@ -380,6 +381,7 @@ export function rowReorder<TRow>(
   }
   return {
     id: "row-reorder",
+    labels: ROW_LABELS,
     requiredSlots: [rowReorderControlKey<never>()],
     apply: () => ({ bodyModel: projectHeadlessRows }),
     mount: useRowReorderMount,

@@ -1,7 +1,5 @@
-import {
-  INACTIVE_TIER_ROWS,
-  type TableCallbackRefresh,
-} from "@adapttable/core";
+import { type TableCallbackRefresh } from "@adapttable/core";
+import { INACTIVE_TIER_ROWS } from "@adapttable/core/binding";
 import { createBasicTableEngine } from "@adapttable/core/engine";
 import { act, renderHook } from "@testing-library/react";
 import { StrictMode } from "react";

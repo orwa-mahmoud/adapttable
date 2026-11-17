@@ -1,5 +1,6 @@
 /** The themed resize hook names the same live keyboard control it adapts. */
-import { columnResizeHandleProps } from "@adapttable/core";
+
+import { columnResizeHandleProps } from "@adapttable/core/binding";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

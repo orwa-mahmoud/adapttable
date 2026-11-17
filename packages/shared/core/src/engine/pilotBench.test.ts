@@ -93,6 +93,36 @@ function sample(run: () => void, repetitions: number): number[] {
   return samples;
 }
 
+/**
+ * Time two runs in alternation, swapping which goes first each round, so load
+ * that lands during the measurement lands on both.
+ */
+function samplePaired(
+  first: () => void,
+  second: () => void,
+  repetitions: number
+): [number[], number[]] {
+  first();
+  second();
+  const firstSamples: number[] = [];
+  const secondSamples: number[] = [];
+  const time = (run: () => void, into: number[]) => {
+    const start = performance.now();
+    run();
+    into.push(performance.now() - start);
+  };
+  for (let index = 0; index < repetitions; index += 1) {
+    if (index % 2 === 0) {
+      time(first, firstSamples);
+      time(second, secondSamples);
+    } else {
+      time(second, secondSamples);
+      time(first, firstSamples);
+    }
+  }
+  return [firstSamples, secondSamples];
+}
+
 function distribution(samples: readonly number[]) {
   return {
     repetitions: samples.length,
@@ -103,7 +133,11 @@ function distribution(samples: readonly number[]) {
   };
 }
 
-/** A reproducible regression: slower at the tail, and not by a sub-frame gap. */
+/**
+ * Slower at the tail, and not by a sub-frame gap. A caller confirms it on a
+ * second, paired measurement before calling it a regression: the two
+ * evaluators share their code, so one noisy tail under load is not one.
+ */
 function regressed(basic: readonly number[], full: readonly number[]): boolean {
   const gap = quantile(basic, 95) - quantile(full, 95);
   return gap > 15 && quantile(basic, 95) > quantile(full, 95) * 1.5;
@@ -136,6 +170,7 @@ describe("composed engine pilot", () => {
     const report: Record<string, unknown>[] = [];
     const problems: string[] = [];
     const timed = new Map<string, number[]>();
+    const runs = new Map<string, () => void>();
 
     for (const count of SIZES) {
       const data = makeRows(count);
@@ -240,6 +275,17 @@ describe("composed engine pilot", () => {
 
         timed.set(`${name}:${count}:construct`, construct);
         timed.set(`${name}:${count}:patch`, patch);
+        runs.set(`${name}:${count}:construct`, () => {
+          const engine = create(options);
+          engine.rows("full");
+          engine.dispose();
+        });
+        runs.set(`${name}:${count}:patch`, () => {
+          const engine = create(options);
+          engine.invalidate(["data"], { data: next });
+          engine.rows("full");
+          engine.dispose();
+        });
         report.push({
           evaluator: name,
           rows: count,
@@ -256,10 +302,16 @@ describe("composed engine pilot", () => {
       const fullConstruct = timed.get(`full:${count}:construct`) ?? [];
       const basicPatch = timed.get(`basic:${count}:patch`) ?? [];
       const fullPatch = timed.get(`full:${count}:patch`) ?? [];
-      if (regressed(basicConstruct, fullConstruct)) {
+      const again = (kind: string) => {
+        const basicRun = runs.get(`basic:${count}:${kind}`);
+        const fullRun = runs.get(`full:${count}:${kind}`);
+        if (!basicRun || !fullRun) throw new Error(`No ${kind} run`);
+        return regressed(...samplePaired(basicRun, fullRun, repetitions));
+      };
+      if (regressed(basicConstruct, fullConstruct) && again("construct")) {
         problems.push(`construct ${count}`);
       }
-      if (regressed(basicPatch, fullPatch)) {
+      if (regressed(basicPatch, fullPatch) && again("patch")) {
         problems.push(`one-row patch ${count}`);
       }
     }

@@ -5,7 +5,7 @@
  */
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import type * as AdapterModule from "@adapttable/react/adapter";
-import { useDataTableShell } from "@adapttable/react/adapter";
+import { TableComposition } from "@adapttable/react/adapter";
 import { MantineProvider } from "@mantine/core";
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -27,7 +27,7 @@ const columns: ColumnDef<Row>[] = [
 
 vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
-  return { ...actual, useDataTableShell: vi.fn(actual.useDataTableShell) };
+  return { ...actual, TableComposition: vi.fn(actual.TableComposition) };
 });
 
 const actualCore = await vi.importActual<typeof AdapterModule>(
@@ -35,24 +35,33 @@ const actualCore = await vi.importActual<typeof AdapterModule>(
 );
 
 beforeEach(() => {
-  vi.mocked(useDataTableShell).mockImplementation((props, render) => {
-    const real = actualCore.useDataTableShell(props, render);
-    return {
-      ...real,
-      skipChromeBody: true,
-      tableProps: {
-        ...real.tableProps,
-        rowEntries: real.tableProps.rows.map((row, index) => ({
-          row,
-          index,
-          key: String(real.tableProps.getRowId(row)),
-        })),
-        paddingTop: 0,
-        // Non-zero trailing padding renders the bottom spacer div.
-        paddingBottom: 40,
+  vi.mocked(TableComposition).mockImplementation(({ props, kit }) =>
+    actualCore.TableComposition({
+      props,
+      kit: {
+        ...kit,
+        body: (view, headerOffset, tableProps) =>
+          kit.body(
+            {
+              ...view,
+              tableProps: {
+                ...view.tableProps,
+                rowEntries: view.tableProps.rows.map((row, index) => ({
+                  row,
+                  index,
+                  key: String(view.tableProps.getRowId(row)),
+                })),
+                paddingTop: 0,
+                // Non-zero trailing padding renders the bottom spacer div.
+                paddingBottom: 40,
+              },
+            },
+            headerOffset,
+            tableProps
+          ),
       },
-    };
-  });
+    })
+  );
 });
 
 const adapter = createMemoryAdapter("");

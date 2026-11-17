@@ -83,6 +83,60 @@ describe("conformance registry", () => {
     }
   });
 
+  /**
+   * A kit that runs its binding's wrapper of the suite.
+   *
+   * @param {string} wrapperBody
+   */
+  function wrapperRoot(wrapperBody) {
+    const root = kitRoot(
+      "packages/react/adapter-fixture/src/conformance.test.tsx",
+      [
+        'import { reactTableConformanceTests } from "../../react/test/kit/conformance";',
+        "for (const test of reactTableConformanceTests(kit)) it(test.name, test.run);",
+        "",
+      ].join("\n")
+    );
+    const wrapper = join(root, "packages/react/react/test/kit/conformance.tsx");
+    mkdirSync(join(wrapper, ".."), { recursive: true });
+    writeFileSync(
+      wrapper,
+      [
+        "export function reactTableConformanceTests(kit: Kit): readonly Test[] {",
+        `  ${wrapperBody}`,
+        "}",
+        "",
+      ].join("\n")
+    );
+    return root;
+  }
+
+  it("accepts a kit that runs its binding's wrapper of the whole suite", () => {
+    const root = wrapperRoot(
+      "return tableConformanceTests(driver(kit), harness);"
+    );
+    try {
+      const checked = checkConformanceRegistry({ root, kits: [kit] });
+      assert.deepEqual(checked.problems, []);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects a binding wrapper that filters the shared cases", () => {
+    const root = wrapperRoot(
+      "return tableConformanceTests(driver(kit), harness).filter(() => false);"
+    );
+    try {
+      const checked = checkConformanceRegistry({ root, kits: [kit] });
+      assert.deepEqual(checked.problems, [
+        "react/adapter-fixture: conformance suite is not registered",
+      ]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it("rejects a shared suite that drops a common case", () => {
     const root = kitRoot(
       "packages/react/adapter-fixture/src/conformance.test.tsx",

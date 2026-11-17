@@ -128,7 +128,7 @@ const PORTABLE_TRIO: readonly {
 
 import { isRecord } from "@adapttable/core/binding";
 
-import { openAiToolNameMap } from "./capabilities/registry";
+import { openAiToolNameMap } from "./capabilities/toolNames";
 
 /**
  * OpenAI function names may only use `[a-zA-Z0-9_-]`. Catalog keys keep

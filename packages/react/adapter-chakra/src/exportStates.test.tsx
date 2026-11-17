@@ -1,10 +1,13 @@
-import { xlsxWriter } from "@adapttable/core/xlsx";
+import { xlsxWriter } from "@adapttable/react/xlsx";
 import { act, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./data-table.test-utils";
+import { exportStatesTests } from "../../react/test/kit/suites/exportStates";
+import { DataTable, kit } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { renderChakra } from "./test-utils";
+
+for (const test of exportStatesTests(kit)) it(test.name, test.run);
 
 /**
  * A host-handled export takes time, and a download says nothing when it lands.
@@ -109,29 +112,6 @@ describe("export states (Chakra)", () => {
       await Promise.resolve();
     });
     expect(button).not.toBeDisabled();
-  });
-
-  it("announces the outcome once the export finishes", async () => {
-    renderExport(() => Promise.resolve());
-    // Present and empty before there is anything to say: a region that appears
-    // with its message is frequently never read.
-    expect(screen.getByRole("status")).toHaveTextContent("");
-
-    await act(async () => {
-      screen.getByRole("button", { name: "Export CSV" }).click();
-      await Promise.resolve();
-    });
-    expect(screen.getByRole("status")).toHaveTextContent("Export complete");
-  });
-
-  it("announces a failure rather than failing silently", async () => {
-    renderExport(() => Promise.reject(new Error("backend said no")));
-
-    await act(async () => {
-      screen.getByRole("button", { name: "Export CSV" }).click();
-      await Promise.resolve();
-    });
-    expect(screen.getByRole("status")).toHaveTextContent("Export failed");
   });
 
   it("names the format it produces, not CSV", () => {

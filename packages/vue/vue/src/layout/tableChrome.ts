@@ -27,6 +27,7 @@ import {
   renderContent,
   renderHeader,
 } from "../columnDef";
+import { withProps } from "../functionalProps";
 import type { GroupRowChromeProps } from "../grouping/groupRowChrome";
 import {
   type SelectionCheckboxAttrs,
@@ -34,13 +35,16 @@ import {
   selectionCheckboxControl,
 } from "../selection/checkboxControl";
 import type { DataTableSlots } from "../tableAdapterContracts";
+import type { TableRail } from "../useDataTable";
 import type { RowActionControl } from "./modelChannels";
-import type {
-  DesktopTableModel,
-  MobileCardsModel,
-  TableBodySlot,
-  TableCellModel,
-  TableRowModel,
+import { keptRowContext, tableRowView } from "./rowView";
+import {
+  type DesktopTableModel,
+  type MobileCardsModel,
+  railCellAttrs,
+  type TableBodySlot,
+  type TableCellModel,
+  type TableRowModel,
 } from "./tableModels";
 import {
   MobileSummaryChrome,
@@ -103,6 +107,7 @@ export interface TableChromeClassNames extends TableSummaryClassNames {
   readonly tr?: string;
   readonly th?: string;
   readonly td?: string;
+  readonly headerCaptionControl?: string;
   readonly sortButton?: string;
   readonly sortIndex?: string;
   readonly headerActions?: string;
@@ -260,637 +265,679 @@ function hasHeaderActionContent(content: VNodeChild): boolean {
   }
   return typeof content !== "string" || content.trim().length > 0;
 }
-export function DesktopTableChrome<TRow>(props: {
-  readonly model: DesktopTableModel<TRow>;
-  readonly slots: TableChromeSlots<TRow>;
-  readonly classNames?: TableChromeClassNames;
-}): VNodeChild {
-  const { model, slots, classNames = {} } = props;
-  const selection = (
-    attrs: SelectionCheckboxAttrs,
-    header: boolean
-  ): VNodeChild =>
-    control(
-      slots.SelectionCheckbox,
-      {
-        ...selectionCheckboxControl(attrs),
-        attrs: mergeVueAttrs(attrs, {
-          class: classNames.selectionCheckbox,
-          "data-adapttable-part": "checkbox",
-        }),
-        header,
-      },
-      "SelectionCheckbox"
-    );
-  const header = (key: string, extra: Attrs = {}): VNodeChild => {
-    const leaf = model.headers.find((item) => item.key === key);
-    if (!leaf) return null;
-    const content = renderHeader(leaf.context, slots.header);
-    const defaultContent = [
-      content,
-      leaf.context.sortIndex === undefined
-        ? null
-        : h(
-            "span",
-            {
-              "data-adapttable-part": "sort-index",
-              class: classNames.sortIndex,
-            },
-            String(leaf.context.sortIndex)
-          ),
-    ];
-    const actions = leaf.column.headerActions
-      ? renderContent(leaf.column.headerActions, leaf.context)
-      : slots.headerActions?.(leaf.context);
-    const caption =
-      leaf.sortAttrs && !leaf.column.headerCell && !slots.header
-        ? control(
-            slots.SortButton,
-            {
-              attrs: mergeVueAttrs(leaf.sortAttrs, {
-                class: classNames.sortButton,
-                "data-adapttable-part": "sort-button",
-              }),
-              context: leaf.context,
-              content: defaultContent,
-            },
-            "SortButton"
-          )
-        : content;
-    return h(
-      "th",
-      {
-        ...mergeVueAttrs(leaf.attrs, {
-          class: classNames.th,
-          "data-adapttable-part": "header-cell",
-        }),
-        ...extra,
-        key,
-      },
-      [
-        leaf.rename ? leaf.rename(caption, { ...classNames }) : caption,
-        leaf.selection?.(classNames.columnSelect),
-        leaf.filter?.(classNames.filterHeaderTrigger),
-        !hasHeaderActionContent(actions)
+/**
+ * One empty set of class names, so a table drawn without any passes the same
+ * object to its rows on every draw.
+ *
+ * @public
+ */
+export const NO_CLASS_NAMES: Readonly<Record<string, undefined>> =
+  Object.freeze({});
+export const DesktopTableChrome = /* @__PURE__ */ withProps(
+  function DesktopTableChrome<TRow>(props: {
+    readonly model: DesktopTableModel<TRow>;
+    readonly slots: TableChromeSlots<TRow>;
+    readonly classNames?: TableChromeClassNames;
+  }): VNodeChild {
+    const { model, slots, classNames = NO_CLASS_NAMES } = props;
+    const selection = (
+      attrs: SelectionCheckboxAttrs,
+      header: boolean
+    ): VNodeChild =>
+      control(
+        slots.SelectionCheckbox,
+        {
+          ...selectionCheckboxControl(attrs),
+          attrs: mergeVueAttrs(attrs, {
+            class: classNames.selectionCheckbox,
+            "data-adapttable-part": "checkbox",
+          }),
+          header,
+        },
+        "SelectionCheckbox"
+      );
+    const header = (key: string, extra: Attrs = {}): VNodeChild => {
+      const leaf = model.headers.find((item) => item.key === key);
+      if (!leaf) return null;
+      const content = renderHeader(leaf.context, slots.header);
+      const defaultContent = [
+        content,
+        leaf.context.sortIndex === undefined
           ? null
           : h(
               "span",
               {
-                "data-adapttable-part": "header-actions",
-                class: classNames.headerActions,
+                "data-adapttable-part": "sort-index",
+                class: classNames.sortIndex,
               },
-              [actions]
+              String(leaf.context.sortIndex)
             ),
-        leaf.resizeAttrs
-          ? control(
-              slots.ResizeHandle,
-              {
-                attrs: mergeVueAttrs(leaf.resizeAttrs, {
-                  class: classNames.resizeHandle,
-                  "data-adapttable-part": "resize-handle",
-                }),
-              },
-              "ResizeHandle"
-            )
-          : null,
-      ]
-    );
-  };
-  const columnSpacer = (
-    tag: "th" | "td",
-    side: "start" | "end",
-    rowspan = 1
-  ): VNodeChild =>
-    model.columnSpacers
-      ? h(tag, {
-          "aria-hidden": "true",
-          rowspan,
-          "data-adapttable-part": `column-spacer-${side}`,
-          style: {
-            width: `${model.columnSpacers[side]}px`,
-            minWidth: `${model.columnSpacers[side]}px`,
-            padding: 0,
-            border: 0,
-          },
-        })
-      : null;
-  const expandHeader = (rowspan = 1): VNodeChild =>
-    model.expandLabel
-      ? h("th", {
-          scope: "col",
-          rowspan,
-          "aria-label": model.expandLabel,
-          "data-adapttable-part": "expand-header",
-          class: [classNames.th, classNames.expandHeader],
-          style: { width: "40px" },
-        })
-      : null;
-  const reorderHeader = (rowspan = 1): VNodeChild =>
-    model.reorderLabel
-      ? h(
-          "th",
-          {
-            scope: "col",
-            rowspan,
-            class: [classNames.th, classNames.reorderHeader],
-            "data-adapttable-part": "reorder-header",
-          },
-          model.reorderLabel
-        )
-      : null;
-  const actionsHeader = (rowspan = 1): VNodeChild =>
-    model.actionsLabel
-      ? h(
-          "th",
-          {
-            scope: "col",
-            role: "columnheader",
-            rowspan,
-            class: classNames.actionsHeader,
-            "data-adapttable-part": "actions-header",
-          },
-          model.actionsLabel
-        )
-      : null;
-  const groupContent = (cell: HeaderGroupCell): VNodeChild[] => {
-    const toggle = model.groupToggleProps(cell);
-    const caption = columnGroupHeaderCaption(cell);
-    return [
-      caption,
-      toggle
-        ? control(
-            slots.ColumnGroupToggle,
-            { ...toggle, className: classNames.columnGroupToggle },
-            "ColumnGroupToggle"
-          )
-        : null,
-    ];
-  };
-  const headerRows = model.headerPlan?.length
-    ? model.headerPlan.map((row, rowIndex) =>
-        h(
-          "tr",
-          {
-            ...mergeVueAttrs(model.headerRowAttrs, { class: classNames.tr }),
-            "data-adapttable-part":
-              rowIndex === model.headerPlan!.length - 1
-                ? "header-row"
-                : "header-group-row",
-            key: rowIndex,
-          },
-          [
-            rowIndex === 0 ? expandHeader(model.headerPlan?.length) : null,
-            rowIndex === 0 && model.headerCheckboxAttrs
-              ? h(
-                  "th",
-                  {
-                    scope: "col",
-                    class: classNames.selectionHeader,
-                    rowspan: model.headerPlan?.length,
-                    "data-adapttable-part": "selection-header",
-                    style: {
-                      width: "1%",
-                      minWidth: "44px",
-                      whiteSpace: "nowrap",
-                      textAlign: "center",
-                    },
-                  },
-                  [selection(model.headerCheckboxAttrs, true)]
-                )
-              : null,
-            rowIndex === 0 ? reorderHeader(model.headerPlan?.length) : null,
-            rowIndex === 0
-              ? columnSpacer("th", "start", model.headerPlan?.length)
-              : null,
-            ...row.map((cell) =>
-              cell.kind === "leaf"
-                ? header(cell.key, { rowspan: cell.rowSpan })
-                : h(
-                    "th",
-                    {
-                      key: cell.key,
-                      scope: "colgroup",
-                      role: "columnheader",
-                      colspan: cell.colSpan,
-                      rowspan: cell.rowSpan,
-                      class: classNames.columnGroup,
-                      "data-adapttable-part": "header-group-cell",
-                      style: { textAlign: groupedHeaderAlign(cell.cell.align) },
-                    },
-                    groupContent(cell.cell)
-                  )
-            ),
-            rowIndex === 0
-              ? columnSpacer("th", "end", model.headerPlan?.length)
-              : null,
-            rowIndex === 0 ? actionsHeader(model.headerPlan?.length) : null,
-          ]
-        )
-      )
-    : [
-        h(
-          "tr",
-          mergeVueAttrs(model.headerRowAttrs, {
-            class: classNames.tr,
-            "data-adapttable-part": "header-row",
-          }),
-          [
-            expandHeader(),
-            model.headerCheckboxAttrs
-              ? h(
-                  "th",
-                  {
-                    scope: "col",
-                    class: classNames.selectionHeader,
-                    "data-adapttable-part": "selection-header",
-                    style: {
-                      width: "1%",
-                      minWidth: "44px",
-                      whiteSpace: "nowrap",
-                      textAlign: "center",
-                    },
-                  },
-                  [selection(model.headerCheckboxAttrs, true)]
-                )
-              : null,
-            reorderHeader(),
-            columnSpacer("th", "start"),
-            ...model.headers.map((leaf) => header(leaf.key)),
-            columnSpacer("th", "end"),
-            actionsHeader(),
-          ]
-        ),
       ];
-  const actionContent = (row: TableRowModel<TRow>): VNodeChild[] => [
-    row.editActions?.(),
-    row.actionControls?.length
-      ? control(
-          slots.RowActions,
-          { row: row.row, controls: row.actionControls, mobile: false },
-          "RowActions"
-        )
-      : null,
-  ];
-  const rowContent = (row: TableRowModel<TRow>): VNode => {
-    const data = h(
-      "tr",
-      { ...mergeVueAttrs(row.attrs, { class: classNames.tr }), key: row.key },
-      [
-        model.expandLabel
-          ? h(
-              "td",
-              mergeVueAttrs(row.expandCellAttrs ?? {}, {
-                class: [classNames.td, classNames.expandCell],
-                "data-adapttable-part": "expand-cell",
-              }),
-              [
-                row.detail
-                  ? control(
-                      slots.RowDetailToggle,
-                      {
-                        attrs: mergeVueAttrs(row.detail.toggleAttrs, {
-                          class: [
-                            classNames.expandButton,
-                            classNames.expandToggle,
-                          ],
-                        }),
-                        expanded: row.detail.expanded,
-                      },
-                      "RowDetailToggle"
-                    )
-                  : null,
-              ]
-            )
-          : null,
-        model.headerCheckboxAttrs
-          ? h(
-              "td",
+      const actions = leaf.column.headerActions
+        ? renderContent(leaf.column.headerActions, leaf.context)
+        : slots.headerActions?.(leaf.context);
+      const caption =
+        leaf.sortAttrs && !leaf.column.headerCell && !slots.header
+          ? control(
+              slots.SortButton,
               {
-                class: classNames.selectionCell,
-                "data-adapttable-part": "selection-cell",
-                style: {
-                  width: "1%",
-                  minWidth: "44px",
-                  whiteSpace: "nowrap",
-                  textAlign: "center",
-                },
+                attrs: mergeVueAttrs(leaf.sortAttrs, {
+                  class: classNames.sortButton,
+                  "data-adapttable-part": "sort-button",
+                }),
+                context: leaf.context,
+                content: defaultContent,
               },
-              [row.checkboxAttrs ? selection(row.checkboxAttrs, false) : null]
+              "SortButton"
             )
-          : null,
-        model.reorderLabel
-          ? h(
-              "td",
-              {
-                class: [classNames.td, classNames.reorderCell],
-                "data-adapttable-part": "reorder-cell",
-              },
-              [row.reorder?.(false)]
-            )
-          : null,
-        columnSpacer("td", "start"),
-        ...row.cells.map((cell) =>
-          h(
-            "td",
-            {
-              ...mergeVueAttrs(cell.attrs, {
-                class: classNames.td,
-                "data-adapttable-part": "cell",
-              }),
-              key: cell.key,
-            },
-            [cellContent(cell, row, slots, classNames, !model.expandLabel)]
-          )
-        ),
-        columnSpacer("td", "end"),
-        model.actionsLabel
-          ? h(
-              "td",
-              {
-                class: classNames.actionsCell,
-                "data-adapttable-part": "actions-cell",
-              },
-              actionContent(row)
-            )
-          : null,
-      ]
-    );
-    return h(Fragment, { key: row.key }, [
-      data,
-      row.detail?.expanded
-        ? h(
-            "tr",
-            {
-              "data-adapttable-part": "detail-row",
-              ref: (node: Element | ComponentPublicInstance | null) =>
-                row.detail?.measure?.(node instanceof Element ? node : null),
-              class: classNames.detailRow,
-            },
-            [
-              h(
-                "td",
-                {
-                  colspan: model.columnCount,
-                  "data-adapttable-part": "detail-cell",
-                  class: classNames.detailCell,
-                },
-                [row.detail.render()]
-              ),
-            ]
-          )
-        : null,
-    ]);
-  };
-  const bodySlot = (slot: TableBodySlot<TRow>): VNode => {
-    if (slot.kind === "row") return rowContent(slot.wiring);
-    if (slot.kind === "group")
-      return h(Fragment, { key: slot.key }, [
-        control(
-          slots.GroupRow,
-          { slot, columnCount: model.columnCount, mobile: false, classNames },
-          "GroupRow"
-        ),
-      ]);
-    if (slot.kind === "virtualPad")
-      return h(
-        "tr",
+          : content;
+      const captionControl = h(
+        "span",
         {
-          key: slot.key,
-          "aria-hidden": "true",
-          class: classNames.virtualSpacer,
-          "data-adapttable-part": "virtual-spacer",
+          "data-adapttable-part": "header-caption-control",
+          class: classNames.headerCaptionControl,
+        },
+        [caption]
+      );
+      return h(
+        "th",
+        {
+          ...mergeVueAttrs(leaf.attrs, {
+            class: classNames.th,
+            "data-adapttable-part": "header-cell",
+          }),
+          ...extra,
+          key,
         },
         [
-          h("td", {
-            colspan: slot.colSpan,
+          leaf.rename
+            ? leaf.rename(captionControl, { ...classNames })
+            : captionControl,
+          leaf.selection?.(classNames.columnSelect),
+          leaf.filter?.(classNames.filterHeaderTrigger),
+          !hasHeaderActionContent(actions)
+            ? null
+            : h(
+                "span",
+                {
+                  "data-adapttable-part": "header-actions",
+                  class: classNames.headerActions,
+                },
+                [actions]
+              ),
+          leaf.resizeAttrs
+            ? control(
+                slots.ResizeHandle,
+                {
+                  attrs: mergeVueAttrs(leaf.resizeAttrs, {
+                    class: classNames.resizeHandle,
+                    "data-adapttable-part": "resize-handle",
+                  }),
+                },
+                "ResizeHandle"
+              )
+            : null,
+        ]
+      );
+    };
+    const columnSpacer = (
+      tag: "th" | "td",
+      side: "start" | "end",
+      rowspan = 1
+    ): VNodeChild =>
+      model.columnSpacers
+        ? h(tag, {
+            "aria-hidden": "true",
+            rowspan,
+            "data-adapttable-part": `column-spacer-${side}`,
             style: {
-              height: `${String(slot.height)}px`,
+              width: `${model.columnSpacers[side]}px`,
+              minWidth: `${model.columnSpacers[side]}px`,
               padding: 0,
               border: 0,
             },
-          }),
+          })
+        : null;
+    const rail = (name: TableRail, header: boolean, attrs: Attrs) =>
+      railCellAttrs(model, name, header, attrs);
+    const expandHeader = (rowspan = 1): VNodeChild =>
+      model.expandLabel
+        ? h(
+            "th",
+            rail("expand", true, {
+              scope: "col",
+              rowspan,
+              "aria-label": model.expandLabel,
+              "data-adapttable-part": "expand-header",
+              class: [classNames.th, classNames.expandHeader],
+              style: { width: "40px" },
+            })
+          )
+        : null;
+    const reorderHeader = (rowspan = 1): VNodeChild =>
+      model.reorderLabel
+        ? h(
+            "th",
+            rail("reorder", true, {
+              scope: "col",
+              rowspan,
+              class: [classNames.th, classNames.reorderHeader],
+              "data-adapttable-part": "reorder-header",
+            }),
+            model.reorderLabel
+          )
+        : null;
+    const selectionHeader = (rowspan = 1): VNodeChild =>
+      model.headerCheckboxAttrs
+        ? h(
+            "th",
+            rail("selection", true, {
+              scope: "col",
+              class: classNames.selectionHeader,
+              rowspan,
+              "data-adapttable-part": "selection-header",
+              style: {
+                width: "1%",
+                minWidth: "44px",
+                whiteSpace: "nowrap",
+                textAlign: "center",
+              },
+            }),
+            [selection(model.headerCheckboxAttrs, true)]
+          )
+        : null;
+    const actionsHeader = (rowspan = 1): VNodeChild =>
+      model.actionsLabel
+        ? h(
+            "th",
+            rail("actions", true, {
+              scope: "col",
+              role: "columnheader",
+              rowspan,
+              class: classNames.actionsHeader,
+              "data-adapttable-part": "actions-header",
+            }),
+            model.actionsLabel
+          )
+        : null;
+    const groupContent = (cell: HeaderGroupCell): VNodeChild[] => {
+      const toggle = model.groupToggleProps(cell);
+      const caption = columnGroupHeaderCaption(cell);
+      return [
+        caption,
+        toggle
+          ? control(
+              slots.ColumnGroupToggle,
+              { ...toggle, className: classNames.columnGroupToggle },
+              "ColumnGroupToggle"
+            )
+          : null,
+      ];
+    };
+    const headerRows = model.headerPlan?.length
+      ? model.headerPlan.map((row, rowIndex) =>
+          h(
+            "tr",
+            {
+              ...mergeVueAttrs(model.headerRowAttrs, { class: classNames.tr }),
+              "data-adapttable-part":
+                rowIndex === model.headerPlan!.length - 1
+                  ? "header-row"
+                  : "header-group-row",
+              key: rowIndex,
+            },
+            [
+              rowIndex === 0 ? expandHeader(model.headerPlan?.length) : null,
+              rowIndex === 0 ? reorderHeader(model.headerPlan?.length) : null,
+              rowIndex === 0 ? selectionHeader(model.headerPlan?.length) : null,
+              rowIndex === 0
+                ? columnSpacer("th", "start", model.headerPlan?.length)
+                : null,
+              ...row.map((cell) =>
+                cell.kind === "leaf"
+                  ? header(cell.key, { rowspan: cell.rowSpan })
+                  : h(
+                      "th",
+                      {
+                        key: cell.key,
+                        scope: "colgroup",
+                        role: "columnheader",
+                        colspan: cell.colSpan,
+                        rowspan: cell.rowSpan,
+                        class: classNames.columnGroup,
+                        "data-adapttable-part": "header-group-cell",
+                        style: {
+                          textAlign: groupedHeaderAlign(cell.cell.align),
+                        },
+                      },
+                      groupContent(cell.cell)
+                    )
+              ),
+              rowIndex === 0
+                ? columnSpacer("th", "end", model.headerPlan?.length)
+                : null,
+              rowIndex === 0 ? actionsHeader(model.headerPlan?.length) : null,
+            ]
+          )
+        )
+      : [
+          h(
+            "tr",
+            mergeVueAttrs(model.headerRowAttrs, {
+              class: classNames.tr,
+              "data-adapttable-part": "header-row",
+            }),
+            [
+              expandHeader(),
+              reorderHeader(),
+              selectionHeader(),
+              columnSpacer("th", "start"),
+              ...model.headers.map((leaf) => header(leaf.key)),
+              columnSpacer("th", "end"),
+              actionsHeader(),
+            ]
+          ),
+        ];
+    const actionContent = (row: TableRowModel<TRow>): VNodeChild[] => [
+      row.editActions?.(),
+      row.actionControls?.length
+        ? control(
+            slots.RowActions,
+            { row: row.row, controls: row.actionControls, mobile: false },
+            "RowActions"
+          )
+        : null,
+    ];
+    const rowContent = (row: TableRowModel<TRow>): VNode => {
+      const data = h(
+        "tr",
+        { ...mergeVueAttrs(row.attrs, { class: classNames.tr }), key: row.key },
+        [
+          model.expandLabel
+            ? h(
+                "td",
+                rail(
+                  "expand",
+                  false,
+                  mergeVueAttrs(row.expandCellAttrs ?? {}, {
+                    class: [classNames.td, classNames.expandCell],
+                    "data-adapttable-part": "expand-cell",
+                  })
+                ),
+                [
+                  row.detail
+                    ? control(
+                        slots.RowDetailToggle,
+                        {
+                          attrs: mergeVueAttrs(row.detail.toggleAttrs, {
+                            class: [
+                              classNames.expandButton,
+                              classNames.expandToggle,
+                            ],
+                          }),
+                          expanded: row.detail.expanded,
+                        },
+                        "RowDetailToggle"
+                      )
+                    : null,
+                ]
+              )
+            : null,
+          model.reorderLabel
+            ? h(
+                "td",
+                rail("reorder", false, {
+                  class: [classNames.td, classNames.reorderCell],
+                  "data-adapttable-part": "reorder-cell",
+                }),
+                [row.reorder?.(false)]
+              )
+            : null,
+          model.headerCheckboxAttrs
+            ? h(
+                "td",
+                rail("selection", false, {
+                  class: classNames.selectionCell,
+                  "data-adapttable-part": "selection-cell",
+                  style: {
+                    width: "1%",
+                    minWidth: "44px",
+                    whiteSpace: "nowrap",
+                    textAlign: "center",
+                  },
+                }),
+                [row.checkboxAttrs ? selection(row.checkboxAttrs, false) : null]
+              )
+            : null,
+          columnSpacer("td", "start"),
+          ...row.cells.map((cell) =>
+            h(
+              "td",
+              {
+                ...mergeVueAttrs(cell.attrs, {
+                  class: classNames.td,
+                  "data-adapttable-part": "cell",
+                }),
+                key: cell.key,
+              },
+              [cellContent(cell, row, slots, classNames, !model.expandLabel)]
+            )
+          ),
+          columnSpacer("td", "end"),
+          model.actionsLabel
+            ? h(
+                "td",
+                rail("actions", false, {
+                  class: classNames.actionsCell,
+                  "data-adapttable-part": "actions-cell",
+                }),
+                actionContent(row)
+              )
+            : null,
         ]
       );
-    const parts = EXTRA_ROW_PARTS[slot.extraKind];
-    const spans = extraUncoveredColSpans(slot.colSpan, slot.coveredSlots);
-    return h(
-      "tr",
-      { ...slot.attrs, key: slot.key, "data-adapttable-part": parts.row },
-      spans.map((span, index) =>
-        h(
-          "td",
-          mergeVueAttrs(
-            {
-              key: index,
-              colspan: span,
-              style: slot.fillStyle,
-              "data-adapttable-part": parts.cell,
-            },
-            {}
-          ),
-          index === 0 ? [slot.render?.()] : []
-        )
-      )
-    );
-  };
-  return h(
-    "table",
-    mergeVueAttrs(model.attrs, {
-      class: classNames.table,
-      "data-adapttable-part": "table",
-    }),
-    [
-      h(
-        "thead",
-        { class: classNames.thead, "data-adapttable-part": "thead" },
-        headerRows
-      ),
-      h(
-        "tbody",
-        { class: classNames.tbody, "data-adapttable-part": "tbody" },
-        model.bodySlots
-          ? model.bodySlots.map(bodySlot)
-          : model.rows.map(rowContent)
-      ),
-      model.summary
-        ? h(TableSummaryChrome<TRow>, {
-            model: model.summary,
-            footer: slots.footer,
-            classNames,
-            leading: [
-              ...(model.expandLabel ? ["expand"] : []),
-              ...(model.headerCheckboxAttrs ? ["selection"] : []),
-              ...(model.reorderLabel ? ["reorder"] : []),
-            ],
-            trailing: model.actionsLabel ? ["actions"] : [],
-            startSpacer: () => columnSpacer("td", "start"),
-            endSpacer: () => columnSpacer("td", "end"),
-          })
-        : null,
-    ]
-  );
-}
-export function MobileCardsChrome<TRow>(props: {
-  readonly model: MobileCardsModel<TRow>;
-  readonly slots: TableChromeSlots<TRow>;
-  readonly classNames?: TableChromeClassNames;
-}): VNodeChild {
-  const { model, slots, classNames = {} } = props;
-  const card = (row: TableRowModel<TRow>): VNode =>
-    h(
-      "article",
-      { ...mergeVueAttrs(row.attrs, { class: classNames.card }), key: row.key },
-      [
-        row.checkboxAttrs
-          ? control(
-              slots.SelectionCheckbox,
-              {
-                ...selectionCheckboxControl(row.checkboxAttrs),
-                attrs: mergeVueAttrs(row.checkboxAttrs, {
-                  class: classNames.selectionCheckbox,
-                  "data-adapttable-part": "checkbox",
-                }),
-                header: false,
-              },
-              "SelectionCheckbox"
-            )
-          : null,
-        row.reorder?.(true),
-        slots.card
-          ? slots.card({
-              row: row.row,
-              index: row.index,
-              selected: row.checkboxAttrs?.checked === true,
-              expanded: row.detail?.expanded === true,
-              fields: row.cells.map((cell) => ({
-                column: cell.context.column,
-                label:
-                  cell.context.column.mobileLabel ??
-                  cell.context.column.header ??
-                  cell.key,
-                value: cellContent(cell, row, slots, classNames, true),
-              })),
-            })
-          : h(
-              "dl",
-              {
-                class: classNames.cardFields,
-              },
-              row.cells.map((cell) =>
-                h(
-                  "div",
-                  {
-                    key: cell.key,
-                    class: classNames.cardRow,
-                    "data-adapttable-part": "card-row",
-                  },
-                  [
-                    h(
-                      "dt",
-                      {
-                        key: `${cell.key}-label`,
-                        class: classNames.cardLabel,
-                        "data-adapttable-part": "card-label",
-                      },
-                      cell.context.column.mobileLabel ??
-                        cell.context.column.header ??
-                        cell.key
-                    ),
-                    h(
-                      "dd",
-                      {
-                        ...mergeVueAttrs(cell.attrs, {
-                          class: classNames.cardValue,
-                        }),
-                        key: cell.key,
-                        "data-adapttable-part": "card-value",
-                      },
-                      [cellContent(cell, row, slots, classNames, true)]
-                    ),
-                  ]
-                )
-              )
-            ),
+      return h(Fragment, { key: row.key }, [
+        data,
         row.detail?.expanded
           ? h(
-              "div",
+              "tr",
               {
-                "data-adapttable-part": "card-detail",
-                class: classNames.cardDetail,
-              },
-              [row.detail.render()]
-            )
-          : null,
-        row.actionControls || row.editActions
-          ? h(
-              "div",
-              {
-                class: classNames.cardActions,
-                "data-adapttable-part": "card-actions",
+                "data-adapttable-part": "detail-row",
+                ref: (node: Element | ComponentPublicInstance | null) =>
+                  row.detail?.measure?.(node instanceof Element ? node : null),
+                class: classNames.detailRow,
               },
               [
-                row.editActions?.(),
-                row.actionControls?.length
-                  ? control(
-                      slots.RowActions,
-                      {
-                        row: row.row,
-                        controls: row.actionControls,
-                        mobile: true,
-                      },
-                      "RowActions"
-                    )
-                  : null,
+                h(
+                  "td",
+                  {
+                    colspan: model.columnCount,
+                    "data-adapttable-part": "detail-cell",
+                    class: classNames.detailCell,
+                  },
+                  [row.detail.render()]
+                ),
               ]
             )
           : null,
+      ]);
+    };
+    // Each row in a component of its own: it redraws for its own changes.
+    // A row redraws when what it reads from the model changes, not each
+    // time the model is rebuilt for another row's data.
+    const rowModel = keptRowContext(slots, {
+      actionsLabel: model.actionsLabel,
+      columnCount: model.columnCount,
+      expandLabel: model.expandLabel,
+      selectable: model.headerCheckboxAttrs !== undefined,
+      reorderLabel: model.reorderLabel,
+    });
+    const row = (wiring: TableRowModel<TRow>): VNode =>
+      tableRowView(
+        wiring,
+        { model: rowModel, controls: slots, classNames },
+        () => rowContent(wiring)
+      );
+    const bodySlot = (slot: TableBodySlot<TRow>): VNode => {
+      if (slot.kind === "row") return row(slot.wiring);
+      if (slot.kind === "group")
+        return h(Fragment, { key: slot.key }, [
+          control(
+            slots.GroupRow,
+            { slot, columnCount: model.columnCount, mobile: false, classNames },
+            "GroupRow"
+          ),
+        ]);
+      if (slot.kind === "virtualPad")
+        return h(
+          "tr",
+          {
+            key: slot.key,
+            "aria-hidden": "true",
+            class: classNames.virtualSpacer,
+            "data-adapttable-part": "virtual-spacer",
+          },
+          [
+            h("td", {
+              colspan: slot.colSpan,
+              style: {
+                height: `${String(slot.height)}px`,
+                padding: 0,
+                border: 0,
+              },
+            }),
+          ]
+        );
+      const parts = EXTRA_ROW_PARTS[slot.extraKind];
+      const spans = extraUncoveredColSpans(slot.colSpan, slot.coveredSlots);
+      return h(
+        "tr",
+        { ...slot.attrs, key: slot.key, "data-adapttable-part": parts.row },
+        spans.map((span, index) =>
+          h(
+            "td",
+            mergeVueAttrs(
+              {
+                key: index,
+                colspan: span,
+                style: slot.fillStyle,
+                "data-adapttable-part": parts.cell,
+              },
+              {}
+            ),
+            index === 0 ? [slot.render?.()] : []
+          )
+        )
+      );
+    };
+    return h(
+      "table",
+      mergeVueAttrs(model.attrs, {
+        class: classNames.table,
+        "data-adapttable-part": "table",
+      }),
+      [
+        h(
+          "thead",
+          { class: classNames.thead, "data-adapttable-part": "thead" },
+          headerRows
+        ),
+        h(
+          "tbody",
+          { class: classNames.tbody, "data-adapttable-part": "tbody" },
+          model.bodySlots ? model.bodySlots.map(bodySlot) : model.rows.map(row)
+        ),
+        model.summary
+          ? h(TableSummaryChrome<TRow>, {
+              model: model.summary,
+              footer: slots.footer,
+              classNames,
+              leading: [
+                ...(model.expandLabel ? ["expand"] : []),
+                ...(model.reorderLabel ? ["reorder"] : []),
+                ...(model.headerCheckboxAttrs ? ["selection"] : []),
+              ],
+              trailing: model.actionsLabel ? ["actions"] : [],
+              startSpacer: () => columnSpacer("td", "start"),
+              endSpacer: () => columnSpacer("td", "end"),
+            })
+          : null,
       ]
     );
-  const bodySlot = (slot: TableBodySlot<TRow>): VNodeChild => {
-    if (slot.kind === "row") return card(slot.wiring);
-    if (slot.kind === "group")
-      return h(Fragment, { key: slot.key }, [
-        control(
-          slots.GroupRow,
-          { slot, columnCount: 1, mobile: true, classNames },
-          "GroupRow"
-        ),
-      ]);
-    if (slot.kind === "virtualPad")
-      return h("div", {
-        key: slot.key,
-        "aria-hidden": "true",
-        class: classNames.virtualSpacer,
-        style: { height: `${String(slot.height)}px` },
-        "data-adapttable-part": "virtual-spacer",
-      });
-    const parts = EXTRA_ROW_PARTS[slot.extraKind];
-    return h(
-      "div",
-      mergeVueAttrs(
+  },
+  ["model", "slots", "classNames"]
+);
+export const MobileCardsChrome = /* @__PURE__ */ withProps(
+  function MobileCardsChrome<TRow>(props: {
+    readonly model: MobileCardsModel<TRow>;
+    readonly slots: TableChromeSlots<TRow>;
+    readonly classNames?: TableChromeClassNames;
+  }): VNodeChild {
+    const { model, slots, classNames = NO_CLASS_NAMES } = props;
+    const card = (row: TableRowModel<TRow>): VNode =>
+      h(
+        "article",
         {
-          ...slot.attrs,
-          key: slot.key,
-          role: "listitem",
-          style: slot.fillStyle,
-          "data-adapttable-part": parts.row,
+          ...mergeVueAttrs(row.attrs, { class: classNames.card }),
+          key: row.key,
         },
-        {}
-      ),
-      [h("div", { "data-adapttable-part": parts.cell }, [slot.render?.()])]
-    );
-  };
-  return h("div", mergeVueAttrs(model.attrs, { class: classNames.cards }), [
-    ...(model.bodySlots ? model.bodySlots.map(bodySlot) : model.rows.map(card)),
-    model.summary
-      ? h(MobileSummaryChrome<TRow>, {
-          model: model.summary,
-          footer: slots.footer,
-          classNames,
-        })
-      : null,
-  ]);
-}
-
-DesktopTableChrome.props = ["model", "slots", "classNames"];
-MobileCardsChrome.props = ["model", "slots", "classNames"];
+        [
+          row.checkboxAttrs
+            ? control(
+                slots.SelectionCheckbox,
+                {
+                  ...selectionCheckboxControl(row.checkboxAttrs),
+                  attrs: mergeVueAttrs(row.checkboxAttrs, {
+                    class: classNames.selectionCheckbox,
+                    "data-adapttable-part": "checkbox",
+                  }),
+                  header: false,
+                },
+                "SelectionCheckbox"
+              )
+            : null,
+          row.reorder?.(true),
+          slots.card
+            ? slots.card({
+                row: row.row,
+                index: row.index,
+                selected: row.checkboxAttrs?.checked === true,
+                expanded: row.detail?.expanded === true,
+                fields: row.cells.map((cell) => ({
+                  column: cell.context.column,
+                  label:
+                    cell.context.column.mobileLabel ??
+                    cell.context.column.header ??
+                    cell.key,
+                  value: cellContent(cell, row, slots, classNames, true),
+                })),
+              })
+            : h(
+                "dl",
+                {
+                  class: classNames.cardFields,
+                },
+                row.cells.map((cell) =>
+                  h(
+                    "div",
+                    {
+                      key: cell.key,
+                      class: classNames.cardRow,
+                      "data-adapttable-part": "card-row",
+                    },
+                    [
+                      h(
+                        "dt",
+                        {
+                          key: `${cell.key}-label`,
+                          class: classNames.cardLabel,
+                          "data-adapttable-part": "card-label",
+                        },
+                        cell.context.column.mobileLabel ??
+                          cell.context.column.header ??
+                          cell.key
+                      ),
+                      h(
+                        "dd",
+                        {
+                          ...mergeVueAttrs(cell.attrs, {
+                            class: classNames.cardValue,
+                          }),
+                          key: cell.key,
+                          "data-adapttable-part": "card-value",
+                        },
+                        [cellContent(cell, row, slots, classNames, true)]
+                      ),
+                    ]
+                  )
+                )
+              ),
+          row.detail?.expanded
+            ? h(
+                "div",
+                {
+                  "data-adapttable-part": "card-detail",
+                  class: classNames.cardDetail,
+                },
+                [row.detail.render()]
+              )
+            : null,
+          row.actionControls || row.editActions
+            ? h(
+                "div",
+                {
+                  class: classNames.cardActions,
+                  "data-adapttable-part": "card-actions",
+                },
+                [
+                  row.editActions?.(),
+                  row.actionControls?.length
+                    ? control(
+                        slots.RowActions,
+                        {
+                          row: row.row,
+                          controls: row.actionControls,
+                          mobile: true,
+                        },
+                        "RowActions"
+                      )
+                    : null,
+                ]
+              )
+            : null,
+        ]
+      );
+    // Each card in a component of its own: it redraws for its own changes.
+    const cardView = (row: TableRowModel<TRow>): VNode =>
+      tableRowView(row, { model, controls: slots, classNames }, () =>
+        card(row)
+      );
+    const bodySlot = (slot: TableBodySlot<TRow>): VNodeChild => {
+      if (slot.kind === "row") return cardView(slot.wiring);
+      if (slot.kind === "group")
+        return h(Fragment, { key: slot.key }, [
+          control(
+            slots.GroupRow,
+            { slot, columnCount: 1, mobile: true, classNames },
+            "GroupRow"
+          ),
+        ]);
+      if (slot.kind === "virtualPad")
+        return h("div", {
+          key: slot.key,
+          "aria-hidden": "true",
+          class: classNames.virtualSpacer,
+          style: { height: `${String(slot.height)}px` },
+          "data-adapttable-part": "virtual-spacer",
+        });
+      const parts = EXTRA_ROW_PARTS[slot.extraKind];
+      return h(
+        "div",
+        mergeVueAttrs(
+          {
+            ...slot.attrs,
+            key: slot.key,
+            role: "listitem",
+            style: slot.fillStyle,
+            "data-adapttable-part": parts.row,
+          },
+          {}
+        ),
+        [h("div", { "data-adapttable-part": parts.cell }, [slot.render?.()])]
+      );
+    };
+    return h("div", mergeVueAttrs(model.attrs, { class: classNames.cards }), [
+      ...(model.bodySlots
+        ? model.bodySlots.map(bodySlot)
+        : model.rows.map(cardView)),
+      model.summary
+        ? h(MobileSummaryChrome<TRow>, {
+            model: model.summary,
+            footer: slots.footer,
+            classNames,
+          })
+        : null,
+    ]);
+  },
+  ["model", "slots", "classNames"]
+);

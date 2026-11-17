@@ -30,6 +30,7 @@ import {
 import { exportCsv } from "@adapttable/angular-material/export";
 import { extraRows } from "@adapttable/angular-material/extra-rows";
 import { filters } from "@adapttable/angular-material/filters";
+import { findInTable } from "@adapttable/angular-material/find-in-table";
 import { fullscreen } from "@adapttable/angular-material/fullscreen";
 import { groupingPanel } from "@adapttable/angular-material/grouping-panel";
 import { headerFilters } from "@adapttable/angular-material/header-filters";
@@ -49,6 +50,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/angular-material/saved-views";
+import { selectionStats } from "@adapttable/angular-material/selection-stats";
 import { sidePanel } from "@adapttable/angular-material/side-panel";
 import { statusBar } from "@adapttable/angular-material/status-bar";
 import { tree } from "@adapttable/angular-material/tree";
@@ -102,6 +104,8 @@ export const kit = {
   contextMenu,
   commandPalette,
   extraRows,
+  findInTable,
+  selectionStats,
   rowAppearance,
   statusBar,
   sidePanel,

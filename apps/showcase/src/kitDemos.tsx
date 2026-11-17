@@ -17,6 +17,7 @@ import {
   type FiltersUi,
   type PageMode,
 } from "./Demo";
+import type { MobileDataState } from "./shared/mobileScenario";
 import { ADAPTER_TOKENS } from "./themeTokens";
 
 export type KitDemoProps = Readonly<{
@@ -44,6 +45,10 @@ export type KitDemoProps = Readonly<{
   highlight?: boolean;
   /** Fail the load, so the error chrome is on screen. */
   failure?: Failure;
+  /** Which data state the table shows: rows, none, a load, a failure. */
+  dataState?: MobileDataState;
+  /** The host callback when a row or card is activated. */
+  onRowActivate?: (row: Person) => void;
   /** What the error state's retry does. */
   onRecover?: () => void;
   /** Lay the mobile cards out with the demo's own `renderCard`. */

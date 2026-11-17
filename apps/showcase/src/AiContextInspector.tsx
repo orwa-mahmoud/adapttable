@@ -14,16 +14,20 @@
  * than rendering a second copy, because two would mean two subscriptions to
  * one session.
  */
-import {
-  type AgentContext,
-  type AgentContextInputs,
-  type AgentManifest,
-  type AgentSession,
-  buildAgentContext,
+import type {
+  AgentContextInputs,
+  AgentManifest,
+  AgentSession,
 } from "@adapttable/ai";
 import { useMemo, useState } from "react";
 
-import type { DemoContextProfile } from "./AiDemoOptions";
+import type { DemoContextProfile } from "./shared/aiDemo";
+import {
+  inspectedContext,
+  INSPECTOR_LINKS,
+  INSPECTOR_TEXT,
+  inspectorView,
+} from "./shared/aiInspector";
 
 /** Props for {@link AiContextInspector}. */
 export interface AiContextInspectorProps {
@@ -31,7 +35,7 @@ export interface AiContextInspectorProps {
   readonly session: AgentSession | null;
   /** The manifest the table last published. */
   readonly manifest: AgentManifest | null;
-  /** Live view and filter state, read fresh on every render. */
+  /** Live view and filter state; a stable function, read when the contract moves. */
   readonly contextInputs: () => AgentContextInputs;
   /** How much of the contract a turn carries. */
   readonly profile: DemoContextProfile;
@@ -39,51 +43,6 @@ export interface AiContextInspectorProps {
   readonly webmcpNames: readonly string[];
   /** The published URL of a docs page, by its `docs/*.md` basename. */
   readonly docsUrl: (page: string) => string;
-}
-
-/** Bytes as something a reader can compare at a glance. */
-function readableBytes(bytes: number): string {
-  return bytes < 1024
-    ? `${String(bytes)} B`
-    : `${(bytes / 1024).toFixed(1)} kB`;
-}
-
-/**
- * What one turn actually carries, in bytes and in tokens.
- *
- * The token count is the estimate the selection reports, and says so when it
- * is one — a reader comparing profiles needs to know which number is measured.
- */
-function sentEachTurn(
-  selection: NonNullable<AgentContext["selection"]>
-): string {
-  const bytes = readableBytes(selection.contractBytes + selection.viewBytes);
-  const tokens = String(selection.estimatedTokens);
-  const qualifier = selection.estimated ? " (estimated)" : "";
-  return `${bytes} · about ${tokens} tokens${qualifier}`;
-}
-
-/** The contract, or why there is not one yet. */
-function useContext(
-  session: AgentSession | null,
-  inputs: () => AgentContextInputs,
-  profile: DemoContextProfile,
-  manifest: AgentManifest | null
-): AgentContext | null {
-  return useMemo(() => {
-    if (!session) return null;
-    return buildAgentContext(session, { profile }, inputs());
-    // Rebuilt when the manifest moves or the profile changes. The manifest is
-    // the right key and the view revision was not: turning a feature off
-    // changes what the table offers without moving the view, and the
-    // inspector would go on listing a capability the table had just retired.
-    // A new manifest object is published only when one actually differs, so
-    // this rebuilds when the contract moves and not on every render.
-    //
-    // `inputs` is read inside and deliberately not a dependency — a new
-    // closure every render would rebuild the contract every render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, profile, manifest]);
 }
 
 /** The developer inspector. */
@@ -95,111 +54,78 @@ export function AiContextInspector({
   webmcpNames,
   docsUrl,
 }: Readonly<AiContextInspectorProps>) {
-  const context = useContext(session, contextInputs, profile, manifest);
-  const capabilities = context?.contract.capabilities ?? [];
-  const [selectedKey, setSelectedKey] = useState("");
-  const selected =
-    capabilities.find((entry) => entry.key === selectedKey)?.key ??
-    capabilities[0]?.key ??
-    "";
-  const guide = capabilities.find((entry) => entry.key === selected);
-  const schema = guide
-    ? JSON.stringify(
-        {
-          key: guide.key,
-          summary: guide.summary,
-          ...(guide.guide ? { guide: guide.guide } : {}),
-          ...(guide.input ? { input: guide.input } : {}),
-        },
-        null,
-        2
-      )
-    : "";
-  const selection = context?.selection;
-  const deferred = selection?.deferred ?? [];
-  const sampled = (context?.contract.columns ?? []).filter(
-    (column) => column.sampled
+  // A new manifest is published only when one actually differs, so this
+  // rebuilds when the contract moves and not on every render.
+  const context = useMemo(
+    () => inspectedContext(session, manifest, profile, contextInputs),
+    [session, profile, manifest, contextInputs]
+  );
+  const [picked, setPicked] = useState("");
+  const view = inspectorView(
+    context,
+    manifest,
+    picked,
+    webmcpNames,
+    session !== null
   );
 
   return (
     <section className="ai-demo__dev" data-testid="ai-inspector" dir="ltr">
-      <h3 className="ai-demo__dev-title">Developer inspector</h3>
-      <p className="ai-demo__revision">
-        Revision {manifest?.viewRevision ?? "—"} · {capabilities.length}{" "}
-        capabilities wired
-      </p>
+      <h3 className="ai-demo__dev-title">{INSPECTOR_TEXT.title}</h3>
+      <p className="ai-demo__revision">{view.revision}</p>
 
       <dl className="ai-demo__facts" data-testid="ai-context-facts">
         <div>
-          <dt>Contract version</dt>
-          {/* The whole contract, named. Two tables with the same version are
-              the same table as far as an agent is concerned. */}
+          <dt>{INSPECTOR_TEXT.version}</dt>
           <dd>
-            <code data-testid="ai-contract-version">
-              {context ? shorten(context.contract.version) : "—"}
-            </code>
+            <code data-testid="ai-contract-version">{view.version}</code>
           </dd>
         </div>
         <div>
-          <dt>Sent each turn</dt>
-          <dd data-testid="ai-context-size">
-            {selection ? sentEachTurn(selection) : "—"}
-          </dd>
+          <dt>{INSPECTOR_TEXT.sent}</dt>
+          <dd data-testid="ai-context-size">{view.sent}</dd>
         </div>
         <div>
-          <dt>Explained up front</dt>
-          <dd data-testid="ai-context-upfront">
-            {selection ? selection.selected.join(", ") || "none" : "—"}
-          </dd>
+          <dt>{INSPECTOR_TEXT.upfront}</dt>
+          <dd data-testid="ai-context-upfront">{view.upfront}</dd>
         </div>
         <div>
-          <dt>Asked for on demand</dt>
-          <dd data-testid="ai-context-deferred">
-            {deferred.length > 0
-              ? deferred.map((entry) => entry.key).join(", ")
-              : "none"}
-          </dd>
+          <dt>{INSPECTOR_TEXT.deferred}</dt>
+          <dd data-testid="ai-context-deferred">{view.deferred}</dd>
         </div>
       </dl>
 
-      {selection?.notes && selection.notes.length > 0 ? (
+      {view.notes.length > 0 ? (
         <ul className="ai-demo__notes" data-testid="ai-context-notes">
-          {selection.notes.map((note) => (
+          {view.notes.map((note) => (
             <li key={note}>{note}</li>
           ))}
         </ul>
       ) : null}
 
       <p className="ai-demo__note" data-testid="ai-sampling-note">
-        {sampled.length > 0
-          ? `Live values sampled for ${sampled.map((column) => column.label).join(", ")}. Everything else shows the examples the author wrote.`
-          : "No column values are sampled. A column's examples are what its author wrote; nothing here reads a row to build the contract."}
+        {view.sampling}
       </p>
 
       <p className="ai-demo__note" data-testid="ai-webmcp-tools">
-        {webmcpNames.length > 0
-          ? `Registered as browser tools: ${webmcpNames.join(", ")}`
-          : "Not registered as browser tools."}
+        {view.webmcp}
       </p>
 
       <label className="ai-demo__pick">
-        <span>Capability</span>
+        <span>{INSPECTOR_TEXT.capability}</span>
         <select
           data-testid="ai-catalog"
-          value={selected}
+          value={view.selected}
           onChange={(event) => {
-            setSelectedKey(event.target.value);
+            setPicked(event.target.value);
           }}
         >
-          {capabilities.length === 0 ? (
-            <option value="">No capabilities wired</option>
+          {view.capabilities.length === 0 ? (
+            <option value="">{INSPECTOR_TEXT.noCapabilities}</option>
           ) : null}
-          {capabilities.map((entry) => (
+          {view.capabilities.map((entry) => (
             <option key={entry.key} value={entry.key}>
-              {entry.key}
-              {deferred.some((left) => left.key === entry.key)
-                ? " (on demand)"
-                : ""}
+              {entry.label}
             </option>
           ))}
         </select>
@@ -211,44 +137,30 @@ export function AiContextInspector({
           className="ai-demo__copy"
           data-testid="ai-schema-copy"
           onClick={() => {
-            void navigator.clipboard?.writeText(schema);
+            void navigator.clipboard?.writeText(
+              view.copyable ? view.schema : ""
+            );
           }}
         >
-          Copy
+          {INSPECTOR_TEXT.copy}
         </button>
         <pre
           className="ai-demo__schema"
           data-testid="ai-schema"
           dir="ltr"
-          aria-label={`Schema for ${selected || "no capability"}`}
+          aria-label={INSPECTOR_TEXT.schemaFor(view.selected)}
         >
-          {schema ||
-            (session
-              ? "This capability's guide is fetched on demand — ask for it in the conversation and it arrives with the answer."
-              : "Attach a session to inspect a capability.")}
+          {view.schema}
         </pre>
       </div>
 
       <p className="ai-demo__refs">
-        <a href={docsUrl("ai-http")}>Connect a backend</a>
-        <a href={docsUrl("ai-integrations")}>AI integrations</a>
-        <a href={docsUrl("agent-capabilities")}>Capabilities</a>
+        {INSPECTOR_LINKS.map((link) => (
+          <a key={link.page} href={docsUrl(link.page)}>
+            {link.label}
+          </a>
+        ))}
       </p>
     </section>
   );
-}
-
-/**
- * A contract version a reader can compare without scrolling.
- *
- * The version is the whole contract serialized, which is what makes two of
- * them comparable; showing it whole would fill the panel.
- */
-function shorten(version: string): string {
-  let hash = 0x811c9dc5;
-  for (let index = 0; index < version.length; index += 1) {
-    hash ^= version.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193) >>> 0;
-  }
-  return hash.toString(16).padStart(8, "0");
 }

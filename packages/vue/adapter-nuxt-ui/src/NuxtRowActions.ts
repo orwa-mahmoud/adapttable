@@ -4,6 +4,7 @@ import {
   mergeVueAttrs,
   scheduleTick,
   useScopeActivity,
+  withProps,
 } from "@adapttable/vue/adapter";
 import UCard from "@nuxt/ui/components/Card.vue";
 import {
@@ -217,9 +218,8 @@ const NuxtRowActionsPresentation = /*#__PURE__*/ defineComponent(
 );
 
 /** Inline action buttons, or a Nuxt UI menu behind one trigger for `layout: "menu"`. */
-export function NuxtRowActions<TRow>(
-  props: RowActionsControlProps<TRow>
-): VNode {
+export const NuxtRowActions = /* @__PURE__ */ withProps(function NuxtRowActions<
+  TRow,
+>(props: RowActionsControlProps<TRow>): VNode {
   return createVNode(NuxtRowActionsPresentation, { ...props });
-}
-NuxtRowActions.props = actionProps;
+}, actionProps);

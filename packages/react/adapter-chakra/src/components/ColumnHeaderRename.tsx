@@ -1,130 +1,103 @@
+/** A column header's rename button and form, drawn with Chakra's controls. */
 import {
-  type ColumnHeaderRenameSlotProps,
-  type ColumnRenameEditorState,
-  LiveRegion,
-  useColumnRenameEditor,
+  createColumnHeaderRename,
+  type KitHeaderRenameLook,
+  type KitRenameFieldProps,
 } from "@adapttable/react/adapter";
-import { Button, Field, IconButton, Input, Text } from "@chakra-ui/react";
-import { type PropsWithChildren, useEffect, useRef } from "react";
+import { Field, Input, Text as ChakraText } from "@chakra-ui/react";
+import type { ReactElement } from "react";
 
 import { EditRowIcon } from "../icons";
+import { Button } from "./ColumnMenu";
+import { IconButton, Text, TextInput } from "./kitPrimitives";
 
-function HeaderRenameForm({
-  rename,
-  labels,
-}: Readonly<{
-  rename: ColumnRenameEditorState;
-  labels: ColumnHeaderRenameSlotProps["labels"];
-}>) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+/** The header's field: label, input and error in one compact row. */
+function RenameField({
+  id,
+  elementRef,
+  label,
+  value,
+  error,
+  errorId,
+  parts,
+  onValueChange,
+  onBlur,
+  onKeyDown,
+}: Readonly<KitRenameFieldProps>): ReactElement {
+  "use no memo";
   return (
-    <form
-      data-adapttable-part="header-rename-form"
-      onSubmit={(event) => {
-        event.preventDefault();
-        rename.submit();
-      }}
+    <Field.Root
+      invalid={error !== undefined}
+      display="inline-flex"
+      flexDirection="row"
+      alignItems="center"
+      flexWrap="wrap"
+      gap={1}
+      width="auto"
     >
-      <Field.Root
-        invalid={Boolean(rename.error)}
-        display="inline-flex"
-        flexDirection="row"
-        alignItems="center"
-        flexWrap="wrap"
-        gap={1}
+      <Field.Label
+        htmlFor={id}
+        data-adapttable-part={parts.label}
+        fontSize="xs"
+        mb={0}
       >
-        <Field.Label
-          htmlFor={rename.inputId}
-          data-adapttable-part="header-rename-label"
+        {label}
+      </Field.Label>
+      <Input
+        ref={elementRef}
+        id={id}
+        value={value}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? errorId : undefined}
+        data-adapttable-part={parts.input}
+        size="xs"
+        width="8rem"
+        onChange={(event) => onValueChange(event.target.value)}
+        onBlur={onBlur}
+        onKeyDown={onKeyDown}
+      />
+      {error ? (
+        <ChakraText
+          id={errorId}
+          role="alert"
+          data-adapttable-part={parts.error}
+          color="red.500"
           fontSize="xs"
-          mb={0}
         >
-          {labels.columnName}
-        </Field.Label>
-        <Input
-          ref={inputRef}
-          id={rename.inputId}
-          value={rename.draft}
-          aria-invalid={rename.error ? true : undefined}
-          aria-describedby={rename.error ? rename.errorId : undefined}
-          data-adapttable-part="header-rename-input"
-          size="xs"
-          width="8rem"
-          onChange={(event) => rename.setDraft(event.target.value)}
-          onBlur={rename.blur}
-          onKeyDown={rename.onKeyDown}
-        />
-        {rename.error ? (
-          <Text
-            id={rename.errorId}
-            role="alert"
-            data-adapttable-part="header-rename-error"
-            color="red.500"
-            fontSize="xs"
-          >
-            {rename.error}
-          </Text>
-        ) : null}
-        <Button
-          type="submit"
-          size="xs"
-          colorPalette="teal"
-          data-adapttable-part="header-rename-save"
-        >
-          {labels.saveColumnName}
-        </Button>
-        <Button
-          type="button"
-          size="xs"
-          variant="ghost"
-          data-adapttable-part="header-rename-cancel"
-          onClick={rename.cancel}
-        >
-          {labels.cancelColumnRename}
-        </Button>
-      </Field.Root>
-    </form>
+          {error}
+        </ChakraText>
+      ) : null}
+    </Field.Root>
   );
 }
 
-export function ColumnHeaderRename({
-  columnKey,
-  name,
-  labels,
-  onRenameColumn,
-  children,
-}: Readonly<PropsWithChildren<ColumnHeaderRenameSlotProps>>) {
-  const rename = useColumnRenameEditor({
-    key: columnKey,
-    name,
-    onRename: onRenameColumn,
-    requiredMessage: labels.columnNameRequired,
-    renamedMessage: labels.columnRenamed,
-  });
-  return (
-    <>
-      {rename.editing ? (
-        <HeaderRenameForm rename={rename} labels={labels} />
-      ) : (
-        children
-      )}
-      <IconButton
-        type="button"
-        size="xs"
-        variant="ghost"
-        aria-label={`${labels.renameColumn}: ${name}`}
-        data-adapttable-part="header-rename-button"
-        disabled={rename.editing}
-        onClick={rename.begin}
-      >
-        <EditRowIcon />
-      </IconButton>
-      <LiveRegion part="header-rename-announcer" statusRole={false}>
-        {rename.announcement}
-      </LiveRegion>
-    </>
-  );
-}
+/** Chakra's step of 4 px between the header's controls. */
+const STEP = 4;
+
+const ROW = {
+  display: "inline-flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: STEP,
+} as const;
+
+const LOOK: KitHeaderRenameLook = {
+  // The caption, the button and the announcer sit in the header's own row.
+  root: { display: "contents" },
+  form: ROW,
+  actions: ROW,
+};
+
+const useLook = (): KitHeaderRenameLook => LOOK;
+
+export const ColumnHeaderRename = /* @__PURE__ */ createColumnHeaderRename(
+  {
+    Button,
+    IconButton,
+    TextInput,
+    Text,
+    RenameField,
+    editIcon: <EditRowIcon />,
+  },
+  useLook
+);

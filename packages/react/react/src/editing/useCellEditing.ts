@@ -11,7 +11,7 @@ import {
   cellEditingView,
   createCellEditSession,
 } from "@adapttable/core/editing";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useContext, useMemo, useState, useSyncExternalStore } from "react";
 
 import type { EditEventHandler } from "./editingEvents";
 
@@ -21,6 +21,7 @@ export type {
   CellEditKeyOutcome,
   CellEditNavigation,
 } from "@adapttable/core";
+import { TableStoreContext } from "../state/tableStoreContext";
 export { beginCellEdit } from "@adapttable/core/editing";
 
 /**
@@ -48,7 +49,10 @@ export interface UseCellEditingOptions<TRow = unknown> {
 export function useCellEditing<TRow = unknown>(
   options: UseCellEditingOptions<TRow> = {}
 ): CellEditingState {
-  const [session] = useState(() => createCellEditSession<TRow>(options));
+  const table = useContext(TableStoreContext);
+  const [session] = useState(() =>
+    createCellEditSession<TRow>(options, { store: table })
+  );
   session.configure(options);
   const snapshot = useSyncExternalStore(
     session.subscribe,

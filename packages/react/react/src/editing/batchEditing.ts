@@ -6,26 +6,43 @@
  */
 import {
   type BatchEditingState,
-  type BatchRowEdit,
+  type BatchRowEdit as CoreBatchRowEdit,
   type EditableColumnLike,
   type FeatureHostState,
 } from "@adapttable/core";
 import {
   batchEditingView,
+  type BatchEditStoreOptions,
   createBatchEditStore,
 } from "@adapttable/core/editing";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useContext, useMemo, useState, useSyncExternalStore } from "react";
 
+import { TableStoreContext } from "../state/tableStoreContext";
 import type { EditEventHandler } from "./editingEvents";
 
-export type { BatchEditingState, BatchRowEdit } from "@adapttable/core";
+export type { BatchEditingState } from "@adapttable/core";
+
+/**
+ * One row's held edits in a batch, as the host's `onBatchEdit` receives them.
+ * Declared here so a kit's types name this binding, not core.
+ *
+ * @public
+ */
+export type BatchRowEdit<TRow> = CoreBatchRowEdit<TRow>;
 
 /**
  * What {@link useBatchEditing} needs.
  *
  * @public
  */
-export interface UseBatchEditingOptions<TRow> {
+export interface UseBatchEditingOptions<TRow> extends Pick<
+  BatchEditStoreOptions<TRow>,
+  | "validateRow"
+  | "applyEdit"
+  | "formatEditError"
+  | "onEditError"
+  | "onValidationFail"
+> {
   /**
    * Whether batch editing is armed. Off by default: it changes when a commit
    * happens, which is a decision about the data rather than a preference.
@@ -60,7 +77,10 @@ export interface UseBatchEditingOptions<TRow> {
 export function useBatchEditing<TRow>(
   options: UseBatchEditingOptions<TRow>
 ): BatchEditingState<TRow> {
-  const [store] = useState(() => createBatchEditStore<TRow>(options));
+  const table = useContext(TableStoreContext);
+  const [store] = useState(() =>
+    createBatchEditStore<TRow>(options, { store: table })
+  );
   store.configure(options);
   const snapshot = useSyncExternalStore(
     store.subscribe,

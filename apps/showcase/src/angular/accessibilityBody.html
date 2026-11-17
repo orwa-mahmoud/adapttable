@@ -1,9 +1,10 @@
 <!-- The keyboard grid and a transcript of its actual live regions. -->
 <div class="mx-demo">
-  <p class="hint">
-    Tab into the grid, then use arrows, Home and End. A checkbox selects a whole
-    column.
-  </p>
+  <div class="hint-row">
+    @for (hint of hints; track hint) {
+      <span class="hint">{{ hint }}</span>
+    }
+  </div>
   <div #tableRoot class="mx-demo__body">
     <adapt-showcase-table
       tableLabel="People keyboard grid"
@@ -14,14 +15,16 @@
       [data]="rows"
       [columns]="columns"
       [rowKey]="rowKey"
+      [defaultColumnLayout]="pageLayout"
+      [selectable]="true"
       [features]="features"
-      [defaults]="{ limit: 10 }"
+      [defaults]="pageDefaults"
     />
   </div>
   <div class="mx-demo__body" data-testid="announcements">
-    <strong>Announced to a screen reader</strong>
+    <strong>{{ transcript.title }}</strong>
     @if (announcements().length === 0) {
-      <p>Move through the grid to hear its position and column.</p>
+      <p>{{ transcript.empty }}</p>
     } @else {
       <ol>
         @for (line of announcements(); track $index) {

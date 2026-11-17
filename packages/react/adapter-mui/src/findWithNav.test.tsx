@@ -2,14 +2,18 @@
  * Find with cell navigation: walking the matches moves the grid's focus — the
  * focus is what brings the cell into view — and the count is spoken.
  */
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { findWithNavTests } from "../../react/test/kit/suites/findWithNav";
 import { cellNavigation } from "./cell-navigation";
+import { kit } from "./data-table.test-utils";
 import { DataTable } from "./DataTable";
 import { findInTable } from "./find-in-table";
 import type { ColumnDef } from "./index";
 import { renderMui } from "./test-utils";
+
+for (const test of findWithNavTests(kit)) it(test.name, test.run);
 
 interface Row {
   id: string;
@@ -27,12 +31,6 @@ const COLS: ColumnDef<Row>[] = [
 
 const part = (name: string) =>
   document.querySelector<HTMLElement>(`[data-adapttable-part="${name}"]`);
-const findInput = () =>
-  document.querySelector<HTMLInputElement>(
-    '[data-adapttable-part="find-bar"] input'
-  )!;
-const current = () =>
-  document.querySelector<HTMLElement>("[data-cell-match-current]");
 const gridCell = (row: number, col: number) =>
   document.querySelector<HTMLElement>(`[data-grid-cell="${row}:${col}"]`)!;
 
@@ -97,12 +95,6 @@ describe("find with cell navigation (mui)", () => {
     expect(part("table")?.closest(".navigation-table")).not.toBeNull();
   });
 
-  it("opens from the toolbar control", () => {
-    table();
-    fireEvent.click(part("find-button")!);
-    expect(part("find-bar")).not.toBeNull();
-  });
-
   it.each([
     ["Ctrl", { ctrlKey: true }],
     ["Cmd", { metaKey: true }],
@@ -111,31 +103,5 @@ describe("find with cell navigation (mui)", () => {
     act(() => gridCell(0, 0).focus());
     fireEvent.keyDown(gridCell(0, 0), { key: "f", ...modifier });
     expect(part("find-bar")).not.toBeNull();
-  });
-
-  it("walks the matches by moving grid focus to the current one", async () => {
-    table();
-    fireEvent.click(part("find-button")!);
-    fireEvent.change(findInput(), { target: { value: "ad" } });
-
-    await waitFor(() => {
-      expect(current()).toHaveTextContent("Ada");
-    });
-    expect(document.activeElement).toBe(current());
-    expect(part("find-count")).toHaveTextContent("1 of 2");
-    expect(part("find-count")?.tagName).toBe("OUTPUT");
-
-    fireEvent.click(part("find-next")!);
-    await waitFor(() => {
-      expect(current()).toHaveTextContent("Adam");
-    });
-    expect(document.activeElement).toBe(current());
-    expect(part("find-count")).toHaveTextContent("2 of 2");
-
-    fireEvent.keyDown(findInput(), { key: "Enter" });
-    await waitFor(() => {
-      expect(current()).toHaveTextContent("Ada");
-    });
-    expect(document.activeElement).toBe(current());
   });
 });

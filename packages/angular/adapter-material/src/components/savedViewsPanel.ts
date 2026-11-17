@@ -189,7 +189,7 @@ class AdaptSavedViewsSurface {
       @for (control of props().controls; track control.key) {
         @if (control.onPress; as run) {
           <button
-            mat-button
+            mat-icon-button
             type="button"
             [attr.data-control]="control.key"
             [style]="props().layout.control"
@@ -202,7 +202,7 @@ class AdaptSavedViewsSurface {
           </button>
         } @else {
           <button
-            mat-button
+            mat-icon-button
             type="button"
             disabled
             [attr.data-control]="control.key"

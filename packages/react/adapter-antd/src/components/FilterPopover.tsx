@@ -1,8 +1,12 @@
+import { usePointerDismiss } from "@adapttable/react";
 import type { Direction, TableLabels } from "@adapttable/react/adapter";
 import { Button, Flex, Popover } from "antd";
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useRef } from "react";
 
 import { usePopoverHeight } from "./usePopoverHeight";
+
+/** The panel and antd's dropdowns, which portal outside the trigger. */
+const NESTED = ".ant-popover, .ant-select-dropdown, .ant-picker-dropdown";
 
 /** Props for {@link FilterPopover}. */
 export interface FilterPopoverProps {
@@ -47,37 +51,11 @@ export function FilterPopover({
   const anchorRef = useRef<HTMLSpanElement>(null);
   const height = usePopoverHeight(open, () => anchorRef.current);
 
-  useEffect(() => {
-    if (!open) return;
-    const handlePointer = (event: MouseEvent) => {
-      const target = event.target as Node | null;
-      // Ignore clicks on the trigger (the toggle handles those) and inside the
-      // floating popover content, which antd portals under `.ant-popover`.
-      if (target && anchorRef.current?.contains(target)) return;
-      if (
-        target instanceof Element &&
-        target.closest(
-          ".ant-popover, .ant-select-dropdown, .ant-picker-dropdown"
-        )
-      ) {
-        return;
-      }
-      onClose();
-    };
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      onClose();
-      // Escape strands keyboard focus inside the removed card — hand it back
-      // to the trigger inside the anchor.
-      anchorRef.current?.querySelector("button")?.focus();
-    };
-    document.addEventListener("mousedown", handlePointer);
-    document.addEventListener("keydown", handleKey);
-    return () => {
-      document.removeEventListener("mousedown", handlePointer);
-      document.removeEventListener("keydown", handleKey);
-    };
-  }, [open, onClose]);
+  usePointerDismiss(open, onClose, NESTED, {
+    contains: (node) => anchorRef.current?.contains(node) === true,
+    // Escape strands focus inside the removed card: hand it to the trigger.
+    afterEscape: () => anchorRef.current?.querySelector("button")?.focus(),
+  });
 
   const content = (
     // The card must never claim the whole screen: antd adds its own padding

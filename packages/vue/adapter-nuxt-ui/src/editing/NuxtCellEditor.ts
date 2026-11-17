@@ -3,6 +3,7 @@ import {
   editorInputType,
   scheduleTick,
   useScopeActivity,
+  withProps,
 } from "@adapttable/vue/adapter";
 import {
   computed,
@@ -191,13 +192,13 @@ const NuxtCellEditorPresentation = defineComponent(
 
 // Keep the row type at the functional boundary; the presentation validates
 // values and owns the editor's reactive lifecycle.
-function NuxtCellEditor<TRow>(
-  props: EditableCellEditorProps<TRow> & { className?: string }
-) {
-  return createVNode(NuxtCellEditorPresentation, { ...props });
-}
-NuxtCellEditor.props = Object.keys(
-  editorRuntimeProps
-) as (keyof typeof editorRuntimeProps)[];
-NuxtCellEditor.inheritAttrs = false;
+const NuxtCellEditor = /* @__PURE__ */ withProps(
+  function NuxtCellEditor<TRow>(
+    props: EditableCellEditorProps<TRow> & { className?: string }
+  ) {
+    return createVNode(NuxtCellEditorPresentation, { ...props });
+  },
+  Object.keys(editorRuntimeProps) as (keyof typeof editorRuntimeProps)[],
+  { inheritAttrs: false }
+);
 export default NuxtCellEditor;

@@ -30,6 +30,7 @@
  * free of React is what lets `@adapttable/core/query` decode the same string a
  * backend never renders.
  */
+import { safeDecode } from "../utils/safeDecode";
 import type { FormulaColumnSpec } from "./formulaColumn";
 
 /**
@@ -41,21 +42,6 @@ import type { FormulaColumnSpec } from "./formulaColumn";
  * same kind of clamp the column-layout codec puts on a width.
  */
 const MAX_FORMULA_COLUMNS = 24;
-
-/**
- * Decode one field, tolerating the malformed input a hand-edited URL brings.
- *
- * Local rather than shared with `url/serialize`: this module deliberately
- * imports nothing at runtime, because it is one of the two files a backend can
- * read a shared link with in a process where React is not installed.
- */
-function decodeField(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
 
 /**
  * Write formula columns as a URL parameter value.
@@ -110,14 +96,14 @@ export function deserializeFormulaColumns(
     // delimiters were not written by this codec, and guessing which field is
     // the formula is how a link starts computing something else.
     if (fields.length < 2 || fields.length > 3) continue;
-    const key = decodeField(fields[0] ?? "").trim();
-    const formula = decodeField(fields[1] ?? "").trim();
+    const key = safeDecode(fields[0] ?? "").trim();
+    const formula = safeDecode(fields[1] ?? "").trim();
     if (key === "" || formula === "") continue;
     // First entry wins: two columns under one key is one column shadowing the
     // other, and which one won would depend on render order.
     if (seen.has(key)) continue;
     seen.add(key);
-    const header = fields.length === 3 ? decodeField(fields[2]!).trim() : "";
+    const header = fields.length === 3 ? safeDecode(fields[2]!).trim() : "";
     specs.push({ key, formula, ...(header === "" ? {} : { header }) });
     if (specs.length === MAX_FORMULA_COLUMNS) break;
   }

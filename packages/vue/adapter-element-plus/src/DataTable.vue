@@ -8,6 +8,7 @@ import {
   type DataTableProps,
   type DataTableSlots,
   DataTableSurfaceChrome,
+  keepTableControls,
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
@@ -30,10 +31,7 @@ import {
   elementColumnGroupToggle,
   elementHierarchyControls,
 } from "./elementHierarchyControls";
-import {
-  ELEMENT_GROUP_ROW,
-  elementGroupRowSlotKey,
-} from "./elementHierarchyControlSlots";
+import { ELEMENT_GROUP_ROW } from "./elementHierarchyControlSlots";
 import { elementSurfaceControls } from "./elementSurfaceControls";
 import { useElementPlusLibrary } from "./libraryEnvironment";
 import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
@@ -57,8 +55,10 @@ const emit = defineEmits<{
   "update:density": [density: TableDensity];
 }>();
 const slots = defineSlots<DataTableSlots<TRow>>();
+const cardSlot = shallowRef(slots.card);
 const footerSlot = shallowRef(slots.footer);
 onBeforeUpdate(() => {
+  cardSlot.value = slots.card;
   footerSlot.value = slots.footer;
 });
 const rootElement = shallowRef<HTMLElement | null>(null);
@@ -138,19 +138,23 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable: Element Plus grouping rows require grouping() from @adapttable/element-plus/grouping."
         );
-      return renderFeatureSlot(
-        elementGroupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        props
-      );
+      return renderFeatureSlot(ELEMENT_GROUP_ROW, shell.slotFills.value, props);
     },
-    card: slots.card,
+    card: cardSlot.value,
     cell: slots.cell,
     header: slots.header,
     headerActions: slots.headerActions,
     footer: slots.footer,
   };
 }
+/** One controls object while the host's slots stay the same. */
+const tableControls = keepTableControls(controls, (kept) => [
+  kept.card,
+  kept.cell,
+  kept.header,
+  kept.headerActions,
+  kept.footer,
+]);
 
 const surface = {
   rootElement: () => rootElement.value,
@@ -181,7 +185,7 @@ function setScrollElement(element: HTMLElement | null): void {
       searchable,
       classNames: names,
     }"
-    :slots="elementSurfaceControls(controls())"
+    :slots="elementSurfaceControls(tableControls())"
     :content="slots"
     :root-ref="setRootElement"
     :scroll-ref="setScrollElement"

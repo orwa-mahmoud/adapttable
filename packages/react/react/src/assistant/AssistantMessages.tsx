@@ -11,8 +11,9 @@
  * from the arguments that actually ran; anything the host did not supply is
  * left out rather than guessed.
  */
-import { resolveLabels, type TableLabels } from "@adapttable/core";
+import { type TableLabels } from "@adapttable/core";
 import {
+  ASSISTANT_LABELS,
   assistantActionsName,
   assistantInitials,
   assistantReceiptDetail,
@@ -24,6 +25,7 @@ import {
   assistantUndoTurnLabel,
   assistantVoicePlaceholder,
   assistantWorkingText,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import {
   type ReactElement,
@@ -55,6 +57,8 @@ import type {
   TableAssistantReceiptView,
   TableAssistantUndoView,
 } from "./assistantView";
+
+const ASSISTANT_GROUPS = [ASSISTANT_LABELS] as const;
 
 /**
  * The assistant's own colour.
@@ -221,7 +225,9 @@ function Receipt({
           // it would put back.
           <span data-adapttable-part="assistant-receipt-undo">
             <Button
-              label={resolveLabels(labels).assistantUndo}
+              label={
+                resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantUndo
+              }
               part="assistant-receipt-undo-button"
               variant="subtle"
               icon={<UndoIcon />}
@@ -233,7 +239,10 @@ function Receipt({
       {assistantReceiptNeedsSave(receipt) ? (
         <span data-adapttable-part="assistant-receipt-save">
           <Badge
-            label={resolveLabels(labels).assistantSaveInTable}
+            label={
+              resolveFeatureLabels(labels, ASSISTANT_GROUPS)
+                .assistantSaveInTable
+            }
             part="assistant-receipt-save-badge"
             // The only status that draws this badge is the one that needs
             // saving, and a change the reader still has to keep is a warning
@@ -245,7 +254,9 @@ function Receipt({
       {receipt.message ? (
         <>
           <Button
-            label={resolveLabels(labels).assistantDetail}
+            label={
+              resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantDetail
+            }
             part="assistant-receipt-detail"
             variant="subtle"
             expanded={open}
@@ -362,7 +373,7 @@ export function AssistantMessage({
       }
     : {};
   const mine = message.role === "user";
-  const copy = resolveLabels(labels);
+  const copy = resolveFeatureLabels(labels, ASSISTANT_GROUPS);
   const speaker = mine ? copy.assistantYou : copy.assistantSpeaker;
   return (
     <li
@@ -844,7 +855,7 @@ function LoneUndo({
   return (
     <span data-adapttable-part="assistant-undo">
       <slots.Button
-        label={resolveLabels(labels).assistantUndo}
+        label={resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantUndo}
         part="assistant-undo-button"
         variant="secondary"
         icon={<UndoIcon />}
@@ -1045,7 +1056,7 @@ function Receipts({
           id={headingId}
           style={{ fontSize: "0.85em", opacity: 0.75, fontWeight: 600 }}
         >
-          {resolveLabels(labels).assistantActionsTitle}
+          {resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantActionsTitle}
         </strong>
         {undoTurn && perRow !== 1 ? (
           <span data-adapttable-part="assistant-receipts-undo-all">
@@ -1233,7 +1244,10 @@ export function AssistantAlwaysAllowed({
       style={{ display: "flex", flexDirection: "column", gap: "0.3em" }}
     >
       <span data-adapttable-part="assistant-always-allowed-title">
-        {resolveLabels(labels).assistantAlwaysAllowedTitle}
+        {
+          resolveFeatureLabels(labels, ASSISTANT_GROUPS)
+            .assistantAlwaysAllowedTitle
+        }
       </span>
       <ul
         style={{

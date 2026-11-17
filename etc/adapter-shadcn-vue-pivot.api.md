@@ -8,13 +8,9 @@ import { PivotPanelChromeProps } from '@adapttable/vue/adapter';
 import { VNodeChild } from 'vue';
 
 // @public (undocumented)
-export function PivotPanel(props: PivotPanelProps): VNodeChild;
-
-// @public (undocumented)
-export namespace PivotPanel {
-    var // (undocumented)
+export const PivotPanel: ((props: PivotPanelProps) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export type PivotPanelProps = Omit<PivotPanelChromeProps, "slots">;

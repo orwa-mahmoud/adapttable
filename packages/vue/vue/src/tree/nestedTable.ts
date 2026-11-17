@@ -1,7 +1,6 @@
 import {
   type NestedTableDefaults,
   nestedTableDefaults,
-  nestedTableLabel,
   type NestedTableParent,
 } from "@adapttable/core";
 import { Fragment, h, type VNodeChild } from "vue";
@@ -32,3 +31,5 @@ export function nestedTableDetail<TRow>(options: {
   return render;
 }
 export type { NestedTableDefaults, NestedTableParent } from "@adapttable/core";
+
+import { nestedTableLabel } from "@adapttable/core/binding";

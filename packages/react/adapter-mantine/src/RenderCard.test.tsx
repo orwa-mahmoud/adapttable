@@ -11,8 +11,11 @@ import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { DataTable } from "./data-table.test-utils";
+import { renderCardTests } from "../../react/test/kit/suites/renderCard";
+import { DataTable, kit } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+
+for (const test of renderCardTests(kit)) it(test.name, test.run);
 
 interface Row {
   id: string;
@@ -71,18 +74,6 @@ describe("renderCard", () => {
 
     expect(screen.getByText(/Ada · 2 fields/)).toBeInTheDocument();
     expect(screen.getByText(/Grace · 2 fields/)).toBeInTheDocument();
-  });
-
-  it("hands over the same value the built-in would have rendered", () => {
-    render(
-      <Harness
-        renderCard={(_row, card) => (
-          <p>{card.fields.map((field) => field.value)}</p>
-        )}
-      />
-    );
-
-    expect(screen.getByText(/Dubai/)).toBeInTheDocument();
   });
 
   it("hands over each field's label, and none where none was asked", () => {

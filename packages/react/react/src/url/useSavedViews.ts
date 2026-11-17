@@ -6,12 +6,12 @@
  * to the controller, and connects it after mount — so the list hydrates in an
  * effect and the server's first render matches the client's.
  */
+import { type SavedViewsControllerOptions } from "@adapttable/core";
 import {
   createSavedViewsController,
   safeLocalStorage,
-  type SavedViewsControllerOptions,
-} from "@adapttable/core";
-import type { UseSavedViewsResult } from "@adapttable/core/binding";
+  type UseSavedViewsResult,
+} from "@adapttable/core/binding";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import type { LayoutStorage } from "../columns/useColumnLayoutStorageState";

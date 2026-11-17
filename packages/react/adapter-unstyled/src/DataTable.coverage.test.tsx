@@ -27,11 +27,11 @@ const columns: ColumnDef<Row>[] = [
 ];
 
 import type * as AdapterModule from "@adapttable/react/adapter";
-import { useDataTableShell } from "@adapttable/react/adapter";
+import { TableComposition } from "@adapttable/react/adapter";
 
 vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
-  return { ...actual, useDataTableShell: vi.fn(actual.useDataTableShell) };
+  return { ...actual, TableComposition: vi.fn(actual.TableComposition) };
 });
 
 const actualAdapter = await vi.importActual<typeof AdapterModule>(
@@ -39,43 +39,54 @@ const actualAdapter = await vi.importActual<typeof AdapterModule>(
 );
 
 /**
- * Force a controlled virtual window by overriding the shell's `tableProps` —
- * the renderers read `rowEntries` exactly as from a real virtualizer.
+ * Force a controlled virtual window by overriding the `tableProps` the kit's
+ * body receives — the renderers read `rowEntries` exactly as from a real
+ * virtualizer.
  */
 function mockVirtualWindow(top: number, bottom: number, indices = [0, 1]) {
-  vi.mocked(useDataTableShell).mockImplementation((props, render) => {
-    const real = actualAdapter.useDataTableShell(props, render);
-    return {
-      ...real,
-      skipChromeBody: true,
-      tableProps: {
-        ...real.tableProps,
-        rowEntries: indices
-          .filter((index) => index < real.tableProps.rows.length)
-          .map((index) => ({
-            row: real.tableProps.rows[index]!,
-            index,
-            key: String(real.tableProps.getRowId(real.tableProps.rows[index])),
-          })),
-        paddingTop: top,
-        paddingBottom: bottom,
-        measureElement: () => undefined,
+  vi.mocked(TableComposition).mockImplementation(({ props, kit }) =>
+    actualAdapter.TableComposition({
+      props,
+      kit: {
+        ...kit,
+        body: (view, headerOffset, tableProps) => {
+          const { rows, getRowId } = view.tableProps;
+          return kit.body(
+            {
+              ...view,
+              tableProps: {
+                ...view.tableProps,
+                rowEntries: indices
+                  .filter((index) => index < rows.length)
+                  .map((index) => {
+                    const row = rows[index]!;
+                    return { row, index, key: String(getRowId(row)) };
+                  }),
+                paddingTop: top,
+                paddingBottom: bottom,
+                measureElement: () => undefined,
+              },
+            },
+            headerOffset,
+            tableProps
+          );
+        },
       },
-    };
-  });
+    })
+  );
 }
 
-function restoreRealShell() {
-  vi.mocked(useDataTableShell).mockImplementation(
-    actualAdapter.useDataTableShell
+function restoreRealComposition() {
+  vi.mocked(TableComposition).mockImplementation(
+    actualAdapter.TableComposition
   );
 }
 
 let adapter: ReturnType<typeof createMemoryAdapter>;
 
 beforeEach(() => {
-  // Default: the real shell, so non-virtual tests run untouched.
-  restoreRealShell();
+  // Default: the real composition, so non-virtual tests run untouched.
+  restoreRealComposition();
 });
 
 function Harness(props: {

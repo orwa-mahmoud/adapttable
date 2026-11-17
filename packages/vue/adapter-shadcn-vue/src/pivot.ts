@@ -2,6 +2,7 @@ import {
   PivotPanelChrome,
   type PivotPanelChromeProps,
   type PivotPanelSlots,
+  withProps,
 } from "@adapttable/vue/adapter";
 import { h } from "vue";
 
@@ -95,7 +96,9 @@ const slots: PivotPanelSlots = {
     }),
 };
 
-export function PivotPanel(props: PivotPanelProps) {
-  return PivotPanelChrome({ ...props, slots });
-}
-PivotPanel.props = ["fields", "config", "onChange", "labels", "className"];
+export const PivotPanel = /* @__PURE__ */ withProps(
+  function PivotPanel(props: PivotPanelProps) {
+    return PivotPanelChrome({ ...props, slots });
+  },
+  ["fields", "config", "onChange", "labels", "className"]
+);

@@ -4,7 +4,6 @@
  * `<DataTable>` uses {@link useTableDataLean} instead, so a three-prop
  * table never downloads this module.
  */
-import { FILTER_ENGINE_IMPL } from "@adapttable/core";
 
 import {
   type UseTableDataOptions,
@@ -19,6 +18,8 @@ export type {
   UseTableDataResult,
 } from "./useTableDataImpl";
 export { isDeclarativeFilters } from "@adapttable/core";
+
+import { FILTER_ENGINE_IMPL } from "@adapttable/core/binding";
 
 /**
  * Resolve the table's data tier and the declarative-filter runtime.

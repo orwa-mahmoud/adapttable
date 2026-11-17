@@ -8,6 +8,14 @@
  * @packageDocumentation
  */
 export {
+  type CaseArgs,
+  collectConformanceTests,
+  type ConformanceBody,
+  type ConformanceDescribe,
+  type ConformanceIt,
+  type ConformanceRegistry,
+} from "./conformance/collectConformanceTests";
+export {
   featureLifecycleConformanceTests,
   type FeatureLifecycleDriver,
   type LifecycleDeclaration,

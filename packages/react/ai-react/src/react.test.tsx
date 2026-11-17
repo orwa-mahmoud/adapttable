@@ -72,7 +72,7 @@ function Publisher({ view }: { view?: TableRuntimeView }) {
           : [],
         rowKey: (row) => (row as { id: string }).id,
       });
-      engineRef.current = engine as ReturnType<typeof createTableEngine>;
+      engineRef.current = engine;
       neutralRef.current = createNeutralTable(
         engineRef.current,
         "test",

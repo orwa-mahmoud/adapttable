@@ -36,6 +36,7 @@ import { AdaptSlot } from "../slots";
 import { AdaptRowDetail } from "../tree/nestedTable";
 import { AdaptColumnSpacer } from "../virtual/columnSpacer";
 import { AdaptDesktopTableModel } from "./desktopTableModel";
+import { RAIL_ROOM_PROPERTY } from "./railRoom";
 import { type BodyRow } from "./tableSurfaceHost";
 
 type RailPart = "expand" | "reorder" | "selection";
@@ -47,12 +48,15 @@ const STRUCTURE_ROW_PARTS = {
   detail: "detail-row",
 } as const;
 
+/** A rail the structure measures: a leading rail, or the trailing actions. */
+type MeasuredRail = RailPart | "actions";
+
 /** Writes the measured rail widths onto the table, without another render. */
 function publishRailLead(element: HTMLElement): void {
   const row = element.closest("tr");
   const table = element.closest("table");
   if (!row || !table) return;
-  const width = (part: RailPart): number => {
+  const width = (part: MeasuredRail): number => {
     const rail = row.querySelector<HTMLElement>(
       `[data-adapttable-part="${part}-header"]`
     );
@@ -62,6 +66,7 @@ function publishRailLead(element: HTMLElement): void {
   const reorder = width("reorder");
   const selection = width("selection");
   const values: Readonly<Record<string, number>> = {
+    [RAIL_ROOM_PROPERTY]: expand + reorder + selection + width("actions"),
     "--at-start-lead": expand + reorder + selection,
     "--at-offset-expand": 0,
     "--at-offset-reorder": expand,
@@ -75,7 +80,8 @@ function publishRailLead(element: HTMLElement): void {
 }
 
 /**
- * Measures the leading rails so a pinned column can stick past them.
+ * Measures the rails so a pinned column can stick past the leading ones and
+ * the table's minimum width holds them all.
  * The width comes from layout, because kit padding changes the rail the
  * shared minimum describes. The result is a custom property on the table,
  * so measuring does not render the table again.
@@ -83,7 +89,7 @@ function publishRailLead(element: HTMLElement): void {
 @Directive({ selector: "[adaptRail]" })
 class AdaptRailProbe {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  readonly adaptRail = input.required<RailPart>();
+  readonly adaptRail = input.required<MeasuredRail>();
 
   constructor() {
     // A kit's attribute binding rewrites the table's style attribute. Publish

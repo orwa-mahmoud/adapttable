@@ -10,9 +10,15 @@ import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Layers } from "./sectionIcons";
+import {
+  FILTER_FORMS,
+  type FilterForm,
+  formShowsFields,
+  formShowsHeaderFunnels,
+  formShowsTree,
+} from "./shared/filterForm";
 
 type FilterLayout = FiltersUi;
-type FilterForm = "fields" | "advanced" | "both";
 
 /**
  * The filtering page: every way this table narrows a set, and nothing else.
@@ -26,7 +32,7 @@ export function FilteringDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [layout, setLayout] = useState<FilterLayout>("popover");
   const [form, setForm] = useState<FilterForm>("both");
   const Demo = ADAPTERS[adapter] ?? ADAPTERS.mantine;
-  const advanced = form !== "fields";
+  const advanced = formShowsTree(form);
   return (
     <div className="mx-demo" data-filter-form={form}>
       <div className="hint-row">
@@ -64,13 +70,7 @@ export function FilteringDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           ))}
         </div>
         <div className="seg" role="group" aria-label="Filter form">
-          {(
-            [
-              ["fields", "Fields"],
-              ["advanced", "Advanced"],
-              ["both", "Both"],
-            ] as const
-          ).map(([value, label]) => (
+          {FILTER_FORMS.map(({ value, label }) => (
             <button
               key={value}
               type="button"
@@ -96,8 +96,11 @@ export function FilteringDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                     urlKey="flt"
                     filterControls
                     filtersUi={layout === "header" ? "popover" : layout}
-                    headerFilters={layout === "header" && form !== "advanced"}
-                    filterFields={form !== "advanced"}
+                    headerFilters={formShowsHeaderFunnels(
+                      layout === "header",
+                      form
+                    )}
+                    filterFields={formShowsFields(form)}
                     focused
                   />
                 </AdvancedFiltersProvider>

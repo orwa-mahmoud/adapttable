@@ -1,10 +1,12 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 
-import { contextMenu } from "./context-menu";
-import { DataTable } from "./data-table.test-utils";
+import { contextMenuTests } from "../../react/test/kit/suites/contextMenu";
+import { kit } from "./data-table.test-utils";
 import { DataTable as BareDataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
+
+for (const test of contextMenuTests(kit)) it(test.name, test.run);
 
 interface Row {
   id: string;
@@ -23,21 +25,6 @@ const COLS: ColumnDef<Row>[] = [
  * So every route is exercised against a real table rather than trusted.
  */
 describe("context menu (mui)", () => {
-  const table = (extra?: Record<string, unknown>) =>
-    render(
-      <>
-        <DataTable
-          data={ROWS}
-          columns={COLS}
-          rowKey={(r) => r.id}
-          urlSync={false}
-          contextMenu
-          features={[contextMenu<Row>()]}
-          {...extra}
-        />
-      </>
-    );
-
   /**
    * No features composed. This one renders the shipped component rather than
    * the harness above, which exists to compose features from props — the very
@@ -57,43 +44,6 @@ describe("context menu (mui)", () => {
   const menu = () =>
     document.querySelector('[data-adapttable-part="context-menu"]');
 
-  it("stays shut until asked", () => {
-    table();
-
-    expect(menu()).toBeNull();
-  });
-
-  it("opens on a right-click over a header, offering that column", () => {
-    table();
-    fireEvent.contextMenu(
-      document.querySelector('[data-adapttable-part="header-cell"]')!,
-      { clientX: 5, clientY: 5 }
-    );
-
-    expect(menu()).not.toBeNull();
-    expect(screen.getByText("Sort ascending")).toBeInTheDocument();
-  });
-
-  it("opens from the keyboard, which is the route usually missing", () => {
-    table();
-    fireEvent.keyDown(
-      document.querySelector('[data-adapttable-part="header-cell"]')!,
-      { key: "F10", shiftKey: true }
-    );
-
-    expect(menu()).not.toBeNull();
-  });
-
-  it("opens on the dedicated menu key too", () => {
-    table();
-    fireEvent.keyDown(
-      document.querySelector('[data-adapttable-part="header-cell"]')!,
-      { key: "ContextMenu" }
-    );
-
-    expect(menu()).not.toBeNull();
-  });
-
   it("renders nothing at all when the feature is not composed", () => {
     bare({ contextMenu: true });
     fireEvent.contextMenu(
@@ -102,43 +52,5 @@ describe("context menu (mui)", () => {
     );
 
     expect(menu()).toBeNull();
-  });
-
-  it("appends the host's own entries", () => {
-    table({
-      contextMenu: {
-        items: () => [{ key: "audit", label: "Audit", onSelect: vi.fn() }],
-      },
-    });
-    fireEvent.contextMenu(
-      document.querySelector('[data-adapttable-part="header-cell"]')!,
-      { clientX: 5, clientY: 5 }
-    );
-
-    expect(screen.getByText("Audit")).toBeInTheDocument();
-  });
-
-  it("marks a destructive entry and one it cannot run", () => {
-    table({
-      contextMenu: {
-        items: () => [
-          {
-            key: "del",
-            label: "Delete",
-            danger: true,
-            separatorBefore: true,
-            onSelect: vi.fn(),
-          },
-          { key: "no", label: "Locked", disabled: true, onSelect: vi.fn() },
-        ],
-      },
-    });
-    fireEvent.contextMenu(
-      document.querySelector('[data-adapttable-part="header-cell"]')!,
-      { clientX: 5, clientY: 5 }
-    );
-
-    expect(screen.getByText("Delete")).toBeInTheDocument();
-    expect(screen.getByText("Locked")).toBeInTheDocument();
   });
 });

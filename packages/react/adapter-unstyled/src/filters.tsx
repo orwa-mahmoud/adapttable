@@ -12,7 +12,7 @@ import { FilterPanel } from "./components/FilterPanel";
 import { FilterPopover } from "./components/FilterPopover";
 import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
 
-function FiltersForm(props: Readonly<FiltersFormSlotProps<never>>) {
+function FiltersForm(props: Readonly<FiltersFormSlotProps<unknown>>) {
   const classNames = useClassNames();
   return (
     <div

@@ -1,27 +1,20 @@
+/** The in-place cell editor and editable cell, drawn with Radix's inputs. */
 import {
-  type ColumnDef,
-  type EditableCellEditing,
-  type EditableCellEditorCtrl,
-  EditableCellGate,
   type MultiSelectEditorCheckboxProps,
   MultiSelectEditorChrome,
   type MultiSelectEditorSlots,
 } from "@adapttable/react";
 import {
-  commitBooleanDraft,
-  editorInputType,
-  editorValidationProps,
-  isBooleanEditor,
-  isDraftChecked,
-  isMultiSelectEditor,
-  isSelectEditor,
-  stopEditKeys,
+  createCellEditor,
+  createEditableCell,
+  type KitCellCheckboxProps,
+  type KitCellEditorProps,
+  type KitCellInputProps,
 } from "@adapttable/react/adapter";
 import { TextField } from "@radix-ui/themes";
-import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
 import { editableCellSlots } from "./kitControls";
-import { Checkbox, NativeSelect } from "./primitives";
+import { Checkbox as UiCheckbox, NativeSelect } from "./primitives";
 
 /** The multi-select editor's options, as Radix Themes checkboxes. */
 function MultiSelectOption({
@@ -32,14 +25,14 @@ function MultiSelectOption({
   focusRef,
 }: Readonly<MultiSelectEditorCheckboxProps>) {
   return (
-    <Checkbox
+    <UiCheckbox
       checked={checked}
       onToggle={onToggle}
       onKeyDown={onKeyDown}
       inputRef={focusRef}
     >
       {label}
-    </Checkbox>
+    </UiCheckbox>
   );
 }
 
@@ -47,73 +40,85 @@ const multiSelectSlots: MultiSelectEditorSlots = {
   Checkbox: MultiSelectOption,
 };
 
-/** Radix Themes text / number / select editor for the active cell. */
-export function RadixCellEditor({
+function Checkbox({
   ctrl,
   label,
-}: Readonly<{
-  ctrl: EditableCellEditorCtrl;
-  label: string;
-}>): ReactElement {
-  const onKeyDown = (event: KeyboardEvent) => {
-    ctrl.onEditorKeyDown(event);
-    stopEditKeys(event);
-  };
+  aria,
+  checked,
+  onCheckedChange,
+  onKeyDown,
+}: Readonly<KitCellCheckboxProps>) {
+  "use no memo";
+  return (
+    <UiCheckbox
+      size="1"
+      aria-label={label}
+      data-adapttable-part="edit-cell-editor"
+      {...aria}
+      inputRef={ctrl.focusRef}
+      checked={checked}
+      onKeyDown={onKeyDown}
+      onToggle={() => onCheckedChange(!checked)}
+    />
+  );
+}
 
-  if (isBooleanEditor(ctrl.editor)) {
-    return (
-      <Checkbox
-        size="1"
-        aria-label={label}
-        data-adapttable-part="edit-cell-editor"
-        {...editorValidationProps(ctrl)}
-        inputRef={ctrl.focusRef}
-        checked={isDraftChecked(ctrl.draft)}
-        onKeyDown={onKeyDown}
-        onToggle={() => commitBooleanDraft(ctrl, !isDraftChecked(ctrl.draft))}
-      />
-    );
-  }
+/** Several choices, as a list of Base UI checkboxes. */
+function MultiSelect({ ctrl, label, onKeyDown }: Readonly<KitCellEditorProps>) {
+  "use no memo";
+  return (
+    <MultiSelectEditorChrome
+      ctrl={ctrl}
+      label={label}
+      onKeyDown={onKeyDown}
+      slots={multiSelectSlots}
+    />
+  );
+}
 
-  if (isMultiSelectEditor(ctrl.editor)) {
-    return (
-      <MultiSelectEditorChrome
-        ctrl={ctrl}
-        label={label}
-        onKeyDown={onKeyDown}
-        slots={multiSelectSlots}
-      />
-    );
-  }
+/** One choice: Radix's select, committed as soon as it is chosen. */
+function Select({
+  ctrl,
+  label,
+  aria,
+  onKeyDown,
+}: Readonly<KitCellEditorProps>) {
+  "use no memo";
+  return (
+    <NativeSelect
+      size="1"
+      width="100%"
+      aria-label={label}
+      data-adapttable-part="edit-cell-editor"
+      {...aria}
+      triggerRef={ctrl.focusRef}
+      value={ctrl.draft}
+      options={ctrl.selectOptions}
+      onKeyDown={onKeyDown}
+      onValueChange={(value) => {
+        ctrl.setDraft(value);
+        ctrl.commitOnBlur();
+      }}
+    />
+  );
+}
 
-  if (isSelectEditor(ctrl.editor)) {
-    return (
-      <NativeSelect
-        size="1"
-        width="100%"
-        aria-label={label}
-        data-adapttable-part="edit-cell-editor"
-        {...editorValidationProps(ctrl)}
-        triggerRef={ctrl.focusRef}
-        value={ctrl.draft}
-        options={ctrl.selectOptions}
-        onKeyDown={onKeyDown}
-        onValueChange={(value) => {
-          ctrl.setDraft(value);
-          ctrl.commitOnBlur();
-        }}
-      />
-    );
-  }
-
+function Input({
+  ctrl,
+  label,
+  aria,
+  type,
+  onKeyDown,
+}: Readonly<KitCellInputProps>) {
+  "use no memo";
   return (
     <TextField.Root
       ref={ctrl.focusRef}
       data-adapttable-part="edit-cell-editor"
-      {...editorValidationProps(ctrl)}
+      {...aria}
       aria-label={label}
       size="1"
-      type={editorInputType(ctrl.editor)}
+      type={type}
       value={ctrl.draft}
       onChange={(event) => ctrl.setDraft(event.target.value)}
       onKeyDown={onKeyDown}
@@ -122,39 +127,18 @@ export function RadixCellEditor({
   );
 }
 
-/** Opt-in editable cell — pass-through when `editing` is omitted.
- * Callers precompute `display` in the row so memoized rows still re-invoke
- * accessors when selection/expansion changes.
- */
-export function EditableDataCell<TRow>(props: {
-  readonly editing: EditableCellEditing<TRow> | undefined;
-  readonly row: TRow;
-  readonly column: ColumnDef<TRow>;
-  readonly rowId: string;
-  readonly rows: readonly TRow[];
-  readonly columns: readonly ColumnDef<TRow>[];
-  readonly rowKey: (row: TRow) => string;
-  readonly editLabel: string;
-  /** `labels.undoEdit` — the control a failed save offers. */
-  readonly undoLabel?: string;
-  readonly display: ReactNode;
-}): ReactElement {
-  return (
-    <EditableCellGate
-      editing={props.editing}
-      row={props.row}
-      column={props.column}
-      rowId={props.rowId}
-      rows={props.rows}
-      columns={props.columns}
-      rowKey={props.rowKey}
-      editLabel={props.editLabel}
-      undoLabel={props.undoLabel}
-      display={props.display}
-      slots={editableCellSlots}
-      renderEditor={(ctrl) => (
-        <RadixCellEditor ctrl={ctrl} label={props.editLabel} />
-      )}
-    />
-  );
-}
+/** The editor for the active cell, with Radix's inputs. */
+export const RadixCellEditor = /* @__PURE__ */ createCellEditor({
+  Checkbox,
+  MultiSelect,
+  Select,
+  Input,
+  rendersError: false,
+});
+
+/** A cell that edits in place; shows its value until editing starts. */
+export const EditableDataCell = /* @__PURE__ */ createEditableCell({
+  Editor: RadixCellEditor,
+  slots: editableCellSlots,
+  rendersError: false,
+});

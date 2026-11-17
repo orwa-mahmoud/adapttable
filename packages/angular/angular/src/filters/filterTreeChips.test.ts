@@ -1,4 +1,5 @@
-import { defaultLabels, type FilterDef } from "@adapttable/core";
+import { type FilterDef } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core/binding";
 import { describe, expect, it, vi } from "vitest";
 
 import { filterTreeChips } from "./filterTreeChips";

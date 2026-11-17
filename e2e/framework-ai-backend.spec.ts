@@ -49,21 +49,21 @@ for (const framework of ["angular", "vue"] as const) {
         framework === "angular"
           ? angularPart(kit, page, name)
           : page.locator(selector(name));
-      await page
-        .getByRole("button", { name: "Connect a backend", exact: true })
-        .click();
-      await page.getByLabel("Your endpoint", { exact: true }).fill(endpoint);
-      await page
-        .getByRole("button", { name: "Connect backend", exact: true })
-        .click();
-      const settings = page.getByRole("region", { name: "Backend connection" });
-      await expect(settings.getByRole("alert")).toBeVisible();
+      const dialog = page.getByRole("dialog", { name: "Connect a backend" });
+      await page.getByTestId("ai-demo-try-real").click();
+      await expect(dialog).toBeVisible();
+      await dialog.getByLabel("Your endpoint", { exact: true }).fill(endpoint);
+      const connect = dialog.getByRole("button", {
+        name: "Connect",
+        exact: true,
+      });
+      await connect.click();
+      await expect(dialog.getByRole("alert")).toBeVisible();
       unavailable = false;
-      await page
-        .getByRole("button", { name: "Retry connection", exact: true })
-        .click();
-      await expect(page.locator("[data-demo-ai-connection]")).toContainText(
-        "Backend:"
+      await connect.click();
+      await expect(dialog).toBeHidden();
+      await expect(page.getByTestId("ai-demo-try-real")).toHaveText(
+        "Connected"
       );
       await part("assistant-launcher").click();
       const ask = async (text: string) => {
@@ -86,17 +86,15 @@ for (const framework of ["angular", "vue"] as const) {
       await expect(
         page.getByRole("columnheader").filter({ hasText: "Salary" })
       ).toHaveAttribute("aria-sort", "none");
-      await part("assistant-close").click();
-      await page
-        .getByRole("button", { name: "Use scripted demo", exact: true })
-        .click();
-      await expect(page.locator("[data-demo-ai-connection]")).toContainText(
-        "Scripted demo"
+      await part("assistant-settings").click();
+      await dialog.getByRole("button", { name: "Disconnect" }).click();
+      await expect(dialog).toBeHidden();
+      await expect(page.getByTestId("ai-demo-try-real")).toHaveText(
+        "Try it for real"
       );
-      await part("assistant-launcher").click();
-      await ask("Sort salaries highest first");
+      await ask("Sort by salary, highest first.");
       await expect(part("assistant-message-text").last()).toHaveText(
-        "Highest salary first."
+        "Sorted by salary, descending."
       );
       expect(turns).toBe(1);
     });

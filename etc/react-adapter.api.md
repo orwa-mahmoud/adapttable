@@ -31,12 +31,12 @@ import { AggregateName } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
 import { applyCollapsedColumnGroups } from '@adapttable/core/binding';
 import { applyTableFeatures } from '@adapttable/core/binding';
-import { APPROVAL_PREVIEW_LIMIT } from '@adapttable/core';
+import { APPROVAL_PREVIEW_LIMIT } from '@adapttable/core/binding';
 import { ApprovalReview } from '@adapttable/core';
 import { approvalReview } from '@adapttable/core';
 import { ApprovalReviewItem } from '@adapttable/core';
 import { ApprovalReviewSlots as ApprovalReviewSlots_2 } from '@adapttable/core/binding';
-import { AssemblyFns } from '@adapttable/core';
+import { AssemblyFns } from '@adapttable/core/binding';
 import { assistantIsBusy } from '@adapttable/core/binding';
 import { assistantIsUsable } from '@adapttable/core/binding';
 import { autoSizeColumns } from '@adapttable/core';
@@ -45,18 +45,20 @@ import { BatchEditBarProps } from '@adapttable/core/binding';
 import { BatchEditBarSlots as BatchEditBarSlots_2 } from '@adapttable/core/binding';
 import { BatchEditButtonProps } from '@adapttable/core/binding';
 import { BatchEditingState } from '@adapttable/core';
-import { BatchRowEdit } from '@adapttable/core';
+import { BatchRowEdit as BatchRowEdit_2 } from '@adapttable/core';
 import { bindFeatureHostFn } from '@adapttable/core';
-import { bindMobileCardList } from '@adapttable/core';
+import { bindMobileCardList } from '@adapttable/core/binding';
 import { TableBodyCell as BodyCell } from '@adapttable/core';
 import { BodyCell as BodyCell_2 } from '@adapttable/core/binding';
 import { bodyCellsHaveRowSpan } from '@adapttable/core/binding';
 import { bodyRowEntries } from '@adapttable/core';
-import { buildBodyCells } from '@adapttable/core';
+import { buildBodyCells } from '@adapttable/core/binding';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
-import { bulkActionErrorMessage } from '@adapttable/core';
+import { bulkActionErrorMessage } from '@adapttable/core/binding';
 import { BulkBarState } from '@adapttable/core/binding';
+import { ButtonHTMLAttributes } from 'react';
+import { CELL_NAV_LIVE } from '@adapttable/core/binding';
 import { CellConflictAsk } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
 import { CellEditCommit } from '@adapttable/core';
@@ -67,7 +69,7 @@ import { CellEditNavigation } from '@adapttable/core';
 import { CellEditor } from '@adapttable/core';
 import { CellEditorOption } from '@adapttable/core';
 import { CellEditTarget } from '@adapttable/core';
-import { cellFlashAttr } from '@adapttable/core';
+import { cellFlashAttr } from '@adapttable/core/binding';
 import { CellNavLiveSlotProps as CellNavLiveSlotProps_2 } from '@adapttable/core/binding';
 import { CellProps } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
@@ -87,6 +89,7 @@ import { ChecklistSearchProps } from '@adapttable/core/binding';
 import { ChecklistSlots as ChecklistSlots_2 } from '@adapttable/core/binding';
 import { ChecklistValue } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
+import { CHROME_BODY } from '@adapttable/core/binding';
 import { ChromeBodySlot } from '@adapttable/core/binding';
 import { ChromeBodySlotProps as ChromeBodySlotProps_2 } from '@adapttable/core/binding';
 import { ChromeExtraSlot } from '@adapttable/core/binding';
@@ -96,16 +99,17 @@ import { ChromeGroupSlot } from '@adapttable/core/binding';
 import { ChromeRowSlot } from '@adapttable/core/binding';
 import { ChromeVirtualPadSlot } from '@adapttable/core/binding';
 import { ColorScheme } from '@adapttable/core';
-import { COLUMN_DND_MIME } from '@adapttable/core';
+import { COLUMN_DND_MIME } from '@adapttable/core/binding';
 import { COLUMN_GROUP_ID_SEP } from '@adapttable/core/binding';
 import { COLUMN_GROUP_RENDER_PREFIX } from '@adapttable/core/binding';
 import { COLUMN_GROUP_STUB_PREFIX } from '@adapttable/core/binding';
 import { COLUMN_GROUP_STUB_WIDTH } from '@adapttable/core/binding';
 import { COLUMN_GROUP_TOGGLE } from '@adapttable/core/binding';
+import { COLUMN_LAYOUT_LIVE } from '@adapttable/core/binding';
 import { COLUMN_MENU } from '@adapttable/core/binding';
 import { ColumnDragRowAttrs } from '@adapttable/core';
 import { ColumnFilter } from '@adapttable/core';
-import { columnFlexShares } from '@adapttable/core';
+import { columnFlexShares } from '@adapttable/core/binding';
 import { ColumnFooterContext } from '@adapttable/core';
 import { ColumnGroupDef } from '@adapttable/core';
 import { columnGroupHeaderCaption } from '@adapttable/core/binding';
@@ -132,17 +136,18 @@ import { ColumnMenuChromeProps } from '@adapttable/core';
 import { ColumnMenuItem } from '@adapttable/core';
 import { ColumnMenuLabels } from '@adapttable/core';
 import { ColumnMenuRow } from '@adapttable/core';
-import { columnMenuRows } from '@adapttable/core';
+import { columnMenuRows } from '@adapttable/core/binding';
 import { ColumnMenuSlotProps } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
 import { ColumnResizeHandleProps } from '@adapttable/core';
-import { columnResizeHandleProps } from '@adapttable/core';
+import { columnResizeHandleProps } from '@adapttable/core/binding';
 import { ColumnSelectCheckboxChromeProps as ColumnSelectCheckboxChromeProps_2 } from '@adapttable/core/binding';
 import { ColumnSelectCheckboxProps } from '@adapttable/core/binding';
 import { columnSelectLabel } from '@adapttable/core/binding';
 import { ColumnSelectSlots as ColumnSelectSlots_2 } from '@adapttable/core/binding';
-import { columnSizeStyle } from '@adapttable/core';
-import { ColumnSizingOptions } from '@adapttable/core';
+import { columnSizeStyle } from '@adapttable/core/binding';
+import { ColumnSizingOptions } from '@adapttable/core/binding';
+import { ColumnSpacerSide } from '@adapttable/core/binding';
 import { Command } from '@adapttable/core';
 import { CommandPaletteChromeProps as CommandPaletteChromeProps_2 } from '@adapttable/core/binding';
 import { CommandPaletteInputProps as CommandPaletteInputProps_2 } from '@adapttable/core/binding';
@@ -165,17 +170,18 @@ import { ContextMenuSlots as ContextMenuSlots_2 } from '@adapttable/core/binding
 import { ContextMenuSurfaceProps as ContextMenuSurfaceProps_2 } from '@adapttable/core/binding';
 import { ContextMenuTarget } from '@adapttable/core';
 import { createFilterRegistry } from '@adapttable/core';
+import { CreateTableEngineOptions } from '@adapttable/core';
 import { CSSProperties } from 'react';
 import { CustomCellEditorConflict } from '@adapttable/core';
 import { CustomCellEditorCtrl } from '@adapttable/core';
 import { CustomCellEditorRender } from '@adapttable/core';
-import { DEFAULT_CARD_SIZE_PX } from '@adapttable/core';
-import { defaultConfirm } from '@adapttable/core';
+import { DEFAULT_CARD_SIZE_PX } from '@adapttable/core/binding';
+import { defaultConfirm } from '@adapttable/core/binding';
 import { defaultFilterRegistry } from '@adapttable/core';
-import { defaultLabels } from '@adapttable/core';
+import { defaultLabels } from '@adapttable/core/binding';
 import { DependencyList } from 'react';
 import { deriveRuntimeOperations } from '@adapttable/core/binding';
-import { deriveSortByOptions } from '@adapttable/core';
+import { deriveSortByOptions } from '@adapttable/core/binding';
 import { DESKTOP_ACTIONS_WIDTH } from '@adapttable/core/binding';
 import { DESKTOP_EXPANSION_WIDTH } from '@adapttable/core/binding';
 import { DESKTOP_SELECTION_WIDTH } from '@adapttable/core/binding';
@@ -185,9 +191,11 @@ import { DirtyCellState } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
 import { DragEvent as DragEvent_2 } from 'react';
 import { edgePinStyle } from '@adapttable/core';
+import { EDIT_HISTORY_LIVE } from '@adapttable/core/binding';
 import { EditableCellActivateProps as EditableCellActivateProps_2 } from '@adapttable/core/binding';
 import { EditableCellButtonProps } from '@adapttable/core/binding';
 import { EditableCellController } from '@adapttable/core';
+import { EditableCellEditorCtrl } from '@adapttable/core/editing';
 import { EditableCellMode } from '@adapttable/core';
 import { EditableCellSlotProps as EditableCellSlotProps_2 } from '@adapttable/core/binding';
 import { EditableCellSlots as EditableCellSlots_2 } from '@adapttable/core/binding';
@@ -202,6 +210,7 @@ import { EditEvent } from '@adapttable/core';
 import { EditEventHandler } from '@adapttable/core';
 import { EditHistoryLiveSlotProps as EditHistoryLiveSlotProps_2 } from '@adapttable/core/binding';
 import { EditHistoryState } from '@adapttable/core';
+import { EDITING_LIVE } from '@adapttable/core/binding';
 import { EditingBundle } from '@adapttable/core';
 import { EditLifecycle } from '@adapttable/core';
 import { editorBusyProps } from '@adapttable/core/editing';
@@ -213,10 +222,12 @@ import { ElementType } from 'react';
 import { ensureForcedColorsStyles } from '@adapttable/core/binding';
 import { EXPAND_TOGGLE } from '@adapttable/core/binding';
 import { ExpandToggleSlotProps } from '@adapttable/core/binding';
+import { EXPANSION_LIVE } from '@adapttable/core/binding';
+import { EXPORT_LIVE } from '@adapttable/core/binding';
 import { ExportAllControls } from '@adapttable/core';
 import { ExportAllQuery } from '@adapttable/core';
 import { ExportAllResult } from '@adapttable/core';
-import { exportButtonLabel } from '@adapttable/core';
+import { exportButtonLabel } from '@adapttable/core/binding';
 import { ExportColumnScope } from '@adapttable/core';
 import { ExportContext } from '@adapttable/core';
 import { ExportCsvOptions } from '@adapttable/core';
@@ -270,7 +281,9 @@ import { FetchAllExport } from '@adapttable/core';
 import { FillHandleCellSlotProps as FillHandleCellSlotProps_2 } from '@adapttable/core/binding';
 import { FillHandleSlotProps } from '@adapttable/core/binding';
 import { FillHandleSlots as FillHandleSlots_2 } from '@adapttable/core/binding';
+import { FILTER_CHIPS_LIVE } from '@adapttable/core/binding';
 import { FILTER_HEADER } from '@adapttable/core/binding';
+import { FILTER_LABELS } from '@adapttable/core/binding';
 import { FILTER_TYPES } from '@adapttable/core';
 import { filterColumnMenuRows } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
@@ -309,6 +322,7 @@ import { FilterWidgetKind } from '@adapttable/core';
 import { filterWidgetKind } from '@adapttable/core';
 import { FilterWidgetRenderProps } from '@adapttable/core';
 import { FIND_BAR } from '@adapttable/core/binding';
+import { FIND_LIVE } from '@adapttable/core/binding';
 import { FIND_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { FindBarProps } from '@adapttable/core/binding';
 import { FindBarSlots as FindBarSlots_2 } from '@adapttable/core/binding';
@@ -316,12 +330,13 @@ import { FindButtonKind } from '@adapttable/core/binding';
 import { FindButtonProps } from '@adapttable/core/binding';
 import { FindInTableState } from '@adapttable/core/binding';
 import { FindSearchProps as FindSearchProps_2 } from '@adapttable/core/binding';
-import { fittedTableStyle } from '@adapttable/core';
+import { fittedTableStyle } from '@adapttable/core/binding';
 import { flattenColumnTree } from '@adapttable/core/binding';
-import { FlattenedColumns } from '@adapttable/core';
+import { FlattenedColumns } from '@adapttable/core/binding';
 import { focusEditorOnMount } from '@adapttable/core/editing';
 import { FORCED_COLORS_CSS } from '@adapttable/core/binding';
 import { formatMultiDraft } from '@adapttable/core/editing';
+import { FULLSCREEN_LIVE } from '@adapttable/core/binding';
 import { FullscreenLiveSlotProps as FullscreenLiveSlotProps_2 } from '@adapttable/core/binding';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
@@ -346,6 +361,7 @@ import { groupedHeaderChildRule } from '@adapttable/core/binding';
 import { groupedHeaderLabelStyle } from '@adapttable/core/binding';
 import { GroupHeaderCardSlotProps as GroupHeaderCardSlotProps_2 } from '@adapttable/core/binding';
 import { GroupHeaderRowSlotProps as GroupHeaderRowSlotProps_2 } from '@adapttable/core/binding';
+import { GROUPING_LIVE } from '@adapttable/core/binding';
 import { GroupingCapability } from '@adapttable/core';
 import { GroupingChipKeyboardProps as GroupingChipKeyboardProps_2 } from '@adapttable/core/binding';
 import { GroupingDragProps as GroupingDragProps_2 } from '@adapttable/core/binding';
@@ -377,7 +393,7 @@ import { groupRowLayout } from '@adapttable/core/grouping';
 import { groupRowParts } from '@adapttable/core/binding';
 import { groupSelectionState } from '@adapttable/core/grouping';
 import { GroupSort } from '@adapttable/core';
-import { hasActiveHeaderFilter } from '@adapttable/core';
+import { hasActiveHeaderFilter } from '@adapttable/core/binding';
 import { HeaderGroupCell } from '@adapttable/core/binding';
 import { headerGroupRow } from '@adapttable/core/binding';
 import { headerGroupRows } from '@adapttable/core/binding';
@@ -412,14 +428,15 @@ import { KitEnvironment } from '@adapttable/core/binding';
 import { LayoutStorage } from '@adapttable/core';
 import { logicalAlign } from '@adapttable/core/binding';
 import { MobileCardField } from '@adapttable/core';
-import { mobileCardListStyle } from '@adapttable/core';
+import { mobileCardListStyle } from '@adapttable/core/binding';
 import { MobileCardModel } from '@adapttable/core';
 import { MobileCardRenderer } from '@adapttable/core';
+import { MouseEvent as MouseEvent_2 } from 'react';
 import { NestedTableDefaults } from '@adapttable/core';
 import { nestedTableDefaults } from '@adapttable/core';
 import { NestedTableParent } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
-import { nextPinSide } from '@adapttable/core';
+import { nextPinSide } from '@adapttable/core/binding';
 import { normalizeEditorOptions } from '@adapttable/core/editing';
 import { orderedCardEntries } from '@adapttable/core/binding';
 import { OVERLAY_MOTION } from '@adapttable/core/binding';
@@ -427,14 +444,14 @@ import { pageSizeOptions } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationItem } from '@adapttable/core';
-import { paginationItems } from '@adapttable/core';
+import { paginationItems } from '@adapttable/core/binding';
 import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
 import { paginationSlots } from '@adapttable/core';
 import { partitionPinnedRows } from '@adapttable/core';
 import { PatchFeature } from '@adapttable/core/binding';
 import { PIN_Z } from '@adapttable/core';
-import { pinActionLabel } from '@adapttable/core';
+import { pinActionLabel } from '@adapttable/core/binding';
 import { PinLeads } from '@adapttable/core';
 import { PinLeads as PinLeads_2 } from '@adapttable/core/binding';
 import { PINNED_BOTTOM_PART } from '@adapttable/core/binding';
@@ -443,7 +460,7 @@ import { PINNED_SUMMARY_TOP_PART } from '@adapttable/core';
 import { PINNED_TOP_PART } from '@adapttable/core/binding';
 import { PinnedCellStyle } from '@adapttable/core';
 import { pinnedCellStyle } from '@adapttable/core';
-import { pinnedColumnWidth } from '@adapttable/core';
+import { pinnedColumnWidth } from '@adapttable/core/binding';
 import { pinnedRowCellStyle } from '@adapttable/core/binding';
 import { pinnedRowPart } from '@adapttable/core/binding';
 import { PinnedRows } from '@adapttable/core';
@@ -454,6 +471,7 @@ import { PinnedSummaryEntry } from '@adapttable/core';
 import { pinnedSummaryPart } from '@adapttable/core';
 import { pinnedSummaryRowId } from '@adapttable/core';
 import { pinnedSummarySideFromId } from '@adapttable/core';
+import { PINNING_LIVE } from '@adapttable/core/binding';
 import { PinOffset } from '@adapttable/core';
 import { PinOffset as PinOffset_2 } from '@adapttable/core/binding';
 import { PinSide } from '@adapttable/core';
@@ -469,6 +487,7 @@ import { PivotPanelSlots as PivotPanelSlots_2 } from '@adapttable/core/binding';
 import { PivotPanelSurfaceProps as PivotPanelSurfaceProps_2 } from '@adapttable/core/binding';
 import { PivotZone } from '@adapttable/core';
 import { PivotZoneProps as PivotZoneProps_2 } from '@adapttable/core/binding';
+import { PlainSlotKey } from '@adapttable/core/binding';
 import { Props } from '@adapttable/core';
 import { QueryAggregate } from '@adapttable/core';
 import { QueryCondition } from '@adapttable/core';
@@ -476,6 +495,7 @@ import { QueryExtensions } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
 import { QueryGroupRow } from '@adapttable/core';
 import { QuerySupport } from '@adapttable/core';
+import { RailInsets } from '@adapttable/core/binding';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { readMultiDraft } from '@adapttable/core/editing';
@@ -495,7 +515,7 @@ import { resetColumnLayout } from '@adapttable/core/binding';
 import { resolveContextTarget } from '@adapttable/core';
 import { ResolvedContextTarget } from '@adapttable/core';
 import { ResolvedDensity } from '@adapttable/core/binding';
-import { resolveDisabledReason } from '@adapttable/core';
+import { resolveDisabledReason } from '@adapttable/core/binding';
 import { ResolvedPaginationMode } from '@adapttable/core';
 import { resolveFilterMode } from '@adapttable/core';
 import { resolveFilterRegistry } from '@adapttable/core';
@@ -504,12 +524,14 @@ import { resolveMobileLabel } from '@adapttable/core/binding';
 import { resolveRowEditTrigger } from '@adapttable/core/editing';
 import { resolveRowHeight } from '@adapttable/core/binding';
 import { resolveRowStyle } from '@adapttable/core/binding';
-import { resolveStickyToolbar } from '@adapttable/core';
-import { resolveVirtualRows } from '@adapttable/core';
-import { restoreFocusSoon } from '@adapttable/core';
+import { resolveStickyToolbar } from '@adapttable/core/binding';
+import { resolveTableLabels } from '@adapttable/core/binding';
+import { resolveVirtualRows } from '@adapttable/core/binding';
+import { restoreFocusSoon } from '@adapttable/core/binding';
+import { ROW_ACTIONS_LIVE } from '@adapttable/core/binding';
 import { ROW_DND_MIME } from '@adapttable/core/binding';
 import { ROW_EDIT_ACTIONS } from '@adapttable/core/binding';
-import { ROW_ID_ATTRIBUTE } from '@adapttable/core';
+import { ROW_ID_ATTRIBUTE } from '@adapttable/core/binding';
 import { ROW_REORDER_ANNOUNCER } from '@adapttable/core/binding';
 import { RowAction } from '@adapttable/core';
 import { RowActionsLayout } from '@adapttable/core';
@@ -529,7 +551,7 @@ import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
 import { RowEditTrigger } from '@adapttable/core';
 import { RowExpansionState } from '@adapttable/core/binding';
-import { rowFlashSignature } from '@adapttable/core';
+import { rowFlashSignature } from '@adapttable/core/binding';
 import { RowGroupLevel } from '@adapttable/core';
 import { RowGroupMoveHandler } from '@adapttable/core';
 import { RowGroupRef } from '@adapttable/core';
@@ -558,6 +580,7 @@ import { RowReorderLabels } from '@adapttable/core';
 import { RowReorderMoveButtonProps } from '@adapttable/core/binding';
 import { RowReorderOptions } from '@adapttable/core';
 import { RowReorderState as RowReorderState_2 } from '@adapttable/core/binding';
+import { RowSlotKey } from '@adapttable/core/binding';
 import { rowSourceIndex } from '@adapttable/core/binding';
 import { rowSpanSignature } from '@adapttable/core/binding';
 import { RowStyle } from '@adapttable/core';
@@ -581,6 +604,8 @@ import { SavedViewsSlotProps as SavedViewsSlotProps_2 } from '@adapttable/core/b
 import { SavedViewsStore } from '@adapttable/core';
 import { SavedViewVisibility } from '@adapttable/core';
 import { SearchInputState } from '@adapttable/core/binding';
+import { SELECTION_LIVE } from '@adapttable/core/binding';
+import { SELECTION_STATS_LIVE } from '@adapttable/core/binding';
 import { SelectionState } from '@adapttable/core/binding';
 import { SelectionStatPart } from '@adapttable/core/binding';
 import { SelectionStats } from '@adapttable/core';
@@ -592,7 +617,7 @@ import { shallowEqualByKeys } from '@adapttable/core/binding';
 import { SHARED_DESKTOP_ROW_KEYS } from '@adapttable/core/binding';
 import { Shortcut } from '@adapttable/core';
 import { showAllColumns } from '@adapttable/core/binding';
-import { showSimpleFilterFields } from '@adapttable/core';
+import { showSimpleFilterFields } from '@adapttable/core/binding';
 import { SidePanelChromeProps as SidePanelChromeProps_2 } from '@adapttable/core/binding';
 import { SidePanelCloseProps } from '@adapttable/core/binding';
 import { SidePanelFrameProps as SidePanelFrameProps_2 } from '@adapttable/core/binding';
@@ -640,10 +665,11 @@ import { TableAssistantView } from '@adapttable/core/binding';
 import { TableAssistantWindowProps as TableAssistantWindowProps_2 } from '@adapttable/core/binding';
 import { TableCommandOptions } from '@adapttable/core';
 import { TableDensity } from '@adapttable/core';
+import { TableEngine } from '@adapttable/core';
 import { TableErrorState } from '@adapttable/core';
-import { tableErrorState } from '@adapttable/core';
+import { tableErrorState } from '@adapttable/core/binding';
 import { TableLabels } from '@adapttable/core';
-import { tableMinWidth } from '@adapttable/core';
+import { tableMinWidth } from '@adapttable/core/binding';
 import { TableOptions } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
 import { TableQueryParams } from '@adapttable/core';
@@ -652,20 +678,26 @@ import { TableRuntimeView } from '@adapttable/core/binding';
 import { TableSource } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 import { TableStateMutators } from '@adapttable/core';
-import { TableStatusAnnouncementOptions } from '@adapttable/core';
+import { TableStatusAnnouncementOptions } from '@adapttable/core/binding';
+import { TableStore } from '@adapttable/core/binding';
 import { TableToolbarSlots } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
+import { TdHTMLAttributes } from 'react';
+import { ThHTMLAttributes } from 'react';
 import { toggleCollapsedColumnGroup } from '@adapttable/core/binding';
 import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
 import { ToolbarExtrasSlotProps } from '@adapttable/core/binding';
 import { toolbarShowsFilters } from '@adapttable/core';
 import { TotalCountCapability } from '@adapttable/core';
+import { TREE_LIVE } from '@adapttable/core/binding';
 import { TREE_TOGGLE } from '@adapttable/core/binding';
 import { treeCardStyle } from '@adapttable/core';
 import { TreeCellProps as TreeCellProps_2 } from '@adapttable/core/binding';
 import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
+import { treeRowAria } from '@adapttable/core/binding';
 import { TreeShape } from '@adapttable/core';
+import { treeTableAria } from '@adapttable/core/binding';
 import { TreeToggleButtonProps } from '@adapttable/core/binding';
 import { TreeToggleProps } from '@adapttable/core/binding';
 import { TreeToggleSlots as TreeToggleSlots_2 } from '@adapttable/core/binding';
@@ -674,11 +706,11 @@ import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
 import { ValidationCheckResult } from '@adapttable/core';
 import { ValidationTarget } from '@adapttable/core';
-import { virtualColumnSpan } from '@adapttable/core';
+import { virtualColumnSpan } from '@adapttable/core/binding';
 import { VirtualItemMeta } from '@adapttable/core';
 import { VirtualTableRow } from '@adapttable/core';
-import { visibleRowActions } from '@adapttable/core';
-import { WidthColumn } from '@adapttable/core';
+import { visibleRowActions } from '@adapttable/core/binding';
+import { WidthColumn } from '@adapttable/core/binding';
 import { windowGroupedEntries } from '@adapttable/core';
 import { withKitEnvironment } from '@adapttable/core/binding';
 
@@ -712,10 +744,10 @@ export type AdapterContextMenuProps = Omit<ContextMenuChromeProps, "slots">;
 
 // @public
 export interface AdapterEditingComponents {
-    readonly BatchEditBar: AdapterFeatureComponent<BatchEditBarProps<never>>;
-    readonly EditableCell: AdapterFeatureComponent<EditableCellRenderProps<never>>;
+    readonly BatchEditBar: AdapterFeatureComponent<BatchEditBarProps<unknown>>;
+    readonly EditableCell: AdapterFeatureComponent<EditableCellRenderProps<unknown>>;
     readonly historyIncludesControls?: boolean;
-    readonly RowEditActions: AdapterFeatureComponent<RowEditActionsProps<never>>;
+    readonly RowEditActions: AdapterFeatureComponent<RowEditActionsProps<unknown>>;
     readonly UndoRedoButtons: AdapterFeatureComponent<ToolbarExtrasSlotProps>;
 }
 
@@ -737,7 +769,7 @@ export interface AdapterFiltersComponents {
     readonly ActiveFilterChips: AdapterFeatureComponent<ActiveFilterChipsSlotProps>;
     readonly FilterDrawer: AdapterFeatureComponent<FilterOverlaySlotProps>;
     readonly FilterPopover: AdapterFeatureComponent<FilterOverlaySlotProps>;
-    readonly FiltersForm: AdapterFeatureComponent<FiltersFormSlotProps<never>>;
+    readonly FiltersForm: AdapterFeatureComponent<FiltersFormSlotProps<unknown>>;
 }
 
 // @public
@@ -754,8 +786,8 @@ export interface AdapterFindButtonProps extends ToolbarExtrasSlotProps {
 
 // @public
 export interface AdapterGroupingComponents {
-    readonly GroupHeaderCard: AdapterFeatureComponent<GroupHeaderCardSlotProps<never>>;
-    readonly GroupHeaderRow: AdapterFeatureComponent<GroupHeaderRowSlotProps<never>>;
+    readonly GroupHeaderCard: AdapterFeatureComponent<GroupHeaderCardSlotProps<unknown>>;
+    readonly GroupHeaderRow: AdapterFeatureComponent<GroupHeaderRowSlotProps<unknown>>;
 }
 
 // @public
@@ -766,9 +798,9 @@ export interface AdapterGroupingFeature {
 
 // @public
 export interface AdapterGroupingPanelComponents {
-    GroupHeaderCard: AdapterFeatureComponent<GroupHeaderCardSlotProps<never>>;
-    GroupHeaderRow: AdapterFeatureComponent<GroupHeaderRowSlotProps<never>>;
-    GroupingPanel: AdapterFeatureComponent<GroupingPanelSlotProps<never>>;
+    GroupHeaderCard: AdapterFeatureComponent<GroupHeaderCardSlotProps<unknown>>;
+    GroupHeaderRow: AdapterFeatureComponent<GroupHeaderRowSlotProps<unknown>>;
+    GroupingPanel: AdapterFeatureComponent<GroupingPanelSlotProps<unknown>>;
 }
 
 // @public
@@ -790,8 +822,8 @@ export interface AdapterRowDetailFeatures {
 
 // @public
 export interface AdapterRowReorderComponents {
-    readonly RowReorderButtons: AdapterFeatureComponent<RowReorderButtonsProps<never>>;
-    readonly RowReorderHandle: AdapterFeatureComponent<RowReorderHandleProps<never>>;
+    readonly RowReorderButtons: AdapterFeatureComponent<RowReorderButtonsProps<unknown>>;
+    readonly RowReorderHandle: AdapterFeatureComponent<RowReorderHandleProps<unknown>>;
 }
 
 // @public
@@ -951,7 +983,8 @@ export interface BatchEditCellProps<TRow> {
 
 export { BatchEditingState }
 
-export { BatchRowEdit }
+// @public
+export type BatchRowEdit<TRow> = BatchRowEdit_2<TRow>;
 
 export { bindFeatureHostFn }
 
@@ -985,10 +1018,12 @@ export interface BulkBarChromeProps {
 
 export { BulkBarState }
 
-// @public
-export const CELL_NAV_LIVE: FeatureSlotKey<CellNavLiveSlotProps<never>>;
+export { CELL_NAV_LIVE }
 
 export { CellConflictAsk }
+
+// @public
+export function cellDisplay<TRow>(column: ColumnDef<TRow>, row: TRow, rowIndex: number): ReactNode;
 
 export { CellEdit }
 
@@ -1006,6 +1041,13 @@ export { CellEditor }
 
 export { CellEditorOption }
 
+// @public
+export interface CellEditorProps {
+    readonly className?: string;
+    readonly ctrl: EditableCellEditorCtrl;
+    readonly label: string;
+}
+
 export { CellEditTarget }
 
 // @public
@@ -1021,7 +1063,12 @@ export { cellFlashAttr }
 export const cellHighlightStyle: (props: Readonly<Record<string, unknown>> | undefined, base: CSSProperties | undefined, selected: CSSProperties) => CSSProperties | undefined;
 
 // @public
-export type CellNavLiveSlotProps<TRow = never> = CellNavLiveSlotProps_2<Omit<UseGridFocusOptions<TRow>, "enabled" | "onPaste" | "onFill" | "onUndo" | "onRedo" | "onFind">, ComposedTableProps<TRow>, GridFocusState, ReactNode>;
+export type CellNavLiveDraw = <TRow>(props: CellNavLiveSlotProps<TRow>) => ReactNode;
+
+// @public
+export type CellNavLiveSlotProps<TRow = never> = CellNavLiveSlotProps_2<Omit<UseGridFocusOptions<TRow>, "enabled" | "onPaste" | "onFill" | "onUndo" | "onRedo" | "onFind">, ComposedTableProps<TRow>, GridFocusState, ReactNode, CellEdit<TRow>> & {
+    readonly editing?: EditableCellEditing<TRow>;
+};
 
 export { CellProps }
 
@@ -1072,8 +1119,7 @@ export { ChecklistValue }
 
 export { ChipLabelResolver }
 
-// @public
-export const CHROME_BODY: FeatureSlotKey<ChromeBodySlotProps<never>>;
+export { CHROME_BODY }
 
 // @public
 export interface ChromeBodyData<TRow> {
@@ -1091,6 +1137,9 @@ export interface ChromeBodyData<TRow> {
 }
 
 // @public
+export type ChromeBodyDraw = <TRow>(props: ChromeBodySlotProps<TRow>) => ReactNode;
+
+// @public
 export function ChromeBodyGate<TRow>(input: {
     readonly chrome: TableChrome<TRow>;
     readonly props: ComposedTableProps<TRow>;
@@ -1099,6 +1148,9 @@ export function ChromeBodyGate<TRow>(input: {
 
 // @public
 export type ChromeBodySlotProps<TRow = never> = ChromeBodySlotProps_2<TableChrome<TRow>, ComposedTableProps<TRow>, ChromeBodyData<TRow>, ReactNode>;
+
+// @public
+export type ChromeExtraDraw = <TRow>(props: ChromeExtraSlotProps<TRow>) => ReactNode;
 
 // @public
 export function ChromeExtrasGate<TRow>(input: {
@@ -1131,8 +1183,7 @@ export { COLUMN_GROUP_TOGGLE }
 // @public
 export const COLUMN_HEADER_RENAME: FeatureSlotKey<ColumnHeaderRenameSlotProps>;
 
-// @public
-export const COLUMN_LAYOUT_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { COLUMN_LAYOUT_LIVE }
 
 export { COLUMN_MENU }
 
@@ -1170,6 +1221,9 @@ export interface ColumnDropProps {
     onDragOver: (event: DragEvent_2<HTMLElement>) => void;
     onDrop: (event: DragEvent_2<HTMLElement>) => void;
 }
+
+// @public
+export function columnDropProps(index: number, move: (key: string, toIndex: number) => void): ColumnDropProps;
 
 export { ColumnFilter }
 
@@ -1221,6 +1275,15 @@ interface ColumnHeaderContext_2<TRow> {
 }
 
 export { ColumnHeaderController }
+
+// @public
+export function columnHeaderController<TRow>(column: ColumnDef<TRow>, extras?: {
+    sortDir?: "asc" | "desc";
+    sortIndex?: number;
+    toggleSort?: (event?: {
+        shiftKey?: boolean;
+    }) => void;
+}): ColumnHeaderController_2;
 
 // @public
 interface ColumnHeaderController_2 {
@@ -1291,6 +1354,9 @@ export interface ColumnReorderKeyProps {
     tabIndex: 0;
 }
 
+// @public
+export function columnReorderKeyProps(key: string, index: number, move: (key: string, toIndex: number) => void, label: string): ColumnReorderKeyProps;
+
 export { ColumnResizeHandleProps }
 
 export { columnResizeHandleProps }
@@ -1300,6 +1366,9 @@ export interface ColumnRowDragProps {
     draggable: true;
     onDragStart: (event: DragEvent_2<HTMLElement>) => void;
 }
+
+// @public
+export function columnRowDragProps(key: string): ColumnRowDragProps;
 
 // @public
 export function ColumnSelectCheckboxChrome(input: Readonly<ColumnSelectCheckboxChromeProps>): JSX.Element;
@@ -1316,6 +1385,9 @@ export { columnSelectLabel }
 // @public
 export type ColumnSelectSlots = ColumnSelectSlots_2<ReactNode>;
 
+// @public
+export function columnsHaveFooter<TRow>(columns: readonly ColumnDef<TRow>[]): boolean;
+
 export { columnSizeStyle }
 
 export { ColumnSizingOptions }
@@ -1326,7 +1398,7 @@ export function ColumnSpacer(input: Readonly<ColumnSpacerProps>): ReactElement |
 // @public
 export interface ColumnSpacerProps {
     as?: "td" | "th";
-    side: "start" | "end";
+    side: ColumnSpacerSide;
     width: number;
 }
 
@@ -1386,7 +1458,7 @@ export { ConfirmRequest }
 export const CONTEXT_MENU: FeatureSlotKey<Omit<ContextMenuChromeProps, "slots">>;
 
 // @public
-export const CONTEXT_MENU_LIVE: FeatureSlotKey<ContextMenuLiveSlotProps<never>>;
+export const CONTEXT_MENU_LIVE: FeatureSlotKey<ContextMenuLiveSlotProps<unknown>>;
 
 export { ContextMenuActions }
 
@@ -1408,7 +1480,7 @@ export { ContextMenuItemsFactory }
 
 // @public
 export function ContextMenuLiveGate(input: {
-    readonly props: Omit<ContextMenuLiveSlotProps<never>, "children">;
+    readonly props: Omit<ContextMenuLiveSlotProps<unknown>, "children">;
     readonly children: (regionProps: Record<string, unknown>) => ReactNode;
 }): ReactNode;
 
@@ -1467,9 +1539,136 @@ export function createAdapterStandardFeatures(factories: AdapterStandardFeatureF
 export function createAdapterTableAssistantFeature(TableAssistant: AdapterFeatureComponent<TableAssistantProps>): StaticTableFeature;
 
 // @public
+export function createAgentApproval(kit: KitPrimitivesOf<"Button">): (props: Readonly<AgentApprovalProps>) => ReactElement;
+
+// @public
+export function createBatchEditBar(kit: KitPrimitivesOf<"Button">): <TRow>(props: Readonly<BatchEditBarProps<TRow>>) => ReactElement;
+
+// @public
+export function createBulkBar(kit: KitBulkBar): (props: Readonly<BulkBarChromeProps>) => ReactElement | null;
+
+// @public
+export function createCellEditor(kit: KitCellEditors): ComponentType<CellEditorProps>;
+
+// @public
+export function createChecklistFilter(kit: KitPrimitivesOf<"TextInput" | "Button" | "Checkbox">, look?: KitChecklistLook): KitChecklistFilter;
+
+// @public
+export function createColumnGroupToggle(kit: KitPrimitivesOf<"IconButton">): (props: Readonly<ColumnGroupToggleProps>) => ReactElement;
+
+// @public
+export function createColumnHeaderRename(kit: KitPrimitivesOf<"Button" | "IconButton" | "TextInput" | "Text"> & {
+    readonly RenameField?: (props: KitRenameFieldProps) => ReactElement;
+    readonly editIcon: ReactNode;
+    readonly usePartClass?: KitUsePartClass;
+}, useLook: () => KitHeaderRenameLook): (props: Readonly<ColumnHeaderRenameSlotProps>) => ReactElement;
+
+// @public
+export function createColumnMenu(kit: KitPrimitivesOf<"Button" | "IconButton" | "TextInput" | "Select" | "Popover" | "Text" | "Divider"> & {
+    readonly RenameField?: (props: KitRenameFieldProps) => ReactElement;
+    readonly usePartClass?: KitUsePartClass;
+}, useLook: () => KitColumnMenuLook): <TRow>(props: Readonly<ColumnMenuSlotProps<TRow>>) => ReactElement;
+
+// @public
+export function createCommandPaletteButton(Button: ComponentType<KitButtonProps>): (props: Readonly<AdapterCommandPaletteTriggerProps>) => ReactElement;
+
+// @public
+export function createDensityButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement;
+
+// @public
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): (props: TProps) => ReactElement;
 
+// @public
+export function createDesktopTable<TExtra>(kit: KitDesktopTable<TExtra>): <TRow>(props: Readonly<KitDesktopTableProps<TRow, TExtra>>) => ReactElement;
+
+// @public
+export function createEditableCell(kit: {
+    readonly Editor: ComponentType<CellEditorProps>;
+    readonly slots: EditableCellSlots;
+    readonly rendersError: boolean;
+}): <TRow>(props: Readonly<EditableDataCellProps<TRow>>) => ReactElement;
+
+// @public
+export function createEditableCellSlots(kit: KitPrimitivesOf<"Button">): EditableCellSlots;
+
+// @public
+export function createExportCsvButton(Button: ComponentType<KitButtonProps>, Surface: (props: ExportProgressSurfaceSlotProps) => ReactNode): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
+
+// @public
+export function createFilterHeaderControl(kit: KitFilterHeader): <TRow>(props: Readonly<FilterHeaderControlProps<TRow>>) => ReactElement | null;
+
+// @public
+export function createFilterHeaderRow(kit: KitFilterHeader): <TRow>(props: Readonly<FilterHeaderRowProps<TRow>>) => ReactElement | null;
+
 export { createFilterRegistry }
+
+// @public
+export function createFindBar(kit: KitPrimitivesOf<"TextInput" | "IconButton">): (props: Readonly<FindBarProps>) => ReactElement;
+
+// @public
+export function createFindButton(Button: ComponentType<KitButtonProps>): (props: Readonly<AdapterFindButtonProps>) => ReactElement;
+
+// @public
+export function createFullscreenButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
+
+// @public
+export function createGroupHeader(kit: KitGroupHeader): {
+    readonly GroupHeaderRow: <TRow>(props: Readonly<KitGroupRowProps<TRow>>) => ReactElement;
+    readonly GroupHeaderCard: <TRow>(props: Readonly<KitGroupHeaderProps<TRow> & {
+        readonly compact?: boolean;
+    }>) => ReactElement;
+};
+
+// @public
+export function createGroupMoreButton(kit: KitPrimitivesOf<"Button">): (props: Readonly<GroupMoreButtonProps>) => ReactElement | null;
+
+// @public
+export function createMobileCards<TExtra>(kit: KitMobileCards<TExtra>): <TRow>(props: Readonly<KitMobileCardsProps<TRow, TExtra>>) => ReactElement;
+
+// @public
+export function createPageButtons(kit: KitPrimitivesOf<"Button" | "Text">, look: KitPageButtonsLook): (props: Readonly<KitPagesProps>) => ReactElement;
+
+// @public
+export function createPager(kit: KitPager): (view: KitPagerView) => ReactElement;
+
+// @public
+export function createPrintButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
+
+// @public
+export function createRowActionButtons(kit: KitRowActions): <TRow>(props: Readonly<RowActionButtonsProps<TRow>>) => ReactElement | null;
+
+// @public
+export function createRowEditActions(kit: KitPrimitivesOf<"Button" | "IconButton">, iconFor: (part: string, icon: unknown) => ReactNode): <TRow>(props: Readonly<RowEditActionsProps<TRow>>) => ReactElement;
+
+// @public
+export function createRowReorderButtons(kit: KitPrimitivesOf<"IconButton"> & (KitPrimitivesOf<"Button" | "Menu" | "Popover" | "Text"> | {
+    readonly MoveMenu: (props: RowMoveMenuSlotProps) => ReactNode;
+})): <TRow>(props: Readonly<RowReorderButtonsProps<TRow>>) => ReactElement;
+
+// @public
+export function createRowReorderHandle(kit: KitPrimitivesOf<"IconButton"> & (KitPrimitivesOf<"Button" | "Menu" | "Popover" | "Text"> | {
+    readonly MoveMenu: (props: RowMoveMenuSlotProps) => ReactNode;
+})): <TRow>(props: Readonly<RowReorderHandleProps<TRow>>) => ReactElement;
+
+// @public
+export function createSavedViewsMenu(kit: KitPrimitivesOf<"Button" | "IconButton" | "TextInput" | "Popover" | "Divider"> & {
+    readonly deleteIcon: ReactNode;
+    readonly usePartClass?: KitUsePartClass;
+}, useLook: () => KitSavedViewsLook): (props: Readonly<SavedViewsSlotProps>) => ReactElement;
+
+// @public
+export function createToolbar(kit: KitToolbar): <TRow>(props: Readonly<KitToolbarProps<TRow>>) => ReactElement;
+
+// @public
+export function createTreeCell(kit: KitPrimitivesOf<"IconButton">): <TRow>(props: Readonly<TreeCellProps<TRow>>) => ReactElement;
+
+// @public
+export function createTreeToggle(kit: KitPrimitivesOf<"IconButton">): <TRow>(props: Readonly<TreeToggleProps<TRow>>) => ReactElement | null;
+
+// @public
+export function createUndoRedoButtons(Button: ComponentType<KitButtonProps>, Group?: ComponentType<{
+    readonly children: ReactNode;
+}>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
 
 export { CustomCellEditorConflict }
 
@@ -1556,6 +1755,7 @@ export interface DataTableShellResult<TRow> {
     statusAnnouncement: string;
     table: UseDataTableResult<TRow>;
     tableProps: DataTableShellTableProps<TRow>;
+    tableStore: TableStore;
     toolbarProps: DataTableShellToolbarProps<TRow>;
     urlAdapter: UrlStateAdapter;
 }
@@ -1721,6 +1921,7 @@ export interface DesktopRowWiring<TRow> {
     pinRowSticky: boolean;
     pinSignature: string;
     pinSticky: ReturnType<typeof pinnedRowSticky>;
+    railInsets: RailInsets;
     renderDetail: (row: TRow) => ReactNode;
     renderRowActions: SharedTableRenderProps<TRow>["renderRowActions"];
     reorderPinned: boolean;
@@ -1866,6 +2067,7 @@ export interface DesktopTablePin {
     inScrollBox: boolean;
     leads: PinLeads;
     pinRowSticky: boolean;
+    railInsets: RailInsets;
     reorderLead: number;
     rowPinOffset: number;
     selectionLead: number;
@@ -1901,14 +2103,15 @@ export function disabledHistory<TRow>(): EditHistoryState<TRow>;
 
 export { edgePinStyle }
 
-// @public
-export const EDIT_HISTORY_LIVE: FeatureSlotKey<EditHistoryLiveSlotProps<never>>;
+export { EDIT_HISTORY_LIVE }
 
 // @public
-export const EDITABLE_CELL: FeatureSlotKey<EditableCellSlotProps<never>>;
+export const EDITABLE_CELL: FeatureSlotKey<EditableCellSlotProps<unknown>>;
 
 // @public
-export type EditableCellActivateProps = EditableCellActivateProps_2<ReactNode>;
+type EditableCellActivateProps$1 = EditableCellActivateProps_2<ReactNode>;
+export { EditableCellActivateProps$1 as EditableCellActivateControlProps }
+export { EditableCellActivateProps$1 as EditableCellActivateProps }
 
 export { EditableCellButtonProps }
 
@@ -1930,26 +2133,7 @@ export interface EditableCellEditing<TRow> extends EditingBundle<TRow> {
     rowEditIcons?: RowEditIcons;
 }
 
-// @public
-export interface EditableCellEditorCtrl {
-    commitOnBlur: () => void;
-    conflict?: boolean;
-    draft: string;
-    editor: NonNullable<ReturnType<typeof editableCellController>["editor"]>;
-    error?: string;
-    errorId: string;
-    focusRef: (node: {
-        focus: () => void;
-    } | null) => void;
-    onEditorKeyDown: (event: {
-        key: string;
-        preventDefault: () => void;
-        shiftKey?: boolean;
-    }) => void;
-    selectOptions: ReturnType<typeof editableCellController>["selectOptions"];
-    setDraft: (value: string) => void;
-    validating: boolean;
-}
+export { EditableCellEditorCtrl }
 
 export { EditableCellMode }
 
@@ -1965,6 +2149,25 @@ export type EditableCellSlotProps<TRow = never> = EditableCellSlotProps_2<TRow, 
 export type EditableCellSlots = EditableCellSlots_2<ReactNode>;
 
 export { EditableColumnLike }
+
+// @public
+export interface EditableDataCellProps<TRow> {
+    readonly activateClassName?: string;
+    readonly column: ColumnDef<TRow>;
+    readonly columns: readonly ColumnDef<TRow>[];
+    readonly display: ReactNode;
+    readonly editing: EditableCellEditing<TRow> | undefined;
+    readonly editLabel: string;
+    readonly editorClassName?: string;
+    readonly errorClassName?: string;
+    readonly rollbackClassName?: string;
+    readonly row: TRow;
+    readonly rowId: string;
+    readonly rowKey: (row: TRow) => string;
+    readonly rows: readonly TRow[];
+    readonly saveErrorClassName?: string;
+    readonly undoLabel?: string;
+}
 
 export { EditConflict }
 
@@ -1992,6 +2195,9 @@ export interface EditHistoryHandle {
 }
 
 // @public
+export type EditHistoryLiveDraw = <TRow>(props: EditHistoryLiveSlotProps<TRow>) => ReactNode;
+
+// @public
 export type EditHistoryLiveSlotProps<TRow = never> = EditHistoryLiveSlotProps_2<TRow, EditHistoryState<TRow>, EditHistoryOptions, ColumnDef<TRow>, ReactNode>;
 
 // @public
@@ -2002,8 +2208,7 @@ export interface EditHistoryOptions {
 
 export { EditHistoryState }
 
-// @public
-export const EDITING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { EDITING_LIVE }
 
 export { EditLifecycle }
 
@@ -2034,11 +2239,9 @@ export function ExpandChevron(input: Readonly<{
 
 export { ExpandToggleSlotProps }
 
-// @public
-export const EXPANSION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { EXPANSION_LIVE }
 
-// @public
-export const EXPORT_LIVE: FeatureSlotKey<ExportLiveSlotProps>;
+export { EXPORT_LIVE }
 
 export { ExportAllControls }
 
@@ -2065,6 +2268,9 @@ export { ExportCsvOptions }
 export { ExportHandlerState }
 
 export { ExportInfo }
+
+// @public
+export type ExportLiveDraw = <TRow>(props: ExportLiveSlotProps<TRow>) => ReactNode;
 
 // @public
 export type ExportLiveSlotProps<TRow = never> = ExportLiveSlotProps_2<TRow, ExportHandlerState, ColumnDef<TRow>, ReactNode>;
@@ -2162,6 +2368,11 @@ export function FeatureHostProvider(input: Readonly<{
 
 export { FeatureHostState }
 
+// @public
+export function featureLabelsFor(props: {
+    readonly featureLabels?: readonly Partial<TableLabels>[];
+}): readonly Partial<TableLabels>[];
+
 export { FeatureNotice }
 
 export { FeatureNoticeAppearance }
@@ -2188,6 +2399,7 @@ export interface FeatureProps<TRow> {
     enableColumnMenu?: boolean;
     exportCsv?: boolean | ExportCsvOptions<TRow>;
     extraRows?: readonly ExtraRow[];
+    featureLabels?: readonly Partial<TableLabels>[];
     filters?: readonly FilterDef<TRow>[] | ReactNode;
     filterTypes?: readonly FilterTypeSpec[];
     findInTable?: boolean;
@@ -2254,8 +2466,14 @@ export function FeatureProviders(input: {
 export type FeatureRender<TProps> = FeatureRender_2<TProps, ReactNode>;
 
 // @public
-export function FeatureSlot<TProps>(input: {
-    readonly slot: FeatureSlotKey<TProps>;
+export function FeatureSlot<TProps>(props: {
+    readonly slot: PlainSlotKey<TProps>;
+    readonly props: TProps;
+}): ReactNode;
+
+// @public
+export function FeatureSlot<TProps>(props: {
+    readonly slot: RowSlotKey<(props: NoInfer<TProps>) => ReactNode>;
     readonly props: TProps;
 }): ReactNode;
 
@@ -2303,13 +2521,14 @@ export type FillHandleSlots = FillHandleSlots_2<ReactNode>;
 // @public
 export function fillSlot<TState>(slot: Slot<TState> | undefined, state: TState): ReactNode;
 
-// @public
-export const FILTER_CHIPS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { FILTER_CHIPS_LIVE }
 
 // @public
 export const FILTER_DRAWER: FeatureSlotKey<FilterOverlaySlotProps>;
 
 export { FILTER_HEADER }
+
+export { FILTER_LABELS }
 
 // @public
 export const FILTER_POPOVER: FeatureSlotKey<FilterOverlaySlotProps>;
@@ -2428,8 +2647,7 @@ export { FilterWidgetRenderProps }
 
 export { FIND_BAR }
 
-// @public
-export const FIND_LIVE: FeatureSlotKey<FindLiveSlotProps<never>>;
+export { FIND_LIVE }
 
 export { FIND_URL_WRITE_DEBOUNCE_MS }
 
@@ -2454,6 +2672,9 @@ export { FindButtonProps }
 export function findButtonRender(Button: AdapterFeatureComponent<AdapterFindButtonProps>): FeatureRender<ToolbarExtrasSlotProps>;
 
 export { FindInTableState }
+
+// @public
+export type FindLiveDraw = <TRow>(props: FindLiveSlotProps<TRow>) => ReactNode;
 
 // @public
 export interface FindLiveSlotProps<TRow = never> extends UseFindInTableOptions<TRow> {
@@ -2488,8 +2709,10 @@ export function ForcedColorsStyle(): null;
 
 export { formatMultiDraft }
 
+export { FULLSCREEN_LIVE }
+
 // @public
-export const FULLSCREEN_LIVE: FeatureSlotKey<FullscreenLiveSlotProps>;
+export type FullscreenLiveDraw = (props: FullscreenLiveSlotProps) => ReactNode;
 
 // @public
 export type FullscreenLiveSlotProps = FullscreenLiveSlotProps_2<FullscreenState, ReactNode>;
@@ -2521,10 +2744,10 @@ export { GridFocusState }
 export function GripIcon(): ReactElement;
 
 // @public
-export const GROUP_HEADER_CARD: FeatureSlotKey<GroupHeaderCardSlotProps<never>>;
+export const GROUP_HEADER_CARD: FeatureSlotKey<GroupHeaderCardSlotProps<unknown>>;
 
 // @public
-export const GROUP_HEADER_ROW: FeatureSlotKey<GroupHeaderRowSlotProps<never>>;
+export const GROUP_HEADER_ROW: FeatureSlotKey<GroupHeaderRowSlotProps<unknown>>;
 
 export { groupAggregateEntries }
 
@@ -2563,11 +2786,10 @@ export type GroupHeaderRowSlotProps<TRow = never> = GroupHeaderRowSlotProps_2<TR
 // @public
 export const groupIndentStyle: (level: number) => CSSProperties;
 
-// @public
-export const GROUPING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { GROUPING_LIVE }
 
 // @public
-export const GROUPING_PANEL: FeatureSlotKey<GroupingPanelSlotProps<never>>;
+export const GROUPING_PANEL: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
 
 export { GroupingCapability }
 
@@ -2686,6 +2908,12 @@ export function HistoryLiveGate<TRow>(input: {
     readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
 }): ReactNode;
 
+// @public
+export interface HorizontalOverflow<E extends HTMLElement> {
+    overflowing: boolean;
+    ref: (node: E | null) => void;
+}
+
 export { HtmlGroupedHeaderCell }
 
 export { htmlGroupedHeaderPlan }
@@ -2739,7 +2967,768 @@ export interface KeyedWindow extends KeyedVirtualization {
 // @public
 export type KeyedWindowSlotProps = KeyedWindowSlotProps_2<KeyedWindow, ReactNode>;
 
+// @public
+export interface KitBulkBar {
+    readonly Button: ComponentType<KitBulkButtonProps>;
+    readonly Frame: ComponentType<KitBulkBarFrameProps>;
+    readonly Text: ComponentType<KitBulkTextProps>;
+}
+
+// @public
+export interface KitBulkBarFrameProps extends KitDataAttributes {
+    readonly actions: ReactNode;
+    readonly clear: ReactNode;
+    readonly count: ReactNode;
+    readonly error: ReactNode;
+    readonly scope: {
+        readonly text: ReactNode;
+        readonly button: ReactNode;
+        readonly attributes: KitDataAttributes & {
+            readonly role: "status";
+        };
+    } | null;
+}
+
+// @public
+export type KitBulkButtonKind = "clear" | "clear-scope" | "select-all-matching" | "action";
+
+// @public
+export interface KitBulkButtonProps extends KitDataAttributes {
+    readonly busy: boolean;
+    readonly children: ReactNode;
+    readonly color?: string;
+    readonly disabled: boolean;
+    readonly icon?: ReactNode;
+    readonly kind: KitBulkButtonKind;
+    readonly onClick: () => void;
+    readonly reason?: string;
+}
+
+// @public
+export type KitBulkTextKind = "count" | "scope" | "error";
+
+// @public
+export interface KitBulkTextProps extends KitDataAttributes {
+    readonly children: ReactNode;
+    readonly kind: KitBulkTextKind;
+    readonly role?: "alert";
+}
+
+// @public
+export interface KitButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color">, KitDataAttributes {
+    readonly busy?: boolean;
+    readonly elementRef?: Ref<HTMLButtonElement>;
+    readonly fullWidth?: boolean;
+    readonly justify?: "start";
+    readonly tone?: KitTone;
+    readonly variant?: KitButtonVariant;
+}
+
+// @public
+export type KitButtonVariant = "text" | "outlined" | "filled";
+
+// @public
+export interface KitCardRegions {
+    readonly actions: ReactNode;
+    readonly body: ReactNode;
+    readonly compact: boolean;
+    readonly detail: ReactNode;
+    readonly expand: ReactNode;
+    readonly reorder: ReactNode;
+    readonly rowEdit: ReactNode;
+    readonly select: ReactNode;
+    readonly tree: ReactNode;
+}
+
+// @public
+export interface KitCardSelectProps {
+    readonly "aria-label": string;
+    readonly checked: boolean;
+    readonly onToggle: () => void;
+}
+
+// @public
+export interface KitCardsLook {
+    readonly actions: CSSProperties;
+    readonly detail: CSSProperties;
+    readonly field: (labelled: boolean, compact: boolean) => CSSProperties;
+    readonly grid: (compact: boolean) => CSSProperties;
+}
+
+// @public
+export interface KitCardTextProps extends KitDataAttributes {
+    readonly children: ReactNode;
+    readonly labelled: boolean;
+}
+
+// @public
+export interface KitCellCheckboxProps extends KitCellEditorProps {
+    readonly checked: boolean;
+    readonly onCheckedChange: (checked: boolean) => void;
+}
+
+// @public
+export interface KitCellEditorProps {
+    readonly aria: Readonly<Record<string, string | true | undefined>>;
+    readonly className?: string;
+    readonly ctrl: EditableCellEditorCtrl;
+    readonly error: string | undefined;
+    readonly label: string;
+    readonly onKeyDown: (event: KeyboardEvent_2) => void;
+}
+
+// @public
+export interface KitCellEditors {
+    readonly Checkbox: ComponentType<KitCellCheckboxProps>;
+    readonly Input: ComponentType<KitCellInputProps>;
+    readonly MultiSelect: ComponentType<KitCellEditorProps>;
+    readonly rendersError: boolean;
+    readonly Select: ComponentType<KitCellEditorProps>;
+}
+
+// @public
+export interface KitCellInputProps extends KitCellEditorProps {
+    readonly type: ReturnType<typeof editorInputType>;
+}
+
+// @public
+export interface KitCheckboxProps extends KitDataAttributes {
+    readonly "aria-label"?: string;
+    readonly checked: boolean;
+    readonly className?: string;
+    readonly disabled?: boolean;
+    readonly indeterminate?: boolean;
+    readonly label?: ReactNode;
+    readonly onCheckedChange: (checked: boolean) => void;
+    readonly rootPart?: string;
+    readonly style?: CSSProperties;
+}
+
+// @public
+export type KitChecklistFilter = <TRow>(props: Readonly<ChecklistFilterProps<TRow>>) => ReactElement;
+
+// @public
+export interface KitChecklistLook {
+    readonly button?: Pick<KitButtonProps, "variant" | "tone">;
+    readonly checkbox?: CSSProperties;
+}
+
+// @public
+export interface KitColumnMenuLook {
+    readonly accent: string;
+    readonly bulk: CSSProperties;
+    readonly choice: CSSProperties;
+    readonly divider: CSSProperties;
+    readonly fixedRow?: CSSProperties;
+    readonly flatItem?: boolean;
+    readonly footerDivider?: boolean;
+    readonly grip: CSSProperties;
+    readonly heading: CSSProperties;
+    readonly panel: CSSProperties;
+    readonly panelInset?: number;
+    readonly renameActions: CSSProperties;
+    readonly renameForm: CSSProperties;
+    readonly row: CSSProperties;
+    readonly rowSpacer: CSSProperties;
+    readonly search: CSSProperties;
+    readonly submenu: CSSProperties;
+}
+
+// @public
+export type KitDataAttributes = Readonly<Partial<Record<`data-${string}`, string>>>;
+
+// @public
+export type KitDesktopCellKind = "lead" | "data" | "actions" | "detail" | "extra" | "pad" | "summary";
+
+// @public
+export interface KitDesktopCellProps extends Omit<TdHTMLAttributes<HTMLTableCellElement>, "align">, KitDataAttributes {
+    readonly kind: KitDesktopCellKind;
+}
+
+// @public
+export type KitDesktopHeaderCellKind = "lead" | "leaf" | "group" | "actions";
+
+// @public
+export interface KitDesktopHeaderCellProps extends Omit<ThHTMLAttributes<HTMLTableCellElement>, "align">, KitDataAttributes {
+    readonly kind: KitDesktopHeaderCellKind;
+    readonly railWidth?: number;
+}
+
+// @public
+export interface KitDesktopLeafState {
+    readonly pinned: boolean;
+    readonly rowSpan: number;
+    readonly size: CSSProperties;
+    readonly style: CSSProperties;
+}
+
+// @public
+export interface KitDesktopPaint {
+    readonly captionRow?: (align: ColumnDef<unknown>["align"]) => CSSProperties;
+    readonly cell: (pin: CSSProperties | undefined, row: KitDesktopRowState) => CSSProperties | undefined;
+    readonly classHighlight?: boolean;
+    readonly group: (cell: Exclude<HtmlGroupedHeaderCell, {
+        readonly kind: "leaf";
+    }>) => CSSProperties;
+    readonly headRail: (side: "start" | "end", pinned: boolean, inset: number, pin: DesktopTablePin) => CSSProperties | undefined;
+    readonly leaf: (leaf: KitDesktopLeafState, pin: DesktopTablePin) => CSSProperties | undefined;
+    readonly rail: (side: "start" | "end", pinned: boolean, inset: number, row: KitDesktopRowState) => CSSProperties | undefined;
+    readonly resizeHandle: (style: CSSProperties) => CSSProperties;
+    readonly selectedCell: CSSProperties;
+    readonly summaryCell?: CSSProperties;
+}
+
+// @public
+export interface KitDesktopRowProps extends HTMLAttributes<HTMLTableRowElement>, KitDataAttributes {
+    readonly elementRef?: Ref<HTMLTableRowElement>;
+    readonly kind: "body" | "detail" | "extra" | "pad" | "summary";
+    readonly selected?: boolean;
+}
+
+// @public
+export interface KitDesktopRowState {
+    readonly rowPinned: boolean;
+    readonly stickyHeader: boolean;
+}
+
+// @public
+export interface KitDesktopTable<TExtra> {
+    readonly Cell: ComponentType<KitDesktopCellProps>;
+    readonly Checkbox: ComponentType<KitCheckboxProps>;
+    readonly Foot: ComponentType<{
+        readonly "data-adapttable-part": string;
+        readonly children: ReactNode;
+    }>;
+    readonly HeaderCell: ComponentType<KitDesktopHeaderCellProps>;
+    readonly Row: ComponentType<KitDesktopRowProps>;
+    readonly RowActions: <TRow>(props: {
+        readonly row: TRow;
+        readonly actions: ReturnType<typeof resolveRowEditTrigger<TRow>>["actions"];
+        readonly confirm: DesktopRowWiring<TRow>["confirm"];
+        readonly labels: DesktopRowWiring<TRow>["labels"];
+        readonly layout: DesktopRowWiring<TRow>["rowActionsLayout"];
+        readonly render: DesktopRowWiring<TRow>["renderRowActions"];
+    }) => ReactNode;
+    readonly SortLabel: ComponentType<KitSortLabelProps>;
+    readonly useChrome: <TRow>(props: KitDesktopTableProps<TRow, TExtra>, assembly: DesktopTableAssembly<TRow>) => Omit<DesktopTableChromeProps<TRow>, "assembly" | "renderLeading" | "renderTrailing" | "renderPlanCell" | "renderLeaf" | "renderRow" | "renderGroup" | "renderExtra" | "renderVirtualPad" | "renderSummary">;
+    readonly usePaint: (stickyHeader: boolean) => KitDesktopPaint;
+    readonly usePartClass?: KitUsePartClass;
+    readonly widths: {
+        readonly expansion: number;
+        readonly selection: number;
+        readonly actions: number;
+    };
+}
+
+// @public
+export type KitDesktopTableProps<TRow, TExtra> = SharedTableRenderProps<TRow> & {
+    readonly dir?: "ltr" | "rtl";
+} & TExtra;
+
+// @public
+export interface KitDividerProps extends KitDataAttributes {
+    readonly style?: CSSProperties;
+}
+
 export { KitEnvironment }
+
+// @public
+export type KitFilterHeader = KitPrimitivesOf<"TextInput" | "Select" | "Button" | "Checkbox"> & (KitPrimitivesOf<"Popover"> | {
+    readonly Multi: (props: Readonly<FilterHeaderMultiProps>) => ReactNode;
+});
+
+// @public
+export interface KitFiltersButtonProps {
+    readonly count: number;
+    readonly elementRef: Ref<HTMLButtonElement>;
+    readonly expanded: boolean | undefined;
+    readonly label: string;
+    readonly onClick: () => void;
+    readonly onPointerDown: () => void;
+    readonly open: boolean;
+}
+
+// @public
+export interface KitGroupCardProps extends KitDataAttributes {
+    readonly aggregates: ReactNode;
+    readonly compact: boolean;
+    readonly head: ReactNode;
+}
+
+// @public
+export interface KitGroupHeader {
+    readonly Card: ComponentType<KitGroupCardProps>;
+    readonly Cell: ComponentType<KitDesktopCellProps>;
+    readonly Checkbox: ComponentType<KitCheckboxProps>;
+    readonly MoreButton: ComponentType<{
+        readonly scope: "groups" | "rows";
+        readonly remaining: number;
+        readonly groupKey?: string;
+        readonly labels: KitGroupHeaderProps<unknown>["labels"];
+        readonly onShowMore: KitGroupHeaderProps<unknown>["onShowMore"];
+    }>;
+    readonly Row: ComponentType<KitDesktopRowProps>;
+    readonly Text: ComponentType<KitGroupTextProps>;
+    readonly Toggle: ComponentType<KitGroupToggleProps>;
+    readonly useLook: () => KitGroupLook;
+}
+
+// @public
+export interface KitGroupHeaderProps<TRow> {
+    readonly columns: readonly ColumnDef<TRow>[];
+    readonly entry: Extract<GroupedFlatEntry<TRow>, {
+        kind: "group" | "groupFooter" | "groupMore";
+    }>;
+    readonly labels: Required<TableLabels>;
+    readonly onShowMore: (entry: {
+        scope: "groups" | "rows";
+        groupKey?: string;
+    }) => void;
+    readonly onToggleCollapse: (groupKey: string) => void;
+    readonly selection: SelectionState | null;
+}
+
+// @public
+export interface KitGroupLook {
+    readonly cardAggregate: CSSProperties;
+    readonly cardHead: CSSProperties;
+    readonly head: CSSProperties;
+    readonly labelCell: CSSProperties;
+    readonly row: CSSProperties;
+}
+
+// @public
+export interface KitGroupRowProps<TRow> extends KitGroupHeaderProps<TRow> {
+    readonly getCellProps: (column: ColumnDef<TRow>) => Record<string, unknown>;
+    readonly leadingCells: number;
+    readonly showActions: boolean;
+}
+
+// @public
+export type KitGroupTextKind = "label" | "count" | "aggregate" | "caption";
+
+// @public
+export interface KitGroupTextProps extends KitDataAttributes {
+    readonly children: ReactNode;
+    readonly kind: KitGroupTextKind;
+    readonly style?: CSSProperties;
+}
+
+// @public
+export interface KitGroupToggleProps {
+    readonly expanded: boolean;
+    readonly label: string;
+    readonly onToggle: () => void;
+}
+
+// @public
+export interface KitHeaderRenameLook {
+    readonly actions: CSSProperties;
+    readonly buttonFirst?: boolean;
+    readonly form: CSSProperties;
+    readonly root: CSSProperties;
+}
+
+// @public
+export interface KitIconButtonProps extends KitButtonProps {
+    readonly "aria-label": string;
+}
+
+// @public
+export interface KitMenuItem {
+    readonly disabled?: boolean;
+    readonly disabledReason?: string;
+    readonly id: string;
+    readonly label: string;
+    readonly onSelect: () => void;
+}
+
+// @public
+export interface KitMenuProps {
+    readonly "aria-label": string;
+    readonly itemPart?: string;
+    readonly items: readonly KitMenuItem[];
+    readonly part?: string;
+    readonly trigger: (props: KitTriggerProps) => ReactNode;
+}
+
+// @public
+export interface KitMobileCards<TExtra> {
+    readonly CardFrame: ComponentType<KitCardRegions>;
+    readonly cardProps: <TRow>(entry: MobileCardEntry<TRow>, props: KitMobileCardsProps<TRow, TExtra>) => Record<string, unknown>;
+    readonly compact: <TRow>(props: KitMobileCardsProps<TRow, TExtra>) => boolean;
+    readonly extraCell: (part: string, content: ReactNode) => ReactNode;
+    readonly extraProps?: NonNullable<MobileCardSlotKit<unknown>["extraProps"]>;
+    readonly FieldLabel: ComponentType<KitCardTextProps>;
+    readonly FieldValue: ComponentType<KitCardTextProps>;
+    readonly groupProps?: NonNullable<MobileCardSlotKit<unknown>["groupProps"]>;
+    readonly RowActions: <TRow>(props: {
+        readonly minTargetSize: number;
+        readonly row: TRow;
+        readonly actions: ReturnType<typeof resolveRowEditTrigger<TRow>>["actions"];
+        readonly confirm: MobileCardBodyProps<TRow>["confirm"];
+        readonly labels: MobileCardBodyProps<TRow>["labels"];
+        readonly layout: MobileCardBodyProps<TRow>["rowActionsLayout"];
+        readonly render: MobileCardBodyProps<TRow>["renderRowActions"];
+    }) => ReactNode;
+    readonly Select: ComponentType<KitCardSelectProps>;
+    readonly SummaryCard: ComponentType<{
+        readonly fields: readonly KitSummaryField[];
+        readonly compact: boolean;
+    }>;
+    readonly summaryPlacement: "last-card" | "after-list";
+    readonly useChrome: <TRow>(props: KitMobileCardsProps<TRow, TExtra>, compact: boolean) => Pick<MobileCardsChromeProps, "hosts" | "listProps" | "listStyle" | "classNames" | "dir">;
+    readonly useLook: () => KitCardsLook;
+    readonly usePartClass?: KitUsePartClass;
+}
+
+// @public
+export type KitMobileCardsProps<TRow, TExtra> = SharedTableRenderProps<TRow> & {
+    readonly dir?: "ltr" | "rtl";
+} & TExtra;
+
+// @public
+export interface KitOption {
+    readonly label: string;
+    readonly value: string;
+}
+
+// @public
+export interface KitPageButtonsLook {
+    readonly ellipsis: CSSProperties;
+    readonly row: CSSProperties;
+}
+
+// @public
+export interface KitPager {
+    readonly Caption: ComponentType<{
+        readonly children: ReactNode;
+    }>;
+    readonly Frame: ComponentType<KitPagerFrameProps>;
+    readonly Pages: ComponentType<KitPagesProps>;
+    readonly RowsPerPage: ComponentType<KitRowsPerPageProps>;
+}
+
+// @public
+export interface KitPagerFrameProps {
+    readonly pageOf: ReactNode;
+    readonly pages: ReactNode;
+    readonly range: ReactNode;
+    readonly rowsPerPage: ReactNode;
+}
+
+// @public
+export interface KitPagerView {
+    readonly chrome: {
+        readonly grouping?: unknown;
+    };
+    readonly labels: Required<TableLabels>;
+    readonly source: Pick<TableSource<unknown>, "limit" | "defaultLimit" | "total" | "setLimit" | "setPage">;
+    readonly table: {
+        readonly pagination: PaginationInfo;
+    };
+}
+
+// @public
+export interface KitPagesProps {
+    readonly labels: Pick<Required<TableLabels>, "previousPage" | "nextPage" | "goToPage">;
+    readonly onPageChange: (page: number) => void;
+    readonly page: number;
+    readonly totalPages: number;
+}
+
+// @public
+export interface KitPopoverProps {
+    readonly "aria-label"?: string;
+    readonly children: ReactNode;
+    readonly className?: string;
+    readonly dir?: "ltr" | "rtl";
+    readonly flush?: boolean;
+    readonly onOpenChange?: (open: boolean) => void;
+    readonly open?: boolean;
+    readonly part?: string;
+    readonly placement?: "bottom-start";
+    readonly role?: "dialog" | "menu";
+    readonly style?: CSSProperties;
+    readonly trigger: (props: KitTriggerProps) => ReactNode;
+}
+
+// @public
+export interface KitPrimitives {
+    readonly Button: ComponentType<KitButtonProps>;
+    readonly Checkbox: ComponentType<KitCheckboxProps>;
+    readonly Divider: ComponentType<KitDividerProps>;
+    readonly IconButton: ComponentType<KitIconButtonProps>;
+    readonly Menu: ComponentType<KitMenuProps>;
+    readonly Popover: ComponentType<KitPopoverProps>;
+    readonly Select: ComponentType<KitSelectProps>;
+    readonly Text: ComponentType<KitTextProps>;
+    readonly TextInput: ComponentType<KitTextInputProps>;
+}
+
+// @public
+export type KitPrimitivesOf<TName extends keyof KitPrimitives> = Pick<KitPrimitives, TName>;
+
+// @public
+export interface KitRenameFieldParts {
+    readonly error: string;
+    readonly input: string;
+    readonly label: string;
+}
+
+// @public
+export interface KitRenameFieldProps {
+    readonly elementRef: Ref<HTMLInputElement>;
+    readonly error: string | undefined;
+    readonly errorId: string;
+    readonly id: string;
+    readonly label: string;
+    readonly onBlur: () => void;
+    readonly onKeyDown: (event: KeyboardEvent_2<HTMLInputElement>) => void;
+    readonly onValueChange: (value: string) => void;
+    readonly parts: KitRenameFieldParts;
+    readonly value: string;
+}
+
+// @public
+export interface KitRowActionItem {
+    readonly color: string | undefined;
+    readonly disabled: boolean;
+    readonly icon: ReactNode;
+    readonly key: string;
+    readonly label: string;
+    readonly minTargetSize: number | undefined;
+    readonly reason: string | undefined;
+}
+
+// @public
+export interface KitRowActionMenuProps {
+    readonly items: readonly (KitRowActionItem & {
+        readonly onSelect: () => void;
+    })[];
+    readonly label: string;
+    readonly minTargetSize: number | undefined;
+}
+
+// @public
+export interface KitRowActionProps extends KitRowActionItem {
+    readonly onClick: ((event: MouseEvent_2) => void) | undefined;
+}
+
+// @public
+export interface KitRowActions {
+    readonly Action: ComponentType<KitRowActionProps>;
+    readonly iconFor: (action: RowAction<never>) => ReactNode;
+    readonly Menu: ComponentType<KitRowActionMenuProps>;
+    readonly Strip: ComponentType<{
+        readonly children: ReactNode;
+    }>;
+}
+
+// @public
+export interface KitRowsPerPageProps {
+    readonly label: string;
+    readonly onValueChange: (value: number) => void;
+    readonly options: readonly number[];
+    readonly value: number;
+}
+
+// @public
+export interface KitSavedViewsLook {
+    readonly divider: CSSProperties;
+    readonly nameInput: CSSProperties;
+    readonly panel: CSSProperties;
+    readonly row: CSSProperties;
+    readonly saveRow: CSSProperties;
+}
+
+// @public
+export interface KitSelectProps extends KitDataAttributes {
+    readonly "aria-label": string;
+    readonly className?: string;
+    readonly disabled?: boolean;
+    readonly fullWidth?: boolean;
+    readonly label?: string;
+    readonly onValueChange: (value: string) => void;
+    readonly options: readonly KitOption[];
+    readonly rootPart?: string;
+    readonly style?: CSSProperties;
+    readonly value: string;
+}
+
+// @public
+export interface KitSkeletonShape {
+    readonly actions: boolean;
+    readonly mobile: boolean;
+}
+
+// @public
+export interface KitSortLabelProps {
+    readonly active: boolean;
+    readonly buttonProps: SortButtonElementProps;
+    readonly children: ReactNode;
+    readonly dir: "asc" | "desc" | undefined;
+    readonly index: number | undefined;
+    readonly title: string | undefined;
+}
+
+// @public
+export interface KitSummaryField {
+    readonly key: string;
+    readonly label: ReactNode;
+    readonly value: ReactNode;
+}
+
+// @public
+export interface KitTable {
+    readonly body: <TRow>(view: DataTableShellResult<TRow>, headerOffset: number, props: KitTableProps<TRow>) => ReactNode;
+    readonly empty: (labels: Required<TableLabels>, onClear: (() => void) | undefined) => ReactNode;
+    readonly error: (state: TableErrorState, labels: Required<TableLabels>) => ReactNode;
+    readonly footer: <TRow>(view: DataTableShellResult<TRow>) => ReactNode;
+    readonly Frame: (props: KitTableFrameProps) => ReactNode;
+    readonly skeleton: (rows: number, columns: number, labels: Required<TableLabels>, shape: KitSkeletonShape) => ReactNode;
+    readonly toolbar: <TRow>(props: KitToolbarProps<TRow>) => ReactNode;
+}
+
+// @public
+export interface KitTableClassNames {
+    readonly card?: string;
+    readonly footer?: string;
+    readonly root?: string;
+    readonly table?: string;
+    readonly tableFooter?: string;
+    readonly toolbar?: string;
+}
+
+// @public
+export interface KitTableFrameProps {
+    readonly animate: boolean;
+    readonly announcers: ReactNode;
+    readonly bars: ReactNode;
+    readonly density: Density;
+    readonly footers: ReactNode;
+    readonly fullscreenContainer: HTMLElement | undefined;
+    readonly labels: Required<TableLabels>;
+    readonly loadMore: {
+        readonly ref: RefObject<HTMLDivElement | null>;
+        readonly busy: boolean;
+        readonly onClick: () => void;
+    } | undefined;
+    readonly main: ReactNode;
+    readonly mobile: boolean;
+    readonly overlays: ReactNode;
+    readonly refreshing: boolean;
+    readonly rootProps: Readonly<Record<string, unknown>>;
+    readonly rootRef: RefObject<HTMLDivElement | null>;
+    readonly rowCount: number;
+    readonly toolbar: ReactNode;
+    readonly toolbarClassName: string | undefined;
+    readonly toolbarRef: RefCallback<HTMLElement | null>;
+    readonly toolbarStyle: CSSProperties | undefined;
+}
+
+// @public
+export type KitTableProps<TRow> = DataTableShellProps<TRow> & {
+    readonly slots?: KitTableSlots;
+    readonly className?: string;
+    readonly classNames?: KitTableClassNames;
+    readonly animate?: boolean;
+};
+
+// @public
+export interface KitTableSlots {
+    readonly empty?: ReactNode;
+    readonly error?: Exclude<Slot<TableErrorState>, undefined>;
+    readonly noResults?: ReactNode;
+    readonly skeleton?: ReactNode;
+}
+
+// @public
+export interface KitTextInputProps extends KitDataAttributes {
+    readonly "aria-describedby"?: string;
+    readonly "aria-invalid"?: "true";
+    readonly "aria-label": string;
+    readonly className?: string;
+    readonly disabled?: boolean;
+    readonly elementRef?: Ref<HTMLInputElement>;
+    readonly fullWidth?: boolean;
+    readonly id?: string;
+    readonly invalid?: boolean;
+    readonly onBlur?: () => void;
+    readonly onKeyDown?: (event: KeyboardEvent_2<HTMLInputElement>) => void;
+    readonly onValueChange: (value: string) => void;
+    readonly placeholder?: string;
+    readonly rootPart?: string;
+    readonly style?: CSSProperties;
+    readonly type?: "text" | "search" | "number" | "date" | "datetime-local";
+    readonly value: string;
+}
+
+// @public
+export interface KitTextProps extends HTMLAttributes<HTMLElement>, KitDataAttributes {
+    readonly as?: "span" | "p" | "div" | "label";
+    readonly htmlFor?: string;
+    readonly tone?: "secondary" | "disabled" | "danger";
+    readonly variant?: "body" | "title" | "caption";
+}
+
+// @public
+export type KitTone = "neutral" | "primary" | "danger";
+
+// @public
+export interface KitToolbar {
+    readonly Button: ComponentType<KitButtonProps>;
+    readonly FiltersButton: ComponentType<KitFiltersButtonProps>;
+    readonly filtersPopover: "anchor" | "wrap";
+    readonly Frame: ComponentType<KitToolbarFrameProps>;
+    readonly RowsPerPage: ComponentType<KitRowsPerPageProps>;
+    readonly Search: ComponentType<KitToolbarSearchProps>;
+    readonly SortSelect: ComponentType<KitToolbarSortProps>;
+}
+
+// @public
+export interface KitToolbarFrameProps {
+    readonly controls: ReactNode;
+    readonly search: ReactNode;
+    readonly start: ReactNode;
+}
+
+// @public
+export interface KitToolbarProps<TRow> extends DataTableShellToolbarProps<TRow> {
+    readonly columnMenu: ReactNode;
+    readonly filtersMode: "popover" | "drawer" | "header";
+    readonly filtersOpen: boolean;
+    readonly loadsMore: boolean;
+    readonly onCloseFilters: () => void;
+    readonly onFiltersTriggerPointerDown: () => void;
+    readonly onToggleFilters: () => void;
+    readonly savedViewsMenu: ReactNode;
+}
+
+// @public
+export interface KitToolbarSearchProps {
+    readonly input: ReturnType<KitToolbarProps<unknown>["table"]["getSearchInputProps"]>;
+}
+
+// @public
+export interface KitToolbarSortProps {
+    readonly label: string;
+    readonly onValueChange: (value: string | undefined) => void;
+    readonly options: readonly SortByOption[];
+    readonly value: string;
+}
+
+// @public
+export interface KitTriggerProps {
+    readonly "aria-controls"?: string;
+    readonly "aria-expanded": boolean;
+    readonly "aria-haspopup": "dialog" | "menu";
+    readonly elementRef: Ref<HTMLButtonElement>;
+    readonly onClick: () => void;
+}
+
+// @public
+export type KitUsePartClass = () => (part: string) => string | undefined;
 
 export { LayoutStorage }
 
@@ -2757,6 +3746,9 @@ export { logicalAlign }
 
 // @public
 export const mergedCellStyle: (colSpan: number, rowSpan: number, appearance?: CellSpanAppearance_2, fill?: "on" | "off") => CSSProperties | undefined;
+
+// @public
+export function mergeRefs<T>(...refs: readonly (Ref<T> | undefined)[]): RefCallback<T>;
 
 // @public
 export interface MobileCardBodyProps<TRow> {
@@ -2935,6 +3927,9 @@ export interface MobileCardSlotKit<TRow> {
 export function mobileCardSlots<TRow>(props: Readonly<MobileCardListProps<TRow>>, kit: MobileCardSlotKit<TRow>): MobileCardSlot[];
 
 // @public
+export const MobileTarget: Context<boolean>;
+
+// @public
 export interface MountStaggerOptions {
     duration?: number;
     enabled: boolean;
@@ -2974,11 +3969,53 @@ export { normalizeEditorOptions }
 export function offersAllMatching(selection: Pick<SelectionState, "acrossPages" | "headerState" | "visibleIds">, total: number): boolean;
 
 // @public
+export function OptionalColumnGroupToggle(props: Readonly<ColumnGroupToggleProps>): ReactNode;
+
+// @public
+export function OptionalColumnHeaderRename(props: Readonly<ColumnHeaderRenameSlotProps>): ReactNode;
+
+// @public
+export function OptionalColumnSelect(props: Readonly<Omit<ColumnSelectCheckboxChromeProps, "slots">>): ReactNode;
+
+// @public
+export function OptionalEditableCell<TRow>(props: Readonly<EditableCellSlotProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalExpandToggle(props: Readonly<ExpandToggleSlotProps>): ReactNode;
+
+// @public
+export function OptionalFillHandle(props: Readonly<FillHandleCellSlotProps>): ReactNode;
+
+// @public
+export function OptionalFilterHeader<TRow>(props: Readonly<FilterHeaderControlProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalGroupHeaderCard<TRow>(props: Readonly<GroupHeaderCardSlotProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalGroupHeaderRow<TRow>(props: Readonly<GroupHeaderRowSlotProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalRowEditActions<TRow>(props: Readonly<RowEditActionsProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalRowReorderButtons<TRow>(props: Readonly<RowReorderButtonsProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalRowReorderHandle<TRow>(props: Readonly<RowReorderHandleProps<TRow>>): ReactNode;
+
+// @public
 export function OptionalSidePanel(input: {
     readonly side?: "start" | "end";
     readonly body: ReactNode;
     readonly panel: ReactNode;
 }): ReactNode;
+
+// @public
+export function OptionalTreeCell<TRow>(props: Readonly<TreeCellProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalTreeToggle<TRow>(props: Readonly<TreeToggleProps<TRow>>): ReactNode;
 
 export { orderedCardEntries }
 
@@ -3057,8 +4094,7 @@ export { pinnedSummaryRowId }
 
 export { pinnedSummarySideFromId }
 
-// @public
-export const PINNING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { PINNING_LIVE }
 
 export { PinOffset }
 
@@ -3147,6 +4183,9 @@ export interface ReactUseColumnLayoutResult<TRow> extends Omit<UseColumnLayoutRe
     visibleColumns: ColumnDef<TRow>[];
 }
 
+// @public
+export function readCellValue<TRow>(row: TRow, column: ColumnDef<TRow>): unknown;
+
 export { readMultiDraft }
 
 export { ReconcileLiveBatchEdit }
@@ -3183,6 +4222,12 @@ export interface ResizableVirtualizer {
     resizeItem: (index: number, size: number) => void;
 }
 
+// @public
+export function resolveColumnFooter<TRow>(column: ColumnDef<TRow>, value: ReactNode): ReactNode;
+
+// @public
+export function resolveColumnHeader<TRow>(column: ColumnDef<TRow>, controller: ColumnHeaderController_2): ReactNode;
+
 export { resolveContextTarget }
 
 export { ResolvedContextTarget }
@@ -3201,6 +4246,9 @@ export { resolveLabels }
 
 export { resolveMobileLabel }
 
+// @public
+export function resolveNeutralColumnHeaders<TRow>(columns: readonly ColumnMetadata<TRow>[]): ColumnMetadata<TRow>[];
+
 export { resolveRowEditTrigger }
 
 export { resolveRowHeight }
@@ -3209,12 +4257,13 @@ export { resolveRowStyle }
 
 export { resolveStickyToolbar }
 
+export { resolveTableLabels }
+
 export { resolveVirtualRows }
 
 export { restoreFocusSoon }
 
-// @public
-export const ROW_ACTIONS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { ROW_ACTIONS_LIVE }
 
 export { ROW_DND_MIME }
 
@@ -3225,12 +4274,23 @@ export { ROW_ID_ATTRIBUTE }
 export { ROW_REORDER_ANNOUNCER }
 
 // @public
-export const ROW_REORDER_BUTTONS: FeatureSlotKey<RowReorderButtonsProps<never>>;
+export const ROW_REORDER_BUTTONS: FeatureSlotKey<RowReorderButtonsProps<unknown>>;
 
 // @public
-export const ROW_REORDER_HANDLE: FeatureSlotKey<RowReorderHandleProps<never>>;
+export const ROW_REORDER_HANDLE: FeatureSlotKey<RowReorderHandleProps<unknown>>;
 
 export { RowAction }
+
+// @public
+export interface RowActionButtonsProps<TRow> {
+    readonly actions: readonly RowAction<TRow>[];
+    readonly confirm: ConfirmHandler;
+    readonly labels: Required<TableLabels>;
+    readonly layout?: RowActionsLayout;
+    readonly minTargetSize?: number;
+    readonly render?: RowActionsRenderer<TRow>;
+    readonly row: TRow;
+}
 
 export { RowActionsLayout }
 
@@ -3491,11 +4551,9 @@ export interface SearchInputElementProps extends Props {
 
 export { SearchInputState }
 
-// @public
-export const SELECTION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { SELECTION_LIVE }
 
-// @public
-export const SELECTION_STATS_LIVE: FeatureSlotKey<SelectionStatsLiveSlotProps<never>>;
+export { SELECTION_STATS_LIVE }
 
 export { SelectionState }
 
@@ -3508,6 +4566,9 @@ export function SelectionStatsChrome(input: Readonly<SelectionStatsChromeProps>)
 
 // @public
 export type SelectionStatsChromeProps = SelectionStatsChromeProps_2<ReactNode>;
+
+// @public
+export type SelectionStatsLiveDraw = <TRow>(props: SelectionStatsLiveSlotProps<TRow>) => ReactNode;
 
 // @public
 export type SelectionStatsLiveSlotProps<TRow = never> = SelectionStatsLiveSlotProps_2<TRow, ColumnDef<TRow>, ReactNode>;
@@ -3663,9 +4724,14 @@ export type SidePanelTabProps = SidePanelTabProps_2<SidePanelEntry, KeyboardEven
 export type Slot<TState> = ReactNode | ((state: TState) => ReactNode);
 
 // @public
-export function slotRender<TProps>(slot: FeatureSlotKey<TProps>, render: (props: TProps) => ReactNode, options?: {
+export function slotRender<TProps>(slot: PlainSlotKey<TProps>, render: (props: TProps) => ReactNode, options?: {
     readonly orderAs?: string;
 }): FeatureRender<TProps>;
+
+// @public
+export function slotRender<TDraw extends (props: never) => ReactNode>(slot: RowSlotKey<TDraw>, render: NoInfer<TDraw>, options?: {
+    readonly orderAs?: string;
+}): FeatureRender<never>;
 
 export { SortableValue }
 
@@ -3699,7 +4765,9 @@ export { splitRelativeToken }
 // @public
 export interface StandardFeatureOptions<TRow> {
     readonly bulkActions?: readonly BulkAction[];
-    readonly filters?: readonly FilterDef<TRow>[];
+    readonly filters?: readonly (FilterDef<TRow> & {
+        readonly getValue?: (row: TRow) => unknown;
+    })[];
     readonly findButton?: boolean;
     readonly grouping?: string | readonly string[];
     readonly savedViews?: UseSavedViewsOptions;
@@ -3843,6 +4911,7 @@ export interface TableChrome<TRow> {
     autoSizeColumns?: () => void;
     body: TableBodyRegion;
     clearFilters: () => void;
+    clearSearchAndFilters: () => void;
     columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
     columnLayout: ReactUseColumnLayoutResult<TRow>;
     columnLayoutLive?: boolean;
@@ -3913,6 +4982,12 @@ export interface TableCommandPalette {
 }
 
 // @public
+export function TableComposition<TRow>(input: {
+    readonly props: KitTableProps<TRow>;
+    readonly kit: KitTable;
+}): ReactNode;
+
+// @public
 export interface TableContextMenu {
     at: ContextMenuPoint | null;
     close: () => void;
@@ -3932,6 +5007,13 @@ export interface TableContextMenuOptions<TRow> {
     rowPins?: readonly RowAction<TRow>[];
     sortBy?: string;
     sortDir?: "asc" | "desc";
+}
+
+// @public
+export interface TableEditHistoryProps<TRow> {
+    columns: readonly ColumnDef<TRow>[];
+    editHistory?: boolean | EditHistoryOptions;
+    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
 }
 
 // @public
@@ -4084,10 +5166,9 @@ export function toReactColumnResizeHandleProps(props: ColumnResizeHandleProps): 
 export { TotalCountCapability }
 
 // @public
-export const TREE_CELL: FeatureSlotKey<TreeCellProps<never>>;
+export const TREE_CELL: FeatureSlotKey<TreeCellProps<unknown>>;
 
-// @public
-export const TREE_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { TREE_LIVE }
 
 export { TREE_TOGGLE }
 
@@ -4107,6 +5188,10 @@ export type TreeCellProps<TRow> = TreeCellProps_2<TRow, ReactNode>;
 export { TreeEntry }
 
 export { TreeExpansionState }
+
+export { treeRowAria }
+
+export { treeTableAria }
 
 export { TreeToggleButtonProps }
 
@@ -4131,6 +5216,16 @@ export { unpinAllColumns }
 export { UrlStateAdapter }
 
 // @public
+export function useActiveFilterChips(input: UseActiveFilterChipsOptions): ActiveFilterChip[];
+
+// @public
+export interface UseActiveFilterChipsOptions {
+    readonly labels: Readonly<Record<string, ChipLabelResolver>>;
+    readonly onChange: (key: string, next: FilterValue) => void;
+    readonly values: Readonly<Record<string, FilterValue>>;
+}
+
+// @public
 export function useBulkBarState(input: Readonly<UseBulkBarStateOptions>): BulkBarState;
 
 // @public
@@ -4140,6 +5235,15 @@ export interface UseBulkBarStateOptions {
     selection: SelectionState;
     total: number;
 }
+
+// @public
+export function useChromeScrollReset<TRow>(ref: RefObject<HTMLElement | null>, chrome: TableChrome<TRow>, props: ComposedTableProps<TRow>): void;
+
+// @public
+export function useColorScheme(preference?: ColorScheme): "light" | "dark";
+
+// @public
+export function useColumnDragState(): ColumnDragState;
 
 export { UseColumnLayoutResult }
 
@@ -4212,7 +5316,10 @@ export interface UseDataTableResult<TRow> {
 }
 
 // @public
-export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, renderAutoForm: (defs: readonly FilterDef<TRow>[], source: TableSource<TRow>, registry: FilterTypeRegistry) => ReactNode): DataTableShellResult<TRow>;
+export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, renderAutoForm: (defs: readonly FilterDef<TRow>[], source: TableSource<TRow>, registry: FilterTypeRegistry, labels: Required<TableLabels>) => ReactNode): DataTableShellResult<TRow>;
+
+// @public
+export function useDebounce<T>(value: T, delay?: number): T;
 
 // @public
 export function useDesktopTableAssembly<TRow>(props: DesktopAssemblyProps<TRow>, options?: DesktopAssemblyOptions): DesktopTableAssembly<TRow>;
@@ -4224,6 +5331,16 @@ export function useEscapeClose(open: boolean, close: () => void, options?: Escap
 export function useExportHandler(handler: ((controls?: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>) | undefined, labels?: TableLabels, format?: string, pageOnly?: boolean, serverBuilt?: boolean): ExportHandlerState;
 
 // @public
+export function useExtraChips(input: UseExtraChipsOptions): ActiveFilterChip[];
+
+// @public
+export interface UseExtraChipsOptions {
+    readonly extra: ExtraFilters;
+    readonly labels: Readonly<Record<string, ChipLabelResolver>>;
+    readonly setExtra: (key: string, value: FilterValue) => void;
+}
+
+// @public
 export function useFeatureHost<TRow = unknown>(): FeatureHostState<TRow> | undefined;
 
 // @public
@@ -4233,6 +5350,12 @@ export function useFeatureSlotFilled(slot: {
 
 // @public
 export function useFeatureState<T>(stateKey: FeatureStateKey<T>): T | undefined;
+
+// @public
+export function useFilterTriggerToggle(open: boolean, setOpen: (next: boolean | ((current: boolean) => boolean)) => void): FilterTriggerToggle;
+
+// @public
+export function useFindFocus(current: GridCell | null, focusCell: (cell: GridCell) => void, selectRange: (range: CellRange | null) => void): void;
 
 // @public
 export interface UseFindInTableOptions<TRow> {
@@ -4257,6 +5380,9 @@ export interface UseGridFocusOptions<TRow> extends GridFocusControllerOptions<TR
 }
 
 // @public
+export function useHorizontalOverflow<E extends HTMLElement>(): HorizontalOverflow<E>;
+
+// @public
 export function useKeyedVirtualization(options: {
     keys: readonly string[];
     enabled?: boolean;
@@ -4269,6 +5395,9 @@ export function useKeyedVirtualization(options: {
 
 // @public
 export function useLocaleLabels(locale: string | undefined): Required<TableLabels> | undefined;
+
+// @public
+export function useMobileTarget(): CSSProperties | undefined;
 
 // @public
 export function useMountStagger(ref: RefObject<HTMLElement | null>, deps: DependencyList, options: MountStaggerOptions): void;
@@ -4303,7 +5432,20 @@ export interface UseSavedViewsOptions extends Omit<SavedViewsControllerOptions, 
 }
 
 // @public
-export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
+export function useScrollToTableTop(input: UseScrollToTableTopOptions): void;
+
+// @public
+export interface UseScrollToTableTopOptions {
+    behavior?: ScrollBehavior;
+    deps: readonly unknown[];
+    enabled?: boolean;
+    gap?: number;
+    offset?: number;
+    ref: RefObject<HTMLElement | null>;
+}
+
+// @public
+export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey" | "store"> {
     active?: boolean;
     aggregates?: readonly QueryAggregate[];
     columns?: readonly ColumnMetadata<TRow>[];
@@ -4327,6 +5469,17 @@ export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions
 }
 
 // @public
+export function useShortcuts(options: UseShortcutsOptions): void;
+
+// @public
+export interface UseShortcutsOptions {
+    enabled: boolean;
+    onCommand: (command: string) => void;
+    shortcuts?: readonly Shortcut[];
+    target?: () => EventTarget | null;
+}
+
+// @public
 export function useStickyToolbarLayout(enabled: boolean, stickyTop?: number): {
     toolbarRef: RefCallback<HTMLElement | null>;
     toolbarStyle: CSSProperties | undefined;
@@ -4337,7 +5490,19 @@ export function useStickyToolbarLayout(enabled: boolean, stickyTop?: number): {
 export function useSummaryCells<TRow>(summaryRow: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined, rows: readonly TRow[]): Partial<Record<string, ReactNode>> | undefined;
 
 // @public
+export function useTableChrome<TRow>(props: ComposedTableProps<TRow>): TableChrome<TRow>;
+
+// @public
 export function useTableContextMenu<TRow>(options: TableContextMenuOptions<TRow>): TableContextMenu;
+
+// @public
+export function useTableEditHistory<TRow>(props: TableEditHistoryProps<TRow>): {
+    history: EditHistoryState<TRow>;
+    onCellEdit: ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
+};
+
+// @public
+export function useTableEngine<TRow>(options: CreateTableEngineOptions<TRow>): TableEngine<TRow>;
 
 // @public
 export function useTableFeatures<P extends object>(incoming: P): P & FeatureProps<RowOf<P>>;
@@ -4355,6 +5520,7 @@ export interface UseTableUrlStateOptions {
         extra?: ExtraFilters;
     };
     numberExtraKeys?: readonly string[];
+    store?: TableStore;
     urlAdapter?: UrlStateAdapter;
     urlKey?: string;
     urlSync?: boolean;
@@ -4375,6 +5541,9 @@ export interface UseTableVirtualizationOptions<TRow> {
     rows: readonly TRow[];
     scrollMargin?: number;
 }
+
+// @public
+export function useVirtualChromeBodyData<TRow>(chrome: TableChrome<TRow>, props: ComposedTableProps<TRow>): ChromeBodyData<TRow>;
 
 export { ValidationCheckResult }
 

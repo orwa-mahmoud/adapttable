@@ -7,15 +7,17 @@
  */
 import {
   type ColumnMetadata,
-  createServerSource,
   type FacetMap,
   type PaginationMode,
   type QueryAggregate,
   type QuerySupport,
-  resolvePaginationMode,
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
+import {
+  createLazyServerSource,
+  resolvePaginationMode,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,
@@ -109,7 +111,9 @@ export interface ServerDataOptions<TRow> extends Omit<
  *
  * The query is sent once Angular has run the effects that follow a change —
  * after the frame that shows it — and the request in flight is aborted when
- * the injection context is destroyed.
+ * the injection context is destroyed. The tier's engine loads on first use
+ * while the first query goes out; a query that asks for aggregates is sent
+ * once the engine is in place.
  *
  * @param options - See {@link ServerDataOptions}.
  * @returns The source.
@@ -120,6 +124,18 @@ export function injectServerData<TRow>(
   options: ServerDataOptions<TRow>
 ): Signal<TableSource<TRow>> {
   if (!options.injector) assertInInjectionContext(injectServerData);
+  return injectServerTier(options, () => true);
+}
+
+/**
+ * {@link injectServerData} for a table that holds a server tier whatever tier
+ * it is on: the engine loads only while `serving` says the table is on it.
+ */
+export function injectServerTier<TRow>(
+  options: ServerDataOptions<TRow>,
+  serving: () => boolean
+): Signal<TableSource<TRow>> {
+  if (!options.injector) assertInInjectionContext(injectServerTier);
   const injector = options.injector ?? inject(Injector);
   const url = injectTableUrlState({ ...options, injector });
   const viewportMobile = injectIsMobile({
@@ -132,7 +148,7 @@ export function injectServerData<TRow>(
       readMaybe(options.forceMobile) ?? viewportMobile()
     )
   );
-  const source = createServerSource<TRow>();
+  const source = createLazyServerSource<TRow>();
   // The source's own state — an append, the cursor trail, a refetch, the
   // aggregate operations — moves the frame through this revision.
   const revision = fromStore(
@@ -146,6 +162,7 @@ export function injectServerData<TRow>(
 
   const frame = computed(() => {
     revision();
+    if (serving()) source.load();
     return source.update(
       {
         rows: readMaybe(options.rows),

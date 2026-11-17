@@ -1,118 +1,110 @@
-/** Row count and the windowed pager. */
+/** Row count and the windowed pager, drawn by the binding with Radix Themes' controls. */
 import {
-  type PaginationInfo,
-  paginationSlots,
-  type TableLabels,
+  createPageButtons,
+  createPager,
+  type KitButtonProps,
+  type KitPagerFrameProps,
+  type KitRowsPerPageProps,
+  mergeRefs,
 } from "@adapttable/react/adapter";
-import { Button, Flex, Text } from "@radix-ui/themes";
+import { Button as UiButton, Flex, Text as UiText } from "@radix-ui/themes";
+import { forwardRef, type ReactNode } from "react";
 
 import { subtleText } from "../styles";
+import { Text } from "./kitPrimitives";
 import { NativeSelect } from "./primitives";
-import { pageSizeSelectOptions } from "./Toolbar";
 
-/** Paged footer with numbered page buttons. */
-export function Footer({
-  pagination,
-  total,
-  limit,
-  defaultLimit = limit,
-  setPage,
-  setLimit,
-  labels,
-  className,
-  showRowsPerPage = true,
-}: Readonly<{
-  pagination: PaginationInfo;
-  total: number;
-  limit: number;
-  defaultLimit?: number;
-  setPage: (n: number) => void;
-  setLimit: (n: number) => void;
-  labels: Required<TableLabels>;
-  /** Class hook for the footer row. */
-  className?: string;
-  /** Hidden in the grouped full-set view, where page size has no effect. */
-  showRowsPerPage?: boolean;
-}>) {
-  const { safePage, totalPages, fromIndex, toIndex } = pagination;
+/** Page size and range at the start, "page n of m" and the pages at the end. */
+function Frame({ rowsPerPage, range, pageOf, pages }: KitPagerFrameProps) {
+  "use no memo";
   return (
-    <Flex
-      data-adapttable-part="footer"
-      gap="3"
-      justify="between"
-      wrap="wrap"
-      align="center"
-      className={className}
-    >
+    <Flex gap="3" justify="between" wrap="wrap" align="center">
       <Flex gap="2" align="center">
-        {showRowsPerPage && (
-          <>
-            <Text size="1" {...subtleText}>
-              {labels.rowsPerPage}
-            </Text>
-            <NativeSelect
-              size="1"
-              width="72px"
-              aria-label={labels.rowsPerPage}
-              value={String(limit)}
-              options={pageSizeSelectOptions(limit, defaultLimit)}
-              onValueChange={(value) => setLimit(Number(value))}
-            />
-          </>
-        )}
-        {total > 0 && (
-          <Text size="1" {...subtleText}>
-            {labels.showing({ from: fromIndex, to: toIndex, total })}
-          </Text>
-        )}
+        {rowsPerPage}
+        {range}
       </Flex>
       <Flex gap="1" align="center">
-        <Text size="1" {...subtleText}>
-          {labels.pageOf({ page: safePage, total: totalPages })}
-        </Text>
-        <Button
-          size="1"
-          variant="soft"
-          color="gray"
-          aria-label={labels.previousPage}
-          disabled={safePage <= 1}
-          onClick={() => setPage(safePage - 1)}
-        >
-          ‹
-        </Button>
-        {paginationSlots(safePage, totalPages).map(({ item, key }) =>
-          item === "ellipsis" ? (
-            <Text
-              key={key}
-              size="1"
-              {...subtleText}
-              style={{ paddingInline: "var(--space-1)" }}
-            >
-              …
-            </Text>
-          ) : (
-            <Button
-              key={key}
-              size="1"
-              variant={item === safePage ? "solid" : "soft"}
-              aria-current={item === safePage ? "page" : undefined}
-              onClick={() => setPage(item)}
-            >
-              {item}
-            </Button>
-          )
-        )}
-        <Button
-          size="1"
-          variant="soft"
-          color="gray"
-          aria-label={labels.nextPage}
-          disabled={safePage >= totalPages}
-          onClick={() => setPage(safePage + 1)}
-        >
-          ›
-        </Button>
+        {pageOf}
+        {pages}
       </Flex>
     </Flex>
   );
 }
+
+function Caption({ children }: Readonly<{ children: ReactNode }>) {
+  "use no memo";
+  return (
+    <UiText size="1" {...subtleText}>
+      {children}
+    </UiText>
+  );
+}
+
+/** The page size, named by its visible caption. */
+function RowsPerPage({
+  label,
+  value,
+  options,
+  onValueChange,
+}: Readonly<KitRowsPerPageProps>) {
+  "use no memo";
+  return (
+    <>
+      <Caption>{label}</Caption>
+      <NativeSelect
+        size="1"
+        width="72px"
+        aria-label={label}
+        value={String(value)}
+        options={options.map((size) => ({
+          value: String(size),
+          label: String(size),
+        }))}
+        onValueChange={(next) => onValueChange(Number(next))}
+      />
+    </>
+  );
+}
+
+/** A page button: soft, grey for previous and next, solid for the current page. */
+const PageButton = forwardRef<HTMLButtonElement, KitButtonProps>(
+  function PageButton(
+    {
+      elementRef,
+      variant,
+      tone: _tone,
+      fullWidth: _fullWidth,
+      justify: _justify,
+      busy: _busy,
+      ...rest
+    },
+    ref
+  ) {
+    "use no memo";
+    return (
+      <UiButton
+        ref={mergeRefs(ref, elementRef)}
+        type="button"
+        size="1"
+        variant={variant === "filled" ? "solid" : "soft"}
+        color={variant === undefined ? "gray" : undefined}
+        {...rest}
+      />
+    );
+  }
+);
+
+/** The table's footer: page size, range, "page n of m" and the pages. */
+export const footer = /* @__PURE__ */ createPager({
+  Frame,
+  RowsPerPage,
+  Caption,
+  // The pages sit in the frame's own row, beside "page n of m".
+  Pages: /* @__PURE__ */ createPageButtons(
+    { Button: PageButton, Text },
+    {
+      row: { display: "contents" },
+      ellipsis: { paddingInline: "var(--space-1)" },
+    }
+  ),
+});

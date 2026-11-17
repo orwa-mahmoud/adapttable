@@ -1,32 +1,12 @@
-/** One source, feature lifecycle and model composition shared by every Vue kit. */
 import {
   ACTIONS_COLUMN_KEY,
-  activeTierValue,
-  type BulkAction,
-  type CellEdit,
-  type CellRange,
   type ConfirmHandler,
   createMemoryAdapter,
-  createTableData,
-  type ExtraFilters,
-  type FacetMap,
-  type FilterDef,
-  type FilterTypeSpec,
-  type FrontendEngineFactory,
-  INACTIVE_TIER_ROWS,
-  projectedGroupingSource,
-  type QueryAggregate,
-  type QueryFilterGroup,
-  type QuerySupport,
   REORDER_COLUMN_KEY,
-  resolveUrlAdapter,
   type RowAction,
   stableKey,
   type TableDensity,
-  type TableQueryListener,
   type TableSource,
-  tierRows,
-  withRowPinActions,
 } from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
@@ -34,31 +14,38 @@ import {
   AGENT_APPROVAL_STATE,
   COLUMN_SELECT,
   columnSelectLabel,
+  createTableStore,
   DENSITY_STATE,
-  EMPTY_FEATURE_HOST,
   type FeatureHostState,
-  type FilterEngine,
+  featureLabelsOf,
+  filterTreeSnapshot,
   FIND_BAR,
-  retainItems,
+  LiveFeatureHost,
+  overlayFeatureOptions,
+  projectedGroupingSource,
+  resolveUrlAdapter,
   type RuntimeChromeInput,
+  sameFilterTree,
   STATUS_BAR,
   TABLE_ASSISTANT,
-  type TableAssistantProps,
   type TableRuntime,
   TableRuntimePublisher,
   type TableRuntimeView,
   TOOLBAR_EXTRAS,
   type ToolbarExtrasSlotProps,
   undoRedoToolbarProps,
+  withRowPinActions,
 } from "@adapttable/core/binding";
-import { isCellEditable } from "@adapttable/core/editing";
+import { type EditingBundle, isCellEditable } from "@adapttable/core/editing";
 import {
   computed,
+  type ComputedRef,
   getCurrentInstance,
   getCurrentScope,
   type MaybeRefOrGetter,
   nextTick,
   onScopeDispose,
+  provide,
   shallowRef,
   toValue,
   type VNodeChild,
@@ -81,19 +68,15 @@ import {
   SIDE_PANEL_MODEL,
   UNDO_REDO_CONTROL,
 } from "./actions/contracts";
-import type { SummaryRowFn } from "./aggregate/aggregate";
 import { mergeVueAttrs, toVueAttrs } from "./attrs";
-import { flattenColumns, type FooterContext } from "./columnDef";
 import {
   COLUMN_HEADER_RENAME,
   columnMenuSlotKey,
 } from "./columns/columnMenuContracts";
-import type { TableEditingOptions } from "./editing/editingModels";
+import { drawnRowEditing, sameDrawnView } from "./editing/editableUnitModel";
 import { type FeatureLifecycle, useFeatureLifecycle } from "./featureLifecycle";
 import {
   assertRequiredSlots,
-  type ComposedFeature,
-  type FeatureMountContext,
   featureOptionsOf,
   featureSlotFillsOf,
   normalizeFeatures,
@@ -101,16 +84,11 @@ import {
 } from "./features/tableFeature";
 import { createFeatureState, provideFeatureState } from "./featureState";
 import {
-  filterTreeSnapshot,
-  sameFilterTree,
-} from "./filters/filterTreeSnapshot";
-import {
   groupingModelKey,
   rowDetailModelKey,
   treeModelKey,
 } from "./hierarchy/models";
 import { tableRowInventory } from "./hierarchy/rowInventory";
-import { createFilterOptionCache } from "./layout/filterOptionCache";
 import {
   batchEditBarSlotKey,
   COLUMN_RESIZE_MODEL,
@@ -121,15 +99,17 @@ import {
   filterViewKey,
   headerFilterModelKey,
   headerFilterSlotKey,
-  type RowActionControlsProjector,
   rowActionsModelKey,
   rowEditActionsSlotKey,
   rowPinningModelKey,
   type TableBodyProjection,
-  type TableBodyProjector,
 } from "./layout/modelChannels";
 import {
+  keptAttrs,
+  lazyCells,
+  sameAttrs,
   type TableBodySlot,
+  type TableCellModel,
   type TableRowModel,
   useDesktopTableModel,
   useMobileCardsModel,
@@ -147,14 +127,16 @@ import {
   GRID_FOCUS_MODEL,
   SELECTION_STATS_MODEL,
 } from "./navigation/contracts";
+import { withLiveSelection } from "./rows/liveRowState";
 import { useRowSelection } from "./selection/selection";
-import { frontendRowModelOf } from "./source/rowModel";
+import type {
+  DataTableHandle,
+  DataTableSurface,
+  ResolvedTableOptions,
+  UseDataTableShellOptions,
+} from "./shell/shellContract";
+import { useShellDataTier } from "./shell/shellDataTier";
 import { useViewportMobile } from "./source/sourceLifecycle";
-import {
-  useFrontendData,
-  type UseFrontendDataOptions,
-} from "./source/useFrontendData";
-import { useServerData } from "./source/useServerData";
 import {
   bodyWindowModelKey,
   groupingPanelControlKey,
@@ -162,8 +144,9 @@ import {
   rowReorderControlKey,
   rowReorderModelKey,
 } from "./specialized/contracts";
-import { type MaybeRefOrGetterOptional, useScopeActivity } from "./store";
-import { useDataTable, type UseDataTableOptions } from "./useDataTable";
+import { useOptionFields, useScopeActivity } from "./store";
+import { TABLE_STORE } from "./tableStore";
+import { useDataTable } from "./useDataTable";
 import {
   DENSITY_CONTROL,
   FULLSCREEN_CONTROL,
@@ -171,136 +154,120 @@ import {
   SAVED_VIEWS_CONTROL,
   SAVED_VIEWS_MODEL,
 } from "./viewControls/contracts";
-export interface DataTableSurface {
-  scrollElement(): HTMLElement | null;
-  rootElement?(): HTMLElement | null;
+export type {
+  DataTableHandle,
+  DataTableSurface,
+  ResolvedTableOptions,
+  UseDataTableShellOptions,
+} from "./shell/shellContract";
+/**
+ * A row model with fields added or replaced. The row's own getters stay
+ * getters, so what it reads lazily is still read when it is drawn; `getters`
+ * add fields of that kind.
+ */
+function withRowFields<TRow>(
+  row: TableRowModel<TRow>,
+  fields: Partial<TableRowModel<TRow>>,
+  getters: Readonly<Record<string, () => unknown>> = {}
+): TableRowModel<TRow> {
+  const descriptors: PropertyDescriptorMap = {
+    ...Object.getOwnPropertyDescriptors(row),
+  };
+  for (const [key, value] of Object.entries(fields))
+    descriptors[key] = { value, enumerable: true, configurable: true };
+  for (const [key, get] of Object.entries(getters))
+    descriptors[key] = { get, enumerable: true, configurable: true };
+  return Object.defineProperties({}, descriptors) as TableRowModel<TRow>;
 }
-export interface DataTableHandle<TRow> {
-  readonly runtime: TableRuntime<TRow>;
-  readonly getView: () => TableRuntimeView<TRow> | undefined;
-  focus(): void;
+
+/**
+ * Whether two navigation cell lists draw the same: each cell's own fields are
+ * the same, its attributes have the same entries, and it has a fill handle in
+ * both or neither (the handle reads the current focus when drawn).
+ */
+function sameNavigationCells<TRow>(
+  previous: readonly TableCellModel<TRow>[],
+  next: readonly TableCellModel<TRow>[]
+): boolean {
+  return (
+    previous.length === next.length &&
+    next.every((cell, index) => {
+      const before = previous[index]!;
+      return (
+        cell.key === before.key &&
+        cell.context === before.context &&
+        cell.render === before.render &&
+        (cell.addon === undefined) === (before.addon === undefined) &&
+        sameAttrs(before.attrs, cell.attrs)
+      );
+    })
+  );
 }
-export interface UseDataTableShellOptions<TRow>
-  extends
-    Omit<UseDataTableOptions<TRow>, "source" | "selection">,
-    Omit<
-      UseFrontendDataOptions<TRow>,
-      "data" | keyof UseDataTableOptions<TRow>
-    > {
-  readonly source?: MaybeRefOrGetterOptional<TableSource<TRow>>;
-  /** Bound the rendered scroll body; CSS lengths are measured after mount. */
-  readonly maxHeight?: number | string;
-  readonly data?: MaybeRefOrGetter<readonly TRow[]>;
-  /**
-   * `"server"` makes `onQueryChange` fetch the rows; `"frontend"` keeps the
-   * table's own processing and makes `onQueryChange` a notification. Absent:
-   * `data` with `onQueryChange` is server, `data` alone is frontend.
-   */
-  readonly mode?: "frontend" | "server";
-  /**
-   * Called with one consolidated query per real change: on the server tier
-   * the host fetches that page and the superseded request's `signal` is
-   * aborted; on the frontend tier it is told what the reader did.
-   */
-  readonly onQueryChange?: TableQueryListener;
-  /** Server tier: the row count across every page. */
-  readonly total?: MaybeRefOrGetterOptional<number>;
-  /** Server tier: what the endpoint can answer, such as facet counts. */
-  readonly supports?: MaybeRefOrGetterOptional<QuerySupport>;
-  /** Server tier: aggregates the endpoint computes for the query. */
-  readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
-  /** Server tier: names the response the aggregates belong to. */
-  readonly responseKey?: MaybeRefOrGetterOptional<string>;
-  /** Server tier: keys sent as `query.facets`; defaults to every checklist filter. */
-  readonly facetKeys?: MaybeRefOrGetterOptional<readonly string[]>;
-  /** Server tier: distinct-value counts from the last fetch. */
-  readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
-  readonly features?: MaybeRefOrGetterOptional<
-    readonly ComposedFeature<NoInfer<TRow>>[]
-  >;
-  readonly assistant?: MaybeRefOrGetterOptional<
-    TableAssistantProps<VNodeChild>
-  >;
-  /** Maps the current source row scope to rendered footer values. */
-  readonly summaryRow?: SummaryRowFn<TRow>;
-  /** Table-wide fallback for columns without a footer renderer. */
-  readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
-  readonly confirm?: ConfirmHandler;
-  readonly density?: MaybeRefOrGetterOptional<TableDensity>;
-  /**
-   * Animate rows and cards as they mount. Off by default. Skipped when the
-   * reader prefers reduced motion.
-   */
-  readonly animate?: MaybeRefOrGetterOptional<boolean>;
-  readonly defaultDensity?: TableDensity;
-  readonly onDensityChange?: (next: TableDensity) => void;
-  readonly selectable?: MaybeRefOrGetter<boolean>;
-  readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
-  readonly defaultSelectedIds?: readonly string[];
-  readonly onSelectionChange?: (ids: string[]) => void;
-  readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly onCellCut?: (range: CellRange) => void;
-  readonly runtimeChannels?: MaybeRefOrGetter<
-    Pick<
-      RuntimeChromeInput<TRow>,
-      | "filterDefs"
-      | "filterRegistry"
-      | "grouping"
-      | "tree"
-      | "editing"
-      | "rowPinning"
-    >
-  >;
+
+/** Whether a value can key a weak map. */
+function isKeyable(value: unknown): value is object {
+  return typeof value === "object" && value !== null;
 }
-export interface ResolvedTableOptions<TRow>
-  extends
-    UseDataTableShellOptions<TRow>,
-    Partial<
-      Omit<
-        TableEditingOptions<TRow>,
-        "rows" | "columns" | "rowKey" | "featureHost"
-      >
-    > {
-  readonly editingModel?: (
-    context: FeatureMountContext<TRow>
-  ) => void | (() => void);
-  readonly bodyModel?: TableBodyProjector<TRow>;
-  readonly filterEngine?: FilterEngine;
-  readonly filters?: readonly FilterDef<TRow>[];
-  readonly filterTypes?: readonly FilterTypeSpec[];
-  readonly rowActionControls?: RowActionControlsProjector<TRow>;
-  readonly undoRedoButtons?: boolean;
-  readonly columnSelectionCheckbox?: boolean;
-  readonly enableColumnMenu?: boolean;
-  readonly statusBar?: boolean;
-  readonly onCellRangeChange?: (range: CellRange | null) => void;
-  readonly onCellCut?: (range: CellRange) => void;
-  readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly rowActions?: readonly RowAction<TRow>[];
-  readonly bulkActions?: readonly BulkAction[];
-  readonly [key: string]: unknown;
+
+/** An array that reads `current` each time it is used, for a stable prop. */
+function liveArray<T>(current: () => readonly T[]): readonly T[] {
+  return new Proxy([] as T[], {
+    get: (_target, key): unknown => Reflect.get(current(), key) as unknown,
+    has: (_target, key) => Reflect.has(current(), key),
+  });
 }
+
+/** Every field of an editing bundle, for a view that reads the current one. */
+const EDITING_BUNDLE_FIELDS = [
+  "onCellEdit",
+  "state",
+  "validation",
+  "saving",
+  "dirty",
+  "rowEditing",
+  "batch",
+  "lifecycle",
+  "conflict",
+  "conflictLabels",
+  "featureHost",
+  "activation",
+] as const satisfies readonly (keyof EditingBundle<unknown>)[];
+
+/** A bundle whose every field is read from `current` when it is used. */
+function liveEditingBundle<TRow>(
+  current: () => EditingBundle<TRow> | undefined
+): EditingBundle<TRow> {
+  const view = {} as EditingBundle<TRow>;
+  for (const field of EDITING_BUNDLE_FIELDS) {
+    Object.defineProperty(view, field, {
+      enumerable: true,
+      get: () => current()?.[field],
+    });
+  }
+  return view;
+}
+
+/** One source, feature lifecycle and model composition shared by every Vue kit. */
+
 export function useDataTableShell<TRow>(
   input: MaybeRefOrGetter<UseDataTableShellOptions<TRow>>
 ) {
   mountForcedColorsStyles();
   const options = computed(() => toValue(input));
+  // The features are composed when the host's features change, not each
+  // time another option (the data) does: their slot fills reach every row.
+  const featureList = computed(() => toValue(options.value.features));
   const declarations = computed(() =>
-    normalizeFeatures(toValue(options.value.features) ?? [])
+    normalizeFeatures(featureList.value ?? [])
   );
   const patches = computed(() => featureOptionsOf(declarations.value));
-  const resolved = computed(() => {
-    const featureValues = patches.value;
-    const explicitValues = Object.fromEntries(
-      Object.entries(options.value).filter(([, value]) => value !== undefined)
-    );
-    return {
-      ...featureValues,
-      ...explicitValues,
-    } as unknown as ResolvedTableOptions<TRow>;
-  });
+  // Read option by option: a change to one option reaches its readers only.
+  const resolved = useOptionFields(() =>
+    overlayFeatureOptions<
+      UseDataTableShellOptions<TRow>,
+      ResolvedTableOptions<TRow>
+    >(patches.value, featureLabelsOf(declarations.value), options.value)
+  );
   const localUrlAdapter = createMemoryAdapter();
   const urlAdapter = computed(() =>
     resolveUrlAdapter(
@@ -317,167 +284,22 @@ export function useDataTableShell<TRow>(
   const isMobile = useViewportMobile(resolved);
   const supplied = computed(() => toValue(resolved.value.source));
   const registered = shallowRef<FeatureHostState<TRow>>(
-    EMPTY_FEATURE_HOST as unknown as FeatureHostState<TRow>
+    new LiveFeatureHost<TRow>()
   );
-  const filterOptionCache = createFilterOptionCache<TRow>();
-  const filterRuntime = computed(() => {
-    const engine = resolved.value.filterEngine;
-    if (!engine) {
-      filterOptionCache.clear();
-      return undefined;
-    }
-    const columns = flattenColumns(toValue(resolved.value.columns)).leaves;
-    const definitions = resolved.value.filters ?? [];
-    return engine.buildRuntime({
-      columns,
-      declaredFilters: definitions,
-      locale: toValue(resolved.value.locale),
-      data:
-        supplied.value?.allFilteredRows ?? toValue(resolved.value.data) ?? [],
-      loadedOptions: {},
-      filterTypes: resolved.value.filterTypes,
-      featureHost: registered.value as FeatureHostState | undefined,
-      optionCache: filterOptionCache.reconcile(columns, definitions),
-    });
-  });
-  const filterRows = (row: TRow, extra: ExtraFilters): boolean =>
-    (filterRuntime.value?.filterFn(row, extra) ?? true) &&
-    (resolved.value.filterFn?.(row, extra) ?? true);
-  const filterTree = (row: TRow, tree: QueryFilterGroup): boolean => {
-    const filters = filterRuntime.value;
-    const keep = filters
-      ? (resolved.value.filterEngine?.evaluateTree(
-          tree,
-          row,
-          filters.defs,
-          filters.registry
-        ) ?? true)
-      : true;
-    return keep && (resolved.value.filterTreeFn?.(row, tree) ?? true);
-  };
-  // The data tier: a supplied source, then the host's server page when
-  // onQueryChange is wired (or mode says so), then the table's own rows.
-  // The active tier owns the URL; an inactive one keeps private state.
-  const dataController = createTableData<TRow>();
-  onScopeDispose(dataController.dispose);
-  const tier = computed(
-    () =>
-      dataController.plan({
-        engine: undefined,
-        source: supplied.value,
-        data: toValue(resolved.value.data),
-        mode: resolved.value.mode,
-        onQueryChange: resolved.value.onQueryChange,
-        columns: [],
-      }).tier
+  // One store per table: its view state, column layout, expansion and row
+  // pinning are its slices. What this setup calls gets it passed; the
+  // components inside the table inject it.
+  const tableStore = createTableStore();
+  provide(TABLE_STORE, tableStore);
+  const { filterRuntime, source } = useShellDataTier<TRow>(
+    resolved,
+    declarations,
+    registered,
+    supplied,
+    urlAdapter,
+    isMobile,
+    tableStore
   );
-  const onFrontend = computed(() => tier.value === "frontend");
-  const onServer = computed(() => tier.value === "server");
-  let columnSource: unknown;
-  let columnLeaves: ReturnType<typeof flattenColumns<TRow>>["leaves"] = [];
-  const tierColumns = (live: boolean) => {
-    if (!live) return INACTIVE_TIER_ROWS;
-    const input = toValue(resolved.value.columns);
-    if (input === columnSource) return columnLeaves;
-    columnSource = input;
-    columnLeaves = input ? flattenColumns(input).leaves : [];
-    return columnLeaves;
-  };
-  let facetKeyList: readonly string[] | undefined;
-  const frontend = useFrontendData(() => ({
-    ...resolved.value,
-    forceMobile: isMobile,
-    data: tierRows(onFrontend.value, toValue(resolved.value.data)),
-    columns: tierColumns(onFrontend.value),
-    getRowId: resolved.value.rowKey,
-    urlAdapter: onFrontend.value ? urlAdapter : undefined,
-    urlSync: onFrontend.value,
-    filterFn: filterRuntime.value ? filterRows : resolved.value.filterFn,
-    filterTreeFn: filterRuntime.value
-      ? filterTree
-      : resolved.value.filterTreeFn,
-    filterKey: filterRuntime.value
-      ? `${String(filterRuntime.value.filterKey)}:${String(toValue(resolved.value.filterKey) ?? "")}`
-      : resolved.value.filterKey,
-    arrayExtraKeys: [
-      ...(toValue(resolved.value.arrayExtraKeys) ?? []),
-      ...(filterRuntime.value?.arrayExtraKeys ?? []),
-    ],
-    numberExtraKeys: [
-      ...(toValue(resolved.value.numberExtraKeys) ?? []),
-      ...(filterRuntime.value?.numberExtraKeys ?? []),
-    ],
-    createEngine: frontendRowModelOf(declarations.value) as
-      FrontendEngineFactory<TRow> | undefined,
-  }));
-  const server = useServerData<TRow>(() => {
-    const value = resolved.value;
-    const live = onServer.value;
-    const filters = filterRuntime.value;
-    if (live) {
-      const checklistKeys = filters?.defs
-        .filter(
-          (def) =>
-            (filters.registry.get(def.type)?.widget ?? def.type) === "checklist"
-        )
-        .map((def) => def.key);
-      facetKeyList = retainItems(
-        facetKeyList,
-        toValue(value.facetKeys) ?? checklistKeys
-      );
-    }
-    return {
-      rows: tierRows(live, toValue(value.data)),
-      total: () => toValue(value.total) ?? 0,
-      loading: value.isLoading,
-      error: value.error,
-      onQueryChange: activeTierValue(live, value.onQueryChange, undefined),
-      // A column's default aggregate is a request to the server, so only the
-      // server tier reads the columns.
-      columns: tierColumns(live),
-      supports: activeTierValue(live, value.supports, undefined),
-      aggregates: activeTierValue(live, value.aggregates, undefined),
-      responseKey: activeTierValue(live, value.responseKey, undefined),
-      facets: activeTierValue(live, value.facets, undefined),
-      // A server query counts every checklist filter unless told which.
-      facetKeys: live ? facetKeyList : undefined,
-      urlAdapter: live ? urlAdapter : undefined,
-      urlSync: live,
-      urlKey: value.urlKey,
-      defaults: value.defaults,
-      arrayExtraKeys: filters?.arrayExtraKeys,
-      numberExtraKeys: filters?.numberExtraKeys,
-      paginationMode: value.paginationMode,
-      forceMobile: isMobile,
-    };
-  });
-  // Once the frame is on screen, a frontend table's onQueryChange hears
-  // about a change; the mount is not one.
-  const tierSource = computed(() =>
-    dataController.finish({
-      resolved:
-        supplied.value ?? (onServer.value ? server.value : frontend.value),
-      frontend: frontend.value,
-    })
-  );
-  watch(tierSource, dataController.commit, { flush: "post" });
-  const source = computed(() => {
-    const raw = tierSource.value;
-    const filters = filterRuntime.value;
-    const engine = resolved.value.filterEngine;
-    if (!filters || !engine || supplied.value || !raw.allSearchedRows)
-      return raw;
-    return {
-      ...raw,
-      facets: engine.computeFacets(
-        filters.defs,
-        raw.allSearchedRows,
-        raw.extra,
-        filterRows,
-        filters.registry
-      ),
-    };
-  });
   const state = createFeatureState();
   const grouping = state.get(groupingModelKey<TRow>());
   const tree = state.get(treeModelKey<TRow>());
@@ -518,6 +340,7 @@ export function useDataTableShell<TRow>(
   );
   const table = useDataTable(() => ({
     ...resolved.value,
+    store: tableStore,
     forceMobile: isMobile,
     source: viewSource,
     selection: selection.value,
@@ -854,50 +677,93 @@ export function useDataTableShell<TRow>(
     () =>
       new Map(table.columns.value.map((column, index) => [column.key, index]))
   );
+  // What row decoration reads, narrowed to the value it uses: the options
+  // object is rebuilt with every data change, and the positions map with
+  // every row change, while each row's own value usually stays the same.
+  const rowActionControls = computed(() => resolved.value.rowActionControls);
+  const positions = new Map<string, ComputedRef<number | undefined>>();
+  const columnPositions = new Map<string, ComputedRef<number>>();
+  const columnPosition = (key: string): number => {
+    let position = columnPositions.get(key);
+    if (!position) {
+      position = computed(() => bodyColumnPositions.value.get(key) ?? -1);
+      columnPositions.set(key, position);
+    }
+    return position.value;
+  };
+  const rowPosition = (key: string): number | undefined => {
+    let position = positions.get(key);
+    if (!position) {
+      position = computed(() => bodyRowPositions.value.get(key));
+      positions.set(key, position);
+    }
+    return position.value;
+  };
+  // Navigation decorates rows while cell navigation or find is on; the focus
+  // and matches a row shows are read when the row is drawn, and kept while
+  // they are the same, so a focus move redraws the rows it moves between.
+  const navigationOn = computed(
+    () => gridFocus.value !== undefined || find.value !== undefined
+  );
+  const navigationCell = (
+    cell: TableCellModel<TRow>,
+    rowIndex: number,
+    absolute: number
+  ): TableCellModel<TRow> => {
+    const col = columnPosition(cell.key);
+    const key = `${absolute}:${col}`;
+    const search = find.value;
+    const current = search?.current;
+    const marks = search?.open
+      ? {
+          "data-cell-match": search.matchKeys.has(key) ? "" : undefined,
+          "data-cell-match-current":
+            current?.row === absolute && current.col === col ? "" : undefined,
+        }
+      : {};
+    const attrs = mergeVueAttrs(cell.attrs, {
+      ...gridFocus.value?.getCellProps({ row: absolute, col }),
+      ...marks,
+    });
+    return {
+      ...cell,
+      attrs,
+      addon: gridFocus.value?.enabled
+        ? (className?: string) =>
+            renderFeatureSlot(FILL_HANDLE_CONTROL, slotFills.value, {
+              focus: gridFocus.value!,
+              windowIndex: rowIndex,
+              firstRowIndex: table.windowStart.value,
+              col,
+              className,
+            })
+        : undefined,
+    };
+  };
   const decorateNavigation = (
     row: TableRowModel<TRow>
   ): TableRowModel<TRow> => {
-    if (row.summary || (!gridFocus.value && !find.value)) return row;
-    const grid = gridFocus.value;
-    const rowIndex = bodyRowPositions.value.get(row.key);
+    if (row.summary || !navigationOn.value) return row;
+    const rowIndex = rowPosition(row.key);
     if (rowIndex === undefined) return row;
     const absolute = table.windowStart.value + rowIndex;
-    return {
-      ...row,
-      attrs: mergeVueAttrs(row.attrs, grid?.getRowProps(absolute) ?? {}),
-      cells: row.cells.map((cell) => {
-        const col = bodyColumnPositions.value.get(cell.key) ?? -1;
-        const address = { row: absolute, col };
-        const key = `${absolute}:${col}`;
-        const current = find.value?.current;
-        const marks = find.value?.open
-          ? {
-              "data-cell-match": find.value.matchKeys.has(key) ? "" : undefined,
-              "data-cell-match-current":
-                current?.row === absolute && current.col === col
-                  ? ""
-                  : undefined,
-            }
-          : {};
-        return {
-          ...cell,
-          attrs: mergeVueAttrs(cell.attrs, {
-            ...grid?.getCellProps(address),
-            ...marks,
-          }),
-          addon: grid?.enabled
-            ? (className?: string) =>
-                renderFeatureSlot(FILL_HANDLE_CONTROL, slotFills.value, {
-                  focus: grid,
-                  windowIndex: rowIndex,
-                  firstRowIndex: table.windowStart.value,
-                  col,
-                  className,
-                })
-            : undefined,
-        };
-      }),
-    };
+    const attrs = keptAttrs(() =>
+      mergeVueAttrs(row.attrs, gridFocus.value?.getRowProps(absolute) ?? {})
+    );
+    const cells = computed<readonly TableCellModel<TRow>[]>((previous) => {
+      const next = row.cells.map((cell) =>
+        navigationCell(cell, rowIndex, absolute)
+      );
+      return previous && sameNavigationCells(previous, next) ? previous : next;
+    });
+    return withRowFields(
+      row,
+      {},
+      {
+        attrs: () => attrs.value,
+        cells: () => cells.value,
+      }
+    );
   };
   const renderNavigationBefore = (
     classNames?: Readonly<Record<string, string | undefined>>
@@ -951,25 +817,145 @@ export function useDataTableShell<TRow>(
     source.value.setPage ??
     supplied.value ??
     source.value;
+  // The owner, not the source it is read from: the source is a new object
+  // with each data change while its owner usually stays the same.
+  const sourceOwner = computed(rowSourceOwner);
+  // Whether one row is still drawn, as its own value: the set of drawn rows is
+  // rebuilt with each data change.
+  const visibility = new WeakMap<object, ComputedRef<boolean>>();
+  const rowVisible = (row: TRow): ComputedRef<boolean> => {
+    if (!isKeyable(row))
+      return computed(() => visibleRowObjects.value.has(row));
+    let visible = visibility.get(row);
+    if (!visible) {
+      visible = computed(() => visibleRowObjects.value.has(row));
+      visibility.set(row, visible);
+    }
+    return visible;
+  };
   const rowControlOwner = (row: TRow) => {
-    const owner = rowSourceOwner();
+    const owner = sourceOwner.value;
     const revision = rowOwnerRevision.value;
+    const visible = rowVisible(row);
     return () =>
       active.value &&
       rowOwnerRevision.value === revision &&
-      rowSourceOwner() === owner &&
-      visibleRowObjects.value.has(row);
+      sourceOwner.value === owner &&
+      visible.value;
   };
+  // A row reads editing through what changes it: whether editing is on, and
+  // a view of the bundle that is replaced only when what the row's cells draw
+  // (`drawnRowEditing`) changes. The view reads the current bundle, so a row's
+  // actions always act on the latest state, while an edit redraws only the
+  // rows it changes.
+  const editingOn = computed(() => editing.value !== undefined);
+  const rowEditFactory = computed(() => editingChrome.value?.row);
+  let latestBundle = editing.value;
+  watch(
+    editing,
+    (bundle) => {
+      latestBundle = bundle;
+    },
+    { flush: "sync" }
+  );
+  const currentBundle = (): EditingBundle<TRow> | undefined => latestBundle;
+  // The drawn rows an editor reads when it moves on (Tab, Enter): read then,
+  // so drawing a row does not depend on every other row's data.
+  let latestVisibleRows = rowInventory.value.visibleRows;
+  watch(
+    () => rowInventory.value.visibleRows,
+    (rows) => {
+      latestVisibleRows = rows;
+    },
+    { flush: "sync" }
+  );
+  const liveVisibleRows = liveArray(() => latestVisibleRows);
+  const rowTargets = new Map<string, TRow>();
+  /** The editing view a row's edit controls draw with. */
+  const rowEditingView = (
+    model: TableRowModel<TRow>
+  ): EditingBundle<TRow> | undefined => {
+    rowTargets.set(model.key, model.row);
+    return bundleFor(model.key);
+  };
+  const rowBundles = new Map<
+    string,
+    ComputedRef<EditingBundle<TRow> | undefined>
+  >();
+  const bundleFor = (rowId: string): EditingBundle<TRow> | undefined => {
+    let view = rowBundles.get(rowId);
+    if (!view) {
+      let drawn: readonly unknown[] | undefined;
+      view = computed<EditingBundle<TRow> | undefined>((previous) => {
+        const next = editing.value;
+        const row = rowTargets.get(rowId);
+        const current =
+          next && row !== undefined
+            ? drawnRowEditing(next, {
+                row,
+                rowId,
+                rows: rowInventory.value.visibleRows,
+                columns: table.columns.value,
+                rowKey: table.rowKey,
+              })
+            : undefined;
+        if (previous && drawn && current && sameDrawnView(drawn, current))
+          return previous;
+        drawn = current;
+        return next && liveEditingBundle(currentBundle);
+      });
+      rowBundles.set(rowId, view);
+    }
+    return view.value;
+  };
+  // A row that leaves the drawn rows leaves its bundle and position behind.
+  watch(
+    () => rowInventory.value.visibleRows,
+    (rows) => {
+      const drawn = new Set(rows.map(table.rowKey));
+      for (const rowId of rowBundles.keys()) {
+        if (drawn.has(rowId)) continue;
+        rowBundles.delete(rowId);
+        rowTargets.delete(rowId);
+      }
+      for (const rowId of positions.keys()) {
+        if (!drawn.has(rowId)) positions.delete(rowId);
+      }
+    }
+  );
+  /** A cell that edits in place, drawn through the kit's editable cell. */
+  const editableCell = (
+    row: TableRowModel<TRow>,
+    cell: TableCellModel<TRow>
+  ): TableCellModel<TRow> =>
+    isCellEditable(cell.context.column, row.row)
+      ? {
+          ...cell,
+          render: (display) =>
+            renderFeatureSlot(editableCellSlotKey<TRow>(), slotFills.value, {
+              editing: bundleFor(row.key),
+              row: row.row,
+              rowId: row.key,
+              rowIndex: row.index,
+              column: cell.context.column,
+              rows: liveVisibleRows,
+              columns: table.columns.value,
+              rowKey: table.rowKey,
+              editLabel: table.labels.value.editCell,
+              undoLabel: table.labels.value.undoEdit,
+              display,
+            }),
+        }
+      : cell;
   const decorateRow = (original: TableRowModel<TRow>): TableRowModel<TRow> => {
     const ownsRow =
-      original.detail || resolved.value.rowActionControls
+      original.detail || rowActionControls.value
         ? rowControlOwner(original.row)
         : undefined;
     const rowDetail = original.detail;
     if (rowDetail) {
       const toggle = rowDetail.toggleAttrs.onClick;
-      original = {
-        ...original,
+      original = withRowFields(original, {
         detail: {
           ...rowDetail,
           toggleAttrs: {
@@ -980,7 +966,7 @@ export function useDataTableShell<TRow>(
             },
           },
         },
-      };
+      });
     }
     const reorder = rowReorder.value;
     if (reorder && !original.summary) {
@@ -1012,16 +998,17 @@ export function useDataTableShell<TRow>(
           }),
       };
     }
-    const projector = resolved.value.rowActionControls;
+    const projector = rowActionControls.value;
     const rowEditing =
       !original.summary && rowEditControlsVisible.value
-        ? editingChrome.value?.row?.(
+        ? rowEditFactory.value?.(
             original.row,
             original.key,
-            mergedActions.value.rowActions
+            rowActionList.value,
+            rowEditingView(original)
           )
         : undefined;
-    const actions = rowEditing?.actions ?? mergedActions.value.rowActions;
+    const actions = rowEditing?.actions ?? rowActionList.value;
     const controls =
       !original.summary && projector && actions
         ? projector({
@@ -1030,14 +1017,12 @@ export function useDataTableShell<TRow>(
             confirm: requestConfirm,
             cancelLabel: table.labels.value.cancel,
             enabled: () =>
-              ownsRow?.() === true &&
-              resolved.value.rowActionControls === projector,
+              ownsRow?.() === true && rowActionControls.value === projector,
           })
         : undefined;
     const row =
       controls || rowEditing
-        ? {
-            ...original,
+        ? withRowFields(original, {
             actionControls: controls,
             editActions: rowEditing
               ? () =>
@@ -1047,42 +1032,58 @@ export function useDataTableShell<TRow>(
                     rowEditing.props
                   )
               : undefined,
-          }
+          })
         : original;
-    if (!editing.value || row.summary) return row;
-    return {
-      ...row,
-      cells: row.cells.map((cell) =>
-        !isCellEditable(cell.context.column, row.row)
-          ? cell
-          : {
-              ...cell,
-              render: (display) =>
-                renderFeatureSlot(
-                  editableCellSlotKey<TRow>(),
-                  slotFills.value,
-                  {
-                    editing: editing.value,
-                    row: row.row,
-                    rowId: row.key,
-                    rowIndex: row.index,
-                    column: cell.context.column,
-                    rows: rowInventory.value.visibleRows,
-                    columns: table.columns.value,
-                    rowKey: table.rowKey,
-                    editLabel: table.labels.value.editCell,
-                    undoLabel: table.labels.value.undoEdit,
-                    display,
-                  }
-                ),
-            }
-      ),
-    };
+    if (!editingOn.value || row.summary) return row;
+    rowTargets.set(row.key, row.row);
+    const editableCells = lazyCells(() =>
+      row.cells.map((cell) => editableCell(row, cell))
+    );
+    return withRowFields(row, {}, { cells: editableCells });
   };
-  const decorateSlots = (slots: readonly TableBodySlot<TRow>[] | undefined) =>
+  // Each row is decorated by a computed of its own, keyed by the row model it
+  // decorates: Vue re-runs it only when something that row's decoration read
+  // changes, so a change to one row does not hand every row new props.
+  const selectable = computed(() => selection.value !== undefined);
+  const currentSelection = () => selection.value;
+  const rowActionList = computed<readonly RowAction<TRow>[] | undefined>(
+    (previous) => {
+      const next = mergedActions.value.rowActions;
+      if (!next || previous?.length !== next.length) return next;
+      return previous.every((action, index) => action === next[index])
+        ? previous
+        : next;
+    }
+  );
+  const decorated = {
+    row: new WeakMap<TableRowModel<TRow>, ComputedRef<TableRowModel<TRow>>>(),
+    card: new WeakMap<TableRowModel<TRow>, ComputedRef<TableRowModel<TRow>>>(),
+  };
+  const decorate = (
+    wiring: TableRowModel<TRow>,
+    element: "row" | "card"
+  ): TableRowModel<TRow> => {
+    let row = decorated[element].get(wiring);
+    if (!row) {
+      row = computed(() => {
+        const drawn = decorateNavigation(decorateRow(wiring));
+        // Whether rows are selectable, not the selection itself: a row reads
+        // its own selected state when it is drawn.
+        return selectable.value
+          ? withLiveSelection(drawn, currentSelection, element)
+          : drawn;
+      });
+      decorated[element].set(wiring, row);
+    }
+    return row.value;
+  };
+  const decorateSlots = (
+    slots: readonly TableBodySlot<TRow>[] | undefined,
+    element: "row" | "card"
+  ) =>
     slots?.map((slot) =>
       slot.kind === "row"
-        ? { ...slot, wiring: decorateNavigation(decorateRow(slot.wiring)) }
+        ? { ...slot, wiring: decorate(slot.wiring, element) }
         : slot
     );
   const renameColumn = (key: string, name: string): void =>
@@ -1177,18 +1178,14 @@ export function useDataTableShell<TRow>(
         resizeAttrs,
       };
     }),
-    rows: windowedBody.value.desktop.rows.map((row) =>
-      decorateNavigation(decorateRow(row))
-    ),
-    bodySlots: decorateSlots(windowedBody.value.desktop.bodySlots),
+    rows: windowedBody.value.desktop.rows.map((row) => decorate(row, "row")),
+    bodySlots: decorateSlots(windowedBody.value.desktop.bodySlots, "row"),
   }));
   const mobile = computed(() => ({
     ...windowedBody.value.mobile,
     summary: mobileSummary.value,
-    rows: windowedBody.value.mobile.rows.map((row) =>
-      decorateNavigation(decorateRow(row))
-    ),
-    bodySlots: decorateSlots(windowedBody.value.mobile.bodySlots),
+    rows: windowedBody.value.mobile.rows.map((row) => decorate(row, "card")),
+    bodySlots: decorateSlots(windowedBody.value.mobile.bodySlots, "card"),
   }));
   if (getCurrentInstance()) provideFeatureState(state);
   const active = useScopeActivity();
@@ -1320,7 +1317,8 @@ export function useDataTableShell<TRow>(
     density,
     table,
     rowInventory,
-    options: resolved,
+    // Features watch the options as one value: a new object on any change.
+    options: computed(() => ({ ...resolved.value })),
     filterRuntime,
     featureHost: registered,
     state,

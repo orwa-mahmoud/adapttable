@@ -227,9 +227,9 @@ export default defineConfig(
     // `@adapttable/react/…`, a Vue or Angular kit its own binding. Only a
     // binding imports `@adapttable/core`, and it re-exports what its kits
     // need, so it can adapt any of it to its framework without touching a kit.
-    // Tests may still reach core's test tooling, such as the conformance suite.
-    files: ["packages/*/adapter-*/src/**/*.{ts,tsx,vue}"],
-    ignores: ["**/*.{test,spec}.{ts,tsx}", "**/*test-utils.{ts,tsx}"],
+    // The rule covers a kit's tests and test helpers too: they take their
+    // fixtures and the conformance suites from the binding as well.
+    files: ["packages/*/adapter-*/**/*.{ts,tsx,vue}"],
     rules: {
       "no-restricted-imports": [
         "error",

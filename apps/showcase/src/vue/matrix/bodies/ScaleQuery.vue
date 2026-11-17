@@ -71,7 +71,7 @@ function usePeopleQuery(
 }
 
 const kit = useShowcaseKit();
-const columns = peopleColumns({ status: kit.status });
+const columns = peopleColumns(kit);
 const alternate = shallowRef(false);
 const query = useQuerySource<Person, PeopleParams, PeoplePage>({
   query: usePeopleQuery,

@@ -1,9 +1,12 @@
-import { resolveLabels } from "../labels";
+import { ROW_LABELS } from "../labelGroups/rowLabels";
+import { resolveFeatureLabels } from "../labelGroups/tableLabels";
 import type {
   RowMoveMenuSlotProps,
   RowReorderState,
 } from "./rowReorderContract";
 import type { RowReorderLabels } from "./rowReorderEngine";
+
+const ROW_GROUPS = [ROW_LABELS] as const;
 
 /**
  * The part of a reorder state the destination menu reads.
@@ -45,7 +48,7 @@ export function rowMoveMenuProps<TRow>(
       : pending?.fromParent.label;
   const to =
     pending?.kind === "group" ? pending.toGroup.label : pending?.toParent.label;
-  const copy = resolveLabels(labels);
+  const copy = resolveFeatureLabels(labels, ROW_GROUPS);
   return {
     label: menu.label,
     items: menu.targets.map((target) => ({

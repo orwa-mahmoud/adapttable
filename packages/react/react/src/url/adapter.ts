@@ -8,11 +8,7 @@
  * `@adapttable/core`. This module adds the hook that resolves one per
  * piece of URL state.
  */
-import {
-  createMemoryAdapter,
-  resolveUrlAdapter,
-  type UrlStateAdapter,
-} from "@adapttable/core";
+import { createMemoryAdapter, type UrlStateAdapter } from "@adapttable/core";
 import { useRef } from "react";
 
 export type { UrlStateAdapter } from "@adapttable/core";
@@ -20,8 +16,11 @@ export {
   createHistoryAdapter,
   createMemoryAdapter,
   getHistoryAdapter,
-  resetHistoryAdapter,
 } from "@adapttable/core";
+
+import { resolveUrlAdapter } from "@adapttable/core/binding";
+
+export { resetHistoryAdapter } from "@adapttable/core/binding";
 
 /**
  * Resolve which `UrlStateAdapter` a URL-synced hook should use: an

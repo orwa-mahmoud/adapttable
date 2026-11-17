@@ -4,27 +4,32 @@
  */
 import {
   approvalArgumentPairs,
-  approvalProposalText,
   type ApprovalReview,
   type ApprovalReviewItem,
-  resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
-import type {
-  AgentApprovalButtonProps,
-  AgentApprovalListProps as NeutralAgentApprovalListProps,
+import {
+  type AgentApprovalButtonProps,
+  type AgentApprovalListProps as NeutralAgentApprovalListProps,
+  approvalProposalText,
+  ASSISTANT_LABELS,
+  type AssistantStrings,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   input,
+  type Signal,
   type TemplateRef,
   type Type,
   viewChild,
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
+
+const APPROVAL_GROUPS = [ASSISTANT_LABELS] as const;
 
 /** The controls carry these parts on the kit's actual elements. */
 const APPROVAL_REVIEW_PARTS = {
@@ -103,7 +108,9 @@ export class AdaptApprovalReviewChrome {
   readonly slots = input.required<ApprovalReviewSlots>();
   /** Localized labels. */
   readonly labels = input<TableLabels>();
-  protected readonly copy = computed(() => resolveLabels(this.labels()));
+  protected readonly copy: Signal<AssistantStrings> = computed(() =>
+    resolveFeatureLabels(this.labels(), APPROVAL_GROUPS)
+  );
   /** Whether to show every proposal. */
   readonly expanded = input<boolean | undefined>(false);
   /** Expand the list. */

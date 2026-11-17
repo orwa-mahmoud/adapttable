@@ -386,6 +386,44 @@ export function budgetAggregateText(
 }
 
 /**
+ * A Load aggregate as text: a percentage, except a count of rows, which counts.
+ *
+ * @param value - The computed aggregate.
+ * @param aggregation - The operation that produced it.
+ * @param locale - The active locale.
+ * @returns The aggregate as the column reads it.
+ */
+export function loadAggregateText(
+  value: number,
+  aggregation?: string,
+  locale: Locale = "en"
+): string {
+  return aggregation === "count"
+    ? formatCount(value, locale)
+    : formatPercent(value, locale);
+}
+
+/**
+ * A Timeline aggregate as text: the day a minimum or maximum names, except a
+ * count of rows, which counts. The column sorts on epoch milliseconds, so min
+ * and max arrive as numbers.
+ *
+ * @param value - The computed aggregate.
+ * @param aggregation - The operation that produced it.
+ * @param locale - The active locale.
+ * @returns The aggregate as the column reads it.
+ */
+export function timelineAggregateText(
+  value: number,
+  aggregation?: string,
+  locale: Locale = "en"
+): string {
+  return aggregation === "count"
+    ? formatCount(value, locale)
+    : formatDate(new Date(value), locale);
+}
+
+/**
  * The showcase's entire filter wiring, as data. Each adapter auto-builds a
  * kit-native form from these definitions, and the chips, the URL params
  * (array/number keys self-register) and the client-side predicate are all
@@ -637,7 +675,7 @@ export function makeLargeDirectory(count = LARGE_ROW_COUNT): Person[] {
  * One row of the large directory, addressed by its position — so a paged
  * server can answer any slice without building the rows before it.
  */
-export function largePerson(index: number): Person {
+function largePerson(index: number): Person {
   const area = index % LARGE_AREAS.length;
   const squad = Math.floor(index / LARGE_AREAS.length) % LARGE_SQUADS;
   const first = index % LARGE_FIRST.length;

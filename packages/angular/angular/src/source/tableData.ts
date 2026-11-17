@@ -6,7 +6,6 @@
  * table's `onQueryChange` are `@adapttable/core`'s table data controller.
  */
 import {
-  createTableData,
   type ExtraFilters,
   type FacetMap,
   type FilterDef,
@@ -14,15 +13,18 @@ import {
   type FilterRuntime,
   type FilterTypeSpec,
   type FrontendEngineFactory,
-  INACTIVE_TIER_ROWS,
   type PaginationMode,
   type QueryAggregate,
   type QuerySupport,
   type SortableValue,
   type TableSource,
-  tierRows,
 } from "@adapttable/core";
-import type { FeatureHostState } from "@adapttable/core/binding";
+import {
+  createTableData,
+  type FeatureHostState,
+  INACTIVE_TIER_ROWS,
+  tierRows,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,
@@ -43,7 +45,7 @@ import {
 } from "../store";
 import type { TableUrlStateOptions } from "../url/tableUrlState";
 import { injectFrontendData } from "./frontendData";
-import { injectServerData, type TableQueryHandler } from "./serverData";
+import { injectServerTier, type TableQueryHandler } from "./serverData";
 
 /**
  * Options for {@link injectTableData}.
@@ -225,39 +227,44 @@ export function injectTableData<TRow>(
     error: options.error,
     injector,
   });
-  const server = injectServerData<TRow>({
-    ...urlOptions,
-    urlSync: computed(() => (onServer() ? readMaybe(options.urlSync) : false)),
-    rows: computed(() =>
-      onServer() ? tierRows(true, data()) : INACTIVE_TIER_ROWS
-    ),
-    total: computed(() => readMaybe(options.total) ?? 0),
-    loading: options.loading,
-    error: options.error,
-    paginationMode: mode,
-    forceMobile: options.forceMobile,
-    mobileBreakpoint: options.mobileBreakpoint,
-    // A column's default aggregate is a request to the server, so only the
-    // server tier reads the columns.
-    columns: computed(() => (onServer() ? columns() : INACTIVE_TIER_ROWS)),
-    onQueryChange: computed(() =>
-      onServer() ? readMaybe(options.onQueryChange) : undefined
-    ),
-    aggregates: computed(() =>
-      onServer() ? readMaybe(options.aggregates) : undefined
-    ),
-    responseKey: computed(() =>
-      onServer() ? readMaybe(options.responseKey) : undefined
-    ),
-    supports: computed(() =>
-      onServer() ? readMaybe(options.supports) : undefined
-    ),
-    facetKeys: computed(() => (onServer() ? plan().facetKeys : undefined)),
-    facets: computed(() =>
-      onServer() ? readMaybe(options.facets) : undefined
-    ),
-    injector,
-  });
+  const server = injectServerTier<TRow>(
+    {
+      ...urlOptions,
+      urlSync: computed(() =>
+        onServer() ? readMaybe(options.urlSync) : false
+      ),
+      rows: computed(() =>
+        onServer() ? tierRows(true, data()) : INACTIVE_TIER_ROWS
+      ),
+      total: computed(() => readMaybe(options.total) ?? 0),
+      loading: options.loading,
+      error: options.error,
+      paginationMode: mode,
+      forceMobile: options.forceMobile,
+      mobileBreakpoint: options.mobileBreakpoint,
+      // A column's default aggregate is a request to the server, so only the
+      // server tier reads the columns.
+      columns: computed(() => (onServer() ? columns() : INACTIVE_TIER_ROWS)),
+      onQueryChange: computed(() =>
+        onServer() ? readMaybe(options.onQueryChange) : undefined
+      ),
+      aggregates: computed(() =>
+        onServer() ? readMaybe(options.aggregates) : undefined
+      ),
+      responseKey: computed(() =>
+        onServer() ? readMaybe(options.responseKey) : undefined
+      ),
+      supports: computed(() =>
+        onServer() ? readMaybe(options.supports) : undefined
+      ),
+      facetKeys: computed(() => (onServer() ? plan().facetKeys : undefined)),
+      facets: computed(() =>
+        onServer() ? readMaybe(options.facets) : undefined
+      ),
+      injector,
+    },
+    onServer
+  );
 
   const source = computed(() => {
     const prebuilt = readMaybe(options.source);

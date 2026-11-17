@@ -129,6 +129,7 @@ export type { TreeExpansionOptions } from "./tree/treeExpansion";
 export type { UseSavedViewsOptions } from "./url/useSavedViews";
 export type { UseTableUrlStateOptions } from "./url/useTableUrlState";
 export type {
+  TableRail,
   useDataTable,
   UseDataTableOptions,
   UseDataTableResult,

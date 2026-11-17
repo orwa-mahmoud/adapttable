@@ -1,6 +1,5 @@
+import { useMobileTarget } from "@adapttable/react/adapter";
 import { Box, IconButton } from "@mui/material";
-
-import { useMobileTarget } from "./mobileTarget";
 
 /** Inline chevron pointing at the reading end; rotates down when open. */
 export function ExpandChevron({

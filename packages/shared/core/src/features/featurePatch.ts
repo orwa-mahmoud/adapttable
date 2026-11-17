@@ -4,13 +4,15 @@
  * Every composed feature may `apply` a patch of internal configuration. The
  * patches merge in array order (later features win), `assembly` merges one
  * level deep so two features can each contribute assembly functions, and a
- * defined host option wins over every feature. The result forgets
+ * defined host option wins over every feature. The strings the features draw
+ * ride along as `featureLabels`. The result forgets
  * `features` and remembers which list produced it, and resolving an already
  * resolved object is a no-op — so a kit and the shell can both apply.
  *
  * The binding adds what it draws (providers, slot renders) on its own
  * feature type; the merge is the same for every binding, so it lives here.
  */
+import type { TableLabels } from "../types";
 import {
   type GroupingContribution,
   mergeGroupingContributions,
@@ -58,10 +60,56 @@ export interface PatchFeature<
 > extends FeatureRegistration<TRow> {
   /** Merge this feature's configuration into the table. Later features win. */
   apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+  /** The strings the feature draws, with their English defaults. */
+  readonly labels?: Partial<TableLabels>;
 }
 
-const applied = new WeakSet<object>();
-const appliedFeatures = new WeakMap<object, readonly PatchFeature[]>();
+interface LabelListNode {
+  readonly next: WeakMap<object, LabelListNode>;
+  list?: readonly Partial<TableLabels>[];
+}
+
+const LABEL_LISTS: LabelListNode = { next: /* @__PURE__ */ new WeakMap() };
+const NO_FEATURE_LABELS: readonly Partial<TableLabels>[] =
+  /* @__PURE__ */ Object.freeze([]);
+
+/**
+ * The strings a table's composed features draw, in composition order.
+ *
+ * The same sequence of label sets returns the same list, so a host that
+ * builds its `features` inline on every render does not re-resolve its
+ * table's strings. Each step is keyed weakly on a label set.
+ *
+ * @param features - The composed features.
+ * @returns Each feature's strings, for {@link resolveTableLabels}.
+ *
+ * @public
+ */
+export function featureLabelsOf(
+  features: readonly PatchFeature<never>[] | undefined
+): readonly Partial<TableLabels>[] {
+  const labels: Partial<TableLabels>[] = [];
+  let node = LABEL_LISTS;
+  for (const feature of features ?? []) {
+    if (feature.labels === undefined) continue;
+    labels.push(feature.labels);
+    let child = node.next.get(feature.labels);
+    if (child === undefined) {
+      child = { next: new WeakMap() };
+      node.next.set(feature.labels, child);
+    }
+    node = child;
+  }
+  if (labels.length === 0) return NO_FEATURE_LABELS;
+  node.list ??= labels;
+  return node.list;
+}
+
+const applied = /* @__PURE__ */ new WeakSet<object>();
+const appliedFeatures = /* @__PURE__ */ new WeakMap<
+  object,
+  readonly PatchFeature[]
+>();
 
 /**
  * The feature list that produced this resolved options object, if any.
@@ -125,7 +173,7 @@ function featuresOf(options: object): readonly PatchFeature[] | undefined {
  * @public
  */
 export function mergeFeaturePatches(
-  list: readonly PatchFeature[]
+  list: readonly PatchFeature<never>[]
 ): Record<string, unknown> {
   let fromFeatures: Record<string, unknown> = {};
   for (const next of list) {
@@ -145,6 +193,41 @@ export function mergeFeaturePatches(
     }
   }
   return fromFeatures;
+}
+
+/**
+ * Lay a table's own options over what its features set: a defined host option
+ * wins over every feature's patch, and the features' strings ride along as
+ * `featureLabels` when there are any.
+ *
+ * Feature patches are untyped option bags, so this is the one place their
+ * merge takes the host options' type: the host's defined values win, which
+ * keeps every option the host typed at its type.
+ *
+ * @param patches - The features' merged patches ({@link mergeFeaturePatches}).
+ * @param featureLabels - The features' strings ({@link featureLabelsOf}).
+ * @typeParam TOptions - The host's options.
+ * @typeParam TResolved - The options the table reads: the host's, plus the
+ *   keys its features set.
+ * @param options - The host's own options.
+ * @returns The options the table reads.
+ *
+ * @public
+ */
+export function overlayFeatureOptions<
+  TOptions extends object,
+  TResolved extends TOptions = TOptions,
+>(
+  patches: Readonly<Record<string, unknown>>,
+  featureLabels: readonly Partial<TableLabels>[],
+  options: TOptions
+): TResolved {
+  const resolved: Record<string, unknown> = {
+    ...patches,
+    ...(featureLabels.length > 0 ? { featureLabels } : {}),
+    ...definedEntries(options),
+  };
+  return resolved as TResolved;
 }
 
 /**
@@ -173,10 +256,11 @@ export function applyTableFeatures<P extends object>(options: P): P {
     return rest;
   }
 
-  const resolved = {
-    ...mergeFeaturePatches(list),
-    ...definedEntries(omitFeatures(options)),
-  } as P;
+  const resolved = overlayFeatureOptions(
+    mergeFeaturePatches(list),
+    featureLabelsOf(list),
+    omitFeatures(options)
+  );
   applied.add(resolved);
   rememberAppliedFeatures(resolved, list);
   return resolved;

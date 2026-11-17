@@ -105,7 +105,7 @@ import {
 export class AdaptHeaderFilterTrigger {
   protected readonly overlayContainer = injectBootstrapOverlayContainer();
   /** The slot's props. */
-  readonly props = input.required<FilterHeaderControlProps<never>>();
+  readonly props = input.required<FilterHeaderControlProps<unknown>>();
 
   protected readonly icon = { ...FILTERS_ICON, width: 14, height: 14 };
   protected readonly registry = defaultFilterRegistry;

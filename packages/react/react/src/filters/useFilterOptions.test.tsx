@@ -2,9 +2,11 @@ import {
   AUTO_OPTIONS_LIMIT,
   type FilterDef,
   type FilterOption,
+} from "@adapttable/core";
+import {
   materializeAutoOptions,
   resetDevWarnings,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 

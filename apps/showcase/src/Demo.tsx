@@ -2,11 +2,9 @@ import {
   applyRowPatchesWithLog,
   type ColumnLayoutState,
   evaluateFilterTree,
-  type GroupNode,
   insertRow,
   type QueryFilterGroup,
   removeRow,
-  type RowGroupRef,
   type RowPatch,
   type RowReorderOptions,
   type TableErrorState,
@@ -14,7 +12,6 @@ import {
   updateRow,
 } from "@adapttable/core";
 import {
-  applyRowReorder,
   type ColumnDef,
   type EditEventHandler,
   type ReactMobileCardModel,
@@ -43,23 +40,26 @@ import {
   type ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 
 import {
+  DEFAULT_PAGE,
   type DemoScenario,
   layoutFor,
-  pageLimitFor,
+  pageDefaultsFor,
+  REALTIME_PAGE,
   seedRoster,
 } from "./casts";
 import {
   BASE_COLUMNS,
   budget,
-  consecutiveTeamSpan,
   DEMO_FILTER_RUNTIME,
   DEMO_GROUP_AGGREGATES,
+  DEMO_GROUPING_EXTRAS,
   type DemoRowHandlers,
   demoUrlSync,
   GROUPS_DEFAULT_LAYOUT,
@@ -67,7 +67,6 @@ import {
   LIVE_DEFAULT_LAYOUT,
   makeLargeDirectory,
   orderPeopleByTeam,
-  PEOPLE,
   type Person,
   personSkills,
   personStatus,
@@ -82,8 +81,28 @@ import {
 import { initialDemoLocale } from "./demoPresentation";
 import { fetchPeople, type PeoplePage, type PeopleParams } from "./mockApi";
 import { usePatchSink } from "./patchSink";
-import { summaryPerson } from "./people";
 import { useRealtimeSlot } from "./realtimeSlot";
+import {
+  attachedNote,
+  budgetTotalOf,
+  pinnedTotals,
+} from "./shared/aggregationScenario";
+import { PEOPLE_GROUP_BY } from "./shared/groupingScenario";
+import {
+  MOBILE_LOAD_ERROR,
+  type MobileDataState,
+  rowsFor,
+} from "./shared/mobileScenario";
+import { revealHiddenOnPin } from "./shared/peopleTable";
+import {
+  addedPerson,
+  nextPersonId,
+  reorderPeople,
+  reorderShapeOf,
+  teamSpan,
+  withPersonMovedToGroup,
+  withPersonMovedUnder,
+} from "./shared/rowsScenario";
 
 /**
  * Where the rows come from.
@@ -181,6 +200,22 @@ const ScenarioContext = createContext<DemoScenario>("live");
 /** Feature pages wrap the table in a scenario; `/` and Feature Lab omit this. */
 export const DemoScenarioProvider = ScenarioContext.Provider;
 
+/**
+ * How the demo's pretend server answers a cell save: the editing page can
+ * ask it to reject the next one, to show the table rolling the edit back.
+ */
+export interface DemoEditPolicy {
+  /** Reject the next save. */
+  readonly rejectNext: boolean;
+  /** Called when a save was rejected, so the page can clear its switch. */
+  readonly onRejected: () => void;
+}
+
+const EditPolicyContext = createContext<DemoEditPolicy | null>(null);
+
+/** Provides the demo's {@link DemoEditPolicy} to the tables below. */
+export const DemoEditPolicyProvider = EditPolicyContext.Provider;
+
 function useDemoScenario(): DemoScenario {
   return useContext(ScenarioContext);
 }
@@ -191,19 +226,7 @@ function withoutFilterTree<T>(source: TableSource<T>): TableSource<T> {
 }
 
 /** A small page size so both modes show real pagination over 30 rows. */
-// Five rows by default: enough to show real data while keeping the
-// whole table (and often the footer) on one screen.
-const DEFAULTS = { limit: 5 };
 const TREE_DEFAULTS = { limit: 30 };
-/**
- * The realtime page: ten rows, Budget sorted. The patcher reads the live
- * direction so a row lands in the first six of what is actually on screen.
- */
-const REALTIME_DEFAULTS = {
-  limit: 10,
-  sortBy: "budget",
-  sortDir: "desc" as const,
-};
 /**
  * A page large enough for the row window to be a window.
  *
@@ -231,7 +254,11 @@ const LARGE_ROW_ESTIMATE = 48;
  */
 /** The kit-drawn features a page asked for, and what each needs. */
 export interface KitFeatureRequests {
-  editing?: (row: Person, key: string, nextValue: unknown) => void;
+  editing?: (
+    row: Person,
+    key: string,
+    nextValue: unknown
+  ) => void | Promise<void>;
   rowEditing?: (row: Person, patch: Record<string, unknown>) => void;
   batchEditing?: (
     edits: readonly { row: Person; patch: Record<string, unknown> }[]
@@ -281,7 +308,11 @@ export interface DemoColumnProps {
   /** Namespace shared with the data hook (`live.find` beside `live.q`). */
   urlKey?: string;
   collapsibleColumnGroups?: boolean;
-  onCellEdit?: (row: Person, key: string, nextValue: unknown) => void;
+  onCellEdit?: (
+    row: Person,
+    key: string,
+    nextValue: unknown
+  ) => void | Promise<void>;
   onEditStart?: EditEventHandler<Person>;
   onEditCancel?: EditEventHandler<Person>;
   onEditCommit?: EditEventHandler<Person>;
@@ -303,21 +334,6 @@ export type TableRender = (
   source: TableSource<Person>,
   columns: DemoColumnProps
 ) => ReactNode;
-
-/**
- * Demo affordance: pinning a column reveals every hidden column, so the table
- * widens past its container and the pin's stickiness becomes visible while
- * scrolling. Only fires when a *new* pin is added (not on unpin/resize).
- */
-function revealHiddenOnPin(
-  prev: ColumnLayoutState,
-  next: ColumnLayoutState
-): ColumnLayoutState {
-  const pinAdded = Object.keys(next.pinned).some(
-    (key) => !(key in prev.pinned)
-  );
-  return pinAdded && next.hidden.length > 0 ? { ...next, hidden: [] } : next;
-}
 
 function usePeopleQuery(params: PeopleParams) {
   return useInfiniteQuery({
@@ -361,6 +377,10 @@ interface DataProps {
   highlight?: boolean;
   /** Fail the load, so the error chrome is on screen. */
   failure?: Failure;
+  /** Which data state the table shows: rows, none, a load, a failure. */
+  dataState?: MobileDataState;
+  /** The host callback when a row or card is activated. */
+  onRowActivate?: (row: Person) => void;
   /** Lay the mobile cards out with the demo's own `renderCard`. */
   customCard?: boolean;
   /** What the error state's retry does — here, clear the simulated failure. */
@@ -423,10 +443,8 @@ function pageDefaults(
 ): { limit: number; sortBy?: string; sortDir?: "asc" | "desc" } {
   if (tree) return TREE_DEFAULTS;
   if (large) return LARGE_DEFAULTS;
-  if (realtime) return REALTIME_DEFAULTS;
-  const limit = pageLimitFor(scenario);
-  if (limit !== undefined) return { limit };
-  return DEFAULTS;
+  if (realtime) return REALTIME_PAGE;
+  return pageDefaultsFor(scenario);
 }
 
 /**
@@ -445,28 +463,6 @@ function paginationFor(
   pageMode: PageMode | undefined
 ): PageMode | undefined {
   return large ? "infinite" : pageMode;
-}
-
-/** The next free id, so an added row never collides with a seeded one. */
-function nextId(rows: readonly Person[]): string {
-  return String(
-    rows.reduce((max, row) => Math.max(max, Number(row.id) || 0), 0) + 1
-  );
-}
-
-/** A blank person to fill in — the row an Add starts from. */
-function blankPerson(rows: readonly Person[]): Person {
-  const id = nextId(rows);
-  return {
-    id,
-    name: "",
-    email: "",
-    role: "",
-    team: PEOPLE[0]?.team ?? "",
-    nameAr: "",
-    roleAr: "",
-    teamAr: "",
-  };
 }
 
 /**
@@ -615,25 +611,7 @@ function composeDemoFeatures(
       : []),
     ...(flags.rowPinning ? [rowPinning()] : []),
     ...(flags.pinnedSummaryRows
-      ? [
-          pinnedSummaryRows<Person>({
-            // Numeric ids so showcase derivations (timeline, load count)
-            // stay defined; namespaced feature keys still own the DOM ids.
-            // Host-owned totals: the demo sums the array it already owns.
-            top: [
-              {
-                ...summaryPerson("901", "Team total"),
-                budget: flags.data.reduce((sum, row) => sum + budget(row), 0),
-              },
-            ],
-            bottom: [
-              {
-                ...summaryPerson("902", "Grand total"),
-                budget: flags.data.reduce((sum, row) => sum + budget(row), 0),
-              },
-            ],
-          }),
-        ]
+      ? [pinnedSummaryRows<Person>(pinnedTotals(flags.budgetTotal))]
       : []),
     ...(flags.rowMutations
       ? [
@@ -737,13 +715,8 @@ function kitRequests(
     ...(flags.grouping
       ? {
           grouping: {
-            groupBy: ["team", "status"],
-            extras: {
-              groupAggregates: DEMO_GROUP_AGGREGATES,
-              groupFooters: true,
-              groupSort: (a: GroupNode<Person>, b: GroupNode<Person>) =>
-                b.leafRows.length - a.leafRows.length,
-            },
+            groupBy: [...PEOPLE_GROUP_BY],
+            extras: DEMO_GROUPING_EXTRAS,
           },
         }
       : {}),
@@ -791,10 +764,17 @@ function frontendColumnProps(
     rowStyle?: boolean;
     customCard?: boolean;
     failure?: Failure;
-    data: readonly Person[];
-    flashClass: (row: Person) => string | undefined;
-    isCellFlashing?: (rowId: string, columnKey: string) => boolean;
-    onCellEdit: (row: Person, key: string, nextValue: unknown) => void;
+    /** The budget summed over every row, for the pinned summary rows. */
+    budgetTotal: number;
+    /** The name of the person the extra row stands in front of. */
+    extraAnchorName: string;
+    /** The first row's id, which the row-style demo accents. */
+    accentId: string | undefined;
+    onCellEdit: (
+      row: Person,
+      key: string,
+      nextValue: unknown
+    ) => void | Promise<void>;
     onEditStart: EditEventHandler<Person>;
     onEditCancel: EditEventHandler<Person>;
     onEditCommit: EditEventHandler<Person>;
@@ -804,6 +784,7 @@ function frontendColumnProps(
     onAddRow: () => void;
     onDuplicateRow: (row: Person) => void;
     onDeleteRow: (row: Person) => void;
+    onArchiveRows: (ids: readonly string[]) => void;
     onRowReorder: (from: number, to: number, row: Person) => void;
     onGroupMove: NonNullable<RowReorderOptions<Person>["onGroupMove"]>;
     onTreeMove: NonNullable<RowReorderOptions<Person>["onTreeMove"]>;
@@ -813,13 +794,15 @@ function frontendColumnProps(
 ): DemoColumnProps {
   const next: DemoColumnProps = {
     ...columns,
-    rowClassName: flags.flashClass,
-    isCellFlashing: flags.isCellFlashing,
     slots: errorSlots(flags.failure),
     renderCard: cardRenderer(flags.customCard),
-    // Delete removes the row. The pencil is a row-edit trigger and needs no
-    // handler: it opens the row's own fields, which save through `onRowEdit`.
-    demoRowHandlers: { onDelete: flags.onDeleteRow },
+    // Delete removes the row and Archive marks the selected rows. The pencil is
+    // a row-edit trigger and needs no handler: it opens the row's own fields,
+    // which save through `onRowEdit`.
+    demoRowHandlers: {
+      onDelete: flags.onDeleteRow,
+      onArchive: flags.onArchiveRows,
+    },
   };
   const onRowEdit = (row: Person, patch: Record<string, unknown>) => {
     flags.writePatches([updateRow(row.id, columnChanges(patch))]);
@@ -838,41 +821,17 @@ function frontendColumnProps(
   // Team is the same fact on consecutive rows in visual order — merge it,
   // leave Person and Email alone. Reorder can break a run; that is the point.
   // Pin keeps the run: the person moves, Core stays one cell.
-  const teamSpan = ({
-    column,
-    sectionRows,
-    sectionRowIndex,
-  }: {
-    column: { key: string };
-    sectionRows: readonly Person[];
-    sectionRowIndex: number;
-  }) => {
-    if (column.key !== "team") return undefined;
-    const span = consecutiveTeamSpan(sectionRows, sectionRowIndex);
-    return span > 1 ? { rowSpan: span } : undefined;
-  };
   if (flags.cellSpan) {
     Object.assign(next, { getCellSpan: teamSpan });
   }
-  const extraAnchorName =
-    flags.data.find((row) => row.id === flags.extraAnchorId)?.name ??
-    "this person";
+  const { extraAnchorName, accentId } = flags;
   const demoExtraRows =
     flags.extraRows && flags.extraAnchorId
-      ? [
-          {
-            key: "note",
-            kind: "fullWidth" as const,
-            beforeRowId: flags.extraAnchorId,
-            render: () =>
-              `Full-width extra attached to ${extraAnchorName}. Drag or pin them — this note stays in front of them.`,
-          },
-        ]
+      ? [attachedNote(flags.extraAnchorId, extraAnchorName)]
       : undefined;
   if (demoExtraRows) {
     Object.assign(next, { extraRows: demoExtraRows });
   }
-  const accentId = flags.data[0]?.id;
   const accentRowStyle = flags.rowStyle
     ? (row: Person) =>
         row.id === accentId
@@ -893,74 +852,6 @@ function frontendColumnProps(
   });
   if (composed.length > 0) Object.assign(next, { features: composed });
   return next;
-}
-
-function sameReorderScope(
-  candidate: Person,
-  row: Person,
-  grouping: boolean | undefined,
-  tree: boolean | undefined
-): boolean {
-  if (grouping) {
-    return candidate.team === row.team && candidate.status === row.status;
-  }
-  if (tree) return reportsTo(candidate) === reportsTo(row);
-  return true;
-}
-
-function reorderDemoRows(
-  rows: readonly Person[],
-  from: number,
-  to: number,
-  row: Person,
-  grouping: boolean | undefined,
-  tree: boolean | undefined
-): readonly Person[] {
-  const sameScope = (candidate: Person) =>
-    sameReorderScope(candidate, row, grouping, tree);
-  const siblings = rows.filter(sameScope);
-  const source = siblings.findIndex((candidate) => candidate.id === row.id);
-  const reordered = applyRowReorder(siblings, source < 0 ? from : source, to);
-  let siblingIndex = 0;
-  return rows.map((candidate) => {
-    if (!sameScope(candidate)) return candidate;
-    const replacement = reordered[siblingIndex];
-    siblingIndex += 1;
-    return replacement ?? candidate;
-  });
-}
-
-function insertionIndex(
-  destinations: readonly number[],
-  position: number,
-  fallback: number
-): number {
-  if (position >= 0 && position < destinations.length) {
-    return destinations[position];
-  }
-  return (destinations.at(-1) ?? fallback - 1) + 1;
-}
-
-function groupDestinationIndices(
-  rows: readonly Person[],
-  group: RowGroupRef
-): number[] {
-  return rows.flatMap((candidate, index) =>
-    group.levels.every(
-      (level) => Reflect.get(candidate, level.key) === level.value
-    )
-      ? [index]
-      : []
-  );
-}
-
-function treeDestinationIndices(
-  rows: readonly Person[],
-  parentId: string | null
-): number[] {
-  return rows.flatMap((candidate, index) =>
-    (reportsTo(candidate) ?? null) === parentId ? [index] : []
-  );
 }
 
 function Frontend({
@@ -987,6 +878,8 @@ function Frontend({
   highlight,
   failure,
   onRecover,
+  dataState,
+  onRowActivate,
   customCard,
   realtime,
   advancedFilters,
@@ -1025,39 +918,59 @@ function Frontend({
   // exactly where a real app would flash it. Note there is no highlight prop
   // on the table: `rowClassName` is the seam, so this works in every kit.
   const flash = useHighlight(highlight === true || realtime === true);
+  const { flashRow } = flash;
+  // Handlers read the rows they act on when they run, so the table's props
+  // stay the same objects while the rows change.
+  const latestData = useRef(data);
+  useEffect(() => {
+    latestData.current = data;
+  }, [data]);
+  const editPolicy = useContext(EditPolicyContext);
+  const latestEditPolicy = useRef(editPolicy);
+  useEffect(() => {
+    latestEditPolicy.current = editPolicy;
+  }, [editPolicy]);
   const onCellEdit = useCallback(
-    (row: Person, key: string, nextValue: unknown) => {
+    (row: Person, key: string, nextValue: unknown): void | Promise<void> => {
+      const policy = latestEditPolicy.current;
+      if (policy?.rejectNext === true) {
+        policy.onRejected();
+        return Promise.reject(
+          new Error("The demo server rejected this change")
+        );
+      }
       const field = editField(key);
       writePatches([updateRow(row.id, { [field]: nextValue as never })]);
-      flash.flashRow(row.id);
+      flashRow(row.id);
     },
-    [flash, writePatches]
+    [flashRow, writePatches]
   );
   const onBatchEdit = useCallback(
     (edits: readonly { row: Person; patch: Record<string, unknown> }[]) => {
       writePatches(
         edits.map((edit) => updateRow(edit.row.id, columnChanges(edit.patch)))
       );
-      for (const edit of edits) flash.flashRow(edit.row.id);
+      for (const edit of edits) flashRow(edit.row.id);
     },
-    [flash, writePatches]
+    [flashRow, writePatches]
   );
   // Adding, copying and removing rows: the table asks, the demo owns the list —
   // the same one-way flow a real app's mutation would follow.
   // The new row is built before the update rather than inside it: a state
   // updater must stay pure, and the flash needs the id it produced.
+  const addEditable = editing === true || rowMode === true || batch === true;
   const onAddRow = useCallback(() => {
-    const added = blankPerson(data);
+    const added = addedPerson(latestData.current, addEditable);
     writePatches([insertRow(added, 0)]);
-    flash.flashRow(added.id);
-  }, [data, flash, writePatches]);
+    flashRow(added.id);
+  }, [addEditable, flashRow, writePatches]);
   const onDuplicateRow = useCallback(
     (row: Person) => {
-      const copy = { ...row, id: nextId(data) };
+      const copy = { ...row, id: nextPersonId(latestData.current) };
       writePatches([insertRow(copy, 0)]);
-      flash.flashRow(copy.id);
+      flashRow(copy.id);
     },
-    [data, flash, writePatches]
+    [flashRow, writePatches]
   );
   const onDeleteRow = useCallback(
     (row: Person) => {
@@ -1065,40 +978,31 @@ function Frontend({
     },
     [writePatches]
   );
+  const onArchiveRows = useCallback(
+    (ids: readonly string[]) => {
+      writePatches(
+        ids.map((id) => updateRow<Person>(id, { status: "Archived" }))
+      );
+    },
+    [writePatches]
+  );
   const onRowReorder = useCallback(
     (from: number, to: number, row: Person) => {
-      setData((prev) => reorderDemoRows(prev, from, to, row, grouping, tree));
+      setData((prev) =>
+        reorderPeople(prev, from, to, row, reorderShapeOf(grouping, tree))
+      );
     },
     [grouping, tree]
   );
   const onGroupMove = useCallback<
     NonNullable<RowReorderOptions<Person>["onGroupMove"]>
   >((row, _fromGroup, toGroup, position) => {
-    setData((prev) => {
-      const remaining = prev.filter((candidate) => candidate.id !== row.id);
-      const changes = Object.fromEntries(
-        toGroup.levels.map((level) => [level.key, level.value])
-      );
-      const moved: Person = Object.assign({}, row, changes);
-      const destinations = groupDestinationIndices(remaining, toGroup);
-      const at = insertionIndex(destinations, position, remaining.length);
-      const next = remaining.slice();
-      next.splice(at, 0, moved);
-      return next;
-    });
+    setData((prev) => withPersonMovedToGroup(prev, row, toGroup, position));
   }, []);
   const onTreeMove = useCallback<
     NonNullable<RowReorderOptions<Person>["onTreeMove"]>
   >((row, _fromParent, toParent, position) => {
-    setData((prev) => {
-      const remaining = prev.filter((candidate) => candidate.id !== row.id);
-      const moved: Person = { ...row, managerId: toParent.id };
-      const destinations = treeDestinationIndices(remaining, toParent.id);
-      const at = insertionIndex(destinations, position, remaining.length);
-      const next = remaining.slice();
-      next.splice(at, 0, moved);
-      return next;
-    });
+    setData((prev) => withPersonMovedUnder(prev, row, toParent.id, position));
   }, []);
   const [activeEdit, setActiveEdit] = useState<{
     rowId: string;
@@ -1150,8 +1054,10 @@ function Frontend({
     [formulaColumns]
   );
   const source = useFrontendData<Person>({
-    data,
-    error: demoError(failure),
+    data: rowsFor(data, dataState ?? "ready"),
+    isLoading: dataState === "loading",
+    error:
+      demoError(failure) ?? (dataState === "error" ? MOBILE_LOAD_ERROR : null),
     // A retry that actually recovers: the demo's "server" answers on the
     // second ask, so the button is worth pressing.
     refetch: onRecover,
@@ -1185,8 +1091,120 @@ function Frontend({
     urlKey,
     urlSync,
   });
-  const tableSource = advancedFilters ? source : withoutFilterTree(source);
+  const tableSource = useMemo(
+    () => (advancedFilters ? source : withoutFilterTree(source)),
+    [advancedFilters, source]
+  );
   const live = realtime === true && RealtimeSlot !== null;
+  const isCellFlashing = useMemo(
+    () =>
+      live || patchSink
+        ? (rowId: string, columnKey: string) =>
+            columnOrFieldFlashing(isFlashingRef.current, rowId, columnKey) ||
+            (patchSink
+              ? columnOrFieldFlashing(
+                  patchSink.isFlashingRef.current,
+                  rowId,
+                  columnKey
+                )
+              : false)
+        : undefined,
+    [live, patchSink]
+  );
+  const budgetTotal = useMemo(() => budgetTotalOf(data), [data]);
+  const extraAnchorName =
+    data.find((row) => row.id === extraAnchorId)?.name ?? "this person";
+  const accentId = data[0]?.id;
+  // The composed props change only with the page's flags and the facts they
+  // name, so an edit or a streamed patch redraws the rows it touched.
+  const composed = useMemo(
+    () =>
+      frontendColumnProps(columns, {
+        large,
+        editing,
+        rowMode,
+        rowActionsShown,
+        grouping,
+        tree,
+        batch,
+        rowMutations,
+        rowReorder,
+        rowPinning,
+        pinnedSummaryRows,
+        summaryRow,
+        cellSpan,
+        extraRows,
+        extraAnchorId,
+        rowStyle,
+        customCard,
+        failure,
+        budgetTotal,
+        extraAnchorName,
+        accentId,
+        onCellEdit,
+        onEditStart,
+        onEditCancel: onEditEnd,
+        onEditCommit: onEditEnd,
+        onBatchEdit,
+        onAddRow,
+        onDuplicateRow,
+        onDeleteRow,
+        onArchiveRows,
+        onRowReorder,
+        onGroupMove,
+        onTreeMove,
+        writePatches,
+        flashRow,
+        urlKey,
+      }),
+    [
+      columns,
+      large,
+      editing,
+      rowMode,
+      rowActionsShown,
+      grouping,
+      tree,
+      batch,
+      rowMutations,
+      rowReorder,
+      rowPinning,
+      pinnedSummaryRows,
+      summaryRow,
+      cellSpan,
+      extraRows,
+      extraAnchorId,
+      rowStyle,
+      customCard,
+      failure,
+      budgetTotal,
+      extraAnchorName,
+      accentId,
+      onCellEdit,
+      onEditStart,
+      onEditEnd,
+      onBatchEdit,
+      onAddRow,
+      onDuplicateRow,
+      onDeleteRow,
+      onArchiveRows,
+      onRowReorder,
+      onGroupMove,
+      onTreeMove,
+      writePatches,
+      flashRow,
+      urlKey,
+    ]
+  );
+  const tableProps = useMemo(
+    () => ({
+      ...composed,
+      rowClassName: flashClass,
+      isCellFlashing,
+      ...(onRowActivate ? { onRowClick: onRowActivate } : {}),
+    }),
+    [composed, flashClass, isCellFlashing, onRowActivate]
+  );
   // Every editing mode gets the incoming-change control: a row form and a
   // batch have something open to disagree with, the same as a cell.
   const editingArmed =
@@ -1225,61 +1243,7 @@ function Frontend({
           isFlashingRef={isFlashingRef}
         />
       ) : null}
-      {render(
-        tableSource,
-        frontendColumnProps(columns, {
-          large,
-          editing,
-          rowMode,
-          rowActionsShown,
-          grouping,
-          tree,
-          batch,
-          rowMutations,
-          rowReorder,
-          rowPinning,
-          pinnedSummaryRows,
-          summaryRow,
-          cellSpan,
-          extraRows,
-          extraAnchorId,
-          rowStyle,
-          customCard,
-          failure,
-          data,
-          flashClass,
-          isCellFlashing:
-            live || patchSink
-              ? (rowId, columnKey) =>
-                  columnOrFieldFlashing(
-                    isFlashingRef.current,
-                    rowId,
-                    columnKey
-                  ) ||
-                  (patchSink
-                    ? columnOrFieldFlashing(
-                        patchSink.isFlashingRef.current,
-                        rowId,
-                        columnKey
-                      )
-                    : false)
-              : undefined,
-          onCellEdit,
-          onEditStart,
-          onEditCancel: onEditEnd,
-          onEditCommit: onEditEnd,
-          onBatchEdit,
-          onAddRow,
-          onDuplicateRow,
-          onDeleteRow,
-          onRowReorder,
-          onGroupMove,
-          onTreeMove,
-          writePatches,
-          flashRow: flash.flashRow,
-          urlKey,
-        })
-      )}
+      {render(tableSource, tableProps)}
     </>
   );
 }
@@ -1296,7 +1260,7 @@ function Backend({
     usePaginatedQuery: usePeopleQuery,
     arrayExtraKeys: DEMO_FILTER_RUNTIME.arrayExtraKeys,
     numberExtraKeys: DEMO_FILTER_RUNTIME.numberExtraKeys,
-    defaults: DEFAULTS,
+    defaults: DEFAULT_PAGE,
     paginationMode: pageMode,
     urlKey,
     urlSync,
@@ -1309,9 +1273,11 @@ function Backend({
     }),
   });
   // No onCellEdit — editing stays dormant on the server path.
-  return (
-    <>{render(advancedFilters ? source : withoutFilterTree(source), columns)}</>
+  const tableSource = useMemo(
+    () => (advancedFilters ? source : withoutFilterTree(source)),
+    [advancedFilters, source]
   );
+  return <>{render(tableSource, columns)}</>;
 }
 
 /**
@@ -1365,6 +1331,8 @@ export function DemoBody({
   highlight,
   failure,
   onRecover,
+  dataState,
+  onRowActivate,
   customCard,
   realtime,
   columnGroups,
@@ -1393,6 +1361,10 @@ export function DemoBody({
   rowStyle?: boolean;
   highlight?: boolean;
   failure?: Failure;
+  /** Which data state the table shows: rows, none, a load, a failure. */
+  dataState?: MobileDataState;
+  /** The host callback when a row or card is activated. */
+  onRowActivate?: (row: Person) => void;
   onRecover?: () => void;
   customCard?: boolean;
   realtime?: boolean;
@@ -1434,14 +1406,24 @@ export function DemoBody({
   // Product hosts can use this channel to write the same accepted name to
   // their schema/backend as well.
   const onColumnRename = useCallback(() => undefined, []);
-  const columns: DemoColumnProps = {
-    columnLayout: layout,
-    onColumnLayoutChange,
-    onColumnRename,
-    collapsibleColumnGroups: columnGroups !== false,
-    urlSync: syncToUrl,
-    urlKey,
-  };
+  const columns = useMemo<DemoColumnProps>(
+    () => ({
+      columnLayout: layout,
+      onColumnLayoutChange,
+      onColumnRename,
+      collapsibleColumnGroups: columnGroups !== false,
+      urlSync: syncToUrl,
+      urlKey,
+    }),
+    [
+      layout,
+      onColumnLayoutChange,
+      onColumnRename,
+      columnGroups,
+      syncToUrl,
+      urlKey,
+    ]
+  );
 
   return mode === "backend" ? (
     <Backend
@@ -1480,6 +1462,8 @@ export function DemoBody({
       rowStyle={rowStyle}
       highlight={highlight}
       failure={failure}
+      dataState={dataState}
+      onRowActivate={onRowActivate}
       onRecover={onRecover}
       customCard={customCard}
       realtime={realtime}

@@ -1,14 +1,14 @@
+import { CHECKLIST_LIST_HEIGHT } from "@adapttable/core";
 import {
-  CHECKLIST_LIST_HEIGHT,
+  type ChecklistClassNames,
+  type ChecklistFilterProps,
+  type ChecklistFilterState,
+  checklistSlice,
+  type ChecklistSlots,
   type ChecklistWindow,
-  checklistWindow,
-  resolveLabels,
-} from "@adapttable/core";
-import type {
-  ChecklistClassNames,
-  ChecklistFilterProps,
-  ChecklistFilterState,
-  ChecklistSlots,
+  FILTER_LABELS,
+  type FilterStrings,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import {
   computed,
@@ -22,6 +22,8 @@ import {
 
 import { useScopeActivity } from "../store";
 import { useChecklistFilter } from "./filterModels";
+
+const FILTER_GROUPS = [FILTER_LABELS] as const;
 export function useChecklistWindow(
   count: MaybeRefOrGetter<number>,
   enabled: MaybeRefOrGetter<boolean>
@@ -49,9 +51,12 @@ export function useChecklistWindow(
   );
   return {
     window: computed<ChecklistWindow>(() =>
-      toValue(enabled)
-        ? checklistWindow(toValue(count), scrollTop.value, width.value)
-        : { start: 0, end: toValue(count), padTop: 0, padBottom: 0 }
+      checklistSlice(
+        toValue(count),
+        toValue(enabled),
+        scrollTop.value,
+        width.value
+      )
     ),
     ref: (value: HTMLElement | null) => {
       element.value = value;
@@ -75,7 +80,7 @@ export function useChecklistModel<TRow>(
     window: window.window.value,
     ref: window.ref,
     onScroll: window.onScroll,
-    labels: resolveLabels(toValue(input).labels),
+    labels: resolveFeatureLabels(toValue(input).labels, FILTER_GROUPS),
     classNames: toValue(input).classNames,
   }));
 }
@@ -84,7 +89,7 @@ export interface ChecklistChromeModel {
   readonly window: ChecklistWindow;
   readonly ref: (element: HTMLElement | null) => void;
   readonly onScroll: () => void;
-  readonly labels: ReturnType<typeof resolveLabels>;
+  readonly labels: FilterStrings;
   readonly classNames?: ChecklistClassNames;
 }
 export function ChecklistChrome(props: {

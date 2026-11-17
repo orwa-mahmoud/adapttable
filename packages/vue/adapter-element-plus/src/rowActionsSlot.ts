@@ -21,7 +21,5 @@ export const ROW_ACTIONS_CONTROL = featureSlotKey<
 export function rowActionsControlKey<TRow>(): FeatureSlotKey<
   RowActionsControlProps<TRow>
 > {
-  return ROW_ACTIONS_CONTROL as unknown as FeatureSlotKey<
-    RowActionsControlProps<TRow>
-  >;
+  return ROW_ACTIONS_CONTROL;
 }

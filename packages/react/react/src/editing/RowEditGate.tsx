@@ -19,14 +19,14 @@ import {
 import {
   batchEditBarModel,
   batchEditErrorId,
+  batchEditorControl,
   customEditorConflict,
-  editorSelectOptions,
-  handleRowEditorKey,
   isCustomEditor,
   resolveCellEditor,
   rowEditActionsLayout,
   rowEditControls,
   rowEditErrorId,
+  rowEditorControl,
   rowEditSaveBlocked,
 } from "@adapttable/core/editing";
 import { type ReactElement, type ReactNode, useCallback, useRef } from "react";
@@ -173,25 +173,10 @@ export function RowEditCell<TRow>({
   const saveBlocked = rowEditSaveBlocked(ask, rowAsking);
 
   const ctrl: EditableCellEditorCtrl = {
-    draft: rowEditing.draftFor(column.key),
-    setDraft: (value) => {
-      rowEditing.setDraft(column.key, value);
-    },
-    // Enter saves the whole row, Escape cancels it, and Enter holds while any
-    // field of the row is waiting on an answer.
-    onEditorKeyDown: (event) => {
-      handleRowEditorKey(event, rowEditing, saveBlocked);
-    },
-    // Nothing commits on blur: the reader is moving between fields of one form.
-    commitOnBlur: () => undefined,
-    editor,
-    selectOptions: editorSelectOptions(editor),
-    error: rowEditing.commit?.validation?.find(
-      (failure) =>
-        failure.rowId === rowEditing.activeRowId &&
-        (failure.columnKey === undefined || failure.columnKey === column.key)
-    )?.message,
-    validating: rowEditing.commit?.phase === "validating",
+    // Enter saves the whole row, Escape cancels it, Enter holds while any
+    // field of the row is waiting on an answer, and nothing commits on blur:
+    // the reader is moving between fields of one form.
+    ...rowEditorControl(rowEditing, column.key, editor, saveBlocked),
     conflict: ask !== undefined,
     errorId,
     focusRef,
@@ -406,17 +391,9 @@ export function BatchEditCell<TRow>({
   if (!editor) return <>{display}</>;
 
   const ctrl: EditableCellEditorCtrl = {
-    draft: batch.draftFor(row, rowId, column.key),
-    setDraft: (value) => {
-      batch.setDraft(row, rowId, column.key, value);
-    },
     // No key ends a batch: the reader is moving through a list, and Enter would
     // send everything they have not finished.
-    onEditorKeyDown: () => undefined,
-    commitOnBlur: () => undefined,
-    editor,
-    selectOptions: editorSelectOptions(editor),
-    validating: false,
+    ...batchEditorControl(batch, row, rowId, column.key, editor),
     conflict: ask !== undefined,
     errorId: batchEditErrorId(rowId, column.key),
     // Nothing steals focus: every cell is a field, and the reader chose where

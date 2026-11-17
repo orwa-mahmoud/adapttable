@@ -9,14 +9,16 @@
  */
 import {
   type CellRange,
-  clampMatchIndex,
-  createFindController,
   findMatches,
   type GridCell,
   matchKeySet,
   singleCellRange,
 } from "@adapttable/core";
-import type { FindInTableState } from "@adapttable/core/binding";
+import {
+  clampMatchIndex,
+  createFindController,
+  type FindInTableState,
+} from "@adapttable/core/binding";
 import {
   useCallback,
   useEffect,

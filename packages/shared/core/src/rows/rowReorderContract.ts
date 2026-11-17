@@ -9,6 +9,7 @@
  * own `TReorder`, so a React kit and an Angular kit fill the same shapes with
  * their own types.
  */
+import type { RowCallback } from "../contracts/rowCallback";
 import { featureStateKey } from "../features/featureKeys";
 import type {
   RowDropPosition,
@@ -245,7 +246,7 @@ export interface RowReorderState<
   /** Whether this row is the one being moved. */
   isLifted: (rowId: string) => boolean;
   /** Whether this row owns the open move confirmation. */
-  isMovePending?: (row: TRow) => boolean;
+  isMovePending?: RowCallback<[row: NoInfer<TRow>], boolean>;
   /** Pointer: start a drag from this row. */
   dragProps: (
     rowId: string,
@@ -256,35 +257,43 @@ export interface RowReorderState<
     onDragEnd: () => void;
   };
   /** Pointer: this row is a drop target. */
-  dropProps: (
-    localIndex: number,
-    row: TRow,
-    windowStart: number
-  ) => {
-    onDragOver: (event: TDragEvent) => void;
-    onDrop: (event: TDragEvent) => void;
-  };
+  dropProps: RowCallback<
+    [localIndex: number, row: NoInfer<TRow>, windowStart: number],
+    {
+      onDragOver: (event: TDragEvent) => void;
+      onDrop: (event: TDragEvent) => void;
+    }
+  >;
   /** Keyboard: Space lifts / drops, arrows move, Escape cancels. */
-  handleKeyDown: (
-    event: TKeyEvent,
-    rowId: string,
-    localIndex: number,
-    row: TRow,
-    windowStart: number,
-    rowCount: number
-  ) => void;
+  handleKeyDown: RowCallback<
+    [
+      event: TKeyEvent,
+      rowId: string,
+      localIndex: number,
+      row: NoInfer<TRow>,
+      windowStart: number,
+      rowCount: number,
+    ],
+    void
+  >;
   /** Mobile: swap with the neighbour. */
-  moveBy: (
-    localIndex: number,
-    delta: -1 | 1,
-    row: TRow,
-    windowStart: number,
-    rowCount: number
-  ) => void;
+  moveBy: RowCallback<
+    [
+      localIndex: number,
+      delta: -1 | 1,
+      row: NoInfer<TRow>,
+      windowStart: number,
+      rowCount: number,
+    ],
+    void
+  >;
   /** Keyboard/touch destinations for this row, when nested. */
-  moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
+  moveMenu: RowCallback<
+    [row: NoInfer<TRow>],
+    RowMoveMenuModel<TRow> | undefined
+  >;
   /** Select a destination from the move menu. */
-  selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
+  selectMoveTarget: RowCallback<[target: NoInfer<RowMoveTarget<TRow>>], void>;
   /** Confirm the move shown by the kit confirmation surface. */
   confirmMove: () => void;
   /** Cancel the move shown by the kit confirmation surface. */

@@ -8,9 +8,14 @@ import {
   type FeatureHostState,
   type RowEditingState,
 } from "@adapttable/core";
-import { createRowEditStore, rowEditingView } from "@adapttable/core/editing";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import {
+  createRowEditStore,
+  rowEditingView,
+  type RowEditStoreOptions,
+} from "@adapttable/core/editing";
+import { useContext, useMemo, useState, useSyncExternalStore } from "react";
 
+import { TableStoreContext } from "../state/tableStoreContext";
 import type { EditEventHandler } from "./editingEvents";
 
 export type { RowEditDrafts, RowEditingState } from "@adapttable/core";
@@ -20,7 +25,14 @@ export type { RowEditDrafts, RowEditingState } from "@adapttable/core";
  *
  * @public
  */
-export interface UseRowEditingOptions<TRow> {
+export interface UseRowEditingOptions<TRow> extends Pick<
+  RowEditStoreOptions<TRow>,
+  | "validateRow"
+  | "applyEdit"
+  | "formatEditError"
+  | "onEditError"
+  | "onValidationFail"
+> {
   /**
    * Whether row editing is armed. Off by default: it changes the commit unit,
    * which is a decision about the data, not a preference.
@@ -55,7 +67,10 @@ export interface UseRowEditingOptions<TRow> {
 export function useRowEditing<TRow>(
   options: UseRowEditingOptions<TRow>
 ): RowEditingState<TRow> {
-  const [store] = useState(() => createRowEditStore<TRow>(options));
+  const table = useContext(TableStoreContext);
+  const [store] = useState(() =>
+    createRowEditStore<TRow>(options, { store: table })
+  );
   store.configure(options);
   const snapshot = useSyncExternalStore(
     store.subscribe,

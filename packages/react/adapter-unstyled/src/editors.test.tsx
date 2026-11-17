@@ -1,8 +1,11 @@
 import { act, fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./data-table.test-utils";
+import { editorsTests } from "../../react/test/kit/suites/editors";
+import { DataTable, kit } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+
+for (const test of editorsTests(kit)) it(test.name, test.run);
 
 interface Shift {
   id: string;
@@ -113,51 +116,6 @@ describe("editor set (unstyled)", () => {
       ROWS[0],
       "approved",
       true
-    );
-  });
-
-  it("seeds a date editor with the day it holds, and commits one back", async () => {
-    const { onCellEdit } = table();
-    open(1);
-    expect(editor()).toHaveAttribute("type", "date");
-    expect(editor()).toHaveValue("2026-08-13");
-    fireEvent.change(editor(), { target: { value: "2026-09-01" } });
-    fireEvent.keyDown(editor(), { key: "Enter" });
-    await settleCommit();
-    expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
-      ROWS[0],
-      "day",
-      "2026-09-01"
-    );
-  });
-
-  it("uses the platform's time control", async () => {
-    const { onCellEdit } = table();
-    open(2);
-    expect(editor()).toHaveAttribute("type", "time");
-    expect(editor()).toHaveValue("09:30");
-    fireEvent.change(editor(), { target: { value: "07:15" } });
-    fireEvent.keyDown(editor(), { key: "Enter" });
-    await settleCommit();
-    expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
-      ROWS[0],
-      "startsAt",
-      "07:15"
-    );
-  });
-
-  it("uses the platform's datetime control", async () => {
-    const { onCellEdit } = table();
-    open(3);
-    expect(editor()).toHaveAttribute("type", "datetime-local");
-    expect(editor()).toHaveValue("2026-08-13T14:05");
-    fireEvent.change(editor(), { target: { value: "2026-08-14T08:00" } });
-    fireEvent.keyDown(editor(), { key: "Enter" });
-    await settleCommit();
-    expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
-      ROWS[0],
-      "reviewedAt",
-      "2026-08-14T08:00"
     );
   });
 

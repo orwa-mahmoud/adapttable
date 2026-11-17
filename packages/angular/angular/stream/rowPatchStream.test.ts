@@ -2,7 +2,8 @@
  * A live patch feed bound to the host's rows: frames become patches applied
  * through the host's own signal, and the connection follows its URL.
  */
-import { FakeSocket, type RowPatch } from "@adapttable/core";
+import { type RowPatch } from "@adapttable/core";
+import { FakeSocket } from "@adapttable/core/binding";
 import {
   createEnvironmentInjector,
   EnvironmentInjector,

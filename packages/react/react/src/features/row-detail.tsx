@@ -10,14 +10,18 @@ import { type ReactNode, useMemo } from "react";
 import { useRowExpansion } from "../rows/useRowExpansion";
 import { nestedTableDetail, type NestedTableFor } from "../tree/nestedTable";
 import { slotRender } from "./providers";
-import { type ChromeExtraSlotProps, EXPANSION_LIVE } from "./slotKeys";
+import {
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  EXPANSION_LIVE,
+} from "./slotKeys";
 import type { TableFeature } from "./tableFeature";
 
-function LiveExpansion({
+function LiveExpansion<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<never>): ReactNode {
+}: ChromeExtraSlotProps<TRow>): ReactNode {
   const expansionState = useRowExpansion(props.defaultExpandedRowIds);
   const { nestedTable, density, labels: hostLabels } = props;
   const hostRenderRowDetail = props.renderRowDetail;
@@ -40,7 +44,7 @@ function LiveExpansion({
   return children({ ...chrome, detail });
 }
 
-const expansionRender = slotRender(EXPANSION_LIVE, (props) => (
+const expansionRender = slotRender<ChromeExtraDraw>(EXPANSION_LIVE, (props) => (
   <LiveExpansion {...props} />
 ));
 

@@ -8,13 +8,15 @@ import {
 import type { RowPinningFeatureOptions } from "@adapttable/angular/features";
 import {
   devWarn,
-  rowPinningBlockedWarning,
-  rowPinningRequested,
-  rowPinningUrlSync,
   type TableLabels,
   type UrlStateAdapter,
 } from "@adapttable/core";
-import { type RowPinningState } from "@adapttable/core/binding";
+import {
+  rowPinningBlockedWarning,
+  rowPinningRequested,
+  type RowPinningState,
+  rowPinningUrlSync,
+} from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,
