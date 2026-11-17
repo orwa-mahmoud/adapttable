@@ -1,5 +1,41 @@
 # @adapttable/server
 
+## 0.5.0
+
+### Minor Changes
+
+- 0fca0b0: Server, CLI and i18n read from core.
+  
+  - `@adapttable/core/query` carries everything a server needs to read a table link: the parameter names, `DEFAULT_LIMIT` and `MAX_LIMIT`, `FILTER_TYPE_OPS`, `parseDateOp`, `isListFilterOp`, `isValuelessFilterOp`, `parseGroupAggregateOverrides`, `splitListParam` and `safeDecode`.
+  - `@adapttable/server`'s `parseTableQuery` takes its limits, parameter names, operators and filter types from there, so every state the table writes reads back as the same query. It reads group aggregation (`groupAgg`) into `groupAggregates`, refusing columns outside the schema, and never throws on a sort key whose escape is not valid UTF-8. `splitListParam` replaces `splitFilterValues`, kept as a deprecated alias.
+  - A table that moves onto the server tier at runtime, or whose `onQueryChange` returns after a page change, asks the host for the page it is showing.
+  - `init` writes the React, Angular and Vue starters from one scaffold core; the files, commands and steps it prints are unchanged.
+  - Every locale is checked against core's per-feature label groups, so each language carries every string of every feature.
+
+### Patch Changes
+
+- 0fca0b0: Each entry point serves one audience, and the three bindings publish the same ones.
+  
+  - `@adapttable/core`'s main entry advertises the names a table reaches for. 651 names only the bindings use, or that no table, guide or example uses, are exported from `@adapttable/core/binding` (internal to AdaptTable packages) and stay on the main entry as deprecated aliases of the same value or type, so existing imports keep working. Undeprecated main-entry names: 1,494 → 845. The bindings take that machinery from `@adapttable/core/binding`.
+  - React's main entry moves the 41 names only kits use to `@adapttable/react/adapter`, with deprecated aliases left on the main entry.
+  - `@adapttable/react/pdf`, `/xlsx` and `@adapttable/angular/pdf`, `/xlsx` carry `exportPdf` / `exportXlsx` and core's PDF and XLSX helpers, as `@adapttable/vue` does; Angular's `exportPdf` and `exportXlsx` on `/features` are deprecated. Every Vue kit publishes the same entry points (`/export-csv`, `/export-pdf`, `/export-xlsx`, `/columns`, `/rows` where they were missing).
+  - New on the bindings so hosts and kits do not reach into core: `applyRowPatches`, `updateRow`, `createMemoryAdapter` on `@adapttable/angular`; `createTableEngine` on `@adapttable/vue`; `treeRowAria` / `treeTableAria` on `@adapttable/react/adapter`. New on core: `filterTreeConditionChips`, `checklistSlice`, `nextChecklistViewport` (the three bindings' chips and checklists are built on them) and `EditableCellEditorCtrl`.
+- Updated dependencies [0fca0b0]
+- Updated dependencies [cbda297]
+- Updated dependencies [39057e0]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [9897b46]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [8bc96c5]
+- Updated dependencies [f20f914]
+- Updated dependencies [aa07a99]
+- Updated dependencies [b8b52f4]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [0fca0b0]
+  - @adapttable/core@3.14.0
+
 ## 0.4.16
 
 ### Patch Changes

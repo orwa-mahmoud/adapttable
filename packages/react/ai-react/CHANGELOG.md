@@ -1,5 +1,40 @@
 # @adapttable/ai-react
 
+## 0.2.21
+
+### Patch Changes
+
+- 0fca0b0: The AI packages run one definition per command.
+  
+  - Each built-in agent capability is one command object — schema, argument reading, live guide, preview and apply — and the session runs every capability, built-in or custom, through the same registry. `@adapttable/ai/openai` no longer loads the capability guides (about 2.7 KB gzip off that entry).
+  - `describe` publishes output schemas matching what each capability returns (`rows.read`'s row envelope, `view.describe`'s columns, filters and pagination, and write results with `partial` approval, `approvalReason` and per-row `results`).
+  - Dictation and the assistant run on shared helpers (`createSpeechSession` on `@adapttable/ai/voice`; `tableAssistantInputs`, `tableAssistantFields`, `assistantUndoView` on `@adapttable/ai/assistant`), so React, Vue and Angular behave the same: choosing a dictation language with voice off writes nothing, and a panel inside the table reports a write waiting on the reader as awaiting approval.
+  - Approvals answer the keyboard in every binding: Vue's strip above the table moves focus to Reject when a change arrives and Escape rejects it; in Angular, Escape belongs to an open approval dialog and leaves the assistant panel open.
+  - The transports and the agent contract are organized into modules by responsibility, with every export unchanged.
+- Updated dependencies [0fca0b0]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [d92b039]
+- Updated dependencies [693ad8e]
+- Updated dependencies [cbda297]
+- Updated dependencies [39057e0]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [9897b46]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [8bc96c5]
+- Updated dependencies [f20f914]
+- Updated dependencies [39057e0]
+- Updated dependencies [aa07a99]
+- Updated dependencies [39057e0]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [b8b52f4]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [0fca0b0]
+  - @adapttable/core@3.14.0
+  - @adapttable/react@1.10.0
+  - @adapttable/ai@0.7.0
+
 ## 0.2.20
 
 ### Patch Changes

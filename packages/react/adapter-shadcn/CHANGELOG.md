@@ -1,5 +1,40 @@
 # @adapttable/shadcn
 
+## 3.4.5
+
+### Patch Changes
+
+- 0fca0b0: Every kit exposes the same structure and accessibility.
+  
+  - Tree tables are a `treegrid` with its `aria-rowcount`, and each row names its level, expanded state and position (`treeTableAria(entryCount)` returns the pair) in every kit.
+  - Busy buttons keep their accessible name and report `aria-busy` (Chakra, MUI); a mixed checkbox reports the mixed state (Chakra); a rejected text value sets `aria-invalid` (Ant Design); a popover opening a menu says `aria-haspopup="menu"` (Mantine); Base UI's menu divider carries its part and data attributes.
+  - A header's caption carries `data-adapttable-part="header-caption-control"` in every kit, styled through `classNames.headerCaptionControl` in React unstyled and the Vue kits; the virtualized spacer row and card carry `virtual-spacer` in every kit.
+  - `watchOverlayDismiss` and `usePointerDismiss` take `OverlayDismissOptions`; an Escape an input method is composing with, or that an earlier handler took, no longer closes an overlay. The MUI, Mantine and Ant Design filters popovers ignore the press that opened them, close on touch, and hand focus back to the Filters button after Escape.
+  - Ctrl/Cmd+F opens Ant Design's find bar only when `findInTable` is set; Spartan's fill handle is outside the tab order; Reka UI's and shadcn-vue's `contextMenu()` take `true` or `false`; ng-zorro's saved-views menu types its direction as `Direction`.
+  - The columns menu has one accessible name in the React kits.
+  - The loading placeholder exposes `loading` with `loading-table` or `loading-cards` in MUI, Chakra, Ant Design, Radix, Base UI and Mantine.
+  - Closing a dialog or the filters drawer returns focus to the control that opened it in every Angular kit, including after the browser drops focus onto the page; `watchClickedOpener` on `@adapttable/core/binding` and `@adapttable/angular/adapter` records that control.
+  - The Filters button carries `data-adapttable-part="filters-button"` and `data-active` while open in every kit.
+  - Escape closes a native row actions menu and returns focus to its trigger in the React unstyled, Angular unstyled and Angular Aria kits, as it does in Vue.
+  - Ant Design's dropdown panels and column menu draw as the platform's non-modal dialog element.
+- 64069d0: Pinned columns paint their kit's surface in every kit, header and rails included, so cells scrolling beneath them no longer show through. In the Columns menu, a pinned column's pin button is filled with the kit's primary colour. Angular marks the expand, reorder and selection rails `data-pinned` while they stick with the start-pinned columns, as Vue does.
+- Updated dependencies [0fca0b0]
+- Updated dependencies [693ad8e]
+- Updated dependencies [39057e0]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [8bc96c5]
+- Updated dependencies [f20f914]
+- Updated dependencies [39057e0]
+- Updated dependencies [39057e0]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [b8b52f4]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [0fca0b0]
+- Updated dependencies [0fca0b0]
+  - @adapttable/react@1.10.0
+  - @adapttable/unstyled@3.5.0
+
 ## 3.4.4
 
 ### Patch Changes
