@@ -347,6 +347,7 @@ export {
   type TableVirtualizationOptions,
 } from "./virtual/tableVirtualization";
 export {
+  type ActionAiOptions,
   type ActiveFilterChip,
   type AgentApprovalDecision,
   type AgentApprovalOperation,

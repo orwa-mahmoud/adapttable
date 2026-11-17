@@ -58531,6 +58531,14 @@
       "behavior": ""
     },
     {
+      "export": "ActionAiOptions",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
       "export": "ActiveFilterChip",
       "currentImport": "@adapttable/react",
       "kind": "type",

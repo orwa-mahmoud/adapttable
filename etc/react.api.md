@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ActionAiOptions } from '@adapttable/core';
 import { ActiveFilterChip } from '@adapttable/core';
 import { AggregateFormatContext } from '@adapttable/core';
 import { AggregateOptions } from '@adapttable/core';
@@ -248,6 +249,8 @@ import { UseTableUrlStateResult } from '@adapttable/core/binding';
 import { ValidationCheckResult } from '@adapttable/core';
 import { ValidationTarget } from '@adapttable/core';
 import { withKitEnvironment } from '@adapttable/core/binding';
+
+export { ActionAiOptions }
 
 export { ActiveFilterChip }
 

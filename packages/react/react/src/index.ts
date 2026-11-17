@@ -142,7 +142,7 @@ export {
   type UseDensityUrlStateResult,
 } from "./url/useDensityUrlState";
 export { type FeatureNotice, type FeatureNoticeKind } from "./useTableChrome";
-export type { OverlayDismissOptions } from "@adapttable/core";
+export type { ActionAiOptions, OverlayDismissOptions } from "@adapttable/core";
 /* ── URL state ─────────────────────────────────────────────────────── */
 
 export {

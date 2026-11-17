@@ -1115,7 +1115,6 @@
     },
     "vue": {
       ".": {
-        "ActionAiOptions": "pending: shared-surface decision",
         "ActionConfirm": "pending: shared-surface decision",
         "AgentApprovalPending": "pending: shared-surface decision",
         "AgentProgress": "pending: shared-surface decision",

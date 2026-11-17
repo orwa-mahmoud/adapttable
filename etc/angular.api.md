@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ActionAiOptions } from '@adapttable/core';
 import { ActiveFilterChip } from '@adapttable/core';
 import { AgentApprovalDecision } from '@adapttable/core';
 import { AgentApprovalOperation } from '@adapttable/core';
@@ -207,6 +208,8 @@ import { UseColumnLayoutResult } from '@adapttable/core';
 import { UseSavedViewsResult } from '@adapttable/core/binding';
 import { VirtualTableRow } from '@adapttable/core';
 import { WritableSignal } from '@angular/core';
+
+export { ActionAiOptions }
 
 export { ActiveFilterChip }
 

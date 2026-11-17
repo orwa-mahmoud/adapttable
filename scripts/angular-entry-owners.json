@@ -1,5 +1,6 @@
 {
   "root": [
+    "ActionAiOptions",
     "ADAPTTABLE_FEATURES",
     "ADAPTTABLE_FEATURE_STATE",
     "ADAPTTABLE_FIND_STATE",
