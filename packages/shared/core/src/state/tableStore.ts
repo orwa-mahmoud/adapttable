@@ -131,11 +131,10 @@ interface Listened {
   readonly listeners: Set<() => void>;
 }
 
-/** A cell an action wrote: publish or drop its staged value. */
+/** A cell an action wrote: publish its staged value. */
 interface StagedCell extends Listened {
   /** Make the staged value the value; whether it changed. */
   readonly publish: () => boolean;
-  readonly drop: () => void;
 }
 
 /**
@@ -150,7 +149,7 @@ interface StagedCell extends Listened {
 export function createTableStore(
   seed?: (store: StoreWriter) => void
 ): TableStore {
-  return storeIn({ depth: 0, staged: new Map() }, seed);
+  return storeIn({ depth: 0, staged: new Map(), journal: [] }, seed);
 }
 
 /** What a store and its scopes share: one change in progress at a time. */
@@ -159,7 +158,16 @@ interface Changes {
   depth: number;
   /** The cells written in the change in progress. */
   readonly staged: Map<Listened, StagedCell>;
+  /**
+   * Each write of the change in progress, oldest first, with what it
+   * replaced: an action or batch that throws undoes its own writes back to
+   * where it began and leaves its caller's as they were.
+   */
+  readonly journal: Undo[];
 }
+
+/** Put a cell's staging back as it was before one write. */
+type Undo = () => void;
 
 /** A store, or one of its scopes, over `changes`. */
 function storeIn(
@@ -168,7 +176,7 @@ function storeIn(
 ): TableStore {
   /** This store's identity in every slice key's cells. */
   const token = {};
-  const { staged } = changes;
+  const { staged, journal } = changes;
 
   function cellOf<T>(key: SliceKey<T>): SliceCell<T> {
     let cell = key.cells.get(token);
@@ -192,18 +200,17 @@ function storeIn(
       for (const listener of cell.listeners) heard.add(listener);
     }
     staged.clear();
+    journal.length = 0;
     for (const listener of heard) listener();
   }
 
   function run(apply: (store: StoreWriter) => void): void {
+    const begun = journal.length;
     changes.depth += 1;
     try {
       apply(writer);
     } catch (error) {
-      if (changes.depth === 1) {
-        for (const cell of staged.values()) cell.drop();
-        staged.clear();
-      }
+      while (journal.length > begun) journal.pop()?.();
       throw error;
     } finally {
       changes.depth -= 1;
@@ -216,8 +223,14 @@ function storeIn(
     write(key, value) {
       const cell = cellOf(key);
       if (key.equals(read(key), value)) return;
+      const before = cell.staged;
+      const listed = staged.has(cell);
+      journal.push(() => {
+        cell.staged = before;
+        if (!listed) staged.delete(cell);
+      });
       cell.staged = { value };
-      if (staged.has(cell)) return;
+      if (listed) return;
       staged.set(cell, {
         listeners: cell.listeners,
         publish() {
@@ -226,9 +239,6 @@ function storeIn(
           if (!next || key.equals(cell.value, next.value)) return false;
           cell.value = next.value;
           return true;
-        },
-        drop() {
-          cell.staged = undefined;
         },
       });
     },

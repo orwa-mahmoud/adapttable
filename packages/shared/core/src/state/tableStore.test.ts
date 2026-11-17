@@ -195,3 +195,89 @@ describe("createTableStore", () => {
     expect(heard).not.toHaveBeenCalled();
   });
 });
+
+describe("createTableStore — a failed action inside a batch", () => {
+  const overwriteAndFail = defineAction<void>(
+    "test/overwrite-fail",
+    (writer) => {
+      writer.write(COUNT, 7);
+      writer.write(FLAG, true);
+      throw new Error("inner failed");
+    }
+  );
+
+  it("restores what the batch staged and publishes only the batch's writes", () => {
+    const store = createTableStore();
+    const count = vi.fn();
+    const flag = vi.fn();
+    store.slice(COUNT).subscribe(count);
+    store.slice(FLAG).subscribe(flag);
+
+    store.batch((writer) => {
+      writer.write(COUNT, 1);
+      expect(() => store.dispatch(overwriteAndFail())).toThrow("inner failed");
+      expect(writer.read(COUNT)).toBe(1);
+      writer.write(NAMES, ["after"]);
+    });
+
+    expect(store.read(COUNT)).toBe(1);
+    expect(store.read(NAMES)).toEqual(["after"]);
+    expect(store.read(FLAG)).toBe(false);
+    expect(count).toHaveBeenCalledTimes(1);
+    expect(flag).not.toHaveBeenCalled();
+  });
+
+  it("publishes nested actions that succeed together, once", () => {
+    const store = createTableStore();
+    const count = vi.fn();
+    store.slice(COUNT).subscribe(count);
+    const add = defineAction<number>("test/add", (writer, by) => {
+      writer.update(COUNT, (value) => value + by);
+    });
+
+    store.batch(() => {
+      store.dispatch(add(2));
+      store.dispatch(add(3));
+      expect(count).not.toHaveBeenCalled();
+    });
+
+    expect(store.read(COUNT)).toBe(5);
+    expect(count).toHaveBeenCalledTimes(1);
+  });
+
+  it("rolls the whole batch back when an error leaves it", () => {
+    const store = createTableStore();
+    const heard = vi.fn();
+    store.slice(COUNT).subscribe(heard);
+
+    expect(() =>
+      store.batch((writer) => {
+        writer.write(COUNT, 3);
+        store.dispatch(overwriteAndFail());
+      })
+    ).toThrow("inner failed");
+
+    expect(store.read(COUNT)).toBe(0);
+    expect(store.read(FLAG)).toBe(false);
+    expect(heard).not.toHaveBeenCalled();
+  });
+
+  it("restores a child scope's writes when its action fails", () => {
+    const store = createTableStore();
+    const child = store.scope();
+    const childCount = vi.fn();
+    child.slice(COUNT).subscribe(childCount);
+
+    store.batch((writer) => {
+      writer.write(COUNT, 4);
+      child.batch((childWriter) => childWriter.write(COUNT, 2));
+      expect(() => child.dispatch(overwriteAndFail())).toThrow("inner failed");
+      expect(child.read(COUNT)).toBe(2);
+    });
+
+    expect(store.read(COUNT)).toBe(4);
+    expect(child.read(COUNT)).toBe(2);
+    expect(child.read(FLAG)).toBe(false);
+    expect(childCount).toHaveBeenCalledTimes(1);
+  });
+});
