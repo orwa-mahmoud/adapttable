@@ -118,7 +118,7 @@ export interface AgentContextSelection {
   readonly viewBytes: number;
   /** Estimated tokens for the contract. */
   readonly estimatedTokens: number;
-  /** Whether {@link estimatedTokens} came from a real tokenizer. */
+  /** Whether `estimatedTokens` came from a real tokenizer. */
   readonly estimated: boolean;
   /** Anything the selector could not carry, said plainly. */
   readonly notes?: readonly string[];

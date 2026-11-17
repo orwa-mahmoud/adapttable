@@ -222,7 +222,7 @@ export interface TableAssistantSnapshot {
   /** The last failure, cleared by the next successful turn. */
   readonly error: string | undefined;
   /**
-   * The machine code behind {@link error}, when a turn ended with work
+   * The machine code behind `error`, when a turn ended with work
    * pending.
    *
    * The message beside it is written for whoever is debugging the turn; a

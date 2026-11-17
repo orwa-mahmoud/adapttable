@@ -113,7 +113,7 @@ export interface AgentHttpRequest {
    * full one.
    */
   readonly selectionVersion?: string;
-  /** User text. Required for `kind: "turn"` unless {@link audio} is sent. */
+  /** User text. Required for `kind: "turn"` unless `audio` is sent. */
   readonly message?: string;
   /**
    * A recording, in place of typed text.
@@ -308,7 +308,7 @@ export interface AgentHttpTurnResult {
    * The capability key each result came from, in the same order.
    *
    * A developer handle, for a host matching a result back to the call it
-   * asked for. What the reader is shown comes from {@link subjects}.
+   * asked for. What the reader is shown comes from `subjects`.
    */
   readonly keys: readonly string[];
   /**
