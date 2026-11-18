@@ -264,6 +264,8 @@ export interface RealTable<TRow> {
   readonly neutral: NeutralTable<TRow>;
   /** Search the table as a reader does; the move commits on the next tick. */
   search(text: string): void;
+  /** Search through the table's own engine, which moves it at once. */
+  searchNow(text: string): void;
   destroy(): void;
 }
 
@@ -300,6 +302,11 @@ export function realTable<TRow extends { readonly id: string }>(
     neutral,
     search: (text) => {
       source().setSearch(text);
+    },
+    searchNow: (text) => {
+      const engine = source().tableEngine;
+      if (!engine) throw new Error("The frontend source published no engine");
+      engine.dispatch({ type: "setSearch", search: text });
     },
     destroy: () => {
       injector.destroy();

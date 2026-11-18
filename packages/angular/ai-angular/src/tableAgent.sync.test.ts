@@ -13,7 +13,6 @@
  * table changed when it did not.
  */
 import type { AgentManifest } from "@adapttable/ai";
-import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -76,7 +75,7 @@ describe("the agent provider follows the table", () => {
         axes: Parameters<typeof original>[0],
         listener: Parameters<typeof original>[1]
       ) => {
-        table.search("ada");
+        table.searchNow("ada");
         return original(axes, listener);
       }
     );
@@ -142,10 +141,9 @@ describe("Angular revision subscriptions", () => {
     mounted.rerender(options(second.neutral, published));
     expect(secondSubscribe).toHaveBeenCalledOnce();
     const before = published.length;
-    first.search("detached");
-    TestBed.tick();
+    first.searchNow("detached");
     expect(published).toHaveLength(before);
-    second.search("grace");
+    second.searchNow("grace");
     await waitFor(() => expect(published.length).toBeGreaterThan(before));
   });
 
@@ -155,8 +153,7 @@ describe("Angular revision subscriptions", () => {
     const mounted = mountRuntime(options(table.neutral, published));
     const before = published.length;
     mounted.unmount();
-    table.search("unmounted");
-    TestBed.tick();
+    table.searchNow("unmounted");
     expect(published).toHaveLength(before);
   });
 });
