@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AdapterFiltersFeature } from '@adapttable/angular/adapter';
 import { AdaptTableFeature } from '@adapttable/angular';
 import { BatchEditHandler } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/angular';
@@ -17,7 +18,6 @@ import { editHistory } from '@adapttable/angular/features';
 import { EditingLifecycleExtras } from '@adapttable/angular/features';
 import { ExportCsvOptions } from '@adapttable/angular';
 import { extraRows } from '@adapttable/angular/features';
-import { FilterDef } from '@adapttable/angular';
 import { filterTypes } from '@adapttable/angular/features';
 import { fitColumns } from '@adapttable/angular/features';
 import { GroupingExtras } from '@adapttable/angular/features';
@@ -91,7 +91,7 @@ export function exportXlsx<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>
 export { extraRows }
 
 // @public
-export function filters<TRow>(defs?: readonly FilterDef<TRow>[]): AdaptTableFeature;
+export const filters: AdapterFiltersFeature;
 
 export { filterTypes }
 

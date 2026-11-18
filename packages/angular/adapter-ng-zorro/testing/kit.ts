@@ -16,7 +16,13 @@ import {
 } from "@adapttable/ng-zorro/editing";
 import { exportCsv, exportPdf, exportXlsx } from "@adapttable/ng-zorro/export";
 import { extraRows } from "@adapttable/ng-zorro/extra-rows";
-import { filters, filterTypes } from "@adapttable/ng-zorro/filters";
+import {
+  filters,
+  filtersWith,
+  filterTypes,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/ng-zorro/filters";
 import { findInTable } from "@adapttable/ng-zorro/find-in-table";
 import { fullscreen } from "@adapttable/ng-zorro/fullscreen";
 import { grouping } from "@adapttable/ng-zorro/grouping";
@@ -108,6 +114,9 @@ export const kit: AngularKitUnderTest = {
     editHistory,
     editing,
     filters,
+    filtersWith,
+    textFilterWidget,
+    rangeFilterWidget,
     grouping,
     nestedTable,
     rowActions,

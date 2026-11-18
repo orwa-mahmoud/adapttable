@@ -2,20 +2,21 @@ import {
   FilterPanelChrome,
   type FilterPanelSlots,
   filterViewKey,
+  type FilterWidget,
+  filterWidgetComponent,
   useFeatureState,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 import { VChip } from "vuetify/components/VChip";
 import { VIcon } from "vuetify/components/VIcon";
 
 import { useClassNames } from "../classNamesContext";
 import VuetifyButton from "../controls/VuetifyButton.vue";
 import VuetifyFilterDrawer from "./VuetifyFilterDrawer.vue";
-import VuetifyFilterField from "./VuetifyFilterField.vue";
 import VuetifyFilterPopover from "./VuetifyFilterPopover.vue";
 import { VuetifyFilterTree } from "./VuetifyFilterTree";
 
-function useVuetifyFiltersPanel() {
+function useVuetifyFiltersPanel(widgets: readonly FilterWidget[]) {
   const names = useClassNames();
   const model = useFeatureState(filterViewKey<unknown>());
   const buttonClass = (part: string) => {
@@ -68,7 +69,10 @@ function useVuetifyFiltersPanel() {
         content: button.label,
       }),
     Tree: (tree) => h(VuetifyFilterTree, { ...tree, classNames: names.value }),
-    Field: (field) => h(VuetifyFilterField, { ...field }),
+    Field: (field) =>
+      h(filterWidgetComponent(field.def, field.registry, widgets), {
+        ...field,
+      }),
     Popover: (surface) => h(VuetifyFilterPopover, { ...surface }),
     Drawer: (surface) => h(VuetifyFilterDrawer, { ...surface }),
   };
@@ -84,5 +88,12 @@ function useVuetifyFiltersPanel() {
 
 export const VuetifyFiltersPanel = defineComponent({
   name: "VuetifyFiltersPanel",
-  setup: useVuetifyFiltersPanel,
+  props: {
+    /** The widgets the panel draws its fields with. */
+    widgets: {
+      type: Array as PropType<readonly FilterWidget[]>,
+      required: true,
+    },
+  },
+  setup: (props) => useVuetifyFiltersPanel(props.widgets),
 });

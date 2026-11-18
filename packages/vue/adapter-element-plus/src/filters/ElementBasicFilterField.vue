@@ -3,16 +3,21 @@ import {
   type DataTableClassNames,
   FilterFieldChrome,
   type FilterFieldOptions,
-  useFilterField,
+  type FilterFieldPart,
+  useFilterFieldWith,
 } from "@adapttable/vue/adapter";
 
 import { elementFilterControls } from "./fieldControls";
 
 defineOptions({ name: "ElementBasicFilterField" });
 const props = defineProps<
-  FilterFieldOptions<TRow> & { classNames?: DataTableClassNames }
+  FilterFieldOptions<TRow> & {
+    classNames?: DataTableClassNames;
+    /** The widget kinds this field can draw. */
+    parts: readonly FilterFieldPart[];
+  }
 >();
-const model = useFilterField(() => props);
+const model = useFilterFieldWith(() => props, props.parts);
 const controls = elementFilterControls(() => props.classNames ?? {});
 const Render = () =>
   FilterFieldChrome({

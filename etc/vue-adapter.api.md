@@ -151,6 +151,7 @@ import { FilterHeaderSearchProps } from '@adapttable/core/binding';
 import { FilterHeaderSelectProps } from '@adapttable/core/binding';
 import { FilterHeaderSlots as FilterHeaderSlots_2 } from '@adapttable/core/binding';
 import { filterLabel } from '@adapttable/core';
+import { FilterOption } from '@adapttable/core';
 import { FilterRuntime } from '@adapttable/core/binding';
 import { FilterRuntime as FilterRuntime_2 } from '@adapttable/core';
 import { FilterStrings } from '@adapttable/core/binding';
@@ -163,7 +164,9 @@ import { FilterTreeSelectProps } from '@adapttable/core/binding';
 import { FilterTreeSlots } from '@adapttable/core/binding';
 import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
+import { FilterWidgetKind } from '@adapttable/core';
 import { filterWidgetKind } from '@adapttable/core';
+import { FilterWidgetOf } from '@adapttable/core/binding';
 import { FIND_BAR } from '@adapttable/core/binding';
 import { FindBarProps } from '@adapttable/core/binding';
 import { FindBarSlots as FindBarSlots_2 } from '@adapttable/core/binding';
@@ -363,6 +366,9 @@ export { ACTIVE_FILTER_CHIPS }
 
 export { ActiveFilterChipsSlotProps }
 
+// @public
+export type AdapterFiltersFeature = <TRow>(defs?: readonly FilterDef<TRow>[], options?: FiltersOptions) => TableFeature<TRow>;
+
 export { AGENT_ALWAYS_ALLOW_STATE }
 
 export { AGENT_APPROVAL_STATE }
@@ -448,6 +454,9 @@ export interface BodyWindowModel<TRow> {
 
 // @public (undocumented)
 export function bodyWindowModelKey<TRow>(): FeatureStateKey<BodyWindowModel<TRow>>;
+
+// @public
+export const booleanFieldPart: FilterFieldPart;
 
 // @public (undocumented)
 export const BULK_ACTIONS_CONTROL: FeatureSlotKey<ActionPresentation & {
@@ -2090,6 +2099,9 @@ export { FillHandleSlotProps }
 // @public (undocumented)
 export type FillHandleSlots = FillHandleSlots_2<VNodeChild>;
 
+// @public
+export const FILTER_FIELD_PARTS: readonly FilterFieldPart[];
+
 // @public (undocumented)
 export const FILTER_VIEW: FeatureStateKey<FilterPanelModel<unknown>>;
 
@@ -2176,6 +2188,18 @@ export type FilterFieldControl = {
     readonly props: FilterCheckboxProps;
 };
 
+// @public
+export interface FilterFieldDraft<TRow> {
+    readonly checkbox: (key: string, label: string, checked: boolean, onChange: FilterCheckboxProps["onChange"]) => void;
+    readonly checkboxGroup: () => void;
+    readonly id: string;
+    readonly input: (key: string, value: string, type: FilterInputProps["type"], onChange: FilterInputProps["onChange"]) => void;
+    readonly label: string;
+    readonly loads: (state: FilterOptionsState) => void;
+    readonly options: FilterFieldOptions<TRow>;
+    readonly select: (key: string, value: string, items: FilterSelectProps["options"], onChange: FilterSelectProps["onChange"], caption?: string) => void;
+}
+
 // @public (undocumented)
 export interface FilterFieldModel {
     // (undocumented)
@@ -2204,6 +2228,12 @@ export interface FilterFieldOptions<TRow> {
     readonly registry?: FilterTypeRegistry;
     // (undocumented)
     readonly source: FilterFormSource<TRow>;
+}
+
+// @public
+export interface FilterFieldPart {
+    readonly kinds: readonly FilterWidgetKind[];
+    readonly setup: <TRow>(def: () => FilterDef<TRow>, source: () => FilterFormSource<TRow>, choices: () => ComputedRef<FilterOptionsState>) => (draft: FilterFieldDraft<TRow>) => void;
 }
 
 // @public (undocumented)
@@ -2297,6 +2327,16 @@ export interface FilterInputProps {
 }
 
 export { filterLabel }
+
+// @public (undocumented)
+export interface FilterOptionsState {
+    // (undocumented)
+    readonly error?: unknown;
+    // (undocumented)
+    readonly loading: boolean;
+    // (undocumented)
+    readonly options: readonly FilterOption[];
+}
 
 // @public (undocumented)
 export interface FilterPanelButtonProps {
@@ -2436,6 +2476,14 @@ export interface FilterSelectProps {
     readonly value: string;
 }
 
+// @public (undocumented)
+export interface FiltersOptions {
+    readonly fields?: boolean;
+    // (undocumented)
+    readonly mode?: "popover" | "drawer";
+    readonly tree?: boolean;
+}
+
 export { FilterTreeBuilderProps }
 
 export { FilterTreeButtonProps }
@@ -2475,6 +2523,12 @@ export interface FilterTriggerProps {
 
 // @public (undocumented)
 export function filterViewKey<TRow>(): FeatureStateKey<FilterPanelModel<TRow>>;
+
+// @public
+export type FilterWidget = FilterWidgetOf<Component>;
+
+// @public
+export function filterWidgetComponent(def: Pick<FilterDef, "key" | "type">, registry: FilterTypeRegistry, widgets: readonly FilterWidget[]): Component;
 
 export { filterWidgetKind }
 
@@ -2857,6 +2911,9 @@ export function mountForcedColorsStyles(): void;
 // @public (undocumented)
 export function mountGrouping<TRow>(context: FeatureMountContext<TRow>): void;
 
+// @public
+export const multiSelectFieldPart: FilterFieldPart;
+
 // @public (undocumented)
 export interface NestedTable {
     // (undocumented)
@@ -2972,6 +3029,9 @@ export function provideFeatureState(state: FeatureState): void;
 
 // @public
 export function railCellAttrs<TRow>(model: Pick<DesktopTableModel<TRow>, "railAttrs">, rail: TableRail, header: boolean, attrs: Attrs): Record<string, unknown>;
+
+// @public
+export const rangeFieldPart: FilterFieldPart;
 
 export { readMultiDraft }
 
@@ -3295,6 +3355,9 @@ export type SavedViewsPanelSlots = SavedViewsPanelSlots_2<VNodeChild>;
 
 // @public
 export function scheduleTick(work: () => void | Promise<void>): void;
+
+// @public
+export const selectFieldPart: FilterFieldPart;
 
 // @public (undocumented)
 export const SELECTION_STATS_MODEL: FeatureStateKey<SelectionStats | null>;
@@ -4109,6 +4172,9 @@ export interface TableTree<TRow> {
     readonly loadingIds: ReadonlySet<string>;
 }
 
+// @public
+export const textFieldPart: FilterFieldPart;
+
 export { toggleCollapsedColumnGroup }
 
 export { TOOLBAR_EXTRAS }
@@ -4608,6 +4674,9 @@ export function useFeatureState<T>(key: FeatureStateKey<T>): Readonly<ShallowRef
 
 // @public
 export function useFilterField<TRow>(input: MaybeRefOrGetter<FilterFieldOptions<TRow>>): ComputedRef<FilterFieldModel>;
+
+// @public
+export function useFilterFieldWith<TRow>(input: MaybeRefOrGetter<FilterFieldOptions<TRow>>, parts: readonly FilterFieldPart[]): ComputedRef<FilterFieldModel>;
 
 // @public
 export function useFilterHeaderControl<TRow>(input: MaybeRefOrGetter<FilterHeaderControlOptions<TRow>>): ComputedRef<FilterHeaderControlModel | undefined>;

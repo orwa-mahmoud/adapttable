@@ -87,6 +87,49 @@ const URL_STATE_MARKERS = [
   "createHistoryAdapter",
 ];
 
+/** Every published Vue kit, by its package folder suffix. */
+const VUE_KITS = [
+  "element-plus",
+  "naive-ui",
+  "nuxt-ui",
+  "quasar",
+  "reka-ui",
+  "shadcn-vue",
+  "vue-unstyled",
+  "vuetify",
+];
+
+/**
+ * Filters on every Vue kit, drawn with every widget and with only the text
+ * widget: the fields a table never draws stay out of its bundle.
+ */
+export const VUE_FILTER_WIDGET_SPECS = VUE_KITS.flatMap((kit) => [
+  {
+    name: `${kit} · + filters`,
+    pkg: `adapter-${kit}`,
+    consumerHost: nativeConsumerHosts[kit],
+    alsoEntryFile: "filters.js",
+    comparable: "mui · + filters",
+    code: 'export { DataTable } from "PKG";\nexport { filters } from "ALSO";',
+    functionality: `${kit} table with filters drawn by every widget`,
+    present: ["DataTable", "useTextFilter", "useRangeFilter"],
+    absent: writers,
+    rejectOptionalAi: true,
+  },
+  {
+    name: `${kit} · + text filters`,
+    pkg: `adapter-${kit}`,
+    consumerHost: nativeConsumerHosts[kit],
+    alsoEntryFile: "filters.js",
+    comparable: "mui · + text filters",
+    code: 'export { DataTable } from "PKG";\nexport { filtersWith, textFilterWidget } from "ALSO";',
+    functionality: `${kit} table with filters drawn by the text widget only`,
+    present: ["DataTable", "useTextFilter"],
+    absent: [...writers, "useRangeFilter", "useBooleanFilter"],
+    rejectOptionalAi: true,
+  },
+]);
+
 /** A headless table that renders its header, rows and cells with Vue. */
 const VUE_RENDERED_TABLE = `import { type ColumnDef, HOOK, useDataTable } from "PKG";
 import { defineComponent, h, type PropType } from "vue";
@@ -288,6 +331,7 @@ export const VUE_CONSUMER_SPECS = [
     absent: [],
   },
   ...VUE_NATIVE_BASE_SPECS,
+  ...VUE_FILTER_WIDGET_SPECS,
 ];
 
 /** Optional rendering is checked independently from the existing size budgets. */

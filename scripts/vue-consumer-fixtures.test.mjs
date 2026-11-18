@@ -32,7 +32,7 @@ const fixture = (name) => {
 
 describe("packed Vue consumers", () => {
   it("registers every distinct real entry and matches existing comparable ceilings", () => {
-    assert.equal(VUE_CONSUMER_SPECS.length, 22);
+    assert.equal(VUE_CONSUMER_SPECS.length, 38);
     assert.deepEqual(
       vue.map((entry) => entry.name),
       VUE_CONSUMER_SPECS.map((entry) => entry.name)

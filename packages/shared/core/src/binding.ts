@@ -780,11 +780,13 @@ export type {
   FilteringContribution,
   FiltersFormSlotProps,
 } from "./filters/filterFormModel";
-export type {
-  FilterTypeRegistry,
-  FilterTypeSpec,
-  FilterWidgetKind,
-  FilterWidgetRenderProps,
+export {
+  type FilterTypeRegistry,
+  type FilterTypeSpec,
+  filterWidgetFor,
+  type FilterWidgetKind,
+  type FilterWidgetOf,
+  type FilterWidgetRenderProps,
 } from "./filters/filterRegistry";
 export {
   type FilterOperandPrimitive,

@@ -10,30 +10,30 @@ import {
   defaultFilterRegistry,
   FILTER_LABELS,
   type FilterDef,
+  type FilterFormSource,
   filterLabel,
   type FilterTypeRegistry,
   type FilterValue,
-  filterWidgetKind,
+  type FilterWidget,
+  FilterWidgetField,
+  type FilterWidgetProps,
   joinRelativeToken,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
-  renderRegisteredFilter,
   resolveTableLabels,
   splitRelativeToken,
   type TableLabels,
   type TableSource,
 } from "@adapttable/react/adapter";
-import {
-  type CSSProperties,
-  type ReactElement,
-  type ReactNode,
-  useId,
-} from "react";
+import { type CSSProperties, type ReactNode, useId } from "react";
 
 import type { DataTableClassNames } from "../types";
 import { ChecklistFilter } from "./ChecklistFilter";
 
 const FORM_LABELS = [FILTER_LABELS];
+
+/** No class overrides: the parts keep only their `data-adapttable-part` hooks. */
+const NO_CLASS_NAMES: DataTableClassNames = {};
 
 /* Part names shared by more than one field shape. */
 const FIELD_PART = "filter-field";
@@ -65,8 +65,9 @@ function selectedValues(value: FilterValue): string[] {
 /** Props shared by every per-definition field component. */
 interface DefFieldProps<TRow> {
   def: FilterDef<TRow>;
-  source: TableSource<TRow>;
-  classNames: DataTableClassNames;
+  source: FilterFormSource<TRow>;
+  /** Per-part class name overrides (the `filter*` keys). */
+  classNames?: DataTableClassNames;
 }
 
 interface GroupFieldProps {
@@ -105,7 +106,7 @@ function GroupField({
 function TextField<TRow>({
   def,
   source,
-  classNames,
+  classNames = NO_CLASS_NAMES,
   labels,
 }: Readonly<DefFieldProps<TRow> & { labels: Required<TableLabels> }>) {
   "use no memo";
@@ -150,7 +151,7 @@ function TextField<TRow>({
 function BooleanField<TRow>({
   def,
   source,
-  classNames,
+  classNames = NO_CLASS_NAMES,
   labels,
 }: Readonly<DefFieldProps<TRow> & { labels: Required<TableLabels> }>) {
   "use no memo";
@@ -188,7 +189,7 @@ function BooleanField<TRow>({
 function SelectField<TRow>({
   def,
   source,
-  classNames,
+  classNames = NO_CLASS_NAMES,
   labels,
 }: Readonly<DefFieldProps<TRow> & { labels: Required<TableLabels> }>) {
   "use no memo";
@@ -235,7 +236,7 @@ function SelectField<TRow>({
 function MultiSelectField<TRow>({
   def,
   source,
-  classNames,
+  classNames = NO_CLASS_NAMES,
 }: Readonly<DefFieldProps<TRow>>) {
   "use no memo";
   const selected = selectedValues(source.extra[def.key]);
@@ -389,7 +390,7 @@ interface RangeFieldProps<TRow> extends DefFieldProps<TRow> {
 function RangeField<TRow>({
   def,
   source,
-  classNames,
+  classNames = NO_CLASS_NAMES,
   labels,
 }: Readonly<RangeFieldProps<TRow>>) {
   "use no memo";
@@ -468,76 +469,90 @@ function RangeField<TRow>({
   );
 }
 
-interface FilterFieldProps<TRow> extends DefFieldProps<TRow> {
-  labels: Required<TableLabels>;
-  registry: FilterTypeRegistry;
+/** The unstyled text filter: its operator and its value. @public */
+export const textFilterWidget: FilterWidget = {
+  kinds: ["text"],
+  render: TextField,
+};
+/** The unstyled yes/no filter. @public */
+export const booleanFilterWidget: FilterWidget = {
+  kinds: ["boolean"],
+  render: BooleanField,
+};
+/** The unstyled single-choice filter. @public */
+export const selectFilterWidget: FilterWidget = {
+  kinds: ["select"],
+  render: SelectField,
+};
+/** The unstyled multiple-choice filter. @public */
+export const multiSelectFilterWidget: FilterWidget = {
+  kinds: ["multiSelect"],
+  render: MultiSelectField,
+};
+/** The unstyled searchable checklist filter. @public */
+export const checklistFilterWidget: FilterWidget = {
+  kinds: ["checklist"],
+  render: ChecklistFilter,
+};
+/** The unstyled operator-first number and date range filter. @public */
+export const rangeFilterWidget: FilterWidget = {
+  kinds: ["dateRange", "numberRange"],
+  render: RangeField,
+};
+/** Every built-in widget: what the automatic filters form draws. */
+export const FILTER_WIDGETS: readonly FilterWidget[] = [
+  textFilterWidget,
+  booleanFilterWidget,
+  selectFilterWidget,
+  multiSelectFilterWidget,
+  checklistFilterWidget,
+  rangeFilterWidget,
+];
+
+/** Props for `FilterFields`. */
+export interface FilterFieldsProps {
+  /** The resolved filter definitions, in render order. */
+  readonly defs: readonly FilterDef<unknown>[];
+  /** The filter bag the widgets read from and write to. */
+  readonly source: FilterFormSource<unknown>;
+  /** Resolved labels for every control. */
+  readonly labels: Required<TableLabels>;
+  /** Per-part class name overrides (the `filter*` keys). */
+  readonly classNames: DataTableClassNames;
+  /** Type registry that names each definition's widget. */
+  readonly registry: FilterTypeRegistry;
+  /** The widgets the fields are drawn with. */
+  readonly widgets: readonly FilterWidget[];
 }
 
-function FilterField<TRow>({
-  def,
+/** One field per definition, drawn with the given widgets. */
+export function FilterFields({
+  defs,
   source,
-  classNames,
   labels,
+  classNames,
   registry,
-}: Readonly<FilterFieldProps<TRow>>): ReactElement | null {
+  widgets,
+}: Readonly<FilterFieldsProps>) {
+  // Every field reads the live source, so a cache would miss on each change.
   "use no memo";
-  const spec = registry.get(def.type);
-  const custom = renderRegisteredFilter(def, source, labels, registry);
-  if (custom) return custom as ReactElement;
-  switch (spec?.widget ?? filterWidgetKind(def, registry)) {
-    case "text":
-      return (
-        <TextField
-          def={def}
-          source={source}
-          classNames={classNames}
-          labels={labels}
+  // The class overrides ride along; every unstyled widget draws them.
+  const field = (def: FilterDef<unknown>): FilterWidgetProps => {
+    const props = { def, source, labels, classNames };
+    return props;
+  };
+  return (
+    <>
+      {defs.map((def) => (
+        <FilterWidgetField
+          key={def.key}
+          field={field(def)}
+          registry={registry}
+          widgets={widgets}
         />
-      );
-    case "boolean":
-      return (
-        <BooleanField
-          def={def}
-          source={source}
-          classNames={classNames}
-          labels={labels}
-        />
-      );
-    case "select":
-      return (
-        <SelectField
-          def={def}
-          source={source}
-          classNames={classNames}
-          labels={labels}
-        />
-      );
-    case "multiSelect":
-      return (
-        <MultiSelectField def={def} source={source} classNames={classNames} />
-      );
-    case "checklist":
-      return (
-        <ChecklistFilter
-          def={def}
-          source={source}
-          classNames={classNames}
-          labels={labels}
-        />
-      );
-    case "dateRange":
-    case "numberRange":
-      return (
-        <RangeField
-          def={def}
-          source={source}
-          classNames={classNames}
-          labels={labels}
-        />
-      );
-    default:
-      return null;
-  }
+      ))}
+    </>
+  );
 }
 
 /**
@@ -580,21 +595,15 @@ export function AutoFilterForm<TRow>({
   labels,
   registry = defaultFilterRegistry,
 }: Readonly<AutoFilterFormProps<TRow>>) {
-  // Every field reads the live source, so a cache would miss on each change.
   "use no memo";
-  const resolvedLabels = resolveTableLabels(labels, FORM_LABELS);
   return (
-    <>
-      {defs.map((def) => (
-        <FilterField
-          key={def.key}
-          def={def}
-          source={source}
-          classNames={classNames}
-          labels={resolvedLabels}
-          registry={registry}
-        />
-      ))}
-    </>
+    <FilterFields
+      defs={defs}
+      source={source}
+      classNames={classNames}
+      labels={resolveTableLabels(labels, FORM_LABELS)}
+      registry={registry}
+      widgets={FILTER_WIDGETS}
+    />
   );
 }

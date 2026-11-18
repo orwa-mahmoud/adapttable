@@ -261,6 +261,22 @@ export function filtersTests(
         expect(parts("filter-header-trigger")).toHaveLength(0);
       });
 
+      it("draws each field with the widget composed for its kind", async () => {
+        const composed = kit.features.filtersWith([
+          kit.features.textFilterWidget,
+          kit.features.rangeFilterWidget,
+        ]);
+        const { parts, openFilters } = await mount([
+          composed<Person>([
+            { key: "name", type: "text" },
+            { key: "age", type: "numberRange" },
+          ]),
+        ]);
+        await openFilters();
+        expect(parts("filter-field")).toHaveLength(2);
+        expect(parts("filter-operator")).toHaveLength(2);
+      });
+
       it("says nothing matched when a filter leaves no rows", async () => {
         const { part, field, type, openFilters } = await mount();
         await openFilters();

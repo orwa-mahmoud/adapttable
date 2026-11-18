@@ -16,7 +16,13 @@ import {
 } from "@adapttable/taiga-ui/editing";
 import { exportCsv, exportPdf, exportXlsx } from "@adapttable/taiga-ui/export";
 import { extraRows } from "@adapttable/taiga-ui/extra-rows";
-import { filters, filterTypes } from "@adapttable/taiga-ui/filters";
+import {
+  filters,
+  filtersWith,
+  filterTypes,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/taiga-ui/filters";
 import { findInTable } from "@adapttable/taiga-ui/find-in-table";
 import { fullscreen } from "@adapttable/taiga-ui/fullscreen";
 import { grouping } from "@adapttable/taiga-ui/grouping";
@@ -109,6 +115,9 @@ export const kit: AngularKitUnderTest = {
     editHistory,
     editing,
     filters,
+    filtersWith,
+    textFilterWidget,
+    rangeFilterWidget,
     grouping,
     nestedTable,
     rowActions,

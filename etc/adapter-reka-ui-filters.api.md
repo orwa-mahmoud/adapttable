@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AdapterFiltersFeature } from '@adapttable/vue/adapter';
 import { ChecklistFilterProps } from '@adapttable/vue/adapter';
 import { FilterDef } from '@adapttable/vue';
 import { FilterFieldOptions } from '@adapttable/vue/adapter';
@@ -12,8 +13,8 @@ import { FiltersOptions } from '@adapttable/vue/features';
 import { FilterTreeBuilderProps } from '@adapttable/vue/adapter';
 import { filterTypes } from '@adapttable/vue/features';
 import { FilterTypeSpec } from '@adapttable/vue';
+import { FilterWidget } from '@adapttable/vue/adapter';
 import { PublicProps } from 'vue';
-import { TableFeature } from '@adapttable/vue';
 import { VNode } from 'vue';
 
 // @public (undocumented)
@@ -76,10 +77,18 @@ type __VLS_PrettifyLocal$2<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [
 // @public (undocumented)
 type __VLS_PrettifyLocal<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
+export { AdapterFiltersFeature }
+
+// @public
+export const booleanFilterWidget: FilterWidget;
+
 // @public (undocumented)
 export const ChecklistFilter: typeof __VLS_export$2;
 
 export { ChecklistFilterProps }
+
+// @public
+export const checklistFilterWidget: FilterWidget;
 
 export { FilterDef }
 
@@ -88,10 +97,13 @@ export const FilterField: typeof __VLS_export$1;
 
 export { FilterOption }
 
-// @public (undocumented)
-export function filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: FiltersOptions): TableFeature<TRow>;
+// @public
+export const filters: AdapterFiltersFeature;
 
 export { FiltersOptions }
+
+// @public
+export function filtersWith(widgets: readonly FilterWidget[]): AdapterFiltersFeature;
 
 // @public (undocumented)
 export const FilterTreeBuilder: typeof __VLS_export;
@@ -101,6 +113,20 @@ export { FilterTreeBuilderProps }
 export { filterTypes }
 
 export { FilterTypeSpec }
+
+export { FilterWidget }
+
+// @public
+export const multiSelectFilterWidget: FilterWidget;
+
+// @public
+export const rangeFilterWidget: FilterWidget;
+
+// @public
+export const selectFilterWidget: FilterWidget;
+
+// @public
+export const textFilterWidget: FilterWidget;
 
 // (No @packageDocumentation comment for this package)
 

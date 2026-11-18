@@ -17,9 +17,12 @@ vi.mock("@adapttable/vue/adapter", async (load) => {
       mounts.cell();
       return actual.useEditableCellModel(input);
     },
-    useFilterField: (input: Parameters<typeof actual.useFilterField>[0]) => {
+    useFilterFieldWith: (
+      input: Parameters<typeof actual.useFilterFieldWith>[0],
+      parts: Parameters<typeof actual.useFilterFieldWith>[1]
+    ) => {
       mounts.field();
-      return actual.useFilterField(input);
+      return actual.useFilterFieldWith(input, parts);
     },
     useChecklistModel: (
       input: Parameters<typeof actual.useChecklistModel>[0]

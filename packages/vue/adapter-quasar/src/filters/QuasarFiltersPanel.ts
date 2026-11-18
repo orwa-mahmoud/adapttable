@@ -2,18 +2,19 @@ import {
   FilterPanelChrome,
   type FilterPanelSlots,
   filterViewKey,
+  type FilterWidget,
+  filterWidgetComponent,
   mergeVueAttrs,
   useDataTableClassNames,
   useFeatureState,
 } from "@adapttable/vue/adapter";
 import { QBadge, QIcon } from "quasar";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import QuasarButton from "../controls/QuasarButton.vue";
-import QuasarFilterField from "./QuasarFilterField.vue";
 import QuasarFilterSurface from "./QuasarFilterSurface.vue";
 import QuasarFilterTree from "./QuasarFilterTree.vue";
-function useQuasarFiltersPanel() {
+function useQuasarFiltersPanel(widgets: readonly FilterWidget[]) {
   const names = useDataTableClassNames();
   const model = useFeatureState(filterViewKey<unknown>());
   const controls: FilterPanelSlots<unknown> = {
@@ -76,7 +77,10 @@ function useQuasarFiltersPanel() {
         label: button.label,
       }),
     Tree: (tree) => h(QuasarFilterTree, { ...tree, classNames: names.value }),
-    Field: (field) => h(QuasarFilterField, { ...field }),
+    Field: (field) =>
+      h(filterWidgetComponent(field.def, field.registry, widgets), {
+        ...field,
+      }),
     Popover: (surface) => h(QuasarFilterSurface, { ...surface, modal: false }),
     Drawer: (surface) => h(QuasarFilterSurface, { ...surface, modal: true }),
   };
@@ -92,5 +96,12 @@ function useQuasarFiltersPanel() {
 
 export const QuasarFiltersPanel = defineComponent({
   name: "QuasarFiltersPanel",
-  setup: useQuasarFiltersPanel,
+  props: {
+    /** The widgets the panel draws its fields with. */
+    widgets: {
+      type: Array as PropType<readonly FilterWidget[]>,
+      required: true,
+    },
+  },
+  setup: (props) => useQuasarFiltersPanel(props.widgets),
 });

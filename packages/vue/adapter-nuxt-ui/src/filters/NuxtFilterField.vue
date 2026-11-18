@@ -1,34 +1,21 @@
 <script setup lang="ts" generic="TRow">
 import {
   defaultFilterRegistry,
+  FILTER_FIELD_PARTS,
   type FilterFieldOptions,
-  filterLabel,
   filterWidgetKind,
-  useDataTableClassNames,
 } from "@adapttable/vue/adapter";
 
 import NuxtBasicFilterField from "./NuxtBasicFilterField.vue";
-import NuxtChecklistFilter from "./NuxtChecklistFilter.vue";
+import NuxtChecklistField from "./NuxtChecklistField.vue";
 const props = defineProps<FilterFieldOptions<TRow>>();
-const names = useDataTableClassNames();
 </script>
 <template>
-  <fieldset
+  <NuxtChecklistField
     v-if="
       filterWidgetKind(def, registry ?? defaultFilterRegistry) === 'checklist'
     "
-    :class="names.filterField"
-    data-adapttable-part="filter-field"
-  >
-    <legend :class="names.filterLabel" data-adapttable-part="filter-label">
-      {{ filterLabel(def) }}
-    </legend>
-    <NuxtChecklistFilter
-      :def="def"
-      :source="source"
-      :labels="labels"
-      :class-names="names"
-    />
-  </fieldset>
-  <NuxtBasicFilterField v-else v-bind="props" />
+    v-bind="props"
+  />
+  <NuxtBasicFilterField v-else v-bind="props" :parts="FILTER_FIELD_PARTS" />
 </template>

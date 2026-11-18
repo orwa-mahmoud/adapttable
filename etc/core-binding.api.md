@@ -5587,7 +5587,16 @@ export interface FilterTypeSpec {
 export type FilterValue = string | string[] | number | undefined;
 
 // @public
+export function filterWidgetFor<TRender>(def: Pick<FilterDef, "key" | "type">, registry: FilterTypeRegistry, widgets: readonly FilterWidgetOf<TRender>[]): TRender | undefined;
+
+// @public
 export type FilterWidgetKind = FilterType;
+
+// @public
+export interface FilterWidgetOf<TRender> {
+    readonly kinds: readonly FilterWidgetKind[];
+    readonly render: TRender;
+}
 
 // @public
 export interface FilterWidgetRenderProps<TRow = unknown> {

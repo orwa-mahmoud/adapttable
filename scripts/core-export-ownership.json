@@ -17409,6 +17409,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "filterWidgetFor",
+      "kind": "runtime",
+      "module": "filters/filterRegistry.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterRegistry.ts#filterWidgetFor",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "FIND_BAR",
       "kind": "runtime",
       "module": "features/slotContract.ts",
@@ -24083,6 +24094,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "filters/filterTreeEditor.ts#FilterTreeValueEditor",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FilterWidgetOf",
+      "kind": "type",
+      "module": "filters/filterRegistry.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterRegistry.ts#FilterWidgetOf",
       "subpaths": ["./binding"]
     },
     {

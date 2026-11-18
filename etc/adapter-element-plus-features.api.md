@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AdapterFiltersFeature } from '@adapttable/vue/adapter';
 import { AgentApprovalProps } from '@adapttable/vue/adapter';
 import { BatchEditBarProps } from '@adapttable/vue/adapter';
 import { BatchEditingState } from '@adapttable/vue';
@@ -47,6 +48,7 @@ import { FiltersOptions } from '@adapttable/vue/features';
 import { FilterTreeBuilderProps } from '@adapttable/vue/adapter';
 import { filterTypes } from '@adapttable/vue/features';
 import { FilterTypeSpec } from '@adapttable/vue';
+import { FilterWidget } from '@adapttable/vue/adapter';
 import { fitColumns } from '@adapttable/vue/features';
 import { GetCellSpan } from '@adapttable/vue';
 import { GetCellSpanArgs } from '@adapttable/vue';
@@ -228,6 +230,8 @@ type __VLS_PrettifyLocal_3<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [
 // @public (undocumented)
 type __VLS_PrettifyLocal_4<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
+export { AdapterFiltersFeature }
+
 // @public (undocumented)
 export const AgentApproval: DefineSetupFnComponent<AgentApprovalProps, {}, {}, AgentApprovalProps & {}, PublicProps>;
 
@@ -242,6 +246,9 @@ export function batchEditing<TRow>(onBatchEdit: NonNullable<TableEditingOptions<
 export { BatchEditingState }
 
 export { BatchRowEdit }
+
+// @public
+export const booleanFilterWidget: FilterWidget;
 
 // @public (undocumented)
 export function bulkActions(actions: readonly BulkAction[]): StaticTableFeature;
@@ -271,6 +278,9 @@ export const ChecklistFilter: (<TRow>(props: ChecklistFilterProps<TRow>, context
 };
 
 export { ChecklistFilterProps }
+
+// @public
+export const checklistFilterWidget: FilterWidget;
 
 export { collapsibleColumnGroups }
 
@@ -361,10 +371,13 @@ export { FilterHeaderRowProps }
 
 export { FilterOption }
 
-// @public (undocumented)
-export function filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: FiltersOptions): TableFeature<TRow>;
+// @public
+export const filters: AdapterFiltersFeature;
 
 export { FiltersOptions }
+
+// @public
+export function filtersWith(widgets: readonly FilterWidget[]): AdapterFiltersFeature;
 
 // @public
 export const FilterTreeBuilder: (<TRow>(props: FilterTreeBuilderProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
@@ -388,6 +401,8 @@ export { FilterTreeBuilderProps }
 export { filterTypes }
 
 export { FilterTypeSpec }
+
+export { FilterWidget }
 
 // @public
 export function findInTable(options?: {
@@ -430,6 +445,9 @@ export { GroupSort }
 // @public
 export function headerFilters(): StaticTableFeature;
 
+// @public
+export const multiSelectFilterWidget: FilterWidget;
+
 export { multiSort }
 
 export { NestedTable }
@@ -449,6 +467,9 @@ export { pinnedSummaryRows }
 // @public (undocumented)
 function print_2(onPrint: () => void, printButton?: boolean): StaticTableFeature;
 export { print_2 as print }
+
+// @public
+export const rangeFilterWidget: FilterWidget;
 
 export { resizableColumns }
 
@@ -510,6 +531,9 @@ export interface SavedViewsPanelProps extends Omit<SavedViewsPanelChromeProps, "
 
 export { SavedViewsStore }
 
+// @public
+export const selectFilterWidget: FilterWidget;
+
 // @public (undocumented)
 export function selectionStats(): StaticTableFeature;
 
@@ -534,6 +558,9 @@ export { TableEditingOptions }
 export { TableRowDetail }
 
 export { TableTree }
+
+// @public
+export const textFilterWidget: FilterWidget;
 
 export { tree }
 

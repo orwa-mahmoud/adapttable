@@ -16,16 +16,17 @@ import {
   type FilterFormSource,
   filterLabel,
   type FilterTypeRegistry,
-  filterWidgetKind,
+  type FilterWidget,
+  FilterWidgetField,
+  type FilterWidgetProps,
   joinRelativeToken,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
-  renderRegisteredFilter,
   resolveTableLabels,
   splitRelativeToken,
   type TableLabels,
 } from "@adapttable/react/adapter";
-import { type ReactElement, type ReactNode, useId } from "react";
+import { type ReactNode, useId } from "react";
 
 import type { BaseUiAccentColor } from "../types";
 import { Flex, Spinner, Text, TextField } from "../ui";
@@ -299,114 +300,183 @@ function BooleanFilterField<TRow>({
   );
 }
 
-/** One definition rendered as its kit-native Base UI control. */
-function AutoFilterField<TRow>({
+function SelectFilterField<TRow>({
+  def,
+  source,
+  labels,
+}: Readonly<FilterWidgetProps<TRow>>) {
+  "use no memo";
+  const label = filterLabel(def);
+  // Static arrays resolve instantly; async loaders run once and report
+  // `loading` so the select shows a native affordance.
+  const { options, loading } = useFilterOptions(def);
+  const selectOptions: SelectOption[] = loading
+    ? [{ value: "", label: "…", disabled: true }]
+    : [
+        { value: "", label: labels.filterAll },
+        ...options.map((option) => ({
+          value: option.value,
+          label: option.label,
+        })),
+      ];
+  return (
+    <FormField label={label} data-adapttable-part="filter-field">
+      <NativeSelect
+        size="1"
+        aria-label={label}
+        data-adapttable-part="filter-select"
+        value={scalarFilterText(source.extra[def.key])}
+        options={selectOptions}
+        onValueChange={(value) => source.setExtra(def.key, value)}
+      />
+    </FormField>
+  );
+}
+
+function MultiSelectFilterField<TRow>({
   def,
   source,
   labels,
   accentColor,
-  registry,
-}: Readonly<{
-  def: FilterDef<TRow>;
-  source: FilterFormSource<TRow>;
-  labels: Required<TableLabels>;
-  accentColor?: BaseUiAccentColor;
-  registry: FilterTypeRegistry;
-}>): ReactElement | null {
+}: Readonly<FilterWidgetProps<TRow> & { accentColor?: BaseUiAccentColor }>) {
   "use no memo";
   const id = useId();
-  const { extra, setExtra } = source;
   const label = filterLabel(def);
-  // Static arrays resolve instantly; async loaders run once and report
-  // `loading` so the select/checkbox controls can show a native affordance.
   const { options, loading } = useFilterOptions(def);
-  const custom = renderRegisteredFilter(def, source, labels, registry);
-  if (custom) return custom as ReactElement;
-  switch (filterWidgetKind(def, registry)) {
-    case "text":
-      return <TextFilterField def={def} source={source} labels={labels} />;
-    case "boolean":
-      return <BooleanFilterField def={def} source={source} labels={labels} />;
-    case "select": {
-      const selectOptions: SelectOption[] = loading
-        ? [{ value: "", label: "…", disabled: true }]
-        : [
-            { value: "", label: labels.filterAll },
-            ...options.map((option) => ({
-              value: option.value,
-              label: option.label,
-            })),
-          ];
-      return (
-        <FormField label={label} data-adapttable-part="filter-field">
-          <NativeSelect
-            size="1"
-            aria-label={label}
-            data-adapttable-part="filter-select"
-            value={scalarFilterText(extra[def.key])}
-            options={selectOptions}
-            onValueChange={(value) => setExtra(def.key, value)}
-          />
-        </FormField>
-      );
-    }
-    case "checklist":
-      return <ChecklistFilter def={def} source={source} labels={labels} />;
-    case "multiSelect": {
-      const selected = listFilterValues(extra[def.key]);
-      const toggle = (value: string) =>
-        setExtra(
-          def.key,
-          selected.includes(value)
-            ? selected.filter((v) => v !== value)
-            : [...selected, value]
-        );
-      return (
-        <GroupField label={label} id={id}>
-          {loading ? (
-            <Spinner size="1" label={labels.loading} />
-          ) : (
-            <Flex
-              gap="2"
-              wrap="wrap"
-              role="group"
-              aria-labelledby={id}
-              style={{
-                maxHeight: CHECKLIST_LIST_HEIGHT,
-                overflow: "auto",
-              }}
-            >
-              {options.map((option) => {
-                const checked = selected.includes(option.value);
-                return (
-                  <label
-                    key={option.value}
-                    className="adapttable-filter-chip"
-                    data-checked={checked ? "true" : "false"}
-                    data-accent={accentColor}
-                  >
-                    <Checkbox
-                      checked={checked}
-                      color={accentColor}
-                      value={option.value}
-                      className="adapttable-visually-hidden"
-                      onToggle={() => toggle(option.value)}
-                    />
-                    {option.label}
-                  </label>
-                );
-              })}
-            </Flex>
-          )}
-        </GroupField>
-      );
-    }
-    case "dateRange":
-    case "numberRange":
-      return <RangeField def={def} source={source} labels={labels} />;
-    default:
-      return null;
-  }
+  const selected = listFilterValues(source.extra[def.key]);
+  const toggle = (value: string) =>
+    source.setExtra(
+      def.key,
+      selected.includes(value)
+        ? selected.filter((v) => v !== value)
+        : [...selected, value]
+    );
+  return (
+    <GroupField label={label} id={id}>
+      {loading ? (
+        <Spinner size="1" label={labels.loading} />
+      ) : (
+        <Flex
+          gap="2"
+          wrap="wrap"
+          role="group"
+          aria-labelledby={id}
+          style={{
+            maxHeight: CHECKLIST_LIST_HEIGHT,
+            overflow: "auto",
+          }}
+        >
+          {options.map((option) => {
+            const checked = selected.includes(option.value);
+            return (
+              <label
+                key={option.value}
+                className="adapttable-filter-chip"
+                data-checked={checked ? "true" : "false"}
+                data-accent={accentColor}
+              >
+                <Checkbox
+                  checked={checked}
+                  color={accentColor}
+                  value={option.value}
+                  className="adapttable-visually-hidden"
+                  onToggle={() => toggle(option.value)}
+                />
+                {option.label}
+              </label>
+            );
+          })}
+        </Flex>
+      )}
+    </GroupField>
+  );
+}
+
+/** The Base UI text filter: its operator and its value. @public */
+export const textFilterWidget: FilterWidget = {
+  kinds: ["text"],
+  render: TextFilterField,
+};
+/** The Base UI yes/no filter. @public */
+export const booleanFilterWidget: FilterWidget = {
+  kinds: ["boolean"],
+  render: BooleanFilterField,
+};
+/** The Base UI single-choice filter. @public */
+export const selectFilterWidget: FilterWidget = {
+  kinds: ["select"],
+  render: SelectFilterField,
+};
+/** The Base UI multiple-choice filter. @public */
+export const multiSelectFilterWidget: FilterWidget = {
+  kinds: ["multiSelect"],
+  render: MultiSelectFilterField,
+};
+/** The Base UI searchable checklist filter. @public */
+export const checklistFilterWidget: FilterWidget = {
+  kinds: ["checklist"],
+  render: ChecklistFilter,
+};
+/** The Base UI operator-first number and date range filter. @public */
+export const rangeFilterWidget: FilterWidget = {
+  kinds: ["dateRange", "numberRange"],
+  render: RangeField,
+};
+
+/** Every built-in widget: what the automatic filters form draws. */
+export const FILTER_WIDGETS: readonly FilterWidget[] = [
+  textFilterWidget,
+  booleanFilterWidget,
+  selectFilterWidget,
+  multiSelectFilterWidget,
+  checklistFilterWidget,
+  rangeFilterWidget,
+];
+
+/** Props for `FilterFields`. */
+export interface FilterFieldsProps {
+  /** The resolved filter definitions, in render order. */
+  readonly defs: readonly FilterDef<unknown>[];
+  /** The resolved table source (filter bag + setters). */
+  readonly source: FilterFormSource<unknown>;
+  /** Resolved labels for every control. */
+  readonly labels: Required<TableLabels>;
+  /** Base UI accent color for option checkboxes. */
+  readonly accentColor?: BaseUiAccentColor;
+  /** Type registry that names each definition's widget. */
+  readonly registry: FilterTypeRegistry;
+  /** The widgets the fields are drawn with. */
+  readonly widgets: readonly FilterWidget[];
+}
+
+/** One field per definition, drawn with the given widgets. */
+export function FilterFields({
+  defs,
+  source,
+  labels,
+  accentColor,
+  registry,
+  widgets,
+}: Readonly<FilterFieldsProps>) {
+  // Every field reads the live source, so a cache would miss on each change.
+  "use no memo";
+  // The kit's own extras ride along; widgets that draw them read them.
+  const field = (def: FilterDef<unknown>): FilterWidgetProps => {
+    const props = { def, source, labels, accentColor };
+    return props;
+  };
+  return (
+    <Flex direction="column" gap="5">
+      {defs.map((def) => (
+        <FilterWidgetField
+          key={def.key}
+          field={field(def)}
+          registry={registry}
+          widgets={widgets}
+        />
+      ))}
+    </Flex>
+  );
 }
 
 /**
@@ -424,21 +494,15 @@ export function AutoFilterForm<TRow>({
   labels,
   registry = defaultFilterRegistry,
 }: Readonly<AutoFilterFormProps<TRow>>) {
-  // Every field reads the live source, so a cache would miss on each change.
   "use no memo";
-  const resolved = resolveTableLabels(labels, FORM_LABELS);
   return (
-    <Flex direction="column" gap="5">
-      {defs.map((def) => (
-        <AutoFilterField
-          key={def.key}
-          def={def}
-          source={source}
-          labels={resolved}
-          accentColor={accentColor}
-          registry={registry}
-        />
-      ))}
-    </Flex>
+    <FilterFields
+      defs={defs}
+      source={source}
+      labels={resolveTableLabels(labels, FORM_LABELS)}
+      accentColor={accentColor}
+      registry={registry}
+      widgets={FILTER_WIDGETS}
+    />
   );
 }

@@ -1088,7 +1088,14 @@
       "UseSavedViewsOptions",
       "useTreeExpansion",
       "virtualize",
-      "VirtualizeOptions"
+      "VirtualizeOptions",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-naive-ui-features": [
       "agentApproval",
@@ -1199,7 +1206,14 @@
       "UseSavedViewsOptions",
       "useTreeExpansion",
       "virtualize",
-      "VirtualizeOptions"
+      "VirtualizeOptions",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-nuxt-ui-features": [
       "agentApproval",
@@ -1331,7 +1345,14 @@
       "UseSavedViewsOptions",
       "useTreeExpansion",
       "virtualize",
-      "VirtualizeOptions"
+      "VirtualizeOptions",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-quasar-features": [
       "agentApproval",
@@ -1432,7 +1453,14 @@
       "useRowReorder",
       "UseSavedViewsOptions",
       "virtualize",
-      "VirtualizeOptions"
+      "VirtualizeOptions",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-vuetify-features": [
       "agentApproval",
@@ -1564,7 +1592,14 @@
       "VuetifyEditableCell",
       "VuetifyFilterField",
       "VuetifyHeaderFilter",
-      "VuetifyRowEditActions"
+      "VuetifyRowEditActions",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-antd": [
       "AgentApproval",
@@ -1795,7 +1830,14 @@
       "contextMenu"
     ],
     "adapter-mui-filters": [
-      "filters"
+      "filters",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-mui-find-in-table": [
       "findInTable"
@@ -5823,7 +5865,14 @@
       "virtualize"
     ],
     "kit/filters": [
-      "filters"
+      "filters",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "kit/find-in-table": [
       "findInTable"
@@ -7086,7 +7135,11 @@
       "useTableChrome",
       "useTableEditHistory",
       "useTableEngine",
-      "useVirtualChromeBodyData"
+      "useVirtualChromeBodyData",
+      "FilterWidget",
+      "FilterWidgetField",
+      "FilterWidgetFieldProps",
+      "FilterWidgetProps"
     ],
     "react-features": [
       "applyTableFeatures",
@@ -9060,7 +9113,9 @@
       "withRowMutationActions",
       "withRowPinActions",
       "writeRangeWidget",
-      "writeStoredColumnLayout"
+      "writeStoredColumnLayout",
+      "filterWidgetFor",
+      "FilterWidgetOf"
     ],
     "core-conformance": [
       "CaseArgs",
@@ -9498,7 +9553,13 @@
       "TableView",
       "TreeCellSlotProps",
       "menuPopover",
-      "placeOverlayBelowTrigger"
+      "placeOverlayBelowTrigger",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-angular-unstyled-assistant": [
       "AGENT_APPROVAL_SLOTS",
@@ -9626,7 +9687,14 @@
     ],
     "adapter-angular-unstyled-filters": [
       "filterTypes",
-      "filters"
+      "filters",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-angular-unstyled-find-in-table": [
       "AdaptFindBar",
@@ -9784,7 +9852,13 @@
       "RowActionsCell",
       "TableView",
       "TreeCellSlotProps",
-      "menuPopover"
+      "menuPopover",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-ng-zorro-assistant": [
       "AGENT_APPROVAL_SLOTS",
@@ -9912,7 +9986,14 @@
     ],
     "adapter-ng-zorro-filters": [
       "filterTypes",
-      "filters"
+      "filters",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-ng-zorro-find-in-table": [
       "AdaptFindBar",
@@ -10072,7 +10153,13 @@
       "TableView",
       "TreeCellSlotProps",
       "menuPopover",
-      "placeOverlayBelowTrigger"
+      "placeOverlayBelowTrigger",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-angular-aria-assistant": [
       "AGENT_APPROVAL_SLOTS",
@@ -10200,7 +10287,14 @@
     ],
     "adapter-angular-aria-filters": [
       "filterTypes",
-      "filters"
+      "filters",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-angular-aria-find-in-table": [
       "AdaptFindBar",
@@ -10362,7 +10456,13 @@
       "TableView",
       "TreeCellSlotProps",
       "menuPopover",
-      "placeOverlayBelowTrigger"
+      "placeOverlayBelowTrigger",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-angular-cdk-assistant": [
       "AGENT_APPROVAL_SLOTS",
@@ -10490,7 +10590,14 @@
     ],
     "adapter-angular-cdk-filters": [
       "filterTypes",
-      "filters"
+      "filters",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-angular-cdk-find-in-table": [
       "AdaptFindBar",
@@ -10648,7 +10755,13 @@
       "RowActionsCell",
       "TableView",
       "TreeCellSlotProps",
-      "menuPopover"
+      "menuPopover",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-material-assistant": [
       "AGENT_APPROVAL_SLOTS",
@@ -10776,7 +10889,14 @@
     ],
     "adapter-material-filters": [
       "filterTypes",
-      "filters"
+      "filters",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-material-find-in-table": [
       "AdaptFindBar",
@@ -10934,7 +11054,13 @@
       "FiltersView",
       "RowActionsCell",
       "TableView",
-      "TreeCellSlotProps"
+      "TreeCellSlotProps",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-ng-bootstrap-assistant": [
       "AGENT_APPROVAL_SLOTS",
@@ -11062,7 +11188,14 @@
     ],
     "adapter-ng-bootstrap-filters": [
       "filterTypes",
-      "filters"
+      "filters",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-ng-bootstrap-find-in-table": [
       "AdaptFindBar",
@@ -11220,7 +11353,13 @@
       "FiltersView",
       "RowActionsCell",
       "TableView",
-      "TreeCellSlotProps"
+      "TreeCellSlotProps",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-ngx-bootstrap-assistant": [
       "AGENT_APPROVAL_SLOTS",
@@ -11348,7 +11487,14 @@
     ],
     "adapter-ngx-bootstrap-filters": [
       "filterTypes",
-      "filters"
+      "filters",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-ngx-bootstrap-find-in-table": [
       "AdaptFindBar",
@@ -11506,7 +11652,13 @@
       "RowActionsCell",
       "TableView",
       "TreeCellSlotProps",
-      "menuPopover"
+      "menuPopover",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-spartan-assistant": [
       "AGENT_APPROVAL_SLOTS",
@@ -11634,7 +11786,14 @@
     ],
     "adapter-spartan-filters": [
       "filterTypes",
-      "filters"
+      "filters",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-spartan-find-in-table": [
       "AdaptFindBar",
@@ -11796,7 +11955,13 @@
       "TreeCellSlotProps",
       "menuPopover",
       "placeOverlayBelowTrigger",
-      "provideAdaptTaiga"
+      "provideAdaptTaiga",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-taiga-ui-assistant": [
       "AGENT_APPROVAL_SLOTS",
@@ -11924,7 +12089,14 @@
     ],
     "adapter-taiga-ui-filters": [
       "filterTypes",
-      "filters"
+      "filters",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-taiga-ui-find-in-table": [
       "AdaptFindBar",
@@ -12905,7 +13077,21 @@
       "useLocaleLabels",
       "withKitEnvironment",
       "scheduleTick",
-      "withProps"
+      "withProps",
+      "AdapterFiltersFeature",
+      "booleanFieldPart",
+      "FILTER_FIELD_PARTS",
+      "FilterFieldDraft",
+      "FilterFieldPart",
+      "FilterOptionsState",
+      "FiltersOptions",
+      "FilterWidget",
+      "filterWidgetComponent",
+      "multiSelectFieldPart",
+      "rangeFieldPart",
+      "selectFieldPart",
+      "textFieldPart",
+      "useFilterFieldWith"
     ],
     "adapter-vue-unstyled": [
       "CellContext",
@@ -13092,7 +13278,14 @@
       "FiltersOptions",
       "NativeFilterField",
       "filterTypes",
-      "filters"
+      "filters",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-vue-unstyled-header-filters": [
       "FilterHeaderControl",
@@ -13308,7 +13501,14 @@
       "useRowExpansion",
       "useRowReorder",
       "useTreeExpansion",
-      "virtualize"
+      "virtualize",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-vue-unstyled-assistant": [
       "AgentApproval",
@@ -14126,7 +14326,12 @@
       "coreExportCsv",
       "coreFilters",
       "coreFindInTable",
-      "coreHeaderFilters"
+      "coreHeaderFilters",
+      "AdaptChecklistFilterFieldModel",
+      "AdapterFiltersFeature",
+      "AdaptFilterWidgetFormModel",
+      "FilterWidget",
+      "withFilterWidgets"
     ],
     "adapter-element-plus-batch-editing": [
       "batchEditing",
@@ -14243,7 +14448,14 @@
       "FilterTreeBuilder",
       "FilterTreeBuilderProps",
       "filterTypes",
-      "FilterTypeSpec"
+      "FilterTypeSpec",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-element-plus-find-in-table": [
       "findInTable"
@@ -14532,7 +14744,14 @@
       "FilterTreeBuilderProps",
       "filterTypes",
       "FilterTypeSpec",
-      "NaiveFilterField"
+      "NaiveFilterField",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-naive-ui-find-in-table": [
       "findInTable"
@@ -14819,7 +15038,14 @@
       "FilterTreeBuilderProps",
       "filterTypes",
       "FilterTypeSpec",
-      "NuxtFilterField"
+      "NuxtFilterField",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-nuxt-ui-find-in-table": [
       "findInTable"
@@ -15092,7 +15318,14 @@
       "FilterTreeBuilderProps",
       "filterTypes",
       "FilterTypeSpec",
-      "QuasarFilterField"
+      "QuasarFilterField",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-quasar-find-in-table": [
       "FindBar",
@@ -15478,7 +15711,14 @@
       "useRowReorder",
       "UseSavedViewsOptions",
       "virtualize",
-      "VirtualizeOptions"
+      "VirtualizeOptions",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-reka-ui-filters": [
       "ChecklistFilter",
@@ -15491,7 +15731,14 @@
       "FilterTreeBuilder",
       "FilterTreeBuilderProps",
       "filterTypes",
-      "FilterTypeSpec"
+      "FilterTypeSpec",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-reka-ui-find-in-table": [
       "findInTable"
@@ -15896,7 +16143,14 @@
       "UseSavedViewsOptions",
       "useTreeExpansion",
       "virtualize",
-      "VirtualizeOptions"
+      "VirtualizeOptions",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-shadcn-vue-filters": [
       "BasicFilterField",
@@ -15915,7 +16169,14 @@
       "FilterTree",
       "FilterTreeBuilderProps",
       "filterTypes",
-      "FilterTypeSpec"
+      "FilterTypeSpec",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-shadcn-vue-find-in-table": [
       "findInTable"
@@ -16195,7 +16456,14 @@
       "FilterTreeBuilderProps",
       "filterTypes",
       "FilterTypeSpec",
-      "VuetifyFilterField"
+      "VuetifyFilterField",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
     ],
     "adapter-vuetify-find-in-table": [
       "findInTable"

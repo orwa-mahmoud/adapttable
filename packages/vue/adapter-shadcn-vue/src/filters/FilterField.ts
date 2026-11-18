@@ -14,7 +14,7 @@ import { ChecklistFilter } from "./ChecklistFilter";
 
 // The header field model already supplies a lifetime-guarded custom renderer.
 // Reuse that binding-owned path rather than calling user renderers with raw state.
-const CustomField = defineComponent(
+export const CustomField = defineComponent(
   (props: BasicFilterFieldProps<unknown>) => {
     const model = useFilterHeaderControl(() => props);
     return () => (model.value?.kind === "custom" ? model.value.content : null);

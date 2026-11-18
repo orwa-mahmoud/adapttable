@@ -16,11 +16,12 @@ import {
   type FilterFormSource,
   filterLabel,
   type FilterTypeRegistry,
-  filterWidgetKind,
+  type FilterWidget,
+  FilterWidgetField,
+  type FilterWidgetProps,
   joinRelativeToken,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
-  renderRegisteredFilter,
   resolveTableLabels,
   splitRelativeToken,
   type TableLabels,
@@ -33,7 +34,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { type ReactElement, type ReactNode, useId } from "react";
+import { type ReactNode, useId } from "react";
 
 import { ChecklistFilter } from "./ChecklistFilter";
 import { FormField, NativeSelect } from "./primitives";
@@ -314,110 +315,176 @@ function BooleanFilterField<TRow>({
   );
 }
 
-/** One definition rendered as its kit-native Chakra control. */
-function AutoFilterField<TRow>({
+function SelectFilterField<TRow>({
   def,
+  source,
+  labels,
+}: Readonly<FilterWidgetProps<TRow>>) {
+  "use no memo";
+  // Static arrays resolve instantly; async loaders run once and report
+  // `loading` so the select shows a native affordance.
+  const { options, loading } = useFilterOptions(def);
+  return (
+    <FormField label={filterLabel(def)} data-adapttable-part="filter-field">
+      <NativeSelect
+        size="sm"
+        data-adapttable-part="filter-select"
+        value={scalarFilterText(source.extra[def.key])}
+        onChange={(e) => source.setExtra(def.key, e.target.value)}
+      >
+        {loading ? (
+          <option value="" disabled>
+            …
+          </option>
+        ) : (
+          <>
+            <option value="">{labels.filterAll}</option>
+            {options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </>
+        )}
+      </NativeSelect>
+    </FormField>
+  );
+}
+
+function MultiSelectFilterField<TRow>({
+  def,
+  source,
+  accentColor,
+}: Readonly<FilterWidgetProps<TRow> & { accentColor?: string }>) {
+  "use no memo";
+  const id = useId();
+  const { options, loading } = useFilterOptions(def);
+  const selected = listFilterValues(source.extra[def.key]);
+  const toggle = (value: string) =>
+    source.setExtra(
+      def.key,
+      selected.includes(value)
+        ? selected.filter((v) => v !== value)
+        : [...selected, value]
+    );
+  return (
+    <GroupField label={filterLabel(def)} id={id}>
+      {loading ? (
+        <Spinner size="xs" />
+      ) : (
+        <HStack
+          gap={2}
+          flexWrap="wrap"
+          align="flex-start"
+          role="group"
+          aria-labelledby={id}
+          maxH={`${CHECKLIST_LIST_HEIGHT}px`}
+          overflowY="auto"
+        >
+          {options.map((option, index) => (
+            <Checkbox.Root
+              key={option.value}
+              id={`${id}-${index}`}
+              size="sm"
+              colorPalette={accentColor}
+              value={option.value}
+              checked={selected.includes(option.value)}
+            >
+              <Checkbox.HiddenInput onClick={() => toggle(option.value)} />
+              <Checkbox.Control />
+              <Checkbox.Label>{option.label}</Checkbox.Label>
+            </Checkbox.Root>
+          ))}
+        </HStack>
+      )}
+    </GroupField>
+  );
+}
+
+/** The Chakra text filter: its operator and its value. @public */
+export const textFilterWidget: FilterWidget = {
+  kinds: ["text"],
+  render: TextFilterField,
+};
+/** The Chakra yes/no filter. @public */
+export const booleanFilterWidget: FilterWidget = {
+  kinds: ["boolean"],
+  render: BooleanFilterField,
+};
+/** The Chakra single-choice filter. @public */
+export const selectFilterWidget: FilterWidget = {
+  kinds: ["select"],
+  render: SelectFilterField,
+};
+/** The Chakra multiple-choice filter. @public */
+export const multiSelectFilterWidget: FilterWidget = {
+  kinds: ["multiSelect"],
+  render: MultiSelectFilterField,
+};
+/** The Chakra searchable checklist filter. @public */
+export const checklistFilterWidget: FilterWidget = {
+  kinds: ["checklist"],
+  render: ChecklistFilter,
+};
+/** The Chakra operator-first number and date range filter. @public */
+export const rangeFilterWidget: FilterWidget = {
+  kinds: ["dateRange", "numberRange"],
+  render: RangeField,
+};
+/** Every built-in widget: what the automatic filters form draws. */
+export const FILTER_WIDGETS: readonly FilterWidget[] = [
+  textFilterWidget,
+  booleanFilterWidget,
+  selectFilterWidget,
+  multiSelectFilterWidget,
+  checklistFilterWidget,
+  rangeFilterWidget,
+];
+
+/** Props for `FilterFields`. */
+export interface FilterFieldsProps {
+  /** The resolved filter definitions, in render order. */
+  readonly defs: readonly FilterDef<unknown>[];
+  /** The filter bag the widgets read from and write to. */
+  readonly source: FilterFormSource<unknown>;
+  /** Resolved labels for every control. */
+  readonly labels: Required<TableLabels>;
+  /** Chakra color scheme for option checkboxes. */
+  readonly accentColor?: string;
+  /** Type registry that names each definition's widget. */
+  readonly registry: FilterTypeRegistry;
+  /** The widgets the fields are drawn with. */
+  readonly widgets: readonly FilterWidget[];
+}
+
+/** One field per definition, drawn with the given widgets. */
+export function FilterFields({
+  defs,
   source,
   labels,
   accentColor,
   registry,
-}: Readonly<{
-  def: FilterDef<TRow>;
-  source: FilterFormSource<TRow>;
-  labels: Required<TableLabels>;
-  accentColor?: string;
-  registry: FilterTypeRegistry;
-}>): ReactElement | null {
+  widgets,
+}: Readonly<FilterFieldsProps>) {
+  // Every field reads the live source, so a cache would miss on each change.
   "use no memo";
-  const id = useId();
-  const { extra, setExtra } = source;
-  const label = filterLabel(def);
-  // Static arrays resolve instantly; async loaders run once and report
-  // `loading` so the select/checkbox controls can show a native affordance.
-  const { options, loading } = useFilterOptions(def);
-  const custom = renderRegisteredFilter(def, source, labels, registry);
-  if (custom) return custom as ReactElement;
-  switch (filterWidgetKind(def, registry)) {
-    case "text":
-      return <TextFilterField def={def} source={source} labels={labels} />;
-    case "boolean":
-      return <BooleanFilterField def={def} source={source} labels={labels} />;
-    case "select":
-      return (
-        <FormField label={label} data-adapttable-part="filter-field">
-          <NativeSelect
-            size="sm"
-            data-adapttable-part="filter-select"
-            value={scalarFilterText(extra[def.key])}
-            onChange={(e) => setExtra(def.key, e.target.value)}
-          >
-            {loading ? (
-              <option value="" disabled>
-                …
-              </option>
-            ) : (
-              <>
-                <option value="">{labels.filterAll}</option>
-                {options.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </>
-            )}
-          </NativeSelect>
-        </FormField>
-      );
-    case "checklist":
-      return <ChecklistFilter def={def} source={source} labels={labels} />;
-    case "multiSelect": {
-      const selected = listFilterValues(extra[def.key]);
-      const toggle = (value: string) =>
-        setExtra(
-          def.key,
-          selected.includes(value)
-            ? selected.filter((v) => v !== value)
-            : [...selected, value]
-        );
-      return (
-        <GroupField label={label} id={id}>
-          {loading ? (
-            <Spinner size="xs" />
-          ) : (
-            <HStack
-              gap={2}
-              flexWrap="wrap"
-              align="flex-start"
-              role="group"
-              aria-labelledby={id}
-              maxH={`${CHECKLIST_LIST_HEIGHT}px`}
-              overflowY="auto"
-            >
-              {options.map((option, index) => (
-                <Checkbox.Root
-                  key={option.value}
-                  id={`${id}-${index}`}
-                  size="sm"
-                  colorPalette={accentColor}
-                  value={option.value}
-                  checked={selected.includes(option.value)}
-                >
-                  <Checkbox.HiddenInput onClick={() => toggle(option.value)} />
-                  <Checkbox.Control />
-                  <Checkbox.Label>{option.label}</Checkbox.Label>
-                </Checkbox.Root>
-              ))}
-            </HStack>
-          )}
-        </GroupField>
-      );
-    }
-    case "dateRange":
-    case "numberRange":
-      return <RangeField def={def} source={source} labels={labels} />;
-    default:
-      return null;
-  }
+  // The kit's own extras ride along; widgets that draw them read them.
+  const field = (def: FilterDef<unknown>): FilterWidgetProps => {
+    const props = { def, source, labels, accentColor };
+    return props;
+  };
+  return (
+    <Stack gap={6}>
+      {defs.map((def) => (
+        <FilterWidgetField
+          key={def.key}
+          field={field(def)}
+          registry={registry}
+          widgets={widgets}
+        />
+      ))}
+    </Stack>
+  );
 }
 
 /**
@@ -435,21 +502,15 @@ export function AutoFilterForm<TRow>({
   labels,
   registry = defaultFilterRegistry,
 }: Readonly<AutoFilterFormProps<TRow>>) {
-  // Every field reads the live source, so a cache would miss on each change.
   "use no memo";
-  const resolved = resolveTableLabels(labels, FORM_LABELS);
   return (
-    <Stack gap={6}>
-      {defs.map((def) => (
-        <AutoFilterField
-          key={def.key}
-          def={def}
-          source={source}
-          labels={resolved}
-          accentColor={accentColor}
-          registry={registry}
-        />
-      ))}
-    </Stack>
+    <FilterFields
+      defs={defs}
+      source={source}
+      labels={resolveTableLabels(labels, FORM_LABELS)}
+      accentColor={accentColor}
+      registry={registry}
+      widgets={FILTER_WIDGETS}
+    />
   );
 }

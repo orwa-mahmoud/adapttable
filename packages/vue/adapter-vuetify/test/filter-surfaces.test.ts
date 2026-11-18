@@ -13,7 +13,12 @@ import { aliases, mdi } from "vuetify/iconsets/mdi-svg";
 import { DataTable } from "../src";
 import VuetifyInput from "../src/controls/VuetifyInput.vue";
 import VuetifySelect from "../src/controls/VuetifySelect.vue";
-import { filters } from "../src/filters";
+import {
+  filters,
+  filtersWith,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "../src/filters";
 import VuetifyFilterDrawer from "../src/filters/VuetifyFilterDrawer.vue";
 import VuetifyFilterPopover from "../src/filters/VuetifyFilterPopover.vue";
 import { headerFilters } from "../src/header-filters";
@@ -461,4 +466,42 @@ it("names a column header's filter panel apart from the toolbar popover", async 
   input.dispatchEvent(new Event("input", { bubbles: true }));
   await settle();
   expect(host.querySelectorAll("tbody [data-row-id]")).toHaveLength(1);
+});
+
+it("draws each field with the widget composed for its kind", async () => {
+  const host = document.createElement("div");
+  document.body.append(host);
+  const composed = filtersWith([textFilterWidget, rangeFilterWidget]);
+  interface Row {
+    id: string;
+    name: string;
+    age: number;
+  }
+  const app = createApp({
+    render: () =>
+      h(DataTable<Row>, {
+        data: [{ id: "a", name: "Ada", age: 36 }],
+        columns: [{ key: "name" }],
+        rowKey: (row: Row) => row.id,
+        urlSync: false,
+        forceMobile: false,
+        features: [
+          composed<Row>([
+            { key: "name", type: "text" },
+            { key: "age", type: "numberRange" },
+          ]),
+        ],
+      }),
+  }).use(vuetify());
+  app.mount(host);
+  cleanups.push(() => {
+    app.unmount();
+    host.remove();
+  });
+  await settle();
+  node<HTMLButtonElement>(host, part("filters-button")).click();
+  await delay();
+  const form = node(document.body, part("filters-form"));
+  expect(form.querySelectorAll(part("filter-field"))).toHaveLength(2);
+  expect(form.querySelectorAll(part("filter-operator"))).toHaveLength(2);
 });

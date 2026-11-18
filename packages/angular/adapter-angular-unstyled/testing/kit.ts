@@ -20,7 +20,13 @@ import {
   exportXlsx,
 } from "@adapttable/angular-unstyled/export";
 import { extraRows } from "@adapttable/angular-unstyled/extra-rows";
-import { filters, filterTypes } from "@adapttable/angular-unstyled/filters";
+import {
+  filters,
+  filtersWith,
+  filterTypes,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/angular-unstyled/filters";
 import { findInTable } from "@adapttable/angular-unstyled/find-in-table";
 import { fullscreen } from "@adapttable/angular-unstyled/fullscreen";
 import { grouping } from "@adapttable/angular-unstyled/grouping";
@@ -112,6 +118,9 @@ export const kit: AngularKitUnderTest = {
     editHistory,
     editing,
     filters,
+    filtersWith,
+    textFilterWidget,
+    rangeFilterWidget,
     grouping,
     nestedTable,
     rowActions,

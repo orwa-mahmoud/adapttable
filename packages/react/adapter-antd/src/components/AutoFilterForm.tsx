@@ -11,17 +11,16 @@ import {
   filterLabel,
   type FilterTypeRegistry,
   type FilterValue,
-  filterWidgetKind,
+  type FilterWidget,
+  FilterWidgetField,
   joinRelativeToken,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
-  renderRegisteredFilter,
   splitRelativeToken,
   type TableLabels,
   type TableSource,
 } from "@adapttable/react/adapter";
 import { Flex, Input, InputNumber, Select, Space, Typography } from "antd";
-import type { ReactElement } from "react";
 
 import { ChecklistFilter } from "./ChecklistFilter";
 
@@ -284,104 +283,138 @@ function BooleanFilterField<TRow>({
   );
 }
 
+/** Props every antd filter widget takes. */
 interface ControlProps<TRow> {
   def: FilterDef<TRow>;
   source: AutoFilterFormProps<TRow>["source"];
   labels: RangeFilterLabels;
-  registry?: FilterTypeRegistry;
 }
 
 /**
- * The kit-native widget for one definition. Every control reads
- * `extra[stateKey]` and writes through `setExtra` / `setExtras`; popup menus
- * stay in the header-filter overlay when one is open, and otherwise portal to
- * `document.body` so a scrolling Filters panel cannot clip them. Empty text
- * or an empty list clears the key (and its URL param).
- *
- * Select/multiSelect choices resolve through `useFilterOptions`, never by
- * mapping `def.options` directly — the source may be an async loader. While
- * one is in flight the select shows a single disabled "…" option and the
- * multi-select shows antd's loading spinner.
+ * Select choices resolve through `useFilterOptions`, never by mapping
+ * `def.options` directly — the source may be an async loader. While one is in
+ * flight the select shows antd's loading state. Popup menus stay in the
+ * header-filter overlay when one is open, and otherwise portal to the body.
  */
-function FilterControl<TRow>({
+function SelectFilterField<TRow>({
   def,
   source,
   labels,
-  registry = defaultFilterRegistry,
-}: Readonly<ControlProps<TRow>>): ReactElement | null {
+}: Readonly<ControlProps<TRow>>) {
+  "use no memo";
+  const { options, loading } = useFilterOptions(def);
+  return (
+    <Select
+      size="small"
+      style={{ width: "100%" }}
+      aria-label={filterLabel(def)}
+      data-adapttable-part="filter-select"
+      value={scalarValue(source.extra[def.key])}
+      loading={loading}
+      getPopupContainer={filterSelectPopupContainer}
+      onChange={(next) => source.setExtra(def.key, next)}
+      options={[
+        { value: "", label: labels.filterAll },
+        ...options.map((option) => ({
+          value: option.value,
+          label: option.label,
+        })),
+      ]}
+    />
+  );
+}
+
+function MultiSelectFilterField<TRow>({
+  def,
+  source,
+}: Readonly<ControlProps<TRow>>) {
   "use no memo";
   const label = filterLabel(def);
   const { options, loading } = useFilterOptions(def);
-  const { extra, setExtra } = source;
-  const custom = renderRegisteredFilter(def, source, labels, registry);
-  if (custom) return custom as ReactElement;
-  switch (filterWidgetKind(def, registry)) {
-    case "text":
-      return <TextFilterField def={def} source={source} labels={labels} />;
-    case "boolean":
-      return <BooleanFilterField def={def} source={source} labels={labels} />;
-    case "select":
-      return (
-        <Select
-          size="small"
-          style={{ width: "100%" }}
-          aria-label={label}
-          data-adapttable-part="filter-select"
-          value={scalarValue(extra[def.key])}
-          loading={loading}
-          getPopupContainer={filterSelectPopupContainer}
-          onChange={(next) => setExtra(def.key, next)}
-          options={[
-            { value: "", label: labels.filterAll },
-            ...options.map((option) => ({
-              value: option.value,
-              label: option.label,
-            })),
-          ]}
-        />
-      );
-    case "checklist":
-      return <ChecklistFilter def={def} source={source} labels={labels} />;
-    case "multiSelect":
-      return (
-        <Select
-          mode="multiple"
-          showSearch={{ optionFilterProp: "label" }}
-          allowClear
-          listHeight={240}
-          aria-label={label}
-          placeholder={label}
-          loading={loading}
-          style={{ width: "100%" }}
-          getPopupContainer={filterSelectPopupContainer}
-          options={options.map((option) => ({
-            label: option.label,
-            value: option.value,
-          }))}
-          value={listValue(extra[def.key])}
-          onChange={(values) => setExtra(def.key, values.map(String))}
-        />
-      );
-    case "dateRange":
-    case "numberRange":
-      return <RangeField def={def} source={source} labels={labels} />;
-    default:
-      return null;
-  }
+  return (
+    <Select
+      mode="multiple"
+      showSearch={{ optionFilterProp: "label" }}
+      allowClear
+      listHeight={240}
+      aria-label={label}
+      placeholder={label}
+      loading={loading}
+      style={{ width: "100%" }}
+      getPopupContainer={filterSelectPopupContainer}
+      options={options.map((option) => ({
+        label: option.label,
+        value: option.value,
+      }))}
+      value={listValue(source.extra[def.key])}
+      onChange={(values) => source.setExtra(def.key, values.map(String))}
+    />
+  );
 }
 
-/**
- * The auto-built filter form for the declarative `filters` array: one
- * labelled antd control per definition, all bound straight to the source's
- * extra-filter bag (so the URL, chips, and — on frontend data — the row
- * predicate react immediately).
- */
-export function AutoFilterForm<TRow>({
+/** The antd text filter: its operator and its value. @public */
+export const textFilterWidget: FilterWidget = {
+  kinds: ["text"],
+  render: TextFilterField,
+};
+/** The antd yes/no filter. @public */
+export const booleanFilterWidget: FilterWidget = {
+  kinds: ["boolean"],
+  render: BooleanFilterField,
+};
+/** The antd single-choice filter. @public */
+export const selectFilterWidget: FilterWidget = {
+  kinds: ["select"],
+  render: SelectFilterField,
+};
+/** The antd multiple-choice filter. @public */
+export const multiSelectFilterWidget: FilterWidget = {
+  kinds: ["multiSelect"],
+  render: MultiSelectFilterField,
+};
+/** The antd searchable checklist filter. @public */
+export const checklistFilterWidget: FilterWidget = {
+  kinds: ["checklist"],
+  render: ChecklistFilter,
+};
+/** The antd operator-first number and date range filter. @public */
+export const rangeFilterWidget: FilterWidget = {
+  kinds: ["dateRange", "numberRange"],
+  render: RangeField,
+};
+
+/** Every built-in widget: what the automatic filters form draws. */
+export const FILTER_WIDGETS: readonly FilterWidget[] = [
+  textFilterWidget,
+  booleanFilterWidget,
+  selectFilterWidget,
+  multiSelectFilterWidget,
+  checklistFilterWidget,
+  rangeFilterWidget,
+];
+
+/** Props for `FilterFields`. */
+export interface FilterFieldsProps {
+  /** The merged, ordered filter definitions from the filter runtime. */
+  readonly defs: readonly FilterDef<unknown>[];
+  /** The source whose `extra` bag the controls read and write. */
+  readonly source: AutoFilterFormProps<unknown>["source"];
+  /** Localized strings for every control. */
+  readonly labels: RangeFilterLabels;
+  /** Type registry that names each definition's widget. */
+  readonly registry: FilterTypeRegistry;
+  /** The widgets the fields are drawn with. */
+  readonly widgets: readonly FilterWidget[];
+}
+
+/** One labelled field per definition, drawn with the given widgets. */
+export function FilterFields({
   defs,
   source,
   labels,
-  registry = defaultFilterRegistry,
-}: Readonly<AutoFilterFormProps<TRow>>) {
+  registry,
+  widgets,
+}: Readonly<FilterFieldsProps>) {
   // Every field reads the live source, so a cache would miss on each change.
   "use no memo";
   return (
@@ -397,14 +430,37 @@ export function AutoFilterForm<TRow>({
           <Typography.Text strong style={{ fontSize: 12 }}>
             {filterLabel(def)}
           </Typography.Text>
-          <FilterControl
-            def={def}
-            source={source}
-            labels={labels}
+          <FilterWidgetField
+            field={{ def, source, labels }}
             registry={registry}
+            widgets={widgets}
           />
         </Space>
       ))}
     </Space>
+  );
+}
+
+/**
+ * The auto-built filter form for the declarative `filters` array: one
+ * labelled antd control per definition, all bound straight to the source's
+ * extra-filter bag (so the URL, chips, and — on frontend data — the row
+ * predicate react immediately).
+ */
+export function AutoFilterForm<TRow>({
+  defs,
+  source,
+  labels,
+  registry = defaultFilterRegistry,
+}: Readonly<AutoFilterFormProps<TRow>>) {
+  "use no memo";
+  return (
+    <FilterFields
+      defs={defs}
+      source={source}
+      labels={labels}
+      registry={registry}
+      widgets={FILTER_WIDGETS}
+    />
   );
 }

@@ -2,8 +2,10 @@ import type { FilterDef, TableFeature } from "@adapttable/vue";
 import {
   ACTIVE_FILTER_CHIPS,
   type ActiveFilterChipsSlotProps,
+  type AdapterFiltersFeature,
   extendFeature,
   filterViewKey,
+  type FilterWidget,
   slotRender,
   TOOLBAR_EXTRAS,
   useDataTableClassNames,
@@ -13,20 +15,32 @@ import { filters as bindingFilters } from "@adapttable/vue/features";
 import { defineComponent, h, type PropType } from "vue";
 
 import { FilterChips } from "./filters/FilterChips";
-import { FilterPanel } from "./filters/FilterPanel";
+import { WidgetFilterPanel } from "./filters/FilterPanel";
+import { FILTER_WIDGETS } from "./filters/widgets";
 
-function useShadcnFilterPanel() {
+function useShadcnFilterPanel(widgets: readonly FilterWidget[]) {
   const model = useFeatureState(filterViewKey());
   const names = useDataTableClassNames();
   return () =>
     model.value
-      ? h(FilterPanel, { model: model.value, classNames: names.value })
+      ? h(WidgetFilterPanel, {
+          model: model.value,
+          classNames: names.value,
+          widgets,
+        })
       : null;
 }
 
 const PanelFeatureControl = defineComponent({
   name: "ShadcnFilterPanelFeature",
-  setup: useShadcnFilterPanel,
+  props: {
+    /** The widgets the panel draws its fields with. */
+    widgets: {
+      type: Array as PropType<readonly FilterWidget[]>,
+      required: true,
+    },
+  },
+  setup: (props) => useShadcnFilterPanel(props.widgets),
 });
 const ChipsFeatureControl = defineComponent(
   (props: ActiveFilterChipsSlotProps) => {
@@ -48,16 +62,31 @@ const ChipsFeatureControl = defineComponent(
 );
 
 export type FiltersOptions = NonNullable<Parameters<typeof bindingFilters>[1]>;
-/** Full kit-native presentation around the binding-owned filter feature. */
-export function filters<TRow>(
-  defs: readonly FilterDef<TRow>[] = [],
-  options: FiltersOptions = {}
-): TableFeature<TRow> {
-  return extendFeature(bindingFilters(defs, options), [
-    slotRender(TOOLBAR_EXTRAS, () => h(PanelFeatureControl)),
-    slotRender(ACTIVE_FILTER_CHIPS, (props) => h(ChipsFeatureControl, props)),
-  ]);
+/**
+ * Declarative filters whose fields are drawn with only the given widgets, so
+ * the widgets a table never shows stay out of its bundle. A filter whose
+ * widget is missing throws when its field draws.
+ *
+ * @param widgets - The widgets to draw fields with, such as `textFilterWidget`.
+ *
+ * @public
+ */
+export function filtersWith(
+  widgets: readonly FilterWidget[]
+): AdapterFiltersFeature {
+  return <TRow>(
+    defs: readonly FilterDef<TRow>[] = [],
+    options: FiltersOptions = {}
+  ): TableFeature<TRow> =>
+    extendFeature(bindingFilters(defs, options), [
+      slotRender(TOOLBAR_EXTRAS, () => h(PanelFeatureControl, { widgets })),
+      slotRender(ACTIVE_FILTER_CHIPS, (props) => h(ChipsFeatureControl, props)),
+    ]);
 }
+
+/** Full kit-native presentation around the binding-owned filter feature. @public */
+export const filters = /* @__PURE__ */ filtersWith(FILTER_WIDGETS);
+
 export type { BasicFilterFieldProps } from "./filters/BasicFilterField";
 export { BasicFilterField } from "./filters/BasicFilterField";
 export { ChecklistFilter } from "./filters/ChecklistFilter";
@@ -67,7 +96,19 @@ export { FilterField } from "./filters/FilterField";
 export type { FilterPanelProps } from "./filters/FilterPanel";
 export { FilterPanel } from "./filters/FilterPanel";
 export { FilterTree } from "./filters/FilterTree";
+export {
+  booleanFilterWidget,
+  checklistFilterWidget,
+  multiSelectFilterWidget,
+  rangeFilterWidget,
+  selectFilterWidget,
+  textFilterWidget,
+} from "./filters/widgets";
 export type { FilterDef, FilterOption, FilterTypeSpec } from "@adapttable/vue";
+export type {
+  AdapterFiltersFeature,
+  FilterWidget,
+} from "@adapttable/vue/adapter";
 export type {
   ChecklistFilterProps,
   FilterTreeBuilderProps,

@@ -689,6 +689,29 @@ function featureDeltaFixtures() {
   });
 }
 
+/**
+ * Filters composed with only the text widget, on every kit: the fields a
+ * table never draws stay out of its bundle.
+ */
+function composedFiltersFixtures() {
+  return ADAPTERS.map(({ kit, pkg }) => ({
+    name: `${kit} · + text filters`,
+    kind: "composed-filters",
+    kit,
+    pkg,
+    alsoEntryFile: "filters.js",
+    initialKB: 160,
+    totalKB: 160,
+    code: `export { DataTable } from "PKG";\nexport { filtersWith, textFilterWidget } from "ALSO";`,
+    present: [FEATURE_MARKERS.filters, "useTextFilterWidget"],
+    absent: [
+      ...absentExcept([FEATURE_MARKERS.filters]),
+      "useBooleanFilterWidget",
+      "useRangeFilterWidget",
+    ],
+  }));
+}
+
 function combinationFixtures() {
   const { pkg } = adapterOf(DELTA_KIT);
   return [
@@ -809,6 +832,7 @@ const existingFixtures = [
   ...adapterBaseFixtures(),
   ...presetFixtures(),
   ...featureDeltaFixtures(),
+  ...composedFiltersFixtures(),
   ...combinationFixtures(),
   featuresBarrelFixture(),
   nativeEntriesFixture(),

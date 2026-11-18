@@ -48,6 +48,7 @@ import { FiltersFormSlotProps } from '@adapttable/angular/adapter';
 import { FiltersMode } from '@adapttable/angular/adapter';
 import { FiltersView } from '@adapttable/angular/adapter';
 import { FilterTreeSlots } from '@adapttable/angular/adapter';
+import { FilterWidget } from '@adapttable/angular/adapter';
 import { GroupingPanelSlotProps } from '@adapttable/angular/adapter';
 import { GroupingPanelSlots } from '@adapttable/angular/adapter';
 import { GroupMoreButtonSlotProps } from '@adapttable/angular/adapter';
@@ -977,10 +978,16 @@ export { BodyRow }
 export { BodySlot }
 
 // @public
+export const booleanFilterWidget: FilterWidget;
+
+// @public
 export interface CdkPopoverTriggerContext {
     readonly $implicit: () => void;
     readonly open: boolean;
 }
+
+// @public
+export const checklistFilterWidget: FilterWidget;
 
 export { DataTableClassNames }
 
@@ -1003,14 +1010,26 @@ export function menuPopover(elements: {
 }, injector: Injector): MenuPopover;
 
 // @public
+export const multiSelectFilterWidget: FilterWidget;
+
+// @public
 export const OVERLAY_Z = 10050;
 
 // @public
 export function placeOverlayBelowTrigger(overlay: HTMLElement, trigger: HTMLElement, dir: "ltr" | "rtl"): void;
 
+// @public
+export const rangeFilterWidget: FilterWidget;
+
 export { RowActionsCell }
 
+// @public
+export const selectFilterWidget: FilterWidget;
+
 export { TableView }
+
+// @public
+export const textFilterWidget: FilterWidget;
 
 // @public
 export type TreeCellSlotProps = TreeCellProps<unknown, TemplateRef<unknown>>;

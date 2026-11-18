@@ -83,6 +83,9 @@ export interface AngularKitFeatures {
   readonly editHistory: typeof editing.editHistory;
   readonly editing: typeof editing.editing;
   readonly filters: typeof filters.filters;
+  readonly filtersWith: typeof filters.filtersWith;
+  readonly textFilterWidget: typeof filters.textFilterWidget;
+  readonly rangeFilterWidget: typeof filters.rangeFilterWidget;
   readonly grouping: typeof grouping.grouping;
   readonly nestedTable: typeof nestedTable.nestedTable;
   readonly rowActions: typeof rowActions.rowActions;

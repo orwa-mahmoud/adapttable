@@ -18,6 +18,7 @@ import { DataTable } from "../src";
 import { filters } from "../src/filters";
 import { NativeFiltersPanel } from "../src/filters/NativeFiltersPanel";
 import { NativeFilterSurface } from "../src/filters/NativeFilterSurface";
+import { FILTER_WIDGETS } from "../src/filters/widgets";
 import { click, find, mountNative, part, tick } from "./filter-editing-helpers";
 
 const focus = HTMLElement.prototype.focus;
@@ -223,7 +224,7 @@ describe("native dialog close focus", () => {
             );
           });
           provideFeatureState(state);
-          return () => h(NativeFiltersPanel);
+          return () => h(NativeFiltersPanel, { widgets: FILTER_WIDGETS });
         },
       });
       const view = mountNative(() => h(Panel));

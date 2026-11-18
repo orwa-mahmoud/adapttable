@@ -87,6 +87,12 @@ export {
   createAdapterFiltersFeature,
 } from "./adapterFeatures/filters";
 export {
+  type FilterWidget,
+  FilterWidgetField,
+  type FilterWidgetFieldProps,
+  type FilterWidgetProps,
+} from "./adapterFeatures/filterWidgets";
+export {
   type AdapterFindButtonProps,
   findButtonRender,
 } from "./adapterFeatures/findButton";

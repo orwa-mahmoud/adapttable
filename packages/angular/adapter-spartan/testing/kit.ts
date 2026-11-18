@@ -16,7 +16,13 @@ import {
 } from "@adapttable/spartan/editing";
 import { exportCsv, exportPdf, exportXlsx } from "@adapttable/spartan/export";
 import { extraRows } from "@adapttable/spartan/extra-rows";
-import { filters, filterTypes } from "@adapttable/spartan/filters";
+import {
+  filters,
+  filtersWith,
+  filterTypes,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/spartan/filters";
 import { findInTable } from "@adapttable/spartan/find-in-table";
 import { fullscreen } from "@adapttable/spartan/fullscreen";
 import { grouping } from "@adapttable/spartan/grouping";
@@ -108,6 +114,9 @@ export const kit: AngularKitUnderTest = {
     editHistory,
     editing,
     filters,
+    filtersWith,
+    textFilterWidget,
+    rangeFilterWidget,
     grouping,
     nestedTable,
     rowActions,

@@ -2,14 +2,13 @@
 import {
   type DataTableClassNames,
   defaultFilterRegistry,
+  FILTER_FIELD_PARTS,
   type FilterFieldOptions,
-  filterLabel,
   filterWidgetKind,
 } from "@adapttable/vue/adapter";
-import { ElFormItem } from "element-plus";
 
 import ElementBasicFilterField from "./ElementBasicFilterField.vue";
-import { ElementChecklistFilter } from "./ElementChecklistFilter";
+import ElementChecklistField from "./ElementChecklistField.vue";
 
 defineOptions({ name: "ElementFilterField" });
 const props = defineProps<
@@ -18,21 +17,12 @@ const props = defineProps<
 </script>
 
 <template>
-  <ElFormItem
+  <ElementChecklistField
     v-if="
       filterWidgetKind(props.def, props.registry ?? defaultFilterRegistry) ===
       'checklist'
     "
-    :label="filterLabel(props.def)"
-    :class="props.classNames?.filterField"
-    data-adapttable-part="filter-field"
-  >
-    <ElementChecklistFilter
-      :def="props.def"
-      :source="props.source"
-      :labels="props.labels"
-      :class-names="props.classNames"
-    />
-  </ElFormItem>
-  <ElementBasicFilterField v-else v-bind="props" />
+    v-bind="props"
+  />
+  <ElementBasicFilterField v-else v-bind="props" :parts="FILTER_FIELD_PARTS" />
 </template>

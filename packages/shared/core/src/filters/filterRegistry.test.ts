@@ -10,6 +10,7 @@ import {
   filterTypeOps,
   type FilterTypeSpec,
   filterTypeSpec,
+  filterWidgetFor,
   filterWidgetKind,
   withExtendedFilterType,
   withFilterType,
@@ -165,5 +166,51 @@ describe("lookup helpers without a spec", () => {
     expect(filterTypeOps({ type: "text" }, empty)).toEqual(["eq"]);
     expect(filterTypeDefaultOp({ type: "text" }, empty)).toBe("eq");
     expect(filterTypeSpec("text", empty)).toBeUndefined();
+  });
+});
+
+describe("filterWidgetFor", () => {
+  const widgets = [
+    { kinds: ["text"] as const, render: "text field" },
+    { kinds: ["dateRange", "numberRange"] as const, render: "range field" },
+  ];
+
+  it("draws the widget composed for the def's kind", () => {
+    const registry = defaultFilterRegistry;
+    expect(filterWidgetFor({ key: "q", type: "text" }, registry, widgets)).toBe(
+      "text field"
+    );
+    expect(
+      filterWidgetFor({ key: "age", type: "numberRange" }, registry, widgets)
+    ).toBe("range field");
+  });
+
+  it("follows a registered type to the widget it names", () => {
+    const registry = withFilterType(defaultFilterRegistry, SKU);
+    expect(
+      filterWidgetFor({ key: "sku", type: "sku" }, registry, widgets)
+    ).toBe("text field");
+  });
+
+  it("draws nothing for a type that names no widget", () => {
+    expect(
+      filterWidgetFor(
+        { key: "q", type: "text" },
+        emptyFilterRegistry(),
+        widgets
+      )
+    ).toBeUndefined();
+  });
+
+  it("names the filter and the missing widget when none was composed", () => {
+    expect(() =>
+      filterWidgetFor(
+        { key: "status", type: "select" },
+        defaultFilterRegistry,
+        widgets
+      )
+    ).toThrow(
+      'filter "status" of type "select" draws the "select" widget, which this filters feature was not composed with'
+    );
   });
 });

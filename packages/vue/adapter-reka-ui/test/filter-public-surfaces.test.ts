@@ -4,7 +4,14 @@ import { afterEach, expect, it, vi } from "vitest";
 import { computed, createApp, h, nextTick, shallowRef } from "vue";
 
 import { DataTable } from "../src";
-import { ChecklistFilter, filters, FilterTreeBuilder } from "../src/filters";
+import {
+  ChecklistFilter,
+  filters,
+  filtersWith,
+  FilterTreeBuilder,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "../src/filters";
 import { FilterHeaderControl, headerFilters } from "../src/header-filters";
 
 interface Row {
@@ -282,4 +289,28 @@ it("filters the actual table through header popovers, then clears the visible fi
   element<HTMLButtonElement>(part("filters-done")).click();
   await flush();
   expect(document.querySelector(part("filters-popover"))).toBeNull();
+});
+
+it("draws each field with the widget composed for its kind", async () => {
+  const composed = filtersWith([textFilterWidget, rangeFilterWidget]);
+  const host = mount(() =>
+    h(DataTable<Row>, {
+      data: rows,
+      columns: [{ key: "name" }],
+      rowKey: (row: Row) => row.id,
+      urlSync: false,
+      features: [
+        composed<Row>([
+          { key: "name", type: "text" },
+          { key: "amount", type: "numberRange" },
+        ]),
+      ],
+    })
+  );
+  await flush();
+  element<HTMLButtonElement>(part("filters-button"), host).click();
+  await flush();
+  const fields = element(part("filters-form"));
+  expect(fields.querySelectorAll(part("filter-field"))).toHaveLength(2);
+  expect(fields.querySelectorAll(part("filter-operator"))).toHaveLength(2);
 });

@@ -2,19 +2,20 @@ import {
   FilterPanelChrome,
   type FilterPanelSlots,
   filterViewKey,
+  type FilterWidget,
+  filterWidgetComponent,
   mergeVueAttrs,
   useDataTableClassNames,
   useFeatureState,
 } from "@adapttable/vue/adapter";
 import { NIcon } from "naive-ui";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { naiveButton } from "../controls/button";
-import NaiveFilterField from "./NaiveFilterField.vue";
 import { NaiveFilterSurface } from "./NaiveFilterSurface";
 import NaiveFilterTree from "./NaiveFilterTree.vue";
 
-function useNaiveFiltersPanel() {
+function useNaiveFiltersPanel(widgets: readonly FilterWidget[]) {
   const names = useDataTableClassNames();
   const model = useFeatureState(filterViewKey<unknown>());
   const buttonClass = (part: string) => {
@@ -74,7 +75,10 @@ function useNaiveFiltersPanel() {
         button.label
       ),
     Tree: (tree) => h(NaiveFilterTree, { ...tree, classNames: names.value }),
-    Field: (field) => h(NaiveFilterField, { ...field }),
+    Field: (field) =>
+      h(filterWidgetComponent(field.def, field.registry, widgets), {
+        ...field,
+      }),
     Popover: (surface) => h(NaiveFilterSurface, { ...surface, modal: false }),
     Drawer: (surface) => h(NaiveFilterSurface, { ...surface, modal: true }),
   };
@@ -90,5 +94,12 @@ function useNaiveFiltersPanel() {
 
 export const NaiveFiltersPanel = defineComponent({
   name: "NaiveFiltersPanel",
-  setup: useNaiveFiltersPanel,
+  props: {
+    /** The widgets the panel draws its fields with. */
+    widgets: {
+      type: Array as PropType<readonly FilterWidget[]>,
+      required: true,
+    },
+  },
+  setup: (props) => useNaiveFiltersPanel(props.widgets),
 });

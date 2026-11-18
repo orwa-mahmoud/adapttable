@@ -9371,7 +9371,63 @@
       "behavior": ""
     },
     {
+      "export": "booleanFilterWidget",
+      "currentImport": "@adapttable/antd/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/antd/filters",
+      "behavior": ""
+    },
+    {
+      "export": "checklistFilterWidget",
+      "currentImport": "@adapttable/antd/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/antd/filters",
+      "behavior": ""
+    },
+    {
       "export": "filters",
+      "currentImport": "@adapttable/antd/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/antd/filters",
+      "behavior": ""
+    },
+    {
+      "export": "filtersWith",
+      "currentImport": "@adapttable/antd/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/antd/filters",
+      "behavior": ""
+    },
+    {
+      "export": "multiSelectFilterWidget",
+      "currentImport": "@adapttable/antd/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/antd/filters",
+      "behavior": ""
+    },
+    {
+      "export": "rangeFilterWidget",
+      "currentImport": "@adapttable/antd/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/antd/filters",
+      "behavior": ""
+    },
+    {
+      "export": "selectFilterWidget",
+      "currentImport": "@adapttable/antd/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/antd/filters",
+      "behavior": ""
+    },
+    {
+      "export": "textFilterWidget",
       "currentImport": "@adapttable/antd/filters",
       "kind": "value",
       "class": "kit-rendering",
@@ -10571,7 +10627,63 @@
       "behavior": ""
     },
     {
+      "export": "booleanFilterWidget",
+      "currentImport": "@adapttable/base-ui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/base-ui/filters",
+      "behavior": ""
+    },
+    {
+      "export": "checklistFilterWidget",
+      "currentImport": "@adapttable/base-ui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/base-ui/filters",
+      "behavior": ""
+    },
+    {
       "export": "filters",
+      "currentImport": "@adapttable/base-ui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/base-ui/filters",
+      "behavior": ""
+    },
+    {
+      "export": "filtersWith",
+      "currentImport": "@adapttable/base-ui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/base-ui/filters",
+      "behavior": ""
+    },
+    {
+      "export": "multiSelectFilterWidget",
+      "currentImport": "@adapttable/base-ui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/base-ui/filters",
+      "behavior": ""
+    },
+    {
+      "export": "rangeFilterWidget",
+      "currentImport": "@adapttable/base-ui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/base-ui/filters",
+      "behavior": ""
+    },
+    {
+      "export": "selectFilterWidget",
+      "currentImport": "@adapttable/base-ui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/base-ui/filters",
+      "behavior": ""
+    },
+    {
+      "export": "textFilterWidget",
       "currentImport": "@adapttable/base-ui/filters",
       "kind": "value",
       "class": "kit-rendering",
@@ -11779,7 +11891,63 @@
       "behavior": ""
     },
     {
+      "export": "booleanFilterWidget",
+      "currentImport": "@adapttable/chakra/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/chakra/filters",
+      "behavior": ""
+    },
+    {
+      "export": "checklistFilterWidget",
+      "currentImport": "@adapttable/chakra/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/chakra/filters",
+      "behavior": ""
+    },
+    {
       "export": "filters",
+      "currentImport": "@adapttable/chakra/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/chakra/filters",
+      "behavior": ""
+    },
+    {
+      "export": "filtersWith",
+      "currentImport": "@adapttable/chakra/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/chakra/filters",
+      "behavior": ""
+    },
+    {
+      "export": "multiSelectFilterWidget",
+      "currentImport": "@adapttable/chakra/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/chakra/filters",
+      "behavior": ""
+    },
+    {
+      "export": "rangeFilterWidget",
+      "currentImport": "@adapttable/chakra/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/chakra/filters",
+      "behavior": ""
+    },
+    {
+      "export": "selectFilterWidget",
+      "currentImport": "@adapttable/chakra/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/chakra/filters",
+      "behavior": ""
+    },
+    {
+      "export": "textFilterWidget",
       "currentImport": "@adapttable/chakra/filters",
       "kind": "value",
       "class": "kit-rendering",
@@ -19267,7 +19435,23 @@
       "behavior": ""
     },
     {
+      "export": "filterWidgetFor",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "FilterWidgetKind",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "FilterWidgetOf",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -47675,7 +47859,63 @@
       "behavior": ""
     },
     {
+      "export": "booleanFilterWidget",
+      "currentImport": "@adapttable/mantine/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mantine/filters",
+      "behavior": ""
+    },
+    {
+      "export": "checklistFilterWidget",
+      "currentImport": "@adapttable/mantine/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mantine/filters",
+      "behavior": ""
+    },
+    {
       "export": "filters",
+      "currentImport": "@adapttable/mantine/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mantine/filters",
+      "behavior": ""
+    },
+    {
+      "export": "filtersWith",
+      "currentImport": "@adapttable/mantine/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mantine/filters",
+      "behavior": ""
+    },
+    {
+      "export": "multiSelectFilterWidget",
+      "currentImport": "@adapttable/mantine/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mantine/filters",
+      "behavior": ""
+    },
+    {
+      "export": "rangeFilterWidget",
+      "currentImport": "@adapttable/mantine/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mantine/filters",
+      "behavior": ""
+    },
+    {
+      "export": "selectFilterWidget",
+      "currentImport": "@adapttable/mantine/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mantine/filters",
+      "behavior": ""
+    },
+    {
+      "export": "textFilterWidget",
       "currentImport": "@adapttable/mantine/filters",
       "kind": "value",
       "class": "kit-rendering",
@@ -48987,7 +49227,63 @@
       "behavior": ""
     },
     {
+      "export": "booleanFilterWidget",
+      "currentImport": "@adapttable/mui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mui/filters",
+      "behavior": ""
+    },
+    {
+      "export": "checklistFilterWidget",
+      "currentImport": "@adapttable/mui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mui/filters",
+      "behavior": ""
+    },
+    {
       "export": "filters",
+      "currentImport": "@adapttable/mui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mui/filters",
+      "behavior": ""
+    },
+    {
+      "export": "filtersWith",
+      "currentImport": "@adapttable/mui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mui/filters",
+      "behavior": ""
+    },
+    {
+      "export": "multiSelectFilterWidget",
+      "currentImport": "@adapttable/mui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mui/filters",
+      "behavior": ""
+    },
+    {
+      "export": "rangeFilterWidget",
+      "currentImport": "@adapttable/mui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mui/filters",
+      "behavior": ""
+    },
+    {
+      "export": "selectFilterWidget",
+      "currentImport": "@adapttable/mui/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mui/filters",
+      "behavior": ""
+    },
+    {
+      "export": "textFilterWidget",
       "currentImport": "@adapttable/mui/filters",
       "kind": "value",
       "class": "kit-rendering",
@@ -50187,7 +50483,63 @@
       "behavior": ""
     },
     {
+      "export": "booleanFilterWidget",
+      "currentImport": "@adapttable/radix/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/radix/filters",
+      "behavior": ""
+    },
+    {
+      "export": "checklistFilterWidget",
+      "currentImport": "@adapttable/radix/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/radix/filters",
+      "behavior": ""
+    },
+    {
       "export": "filters",
+      "currentImport": "@adapttable/radix/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/radix/filters",
+      "behavior": ""
+    },
+    {
+      "export": "filtersWith",
+      "currentImport": "@adapttable/radix/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/radix/filters",
+      "behavior": ""
+    },
+    {
+      "export": "multiSelectFilterWidget",
+      "currentImport": "@adapttable/radix/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/radix/filters",
+      "behavior": ""
+    },
+    {
+      "export": "rangeFilterWidget",
+      "currentImport": "@adapttable/radix/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/radix/filters",
+      "behavior": ""
+    },
+    {
+      "export": "selectFilterWidget",
+      "currentImport": "@adapttable/radix/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/radix/filters",
+      "behavior": ""
+    },
+    {
+      "export": "textFilterWidget",
       "currentImport": "@adapttable/radix/filters",
       "kind": "value",
       "class": "kit-rendering",
@@ -53388,6 +53740,38 @@
     },
     {
       "export": "FilterTriggerToggle",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "FilterWidget",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "FilterWidgetField",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "FilterWidgetFieldProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "FilterWidgetProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",
@@ -62883,7 +63267,63 @@
       "behavior": ""
     },
     {
+      "export": "booleanFilterWidget",
+      "currentImport": "@adapttable/unstyled/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/unstyled/filters",
+      "behavior": ""
+    },
+    {
+      "export": "checklistFilterWidget",
+      "currentImport": "@adapttable/unstyled/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/unstyled/filters",
+      "behavior": ""
+    },
+    {
       "export": "filters",
+      "currentImport": "@adapttable/unstyled/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/unstyled/filters",
+      "behavior": ""
+    },
+    {
+      "export": "filtersWith",
+      "currentImport": "@adapttable/unstyled/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/unstyled/filters",
+      "behavior": ""
+    },
+    {
+      "export": "multiSelectFilterWidget",
+      "currentImport": "@adapttable/unstyled/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/unstyled/filters",
+      "behavior": ""
+    },
+    {
+      "export": "rangeFilterWidget",
+      "currentImport": "@adapttable/unstyled/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/unstyled/filters",
+      "behavior": ""
+    },
+    {
+      "export": "selectFilterWidget",
+      "currentImport": "@adapttable/unstyled/filters",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/unstyled/filters",
+      "behavior": ""
+    },
+    {
+      "export": "textFilterWidget",
       "currentImport": "@adapttable/unstyled/filters",
       "kind": "value",
       "class": "kit-rendering",

@@ -2,18 +2,19 @@ import {
   FilterPanelChrome,
   type FilterPanelSlots,
   filterViewKey,
+  type FilterWidget,
+  filterWidgetComponent,
   useFeatureState,
 } from "@adapttable/vue/adapter";
 import { ElIcon, ElTag } from "element-plus";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { useClassNames } from "../classNamesContext";
 import { elementButton } from "../controls/button";
-import ElementFilterField from "./ElementFilterField.vue";
 import { ElementFilterSurface } from "./ElementFilterSurface";
 import { ElementFilterTree } from "./ElementFilterTree";
 
-function useElementFiltersPanel() {
+function useElementFiltersPanel(widgets: readonly FilterWidget[]) {
   const names = useClassNames();
   const model = useFeatureState(filterViewKey<unknown>());
   const controls: FilterPanelSlots<unknown> = {
@@ -75,7 +76,10 @@ function useElementFiltersPanel() {
         control.label
       ),
     Field: (field) =>
-      h(ElementFilterField<unknown>, { ...field, classNames: names.value }),
+      h(filterWidgetComponent(field.def, field.registry, widgets), {
+        ...field,
+        classNames: names.value,
+      }),
     Tree: (tree) => h(ElementFilterTree, { ...tree, classNames: names.value }),
     Popover: (surface) => h(ElementFilterSurface, { ...surface, modal: false }),
     Drawer: (surface) =>
@@ -97,5 +101,12 @@ function useElementFiltersPanel() {
 
 export const ElementFiltersPanel = defineComponent({
   name: "ElementFiltersPanel",
-  setup: useElementFiltersPanel,
+  props: {
+    /** The widgets the panel draws its fields with. */
+    widgets: {
+      type: Array as PropType<readonly FilterWidget[]>,
+      required: true,
+    },
+  },
+  setup: (props) => useElementFiltersPanel(props.widgets),
 });

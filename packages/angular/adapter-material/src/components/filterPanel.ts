@@ -15,7 +15,7 @@ import {
 } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 
-import { AdaptAutoFilterForm } from "./autoFilterForm";
+import { AdaptWidgetFilterForm } from "./autoFilterForm";
 import { TREE_SLOTS } from "./filterTreeBuilder";
 import { AdaptMaterialDialog } from "./materialDialog";
 
@@ -29,7 +29,7 @@ import { AdaptMaterialDialog } from "./materialDialog";
  */
 @Component({
   selector: "adapt-filters-form",
-  imports: [AdaptAutoFilterForm, AdaptFilterTreeChrome],
+  imports: [AdaptWidgetFilterForm, AdaptFilterTreeChrome],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let p = props();
@@ -48,7 +48,7 @@ import { AdaptMaterialDialog } from "./materialDialog";
         />
       </div>
       @if (p.showSimpleFields) {
-        <adapt-auto-filter-form
+        <adapt-widget-filter-form
           [defs]="p.defs"
           [source]="p.source"
           [labels]="p.labels"

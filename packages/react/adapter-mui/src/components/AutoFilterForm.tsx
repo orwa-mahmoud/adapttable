@@ -12,11 +12,11 @@ import {
   filterLabel,
   type FilterTypeRegistry,
   type FilterValue,
-  filterWidgetKind,
+  type FilterWidget,
+  FilterWidgetField,
   joinRelativeToken,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
-  renderRegisteredFilter,
   splitRelativeToken,
   type TableLabels,
   type TableSource,
@@ -30,7 +30,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import type { HTMLAttributes, ReactElement, ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 
 import { ChecklistFilter } from "./ChecklistFilter";
 
@@ -392,34 +392,83 @@ function RangeFilter<TRow>({
   );
 }
 
-function FilterField<TRow>({
-  def,
+/** The MUI text filter: its operator and its value. @public */
+export const textFilterWidget: FilterWidget = {
+  kinds: ["text"],
+  render: TextFilter,
+};
+/** The MUI yes/no filter. @public */
+export const booleanFilterWidget: FilterWidget = {
+  kinds: ["boolean"],
+  render: BooleanFilter,
+};
+/** The MUI single-choice filter. @public */
+export const selectFilterWidget: FilterWidget = {
+  kinds: ["select"],
+  render: SelectFilter,
+};
+/** The MUI multiple-choice filter. @public */
+export const multiSelectFilterWidget: FilterWidget = {
+  kinds: ["multiSelect"],
+  render: MultiSelectFilter,
+};
+/** The MUI searchable checklist filter. @public */
+export const checklistFilterWidget: FilterWidget = {
+  kinds: ["checklist"],
+  render: ChecklistFilter,
+};
+/** The MUI operator-first number and date range filter. @public */
+export const rangeFilterWidget: FilterWidget = {
+  kinds: ["dateRange", "numberRange"],
+  render: RangeFilter,
+};
+
+/** Every built-in widget: what the automatic filters form draws. */
+export const FILTER_WIDGETS: readonly FilterWidget[] = [
+  textFilterWidget,
+  booleanFilterWidget,
+  selectFilterWidget,
+  multiSelectFilterWidget,
+  checklistFilterWidget,
+  rangeFilterWidget,
+];
+
+/** Props for `FilterFields`. */
+export interface FilterFieldsProps {
+  /** The resolved declarative definitions, in render order. */
+  readonly defs: readonly FilterDef<unknown>[];
+  /** The filter bag the widgets read from and write to. */
+  readonly source: FilterBag<unknown>;
+  /** Resolved labels for every control. */
+  readonly labels: Required<TableLabels>;
+  /** Type registry that names each definition's widget. */
+  readonly registry: FilterTypeRegistry;
+  /** The widgets the fields are drawn with. */
+  readonly widgets: readonly FilterWidget[];
+}
+
+/** One field per definition, drawn with the given widgets. */
+export function FilterFields({
+  defs,
   source,
   labels,
   registry,
-}: Readonly<
-  LabeledFieldProps<TRow> & { registry: FilterTypeRegistry }
->): ReactElement | null {
+  widgets,
+}: Readonly<FilterFieldsProps>) {
+  // Every field reads the live source, so a cache would miss on each change.
   "use no memo";
-  const custom = renderRegisteredFilter(def, source, labels, registry);
-  if (custom) return custom as ReactElement;
-  switch (filterWidgetKind(def, registry)) {
-    case "text":
-      return <TextFilter def={def} source={source} labels={labels} />;
-    case "boolean":
-      return <BooleanFilter def={def} source={source} labels={labels} />;
-    case "select":
-      return <SelectFilter def={def} source={source} labels={labels} />;
-    case "multiSelect":
-      return <MultiSelectFilter def={def} source={source} />;
-    case "checklist":
-      return <ChecklistFilter def={def} source={source} labels={labels} />;
-    case "dateRange":
-    case "numberRange":
-      return <RangeFilter def={def} source={source} labels={labels} />;
-    default:
-      return null;
-  }
+  return (
+    <Stack spacing={3}>
+      {defs.map((def) => (
+        <FilterWidgetField
+          key={def.key}
+          field={{ def, source, labels }}
+          registry={registry}
+          widgets={widgets}
+        />
+      ))}
+    </Stack>
+  );
 }
 
 /**
@@ -436,19 +485,14 @@ export function AutoFilterForm<TRow>({
   labels,
   registry = defaultFilterRegistry,
 }: Readonly<AutoFilterFormProps<TRow>>) {
-  // Every field reads the live source, so a cache would miss on each change.
   "use no memo";
   return (
-    <Stack spacing={3}>
-      {defs.map((def) => (
-        <FilterField
-          key={def.key}
-          def={def}
-          source={source}
-          labels={labels}
-          registry={registry}
-        />
-      ))}
-    </Stack>
+    <FilterFields
+      defs={defs}
+      source={source}
+      labels={labels}
+      registry={registry}
+      widgets={FILTER_WIDGETS}
+    />
   );
 }

@@ -4,14 +4,39 @@
 
 ```ts
 
-import { AdaptTableFeature } from '@adapttable/angular';
-import { FilterDef } from '@adapttable/angular';
+import { AdapterFiltersFeature } from '@adapttable/angular/adapter';
 import { filterTypes } from '@adapttable/angular/features';
+import { FilterWidget } from '@adapttable/angular/adapter';
+
+export { AdapterFiltersFeature }
 
 // @public
-export function filters<TRow>(defs?: readonly FilterDef<TRow>[]): AdaptTableFeature;
+export const booleanFilterWidget: FilterWidget;
+
+// @public
+export const checklistFilterWidget: FilterWidget;
+
+// @public
+export const filters: AdapterFiltersFeature;
+
+// @public
+export function filtersWith(widgets: readonly FilterWidget[]): AdapterFiltersFeature;
 
 export { filterTypes }
+
+export { FilterWidget }
+
+// @public
+export const multiSelectFilterWidget: FilterWidget;
+
+// @public
+export const rangeFilterWidget: FilterWidget;
+
+// @public
+export const selectFilterWidget: FilterWidget;
+
+// @public
+export const textFilterWidget: FilterWidget;
 
 // (No @packageDocumentation comment for this package)
 
