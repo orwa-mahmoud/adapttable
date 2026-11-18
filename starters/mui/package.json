@@ -8,8 +8,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@adapttable/core": "^3.15.0",
-    "@adapttable/mui": "^3.4.1",
+    "@adapttable/core": "^3.16.0",
+    "@adapttable/mui": "^3.5.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^9.3.1",
