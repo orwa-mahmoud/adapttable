@@ -26,7 +26,7 @@ export { AdaptCommandPaletteButton, AdaptCommandPaletteLive };
  *
  * `button: true` also draws a control among the toolbar's view controls.
  *
- * @param options - `true`, or {@link CommandPaletteOptions}. `button` draws
+ * @param options - `true`, or `CommandPaletteOptions`. `button` draws
  *   the toolbar control. Off by default.
  * @returns The feature.
  *

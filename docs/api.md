@@ -537,6 +537,13 @@ deprecated alias until the next major.
   `setExtras`, `setFilterTree`, `setGroupBy`,
   `setGroupAggregateOverrides`, `initializeGroupBy`, `clearExtras`, `clearAll`). Group keys use
   `groupBy`; overrides use `groupAgg`.
+- `useLocalTableViewState(options?): UseTableUrlStateResult` — the same state
+  and setters held in memory, with no URL code; `UseLocalTableViewStateOptions`
+  takes `defaults`, `numberExtraKeys`, `arrayExtraKeys` and `store`. In Vue the
+  same composable returns the readonly `state` ref.
+- `useLocalFrontendData(options)` — `useFrontendData` over
+  `useLocalTableViewState`: `UseLocalFrontendDataOptions` omits `urlAdapter`,
+  `urlSync` and `urlKey`, and the bundle carries no URL code.
 - `useColumnLayoutUrlState(options?): { layout, onLayoutChange }` —
   URL-persisted column layout (hidden / order / pinned / widths / names).
 - `useColumnLayoutStorageState(options): { layout, onLayoutChange }` — the
@@ -734,6 +741,9 @@ explains which import a program changes. This list is the reference.
   configured by `TableViewStateConfig`: `getSnapshot()`, `subscribe()` and the
   mutators. `TableViewStore` is the store, `TableViewState` its snapshot, and
   `ViewStateSubscription` how a binding listens.
+- `createLocalTableViewStore(config?, options?)` — the same `TableViewStore`
+  held in memory, optionally scoped into the table's store (`options.store`),
+  with no URL adapter and no URL code.
 - `createUrlSliceStore(source, spec, config)` — one debounced URL slice
   (`URL_SLICE_WRITE_DEBOUNCE_MS`) described by a `UrlSliceSpec`, as a
   `UrlSliceStore`. The slices the table ships: `columnLayoutSlice`,
@@ -3734,6 +3744,9 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   options, and `isLoading`, `isFetching`, `error` and `refetch` to show when
   the rows came from a request) and returns a signal of the core
   `TableSource`.
+- `injectLocalFrontendData(options)` is the in-memory tier with its view
+  state in the table's store and no URL code: `LocalFrontendDataOptions` is
+  `FrontendDataOptions` without `urlAdapter`, `urlSync` and `urlKey`.
 - `injectServerData(options)` is the server tier: it takes
   `ServerDataOptions` — the page the host fetched (`rows`, `total`, and
   `loading`, `error`, `nextCursor` as values or signals), what the endpoint
@@ -3771,6 +3784,9 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   `arrayExtraKeys` may be signals the state follows. `ADAPTTABLE_URL_ADAPTER`
   is the injection token that sets the URL adapter every table under an
   injector uses.
+- `injectLocalTableViewState(options)` is the same `TableUrlState` held in
+  memory, configured by `LocalTableViewStateOptions` (`defaults`,
+  `numberExtraKeys`, `arrayExtraKeys`, `injector`).
 - The other pieces of view state keep to the URL the same way:
   `injectColumnLayoutUrlState` (`ColumnLayoutUrlStateOptions`, returning a
   `ColumnLayoutUrlState` with the `layout` signal and `onLayoutChange`),

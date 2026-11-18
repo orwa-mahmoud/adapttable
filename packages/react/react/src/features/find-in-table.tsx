@@ -3,7 +3,7 @@
  *
  * The factory and the hook live together on this entry, so a table that
  * never imports it never carries the find walk. The hook mounts in-tree
- * through {@link FIND_LIVE}.
+ * through `FIND_LIVE`.
  */
 import { type GridCell } from "@adapttable/core";
 import { coreFindInTable, findMatchRow } from "@adapttable/core/binding";

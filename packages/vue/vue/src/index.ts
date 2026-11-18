@@ -133,6 +133,14 @@ export type {
   UseFrontendDataOptions,
 } from "./source/useFrontendData";
 export { useFrontendData } from "./source/useFrontendData";
+export {
+  useLocalFrontendData,
+  type UseLocalFrontendDataOptions,
+} from "./source/useLocalFrontendData";
+export {
+  useLocalTableViewState,
+  type UseLocalTableViewStateOptions,
+} from "./url/useLocalTableViewState";
 /** The full frontend evaluator, for `useFrontendData`'s `createEngine`. */
 export type {
   InfiniteQueryState,

@@ -15,7 +15,7 @@ import type { ApprovalPresentation } from "../types";
 /**
  * Live pending-approval state published by the optional agent feature.
  *
- * Adapters read this and fill {@link AGENT_APPROVAL}. The optional AI
+ * Adapters read this and fill `AGENT_APPROVAL`. The optional AI
  * package stays out of the adapter graph.
  *
  * @public
@@ -31,7 +31,7 @@ export interface AgentApprovalPending {
   /**
    * Proposed writes waiting for a human decision.
    *
-   * Empty when the write names no rows — see {@link operation}.
+   * Empty when the write names no rows — see `operation`.
    */
   readonly proposals: readonly AgentApprovalProposal[];
   /**
@@ -116,7 +116,7 @@ export interface AgentApprovalProposal {
    * Resolved from the table on screen rather than from anything the model
    * was given, so a row the current filter hides still reads correctly for
    * the person approving it. Absent when the table cannot show one — see
-   * {@link beforeUnavailable}, which is how a value nobody could look up is
+   * `beforeUnavailable`, which is how a value nobody could look up is
    * told apart from a cell that is genuinely empty.
    */
   readonly before?: unknown;
@@ -132,13 +132,13 @@ export interface AgentApprovalProposal {
    * The before-value as the column itself writes it.
    *
    * Present only when the column says how its values read. A surface prefers
-   * it over {@link before}: a table showing `$170k` everywhere else must not
+   * it over `before`: a table showing `$170k` everywhere else must not
    * ask the reader to agree to `170`.
    */
   readonly beforeText?: string;
   /** Value after the write. */
   readonly after?: unknown;
-  /** The after-value as the column itself writes it. See {@link beforeText}. */
+  /** The after-value as the column itself writes it. See `beforeText`. */
   readonly afterText?: string;
   /** Reader-facing name for the row, when the table can supply one. */
   readonly rowLabel?: string;

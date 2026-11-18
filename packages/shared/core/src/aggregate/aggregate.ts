@@ -167,7 +167,7 @@ function instantFromIsoString(text: string): number | undefined {
  * Accepts a `Date`, a finite number (including an epoch), a numeric string,
  * or a strict ISO date / datetime / time string. Locale-dependent forms
  * (`"9 Sep 2026"`, `"09/09/2026"`) are invalid and skipped — the same way a
- * non-numeric string is skipped by {@link toAggregateNumber}.
+ * non-numeric string is skipped by `toAggregateNumber`.
  *
  * @param value - The resolved cell value, already through `sortValue` when
  *   the column has one.
@@ -217,18 +217,53 @@ export function toAggregateOrdered(
   return undefined;
 }
 
-/** Numbers only — everything else is not summable, and silently skipped. */
-function numbers(values: readonly AggregateOrderedValue[]): number[] {
-  const out: number[] = [];
-  for (const v of values) {
-    const n = toAggregateNumber(v);
-    if (n !== undefined) out.push(n);
-  }
-  return out;
+/**
+ * One built-in's running state for a single column: it sees each present
+ * value once, in row order, and answers when the rows are done.
+ */
+interface BuiltInFold {
+  step(value: AggregateOrderedValue): void;
+  result(): AggregateOrderedValue | undefined;
+}
+
+/** Sum and count the summable values; anything else is silently skipped. */
+function numericFold(
+  answer: (total: number, count: number) => number | undefined
+): BuiltInFold {
+  let total = 0;
+  let count = 0;
+  return {
+    step(value) {
+      const n = toAggregateNumber(value);
+      if (n === undefined) return;
+      total += n;
+      count += 1;
+    },
+    result: () => answer(total, count),
+  };
+}
+
+/** The first value of lowest or highest rank, as the original value. */
+function extremeFold(which: "min" | "max"): BuiltInFold {
+  let best: { rank: number; result: AggregateOrderedValue } | undefined;
+  return {
+    step(value) {
+      const ordered = toAggregateOrdered(value);
+      if (!ordered) return;
+      if (
+        !best ||
+        (which === "min" ? ordered.rank < best.rank : ordered.rank > best.rank)
+      ) {
+        best = ordered;
+      }
+    },
+    result: () => best?.result,
+  };
 }
 
 /**
- * The built-ins.
+ * The built-ins, each a fold over the present values, so a total never
+ * builds a list of the column's values first.
  *
  * `count` counts rows that have a value, not rows in the group — a column
  * that is blank for half the group reports the half that is filled, which is
@@ -241,34 +276,21 @@ function numbers(values: readonly AggregateOrderedValue[]): number[] {
  * `formatAggregate` receives the winning original rather than a timestamp.
  * Locale-dependent date strings are skipped, not guessed.
  */
-const BUILT_INS: Record<AggregateName, Aggregator> = {
-  sum: (values) => numbers(values).reduce((a, b) => a + b, 0),
-  avg: (values) => {
-    const ns = numbers(values);
-    return ns.length ? ns.reduce((a, b) => a + b, 0) / ns.length : undefined;
+const BUILT_INS: Record<AggregateName, () => BuiltInFold> = {
+  sum: () => numericFold((total) => total),
+  avg: () => numericFold((total, count) => (count ? total / count : undefined)),
+  count: () => {
+    let count = 0;
+    return {
+      step() {
+        count += 1;
+      },
+      result: () => count,
+    };
   },
-  count: (values) => values.length,
-  min: (values) => extreme(values, "min"),
-  max: (values) => extreme(values, "max"),
+  min: () => extremeFold("min"),
+  max: () => extremeFold("max"),
 };
-
-function extreme(
-  values: readonly AggregateOrderedValue[],
-  which: "min" | "max"
-): AggregateOrderedValue | undefined {
-  let best: { rank: number; result: AggregateOrderedValue } | undefined;
-  for (const value of values) {
-    const ordered = toAggregateOrdered(value);
-    if (!ordered) continue;
-    if (
-      !best ||
-      (which === "min" ? ordered.rank < best.rank : ordered.rank > best.rank)
-    ) {
-      best = ordered;
-    }
-  }
-  return best?.result;
-}
 
 /**
  * Every built-in aggregate name, for a UI that offers a choice.
@@ -282,11 +304,6 @@ export const AGGREGATE_NAMES = /* @__PURE__ */ Object.keys(
 /** Whether an id is one of the built-in names. */
 function isAggregateName(id: string): id is AggregateName {
   return (AGGREGATE_NAMES as readonly string[]).includes(id);
-}
-
-/** The built-in behind a name, or `undefined` for any other id. */
-function builtInAggregator(name: string): Aggregator | undefined {
-  return isAggregateName(name) ? BUILT_INS[name] : undefined;
 }
 
 /**
@@ -308,6 +325,65 @@ export function resolveAggregateValue<TRow>(
     ? column.sortValue(row)
     : (getPath(row, key) as AggregateOrderedValue);
   return value;
+}
+
+/** A built-in's answer for one column, folding the rows directly. */
+function folded<TRow>(
+  fold: BuiltInFold,
+  rows: readonly TRow[],
+  key: string,
+  column: ColumnMetadata<TRow> | undefined
+): DisplayValue | undefined {
+  for (const row of rows) {
+    const value = resolveAggregateValue(row, key, column);
+    // A missing value is not a zero: the fold sees only what is really there.
+    if (value !== undefined && value !== null) fold.step(value);
+  }
+  return fold.result();
+}
+
+/** How one column is computed from the rows it is handed. */
+type ColumnOperation<TRow> = (
+  rows: readonly TRow[],
+  key: string,
+  column: ColumnMetadata<TRow> | undefined
+) => DisplayValue | undefined;
+
+/**
+ * The operation a declaration names: a built-in folds the rows directly, a
+ * registered or passed aggregator receives the present values as a list,
+ * and an id that names nothing leaves the column out.
+ */
+function columnOperation<TRow>(
+  fn: AggregateOperationId | Aggregator,
+  boundHost: FeatureHostState | undefined
+): ColumnOperation<TRow> | undefined {
+  if (typeof fn === "string" && isAggregateName(fn)) {
+    return (rows, key, column) => folded(BUILT_INS[fn](), rows, key, column);
+  }
+  const aggregator =
+    typeof fn === "string"
+      ? (boundHost ?? currentFeatureHost())?.aggregators.get(fn)
+      : fn;
+  if (typeof aggregator !== "function") return undefined;
+  return (rows, key, column) => collected(aggregator, rows, key, column);
+}
+
+/** A custom aggregator's input: the present values, in row order. */
+function collected<TRow>(
+  aggregator: Aggregator,
+  rows: readonly TRow[],
+  key: string,
+  column: ColumnMetadata<TRow> | undefined
+): DisplayValue | undefined {
+  const values: AggregateOrderedValue[] = [];
+  for (const row of rows) {
+    const value = resolveAggregateValue(row, key, column);
+    // A missing value is not a zero — skip it and let the aggregator see
+    // only what is really there.
+    if (value !== undefined && value !== null) values.push(value);
+  }
+  return aggregator(values);
 }
 
 /**
@@ -335,20 +411,9 @@ export function aggregate<TRow>(
     const out: Partial<Record<string, DisplayValue>> = {};
     for (const [key, fn] of entries) {
       if (!fn) continue;
-      const aggregator =
-        typeof fn === "string"
-          ? (builtInAggregator(fn) ??
-            (boundHost ?? currentFeatureHost())?.aggregators.get(fn))
-          : fn;
-      if (typeof aggregator !== "function") continue;
-      const values: AggregateOrderedValue[] = [];
-      for (const row of rows) {
-        const value = resolveAggregateValue(row, key, byKey.get(key));
-        // A missing value is not a zero — skip it and let the aggregator see
-        // only what is really there.
-        if (value !== undefined && value !== null) values.push(value);
-      }
-      const result = aggregator(values);
+      const operation = columnOperation(fn, boundHost);
+      if (!operation) continue;
+      const result = operation(rows, key, byKey.get(key));
       out[key] = format ? format(result, key) : result;
     }
     return out;

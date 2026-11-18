@@ -1,5 +1,6 @@
 {
   "root": [
+    "ActionAiOptions",
     "ADAPTTABLE_FEATURES",
     "ADAPTTABLE_FEATURE_STATE",
     "ADAPTTABLE_FIND_STATE",
@@ -109,6 +110,7 @@
     "FooterContext",
     "FromStoreOptions",
     "FrontendDataOptions",
+    "LocalFrontendDataOptions",
     "FullscreenState",
     "GetCellSpan",
     "GridCell",
@@ -221,6 +223,7 @@
     "TableSource",
     "TableUrlState",
     "TableUrlStateOptions",
+    "LocalTableViewStateOptions",
     "TableVirtualization",
     "TableVirtualizationOptions",
     "TextOp",
@@ -271,6 +274,7 @@
     "injectFindShortcut",
     "injectFindWindowScroll",
     "injectFrontendData",
+    "injectLocalFrontendData",
     "injectFullscreen",
     "injectGridFocus",
     "injectGroupCollapse",
@@ -299,6 +303,7 @@
     "injectTableData",
     "injectTableEditHistory",
     "injectTableUrlState",
+    "injectLocalTableViewState",
     "injectTableVirtualization",
     "injectTableVirtualizer",
     "injectTreeExpansion",

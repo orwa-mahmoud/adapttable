@@ -108,11 +108,11 @@ export interface TableEditHistoryProps<TRow> {
  *
  * The returned `onCellEdit` captures the previous value before the host runs
  * and records successful inline commits as one-cell gestures. Batch routes (paste, fill) must NOT go through it —
- * they record themselves through {@link asGesture}, so that two hundred pasted
+ * they record themselves through `asGesture`, so that two hundred pasted
  * cells undo in one press rather than two hundred.
  *
  * @typeParam TRow - The row type.
- * @param props - See {@link TableEditHistoryProps}.
+ * @param props - See `TableEditHistoryProps`.
  * @returns The history state and the commit channel to give the chrome.
  *
  * @public

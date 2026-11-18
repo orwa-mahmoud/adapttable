@@ -63,7 +63,7 @@ export interface ResponseAggregateOpsInput {
 export interface ResponseAggregateOps {
   /**
    * Remember a request's operations before anything can answer it. Safe to
-   * call on every read; the first call also seeds {@link current}.
+   * call on every read; the first call also seeds `current`.
    */
   readonly remember: (
     requestKey: string,
@@ -73,7 +73,7 @@ export interface ResponseAggregateOps {
   readonly current: () => GroupAggregateOps | undefined;
   /**
    * Settle what is displayed from what is known now, once the frame is on
-   * screen. Returns whether {@link current} changed.
+   * screen. Returns whether `current` changed.
    */
   readonly settle: (input: ResponseAggregateOpsInput) => boolean;
 }

@@ -16531,6 +16531,14 @@
       "behavior": ""
     },
     {
+      "export": "createLocalTableViewStore",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "createMenuNavigation",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -58523,6 +58531,14 @@
       "behavior": ""
     },
     {
+      "export": "ActionAiOptions",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
       "export": "ActiveFilterChip",
       "currentImport": "@adapttable/react",
       "kind": "type",
@@ -60612,6 +60628,38 @@
     },
     {
       "export": "UseLazyChildrenOptions",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "useLocalFrontendData",
+      "currentImport": "@adapttable/react",
+      "kind": "value",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "UseLocalFrontendDataOptions",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "useLocalTableViewState",
+      "currentImport": "@adapttable/react",
+      "kind": "value",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "UseLocalTableViewStateOptions",
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",

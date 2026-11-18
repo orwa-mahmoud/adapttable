@@ -1,7 +1,7 @@
 <script setup lang="ts" generic="TRow">
-import type { ChecklistFilterProps } from "@adapttable/core/binding";
 import {
   ChecklistChrome,
+  type ChecklistFilterProps,
   type ChecklistSlots,
   useChecklistModel,
 } from "@adapttable/vue/adapter";
@@ -11,7 +11,17 @@ import { nativeCheckbox } from "../nativeCheckbox";
 
 /** Native controls for the binding-owned searchable, windowed checklist. */
 defineOptions({ name: "NativeChecklistFilter" });
-const props = defineProps<ChecklistFilterProps<TRow>>();
+// Vue's props compiler reads the keys from this literal; each type is the
+// binding's own.
+const props = defineProps<{
+  readonly def: ChecklistFilterProps<TRow>["def"];
+  readonly source: ChecklistFilterProps<TRow>["source"];
+  readonly labels?: Exclude<ChecklistFilterProps<TRow>["labels"], undefined>;
+  readonly classNames?: Exclude<
+    ChecklistFilterProps<TRow>["classNames"],
+    undefined
+  >;
+}>();
 const model = useChecklistModel(() => props);
 const controls: ChecklistSlots<VNodeChild> = {
   Search: (control) =>

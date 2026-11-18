@@ -182,6 +182,28 @@ const CORE_FIXTURES = [
     ],
   },
   {
+    // The same table with its view state in memory: no URL code at all.
+    name: "react · local table",
+    kind: "react",
+    pkg: "react",
+    // 17.4 KiB on 2026-11-17, against 19.7 KiB for the URL-synced table.
+    initialKB: 20,
+    totalKB: 20,
+    code: `export { useLocalFrontendData, useDataTable } from "PKG";`,
+    present: [
+      "useDataTable",
+      "useLocalFrontendData",
+      "createLocalTableViewStore",
+    ],
+    absent: [
+      "defaultLabels",
+      "createTableViewStore",
+      "parseTableUrlState",
+      "updateTableUrlState",
+      "createHistoryAdapter",
+    ],
+  },
+  {
     name: "core · basic table",
     kind: "core",
     pkg: "core",
@@ -285,8 +307,8 @@ const CORE_FIXTURES = [
     // controllers and state machines every binding drives, and the shared
     // behaviours the bindings would otherwise copy. A table bundles only the
     // names it imports, so this row tracks the surface, not a table's cost.
-    initialKB: 106,
-    totalKB: 106,
+    initialKB: 107,
+    totalKB: 107,
     code: `export * from "PKG";`,
     // The engines a named primitive must not carry are real identifiers of
     // the full graph, so their absence there is a finding, not a typo.
@@ -635,10 +657,15 @@ function combinationFixtures() {
   ];
 }
 
-function allFeatureFixture() {
+/**
+ * The table and the kit's features barrel: every feature factory the binding
+ * exports through the kit. It names the factories, not each feature's native
+ * UI, which loads from the feature's own entry.
+ */
+function featuresBarrelFixture() {
   const { pkg } = adapterOf(DELTA_KIT);
   return {
-    name: `${DELTA_KIT} · all features`,
+    name: `${DELTA_KIT} · features barrel`,
     kind: "all-features",
     kit: DELTA_KIT,
     pkg,
@@ -649,6 +676,39 @@ function allFeatureFixture() {
   };
 }
 
+/**
+ * The export ceiling of the kit's native feature entries: the table and a
+ * namespace of every feature entry in the catalog, so each entry keeps its
+ * whole surface and no two entries' names collide. React and the kit's UI
+ * library stay external. It bounds what importing everything costs; it is
+ * not a representative application.
+ */
+function nativeEntriesFixture() {
+  const { pkg } = adapterOf(DELTA_KIT);
+  const subpaths = uniqueFeatureSubpaths();
+  const present = [
+    ...new Set(
+      subpaths.map((subpath) => FEATURE_MARKERS[subpath]).filter(Boolean)
+    ),
+  ];
+  return {
+    name: `${DELTA_KIT} · native feature entries`,
+    kind: "all-features",
+    kit: DELTA_KIT,
+    pkg,
+    alsoFiles: subpaths.map((subpath) => `${subpath}.js`),
+    initialKB: 210,
+    totalKB: 210,
+    code: [
+      `export { DataTable } from "PKG";`,
+      ...subpaths.map(
+        (_, index) => `export * as entry${index} from "ALSO${index}";`
+      ),
+    ].join("\n"),
+    present,
+  };
+}
+
 const existingFixtures = [
   ...CORE_FIXTURES,
   ...REACT_FIXTURES,
@@ -656,7 +716,8 @@ const existingFixtures = [
   ...presetFixtures(),
   ...featureDeltaFixtures(),
   ...combinationFixtures(),
-  allFeatureFixture(),
+  featuresBarrelFixture(),
+  nativeEntriesFixture(),
 ];
 
 /**

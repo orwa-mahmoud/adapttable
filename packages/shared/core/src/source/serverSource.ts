@@ -155,7 +155,7 @@ export interface ServerSource<TRow> {
   /**
    * Read what the table shows for the host's answer and the view. Pure apart
    * from remembering the inputs: nothing is sent until
-   * {@link ServerSource.commit}.
+   * `ServerSource.commit`.
    */
   readonly update: (
     config: ServerSourceConfig<TRow>,
@@ -217,7 +217,7 @@ export interface ServerSourceHandoff {
 /**
  * Create one table's server tier.
  *
- * @returns The source; call {@link ServerSource.update} before the rest.
+ * @returns The source; call `ServerSource.update` before the rest.
  *
  * @public
  */

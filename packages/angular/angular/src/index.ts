@@ -250,6 +250,10 @@ export {
   injectFrontendData,
 } from "./source/frontendData";
 export {
+  injectLocalFrontendData,
+  type LocalFrontendDataOptions,
+} from "./source/localFrontendData";
+export {
   type InfiniteQuerySignals,
   injectQuerySource,
   type QuerySourceOptions,
@@ -304,6 +308,10 @@ export {
   injectGroupCollapseUrlState,
 } from "./url/groupCollapseUrlState";
 export {
+  injectLocalTableViewState,
+  type LocalTableViewStateOptions,
+} from "./url/localTableViewState";
+export {
   injectRowPinningUrlState,
   type RowPinningUrlState,
 } from "./url/rowPinningUrlState";
@@ -339,6 +347,7 @@ export {
   type TableVirtualizationOptions,
 } from "./virtual/tableVirtualization";
 export {
+  type ActionAiOptions,
   type ActiveFilterChip,
   type AgentApprovalDecision,
   type AgentApprovalOperation,

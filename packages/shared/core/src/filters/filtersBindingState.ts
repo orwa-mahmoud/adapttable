@@ -7,7 +7,7 @@ import type { ChecklistValue } from "../contracts/query";
 import type { ChecklistWindow } from "./checklistModel";
 
 /**
- * Kit-agnostic state behind {@link useChecklistFilter}.
+ * Kit-agnostic state behind `useChecklistFilter`.
  *
  * @public
  */
@@ -34,7 +34,7 @@ export interface ChecklistFilterState {
   toggle: (value: string, on: boolean) => void;
 }
 
-/** What {@link useChecklistWindow} hands the layout. */
+/** What `useChecklistWindow` hands the layout. */
 export interface ChecklistWindowState extends ChecklistWindow {
   /** Attach to the scrolling list element. */
   ref: (element: HTMLDivElement | null) => void;

@@ -282,7 +282,7 @@ export interface FeatureProps<TRow> {
   /**
    * Glyphs for the row-mode controls. Omit for each kit's own pencil, check
    * and cross, named by `labels.editRow`, `labels.saveRow` and
-   * `labels.cancel`. See {@link RowEditIcons}.
+   * `labels.cancel`. See `RowEditIcons`.
    */
   rowEditIcons?: RowEditIcons;
   /**

@@ -336,6 +336,13 @@ memory adapter from the request and supply matching state during hydration.
 the neutral store signatures. It omits subscription/configuration methods.
 Actions remain stable when the options or namespace changes; after scope
 disposal they no longer mutate state. Install the native filter/grouping features to add their controls.
+`useLocalFrontendData(input: MaybeRefOrGetter<UseLocalFrontendDataOptions<TRow>>)`
+is `useFrontendData` with its view state in the table's store and no URL code:
+`UseLocalFrontendDataOptions` omits `urlAdapter`, `urlSync` and `urlKey`.
+`useLocalTableViewState(input?: MaybeRefOrGetter<UseLocalTableViewStateOptions>)`
+returns the same `UseTableUrlStateResult` from memory; its options are
+`defaults`, `numberExtraKeys`, `arrayExtraKeys` and `store`.
+
 [Additional slices and Saved Views](./saved-views.md#what-a-view-restores) document
 density, pins, explicit group collapse and the state that is not captured.
 

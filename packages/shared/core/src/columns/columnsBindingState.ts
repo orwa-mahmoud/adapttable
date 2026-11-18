@@ -6,7 +6,7 @@
 import type { ColumnLayoutState } from "./columnLayoutModel";
 
 /**
- * State + change handler returned by {@link useColumnLayoutStorageState}.
+ * State + change handler returned by `useColumnLayoutStorageState`.
  *
  * @public
  */

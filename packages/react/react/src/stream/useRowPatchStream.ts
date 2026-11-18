@@ -54,7 +54,7 @@ export interface UseRowPatchStreamOptions<TRow> {
    */
   onPatch: (update: (rows: readonly TRow[]) => readonly TRow[]) => void;
   /**
-   * Turn a frame into patches. Defaults to {@link parseRowPatchFrame}, which
+   * Turn a frame into patches. Defaults to `parseRowPatchFrame`, which
    * reads the table's own patch shape as JSON. Supply this when the server
    * speaks something else.
    */

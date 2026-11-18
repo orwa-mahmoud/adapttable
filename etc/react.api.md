@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ActionAiOptions } from '@adapttable/core';
 import { ActiveFilterChip } from '@adapttable/core';
 import { AggregateFormatContext } from '@adapttable/core';
 import { AggregateOptions } from '@adapttable/core';
@@ -248,6 +249,8 @@ import { UseTableUrlStateResult } from '@adapttable/core/binding';
 import { ValidationCheckResult } from '@adapttable/core';
 import { ValidationTarget } from '@adapttable/core';
 import { withKitEnvironment } from '@adapttable/core/binding';
+
+export { ActionAiOptions }
 
 export { ActiveFilterChip }
 
@@ -1598,6 +1601,18 @@ export interface UseLazyChildrenOptions<TRow> {
     onLoadChildren?: (row: TRow) => void | Promise<void>;
     onLoadFailed?: (row: TRow, id: string) => void;
 }
+
+// @public
+export function useLocalFrontendData<TRow>(options: UseLocalFrontendDataOptions<TRow>): TableSource<TRow>;
+
+// @public
+export type UseLocalFrontendDataOptions<TRow> = Omit<UseFrontendDataOptions<TRow>, "urlAdapter" | "urlSync" | "urlKey">;
+
+// @public
+export function useLocalTableViewState(options?: UseLocalTableViewStateOptions): UseTableUrlStateResult;
+
+// @public
+export type UseLocalTableViewStateOptions = Pick<UseTableUrlStateOptions, "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "store">;
 
 // @public
 export function useMediaQuery(query: string, defaultValue?: boolean): boolean;

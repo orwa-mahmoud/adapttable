@@ -35,7 +35,7 @@ class AdaptZorroTableHost {
 
 /**
  * The desktop table body. Layout, rows and part names come from
- * {@link AdaptDesktopStructure}; this kit fills the slots with its own elements.
+ * `AdaptDesktopStructure`; this kit fills the slots with its own elements.
  *
  * @internal
  */

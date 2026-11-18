@@ -13,16 +13,13 @@
  * table changed when it did not.
  */
 import type { AgentManifest } from "@adapttable/ai";
-import {
-  createNeutralTable,
-  createTableEngine,
-  type NeutralTable,
-} from "@adapttable/core";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   act,
   mountRuntime,
+  type NeutralTable,
+  realTable,
   testAgent as tableAgent,
   waitFor,
 } from "./tableAgent.fixture";
@@ -37,16 +34,13 @@ const ROWS: Row[] = [
   { id: "2", name: "Grace" },
 ];
 
+const tables: { destroy: () => void }[] = [];
+afterEach(() => tables.splice(0).forEach((table) => table.destroy()));
+
 function makeTable() {
-  const engine = createTableEngine<Row>({
-    data: ROWS,
-    columns: [{ key: "name", header: "Name", sortable: true }],
-    rowKey: (row) => row.id,
-  });
-  return {
-    engine,
-    neutral: createNeutralTable(engine, "sync"),
-  };
+  const table = realTable(ROWS);
+  tables.push(table);
+  return table;
 }
 
 function options(neutral: NeutralTable<Row>, published: AgentManifest[]) {
@@ -69,7 +63,8 @@ function options(neutral: NeutralTable<Row>, published: AgentManifest[]) {
 
 describe("the agent provider follows the table", () => {
   it("catches a revision that moved before the subscription attached", async () => {
-    const { engine, neutral } = makeTable();
+    const table = makeTable();
+    const { neutral } = table;
     const published: AgentManifest[] = [];
 
     // The table moves while Angular is still rendering the tree that will
@@ -80,7 +75,7 @@ describe("the agent provider follows the table", () => {
         axes: Parameters<typeof original>[0],
         listener: Parameters<typeof original>[1]
       ) => {
-        engine.dispatch({ type: "setSearch", search: "ada" });
+        table.searchNow("ada");
         return original(axes, listener);
       }
     );
@@ -100,19 +95,21 @@ describe("the agent provider follows the table", () => {
   });
 
   it("republishes when the table moves after mount", async () => {
-    const { engine, neutral } = makeTable();
+    const table = makeTable();
     const published: AgentManifest[] = [];
-    mountRuntime(options(neutral, published));
+    mountRuntime(options(table.neutral, published));
     await waitFor(() => {
       expect(published.length).toBeGreaterThan(0);
     });
     const before = published.length;
 
     await act(async () => {
-      engine.dispatch({ type: "setSearch", search: "grace" });
+      table.search("grace");
       await Promise.resolve();
     });
-    expect(published.length).toBeGreaterThan(before);
+    await waitFor(() => {
+      expect(published.length).toBeGreaterThan(before);
+    });
   });
 
   it("publishes nothing when a rerender changes nothing", async () => {
@@ -144,19 +141,19 @@ describe("Angular revision subscriptions", () => {
     mounted.rerender(options(second.neutral, published));
     expect(secondSubscribe).toHaveBeenCalledOnce();
     const before = published.length;
-    first.engine.dispatch({ type: "setSearch", search: "detached" });
+    first.searchNow("detached");
     expect(published).toHaveLength(before);
-    second.engine.dispatch({ type: "setSearch", search: "grace" });
+    second.searchNow("grace");
     await waitFor(() => expect(published.length).toBeGreaterThan(before));
   });
 
   it("releases the engine subscription on destruction", () => {
-    const { engine, neutral } = makeTable();
+    const table = makeTable();
     const published: AgentManifest[] = [];
-    const mounted = mountRuntime(options(neutral, published));
+    const mounted = mountRuntime(options(table.neutral, published));
     const before = published.length;
     mounted.unmount();
-    engine.dispatch({ type: "setSearch", search: "unmounted" });
+    table.searchNow("unmounted");
     expect(published).toHaveLength(before);
   });
 });

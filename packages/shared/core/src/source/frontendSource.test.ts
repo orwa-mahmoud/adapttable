@@ -629,3 +629,76 @@ describe.each([
     expect(ids(source.engine.rows("full"))).toEqual(["b"]);
   });
 });
+
+describe("createFrontendSource — the searchable text changes", () => {
+  interface Person {
+    id: string;
+    first: string;
+    last: string;
+  }
+  const PEOPLE: Person[] = [
+    { id: "1", first: "Ada", last: "Lovelace" },
+    { id: "2", first: "Alan", last: "Turing" },
+    { id: "3", first: "Grace", last: "Hopper" },
+  ];
+  const byFirst = (row: Person): string => row.first;
+  const byLast = (row: Person): string => row.last;
+  const peopleConfig = (
+    getSearchText: (row: Person) => string
+  ): FrontendSourceConfig<Person> => ({
+    data: PEOPLE,
+    columns: [{ key: "first" }, { key: "last" }],
+    paginationMode: "paged",
+    getSearchText,
+  });
+  const engines = [
+    ["full", createTableEngine],
+    ["basic", createBasicTableEngine],
+  ] as const;
+
+  for (const [name, engine] of engines) {
+    for (const [label, before, after] of [
+      ["an unchanged query", "turing", "turing"],
+      ["a query changed in the same update", "ada", "hopper"],
+    ] as const) {
+      it(`${name} engine: switching the field re-reads every row for ${label}`, () => {
+        const source = createFrontendSourceWith<Person>(engine);
+        source.update(peopleConfig(byFirst), { ...VIEW, search: before });
+        source.commit();
+        const frame = source.update(peopleConfig(byLast), {
+          ...VIEW,
+          search: after,
+        });
+        source.commit();
+        const fresh = createFrontendSourceWith<Person>(engine).update(
+          peopleConfig(byLast),
+          { ...VIEW, search: after }
+        );
+        expect(frame.rows.map((row) => row.id)).toEqual(
+          fresh.rows.map((row) => row.id)
+        );
+        expect(frame.total).toBe(fresh.total);
+        expect(frame.allSearchedRows.map((row) => row.id)).toEqual(
+          fresh.allSearchedRows.map((row) => row.id)
+        );
+        expect(frame.total).toBe(1);
+      });
+    }
+
+    it(`${name} engine: an update dropped before commit leaves the next one correct`, () => {
+      const source = createFrontendSourceWith<Person>(engine);
+      source.update(peopleConfig(byFirst), { ...VIEW, search: "turing" });
+      source.commit();
+      // A candidate built with the new field and never committed.
+      source.update(peopleConfig(byLast), { ...VIEW, search: "turing" });
+      source.engine.discardCandidate();
+      const retried = source.update(peopleConfig(byLast), {
+        ...VIEW,
+        search: "turing",
+      });
+      source.commit();
+      expect(retried.rows.map((row) => row.id)).toEqual(["2"]);
+      expect(retried.allSearchedRows.map((row) => row.id)).toEqual(["2"]);
+    });
+  }
+});

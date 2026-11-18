@@ -52,7 +52,7 @@ import {
 import type { Signal, TemplateRef } from "@angular/core";
 
 /**
- * Options for {@link commandPalette}.
+ * Options for `commandPalette`.
  *
  * @public
  */
@@ -79,7 +79,7 @@ export interface CommandPaletteOptions {
 }
 
 /**
- * Options for {@link contextMenu}.
+ * Options for `contextMenu`.
  *
  * @public
  */
@@ -94,7 +94,7 @@ export interface ContextMenuOptions<TRow> {
 }
 
 /**
- * One panel in {@link sidePanel}'s strip.
+ * One panel in `sidePanel`'s strip.
  *
  * @public
  */
@@ -106,7 +106,7 @@ export interface SidePanelPanel extends SidePanelEntry {
 }
 
 /**
- * Options for {@link sidePanel}.
+ * Options for `sidePanel`.
  *
  * @public
  */

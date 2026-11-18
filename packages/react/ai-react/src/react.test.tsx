@@ -4,7 +4,6 @@ import type {
   AgentManifest,
   AgentSession,
 } from "@adapttable/ai";
-import { createNeutralTable, createTableEngine } from "@adapttable/core";
 import {
   AGENT_VIEW_STATE,
   applyTableFeatures,
@@ -13,11 +12,17 @@ import {
   useFeatureState,
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
+import type { ColumnDef } from "@adapttable/unstyled";
 import { act, render, waitFor } from "@testing-library/react";
-import { useLayoutEffect, useRef } from "react";
+import { type ReactNode, useLayoutEffect, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { TABLE_AGENT_STATE, tableAgent } from "./react";
+import {
+  type NeutralTable,
+  type ProbeRow,
+  RealTable,
+} from "./realTable.test-utils";
 
 function Harness({
   features,
@@ -27,74 +32,40 @@ function Harness({
   view?: TableRuntimeView;
 }) {
   const props = applyTableFeatures({ features });
+  const [neutral, setNeutral] = useState<NeutralTable>();
+  const rows = view?.rows as readonly ProbeRow[] | undefined;
+  const needsTable = Boolean(rows?.length && !view?.neutralTable);
   return (
-    <FeatureProviders props={props}>
-      <Publisher view={view} />
-      <Reader />
-    </FeatureProviders>
+    <>
+      {needsTable && rows ? (
+        <RealTable
+          rows={rows}
+          onPublish={(table) => setNeutral(table.neutral)}
+        />
+      ) : null}
+      {/* A frontend table's agent starts once the table has published. */}
+      {needsTable && !neutral ? null : (
+        <FeatureProviders props={props}>
+          <Publisher view={view} neutral={neutral} />
+          <Reader />
+        </FeatureProviders>
+      )}
+    </>
   );
 }
 
-/** Whether a row object carries a `name` field worth declaring a column for. */
-function hasNameField(row: unknown): boolean {
-  return typeof row === "object" && row !== null && "name" in row;
-}
-
-function Publisher({ view }: { view?: TableRuntimeView }) {
-  const engineRef = useRef<ReturnType<typeof createTableEngine> | null>(null);
-  const neutralRef = useRef<ReturnType<typeof createNeutralTable> | null>(null);
-  const bindingRef = useRef<{
-    visibleRows?: () => readonly unknown[];
-    operations?: () => Readonly<Record<string, boolean>>;
-  }>({});
-  const viewRef = useRef(view);
-  viewRef.current = view;
-  bindingRef.current.visibleRows = () =>
-    viewRef.current?.visibleRows ?? viewRef.current?.rows ?? [];
-  bindingRef.current.operations = () => ({
-    setPage: Boolean(viewRef.current?.query?.setPage),
-    setSearch: Boolean(viewRef.current?.query?.setSearch),
-    setSort: Boolean(viewRef.current?.query?.setSort),
-    setLimit: Boolean(viewRef.current?.query?.setLimit),
-    setFilters: Boolean(
-      viewRef.current?.query?.setExtras ?? viewRef.current?.query?.clearExtras
-    ),
-    setGroupBy: Boolean(viewRef.current?.groupingState?.setGroupBy),
-    setSelection: Boolean(viewRef.current?.selection),
-  });
-  const rowsRef = useRef(view?.rows);
-  if (view?.rows?.length && !view.neutralTable) {
-    if (!engineRef.current) {
-      const engine = createTableEngine({
-        data: view.rows as { id: string; name?: string }[],
-        columns: hasNameField(view.rows[0])
-          ? [{ key: "name", header: "Name", sortable: true }]
-          : [],
-        rowKey: (row) => (row as { id: string }).id,
-      });
-      engineRef.current = engine;
-      neutralRef.current = createNeutralTable(
-        engineRef.current,
-        "test",
-        bindingRef.current
-      );
-    }
-  }
-  useLayoutEffect(() => {
-    if (!engineRef.current || !view?.rows || view.neutralTable) return;
-    if (rowsRef.current === view.rows) return;
-    rowsRef.current = view.rows;
-    engineRef.current.invalidate(
-      ["data"],
-      { data: view.rows },
-      { silent: true }
-    );
-  });
+function Publisher({
+  view,
+  neutral,
+}: {
+  view?: TableRuntimeView;
+  neutral?: NeutralTable;
+}) {
   usePublishTableRuntime(view?.visibleRows ?? view?.rows ?? [], undefined, {
     ...view,
     rows: view?.rows ?? [],
     visibleRows: view?.visibleRows ?? view?.rows,
-    neutralTable: view?.neutralTable ?? neutralRef.current ?? undefined,
+    neutralTable: view?.neutralTable ?? neutral,
     getRowId: view?.getRowId ?? ((row) => (row as { id: string }).id),
     rowLabel:
       view?.rowLabel ??
@@ -1591,57 +1562,72 @@ describe("the values a column's author asked to show", () => {
     return null;
   }
 
-  /** A table whose `team` column asks for live values, and whose `name` does not. */
-  function sampledTable(patch: { readonly sample?: boolean } = {}) {
-    const engine = createTableEngine({
-      data: [
-        { id: "1", name: "Ada", team: "Core" },
-        { id: "2", name: "Grace", team: "Platform" },
-        { id: "3", name: "Katherine", team: "Core" },
-      ],
-      columns: [
-        { key: "name", header: "Name" },
-        {
-          key: "team",
-          header: "Team",
-          // The author's opt-in, written where the column is defined. It is
-          // theirs, which is why the agent's own column patch cannot set it.
-          ...(patch.sample === false ? {} : { ai: { sample: true } }),
-        },
-      ],
-      rowKey: (row) => (row as { id: string }).id,
-    });
-    return createNeutralTable(
-      engine as ReturnType<typeof createTableEngine>,
-      "test",
-      {}
-    );
+  const SAMPLED_ROWS = [
+    { id: "1", name: "Ada", team: "Core" },
+    { id: "2", name: "Grace", team: "Platform" },
+    { id: "3", name: "Katherine", team: "Core" },
+  ];
+
+  /** Columns whose `team` asks for live values, and whose `name` does not. */
+  function sampledColumns(sample = true): ColumnDef<ProbeRow>[] {
+    return [
+      { key: "name", header: "Name" },
+      {
+        key: "team",
+        header: "Team",
+        // The author's opt-in, written where the column is defined. It is
+        // theirs, which is why the agent's own column patch cannot set it.
+        ...(sample ? { ai: { sample: true } } : {}),
+      },
+    ];
   }
 
-  function view(neutralTable: ReturnType<typeof createNeutralTable>) {
+  function view(neutralTable: NeutralTable): TableRuntimeView {
     return {
-      rows: [
-        { id: "1", name: "Ada", team: "Core" },
-        { id: "2", name: "Grace", team: "Platform" },
-        { id: "3", name: "Katherine", team: "Core" },
-      ],
+      rows: SAMPLED_ROWS,
       getRowId: (row: unknown) => String((row as { id: string }).id),
       rowLabel: (row: unknown) => String((row as { name: string }).name),
       neutralTable,
-    } as unknown as TableRuntimeView;
+    };
+  }
+
+  /** The agent over a real table whose columns may ask for values. */
+  function Sampled({
+    agent,
+    sample,
+    onNeutral,
+    children,
+  }: {
+    agent: ReturnType<typeof tableAgent>;
+    sample?: boolean;
+    onNeutral?: () => void;
+    children?: ReactNode;
+  }) {
+    const [neutral, setNeutral] = useState<NeutralTable>();
+    return (
+      <>
+        <RealTable
+          rows={SAMPLED_ROWS}
+          columns={sampledColumns(sample)}
+          onPublish={(table) => {
+            setNeutral(table.neutral);
+            onNeutral?.();
+          }}
+        />
+        <FeatureProviders props={applyTableFeatures({ features: [agent] })}>
+          {neutral ? <Publisher view={view(neutral)} /> : null}
+          {children}
+        </FeatureProviders>
+      </>
+    );
   }
 
   it("carries live values for a column that opted in", async () => {
     let seen: { samples?: Record<string, readonly unknown[]> } | undefined;
     render(
-      <FeatureProviders
-        props={applyTableFeatures({
-          features: [tableAgent({ tableId: "one" })],
-        })}
-      >
-        <Publisher view={view(sampledTable())} />
+      <Sampled agent={tableAgent({ tableId: "one" })}>
         <InputsReader onRead={(value) => (seen = value as typeof seen)} />
-      </FeatureProviders>
+      </Sampled>
     );
 
     await waitFor(() => expect(seen?.samples?.team).toBeDefined());
@@ -1656,21 +1642,16 @@ describe("the values a column's author asked to show", () => {
   it("samples nothing for a column the agent may not read", async () => {
     let seen: { samples?: Record<string, readonly unknown[]> } | undefined;
     render(
-      <FeatureProviders
-        props={applyTableFeatures({
-          features: [
-            // Opted in by its author and forbidden by the table. Forbidden
-            // wins: asking to show values cannot widen what the agent reads.
-            tableAgent({
-              tableId: "one",
-              columns: { team: { readable: false } },
-            }),
-          ],
+      <Sampled
+        // Opted in by its author and forbidden by the table. Forbidden
+        // wins: asking to show values cannot widen what the agent reads.
+        agent={tableAgent({
+          tableId: "one",
+          columns: { team: { readable: false } },
         })}
       >
-        <Publisher view={view(sampledTable())} />
         <InputsReader onRead={(value) => (seen = value as typeof seen)} />
-      </FeatureProviders>
+      </Sampled>
     );
 
     await waitFor(() => expect(seen).toBeDefined());
@@ -1681,14 +1662,9 @@ describe("the values a column's author asked to show", () => {
   it("carries nothing when no column asked", async () => {
     let seen: { samples?: Record<string, readonly unknown[]> } | undefined;
     render(
-      <FeatureProviders
-        props={applyTableFeatures({
-          features: [tableAgent({ tableId: "one" })],
-        })}
-      >
-        <Publisher view={view(sampledTable({ sample: false }))} />
+      <Sampled agent={tableAgent({ tableId: "one" })} sample={false}>
         <InputsReader onRead={(value) => (seen = value as typeof seen)} />
-      </FeatureProviders>
+      </Sampled>
     );
 
     await waitFor(() => expect(seen).toBeDefined());
@@ -1697,15 +1673,14 @@ describe("the values a column's author asked to show", () => {
   });
 
   it("abandons a sample that comes back after the table is gone", async () => {
+    let published = false;
     const { unmount } = render(
-      <FeatureProviders
-        props={applyTableFeatures({
-          features: [tableAgent({ tableId: "gone" })],
-        })}
-      >
-        <Publisher view={view(sampledTable())} />
-      </FeatureProviders>
+      <Sampled
+        agent={tableAgent({ tableId: "gone" })}
+        onNeutral={() => (published = true)}
+      />
     );
+    await waitFor(() => expect(published).toBe(true));
     // Leaving the page mid-read must not throw into the next table.
     expect(() => {
       unmount();

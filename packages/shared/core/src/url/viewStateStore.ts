@@ -12,44 +12,27 @@
  * render gets the same object, and a value whose inputs did not change keeps
  * its identity across renders.
  */
-import type {
-  ExtraFilters,
-  FilterValue,
-  SortDirection,
-} from "../contracts/columns";
+import type { ExtraFilters } from "../contracts/columns";
 import type { QueryFilterGroup } from "../contracts/query";
 import {
   type GroupAggregateOverrides,
   parseGroupAggregateOverrides,
   serializeGroupAggregateOverrides,
 } from "../grouping/groupAggregateOverrides";
+import { viewStoreActions } from "../state/localViewStore";
 import {
-  type ActionDefinition,
   createTableStore,
   type StoreWriter,
   type TableStore,
 } from "../state/tableStore";
 import {
-  clearAll,
-  clearExtras,
   configureView,
-  initializeGroupBy,
   replaceOverrides,
   sameSortLevels,
   sameViewConfig,
-  setExtra,
-  setExtras,
-  setFilterTree,
-  setGroupAggregateOverrides,
-  setGroupBy,
-  setLimit,
-  setPage,
-  setSearch,
-  setSort,
   shallowEqual,
   type TableViewState,
   type TableViewStateConfig,
-  toggleSortLevel,
   VIEW_CONFIG,
   VIEW_OVERRIDES,
   VIEW_WRITTEN,
@@ -440,9 +423,6 @@ export function createTableViewStore(
       pull();
       run(...args);
     };
-  /** A mutator that dispatches one action with its one argument. */
-  const run = <TPayload>(action: ActionDefinition<TPayload>) =>
-    act((payload: TPayload) => store.dispatch(action(payload)));
 
   return {
     getSnapshot() {
@@ -507,23 +487,7 @@ export function createTableViewStore(
         else counts.set(ns, remaining);
       };
     },
-    setPage: run(setPage),
-    setLimit: run(setLimit),
-    setSearch: run(setSearch),
-    setSort: act((key: string | undefined, dir?: SortDirection) =>
-      store.dispatch(setSort({ key, dir }))
-    ),
-    setGroupBy: run(setGroupBy),
-    initializeGroupBy: run(initializeGroupBy),
-    setGroupAggregateOverrides: run(setGroupAggregateOverrides),
-    toggleSortLevel: run(toggleSortLevel),
-    setExtra: act((key: string, value: FilterValue) =>
-      store.dispatch(setExtra({ key, value }))
-    ),
-    setExtras: run(setExtras),
-    setFilterTree: run(setFilterTree),
-    clearExtras: run(clearExtras),
-    clearAll: run(clearAll),
+    ...viewStoreActions(store, act),
   };
 }
 

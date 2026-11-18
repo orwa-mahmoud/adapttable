@@ -3,7 +3,7 @@
  *
  * The factory and the TanStack-backed body live together on this entry, so a
  * table that never imports it never carries `@tanstack/react-virtual`. The
- * body mounts in-tree through {@link CHROME_BODY}; the base graph never
+ * body mounts in-tree through `CHROME_BODY`; the base graph never
  * reaches the hooks.
  */
 import { coreVirtualize } from "@adapttable/core/binding";
@@ -39,7 +39,7 @@ export type VirtualizeOptions =
 
 /**
  * The in-tree body that calls TanStack. Mounted only when this feature
- * fills {@link CHROME_BODY}.
+ * fills `CHROME_BODY`.
  */
 function VirtualChromeBody<TRow>({
   chrome,

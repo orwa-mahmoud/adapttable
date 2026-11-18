@@ -75,6 +75,7 @@ export function HistoryLiveGate<TRow>({
   readonly shell: DataTableShellResult<TRow>;
   readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
 }): ReactNode {
+  "use no memo";
   const filled = useFeatureSlotFilled(EDIT_HISTORY_LIVE);
   const apply = (result: HistoryResult<TRow>) => {
     const chromeProps = {
@@ -138,6 +139,7 @@ function FindStage<TRow>({
   live,
   children,
 }: StageProps<TRow>): ReactNode {
+  "use no memo";
   const filled = useFeatureSlotFilled(FIND_LIVE);
   const chrome = shell.chrome;
   const findProps = {
@@ -165,6 +167,7 @@ function CellNavStage<TRow>({
   live,
   children,
 }: StageProps<TRow>): ReactNode {
+  "use no memo";
   const filled = useFeatureSlotFilled(CELL_NAV_LIVE);
   const props = shell.chromeProps;
   const chrome = shell.chrome;
@@ -231,6 +234,7 @@ function ExportStage<TRow>({
   live,
   children,
 }: StageProps<TRow>): ReactNode {
+  "use no memo";
   const filled = useFeatureSlotFilled(EXPORT_LIVE);
   const props = shell.chromeProps;
   const chrome = shell.chrome;
@@ -268,6 +272,7 @@ function FullscreenStage<TRow>({
   live,
   children,
 }: StageProps<TRow>): ReactNode {
+  "use no memo";
   const filled = useFeatureSlotFilled(FULLSCREEN_LIVE);
   // The root exists only once the table has committed. Read from the ref
   // during render it is still null, and the button would do nothing until
@@ -296,6 +301,7 @@ function SelectionStatsStage<TRow>({
   live,
   children,
 }: StageProps<TRow>): ReactNode {
+  "use no memo";
   const filled = useFeatureSlotFilled(SELECTION_STATS_LIVE);
   const statsProps = {
     range: live.gridFocus.range,
@@ -333,6 +339,7 @@ function LiveChain<TRow>({
   live,
   children,
 }: StageProps<TRow> & { readonly index: number }): ReactNode {
+  "use no memo";
   const Stage = LIVE_STAGES[index];
   return Stage === undefined ? (
     children(live)
@@ -361,6 +368,9 @@ export function ShellLiveGate<TRow>({
   readonly shell: DataTableShellResult<TRow>;
   readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
 }): ReactNode {
+  // Every stage rebuilds its props from the shell each render, so its
+  // stages and this gate are left uncompiled: a cache here would never hit.
+  "use no memo";
   const idle: ShellLive<TRow> = {
     find: DISABLED_FIND,
     gridFocus: disabledGridFocus(),
@@ -392,6 +402,7 @@ function PublishLiveOperations<TRow>({
   readonly live: ShellLive<TRow>;
   readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
 }): ReactNode {
+  "use no memo";
   const input = liveShellOperations(shell, live);
   publishShellOverlay(shell.chrome, input);
   const runtime = useTableRuntime<TRow>();

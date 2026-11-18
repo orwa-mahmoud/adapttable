@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ActionAiOptions } from '@adapttable/core';
 import { ActiveFilterChip } from '@adapttable/core';
 import { AgentApprovalDecision } from '@adapttable/core';
 import { AgentApprovalOperation } from '@adapttable/core';
@@ -207,6 +208,8 @@ import { UseColumnLayoutResult } from '@adapttable/core';
 import { UseSavedViewsResult } from '@adapttable/core/binding';
 import { VirtualTableRow } from '@adapttable/core';
 import { WritableSignal } from '@angular/core';
+
+export { ActionAiOptions }
 
 export { ActiveFilterChip }
 
@@ -1165,6 +1168,12 @@ export function injectLazyChildren<TRow>(options: LazyChildrenInjectOptions<TRow
 export function injectLiveEditConflict<TRow>(options: LiveEditConflictOptions<TRow>): Signal<EditConflictState<TRow>>;
 
 // @public
+export function injectLocalFrontendData<TRow>(options: LocalFrontendDataOptions<TRow>): Signal<TableSource<TRow>>;
+
+// @public
+export function injectLocalTableViewState(options?: LocalTableViewStateOptions): TableUrlState;
+
+// @public
 export function injectMediaQuery(query: string, injector?: Injector): Signal<boolean>;
 
 // @public
@@ -1274,6 +1283,12 @@ export interface LiveEditConflictOptions<TRow> extends FromStoreOptions {
     readonly input: MaybeSignal<LiveEditConflictInput<TRow>>;
     readonly row?: Signal<RowEditingState<TRow>>;
 }
+
+// @public
+export type LocalFrontendDataOptions<TRow> = Omit<FrontendDataOptions<TRow>, "urlAdapter" | "urlSync" | "urlKey">;
+
+// @public
+export type LocalTableViewStateOptions = Pick<TableUrlStateOptions, "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "injector">;
 
 // @public
 export type MaybeSignal<T> = T | Signal<T>;

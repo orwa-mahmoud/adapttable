@@ -16,6 +16,7 @@ import { useIsMobile } from "../hooks/useIsMobile";
 import {
   useTableUrlState,
   type UseTableUrlStateOptions,
+  type UseTableUrlStateResult,
 } from "../url/useTableUrlState";
 import {
   type FrameHold,
@@ -50,7 +51,7 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
   /** The source array. Filtered / sorted / sliced internally by state. */
   data: readonly TRow[];
   /**
-   * How a row's id is derived — the same function {@link applyRowPatches}
+   * How a row's id is derived — the same function `applyRowPatches`
    * used. Defaults to `String(row.id)` when the row has an `id`.
    */
   getRowId?: (row: TRow) => string;
@@ -120,7 +121,7 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
 }
 
 /**
- * In-memory {@link TableSource}: reads URL/local state and filters, sorts,
+ * In-memory `TableSource`: reads URL/local state and filters, sorts,
  * and slices a caller-supplied array. The mirror of `useQuerySource` —
  * the table cannot tell which produced it.
  *
@@ -130,12 +131,30 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
  *
  * @typeParam TRow - The row item type.
  * @param options - See {@link UseFrontendDataOptions}.
- * @returns A {@link TableSource} over the in-memory data.
+ * @returns A `TableSource` over the in-memory data.
  *
  * @public
  */
 export function useFrontendData<TRow>(
   options: UseFrontendDataOptions<TRow>
+): TableSource<TRow> {
+  // A pass-through: the compiler's cache would outweigh the call it saves.
+  "use no memo";
+  return useFrontendDataWith(options, useTableUrlState);
+}
+
+/**
+ * The frontend tier over whichever view state `useViewState` holds: the URL
+ * for `useFrontendData`, memory for `useLocalFrontendData`.
+ *
+ * @param options - The data and its view options.
+ * @param useViewState - The hook that holds the page, sort, search and
+ *   filters.
+ * @returns A `TableSource` over the in-memory data.
+ */
+export function useFrontendDataWith<TRow>(
+  options: UseFrontendDataOptions<TRow>,
+  useViewState: (options: UseTableUrlStateOptions) => UseTableUrlStateResult
 ): TableSource<TRow> {
   // The source is created once. An active render, and the first inactive
   // render, apply this render's inputs; a later render of those same inputs
@@ -172,7 +191,7 @@ export function useFrontendData<TRow>(
   const isMobile = forceMobile ?? mediaMobile;
   const resolvedMode = resolvePaginationMode(paginationMode, isMobile);
 
-  const state = useTableUrlState(urlOptions);
+  const state = useViewState(urlOptions);
   const { limit, search, sortBy, sortDir, groupBy } = state;
 
   const [source] = useState<FrontendSource<TRow>>(() =>

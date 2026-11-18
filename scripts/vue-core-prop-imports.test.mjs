@@ -27,39 +27,37 @@ for (const [component, propType] of [
   ["NativeFilterTree.vue", "FilterTreeBuilderProps"],
 ]) {
   const file = `packages/vue/adapter-vue-unstyled/src/filters/${component}`;
-  test(`${component} allows only its canonical prop type`, async () => {
+  test(`${component} takes its prop type from the Vue binding`, async () => {
     assert.deepEqual(
       await restrictedImports(
         file,
-        `import type { ${propType} } from "@adapttable/core/binding";`
+        `import type { ${propType} } from "@adapttable/vue/adapter";`
       ),
       []
     );
     for (const source of [
+      `import type { ${propType} } from "@adapttable/core/binding";`,
       `import { ${propType} } from "@adapttable/core/binding";`,
-      'import { featureSlotKey } from "@adapttable/core/binding";',
-      'import type { FeatureSlotKey } from "@adapttable/core/binding";',
-      'import type * as Neutral from "@adapttable/core/binding";',
       'import type { TableSource } from "@adapttable/core";',
-      'import type { PdfWriterOptions } from "@adapttable/core/pdf";',
-      `import { type ${propType}, featureSlotKey } from "@adapttable/core/binding";`,
     ]) {
       assert.ok((await restrictedImports(file, source)).length > 0, source);
     }
   });
 }
 
-test("the canonical prop exception does not apply to other kit files", async () => {
-  const file =
-    "packages/vue/adapter-vue-unstyled/src/filters/NativeFilterField.vue";
-  for (const propType of ["ChecklistFilterProps", "FilterTreeBuilderProps"]) {
-    assert.ok(
-      (
-        await restrictedImports(
-          file,
-          `import type { ${propType} } from "@adapttable/core/binding";`
-        )
-      ).length > 0
-    );
-  }
+test("an AI binding takes core types from its framework binding", async () => {
+  const results = await eslint.lintText(
+    'import type { ActionAiOptions } from "@adapttable/core";\nexport type A = ActionAiOptions;\n',
+    {
+      filePath: join(
+        REPO_ROOT,
+        "packages/react/ai-react/src/react.approval.test.tsx"
+      ),
+    }
+  );
+  assert.ok(
+    results
+      .flatMap((result) => result.messages)
+      .some((message) => message.ruleId === "no-restricted-imports")
+  );
 });

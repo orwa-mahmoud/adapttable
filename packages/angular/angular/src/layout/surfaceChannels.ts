@@ -74,7 +74,7 @@ export interface SurfaceHandles<TRow> {
   createGrouping(injector: Injector): Signal<unknown> | undefined;
 }
 
-/** Provided by {@link injectTableSurfaceHost} for the mounts it runs. @public */
+/** Provided by `injectTableSurfaceHost` for the mounts it runs. @public */
 export const SURFACE_HANDLES = new InjectionToken<SurfaceHandles<unknown>>(
   "adapttable.surface-handles"
 );

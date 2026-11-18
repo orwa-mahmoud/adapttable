@@ -1980,6 +1980,7 @@ export {
 export { createControllableStore } from "./state/controllableStore";
 export { fillSlot, tableErrorState } from "./state/errorState";
 export { collectFeatureNotices } from "./state/featureNotices";
+export { createLocalTableViewStore } from "./state/localViewStore";
 export {
   groupsCollapsedToDepth,
   headerSelectionOf,

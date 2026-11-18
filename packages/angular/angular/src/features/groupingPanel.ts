@@ -45,7 +45,7 @@ const GROUPING_PANEL_IMPLEMENTATION: GroupingPanelImplementation = {
 
 /**
  * Interactive row grouping: the panel owns the group-by state and groups the
- * rows as `grouping()` does, and a kit fills {@link GROUPING_PANEL} with its
+ * rows as `grouping()` does, and a kit fills `GROUPING_PANEL` with its
  * own strip.
  *
  * The binding ships only the feature's configuration. The unstyled kit (or

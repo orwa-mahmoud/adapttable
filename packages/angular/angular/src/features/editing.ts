@@ -33,7 +33,7 @@ import {
 import { computed } from "@angular/core";
 
 /**
- * Lifecycle observers a host may pass to {@link editing}.
+ * Lifecycle observers a host may pass to `editing`.
  *
  * @public
  */
@@ -97,7 +97,7 @@ function withEditingImplementation(
  *
  * @param onCellEdit - The host's write for a committed edit.
  * @param extras - Optional lifecycle observers merged into the feature patch;
- *   {@link injectCellEditing} reads `onEditStart` / `onEditCancel`, and the
+ *   `injectCellEditing` reads `onEditStart` / `onEditCancel`, and the
  *   editing bundle's lifecycle carries `onEditCommit`.
  * @returns The feature.
  *

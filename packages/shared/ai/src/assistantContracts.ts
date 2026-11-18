@@ -31,7 +31,7 @@ import type { AgentSession, ExecuteResult } from "./types";
 export interface AssistantSuggestion {
   /** Stable id. Survives label and prompt edits, and translation. */
   readonly id: string;
-  /** What the reader sees. Localize this; never localize {@link id}. */
+  /** What the reader sees. Localize this; never localize `id`. */
   readonly title: string;
   /** The request text this sends, as if the reader had typed it. */
   readonly prompt: string;
@@ -238,7 +238,7 @@ export function assertUniqueSuggestions(
 /**
  * One prior exchange, as a transport needs it.
  *
- * Deliberately smaller than {@link AssistantTurn}: a transport carries
+ * Deliberately smaller than `AssistantTurn`: a transport carries
  * history to a backend, and a backend has no use for the proposals and
  * receipts a controller keeps. Handing it the full turn would also drag the
  * whole conversation type closure onto every transport entry point.

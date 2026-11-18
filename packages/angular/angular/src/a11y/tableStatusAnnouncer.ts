@@ -20,6 +20,6 @@ import { AdaptLiveRegion } from "./liveRegion";
   `,
 })
 export class AdaptTableStatusAnnouncer {
-  /** What to announce, from {@link trackTableStatus}. Empty until something changes. */
+  /** What to announce, from `trackTableStatus`. Empty until something changes. */
   readonly announcement = input.required<string>();
 }

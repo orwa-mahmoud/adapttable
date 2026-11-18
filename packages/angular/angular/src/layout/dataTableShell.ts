@@ -649,12 +649,12 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   >();
   /**
    * Pagination mode. Defaults to `"auto"` (phone → infinite). Pass
-   * `"infinite"` with {@link virtualize} so the body windows.
+   * `"infinite"` with `virtualize` so the body windows.
    */
   readonly paginationMode = input<PaginationMode>();
   /**
    * Cap the table body's height; the body scrolls inside the box and a
-   * composed {@link virtualize} tracks the box instead of the page.
+   * composed `virtualize` tracks the box instead of the page.
    */
   readonly maxHeight = input<number | string>();
   /**

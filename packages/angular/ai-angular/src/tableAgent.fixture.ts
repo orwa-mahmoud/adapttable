@@ -2,6 +2,7 @@
 import type { AgentSession } from "@adapttable/ai";
 import {
   type AdaptTableFeature,
+  type ColumnDef,
   createFeatureState,
   type FeatureState,
   injectDataTable,
@@ -10,13 +11,7 @@ import {
   type TableRuntime,
   type TableRuntimeView,
 } from "@adapttable/angular";
-import { AGENT_VIEW_STATE } from "@adapttable/angular/adapter";
-import {
-  createNeutralTable,
-  createTableEngine,
-  type NeutralTable,
-  type TableEngine,
-} from "@adapttable/core";
+import { AGENT_VIEW_STATE, tableRuntimeFor } from "@adapttable/angular/adapter";
 import {
   Component,
   computed,
@@ -49,10 +44,6 @@ export function testAgent(options: TableAgentOptions): LiveFeature {
   return { ...tableAgent(testOptions), testOptions };
 }
 
-function hasNameField(row: unknown): boolean {
-  return typeof row === "object" && row !== null && "name" in row;
-}
-
 function liveFeature(feature: AdaptTableFeature): feature is LiveFeature {
   return "testOptions" in feature;
 }
@@ -66,6 +57,8 @@ export interface RuntimeFixtureOptions<TRow = unknown> {
   /** Match frontend scenarios that publish the engine; false is the server tier. */
   readonly frontend?: boolean;
   readonly replayMount?: boolean;
+  /** The real table's columns. Defaults to one sortable `name` column. */
+  readonly columns?: readonly ColumnDef<TRow>[];
 }
 
 @Component({
@@ -99,7 +92,10 @@ class RuntimeHost<TRow> {
   readonly data = computed(
     () => this.suppliedView?.().rows ?? this.config().view?.rows ?? []
   );
-  readonly columns = [{ key: "name", header: "Name", sortable: true }];
+  readonly columns = computed(
+    (): readonly ColumnDef<TRow>[] =>
+      this.config().columns ?? [{ key: "name", header: "Name", sortable: true }]
+  );
   readonly source = injectFrontendData<TRow>({
     data: this.data,
     columns: this.columns,
@@ -111,9 +107,12 @@ class RuntimeHost<TRow> {
     columns: this.columns,
     rowKey: (row: unknown) => String((row as { id: string }).id),
   });
-  private engine: TableEngine<TRow> | undefined;
-  private neutral: NeutralTable<TRow> | undefined;
-  private previousRows: readonly TRow[] | undefined;
+  /** The real table's own runtime, whose neutral surface frontend scenarios read. */
+  private readonly published = tableRuntimeFor<TRow>(
+    this.table,
+    this.source,
+    []
+  );
   readonly runtime: TableRuntime<TRow> = {
     rowAt: (index) =>
       this.view()?.visibleRows?.[index] ?? this.view()?.rows[index],
@@ -124,44 +123,15 @@ class RuntimeHost<TRow> {
   private readonly view = computed<TableRuntimeView<TRow>>(() => {
     const config = this.config();
     const view = this.suppliedView?.() ?? config.view;
-    if (config.frontend && view?.rows.length && !view.neutralTable) {
-      if (!this.engine) {
-        const first = view.rows[0];
-        this.engine = createTableEngine<TRow>({
-          data: view.rows,
-          columns: hasNameField(first) ? this.columns : [],
-          rowKey: (row: unknown) => String((row as { id: string }).id),
-        });
-        this.neutral = createNeutralTable(this.engine, "test", {
-          visibleRows: () =>
-            this.config().view?.visibleRows ?? this.config().view?.rows ?? [],
-          operations: () => {
-            const current = this.config().view;
-            return {
-              setPage: Boolean(current?.query?.setPage),
-              setLimit: Boolean(current?.query?.setLimit),
-              setSearch: Boolean(current?.query?.setSearch),
-              setSort: Boolean(current?.query?.setSort),
-              setFilters: Boolean(
-                current?.query?.setExtras ?? current?.query?.clearExtras
-              ),
-              setGroupBy: Boolean(current?.groupingState?.setGroupBy),
-              setSelection: Boolean(current?.selection),
-            };
-          },
-        });
-      }
-      if (this.previousRows !== view.rows) {
-        this.previousRows = view.rows;
-        this.engine.invalidate(["data"], { data: view.rows }, { silent: true });
-      }
-    }
+    const neutral =
+      config.frontend && view?.rows.length && !view.neutralTable
+        ? untracked(() => this.published.view()?.neutralTable)
+        : undefined;
     return {
       ...view,
       rows: view?.rows ?? [],
       visibleRows: view?.visibleRows ?? view?.rows,
-      neutralTable:
-        view?.neutralTable ?? (config.frontend ? this.neutral : undefined),
+      neutralTable: view?.neutralTable ?? neutral,
       getRowId:
         view?.getRowId ??
         ((row: unknown) => String((row as { id: string }).id)),
@@ -185,7 +155,6 @@ class RuntimeHost<TRow> {
         if (view) config.onRead?.(view.read());
       });
     });
-    inject(DestroyRef).onDestroy(() => this.engine?.dispose());
   }
 }
 
@@ -281,6 +250,66 @@ export function mountRuntime<TRow = unknown>(
       cleanup();
       destroy();
       mounted.delete(destroy);
+    },
+  };
+}
+
+/** The neutral surface a frontend table publishes. */
+export type NeutralTable<TRow = unknown> = NonNullable<
+  TableRuntimeView<TRow>["neutralTable"]
+>;
+
+/** A real table a test owns: its neutral surface and a reader's search. */
+export interface RealTable<TRow> {
+  readonly neutral: NeutralTable<TRow>;
+  /** Search the table as a reader does; the move commits on the next tick. */
+  search(text: string): void;
+  /** Search through the table's own engine, which moves it at once. */
+  searchNow(text: string): void;
+  destroy(): void;
+}
+
+/**
+ * A real frontend table over `rows` — the binding's source, table and
+ * runtime in its own injector — for scenarios that need more than one.
+ */
+export function realTable<TRow extends { readonly id: string }>(
+  rows: readonly TRow[]
+): RealTable<TRow> {
+  const injector = Injector.create({
+    providers: [],
+    parent: TestBed.inject(Injector),
+  }) as Injector & { destroy: () => void };
+  const columns = [{ key: "name", header: "Name", sortable: true }];
+  const { source, runtime } = runInInjectionContext(injector, () => {
+    const source = injectFrontendData<TRow>({
+      data: rows,
+      columns,
+      getRowId: (row) => row.id,
+      urlSync: false,
+    });
+    const table = injectDataTable<TRow>({
+      source,
+      columns,
+      rowKey: (row) => row.id,
+    });
+    return { source, runtime: tableRuntimeFor<TRow>(table, source, []) };
+  });
+  TestBed.tick();
+  const neutral = runtime.view()?.neutralTable;
+  if (!neutral) throw new Error("The table published no neutral surface");
+  return {
+    neutral,
+    search: (text) => {
+      source().setSearch(text);
+    },
+    searchNow: (text) => {
+      const engine = source().tableEngine;
+      if (!engine) throw new Error("The frontend source published no engine");
+      engine.dispatch({ type: "setSearch", search: text });
+    },
+    destroy: () => {
+      injector.destroy();
     },
   };
 }

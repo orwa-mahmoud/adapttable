@@ -44,7 +44,7 @@ import { TAIGA_CONTROLS } from "../taigaControls";
 import { AdaptTaigaEditorValidation } from "./editorValidation";
 
 /**
- * Native editable cell — the kit fill for {@link EDITABLE_CELL}.
+ * Native editable cell — the kit fill for `EDITABLE_CELL`.
  */
 
 @Component({
@@ -382,7 +382,7 @@ const SLOTS: EditableCellSlots = {
 
 /**
  * Opt-in editable cell — pass-through when `editing` is omitted. Fills
- * {@link EDITABLE_CELL}.
+ * `EDITABLE_CELL`.
  *
  * @public
  */

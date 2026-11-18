@@ -5,7 +5,7 @@
  * and the save it watches, and the step to the next cell.
  *
  * A binding builds the bundle from the stores in this folder and calls
- * {@link editableCellController} per cell; it renders what the controller
+ * `editableCellController` per cell; it renders what the controller
  * returns and wires its handlers. Nothing here renders.
  */
 import type { FeatureHostState } from "../features/currentHost";
@@ -405,7 +405,7 @@ export interface EditingBundle<TRow> {
 export type EditableCellMode = "display" | "activatable" | "editing";
 
 /**
- * Controller returned by {@link editableCellController}.
+ * Controller returned by `editableCellController`.
  *
  * @public
  */

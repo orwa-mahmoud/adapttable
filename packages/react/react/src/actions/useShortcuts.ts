@@ -30,7 +30,7 @@ import { createShortcutHandler } from "@adapttable/core/binding";
 export interface UseShortcutsOptions {
   /** Off unless the host armed it; nothing is bound when false. */
   enabled: boolean;
-  /** The shortcuts. Defaults to {@link DEFAULT_SHORTCUTS}. */
+  /** The shortcuts. Defaults to `DEFAULT_SHORTCUTS`. */
   shortcuts?: readonly Shortcut[];
   /** Run a command by key. Returning nothing is fine. */
   onCommand: (command: string) => void;

@@ -24,6 +24,6 @@ import { AdaptLiveRegion } from "../a11y/liveRegion";
   `,
 })
 export class AdaptExportAnnouncer {
-  /** `exportAnnouncement` from {@link injectExportHandler}. Empty until an export ends. */
+  /** `exportAnnouncement` from `injectExportHandler`. Empty until an export ends. */
   readonly announcement = input("");
 }

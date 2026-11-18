@@ -9,7 +9,7 @@
  * arrives through the source like all the others, and editing, validation,
  * grouping, the hierarchy and virtualization need to know nothing about it.
  *
- * Duplicate and delete arrive as ordinary {@link RowAction}s, so every kit
+ * Duplicate and delete arrive as ordinary `RowAction`s, so every kit
  * already renders them — trailing buttons on desktop, card buttons on mobile,
  * hideable and end-pinnable with the actions column, and confirmable through
  * the same dialog a host's own destructive action uses.

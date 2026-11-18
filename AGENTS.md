@@ -40,18 +40,17 @@ standing pattern is **Chrome + slots**:
 - `data-adapttable-part` names and placement are part of the public contract:
   the same part lands on the same element in every adapter, and documented
   `classNames` keys are honored by every adapter that renders the part.
-- A kit talks only to its binding: a React kit imports only
-  `@adapttable/react/…`, a Vue or Angular kit only its own binding. Only a
-  binding imports `@adapttable/core`, and it re-exports what its kits need.
-  When a kit needs a core name its binding lacks, add the re-export to the
-  binding — never import core from the kit. Core's deprecation notes point to
-  core (`@adapttable/core/binding`), never to a framework package. ESLint
-  enforces this on kit sources. The two Vue generic filter SFCs are a type-only
-  exception: `NativeChecklistFilter.vue` imports its original
-  `ChecklistFilterProps`, and `NativeFilterTree.vue` imports its original
-  `FilterTreeBuilderProps`, from `@adapttable/core/binding`. Vue's macro resolver
-  needs these original declarations directly. Their runtime Chrome, models and
-  helpers still come from the Vue binding; other core imports remain restricted.
+- A kit or AI binding talks only to its framework binding: a React kit
+  imports only `@adapttable/react/…`, a Vue or Angular kit only its own
+  binding, and `@adapttable/ai-react`, `ai-vue` and `ai-angular` likewise.
+  Only a binding imports `@adapttable/core`, and it re-exports what the
+  packages above it need. When one of them needs a core name its binding
+  lacks, add the re-export to the binding — never import core from it. No
+  package above a binding lists `@adapttable/core` in any dependency field
+  or imports it from any file, tests included: their tests mount real tables
+  through the binding. Core's deprecation notes point to core
+  (`@adapttable/core/binding`), never to a framework package. ESLint and
+  `check:boundary` enforce this.
 - One store owns a table's state (`createTableStore` in core): the view state,
   the column layout, the row state and the derived view are slices of it.
   Changes go in as named actions, and a reader hears about a change only when

@@ -34,7 +34,7 @@ const cellChrome = [
 /**
  * Edit a single cell in place. The host's write receives the row, column
  * key and committed value; the table never mutates the array. Fills
- * {@link EDITABLE_CELL} with this kit's native editors.
+ * `EDITABLE_CELL` with this kit's native editors.
  *
  * @param onCellEdit - Called when a draft commits.
  * @param extras - Optional lifecycle observers merged into the patch.

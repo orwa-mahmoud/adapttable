@@ -14,7 +14,7 @@ import type { SavedView } from "./savedViewsController";
 import type { TableDensity } from "./viewStateSlices";
 
 /**
- * State + change handler returned by {@link useColumnLayoutUrlState}.
+ * State + change handler returned by `useColumnLayoutUrlState`.
  *
  * @public
  */

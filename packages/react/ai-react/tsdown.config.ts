@@ -16,7 +16,6 @@ export default defineConfig({
   deps: {
     neverBundle: [
       "@adapttable/ai",
-      "@adapttable/core",
       "@adapttable/react",
       "react",
       "react-dom",

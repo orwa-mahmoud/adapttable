@@ -3,7 +3,7 @@
  *
  * The figures share export value resolution. Computing them mounts only
  * when requested, in-tree through
- * {@link SELECTION_STATS_LIVE}.
+ * `SELECTION_STATS_LIVE`.
  */
 import { selectionStats as compute } from "@adapttable/core";
 import { coreSelectionStats } from "@adapttable/core/binding";

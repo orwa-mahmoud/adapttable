@@ -10,23 +10,23 @@
 import type { AgentSession } from "@adapttable/ai";
 import { AGENT_SCHEMA_VERSION, runAgentHttpTurn } from "@adapttable/ai/http";
 import {
-  createNeutralTable,
-  createTableEngine,
-  type NeutralTable,
-} from "@adapttable/core";
-import { useFrontendData } from "@adapttable/react";
-import {
   applyTableFeatures,
+  type FeatureProviderProps,
   FeatureProviders,
+  type TableFeature,
+  type TableRuntimeView,
   usePublishTableRuntime,
+  useTableRuntime,
 } from "@adapttable/react/adapter";
+import { DataTable } from "@adapttable/unstyled";
 import { act, render, waitFor } from "@testing-library/react";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { describe, expect, it } from "vitest";
 
 import { tableAgent } from "./react";
 
 type TurnResult = Awaited<ReturnType<typeof runAgentHttpTurn>>;
+type Query = NonNullable<TableRuntimeView["query"]>;
 
 interface Row {
   id: string;
@@ -39,189 +39,72 @@ const ROWS: Row[] = [
   { id: "2", name: "Grace", salary: 140 },
 ];
 
-const WIRED = {
-  setPage: true,
-  setLimit: true,
-  setSearch: true,
-  setSort: true,
-  setFilters: true,
-};
-
-function makeTable() {
-  const engine = createTableEngine<Row>({
-    data: ROWS,
-    columns: [
-      { key: "name", header: "Name", sortable: true },
-      { key: "salary", header: "Salary", sortable: true },
-    ],
-    rowKey: (row) => row.id,
-  });
-  const neutral = createNeutralTable(engine, "http-binding", {
-    operations: () => WIRED,
-  }) as NeutralTable<unknown>;
-  return { engine, neutral };
+/** Reads the table's runtime, for the reader's side of a test. */
+interface LiveQuery {
+  current?: () => Query | undefined;
 }
 
-type LiveTable = ReturnType<typeof makeTable>;
-
-function Publisher({ engine, neutral }: LiveTable) {
-  const rows = neutral.rows("visible");
-  usePublishTableRuntime(rows, undefined, {
-    rows,
-    visibleRows: rows,
-    neutralTable: neutral,
-    getRowId: (row: unknown) => (row as Row).id,
-    rowLabel: (row: unknown) => (row as Row).name,
-    query: {
-      page: 1,
-      // One row a page, so the two rows above really are two pages and the
-      // move to page 2 below is a move the table can make.
-      limit: 1,
-      search: "",
-      setPage: (page: number) => engine.dispatch({ type: "setPage", page }),
-      setLimit: (limit: number) => engine.dispatch({ type: "setLimit", limit }),
-      setSearch: (search: string) =>
-        engine.dispatch({ type: "setSearch", search }),
-      setSort: (key?: string, dir?: "asc" | "desc") =>
-        engine.dispatch({ type: "setSort", key, dir }),
-      setExtras: (extra) =>
-        engine.dispatch({ type: "setFilters", filters: extra }),
-      clearExtras: () => engine.dispatch({ type: "setFilters", filters: {} }),
-    },
-  });
-  return null;
+function queryProbe(live: LiveQuery): TableFeature<Row> {
+  function Provider({ children }: FeatureProviderProps) {
+    const runtime = useTableRuntime();
+    useEffect(() => {
+      live.current = () => runtime.view()?.query;
+    }, [runtime]);
+    return children;
+  }
+  return { id: "query-probe", provider: { Provider } };
 }
 
-function Harness({
-  engine,
-  neutral,
-  onAttach,
-}: LiveTable & { onAttach: (session: AgentSession) => void }) {
-  const props = applyTableFeatures({
-    features: [
-      tableAgent({
-        tableId: "http-binding",
-        writePolicy: "allow",
-        approval: "never",
-        bridge: { attach: onAttach },
-      }),
-    ],
-  });
-  return (
-    <FeatureProviders props={props}>
-      <Publisher engine={engine} neutral={neutral} />
-    </FeatureProviders>
-  );
+/** The query the table last published; throws when it has published none. */
+function readerQuery(live: LiveQuery): Query {
+  const query = live.current?.();
+  if (!query) throw new Error("The table published no query");
+  return query;
 }
 
-async function mounted() {
-  const { engine, neutral } = makeTable();
+/** A real unstyled table whose features include the agent under test. */
+async function mounted(
+  tableId: string,
+  limit?: number
+): Promise<{ session: AgentSession; live: LiveQuery }> {
+  const live: LiveQuery = {};
   let session: AgentSession | undefined;
+  const features = [
+    tableAgent({
+      tableId,
+      writePolicy: "allow",
+      approval: "never",
+      columns: {
+        name: { type: "string", sortable: true },
+        salary: { type: "number", sortable: true },
+      },
+      bridge: {
+        attach: (next) => {
+          session = next;
+        },
+      },
+    }),
+    queryProbe(live),
+  ];
   render(
-    <Harness
-      engine={engine}
-      neutral={neutral}
-      onAttach={(live) => {
-        session = live;
-      }}
+    <DataTable<Row>
+      data={ROWS}
+      columns={[
+        { key: "name", header: "Name", sortable: true },
+        { key: "salary", header: "Salary", sortable: true },
+      ]}
+      rowKey={(row) => row.id}
+      features={features}
+      urlSync={false}
+      defaults={limit === undefined ? undefined : { limit }}
     />
   );
   await waitFor(() => {
     expect(session).toBeDefined();
+    expect(live.current).toBeDefined();
   });
-  if (!session) throw new Error("the binding never attached a session");
-  return { engine, session };
-}
-
-function FrontendPublisher({
-  state,
-}: {
-  state: {
-    search: string;
-    sortBy?: string;
-    setSearch?: (search: string) => void;
-  };
-}) {
-  const source = useFrontendData({
-    data: ROWS,
-    columns: [
-      { key: "name", header: "Name", sortable: true },
-      { key: "salary", header: "Salary", sortable: true },
-    ],
-    getRowId: (row) => row.id,
-    urlSync: false,
-  });
-  const engine = source.tableEngine;
-  if (!engine) throw new Error("useFrontendData did not publish its engine");
-  const neutral = useMemo(
-    () =>
-      createNeutralTable(engine, "http-frontend-binding", {
-        operations: () => WIRED,
-      }) as NeutralTable<unknown>,
-    [engine]
-  );
-  state.search = source.search;
-  state.sortBy = source.sortBy;
-  state.setSearch = source.setSearch;
-  usePublishTableRuntime(source.rows, undefined, {
-    rows: source.rows,
-    visibleRows: source.rows,
-    neutralTable: neutral,
-    getRowId: (row: unknown) => (row as Row).id,
-    rowLabel: (row: unknown) => (row as Row).name,
-    query: {
-      page: source.page,
-      limit: source.limit,
-      search: source.search,
-      sortBy: source.sortBy,
-      sortDir: source.sortDir,
-      setPage: source.setPage,
-      setLimit: source.setLimit,
-      setSearch: source.setSearch,
-      setSort: source.setSort,
-      setExtras: source.setExtras,
-      clearExtras: source.clearExtras,
-    },
-  });
-  return null;
-}
-
-async function mountedFrontend() {
-  const state: {
-    search: string;
-    sortBy?: string;
-    setSearch?: (search: string) => void;
-  } = { search: "" };
-  let session: AgentSession | undefined;
-  const props = applyTableFeatures({
-    features: [
-      tableAgent({
-        tableId: "http-frontend-binding",
-        writePolicy: "allow",
-        approval: "never",
-        columns: {
-          name: { type: "string", sortable: true },
-          salary: { type: "number", sortable: true },
-        },
-        bridge: {
-          attach: (live) => {
-            session = live;
-          },
-        },
-      }),
-    ],
-  });
-  render(
-    <FeatureProviders props={props}>
-      <FrontendPublisher state={state} />
-    </FeatureProviders>
-  );
-  await waitFor(() => {
-    expect(session).toBeDefined();
-  });
-  if (!session)
-    throw new Error("the frontend binding never attached a session");
-  return { session, state };
+  if (!session) throw new Error("the table never attached a session");
+  return { session, live };
 }
 
 function ServerPublisher({
@@ -296,7 +179,7 @@ async function mountedServer() {
 
 describe("an HTTP turn over the live React binding", () => {
   it("runs filter then sort in one reply, following the table it moved", async () => {
-    const { engine, session } = await mounted();
+    const { session, live } = await mounted("http-binding", 1);
     const opening = session.manifest().viewRevision;
 
     let result!: TurnResult;
@@ -332,13 +215,15 @@ describe("an HTTP turn over the live React binding", () => {
       opening + 1,
       opening + 2,
     ]);
-    expect(engine.snapshot().search).toBe("ada");
-    expect(engine.snapshot().sortBy).toBe("salary");
-    expect(engine.snapshot().sortDir).toBe("desc");
+    expect(readerQuery(live)).toMatchObject({
+      search: "ada",
+      sortBy: "salary",
+      sortDir: "desc",
+    });
   });
 
   it("keeps useFrontendData search then sort in one reply", async () => {
-    const { session, state } = await mountedFrontend();
+    const { session, live } = await mounted("http-frontend-binding");
 
     let result!: TurnResult;
     await act(async () => {
@@ -365,11 +250,14 @@ describe("an HTTP turn over the live React binding", () => {
     });
 
     expect(result.results.map((entry) => entry.ok)).toEqual([true, true]);
-    expect(state).toMatchObject({ search: "ada", sortBy: "salary" });
+    expect(readerQuery(live)).toMatchObject({
+      search: "ada",
+      sortBy: "salary",
+    });
   });
 
   it("flushes a pending reader change before admitting useFrontendData work", async () => {
-    const { session, state } = await mountedFrontend();
+    const { session, live } = await mounted("http-frontend-binding");
 
     let result!: TurnResult;
     await act(async () => {
@@ -379,7 +267,7 @@ describe("an HTTP turn over the live React binding", () => {
           // React has accepted the reader's update but has not committed the
           // frontend engine yet. Admission flushes it before checking the
           // revision; the agent may not claim it as part of its own sort.
-          state.setSearch?.("grace");
+          readerQuery(live).setSearch("grace");
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
             toolCalls: [
@@ -395,8 +283,8 @@ describe("an HTTP turn over the live React binding", () => {
     });
 
     expect(result.results[0]?.error?.code).toBe("revision-mismatch");
-    expect(state.search).toBe("grace");
-    expect(state.sortBy).toBeUndefined();
+    expect(readerQuery(live).search).toBe("grace");
+    expect(readerQuery(live).sortBy).toBeUndefined();
   });
 
   it("bumps and checks a server query revision with no neutral engine", async () => {
@@ -430,7 +318,7 @@ describe("an HTTP turn over the live React binding", () => {
   });
 
   it("refuses the reply when the table was edited during the model call", async () => {
-    const { engine, session } = await mounted();
+    const { session, live } = await mounted("http-binding", 1);
 
     let result!: TurnResult;
     await act(async () => {
@@ -438,7 +326,7 @@ describe("an HTTP turn over the live React binding", () => {
         endpoint: "https://agent.example/turn",
         request: () => {
           // A person searches the table while the backend is still thinking.
-          engine.dispatch({ type: "setSearch", search: "grace" });
+          readerQuery(live).setSearch("grace");
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
             text: "Sorted.",
@@ -457,21 +345,21 @@ describe("an HTTP turn over the live React binding", () => {
     expect(result.results[0]?.ok).toBe(false);
     expect(result.results[0]?.error?.code).toBe("revision-mismatch");
     // The person's search stands, and nothing was written over it.
-    expect(engine.snapshot().search).toBe("grace");
-    expect(engine.snapshot().sortBy).toBeUndefined();
+    expect(readerQuery(live).search).toBe("grace");
+    expect(readerQuery(live).sortBy).toBeUndefined();
   });
 
   it("leaves a rerender that changed nothing out of the way", async () => {
-    const { engine, session } = await mounted();
+    const { session, live } = await mounted("http-binding", 1);
 
     let result!: TurnResult;
     await act(async () => {
       result = await runAgentHttpTurn(session, "Page 2", {
         endpoint: "https://agent.example/turn",
         request: () => {
-          // Re-dispatching the search the table already has produces no
-          // change, so the engine publishes no revision and the action runs.
-          engine.dispatch({ type: "setSearch", search: "" });
+          // Re-sending the search the table already has produces no change,
+          // so the engine publishes no revision and the action runs.
+          readerQuery(live).setSearch("");
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
             text: "Paged.",
@@ -484,6 +372,6 @@ describe("an HTTP turn over the live React binding", () => {
     });
 
     expect(result.results[0]?.ok).toBe(true);
-    expect(engine.snapshot().requestedPage).toBe(2);
+    expect(readerQuery(live).page).toBe(2);
   });
 });

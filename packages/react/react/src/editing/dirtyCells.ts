@@ -12,7 +12,7 @@ import { TableStoreContext } from "../state/tableStoreContext";
 export type { DirtyCellState } from "@adapttable/core";
 
 /**
- * What {@link useDirtyCells} needs.
+ * What `useDirtyCells` needs.
  *
  * @public
  */
@@ -27,7 +27,7 @@ export interface UseDirtyCellsOptions {
 /**
  * Headless dirty-cell state for inline editing.
  *
- * @param options - See {@link UseDirtyCellsOptions}.
+ * @param options - See `UseDirtyCellsOptions`.
  * @returns The state; inert unless `enabled`.
  *
  * @public

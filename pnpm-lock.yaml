@@ -1201,9 +1201,6 @@ importers:
       '@adapttable/angular-unstyled':
         specifier: workspace:*
         version: link:../adapter-angular-unstyled
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
         version: 2.7.5(@angular/build@22.2.3(1b4fa7f56bc3a43f78aadd56a7893c03))(@emnapi/core@2.0.0-beta.2)(@emnapi/runtime@2.0.0-beta.2)(vite@8.3.5(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
@@ -1591,9 +1588,6 @@ importers:
       '@adapttable/ai':
         specifier: workspace:*
         version: link:../../shared/ai
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       '@adapttable/react':
         specifier: workspace:*
         version: link:../react
@@ -1601,6 +1595,9 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0(react@19.2.8)
     devDependencies:
+      '@adapttable/unstyled':
+        specifier: workspace:*
+        version: link:../adapter-unstyled
       '@testing-library/react':
         specifier: ^16.3.2
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -1818,9 +1815,6 @@ importers:
 
   packages/vue/adapter-vue-unstyled:
     dependencies:
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       '@adapttable/vue':
         specifier: 0.5.0
         version: link:../vue
@@ -1869,9 +1863,6 @@ importers:
         specifier: 0.5.0
         version: link:../vue
     devDependencies:
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../../shared/core
       '@adapttable/vue-unstyled':
         specifier: 0.2.4
         version: link:../adapter-vue-unstyled

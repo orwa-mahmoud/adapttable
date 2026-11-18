@@ -7,7 +7,7 @@
  * alone, so it is driven here the way the approval strip drives it.
  */
 import type { AgentApply, AgentSession, ExecuteResult } from "@adapttable/ai";
-import type { ActionAiOptions } from "@adapttable/core";
+import type { ActionAiOptions } from "@adapttable/react";
 import {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,

@@ -1,5 +1,4 @@
 import type { AgentCapabilityDefinition } from "@adapttable/ai";
-import { createNeutralTable, createTableEngine } from "@adapttable/core";
 import type { TableRuntimeView } from "@adapttable/vue";
 import {
   AGENT_APPROVAL_STATE,
@@ -7,7 +6,7 @@ import {
   useDataTableShell,
 } from "@adapttable/vue/adapter";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { effectScope, nextTick, shallowRef } from "vue";
+import { effectScope, nextTick, shallowRef, watchEffect } from "vue";
 
 import {
   TABLE_AGENT_STATE,
@@ -67,6 +66,37 @@ function mount(options: TableAgentOptions, initiallyActive = true) {
       return session;
     },
   };
+}
+type NeutralTable = NonNullable<TableRuntimeView["neutralTable"]>;
+
+/** A real table's neutral surface: a shell over `rows`, read from its runtime. */
+async function tableOver(
+  rows: readonly { id: string }[]
+): Promise<NeutralTable> {
+  const scope = effectScope();
+  let neutral: NeutralTable | undefined;
+  scope.run(() =>
+    useDataTableShell<unknown>({
+      data: rows,
+      columns: [{ key: "id" }],
+      rowKey: (row) => String((row as { id: string }).id),
+      features: [
+        {
+          id: "neutral-probe",
+          mount: (context) => {
+            watchEffect(() => {
+              neutral = context.runtime.view()?.neutralTable ?? neutral;
+            });
+          },
+        },
+      ],
+    })
+  );
+  stops.push(() => scope.stop());
+  await nextTick();
+  await nextTick();
+  if (!neutral) throw new Error("The shell published no neutral table");
+  return neutral;
 }
 const options = (
   patch: Partial<TableAgentOptions> = {}
@@ -174,20 +204,9 @@ describe("tableAgent lifecycle", () => {
     expect(write).not.toHaveBeenCalled();
   });
   it("replaces same-revision neutral sources without retaining old observation identity", async () => {
-    const one = createTableEngine<unknown>({
-      data: [{ id: "one" }],
-      columns: [{ key: "id" }],
-      rowKey: (row) => String((row as { id: string }).id),
-    });
-    const two = createTableEngine<unknown>({
-      data: [{ id: "two" }],
-      columns: [{ key: "id" }],
-      rowKey: (row) => String((row as { id: string }).id),
-    });
-    stops.push(one.dispose, two.dispose);
     const host = mount(options());
-    const source1 = createNeutralTable(one, "people");
-    const source2 = createNeutralTable(two, "people");
+    const source1 = await tableOver([{ id: "one" }]);
+    const source2 = await tableOver([{ id: "two" }]);
     host.view.value = { ...host.view.value, neutralTable: source1 };
     await nextTick();
     await nextTick();

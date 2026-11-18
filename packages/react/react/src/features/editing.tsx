@@ -3,7 +3,7 @@
  *
  * Cell, row and batch editing hooks live on this entry. A table that never
  * imports it never carries the editor state machines. The hooks mount
- * in-tree through {@link EDITING_LIVE}.
+ * in-tree through `EDITING_LIVE`.
  *
  * {@link editing}, {@link rowEditing} and {@link batchEditing} all fill
  * the same slot; apply() sets the channel each one owns.

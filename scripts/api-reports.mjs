@@ -35,7 +35,7 @@ import {
   readFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -126,6 +126,8 @@ const counts = {
 
 /** Every entry point that hands back a type it does not export, named. */
 const findings = [];
+/** Every doc-comment link the report's own entry point cannot resolve, located. */
+const unresolvedLinks = [];
 const reportReferenceFindings = [];
 const valueAliasEvidence = new Set();
 const propertyNormalizerEvidence = new Set();
@@ -243,6 +245,9 @@ function extractOne({ dir, report, entry, isMainEntry }, packageState) {
     }
     if (message.messageId === "ae-unresolved-link") {
       counts.unresolvedLink += 1;
+      unresolvedLinks.push(
+        `${report}: ${relative(REPO_ROOT, message.sourceFilePath ?? "")}:${String(message.sourceFileLine ?? "")} — ${message.text}`
+      );
       return;
     }
     if (message.messageId === "ae-missing-release-tag") {
@@ -446,6 +451,19 @@ if (holes > 0) {
     `\n✗ ${holes} public signature(s) hand back a type their own entry point does not export:\n  ` +
       `${shown}${more}\n  ` +
       `Export the type from that entry, or give the signature one the entry already names.`
+  );
+  ok = false;
+}
+// A doc-comment link names only what the entry point carrying the comment
+// exports. A name from another entry point or package is written as code text.
+if (unresolvedLinks.length > 0) {
+  const shown = unresolvedLinks.slice(0, 40).join("\n  ");
+  const rest = unresolvedLinks.length - 40;
+  const more = rest > 0 ? `\n  … and ${rest} more` : "";
+  console.error(
+    `\n✗ ${unresolvedLinks.length} doc-comment link(s) do not resolve in their entry point:\n  ` +
+      `${shown}${more}\n  ` +
+      "Link only what that entry exports; write any other name as code text."
   );
   ok = false;
 }

@@ -79,6 +79,7 @@ function RelativeTokenField({
   value: string;
   onValue: (next: string) => void;
 }>) {
+  "use no memo";
   const { preset, n } = splitRelativeToken(value);
   const counted = preset === "last" || preset === "next";
   return (
@@ -126,6 +127,7 @@ function RangeField<TRow>({
   source: TableSource<TRow>;
   labels: Required<TableLabels>;
 }>) {
+  "use no memo";
   const { label, ops, opLabelKeys, inputType, arity, op, setOp, a, b, write } =
     useRangeFilterWidget(def, source);
   const data = ops.map((value) => ({
@@ -227,6 +229,7 @@ function BooleanControl<TRow>({
   source: TableSource<TRow>;
   labels: Required<TableLabels>;
 }>) {
+  "use no memo";
   const { label, choice, write } = useBooleanFilterWidget(def, source);
   return (
     <Select
@@ -259,6 +262,7 @@ function SelectControl<TRow>({
   source: TableSource<TRow>;
   labels: Required<TableLabels>;
 }>) {
+  "use no memo";
   const label = filterLabel(def);
   const { options, loading } = useFilterOptions(def);
   const data = loading
@@ -288,6 +292,7 @@ function MultiSelectControl<TRow>({
   def,
   source,
 }: Readonly<{ def: FilterDef<TRow>; source: TableSource<TRow> }>) {
+  "use no memo";
   const label = filterLabel(def);
   const { options, loading } = useFilterOptions(def);
   return (
@@ -320,6 +325,7 @@ function TextFilterField<TRow>({
   source: TableSource<TRow>;
   labels: Required<TableLabels>;
 }>) {
+  "use no memo";
   const { label, ops, opLabelKeys, op, value, needsValue, write } =
     useTextFilterWidget(def, source);
   const data = ops.map((choice) => ({
@@ -371,6 +377,7 @@ function FilterControl<TRow>({
   labels: Required<TableLabels>;
   registry: FilterTypeRegistry;
 }>): ReactElement | null {
+  "use no memo";
   const custom = renderRegisteredFilter(def, source, labels, registry);
   if (custom) return custom as ReactElement;
   switch (filterWidgetKind(def, registry)) {
@@ -410,6 +417,8 @@ export function AutoFilterForm<TRow>({
   labels,
   registry = defaultFilterRegistry,
 }: Readonly<AutoFilterFormProps<TRow>>) {
+  // Every field reads the live source, so a cache would miss on each change.
+  "use no memo";
   return (
     <Stack gap="lg">
       {defs.map((def) => (

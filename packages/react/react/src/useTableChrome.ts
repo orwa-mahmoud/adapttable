@@ -58,6 +58,9 @@ const NO_ROW_MUTATIONS: RowMutationsState<never> = {
 export function useTableChrome<TRow>(
   props: ComposedTableProps<TRow>
 ): TableChrome<TRow> {
+  // The costly parts are memoized by hand below; compiling the rest adds
+  // bytes without saving a render.
+  "use no memo";
   const {
     source,
     columns,

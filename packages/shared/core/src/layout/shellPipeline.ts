@@ -138,7 +138,7 @@ export interface RuntimeChromeInput<TRow> {
   readonly grouping?: GroupingContribution<TRow>;
   /**
    * Grouping a feature contributed when the host published none.
-   * A defined {@link grouping} wins.
+   * A defined `grouping` wins.
    */
   readonly featureGrouping?: GroupingContribution<TRow>;
   /** The host's tree bundle, when a tree renders. */

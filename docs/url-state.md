@@ -220,6 +220,19 @@ changes, and any `urlAdapter` is ignored.
 Headless equivalent: `useTableUrlState({ urlSync: false })` — handy inside
 modals or drawers where the address bar shouldn't change.
 
+A headless table that never syncs with the URL can leave the URL code out of
+its bundle: `useLocalFrontendData` takes the options of `useFrontendData`
+without `urlAdapter`, `urlSync` and `urlKey` (`UseLocalFrontendDataOptions`)
+and keeps the view state in the table's store. `useLocalTableViewState`
+(`UseLocalTableViewStateOptions`: `defaults`, `numberExtraKeys`,
+`arrayExtraKeys`, `store`) returns the same state and setters as
+`useTableUrlState` from memory alone.
+
+```tsx
+const source = useLocalFrontendData({ data, columns });
+const table = useDataTable({ source, columns, rowKey: (r) => r.id });
+```
+
 ## Param reference
 
 | Param                       | Example                        | Meaning                                                                                                                                                                                                                                |

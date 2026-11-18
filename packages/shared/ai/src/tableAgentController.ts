@@ -190,7 +190,7 @@ export interface TableAgentController {
   readonly session: () => AgentSession;
   /** The current snapshot. Unchanged until something in it changes. */
   readonly getState: () => TableAgentState;
-  /** Told when {@link getState} would return something new. */
+  /** Told when `getState` would return something new. */
   readonly subscribe: (listener: () => void) => () => void;
   /**
    * Where the table is, as a token that changes whenever it moves.
@@ -215,10 +215,10 @@ export interface TableAgentController {
    */
   readonly sync: () => void;
   /**
-   * Let go of everything {@link sync} set up.
+   * Let go of everything `sync` set up.
    *
    * An open approval is refused, an announced one retracted, a registration
-   * withdrawn and a pending sample abandoned. A later {@link sync} starts
+   * withdrawn and a pending sample abandoned. A later `sync` starts
    * again, which is what a remount needs.
    */
   readonly disconnect: () => void;

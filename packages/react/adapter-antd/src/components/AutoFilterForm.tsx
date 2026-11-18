@@ -81,6 +81,7 @@ function RelativeTokenField({
   value: string;
   onValue: (next: string) => void;
 }>) {
+  "use no memo";
   const { preset, n } = splitRelativeToken(value);
   const counted = preset === "last" || preset === "next";
   return (
@@ -129,6 +130,7 @@ function RangeField<TRow>({
   source: AutoFilterFormProps<TRow>["source"];
   labels: RangeFilterLabels;
 }>) {
+  "use no memo";
   const { label, ops, opLabelKeys, inputType, arity, op, setOp, a, b, write } =
     useRangeFilterWidget(def, source);
   const input = (
@@ -218,6 +220,7 @@ function TextFilterField<TRow>({
   source: AutoFilterFormProps<TRow>["source"];
   labels: RangeFilterLabels;
 }>) {
+  "use no memo";
   const { ops, opLabelKeys, op, value, needsValue, write } =
     useTextFilterWidget(def, source);
   const label = filterLabel(def);
@@ -259,6 +262,7 @@ function BooleanFilterField<TRow>({
   source,
   labels,
 }: Readonly<ControlProps<TRow>>) {
+  "use no memo";
   const { label, choice, write } = useBooleanFilterWidget(def, source);
   return (
     <Select
@@ -305,6 +309,7 @@ function FilterControl<TRow>({
   labels,
   registry = defaultFilterRegistry,
 }: Readonly<ControlProps<TRow>>): ReactElement | null {
+  "use no memo";
   const label = filterLabel(def);
   const { options, loading } = useFilterOptions(def);
   const { extra, setExtra } = source;
@@ -377,6 +382,8 @@ export function AutoFilterForm<TRow>({
   labels,
   registry = defaultFilterRegistry,
 }: Readonly<AutoFilterFormProps<TRow>>) {
+  // Every field reads the live source, so a cache would miss on each change.
+  "use no memo";
   return (
     <Space orientation="vertical" size="large" style={{ width: "100%" }}>
       {defs.map((def) => (

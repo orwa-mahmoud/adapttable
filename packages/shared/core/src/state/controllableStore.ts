@@ -46,7 +46,7 @@ export interface ControllableStoreOptions<T> {
   /** Skip a commit equal to the current value. Omit to commit every change. */
   readonly equals?: (current: T, next: T) => boolean;
   /**
-   * While controlled, let {@link ControllableStore.current} read the store's
+   * While controlled, let `ControllableStore.current` read the store's
    * own last commit until the host hands over its value again — so two
    * changes made in one event compose instead of the second overwriting
    * the first. Off by default: most domains compute from the value rendered.
@@ -84,7 +84,7 @@ export interface ControllableStore<T> {
    * store's own value otherwise.
    */
   readonly commit: (next: T) => void;
-  /** Commit what `recipe` makes of {@link ControllableStore.current}. */
+  /** Commit what `recipe` makes of `ControllableStore.current`. */
   readonly update: (recipe: (current: T) => T) => void;
 }
 

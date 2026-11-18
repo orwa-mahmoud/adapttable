@@ -16,7 +16,7 @@ import type { TableLabels } from "./types";
 
 /**
  * English default strings. Consumers override any subset via the
- * `labels` option; {@link resolveLabels} merges their overrides on top.
+ * `labels` option; `resolveLabels` merges their overrides on top.
  *
  * @public
  */

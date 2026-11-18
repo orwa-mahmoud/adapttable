@@ -1,5 +1,5 @@
 /**
- * Build the live {@link TableRuntime} Angular Chrome reads from a table and
+ * Build the live `TableRuntime` Angular Chrome reads from a table and
  * its source — published through core's {@link TableRuntimePublisher}, the
  * same path React's chrome extras gate uses.
  */
@@ -108,7 +108,7 @@ export interface RuntimeTableOptions<TRow> extends Pick<
 }
 
 /**
- * Build the live {@link TableRuntime} a grouping panel or reorder controller
+ * Build the live `TableRuntime` a grouping panel or reorder controller
  * reads. One publisher per source engine keeps the neutral table stable across
  * ordinary updates. Replacing the engine starts a new reader lifecycle. With
  * `grouping`, the rows the runtime reads are the grouped leaves in render order.

@@ -142,7 +142,7 @@ export {
   type UseDensityUrlStateResult,
 } from "./url/useDensityUrlState";
 export { type FeatureNotice, type FeatureNoticeKind } from "./useTableChrome";
-export type { OverlayDismissOptions } from "@adapttable/core";
+export type { ActionAiOptions, OverlayDismissOptions } from "@adapttable/core";
 /* ── URL state ─────────────────────────────────────────────────────── */
 
 export {
@@ -155,6 +155,10 @@ export {
   useFrontendData,
   type UseFrontendDataOptions,
 } from "./source/useFrontendData";
+export {
+  useLocalFrontendData,
+  type UseLocalFrontendDataOptions,
+} from "./source/useLocalFrontendData";
 export {
   type InfiniteQueryLike,
   type PageSelector,
@@ -172,6 +176,10 @@ export {
   type UseColumnLayoutUrlStateOptions,
   type UseColumnLayoutUrlStateResult,
 } from "./url/useColumnLayoutUrlState";
+export {
+  useLocalTableViewState,
+  type UseLocalTableViewStateOptions,
+} from "./url/useLocalTableViewState";
 export {
   SAVED_VIEW_VERSION,
   type SavedView,

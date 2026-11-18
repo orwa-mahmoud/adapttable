@@ -1939,6 +1939,18 @@ export function useGroupPaging(enabled?: MaybeRefOrGetter<boolean>): ComputedRef
 export function useLazyChildren<TRow>(input: MaybeRefOrGetter<LazyChildrenVueOptions<TRow>>): ComputedRef<LazyChildrenState<TRow>>;
 
 // @public
+export function useLocalFrontendData<TRow>(input: MaybeRefOrGetter<UseLocalFrontendDataOptions<TRow>>): FrontendDataState<TRow>;
+
+// @public
+export type UseLocalFrontendDataOptions<TRow> = Omit<UseFrontendDataOptions<TRow>, "urlAdapter" | "urlSync" | "urlKey">;
+
+// @public
+export function useLocalTableViewState(input?: MaybeRefOrGetter<UseLocalTableViewStateOptions>): UseTableUrlStateResult;
+
+// @public
+export type UseLocalTableViewStateOptions = Pick<UseTableUrlStateOptions, "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "store">;
+
+// @public
 export function useQuerySource<TRow, TParams extends TableQueryParams = TableQueryParams, TPage = PaginatedResponse<TRow>>(input: MaybeRefOrGetter<UseQuerySourceOptions<TRow, TParams, TPage>>): QuerySourceState<TRow>;
 
 // @public

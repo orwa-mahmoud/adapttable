@@ -59,12 +59,12 @@ export interface SparklineProps {
   height?: number;
   /** Stroke / bar fill. Default `currentColor` so the kit theme wins. */
   color?: string;
-  /** Accessible summary. Defaults to {@link sparklineSummary}. */
+  /** Accessible summary. Defaults to `sparklineSummary`. */
   label?: string;
 }
 
 /**
- * How {@link sparklineColumn} is declared.
+ * How `sparklineColumn` is declared.
  *
  * @public
  */

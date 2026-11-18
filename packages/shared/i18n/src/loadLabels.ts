@@ -32,7 +32,7 @@ const LOADERS = {
 /**
  * Loads the label preset for a BCP 47 tag, fetching only that language.
  *
- * Resolves the tag the way {@link getLabels} does (`ar-EG` → Arabic,
+ * Resolves the tag the way `getLabels` does (`ar-EG` → Arabic,
  * `zh-TW` → Traditional Chinese). Unlike `getLabels`, an unknown
  * language resolves to `undefined` instead of English, so a caller can
  * keep its current copy.

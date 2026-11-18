@@ -2,7 +2,7 @@
  * Tree rows — `@adapttable/<kit>/tree`.
  *
  * Expansion, lazy children and the walked hierarchy live on this entry.
- * The hooks mount in-tree through {@link TREE_LIVE}.
+ * The hooks mount in-tree through `TREE_LIVE`.
  */
 import {
   buildTreeEntries,

@@ -1,7 +1,7 @@
 /**
  * Mount the chrome-body hooks in-tree, never in the parent shell.
  *
- * The virtualize feature fills {@link CHROME_BODY} with a child that calls
+ * The virtualize feature fills `CHROME_BODY` with a child that calls
  * TanStack. The plain path mounts a sibling that never imports it. First
  * paint already knows which child to mount — features are static — so SSR
  * and hydration see the same tree.

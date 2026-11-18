@@ -30,7 +30,7 @@ export interface TableAssistantReceiptSubject {
    * What it acted on, already readable — "Team is Core", "Salary".
    *
    * A host that knows its own wording sets this and the panel shows it as
-   * given. The built-in capabilities fill {@link terms} instead, so the
+   * given. The built-in capabilities fill `terms` instead, so the
    * sentence is written in the reader's language rather than the runner's.
    */
   readonly detail?: string;
@@ -234,7 +234,7 @@ export interface TableAssistantView {
   /** The last failure, when there is one. */
   readonly error?: string;
   /**
-   * The machine code behind {@link error}, when a turn ended with work
+   * The machine code behind `error`, when a turn ended with work
    * pending. The labels turn it into a sentence; without one the message
    * itself is shown.
    */

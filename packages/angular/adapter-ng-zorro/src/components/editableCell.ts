@@ -1,5 +1,5 @@
 /**
- * NG-ZORRO editable cell — the kit fill for {@link EDITABLE_CELL}.
+ * NG-ZORRO editable cell — the kit fill for `EDITABLE_CELL`.
  */
 import type { ColumnDef, EditableCellEditing } from "@adapttable/angular";
 import {
@@ -315,7 +315,7 @@ const SLOTS: EditableCellSlots = {
 
 /**
  * Opt-in editable cell — pass-through when `editing` is omitted. Fills
- * {@link EDITABLE_CELL}.
+ * `EDITABLE_CELL`.
  *
  * @public
  */

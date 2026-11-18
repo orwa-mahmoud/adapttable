@@ -563,7 +563,7 @@ export function resolveRowEditTrigger<TRow>(
 }
 
 /**
- * What {@link rowEditControls} reads.
+ * What `rowEditControls` reads.
  *
  * @public
  */

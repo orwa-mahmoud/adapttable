@@ -29,7 +29,7 @@ export type {
  * @public
  */
 export interface GroupMoreButtonSlots {
-  /** Renders a button; receives {@link GroupMoreButtonSlotProps}. */
+  /** Renders a button; receives `GroupMoreButtonSlotProps`. */
   readonly Button: Type<unknown>;
 }
 

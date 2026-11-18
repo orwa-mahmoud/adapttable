@@ -4,7 +4,7 @@
  * shapes, so a kit reads the same fields in every framework.
  */
 /**
- * What {@link useFullscreen} returns.
+ * What `useFullscreen` returns.
  *
  * @public
  */

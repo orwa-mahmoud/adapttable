@@ -16,7 +16,7 @@ import { AdaptRowActions } from "./rowActionButtons";
 
 /**
  * The desktop table drawn with native elements. Layout, rows and part names
- * come from {@link AdaptDesktopStructure}; this kit fills the slots.
+ * come from `AdaptDesktopStructure`; this kit fills the slots.
  *
  * @internal
  */

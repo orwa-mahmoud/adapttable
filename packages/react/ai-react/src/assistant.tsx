@@ -257,7 +257,7 @@ export interface TableAssistantState {
   /** The last failure, cleared by the next successful turn. */
   readonly error: string | undefined;
   /**
-   * The machine code behind {@link error}, when a turn ended with work
+   * The machine code behind `error`, when a turn ended with work
    * pending. A surface with labels turns it into a sentence for the reader;
    * the message beside it is written for whoever is debugging the turn.
    */

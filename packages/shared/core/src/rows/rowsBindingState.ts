@@ -33,7 +33,7 @@ export interface ChangedCellFlashState {
 }
 
 /**
- * What {@link useHighlight} returns.
+ * What `useHighlight` returns.
  *
  * @public
  */

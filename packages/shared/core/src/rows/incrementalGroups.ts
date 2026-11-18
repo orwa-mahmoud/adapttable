@@ -27,7 +27,7 @@ const groupedSnapshots = /* @__PURE__ */ new WeakMap<
  * The groups on the snapshot attached to `rows`, after `patch` is applied.
  *
  * Absent when the array has no snapshot, and when the attached view is not
- * one {@link createIncrementalView} built. A basic engine attaches its own
+ * one `createIncrementalView` built. A basic engine attaches its own
  * view to the same array; grouping builds that model itself. An attached
  * snapshot with no groups returns `undefined` as well.
  */

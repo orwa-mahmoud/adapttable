@@ -183,7 +183,7 @@ export interface TableFeatureHost<
   ): void;
   /**
    * Phantom marker that pins the row type; never read at runtime. Read
-   * contravariantly, for the same reason {@link FeaturePatch.__row} is: a
+   * contravariantly, for the same reason `FeaturePatch.__row` is: a
    * feature that registers nothing row-shaped fits any table, and one built
    * for the wrong row still does not.
    */

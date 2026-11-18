@@ -113,7 +113,7 @@ export interface BatchEditingState<TRow> {
 }
 
 /**
- * What {@link createBatchEditStore} needs.
+ * What `createBatchEditStore` needs.
  *
  * @public
  */

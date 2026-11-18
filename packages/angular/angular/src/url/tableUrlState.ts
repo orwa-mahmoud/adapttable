@@ -32,6 +32,7 @@ import {
 import { onBrowser } from "../hooks/platform";
 import { type MaybeSignalOptional, readMaybe } from "../store";
 import { tableStoreOf } from "../tableStore";
+import { viewStateMutators } from "./viewStateMutators";
 
 /**
  * The URL adapter every table in this injector reads and writes, when the
@@ -46,13 +47,13 @@ export const ADAPTTABLE_URL_ADAPTER = new InjectionToken<UrlStateAdapter>(
 );
 
 /**
- * Options for {@link injectTableUrlState}.
+ * Options for `injectTableUrlState`.
  *
  * @public
  */
 export interface TableUrlStateOptions {
   /**
-   * URL-state backend. Defaults to {@link ADAPTTABLE_URL_ADAPTER}, then the
+   * URL-state backend. Defaults to `ADAPTTABLE_URL_ADAPTER`, then the
    * browser History API — on the server, the request's query string.
    * A signal selects a different backend while retaining inactive stores.
    */
@@ -211,20 +212,7 @@ export function injectTableUrlState(
       store.configure(config());
       return store.getSnapshot();
     }),
-    setPage: (...args) => current().setPage(...args),
-    setLimit: (...args) => current().setLimit(...args),
-    setSort: (...args) => current().setSort(...args),
-    setGroupBy: (...args) => current().setGroupBy(...args),
-    initializeGroupBy: (...args) => current().initializeGroupBy(...args),
-    setGroupAggregateOverrides: (...args) =>
-      current().setGroupAggregateOverrides(...args),
-    toggleSortLevel: (...args) => current().toggleSortLevel(...args),
-    setSearch: (...args) => current().setSearch(...args),
-    setExtra: (...args) => current().setExtra(...args),
-    setExtras: (...args) => current().setExtras(...args),
-    setFilterTree: (...args) => current().setFilterTree(...args),
-    clearExtras: (...args) => current().clearExtras(...args),
-    clearAll: (...args) => current().clearAll(...args),
+    ...viewStateMutators(current),
   };
 }
 
@@ -235,7 +223,7 @@ export function injectTableUrlState(
  * URL.
  *
  * @param options - The table's URL options.
- * @param injector - Where {@link ADAPTTABLE_URL_ADAPTER} is looked up.
+ * @param injector - Where `ADAPTTABLE_URL_ADAPTER` is looked up.
  * @returns The adapter.
  *
  * @public

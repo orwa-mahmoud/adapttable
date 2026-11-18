@@ -112,7 +112,7 @@ export interface RowEditingState<TRow> {
 }
 
 /**
- * What {@link createRowEditStore} needs.
+ * What `createRowEditStore` needs.
  *
  * @public
  */

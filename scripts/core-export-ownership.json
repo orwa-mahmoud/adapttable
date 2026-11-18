@@ -15935,6 +15935,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "createLocalTableViewStore",
+      "kind": "runtime",
+      "module": "state/localViewStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/localViewStore.ts#createLocalTableViewStore",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "createMenuNavigation",
       "kind": "runtime",
       "module": "actions/menuNavigation.ts",

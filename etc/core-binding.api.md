@@ -3039,6 +3039,11 @@ export function createLazyChildrenController<TRow>(initial: LazyChildrenOptions<
 export function createLazyServerSource<TRow>(): LazyServerSource<TRow>;
 
 // @public
+export function createLocalTableViewStore(config?: TableViewStateConfig, options?: {
+    readonly store?: TableStore;
+}): TableViewStore;
+
+// @public
 export function createMenuNavigation(): MenuNavigationController;
 
 // @public

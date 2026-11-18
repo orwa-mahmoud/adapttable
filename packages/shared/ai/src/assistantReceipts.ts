@@ -73,7 +73,7 @@ export interface AssistantReceiptSubject {
    * What it acted on, already readable — "Team is Core".
    *
    * A host that knows its own wording sets this and a surface shows it as
-   * given. The built-in capabilities leave it alone and fill {@link terms}
+   * given. The built-in capabilities leave it alone and fill `terms`
    * instead, because the sentence that joins a column to a value belongs to
    * the reader's language rather than to the package that ran the call.
    */
@@ -82,7 +82,7 @@ export interface AssistantReceiptSubject {
    * What it acted on, structurally, for a surface to phrase.
    *
    * Column labels and formatted values, never keys: "Team" and "Platform",
-   * not `team`. An empty list is not the same as none — see {@link cleared}.
+   * not `team`. An empty list is not the same as none — see `cleared`.
    */
   readonly terms?: readonly AssistantReceiptTerm[];
   /** Which way a sort went, when the action was one. */

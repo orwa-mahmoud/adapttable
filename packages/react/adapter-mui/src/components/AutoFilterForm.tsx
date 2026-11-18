@@ -93,6 +93,7 @@ function TextFilter<TRow>({
   source,
   labels,
 }: Readonly<LabeledFieldProps<TRow>>) {
+  "use no memo";
   const { label, ops, opLabelKeys, op, value, needsValue, write } =
     useTextFilterWidget(def, source);
   return (
@@ -152,6 +153,7 @@ function BooleanFilter<TRow>({
   source,
   labels,
 }: Readonly<LabeledFieldProps<TRow>>) {
+  "use no memo";
   const { label, choice, write } = useBooleanFilterWidget(def, source);
   return (
     <TextField
@@ -181,6 +183,7 @@ function SelectFilter<TRow>({
   source,
   labels,
 }: Readonly<LabeledFieldProps<TRow>>) {
+  "use no memo";
   // The options source may be an array OR an async loader — never map it
   // directly. The hook resolves both (and reports loader progress).
   const { options, loading } = useFilterOptions(def);
@@ -213,6 +216,7 @@ function SelectFilter<TRow>({
 }
 
 function MultiSelectFilter<TRow>({ def, source }: Readonly<FieldProps<TRow>>) {
+  "use no memo";
   const label = filterLabel(def);
   const { options, loading } = useFilterOptions(def);
   const selected = listFilterValues(source.extra[def.key]);
@@ -255,6 +259,7 @@ function RelativeTokenField({
   value: string;
   onValue: (next: string) => void;
 }>) {
+  "use no memo";
   const { preset, n } = splitRelativeToken(value);
   const counted = preset === "last" || preset === "next";
   return (
@@ -306,6 +311,7 @@ function RangeFilter<TRow>({
   source,
   labels,
 }: Readonly<LabeledFieldProps<TRow>>) {
+  "use no memo";
   const { label, ops, opLabelKeys, inputType, arity, op, setOp, a, b, write } =
     useRangeFilterWidget(def, source);
   const boundType = inputType === "text" ? "text" : inputType;
@@ -394,6 +400,7 @@ function FilterField<TRow>({
 }: Readonly<
   LabeledFieldProps<TRow> & { registry: FilterTypeRegistry }
 >): ReactElement | null {
+  "use no memo";
   const custom = renderRegisteredFilter(def, source, labels, registry);
   if (custom) return custom as ReactElement;
   switch (filterWidgetKind(def, registry)) {
@@ -429,6 +436,8 @@ export function AutoFilterForm<TRow>({
   labels,
   registry = defaultFilterRegistry,
 }: Readonly<AutoFilterFormProps<TRow>>) {
+  // Every field reads the live source, so a cache would miss on each change.
+  "use no memo";
   return (
     <Stack spacing={3}>
       {defs.map((def) => (

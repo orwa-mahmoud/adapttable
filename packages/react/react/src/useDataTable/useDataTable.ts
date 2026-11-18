@@ -287,7 +287,7 @@ export interface SearchInputElementProps extends Props {
 }
 
 /**
- * The headless entry point. Combines a {@link TableSource} with columns,
+ * The headless entry point. Combines a `TableSource` with columns,
  * sorting, a debounced search input, selection, and filter chips, and
  * returns derived state plus accessible prop-getters so consumers can
  * render any markup with any UI kit.
