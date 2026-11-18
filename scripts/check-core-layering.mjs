@@ -8,12 +8,13 @@
  * tests and test helpers included. It reaches core through its binding.
  */
 import { readdirSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import ts from "typescript";
 
-import { listPackages, REPO_ROOT } from "./packages.mjs";
+import { listPackages, packageDir, REPO_ROOT } from "./packages.mjs";
 
 const BINDINGS = [
   "@adapttable/react",
@@ -41,12 +42,18 @@ function isCore(specifier) {
   return specifier === CORE || specifier.startsWith(`${CORE}/`);
 }
 
+/** Vue's SFC parser, from the Vue binding's own `vue` dependency. */
+const parseSfc = createRequire(join(packageDir("vue"), "package.json"))(
+  "vue/compiler-sfc"
+).parse;
+
 /** The script blocks of a Vue SFC, or the whole file for script sources. */
 function scriptsOf(file, text) {
   if (!file.endsWith(".vue")) return [text];
-  return [...text.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(
-    (match) => match[1] ?? ""
-  );
+  const { descriptor } = parseSfc(text, { filename: file });
+  return [descriptor.script, descriptor.scriptSetup]
+    .filter((block) => block !== null)
+    .map((block) => block.content);
 }
 
 /** Every module specifier a source imports, re-exports, requires or loads. */

@@ -62,13 +62,16 @@ describe("core layering", () => {
     assert.deepEqual(coreLayeringProblems(root).length, 5);
   });
 
-  it("ignores core named in strings, configs and built output", () => {
+  it("ignores core named in strings, configs, custom blocks and built output", () => {
     const root = repo(kit(), {
       "src/fixture.test.ts":
         'const input = `import { DataTable } from "@adapttable/core";`;\n',
       "vitest.config.ts":
         "export default { alias: [{ find: /^@adapttable\\/core$/ }] };\n",
       "dist/index.js": 'import "@adapttable/core";\n',
+      // Vue reads an upper-case SCRIPT element as a custom block, never as code.
+      "src/F.vue":
+        '<SCRIPT lang="ts">\nimport { y } from "@adapttable/core";\n</SCRIPT>\n<template><div /></template>\n',
     });
     assert.deepEqual(coreLayeringProblems(root), []);
   });
