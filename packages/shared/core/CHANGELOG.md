@@ -1,5 +1,15 @@
 # @adapttable/core
 
+## 3.16.0
+
+### Minor Changes
+
+- 6bee472: Filters can be composed with only the widgets a table draws. `filtersWith([textFilterWidget, rangeFilterWidget])` from any kit's filters entry is the `filters` feature with those fields alone, so the other widgets stay out of the bundle: a text-only filter form is 4.4 KiB lighter on MUI, 1.3–2.4 KiB on the Vue kits and 4.8 KiB on the Angular native kit (min+gzip). Each kit exports `textFilterWidget`, `booleanFilterWidget`, `selectFilterWidget`, `multiSelectFilterWidget`, `checklistFilterWidget` and `rangeFilterWidget`; a filter whose widget was not composed throws, naming the widget to add. `filters` keeps drawing every widget.
+
+### Patch Changes
+
+- 8c8eb0a: A row insert at a position that is not a whole number (`NaN`, a fraction, `±Infinity`) lands where `Array#splice` puts it, and a later patch in the same batch updates or removes the row it names. The insert event reports that whole-number index.
+
 ## 3.15.0
 
 ### Minor Changes

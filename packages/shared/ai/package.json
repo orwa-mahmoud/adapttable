@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/ai",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Provider-neutral adaptive table capability discovery — catalog, describe and execute against a live AdaptTable without shipping a model SDK.",
   "keywords": [
     "data-table",
@@ -163,7 +163,7 @@
     "clean": "rimraf dist coverage .turbo"
   },
   "dependencies": {
-    "@adapttable/core": "3.15.0"
+    "@adapttable/core": "3.16.0"
   },
   "publishConfig": {
     "access": "public"
