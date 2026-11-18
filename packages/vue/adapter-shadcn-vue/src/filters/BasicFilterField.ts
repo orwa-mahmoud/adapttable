@@ -23,7 +23,8 @@ export interface BasicFilterFieldProps<TRow> extends FilterFieldOptions<TRow> {
   readonly dir?: "ltr" | "rtl";
 }
 
-const propNames = {
+/** The runtime props of a basic field, for the components that wrap one. */
+export const basicFieldProps = {
   id: { type: String as PropType<BasicFilterFieldProps<unknown>["id"]> },
   def: { type: Object as PropType<BasicFilterFieldProps<unknown>["def"]> },
   source: {
@@ -70,7 +71,7 @@ export const PartsFilterField = defineComponent(
   {
     name: "ShadcnBasicFilterField",
     props: {
-      ...propNames,
+      ...basicFieldProps,
       parts: {
         type: Array as PropType<PartsFilterFieldProps<unknown>["parts"]>,
         required: true,
@@ -92,5 +93,5 @@ export const BasicFilterField = /* @__PURE__ */ withProps(
       parts: FILTER_FIELD_PARTS,
     });
   },
-  Object.keys(propNames) as (keyof BasicFilterFieldProps<unknown>)[]
+  Object.keys(basicFieldProps) as (keyof BasicFilterFieldProps<unknown>)[]
 );

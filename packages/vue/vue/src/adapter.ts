@@ -230,6 +230,7 @@ export type {
 export {
   FilterHeaderControlChrome,
   useFilterHeaderControl,
+  useRegisteredFilterRender,
 } from "./filters/filterHeaderControl";
 export type {
   FilterHeaderRowProps,

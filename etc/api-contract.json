@@ -13091,7 +13091,8 @@
       "rangeFieldPart",
       "selectFieldPart",
       "textFieldPart",
-      "useFilterFieldWith"
+      "useFilterFieldWith",
+      "useRegisteredFilterRender"
     ],
     "adapter-vue-unstyled": [
       "CellContext",

@@ -22,7 +22,7 @@ function basicWidget(part: FilterFieldPart): FilterWidget {
 
 const ChecklistField: FunctionalComponent<FilterFieldOptions<unknown>> = (
   props
-) => h(QuasarChecklistField<unknown>, props);
+) => h(QuasarChecklistField<unknown>, { ...props });
 
 /** The Quasar text filter: its operator and its value. @public */
 export const textFilterWidget = /* @__PURE__ */ basicWidget(textFieldPart);

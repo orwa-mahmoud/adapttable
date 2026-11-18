@@ -4752,6 +4752,9 @@ export function useLocaleLabels(environment: Readonly<Ref<KitEnvironment>>): Com
 // @public (undocumented)
 export function useMobileCardsModel<TRow>(table: UseDataTableResult<TRow>, desktop: ComputedRef<DesktopTableModel<TRow>>): ComputedRef<MobileCardsModel<TRow>>;
 
+// @public
+export function useRegisteredFilterRender<TRow>(input: MaybeRefOrGetter<Pick<FilterHeaderControlOptions<TRow>, "def" | "source" | "labels" | "registry" | "className">>): ComputedRef<VNodeChild | undefined>;
+
 // @public (undocumented)
 export interface UseSavedViewsResult {
     // (undocumented)

@@ -22,7 +22,7 @@ function basicWidget(part: FilterFieldPart): FilterWidget {
 
 const ChecklistField: FunctionalComponent<FilterFieldOptions<unknown>> = (
   props
-) => h(VuetifyChecklistField<unknown>, props);
+) => h(VuetifyChecklistField<unknown>, { ...props });
 
 /** The Vuetify text filter: its operator and its value. @public */
 export const textFilterWidget = /* @__PURE__ */ basicWidget(textFieldPart);

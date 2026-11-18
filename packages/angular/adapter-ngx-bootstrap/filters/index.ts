@@ -56,14 +56,8 @@ export function filtersWith(
     );
 }
 
-/**
- * Declarative filters: the Filters button with an anchored popover (or the
- * drawer, with `filtersMode="drawer"`), the nested AND/OR builder, one
- * native field per definition, and removable chips for what is active.
- *
- * @public
- */
-export const filters = /* @__PURE__ */ filtersWith([
+/** Every widget: what `filters` draws its fields with. */
+const everyWidget = /* @__PURE__ */ filtersWith([
   textFilterWidget,
   booleanFilterWidget,
   selectFilterWidget,
@@ -71,6 +65,22 @@ export const filters = /* @__PURE__ */ filtersWith([
   checklistFilterWidget,
   rangeFilterWidget,
 ]);
+
+/**
+ * Declarative filters: the Filters button with an anchored popover (or the
+ * drawer, with `filtersMode="drawer"`), the nested AND/OR builder, one
+ * native field per definition, and removable chips for what is active.
+ *
+ * @param defs - The filter definitions. Columns that declare `filter` add
+ *   theirs.
+ *
+ * @public
+ */
+export function filters<TRow>(
+  defs: readonly FilterDef<TRow>[] = []
+): AdaptTableFeature {
+  return everyWidget(defs);
+}
 
 export {
   booleanFilterWidget,

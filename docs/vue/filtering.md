@@ -128,7 +128,7 @@ taking the same definitions and options as `filters`) and the six widgets:
 `multiSelectFilterWidget`, `checklistFilterWidget` and `rangeFilterWidget`.
 A filter whose widget was not composed throws when its field draws, naming
 the filter and the widget to add. Measured 2026-11-18, a table with text
-filters only is 1.4–2.4 KiB (min+gzip) lighter than one with every widget.
+filters only is 1.3–2.4 KiB (min+gzip) lighter than one with every widget.
 
 A widget is a `FilterWidget`: the `kinds` it draws and the component that
 draws them with `FilterFieldOptions` props. Adapter authors find a field's

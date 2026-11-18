@@ -17,6 +17,7 @@ import {
 } from "@adapttable/core/binding";
 import {
   computed,
+  type ComputedRef,
   h,
   type MaybeRefOrGetter,
   toValue,
@@ -65,16 +66,7 @@ export function useFilterHeaderControl<TRow>(
   const range = useRangeFilter(definition, source);
   const boolean = useBooleanFilter(definition, source);
   const owner = useFilterActionOwner(definition, source);
-  const custom = computed(() => {
-    const options = toValue(input);
-    return renderRegisteredFilter(
-      options.def,
-      owner.value.source,
-      options.labels,
-      options.registry ?? defaultFilterRegistry,
-      options.className
-    );
-  });
+  const custom = useRegisteredFilterRender(input);
   const choices = useFilterOptions(() => {
     const options = toValue(input);
     const kind = headerFilterCellKind(
@@ -90,7 +82,7 @@ export function useFilterHeaderControl<TRow>(
     const registry = options.registry ?? defaultFilterRegistry;
     const ownedSource = owner.value.source;
     if (custom.value !== undefined)
-      return { kind: "custom", content: renderDisplayValue(custom.value) };
+      return { kind: "custom", content: custom.value };
     const common = { className: options.className };
     switch (headerFilterCellKind(options.def, registry)) {
       case "text": {
@@ -241,3 +233,35 @@ export type {
   FilterHeaderSearchProps,
   FilterHeaderSelectProps,
 } from "@adapttable/core/binding";
+
+/**
+ * What a filter type's registered `render` draws for a field, through the
+ * field's action owner so a retired field cannot write; `undefined` when the
+ * type registered none.
+ *
+ * @public
+ */
+export function useRegisteredFilterRender<TRow>(
+  input: MaybeRefOrGetter<
+    Pick<
+      FilterHeaderControlOptions<TRow>,
+      "def" | "source" | "labels" | "registry" | "className"
+    >
+  >
+): ComputedRef<VNodeChild | undefined> {
+  const owner = useFilterActionOwner(
+    () => toValue(input).def,
+    () => toValue(input).source
+  );
+  return computed(() => {
+    const options = toValue(input);
+    const value = renderRegisteredFilter(
+      options.def,
+      owner.value.source,
+      options.labels,
+      options.registry ?? defaultFilterRegistry,
+      options.className
+    );
+    return value === undefined ? undefined : renderDisplayValue(value);
+  });
+}

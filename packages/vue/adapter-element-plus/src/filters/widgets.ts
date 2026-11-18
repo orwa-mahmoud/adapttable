@@ -25,7 +25,7 @@ function basicWidget(part: FilterFieldPart): FilterWidget {
 
 const ChecklistField: FunctionalComponent<
   FilterFieldOptions<unknown> & { classNames?: DataTableClassNames }
-> = (props) => h(ElementChecklistField<unknown>, props);
+> = (props) => h(ElementChecklistField<unknown>, { ...props });
 
 /** The Element Plus text filter: its operator and its value. @public */
 export const textFilterWidget = /* @__PURE__ */ basicWidget(textFieldPart);

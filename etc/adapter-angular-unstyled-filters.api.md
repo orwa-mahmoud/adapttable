@@ -5,6 +5,8 @@
 ```ts
 
 import { AdapterFiltersFeature } from '@adapttable/angular/adapter';
+import { AdaptTableFeature } from '@adapttable/angular';
+import { FilterDef } from '@adapttable/angular';
 import { filterTypes } from '@adapttable/angular/features';
 import { FilterWidget } from '@adapttable/angular/adapter';
 
@@ -17,7 +19,7 @@ export const booleanFilterWidget: FilterWidget;
 export const checklistFilterWidget: FilterWidget;
 
 // @public
-export const filters: AdapterFiltersFeature;
+export function filters<TRow>(defs?: readonly FilterDef<TRow>[]): AdaptTableFeature;
 
 // @public
 export function filtersWith(widgets: readonly FilterWidget[]): AdapterFiltersFeature;
