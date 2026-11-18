@@ -1,5 +1,12 @@
 # @adapttable/vuetify
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [2582d80]
+  - @adapttable/vue@0.6.0
+
 ## 0.4.0
 
 ### Minor Changes

@@ -1,5 +1,13 @@
 # @adapttable/reka-ui
 
+## 0.3.1
+
+### Patch Changes
+
+- 6efb8e3: The Reka UI search field's spacing and width live in one stylesheet rule; the rendered field is unchanged.
+- Updated dependencies [2582d80]
+  - @adapttable/vue@0.6.0
+
 ## 0.3.0
 
 ### Minor Changes

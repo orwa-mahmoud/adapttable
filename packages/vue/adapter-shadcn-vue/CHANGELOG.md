@@ -1,5 +1,12 @@
 # @adapttable/shadcn-vue
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [2582d80]
+  - @adapttable/vue@0.6.0
+
 ## 0.3.0
 
 ### Minor Changes

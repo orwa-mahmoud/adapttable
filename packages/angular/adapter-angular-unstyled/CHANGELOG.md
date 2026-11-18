@@ -1,5 +1,15 @@
 # @adapttable/angular-unstyled
 
+## 0.3.3
+
+### Patch Changes
+
+- fb0e3af: Doc comments name a link target only when the entry point that publishes the comment exports it; any other name is written as code. Editor hovers and the API reference show no broken links.
+- Updated dependencies [75dbf94]
+- Updated dependencies [fb0e3af]
+- Updated dependencies [2582d80]
+  - @adapttable/angular@0.10.0
+
 ## 0.3.2
 
 ### Patch Changes

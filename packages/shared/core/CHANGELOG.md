@@ -1,5 +1,19 @@
 # @adapttable/core
 
+## 3.15.0
+
+### Minor Changes
+
+- 2582d80: A headless table that keeps its view state in memory no longer bundles the URL code. React and Vue gain `useLocalFrontendData` and `useLocalTableViewState`, Angular `injectLocalFrontendData` and `injectLocalTableViewState`, over core's `createLocalTableViewStore`. Search, sort, filters, grouping and paging behave as with `urlSync: false`; the table measures about 2.3 KiB smaller in React and Vue and 2.5 KiB smaller in Angular.
+
+### Patch Changes
+
+- 308e2f8: Built-in aggregates (`sum`, `avg`, `count`, `min`, `max`) fold each column's values as they are read instead of collecting them into lists first: a 100,000-row, five-column `aggregate()` pass needs about 15 MB of temporary memory instead of 70–85 MB, with identical results. Custom and registered aggregators still receive the column's present values as a list.
+- fb0e3af: Doc comments name a link target only when the entry point that publishes the comment exports it; any other name is written as code. Editor hovers and the API reference show no broken links.
+- e8d3443: Frontend search releases the text of rows a patch removes, so a long-lived table no longer keeps every removed row in memory, and it searches again when `getSearchText` changes on the same rows, keeping the page, total and facet rows in step with the new field.
+- 55d0118: `applyRowPatches` and `applyRowPatchesWithLog` read each row's id at most twice per batch instead of once per patch. 200 updates at the end of 20,000 rows take about 2 ms instead of 44 ms; single-row patches cost the same as before.
+- e1bad04: A store action or batch that throws inside another batch undoes only its own writes: the outer batch keeps what it staged, and a slice the failed action alone touched keeps its value and notifies no one.
+
 ## 3.14.0
 
 ### Minor Changes
