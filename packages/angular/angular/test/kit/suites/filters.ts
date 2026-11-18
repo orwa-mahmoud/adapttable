@@ -309,7 +309,7 @@ export function filtersTests(
         } = {};
         const { fixture, part, openFilters } = await mount([
           filters(CUSTOM_DEFS),
-          filterTypes([customSpec(() => host.template)]),
+          filterTypes([customSpec(() => host.template ?? null)]),
         ]);
         host.template = fixture.componentInstance.custom();
         await openFilters();
