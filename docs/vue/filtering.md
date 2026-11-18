@@ -93,6 +93,53 @@ and `FilterTreeBuilder` for standalone native fields/builders, and
 `FilterFieldOptions<TRow>`, `ChecklistFilterProps<TRow>`,
 `FilterTreeBuilderProps<TRow>` and `HeaderFilterOptions<TRow>`.
 
+## Draw only the widgets you use
+
+`filters` draws every built-in widget, because filter types are data the
+table reads at runtime. When a table only ever shows some of them, compose
+`filtersWith` from the same entry with those widgets, and the rest stay out of
+the bundle:
+
+```ts
+import {
+  filtersWith,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/vue-unstyled/filters";
+
+interface Person {
+  id: string;
+  name: string;
+  score: number;
+}
+const filters = filtersWith([textFilterWidget, rangeFilterWidget]);
+const features = [
+  filters<Person>([
+    { key: "name", type: "text", label: "Name" },
+    { key: "score", type: "numberRange", label: "Score" },
+  ]),
+];
+// Pass these features with the Person columns and rows from getting started.
+```
+
+Every kit's filters entry exports `filtersWith` (an `AdapterFiltersFeature`,
+taking the same definitions and options as `filters`) and the six widgets:
+`textFilterWidget`, `booleanFilterWidget`, `selectFilterWidget`,
+`multiSelectFilterWidget`, `checklistFilterWidget` and `rangeFilterWidget`.
+A filter whose widget was not composed throws when its field draws, naming
+the filter and the widget to add. Measured 2026-11-18, a table with text
+filters only is 1.3–2.4 KiB (min+gzip) lighter than one with every widget.
+
+A widget is a `FilterWidget`: the `kinds` it draws and the component that
+draws them with `FilterFieldOptions` props. Adapter authors find a field's
+component with `filterWidgetComponent(def, registry, widgets)`, and build a
+field model with `useFilterFieldWith(input, parts)` from the field parts
+that draw each kind: `textFieldPart`, `rangeFieldPart`, `booleanFieldPart`,
+`selectFieldPart` and `multiSelectFieldPart`. `FILTER_FIELD_PARTS` holds all
+five, which is what `useFilterField` uses. A `FilterFieldPart` sets up its
+state once and adds its controls to a `FilterFieldDraft` each time the model
+is read.
+
 ## Explore the implementation
 
 Use the [Vue live demo](https://adapttable.orwamahmoud.com/vue/demo/) to switch

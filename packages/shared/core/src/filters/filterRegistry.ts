@@ -189,6 +189,42 @@ export function filterWidgetKind(
 }
 
 /**
+ * A kit's drawing of one or more built-in widget kinds, in the binding's own
+ * render form: a React component, a Vue component or an Angular component.
+ *
+ * @public
+ */
+export interface FilterWidgetOf<TRender> {
+  /** The widget kinds this drawing serves. */
+  readonly kinds: readonly FilterWidgetKind[];
+  /** What the binding draws for a field of one of those kinds. */
+  readonly render: TRender;
+}
+
+/**
+ * The drawing a filters form uses for this def: the widget composed for its
+ * kind, or `undefined` when its type names no built-in widget.
+ *
+ * @throws When the def's kind has no widget among `widgets`. The message names
+ *   the filter, its type and the widget kind to compose.
+ *
+ * @public
+ */
+export function filterWidgetFor<TRender>(
+  def: Pick<FilterDef, "key" | "type">,
+  registry: FilterTypeRegistry,
+  widgets: readonly FilterWidgetOf<TRender>[]
+): TRender | undefined {
+  const kind = filterWidgetKind(def, registry);
+  if (kind === undefined) return undefined;
+  const widget = widgets.find((candidate) => candidate.kinds.includes(kind));
+  if (widget) return widget.render;
+  throw new Error(
+    `AdaptTable: filter "${def.key}" of type "${def.type}" draws the "${kind}" widget, which this filters feature was not composed with. Add that widget to filtersWith([...]).`
+  );
+}
+
+/**
  * Operators the tree builder offers for this def.
  *
  * @public

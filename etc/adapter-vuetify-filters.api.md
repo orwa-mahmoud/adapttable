@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AdapterFiltersFeature } from '@adapttable/vue/adapter';
 import { ChecklistFilterProps } from '@adapttable/vue/adapter';
 import { FilterDef } from '@adapttable/vue';
 import { FilterFieldOptions } from '@adapttable/vue/adapter';
@@ -12,11 +13,11 @@ import { FiltersOptions } from '@adapttable/vue/features';
 import { FilterTreeBuilderProps } from '@adapttable/vue/adapter';
 import { filterTypes } from '@adapttable/vue/features';
 import { FilterTypeSpec } from '@adapttable/vue';
+import { FilterWidget } from '@adapttable/vue/adapter';
 import { PublicProps } from 'vue';
 import { RendererElement } from 'vue';
 import { RendererNode } from 'vue';
 import { SetupContext } from 'vue';
-import { TableFeature } from '@adapttable/vue';
 import { VNode } from 'vue';
 
 // @public (undocumented)
@@ -35,6 +36,11 @@ const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>
 // @public (undocumented)
 type __VLS_PrettifyLocal<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
+export { AdapterFiltersFeature }
+
+// @public
+export const booleanFilterWidget: FilterWidget;
+
 // @public
 export const ChecklistFilter: (<TRow>(props: ChecklistFilterProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
@@ -44,14 +50,20 @@ export const ChecklistFilter: (<TRow>(props: ChecklistFilterProps<TRow>, context
 
 export { ChecklistFilterProps }
 
+// @public
+export const checklistFilterWidget: FilterWidget;
+
 export { FilterDef }
 
 export { FilterOption }
 
 // @public
-export function filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: FiltersOptions): TableFeature<TRow>;
+export const filters: AdapterFiltersFeature;
 
 export { FiltersOptions }
+
+// @public
+export function filtersWith(widgets: readonly FilterWidget[]): AdapterFiltersFeature;
 
 // @public
 export const FilterTreeBuilder: (<TRow>(props: FilterTreeBuilderProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
@@ -75,6 +87,20 @@ export { FilterTreeBuilderProps }
 export { filterTypes }
 
 export { FilterTypeSpec }
+
+export { FilterWidget }
+
+// @public
+export const multiSelectFilterWidget: FilterWidget;
+
+// @public
+export const rangeFilterWidget: FilterWidget;
+
+// @public
+export const selectFilterWidget: FilterWidget;
+
+// @public
+export const textFilterWidget: FilterWidget;
 
 // @public (undocumented)
 export const VuetifyFilterField: typeof __VLS_export;

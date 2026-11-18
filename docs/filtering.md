@@ -181,6 +181,50 @@ every filter lives on a column, or pass standalone defs as above. See
 | `filterTypes([…])`          | `FilterTypeSpec[]`                  | built-ins   | Factory from `@adapttable/<kit>/filters`; extra or replacement filter types merged onto `defaultFilterRegistry`. Same `type` replaces.                                       |
 | `headerFilters()`           | factory                             | off         | Factory from `@adapttable/<kit>/header-filters`; per-column header filter funnel. Composing it selects header mode. Desktop only. Never stacked with the popover or drawer.  |
 
+## Draw only the widgets you use
+
+`filters` draws every built-in widget, because filter types are data the
+table reads at runtime. When a table only ever shows some of them, compose
+`filtersWith` from the same entry with those widgets, and the rest stay out of
+the bundle:
+
+```tsx
+import {
+  filtersWith,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/mui/filters";
+
+const filters = filtersWith([textFilterWidget, rangeFilterWidget]);
+
+const features = [
+  filters<Person>([
+    { key: "name", type: "text" },
+    { key: "salary", type: "numberRange" },
+  ]),
+];
+// <DataTable data={people} columns={columns} rowKey={(row) => row.id} features={features} />
+```
+
+Every kit's filters entry exports `filtersWith` and the six widgets:
+`textFilterWidget`, `booleanFilterWidget`, `selectFilterWidget`,
+`multiSelectFilterWidget`, `checklistFilterWidget` and `rangeFilterWidget`
+(both `dateRange` and `numberRange`). A filter whose widget was not composed
+throws when its field draws, naming the filter and the widget to add. A type
+registered with its own `render` draws that, whatever was composed. Measured
+2026-11-18 on MUI, a table with text filters only is 4.4 KiB (min+gzip)
+lighter than one with every widget.
+
+A widget is a `FilterWidget`: the `kinds` it draws and the component that
+draws them, which receives `FilterWidgetProps` (`def`, `source`, `labels`).
+A kit hands its own extras to every field as well, such as an accent color or
+its class overrides, and a widget that draws them reads them from its props.
+Adapter authors draw one field
+with `FilterWidgetField` (`FilterWidgetFieldProps`: `field`, `registry`,
+`widgets`) from `@adapttable/react/adapter`; it runs a registered `render`
+first, then the widget composed for the kind, through core's
+`filterWidgetFor` over a `FilterWidgetOf<TRender>` list.
+
 ## Headless filter primitives
 
 The pieces behind the auto-built forms are exported for custom filter UIs:

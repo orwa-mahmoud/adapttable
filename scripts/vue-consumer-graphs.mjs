@@ -32,7 +32,7 @@ export async function vueConsumerGraph(fixture, dir) {
   }
   const input = join(
     dir,
-    `${fixture.name.replaceAll(/[^a-zA-Z0-9.-]/g, "_")}.mjs`
+    `${fixture.name.replaceAll(/[^a-zA-Z0-9.-]/g, "_")}.${fixture.typescript ? "ts" : "mjs"}`
   );
   writeFileSync(input, code);
   const imports = new Set();

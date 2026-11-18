@@ -178,6 +178,13 @@ export {
   type FilterTreeSlots,
 } from "./filters/filterTreeChrome";
 export {
+  AdaptChecklistFilterFieldModel,
+  type AdapterFiltersFeature,
+  AdaptFilterWidgetFormModel,
+  type FilterWidget,
+  withFilterWidgets,
+} from "./filters/filterWidgets";
+export {
   type FiltersMode,
   type FiltersView,
   filtersViewFor,

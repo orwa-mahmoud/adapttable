@@ -3,6 +3,8 @@ import {
   FilterPanelChrome,
   type FilterPanelSlots,
   filterViewKey,
+  type FilterWidget,
+  filterWidgetComponent,
   useDataTableClassNames,
   useFeatureState,
 } from "@adapttable/vue/adapter";
@@ -10,10 +12,13 @@ import UBadge from "@nuxt/ui/components/Badge.vue";
 import { h } from "vue";
 
 import NuxtButton from "../controls/NuxtButton.vue";
-import NuxtFilterField from "./NuxtFilterField.vue";
 import NuxtFilterSurface from "./NuxtFilterSurface";
 import NuxtFilterTree from "./NuxtFilterTree.vue";
 
+const props = defineProps<{
+  /** The widgets the panel draws its fields with. */
+  widgets: readonly FilterWidget[];
+}>();
 const names = useDataTableClassNames();
 const model = useFeatureState(filterViewKey<unknown>());
 const buttonClassName = (part: string) => {
@@ -82,7 +87,10 @@ const controls: FilterPanelSlots<unknown> = {
       },
       () => control.label
     ),
-  Field: (control) => h(NuxtFilterField<unknown>, { ...control }),
+  Field: (control) =>
+    h(filterWidgetComponent(control.def, control.registry, props.widgets), {
+      ...control,
+    }),
   Tree: (control) =>
     h(NuxtFilterTree<unknown>, { ...control, classNames: names.value }),
   Popover: (control) => h(NuxtFilterSurface, { ...control, modal: false }),

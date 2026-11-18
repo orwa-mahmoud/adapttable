@@ -43,8 +43,11 @@ import {
 import {
   ChecklistFilter,
   filters,
+  filtersWith,
   FilterTreeBuilder,
   QuasarFilterField,
+  rangeFilterWidget,
+  textFilterWidget,
 } from "../src/filters";
 import QuasarFilterSurface from "../src/filters/QuasarFilterSurface.vue";
 import {
@@ -300,6 +303,20 @@ describe("Quasar filters and editors", () => {
     await wrapper.findAllComponents(QBtn)[0]!.trigger("click");
     await settle();
     expect(state.extra.value.name).toEqual(["Ada"]);
+  });
+  it("draws each field with the widget composed for its kind", async () => {
+    const composed = filtersWith([textFilterWidget, rangeFilterWidget]);
+    const wrapper = table([
+      composed<Row>([
+        { key: "name", type: "text" },
+        { key: "amount", type: "numberRange" },
+      ]),
+    ]);
+    await wrapper.get(part("filters-button")).trigger("click");
+    await settle();
+    const form = document.body.querySelector(part("filters-form"))!;
+    expect(form.querySelectorAll(part("filter-field"))).toHaveLength(2);
+    expect(form.querySelectorAll(part("filter-operator"))).toHaveLength(2);
   });
   it("opens the kit popover, filters the actual table, and removes active chips", async () => {
     const wrapper = table([

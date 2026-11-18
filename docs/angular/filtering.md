@@ -94,6 +94,69 @@ the received query in `[onQueryChange]`. Changing filters does not filter the
 server page locally. See [data tiers](./data-tiers.md) and the shared
 [server query contract](../server-queries.md).
 
+## Draw only the widgets you use
+
+`filters()` draws every built-in widget, because filter types are data the
+table reads at runtime. When a table only ever shows some of them, compose
+`filtersWith` from the same entry with those widgets, and the rest stay out of
+the bundle:
+
+```ts
+import { Component } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/angular-unstyled";
+import {
+  filtersWith,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/angular-unstyled/filters";
+
+interface Person {
+  id: string;
+  name: string;
+  budget: number;
+}
+
+const filters = filtersWith([textFilterWidget, rangeFilterWidget]);
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="rows"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  `,
+})
+export class People {
+  readonly rows: Person[] = [{ id: "ada", name: "Ada", budget: 20000 }];
+  readonly columns: ColumnDef<Person>[] = [
+    { key: "name", header: "Name", filter: "text" },
+    { key: "budget", header: "Budget", filter: "numberRange" },
+  ];
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [filters<Person>()];
+}
+```
+
+Every kit's filters entry exports `filtersWith` (an `AdapterFiltersFeature`)
+and the six widgets: `textFilterWidget`, `booleanFilterWidget`,
+`selectFilterWidget`, `multiSelectFilterWidget`, `checklistFilterWidget` and
+`rangeFilterWidget`. A filter whose widget was not composed throws when its
+field draws, naming the filter and the widget to add. A type registered with
+its own `render` draws that, whatever was composed. Measured 2026-11-18 on the
+native kit, a table with text filters only is 4.8 KiB (min+gzip) lighter than
+one with every widget.
+
+A widget is a `FilterWidget`: the `kinds` it draws and a component with
+`def`, `source` and `labels` inputs. Adapter authors publish the widgets with
+`withFilterWidgets(feature, widgets)` and draw the form from
+`AdaptFilterWidgetFormModel`, which reads them; a checklist widget builds on
+`AdaptChecklistFilterFieldModel`.
+
 ## Interaction and persistence
 
 `filtersMode="popover"` opens an anchored panel without a backdrop. Escape

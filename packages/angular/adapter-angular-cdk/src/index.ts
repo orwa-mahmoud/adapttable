@@ -8,7 +8,15 @@
  * @packageDocumentation
  */
 export { AdaptFilterChips } from "./components/activeFilterChips";
-export { AdaptAutoFilterForm } from "./components/autoFilterForm";
+export {
+  AdaptAutoFilterForm,
+  booleanFilterWidget,
+  checklistFilterWidget,
+  multiSelectFilterWidget,
+  rangeFilterWidget,
+  selectFilterWidget,
+  textFilterWidget,
+} from "./components/autoFilterForm";
 export { AdaptBulkBar } from "./components/bulkActionBar";
 export {
   AdaptCdkPopover,

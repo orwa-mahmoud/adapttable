@@ -110,6 +110,8 @@ export abstract class AdaptMultiSelectFilterFieldModel<
 > extends AdaptFilterOptionsModel<TRow> {
   readonly def = input.required<FilterDef<TRow>>();
   readonly source = input.required<TableSource<TRow>>();
+  /** Resolved labels; every widget field takes them. */
+  readonly labels = input<Required<TableLabels>>();
   protected readonly id = createFilterFieldId();
   protected readonly listHeight = 220;
   protected readonly caption = computed(() => filterLabel(this.def()));

@@ -17,7 +17,12 @@ import {
 import { renderToString } from "vue/server-renderer";
 
 import { DataTable, type DataTableProps } from "../src";
-import { filters } from "../src/filters";
+import {
+  filters,
+  filtersWith,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "../src/filters";
 import { FilterDrawer } from "../src/filters/FilterDrawer";
 import { FilterHeaderControl } from "../src/filters/FilterHeaderControl";
 import { FilterPopover } from "../src/filters/FilterPopover";
@@ -610,5 +615,24 @@ describe("shadcn filter surface ownership", () => {
     controller.onCloseAutoFocus(new Event("close", { cancelable: true }));
     await nextTick();
     expect(focus).not.toHaveBeenCalled();
+  });
+
+  it("draws each field with the widget composed for its kind", async () => {
+    const composed = filtersWith([textFilterWidget, rangeFilterWidget]);
+    const { root } = table("popover", {
+      features: [
+        composed<Row>([
+          { key: "name", type: "text" },
+          { key: "score", type: "numberRange" },
+        ]),
+      ],
+    });
+    const trigger = get<HTMLButtonElement>(root, part("filters-button"));
+    visible(trigger);
+    trigger.click();
+    await settle();
+    const form = get(document, part("filters-form"));
+    expect(form.querySelectorAll(part("filter-field"))).toHaveLength(2);
+    expect(form.querySelectorAll(part("filter-operator"))).toHaveLength(2);
   });
 });

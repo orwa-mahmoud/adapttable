@@ -20,7 +20,13 @@ import {
   exportXlsx,
 } from "@adapttable/ngx-bootstrap/export";
 import { extraRows } from "@adapttable/ngx-bootstrap/extra-rows";
-import { filters, filterTypes } from "@adapttable/ngx-bootstrap/filters";
+import {
+  filters,
+  filtersWith,
+  filterTypes,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/ngx-bootstrap/filters";
 import { findInTable } from "@adapttable/ngx-bootstrap/find-in-table";
 import { fullscreen } from "@adapttable/ngx-bootstrap/fullscreen";
 import { grouping } from "@adapttable/ngx-bootstrap/grouping";
@@ -110,6 +116,9 @@ export const kit: AngularKitUnderTest = {
     editHistory,
     editing,
     filters,
+    filtersWith,
+    textFilterWidget,
+    rangeFilterWidget,
     grouping,
     nestedTable,
     rowActions,

@@ -2,17 +2,18 @@ import {
   FilterPanelChrome,
   type FilterPanelSlots,
   filterViewKey,
+  type FilterWidget,
+  filterWidgetComponent,
   useFeatureState,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { useRekaClasses } from "../context";
 import { rekaButton } from "../controls/basic";
 import { RekaSurface } from "../controls/RekaSurface";
-import FilterField from "./FilterField.vue";
 import FilterTreeBuilder from "./FilterTreeBuilder.vue";
 
-function useRekaFiltersPanel() {
+function useRekaFiltersPanel(widgets: readonly FilterWidget[]) {
   const names = useRekaClasses();
   const model = useFeatureState(filterViewKey<unknown>());
   const buttonClass = (part: string) => {
@@ -73,7 +74,8 @@ function useRekaFiltersPanel() {
         },
         control.label
       ),
-    Field: (control) => h(FilterField, control),
+    Field: (control) =>
+      h(filterWidgetComponent(control.def, control.registry, widgets), control),
     Tree: (control) =>
       h(FilterTreeBuilder, { ...control, classNames: names.value }),
     Popover: (control) => h(RekaSurface, { ...control, modal: false }),
@@ -97,5 +99,12 @@ function useRekaFiltersPanel() {
 
 export const RekaFiltersPanel = defineComponent({
   name: "RekaFiltersPanel",
-  setup: useRekaFiltersPanel,
+  props: {
+    /** The widgets the panel draws its fields with. */
+    widgets: {
+      type: Array as PropType<readonly FilterWidget[]>,
+      required: true,
+    },
+  },
+  setup: (props) => useRekaFiltersPanel(props.widgets),
 });

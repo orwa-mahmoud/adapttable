@@ -20,7 +20,13 @@ import {
   exportXlsx,
 } from "@adapttable/angular-aria/export";
 import { extraRows } from "@adapttable/angular-aria/extra-rows";
-import { filters, filterTypes } from "@adapttable/angular-aria/filters";
+import {
+  filters,
+  filtersWith,
+  filterTypes,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/angular-aria/filters";
 import { findInTable } from "@adapttable/angular-aria/find-in-table";
 import { fullscreen } from "@adapttable/angular-aria/fullscreen";
 import { grouping } from "@adapttable/angular-aria/grouping";
@@ -112,6 +118,9 @@ export const kit: AngularKitUnderTest = {
     editHistory,
     editing,
     filters,
+    filtersWith,
+    textFilterWidget,
+    rangeFilterWidget,
     grouping,
     nestedTable,
     rowActions,

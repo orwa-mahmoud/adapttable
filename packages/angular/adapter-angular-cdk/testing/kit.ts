@@ -20,7 +20,13 @@ import {
   exportXlsx,
 } from "@adapttable/angular-cdk/export";
 import { extraRows } from "@adapttable/angular-cdk/extra-rows";
-import { filters, filterTypes } from "@adapttable/angular-cdk/filters";
+import {
+  filters,
+  filtersWith,
+  filterTypes,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/angular-cdk/filters";
 import { findInTable } from "@adapttable/angular-cdk/find-in-table";
 import { fullscreen } from "@adapttable/angular-cdk/fullscreen";
 import { grouping } from "@adapttable/angular-cdk/grouping";
@@ -112,6 +118,9 @@ export const kit: AngularKitUnderTest = {
     editHistory,
     editing,
     filters,
+    filtersWith,
+    textFilterWidget,
+    rangeFilterWidget,
     grouping,
     nestedTable,
     rowActions,

@@ -1,8 +1,10 @@
 import {
   type DataTableClassNames,
+  FILTER_FIELD_PARTS,
   FilterFieldChrome,
   type FilterFieldOptions,
-  useFilterField,
+  type FilterFieldPart,
+  useFilterFieldWith,
   withProps,
 } from "@adapttable/vue/adapter";
 import {
@@ -21,7 +23,8 @@ export interface BasicFilterFieldProps<TRow> extends FilterFieldOptions<TRow> {
   readonly dir?: "ltr" | "rtl";
 }
 
-const propNames = {
+/** The runtime props of a basic field, for the components that wrap one. */
+export const basicFieldProps = {
   id: { type: String as PropType<BasicFilterFieldProps<unknown>["id"]> },
   def: { type: Object as PropType<BasicFilterFieldProps<unknown>["def"]> },
   source: {
@@ -41,9 +44,18 @@ const propNames = {
   },
   dir: { type: String as PropType<BasicFilterFieldProps<unknown>["dir"]> },
 };
-const BasicFieldPresentation = defineComponent(
-  (props: BasicFilterFieldProps<unknown>) => {
-    const model = useFilterField(() => props);
+/** Props of a field drawn by a chosen set of field parts. */
+export interface PartsFilterFieldProps<
+  TRow,
+> extends BasicFilterFieldProps<TRow> {
+  /** The widget kinds this field can draw. */
+  readonly parts: readonly FilterFieldPart[];
+}
+
+/** A basic field drawn by only the given field parts. */
+export const PartsFilterField = defineComponent(
+  (props: PartsFilterFieldProps<unknown>) => {
+    const model = useFilterFieldWith(() => props, props.parts);
     const controls = shadcnFilterControls(
       () => filterClassNames(props.classNames),
       () => props.dir
@@ -56,7 +68,16 @@ const BasicFieldPresentation = defineComponent(
         className: props.className,
       });
   },
-  { name: "ShadcnBasicFilterField", props: propNames }
+  {
+    name: "ShadcnBasicFilterField",
+    props: {
+      ...basicFieldProps,
+      parts: {
+        type: Array as PropType<PartsFilterFieldProps<unknown>["parts"]>,
+        required: true,
+      },
+    },
+  }
 );
 
 /** Generic boundary keeps filter accessors tied to the host's row type. */
@@ -65,11 +86,12 @@ export const BasicFilterField = /* @__PURE__ */ withProps(
     props: BasicFilterFieldProps<TRow>,
     context: Pick<SetupContext, "attrs">
   ) {
-    return createVNode(BasicFieldPresentation, {
+    return createVNode(PartsFilterField, {
       ...context.attrs,
       ...props,
       dir: props.dir,
+      parts: FILTER_FIELD_PARTS,
     });
   },
-  Object.keys(propNames) as (keyof BasicFilterFieldProps<unknown>)[]
+  Object.keys(basicFieldProps) as (keyof BasicFilterFieldProps<unknown>)[]
 );

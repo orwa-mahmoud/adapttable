@@ -3,6 +3,8 @@ import {
   FilterPanelChrome,
   type FilterPanelModel,
   type FilterPanelSlots,
+  type FilterWidget,
+  filterWidgetComponent,
   withProps,
 } from "@adapttable/vue/adapter";
 import {
@@ -16,12 +18,13 @@ import {
 import { shadcnButton } from "../controls";
 import { cn } from "../lib/utils";
 import { FilterDrawer } from "./FilterDrawer";
-import { FilterField } from "./FilterField";
+import { CustomField } from "./FilterField";
 import { FilterPopover } from "./FilterPopover";
 import { FilterTree } from "./FilterTree";
 import { FilterTrigger } from "./FilterTrigger";
 import { filterClassNames } from "./presentation";
 import { usePanelClose } from "./usePanelClose";
+import { FILTER_WIDGETS } from "./widgets";
 
 export interface FilterPanelProps<TRow> {
   readonly model: FilterPanelModel<TRow>;
@@ -36,8 +39,14 @@ const filterPanelRuntimeProps = {
   },
 };
 
-const PanelPresentation = defineComponent(
-  (props: FilterPanelProps<unknown>) => {
+/** Props of a panel whose fields are drawn with the given widgets. */
+interface WidgetFilterPanelProps extends FilterPanelProps<unknown> {
+  readonly widgets: readonly FilterWidget[];
+}
+
+/** The filters panel, drawing each field with the widget for its kind. */
+export const WidgetFilterPanel = defineComponent(
+  (props: WidgetFilterPanelProps) => {
     const { close, onCloseAutoFocus } = usePanelClose(() => props.model);
     const names = () => filterClassNames(props.classNames);
     const controls: FilterPanelSlots<unknown> = {
@@ -58,12 +67,19 @@ const PanelPresentation = defineComponent(
             ),
           },
         }),
-      Field: (control) =>
-        h(FilterField, {
-          ...control,
-          classNames: names(),
-          dir: props.model.dir,
-        }),
+      Field: (control) => {
+        const field = { ...control, classNames: names(), dir: props.model.dir };
+        return control.registry.get(control.def.type)?.render
+          ? h(CustomField, field)
+          : h(
+              filterWidgetComponent(
+                control.def,
+                control.registry,
+                props.widgets
+              ),
+              field
+            );
+      },
       Tree: (control) =>
         h(FilterTree, {
           ...control,
@@ -94,12 +110,25 @@ const PanelPresentation = defineComponent(
         controls,
       });
   },
-  { name: "ShadcnFilterPanel", props: filterPanelRuntimeProps }
+  {
+    name: "ShadcnFilterPanel",
+    props: {
+      ...filterPanelRuntimeProps,
+      widgets: {
+        type: Array as PropType<WidgetFilterPanelProps["widgets"]>,
+        required: true,
+      },
+    },
+  }
 );
 
 export const FilterPanel = /* @__PURE__ */ withProps(function FilterPanel<TRow>(
   props: FilterPanelProps<TRow>,
   context: Pick<SetupContext, "attrs">
 ) {
-  return createVNode(PanelPresentation, { ...context.attrs, ...props });
+  return createVNode(WidgetFilterPanel, {
+    ...context.attrs,
+    ...props,
+    widgets: FILTER_WIDGETS,
+  });
 }, Object.keys(filterPanelRuntimeProps));

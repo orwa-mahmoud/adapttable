@@ -19,7 +19,13 @@ import {
 import { renderToString } from "vue/server-renderer";
 
 import { DataTable } from "../src";
-import { filters, NuxtFilterField } from "../src/filters";
+import {
+  filters,
+  filtersWith,
+  NuxtFilterField,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "../src/filters";
 import NuxtFilterSurface from "../src/filters/NuxtFilterSurface";
 
 interface Row {
@@ -354,5 +360,29 @@ describe("Nuxt filtering feature", () => {
     const html = await renderToString(app);
     expect(html).toContain('data-adapttable-part="filters-button"');
     expect(html).not.toContain('data-adapttable-part="filters-popover"');
+  });
+
+  it("draws each field with the widget composed for its kind", async () => {
+    const composed = filtersWith([textFilterWidget, rangeFilterWidget]);
+    mount(() =>
+      h(DataTable<Row>, {
+        data: rows,
+        columns,
+        rowKey: (row) => row.id,
+        urlSync: false,
+        forceMobile: false,
+        features: [
+          composed<Row>([
+            { key: "name", type: "text" },
+            { key: "team", type: "numberRange" },
+          ]),
+        ],
+      })
+    );
+    await settle();
+    await click(part("filters-button"));
+    const form = target(part("filters-form"));
+    expect(form.querySelectorAll(part("filter-field"))).toHaveLength(2);
+    expect(form.querySelectorAll(part("filter-operator"))).toHaveLength(2);
   });
 });

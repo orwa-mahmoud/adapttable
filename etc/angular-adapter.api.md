@@ -195,6 +195,7 @@ import { FilterTreeSelectProps } from '@adapttable/core/binding';
 import { FilterTriggerToggleState } from '@adapttable/core/binding';
 import { FilterTypeRegistry } from '@adapttable/core';
 import { filterWidgetKind } from '@adapttable/core';
+import { FilterWidgetOf } from '@adapttable/core/binding';
 import { FilterWidgetRenderProps } from '@adapttable/core';
 import { FIND_BAR } from '@adapttable/core/binding';
 import { FindBarProps } from '@adapttable/core/binding';
@@ -1360,7 +1361,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "setExtras" | "facets">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -1405,6 +1406,36 @@ export class AdaptChecklistChrome<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptChecklistChrome<any>, never>;
+}
+
+// @public
+export abstract class AdaptChecklistFilterFieldModel<TRow> {
+    // (undocumented)
+    readonly def: InputSignal<FilterDef<TRow>>;
+    // (undocumented)
+    readonly labels: InputSignal<Required<TableLabels>>;
+    // (undocumented)
+    readonly source: InputSignal<TableSource<TRow>>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptChecklistFilterFieldModel<any>, never, never, {
+        "def": {
+            "alias": "def";
+            "required": true;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptChecklistFilterFieldModel<any>, never>;
 }
 
 // @public
@@ -2648,6 +2679,9 @@ export class AdaptEditableCellGate<TRow> {
 }
 
 // @public
+export type AdapterFiltersFeature = <TRow>(defs?: readonly FilterDef<TRow>[]) => AdaptTableFeature;
+
+// @public
 export class AdaptExportAnnouncer {
     readonly announcement: InputSignal<string>;
     // (undocumented)
@@ -3029,6 +3063,38 @@ export class AdaptFilterTreeChrome<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFilterTreeChrome<any>, never>;
+}
+
+// @public
+export abstract class AdaptFilterWidgetFormModel<TRow> extends AdaptAutoFilterFormModel<TRow> {
+    protected readonly widgetFields: Signal<    {
+    widget: Type<unknown> | undefined;
+    inputs: {
+    def: FilterDef<TRow>;
+    source: TableSource<TRow>;
+    labels: Required<TableLabels>;
+    };
+    def: FilterDef<TRow>;
+    context: {
+    $implicit: FilterWidgetRenderProps<TRow>;
+    def: FilterDef<TRow>;
+    source: FilterFormSource<TRow>;
+    labels: Required<TableLabels>;
+    className?: string;
+    };
+    renderer: ResolvedRenderer<    {
+    $implicit: FilterWidgetRenderProps<TRow>;
+    def: FilterDef<TRow>;
+    source: FilterFormSource<TRow>;
+    labels: Required<TableLabels>;
+    className?: string;
+    }> | null;
+    text: string | null;
+    }[]>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptFilterWidgetFormModel<any>, never, never, {}, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFilterWidgetFormModel<any>, never>;
 }
 
 // @public
@@ -3607,6 +3673,7 @@ export abstract class AdaptMultiSelectFilterFieldModel<TRow> extends AdaptFilter
     readonly def: InputSignal<FilterDef<TRow>>;
     // (undocumented)
     protected readonly id: string;
+    readonly labels: InputSignal<Required<TableLabels> | undefined>;
     // (undocumented)
     protected readonly listHeight = 220;
     // (undocumented)
@@ -3625,6 +3692,11 @@ export abstract class AdaptMultiSelectFilterFieldModel<TRow> extends AdaptFilter
         "source": {
             "alias": "source";
             "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
             "isSignal": true;
         };
     }, {}, never, never, true, never>;
@@ -5646,6 +5718,9 @@ export interface FilterTreeSlots {
 
 export { FilterTriggerToggleState }
 
+// @public
+export type FilterWidget = FilterWidgetOf<Type<unknown>>;
+
 export { filterWidgetKind }
 
 export { FilterWidgetRenderProps }
@@ -6585,6 +6660,9 @@ export { watchClickedOpener }
 export { watchOverlayDismiss }
 
 export { windowGroupedEntries }
+
+// @public
+export function withFilterWidgets(feature: AdaptTableFeature, widgets: readonly FilterWidget[]): AdaptTableFeature;
 
 export { withRowMutationActions }
 

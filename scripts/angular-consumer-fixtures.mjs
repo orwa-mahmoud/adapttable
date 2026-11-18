@@ -163,6 +163,12 @@ const FEATURES = {
     call: "filters()",
     present: ["filters"],
   },
+  "text filters": {
+    factory: "filtersWith, textFilterWidget",
+    entry: "filters",
+    call: "filtersWith([textFilterWidget])()",
+    present: ["filtersWith", "AdaptTextFilterField"],
+  },
   virtualize: {
     factory: "virtualize",
     entry: "virtualize",
@@ -327,6 +333,7 @@ const CEILINGS = {
   "angular · unstyled grouping + aggregation": { own: 143, app: 254 },
   "angular · unstyled + editing": { own: 148, app: 260 },
   "angular · unstyled + filters": { own: 154, app: 266 },
+  "angular · unstyled + text filters": { own: 154, app: 266 },
   "angular · unstyled + virtualize": { own: 140, app: 250 },
   "angular · unstyled + exportCsv": { own: 142, app: 252 },
   "angular · unstyled combination": { own: 156, app: 268 },
@@ -465,6 +472,11 @@ export function angularConsumerFixtures(kits = angularKits()) {
     ),
     feature("editing", "Native table with cell editing"),
     feature("filters", "Native table with the filter drawer"),
+    feature(
+      "text filters",
+      "Native table with the filter drawer drawn by the text widget only",
+      [...BASE_ABSENT, "AdaptRangeFilterField", "AdaptBooleanFilterField"]
+    ),
     feature("virtualize", "Native table with row virtualization"),
     feature("exportCsv", "Native table with CSV export"),
     rendered(

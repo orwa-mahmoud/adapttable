@@ -25,7 +25,7 @@ import {
   type NgbOffcanvasRef,
 } from "@ng-bootstrap/ng-bootstrap/offcanvas";
 
-import { AdaptAutoFilterForm } from "./autoFilterForm";
+import { AdaptWidgetFilterForm } from "./autoFilterForm";
 import { TREE_SLOTS } from "./filterTreeBuilder";
 
 /** An overlay's props in Angular: its content is a template. */
@@ -38,7 +38,7 @@ import { TREE_SLOTS } from "./filterTreeBuilder";
  */
 @Component({
   selector: "adapt-filters-form",
-  imports: [AdaptAutoFilterForm, AdaptFilterTreeChrome],
+  imports: [AdaptWidgetFilterForm, AdaptFilterTreeChrome],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let p = props();
@@ -57,7 +57,7 @@ import { TREE_SLOTS } from "./filterTreeBuilder";
         />
       </div>
       @if (p.showSimpleFields) {
-        <adapt-auto-filter-form
+        <adapt-widget-filter-form
           [defs]="p.defs"
           [source]="p.source"
           [labels]="p.labels"

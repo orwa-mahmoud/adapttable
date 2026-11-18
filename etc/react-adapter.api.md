@@ -288,6 +288,7 @@ import { FILTER_TYPES } from '@adapttable/core';
 import { filterColumnMenuRows } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
 import { FilterFormSource } from '@adapttable/core/binding';
+import { FilterFormSource as FilterFormSource_2 } from '@adapttable/core';
 import { FilterHeaderClassNames } from '@adapttable/core/binding';
 import { FilterHeaderControlProps } from '@adapttable/core/binding';
 import { FilterHeaderMultiProps } from '@adapttable/core/binding';
@@ -320,6 +321,7 @@ import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { FilterWidgetKind } from '@adapttable/core';
 import { filterWidgetKind } from '@adapttable/core';
+import { FilterWidgetOf } from '@adapttable/core/binding';
 import { FilterWidgetRenderProps } from '@adapttable/core';
 import { FIND_BAR } from '@adapttable/core/binding';
 import { FIND_LIVE } from '@adapttable/core/binding';
@@ -2639,9 +2641,29 @@ export { FilterTypeSpec }
 
 export { FilterValue }
 
+// @public
+export type FilterWidget<TProps extends FilterWidgetProps = FilterWidgetProps> = FilterWidgetOf<ComponentType<TProps>>;
+
+// @public
+export function FilterWidgetField<TProps extends FilterWidgetProps>(input: Readonly<FilterWidgetFieldProps<TProps>>): ReactElement | null;
+
+// @public
+export interface FilterWidgetFieldProps<TProps extends FilterWidgetProps> {
+    readonly field: TProps;
+    readonly registry: FilterTypeRegistry;
+    readonly widgets: readonly FilterWidget<TProps>[];
+}
+
 export { FilterWidgetKind }
 
 export { filterWidgetKind }
+
+// @public
+export interface FilterWidgetProps<TRow = unknown> {
+    readonly def: FilterDef<TRow>;
+    readonly labels: Required<TableLabels>;
+    readonly source: FilterFormSource_2<TRow>;
+}
 
 export { FilterWidgetRenderProps }
 

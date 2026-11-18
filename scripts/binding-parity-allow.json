@@ -289,7 +289,6 @@
         "AdapterEditingFeatures": "pending: shared-surface decision",
         "AdapterFeatureComponent": "pending: shared-surface decision",
         "AdapterFiltersComponents": "pending: shared-surface decision",
-        "AdapterFiltersFeature": "pending: shared-surface decision",
         "AdapterFindButtonProps": "pending: shared-surface decision",
         "AdapterGroupingComponents": "pending: shared-surface decision",
         "AdapterGroupingFeature": "pending: shared-surface decision",
@@ -1037,7 +1036,10 @@
         "windowedTableAria": "pending: shared-surface decision",
         "withFindMarks": "pending: shared-surface decision",
         "withKitEnvironment": "pending: shared-surface decision",
-        "withRowDropTarget": "pending: shared-surface decision"
+        "withRowDropTarget": "pending: shared-surface decision",
+        "FilterWidgetField": "React kits draw one filter field with this; a Vue kit's panel looks the component up with filterWidgetComponent, and an Angular kit's form reads its widgets through AdaptFilterWidgetFormModel",
+        "FilterWidgetFieldProps": "React kits draw one filter field with this; a Vue kit's panel looks the component up with filterWidgetComponent, and an Angular kit's form reads its widgets through AdaptFilterWidgetFormModel",
+        "FilterWidgetProps": "React kits draw one filter field with this; a Vue kit's panel looks the component up with filterWidgetComponent, and an Angular kit's form reads its widgets through AdaptFilterWidgetFormModel"
       },
       "features": {
         "BatchRowEdit": "pending: shared-surface decision",
@@ -1853,7 +1855,20 @@
         "useSummaryCells": "pending: shared-surface decision",
         "useTableSummaryModel": "pending: shared-surface decision",
         "withKitEnvironment": "pending: shared-surface decision",
-        "withProps": "pending: shared-surface decision"
+        "withProps": "pending: shared-surface decision",
+        "booleanFieldPart": "Vue kits build a field model from per-kind parts and look a field's component up for their panel; React kits draw one field with FilterWidgetField, and Angular kits read their widgets through AdaptFilterWidgetFormModel",
+        "FILTER_FIELD_PARTS": "Vue kits build a field model from per-kind parts and look a field's component up for their panel; React kits draw one field with FilterWidgetField, and Angular kits read their widgets through AdaptFilterWidgetFormModel",
+        "FilterFieldDraft": "Vue kits build a field model from per-kind parts and look a field's component up for their panel; React kits draw one field with FilterWidgetField, and Angular kits read their widgets through AdaptFilterWidgetFormModel",
+        "FilterFieldPart": "Vue kits build a field model from per-kind parts and look a field's component up for their panel; React kits draw one field with FilterWidgetField, and Angular kits read their widgets through AdaptFilterWidgetFormModel",
+        "FilterOptionsState": "Vue kits build a field model from per-kind parts and look a field's component up for their panel; React kits draw one field with FilterWidgetField, and Angular kits read their widgets through AdaptFilterWidgetFormModel",
+        "filterWidgetComponent": "Vue kits build a field model from per-kind parts and look a field's component up for their panel; React kits draw one field with FilterWidgetField, and Angular kits read their widgets through AdaptFilterWidgetFormModel",
+        "multiSelectFieldPart": "Vue kits build a field model from per-kind parts and look a field's component up for their panel; React kits draw one field with FilterWidgetField, and Angular kits read their widgets through AdaptFilterWidgetFormModel",
+        "rangeFieldPart": "Vue kits build a field model from per-kind parts and look a field's component up for their panel; React kits draw one field with FilterWidgetField, and Angular kits read their widgets through AdaptFilterWidgetFormModel",
+        "selectFieldPart": "Vue kits build a field model from per-kind parts and look a field's component up for their panel; React kits draw one field with FilterWidgetField, and Angular kits read their widgets through AdaptFilterWidgetFormModel",
+        "textFieldPart": "Vue kits build a field model from per-kind parts and look a field's component up for their panel; React kits draw one field with FilterWidgetField, and Angular kits read their widgets through AdaptFilterWidgetFormModel",
+        "useFilterFieldWith": "Vue kits build a field model from per-kind parts and look a field's component up for their panel; React kits draw one field with FilterWidgetField, and Angular kits read their widgets through AdaptFilterWidgetFormModel",
+        "FiltersOptions": "Vue kits take the panel options beside the definitions in filters and filtersWith; React and Angular kits pass them as table props",
+        "useRegisteredFilterRender": "Vue kits draw a filter type's registered render through the field's action owner with this; React kits draw it in FilterWidgetField, and Angular kits through AdaptFilterWidgetFormModel"
       },
       "features": {
         "Attrs": "pending: shared-surface decision",
@@ -2666,7 +2681,10 @@
         "undoRedoToolbarProps": "pending: shared-surface decision",
         "virtualizeIgnoredOnPage": "pending: shared-surface decision",
         "watchClickedOpener": "Angular kits record the button that opened a dialog or drawer; React and Vue kits return focus through their overlay primitives.",
-        "withRowMutationActions": "pending: shared-surface decision"
+        "withRowMutationActions": "pending: shared-surface decision",
+        "AdaptChecklistFilterFieldModel": "Angular kits publish their composed widgets as feature state and draw the form from these models; React kits draw one field with FilterWidgetField, and Vue kits look the component up with filterWidgetComponent",
+        "AdaptFilterWidgetFormModel": "Angular kits publish their composed widgets as feature state and draw the form from these models; React kits draw one field with FilterWidgetField, and Vue kits look the component up with filterWidgetComponent",
+        "withFilterWidgets": "Angular kits publish their composed widgets as feature state and draw the form from these models; React kits draw one field with FilterWidgetField, and Vue kits look the component up with filterWidgetComponent"
       },
       "features": {
         "BatchEditHandler": "pending: shared-surface decision",

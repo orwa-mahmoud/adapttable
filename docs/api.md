@@ -456,6 +456,17 @@ operators, predicate, chips, tree projection, and optional `render`
 `filterTypeSpec` / `filterWidgetKind` / `filterTypeOps` /
 `filterTypeDefaultOp` / `renderRegisteredFilter`.
 
+`filtersWith(widgets)` from every kit's filters entry is the `filters`
+feature drawn with only the given widgets: `textFilterWidget`,
+`booleanFilterWidget`, `selectFilterWidget`, `multiSelectFilterWidget`,
+`checklistFilterWidget` and `rangeFilterWidget`. A `FilterWidget` pairs the
+widget `kinds` with the component that draws them, which receives
+`FilterWidgetProps`. `FilterWidgetField`
+(`FilterWidgetFieldProps`) draws one field from `@adapttable/react/adapter`.
+Core's `filterWidgetFor(def, registry, widgets)` picks the drawing for a
+definition from a `FilterWidgetOf<TRender>` list and throws, naming the
+widget, when the kind has none. See [filtering](./filtering.md#draw-only-the-widgets-you-use).
+
 ## Adapter extras
 
 Props beyond the core surface, with per-kit availability.
@@ -3985,6 +3996,12 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   `/fit-columns` turn those on; the desktop header draws `resize-handle`,
   `sort-index` and `header-actions`, `AdaptColumnHeaderRename` the
   `header-rename-*` parts, and a phone draws `sort-select`.
+- Filter widgets: `filtersWith(widgets)` publishes its widgets with
+  `withFilterWidgets(feature, widgets)` (`FilterWidget`,
+  `AdapterFiltersFeature`); the kits' filters form extends
+  `AdaptFilterWidgetFormModel`, and their checklist widget
+  `AdaptChecklistFilterFieldModel`. Every kit exports the six widgets from its
+  main and filters entries.
 - Filters: `filterTypes()` registers custom filter types.
   `FilterWidgetRenderProps` and `renderRegisteredFilter` are public root exports.
   `renderRegisteredFilter(def, source, labels, registry, className?)` calls
@@ -4719,21 +4736,24 @@ Binding factories provide behavior and require adapter slots; the native kit's
 factories include the corresponding controls. Public entry points are listed
 in the [Vue API](./vue/api.md#entry-points).
 
-| Filter export                                                                             | Signature or role                                                                                                                                            |
-| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `FiltersOptions`, `filters`, `filterTypes`                                                | `filters<TRow>(defs?, { mode?, tree? })`; `filterTypes(specs)` registers filter semantics. See [Vue filtering](./vue/features.md#filtering).                 |
-| `FILTER_VIEW`, `filterViewKey`, `FilterPanelModel`                                        | Table-owned panel state: definitions/source/registry, trigger, anchor, mode, optional tree and fullscreen container.                                         |
-| `FilterPanelChrome`, `FilterPanelSlots`, `FilterPanelClassNames`                          | Structural form/panel using required Trigger, Button, Field, Popover and Drawer slots, plus Tree when enabled; wrapper class hooks.                          |
-| `FilterTriggerProps`, `FilterPanelButtonProps`, `FilterPanelSurfaceProps`                 | Trigger count/ref/actions, labeled action button, and open/anchor/content/container/close contracts for kit overlays.                                        |
-| `useTextFilterWidget`, `useRangeFilterWidget`, `useBooleanFilterWidget`                   | Reactive definition and source inputs to computed widget models with guarded write actions.                                                                  |
-| `useFilterField`, `FilterFieldOptions`, `FilterFieldModel`, `FilterFieldControl`          | Definition/source/labels/registry input to an ID, label, loading/error and discriminated control list; explicit ID required outside a component.             |
-| `FilterFieldChrome`, `FilterFieldSlots`, `FilterFieldClassNames`                          | Structural field with required Input/Select/Checkbox slots and field/label/control class hooks.                                                              |
-| `FilterInputProps`, `FilterSelectProps`, `FilterCheckboxProps`                            | Labels, current values or checked state, semantic attrs and a single value-change action for filter controls.                                                |
-| `useChecklistWindow`, `useChecklistModel`, `ChecklistChromeModel`                         | Reactive virtual choice window and combined checklist state/labels/ref/scroll projection consumed by `ChecklistChrome`. This does not virtualize table rows. |
-| `useFilterTree`, `FilterTreeOptions`                                                      | Definitions and a source with tree writes to refs for disclosure/tree/actions; add, replace, remove and change combinators.                                  |
-| `useFilterTreeModel`, `FilterTreeModel`, `FilterTreeChrome`                               | Resolve labels/registry and render recursive AND/OR structure through Select/Input/Button/Disclosure slots.                                                  |
-| `useHeaderFilter`, `HeaderFilterOptions`, `HeaderFilterChrome`, `HeaderFilterChromeSlots` | Computed header overlay state from neutral props plus optional ID/direction; required Trigger/Popover/Field controls.                                        |
-| `NativeFilterField`, `ChecklistFilter`, `FilterTreeBuilder`, `NativeHeaderFilter`         | Native components accepting the corresponding field, checklist, tree-builder and header-filter props; exported by native filter entries.                     |
+| Filter export                                                                             | Signature or role                                                                                                                                                                    |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `FiltersOptions`, `filters`, `filterTypes`                                                | `filters<TRow>(defs?, { mode?, tree? })`; `filterTypes(specs)` registers filter semantics. See [Vue filtering](./vue/features.md#filtering).                                         |
+| `FILTER_VIEW`, `filterViewKey`, `FilterPanelModel`                                        | Table-owned panel state: definitions/source/registry, trigger, anchor, mode, optional tree and fullscreen container.                                                                 |
+| `FilterPanelChrome`, `FilterPanelSlots`, `FilterPanelClassNames`                          | Structural form/panel using required Trigger, Button, Field, Popover and Drawer slots, plus Tree when enabled; wrapper class hooks.                                                  |
+| `FilterTriggerProps`, `FilterPanelButtonProps`, `FilterPanelSurfaceProps`                 | Trigger count/ref/actions, labeled action button, and open/anchor/content/container/close contracts for kit overlays.                                                                |
+| `useTextFilterWidget`, `useRangeFilterWidget`, `useBooleanFilterWidget`                   | Reactive definition and source inputs to computed widget models with guarded write actions.                                                                                          |
+| `useFilterField`, `FilterFieldOptions`, `FilterFieldModel`, `FilterFieldControl`          | Definition/source/labels/registry input to an ID, label, loading/error and discriminated control list; explicit ID required outside a component.                                     |
+| `useFilterFieldWith`, `FilterFieldPart`, `FilterFieldDraft`, `FILTER_FIELD_PARTS`         | A field model drawn by only the given parts (`textFieldPart`, `rangeFieldPart`, `booleanFieldPart`, `selectFieldPart`, `multiSelectFieldPart`); `FILTER_FIELD_PARTS` holds all five. |
+| `FilterWidget`, `AdapterFiltersFeature`, `filterWidgetComponent`, `FilterOptionsState`    | A kit widget, a kit's `filters`/`filtersWith` result, and the component a panel draws for a definition; throws when the kind has no widget.                                          |
+| `useRegisteredFilterRender`                                                               | What a filter type's registered `render` draws for a field, called through the field's action owner; `undefined` when the type registered none.                                      |
+| `FilterFieldChrome`, `FilterFieldSlots`, `FilterFieldClassNames`                          | Structural field with required Input/Select/Checkbox slots and field/label/control class hooks.                                                                                      |
+| `FilterInputProps`, `FilterSelectProps`, `FilterCheckboxProps`                            | Labels, current values or checked state, semantic attrs and a single value-change action for filter controls.                                                                        |
+| `useChecklistWindow`, `useChecklistModel`, `ChecklistChromeModel`                         | Reactive virtual choice window and combined checklist state/labels/ref/scroll projection consumed by `ChecklistChrome`. This does not virtualize table rows.                         |
+| `useFilterTree`, `FilterTreeOptions`                                                      | Definitions and a source with tree writes to refs for disclosure/tree/actions; add, replace, remove and change combinators.                                                          |
+| `useFilterTreeModel`, `FilterTreeModel`, `FilterTreeChrome`                               | Resolve labels/registry and render recursive AND/OR structure through Select/Input/Button/Disclosure slots.                                                                          |
+| `useHeaderFilter`, `HeaderFilterOptions`, `HeaderFilterChrome`, `HeaderFilterChromeSlots` | Computed header overlay state from neutral props plus optional ID/direction; required Trigger/Popover/Field controls.                                                                |
+| `NativeFilterField`, `ChecklistFilter`, `FilterTreeBuilder`, `NativeHeaderFilter`         | Native components accepting the corresponding field, checklist, tree-builder and header-filter props; exported by native filter entries.                                             |
 
 `FilterChipsChrome` from `@adapttable/vue/adapter` renders the active chip list
 from `ActiveFilterChipsSlotProps`. Its required `FilterChipsSlots` provide Remove

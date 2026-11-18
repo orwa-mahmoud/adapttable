@@ -1,34 +1,21 @@
 <script setup lang="ts" generic="TRow">
 import {
   defaultFilterRegistry,
+  FILTER_FIELD_PARTS,
   type FilterFieldOptions,
-  filterLabel,
   filterWidgetKind,
-  useDataTableClassNames,
 } from "@adapttable/vue/adapter";
 
 import QuasarBasicFilterField from "./QuasarBasicFilterField.vue";
-import QuasarChecklistFilter from "./QuasarChecklistFilter.vue";
+import QuasarChecklistField from "./QuasarChecklistField.vue";
 const props = defineProps<FilterFieldOptions<TRow>>();
-const names = useDataTableClassNames();
 </script>
 <template>
-  <fieldset
+  <QuasarChecklistField
     v-if="
       filterWidgetKind(def, registry ?? defaultFilterRegistry) === 'checklist'
     "
-    :class="names.filterField"
-    data-adapttable-part="filter-field"
-  >
-    <legend :class="names.filterLabel" data-adapttable-part="filter-label">
-      {{ filterLabel(def) }}
-    </legend>
-    <QuasarChecklistFilter
-      :def="def"
-      :source="source"
-      :labels="labels"
-      :class-names="names"
-    />
-  </fieldset>
-  <QuasarBasicFilterField v-else v-bind="props" />
+    v-bind="props"
+  />
+  <QuasarBasicFilterField v-else v-bind="props" :parts="FILTER_FIELD_PARTS" />
 </template>

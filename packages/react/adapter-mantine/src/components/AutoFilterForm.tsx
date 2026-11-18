@@ -8,14 +8,15 @@ import {
 import {
   defaultFilterRegistry,
   type FilterDef,
+  type FilterFormSource,
   filterLabel,
   type FilterTypeRegistry,
   type FilterValue,
-  filterWidgetKind,
+  type FilterWidget,
+  FilterWidgetField,
   joinRelativeToken,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
-  renderRegisteredFilter,
   splitRelativeToken,
   type TableLabels,
   type TableSource,
@@ -30,7 +31,7 @@ import {
   Stack,
   TextInput,
 } from "@mantine/core";
-import { type ReactElement, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import { ChecklistFilter } from "./ChecklistFilter";
 
@@ -124,7 +125,7 @@ function RangeField<TRow>({
   labels,
 }: Readonly<{
   def: FilterDef<TRow>;
-  source: TableSource<TRow>;
+  source: FilterFormSource<TRow>;
   labels: Required<TableLabels>;
 }>) {
   "use no memo";
@@ -226,7 +227,7 @@ function BooleanControl<TRow>({
   labels,
 }: Readonly<{
   def: FilterDef<TRow>;
-  source: TableSource<TRow>;
+  source: FilterFormSource<TRow>;
   labels: Required<TableLabels>;
 }>) {
   "use no memo";
@@ -259,7 +260,7 @@ function SelectControl<TRow>({
   labels,
 }: Readonly<{
   def: FilterDef<TRow>;
-  source: TableSource<TRow>;
+  source: FilterFormSource<TRow>;
   labels: Required<TableLabels>;
 }>) {
   "use no memo";
@@ -291,7 +292,7 @@ function SelectControl<TRow>({
 function MultiSelectControl<TRow>({
   def,
   source,
-}: Readonly<{ def: FilterDef<TRow>; source: TableSource<TRow> }>) {
+}: Readonly<{ def: FilterDef<TRow>; source: FilterFormSource<TRow> }>) {
   "use no memo";
   const label = filterLabel(def);
   const { options, loading } = useFilterOptions(def);
@@ -322,7 +323,7 @@ function TextFilterField<TRow>({
   labels,
 }: Readonly<{
   def: FilterDef<TRow>;
-  source: TableSource<TRow>;
+  source: FilterFormSource<TRow>;
   labels: Required<TableLabels>;
 }>) {
   "use no memo";
@@ -365,38 +366,82 @@ function TextFilterField<TRow>({
   );
 }
 
-/** One labeled, kit-native control for a single filter definition. */
-function FilterControl<TRow>({
-  def,
+/** The Mantine text filter: its operator and its value. @public */
+export const textFilterWidget: FilterWidget = {
+  kinds: ["text"],
+  render: TextFilterField,
+};
+/** The Mantine yes/no filter. @public */
+export const booleanFilterWidget: FilterWidget = {
+  kinds: ["boolean"],
+  render: BooleanControl,
+};
+/** The Mantine single-choice filter. @public */
+export const selectFilterWidget: FilterWidget = {
+  kinds: ["select"],
+  render: SelectControl,
+};
+/** The Mantine multiple-choice filter. @public */
+export const multiSelectFilterWidget: FilterWidget = {
+  kinds: ["multiSelect"],
+  render: MultiSelectControl,
+};
+/** The Mantine searchable checklist filter. @public */
+export const checklistFilterWidget: FilterWidget = {
+  kinds: ["checklist"],
+  render: ChecklistFilter,
+};
+/** The Mantine operator-first number and date range filter. @public */
+export const rangeFilterWidget: FilterWidget = {
+  kinds: ["dateRange", "numberRange"],
+  render: RangeField,
+};
+/** Every built-in widget: what the automatic filters form draws. */
+export const FILTER_WIDGETS: readonly FilterWidget[] = [
+  textFilterWidget,
+  booleanFilterWidget,
+  selectFilterWidget,
+  multiSelectFilterWidget,
+  checklistFilterWidget,
+  rangeFilterWidget,
+];
+
+/** Props for `FilterFields`. */
+export interface FilterFieldsProps {
+  /** The resolved filter definitions, in render order. */
+  readonly defs: readonly FilterDef<unknown>[];
+  /** The filter bag the widgets read from and write to. */
+  readonly source: FilterFormSource<unknown>;
+  /** Resolved labels for every control. */
+  readonly labels: Required<TableLabels>;
+  /** Type registry that names each definition's widget. */
+  readonly registry: FilterTypeRegistry;
+  /** The widgets the fields are drawn with. */
+  readonly widgets: readonly FilterWidget[];
+}
+
+/** One field per definition, drawn with the given widgets. */
+export function FilterFields({
+  defs,
   source,
   labels,
   registry,
-}: Readonly<{
-  def: FilterDef<TRow>;
-  source: TableSource<TRow>;
-  labels: Required<TableLabels>;
-  registry: FilterTypeRegistry;
-}>): ReactElement | null {
+  widgets,
+}: Readonly<FilterFieldsProps>) {
+  // Every field reads the live source, so a cache would miss on each change.
   "use no memo";
-  const custom = renderRegisteredFilter(def, source, labels, registry);
-  if (custom) return custom as ReactElement;
-  switch (filterWidgetKind(def, registry)) {
-    case "text":
-      return <TextFilterField def={def} source={source} labels={labels} />;
-    case "boolean":
-      return <BooleanControl def={def} source={source} labels={labels} />;
-    case "select":
-      return <SelectControl def={def} source={source} labels={labels} />;
-    case "multiSelect":
-      return <MultiSelectControl def={def} source={source} />;
-    case "checklist":
-      return <ChecklistFilter def={def} source={source} labels={labels} />;
-    case "dateRange":
-    case "numberRange":
-      return <RangeField def={def} source={source} labels={labels} />;
-    default:
-      return null;
-  }
+  return (
+    <Stack gap="lg">
+      {defs.map((def) => (
+        <FilterWidgetField
+          key={def.key}
+          field={{ def, source, labels }}
+          registry={registry}
+          widgets={widgets}
+        />
+      ))}
+    </Stack>
+  );
 }
 
 /**
@@ -417,19 +462,14 @@ export function AutoFilterForm<TRow>({
   labels,
   registry = defaultFilterRegistry,
 }: Readonly<AutoFilterFormProps<TRow>>) {
-  // Every field reads the live source, so a cache would miss on each change.
   "use no memo";
   return (
-    <Stack gap="lg">
-      {defs.map((def) => (
-        <FilterControl
-          key={def.key}
-          def={def}
-          registry={registry}
-          source={source}
-          labels={labels}
-        />
-      ))}
-    </Stack>
+    <FilterFields
+      defs={defs}
+      source={source}
+      labels={labels}
+      registry={registry}
+      widgets={FILTER_WIDGETS}
+    />
   );
 }

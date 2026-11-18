@@ -45,6 +45,7 @@ import { FiltersFormSlotProps } from '@adapttable/angular/adapter';
 import { FiltersMode } from '@adapttable/angular/adapter';
 import { FiltersView } from '@adapttable/angular/adapter';
 import { FilterTreeSlots } from '@adapttable/angular/adapter';
+import { FilterWidget } from '@adapttable/angular/adapter';
 import { GroupingPanelSlotProps } from '@adapttable/angular/adapter';
 import { GroupingPanelSlots } from '@adapttable/angular/adapter';
 import { GroupMoreButtonSlotProps } from '@adapttable/angular/adapter';
@@ -981,6 +982,12 @@ export { BodyRow }
 
 export { BodySlot }
 
+// @public
+export const booleanFilterWidget: FilterWidget;
+
+// @public
+export const checklistFilterWidget: FilterWidget;
+
 export { DataTableClassNames }
 
 export { FiltersMode }
@@ -1004,6 +1011,9 @@ export function menuPopover(elements: {
     readonly panel: () => HTMLElement | undefined;
 }, injector: Injector): MenuPopover;
 
+// @public
+export const multiSelectFilterWidget: FilterWidget;
+
 // @internal
 export const OVERLAY_Z = 10050;
 
@@ -1013,12 +1023,21 @@ export function overlayContains(panel: HTMLElement | null | undefined, target: E
 // @internal
 export function overlayEscapeHandled(event: KeyboardEvent): boolean;
 
+// @public
+export const rangeFilterWidget: FilterWidget;
+
 // @internal
 export function registerOverlayOrigin(origin: HTMLElement, popup: () => HTMLElement | null | undefined): () => void;
 
 export { RowActionsCell }
 
+// @public
+export const selectFilterWidget: FilterWidget;
+
 export { TableView }
+
+// @public
+export const textFilterWidget: FilterWidget;
 
 // @public
 export type TreeCellSlotProps = TreeCellProps<unknown, TemplateRef<unknown>>;

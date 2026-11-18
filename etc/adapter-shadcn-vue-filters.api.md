@@ -5,6 +5,7 @@
 ```ts
 
 import { ActiveFilterChipsSlotProps } from '@adapttable/vue/adapter';
+import { AdapterFiltersFeature } from '@adapttable/vue/adapter';
 import { ChecklistFilterProps } from '@adapttable/vue/adapter';
 import { DataTableClassNames } from '@adapttable/vue/adapter';
 import { DefineSetupFnComponent } from 'vue';
@@ -16,12 +17,14 @@ import { filters as filters_2 } from '@adapttable/vue/features';
 import { FilterTreeBuilderProps } from '@adapttable/vue/adapter';
 import { filterTypes } from '@adapttable/vue/features';
 import { FilterTypeSpec } from '@adapttable/vue';
+import { FilterWidget } from '@adapttable/vue/adapter';
 import { PublicProps } from 'vue';
 import { RendererElement } from 'vue';
 import { RendererNode } from 'vue';
 import { SetupContext } from 'vue';
-import { TableFeature } from '@adapttable/vue';
 import { VNode } from 'vue';
+
+export { AdapterFiltersFeature }
 
 // @public
 export const BasicFilterField: (<TRow>(props: BasicFilterFieldProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
@@ -41,6 +44,9 @@ export interface BasicFilterFieldProps<TRow> extends FilterFieldOptions<TRow> {
 }
 
 // @public
+export const booleanFilterWidget: FilterWidget;
+
+// @public
 export const ChecklistFilter: (<TRow>(props: ChecklistFilterProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
 }>) & {
@@ -48,6 +54,9 @@ export const ChecklistFilter: (<TRow>(props: ChecklistFilterProps<TRow>, context
 };
 
 export { ChecklistFilterProps }
+
+// @public
+export const checklistFilterWidget: FilterWidget;
 
 // @public (undocumented)
 export const FilterChips: DefineSetupFnComponent<FilterChipsProps, {}, {}, FilterChipsProps & {}, PublicProps>;
@@ -85,10 +94,13 @@ export interface FilterPanelProps<TRow> {
 }
 
 // @public
-export function filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: FiltersOptions): TableFeature<TRow>;
+export const filters: AdapterFiltersFeature;
 
 // @public (undocumented)
 export type FiltersOptions = NonNullable<Parameters<typeof filters_2>[1]>;
+
+// @public
+export function filtersWith(widgets: readonly FilterWidget[]): AdapterFiltersFeature;
 
 // @public (undocumented)
 export const FilterTree: (<TRow>(props: FilterTreeBuilderProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
@@ -102,6 +114,20 @@ export { FilterTreeBuilderProps }
 export { filterTypes }
 
 export { FilterTypeSpec }
+
+export { FilterWidget }
+
+// @public
+export const multiSelectFilterWidget: FilterWidget;
+
+// @public
+export const rangeFilterWidget: FilterWidget;
+
+// @public
+export const selectFilterWidget: FilterWidget;
+
+// @public
+export const textFilterWidget: FilterWidget;
 
 // (No @packageDocumentation comment for this package)
 

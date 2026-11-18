@@ -464,6 +464,73 @@ const CORE_FIXTURES = [
   },
 ];
 
+/** What only a URL-synced table carries. */
+const URL_STATE_MARKERS = [
+  "createTableViewStore",
+  "parseTableUrlState",
+  "updateTableUrlState",
+  "createHistoryAdapter",
+];
+
+/**
+ * A headless table that renders its header, rows and cells. React stays
+ * external and untyped in the scratch consumer, so the markup is built with
+ * the element factory the host hands in: React's `createElement`.
+ */
+const REACT_RENDERED_TABLE = `import { type ColumnDef, HOOK, useDataTable } from "PKG";
+
+interface Person {
+  id: string;
+  name: string;
+  role: string;
+}
+type CreateElement = (
+  type: string,
+  props: object | null,
+  ...children: unknown[]
+) => unknown;
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "role" },
+];
+
+export function usePeopleTable(people: readonly Person[], h: CreateElement) {
+  const source = HOOK({ data: people, columns });
+  const table = useDataTable({ source, columns, rowKey: (row) => row.id });
+  const header = (column: (typeof table.columns)[number]) =>
+    h(
+      "th",
+      { key: column.key, ...table.getHeaderCellProps(column) },
+      column.sortable
+        ? h("button", table.getSortButtonProps(column), column.header)
+        : column.header
+    );
+  const row = (item: Person, index: number) =>
+    h(
+      "tr",
+      { key: table.getRowKey(item), ...table.getRowProps(item, index) },
+      ...table.columns.map((column) =>
+        h(
+          "td",
+          { key: column.key, ...table.getCellProps(column) },
+          table.getCellContent(column, item, index)
+        )
+      )
+    );
+  return h(
+    "div",
+    null,
+    h("input", table.getSearchInputProps()),
+    h(
+      "table",
+      table.getTableProps(),
+      h("thead", null, h("tr", table.getHeaderRowProps(), ...table.columns.map(header))),
+      h("tbody", null, ...table.rows.map(row))
+    )
+  );
+}`;
+
 const REACT_FIXTURES = [
   {
     name: "react · simple table",
@@ -481,6 +548,33 @@ const REACT_FIXTURES = [
       "createEditHistory",
     ],
   },
+  // An application that renders the table it builds: header buttons, rows
+  // and cells, as the headless guide writes it.
+  ...[
+    ["rendered table", "useFrontendData", "createTableViewStore"],
+    [
+      "rendered local table",
+      "useLocalFrontendData",
+      "createLocalTableViewStore",
+    ],
+  ].map(([name, hook, store]) => ({
+    name: `react · ${name}`,
+    kind: "react",
+    pkg: "react",
+    initialKB: 35,
+    totalKB: 35,
+    typescript: true,
+    code: REACT_RENDERED_TABLE.replaceAll("HOOK", hook),
+    present: ["useDataTable", hook, store],
+    absent: [
+      "defaultLabels",
+      "grouping-drop-zone",
+      "createCellEditSession",
+      "createEditValidationStore",
+      "createEditHistory",
+      ...(store === "createLocalTableViewStore" ? URL_STATE_MARKERS : []),
+    ],
+  })),
   {
     name: "react · grouping panel",
     kind: "react",
@@ -593,6 +687,29 @@ function featureDeltaFixtures() {
       absent: absentExcept(present),
     };
   });
+}
+
+/**
+ * Filters composed with only the text widget, on every kit: the fields a
+ * table never draws stay out of its bundle.
+ */
+function composedFiltersFixtures() {
+  return ADAPTERS.map(({ kit, pkg }) => ({
+    name: `${kit} · + text filters`,
+    kind: "composed-filters",
+    kit,
+    pkg,
+    alsoEntryFile: "filters.js",
+    initialKB: 160,
+    totalKB: 160,
+    code: `export { DataTable } from "PKG";\nexport { filtersWith, textFilterWidget } from "ALSO";`,
+    present: [FEATURE_MARKERS.filters, "useTextFilterWidget"],
+    absent: [
+      ...absentExcept([FEATURE_MARKERS.filters]),
+      "useBooleanFilterWidget",
+      "useRangeFilterWidget",
+    ],
+  }));
 }
 
 function combinationFixtures() {
@@ -715,6 +832,7 @@ const existingFixtures = [
   ...adapterBaseFixtures(),
   ...presetFixtures(),
   ...featureDeltaFixtures(),
+  ...composedFiltersFixtures(),
   ...combinationFixtures(),
   featuresBarrelFixture(),
   nativeEntriesFixture(),

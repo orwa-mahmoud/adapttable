@@ -17,7 +17,7 @@ import {
   viewChild,
 } from "@angular/core";
 
-import { AdaptAutoFilterForm } from "./autoFilterForm";
+import { AdaptWidgetFilterForm } from "./autoFilterForm";
 import { bootstrapModal } from "./bootstrapModal";
 import { TREE_SLOTS } from "./filterTreeBuilder";
 
@@ -31,7 +31,7 @@ import { TREE_SLOTS } from "./filterTreeBuilder";
  */
 @Component({
   selector: "adapt-filters-form",
-  imports: [AdaptAutoFilterForm, AdaptFilterTreeChrome],
+  imports: [AdaptWidgetFilterForm, AdaptFilterTreeChrome],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let p = props();
@@ -50,7 +50,7 @@ import { TREE_SLOTS } from "./filterTreeBuilder";
         />
       </div>
       @if (p.showSimpleFields) {
-        <adapt-auto-filter-form
+        <adapt-widget-filter-form
           [defs]="p.defs"
           [source]="p.source"
           [labels]="p.labels"

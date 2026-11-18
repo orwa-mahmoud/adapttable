@@ -7,10 +7,13 @@ import {
   AdaptAutoFilterFormModel,
   AdaptBooleanFilterFieldModel,
   AdaptChecklistChrome,
+  AdaptChecklistFilterFieldModel,
+  AdaptFilterWidgetFormModel,
   AdaptMultiSelectFilterFieldModel,
   AdaptRangeFilterFieldModel,
   AdaptSelectFilterFieldModel,
   AdaptTextFilterFieldModel,
+  type FilterWidget,
 } from "@adapttable/angular/adapter";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component } from "@angular/core";
@@ -414,3 +417,93 @@ export class AdaptRangeFilterField<
 export class AdaptAutoFilterForm<TRow> extends AdaptAutoFilterFormModel<TRow> {
   protected readonly checklistSlots = CHECKLIST_SLOTS;
 }
+
+/** The Angular Material searchable checklist field. @internal */
+@Component({
+  selector: "adapt-checklist-filter-field",
+  imports: [AdaptChecklistChrome],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: contents" },
+  template: `
+    <adapt-checklist-chrome
+      [def]="def()"
+      [source]="source()"
+      [labels]="labels()"
+      [slots]="slots"
+    />
+  `,
+})
+export class AdaptChecklistFilterField<
+  TRow,
+> extends AdaptChecklistFilterFieldModel<TRow> {
+  protected readonly slots = CHECKLIST_SLOTS;
+}
+
+/** The Angular Material text filter: its operator and its value. @public */
+export const textFilterWidget: FilterWidget = {
+  kinds: ["text"],
+  render: AdaptTextFilterField,
+};
+/** The Angular Material yes/no filter. @public */
+export const booleanFilterWidget: FilterWidget = {
+  kinds: ["boolean"],
+  render: AdaptBooleanFilterField,
+};
+/** The Angular Material single-choice filter. @public */
+export const selectFilterWidget: FilterWidget = {
+  kinds: ["select"],
+  render: AdaptSelectFilterField,
+};
+/** The Angular Material multiple-choice filter. @public */
+export const multiSelectFilterWidget: FilterWidget = {
+  kinds: ["multiSelect"],
+  render: AdaptMultiSelectFilterField,
+};
+/** The Angular Material searchable checklist filter. @public */
+export const checklistFilterWidget: FilterWidget = {
+  kinds: ["checklist"],
+  render: AdaptChecklistFilterField,
+};
+/** The Angular Material operator-first number and date range filter. @public */
+export const rangeFilterWidget: FilterWidget = {
+  kinds: ["dateRange", "numberRange"],
+  render: AdaptRangeFilterField,
+};
+
+/**
+ * The filter form its filters feature composes: one field per definition,
+ * drawn with the widget composed for its kind.
+ *
+ * @internal
+ */
+@Component({
+  selector: "adapt-widget-filter-form",
+  imports: [NgComponentOutlet, NgTemplateOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: contents" },
+  template: `
+    @for (field of widgetFields(); track field.def.key) {
+      @if (field.renderer?.template; as template) {
+        <ng-container
+          [ngTemplateOutlet]="template"
+          [ngTemplateOutletContext]="field.context"
+        />
+      } @else if (field.renderer?.component; as component) {
+        <ng-container
+          [ngComponentOutlet]="component"
+          [ngComponentOutletInputs]="field.renderer.inputs"
+        />
+      } @else if (field.text; as text) {
+        {{ text }}
+      } @else if (field.widget; as widget) {
+        <ng-container
+          [ngComponentOutlet]="widget"
+          [ngComponentOutletInputs]="field.inputs"
+        />
+      }
+    }
+  `,
+})
+export class AdaptWidgetFilterForm<
+  TRow,
+> extends AdaptFilterWidgetFormModel<TRow> {}

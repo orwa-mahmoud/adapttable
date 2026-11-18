@@ -185,6 +185,7 @@ export {
   provideFeatureState,
   useFeatureState,
 } from "./featureState";
+export type { FiltersOptions } from "./filters";
 export { FILTER_VIEW } from "./filters";
 export type { ChecklistChromeModel } from "./filters/checklistChrome";
 export {
@@ -202,13 +203,25 @@ export type {
   FilterCheckboxProps,
   FilterFieldClassNames,
   FilterFieldControl,
+  FilterFieldDraft,
   FilterFieldModel,
   FilterFieldOptions,
+  FilterFieldPart,
   FilterFieldSlots,
   FilterInputProps,
   FilterSelectProps,
 } from "./filters/filterFieldChrome";
-export { FilterFieldChrome, useFilterField } from "./filters/filterFieldChrome";
+export {
+  booleanFieldPart,
+  FILTER_FIELD_PARTS,
+  FilterFieldChrome,
+  multiSelectFieldPart,
+  rangeFieldPart,
+  selectFieldPart,
+  textFieldPart,
+  useFilterField,
+  useFilterFieldWith,
+} from "./filters/filterFieldChrome";
 export type {
   FilterHeaderControlModel,
   FilterHeaderControlOptions,
@@ -217,12 +230,14 @@ export type {
 export {
   FilterHeaderControlChrome,
   useFilterHeaderControl,
+  useRegisteredFilterRender,
 } from "./filters/filterHeaderControl";
 export type {
   FilterHeaderRowProps,
   FilterHeaderRowSlots,
 } from "./filters/filterHeaderRow";
 export { FilterHeaderRowChrome as FilterHeaderChrome } from "./filters/filterHeaderRow";
+export type { FilterOptionsState } from "./filters/filterModels";
 export type {
   FilterPanelButtonProps,
   FilterPanelClassNames,
@@ -237,6 +252,11 @@ export {
   FilterTreeChrome,
   useFilterTreeModel,
 } from "./filters/filterTreeChrome";
+export {
+  type AdapterFiltersFeature,
+  type FilterWidget,
+  filterWidgetComponent,
+} from "./filters/filterWidgets";
 export type {
   HeaderFilterChromeSlots,
   HeaderFilterOptions,

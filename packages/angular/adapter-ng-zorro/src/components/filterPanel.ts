@@ -24,7 +24,7 @@ import { NzButtonModule } from "ng-zorro-antd/button";
 import { NzCardModule } from "ng-zorro-antd/card";
 import { NzDrawerComponent, NzDrawerModule } from "ng-zorro-antd/drawer";
 
-import { AdaptAutoFilterForm } from "./autoFilterForm";
+import { AdaptWidgetFilterForm } from "./autoFilterForm";
 import { TREE_SLOTS } from "./filterTreeBuilder";
 import { OVERLAY_Z, overlayEscapeHandled } from "./overlayPlacement";
 
@@ -38,7 +38,7 @@ import { OVERLAY_Z, overlayEscapeHandled } from "./overlayPlacement";
  */
 @Component({
   selector: "adapt-filters-form",
-  imports: [AdaptAutoFilterForm, AdaptFilterTreeChrome],
+  imports: [AdaptWidgetFilterForm, AdaptFilterTreeChrome],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let p = props();
@@ -57,7 +57,7 @@ import { OVERLAY_Z, overlayEscapeHandled } from "./overlayPlacement";
         />
       </div>
       @if (p.showSimpleFields) {
-        <adapt-auto-filter-form
+        <adapt-widget-filter-form
           [defs]="p.defs"
           [source]="p.source"
           [labels]="p.labels"
