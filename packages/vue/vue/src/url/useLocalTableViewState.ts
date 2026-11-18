@@ -7,7 +7,7 @@ import type {
   TableUrlState,
   UseTableUrlStateOptions,
 } from "./useTableUrlState";
-import { projectViewStore } from "./viewStateProjection";
+import { useViewStoreProjection } from "./viewStateProjection";
 
 /**
  * Options for `useLocalTableViewState`: the view's defaults and the table's
@@ -39,5 +39,5 @@ export function useLocalTableViewState(
     {},
     { store: options.value.store ?? injectTableStore() }
   );
-  return projectViewStore(shallowRef(store), options);
+  return useViewStoreProjection(shallowRef(store), options);
 }

@@ -21,7 +21,7 @@ import {
 
 import { type MaybeRefOrGetterOptional, requireScope } from "../store";
 import { injectTableStore } from "../tableStore";
-import { projectViewStore } from "./viewStateProjection";
+import { useViewStoreProjection } from "./viewStateProjection";
 
 /** Reactive URL configuration. Callback fields are never getter inputs. @public */
 export interface UseTableUrlStateOptions {
@@ -113,5 +113,5 @@ export function useTableUrlState(
     },
     { flush: "sync" }
   );
-  return projectViewStore(current, options);
+  return useViewStoreProjection(current, options);
 }

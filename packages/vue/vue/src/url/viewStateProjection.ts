@@ -26,7 +26,7 @@ import type {
  * @param options - The view options the store is configured from.
  * @returns The state and its mutators.
  */
-export function projectViewStore(
+export function useViewStoreProjection(
   current: ShallowRef<TableViewStore>,
   options: ComputedRef<
     Pick<
