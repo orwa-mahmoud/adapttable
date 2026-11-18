@@ -293,6 +293,47 @@ export function filtersTests(
       { key: "name", type: "custom", label: "Person" },
     ];
 
+    @Component({
+      selector: "adapt-test-custom-filter",
+      template: `<span data-custom-component>{{ def().label }}</span>`,
+    })
+    class CustomFilter {
+      readonly def = input.required<FilterDef<Person>>();
+    }
+
+    describe("registered Angular renderers in the filters panel", () => {
+      it("draws a registered template in place of the kit widget", async () => {
+        // The render runs when the panel draws, after the host has its template.
+        const host: {
+          template?: TemplateRef<FilterWidgetRenderProps<Person>>;
+        } = {};
+        const { fixture, part, openFilters } = await mount([
+          filters(CUSTOM_DEFS),
+          filterTypes([customSpec(() => host.template)]),
+        ]);
+        host.template = fixture.componentInstance.custom();
+        await openFilters();
+        const input = part("filters-form")?.querySelector<HTMLInputElement>(
+          "input[data-custom-filter]"
+        );
+        expect(input?.getAttribute("aria-label")).toBe("Person");
+        expect(part("filter-input")).toBeNull();
+      });
+
+      it("draws a registered component in place of the kit widget", async () => {
+        const { part, openFilters } = await mount([
+          filters(CUSTOM_DEFS),
+          filterTypes([customSpec(() => CustomFilter)]),
+        ]);
+        await openFilters();
+        expect(
+          part("filters-form")?.querySelector("[data-custom-component]")
+            ?.textContent
+        ).toBe("Person");
+        expect(part("filter-input")).toBeNull();
+      });
+    });
+
     describe("registered Angular form renderers", () => {
       it.each([
         { value: "Custom caption", text: "Custom caption" },

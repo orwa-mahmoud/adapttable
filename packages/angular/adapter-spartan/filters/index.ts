@@ -77,7 +77,7 @@ const everyWidget = /* @__PURE__ */ filtersWith([
  * @public
  */
 export function filters<TRow>(
-  defs: readonly FilterDef<TRow>[] = []
+  defs?: readonly FilterDef<TRow>[]
 ): AdaptTableFeature {
   return everyWidget(defs);
 }
