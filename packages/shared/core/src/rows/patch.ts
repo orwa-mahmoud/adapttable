@@ -93,10 +93,16 @@ function alreadyApplied<TRow>(row: TRow, changes: Partial<TRow>): boolean {
   );
 }
 
-/** Clamp an insert position, letting a negative index count from the end. */
+/**
+ * The whole-number slot an insert lands in, read the way `Array#splice`
+ * reads a start: `NaN` is 0, a fraction drops toward zero, a negative index
+ * counts from the end, and the result is clamped to the list. The list, the
+ * id lookup and the event all use this one value.
+ */
 function insertIndex(at: number | undefined, length: number): number {
   if (at === undefined) return length;
-  const resolved = at < 0 ? length + at : at;
+  const whole = Number.isNaN(at) ? 0 : Math.trunc(at);
+  const resolved = whole < 0 ? length + whole : whole;
   return Math.min(Math.max(resolved, 0), length);
 }
 

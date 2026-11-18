@@ -203,11 +203,10 @@ describe("applyRowPatchesWithLog id lookup", () => {
   const find = (list: Item[], id: string) =>
     list.findIndex((row) => row.id === id);
 
+  /** Inserts where `Array#splice` puts a row, and reports where it went. */
   function referenceInsert(list: Item[], patch: InsertPatch<Item>): Event {
-    const at = patch.at ?? list.length;
-    const resolved = at < 0 ? list.length + at : at;
-    const index = Math.min(Math.max(resolved, 0), list.length);
-    list.splice(index, 0, patch.row);
+    list.splice(patch.at ?? list.length, 0, patch.row);
+    const index = list.indexOf(patch.row);
     return { type: "insert", id: patch.row.id, row: patch.row, index };
   }
 
@@ -271,13 +270,19 @@ describe("applyRowPatchesWithLog id lookup", () => {
     };
   }
 
+  /** Positions that are not whole numbers, which splice still accepts. */
+  const ODD_POSITIONS = [Number.NaN, 1.5, -1.5, Infinity, -Infinity, 0.4];
+
   function batch(next: (max: number) => number, size: number) {
     const id = () => String(next(size + 8));
+    const position = () =>
+      next(4) === 0
+        ? ODD_POSITIONS[next(ODD_POSITIONS.length)]
+        : next(size + 4) - 2;
     const patches: RowPatch<Item>[] = [];
     for (let i = 0; i < size; i++) {
       const kind = next(6);
-      if (kind === 0)
-        patches.push(insertRow({ id: id(), v: -i }, next(size + 4) - 2));
+      if (kind === 0) patches.push(insertRow({ id: id(), v: -i }, position()));
       else if (kind === 1) patches.push(removeRow(id()));
       else if (kind === 2) patches.push(upsertRow({ id: id(), v: i }));
       else if (kind === 3) patches.push(updateRow(id(), { id: id() }));
@@ -305,6 +310,37 @@ describe("applyRowPatchesWithLog id lookup", () => {
       );
     }
   });
+
+  it.each([
+    ["NaN", Number.NaN, 0, ["x", "0", "2"]],
+    ["a fraction", 1.5, 1, ["0", "x", "2"]],
+    ["a negative fraction", -1.5, 2, ["0", "x", "2"]],
+    ["Infinity", Infinity, 3, ["0", "2", "x"]],
+    ["-Infinity", -Infinity, 0, ["x", "0", "2"]],
+  ])(
+    "inserts at %s where splice does and still removes the right row",
+    (_, at, index, order) => {
+      const rows = items(3);
+      const added = { id: "x", v: 9 };
+      const log = applyRowPatchesWithLog(
+        rows,
+        [
+          updateRow<Item>("2", { v: 20 }),
+          updateRow<Item>("1", { v: 10 }),
+          insertRow(added, at),
+          removeRow("1"),
+        ],
+        (row) => row.id
+      );
+      expect(log.rows.map((row) => row.id)).toEqual(order);
+      expect(log.events[2]).toEqual({
+        type: "insert",
+        id: "x",
+        row: added,
+        index,
+      });
+    }
+  );
 
   it("reads ids in proportion to rows plus updates for a burst at the end", () => {
     const rows = items(20_000);
