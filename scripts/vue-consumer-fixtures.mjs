@@ -79,6 +79,66 @@ export const VUE_NATIVE_BASE_SPECS = [
   rejectOptionalAi: true,
 }));
 
+/** What only a URL-synced table carries. */
+const URL_STATE_MARKERS = [
+  "createTableViewStore",
+  "parseTableUrlState",
+  "updateTableUrlState",
+  "createHistoryAdapter",
+];
+
+/** A headless table that renders its header, rows and cells with Vue. */
+const VUE_RENDERED_TABLE = `import { type ColumnDef, HOOK, useDataTable } from "PKG";
+import { defineComponent, h, type PropType } from "vue";
+
+interface Person {
+  id: string;
+  name: string;
+  role: string;
+}
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "role" },
+];
+
+export const PeopleTable = defineComponent({
+  props: {
+    people: { type: Array as PropType<Person[]>, required: true },
+  },
+  setup(props) {
+    const source = HOOK({ data: () => props.people, columns });
+    const table = useDataTable({ source, columns, rowKey: (row) => row.id });
+    type Column = (typeof table.columns.value)[number];
+    const header = (column: Column) =>
+      h("th", { key: column.key, ...table.headerCellAttrs(column) }, [
+        column.sortable
+          ? h("button", table.sortButtonAttrs(column), column.header)
+          : column.header,
+      ]);
+    const row = (item: Person, index: number) =>
+      h(
+        "tr",
+        { key: table.rowKey(item), ...table.rowAttrs(item, index) },
+        table.columns.value.map((column) =>
+          h(
+            "td",
+            { key: column.key, ...table.cellAttrs(column) },
+            String(table.cellValue(column, item) ?? "")
+          )
+        )
+      );
+    return () =>
+      h("div", [
+        h("input", table.searchInputAttrs()),
+        h("table", table.tableAttrs(), [
+          h("thead", [h("tr", table.headerRowAttrs(), table.columns.value.map(header))]),
+          h("tbody", table.rows.value.map(row)),
+        ]),
+      ]);
+  },
+});`;
+
 /** Each row names the actual published entries and functionality being measured. */
 export const VUE_CONSUMER_SPECS = [
   {
@@ -111,6 +171,30 @@ export const VUE_CONSUMER_SPECS = [
       "createHistoryAdapter",
     ],
   },
+  // An application that renders the table it builds: header buttons, rows
+  // and cells from a render function.
+  ...[
+    ["rendered table", "useFrontendData", "createTableViewStore"],
+    [
+      "rendered local table",
+      "useLocalFrontendData",
+      "createLocalTableViewStore",
+    ],
+  ].map(([name, hook, store]) => ({
+    name: `vue · ${name}`,
+    pkg: "vue",
+    comparable: `react · ${name}`,
+    typescript: true,
+    code: VUE_RENDERED_TABLE.replaceAll("HOOK", hook),
+    functionality: `Headless table rendered by the application, ${hook}`,
+    present: ["useDataTable", hook, store],
+    absent: [
+      ...writers,
+      "DataTableSurfaceChrome",
+      "defaultLabels",
+      ...(store === "createLocalTableViewStore" ? URL_STATE_MARKERS : []),
+    ],
+  })),
   {
     name: "vue-unstyled · table",
     pkg: "adapter-vue-unstyled",

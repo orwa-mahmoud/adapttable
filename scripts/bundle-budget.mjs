@@ -467,7 +467,8 @@ function consumerExternals(framework, pkg) {
 
 export async function measure(fixture, dir, install, angular) {
   const { code, imports } = entryModule(fixture, install);
-  const entry = join(dir, fixture.typeOnly ? "entry.ts" : "entry.js");
+  const typed = fixture.typeOnly || fixture.typescript;
+  const entry = join(dir, typed ? "entry.ts" : "entry.js");
   writeFileSync(entry, code);
   const framework = fixture.framework ?? "react";
   const externals = consumerExternals(framework, fixture.pkg);
