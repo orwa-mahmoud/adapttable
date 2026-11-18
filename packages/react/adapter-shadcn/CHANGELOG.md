@@ -1,5 +1,16 @@
 # @adapttable/shadcn
 
+## 3.4.6
+
+### Patch Changes
+
+- Updated dependencies [75dbf94]
+- Updated dependencies [fb0e3af]
+- Updated dependencies [2582d80]
+- Updated dependencies [42282d3]
+  - @adapttable/react@1.11.0
+  - @adapttable/unstyled@3.5.1
+
 ## 3.4.5
 
 ### Patch Changes

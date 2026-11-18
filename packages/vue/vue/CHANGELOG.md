@@ -1,5 +1,22 @@
 # @adapttable/vue
 
+## 0.6.0
+
+### Minor Changes
+
+- 2582d80: A headless table that keeps its view state in memory no longer bundles the URL code. React and Vue gain `useLocalFrontendData` and `useLocalTableViewState`, Angular `injectLocalFrontendData` and `injectLocalTableViewState`, over core's `createLocalTableViewStore`. Search, sort, filters, grouping and paging behave as with `urlSync: false`; the table measures about 2.3 KiB smaller in React and Vue and 2.5 KiB smaller in Angular.
+
+### Patch Changes
+
+- Updated dependencies [308e2f8]
+- Updated dependencies [fb0e3af]
+- Updated dependencies [e8d3443]
+- Updated dependencies [2582d80]
+- Updated dependencies [55d0118]
+- Updated dependencies [e1bad04]
+  - @adapttable/core@3.15.0
+  - @adapttable/i18n@3.4.1
+
 ## 0.5.0
 
 ### Minor Changes

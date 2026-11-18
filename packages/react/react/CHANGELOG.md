@@ -1,5 +1,25 @@
 # @adapttable/react
 
+## 1.11.0
+
+### Minor Changes
+
+- 75dbf94: `ActionAiOptions`, the type of a row or bulk action's `ai` options, is exported from `@adapttable/react` and `@adapttable/angular`, as it already is from `@adapttable/vue`.
+- 2582d80: A headless table that keeps its view state in memory no longer bundles the URL code. React and Vue gain `useLocalFrontendData` and `useLocalTableViewState`, Angular `injectLocalFrontendData` and `injectLocalTableViewState`, over core's `createLocalTableViewStore`. Search, sort, filters, grouping and paging behave as with `urlSync: false`; the table measures about 2.3 KiB smaller in React and Vue and 2.5 KiB smaller in Angular.
+
+### Patch Changes
+
+- fb0e3af: Doc comments name a link target only when the entry point that publishes the comment exports it; any other name is written as code. Editor hovers and the API reference show no broken links.
+- 42282d3: Smaller React bundles with the same rendering: a plain adapter `DataTable` is 1.6–2.5 KiB lighter and a table with the standard preset 3.0–4.3 KiB lighter (min+gzip). The table's live-feature gate, its chrome hook and every kit's filter form are no longer compiled by the React Compiler, whose caches there never saved a render.
+- Updated dependencies [308e2f8]
+- Updated dependencies [fb0e3af]
+- Updated dependencies [e8d3443]
+- Updated dependencies [2582d80]
+- Updated dependencies [55d0118]
+- Updated dependencies [e1bad04]
+  - @adapttable/core@3.15.0
+  - @adapttable/i18n@3.4.1
+
 ## 1.10.0
 
 ### Minor Changes

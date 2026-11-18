@@ -1,5 +1,13 @@
 # @adapttable/vue-unstyled
 
+## 0.2.5
+
+### Patch Changes
+
+- 850c38c: `@adapttable/vue-unstyled` no longer depends on `@adapttable/core`: its native checklist and filter tree take their prop types from `@adapttable/vue/adapter`.
+- Updated dependencies [2582d80]
+  - @adapttable/vue@0.6.0
+
 ## 0.2.4
 
 ### Patch Changes

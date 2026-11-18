@@ -1,5 +1,16 @@
 # @adapttable/base-ui
 
+## 3.4.1
+
+### Patch Changes
+
+- 42282d3: Smaller React bundles with the same rendering: a plain adapter `DataTable` is 1.6–2.5 KiB lighter and a table with the standard preset 3.0–4.3 KiB lighter (min+gzip). The table's live-feature gate, its chrome hook and every kit's filter form are no longer compiled by the React Compiler, whose caches there never saved a render.
+- Updated dependencies [75dbf94]
+- Updated dependencies [fb0e3af]
+- Updated dependencies [2582d80]
+- Updated dependencies [42282d3]
+  - @adapttable/react@1.11.0
+
 ## 3.4.0
 
 ### Minor Changes

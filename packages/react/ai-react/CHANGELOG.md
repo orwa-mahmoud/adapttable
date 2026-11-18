@@ -1,5 +1,18 @@
 # @adapttable/ai-react
 
+## 0.2.22
+
+### Patch Changes
+
+- 360e323: `@adapttable/ai-react` no longer depends on `@adapttable/core`; it reaches the table only through `@adapttable/react` and `@adapttable/ai`.
+- fb0e3af: Doc comments name a link target only when the entry point that publishes the comment exports it; any other name is written as code. Editor hovers and the API reference show no broken links.
+- Updated dependencies [75dbf94]
+- Updated dependencies [fb0e3af]
+- Updated dependencies [2582d80]
+- Updated dependencies [42282d3]
+  - @adapttable/react@1.11.0
+  - @adapttable/ai@0.7.1
+
 ## 0.2.21
 
 ### Patch Changes
