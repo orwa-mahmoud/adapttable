@@ -288,8 +288,6 @@
 }
 .at-reka-search .at-reka-input {
   padding-inline-start: 32px;
-}
-.at-reka-search .at-reka-input {
   inline-size: min(22rem, 100%);
 }
 .at-reka [data-adapttable-part="scroll-box"] {
