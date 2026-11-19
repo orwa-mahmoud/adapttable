@@ -4195,6 +4195,19 @@ export const builtAdapters = (framework = SNIPPET_FRAMEWORK) =>
   adaptersOf(framework).filter((adapter) => adapter.built);
 
 /**
+ * The kit a framework's main demo opens on: its first built adapter. A link
+ * to a demo feature with no kit in it is answered with this kit's page.
+ *
+ * @param {string} framework A key of {@link SHOWCASE_FRAMEWORKS}.
+ * @returns {ShowcaseAdapter}
+ */
+export const leadAdapter = (framework) => {
+  const [lead] = builtAdapters(framework);
+  if (!lead) throw new Error(`no built ${framework} adapter to open on`);
+  return lead;
+};
+
+/**
  * The other built kits on this adapter's framework, in matrix order.
  *
  * @param {ShowcaseAdapter} adapter

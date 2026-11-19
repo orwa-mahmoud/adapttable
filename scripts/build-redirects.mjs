@@ -35,8 +35,21 @@ import {
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import {
+  leadAdapter,
+  MATRIX_FEATURES,
+  pathOf,
+} from "../apps/showcase/matrix.mjs";
 import { LEGACY_SITE, legacyRoute } from "./legacy-routes.mjs";
-import { DEMO_ROOT, docsRoute, FRAMEWORK, siteUrl } from "./site.mjs";
+import { listPackages } from "./packages.mjs";
+import {
+  DEMO_ROOT,
+  DEMO_ROOTS,
+  demoRoute,
+  docsRoute,
+  ORIGIN,
+  siteUrl,
+} from "./site.mjs";
 import { isRedirectPage, locsIn, SITE } from "./sitemap-routes.mjs";
 
 const DEFAULT_SITE = fileURLToPath(
@@ -125,6 +138,125 @@ export const addressMap = (root) =>
 export const LICENSE_URL =
   "https://github.com/orwa-mahmoud/adapttable/blob/main/LICENSE";
 
+/** The status a framework section's root answers with: a front door, not a move. */
+const FRONT_DOOR_STATUS = 302;
+
+/**
+ * Each framework section's root, with and without its slash, to that
+ * framework's Getting started — for every framework the site has one for.
+ *
+ * @param {ReadonlySet<string>} served - Every route the site serves.
+ * @returns {string[]}
+ */
+export const frontDoors = (served) =>
+  Object.keys(DEMO_ROOTS).flatMap((framework) => {
+    const front = docsRoute("getting-started", framework);
+    if (!served.has(front)) return [];
+    return [
+      `/${framework} ${front} ${FRONT_DOOR_STATUS}`,
+      `/${framework}/ ${front} ${FRONT_DOOR_STATUS}`,
+    ];
+  });
+
+/**
+ * A demo feature asked for without a kit — `/vue/demo/columns/` — answers with
+ * that feature on the framework's lead kit, the kit its main demo opens on.
+ * An address that serves a page keeps it, and a feature the lead kit has no
+ * page for gets no rule.
+ *
+ * @param {ReadonlySet<string>} served - Every route the site serves.
+ * @returns {string[]}
+ */
+export const kitlessFeatures = (served) =>
+  Object.keys(DEMO_ROOTS).flatMap((framework) => {
+    const lead = pathOf(leadAdapter(framework));
+    return MATRIX_FEATURES.flatMap(({ slug }) => {
+      const from = demoRoute(slug, framework);
+      const to = demoRoute(`${lead}/${slug}`, framework);
+      if (served.has(from) || !served.has(to)) return [];
+      return [`${from} ${to} 301`, `${from.slice(0, -1)} ${to} 301`];
+    });
+  });
+
+/**
+ * Every published package whose `homepage` is on this site, with that
+ * homepage's path.
+ *
+ * @returns {{ name: string, home: string }[]}
+ */
+const packageHomepages = () =>
+  listPackages().flatMap(({ dir }) => {
+    const manifest = JSON.parse(
+      readFileSync(join(dir, "package.json"), "utf8")
+    );
+    if (manifest.private || typeof manifest.homepage !== "string") return [];
+    const home = new URL(manifest.homepage);
+    return home.origin === ORIGIN
+      ? [{ name: manifest.name, home: home.pathname }]
+      : [];
+  });
+
+/**
+ * The licence links registries build from a package's homepage —
+ * `<homepage>LICENSE` and `<homepage>blob/master/LICENSE` — for every
+ * distinct on-site homepage.
+ *
+ * @returns {string[]}
+ */
+export const homepageLicences = () =>
+  [...new Set(packageHomepages().map(({ home }) => home))]
+    .sort()
+    .flatMap((home) => [
+      `${home}LICENSE ${LICENSE_URL} 301`,
+      `${home}blob/master/LICENSE ${LICENSE_URL} 301`,
+    ]);
+
+/**
+ * A kit package asked for by its own name where its demo folder is named
+ * differently — `/react/demo/unstyled/` for `@adapttable/unstyled`, shown at
+ * `/react/demo/tailwind/` — answers with its homepage. Only homepages that are
+ * one kit's demo, and only names that serve no page.
+ *
+ * @param {ReadonlySet<string>} served - Every route the site serves.
+ * @returns {string[]}
+ */
+export const packageNameShortcuts = (served) =>
+  packageHomepages().flatMap(({ name, home }) => {
+    const kit = /^\/([^/]+)\/demo\/([^/]+)\/$/.exec(home);
+    const short = name.slice(name.indexOf("/") + 1);
+    if (!kit || kit[2] === short || !served.has(home)) return [];
+    const from = demoRoute(short, kit[1]);
+    if (served.has(from)) return [];
+    return [`${from} ${home} 301`, `${from.slice(0, -1)} ${home} 301`];
+  });
+
+/**
+ * What is wrong with a `_redirects` table against the pages the site serves:
+ * a static rule that forwards to an on-site route with no page, or one whose
+ * source is itself a served page, which the host would answer with the
+ * redirect instead.
+ *
+ * @param {string} table
+ * @param {readonly string[]} routes - Every route the site serves.
+ * @returns {string[]} One line per fault; empty when the table is sound.
+ */
+export const redirectFaults = (table, routes) => {
+  const served = new Set(routes);
+  const faults = [];
+  for (const line of table.split("\n")) {
+    if (!/^\/\S* \S+ \d{3}$/.test(line)) continue;
+    const [from, to] = line.split(" ");
+    if (/[*:]/.test(from)) continue;
+    if (served.has(from)) {
+      faults.push(`${from} → ${to}: a served page answers this address`);
+      continue;
+    }
+    if (to.startsWith("/") && !served.has(new URL(to, ORIGIN).pathname))
+      faults.push(`${from} → ${to}: no page is served there`);
+  }
+  return faults;
+};
+
 /** Cloudflare's per-file limits for `_redirects`. */
 export const REDIRECT_LIMITS = Object.freeze({ static: 2000, dynamic: 100 });
 
@@ -170,15 +302,14 @@ export const kitShortcuts = (routes) => {
  * @returns {string}
  */
 export const redirectsTable = (root) => {
+  const served = new Set(sitePages(root).map(({ route }) => route));
   const lines = [
     "# Generated by scripts/build-redirects.mjs — previous path shapes on this",
     "# origin, answered with a permanent redirect to the page's current route.",
-    `/${FRAMEWORK} ${docsRoute("getting-started")} 302`,
-    `/${FRAMEWORK}/ ${docsRoute("getting-started")} 302`,
-    `/angular ${docsRoute("angular/getting-started")} 302`,
-    `/angular/ ${docsRoute("angular/getting-started")} 302`,
+    ...frontDoors(served),
     `/LICENSE ${LICENSE_URL} 301`,
     `/blob/master/LICENSE ${LICENSE_URL} 301`,
+    ...homepageLicences(),
   ];
   for (const { from, to } of addressMap(root)) {
     if (from === to || from.startsWith("/demo/")) continue;
@@ -200,7 +331,11 @@ export const redirectsTable = (root) => {
   const { statics, splats } = kitShortcuts(
     sitePages(root).map(({ route }) => route)
   );
-  for (const rule of statics) {
+  for (const rule of [
+    ...statics,
+    ...kitlessFeatures(served),
+    ...packageNameShortcuts(served),
+  ]) {
     const from = rule.split(" ")[0];
     if (listed.has(from)) continue;
     lines.push(rule);
@@ -373,6 +508,17 @@ const main = () => {
       `build-redirects: ${counts.static} static and ${counts.dynamic} dynamic ` +
         `rules exceed the host's ${REDIRECT_LIMITS.static} / ` +
         `${REDIRECT_LIMITS.dynamic} limit; rules past it are ignored.`
+    );
+    process.exit(1);
+  }
+  const faults = redirectFaults(
+    table,
+    sitePages(root).map(({ route }) => route)
+  );
+  if (faults.length > 0) {
+    console.error(
+      `build-redirects: ${faults.length} rules would not land on a page:\n` +
+        faults.map((fault) => `  ${fault}`).join("\n")
     );
     process.exit(1);
   }
