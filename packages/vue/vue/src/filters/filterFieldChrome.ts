@@ -314,6 +314,18 @@ export const FILTER_FIELD_PARTS: readonly FilterFieldPart[] = [
   multiSelectFieldPart,
 ];
 
+/**
+ * A function that runs `load` on its first call and returns that result on
+ * every call after it.
+ */
+function firstCall<T>(load: () => T): () => T {
+  let loaded: { readonly value: T } | undefined;
+  return () => {
+    loaded ??= { value: load() };
+    return loaded.value;
+  };
+}
+
 /** One common field model; kits supply only the native controls. */
 export function useFilterField<TRow>(
   input: MaybeRefOrGetter<FilterFieldOptions<TRow>>
@@ -343,12 +355,13 @@ export function useFilterFieldWith<TRow>(
     );
   const def = () => toValue(input).def;
   const source = () => toValue(input).source;
-  let options: ComputedRef<FilterOptionsState> | undefined;
-  /** The field's options, loaded the first time a part asks for them. */
-  const useChoices = () => (options ??= useFilterOptions(def));
+  /** The field's options. */
+  const useFieldOptions = () => useFilterOptions(def);
+  // Loaded the first time a part asks for them, then shared by every part.
+  const choices = firstCall(useFieldOptions);
   const fills = parts.map((part) => ({
     kinds: part.kinds,
-    fill: part.setup(def, source, useChoices),
+    fill: part.setup(def, source, choices),
   }));
   const owner = useFilterActionOwner(def, source);
   return computed<FilterFieldModel>(() => {
