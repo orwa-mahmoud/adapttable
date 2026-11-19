@@ -487,7 +487,7 @@ export class AdaptFilterPopover {
     constructor();
     // (undocumented)
     protected readonly availableHeight: Signal<number>;
-    protected readonly direction: Signal<"top" | "bottom">;
+    protected readonly direction: WritableSignal<"top" | null>;
     // (undocumented)
     protected onOpenChange(open: boolean): void;
     readonly props: InputSignal<FilterOverlaySlotProps<TemplateRef<unknown>>>;

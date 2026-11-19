@@ -2,12 +2,13 @@ import {
   type FilterOverlaySlotProps,
   injectPopoverSpace,
 } from "@adapttable/angular/adapter";
-import { isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
+import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   type ElementRef,
   inject,
   input,
@@ -51,9 +52,9 @@ const MIN_ROOM_BELOW = 160;
       [tuiDropdown]="triggerReady() ? content : null"
       tuiDropdownRole="dialog"
       [adaptTaigaDropdownLabel]="p.labels.filters"
-      [tuiDropdownOpen]="p.open"
       [tuiDropdownMaxHeight]="availableHeight() + 32"
       [tuiDropdownDirection]="direction()"
+      [tuiDropdownOpen]="p.open"
       (tuiDropdownOpenChange)="onOpenChange($event)"
       data-taiga-part="filters-anchor"
       style="position: relative; display: inline-flex"
@@ -137,15 +138,12 @@ export class AdaptFilterPopover {
     Math.min(560, this.viewportSpace())
   );
   /**
-   * The side the card opens on: the one its height was measured for. Taiga
-   * keeps the side it chose while the card was still short, so a card sized to
-   * the room above would otherwise open below and run off the viewport. Read
-   * again whenever the room is measured again.
+   * Above, when the card takes its height from the room above the opener;
+   * otherwise Taiga's own choice. Taiga keeps the side it chose while the
+   * card was still short, so a card sized to the room above would open below
+   * and run off the viewport.
    */
-  protected readonly direction = computed(() => {
-    this.viewportSpace();
-    return this.opensAbove() ? "top" : "bottom";
-  });
+  protected readonly direction = signal<"top" | null>(null);
   protected readonly triggerReady = signal(false);
 
   constructor() {
@@ -153,6 +151,22 @@ export class AdaptFilterPopover {
     // dropdown only after it is mounted, so Taiga assigns popup ARIA to the
     // focusable button rather than the temporarily empty anchor span.
     afterNextRender(() => this.triggerReady.set(true));
+    // Taiga places the card once, when it opens, so the side must already be
+    // current: kept in step with the opener's place while the page scrolls
+    // or resizes.
+    const viewport = inject(DOCUMENT).defaultView;
+    if (!this.browser || !viewport) return;
+    const follow = () => this.direction.set(this.opensAbove() ? "top" : null);
+    afterNextRender(follow);
+    viewport.addEventListener("scroll", follow, {
+      capture: true,
+      passive: true,
+    });
+    viewport.addEventListener("resize", follow, { passive: true });
+    inject(DestroyRef).onDestroy(() => {
+      viewport.removeEventListener("scroll", follow, { capture: true });
+      viewport.removeEventListener("resize", follow);
+    });
   }
 
   /** Whether the room below the opener is too small and the room above is larger. */
