@@ -18,7 +18,10 @@ import { FilterChips } from "./filters/FilterChips";
 import { WidgetFilterPanel } from "./filters/FilterPanel";
 import { FILTER_WIDGETS } from "./filters/widgets";
 
-function useShadcnFilterPanel(widgets: readonly FilterWidget[]) {
+function useShadcnFilterPanel(props: {
+  readonly widgets: readonly FilterWidget[];
+}) {
+  const widgets = props.widgets;
   const model = useFeatureState(filterViewKey());
   const names = useDataTableClassNames();
   return () =>
@@ -40,7 +43,7 @@ const PanelFeatureControl = defineComponent({
       required: true,
     },
   },
-  setup: (props) => useShadcnFilterPanel(props.widgets),
+  setup: useShadcnFilterPanel,
 });
 const ChipsFeatureControl = defineComponent(
   (props: ActiveFilterChipsSlotProps) => {

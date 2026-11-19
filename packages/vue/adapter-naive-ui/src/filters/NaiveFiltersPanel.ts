@@ -15,7 +15,10 @@ import { naiveButton } from "../controls/button";
 import { NaiveFilterSurface } from "./NaiveFilterSurface";
 import NaiveFilterTree from "./NaiveFilterTree.vue";
 
-function useNaiveFiltersPanel(widgets: readonly FilterWidget[]) {
+function useNaiveFiltersPanel(props: {
+  readonly widgets: readonly FilterWidget[];
+}) {
+  const widgets = props.widgets;
   const names = useDataTableClassNames();
   const model = useFeatureState(filterViewKey<unknown>());
   const buttonClass = (part: string) => {
@@ -101,5 +104,5 @@ export const NaiveFiltersPanel = defineComponent({
       required: true,
     },
   },
-  setup: (props) => useNaiveFiltersPanel(props.widgets),
+  setup: useNaiveFiltersPanel,
 });

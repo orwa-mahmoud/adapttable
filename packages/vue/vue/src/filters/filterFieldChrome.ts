@@ -148,98 +148,116 @@ export interface FilterFieldPart {
   ) => (draft: FilterFieldDraft<TRow>) => void;
 }
 
+/** The text part: its operator and, when the operator takes one, a value. */
+function useTextFieldPart<TRow>(
+  def: () => FilterDef<TRow>,
+  source: () => FilterFormSource<TRow>
+): (draft: FilterFieldDraft<TRow>) => void {
+  const text = useTextFilter(def, source);
+  return (draft) => {
+    const widget = text.value;
+    const { labels } = draft.options;
+    draft.select(
+      "operator",
+      widget.op,
+      widget.ops.map((value) => ({
+        value,
+        label: filterOpLabel(labels, widget.opLabelKeys[value]),
+      })),
+      (value) => {
+        const op = widget.ops.find((item) => item === value);
+        if (op) widget.setOp(op);
+      },
+      labels.operator
+    );
+    if (widget.needsValue)
+      draft.input("value", widget.value, "text", (value) =>
+        widget.write(widget.op, value)
+      );
+  };
+}
+
 /** The text field: its operator and, when the operator takes one, a value. @public */
 export const textFieldPart: FilterFieldPart = {
   kinds: ["text"],
-  setup(def, source) {
-    const text = useTextFilter(def, source);
-    return (draft) => {
-      const widget = text.value;
-      const { labels } = draft.options;
-      draft.select(
-        "operator",
-        widget.op,
-        widget.ops.map((value) => ({
-          value,
-          label: filterOpLabel(labels, widget.opLabelKeys[value]),
-        })),
-        (value) => {
-          const op = widget.ops.find((item) => item === value);
-          if (op) widget.setOp(op);
-        },
-        labels.operator
-      );
-      if (widget.needsValue)
-        draft.input("value", widget.value, "text", (value) =>
-          widget.write(widget.op, value)
-        );
-    };
-  },
+  setup: useTextFieldPart,
 };
+
+/** The range part: its operator, then one or two bounds. */
+function useRangeFieldPart<TRow>(
+  def: () => FilterDef<TRow>,
+  source: () => FilterFormSource<TRow>
+): (draft: FilterFieldDraft<TRow>) => void {
+  const range = useRangeFilter(def, source);
+  return (draft) => {
+    const widget = range.value;
+    const { labels } = draft.options;
+    draft.select(
+      "operator",
+      widget.op ?? "",
+      [
+        { value: "", label: labels.boolAny },
+        ...widget.ops.map((value) => ({
+          value,
+          label: filterOpLabel(
+            labels,
+            widget.opLabelKeys[value as keyof typeof widget.opLabelKeys]
+          ),
+        })),
+      ],
+      (value) => {
+        const op = widget.ops.find((item) => item === value);
+        widget.setOp(op);
+        widget.write(op, widget.a, widget.b);
+      },
+      labels.operator
+    );
+    if (widget.op !== undefined && widget.arity !== "none")
+      draft.input("a", widget.a, widget.inputType, (value) =>
+        widget.write(widget.op, value, widget.b)
+      );
+    if (widget.arity === "two")
+      draft.input("b", widget.b, widget.inputType, (value) =>
+        widget.write(widget.op, widget.a, value)
+      );
+  };
+}
 
 /** The operator-first number and date range field. @public */
 export const rangeFieldPart: FilterFieldPart = {
   kinds: ["dateRange", "numberRange"],
-  setup(def, source) {
-    const range = useRangeFilter(def, source);
-    return (draft) => {
-      const widget = range.value;
-      const { labels } = draft.options;
-      draft.select(
-        "operator",
-        widget.op ?? "",
-        [
-          { value: "", label: labels.boolAny },
-          ...widget.ops.map((value) => ({
-            value,
-            label: filterOpLabel(
-              labels,
-              widget.opLabelKeys[value as keyof typeof widget.opLabelKeys]
-            ),
-          })),
-        ],
-        (value) => {
-          const op = widget.ops.find((item) => item === value);
-          widget.setOp(op);
-          widget.write(op, widget.a, widget.b);
-        },
-        labels.operator
-      );
-      if (widget.op !== undefined && widget.arity !== "none")
-        draft.input("a", widget.a, widget.inputType, (value) =>
-          widget.write(widget.op, value, widget.b)
-        );
-      if (widget.arity === "two")
-        draft.input("b", widget.b, widget.inputType, (value) =>
-          widget.write(widget.op, widget.a, value)
-        );
-    };
-  },
+  setup: useRangeFieldPart,
 };
+
+/** The yes/no part: one choice of any, yes or no. */
+function useBooleanFieldPart<TRow>(
+  def: () => FilterDef<TRow>,
+  source: () => FilterFormSource<TRow>
+): (draft: FilterFieldDraft<TRow>) => void {
+  const boolean = useBooleanFilter(def, source);
+  return (draft) => {
+    const widget = boolean.value;
+    const { labels } = draft.options;
+    draft.select(
+      "value",
+      widget.choice,
+      [
+        { value: "", label: labels.boolAny },
+        { value: "true", label: labels.boolTrue },
+        { value: "false", label: labels.boolFalse },
+      ],
+      (value) => {
+        if (value === "" || value === "true" || value === "false")
+          widget.write(value);
+      }
+    );
+  };
+}
 
 /** The yes/no field. @public */
 export const booleanFieldPart: FilterFieldPart = {
   kinds: ["boolean"],
-  setup(def, source) {
-    const boolean = useBooleanFilter(def, source);
-    return (draft) => {
-      const widget = boolean.value;
-      const { labels } = draft.options;
-      draft.select(
-        "value",
-        widget.choice,
-        [
-          { value: "", label: labels.boolAny },
-          { value: "true", label: labels.boolTrue },
-          { value: "false", label: labels.boolFalse },
-        ],
-        (value) => {
-          if (value === "" || value === "true" || value === "false")
-            widget.write(value);
-        }
-      );
-    };
-  },
+  setup: useBooleanFieldPart,
 };
 
 /** The single-choice field. @public */
@@ -326,10 +344,11 @@ export function useFilterFieldWith<TRow>(
   const def = () => toValue(input).def;
   const source = () => toValue(input).source;
   let options: ComputedRef<FilterOptionsState> | undefined;
-  const choices = () => (options ??= useFilterOptions(def));
+  /** The field's options, loaded the first time a part asks for them. */
+  const useChoices = () => (options ??= useFilterOptions(def));
   const fills = parts.map((part) => ({
     kinds: part.kinds,
-    fill: part.setup(def, source, choices),
+    fill: part.setup(def, source, useChoices),
   }));
   const owner = useFilterActionOwner(def, source);
   return computed<FilterFieldModel>(() => {

@@ -13,7 +13,10 @@ import { rekaButton } from "../controls/basic";
 import { RekaSurface } from "../controls/RekaSurface";
 import FilterTreeBuilder from "./FilterTreeBuilder.vue";
 
-function useRekaFiltersPanel(widgets: readonly FilterWidget[]) {
+function useRekaFiltersPanel(props: {
+  readonly widgets: readonly FilterWidget[];
+}) {
+  const widgets = props.widgets;
   const names = useRekaClasses();
   const model = useFeatureState(filterViewKey<unknown>());
   const buttonClass = (part: string) => {
@@ -106,5 +109,5 @@ export const RekaFiltersPanel = defineComponent({
       required: true,
     },
   },
-  setup: (props) => useRekaFiltersPanel(props.widgets),
+  setup: useRekaFiltersPanel,
 });
