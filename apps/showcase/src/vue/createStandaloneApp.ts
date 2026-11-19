@@ -1,4 +1,16 @@
-import { type Component, createApp, h, onMounted, shallowRef } from "vue";
+import {
+  type Component,
+  createApp,
+  h,
+  onMounted,
+  onScopeDispose,
+  shallowRef,
+} from "vue";
+
+import {
+  installSiteEvents,
+  SITE_SURFACE,
+} from "../../../../scripts/site-events.mjs";
 
 /** Keep focused fixtures readable as pages while their minimal test hosts stay intact. */
 export function createStandaloneApp(component: Component) {
@@ -15,6 +27,7 @@ export function createStandaloneApp(component: Component) {
     setup() {
       const host = shallowRef<HTMLElement | null>(null);
       const intro = shallowRef(false);
+      onScopeDispose(installSiteEvents(SITE_SURFACE.demoLab));
       onMounted(() => {
         intro.value = !host.value?.querySelector("h1");
       });

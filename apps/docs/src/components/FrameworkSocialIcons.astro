@@ -2,6 +2,7 @@
 import config from "virtual:starlight/user-config";
 import { Icon } from "@astrojs/starlight/components";
 import { selectedFramework } from "../../../../scripts/framework-navigation.mjs";
+import { ORIGIN } from "../../../../scripts/site.mjs";
 const framework = selectedFramework(Astro.url.pathname);
 const links = (config.social || []).map((link) => ({
   ...link,
@@ -10,7 +11,7 @@ const links = (config.social || []).map((link) => ({
     : link.href,
 }));
 ---
-{links.map(({ label, href, icon }) => <a {href} rel="me" class="sl-flex"><span class="sr-only">{label}</span><Icon name={icon} /></a>)}
+{links.map(({ label, href, icon }) => <a {href} rel="me" class="sl-flex" data-cta={href.startsWith("/") || href.startsWith(ORIGIN) ? label.toLowerCase().replaceAll(" ", "_") : undefined}><span class="sr-only">{label}</span><Icon name={icon} /></a>)}
 <style>
   @layer starlight.core {
     a { color: var(--sl-color-text-accent); padding: .5em; margin: -.5em; }

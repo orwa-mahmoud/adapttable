@@ -12,6 +12,7 @@
         "$TURBO_ROOT$/scripts/framework-navigation.mjs",
         "$TURBO_ROOT$/scripts/build-llms-full.mjs",
         "$TURBO_ROOT$/scripts/docs-files.mjs",
+        "$TURBO_ROOT$/scripts/site-events.mjs",
         "$TURBO_ROOT$/scripts/site-notices.mjs",
         "$TURBO_ROOT$/scripts/third-party-licenses/**",
         "$TURBO_ROOT$/scripts/site.mjs",

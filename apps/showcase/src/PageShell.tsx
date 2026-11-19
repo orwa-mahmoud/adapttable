@@ -2,6 +2,7 @@ import type { ConfirmRequest } from "@adapttable/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, startTransition, useEffect, useState } from "react";
 
+import { installSiteEvents } from "../../../scripts/site-events.mjs";
 import { DEMO_CONFIRM_EVENT } from "./data";
 import {
   readShowcaseTheme,
@@ -27,11 +28,14 @@ const queryClient = new QueryClient();
 export function PageShell({
   active,
   root,
+  surface,
   children,
 }: Readonly<{
   /** The page's own id — see the note on the nav's page ids in `sections.tsx`. */
   active: string;
   root: string;
+  /** Which part of the site this page reports as: one of `SITE_SURFACE`. */
+  surface: string;
   children: (dark: boolean) => ReactNode;
 }>) {
   // Each demo page is its own static app, so the theme must live in
@@ -47,6 +51,8 @@ export function PageShell({
     document.documentElement.style.colorScheme = dark ? "dark" : "light";
     storeShowcaseTheme(dark);
   }, [dark]);
+
+  useEffect(() => installSiteEvents(surface), [surface]);
 
   useEffect(() => {
     const onConfirm = (event: Event) => {

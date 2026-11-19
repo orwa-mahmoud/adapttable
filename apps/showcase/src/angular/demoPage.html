@@ -95,7 +95,9 @@
             {{ setupCopyStatus() === "Copied" ? "Copied" : "Copy" }}
           </button>
         </div>
-        <a class="demo-setup__docs" [href]="setupDocs">Setup and providers</a>
+        <a class="demo-setup__docs" [href]="setupDocs" data-cta="setup_docs"
+          >Setup and providers</a
+        >
       </div>
       <p class="demo-setup__feedback" role="status">{{ setupCopyStatus() }}</p>
       <details class="demo-setup__direct">

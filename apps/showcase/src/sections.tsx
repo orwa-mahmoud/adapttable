@@ -14,6 +14,7 @@ import {
   showcasePageHref,
   SITE_FRAMEWORKS,
 } from "../../../scripts/framework-navigation.mjs";
+import { SITE_EVENT, track, trackCopy } from "../../../scripts/site-events.mjs";
 import { cssVars } from "./cssVars";
 import {
   adapterByKey,
@@ -698,6 +699,7 @@ export function AppNav({
               value="react"
               onChange={(event) => {
                 const framework = event.currentTarget.value;
+                track(SITE_EVENT.frameworkSwitch, { framework });
                 try {
                   localStorage.setItem(FRAMEWORK_STORAGE_KEY, framework);
                 } catch {
@@ -732,6 +734,7 @@ export function AppNav({
           <a
             className="nav__docs"
             href={docsUrl("getting-started")}
+            data-cta="docs"
             target="_blank"
             rel="noreferrer"
           >
@@ -799,19 +802,25 @@ export function useNavHeight(): number {
 
 const REPO_URL = "https://github.com/orwa-mahmoud/adapttable";
 
-export function Install({ large = false }: Readonly<{ large?: boolean }>) {
+const INSTALL_COMMAND = "npx @adapttable/cli init";
+
+export function Install({
+  large = false,
+  surface,
+}: Readonly<{ large?: boolean; surface?: string }>) {
   const [copied, setCopied] = useState(false);
   return (
     <div className={large ? "install install--lg" : "install"}>
       <span className="install__prompt">$</span>
-      <code>npx @adapttable/cli init</code>
+      <code>{INSTALL_COMMAND}</code>
       {!large && (
         <button
           type="button"
           className={copied ? "install__copy ok" : "install__copy"}
           aria-label="Copy install command"
           onClick={() => {
-            void navigator.clipboard?.writeText("npx @adapttable/cli init");
+            void navigator.clipboard?.writeText(INSTALL_COMMAND);
+            if (surface) trackCopy(surface, INSTALL_COMMAND, "install");
             setCopied(true);
             window.setTimeout(() => setCopied(false), 1200);
           }}
@@ -827,10 +836,10 @@ const STACKBLITZ_URL =
   "https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine";
 
 /** Install + try-in-browser CTAs parked at the moment of kit-switch delight. */
-export function TrialCta() {
+export function TrialCta({ surface }: Readonly<{ surface: string }>) {
   return (
     <div className="trial-cta">
-      <Install />
+      <Install surface={surface} />
       <a
         className="trial-cta__blitz"
         href={STACKBLITZ_URL}
@@ -839,7 +848,11 @@ export function TrialCta() {
       >
         <External size={14} /> Open in StackBlitz
       </a>
-      <a className="trial-cta__docs" href={docsUrl("getting-started")}>
+      <a
+        className="trial-cta__docs"
+        href={docsUrl("getting-started")}
+        data-cta="trial_docs"
+      >
         Docs
       </a>
     </div>
@@ -873,12 +886,14 @@ export function SectionHead({
 const FOOT_LINKS = [
   {
     label: "Landing",
+    cta: "footer_landing",
     href: SITE_HOME,
     icon: ["M3 10.5 12 3l9 7.5", "M5 9.5V21h14V9.5", "M9 21v-7h6v7"],
     newTab: false,
   },
   {
     label: "Docs",
+    cta: "footer_docs",
     href: docsUrl("getting-started"),
     icon: [
       "M4 19.5A2.5 2.5 0 0 1 6.5 17H20",
@@ -918,6 +933,7 @@ export function Footer({ root }: Readonly<{ root: string }>) {
             <a
               key={l.label}
               href={l.href}
+              data-cta={l.cta}
               target={l.newTab === false ? undefined : "_blank"}
               rel={l.newTab === false ? undefined : "noreferrer"}
             >

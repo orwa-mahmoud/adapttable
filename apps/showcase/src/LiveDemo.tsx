@@ -1,5 +1,11 @@
 import { startTransition, Suspense, useState } from "react";
 
+import {
+  DEMO_KIT_KEY,
+  DEMO_OPTION,
+  SITE_SURFACE,
+  trackDemoChoice,
+} from "../../../scripts/site-events.mjs";
 import { cssVars } from "./cssVars";
 import { type DataMode, type FiltersUi } from "./Demo";
 import {
@@ -31,6 +37,19 @@ function groupedByUrl(): "on" | "off" {
     "live.groupBy"
   );
   return groupBy && groupBy.length > 0 ? "on" : "off";
+}
+
+/**
+ * An option setter that also reports the choice as `demo_option`.
+ *
+ * @param option - The option's `DEMO_OPTION` name.
+ * @param set - Applies the chosen value.
+ */
+function reported<T extends string>(option: string, set: (value: T) => void) {
+  return (value: T) => {
+    trackDemoChoice(option, value);
+    set(value);
+  };
 }
 
 export function LiveDemo({ dark }: Readonly<{ dark: boolean }>) {
@@ -75,18 +94,18 @@ export function LiveDemo({ dark }: Readonly<{ dark: boolean }>) {
       <KitSwitcher
         adapter={adapter}
         dark={dark}
-        onChange={setAdapter}
+        onChange={reported(DEMO_KIT_KEY, setAdapter)}
         urlSync
       />
 
-      <TrialCta />
+      <TrialCta surface={SITE_SURFACE.demoMain} />
 
       <div className="controls">
         <Control label="Data">
           <Segmented
             label="data source"
             value={mode}
-            onChange={changeMode}
+            onChange={reported(DEMO_OPTION.data, changeMode)}
             options={[
               { value: "frontend", label: "Frontend" },
               { value: "backend", label: "Backend" },
@@ -97,9 +116,9 @@ export function LiveDemo({ dark }: Readonly<{ dark: boolean }>) {
           <Segmented
             label="locale"
             value={locale}
-            onChange={(v) => {
+            onChange={reported(DEMO_OPTION.locale, (v) => {
               startTransition(() => setLocale(v));
-            }}
+            })}
             options={[
               { value: "en", label: "EN" },
               { value: "ar", label: "العربية" },
@@ -110,9 +129,9 @@ export function LiveDemo({ dark }: Readonly<{ dark: boolean }>) {
           <Segmented
             label="filters container"
             value={filtersUi}
-            onChange={(v) => {
+            onChange={reported(DEMO_OPTION.filters, (v) => {
               startTransition(() => setFiltersUi(v));
-            }}
+            })}
             options={[
               { value: "popover", label: "Popover" },
               { value: "drawer", label: "Drawer" },
@@ -123,9 +142,9 @@ export function LiveDemo({ dark }: Readonly<{ dark: boolean }>) {
           <Segmented
             label="density"
             value={density}
-            onChange={(v) => {
+            onChange={reported(DEMO_OPTION.density, (v) => {
               startTransition(() => setDensity(v));
-            }}
+            })}
             options={[
               { value: "comfortable", label: "Comfortable" },
               { value: "compact", label: "Compact" },
@@ -137,9 +156,9 @@ export function LiveDemo({ dark }: Readonly<{ dark: boolean }>) {
           <Segmented
             label="grouping"
             value={grouping}
-            onChange={(v) => {
+            onChange={reported(DEMO_OPTION.grouping, (v) => {
               startTransition(() => setGrouping(v));
-            }}
+            })}
             options={[
               { value: "off", label: "Off" },
               {
@@ -155,9 +174,9 @@ export function LiveDemo({ dark }: Readonly<{ dark: boolean }>) {
           <Segmented
             label="editing"
             value={editing}
-            onChange={(v) => {
+            onChange={reported(DEMO_OPTION.editing, (v) => {
               startTransition(() => setEditing(v));
-            }}
+            })}
             options={[
               { value: "off", label: "Off" },
               {
@@ -173,9 +192,9 @@ export function LiveDemo({ dark }: Readonly<{ dark: boolean }>) {
           <Segmented
             label="motion"
             value={motion}
-            onChange={(v) => {
+            onChange={reported(DEMO_OPTION.motion, (v) => {
               startTransition(() => setMotion(v));
-            }}
+            })}
             options={[
               { value: "on", label: "On" },
               { value: "off", label: "Off" },

@@ -3,6 +3,12 @@ import { onScopeDispose, shallowRef, watch } from "vue";
 
 import { FRAMEWORK_STORAGE_KEY } from "../../../../../scripts/framework-navigation.mjs";
 import {
+  installSiteEvents,
+  SITE_SURFACE,
+  trackCopy,
+  trackDemoChoice,
+} from "../../../../../scripts/site-events.mjs";
+import {
   canReplaceDemo,
   navigateDemo,
   replaceDemoUrl,
@@ -79,12 +85,15 @@ const toggles = [
     : []),
 ];
 const dark = shallowRef(false);
+const surface = props.lab ? SITE_SURFACE.demoLab : SITE_SURFACE.demoMain;
+onScopeDispose(installSiteEvents(surface));
 const setupCopyStatus = shallowRef("");
 const setupCommand = () =>
   `npx @adapttable/cli init --kit ${props.adapter.key}`;
 async function copySetup(): Promise<void> {
   try {
     await navigator.clipboard.writeText(setupCommand());
+    trackCopy(surface, setupCommand(), "setup");
     setupCopyStatus.value = "Copied";
   } catch {
     setupCopyStatus.value = "Copy unavailable. Select the command to copy.";
@@ -154,6 +163,7 @@ const close = () => {
 };
 onScopeDispose(() => dialog.value?.close());
 function setOption(key: string, value: string): void {
+  if (!props.lab) trackDemoChoice(key, value);
   const url = new URL(window.location.href);
   url.searchParams.set(key, value);
   if (key === "kit") url.searchParams.delete("kit-unavailable");
@@ -253,7 +263,10 @@ function reset(): void {
             {{ setupCopyStatus === "Copied" ? "Copied" : "Copy" }}
           </button>
         </div>
-        <a class="demo-setup__docs" :href="docsUrl('getting-started', 'vue')"
+        <a
+          class="demo-setup__docs"
+          :href="docsUrl('getting-started', 'vue')"
+          data-cta="setup_docs"
           >Setup and providers</a
         >
       </div>

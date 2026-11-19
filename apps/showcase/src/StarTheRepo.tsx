@@ -1,5 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 
+import { SITE_EVENT, track, trackOnce } from "../../../scripts/site-events.mjs";
 import { assistantActive, subscribeAssistantActive } from "./assistantActivity";
 
 const DISMISS_KEY = "adapttable-star-the-repo";
@@ -88,6 +89,7 @@ export function StarTheRepo() {
   }, []);
 
   const close = () => {
+    track(SITE_EVENT.starPromptClosed, { item: "close" });
     persistClosed();
     setOpen(false);
   };
@@ -98,7 +100,23 @@ export function StarTheRepo() {
     setOpen(false);
   };
 
-  if (!open || busy) return null;
+  const star = () => {
+    track(SITE_EVENT.starPromptStar);
+    dismissForever();
+  };
+
+  const never = () => {
+    track(SITE_EVENT.starPromptClosed, { item: "never" });
+    dismissForever();
+  };
+
+  const visible = open && !busy;
+  useEffect(() => {
+    if (visible)
+      trackOnce(SITE_EVENT.starPromptShown, SITE_EVENT.starPromptShown);
+  }, [visible]);
+
+  if (!visible) return null;
 
   return (
     <section
@@ -137,7 +155,7 @@ export function StarTheRepo() {
           href={REPO}
           target="_blank"
           rel="noreferrer"
-          onClick={dismissForever}
+          onClick={star}
         >
           <svg
             width="14"
@@ -150,11 +168,7 @@ export function StarTheRepo() {
           </svg>
           Star AdaptTable
         </a>
-        <button
-          type="button"
-          className="star-the-repo__skip"
-          onClick={dismissForever}
-        >
+        <button type="button" className="star-the-repo__skip" onClick={never}>
           Don&apos;t show again
         </button>
       </div>

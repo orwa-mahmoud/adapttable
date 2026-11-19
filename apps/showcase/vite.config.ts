@@ -10,111 +10,30 @@ import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import vue from "@vitejs/plugin-vue";
 import { defineConfig, type Plugin } from "vite";
 
-import { appendScript, guarded } from "../../scripts/analytics-guard.mjs";
 import { listPackages, packageDir } from "../../scripts/packages.mjs";
+import { analyticsTag, clarityTag } from "../../scripts/site-events.mjs";
 import { installedPackage, siteNotices } from "../../scripts/site-notices.mjs";
 import { SHOWCASE_PAGES } from "./pages.mjs";
 
-const GA_MEASUREMENT_ID = "G-FT8LY7Z15Y";
-
-const CLARITY_PROJECT_ID = "xxq9dbsjnj";
-
 /**
- * Inject Google Analytics (GA4) into every HTML entry.
+ * Inject Google Analytics (GA4) and Microsoft Clarity into every HTML entry.
  *
  * The showcase is a multi-page app, so this lives here rather than being
- * pasted into each `index.html` — one definition covers all eight pages and
- * any page added later. The docs site injects the same tag through Starlight's
- * `head` config. Microsoft Clarity below follows the identical pattern.
- */
-const googleAnalytics = (): Plugin => ({
-  name: "adapttable-google-analytics",
-  // Production builds only. `transformIndexHtml` runs in dev too, and the
-  // Playwright suite drives the dev server — every e2e run reported real
-  // sessions against `localhost`, 332 of them in one day. Cloudflare drops
-  // those because its beacon is bound to a hostname; GA4 accepts any host, so
-  // it counted CI as traffic.
-  apply: "build",
-  transformIndexHtml: () => [
-    {
-      tag: "script",
-      children: guarded(
-        [
-          // googletagmanager.com serves the tag with
-          // `access-control-allow-origin: *`, so an anonymous fetch gives the
-          // browser full error detail instead of the opaque "Script error."
-          // every cross-origin failure collapses into.
-          appendScript(
-            `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`,
-            { async: true, crossorigin: "anonymous" }
-          ),
-          "window.dataLayer = window.dataLayer || [];",
-          "function gtag(){dataLayer.push(arguments);}",
-          "gtag('js', new Date());",
-          `gtag('config', '${GA_MEASUREMENT_ID}');`,
-          "(function () {",
-          "  function report(type, fatal) {",
-          "    if (typeof gtag !== 'function') return;",
-          "    gtag('event', 'web_exception', {",
-          "      exception_type: type,",
-          "      fatal: fatal,",
-          "      non_interaction: true",
-          "    });",
-          "  }",
-          "  window.addEventListener('error', function (event) {",
-          "    var message = typeof event.message === 'string' ? event.message : '';",
-          // ResizeObserver's benign loop notification arrives as an error event
-          // with no error object. It gets its own bucket so the count stays
-          // readable in GA4 instead of hiding inside a generic 'Error' total.
-          "    if (message.startsWith('ResizeObserver loop')) {",
-          "      report('ResizeObserverLoop', false);",
-          "      return;",
-          "    }",
-          "    var error = event.error;",
-          // Without an error object the message is the only identifying detail
-          // GA4 will ever see, so send it instead of the blanket 'Error' —
-          // truncated to the 100-character parameter limit. Only a real error
-          // object marks the event fatal.
-          "    var name = error && error.name ? error.name : '';",
-          "    report(name || message.slice(0, 100) || 'Error', Boolean(error));",
-          "  });",
-          "  window.addEventListener('unhandledrejection', function (event) {",
-          "    report(event.reason && event.reason.name ? event.reason.name : 'UnhandledRejection', false);",
-          "  });",
-          "})();",
-        ].join("\n")
-      ),
-      injectTo: "head",
-    },
-  ],
-});
-
-/**
- * Inject Microsoft Clarity session recording into every HTML entry.
+ * pasted into each `index.html` — one definition covers every page and any
+ * page added later. The tags themselves are the shared ones the docs and the
+ * landing page install (`scripts/site-events.mjs`).
  *
- * Same shape and the same build-only gate as GA4 above, for the same reason:
- * the Playwright suite drives the dev server, and a recorder that loads there
- * would file every e2e run as a real visitor session. The stub queues
- * `clarity()` calls until the tag loads.
+ * Production builds only. `transformIndexHtml` runs in dev too, and the
+ * Playwright suite drives the dev server: a tag that loads there would report
+ * every e2e run as a real session. Each tag also carries its own host guard,
+ * so a local build served from localhost reports nothing either.
  */
-const microsoftClarity = (): Plugin => ({
-  name: "adapttable-microsoft-clarity",
+const siteAnalytics = (): Plugin => ({
+  name: "adapttable-site-analytics",
   apply: "build",
   transformIndexHtml: () => [
-    {
-      tag: "script",
-      children: guarded(
-        [
-          "  window.clarity = window.clarity || function () {",
-          "    (window.clarity.q = window.clarity.q || []).push(arguments);",
-          "  };",
-          appendScript(`https://www.clarity.ms/tag/${CLARITY_PROJECT_ID}`, {
-            async: true,
-          }),
-        ].join("\n")
-      ),
-      injectTo: "head",
-    },
+    { tag: "script", children: analyticsTag(), injectTo: "head" },
+    { tag: "script", children: clarityTag(), injectTo: "head" },
   ],
 });
 
@@ -417,8 +336,7 @@ export default defineConfig({
       ],
     }),
     stalePreloadRecovery(),
-    googleAnalytics(),
-    microsoftClarity(),
+    siteAnalytics(),
     patchStream(),
   ],
   // Multi-page app: each demo page is its own static HTML entry, linked

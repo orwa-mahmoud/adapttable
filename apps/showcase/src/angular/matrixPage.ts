@@ -22,6 +22,11 @@ import {
 
 import { FRAMEWORK_STORAGE_KEY } from "../../../../scripts/framework-navigation.mjs";
 import {
+  installSiteEvents,
+  SITE_SURFACE,
+  trackCopy,
+} from "../../../../scripts/site-events.mjs";
+import {
   docsUrl,
   featuresOf,
   fillTemplate,
@@ -197,6 +202,7 @@ export class AdaptShowcaseMatrixPage {
   private copyTimer: number | undefined;
 
   constructor() {
+    inject(DestroyRef).onDestroy(installSiteEvents(SITE_SURFACE.demoKit));
     this.dark.set(readStoredTheme());
     try {
       window.localStorage.setItem(FRAMEWORK_STORAGE_KEY, "angular");
@@ -238,6 +244,7 @@ export class AdaptShowcaseMatrixPage {
   /** Copy text to the clipboard and say so on the button that did it. */
   copy(which: "code" | "install", text: string): void {
     void navigator.clipboard.writeText(text);
+    trackCopy(SITE_SURFACE.demoKit, text, this.route().feature?.slug ?? which);
     this.copied.set(which);
     window.clearTimeout(this.copyTimer);
     this.copyTimer = window.setTimeout(() => this.copied.set(null), 1400);

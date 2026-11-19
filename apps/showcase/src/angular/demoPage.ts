@@ -44,6 +44,12 @@ import {
 } from "@angular/core";
 
 import { FRAMEWORK_STORAGE_KEY } from "../../../../scripts/framework-navigation.mjs";
+import {
+  installSiteEvents,
+  SITE_SURFACE,
+  trackCopy,
+  trackDemoChoice,
+} from "../../../../scripts/site-events.mjs";
 import { docsUrl, kitAccent, SHOWCASE_ADAPTERS } from "../matrix/content";
 import {
   budget,
@@ -210,9 +216,11 @@ export class AdaptShowcaseDemoPage {
   readonly cliKit = cliKitNames[this.kit.key] ?? this.kit.key;
   readonly setupCommand = `npx @adapttable/cli init --kit ${this.cliKit}`;
   readonly setupCopyStatus = signal("");
+  readonly surface = this.lab ? SITE_SURFACE.demoLab : SITE_SURFACE.demoMain;
   async copySetup(): Promise<void> {
     try {
       await navigator.clipboard.writeText(this.setupCommand);
+      trackCopy(this.surface, this.setupCommand, "setup");
       this.setupCopyStatus.set("Copied");
     } catch {
       this.setupCopyStatus.set("Copy unavailable. Select the command to copy.");
@@ -964,6 +972,7 @@ export class AdaptShowcaseDemoPage {
   }
 
   constructor() {
+    inject(DestroyRef).onDestroy(installSiteEvents(this.surface));
     inject(DestroyRef).onDestroy(
       registerDemoControlRestore(() => this.restoreControls())
     );
@@ -1036,6 +1045,7 @@ export class AdaptShowcaseDemoPage {
     ))
       return;
     const value = controlValue(target);
+    if (!this.lab) trackDemoChoice(key, value);
     const url = new URL(location.href);
     url.searchParams.set(key, value);
     if (key === "kit") url.searchParams.delete("kit-unavailable");

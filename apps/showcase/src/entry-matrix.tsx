@@ -4,6 +4,7 @@ import "./styles.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
+import { SITE_SURFACE } from "../../../scripts/site-events.mjs";
 import { resolveMatrixRoute } from "./matrix/content";
 import { MatrixPage } from "./matrix/MatrixPage";
 import { PageShell } from "./PageShell";
@@ -38,7 +39,7 @@ const root = "..".concat("/..".repeat(id.split("/").length - 1));
 
 createRoot(container).render(
   <StrictMode>
-    <PageShell active={id} root={root}>
+    <PageShell active={id} root={root} surface={SITE_SURFACE.demoKit}>
       {(dark) => <MatrixPage route={route} dark={dark} root={root} />}
     </PageShell>
   </StrictMode>

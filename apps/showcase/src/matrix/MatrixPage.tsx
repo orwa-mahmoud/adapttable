@@ -20,6 +20,7 @@ import {
   useState,
 } from "react";
 
+import { SITE_SURFACE, trackCopy } from "../../../../scripts/site-events.mjs";
 import { cssVars } from "../cssVars";
 import { DemoFallback } from "../kitDemos";
 import {
@@ -156,8 +157,13 @@ function Seam({ pkg }: Readonly<{ pkg: string }>) {
   );
 }
 
-/** Copy-to-clipboard, with the button reporting what it did. */
-function useCopy(text: string) {
+/**
+ * Copy-to-clipboard, with the button reporting what it did.
+ *
+ * @param text - What the button copies.
+ * @param item - How the copy is reported when it is not an install command.
+ */
+function useCopy(text: string, item: string) {
   const [done, setDone] = useState(false);
   const timer = useRef<number | undefined>(undefined);
   useEffect(
@@ -168,16 +174,21 @@ function useCopy(text: string) {
   );
   const copy = useCallback(() => {
     void navigator.clipboard?.writeText(text);
+    trackCopy(SITE_SURFACE.demoKit, text, item);
     setDone(true);
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setDone(false), 1400);
-  }, [text]);
+  }, [text, item]);
   return { done, copy };
 }
 
 /** A titled code window. The bar names what the code is, which a bare block never does. */
-function CodeBlock({ title, code }: Readonly<{ title: string; code: string }>) {
-  const { done, copy } = useCopy(code);
+function CodeBlock({
+  title,
+  code,
+  item,
+}: Readonly<{ title: string; code: string; item: string }>) {
+  const { done, copy } = useCopy(code, item);
   return (
     <div className="mx-code">
       <div className="mx-code__bar">
@@ -200,7 +211,7 @@ function CodeBlock({ title, code }: Readonly<{ title: string; code: string }>) {
 
 /** The three facts a developer needs before they read anything else. */
 function SpecPlate({ adapter }: Readonly<{ adapter: ShowcaseAdapter }>) {
-  const { done, copy } = useCopy(adapter.install);
+  const { done, copy } = useCopy(adapter.install, "install");
   return (
     <aside className="mx-plate">
       <div className="mx-plate__head">
@@ -350,10 +361,15 @@ function AdapterLanding({
               href={docsUrl("getting-started")}
               target="_blank"
               rel="noreferrer"
+              data-cta="get_started"
             >
               <External size={14} /> Get started
             </a>
-            <a className="mx-btn" href={`${root}/?kit=${adapter.key}`}>
+            <a
+              className="mx-btn"
+              href={`${root}/?kit=${adapter.key}`}
+              data-cta="compare_kits"
+            >
               Compare all eight kits
             </a>
           </div>
@@ -410,6 +426,7 @@ function FeaturePage({
       <CodeBlock
         title={`${feature.label} · ${adapter.label}`}
         code={fill(snippetFor(feature, adapter, framework))}
+        item={feature.slug}
       />
       <div className="mx-brief__side">
         {note ? (

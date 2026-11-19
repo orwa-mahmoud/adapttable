@@ -15,6 +15,7 @@ import {
   showcasePageHref,
   SITE_FRAMEWORKS,
 } from "../../../../scripts/framework-navigation.mjs";
+import { SITE_EVENT, track } from "../../../../scripts/site-events.mjs";
 import {
   docsUrl,
   featuresOf,
@@ -209,6 +210,7 @@ export class AdaptShowcaseNav {
       return;
     }
     const framework = event.target.value;
+    track(SITE_EVENT.frameworkSwitch, { framework });
     try {
       localStorage.setItem(FRAMEWORK_STORAGE_KEY, framework);
     } catch {

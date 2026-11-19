@@ -11,6 +11,11 @@ import { type Component, onScopeDispose, shallowRef, watch } from "vue";
 
 import { FRAMEWORK_STORAGE_KEY } from "../../../../../scripts/framework-navigation.mjs";
 import {
+  installSiteEvents,
+  SITE_SURFACE,
+  trackCopy,
+} from "../../../../../scripts/site-events.mjs";
+import {
   docsUrl,
   featuresOf,
   fillTemplate,
@@ -108,6 +113,7 @@ onScopeDispose(
   })
 );
 const gettingStarted = docsUrl("getting-started", "vue");
+onScopeDispose(installSiteEvents(SITE_SURFACE.demoKit));
 const unavailable = new URLSearchParams(window.location.search).get(
   "unavailable"
 );
@@ -182,6 +188,7 @@ function changeLocale(event: Event): void {
 /** Copy text to the clipboard and say so on the button that did it. */
 function copy(which: "code" | "install", text: string): void {
   void navigator.clipboard.writeText(text);
+  trackCopy(SITE_SURFACE.demoKit, text, feature?.slug ?? which);
   copied.value = which;
   window.clearTimeout(copyTimer);
   copyTimer = window.setTimeout(() => {
@@ -236,6 +243,7 @@ function copy(which: "code" | "install", text: string): void {
               :href="gettingStarted"
               target="_blank"
               rel="noreferrer"
+              data-cta="get_started"
               >Get started</a
             >
           </div>
