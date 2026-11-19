@@ -134,5 +134,15 @@ export const siteAsset = (route: string): string => siteUrl(route);
  * @param root - The relative prefix back to the demo home.
  * @returns The href.
  */
+/**
+ * The showcase root as a root-relative path without its trailing slash —
+ * `/react/demo` on the published site, empty where the showcase is served
+ * from `/` — from a page's relative way back to it (`..`, `../..`). Links
+ * built on it are root-relative, so they land on the same page whatever
+ * address the page itself was read at.
+ */
+export const showcaseRootPath = (relativeRoot: string): string =>
+  new URL(`${relativeRoot}/`, document.baseURI).pathname.replace(/\/$/, "");
+
 export const adapterHref = (adapter: ShowcaseAdapter, root: string): string =>
   adapter.built ? `${root}/${adapter.key}/` : `${root}/?kit=${adapter.key}`;

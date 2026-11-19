@@ -13,7 +13,7 @@ import "../assistantShowcase.css";
 import { provideZonelessChangeDetection } from "@angular/core";
 import { bootstrapApplication } from "@angular/platform-browser";
 
-import { resolveMatrixRoute } from "../matrix/content";
+import { resolveMatrixRoute, showcaseRootPath } from "../matrix/content";
 import { AdaptShowcaseMatrixPage, MATRIX_PAGE } from "./matrixPage";
 import { SHOWCASE_ASSET_ROOT, SHOWCASE_KIT } from "./showcaseKit";
 
@@ -62,8 +62,10 @@ const { kit } = await (() => {
   }
 })();
 
-/** `..` from an adapter landing, `../..` from one of its feature pages. */
-const root = "..".concat("/..".repeat(id.split("/").length - 1));
+/** The showcase root, reached by `..` from an adapter landing and `../..` from a feature page. */
+const root = showcaseRootPath(
+  "..".concat("/..".repeat(id.split("/").length - 1))
+);
 
 container.replaceChildren(document.createElement("adapt-showcase-matrix-page"));
 await bootstrapApplication(AdaptShowcaseMatrixPage, {
@@ -72,7 +74,7 @@ await bootstrapApplication(AdaptShowcaseMatrixPage, {
     ...kit.providers,
     {
       provide: SHOWCASE_ASSET_ROOT,
-      useValue: new URL(`${root}/assets`, document.baseURI).pathname,
+      useValue: `${root}/assets`,
     },
     { provide: SHOWCASE_KIT, useValue: kit },
     { provide: MATRIX_PAGE, useValue: { route, root } },

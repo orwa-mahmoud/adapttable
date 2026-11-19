@@ -225,11 +225,11 @@ export function DemoFallback() {
   );
 }
 
-/** Open the live demo or Feature Lab in the linked kit. Unknown or missing
- * values fall back to Mantine. */
 /** The kit the React main demo opens on. */
 const LEAD_KIT = leadAdapter("react").key;
 
+/** Open the live demo or Feature Lab in the linked kit. Unknown or missing
+ * values fall back to the lead kit. */
 export function readKitFromUrl(): string {
   if (typeof window === "undefined") return LEAD_KIT;
   const kit = new URLSearchParams(window.location.search).get("kit");

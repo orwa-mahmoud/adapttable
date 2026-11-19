@@ -398,20 +398,20 @@ ${note ? `        <p>${paragraph(note)}</p>\n` : ""}        <h2>The code</h2>
 ${linkSection(
   "The same feature in the other kits",
   kitsWithFeature(adapter, feature).map((other) => ({
-    href: `../../${pathOf(other)}/${feature.slug}/`,
+    href: demoRoute(pagePathOf(other, feature.slug), framework.key),
     text: fillTemplate(headFor(feature, other).h1, other),
     note: other.blurb,
   }))
 )}${linkSection(
     `More ${adapter.label} features`,
     siblingFeatures(adapter, feature).map((sibling) => ({
-      href: `../${sibling.slug}/`,
+      href: demoRoute(pagePathOf(adapter, sibling.slug), framework.key),
       text: fill(headFor(sibling, adapter, framework).h1),
       note: fill(headFor(sibling, adapter, framework).card),
     }))
   )}        <p>
           Reference: ${docsList(feature.docs, adapter.framework)}. More of this kit:
-          <a href="../">AdaptTable for ${escapeHtml(adapter.label)}</a>, or
+          <a href="${demoRoute(pagePathOf(adapter), framework.key)}">AdaptTable for ${escapeHtml(adapter.label)}</a>, or
           <a href="${liveDemoRoute(adapter)}">the live demo</a>.
         </p>
       </main>
@@ -433,14 +433,14 @@ ${linkSection(
 };
 
 /** The landing page's links to the other kits on its framework, if any. */
-const otherKitsSection = (adapter, fill) => {
+const otherKitsSection = (adapter, fill, framework) => {
   const others = otherKitsOf(adapter);
   if (others.length === 0) return "";
   return `        <h2>${escapeHtml(fill(LANDING.kitsTitle))}</h2>
         <p>${paragraph(fill(LANDING.kitsLead))}</p>
 ${linkList(
   others.map((other) => ({
-    href: `../${pathOf(other)}/`,
+    href: demoRoute(pagePathOf(other), framework.key),
     text: fillTemplate(LANDING.h1, other),
     note: other.blurb,
   }))
@@ -477,12 +477,12 @@ ${landingIntro(adapter)
         <h2>Every feature, on its own page</h2>
 ${linkList(
   featuresOf(adapter).map((feature) => ({
-    href: `./${feature.slug}/`,
+    href: demoRoute(pagePathOf(adapter, feature.slug), framework.key),
     text: fill(headFor(feature, adapter, framework).h1),
     note: fill(headFor(feature, adapter, framework).card),
   }))
 )}
-${otherKitsSection(adapter, fill)}        <p>
+${otherKitsSection(adapter, fill, framework)}        <p>
           Reference: <a href="${siteUrl(docsReferenceRoute("getting-started", adapter.framework))}">getting started</a>. Or
           open <a href="${liveDemoRoute(adapter)}">the live demo</a> and switch kits on
           the same table.
