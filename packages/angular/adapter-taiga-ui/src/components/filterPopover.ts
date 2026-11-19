@@ -2,7 +2,7 @@ import {
   type FilterOverlaySlotProps,
   injectPopoverSpace,
 } from "@adapttable/angular/adapter";
-import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
   ChangeDetectionStrategy,
@@ -12,7 +12,6 @@ import {
   type ElementRef,
   inject,
   input,
-  PLATFORM_ID,
   signal,
   type TemplateRef,
   viewChild,
@@ -126,8 +125,6 @@ export class AdaptFilterPopover {
 
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
-  /** Only a browser has a viewport to measure. */
-  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly viewportSpace = injectPopoverSpace({
     origin: () => this.anchor()?.nativeElement,
     open: () => this.props().open,
@@ -152,32 +149,34 @@ export class AdaptFilterPopover {
     // focusable button rather than the temporarily empty anchor span.
     afterNextRender(() => this.triggerReady.set(true));
     // Taiga places the card once, when it opens, so the side must already be
-    // current: kept in step with the opener's place while the page scrolls
-    // or resizes.
-    const viewport = inject(DOCUMENT).defaultView;
-    if (!this.browser || !viewport) return;
-    const follow = () => this.direction.set(this.opensAbove() ? "top" : null);
-    afterNextRender(follow);
-    viewport.addEventListener("scroll", follow, {
-      capture: true,
-      passive: true,
-    });
-    viewport.addEventListener("resize", follow, { passive: true });
-    inject(DestroyRef).onDestroy(() => {
-      viewport.removeEventListener("scroll", follow, { capture: true });
-      viewport.removeEventListener("resize", follow);
+    // current: kept in step with the opener's place as the page renders,
+    // scrolls and resizes. Render hooks run only in a browser.
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => {
+      const follow = () => this.direction.set(this.opensAbove() ? "top" : null);
+      follow();
+      window.addEventListener("scroll", follow, {
+        capture: true,
+        passive: true,
+      });
+      window.addEventListener("resize", follow, { passive: true });
+      destroyRef.onDestroy(() => {
+        window.removeEventListener("scroll", follow, { capture: true });
+        window.removeEventListener("resize", follow);
+      });
     });
   }
 
-  /** Whether the room below the opener is too small and the room above is larger. */
+  /**
+   * Whether the room below the opener is too small and the room above is
+   * larger. Called only in a browser: from render hooks and from the room's
+   * own measurement, which runs only there.
+   */
   private opensAbove(): boolean {
-    const origin = this.anchor()?.nativeElement;
-    const viewport = origin?.ownerDocument.defaultView;
-    if (!this.browser || !origin || !viewport) return false;
-    const rect = origin.getBoundingClientRect();
+    const rect = this.anchor().nativeElement.getBoundingClientRect();
     const clamp = (edge: number) =>
-      Math.max(0, Math.min(viewport.innerHeight, edge));
-    const below = viewport.innerHeight - clamp(rect.bottom) - RESERVE;
+      Math.max(0, Math.min(window.innerHeight, edge));
+    const below = window.innerHeight - clamp(rect.bottom) - RESERVE;
     const above = clamp(rect.top) - RESERVE;
     return below < MIN_ROOM_BELOW && above > below;
   }

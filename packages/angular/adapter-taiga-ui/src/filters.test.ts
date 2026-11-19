@@ -951,6 +951,20 @@ describe("filter card viewport space", () => {
       window.dispatchEvent(new Event("resize"));
       await settle();
       expect(options.direction).toBeNull();
+      // A window too short for either side: the larger room stays below.
+      const height = Object.getOwnPropertyDescriptor(window, "innerHeight");
+      Object.defineProperty(window, "innerHeight", {
+        configurable: true,
+        value: 200,
+      });
+      try {
+        top = 60;
+        window.dispatchEvent(new Event("resize"));
+        await settle();
+        expect(options.direction).toBeNull();
+      } finally {
+        if (height) Object.defineProperty(window, "innerHeight", height);
+      }
     } finally {
       measurement.mockRestore();
       if (hitTest) Object.defineProperty(document, "elementFromPoint", hitTest);
