@@ -543,8 +543,9 @@ for (const kit of AI_KITS.filter(
 }
 
 /**
- * The star prompt is a centered modal on a twenty-second timer, and it knows
- * nothing about the assistant. Landing it over an open conversation covers
+ * The star prompt is a centered modal that comes due twenty seconds after the
+ * first demo page once the reader has used a live table three times, and it
+ * knows nothing about the assistant. Landing it over an open conversation covers
  * the one workflow this page exists to show, so it waits — and because it
  * waits rather than cancels, it still gets asked once the reader is done.
  *
@@ -556,11 +557,13 @@ test.describe("the star prompt and an open conversation", () => {
     await page.addInitScript(() => {
       Object.defineProperty(navigator, "webdriver", { get: () => false });
       // Five seconds left on its timer — enough to open the conversation
-      // first, so the prompt comes due with a reader mid-question.
+      // first, so the prompt comes due with a reader mid-question — and the
+      // table already used three times in this tab.
       sessionStorage.setItem(
         "adapttable-star-the-repo-since",
         String(Date.now() - 15_000)
       );
+      sessionStorage.setItem("adapttable-star-the-repo-actions", "3");
     });
     await page.goto(`/${CANONICAL_AI_ADAPTER}/ai/`);
     await mountedTable(page);
