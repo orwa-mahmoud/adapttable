@@ -3,6 +3,7 @@
 import { nextTick, onMounted, onScopeDispose, shallowRef } from "vue";
 
 import { FRAMEWORK_STORAGE_KEY } from "../../../../../scripts/framework-navigation.mjs";
+import { SITE_EVENT, track } from "../../../../../scripts/site-events.mjs";
 import {
   adaptersOf,
   docsUrl,
@@ -178,6 +179,7 @@ function switchFramework(event: Event): void {
     event.target.value = "vue";
     return;
   }
+  track(SITE_EVENT.frameworkSwitch, { framework });
   try {
     localStorage.setItem(FRAMEWORK_STORAGE_KEY, framework);
   } catch {
@@ -396,7 +398,13 @@ onScopeDispose(() => {
             <path v-else d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z" />
           </svg>
         </button>
-        <a class="nav__docs" :href="docs" target="_blank" rel="noreferrer">
+        <a
+          class="nav__docs"
+          :href="docs"
+          target="_blank"
+          rel="noreferrer"
+          data-cta="docs"
+        >
           <svg
             width="14"
             height="14"

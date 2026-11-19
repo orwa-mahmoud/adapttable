@@ -16,7 +16,10 @@ import VuetifyFilterDrawer from "./VuetifyFilterDrawer.vue";
 import VuetifyFilterPopover from "./VuetifyFilterPopover.vue";
 import { VuetifyFilterTree } from "./VuetifyFilterTree";
 
-function useVuetifyFiltersPanel(widgets: readonly FilterWidget[]) {
+function useVuetifyFiltersPanel(props: {
+  readonly widgets: readonly FilterWidget[];
+}) {
+  const widgets = props.widgets;
   const names = useClassNames();
   const model = useFeatureState(filterViewKey<unknown>());
   const buttonClass = (part: string) => {
@@ -95,5 +98,5 @@ export const VuetifyFiltersPanel = defineComponent({
       required: true,
     },
   },
-  setup: (props) => useVuetifyFiltersPanel(props.widgets),
+  setup: useVuetifyFiltersPanel,
 });

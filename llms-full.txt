@@ -9,20 +9,9 @@ Start with your framework's getting-started and the shared concepts for package 
 
 # Get started with AdaptTable — React table for your UI kit
 
-▶ **Nothing to install yet — [open the live demo](https://adapttable.orwamahmoud.com/react/demo/) and use it.** Flip
-between [Mantine](https://adapttable.orwamahmoud.com/react/demo/?kit=mantine) · [MUI](https://adapttable.orwamahmoud.com/react/demo/?kit=mui) ·
-[Chakra](https://adapttable.orwamahmoud.com/react/demo/?kit=chakra) · [Ant Design](https://adapttable.orwamahmoud.com/react/demo/?kit=antd) ·
-[Radix](https://adapttable.orwamahmoud.com/react/demo/?kit=radix) · [Base UI](https://adapttable.orwamahmoud.com/react/demo/?kit=base-ui) ·
-[shadcn](https://adapttable.orwamahmoud.com/react/demo/?kit=shadcn) · [Tailwind](https://adapttable.orwamahmoud.com/react/demo/?kit=tailwind) on the same data,
-and toggle grouping and inline editing while you are there.
-
-<video src="https://adapttable.orwamahmoud.com/media/core/tour.mp4" poster="https://adapttable.orwamahmoud.com/media/core/poster.png?v=2" controls playsinline preload="none" width="1500" height="1065" style="width:100%;height:auto;aspect-ratio:1500/1065;border-radius:8px"></video>
-
 AdaptTable is a headless, UI-agnostic React data table. Pick the adapter for
 your design system and you get a styled, sortable, searchable, paginated
-table with URL-synced state, RTL, and dark mode. Filters, selection with bulk
-actions, and every other feature are opt-in imports composed in
-`features={[...]}`.
+table with URL-synced state, RTL, and dark mode.
 
 ## Install
 
@@ -33,7 +22,8 @@ prints the install command, and scaffolds a starter `src/PeopleTable.tsx`:
 npx @adapttable/cli init
 ```
 
-Prefer zero install first? Open a live starter in
+Nothing to install yet? [Open the live demo](https://adapttable.orwamahmoud.com/react/demo/)
+and use it, or open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
@@ -223,7 +213,9 @@ export function PeopleTable() {
 }
 ```
 
-Column `filter` declarations need the filters feature — `filters([])` when
+Filters, selection with bulk actions, and every other feature are opt-in
+imports composed in `features={[...]}`. Column `filter` declarations need the
+filters feature — `filters([])` when
 every filter lives on a column, or pass standalone defs to the factory (below).
 See [feature composition](./features.md).
 
@@ -256,6 +248,16 @@ filter also drives its own removable chip, URL parsing, and row predicate.
   ]}
 />
 ```
+
+## Every kit in the live demo
+
+Flip between [Mantine](https://adapttable.orwamahmoud.com/react/demo/?kit=mantine) · [MUI](https://adapttable.orwamahmoud.com/react/demo/?kit=mui) ·
+[Chakra](https://adapttable.orwamahmoud.com/react/demo/?kit=chakra) · [Ant Design](https://adapttable.orwamahmoud.com/react/demo/?kit=antd) ·
+[Radix](https://adapttable.orwamahmoud.com/react/demo/?kit=radix) · [Base UI](https://adapttable.orwamahmoud.com/react/demo/?kit=base-ui) ·
+[shadcn](https://adapttable.orwamahmoud.com/react/demo/?kit=shadcn) · [Tailwind](https://adapttable.orwamahmoud.com/react/demo/?kit=tailwind) on the same data,
+and toggle grouping and inline editing while you are there.
+
+<video src="https://adapttable.orwamahmoud.com/media/core/tour.mp4" poster="https://adapttable.orwamahmoud.com/media/core/poster.png?v=2" controls playsinline preload="none" width="1500" height="1065" style="width:100%;height:auto;aspect-ratio:1500/1065;border-radius:8px"></video>
 
 ## Try it in StackBlitz
 
@@ -4263,6 +4265,50 @@ every filter lives on a column, or pass standalone defs as above. See
 | `filterFields`              | `boolean`                           | `true`      | Mount the per-field form inside Filters; `false` leaves only the AND/OR tree.                                                                                                |
 | `filterTypes([…])`          | `FilterTypeSpec[]`                  | built-ins   | Factory from `@adapttable/<kit>/filters`; extra or replacement filter types merged onto `defaultFilterRegistry`. Same `type` replaces.                                       |
 | `headerFilters()`           | factory                             | off         | Factory from `@adapttable/<kit>/header-filters`; per-column header filter funnel. Composing it selects header mode. Desktop only. Never stacked with the popover or drawer.  |
+
+## Draw only the widgets you use
+
+`filters` draws every built-in widget, because filter types are data the
+table reads at runtime. When a table only ever shows some of them, compose
+`filtersWith` from the same entry with those widgets, and the rest stay out of
+the bundle:
+
+```tsx
+import {
+  filtersWith,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/mui/filters";
+
+const filters = filtersWith([textFilterWidget, rangeFilterWidget]);
+
+const features = [
+  filters<Person>([
+    { key: "name", type: "text" },
+    { key: "salary", type: "numberRange" },
+  ]),
+];
+// <DataTable data={people} columns={columns} rowKey={(row) => row.id} features={features} />
+```
+
+Every kit's filters entry exports `filtersWith` and the six widgets:
+`textFilterWidget`, `booleanFilterWidget`, `selectFilterWidget`,
+`multiSelectFilterWidget`, `checklistFilterWidget` and `rangeFilterWidget`
+(both `dateRange` and `numberRange`). A filter whose widget was not composed
+throws when its field draws, naming the filter and the widget to add. A type
+registered with its own `render` draws that, whatever was composed. Measured
+2026-11-18 on MUI, a table with text filters only is 4.4 KiB (min+gzip)
+lighter than one with every widget.
+
+A widget is a `FilterWidget`: the `kinds` it draws and the component that
+draws them, which receives `FilterWidgetProps` (`def`, `source`, `labels`).
+A kit hands its own extras to every field as well, such as an accent color or
+its class overrides, and a widget that draws them reads them from its props.
+Adapter authors draw one field
+with `FilterWidgetField` (`FilterWidgetFieldProps`: `field`, `registry`,
+`widgets`) from `@adapttable/react/adapter`; it runs a registered `render`
+first, then the widget composed for the kind, through core's
+`filterWidgetFor` over a `FilterWidgetOf<TRender>` list.
 
 ## Headless filter primitives
 
@@ -17518,6 +17564,17 @@ operators, predicate, chips, tree projection, and optional `render`
 `filterTypeSpec` / `filterWidgetKind` / `filterTypeOps` /
 `filterTypeDefaultOp` / `renderRegisteredFilter`.
 
+`filtersWith(widgets)` from every kit's filters entry is the `filters`
+feature drawn with only the given widgets: `textFilterWidget`,
+`booleanFilterWidget`, `selectFilterWidget`, `multiSelectFilterWidget`,
+`checklistFilterWidget` and `rangeFilterWidget`. A `FilterWidget` pairs the
+widget `kinds` with the component that draws them, which receives
+`FilterWidgetProps`. `FilterWidgetField`
+(`FilterWidgetFieldProps`) draws one field from `@adapttable/react/adapter`.
+Core's `filterWidgetFor(def, registry, widgets)` picks the drawing for a
+definition from a `FilterWidgetOf<TRender>` list and throws, naming the
+widget, when the kind has none. See [filtering](./filtering.md#draw-only-the-widgets-you-use).
+
 ## Adapter extras
 
 Props beyond the core surface, with per-kit availability.
@@ -21047,6 +21104,12 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   `/fit-columns` turn those on; the desktop header draws `resize-handle`,
   `sort-index` and `header-actions`, `AdaptColumnHeaderRename` the
   `header-rename-*` parts, and a phone draws `sort-select`.
+- Filter widgets: `filtersWith(widgets)` publishes its widgets with
+  `withFilterWidgets(feature, widgets)` (`FilterWidget`,
+  `AdapterFiltersFeature`); the kits' filters form extends
+  `AdaptFilterWidgetFormModel`, and their checklist widget
+  `AdaptChecklistFilterFieldModel`. Every kit exports the six widgets from its
+  main and filters entries.
 - Filters: `filterTypes()` registers custom filter types.
   `FilterWidgetRenderProps` and `renderRegisteredFilter` are public root exports.
   `renderRegisteredFilter(def, source, labels, registry, className?)` calls
@@ -21781,21 +21844,24 @@ Binding factories provide behavior and require adapter slots; the native kit's
 factories include the corresponding controls. Public entry points are listed
 in the [Vue API](./vue/api.md#entry-points).
 
-| Filter export                                                                             | Signature or role                                                                                                                                            |
-| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `FiltersOptions`, `filters`, `filterTypes`                                                | `filters<TRow>(defs?, { mode?, tree? })`; `filterTypes(specs)` registers filter semantics. See [Vue filtering](./vue/features.md#filtering).                 |
-| `FILTER_VIEW`, `filterViewKey`, `FilterPanelModel`                                        | Table-owned panel state: definitions/source/registry, trigger, anchor, mode, optional tree and fullscreen container.                                         |
-| `FilterPanelChrome`, `FilterPanelSlots`, `FilterPanelClassNames`                          | Structural form/panel using required Trigger, Button, Field, Popover and Drawer slots, plus Tree when enabled; wrapper class hooks.                          |
-| `FilterTriggerProps`, `FilterPanelButtonProps`, `FilterPanelSurfaceProps`                 | Trigger count/ref/actions, labeled action button, and open/anchor/content/container/close contracts for kit overlays.                                        |
-| `useTextFilterWidget`, `useRangeFilterWidget`, `useBooleanFilterWidget`                   | Reactive definition and source inputs to computed widget models with guarded write actions.                                                                  |
-| `useFilterField`, `FilterFieldOptions`, `FilterFieldModel`, `FilterFieldControl`          | Definition/source/labels/registry input to an ID, label, loading/error and discriminated control list; explicit ID required outside a component.             |
-| `FilterFieldChrome`, `FilterFieldSlots`, `FilterFieldClassNames`                          | Structural field with required Input/Select/Checkbox slots and field/label/control class hooks.                                                              |
-| `FilterInputProps`, `FilterSelectProps`, `FilterCheckboxProps`                            | Labels, current values or checked state, semantic attrs and a single value-change action for filter controls.                                                |
-| `useChecklistWindow`, `useChecklistModel`, `ChecklistChromeModel`                         | Reactive virtual choice window and combined checklist state/labels/ref/scroll projection consumed by `ChecklistChrome`. This does not virtualize table rows. |
-| `useFilterTree`, `FilterTreeOptions`                                                      | Definitions and a source with tree writes to refs for disclosure/tree/actions; add, replace, remove and change combinators.                                  |
-| `useFilterTreeModel`, `FilterTreeModel`, `FilterTreeChrome`                               | Resolve labels/registry and render recursive AND/OR structure through Select/Input/Button/Disclosure slots.                                                  |
-| `useHeaderFilter`, `HeaderFilterOptions`, `HeaderFilterChrome`, `HeaderFilterChromeSlots` | Computed header overlay state from neutral props plus optional ID/direction; required Trigger/Popover/Field controls.                                        |
-| `NativeFilterField`, `ChecklistFilter`, `FilterTreeBuilder`, `NativeHeaderFilter`         | Native components accepting the corresponding field, checklist, tree-builder and header-filter props; exported by native filter entries.                     |
+| Filter export                                                                             | Signature or role                                                                                                                                                                    |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `FiltersOptions`, `filters`, `filterTypes`                                                | `filters<TRow>(defs?, { mode?, tree? })`; `filterTypes(specs)` registers filter semantics. See [Vue filtering](./vue/features.md#filtering).                                         |
+| `FILTER_VIEW`, `filterViewKey`, `FilterPanelModel`                                        | Table-owned panel state: definitions/source/registry, trigger, anchor, mode, optional tree and fullscreen container.                                                                 |
+| `FilterPanelChrome`, `FilterPanelSlots`, `FilterPanelClassNames`                          | Structural form/panel using required Trigger, Button, Field, Popover and Drawer slots, plus Tree when enabled; wrapper class hooks.                                                  |
+| `FilterTriggerProps`, `FilterPanelButtonProps`, `FilterPanelSurfaceProps`                 | Trigger count/ref/actions, labeled action button, and open/anchor/content/container/close contracts for kit overlays.                                                                |
+| `useTextFilterWidget`, `useRangeFilterWidget`, `useBooleanFilterWidget`                   | Reactive definition and source inputs to computed widget models with guarded write actions.                                                                                          |
+| `useFilterField`, `FilterFieldOptions`, `FilterFieldModel`, `FilterFieldControl`          | Definition/source/labels/registry input to an ID, label, loading/error and discriminated control list; explicit ID required outside a component.                                     |
+| `useFilterFieldWith`, `FilterFieldPart`, `FilterFieldDraft`, `FILTER_FIELD_PARTS`         | A field model drawn by only the given parts (`textFieldPart`, `rangeFieldPart`, `booleanFieldPart`, `selectFieldPart`, `multiSelectFieldPart`); `FILTER_FIELD_PARTS` holds all five. |
+| `FilterWidget`, `AdapterFiltersFeature`, `filterWidgetComponent`, `FilterOptionsState`    | A kit widget, a kit's `filters`/`filtersWith` result, and the component a panel draws for a definition; throws when the kind has no widget.                                          |
+| `useRegisteredFilterRender`                                                               | What a filter type's registered `render` draws for a field, called through the field's action owner; `undefined` when the type registered none.                                      |
+| `FilterFieldChrome`, `FilterFieldSlots`, `FilterFieldClassNames`                          | Structural field with required Input/Select/Checkbox slots and field/label/control class hooks.                                                                                      |
+| `FilterInputProps`, `FilterSelectProps`, `FilterCheckboxProps`                            | Labels, current values or checked state, semantic attrs and a single value-change action for filter controls.                                                                        |
+| `useChecklistWindow`, `useChecklistModel`, `ChecklistChromeModel`                         | Reactive virtual choice window and combined checklist state/labels/ref/scroll projection consumed by `ChecklistChrome`. This does not virtualize table rows.                         |
+| `useFilterTree`, `FilterTreeOptions`                                                      | Definitions and a source with tree writes to refs for disclosure/tree/actions; add, replace, remove and change combinators.                                                          |
+| `useFilterTreeModel`, `FilterTreeModel`, `FilterTreeChrome`                               | Resolve labels/registry and render recursive AND/OR structure through Select/Input/Button/Disclosure slots.                                                                          |
+| `useHeaderFilter`, `HeaderFilterOptions`, `HeaderFilterChrome`, `HeaderFilterChromeSlots` | Computed header overlay state from neutral props plus optional ID/direction; required Trigger/Popover/Field controls.                                                                |
+| `NativeFilterField`, `ChecklistFilter`, `FilterTreeBuilder`, `NativeHeaderFilter`         | Native components accepting the corresponding field, checklist, tree-builder and header-filter props; exported by native filter entries.                                             |
 
 `FilterChipsChrome` from `@adapttable/vue/adapter` renders the active chip list
 from `ActiveFilterChipsSlotProps`. Its required `FilterChipsSlots` provide Remove
@@ -24809,35 +24875,6 @@ a stable row key. Add feature imports when the table needs them.
 Upgrading an existing binding? Read the [0.5 migration guide](migrating-to-0-5.md)
 before changing imports. The new entry paths require the 0.5 release.
 
-## Published Angular kits
-
-All nine Angular kits are available on npm. The additional native choices are
-[Angular Material](material.md), [ng-bootstrap](ng-bootstrap.md),
-[Spartan](spartan.md), [Taiga UI](taiga-ui.md), [Angular Aria](aria.md),
-[Angular CDK](angular-cdk.md) and [ngx-bootstrap](ngx-bootstrap.md).
-
-Each kit guide includes its registry command, Angular 22 peers, provider setup,
-styling and assets. Their local showcase routes are `/material/`,
-`/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`, `/aria/`, `/angular-cdk/` and
-`/ngx-bootstrap/`. ngx-bootstrap also has a
-[documented upstream pre-hydration pagination replay limitation](ngx-bootstrap.md#known-upstream-event-replay-limitation).
-
-## Choose a kit
-
-- `@adapttable/angular-unstyled` uses native HTML. Supply your own CSS or
-  Tailwind classes
-- `@adapttable/ng-zorro` uses NG-ZORRO controls, cards and overlays
-- The seven kits linked above add Material, Bootstrap, Spartan, Taiga UI,
-  Angular Aria and CDK presentation choices with their own setup requirements
-- `@adapttable/angular` supplies signals, column types and structural Chrome
-  for any Angular kit or your own renderer
-
-The Angular binding, all nine kits and the optional AI binding are available
-on npm. When upgrading from before the 0.5 import reorganization, follow the
-[migration guide](./migrating-to-0-5.md) for the canonical entry points.
-Package versions are independent; each kit declares its compatible binding and
-engine dependencies. Do not force core, binding and kit to share a version.
-
 ## Install an Angular table package
 
 Inside an existing Angular application, choose one kit. For native HTML
@@ -24875,6 +24912,35 @@ global stylesheet:
 ```
 
 The native kit does not supply a theme stylesheet.
+
+## Published Angular kits
+
+All nine Angular kits are available on npm. The additional native choices are
+[Angular Material](material.md), [ng-bootstrap](ng-bootstrap.md),
+[Spartan](spartan.md), [Taiga UI](taiga-ui.md), [Angular Aria](aria.md),
+[Angular CDK](angular-cdk.md) and [ngx-bootstrap](ngx-bootstrap.md).
+
+Each kit guide includes its registry command, Angular 22 peers, provider setup,
+styling and assets. Their local showcase routes are `/material/`,
+`/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`, `/aria/`, `/angular-cdk/` and
+`/ngx-bootstrap/`. ngx-bootstrap also has a
+[documented upstream pre-hydration pagination replay limitation](ngx-bootstrap.md#known-upstream-event-replay-limitation).
+
+## Choose a kit
+
+- `@adapttable/angular-unstyled` uses native HTML. Supply your own CSS or
+  Tailwind classes
+- `@adapttable/ng-zorro` uses NG-ZORRO controls, cards and overlays
+- The seven kits linked above add Material, Bootstrap, Spartan, Taiga UI,
+  Angular Aria and CDK presentation choices with their own setup requirements
+- `@adapttable/angular` supplies signals, column types and structural Chrome
+  for any Angular kit or your own renderer
+
+The Angular binding, all nine kits and the optional AI binding are available
+on npm. When upgrading from before the 0.5 import reorganization, follow the
+[migration guide](./migrating-to-0-5.md) for the canonical entry points.
+Package versions are independent; each kit declares its compatible binding and
+engine dependencies. Do not force core, binding and kit to share a version.
 
 ## Run the Angular examples from source
 
@@ -27566,6 +27632,69 @@ With server data, declare the endpoint's actual capabilities and implement
 the received query in `[onQueryChange]`. Changing filters does not filter the
 server page locally. See [data tiers](./data-tiers.md) and the shared
 [server query contract](../server-queries.md).
+
+## Draw only the widgets you use
+
+`filters()` draws every built-in widget, because filter types are data the
+table reads at runtime. When a table only ever shows some of them, compose
+`filtersWith` from the same entry with those widgets, and the rest stay out of
+the bundle:
+
+```ts
+import { Component } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/angular-unstyled";
+import {
+  filtersWith,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/angular-unstyled/filters";
+
+interface Person {
+  id: string;
+  name: string;
+  budget: number;
+}
+
+const filters = filtersWith([textFilterWidget, rangeFilterWidget]);
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="rows"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  `,
+})
+export class People {
+  readonly rows: Person[] = [{ id: "ada", name: "Ada", budget: 20000 }];
+  readonly columns: ColumnDef<Person>[] = [
+    { key: "name", header: "Name", filter: "text" },
+    { key: "budget", header: "Budget", filter: "numberRange" },
+  ];
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [filters<Person>()];
+}
+```
+
+Every kit's filters entry exports `filtersWith` (an `AdapterFiltersFeature`)
+and the six widgets: `textFilterWidget`, `booleanFilterWidget`,
+`selectFilterWidget`, `multiSelectFilterWidget`, `checklistFilterWidget` and
+`rangeFilterWidget`. A filter whose widget was not composed throws when its
+field draws, naming the filter and the widget to add. A type registered with
+its own `render` draws that, whatever was composed. Measured 2026-11-18 on the
+native kit, a table with text filters only is 4.8 KiB (min+gzip) lighter than
+one with every widget.
+
+A widget is a `FilterWidget`: the `kinds` it draws and a component with
+`def`, `source` and `labels` inputs. Adapter authors publish the widgets with
+`withFilterWidgets(feature, widgets)` and draw the form from
+`AdaptFilterWidgetFormModel`, which reads them; a checklist widget builds on
+`AdaptChecklistFilterFieldModel`.
 
 ## Interaction and persistence
 
@@ -34599,6 +34728,53 @@ and `FilterTreeBuilder` for standalone native fields/builders, and
 `NativeHeaderFilter` for one column. Their inputs are respectively
 `FilterFieldOptions<TRow>`, `ChecklistFilterProps<TRow>`,
 `FilterTreeBuilderProps<TRow>` and `HeaderFilterOptions<TRow>`.
+
+## Draw only the widgets you use
+
+`filters` draws every built-in widget, because filter types are data the
+table reads at runtime. When a table only ever shows some of them, compose
+`filtersWith` from the same entry with those widgets, and the rest stay out of
+the bundle:
+
+```ts
+import {
+  filtersWith,
+  rangeFilterWidget,
+  textFilterWidget,
+} from "@adapttable/vue-unstyled/filters";
+
+interface Person {
+  id: string;
+  name: string;
+  score: number;
+}
+const filters = filtersWith([textFilterWidget, rangeFilterWidget]);
+const features = [
+  filters<Person>([
+    { key: "name", type: "text", label: "Name" },
+    { key: "score", type: "numberRange", label: "Score" },
+  ]),
+];
+// Pass these features with the Person columns and rows from getting started.
+```
+
+Every kit's filters entry exports `filtersWith` (an `AdapterFiltersFeature`,
+taking the same definitions and options as `filters`) and the six widgets:
+`textFilterWidget`, `booleanFilterWidget`, `selectFilterWidget`,
+`multiSelectFilterWidget`, `checklistFilterWidget` and `rangeFilterWidget`.
+A filter whose widget was not composed throws when its field draws, naming
+the filter and the widget to add. Measured 2026-11-18, a table with text
+filters only is 1.3–2.4 KiB (min+gzip) lighter than one with every widget.
+
+A widget is a `FilterWidget`: the `kinds` it draws and the component that
+draws them with `FilterFieldOptions` props. Adapter authors find a field's
+component with `filterWidgetComponent(def, registry, widgets)`, and build a
+field model with `useFilterFieldWith(input, parts)` from the field parts
+that draw each kind: `textFieldPart`, `rangeFieldPart`, `booleanFieldPart`,
+`selectFieldPart` and `multiSelectFieldPart`. `FILTER_FIELD_PARTS` holds all
+five, which is what `useFilterField` uses. A `FilterFieldPart` sets up its
+state once and adds its controls to a `FilterFieldDraft` each time the model
+is read.
 
 ## Explore the implementation
 

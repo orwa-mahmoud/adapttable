@@ -8,7 +8,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   type ElementRef,
+  inject,
   input,
   signal,
   type TemplateRef,
@@ -16,6 +18,12 @@ import {
 } from "@angular/core";
 
 import { TAIGA_CONTROLS } from "../taigaControls";
+
+/** Room kept between the card and the viewport's edge, for its offset and gutter. */
+const RESERVE = 32;
+
+/** Below this much room under the opener, the card may take the room above it. */
+const MIN_ROOM_BELOW = 160;
 
 /**
  * The anchored filter card: opens under the Filters button with no
@@ -43,8 +51,9 @@ import { TAIGA_CONTROLS } from "../taigaControls";
       [tuiDropdown]="triggerReady() ? content : null"
       tuiDropdownRole="dialog"
       [adaptTaigaDropdownLabel]="p.labels.filters"
-      [tuiDropdownOpen]="p.open"
       [tuiDropdownMaxHeight]="availableHeight() + 32"
+      [tuiDropdownDirection]="direction()"
+      [tuiDropdownOpen]="p.open"
       (tuiDropdownOpenChange)="onOpenChange($event)"
       data-taiga-part="filters-anchor"
       style="position: relative; display: inline-flex"
@@ -119,19 +128,19 @@ export class AdaptFilterPopover {
   private readonly viewportSpace = injectPopoverSpace({
     origin: () => this.anchor()?.nativeElement,
     open: () => this.props().open,
-    reserve: 32,
-    allowAbove: () => {
-      const origin = this.anchor()?.nativeElement;
-      const viewport = origin?.ownerDocument.defaultView;
-      return (
-        viewport != null &&
-        viewport.innerHeight - origin.getBoundingClientRect().bottom - 32 < 160
-      );
-    },
+    reserve: RESERVE,
+    allowAbove: () => this.opensAbove(),
   });
   protected readonly availableHeight = computed(() =>
     Math.min(560, this.viewportSpace())
   );
+  /**
+   * Above, when the card takes its height from the room above the opener;
+   * otherwise Taiga's own choice. Taiga keeps the side it chose while the
+   * card was still short, so a card sized to the room above would open below
+   * and run off the viewport.
+   */
+  protected readonly direction = signal<"top" | null>(null);
   protected readonly triggerReady = signal(false);
 
   constructor() {
@@ -139,6 +148,37 @@ export class AdaptFilterPopover {
     // dropdown only after it is mounted, so Taiga assigns popup ARIA to the
     // focusable button rather than the temporarily empty anchor span.
     afterNextRender(() => this.triggerReady.set(true));
+    // Taiga places the card once, when it opens, so the side must already be
+    // current: kept in step with the opener's place as the page renders,
+    // scrolls and resizes. Render hooks run only in a browser.
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => {
+      const follow = () => this.direction.set(this.opensAbove() ? "top" : null);
+      follow();
+      window.addEventListener("scroll", follow, {
+        capture: true,
+        passive: true,
+      });
+      window.addEventListener("resize", follow, { passive: true });
+      destroyRef.onDestroy(() => {
+        window.removeEventListener("scroll", follow, { capture: true });
+        window.removeEventListener("resize", follow);
+      });
+    });
+  }
+
+  /**
+   * Whether the room below the opener is too small and the room above is
+   * larger. Called only in a browser: from render hooks and from the room's
+   * own measurement, which runs only there.
+   */
+  private opensAbove(): boolean {
+    const rect = this.anchor().nativeElement.getBoundingClientRect();
+    const clamp = (edge: number) =>
+      Math.max(0, Math.min(window.innerHeight, edge));
+    const below = window.innerHeight - clamp(rect.bottom) - RESERVE;
+    const above = clamp(rect.top) - RESERVE;
+    return below < MIN_ROOM_BELOW && above > below;
   }
 
   protected onOpenChange(open: boolean): void {

@@ -11,6 +11,11 @@ import { type Component, onScopeDispose, shallowRef, watch } from "vue";
 
 import { FRAMEWORK_STORAGE_KEY } from "../../../../../scripts/framework-navigation.mjs";
 import {
+  installSiteEvents,
+  SITE_SURFACE,
+  trackCopy,
+} from "../../../../../scripts/site-events.mjs";
+import {
   docsUrl,
   featuresOf,
   fillTemplate,
@@ -59,6 +64,7 @@ import ScaleBody from "./bodies/ScaleBody.vue";
 import SelectionBody from "./bodies/SelectionBody.vue";
 import TreeBody from "./bodies/TreeBody.vue";
 import { SHOWCASE_PRESENTATION } from "./data";
+import InstallPlate from "./InstallPlate.vue";
 import MoreExamples from "./MoreExamples.vue";
 import { demoFileHref, vueHref } from "./routes";
 import { useShowcaseKit } from "./showcaseKit";
@@ -108,6 +114,7 @@ onScopeDispose(
   })
 );
 const gettingStarted = docsUrl("getting-started", "vue");
+onScopeDispose(installSiteEvents(SITE_SURFACE.demoKit));
 const unavailable = new URLSearchParams(window.location.search).get(
   "unavailable"
 );
@@ -132,6 +139,9 @@ const importLine = `import { DataTable } from "${adapter.pkg}";`;
 const intro = (
   feature ? introFor(feature, adapter) : landingIntro(adapter)
 ).map(fill);
+/** A feature page opens on its first line; the rest follows the live table. */
+const heroIntro = feature ? intro.slice(0, 1) : intro;
+const moreIntro = feature ? intro.slice(1) : [];
 const code = feature
   ? fill(snippetFor(feature, adapter, props.route.framework))
   : "";
@@ -182,6 +192,7 @@ function changeLocale(event: Event): void {
 /** Copy text to the clipboard and say so on the button that did it. */
 function copy(which: "code" | "install", text: string): void {
   void navigator.clipboard.writeText(text);
+  trackCopy(SITE_SURFACE.demoKit, text, feature?.slug ?? which);
   copied.value = which;
   window.clearTimeout(copyTimer);
   copyTimer = window.setTimeout(() => {
@@ -224,7 +235,7 @@ function copy(which: "code" | "install", text: string): void {
             {{ heading.before }}<em>{{ adapter.label }}</em
             >{{ heading.after }}
           </h1>
-          <p v-for="(line, index) in intro" :key="index" class="mx-lead">
+          <p v-for="(line, index) in heroIntro" :key="index" class="mx-lead">
             <template v-for="(part, at) in codeSpans(line)" :key="at">
               <code v-if="part.code">{{ part.text }}</code>
               <template v-else>{{ part.text }}</template>
@@ -236,26 +247,18 @@ function copy(which: "code" | "install", text: string): void {
               :href="gettingStarted"
               target="_blank"
               rel="noreferrer"
+              data-cta="get_started"
               >Get started</a
             >
           </div>
         </div>
-        <aside v-if="!feature" class="mx-plate">
-          <div class="mx-plate__head">
-            <span>{{ adapter.pkg }}</span>
-            <button
-              type="button"
-              class="mx-code__copy"
-              :class="{ 'is-done': copied === 'install' }"
-              @click="copy('install', adapter.install)"
-            >
-              {{ copied === "install" ? "Copied" : "Copy install" }}
-            </button>
-          </div>
-          <div class="mx-plate__row">
-            <span class="mx-plate__key">Install</span>
-            <code class="mx-plate__val">{{ adapter.install }}</code>
-          </div>
+        <InstallPlate
+          v-if="!feature"
+          :pkg="adapter.pkg"
+          :install="adapter.install"
+          :copied="copied === 'install'"
+          @copy="copy('install', adapter.install)"
+        >
           <div class="mx-plate__row">
             <span class="mx-plate__key">Import</span>
             <code class="mx-plate__val">{{ importLine }}</code>
@@ -264,46 +267,8 @@ function copy(which: "code" | "install", text: string): void {
             <span class="mx-plate__key">Peer</span>
             <code class="mx-plate__val">{{ adapter.peer }}</code>
           </div>
-        </aside>
+        </InstallPlate>
       </header>
-
-      <div v-if="feature" class="mx-brief">
-        <div class="mx-code">
-          <div class="mx-code__bar">
-            <span>{{ head(feature).label }} · {{ adapter.label }}</span>
-            <button
-              type="button"
-              class="mx-code__copy"
-              :class="{ 'is-done': copied === 'code' }"
-              @click="copy('code', code)"
-            >
-              {{ copied === "code" ? "Copied" : "Copy" }}
-            </button>
-          </div>
-          <pre><code>{{ code }}</code></pre>
-        </div>
-        <div class="mx-brief__side">
-          <div v-if="note" class="mx-note">
-            <span class="mx-note__key">In {{ adapter.label }}</span>
-            <p>{{ note }}</p>
-          </div>
-          <div class="mx-refs">
-            <span class="mx-refs__key">Reference</span>
-            <div class="mx-refs__list">
-              <a
-                v-for="slug in feature.docs"
-                :key="slug"
-                :href="docsUrl(slug, 'vue')"
-                target="_blank"
-                rel="noreferrer"
-                >{{ slug.replaceAll("-", " ") }}</a
-              >
-            </div>
-          </div>
-          <!-- Where the AI page's developer inspector lands, below Reference. -->
-          <div id="mx-inspector-slot" />
-        </div>
-      </div>
 
       <div class="angular-presentation">
         <fieldset class="angular-choice">
@@ -347,6 +312,69 @@ function copy(which: "code" | "install", text: string): void {
         <component :is="body" />
       </component>
       <component :is="body" v-else />
+
+      <div v-if="moreIntro.length > 0" class="mx-more">
+        <p v-for="(line, index) in moreIntro" :key="index" class="mx-lead">
+          <template v-for="(part, at) in codeSpans(line)" :key="at">
+            <code v-if="part.code">{{ part.text }}</code>
+            <template v-else>{{ part.text }}</template>
+          </template>
+        </p>
+      </div>
+
+      <div v-if="feature" class="mx-brief">
+        <div class="mx-code">
+          <div class="mx-code__bar">
+            <span>{{ head(feature).label }} · {{ adapter.label }}</span>
+            <button
+              type="button"
+              class="mx-code__copy"
+              :class="{ 'is-done': copied === 'code' }"
+              @click="copy('code', code)"
+            >
+              {{ copied === "code" ? "Copied" : "Copy" }}
+            </button>
+          </div>
+          <pre><code>{{ code }}</code></pre>
+        </div>
+        <div class="mx-brief__side">
+          <InstallPlate
+            :pkg="adapter.pkg"
+            :install="adapter.install"
+            :copied="copied === 'install'"
+            @copy="copy('install', adapter.install)"
+          >
+            <div class="mx-plate__row">
+              <span class="mx-plate__key">Guide</span>
+              <a
+                class="mx-plate__link"
+                :href="gettingStarted"
+                data-cta="get_started"
+                >Getting started</a
+              >
+            </div>
+          </InstallPlate>
+          <div v-if="note" class="mx-note">
+            <span class="mx-note__key">In {{ adapter.label }}</span>
+            <p>{{ note }}</p>
+          </div>
+          <div class="mx-refs">
+            <span class="mx-refs__key">Reference</span>
+            <div class="mx-refs__list">
+              <a
+                v-for="slug in feature.docs"
+                :key="slug"
+                :href="docsUrl(slug, 'vue')"
+                target="_blank"
+                rel="noreferrer"
+                >{{ slug.replaceAll("-", " ") }}</a
+              >
+            </div>
+          </div>
+          <!-- Where the AI page's developer inspector lands, below Reference. -->
+          <div id="mx-inspector-slot" />
+        </div>
+      </div>
 
       <section v-if="feature" class="mx-section">
         <div class="mx-section__head">

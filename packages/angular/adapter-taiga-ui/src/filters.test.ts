@@ -27,6 +27,7 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import { TuiDropdownOptionsDirective } from "@taiga-ui/core";
 
 import { filtersTests } from "../../angular/test/kit/suites/filters";
 import { AdaptHeaderFilterTrigger } from "../header-filters/headerFilterTrigger";
@@ -919,6 +920,93 @@ describe("registered Angular form renderers", () => {
 });
 
 describe("filter card viewport space", () => {
+  it("opens the card above a low opener and leaves the side to Taiga otherwise", async () => {
+    const { fixture, openFilters, settle } = await mount();
+    const host = fixture.debugElement.query(By.directive(AdaptFilterPopover));
+    const options = host
+      .query(By.directive(TuiDropdownOptionsDirective))
+      .injector.get(TuiDropdownOptionsDirective);
+    const anchor = (host.nativeElement as HTMLElement).querySelector("span")!;
+    const hitTest = Object.getOwnPropertyDescriptor(
+      document,
+      "elementFromPoint"
+    );
+    Object.defineProperty(document, "elementFromPoint", {
+      configurable: true,
+      value: () => anchor,
+    });
+    let top = window.innerHeight - 48;
+    const measurement = vi
+      .spyOn(anchor, "getBoundingClientRect")
+      .mockImplementation(() =>
+        DOMRect.fromRect({ x: 300, y: top, width: 100, height: 32 })
+      );
+    try {
+      // The opener reaches its place on the page through layout, scroll or resize.
+      window.dispatchEvent(new Event("resize"));
+      await settle();
+      await openFilters();
+      expect(options.direction).toBe("top");
+      top = 40;
+      window.dispatchEvent(new Event("resize"));
+      await settle();
+      expect(options.direction).toBeNull();
+      // A window too short for either side: the larger room stays below.
+      const height = Object.getOwnPropertyDescriptor(window, "innerHeight");
+      Object.defineProperty(window, "innerHeight", {
+        configurable: true,
+        value: 200,
+      });
+      try {
+        top = 60;
+        window.dispatchEvent(new Event("resize"));
+        await settle();
+        expect(options.direction).toBeNull();
+      } finally {
+        if (height) Object.defineProperty(window, "innerHeight", height);
+      }
+    } finally {
+      measurement.mockRestore();
+      if (hitTest) Object.defineProperty(document, "elementFromPoint", hitTest);
+      else Reflect.deleteProperty(document, "elementFromPoint");
+    }
+  });
+
+  it("measures the side afresh each time the card opens", async () => {
+    const { fixture, openFilters, settle } = await mount();
+    const host = fixture.debugElement.query(By.directive(AdaptFilterPopover));
+    const options = host
+      .query(By.directive(TuiDropdownOptionsDirective))
+      .injector.get(TuiDropdownOptionsDirective);
+    const anchor = (host.nativeElement as HTMLElement).querySelector("span")!;
+    const hitTest = Object.getOwnPropertyDescriptor(
+      document,
+      "elementFromPoint"
+    );
+    Object.defineProperty(document, "elementFromPoint", {
+      configurable: true,
+      value: () => anchor,
+    });
+    // Low on the page while closed, then scrolled up before it is opened.
+    let top = window.innerHeight - 48;
+    const measurement = vi
+      .spyOn(anchor, "getBoundingClientRect")
+      .mockImplementation(() =>
+        DOMRect.fromRect({ x: 300, y: top, width: 100, height: 32 })
+      );
+    try {
+      await settle();
+      expect(options.direction).toBeNull();
+      top = 40;
+      await openFilters();
+      expect(options.direction).toBeNull();
+    } finally {
+      measurement.mockRestore();
+      if (hitTest) Object.defineProperty(document, "elementFromPoint", hitTest);
+      else Reflect.deleteProperty(document, "elementFromPoint");
+    }
+  });
+
   it("uses above-origin room for a low opener and updates to below room on scroll", async () => {
     const { fixture, part, openFilters, settle } = await mount();
     const host = fixture.debugElement.query(By.directive(AdaptFilterPopover));

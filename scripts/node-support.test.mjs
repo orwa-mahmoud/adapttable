@@ -265,7 +265,7 @@ describe("supported Node contract", () => {
     for (const version of ["22.12.0", "v22.12.0", "22.18.9"]) {
       const packages = packagesForRuntime(published, version);
       const deps = kitLoadDependencies(packages, version);
-      assert.equal(deps["@nuxt/ui"], "^4.11.3");
+      assert.equal(deps["@nuxt/ui"], "^4.11.3 <4.13.0");
       assert.equal(deps.unifont, "0.7.4");
       assert.equal(deps.undici, undefined);
       assert.equal(kitLoadOverrides({}, deps).unifont, undefined);
@@ -280,7 +280,9 @@ describe("supported Node contract", () => {
     }
     for (const version of ["22.19.0", "22.22.3", "24.15.0", "26.0.0"]) {
       const packages = packagesForRuntime(published, version);
-      assert.equal(kitLoadDependencies(packages, version).unifont, undefined);
+      const deps = kitLoadDependencies(packages, version);
+      assert.equal(deps.unifont, undefined);
+      assert.equal(deps["@nuxt/ui"], "^4.11.3");
     }
   });
 

@@ -17,6 +17,7 @@ import {
   type FiltersUi,
   type PageMode,
 } from "./Demo";
+import { leadAdapter } from "./matrix/content";
 import type { MobileDataState } from "./shared/mobileScenario";
 import { ADAPTER_TOKENS } from "./themeTokens";
 
@@ -224,12 +225,15 @@ export function DemoFallback() {
   );
 }
 
+/** The kit the React main demo opens on. */
+const LEAD_KIT = leadAdapter("react").key;
+
 /** Open the live demo or Feature Lab in the linked kit. Unknown or missing
- * values fall back to Mantine. */
+ * values fall back to the lead kit. */
 export function readKitFromUrl(): string {
-  if (typeof window === "undefined") return "mantine";
+  if (typeof window === "undefined") return LEAD_KIT;
   const kit = new URLSearchParams(window.location.search).get("kit");
-  return kit && kit in ADAPTERS ? kit : "mantine";
+  return kit && kit in ADAPTERS ? kit : LEAD_KIT;
 }
 
 export function KitSwitcher({
@@ -258,7 +262,7 @@ export function KitSwitcher({
             if (urlSync) {
               const url = new URL(window.location.href);
               url.searchParams.delete("kit-unavailable");
-              if (a.key === "mantine") url.searchParams.delete("kit");
+              if (a.key === LEAD_KIT) url.searchParams.delete("kit");
               else url.searchParams.set("kit", a.key);
               window.history.replaceState(window.history.state, "", url);
               window.dispatchEvent(new Event("showcase-preferences-change"));

@@ -14,7 +14,10 @@ import { defineComponent, h, type PropType } from "vue";
 import QuasarButton from "../controls/QuasarButton.vue";
 import QuasarFilterSurface from "./QuasarFilterSurface.vue";
 import QuasarFilterTree from "./QuasarFilterTree.vue";
-function useQuasarFiltersPanel(widgets: readonly FilterWidget[]) {
+function useQuasarFiltersPanel(props: {
+  readonly widgets: readonly FilterWidget[];
+}) {
+  const widgets = props.widgets;
   const names = useDataTableClassNames();
   const model = useFeatureState(filterViewKey<unknown>());
   const controls: FilterPanelSlots<unknown> = {
@@ -103,5 +106,5 @@ export const QuasarFiltersPanel = defineComponent({
       required: true,
     },
   },
-  setup: (props) => useQuasarFiltersPanel(props.widgets),
+  setup: useQuasarFiltersPanel,
 });

@@ -169,7 +169,6 @@
         <p>Swap the writer and the same button produces a different file. <code>xlsxWriter</code> writes Excel outline levels for grouped rows and bolds the totals; <code>pdfWriter</code> lays out a paginated document, right-to-left scripts included when you hand it a font.</p>
         <p>Past the 50,000-row browser cap, <code>onExportAll</code> sends the page-free current view to your backend while the kit shows determinate or indeterminate progress, Cancel, Retry, and the finished download.</p>
         <p><code>printTable</code> opens the browser's own print dialog against a layout built for paper rather than a screenshot of the page.</p>
-        <p>The export control is a Mantine Button in the kit's toolbar, and its busy state is Mantine's — the file is written off the main thread either way.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/mantine&quot;;
 import { exportCsv } from &quot;@adapttable/mantine/export&quot;;
@@ -194,44 +193,46 @@ export function People({ source, columns, api }) {
     /&gt;
   );
 }</code></pre>
+        <p>The export control is a Mantine Button in the kit's toolbar, and its busy state is Mantine's — the file is written off the main thread either way.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/mantine @adapttable/core @mantine/core @mantine/hooks</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
-          <li><a href="../../mui/export/">Export and print in MUI</a> — Material elevation, uppercase actions</li>
-          <li><a href="../../chakra/export/">Export and print in Chakra</a> — Soft teal, generous radius</li>
-          <li><a href="../../antd/export/">Export and print in Ant Design</a> — Compact, tinted header, crisp</li>
-          <li><a href="../../radix/export/">Export and print in Radix</a> — Radix Themes, iris accent</li>
-          <li><a href="../../base-ui/export/">Export and print in Base UI</a> — Unstyled primitives, blue accent</li>
-          <li><a href="../../shadcn/export/">Export and print in shadcn</a> — Monochrome, ring focus</li>
-          <li><a href="../../tailwind/export/">Export and print in Tailwind</a> — Unstyled — your own classes</li>
+          <li><a href="/react/demo/mui/export/">Export and print in MUI</a> — Material elevation, uppercase actions</li>
+          <li><a href="/react/demo/chakra/export/">Export and print in Chakra</a> — Soft teal, generous radius</li>
+          <li><a href="/react/demo/antd/export/">Export and print in Ant Design</a> — Compact, tinted header, crisp</li>
+          <li><a href="/react/demo/radix/export/">Export and print in Radix</a> — Radix Themes, iris accent</li>
+          <li><a href="/react/demo/base-ui/export/">Export and print in Base UI</a> — Unstyled primitives, blue accent</li>
+          <li><a href="/react/demo/shadcn/export/">Export and print in shadcn</a> — Monochrome, ring focus</li>
+          <li><a href="/react/demo/tailwind/export/">Export and print in Tailwind</a> — Unstyled — your own classes</li>
         </ul>
         <h2>More Mantine features</h2>
         <ul>
-          <li><a href="../filtering/">Filtering in Mantine</a> — Operators, an AND/OR tree, chips, and find in the same URL.</li>
-          <li><a href="../columns/">Column management in Mantine</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
-          <li><a href="../column-groups/">Column groups in Mantine</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
-          <li><a href="../selection/">Row selection in Mantine</a> — A set of ids that survives paging, with bulk actions over it.</li>
-          <li><a href="../rows/">Rows in Mantine</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
-          <li><a href="../row-reordering/">Row reordering in Mantine</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
-          <li><a href="../editing/">Inline cell editing in Mantine</a> — Kit-native editors in the cell; every write goes through your handler.</li>
-          <li><a href="../grouping/">Row grouping in Mantine</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
-          <li><a href="../aggregation/">Aggregation in Mantine</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
-          <li><a href="../nested-tables/">Nested tables in Mantine</a> — A real table under a row — same engine, own columns, own keys.</li>
-          <li><a href="../scale/">Row and column virtualization in Mantine</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
-          <li><a href="../tree/">Tree data in Mantine</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
-          <li><a href="../mobile-cards/">Mobile cards in Mantine</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
-          <li><a href="../pivot/">Pivot tables in Mantine</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
-          <li><a href="../saved-views/">Saved views in Mantine</a> — Name an arrangement, share it as a link, manage the list in place.</li>
-          <li><a href="../formulas/">Spreadsheet formulas in Mantine</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
-          <li><a href="../rtl/">Right-to-left Mantine data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
-          <li><a href="../realtime/">Live updates in Mantine</a> — Rows change while you read them. Sort and selection hold.</li>
-          <li><a href="../accessibility/">Accessible Mantine data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
-          <li><a href="../ai/">AI table assistant in Mantine</a> — Native assistant, feature-aware prompts and governed action receipts.</li>
+          <li><a href="/react/demo/mantine/filtering/">Filtering in Mantine</a> — Operators, an AND/OR tree, chips, and find in the same URL.</li>
+          <li><a href="/react/demo/mantine/columns/">Column management in Mantine</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
+          <li><a href="/react/demo/mantine/column-groups/">Column groups in Mantine</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
+          <li><a href="/react/demo/mantine/selection/">Row selection in Mantine</a> — A set of ids that survives paging, with bulk actions over it.</li>
+          <li><a href="/react/demo/mantine/rows/">Rows in Mantine</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
+          <li><a href="/react/demo/mantine/row-reordering/">Row reordering in Mantine</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
+          <li><a href="/react/demo/mantine/editing/">Inline cell editing in Mantine</a> — Kit-native editors in the cell; every write goes through your handler.</li>
+          <li><a href="/react/demo/mantine/grouping/">Row grouping in Mantine</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
+          <li><a href="/react/demo/mantine/aggregation/">Aggregation in Mantine</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
+          <li><a href="/react/demo/mantine/nested-tables/">Nested tables in Mantine</a> — A real table under a row — same engine, own columns, own keys.</li>
+          <li><a href="/react/demo/mantine/scale/">Row and column virtualization in Mantine</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
+          <li><a href="/react/demo/mantine/tree/">Tree data in Mantine</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
+          <li><a href="/react/demo/mantine/mobile-cards/">Mobile cards in Mantine</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
+          <li><a href="/react/demo/mantine/pivot/">Pivot tables in Mantine</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
+          <li><a href="/react/demo/mantine/saved-views/">Saved views in Mantine</a> — Name an arrangement, share it as a link, manage the list in place.</li>
+          <li><a href="/react/demo/mantine/formulas/">Spreadsheet formulas in Mantine</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
+          <li><a href="/react/demo/mantine/rtl/">Right-to-left Mantine data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
+          <li><a href="/react/demo/mantine/realtime/">Live updates in Mantine</a> — Rows change while you read them. Sort and selection hold.</li>
+          <li><a href="/react/demo/mantine/accessibility/">Accessible Mantine data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
+          <li><a href="/react/demo/mantine/ai/">AI table assistant in Mantine</a> — Native assistant, feature-aware prompts and governed action receipts.</li>
         </ul>
         <p>
           Reference: <a href="https://adapttable.orwamahmoud.com/react/exporting/">exporting</a>, <a href="https://adapttable.orwamahmoud.com/react/export-pdf/">export-pdf</a>. More of this kit:
-          <a href="../">AdaptTable for Mantine</a>, or
+          <a href="/react/demo/mantine/">AdaptTable for Mantine</a>, or
           <a href="/react/demo/?kit=mantine">the live demo</a>.
         </p>
       </main>

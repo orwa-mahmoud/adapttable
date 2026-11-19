@@ -17,7 +17,7 @@ import {
   registerDemoRenderer,
   showDemoEditWarning,
 } from "../../angular/demoTransitions.mjs";
-import { adaptersOf } from "../../matrix/content";
+import { adaptersOf, leadAdapter } from "../../matrix/content";
 import {
   refreshShowcasePresentation,
   SHOWCASE_PRESENTATION,
@@ -44,7 +44,8 @@ const render = createLatestDemoTask(async (isCurrent) => {
     const signature = demoOptionSignature(window.location.href);
     const requested = new URLSearchParams(window.location.search).get("kit");
     const adapter =
-      adapters.find((candidate) => candidate.key === requested) ?? adapters[0];
+      adapters.find((candidate) => candidate.key === requested) ??
+      leadAdapter("vue");
     // Load the next kit alongside the page, while the mounted table stays usable.
     const [{ kit }, { default: DemoPage }] = await Promise.all([
       loadVueShowcaseKit(adapter.key),

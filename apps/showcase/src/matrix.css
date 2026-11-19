@@ -188,6 +188,17 @@
   text-transform: uppercase;
   color: var(--ink-3);
 }
+.mx-plate__link {
+  justify-self: start;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--kit-ink);
+  border-bottom: 1px solid var(--kit-line);
+  transition: border-color var(--dur-state) var(--ease);
+}
+.mx-plate__link:hover {
+  border-color: currentColor;
+}
 /* Install lines and imports wrap rather than scroll: a command whose tail is
    hidden behind a scrollbar is a command someone copies half of. */
 .mx-plate__val {
@@ -471,8 +482,9 @@
   color: var(--kit-ink);
   border-color: var(--kit-line);
 }
+/* Full height: a code block that scrolls inside itself takes the wheel from
+   the page. Long lines keep their own horizontal scroll. */
 .mx-code pre {
-  max-block-size: 26rem;
   margin: 0;
   padding: var(--sp-4);
   overflow-x: auto;
@@ -514,8 +526,14 @@
   text-wrap: pretty;
 }
 
-/* The feature page's top block: the code on one side, the kit note and the
-   reference links on the other. */
+/* A feature page's introduction after its first line, read once the live
+   table has shown what it describes. */
+.mx-more {
+  margin-top: var(--sp-6);
+}
+
+/* A feature page's code block: the code on one side; the install command, the
+   kit note and the reference links on the other. */
 .mx-brief {
   display: grid;
   grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);

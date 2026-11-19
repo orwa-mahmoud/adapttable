@@ -11,15 +11,18 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, describe, it } from "node:test";
 
+import { leadAdapter, pathOf } from "../apps/showcase/matrix.mjs";
 import {
   addressMap,
   finalRoute,
   forwardedQuery,
   kitShortcuts,
   LICENSE_URL,
+  redirectFaults,
   redirectPage,
   redirectsTable,
   ruleCounts,
+  sitePages,
   writeLegacySite,
 } from "./build-redirects.mjs";
 import { LEGACY_SITE } from "./legacy-routes.mjs";
@@ -51,7 +54,25 @@ const composed = () => {
   write(root, `v1${docsRoute("filtering")}index.html`, PAGE);
   write(root, `${demo}index.html`, PAGE);
   write(root, `${demo}mantine/columns/index.html`, PAGE);
+  write(root, `${demo}mantine/filtering/index.html`, PAGE);
   write(root, `${demo}columns/index.html`, STUB);
+  for (const framework of ["react", "angular", "vue"])
+    write(
+      root,
+      `${docsRoute("getting-started", framework).slice(1)}index.html`,
+      PAGE
+    );
+  for (const [framework, kit] of [
+    ["angular", leadAdapter("angular")],
+    ["vue", leadAdapter("vue")],
+  ])
+    write(
+      root,
+      `${demoRoute(pathOf(kit) + "/columns", framework).slice(1)}index.html`,
+      PAGE
+    );
+  write(root, `${demoRoute("mui").slice(1)}index.html`, PAGE);
+  write(root, `${demoRoute("tailwind").slice(1)}index.html`, PAGE);
   write(root, "media/ai/demo.gif", "GIF89a");
   write(root, "og/filtering.png", "png");
   write(root, "llms.txt", "# AdaptTable");
@@ -93,17 +114,90 @@ describe("addressMap", () => {
     assert.equal(byFrom.get("/v1/filtering/"), `/v1${docsRoute("filtering")}`);
     assert.equal(byFrom.get("/demo/"), DEMO_ROOT);
     assert.equal(byFrom.get("/demo/columns/"), demoRoute("mantine/columns"));
-    assert.equal(map.length, 7);
+    assert.equal(map.length, 15);
   });
 });
 
 describe("redirectsTable", () => {
-  it("gives React and Angular section roots their own getting-started front doors", () => {
+  it("gives every framework section root its own getting-started front door", () => {
     const lines = redirectsTable(composed()).split("\n");
-    assert.ok(lines.includes("/react /react/getting-started/ 302"));
-    assert.ok(lines.includes("/react/ /react/getting-started/ 302"));
-    assert.ok(lines.includes("/angular /angular/getting-started/ 302"));
-    assert.ok(lines.includes("/angular/ /angular/getting-started/ 302"));
+    for (const framework of ["react", "angular", "vue"]) {
+      const front = docsRoute("getting-started", framework);
+      assert.ok(lines.includes(`/${framework} ${front} 302`), framework);
+      assert.ok(lines.includes(`/${framework}/ ${front} 302`), framework);
+    }
+  });
+
+  it("gives no front door to a framework without a getting-started page", () => {
+    const root = composed();
+    rmSync(join(root, docsRoute("getting-started", "vue").slice(1)), {
+      recursive: true,
+    });
+    const lines = redirectsTable(root).split("\n");
+    assert.equal(
+      lines.some((line) => line.startsWith("/vue ")),
+      false
+    );
+  });
+
+  it("sends a demo feature asked for without a kit to the lead kit's page", () => {
+    const lines = redirectsTable(composed()).split("\n");
+    const mantine = demoRoute("mantine/filtering");
+    assert.ok(lines.includes(`/react/demo/filtering/ ${mantine} 301`));
+    assert.ok(lines.includes(`/react/demo/filtering ${mantine} 301`));
+    for (const framework of ["angular", "vue"]) {
+      const lead = demoRoute(
+        `${pathOf(leadAdapter(framework))}/columns`,
+        framework
+      );
+      assert.ok(
+        lines.includes(`/${framework}/demo/columns/ ${lead} 301`),
+        framework
+      );
+      assert.ok(
+        lines.includes(`/${framework}/demo/columns ${lead} 301`),
+        framework
+      );
+    }
+  });
+
+  it("leaves a served demo address alone and skips features the lead kit lacks", () => {
+    const lines = redirectsTable(composed()).split("\n");
+    assert.equal(
+      lines.some((line) => line.startsWith(`${demoRoute("columns")} `)),
+      false
+    );
+    assert.equal(
+      lines.some((line) => line.startsWith("/angular/demo/filtering")),
+      false
+    );
+  });
+
+  it("sends the licence links registries build under each package homepage", () => {
+    const lines = redirectsTable(composed()).split("\n");
+    for (const home of [demoRoute(), demoRoute("mui"), demoRoute("tailwind")]) {
+      assert.ok(lines.includes(`${home}LICENSE ${LICENSE_URL} 301`), home);
+      assert.ok(
+        lines.includes(`${home}blob/master/LICENSE ${LICENSE_URL} 301`),
+        home
+      );
+    }
+  });
+
+  it("sends a kit package's own name to its demo when the demo folder differs", () => {
+    const lines = redirectsTable(composed()).split("\n");
+    const tailwind = demoRoute("tailwind");
+    assert.ok(lines.includes(`${demoRoute("unstyled")} ${tailwind} 301`));
+    assert.ok(
+      lines.includes(`${demoRoute("unstyled").slice(0, -1)} ${tailwind} 301`)
+    );
+  });
+
+  it("forwards only to served pages and never over one", () => {
+    const root = composed();
+    const table = redirectsTable(root);
+    const routes = sitePages(root).map(({ route }) => route);
+    assert.deepEqual(redirectFaults(table, routes), []);
   });
   it("answers each changed path, with and without its slash", () => {
     const lines = redirectsTable(composed()).split("\n");
@@ -270,7 +364,7 @@ describe("writeLegacySite", () => {
     const out = mkdtempSync(join(tmpdir(), "adapttable-legacy-"));
     temps.push(out);
     const { pages, listed } = writeLegacySite(root, out);
-    assert.equal(pages, 7);
+    assert.equal(pages, 15);
     assert.equal(listed, 4);
 
     const filtering = readFileSync(
@@ -306,5 +400,24 @@ describe("writeLegacySite", () => {
         `Sitemap: ${LEGACY_SITE}/sitemap.xml`
       )
     );
+  });
+});
+
+describe("redirectFaults", () => {
+  it("names a rule that forwards to a missing page or over a served one", () => {
+    const routes = ["/", "/react/getting-started/", "/react/demo/mui/"];
+    const table = [
+      "# comment",
+      "/react /react/getting-started/ 302",
+      "/react/demo/gone/ /react/demo/missing/ 301",
+      "/react/demo/mui/ /react/getting-started/ 301",
+      `/LICENSE ${LICENSE_URL} 301`,
+      "/react/demo/mui/* /react/demo/mui/:splat 301",
+      "/react/demo/mui /react/demo/mui/ 301",
+    ].join("\n");
+    assert.deepEqual(redirectFaults(table, routes), [
+      "/react/demo/gone/ → /react/demo/missing/: no page is served there",
+      "/react/demo/mui/ → /react/getting-started/: a served page answers this address",
+    ]);
   });
 });

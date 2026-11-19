@@ -4,7 +4,8 @@ import "./styles.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { resolveMatrixRoute } from "./matrix/content";
+import { SITE_SURFACE } from "../../../scripts/site-events.mjs";
+import { resolveMatrixRoute, showcaseRootPath } from "./matrix/content";
 import { MatrixPage } from "./matrix/MatrixPage";
 import { PageShell } from "./PageShell";
 
@@ -33,12 +34,14 @@ if (!route) {
   );
 }
 
-/** `..` from an adapter landing, `../..` from one of its feature pages. */
-const root = "..".concat("/..".repeat(id.split("/").length - 1));
+/** The showcase root, reached by `..` from an adapter landing and `../..` from a feature page. */
+const root = showcaseRootPath(
+  "..".concat("/..".repeat(id.split("/").length - 1))
+);
 
 createRoot(container).render(
   <StrictMode>
-    <PageShell active={id} root={root}>
+    <PageShell active={id} root={root} surface={SITE_SURFACE.demoKit}>
       {(dark) => <MatrixPage route={route} dark={dark} root={root} />}
     </PageShell>
   </StrictMode>

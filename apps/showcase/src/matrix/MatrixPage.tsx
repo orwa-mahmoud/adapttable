@@ -20,6 +20,7 @@ import {
   useState,
 } from "react";
 
+import { SITE_SURFACE, trackCopy } from "../../../../scripts/site-events.mjs";
 import { cssVars } from "../cssVars";
 import { DemoFallback } from "../kitDemos";
 import {
@@ -156,8 +157,13 @@ function Seam({ pkg }: Readonly<{ pkg: string }>) {
   );
 }
 
-/** Copy-to-clipboard, with the button reporting what it did. */
-function useCopy(text: string) {
+/**
+ * Copy-to-clipboard, with the button reporting what it did.
+ *
+ * @param text - What the button copies.
+ * @param item - How the copy is reported when it is not an install command.
+ */
+function useCopy(text: string, item: string) {
   const [done, setDone] = useState(false);
   const timer = useRef<number | undefined>(undefined);
   useEffect(
@@ -168,16 +174,21 @@ function useCopy(text: string) {
   );
   const copy = useCallback(() => {
     void navigator.clipboard?.writeText(text);
+    trackCopy(SITE_SURFACE.demoKit, text, item);
     setDone(true);
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setDone(false), 1400);
-  }, [text]);
+  }, [text, item]);
   return { done, copy };
 }
 
 /** A titled code window. The bar names what the code is, which a bare block never does. */
-function CodeBlock({ title, code }: Readonly<{ title: string; code: string }>) {
-  const { done, copy } = useCopy(code);
+function CodeBlock({
+  title,
+  code,
+  item,
+}: Readonly<{ title: string; code: string; item: string }>) {
+  const { done, copy } = useCopy(code, item);
   return (
     <div className="mx-code">
       <div className="mx-code__bar">
@@ -198,9 +209,12 @@ function CodeBlock({ title, code }: Readonly<{ title: string; code: string }>) {
   );
 }
 
-/** The three facts a developer needs before they read anything else. */
-function SpecPlate({ adapter }: Readonly<{ adapter: ShowcaseAdapter }>) {
-  const { done, copy } = useCopy(adapter.install);
+/** The kit's install command with its copy button, and whatever rows follow it. */
+function InstallPlate({
+  adapter,
+  children,
+}: Readonly<{ adapter: ShowcaseAdapter; children: ReactNode }>) {
+  const { done, copy } = useCopy(adapter.install, "install");
   return (
     <aside className="mx-plate">
       <div className="mx-plate__head">
@@ -218,6 +232,15 @@ function SpecPlate({ adapter }: Readonly<{ adapter: ShowcaseAdapter }>) {
         <span className="mx-plate__key">Install</span>
         <code className="mx-plate__val">{adapter.install}</code>
       </div>
+      {children}
+    </aside>
+  );
+}
+
+/** The three facts a developer needs before they read anything else. */
+function SpecPlate({ adapter }: Readonly<{ adapter: ShowcaseAdapter }>) {
+  return (
+    <InstallPlate adapter={adapter}>
       <div className="mx-plate__row">
         <span className="mx-plate__key">Import</span>
         <code className="mx-plate__val">
@@ -234,7 +257,7 @@ function SpecPlate({ adapter }: Readonly<{ adapter: ShowcaseAdapter }>) {
         <span className="mx-plate__key">Peer</span>
         <code className="mx-plate__val">{adapter.peer}</code>
       </div>
-    </aside>
+    </InstallPlate>
   );
 }
 
@@ -350,10 +373,15 @@ function AdapterLanding({
               href={docsUrl("getting-started")}
               target="_blank"
               rel="noreferrer"
+              data-cta="get_started"
             >
               <External size={14} /> Get started
             </a>
-            <a className="mx-btn" href={`${root}/?kit=${adapter.key}`}>
+            <a
+              className="mx-btn"
+              href={`${root}/?kit=${adapter.key}`}
+              data-cta="compare_kits"
+            >
               Compare all eight kits
             </a>
           </div>
@@ -385,7 +413,7 @@ function AdapterLanding({
   );
 }
 
-/** "Saved views in Mantine": the words, the code, the kit's own note, the demo. */
+/** "Saved views in Mantine": the title, the live table, the rest of the words, the code. */
 function FeaturePage({
   adapter,
   framework,
@@ -405,13 +433,27 @@ function FeaturePage({
     throw new Error(`No demo body for feature "${feature.slug}"`);
   }
   const note = feature.notes[adapter.key];
+  const [firstLine, ...moreLines] = introFor(feature, adapter);
   const brief = (
     <div className="mx-brief">
       <CodeBlock
         title={`${feature.label} · ${adapter.label}`}
         code={fill(snippetFor(feature, adapter, framework))}
+        item={feature.slug}
       />
       <div className="mx-brief__side">
+        <InstallPlate adapter={adapter}>
+          <div className="mx-plate__row">
+            <span className="mx-plate__key">Guide</span>
+            <a
+              className="mx-plate__link"
+              href={docsUrl("getting-started")}
+              data-cta="get_started"
+            >
+              Getting started
+            </a>
+          </div>
+        </InstallPlate>
         {note ? (
           <div className="mx-note">
             <span className="mx-note__key">In {adapter.label}</span>
@@ -454,20 +496,24 @@ function FeaturePage({
             {feature.label}
           </Kicker>
           <KitHeading text={fill(feature.h1)} kit={adapter.label} />
-          {introFor(feature, adapter).map((line) => (
-            <Lead key={line} text={fill(line)} />
-          ))}
+          {firstLine ? <Lead text={fill(firstLine)} /> : null}
         </div>
       </header>
 
-      {brief}
-
       <Seam pkg={adapter.pkg} />
-      {Body ? (
-        <Suspense fallback={<DemoFallback />}>
-          <Body dark={dark} adapter={adapter.key} />
-        </Suspense>
+      <Suspense fallback={<DemoFallback />}>
+        <Body dark={dark} adapter={adapter.key} />
+      </Suspense>
+
+      {moreLines.length > 0 ? (
+        <div className="mx-more">
+          {moreLines.map((line) => (
+            <Lead key={line} text={fill(line)} />
+          ))}
+        </div>
       ) : null}
+
+      {brief}
 
       <section className="mx-section">
         <div className="mx-section__head">

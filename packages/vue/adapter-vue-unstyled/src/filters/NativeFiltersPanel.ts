@@ -13,7 +13,10 @@ import { useClassNames } from "../classNamesContext";
 import { NativeFilterSurface } from "./NativeFilterSurface";
 import { NativeFilterTree } from "./NativeFilterTree";
 
-function useNativeFiltersPanel(widgets: readonly FilterWidget[]) {
+function useNativeFiltersPanel(props: {
+  readonly widgets: readonly FilterWidget[];
+}) {
+  const widgets = props.widgets;
   const names = useClassNames();
   const model = useFeatureState(filterViewKey<unknown>());
   const buttonClassName = (part: string): string | undefined => {
@@ -110,5 +113,5 @@ export const NativeFiltersPanel = defineComponent({
       required: true,
     },
   },
-  setup: (props) => useNativeFiltersPanel(props.widgets),
+  setup: useNativeFiltersPanel,
 });

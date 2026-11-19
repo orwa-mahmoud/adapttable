@@ -1,19 +1,8 @@
 # Get started with AdaptTable — React table for your UI kit
 
-▶ **Nothing to install yet — [open the live demo](https://adapttable.orwamahmoud.com/react/demo/) and use it.** Flip
-between [Mantine](https://adapttable.orwamahmoud.com/react/demo/?kit=mantine) · [MUI](https://adapttable.orwamahmoud.com/react/demo/?kit=mui) ·
-[Chakra](https://adapttable.orwamahmoud.com/react/demo/?kit=chakra) · [Ant Design](https://adapttable.orwamahmoud.com/react/demo/?kit=antd) ·
-[Radix](https://adapttable.orwamahmoud.com/react/demo/?kit=radix) · [Base UI](https://adapttable.orwamahmoud.com/react/demo/?kit=base-ui) ·
-[shadcn](https://adapttable.orwamahmoud.com/react/demo/?kit=shadcn) · [Tailwind](https://adapttable.orwamahmoud.com/react/demo/?kit=tailwind) on the same data,
-and toggle grouping and inline editing while you are there.
-
-<video src="https://adapttable.orwamahmoud.com/media/core/tour.mp4" poster="https://adapttable.orwamahmoud.com/media/core/poster.png?v=2" controls playsinline preload="none" width="1500" height="1065" style="width:100%;height:auto;aspect-ratio:1500/1065;border-radius:8px"></video>
-
 AdaptTable is a headless, UI-agnostic React data table. Pick the adapter for
 your design system and you get a styled, sortable, searchable, paginated
-table with URL-synced state, RTL, and dark mode. Filters, selection with bulk
-actions, and every other feature are opt-in imports composed in
-`features={[...]}`.
+table with URL-synced state, RTL, and dark mode.
 
 ## Install
 
@@ -24,7 +13,8 @@ prints the install command, and scaffolds a starter `src/PeopleTable.tsx`:
 npx @adapttable/cli init
 ```
 
-Prefer zero install first? Open a live starter in
+Nothing to install yet? [Open the live demo](https://adapttable.orwamahmoud.com/react/demo/)
+and use it, or open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
@@ -214,7 +204,9 @@ export function PeopleTable() {
 }
 ```
 
-Column `filter` declarations need the filters feature — `filters([])` when
+Filters, selection with bulk actions, and every other feature are opt-in
+imports composed in `features={[...]}`. Column `filter` declarations need the
+filters feature — `filters([])` when
 every filter lives on a column, or pass standalone defs to the factory (below).
 See [feature composition](./features.md).
 
@@ -247,6 +239,16 @@ filter also drives its own removable chip, URL parsing, and row predicate.
   ]}
 />
 ```
+
+## Every kit in the live demo
+
+Flip between [Mantine](https://adapttable.orwamahmoud.com/react/demo/?kit=mantine) · [MUI](https://adapttable.orwamahmoud.com/react/demo/?kit=mui) ·
+[Chakra](https://adapttable.orwamahmoud.com/react/demo/?kit=chakra) · [Ant Design](https://adapttable.orwamahmoud.com/react/demo/?kit=antd) ·
+[Radix](https://adapttable.orwamahmoud.com/react/demo/?kit=radix) · [Base UI](https://adapttable.orwamahmoud.com/react/demo/?kit=base-ui) ·
+[shadcn](https://adapttable.orwamahmoud.com/react/demo/?kit=shadcn) · [Tailwind](https://adapttable.orwamahmoud.com/react/demo/?kit=tailwind) on the same data,
+and toggle grouping and inline editing while you are there.
+
+<video src="https://adapttable.orwamahmoud.com/media/core/tour.mp4" poster="https://adapttable.orwamahmoud.com/media/core/poster.png?v=2" controls playsinline preload="none" width="1500" height="1065" style="width:100%;height:auto;aspect-ratio:1500/1065;border-radius:8px"></video>
 
 ## Try it in StackBlitz
 

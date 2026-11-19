@@ -14,7 +14,10 @@ import { elementButton } from "../controls/button";
 import { ElementFilterSurface } from "./ElementFilterSurface";
 import { ElementFilterTree } from "./ElementFilterTree";
 
-function useElementFiltersPanel(widgets: readonly FilterWidget[]) {
+function useElementFiltersPanel(props: {
+  readonly widgets: readonly FilterWidget[];
+}) {
+  const widgets = props.widgets;
   const names = useClassNames();
   const model = useFeatureState(filterViewKey<unknown>());
   const controls: FilterPanelSlots<unknown> = {
@@ -108,5 +111,5 @@ export const ElementFiltersPanel = defineComponent({
       required: true,
     },
   },
-  setup: (props) => useElementFiltersPanel(props.widgets),
+  setup: useElementFiltersPanel,
 });

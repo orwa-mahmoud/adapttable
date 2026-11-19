@@ -1,11 +1,20 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 
+import {
+  onTableAction,
+  SITE_EVENT,
+  track,
+  trackOnce,
+} from "../../../scripts/site-events.mjs";
 import { assistantActive, subscribeAssistantActive } from "./assistantActivity";
 
 const DISMISS_KEY = "adapttable-star-the-repo";
 const START_KEY = "adapttable-star-the-repo-since";
 const CLOSED_KEY = "adapttable-star-the-repo-closed";
+const ACTIONS_KEY = "adapttable-star-the-repo-actions";
 const DELAY_MS = 20_000;
+/** Actions on a live table in this tab before the prompt may open. */
+const REQUIRED_ACTIONS = 3;
 const REPO = "https://github.com/orwa-mahmoud/adapttable";
 
 const readDismissed = (): boolean => {
@@ -57,10 +66,36 @@ const readStart = (): number => {
 };
 
 /**
- * Centered modal on the live demo: twenty elapsed seconds from the first
- * demo page in this tab, then ask once for a GitHub star. Interaction is
- * not required. It does not block the table. Close hides it for this tab;
- * Don't show again or the star link writes localStorage and never shows
+ * Actions on a live table counted in this tab, across demo pages; `null`
+ * when session storage is unavailable, which keeps the prompt closed.
+ */
+const readActions = (): number | null => {
+  try {
+    const count = Number(window.sessionStorage.getItem(ACTIONS_KEY) ?? "0");
+    return Number.isFinite(count) ? count : 0;
+  } catch {
+    return null;
+  }
+};
+
+/** Count one more table action; the new total, or `null` without storage. */
+const countAction = (): number | null => {
+  const count = readActions();
+  if (count === null) return null;
+  try {
+    window.sessionStorage.setItem(ACTIONS_KEY, String(count + 1));
+    return count + 1;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Centered modal on the live demo that asks once for a GitHub star. It opens
+ * when twenty seconds have passed since the first demo page in this tab AND
+ * the visitor has acted on a live table three times in this tab; whichever
+ * comes last opens it. It does not block the table. Close hides it for this
+ * tab; Don't show again or the star link writes localStorage and never shows
  * again on this device until that key is cleared.
  */
 export function StarTheRepo() {
@@ -79,15 +114,32 @@ export function StarTheRepo() {
     if (navigator.webdriver) return;
 
     const remaining = DELAY_MS - (Date.now() - readStart());
-    if (remaining <= 0) {
-      setOpen(true);
-      return;
-    }
-    const timer = window.setTimeout(() => setOpen(true), remaining);
-    return () => window.clearTimeout(timer);
+    let waited = remaining <= 0;
+    let used = (readActions() ?? 0) >= REQUIRED_ACTIONS;
+    const openWhenDue = () => {
+      if (waited && used) setOpen(true);
+    };
+    const stopCounting = onTableAction(() => {
+      const count = countAction();
+      if (count === null || count < REQUIRED_ACTIONS) return;
+      used = true;
+      openWhenDue();
+    });
+    const timer = waited
+      ? undefined
+      : window.setTimeout(() => {
+          waited = true;
+          openWhenDue();
+        }, remaining);
+    openWhenDue();
+    return () => {
+      stopCounting();
+      window.clearTimeout(timer);
+    };
   }, []);
 
   const close = () => {
+    track(SITE_EVENT.starPromptClosed, { item: "close" });
     persistClosed();
     setOpen(false);
   };
@@ -98,7 +150,23 @@ export function StarTheRepo() {
     setOpen(false);
   };
 
-  if (!open || busy) return null;
+  const star = () => {
+    track(SITE_EVENT.starPromptStar);
+    dismissForever();
+  };
+
+  const never = () => {
+    track(SITE_EVENT.starPromptClosed, { item: "never" });
+    dismissForever();
+  };
+
+  const visible = open && !busy;
+  useEffect(() => {
+    if (visible)
+      trackOnce(SITE_EVENT.starPromptShown, SITE_EVENT.starPromptShown);
+  }, [visible]);
+
+  if (!visible) return null;
 
   return (
     <section
@@ -137,7 +205,7 @@ export function StarTheRepo() {
           href={REPO}
           target="_blank"
           rel="noreferrer"
-          onClick={dismissForever}
+          onClick={star}
         >
           <svg
             width="14"
@@ -150,11 +218,7 @@ export function StarTheRepo() {
           </svg>
           Star AdaptTable
         </a>
-        <button
-          type="button"
-          className="star-the-repo__skip"
-          onClick={dismissForever}
-        >
+        <button type="button" className="star-the-repo__skip" onClick={never}>
           Don&apos;t show again
         </button>
       </div>

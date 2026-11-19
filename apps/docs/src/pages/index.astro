@@ -18,29 +18,49 @@ const ANGULAR_KITS = builtAdapters("angular");
 const VUE_KITS = builtAdapters("vue");
 const KITS = [
   {
+    key: "mantine",
     label: "Mantine",
     c: "oklch(0.58 0.17 252)",
     href: `${siteUrl(demoRoute("mantine"))}`,
   },
-  { label: "MUI", c: "oklch(0.55 0.18 264)", href: `${siteUrl(demoRoute("mui"))}` },
-  { label: "Chakra", c: "oklch(0.6 0.1 188)", href: `${siteUrl(demoRoute("chakra"))}` },
   {
+    key: "mui",
+    label: "MUI",
+    c: "oklch(0.55 0.18 264)",
+    href: `${siteUrl(demoRoute("mui"))}`,
+  },
+  {
+    key: "chakra",
+    label: "Chakra",
+    c: "oklch(0.6 0.1 188)",
+    href: `${siteUrl(demoRoute("chakra"))}`,
+  },
+  {
+    key: "antd",
     label: "Ant Design",
     c: "oklch(0.56 0.2 262)",
     href: `${siteUrl(demoRoute("antd"))}`,
   },
-  { label: "Radix", c: "oklch(0.54 0.19 280)", href: `${siteUrl(demoRoute("radix"))}` },
   {
+    key: "radix",
+    label: "Radix",
+    c: "oklch(0.54 0.19 280)",
+    href: `${siteUrl(demoRoute("radix"))}`,
+  },
+  {
+    key: "base-ui",
     label: "Base UI",
     c: "oklch(0.55 0.19 255)",
     href: `${siteUrl(demoRoute("base-ui"))}`,
   },
   {
+    key: "shadcn",
     label: "shadcn / Tailwind",
     c: "oklch(0.28 0.01 264)",
     href: `${siteUrl(demoRoute("shadcn"))}`,
   },
   {
+    key: "tailwind",
     label: "Custom Tailwind",
     c: "oklch(0.55 0.2 277)",
     href: `${siteUrl(demoRoute("tailwind"))}`,
@@ -224,6 +244,7 @@ const JSON_LD = JSON.stringify({
   ],
 });
 import { appendScript, guarded } from "../../../../scripts/analytics-guard.mjs";
+import { analyticsTag, clarityTag } from "../../../../scripts/site-events.mjs";
 ---
 
 <!doctype html>
@@ -261,70 +282,16 @@ import { appendScript, guarded } from "../../../../scripts/analytics-guard.mjs";
     />
     <!--
       Google Analytics (GA4) and Microsoft Clarity, production builds only.
-      This landing page is a standalone Astro page, so Starlight's `head`
-      config in astro.config.mjs does not reach it — both tags are repeated
-      here on purpose. Change the GA4 measurement ID or the Clarity project
-      ID in both places.
-
-      The dev guard matters: unlike the Cloudflare beacon, which is bound to a
-      hostname and drops anything that is not the real site, GA4 and Clarity
-      accept hits from any host — so an unguarded tag makes `localhost` look
-      like traffic.
+      This landing page is a standalone Astro page outside Starlight's `head`
+      config, so it installs the same shared tags itself. Each tag carries its
+      own host guard: GA4 and Clarity accept hits from any host, so an
+      unguarded tag makes `localhost` look like traffic.
     -->
     {
       import.meta.env.PROD && (
         <>
-          {/* googletagmanager.com serves the tag with
-              `access-control-allow-origin: *`, so an anonymous fetch gives the
-              browser full error detail instead of the opaque "Script error."
-              every cross-origin failure collapses into. */}
-          <script
-            is:inline
-            set:html={guarded(`${appendScript(
-              "https://www.googletagmanager.com/gtag/js?id=G-FT8LY7Z15Y",
-              { async: true, crossorigin: "anonymous" }
-            )}
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-FT8LY7Z15Y');
-(function () {
-  function report(type, fatal) {
-    if (typeof gtag !== 'function') return;
-    gtag('event', 'web_exception', {
-      exception_type: type,
-      fatal: fatal,
-      non_interaction: true
-    });
-  }
-  window.addEventListener('error', function (event) {
-    var message = typeof event.message === 'string' ? event.message : '';
-    // ResizeObserver's benign loop notification arrives as an error event with
-    // no error object. It gets its own bucket so the count stays readable in
-    // GA4 instead of hiding inside a generic 'Error' total.
-    if (message.startsWith('ResizeObserver loop')) {
-      report('ResizeObserverLoop', false);
-      return;
-    }
-    var error = event.error;
-    // Without an error object the message is the only identifying detail GA4
-    // will ever see, so send it instead of the blanket 'Error' — truncated to
-    // the 100-character parameter limit. Only a real error object is fatal.
-    var name = error && error.name ? error.name : '';
-    report(name || message.slice(0, 100) || 'Error', Boolean(error));
-  });
-  window.addEventListener('unhandledrejection', function (event) {
-    report(event.reason && event.reason.name ? event.reason.name : 'UnhandledRejection', false);
-  });
-})();`)}
-          />
-          <script
-            is:inline
-            set:html={guarded(`window.clarity = window.clarity || function () {
-  (window.clarity.q = window.clarity.q || []).push(arguments);
-};
-${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
-          />
+          <script is:inline set:html={analyticsTag()} />
+          <script is:inline set:html={clarityTag()} />
         </>
       )
     }
@@ -435,7 +402,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
               <option value="vue">Vue</option>
             </select>
           </label>
-          <a class="nav__docs" href={`${siteUrl(docsRoute("getting-started"))}`}>
+          <a class="nav__docs" href={`${siteUrl(docsRoute("getting-started"))}`} data-cta="docs">
             <svg
               width="14"
               height="14"
@@ -545,7 +512,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
               </svg>
             </button>
           </div>
-          <a class="btn-demo" href={`${siteUrl(demoRoute())}`}>
+          <a class="btn-demo" href={`${siteUrl(demoRoute())}`} data-cta="try_demo">
             Try the live demo
             <svg
               width="14"
@@ -578,14 +545,14 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
           <span class="hero__adapters-l">Renders natively in</span>
           {
             KITS.map((kit) => (
-              <a data-framework-only="react" class="hero__chip" href={kit.href} style={`--c:${kit.c}`}>
+              <a data-framework-only="react" class="hero__chip" href={kit.href} data-cta={`kit_${kit.key}`} style={`--c:${kit.c}`}>
                 <span class="hero__chip-dot" />
                 {kit.label}
               </a>
             ))
           }
-          {ANGULAR_KITS.map((kit) => <a hidden data-framework-only="angular" class="hero__chip" href={siteUrl(demoRoute(kit.key, "angular"))} style={`--c:${kit.accentLight}`}><span class="hero__chip-dot" />{kit.label}</a>)}
-          {VUE_KITS.map((kit) => <a hidden data-framework-only="vue" class="hero__chip" href={siteUrl(demoRoute(kit.path ?? kit.key, "vue"))} style={`--c:${kit.accentLight}`}><span class="hero__chip-dot" />{kit.label}</a>)}
+          {ANGULAR_KITS.map((kit) => <a hidden data-framework-only="angular" class="hero__chip" href={siteUrl(demoRoute(kit.key, "angular"))} data-cta={`kit_${kit.key}`} style={`--c:${kit.accentLight}`}><span class="hero__chip-dot" />{kit.label}</a>)}
+          {VUE_KITS.map((kit) => <a hidden data-framework-only="vue" class="hero__chip" href={siteUrl(demoRoute(kit.path ?? kit.key, "vue"))} data-cta={`kit_${kit.key}`} style={`--c:${kit.accentLight}`}><span class="hero__chip-dot" />{kit.label}</a>)}
         </div>
 
         </div>
@@ -605,6 +572,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
         <figure class="tour" data-framework-only="react">
           <video
             class="tour__video"
+            data-video="tour"
             controls
             muted
             loop
@@ -623,10 +591,10 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
           </figcaption>
         </figure>
         <div class="hero__cta" hidden data-framework-only="angular">
-          {ANGULAR_KITS.map((kit) => <a class="btn-demo" href={siteUrl(demoRoute(kit.key, "angular"))}>Explore {kit.label}</a>)}
+          {ANGULAR_KITS.map((kit) => <a class="btn-demo" href={siteUrl(demoRoute(kit.key, "angular"))} data-cta={`explore_${kit.key}`}>Explore {kit.label}</a>)}
         </div>
         <div class="hero__cta" hidden data-framework-only="vue">
-          {VUE_KITS.map((kit) => <a class="btn-demo" href={siteUrl(demoRoute(kit.path ?? kit.key, "vue"))}>Explore {kit.label}</a>)}
+          {VUE_KITS.map((kit) => <a class="btn-demo" href={siteUrl(demoRoute(kit.path ?? kit.key, "vue"))} data-cta={`explore_${kit.key}`}>Explore {kit.label}</a>)}
         </div>
         </div>
       </section>
@@ -759,7 +727,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
             </p>
           </div>
           <div class="ai__links">
-            <a class="gs-btn gs-btn--primary" href={`${siteUrl(demoRoute("mantine/ai"))}`}
+            <a class="gs-btn gs-btn--primary" href={`${siteUrl(demoRoute("mantine/ai"))}`} data-cta="try_ai_demo"
               >Try the AI demo</a
             >
             <a class="gs-btn gs-btn--ghost" href={`${siteUrl(docsRoute("ai"))}`}>AI docs</a>
@@ -768,6 +736,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
         <figure class="aidemo reveal">
           <video
             class="aidemo__video"
+            data-video="ai"
             controls
             playsinline
             preload="none"
@@ -925,7 +894,7 @@ const features = [filters([])];
               <code>npx @adapttable/cli init</code>
             </div>
             <div class="getstarted__btns">
-              <a class="gs-btn gs-btn--primary" href={`${siteUrl(docsRoute("getting-started"))}`}
+              <a class="gs-btn gs-btn--primary" href={`${siteUrl(docsRoute("getting-started"))}`} data-cta="get_started"
                 >Get started</a
               >
 
@@ -1039,7 +1008,7 @@ const features = [filters([])];
           <code>npx @adapttable/cli init</code>
         </div>
         <nav class="foot__links" aria-label="Footer">
-          <a href={`${siteUrl(demoRoute())}`}>
+          <a href={`${siteUrl(demoRoute())}`} data-cta="footer_demo">
             <svg
               width="14"
               height="14"
@@ -1056,7 +1025,7 @@ const features = [filters([])];
             </svg>
             Demo
           </a>
-          <a href={`${siteUrl(docsRoute("getting-started"))}`}>
+          <a href={`${siteUrl(docsRoute("getting-started"))}`} data-cta="footer_docs">
             <svg
               width="14"
               height="14"
@@ -1118,6 +1087,15 @@ const features = [filters([])];
 
     <script>
       import "../landing-framework";
+      import {
+        installSiteEvents,
+        SITE_EVENT,
+        SITE_SURFACE,
+        trackCopy,
+        trackOnce,
+      } from "../../../../scripts/site-events.mjs";
+
+      installSiteEvents(SITE_SURFACE.landing);
       // Mouse wheel paginates the deck: one flick, one slide — and a
       // SUSTAINED scroll chains slide after slide, so the whole page can
       // be traversed in one go. The listener lives on window so the
@@ -1240,9 +1218,42 @@ const features = [filters([])];
       document.querySelectorAll<HTMLButtonElement>("[data-copy]").forEach(
         (btn) => {
           btn.addEventListener("click", () => {
-            void navigator.clipboard?.writeText(btn.dataset.copy ?? "");
+            const command = btn.dataset.copy ?? "";
+            void navigator.clipboard?.writeText(command);
+            trackCopy(SITE_SURFACE.landing, command, "install");
             btn.classList.add("ok");
             window.setTimeout(() => btn.classList.remove("ok"), 1200);
+          });
+        }
+      );
+
+      // The tour and AI videos: first play, and the first time one reaches
+      // its end. The tour loops and never fires `ended`, so its end is the
+      // playhead wrapping back to the start from its last seconds.
+      const VIDEO_END_WINDOW_S = 2;
+      document.querySelectorAll<HTMLVideoElement>("video[data-video]").forEach(
+        (video) => {
+          const item = video.dataset.video ?? "";
+          const complete = () => {
+            trackOnce(
+              `${SITE_EVENT.videoComplete}:${item}`,
+              SITE_EVENT.videoComplete,
+              { item }
+            );
+          };
+          let last = 0;
+          video.addEventListener("play", () => {
+            trackOnce(`${SITE_EVENT.videoPlay}:${item}`, SITE_EVENT.videoPlay, {
+              item,
+            });
+          });
+          video.addEventListener("ended", complete);
+          video.addEventListener("timeupdate", () => {
+            const wrapped =
+              video.currentTime < last &&
+              last >= video.duration - VIDEO_END_WINDOW_S;
+            last = video.currentTime;
+            if (wrapped) complete();
           });
         }
       );

@@ -4,6 +4,7 @@ import {
   frameworkDocsTarget,
   selectedFramework,
 } from "../../../scripts/framework-navigation.mjs";
+import { SITE_EVENT, track } from "../../../scripts/site-events.mjs";
 import { ORIGIN } from "../../../scripts/site.mjs";
 
 function updateFrameworkNavigation() {
@@ -32,6 +33,7 @@ function updateFrameworkNavigation() {
         const targetFramework =
           DOCS_FRAMEWORKS.find(({ key }) => key === select.value)?.key ??
           "react";
+        track(SITE_EVENT.frameworkSwitch, { framework: targetFramework });
         try {
           localStorage.setItem(FRAMEWORK_STORAGE_KEY, targetFramework);
         } catch {

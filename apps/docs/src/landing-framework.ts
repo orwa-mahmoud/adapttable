@@ -5,6 +5,7 @@ import {
   normalizeFramework,
   selectedFramework,
 } from "../../../scripts/framework-navigation.mjs";
+import { SITE_EVENT, track } from "../../../scripts/site-events.mjs";
 import { ORIGIN } from "../../../scripts/site.mjs";
 import { featuresOf, SHOWCASE_ADAPTERS } from "../../showcase/matrix.mjs";
 
@@ -92,6 +93,7 @@ if (select)
   select.onchange = () => {
     const url = new URL(location.href);
     const framework = normalizeFramework(select.value);
+    track(SITE_EVENT.frameworkSwitch, { framework });
     url.searchParams.set("framework", framework);
     history.pushState(null, "", url);
     updateLandingFramework(framework);

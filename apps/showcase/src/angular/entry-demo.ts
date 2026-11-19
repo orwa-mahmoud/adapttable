@@ -10,6 +10,7 @@ import {
 } from "@angular/core";
 import { bootstrapApplication } from "@angular/platform-browser";
 
+import { leadAdapter } from "../matrix/content";
 import { refreshShowcasePresentation } from "./data";
 import {
   canReplaceDemo,
@@ -86,7 +87,7 @@ const render = createLatestDemoTask(async (isCurrent) => {
     // Keep the mounted app usable while the next kit's own bundle arrives.
     const [{ kit }, { AdaptShowcaseDemoPage, SHOWCASE_LAB }] =
       await Promise.all([
-        loadKit(url.searchParams.get("kit") ?? "unstyled"),
+        loadKit(url.searchParams.get("kit") ?? leadAdapter("angular").key),
         import("./demoPage"),
       ]);
     if (!isCurrent()) return;

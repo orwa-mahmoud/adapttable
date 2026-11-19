@@ -195,11 +195,12 @@ test("a kit's feature rail answers for the kit the reader is in", async ({
     .evaluateAll((links) =>
       links.map((link) => link.getAttribute("href") ?? "")
     );
-  // Two levels down, so the prefix climbs twice — and every destination stays
-  // inside the kit whose page this is. The rail is the path that made a
-  // Features menu redundant, so this is the contract that menu used to hold.
+  // Root-relative from the showcase root this page is served under, and every
+  // destination stays inside the kit whose page this is. The rail is the path
+  // that made a Features menu redundant, so this is the contract that menu
+  // used to hold.
   expect(hrefs).toEqual(
-    MATRIX_FEATURES.map((feature) => `../../mantine/${feature.slug}/`)
+    MATRIX_FEATURES.map((feature) => `/mantine/${feature.slug}/`)
   );
 });
 

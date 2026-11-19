@@ -168,7 +168,6 @@
         <p>Tab into the grid and the arrows move a visible focus, one cell at a time. Home and End jump to the row's edges.</p>
         <p>Every move, sort, filter and edit is announced through a live region — the part of a table a sighted reader cannot check, so this page repeats those announcements as text as they happen.</p>
         <p><code>columnSelectionCheckbox</code> puts a named checkbox on each header so a column can be selected without a modifier key a touchscreen does not have. Focus, selection, status and disabled controls stay legible in high contrast and forced-colors — nothing is color-only. The grid and the checkboxes are shadcn.</p>
-        <p>The grid is semantic markup wearing the preset; the header checkbox is a native input with the preset's classes, and the focus ring is the same outline the rest of the table uses.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/shadcn&quot;;
 import { cellNavigation } from &quot;@adapttable/shadcn/cell-navigation&quot;;
@@ -184,44 +183,46 @@ export function People({ rows, columns }) {
     /&gt;
   );
 }</code></pre>
+        <p>The grid is semantic markup wearing the preset; the header checkbox is a native input with the preset's classes, and the focus ring is the same outline the rest of the table uses.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/shadcn @adapttable/core</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
-          <li><a href="../../mantine/accessibility/">Accessible Mantine data table</a> — Rounded, friendly, filled controls</li>
-          <li><a href="../../mui/accessibility/">Accessible MUI data table</a> — Material elevation, uppercase actions</li>
-          <li><a href="../../chakra/accessibility/">Accessible Chakra data table</a> — Soft teal, generous radius</li>
-          <li><a href="../../antd/accessibility/">Accessible Ant Design data table</a> — Compact, tinted header, crisp</li>
-          <li><a href="../../radix/accessibility/">Accessible Radix data table</a> — Radix Themes, iris accent</li>
-          <li><a href="../../base-ui/accessibility/">Accessible Base UI data table</a> — Unstyled primitives, blue accent</li>
-          <li><a href="../../tailwind/accessibility/">Accessible Tailwind data table</a> — Unstyled — your own classes</li>
+          <li><a href="/react/demo/mantine/accessibility/">Accessible Mantine data table</a> — Rounded, friendly, filled controls</li>
+          <li><a href="/react/demo/mui/accessibility/">Accessible MUI data table</a> — Material elevation, uppercase actions</li>
+          <li><a href="/react/demo/chakra/accessibility/">Accessible Chakra data table</a> — Soft teal, generous radius</li>
+          <li><a href="/react/demo/antd/accessibility/">Accessible Ant Design data table</a> — Compact, tinted header, crisp</li>
+          <li><a href="/react/demo/radix/accessibility/">Accessible Radix data table</a> — Radix Themes, iris accent</li>
+          <li><a href="/react/demo/base-ui/accessibility/">Accessible Base UI data table</a> — Unstyled primitives, blue accent</li>
+          <li><a href="/react/demo/tailwind/accessibility/">Accessible Tailwind data table</a> — Unstyled — your own classes</li>
         </ul>
         <h2>More shadcn features</h2>
         <ul>
-          <li><a href="../filtering/">Filtering in shadcn</a> — Operators, an AND/OR tree, chips, and find in the same URL.</li>
-          <li><a href="../columns/">Column management in shadcn</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
-          <li><a href="../column-groups/">Column groups in shadcn</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
-          <li><a href="../selection/">Row selection in shadcn</a> — A set of ids that survives paging, with bulk actions over it.</li>
-          <li><a href="../rows/">Rows in shadcn</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
-          <li><a href="../row-reordering/">Row reordering in shadcn</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
-          <li><a href="../editing/">Inline cell editing in shadcn</a> — Kit-native editors in the cell; every write goes through your handler.</li>
-          <li><a href="../grouping/">Row grouping in shadcn</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
-          <li><a href="../aggregation/">Aggregation in shadcn</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
-          <li><a href="../nested-tables/">Nested tables in shadcn</a> — A real table under a row — same engine, own columns, own keys.</li>
-          <li><a href="../export/">Export and print in shadcn</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
-          <li><a href="../scale/">Row and column virtualization in shadcn</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
-          <li><a href="../tree/">Tree data in shadcn</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
-          <li><a href="../mobile-cards/">Mobile cards in shadcn</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
-          <li><a href="../pivot/">Pivot tables in shadcn</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
-          <li><a href="../saved-views/">Saved views in shadcn</a> — Name an arrangement, share it as a link, manage the list in place.</li>
-          <li><a href="../formulas/">Spreadsheet formulas in shadcn</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
-          <li><a href="../rtl/">Right-to-left shadcn data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
-          <li><a href="../realtime/">Live updates in shadcn</a> — Rows change while you read them. Sort and selection hold.</li>
-          <li><a href="../ai/">AI table assistant in shadcn</a> — Native assistant, feature-aware prompts and governed action receipts.</li>
+          <li><a href="/react/demo/shadcn/filtering/">Filtering in shadcn</a> — Operators, an AND/OR tree, chips, and find in the same URL.</li>
+          <li><a href="/react/demo/shadcn/columns/">Column management in shadcn</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
+          <li><a href="/react/demo/shadcn/column-groups/">Column groups in shadcn</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
+          <li><a href="/react/demo/shadcn/selection/">Row selection in shadcn</a> — A set of ids that survives paging, with bulk actions over it.</li>
+          <li><a href="/react/demo/shadcn/rows/">Rows in shadcn</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
+          <li><a href="/react/demo/shadcn/row-reordering/">Row reordering in shadcn</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
+          <li><a href="/react/demo/shadcn/editing/">Inline cell editing in shadcn</a> — Kit-native editors in the cell; every write goes through your handler.</li>
+          <li><a href="/react/demo/shadcn/grouping/">Row grouping in shadcn</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
+          <li><a href="/react/demo/shadcn/aggregation/">Aggregation in shadcn</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
+          <li><a href="/react/demo/shadcn/nested-tables/">Nested tables in shadcn</a> — A real table under a row — same engine, own columns, own keys.</li>
+          <li><a href="/react/demo/shadcn/export/">Export and print in shadcn</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
+          <li><a href="/react/demo/shadcn/scale/">Row and column virtualization in shadcn</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
+          <li><a href="/react/demo/shadcn/tree/">Tree data in shadcn</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
+          <li><a href="/react/demo/shadcn/mobile-cards/">Mobile cards in shadcn</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
+          <li><a href="/react/demo/shadcn/pivot/">Pivot tables in shadcn</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
+          <li><a href="/react/demo/shadcn/saved-views/">Saved views in shadcn</a> — Name an arrangement, share it as a link, manage the list in place.</li>
+          <li><a href="/react/demo/shadcn/formulas/">Spreadsheet formulas in shadcn</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
+          <li><a href="/react/demo/shadcn/rtl/">Right-to-left shadcn data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
+          <li><a href="/react/demo/shadcn/realtime/">Live updates in shadcn</a> — Rows change while you read them. Sort and selection hold.</li>
+          <li><a href="/react/demo/shadcn/ai/">AI table assistant in shadcn</a> — Native assistant, feature-aware prompts and governed action receipts.</li>
         </ul>
         <p>
           Reference: <a href="https://adapttable.orwamahmoud.com/react/accessibility/">accessibility</a>, <a href="https://adapttable.orwamahmoud.com/react/cell-navigation/">cell-navigation</a>. More of this kit:
-          <a href="../">AdaptTable for shadcn</a>, or
+          <a href="/react/demo/shadcn/">AdaptTable for shadcn</a>, or
           <a href="/react/demo/?kit=shadcn">the live demo</a>.
         </p>
       </main>

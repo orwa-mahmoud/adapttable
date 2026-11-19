@@ -168,7 +168,6 @@
         <p><code>@adapttable/ai</code> is optional and provider-neutral. This Mantine demo combines a conversational assistant with a real table. Try filtering, grouping, column pinning and a proposed edit; available actions depend on the mounted features and the host's permissions. Row pinning requires an ungrouped view in this demo.</p>
         <p>Start in Simulated mode: suggested prompts run deterministic local scenarios, not a language model. The conversation shows action receipts; a proposed write still follows approval and save policy. Connect backend sends your prompt and permitted table context to an endpoint you run. The assistant keeps the same table session and Mantine controls in both modes.</p>
         <p>Three integration levels share that session: a custom bridge that maps any agent format onto <code>session.execute</code>, an <code>AgentEnvelope</code> on your transport, and optional JSON, OpenAI, MCP or HTTP helpers from your own runtime. Execution never requires another model call.</p>
-        <p>The optional assistant, filters and approval controls use Mantine. Import the assistant separately, or build your own conversation UI on the headless controller.</p>
         <h2>The code</h2>
         <pre><code>import type { AgentSession } from &quot;@adapttable/ai&quot;;
 import { useTableAssistant } from &quot;@adapttable/ai-react&quot;;
@@ -225,44 +224,46 @@ export function Orders({ rows, columns, onEdit }) {
     &lt;/&gt;
   );
 }</code></pre>
+        <p>The optional assistant, filters and approval controls use Mantine. Import the assistant separately, or build your own conversation UI on the headless controller.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/mantine @adapttable/core @mantine/core @mantine/hooks</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
-          <li><a href="../../mui/ai/">AI table assistant in MUI</a> — Material elevation, uppercase actions</li>
-          <li><a href="../../chakra/ai/">AI table assistant in Chakra</a> — Soft teal, generous radius</li>
-          <li><a href="../../antd/ai/">AI table assistant in Ant Design</a> — Compact, tinted header, crisp</li>
-          <li><a href="../../radix/ai/">AI table assistant in Radix</a> — Radix Themes, iris accent</li>
-          <li><a href="../../base-ui/ai/">AI table assistant in Base UI</a> — Unstyled primitives, blue accent</li>
-          <li><a href="../../shadcn/ai/">AI table assistant in shadcn</a> — Monochrome, ring focus</li>
-          <li><a href="../../tailwind/ai/">AI table assistant in Tailwind</a> — Unstyled — your own classes</li>
+          <li><a href="/react/demo/mui/ai/">AI table assistant in MUI</a> — Material elevation, uppercase actions</li>
+          <li><a href="/react/demo/chakra/ai/">AI table assistant in Chakra</a> — Soft teal, generous radius</li>
+          <li><a href="/react/demo/antd/ai/">AI table assistant in Ant Design</a> — Compact, tinted header, crisp</li>
+          <li><a href="/react/demo/radix/ai/">AI table assistant in Radix</a> — Radix Themes, iris accent</li>
+          <li><a href="/react/demo/base-ui/ai/">AI table assistant in Base UI</a> — Unstyled primitives, blue accent</li>
+          <li><a href="/react/demo/shadcn/ai/">AI table assistant in shadcn</a> — Monochrome, ring focus</li>
+          <li><a href="/react/demo/tailwind/ai/">AI table assistant in Tailwind</a> — Unstyled — your own classes</li>
         </ul>
         <h2>More Mantine features</h2>
         <ul>
-          <li><a href="../filtering/">Filtering in Mantine</a> — Operators, an AND/OR tree, chips, and find in the same URL.</li>
-          <li><a href="../columns/">Column management in Mantine</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
-          <li><a href="../column-groups/">Column groups in Mantine</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
-          <li><a href="../selection/">Row selection in Mantine</a> — A set of ids that survives paging, with bulk actions over it.</li>
-          <li><a href="../rows/">Rows in Mantine</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
-          <li><a href="../row-reordering/">Row reordering in Mantine</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
-          <li><a href="../editing/">Inline cell editing in Mantine</a> — Kit-native editors in the cell; every write goes through your handler.</li>
-          <li><a href="../grouping/">Row grouping in Mantine</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
-          <li><a href="../aggregation/">Aggregation in Mantine</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
-          <li><a href="../nested-tables/">Nested tables in Mantine</a> — A real table under a row — same engine, own columns, own keys.</li>
-          <li><a href="../export/">Export and print in Mantine</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
-          <li><a href="../scale/">Row and column virtualization in Mantine</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
-          <li><a href="../tree/">Tree data in Mantine</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
-          <li><a href="../mobile-cards/">Mobile cards in Mantine</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
-          <li><a href="../pivot/">Pivot tables in Mantine</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
-          <li><a href="../saved-views/">Saved views in Mantine</a> — Name an arrangement, share it as a link, manage the list in place.</li>
-          <li><a href="../formulas/">Spreadsheet formulas in Mantine</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
-          <li><a href="../rtl/">Right-to-left Mantine data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
-          <li><a href="../realtime/">Live updates in Mantine</a> — Rows change while you read them. Sort and selection hold.</li>
-          <li><a href="../accessibility/">Accessible Mantine data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
+          <li><a href="/react/demo/mantine/filtering/">Filtering in Mantine</a> — Operators, an AND/OR tree, chips, and find in the same URL.</li>
+          <li><a href="/react/demo/mantine/columns/">Column management in Mantine</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
+          <li><a href="/react/demo/mantine/column-groups/">Column groups in Mantine</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
+          <li><a href="/react/demo/mantine/selection/">Row selection in Mantine</a> — A set of ids that survives paging, with bulk actions over it.</li>
+          <li><a href="/react/demo/mantine/rows/">Rows in Mantine</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
+          <li><a href="/react/demo/mantine/row-reordering/">Row reordering in Mantine</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
+          <li><a href="/react/demo/mantine/editing/">Inline cell editing in Mantine</a> — Kit-native editors in the cell; every write goes through your handler.</li>
+          <li><a href="/react/demo/mantine/grouping/">Row grouping in Mantine</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
+          <li><a href="/react/demo/mantine/aggregation/">Aggregation in Mantine</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
+          <li><a href="/react/demo/mantine/nested-tables/">Nested tables in Mantine</a> — A real table under a row — same engine, own columns, own keys.</li>
+          <li><a href="/react/demo/mantine/export/">Export and print in Mantine</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
+          <li><a href="/react/demo/mantine/scale/">Row and column virtualization in Mantine</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
+          <li><a href="/react/demo/mantine/tree/">Tree data in Mantine</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
+          <li><a href="/react/demo/mantine/mobile-cards/">Mobile cards in Mantine</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
+          <li><a href="/react/demo/mantine/pivot/">Pivot tables in Mantine</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
+          <li><a href="/react/demo/mantine/saved-views/">Saved views in Mantine</a> — Name an arrangement, share it as a link, manage the list in place.</li>
+          <li><a href="/react/demo/mantine/formulas/">Spreadsheet formulas in Mantine</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
+          <li><a href="/react/demo/mantine/rtl/">Right-to-left Mantine data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
+          <li><a href="/react/demo/mantine/realtime/">Live updates in Mantine</a> — Rows change while you read them. Sort and selection hold.</li>
+          <li><a href="/react/demo/mantine/accessibility/">Accessible Mantine data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
         </ul>
         <p>
           Reference: <a href="https://adapttable.orwamahmoud.com/ai-http/">ai-http</a>, <a href="https://adapttable.orwamahmoud.com/ai-integrations/">ai-integrations</a>, <a href="https://adapttable.orwamahmoud.com/ai/">ai</a>, <a href="https://adapttable.orwamahmoud.com/react/agent-capabilities/">agent-capabilities</a>. More of this kit:
-          <a href="../">AdaptTable for Mantine</a>, or
+          <a href="/react/demo/mantine/">AdaptTable for Mantine</a>, or
           <a href="/react/demo/?kit=mantine">the live demo</a>.
         </p>
       </main>
