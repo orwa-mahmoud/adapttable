@@ -1,5 +1,11 @@
 # @adapttable/taiga-ui
 
+## 0.5.1
+
+### Patch Changes
+
+- b195495: The filter popover opens above the Filters button when there is too little room below it, so it stays inside the window and its selects open wherever the button sits on the page.
+
 ## 0.5.0
 
 ### Minor Changes
