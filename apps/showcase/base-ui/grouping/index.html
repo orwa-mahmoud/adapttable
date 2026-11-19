@@ -169,7 +169,6 @@
         <p>Every chip handle is keyboard movable with the arrow keys. On phones the same Base UI panel swaps drag targets for kit-native selects, without changing the grouping model.</p>
         <p>A column's <code>aggregatable</code> declaration seeds the grouping strip — every active column is its own item, with its own operation and remove. Group footers close each group. Independent pinned summary rows and the table footer total live on the aggregation page; moving rows inside a group lives on the row-reordering page.</p>
         <p>Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.</p>
-        <p>A group header is a table row with a spanning cell carrying the indent, a Base UI Checkbox for the tri-state group selection, and the engine's chevron inside a Base UI Button.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/base-ui&quot;;
 import { groupingPanel } from &quot;@adapttable/base-ui/grouping-panel&quot;;
@@ -188,8 +187,10 @@ export function People({ rows, columns }) {
     /&gt;
   );
 }</code></pre>
+        <p>A group header is a table row with a spanning cell carrying the indent, a Base UI Checkbox for the tri-state group selection, and the engine's chevron inside a Base UI Button.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/base-ui @adapttable/core @base-ui/react</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/grouping/">Row grouping in Mantine</a> — Rounded, friendly, filled controls</li>

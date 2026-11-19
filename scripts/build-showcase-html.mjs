@@ -361,9 +361,10 @@ const linkSection = (title, items) =>
     : `        <h2>${escapeHtml(title)}</h2>\n${linkList(items)}\n`;
 
 /**
- * One feature page's static HTML: the words a crawler reads, and the mount
- * point the kit's framework takes over — the page boots that framework's
- * entry and shows the code written for it.
+ * One feature page's static HTML: the words a crawler reads, in the order
+ * the rendered page shows them, and the mount point the kit's framework takes
+ * over — the page boots that framework's entry and shows the code written
+ * for it.
  *
  * @param {import("../apps/showcase/matrix.mjs").ShowcaseAdapter} adapter
  * @param {import("../apps/showcase/matrix.mjs").MatrixFeature} feature
@@ -391,10 +392,11 @@ export const featurePage = (
 ${introFor(feature, adapter, framework)
   .map((line) => `        <p>${paragraph(fill(line))}</p>`)
   .join("\n")}
-${note ? `        <p>${paragraph(note)}</p>\n` : ""}        <h2>The code</h2>
+        <h2>The code</h2>
         <pre><code>${escapeHtml(fill(snippetFor(feature, adapter, framework)))}</code></pre>
-        <h2>Install</h2>
+${note ? `        <p>${paragraph(note)}</p>\n` : ""}        <h2>Install</h2>
         <pre><code>${escapeHtml(adapter.install)}</code></pre>
+        <p><a href="${siteUrl(docsReferenceRoute("getting-started", adapter.framework))}">Getting started</a></p>
 ${linkSection(
   "The same feature in the other kits",
   kitsWithFeature(adapter, feature).map((other) => ({

@@ -168,7 +168,6 @@
         <p>A formula column is a column nobody wrote code for: type <code>=ROUND(budget * 0.15, 0)</code> and the table computes it per row, sorts it, filters it and exports it like any other column.</p>
         <p>The engine covers arithmetic including POWER and SQRT, comparison, string joins, IF, and the aggregate functions a footer needs. A bad reference reports in the cell that caused it rather than blanking the table, and a circular reference reports <code>#CYCLE!</code> instead of recursing.</p>
         <p>Formula columns serialize to the URL with everything else, so a derived column travels in the same link as the filters it sits beside.</p>
-        <p>There is no Chakra-specific formula code: a computed column arrives as an ordinary column definition and renders in the same Table.Cell as a declared one, error token included.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/chakra&quot;;
 import { buildFormulaColumns } from &quot;@adapttable/react/formula&quot;;
@@ -195,8 +194,10 @@ export function People({ rows, columns }) {
     /&gt;
   );
 }</code></pre>
+        <p>There is no Chakra-specific formula code: a computed column arrives as an ordinary column definition and renders in the same Table.Cell as a declared one, error token included.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/chakra @adapttable/core @chakra-ui/react @emotion/react</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/formulas/">Spreadsheet formulas in Mantine</a> — Rounded, friendly, filled controls</li>

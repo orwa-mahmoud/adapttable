@@ -3,6 +3,25 @@
   [kit]="adapter().key"
 />
 
+<!-- The kit's install command with its copy button, shared by both plates. -->
+<ng-template #installRows>
+  <div class="mx-plate__head">
+    <span>{{ adapter().pkg }}</span>
+    <button
+      type="button"
+      class="mx-code__copy"
+      [class.is-done]="copied() === 'install'"
+      (click)="copy('install', adapter().install)"
+    >
+      {{ copied() === "install" ? "Copied" : "Copy install" }}
+    </button>
+  </div>
+  <div class="mx-plate__row">
+    <span class="mx-plate__key">Install</span>
+    <code class="mx-plate__val">{{ adapter().install }}</code>
+  </div>
+</ng-template>
+
 <main>
   @if (unavailable) {
     <p class="shell" role="status">
@@ -36,7 +55,7 @@
           {{ heading().before }}<em>{{ adapter().label }}</em
           >{{ heading().after }}
         </h1>
-        @for (line of intro(); track $index) {
+        @for (line of heroIntro(); track $index) {
           <p class="mx-lead" [innerHTML]="leadHtml(line)"></p>
         }
         @if (!feature()) {
@@ -54,21 +73,7 @@
       </div>
       @if (!feature()) {
         <aside class="mx-plate">
-          <div class="mx-plate__head">
-            <span>{{ adapter().pkg }}</span>
-            <button
-              type="button"
-              class="mx-code__copy"
-              [class.is-done]="copied() === 'install'"
-              (click)="copy('install', adapter().install)"
-            >
-              {{ copied() === "install" ? "Copied" : "Copy install" }}
-            </button>
-          </div>
-          <div class="mx-plate__row">
-            <span class="mx-plate__key">Install</span>
-            <code class="mx-plate__val">{{ adapter().install }}</code>
-          </div>
+          <ng-container [ngTemplateOutlet]="installRows" />
           <div class="mx-plate__row">
             <span class="mx-plate__key">Import</span>
             <code class="mx-plate__val">{{ importLine() }}</code>
@@ -80,45 +85,6 @@
         </aside>
       }
     </header>
-
-    @if (feature(); as current) {
-      <div class="mx-brief">
-        <div class="mx-code">
-          <div class="mx-code__bar">
-            <span>{{ head(current).label }} · {{ adapter().label }}</span>
-            <button
-              type="button"
-              class="mx-code__copy"
-              [class.is-done]="copied() === 'code'"
-              (click)="copy('code', code())"
-            >
-              {{ copied() === "code" ? "Copied" : "Copy" }}
-            </button>
-          </div>
-          <pre><code>{{ code() }}</code></pre>
-        </div>
-        <div class="mx-brief__side">
-          @if (note(); as text) {
-            <div class="mx-note">
-              <span class="mx-note__key">In {{ adapter().label }}</span>
-              <p>{{ text }}</p>
-            </div>
-          }
-          <div class="mx-refs">
-            <span class="mx-refs__key">Reference</span>
-            <div class="mx-refs__list">
-              @for (slug of current.docs; track slug) {
-                <a [href]="docsUrl(slug)" target="_blank" rel="noreferrer">{{
-                  slug.replaceAll("-", " ")
-                }}</a>
-              }
-            </div>
-          </div>
-          <!-- Where the AI page's developer inspector lands, below Reference. -->
-          <div id="mx-inspector-slot"></div>
-        </div>
-      </div>
-    }
 
     <div class="angular-presentation">
       <fieldset class="angular-choice">
@@ -177,6 +143,64 @@
     } @else {
       <ng-container [ngTemplateOutlet]="demoBody" />
     }
+    @if (moreIntro().length > 0) {
+      <div class="mx-more">
+        @for (line of moreIntro(); track $index) {
+          <p class="mx-lead" [innerHTML]="leadHtml(line)"></p>
+        }
+      </div>
+    }
+    @if (feature(); as current) {
+      <div class="mx-brief">
+        <div class="mx-code">
+          <div class="mx-code__bar">
+            <span>{{ head(current).label }} · {{ adapter().label }}</span>
+            <button
+              type="button"
+              class="mx-code__copy"
+              [class.is-done]="copied() === 'code'"
+              (click)="copy('code', code())"
+            >
+              {{ copied() === "code" ? "Copied" : "Copy" }}
+            </button>
+          </div>
+          <pre><code>{{ code() }}</code></pre>
+        </div>
+        <div class="mx-brief__side">
+          <aside class="mx-plate">
+            <ng-container [ngTemplateOutlet]="installRows" />
+            <div class="mx-plate__row">
+              <span class="mx-plate__key">Guide</span>
+              <a
+                class="mx-plate__link"
+                [href]="gettingStarted"
+                data-cta="get_started"
+                >Getting started</a
+              >
+            </div>
+          </aside>
+          @if (note(); as text) {
+            <div class="mx-note">
+              <span class="mx-note__key">In {{ adapter().label }}</span>
+              <p>{{ text }}</p>
+            </div>
+          }
+          <div class="mx-refs">
+            <span class="mx-refs__key">Reference</span>
+            <div class="mx-refs__list">
+              @for (slug of current.docs; track slug) {
+                <a [href]="docsUrl(slug)" target="_blank" rel="noreferrer">{{
+                  slug.replaceAll("-", " ")
+                }}</a>
+              }
+            </div>
+          </div>
+          <!-- Where the AI page's developer inspector lands, below Reference. -->
+          <div id="mx-inspector-slot"></div>
+        </div>
+      </div>
+    }
+
     @if (feature(); as current) {
       <section class="mx-section">
         <div class="mx-section__head">

@@ -168,7 +168,6 @@
         <p>Compose <code>rowReorder</code> from <code>@adapttable/base-ui/row-reorder</code> and a grip appears. Space lifts a row, arrows move it, Space drops it. The table never mutates your array: <code>onRowReorder</code> asks the host, and the host writes.</p>
         <p><code>movePolicy: &quot;confirm&quot;</code> opens the kit's own move menu before a drop lands. Grouped moves stay inside a group unless <code>onGroupMove</code> says otherwise; tree moves stay under the same parent unless <code>onTreeMove</code> accepts a new one. A second move cannot start while a host confirmation is still pending.</p>
         <p>Row identity is the row key, not the visual index — a virtual window or a later page does not lie about where the row sat. The grip, the move buttons and the confirmation menu are Base UI.</p>
-        <p>The grip is a Base UI Button and the confirmation is a Base UI Menu; the announcer sits beside them so a keyboard move is heard once.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/base-ui&quot;;
 import { applyRowReorder } from &quot;@adapttable/react&quot;;
@@ -188,8 +187,10 @@ export function Tasks({ rows, setRows, columns }) {
     /&gt;
   );
 }</code></pre>
+        <p>The grip is a Base UI Button and the confirmation is a Base UI Menu; the announcer sits beside them so a keyboard move is heard once.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/base-ui @adapttable/core @base-ui/react</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/row-reordering/">Row reordering in Mantine</a> — Rounded, friendly, filled controls</li>

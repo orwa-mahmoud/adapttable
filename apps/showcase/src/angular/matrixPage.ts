@@ -177,6 +177,14 @@ export class AdaptShowcaseMatrixPage {
     ).map((line) => this.fill(line));
   });
 
+  /** A feature page opens on its first line; the rest follows the live table. */
+  readonly heroIntro = computed(() =>
+    this.feature() ? this.intro().slice(0, 1) : this.intro()
+  );
+  readonly moreIntro = computed(() =>
+    this.feature() ? this.intro().slice(1) : []
+  );
+
   readonly code = computed(() => {
     const feature = this.feature();
     return feature

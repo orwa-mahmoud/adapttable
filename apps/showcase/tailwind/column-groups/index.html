@@ -168,7 +168,6 @@
         <p>A parent with <code>children</code> is a column group. This table has three, two children each, open by default. Collapse one to see its mode. Actions stays ungrouped at the end.</p>
         <p>Contact is Name + Role with no collapse options: fold is the chevron. Assignment is Team + Status with <code>collapsedKey: &quot;team&quot;</code>. Delivery is Timeline + Budget with <code>collapsedRender</code> ($25,300 for 35 days) and <code>align: &quot;start&quot;</code>.</p>
         <p><code>collapsibleColumnGroups</code> arms the toggles. The headers and the chevrons are Tailwind.</p>
-        <p>A group header is a spanning th carrying the map's classes; the toggle is a native button, and a collapsed stub hides the caption while the accessible name still names the group.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, type ColumnInput } from &quot;@adapttable/unstyled&quot;;
 import { collapsibleColumnGroups } from &quot;@adapttable/unstyled/column-groups&quot;;
@@ -210,8 +209,10 @@ export function People({ rows }) {
     /&gt;
   );
 }</code></pre>
+        <p>A group header is a spanning th carrying the map's classes; the toggle is a native button, and a collapsed stub hides the caption while the accessible name still names the group.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/unstyled @adapttable/core</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/column-groups/">Column groups in Mantine</a> — Rounded, friendly, filled controls</li>

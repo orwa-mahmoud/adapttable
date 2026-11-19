@@ -168,7 +168,6 @@
         <p>Declare what a column filters by and the table builds the control: text and number operators, date ranges with relative presets, and a checklist of the values actually present.</p>
         <p>For the cases one row of inputs cannot express there is an AND/OR tree, and every active filter shows as a chip that removes itself. Quick find is a different control — it highlights matching cells and writes <code>find=</code> into the same URL namespace; it does not replace the filter tree.</p>
         <p>Filter state and the find query both live in the versioned URL, so a filtered-and-found view is a link someone can send — and the popover, drawer, inputs, chips and find field are all Chakra components.</p>
-        <p>The popover is Chakra's Popover and the drawer its Drawer, backdrop and all; inside, the operators are NativeSelects, the bounds are Inputs, and a multi-select filter is a group of Chakra Checkboxes.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/chakra&quot;;
 import { filters } from &quot;@adapttable/chakra/filters&quot;;
@@ -195,8 +194,10 @@ export function People({ rows }) {
     /&gt;
   );
 }</code></pre>
+        <p>The popover is Chakra's Popover and the drawer its Drawer, backdrop and all; inside, the operators are NativeSelects, the bounds are Inputs, and a multi-select filter is a group of Chakra Checkboxes.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/chakra @adapttable/core @chakra-ui/react @emotion/react</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/filtering/">Filtering in Mantine</a> — Rounded, friendly, filled controls</li>

@@ -168,7 +168,6 @@
         <p>Tick rows one at a time or take the whole page from the header box. The selection is a set of ids rather than a slice of what is rendered, so a row chosen on page one is still chosen while page three is on screen.</p>
         <p>Bulk actions run against that set, can ask for confirmation first, and report back through your own handler — the table never performs the write.</p>
         <p>Selection is controllable: hand it <code>selectedIds</code> and <code>onSelectionChange</code> and it becomes state your app owns.</p>
-        <p>Base UI's Checkbox draws a genuine mixed state — a dash rather than a tick — and where a box carries a visible label the part moves to the label wrapper, because that is the element Base UI names.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/base-ui&quot;;
 import { bulkActions } from &quot;@adapttable/base-ui/bulk-actions&quot;;
@@ -196,8 +195,10 @@ export function People({ rows, columns, onArchive }) {
     /&gt;
   );
 }</code></pre>
+        <p>Base UI's Checkbox draws a genuine mixed state — a dash rather than a tick — and where a box carries a visible label the part moves to the label wrapper, because that is the element Base UI names.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/base-ui @adapttable/core @base-ui/react</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/selection/">Row selection in Mantine</a> — Rounded, friendly, filled controls</li>

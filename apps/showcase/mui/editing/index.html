@@ -168,7 +168,6 @@
         <p>Mark a column <code>editable</code>, compose <code>editing(onCellEdit)</code>, and double-click opens a MUI editor in the cell. Enter commits, Escape cancels, Tab moves to the next editable cell.</p>
         <p>The table never mutates your rows. It hands your handler the row, the column and the new value, and shows whatever you hand back — which is what makes optimistic updates, validation and rollback yours to decide.</p>
         <p>With <code>cellNavigation</code> on, the same handler receives whole blocks: paste a spreadsheet range with Ctrl+V, drag the fill handle, and undo the entire paste with one Ctrl+Z.</p>
-        <p>Every editor is a small TextField — text, number and the select variant with MenuItem options — so a rejected value reports through the field's own error state and helperText rather than through chrome bolted beside it.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/mui&quot;;
 import { cellNavigation } from &quot;@adapttable/mui/cell-navigation&quot;;
@@ -200,8 +199,10 @@ export function People({ rows, onSave }) {
     /&gt;
   );
 }</code></pre>
+        <p>Every editor is a small TextField — text, number and the select variant with MenuItem options — so a rejected value reports through the field's own error state and helperText rather than through chrome bolted beside it.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/mui @adapttable/core @mui/material</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/editing/">Inline cell editing in Mantine</a> — Rounded, friendly, filled controls</li>

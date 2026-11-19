@@ -168,7 +168,6 @@
         <p>A row is more than a record. Pin it under the header or to the floor of the scroll box, merge cells that share a team so the name is written once, and add or delete through the 3-dot menu.</p>
         <p><code>rowPinning()</code>, <code>cellSpan()</code> and <code>rowActionsLayout=&quot;menu&quot;</code> are what this page turns on. Add and delete are callbacks to the host — the table never owns the data. Movement across flat, grouped and tree rows lives on the dedicated row-reordering page.</p>
         <p>The pin actions, the menu and the merged cells are Tailwind. Independent pinned summary rows — totals that are not data rows — live on the aggregation page.</p>
-        <p>The menu trigger and the merged cell carry the map's classes; rowspan is the browser's, so the fill is yours to dress. The drag grip lives on the row-reordering page.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/unstyled&quot;;
 import { cellSpan } from &quot;@adapttable/unstyled/cell-span&quot;;
@@ -188,8 +187,10 @@ export function People({ rows, columns, setPinned, spanTeam }) {
     /&gt;
   );
 }</code></pre>
+        <p>The menu trigger and the merged cell carry the map's classes; rowspan is the browser's, so the fill is yours to dress. The drag grip lives on the row-reordering page.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/unstyled @adapttable/core</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/rows/">Rows in Mantine</a> — Rounded, friendly, filled controls</li>

@@ -168,7 +168,6 @@
         <p>An Arabic table mirrors the entire layout — search, sort arrows, pinned columns and the pager. Not just translated strings: a genuinely flipped axis.</p>
         <p>The filters popover anchors and flips from the correct edge; that is the part only a real RTL page can show.</p>
         <p><code>locale=&quot;ar&quot;</code> sets the strings and the direction. The table and the popover are Mantine.</p>
-        <p><code>locale=&quot;ar&quot;</code> flips the Mantine table and its Popover — the Filters trigger is Arabic, and the popover anchors from the inline-end edge.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/mantine&quot;;
 
@@ -183,8 +182,10 @@ export function People({ rows, columns }) {
     /&gt;
   );
 }</code></pre>
+        <p><code>locale=&quot;ar&quot;</code> flips the Mantine table and its Popover — the Filters trigger is Arabic, and the popover anchors from the inline-end edge.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/mantine @adapttable/core @mantine/core @mantine/hooks</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mui/rtl/">Right-to-left MUI data table</a> — Material elevation, uppercase actions</li>

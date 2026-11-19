@@ -168,7 +168,6 @@
         <p>A summary row is not a pinned data row and not a group footer. <code>summaryRow</code> writes a grand total in the table footer. <code>pinnedSummaryRows</code> sticks host-owned totals above or below the scroll box. <code>groupAggregates</code> plus <code>groupFooters</code> close each group.</p>
         <p>Filter the table and every total recomputes from the rows that remain — client <code>aggregate()</code> and a source that already computed the same numbers share one mapper shape. Extra full-width rows stay attached to a person, not to a total.</p>
         <p>The footer, the pinned summaries and the group totals render through Mantine's own table rows. Building and reordering group levels stays on the grouping page.</p>
-        <p>The footer is a Mantine Table.Tfoot, group totals close a Mantine table row, and pinned summaries are extra rows the same Table already knows how to stick.</p>
         <h2>The code</h2>
         <pre><code>import { aggregate } from &quot;@adapttable/react&quot;;
 import { DataTable } from &quot;@adapttable/mantine&quot;;
@@ -193,8 +192,10 @@ export function Sales({ rows, columns, teamTotal, grandTotal }) {
     /&gt;
   );
 }</code></pre>
+        <p>The footer is a Mantine Table.Tfoot, group totals close a Mantine table row, and pinned summaries are extra rows the same Table already knows how to stick.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/mantine @adapttable/core @mantine/core @mantine/hooks</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mui/aggregation/">Aggregation in MUI</a> — Material elevation, uppercase actions</li>

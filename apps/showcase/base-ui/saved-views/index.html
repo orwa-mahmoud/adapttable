@@ -168,7 +168,6 @@
         <p>A view is everything the table can put in a URL — search, sort, filters, grouping, the column layout, density and the pivot — saved under a name.</p>
         <p>Readers pick one from the views menu; the panel beside the table renames, reorders, sets the default and deletes. A view someone else shared arrives read-only and says so on the row.</p>
         <p>Both are Base UI components: the menu, the panel, the rename box and every control on it come from @base-ui/react, so a saved view looks like the rest of your app.</p>
-        <p>The controls are Base UI's Button and Input, and the panel re-declares the adapter's token class on itself — mounted beside the table it sits outside the table's scope, and every token in it would otherwise resolve to nothing.</p>
         <h2>The code</h2>
         <pre><code>import {
   DataTable,
@@ -202,8 +201,10 @@ export function People({ rows, columns }) {
     &lt;/&gt;
   );
 }</code></pre>
+        <p>The controls are Base UI's Button and Input, and the panel re-declares the adapter's token class on itself — mounted beside the table it sits outside the table's scope, and every token in it would otherwise resolve to nothing.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/base-ui @adapttable/core @base-ui/react</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/saved-views/">Saved views in Mantine</a> — Rounded, friendly, filled controls</li>

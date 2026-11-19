@@ -168,7 +168,6 @@
         <p>Open a row and the panel holds another Mantine table — the same component, not a hand-built list. Each person has recent orders; the inner table has its own columns and row keys.</p>
         <p><code>nestedTable()</code> mounts the kit's DataTable with defaults that keep the two tables from fighting over the URL. Rows with no nested table can still use <code>rowDetail()</code>.</p>
         <p>The expand chevron and both tables are Mantine.</p>
-        <p>The chevron is a Mantine ActionIcon; the inner table is another Mantine DataTable, so the nested orders sort and page with Mantine controls rather than a list in a blank panel.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/mantine&quot;;
 import { nestedTable } from &quot;@adapttable/mantine/nested-table&quot;;
@@ -195,8 +194,10 @@ export function People({ rows, columns, orderColumns }) {
     /&gt;
   );
 }</code></pre>
+        <p>The chevron is a Mantine ActionIcon; the inner table is another Mantine DataTable, so the nested orders sort and page with Mantine controls rather than a list in a blank panel.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/mantine @adapttable/core @mantine/core @mantine/hooks</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mui/nested-tables/">Nested tables in MUI</a> — Material elevation, uppercase actions</li>

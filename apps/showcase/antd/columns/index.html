@@ -168,7 +168,6 @@
         <p>Everything a user expects to do to a column, without writing a column-settings panel: rename, show and hide, reorder by drag, pin to either edge, resize by drag or keyboard, and switch row density.</p>
         <p>Pinning is logical rather than physical, so a column pinned to the start stays on the correct side in a right-to-left layout.</p>
         <p>The arrangement is state like any other: persist it to the URL, to localStorage, or to your own server through <code>columnLayout</code> and <code>onColumnLayoutChange</code>.</p>
-        <p>The menu is a controlled antd Popover with its content padding stripped, flipped by writing direction, and closed by a keydown listener the adapter adds — antd's Popover has no Escape handling of its own.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/antd&quot;;
 import { columnMenu } from &quot;@adapttable/antd/column-menu&quot;;
@@ -186,8 +185,10 @@ export function People({ rows, columns, layout, onLayout }) {
     /&gt;
   );
 }</code></pre>
+        <p>The menu is a controlled antd Popover with its content padding stripped, flipped by writing direction, and closed by a keydown listener the adapter adds — antd's Popover has no Escape handling of its own.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/antd @adapttable/core antd</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/columns/">Column management in Mantine</a> — Rounded, friendly, filled controls</li>

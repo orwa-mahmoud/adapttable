@@ -168,7 +168,6 @@
         <p>A view is everything the table can put in a URL — search, sort, filters, grouping, the column layout, density and the pivot — saved under a name.</p>
         <p>Readers pick one from the views menu; the panel beside the table renames, reorders, sets the default and deletes. A view someone else shared arrives read-only and says so on the row.</p>
         <p>Both are native elements — buttons, inputs, a list — and every one of them takes your classes, so the panel matches the rest of your app because you styled it, not because a kit did.</p>
-        <p>Every row is native markup carrying the map's classes — a gray-bordered button per name, an indigo ring on the rename input, and the save action in bg-indigo-600.</p>
         <h2>The code</h2>
         <pre><code>import {
   DataTable,
@@ -202,8 +201,10 @@ export function People({ rows, columns }) {
     &lt;/&gt;
   );
 }</code></pre>
+        <p>Every row is native markup carrying the map's classes — a gray-bordered button per name, an indigo ring on the rename input, and the save action in bg-indigo-600.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/unstyled @adapttable/core</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/saved-views/">Saved views in Mantine</a> — Rounded, friendly, filled controls</li>

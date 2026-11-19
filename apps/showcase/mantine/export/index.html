@@ -169,7 +169,6 @@
         <p>Swap the writer and the same button produces a different file. <code>xlsxWriter</code> writes Excel outline levels for grouped rows and bolds the totals; <code>pdfWriter</code> lays out a paginated document, right-to-left scripts included when you hand it a font.</p>
         <p>Past the 50,000-row browser cap, <code>onExportAll</code> sends the page-free current view to your backend while the kit shows determinate or indeterminate progress, Cancel, Retry, and the finished download.</p>
         <p><code>printTable</code> opens the browser's own print dialog against a layout built for paper rather than a screenshot of the page.</p>
-        <p>The export control is a Mantine Button in the kit's toolbar, and its busy state is Mantine's — the file is written off the main thread either way.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/mantine&quot;;
 import { exportCsv } from &quot;@adapttable/mantine/export&quot;;
@@ -194,8 +193,10 @@ export function People({ source, columns, api }) {
     /&gt;
   );
 }</code></pre>
+        <p>The export control is a Mantine Button in the kit's toolbar, and its busy state is Mantine's — the file is written off the main thread either way.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/mantine @adapttable/core @mantine/core @mantine/hooks</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mui/export/">Export and print in MUI</a> — Material elevation, uppercase actions</li>

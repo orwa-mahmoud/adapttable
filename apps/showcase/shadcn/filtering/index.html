@@ -168,7 +168,6 @@
         <p>Declare what a column filters by and the table builds the control: text and number operators, date ranges with relative presets, and a checklist of the values actually present.</p>
         <p>For the cases one row of inputs cannot express there is an AND/OR tree, and every active filter shows as a chip that removes itself.</p>
         <p>The whole filter state lives in the URL, so a filtered view is a link someone can send — and the popover, drawer, inputs and chips are semantic markup wearing shadcn's tokens rather than components you have to install.</p>
-        <p>Plain DOM has no collision detection, so the popover clamps itself to the viewport in script; the drawer is a real modal dialog with its own focus trap, and a checkbox option hides its native box and turns the whole label into the swatch.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/shadcn&quot;;
 import { filters } from &quot;@adapttable/shadcn/filters&quot;;
@@ -195,8 +194,10 @@ export function People({ rows }) {
     /&gt;
   );
 }</code></pre>
+        <p>Plain DOM has no collision detection, so the popover clamps itself to the viewport in script; the drawer is a real modal dialog with its own focus trap, and a checkbox option hides its native box and turns the whole label into the swatch.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/shadcn @adapttable/core</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/filtering/">Filtering in Mantine</a> — Rounded, friendly, filled controls</li>

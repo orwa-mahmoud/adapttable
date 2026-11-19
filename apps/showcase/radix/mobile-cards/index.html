@@ -168,7 +168,6 @@
         <p>Below the mobile breakpoint every row becomes a Radix card. Same columns, same row content, same query state — there is nothing to configure and no second layout to build.</p>
         <p><code>paginationMode=&quot;auto&quot;</code> resolves to infinite scroll on phones and a pager on desktop. Per column, <code>mobileLabel</code> and <code>hideOnMobile</code> tune what a card shows.</p>
         <p>Unlabeled identity fields span the card; labeled details share the available width. Column renderers keep native avatars, badges and progress indicators. Set <code>forceMobile</code> to false to keep a horizontally scrolling table on phones.</p>
-        <p>Each card is a Radix Card that changes size with density — size 2 comfortable, size 1 compact — so the phone layout tightens the way the rest of a Radix app does.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/radix&quot;;
 
@@ -183,8 +182,10 @@ export function People({ rows, columns }) {
     /&gt;
   );
 }</code></pre>
+        <p>Each card is a Radix Card that changes size with density — size 2 comfortable, size 1 compact — so the phone layout tightens the way the rest of a Radix app does.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/radix @adapttable/core @radix-ui/themes</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/mobile-cards/">Mobile cards in Mantine</a> — Rounded, friendly, filled controls</li>

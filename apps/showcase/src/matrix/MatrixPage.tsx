@@ -209,8 +209,11 @@ function CodeBlock({
   );
 }
 
-/** The three facts a developer needs before they read anything else. */
-function SpecPlate({ adapter }: Readonly<{ adapter: ShowcaseAdapter }>) {
+/** The kit's install command with its copy button, and whatever rows follow it. */
+function InstallPlate({
+  adapter,
+  children,
+}: Readonly<{ adapter: ShowcaseAdapter; children: ReactNode }>) {
   const { done, copy } = useCopy(adapter.install, "install");
   return (
     <aside className="mx-plate">
@@ -229,6 +232,15 @@ function SpecPlate({ adapter }: Readonly<{ adapter: ShowcaseAdapter }>) {
         <span className="mx-plate__key">Install</span>
         <code className="mx-plate__val">{adapter.install}</code>
       </div>
+      {children}
+    </aside>
+  );
+}
+
+/** The three facts a developer needs before they read anything else. */
+function SpecPlate({ adapter }: Readonly<{ adapter: ShowcaseAdapter }>) {
+  return (
+    <InstallPlate adapter={adapter}>
       <div className="mx-plate__row">
         <span className="mx-plate__key">Import</span>
         <code className="mx-plate__val">
@@ -245,7 +257,7 @@ function SpecPlate({ adapter }: Readonly<{ adapter: ShowcaseAdapter }>) {
         <span className="mx-plate__key">Peer</span>
         <code className="mx-plate__val">{adapter.peer}</code>
       </div>
-    </aside>
+    </InstallPlate>
   );
 }
 
@@ -401,7 +413,7 @@ function AdapterLanding({
   );
 }
 
-/** "Saved views in Mantine": the words, the code, the kit's own note, the demo. */
+/** "Saved views in Mantine": the title, the live table, the rest of the words, the code. */
 function FeaturePage({
   adapter,
   framework,
@@ -421,6 +433,7 @@ function FeaturePage({
     throw new Error(`No demo body for feature "${feature.slug}"`);
   }
   const note = feature.notes[adapter.key];
+  const [firstLine, ...moreLines] = introFor(feature, adapter);
   const brief = (
     <div className="mx-brief">
       <CodeBlock
@@ -429,6 +442,18 @@ function FeaturePage({
         item={feature.slug}
       />
       <div className="mx-brief__side">
+        <InstallPlate adapter={adapter}>
+          <div className="mx-plate__row">
+            <span className="mx-plate__key">Guide</span>
+            <a
+              className="mx-plate__link"
+              href={docsUrl("getting-started")}
+              data-cta="get_started"
+            >
+              Getting started
+            </a>
+          </div>
+        </InstallPlate>
         {note ? (
           <div className="mx-note">
             <span className="mx-note__key">In {adapter.label}</span>
@@ -471,20 +496,24 @@ function FeaturePage({
             {feature.label}
           </Kicker>
           <KitHeading text={fill(feature.h1)} kit={adapter.label} />
-          {introFor(feature, adapter).map((line) => (
-            <Lead key={line} text={fill(line)} />
-          ))}
+          {firstLine ? <Lead text={fill(firstLine)} /> : null}
         </div>
       </header>
 
-      {brief}
-
       <Seam pkg={adapter.pkg} />
-      {Body ? (
-        <Suspense fallback={<DemoFallback />}>
-          <Body dark={dark} adapter={adapter.key} />
-        </Suspense>
+      <Suspense fallback={<DemoFallback />}>
+        <Body dark={dark} adapter={adapter.key} />
+      </Suspense>
+
+      {moreLines.length > 0 ? (
+        <div className="mx-more">
+          {moreLines.map((line) => (
+            <Lead key={line} text={fill(line)} />
+          ))}
+        </div>
       ) : null}
+
+      {brief}
 
       <section className="mx-section">
         <div className="mx-section__head">

@@ -168,7 +168,6 @@
         <p>Declare what a column filters by and the table builds the control: text and number operators, date ranges with relative presets, and a checklist of the values actually present.</p>
         <p>For the cases one row of inputs cannot express there is an AND/OR tree, and every active filter shows as a chip that removes itself. Quick find is a different control — it highlights matching cells and writes <code>find=</code> into the same URL namespace; it does not replace the filter tree.</p>
         <p>Filter state and the find query both live in the versioned URL, so a filtered-and-found view is a link someone can send — and the popover, drawer, inputs, chips and find field are all Ant Design components.</p>
-        <p>The popover lets antd portal its Selects and pickers to the body the way antd does everywhere, and teaches the outside-click handler to ignore those layers instead — numbers filter through an InputNumber, and each active filter is a closable Tag.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/antd&quot;;
 import { filters } from &quot;@adapttable/antd/filters&quot;;
@@ -195,8 +194,10 @@ export function People({ rows }) {
     /&gt;
   );
 }</code></pre>
+        <p>The popover lets antd portal its Selects and pickers to the body the way antd does everywhere, and teaches the outside-click handler to ignore those layers instead — numbers filter through an InputNumber, and each active filter is a closable Tag.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/antd @adapttable/core antd</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/filtering/">Filtering in Mantine</a> — Rounded, friendly, filled controls</li>

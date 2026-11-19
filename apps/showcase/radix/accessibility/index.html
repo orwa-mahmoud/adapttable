@@ -168,7 +168,6 @@
         <p>Tab into the grid and the arrows move a visible focus, one cell at a time. Home and End jump to the row's edges.</p>
         <p>Every move, sort, filter and edit is announced through a live region — the part of a table a sighted reader cannot check, so this page repeats those announcements as text as they happen.</p>
         <p><code>columnSelectionCheckbox</code> puts a named checkbox on each header so a column can be selected without a modifier key a touchscreen does not have. Focus, selection, status and disabled controls stay legible in high contrast and forced-colors — nothing is color-only. The grid and the checkboxes are Radix.</p>
-        <p>The grid is Radix Table rows; the header checkbox is a Radix Checkbox, and the focus ring is the kit's outline on the active cell.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/radix&quot;;
 import { cellNavigation } from &quot;@adapttable/radix/cell-navigation&quot;;
@@ -184,8 +183,10 @@ export function People({ rows, columns }) {
     /&gt;
   );
 }</code></pre>
+        <p>The grid is Radix Table rows; the header checkbox is a Radix Checkbox, and the focus ring is the kit's outline on the active cell.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/radix @adapttable/core @radix-ui/themes</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/accessibility/">Accessible Mantine data table</a> — Rounded, friendly, filled controls</li>

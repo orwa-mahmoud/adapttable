@@ -168,7 +168,6 @@
         <p>Declare what a column filters by and the table builds the control: text and number operators, date ranges with relative presets, and a checklist of the values actually present.</p>
         <p>For the cases one row of inputs cannot express there is an AND/OR tree, and every active filter shows as a chip that removes itself. Quick find is a different control — it highlights matching cells and writes <code>find=</code> into the same URL namespace; it does not replace the filter tree.</p>
         <p>Filter state and the find query both live in the versioned URL, so a filtered-and-found view is a link someone can send — and the popover, drawer, inputs, chips and find field are all Radix components.</p>
-        <p>Radix Themes ships no Drawer, so the drawer is a Dialog pinned to the inline edge; the popover holds its ground by clamping its own height rather than flipping, and the chips are full-radius Badges.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/radix&quot;;
 import { filters } from &quot;@adapttable/radix/filters&quot;;
@@ -195,8 +194,10 @@ export function People({ rows }) {
     /&gt;
   );
 }</code></pre>
+        <p>Radix Themes ships no Drawer, so the drawer is a Dialog pinned to the inline edge; the popover holds its ground by clamping its own height rather than flipping, and the chips are full-radius Badges.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/radix @adapttable/core @radix-ui/themes</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/filtering/">Filtering in Mantine</a> — Rounded, friendly, filled controls</li>

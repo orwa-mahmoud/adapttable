@@ -168,7 +168,6 @@
         <p>Compose <code>virtualize()</code> and the table renders the rows in view plus a small overscan, whatever the dataset's size. <code>virtualize({ virtualizeColumns: true })</code> does the same across, for column sets far wider than the window.</p>
         <p>The header stays pinned, pinned columns stay put, and the scroll box scrolls — never the page. Sorting, filtering and selection keep working on the whole dataset rather than on what is drawn.</p>
         <p>Nothing about the markup changes: it is the same Ant Design table, with the rows outside the window absent rather than hidden.</p>
-        <p>This is antd's own virtual table, not a second virtualizer over it: antd owns the scroller, so the adapter feeds it an explicit scroll size, drives infinite paging off antd's internal scroll position, and pins columns through antd's native fixed API.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/antd&quot;;
 import { virtualize } from &quot;@adapttable/antd/virtualize&quot;;
@@ -185,8 +184,10 @@ export function Ledger({ rows, columns }) {
     /&gt;
   );
 }</code></pre>
+        <p>This is antd's own virtual table, not a second virtualizer over it: antd owns the scroller, so the adapter feeds it an explicit scroll size, drives infinite paging off antd's internal scroll position, and pins columns through antd's native fixed API.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/antd @adapttable/core antd</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/scale/">Row and column virtualization in Mantine</a> — Rounded, friendly, filled controls</li>

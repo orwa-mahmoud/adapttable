@@ -168,7 +168,6 @@
         <p>Rows patch in as they arrive, the way a websocket would. This page applies one budget change at a time so the movement is followable.</p>
         <p>Patches go through the row-patch API rather than replacing the array, so search, filters and sort re-run for the touched rows only — your scroll and selection survive.</p>
         <p>The feed lists every patch as it lands. The table is Base UI.</p>
-        <p>The feed is the host's chrome; a patched budget is a Base UI table cell that re-renders with the new number.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/base-ui&quot;;
 import { applyRowPatches, updateRow } from &quot;@adapttable/core&quot;;
@@ -190,8 +189,10 @@ export function People({ rows, columns, setRows }) {
     /&gt;
   );
 }</code></pre>
+        <p>The feed is the host's chrome; a patched budget is a Base UI table cell that re-renders with the new number.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/base-ui @adapttable/core @base-ui/react</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/realtime/">Live updates in Mantine</a> — Rounded, friendly, filled controls</li>

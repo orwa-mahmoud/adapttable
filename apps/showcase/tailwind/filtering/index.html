@@ -168,7 +168,6 @@
         <p>Declare what a column filters by and the table builds the control: text and number operators, date ranges with relative presets, and a checklist of the values actually present.</p>
         <p>For the cases one row of inputs cannot express there is an AND/OR tree, and every active filter shows as a chip that removes itself.</p>
         <p>The whole filter state lives in the URL, so a filtered view is a link someone can send — and the popover, drawer, inputs and chips are native elements, each one addressable by class so the filter form looks like the form you wrote.</p>
-        <p>The backdrop, panel, popover and every filter input carry the map's classes with an indigo focus ring, and a checked option fills its label in indigo; the checklist and the AND/OR builder are not in the map, so they read as browser defaults.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/unstyled&quot;;
 import { filters } from &quot;@adapttable/unstyled/filters&quot;;
@@ -195,8 +194,10 @@ export function People({ rows }) {
     /&gt;
   );
 }</code></pre>
+        <p>The backdrop, panel, popover and every filter input carry the map's classes with an indigo focus ring, and a checked option fills its label in indigo; the checklist and the AND/OR builder are not in the map, so they read as browser defaults.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/unstyled @adapttable/core</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/filtering/">Filtering in Mantine</a> — Rounded, friendly, filled controls</li>

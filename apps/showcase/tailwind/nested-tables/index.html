@@ -168,7 +168,6 @@
         <p>Open a row and the panel holds another Tailwind table — the same component, not a hand-built list. Each person has recent orders; the inner table has its own columns and row keys.</p>
         <p><code>nestedTable()</code> mounts the kit's DataTable with defaults that keep the two tables from fighting over the URL. Rows with no nested table can still use <code>rowDetail()</code>.</p>
         <p>The expand chevron and both tables are Tailwind.</p>
-        <p>The chevron and both tables carry the map's classes; the nested orders are a second native table, not a div pretending to be one.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/unstyled&quot;;
 import { nestedTable } from &quot;@adapttable/unstyled/nested-table&quot;;
@@ -195,8 +194,10 @@ export function People({ rows, columns, orderColumns }) {
     /&gt;
   );
 }</code></pre>
+        <p>The chevron and both tables carry the map's classes; the nested orders are a second native table, not a div pretending to be one.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/unstyled @adapttable/core</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/nested-tables/">Nested tables in Mantine</a> — Rounded, friendly, filled controls</li>

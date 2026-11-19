@@ -179,7 +179,6 @@
         <p>This demo mounts a real Unstyled Angular table and its Unstyled assistant. Start with scripted sorting, questions and approved edits, or connect your HTTP backend for free-form AI requests. The scripted mode needs no model or API key.</p>
         <p>A question filters the table only after you answer. A proposed edit waits for your approval in the assistant, the table or a dialog; an approved write updates the host's data and its status line. Rejecting leaves the data unchanged, and the conversation records the execution result.</p>
         <p><code>tableAgent</code> and <code>injectTableAssistant</code> from <code>@adapttable/ai-angular</code> share the mounted table's session. The snippet below shows a minimal local sorting transport; the demo also includes questions and governed edits. JSON, OpenAI, HTTP, MCP, MCP Apps, WebMCP, AG-UI and AI SDK helpers can use the same session in your application.</p>
-        <p>The assistant, question choices and approval controls are native HTML. Start with the local script or connect your HTTP backend. The host status line records approved writes, and the approval-surface selector chooses assistant, table or dialog review.</p>
         <h2>The code</h2>
         <pre><code>import type { AgentSession, AssistantTransport } from &quot;@adapttable/ai&quot;;
 import { injectTableAssistant, tableAgent } from &quot;@adapttable/ai-angular&quot;;
@@ -250,8 +249,10 @@ export class PeopleAssistant {
     bridge: { attach: (session) =&gt; this.session.set(session) },
   })];
 }</code></pre>
+        <p>The assistant, question choices and approval controls are native HTML. Start with the local script or connect your HTTP backend. The host status line records approved writes, and the approval-surface selector chooses assistant, table or dialog review.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/angular-unstyled @adapttable/angular @adapttable/core</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/angular/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/angular/demo/ng-zorro/ai/">AI table assistant in NG-ZORRO Angular</a> — Ant Design components for Angular</li>

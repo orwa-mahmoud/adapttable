@@ -168,7 +168,6 @@
         <p>Below the mobile breakpoint every row becomes a Base UI card. Same columns, same row content, same query state — there is nothing to configure and no second layout to build.</p>
         <p><code>paginationMode=&quot;auto&quot;</code> resolves to infinite scroll on phones and a pager on desktop. Per column, <code>mobileLabel</code> and <code>hideOnMobile</code> tune what a card shows.</p>
         <p>Unlabeled identity fields span the card; labeled details share the available width. Column renderers keep native avatars, badges and progress indicators. Set <code>forceMobile</code> to false to keep a horizontally scrolling table on phones.</p>
-        <p>A card here is the adapter's own bordered surface rather than a Base UI component, since Base UI ships no Card; density tightens the gaps around it rather than the card's own padding.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/base-ui&quot;;
 
@@ -183,8 +182,10 @@ export function People({ rows, columns }) {
     /&gt;
   );
 }</code></pre>
+        <p>A card here is the adapter's own bordered surface rather than a Base UI component, since Base UI ships no Card; density tightens the gaps around it rather than the card's own padding.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/base-ui @adapttable/core @base-ui/react</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/mobile-cards/">Mobile cards in Mantine</a> — Rounded, friendly, filled controls</li>

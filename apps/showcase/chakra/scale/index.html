@@ -168,7 +168,6 @@
         <p>Compose <code>virtualize()</code> and the table renders the rows in view plus a small overscan, whatever the dataset's size. <code>virtualize({ virtualizeColumns: true })</code> does the same across, for column sets far wider than the window.</p>
         <p>The header stays pinned, pinned columns stay put, and the scroll box scrolls — never the page. Sorting, filtering and selection keep working on the whole dataset rather than on what is drawn.</p>
         <p>Nothing about the markup changes: it is the same Chakra table, with the rows outside the window absent rather than hidden.</p>
-        <p>The scroll box is a Box rather than a Table.ScrollArea, so the sticky header keeps working; each header cell carries the sticky rule, and pinned cells take an explicit opaque background so scrolled content cannot show through.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/chakra&quot;;
 import { virtualize } from &quot;@adapttable/chakra/virtualize&quot;;
@@ -185,8 +184,10 @@ export function Ledger({ rows, columns }) {
     /&gt;
   );
 }</code></pre>
+        <p>The scroll box is a Box rather than a Table.ScrollArea, so the sticky header keeps working; each header cell carries the sticky rule, and pinned cells take an explicit opaque background so scrolled content cannot show through.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/chakra @adapttable/core @chakra-ui/react @emotion/react</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/scale/">Row and column virtualization in Mantine</a> — Rounded, friendly, filled controls</li>

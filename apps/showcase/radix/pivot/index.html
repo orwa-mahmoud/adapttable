@@ -168,7 +168,6 @@
         <p>Grouping answers “what is the total per team”. A pivot answers “what is the total per team per status”, and that second dimension becomes columns your data never had.</p>
         <p>Fields move between the three zones with buttons rather than drag, so the pivot can be built from the keyboard. Subtotals close every group and a grand total closes the table.</p>
         <p>The configuration — axes, measures, aggregation and what you folded — lives in the URL, so a pivot you build is a pivot you can send someone.</p>
-        <p>Each zone is a Card wrapping a real fieldset — the fieldset is what a screen reader hears, the Card is what you see — with soft Buttons for the moves and Radix Selects for the pickers.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, PivotPanel } from &quot;@adapttable/radix&quot;;
 import {
@@ -201,8 +200,10 @@ export function Spend({ rows, fields }) {
     &lt;/&gt;
   );
 }</code></pre>
+        <p>Each zone is a Card wrapping a real fieldset — the fieldset is what a screen reader hears, the Card is what you see — with soft Buttons for the moves and Radix Selects for the pickers.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/radix @adapttable/core @radix-ui/themes</code></pre>
+        <p><a href="https://adapttable.orwamahmoud.com/react/getting-started/">Getting started</a></p>
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="/react/demo/mantine/pivot/">Pivot tables in Mantine</a> — Rounded, friendly, filled controls</li>
