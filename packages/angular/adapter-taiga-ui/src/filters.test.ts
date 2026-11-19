@@ -27,6 +27,7 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import { TuiDropdownOptionsDirective } from "@taiga-ui/core";
 
 import { filtersTests } from "../../angular/test/kit/suites/filters";
 import { AdaptHeaderFilterTrigger } from "../header-filters/headerFilterTrigger";
@@ -919,6 +920,41 @@ describe("registered Angular form renderers", () => {
 });
 
 describe("filter card viewport space", () => {
+  it("opens the card where it measured its room: above a low opener, below a high one", async () => {
+    const { fixture, openFilters, settle } = await mount();
+    const host = fixture.debugElement.query(By.directive(AdaptFilterPopover));
+    const options = host
+      .query(By.directive(TuiDropdownOptionsDirective))
+      .injector.get(TuiDropdownOptionsDirective);
+    const anchor = (host.nativeElement as HTMLElement).querySelector("span")!;
+    const hitTest = Object.getOwnPropertyDescriptor(
+      document,
+      "elementFromPoint"
+    );
+    Object.defineProperty(document, "elementFromPoint", {
+      configurable: true,
+      value: () => anchor,
+    });
+    let top = window.innerHeight - 48;
+    const measurement = vi
+      .spyOn(anchor, "getBoundingClientRect")
+      .mockImplementation(() =>
+        DOMRect.fromRect({ x: 300, y: top, width: 100, height: 32 })
+      );
+    try {
+      await openFilters();
+      expect(options.direction).toBe("top");
+      top = 40;
+      window.dispatchEvent(new Event("resize"));
+      await settle();
+      expect(options.direction).toBe("bottom");
+    } finally {
+      measurement.mockRestore();
+      if (hitTest) Object.defineProperty(document, "elementFromPoint", hitTest);
+      else Reflect.deleteProperty(document, "elementFromPoint");
+    }
+  });
+
   it("uses above-origin room for a low opener and updates to below room on scroll", async () => {
     const { fixture, part, openFilters, settle } = await mount();
     const host = fixture.debugElement.query(By.directive(AdaptFilterPopover));
