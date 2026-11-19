@@ -67,7 +67,8 @@ describe("packed Vue host contracts", () => {
     const deps = kitLoadDependencies([fixture], "22.12.0");
     assert.equal(deps.vite, "^8.3.0");
     assert.equal(deps["@vitejs/plugin-vue"], "^6.0.9");
-    assert.equal(deps["@nuxt/ui"], "^4.11.3");
+    // The Node 22.12 floor holds @nuxt/ui before its Undici 8 font line.
+    assert.equal(deps["@nuxt/ui"], "^4.11.3 <4.13.0");
     assert.equal(kitLoadDependencies([], "22.12.0").vite, undefined);
   });
 

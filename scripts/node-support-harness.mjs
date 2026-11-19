@@ -231,13 +231,21 @@ export function kitLoadDependencies(
   return deps;
 }
 
+/**
+ * The first @nuxt/ui release whose @nuxt/fonts (^1.2.0) reaches unifont 1,
+ * and so Undici 8, which requires Node >=22.19.
+ */
+const NUXT_UI_UNDICI_8 = "4.13.0";
+
 function useCompatibleNuxtFonts(deps, nodeVersion) {
   const [major, minor] = nodeVersion.replace(/^v/, "").split(".").map(Number);
   if (deps["@nuxt/ui"] && major === 22 && minor < 19) {
-    // @nuxt/fonts 0.14.0 and fontless 0.2.1 both accept ^0.7.4.
-    // unifont 0.7.5 introduced Undici 8, which requires Node >=22.19.
-    // Use the preceding normal dependency on the baseline runtime only;
-    // never force Undici 7 outside unifont 0.7.5's declared range.
+    // Below Node 22.19, stay inside the kit's declared @nuxt/ui range but
+    // before the release on the Undici 8 font line. Its @nuxt/fonts 0.14
+    // and fontless 0.2.1 both accept ^0.7.4; unifont 0.7.5 introduced
+    // Undici 8, so use the preceding normal dependency on the baseline
+    // runtime only and never force Undici 7 outside a declared range.
+    deps["@nuxt/ui"] = `${deps["@nuxt/ui"]} <${NUXT_UI_UNDICI_8}`;
     deps.unifont = "0.7.4";
   }
 }
