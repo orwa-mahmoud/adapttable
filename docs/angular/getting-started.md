@@ -7,35 +7,6 @@ a stable row key. Add feature imports when the table needs them.
 Upgrading an existing binding? Read the [0.5 migration guide](migrating-to-0-5.md)
 before changing imports. The new entry paths require the 0.5 release.
 
-## Published Angular kits
-
-All nine Angular kits are available on npm. The additional native choices are
-[Angular Material](material.md), [ng-bootstrap](ng-bootstrap.md),
-[Spartan](spartan.md), [Taiga UI](taiga-ui.md), [Angular Aria](aria.md),
-[Angular CDK](angular-cdk.md) and [ngx-bootstrap](ngx-bootstrap.md).
-
-Each kit guide includes its registry command, Angular 22 peers, provider setup,
-styling and assets. Their local showcase routes are `/material/`,
-`/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`, `/aria/`, `/angular-cdk/` and
-`/ngx-bootstrap/`. ngx-bootstrap also has a
-[documented upstream pre-hydration pagination replay limitation](ngx-bootstrap.md#known-upstream-event-replay-limitation).
-
-## Choose a kit
-
-- `@adapttable/angular-unstyled` uses native HTML. Supply your own CSS or
-  Tailwind classes
-- `@adapttable/ng-zorro` uses NG-ZORRO controls, cards and overlays
-- The seven kits linked above add Material, Bootstrap, Spartan, Taiga UI,
-  Angular Aria and CDK presentation choices with their own setup requirements
-- `@adapttable/angular` supplies signals, column types and structural Chrome
-  for any Angular kit or your own renderer
-
-The Angular binding, all nine kits and the optional AI binding are available
-on npm. When upgrading from before the 0.5 import reorganization, follow the
-[migration guide](./migrating-to-0-5.md) for the canonical entry points.
-Package versions are independent; each kit declares its compatible binding and
-engine dependencies. Do not force core, binding and kit to share a version.
-
 ## Install an Angular table package
 
 Inside an existing Angular application, choose one kit. For native HTML
@@ -73,6 +44,35 @@ global stylesheet:
 ```
 
 The native kit does not supply a theme stylesheet.
+
+## Published Angular kits
+
+All nine Angular kits are available on npm. The additional native choices are
+[Angular Material](material.md), [ng-bootstrap](ng-bootstrap.md),
+[Spartan](spartan.md), [Taiga UI](taiga-ui.md), [Angular Aria](aria.md),
+[Angular CDK](angular-cdk.md) and [ngx-bootstrap](ngx-bootstrap.md).
+
+Each kit guide includes its registry command, Angular 22 peers, provider setup,
+styling and assets. Their local showcase routes are `/material/`,
+`/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`, `/aria/`, `/angular-cdk/` and
+`/ngx-bootstrap/`. ngx-bootstrap also has a
+[documented upstream pre-hydration pagination replay limitation](ngx-bootstrap.md#known-upstream-event-replay-limitation).
+
+## Choose a kit
+
+- `@adapttable/angular-unstyled` uses native HTML. Supply your own CSS or
+  Tailwind classes
+- `@adapttable/ng-zorro` uses NG-ZORRO controls, cards and overlays
+- The seven kits linked above add Material, Bootstrap, Spartan, Taiga UI,
+  Angular Aria and CDK presentation choices with their own setup requirements
+- `@adapttable/angular` supplies signals, column types and structural Chrome
+  for any Angular kit or your own renderer
+
+The Angular binding, all nine kits and the optional AI binding are available
+on npm. When upgrading from before the 0.5 import reorganization, follow the
+[migration guide](./migrating-to-0-5.md) for the canonical entry points.
+Package versions are independent; each kit declares its compatible binding and
+engine dependencies. Do not force core, binding and kit to share a version.
 
 ## Run the Angular examples from source
 
