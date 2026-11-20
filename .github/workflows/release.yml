@@ -83,7 +83,6 @@ jobs:
     if: ${{ needs.detect.outputs.needPublish == 'true' }}
     name: Publish
     runs-on: ubuntu-latest
-    environment: npm-publish
     # contents: create tags and releases · id-token: npm OIDC trusted publishing.
     # Provenance is automatic when trusted publishing is configured on npm.
     permissions:
