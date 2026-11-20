@@ -191,8 +191,8 @@ not from habit:
    versions; exact pins resolve core automatically.
 
 Release mechanics: merge the PR carrying its changeset → the bot opens a
-"Version Packages" PR → merging that publishes to npm. A main push with
-neither a pending changeset nor an unpublished version skips the Release
+"Version Packages" PR → merging that queues the owner-approved npm publish
+job. A main push with neither a pending changeset nor an unpublished version skips the Release
 job; publish is build → publint → `changeset publish`, not `verify:release`.
 `pnpm version-packages` preserves the tested lockfile graph and updates only
 linked workspace specifiers, then validates with a frozen install. Dependency

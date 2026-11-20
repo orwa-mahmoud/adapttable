@@ -1,0 +1,39 @@
+name: Release merge gate
+
+on:
+  workflow_run:
+    workflows: [PR]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  check:
+    name: Report release merge status
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: release-merge-check
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.1
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      - name: Report through the release gate app
+        run: node scripts/release-merge-gate.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_GATE_APP_ID: ${{ vars.RELEASE_GATE_APP_ID }}
+          RELEASE_GATE_INSTALLATION_ID: ${{ vars.RELEASE_GATE_INSTALLATION_ID }}
+          RELEASE_GATE_PRIVATE_KEY: ${{ secrets.RELEASE_GATE_PRIVATE_KEY }}
