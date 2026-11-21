@@ -15,6 +15,7 @@ import {
   flattenGroupPartitions,
   type GroupedFlatEntry,
   groupingKeys,
+  type GroupPartition,
   groupPathReader,
   type GroupPathStep,
   makeGroupRowKey,
@@ -39,19 +40,25 @@ interface DerivedState<TRow> {
   /** The sorted rows it was derived from, and each one's group path by position. */
   readonly sorted: readonly TRow[];
   readonly paths: readonly GroupPath[] | undefined;
+  /** The buckets the groups were laid out from. */
+  readonly partitions: readonly GroupPartition<TRow>[] | undefined;
   /** Cells of every group drawn, by group key. */
   readonly cells: ReadonlyMap<string, Cells>;
   readonly summary: IncrementalAggregate<TRow> | undefined;
 }
 
+/** The state each derivation was built from, for a layout-only re-derive. */
+const derivedStates = /* @__PURE__ */ new WeakMap<
+  object,
+  DerivedState<never>
+>();
+
 /**
- * The value that changes exactly when the groups or totals would. Callbacks
- * a host rebuilds on every render count by presence; `derivedKey` carries
- * what they answer.
+ * What only lays the groups out: folding, paging, footers, labels, order and
+ * filter. A change to these alone keeps the partition and the totals.
  */
-function stageFingerprint<TRow>(config: IncrementalViewConfig<TRow>): string {
+function layoutFingerprint<TRow>(config: IncrementalViewConfig<TRow>): string {
   return stableKey({
-    groupBy: groupingKeys(config.groupBy ?? []),
     groupFooters: Boolean(config.groupFooters),
     collapsed: config.collapsedGroupIds
       ? [...config.collapsedGroupIds].sort((a, b) => a.localeCompare(b))
@@ -60,9 +67,6 @@ function stageFingerprint<TRow>(config: IncrementalViewConfig<TRow>): string {
     rowPageSize: config.rowPageSize ?? null,
     paging: config.paging ?? null,
     blankLabel: config.blankLabel ?? null,
-    hasGroupAggregates: config.groupAggregates !== undefined,
-    derivedKey: config.derivedKey ?? null,
-    groupAggregateOps: config.groupAggregateOps ?? null,
     // A named order is a value and is compared as one; a comparator is a
     // function, which a host that changes it signals through `derivedKey`.
     groupSort:
@@ -70,6 +74,20 @@ function stageFingerprint<TRow>(config: IncrementalViewConfig<TRow>): string {
         ? config.groupSort
         : config.groupSort !== undefined,
     hasGroupFilter: config.groupFilter !== undefined,
+  });
+}
+
+/**
+ * What the partition and the totals are made from. Callbacks a host rebuilds
+ * on every render count by presence; `derivedKey` carries what they answer,
+ * and any change to it derives the stage again from the rows.
+ */
+function contentFingerprint<TRow>(config: IncrementalViewConfig<TRow>): string {
+  return stableKey({
+    groupBy: groupingKeys(config.groupBy ?? []),
+    hasGroupAggregates: config.groupAggregates !== undefined,
+    derivedKey: config.derivedKey ?? null,
+    groupAggregateOps: config.groupAggregateOps ?? null,
     hasSummaryRow: config.summaryRow !== undefined,
     aggregateSpec: config.aggregateSpec ?? null,
     aggregateOptions: config.aggregateOptions ?? null,
@@ -175,10 +193,13 @@ function paintCells<TRow>(
   entries: GroupedFlatEntry<TRow>[],
   config: IncrementalViewConfig<TRow>,
   previous: ReadonlyMap<string, Cells>,
-  touched: ReadonlySet<string> | undefined
+  touched: ReadonlySet<string> | undefined,
+  keepPrevious = false
 ): Map<string, Cells> {
   const aggregator = groupAggregator(config);
-  const cells = new Map<string, Cells>();
+  // A layout change keeps the cells of groups it folded away, so unfolding
+  // them again reads no rows.
+  const cells = new Map<string, Cells>(keepPrevious ? previous : undefined);
   for (const entry of entries) {
     if (entry.kind === "group") {
       const known = touched?.has(entry.key)
@@ -210,13 +231,21 @@ function derivation<TRow>(
   sorted: readonly TRow[],
   config: IncrementalViewConfig<TRow>,
   state: DerivedState<TRow> | undefined,
-  moved: { left: readonly TRow[]; entered: readonly TRow[] } | undefined
+  moved: { left: readonly TRow[]; entered: readonly TRow[] } | undefined,
+  layoutOnly = false
 ): Derivation<TRow> {
   const keys = groupingKeys(config.groupBy ?? []);
-  let paths: GroupPath[] | undefined;
+  let paths: readonly GroupPath[] | undefined;
+  let partitions: readonly GroupPartition<TRow>[] | undefined;
   let cells: ReadonlyMap<string, Cells> = new Map();
   let groups: GroupedFlatEntry<TRow>[] | undefined;
-  if (keys.length > 0) {
+  if (keys.length > 0 && layoutOnly && state?.partitions) {
+    // Same rows, same totals, new layout: lay the kept buckets out again.
+    paths = state.paths;
+    partitions = state.partitions;
+    groups = flattenGroupPartitions(partitions, flattenOptions(config));
+    cells = paintCells(groups, config, state.cells, undefined, true);
+  } else if (keys.length > 0) {
     const read = groupPathReader(keys, config.columns ?? [], config.locale);
     let touched: Set<string> | undefined;
     if (state?.paths && moved) {
@@ -232,20 +261,18 @@ function derivation<TRow>(
     } else {
       paths = sorted.map(read);
     }
-    groups = flattenGroupPartitions(
-      partitionGroupedRows(
-        sorted,
-        keys,
-        config.columns ?? [],
-        config.locale,
-        paths
-      ),
-      flattenOptions(config)
+    partitions = partitionGroupedRows(
+      sorted,
+      keys,
+      config.columns ?? [],
+      config.locale,
+      paths
     );
+    groups = flattenGroupPartitions(partitions, flattenOptions(config));
     cells = paintCells(groups, config, state?.cells ?? new Map(), touched);
   }
   let summary = state?.summary;
-  if (config.aggregateSpec) {
+  if (config.aggregateSpec && !layoutOnly) {
     summary =
       summary && moved
         ? movedIncrementalAggregate(summary, moved.left, moved.entered)
@@ -255,13 +282,28 @@ function derivation<TRow>(
             config.aggregateOptions
           );
   }
-  const next: DerivedState<TRow> = { sorted, paths, cells, summary };
-  return {
+  const next: DerivedState<TRow> = {
+    sorted,
+    paths,
+    partitions,
+    cells,
+    summary,
+  };
+  const result: Derivation<TRow> = {
     groups,
     aggregates: summaryOf(sorted, config, summary),
     patch: (nextSorted, left, entered, nextConfig) =>
       derivation(nextSorted, nextConfig, next, { left, entered }),
   };
+  derivedStates.set(result, next as DerivedState<never>);
+  return result;
+}
+
+/** The state a derivation was built from, when this stage built it. */
+function stateOf<TRow>(
+  built: Derivation<TRow> | undefined
+): DerivedState<TRow> | undefined {
+  return built ? derivedStates.get(built) : undefined;
 }
 
 /** The full evaluator's stage: groups, group cells and grand totals. */
@@ -278,7 +320,12 @@ export function groupsAndTotals<TRow>(): DerivedStage<TRow> {
   return {
     derive,
     rederive: (view, evaluation, config, mode) => {
-      if (stageFingerprint(evaluation.config) === stageFingerprint(config)) {
+      const sameContent =
+        contentFingerprint(evaluation.config) === contentFingerprint(config);
+      if (
+        sameContent &&
+        layoutFingerprint(evaluation.config) === layoutFingerprint(config)
+      ) {
         return undefined;
       }
       // A new record gets its own row arrays, so the snapshot attached to
@@ -288,10 +335,15 @@ export function groupsAndTotals<TRow>(): DerivedStage<TRow> {
         filtered = [...view.filtered];
         sorted = view.sorted === view.filtered ? filtered : [...view.sorted];
       }
+      // A new record's copies hold the same rows in the same order, so the
+      // kept buckets still describe them.
+      const previous = sameContent ? stateOf(evaluation.derivation) : undefined;
       return derivedRecord(view.rows, filtered, sorted, {
         ...evaluation,
         config,
-        derivation: derive(sorted, config),
+        derivation: previous?.partitions
+          ? derivation(sorted, config, previous, undefined, true)
+          : derive(sorted, config),
       });
     },
   };
