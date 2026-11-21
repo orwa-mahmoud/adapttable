@@ -105,6 +105,10 @@ export type {
   CustomCellEditorRender,
 } from "./editing/cellEditing";
 export type {
+  DeferredExportWriter,
+  ExportWriterOption,
+} from "./export/deferredWriter";
+export type {
   ExportPayload,
   ExportRowMeta,
   ExportRowRole,

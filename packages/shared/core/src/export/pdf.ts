@@ -50,7 +50,7 @@ import { parseSfnt } from "./sfnt";
 export type { ExportWriter, PrintPageBreak };
 
 /**
- * Options the writer and {@link buildTablePdf} share.
+ * Options the writer and `buildTablePdf` share.
  *
  * @public
  */

@@ -3306,7 +3306,6 @@
       "BuildGroupedFlatModelOptions",
       "buildTableCsv",
       "buildTableQuery",
-      "buildTableXlsx",
       "buildTreeEntries",
       "BuildTreeEntriesOptions",
       "BUILTIN_AGGREGATE_LABELS",
@@ -4681,7 +4680,6 @@
       "writeRowPins",
       "writeSortLevels",
       "writeStoredColumnLayout",
-      "xlsxWriter",
       "approvalProposalText",
       "gridRowFocusSignature",
       "OverlayDismissOptions",
@@ -4693,7 +4691,15 @@
       "TableAction",
       "TableStore",
       "mergeProps",
-      "resetHistoryAdapter"
+      "resetHistoryAdapter",
+      "DeferredExportWriter",
+      "ExportWriterOption",
+      "deferredExportWriter",
+      "deferredPdfWriter",
+      "deferredXlsxWriter",
+      "PdfWriterOptions",
+      "PrintPageBreak",
+      "PrintPageSize"
     ],
     "core-editing": [
       "ActionAiOptions",
@@ -5002,7 +5008,9 @@
       "StoreReader",
       "StoreWriter",
       "TableAction",
-      "TableStore"
+      "TableStore",
+      "DeferredExportWriter",
+      "ExportWriterOption"
     ],
     "core-engine": [
       "Aggregatable",
@@ -5129,7 +5137,9 @@
       "TableSourceCapabilities",
       "TableStateMutators",
       "TotalCountCapability",
-      "UseColumnLayoutResult"
+      "UseColumnLayoutResult",
+      "DeferredExportWriter",
+      "ExportWriterOption"
     ],
     "core-formula": [
       "Aggregatable",
@@ -5542,7 +5552,9 @@
       "TableStateMutators",
       "TEXT_OPS",
       "TotalCountCapability",
-      "UseColumnLayoutResult"
+      "UseColumnLayoutResult",
+      "DeferredExportWriter",
+      "ExportWriterOption"
     ],
     "core-selection": [
       "AllMatchingScope",
@@ -7697,6 +7709,9 @@
       "EMPTY_FEATURE_HOST",
       "EndReachedLatch",
       "ContrastRules",
+      "DeferredExportWriter",
+      "ExportWriterOption",
+      "isDeferredExportWriter",
       "ensureForcedColorsStyles",
       "entryKeys",
       "estimateBodyItemSize",

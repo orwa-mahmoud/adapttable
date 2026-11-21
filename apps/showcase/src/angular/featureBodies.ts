@@ -37,10 +37,10 @@ import {
 } from "@adapttable/angular/stream";
 import {
   applyRowPatchesWithLog,
+  deferredXlsxWriter,
   type RowPatchEvent,
   rowPatchLog,
 } from "@adapttable/core";
-import { xlsxWriter } from "@adapttable/core/xlsx";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
@@ -1711,7 +1711,7 @@ class ColumnsBody {
     this.kit.cellNavigation(),
     this.kit.exportCsv({
       scope: "range",
-      writer: xlsxWriter({ sheetName: "People" }),
+      writer: deferredXlsxWriter({ sheetName: "People" }),
       filename: "people.xlsx",
     }),
   ];

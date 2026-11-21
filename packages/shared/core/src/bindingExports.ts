@@ -197,7 +197,6 @@ export { type ElementRef } from "./virtual/mobileCardList";
 export type { RowPairMeasurer } from "./virtual/rowPairModel";
 export type { KeyedVirtualization } from "./virtual/virtualTableModel";
 export { rowSourceIndex, virtualItemMeta } from "./virtual/virtualTableModel";
-export { buildTableXlsx, xlsxWriter } from "./xlsx";
 
 /**
  * Member types the exported signatures above hand back. A consumer that can

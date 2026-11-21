@@ -379,7 +379,7 @@ export function exportAllQueryOf<TRow>(
   visibleColumns: readonly ColumnMetadata<TRow>[],
   options: ExportCsvOptions<TRow>,
   context: ExportContext<TRow> | undefined,
-  writer: ExportWriter
+  writer: Pick<ExportWriter, "extension">
 ): ExportAllQuery {
   const columns = resolveExportColumns(
     options.columns,

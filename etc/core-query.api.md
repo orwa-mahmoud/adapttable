@@ -348,6 +348,13 @@ export type DeclaredAggregates = Readonly<Record<string, string>>;
 export const DEFAULT_LIMIT = 25;
 
 // @public
+export interface DeferredExportWriter {
+    readonly extension: string;
+    readonly load: () => Promise<ExportWriter>;
+    readonly preload: () => () => void;
+}
+
+// @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
 
 // @public
@@ -401,6 +408,9 @@ export interface ExportWriter {
 }
 
 // @public
+export type ExportWriterOption = ExportWriter | DeferredExportWriter;
+
+// @public
 export type ExtraFilters = Record<string, FilterValue>;
 
 // @public
@@ -419,7 +429,7 @@ export interface FeatureHostState<TRow = unknown> {
     readonly filterExtends: readonly FilterTypeExtend[];
     readonly filterTypes: readonly FilterTypeSpec[];
     readonly panels: readonly SidePanelEntry[];
-    readonly writers: readonly ExportWriter[];
+    readonly writers: readonly ExportWriterOption[];
 }
 
 // @public

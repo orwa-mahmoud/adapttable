@@ -2793,7 +2793,7 @@ export function coreEditing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Fe
 
 // @public
 export function coreExportCsv<TRow>(options?: boolean | {
-    readonly writer?: ExportWriter;
+    readonly writer?: ExportWriterOption;
 }): CoreFeature<TRow>;
 
 // @public
@@ -2801,7 +2801,7 @@ export function coreExtraRows<TExtraRow extends Pick<ExtraRow, "key" | "kind" | 
 
 // @public
 export interface CoreFeature<TRow = unknown, THost = CoreFeatureRegistrar> extends PatchFeature<TRow> {
-    setup?(host: THost): void;
+    setup?(host: THost): void | (() => void);
 }
 
 // @public
@@ -2812,7 +2812,7 @@ export interface CoreFeatureRegistrar<TPanel extends SidePanelEntry = SidePanelE
     registerCommand(command: Command): void;
     registerFilterType(spec: FilterTypeSpec): void;
     registerPanel(panel: TPanel): void;
-    registerWriter(writer: ExportWriter): void;
+    registerWriter(writer: ExportWriterOption): void;
 }
 
 // @public
@@ -3269,6 +3269,13 @@ export function defaultSaveErrorMessage(error: unknown): string;
 export function deferGroupingDropToInner<TEvent extends {
     readonly defaultPrevented: boolean;
 }>(props: GroupingDropHandlers<TEvent>): GroupingDropHandlers<TEvent>;
+
+// @public
+export interface DeferredExportWriter {
+    readonly extension: string;
+    readonly load: () => Promise<ExportWriter>;
+    readonly preload: () => () => void;
+}
 
 // @public
 export function defineAction<TPayload>(type: string, reduce: (store: StoreWriter, payload: TPayload) => void): ActionDefinition<TPayload>;
@@ -4626,7 +4633,7 @@ export interface ExportCsvOptions<TRow = unknown> {
     onExportAll?: (query: ExportAllQuery, controls: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>;
     request?: (info: ExportRequest<TRow>) => void | Promise<void>;
     scope?: ExportRowScope;
-    writer?: ExportWriter;
+    writer?: ExportWriterOption;
 }
 
 // @public
@@ -4843,6 +4850,9 @@ export interface ExportWriter {
 }
 
 // @public
+export type ExportWriterOption = ExportWriter | DeferredExportWriter;
+
+// @public
 export const EXTRA_OVER_SPAN_ROW_STYLE: CssProperties;
 
 // @public
@@ -4990,7 +5000,7 @@ export interface FeatureHostState<TRow = unknown> {
     readonly filterExtends: readonly FilterTypeExtend[];
     readonly filterTypes: readonly FilterTypeSpec[];
     readonly panels: readonly SidePanelEntry[];
-    readonly writers: readonly ExportWriter[];
+    readonly writers: readonly ExportWriterOption[];
 }
 
 // @public
@@ -7350,6 +7360,9 @@ export function isCustomEditor(editor: CellEditor | null): editor is {
 };
 
 // @public
+export function isDeferredExportWriter(writer: ExportWriterOption): writer is DeferredExportWriter;
+
+// @public
 export function isDefinedFeature(feature: unknown): feature is DefinedFeature<unknown, FeatureSliceMap, Record<string, never>>;
 
 // @public
@@ -7548,9 +7561,9 @@ export class LiveFeatureHost<TRow = unknown, TPanel extends SidePanelEntry = Sid
     registerEditor(type: string, render: CustomCellEditorRender): void;
     registerFilterType(spec: FilterTypeSpec): void;
     registerPanel(panel: TPanel): void;
-    registerWriter(writer: ExportWriter): void;
+    registerWriter(writer: ExportWriterOption): void;
     releaseFeature(id: string): void;
-    readonly writers: ExportWriter[];
+    readonly writers: ExportWriterOption[];
 }
 
 // @public

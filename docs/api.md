@@ -1721,6 +1721,18 @@ emptied, `exportViewFromChrome` picks which model is showing, and
 `summaryExportValues` turns a `summaryRow` into file values. See
 [customization](./customization.md#spreadsheet-xlsx-export).
 
+**Writers that load on demand.** A `DeferredExportWriter` names its format at
+once and loads its builder on the first export: `load()` resolves the
+`ExportWriter`, shares a load in flight and tries again after one that
+failed, and `preload()` starts the load when the browser is idle. The
+`writer` option takes either (`ExportWriterOption`); `isDeferredExportWriter`
+tells them apart. `deferredExportWriter(extension, loader)` builds one, and
+`deferredXlsxWriter` / `deferredPdfWriter` are core's Excel and PDF writers
+loaded that way — the bindings' `exportXlsx` and `exportPdf` features use
+them and start the preload once the table is mounted. A load that fails is a
+failed export: no download, no `onAfterExport`, and the next export loads
+again.
+
 **PDF export and print layout.** `@adapttable/core/pdf` adds `pdfWriter` for
 the export button and `buildTablePdf` for a host assembling rows by hand.
 Print is a different verb: `openPrintLayout` (an `ExportTable`) and

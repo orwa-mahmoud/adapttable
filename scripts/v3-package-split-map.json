@@ -18627,6 +18627,54 @@
       "behavior": ""
     },
     {
+      "export": "DeferredExportWriter",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "deferredExportWriter",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "deferredPdfWriter",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "deferredXlsxWriter",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ExportWriterOption",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "isDeferredExportWriter",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "ensureForcedColorsStyles",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -35787,14 +35835,6 @@
       "behavior": ""
     },
     {
-      "export": "buildTableXlsx",
-      "currentImport": "@adapttable/core",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core",
-      "behavior": ""
-    },
-    {
       "export": "buildTreeEntries",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -46868,14 +46908,6 @@
     },
     {
       "export": "writeStoredColumnLayout",
-      "currentImport": "@adapttable/core",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core",
-      "behavior": ""
-    },
-    {
-      "export": "xlsxWriter",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
@@ -63976,6 +64008,94 @@
       "kind": "value",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "DeferredExportWriter",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ExportWriterOption",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "DeferredExportWriter",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
+      "export": "ExportWriterOption",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
+      "export": "DeferredExportWriter",
+      "currentImport": "@adapttable/core/engine",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/engine",
+      "behavior": ""
+    },
+    {
+      "export": "ExportWriterOption",
+      "currentImport": "@adapttable/core/engine",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/engine",
+      "behavior": ""
+    },
+    {
+      "export": "DeferredExportWriter",
+      "currentImport": "@adapttable/core/query",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "ExportWriterOption",
+      "currentImport": "@adapttable/core/query",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "PdfWriterOptions",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "PrintPageBreak",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "PrintPageSize",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
       "behavior": ""
     }
   ]

@@ -678,17 +678,6 @@
       "subpaths": ["."]
     },
     {
-      "name": "buildTableXlsx",
-      "kind": "runtime",
-      "module": "adapterMachinery.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "adapterMachinery.ts#buildTableXlsx",
-      "subpaths": ["."]
-    },
-    {
       "name": "buildTreeEntries",
       "kind": "runtime",
       "module": "tree/treeRows.ts",
@@ -2622,6 +2611,39 @@
       "forward": false,
       "deprecated": true,
       "identity": "mainEntryAliases.ts#deferGroupingDropToInner",
+      "subpaths": ["."]
+    },
+    {
+      "name": "deferredExportWriter",
+      "kind": "runtime",
+      "module": "export/deferredWriter.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "export/deferredWriter.ts#deferredExportWriter",
+      "subpaths": ["."]
+    },
+    {
+      "name": "deferredPdfWriter",
+      "kind": "runtime",
+      "module": "export/deferredWriter.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "export/deferredWriter.ts#deferredPdfWriter",
+      "subpaths": ["."]
+    },
+    {
+      "name": "deferredXlsxWriter",
+      "kind": "runtime",
+      "module": "export/deferredWriter.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "export/deferredWriter.ts#deferredXlsxWriter",
       "subpaths": ["."]
     },
     {
@@ -8628,17 +8650,6 @@
       "forward": false,
       "deprecated": true,
       "identity": "mainEntryAliases.ts#writeStoredColumnLayout",
-      "subpaths": ["."]
-    },
-    {
-      "name": "xlsxWriter",
-      "kind": "runtime",
-      "module": "adapterMachinery.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "adapterMachinery.ts#xlsxWriter",
       "subpaths": ["."]
     },
     {
@@ -18594,6 +18605,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "style/cellDisplay.ts#isCurrentMatchCell",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "isDeferredExportWriter",
+      "kind": "runtime",
+      "module": "export/deferredWriter.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "export/deferredWriter.ts#isDeferredExportWriter",
       "subpaths": ["./binding"]
     },
     {
@@ -29574,6 +29596,17 @@
       ]
     },
     {
+      "name": "DeferredExportWriter",
+      "kind": "type",
+      "module": "export/deferredWriter.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "export/deferredWriter.ts#DeferredExportWriter",
+      "subpaths": [".", "./binding", "./editing", "./engine", "./query"]
+    },
+    {
       "name": "DirtyCellSnapshot",
       "kind": "type",
       "module": "editing/dirtyCells.ts",
@@ -30188,6 +30221,17 @@
         "./query",
         "./xlsx"
       ]
+    },
+    {
+      "name": "ExportWriterOption",
+      "kind": "type",
+      "module": "export/deferredWriter.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "export/deferredWriter.ts#ExportWriterOption",
+      "subpaths": [".", "./binding", "./editing", "./engine", "./query"]
     },
     {
       "name": "ExtraFilters",
@@ -32283,7 +32327,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "export/pdf.ts#PdfWriterOptions",
-      "subpaths": ["./pdf"]
+      "subpaths": [".", "./pdf"]
     },
     {
       "name": "PrintLayoutOptions",
@@ -32305,7 +32349,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "export/printLayout.ts#PrintPageBreak",
-      "subpaths": ["./pdf"]
+      "subpaths": [".", "./pdf"]
     },
     {
       "name": "PrintPageSize",
@@ -32316,7 +32360,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "export/printLayout.ts#PrintPageSize",
-      "subpaths": ["./pdf"]
+      "subpaths": [".", "./pdf"]
     },
     {
       "name": "assignField",

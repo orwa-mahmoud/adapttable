@@ -189,6 +189,10 @@ export type {
   TableSnapshot,
 } from "./engine/createTableEngine";
 export type {
+  DeferredExportWriter,
+  ExportWriterOption,
+} from "./export/deferredWriter";
+export type {
   ExportPayload,
   ExportRowMeta,
   ExportRowRole,

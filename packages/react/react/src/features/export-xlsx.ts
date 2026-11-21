@@ -1,8 +1,7 @@
 /**
  * XLSX export — the export feature with core's XLSX writer.
  */
-import type { ExportCsvOptions } from "@adapttable/core";
-import { xlsxWriter } from "@adapttable/core/xlsx";
+import { deferredXlsxWriter, type ExportCsvOptions } from "@adapttable/core";
 
 import { exportCsv } from "./export-csv";
 import type { TableFeature } from "./tableFeature";
@@ -28,6 +27,6 @@ export function exportXlsx<TRow>(
   return exportCsv<TRow>(
     options === false
       ? false
-      : { ...(options === true ? {} : options), writer: xlsxWriter() }
+      : { ...(options === true ? {} : options), writer: deferredXlsxWriter() }
   );
 }

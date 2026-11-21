@@ -792,7 +792,6 @@ export {
   applyCollapsedColumnGroups,
   type BodyCell,
   bodyCellsHaveRowSpan,
-  buildTableXlsx,
   cellsForRow,
   cellSpanMark,
   COLUMN_GROUP_ID_SEP,
@@ -851,12 +850,20 @@ export {
   showAllColumns,
   toggleCollapsedColumnGroup,
   unpinAllColumns,
-  xlsxWriter,
 } from "./adapterMachinery";
 export type {
   EditCommitSnapshot,
   EditCommitValidationFailure,
   EditCommitValidationOptions,
 } from "./editing/editCommitLifecycle";
+export {
+  type DeferredExportWriter,
+  deferredExportWriter,
+  deferredPdfWriter,
+  deferredXlsxWriter,
+  type ExportWriterOption,
+} from "./export/deferredWriter";
 export * from "./mainEntryAliases";
 export * from "./panelFeatureExports";
+export type { PdfWriterOptions } from "./export/pdf";
+export type { PrintPageBreak, PrintPageSize } from "./export/printLayout";

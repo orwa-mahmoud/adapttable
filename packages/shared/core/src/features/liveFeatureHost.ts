@@ -10,7 +10,7 @@
 import type { Command } from "../actions/commandRegistry";
 import type { Aggregator } from "../contracts/columns";
 import type { CustomCellEditorRender } from "../editing/cellEditing";
-import type { ExportWriter } from "../export/exportWriter";
+import type { ExportWriterOption } from "../export/deferredWriter";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
 import type {
   ColumnMenuActionFactory,
@@ -45,7 +45,7 @@ export class LiveFeatureHost<
   /** Aggregators, by aggregate name. */
   readonly aggregators = new Map<string, Aggregator>();
   /** Export writers features added. */
-  readonly writers: ExportWriter[] = [];
+  readonly writers: ExportWriterOption[] = [];
   /** Factories that add entries to the column menu. */
   readonly columnMenuActions: ColumnMenuActionFactory<TRow>[] = [];
   /** Side-panel tabs features added. */
@@ -151,7 +151,7 @@ export class LiveFeatureHost<
     this.aggregators.set(name, aggregator);
   }
   /** Register an export writer. */
-  registerWriter(writer: ExportWriter): void {
+  registerWriter(writer: ExportWriterOption): void {
     this.writers.push(writer);
   }
   /** Append entries to the column menu. */

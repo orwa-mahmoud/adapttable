@@ -1,4 +1,4 @@
-import { xlsxWriter } from "@adapttable/core/xlsx";
+import { deferredXlsxWriter } from "@adapttable/core";
 import { Suspense } from "react";
 
 import { DemoScenarioProvider } from "./Demo";
@@ -9,7 +9,7 @@ import { Columns, Keyboard, Pin, Resize } from "./sectionIcons";
 
 const EXPORT_RANGE_AS_XLSX = {
   scope: "range",
-  writer: xlsxWriter({ sheetName: "People" }),
+  writer: deferredXlsxWriter({ sheetName: "People" }),
   filename: "people.xlsx",
 } as const;
 

@@ -11,6 +11,7 @@ import type { FeatureHostState } from "../features/currentHost";
 import type { TableSource } from "../source/TableSource";
 import { devWarn } from "../utils/devWarn";
 import { csvWriter } from "./csvWriter";
+import { isDeferredExportWriter } from "./deferredWriter";
 import {
   exportAllFallsBackToPage,
   exportAllQueryOf,
@@ -175,6 +176,9 @@ export function makeExportCsvHandler<TRow>(
   if (serverAll) {
     return async () => {
       const rows = await fetchAllExportRows(source, serverAll);
+      const built = isDeferredExportWriter(writer)
+        ? await writer.load()
+        : writer;
       downloadTableCsv({
         source: { ...source, allFilteredRows: rows },
         columns,
@@ -183,7 +187,7 @@ export function makeExportCsvHandler<TRow>(
         columnScope: options.columns,
         escapeFormulas: options.escapeFormulas,
         context,
-        writer,
+        writer: built,
         onBeforeExport: options.onBeforeExport,
         onAfterExport: options.onAfterExport,
       });
@@ -202,7 +206,7 @@ export function makeExportCsvHandler<TRow>(
     };
   }
 
-  return () =>
+  const download = (built: ExportWriter): void => {
     downloadTableCsv({
       source,
       columns,
@@ -211,10 +215,22 @@ export function makeExportCsvHandler<TRow>(
       columnScope: options.columns,
       escapeFormulas: options.escapeFormulas,
       context,
-      writer,
+      writer: built,
       onBeforeExport: options.onBeforeExport,
       onAfterExport: options.onAfterExport,
     });
+  };
+  // A writer that loads on demand makes the run asynchronous: the export
+  // waits for the builder, and a load that fails is a failed run, reported
+  // by the export controller without a download or `onAfterExport`.
+  if (isDeferredExportWriter(writer)) {
+    return async () => {
+      download(await writer.load());
+    };
+  }
+  return () => {
+    download(writer);
+  };
 }
 
 export { exportableColumns, resolveExportColumns } from "./exportRows";

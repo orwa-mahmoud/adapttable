@@ -1,6 +1,5 @@
 import type { AdaptTableFeature } from "@adapttable/angular";
-import type { ExportCsvOptions } from "@adapttable/core";
-import { xlsxWriter } from "@adapttable/core/xlsx";
+import { deferredXlsxWriter, type ExportCsvOptions } from "@adapttable/core";
 
 import { exportWith } from "./exportWith";
 
@@ -15,5 +14,5 @@ import { exportWith } from "./exportWith";
 export function exportXlsx<TRow>(
   options: boolean | Omit<ExportCsvOptions<TRow>, "writer"> = true
 ): AdaptTableFeature {
-  return exportWith(options, xlsxWriter());
+  return exportWith(options, deferredXlsxWriter());
 }

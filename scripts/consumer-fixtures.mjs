@@ -140,16 +140,19 @@ function adapterOf(kit) {
 const ROOT_CORE_ENGINES = [
   "createTableEngine",
   "buildExportTable",
-  "xlsxWriter",
   "parseFilterTree",
 ];
 
 /** Engines only their own entries serve (`/pivot`, `/formula`). */
 const SPECIALTY_CORE_ENGINES = ["PIVOT_BLANK", "parseFormula"];
 
+// The Excel writer is reachable from the main entry only lazily, through
+// `deferredXlsxWriter`, so it is absent from a small graph but not from the
+// whole surface.
 const UNRELATED_CORE_ENGINES = [
   ...ROOT_CORE_ENGINES,
   ...SPECIALTY_CORE_ENGINES,
+  "xlsxWriter",
 ];
 
 /**

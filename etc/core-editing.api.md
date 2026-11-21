@@ -755,6 +755,13 @@ export function defaultPendingRows(count: number): string;
 export function defaultSaveErrorMessage(error: unknown): string;
 
 // @public
+export interface DeferredExportWriter {
+    readonly extension: string;
+    readonly load: () => Promise<ExportWriter>;
+    readonly preload: () => () => void;
+}
+
+// @public
 export function dirtyCellKey(rowId: string, columnKey: string): string;
 
 // @public
@@ -1259,6 +1266,9 @@ export interface ExportWriter {
 }
 
 // @public
+export type ExportWriterOption = ExportWriter | DeferredExportWriter;
+
+// @public
 export type ExtraFilters = Record<string, FilterValue>;
 
 // @public
@@ -1284,7 +1294,7 @@ export interface FeatureHostState<TRow = unknown> {
     readonly filterExtends: readonly FilterTypeExtend[];
     readonly filterTypes: readonly FilterTypeSpec[];
     readonly panels: readonly SidePanelEntry[];
-    readonly writers: readonly ExportWriter[];
+    readonly writers: readonly ExportWriterOption[];
 }
 
 // @public

@@ -112,7 +112,14 @@ describe("@adapttable/core/binding", () => {
     for (const name of ["columnGroupId", "insertExtraRows"]) {
       expect(Reflect.get(main, name)).toBe(Reflect.get(binding, name));
     }
-    expect(Reflect.get(main, "xlsxWriter")).toBe(xlsx.xlsxWriter);
+  });
+
+  it("serves the Excel writer from its own entry only", () => {
+    // The main entry must not reach the workbook code: an export that loads
+    // the writer on demand would otherwise ship it with every table.
+    expect(typeof xlsx.xlsxWriter).toBe("function");
+    expect("xlsxWriter" in main).toBe(false);
+    expect("buildTableXlsx" in main).toBe(false);
   });
 });
 

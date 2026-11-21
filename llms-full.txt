@@ -18863,6 +18863,18 @@ emptied, `exportViewFromChrome` picks which model is showing, and
 `summaryExportValues` turns a `summaryRow` into file values. See
 [customization](./customization.md#spreadsheet-xlsx-export).
 
+**Writers that load on demand.** A `DeferredExportWriter` names its format at
+once and loads its builder on the first export: `load()` resolves the
+`ExportWriter`, shares a load in flight and tries again after one that
+failed, and `preload()` starts the load when the browser is idle. The
+`writer` option takes either (`ExportWriterOption`); `isDeferredExportWriter`
+tells them apart. `deferredExportWriter(extension, loader)` builds one, and
+`deferredXlsxWriter` / `deferredPdfWriter` are core's Excel and PDF writers
+loaded that way — the bindings' `exportXlsx` and `exportPdf` features use
+them and start the preload once the table is mounted. A load that fails is a
+failed export: no download, no `onAfterExport`, and the next export loads
+again.
+
 **PDF export and print layout.** `@adapttable/core/pdf` adds `pdfWriter` for
 the export button and `buildTablePdf` for a host assembling rows by hand.
 Print is a different verb: `openPrintLayout` (an `ExportTable`) and
@@ -22374,13 +22386,13 @@ React and the UI kit external because your app already ships those):
 | What you import                            | min+gzip  |
 | ------------------------------------------ | --------- |
 | `useFrontendData` + `useDataTable` (react) | ~20 kB    |
-| every core export                          | ~98 kB    |
+| every core export                          | ~97 kB    |
 | `DataTable` from an adapter                | ~64–73 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. The every-export
 row is the whole public surface imported at once, measured 2026-11-21 at
-98.2 KiB. It holds the deprecated aliases the main
+96.9 KiB. It holds the deprecated aliases the main
 entry keeps for names that moved to `@adapttable/core/binding`, the composed
 session with one committed state and a staged row-model evaluator, and the
 shell operations, plus the snapshot guard, the

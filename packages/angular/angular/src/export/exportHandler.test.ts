@@ -1,10 +1,12 @@
 /** Exports preserve selected data, column scope and current source capabilities. */
 import {
+  csvWriter,
+  deferredExportWriter,
   type ExportCsvOptions,
   sourceCapabilities,
   type TableSource,
 } from "@adapttable/core";
-import { defaultLabels } from "@adapttable/core/binding";
+import { defaultLabels, type ExportWriter } from "@adapttable/core/binding";
 import { signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -230,5 +232,46 @@ describe("export context", () => {
     expect(await download(result)).toBe(
       "Name,Country\r\nDubai,UAE\r\nAmman,Jordan"
     );
+  });
+});
+
+describe("an export writer that loads on demand", () => {
+  it("waits for a writer still loading, then downloads", async () => {
+    let finish: ((writer: ExportWriter) => void) | undefined;
+    const result = mount({
+      writer: deferredExportWriter(
+        "csv",
+        () =>
+          new Promise<ExportWriter>((resolve) => {
+            finish = resolve;
+          })
+      ),
+    });
+    result.state().onExportCsv!();
+    expect(result.files).toHaveLength(0);
+    finish?.(csvWriter);
+    await vi.waitFor(() => expect(result.files).toHaveLength(1));
+    await vi.waitFor(() => expect(result.state().exportStatus).toBe("done"));
+  });
+
+  it("reports a writer that cannot load and loads it again on the next export", async () => {
+    const load = vi
+      .fn<() => Promise<ExportWriter>>()
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValue(csvWriter);
+    const result = mount({ writer: deferredExportWriter("csv", load) });
+    result.state().onExportCsv!();
+    await vi.waitFor(() => expect(result.state().exportStatus).toBe("failed"));
+    expect(result.state().exportAnnouncement).toContain("Export failed");
+    expect(result.state().exportDisabled).toBe(false);
+    expect(result.files).toHaveLength(0);
+    expect(await download(result)).toBe("Name\r\nDubai\r\nAmman");
+    expect(load).toHaveBeenCalledTimes(2);
+  });
+
+  it("downloads at once with a writer that builds at once", () => {
+    const result = mount({ writer: csvWriter });
+    result.state().onExportCsv!();
+    expect(result.files).toHaveLength(1);
   });
 });

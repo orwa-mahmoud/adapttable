@@ -26,7 +26,7 @@ import { columnResizeHandleProps } from "../columns/columnResize";
 import type { BatchEditHandler } from "../editing/batchEditing";
 import type { CellEditHandler, EditHistoryInput } from "../editing/editHistory";
 import type { RowEditHandler } from "../editing/rowEditing";
-import type { ExportWriter } from "../export/exportWriter";
+import type { ExportWriterOption } from "../export/deferredWriter";
 import type { FilterDef } from "../filters/filterDefs";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
 import { ACTION_LABELS } from "../labelGroups/actionLabels";
@@ -72,7 +72,7 @@ export interface CoreFeatureRegistrar<
   /** Register a filter type for this table. */
   registerFilterType(spec: FilterTypeSpec): void;
   /** Register an export writer. */
-  registerWriter(writer: ExportWriter): void;
+  registerWriter(writer: ExportWriterOption): void;
   /** Register a side-panel tab. */
   registerPanel(panel: TPanel): void;
   /** Register a command-palette command. */
@@ -106,7 +106,7 @@ export interface CoreFeature<
   THost = CoreFeatureRegistrar,
 > extends PatchFeature<TRow> {
   /** Hand the options' registrations to the live host. */
-  setup?(host: THost): void;
+  setup?(host: THost): void | (() => void);
 }
 
 function define<TRow>(
@@ -540,7 +540,7 @@ export function coreDirtyIndicators(): CoreFeature {
  * @public
  */
 export function coreExportCsv<TRow>(
-  options: boolean | { readonly writer?: ExportWriter } = true
+  options: boolean | { readonly writer?: ExportWriterOption } = true
 ): CoreFeature<TRow> {
   const writer = typeof options === "object" ? options.writer : undefined;
   const feature = define<TRow>(
@@ -549,7 +549,15 @@ export function coreExportCsv<TRow>(
     EXPORT_LABELS
   );
   if (!writer) return feature;
-  return { ...feature, setup: (host) => host.registerWriter(writer) };
+  return {
+    ...feature,
+    setup(host) {
+      host.registerWriter(writer);
+      // A writer that loads on demand starts loading once the table is up,
+      // so an export after the connection drops still has its builder.
+      return "preload" in writer ? writer.preload() : undefined;
+    },
+  };
 }
 
 /**

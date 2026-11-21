@@ -15,7 +15,6 @@ import * as extraRows from "./rows/extraRows";
 import * as pinnedRowChrome from "./rows/pinnedRowChrome";
 import * as rowPresentation from "./rows/rowPresentation";
 import * as virtualTableModel from "./virtual/virtualTableModel";
-import * as xlsx from "./xlsx";
 
 /**
  * The adapter helper of the same name from `@adapttable/core/binding`.
@@ -501,17 +500,3 @@ export const resolveRowHeight: typeof rowPresentation.resolveRowHeight =
  */
 export const rowSourceIndex: typeof virtualTableModel.rowSourceIndex =
   virtualTableModel.rowSourceIndex;
-/**
- * The workbook writer of the same name from `@adapttable/core/xlsx`.
- *
- * @deprecated Import from `@adapttable/core/xlsx`.
- * @public
- */
-export const buildTableXlsx: typeof xlsx.buildTableXlsx = xlsx.buildTableXlsx;
-/**
- * The workbook writer of the same name from `@adapttable/core/xlsx`.
- *
- * @deprecated Import from `@adapttable/core/xlsx`.
- * @public
- */
-export const xlsxWriter: typeof xlsx.xlsxWriter = xlsx.xlsxWriter;

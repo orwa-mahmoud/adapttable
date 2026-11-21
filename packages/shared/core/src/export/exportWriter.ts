@@ -264,7 +264,9 @@ export function buildExportTable<TRow>(
 export { csvWriter } from "./csvWriter";
 
 /** `"export.xlsx"` — the name when the caller did not choose one. */
-export function defaultExportFilename(writer: ExportWriter): string {
+export function defaultExportFilename(
+  writer: Pick<ExportWriter, "extension">
+): string {
   return `export.${writer.extension}`;
 }
 

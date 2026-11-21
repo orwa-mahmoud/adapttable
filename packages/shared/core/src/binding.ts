@@ -653,6 +653,11 @@ export type {
   TableSnapshot,
 } from "./engine/createTableEngine";
 export type { NeutralTable } from "./engine/neutralTable";
+export {
+  type DeferredExportWriter,
+  type ExportWriterOption,
+  isDeferredExportWriter,
+} from "./export/deferredWriter";
 export type {
   ExportProgressState,
   ExportStatus,

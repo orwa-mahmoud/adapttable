@@ -731,18 +731,6 @@ export const buildTableQuery: typeof buildTableQuery_2;
 // @public
 function buildTableQuery_2(input: TableQueryInput_2): TableQuery;
 
-// @public @deprecated
-export const buildTableXlsx: typeof buildTableXlsx_2;
-
-// @public
-function buildTableXlsx_2<TRow>(options: {
-    rows: readonly TRow[];
-    columns: readonly ColumnMetadata<TRow>[];
-    sheetName?: string;
-    view?: readonly ExportViewEntry<TRow>[];
-    summary?: Readonly<Partial<Record<string, unknown>>>;
-}): Uint8Array<ArrayBuffer>;
-
 // @public
 export function buildTreeEntries<TRow>(options: BuildTreeEntriesOptions<TRow>): TreeEntry<TRow>[];
 
@@ -3099,6 +3087,24 @@ function deferGroupingDropToInner_2<TEvent extends {
 }>(props: GroupingDropHandlers_2<TEvent>): GroupingDropHandlers_2<TEvent>;
 
 // @public
+export interface DeferredExportWriter {
+    readonly extension: string;
+    readonly load: () => Promise<ExportWriter>;
+    readonly preload: () => () => void;
+}
+
+// @public
+export function deferredExportWriter(extension: string, loader: () => Promise<ExportWriter>): DeferredExportWriter;
+
+// @public
+export function deferredPdfWriter(options?: PdfWriterOptions): DeferredExportWriter;
+
+// @public
+export function deferredXlsxWriter(options?: {
+    sheetName?: string;
+}): DeferredExportWriter;
+
+// @public
 export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
 
 // @public
@@ -3918,7 +3924,7 @@ export interface ExportCsvOptions<TRow = unknown> {
     onExportAll?: (query: ExportAllQuery, controls: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>;
     request?: (info: ExportRequest<TRow>) => void | Promise<void>;
     scope?: ExportRowScope;
-    writer?: ExportWriter;
+    writer?: ExportWriterOption;
 }
 
 // @public
@@ -4104,6 +4110,9 @@ export interface ExportWriter {
 }
 
 // @public
+export type ExportWriterOption = ExportWriter | DeferredExportWriter;
+
+// @public
 export function extendCellRange(range: CellRange | null, head: GridCell, fallbackAnchor: GridCell): CellRange;
 
 // @public @deprecated
@@ -4250,7 +4259,7 @@ export interface FeatureHostState<TRow = unknown> {
     readonly filterExtends: readonly FilterTypeExtend[];
     readonly filterTypes: readonly FilterTypeSpec[];
     readonly panels: readonly SidePanelEntry[];
-    readonly writers: readonly ExportWriter[];
+    readonly writers: readonly ExportWriterOption[];
 }
 
 // @public
@@ -7200,6 +7209,15 @@ export const patchTouchedKeys: typeof patchTouchedKeys_2;
 function patchTouchedKeys_2(event: RowPatchEvent<unknown>): readonly string[] | null;
 
 // @public
+export interface PdfWriterOptions {
+    direction?: "ltr" | "rtl";
+    font?: Uint8Array | ArrayBuffer;
+    pageBreak?: PrintPageBreak;
+    pageSize?: PrintPageSize;
+    title?: string;
+}
+
+// @public
 export const PIN_BOTTOM_ACTION_KEY = "adapttable:pin-row-bottom";
 
 // @public
@@ -7561,6 +7579,12 @@ interface PointerReleaseTarget_2 {
 export interface PrintContribution {
     readonly onPrint: () => void;
 }
+
+// @public
+export type PrintPageBreak = "auto" | "group";
+
+// @public
+export type PrintPageSize = "a4" | "a4-landscape" | "letter" | "letter-landscape";
 
 // @public @deprecated
 export const projectedGroupingSource: typeof projectedGroupingSource_2;
@@ -11454,14 +11478,6 @@ export const writeStoredColumnLayout: typeof writeStoredColumnLayout_2;
 
 // @public
 function writeStoredColumnLayout_2(storage: LayoutStorage | undefined, storageKey: string, next: ColumnLayoutState, fallback: ColumnLayoutState): void;
-
-// @public @deprecated
-export const xlsxWriter: typeof xlsxWriter_2;
-
-// @public
-function xlsxWriter_2(options?: {
-    sheetName?: string;
-}): ExportWriter;
 
 // (No @packageDocumentation comment for this package)
 
