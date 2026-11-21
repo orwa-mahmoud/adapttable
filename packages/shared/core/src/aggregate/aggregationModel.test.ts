@@ -20,7 +20,6 @@ import {
   addAggregation,
   aggregationModel,
   columnAggregationSignature,
-  computedAggregateKeys,
   declaredByDeveloper,
   effectiveAggregateOps,
   initialOperation,
@@ -29,6 +28,7 @@ import {
   restoreAggregationDefaults,
   serializeAggregationDerivedKey,
 } from "./aggregationModel";
+import { computedAggregateKeys } from "./computedAggregateKeys";
 
 interface Row {
   budget: number;

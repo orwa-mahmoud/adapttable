@@ -11,7 +11,7 @@
  * directive, a signal graph — but the order and the data passed between
  * stages are the same everywhere, so they live here.
  */
-import { computedAggregateKeys } from "../aggregate/aggregationModel";
+import { computedAggregateKeys } from "../aggregate/computedAggregateKeys";
 import {
   applyColumnOrder,
   type ColumnLayoutContribution,

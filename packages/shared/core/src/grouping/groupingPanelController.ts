@@ -30,7 +30,6 @@ import {
   restoreAggregationDefaults,
 } from "../aggregate/aggregationModel";
 import type { TableRuntime } from "../features/tableRuntime";
-import { panelStateOf } from "../layout/tableChromeState";
 import { isRtlElement } from "../layout/writingDirection";
 import type { GroupAggregateOverride } from "./groupAggregateOverrides";
 import {
@@ -49,6 +48,7 @@ import {
   moveGroupingKeyBy,
   removeGroupingKey,
 } from "./groupingPanelModel";
+import { panelStateOf } from "./groupingPanelState";
 import { formatGroupBy, parseGroupBy } from "./groupKeys";
 
 export type { GroupingDragEventLike, GroupingKeyEventLike };

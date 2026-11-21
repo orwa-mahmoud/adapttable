@@ -32,6 +32,10 @@ export type {
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "./grouping/groupingPanelModel";
+export type {
+  GroupingPanelSource,
+  GroupingPanelStateInput,
+} from "./grouping/groupingPanelState";
 export {
   formatGroupBy,
   type GroupByInput,
@@ -60,10 +64,6 @@ export {
   type RowGroupRef,
 } from "./grouping/groupRows";
 export { groupSelectionState } from "./grouping/groupSelection";
-export type {
-  GroupingPanelSource,
-  GroupingPanelStateInput,
-} from "./layout/tableChromeState";
 export type { QueryGroupRow } from "./source/queryGroups";
 
 /**

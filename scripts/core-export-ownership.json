@@ -1637,12 +1637,12 @@
     {
       "name": "computedAggregateKeys",
       "kind": "runtime",
-      "module": "aggregate/aggregationModel.ts",
+      "module": "aggregate/computedAggregateKeys.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "aggregate/aggregationModel.ts#computedAggregateKeys",
+      "identity": "aggregate/computedAggregateKeys.ts#computedAggregateKeys",
       "subpaths": [".", "./binding"]
     },
     {
@@ -18027,12 +18027,12 @@
     {
       "name": "groupingPanelState",
       "kind": "runtime",
-      "module": "layout/tableChromeState.ts",
+      "module": "grouping/groupingPanelState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/tableChromeState.ts#groupingPanelState",
+      "identity": "grouping/groupingPanelState.ts#groupingPanelState",
       "subpaths": ["./binding"]
     },
     {
@@ -30642,12 +30642,12 @@
     {
       "name": "GroupingPanelSource",
       "kind": "type",
-      "module": "layout/tableChromeState.ts",
+      "module": "grouping/groupingPanelState.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/tableChromeState.ts#GroupingPanelSource",
+      "identity": "grouping/groupingPanelState.ts#GroupingPanelSource",
       "subpaths": [
         ".",
         "./binding",
@@ -30678,12 +30678,12 @@
     {
       "name": "GroupingPanelStateInput",
       "kind": "type",
-      "module": "layout/tableChromeState.ts",
+      "module": "grouping/groupingPanelState.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/tableChromeState.ts#GroupingPanelStateInput",
+      "identity": "grouping/groupingPanelState.ts#GroupingPanelStateInput",
       "subpaths": [
         ".",
         "./binding",

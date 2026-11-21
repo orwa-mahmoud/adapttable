@@ -16,10 +16,10 @@ import {
 import {
   type AggregationModel,
   aggregationModel,
-  computedAggregateKeys,
   effectiveAggregateOps,
   serializeAggregationDerivedKey,
 } from "../aggregate/aggregationModel";
+import { computedAggregateKeys } from "../aggregate/computedAggregateKeys";
 import type { ColumnMetadata } from "../contracts/columns";
 import {
   type ExtraEntry,

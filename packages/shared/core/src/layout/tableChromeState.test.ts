@@ -9,6 +9,7 @@ import { describe, expect, it, vi } from "vitest";
 import { REORDER_COLUMN_KEY } from "../columns/columnMenuModel";
 import type { ColumnMetadata } from "../contracts/columns";
 import type { GroupingPanelInteractions } from "../grouping/groupingPanelModel";
+import { groupingPanelState } from "../grouping/groupingPanelState";
 import { defaultLabels } from "../labels";
 import {
   applyFeatureNoticesAttribute,
@@ -23,7 +24,6 @@ import {
   clearSearchAndFilters,
   featureNoticesAttribute,
   FilterTriggerToggleState,
-  groupingPanelState,
   rowReorderEnablement,
   scrollResetKeys,
   selectionObserverIds,

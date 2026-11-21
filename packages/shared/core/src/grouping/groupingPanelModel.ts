@@ -1,10 +1,10 @@
 import type { DeclaredAggregates } from "../aggregate/aggregate";
 import type { AggregationModel } from "../aggregate/aggregationModel";
-import type { GroupingPanelStateInput } from "../layout/tableChromeState";
 import type {
   GroupAggregateOverride,
   GroupAggregateOverrides,
 } from "./groupAggregateOverrides";
+import type { GroupingPanelStateInput } from "./groupingPanelState";
 
 /** Native drag payload used only by the optional grouping-panel feature. */
 export const GROUPING_COLUMN_DND_MIME =

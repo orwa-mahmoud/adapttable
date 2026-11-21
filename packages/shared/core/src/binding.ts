@@ -822,6 +822,11 @@ export type {
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "./grouping/groupingPanelModel";
+export {
+  type GroupingPanelSource,
+  groupingPanelState,
+  type GroupingPanelStateInput,
+} from "./grouping/groupingPanelState";
 export type { GroupAggregateOps } from "./grouping/groupRowLayout";
 export type {
   GroupAggregatesFn,
@@ -922,9 +927,6 @@ export {
   clearSearchAndFilters,
   featureNoticesAttribute,
   FilterTriggerToggleState,
-  type GroupingPanelSource,
-  groupingPanelState,
-  type GroupingPanelStateInput,
   rowReorderEnablement,
   scrollResetKeys,
   selectionObserverIds,
@@ -2102,7 +2104,7 @@ export type {
 export type { GroupAggregatesMapper } from "./aggregate/aggregate";
 export { aggregate, declaredAggregates } from "./aggregate/aggregate";
 export type { AggregationModelInput } from "./aggregate/aggregationModel";
-export { computedAggregateKeys } from "./aggregate/aggregationModel";
+export { computedAggregateKeys } from "./aggregate/computedAggregateKeys";
 export { autoSizeColumns } from "./columns/autoSizeColumns";
 export type { ColumnDragRowAttrs } from "./columns/columnReorderModel";
 export type { ColumnResizeHandleOptions } from "./columns/columnResize";

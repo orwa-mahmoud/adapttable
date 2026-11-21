@@ -127,7 +127,6 @@ export {
   aggregationModel,
   type AggregationModelInput,
   type AggregationOrigin,
-  computedAggregateKeys,
   type EffectiveAggregation,
   type EffectiveAggregationInput,
   type EffectiveAggregationKind,
@@ -135,6 +134,7 @@ export {
   restoreAggregationDefaults,
   serializeAggregationDerivedKey,
 } from "./aggregate/aggregationModel";
+export { computedAggregateKeys } from "./aggregate/computedAggregateKeys";
 export {
   type ApprovalArgumentPair,
   approvalArgumentPairs,
@@ -680,6 +680,10 @@ export type {
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "./grouping/groupingPanelModel";
+export type {
+  GroupingPanelSource,
+  GroupingPanelStateInput,
+} from "./grouping/groupingPanelState";
 export { type GroupByInput } from "./grouping/groupKeys";
 export {
   type GroupAggregateOps,
@@ -695,10 +699,6 @@ export {
   type RowGroupLevel,
   type RowGroupRef,
 } from "./grouping/groupRows";
-export type {
-  GroupingPanelSource,
-  GroupingPanelStateInput,
-} from "./layout/tableChromeState";
 export type { SelectionContribution } from "./selection/selectionBindingState";
 export { type QueryGroupRow } from "./source/queryGroups";
 /* ── Export (CSV, and any format a writer adds) ────────────────────── */

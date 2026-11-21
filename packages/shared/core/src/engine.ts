@@ -151,6 +151,10 @@ export type {
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "./grouping/groupingPanelModel";
+export type {
+  GroupingPanelSource,
+  GroupingPanelStateInput,
+} from "./grouping/groupingPanelState";
 export type { GroupAggregateOps } from "./grouping/groupRowLayout";
 export type {
   GroupAggregatesFn,
@@ -158,10 +162,6 @@ export type {
   GroupPaging,
   GroupSort,
 } from "./grouping/groupRows";
-export type {
-  GroupingPanelSource,
-  GroupingPanelStateInput,
-} from "./layout/tableChromeState";
 export type { IncrementalViewConfig } from "./rows/incremental";
 export type { SortLevel } from "./sort/compare";
 export type {
