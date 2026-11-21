@@ -469,7 +469,6 @@ export const ko: Required<TableLabels> = {
   noticeVirtualizePaged:
     "가상화는 꺼져 있습니다. 이 페이지 테이블은 한 번에 한 페이지만 보여 줍니다.",
   noticePinNested: "그룹화 또는 트리가 켜져 있으면 행 고정은 꺼집니다.",
-  noticeReorderNested: "그룹화 또는 트리가 켜져 있으면 행 재배치는 꺼집니다.",
   noticeGroupingUnavailable:
     "그룹화가 꺼져 있습니다. 이 소스는 그룹화할 수 없습니다.",
   noticeExportAllPage:

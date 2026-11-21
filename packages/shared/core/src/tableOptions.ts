@@ -152,13 +152,6 @@ export interface TableOptions<TRow, TNode = unknown> {
    * in infinite mode; on a paged desktop table it is inert.
    */
   paginationMode?: PaginationMode;
-  /**
-   * Accepted and ignored.
-   *
-   * @deprecated A card shows every column without `hideOnMobile`, so
-   * `hideOnMobile` decides what a card shows. Removed in v4.
-   */
-  mobileIdentityColumns?: number;
   /** Hover-prefetch callback fired on desktop row mouse-enter. */
   prefetch?: (row: TRow) => void;
   /**

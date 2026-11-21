@@ -466,7 +466,6 @@ export const fa: Required<TableLabels> = {
   noticeVirtualizePaged:
     "مجازی‌سازی خاموش است — این جدول صفحه‌بندی‌شده هر بار یک صفحه نشان می‌دهد.",
   noticePinNested: "سنجاق‌کردن ردیف‌ها هنگام گروه‌بندی یا درخت خاموش است.",
-  noticeReorderNested: "جابه‌جایی ردیف‌ها هنگام گروه‌بندی یا درخت خاموش است.",
   noticeGroupingUnavailable:
     "گروه‌بندی خاموش است — این منبع نمی‌تواند گروه‌بندی کند.",
   noticeExportAllPage:

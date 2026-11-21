@@ -483,8 +483,6 @@ export const fr: Required<TableLabels> = {
     "La virtualisation est inactive — ce tableau paginé affiche une page à la fois.",
   noticePinNested:
     "L’épinglage des lignes est inactif tant que le regroupement ou un arbre est actif.",
-  noticeReorderNested:
-    "Le réordonnancement des lignes est inactif tant que le regroupement ou un arbre est actif.",
   noticeGroupingUnavailable:
     "Le groupement est désactivé — cette source ne peut pas grouper.",
   noticeExportAllPage:

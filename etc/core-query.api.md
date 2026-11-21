@@ -1202,8 +1202,6 @@ export interface TableLabels {
     noticeExportAllPage?: string;
     noticeGroupingUnavailable?: string;
     noticePinNested?: string;
-    // @deprecated
-    noticeReorderNested?: string;
     noticeVirtualizePaged?: string;
     opAfter?: string;
     opAtLeast?: string;

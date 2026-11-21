@@ -469,8 +469,6 @@ export const cs: Required<TableLabels> = {
   noticeVirtualizePaged:
     "Virtualizace je vypnutá: tato stránkovaná tabulka zobrazuje po jedné stránce.",
   noticePinNested: "Připínání řádků je vypnuté při seskupení nebo stromu.",
-  noticeReorderNested:
-    "Změna pořadí řádků je vypnutá při seskupení nebo stromu.",
   noticeGroupingUnavailable:
     "Seskupení je vypnuté: tento zdroj seskupení nepodporuje.",
   noticeExportAllPage:

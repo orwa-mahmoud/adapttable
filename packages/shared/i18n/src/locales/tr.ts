@@ -472,7 +472,6 @@ export const tr: Required<TableLabels> = {
   noticeVirtualizePaged:
     "Sanallaştırma kapalı — bu sayfalanmış tablo her seferinde bir sayfa gösterir.",
   noticePinNested: "Gruplama veya ağaç açıkken satır sabitleme kapalıdır.",
-  noticeReorderNested: "Gruplama veya ağaç açıkken satır sıralama kapalıdır.",
   noticeGroupingUnavailable: "Gruplama kapalı — bu kaynak gruplayamaz.",
   noticeExportAllPage:
     "Tümünü dışa aktarma kapalı — bu kaynak her seferinde tek sayfa verir.",

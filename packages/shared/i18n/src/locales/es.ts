@@ -475,8 +475,6 @@ export const es: Required<TableLabels> = {
     "La virtualización está desactivada: esta tabla paginada muestra una página cada vez.",
   noticePinNested:
     "El anclaje de filas está desactivado mientras hay agrupación o un árbol.",
-  noticeReorderNested:
-    "El reorden de filas está desactivado mientras hay agrupación o un árbol.",
   noticeGroupingUnavailable:
     "La agrupación está desactivada: esta fuente no puede agrupar.",
   noticeExportAllPage:

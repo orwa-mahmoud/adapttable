@@ -1135,8 +1135,6 @@ export interface UseDataTableOptions<TRow> {
     forceMobile?: boolean;
     labels?: TableLabels;
     locale?: string;
-    // @deprecated
-    mobileIdentityColumns?: number;
     multiSort?: boolean;
     onSelectedIdsChange?: (selectedIds: string[]) => void;
     rowKey: (row: TRow) => string;

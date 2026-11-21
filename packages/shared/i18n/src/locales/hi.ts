@@ -471,8 +471,6 @@ export const hi: Required<TableLabels> = {
   noticeVirtualizePaged:
     "वर्चुअलाइज़ेशन बंद है — यह पृष्ठांकित तालिका एक समय में एक पृष्ठ दिखाती है।",
   noticePinNested: "समूहीकरण या वृक्ष चालू होने पर पंक्ति पिन बंद है।",
-  noticeReorderNested:
-    "समूहीकरण या वृक्ष चालू होने पर पंक्ति क्रम बदलना बंद है।",
   noticeGroupingUnavailable: "समूहन बंद है — यह स्रोत समूहन नहीं कर सकता।",
   noticeExportAllPage:
     "सभी निर्यात बंद है — यह स्रोत एक बार में एक ही पृष्ठ देता है।",

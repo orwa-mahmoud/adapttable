@@ -920,9 +920,7 @@ export {
   renderedRowsOf,
   type RuntimeChromeInput,
   type RuntimeColumn,
-  SHELL_LIVE_STAGE_ORDER,
   type ShellBodyInput,
-  type ShellLiveStageId,
   TableRuntimePublisher,
   tableRuntimeView,
   undoRedoToolbarProps,
@@ -1123,7 +1121,6 @@ export {
   resolveColumnDefaults,
   resolveColumnHeaders,
 } from "./columns/resolveColumns";
-export { sameRows } from "./engine/sameRows";
 export { isRecord } from "./utils/isRecord";
 export { retainItems, sameItems } from "./utils/sameItems";
 

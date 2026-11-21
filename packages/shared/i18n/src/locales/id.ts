@@ -475,8 +475,6 @@ export const id: Required<TableLabels> = {
     "Virtualisasi dinonaktifkan: tabel berhalaman ini menampilkan satu halaman setiap saat.",
   noticePinNested:
     "Sematan baris dinonaktifkan saat ada pengelompokan atau pohon.",
-  noticeReorderNested:
-    "Pengurutan ulang baris dinonaktifkan saat ada pengelompokan atau pohon.",
   noticeGroupingUnavailable:
     "Pengelompokan dinonaktifkan: sumber data ini tidak dapat mengelompokkan.",
   noticeExportAllPage:

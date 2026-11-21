@@ -4972,8 +4972,6 @@ export interface TableLabels {
     noticeExportAllPage?: string;
     noticeGroupingUnavailable?: string;
     noticePinNested?: string;
-    // @deprecated
-    noticeReorderNested?: string;
     noticeVirtualizePaged?: string;
     opAfter?: string;
     opAtLeast?: string;
@@ -5187,8 +5185,6 @@ export interface TableOptions<TRow, TNode = unknown> {
     locale?: string;
     maxHeight?: number;
     mobileBreakpoint?: number;
-    // @deprecated
-    mobileIdentityColumns?: number;
     onCellCut?: (range: CellRange) => void;
     onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
     onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
@@ -5679,9 +5675,6 @@ export interface VirtualTableRow<TRow> {
 
 // @public
 export function visibleColumns<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], layout: TableLayout): TCol[];
-
-// @public @deprecated
-export function visibleColumns<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], layout: TableLayout, mobileIdentityColumns: number): TCol[];
 
 // @public
 export function windowGroupedEntries<TEntry>(entries: readonly TEntry[], indices: readonly number[]): readonly TEntry[];

@@ -459,7 +459,6 @@ export const zhTW: Required<TableLabels> = {
     `已選取第 ${fromRow} 至 ${toRow} 列、第 ${fromColumn} 至 ${toColumn} 欄，共 ${cells} 個儲存格`,
   noticeVirtualizePaged: "虛擬捲動已關閉 — 此分頁表格每次只顯示一頁。",
   noticePinNested: "分組或樹狀結構開啟時，列固定已關閉。",
-  noticeReorderNested: "分組或樹狀結構開啟時，列重排已關閉。",
   noticeGroupingUnavailable: "分組已關閉 — 此資料來源無法分組。",
   noticeExportAllPage: "匯出全部已關閉 — 此資料來源每次僅提供一頁。",
   noticeEditWithoutWriter: "編輯已關閉 — 未接上寫入處理函式。",

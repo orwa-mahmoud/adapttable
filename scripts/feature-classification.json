@@ -1227,7 +1227,7 @@
     ]
   },
   "v4Removals": {
-    "note": "Deprecated in v3 and removed by the v4 major. Each entry is still declared and still works, and carries a @deprecated notice until then; scripts/check-feature-classification.mjs holds each one to that.",
+    "note": "Removed by the v4 major. scripts/check-feature-classification.mjs holds each prop off the public prop surface.",
     "groups": [
       {
         "id": "mobile-identity-columns",
@@ -1239,7 +1239,7 @@
           "@adapttable/react",
           "every @adapttable/<kit>"
         ],
-        "warnedBy": "@deprecated on BaseDataTableProps, the useDataTable option and the visibleColumns overload",
+        "warnedBy": "removed — hideOnMobile decides what a card shows",
         "test": "packages/shared/core/src/columns/visibleColumns.test.ts — \"is every column without hideOnMobile, in declared order\"",
         "props": ["mobileIdentityColumns"]
       }

@@ -478,8 +478,6 @@ export const pl: Required<TableLabels> = {
     "Wirtualizacja jest wyłączona: ta tabela paginowana wyświetla po jednej stronie na raz.",
   noticePinNested:
     "Przypinanie wierszy jest wyłączone podczas grupowania lub drzewa.",
-  noticeReorderNested:
-    "Zmiana kolejności wierszy jest wyłączona podczas grupowania lub drzewa.",
   noticeGroupingUnavailable:
     "Grupowanie jest wyłączone: to źródło nie obsługuje grupowania.",
   noticeExportAllPage:

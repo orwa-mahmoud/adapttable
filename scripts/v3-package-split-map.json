@@ -25395,14 +25395,6 @@
       "behavior": ""
     },
     {
-      "export": "sameRows",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "sanitizeStoredLayout",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -25907,14 +25899,6 @@
       "behavior": ""
     },
     {
-      "export": "SHELL_LIVE_STAGE_ORDER",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "SHELL_OPERATION_OWNERS",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -25924,14 +25908,6 @@
     },
     {
       "export": "ShellBodyInput",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ShellLiveStageId",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",

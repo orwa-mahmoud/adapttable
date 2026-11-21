@@ -77,36 +77,6 @@ export const CHROME_EXTRA_SLOT_ORDER = [
   "editing-live",
 ] as const;
 
-/**
- * The live stages after history, in the order they run. Each reads what
- * the ones before it produced: cell navigation needs find's walk, export
- * and the selection figures need the selected range.
- *
- * @deprecated Each live stage names what it reads and writes with
- * `liveStageKey`, and `liveStagesOf` orders the composed stages.
- * @public
- */
-export const SHELL_LIVE_STAGE_ORDER = [
-  "find-live",
-  "cell-nav-live",
-  "export-live",
-  "fullscreen-live",
-  "selection-stats-live",
-] as const;
-
-/**
- * One of {@link SHELL_LIVE_STAGE_ORDER}.
- *
- * @deprecated See {@link SHELL_LIVE_STAGE_ORDER}.
- * @public
- */
-export type ShellLiveStageId =
-  | "find-live"
-  | "cell-nav-live"
-  | "export-live"
-  | "fullscreen-live"
-  | "selection-stats-live";
-
 /** A column as the runtime projection reads it. */
 export type RuntimeColumn<TRow> = ColumnMetadata<TRow>;
 

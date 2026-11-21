@@ -469,8 +469,6 @@ export const ur: Required<TableLabels> = {
   noticeVirtualizePaged:
     "ورچوئلائزیشن بند ہے — یہ صفحہ بند جدول ایک وقت میں ایک صفحہ دکھاتا ہے۔",
   noticePinNested: "گروپنگ یا درخت آن ہونے پر قطار پن بند ہے۔",
-  noticeReorderNested:
-    "گروپنگ یا درخت آن ہونے پر قطاروں کی ترتیب بدلنا بند ہے۔",
   noticeGroupingUnavailable:
     "گروہ بندی بند ہے — یہ ماخذ گروہ بندی نہیں کر سکتا۔",
   noticeExportAllPage:

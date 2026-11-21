@@ -9073,7 +9073,7 @@ export const ROW_EDIT_ACTIONS: FeatureSlotKey<RowEditActionsProps<unknown>>;
 export const ROW_ID_ATTRIBUTE = "data-row-id";
 
 // @public
-export const ROW_LABELS: Pick<Required<TableLabels>, "duplicateRow" | "deleteRow" | "deleteRowConfirm" | "moveRowUp" | "moveRowDown" | "rowLifted" | "rowMoved" | "rowReorderCancelled" | "rowMoveOptions" | "moveToGroup" | "moveUnder" | "moveToTopLevel" | "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever" | "moveRejectedSorted" | "moveRejectedCycle" | "moveUnavailable" | "rootLevel" | "pinToTop" | "pinToBottom" | "unpinRow" | "noticePinNested" | "noticeReorderNested">;
+export const ROW_LABELS: Pick<Required<TableLabels>, "duplicateRow" | "deleteRow" | "deleteRowConfirm" | "moveRowUp" | "moveRowDown" | "rowLifted" | "rowMoved" | "rowReorderCancelled" | "rowMoveOptions" | "moveToGroup" | "moveUnder" | "moveToTopLevel" | "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever" | "moveRejectedSorted" | "moveRejectedCycle" | "moveUnavailable" | "rootLevel" | "pinToTop" | "pinToBottom" | "unpinRow" | "noticePinNested">;
 
 // @public
 export const ROW_PIN_STORE_OPTIONS: ControllableStoreOptions<RowPinState>;
@@ -9880,9 +9880,6 @@ export function sameItems<T>(a: readonly T[], b: readonly T[]): boolean;
 // @public
 export function sameRowPins(left: RowPinState, right: RowPinState): boolean;
 
-// @public @deprecated
-export function sameRows<TRow>(a: readonly TRow[], b: readonly TRow[]): boolean;
-
 // @public
 export function sanitizeStoredLayout(parsed: unknown): ColumnLayoutState | null;
 
@@ -10319,9 +10316,6 @@ export function shallowEqualByKeys<T>(keys: readonly (keyof T)[], prev: Readonly
 // @public
 export const SHARED_DESKTOP_ROW_KEYS: readonly ["row", "id", "index", "selected", "expanded", "size", "dir", "columns", "columnWidths", "pinSignature", "className", "labels", "hasSelection", "expandable", "showActions", "showReorder", "reorderSignature", "rowPinSignature", "spanSignature", "hasRowClick", "columnSpan", "gridFocus", "treeEntry", "treeColumnKey", "rowActionsLayout", "renderRowActions", "cellSpanAppearance"];
 
-// @public @deprecated
-export const SHELL_LIVE_STAGE_ORDER: readonly ["find-live", "cell-nav-live", "export-live", "fullscreen-live", "selection-stats-live"];
-
 // @public
 export const SHELL_OPERATION_OWNERS: {
     readonly find: "find/findController.ts";
@@ -10364,9 +10358,6 @@ export interface ShellBodyInput<TRef> {
     // (undocumented)
     readonly virtualScrollRef: TRef;
 }
-
-// @public @deprecated
-export type ShellLiveStageId = "find-live" | "cell-nav-live" | "export-live" | "fullscreen-live" | "selection-stats-live";
 
 // @public
 export type ShellOperation = keyof typeof SHELL_OPERATION_OWNERS;
@@ -11601,8 +11592,6 @@ export interface TableLabels {
     noticeExportAllPage?: string;
     noticeGroupingUnavailable?: string;
     noticePinNested?: string;
-    // @deprecated
-    noticeReorderNested?: string;
     noticeVirtualizePaged?: string;
     opAfter?: string;
     opAtLeast?: string;
@@ -12508,9 +12497,6 @@ export interface VirtualTableRow<TRow> {
 
 // @public
 export function visibleColumns<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], layout: TableLayout): TCol[];
-
-// @public @deprecated
-export function visibleColumns<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], layout: TableLayout, mobileIdentityColumns: number): TCol[];
 
 // @public
 export function visibleRowActions<TRow>(actions: readonly RowAction<TRow>[], row: TRow): RowAction<TRow>[];

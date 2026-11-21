@@ -478,8 +478,6 @@ export const it: Required<TableLabels> = {
     "La virtualizzazione è disattivata: questa tabella paginata mostra una pagina alla volta.",
   noticePinNested:
     "Il blocco delle righe è disattivato con raggruppamento o albero attivi.",
-  noticeReorderNested:
-    "Il riordino delle righe è disattivato con raggruppamento o albero attivi.",
   noticeGroupingUnavailable:
     "Il raggruppamento è disattivato: questa origine non può raggruppare.",
   noticeExportAllPage:

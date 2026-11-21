@@ -484,8 +484,6 @@ export const de: Required<TableLabels> = {
     "Virtualisierung ist aus — diese paginierte Tabelle zeigt eine Seite auf einmal.",
   noticePinNested:
     "Zeilenheften ist aus, solange Gruppierung oder ein Baum aktiv ist.",
-  noticeReorderNested:
-    "Zeilenverschieben ist aus, solange Gruppierung oder ein Baum aktiv ist.",
   noticeGroupingUnavailable:
     "Gruppierung ist aus — diese Quelle kann nicht gruppieren.",
   noticeExportAllPage:

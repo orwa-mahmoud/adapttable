@@ -466,7 +466,6 @@ export const ar: Required<TableLabels> = {
   noticeVirtualizePaged:
     "التصفح الافتراضي متوقف — يعرض هذا الجدول المقسّم صفحة واحدة في كل مرة.",
   noticePinNested: "تثبيت الصفوف متوقف أثناء التجميع أو الشجرة.",
-  noticeReorderNested: "إعادة ترتيب الصفوف متوقفة أثناء التجميع أو الشجرة.",
   noticeGroupingUnavailable: "التجميع متوقف — هذا المصدر لا يدعم التجميع.",
   noticeExportAllPage:
     "تصدير الكل متوقف — هذا المصدر يوفّر صفحة واحدة في كل مرة.",

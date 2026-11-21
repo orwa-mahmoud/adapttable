@@ -467,8 +467,6 @@ export const ja: Required<TableLabels> = {
   noticeVirtualizePaged:
     "仮想化はオフです。このページ分割テーブルは一度に1ページだけ表示します。",
   noticePinNested: "グループ化またはツリーの使用中は行の固定はオフです。",
-  noticeReorderNested:
-    "グループ化またはツリーの使用中は行の並べ替えはオフです。",
   noticeGroupingUnavailable:
     "グループ化はオフです。このソースはグループ化できません。",
   noticeExportAllPage:

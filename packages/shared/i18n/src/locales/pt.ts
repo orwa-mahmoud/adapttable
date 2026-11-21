@@ -478,8 +478,6 @@ export const pt: Required<TableLabels> = {
     "A virtualização está desligada — esta tabela paginada mostra uma página de cada vez.",
   noticePinNested:
     "A fixação de linhas está desligada com agrupamento ou árvore ativos.",
-  noticeReorderNested:
-    "A reordenação de linhas está desligada com agrupamento ou árvore ativos.",
   noticeGroupingUnavailable:
     "O agrupamento está desativado — esta fonte não consegue agrupar.",
   noticeExportAllPage:

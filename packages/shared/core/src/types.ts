@@ -1144,12 +1144,6 @@ export interface TableLabels {
   /** Status copy when row pin is on while grouping or a tree is on. */
   noticePinNested?: string;
   /**
-   * Compatibility override for the former nested-reorder notice.
-   *
-   * @deprecated Nested reorder is supported and no longer emits this notice.
-   */
-  noticeReorderNested?: string;
-  /**
    * Status copy when `groupBy` is set and the source's capabilities say it
    * cannot group.
    */

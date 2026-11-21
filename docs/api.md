@@ -45,16 +45,15 @@ per-column aggregation choices.
 
 ### Columns & layout
 
-| Prop                    | Type                                  | Default | Description                                                                                                                    |
-| ----------------------- | ------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `columns`               | `ColumnInput<TRow>[]`                 | —       | Leaf `ColumnDef`s and optional `ColumnGroupDef` parents — see [ColumnDef](#columndef) and [column groups](./column-groups.md). |
-| `columnLayout`          | `ColumnLayoutState`                   | —       | Controlled column layout (hidden/order/pinned/widths).                                                                         |
-| `onColumnLayoutChange`  | `(next: ColumnLayoutState) => void`   | —       | Change handler for the controlled column layout.                                                                               |
-| `defaultColumnLayout`   | `Partial<ColumnLayoutState>`          | —       | Initial column layout for the uncontrolled mode.                                                                               |
-| `onColumnRename`        | `(key: string, name: string) => void` | —       | Host persistence channel for a `renameable` column's accepted display name; stable keys never change.                          |
-| `maxHeight`             | `number`                              | —       | Fixed-height scroll box (px) enabling sideways scrolling + column pinning; omit for page scroll.                               |
-| `sortByOptions`         | `SortByOption[]`                      | —       | Options for a mobile sort-by select.                                                                                           |
-| `mobileIdentityColumns` | `number`                              | —       | Deprecated and ignored; removed in v4. `hideOnMobile` decides which fields a card shows.                                       |
+| Prop                   | Type                                  | Default | Description                                                                                                                    |
+| ---------------------- | ------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `columns`              | `ColumnInput<TRow>[]`                 | —       | Leaf `ColumnDef`s and optional `ColumnGroupDef` parents — see [ColumnDef](#columndef) and [column groups](./column-groups.md). |
+| `columnLayout`         | `ColumnLayoutState`                   | —       | Controlled column layout (hidden/order/pinned/widths).                                                                         |
+| `onColumnLayoutChange` | `(next: ColumnLayoutState) => void`   | —       | Change handler for the controlled column layout.                                                                               |
+| `defaultColumnLayout`  | `Partial<ColumnLayoutState>`          | —       | Initial column layout for the uncontrolled mode.                                                                               |
+| `onColumnRename`       | `(key: string, name: string) => void` | —       | Host persistence channel for a `renameable` column's accepted display name; stable keys never change.                          |
+| `maxHeight`            | `number`                              | —       | Fixed-height scroll box (px) enabling sideways scrolling + column pinning; omit for page scroll.                               |
+| `sortByOptions`        | `SortByOption[]`                      | —       | Options for a mobile sort-by select.                                                                                           |
 
 ### Filters & search
 
@@ -1307,8 +1306,7 @@ results and the rest), the feature-state keys `DENSITY_STATE`
 (`ResolvableColumn`) and `resolveColumnHeaders` for a column's declarative
 defaults, `columnPathText` for a data-path value as cell text, and
 `sameItems` — whether two lists hold the same items by identity, so a table
-engine does not rebuild for an inline array (`sameRows` is its deprecated
-row-named form) — with `retainItems`, which keeps the previous list while its
+engine does not rebuild for an inline array — with `retainItems`, which keeps the previous list while its
 items are unchanged — and `isRecord`, whether a value is a plain record.
 Source refresh shares `sourceViewKey` /
 `SourceViewKeyInput` and `cachedSnapshot` / `CachedSnapshot`; a composed grouping feature carries its evaluator through
@@ -1408,7 +1406,6 @@ shares, so a new binding calls them rather than re-deriving them.
   (`LiveStageKey`, `LiveStageDependencies`) that names the live values it reads
   and the one it writes; `liveStagesOf` collects the composed stages and
   `orderLiveStages` (`LiveStage`) runs each after the stages it reads from.
-  `SHELL_LIVE_STAGE_ORDER` (`ShellLiveStageId`) is deprecated.
   `TableRuntimePublisher` projects the chrome into the runtime view through
   `tableRuntimeView`, `renderedRowsOf`, `readableRowLabel`,
   `liveColumnLayout` and `livePinning` (`RuntimeChromeInput`,

@@ -87,13 +87,6 @@ export interface UseDataTableOptions<TRow> {
    * bare-key columns, exactly as it does under `<DataTable>`.
    */
   locale?: string;
-  /**
-   * Accepted and ignored.
-   *
-   * @deprecated A card shows every column without `hideOnMobile`, so
-   * `hideOnMobile` decides what a card shows. Removed in v4.
-   */
-  mobileIdentityColumns?: number;
   /** Search debounce in ms. Defaults to 300. */
   searchDebounceMs?: number;
   /** Bulk actions — enabling these turns on selection. */

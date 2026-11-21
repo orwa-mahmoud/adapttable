@@ -33,7 +33,6 @@ export const ROW_LABELS: Pick<
   | "pinToBottom"
   | "unpinRow"
   | "noticePinNested"
-  | "noticeReorderNested"
 > = {
   duplicateRow: "Duplicate row",
   deleteRow: "Delete row",
@@ -58,6 +57,4 @@ export const ROW_LABELS: Pick<
   pinToBottom: "Pin to bottom",
   unpinRow: "Unpin row",
   noticePinNested: "Row pinning is off while grouping or a tree is on.",
-  noticeReorderNested:
-    "Cross-boundary row moves follow the configured move policy.",
 };

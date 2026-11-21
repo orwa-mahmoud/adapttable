@@ -15576,19 +15576,6 @@
       ]
     },
     {
-      "name": "sameRows",
-      "kind": "runtime",
-      "module": "engine/sameRows.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "engine/sameRows.ts#sameRows",
-      "subpaths": [
-        "./binding"
-      ]
-    },
-    {
       "name": "sanitizeStoredLayout",
       "kind": "runtime",
       "module": "state/tableStores.ts",
@@ -15896,19 +15883,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "style/cellDisplay.ts#SHARED_DESKTOP_ROW_KEYS",
-      "subpaths": [
-        "./binding"
-      ]
-    },
-    {
-      "name": "SHELL_LIVE_STAGE_ORDER",
-      "kind": "runtime",
-      "module": "layout/shellPipeline.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "layout/shellPipeline.ts#SHELL_LIVE_STAGE_ORDER",
       "subpaths": [
         "./binding"
       ]
@@ -22279,19 +22253,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "layout/shellPipeline.ts#ShellBodyInput",
-      "subpaths": [
-        "./binding"
-      ]
-    },
-    {
-      "name": "ShellLiveStageId",
-      "kind": "type",
-      "module": "layout/shellPipeline.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "layout/shellPipeline.ts#ShellLiveStageId",
       "subpaths": [
         "./binding"
       ]
