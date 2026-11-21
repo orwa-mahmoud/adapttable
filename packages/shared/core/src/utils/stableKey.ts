@@ -4,8 +4,10 @@
  * changing identity on every render.
  *
  * Guarantees:
- * - Object keys are sorted, so `{ a, b }` and `{ b, a }` serialise
- *   identically.
+ * - Object keys are sorted by UTF-16 code unit, so `{ a, b }` and `{ b, a }`
+ *   serialise identically, in any locale and whatever order keys arrive in.
+ * - A value with `toJSON` (a `Date`) is read through it, as `JSON.stringify`
+ *   reads it.
  * - Nested objects are normalised recursively.
  * - Array order is preserved (order is meaningful for lists).
  * - `undefined` values are dropped, mirroring how query strings and
@@ -26,24 +28,29 @@ export function stableKey(input: unknown): string {
   return JSON.stringify(normalize(input));
 }
 
-function normalize(value: unknown): unknown {
+/** Code-unit order: total, and the same in every locale. */
+function byCodeUnit(a: string, b: string): number {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
+}
+
+function normalize(value: unknown, key = ""): unknown {
   if (value === null || typeof value !== "object") {
     return value === undefined ? undefined : value;
   }
-
-  if (Array.isArray(value)) {
-    return value.map((entry) => normalize(entry));
+  const json = (value as { toJSON?: unknown }).toJSON;
+  if (typeof json === "function") {
+    return normalize((json as (key: string) => unknown).call(value, key), key);
   }
-
+  if (Array.isArray(value)) {
+    return value.map((entry, index) => normalize(entry, String(index)));
+  }
   const source = value as Record<string, unknown>;
-  // Locale-pinned sort keeps the key identical across user locales while
-  // staying lexicographic on UTF-16 code units.
-  const keys = Object.keys(source).sort((a, b) => a.localeCompare(b, "en"));
   const out: Record<string, unknown> = {};
-  for (const key of keys) {
-    const normalized = normalize(source[key]);
+  for (const name of Object.keys(source).sort(byCodeUnit)) {
+    const normalized = normalize(source[name], name);
     if (normalized !== undefined) {
-      out[key] = normalized;
+      out[name] = normalized;
     }
   }
   return out;
