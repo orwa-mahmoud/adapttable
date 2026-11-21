@@ -15,7 +15,6 @@ import {
 } from "@adapttable/core";
 import { describe, expect, it } from "vitest";
 
-import * as server from "./index";
 import {
   parseTableQuery,
   pickFilters,
@@ -65,11 +64,6 @@ describe("splitListParam", () => {
 
   it("trims entries and drops empty ones", () => {
     expect(splitListParam(" Core , ,Data,")).toEqual(["Core", "Data"]);
-  });
-
-  it("is what the splitFilterValues name still serves", () => {
-    // Read by name: the old name carries the deprecation notice.
-    expect(Reflect.get(server, "splitFilterValues")).toBe(splitListParam);
   });
 });
 

@@ -2391,7 +2391,7 @@ lookups once for a route that checks every request against it; the
 `PreparedQuerySchema` it returns goes to `parseTableQuery` in place of the
 schema. `pickFilters(defs, keys)` scopes the declared
 filters per caller, and `splitListParam(raw)` inverts the table's
-multi-value encoding (`splitFilterValues` is its deprecated name).
+multi-value encoding.
 `QueryInput` is a `Request`, `URL`, query string or `URLSearchParams`;
 `ServerFilterValue` is one filter's value. See
 [server queries](./server-queries.md).

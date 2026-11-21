@@ -186,8 +186,7 @@ role, goes to `parseTableQuery` as it is.
 The table writes a multi-value filter (`multiSelect`, checklist) as ONE
 parameter: entries joined with commas, each percent-encoded, so a value may
 itself contain a comma. `typedFilters` splits it; at level 1 the raw string
-is in `filters`, and `splitListParam(raw)` is the exact inverse
-(`splitFilterValues` is its deprecated name).
+is in `filters`, and `splitListParam(raw)` is the exact inverse.
 
 `groupByKeys` lists every grouping key, outermost first
 (`groupBy=team,status` → `["team", "status"]`), each checked against

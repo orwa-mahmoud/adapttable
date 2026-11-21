@@ -56171,14 +56171,6 @@
       "behavior": ""
     },
     {
-      "export": "splitFilterValues",
-      "currentImport": "@adapttable/server",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/server",
-      "behavior": ""
-    },
-    {
       "export": "splitListParam",
       "currentImport": "@adapttable/server",
       "kind": "value",

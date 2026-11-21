@@ -90,7 +90,6 @@ export {
   type ServerFilterDef,
   type ServerFilterType,
   type ShapedFilter,
-  splitFilterValues,
   type TextFilter,
   type TypedFilter,
 } from "./filters";
@@ -694,7 +693,7 @@ function validFilters(
       return;
     }
     // The table writes a multi-value filter as ONE parameter, entries joined
-    // with commas and each one percent-encoded — `splitFilterValues` reads
+    // with commas and each one percent-encoded — `splitListParam` reads
     // that. A repeated parameter is kept as a list, for a client that sends
     // one.
     const all = params.getAll(key);

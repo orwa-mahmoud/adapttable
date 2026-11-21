@@ -30,16 +30,6 @@ import {
 } from "@adapttable/core/query";
 
 /**
- * Split a multi-value filter parameter into its values.
- *
- * @deprecated Use `splitListParam`, exported here and from
- * `@adapttable/core/query`; this name forwards to it.
- *
- * @public
- */
-export const splitFilterValues: typeof splitListParam = splitListParam;
-
-/**
  * One filter as the URL carried it, with no type to check it against: its
  * operator beside it and a range's bounds joined, every value a string.
  *

@@ -6637,7 +6637,6 @@
       "ServerFilterValue",
       "ServerTableQuery",
       "ShapedFilter",
-      "splitFilterValues",
       "splitListParam",
       "TextFilter",
       "TypedFilter"

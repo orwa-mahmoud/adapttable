@@ -142,9 +142,6 @@ export interface ShapedFilter {
     readonly value?: string;
 }
 
-// @public @deprecated
-export const splitFilterValues: typeof splitListParam;
-
 export { splitListParam }
 
 // @public
