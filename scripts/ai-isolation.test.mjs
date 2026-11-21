@@ -44,10 +44,12 @@ describe("AI isolation", () => {
     // Private implemented Angular and Vue kits still owe AI isolation proof.
     const expected = [
       "packages/shared/core/dist/index.js",
-      // Core's `development` export condition is a second graph of its own.
+      // A `development` export condition is a second graph of its own.
       "packages/shared/core/dist/dev/index.js",
       "packages/react/react/dist/index.js",
+      "packages/react/react/dist/dev/index.js",
       "packages/vue/vue/dist/index.js",
+      "packages/vue/vue/dist/dev/index.js",
       "packages/vue/adapter-vue-unstyled/dist/index.js",
       ...[
         "element-plus",

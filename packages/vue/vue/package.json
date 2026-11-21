@@ -52,90 +52,108 @@
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
+        "development": "./dist/dev/index.js",
         "default": "./dist/index.js"
       },
       "require": {
         "types": "./dist/index.d.cts",
+        "development": "./dist/dev/index.cjs",
         "default": "./dist/index.cjs"
       }
     },
     "./adapter": {
       "import": {
         "types": "./dist/adapter.d.ts",
+        "development": "./dist/dev/adapter.js",
         "default": "./dist/adapter.js"
       },
       "require": {
         "types": "./dist/adapter.d.cts",
+        "development": "./dist/dev/adapter.cjs",
         "default": "./dist/adapter.cjs"
       }
     },
     "./features": {
       "import": {
         "types": "./dist/features.d.ts",
+        "development": "./dist/dev/features.js",
         "default": "./dist/features.js"
       },
       "require": {
         "types": "./dist/features.d.cts",
+        "development": "./dist/dev/features.cjs",
         "default": "./dist/features.cjs"
       }
     },
     "./formula": {
       "import": {
         "types": "./dist/formula.d.ts",
+        "development": "./dist/dev/formula.js",
         "default": "./dist/formula.js"
       },
       "require": {
         "types": "./dist/formula.d.cts",
+        "development": "./dist/dev/formula.cjs",
         "default": "./dist/formula.cjs"
       }
     },
     "./pivot": {
       "import": {
         "types": "./dist/pivot.d.ts",
+        "development": "./dist/dev/pivot.js",
         "default": "./dist/pivot.js"
       },
       "require": {
         "types": "./dist/pivot.d.cts",
+        "development": "./dist/dev/pivot.cjs",
         "default": "./dist/pivot.cjs"
       }
     },
     "./stream": {
       "import": {
         "types": "./dist/stream.d.ts",
+        "development": "./dist/dev/stream.js",
         "default": "./dist/stream.js"
       },
       "require": {
         "types": "./dist/stream.d.cts",
+        "development": "./dist/dev/stream.cjs",
         "default": "./dist/stream.cjs"
       }
     },
     "./sparkline": {
       "import": {
         "types": "./dist/sparkline.d.ts",
+        "development": "./dist/dev/sparkline.js",
         "default": "./dist/sparkline.js"
       },
       "require": {
         "types": "./dist/sparkline.d.cts",
+        "development": "./dist/dev/sparkline.cjs",
         "default": "./dist/sparkline.cjs"
       }
     },
     "./pdf": {
       "import": {
         "types": "./dist/pdf.d.ts",
+        "development": "./dist/dev/pdf.js",
         "default": "./dist/pdf.js"
       },
       "require": {
         "types": "./dist/pdf.d.cts",
+        "development": "./dist/dev/pdf.cjs",
         "default": "./dist/pdf.cjs"
       }
     },
     "./xlsx": {
       "import": {
         "types": "./dist/xlsx.d.ts",
+        "development": "./dist/dev/xlsx.js",
         "default": "./dist/xlsx.js"
       },
       "require": {
         "types": "./dist/xlsx.d.cts",
+        "development": "./dist/dev/xlsx.cjs",
         "default": "./dist/xlsx.cjs"
       }
     },
