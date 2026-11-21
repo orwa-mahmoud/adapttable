@@ -183,7 +183,6 @@ export const VIEW_CONFIG = defineSlice<TableViewStateConfig>(
   sameViewConfig
 );
 
-export { isEmptyFilterValue } from "../filters/isEmptyFilterValue";
 
 /**
  * The bag a write keeps: each value as a URL keeps it — written into params

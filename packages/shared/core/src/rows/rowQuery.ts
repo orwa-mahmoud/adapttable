@@ -65,10 +65,6 @@ export function sortLevels<TRow>(
     : [];
 }
 
-export function hasSort<TRow>(config: IncrementalViewConfig<TRow>): boolean {
-  return sortLevels(config).length > 0;
-}
-
 export function searchTerm<TRow>(config: IncrementalViewConfig<TRow>): string {
   return config.search?.trim().toLowerCase() ?? "";
 }
