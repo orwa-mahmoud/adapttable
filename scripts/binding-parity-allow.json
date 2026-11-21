@@ -2355,6 +2355,7 @@
         "UrlSliceOptions": "pending: shared-surface decision",
         "UseShortcutsOptions": "pending: shared-surface decision",
         "VirtualTableRow": "pending: shared-surface decision",
+        "VirtualizeImplementation": "pending: shared-surface decision",
         "activeFilterChipsFor": "pending: shared-surface decision",
         "booleanFilterFor": "pending: shared-surface decision",
         "createFeatureResources": "pending: shared-surface decision",
