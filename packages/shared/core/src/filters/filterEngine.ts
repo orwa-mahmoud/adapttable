@@ -27,7 +27,7 @@ import {
   type FilterTypeSpec,
   withFilterType,
 } from "./filterRegistry";
-import { evaluateFilterTree } from "./filterTree";
+import { evaluatePreparedFilterTree } from "./filterTree";
 
 /**
  * Functions the lean data hook calls only when filters are composed.
@@ -135,7 +135,7 @@ function filterSemanticKey<TRow>(
 export function createFilterEngine(builtIns: FilterTypeRegistry): FilterEngine {
   return {
     buildRuntime: (input) => buildRuntimeOn(builtIns, input),
-    evaluateTree: evaluateFilterTree,
+    evaluateTree: evaluatePreparedFilterTree,
     computeFacets: computeFilterFacets,
   };
 }

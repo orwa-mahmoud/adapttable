@@ -89,3 +89,69 @@ export function evaluateFilterTree<TRow>(
     ? results.every(Boolean)
     : results.some(Boolean);
 }
+
+/** One condition, its definition, predicate and filter values resolved. */
+function prepareCondition<TRow>(
+  condition: QueryCondition,
+  defs: readonly FilterDef<TRow>[],
+  registry: FilterTypeRegistry
+): (row: TRow) => boolean {
+  const def = defs.find((item) => item.key === condition.key);
+  if (!def) return () => true;
+  const predicate = filterPredicate(def, registry);
+  const extra = conditionToExtra(def, condition, registry);
+  return (row) => predicate(row, extra);
+}
+
+/**
+ * A tree prepared once for many rows: settled, and each condition's
+ * definition, predicate and filter values resolved, so a row only runs the
+ * predicates. Answers as {@link evaluateFilterTree} does.
+ */
+export function prepareFilterTree<TRow>(
+  tree: QueryFilterGroup | undefined,
+  defs: readonly FilterDef<TRow>[],
+  registry: FilterTypeRegistry
+): (row: TRow) => boolean {
+  const settled = settledFilterTree(tree);
+  if (!settled) return () => true;
+  const parts = settled.conditions.map((node) =>
+    isFilterGroup(node)
+      ? prepareFilterTree(node, defs, registry)
+      : prepareCondition(node, defs, registry)
+  );
+  return settled.combinator === "and"
+    ? (row) => parts.every((part) => part(row))
+    : (row) => parts.some((part) => part(row));
+}
+
+interface PreparedTree<TRow> {
+  readonly defs: readonly FilterDef<TRow>[];
+  readonly registry: FilterTypeRegistry;
+  readonly run: (row: TRow) => boolean;
+}
+
+/** Each tree an engine has read, prepared for the definitions it read with. */
+const preparedTrees = /* @__PURE__ */ new WeakMap<
+  QueryFilterGroup,
+  PreparedTree<never>
+>();
+
+/**
+ * {@link evaluateFilterTree} for an engine, which reads every row of a pass
+ * against the same tree: the tree is prepared once per tree, definitions and
+ * registry, then each row runs only its predicates.
+ */
+export function evaluatePreparedFilterTree<TRow>(
+  tree: QueryFilterGroup,
+  row: TRow,
+  defs: readonly FilterDef<TRow>[],
+  registry: FilterTypeRegistry
+): boolean {
+  let prepared = preparedTrees.get(tree) as PreparedTree<TRow> | undefined;
+  if (prepared?.defs !== defs || prepared.registry !== registry) {
+    prepared = { defs, registry, run: prepareFilterTree(tree, defs, registry) };
+    preparedTrees.set(tree, prepared);
+  }
+  return prepared.run(row);
+}
