@@ -1502,7 +1502,7 @@ export function chromeFeatureNotices<TRow>(input: ChromeFeatureNoticesInput<TRow
 export interface ChromeFeatureNoticesInput<TRow> {
     readonly groupByKeys: readonly string[];
     readonly hasEditableColumn: boolean;
-    readonly labels: TableLabels;
+    readonly labels: FeatureNoticeLabels;
     readonly nestedArmed: boolean;
     readonly options: Pick<CollectFeatureNoticesInput<TRow>, "virtualize" | "onCellEdit" | "rowEditing" | "onRowEdit" | "batchEditing" | "onBatchEdit" | "exportCsv"> & {
         readonly pinnedRowIds?: unknown;
@@ -1657,7 +1657,7 @@ export interface CollectFeatureNoticesInput<TRow = unknown> {
     exportCsv?: boolean | ExportCsvOptions<TRow>;
     groupByKeys: readonly string[];
     hasEditableColumn: boolean;
-    labels: TableLabels;
+    labels: FeatureNoticeLabels;
     nestedArmed: boolean;
     onBatchEdit?: unknown;
     onCellEdit?: unknown;
@@ -4701,7 +4701,7 @@ export interface ExportLiveSlotProps<TRow = unknown, TExport = unknown, TColumn 
     context: ExportContext<TRow>;
     exportCsv: boolean | ExportCsvOptions<TRow> | undefined;
     featureHost?: FeatureHostState;
-    labels: TableLabels;
+    labels: Required<TableLabels>;
     pageOnly: boolean;
     source: TableSource<TRow>;
 }
@@ -5058,6 +5058,9 @@ export type FeatureNoticeAppearance = "off" | "disabled" | "one-page";
 
 // @public
 export type FeatureNoticeKind = "virtualize-paged" | "pin-nested" | "grouping-unavailable" | "export-all-page" | "edit-without-writer";
+
+// @public
+export type FeatureNoticeLabels = Pick<Required<TableLabels>, "noticeVirtualizePaged" | "noticePinNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter">;
 
 // @public
 export function featureNoticesAttribute(notices: readonly Pick<FeatureNotice, "kind">[]): string | undefined;
@@ -8958,7 +8961,7 @@ export function resolveExportAnnouncement(input: {
 }): string;
 
 // @public
-export function resolveExportDisabledReason(labels: TableLabels | undefined, pageOnly: boolean): string;
+export function resolveExportDisabledReason(labels: Pick<Required<TableLabels>, "noticeExportAllPage">, pageOnly: boolean): string;
 
 // @public
 export function resolveExportProgressState(input: {

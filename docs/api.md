@@ -1467,7 +1467,7 @@ an adapter or a plugin genuinely needs it.
 | `revisionToken(revisions)`                                                                                                               | Collapse the four revision counters into one comparable string.                                                                                                                    |
 | `engineSearchText(row)` / `cellSortValue` / `resolveColumnPath`                                                                          | The engine's default searchable text, its sort-value resolution, and a column's `i18n` path.                                                                                       |
 | `FeatureRegistration` / `NeutralFeatureHost` / `currentFeatureHost()` / `runWithFeatureHost`                                             | How a feature registers with the host, and the ambient host a registration runs against.                                                                                           |
-| `collectFeatureNotices(input)` / `CollectFeatureNoticesInput`                                                                            | The dev-time notices a table raises when a feature is asked for something it cannot do.                                                                                            |
+| `collectFeatureNotices(input)` / `CollectFeatureNoticesInput` / `FeatureNoticeLabels`                                                    | The notices a table raises when a feature is asked for something it cannot do; each message comes from the resolved labels.                                                        |
 | `groupedEntriesForStrategy(options)` / `GroupedEntriesForStrategyOptions` / `groupingComputationKind` / `GroupingComputationKind`        | Which grouping computation a view needs, and the entries it produces.                                                                                                              |
 | `groupingDragKey` / `moveGroupingKey` / `moveGroupingKeyBy` / `removeGroupingKey` / `hasGroupingColumnDrag` / `GROUPING_COLUMN_DND_MIME` | Reordering the grouping panel's keys by pointer or keyboard.                                                                                                                       |
 | `EMPTY_COLUMN_LAYOUT` / `applyColumnOrder` / `applyColumnNames` / `declaredColumnLayout` / `declaredColumnName`                          | The column-layout value and the pure functions that move it.                                                                                                                       |
@@ -1495,8 +1495,9 @@ an adapter or a plugin genuinely needs it.
 - `useDebounce(value, ms)`, `useMediaQuery(query)`, `useIsMobile()`,
   `usePrefersReducedMotion()`, `useColorScheme(preference)`.
 
-- `useExportHandler(handler)` — binds the Export button: makes a host-handled
-  export single-flight and reports `exportBusy`. From `@adapttable/react/adapter`.
+- `useExportHandler(handler, labels)` — binds the Export button: makes a
+  host-handled export single-flight and reports `exportBusy`, with its caption
+  and announcements from the resolved labels. From `@adapttable/react/adapter`.
 
 Building blocks for columns, rows and queries:
 
@@ -2779,7 +2780,7 @@ something narrower — `scope: "all"` writing one page, `groupBy` doing nothing,
 | `GroupingCapability` / `ExportScopeCapability` / `TotalCountCapability` | `"client" \| "server" \| false`, `"all" \| "page"`, and `"exact" \| "loaded"`.                                                                                 |
 | `sourceCapabilities(source, support?)`                                  | The one place the answer is decided: the source's own declaration when it has one, otherwise inferred from its shape (and `QuerySupport.grouping` when given). |
 | `CapabilitySource`                                                      | The handful of fields that read consults — enough to ask without holding a whole source.                                                                       |
-| `capabilityReason(capability)`                                          | The sentence a kit puts on the control it disabled. Localized copy overrides it through `TableLabels`.                                                         |
+| `capabilityReason(capability, labels)`                                  | The sentence a kit puts on the control it disabled, for `"grouping"` or `"exportScope"`, read from the resolved labels.                                        |
 | `offersAllMatching(selection, total)`                                   | Whether the "select all N matching" banner applies: the source can reach past the page, the page is fully selected, and more rows match.                       |
 
 | Capability          | Runtime consequence                                                                                                                                                                                                                        |

@@ -19411,6 +19411,14 @@
       "behavior": ""
     },
     {
+      "export": "FeatureNoticeLabels",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "featureNoticesAttribute",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",

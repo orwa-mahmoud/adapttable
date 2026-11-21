@@ -26,7 +26,7 @@ import {
   type ExtraRow,
   insertExtraRows,
 } from "../rows/extraRows";
-import { capabilityReason, sourceCapabilities } from "../source/capabilities";
+import { sourceCapabilities } from "../source/capabilities";
 import type { TableSource } from "../source/TableSource";
 import { withGroupAggregateOverrides } from "./groupAggregateOverrides";
 import {
@@ -105,7 +105,7 @@ export function groupingIgnoredWarning<TRow>(
     capabilities: source.capabilities,
   }).grouping;
   if (canGroup !== false) return undefined;
-  return `groupBy is ignored: ${capabilityReason("grouping")} Grouping needs either the full filtered set (\`allFilteredRows\`, which the frontend tier provides) or a source that groups server-side.`;
+  return `groupBy is ignored: this source cannot group. Grouping needs either the full filtered set (\`allFilteredRows\`, which the frontend tier provides) or a source that groups server-side.`;
 }
 
 /**

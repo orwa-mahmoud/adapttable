@@ -1004,7 +1004,10 @@ export {
 export type { TableSource } from "./source/TableSource";
 export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
 export type { FeatureNoticeAppearance } from "./state/featureNotices";
-export type { CollectFeatureNoticesInput } from "./state/featureNotices";
+export type {
+  CollectFeatureNoticesInput,
+  FeatureNoticeLabels,
+} from "./state/featureNotices";
 export {
   cellHighlightKind,
   cellHighlightStyle,

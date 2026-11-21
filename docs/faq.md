@@ -185,7 +185,7 @@ React and the UI kit external because your app already ships those):
 The first row is the one to read: a headless table costs well under half of
 the full core, because the parts you never import never arrive. The
 every-export row is the whole public surface imported at once, measured
-2026-11-22 at 47.3 KiB: the composed session with one committed state and a
+2026-11-22 at 47.2 KiB: the composed session with one committed state and a
 staged row-model evaluator, the shell operations, the snapshot guard, the
 grouped-snapshot cache, and the shared behaviours the bindings used to copy.
 Binding and kit machinery lives on `@adapttable/core/binding`, and each

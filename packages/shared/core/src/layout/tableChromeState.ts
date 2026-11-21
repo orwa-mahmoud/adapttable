@@ -14,8 +14,8 @@ import {
   collectFeatureNotices,
   type CollectFeatureNoticesInput,
   type FeatureNotice,
+  type FeatureNoticeLabels,
 } from "../state/featureNotices";
-import type { TableLabels } from "../types";
 
 /**
  * Which body region a table renders.
@@ -203,7 +203,7 @@ export interface ChromeFeatureNoticesInput<TRow> {
   /** Whether any declared column is editable. */
   readonly hasEditableColumn: boolean;
   /** Resolved labels. */
-  readonly labels: TableLabels;
+  readonly labels: FeatureNoticeLabels;
 }
 
 /**

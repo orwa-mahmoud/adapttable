@@ -666,7 +666,7 @@ export interface ExportLiveSlotProps<
   /** This table's plugin host, for registered writers. */
   featureHost?: FeatureHostState;
   /** Resolved labels. */
-  labels: TableLabels;
+  labels: Required<TableLabels>;
   /** Whether the handler can only write the current page. */
   pageOnly: boolean;
   /** The table; receives export button state. */

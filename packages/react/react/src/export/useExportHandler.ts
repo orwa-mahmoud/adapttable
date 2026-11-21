@@ -47,7 +47,7 @@ export function useExportHandler(
         controls?: ExportAllControls
       ) => ExportAllResult | Promise<ExportAllResult>)
     | undefined,
-  labels?: TableLabels,
+  labels: Required<TableLabels>,
   format = "csv",
   pageOnly = false,
   serverBuilt = false

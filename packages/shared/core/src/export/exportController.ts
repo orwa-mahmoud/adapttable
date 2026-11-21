@@ -464,9 +464,9 @@ export function resolveExportProgressState(input: {
  * @public
  */
 export function resolveExportDisabledReason(
-  labels: TableLabels | undefined,
+  labels: Pick<Required<TableLabels>, "noticeExportAllPage">,
   pageOnly: boolean
 ): string {
   if (!pageOnly) return "";
-  return labels?.noticeExportAllPage ?? capabilityReason("exportScope");
+  return capabilityReason("exportScope", labels);
 }

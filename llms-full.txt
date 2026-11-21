@@ -16823,7 +16823,7 @@ The root entry holds no label data. Two explicit paths load presets
 synchronously:
 
 - `@adapttable/i18n/catalog` — `getLabels(locale)` and `locales`, every preset
-  keyed by tag (`LocaleKey`). It loads all 20 languages.
+  keyed by tag (`LocaleKey`). It loads every bundled language.
 - `@adapttable/i18n/locales/<tag>` — one preset alone, as a named export:
   `import { ar } from "@adapttable/i18n/locales/ar"`, and `zhTW` from
   `@adapttable/i18n/locales/zh-TW`.
@@ -18654,7 +18654,7 @@ an adapter or a plugin genuinely needs it.
 | `revisionToken(revisions)`                                                                                                               | Collapse the four revision counters into one comparable string.                                                                                                                    |
 | `engineSearchText(row)` / `cellSortValue` / `resolveColumnPath`                                                                          | The engine's default searchable text, its sort-value resolution, and a column's `i18n` path.                                                                                       |
 | `FeatureRegistration` / `NeutralFeatureHost` / `currentFeatureHost()` / `runWithFeatureHost`                                             | How a feature registers with the host, and the ambient host a registration runs against.                                                                                           |
-| `collectFeatureNotices(input)` / `CollectFeatureNoticesInput`                                                                            | The dev-time notices a table raises when a feature is asked for something it cannot do.                                                                                            |
+| `collectFeatureNotices(input)` / `CollectFeatureNoticesInput` / `FeatureNoticeLabels`                                                    | The notices a table raises when a feature is asked for something it cannot do; each message comes from the resolved labels.                                                        |
 | `groupedEntriesForStrategy(options)` / `GroupedEntriesForStrategyOptions` / `groupingComputationKind` / `GroupingComputationKind`        | Which grouping computation a view needs, and the entries it produces.                                                                                                              |
 | `groupingDragKey` / `moveGroupingKey` / `moveGroupingKeyBy` / `removeGroupingKey` / `hasGroupingColumnDrag` / `GROUPING_COLUMN_DND_MIME` | Reordering the grouping panel's keys by pointer or keyboard.                                                                                                                       |
 | `EMPTY_COLUMN_LAYOUT` / `applyColumnOrder` / `applyColumnNames` / `declaredColumnLayout` / `declaredColumnName`                          | The column-layout value and the pure functions that move it.                                                                                                                       |
@@ -18682,8 +18682,9 @@ an adapter or a plugin genuinely needs it.
 - `useDebounce(value, ms)`, `useMediaQuery(query)`, `useIsMobile()`,
   `usePrefersReducedMotion()`, `useColorScheme(preference)`.
 
-- `useExportHandler(handler)` — binds the Export button: makes a host-handled
-  export single-flight and reports `exportBusy`. From `@adapttable/react/adapter`.
+- `useExportHandler(handler, labels)` — binds the Export button: makes a
+  host-handled export single-flight and reports `exportBusy`, with its caption
+  and announcements from the resolved labels. From `@adapttable/react/adapter`.
 
 Building blocks for columns, rows and queries:
 
@@ -19966,7 +19967,7 @@ something narrower — `scope: "all"` writing one page, `groupBy` doing nothing,
 | `GroupingCapability` / `ExportScopeCapability` / `TotalCountCapability` | `"client" \| "server" \| false`, `"all" \| "page"`, and `"exact" \| "loaded"`.                                                                                 |
 | `sourceCapabilities(source, support?)`                                  | The one place the answer is decided: the source's own declaration when it has one, otherwise inferred from its shape (and `QuerySupport.grouping` when given). |
 | `CapabilitySource`                                                      | The handful of fields that read consults — enough to ask without holding a whole source.                                                                       |
-| `capabilityReason(capability)`                                          | The sentence a kit puts on the control it disabled. Localized copy overrides it through `TableLabels`.                                                         |
+| `capabilityReason(capability, labels)`                                  | The sentence a kit puts on the control it disabled, for `"grouping"` or `"exportScope"`, read from the resolved labels.                                        |
 | `offersAllMatching(selection, total)`                                   | Whether the "select all N matching" banner applies: the source can reach past the page, the page is fully selected, and more rows match.                       |
 
 | Capability          | Runtime consequence                                                                                                                                                                                                                        |
@@ -22478,7 +22479,7 @@ React and the UI kit external because your app already ships those):
 The first row is the one to read: a headless table costs well under half of
 the full core, because the parts you never import never arrive. The
 every-export row is the whole public surface imported at once, measured
-2026-11-22 at 47.3 KiB: the composed session with one committed state and a
+2026-11-22 at 47.2 KiB: the composed session with one committed state and a
 staged row-model evaluator, the shell operations, the snapshot guard, the
 grouped-snapshot cache, and the shared behaviours the bindings used to copy.
 Binding and kit machinery lives on `@adapttable/core/binding`, and each
@@ -22637,7 +22638,7 @@ consumer fixtures in `scripts/bundle-budget.mjs`.
 - `@adapttable/ai` is a separate package. Eleven base graphs contain none
   of `createAgentSession`, `tableAgent`, `adapttable.agent.v1` or
   `@adapttable/ai` (`scripts/ai-isolation.mjs`).
-- Importing every core export measured 47.3 KiB gzip on 2026-11-22. The
+- Importing every core export measured 47.2 KiB gzip on 2026-11-22. The
   fixture ceiling is 55 KiB. The figure is the whole public surface, not a
   table's download. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
 

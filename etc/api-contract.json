@@ -7027,6 +7027,7 @@
       "ContrastRules",
       "DeferredExportWriter",
       "ExportWriterOption",
+      "FeatureNoticeLabels",
       "isDeferredExportWriter",
       "ensureForcedColorsStyles",
       "entryKeys",

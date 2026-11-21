@@ -92,7 +92,7 @@ consumer fixtures in `scripts/bundle-budget.mjs`.
 - `@adapttable/ai` is a separate package. Eleven base graphs contain none
   of `createAgentSession`, `tableAgent`, `adapttable.agent.v1` or
   `@adapttable/ai` (`scripts/ai-isolation.mjs`).
-- Importing every core export measured 47.3 KiB gzip on 2026-11-22. The
+- Importing every core export measured 47.2 KiB gzip on 2026-11-22. The
   fixture ceiling is 55 KiB. The figure is the whole public surface, not a
   table's download. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
 

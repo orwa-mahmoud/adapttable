@@ -29,6 +29,20 @@ export type FeatureNoticeKind =
   | "edit-without-writer";
 
 /**
+ * The resolved labels the notices read their text from.
+ *
+ * @public
+ */
+export type FeatureNoticeLabels = Pick<
+  Required<TableLabels>,
+  | "noticeVirtualizePaged"
+  | "noticePinNested"
+  | "noticeGroupingUnavailable"
+  | "noticeExportAllPage"
+  | "noticeEditWithoutWriter"
+>;
+
+/**
  * How the table already looks to the person sitting at it.
  *
  * @public
@@ -88,8 +102,8 @@ export interface CollectFeatureNoticesInput<TRow = unknown> {
   onBatchEdit?: unknown;
   /** CSV export, and its options when it is more than a flag. */
   exportCsv?: boolean | ExportCsvOptions<TRow>;
-  /** Label overrides; gaps fall back to English. */
-  labels: TableLabels;
+  /** Resolved labels: each notice's text comes from them. */
+  labels: FeatureNoticeLabels;
 }
 
 /**
@@ -108,9 +122,7 @@ export function collectFeatureNotices<TRow>(
     notices.push({
       kind: "virtualize-paged",
       appearance: "one-page",
-      message:
-        labels.noticeVirtualizePaged ??
-        "Virtualization is off — this paged table shows one page at a time.",
+      message: labels.noticeVirtualizePaged,
     });
   }
 
@@ -125,7 +137,7 @@ export function collectFeatureNotices<TRow>(
     notices.push({
       kind: "grouping-unavailable",
       appearance: "off",
-      message: labels.noticeGroupingUnavailable ?? capabilityReason("grouping"),
+      message: capabilityReason("grouping", labels),
     });
   }
 
@@ -133,9 +145,7 @@ export function collectFeatureNotices<TRow>(
     notices.push({
       kind: "pin-nested",
       appearance: "off",
-      message:
-        labels.noticePinNested ??
-        "Row pinning is off while grouping or a tree is on.",
+      message: labels.noticePinNested,
     });
   }
 
@@ -150,7 +160,7 @@ export function collectFeatureNotices<TRow>(
     notices.push({
       kind: "export-all-page",
       appearance: "disabled",
-      message: labels.noticeExportAllPage ?? capabilityReason("exportScope"),
+      message: capabilityReason("exportScope", labels),
     });
   }
 
@@ -162,9 +172,7 @@ export function collectFeatureNotices<TRow>(
     notices.push({
       kind: "edit-without-writer",
       appearance: "off",
-      message:
-        labels.noticeEditWithoutWriter ??
-        "Editing is off — no write handler is wired.",
+      message: labels.noticeEditWithoutWriter,
     });
   }
 

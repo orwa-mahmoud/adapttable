@@ -192,7 +192,7 @@ describe("collectFeatureNotices", () => {
       ...BASE,
       virtualize: true,
       paginationMode: "paged",
-      labels: { noticeVirtualizePaged: "One page only" },
+      labels: { ...defaultLabels, noticeVirtualizePaged: "One page only" },
     });
     expect(notices[0]?.message).toBe("One page only");
   });

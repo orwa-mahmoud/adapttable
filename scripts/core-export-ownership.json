@@ -19151,6 +19151,19 @@
       ]
     },
     {
+      "name": "FeatureNoticeLabels",
+      "kind": "type",
+      "module": "state/featureNotices.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/featureNotices.ts#FeatureNoticeLabels",
+      "subpaths": [
+        "./binding"
+      ]
+    },
+    {
       "name": "FeaturePatch",
       "kind": "type",
       "module": "features/featurePatch.ts",

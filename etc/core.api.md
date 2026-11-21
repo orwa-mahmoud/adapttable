@@ -469,7 +469,10 @@ export interface BulkActionRunnerOptions {
 }
 
 // @public
-export function capabilityReason(capability: keyof TableSourceCapabilities): string;
+export function capabilityReason(capability: "grouping", labels: Pick<Required<TableLabels>, "noticeGroupingUnavailable">): string;
+
+// @public
+export function capabilityReason(capability: "exportScope", labels: Pick<Required<TableLabels>, "noticeExportAllPage">): string;
 
 // @public
 export interface CapabilitySource {

@@ -5422,7 +5422,7 @@ export function useDesktopTableAssembly<TRow>(props: DesktopAssemblyProps<TRow>,
 export function useEscapeClose(open: boolean, close: () => void, options?: EscapeCloseOptions): void;
 
 // @public
-export function useExportHandler(handler: ((controls?: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>) | undefined, labels?: TableLabels, format?: string, pageOnly?: boolean, serverBuilt?: boolean): ExportHandlerState;
+export function useExportHandler(handler: ((controls?: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>) | undefined, labels: Required<TableLabels>, format?: string, pageOnly?: boolean, serverBuilt?: boolean): ExportHandlerState;
 
 // @public
 export function useExtraChips(input: UseExtraChipsOptions): ActiveFilterChip[];
