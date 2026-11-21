@@ -12,6 +12,7 @@ import { PIVOT_LABELS } from "./labelGroups/pivotLabels";
 import { ROW_LABELS } from "./labelGroups/rowLabels";
 import { SAVED_VIEW_LABELS } from "./labelGroups/savedViewLabels";
 import { VIEW_CONTROL_LABELS } from "./labelGroups/viewControlLabels";
+import { VIRTUALIZE_LABELS } from "./labelGroups/virtualizeLabels";
 import type { TableLabels } from "./types";
 
 /**
@@ -34,7 +35,8 @@ export const defaultLabels: Required<TableLabels> = /* @__PURE__ */ allLabels(
   GROUPING_LABELS,
   COLUMN_MENU_LABELS,
   ACTION_LABELS,
-  VIEW_CONTROL_LABELS
+  VIEW_CONTROL_LABELS,
+  VIRTUALIZE_LABELS
 );
 
 /**

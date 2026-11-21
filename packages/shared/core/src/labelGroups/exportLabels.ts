@@ -18,6 +18,7 @@ export const EXPORT_LABELS: Pick<
   | "exportCancelled"
   | "exportDownload"
   | "exportDismiss"
+  | "noticeExportAllPage"
 > = {
   exportFile: (format) => `Export ${format.toUpperCase()}`,
   exportStarted: "Preparing export",
@@ -27,4 +28,6 @@ export const EXPORT_LABELS: Pick<
   exportCancelled: "Export cancelled",
   exportDownload: "Download export",
   exportDismiss: "Dismiss",
+  noticeExportAllPage:
+    "Export all is off — this source provides one page at a time.",
 };

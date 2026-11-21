@@ -8377,6 +8377,7 @@
       "UseTableDataResult",
       "UseTableUrlStateResult",
       "VIEW_CONTROL_LABELS",
+      "VIRTUALIZE_LABELS",
       "viewControlsToolbarProps",
       "virtualItemMeta",
       "VirtualItemMeta",

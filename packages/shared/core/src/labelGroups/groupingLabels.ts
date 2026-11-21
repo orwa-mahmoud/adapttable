@@ -33,6 +33,7 @@ export const GROUPING_LABELS: Pick<
   | "groupingRemoved"
   | "groupingMoved"
   | "groupingAggregateChanged"
+  | "noticeGroupingUnavailable"
 > = {
   moreGroups: (remaining) => `Show ${remaining} more groups`,
   moreRowsInGroup: (remaining) => `Show ${remaining} more in this group`,
@@ -59,4 +60,5 @@ export const GROUPING_LABELS: Pick<
     `${label} moved to grouping position ${position}`,
   groupingAggregateChanged: (label, aggregation) =>
     `${label} group aggregation changed to ${aggregation}`,
+  noticeGroupingUnavailable: "Grouping is off — this source cannot group.",
 };

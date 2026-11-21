@@ -630,6 +630,11 @@ function adapterBaseFixtures() {
       ...(kit === "antd"
         ? []
         : ["contextMenuCopyTarget", "AGENT_APPROVAL_STATE"]),
+      // A string only its feature's labels carry. Chakra and antd load their
+      // library's locale, whose English chunk holds every string.
+      ...(kit === "chakra" || kit === "antd"
+        ? []
+        : ["Cross-boundary row moves"]),
     ],
   }));
 }

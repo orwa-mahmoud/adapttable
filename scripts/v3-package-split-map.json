@@ -64473,6 +64473,14 @@
       "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
+    },
+    {
+      "export": "VIRTUALIZE_LABELS",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
     }
   ]
 }

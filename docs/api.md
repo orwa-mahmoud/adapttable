@@ -2697,7 +2697,7 @@ and error states, and the announcements). Each feature declares its own
 strings in `labels`: `FILTER_LABELS`, `SAVED_VIEW_LABELS`, `EXPORT_LABELS`,
 `EDITING_LABELS`, `ASSISTANT_LABELS`, `ROW_LABELS`, `GRID_LABELS`,
 `FIND_LABELS`, `PIVOT_LABELS`, `GROUPING_LABELS`, `COLUMN_MENU_LABELS`,
-`ACTION_LABELS` and `VIEW_CONTROL_LABELS`, all from
+`ACTION_LABELS`, `VIEW_CONTROL_LABELS` and `VIRTUALIZE_LABELS`, all from
 `@adapttable/core/binding`. `featureLabelsOf(features)` lists the composed
 features' strings and `resolveTableLabels(labels, featureLabels)` resolves a
 table's strings: the base strings, then each feature's, then the host's

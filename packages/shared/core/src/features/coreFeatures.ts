@@ -30,6 +30,7 @@ import { GROUPING_LABELS } from "../labelGroups/groupingLabels";
 import { ROW_LABELS } from "../labelGroups/rowLabels";
 import { SAVED_VIEW_LABELS } from "../labelGroups/savedViewLabels";
 import { VIEW_CONTROL_LABELS } from "../labelGroups/viewControlLabels";
+import { VIRTUALIZE_LABELS } from "../labelGroups/virtualizeLabels";
 import {
   buildBodyCells,
   type CellSpanAppearance,
@@ -681,6 +682,7 @@ export function coreVirtualize(options: VirtualizeInput = true): CoreFeature {
     "virtualize",
     typeof options === "boolean"
       ? { virtualize: options }
-      : { virtualize: true, ...options }
+      : { virtualize: true, ...options },
+    VIRTUALIZE_LABELS
   );
 }

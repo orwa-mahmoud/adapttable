@@ -855,6 +855,7 @@ export {
   resolveTableLabels,
 } from "./labelGroups/tableLabels";
 export { VIEW_CONTROL_LABELS } from "./labelGroups/viewControlLabels";
+export { VIRTUALIZE_LABELS } from "./labelGroups/virtualizeLabels";
 export {
   absoluteColumnIndex,
   columnHeaderControllerFor,

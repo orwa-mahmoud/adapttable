@@ -21732,6 +21732,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "VIRTUALIZE_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/virtualizeLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/virtualizeLabels.ts#VIRTUALIZE_LABELS",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "virtualizeIgnoredOnPage",
       "kind": "runtime",
       "module": "virtual/viewportState.ts",
