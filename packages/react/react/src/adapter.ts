@@ -69,7 +69,12 @@ export {
 export {
   type AdapterEditingComponents,
   type AdapterEditingFeatures,
+  createAdapterBatchEditing,
+  createAdapterEditHistory,
+  createAdapterEditing,
   createAdapterEditingFeatures,
+  createAdapterRowEditing,
+  createAdapterUndoRedoButtons,
   type EditableCellRenderProps,
 } from "./adapterFeatures/editing";
 export {

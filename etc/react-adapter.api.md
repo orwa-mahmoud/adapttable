@@ -1510,10 +1510,19 @@ export { ContextMenuTarget }
 export function createAdapterAgentApprovalFeature(AgentApproval: AdapterFeatureComponent<AgentApprovalProps>): StaticTableFeature;
 
 // @public
+export function createAdapterBatchEditing(EditableCell: AdapterEditingComponents["EditableCell"], BatchEditBar: AdapterEditingComponents["BatchEditBar"]): AdapterEditingFeatures["batchEditing"];
+
+// @public
 export function createAdapterCommandPaletteFeature(CommandPalette: AdapterFeatureComponent<AdapterCommandPaletteProps>, Trigger?: AdapterFeatureComponent<AdapterCommandPaletteTriggerProps>): AdapterCommandPaletteFeature;
 
 // @public
 export function createAdapterContextMenuFeature(ContextMenu: AdapterFeatureComponent<AdapterContextMenuProps>): AdapterContextMenuFeature;
+
+// @public
+export function createAdapterEditHistory(UndoRedoButtons?: AdapterEditingComponents["UndoRedoButtons"]): AdapterEditingFeatures["editHistory"];
+
+// @public
+export function createAdapterEditing(EditableCell: AdapterEditingComponents["EditableCell"]): AdapterEditingFeatures["editing"];
 
 // @public
 export function createAdapterEditingFeatures(components: AdapterEditingComponents): AdapterEditingFeatures;
@@ -1531,6 +1540,9 @@ export function createAdapterGroupingPanelFeature(components: AdapterGroupingPan
 export function createAdapterRowDetailFeatures(components: AdapterRowDetailComponents): AdapterRowDetailFeatures;
 
 // @public
+export function createAdapterRowEditing(EditableCell: AdapterEditingComponents["EditableCell"], RowEditActions: AdapterEditingComponents["RowEditActions"]): AdapterEditingFeatures["rowEditing"];
+
+// @public
 export function createAdapterRowReorderFeature(components: AdapterRowReorderComponents): AdapterRowReorderFeature;
 
 // @public
@@ -1538,6 +1550,9 @@ export function createAdapterStandardFeatures(factories: AdapterStandardFeatureF
 
 // @public
 export function createAdapterTableAssistantFeature(TableAssistant: AdapterFeatureComponent<TableAssistantProps>): StaticTableFeature;
+
+// @public
+export function createAdapterUndoRedoButtons(UndoRedoButtons?: AdapterEditingComponents["UndoRedoButtons"]): AdapterEditingFeatures["undoRedoButtons"];
 
 // @public
 export function createAgentApproval(kit: KitPrimitivesOf<"Button">): (props: Readonly<AgentApprovalProps>) => ReactElement;

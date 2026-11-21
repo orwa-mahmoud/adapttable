@@ -17373,7 +17373,13 @@ Adapter authors bind those slots without copying feature lifecycle through
 `createAdapterRowReorderFeature`, `createAdapterContextMenuFeature`,
 `createAdapterCommandPaletteFeature` and
 `createAdapterAgentApprovalFeature`. Each accepts kit-owned
-`AdapterFeatureComponent`s and returns ordinary feature factories. Their
+`AdapterFeatureComponent`s and returns ordinary feature factories. Editing
+also comes one feature at a time — `createAdapterEditing(EditableCell)`,
+`createAdapterRowEditing(EditableCell, RowEditActions)`,
+`createAdapterBatchEditing(EditableCell, BatchEditBar)`,
+`createAdapterEditHistory(UndoRedoButtons?)` and
+`createAdapterUndoRedoButtons(UndoRedoButtons?)` — so a kit that builds each
+export with its own call lets a table keep only the editing features it names. Their
 contracts are `AdapterEditingComponents` — whose `EditableCell` is handed
 `EditableCellRenderProps`, the slot's props with the display already worked
 out from the row, the column's `Cell` or its accessor, so no kit repeats that

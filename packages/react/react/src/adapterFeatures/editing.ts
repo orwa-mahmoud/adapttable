@@ -14,7 +14,11 @@ import {
   rowEditing as coreRowEditing,
 } from "../features/editing";
 import { undoRedoButtons as coreUndoRedoButtons } from "../features/factories";
-import { extendFeature, slotRender } from "../features/providers";
+import {
+  extendFeature,
+  type FeatureRender,
+  slotRender,
+} from "../features/providers";
 import {
   BATCH_EDIT_BAR,
   EDITABLE_CELL,
@@ -129,6 +133,137 @@ function withResolvedDisplay(
   };
 }
 
+/** One resolved-display cell per kit cell, so every editing feature fills the
+ * slot with the same component. */
+const RESOLVED_CELLS = /* @__PURE__ */ new WeakMap<
+  AdapterFeatureComponent<EditableCellRenderProps<unknown>>,
+  readonly FeatureRender<never>[]
+>();
+
+function editableCellChrome(
+  Cell: AdapterFeatureComponent<EditableCellRenderProps<unknown>>
+): readonly FeatureRender<never>[] {
+  let chrome = RESOLVED_CELLS.get(Cell);
+  if (chrome === undefined) {
+    const Resolved = withResolvedDisplay(Cell);
+    chrome = [
+      slotRender(EDITABLE_CELL, (props) => createElement(Resolved, props)),
+    ];
+    RESOLVED_CELLS.set(Cell, chrome);
+  }
+  return chrome;
+}
+
+function undoRedoChrome(
+  UndoRedoButtons: AdapterFeatureComponent<ToolbarExtrasSlotProps>
+): readonly FeatureRender<never>[] {
+  // Undo and redo sit where `undoRedoButtons` puts them in every kit, even in
+  // a kit whose `editHistory` draws them.
+  return [
+    slotRender(
+      TOOLBAR_EXTRAS,
+      (props) => createElement(UndoRedoButtons, props),
+      { orderAs: "undo-redo-buttons" }
+    ),
+  ];
+}
+
+/**
+ * Cell editing drawn with a kit's editable cell.
+ *
+ * @param EditableCell - The kit's in-place cell editor.
+ * @returns The kit's `editing` factory.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function createAdapterEditing(
+  EditableCell: AdapterEditingComponents["EditableCell"]
+): AdapterEditingFeatures["editing"] {
+  const chrome = editableCellChrome(EditableCell);
+  return (onCellEdit, extras) =>
+    extendFeature(coreEditing(onCellEdit, extras), chrome);
+}
+
+/**
+ * Row editing drawn with a kit's editable cell and row actions.
+ *
+ * @param EditableCell - The kit's in-place cell editor.
+ * @param RowEditActions - The kit's save and cancel actions for a row.
+ * @returns The kit's `rowEditing` factory.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function createAdapterRowEditing(
+  EditableCell: AdapterEditingComponents["EditableCell"],
+  RowEditActions: AdapterEditingComponents["RowEditActions"]
+): AdapterEditingFeatures["rowEditing"] {
+  const chrome = [
+    ...editableCellChrome(EditableCell),
+    slotRender(ROW_EDIT_ACTIONS, (props) =>
+      createElement(RowEditActions, props)
+    ),
+  ];
+  return (onRowEdit, extras) =>
+    extendFeature(coreRowEditing(onRowEdit, extras), chrome);
+}
+
+/**
+ * Batch editing drawn with a kit's editable cell and batch bar.
+ *
+ * @param EditableCell - The kit's in-place cell editor.
+ * @param BatchEditBar - The kit's save and discard bar.
+ * @returns The kit's `batchEditing` factory.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function createAdapterBatchEditing(
+  EditableCell: AdapterEditingComponents["EditableCell"],
+  BatchEditBar: AdapterEditingComponents["BatchEditBar"]
+): AdapterEditingFeatures["batchEditing"] {
+  const chrome = [
+    ...editableCellChrome(EditableCell),
+    slotRender(BATCH_EDIT_BAR, (props) => createElement(BatchEditBar, props)),
+  ];
+  return (onBatchEdit) => extendFeature(coreBatchEditing(onBatchEdit), chrome);
+}
+
+/**
+ * Edit history, drawing the kit's undo and redo controls only when the kit's
+ * contract couples them to history.
+ *
+ * @param UndoRedoButtons - The controls, for a kit whose history draws them.
+ * @returns The kit's `editHistory` factory.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function createAdapterEditHistory(
+  UndoRedoButtons?: AdapterEditingComponents["UndoRedoButtons"]
+): AdapterEditingFeatures["editHistory"] {
+  const chrome = UndoRedoButtons ? undoRedoChrome(UndoRedoButtons) : [];
+  return (options = true) => extendFeature(coreEditHistory(options), chrome);
+}
+
+/**
+ * Undo and redo controls drawn with the kit's buttons.
+ *
+ * @param UndoRedoButtons - The kit's controls; omitted when the kit's history
+ *   already draws them.
+ * @returns The kit's `undoRedoButtons` factory.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function createAdapterUndoRedoButtons(
+  UndoRedoButtons?: AdapterEditingComponents["UndoRedoButtons"]
+): AdapterEditingFeatures["undoRedoButtons"] {
+  const chrome = UndoRedoButtons ? undoRedoChrome(UndoRedoButtons) : [];
+  return () => extendFeature(coreUndoRedoButtons(), chrome);
+}
+
 /**
  * Bind core's editing lifecycle to one kit's editors and controls.
  *
@@ -137,70 +272,23 @@ function withResolvedDisplay(
 export function createAdapterEditingFeatures(
   components: AdapterEditingComponents
 ): AdapterEditingFeatures {
-  const EditableCell = withResolvedDisplay(components.EditableCell);
-  const cellChrome = [
-    slotRender(EDITABLE_CELL, (props) => createElement(EditableCell, props)),
-    slotRender(ROW_EDIT_ACTIONS, (props) =>
-      createElement(components.RowEditActions, props)
-    ),
-  ];
-  // Undo and redo sit where `undoRedoButtons` puts them in every kit, even in
-  // a kit whose `editHistory` draws them.
-  const undoChrome = [
-    slotRender(
-      TOOLBAR_EXTRAS,
-      (props) => createElement(components.UndoRedoButtons, props),
-      { orderAs: "undo-redo-buttons" }
-    ),
-  ];
-
-  function editing<TRow>(
-    onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown,
-    extras?: FeaturePatch<TRow>
-  ): TableFeature<TRow> {
-    return extendFeature(coreEditing(onCellEdit, extras), cellChrome);
-  }
-
-  function rowEditing<TRow>(
-    onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown,
-    extras?: FeaturePatch<TRow>
-  ): TableFeature<TRow> {
-    return extendFeature(coreRowEditing(onRowEdit, extras), cellChrome);
-  }
-
-  function editHistory(
-    options: boolean | EditHistoryOptions = true
-  ): StaticTableFeature {
-    return extendFeature(
-      coreEditHistory(options),
-      components.historyIncludesControls === true ? undoChrome : []
-    );
-  }
-
-  function undoRedoButtons(): StaticTableFeature {
-    return extendFeature(
-      coreUndoRedoButtons(),
-      components.historyIncludesControls === true ? [] : undoChrome
-    );
-  }
-
-  function batchEditing<TRow>(
-    onBatchEdit: (edits: readonly BatchRowEdit<TRow>[]) => unknown
-  ): TableFeature<TRow> {
-    return extendFeature(coreBatchEditing(onBatchEdit), [
-      ...cellChrome,
-      slotRender(BATCH_EDIT_BAR, (props) =>
-        createElement(components.BatchEditBar, props)
-      ),
-    ]);
-  }
-
+  const historyDraws = components.historyIncludesControls === true;
   return {
-    editing,
-    rowEditing,
+    editing: createAdapterEditing(components.EditableCell),
+    rowEditing: createAdapterRowEditing(
+      components.EditableCell,
+      components.RowEditActions
+    ),
     dirtyIndicators: coreDirtyIndicators,
-    editHistory,
-    undoRedoButtons,
-    batchEditing,
+    editHistory: createAdapterEditHistory(
+      historyDraws ? components.UndoRedoButtons : undefined
+    ),
+    undoRedoButtons: createAdapterUndoRedoButtons(
+      historyDraws ? undefined : components.UndoRedoButtons
+    ),
+    batchEditing: createAdapterBatchEditing(
+      components.EditableCell,
+      components.BatchEditBar
+    ),
   };
 }

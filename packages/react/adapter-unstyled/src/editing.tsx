@@ -1,7 +1,13 @@
+import type { StaticTableFeature } from "@adapttable/react";
 import {
-  createAdapterEditingFeatures,
+  createAdapterBatchEditing,
+  createAdapterEditHistory,
+  createAdapterEditing,
+  createAdapterRowEditing,
+  createAdapterUndoRedoButtons,
   type EditableCellRenderProps,
 } from "@adapttable/react/adapter";
+import { dirtyIndicators as bindingDirtyIndicators } from "@adapttable/react/features";
 
 import { useClassNames } from "./components/classNamesContext";
 import { EditableDataCell } from "./components/EditableCell";
@@ -22,22 +28,20 @@ function EditableSlot(props: Readonly<EditableCellRenderProps<unknown>>) {
   );
 }
 
-const editingFeatures = createAdapterEditingFeatures({
-  EditableCell: EditableSlot,
-  RowEditActions,
-  BatchEditBar,
-  UndoRedoButtons,
-});
+// Each feature is built on its own, so a table keeps only the ones it names.
 
 /** Edit a single cell in place with this kit's controls. @public */
-export const editing = editingFeatures.editing;
+export const editing = createAdapterEditing(EditableSlot);
 /** Edit a whole row with this kit's controls. @public */
-export const rowEditing = editingFeatures.rowEditing;
+export const rowEditing = createAdapterRowEditing(EditableSlot, RowEditActions);
 /** Mark unsaved rows and cells. @public */
-export const dirtyIndicators = editingFeatures.dirtyIndicators;
+export const dirtyIndicators: () => StaticTableFeature = bindingDirtyIndicators;
 /** Track edit history. @public */
-export const editHistory = editingFeatures.editHistory;
+export const editHistory = createAdapterEditHistory();
 /** Add undo and redo controls. @public */
-export const undoRedoButtons = editingFeatures.undoRedoButtons;
+export const undoRedoButtons = createAdapterUndoRedoButtons(UndoRedoButtons);
 /** Hold edits until the batch is saved or discarded. @public */
-export const batchEditing = editingFeatures.batchEditing;
+export const batchEditing = createAdapterBatchEditing(
+  EditableSlot,
+  BatchEditBar
+);

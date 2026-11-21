@@ -9,6 +9,9 @@ import {
 import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
+import { batchEditing } from "../features/editing";
+import { FeatureProviders } from "../features/providers";
+import { applyTableFeatures } from "../features/tableFeature";
 import { editableCellTestSlots } from "../internal/chromeTestSlots";
 import { useBatchEditing } from "./batchEditing";
 import { focusEditorOnMount } from "./editableCellController";
@@ -200,29 +203,33 @@ describe("EditableCellGate", () => {
       }),
     }));
     render(
-      <EditableCellGate
-        slots={editableCellTestSlots}
-        editing={{
-          onCellEdit,
-          state: result.current.state,
-          batch: result.current.batch,
-        }}
-        row={ROW}
-        column={COLS[0]!}
-        rowId="1"
-        rows={[ROW]}
-        columns={COLS}
-        rowKey={(r) => r.id}
-        editLabel="Edit cell"
-        display={<span>{ROW.name}</span>}
-        renderEditor={(ctrl) => (
-          <input
-            aria-label="Edit cell"
-            value={ctrl.draft}
-            onChange={(event) => ctrl.setDraft(event.target.value)}
-          />
-        )}
-      />
+      <FeatureProviders
+        props={applyTableFeatures({ features: [batchEditing(vi.fn())] })}
+      >
+        <EditableCellGate
+          slots={editableCellTestSlots}
+          editing={{
+            onCellEdit,
+            state: result.current.state,
+            batch: result.current.batch,
+          }}
+          row={ROW}
+          column={COLS[0]!}
+          rowId="1"
+          rows={[ROW]}
+          columns={COLS}
+          rowKey={(r) => r.id}
+          editLabel="Edit cell"
+          display={<span>{ROW.name}</span>}
+          renderEditor={(ctrl) => (
+            <input
+              aria-label="Edit cell"
+              value={ctrl.draft}
+              onChange={(event) => ctrl.setDraft(event.target.value)}
+            />
+          )}
+        />
+      </FeatureProviders>
     );
     expect(
       document.querySelector('[data-adapttable-part="batch-edit-cell"]')

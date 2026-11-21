@@ -24,6 +24,8 @@ import {
 } from "react";
 
 import type { ColumnDef } from "../columnDef";
+import { BATCH_EDIT_CELL, ROW_EDIT_CELL } from "../features/editingStageKeys";
+import { FeatureSlot } from "../features/providers";
 import {
   editableCellController,
   type EditableCellEditing,
@@ -31,7 +33,6 @@ import {
   stopCellEditKeyboard,
 } from "./editableCellController";
 import { EditingCellFrame } from "./EditingCellFrame";
-import { BatchEditCell, RowEditCell } from "./RowEditGate";
 
 export type { EditableCellButtonProps } from "@adapttable/core/binding";
 export type { EditableCellEditorCtrl } from "@adapttable/core/editing";
@@ -301,18 +302,21 @@ export function EditableCellGate<TRow>(
   const batch = props.editing?.batch;
   if (presentation === "batch" && batch) {
     return (
-      <BatchEditCell
-        batch={batch}
-        row={props.row}
-        rowId={props.rowId}
-        column={props.column}
-        display={<>{props.display}</>}
-        editLabel={props.editLabel}
-        renderEditor={props.renderEditor}
-        ask={cellConflictAsk(props.editing, props.rowId, props.column.key)}
-        conflictLabels={props.editing?.conflictLabels}
-        errorClassName={props.errorClassName}
-        slots={props.slots}
+      <FeatureSlot
+        slot={BATCH_EDIT_CELL}
+        props={{
+          batch,
+          row: props.row,
+          rowId: props.rowId,
+          column: props.column,
+          display: <>{props.display}</>,
+          editLabel: props.editLabel,
+          renderEditor: props.renderEditor,
+          ask: cellConflictAsk(props.editing, props.rowId, props.column.key),
+          conflictLabels: props.editing?.conflictLabels,
+          errorClassName: props.errorClassName,
+          slots: props.slots,
+        }}
       />
     );
   }
@@ -320,18 +324,21 @@ export function EditableCellGate<TRow>(
   const rowEditing = props.editing?.rowEditing;
   if (presentation === "row" && rowEditing) {
     return (
-      <RowEditCell
-        rowEditing={rowEditing}
-        column={props.column}
-        display={<>{props.display}</>}
-        editLabel={props.editLabel}
-        takesFocus={isFirstEditableColumn(props.columns, props.column.key)}
-        renderEditor={props.renderEditor}
-        ask={cellConflictAsk(props.editing, props.rowId, props.column.key)}
-        rowAsking={props.editing?.conflict?.isRowContested(props.rowId)}
-        conflictLabels={props.editing?.conflictLabels}
-        errorClassName={props.errorClassName}
-        slots={props.slots}
+      <FeatureSlot
+        slot={ROW_EDIT_CELL}
+        props={{
+          rowEditing,
+          column: props.column,
+          display: <>{props.display}</>,
+          editLabel: props.editLabel,
+          takesFocus: isFirstEditableColumn(props.columns, props.column.key),
+          renderEditor: props.renderEditor,
+          ask: cellConflictAsk(props.editing, props.rowId, props.column.key),
+          rowAsking: props.editing?.conflict?.isRowContested(props.rowId),
+          conflictLabels: props.editing?.conflictLabels,
+          errorClassName: props.errorClassName,
+          slots: props.slots,
+        }}
       />
     );
   }
