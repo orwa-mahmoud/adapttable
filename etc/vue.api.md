@@ -159,7 +159,6 @@ import { LazyChildrenState } from '@adapttable/core/binding';
 import { LiveFeatureHost } from '@adapttable/core/binding';
 import { MaybeRefOrGetter } from 'vue';
 import { NestedTableDefaults } from '@adapttable/core';
-import { normalizeEditorOptions } from '@adapttable/core/binding';
 import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
@@ -1790,7 +1789,7 @@ export function useEditableCell<TRow>(input: MaybeRefOrGetter<Parameters<typeof 
     isDirty: boolean;
     canRollback: boolean;
     editor: CellEditor | null;
-    selectOptions: ReturnType<normalizeEditorOptions>;
+    selectOptions: CellEditorOption[];
     draft: string;
     conflict?: EditConflict<TRow> | undefined;
     conflictLabels?: EditConflictLabels;
