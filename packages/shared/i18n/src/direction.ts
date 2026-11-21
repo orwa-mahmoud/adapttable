@@ -44,7 +44,32 @@ export function primarySubtag(locale: string): string {
 }
 
 /**
- * Whether a locale is written right-to-left.
+ * ISO 15924 scripts written right-to-left, lower-cased.
+ */
+const RTL_SCRIPTS: ReadonlySet<string> = new Set([
+  "adlm", // Adlam
+  "arab", // Arabic
+  "hebr", // Hebrew
+  "mand", // Mandaic
+  "mend", // Mende Kikakui
+  "nkoo", // N'Ko
+  "rohg", // Hanifi Rohingya
+  "samr", // Samaritan
+  "syrc", // Syriac
+  "thaa", // Thaana
+  "yezi", // Yezidi
+]);
+
+/** The script subtag a locale names, lower-cased, if it names one. */
+function scriptSubtag(locale: string): string | undefined {
+  const script = locale.toLowerCase().split(/[-_]/)[1];
+  return script !== undefined && /^[a-z]{4}$/.test(script) ? script : undefined;
+}
+
+/**
+ * Whether a locale is written right-to-left. A tag that names a script is
+ * read by its script (`"az-Arab"` is RTL, `"ar-Latn"` is not); one that
+ * names none is read by its language.
  *
  * @param locale - A BCP-47 locale such as `"ar"`, `"ar-EG"`, or `"he-IL"`.
  * @returns `true` for RTL locales.
@@ -52,6 +77,8 @@ export function primarySubtag(locale: string): string {
  * @public
  */
 export function isRtlLocale(locale: string): boolean {
+  const script = scriptSubtag(locale);
+  if (script !== undefined) return RTL_SCRIPTS.has(script);
   return (RTL_LANGUAGES as readonly string[]).includes(primarySubtag(locale));
 }
 
