@@ -68,29 +68,30 @@ describe("adapter feature assembly", () => {
     const rowEditing = features.rowEditing<{ id: string }>(() => undefined);
     const batch = features.batchEditing<{ id: string }>(() => undefined);
 
-    expect(renderSlots(editing)).toEqual([
+    // Row controls draw only while row editing is armed, so only row editing
+    // fills them; each mode adds its own stage and cell.
+    expect(renderSlots(editing)).toEqual(["editing-live", "editable-cell"]);
+    expect(renderSlots(rowEditing)).toEqual([
       "editing-live",
+      "row-editing-stage",
+      "row-edit-cell",
       "editable-cell",
       "row-edit-actions",
     ]);
     expect(renderSlots(batch)).toEqual([
       "editing-live",
+      "batch-editing-stage",
+      "batch-edit-cell",
       "table-bars",
       "editable-cell",
-      "row-edit-actions",
       "batch-edit-bar",
     ]);
-    expect(renderSlots(rowEditing)).toEqual(renderSlots(editing));
     expect(features.dirtyIndicators().id).toBe("dirty-indicators");
     expect(renderSlots(features.editHistory())).toEqual(["edit-history-live"]);
     expect(renderSlots(features.undoRedoButtons())).toEqual(["toolbar-extras"]);
-    expectKitRenders(editing, ["editable-cell", "row-edit-actions"]);
+    expectKitRenders(editing, ["editable-cell"]);
     expectKitRenders(rowEditing, ["editable-cell", "row-edit-actions"]);
-    expectKitRenders(batch, [
-      "editable-cell",
-      "row-edit-actions",
-      "batch-edit-bar",
-    ]);
+    expectKitRenders(batch, ["editable-cell", "batch-edit-bar"]);
     expectKitRenders(features.undoRedoButtons(), ["toolbar-extras"]);
     expectTypeOf(editing).toEqualTypeOf<TableFeature<{ id: string }>>();
   });
