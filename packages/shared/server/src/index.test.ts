@@ -7,6 +7,7 @@
  * the caller reaching a database — does not look like a bug until it does.
  */
 import {
+  FILTER_TREE_VERSION,
   type QueryFilterGroup,
   serializeFilterTree,
 } from "@adapttable/core/query";
@@ -24,6 +25,9 @@ const treeParam = (tree: QueryFilterGroup) =>
   `?ft=${encodeURIComponent(serializeFilterTree(tree) ?? "")}`;
 
 const schema = { columns: ["name", "team", "budget"] };
+
+/** The prefix a stored tree carries, for a tree written by hand. */
+const VERSIONED = `${String(FILTER_TREE_VERSION)}.`;
 
 describe("parseTableQuery", () => {
   it("reads a plain query", () => {
@@ -175,6 +179,63 @@ describe("parseTableQuery", () => {
       );
 
       expect(query.filterTree?.combinator).toBe("and");
+      expect(query.rejected).toEqual([]);
+    });
+
+    it("drops the whole tree when one condition is malformed", () => {
+      // The codec's lenient read prunes a malformed node, which turns a
+      // two-condition AND into a one-condition filter that matches more.
+      const raw = (tree: unknown) =>
+        `?ft=${encodeURIComponent(VERSIONED + JSON.stringify(tree))}`;
+      const malformed = [
+        {
+          combinator: "and",
+          conditions: [
+            { key: "team", op: "eq", value: "core" },
+            { key: "name", value: "x" },
+          ],
+        },
+        {
+          combinator: "or",
+          conditions: [
+            { key: "team", op: "eq", value: "core" },
+            { combinator: "and", conditions: [{ op: "eq", value: "x" }] },
+          ],
+        },
+        {
+          combinator: "and",
+          conditions: [
+            { key: "team", op: "eq", value: "core" },
+            { combinator: "xor", conditions: [] },
+          ],
+        },
+        { combinator: "and", conditions: [{ key: "team", op: "eq" }, 7] },
+      ];
+      for (const tree of malformed) {
+        for (const over of [schema, { columns: "any" as const }]) {
+          const query = parseTableQuery(raw(tree), over);
+          expect(query.filterTree, JSON.stringify(tree)).toBeUndefined();
+          expect(query.rejected, JSON.stringify(tree)).toEqual([
+            expect.objectContaining({
+              param: "ft",
+              reason: "filter tree has a malformed condition",
+            }),
+          ]);
+        }
+      }
+    });
+
+    it("keeps a tree the table writes, an unfinished condition included", () => {
+      const tree = {
+        combinator: "and" as const,
+        conditions: [
+          { key: "team", op: "eq", value: "core" },
+          { combinator: "or" as const, conditions: [] },
+          { key: "name", op: "contains" },
+        ],
+      };
+      const query = parseTableQuery(treeParam(tree), schema);
+      expect(query.filterTree).toEqual(tree);
       expect(query.rejected).toEqual([]);
     });
 

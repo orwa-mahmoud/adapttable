@@ -34043,6 +34043,14 @@
       "behavior": ""
     },
     {
+      "export": "parseStrictFilterTree",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
       "export": "PinnedSide",
       "currentImport": "@adapttable/core/query",
       "kind": "type",

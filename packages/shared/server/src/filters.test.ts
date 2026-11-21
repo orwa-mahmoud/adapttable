@@ -375,6 +375,26 @@ describe("typed filter trees", () => {
     expect(query.rejected).toEqual([]);
   });
 
+  it("drops a typed tree with a malformed condition and says so", () => {
+    const tree = {
+      combinator: "and",
+      conditions: [
+        { key: "name", op: "contains", value: "a" },
+        { key: "status", value: "open" },
+      ],
+    };
+    const stored = `1.${JSON.stringify(tree)}`;
+    const raw = `?ft=${encodeURIComponent(stored)}`;
+    const query = parseTableQuery(raw, schema);
+    expect(query.filterTree).toBeUndefined();
+    expect(query.rejected).toEqual([
+      expect.objectContaining({
+        param: "ft",
+        reason: "filter tree has a malformed condition",
+      }),
+    ]);
+  });
+
   it("refuses a tree it cannot read", () => {
     const query = parseTableQuery("?ft=not-a-tree", schema);
 

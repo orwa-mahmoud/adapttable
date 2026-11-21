@@ -260,6 +260,13 @@ const tree = parseFilterTree(params.get("ft"));
 const config = deserializePivot(params.get("pivot"));
 ```
 
+`parseFilterTree` keeps the readable part of a hand-edited link and drops a
+node it cannot read. Before a request reaches a database, read the tree with
+`parseStrictFilterTree` instead: it answers `undefined` when any node is
+malformed, because an AND with one condition removed matches more rows than
+the one the client asked for. `parseTableQuery` reads it this way and reports
+the refusal.
+
 It exports the `ft=1.{…}` codec (`parseFilterTree`, `serializeFilterTree`,
 `isActiveFilterTree`, `FILTER_TREE_PARAM`, `FILTER_TREE_VERSION`), the
 `pivot=rows:…` codec (`serializePivot`, `deserializePivot`, and

@@ -58,6 +58,7 @@ export {
   isActiveFilterTree,
   isFilterTreeConditionSet,
   parseFilterTree,
+  parseStrictFilterTree,
   serializeFilterTree,
   settledFilterTree,
 } from "./filters/filterTreeCodec";

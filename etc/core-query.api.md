@@ -774,6 +774,9 @@ export function parseGroupAggregateOverrides(value: string | null | undefined): 
 export function parseRelativeToken(raw: string | undefined): RelativeDateToken | undefined;
 
 // @public
+export function parseStrictFilterTree(raw: string | null | undefined): QueryFilterGroup | undefined;
+
+// @public
 export type PinnedSide = PinSide | undefined;
 
 // @public

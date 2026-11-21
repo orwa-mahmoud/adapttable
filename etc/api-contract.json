@@ -5562,6 +5562,7 @@
       "PARAM_SORT_DIR",
       "parseDateOp",
       "parseFilterTree",
+      "parseStrictFilterTree",
       "parseGroupAggregateOverrides",
       "parseRelativeToken",
       "PinnedSide",

@@ -100,22 +100,43 @@ function sanitizeCondition(raw: unknown): QueryCondition | undefined {
   return { key: node.key, op: node.op, value: node.value };
 }
 
-function sanitizeGroup(raw: unknown): QueryFilterGroup | undefined {
+/**
+ * How a read treats a node that is neither a group nor a condition: the
+ * table's own read drops it, a strict read refuses the whole tree.
+ */
+type MalformedNodes = "drop" | "refuse";
+
+function sanitizeGroup(
+  raw: unknown,
+  malformed: MalformedNodes
+): QueryFilterGroup | undefined {
   if (raw == null || typeof raw !== "object") return undefined;
   const node = raw as Record<string, unknown>;
   if (!isCombinator(node.combinator)) return undefined;
   if (!Array.isArray(node.conditions)) return undefined;
   const conditions: (QueryCondition | QueryFilterGroup)[] = [];
   for (const child of node.conditions) {
-    const group = sanitizeGroup(child);
-    if (group) {
-      conditions.push(group);
-      continue;
-    }
-    const condition = sanitizeCondition(child);
-    if (condition) conditions.push(condition);
+    const kept = sanitizeGroup(child, malformed) ?? sanitizeCondition(child);
+    if (kept) conditions.push(kept);
+    else if (malformed === "refuse") return undefined;
   }
   return { combinator: node.combinator, conditions };
+}
+
+function readTree(
+  raw: string | null | undefined,
+  malformed: MalformedNodes
+): QueryFilterGroup | undefined {
+  if (raw == null || raw === "") return undefined;
+  if (!raw.startsWith(VERSION_PREFIX)) return undefined;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw.slice(VERSION_PREFIX.length));
+  } catch {
+    // Not JSON is the same answer as not a tree: there is nothing to read.
+    return undefined;
+  }
+  return sanitizeGroup(parsed, malformed);
 }
 
 /**
@@ -128,13 +149,21 @@ function sanitizeGroup(raw: unknown): QueryFilterGroup | undefined {
 export function parseFilterTree(
   raw: string | null | undefined
 ): QueryFilterGroup | undefined {
-  if (raw == null || raw === "") return undefined;
-  if (!raw.startsWith(VERSION_PREFIX)) return undefined;
-  try {
-    return sanitizeGroup(JSON.parse(raw.slice(VERSION_PREFIX.length)));
-  } catch {
-    return undefined;
-  }
+  return readTree(raw, "drop");
+}
+
+/**
+ * Parse a stored `ft` value the way a server must: `undefined` unless every
+ * node is a well-formed group or condition. {@link parseFilterTree} drops a
+ * malformed node so a link keeps its readable part, which for a request a
+ * server answers means a narrower filter quietly matching more rows.
+ *
+ * @public
+ */
+export function parseStrictFilterTree(
+  raw: string | null | undefined
+): QueryFilterGroup | undefined {
+  return readTree(raw, "refuse");
 }
 
 /**

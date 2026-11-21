@@ -57,6 +57,7 @@ import {
   PARAM_SORT_DIR,
   parseFilterTree,
   parseGroupAggregateOverrides,
+  parseStrictFilterTree,
   type PivotConfig,
   type PivotUrlState,
   type QueryFilterGroup,
@@ -559,6 +560,27 @@ function validGroupAggregates(
 }
 
 /**
+ * The submitted tree, read strictly: a malformed node refuses the whole tree
+ * rather than being pruned out of it, since a pruned AND matches more rows
+ * than the one the client asked for.
+ */
+function submittedTree(
+  raw: string,
+  refuse: Refuse
+): QueryFilterGroup | undefined {
+  const tree = parseStrictFilterTree(raw);
+  if (tree) return tree;
+  refuse(
+    FILTER_TREE_PARAM,
+    raw,
+    parseFilterTree(raw)
+      ? "filter tree has a malformed condition"
+      : "not a readable filter tree"
+  );
+  return undefined;
+}
+
+/**
  * The filter tree, checked against the declared filters: every condition a
  * declared key, an operator its type allows, a value of its shape, each
  * operator in its type's own spelling. As with columns, one bad condition
@@ -571,11 +593,8 @@ function typedTree(
   refuse: Refuse
 ): QueryFilterGroup | undefined {
   if (raw === null || raw === "") return undefined;
-  const tree = parseFilterTree(raw);
-  if (!tree) {
-    refuse(FILTER_TREE_PARAM, raw, "not a readable filter tree");
-    return undefined;
-  }
+  const tree = submittedTree(raw, refuse);
+  if (!tree) return undefined;
   const checked = checkTree(tree, defs, custom);
   if ("problem" in checked) {
     refuse(FILTER_TREE_PARAM, raw, checked.problem);
@@ -622,11 +641,8 @@ function validTree(
   refuse: Refuse
 ): QueryFilterGroup | undefined {
   if (raw === null || raw === "") return undefined;
-  const tree = parseFilterTree(raw);
-  if (!tree) {
-    refuse(FILTER_TREE_PARAM, raw, "not a readable filter tree");
-    return undefined;
-  }
+  const tree = submittedTree(raw, refuse);
+  if (!tree) return undefined;
   const unknown = treeColumns(tree).filter((field) => !allowed(field));
   if (unknown.length > 0) {
     refuse(

@@ -1832,7 +1832,10 @@ AND/OR trees: `FILTER_TREE_PARAM` / `FILTER_TREE_VERSION` /
 `evaluateFilterTree` / `conditionToExtra` /
 `isFilterTreeConditionSet` / `settledFilterTree` — a condition still waiting
 for a value filters nothing: it gets no chip, is not counted, is left out of
-evaluation and is not sent to a server. Mutations:
+evaluation and is not sent to a server. `parseStrictFilterTree` (on
+`@adapttable/core/query`) reads a tree the way a server must: `undefined`
+unless every node is a well-formed group or condition, where
+`parseFilterTree` drops the malformed node and keeps the rest. Mutations:
 `emptyFilterTree` / `addFilterTreeCondition` / `addFilterTreeGroup` /
 `removeFilterTreeNode` / `replaceFilterTreeNode` /
 `setFilterTreeCombinator` / `walkFilterTreeConditions` /
