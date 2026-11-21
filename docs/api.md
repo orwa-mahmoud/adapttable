@@ -1042,6 +1042,10 @@ RowReorderController` — the keyboard grab, drag and drop, the mobile swap and
   writes; bindings synchronize in their committed lifecycle with
   `syncFromUrl()`. Disconnecting flushes an outstanding query to its original
   destination.
+- `createFindMatcher<TRow>()` — a find that remembers its last answer: called
+  with the same rows, columns and first row index and a query that contains
+  the previous one, it reads only the previous hits; anything else scans every
+  cell as `findMatches` does. Takes `FindMatchesOptions`; each table keeps one.
 - `createHeaderFilterOverlay(options: HeaderFilterOverlayOptions):
 HeaderFilterOverlayController` — one header filter's open state and reset
   key. `HeaderFilterOverlaySnapshot`, `isHeaderFilterOpen`,

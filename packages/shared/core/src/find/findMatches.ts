@@ -64,6 +64,56 @@ export function findMatches<TRow>(
   return matches;
 }
 
+/** One find over the same inputs, remembered so the next query can narrow it. */
+interface LastFind<TRow> {
+  readonly needle: string;
+  readonly rows: readonly TRow[];
+  readonly columns: readonly ColumnMetadata<TRow>[];
+  readonly firstRowIndex: number;
+  readonly matches: GridCell[];
+}
+
+/**
+ * A find that remembers its last answer. When the rows, the columns and the
+ * first row index are the same objects as last time and the new query
+ * contains the previous one, only the previous hits are read again: a cell
+ * whose text holds the longer query also held the shorter one. Any other
+ * change reads every cell, as `findMatches` does. Each table keeps one.
+ *
+ * @public
+ */
+export function createFindMatcher<TRow>(): (
+  options: FindMatchesOptions<TRow>
+) => GridCell[] {
+  let last: LastFind<TRow> | undefined;
+  return (options) => {
+    const { query, rows, columns, firstRowIndex = 0 } = options;
+    const needle = query.trim().toLowerCase();
+    if (needle === "") {
+      last = undefined;
+      return [];
+    }
+    const previous = last;
+    const matches =
+      previous?.rows === rows &&
+      previous.columns === columns &&
+      previous.firstRowIndex === firstRowIndex &&
+      needle.includes(previous.needle)
+        ? previous.matches.filter((cell) => {
+            const row = rows[cell.row - firstRowIndex];
+            const column = columns[cell.col];
+            return (
+              row !== undefined &&
+              column !== undefined &&
+              columnText(column, row).toLowerCase().includes(needle)
+            );
+          })
+        : findMatches({ query, rows, columns, firstRowIndex });
+    last = { needle, rows, columns, firstRowIndex, matches };
+    return matches;
+  };
+}
+
 /**
  * A cell address as a string, for set membership without a nested scan.
  *

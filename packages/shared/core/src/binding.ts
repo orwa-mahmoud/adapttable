@@ -1679,7 +1679,11 @@ export {
   createFindController,
   readFindQuery,
 } from "./find/findController";
-export { matchKey } from "./find/findMatches";
+export {
+  createFindMatcher,
+  type FindMatchesOptions,
+  matchKey,
+} from "./find/findMatches";
 export { batchEditHandler } from "./focus/cellEdits";
 export {
   cellNavigationChannels,

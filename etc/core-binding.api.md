@@ -3004,6 +3004,9 @@ export function createFilterOptionsLoader(): FilterOptionsLoader;
 export function createFindController(initial: FindControllerOptions): FindController;
 
 // @public
+export function createFindMatcher<TRow>(): (options: FindMatchesOptions<TRow>) => GridCell[];
+
+// @public
 export function createFindShortcutScope(options: FindShortcutScopeOptions): FindShortcutScope;
 
 // @public
@@ -5721,6 +5724,14 @@ export type FindLiveSlotProps<TOptions = unknown, TNode = unknown> = TOptions & 
 
 // @public
 export function findMatchCountText(labels: Pick<TableLabels, "findMatchCount"> | undefined, index: number, total: number): string;
+
+// @public
+export interface FindMatchesOptions<TRow> {
+    columns: readonly ColumnMetadata<TRow>[];
+    firstRowIndex?: number;
+    query: string;
+    rows: readonly TRow[];
+}
 
 // @public
 export function findMatchRow<TRow>(rows: readonly TRow[], firstRowIndex: number | undefined, current: GridCell | null): TRow | undefined;

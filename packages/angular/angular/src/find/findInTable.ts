@@ -6,14 +6,11 @@
  * follows it, derives the hits over the rows it is given, and leaves focus
  * to the table.
  */
-import {
-  findMatches,
-  matchKeySet,
-  type UrlStateAdapter,
-} from "@adapttable/core";
+import { matchKeySet, type UrlStateAdapter } from "@adapttable/core";
 import {
   clampMatchIndex,
   createFindController,
+  createFindMatcher,
   type FindInTableState,
 } from "@adapttable/core/binding";
 import {
@@ -80,6 +77,7 @@ export function injectFindInTable<TRow>(
   const enabled = computed(() => readMaybe(options.enabled ?? true));
   const adapter =
     options.urlAdapter ?? urlAdapterFor({ urlSync: options.urlSync }, injector);
+  const match = createFindMatcher<TRow>();
   const controller = createFindController({
     enabled: untracked(enabled),
     adapter,
@@ -122,7 +120,7 @@ export function injectFindInTable<TRow>(
     const { open, query, index } = snapshot();
     const matches =
       on && open
-        ? findMatches({
+        ? match({
             query,
             rows: options.rows(),
             columns: options.columns(),
