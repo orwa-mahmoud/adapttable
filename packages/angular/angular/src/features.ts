@@ -1,8 +1,4 @@
 /** Opt-in Angular feature factories and their options. @packageDocumentation */
-import {
-  exportPdf as exportPdfFeature,
-  exportXlsx as exportXlsxFeature,
-} from "./features/export";
 export {
   cellNavigation,
   type CellNavigationOptions,
@@ -79,19 +75,3 @@ export type {
   RowEditHandler,
   SlotComponent,
 } from "@adapttable/angular";
-
-/**
- * PDF export of the current view.
- *
- * @deprecated Import `exportPdf` from `@adapttable/angular/pdf`.
- * @public
- */
-export const exportPdf: typeof exportPdfFeature = exportPdfFeature;
-
-/**
- * XLSX export of the current view.
- *
- * @deprecated Import `exportXlsx` from `@adapttable/angular/xlsx`.
- * @public
- */
-export const exportXlsx: typeof exportXlsxFeature = exportXlsxFeature;

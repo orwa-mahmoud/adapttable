@@ -17,7 +17,6 @@ import { DirtyCellState } from '@adapttable/core';
 import { EditConflictHandler } from '@adapttable/core';
 import { EditConflictPolicy } from '@adapttable/core';
 import { EditEventHandler } from '@adapttable/core';
-import { ExportCsvOptions } from '@adapttable/core';
 import { ExtraRow } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
@@ -155,18 +154,6 @@ export interface EditingLifecycleExtras<TRow = unknown> {
     readonly rowVersion?: (row: TRow) => string | number;
     readonly validateRow?: RowValidator<TRow>;
 }
-
-// @public
-function exportPdf$1<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
-
-// @public @deprecated
-export const exportPdf: typeof exportPdf$1;
-
-// @public
-function exportXlsx$1<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
-
-// @public @deprecated
-export const exportXlsx: typeof exportXlsx$1;
 
 // @public
 export function extraRows(rows: readonly ExtraRow[]): AdaptTableFeature;

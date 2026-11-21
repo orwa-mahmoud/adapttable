@@ -2683,9 +2683,7 @@
         "SelectionStatsOptions": "pending: shared-surface decision",
         "SidePanelPanel": "pending: shared-surface decision",
         "SlotComponent": "pending: shared-surface decision",
-        "TreeFeatureOptions": "pending: shared-surface decision",
-        "exportPdf": "pending: shared-surface decision",
-        "exportXlsx": "pending: shared-surface decision"
+        "TreeFeatureOptions": "pending: shared-surface decision"
       },
       "formula": {
         "AngularFormulaColumnsResult": "pending: shared-surface decision",
