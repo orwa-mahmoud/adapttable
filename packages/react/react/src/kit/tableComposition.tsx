@@ -17,15 +17,10 @@ import type { CSSProperties, ReactNode, RefCallback, RefObject } from "react";
 
 import { TableStatusAnnouncer } from "../a11y/TableStatusAnnouncer";
 import { OptionalSidePanel } from "../adapterFeatures/featureRoot";
-import { AGENT_APPROVAL_STATE } from "../editing/AgentApprovalChrome";
 import { DataTableShellView } from "../features/chromeBodyGate";
 import { FeatureHostProvider } from "../features/featureHostContext";
-import { FeatureSlot, useFeatureState } from "../features/providers";
+import { FeatureSlot } from "../features/providers";
 import {
-  ACTIVE_FILTER_CHIPS,
-  AGENT_APPROVAL,
-  BATCH_EDIT_BAR,
-  BULK_BAR,
   COMMAND_PALETTE_LIVE,
   FILTER_DRAWER,
   FILTERS_FORM,
@@ -50,6 +45,7 @@ import { fillSlot, type Slot } from "../state/slots";
 import type { Density } from "../url/useDensityUrlState";
 import { useDataTableShell } from "../useDataTableShell";
 import {
+  BARS_AREA,
   COLUMN_MENU_REGION,
   RootRegion,
   SAVED_VIEWS_REGION,
@@ -346,7 +342,6 @@ export function TableComposition<TRow>({
       return <FeatureSlot slot={FILTERS_FORM} props={form} />;
     }
   );
-  const approval = useFeatureState(AGENT_APPROVAL_STATE);
   const sticky = useStickyToolbarLayout(
     resolveStickyToolbar(
       props.stickyHeader,
@@ -360,7 +355,6 @@ export function TableComposition<TRow>({
     <DataTableShellView shell={shell}>
       {(view) => {
         const { chrome, labels, source, table } = view;
-        const batch = chrome.editing?.batch;
         const reorder = view.tableProps.rowReorder;
         return (
           <FeatureHostProvider host={view.featureHost}>
@@ -404,42 +398,7 @@ export function TableComposition<TRow>({
                   toolbarStyle={sticky.toolbarStyle}
                   toolbar={toolbarOf(kit, view, props)}
                   bars={
-                    <>
-                      <FeatureSlot
-                        slot={ACTIVE_FILTER_CHIPS}
-                        props={{
-                          chips: chrome.mergedChips,
-                          onClearAll: chrome.clearFilters,
-                          labels,
-                        }}
-                      />
-                      {batch ? (
-                        <FeatureSlot
-                          slot={BATCH_EDIT_BAR}
-                          props={{
-                            batch,
-                            contested: chrome.editing?.conflict?.anyContested,
-                            labels,
-                          }}
-                        />
-                      ) : null}
-                      <FeatureSlot
-                        slot={AGENT_APPROVAL}
-                        props={{ pending: approval, labels }}
-                      />
-                      {table.selection && props.bulkActions ? (
-                        <FeatureSlot
-                          slot={BULK_BAR}
-                          props={{
-                            selection: table.selection,
-                            total: source.total,
-                            bulkActions: props.bulkActions,
-                            confirm: chrome.confirm,
-                            labels,
-                          }}
-                        />
-                      ) : null}
-                    </>
+                    <FeatureSlot slot={BARS_AREA} props={{ view, props }} />
                   }
                   refreshing={chrome.isRefreshing}
                   main={

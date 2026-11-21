@@ -1,6 +1,7 @@
 import { createElement } from "react";
 
 import type { AgentApprovalProps } from "../editing/AgentApprovalChrome";
+import { AGENT_APPROVAL_BAR_RENDER } from "../features/barRegions";
 import { extendFeature, slotRender } from "../features/providers";
 import { AGENT_APPROVAL } from "../features/slotKeys";
 import type { StaticTableFeature } from "../features/tableFeature";
@@ -15,6 +16,7 @@ export function createAdapterAgentApprovalFeature(
   AgentApproval: AdapterFeatureComponent<AgentApprovalProps>
 ): StaticTableFeature {
   return extendFeature({ id: "agent-approval" }, [
+    AGENT_APPROVAL_BAR_RENDER,
     slotRender(AGENT_APPROVAL, (props) => createElement(AgentApproval, props)),
   ]);
 }

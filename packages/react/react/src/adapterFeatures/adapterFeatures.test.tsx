@@ -75,6 +75,7 @@ describe("adapter feature assembly", () => {
     ]);
     expect(renderSlots(batch)).toEqual([
       "editing-live",
+      "table-bars",
       "editable-cell",
       "row-edit-actions",
       "batch-edit-bar",
@@ -147,6 +148,7 @@ describe("adapter feature assembly", () => {
     expect(feature.provider).toBeDefined();
     expect(renderSlots(feature)).toEqual([
       "filter-chips-live",
+      "table-bars",
       "filters-form",
       "active-filter-chips",
       "filter-drawer",
@@ -234,7 +236,7 @@ describe("adapter feature assembly", () => {
   it("binds the kit approval strip to the agent-approval slot", () => {
     const feature = createAdapterAgentApprovalFeature(KitComponent);
     expect(feature.id).toBe("agent-approval");
-    expect(renderSlots(feature)).toEqual(["agent-approval"]);
+    expect(renderSlots(feature)).toEqual(["table-bars", "agent-approval"]);
     expectKitRenders(feature, ["agent-approval"]);
   });
 

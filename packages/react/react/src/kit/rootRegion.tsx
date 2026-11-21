@@ -76,6 +76,14 @@ export const COLUMN_MENU_REGION = rowSlotKey<KitRegionDraw>(
   { single: true }
 );
 
+/**
+ * The bars under the toolbar. Every composed feature that draws a bar fills
+ * it; the bars stack in feature order.
+ *
+ * @public
+ */
+export const BARS_AREA = rowSlotKey<KitRegionDraw>("table-bars");
+
 /** Nest the composed fills around the root, collecting their attributes. */
 export function RootRegion<TRow>({
   view,

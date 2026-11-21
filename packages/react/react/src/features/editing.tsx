@@ -30,6 +30,7 @@ import { useCellSaveState } from "../editing/saveState";
 import { useCellEditing } from "../editing/useCellEditing";
 import { useEditValidation } from "../editing/validation";
 import type { ComposedTableProps } from "../props";
+import { BATCH_EDIT_BAR_RENDER } from "./barRegions";
 import { featureHostOf } from "./featureHost";
 import { slotRender } from "./providers";
 import {
@@ -340,7 +341,7 @@ export function batchEditing<TRow>(
 ): TableFeature<TRow> {
   return {
     ...coreBatchEditing(onBatchEdit, extras),
-    renders: [editingRender],
+    renders: [editingRender, BATCH_EDIT_BAR_RENDER],
   };
 }
 

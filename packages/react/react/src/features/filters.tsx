@@ -15,6 +15,7 @@ import {
 } from "../filters/useActiveFilterChips";
 import { useExtraChips } from "../filters/useExtraChips";
 import { useFilterTreeChips } from "../filters/useFilterTreeChips";
+import { FILTER_CHIPS_BAR_RENDER } from "./barRegions";
 import { FILTER_ENGINE } from "./filterEngineKey";
 import {
   type FeatureProviderProps,
@@ -106,6 +107,7 @@ export function filters<TRow>(
       slotRender<ChromeExtraDraw>(FILTER_CHIPS_LIVE, (props) => (
         <LiveFilterChips {...props} />
       )),
+      FILTER_CHIPS_BAR_RENDER,
     ],
   };
 }

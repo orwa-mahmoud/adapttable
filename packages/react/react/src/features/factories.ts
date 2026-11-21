@@ -20,6 +20,7 @@ import type { CommandPaletteOptions } from "../actions/useCommandPalette";
 import type { ContextMenuOptions } from "../actions/useTableContextMenu";
 import type { SidePanelOptions } from "../props";
 import type { UseSavedViewsOptions } from "../url/useSavedViews";
+import { BULK_ACTIONS_BAR_RENDER } from "./barRegions";
 import { COLUMN_LAYOUT_LIVE_RENDER } from "./column-layout-live";
 import { CONTEXT_MENU_REGION_RENDER } from "./contextMenuRegion";
 import { SELECTION_LIVE_RENDER } from "./selection-live";
@@ -238,7 +239,7 @@ export function bulkActions(
 ): StaticTableFeature {
   return {
     ...rowFree(coreBulkActions(actions)),
-    renders: [SELECTION_LIVE_RENDER],
+    renders: [SELECTION_LIVE_RENDER, BULK_ACTIONS_BAR_RENDER],
   };
 }
 

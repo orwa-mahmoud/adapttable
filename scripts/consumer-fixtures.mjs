@@ -627,7 +627,9 @@ function adapterBaseFixtures() {
     absent: [
       ...ADAPTER_ABSENT,
       ...(kit === "mui" ? ["defaultLabels"] : []),
-      ...(kit === "antd" ? [] : ["contextMenuCopyTarget"]),
+      ...(kit === "antd"
+        ? []
+        : ["contextMenuCopyTarget", "AGENT_APPROVAL_STATE"]),
     ],
   }));
 }
