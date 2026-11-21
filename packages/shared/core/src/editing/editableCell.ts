@@ -13,6 +13,7 @@ import type { BatchEditingState } from "./batchEditing";
 import {
   type CellEditCommit,
   type CellEditor,
+  type CellEditorOption,
   type CellEditTarget,
   type EditableColumnLike,
   isCellEditable,
@@ -435,7 +436,7 @@ export interface EditableCellController<TRow = unknown> {
   /** Resolved editor when the column is editable; always set for activatable/editing. */
   editor: CellEditor | null;
   /** Normalized select options (empty for text/number). */
-  selectOptions: ReturnType<typeof normalizeEditorOptions>;
+  selectOptions: CellEditorOption[];
   /** The value being edited, as text. */
   draft: string;
   /** Opens the editor. */

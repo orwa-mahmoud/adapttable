@@ -33,19 +33,16 @@ export {
 } from "./stream/useRowPatchStream";
 export type { RowPatch, RowPatchEvent } from "@adapttable/core";
 export {
-  openRowPatchStream,
   type OpenRowPatchStreamOptions,
   type RowPatchStreamHandle,
   type RowPatchStreamReconnect,
   type StreamSocket,
   type StreamSocketEvent,
 } from "@adapttable/core";
-export { parseRowPatchFrame } from "@adapttable/core";
-export {
-  isStreamLive,
-  isStreamSettled,
-  type RowPatchStreamStatus,
-} from "@adapttable/core";
+export { type RowPatchStreamStatus } from "@adapttable/core";
+export { openRowPatchStream } from "@adapttable/core/stream";
+export { parseRowPatchFrame } from "@adapttable/core/stream";
+export { isStreamLive, isStreamSettled } from "@adapttable/core/stream";
 
 /**
  * The member types the signatures above hand back.

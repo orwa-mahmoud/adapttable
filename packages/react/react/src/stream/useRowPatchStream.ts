@@ -19,14 +19,16 @@
  */
 import {
   applyRowPatches,
-  openRowPatchStream,
-  parseRowPatchFrame,
   type RowPatch,
   type RowPatchStreamReconnect,
   type RowPatchStreamStatus,
   type StreamSocket,
 } from "@adapttable/core";
 import type { RowPatchStreamState } from "@adapttable/core/binding";
+import {
+  openRowPatchStream,
+  parseRowPatchFrame,
+} from "@adapttable/core/stream";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 export type { RowPatchStreamState } from "@adapttable/core/binding";
 

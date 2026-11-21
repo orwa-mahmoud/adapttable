@@ -7,13 +7,14 @@
  * propagates outward instead of being counted as zero — a wrong total that
  * looks right is the bug this engine exists to avoid.
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 
 import {
   evaluateFormula,
   FORMULA_ERRORS,
   FORMULA_FUNCTIONS,
   formulaDisplay,
+  type FormulaErrorCode,
   formulaSortValue,
   type FormulaValue,
   isFormulaError,
@@ -364,5 +365,16 @@ describe("values", () => {
     expect(formulaSortValue(run("=note"))).toBeNull();
     expect(formulaSortValue(run("=missing"))).toBeNull();
     expect(formulaSortValue(run("=quantity / discount"))).toBeNull();
+  });
+});
+
+describe("FORMULA_ERRORS", () => {
+  it("lists exactly the codes FormulaErrorCode names", () => {
+    expectTypeOf<
+      (typeof FORMULA_ERRORS)[keyof typeof FORMULA_ERRORS]
+    >().toEqualTypeOf<FormulaErrorCode>();
+    expect(new Set(Object.values(FORMULA_ERRORS)).size).toBe(
+      Object.keys(FORMULA_ERRORS).length
+    );
   });
 });

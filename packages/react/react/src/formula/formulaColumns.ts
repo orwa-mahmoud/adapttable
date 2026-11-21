@@ -2,10 +2,10 @@
  * The React face of the neutral formula-column builder.
  */
 import {
-  buildFormulaColumns as neutralBuildFormulaColumns,
   type FormulaColumnSpec,
   type FormulaColumnsResult,
 } from "@adapttable/core";
+import { buildFormulaColumns as neutralBuildFormulaColumns } from "@adapttable/core/formula";
 
 import type { ColumnDef } from "../columnDef";
 

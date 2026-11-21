@@ -824,7 +824,7 @@ export interface EditableCellController<TRow = unknown> {
     rollback: () => void;
     saveFailure?: FailedCellSave<TRow>;
     saveStatus?: CellSaveStatus;
-    selectOptions: ReturnType<typeof normalizeEditorOptions>;
+    selectOptions: CellEditorOption[];
     setDraft: (value: string) => void;
     takeConflict: () => void;
     validating: boolean;
@@ -1142,7 +1142,7 @@ export interface EditorDraftControl {
         preventDefault: () => void;
         shiftKey?: boolean;
     }) => void;
-    selectOptions: ReturnType<typeof editorSelectOptions>;
+    selectOptions: CellEditorOption[];
     setDraft: (value: string) => void;
     validating: boolean;
 }
@@ -1154,7 +1154,7 @@ export function editorInputType(editor: CellEditor | null): "text" | "number" | 
 export function editorKeyRestoresFocus(key: string): boolean;
 
 // @public
-export function editorSelectOptions(editor: CellEditor): ReturnType<typeof normalizeEditorOptions>;
+export function editorSelectOptions(editor: CellEditor): CellEditorOption[];
 
 // @public
 export function editorValidationProps(ctrl: EditorAriaState): {

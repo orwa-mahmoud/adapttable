@@ -6,7 +6,6 @@ import {
   type FeatureHostState,
   filterTypeDefaultOp,
   type FilterTypeSpec,
-  pivot,
   resolveExportCsv,
   resolveFilterRegistry,
 } from "@adapttable/core";
@@ -18,6 +17,7 @@ import {
   runWithFeatureHost,
 } from "@adapttable/core/binding";
 import { resolveCellEditor } from "@adapttable/core/editing";
+import { pivot } from "@adapttable/core/pivot";
 import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { StrictMode } from "react";
 import { describe, expect, it, vi } from "vitest";

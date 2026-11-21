@@ -6,11 +6,11 @@
 
 import { ChangedCellFlashState } from '@adapttable/core/binding';
 import { InsertPatch } from '@adapttable/core';
-import { isStreamLive } from '@adapttable/core';
-import { isStreamSettled } from '@adapttable/core';
-import { openRowPatchStream } from '@adapttable/core';
+import { isStreamLive } from '@adapttable/core/stream';
+import { isStreamSettled } from '@adapttable/core/stream';
+import { openRowPatchStream } from '@adapttable/core/stream';
 import { OpenRowPatchStreamOptions } from '@adapttable/core';
-import { parseRowPatchFrame } from '@adapttable/core';
+import { parseRowPatchFrame } from '@adapttable/core/stream';
 import { RemovePatch } from '@adapttable/core';
 import { RowPatch } from '@adapttable/core';
 import { RowPatchEvent } from '@adapttable/core';

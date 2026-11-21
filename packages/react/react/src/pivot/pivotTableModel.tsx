@@ -32,11 +32,9 @@
  * grand-total captions are structure, which is core's.
  */
 import {
-  PIVOT_ROW_COLUMN_KEY,
   type PivotField,
   type PivotResult,
   type PivotRow,
-  pivotRowCaption,
   type TableLabels,
 } from "@adapttable/core";
 import {
@@ -46,6 +44,7 @@ import {
   pivotTableLayout,
   resolveFeatureLabels,
 } from "@adapttable/core/binding";
+import { PIVOT_ROW_COLUMN_KEY, pivotRowCaption } from "@adapttable/core/pivot";
 import type { ReactNode } from "react";
 
 import type { ColumnDef } from "../columnDef";
@@ -54,7 +53,7 @@ const PIVOT_GROUPS = [PIVOT_LABELS] as const;
 
 export type { TableLabels };
 
-export { PIVOT_ROW_COLUMN_KEY } from "@adapttable/core";
+export { PIVOT_ROW_COLUMN_KEY } from "@adapttable/core/pivot";
 
 /**
  * Options for {@link pivotTableModel}.

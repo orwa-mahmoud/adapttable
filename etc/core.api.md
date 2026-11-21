@@ -417,12 +417,6 @@ export interface ApprovalReviewItem {
 // @public
 export function approvalValueText(value: unknown): string | undefined;
 
-// @public
-export function asBatchGesture<TRow>(apply: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
-
-// @public
-export function asGesture<TRow>(apply: ((edits: CellEdit<TRow>[]) => unknown) | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): ((edits: CellEdit<TRow>[]) => unknown) | undefined;
-
 // @public @deprecated
 export type AssemblyFns<TRow = unknown> = AssemblyFns_2<TRow>;
 
@@ -459,9 +453,6 @@ interface AssemblyFns_2<TRow = unknown> {
     } | TableExtraEntry)[];
 }
 
-// @public
-export function assignField(config: PivotConfig, key: string, zone: PivotZone, index?: number): PivotConfig;
-
 // @public @deprecated
 export const attachIncrementalView: typeof attachIncrementalView_2;
 
@@ -473,9 +464,6 @@ export const AUTO_OPTIONS_LIMIT = 50;
 
 // @public
 export function autoSizeColumns(root: Element | null, keys: readonly string[], setWidth: (key: string, width: number) => void): number;
-
-// @public
-export function availableFields(fields: readonly PivotField[], config: PivotConfig): PivotField[];
 
 // @public @deprecated
 export const BASE_LABELS: typeof BASE_LABELS_2;
@@ -707,12 +695,6 @@ export function buildExportTable<TRow>(rows: readonly TRow[], columns: readonly 
 
 // @public
 export function buildFilterRuntime<TRow>(defs: readonly FilterDef<TRow>[], registry: FilterTypeRegistry): FilterRuntime<TRow>;
-
-// @public
-export function buildFormulaColumns<TRow extends object>(specs: readonly FormulaColumnSpec[]): FormulaColumnsResult<TRow>;
-
-// @public
-export function buildGroupedFlatModel<TRow>(options: BuildGroupedFlatModelOptions<TRow>): GroupedFlatEntry<TRow>[];
 
 // @public
 export interface BuildGroupedFlatModelOptions<TRow> {
@@ -2592,26 +2574,13 @@ function coveredAddressSet_2<TRow>(options: {
 }): ReadonlySet<string>;
 
 // @public
-export function createAllMatchingScope(): AllMatchingScope;
-
-// @public
 export function createBasicTableEngine<TRow>(options: CreateTableEngineOptions<TRow>): TableEngine<TRow>;
-
-// @public
-export function createBatchEditStore<TRow>(options: BatchEditStoreOptions<TRow>, within?: {
-    readonly store?: TableStore;
-}): BatchEditStore<TRow>;
 
 // @public @deprecated
 export const createBulkActionRunner: typeof createBulkActionRunner_2;
 
 // @public
 function createBulkActionRunner_2(initial: BulkActionRunnerOptions): BulkActionRunnerController_2;
-
-// @public
-export function createCellEditSession<TRow = unknown>(options?: CellEditSessionOptions<TRow>, within?: {
-    readonly store?: TableStore;
-}): CellEditSession<TRow>;
 
 // @public @deprecated
 export const createCellSaveStore: typeof createCellSaveStore_2;
@@ -2686,11 +2655,6 @@ export const createEditConflictStore: typeof createEditConflictStore_2;
 function createEditConflictStore_2<TRow>(within?: {
     readonly store?: TableStore;
 }): EditConflictStore_2<TRow>;
-
-// @public
-export function createEditHistory<TRow>(options: EditHistoryControllerOptions<TRow>, within?: {
-    readonly store?: TableStore;
-}): EditHistoryController<TRow>;
 
 // @public @deprecated
 export const createEditHistoryStack: typeof createEditHistoryStack_2;
@@ -2825,11 +2789,6 @@ export const createResponseAggregateOps: typeof createResponseAggregateOps_2;
 
 // @public
 function createResponseAggregateOps_2(): ResponseAggregateOps_2;
-
-// @public
-export function createRowEditStore<TRow>(options: RowEditStoreOptions<TRow>, within?: {
-    readonly store?: TableStore;
-}): RowEditStore<TRow>;
 
 // @public
 export function createRowReorderController<TRow>(initial: RowReorderControllerOptions<TRow>): RowReorderController<TRow>;
@@ -3300,22 +3259,11 @@ export interface EditableCellController<TRow = unknown> {
     rollback: () => void;
     saveFailure?: FailedCellSave<TRow>;
     saveStatus?: CellSaveStatus;
-    selectOptions: ReturnType<typeof normalizeEditorOptions>;
+    selectOptions: CellEditorOption[];
     setDraft: (value: string) => void;
     takeConflict: () => void;
     validating: boolean;
 }
-
-// @public
-export function editableCellController<TRow>(options: {
-    editing: EditingBundle<TRow> | undefined;
-    row: TRow;
-    column: EditableColumnLike<TRow>;
-    rowId: string;
-    rows: readonly TRow[];
-    columns: readonly EditableColumnLike<TRow>[];
-    rowKey: (row: TRow) => string;
-}): EditableCellController<TRow>;
 
 // @public
 export interface EditableCellEditing<_TRow = unknown> {
@@ -3708,30 +3656,16 @@ export interface EditorDraftControl {
         preventDefault: () => void;
         shiftKey?: boolean;
     }) => void;
-    selectOptions: ReturnType<typeof editorSelectOptions>;
+    selectOptions: CellEditorOption[];
     setDraft: (value: string) => void;
     validating: boolean;
 }
-
-// @public
-export function editorInputType(editor: CellEditor | null): "text" | "number" | "date" | "datetime-local" | "time";
 
 // @public @deprecated
 export const editorKeyRestoresFocus: typeof editorKeyRestoresFocus_2;
 
 // @public
 function editorKeyRestoresFocus_2(key: string): boolean;
-
-// @public
-export function editorSelectOptions(editor: CellEditor): ReturnType<typeof normalizeEditorOptions>;
-
-// @public
-export function editorValidationProps(ctrl: EditorAriaState): {
-    "aria-invalid"?: true;
-    "aria-describedby"?: string;
-    "aria-busy"?: true;
-    "data-conflict"?: "";
-};
 
 // @public
 export type EditUnit = "cell" | "row" | "batch";
@@ -3851,9 +3785,6 @@ export const EMPTY_PINNED_ROWS: typeof EMPTY_PINNED_ROWS_2;
 const EMPTY_PINNED_ROWS_2: PinnedRows<never>;
 
 // @public
-export const EMPTY_PIVOT_CONFIG: PivotConfig;
-
-// @public
 export const EMPTY_ROW_PIN_STATE: RowPinState;
 
 // @public
@@ -3882,9 +3813,6 @@ function estimateFromRowHeight_2<TRow>(rowHeight: RowHeight<TRow> | undefined, f
 
 // @public
 export function evaluateFilterTree<TRow>(tree: QueryFilterGroup | undefined, row: TRow, defs: readonly FilterDef<TRow>[], registry?: FilterTypeRegistry): boolean;
-
-// @public
-export function evaluateFormula(node: FormulaNode, scope: FormulaScope): FormulaValue;
 
 // @public
 export const EXPORT_FETCH_ALL_MAX_ROWS = 50000;
@@ -4940,30 +4868,6 @@ export const formatGroupBy: typeof formatGroupBy_2;
 function formatGroupBy_2(value: GroupByInput): string | undefined;
 
 // @public
-export function formatGroupLabel(value: unknown, blankLabel?: string): string;
-
-// @public
-export function formatMultiDraft(values: readonly string[]): string;
-
-// @public
-export const FORMULA_BLANK: FormulaValue;
-
-// @public
-export const FORMULA_ERRORS: {
-    readonly name: "#NAME?";
-    readonly value: "#VALUE!";
-    readonly divideByZero: "#DIV/0!";
-    readonly cycle: "#CYCLE!";
-    readonly syntax: "#ERROR!";
-};
-
-// @public
-export const FORMULA_FUNCTIONS: readonly string[];
-
-// @public
-export function formulaBoolean(value: boolean): FormulaValue;
-
-// @public
 export interface FormulaColumnSpec {
     format?: (value: FormulaValue) => string;
     formula: string;
@@ -4979,13 +4883,7 @@ export interface FormulaColumnsResult<TRow> {
 }
 
 // @public
-export function formulaDisplay(value: FormulaValue): string;
-
-// @public
-export function formulaError(code: FormulaErrorCode): FormulaValue;
-
-// @public
-export type FormulaErrorCode = (typeof FORMULA_ERRORS)[keyof typeof FORMULA_ERRORS];
+export type FormulaErrorCode = "#NAME?" | "#VALUE!" | "#DIV/0!" | "#CYCLE!" | "#ERROR!";
 
 // @public
 export type FormulaNode = {
@@ -5012,12 +4910,6 @@ export type FormulaNode = {
 };
 
 // @public
-export function formulaNumber(value: number): FormulaValue;
-
-// @public
-export function formulaRefs(node: FormulaNode): string[];
-
-// @public
 export type FormulaScope = (key: string) => FormulaValue | undefined;
 
 // @public @deprecated
@@ -5027,12 +4919,6 @@ export const formulaSlice: typeof formulaSlice_2;
 const formulaSlice_2: UrlSliceSpec<readonly FormulaColumnSpec[], {
     readonly defaultFormulas?: readonly FormulaColumnSpec[];
 }>;
-
-// @public
-export function formulaSortValue(value: FormulaValue): SortableValue;
-
-// @public
-export function formulaText(value: string): FormulaValue;
 
 // @public
 export type FormulaValue = {
@@ -5348,9 +5234,6 @@ export const gridRowFocusSignature: typeof gridRowFocusSignature_2;
 
 // @public
 function gridRowFocusSignature_2(input: GridCellAttributesInput_2, rowIndex: number, colCount: number): string;
-
-// @public
-export function groupAggregateEntries<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(columns: readonly TCol[], aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined, aggregation?: GroupAggregateOps): GroupRowCell<TRow, TCol>[];
 
 // @public @deprecated
 export const groupAggregateNode: typeof groupAggregateNode_2;
@@ -6018,9 +5901,6 @@ export interface GroupRowLayout<TRow, TCol extends ColumnMetadata<TRow> = Column
     labelColumns: readonly TCol[];
 }
 
-// @public
-export function groupRowLayout<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(columns: readonly TCol[], aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined, aggregation?: GroupAggregateOps): GroupRowLayout<TRow, TCol>;
-
 // @public @deprecated
 export const groupsCollapsedToDepth: typeof groupsCollapsedToDepth_2;
 
@@ -6029,9 +5909,6 @@ function groupsCollapsedToDepth_2(groups: readonly {
     readonly key: string;
     readonly level: number;
 }[], depth: number): Set<string>;
-
-// @public
-export function groupSelectionState(leafIds: readonly string[], selectedIds: ReadonlySet<string>): HeaderSelectionState;
 
 // @public @deprecated
 export type GroupShowMoreRequest = GroupShowMoreRequest_2;
@@ -6057,9 +5934,6 @@ function groupShowMoreRequest_2(entry: {
 
 // @public
 export type GroupSort<TRow> = "label" | "label-desc" | "count" | "count-desc" | ((a: GroupNode<TRow>, b: GroupNode<TRow>) => number);
-
-// @public
-export function groupValueKey(value: unknown): string;
 
 // @public @deprecated
 export const handleFindBarKey: typeof handleFindBarKey_2;
@@ -6104,9 +5978,6 @@ function hasActiveHeaderFilter_2<TRow>(props: Readonly<{
     source: FilterFormSource<TRow>;
     registry?: FilterTypeRegistry;
 }>): boolean;
-
-// @public
-export function hasEditableColumns(columns: readonly EditableColumnLike[]): boolean;
 
 // @public @deprecated
 export const hasGroupingColumnDrag: typeof hasGroupingColumnDrag_2;
@@ -6558,9 +6429,6 @@ export const isBrowser: typeof isBrowser_2;
 // @public
 function isBrowser_2(): boolean;
 
-// @public
-export function isCellEditable<TRow>(column: EditableColumnLike<TRow>, row: TRow): boolean;
-
 // @public @deprecated
 export const isCellEditActive: typeof isCellEditActive_2;
 
@@ -6687,9 +6555,6 @@ function isFirstEditableColumn_2(columns: readonly {
     editable?: unknown;
 }[], key: string): boolean;
 
-// @public
-export function isFormulaError(value: FormulaValue): boolean;
-
 // @public @deprecated
 export const isGridColumnSelected: typeof isGridColumnSelected_2;
 
@@ -6726,13 +6591,7 @@ function isMultiSelectEditor_2(editor: CellEditor | null): editor is {
 export function isPinnedSummaryRowId(id: string): boolean;
 
 // @public
-export function isPivotReady(config: PivotConfig): boolean;
-
-// @public
 export function isRelativeDateToken(raw: string | undefined): boolean;
-
-// @public
-export function isRowContested<TRow>(snapshot: EditConflictSnapshot<TRow>, rowId: string): boolean;
 
 // @public
 export function isRowMovePending<TRow>(pendingMove: RowMoveRequest<TRow> | null, row: TRow, getRowId?: (row: TRow) => string): boolean;
@@ -6754,12 +6613,6 @@ function isSelectEditor_2(editor: CellEditor | null): editor is {
 
 // @public
 export function isSingleCell(range: CellRange | null): boolean;
-
-// @public
-export function isStreamLive(status: RowPatchStreamStatus): boolean;
-
-// @public
-export function isStreamSettled(status: RowPatchStreamStatus): boolean;
 
 // @public @deprecated
 export const isTextEntryTarget: typeof isTextEntryTarget_2;
@@ -6816,14 +6669,6 @@ interface LazyChildrenSnapshot_2 {
 
 // @public
 export function listFilterValues(value: FilterValue): string[];
-
-// @public
-export function liveRowChanged<TRow>(input: {
-    opened: TRow;
-    current: TRow;
-    column: EditableColumnLike<TRow>;
-    rowVersion?: (row: TRow) => string | number;
-}): boolean;
 
 // @public @deprecated
 export type LoadedFilterOption = LoadedFilterOption_2;
@@ -6888,9 +6733,6 @@ export const measuredToolbarHeight: typeof measuredToolbarHeight_2;
 // @public
 function measuredToolbarHeight_2(element: Pick<Element, "getBoundingClientRect">): number;
 
-// @public
-export function measureLabel(measure: PivotMeasure, fields: readonly PivotField[], aggregationLabels?: Readonly<Record<string, string | undefined>>): string;
-
 // @public @deprecated
 export type MergedRowActions<TRow> = MergedRowActions_2<TRow>;
 
@@ -6953,9 +6795,6 @@ export interface MobileCardModel<TRow> {
 
 // @public
 export type MobileCardRenderer<TRow> = (row: TRow, card: MobileCardModel<TRow>) => DisplayValue | undefined;
-
-// @public
-export function moveField(config: PivotConfig, zone: PivotZone, index: number, delta: -1 | 1): PivotConfig;
 
 // @public
 export function moveGridFocus(from: GridCell, move: GridFocusMove, bounds: GridBounds, covered?: (cell: GridCell) => boolean): GridCell;
@@ -7085,9 +6924,6 @@ export const nextSort: typeof nextSort_2;
 // @public
 function nextSort_2(current: Partial<SortLevel>, key: string): Partial<SortLevel>;
 
-// @public
-export function normalizeEditorOptions(options: readonly CellEditorOption[] | readonly string[]): CellEditorOption[];
-
 // @public @deprecated
 export const normalizeLocaleTag: typeof normalizeLocaleTag_2;
 
@@ -7137,9 +6973,6 @@ export const OPEN_PALETTE_COMMAND: typeof OPEN_PALETTE_COMMAND_2;
 
 // @public
 const OPEN_PALETTE_COMMAND_2 = "command-palette";
-
-// @public
-export function openRowPatchStream(options: OpenRowPatchStreamOptions): RowPatchStreamHandle;
 
 // @public
 export interface OpenRowPatchStreamOptions {
@@ -7267,9 +7100,6 @@ export const PARAM_SORT_DIR = "sortDir";
 // @public
 export function parseBooleanChoice(value: FilterValue): BooleanChoice;
 
-// @public
-export function parseCellEditValue(editor: CellEditor, draft: string): unknown;
-
 // @public @deprecated
 export const parseChord: typeof parseChord_2;
 
@@ -7305,9 +7135,6 @@ interface ParsedChord_2 {
 export function parseFilterTree(raw: string | null | undefined): QueryFilterGroup | undefined;
 
 // @public
-export function parseFormula(text: string): ParseResult;
-
-// @public
 export function parseGroupAggregateOverrides(value: string | null | undefined): GroupAggregateOverrides;
 
 // @public @deprecated
@@ -7340,9 +7167,6 @@ export interface ParseResult {
     readonly node?: FormulaNode;
     readonly ok: boolean;
 }
-
-// @public
-export function parseRowPatchFrame<TRow>(frame: string): readonly RowPatch<TRow>[];
 
 // @public
 export function parseTableUrlState(search: string, namespace: string): URLSearchParams;
@@ -7526,26 +7350,17 @@ export interface PinOffset {
 // @public
 export type PinSide = "start" | "end";
 
-// @public
-export function pivot<TRow>(rows: readonly TRow[], config: PivotConfig, options?: PivotOptions<TRow>): PivotResult;
-
 // @public @deprecated
 export const PIVOT_AGGREGATIONS: typeof PIVOT_AGGREGATIONS_2;
 
 // @public
 const PIVOT_AGGREGATIONS_2: readonly AggregateName[];
 
-// @public
-export const PIVOT_BLANK = "—";
-
 // @public @deprecated
 export const PIVOT_GRAND_TOTAL_KEY: typeof PIVOT_GRAND_TOTAL_KEY_2;
 
 // @public
 const PIVOT_GRAND_TOTAL_KEY_2 = "grand";
-
-// @public
-export const PIVOT_ROW_COLUMN_KEY = "pivot-row";
 
 // @public @deprecated
 export const PIVOT_ROW_INDENT: typeof PIVOT_ROW_INDENT_2;
@@ -7589,9 +7404,6 @@ export interface PivotField {
     key: string;
     label: string;
 }
-
-// @public
-export function pivotLeafColumnKey(index: number): string;
 
 // @public @deprecated
 export type PivotLeafColumnLayout = PivotLeafColumnLayout_2;
@@ -7656,9 +7468,6 @@ export interface PivotRow {
     label: string;
     path: readonly string[];
 }
-
-// @public
-export function pivotRowCaption(row: PivotRow, labels: Pick<Required<TableLabels>, "pivotGrandTotal">): string;
 
 // @public @deprecated
 export const pivotRowIndentStyle: typeof pivotRowIndentStyle_2;
@@ -8039,13 +7848,6 @@ export interface RangeWidgetState {
 }
 
 // @public
-export function readCellValue<TRow>(row: TRow, column: {
-    readonly key: string;
-    readonly editValue?: (row: TRow) => unknown;
-    readonly sortValue?: (row: TRow) => unknown;
-}): unknown;
-
-// @public
 export function readClipboardText(): Promise<string | null>;
 
 // @public
@@ -8245,9 +8047,6 @@ export const removeAggregation: typeof removeAggregation_2;
 // @public
 function removeAggregation_2(overrides: Readonly<Partial<Record<string, string>>>, columnKey: string, declaredByDeveloper: boolean): Readonly<Partial<Record<string, string>>>;
 
-// @public
-export function removeField(config: PivotConfig, zone: PivotZone, index: number): PivotConfig;
-
 // @public @deprecated
 export const removeFilterTreeNode: typeof removeFilterTreeNode_2;
 
@@ -8356,9 +8155,6 @@ export const resolveAssembly: typeof resolveAssembly_2;
 
 // @public
 function resolveAssembly_2<TRow>(partial?: Partial<AssemblyFns_2<TRow>>): AssemblyFns_2<TRow>;
-
-// @public
-export function resolveCellEditor(column: EditableColumnLike, host?: FeatureHostState): CellEditor | null;
 
 // @public @deprecated
 export const resolveColumnPath: typeof resolveColumnPath_2;
@@ -8536,9 +8332,6 @@ export function resolvePinnedRows<TRow>(pinnedRows: PinnedRows<TRow> | undefined
 
 // @public
 export function resolveRelativeRange(raw: string | undefined, now?: number | Date): RelativeDateRange | undefined;
-
-// @public
-export function resolveRowEditTrigger<TRow>(actions: readonly RowAction<TRow>[] | undefined, rowEditing: Pick<RowEditingState<TRow>, "isEditing" | "begin"> | undefined, row: TRow, rowId: string): RowEditTrigger<TRow>;
 
 // @public @deprecated
 export const resolveRowHeight: typeof resolveRowHeight_2;
@@ -8769,9 +8562,6 @@ export interface RowEditConflict {
 }
 
 // @public
-export function rowEditConflict<TRow>(editing: Pick<EditingBundle<TRow>, "conflict"> | undefined, rowId: string): RowEditConflict | undefined;
-
-// @public
 export interface RowEditControls {
     begin: () => void;
     cancel: () => void;
@@ -8782,9 +8572,6 @@ export interface RowEditControls {
     save: () => void;
     saveLabel: string;
 }
-
-// @public
-export function rowEditControls<TRow>(input: Readonly<RowEditControlsOptions<TRow>>): RowEditControls;
 
 // @public
 export interface RowEditControlsOptions<TRow> {
@@ -9665,9 +9452,6 @@ export function serializeFilterTree(tree: QueryFilterGroup | undefined): string 
 export function serializeFormulaColumns(specs: readonly FormulaColumnSpec[]): string;
 
 // @public
-export function serializeGroupAggregateOverrides(overrides: GroupAggregateOverrides): string | undefined;
-
-// @public
 export function serializePivot(config: PivotConfig): string;
 
 // @public
@@ -9698,9 +9482,6 @@ export interface ServerPivotOptions {
     config: PivotConfig;
     format?: (value: DisplayValue, measure: PivotConfig["measures"][number]) => DisplayValue;
 }
-
-// @public
-export function serverPivotResult(page: QueryPivotPage, input: ServerPivotOptions): PivotResult;
 
 // @public @deprecated
 export type ServerSource<TRow> = ServerSource_2<TRow>;
@@ -9774,9 +9555,6 @@ export const setFilterTreeCombinator: typeof setFilterTreeCombinator_2;
 
 // @public
 function setFilterTreeCombinator_2(tree: QueryFilterGroup, path: readonly number[], combinator: QueryFilterGroup["combinator"]): QueryFilterGroup;
-
-// @public
-export function setMeasureAgg(config: PivotConfig, index: number, agg: AggregateName): PivotConfig;
 
 // @public @deprecated
 export const settledFilterTree: typeof settledFilterTree_2;
@@ -11246,9 +11024,6 @@ function toAggregateOrdered_2(value: AggregateOrderedValue): {
     result: AggregateOrderedValue;
 } | undefined;
 
-// @public
-export function toFormulaValue(raw: unknown): FormulaValue;
-
 // @public @deprecated
 export const toggleCollapsedColumnGroup: typeof toggleCollapsedColumnGroup_2;
 
@@ -11618,12 +11393,6 @@ export const withFilterType: typeof withFilterType_2;
 
 // @public
 function withFilterType_2(registry: FilterTypeRegistry, spec: FilterTypeSpec): FilterTypeRegistry;
-
-// @public
-export function withGroupAggregateOverrides<TRow>(base: GroupAggregatesFn<TRow> | undefined, overrides: GroupAggregateOverrides, columns: readonly ColumnMetadata<TRow>[], source?: AggregationSourceSupport): GroupAggregatesFn<TRow> | undefined;
-
-// @public
-export function withQueryAggregateOverrides<TRow = unknown>(base: readonly QueryAggregate[] | undefined, overrides: GroupAggregateOverrides, columns?: readonly ColumnMetadata<TRow>[], source?: AggregationSourceSupport): readonly QueryAggregate[] | undefined;
 
 // @public @deprecated
 export const withRowMutationActions: typeof withRowMutationActions_2;

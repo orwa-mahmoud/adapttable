@@ -68,7 +68,7 @@ export type FormulaNode =
     };
 
 /**
- * What {@link parseFormula} answers with.
+ * What `parseFormula` answers with.
  *
  * @public
  */

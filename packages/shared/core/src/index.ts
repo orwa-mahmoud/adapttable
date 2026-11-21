@@ -153,7 +153,6 @@ export {
   type BatchEditStore,
   type BatchEditStoreOptions,
   type BatchPendingDrafts,
-  createBatchEditStore,
 } from "./editing/batchEditing";
 export {
   type DirtyCellState,
@@ -163,7 +162,6 @@ export {
   type CellEditingState,
   type CellSaveState,
   type EditableCellController,
-  editableCellController,
   type EditableCellMode,
   type EditActivation,
   type EditConflictLabels,
@@ -174,8 +172,6 @@ export {
   type ContestedEditCell,
   type EditConflictSnapshot,
   type EditConflictState,
-  isRowContested,
-  liveRowChanged,
   type ReconcileLiveBatchEdit,
   type ReconcileLiveEdit,
   type ReconcileLiveRowEdit,
@@ -197,14 +193,11 @@ export type {
 } from "./editing/editContracts";
 export {
   type CellEditHandler,
-  createEditHistory,
   type EditHistoryController,
   type EditHistoryControllerOptions,
   type EditHistoryState,
 } from "./editing/editHistory";
 export {
-  asBatchGesture,
-  asGesture,
   type CellEditKeyAction,
   type CellEditKeyOutcome,
   type CellEditNavigation,
@@ -213,12 +206,10 @@ export {
   type CellEditSnapshot,
   type CellSaveStatus,
   type CellSaveStoreOptions,
-  createCellEditSession,
   type EditHistoryEntry,
   type EditHistorySnapshot,
   type EditValidationStoreOptions,
   type FailedCellSave,
-  readCellValue,
   type ValidationCheckResult,
 } from "./editing/editingController";
 export {
@@ -226,18 +217,12 @@ export {
   type EditableCellEditorCtrl,
   type EditorAriaState,
   type EditorDraftControl,
-  editorSelectOptions,
-  editorValidationProps,
-  resolveRowEditTrigger,
   type RowEditConflict,
-  rowEditConflict,
   type RowEditControls,
-  rowEditControls,
   type RowEditControlsOptions,
   type RowEditTrigger,
 } from "./editing/editingGate";
 export {
-  createRowEditStore,
   type RowEditDrafts,
   type RowEditHandler,
   type RowEditingState,
@@ -586,13 +571,6 @@ export {
   type CustomCellEditorCtrl,
   type CustomCellEditorRender,
   type EditableColumnLike,
-  editorInputType,
-  formatMultiDraft,
-  hasEditableColumns,
-  isCellEditable,
-  normalizeEditorOptions,
-  parseCellEditValue,
-  resolveCellEditor,
 } from "./editing/cellEditing";
 export {
   type CellSpanAppearance,
@@ -692,9 +670,6 @@ export {
   type GroupAggregateOverride,
   type GroupAggregateOverrides,
   parseGroupAggregateOverrides,
-  serializeGroupAggregateOverrides,
-  withGroupAggregateOverrides,
-  withQueryAggregateOverrides,
 } from "./grouping/groupAggregateOverrides";
 export type {
   GroupingChipKeyboardProps,
@@ -707,25 +682,19 @@ export type {
 } from "./grouping/groupingPanelModel";
 export { type GroupByInput } from "./grouping/groupKeys";
 export {
-  groupAggregateEntries,
   type GroupAggregateOps,
   type GroupRowCell,
   type GroupRowLayout,
-  groupRowLayout,
 } from "./grouping/groupRowLayout";
 export {
-  buildGroupedFlatModel,
-  formatGroupLabel,
   type GroupAggregatesFn,
   type GroupedFlatEntry,
   type GroupNode,
   type GroupPaging,
   type GroupSort,
-  groupValueKey,
   type RowGroupLevel,
   type RowGroupRef,
 } from "./grouping/groupRows";
-export { groupSelectionState } from "./grouping/groupSelection";
 export type {
   GroupingPanelSource,
   GroupingPanelStateInput,

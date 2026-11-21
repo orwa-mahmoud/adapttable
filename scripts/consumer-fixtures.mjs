@@ -136,13 +136,20 @@ function adapterOf(kit) {
  * Core engines a consumer of one named primitive must not download: the
  * table engine, pivot, formula, the export writers and the filter-tree codec.
  */
-const UNRELATED_CORE_ENGINES = [
+/** Engines on core's main entry. */
+const ROOT_CORE_ENGINES = [
   "createTableEngine",
-  "PIVOT_BLANK",
-  "parseFormula",
   "buildExportTable",
   "xlsxWriter",
   "parseFilterTree",
+];
+
+/** Engines only their own entries serve (`/pivot`, `/formula`). */
+const SPECIALTY_CORE_ENGINES = ["PIVOT_BLANK", "parseFormula"];
+
+const UNRELATED_CORE_ENGINES = [
+  ...ROOT_CORE_ENGINES,
+  ...SPECIALTY_CORE_ENGINES,
 ];
 
 /**
@@ -314,8 +321,12 @@ const CORE_FIXTURES = [
     code: `export * from "PKG";`,
     // The engines a named primitive must not carry are real identifiers of
     // the full graph, so their absence there is a finding, not a typo.
-    present: [...UNRELATED_CORE_ENGINES, "defaultLabels", "resolveLabels"],
-    absent: ["useRowPatchStream", "grouping-drop-zone"],
+    present: [...ROOT_CORE_ENGINES, "defaultLabels", "resolveLabels"],
+    absent: [
+      ...SPECIALTY_CORE_ENGINES,
+      "useRowPatchStream",
+      "grouping-drop-zone",
+    ],
   },
   {
     name: "core · pivot",

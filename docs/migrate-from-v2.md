@@ -261,14 +261,14 @@ the same list stay on `@adapttable/core`:
 | `FeatureRender`                    | `@adapttable/react`                       |
 | `FilterChromeMode`                 | `@adapttable/core`                        |
 | `FilterTypeSpec`                   | `@adapttable/core`                        |
-| `groupAggregateEntries`            | `@adapttable/core`                        |
+| `groupAggregateEntries`            | `@adapttable/core/grouping`               |
 | `GroupAggregatesFn`                | `@adapttable/core`                        |
 | `GroupedFlatEntry`                 | `@adapttable/core`                        |
 | `GroupingChipKeyboardProps`        | `@adapttable/core`                        |
 | `GroupingDragProps`                | `@adapttable/core`                        |
 | `GroupingDropProps`                | `@adapttable/core`                        |
 | `GroupRowCell`                     | `@adapttable/core`                        |
-| `groupRowLayout`                   | `@adapttable/core`                        |
+| `groupRowLayout`                   | `@adapttable/core/grouping`               |
 | `HeaderFilterOpenProvider`         | `@adapttable/react`                       |
 | `headerFilterStickTop`             | `@adapttable/react`                       |
 | `IncrementalView`                  | `@adapttable/core`                        |

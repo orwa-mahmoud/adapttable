@@ -5,11 +5,8 @@
  * a formula that reads another formula, two that read each other, and one
  * that will not parse at all.
  */
-import {
-  buildFormulaColumns,
-  FORMULA_ERRORS,
-  type FormulaColumnSpec,
-} from "@adapttable/core";
+import { type FormulaColumnSpec } from "@adapttable/core";
+import { buildFormulaColumns, FORMULA_ERRORS } from "@adapttable/core/formula";
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

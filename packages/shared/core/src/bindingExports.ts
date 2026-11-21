@@ -69,30 +69,15 @@ export type { FilterEngine } from "./filters/filterEngine";
 export type { DateOp, NumberOp, TextOp } from "./filters/operators";
 export {
   type BinaryOp,
-  buildFormulaColumns,
   deserializeFormulaColumns,
-  evaluateFormula,
-  FORMULA_BLANK,
-  FORMULA_ERRORS,
-  FORMULA_FUNCTIONS,
-  formulaBoolean,
   type FormulaColumnSpec,
   type FormulaColumnsResult,
-  formulaDisplay,
-  formulaError,
   type FormulaErrorCode,
   type FormulaNode,
-  formulaNumber,
-  formulaRefs,
   type FormulaScope,
-  formulaSortValue,
-  formulaText,
   type FormulaValue,
-  isFormulaError,
-  parseFormula,
   type ParseResult,
   serializeFormulaColumns,
-  toFormulaValue,
 } from "./formula";
 export {
   bodyCellsHaveRowSpan,
@@ -118,16 +103,8 @@ export type {
 } from "./pagination/paginationMath";
 export { paginationSlots } from "./pagination/paginationMath";
 export {
-  assignField,
-  availableFields,
   deserializePivot,
   deserializePivotState,
-  EMPTY_PIVOT_CONFIG,
-  isPivotReady,
-  measureLabel,
-  moveField,
-  pivot,
-  PIVOT_BLANK,
   type PivotColumnLeaf,
   type PivotColumnNode,
   type PivotConfig,
@@ -141,12 +118,9 @@ export {
   type PivotZone,
   type QueryPivotPage,
   type QueryPivotRow,
-  removeField,
   serializePivot,
   serializePivotState,
   type ServerPivotOptions,
-  serverPivotResult,
-  setMeasureAgg,
 } from "./pivot";
 export { type BodyCell, cellSpanMark } from "./rows/cellSpan";
 export {
@@ -172,11 +146,7 @@ export { isDeclarativeFilters } from "./source/isDeclarativeFilters";
 export type { TableQuery } from "./source/tableQuery";
 export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
 export {
-  isStreamLive,
-  isStreamSettled,
-  openRowPatchStream,
   type OpenRowPatchStreamOptions,
-  parseRowPatchFrame,
   type RowPatchStreamHandle,
   type RowPatchStreamReconnect,
   type RowPatchStreamStatus,

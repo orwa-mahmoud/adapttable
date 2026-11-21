@@ -10,7 +10,7 @@ import { ExtraFilters } from '@adapttable/core';
 import * as i0 from '@angular/core';
 import { Injector } from '@angular/core';
 import { InputSignal } from '@angular/core';
-import { PIVOT_ROW_COLUMN_KEY } from '@adapttable/core';
+import { PIVOT_ROW_COLUMN_KEY } from '@adapttable/core/pivot';
 import { URL_SLICE_WRITE_DEBOUNCE_MS as PIVOT_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { PivotConfig } from '@adapttable/core';
 import { PivotField } from '@adapttable/core';

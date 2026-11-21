@@ -16,15 +16,9 @@ export {
   sparklineExportValue,
   sparklineSummary,
 } from "./columns/sparklineGeometry";
-export {
-  PIVOT_ROW_COLUMN_KEY,
-  pivotLeafColumnKey,
-  pivotRowCaption,
-} from "./pivot/pivotTableLayout";
 export type { ChangedCellFlashOptions } from "./rows/changedCellFlash";
 export type { HighlightedCell } from "./rows/highlightStore";
 export type { AllMatchingScope } from "./selection/allMatchingScope";
-export { createAllMatchingScope } from "./selection/allMatchingScope";
 export type {
   NestedTableDefaults,
   NestedTableParent,

@@ -159,7 +159,7 @@ import { LazyChildrenState } from '@adapttable/core/binding';
 import { LiveFeatureHost } from '@adapttable/core/binding';
 import { MaybeRefOrGetter } from 'vue';
 import { NestedTableDefaults } from '@adapttable/core';
-import { normalizeEditorOptions } from '@adapttable/core';
+import { normalizeEditorOptions } from '@adapttable/core/binding';
 import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';

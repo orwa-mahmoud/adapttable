@@ -11,6 +11,7 @@ import type { RowAction, TableLabels } from "../types";
 import type { BatchEditingState } from "./batchEditing";
 import {
   type CellEditor,
+  type CellEditorOption,
   type CustomCellEditorConflict,
   isCustomEditor,
   normalizeEditorOptions,
@@ -338,9 +339,7 @@ export function editorBusyProps(ctrl: EditorAriaState): {
  *
  * @public
  */
-export function editorSelectOptions(
-  editor: CellEditor
-): ReturnType<typeof normalizeEditorOptions> {
+export function editorSelectOptions(editor: CellEditor): CellEditorOption[] {
   if (
     typeof editor === "object" &&
     (editor.type === "select" || editor.type === "multi-select")
@@ -747,7 +746,7 @@ export interface EditorDraftControl {
   /** The editor shape the column declared. */
   editor: CellEditor;
   /** Choices for a select editor, empty for other shapes. */
-  selectOptions: ReturnType<typeof editorSelectOptions>;
+  selectOptions: CellEditorOption[];
   /** A validator's message for this cell, when the last save was refused. */
   error?: string;
   /** Whether a validator is still deciding. */

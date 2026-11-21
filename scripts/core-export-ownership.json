@@ -27515,7 +27515,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editHistory.ts#asBatchGesture",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "asGesture",
@@ -27526,7 +27526,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editHistory.ts#asGesture",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "batchEditBarModel",
@@ -27724,7 +27724,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/batchEditing.ts#createBatchEditStore",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "createCellEditSession",
@@ -27735,7 +27735,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editSession.ts#createCellEditSession",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "createCellSaveStore",
@@ -27779,7 +27779,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editHistory.ts#createEditHistory",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "createEditHistoryStack",
@@ -27812,7 +27812,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/rowEditing.ts#createRowEditStore",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "customEditorConflict",
@@ -27900,7 +27900,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editableCell.ts#editableCellController",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "editableCellErrorId",
@@ -27977,7 +27977,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/cellEditing.ts#editorInputType",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "editorKeyRestoresFocus",
@@ -27999,7 +27999,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editingGate.ts#editorSelectOptions",
-      "subpaths": [".", "./binding", "./editing"]
+      "subpaths": ["./binding", "./editing"]
     },
     {
       "name": "editorValidationProps",
@@ -28010,7 +28010,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editingGate.ts#editorValidationProps",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "editValidationView",
@@ -28054,7 +28054,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/cellEditing.ts#formatMultiDraft",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "handleRowEditorKey",
@@ -28076,7 +28076,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/cellEditing.ts#hasEditableColumns",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "isBooleanEditor",
@@ -28098,7 +28098,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/cellEditing.ts#isCellEditable",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "isCellEditActive",
@@ -28186,7 +28186,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editConflict.ts#isRowContested",
-      "subpaths": [".", "./binding", "./editing"]
+      "subpaths": ["./binding", "./editing"]
     },
     {
       "name": "isSelectEditor",
@@ -28208,7 +28208,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editConflict.ts#liveRowChanged",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "MULTI_SEPARATOR",
@@ -28230,7 +28230,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/cellEditing.ts#normalizeEditorOptions",
-      "subpaths": [".", "./binding", "./editing"]
+      "subpaths": ["./binding", "./editing"]
     },
     {
       "name": "observeEdit",
@@ -28252,7 +28252,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/cellEditing.ts#parseCellEditValue",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "parseColumnDraft",
@@ -28274,7 +28274,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editHistory.ts#readCellValue",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "readMultiDraft",
@@ -28307,7 +28307,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/cellEditing.ts#resolveCellEditor",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "resolveConflictChoice",
@@ -28362,7 +28362,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editingGate.ts#resolveRowEditTrigger",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "rowEditActionsLayout",
@@ -28384,7 +28384,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editingGate.ts#rowEditConflict",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "rowEditControls",
@@ -28395,7 +28395,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editingGate.ts#rowEditControls",
-      "subpaths": [".", "./editing"]
+      "subpaths": ["./editing"]
     },
     {
       "name": "rowEditErrorId",
@@ -31546,7 +31546,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/formulaColumn.ts#buildFormulaColumns",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "deserializeFormulaColumns",
@@ -31568,7 +31568,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/evaluate.ts#evaluateFormula",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "FORMULA_BLANK",
@@ -31579,7 +31579,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/evaluate.ts#FORMULA_BLANK",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "FORMULA_ERRORS",
@@ -31590,7 +31590,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/evaluate.ts#FORMULA_ERRORS",
-      "subpaths": [".", "./binding", "./formula"]
+      "subpaths": ["./binding", "./formula"]
     },
     {
       "name": "FORMULA_FUNCTIONS",
@@ -31601,7 +31601,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/evaluate.ts#FORMULA_FUNCTIONS",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "formulaBoolean",
@@ -31612,7 +31612,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/evaluate.ts#formulaBoolean",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "formulaDisplay",
@@ -31623,7 +31623,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/evaluate.ts#formulaDisplay",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "formulaError",
@@ -31634,7 +31634,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/evaluate.ts#formulaError",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "formulaNumber",
@@ -31645,7 +31645,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/evaluate.ts#formulaNumber",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "formulaRefs",
@@ -31656,7 +31656,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/parse.ts#formulaRefs",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "formulaSortValue",
@@ -31667,7 +31667,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/evaluate.ts#formulaSortValue",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "formulaText",
@@ -31678,7 +31678,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/evaluate.ts#formulaText",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "isFormulaError",
@@ -31689,7 +31689,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/evaluate.ts#isFormulaError",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "parseFormula",
@@ -31700,7 +31700,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/parse.ts#parseFormula",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "serializeFormulaColumns",
@@ -31722,7 +31722,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "formula/evaluate.ts#toFormulaValue",
-      "subpaths": [".", "./formula"]
+      "subpaths": ["./formula"]
     },
     {
       "name": "BinaryOp",
@@ -31832,7 +31832,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupRows.ts#buildGroupedFlatModel",
-      "subpaths": [".", "./grouping"]
+      "subpaths": ["./grouping"]
     },
     {
       "name": "formatGroupBy",
@@ -31854,7 +31854,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupRows.ts#formatGroupLabel",
-      "subpaths": [".", "./grouping"]
+      "subpaths": ["./grouping"]
     },
     {
       "name": "groupAggregateEntries",
@@ -31865,7 +31865,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupRowLayout.ts#groupAggregateEntries",
-      "subpaths": [".", "./grouping"]
+      "subpaths": ["./grouping"]
     },
     {
       "name": "groupAggregateNode",
@@ -31898,7 +31898,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupRowLayout.ts#groupRowLayout",
-      "subpaths": [".", "./grouping"]
+      "subpaths": ["./grouping"]
     },
     {
       "name": "groupSelectionState",
@@ -31909,7 +31909,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupSelection.ts#groupSelectionState",
-      "subpaths": [".", "./grouping"]
+      "subpaths": ["./grouping"]
     },
     {
       "name": "groupValueKey",
@@ -31920,7 +31920,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupRows.ts#groupValueKey",
-      "subpaths": [".", "./grouping"]
+      "subpaths": ["./grouping"]
     },
     {
       "name": "parseGroupAggregateOverrides",
@@ -31964,7 +31964,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupAggregateUrlCodec.ts#serializeGroupAggregateOverrides",
-      "subpaths": [".", "./grouping"]
+      "subpaths": ["./grouping"]
     },
     {
       "name": "withGroupAggregateOverrides",
@@ -31975,7 +31975,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupAggregateOverrides.ts#withGroupAggregateOverrides",
-      "subpaths": [".", "./grouping"]
+      "subpaths": ["./grouping"]
     },
     {
       "name": "withQueryAggregateOverrides",
@@ -31986,7 +31986,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupAggregateOverrides.ts#withQueryAggregateOverrides",
-      "subpaths": [".", "./grouping"]
+      "subpaths": ["./grouping"]
     },
     {
       "name": "AggregationSourceSupport",
@@ -32327,7 +32327,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotConfigModel.ts#assignField",
-      "subpaths": [".", "./pivot"]
+      "subpaths": ["./pivot"]
     },
     {
       "name": "availableFields",
@@ -32338,7 +32338,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotConfigModel.ts#availableFields",
-      "subpaths": [".", "./pivot"]
+      "subpaths": ["./pivot"]
     },
     {
       "name": "deserializePivot",
@@ -32371,7 +32371,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotConfigModel.ts#EMPTY_PIVOT_CONFIG",
-      "subpaths": [".", "./pivot"]
+      "subpaths": ["./pivot"]
     },
     {
       "name": "isPivotReady",
@@ -32382,7 +32382,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotConfigModel.ts#isPivotReady",
-      "subpaths": [".", "./pivot"]
+      "subpaths": ["./pivot"]
     },
     {
       "name": "measureLabel",
@@ -32393,7 +32393,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotConfigModel.ts#measureLabel",
-      "subpaths": [".", "./pivot"]
+      "subpaths": ["./pivot"]
     },
     {
       "name": "moveField",
@@ -32404,7 +32404,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotConfigModel.ts#moveField",
-      "subpaths": [".", "./pivot"]
+      "subpaths": ["./pivot"]
     },
     {
       "name": "pivot",
@@ -32415,7 +32415,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotModel.ts#pivot",
-      "subpaths": [".", "./binding", "./pivot"]
+      "subpaths": ["./binding", "./pivot"]
     },
     {
       "name": "PIVOT_AGGREGATIONS",
@@ -32437,7 +32437,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotModel.ts#PIVOT_BLANK",
-      "subpaths": [".", "./pivot"]
+      "subpaths": ["./pivot"]
     },
     {
       "name": "PIVOT_GRAND_TOTAL_KEY",
@@ -32459,7 +32459,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotTableLayout.ts#PIVOT_ROW_COLUMN_KEY",
-      "subpaths": [".", "./pivot"]
+      "subpaths": ["./pivot"]
     },
     {
       "name": "PIVOT_ROW_INDENT",
@@ -32492,7 +32492,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotTableLayout.ts#pivotLeafColumnKey",
-      "subpaths": [".", "./pivot"]
+      "subpaths": ["./pivot"]
     },
     {
       "name": "pivotLeafGroup",
@@ -32536,7 +32536,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotTableLayout.ts#pivotRowCaption",
-      "subpaths": [".", "./pivot"]
+      "subpaths": ["./pivot"]
     },
     {
       "name": "pivotRowIndentStyle",
@@ -32580,7 +32580,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotConfigModel.ts#removeField",
-      "subpaths": [".", "./pivot"]
+      "subpaths": ["./pivot"]
     },
     {
       "name": "serializePivot",
@@ -32613,7 +32613,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/serverPivot.ts#serverPivotResult",
-      "subpaths": [".", "./pivot"]
+      "subpaths": ["./pivot"]
     },
     {
       "name": "setMeasureAgg",
@@ -32624,7 +32624,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotConfigModel.ts#setMeasureAgg",
-      "subpaths": [".", "./pivot"]
+      "subpaths": ["./pivot"]
     },
     {
       "name": "PivotColumnLeaf",
@@ -33240,7 +33240,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "selection/allMatchingScope.ts#createAllMatchingScope",
-      "subpaths": [".", "./selection"]
+      "subpaths": ["./selection"]
     },
     {
       "name": "AllMatchingScope",
@@ -33273,7 +33273,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "stream/status.ts#isStreamLive",
-      "subpaths": [".", "./stream"]
+      "subpaths": ["./stream"]
     },
     {
       "name": "isStreamSettled",
@@ -33284,7 +33284,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "stream/status.ts#isStreamSettled",
-      "subpaths": [".", "./stream"]
+      "subpaths": ["./stream"]
     },
     {
       "name": "openRowPatchStream",
@@ -33295,7 +33295,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "stream/connect.ts#openRowPatchStream",
-      "subpaths": [".", "./stream"]
+      "subpaths": ["./stream"]
     },
     {
       "name": "parseRowPatchFrame",
@@ -33306,7 +33306,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "stream/parse.ts#parseRowPatchFrame",
-      "subpaths": [".", "./stream"]
+      "subpaths": ["./stream"]
     },
     {
       "name": "InsertPatch",

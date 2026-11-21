@@ -9,13 +9,15 @@ import {
 } from "@adapttable/angular";
 import {
   applyRowPatches,
-  openRowPatchStream,
-  parseRowPatchFrame,
   type RowPatch,
   type RowPatchStreamReconnect,
   type RowPatchStreamStatus,
   type StreamSocket,
 } from "@adapttable/core";
+import {
+  openRowPatchStream,
+  parseRowPatchFrame,
+} from "@adapttable/core/stream";
 import {
   assertInInjectionContext,
   effect,

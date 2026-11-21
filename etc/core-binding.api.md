@@ -3993,7 +3993,7 @@ export interface EditableCellController<TRow = unknown> {
     rollback: () => void;
     saveFailure?: FailedCellSave<TRow>;
     saveStatus?: CellSaveStatus;
-    selectOptions: ReturnType<typeof normalizeEditorOptions>;
+    selectOptions: CellEditorOption[];
     setDraft: (value: string) => void;
     takeConflict: () => void;
     validating: boolean;
@@ -4388,7 +4388,7 @@ export interface EditorDraftControl {
         preventDefault: () => void;
         shiftKey?: boolean;
     }) => void;
-    selectOptions: ReturnType<typeof editorSelectOptions>;
+    selectOptions: CellEditorOption[];
     setDraft: (value: string) => void;
     validating: boolean;
 }
@@ -4397,7 +4397,7 @@ export interface EditorDraftControl {
 export function editorKeyRestoresFocus(key: string): boolean;
 
 // @public
-export function editorSelectOptions(editor: CellEditor): ReturnType<typeof normalizeEditorOptions>;
+export function editorSelectOptions(editor: CellEditor): CellEditorOption[];
 
 // @public
 export type EditUnit = "cell" | "row" | "batch";
@@ -5870,7 +5870,7 @@ export interface FormulaColumnSpec {
 }
 
 // @public
-export type FormulaErrorCode = (typeof FORMULA_ERRORS)[keyof typeof FORMULA_ERRORS];
+export type FormulaErrorCode = "#NAME?" | "#VALUE!" | "#DIV/0!" | "#CYCLE!" | "#ERROR!";
 
 // @public
 export const formulaSlice: UrlSliceSpec<readonly FormulaColumnSpec[], {

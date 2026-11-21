@@ -130,6 +130,11 @@ Each is a published, supported entry — not an implementation detail:
 | `@adapttable/core/stream`    | Live row patches (`RowPatch`, `RowPatchEvent`, …)                                                     |
 | `@adapttable/core/xlsx`      | Spreadsheet export writer                                                                             |
 
+A name a focused entry owns is served by that entry only: the editing, pivot,
+formula, grouping, stream and selection names are not on the main entry. The
+query codecs and the engine constructors are on the main entry as well, since
+every table speaks them.
+
 `@adapttable/react` publishes the React-facing counterparts of the ones that
 need elements — `/formula`, `/pivot`, `/stream` — plus `/sparkline`, the
 sparkline column helper. `pivotTableModel` lives on `@adapttable/react/pivot`.

@@ -5,13 +5,13 @@
  * A framework adds only its controls and renderers.
  */
 import {
-  buildGroupedFlatModel,
   type ColumnMetadata,
   type ExportAllControls,
   type ExportAllResult,
   type ExportCsvOptions,
   viewFromGroupedEntries,
 } from "@adapttable/core";
+import { buildGroupedFlatModel } from "@adapttable/core/grouping";
 import { pdfWriter, printTable } from "@adapttable/core/pdf";
 
 import { rosterFor } from "../casts";

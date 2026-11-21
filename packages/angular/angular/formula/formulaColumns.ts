@@ -3,10 +3,10 @@
  */
 import type { ColumnDef } from "@adapttable/angular";
 import {
-  buildFormulaColumns as neutralBuildFormulaColumns,
   type FormulaColumnSpec,
   type FormulaColumnsResult,
 } from "@adapttable/core";
+import { buildFormulaColumns as neutralBuildFormulaColumns } from "@adapttable/core/formula";
 
 /**
  * What {@link buildFormulaColumns} reports back to an Angular host.

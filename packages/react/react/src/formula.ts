@@ -27,21 +27,9 @@ export {
 export type { UrlStateAdapter } from "./url/adapter";
 export type { SortableValue } from "@adapttable/core";
 export {
-  evaluateFormula,
-  FORMULA_BLANK,
-  FORMULA_ERRORS,
-  FORMULA_FUNCTIONS,
-  formulaBoolean,
-  formulaDisplay,
-  formulaError,
   type FormulaErrorCode,
-  formulaNumber,
   type FormulaScope,
-  formulaSortValue,
-  formulaText,
   type FormulaValue,
-  isFormulaError,
-  toFormulaValue,
 } from "@adapttable/core";
 export { type FormulaColumnSpec } from "@adapttable/core";
 export {
@@ -51,10 +39,23 @@ export {
 export {
   type BinaryOp,
   type FormulaNode,
-  formulaRefs,
-  parseFormula,
   type ParseResult,
 } from "@adapttable/core";
+export {
+  evaluateFormula,
+  FORMULA_BLANK,
+  FORMULA_ERRORS,
+  FORMULA_FUNCTIONS,
+  formulaBoolean,
+  formulaDisplay,
+  formulaError,
+  formulaNumber,
+  formulaSortValue,
+  formulaText,
+  isFormulaError,
+  toFormulaValue,
+} from "@adapttable/core/formula";
+export { formulaRefs, parseFormula } from "@adapttable/core/formula";
 
 /**
  * The member types the signatures above hand back.

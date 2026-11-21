@@ -1,16 +1,10 @@
 /** Opt-in pivot data, URL state, and structural configuration controls. */
 import {
   type AggregateName,
-  assignField,
-  moveField,
-  PIVOT_ROW_COLUMN_KEY,
   type PivotConfig,
   type PivotField,
   type PivotResult,
   type PivotRow,
-  pivotRowCaption,
-  removeField,
-  setMeasureAgg,
   type TableLabels,
 } from "@adapttable/core";
 import {
@@ -26,6 +20,14 @@ import {
   pivotTableLayout,
   resolveFeatureLabels,
 } from "@adapttable/core/binding";
+import {
+  assignField,
+  moveField,
+  PIVOT_ROW_COLUMN_KEY,
+  pivotRowCaption,
+  removeField,
+  setMeasureAgg,
+} from "@adapttable/core/pivot";
 import {
   computed,
   h,
