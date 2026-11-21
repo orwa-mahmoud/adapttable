@@ -93,7 +93,10 @@ describe.each([
         extension.toUpperCase()
       );
       await click(host, "export-csv-button");
-      expect(after).toHaveBeenCalledOnce();
+      // The format's writer loads on the first export; the file follows.
+      await vi.waitFor(() => {
+        expect(after).toHaveBeenCalledOnce();
+      });
       expect(required(files[0]).mimeType).toBe(
         extension === "pdf"
           ? "application/pdf"
@@ -148,6 +151,10 @@ describe.each([
         extension.toUpperCase()
       );
       await click(host, "export-csv-button");
+      // The format's writer loads on the first export; the file follows.
+      await vi.waitFor(() => {
+        expect(files).toHaveLength(1);
+      });
       expect(required(files[0]).type).toBe(
         extension === "pdf"
           ? "application/pdf"

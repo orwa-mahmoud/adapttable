@@ -774,7 +774,10 @@ describe("native action controls in the real DataTable", () => {
           writer.extension.toUpperCase()
         );
         await click(host, "export-csv-button");
-        expect(after).toHaveBeenCalledOnce();
+        // The Excel writer deflates asynchronously; the file lands a tick later.
+        await vi.waitFor(() => {
+          expect(after).toHaveBeenCalledOnce();
+        });
         expect(after.mock.calls[0]?.[0].file.parts.length).toBeGreaterThan(0);
         stop();
       }
