@@ -24,44 +24,7 @@ export type {
   ColumnMenuChromeProps,
   ColumnMenuSlotProps,
 } from "./columns/columnMenuModel";
-export {
-  columnMenuActions,
-  filterColumnMenuRows,
-  hideAllColumns,
-  REORDER_COLUMN_KEY,
-  resetColumnLayout,
-  showAllColumns,
-  unpinAllColumns,
-} from "./columns/columnMenuModel";
-export {
-  applyCollapsedColumnGroups,
-  flattenColumnTree,
-} from "./columns/columnTree";
-export type {
-  HeaderGroupCell,
-  HtmlGroupedHeaderCell,
-} from "./columns/headerGroups";
-export {
-  COLUMN_GROUP_ID_SEP,
-  COLUMN_GROUP_RENDER_PREFIX,
-  COLUMN_GROUP_STUB_PREFIX,
-  COLUMN_GROUP_STUB_WIDTH,
-  columnGroupHeaderCaption,
-  columnGroupId,
-  columnGroupPath,
-  columnGroupStubStyle,
-  groupedHeaderAlign,
-  groupedHeaderCellStyle,
-  groupedHeaderChildRule,
-  groupedHeaderLabelStyle,
-  headerGroupRow,
-  headerGroupRows,
-  htmlGroupedHeaderPlan,
-  isColumnGroupRenderKey,
-  isColumnGroupStubKey,
-  isColumnGroupSummaryKey,
-  toggleCollapsedColumnGroup,
-} from "./columns/headerGroups";
+export { REORDER_COLUMN_KEY } from "./columns/columnMenuModel";
 export { resolveCommitValue } from "./editing/cellEditing";
 export type { FeatureHostState } from "./features/currentHost";
 export { bindFeatureHostFn } from "./features/currentHost";
@@ -79,24 +42,7 @@ export {
   type ParseResult,
   serializeFormulaColumns,
 } from "./formula";
-export {
-  bodyCellsHaveRowSpan,
-  cellsForRow,
-  extraHostFillStyle,
-  filterDefForColumn,
-  isExtraEntry,
-  pinnedRowCellStyle,
-  pinnedRowPart,
-  pinnedRowSticky,
-  REORDER_COLUMN_WIDTH,
-  resolveRowStyle,
-  rowIsDirty,
-  rowPinSignature,
-  rowReorderDropStyle,
-  rowReorderSignature,
-  rowSpanSignature,
-  rowStyleSignature,
-} from "./layout/leanAssembly";
+export { filterDefForColumn, rowIsDirty } from "./layout/leanAssembly";
 export type {
   PaginationItem,
   PaginationSlot,
@@ -122,26 +68,7 @@ export {
   serializePivotState,
   type ServerPivotOptions,
 } from "./pivot";
-export { type BodyCell, cellSpanMark } from "./rows/cellSpan";
-export {
-  EXTRA_OVER_SPAN_ROW_STYLE,
-  EXTRA_OVER_SPAN_STYLE,
-  EXTRA_ROW_PARTS,
-  extraCountBeforeRowIds,
-  extraCoveredTableSlots,
-  extraRowsForSection,
-  extraUncoveredColSpans,
-  inflateBodyCellRowSpans,
-  insertExtraRows,
-  insertExtrasBeforeRows,
-} from "./rows/extraRows";
-export {
-  orderedCardEntries,
-  PINNED_BOTTOM_PART,
-  PINNED_TOP_PART,
-  pinnedRowStickyStyle,
-} from "./rows/pinnedRowChrome";
-export { partitionPinnedRows, resolveRowHeight } from "./rows/rowPresentation";
+export { partitionPinnedRows } from "./rows/rowPresentation";
 export { isDeclarativeFilters } from "./source/isDeclarativeFilters";
 export type { TableQuery } from "./source/tableQuery";
 export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
@@ -196,7 +123,7 @@ export { devWarn } from "./utils/devWarn";
 export { type ElementRef } from "./virtual/mobileCardList";
 export type { RowPairMeasurer } from "./virtual/rowPairModel";
 export type { KeyedVirtualization } from "./virtual/virtualTableModel";
-export { rowSourceIndex, virtualItemMeta } from "./virtual/virtualTableModel";
+export { virtualItemMeta } from "./virtual/virtualTableModel";
 
 /**
  * Member types the exported signatures above hand back. A consumer that can

@@ -125,6 +125,7 @@ import { ColumnGroupToggleProps } from '@adapttable/core/binding';
 import { ColumnGroupToggleSlots as ColumnGroupToggleSlots_2 } from '@adapttable/core/binding';
 import { ColumnHeaderContext } from '@adapttable/core';
 import { ColumnHeaderController } from '@adapttable/core';
+import { columnHeaderLabel } from '@adapttable/core/binding';
 import { ColumnHeaderRenameSlotProps as ColumnHeaderRenameSlotProps_2 } from '@adapttable/core/binding';
 import { ColumnInput } from '@adapttable/core';
 import { ColumnLayoutState } from '@adapttable/core';
@@ -251,6 +252,7 @@ import { ExportRowScope } from '@adapttable/core';
 import { ExportScopeCapability } from '@adapttable/core';
 import { ExportStatus } from '@adapttable/core';
 import { ExportTable } from '@adapttable/core';
+import { exportViewFromChrome } from '@adapttable/core/binding';
 import { ExportWriteContext } from '@adapttable/core';
 import { ExportWriter } from '@adapttable/core';
 import { EXTRA_OVER_SPAN_ROW_STYLE } from '@adapttable/core/binding';
@@ -1319,6 +1321,8 @@ interface ColumnHeaderController_2 {
     }) => void;
 }
 
+export { columnHeaderLabel }
+
 // @public
 export type ColumnHeaderRenameSlotProps = ColumnHeaderRenameSlotProps_2<ReactNode>;
 
@@ -2361,6 +2365,8 @@ export { ExportScopeCapability }
 export { ExportStatus }
 
 export { ExportTable }
+
+export { exportViewFromChrome }
 
 export { ExportWriteContext }
 

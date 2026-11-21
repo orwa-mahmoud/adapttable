@@ -165,7 +165,7 @@ export interface FrontendSourceFrame<TRow> {
 /**
  * Builds the engine a frontend source drives.
  *
- * {@link createFrontendSource} passes the full evaluator. A plain table
+ * `createFrontendSource` passes the full evaluator. A plain table
  * passes `createBasicTableEngine` so grouping stays out of that graph.
  *
  * @public
@@ -303,7 +303,7 @@ function warnUnresolvableSort<TRow>(
  * What the source last staged is compared only while the engine still holds
  * it: an update that threw, or a candidate that was dropped before its
  * commit, is staged again whole.
- * {@link createFrontendSource} is the convenience form that supplies the
+ * `createFrontendSource` is the convenience form that supplies the
  * full evaluator.
  *
  * @returns The source; call `FrontendSource.update` before reading.

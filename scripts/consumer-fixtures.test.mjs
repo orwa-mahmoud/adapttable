@@ -144,16 +144,15 @@ describe("consumer fixtures", () => {
     assert.ok(mui.absent.includes("defaultLabels"));
   });
 
-  it("measures named primitives against engines the full graph really holds", () => {
-    const every = FIXTURES.find((f) => f.name === "core · every export");
+  it("measures named primitives against engines a core graph really holds", () => {
+    const live = new Set(
+      FIXTURES.filter((f) => f.kind === "core").flatMap((f) => f.present ?? [])
+    );
     for (const name of ["core · one primitive", "core · binding helper"]) {
       const primitive = FIXTURES.find((f) => f.name === name);
       assert.ok(primitive.absent.length >= 5, name);
       for (const marker of primitive.absent) {
-        assert.ok(
-          every.present.includes(marker),
-          `${marker} is not proven live`
-        );
+        assert.ok(live.has(marker), `${marker} is not proven live`);
       }
     }
     const typeOnly = FIXTURES.find((f) => f.name === "core · type only");

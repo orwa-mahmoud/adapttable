@@ -243,7 +243,7 @@ the same list stay on `@adapttable/core`:
 | `ColumnGroupDef`                   | `@adapttable/core`                        |
 | `ColumnGroupRecord`                | `@adapttable/core`                        |
 | `ColumnHeaderController`           | `@adapttable/core` or `@adapttable/react` |
-| `columnHeaderLabel`                | `@adapttable/core`                        |
+| `columnHeaderLabel`                | `@adapttable/react/adapter`               |
 | `ColumnReorderKeyProps`            | `@adapttable/react`                       |
 | `ColumnResizeHandleProps`          | `@adapttable/core`                        |
 | `ComputedColumnSpec`               | `@adapttable/core`                        |
@@ -253,7 +253,7 @@ the same list stay on `@adapttable/core`:
 | `EditableCellGate`                 | `@adapttable/react`                       |
 | `EditableCellGateProps`            | `@adapttable/react`                       |
 | `ExportContext`                    | `@adapttable/core`                        |
-| `exportViewFromChrome`             | `@adapttable/core`                        |
+| `exportViewFromChrome`             | `@adapttable/react/adapter`               |
 | `ExtraRow`                         | `@adapttable/core`                        |
 | `FeatureProps`                     | `@adapttable/react`                       |
 | `FeatureProviderContribution`      | `@adapttable/react`                       |

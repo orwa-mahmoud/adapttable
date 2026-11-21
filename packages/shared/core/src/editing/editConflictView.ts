@@ -209,7 +209,7 @@ export interface EditConflictSnapshot<TRow> {
   readonly current: EditConflict<TRow> | null;
   /**
    * Every cell of a row form or a batch waiting on an answer, keyed by
-   * {@link contestedCellKey}.
+   * `contestedCellKey`.
    */
   readonly contested: ReadonlyMap<string, ContestedEditCell<TRow>>;
 }

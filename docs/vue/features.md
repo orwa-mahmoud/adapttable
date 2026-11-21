@@ -273,6 +273,12 @@ the column-layout and filtering families.
 import { columnLayoutFamily } from "@adapttable/vue-unstyled/column-layout";
 import { editingFamily } from "@adapttable/vue-unstyled/editing";
 
+interface Person {
+  id: string;
+  name: string;
+}
+declare function save(row: Person, key: string, value: unknown): Promise<void>;
+
 const features = [editingFamily<Person>(save), columnLayoutFamily()];
 ```
 

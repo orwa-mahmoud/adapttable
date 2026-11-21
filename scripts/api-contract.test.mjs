@@ -549,10 +549,10 @@ describe("new Angular kit release contracts", () => {
       reports: { ...reports, ...overrides },
     });
 
-  it("gives all 287 typed entries nonempty Angular-owned policies", () => {
+  it("gives all 301 typed entries nonempty Angular-owned policies", () => {
     for (const kit of kits) {
       const kitEntries = entries.filter((entry) => entry.dir === kit);
-      assert.equal(kitEntries.length, 41, kit);
+      assert.equal(kitEntries.length, 43, kit);
       for (const entry of kitEntries) {
         assert.equal(entry.published, true, entry.report);
         const policy = manifest.entrypoints[entry.report];

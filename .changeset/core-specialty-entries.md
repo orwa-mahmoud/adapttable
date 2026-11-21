@@ -1,8 +1,8 @@
 ---
 "@adapttable/core": major
-"@adapttable/react": patch
+"@adapttable/react": minor
 "@adapttable/vue": patch
 "@adapttable/angular": patch
 ---
 
-The editing, pivot, formula, grouping, stream and selection names come from their own entries: `@adapttable/core/editing`, `/pivot`, `/formula`, `/grouping`, `/stream` and `/selection`. Sixty-five values leave the main entry, which drops importing every core export from 107.2 to 98.2 KiB. The query codecs and engine constructors stay on the main entry.
+`@adapttable/core`'s main entry serves the names a table uses. Binding and kit machinery comes from `@adapttable/core/binding`, and the editing, pivot, formula, grouping, stream and selection names from their own entries: `@adapttable/core/editing`, `/pivot`, `/formula`, `/grouping`, `/stream` and `/selection`. Importing every core export drops from 107.2 to 47.4 KiB gzip. The query codecs and engine constructors stay on the main entry. `columnHeaderLabel` and `exportViewFromChrome` are exported from `@adapttable/react/adapter`.

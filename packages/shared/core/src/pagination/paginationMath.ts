@@ -55,7 +55,7 @@ function range(start: number, end: number): number[] {
 /**
  * A pager slot paired with a stable React key — page numbers key on themselves,
  * ellipses on their semantic side (`ellipsis-left` / `ellipsis-right`). Use this
- * instead of indexing into {@link paginationItems} so list keys never depend on
+ * instead of indexing into `paginationItems` so list keys never depend on
  * the array position.
  *
  * @public
@@ -69,7 +69,7 @@ export interface PaginationSlot {
 
 /**
  * Build the keyed pager slots (see {@link PaginationSlot}) for a numbered pager.
- * Wraps {@link paginationItems}, assigning each ellipsis a `left`/`right` side
+ * Wraps `paginationItems`, assigning each ellipsis a `left`/`right` side
  * key in encounter order — at most two ellipses ever appear, so the side is a
  * stable identity that does not rely on the array index.
  *

@@ -107,10 +107,10 @@ describe("@adapttable/core/binding", () => {
     expect(typeof binding.flattenColumnTree).toBe("function");
   });
 
-  it("serves the same functions the main entry still serves", () => {
-    // Read by name: the main entry's copies carry the deprecation notice.
-    for (const name of ["columnGroupId", "insertExtraRows"]) {
-      expect(Reflect.get(main, name)).toBe(Reflect.get(binding, name));
+  it("serves the binding machinery the main entry does not", () => {
+    for (const name of ["columnGroupId", "insertExtraRows", "pinnedRowPart"]) {
+      expect(typeof Reflect.get(binding, name)).toBe("function");
+      expect(name in main).toBe(false);
     }
   });
 

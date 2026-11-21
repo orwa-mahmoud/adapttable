@@ -95,6 +95,12 @@ its own entry, so a member imported alone still loads alone.
 import { columnLayoutFamily } from "@adapttable/angular-unstyled/column-layout";
 import { editingFamily } from "@adapttable/angular-unstyled/editing";
 
+interface Person {
+  id: string;
+  name: string;
+}
+declare function save(row: Person, key: string, value: unknown): Promise<void>;
+
 const features = [editingFamily<Person>(save), columnLayoutFamily()];
 ```
 

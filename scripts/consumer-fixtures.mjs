@@ -144,7 +144,7 @@ const ROOT_CORE_ENGINES = [
 ];
 
 /** Engines only their own entries serve (`/pivot`, `/formula`). */
-const SPECIALTY_CORE_ENGINES = ["PIVOT_BLANK", "parseFormula"];
+const SPECIALTY_CORE_ENGINES = ["columnTreeOf", "parseFormula"];
 
 // The Excel writer is reachable from the main entry only lazily, through
 // `deferredXlsxWriter`, so it is absent from a small graph but not from the
@@ -318,11 +318,11 @@ const CORE_FIXTURES = [
     // controllers and state machines every binding drives, and the shared
     // behaviours the bindings would otherwise copy. A table bundles only the
     // names it imports, so this row tracks the surface, not a table's cost.
-    // It includes the deprecated root aliases. The total also holds the PDF
-    // and Excel builders, which the main entry reaches only lazily through
-    // `deferredPdfWriter` / `deferredXlsxWriter`.
-    initialKB: 108,
-    totalKB: 120,
+    // The total also holds the PDF and Excel builders, which the main entry
+    // reaches only lazily through `deferredPdfWriter` / `deferredXlsxWriter`.
+    // Packed 2026-11-22: 47.4 KiB initial, 58.7 KiB total.
+    initialKB: 55,
+    totalKB: 68,
     code: `export * from "PKG";`,
     // The engines a named primitive must not carry are real identifiers of
     // the full graph, so their absence there is a finding, not a typo.
@@ -341,6 +341,7 @@ const CORE_FIXTURES = [
     initialKB: 5,
     totalKB: 5,
     code: `export { pivot } from "PKG";`,
+    present: ["columnTreeOf"],
   },
   {
     name: "core · formula",
@@ -350,6 +351,7 @@ const CORE_FIXTURES = [
     initialKB: 6,
     totalKB: 6,
     code: `export { buildFormulaColumns } from "PKG";`,
+    present: ["parseFormula"],
   },
   {
     name: "core · stream",
@@ -377,7 +379,7 @@ const CORE_FIXTURES = [
     absent: [
       "useState",
       "useSyncExternalStore",
-      "PIVOT_BLANK",
+      "columnTreeOf",
       "toCsv",
       "parseFormula",
     ],
@@ -473,7 +475,7 @@ const CORE_FIXTURES = [
     initialKB: 5,
     totalKB: 5,
     code: `export { parseTableQuery } from "PKG";`,
-    absent: ["useState", "PIVOT_BLANK", "toCsv"],
+    absent: ["useState", "columnTreeOf", "toCsv"],
     node: [
       `import { parseTableQuery } from "PKG";`,
       `const query = parseTableQuery("?page=2&limit=10&sort=name", { columns: ["name"] });`,

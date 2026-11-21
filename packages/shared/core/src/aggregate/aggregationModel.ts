@@ -347,7 +347,7 @@ export function effectiveAggregateOps<TRow>(
  * named reader state. Equivalent configurations still share one key.
  *
  * @typeParam TRow - The row type.
- * @param input - The same input {@link effectiveAggregateOps} reads.
+ * @param input - The same input `effectiveAggregateOps` reads.
  * @returns A stable fingerprint, or `undefined` when nothing is effective.
  *
  * @public

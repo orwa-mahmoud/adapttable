@@ -39,10 +39,9 @@ import { exportedNames } from "./packed-names.mjs";
 /**
  * The exact places a public type is derived from a runtime value.
  *
- * `FilterType` is `(typeof FILTER_TYPES)[number]`, and `FormulaErrorCode` is
- * the same shape over `FORMULA_ERRORS`. Naming the type from a subpath means
- * re-exporting the const, and a value re-export ships bytes: measured
- * 2026-08-29, adding these to the entry barrels cost 0.1–0.2 KB gzipped on
+ * `FilterType` is `(typeof FILTER_TYPES)[number]`. Naming the type from a
+ * subpath means re-exporting the const, and a value re-export ships bytes:
+ * measured 2026-08-29, adding these to the entry barrels cost 0.1–0.2 KB gzipped on
  * every one of the eight adapters, took `unstyled` from 0.2 KB of headroom to
  * 0.0, and moved `core/pivot` from 1.5 KB to 1.6 — a published figure. The
  * entries whose whole promise is that they are small do not pay that for a
@@ -55,7 +54,6 @@ export const VALUE_BACKED = [
   ["core-formula.api.md", "FILTER_TYPES"],
   ["core-pdf.api.md", "FILTER_TYPES"],
   ["core-pivot.api.md", "FILTER_TYPES"],
-  ["core-query.api.md", "FORMULA_ERRORS"],
   ["core-xlsx.api.md", "FILTER_TYPES"],
 ];
 

@@ -40,7 +40,7 @@ export const defaultLabels: Required<TableLabels> = /* @__PURE__ */ allLabels(
 );
 
 /**
- * Merge caller overrides over {@link defaultLabels}. Undefined entries in
+ * Merge caller overrides over `defaultLabels`. Undefined entries in
  * the override are ignored, so partial `labels` objects are safe.
  *
  * @param overrides - A partial set of label overrides.

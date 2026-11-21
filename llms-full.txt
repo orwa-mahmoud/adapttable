@@ -22468,17 +22468,17 @@ React and the UI kit external because your app already ships those):
 | What you import                            | min+gzip  |
 | ------------------------------------------ | --------- |
 | `useFrontendData` + `useDataTable` (react) | ~20 kB    |
-| every core export                          | ~95 kB    |
+| every core export                          | ~47 kB    |
 | `DataTable` from an adapter                | ~64–73 kB |
 
-The first row is the one to read: a headless table costs about a fifth of the
-full core, because the parts you never import never arrive. The every-export
-row is the whole public surface imported at once, measured 2026-11-21 at
-96.9 KiB. It holds the deprecated aliases the main
-entry keeps for names that moved to `@adapttable/core/binding`, the composed
-session with one committed state and a staged row-model evaluator, and the
-shell operations, plus the snapshot guard, the
-grouped-snapshot cache, and the shared behaviours the bindings used to copy. It is not the download of a table. All eight React adapters
+The first row is the one to read: a headless table costs well under half of
+the full core, because the parts you never import never arrive. The
+every-export row is the whole public surface imported at once, measured
+2026-11-22 at 47.4 KiB: the composed session with one committed state and a
+staged row-model evaluator, the shell operations, the snapshot guard, the
+grouped-snapshot cache, and the shared behaviours the bindings used to copy.
+Binding and kit machinery lives on `@adapttable/core/binding`, and each
+specialty engine (pivot, formula, grouping, editing) on its own entry. It is not the download of a table. All eight React adapters
 land within ~12 kB of each other, so switching kits does not change what you
 pay. Tree-shaking drops unused exports from an application bundle. Installing
 a package still installs that package.
@@ -22633,9 +22633,9 @@ consumer fixtures in `scripts/bundle-budget.mjs`.
 - `@adapttable/ai` is a separate package. Eleven base graphs contain none
   of `createAgentSession`, `tableAgent`, `adapttable.agent.v1` or
   `@adapttable/ai` (`scripts/ai-isolation.mjs`).
-- Importing every core export measured 104.28 KiB gzip on 2026-11-09
-  (106,778 bytes). The fixture ceiling is that measurement. The figure is the
-  whole public surface, not a table's download. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
+- Importing every core export measured 47.4 KiB gzip on 2026-11-22. The
+  fixture ceiling is 55 KiB. The figure is the whole public surface, not a
+  table's download. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
 
 Published FAQ figures are the measurements the budget script checks, not
 a second estimate. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable) ·
@@ -22707,27 +22707,27 @@ a fix was attempted and failed. None is listed.
 
 ## Sources
 
-| Claim                                       | Source                                                                                                        |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Host callbacks own writes                   | [cell-editing](./cell-editing.md), [row-reordering](./row-reordering.md)                                      |
-| Formula grammar and refused tokens          | [formulas](./formulas.md), `parseFormula`                                                                     |
-| Move policy, cycle guard, sort block        | [row-reordering](./row-reordering.md)                                                                         |
-| `fullDataset` / export-all / `rows.read`    | [data-tiers](./data-tiers.md), [agent-capabilities](./agent-capabilities.md), `session.governed.test.ts`      |
-| `readMax` default 50                        | `packages/shared/ai/src/commands/rowAddress.ts` `readMaxOf`                                                   |
-| Virtualize DOM count                        | [virtualization](./virtualization.md)                                                                         |
-| Export 50,000 cap                           | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                       |
-| URL-state 8,192 cap, `limit` 1–500          | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`                  |
-| Adapter ≤ 80 KB, omitted-feature markers    | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                                  |
-| Every core export at its 104.28 KiB ceiling | [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable), `core · every export` in `scripts/consumer-fixtures.mjs` |
-| AI absent from base graphs                  | `scripts/ai-isolation.mjs`                                                                                    |
-| Perf baseline                               | `scripts/v3-perf-baseline.json`                                                                               |
-| Chromium e2e                                | `playwright.config.ts`                                                                                        |
-| Nightly Firefox / WebKit / Pixel 5          | `.github/workflows/e2e-nightly.yml`, `name: "firefox"` in `playwright.config.ts`                              |
-| Showcase axe audit                          | `e2e/axe-audit.spec.ts`                                                                                       |
-| Visual baselines                            | `e2e/visual/v3-ui.spec.ts`, `e2e/visual/README.md`                                                            |
-| SSR seams                                   | [ssr-rsc](./ssr-rsc.md)                                                                                       |
-| antd sticky header association              | `e2e/aria-parity.spec.ts`, [accessibility](./accessibility.md)                                                |
-| React / Node / kit floors                   | [getting-started](./getting-started.md)                                                                       |
+| Claim                                    | Source                                                                                                        |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Host callbacks own writes                | [cell-editing](./cell-editing.md), [row-reordering](./row-reordering.md)                                      |
+| Formula grammar and refused tokens       | [formulas](./formulas.md), `parseFormula`                                                                     |
+| Move policy, cycle guard, sort block     | [row-reordering](./row-reordering.md)                                                                         |
+| `fullDataset` / export-all / `rows.read` | [data-tiers](./data-tiers.md), [agent-capabilities](./agent-capabilities.md), `session.governed.test.ts`      |
+| `readMax` default 50                     | `packages/shared/ai/src/commands/rowAddress.ts` `readMaxOf`                                                   |
+| Virtualize DOM count                     | [virtualization](./virtualization.md)                                                                         |
+| Export 50,000 cap                        | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                       |
+| URL-state 8,192 cap, `limit` 1–500       | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`                  |
+| Adapter ≤ 80 KB, omitted-feature markers | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                                  |
+| Every core export at its 55 KiB ceiling  | [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable), `core · every export` in `scripts/consumer-fixtures.mjs` |
+| AI absent from base graphs               | `scripts/ai-isolation.mjs`                                                                                    |
+| Perf baseline                            | `scripts/v3-perf-baseline.json`                                                                               |
+| Chromium e2e                             | `playwright.config.ts`                                                                                        |
+| Nightly Firefox / WebKit / Pixel 5       | `.github/workflows/e2e-nightly.yml`, `name: "firefox"` in `playwright.config.ts`                              |
+| Showcase axe audit                       | `e2e/axe-audit.spec.ts`                                                                                       |
+| Visual baselines                         | `e2e/visual/v3-ui.spec.ts`, `e2e/visual/README.md`                                                            |
+| SSR seams                                | [ssr-rsc](./ssr-rsc.md)                                                                                       |
+| antd sticky header association           | `e2e/aria-parity.spec.ts`, [accessibility](./accessibility.md)                                                |
+| React / Node / kit floors                | [getting-started](./getting-started.md)                                                                       |
 
 ---
 
@@ -24388,7 +24388,7 @@ the same list stay on `@adapttable/core`:
 | `ColumnGroupDef`                   | `@adapttable/core`                        |
 | `ColumnGroupRecord`                | `@adapttable/core`                        |
 | `ColumnHeaderController`           | `@adapttable/core` or `@adapttable/react` |
-| `columnHeaderLabel`                | `@adapttable/core`                        |
+| `columnHeaderLabel`                | `@adapttable/react/adapter`               |
 | `ColumnReorderKeyProps`            | `@adapttable/react`                       |
 | `ColumnResizeHandleProps`          | `@adapttable/core`                        |
 | `ComputedColumnSpec`               | `@adapttable/core`                        |
@@ -24398,7 +24398,7 @@ the same list stay on `@adapttable/core`:
 | `EditableCellGate`                 | `@adapttable/react`                       |
 | `EditableCellGateProps`            | `@adapttable/react`                       |
 | `ExportContext`                    | `@adapttable/core`                        |
-| `exportViewFromChrome`             | `@adapttable/core`                        |
+| `exportViewFromChrome`             | `@adapttable/react/adapter`               |
 | `ExtraRow`                         | `@adapttable/core`                        |
 | `FeatureProps`                     | `@adapttable/react`                       |
 | `FeatureProviderContribution`      | `@adapttable/react`                       |
@@ -26380,6 +26380,12 @@ its own entry, so a member imported alone still loads alone.
 ```ts
 import { columnLayoutFamily } from "@adapttable/angular-unstyled/column-layout";
 import { editingFamily } from "@adapttable/angular-unstyled/editing";
+
+interface Person {
+  id: string;
+  name: string;
+}
+declare function save(row: Person, key: string, value: unknown): Promise<void>;
 
 const features = [editingFamily<Person>(save), columnLayoutFamily()];
 ```
@@ -34288,6 +34294,12 @@ the column-layout and filtering families.
 ```ts
 import { columnLayoutFamily } from "@adapttable/vue-unstyled/column-layout";
 import { editingFamily } from "@adapttable/vue-unstyled/editing";
+
+interface Person {
+  id: string;
+  name: string;
+}
+declare function save(row: Person, key: string, value: unknown): Promise<void>;
 
 const features = [editingFamily<Person>(save), columnLayoutFamily()];
 ```

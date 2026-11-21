@@ -44,7 +44,7 @@ export interface DirtyCellState {
 }
 
 /**
- * What {@link createDirtyCellStore} needs.
+ * What `createDirtyCellStore` needs.
  *
  * @public
  */

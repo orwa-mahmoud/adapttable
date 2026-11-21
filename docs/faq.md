@@ -179,17 +179,17 @@ React and the UI kit external because your app already ships those):
 | What you import                            | min+gzip  |
 | ------------------------------------------ | --------- |
 | `useFrontendData` + `useDataTable` (react) | ~20 kB    |
-| every core export                          | ~95 kB    |
+| every core export                          | ~47 kB    |
 | `DataTable` from an adapter                | ~64–73 kB |
 
-The first row is the one to read: a headless table costs about a fifth of the
-full core, because the parts you never import never arrive. The every-export
-row is the whole public surface imported at once, measured 2026-11-21 at
-96.9 KiB. It holds the deprecated aliases the main
-entry keeps for names that moved to `@adapttable/core/binding`, the composed
-session with one committed state and a staged row-model evaluator, and the
-shell operations, plus the snapshot guard, the
-grouped-snapshot cache, and the shared behaviours the bindings used to copy. It is not the download of a table. All eight React adapters
+The first row is the one to read: a headless table costs well under half of
+the full core, because the parts you never import never arrive. The
+every-export row is the whole public surface imported at once, measured
+2026-11-22 at 47.4 KiB: the composed session with one committed state and a
+staged row-model evaluator, the shell operations, the snapshot guard, the
+grouped-snapshot cache, and the shared behaviours the bindings used to copy.
+Binding and kit machinery lives on `@adapttable/core/binding`, and each
+specialty engine (pivot, formula, grouping, editing) on its own entry. It is not the download of a table. All eight React adapters
 land within ~12 kB of each other, so switching kits does not change what you
 pay. Tree-shaking drops unused exports from an application bundle. Installing
 a package still installs that package.
