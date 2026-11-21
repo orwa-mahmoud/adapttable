@@ -1442,7 +1442,7 @@ export type {
   WidthColumn,
 } from "@adapttable/core/binding";
 
-/* ── Kit machinery the main entry serves only as deprecated aliases ── */
+/* ── Kit machinery ── */
 export type { UseShortcutsOptions } from "./actions/useShortcuts";
 export { useShortcuts } from "./actions/useShortcuts";
 export { useChromeScrollReset } from "./chrome/scrollReset";

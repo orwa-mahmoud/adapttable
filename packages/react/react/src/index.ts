@@ -411,7 +411,6 @@ export {
   type GroupPagingState,
   useGroupPaging,
 } from "./grouping/useGroupPaging";
-export * from "./mainEntryAliases";
 export type { Slot } from "./state/slots";
 export {
   useGroupCollapseUrlState,

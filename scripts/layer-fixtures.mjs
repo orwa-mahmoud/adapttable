@@ -309,13 +309,9 @@ export function Headless() {
 `;
 
 /**
- * The names v3 moved off the main entry, as the inventory records them.
- *
- * They used to be read out of `mainEntryAliases.ts`; v3 deleted that module,
- * and the list is now closed — nothing joins a set of removals that already
- * happened. What the probes check is the other half of the promise: every one
- * of them still ships from `@adapttable/react/adapter`, which is the import a
- * host moves to.
+ * The names v3 moved off the main entry, as the inventory records them. The
+ * list is closed. The probes check that every one of them ships from
+ * `@adapttable/react/adapter`, the import a host moves to.
  */
 export function movedAliases(manifest) {
   const group = manifest.v3Removals.groups.find(

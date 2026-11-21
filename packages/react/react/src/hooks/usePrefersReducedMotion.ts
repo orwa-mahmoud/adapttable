@@ -33,7 +33,7 @@ export function ReducedMotionScope({
 
 /**
  * Whether motion should stay off. True when the operating system requests
- * reduced motion, or when a {@link ReducedMotionScope} above this component
+ * reduced motion, or when a `ReducedMotionScope` above this component
  * says the UI library has turned motion off.
  *
  * @returns `true` when animation and overlay motion should not run.

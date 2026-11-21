@@ -54107,14 +54107,6 @@
       "behavior": ""
     },
     {
-      "export": "ChromeBodyData",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
       "export": "collectChecklistValues",
       "currentImport": "@adapttable/react",
       "kind": "value",
@@ -54139,30 +54131,6 @@
       "behavior": ""
     },
     {
-      "export": "ColumnDragState",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "columnDropProps",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "ColumnDropProps",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
       "export": "ColumnFooterContext",
       "currentImport": "@adapttable/react",
       "kind": "type",
@@ -54175,14 +54143,6 @@
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "columnHeaderController",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "neutral-operation",
       "proposedImport": "@adapttable/react",
       "behavior": ""
     },
@@ -54203,63 +54163,7 @@
       "behavior": ""
     },
     {
-      "export": "columnReorderKeyProps",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "ColumnReorderKeyProps",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "columnRowDragProps",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "ColumnRowDragProps",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "columnsHaveFooter",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "ColumnWindow",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
       "export": "CommandPaletteOptions",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "ComposedTableProps",
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",
@@ -54675,14 +54579,6 @@
       "behavior": ""
     },
     {
-      "export": "FilterTriggerToggle",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
       "export": "FIND_URL_WRITE_DEBOUNCE_MS",
       "currentImport": "@adapttable/react",
       "kind": "value",
@@ -54819,14 +54715,6 @@
       "behavior": ""
     },
     {
-      "export": "HorizontalOverflow",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
       "export": "InfiniteQueryLike",
       "currentImport": "@adapttable/react",
       "kind": "type",
@@ -54927,14 +54815,6 @@
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "offersAllMatching",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "neutral-operation",
       "proposedImport": "@adapttable/react",
       "behavior": ""
     },
@@ -55051,14 +54931,6 @@
       "behavior": ""
     },
     {
-      "export": "readCellValue",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
       "export": "ReconcileLiveBatchEdit",
       "currentImport": "@adapttable/react",
       "kind": "type",
@@ -55083,30 +54955,6 @@
       "behavior": ""
     },
     {
-      "export": "ReducedMotionScope",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "resolveColumnFooter",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "resolveColumnHeader",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
       "export": "resolveColumns",
       "currentImport": "@adapttable/react",
       "kind": "value",
@@ -55119,14 +54967,6 @@
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "resolveNeutralColumnHeaders",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "neutral-operation",
       "proposedImport": "@adapttable/react",
       "behavior": ""
     },
@@ -55419,14 +55259,6 @@
       "behavior": ""
     },
     {
-      "export": "TableEditHistoryProps",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
       "export": "TableElementProps",
       "currentImport": "@adapttable/react",
       "kind": "type",
@@ -55486,22 +55318,6 @@
       "export": "UNPIN_ROW_ACTION_KEY",
       "currentImport": "@adapttable/react",
       "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "useActiveFilterChips",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "UseActiveFilterChipsOptions",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/react",
       "behavior": ""
@@ -55580,30 +55396,6 @@
     },
     {
       "export": "useChecklistFilter",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "useChromeScrollReset",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "useColorScheme",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "useColumnDragState",
       "currentImport": "@adapttable/react",
       "kind": "value",
       "class": "react-binding",
@@ -55699,14 +55491,6 @@
       "behavior": ""
     },
     {
-      "export": "useDebounce",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
       "export": "useDensityUrlState",
       "currentImport": "@adapttable/react",
       "kind": "value",
@@ -55771,22 +55555,6 @@
       "behavior": ""
     },
     {
-      "export": "useExtraChips",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "UseExtraChipsOptions",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
       "export": "useFilterOptions",
       "currentImport": "@adapttable/react",
       "kind": "value",
@@ -55807,22 +55575,6 @@
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "useFilterTriggerToggle",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "useFindFocus",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
       "proposedImport": "@adapttable/react",
       "behavior": ""
     },
@@ -55931,14 +55683,6 @@
       "behavior": ""
     },
     {
-      "export": "useHorizontalOverflow",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
       "export": "useInfiniteScroll",
       "currentImport": "@adapttable/react",
       "kind": "value",
@@ -56015,14 +55759,6 @@
       "currentImport": "@adapttable/react",
       "kind": "value",
       "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "usePlainChromeBodyData",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-chrome",
       "proposedImport": "@adapttable/react",
       "behavior": ""
     },
@@ -56171,22 +55907,6 @@
       "behavior": ""
     },
     {
-      "export": "useScrollToTableTop",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "UseScrollToTableTopOptions",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
       "export": "useSearchInput",
       "currentImport": "@adapttable/react",
       "kind": "value",
@@ -56227,30 +55947,6 @@
       "behavior": ""
     },
     {
-      "export": "useShortcuts",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "UseShortcutsOptions",
-      "currentImport": "@adapttable/react",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "useTableChrome",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
       "export": "useTableData",
       "currentImport": "@adapttable/react",
       "kind": "value",
@@ -56271,22 +55967,6 @@
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "useTableEditHistory",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "useTableEngine",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-binding",
       "proposedImport": "@adapttable/react",
       "behavior": ""
     },
@@ -56343,14 +56023,6 @@
       "currentImport": "@adapttable/react",
       "kind": "value",
       "class": "react-binding",
-      "proposedImport": "@adapttable/react",
-      "behavior": ""
-    },
-    {
-      "export": "useVirtualChromeBodyData",
-      "currentImport": "@adapttable/react",
-      "kind": "value",
-      "class": "react-chrome",
       "proposedImport": "@adapttable/react",
       "behavior": ""
     },

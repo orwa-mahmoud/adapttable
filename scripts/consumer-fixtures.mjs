@@ -921,7 +921,7 @@ export function plantedLeakFixture() {
     name: "planted leak · antd + useTableEditHistory",
     kind: "planted-leak",
     pkg: "adapter-antd",
-    code: `export { DataTable } from "PKG";\nexport { useTableEditHistory, asBatchGesture } from "@adapttable/react";`,
+    code: `export { DataTable } from "PKG";\nexport { useTableEditHistory } from "@adapttable/react/adapter";\nexport { asBatchGesture } from "@adapttable/react";`,
     absent: ["useTableEditHistory", "asBatchGesture"],
   };
 }
