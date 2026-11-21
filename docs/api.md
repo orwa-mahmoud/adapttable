@@ -3386,6 +3386,9 @@ bridge, samples the columns that asked, and offers the table to a browser agent.
 `TableAgentControllerInputs` carries the binding's live
 `TableAgentControllerOptions` (the runtime options plus `bridge` and `webmcp`,
 narrowed by `TableAgentWebMcpOptions`), its runtime and its commit hooks.
+The controller and `TABLE_AGENT_STATE` are also on `@adapttable/ai/agent`, an
+entry that does not carry `registerWebMcpTools`: through it, the WebMCP
+registrar loads only when a table sets `webmcp`.
 Its optional `settleApply` has the same delivery contract as `LiveSessionInputs`;
 the controller forwards it to the live session. It complements
 `flushAdmission`, which delivers pending state before a call is admitted.

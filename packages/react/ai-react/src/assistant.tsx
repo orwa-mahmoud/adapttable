@@ -34,10 +34,12 @@ import {
   type AssistantSuggestion,
   type AssistantTransport,
   type AssistantUndoView,
+} from "@adapttable/ai";
+import {
   createTableAssistant,
   tableAssistantFields,
   tableAssistantInputs,
-} from "@adapttable/ai";
+} from "@adapttable/ai/assistant";
 import {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,

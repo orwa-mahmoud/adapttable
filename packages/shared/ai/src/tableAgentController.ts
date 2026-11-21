@@ -61,7 +61,19 @@ import {
   viewRevisionStamp,
 } from "./tableAgentRuntime";
 import type { AgentSession, ApprovalResult, ApprovalSubject } from "./types";
-import { registerWebMcpTools } from "./webmcp";
+import type * as WebMcp from "./webmcp";
+
+/**
+ * The WebMCP registrar, loaded the first time a table offers itself. A table
+ * that never sets `webmcp` never downloads it; every table that does shares
+ * the one load, and a load that failed is tried again on the next offer.
+ */
+let webMcpModule: Promise<typeof WebMcp> | null = null;
+
+function loadWebMcp(): Promise<typeof WebMcp> {
+  webMcpModule ??= import("./webmcp");
+  return webMcpModule;
+}
 
 /**
  * Offering the table to a browser-resident agent.
@@ -701,6 +713,13 @@ export function createTableAgentController(
     readonly version: string;
     readonly dispose: () => void;
   } | null = null;
+  // The offer waiting on the registrar to load. Only the latest one registers,
+  // and only while it is still what the table wants.
+  let offering: {
+    readonly session: AgentSession;
+    readonly webmcp: true | TableAgentWebMcpOptions;
+    readonly version: string;
+  } | null = null;
   // Who is listening for approvals, and what they were last told. Compared by
   // the subscriber's own identity rather than the bridge's: a host that
   // rebuilds `bridge={{ ... }}` inline on every render still passes the same
@@ -747,15 +766,38 @@ export function createTableAgentController(
   const syncWebMcp = (live: AgentSession) => {
     const webmcp = optionsRef.current.webmcp;
     const version = webmcp ? contractVersion() : "";
+    const current = registration ?? offering;
     if (
-      registration?.session === live &&
-      registration.webmcp === webmcp &&
-      registration.version === version
+      current?.session === live &&
+      current.webmcp === webmcp &&
+      current.version === version
     ) {
       return;
     }
     withdraw();
     if (!webmcp) return;
+    const wanted = { session: live, webmcp, version };
+    offering = wanted;
+    loadWebMcp().then(
+      ({ registerWebMcpTools }) => {
+        // A table that disconnected, switched the offer off or moved to a
+        // new contract while the registrar loaded registers nothing stale.
+        if (offering !== wanted) return;
+        offering = null;
+        register(registerWebMcpTools, wanted);
+      },
+      (error: unknown) => {
+        webMcpModule = null;
+        if (offering === wanted) offering = null;
+        console.warn("[adapttable] webmcp: the registrar did not load", error);
+      }
+    );
+  };
+
+  const register = (
+    registerWebMcpTools: (typeof WebMcp)["registerWebMcpTools"],
+    { session: live, webmcp, version }: NonNullable<typeof offering>
+  ) => {
     const offer = webmcp === true ? {} : webmcp;
     const registered = registerWebMcpTools(live, {
       ...(offer.exposedTo ? { exposedTo: offer.exposedTo } : {}),
@@ -782,6 +824,7 @@ export function createTableAgentController(
   const withdraw = () => {
     const previous = registration;
     registration = null;
+    offering = null;
     previous?.dispose();
   };
 

@@ -181,6 +181,7 @@ re-export it. Its subpaths are supported entries too:
 
 | Entry                      | What it is                                                                 |
 | -------------------------- | -------------------------------------------------------------------------- |
+| `@adapttable/ai/agent`     | The table agent controller (`createTableAgentController`)                  |
 | `@adapttable/ai/json`      | Provider-neutral JSON tool envelope (`executeEnvelope`, `executeJsonTool`) |
 | `@adapttable/ai/openai`    | OpenAI tool definitions and execution (`executeOpenAITool`)                |
 | `@adapttable/ai/mcp`       | MCP tool execution (`executeMcpTool`, `mcpListChanged`)                    |

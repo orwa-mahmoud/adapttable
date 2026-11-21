@@ -8,12 +8,14 @@
  */
 import {
   type AgentSession,
-  createTableAgentController,
-  TABLE_AGENT_STATE,
   type TableAgentBridge as NeutralBridge,
   type TableAgentController,
   type TableAgentControllerOptions,
 } from "@adapttable/ai";
+import {
+  createTableAgentController,
+  TABLE_AGENT_STATE,
+} from "@adapttable/ai/agent";
 import {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,

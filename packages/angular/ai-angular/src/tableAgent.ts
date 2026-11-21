@@ -1,10 +1,12 @@
 /** Angular's lifecycle around the framework-neutral table agent controller. */
 import {
-  createTableAgentController,
-  TABLE_AGENT_STATE,
   type TableAgentBridge as NeutralBridge,
   type TableAgentControllerOptions,
 } from "@adapttable/ai";
+import {
+  createTableAgentController,
+  TABLE_AGENT_STATE,
+} from "@adapttable/ai/agent";
 import {
   type AdaptTableFeature,
   type FeatureMountContext,

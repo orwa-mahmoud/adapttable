@@ -1194,7 +1194,7 @@ describe("webmcp", () => {
     return { tools, context };
   }
 
-  it("offers the table, narrows it, and withdraws on disconnect", () => {
+  it("offers the table, narrows it, and withdraws on disconnect", async () => {
     const fake = fakeContext();
     vi.stubGlobal("document", { modelContext: fake.context });
     const onRegister = vi.fn();
@@ -1203,6 +1203,7 @@ describe("webmcp", () => {
     });
     h.controller.sync();
     h.controller.sync();
+    await vi.dynamicImportSettled();
     expect([...fake.tools.keys()]).toEqual(["adapttable.staff.view.describe"]);
     expect(onRegister).toHaveBeenCalledTimes(1);
 
@@ -1211,11 +1212,12 @@ describe("webmcp", () => {
     expect(onRegister).toHaveBeenLastCalledWith([]);
   });
 
-  it("offers everything for `true` and takes it back when switched off", () => {
+  it("offers everything for `true` and takes it back when switched off", async () => {
     const fake = fakeContext();
     vi.stubGlobal("document", { modelContext: fake.context });
     const h = harness({ webmcp: true });
     h.controller.sync();
+    await vi.dynamicImportSettled();
     expect(fake.tools.size).toBeGreaterThan(1);
 
     h.options.current = { ...h.options.current, webmcp: undefined };
@@ -1223,12 +1225,49 @@ describe("webmcp", () => {
     expect(fake.tools.size).toBe(0);
   });
 
-  it("warns once when the page forbids it", () => {
+  it("warns once when the page forbids it", async () => {
     vi.stubGlobal("document", { modelContext: fakeContext(true).context });
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     harness({ webmcp: true }).controller.sync();
+    await vi.dynamicImportSettled();
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining("forbidden by policy")
     );
+  });
+
+  it("registers nothing when the table leaves before the registrar loads", async () => {
+    const fake = fakeContext();
+    vi.stubGlobal("document", { modelContext: fake.context });
+    const onRegister = vi.fn();
+    const h = harness({ webmcp: { onRegister } });
+    h.controller.sync();
+    h.controller.disconnect();
+    await vi.dynamicImportSettled();
+    expect(fake.tools.size).toBe(0);
+    expect(onRegister).not.toHaveBeenCalled();
+  });
+
+  it("registers nothing when the offer is switched off before the registrar loads", async () => {
+    const fake = fakeContext();
+    vi.stubGlobal("document", { modelContext: fake.context });
+    const h = harness({ webmcp: true });
+    h.controller.sync();
+    h.options.current = { ...h.options.current, webmcp: undefined };
+    h.controller.sync();
+    await vi.dynamicImportSettled();
+    expect(fake.tools.size).toBe(0);
+  });
+
+  it("registers once for repeated syncs while the registrar loads", async () => {
+    const fake = fakeContext();
+    vi.stubGlobal("document", { modelContext: fake.context });
+    const onRegister = vi.fn();
+    const h = harness({ webmcp: { onRegister } });
+    h.controller.sync();
+    h.controller.sync();
+    h.controller.sync();
+    await vi.dynamicImportSettled();
+    expect(onRegister).toHaveBeenCalledTimes(1);
+    expect(fake.tools.size).toBeGreaterThan(1);
   });
 });

@@ -562,11 +562,12 @@ unchanged either way: the receipts stay in the conversation state.
 
 Each is an optional subpath, and each routes every call back through
 `session.execute`. `http`, `json`, `openai`, `mcp`, `mcp-apps`, `ag-ui` and
-`ai-sdk` stay out of the root graph; `assistant`, `context`, `voice` and
-`webmcp` are also re-exported from the root entry.
+`ai-sdk` stay out of the root graph; `agent`, `assistant`, `context`, `voice`
+and `webmcp` are also re-exported from the root entry.
 
 | Subpath                    | For                                                             |
 | -------------------------- | --------------------------------------------------------------- |
+| `@adapttable/ai/agent`     | The table agent controller a framework binding drives           |
 | `@adapttable/ai/http`      | The wire, the client and the assistant transport                |
 | `@adapttable/ai/assistant` | The framework-free conversation store                           |
 | `@adapttable/ai/context`   | The permitted context, and column sampling                      |

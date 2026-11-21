@@ -41,6 +41,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./agent": {
+      "import": {
+        "types": "./dist/agent.d.ts",
+        "default": "./dist/agent.js"
+      },
+      "require": {
+        "types": "./dist/agent.d.cts",
+        "default": "./dist/agent.cjs"
+      }
+    },
     "./json": {
       "import": {
         "types": "./dist/json.d.ts",

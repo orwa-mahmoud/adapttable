@@ -17,7 +17,7 @@ import { SpeechClip } from '@adapttable/ai/voice';
 import { SpeechInputHandle } from '@adapttable/vue/adapter';
 import { SpeechState } from '@adapttable/ai/voice';
 import { StaticTableFeature } from '@adapttable/vue';
-import { TABLE_AGENT_STATE } from '@adapttable/ai';
+import { TABLE_AGENT_STATE } from '@adapttable/ai/agent';
 import { TableAgentBridge as TableAgentBridge_2 } from '@adapttable/ai';
 import { TableAgentColumnPatch } from '@adapttable/ai';
 import { TableAgentControllerOptions } from '@adapttable/ai';

@@ -12,10 +12,12 @@ import {
   type AssistantSuggestion,
   type AssistantTransport,
   type AssistantUndoView,
+} from "@adapttable/ai";
+import {
   createTableAssistant,
   tableAssistantFields,
   tableAssistantInputs,
-} from "@adapttable/ai";
+} from "@adapttable/ai/assistant";
 import {
   fromStore,
   injectFeatureState,

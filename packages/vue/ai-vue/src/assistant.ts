@@ -3,13 +3,15 @@ import {
   type AgentSession,
   type AlwaysAllowedState,
   type AssistantUndoView,
-  assistantUndoView,
-  createTableAssistant,
   type TableAssistantInputs,
-  tableAssistantInputs,
   type TableAssistantSnapshot,
   type TableAssistantStore,
 } from "@adapttable/ai";
+import {
+  assistantUndoView,
+  createTableAssistant,
+  tableAssistantInputs,
+} from "@adapttable/ai/assistant";
 import { type AgentApprovalPending, type AgentProgress } from "@adapttable/vue";
 import {
   AGENT_ALWAYS_ALLOW_STATE,
