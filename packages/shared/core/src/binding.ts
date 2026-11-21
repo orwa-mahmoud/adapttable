@@ -217,6 +217,14 @@ export {
   type FeatureSetup,
   LiveFeatureHost,
 } from "./features/liveFeatureHost";
+export {
+  type LiveStage,
+  type LiveStageDependencies,
+  type LiveStageKey,
+  liveStageKey,
+  liveStagesOf,
+  orderLiveStages,
+} from "./features/liveStages";
 export { deriveRuntimeOperations } from "./features/runtimeOperations";
 export {
   ACTIVE_FILTER_CHIPS,
@@ -880,6 +888,7 @@ export {
   exportPageOnly,
   finishShellBody,
   finishShellLive,
+  gridRowCount,
   liveColumnLayout,
   livePinning,
   type OverlayChrome,

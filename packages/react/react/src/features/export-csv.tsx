@@ -10,17 +10,66 @@ import {
   makeExportCsvHandler,
   resolveExportCsv,
 } from "@adapttable/core";
-import { coreExportCsv } from "@adapttable/core/binding";
+import {
+  coreExportCsv,
+  exportPageOnly,
+  liveStageKey,
+  sourceWindowStart,
+} from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
-import { useExportHandler } from "../export/useExportHandler";
-import { slotRender } from "./providers";
+import {
+  type ExportHandlerState,
+  useExportHandler,
+} from "../export/useExportHandler";
+import type { LiveStageProps } from "./liveStage";
+import { FeatureSlot, slotRender } from "./providers";
 import {
   EXPORT_LIVE,
   type ExportLiveDraw,
   type ExportLiveSlotProps,
 } from "./slotKeys";
 import type { TableFeature } from "./tableFeature";
+
+/** Export's live stage: reads the grid's range, writes the export control. */
+const EXPORT_STAGE = liveStageKey<LiveStageProps<unknown>>("export", {
+  reads: ["gridFocus"],
+  writes: "exportHandler",
+});
+
+/** Build the export's inputs from the shell and hand them to its slot. */
+function ExportStage<TRow>({
+  shell,
+  live,
+  children,
+}: LiveStageProps<TRow>): ReactNode {
+  "use no memo";
+  const props = shell.chromeProps;
+  const chrome = shell.chrome;
+  const exportProps = {
+    exportCsv: props.exportCsv,
+    source: chrome.source,
+    columns: chrome.columnLayout.visibleColumns,
+    context: {
+      selectedIds: chrome.table.selection?.selectedIds,
+      getRowId: chrome.getRowId,
+      allColumns: chrome.allColumns,
+      range: live.gridFocus.range,
+      firstRowIndex: sourceWindowStart(chrome.source),
+      getCellSpan: props.getCellSpan,
+      grouping: chrome.grouping,
+      tree: chrome.tree,
+      groupTotal: shell.labels.groupTotal,
+      summaryRow: props.summaryRow,
+    },
+    featureHost: shell.featureHost,
+    labels: shell.labels,
+    pageOnly: exportPageOnly(chrome.featureNotices),
+    children: (exportHandler: ExportHandlerState) =>
+      children({ ...live, exportHandler }),
+  } satisfies ExportLiveSlotProps<TRow>;
+  return <FeatureSlot slot={EXPORT_LIVE} props={exportProps} />;
+}
 
 function LiveExport<TRow>({
   exportCsv,
@@ -64,6 +113,7 @@ export function exportCsv<TRow>(
   return {
     ...coreExportCsv<TRow>(options),
     renders: [
+      slotRender(EXPORT_STAGE, (props) => <ExportStage {...props} />),
       slotRender<ExportLiveDraw>(EXPORT_LIVE, (props) => (
         <LiveExport {...props} />
       )),

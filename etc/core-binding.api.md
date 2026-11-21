@@ -6179,6 +6179,12 @@ export function gridRowAttributes(input: {
 };
 
 // @public
+export function gridRowCount<TRow>(source: Pick<TableSource<TRow>, "rows" | "total" | "paginationMode" | "page" | "limit">, pinnedRows?: {
+    readonly top?: readonly TRow[];
+    readonly bottom?: readonly TRow[];
+}): number;
+
+// @public
 export function gridRowFocusSignature(input: GridCellAttributesInput, rowIndex: number, colCount: number): string;
 
 // @public
@@ -7546,6 +7552,35 @@ export class LiveFeatureHost<TRow = unknown, TPanel extends SidePanelEntry = Sid
 export function livePinning<TRow>(chrome: Pick<RuntimeChromeInput<TRow>, "columnLayout" | "rowPinning">): PinningContribution;
 
 // @public
+export interface LiveStage<TNode = unknown> {
+    readonly id: string;
+    readonly render: (props: never) => TNode;
+    readonly stage: LiveStageDependencies;
+}
+
+// @public
+export interface LiveStageDependencies {
+    readonly reads: readonly string[];
+    readonly writes: string;
+}
+
+// @public
+export interface LiveStageKey<TProps> extends FeatureSlotKey<TProps> {
+    readonly stage: LiveStageDependencies;
+}
+
+// @public
+export function liveStageKey<TProps>(id: string, stage: LiveStageDependencies): LiveStageKey<TProps> & {
+    readonly __draw?: undefined;
+};
+
+// @public
+export function liveStagesOf<TNode>(features: readonly {
+    readonly id: string;
+    readonly renders?: readonly FeatureRender<never, TNode>[];
+}[]): readonly LiveStage<TNode>[];
+
+// @public
 export interface LoadedFilterOption {
     label: string;
     value: string;
@@ -7829,6 +7864,9 @@ export interface OrderedContribution<TFeature, TContribution> {
 export function orderedContributions<TFeature extends {
     readonly id: string;
 }, TContribution>(features: readonly TFeature[], pick: (feature: TFeature) => TContribution | undefined, kind: string): readonly OrderedContribution<TFeature, TContribution>[];
+
+// @public
+export function orderLiveStages<TNode>(stages: readonly LiveStage<TNode>[]): readonly LiveStage<TNode>[];
 
 // @public
 export const OVERLAY_MOTION: {
@@ -10198,7 +10236,7 @@ export function shallowEqualByKeys<T>(keys: readonly (keyof T)[], prev: Readonly
 // @public
 export const SHARED_DESKTOP_ROW_KEYS: readonly ["row", "id", "index", "selected", "expanded", "size", "dir", "columns", "columnWidths", "pinSignature", "className", "labels", "hasSelection", "expandable", "showActions", "showReorder", "reorderSignature", "rowPinSignature", "spanSignature", "hasRowClick", "columnSpan", "gridFocus", "treeEntry", "treeColumnKey", "rowActionsLayout", "renderRowActions", "cellSpanAppearance"];
 
-// @public
+// @public @deprecated
 export const SHELL_LIVE_STAGE_ORDER: readonly ["find-live", "cell-nav-live", "export-live", "fullscreen-live", "selection-stats-live"];
 
 // @public
@@ -10244,8 +10282,8 @@ export interface ShellBodyInput<TRef> {
     readonly virtualScrollRef: TRef;
 }
 
-// @public
-export type ShellLiveStageId = (typeof SHELL_LIVE_STAGE_ORDER)[number];
+// @public @deprecated
+export type ShellLiveStageId = "find-live" | "cell-nav-live" | "export-live" | "fullscreen-live" | "selection-stats-live";
 
 // @public
 export type ShellOperation = keyof typeof SHELL_OPERATION_OWNERS;

@@ -1,28 +1,33 @@
 import {
-  cellNavigationInput,
-  exportPageOnly,
   finishShellLive,
+  gridRowCount,
+  type LiveStage,
+  type LiveStageDependencies,
+  orderLiveStages,
   publishShellOverlay,
   type ShellOperationInput,
   sourceWindowStart,
   withShellOperations,
 } from "@adapttable/core/binding";
 /**
- * Mount shell interaction hooks in-tree: history, find, grid, export, fullscreen.
+ * Mount shell interaction hooks in-tree: edit history, then the live stages
+ * the composed features bring.
  *
- * Features fill the live slots. Empty slots pass inert stubs, so the lean
- * table never imports those hooks. Enter-to-edit and batch recording live in
+ * Each live value starts inert; a composed feature's stage replaces the one
+ * it writes, so the lean table never imports those hooks. Enter-to-edit and batch recording live in
  * the cell-navigation and editing entries; this file only forwards the host
  * callbacks when those slots are empty.
  */
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useMemo } from "react";
 
 import { withFindMarks } from "../find/findMarks";
 import type { DataTableShellResult } from "../useDataTableShell";
 import { rememberFeatureHost } from "./featureHost";
+import type { LiveStageProps, ShellLive } from "./liveStage";
 import {
   FeatureSlot,
   useFeatureSlotFilled,
+  useLiveStages,
   usePublishTableRuntime,
   useTableRuntime,
 } from "./providers";
@@ -34,20 +39,7 @@ import {
   disabledHistory,
   windowedTableAria,
 } from "./shellLiveStubs";
-import {
-  CELL_NAV_LIVE,
-  type CellNavLiveSlotProps,
-  EDIT_HISTORY_LIVE,
-  type EditHistoryLiveSlotProps,
-  EXPORT_LIVE,
-  type ExportLiveSlotProps,
-  FIND_LIVE,
-  type FindLiveSlotProps,
-  FULLSCREEN_LIVE,
-  type FullscreenLiveSlotProps,
-  SELECTION_STATS_LIVE,
-  type SelectionStatsLiveSlotProps,
-} from "./slotKeys";
+import { EDIT_HISTORY_LIVE, type EditHistoryLiveSlotProps } from "./slotKeys";
 
 interface HistoryResult<TRow> {
   history: DataTableShellResult<TRow>["editHistory"];
@@ -107,90 +99,84 @@ export function HistoryLiveGate<TRow>({
   );
 }
 
-/**
- * What the live slots hand back, one field per stage.
- *
- * The stages run in order and each reads what the ones before it produced —
- * cell navigation needs the find walk to jump to a match, export needs the
- * selected range, the figures need it too — so the bag grows rather than being
- * assembled at the end.
- */
-interface ShellLive<TRow> {
-  readonly find: typeof DISABLED_FIND;
-  readonly gridFocus: ReturnType<typeof disabledGridFocus>;
-  readonly exportHandler: typeof DISABLED_EXPORT;
-  readonly fullscreen: typeof DISABLED_FULLSCREEN;
-  readonly stats: DataTableShellResult<TRow>["selectionStats"];
-}
-
-interface StageProps<TRow> {
-  readonly shell: DataTableShellResult<TRow>;
-  readonly live: ShellLive<TRow>;
-  readonly children: (live: ShellLive<TRow>) => ReactNode;
-}
+type StageProps<TRow> = LiveStageProps<TRow>;
 
 /** Where the rendered slice begins in the dataset. */
 function windowStartOf<TRow>(shell: DataTableShellResult<TRow>): number {
   return sourceWindowStart(shell.chrome.source);
 }
 
-function FindStage<TRow>({
-  shell,
-  live,
-  children,
-}: StageProps<TRow>): ReactNode {
-  "use no memo";
-  const filled = useFeatureSlotFilled(FIND_LIVE);
-  const chrome = shell.chrome;
-  const findProps = {
-    enabled: shell.chromeProps.findInTable === true,
-    rows: chrome.source.rows,
-    columns: chrome.columnLayout.visibleColumns,
-    firstRowIndex: windowStartOf(shell),
-    // Same resolved adapter the shell already owns — find rides the table URL
-    // and Saved Views without a second History binding.
-    urlAdapter: shell.urlAdapter,
-    urlSync: shell.chromeProps.urlSync,
-    urlKey: shell.chromeProps.urlKey,
-    root: chrome.rootRef,
-    children: (find: typeof DISABLED_FIND) => children({ ...live, find }),
-  } satisfies FindLiveSlotProps<TRow>;
-  return filled ? (
-    <FeatureSlot slot={FIND_LIVE} props={findProps} />
-  ) : (
-    children({ ...live, find: DISABLED_FIND })
-  );
+/** A stage the base still mounts itself, with what it reads and writes. */
+function baseStage(
+  id: string,
+  stage: LiveStageDependencies,
+  render: (props: StageProps<never>) => ReactNode
+): LiveStage<ReactNode> {
+  return { id, stage, render };
 }
 
-function CellNavStage<TRow>({
+/**
+ * The stages to walk: the composed ones in dependency order, with the base's
+ * own grid attributes when no stage writes the grid.
+ */
+export function liveStageWalk(
+  composed: readonly LiveStage<ReactNode>[]
+): readonly LiveStage<ReactNode>[] {
+  const gridWritten = composed.some(
+    ({ stage }) => stage.writes === "gridFocus"
+  );
+  return gridWritten
+    ? composed
+    : orderLiveStages([...composed, PLAIN_GRID_STAGE]);
+}
+
+/** One link of the chain: run this stage, then hand the rest what it grew. */
+function LiveChain<TRow>({
+  stages,
+  index,
+  shell,
+  live,
+  children,
+}: StageProps<TRow> & {
+  readonly stages: readonly LiveStage<ReactNode>[];
+  readonly index: number;
+}): ReactNode {
+  "use no memo";
+  const stage = stages[index];
+  if (stage === undefined) return children(live);
+  const run = stage.render as (props: StageProps<TRow>) => ReactNode;
+  return run({
+    shell,
+    live,
+    children: (grown) => (
+      <LiveChain stages={stages} index={index + 1} shell={shell} live={grown}>
+        {children}
+      </LiveChain>
+    ),
+  });
+}
+
+/**
+ * The grid without the keyboard-grid feature still names its real size —
+ * assistive tech can only count the slice in the DOM — and find still marks
+ * its matches.
+ */
+function PlainGridFocus<TRow>({
   shell,
   live,
   children,
 }: StageProps<TRow>): ReactNode {
   "use no memo";
-  const filled = useFeatureSlotFilled(CELL_NAV_LIVE);
-  const props = shell.chromeProps;
   const chrome = shell.chrome;
-  const options = {
-    ...cellNavigationInput({
-      source: chrome.source,
-      pinnedRows: chrome.pinnedRows,
-      columns: chrome.columnLayout.visibleColumns,
-      columnsWindowed: shell.tableProps.columnWindow.enabled,
-      headerCheckbox: props.columnSelectionCheckbox === true,
-    }),
-    getRowId: props.rowKey,
-    dir: props.dir,
-    labels: shell.labels,
-    onCut: props.onCellCut,
-  };
-  const windowStart = options.firstRowIndex;
-  // One object per table shape, not per render: a kit that keys its table
-  // components on these getters (antd) would remount the table on every
-  // render if they were rebuilt.
-  const { rowCount, columnsWindowed, firstRowIndex } = options;
-  const rowsLength = options.rows.length;
-  const columnsLength = options.columns.length;
+  const pinned = chrome.pinnedRows;
+  const firstRowIndex = windowStartOf(shell);
+  const rowCount = gridRowCount(chrome.source, pinned);
+  const rowsLength =
+    (pinned?.top?.length ?? 0) +
+    chrome.source.rows.length +
+    (pinned?.bottom?.length ?? 0);
+  const columnsLength = chrome.columnLayout.visibleColumns.length;
+  const columnsWindowed = shell.tableProps.columnWindow.enabled;
   const windowedAria = useMemo(
     () =>
       windowedTableAria({
@@ -202,157 +188,17 @@ function CellNavStage<TRow>({
       }),
     [rowCount, rowsLength, columnsLength, columnsWindowed, firstRowIndex]
   );
-  const navProps = {
-    options,
-    hostProps: props,
-    pinOffset: chrome.columnLayout.pinOffset,
-    record: shell.editHistory.record,
-    undo: shell.editHistory.undo,
-    redo: shell.editHistory.redo,
-    onFind: live.find.openBar,
-    matchKeys: live.find.matchKeys,
-    currentMatch: live.find.current,
-    editing: chrome.editing,
-    children: (gridFocus: ReturnType<typeof disabledGridFocus>) =>
-      children({ ...live, gridFocus }),
-  } satisfies CellNavLiveSlotProps<TRow>;
-  return filled ? (
-    <FeatureSlot slot={CELL_NAV_LIVE} props={navProps} />
-  ) : (
-    children({
-      ...live,
-      // Without the feature the table still names its real size: assistive
-      // tech can only count the slice in the DOM — and find still marks its
-      // matches.
-      gridFocus: withFindMarks(windowedAria, live.find, windowStart),
-    })
-  );
+  return children({
+    ...live,
+    gridFocus: withFindMarks(windowedAria, live.find, firstRowIndex),
+  });
 }
 
-function ExportStage<TRow>({
-  shell,
-  live,
-  children,
-}: StageProps<TRow>): ReactNode {
-  "use no memo";
-  const filled = useFeatureSlotFilled(EXPORT_LIVE);
-  const props = shell.chromeProps;
-  const chrome = shell.chrome;
-  const exportProps = {
-    exportCsv: props.exportCsv,
-    source: chrome.source,
-    columns: chrome.columnLayout.visibleColumns,
-    context: {
-      selectedIds: chrome.table.selection?.selectedIds,
-      getRowId: chrome.getRowId,
-      allColumns: chrome.allColumns,
-      range: live.gridFocus.range,
-      firstRowIndex: windowStartOf(shell),
-      getCellSpan: props.getCellSpan,
-      grouping: chrome.grouping,
-      tree: chrome.tree,
-      groupTotal: shell.labels.groupTotal,
-      summaryRow: props.summaryRow,
-    },
-    featureHost: shell.featureHost,
-    labels: shell.labels,
-    pageOnly: exportPageOnly(chrome.featureNotices),
-    children: (exportHandler: typeof DISABLED_EXPORT) =>
-      children({ ...live, exportHandler }),
-  } satisfies ExportLiveSlotProps<TRow>;
-  return filled ? (
-    <FeatureSlot slot={EXPORT_LIVE} props={exportProps} />
-  ) : (
-    children({ ...live, exportHandler: DISABLED_EXPORT })
-  );
-}
-
-function FullscreenStage<TRow>({
-  shell,
-  live,
-  children,
-}: StageProps<TRow>): ReactNode {
-  "use no memo";
-  const filled = useFeatureSlotFilled(FULLSCREEN_LIVE);
-  // The root exists only once the table has committed. Read from the ref
-  // during render it is still null, and the button would do nothing until
-  // something else happened to re-render the table. A passive effect runs
-  // after every ref in the commit is attached, wherever the root sits; it
-  // follows each shell render, since one can swap the root (loading to table).
-  const rootRef = shell.chrome.rootRef;
-  const [element, setElement] = useState<HTMLElement | null>(null);
-  useEffect(() => {
-    if (filled) setElement(rootRef.current);
-  }, [filled, rootRef, shell]);
-  const fullscreenProps = {
-    element,
-    children: (fullscreen: typeof DISABLED_FULLSCREEN) =>
-      children({ ...live, fullscreen }),
-  } satisfies FullscreenLiveSlotProps;
-  return filled ? (
-    <FeatureSlot slot={FULLSCREEN_LIVE} props={fullscreenProps} />
-  ) : (
-    children({ ...live, fullscreen: DISABLED_FULLSCREEN })
-  );
-}
-
-function SelectionStatsStage<TRow>({
-  shell,
-  live,
-  children,
-}: StageProps<TRow>): ReactNode {
-  "use no memo";
-  const filled = useFeatureSlotFilled(SELECTION_STATS_LIVE);
-  const statsProps = {
-    range: live.gridFocus.range,
-    rows: shell.chrome.source.rows,
-    columns: shell.chrome.columnLayout.visibleColumns,
-    firstRowIndex: windowStartOf(shell),
-    children: (stats: DataTableShellResult<TRow>["selectionStats"]) =>
-      children({ ...live, stats }),
-  } satisfies SelectionStatsLiveSlotProps<TRow>;
-  return filled ? (
-    <FeatureSlot slot={SELECTION_STATS_LIVE} props={statsProps} />
-  ) : (
-    children({ ...live, stats: null })
-  );
-}
-
-/** Each live slot's stage; core owns the order they mount in. */
-type LiveStage = <TRow>(props: StageProps<TRow>) => ReactNode;
-/**
- * The live stages, in core's `SHELL_LIVE_STAGE_ORDER` (history runs before
- * them); a test holds the order.
- */
-export const LIVE_STAGES: readonly LiveStage[] = [
-  FindStage,
-  CellNavStage,
-  ExportStage,
-  FullscreenStage,
-  SelectionStatsStage,
-];
-
-/** One link of the chain: run this stage, then hand the rest what it grew. */
-function LiveChain<TRow>({
-  index,
-  shell,
-  live,
-  children,
-}: StageProps<TRow> & { readonly index: number }): ReactNode {
-  "use no memo";
-  const Stage = LIVE_STAGES[index];
-  return Stage === undefined ? (
-    children(live)
-  ) : (
-    <Stage shell={shell} live={live}>
-      {(grown) => (
-        <LiveChain index={index + 1} shell={shell} live={grown}>
-          {children}
-        </LiveChain>
-      )}
-    </Stage>
-  );
-}
+const PLAIN_GRID_STAGE = baseStage(
+  "grid-attributes",
+  { reads: ["find"], writes: "gridFocus" },
+  PlainGridFocus
+);
 
 /**
  * Overlay find, grid focus, export and fullscreen onto a finished shell.
@@ -371,6 +217,8 @@ export function ShellLiveGate<TRow>({
   // Every stage rebuilds its props from the shell each render, so its
   // stages and this gate are left uncompiled: a cache here would never hit.
   "use no memo";
+  const composed = useLiveStages();
+  const stages = useMemo(() => liveStageWalk(composed), [composed]);
   const idle: ShellLive<TRow> = {
     find: DISABLED_FIND,
     gridFocus: disabledGridFocus(),
@@ -379,7 +227,7 @@ export function ShellLiveGate<TRow>({
     stats: null,
   };
   return (
-    <LiveChain index={0} shell={shell} live={idle}>
+    <LiveChain stages={stages} index={0} shell={shell} live={idle}>
       {(live) => (
         <PublishLiveOperations shell={shell} live={live}>
           {children}

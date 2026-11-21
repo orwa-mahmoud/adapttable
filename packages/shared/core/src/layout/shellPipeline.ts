@@ -82,6 +82,8 @@ export const CHROME_EXTRA_SLOT_ORDER = [
  * the ones before it produced: cell navigation needs find's walk, export
  * and the selection figures need the selected range.
  *
+ * @deprecated Each live stage names what it reads and writes with
+ * `liveStageKey`, and `liveStagesOf` orders the composed stages.
  * @public
  */
 export const SHELL_LIVE_STAGE_ORDER = [
@@ -95,9 +97,15 @@ export const SHELL_LIVE_STAGE_ORDER = [
 /**
  * One of {@link SHELL_LIVE_STAGE_ORDER}.
  *
+ * @deprecated See {@link SHELL_LIVE_STAGE_ORDER}.
  * @public
  */
-export type ShellLiveStageId = (typeof SHELL_LIVE_STAGE_ORDER)[number];
+export type ShellLiveStageId =
+  | "find-live"
+  | "cell-nav-live"
+  | "export-live"
+  | "fullscreen-live"
+  | "selection-stats-live";
 
 /** A column as the runtime projection reads it. */
 export type RuntimeColumn<TRow> = ColumnMetadata<TRow>;
@@ -467,6 +475,34 @@ export class TableRuntimePublisher<TRow> {
 }
 
 /**
+ * How many rows the grid spans: the whole dataset (or the rows loaded so
+ * far, when more than it reports) and any pinned rows. What a table names as
+ * its row count to assistive tech, with or without the keyboard grid.
+ *
+ * @param source - The table's source.
+ * @param pinnedRows - Rows pinned above and below the body.
+ * @returns The row count.
+ *
+ * @public
+ */
+export function gridRowCount<TRow>(
+  source: Pick<
+    TableSource<TRow>,
+    "rows" | "total" | "paginationMode" | "page" | "limit"
+  >,
+  pinnedRows?: {
+    readonly top?: readonly TRow[];
+    readonly bottom?: readonly TRow[];
+  }
+): number {
+  return (
+    Math.max(source.total, sourceWindowStart(source) + source.rows.length) +
+    (pinnedRows?.top?.length ?? 0) +
+    (pinnedRows?.bottom?.length ?? 0)
+  );
+}
+
+/**
  * The inputs cell navigation runs over: the dataset-sized row count, the
  * rendered rows with the pinned ones around them, and Enter / F2 resolving
  * a focused cell to the row and column to open.
@@ -505,10 +541,7 @@ export function cellNavigationInput<TRow, TColumn>(input: {
   ];
   return {
     headerCheckbox: input.headerCheckbox,
-    rowCount:
-      Math.max(source.total, windowStart + source.rows.length) +
-      (pinnedRows?.top?.length ?? 0) +
-      (pinnedRows?.bottom?.length ?? 0),
+    rowCount: gridRowCount(source, pinnedRows),
     columns: input.columns,
     columnsWindowed: input.columnsWindowed,
     rows,

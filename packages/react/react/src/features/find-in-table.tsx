@@ -6,7 +6,12 @@
  * through `FIND_LIVE`.
  */
 import { type GridCell } from "@adapttable/core";
-import { coreFindInTable, findMatchRow } from "@adapttable/core/binding";
+import {
+  coreFindInTable,
+  findMatchRow,
+  liveStageKey,
+  sourceWindowStart,
+} from "@adapttable/core/binding";
 import { type ReactNode, useContext, useEffect, useRef } from "react";
 
 import {
@@ -14,9 +19,10 @@ import {
   useFindScroll,
   useFindShortcut,
 } from "../find/findMarks";
-import { useFindInTable } from "../find/useFindInTable";
+import { type FindInTableState, useFindInTable } from "../find/useFindInTable";
 import { RowScrollContext } from "../virtual/rowScroll";
-import { slotRender, useFeatureSlotFilled } from "./providers";
+import type { LiveStageProps } from "./liveStage";
+import { FeatureSlot, slotRender, useFeatureSlotFilled } from "./providers";
 import {
   CELL_NAV_LIVE,
   FIND_LIVE,
@@ -24,6 +30,36 @@ import {
   type FindLiveSlotProps,
 } from "./slotKeys";
 import type { StaticTableFeature } from "./tableFeature";
+
+/** Find's live stage: reads nothing, writes the matches. */
+const FIND_STAGE = liveStageKey<LiveStageProps<unknown>>("find-in-table", {
+  reads: [],
+  writes: "find",
+});
+
+/** Build the find walk's inputs from the shell and hand them to its slot. */
+function FindStage<TRow>({
+  shell,
+  live,
+  children,
+}: LiveStageProps<TRow>): ReactNode {
+  "use no memo";
+  const chrome = shell.chrome;
+  const findProps = {
+    enabled: shell.chromeProps.findInTable === true,
+    rows: chrome.source.rows,
+    columns: chrome.columnLayout.visibleColumns,
+    firstRowIndex: sourceWindowStart(chrome.source),
+    // Same resolved adapter the shell already owns — find rides the table URL
+    // and Saved Views without a second History binding.
+    urlAdapter: shell.urlAdapter,
+    urlSync: shell.chromeProps.urlSync,
+    urlKey: shell.chromeProps.urlKey,
+    root: chrome.rootRef,
+    children: (find: FindInTableState) => children({ ...live, find }),
+  } satisfies FindLiveSlotProps<TRow>;
+  return <FeatureSlot slot={FIND_LIVE} props={findProps} />;
+}
 
 /**
  * Ask a virtualized body to render the match the walk moved to. The mark, the
@@ -85,6 +121,7 @@ export function findInTable(): StaticTableFeature {
   return {
     ...coreFindInTable(),
     renders: [
+      slotRender(FIND_STAGE, (props) => <FindStage {...props} />),
       slotRender<FindLiveDraw>(FIND_LIVE, (props) => <LiveFind {...props} />),
     ],
   };

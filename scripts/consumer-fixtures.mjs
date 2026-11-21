@@ -66,6 +66,7 @@ export const ADAPTER_ABSENT = [
   "buildExportTable",
   "useFilterTreeChips",
   "matchKeySet",
+  "cellNavigationInput",
   "useRowPinningUrlState",
   "useTableEditHistory",
   "beginCellEdit",

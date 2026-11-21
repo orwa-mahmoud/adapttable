@@ -8,8 +8,10 @@
 import { type CellRange } from "@adapttable/core";
 import {
   cellNavigationChannels,
+  cellNavigationInput,
   cellRangeKey,
   coreCellNavigation,
+  liveStageKey,
   reportedCellRange,
 } from "@adapttable/core/binding";
 import { beginCellEdit } from "@adapttable/core/editing";
@@ -23,9 +25,10 @@ import {
 
 import { useFindFocus } from "../find/useFindInTable";
 import { GridFocusAnnouncer } from "../focus/GridFocusAnnouncer";
-import { useGridFocus } from "../focus/useGridFocus";
+import { type GridFocusState, useGridFocus } from "../focus/useGridFocus";
 import { RowScrollContext } from "../virtual/rowScroll";
-import { slotRender } from "./providers";
+import type { LiveStageProps } from "./liveStage";
+import { FeatureSlot, slotRender } from "./providers";
 import {
   CELL_NAV_LIVE,
   type CellNavLiveDraw,
@@ -33,6 +36,49 @@ import {
   GRID_FOCUS_ANNOUNCER,
 } from "./slotKeys";
 import type { StaticTableFeature } from "./tableFeature";
+
+/** The keyboard grid's live stage: reads find's matches, writes the grid. */
+const CELL_NAV_STAGE = liveStageKey<LiveStageProps<unknown>>(
+  "cell-navigation",
+  { reads: ["find"], writes: "gridFocus" }
+);
+
+/** Build the grid's inputs from the shell and hand them to the grid slot. */
+function CellNavStage<TRow>({
+  shell,
+  live,
+  children,
+}: LiveStageProps<TRow>): ReactNode {
+  "use no memo";
+  const props = shell.chromeProps;
+  const chrome = shell.chrome;
+  const navProps = {
+    options: {
+      ...cellNavigationInput({
+        source: chrome.source,
+        pinnedRows: chrome.pinnedRows,
+        columns: chrome.columnLayout.visibleColumns,
+        columnsWindowed: shell.tableProps.columnWindow.enabled,
+        headerCheckbox: props.columnSelectionCheckbox === true,
+      }),
+      getRowId: props.rowKey,
+      dir: props.dir,
+      labels: shell.labels,
+      onCut: props.onCellCut,
+    },
+    hostProps: props,
+    pinOffset: chrome.columnLayout.pinOffset,
+    record: shell.editHistory.record,
+    undo: shell.editHistory.undo,
+    redo: shell.editHistory.redo,
+    onFind: live.find.openBar,
+    matchKeys: live.find.matchKeys,
+    currentMatch: live.find.current,
+    editing: chrome.editing,
+    children: (gridFocus: GridFocusState) => children({ ...live, gridFocus }),
+  } satisfies CellNavLiveSlotProps<TRow>;
+  return <FeatureSlot slot={CELL_NAV_LIVE} props={navProps} />;
+}
 
 function LiveCellNav<TRow>({
   options,
@@ -133,6 +179,7 @@ export function cellNavigation(
   return {
     ...coreCellNavigation(options),
     renders: [
+      slotRender(CELL_NAV_STAGE, (props) => <CellNavStage {...props} />),
       slotRender<CellNavLiveDraw>(CELL_NAV_LIVE, (props) => (
         <LiveCellNav {...props} />
       )),

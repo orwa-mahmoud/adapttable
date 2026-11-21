@@ -31,6 +31,8 @@ import {
   drawnSlotFills,
   type FeatureRender as NeutralFeatureRender,
   type FeatureSlotKey,
+  type LiveStage,
+  liveStagesOf,
   orderedContributions,
   type PlainSlotKey,
   type RowSlotKey,
@@ -289,6 +291,17 @@ export function FeatureSlot({
   ));
 }
 
+const LiveStageContext = createContext<readonly LiveStage<ReactNode>[]>([]);
+
+/**
+ * The live stages the composed features bring, in the order they run.
+ *
+ * @returns The stages; empty for a table that composes none.
+ */
+export function useLiveStages(): readonly LiveStage<ReactNode>[] {
+  return useContext(LiveStageContext);
+}
+
 /**
  * Whether any feature fills a slot, for chrome that must not draw its wrapper
  * around nothing.
@@ -325,6 +338,7 @@ export function FeatureProviders({
   });
   cell.current.featureIds = (features ?? []).map((feature) => feature.id);
   const renders = useMemo(() => slotFillsOf(features ?? []), [features]);
+  const stages = useMemo(() => liveStagesOf(features ?? []), [features]);
   const tree = providers.reduceRight<ReactNode>(
     (inner, { id, contribution: Provider, feature }) => (
       <Provider key={id} feature={feature}>
@@ -336,7 +350,9 @@ export function FeatureProviders({
   return (
     <TableRuntimeContext.Provider value={cell}>
       <FeatureRenderContext.Provider value={renders}>
-        {tree}
+        <LiveStageContext.Provider value={stages}>
+          {tree}
+        </LiveStageContext.Provider>
       </FeatureRenderContext.Provider>
     </TableRuntimeContext.Provider>
   );

@@ -17706,6 +17706,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "gridRowCount",
+      "kind": "runtime",
+      "module": "layout/shellPipeline.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/shellPipeline.ts#gridRowCount",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "gridRowFocusSignature",
       "kind": "runtime",
       "module": "focus/gridAria.ts",
@@ -18773,6 +18784,28 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "liveStageKey",
+      "kind": "runtime",
+      "module": "features/liveStages.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/liveStages.ts#liveStageKey",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "liveStagesOf",
+      "kind": "runtime",
+      "module": "features/liveStages.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/liveStages.ts#liveStagesOf",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "localizedColumnPath",
       "kind": "runtime",
       "module": "columns/resolveColumns.ts",
@@ -19155,6 +19188,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/featureContribution.ts#orderedContributions",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "orderLiveStages",
+      "kind": "runtime",
+      "module": "features/liveStages.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/liveStages.ts#orderLiveStages",
       "subpaths": ["./binding"]
     },
     {
@@ -25117,6 +25161,39 @@
       "forward": true,
       "deprecated": false,
       "identity": "layout/desktopHeader.ts#LeafSortProps",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "LiveStage",
+      "kind": "type",
+      "module": "features/liveStages.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/liveStages.ts#LiveStage",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "LiveStageDependencies",
+      "kind": "type",
+      "module": "features/liveStages.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/liveStages.ts#LiveStageDependencies",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "LiveStageKey",
+      "kind": "type",
+      "module": "features/liveStages.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/liveStages.ts#LiveStageKey",
       "subpaths": ["./binding"]
     },
     {

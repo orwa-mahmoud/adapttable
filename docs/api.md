@@ -1370,12 +1370,16 @@ shares, so a new binding calls them rather than re-deriving them.
 - **Standard preset.** `standardFeatureList` (`CoreStandardFeatureFactories`,
   `CoreStandardFeatureOptions`) builds the preset's members in order from the
   binding's own factories.
-- **Shell pipeline.** `CHROME_EXTRA_SLOT_ORDER` and `SHELL_LIVE_STAGE_ORDER`
-  (`ShellLiveStageId`) fix the order of the extra slots and live stages.
+- **Shell pipeline.** `CHROME_EXTRA_SLOT_ORDER` fixes the order of the extra
+  slots. A feature brings its live stage under a `liveStageKey`
+  (`LiveStageKey`, `LiveStageDependencies`) that names the live values it reads
+  and the one it writes; `liveStagesOf` collects the composed stages and
+  `orderLiveStages` (`LiveStage`) runs each after the stages it reads from.
+  `SHELL_LIVE_STAGE_ORDER` (`ShellLiveStageId`) is deprecated.
   `TableRuntimePublisher` projects the chrome into the runtime view through
   `tableRuntimeView`, `renderedRowsOf`, `readableRowLabel`,
   `liveColumnLayout` and `livePinning` (`RuntimeChromeInput`,
-  `RuntimeColumn`). `cellNavigationInput`, `exportPageOnly`,
+  `RuntimeColumn`). `cellNavigationInput`, `gridRowCount`, `exportPageOnly`,
   `viewControlsToolbarProps`, `undoRedoToolbarProps` and `printToolbarProps`
   build the live stages' inputs. `finishShellLive`, `overlayChromeExtras` and
   `finishShellBody` (`PipelineShell`, `OverlayChrome`, `ShellBodyInput`)

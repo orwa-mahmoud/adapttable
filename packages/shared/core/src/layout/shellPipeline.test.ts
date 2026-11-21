@@ -30,7 +30,6 @@ import {
   readableRowLabel,
   renderedRowsOf,
   type RuntimeChromeInput,
-  SHELL_LIVE_STAGE_ORDER,
   TableRuntimePublisher,
   tableRuntimeView,
   undoRedoToolbarProps,
@@ -126,16 +125,6 @@ describe("stage order", () => {
       "pinning-live",
       "expansion-live",
       "editing-live",
-    ]);
-  });
-
-  it("runs the live stages after history, each after what it reads", () => {
-    expect(SHELL_LIVE_STAGE_ORDER).toEqual([
-      "find-live",
-      "cell-nav-live",
-      "export-live",
-      "fullscreen-live",
-      "selection-stats-live",
     ]);
   });
 });
