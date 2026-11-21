@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-export { exportXlsx } from "./features/export";
+export { exportXlsx } from "./features/exportXlsx";
 export { buildTableXlsx, xlsxWriter } from "@adapttable/core/xlsx";
 
 // Types this entry's own signatures hand back, named from their owning entry.
