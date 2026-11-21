@@ -10,12 +10,8 @@ import { describe, expect, it } from "vitest";
 
 import type { ColumnMetadata } from "../contracts/columns";
 import type { ExportTable } from "./exportWriter";
-import {
-  buildTableXlsx,
-  columnLetter,
-  safeSheetName,
-  xlsxWriter,
-} from "./xlsx";
+import { columnLetter, safeSheetName } from "./sheetText";
+import { buildTableXlsx, xlsxWriter } from "./xlsx";
 
 interface Row {
   id: string;

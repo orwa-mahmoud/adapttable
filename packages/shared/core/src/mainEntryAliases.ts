@@ -50,7 +50,7 @@ import * as exportControllerModule from "./export/exportController";
 import * as exportLabelModule from "./export/exportLabel";
 import * as exportProgressViewModule from "./export/exportProgressView";
 import * as exportViewModule from "./export/exportView";
-import * as xlsxModule from "./export/xlsx";
+import * as sheetTextModule from "./export/sheetText";
 import * as currentHostModule from "./features/currentHost";
 import * as featureContributionModule from "./features/featureContribution";
 import type * as featureRegistrationModule from "./features/featureRegistration";
@@ -2455,8 +2455,8 @@ export const columnLayoutVisibleColumns: typeof columnLayoutControllerModule.col
  * @deprecated Import from `@adapttable/core/binding`.
  * @public
  */
-export const columnLetter: typeof xlsxModule.columnLetter =
-  xlsxModule.columnLetter;
+export const columnLetter: typeof sheetTextModule.columnLetter =
+  sheetTextModule.columnLetter;
 /**
  * The export of the same name on `@adapttable/core/binding`.
  *
@@ -4782,8 +4782,8 @@ export const safeLocalStorage: typeof envModule.safeLocalStorage =
  * @deprecated Import from `@adapttable/core/binding`.
  * @public
  */
-export const safeSheetName: typeof xlsxModule.safeSheetName =
-  xlsxModule.safeSheetName;
+export const safeSheetName: typeof sheetTextModule.safeSheetName =
+  sheetTextModule.safeSheetName;
 /**
  * The export of the same name on `@adapttable/core/binding`.
  *

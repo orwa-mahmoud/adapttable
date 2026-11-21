@@ -10542,7 +10542,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "find/findMatches.ts#FindMatchesOptions",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "FindShortcutScope",
@@ -14892,12 +14892,12 @@
     {
       "name": "columnLetter",
       "kind": "runtime",
-      "module": "export/xlsx.ts",
+      "module": "export/sheetText.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "export/xlsx.ts#columnLetter",
+      "identity": "export/sheetText.ts#columnLetter",
       "subpaths": ["./binding"]
     },
     {
@@ -15811,6 +15811,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "find/findController.ts#createFindController",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "createFindMatcher",
+      "kind": "runtime",
+      "module": "find/findMatches.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "find/findMatches.ts#createFindMatcher",
       "subpaths": ["./binding"]
     },
     {
@@ -19796,6 +19807,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "reportFailure",
+      "kind": "runtime",
+      "module": "utils/reportFailure.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "utils/reportFailure.ts#reportFailure",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "requestDensityChange",
       "kind": "runtime",
       "module": "layout/density.ts",
@@ -20612,12 +20634,12 @@
     {
       "name": "safeSheetName",
       "kind": "runtime",
-      "module": "export/xlsx.ts",
+      "module": "export/sheetText.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "export/xlsx.ts#safeSheetName",
+      "identity": "export/sheetText.ts#safeSheetName",
       "subpaths": ["./binding"]
     },
     {
@@ -20849,6 +20871,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "layout/tableChromeState.ts#selectionObserverIds",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "selectionResetKey",
+      "kind": "runtime",
+      "module": "selection/selectionBindingState.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "selection/selectionBindingState.ts#selectionResetKey",
       "subpaths": ["./binding"]
     },
     {
@@ -32988,6 +33021,17 @@
       "deprecated": false,
       "identity": "filters/relativeDates.ts#parseRelativeToken",
       "subpaths": [".", "./query"]
+    },
+    {
+      "name": "parseStrictFilterTree",
+      "kind": "runtime",
+      "module": "filters/filterTreeCodec.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterTreeCodec.ts#parseStrictFilterTree",
+      "subpaths": ["./query"]
     },
     {
       "name": "RANGE_SUFFIXES",

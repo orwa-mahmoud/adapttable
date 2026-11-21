@@ -1551,7 +1551,7 @@ export {
   summaryExportValues,
   viewFromTreeEntries,
 } from "./export/exportView";
-export { columnLetter, safeSheetName } from "./export/xlsx";
+export { columnLetter, safeSheetName } from "./export/sheetText";
 export {
   appendByKey,
   applyFilterExtends,
