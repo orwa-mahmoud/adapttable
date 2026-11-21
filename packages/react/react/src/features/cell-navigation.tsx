@@ -27,6 +27,7 @@ import { useFindFocus } from "../find/useFindInTable";
 import { GridFocusAnnouncer } from "../focus/GridFocusAnnouncer";
 import { type GridFocusState, useGridFocus } from "../focus/useGridFocus";
 import { RowScrollContext } from "../virtual/rowScroll";
+import { GRID_FOCUS_ANNOUNCER_RENDER } from "./areaRegions";
 import type { LiveStageProps } from "./liveStage";
 import { FeatureSlot, slotRender } from "./providers";
 import {
@@ -186,6 +187,7 @@ export function cellNavigation(
       slotRender(GRID_FOCUS_ANNOUNCER, (props) => (
         <GridFocusAnnouncer focus={props.focus} />
       )),
+      GRID_FOCUS_ANNOUNCER_RENDER,
     ],
   };
 }

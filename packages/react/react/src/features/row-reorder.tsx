@@ -72,6 +72,7 @@ export function rowReorder<TRow>(
     onRowReorder,
     options,
     provider: { Provider: RowReorderProvider },
+    renders: [ROW_REORDER_ANNOUNCER_RENDER],
   } as RowReorderFeature<TRow>;
 }
 
@@ -93,4 +94,5 @@ export type {
   RowTreeMoveHandler,
   RowTreeParentRef,
 } from "@adapttable/core";
+import { ROW_REORDER_ANNOUNCER_RENDER } from "./areaRegions";
 export { rowDropPosition, treeMoveCreatesCycle } from "@adapttable/core";

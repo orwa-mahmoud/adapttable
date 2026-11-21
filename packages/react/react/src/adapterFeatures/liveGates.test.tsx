@@ -316,6 +316,7 @@ describe("the command palette's toolbar control", () => {
     const feature = commandPalette({ button: true });
 
     expect(feature.renders?.map((entry) => entry.slot.id)).toEqual([
+      "table-main",
       "command-palette-live",
     ]);
   });

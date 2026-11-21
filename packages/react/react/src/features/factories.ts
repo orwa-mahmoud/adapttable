@@ -78,6 +78,12 @@ import {
   coreUndoRedoButtons,
 } from "@adapttable/core/binding";
 
+import {
+  COMMAND_PALETTE_RENDER,
+  SIDE_PANEL_RENDER,
+  STATUS_BAR_RENDER,
+} from "./areaRegions";
+
 /**
  * A core feature, as a row-aware feature of this binding. Every built-in
  * here draws nothing of its own beyond the renders it adds, so the core
@@ -203,7 +209,10 @@ export function collapsibleColumnGroups(): StaticTableFeature {
 export function commandPalette(
   options: boolean | CommandPaletteOptions = true
 ): StaticTableFeature {
-  return rowFree(coreCommandPalette(options));
+  return {
+    ...rowFree(coreCommandPalette(options)),
+    renders: [COMMAND_PALETTE_RENDER],
+  };
 }
 
 /**
@@ -226,7 +235,7 @@ export function contextMenu<TRow>(
  * @public
  */
 export function sidePanel(options: SidePanelOptions): StaticTableFeature {
-  return coreSidePanel(options);
+  return { ...coreSidePanel(options), renders: [SIDE_PANEL_RENDER] };
 }
 
 /**
@@ -296,7 +305,7 @@ export function print(
  * @public
  */
 export function statusBar(): StaticTableFeature {
-  return rowFree(coreStatusBar());
+  return { ...rowFree(coreStatusBar()), renders: [STATUS_BAR_RENDER] };
 }
 
 /**

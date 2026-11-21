@@ -84,6 +84,49 @@ export const COLUMN_MENU_REGION = rowSlotKey<KitRegionDraw>(
  */
 export const BARS_AREA = rowSlotKey<KitRegionDraw>("table-bars");
 
+/**
+ * The announcers and the find bar above the toolbar, after the table's own
+ * status announcer.
+ *
+ * @public
+ */
+export const ANNOUNCERS_AREA = rowSlotKey<KitRegionDraw>("table-announcers");
+
+/**
+ * Chrome drawn above the body: the command palette, the grouping strip.
+ *
+ * @public
+ */
+export const MAIN_AREA = rowSlotKey<KitRegionDraw>("table-main");
+
+/**
+ * The panel drawn beside the body, filled by the side-panel feature.
+ *
+ * @public
+ */
+export const SIDE_PANEL_REGION = rowSlotKey<KitRegionDraw>(
+  "side-panel-region",
+  { single: true }
+);
+
+/**
+ * Overlays above the table: the filter drawer.
+ *
+ * @public
+ */
+export const OVERLAYS_AREA = rowSlotKey<KitRegionDraw>("table-overlays");
+
+/**
+ * The status strip, filled by the status-bar and selection-stats features;
+ * one strip serves both.
+ *
+ * @public
+ */
+export const STATUS_BAR_REGION = rowSlotKey<KitRegionDraw>(
+  "status-bar-region",
+  { single: true }
+);
+
 /** Nest the composed fills around the root, collecting their attributes. */
 export function RootRegion<TRow>({
   view,

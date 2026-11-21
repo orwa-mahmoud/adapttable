@@ -17,6 +17,7 @@ import {
   useSyncExternalStore,
 } from "react";
 
+import { GROUPING_PANEL_RENDER } from "./areaRegions";
 import { grouping, type GroupingExtras } from "./grouping";
 import { GROUPING_PANEL_STATE } from "./groupingPanelKey";
 import {
@@ -100,5 +101,6 @@ export function groupingPanel<TRow = unknown>(
     initialGroupBy: groupBy,
     extras,
     provider: { Provider: GroupingPanelProvider },
+    renders: [...(base.renders ?? []), GROUPING_PANEL_RENDER],
   } as GroupingPanelFeature<TRow>;
 }

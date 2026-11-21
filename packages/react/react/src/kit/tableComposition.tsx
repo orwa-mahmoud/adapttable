@@ -20,18 +20,7 @@ import { OptionalSidePanel } from "../adapterFeatures/featureRoot";
 import { DataTableShellView } from "../features/chromeBodyGate";
 import { FeatureHostProvider } from "../features/featureHostContext";
 import { FeatureSlot } from "../features/providers";
-import {
-  COMMAND_PALETTE_LIVE,
-  FILTER_DRAWER,
-  FILTERS_FORM,
-  FIND_BAR,
-  GRID_FOCUS_ANNOUNCER,
-  GROUPING_PANEL,
-  ROW_REORDER_ANNOUNCER,
-  SIDE_PANEL,
-  STATUS_BAR,
-} from "../features/slotKeys";
-import type { GroupingPanelSlotProps } from "../grouping/GroupingPanelChrome";
+import { FILTERS_FORM } from "../features/slotKeys";
 import {
   resolveStickyToolbar,
   useStickyToolbarLayout,
@@ -45,10 +34,15 @@ import { fillSlot, type Slot } from "../state/slots";
 import type { Density } from "../url/useDensityUrlState";
 import { useDataTableShell } from "../useDataTableShell";
 import {
+  ANNOUNCERS_AREA,
   BARS_AREA,
   COLUMN_MENU_REGION,
+  MAIN_AREA,
+  OVERLAYS_AREA,
   RootRegion,
   SAVED_VIEWS_REGION,
+  SIDE_PANEL_REGION,
+  STATUS_BAR_REGION,
 } from "./rootRegion";
 
 /**
@@ -354,8 +348,7 @@ export function TableComposition<TRow>({
   return (
     <DataTableShellView shell={shell}>
       {(view) => {
-        const { chrome, labels, source, table } = view;
-        const reorder = view.tableProps.rowReorder;
+        const { chrome, labels, source } = view;
         return (
           <FeatureHostProvider host={view.featureHost}>
             <RootRegion view={view} props={props}>
@@ -374,22 +367,12 @@ export function TableComposition<TRow>({
                   fullscreenContainer={view.fullscreen.container}
                   announcers={
                     <>
-                      <FeatureSlot
-                        slot={GRID_FOCUS_ANNOUNCER}
-                        props={{ focus: view.gridFocus }}
-                      />
                       <TableStatusAnnouncer
                         announcement={view.statusAnnouncement}
                       />
-                      {reorder ? (
-                        <FeatureSlot
-                          slot={ROW_REORDER_ANNOUNCER}
-                          props={{ announcement: reorder.announcement }}
-                        />
-                      ) : null}
                       <FeatureSlot
-                        slot={FIND_BAR}
-                        props={{ find: view.find, labels }}
+                        slot={ANNOUNCERS_AREA}
+                        props={{ view, props }}
                       />
                     </>
                   }
@@ -403,44 +386,15 @@ export function TableComposition<TRow>({
                   refreshing={chrome.isRefreshing}
                   main={
                     <>
-                      <FeatureSlot
-                        slot={COMMAND_PALETTE_LIVE}
-                        props={{
-                          commandPalette: props.commandPalette,
-                          labels,
-                          onPrint: props.onPrint,
-                          onExport: view.toolbarProps.onExportCsv,
-                          exportLabel: view.toolbarProps.exportLabel,
-                          onClearFilters: chrome.clearFilters,
-                          hasFilters: chrome.activeFilterCount > 0,
-                          featureHost: view.featureHost,
-                        }}
-                      />
-                      {view.groupingPanelProps ? (
-                        <FeatureSlot
-                          slot={GROUPING_PANEL}
-                          props={
-                            view.groupingPanelProps as GroupingPanelSlotProps<unknown>
-                          }
-                        />
-                      ) : null}
+                      <FeatureSlot slot={MAIN_AREA} props={{ view, props }} />
                       <OptionalSidePanel
                         side={sidePanel?.side}
                         body={bodyOf(kit, view, sticky.headerOffset, props)}
                         panel={
                           sidePanel?.open != null && (
                             <FeatureSlot
-                              slot={SIDE_PANEL}
-                              props={{
-                                panels: sidePanel.panels,
-                                openPanel: sidePanel.open,
-                                onOpenPanel: sidePanel.onOpenChange,
-                                onClose: () => {
-                                  sidePanel.onOpenChange(null);
-                                },
-                                side: sidePanel.side,
-                                labels,
-                              }}
+                              slot={SIDE_PANEL_REGION}
+                              props={{ view, props }}
                             />
                           )
                         }
@@ -480,36 +434,13 @@ export function TableComposition<TRow>({
                   }
                   overlays={
                     <>
-                      {view.filtersNode && props.filtersMode === "drawer" ? (
-                        <FeatureSlot
-                          slot={FILTER_DRAWER}
-                          props={{
-                            open: view.filtersOpen,
-                            onClose: () => {
-                              view.setFiltersOpen(false);
-                            },
-                            filters: view.filtersNode,
-                            activeFilterCount: chrome.activeFilterCount,
-                            onClearFilters: chrome.clearFilters,
-                            labels,
-                            dir: props.dir,
-                          }}
-                        />
-                      ) : null}
                       <FeatureSlot
-                        slot={STATUS_BAR}
-                        props={{
-                          enabled: props.statusBar === true,
-                          notices: chrome.featureNotices,
-                          shown: source.rows.length,
-                          page: source.page,
-                          limit: source.limit,
-                          total: source.total,
-                          selected: table.selection?.selectedCount ?? 0,
-                          stats: view.selectionStats,
-                          labels,
-                          locale: props.locale,
-                        }}
+                        slot={OVERLAYS_AREA}
+                        props={{ view, props }}
+                      />
+                      <FeatureSlot
+                        slot={STATUS_BAR_REGION}
+                        props={{ view, props }}
                       />
                     </>
                   }

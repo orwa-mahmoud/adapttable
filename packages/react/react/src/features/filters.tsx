@@ -15,6 +15,7 @@ import {
 } from "../filters/useActiveFilterChips";
 import { useExtraChips } from "../filters/useExtraChips";
 import { useFilterTreeChips } from "../filters/useFilterTreeChips";
+import { FILTER_DRAWER_RENDER } from "./areaRegions";
 import { FILTER_CHIPS_BAR_RENDER } from "./barRegions";
 import { FILTER_ENGINE } from "./filterEngineKey";
 import {
@@ -108,6 +109,7 @@ export function filters<TRow>(
         <LiveFilterChips {...props} />
       )),
       FILTER_CHIPS_BAR_RENDER,
+      FILTER_DRAWER_RENDER,
     ],
   };
 }

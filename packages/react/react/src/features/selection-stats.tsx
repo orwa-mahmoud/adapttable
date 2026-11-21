@@ -13,6 +13,7 @@ import {
 } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
+import { STATUS_BAR_RENDER } from "./areaRegions";
 import type { LiveStageProps } from "./liveStage";
 import { FeatureSlot, slotRender } from "./providers";
 import { SELECTION_LIVE_RENDER } from "./selection-live";
@@ -81,6 +82,7 @@ export function selectionStats(): StaticTableFeature {
       slotRender<SelectionStatsLiveDraw>(SELECTION_STATS_LIVE, (props) => (
         <LiveSelectionStats {...props} />
       )),
+      STATUS_BAR_RENDER,
     ],
   };
 }

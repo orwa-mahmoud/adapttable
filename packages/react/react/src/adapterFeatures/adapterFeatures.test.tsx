@@ -149,6 +149,7 @@ describe("adapter feature assembly", () => {
     expect(renderSlots(feature)).toEqual([
       "filter-chips-live",
       "table-bars",
+      "table-overlays",
       "filters-form",
       "active-filter-chips",
       "filter-drawer",
@@ -201,6 +202,7 @@ describe("adapter feature assembly", () => {
     const reorderFeature = reorder<{ id: string }>(() => undefined);
     expect(reorderFeature.provider).toBeDefined();
     expect(renderSlots(reorderFeature)).toEqual([
+      "table-announcers",
       "row-reorder-handle",
       "row-reorder-buttons",
       "row-reorder-announcer",
@@ -222,6 +224,7 @@ describe("adapter feature assembly", () => {
     expect(feature.provider).toBeDefined();
     expect(renderSlots(feature)).toEqual([
       "grouping-live",
+      "table-main",
       "group-header-row",
       "group-header-card",
       "grouping-panel",
@@ -251,7 +254,10 @@ describe("adapter feature assembly", () => {
       "table-root-region",
       "context-menu-live",
     ]);
-    expect(renderSlots(commandFeature)).toEqual(["command-palette-live"]);
+    expect(renderSlots(commandFeature)).toEqual([
+      "table-main",
+      "command-palette-live",
+    ]);
 
     render(
       featureTree(

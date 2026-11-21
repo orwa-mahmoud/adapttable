@@ -21,6 +21,7 @@ import {
 } from "../find/findMarks";
 import { type FindInTableState, useFindInTable } from "../find/useFindInTable";
 import { RowScrollContext } from "../virtual/rowScroll";
+import { FIND_BAR_RENDER } from "./areaRegions";
 import type { LiveStageProps } from "./liveStage";
 import { FeatureSlot, slotRender, useFeatureSlotFilled } from "./providers";
 import {
@@ -123,6 +124,7 @@ export function findInTable(): StaticTableFeature {
     renders: [
       slotRender(FIND_STAGE, (props) => <FindStage {...props} />),
       slotRender<FindLiveDraw>(FIND_LIVE, (props) => <LiveFind {...props} />),
+      FIND_BAR_RENDER,
     ],
   };
 }
