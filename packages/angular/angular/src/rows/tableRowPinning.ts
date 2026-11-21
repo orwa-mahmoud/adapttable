@@ -102,13 +102,15 @@ export function injectTableRowPinning<TRow>(
     })
   );
   const enabled = computed(() => !options.blocked());
-  effect(
-    () => {
-      const warning = rowPinningBlockedWarning(requested, options.blocked());
-      if (warning !== undefined) devWarn(warning);
-    },
-    { injector }
-  );
+  if (ngDevMode) {
+    effect(
+      () => {
+        const warning = rowPinningBlockedWarning(requested, options.blocked());
+        if (warning !== undefined) devWarn(warning);
+      },
+      { injector }
+    );
+  }
   const pinning = code.state<TRow>({
     enabled,
     pinnedRowIds: computed(() => control().pinnedRowIds),

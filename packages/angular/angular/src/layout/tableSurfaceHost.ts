@@ -391,7 +391,11 @@ export function bodyWindowFor<TRow>(options: {
       isMobile: table.isMobile(),
     };
   });
-  if (wantVirtualize && virtualizeIgnoredOnPage(true, bodyChrome())) {
+  if (
+    ngDevMode &&
+    wantVirtualize &&
+    virtualizeIgnoredOnPage(true, bodyChrome())
+  ) {
     devWarn(
       'virtualize only applies in infinite mode — this paged table renders unvirtualized. Pass paginationMode="infinite" to enable it, or group the rows: an expanded page is windowed.'
     );

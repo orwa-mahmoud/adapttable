@@ -204,6 +204,12 @@ const BASE_ABSENT = [
   "xlsxWriter",
 ];
 
+/**
+ * Development warnings a production application drops: each is guarded by
+ * `ngDevMode`, which `ng build` defines as false.
+ */
+const DEV_WARNINGS = ["column keys must be unique", "virtualize only applies"];
+
 const LEAN = `import { Component, input } from "@angular/core";
 import { injectTableSurfaceHost } from "@adapttable/angular/adapter";
 
@@ -366,7 +372,7 @@ export function angularConsumerFixtures(kits = angularKits()) {
       [],
       {
         functionality: `${kit.name} base table, no optional feature`,
-        absent: BASE_ABSENT,
+        absent: [...BASE_ABSENT, ...DEV_WARNINGS],
         ...ceilings(`angular · ${kit.name.replace("@adapttable/", "")} table`),
       }
     )
@@ -389,7 +395,13 @@ export function angularConsumerFixtures(kits = angularKits()) {
       peerPolicy: "own-share",
       functionality: "Headless table: signals, attributes and cell projection",
       present: ["injectDataTable", "injectFrontendData", "resolveTableLabels"],
-      absent: ["AdaptDataTable", "coreGrouping", "xlsxWriter", "defaultLabels"],
+      absent: [
+        "AdaptDataTable",
+        "coreGrouping",
+        "xlsxWriter",
+        "defaultLabels",
+        ...DEV_WARNINGS,
+      ],
       ...ceilings("angular · headless table"),
       code: HEADLESS,
     },

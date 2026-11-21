@@ -136,13 +136,15 @@ export function injectGrouping<TRow>(
     { equal: sameFields }
   );
 
-  effect(
-    () => {
-      const warning = code.ignoredWarning(groupByKeys(), groupingSource());
-      if (warning !== undefined) devWarn(warning);
-    },
-    { injector }
-  );
+  if (ngDevMode) {
+    effect(
+      () => {
+        const warning = code.ignoredWarning(groupByKeys(), groupingSource());
+        if (warning !== undefined) devWarn(warning);
+      },
+      { injector }
+    );
+  }
 
   const setGroupBy = (key: GroupByInput): void => {
     options.source().setGroupBy(formatGroupBy(key));
