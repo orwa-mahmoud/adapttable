@@ -6,9 +6,12 @@
  */
 import { describe, expect, it } from "vitest";
 
-import {   applyRowPatchLogToView,
+import {
+  applyRowPatchLogToView,
   configureIncrementalView,
-  createIncrementalView,type IncrementalViewConfig } from "./incremental";
+  createIncrementalView,
+  type IncrementalViewConfig,
+} from "./incremental";
 import { applyRowPatches, rowPatchLog } from "./patch";
 
 interface Row {
