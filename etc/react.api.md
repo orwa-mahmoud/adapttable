@@ -1740,6 +1740,7 @@ export function useSelection<TRow>(options: UseSelectionOptions<TRow>): Selectio
 // @public
 export interface UseSelectionOptions<TRow> {
     acrossPages?: boolean;
+    enabled?: boolean;
     getId: (row: TRow) => string;
     onSelectionChange?: (selectedIds: string[]) => void;
     resetKey?: unknown;

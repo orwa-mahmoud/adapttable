@@ -5386,7 +5386,8 @@ export function PeopleTable() {
 - The selection toolbar's strings (`selectedCount`, `selectAllMatching`,
   `allMatchingSelected`, …) are overridable via the `labels` prop.
 - Headless consumers can reuse the same machinery: `useSelection` (with a
-  `resetKey`) and `useBulkActionRunner` are exported from `@adapttable/react`;
+  `resetKey`, and `enabled: false` to read no row ids while selection is off)
+  and `useBulkActionRunner` are exported from `@adapttable/react`;
   `runRowAction` from `@adapttable/core`.
 
 See it live in the [selection demo](https://adapttable.orwamahmoud.com/react/demo/mantine/selection/).
