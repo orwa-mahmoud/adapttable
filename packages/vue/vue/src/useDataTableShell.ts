@@ -6,7 +6,6 @@ import {
   type RowAction,
   stableKey,
   type TableDensity,
-  type TableSource,
 } from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
@@ -1217,8 +1216,8 @@ export function useDataTableShell<TRow>(
   // reconciliation. A throwing computed can cache undefined and mask that
   // contract error on the error boundary's next render.
   const slotFills = computed(() => featureSlotFillsOf(declarations.value));
-  let publisher = new TableRuntimePublisher<TRow>();
-  let publishedEngine: TableSource<TRow>["tableEngine"];
+  // Follows a replaced source's engine itself; the source owns the engine.
+  const publisher = new TableRuntimePublisher<TRow>();
   let disposed = false;
   let currentView: TableRuntimeView<TRow> | undefined;
   const frame = computed((): RuntimeChromeInput<TRow> => ({
@@ -1268,10 +1267,6 @@ export function useDataTableShell<TRow>(
   const publish = (): TableRuntimeView<TRow> | undefined => {
     if (disposed) return undefined;
     const chrome = frame.value;
-    if (chrome.source.tableEngine !== publishedEngine) {
-      publisher = new TableRuntimePublisher<TRow>();
-      publishedEngine = chrome.source.tableEngine;
-    }
     currentView = publisher.update(chrome, {
       rowActions: rowActions.value?.hostActions,
       bulkActions: resolved.value.bulkActions,

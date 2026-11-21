@@ -131,8 +131,9 @@ export function tableRuntimeFor<TRow>(
       (feature, index) => feature.id ?? `feature-${String(index)}`
     )
   );
-  let publisher = new TableRuntimePublisher<TRow>();
-  let publishedEngine: TableSource<TRow>["tableEngine"];
+  // Follows a replaced source's engine itself, an intervening server source
+  // with no engine included; the source owns its engine.
+  const publisher = new TableRuntimePublisher<TRow>();
   const frame = computed(() => {
     const current: RuntimeTableOptions<TRow> = options?.() ?? {};
     return {
@@ -147,18 +148,7 @@ export function tableRuntimeFor<TRow>(
     // Track only the assembled frame, not state read by downstream engine
     // listeners while the publisher refreshes its neutral view.
     const current = frame();
-    return untracked(() => {
-      const engine = current.chrome.source.tableEngine;
-      if (engine !== publishedEngine) {
-        // The neutral publisher belongs to the engine it first observes.
-        // Release that binding when a host replaces its source, including
-        // an intervening server source with no engine. The source itself
-        // owns its engine; replacing the reader must never dispose it.
-        publisher = new TableRuntimePublisher<TRow>();
-        publishedEngine = engine;
-      }
-      return publisher.update(current.chrome, current.actions);
-    });
+    return untracked(() => publisher.update(current.chrome, current.actions));
   };
   return {
     rowAt: (index) => {

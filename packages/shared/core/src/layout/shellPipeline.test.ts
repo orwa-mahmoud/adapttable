@@ -470,6 +470,51 @@ describe("TableRuntimePublisher", () => {
     expect(publisher.update(makeChrome(), {}).neutralTable).toBeUndefined();
   });
 
+  it("follows a replaced engine for every scope and keeps the handle otherwise", () => {
+    const people = (rows: Row[], tableId: string) =>
+      createTableEngine<Row>({
+        data: rows,
+        columns: [{ key: "name", header: "Name" }],
+        rowKey: getRowId,
+        tableId,
+      });
+    const before = people(ROWS, "people");
+    const after = people([{ id: "c", name: "Cleo", score: 5 }], "people-next");
+    const publisher = new TableRuntimePublisher<Row>();
+    const first = publisher.update(
+      makeChrome({ source: makeSource({ tableEngine: before }) }),
+      {}
+    );
+    const again = publisher.update(
+      makeChrome({ source: makeSource({ tableEngine: before }) }),
+      {}
+    );
+    expect(again.neutralTable).toBe(first.neutralTable);
+
+    const swapped = publisher.update(
+      makeChrome({
+        source: makeSource({ tableEngine: after, rows: [] }),
+      }),
+      {}
+    );
+    const neutral = swapped.neutralTable;
+    expect(neutral).not.toBe(first.neutralTable);
+    expect(neutral?.tableId).toBe("people-next");
+    expect(neutral?.rows("full").map((row) => row.id)).toEqual(["c"]);
+    expect(neutral?.rows("page").map((row) => row.id)).toEqual(["c"]);
+    expect(neutral?.columns.map((column) => column.key)).toEqual(["name"]);
+    expect(neutral?.rowByKey("c")?.name).toBe("Cleo");
+
+    // A server interval with no engine, then a frontend source again.
+    expect(publisher.update(makeChrome(), {}).neutralTable).toBeUndefined();
+    const back = publisher.update(
+      makeChrome({ source: makeSource({ tableEngine: before }) }),
+      {}
+    );
+    expect(back.neutralTable?.tableId).toBe("people");
+    expect(back.neutralTable?.rows("full")).toEqual(ROWS);
+  });
+
   it("reads a shell overlay published after the view, per chrome", () => {
     const engine = makeEngine();
     const publisher = new TableRuntimePublisher<Row>();

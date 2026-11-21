@@ -387,35 +387,47 @@ export function tableRuntimeView<TRow>(
   };
 }
 
-/**
- * Keeps one table's runtime view and its neutral table across renders.
- *
- * The neutral table is created once, from the first engine the source
- * publishes, and keeps whatever binding it was handed — so it is handed a
- * stable one that reads the LATEST published view on every call. Handing it
- * the first view would freeze it, and a capability the host later turns off
- * (or on) would never reach the agent.
- *
- * @public
- */
-export class TableRuntimePublisher<TRow> {
-  #view: TableRuntimeView<TRow> | undefined;
-  #chrome: object | undefined;
-  #visibleRows: readonly TRow[] = [];
-  #neutral: NeutralTable<TRow> | undefined;
-  readonly #binding = {
-    visibleRows: (): readonly TRow[] => this.#visibleRows,
+/** What one engine's neutral table reads: that engine's latest render. */
+interface PublishedFrame<TRow> {
+  view: TableRuntimeView<TRow> | undefined;
+  chrome: object | undefined;
+  visibleRows: readonly TRow[];
+}
+
+function frameBinding<TRow>(frame: PublishedFrame<TRow>) {
+  return {
+    visibleRows: (): readonly TRow[] => frame.visibleRows,
     operations: (): Readonly<Record<string, boolean>> => {
-      const view = this.#view;
+      const { view, chrome } = frame;
       if (!view) return {};
-      const overlay = this.#chrome
-        ? readShellOverlay<TRow>(this.#chrome)
-        : undefined;
+      const overlay = chrome ? readShellOverlay<TRow>(chrome) : undefined;
       return deriveRuntimeOperations(
         overlay ? withShellOperations(view, overlay) : view
       );
     },
   };
+}
+
+/**
+ * Keeps one table's runtime view and its neutral table across renders.
+ *
+ * The neutral table is created from the engine the source publishes and
+ * keeps the binding it was handed, so it is handed one that reads that
+ * engine's LATEST published view on every call: a capability the host later
+ * turns off (or on) still reaches the agent. When the source's engine is
+ * replaced, a new neutral table is created for the new one and the old one
+ * keeps reading its own last render.
+ *
+ * @public
+ */
+export class TableRuntimePublisher<TRow> {
+  #frame: PublishedFrame<TRow> = {
+    view: undefined,
+    chrome: undefined,
+    visibleRows: [],
+  };
+  #neutral: NeutralTable<TRow> | undefined;
+  #engine: TableEngine<TRow> | undefined;
 
   /**
    * Publish this render's chrome.
@@ -434,14 +446,23 @@ export class TableRuntimePublisher<TRow> {
     }
   ): TableRuntimeView<TRow> {
     const view = tableRuntimeView(chrome, options);
-    this.#chrome = chrome;
-    this.#view = view;
-    this.#visibleRows = view.visibleRows ?? view.rows;
     const engine = chrome.source.tableEngine;
-    if (engine && !this.#neutral) {
-      this.#neutral = createNeutralTable(engine, engine.tableId, this.#binding);
+    // The neutral table belongs to the engine it reads, and reads only that
+    // engine's renders. A replaced source (another engine, or a server
+    // interval with none) starts a new frame and releases the old reader on
+    // its last render; the source owns its engine, so it is never disposed
+    // here.
+    if (engine !== this.#engine) {
+      this.#engine = engine;
+      this.#frame = { view: undefined, chrome: undefined, visibleRows: [] };
+      this.#neutral = engine
+        ? createNeutralTable(engine, engine.tableId, frameBinding(this.#frame))
+        : undefined;
     }
-    return { ...view, neutralTable: engine ? this.#neutral : undefined };
+    this.#frame.chrome = chrome;
+    this.#frame.view = view;
+    this.#frame.visibleRows = view.visibleRows ?? view.rows;
+    return { ...view, neutralTable: this.#neutral };
   }
 }
 
