@@ -80,20 +80,51 @@ export function schemaFingerprint(session: AgentSession): string {
  * session still holds no pin, still sends the contract, and the backend
  * re-pins it against the thread it already had.
  */
-export const sessionHandles = new Map<string, string>();
+const sessionHandles = new Map<string, string>();
 
-/** Tables whose handle is kept. Enough for any page; this is not a store. */
+/**
+ * Where a handle is kept: the connection that was issued it and the table it
+ * names, partitioned like the pins and guides. A handle one backend issued is
+ * meaningless to another, and a second credential on the same endpoint is a
+ * different conversation.
+ */
+function handleKey(connectionId: string, tableId: string): string {
+  return JSON.stringify([connectionId, tableId]);
+}
+
+/** Connections and tables whose handle is kept. Enough for any page. */
 const MAX_SESSION_HANDLES = 16;
 
-function rememberHandle(tableId: string, sessionId: string | undefined): void {
+function rememberHandle(
+  connectionId: string,
+  tableId: string,
+  sessionId: string | undefined
+): void {
   if (!sessionId) return;
+  const key = handleKey(connectionId, tableId);
   // Re-inserted so the least recently confirmed is the one that goes.
-  sessionHandles.delete(tableId);
-  sessionHandles.set(tableId, sessionId);
+  sessionHandles.delete(key);
+  sessionHandles.set(key, sessionId);
   if (sessionHandles.size > MAX_SESSION_HANDLES) {
     const oldest = sessionHandles.keys().next().value;
     if (oldest !== undefined) sessionHandles.delete(oldest);
   }
+}
+
+/** The handle this connection holds for a table, if it holds one. */
+export function sessionHandleFor(
+  connectionId: string,
+  tableId: string
+): string | undefined {
+  return sessionHandles.get(handleKey(connectionId, tableId));
+}
+
+/** Drop the handle this connection holds for a table. */
+export function forgetSessionHandle(
+  connectionId: string,
+  tableId: string
+): void {
+  sessionHandles.delete(handleKey(connectionId, tableId));
 }
 
 /**
@@ -131,7 +162,7 @@ export function rememberPin(
       ? held.sessionId
       : undefined;
   const handle = response.sessionId ?? carried;
-  rememberHandle(tableId, handle);
+  rememberHandle(connectionId, tableId, handle);
   pins.remember(session, {
     connectionId,
     tableId,
@@ -203,7 +234,7 @@ export function compactRequest(
   const sessionId =
     extra.sessionId ??
     record?.sessionId ??
-    sessionHandles.get(manifest.tableId);
+    (pin ? sessionHandleFor(pin.connectionId, manifest.tableId) : undefined);
   const contractVersion = pin?.version;
   const context = pin?.context;
   const versions = {

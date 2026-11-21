@@ -3,12 +3,12 @@ import {
   compactRequest,
   connectionIdOf,
   currentContext,
+  forgetSessionHandle,
   guideCache,
   pins,
   refreshSchemaPin,
   rememberPin,
   schemaFingerprint,
-  sessionHandles,
   usesPinnedCatalog,
 } from "./httpConnection";
 import { type HttpPhaseContext } from "./httpExecution";
@@ -149,7 +149,7 @@ export function forgetConnection(
   // backend answering that it holds no such pin, are both saying this thread
   // is not one to carry on — and claiming a handle after either is claiming
   // someone else's.
-  sessionHandles.delete(session.manifest().tableId);
+  forgetSessionHandle(connectionId, session.manifest().tableId);
 }
 
 /**

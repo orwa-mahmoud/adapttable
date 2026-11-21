@@ -1147,6 +1147,74 @@ describe("a backend that holds the contract between turns", () => {
   });
 });
 
+describe("backend handles, per connection and table", () => {
+  /** A session for one table, on its own id so no other spec shares it. */
+  const tableSession = (tableId: string) =>
+    createAgentSession({
+      observe: () => observation({ tableId }),
+      apply: { setPage: vi.fn() },
+    });
+
+  /** A client whose backend issues `handle`, recording every request body. */
+  const backend = (
+    endpoint: string,
+    handle: (tableId: string) => string | undefined
+  ) => {
+    const bodies: Record<string, unknown>[] = [];
+    const client = createAgentHttpClient({
+      endpoint,
+      request: (body) => {
+        const sent = body as unknown as Record<string, unknown>;
+        bodies.push(sent);
+        const sessionId = handle(String(sent.tableId));
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+          ...(sessionId ? { sessionId } : {}),
+          pin: {
+            status: "acknowledged",
+            contractVersion: sent.contractVersion as string | undefined,
+          },
+        });
+      },
+    });
+    return { client, bodies };
+  };
+
+  it("never sends one connection's handle on another connection to the same table", async () => {
+    const first = backend("https://first.example/turn", () => "first-handle");
+    const second = backend("https://second.example/turn", () => undefined);
+    await first.client.connect(tableSession("handles-shared"));
+    await second.client.send(tableSession("handles-shared"), "hello");
+    expect(second.bodies.map((body) => body.sessionId)).toEqual([undefined]);
+  });
+
+  it("keeps each table's handle on one connection", async () => {
+    const { client, bodies } = backend(
+      "https://tables.example/turn",
+      (tableId) => `handle-for-${tableId}`
+    );
+    await client.connect(tableSession("handles-a"));
+    await client.connect(tableSession("handles-b"));
+    await client.send(tableSession("handles-a"), "one");
+    await client.send(tableSession("handles-b"), "two");
+    expect(bodies.slice(-2).map((body) => body.sessionId)).toEqual([
+      "handle-for-handles-a",
+      "handle-for-handles-b",
+    ]);
+  });
+
+  it("resets only the connection that was reset", async () => {
+    const first = backend("https://reset-a.example/turn", () => "a-handle");
+    const second = backend("https://reset-b.example/turn", () => "b-handle");
+    await first.client.connect(tableSession("handles-reset"));
+    await second.client.connect(tableSession("handles-reset"));
+    first.client.reset(tableSession("handles-reset"));
+    await second.client.send(tableSession("handles-reset"), "still here");
+    expect(second.bodies.at(-1)?.sessionId).toBe("b-handle");
+  });
+});
+
 describe("a table that changed while the backend was thinking", () => {
   it("ends the turn when the table it was answering is gone", async () => {
     let tableId = "orders";
