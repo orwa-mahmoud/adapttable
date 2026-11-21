@@ -179,12 +179,15 @@ export function batchEditing<TRow>(
 /**
  * Marks on the cells and rows that hold unsaved edits.
  *
+ * Marks follow the edits an editing feature makes, and that feature brings
+ * the editing code; this one only turns the marks on.
+ *
  * @returns The feature.
  *
  * @public
  */
 export function dirtyIndicators(): AdaptTableFeature {
-  return withEditingImplementation(coreDirtyIndicators());
+  return coreDirtyIndicators();
 }
 
 export type {

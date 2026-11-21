@@ -345,13 +345,13 @@ export function batchEditing<TRow>(
 /**
  * Mark cells and rows that have unsaved edits.
  *
+ * Marks follow the edits an editing feature makes, and that feature mounts
+ * the editing stage; this one only turns the marks on.
+ *
  * @public
  */
 export function dirtyIndicators(): StaticTableFeature {
-  return {
-    ...coreDirtyIndicators(),
-    renders: [editingRender],
-  };
+  return coreDirtyIndicators();
 }
 
 export type { BatchRowEdit } from "../editing/batchEditing";
