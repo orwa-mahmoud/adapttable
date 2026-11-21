@@ -672,6 +672,31 @@ describe("withSourceIndices", () => {
     // A row the page does not hold keeps its window index.
     expect(result.rows.map((entry) => entry.sourceIndex)).toEqual([2, 5]);
   });
+
+  it("follows a new order, new rows and a new key across window updates", () => {
+    const windowOf = (keys: string[]) => ({
+      enabled: true,
+      rows: keys.map((key, index) => ({ row: { id: key }, index, key })),
+      paddingTop: 0,
+      paddingBottom: 0,
+    });
+    const indices = (
+      keys: string[],
+      rows: readonly Row[],
+      key: (row: Row) => string = rowKey
+    ) =>
+      withSourceIndices(windowOf(keys), rows, key).rows.map(
+        (entry) => entry.sourceIndex
+      );
+    expect(indices(["b", "d"], ROWS)).toEqual([1, 3]);
+    expect(indices(["a", "c"], ROWS)).toEqual([0, 2]);
+    const reversed = [...ROWS].reverse();
+    expect(indices(["b", "d"], reversed)).toEqual([2, 0]);
+    const grown = [{ id: "z" }, ...ROWS];
+    expect(indices(["b", "z"], grown)).toEqual([2, 0]);
+    const upper = (row: Row) => row.id.toUpperCase();
+    expect(indices(["B", "D"], ROWS, upper)).toEqual([1, 3]);
+  });
 });
 
 describe("rowScrollTarget", () => {

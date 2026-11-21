@@ -246,6 +246,31 @@ export function resolveBodyVirtualization<TRow>(
   };
 }
 
+/** Each source array's row positions by key, for the key function read with. */
+const sourceIndexes = /* @__PURE__ */ new WeakMap<
+  readonly unknown[],
+  {
+    readonly rowKey: (row: never) => string;
+    readonly byId: ReadonlyMap<string, number>;
+  }
+>();
+
+/**
+ * Where each row sits in `sourceRows`, by key. Built once per array and key
+ * function, so every window update over the same rows reuses it.
+ */
+function sourceIndexOf<TRow>(
+  sourceRows: readonly TRow[],
+  rowKey: (row: TRow) => string
+): ReadonlyMap<string, number> {
+  const cached = sourceIndexes.get(sourceRows);
+  if (cached?.rowKey === rowKey) return cached.byId;
+  const byId = new Map<string, number>();
+  sourceRows.forEach((row, index) => byId.set(rowKey(row), index));
+  sourceIndexes.set(sourceRows, { rowKey, byId });
+  return byId;
+}
+
 /**
  * Point each windowed entry at its row's index in the page, so ARIA and
  * focus address the dataset rather than the unpinned scroll list.
@@ -257,8 +282,7 @@ export function withSourceIndices<TRow>(
   sourceRows: readonly TRow[],
   rowKey: (row: TRow) => string
 ): TableVirtualization<TRow> {
-  const byId = new Map<string, number>();
-  sourceRows.forEach((row, index) => byId.set(rowKey(row), index));
+  const byId = sourceIndexOf(sourceRows, rowKey);
   return {
     ...virtualization,
     rows: virtualization.rows.map((entry) => ({
