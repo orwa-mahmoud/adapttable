@@ -225,3 +225,44 @@ describe("bodyRowEntries", () => {
     expect(out[1]?.treeEntry?.level).toBe(1);
   });
 });
+
+describe("LEAN_ASSEMBLY.buildBodyCells", () => {
+  interface Row {
+    id: string;
+  }
+  const columns: ColumnMetadata<Row>[] = ["a", "b", "c"].map((key) => ({
+    key,
+    header: key,
+  }));
+  const rows: Row[] = [{ id: "1" }, { id: "2" }, { id: "3" }];
+
+  it("shares one read-only cell list across every plain row", () => {
+    const cells = resolveAssembly<Row>().buildBodyCells({
+      rows,
+      columns,
+      getRowId: (row) => row.id,
+    });
+    const lists = rows.map((row) => cells.get(row.id));
+    expect(lists[0]).toEqual([
+      { column: columns[0], columnIndex: 0, colSpan: 1, rowSpan: 1 },
+      { column: columns[1], columnIndex: 1, colSpan: 1, rowSpan: 1 },
+      { column: columns[2], columnIndex: 2, colSpan: 1, rowSpan: 1 },
+    ]);
+    expect(lists[1]).toBe(lists[0]);
+    expect(lists[2]).toBe(lists[0]);
+    expect(Object.isFrozen(lists[0])).toBe(true);
+    expect(Object.isFrozen(lists[0]?.[0])).toBe(true);
+  });
+
+  it("keeps each column's index in the full list when a window hides some", () => {
+    const cells = resolveAssembly<Row>().buildBodyCells({
+      rows,
+      columns,
+      getRowId: (row) => row.id,
+      windowKeys: new Set(["c"]),
+    });
+    expect(cells.get("2")).toEqual([
+      { column: columns[2], columnIndex: 2, colSpan: 1, rowSpan: 1 },
+    ]);
+  });
+});

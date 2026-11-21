@@ -110,15 +110,17 @@ function leanBuildBodyCells<TRow>(options: {
   getRowId: (row: TRow) => string;
   windowKeys?: ReadonlySet<string>;
 }): ReadonlyMap<string, readonly BodyCell<TRow>[]> {
-  const result = new Map<string, BodyCell<TRow>[]>();
-  for (const row of options.rows) {
-    const cells: BodyCell<TRow>[] = [];
-    options.columns.forEach((column, columnIndex) => {
-      if (options.windowKeys && !options.windowKeys.has(column.key)) return;
-      cells.push({ column, columnIndex, colSpan: 1, rowSpan: 1 });
-    });
-    result.set(options.getRowId(row), cells);
-  }
+  // Without spans every row has the same cells, so every row shares one
+  // frozen list rather than building its own.
+  const cells: readonly BodyCell<TRow>[] = Object.freeze(
+    options.columns.flatMap((column, columnIndex) =>
+      options.windowKeys && !options.windowKeys.has(column.key)
+        ? []
+        : [Object.freeze({ column, columnIndex, colSpan: 1, rowSpan: 1 })]
+    )
+  );
+  const result = new Map<string, readonly BodyCell<TRow>[]>();
+  for (const row of options.rows) result.set(options.getRowId(row), cells);
   return result;
 }
 
