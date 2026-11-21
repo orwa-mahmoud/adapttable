@@ -18,7 +18,7 @@ import { FILTER_LABELS } from "../labelGroups/filterLabels";
 import type { TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { humanizeKey } from "../utils/humanizeKey";
-import { getPath } from "../utils/path";
+import { getPath, pathReader } from "../utils/path";
 import type { FilterTypeRegistry, FilterTypeSpec } from "./filterRegistry";
 import {
   DATE_OP_LABEL_KEYS,
@@ -268,9 +268,7 @@ export function resolveFilterDefs<TRow>(
       label:
         declaredLabel ??
         (typeof column.header === "string" ? column.header : undefined),
-      ...(path === column.key
-        ? {}
-        : { getValue: (row: TRow) => getPath(row, path) }),
+      ...(path === column.key ? {} : { getValue: pathReader(path) }),
       ...base,
     } as FilterDef<TRow>);
   }
