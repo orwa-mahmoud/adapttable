@@ -63,6 +63,18 @@ describe("useMountStagger", () => {
     expect(animate).not.toHaveBeenCalled();
   });
 
+  it("looks for no marks when disabled or when motion is reduced", async () => {
+    const scan = vi.spyOn(Element.prototype, "querySelectorAll");
+    media(false);
+    await mount(false);
+    media(true);
+    await mount(true);
+    expect(
+      scan.mock.calls.filter(([selector]) => selector === "[data-stagger]")
+    ).toEqual([]);
+    scan.mockRestore();
+  });
+
   it("does nothing when the reader prefers reduced motion", async () => {
     media(true);
     const animate = vi.fn();

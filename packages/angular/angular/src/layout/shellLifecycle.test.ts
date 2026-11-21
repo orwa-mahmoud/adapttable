@@ -1,7 +1,8 @@
 /**
- * The kit's library locale loads its labels in a pending task, so server
- * rendering waits for them. The task settles whether the language loads or
- * fails, and a failure keeps the current copy and reports the error.
+ * The shell's own lifecycle work. The kit's library locale loads its labels
+ * in a pending task, so server rendering waits for them, and that task
+ * settles whether the language loads or fails. Entrance motion looks for
+ * nothing while it is off.
  */
 import type { TableSource } from "@adapttable/core";
 import { getLabels } from "@adapttable/i18n";
@@ -87,5 +88,50 @@ describe("library locale labels", () => {
     expect(fixture.componentInstance.current()?.table.labels().search).toBe(
       getLabels("en").search
     );
+  });
+});
+
+@Component({
+  template: '<div #root><span data-stagger=""></span></div>',
+  providers: [
+    { provide: ADAPTTABLE_CONTEXT_MENU, useFactory: () => signal(null) },
+  ],
+})
+class MarkedShell extends AdaptDataTableShell<Row> {}
+
+describe("entrance motion", () => {
+  async function mountMarked(animate: boolean) {
+    const base = TestBed.runInInjectionContext(() =>
+      injectFrontendData({
+        data: [{ id: "one", name: "Ada" }],
+        columns: [{ key: "name" }],
+        urlSync: false,
+      })
+    );
+    const fixture = TestBed.createComponent(MarkedShell);
+    fixture.componentRef.setInput("source", signal<TableSource<Row>>(base()));
+    fixture.componentRef.setInput("columns", [{ key: "name" }]);
+    fixture.componentRef.setInput("rowKey", (row: Row) => row.id);
+    fixture.componentRef.setInput("urlSync", false);
+    fixture.componentRef.setInput("animate", animate);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    return fixture;
+  }
+  const scans = (scan: { mock: { calls: unknown[][] } }) =>
+    scan.mock.calls.filter(([selector]) => selector === "[data-stagger]");
+
+  it("looks for no animation marks while animate is off", async () => {
+    const scan = vi.spyOn(Element.prototype, "querySelectorAll");
+    const fixture = await mountMarked(false);
+    fixture.componentRef.setInput("columns", [{ key: "name" }, { key: "id" }]);
+    await fixture.whenStable();
+    expect(scans(scan)).toEqual([]);
+  });
+
+  it("still finds the marks when animate is on", async () => {
+    const scan = vi.spyOn(Element.prototype, "querySelectorAll");
+    await mountMarked(true);
+    expect(scans(scan).length).toBeGreaterThan(0);
   });
 });

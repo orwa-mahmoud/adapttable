@@ -108,6 +108,7 @@ import {
   type FindBarProps,
   type FindInTableState,
   GROUPING_PANEL,
+  MOUNT_STAGGER,
   printToolbarProps,
   projectedGroupingSource,
   renderedRowsOf,
@@ -974,13 +975,14 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       const mobile = current?.table.isMobile() ?? false;
       const enabled = this.animate();
       const reduced = this.reducedMotion();
-      const root = this.root()?.nativeElement;
-      const marked = root?.querySelectorAll("[data-stagger]").length ?? 0;
-      const generation = `${enabled}:${reduced}:${rows}:${mobile ? 1 : 0}:${marked}`;
+      // Motion off or reduced: nothing plays, so nothing is looked up.
       if (!enabled || reduced) {
-        this.staggerGeneration = generation;
+        this.staggerGeneration = `${enabled}:${reduced}:${rows}:${mobile ? 1 : 0}`;
         return;
       }
+      const root = this.root()?.nativeElement;
+      const marked = root?.querySelectorAll(MOUNT_STAGGER.selector).length ?? 0;
+      const generation = `${enabled}:${reduced}:${rows}:${mobile ? 1 : 0}:${marked}`;
       if (!root || marked === 0 || generation === this.staggerGeneration)
         return;
       this.staggerGeneration = generation;
