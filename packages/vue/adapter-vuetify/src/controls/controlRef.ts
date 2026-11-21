@@ -22,7 +22,7 @@ export function controlAttrs(attrs: Attrs): Record<string, unknown> {
   );
 }
 
-/** v-model owns value updates; legacy native listeners must not request twice. */
+/** v-model owns value updates; native input listeners must not request twice. */
 export function valueControlAttrs(attrs: Attrs): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(attrs).filter(

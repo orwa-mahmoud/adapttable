@@ -10,7 +10,6 @@ import {
 } from "@adapttable/react";
 import {
   defaultFilterRegistry,
-  type Direction,
   FILTER_LABELS,
   type FilterDef,
   type FilterFormSource,
@@ -63,8 +62,6 @@ function GroupField({
 
 /** Props for `AutoFilterForm`. */
 export interface AutoFilterFormProps<TRow> {
-  /** Writing direction (kept for parity; Radix controls flip from ambient dir). */
-  dir?: Direction;
   /** The resolved filter definitions, in render order. */
   defs: readonly FilterDef<TRow>[];
   /** The resolved table source (filter bag + setters). */

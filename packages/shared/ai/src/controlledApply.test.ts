@@ -499,13 +499,13 @@ describe("controlled apply lane", () => {
     expect(call.revision).toBe(2);
   });
 
-  it("releases a cancelled never-settling legacy lane for a fresh call", async () => {
+  it("releases a cancelled never-settling host-call lane for a fresh call", async () => {
     const h = harness();
     const abort = new AbortController();
     const first = h.begin(abort.signal);
     const gate = deferred<void>();
-    const legacy = Promise.resolve(
-      first.call.trackLegacy(
+    const hostCall = Promise.resolve(
+      first.call.trackHostCall(
         () => gate.promise,
         () => undefined
       )
@@ -522,7 +522,7 @@ describe("controlled apply lane", () => {
       expect(await ticket).toBeUndefined();
     } finally {
       gate.resolve();
-      await legacy;
+      await hostCall;
     }
   });
 
@@ -553,12 +553,12 @@ describe("controlled apply lane", () => {
     await call.drain();
   });
 
-  it("refuses new legacy mutations after the handler sealed its ledger", () => {
+  it("refuses new host-call mutations after the handler sealed its ledger", () => {
     const h = harness();
     const { call } = h.begin();
     call.seal();
     const run = vi.fn();
-    expect(() => call.trackLegacy(run, () => undefined)).toThrow();
+    expect(() => call.trackHostCall(run, () => undefined)).toThrow();
     expect(run).not.toHaveBeenCalled();
   });
 
@@ -598,16 +598,16 @@ describe("controlled apply lane", () => {
     expect(reserve).toHaveBeenCalledOnce();
   });
 
-  it("preserves synchronous legacy return values and uses their accepted baseline", async () => {
+  it("preserves synchronous host-call return values and uses their accepted baseline", async () => {
     const h = harness();
     const { call } = h.begin();
     const receipt = { acknowledged: true };
-    const returned = call.trackLegacy(
+    const returned = call.trackHostCall(
       () => {
         h.foreign();
         return receipt;
       },
-      () => call.observeLegacy(h.revision())
+      () => call.observeHostRevision(h.revision())
     );
     expect(returned).toBe(receipt);
     expect(call.revision).toBe(2);
@@ -787,7 +787,7 @@ describe("controlled session results and reservations", () => {
     expect(h.invokes).toHaveLength(0);
   });
 
-  it("cancels execute already draining an ignored never-settling legacy promise", async () => {
+  it("cancels execute already draining an ignored never-settling host-call promise", async () => {
     const h = harness();
     const gate = deferred<void>();
     const entered = deferred<void>();
@@ -905,16 +905,16 @@ describe("controlled session results and reservations", () => {
     expect(h.view).toHaveBeenCalledTimes(reads);
   });
 
-  it("does not observe disposed state when a legacy promise resolves after cancellation", async () => {
+  it("does not observe disposed state when a host-call promise resolves after cancellation", async () => {
     const h = harness();
     const gate = deferred<void>();
     const abort = new AbortController();
     const begun = deferred<void>();
-    let legacy: Promise<unknown> = Promise.resolve();
+    let hostCall: Promise<unknown> = Promise.resolve();
     const session = h.session(
       [
         custom((context) => {
-          legacy = Promise.resolve(context.apply.runExport?.("csv")).catch(
+          hostCall = Promise.resolve(context.apply.runExport?.("csv")).catch(
             (error) => error
           );
           context.apply.hideColumn?.("a", true);
@@ -937,7 +937,7 @@ describe("controlled session results and reservations", () => {
     abort.abort();
     await result;
     gate.resolve();
-    await legacy;
+    await hostCall;
     await Promise.resolve();
     expect(h.view).toHaveBeenCalledTimes(reads);
   });

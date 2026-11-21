@@ -9,7 +9,7 @@ import { h } from "vue";
 
 import { NuxtColumnSelect } from "./navigation/nuxtNavigation";
 
-/** Canonical opt-in entry, also retained through cell-navigation for compatibility. */
+/** The opt-in column-selection entry. */
 export function columnSelectionCheckbox(): StaticTableFeature {
   return extendFeature(bindingColumnSelectionCheckbox(), [
     slotRender(COLUMN_SELECT, (props) => h(NuxtColumnSelect, props)),

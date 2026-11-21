@@ -12,7 +12,7 @@
  * summaryRow={aggregate({ budget: "sum", headcount: "avg" })}
  * ```
  *
- * The mapper API is untouched and still accepted anywhere: this returns one.
+ * `aggregate` returns a mapper, so a hand-written mapper works wherever it does.
  *
  * Values are found the same way the table finds them elsewhere — the column's
  * `sortValue` if it has one, else the key's data path — so a formatted cell
