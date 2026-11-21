@@ -13,7 +13,8 @@
  * ```
  */
 export type { ExportViewEntry, ExportWriter } from "./export/exportWriter";
-export { buildTableXlsx, xlsxWriter } from "./export/xlsx";
+export { buildTableXlsx } from "./export/tableXlsx";
+export { xlsxWriter } from "./export/xlsx";
 export type { ColumnModel } from "./types";
 
 /**

@@ -32288,12 +32288,12 @@
     {
       "name": "buildTablePdf",
       "kind": "runtime",
-      "module": "export/pdf.ts",
+      "module": "export/tablePdf.ts",
       "audience": "app",
       "path": "./pdf",
       "forward": true,
       "deprecated": false,
-      "identity": "export/pdf.ts#buildTablePdf",
+      "identity": "export/tablePdf.ts#buildTablePdf",
       "subpaths": ["./pdf"]
     },
     {
@@ -33575,12 +33575,12 @@
     {
       "name": "buildTableXlsx",
       "kind": "runtime",
-      "module": "export/xlsx.ts",
+      "module": "export/tableXlsx.ts",
       "audience": "app",
       "path": "./xlsx",
       "forward": true,
       "deprecated": false,
-      "identity": "export/xlsx.ts#buildTableXlsx",
+      "identity": "export/tableXlsx.ts#buildTableXlsx",
       "subpaths": ["./xlsx"]
     },
     {

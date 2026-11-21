@@ -13,7 +13,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ColumnMetadata } from "../contracts/columns";
 import type { ExportTable } from "./exportWriter";
 import { columnLetter, safeSheetName } from "./sheetText";
-import { buildTableXlsx, xlsxWriter } from "./xlsx";
+import { buildTableXlsx } from "./tableXlsx";
+import { xlsxWriter } from "./xlsx";
 
 interface Row {
   id: string;

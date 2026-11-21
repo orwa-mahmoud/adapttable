@@ -16,13 +16,7 @@
  * of exporting to a spreadsheet rather than a CSV.
  */
 
-import type { ColumnMetadata } from "../contracts/columns";
-import {
-  buildExportTable,
-  type ExportTable,
-  type ExportViewEntry,
-  type ExportWriter,
-} from "./exportWriter";
+import type { ExportTable, ExportWriter } from "./exportWriter";
 import { columnLetter, safeSheetName, safeText } from "./sheetText";
 import { buildZip, deflateRaw, utf8, type ZipEntry } from "./zip";
 
@@ -257,37 +251,12 @@ function documents(table: ExportTable, sheetName: string): ZipEntry[] {
 }
 
 /**
- * Build an `.xlsx` for the given rows and columns.
+ * The workbook for an already-resolved table — what the writer and
+ * `buildTableXlsx` call.
  *
- * Cell values resolve exactly as they do for CSV — a column's `exportValue`
- * first, then its accessor or `sortValue` — so the same table produces the same
- * data in either format. What differs is that numbers, booleans and dates stay
- * typed, because a spreadsheet that cannot sum a column is a screenshot.
- *
- * @typeParam TRow - The row type.
- * @param options - Rows, columns, and the sheet's name.
- * @returns The workbook bytes, ready to download.
- *
- * @public
+ * @internal
  */
-export function buildTableXlsx<TRow>(options: {
-  rows: readonly TRow[];
-  columns: readonly ColumnMetadata<TRow>[];
-  sheetName?: string;
-  view?: readonly ExportViewEntry<TRow>[];
-  summary?: Readonly<Partial<Record<string, unknown>>>;
-}): Uint8Array<ArrayBuffer> {
-  return xlsxBytes(
-    buildExportTable(options.rows, options.columns, {
-      view: options.view,
-      summary: options.summary,
-    }),
-    options.sheetName
-  );
-}
-
-/** The workbook for an already-resolved table — what the writer calls. */
-function xlsxBytes(
+export function xlsxBytes(
   table: ExportTable,
   sheetName?: string
 ): Uint8Array<ArrayBuffer> {

@@ -21,7 +21,7 @@ export type {
   ExportWriter,
 } from "./export/exportWriter";
 export type { PdfWriterOptions } from "./export/pdf";
-export { buildTablePdf, pdfWriter } from "./export/pdf";
+export { pdfWriter } from "./export/pdf";
 export type {
   PrintLayoutOptions,
   PrintPageBreak,
@@ -34,6 +34,7 @@ export {
   printStyles,
   printTable,
 } from "./export/printLayout";
+export { buildTablePdf } from "./export/tablePdf";
 export type { ColumnModel } from "./types";
 
 /**

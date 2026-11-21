@@ -24,13 +24,7 @@
  * wrong table.
  */
 
-import type { ColumnMetadata } from "../contracts/columns";
-import {
-  buildExportTable,
-  type ExportTable,
-  type ExportViewEntry,
-  type ExportWriter,
-} from "./exportWriter";
+import type { ExportTable, ExportWriter } from "./exportWriter";
 import {
   embeddedFace,
   hex4,
@@ -39,12 +33,8 @@ import {
   standardFace,
   type TextFace,
 } from "./pdfFont";
-import {
-  exportCellText,
-  type PrintPageBreak,
-  type PrintPageSize,
-  resolvePrintDirection,
-} from "./printLayout";
+import type { PrintPageBreak, PrintPageSize } from "./printLayout";
+import { exportCellText, resolvePrintDirection } from "./printText";
 import { parseSfnt } from "./sfnt";
 
 export type { ExportWriter, PrintPageBreak };
@@ -563,7 +553,13 @@ function faceFor(font: PdfWriterOptions["font"]): TextFace {
   return font === undefined ? standardFace() : embeddedFace(parseSfnt(font));
 }
 
-function pdfBytes(
+/**
+ * The PDF for an already-resolved table — what the writer and
+ * `buildTablePdf` call.
+ *
+ * @internal
+ */
+export function pdfBytes(
   table: ExportTable,
   options: PdfWriterOptions
 ): Uint8Array<ArrayBuffer> {
@@ -591,37 +587,6 @@ function pdfBytes(
 function titleFromFilename(filename: string): string {
   const stem = filename.replace(/\.[^.]+$/, "");
   return stem === "" ? filename : stem;
-}
-
-/**
- * Build a PDF for the given rows and columns.
- *
- * Cell values resolve exactly as they do for CSV and XLSX — a column's
- * `exportValue` first, then its accessor — so the same table produces the
- * same data in every format. Page breaks, column widths and group
- * structure are taken from the resolved view.
- *
- * @typeParam TRow - The row type.
- * @param options - Rows, columns, and how the pages should look.
- * @returns The PDF bytes, ready to download.
- *
- * @public
- */
-export function buildTablePdf<TRow>(
-  options: {
-    rows: readonly TRow[];
-    columns: readonly ColumnMetadata<TRow>[];
-    view?: readonly ExportViewEntry<TRow>[];
-    summary?: Readonly<Partial<Record<string, unknown>>>;
-  } & PdfWriterOptions
-): Uint8Array<ArrayBuffer> {
-  return pdfBytes(
-    buildExportTable(options.rows, options.columns, {
-      view: options.view,
-      summary: options.summary,
-    }),
-    options
-  );
 }
 
 /** The MIME type every reader registers for `.pdf`. */
