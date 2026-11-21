@@ -393,7 +393,7 @@ state.
 
 ## Navigation and status
 
-Import `cellNavigation` and `columnSelectionCheckbox` from `@adapttable/nuxt-ui/cell-navigation`, `findInTable` from `@adapttable/nuxt-ui/find-in-table`, and `statusBar` or `selectionStats` from `@adapttable/nuxt-ui/status-bar`. The `selection-stats` entry also exports `selectionStats`. `findInTable({ button: true })` adds a genuine Nuxt toolbar button; its search field and actions use Nuxt Input and Button. Column selection uses Nuxt Checkbox, and status figures use Nuxt Badge.
+Import `cellNavigation` from `@adapttable/nuxt-ui/cell-navigation`, `columnSelectionCheckbox` from `@adapttable/nuxt-ui/column-selection`, `findInTable` from `@adapttable/nuxt-ui/find-in-table`, and `statusBar` or `selectionStats` from `@adapttable/nuxt-ui/status-bar`. The `selection-stats` entry also exports `selectionStats`. `findInTable({ button: true })` adds a genuine Nuxt toolbar button; its search field and actions use Nuxt Input and Button. Column selection uses Nuxt Checkbox, and status figures use Nuxt Badge.
 
 The shared Vue binding owns keyboard navigation, range selection, fill requests, Find state and localized status text. Host fill callbacks remain requests; the adapter never changes row data itself. Desktop navigation attaches after hydration and stays disabled on mobile. The fill handle is a positioned span carrying the binding's pointer handlers. All canonical part markers and class names remain on their semantic targets.
 

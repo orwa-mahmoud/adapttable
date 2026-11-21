@@ -2736,9 +2736,6 @@ export interface GroupRowModel<TRow> {
     readonly trailingColumns: number;
 }
 
-// @public @deprecated
-export function groupRowSlotKey<_TRow = unknown>(): RowSlotKey<GroupRowDraw>;
-
 // @public
 export type GroupRowSlotProps<TRow> = Parameters<NonNullable<TableChromeSlots<TRow>["GroupRow"]>>[0];
 

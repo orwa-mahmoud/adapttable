@@ -280,7 +280,7 @@ export type {
 } from "./layout/dataTableSurfaceChrome";
 export { DataTableSurfaceChrome } from "./layout/dataTableSurfaceChrome";
 export type { GroupRowDraw, GroupRowSlotProps } from "./layout/groupRowSlot";
-export { GROUP_ROW, groupRowSlotKey } from "./layout/groupRowSlot";
+export { GROUP_ROW } from "./layout/groupRowSlot";
 export type {
   ColumnResizeModel,
   EditingChromeModel,

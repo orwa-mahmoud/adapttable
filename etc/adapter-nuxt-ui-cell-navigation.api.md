@@ -19,9 +19,6 @@ export { CellNavigationOptions }
 
 export { CellRange }
 
-// @public
-export function columnSelectionCheckbox(): StaticTableFeature;
-
 export { GridCell }
 
 // (No @packageDocumentation comment for this package)

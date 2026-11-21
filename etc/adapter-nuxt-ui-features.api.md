@@ -354,9 +354,6 @@ export { ColumnResizeHandleOptions }
 
 export { ColumnResizeHandleProps }
 
-// @public
-export function columnSelectionCheckbox(): StaticTableFeature;
-
 // @public (undocumented)
 export function commandPalette(options?: Parameters<typeof commandPalette_2>[0]): StaticTableFeature;
 

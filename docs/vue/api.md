@@ -147,7 +147,7 @@ The framework-neutral core remains independent of rendered UI.
 `DataTableProps<TRow>`, `DataTableSlots<TRow>`, and `DataTableClassNames` are
 canonical adapter contracts. `provideDataTableClassNames` and
 `useDataTableClassNames` share reactive presentation hooks with feature controls.
-`GROUP_ROW`, `groupRowSlotKey<TRow>()`, and `GroupRowSlotProps<TRow>` let a grouping
+`GROUP_ROW` and `GroupRowSlotProps<TRow>` let a grouping
 feature supply its row renderer lazily; importing the table surface does not
 install a grouping renderer or another optional feature.
 

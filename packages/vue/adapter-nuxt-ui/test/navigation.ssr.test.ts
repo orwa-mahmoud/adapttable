@@ -6,10 +6,8 @@ import { createSSRApp, h } from "vue";
 import { renderToString } from "vue/server-renderer";
 
 import { DataTable } from "../src";
-import {
-  cellNavigation,
-  columnSelectionCheckbox,
-} from "../src/cell-navigation";
+import { cellNavigation } from "../src/cell-navigation";
+import { columnSelectionCheckbox } from "../src/column-selection";
 import { findInTable } from "../src/find-in-table";
 import { selectionStats, statusBar } from "../src/status-bar";
 import { virtualize } from "../src/virtualize";

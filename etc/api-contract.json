@@ -1284,7 +1284,6 @@
       "ColumnMenuSlotProps",
       "ColumnResizeHandleOptions",
       "ColumnResizeHandleProps",
-      "columnSelectionCheckbox",
       "commandPalette",
       "ConfirmHandler",
       "ConfirmRequest",
@@ -12374,7 +12373,6 @@
       "filterWidgetKind",
       "flattenColumnTree",
       "formatMultiDraft",
-      "groupRowSlotKey",
       "groupedHeaderAlign",
       "groupedHeaderCellStyle",
       "groupedHeaderChildRule",
@@ -14436,7 +14434,6 @@
       "cellNavigation",
       "CellNavigationOptions",
       "CellRange",
-      "columnSelectionCheckbox",
       "GridCell"
     ],
     "adapter-nuxt-ui-cell-span": [
