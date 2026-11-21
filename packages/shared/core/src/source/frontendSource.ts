@@ -31,6 +31,8 @@ import {
   sessionEvaluator,
   stageSessionEvaluator,
 } from "../engine/tableSession";
+import type { IncrementalView } from "../rows/incremental";
+import { incrementalViewOf } from "../rows/incrementalView";
 import {
   type RowPatchEvent,
   type RowPatchLog,
@@ -487,6 +489,23 @@ export function createFrontendSourceWith<TRow>(
     return next;
   }
 
+  /**
+   * The engine's filtered rows when nothing but search filtered them: then
+   * they are the searched rows, in source order, and searching again would
+   * read every row a second time.
+   */
+  function searchOnlyRows(
+    config: FrontendSourceConfig<TRow>,
+    view: FrontendSourceViewState,
+    sorted: readonly TRow[]
+  ): readonly TRow[] | undefined {
+    const filters =
+      config.filterFn !== undefined ||
+      (view.filterTree !== undefined && config.filterTreeFn !== undefined);
+    if (filters) return undefined;
+    return incrementalViewOf<IncrementalView<TRow>>(sorted)?.filtered;
+  }
+
   function update(
     config: FrontendSourceConfig<TRow>,
     view: FrontendSourceViewState
@@ -600,7 +619,9 @@ export function createFrontendSourceWith<TRow>(
       allFilteredRows: sorted,
       // Facets count after search, BEFORE extra filters: `filtered` already
       // applied filterFn, so a selected checklist would hide every other value.
-      allSearchedRows: searchedRows(config.data, view.search),
+      allSearchedRows:
+        searchOnlyRows(config, view, sorted) ??
+        searchedRows(config.data, view.search),
       total: snapshot.total,
       page: snapshot.page,
       hasNextPage:

@@ -207,6 +207,24 @@ describe("createFrontendSource", () => {
     expect(unsearched.allSearchedRows).toBe(ROWS);
   });
 
+  it("gives the searched rows in source order when nothing else filters", () => {
+    const frame = createFrontendSource<Row>().update(config(), {
+      ...VIEW,
+      search: "li",
+      sortBy: "count",
+      sortDir: "asc",
+    });
+    expect(ids(frame.rows)).toEqual(["c", "a"]);
+    // Search alone filtered, so these are the searched rows, in source order.
+    expect(ids(frame.allSearchedRows)).toEqual(["a", "c"]);
+    const sortedOnly = createFrontendSource<Row>().update(config(), {
+      ...VIEW,
+      sortBy: "count",
+      sortDir: "asc",
+    });
+    expect(ids(sortedOnly.allSearchedRows)).toEqual(ids(ROWS));
+  });
+
   it("keeps the facet rows while data and search stay the same", () => {
     const source = createFrontendSource<Row>();
     const first = source.update(config(), { ...VIEW, search: "a" });
