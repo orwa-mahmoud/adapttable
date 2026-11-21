@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { sortRows } from "../sort/compare";
+import { sortRows } from "../sort/referenceSort";
 import { computed } from "./computed";
 
 interface Order {

@@ -26219,22 +26219,6 @@
       "behavior": ""
     },
     {
-      "export": "sortRows",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "sortRowsMulti",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "sourceCapabilities",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",

@@ -2687,7 +2687,7 @@ Adapter-machinery names (`headerGroupRows`, `insertExtraRows`, `useFullscreen`,
 
 Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 (CSV export — or compose `exportCsv()` for a built-in button),
-`sortRows` / `sortRowsMulti` / `compareValues` / `nextSort`,
+`compareValues` / `nextSort`,
 `computePagination`, `headerGroupRow` / `headerGroupRows` /
 `htmlGroupedHeaderPlan` / `groupedHeaderChildRule` /
 `groupedHeaderCellStyle` / `groupedHeaderLabelStyle` / `groupedHeaderAlign` / `columnGroupStubStyle` / `COLUMN_GROUP_STUB_WIDTH`,

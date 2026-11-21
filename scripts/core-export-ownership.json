@@ -16083,32 +16083,6 @@
       ]
     },
     {
-      "name": "sortRows",
-      "kind": "runtime",
-      "module": "sort/compare.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "sort/compare.ts#sortRows",
-      "subpaths": [
-        "./binding"
-      ]
-    },
-    {
-      "name": "sortRowsMulti",
-      "kind": "runtime",
-      "module": "sort/compare.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "sort/compare.ts#sortRowsMulti",
-      "subpaths": [
-        "./binding"
-      ]
-    },
-    {
       "name": "sourceViewKey",
       "kind": "runtime",
       "module": "source/sourceRefresh.ts",

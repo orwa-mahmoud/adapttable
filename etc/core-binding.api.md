@@ -10629,12 +10629,6 @@ export function sortLevelOf(levels: readonly {
 } | undefined;
 
 // @public
-export function sortRows<TRow>(rows: readonly TRow[], getValue: (row: TRow) => SortableValue, direction: SortDirection): TRow[];
-
-// @public
-export function sortRowsMulti<TRow>(rows: readonly TRow[], levels: readonly SortLevel[], getValue: (row: TRow, key: string) => SortableValue): TRow[];
-
-// @public
 export function sourceCapabilities(source: CapabilitySource, support?: QuerySupport): TableSourceCapabilities;
 
 // @public

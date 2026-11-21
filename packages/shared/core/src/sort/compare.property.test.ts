@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
-import { sortRows, sortRowsMulti } from "./compare";
+import { sortRows, sortRowsMulti } from "./referenceSort";
 
 const rowsArb = fc.array(
   fc.record({

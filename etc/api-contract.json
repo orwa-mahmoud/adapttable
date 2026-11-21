@@ -8381,8 +8381,6 @@
       "SidePanelTabModel",
       "Slot",
       "SortByOption",
-      "sortRows",
-      "sortRowsMulti",
       "sourceCapabilities",
       "spanningArmed",
       "SPARKLINE_DEFAULT_HEIGHT",

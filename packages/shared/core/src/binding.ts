@@ -1945,7 +1945,7 @@ export {
 } from "./rows/rowReorderPolicy";
 export { dispatchRowMove, rowMoveView } from "./rows/rowReorderRuntime";
 export { rowStyleArmed } from "./rows/rowStyle";
-export { compareValues, sortRows, sortRowsMulti } from "./sort/compare";
+export { compareValues } from "./sort/compare";
 export { nextSort } from "./sort/cycleSort";
 export { deriveSortByOptions } from "./sort/sortByOptions";
 export type {

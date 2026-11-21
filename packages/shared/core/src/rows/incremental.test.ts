@@ -18,7 +18,7 @@ import {
   buildGroupedFlatModel,
   type GroupedFlatEntry,
 } from "../grouping/groupRows";
-import { sortRows, sortRowsMulti } from "../sort/compare";
+import { sortRows, sortRowsMulti } from "../sort/referenceSort";
 import {
   applyRowPatchesToView,
   applyRowPatchLogToView,
