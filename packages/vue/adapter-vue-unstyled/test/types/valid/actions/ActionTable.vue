@@ -3,7 +3,7 @@ import { DataTable } from "@adapttable/vue-unstyled";
 import { bulkActions } from "@adapttable/vue-unstyled/bulk-actions";
 import { commandPalette } from "@adapttable/vue-unstyled/command-palette";
 import { contextMenu } from "@adapttable/vue-unstyled/context-menu";
-import { exportCsv } from "@adapttable/vue-unstyled/export-csv";
+import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { pdfWriter } from "@adapttable/vue-unstyled/export-pdf";
 import { xlsxWriter } from "@adapttable/vue-unstyled/export-xlsx";
 import { print } from "@adapttable/vue-unstyled/print";

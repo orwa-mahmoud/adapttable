@@ -47,7 +47,6 @@ export default defineConfig({
     "src/selection-stats.ts",
     "src/saved-views.ts",
     "src/export.ts",
-    "src/export-csv.ts",
     "src/export-pdf.ts",
     "src/export-xlsx.ts",
     "src/pivot.ts",

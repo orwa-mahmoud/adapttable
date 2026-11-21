@@ -2,7 +2,6 @@
 import type { TableFeature } from "@adapttable/vue";
 import { type ColumnDef, DataTable } from "@adapttable/vue-unstyled";
 import { exportCsv } from "@adapttable/vue-unstyled/export";
-import { exportCsv as compatibleCsv } from "@adapttable/vue-unstyled/export-csv";
 import {
   exportPdf,
   type ExportPdfOptions,
@@ -32,7 +31,7 @@ const rowKey = (row: Person) => row.id;
 const bare = standardFeatures();
 const bareFormats = [
   exportCsv(),
-  compatibleCsv(false),
+  exportCsv(false),
   exportPdf(),
   exportXlsx(false),
 ];
@@ -59,7 +58,7 @@ const configured: TableFeature<Person>[] = [
   exportXlsx(xlsx),
   barrelPdf<Person>(false),
   barrelXlsx<Person>(true),
-  compatibleCsv<Person>({ writer: pdfWriter() }),
+  exportCsv<Person>({ writer: pdfWriter() }),
   exportCsv<Person>({ writer: xlsxWriter() }),
 ];
 </script>

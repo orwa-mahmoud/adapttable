@@ -14,7 +14,7 @@ import {
   editing,
   undoRedoButtons,
 } from "@adapttable/vue-unstyled/editing";
-import { exportCsv } from "@adapttable/vue-unstyled/export-csv";
+import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { print } from "@adapttable/vue-unstyled/print";
 import { sidePanel } from "@adapttable/vue-unstyled/side-panel";
 import { computed, ref, shallowRef } from "vue";

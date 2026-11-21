@@ -293,7 +293,6 @@ export const VUE_CONSUMER_SPECS = [
   },
   ...[
     ["export", "exportCsv", [], writers],
-    ["export-csv", "exportCsv", [], writers],
     ["export-pdf", "exportPdf", [PDF_WRITER_MARKER], [XLSX_WRITER_MARKER]],
     ["export-xlsx", "exportXlsx", [XLSX_WRITER_MARKER], [PDF_WRITER_MARKER]],
   ].map(([entry, factory, present, absent]) => ({

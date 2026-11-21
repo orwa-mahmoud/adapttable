@@ -42,7 +42,6 @@ export default defineConfig({
     "src/command-palette.ts",
     "src/context-menu.ts",
     "src/export.ts",
-    "src/export-csv.ts",
     "src/export-pdf.ts",
     "src/export-xlsx.ts",
     "src/grouping-panel.ts",

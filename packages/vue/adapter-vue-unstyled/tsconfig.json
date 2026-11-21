@@ -47,7 +47,6 @@
       "@adapttable/vue-unstyled/context-menu": ["./src/context-menu.ts"],
       "@adapttable/vue-unstyled/side-panel": ["./src/side-panel.ts"],
       "@adapttable/vue-unstyled/print": ["./src/print.ts"],
-      "@adapttable/vue-unstyled/export-csv": ["./src/export-csv.ts"],
       "@adapttable/vue-unstyled/export-pdf": ["./src/export-pdf.ts"],
       "@adapttable/vue-unstyled/export-xlsx": ["./src/export-xlsx.ts"],
       "@adapttable/vue-unstyled/pivot": ["./src/pivot.ts"],

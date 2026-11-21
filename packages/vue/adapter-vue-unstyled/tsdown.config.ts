@@ -42,7 +42,6 @@ export default defineConfig({
     "src/print.ts",
     "src/export.ts",
     "src/preset.ts",
-    "src/export-csv.ts",
     "src/export-pdf.ts",
     "src/export-xlsx.ts",
     "src/pivot.ts",

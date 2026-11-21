@@ -172,7 +172,7 @@ binding and shared core; these contributions provide native controls.
   panel state remain host-owned.
 - `/export` and `/print`: CSV export with loaded, selected, range or
   host-provided all-row scopes, optional server progress/cancellation, and a host
-  print callback. `/export-csv` remains a deprecated compatibility path.
+  print callback.
   `/export-pdf` and `/export-xlsx` provide `exportPdf` and `exportXlsx` with
   the same native controls and lifetime. Their `pdfWriter` and `xlsxWriter`
   helpers remain available for `exportCsv({ writer })`. See
@@ -256,8 +256,8 @@ columns, density, CSV export, Find, fit columns, fullscreen, header filters,
 multi-sort, resize handles and status controls. Add typed `grouping`,
 `bulkActions`, `filters` or `savedViews` options only when you need them.
 
-CSV is available from `@adapttable/vue-unstyled/export`; `/export-csv` remains
-compatible. `exportPdf` and `exportXlsx` live in the separate `/export-pdf` and
+CSV is available from `@adapttable/vue-unstyled/export`. `exportPdf` and
+`exportXlsx` live in the separate `/export-pdf` and
 `/export-xlsx` entries alongside their writer helpers. All accept `false` to
 disable export. Append either factory after `standardFeatures()` to replace
 its CSV control with that format. Import individual entries to keep unused

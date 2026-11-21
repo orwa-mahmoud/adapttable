@@ -472,16 +472,6 @@
         "default": "./dist/export.cjs"
       }
     },
-    "./export-csv": {
-      "import": {
-        "types": "./dist/export-csv.d.ts",
-        "default": "./dist/export-csv.js"
-      },
-      "require": {
-        "types": "./dist/export-csv.d.cts",
-        "default": "./dist/export-csv.cjs"
-      }
-    },
     "./export-pdf": {
       "import": {
         "types": "./dist/export-pdf.d.ts",

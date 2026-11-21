@@ -37,7 +37,7 @@ individual entries to state which behaviors a table needs.
 | `/density`             | `densityChooser`: comfortable/compact toolbar control.                                                                                                       |
 | `/fullscreen`          | `fullscreen`: browser fullscreen for the table's actual root.                                                                                                |
 | `/saved-views`         | `savedViews`, `SavedViewsPanel`: named state captures and an optional management surface.                                                                    |
-| `/export`              | `exportCsv`: export the current scope as CSV with native progress controls. `/export-csv` remains a deprecated compatibility path.                           |
+| `/export`              | `exportCsv`: export the current scope as CSV with native progress controls.                                                                                  |
 | `/export-pdf`          | `exportPdf`: export with the optional PDF writer and the same native lifecycle. Also exports PDF and print utilities.                                        |
 | `/export-xlsx`         | `exportXlsx`: export with the optional XLSX writer and the same native lifecycle. Also exports XLSX utilities.                                               |
 

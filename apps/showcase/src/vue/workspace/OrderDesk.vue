@@ -24,7 +24,7 @@ import { commandPalette } from "@adapttable/vue-unstyled/command-palette";
 import { contextMenu } from "@adapttable/vue-unstyled/context-menu";
 import { densityChooser } from "@adapttable/vue-unstyled/density";
 import { editing } from "@adapttable/vue-unstyled/editing";
-import { exportCsv } from "@adapttable/vue-unstyled/export-csv";
+import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { filters } from "@adapttable/vue-unstyled/filters";
 import { findInTable } from "@adapttable/vue-unstyled/find-in-table";
 import { useGroupCollapseUrlState } from "@adapttable/vue-unstyled/grouping";

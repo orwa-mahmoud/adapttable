@@ -17,7 +17,6 @@ export default defineConfig({
     "src/bulk-actions.ts",
     "src/cell-navigation.ts",
     "src/export.ts",
-    "src/export-csv.ts",
     "src/export-pdf.ts",
     "src/export-xlsx.ts",
     "src/find-in-table.ts",

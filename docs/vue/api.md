@@ -79,8 +79,8 @@ Vue exports to their owning entries. Separate formula, pivot, sparkline and
 stream helpers are not automatically loaded by the feature barrel.
 
 The native `/preset` entry exports `standardFeatures` and
-`StandardFeatureOptions<TRow>`. Native `/export` is the canonical CSV entry;
-`/export-csv` remains available. Binding `/pdf` and `/xlsx`, and native `/export-pdf` and
+`StandardFeatureOptions<TRow>`. Native `/export` is the CSV entry. Binding
+`/pdf` and `/xlsx`, and native `/export-pdf` and
 `/export-xlsx`, expose `exportPdf` / `exportXlsx`,
 `ExportPdfOptions<TRow>` / `ExportXlsxOptions<TRow>` and writer utilities. Native `/features` also exports these factories.
 See [export scope and lifecycle](./actions.md) and
