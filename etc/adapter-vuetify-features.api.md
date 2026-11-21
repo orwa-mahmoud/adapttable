@@ -282,6 +282,9 @@ export const checklistFilterWidget: FilterWidget;
 
 export { collapsibleColumnGroups }
 
+// @public
+export function columnLayoutFamily(): readonly StaticTableFeature[];
+
 // @public (undocumented)
 export function columnMenu(): StaticTableFeature;
 
@@ -352,6 +355,9 @@ export { FilterHeaderControlProps }
 export const FilterHeaderRow: typeof __VLS_export;
 
 export { FilterHeaderRowProps }
+
+// @public
+export function filteringFamily<TRow>(defs: readonly FilterDef<TRow>[]): readonly TableFeature<TRow>[];
 
 export { FilterOption }
 

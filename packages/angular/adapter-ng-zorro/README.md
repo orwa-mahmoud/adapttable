@@ -106,7 +106,7 @@ const features = [
 
 The feature entries cover:
 
-- **Feature composition** through individual kit subpaths and `standardPreset()`;
+- **Feature composition** through individual kit subpaths and `standardFeatures()`;
   import only the behavior you need
 - **Global search, sorting and pagination** for in-memory or host-fetched data,
   with URL-synced state and infinite scrolling on mobile
@@ -138,8 +138,8 @@ The feature entries cover:
   separately imported AI bindings
 
 `/features` gathers the feature factories. `/preset` exports
-`standardPreset()`: column menu, density, CSV export, fullscreen, header
-filters and status bar, with grouping, bulk actions, filters and saved views
+`standardFeatures()`: columns menu, resizing, fitting, density, CSV export, keyboard Find,
+fullscreen, multi-sort, header filters and status bar, with grouping, bulk actions, filters and saved views
 included when their options are supplied. Import individual entries when
 controlling bundle cost. See the
 [Angular feature guide](https://adapttable.orwamahmoud.com/angular/features/)

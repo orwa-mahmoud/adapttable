@@ -13,6 +13,7 @@ export { bulkActions } from "@adapttable/angular-aria/bulk-actions";
 export { cellNavigation } from "@adapttable/angular-aria/cell-navigation";
 export { cellSpan } from "@adapttable/angular-aria/cell-span";
 export { collapsibleColumnGroups } from "@adapttable/angular-aria/column-groups";
+export { columnLayoutFamily } from "@adapttable/angular-aria/column-layout";
 export { columnMenu } from "@adapttable/angular-aria/column-menu";
 export { columnSelectionCheckbox } from "@adapttable/angular-aria/column-selection";
 export { commandPalette } from "@adapttable/angular-aria/command-palette";
@@ -22,6 +23,7 @@ export {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/angular-aria/editing";
@@ -31,6 +33,7 @@ export {
   exportXlsx,
 } from "@adapttable/angular-aria/export";
 export { extraRows } from "@adapttable/angular-aria/extra-rows";
+export { filteringFamily } from "@adapttable/angular-aria/filtering";
 export { filters, filterTypes } from "@adapttable/angular-aria/filters";
 export { findInTable } from "@adapttable/angular-aria/find-in-table";
 export { fitColumns } from "@adapttable/angular-aria/fit-columns";

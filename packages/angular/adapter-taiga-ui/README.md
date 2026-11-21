@@ -91,7 +91,7 @@ page selector.
 ## Features
 
 - **Feature composition** through individual kit subpaths, `/features` and
-  `standardPreset()`; import only the behavior you need
+  `standardFeatures()`; import only the behavior you need
 - **Global search, sorting and pagination** for in-memory or host-fetched rows,
   with URL-synced state and mobile infinite scrolling
 - **Filtering** with an AND/OR filter tree, header filters, custom filter types,

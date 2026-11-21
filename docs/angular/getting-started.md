@@ -161,7 +161,7 @@ import { multiSort } from "@adapttable/angular-unstyled/multi-sort";
 const features = [columnMenu(), multiSort()];
 ```
 
-`standardPreset()` from the kit's `/preset` entry is a convenient larger
+`standardFeatures()` from the kit's `/preset` entry is a convenient larger
 composition. See [Features](./features.md) for its exact members and the
 individual imports.
 

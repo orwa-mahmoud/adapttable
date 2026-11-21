@@ -3,6 +3,7 @@ export * from "./assistant";
 export * from "./batch-editing";
 export { bulkActions } from "./bulk-actions";
 export * from "./cell-navigation";
+export * from "./column-layout";
 export { columnMenu } from "./column-menu";
 export * from "./columns";
 export { commandPalette } from "./command-palette";
@@ -15,6 +16,7 @@ export type {
 } from "./editing";
 export * from "./editing";
 export { exportCsv } from "./export";
+export * from "./filtering";
 export * from "./filters";
 export * from "./find-in-table";
 export * from "./fullscreen";

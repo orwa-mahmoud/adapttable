@@ -59,25 +59,44 @@ without replacing their feature.
 ## The standard preset
 
 ```ts
-import { standardPreset } from "@adapttable/angular-unstyled/preset";
+import { standardFeatures } from "@adapttable/angular-unstyled/preset";
 
-const features = standardPreset();
+const features = standardFeatures();
 ```
 
 The zero-argument preset contains exactly:
 
-- `columnMenu()`
+- `columnMenu()`, `resizableColumns()` and `fitColumns()` — the column-layout
+  family
 - `densityChooser()`
 - `exportCsv()`
+- `findInTable()` — keyboard Find; `findButton: true` adds its toolbar control
 - `fullscreen()`
-- `headerFilters()`
+- `multiSort()`
 - `statusBar()`
+- `headerFilters()`
 
 Its optional `grouping`, `bulkActions`, `filters` and `savedViews` options add
-the corresponding configured factories. For example,
-`standardPreset({ grouping: "department" })` adds grouping by that column.
-Find, fit-to-width, multi-sort and resizing are separate opt-ins. The preset
-returns an ordinary array, so append other features as needed.
+the corresponding configured factories; `filters` brings the filtering
+family. For example, `standardFeatures({ grouping: "department" })` adds
+grouping by that column. The preset returns an ordinary array, so append
+other features as needed.
+
+## Families
+
+A family is every member of an area built by one call and passed to
+`features` as one entry: `editingFamily(save)` from `/editing` (cell editing,
+dirty marks, edit history and undo controls), `filteringFamily(defs)` from
+`/filtering` (the filter panel and header filters) and `columnLayoutFamily()`
+from `/column-layout` (columns menu, resizing and fitting). Each family has
+its own entry, so a member imported alone still loads alone.
+
+```ts
+import { columnLayoutFamily } from "@adapttable/angular-unstyled/column-layout";
+import { editingFamily } from "@adapttable/angular-unstyled/editing";
+
+const features = [editingFamily<Person>(save), columnLayoutFamily()];
+```
 
 `/features` gathers the kit's factory exports. Individual subpaths give you
 a smaller dependency graph and make feature cost easier to inspect. A preset

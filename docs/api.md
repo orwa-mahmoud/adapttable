@@ -4423,9 +4423,14 @@ opens `AdaptNativeCellEditor`,
 separator and full-width rows on the desktop body and the phone cards) and
 `rowAppearance` (`/row-appearance`; a class, style and height on each row
 and card) — each importable from its own
-subpath (or from `@adapttable/angular-unstyled/features`). `standardPreset`
-(`@adapttable/angular-unstyled/preset`, `StandardPresetOptions`) assembles
-the zero-configuration set. Overlay helpers `menuPopover` / `MenuPopover`,
+subpath (or from `@adapttable/angular-unstyled/features`). `standardFeatures`
+(`@adapttable/angular-unstyled/preset`, `StandardFeatureOptions`) assembles
+the zero-configuration set from core's `standardFeatureList`. The families are
+`editingFamily` on `/editing`, `filteringFamily` on `/filtering` and
+`columnLayoutFamily` on `/column-layout`; the Angular adapter entry
+re-exports `editingFamilyList`, `filteringFamilyList`,
+`columnLayoutFamilyList`, `standardFeatureList`, `flattenFeatures` and
+`FeatureListEntry`. Overlay helpers `menuPopover` / `MenuPopover`,
 `OVERLAY_Z` and `placeOverlayBelowTrigger` position kit menus, and
 `filtersMode` (`FiltersMode`) picks the anchored popover or the drawer.
 `searchable` draws the search box (on by default; a nested table turns it
@@ -4575,10 +4580,11 @@ above: `AdaptPivotPanelChrome`, `PivotPanelSlots`, `PivotConfig`, `PivotField`,
 `PIVOT_URL_WRITE_DEBOUNCE_MS`.
 
 `/features` gathers the feature factories and `RowActionsFeatureOptions`.
-`/preset` exports `standardPreset` and `StandardPresetOptions`: its default
-set is column menu, density, CSV export, fullscreen, header filters and
-status bar; grouping, bulk actions, filters and saved views join when their
-options are supplied. An omitted feature renders no controls.
+`/preset` exports `standardFeatures` and `StandardFeatureOptions`: its
+default set is the columns menu, resizing, fitting, density, CSV export,
+keyboard Find, fullscreen, multi-sort, header filters and status bar;
+`findButton: true` draws the toolbar Find control, and grouping, bulk
+actions, filters and saved views join when their options are supplied. An omitted feature renders no controls.
 
 The root also exposes the kit's reusable table components:
 `AdaptAutoFilterForm`, `AdaptColumnMenu`, `AdaptColumnHeaderRename`,

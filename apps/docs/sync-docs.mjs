@@ -279,7 +279,7 @@ export const DESCRIPTIONS = {
   "angular/getting-started.md":
     "Install an Angular table with native HTML or NG-ZORRO controls. Follow npm setup, CLI scaffolding and a standalone component example with signal-backed rows.",
   "angular/features.md":
-    "Compose Angular table features through kit subpaths and standardPreset. Add only the required controls and keep data ownership in your application.",
+    "Compose Angular table features through kit subpaths, families and standardFeatures. Add only the required controls and keep data ownership in your application.",
   "angular/data-tiers.md":
     "Connect Angular tables to in-memory data, server paging or query-library signals with injectTableData, injectServerData and injectQuerySource.",
   "angular/headless.md":

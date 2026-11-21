@@ -12,10 +12,13 @@ import {
 } from "@adapttable/angular";
 import {
   EDITABLE_CELL,
+  editingFamilyList,
   ROW_EDIT_ACTIONS,
   TOOLBAR_EXTRAS,
 } from "@adapttable/angular/adapter";
 import {
+  dirtyIndicators,
+  editHistory,
   editing as coreAngularEditing,
   type EditingLifecycleExtras,
   rowEditing as coreAngularRowEditing,
@@ -79,4 +82,31 @@ export type {
   EditHistoryHandle,
   EditHistoryOptions,
 } from "@adapttable/angular";
-export { dirtyIndicators, editHistory } from "@adapttable/angular/features";
+export { dirtyIndicators, editHistory };
+
+/**
+ * All of editing — cell editing, dirty marks, edit history and undo
+ * controls — with this kit's controls, passed to `features` as one entry.
+ * Row and batch editing join beside it.
+ *
+ * @public
+ */
+export function editingFamily<TRow>(
+  onCellEdit: CellEditHandler<TRow>,
+  extras?: EditingLifecycleExtras<TRow>
+): readonly AdaptTableFeature[] {
+  return editingFamilyList<
+    AdaptTableFeature,
+    CellEditHandler<TRow>,
+    EditingLifecycleExtras<TRow> | undefined
+  >(
+    {
+      editing: (save, more) => editing(save, more),
+      dirtyIndicators,
+      editHistory: () => editHistory(),
+      undoRedoButtons,
+    },
+    onCellEdit,
+    extras
+  );
+}

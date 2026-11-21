@@ -68,7 +68,8 @@ behavior, not a guarantee that unused members disappear.
 
 Angular hosts import `AdaptDataTable` from `@adapttable/angular-unstyled` or
 `@adapttable/ng-zorro`, and features from that kit’s subpaths. Its
-`standardPreset()` composes the default feature set. Templates and component
+`standardFeatures()` composes the default feature set, as in the React and
+Vue kits. Templates and component
 renderers stay in the binding; neutral values and operations stay in core.
 The Angular kits and `@adapttable/ai-angular` are prepared for their first
 public `0.1.0` release; the binding is `@adapttable/angular`. Publishable

@@ -71,6 +71,7 @@ import { columnGroupHeaderCaption } from '@adapttable/core/binding';
 import { ColumnGroupRecord } from '@adapttable/core';
 import { ColumnGroupToggleButtonProps } from '@adapttable/core/binding';
 import { ColumnGroupToggleProps } from '@adapttable/core/binding';
+import { columnLayoutFamilyList } from '@adapttable/core/binding';
 import { ColumnLayoutState } from '@adapttable/core';
 import { columnMenuActions } from '@adapttable/core/binding';
 import { ColumnMenuChoice } from '@adapttable/core';
@@ -132,6 +133,7 @@ import { EditConflictHandler } from '@adapttable/core';
 import { EditConflictLabels } from '@adapttable/core';
 import { EditConflictPolicy } from '@adapttable/core';
 import { EditingBundle } from '@adapttable/core';
+import { editingFamilyList } from '@adapttable/core/binding';
 import { editorBusyProps } from '@adapttable/core/editing';
 import { editorInputType } from '@adapttable/core/editing';
 import { editorValidationProps } from '@adapttable/core/editing';
@@ -182,6 +184,7 @@ import { FilterHeaderOption } from '@adapttable/core/binding';
 import { FilterHeaderRangeProps } from '@adapttable/core/binding';
 import { FilterHeaderSearchProps } from '@adapttable/core/binding';
 import { FilterHeaderSelectProps } from '@adapttable/core/binding';
+import { filteringFamilyList } from '@adapttable/core/binding';
 import { filterLabel } from '@adapttable/core';
 import { filterOpLabel } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
@@ -206,6 +209,7 @@ import { FindButtonProps } from '@adapttable/core/binding';
 import { FindInTableState } from '@adapttable/core/binding';
 import { FindSearchProps } from '@adapttable/core/binding';
 import { FindStrings } from '@adapttable/core/binding';
+import { flattenFeatures } from '@adapttable/core/binding';
 import { focusEditorOnMount } from '@adapttable/core/editing';
 import { formatMultiDraft } from '@adapttable/core/editing';
 import { GridCell } from '@adapttable/core';
@@ -384,6 +388,7 @@ import { SpeechInputHandle } from '@adapttable/core/binding';
 import { SpeechInputState } from '@adapttable/core/binding';
 import { SpeechInputStatus } from '@adapttable/core/binding';
 import { splitRelativeToken } from '@adapttable/core';
+import { standardFeatureList } from '@adapttable/core/binding';
 import { STATUS_BAR } from '@adapttable/core/binding';
 import { StatusBarChromeProps } from '@adapttable/core/binding';
 import { StatusBarItem } from '@adapttable/core/binding';
@@ -1364,7 +1369,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "extra" | "allFilteredRows" | "setExtra" | "setExtras" | "facets">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "setExtras" | "facets">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -5199,6 +5204,8 @@ export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
 // @public
 export type ColumnLayout<TRow> = UseColumnLayoutResult<TRow>;
 
+export { columnLayoutFamilyList }
+
 export { columnMenuActions }
 
 export { ColumnMenuChoice }
@@ -5530,6 +5537,8 @@ export interface EditableCellSlots {
     readonly Button: Type<unknown>;
 }
 
+export { editingFamilyList }
+
 export { editorBusyProps }
 
 export { editorInputType }
@@ -5566,6 +5575,8 @@ export { EXTRA_ROW_PARTS }
 export { extraHostFillStyle }
 
 export { eyeIcon }
+
+export { FeatureListEntry }
 
 // @public
 export interface FeatureMountContext {
@@ -5638,6 +5649,8 @@ export interface FilterHeaderSlots {
     readonly Search: Type<unknown>;
     readonly Select: Type<unknown>;
 }
+
+export { filteringFamilyList }
 
 export { filterLabel }
 
@@ -5744,6 +5757,8 @@ export { FindButtonKind }
 export { FindButtonProps }
 
 export { FindSearchProps }
+
+export { flattenFeatures }
 
 // @public (undocumented)
 export const FLOATING_MIN_WIDTH = 640;
@@ -6360,6 +6375,8 @@ export { SpeechInputState }
 export { SpeechInputStatus }
 
 export { splitRelativeToken }
+
+export { standardFeatureList }
 
 export { STATUS_BAR }
 

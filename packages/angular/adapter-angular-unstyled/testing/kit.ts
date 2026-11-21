@@ -3,6 +3,7 @@ import { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
 import { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
 import { cellSpan } from "@adapttable/angular-unstyled/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/angular-unstyled/column-groups";
+import { columnLayoutFamily } from "@adapttable/angular-unstyled/column-layout";
 import { columnMenu } from "@adapttable/angular-unstyled/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/angular-unstyled/column-selection";
 import { commandPalette } from "@adapttable/angular-unstyled/command-palette";
@@ -11,6 +12,7 @@ import {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/angular-unstyled/editing";
@@ -20,6 +22,7 @@ import {
   exportXlsx,
 } from "@adapttable/angular-unstyled/export";
 import { extraRows } from "@adapttable/angular-unstyled/extra-rows";
+import { filteringFamily } from "@adapttable/angular-unstyled/filtering";
 import {
   filters,
   filtersWith,
@@ -83,6 +86,9 @@ export const kit: AngularKitUnderTest = {
   name: "angular-unstyled",
   Table: AdaptDataTable,
   features: {
+    editingFamily,
+    filteringFamily,
+    columnLayoutFamily,
     commandPalette,
     dirtyIndicators,
     filterTypes,

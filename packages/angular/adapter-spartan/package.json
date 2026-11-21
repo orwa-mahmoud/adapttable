@@ -66,6 +66,10 @@
       "types": "./dist/types/adapttable-spartan-column-menu.d.ts",
       "default": "./dist/fesm2022/adapttable-spartan-column-menu.mjs"
     },
+    "./column-layout": {
+      "types": "./dist/types/adapttable-spartan-column-layout.d.ts",
+      "default": "./dist/fesm2022/adapttable-spartan-column-layout.mjs"
+    },
     "./column-selection": {
       "types": "./dist/types/adapttable-spartan-column-selection.d.ts",
       "default": "./dist/fesm2022/adapttable-spartan-column-selection.mjs"
@@ -105,6 +109,10 @@
     "./filters": {
       "types": "./dist/types/adapttable-spartan-filters.d.ts",
       "default": "./dist/fesm2022/adapttable-spartan-filters.mjs"
+    },
+    "./filtering": {
+      "types": "./dist/types/adapttable-spartan-filtering.d.ts",
+      "default": "./dist/fesm2022/adapttable-spartan-filtering.mjs"
     },
     "./fit-columns": {
       "types": "./dist/types/adapttable-spartan-fit-columns.d.ts",

@@ -3,6 +3,7 @@ import { bulkActions } from "@adapttable/taiga-ui/bulk-actions";
 import { cellNavigation } from "@adapttable/taiga-ui/cell-navigation";
 import { cellSpan } from "@adapttable/taiga-ui/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/taiga-ui/column-groups";
+import { columnLayoutFamily } from "@adapttable/taiga-ui/column-layout";
 import { columnMenu } from "@adapttable/taiga-ui/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/taiga-ui/column-selection";
 import { commandPalette } from "@adapttable/taiga-ui/command-palette";
@@ -11,11 +12,13 @@ import {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/taiga-ui/editing";
 import { exportCsv, exportPdf, exportXlsx } from "@adapttable/taiga-ui/export";
 import { extraRows } from "@adapttable/taiga-ui/extra-rows";
+import { filteringFamily } from "@adapttable/taiga-ui/filtering";
 import {
   filters,
   filtersWith,
@@ -80,6 +83,9 @@ export const kit: AngularKitUnderTest = {
   name: "taiga-ui",
   Table: AdaptDataTable,
   features: {
+    editingFamily,
+    filteringFamily,
+    columnLayoutFamily,
     commandPalette,
     dirtyIndicators,
     filterTypes,

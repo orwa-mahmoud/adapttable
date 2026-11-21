@@ -65,6 +65,10 @@
       "types": "./dist/types/adapttable-ng-bootstrap-column-menu.d.ts",
       "default": "./dist/fesm2022/adapttable-ng-bootstrap-column-menu.mjs"
     },
+    "./column-layout": {
+      "types": "./dist/types/adapttable-ng-bootstrap-column-layout.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-column-layout.mjs"
+    },
     "./column-selection": {
       "types": "./dist/types/adapttable-ng-bootstrap-column-selection.d.ts",
       "default": "./dist/fesm2022/adapttable-ng-bootstrap-column-selection.mjs"
@@ -104,6 +108,10 @@
     "./filters": {
       "types": "./dist/types/adapttable-ng-bootstrap-filters.d.ts",
       "default": "./dist/fesm2022/adapttable-ng-bootstrap-filters.mjs"
+    },
+    "./filtering": {
+      "types": "./dist/types/adapttable-ng-bootstrap-filtering.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-filtering.mjs"
     },
     "./fit-columns": {
       "types": "./dist/types/adapttable-ng-bootstrap-fit-columns.d.ts",

@@ -45,6 +45,9 @@ export { EditHistoryOptions }
 export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): AdaptTableFeature;
 
 // @public
+export function editingFamily<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): readonly AdaptTableFeature[];
+
+// @public
 export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): AdaptTableFeature;
 
 // @public

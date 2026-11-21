@@ -10,6 +10,7 @@ export { bulkActions } from "@adapttable/taiga-ui/bulk-actions";
 export { cellNavigation } from "@adapttable/taiga-ui/cell-navigation";
 export { cellSpan } from "@adapttable/taiga-ui/cell-span";
 export { collapsibleColumnGroups } from "@adapttable/taiga-ui/column-groups";
+export { columnLayoutFamily } from "@adapttable/taiga-ui/column-layout";
 export { columnMenu } from "@adapttable/taiga-ui/column-menu";
 export { columnSelectionCheckbox } from "@adapttable/taiga-ui/column-selection";
 export { commandPalette } from "@adapttable/taiga-ui/command-palette";
@@ -19,11 +20,13 @@ export {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/taiga-ui/editing";
 export { exportCsv, exportPdf, exportXlsx } from "@adapttable/taiga-ui/export";
 export { extraRows } from "@adapttable/taiga-ui/extra-rows";
+export { filteringFamily } from "@adapttable/taiga-ui/filtering";
 export { filters, filterTypes } from "@adapttable/taiga-ui/filters";
 export { findInTable } from "@adapttable/taiga-ui/find-in-table";
 export { fitColumns } from "@adapttable/taiga-ui/fit-columns";

@@ -3,6 +3,7 @@ import { bulkActions } from "@adapttable/angular-aria/bulk-actions";
 import { cellNavigation } from "@adapttable/angular-aria/cell-navigation";
 import { cellSpan } from "@adapttable/angular-aria/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/angular-aria/column-groups";
+import { columnLayoutFamily } from "@adapttable/angular-aria/column-layout";
 import { columnMenu } from "@adapttable/angular-aria/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/angular-aria/column-selection";
 import { commandPalette } from "@adapttable/angular-aria/command-palette";
@@ -11,6 +12,7 @@ import {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/angular-aria/editing";
@@ -20,6 +22,7 @@ import {
   exportXlsx,
 } from "@adapttable/angular-aria/export";
 import { extraRows } from "@adapttable/angular-aria/extra-rows";
+import { filteringFamily } from "@adapttable/angular-aria/filtering";
 import {
   filters,
   filtersWith,
@@ -83,6 +86,9 @@ export const kit: AngularKitUnderTest = {
   name: "angular-aria",
   Table: AdaptDataTable,
   features: {
+    editingFamily,
+    filteringFamily,
+    columnLayoutFamily,
     commandPalette,
     dirtyIndicators,
     filterTypes,

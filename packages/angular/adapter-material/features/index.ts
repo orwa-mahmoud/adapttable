@@ -13,6 +13,7 @@ export { bulkActions } from "@adapttable/angular-material/bulk-actions";
 export { cellNavigation } from "@adapttable/angular-material/cell-navigation";
 export { cellSpan } from "@adapttable/angular-material/cell-span";
 export { collapsibleColumnGroups } from "@adapttable/angular-material/column-groups";
+export { columnLayoutFamily } from "@adapttable/angular-material/column-layout";
 export { columnMenu } from "@adapttable/angular-material/column-menu";
 export { columnSelectionCheckbox } from "@adapttable/angular-material/column-selection";
 export { commandPalette } from "@adapttable/angular-material/command-palette";
@@ -22,6 +23,7 @@ export {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/angular-material/editing";
@@ -31,6 +33,7 @@ export {
   exportXlsx,
 } from "@adapttable/angular-material/export";
 export { extraRows } from "@adapttable/angular-material/extra-rows";
+export { filteringFamily } from "@adapttable/angular-material/filtering";
 export { filters, filterTypes } from "@adapttable/angular-material/filters";
 export { findInTable } from "@adapttable/angular-material/find-in-table";
 export { fitColumns } from "@adapttable/angular-material/fit-columns";

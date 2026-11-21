@@ -63,9 +63,10 @@ and first-release status.
 
 ## Preset and individual entries
 
-`standardPreset()` from your kit's `/preset` returns these six features:
-`columnMenu`, `densityChooser`, `exportCsv`, `fullscreen`, `headerFilters` and
-`statusBar`. Its optional `grouping`, `bulkActions`, `filters` and `savedViews`
+`standardFeatures()` from your kit's `/preset` returns these ten features:
+`columnMenu`, `resizableColumns`, `fitColumns`, `densityChooser`, `exportCsv`,
+`findInTable`, `fullscreen`, `multiSort`, `statusBar` and `headerFilters`.
+Its optional `grouping`, `bulkActions`, `filters` and `savedViews`
 arguments add configured features. It does not automatically include cell
 editing, virtualization, a command palette or every separately available
 feature.

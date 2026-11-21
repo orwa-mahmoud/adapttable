@@ -65,6 +65,10 @@
       "types": "./dist/types/adapttable-angular-material-column-menu.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-material-column-menu.mjs"
     },
+    "./column-layout": {
+      "types": "./dist/types/adapttable-angular-material-column-layout.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-column-layout.mjs"
+    },
     "./column-selection": {
       "types": "./dist/types/adapttable-angular-material-column-selection.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-material-column-selection.mjs"
@@ -104,6 +108,10 @@
     "./filters": {
       "types": "./dist/types/adapttable-angular-material-filters.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-material-filters.mjs"
+    },
+    "./filtering": {
+      "types": "./dist/types/adapttable-angular-material-filtering.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-filtering.mjs"
     },
     "./fit-columns": {
       "types": "./dist/types/adapttable-angular-material-fit-columns.d.ts",

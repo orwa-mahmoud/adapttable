@@ -13,6 +13,7 @@ export { bulkActions } from "@adapttable/ng-bootstrap/bulk-actions";
 export { cellNavigation } from "@adapttable/ng-bootstrap/cell-navigation";
 export { cellSpan } from "@adapttable/ng-bootstrap/cell-span";
 export { collapsibleColumnGroups } from "@adapttable/ng-bootstrap/column-groups";
+export { columnLayoutFamily } from "@adapttable/ng-bootstrap/column-layout";
 export { columnMenu } from "@adapttable/ng-bootstrap/column-menu";
 export { columnSelectionCheckbox } from "@adapttable/ng-bootstrap/column-selection";
 export { commandPalette } from "@adapttable/ng-bootstrap/command-palette";
@@ -22,6 +23,7 @@ export {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/ng-bootstrap/editing";
@@ -31,6 +33,7 @@ export {
   exportXlsx,
 } from "@adapttable/ng-bootstrap/export";
 export { extraRows } from "@adapttable/ng-bootstrap/extra-rows";
+export { filteringFamily } from "@adapttable/ng-bootstrap/filtering";
 export { filters, filterTypes } from "@adapttable/ng-bootstrap/filters";
 export { findInTable } from "@adapttable/ng-bootstrap/find-in-table";
 export { fitColumns } from "@adapttable/ng-bootstrap/fit-columns";

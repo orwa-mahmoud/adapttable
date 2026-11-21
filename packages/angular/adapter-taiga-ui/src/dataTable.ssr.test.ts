@@ -1,7 +1,7 @@
 import "@angular/compiler";
 
 import { type ColumnDef } from "@adapttable/angular";
-import { standardPreset } from "@adapttable/taiga-ui/preset";
+import { standardFeatures } from "@adapttable/taiga-ui/preset";
 import { virtualize } from "@adapttable/taiga-ui/virtualize";
 import { Component, provideZonelessChangeDetection } from "@angular/core";
 import {
@@ -58,7 +58,7 @@ class App {
   readonly columns = COLUMNS;
   readonly rowKey = (row: City) => row.id;
   readonly features = [
-    ...standardPreset<City>({ filters: [] }),
+    ...standardFeatures<City>({ filters: [] }),
     virtualize({ estimateRowSize: 40 }),
   ];
 }

@@ -3,6 +3,7 @@ import { bulkActions } from "@adapttable/angular-cdk/bulk-actions";
 import { cellNavigation } from "@adapttable/angular-cdk/cell-navigation";
 import { cellSpan } from "@adapttable/angular-cdk/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/angular-cdk/column-groups";
+import { columnLayoutFamily } from "@adapttable/angular-cdk/column-layout";
 import { columnMenu } from "@adapttable/angular-cdk/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/angular-cdk/column-selection";
 import { commandPalette } from "@adapttable/angular-cdk/command-palette";
@@ -11,6 +12,7 @@ import {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/angular-cdk/editing";
@@ -20,6 +22,7 @@ import {
   exportXlsx,
 } from "@adapttable/angular-cdk/export";
 import { extraRows } from "@adapttable/angular-cdk/extra-rows";
+import { filteringFamily } from "@adapttable/angular-cdk/filtering";
 import {
   filters,
   filtersWith,
@@ -83,6 +86,9 @@ export const kit: AngularKitUnderTest = {
   name: "angular-cdk",
   Table: AdaptDataTable,
   features: {
+    editingFamily,
+    filteringFamily,
+    columnLayoutFamily,
     commandPalette,
     dirtyIndicators,
     filterTypes,

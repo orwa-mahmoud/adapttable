@@ -99,7 +99,7 @@ rows: edits, additions, deletes and reorders call the host.
 Import a feature from its own secondary entry and compose it through the
 `features` input. The implemented surface includes:
 
-- **Feature composition** through individual kit subpaths and `standardPreset()`;
+- **Feature composition** through individual kit subpaths and `standardFeatures()`;
   import only the behavior you need
 - **Global search, sorting and pagination** for in-memory or host-fetched data,
   with URL-synced state and infinite scrolling on mobile
@@ -146,8 +146,8 @@ const features = [
 ```
 
 `/features` gathers the kit's feature factories. `/preset` exports
-`standardPreset()`: column menu, density, CSV export, fullscreen, header
-filters and status bar, with grouping, bulk actions, filters and saved views
+`standardFeatures()`: columns menu, resizing, fitting, density, CSV export, keyboard Find,
+fullscreen, multi-sort, header filters and status bar, with grouping, bulk actions, filters and saved views
 included when their options are supplied. Import individual entries when
 controlling bundle cost. See the
 [Angular feature guide](https://adapttable.orwamahmoud.com/angular/features/)

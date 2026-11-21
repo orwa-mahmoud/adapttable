@@ -3,6 +3,7 @@ import { bulkActions } from "@adapttable/angular-material/bulk-actions";
 import { cellNavigation } from "@adapttable/angular-material/cell-navigation";
 import { cellSpan } from "@adapttable/angular-material/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/angular-material/column-groups";
+import { columnLayoutFamily } from "@adapttable/angular-material/column-layout";
 import { columnMenu } from "@adapttable/angular-material/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/angular-material/column-selection";
 import { commandPalette } from "@adapttable/angular-material/command-palette";
@@ -11,6 +12,7 @@ import {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/angular-material/editing";
@@ -20,6 +22,7 @@ import {
   exportXlsx,
 } from "@adapttable/angular-material/export";
 import { extraRows } from "@adapttable/angular-material/extra-rows";
+import { filteringFamily } from "@adapttable/angular-material/filtering";
 import {
   filters,
   filtersWith,
@@ -80,6 +83,9 @@ export const kit: AngularKitUnderTest = {
   name: "angular-material",
   Table: AdaptDataTable,
   features: {
+    editingFamily,
+    filteringFamily,
+    columnLayoutFamily,
     commandPalette,
     dirtyIndicators,
     filterTypes,

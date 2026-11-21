@@ -61,6 +61,10 @@
       "types": "./dist/types/adapttable-taiga-ui-column-menu.d.ts",
       "default": "./dist/fesm2022/adapttable-taiga-ui-column-menu.mjs"
     },
+    "./column-layout": {
+      "types": "./dist/types/adapttable-taiga-ui-column-layout.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-column-layout.mjs"
+    },
     "./column-selection": {
       "types": "./dist/types/adapttable-taiga-ui-column-selection.d.ts",
       "default": "./dist/fesm2022/adapttable-taiga-ui-column-selection.mjs"
@@ -100,6 +104,10 @@
     "./filters": {
       "types": "./dist/types/adapttable-taiga-ui-filters.d.ts",
       "default": "./dist/fesm2022/adapttable-taiga-ui-filters.mjs"
+    },
+    "./filtering": {
+      "types": "./dist/types/adapttable-taiga-ui-filtering.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-filtering.mjs"
     },
     "./fit-columns": {
       "types": "./dist/types/adapttable-taiga-ui-fit-columns.d.ts",

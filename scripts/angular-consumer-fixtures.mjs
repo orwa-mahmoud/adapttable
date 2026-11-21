@@ -182,11 +182,11 @@ const FEATURES = {
     present: ["coreExportCsv"],
   },
   preset: {
-    factory: "standardPreset",
+    factory: "standardFeatures",
     entry: "preset",
     // The preset returns the feature list itself, so it spreads into features.
-    call: "...standardPreset()",
-    present: ["standardPreset"],
+    call: "...standardFeatures()",
+    present: ["standardFeatures"],
   },
 };
 

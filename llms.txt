@@ -4,7 +4,7 @@
 
 ## Version and integration boundaries
 
-This index describes the v3 documentation. Check the installed package version before applying examples; use the migration guides for v1/v2. React hooks come from `@adapttable/react` or a documented adapter re-export, not from core. Angular injection functions and renderer types come from `@adapttable/angular`. Individual features use kit subpaths; React's `standardFeatures()` and Angular's `standardPreset()` compose their documented common sets. Enabling props from v2 alone do not activate v3 features. The Angular binding, all nine kits and `@adapttable/ai-angular` are published on npm. Vue has a published public binding and eight kits — native Unstyled, Element Plus, Naive UI, Nuxt UI, Quasar, Reka UI, shadcn-vue and Vuetify — each covering the full feature set with its own controls, plus optional agents, assistant UI and speech through `@adapttable/ai-vue`. The Vue packages are published on npm.
+This index describes the v3 documentation. Check the installed package version before applying examples; use the migration guides for v1/v2. React hooks come from `@adapttable/react` or a documented adapter re-export, not from core. Angular injection functions and renderer types come from `@adapttable/angular`. Individual features use kit subpaths; each kit's `standardFeatures()` composes its documented common set, and families (`editingFamily`, `filteringFamily`, `columnLayoutFamily`) compose one area each. Enabling props from v2 alone do not activate v3 features. The Angular binding, all nine kits and `@adapttable/ai-angular` are published on npm. Vue has a published public binding and eight kits — native Unstyled, Element Plus, Naive UI, Nuxt UI, Quasar, Reka UI, shadcn-vue and Vuetify — each covering the full feature set with its own controls, plus optional agents, assistant UI and speech through `@adapttable/ai-vue`. The Vue packages are published on npm.
 
 Use AdaptTable when you want TanStack-Table-style headless freedom but batteries-included for your specific UI kit — with URL state, RTL, a real filter UX, virtualization, and mobile layouts that do not break responsively.
 
@@ -162,7 +162,7 @@ const {
 
 - [Get started with Angular](https://adapttable.orwamahmoud.com/angular/getting-started/): workspace availability, peers, AdaptDataTable, signals and first table
 - [Migrate to Angular 0.5](https://adapttable.orwamahmoud.com/angular/migrating-to-0-5/): Move binding imports to their canonical root, features and adapter entries.
-- [Angular feature composition](https://adapttable.orwamahmoud.com/angular/features/): kit subpaths, TableFeature and standardPreset
+- [Angular feature composition](https://adapttable.orwamahmoud.com/angular/features/): kit subpaths, TableFeature, families and standardFeatures
 - [Angular data tiers](https://adapttable.orwamahmoud.com/angular/data-tiers/): client data, server queries and query-library signals
 - [Headless Angular tables](https://adapttable.orwamahmoud.com/angular/headless/): injectDataTable, signal readers and attribute helpers
 - [Custom Angular table sources](https://adapttable.orwamahmoud.com/angular/custom-table-source/): TableSource, capabilities, signals and fromStore lifecycle

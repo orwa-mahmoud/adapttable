@@ -10,6 +10,7 @@ export { bulkActions } from "@adapttable/ng-zorro/bulk-actions";
 export { cellNavigation } from "@adapttable/ng-zorro/cell-navigation";
 export { cellSpan } from "@adapttable/ng-zorro/cell-span";
 export { collapsibleColumnGroups } from "@adapttable/ng-zorro/column-groups";
+export { columnLayoutFamily } from "@adapttable/ng-zorro/column-layout";
 export { columnMenu } from "@adapttable/ng-zorro/column-menu";
 export { columnSelectionCheckbox } from "@adapttable/ng-zorro/column-selection";
 export { commandPalette } from "@adapttable/ng-zorro/command-palette";
@@ -19,11 +20,13 @@ export {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/ng-zorro/editing";
 export { exportCsv, exportPdf, exportXlsx } from "@adapttable/ng-zorro/export";
 export { extraRows } from "@adapttable/ng-zorro/extra-rows";
+export { filteringFamily } from "@adapttable/ng-zorro/filtering";
 export { filters, filterTypes } from "@adapttable/ng-zorro/filters";
 export { findInTable } from "@adapttable/ng-zorro/find-in-table";
 export { fitColumns } from "@adapttable/ng-zorro/fit-columns";

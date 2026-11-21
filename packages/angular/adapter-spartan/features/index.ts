@@ -10,6 +10,7 @@ export { bulkActions } from "@adapttable/spartan/bulk-actions";
 export { cellNavigation } from "@adapttable/spartan/cell-navigation";
 export { cellSpan } from "@adapttable/spartan/cell-span";
 export { collapsibleColumnGroups } from "@adapttable/spartan/column-groups";
+export { columnLayoutFamily } from "@adapttable/spartan/column-layout";
 export { columnMenu } from "@adapttable/spartan/column-menu";
 export { columnSelectionCheckbox } from "@adapttable/spartan/column-selection";
 export { commandPalette } from "@adapttable/spartan/command-palette";
@@ -19,11 +20,13 @@ export {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/spartan/editing";
 export { exportCsv, exportPdf, exportXlsx } from "@adapttable/spartan/export";
 export { extraRows } from "@adapttable/spartan/extra-rows";
+export { filteringFamily } from "@adapttable/spartan/filtering";
 export { filters, filterTypes } from "@adapttable/spartan/filters";
 export { findInTable } from "@adapttable/spartan/find-in-table";
 export { fitColumns } from "@adapttable/spartan/fit-columns";

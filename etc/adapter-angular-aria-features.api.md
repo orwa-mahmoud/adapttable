@@ -58,6 +58,9 @@ export { cellSpan }
 export function collapsibleColumnGroups(): AdaptTableFeature;
 
 // @public
+export function columnLayoutFamily(): readonly AdaptTableFeature[];
+
+// @public
 export function columnMenu(): AdaptTableFeature;
 
 // @public
@@ -80,6 +83,9 @@ export { editHistory }
 export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): AdaptTableFeature;
 
 // @public
+export function editingFamily<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): readonly AdaptTableFeature[];
+
+// @public
 export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): AdaptTableFeature;
 
 // @public
@@ -89,6 +95,9 @@ export function exportPdf<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>,
 export function exportXlsx<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
 
 export { extraRows }
+
+// @public
+export function filteringFamily<TRow>(defs: readonly FilterDef<TRow>[]): readonly AdaptTableFeature[];
 
 // @public
 export function filters<TRow>(defs?: readonly FilterDef<TRow>[]): AdaptTableFeature;

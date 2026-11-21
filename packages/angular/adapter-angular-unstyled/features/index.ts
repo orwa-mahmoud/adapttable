@@ -13,6 +13,7 @@ export { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
 export { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
 export { cellSpan } from "@adapttable/angular-unstyled/cell-span";
 export { collapsibleColumnGroups } from "@adapttable/angular-unstyled/column-groups";
+export { columnLayoutFamily } from "@adapttable/angular-unstyled/column-layout";
 export { columnMenu } from "@adapttable/angular-unstyled/column-menu";
 export { columnSelectionCheckbox } from "@adapttable/angular-unstyled/column-selection";
 export { commandPalette } from "@adapttable/angular-unstyled/command-palette";
@@ -22,6 +23,7 @@ export {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/angular-unstyled/editing";
@@ -31,6 +33,7 @@ export {
   exportXlsx,
 } from "@adapttable/angular-unstyled/export";
 export { extraRows } from "@adapttable/angular-unstyled/extra-rows";
+export { filteringFamily } from "@adapttable/angular-unstyled/filtering";
 export { filters, filterTypes } from "@adapttable/angular-unstyled/filters";
 export { findInTable } from "@adapttable/angular-unstyled/find-in-table";
 export { fitColumns } from "@adapttable/angular-unstyled/fit-columns";

@@ -54,6 +54,7 @@
       "adapter-angular-unstyled-cell-span",
       "adapter-angular-unstyled-column-groups",
       "adapter-angular-unstyled-column-menu",
+      "adapter-angular-unstyled-column-layout",
       "adapter-angular-unstyled-column-selection",
       "adapter-angular-unstyled-command-palette",
       "adapter-angular-unstyled-context-menu",
@@ -63,6 +64,7 @@
       "adapter-angular-unstyled-extra-rows",
       "adapter-angular-unstyled-features",
       "adapter-angular-unstyled-filters",
+      "adapter-angular-unstyled-filtering",
       "adapter-angular-unstyled-find-in-table",
       "adapter-angular-unstyled-fit-columns",
       "adapter-angular-unstyled-fullscreen",
@@ -95,6 +97,7 @@
       "adapter-ng-zorro-cell-span",
       "adapter-ng-zorro-column-groups",
       "adapter-ng-zorro-column-menu",
+      "adapter-ng-zorro-column-layout",
       "adapter-ng-zorro-column-selection",
       "adapter-ng-zorro-command-palette",
       "adapter-ng-zorro-context-menu",
@@ -104,6 +107,7 @@
       "adapter-ng-zorro-extra-rows",
       "adapter-ng-zorro-features",
       "adapter-ng-zorro-filters",
+      "adapter-ng-zorro-filtering",
       "adapter-ng-zorro-find-in-table",
       "adapter-ng-zorro-fit-columns",
       "adapter-ng-zorro-fullscreen",
@@ -136,6 +140,7 @@
       "adapter-angular-aria-cell-span",
       "adapter-angular-aria-column-groups",
       "adapter-angular-aria-column-menu",
+      "adapter-angular-aria-column-layout",
       "adapter-angular-aria-column-selection",
       "adapter-angular-aria-command-palette",
       "adapter-angular-aria-context-menu",
@@ -145,6 +150,7 @@
       "adapter-angular-aria-extra-rows",
       "adapter-angular-aria-features",
       "adapter-angular-aria-filters",
+      "adapter-angular-aria-filtering",
       "adapter-angular-aria-find-in-table",
       "adapter-angular-aria-fit-columns",
       "adapter-angular-aria-fullscreen",
@@ -177,6 +183,7 @@
       "adapter-angular-cdk-cell-span",
       "adapter-angular-cdk-column-groups",
       "adapter-angular-cdk-column-menu",
+      "adapter-angular-cdk-column-layout",
       "adapter-angular-cdk-column-selection",
       "adapter-angular-cdk-command-palette",
       "adapter-angular-cdk-context-menu",
@@ -186,6 +193,7 @@
       "adapter-angular-cdk-extra-rows",
       "adapter-angular-cdk-features",
       "adapter-angular-cdk-filters",
+      "adapter-angular-cdk-filtering",
       "adapter-angular-cdk-find-in-table",
       "adapter-angular-cdk-fit-columns",
       "adapter-angular-cdk-fullscreen",
@@ -218,6 +226,7 @@
       "adapter-material-cell-span",
       "adapter-material-column-groups",
       "adapter-material-column-menu",
+      "adapter-material-column-layout",
       "adapter-material-column-selection",
       "adapter-material-command-palette",
       "adapter-material-context-menu",
@@ -227,6 +236,7 @@
       "adapter-material-extra-rows",
       "adapter-material-features",
       "adapter-material-filters",
+      "adapter-material-filtering",
       "adapter-material-find-in-table",
       "adapter-material-fit-columns",
       "adapter-material-fullscreen",
@@ -259,6 +269,7 @@
       "adapter-ng-bootstrap-cell-span",
       "adapter-ng-bootstrap-column-groups",
       "adapter-ng-bootstrap-column-menu",
+      "adapter-ng-bootstrap-column-layout",
       "adapter-ng-bootstrap-column-selection",
       "adapter-ng-bootstrap-command-palette",
       "adapter-ng-bootstrap-context-menu",
@@ -268,6 +279,7 @@
       "adapter-ng-bootstrap-extra-rows",
       "adapter-ng-bootstrap-features",
       "adapter-ng-bootstrap-filters",
+      "adapter-ng-bootstrap-filtering",
       "adapter-ng-bootstrap-find-in-table",
       "adapter-ng-bootstrap-fit-columns",
       "adapter-ng-bootstrap-fullscreen",
@@ -300,6 +312,7 @@
       "adapter-ngx-bootstrap-cell-span",
       "adapter-ngx-bootstrap-column-groups",
       "adapter-ngx-bootstrap-column-menu",
+      "adapter-ngx-bootstrap-column-layout",
       "adapter-ngx-bootstrap-column-selection",
       "adapter-ngx-bootstrap-command-palette",
       "adapter-ngx-bootstrap-context-menu",
@@ -309,6 +322,7 @@
       "adapter-ngx-bootstrap-extra-rows",
       "adapter-ngx-bootstrap-features",
       "adapter-ngx-bootstrap-filters",
+      "adapter-ngx-bootstrap-filtering",
       "adapter-ngx-bootstrap-find-in-table",
       "adapter-ngx-bootstrap-fit-columns",
       "adapter-ngx-bootstrap-fullscreen",
@@ -341,6 +355,7 @@
       "adapter-spartan-cell-span",
       "adapter-spartan-column-groups",
       "adapter-spartan-column-menu",
+      "adapter-spartan-column-layout",
       "adapter-spartan-column-selection",
       "adapter-spartan-command-palette",
       "adapter-spartan-context-menu",
@@ -350,6 +365,7 @@
       "adapter-spartan-extra-rows",
       "adapter-spartan-features",
       "adapter-spartan-filters",
+      "adapter-spartan-filtering",
       "adapter-spartan-find-in-table",
       "adapter-spartan-fit-columns",
       "adapter-spartan-fullscreen",
@@ -382,6 +398,7 @@
       "adapter-taiga-ui-cell-span",
       "adapter-taiga-ui-column-groups",
       "adapter-taiga-ui-column-menu",
+      "adapter-taiga-ui-column-layout",
       "adapter-taiga-ui-column-selection",
       "adapter-taiga-ui-command-palette",
       "adapter-taiga-ui-context-menu",
@@ -391,6 +408,7 @@
       "adapter-taiga-ui-extra-rows",
       "adapter-taiga-ui-features",
       "adapter-taiga-ui-filters",
+      "adapter-taiga-ui-filtering",
       "adapter-taiga-ui-find-in-table",
       "adapter-taiga-ui-fit-columns",
       "adapter-taiga-ui-fullscreen",
@@ -1118,7 +1136,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget",
-      "editingFamily"
+      "editingFamily",
+      "columnLayoutFamily",
+      "filteringFamily"
     ],
     "adapter-naive-ui-features": [
       "agentApproval",
@@ -1237,7 +1257,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget",
-      "editingFamily"
+      "editingFamily",
+      "columnLayoutFamily",
+      "filteringFamily"
     ],
     "adapter-nuxt-ui-features": [
       "agentApproval",
@@ -1377,7 +1399,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget",
-      "editingFamily"
+      "editingFamily",
+      "columnLayoutFamily",
+      "filteringFamily"
     ],
     "adapter-quasar-features": [
       "agentApproval",
@@ -1486,7 +1510,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget",
-      "editingFamily"
+      "editingFamily",
+      "columnLayoutFamily",
+      "filteringFamily"
     ],
     "adapter-vuetify-features": [
       "agentApproval",
@@ -1626,7 +1652,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget",
-      "editingFamily"
+      "editingFamily",
+      "columnLayoutFamily",
+      "filteringFamily"
     ],
     "adapter-antd": [
       "AgentApproval",
@@ -9711,6 +9739,9 @@
     "adapter-angular-unstyled-column-menu": [
       "columnMenu"
     ],
+    "adapter-angular-unstyled-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-angular-unstyled-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -9737,7 +9768,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-angular-unstyled-export": [
       "exportCsv",
@@ -9793,7 +9825,10 @@
       "tableAssistant",
       "tree",
       "undoRedoButtons",
-      "virtualize"
+      "virtualize",
+      "columnLayoutFamily",
+      "editingFamily",
+      "filteringFamily"
     ],
     "adapter-angular-unstyled-filters": [
       "filterTypes",
@@ -9805,6 +9840,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-angular-unstyled-filtering": [
+      "filteringFamily"
     ],
     "adapter-angular-unstyled-find-in-table": [
       "AdaptFindBar",
@@ -9864,8 +9902,8 @@
       "pivotTableModel"
     ],
     "adapter-angular-unstyled-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-angular-unstyled-print": [
       "print"
@@ -10010,6 +10048,9 @@
     "adapter-ng-zorro-column-menu": [
       "columnMenu"
     ],
+    "adapter-ng-zorro-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-ng-zorro-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -10036,7 +10077,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-ng-zorro-export": [
       "exportCsv",
@@ -10092,7 +10134,10 @@
       "tableAssistant",
       "tree",
       "undoRedoButtons",
-      "virtualize"
+      "virtualize",
+      "columnLayoutFamily",
+      "editingFamily",
+      "filteringFamily"
     ],
     "adapter-ng-zorro-filters": [
       "filterTypes",
@@ -10104,6 +10149,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-ng-zorro-filtering": [
+      "filteringFamily"
     ],
     "adapter-ng-zorro-find-in-table": [
       "AdaptFindBar",
@@ -10163,8 +10211,8 @@
       "pivotTableModel"
     ],
     "adapter-ng-zorro-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-ng-zorro-print": [
       "print"
@@ -10311,6 +10359,9 @@
     "adapter-angular-aria-column-menu": [
       "columnMenu"
     ],
+    "adapter-angular-aria-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-angular-aria-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -10337,7 +10388,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-angular-aria-export": [
       "exportCsv",
@@ -10393,7 +10445,10 @@
       "tableAssistant",
       "tree",
       "undoRedoButtons",
-      "virtualize"
+      "virtualize",
+      "columnLayoutFamily",
+      "editingFamily",
+      "filteringFamily"
     ],
     "adapter-angular-aria-filters": [
       "filterTypes",
@@ -10405,6 +10460,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-angular-aria-filtering": [
+      "filteringFamily"
     ],
     "adapter-angular-aria-find-in-table": [
       "AdaptFindBar",
@@ -10464,8 +10522,8 @@
       "pivotTableModel"
     ],
     "adapter-angular-aria-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-angular-aria-print": [
       "print"
@@ -10614,6 +10672,9 @@
     "adapter-angular-cdk-column-menu": [
       "columnMenu"
     ],
+    "adapter-angular-cdk-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-angular-cdk-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -10640,7 +10701,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-angular-cdk-export": [
       "exportCsv",
@@ -10696,7 +10758,10 @@
       "tableAssistant",
       "tree",
       "undoRedoButtons",
-      "virtualize"
+      "virtualize",
+      "columnLayoutFamily",
+      "editingFamily",
+      "filteringFamily"
     ],
     "adapter-angular-cdk-filters": [
       "filterTypes",
@@ -10708,6 +10773,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-angular-cdk-filtering": [
+      "filteringFamily"
     ],
     "adapter-angular-cdk-find-in-table": [
       "AdaptFindBar",
@@ -10767,8 +10835,8 @@
       "pivotTableModel"
     ],
     "adapter-angular-cdk-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-angular-cdk-print": [
       "print"
@@ -10913,6 +10981,9 @@
     "adapter-material-column-menu": [
       "columnMenu"
     ],
+    "adapter-material-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-material-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -10939,7 +11010,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-material-export": [
       "exportCsv",
@@ -10995,7 +11067,10 @@
       "tableAssistant",
       "tree",
       "undoRedoButtons",
-      "virtualize"
+      "virtualize",
+      "columnLayoutFamily",
+      "editingFamily",
+      "filteringFamily"
     ],
     "adapter-material-filters": [
       "filterTypes",
@@ -11007,6 +11082,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-material-filtering": [
+      "filteringFamily"
     ],
     "adapter-material-find-in-table": [
       "AdaptFindBar",
@@ -11066,8 +11144,8 @@
       "pivotTableModel"
     ],
     "adapter-material-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-material-print": [
       "print"
@@ -11212,6 +11290,9 @@
     "adapter-ng-bootstrap-column-menu": [
       "columnMenu"
     ],
+    "adapter-ng-bootstrap-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-ng-bootstrap-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -11238,7 +11319,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-ng-bootstrap-export": [
       "exportCsv",
@@ -11294,7 +11376,10 @@
       "tableAssistant",
       "tree",
       "undoRedoButtons",
-      "virtualize"
+      "virtualize",
+      "columnLayoutFamily",
+      "editingFamily",
+      "filteringFamily"
     ],
     "adapter-ng-bootstrap-filters": [
       "filterTypes",
@@ -11306,6 +11391,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-ng-bootstrap-filtering": [
+      "filteringFamily"
     ],
     "adapter-ng-bootstrap-find-in-table": [
       "AdaptFindBar",
@@ -11365,8 +11453,8 @@
       "pivotTableModel"
     ],
     "adapter-ng-bootstrap-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-ng-bootstrap-print": [
       "print"
@@ -11511,6 +11599,9 @@
     "adapter-ngx-bootstrap-column-menu": [
       "columnMenu"
     ],
+    "adapter-ngx-bootstrap-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-ngx-bootstrap-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -11537,7 +11628,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-ngx-bootstrap-export": [
       "exportCsv",
@@ -11593,7 +11685,10 @@
       "tableAssistant",
       "tree",
       "undoRedoButtons",
-      "virtualize"
+      "virtualize",
+      "columnLayoutFamily",
+      "editingFamily",
+      "filteringFamily"
     ],
     "adapter-ngx-bootstrap-filters": [
       "filterTypes",
@@ -11605,6 +11700,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-ngx-bootstrap-filtering": [
+      "filteringFamily"
     ],
     "adapter-ngx-bootstrap-find-in-table": [
       "AdaptFindBar",
@@ -11664,8 +11762,8 @@
       "pivotTableModel"
     ],
     "adapter-ngx-bootstrap-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-ngx-bootstrap-print": [
       "print"
@@ -11810,6 +11908,9 @@
     "adapter-spartan-column-menu": [
       "columnMenu"
     ],
+    "adapter-spartan-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-spartan-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -11836,7 +11937,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-spartan-export": [
       "exportCsv",
@@ -11892,7 +11994,10 @@
       "tableAssistant",
       "tree",
       "undoRedoButtons",
-      "virtualize"
+      "virtualize",
+      "columnLayoutFamily",
+      "editingFamily",
+      "filteringFamily"
     ],
     "adapter-spartan-filters": [
       "filterTypes",
@@ -11904,6 +12009,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-spartan-filtering": [
+      "filteringFamily"
     ],
     "adapter-spartan-find-in-table": [
       "AdaptFindBar",
@@ -11963,8 +12071,8 @@
       "pivotTableModel"
     ],
     "adapter-spartan-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-spartan-print": [
       "print"
@@ -12113,6 +12221,9 @@
     "adapter-taiga-ui-column-menu": [
       "columnMenu"
     ],
+    "adapter-taiga-ui-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-taiga-ui-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -12139,7 +12250,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-taiga-ui-export": [
       "exportCsv",
@@ -12195,7 +12307,10 @@
       "tableAssistant",
       "tree",
       "undoRedoButtons",
-      "virtualize"
+      "virtualize",
+      "columnLayoutFamily",
+      "editingFamily",
+      "filteringFamily"
     ],
     "adapter-taiga-ui-filters": [
       "filterTypes",
@@ -12207,6 +12322,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-taiga-ui-filtering": [
+      "filteringFamily"
     ],
     "adapter-taiga-ui-find-in-table": [
       "AdaptFindBar",
@@ -12266,8 +12384,8 @@
       "pivotTableModel"
     ],
     "adapter-taiga-ui-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-taiga-ui-print": [
       "print"
@@ -13624,7 +13742,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget",
-      "editingFamily"
+      "editingFamily",
+      "columnLayoutFamily",
+      "filteringFamily"
     ],
     "adapter-vue-unstyled-assistant": [
       "AgentApproval",
@@ -15870,7 +15990,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget",
-      "editingFamily"
+      "editingFamily",
+      "columnLayoutFamily",
+      "filteringFamily"
     ],
     "adapter-reka-ui-filters": [
       "ChecklistFilter",
@@ -16310,7 +16432,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget",
-      "editingFamily"
+      "editingFamily",
+      "columnLayoutFamily",
+      "filteringFamily"
     ],
     "adapter-shadcn-vue-filters": [
       "BasicFilterField",
@@ -18089,6 +18213,9 @@
     "adapter-angular-unstyled-column-menu.api.md": {
       "surface": "adapter-angular-unstyled-column-menu"
     },
+    "adapter-angular-unstyled-column-layout.api.md": {
+      "surface": "adapter-angular-unstyled-column-layout"
+    },
     "adapter-angular-unstyled-column-selection.api.md": {
       "surface": "adapter-angular-unstyled-column-selection"
     },
@@ -18115,6 +18242,9 @@
     },
     "adapter-angular-unstyled-filters.api.md": {
       "surface": "adapter-angular-unstyled-filters"
+    },
+    "adapter-angular-unstyled-filtering.api.md": {
+      "surface": "adapter-angular-unstyled-filtering"
     },
     "adapter-angular-unstyled-find-in-table.api.md": {
       "surface": "adapter-angular-unstyled-find-in-table"
@@ -18212,6 +18342,9 @@
     "adapter-ng-zorro-column-menu.api.md": {
       "surface": "adapter-ng-zorro-column-menu"
     },
+    "adapter-ng-zorro-column-layout.api.md": {
+      "surface": "adapter-ng-zorro-column-layout"
+    },
     "adapter-ng-zorro-column-selection.api.md": {
       "surface": "adapter-ng-zorro-column-selection"
     },
@@ -18238,6 +18371,9 @@
     },
     "adapter-ng-zorro-filters.api.md": {
       "surface": "adapter-ng-zorro-filters"
+    },
+    "adapter-ng-zorro-filtering.api.md": {
+      "surface": "adapter-ng-zorro-filtering"
     },
     "adapter-ng-zorro-find-in-table.api.md": {
       "surface": "adapter-ng-zorro-find-in-table"
@@ -18335,6 +18471,9 @@
     "adapter-angular-aria-column-menu.api.md": {
       "surface": "adapter-angular-aria-column-menu"
     },
+    "adapter-angular-aria-column-layout.api.md": {
+      "surface": "adapter-angular-aria-column-layout"
+    },
     "adapter-angular-aria-column-selection.api.md": {
       "surface": "adapter-angular-aria-column-selection"
     },
@@ -18361,6 +18500,9 @@
     },
     "adapter-angular-aria-filters.api.md": {
       "surface": "adapter-angular-aria-filters"
+    },
+    "adapter-angular-aria-filtering.api.md": {
+      "surface": "adapter-angular-aria-filtering"
     },
     "adapter-angular-aria-find-in-table.api.md": {
       "surface": "adapter-angular-aria-find-in-table"
@@ -18458,6 +18600,9 @@
     "adapter-angular-cdk-column-menu.api.md": {
       "surface": "adapter-angular-cdk-column-menu"
     },
+    "adapter-angular-cdk-column-layout.api.md": {
+      "surface": "adapter-angular-cdk-column-layout"
+    },
     "adapter-angular-cdk-column-selection.api.md": {
       "surface": "adapter-angular-cdk-column-selection"
     },
@@ -18484,6 +18629,9 @@
     },
     "adapter-angular-cdk-filters.api.md": {
       "surface": "adapter-angular-cdk-filters"
+    },
+    "adapter-angular-cdk-filtering.api.md": {
+      "surface": "adapter-angular-cdk-filtering"
     },
     "adapter-angular-cdk-find-in-table.api.md": {
       "surface": "adapter-angular-cdk-find-in-table"
@@ -18581,6 +18729,9 @@
     "adapter-material-column-menu.api.md": {
       "surface": "adapter-material-column-menu"
     },
+    "adapter-material-column-layout.api.md": {
+      "surface": "adapter-material-column-layout"
+    },
     "adapter-material-column-selection.api.md": {
       "surface": "adapter-material-column-selection"
     },
@@ -18607,6 +18758,9 @@
     },
     "adapter-material-filters.api.md": {
       "surface": "adapter-material-filters"
+    },
+    "adapter-material-filtering.api.md": {
+      "surface": "adapter-material-filtering"
     },
     "adapter-material-find-in-table.api.md": {
       "surface": "adapter-material-find-in-table"
@@ -18704,6 +18858,9 @@
     "adapter-ng-bootstrap-column-menu.api.md": {
       "surface": "adapter-ng-bootstrap-column-menu"
     },
+    "adapter-ng-bootstrap-column-layout.api.md": {
+      "surface": "adapter-ng-bootstrap-column-layout"
+    },
     "adapter-ng-bootstrap-column-selection.api.md": {
       "surface": "adapter-ng-bootstrap-column-selection"
     },
@@ -18730,6 +18887,9 @@
     },
     "adapter-ng-bootstrap-filters.api.md": {
       "surface": "adapter-ng-bootstrap-filters"
+    },
+    "adapter-ng-bootstrap-filtering.api.md": {
+      "surface": "adapter-ng-bootstrap-filtering"
     },
     "adapter-ng-bootstrap-find-in-table.api.md": {
       "surface": "adapter-ng-bootstrap-find-in-table"
@@ -18827,6 +18987,9 @@
     "adapter-ngx-bootstrap-column-menu.api.md": {
       "surface": "adapter-ngx-bootstrap-column-menu"
     },
+    "adapter-ngx-bootstrap-column-layout.api.md": {
+      "surface": "adapter-ngx-bootstrap-column-layout"
+    },
     "adapter-ngx-bootstrap-column-selection.api.md": {
       "surface": "adapter-ngx-bootstrap-column-selection"
     },
@@ -18853,6 +19016,9 @@
     },
     "adapter-ngx-bootstrap-filters.api.md": {
       "surface": "adapter-ngx-bootstrap-filters"
+    },
+    "adapter-ngx-bootstrap-filtering.api.md": {
+      "surface": "adapter-ngx-bootstrap-filtering"
     },
     "adapter-ngx-bootstrap-find-in-table.api.md": {
       "surface": "adapter-ngx-bootstrap-find-in-table"
@@ -18950,6 +19116,9 @@
     "adapter-spartan-column-menu.api.md": {
       "surface": "adapter-spartan-column-menu"
     },
+    "adapter-spartan-column-layout.api.md": {
+      "surface": "adapter-spartan-column-layout"
+    },
     "adapter-spartan-column-selection.api.md": {
       "surface": "adapter-spartan-column-selection"
     },
@@ -18976,6 +19145,9 @@
     },
     "adapter-spartan-filters.api.md": {
       "surface": "adapter-spartan-filters"
+    },
+    "adapter-spartan-filtering.api.md": {
+      "surface": "adapter-spartan-filtering"
     },
     "adapter-spartan-find-in-table.api.md": {
       "surface": "adapter-spartan-find-in-table"
@@ -19073,6 +19245,9 @@
     "adapter-taiga-ui-column-menu.api.md": {
       "surface": "adapter-taiga-ui-column-menu"
     },
+    "adapter-taiga-ui-column-layout.api.md": {
+      "surface": "adapter-taiga-ui-column-layout"
+    },
     "adapter-taiga-ui-column-selection.api.md": {
       "surface": "adapter-taiga-ui-column-selection"
     },
@@ -19099,6 +19274,9 @@
     },
     "adapter-taiga-ui-filters.api.md": {
       "surface": "adapter-taiga-ui-filters"
+    },
+    "adapter-taiga-ui-filtering.api.md": {
+      "surface": "adapter-taiga-ui-filtering"
     },
     "adapter-taiga-ui-find-in-table.api.md": {
       "surface": "adapter-taiga-ui-find-in-table"

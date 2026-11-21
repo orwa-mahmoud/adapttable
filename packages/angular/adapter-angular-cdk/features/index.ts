@@ -13,6 +13,7 @@ export { bulkActions } from "@adapttable/angular-cdk/bulk-actions";
 export { cellNavigation } from "@adapttable/angular-cdk/cell-navigation";
 export { cellSpan } from "@adapttable/angular-cdk/cell-span";
 export { collapsibleColumnGroups } from "@adapttable/angular-cdk/column-groups";
+export { columnLayoutFamily } from "@adapttable/angular-cdk/column-layout";
 export { columnMenu } from "@adapttable/angular-cdk/column-menu";
 export { columnSelectionCheckbox } from "@adapttable/angular-cdk/column-selection";
 export { commandPalette } from "@adapttable/angular-cdk/command-palette";
@@ -22,6 +23,7 @@ export {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/angular-cdk/editing";
@@ -31,6 +33,7 @@ export {
   exportXlsx,
 } from "@adapttable/angular-cdk/export";
 export { extraRows } from "@adapttable/angular-cdk/extra-rows";
+export { filteringFamily } from "@adapttable/angular-cdk/filtering";
 export { filters, filterTypes } from "@adapttable/angular-cdk/filters";
 export { findInTable } from "@adapttable/angular-cdk/find-in-table";
 export { fitColumns } from "@adapttable/angular-cdk/fit-columns";

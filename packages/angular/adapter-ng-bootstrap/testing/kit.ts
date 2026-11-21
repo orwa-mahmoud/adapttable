@@ -3,6 +3,7 @@ import { bulkActions } from "@adapttable/ng-bootstrap/bulk-actions";
 import { cellNavigation } from "@adapttable/ng-bootstrap/cell-navigation";
 import { cellSpan } from "@adapttable/ng-bootstrap/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/ng-bootstrap/column-groups";
+import { columnLayoutFamily } from "@adapttable/ng-bootstrap/column-layout";
 import { columnMenu } from "@adapttable/ng-bootstrap/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/ng-bootstrap/column-selection";
 import { commandPalette } from "@adapttable/ng-bootstrap/command-palette";
@@ -11,6 +12,7 @@ import {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/ng-bootstrap/editing";
@@ -20,6 +22,7 @@ import {
   exportXlsx,
 } from "@adapttable/ng-bootstrap/export";
 import { extraRows } from "@adapttable/ng-bootstrap/extra-rows";
+import { filteringFamily } from "@adapttable/ng-bootstrap/filtering";
 import {
   filters,
   filtersWith,
@@ -81,6 +84,9 @@ export const kit: AngularKitUnderTest = {
   name: "ng-bootstrap",
   Table: AdaptDataTable,
   features: {
+    editingFamily,
+    filteringFamily,
+    columnLayoutFamily,
     commandPalette,
     dirtyIndicators,
     filterTypes,
