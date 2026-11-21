@@ -1185,6 +1185,7 @@ export type {
   SelectionContribution,
   SelectionState,
 } from "./selection/selectionBindingState";
+export { selectionResetKey } from "./selection/selectionBindingState";
 export type { HeaderSelectionState } from "./selection/selectionState";
 export type {
   SearchInputState,

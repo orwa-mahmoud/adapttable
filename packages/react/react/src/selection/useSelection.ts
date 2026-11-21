@@ -52,6 +52,11 @@ export interface UseSelectionOptions<TRow> {
    * cannot describe.
    */
   acrossPages?: boolean;
+  /**
+   * When false the hook keeps its state but reads no row ids, for a table
+   * whose selection is turned off. Defaults to true.
+   */
+  enabled?: boolean;
 }
 
 /**
@@ -152,7 +157,11 @@ export function useSelection<TRow>(
     commit(() => new Set());
   }, [resetKey, store, commit, scope]);
 
-  const visibleIds = useMemo(() => rows.map(getId), [rows, getId]);
+  const enabled = options.enabled ?? true;
+  const visibleIds = useMemo(
+    () => (enabled ? rows.map(getId) : []),
+    [enabled, rows, getId]
+  );
 
   const headerState = useMemo(
     () => headerSelectionOf(visibleIds, selectedIds),

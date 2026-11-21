@@ -17843,6 +17843,11 @@ explains which import a program changes. This list is the reference.
   `ColumnLayoutContribution` is hide and order when a layout feature
   publishes setters. `SelectionContribution` is the host's `selectedIds` set
   on the runtime view. It does not copy that set.
+- `selectionResetKey(source)` — the result-set identity a selection resets
+  on: search, filter values, the advanced filter tree and grouping. The tree
+  is read through its snapshot, so an operand that is not a plain value counts
+  by identity and is never read. A selection clears when the key changes and
+  survives page, sort and page size.
 - `projectGrouping(input): GroupingProjection` — one grouping snapshot.
   `GroupingProjectionInput` is what it reads besides the binding's collapse
   and paging snapshots. `GroupingProjection` is the warning, the aggregates

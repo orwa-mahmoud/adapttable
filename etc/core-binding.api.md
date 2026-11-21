@@ -10033,6 +10033,14 @@ export interface SelectionContribution {
 export function selectionObserverIds(controlled: boolean, selectedIds: ReadonlySet<string> | undefined): string[] | undefined;
 
 // @public
+export function selectionResetKey(source: {
+    readonly search: string;
+    readonly extra: unknown;
+    readonly filterTree?: QueryFilterGroup;
+    readonly groupBy?: unknown;
+}): string;
+
+// @public
 export interface SelectionState {
     acrossPages: boolean;
     allMatching: boolean;

@@ -8226,6 +8226,7 @@
       "SELECTION_STATS_LIVE",
       "SelectionContribution",
       "selectionObserverIds",
+      "selectionResetKey",
       "SelectionState",
       "SelectionStatPart",
       "SelectionStats",

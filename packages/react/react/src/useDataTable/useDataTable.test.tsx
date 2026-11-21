@@ -155,6 +155,22 @@ describe("useDataTable", () => {
     expect(result.current.selection?.selectedCount).toBe(0);
   });
 
+  it("resets the selection when only the advanced filter tree changes", () => {
+    const bulkActions: BulkAction[] = [
+      { key: "del", label: "Delete", onClick: vi.fn() },
+    ];
+    const { result } = mount("", { bulkActions });
+    act(() => result.current.selection?.toggle("a"));
+    expect(result.current.selection?.selectedCount).toBe(1);
+    act(() =>
+      result.current.source.setFilterTree?.({
+        combinator: "and",
+        conditions: [{ key: "city", op: "eq", value: "Riyadh" }],
+      })
+    );
+    expect(result.current.selection?.isSelected("a")).toBe(false);
+  });
+
   describe("prop-getters", () => {
     it("getTableProps carries role, dir and aria-label", () => {
       const { result } = mount("", { dir: "rtl", tableLabel: "People" });

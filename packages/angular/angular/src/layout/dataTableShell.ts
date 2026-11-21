@@ -75,7 +75,6 @@ import {
   type RowStyle,
   type SavedViewsControllerOptions,
   sourceCapabilities,
-  stableKey,
   type TableDensity,
   type TableLabels,
   type TableQueryParams,
@@ -120,6 +119,7 @@ import {
   SAVED_VIEWS,
   type SavedViewsSlotProps,
   SEARCH_ICON,
+  selectionResetKey,
   type SelectionState,
   SIDE_PANEL,
   type SidePanelSide,
@@ -1178,15 +1178,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
               acrossPages: computed(
                 () => sourceCapabilities(source()).selectAcrossPages
               ),
-              resetKey: computed(() => {
-                const current = source();
-                return stableKey([
-                  current.search,
-                  current.extra,
-                  current.filterTree,
-                  current.groupBy,
-                ]);
-              }),
+              resetKey: computed(() => selectionResetKey(source())),
               injector,
             })
           )
