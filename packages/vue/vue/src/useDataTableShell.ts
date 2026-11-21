@@ -661,6 +661,8 @@ export function useDataTableShell<TRow>(
       (rowReorder.value ? 1 : 0) +
       (mergedActions.value.rowActions || rowEditControlsVisible.value ? 1 : 0),
   }));
+  // The card projection is read on demand: a table drawing desktop rows
+  // never builds it, and one drawing cards builds it when it reads `mobile`.
   const body = computed<TableBodyProjection<TRow>>(
     () =>
       resolved.value.bodyModel?.({
@@ -668,13 +670,20 @@ export function useDataTableShell<TRow>(
         rowInventory: rowInventory.value,
         options: resolved.value,
         desktop: actionsDesktop.value,
-        mobile: baseMobile.value,
+        get mobile() {
+          return baseMobile.value;
+        },
         pinning: pinning.value,
         grouping: grouping.value,
         tree: tree.value,
         detail: detail.value,
         selection: selection.value,
-      }) ?? { desktop: actionsDesktop.value, mobile: baseMobile.value }
+      }) ?? {
+        desktop: actionsDesktop.value,
+        get mobile() {
+          return baseMobile.value;
+        },
+      }
   );
   const windowedBody = computed(
     () => bodyWindow.value?.projection ?? body.value
