@@ -2234,7 +2234,7 @@ function computePagination_2(input: {
 }): PaginationInfo;
 
 // @public
-export function conditionToExtra<TRow>(def: FilterDef<TRow>, condition: QueryCondition, registry?: FilterTypeRegistry): ExtraFilters;
+export function conditionToExtra<TRow>(def: FilterDef<TRow>, condition: QueryCondition, registry: FilterTypeRegistry): ExtraFilters;
 
 // @public @deprecated
 export const configureIncrementalView: typeof configureIncrementalView_2;
@@ -3818,7 +3818,7 @@ function estimateFromRowHeight_2<TRow>(rowHeight: RowHeight<TRow> | undefined, f
 } | undefined): (index: number) => number;
 
 // @public
-export function evaluateFilterTree<TRow>(tree: QueryFilterGroup | undefined, row: TRow, defs: readonly FilterDef<TRow>[], registry?: FilterTypeRegistry): boolean;
+export function evaluateFilterTree<TRow>(tree: QueryFilterGroup | undefined, row: TRow, defs: readonly FilterDef<TRow>[], registry: FilterTypeRegistry): boolean;
 
 // @public
 export const EXPORT_FETCH_ALL_MAX_ROWS = 50000;

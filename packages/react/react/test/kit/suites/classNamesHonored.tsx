@@ -3,6 +3,7 @@ import {
   type ConformanceTest,
 } from "@adapttable/core/conformance";
 import {
+  defaultFilterRegistry,
   defaultLabels,
   type ExtraFilters,
   type FilterDef,
@@ -94,6 +95,7 @@ export function classNamesHonoredTests(
         <FilterTreeBuilder
           defs={DEFS}
           source={{ filterTree, setFilterTree }}
+          registry={defaultFilterRegistry}
           labels={defaultLabels}
           classNames={{
             filterSelect: "select-cls",

@@ -6,8 +6,12 @@
  * `FILTER_CHIPS_LIVE`.
  */
 import { type FilterDef } from "@adapttable/core";
-import { coreFilters, FILTER_ENGINE_IMPL } from "@adapttable/core/binding";
-import { type ReactNode, useMemo } from "react";
+import {
+  coreFilters,
+  FILTER_ENGINE_IMPL,
+  type FilterEngine,
+} from "@adapttable/core/binding";
+import { type ComponentType, type ReactNode, useMemo } from "react";
 
 import {
   mergeFilterChips,
@@ -30,14 +34,29 @@ import {
 } from "./slotKeys";
 import type { StaticTableFeature, TableFeature } from "./tableFeature";
 
-function FiltersEngineProvider({
-  children,
-}: Readonly<FeatureProviderProps>): ReactNode {
-  return (
-    <FeatureStateScope stateKey={FILTER_ENGINE} value={FILTER_ENGINE_IMPL}>
-      {children}
-    </FeatureStateScope>
-  );
+/** One provider per engine, so a feature built twice keeps one component. */
+const ENGINE_PROVIDERS = /* @__PURE__ */ new WeakMap<
+  FilterEngine,
+  ComponentType<FeatureProviderProps>
+>();
+
+function engineProvider(
+  engine: FilterEngine
+): ComponentType<FeatureProviderProps> {
+  let Provider = ENGINE_PROVIDERS.get(engine);
+  if (!Provider) {
+    Provider = function FiltersEngineProvider({
+      children,
+    }: Readonly<FeatureProviderProps>): ReactNode {
+      return (
+        <FeatureStateScope stateKey={FILTER_ENGINE} value={engine}>
+          {children}
+        </FeatureStateScope>
+      );
+    };
+    ENGINE_PROVIDERS.set(engine, Provider);
+  }
+  return Provider;
 }
 
 function LiveFilterChips<TRow>({
@@ -101,9 +120,26 @@ export function filters<TRow>(
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[] | ReactNode
 ): TableFeature<TRow> {
-  return {
+  return filtersOn(FILTER_ENGINE_IMPL)(defs);
+}
+
+/**
+ * The filters feature on a given engine — the full one, or one holding only
+ * the types a kit's widgets carry (`filterEngineForWidgets`).
+ *
+ * @param engine - The filter engine the table runs.
+ * @returns The feature factory.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function filtersOn(
+  engine: FilterEngine
+): <TRow>(defs: readonly FilterDef<TRow>[] | ReactNode) => TableFeature<TRow> {
+  const Provider = engineProvider(engine);
+  return <TRow,>(defs: readonly FilterDef<TRow>[] | ReactNode) => ({
     ...coreFilters<TRow, ReactNode>(defs),
-    provider: { Provider: FiltersEngineProvider },
+    provider: { Provider },
     renders: [
       slotRender<ChromeExtraDraw>(FILTER_CHIPS_LIVE, (props) => (
         <LiveFilterChips {...props} />
@@ -111,5 +147,5 @@ export function filters<TRow>(
       FILTER_CHIPS_BAR_RENDER,
       FILTER_DRAWER_RENDER,
     ],
-  };
+  });
 }

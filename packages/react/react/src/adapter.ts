@@ -85,6 +85,7 @@ export {
   type AdapterFiltersComponents,
   type AdapterFiltersFeature,
   createAdapterFiltersFeature,
+  createAdapterFiltersFeatureOn,
 } from "./adapterFeatures/filters";
 export {
   type FilterWidget,
@@ -1012,6 +1013,15 @@ export {
   type VirtualTableRow,
   windowGroupedEntries,
 } from "@adapttable/core";
+export {
+  booleanFilterSpecs,
+  checklistFilterSpecs,
+  filterEngineForWidgets,
+  multiSelectFilterSpecs,
+  rangeFilterSpecs,
+  selectFilterSpecs,
+  textFilterSpecs,
+} from "@adapttable/core/binding";
 
 /**
  * The member types the signatures above hand back.

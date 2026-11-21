@@ -14065,6 +14065,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "booleanFilterSpecs",
+      "kind": "runtime",
+      "module": "filters/filterDefs.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterDefs.ts#booleanFilterSpecs",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "booleanFilterWidget",
       "kind": "runtime",
       "module": "filters/filterWidgets.ts",
@@ -14370,6 +14381,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "filters/checklistModel.ts#checklistColumnsAcross",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "checklistFilterSpecs",
+      "kind": "runtime",
+      "module": "filters/filterDefs.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterDefs.ts#checklistFilterSpecs",
       "subpaths": ["./binding"]
     },
     {
@@ -15800,6 +15822,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/liveFeatureHost.ts#createFeatureHost",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "createFilterEngine",
+      "kind": "runtime",
+      "module": "filters/filterEngine.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterEngine.ts#createFilterEngine",
       "subpaths": ["./binding"]
     },
     {
@@ -17296,6 +17329,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "columns/columnMenuModel.ts#filterColumnMenuRows",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "filterEngineForWidgets",
+      "kind": "runtime",
+      "module": "filters/filterEngine.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterEngine.ts#filterEngineForWidgets",
       "subpaths": ["./binding"]
     },
     {
@@ -19048,6 +19092,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "multiSelectFilterSpecs",
+      "kind": "runtime",
+      "module": "filters/filterDefs.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterDefs.ts#multiSelectFilterSpecs",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "NESTED_TABLE_DEFAULT_LABEL",
       "kind": "runtime",
       "module": "tree/nestedTableDefaults.ts",
@@ -19628,6 +19683,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "source/serverRequest.ts#queryGroupBy",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "rangeFilterSpecs",
+      "kind": "runtime",
+      "module": "filters/filterDefs.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterDefs.ts#rangeFilterSpecs",
       "subpaths": ["./binding"]
     },
     {
@@ -20885,6 +20951,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "selectFilterSpecs",
+      "kind": "runtime",
+      "module": "filters/filterDefs.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterDefs.ts#selectFilterSpecs",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "selectFrom",
       "kind": "runtime",
       "module": "state/tableStore.ts",
@@ -21487,6 +21564,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "actions/commandListModel.ts#tabTrapTarget",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "textFilterSpecs",
+      "kind": "runtime",
+      "module": "filters/filterDefs.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterDefs.ts#textFilterSpecs",
       "subpaths": ["./binding"]
     },
     {

@@ -888,6 +888,7 @@
         "createAdapterEditing": "pending: shared-surface decision",
         "createAdapterEditingFeatures": "pending: shared-surface decision",
         "createAdapterFiltersFeature": "pending: shared-surface decision",
+        "createAdapterFiltersFeatureOn": "pending: shared-surface decision",
         "createAdapterGroupingFeature": "pending: shared-surface decision",
         "createAdapterGroupingPanelFeature": "pending: shared-surface decision",
         "createAdapterRowDetailFeatures": "pending: shared-surface decision",

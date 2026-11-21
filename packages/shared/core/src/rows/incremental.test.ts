@@ -10,6 +10,7 @@ import { serializeAggregationDerivedKey } from "../aggregate/aggregationModel";
 import type { ColumnModel } from "../contracts/columns";
 import type { QueryFilterGroup } from "../contracts/query";
 import type { RowPatch, RowPatchEvent } from "../contracts/rows";
+import { defaultFilterRegistry } from "../filters/filterBuiltins";
 import type { FilterDef } from "../filters/filterDefs";
 import { evaluateFilterTree } from "../filters/filterTree";
 import { withGroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
@@ -284,7 +285,7 @@ describe("createIncrementalView / applyRowPatchesToView", () => {
       getRowId: byId,
       filterTree: tree,
       filterTreeFn: (row, active) =>
-        evaluateFilterTree(active, row, FILTER_DEFS),
+        evaluateFilterTree(active, row, FILTER_DEFS, defaultFilterRegistry),
     };
     const start = createIncrementalView(ROWS, config);
     expect(ids(start.filtered)).toEqual(["1", "3"]);

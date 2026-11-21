@@ -13,7 +13,7 @@ import {
 } from "../features/currentHost";
 import { stableKey } from "../utils/stableKey";
 import { computeFilterFacets } from "./facets";
-import { resolveFilterRegistry } from "./filterBuiltins";
+import { defaultFilterRegistry } from "./filterBuiltins";
 import {
   buildFilterRuntime,
   type FilterDef,
@@ -21,7 +21,12 @@ import {
   materializeAutoOptions,
   resolveFilterDefs,
 } from "./filterDefs";
-import type { FilterTypeRegistry, FilterTypeSpec } from "./filterRegistry";
+import {
+  createFilterRegistry,
+  type FilterTypeRegistry,
+  type FilterTypeSpec,
+  withFilterType,
+} from "./filterRegistry";
 import { evaluateFilterTree } from "./filterTree";
 
 /**
@@ -118,50 +123,94 @@ function filterSemanticKey<TRow>(
 }
 
 /**
- * The real engine. Imported only from the filters feature.
+ * A filter engine whose built-in types are `builtIns`. Host `filterTypes` and
+ * feature registrations layer on top, as on the full engine.
+ *
+ * @param builtIns - The built-in types the table's widgets carry.
+ * @returns The engine.
  *
  * @public
  */
-export const FILTER_ENGINE_IMPL: FilterEngine = {
-  buildRuntime(input) {
-    const {
-      columns,
-      declaredFilters,
-      locale,
-      data,
-      loadedOptions,
-      filterTypes,
-      featureHost,
-      optionCache,
-    } = input;
-    const filterKey = filterSemanticKey(input);
-    const materialized = materializeAutoOptions(
-      resolveFilterDefs(columns, declaredFilters, locale),
-      data
-    );
-    const withAsync = materialized.map((def) => {
-      if (typeof def.options !== "function") return def;
-      const loaded = loadedOptions[def.key];
-      if (loaded) return { ...def, options: loaded };
-      let cached = optionCache.get(def.key);
-      if (!cached) {
-        const original = def.options;
-        let inFlight: Promise<
-          readonly { value: string; label: string }[]
-        > | null = null;
-        cached = () => (inFlight ??= original());
-        optionCache.set(def.key, cached);
-      }
-      return { ...def, options: cached };
-    });
-    return {
-      ...buildFilterRuntime(
-        withAsync,
-        applyFilterExtends(resolveFilterRegistry(filterTypes), featureHost)
-      ),
-      filterKey,
-    };
-  },
-  evaluateTree: evaluateFilterTree,
-  computeFacets: computeFilterFacets,
-};
+/* @__NO_SIDE_EFFECTS__ */
+export function createFilterEngine(builtIns: FilterTypeRegistry): FilterEngine {
+  return {
+    buildRuntime: (input) => buildRuntimeOn(builtIns, input),
+    evaluateTree: evaluateFilterTree,
+    computeFacets: computeFilterFacets,
+  };
+}
+
+/**
+ * The engine for a filters feature's widgets: the built-in types those
+ * widgets carry, nothing else. A widget that names no rules adds no type.
+ *
+ * @param widgets - The widgets the filters form draws with.
+ * @returns The engine.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function filterEngineForWidgets(
+  widgets: readonly { readonly specs?: readonly FilterTypeSpec[] }[]
+): FilterEngine {
+  return createFilterEngine(
+    createFilterRegistry(widgets.flatMap((widget) => widget.specs ?? []))
+  );
+}
+
+function buildRuntimeOn<TRow>(
+  builtIns: FilterTypeRegistry,
+  input: Parameters<FilterEngine["buildRuntime"]>[0] & {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+  }
+): FilterRuntime<TRow> {
+  const {
+    columns,
+    declaredFilters,
+    locale,
+    data,
+    loadedOptions,
+    filterTypes,
+    featureHost,
+    optionCache,
+  } = input;
+  const filterKey = filterSemanticKey(input);
+  const materialized = materializeAutoOptions(
+    resolveFilterDefs(columns, declaredFilters, locale),
+    data
+  );
+  const withAsync = materialized.map((def) => {
+    if (typeof def.options !== "function") return def;
+    const loaded = loadedOptions[def.key];
+    if (loaded) return { ...def, options: loaded };
+    let cached = optionCache.get(def.key);
+    if (!cached) {
+      const original = def.options;
+      let inFlight: Promise<
+        readonly { value: string; label: string }[]
+      > | null = null;
+      cached = () => (inFlight ??= original());
+      optionCache.set(def.key, cached);
+    }
+    return { ...def, options: cached };
+  });
+  return {
+    ...buildFilterRuntime(
+      withAsync,
+      applyFilterExtends(
+        (filterTypes ?? []).reduce(withFilterType, builtIns),
+        featureHost
+      )
+    ),
+    filterKey,
+  };
+}
+
+/**
+ * The full engine: every built-in type. Imported only from the filters
+ * feature that draws every widget.
+ *
+ * @public
+ */
+export const FILTER_ENGINE_IMPL: FilterEngine =
+  /* @__PURE__ */ createFilterEngine(defaultFilterRegistry);

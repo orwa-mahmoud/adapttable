@@ -1,7 +1,8 @@
 import type { FilterDef } from "@adapttable/core";
+import type { FilterEngine } from "@adapttable/core/binding";
 import { createElement, type ReactNode } from "react";
 
-import { filters as coreFilters } from "../features/filters";
+import { filters as coreFilters, filtersOn } from "../features/filters";
 import { extendFeature, slotRender } from "../features/providers";
 import {
   ACTIVE_FILTER_CHIPS,
@@ -54,6 +55,34 @@ export interface AdapterFiltersFeature {
 export function createAdapterFiltersFeature(
   components: AdapterFiltersComponents
 ): AdapterFiltersFeature {
+  return withFilterChrome(components, coreFilters);
+}
+
+/**
+ * Declarative filters drawn with a kit's components on a given engine — the
+ * one `filterEngineForWidgets` builds from the widgets a table composes, so a
+ * text-only table carries only the text rules.
+ *
+ * @param components - The kit's form, chips, drawer and popover.
+ * @param engine - The filter engine the table runs.
+ * @returns The kit's filters feature.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function createAdapterFiltersFeatureOn(
+  components: AdapterFiltersComponents,
+  engine: FilterEngine
+): AdapterFiltersFeature {
+  return withFilterChrome(components, filtersOn(engine));
+}
+
+function withFilterChrome(
+  components: AdapterFiltersComponents,
+  base: <TRow>(
+    defs: readonly FilterDef<TRow>[] | ReactNode
+  ) => TableFeature<TRow>
+): AdapterFiltersFeature {
   const renders = [
     slotRender(FILTERS_FORM, (props) =>
       createElement(components.FiltersForm, props)
@@ -71,5 +100,5 @@ export function createAdapterFiltersFeature(
 
   return <TRow>(
     defs: readonly FilterDef<TRow>[] | ReactNode
-  ): TableFeature<TRow> => extendFeature(coreFilters<TRow>(defs), renders);
+  ): TableFeature<TRow> => extendFeature(base<TRow>(defs), renders);
 }

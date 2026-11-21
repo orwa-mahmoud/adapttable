@@ -17617,6 +17617,16 @@ Core's `filterWidgetFor(def, registry, widgets)` picks the drawing for a
 definition from a `FilterWidgetOf<TRender>` list and throws, naming the
 widget, when the kind has none. See [filtering](./filtering.md#draw-only-the-widgets-you-use).
 
+A widget may also carry `specs`, the rules of the kinds it draws —
+`textFilterSpecs()`, `selectFilterSpecs()`, `multiSelectFilterSpecs()`,
+`checklistFilterSpecs()`, `booleanFilterSpecs()` or `rangeFilterSpecs()`.
+`filterEngineForWidgets(widgets)` builds a filter engine holding only those
+types (`createFilterEngine(registry)` builds one from any registry), and a
+kit's `filtersWith` passes it to `createAdapterFiltersFeatureOn(components,
+engine)`, so a table that draws only text filters carries only the text
+rules. Host `filterTypes` still layer on top. `createAdapterFiltersFeature`
+keeps every built-in type.
+
 ## Adapter extras
 
 Props beyond the core surface, with per-kit availability.

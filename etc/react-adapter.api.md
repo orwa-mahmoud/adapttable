@@ -52,6 +52,7 @@ import { TableBodyCell as BodyCell } from '@adapttable/core';
 import { BodyCell as BodyCell_2 } from '@adapttable/core/binding';
 import { bodyCellsHaveRowSpan } from '@adapttable/core/binding';
 import { bodyRowEntries } from '@adapttable/core';
+import { booleanFilterSpecs } from '@adapttable/core/binding';
 import { buildBodyCells } from '@adapttable/core/binding';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
@@ -85,6 +86,7 @@ import { ChecklistButtonProps } from '@adapttable/core/binding';
 import { ChecklistCheckboxProps } from '@adapttable/core/binding';
 import { ChecklistClassNames } from '@adapttable/core/binding';
 import { ChecklistFilterProps } from '@adapttable/core/binding';
+import { checklistFilterSpecs } from '@adapttable/core/binding';
 import { ChecklistSearchProps } from '@adapttable/core/binding';
 import { ChecklistSlots as ChecklistSlots_2 } from '@adapttable/core/binding';
 import { ChecklistValue } from '@adapttable/core';
@@ -287,6 +289,8 @@ import { FILTER_LABELS } from '@adapttable/core/binding';
 import { FILTER_TYPES } from '@adapttable/core';
 import { filterColumnMenuRows } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
+import { FilterEngine } from '@adapttable/core/binding';
+import { filterEngineForWidgets } from '@adapttable/core/binding';
 import { FilterFormSource } from '@adapttable/core/binding';
 import { FilterFormSource as FilterFormSource_2 } from '@adapttable/core';
 import { FilterHeaderClassNames } from '@adapttable/core/binding';
@@ -306,7 +310,7 @@ import { FilterRuntime } from '@adapttable/core';
 import { FILTERS_FORM } from '@adapttable/core/binding';
 import { FiltersFormSlotProps } from '@adapttable/core/binding';
 import { filterStateKeys } from '@adapttable/core';
-import { FilterTreeBuilderProps } from '@adapttable/core/binding';
+import { FilterTreeBuilderProps as FilterTreeBuilderProps_2 } from '@adapttable/core/binding';
 import { FilterTreeButtonProps } from '@adapttable/core/binding';
 import { FilterTreeClassNames } from '@adapttable/core/binding';
 import { FilterTreeDisclosureProps as FilterTreeDisclosureProps_2 } from '@adapttable/core/binding';
@@ -433,6 +437,7 @@ import { mobileCardListStyle } from '@adapttable/core/binding';
 import { MobileCardModel } from '@adapttable/core';
 import { MobileCardRenderer } from '@adapttable/core';
 import { MouseEvent as MouseEvent_2 } from 'react';
+import { multiSelectFilterSpecs } from '@adapttable/core/binding';
 import { NestedTableDefaults } from '@adapttable/core';
 import { nestedTableDefaults } from '@adapttable/core';
 import { NestedTableParent } from '@adapttable/core';
@@ -497,6 +502,7 @@ import { QueryFilterGroup } from '@adapttable/core';
 import { QueryGroupRow } from '@adapttable/core';
 import { QuerySupport } from '@adapttable/core';
 import { RailInsets } from '@adapttable/core/binding';
+import { rangeFilterSpecs } from '@adapttable/core/binding';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { readMultiDraft } from '@adapttable/core/editing';
@@ -605,6 +611,7 @@ import { SavedViewsSlotProps as SavedViewsSlotProps_2 } from '@adapttable/core/b
 import { SavedViewsStore } from '@adapttable/core';
 import { SavedViewVisibility } from '@adapttable/core';
 import { SearchInputState } from '@adapttable/core/binding';
+import { selectFilterSpecs } from '@adapttable/core/binding';
 import { SELECTION_LIVE } from '@adapttable/core/binding';
 import { SELECTION_STATS_LIVE } from '@adapttable/core/binding';
 import { SelectionState } from '@adapttable/core/binding';
@@ -684,6 +691,7 @@ import { TableStore } from '@adapttable/core/binding';
 import { TableToolbarSlots } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
 import { TdHTMLAttributes } from 'react';
+import { textFilterSpecs } from '@adapttable/core/binding';
 import { ThHTMLAttributes } from 'react';
 import { toggleCollapsedColumnGroup } from '@adapttable/core/binding';
 import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
@@ -997,6 +1005,8 @@ export { bodyCellsHaveRowSpan }
 
 export { bodyRowEntries }
 
+export { booleanFilterSpecs }
+
 export { buildBodyCells }
 
 // @public
@@ -1110,6 +1120,8 @@ export interface ChecklistChromeProps<TRow> extends ChecklistFilterProps<TRow> {
 export { ChecklistClassNames }
 
 export { ChecklistFilterProps }
+
+export { checklistFilterSpecs }
 
 export { ChecklistSearchProps }
 
@@ -1529,6 +1541,9 @@ export function createAdapterEditingFeatures(components: AdapterEditingComponent
 
 // @public
 export function createAdapterFiltersFeature(components: AdapterFiltersComponents): AdapterFiltersFeature;
+
+// @public
+export function createAdapterFiltersFeatureOn(components: AdapterFiltersComponents, engine: FilterEngine): AdapterFiltersFeature;
 
 // @public
 export function createAdapterGroupingFeature(components: AdapterGroupingComponents): AdapterGroupingFeature;
@@ -2553,6 +2568,8 @@ export { filterColumnMenuRows }
 
 export { FilterDef }
 
+export { filterEngineForWidgets }
+
 export { FilterFormSource }
 
 // @public
@@ -2611,7 +2628,10 @@ export function FiltersIcon(): ReactElement;
 
 export { filterStateKeys }
 
-export { FilterTreeBuilderProps }
+// @public
+export interface FilterTreeBuilderProps<TRow> extends Omit<FilterTreeBuilderProps_2<TRow>, "registry"> {
+    readonly registry: FilterTypeRegistry;
+}
 
 export { FilterTreeButtonProps }
 
@@ -3968,6 +3988,8 @@ export interface MountStaggerOptions {
 // @public
 export function multiDraftFromSelect(select: HTMLSelectElement): string;
 
+export { multiSelectFilterSpecs }
+
 // @public
 export interface NestedTable {
     label?: string;
@@ -4181,6 +4203,8 @@ export { QueryFilterGroup }
 export { QueryGroupRow }
 
 export { QuerySupport }
+
+export { rangeFilterSpecs }
 
 // @public
 export interface ReactColumnGroupDef<TRow> extends Omit<ColumnGroupDef<TRow>, "children"> {
@@ -4579,6 +4603,8 @@ export interface SearchInputElementProps extends Props {
 }
 
 export { SearchInputState }
+
+export { selectFilterSpecs }
 
 export { SELECTION_LIVE }
 
@@ -5137,6 +5163,8 @@ export interface TableStatusAnnouncerProps {
 }
 
 export { TableVirtualization }
+
+export { textFilterSpecs }
 
 export { toggleCollapsedColumnGroup }
 

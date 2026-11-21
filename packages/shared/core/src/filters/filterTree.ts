@@ -7,7 +7,6 @@
 import type { ExtraFilters } from "../contracts/columns";
 import type { QueryCondition, QueryFilterGroup } from "../contracts/query";
 import { isFilterGroup } from "../source/queryContract";
-import { defaultFilterRegistry } from "./filterBuiltins";
 import { type FilterDef, filterPredicate } from "./filterDefs";
 import type { FilterTypeRegistry } from "./filterRegistry";
 import { settledFilterTree } from "./filterTreeCodec";
@@ -41,7 +40,7 @@ function asScalar(value: unknown): string | undefined {
 export function conditionToExtra<TRow>(
   def: FilterDef<TRow>,
   condition: QueryCondition,
-  registry: FilterTypeRegistry = defaultFilterRegistry
+  registry: FilterTypeRegistry
 ): ExtraFilters {
   const spec = registry.get(def.type);
   if (spec) return spec.conditionToExtra(def, condition);
@@ -77,7 +76,7 @@ export function evaluateFilterTree<TRow>(
   tree: QueryFilterGroup | undefined,
   row: TRow,
   defs: readonly FilterDef<TRow>[],
-  registry: FilterTypeRegistry = defaultFilterRegistry
+  registry: FilterTypeRegistry
 ): boolean {
   const settled = settledFilterTree(tree);
   if (!settled) return true;

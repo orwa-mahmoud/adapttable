@@ -727,7 +727,81 @@ function rangeSpec(flavour: "dateRange" | "numberRange"): FilterTypeSpec {
   };
 }
 
-/** Built-in types — the registry's first consumers. */
+/**
+ * The text filter's rules: its operators, predicate, chips and URL keys.
+ *
+ * A kit's text widget carries these, so a table that draws only text filters
+ * carries only text rules.
+ *
+ * @returns The `"text"` type.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function textFilterSpecs(): readonly FilterTypeSpec[] {
+  return [textSpec()];
+}
+
+/**
+ * The single-choice filter's rules.
+ *
+ * @returns The `"select"` type.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function selectFilterSpecs(): readonly FilterTypeSpec[] {
+  return [selectSpec("select")];
+}
+
+/**
+ * The multiple-choice filter's rules.
+ *
+ * @returns The `"multiSelect"` type.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function multiSelectFilterSpecs(): readonly FilterTypeSpec[] {
+  return [listSpec("multiSelect")];
+}
+
+/**
+ * The checklist filter's rules.
+ *
+ * @returns The `"checklist"` type.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function checklistFilterSpecs(): readonly FilterTypeSpec[] {
+  return [listSpec("checklist")];
+}
+
+/**
+ * The yes/no filter's rules.
+ *
+ * @returns The `"boolean"` type.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function booleanFilterSpecs(): readonly FilterTypeSpec[] {
+  return [booleanSpec()];
+}
+
+/**
+ * The date and number range filters' rules, relative dates included.
+ *
+ * @returns The `"dateRange"` and `"numberRange"` types.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function rangeFilterSpecs(): readonly FilterTypeSpec[] {
+  return [rangeSpec("dateRange"), rangeSpec("numberRange")];
+}
+
 /** Built-in specs — imported only by {@link defaultFilterRegistry}. */
 export function createBuiltInFilterSpecs(): FilterTypeSpec[] {
   return [

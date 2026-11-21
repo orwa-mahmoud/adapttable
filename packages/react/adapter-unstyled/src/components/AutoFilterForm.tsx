@@ -7,6 +7,8 @@ import {
   useTextFilterWidget,
 } from "@adapttable/react";
 import {
+  booleanFilterSpecs,
+  checklistFilterSpecs,
   defaultFilterRegistry,
   FILTER_LABELS,
   type FilterDef,
@@ -18,12 +20,16 @@ import {
   FilterWidgetField,
   type FilterWidgetProps,
   joinRelativeToken,
+  multiSelectFilterSpecs,
+  rangeFilterSpecs,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
   resolveTableLabels,
+  selectFilterSpecs,
   splitRelativeToken,
   type TableLabels,
   type TableSource,
+  textFilterSpecs,
 } from "@adapttable/react/adapter";
 import { type CSSProperties, type ReactNode, useId } from "react";
 
@@ -473,31 +479,37 @@ function RangeField<TRow>({
 export const textFilterWidget: FilterWidget = {
   kinds: ["text"],
   render: TextField,
+  specs: /* @__PURE__ */ textFilterSpecs(),
 };
 /** The unstyled yes/no filter. @public */
 export const booleanFilterWidget: FilterWidget = {
   kinds: ["boolean"],
   render: BooleanField,
+  specs: /* @__PURE__ */ booleanFilterSpecs(),
 };
 /** The unstyled single-choice filter. @public */
 export const selectFilterWidget: FilterWidget = {
   kinds: ["select"],
   render: SelectField,
+  specs: /* @__PURE__ */ selectFilterSpecs(),
 };
 /** The unstyled multiple-choice filter. @public */
 export const multiSelectFilterWidget: FilterWidget = {
   kinds: ["multiSelect"],
   render: MultiSelectField,
+  specs: /* @__PURE__ */ multiSelectFilterSpecs(),
 };
 /** The unstyled searchable checklist filter. @public */
 export const checklistFilterWidget: FilterWidget = {
   kinds: ["checklist"],
   render: ChecklistFilter,
+  specs: /* @__PURE__ */ checklistFilterSpecs(),
 };
 /** The unstyled operator-first number and date range filter. @public */
 export const rangeFilterWidget: FilterWidget = {
   kinds: ["dateRange", "numberRange"],
   render: RangeField,
+  specs: /* @__PURE__ */ rangeFilterSpecs(),
 };
 /** Every built-in widget: what the automatic filters form draws. */
 export const FILTER_WIDGETS: readonly FilterWidget[] = [

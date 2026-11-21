@@ -744,6 +744,9 @@ export interface BooleanFieldWidget {
 }
 
 // @public
+export function booleanFilterSpecs(): readonly FilterTypeSpec[];
+
+// @public
 export function booleanFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtra">): BooleanFieldWidget;
 
 // @public
@@ -1318,6 +1321,9 @@ export interface ChecklistFilterProps<TRow> {
     readonly labels?: TableLabels;
     readonly source: Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "facets">;
 }
+
+// @public
+export function checklistFilterSpecs(): readonly FilterTypeSpec[];
 
 // @public
 export interface ChecklistFilterState {
@@ -2448,7 +2454,7 @@ export function computePagination(input: {
 }): PaginationInfo;
 
 // @public
-export function conditionToExtra<TRow>(def: FilterDef<TRow>, condition: QueryCondition, registry?: FilterTypeRegistry): ExtraFilters;
+export function conditionToExtra<TRow>(def: FilterDef<TRow>, condition: QueryCondition, registry: FilterTypeRegistry): ExtraFilters;
 
 // @public
 export function configureIncrementalView<TRow>(view: IncrementalView<TRow>, patch: Partial<IncrementalViewConfig<TRow>>): IncrementalView<TRow>;
@@ -3002,6 +3008,9 @@ export function createExportController(initial: ExportControllerOptions): Export
 
 // @public
 export function createFeatureHost<TPanel extends SidePanelEntry = SidePanelEntry>(features: readonly FeatureSetup<unknown, TPanel>[] | undefined): FeatureHostState;
+
+// @public
+export function createFilterEngine(builtIns: FilterTypeRegistry): FilterEngine;
 
 // @public
 export function createFilterOptionsLoader(): FilterOptionsLoader;
@@ -5204,6 +5213,11 @@ export interface FilterEngine {
 }
 
 // @public
+export function filterEngineForWidgets(widgets: readonly {
+    readonly specs?: readonly FilterTypeSpec[];
+}[]): FilterEngine;
+
+// @public
 export function filterExportView<TRow>(view: readonly ExportViewEntry<TRow>[], scopedIds: ReadonlySet<string>, getRowId: (row: TRow) => string): ExportViewEntry<TRow>[];
 
 // @public
@@ -5624,6 +5638,7 @@ export type FilterWidgetKind = FilterType;
 export interface FilterWidgetOf<TRender> {
     readonly kinds: readonly FilterWidgetKind[];
     readonly render: TRender;
+    readonly specs?: readonly FilterTypeSpec[];
 }
 
 // @public
@@ -7771,6 +7786,9 @@ export interface MultiSelectEditorSlots<TNode = unknown, TKeyboardEvent = Keyboa
 }
 
 // @public
+export function multiSelectFilterSpecs(): readonly FilterTypeSpec[];
+
+// @public
 export const NESTED_TABLE_DEFAULT_LABEL = "Row details";
 
 // @public
@@ -8594,6 +8612,9 @@ export interface RangeFieldWidget {
     setOp: (op: RangeOp | undefined) => void;
     write: (nextOp: RangeOp | undefined, nextA: string, nextB: string) => void;
 }
+
+// @public
+export function rangeFilterSpecs(): readonly FilterTypeSpec[];
 
 // @public
 export function rangeFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtras">, op: RangeOp | undefined): Omit<RangeFieldWidget, "setOp">;
@@ -10072,6 +10093,9 @@ export const SELECTED_CELL_OUTLINE: {
 
 // @public
 export const SELECTED_IDS: SliceKey<ReadonlySet<string>>;
+
+// @public
+export function selectFilterSpecs(): readonly FilterTypeSpec[];
 
 // @public
 export function selectFrom<T>(store: TableStore, selector: (read: SliceRead) => T, equals?: (a: T, b: T) => boolean): StoreReader<T>;
@@ -12031,6 +12055,9 @@ export interface TextFieldWidget {
     value: string;
     write: (nextOp: TextOp, nextValue: string) => void;
 }
+
+// @public
+export function textFilterSpecs(): readonly FilterTypeSpec[];
 
 // @public
 export function textFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtras">, localOp: TextOp, setLocalOp: (op: TextOp) => void): TextFieldWidget;

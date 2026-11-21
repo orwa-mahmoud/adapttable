@@ -1604,7 +1604,19 @@ export {
   filterPredicate,
   materializeAutoOptions,
 } from "./filters/filterDefs";
-export { FILTER_ENGINE_IMPL } from "./filters/filterEngine";
+export {
+  booleanFilterSpecs,
+  checklistFilterSpecs,
+  multiSelectFilterSpecs,
+  rangeFilterSpecs,
+  selectFilterSpecs,
+  textFilterSpecs,
+} from "./filters/filterDefs";
+export {
+  createFilterEngine,
+  FILTER_ENGINE_IMPL,
+  filterEngineForWidgets,
+} from "./filters/filterEngine";
 export { withFilterType } from "./filters/filterRegistry";
 export { filterTreeConditionChips } from "./filters/filterTreeChips";
 export {

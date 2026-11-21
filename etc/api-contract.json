@@ -7160,7 +7160,15 @@
       "FilterWidget",
       "FilterWidgetField",
       "FilterWidgetFieldProps",
-      "FilterWidgetProps"
+      "FilterWidgetProps",
+      "createAdapterFiltersFeatureOn",
+      "booleanFilterSpecs",
+      "checklistFilterSpecs",
+      "filterEngineForWidgets",
+      "multiSelectFilterSpecs",
+      "rangeFilterSpecs",
+      "selectFilterSpecs",
+      "textFilterSpecs"
     ],
     "react-features": [
       "applyTableFeatures",
@@ -9153,7 +9161,15 @@
       "writeRangeWidget",
       "writeStoredColumnLayout",
       "filterWidgetFor",
-      "FilterWidgetOf"
+      "FilterWidgetOf",
+      "booleanFilterSpecs",
+      "checklistFilterSpecs",
+      "createFilterEngine",
+      "filterEngineForWidgets",
+      "multiSelectFilterSpecs",
+      "rangeFilterSpecs",
+      "selectFilterSpecs",
+      "textFilterSpecs"
     ],
     "core-conformance": [
       "CaseArgs",

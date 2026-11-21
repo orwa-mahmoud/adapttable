@@ -1,5 +1,6 @@
 import {
   type BatchEditingState,
+  defaultFilterRegistry,
   type QueryFilterGroup,
   type RowEditingState,
   type RowReorderState,
@@ -125,7 +126,11 @@ function TriggerHarness({ extra: initial = {} }: { extra?: ExtraFilters }) {
 function TreeHarness() {
   const [filterTree, setFilterTree] = useState<QueryFilterGroup | undefined>();
   return (
-    <FilterTreeBuilder defs={DEFS} source={{ filterTree, setFilterTree }} />
+    <FilterTreeBuilder
+      defs={DEFS}
+      source={{ filterTree, setFilterTree }}
+      registry={defaultFilterRegistry}
+    />
   );
 }
 
