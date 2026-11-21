@@ -6,10 +6,11 @@ import {
 } from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
+  loadEditConflictStore,
   slotRender,
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/binding";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import {
   createSSRApp,
   defineComponent,
@@ -72,6 +73,13 @@ function controls<TRow>(feature: TableFeature<TRow>): TableFeature<TRow> {
     slotRender(editableCellSlotKey<TRow>(), () => null),
   ]);
 }
+
+// The conflict store loads when an edit first opens; load it once so these
+// specs read the question asked, not the load.
+beforeAll(async () => {
+  await loadEditConflictStore();
+});
+
 describe("Vue filter models", () => {
   it("keeps a rejected controlled field value authoritative, without host mutation", () => {
     const scope = effectScope();

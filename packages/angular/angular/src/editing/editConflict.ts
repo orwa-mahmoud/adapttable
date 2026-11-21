@@ -11,7 +11,7 @@ import {
   type RowEditingState,
 } from "@adapttable/core";
 import {
-  createEditConflictStore,
+  createDeferredEditConflictStore,
   editConflictView,
 } from "@adapttable/core/editing";
 import {
@@ -56,7 +56,7 @@ export function injectEditConflict<TRow>(
 ): Signal<EditConflictState<TRow>> {
   if (!options.injector) assertInInjectionContext(injectEditConflict);
   const injector = options.injector ?? inject(Injector);
-  const store = createEditConflictStore<TRow>({
+  const store = createDeferredEditConflictStore<TRow>({
     store: tableStoreOf(injector),
   });
   const snapshot = fromStore(store, { injector });

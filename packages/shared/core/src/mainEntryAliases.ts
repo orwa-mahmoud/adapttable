@@ -38,7 +38,7 @@ import * as batchEditingModule from "./editing/batchEditing";
 import * as cellEditingModule from "./editing/cellEditing";
 import * as dirtyCellsModule from "./editing/dirtyCells";
 import * as editableCellModule from "./editing/editableCell";
-import * as editConflictModule from "./editing/editConflict";
+import * as editConflictModule from "./editing/editConflictView";
 import * as editHistoryModule from "./editing/editHistory";
 import * as editingGateModule from "./editing/editingGate";
 import * as editSessionModule from "./editing/editSession";
@@ -2713,14 +2713,6 @@ export const createControllableStore: typeof controllableStoreModule.createContr
  */
 export const createDirtyCellStore: typeof dirtyCellsModule.createDirtyCellStore =
   dirtyCellsModule.createDirtyCellStore;
-/**
- * The export of the same name on `@adapttable/core/binding`.
- *
- * @deprecated Import from `@adapttable/core/binding`.
- * @public
- */
-export const createEditConflictStore: typeof editConflictModule.createEditConflictStore =
-  editConflictModule.createEditConflictStore;
 /**
  * The export of the same name on `@adapttable/core/binding`.
  *

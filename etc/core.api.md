@@ -2637,14 +2637,6 @@ function createDirtyCellStore_2(options?: DirtyCellStoreOptions, within?: {
 }): DirtyCellStore_2;
 
 // @public @deprecated
-export const createEditConflictStore: typeof createEditConflictStore_2;
-
-// @public
-function createEditConflictStore_2<TRow>(within?: {
-    readonly store?: TableStore;
-}): EditConflictStore_2<TRow>;
-
-// @public @deprecated
 export const createEditHistoryStack: typeof createEditHistoryStack_2;
 
 // @public

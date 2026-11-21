@@ -2984,14 +2984,14 @@ export function createContextMenuOpenController<TRow>(initial: ContextMenuOpenCo
 export function createControllableStore<T>(initial: T, options?: ControllableStoreOptions<T>): ControllableStore<T>;
 
 // @public
+export function createDeferredEditConflictStore<TRow>(within?: {
+    readonly store?: TableStore;
+}): EditConflictStore<TRow>;
+
+// @public
 export function createDirtyCellStore(options?: DirtyCellStoreOptions, within?: {
     readonly store?: TableStore;
 }): DirtyCellStore;
-
-// @public
-export function createEditConflictStore<TRow>(within?: {
-    readonly store?: TableStore;
-}): EditConflictStore<TRow>;
 
 // @public
 export function createEditHistoryStack<TRow>(within?: {
@@ -7619,6 +7619,9 @@ export interface LoadedFilterOption {
     label: string;
     value: string;
 }
+
+// @public
+export function loadEditConflictStore(): Promise<void>;
 
 // @public
 export function localizedColumnPath(column: Pick<ColumnModel<unknown>, "key" | "i18n">, locale: string | undefined): string;

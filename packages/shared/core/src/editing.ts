@@ -44,6 +44,10 @@ export {
   resolveCellEditor,
 } from "./editing/cellEditing";
 export {
+  createDeferredEditConflictStore,
+  loadEditConflictStore,
+} from "./editing/deferredEditConflict";
+export {
   createDirtyCellStore,
   dirtyCellKey,
   type DirtyCellSnapshot,
@@ -79,7 +83,6 @@ export {
   contestedCellKey,
   type ContestedEditCell,
   contestedRowSignature,
-  createEditConflictStore,
   type EditConflictSnapshot,
   type EditConflictState,
   type EditConflictStore,
@@ -91,7 +94,7 @@ export {
   type ReconcileLiveEdit,
   type ReconcileLiveRowEdit,
   resolveConflictChoice,
-} from "./editing/editConflict";
+} from "./editing/editConflictView";
 export type {
   BatchRowEdit,
   CellValidator,

@@ -14,7 +14,7 @@ import {
   type ContestedEditCell,
   contestedRowSignature,
   type EditConflictSnapshot,
-} from "./editConflict";
+} from "./editConflictView";
 import {
   cellSaveKey,
   cellSaveStatus,

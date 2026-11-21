@@ -17059,7 +17059,15 @@
       "behavior": ""
     },
     {
-      "export": "createEditConflictStore",
+      "export": "createDeferredEditConflictStore",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "loadEditConflictStore",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -28555,7 +28563,15 @@
       "behavior": ""
     },
     {
-      "export": "createEditConflictStore",
+      "export": "createDeferredEditConflictStore",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
+      "export": "loadEditConflictStore",
       "currentImport": "@adapttable/core/editing",
       "kind": "value",
       "class": "neutral-operation",
@@ -37812,14 +37828,6 @@
     },
     {
       "export": "createDirtyCellStore",
-      "currentImport": "@adapttable/core",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core",
-      "behavior": ""
-    },
-    {
-      "export": "createEditConflictStore",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",

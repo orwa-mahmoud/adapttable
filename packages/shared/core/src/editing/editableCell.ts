@@ -25,7 +25,7 @@ import {
   resolveCommitValue,
 } from "./cellEditing";
 import type { DirtyCellState } from "./dirtyCells";
-import type { EditConflictState } from "./editConflict";
+import type { EditConflictState } from "./editConflictView";
 import type {
   CellValidator,
   EditConflict,

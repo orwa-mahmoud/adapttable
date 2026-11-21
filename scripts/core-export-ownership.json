@@ -1954,17 +1954,6 @@
       "subpaths": ["."]
     },
     {
-      "name": "createEditConflictStore",
-      "kind": "runtime",
-      "module": "mainEntryAliases.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": false,
-      "deprecated": true,
-      "identity": "mainEntryAliases.ts#createEditConflictStore",
-      "subpaths": ["."]
-    },
-    {
       "name": "createEditHistoryStack",
       "kind": "runtime",
       "module": "mainEntryAliases.ts",
@@ -27795,23 +27784,23 @@
     {
       "name": "contestedCellKey",
       "kind": "runtime",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#contestedCellKey",
+      "identity": "editing/editConflictView.ts#contestedCellKey",
       "subpaths": ["./binding", "./editing"]
     },
     {
       "name": "contestedRowSignature",
       "kind": "runtime",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#contestedRowSignature",
+      "identity": "editing/editConflictView.ts#contestedRowSignature",
       "subpaths": ["./binding", "./editing"]
     },
     {
@@ -27859,6 +27848,17 @@
       "subpaths": ["./binding", "./editing"]
     },
     {
+      "name": "createDeferredEditConflictStore",
+      "kind": "runtime",
+      "module": "editing/deferredEditConflict.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "editing/deferredEditConflict.ts#createDeferredEditConflictStore",
+      "subpaths": ["./binding", "./editing"]
+    },
+    {
       "name": "createDirtyCellStore",
       "kind": "runtime",
       "module": "editing/dirtyCells.ts",
@@ -27867,17 +27867,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/dirtyCells.ts#createDirtyCellStore",
-      "subpaths": ["./binding", "./editing"]
-    },
-    {
-      "name": "createEditConflictStore",
-      "kind": "runtime",
-      "module": "editing/editConflict.ts",
-      "audience": "app",
-      "path": "./editing",
-      "forward": true,
-      "deprecated": false,
-      "identity": "editing/editConflict.ts#createEditConflictStore",
       "subpaths": ["./binding", "./editing"]
     },
     {
@@ -28037,12 +28026,12 @@
     {
       "name": "editConflictView",
       "kind": "runtime",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#editConflictView",
+      "identity": "editing/editConflictView.ts#editConflictView",
       "subpaths": ["./binding", "./editing"]
     },
     {
@@ -28224,12 +28213,12 @@
     {
       "name": "isCellInConflict",
       "kind": "runtime",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#isCellInConflict",
+      "identity": "editing/editConflictView.ts#isCellInConflict",
       "subpaths": ["./binding", "./editing"]
     },
     {
@@ -28290,12 +28279,12 @@
     {
       "name": "isRowContested",
       "kind": "runtime",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#isRowContested",
+      "identity": "editing/editConflictView.ts#isRowContested",
       "subpaths": ["./binding", "./editing"]
     },
     {
@@ -28312,13 +28301,24 @@
     {
       "name": "liveRowChanged",
       "kind": "runtime",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#liveRowChanged",
+      "identity": "editing/editConflictView.ts#liveRowChanged",
       "subpaths": ["./editing"]
+    },
+    {
+      "name": "loadEditConflictStore",
+      "kind": "runtime",
+      "module": "editing/deferredEditConflict.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "editing/deferredEditConflict.ts#loadEditConflictStore",
+      "subpaths": ["./binding", "./editing"]
     },
     {
       "name": "MULTI_SEPARATOR",
@@ -28422,12 +28422,12 @@
     {
       "name": "resolveConflictChoice",
       "kind": "runtime",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#resolveConflictChoice",
+      "identity": "editing/editConflictView.ts#resolveConflictChoice",
       "subpaths": ["./binding", "./editing"]
     },
     {
@@ -29545,12 +29545,12 @@
     {
       "name": "ContestedEditCell",
       "kind": "type",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#ContestedEditCell",
+      "identity": "editing/editConflictView.ts#ContestedEditCell",
       "subpaths": [".", "./binding", "./editing"]
     },
     {
@@ -29928,34 +29928,34 @@
     {
       "name": "EditConflictSnapshot",
       "kind": "type",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#EditConflictSnapshot",
+      "identity": "editing/editConflictView.ts#EditConflictSnapshot",
       "subpaths": [".", "./binding", "./editing"]
     },
     {
       "name": "EditConflictState",
       "kind": "type",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#EditConflictState",
+      "identity": "editing/editConflictView.ts#EditConflictState",
       "subpaths": [".", "./binding", "./editing"]
     },
     {
       "name": "EditConflictStore",
       "kind": "type",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#EditConflictStore",
+      "identity": "editing/editConflictView.ts#EditConflictStore",
       "subpaths": ["./binding", "./editing"]
     },
     {
@@ -30984,34 +30984,34 @@
     {
       "name": "ReconcileLiveBatchEdit",
       "kind": "type",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#ReconcileLiveBatchEdit",
+      "identity": "editing/editConflictView.ts#ReconcileLiveBatchEdit",
       "subpaths": [".", "./binding", "./editing"]
     },
     {
       "name": "ReconcileLiveEdit",
       "kind": "type",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#ReconcileLiveEdit",
+      "identity": "editing/editConflictView.ts#ReconcileLiveEdit",
       "subpaths": [".", "./binding", "./editing"]
     },
     {
       "name": "ReconcileLiveRowEdit",
       "kind": "type",
-      "module": "editing/editConflict.ts",
+      "module": "editing/editConflictView.ts",
       "audience": "app",
       "path": "./editing",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editConflict.ts#ReconcileLiveRowEdit",
+      "identity": "editing/editConflictView.ts#ReconcileLiveRowEdit",
       "subpaths": [".", "./binding", "./editing"]
     },
     {

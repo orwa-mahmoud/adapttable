@@ -1,8 +1,9 @@
 import {
   type EditableCellButtonProps,
+  loadEditConflictStore,
   slotRender,
 } from "@adapttable/core/binding";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import {
   createApp,
   effectScope,
@@ -74,6 +75,13 @@ const controls: EditableCellChromeSlots<Row> = {
   Editor: (props) => h("b", props.label),
   Button: (props) => h("u", props.label),
 };
+
+// The conflict store loads when an edit first opens; load it once so these
+// specs read the question asked, not the load.
+beforeAll(async () => {
+  await loadEditConflictStore();
+});
+
 describe("editable cell control contracts", () => {
   it("renders display without editing and rejects absent native controls when enabled", () => {
     const value = fixture({ onCellEdit: undefined });

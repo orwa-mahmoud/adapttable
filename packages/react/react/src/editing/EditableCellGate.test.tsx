@@ -1,3 +1,4 @@
+import { loadEditConflictStore } from "@adapttable/core/binding";
 import { formatMultiDraft } from "@adapttable/core/editing";
 import {
   act,
@@ -6,7 +7,7 @@ import {
   renderHook,
   screen,
 } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import { batchEditing } from "../features/editing";
@@ -26,6 +27,12 @@ import {
 import { useEditConflict } from "./editConflict";
 import { useCellSaveState } from "./saveState";
 import { useCellEditing } from "./useCellEditing";
+
+// The conflict store loads when an edit first opens; these specs are about
+// the question it asks, so it is loaded up front. Core covers the load.
+beforeAll(async () => {
+  await loadEditConflictStore();
+});
 
 interface Person {
   id: string;

@@ -1,5 +1,6 @@
+import { loadEditConflictStore } from "@adapttable/core/binding";
 import { act, render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import type { EditConflictPolicy } from "../editing/editConflict";
@@ -12,6 +13,12 @@ import { batchEditing, editing, rowEditing } from "./editing";
 import { FeatureProviders } from "./providers";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
 import { tree } from "./tree";
+
+// The conflict store loads when an edit first opens; these specs are about
+// the question it asks, so it is loaded up front. Core covers the load.
+beforeAll(async () => {
+  await loadEditConflictStore();
+});
 
 /**
  * What an open editor and an expanding tree do when the host's data moves

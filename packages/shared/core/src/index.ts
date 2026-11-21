@@ -175,7 +175,7 @@ export {
   type ReconcileLiveBatchEdit,
   type ReconcileLiveEdit,
   type ReconcileLiveRowEdit,
-} from "./editing/editConflict";
+} from "./editing/editConflictView";
 export type {
   BatchRowEdit,
   CellValidator,
@@ -863,7 +863,7 @@ export {
   deferredXlsxWriter,
   type ExportWriterOption,
 } from "./export/deferredWriter";
-export * from "./mainEntryAliases";
-export * from "./panelFeatureExports";
 export type { PdfWriterOptions } from "./export/pdf";
 export type { PrintPageBreak, PrintPageSize } from "./export/printLayout";
+export * from "./mainEntryAliases";
+export * from "./panelFeatureExports";

@@ -670,14 +670,14 @@ export function createCellSaveStore<TRow>(options?: CellSaveStoreOptions<TRow>, 
 }): CellSaveStore<TRow>;
 
 // @public
+export function createDeferredEditConflictStore<TRow>(within?: {
+    readonly store?: TableStore;
+}): EditConflictStore<TRow>;
+
+// @public
 export function createDirtyCellStore(options?: DirtyCellStoreOptions, within?: {
     readonly store?: TableStore;
 }): DirtyCellStore;
-
-// @public
-export function createEditConflictStore<TRow>(within?: {
-    readonly store?: TableStore;
-}): EditConflictStore<TRow>;
 
 // @public
 export function createEditHistory<TRow>(options: EditHistoryControllerOptions<TRow>, within?: {
@@ -1609,6 +1609,9 @@ export function liveRowChanged<TRow>(input: {
     column: EditableColumnLike<TRow>;
     rowVersion?: (row: TRow) => string | number;
 }): boolean;
+
+// @public
+export function loadEditConflictStore(): Promise<void>;
 
 // @public
 export const MULTI_SEPARATOR = "";

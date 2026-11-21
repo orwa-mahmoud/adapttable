@@ -421,8 +421,10 @@ describe("Naive UI editing alternate controls", () => {
     const input = await activate(view.host);
     await write(input, "Mine");
     view.rows.value = [{ ...original, name: "Theirs" }];
-    await tick();
-    const conflict = find(view.host, part("edit-cell-conflict"));
+    // The conflict store loads with the first open edit; the question follows.
+    const conflict = await vi.waitFor(() =>
+      find(view.host, part("edit-cell-conflict"))
+    );
     expect(conflict.tagName).toBe("SPAN");
     expect(conflict.getAttribute("role")).toBe("alert");
     expect(input.getAttribute("aria-describedby")).toBe(conflict.id);

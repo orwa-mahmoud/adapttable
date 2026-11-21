@@ -3,11 +3,12 @@
  *
  * The table does not own the data, so it cannot merge. It can keep what the
  * reader typed, take the incoming value, or ask. The reconciler lives in
- * `@adapttable/core` (`createEditConflictStore`); this hook subscribes to it.
+ * `@adapttable/core` and loads when an edit first opens
+ * (`createDeferredEditConflictStore`); this hook subscribes to it.
  */
 import { type EditConflictState } from "@adapttable/core";
 import {
-  createEditConflictStore,
+  createDeferredEditConflictStore,
   editConflictView,
 } from "@adapttable/core/editing";
 import { useMemo, useState, useSyncExternalStore } from "react";
@@ -35,7 +36,7 @@ export {
  * @public
  */
 export function useEditConflict<TRow>(): EditConflictState<TRow> {
-  const [store] = useState(createEditConflictStore<TRow>);
+  const [store] = useState(createDeferredEditConflictStore<TRow>);
   const snapshot = useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,

@@ -5,6 +5,7 @@ import {
   type EditConflictPolicy,
   injectQuerySource,
 } from "@adapttable/angular";
+import { loadEditConflictStore } from "@adapttable/core/binding";
 import {
   collectConformanceTests,
   type ConformanceTest,
@@ -26,7 +27,11 @@ export function editConflictTests(
 ): readonly ConformanceTest[] {
   const { Table: AdaptDataTable, kitSelector } = kit;
   const { batchEditing, editing, grouping, rowEditing } = kit.features;
-  return collectConformanceTests(({ describe, it, afterEach }) => {
+  return collectConformanceTests(({ describe, it, afterEach, beforeEach }) => {
+    // The conflict store loads when an edit first opens; these specs are about
+    // the question it asks, so it is loaded up front. Core covers the load.
+    beforeEach(() => loadEditConflictStore());
+
     /**
      * Live updates through mounted native editors: conflict choices, guarded
      * commits and session cleanup on desktop rows and mobile cards.

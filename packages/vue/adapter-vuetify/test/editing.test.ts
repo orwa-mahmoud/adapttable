@@ -349,8 +349,10 @@ it("renders binding-owned conflict resolution with genuine Vuetify actions", asy
   const input = await activate(host);
   await write(input, "Mine");
   rows.value = [{ ...original, name: "Theirs" }];
-  await settle();
-  const conflict = node(host, part("edit-cell-conflict"));
+  // The conflict store loads with the first open edit; the question follows.
+  const conflict = await vi.waitFor(() =>
+    node(host, part("edit-cell-conflict"))
+  );
   expect(input.getAttribute("aria-describedby")).toBe(conflict.id);
   expect(node(host, part("edit-cell-incoming")).textContent).toContain(
     "Theirs"
@@ -381,8 +383,10 @@ it("takes the host's incoming value without making a write request", async () =>
   const input = await activate(host);
   await write(input, "Mine");
   rows.value = [{ ...original, name: "Theirs" }];
-  await settle();
-  const take = node<HTMLButtonElement>(host, part("edit-cell-take-theirs"));
+  // The conflict store loads with the first open edit; the question follows.
+  const take = await vi.waitFor(() =>
+    node<HTMLButtonElement>(host, part("edit-cell-take-theirs"))
+  );
   expect(take.classList.contains("v-btn")).toBe(true);
   take.click();
   await settle();

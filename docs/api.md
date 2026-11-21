@@ -952,12 +952,13 @@ EditHistoryController` — the history a table runs: records a gesture with
   `resolveEditHistory` reads the `editHistory` prop (`EditHistoryInput`: `true`
   or `{ depth }`), and `recordingCellEdit`
   wraps the channel so each inline commit is one gesture.
-- `createEditConflictStore(): EditConflictStore` — the live-update
+- `createDeferredEditConflictStore(): EditConflictStore` — the live-update
   reconciler for the open cell, an open row form and a batch
   (`ReconcileLiveEdit`, `ReconcileLiveRowEdit`, `ReconcileLiveBatchEdit`): a
   field the reader never typed in takes what arrived, the rest follow
-  `onEditConflict` or the policy, and "ask" holds the question.
-  `EditConflictSnapshot`, `ContestedEditCell`, `contestedCellKey`,
+  `onEditConflict` or the policy, and "ask" holds the question. Its module
+  loads when the first edit opens; `loadEditConflictStore()` loads it ahead of
+  time. `EditConflictSnapshot`, `ContestedEditCell`, `contestedCellKey`,
   `isCellInConflict`, `isRowContested`, `contestedRowSignature`,
   `editConflictView` (`EditConflictState`), `liveRowChanged`,
   `resolveConflictChoice`.

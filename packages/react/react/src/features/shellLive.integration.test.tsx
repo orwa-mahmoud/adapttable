@@ -1,6 +1,7 @@
 import type { ExportRequest, TreeShape } from "@adapttable/core";
+import { loadEditConflictStore } from "@adapttable/core/binding";
 import { act, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import {
@@ -22,6 +23,12 @@ import { selectionStats } from "./selection-stats";
 import { GRID_FOCUS_ANNOUNCER } from "./slotKeys";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
 import { tree } from "./tree";
+
+// The conflict store loads when an edit first opens; these specs are about
+// the question it asks, so it is loaded up front. Core covers the load.
+beforeAll(async () => {
+  await loadEditConflictStore();
+});
 
 /**
  * The shell's live interaction hooks, mounted by the features that own them.

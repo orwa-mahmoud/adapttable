@@ -1450,6 +1450,10 @@ export {
   readMultiDraft,
   stepEditableCell,
 } from "./editing/cellEditing";
+export {
+  createDeferredEditConflictStore,
+  loadEditConflictStore,
+} from "./editing/deferredEditConflict";
 export type { DirtyCellSnapshot, DirtyCellStore } from "./editing/dirtyCells";
 export {
   createDirtyCellStore,
@@ -1465,15 +1469,14 @@ export {
   focusEditorOnMount,
   stopCellEditKeyboard,
 } from "./editing/editableCell";
-export type { EditConflictStore } from "./editing/editConflict";
+export type { EditConflictStore } from "./editing/editConflictView";
 export {
   contestedCellKey,
   contestedRowSignature,
-  createEditConflictStore,
   editConflictView,
   isCellInConflict,
   resolveConflictChoice,
-} from "./editing/editConflict";
+} from "./editing/editConflictView";
 export type { EditHistoryStack } from "./editing/editHistory";
 export {
   cellsOfBatch,
@@ -2162,8 +2165,8 @@ export type {
   ReconcileLiveBatchEdit,
   ReconcileLiveEdit,
   ReconcileLiveRowEdit,
-} from "./editing/editConflict";
-export { isRowContested } from "./editing/editConflict";
+} from "./editing/editConflictView";
+export { isRowContested } from "./editing/editConflictView";
 export type {
   CellValidator,
   EditConflict,

@@ -28,8 +28,8 @@ import {
   createBatchEditStore,
   createCellEditSession,
   createCellSaveStore,
+  createDeferredEditConflictStore,
   createDirtyCellStore,
-  createEditConflictStore,
   createEditHistory,
   createEditValidationStore,
   createRowEditStore,
@@ -503,7 +503,7 @@ export function useTableEditing<TRow>(
     },
     { immediate: true, flush: "sync" }
   );
-  const conflicts = createEditConflictStore<TRow>({
+  const conflicts = createDeferredEditConflictStore<TRow>({
     store: injectTableStore(),
   });
   const conflictSnapshot = useExternalStore(conflicts, lifecycle);
