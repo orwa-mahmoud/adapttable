@@ -12,6 +12,7 @@
 import type { TableStore } from "../state/tableStore";
 import { devWarn } from "../utils/devWarn";
 import { type EditableColumnLike, readEditableCellValue } from "./cellEditing";
+import { cellIdentity, cellIdentityParts, cellKeysByRow } from "./cellIdentity";
 import type {
   EditConflict,
   EditConflictChange,
@@ -343,12 +344,12 @@ function sameContested<TRow>(
  * @public
  */
 export function contestedCellKey(rowId: string, columnKey: string): string {
-  return `${rowId}\u0000${columnKey}`;
+  return cellIdentity(rowId, columnKey);
 }
 
 /** Whether a contested key belongs to this row. */
 function ofRow(key: string, rowId: string): boolean {
-  return key.startsWith(`${rowId}\u0000`);
+  return cellIdentityParts(key)[0] === rowId;
 }
 
 /** How the open cell's question is answered. */
@@ -377,7 +378,9 @@ export function createEditConflictStore<TRow>(
     },
     within.store
   );
+  /** The question last asked, as `[unit, row, column, incoming]` JSON. */
   let seen = "";
+  let seenUnit: "cell" | "row" | null = null;
   /**
    * How to answer the conflict being asked about — captured from the pass that
    * raised it. A cell and a row form resolve differently, and a table that
@@ -408,6 +411,7 @@ export function createEditConflictStore<TRow>(
 
   const clear = (): void => {
     seen = "";
+    seenUnit = null;
     pending = null;
     answer = null;
     setCurrent(null);
@@ -421,7 +425,7 @@ export function createEditConflictStore<TRow>(
    * row pass had just asked, which the row pass then asked again.
    */
   const clearUnit = (unit: "cell" | "row"): void => {
-    if (!seen.startsWith(`${unit}::`)) return;
+    if (seenUnit !== unit) return;
     clear();
   };
 
@@ -614,9 +618,15 @@ export function createEditConflictStore<TRow>(
       }
       const incomingValue = readEditableCellValue(live, column);
       const previousValue = readEditableCellValue(openedRow, column);
-      const token = `cell::${active.rowId}::${active.columnKey}::${incomingValue}`;
+      const token = JSON.stringify([
+        "cell",
+        active.rowId,
+        active.columnKey,
+        incomingValue,
+      ]);
       if (token === seen) return;
       seen = token;
+      seenUnit = "cell";
       const conflict: EditConflict<TRow> = {
         unit: "cell",
         row: live,
@@ -669,8 +679,7 @@ export function createEditConflictStore<TRow>(
     },
     reconcileBatch(input) {
       const open = new Set(input.entries.map((entry) => entry.rowId));
-      for (const key of contested.keys()) {
-        const rowId = key.slice(0, key.indexOf("\u0000"));
+      for (const rowId of cellKeysByRow(contested).keys()) {
         if (!open.has(rowId)) dropRow(rowId);
       }
       for (const entry of input.entries) {
@@ -730,10 +739,7 @@ export function isRowContested<TRow>(
   snapshot: EditConflictSnapshot<TRow>,
   rowId: string
 ): boolean {
-  for (const key of snapshot.contested.keys()) {
-    if (ofRow(key, rowId)) return true;
-  }
-  return false;
+  return cellKeysByRow(snapshot.contested).has(rowId);
 }
 
 /**
@@ -745,13 +751,14 @@ export function contestedRowSignature<TRow>(
   snapshot: EditConflictSnapshot<TRow>,
   rowId: string
 ): string {
-  let digest = "";
-  for (const [key, cell] of snapshot.contested) {
-    if (ofRow(key, rowId)) {
-      digest += `|${key.slice(rowId.length + 1)}=${cell.incoming}`;
-    }
-  }
-  return digest;
+  const keys = cellKeysByRow(snapshot.contested).get(rowId);
+  if (!keys) return "";
+  return JSON.stringify(
+    keys.map((key) => [
+      cellIdentityParts(key)[1],
+      snapshot.contested.get(key)?.incoming,
+    ])
+  );
 }
 
 /**

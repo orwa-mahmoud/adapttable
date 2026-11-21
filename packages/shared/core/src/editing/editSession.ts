@@ -14,6 +14,7 @@ import {
   type EditableColumnLike,
   stepEditableCell,
 } from "./cellEditing";
+import { cellIdentity, cellKeysByRow } from "./cellIdentity";
 import type { EditEvent, EditEventHandler } from "./editContracts";
 import { preserveEditorFocusOnLayoutChange } from "./layoutFocus";
 import { isThenable, stateCell } from "./storePlumbing";
@@ -387,7 +388,7 @@ export interface CellSaveStore<TRow> {
  * @public
  */
 export function cellSaveKey(rowId: string, columnKey: string): string {
-  return `${rowId} ${columnKey}`;
+  return cellIdentity(rowId, columnKey);
 }
 
 /**
@@ -437,12 +438,28 @@ export function cellSaveFailure<TRow>(
 export function cellSaveSignature<TRow>(
   snapshot: CellSaveSnapshot<TRow>
 ): string {
-  return [
-    ...snapshot.saving,
-    ...[...snapshot.failures.entries()].map(
-      ([key, failure]) => key + failure.message
-    ),
-  ].join("");
+  if (snapshot.saving.size === 0 && snapshot.failures.size === 0) return "";
+  return JSON.stringify([
+    [...snapshot.saving],
+    [...snapshot.failures].map(([key, failure]) => [key, failure.message]),
+  ]);
+}
+
+/**
+ * A value-comparable digest of one row's save state, for that row's memo;
+ * empty when none of its cells is saving or failed.
+ */
+export function cellSaveRowSignature<TRow>(
+  snapshot: CellSaveSnapshot<TRow>,
+  rowId: string
+): string {
+  const saving = cellKeysByRow(snapshot.saving).get(rowId);
+  const failed = cellKeysByRow(snapshot.failures).get(rowId);
+  if (!saving && !failed) return "";
+  return JSON.stringify([
+    saving ?? [],
+    (failed ?? []).map((key) => [key, snapshot.failures.get(key)?.message]),
+  ]);
 }
 
 /**

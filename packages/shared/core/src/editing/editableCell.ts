@@ -37,6 +37,7 @@ import {
   type CellEditSession,
   type CellEditSnapshot,
   cellSaveFailure,
+  cellSaveRowSignature,
   cellSaveSignature,
   type CellSaveSnapshot,
   type CellSaveStatus,
@@ -280,6 +281,8 @@ export interface CellSaveState<TRow> {
   clear: (rowId: string, columnKey: string) => void;
   /** A digest of the states, for a row memo comparator. */
   signature: string;
+  /** A digest of one row's states, for that row's memo comparator. */
+  rowSignature?: (rowId: string) => string;
   /**
    * Whether the table was told how to put a row back. An undo control offered
    * without one would do nothing when pressed.
@@ -310,6 +313,7 @@ export function cellSaveView<TRow>(
     rollback: store.rollback,
     clear: store.clear,
     signature: cellSaveSignature(snapshot),
+    rowSignature: (rowId) => cellSaveRowSignature(snapshot, rowId),
     canRollback,
   };
 }

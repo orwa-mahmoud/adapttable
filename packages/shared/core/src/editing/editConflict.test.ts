@@ -566,8 +566,12 @@ describe("a batch of open rows", () => {
       take: vi.fn(),
     });
 
-    expect(result.current.rowSignature("1")).toBe("|title=Arrived");
-    expect(result.current.rowSignature("2")).toBe("|title=Moved");
+    const first = result.current.rowSignature("1");
+    const second = result.current.rowSignature("2");
+    expect(first).toContain("Arrived");
+    expect(first).not.toContain("Moved");
+    expect(second).toContain("Moved");
+    expect(second).not.toContain("Arrived");
   });
 });
 

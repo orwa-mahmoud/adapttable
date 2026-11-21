@@ -608,6 +608,7 @@ export interface BatchEditingState<TRow> {
     isChanged: (rowId: string, columnKey: string) => boolean;
     isPending: (rowId: string) => boolean;
     pending: boolean;
+    rowSignature?: (rowId: string) => string;
     saveAll: () => void;
     setDraft: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string, value: string], void>;
     signature: string;
@@ -1153,6 +1154,7 @@ export interface CellSaveState<TRow> {
     clear: (rowId: string, columnKey: string) => void;
     failureFor: (rowId: string, columnKey: string) => FailedCellSave<TRow> | undefined;
     rollback: (rowId: string, columnKey: string) => void;
+    rowSignature?: (rowId: string) => string;
     signature: string;
     statusFor: (rowId: string, columnKey: string) => CellSaveStatus | undefined;
     track: (options: {
@@ -3871,6 +3873,7 @@ export interface DirtyCellState {
     isDirty: (rowId: string, columnKey: string) => boolean;
     isRowDirty: (rowId: string) => boolean;
     mark: (rowId: string, columnKey: string) => void;
+    rowSignature?: (rowId: string) => string;
     signature: string;
 }
 
@@ -3992,6 +3995,7 @@ export interface EditableCellEditing<_TRow = unknown> {
     // (undocumented)
     batch?: {
         signature?: string;
+        rowSignature?: (rowId: string) => string;
     };
     // (undocumented)
     conflict?: {
@@ -4006,6 +4010,7 @@ export interface EditableCellEditing<_TRow = unknown> {
     dirty?: {
         isRowDirty(rowId: string): boolean;
         signature?: string;
+        rowSignature?: (rowId: string) => string;
     };
     // (undocumented)
     rowEditing?: {
@@ -4015,6 +4020,7 @@ export interface EditableCellEditing<_TRow = unknown> {
     // (undocumented)
     saving?: {
         signature?: string;
+        rowSignature?: (rowId: string) => string;
     };
     // (undocumented)
     state: {

@@ -5,6 +5,7 @@
  * ignored, so it cannot replace the message or the draft the cell holds now.
  */
 import type { TableStore } from "../state/tableStore";
+import { cellIdentity, cellKeysByRow } from "./cellIdentity";
 import type {
   CellValidator,
   RowValidator,
@@ -93,7 +94,7 @@ export interface EditValidationStore<TRow> {
  * @public
  */
 export function validationKey(rowId: string, columnKey: string): string {
-  return `${rowId}\u0000${columnKey}`;
+  return cellIdentity(rowId, columnKey);
 }
 
 /**
@@ -118,12 +119,10 @@ export function rowHasValidationError(
   snapshot: EditValidationSnapshot,
   rowId: string
 ): boolean {
-  if (snapshot.rowErrors.has(rowId)) return true;
-  const prefix = `${rowId}\u0000`;
-  for (const key of snapshot.cellErrors.keys()) {
-    if (key.startsWith(prefix)) return true;
-  }
-  return false;
+  return (
+    snapshot.rowErrors.has(rowId) ||
+    cellKeysByRow(snapshot.cellErrors).has(rowId)
+  );
 }
 
 /**
@@ -132,13 +131,9 @@ export function rowHasValidationError(
  * @public
  */
 export function validationSignature(snapshot: EditValidationSnapshot): string {
-  return [
-    ...snapshot.cellErrors.entries(),
-    ...snapshot.rowErrors.entries(),
-    ...snapshot.validating,
-  ]
-    .flat()
-    .join("\u0001");
+  const { cellErrors, rowErrors, validating } = snapshot;
+  if (cellErrors.size + rowErrors.size + validating.size === 0) return "";
+  return JSON.stringify([[...cellErrors], [...rowErrors], [...validating]]);
 }
 
 function shallowApplyEdit<TRow>(

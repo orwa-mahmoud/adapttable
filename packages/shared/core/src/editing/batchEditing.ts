@@ -108,6 +108,8 @@ export interface BatchEditingState<TRow> {
   >;
   /** A digest of the pending drafts, for a row memo comparator. */
   signature: string;
+  /** A digest of one row's pending drafts, for that row's memo comparator. */
+  rowSignature?: (rowId: string) => string;
   /** The table that owns these editors — never a sibling's host. */
   featureHost?: FeatureHostState;
 }
@@ -214,6 +216,13 @@ export interface BatchEditStore<TRow> {
   >;
 }
 
+/** A digest of every pending draft; empty when nothing is pending. */
+function batchSignature(pending: BatchPendingDrafts): string {
+  const rows = Object.entries(pending);
+  if (rows.length === 0) return "";
+  return JSON.stringify(rows.map(([rowId, entry]) => [rowId, entry.drafts]));
+}
+
 /** The snapshot for a pending set. */
 function batchSnapshot(pending: BatchPendingDrafts): BatchEditSnapshot {
   return {
@@ -224,14 +233,7 @@ function batchSnapshot(pending: BatchPendingDrafts): BatchEditSnapshot {
       seeds: entry.seeds,
       drafts: entry.drafts,
     })),
-    signature: Object.entries(pending)
-      .map(
-        ([rowId, entry]) =>
-          `${rowId}:${Object.entries(entry.drafts)
-            .map(([key, value]) => `${key}=${value}`)
-            .join("|")}`
-      )
-      .join(";"),
+    signature: batchSignature(pending),
   };
 }
 
@@ -510,6 +512,10 @@ export function batchEditingView<TRow>(
     acceptSeeds: store.acceptSeeds,
     takeSeeds: store.takeSeeds,
     signature: snapshot.signature,
+    rowSignature: (rowId) => {
+      const entry = pending[rowId];
+      return entry ? JSON.stringify(entry.drafts) : "";
+    },
     featureHost: options.featureHost,
   };
 }

@@ -43,6 +43,7 @@ import {
   recordingCellEdit,
   resolveEditHistory,
   rowEditingView,
+  validationKey,
 } from "@adapttable/core/editing";
 import {
   computed,
@@ -126,7 +127,7 @@ export function useEditValidation<TRow>(
   let disposed = false;
   const check: typeof store.check = async (value) => {
     if (disposed) return { allowed: false };
-    const key = `${value.target.rowId}\u0000${value.target.columnKey}`;
+    const key = validationKey(value.target.rowId, value.target.columnKey);
     const target = pending.get(key) ?? { ...value.target, count: 0 };
     target.count += 1;
     pending.set(key, target);

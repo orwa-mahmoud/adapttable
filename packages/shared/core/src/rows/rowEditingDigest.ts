@@ -5,7 +5,12 @@
  * @public
  */
 export interface EditableCellEditing<_TRow = unknown> {
-  dirty?: { isRowDirty(rowId: string): boolean; signature?: string };
+  dirty?: {
+    isRowDirty(rowId: string): boolean;
+    signature?: string;
+    /** A digest of this row's marks; without it the whole digest is read. */
+    rowSignature?: (rowId: string) => string;
+  };
   state: {
     active?: { rowId: string; columnKey: string } | null;
     draft?: string;
@@ -15,9 +20,17 @@ export interface EditableCellEditing<_TRow = unknown> {
     isValidating(rowId: string, columnKey: string): boolean | undefined;
     errorFor(rowId: string, columnKey: string): string | undefined;
   };
-  saving?: { signature?: string };
+  saving?: {
+    signature?: string;
+    /** A digest of this row's saves; without it the whole digest is read. */
+    rowSignature?: (rowId: string) => string;
+  };
   rowEditing?: { activeRowId?: string; signature?: string };
-  batch?: { signature?: string };
+  batch?: {
+    signature?: string;
+    /** A digest of this row's drafts; without it the whole digest is read. */
+    rowSignature?: (rowId: string) => string;
+  };
   conflict?: {
     current?: { rowId: string; columnKey: string; incomingValue: string };
     /**
