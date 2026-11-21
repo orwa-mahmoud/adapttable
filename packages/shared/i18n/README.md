@@ -21,7 +21,8 @@ Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 
 
 ```tsx
 import { DataTable, useFrontendData } from "@adapttable/mantine";
-import { getLabels, getDirection } from "@adapttable/i18n";
+import { getDirection } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 
 function LocalizedTable({ locale }: { locale: string }) {
   const source = useFrontendData({ data, columns });
@@ -39,17 +40,27 @@ function LocalizedTable({ locale }: { locale: string }) {
 
 ## API
 
-- `getLabels(locale)` — the label preset for a locale (matches the primary
-  subtag, e.g. `"de-AT"` → German); falls back to English.
+From `@adapttable/i18n`, which loads no label data:
+
 - `getDirection(locale)` → `"ltr" | "rtl"`.
 - `isRtlLocale(locale)` / `primarySubtag(locale)` / `RTL_LANGUAGES`.
-- Raw preset objects: `en`, `ar`, `cs`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`,
-  `zh`. `locales` — the keyed map; `hasLocale(locale)` — membership check.
+- `hasLocale(locale)` — membership check.
+- `loadLabels(locale)` — one preset on demand; `undefined` for a language
+  without one.
+
+From `@adapttable/i18n/catalog`, which loads every bundled language:
+
+- `getLabels(locale)` — the label preset for a locale (matches the primary
+  subtag, e.g. `"de-AT"` → German); falls back to English.
+- `locales` — the keyed map.
+
+From `@adapttable/i18n/locales/<tag>`, one language alone: `en`, `ar`, `cs`,
+`de`, … and `zhTW` from `/locales/zh-TW`.
 
 Bring your own languages by spreading a preset and overriding strings:
 
 ```ts
-import { en } from "@adapttable/i18n";
+import { en } from "@adapttable/i18n/locales/en";
 const fr = { ...en, search: "Rechercher", noData: "Aucune donnée" };
 ```
 

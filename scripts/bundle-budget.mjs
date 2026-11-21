@@ -151,7 +151,7 @@ const SOURCE_MAP = /\.map$/;
  * largest member, not their sum.
  */
 const LOCALE_PRESET =
-  /[\\/]@adapttable[\\/]i18n[\\/]dist[\\/](?!index|load|rolldown-runtime)[\w-]+\.js$/;
+  /[\\/]@adapttable[\\/]i18n[\\/]dist[\\/]locales[\\/][\w-]+\.js$/;
 
 /**
  * The group a lazy chunk is one alternative of, when it is one: a chunk that

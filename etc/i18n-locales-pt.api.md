@@ -7,7 +7,7 @@
 import { TableLabels } from '@adapttable/core';
 
 // @public
-export function loadLabels(locale: string): Promise<Required<TableLabels> | undefined>;
+export const pt: Required<TableLabels>;
 
 // (No @packageDocumentation comment for this package)
 

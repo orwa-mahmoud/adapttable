@@ -31,7 +31,27 @@
       "core-stream",
       "core-xlsx",
       "i18n",
-      "i18n-load",
+      "i18n-catalog",
+      "i18n-locales-ar",
+      "i18n-locales-cs",
+      "i18n-locales-de",
+      "i18n-locales-en",
+      "i18n-locales-es",
+      "i18n-locales-fa",
+      "i18n-locales-fr",
+      "i18n-locales-he",
+      "i18n-locales-hi",
+      "i18n-locales-id",
+      "i18n-locales-it",
+      "i18n-locales-ja",
+      "i18n-locales-ko",
+      "i18n-locales-pl",
+      "i18n-locales-pt",
+      "i18n-locales-ru",
+      "i18n-locales-tr",
+      "i18n-locales-ur",
+      "i18n-locales-zh",
+      "i18n-locales-zh-TW",
       "server"
     ],
     "angular": [
@@ -5075,38 +5095,14 @@
       "@adapttable/unstyled/virtualize"
     ],
     "i18n": [
-      "ar",
-      "cs",
-      "de",
       "Direction",
-      "en",
-      "es",
-      "fa",
-      "fr",
       "getDirection",
-      "getLabels",
       "hasLocale",
-      "he",
-      "hi",
-      "id",
       "isRtlLocale",
-      "it",
-      "ja",
-      "ko",
+      "loadLabels",
       "LocaleKey",
-      "locales",
-      "pl",
       "primarySubtag",
-      "pt",
-      "RTL_LANGUAGES",
-      "ru",
-      "tr",
-      "ur",
-      "zh",
-      "zhTW"
-    ],
-    "i18n-load": [
-      "loadLabels"
+      "RTL_LANGUAGES"
     ],
     "kit/batch-editing": [
       "batchEditing"
@@ -16192,6 +16188,70 @@
       "FeatureState",
       "SlotComponent",
       "xlsxWriter"
+    ],
+    "i18n-catalog": [
+      "getLabels",
+      "locales"
+    ],
+    "i18n-locales-ar": [
+      "ar"
+    ],
+    "i18n-locales-cs": [
+      "cs"
+    ],
+    "i18n-locales-de": [
+      "de"
+    ],
+    "i18n-locales-en": [
+      "en"
+    ],
+    "i18n-locales-es": [
+      "es"
+    ],
+    "i18n-locales-fa": [
+      "fa"
+    ],
+    "i18n-locales-fr": [
+      "fr"
+    ],
+    "i18n-locales-he": [
+      "he"
+    ],
+    "i18n-locales-hi": [
+      "hi"
+    ],
+    "i18n-locales-id": [
+      "id"
+    ],
+    "i18n-locales-it": [
+      "it"
+    ],
+    "i18n-locales-ja": [
+      "ja"
+    ],
+    "i18n-locales-ko": [
+      "ko"
+    ],
+    "i18n-locales-pl": [
+      "pl"
+    ],
+    "i18n-locales-pt": [
+      "pt"
+    ],
+    "i18n-locales-ru": [
+      "ru"
+    ],
+    "i18n-locales-tr": [
+      "tr"
+    ],
+    "i18n-locales-ur": [
+      "ur"
+    ],
+    "i18n-locales-zh-TW": [
+      "zhTW"
+    ],
+    "i18n-locales-zh": [
+      "zh"
     ]
   },
   "entrypoints": {
@@ -17332,9 +17392,6 @@
     },
     "i18n.api.md": {
       "surface": "i18n"
-    },
-    "i18n-load.api.md": {
-      "surface": "i18n-load"
     },
     "react-adapter.api.md": {
       "surface": "react-adapter"
@@ -19723,6 +19780,69 @@
     },
     "angular-xlsx.api.md": {
       "surface": "angular-xlsx"
+    },
+    "i18n-catalog.api.md": {
+      "surface": "i18n-catalog"
+    },
+    "i18n-locales-ar.api.md": {
+      "surface": "i18n-locales-ar"
+    },
+    "i18n-locales-cs.api.md": {
+      "surface": "i18n-locales-cs"
+    },
+    "i18n-locales-de.api.md": {
+      "surface": "i18n-locales-de"
+    },
+    "i18n-locales-en.api.md": {
+      "surface": "i18n-locales-en"
+    },
+    "i18n-locales-es.api.md": {
+      "surface": "i18n-locales-es"
+    },
+    "i18n-locales-fa.api.md": {
+      "surface": "i18n-locales-fa"
+    },
+    "i18n-locales-fr.api.md": {
+      "surface": "i18n-locales-fr"
+    },
+    "i18n-locales-he.api.md": {
+      "surface": "i18n-locales-he"
+    },
+    "i18n-locales-hi.api.md": {
+      "surface": "i18n-locales-hi"
+    },
+    "i18n-locales-id.api.md": {
+      "surface": "i18n-locales-id"
+    },
+    "i18n-locales-it.api.md": {
+      "surface": "i18n-locales-it"
+    },
+    "i18n-locales-ja.api.md": {
+      "surface": "i18n-locales-ja"
+    },
+    "i18n-locales-ko.api.md": {
+      "surface": "i18n-locales-ko"
+    },
+    "i18n-locales-pl.api.md": {
+      "surface": "i18n-locales-pl"
+    },
+    "i18n-locales-pt.api.md": {
+      "surface": "i18n-locales-pt"
+    },
+    "i18n-locales-ru.api.md": {
+      "surface": "i18n-locales-ru"
+    },
+    "i18n-locales-tr.api.md": {
+      "surface": "i18n-locales-tr"
+    },
+    "i18n-locales-ur.api.md": {
+      "surface": "i18n-locales-ur"
+    },
+    "i18n-locales-zh-TW.api.md": {
+      "surface": "i18n-locales-zh-TW"
+    },
+    "i18n-locales-zh.api.md": {
+      "surface": "i18n-locales-zh"
     }
   }
 }

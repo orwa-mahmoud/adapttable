@@ -2,8 +2,8 @@
  * A language whose labels fail to load leaves the table on its current copy,
  * reports the error, and loads on the next request.
  */
-import { getLabels } from "@adapttable/i18n";
-import type * as Load from "@adapttable/i18n/load";
+import type * as Load from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -12,7 +12,7 @@ const load = vi.hoisted(() => ({
   gates: new Map<string, () => void>(),
 }));
 
-vi.mock("@adapttable/i18n/load", async (importOriginal) => {
+vi.mock("@adapttable/i18n", async (importOriginal) => {
   const actual = await importOriginal<typeof Load>();
   return {
     loadLabels: async (locale: string) => {

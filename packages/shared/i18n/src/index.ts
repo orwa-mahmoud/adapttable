@@ -1,16 +1,13 @@
 /**
- * `@adapttable/i18n` — locale presets and RTL helpers for AdaptTable.
+ * `@adapttable/i18n` — locale membership, direction and on-demand labels.
  *
- * Bundles ready label sets for 20 languages (English, Arabic, Czech, German,
- * Spanish, Persian, French, Hebrew, Hindi, Indonesian, Italian, Japanese, Korean,
- * Polish, Portuguese, Russian, Turkish, Urdu, Simplified Chinese,
- * Traditional Chinese) plus direction utilities, so consumers get multilingual +
- * right-to-left support without wiring an i18n library. The core stays
- * i18n-agnostic; this package is purely optional.
+ * Importing this entry adds no label data: `loadLabels` fetches one
+ * language's chunk the first time it is asked for. The synchronous catalog of
+ * all 20 languages is `@adapttable/i18n/catalog`, and each language alone is
+ * `@adapttable/i18n/locales/<tag>`.
  *
  * @packageDocumentation
  */
-
 export {
   type Direction,
   getDirection,
@@ -18,25 +15,5 @@ export {
   primarySubtag,
   RTL_LANGUAGES,
 } from "./direction";
-export { getLabels, locales } from "./getLabels";
+export { loadLabels } from "./loadLabels";
 export { hasLocale, type LocaleKey } from "./localeCatalog";
-export { ar } from "./locales/ar";
-export { cs } from "./locales/cs";
-export { de } from "./locales/de";
-export { en } from "./locales/en";
-export { es } from "./locales/es";
-export { fa } from "./locales/fa";
-export { fr } from "./locales/fr";
-export { he } from "./locales/he";
-export { hi } from "./locales/hi";
-export { id } from "./locales/id";
-export { it } from "./locales/it";
-export { ja } from "./locales/ja";
-export { ko } from "./locales/ko";
-export { pl } from "./locales/pl";
-export { pt } from "./locales/pt";
-export { ru } from "./locales/ru";
-export { tr } from "./locales/tr";
-export { ur } from "./locales/ur";
-export { zh } from "./locales/zh";
-export { zhTW } from "./locales/zh-TW";

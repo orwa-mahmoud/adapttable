@@ -1,5 +1,8 @@
 ---
-"@adapttable/i18n": patch
+"@adapttable/i18n": major
+"@adapttable/react": patch
+"@adapttable/vue": patch
+"@adapttable/angular": patch
 ---
 
-Asking whether a language is bundled loads no dictionary: `hasLocale` alone is 0.37 KiB gzip instead of 82.96 KiB, and `getLabels`, `hasLocale` and the lazy `loadLabels` share one locale catalog. Importing `@adapttable/i18n/load` in Node reads 4 files (5.5 KB) instead of 46 (1.31 MB) before a language is chosen. A tag that names a script picks the preset written in it: `zh-Hant` and `zh-Hant-TW` read Traditional Chinese, `zh-Hans` Simplified. Text direction follows an explicit script too: `az-Arab` and `pa-Arab` are right-to-left, `ar-Latn` and `ks-Deva` left-to-right.
+`@adapttable/i18n` loads no label data from its root: `getDirection`, `isRtlLocale`, `hasLocale` and the on-demand `loadLabels` read 2 files (6 kB) in Node instead of 23 (380 kB). `getLabels` and `locales` come from `@adapttable/i18n/catalog`, one language alone from `@adapttable/i18n/locales/<tag>` (21 kB for Arabic), and `@adapttable/i18n/load` is part of the root. A tag that names a script picks the preset written in it: `zh-Hant` and `zh-Hant-TW` read Traditional Chinese, `zh-Hans` Simplified; `az-Arab` and `pa-Arab` are right-to-left, `ar-Latn` and `ks-Deva` left-to-right.

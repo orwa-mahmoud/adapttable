@@ -137,7 +137,7 @@ import {
   withRowMutationActions,
   withRowPinActions,
 } from "@adapttable/core/binding";
-import { loadLabels } from "@adapttable/i18n/load";
+import { loadLabels } from "@adapttable/i18n";
 import {
   afterRenderEffect,
   computed,

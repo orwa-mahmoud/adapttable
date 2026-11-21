@@ -41547,35 +41547,179 @@
       "behavior": ""
     },
     {
-      "export": "loadLabels",
-      "currentImport": "@adapttable/i18n/load",
+      "export": "getLabels",
+      "currentImport": "@adapttable/i18n/catalog",
       "kind": "value",
       "class": "application-hook",
-      "proposedImport": "@adapttable/i18n/load",
+      "proposedImport": "@adapttable/i18n/catalog",
+      "behavior": ""
+    },
+    {
+      "export": "locales",
+      "currentImport": "@adapttable/i18n/catalog",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/catalog",
       "behavior": ""
     },
     {
       "export": "ar",
-      "currentImport": "@adapttable/i18n",
+      "currentImport": "@adapttable/i18n/locales/ar",
       "kind": "value",
       "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
+      "proposedImport": "@adapttable/i18n/locales/ar",
       "behavior": ""
     },
     {
       "export": "cs",
-      "currentImport": "@adapttable/i18n",
+      "currentImport": "@adapttable/i18n/locales/cs",
       "kind": "value",
       "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
+      "proposedImport": "@adapttable/i18n/locales/cs",
       "behavior": ""
     },
     {
       "export": "de",
-      "currentImport": "@adapttable/i18n",
+      "currentImport": "@adapttable/i18n/locales/de",
       "kind": "value",
       "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
+      "proposedImport": "@adapttable/i18n/locales/de",
+      "behavior": ""
+    },
+    {
+      "export": "en",
+      "currentImport": "@adapttable/i18n/locales/en",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/en",
+      "behavior": ""
+    },
+    {
+      "export": "es",
+      "currentImport": "@adapttable/i18n/locales/es",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/es",
+      "behavior": ""
+    },
+    {
+      "export": "fa",
+      "currentImport": "@adapttable/i18n/locales/fa",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/fa",
+      "behavior": ""
+    },
+    {
+      "export": "fr",
+      "currentImport": "@adapttable/i18n/locales/fr",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/fr",
+      "behavior": ""
+    },
+    {
+      "export": "he",
+      "currentImport": "@adapttable/i18n/locales/he",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/he",
+      "behavior": ""
+    },
+    {
+      "export": "hi",
+      "currentImport": "@adapttable/i18n/locales/hi",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/hi",
+      "behavior": ""
+    },
+    {
+      "export": "id",
+      "currentImport": "@adapttable/i18n/locales/id",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/id",
+      "behavior": ""
+    },
+    {
+      "export": "it",
+      "currentImport": "@adapttable/i18n/locales/it",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/it",
+      "behavior": ""
+    },
+    {
+      "export": "ja",
+      "currentImport": "@adapttable/i18n/locales/ja",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/ja",
+      "behavior": ""
+    },
+    {
+      "export": "ko",
+      "currentImport": "@adapttable/i18n/locales/ko",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/ko",
+      "behavior": ""
+    },
+    {
+      "export": "pl",
+      "currentImport": "@adapttable/i18n/locales/pl",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/pl",
+      "behavior": ""
+    },
+    {
+      "export": "pt",
+      "currentImport": "@adapttable/i18n/locales/pt",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/pt",
+      "behavior": ""
+    },
+    {
+      "export": "ru",
+      "currentImport": "@adapttable/i18n/locales/ru",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/ru",
+      "behavior": ""
+    },
+    {
+      "export": "tr",
+      "currentImport": "@adapttable/i18n/locales/tr",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/tr",
+      "behavior": ""
+    },
+    {
+      "export": "ur",
+      "currentImport": "@adapttable/i18n/locales/ur",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/ur",
+      "behavior": ""
+    },
+    {
+      "export": "zhTW",
+      "currentImport": "@adapttable/i18n/locales/zh-TW",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/zh-TW",
+      "behavior": ""
+    },
+    {
+      "export": "zh",
+      "currentImport": "@adapttable/i18n/locales/zh",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n/locales/zh",
       "behavior": ""
     },
     {
@@ -41587,47 +41731,7 @@
       "behavior": ""
     },
     {
-      "export": "en",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "es",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "fa",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "fr",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
       "export": "getDirection",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "getLabels",
       "currentImport": "@adapttable/i18n",
       "kind": "value",
       "class": "application-hook",
@@ -41643,30 +41747,6 @@
       "behavior": ""
     },
     {
-      "export": "he",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "hi",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "id",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
       "export": "isRtlLocale",
       "currentImport": "@adapttable/i18n",
       "kind": "value",
@@ -41675,23 +41755,7 @@
       "behavior": ""
     },
     {
-      "export": "it",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "ja",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "ko",
+      "export": "loadLabels",
       "currentImport": "@adapttable/i18n",
       "kind": "value",
       "class": "application-hook",
@@ -41707,22 +41771,6 @@
       "behavior": ""
     },
     {
-      "export": "locales",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "pl",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
       "export": "primarySubtag",
       "currentImport": "@adapttable/i18n",
       "kind": "value",
@@ -41731,55 +41779,7 @@
       "behavior": ""
     },
     {
-      "export": "pt",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
       "export": "RTL_LANGUAGES",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "ru",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "tr",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "ur",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "zh",
-      "currentImport": "@adapttable/i18n",
-      "kind": "value",
-      "class": "application-hook",
-      "proposedImport": "@adapttable/i18n",
-      "behavior": ""
-    },
-    {
-      "export": "zhTW",
       "currentImport": "@adapttable/i18n",
       "kind": "value",
       "class": "application-hook",

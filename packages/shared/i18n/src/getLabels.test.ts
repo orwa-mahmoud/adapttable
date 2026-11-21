@@ -2,7 +2,8 @@ import { localizedColumnPath } from "@adapttable/core/binding";
 import { describe, expect, it } from "vitest";
 
 import { getDirection } from "./direction";
-import { getLabels, hasLocale, locales } from "./getLabels";
+import { getLabels, locales } from "./getLabels";
+import { hasLocale } from "./localeCatalog";
 import { ar } from "./locales/ar";
 import { cs } from "./locales/cs";
 import { de } from "./locales/de";

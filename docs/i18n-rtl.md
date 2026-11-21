@@ -14,7 +14,8 @@ per-column `i18n` data paths resolve — three independent props, one line each:
 ```tsx
 import { DataTable } from "@adapttable/mantine";
 import { filters } from "@adapttable/mantine/filters";
-import { getDirection, getLabels } from "@adapttable/i18n";
+import { getDirection } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 
 type Person = {
   id: string;
@@ -116,12 +117,20 @@ Helpers from `@adapttable/i18n`:
 - `isRtlLocale(locale)` — covers ar, he, fa, ur, ps, and more
 - `RTL_LANGUAGES` — the raw list of RTL primary subtags
 - `primarySubtag(locale)` — `"ar-EG"` → `"ar"`
-- `locales` — every preset keyed by tag (`LocaleKey`); each preset is also a
-  named export (`ar`, `cs`, `de`, …, `zhTW` for `zh-TW`)
-- `loadLabels(locale)` from `@adapttable/i18n/load` — fetches one preset on
-  demand and resolves to `undefined` for a language without one. Kits that
-  follow their UI library's locale use it, so a plain table carries no label
-  data until a language is needed
+- `hasLocale(locale)` — whether a preset exists for the tag
+- `loadLabels(locale)` — fetches one preset on demand and resolves to
+  `undefined` for a language without one. Kits that follow their UI
+  library's locale use it, so a plain table carries no label data until a
+  language is needed
+
+The root entry holds no label data. Two explicit paths load presets
+synchronously:
+
+- `@adapttable/i18n/catalog` — `getLabels(locale)` and `locales`, every preset
+  keyed by tag (`LocaleKey`). It loads every bundled language.
+- `@adapttable/i18n/locales/<tag>` — one preset alone, as a named export:
+  `import { ar } from "@adapttable/i18n/locales/ar"`, and `zhTW` from
+  `@adapttable/i18n/locales/zh-TW`.
 
 ## Custom labels
 
@@ -147,7 +156,7 @@ works:
 Need a language without a preset? Spread one and override:
 
 ```ts
-import { en } from "@adapttable/i18n";
+import { en } from "@adapttable/i18n/locales/en";
 
 const sw = { ...en, search: "Tafuta", noData: "Hakuna data" };
 ```

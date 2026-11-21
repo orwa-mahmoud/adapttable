@@ -1,6 +1,6 @@
 import type { TableLabels } from "@adapttable/core";
 import { type KitEnvironment, reportFailure } from "@adapttable/core/binding";
-import { loadLabels } from "@adapttable/i18n/load";
+import { loadLabels } from "@adapttable/i18n";
 import { computed, type ComputedRef, type Ref, shallowRef, watch } from "vue";
 
 /**

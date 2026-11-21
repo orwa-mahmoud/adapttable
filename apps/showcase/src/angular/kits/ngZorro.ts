@@ -3,7 +3,8 @@
 // the native Angular or React entry graphs.
 import "../ngZorro.css";
 
-import { type LocaleKey, locales } from "@adapttable/i18n";
+import { type LocaleKey } from "@adapttable/i18n";
+import { locales } from "@adapttable/i18n/catalog";
 import { AdaptDataTable } from "@adapttable/ng-zorro";
 import {
   AdaptAssistantButton,

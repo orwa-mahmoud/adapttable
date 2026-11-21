@@ -2799,7 +2799,8 @@ export function People({ rows }) {
     snippets: {
       angular: `import { Component, input } from "@angular/core";
 import type { ColumnDef } from "@adapttable/angular";
-import { getDirection, getLabels } from "@adapttable/i18n";
+import { getDirection } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { AdaptDataTable } from "{pkg}";
 import { filters } from "{pkg}/filters";
 
@@ -2823,7 +2824,8 @@ export class ArabicPeople {
   readonly features = [filters([{ key: "name", type: "text", label: "الاسم" }])];
 }`,
       vue: `<script setup lang="ts">
-import { getDirection, getLabels } from "@adapttable/i18n";
+import { getDirection } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import type { ColumnDef } from "{binding}";
 import { DataTable } from "{pkg}";
 import { filters } from "{pkg}/filters";

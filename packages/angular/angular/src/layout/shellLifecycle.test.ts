@@ -5,8 +5,8 @@
  * nothing while it is off.
  */
 import type { TableSource } from "@adapttable/core";
-import { getLabels } from "@adapttable/i18n";
-import type * as Load from "@adapttable/i18n/load";
+import type * as Load from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -18,7 +18,7 @@ import type { KitEnvironment } from "./kitEnvironment";
 
 const load = vi.hoisted(() => ({ fail: new Set<string>() }));
 
-vi.mock("@adapttable/i18n/load", async (importOriginal) => {
+vi.mock("@adapttable/i18n", async (importOriginal) => {
   const actual = await importOriginal<typeof Load>();
   return {
     loadLabels: async (locale: string) => {

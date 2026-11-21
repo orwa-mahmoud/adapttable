@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import "./showcase.css";
 
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import {
   type ColumnDef,
   type ColumnLayoutState,

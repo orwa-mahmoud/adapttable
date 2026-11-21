@@ -9,7 +9,7 @@ import {
   tableAgent,
   useTableAssistant,
 } from "@adapttable/ai-vue";
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { computed, shallowRef } from "vue";
 
 import { workspaceCopy } from "./copy";

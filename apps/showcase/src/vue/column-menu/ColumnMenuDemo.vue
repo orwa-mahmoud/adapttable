@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import {
   type ColumnDef,
   type ColumnLayoutState,

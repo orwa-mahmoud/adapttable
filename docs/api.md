@@ -2675,9 +2675,9 @@ API the column-layout hook needs, injectable for tests. `SavedViewsMenu` /
 `ToolbarChromeProps` is the toolbar's kit-agnostic prop surface. The CLI
 exports `Kit`, the union of UI kits `@adapttable/cli init` can detect.
 
-**Locale exports.** `@adapttable/i18n` exports one label set per locale, named
-by its tag: `ar`, `cs`, `de`, `en`, `es`, `fa`, `fr`, `he`, `hi`, `it`, `ja`, `ko`,
-`pl`, `pt`, `ru`, `tr`, `ur`, `zh`, `zhTW`. See
+**Locale exports.** `@adapttable/i18n/locales/<tag>` exports one label set,
+named by its tag: `ar`, `cs`, `de`, `en`, `es`, `fa`, `fr`, `he`, `hi`, `it`, `ja`,
+`ko`, `pl`, `pt`, `ru`, `tr`, `ur`, `zh`, and `zhTW` from `/locales/zh-TW`. See
 [i18n & RTL](./i18n-rtl.md).
 
 Adapter-machinery names (`headerGroupRows`, `insertExtraRows`, `useFullscreen`,
@@ -4669,12 +4669,12 @@ Applications should use the documented table, feature and provider APIs instead.
 
 ## Other packages
 
-- `@adapttable/i18n` — `getLabels(locale)`, `getDirection(locale)`,
-  `isRtlLocale(locale)`, `hasLocale(locale)`, `primarySubtag(locale)`,
-  `RTL_LANGUAGES`, `locales` (keyed by `LocaleKey`) and the bundled
-  presets (`en`, `ar`, `cs`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`, `zh`,
-  … including `zhTW`), and `loadLabels(locale)` from `@adapttable/i18n/load`,
-  which fetches one preset on demand — see [i18n & RTL](./i18n-rtl.md).
+- `@adapttable/i18n` — `getDirection(locale)`, `isRtlLocale(locale)`,
+  `hasLocale(locale)`, `primarySubtag(locale)`, `RTL_LANGUAGES`, `LocaleKey`
+  and `loadLabels(locale)`, which fetches one preset on demand;
+  `@adapttable/i18n/catalog` serves `getLabels(locale)` and `locales`, and
+  `@adapttable/i18n/locales/<tag>` one preset each (`en`, `ar`, … `zhTW`) —
+  see [i18n & RTL](./i18n-rtl.md).
 - `@adapttable/cli` — binary `adapttable init [--kit <kit>] [--force]`; programmatic
   `detectFramework`, `detectKit`, `choosePackageManager`, `installCommand`,
   `scaffoldFiles`, `runInit` plus the pieces they compose: `KITS` / `KitInfo` / `SHADCN`

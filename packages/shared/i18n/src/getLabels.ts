@@ -50,8 +50,6 @@ export const locales = {
   "zh-TW": zhTW,
 } as const satisfies Record<LocaleKey, Required<TableLabels>>;
 
-export { hasLocale, type LocaleKey } from "./localeCatalog";
-
 /**
  * Resolve the label preset for a locale. Prefers an exact tag match
  * (e.g. `"zh-TW"` → Traditional Chinese), then the script a tag names

@@ -7,7 +7,7 @@ import {
   type PivotField,
   type PivotRow,
 } from "@adapttable/core/pivot";
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import type {} from "@adapttable/mantine";
 import { sidePanel as mantineSidePanel } from "@adapttable/mantine/side-panel";
 import { sidePanel as muiSidePanel } from "@adapttable/mui/side-panel";

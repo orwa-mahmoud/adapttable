@@ -181,7 +181,8 @@
         <p>Append <code>?locale=ar&amp;dir=rtl</code> to any Vue feature page to exercise its real table in Arabic and right-to-left layout.</p>
         <h2>The code</h2>
         <pre><code>&lt;script setup lang=&quot;ts&quot;&gt;
-import { getDirection, getLabels } from &quot;@adapttable/i18n&quot;;
+import { getDirection } from &quot;@adapttable/i18n&quot;;
+import { getLabels } from &quot;@adapttable/i18n/catalog&quot;;
 import type { ColumnDef } from &quot;@adapttable/vue&quot;;
 import { DataTable } from &quot;@adapttable/reka-ui&quot;;
 import { filters } from &quot;@adapttable/reka-ui/filters&quot;;

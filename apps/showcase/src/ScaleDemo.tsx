@@ -3,7 +3,7 @@ import {
   applyRowPatchesWithLog,
   updateRow,
 } from "@adapttable/core";
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import {
   type CellProps,
   type ColumnDef,

@@ -11,7 +11,8 @@ assistive technology.
 import { Component, computed, signal } from "@angular/core";
 import type { ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/ng-zorro";
-import { getDirection, getLabels } from "@adapttable/i18n";
+import { getDirection } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 
 interface Person {
   id: string;
@@ -68,8 +69,9 @@ to the source and renderer when their value resolution depends on it;
 
 ## Labels and formatting
 
-`@adapttable/i18n` is optional and framework-neutral. It exports ready locale
-bundles such as `ar` and `en`, `getLabels`, `getDirection` and RTL helpers.
+`@adapttable/i18n` is optional and framework-neutral. Its root exports
+`getDirection`, the RTL helpers and `loadLabels`; `/catalog` exports
+`getLabels`, and `/locales/<tag>` one ready locale bundle such as `ar`.
 You may instead pass your application's own `TableLabels`. Missing labels
 fall back to English, so provide all relevant labels for a fully localized
 experience, including labels contributed by editing, filters and assistants.

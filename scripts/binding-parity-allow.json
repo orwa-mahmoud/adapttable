@@ -2308,6 +2308,7 @@
         "SlotTable": "pending: shared-surface decision",
         "SurfaceHandles": "pending: shared-surface decision",
         "SurfaceOccupation": "pending: shared-surface decision",
+        "TABLE_STORE": "Angular injection token for the table store the shell provides; React and Vue hand the store to their parts directly",
         "TableAssistantAvatars": "pending: shared-surface decision",
         "TableAssistantBoundary": "pending: shared-surface decision",
         "TableAssistantFace": "pending: shared-surface decision",

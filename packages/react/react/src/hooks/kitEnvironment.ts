@@ -1,6 +1,6 @@
 import type { TableLabels } from "@adapttable/core";
 import { reportFailure } from "@adapttable/core/binding";
-import { loadLabels } from "@adapttable/i18n/load";
+import { loadLabels } from "@adapttable/i18n";
 import { useEffect, useState } from "react";
 
 export {
