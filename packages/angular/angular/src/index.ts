@@ -129,6 +129,7 @@ export {
   type RowPinningImplementation,
   type RowReorderImplementation,
   type TreeImplementation,
+  type VirtualizeImplementation,
 } from "./featureImplementations";
 export {
   createFeatureResources,

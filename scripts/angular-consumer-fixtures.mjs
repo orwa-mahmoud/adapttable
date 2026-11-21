@@ -173,7 +173,7 @@ const FEATURES = {
     factory: "virtualize",
     entry: "virtualize",
     call: "virtualize()",
-    present: ["coreVirtualize"],
+    present: ["coreVirtualize", "injectVirtualizer"],
   },
   exportCsv: {
     factory: "exportCsv",
@@ -198,6 +198,7 @@ const FEATURES = {
 const BASE_ABSENT = [
   "coreGrouping",
   "coreVirtualize",
+  "injectVirtualizer",
   "coreExportCsv",
   "pdfWriter",
   "xlsxWriter",
@@ -432,6 +433,7 @@ export function angularConsumerFixtures(kits = angularKits()) {
         "coreGrouping",
         "createGridFocusController",
         "injectCellEditing",
+        "injectVirtualizer",
         "pdfWriter",
         "xlsxWriter",
       ],
@@ -453,7 +455,12 @@ export function angularConsumerFixtures(kits = angularKits()) {
         "createGridFocusController",
         "injectCellEditing",
       ],
-      absent: ["AdaptDataTable", "pdfWriter", "xlsxWriter"],
+      absent: [
+        "AdaptDataTable",
+        "injectVirtualizer",
+        "pdfWriter",
+        "xlsxWriter",
+      ],
       ...ceilings("angular · lean grouping navigation editing"),
       code: LEAN_COMPOSED,
     },
@@ -494,7 +501,7 @@ export function angularConsumerFixtures(kits = angularKits()) {
       "Native table with the standard preset",
       // The preset's own list includes grouping and CSV export, so their
       // engines belong in this graph. The writers it never configures do not.
-      ["coreVirtualize", "pdfWriter", "xlsxWriter"]
+      ["coreVirtualize", "injectVirtualizer", "pdfWriter", "xlsxWriter"]
     ),
   ];
 }

@@ -14,13 +14,13 @@ import {
   type DataTable,
   type DataTableClassNames,
   type EditableCellEditing,
+  FEATURE_IMPLEMENTATIONS,
+  featureImplementation,
   featureOptionsOf,
   flattenColumns,
   type GridFocus,
   injectDataTable,
-  injectKeyedVirtualization,
   injectTableData,
-  injectTableVirtualizer,
   type MaybeSignal,
   type MaybeSignalOptional,
   type MobileCardRenderer,
@@ -33,6 +33,7 @@ import {
   SURFACE_GROUPING,
   SURFACE_HANDLES,
   type SurfaceHandles,
+  type VirtualizeImplementation,
 } from "@adapttable/angular";
 import {
   type CellSpanAppearance,
@@ -348,6 +349,8 @@ export function bodyWindowFor<TRow>(options: {
   /** The rows that scroll — every row but the pinned ones. */
   readonly scrollRows: Signal<readonly TRow[]>;
   readonly featureOptions: Readonly<Record<string, unknown>>;
+  /** The windowing code `virtualize()` brought, when it is composed. */
+  readonly virtualizer: VirtualizeImplementation | undefined;
   readonly rowKey: (row: TRow) => string;
   readonly maxHeight: number | string | undefined;
   readonly scrollBox: () => HTMLElement | null;
@@ -361,6 +364,7 @@ export function bodyWindowFor<TRow>(options: {
     expandable,
     scrollRows,
     featureOptions,
+    virtualizer,
     rowKey,
     maxHeight,
     scrollBox,
@@ -368,7 +372,8 @@ export function bodyWindowFor<TRow>(options: {
     injector,
   } = options;
   const source = table.source;
-  const wantVirtualize = featureOptions.virtualize === true;
+  const wantVirtualize =
+    featureOptions.virtualize === true && virtualizer !== undefined;
   const groupEntries = computed(() => grouping?.()?.entries);
   const treeEntries = computed(() => tree?.()?.entries);
   const bodyChrome = computed(() => {
@@ -429,7 +434,7 @@ export function bodyWindowFor<TRow>(options: {
     table.loadMore();
   };
   const kind = computed(() => bodyWindowKind(true, bodyChrome()));
-  const flat = injectTableVirtualizer<TRow>({
+  const flat = virtualizer.flat<TRow>({
     rows: scrollRows,
     rowKey,
     enabled: computed(() => kind() === "flat"),
@@ -441,7 +446,7 @@ export function bodyWindowFor<TRow>(options: {
     onEndReached,
     injector,
   });
-  const keyed = injectKeyedVirtualization({
+  const keyed = virtualizer.keyed({
     keys: computed(() =>
       (kind() === "tree" ? (treeEntries() ?? []) : (groupEntries() ?? [])).map(
         (entry) => entry.key
@@ -1031,6 +1036,10 @@ function surfaceViewFor<TRow>(
     expandable: false,
     scrollRows: computed(() => table.source().rows),
     featureOptions,
+    virtualizer: featureImplementation(
+      features,
+      FEATURE_IMPLEMENTATIONS.virtualize
+    ),
     rowKey: options.rowKey,
     maxHeight: readMaybe(options.maxHeight),
     scrollBox: () => null,

@@ -741,6 +741,7 @@ export const FEATURE_IMPLEMENTATIONS: {
     readonly groupingPanel: FeatureStateKey<GroupingPanelImplementation>;
     readonly rowPinning: FeatureStateKey<RowPinningImplementation>;
     readonly tree: FeatureStateKey<TreeImplementation>;
+    readonly virtualize: FeatureStateKey<VirtualizeImplementation>;
 };
 
 // @public
@@ -1833,6 +1834,12 @@ export interface UseShortcutsOptions {
     readonly onCommand: (command: string) => void;
     readonly shortcuts?: readonly Shortcut[];
     readonly target?: () => EventTarget | null;
+}
+
+// @public
+export interface VirtualizeImplementation {
+    readonly flat: typeof injectTableVirtualizer;
+    readonly keyed: typeof injectKeyedVirtualization;
 }
 
 export { VirtualTableRow }

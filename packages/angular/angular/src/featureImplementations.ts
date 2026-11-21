@@ -46,6 +46,10 @@ import type { injectRowPinning } from "./rows/rowPinning";
 import type { injectLazyChildren } from "./tree/lazyChildren";
 import type { injectTreeExpansion } from "./tree/treeExpansion";
 import type { injectRowPinningUrlState } from "./url/rowPinningUrlState";
+import type {
+  injectKeyedVirtualization,
+  injectTableVirtualizer,
+} from "./virtual/tableVirtualization";
 
 /**
  * The code the edit-history feature brings.
@@ -166,6 +170,18 @@ export interface RowPinningImplementation {
 }
 
 /**
+ * The code the virtualize feature brings.
+ *
+ * @public
+ */
+export interface VirtualizeImplementation {
+  /** Windows the flat rows. */
+  readonly flat: typeof injectTableVirtualizer;
+  /** Windows grouped entries and open tree nodes by key. */
+  readonly keyed: typeof injectKeyedVirtualization;
+}
+
+/**
  * The keys a feature files its code under, and the table reads it from.
  *
  * @public
@@ -191,4 +207,6 @@ export const FEATURE_IMPLEMENTATIONS = {
   rowPinning: featureStateKey<RowPinningImplementation>("row-pinning"),
   /** The expandable tree, from `tree()`. */
   tree: featureStateKey<TreeImplementation>("tree"),
+  /** The row window, from `virtualize()`. */
+  virtualize: featureStateKey<VirtualizeImplementation>("virtualize"),
 } as const;

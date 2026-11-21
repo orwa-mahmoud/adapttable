@@ -9485,6 +9485,7 @@
       "RowPinningImplementation",
       "RowReorderImplementation",
       "TreeImplementation",
+      "VirtualizeImplementation",
       "withFeatureImplementation"
     ],
     "angular-formula": [

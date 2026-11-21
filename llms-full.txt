@@ -20889,7 +20889,8 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   filed as `FIND_IN_TABLE_IMPLEMENTATION`), `exportCsv` (`injectExportCsv`),
   `rowReorder` (`RowReorderImplementation`), `grouping`
   (`GroupingImplementation`), `groupingPanel` (`GroupingPanelImplementation`),
-  `rowPinning` (`RowPinningImplementation`) and `tree` (`TreeImplementation`).
+  `rowPinning` (`RowPinningImplementation`), `tree` (`TreeImplementation`) and
+  `virtualize` (`VirtualizeImplementation`).
   The filter engine travels under core's `FILTER_ENGINE` key. The adapter
   entry's `coreExportCsv`, `coreFilters`, `coreHeaderFilters` and
   `coreFindInTable` are the core factories with their implementations filed,

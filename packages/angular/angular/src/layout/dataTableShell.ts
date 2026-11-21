@@ -1790,6 +1790,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
               labels: table.labels(),
             };
           });
+    const virtualizer = featureImplementation(
+      liveFeatures(),
+      FEATURE_IMPLEMENTATIONS.virtualize
+    );
     const bodyWindow = resources.use(
       "body-window",
       [
@@ -1798,6 +1802,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         rowDetail,
         pinning,
         featureOptions.virtualize,
+        virtualizer,
         featureOptions.estimateRowSize,
         featureOptions.estimateCardSize,
         featureOptions.rowHeight,
@@ -1815,6 +1820,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             () => pinnedRows()?.scroll ?? table.source().rows
           ),
           featureOptions,
+          virtualizer,
           rowKey: (row) => this.rowKey()(row),
           maxHeight: this.maxHeight(),
           scrollBox: () =>
