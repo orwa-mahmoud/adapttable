@@ -527,6 +527,16 @@ export function createTableSession<TRow>(
 
   /** The reads of one state, as a {@link TableEngineReader}. */
   function readerOf(state: () => SessionState<TRow>): TableEngineReader<TRow> {
+    /** Lookups by id against one row array: a scan, then an index. */
+    let lookups:
+      | {
+          readonly data: readonly TRow[];
+          readonly getRowId: (row: TRow) => string;
+          readonly revision: number;
+          reads: number;
+          index: Map<string, TRow> | undefined;
+        }
+      | undefined;
     /** Each column's cell reader, for the columns and locale they read. */
     let readers:
       | {
@@ -568,9 +578,28 @@ export function createTableSession<TRow>(
       rowByKey(rowKey) {
         assertLive();
         const current = state();
-        return current.view.data.find(
-          (row) => current.view.getRowId(row) === rowKey
-        );
+        const { data, getRowId } = current.view;
+        // The data revision moves on an in-place change the host invalidates.
+        const revision = current.revisions.data;
+        if (
+          lookups?.data !== data ||
+          lookups.getRowId !== getRowId ||
+          lookups.revision !== revision
+        ) {
+          lookups = { data, getRowId, revision, reads: 0, index: undefined };
+        }
+        lookups.reads += 1;
+        // One read scans; a second read of the same rows indexes them once.
+        if (lookups.index === undefined && lookups.reads > 1) {
+          const index = new Map<string, TRow>();
+          for (const row of data) {
+            const id = getRowId(row);
+            if (!index.has(id)) index.set(id, row);
+          }
+          lookups.index = index;
+        }
+        if (lookups.index) return lookups.index.get(rowKey);
+        return data.find((row) => getRowId(row) === rowKey);
       },
     };
   }
