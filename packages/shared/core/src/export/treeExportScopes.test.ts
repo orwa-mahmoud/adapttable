@@ -366,8 +366,10 @@ describe("source-scoped tree exports", () => {
     ["xlsx", xlsxWriter()],
   ] satisfies [string, ExportWriter][])(
     "gives %s and hooks identical data while summarizing raw roots",
-    (_format, writer) => {
+    async (_format, writer) => {
       const build = vi.fn(writer.build);
+      // The export path prefers an asynchronous build where a writer has one.
+      const buildAsync = writer.buildAsync && vi.fn(writer.buildAsync);
       const summaryRow = vi.fn((rows: readonly Row[]) => ({
         id: "TOTAL",
         parcels: rows.reduce((total, row) => total + row.parcels, 0),
@@ -376,16 +378,16 @@ describe("source-scoped tree exports", () => {
         filename: `dispatch.${writer.extension}`,
       }));
       const after = vi.fn();
-      downloadTableCsv({
+      await downloadTableCsv({
         source: source([r1], roots),
         columns,
         scope: "all",
         context: { getRowId, tree: tree([r1]), summaryRow },
-        writer: { ...writer, build },
+        writer: { ...writer, build, ...(buildAsync && { buildAsync }) },
         onBeforeExport: before,
         onAfterExport: after,
       });
-      const input = build.mock.calls[0]?.[0];
+      const input = (buildAsync ?? build).mock.calls[0]?.[0];
       expect(input?.table.rows.map((row) => row[0])).toEqual([
         ...allIds,
         "TOTAL",

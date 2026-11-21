@@ -9,11 +9,11 @@
  * The independent check is Node's own `zlib`, which is not what the writer
  * uses — nothing here shares an implementation with the code under test.
  */
-import { crc32 } from "node:zlib";
+import { crc32, inflateRawSync } from "node:zlib";
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { buildZip, utf8 } from "./zip";
+import { buildZip, deflateRaw, utf8 } from "./zip";
 
 const LOCAL_SIG = 0x04034b50;
 const CENTRAL_SIG = 0x02014b50;
@@ -171,5 +171,67 @@ describe("buildZip", () => {
 describe("utf8", () => {
   it("encodes beyond ASCII", () => {
     expect([...utf8("é")]).toEqual([0xc3, 0xa9]);
+  });
+});
+
+describe("deflated entries", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("deflates bytes a raw inflater reads back", async () => {
+    const data = utf8("<row>".repeat(5000));
+    const deflated = await deflateRaw(data);
+    expect(deflated).toBeDefined();
+    expect(deflated!.length).toBeLessThan(data.length / 10);
+    expect(
+      Buffer.from(inflateRawSync(deflated!)).equals(Buffer.from(data))
+    ).toBe(true);
+  });
+
+  it("stores the entry where the browser has no deflate stream", async () => {
+    vi.stubGlobal("CompressionStream", undefined);
+    expect(await deflateRaw(utf8("x"))).toBeUndefined();
+  });
+
+  it("stores the entry where the stream lacks the raw format", async () => {
+    vi.stubGlobal(
+      "CompressionStream",
+      class {
+        constructor() {
+          throw new TypeError("Unsupported compression format");
+        }
+      }
+    );
+    expect(await deflateRaw(utf8("x"))).toBeUndefined();
+  });
+
+  it("writes method 8 with both sizes and the original's checksum", async () => {
+    const sheet = utf8("<c><v>1</v></c>".repeat(2000));
+    const deflated = await deflateRaw(sheet);
+    const zip = buildZip([
+      { name: "stored.txt", data: utf8("hello") },
+      { name: "sheet.xml", data: sheet, deflated },
+    ]);
+    const [stored, packed] = readCentralDirectory(zip);
+    expect(stored).toMatchObject({ name: "stored.txt", method: 0 });
+    // The central directory's size field is the uncompressed one.
+    expect(packed).toMatchObject({
+      name: "sheet.xml",
+      method: 8,
+      crc: crc32(sheet),
+      size: sheet.length,
+    });
+    const local = packed!.localOffset;
+    expect(readInt(zip, local + 18, 4)).toBe(deflated!.length);
+    expect(readInt(zip, local + 8, 2)).toBe(8);
+    expect(readInt(zip, local + 22, 4)).toBe(sheet.length);
+    const body = readEntryData(zip, local);
+    expect(Buffer.from(inflateRawSync(body)).equals(Buffer.from(sheet))).toBe(
+      true
+    );
+    // The central directory still starts where the last local entry ends.
+    const eocd = readEocd(zip);
+    expect(eocd.centralOffset + eocd.centralSize + 22).toBe(zip.length);
   });
 });

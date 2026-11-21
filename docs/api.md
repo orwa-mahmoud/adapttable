@@ -1702,7 +1702,10 @@ hears matches what the footer shows. See
 
 **File formats.** An `ExportWriter` turns an `ExportWriteContext` — an
 `ExportTable` of values resolved once by `buildExportTable`, plus the filename —
-into an `ExportPayload`, which `downloadExportFile` hands to the browser.
+into an `ExportPayload`, which `downloadExportFile` hands to the browser. A
+writer may also offer `buildAsync`, which the table's export prefers: the
+Excel writer's deflates the worksheet where the browser has
+`CompressionStream`, and `build` stays the synchronous, stored answer.
 `csvWriter` is the built-in one, and `matrixToCsv` writes CSV from values a
 caller assembled itself. `exportButtonLabel` gives the button a caption naming
 the format it produces — `labels.exportCsv` for CSV, `labels.exportFile(format)`

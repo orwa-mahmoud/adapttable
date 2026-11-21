@@ -318,9 +318,11 @@ const CORE_FIXTURES = [
     // controllers and state machines every binding drives, and the shared
     // behaviours the bindings would otherwise copy. A table bundles only the
     // names it imports, so this row tracks the surface, not a table's cost.
-    // It includes the deprecated root aliases.
+    // It includes the deprecated root aliases. The total also holds the PDF
+    // and Excel builders, which the main entry reaches only lazily through
+    // `deferredPdfWriter` / `deferredXlsxWriter`.
     initialKB: 108,
-    totalKB: 108,
+    totalKB: 120,
     code: `export * from "PKG";`,
     // The engines a named primitive must not carry are real identifiers of
     // the full graph, so their absence there is a finding, not a typo.

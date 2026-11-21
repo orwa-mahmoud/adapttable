@@ -24,7 +24,7 @@ import {
   type ExportWriter,
 } from "./exportWriter";
 import { columnLetter, safeSheetName, safeText } from "./sheetText";
-import { buildZip, utf8, type ZipEntry } from "./zip";
+import { buildZip, deflateRaw, utf8, type ZipEntry } from "./zip";
 
 export type { ExportWriter };
 
@@ -294,6 +294,26 @@ function xlsxBytes(
   return buildZip(documents(table, sheetName ?? "Sheet1"));
 }
 
+/**
+ * The workbook with its worksheet deflated where the browser can, for the
+ * asynchronous export path. The worksheet is nearly all of the file; the small
+ * parts stay stored.
+ */
+async function deflatedXlsxBytes(
+  table: ExportTable,
+  sheetName?: string
+): Promise<Uint8Array<ArrayBuffer>> {
+  const entries = documents(table, sheetName ?? "Sheet1");
+  const sheet = entries.find((entry) =>
+    entry.name.startsWith("xl/worksheets/")
+  );
+  if (sheet) {
+    const deflated = await deflateRaw(sheet.data);
+    if (deflated) sheet.deflated = deflated;
+  }
+  return buildZip(entries);
+}
+
 /** The MIME type Excel, Numbers and Google Sheets all register for `.xlsx`. */
 const XLSX_MIME =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
@@ -322,6 +342,11 @@ export function xlsxWriter(options?: { sheetName?: string }): ExportWriter {
       parts: [xlsxBytes(table, options?.sheetName)],
       mimeType: XLSX_MIME,
       // Binary: the bytes are the file, and there is no text form of them.
+      text: "",
+    }),
+    buildAsync: async ({ table }) => ({
+      parts: [await deflatedXlsxBytes(table, options?.sheetName)],
+      mimeType: XLSX_MIME,
       text: "",
     }),
   };

@@ -4846,6 +4846,7 @@ export interface ExportWriteContext {
 // @public
 export interface ExportWriter {
     build: (context: ExportWriteContext) => ExportPayload;
+    buildAsync?: (context: ExportWriteContext) => Promise<ExportPayload>;
     extension: string;
 }
 

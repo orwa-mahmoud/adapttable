@@ -6,7 +6,9 @@
  * arrives in the cell as what it IS, because a number turned into text cannot
  * be summed and a postal code turned into a number cannot be recovered.
  */
-import { describe, expect, it } from "vitest";
+import { inflateRawSync } from "node:zlib";
+
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { ColumnMetadata } from "../contracts/columns";
 import type { ExportTable } from "./exportWriter";
@@ -228,5 +230,74 @@ describe("text XML cannot carry", () => {
     const safe = safeSheetName(name);
     expect(safe).toBe("x".repeat(30));
     expect(safeSheetName("tab￾name")).toBe("tabname");
+  });
+});
+
+/** Every entry of an archive by name, inflated when it was deflated. */
+function entriesOf(
+  zip: Uint8Array
+): Map<string, { method: number; data: Buffer }> {
+  const int = (at: number, size: number) => {
+    let value = 0;
+    for (let i = size - 1; i >= 0; i--) value = value * 256 + zip[at + i]!;
+    return value;
+  };
+  const eocd = zip.length - 22;
+  const out = new Map<string, { method: number; data: Buffer }>();
+  let at = int(eocd + 16, 4);
+  for (let i = 0; i < int(eocd + 10, 2); i++) {
+    const method = int(at + 10, 2);
+    const packed = int(at + 20, 4);
+    const nameLength = int(at + 28, 2);
+    const name = new TextDecoder().decode(
+      zip.slice(at + 46, at + 46 + nameLength)
+    );
+    const local = int(at + 42, 4);
+    const start = local + 30 + int(local + 26, 2) + int(local + 28, 2);
+    const body = Buffer.from(zip.slice(start, start + packed));
+    out.set(name, { method, data: method === 8 ? inflateRawSync(body) : body });
+    at += 46 + nameLength + int(at + 30, 2) + int(at + 32, 2);
+  }
+  return out;
+}
+
+describe("xlsxWriter's asynchronous build", () => {
+  const big: ExportTable = {
+    headers: ["Name", "Salary", "Team"],
+    keys: ["name", "salary", "team"],
+    rows: Array.from({ length: 2000 }, (_, i) => [
+      `Person ${i}`,
+      i * 10,
+      "Ops",
+    ]),
+  };
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("deflates the worksheet to the same XML the stored build holds", async () => {
+    const writer = xlsxWriter({ sheetName: "People" });
+    const stored = writer.build({ table: big } as never).parts[0] as Uint8Array;
+    const built = await writer.buildAsync!({ table: big } as never);
+    const deflated = built.parts[0] as Uint8Array;
+    expect(deflated.length).toBeLessThan(stored.length / 4);
+    const from = entriesOf(stored);
+    const to = entriesOf(deflated);
+    expect([...to.keys()]).toEqual([...from.keys()]);
+    for (const [name, entry] of to) {
+      expect(entry.method).toBe(name.startsWith("xl/worksheets/") ? 8 : 0);
+      expect(entry.data.equals(from.get(name)!.data)).toBe(true);
+    }
+  });
+
+  it("stores the workbook where the browser cannot deflate", async () => {
+    vi.stubGlobal("CompressionStream", undefined);
+    const writer = xlsxWriter();
+    const stored = writer.build({ table: big } as never).parts[0] as Uint8Array;
+    const built = await writer.buildAsync!({ table: big } as never);
+    expect(
+      Buffer.from(built.parts[0] as Uint8Array).equals(Buffer.from(stored))
+    ).toBe(true);
   });
 });

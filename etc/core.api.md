@@ -3227,7 +3227,7 @@ export function downloadTableCsv<TRow>(options: {
     writer?: ExportWriter;
     onBeforeExport?: NonNullable<ExportCsvOptions<TRow>["onBeforeExport"]>;
     onAfterExport?: NonNullable<ExportCsvOptions<TRow>["onAfterExport"]>;
-}): void;
+}): void | Promise<void>;
 
 // @public @deprecated
 export const dropColumn: typeof dropColumn_2;
@@ -4106,6 +4106,7 @@ export interface ExportWriteContext {
 // @public
 export interface ExportWriter {
     build: (context: ExportWriteContext) => ExportPayload;
+    buildAsync?: (context: ExportWriteContext) => Promise<ExportPayload>;
     extension: string;
 }
 

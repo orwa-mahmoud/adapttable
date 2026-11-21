@@ -152,3 +152,29 @@ describe("an export with a deferred writer", () => {
     expect(onAfterExport).not.toHaveBeenCalled();
   });
 });
+
+describe("an export whose asynchronous build fails", () => {
+  it("rejects without a download or onAfterExport", async () => {
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => undefined);
+    const onAfterExport = vi.fn();
+    const rows = [{ id: "1", name: "Ada" }];
+    const handler = makeExportCsvHandler(
+      {
+        writer: {
+          ...BUILT,
+          buildAsync: () => Promise.reject(new Error("out of memory")),
+        },
+        onAfterExport,
+      },
+      { rows, total: 1, page: 1, limit: 25 } as unknown as TableSource<
+        (typeof rows)[number]
+      >,
+      [{ key: "name" }]
+    );
+    await expect(handler?.()).rejects.toThrow("out of memory");
+    expect(click).not.toHaveBeenCalled();
+    expect(onAfterExport).not.toHaveBeenCalled();
+  });
+});
