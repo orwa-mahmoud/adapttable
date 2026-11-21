@@ -149,8 +149,11 @@ export interface TableDataPlan<TRow> {
   readonly runtime: FilterRuntime<TRow>;
   /** Stable key for declared filter semantics, independent of rows and generated callbacks. */
   readonly filterKey: string;
-  /** The declarative filters AND-ed with the host's `filterFn`. */
-  readonly filterFn: (row: TRow, extra: ExtraFilters) => boolean;
+  /**
+   * The declarative filters AND-ed with the host's `filterFn`; absent when
+   * the table has neither, so nothing filters row by row.
+   */
+  readonly filterFn: ((row: TRow, extra: ExtraFilters) => boolean) | undefined;
   /** Evaluates the AND/OR filter tree, when the engine is composed. */
   readonly filterTreeFn:
     ((row: TRow, tree: QueryFilterGroup) => boolean) | undefined;
@@ -273,15 +276,19 @@ export function createTableData<TRow>(): TableData<TRow> {
           })
         : (EMPTY_RUNTIME as FilterRuntime<TRow>)
   );
+  // No filters feature and no host predicate: no predicate at all, so the
+  // source skips the filter pass instead of calling `() => true` per row.
   const combinedFilterOf = memoOne(
     (
       runtime: FilterRuntime<TRow>,
       filterFn: ((row: TRow, extra: ExtraFilters) => boolean) | undefined
-    ) =>
-      filterFn
+    ) => {
+      if (runtime === EMPTY_RUNTIME) return filterFn;
+      return filterFn
         ? (row: TRow, extra: ExtraFilters) =>
             runtime.filterFn(row, extra) && filterFn(row, extra)
-        : runtime.filterFn
+        : runtime.filterFn;
+    }
   );
   // Facet counts for the checklist filters, when nothing else answered them:
   // a frontend tier has the rows in hand, so the counts come from the same
@@ -293,14 +300,14 @@ export function createTableData<TRow>(): TableData<TRow> {
       resolved: TableSource<TRow>,
       defs: readonly FilterDef<TRow>[],
       registry: FilterTypeRegistry,
-      filterFn: (row: TRow, extra: ExtraFilters) => boolean
+      filterFn: ((row: TRow, extra: ExtraFilters) => boolean) | undefined
     ): FacetMap | undefined => {
       if (!engine || resolved.facets) return resolved.facets;
       const rows = resolved.allSearchedRows;
       if (!rows) return undefined;
       const tree = resolved.filterTree;
       const keep = (row: TRow, extra: ExtraFilters) => {
-        if (!filterFn(row, extra)) return false;
+        if (filterFn && !filterFn(row, extra)) return false;
         if (!tree) return true;
         return engine.evaluateTree(tree, row, defs, registry);
       };

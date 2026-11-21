@@ -16,6 +16,7 @@ import {
   createTableData,
   INACTIVE_TIER_ROWS,
   type TableDataConfig,
+  type TableDataPlan,
   tierRows,
 } from "./tableData";
 import type { TableSource } from "./TableSource";
@@ -126,6 +127,13 @@ function sourceOf(overrides: Partial<TableSource<Row>> = {}): TableSource<Row> {
   } as TableSource<Row>;
 }
 
+/** The plan's predicate, which a table with filters always has. */
+function filterOf(plan: TableDataPlan<Row>) {
+  const { filterFn } = plan;
+  if (filterFn === undefined) throw new Error("expected the plan to filter");
+  return filterFn;
+}
+
 afterEach(() => {
   vi.restoreAllMocks();
   resetDevWarnings();
@@ -140,10 +148,14 @@ describe("createTableData", () => {
     expect(plan.runtime.registry.get("x")).toBeUndefined();
     expect(plan.runtime.registry.has("x")).toBe(false);
     expect(plan.runtime.registry.types()).toEqual([]);
-    expect(plan.filterFn(ROWS[1]!, {})).toBe(true);
+    // Nothing filters, so there is no predicate to call row by row.
+    expect(plan.filterFn).toBeUndefined();
     expect(plan.filterTreeFn).toBeUndefined();
     expect(plan.facetKeys).toBeUndefined();
     expect(table.plan(config({ onQueryChange: vi.fn() })).tier).toBe("server");
+    // A host predicate alone is the predicate, as it is.
+    const hostOnly = (row: Row) => row.id === "a";
+    expect(table.plan(config({ filterFn: hostOnly })).filterFn).toBe(hostOnly);
 
     const resolved = sourceOf();
     expect(table.finish({ resolved, frontend: resolved })).toBe(resolved);
@@ -168,8 +180,8 @@ describe("createTableData", () => {
     expect(again.runtime).toBe(first.runtime);
     expect(again.filterFn).toBe(first.filterFn);
     expect(engine.buildRuntime).toHaveBeenCalledTimes(1);
-    expect(first.filterFn(ROWS[0]!, {})).toBe(true);
-    expect(first.filterFn(ROWS[1]!, {})).toBe(false);
+    expect(filterOf(first)(ROWS[0]!, {})).toBe(true);
+    expect(filterOf(first)(ROWS[1]!, {})).toBe(false);
 
     const tree = { combinator: "and" as const, conditions: [] };
     expect(first.filterTreeFn?.(ROWS[0]!, tree)).toBe(true);
@@ -221,7 +233,7 @@ describe("createTableData", () => {
       declaredFilters: original,
     });
     const first = table.plan(originalConfig);
-    expect(ROWS.filter((row) => first.filterFn(row, { team: "x" }))).toEqual([
+    expect(ROWS.filter((row) => filterOf(first)(row, { team: "x" }))).toEqual([
       ROWS[0],
     ]);
     const changed = table.plan(
@@ -236,15 +248,15 @@ describe("createTableData", () => {
       })
     );
     expect(changed.filterKey).not.toBe(first.filterKey);
-    expect(ROWS.filter((row) => changed.filterFn(row, { team: "x" }))).toEqual([
-      ROWS[1],
-    ]);
+    expect(ROWS.filter((row) => filterOf(changed)(row, { team: "x" }))).toEqual(
+      [ROWS[1]]
+    );
 
     const removed = table.plan(
       config({ engine: FILTER_ENGINE_IMPL, declaredFilters: [] })
     );
     expect(removed.filterKey).not.toBe(first.filterKey);
-    expect(ROWS.filter((row) => removed.filterFn(row, { team: "x" }))).toEqual(
+    expect(ROWS.filter((row) => filterOf(removed)(row, { team: "x" }))).toEqual(
       ROWS
     );
     expect(table.plan(originalConfig).filterKey).toBe(first.filterKey);
@@ -253,9 +265,9 @@ describe("createTableData", () => {
     featureHost.extendFilterType("text", { match: () => true });
     const extended = table.plan({ ...originalConfig, featureHost });
     expect(extended.filterKey).not.toBe(first.filterKey);
-    expect(ROWS.filter((row) => extended.filterFn(row, { team: "x" }))).toEqual(
-      ROWS
-    );
+    expect(
+      ROWS.filter((row) => filterOf(extended)(row, { team: "x" }))
+    ).toEqual(ROWS);
   });
 
   it("tracks structural engines without runtime keys through replacement and removal", () => {
@@ -272,21 +284,26 @@ describe("createTableData", () => {
     const table = createTableData<Row>();
     const first = table.plan(config({ engine }));
     expect(first.runtime.filterKey).toBeUndefined();
-    expect(ROWS.filter((row) => first.filterFn(row, {}))).toEqual([ROWS[0]]);
+    expect(ROWS.filter((row) => filterOf(first)(row, {}))).toEqual([ROWS[0]]);
 
     const replaced = table.plan(config({ engine: replacement }));
     expect(replaced.runtime.filterKey).toBeUndefined();
     expect(replaced.filterKey).not.toBe(first.filterKey);
-    expect(ROWS.filter((row) => replaced.filterFn(row, {}))).toEqual([ROWS[1]]);
+    expect(ROWS.filter((row) => filterOf(replaced)(row, {}))).toEqual([
+      ROWS[1],
+    ]);
 
     const removed = table.plan(config());
     expect(removed.filterKey).not.toBe(first.filterKey);
     expect(removed.filterKey).not.toBe(replaced.filterKey);
-    expect(ROWS.filter((row) => removed.filterFn(row, {}))).toEqual(ROWS);
+    // Without the engine nothing filters: every row stays, with no predicate.
+    expect(removed.filterFn).toBeUndefined();
 
     const restored = table.plan(config({ engine }));
     expect(restored.filterKey).toBe(first.filterKey);
-    expect(ROWS.filter((row) => restored.filterFn(row, {}))).toEqual([ROWS[0]]);
+    expect(ROWS.filter((row) => filterOf(restored)(row, {}))).toEqual([
+      ROWS[0],
+    ]);
   });
 
   it("uses a custom runtime key for same-engine semantic changes", () => {
@@ -308,14 +325,14 @@ describe("createTableData", () => {
     const refreshed = table.plan(config({ engine, data: [...ROWS] }));
     expect(refreshed.runtime.filterFn).not.toBe(first.runtime.filterFn);
     expect(refreshed.filterKey).toBe(first.filterKey);
-    expect(ROWS.filter((row) => refreshed.filterFn(row, {}))).toEqual([
+    expect(ROWS.filter((row) => filterOf(refreshed)(row, {}))).toEqual([
       ROWS[0],
     ]);
 
     revision = 1;
     const changed = table.plan(config({ engine, data: [...ROWS] }));
     expect(changed.filterKey).not.toBe(first.filterKey);
-    expect(ROWS.filter((row) => changed.filterFn(row, {}))).toEqual([ROWS[1]]);
+    expect(ROWS.filter((row) => filterOf(changed)(row, {}))).toEqual([ROWS[1]]);
 
     revision = 0;
     const replaced = table.plan(config({ engine: { ...engine } }));
@@ -330,11 +347,11 @@ describe("createTableData", () => {
     const first = table.plan(config({ engine }));
     const added = table.plan(config({ engine, filterFn: () => true }));
     expect(added.filterKey).not.toBe(first.filterKey);
-    expect(ROWS.filter((row) => added.filterFn(row, {}))).toEqual([ROWS[0]]);
+    expect(ROWS.filter((row) => filterOf(added)(row, {}))).toEqual([ROWS[0]]);
 
     const replaced = table.plan(config({ engine, filterFn: () => false }));
     expect(replaced.filterKey).toBe(added.filterKey);
-    expect(ROWS.filter((row) => replaced.filterFn(row, {}))).toEqual([]);
+    expect(ROWS.filter((row) => filterOf(replaced)(row, {}))).toEqual([]);
     expect(table.plan(config({ engine })).filterKey).toBe(first.filterKey);
   });
 

@@ -10109,7 +10109,7 @@ export type TableDataPlan<TRow> = TableDataPlan_2<TRow>;
 // @public
 interface TableDataPlan_2<TRow> {
     readonly facetKeys: readonly string[] | undefined;
-    readonly filterFn: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterFn: ((row: TRow, extra: ExtraFilters) => boolean) | undefined;
     readonly filterKey: string;
     readonly filterTreeFn: ((row: TRow, tree: QueryFilterGroup) => boolean) | undefined;
     readonly runtime: FilterRuntime<TRow>;

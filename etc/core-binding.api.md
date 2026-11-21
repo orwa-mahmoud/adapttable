@@ -11311,7 +11311,7 @@ export interface TableDataConfig<TRow> {
 // @public
 export interface TableDataPlan<TRow> {
     readonly facetKeys: readonly string[] | undefined;
-    readonly filterFn: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterFn: ((row: TRow, extra: ExtraFilters) => boolean) | undefined;
     readonly filterKey: string;
     readonly filterTreeFn: ((row: TRow, tree: QueryFilterGroup) => boolean) | undefined;
     readonly runtime: FilterRuntime<TRow>;
