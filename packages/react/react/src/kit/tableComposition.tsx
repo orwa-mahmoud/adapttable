@@ -16,10 +16,7 @@ import {
 import type { CSSProperties, ReactNode, RefCallback, RefObject } from "react";
 
 import { TableStatusAnnouncer } from "../a11y/TableStatusAnnouncer";
-import {
-  ContextMenuLiveGate,
-  OptionalSidePanel,
-} from "../adapterFeatures/featureRoot";
+import { OptionalSidePanel } from "../adapterFeatures/featureRoot";
 import { AGENT_APPROVAL_STATE } from "../editing/AgentApprovalChrome";
 import { DataTableShellView } from "../features/chromeBodyGate";
 import { FeatureHostProvider } from "../features/featureHostContext";
@@ -31,7 +28,6 @@ import {
   BULK_BAR,
   COLUMN_MENU,
   COMMAND_PALETTE_LIVE,
-  type ContextMenuLiveSlotProps,
   FILTER_DRAWER,
   FILTERS_FORM,
   FIND_BAR,
@@ -42,7 +38,6 @@ import {
   SIDE_PANEL,
   STATUS_BAR,
 } from "../features/slotKeys";
-import { contextMenuCopyTarget } from "../focus/contextMenuCopy";
 import type { GroupingPanelSlotProps } from "../grouping/GroupingPanelChrome";
 import {
   resolveStickyToolbar,
@@ -56,6 +51,7 @@ import type {
 import { fillSlot, type Slot } from "../state/slots";
 import type { Density } from "../url/useDensityUrlState";
 import { useDataTableShell } from "../useDataTableShell";
+import { RootRegion } from "./rootRegion";
 
 /**
  * Content a host puts in place of a kit's own state views.
@@ -286,56 +282,6 @@ function bodyOf<TRow>(
   return kit.body(view, headerOffset, props);
 }
 
-function contextMenuProps<TRow>(
-  view: DataTableShellResult<TRow>,
-  props: KitTableProps<TRow>
-): Omit<ContextMenuLiveSlotProps<unknown>, "children"> {
-  const { chrome, gridFocus, source } = view;
-  const copy = (
-    target: Parameters<typeof contextMenuCopyTarget>[1],
-    cut?: true
-  ) => {
-    // The cell that was right-clicked, unless it sits inside a selection —
-    // then the selection is what was asked for.
-    const found = contextMenuCopyTarget(gridFocus, target);
-    if (found.available) gridFocus.copyCells(found.cell, cut);
-  };
-  return {
-    contextMenu: props.contextMenu,
-    columns: chrome.allColumns,
-    labels: view.labels,
-    rowFor: (rowId: string) =>
-      source.rows.find((row) => props.rowKey(row) === rowId),
-    actions: {
-      onCopy: (target) => {
-        copy(target);
-      },
-      // Cut writes the target to the clipboard, then asks the host to clear
-      // it through onCellCut — offered only when both exist.
-      onCut:
-        props.onCellCut && gridFocus.enabled
-          ? (target) => {
-              copy(target, true);
-            }
-          : undefined,
-      onSort: (key: string, dir: "asc" | "desc") => {
-        source.setSort(key, dir);
-      },
-      onHide: (key: string) => {
-        chrome.columnLayout.toggleVisible(key);
-      },
-      onFilter: () => {
-        view.setFiltersOpen(true);
-      },
-    },
-    sortBy: source.sortBy,
-    sortDir: source.sortDir,
-    rowPins: chrome.rowPinning?.actions,
-    featureHost: view.featureHost,
-    container: view.fullscreen.container,
-  } as Omit<ContextMenuLiveSlotProps<unknown>, "children">;
-}
-
 function toolbarOf<TRow>(
   kit: KitTable,
   view: DataTableShellResult<TRow>,
@@ -450,7 +396,7 @@ export function TableComposition<TRow>({
         const reorder = view.tableProps.rowReorder;
         return (
           <FeatureHostProvider host={view.featureHost}>
-            <ContextMenuLiveGate props={contextMenuProps(view, props)}>
+            <RootRegion view={view} props={props}>
               {(regionProps) => (
                 <Frame
                   rootProps={{
@@ -650,7 +596,7 @@ export function TableComposition<TRow>({
                   animate={props.animate === true}
                 />
               )}
-            </ContextMenuLiveGate>
+            </RootRegion>
           </FeatureHostProvider>
         );
       }}

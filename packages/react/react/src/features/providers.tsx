@@ -291,6 +291,20 @@ export function FeatureSlot({
   ));
 }
 
+/**
+ * The fills of one slot, in canonical order, for chrome that nests them.
+ *
+ * @param slot - The slot.
+ * @returns Its fills; empty when no feature fills it.
+ */
+export function useSlotFills(slot: {
+  readonly id: string;
+}): readonly SlotFill<ReactNode>[] {
+  return useContext(FeatureRenderContext).get(slot.id) ?? NO_FILLS;
+}
+
+const NO_FILLS: readonly SlotFill<ReactNode>[] = [];
+
 const LiveStageContext = createContext<readonly LiveStage<ReactNode>[]>([]);
 
 /**

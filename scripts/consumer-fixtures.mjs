@@ -622,8 +622,13 @@ function adapterBaseFixtures() {
     code: `export { DataTable } from "PKG";`,
     // A kit that loads locales lazily carries every string in its English
     // locale chunk, so only a base table without one can name them absent.
-    absent:
-      kit === "mui" ? [...ADAPTER_ABSENT, "defaultLabels"] : ADAPTER_ABSENT,
+    // antd builds its chrome by hand and wires the context menu in its own
+    // table; every other kit draws through the binding's composition.
+    absent: [
+      ...ADAPTER_ABSENT,
+      ...(kit === "mui" ? ["defaultLabels"] : []),
+      ...(kit === "antd" ? [] : ["contextMenuCopyTarget"]),
+    ],
   }));
 }
 

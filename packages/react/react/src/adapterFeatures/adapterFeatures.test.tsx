@@ -246,6 +246,7 @@ describe("adapter feature assembly", () => {
 
     expect(renderSlots(contextFeature)).toEqual([
       "column-layout-live",
+      "table-root-region",
       "context-menu-live",
     ]);
     expect(renderSlots(commandFeature)).toEqual(["command-palette-live"]);

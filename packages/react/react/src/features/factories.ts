@@ -21,6 +21,7 @@ import type { ContextMenuOptions } from "../actions/useTableContextMenu";
 import type { SidePanelOptions } from "../props";
 import type { UseSavedViewsOptions } from "../url/useSavedViews";
 import { COLUMN_LAYOUT_LIVE_RENDER } from "./column-layout-live";
+import { CONTEXT_MENU_REGION_RENDER } from "./contextMenuRegion";
 import { SELECTION_LIVE_RENDER } from "./selection-live";
 import type {
   FeaturePatch,
@@ -210,7 +211,7 @@ export function contextMenu<TRow>(
 ): TableFeature<TRow> {
   return {
     ...rowAware(coreContextMenu(options)),
-    renders: [COLUMN_LAYOUT_LIVE_RENDER],
+    renders: [COLUMN_LAYOUT_LIVE_RENDER, CONTEXT_MENU_REGION_RENDER],
   };
 }
 
