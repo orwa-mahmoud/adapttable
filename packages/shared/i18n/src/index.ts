@@ -18,7 +18,8 @@ export {
   primarySubtag,
   RTL_LANGUAGES,
 } from "./direction";
-export { getLabels, hasLocale, type LocaleKey, locales } from "./getLabels";
+export { getLabels, locales } from "./getLabels";
+export { hasLocale, type LocaleKey } from "./localeCatalog";
 export { ar } from "./locales/ar";
 export { cs } from "./locales/cs";
 export { de } from "./locales/de";

@@ -1,7 +1,6 @@
-import { type TableLabels } from "@adapttable/core";
-import { resolveLocaleTag } from "@adapttable/core/binding";
+import type { TableLabels } from "@adapttable/core";
 
-import type { LocaleKey } from "./getLabels";
+import { type LocaleKey, resolveLocaleKey } from "./localeCatalog";
 
 type Loader = () => Promise<Required<TableLabels>>;
 
@@ -45,7 +44,6 @@ const LOADERS = {
 export async function loadLabels(
   locale: string
 ): Promise<Required<TableLabels> | undefined> {
-  const key = resolveLocaleTag(Object.keys(LOADERS), locale) as
-    LocaleKey | undefined;
+  const key = resolveLocaleKey(locale);
   return key === undefined ? undefined : LOADERS[key]();
 }
