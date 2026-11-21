@@ -90,8 +90,11 @@ export function stripDevWarnings({ callee, include }) {
         edited.overwrite(statement.start, statement.end, "{}");
       }
       dropped += statements.length;
-      // The bundler takes a plain source map object.
-      const map = JSON.parse(JSON.stringify(edited.generateMap()));
+      // The map's fields are getters on a native object: serialize it, named
+      // after the module, so the bundler can chain every position.
+      const map = JSON.parse(
+        edited.generateMap({ source: id, hires: true }).toString()
+      );
       return { code: edited.toString(), map };
     },
     buildEnd(error) {
