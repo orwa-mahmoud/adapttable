@@ -24,9 +24,9 @@ import {
   definedConfigPatch,
   hasFilter,
   queryConfigFingerprint,
-  resolveSortValue,
   rowMatcher,
   sortLevels,
+  sortValueReader,
 } from "./rowQuery";
 
 /**
@@ -163,22 +163,26 @@ interface SortEntry<TRow> {
   readonly index: number;
 }
 
+/** Each level's reader, prepared once per sort. */
+function sortReaders<TRow>(
+  levels: readonly SortLevel[],
+  config: IncrementalViewConfig<TRow>
+): ((row: TRow) => SortableValue)[] {
+  return levels.map((level) => sortValueReader(level.key, config));
+}
+
 function entryOf<TRow>(
   row: TRow,
   index: number,
-  levels: readonly SortLevel[],
-  config: IncrementalViewConfig<TRow>
+  readers: readonly ((row: TRow) => SortableValue)[]
 ): SortEntry<TRow> {
-  const value = resolveSortValue(row, levels[0]!.key, config);
-  if (levels.length === 1) return { row, index, value };
-  return {
-    row,
-    index,
-    value,
-    rest: levels
-      .slice(1)
-      .map((level) => resolveSortValue(row, level.key, config)),
-  };
+  const value = readers[0]!(row);
+  if (readers.length === 1) return { row, index, value };
+  const rest: SortableValue[] = [];
+  for (let level = 1; level < readers.length; level++) {
+    rest.push(readers[level]!(row));
+  }
+  return { row, index, value, rest };
 }
 
 /** Order two entries level by level; `0` is a tie. */
@@ -218,8 +222,9 @@ function sortedEntries<TRow>(
           compareSortEntries(a, b, only.dir)
       : (a: SortEntry<TRow>, b: SortEntry<TRow>) =>
           compareEntries(levels, a, b) || a.index - b.index;
+  const readers = sortReaders(levels, config);
   return filtered
-    .map((row, index) => entryOf(row, index, levels, config))
+    .map((row, index) => entryOf(row, index, readers))
     .sort(compare);
 }
 
@@ -265,8 +270,9 @@ function mergedEntries<TRow>(
   const positionOf = sourcePositions(filtered, entered.length);
   const order = (a: SortEntry<TRow>, b: SortEntry<TRow>) =>
     compareEntries(levels, a, b) || positionOf(a.row) - positionOf(b.row);
+  const readers = sortReaders(levels, config);
   const incoming = entered
-    .map((row, index) => entryOf(row, index, levels, config))
+    .map((row, index) => entryOf(row, index, readers))
     .sort(order);
   const merged: SortEntry<TRow>[] = [];
   let from = 0;
