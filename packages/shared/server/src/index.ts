@@ -68,7 +68,8 @@ import {
 
 import {
   checkTree,
-  declaredFilters,
+  type FilterLookups,
+  filterLookups,
   type Refuse,
   type ServerFilterDef,
   type ServerFilterType,
@@ -303,12 +304,90 @@ function treeColumns(group: QueryFilterGroup): string[] {
  */
 export function parseTableQuery(
   input: QueryInput,
-  schema: QuerySchema
+  schema: QuerySchema | PreparedQuerySchema
 ): ServerTableQuery {
   const params = toParams(input);
+  const prepared = preparedLookups.get(schema);
+  if (prepared) return parseWith(params, prepared);
+  if (!("columns" in schema)) {
+    throw new TypeError(
+      "parseTableQuery: a prepared schema must come from prepareQuerySchema"
+    );
+  }
+  return parseWith(params, lookupsOf(schema));
+}
+
+/** The column and filter lookups one schema is checked with. */
+interface SchemaLookups {
+  readonly schema: QuerySchema;
+  readonly listed: ReadonlySet<string> | undefined;
+  readonly filters: FilterLookups | undefined;
+}
+
+/**
+ * A schema whose lookups were prepared once, for a route that answers every
+ * request against the same schema.
+ *
+ * @public
+ */
+export interface PreparedQuerySchema {
+  /** The schema as it was when it was prepared. */
+  readonly schema: Readonly<QuerySchema>;
+}
+
+const preparedLookups = new WeakMap<object, SchemaLookups>();
+
+function lookupsOf(schema: QuerySchema): SchemaLookups {
+  return {
+    schema,
+    listed: schema.columns === "any" ? undefined : new Set(schema.columns),
+    filters:
+      schema.filters === undefined
+        ? undefined
+        : filterLookups(schema.filters, schema.filterTypes ?? []),
+  };
+}
+
+/**
+ * Prepare a schema's column and filter lookups once, for a route that
+ * checks every request against the same schema: the allowed columns, the
+ * declared filters, their parameters and their static choices. Pass the
+ * result to {@link parseTableQuery} in place of the schema; it answers
+ * exactly as the schema would.
+ *
+ * The schema is read now. A schema built per request — scoped to a user or a
+ * role — goes to `parseTableQuery` as it is, and is checked fresh each time.
+ *
+ * @param schema - The schema every request is checked against.
+ * @returns The prepared schema.
+ *
+ * @public
+ */
+export function prepareQuerySchema(schema: QuerySchema): PreparedQuerySchema {
+  const snapshot: QuerySchema = Object.freeze({
+    ...schema,
+    columns:
+      schema.columns === "any" ? "any" : Object.freeze([...schema.columns]),
+  });
+  const prepared: PreparedQuerySchema = Object.freeze({ schema: snapshot });
+  const lookups = lookupsOf(snapshot);
+  // Read every filter's choices and the key index now, so a host that edits
+  // its filter definitions later does not change what this schema allows.
+  for (const def of lookups.filters?.defs ?? []) {
+    lookups.filters?.choicesOf(def);
+  }
+  lookups.filters?.filterFor("");
+  preparedLookups.set(prepared, lookups);
+  return prepared;
+}
+
+function parseWith(
+  params: URLSearchParams,
+  lookups: SchemaLookups
+): ServerTableQuery {
+  const { schema, listed } = lookups;
   const ns = schema.urlKey ? `${schema.urlKey}.` : "";
   const get = (name: string) => params.get(`${ns}${name}`);
-  const listed = schema.columns === "any" ? undefined : new Set(schema.columns);
   const allowed: Allows = (key) => listed === undefined || listed.has(key);
   const rejected: QueryRejection[] = [];
   const refuse = (param: string, value: string, reason: string) => {
@@ -320,7 +399,7 @@ export function parseTableQuery(
   const cursor = get(PARAM_CURSOR);
   const sort = validSort(get, allowed, refuse);
   const grouping = readGrouping(get, schema, allowed, refuse);
-  const filtering = readFiltering(params, ns, schema, listed, allowed, refuse);
+  const filtering = readFiltering(params, ns, lookups, allowed, refuse);
   const pivot = validPivot(get(PARAM_PIVOT), allowed, refuse);
 
   return {
@@ -413,8 +492,7 @@ function readGrouping(
 function readFiltering(
   params: URLSearchParams,
   ns: string,
-  schema: QuerySchema,
-  listed: ReadonlySet<string> | undefined,
+  { listed, filters: lookups }: SchemaLookups,
   allowed: Allows,
   refuse: Refuse
 ): Pick<
@@ -422,7 +500,7 @@ function readFiltering(
   "filters" | "shapedFilters" | "typedFilters" | "filterTree"
 > {
   const tree = params.get(`${ns}${FILTER_TREE_PARAM}`);
-  if (schema.filters === undefined) {
+  if (lookups === undefined) {
     const filters = validFilters(params, ns, allowed, refuse);
     const filterTree = validTree(tree, allowed, refuse);
     return {
@@ -433,10 +511,8 @@ function readFiltering(
       ...(filterTree === undefined ? {} : { filterTree }),
     };
   }
-  const defs = declaredFilters(schema.filters);
-  const custom = schema.filterTypes ?? [];
-  const typed = typeFilters(params, ns, defs, custom, refuse);
-  const filterTree = typedTree(tree, defs, custom, refuse);
+  const typed = typeFilters(params, ns, lookups, refuse);
+  const filterTree = typedTree(tree, lookups, refuse);
   return {
     filters: typed.raw,
     typedFilters: typed.typed,
@@ -588,14 +664,13 @@ function submittedTree(
  */
 function typedTree(
   raw: string | null,
-  defs: readonly ServerFilterDef[],
-  custom: readonly ServerFilterType[],
+  lookups: FilterLookups,
   refuse: Refuse
 ): QueryFilterGroup | undefined {
   if (raw === null || raw === "") return undefined;
   const tree = submittedTree(raw, refuse);
   if (!tree) return undefined;
-  const checked = checkTree(tree, defs, custom);
+  const checked = checkTree(tree, lookups);
   if ("problem" in checked) {
     refuse(FILTER_TREE_PARAM, raw, checked.problem);
     return undefined;

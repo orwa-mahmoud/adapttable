@@ -380,7 +380,7 @@ function operatorFor(operators: Operators, raw: ShapedFilter): string {
 }
 
 /** The static choices a definition allows, or `undefined` when any may come. */
-function staticChoices(def: ServerFilterDef): Set<string> | undefined {
+function staticChoices(def: ServerFilterDef): ReadonlySet<string> | undefined {
   if (!Array.isArray(def.options)) return undefined;
   const values = (def.options as readonly unknown[]).flatMap((option) =>
     option !== null &&
@@ -432,7 +432,7 @@ interface Reader {
   readonly def: ServerFilterDef;
   readonly param: (suffix?: string) => string;
   readonly refuse: Refuse;
-  readonly choices: Set<string> | undefined;
+  readonly choices: ReadonlySet<string> | undefined;
 }
 
 /** Values outside a static list, refused by name. */
@@ -628,6 +628,58 @@ function ownedKeys(
   ];
 }
 
+/** What a declared filter schema is checked with, prepared once. */
+export interface FilterLookups {
+  /** The declared filters, one list whichever form the schema used. */
+  readonly defs: readonly ServerFilterDef[];
+  /** The filter types the host registered. */
+  readonly custom: readonly ServerFilterType[];
+  /** Which filter, and which part of it, each bare parameter key fills. */
+  readonly owners: ReadonlyMap<
+    string,
+    { readonly def: ServerFilterDef; readonly part: keyof ShapedFilter }
+  >;
+  /** The declared filter with this key. */
+  readonly filterFor: (key: string) => ServerFilterDef | undefined;
+  /** A filter's static choices; `undefined` when any value may come. */
+  readonly choicesOf: (def: ServerFilterDef) => ReadonlySet<string> | undefined;
+}
+
+/**
+ * The lookups for one declared-filter schema. The parameter owners are built
+ * at once; a filter's choices and the key index are built the first time a
+ * request needs them and kept, so a schema checked once costs no more than it
+ * reads, and a prepared one pays each only once.
+ */
+export function filterLookups(
+  filters: Readonly<Record<string, string>> | readonly ServerFilterDef[],
+  custom: readonly ServerFilterType[]
+): FilterLookups {
+  const defs = declaredFilters(filters);
+  const owners = new Map<
+    string,
+    { readonly def: ServerFilterDef; readonly part: keyof ShapedFilter }
+  >();
+  for (const def of defs) {
+    for (const [key, part] of ownedKeys(def)) owners.set(key, { def, part });
+  }
+  let byKey: ReadonlyMap<string, ServerFilterDef> | undefined;
+  const choices = new Map<ServerFilterDef, ReadonlySet<string> | undefined>();
+  return {
+    defs,
+    custom: [...custom],
+    owners,
+    filterFor: (key) => {
+      byKey ??= new Map(defs.map((def) => [def.key, def]));
+      return byKey.get(key);
+    },
+    choicesOf: (def) => {
+      if (!choices.has(def)) choices.set(def, staticChoices(def));
+      return choices.get(def);
+    },
+  };
+}
+
 /**
  * Every declared filter, typed and checked; everything else refused.
  *
@@ -638,20 +690,13 @@ function ownedKeys(
 export function typeFilters(
   params: URLSearchParams,
   ns: string,
-  defs: readonly ServerFilterDef[],
-  custom: readonly ServerFilterType[],
+  lookups: FilterLookups,
   refuse: Refuse
 ): {
   readonly typed: Record<string, TypedFilter>;
   readonly raw: Record<string, string>;
 } {
-  const owner = new Map<
-    string,
-    { readonly def: ServerFilterDef; readonly part: keyof ShapedFilter }
-  >();
-  for (const def of defs) {
-    for (const [key, part] of ownedKeys(def)) owner.set(key, { def, part });
-  }
+  const { defs, custom, owners: owner } = lookups;
   const shaped = new Map<string, Record<string, string>>();
   const raw: Record<string, string> = {};
   for (const [bare, value] of filterParams(params, ns)) {
@@ -673,7 +718,7 @@ export function typeFilters(
       def,
       param: (suffix = "") => `${FILTER_PREFIX}${def.key}${suffix}`,
       refuse,
-      choices: staticChoices(def),
+      choices: lookups.choicesOf(def),
     };
     const one = typeOne(def, parts, custom, reader);
     if (one) typed[def.key] = one;
@@ -689,16 +734,14 @@ export function typeFilters(
  */
 export function checkTree(
   tree: QueryFilterGroup,
-  defs: readonly ServerFilterDef[],
-  custom: readonly ServerFilterType[]
+  lookups: FilterLookups
 ): { readonly tree: QueryFilterGroup } | { readonly problem: string } {
-  const byKey = new Map(defs.map((def) => [def.key, def]));
   let problem: string | undefined;
   const walk = (group: QueryFilterGroup): QueryFilterGroup => ({
     ...group,
     conditions: group.conditions.map((child) => {
       if (isFilterGroup(child)) return walk(child);
-      const checked = checkCondition(child, byKey, custom);
+      const checked = checkCondition(child, lookups);
       if ("problem" in checked) {
         problem ??= checked.problem;
         return child;
@@ -713,12 +756,11 @@ export function checkTree(
 /** One tree condition in its type's spelling, or why it cannot be used. */
 function checkCondition(
   condition: QueryCondition,
-  byKey: ReadonlyMap<string, ServerFilterDef>,
-  custom: readonly ServerFilterType[]
+  lookups: FilterLookups
 ): { readonly condition: QueryCondition } | { readonly problem: string } {
-  const def = byKey.get(condition.key);
+  const def = lookups.filterFor(condition.key);
   if (!def) return { problem: `"${condition.key}" is not a declared filter` };
-  const operators = operatorsOf(def.type, custom);
+  const operators = operatorsOf(def.type, lookups.custom);
   const op = operators ? spelled(operators, condition.op) : condition.op;
   if (!operators?.ops.includes(op)) {
     return {
@@ -726,14 +768,14 @@ function checkCondition(
     };
   }
   const own = op === condition.op ? condition : { ...condition, op };
-  const problem = valueProblem(def, own);
+  const problem = valueProblem(def, own, lookups.choicesOf(def));
   return problem === undefined ? { condition: own } : { problem };
 }
 
 type ValueCheck = (
   condition: QueryCondition,
   list: readonly unknown[],
-  def: ServerFilterDef
+  choices: ReadonlySet<string> | undefined
 ) => string | undefined;
 
 const VALUE_CHECKS: Readonly<Record<string, ValueCheck>> = {
@@ -765,13 +807,12 @@ const VALUE_CHECKS: Readonly<Record<string, ValueCheck>> = {
 function choiceProblem(
   condition: QueryCondition,
   list: readonly unknown[],
-  def: ServerFilterDef
+  choices: ReadonlySet<string> | undefined
 ): string | undefined {
   const texts = list.filter((entry) => typeof entry === "string");
   if (texts.length !== list.length) {
     return `"${condition.key}" needs text values`;
   }
-  const choices = staticChoices(def);
   return choices && !texts.every((entry) => choices.has(entry))
     ? `"${condition.key}" names a value outside its options`
     : undefined;
@@ -780,10 +821,11 @@ function choiceProblem(
 /** Why one tree condition's value does not fit its filter's type. */
 function valueProblem(
   def: ServerFilterDef,
-  condition: QueryCondition
+  condition: QueryCondition,
+  choices: ReadonlySet<string> | undefined
 ): string | undefined {
   const { value, op } = condition;
   if (isValuelessFilterOp(op)) return undefined;
   const check = VALUE_CHECKS[def.type];
-  return check?.(condition, Array.isArray(value) ? value : [value], def);
+  return check?.(condition, Array.isArray(value) ? value : [value], choices);
 }

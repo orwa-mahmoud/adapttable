@@ -53,7 +53,7 @@ export interface NumberRangeFilter {
 }
 
 // @public
-export function parseTableQuery(input: QueryInput, schema: QuerySchema): ServerTableQuery;
+export function parseTableQuery(input: QueryInput, schema: QuerySchema | PreparedQuerySchema): ServerTableQuery;
 
 // @public
 export function pickFilters<TDef extends {
@@ -62,6 +62,14 @@ export function pickFilters<TDef extends {
 
 // @public
 export function pickFilters(defs: Readonly<Record<string, string>>, keys: readonly string[]): Record<string, string>;
+
+// @public
+export interface PreparedQuerySchema {
+    readonly schema: Readonly<QuerySchema>;
+}
+
+// @public
+export function prepareQuerySchema(schema: QuerySchema): PreparedQuerySchema;
 
 // @public
 export type QueryInput = string | URL | URLSearchParams | {

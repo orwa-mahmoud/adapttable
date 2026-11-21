@@ -7347,6 +7347,8 @@
       "NumberRangeFilter",
       "parseTableQuery",
       "pickFilters",
+      "PreparedQuerySchema",
+      "prepareQuerySchema",
       "QueryInput",
       "QueryRejection",
       "QuerySchema",

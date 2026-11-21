@@ -2324,7 +2324,10 @@ and `filters` — a shorthand record or the table's own `FilterDef[]`, read as
 `BooleanFilter`, `NumberRangeFilter`, `DateRangeFilter` or
 `CustomTypedFilter`), with `filterTypes` (`ServerFilterType`s) for registered
 types. `groupByKeys: true`
-lists every grouping key. `pickFilters(defs, keys)` scopes the declared
+lists every grouping key. `prepareQuerySchema(schema)` reads a schema's
+lookups once for a route that checks every request against it; the
+`PreparedQuerySchema` it returns goes to `parseTableQuery` in place of the
+schema. `pickFilters(defs, keys)` scopes the declared
 filters per caller, and `splitListParam(raw)` inverts the table's
 multi-value encoding (`splitFilterValues` is its deprecated name).
 `QueryInput` is a `Request`, `URL`, query string or `URLSearchParams`;

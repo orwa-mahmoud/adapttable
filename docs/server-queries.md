@@ -158,6 +158,29 @@ const query = parseTableQuery(request, {
 
 A filter outside the subset is refused like any undeclared one.
 
+### One schema for every request
+
+A route that checks every request against the same schema can prepare it
+once. `prepareQuerySchema(schema)` reads the allowed columns, the declared
+filters, their parameters and their static choices, and `parseTableQuery`
+takes the result in place of the schema and answers exactly as the schema
+would:
+
+```ts
+import { parseTableQuery, prepareQuerySchema } from "@adapttable/server";
+
+const PEOPLE = prepareQuerySchema({ columns: COLUMNS, filters: FILTER_DEFS });
+
+export function handle(request: Request) {
+  const query = parseTableQuery(request, PEOPLE);
+  // …
+}
+```
+
+The schema is read when it is prepared; later edits to it do not change what
+the prepared schema allows. A schema built per request, scoped to a user or a
+role, goes to `parseTableQuery` as it is.
+
 ### Multi-value filters and nested grouping
 
 The table writes a multi-value filter (`multiSelect`, checklist) as ONE

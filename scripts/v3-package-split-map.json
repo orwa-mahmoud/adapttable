@@ -62003,6 +62003,22 @@
       "behavior": ""
     },
     {
+      "export": "PreparedQuerySchema",
+      "currentImport": "@adapttable/server",
+      "kind": "type",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/server",
+      "behavior": ""
+    },
+    {
+      "export": "prepareQuerySchema",
+      "currentImport": "@adapttable/server",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/server",
+      "behavior": ""
+    },
+    {
       "export": "QueryInput",
       "currentImport": "@adapttable/server",
       "kind": "type",
