@@ -9,7 +9,6 @@
  * the same slot; apply() sets the channel each one owns.
  */
 import {
-  devWarn,
   type EditableColumnLike,
   type EditConflictState,
 } from "@adapttable/core";
@@ -147,14 +146,6 @@ function EditingAssembly<TRow>({
       props,
     ]
   );
-
-  const hasEditableColumn = chrome.allColumns.some((column) => column.editable);
-  useEffect(() => {
-    if (!hasEditableColumn || onCellEdit) return;
-    devWarn(
-      "columns declare `editable` but no edit handler is composed — cell editing stays inert. Add `editing(handler)` to the table's features."
-    );
-  }, [hasEditableColumn, onCellEdit]);
 
   const rowKey = props.rowKey;
   useEffect(() => {

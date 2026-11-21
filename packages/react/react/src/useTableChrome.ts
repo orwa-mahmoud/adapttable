@@ -1,4 +1,8 @@
-import { type GroupingPanelState, resolvePinnedRows } from "@adapttable/core";
+import {
+  devWarn,
+  type GroupingPanelState,
+  resolvePinnedRows,
+} from "@adapttable/core";
 import {
   applyFeatureNoticesAttribute,
   chromeBodyRegion,
@@ -212,6 +216,16 @@ export function useTableChrome<TRow>(
   const editing = undefined;
   const onCellEdit = props.onCellEdit;
   const hasEditableColumn = resolvedColumns.some((column) => column.editable);
+  const hasEditHandler =
+    onCellEdit !== undefined ||
+    props.onRowEdit !== undefined ||
+    props.onBatchEdit !== undefined;
+  useEffect(() => {
+    if (!hasEditableColumn || hasEditHandler) return;
+    devWarn(
+      "columns declare `editable` but no edit handler is composed — cell editing stays inert. Add `editing(handler)` to the table's features."
+    );
+  }, [hasEditableColumn, hasEditHandler]);
 
   const getRowId = selectionGetId ?? rowKey;
   const rowMutations = NO_ROW_MUTATIONS as RowMutationsState<TRow>;
