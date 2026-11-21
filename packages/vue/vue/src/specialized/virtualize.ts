@@ -284,28 +284,53 @@ function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
         )
           injectedWidths.value = { leadingWidth, trailingWidth };
       };
-      node.addEventListener("scroll", read, { passive: true });
-      window.addEventListener("resize", read);
+      // One read per frame, however many signals arrive in it.
+      let pending: number | undefined;
+      const schedule = () => {
+        pending ??= requestAnimationFrame(() => {
+          pending = undefined;
+          read();
+        });
+      };
+      node.addEventListener("scroll", schedule, { passive: true });
+      window.addEventListener("resize", schedule);
       const observer =
         typeof ResizeObserver === "undefined"
           ? undefined
-          : new ResizeObserver(read);
+          : new ResizeObserver(schedule);
       observer?.observe(node);
       observer?.observe(document.documentElement);
+      // What can move or resize the table: its own content (header controls
+      // that come and go), and each ancestor's attributes and direct children
+      // (visibility, a style that shifts it, content inserted above it).
+      // Changes elsewhere in the page cannot, so they are not watched.
       const mutation =
         typeof MutationObserver === "undefined"
           ? undefined
-          : new MutationObserver(read);
-      mutation?.observe(document.body, {
+          : new MutationObserver(schedule);
+      const attributeFilter = ["style", "class", "hidden"];
+      mutation?.observe(node, {
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ["style", "class", "hidden"],
+        attributeFilter,
       });
+      for (
+        let ancestor = node.parentElement;
+        ancestor !== null;
+        ancestor = ancestor.parentElement
+      ) {
+        mutation?.observe(ancestor, {
+          childList: true,
+          attributes: true,
+          attributeFilter,
+        });
+      }
       read();
       cleanup(() => {
-        node.removeEventListener("scroll", read);
-        window.removeEventListener("resize", read);
+        if (pending !== undefined) cancelAnimationFrame(pending);
+        node.removeEventListener("scroll", schedule);
+        window.removeEventListener("resize", schedule);
         observer?.disconnect();
         mutation?.disconnect();
       });
