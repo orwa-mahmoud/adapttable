@@ -320,7 +320,7 @@ const CORE_FIXTURES = [
     // names it imports, so this row tracks the surface, not a table's cost.
     // The total also holds the PDF and Excel builders, which the main entry
     // reaches only lazily through `deferredPdfWriter` / `deferredXlsxWriter`.
-    // Packed 2026-11-22: 47.4 KiB initial, 58.7 KiB total.
+    // Packed 2026-11-22: 47.3 KiB initial, 58.6 KiB total.
     initialKB: 55,
     totalKB: 68,
     code: `export * from "PKG";`,
