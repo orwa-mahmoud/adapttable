@@ -9,7 +9,7 @@ import { type ReactNode, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
-import { contextMenu } from "../features/factories";
+import { columnMenu, contextMenu } from "../features/factories";
 import { useTableFeatures } from "../features/featureHost";
 import { FeatureProviders, slotRender } from "../features/providers";
 import { COLUMN_MENU, CONTEXT_MENU_LIVE } from "../features/slotKeys";
@@ -352,9 +352,12 @@ describe("TableComposition", () => {
         }),
       ],
     };
-    // The context menu's inputs come with its feature; the probe draws them.
+    // The menus' inputs come with their features; the probe draws them.
     mount({
-      override: { features: [contextMenu(), probe], enableColumnMenu: true },
+      override: {
+        features: [columnMenu(), contextMenu(), probe],
+        enableColumnMenu: true,
+      },
     });
     const body = () => screen.getByTestId("kit-body").textContent;
     const toolbar = () => screen.getByTestId("kit-toolbar");

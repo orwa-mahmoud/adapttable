@@ -7,7 +7,7 @@
  * rest of the walk the attributes it adds to the root. Fills nest in feature
  * order; when two add the same attribute, the later one's value is used.
  */
-import { featureSlotKey } from "@adapttable/core/binding";
+import { featureSlotKey, rowSlotKey } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { useSlotFills } from "../features/providers";
@@ -35,6 +35,46 @@ export interface RootRegionProps<TRow> {
  */
 export const TABLE_ROOT_REGION =
   featureSlotKey<RootRegionProps<unknown>>("table-root-region");
+
+/**
+ * What a toolbar position's fill is rendered with: the finished view and the
+ * table's props, from which the feature builds its own control's props.
+ *
+ * @public
+ */
+export interface KitRegionProps<TRow> {
+  /** The finished view. */
+  readonly view: DataTableShellResult<TRow>;
+  /** The table's props. */
+  readonly props: KitTableProps<TRow>;
+}
+
+/**
+ * How a toolbar position's fill draws, for any row type.
+ *
+ * @public
+ */
+export type KitRegionDraw = <TRow>(props: KitRegionProps<TRow>) => ReactNode;
+
+/**
+ * The toolbar's saved-views position, filled by the saved-views feature.
+ *
+ * @public
+ */
+export const SAVED_VIEWS_REGION = rowSlotKey<KitRegionDraw>(
+  "saved-views-region",
+  { single: true }
+);
+
+/**
+ * The toolbar's column-menu position, filled by the column-menu feature.
+ *
+ * @public
+ */
+export const COLUMN_MENU_REGION = rowSlotKey<KitRegionDraw>(
+  "column-menu-region",
+  { single: true }
+);
 
 /** Nest the composed fills around the root, collecting their attributes. */
 export function RootRegion<TRow>({

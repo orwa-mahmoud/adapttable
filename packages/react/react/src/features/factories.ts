@@ -28,6 +28,10 @@ import type {
   StaticTableFeature,
   TableFeature,
 } from "./tableFeature";
+import {
+  COLUMN_MENU_REGION_RENDER,
+  SAVED_VIEWS_REGION_RENDER,
+} from "./toolbarRegions";
 
 export type {
   BulkAction,
@@ -162,7 +166,7 @@ export function rowAppearance<TRow>(options: {
 export function columnMenu(): StaticTableFeature {
   return {
     ...rowFree(coreColumnMenu()),
-    renders: [COLUMN_LAYOUT_LIVE_RENDER],
+    renders: [COLUMN_LAYOUT_LIVE_RENDER, COLUMN_MENU_REGION_RENDER],
   };
 }
 
@@ -269,7 +273,7 @@ export function savedViews(options: UseSavedViewsOptions): StaticTableFeature {
     // A view is the whole table state, columns included: restoring one writes
     // the layout params back, so this feature has to own the layout they land
     // in. Without it a restored view changes everything except its columns.
-    renders: [COLUMN_LAYOUT_LIVE_RENDER],
+    renders: [COLUMN_LAYOUT_LIVE_RENDER, SAVED_VIEWS_REGION_RENDER],
   };
 }
 

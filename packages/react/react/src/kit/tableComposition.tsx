@@ -26,7 +26,6 @@ import {
   AGENT_APPROVAL,
   BATCH_EDIT_BAR,
   BULK_BAR,
-  COLUMN_MENU,
   COMMAND_PALETTE_LIVE,
   FILTER_DRAWER,
   FILTERS_FORM,
@@ -34,7 +33,6 @@ import {
   GRID_FOCUS_ANNOUNCER,
   GROUPING_PANEL,
   ROW_REORDER_ANNOUNCER,
-  SAVED_VIEWS,
   SIDE_PANEL,
   STATUS_BAR,
 } from "../features/slotKeys";
@@ -51,7 +49,11 @@ import type {
 import { fillSlot, type Slot } from "../state/slots";
 import type { Density } from "../url/useDensityUrlState";
 import { useDataTableShell } from "../useDataTableShell";
-import { RootRegion } from "./rootRegion";
+import {
+  COLUMN_MENU_REGION,
+  RootRegion,
+  SAVED_VIEWS_REGION,
+} from "./rootRegion";
 
 /**
  * Content a host puts in place of a kit's own state views.
@@ -287,7 +289,7 @@ function toolbarOf<TRow>(
   view: DataTableShellResult<TRow>,
   props: KitTableProps<TRow>
 ): ReactNode {
-  const { chrome, labels, source } = view;
+  const { chrome } = view;
   return kit.toolbar<TRow>({
     ...view.toolbarProps,
     filtersMode: props.filtersMode ?? "popover",
@@ -298,46 +300,12 @@ function toolbarOf<TRow>(
     onCloseFilters: () => {
       view.setFiltersOpen(false);
     },
-    // Saved views capture the table's own URL params, so the menu defaults
-    // to the table's URL backend and namespace; an explicit option wins.
     savedViewsMenu: props.savedViews ? (
-      <FeatureSlot
-        slot={SAVED_VIEWS}
-        props={{
-          options: {
-            urlAdapter: view.urlAdapter,
-            urlKey: props.urlKey,
-            ...props.savedViews,
-          },
-          labels,
-        }}
-      />
+      <FeatureSlot slot={SAVED_VIEWS_REGION} props={{ view, props }} />
     ) : null,
     columnMenu:
       props.enableColumnMenu && !chrome.isMobile ? (
-        <FeatureSlot
-          slot={COLUMN_MENU}
-          props={{
-            allColumns: chrome.allColumns,
-            onAutoSize: view.autoSizeColumns,
-            onAutoSizeColumn: view.autoSizeColumn,
-            onSortColumn: (key, sortDir) => source.setSort(key, sortDir),
-            onFilterColumn: () => {
-              view.setFiltersOpen(true);
-            },
-            onRenameColumn: props.onColumnRename
-              ? chrome.columnLayout.setName
-              : undefined,
-            sortBy: source.sortBy,
-            sortDir: source.sortDir,
-            layout: chrome.columnLayout,
-            labels,
-            hasRowActions: view.hasRowActions,
-            hasRowReorder: view.hasRowReorder,
-            groupingPanel: chrome.groupingPanel,
-            dir: props.dir,
-          }}
-        />
+        <FeatureSlot slot={COLUMN_MENU_REGION} props={{ view, props }} />
       ) : null,
   });
 }
