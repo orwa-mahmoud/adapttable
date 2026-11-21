@@ -122,6 +122,7 @@ Each is a published, supported entry — not an implementation detail:
 | `@adapttable/core/engine`    | Table constructors (`createTableEngine`, `createBasicTableEngine`, …)                                 |
 | `@adapttable/core/formula`   | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                                            |
 | `@adapttable/core/grouping`  | Row grouping (`buildGroupedFlatModel`, `groupSelectionState`, …)                                      |
+| `@adapttable/core/locale`    | The shared locale-tag resolver (`resolveLocaleTag`, `normalizeLocaleTag`)                             |
 | `@adapttable/core/pdf`       | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …)                            |
 | `@adapttable/core/pivot`     | Pivot engine (`pivot`, `serverPivotResult`, field helpers, pivot URL codecs)                          |
 | `@adapttable/core/query`     | The query model without React — codecs a backend can load                                             |

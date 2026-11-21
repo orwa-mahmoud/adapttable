@@ -23,6 +23,7 @@
       "core-engine",
       "core-formula",
       "core-grouping",
+      "core-locale",
       "core-pdf",
       "core-pivot",
       "core-query",
@@ -5318,6 +5319,10 @@
       "TotalCountCapability",
       "withGroupAggregateOverrides",
       "withQueryAggregateOverrides"
+    ],
+    "core-locale": [
+      "normalizeLocaleTag",
+      "resolveLocaleTag"
     ],
     "core-pdf": [
       "Aggregatable",
@@ -17832,6 +17837,9 @@
     },
     "core-grouping.api.md": {
       "surface": "core-grouping"
+    },
+    "core-locale.api.md": {
+      "surface": "core-locale"
     },
     "core-pdf.api.md": {
       "surface": "core-pdf"

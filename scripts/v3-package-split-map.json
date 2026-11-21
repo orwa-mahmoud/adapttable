@@ -32147,6 +32147,22 @@
       "behavior": ""
     },
     {
+      "export": "normalizeLocaleTag",
+      "currentImport": "@adapttable/core/locale",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/locale",
+      "behavior": ""
+    },
+    {
+      "export": "resolveLocaleTag",
+      "currentImport": "@adapttable/core/locale",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/locale",
+      "behavior": ""
+    },
+    {
       "export": "Aggregatable",
       "currentImport": "@adapttable/core/pdf",
       "kind": "type",

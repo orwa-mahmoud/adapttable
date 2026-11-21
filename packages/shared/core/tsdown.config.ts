@@ -115,6 +115,7 @@ const library = (flavor: Flavor) =>
       "src/grouping.ts",
       "src/editing.ts",
       "src/selection.ts",
+      "src/locale.ts",
     ],
     format: ["esm", "cjs"],
     // Both builds share the production build's declarations.
