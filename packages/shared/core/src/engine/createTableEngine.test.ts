@@ -252,6 +252,12 @@ describe("createTableEngine", () => {
 
     engine.configure({ locale: "ar" });
     expect(engine.cellValue(first!, "nameEn")).toBe("آدا");
+    // New columns read through their own paths, not the ones read before.
+    engine.configure({ columns: [{ key: "nameEn", i18n: { ar: "ref" } }] });
+    expect(engine.cellValue(first!, "nameEn")).toBe("a");
+    engine.configure({
+      columns: [{ key: "nameEn", i18n: { ar: "nameAr" } }],
+    });
     expect(engine.snapshot().revisions.schema).toBeGreaterThan(1);
 
     engine.configure({ paginationMode: "infinite" });

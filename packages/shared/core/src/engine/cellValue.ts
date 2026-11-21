@@ -53,6 +53,37 @@ export function cellSortValue<TRow>(
 }
 
 /**
+ * How a column reads a row, prepared once: the same order as
+ * {@link cellValue}, with the `i18n` path resolved here rather than per row.
+ */
+export function cellValueReader<TRow>(
+  column: ColumnMetadata<TRow>,
+  locale?: string
+): (row: TRow) => unknown {
+  const { formatValue, exportValue, sortValue } = column;
+  if (formatValue) return (row) => formatValue.call(column, row);
+  if (exportValue) return (row) => exportValue.call(column, row);
+  if (sortValue) return (row) => sortValue.call(column, row);
+  const path = resolveColumnPath(column, locale);
+  return (row) => getPath(row, path);
+}
+
+/**
+ * How a column reads a row's sort key, prepared once: the same answer as
+ * {@link cellSortValue}, with the `i18n` path resolved here rather than per
+ * row.
+ */
+export function cellSortReader<TRow>(
+  column: ColumnMetadata<TRow>,
+  locale?: string
+): (row: TRow) => SortableValue {
+  const { sortValue } = column;
+  if (sortValue) return (row) => sortValue.call(column, row);
+  const read = cellValueReader(column, locale);
+  return (row) => asSortable(read(row));
+}
+
+/**
  * Data path for a column, honouring `i18n` through the one locale resolver
  * every locale-shaped lookup shares (`resolveLocaleTag`): the exact tag in
  * any case and with `-` or `_`, then its primary subtag, then `key`.

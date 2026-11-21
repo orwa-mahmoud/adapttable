@@ -6,7 +6,7 @@
 import { columnValueInputs } from "../columns/columnValueInputs";
 import type { SortableValue } from "../contracts/columns";
 import type { SortLevel } from "../contracts/query";
-import { cellSortValue } from "../engine/cellValue";
+import { cellSortReader } from "../engine/cellValue";
 import { engineSearchText } from "../engine/searchText";
 import { stableKey } from "../utils/stableKey";
 import type { IncrementalViewConfig } from "./incremental";
@@ -109,6 +109,5 @@ export function sortValueReader<TRow>(
   // extractors at once: some rows by their value, the rest by their rendered
   // text, with nothing on screen to say which row got which.
   if (!column) return () => null;
-  const { locale } = config;
-  return (row) => cellSortValue(row, column, locale);
+  return cellSortReader(column, config.locale);
 }

@@ -18,7 +18,7 @@ import { attachIncrementalView } from "../rows/incrementalView";
 import { rowPatchLog, rowPatchLogStartsAt } from "../rows/patch";
 import { sourceCapabilities } from "../source/capabilities";
 import { sameItems } from "../utils/sameItems";
-import { cellValue } from "./cellValue";
+import { cellValueReader } from "./cellValue";
 import type {
   CreateTableEngineOptions,
   TableCallbackRefresh,
@@ -527,6 +527,14 @@ export function createTableSession<TRow>(
 
   /** The reads of one state, as a {@link TableEngineReader}. */
   function readerOf(state: () => SessionState<TRow>): TableEngineReader<TRow> {
+    /** Each column's cell reader, for the columns and locale they read. */
+    let readers:
+      | {
+          readonly columns: readonly ColumnMetadata<TRow>[];
+          readonly locale: string | undefined;
+          readonly byKey: Map<string, (row: TRow) => unknown>;
+        }
+      | undefined;
     return {
       snapshot() {
         assertLive();
@@ -538,10 +546,18 @@ export function createTableSession<TRow>(
       },
       cellValue(row, columnKey) {
         assertLive();
-        const current = state();
-        const column = columnByKey(current.view.columns, columnKey);
-        if (!column) return undefined;
-        return cellValue(row, column, current.view.locale);
+        const { columns, locale } = state().view;
+        if (readers?.columns !== columns || readers.locale !== locale) {
+          readers = { columns, locale, byKey: new Map() };
+        }
+        let read = readers.byKey.get(columnKey);
+        if (read === undefined) {
+          const column = columnByKey(columns, columnKey);
+          if (!column) return undefined;
+          read = cellValueReader(column, locale);
+          readers.byKey.set(columnKey, read);
+        }
+        return read(row);
       },
       rows(scope) {
         assertLive();
