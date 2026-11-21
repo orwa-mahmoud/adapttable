@@ -64,7 +64,8 @@ export async function fetchAllExportRows<TRow>(
   let page = 1;
   while (out.length < maxRows && !reachedEnd) {
     const batch = await config.fetchPage({ ...base, page, limit });
-    out.push(...batch);
+    // One push per row: a host's page size can exceed what a spread can pass.
+    for (const row of batch) out.push(row);
     // A short page is the end of the set; an empty one guards a source that
     // answers the page after the last with an empty array rather than fewer.
     reachedEnd = batch.length < limit;

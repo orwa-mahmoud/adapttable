@@ -183,6 +183,16 @@ describe("fetchAllExportRows", () => {
     expect(onCapped).toHaveBeenCalledWith({ rows: 10, maxRows: 10 });
   });
 
+  it("takes a page larger than an argument list can carry", async () => {
+    const rows = await fetchAllExportRows(source(), {
+      fetchPage: paged([600_000, 3]) as never,
+      pageSize: 600_000,
+      maxRows: 700_000,
+    });
+    expect(rows).toHaveLength(600_003);
+    expect(rows.at(-1)?.id).toBe("600002");
+  });
+
   it("returns nothing for an empty set, uncapped", async () => {
     const onCapped = vi.fn();
     const rows = await fetchAllExportRows(source(), {

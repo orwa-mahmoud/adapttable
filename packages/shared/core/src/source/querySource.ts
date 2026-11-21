@@ -187,7 +187,9 @@ function project<TRow, TPage>(
   let facets: FacetMap | undefined;
   for (const page of pages) {
     const projected = select(page);
-    rows.push(...projected.rows);
+    // One push per row: a spread passes the page as arguments, and a large page
+    // overflows the argument stack.
+    for (const row of projected.rows) rows.push(row);
     if (projected.total !== undefined) total = projected.total;
     if (projected.facets) facets = projected.facets;
   }
