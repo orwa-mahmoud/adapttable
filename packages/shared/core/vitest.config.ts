@@ -1,10 +1,28 @@
-import { mergeConfig } from "vitest/config";
+import { configDefaults, mergeConfig } from "vitest/config";
 
 import { sharedConfig } from "../../../vitest.shared.ts";
+
+/** Specs that run the code under test in named time zones. */
+const TIME_ZONE_SPECS = "src/**/*.tz.test.ts";
 
 export default mergeConfig(sharedConfig, {
   test: {
     setupFiles: ["./vitest.setup.ts"],
+    // A spec that switches `process.env.TZ` needs its own process: a worker
+    // thread keeps the time zone it started with.
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "core",
+          exclude: [...configDefaults.exclude, TIME_ZONE_SPECS],
+        },
+      },
+      {
+        extends: true,
+        test: { name: "timezones", include: [TIME_ZONE_SPECS], pool: "forks" },
+      },
+    ],
     coverage: {
       // Pure type-only modules (interfaces only) compile to nothing and
       // would otherwise report as 0% covered. Thresholds themselves do not

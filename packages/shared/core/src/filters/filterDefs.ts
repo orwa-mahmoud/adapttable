@@ -37,7 +37,11 @@ import {
   TEXT_OP_LABEL_KEYS,
   TEXT_OPS,
 } from "./operators";
-import { relativeTokenLabel, resolveRelativeRange } from "./relativeDates";
+import {
+  localDayEndMs,
+  relativeTokenLabel,
+  resolveRelativeRange,
+} from "./relativeDates";
 
 /**
  * Resolve a chip's visible label from its raw extra-filter value.
@@ -303,7 +307,12 @@ function valueText(value: unknown): string {
 }
 
 const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;
-const END_OF_DAY_MS = 86_399_999;
+
+/** The year, month index and day of a date-only string. */
+function dateOnlyParts(text: string): [number, number, number] {
+  const [year = 0, month = 1, day = 1] = text.split("-").map(Number);
+  return [year, month - 1, day];
+}
 
 /**
  * One coercion path for everything `dateRange` compares — row values and
@@ -322,8 +331,8 @@ function dateValueToEpochMs(value: unknown): number {
   const text = value.trim();
   if (text === "") return Number.NaN;
   if (DATE_ONLY_RE.test(text)) {
-    const [year = 0, month = 1, day = 1] = text.split("-").map(Number);
-    return new Date(year, month - 1, day).getTime();
+    const [year, monthIndex, day] = dateOnlyParts(text);
+    return new Date(year, monthIndex, day).getTime();
   }
   return new Date(text).getTime();
 }
@@ -370,13 +379,15 @@ function textRowMatches(
   }
 }
 
+/**
+ * The latest instant a bound includes: the last millisecond of its local
+ * calendar day for a date-only bound, the instant itself otherwise.
+ */
 function dateUpperBoundMs(bound: FilterValue): number {
-  return (
-    dateValueToEpochMs(bound) +
-    (typeof bound === "string" && DATE_ONLY_RE.test(bound.trim())
-      ? END_OF_DAY_MS
-      : 0)
-  );
+  if (typeof bound === "string" && DATE_ONLY_RE.test(bound.trim())) {
+    return localDayEndMs(...dateOnlyParts(bound.trim()));
+  }
+  return dateValueToEpochMs(bound);
 }
 
 function dateOnMatch(time: number, day: FilterValue | undefined): boolean {
