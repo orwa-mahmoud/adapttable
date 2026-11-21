@@ -207,6 +207,34 @@ describe("createFrontendSource", () => {
     expect(unsearched.allSearchedRows).toBe(ROWS);
   });
 
+  it("filters each row once when the rows and the query change together", () => {
+    const filterFn = vi.fn(() => true);
+    const source = createFrontendSource<Row>();
+    source.update(config({ filterFn, filterKey: "a" }), VIEW);
+    source.commit();
+    filterFn.mockClear();
+    const next = ROWS.map((row) => ({ ...row }));
+    const frame = source.update(
+      config({ data: next, filterFn, filterKey: "a" }),
+      {
+        ...VIEW,
+        sortBy: "count",
+        sortDir: "asc",
+      }
+    );
+    expect(ids(frame.rows)).toEqual(["c", "a", "b"]);
+    expect(filterFn).toHaveBeenCalledTimes(next.length);
+    source.commit();
+    filterFn.mockClear();
+    // New filter semantics read the same rows again, once.
+    source.update(config({ data: next, filterFn, filterKey: "b" }), {
+      ...VIEW,
+      sortBy: "count",
+      sortDir: "desc",
+    });
+    expect(filterFn).toHaveBeenCalledTimes(next.length);
+  });
+
   it("gives the searched rows in source order when nothing else filters", () => {
     const frame = createFrontendSource<Row>().update(config(), {
       ...VIEW,

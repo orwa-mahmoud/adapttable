@@ -699,9 +699,14 @@ export function createTableSession<TRow>(
     candidate = { ...next, revisions: bump(committed.revisions, pendingAxes) };
   }
 
+  /**
+   * Apply a configure patch to the draft's view. With `derive` false the
+   * caller rebuilds the derivation itself, once, after its other changes.
+   */
   function applyConfigurePatch(
     draft: Draft<TRow>,
-    patch: TableEngineConfigPatch<TRow>
+    patch: TableEngineConfigPatch<TRow>,
+    derive = true
   ): readonly TableRevisionAxis[] {
     const current = draft.view;
     const next: EngineView<TRow> = { ...current };
@@ -741,6 +746,7 @@ export function createTableSession<TRow>(
 
     if (changed.size === 0) return [];
     draft.view = next;
+    if (!derive) return axesForChange(changed);
     if (changed.has("identity")) {
       // Row identity decides membership in every incremental bucket, so the
       // view is rebuilt rather than reconciled.
@@ -921,6 +927,17 @@ export function createTableSession<TRow>(
     stageCandidate(patch, next) {
       assertLive();
       writeCandidate((draft) => {
+        // Rows that arrive with a changed view derive once, under that view,
+        // rather than under the old view and again under the new one.
+        if (next?.data && applyConfigurePatch(draft, patch, false).length > 0) {
+          draft.view = {
+            ...draft.view,
+            data: next.data,
+            ...(next.columns ? { columns: next.columns } : {}),
+          };
+          rebuild(draft);
+          return;
+        }
         if (next?.data) replaceData(draft, next.data);
         if (next?.columns) {
           draft.view = { ...draft.view, columns: next.columns };

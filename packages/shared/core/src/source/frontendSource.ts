@@ -516,10 +516,7 @@ export function createFrontendSourceWith<TRow>(
     const table = engineOf(config, view);
     const held = heldFrame(table);
 
-    if (config.data !== held?.data) {
-      table.stageCandidate({}, { data: config.data });
-      stages += 1;
-    }
+    const dataChanged = config.data !== held?.data;
 
     const viewConfig = {
       getRowId,
@@ -553,18 +550,22 @@ export function createFrontendSourceWith<TRow>(
         !Object.is(held.filterKey, config.filterKey)) ||
       searchReaderChanged;
     if (held?.fingerprint !== nextFingerprint || filtersChanged) {
-      table.stageCandidate({
-        ...viewConfig,
-        paginationMode: config.paginationMode,
-        page: view.page,
-        limit: view.limit,
-      });
-      if (filtersChanged) {
-        // First adopt the new callbacks, then re-evaluate the same dataset.
-        // The engine stages changed row membership as a view revision and
-        // publishes it only at commit; the host's data identity stays intact.
-        table.stageCandidate({}, { data: config.data });
-      }
+      // One stage carries the view and, when they changed or the filters
+      // must read them again, the rows, so the engine evaluates once. The
+      // engine stages changed row membership as a view revision and publishes
+      // it only at commit; the host's data identity stays intact.
+      table.stageCandidate(
+        {
+          ...viewConfig,
+          paginationMode: config.paginationMode,
+          page: view.page,
+          limit: view.limit,
+        },
+        dataChanged || filtersChanged ? { data: config.data } : undefined
+      );
+      stages += 1;
+    } else if (dataChanged) {
+      table.stageCandidate({}, { data: config.data });
       stages += 1;
     }
 
