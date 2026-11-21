@@ -306,7 +306,7 @@ export function evaluateRows<TRow>(
   });
 }
 
-/** One row id's net change over a batch. */
+/** One row's net change over a batch. */
 interface NetChange<TRow> {
   /** The object the record held before the batch; absent for an insert. */
   readonly before: TRow | undefined;
@@ -325,21 +325,34 @@ function eventRows<TRow>(
 }
 
 /**
- * Each touched id's first and last object. A row that comes back as the same
- * object after an insert or a remove may have moved, so it still counts.
+ * Each touched row's first and last object. Events chain by the object they
+ * replace — an update or a remove names the object the previous event left —
+ * so a row that a patch renamed, and a later patch updates, renames again or
+ * removes under its new id, nets to one change. A row that comes back as the
+ * same object after an insert or a remove may have moved, so it still counts.
  */
 function netChanges<TRow>(log: RowPatchLog<TRow>): NetChange<TRow>[] {
-  const changes = new Map<string, NetChange<TRow>>();
+  const changes: {
+    before: TRow | undefined;
+    after: TRow | undefined;
+    moved: boolean;
+  }[] = [];
+  const current = new Map<TRow, number>();
   for (const event of log.events) {
     const [before, after] = eventRows(event);
-    const known = changes.get(event.id);
-    changes.set(event.id, {
-      before: known ? known.before : before,
-      after,
-      moved: known?.moved === true || event.type !== "update",
-    });
+    const at = before === undefined ? undefined : current.get(before);
+    const moved = event.type !== "update";
+    if (at === undefined) {
+      changes.push({ before, after, moved });
+    } else {
+      const known = changes[at]!;
+      current.delete(before!);
+      known.after = after;
+      known.moved ||= moved;
+    }
+    if (after !== undefined) current.set(after, at ?? changes.length - 1);
   }
-  return [...changes.values()].filter(
+  return changes.filter(
     (change) => change.moved || change.before !== change.after
   );
 }
