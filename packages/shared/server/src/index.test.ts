@@ -244,6 +244,44 @@ describe("parseTableQuery", () => {
       expect(query.limit).toBe(25);
     });
 
+    it("reads only a whole decimal page or limit", () => {
+      for (const raw of ["12abc", "1.5", "2e3", " 3", "0x10", "+4"]) {
+        const query = parseTableQuery(
+          `?page=${encodeURIComponent(raw)}&limit=${encodeURIComponent(raw)}`,
+          schema
+        );
+        expect([query.page, query.limit], raw).toEqual([1, 25]);
+      }
+      expect(parseTableQuery("?page=007&limit=040", schema)).toMatchObject({
+        page: 7,
+        limit: 40,
+        offset: 240,
+      });
+    });
+
+    it("keeps the offset a safe integer for any page a link names", () => {
+      const huge = "9".repeat(400);
+      for (const page of [
+        huge,
+        "1".padEnd(310, "0"),
+        String(Number.MAX_SAFE_INTEGER),
+      ]) {
+        const query = parseTableQuery(`?page=${page}&limit=100`, schema);
+        expect(Number.isSafeInteger(query.offset), page.slice(0, 12)).toBe(
+          true
+        );
+        expect(query.page).toBe(1);
+        expect(query.rejected).toContainEqual(
+          expect.objectContaining({ param: "page", value: page })
+        );
+      }
+      const last = Math.floor(Number.MAX_SAFE_INTEGER / 100) + 1;
+      const kept = parseTableQuery(`?page=${String(last)}&limit=100`, schema);
+      expect(kept.page).toBe(last);
+      expect(Number.isSafeInteger(kept.offset)).toBe(true);
+      expect(kept.rejected).toEqual([]);
+    });
+
     it("honours the schema's default page size", () => {
       expect(parseTableQuery("", { ...schema, defaultLimit: 50 }).limit).toBe(
         50

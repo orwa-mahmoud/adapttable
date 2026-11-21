@@ -403,10 +403,24 @@ const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 const ISO_TIME = /^\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?$/;
 const ISO_ZONE = /(?:Z|[+-]\d{2}:\d{2})$/;
 
+/** Days in each month of a common year. */
+const MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+/** Whether `YYYY-MM-DD` names a day the calendar has: no February 30. */
+function isCalendarDay(day: string): boolean {
+  const [year = 0, month = 0, date = 0] = day.split("-").map(Number);
+  const days = MONTH_DAYS[month - 1];
+  if (days === undefined || date < 1) return false;
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  return date <= (month === 2 && leap ? 29 : days);
+}
+
 /** An ISO date or date-time that names a real instant. */
 function isIsoDate(raw: string): boolean {
   const [day = "", time, ...rest] = raw.split("T");
-  if (rest.length > 0 || !ISO_DAY.test(day)) return false;
+  if (rest.length > 0 || !ISO_DAY.test(day) || !isCalendarDay(day)) {
+    return false;
+  }
   if (time !== undefined && !ISO_TIME.test(time.replace(ISO_ZONE, ""))) {
     return false;
   }

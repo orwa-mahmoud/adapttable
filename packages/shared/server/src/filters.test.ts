@@ -279,6 +279,31 @@ describe("typed filters", () => {
       }
     });
 
+    it("refuses a day the calendar does not have", () => {
+      for (const bad of [
+        "2026-02-30",
+        "2026-02-29",
+        "1900-02-29",
+        "2026-04-31",
+        "2026-13-01",
+        "2026-00-10",
+        "2026-02-30T10:00:00Z",
+      ]) {
+        expect(read({ hiredAtTo: bad }).rejected, bad).toEqual([
+          { param: "f_hiredAtTo", value: bad, reason: "not an ISO date" },
+        ]);
+      }
+      for (const good of [
+        "2024-02-29",
+        "2000-02-29",
+        "0000-02-29",
+        "2026-12-31",
+        "2026-02-28T23:59:59Z",
+      ]) {
+        expect(read({ hiredAtTo: good }).rejected, good).toEqual([]);
+      }
+    });
+
     it("keeps a range open at the start when only the end is sent", () => {
       expect(read({ hiredAtTo: "2024-12-31" }).typedFilters).toEqual({
         hiredAt: { type: "dateRange", op: "lte", to: "2024-12-31" },

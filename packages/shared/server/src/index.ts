@@ -347,18 +347,24 @@ function readPaging(
 ): { readonly page: number; readonly limit: number } {
   const ceiling = Math.min(schema.maxLimit ?? MAX_LIMIT, MAX_LIMIT);
   const askedLimit = get(PARAM_LIMIT);
-  const limit = readCount(askedLimit, schema.defaultLimit ?? DEFAULT_LIMIT);
-  if (limit > ceiling) {
+  const asked = wholeCount(askedLimit) ?? schema.defaultLimit ?? DEFAULT_LIMIT;
+  if (asked > ceiling) {
     refuse(
       PARAM_LIMIT,
       askedLimit ?? "",
       `above the maximum of ${String(ceiling)}`
     );
   }
-  return {
-    page: readCount(get(PARAM_PAGE), 1),
-    limit: Math.min(limit, ceiling),
-  };
+  const limit = Math.min(asked, ceiling);
+  const askedPage = get(PARAM_PAGE);
+  const page = wholeCount(askedPage) ?? 1;
+  // The offset is computed here and handed to a database, so it stays a
+  // safe integer: a page past that is refused, not rounded.
+  if (!Number.isSafeInteger((page - 1) * limit)) {
+    refuse(PARAM_PAGE, askedPage ?? "", "beyond the largest safe offset");
+    return { page: 1, limit };
+  }
+  return { page, limit };
 }
 
 /**
@@ -438,16 +444,18 @@ function readFiltering(
 }
 
 /**
- * A positive whole number, or the fallback.
+ * A positive whole number written in decimal digits, or `undefined`.
  *
- * Anything else — a float, a negative, a word, an empty string — is the
- * fallback rather than a thrown error: a page number is the least surprising
- * thing in a URL to be wrong, and the least worth refusing over.
+ * Anything else — a float, a negative, an exponent, a word, a number with
+ * text after it, an empty string — reads as absent rather than a thrown
+ * error: a page number is the least surprising thing in a URL to be wrong,
+ * and the least worth refusing over. A number too large to be exact is still
+ * a number; the caller decides what that means.
  */
-function readCount(raw: string | null, fallback: number): number {
-  if (raw === null) return fallback;
-  const n = Number.parseInt(raw, 10);
-  return Number.isFinite(n) && n > 0 ? n : fallback;
+function wholeCount(raw: string | null): number | undefined {
+  if (raw === null || !/^\d+$/.test(raw)) return undefined;
+  const n = Number(raw);
+  return n > 0 ? n : undefined;
 }
 
 /** Whether the schema lets a client name a column. */
