@@ -3,6 +3,7 @@
  * filters, how they sort, and which configuration changes force a re-query.
  * The basic and full row models both evaluate it from here.
  */
+import { columnValueInputs } from "../columns/columnValueInputs";
 import type { SortableValue } from "../contracts/columns";
 import type { SortLevel } from "../contracts/query";
 import { cellSortValue } from "../engine/cellValue";
@@ -36,7 +37,7 @@ export function queryConfigFingerprint<TRow>(
       key: level.key,
       dir: level.dir,
     })),
-    columnKeys: (config.columns ?? []).map((column) => column.key),
+    columns: columnValueInputs(config.columns),
     locale: config.locale ?? null,
     hasFilterFn: config.filterFn !== undefined,
     hasFilterTreeFn: config.filterTreeFn !== undefined,

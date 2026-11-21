@@ -93,6 +93,34 @@ describe("useFrontendData", () => {
     expect(result.current.total).toBe(1);
   });
 
+  it("re-sorts when a localized column's data path changes under the same key", () => {
+    interface Localized {
+      id: string;
+      label: string;
+      labelAr: string;
+      labelAlt: string;
+    }
+    const data: Localized[] = [
+      { id: "1", label: "a", labelAr: "ab", labelAlt: "ba" },
+      { id: "2", label: "b", labelAr: "a", labelAlt: "z" },
+    ];
+    const adapter = createMemoryAdapter("sortBy=label&sortDir=asc");
+    const { result, rerender } = renderHook(
+      ({ path }: { path: string }) =>
+        useFrontendData<Localized>({
+          data,
+          columns: [{ key: "label", header: "Label", i18n: { ar: path } }],
+          locale: "ar",
+          urlAdapter: adapter,
+          paginationMode: "paged",
+        }),
+      { initialProps: { path: "labelAr" } }
+    );
+    expect(result.current.rows.map((row) => row.id)).toEqual(["2", "1"]);
+    rerender({ path: "labelAlt" });
+    expect(result.current.rows.map((row) => row.id)).toEqual(["1", "2"]);
+  });
+
   it("filters with a custom getSearchText", () => {
     const { result } = render("q=3", {
       getSearchText: (r) => String(r.count),

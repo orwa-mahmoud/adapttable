@@ -11,6 +11,7 @@
  * own reactivity and the moment it commits.
  */
 
+import { columnValueInputs } from "../columns/columnValueInputs";
 import type {
   ColumnMetadata,
   ExtraFilters,
@@ -203,7 +204,10 @@ export interface FrontendSource<TRow> {
   readonly replaceEngine: (createEngine: FrontendEngineFactory<TRow>) => void;
 }
 
-/** Value-only inputs. Callback and array identity are ignored. */
+/**
+ * Value-only inputs. Callback and array identity are ignored; a column counts
+ * by what its value is read from.
+ */
 function viewFingerprint<TRow>(
   config: FrontendSourceConfig<TRow>,
   view: FrontendSourceViewState
@@ -219,7 +223,7 @@ function viewFingerprint<TRow>(
       dir: level.dir,
     })),
     groupBy: view.groupBy ?? null,
-    columnKeys: (config.columns ?? []).map((column) => column.key),
+    columns: columnValueInputs(config.columns),
     hasFilterFn: config.filterFn !== undefined,
     hasFilterTreeFn: config.filterTreeFn !== undefined,
     hasGetSortValue: config.getSortValue !== undefined,

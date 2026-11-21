@@ -104,3 +104,31 @@ describe("injectLocalTableViewState", () => {
     expect(view.state().search).toBe("ada");
   });
 });
+
+describe("injectFrontendData column value inputs", () => {
+  it("re-sorts when a localized column's data path changes under the same key", () => {
+    interface Localized {
+      id: string;
+      label: string;
+      labelAr: string;
+      labelAlt: string;
+    }
+    const localized = signal([{ key: "label", i18n: { ar: "labelAr" } }]);
+    const source = run(() =>
+      injectFrontendData<Localized>({
+        data: [
+          { id: "1", label: "a", labelAr: "ab", labelAlt: "ba" },
+          { id: "2", label: "b", labelAr: "a", labelAlt: "z" },
+        ],
+        columns: localized,
+        locale: "ar",
+        paginationMode: "paged",
+        urlSync: false,
+        defaults: { sortBy: "label", sortDir: "asc" },
+      })
+    );
+    expect(source().rows.map((row) => row.id)).toEqual(["2", "1"]);
+    localized.set([{ key: "label", i18n: { ar: "labelAlt" } }]);
+    expect(source().rows.map((row) => row.id)).toEqual(["1", "2"]);
+  });
+});
