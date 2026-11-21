@@ -132,6 +132,69 @@ describe("fetchAllExportRows", () => {
     expect(onCapped).toHaveBeenCalledWith({ rows: 3, maxRows: 3 });
   });
 
+  const numbered = (count: number, from = 0): Row[] =>
+    Array.from({ length: count }, (_, index) => ({
+      ...ROWS[0]!,
+      id: String(from + index),
+    }));
+  const paged =
+    (sizes: readonly number[]) =>
+    (query: { page: number }): Promise<readonly Row[]> => {
+      const before = sizes
+        .slice(0, query.page - 1)
+        .reduce((sum, size) => sum + size, 0);
+      return Promise.resolve(numbered(sizes[query.page - 1] ?? 0, before));
+    };
+
+  it("holds a short last page to the cap, in order, and says so", async () => {
+    const onCapped = vi.fn();
+    const rows = await fetchAllExportRows(source(), {
+      fetchPage: paged([100, 50]) as never,
+      pageSize: 100,
+      maxRows: 120,
+      onCapped,
+    });
+    expect(rows).toHaveLength(120);
+    expect(rows.at(-1)?.id).toBe("119");
+    expect(onCapped).toHaveBeenCalledWith({ rows: 120, maxRows: 120 });
+  });
+
+  it("is not capped when the set ends exactly at the cap", async () => {
+    const onCapped = vi.fn();
+    const rows = await fetchAllExportRows(source(), {
+      fetchPage: paged([100, 20]) as never,
+      pageSize: 100,
+      maxRows: 120,
+      onCapped,
+    });
+    expect(rows).toHaveLength(120);
+    expect(onCapped).not.toHaveBeenCalled();
+  });
+
+  it("holds an oversized first page to the cap", async () => {
+    const onCapped = vi.fn();
+    const rows = await fetchAllExportRows(source(), {
+      fetchPage: paged([30]) as never,
+      pageSize: 100,
+      maxRows: 10,
+      onCapped,
+    });
+    expect(rows).toHaveLength(10);
+    expect(onCapped).toHaveBeenCalledWith({ rows: 10, maxRows: 10 });
+  });
+
+  it("returns nothing for an empty set, uncapped", async () => {
+    const onCapped = vi.fn();
+    const rows = await fetchAllExportRows(source(), {
+      fetchPage: paged([]) as never,
+      pageSize: 100,
+      maxRows: 10,
+      onCapped,
+    });
+    expect(rows).toEqual([]);
+    expect(onCapped).not.toHaveBeenCalled();
+  });
+
   it("defaults its page size to the table's and its cap to the published one", async () => {
     const fetchPage = vi.fn((_query: ExportQuery) =>
       Promise.resolve([] as readonly Row[])

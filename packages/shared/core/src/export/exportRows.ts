@@ -72,7 +72,8 @@ export async function fetchAllExportRows<TRow>(
   }
   // Stopping ON the cap is still stopping short — a full last page says
   // nothing about whether more exist, so only a short page proves the end.
-  if (!reachedEnd) {
+  // A page that carries the set past the cap is capped too, whatever its size.
+  if (!reachedEnd || out.length > maxRows) {
     const rows = Math.min(out.length, maxRows);
     config.onCapped?.({ rows, maxRows });
     return out.slice(0, rows);
