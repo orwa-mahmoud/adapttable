@@ -17,7 +17,6 @@ import type { FilterDef } from "../filters/filterDefs";
 import type { BodyCell, GetCellSpan } from "../rows/cellSpan";
 import type { ExtraEntry, ExtraRow } from "../rows/extraRows";
 import type { RowPinSide } from "../rows/rowPinModel";
-import { extraHostFillStyle } from "../rows/rowPresentation";
 import type { RowStyle } from "../rows/rowStyle";
 import type { CssProperties } from "../style/cssProperties";
 import type { TreeEntry } from "../tree/treeRows";
@@ -148,6 +147,10 @@ function leanExtraCoveredTableSlots(): ReadonlySet<number> {
   return new Set();
 }
 
+function leanExtraHostFillStyle(): undefined {
+  return undefined;
+}
+
 function leanColumnResizeHandleProps(): undefined {
   return undefined;
 }
@@ -157,7 +160,7 @@ export const LEAN_ASSEMBLY: AssemblyFns = {
   buildBodyCells: leanBuildBodyCells,
   insertExtraRows: leanInsertExtraRows,
   insertExtrasBeforeRows: leanInsertExtrasBeforeRows,
-  extraHostFillStyle,
+  extraHostFillStyle: leanExtraHostFillStyle,
   inflateBodyCellRowSpans: leanInflateBodyCellRowSpans,
   extraCoveredTableSlots: leanExtraCoveredTableSlots,
   columnResizeHandleProps: leanColumnResizeHandleProps,
