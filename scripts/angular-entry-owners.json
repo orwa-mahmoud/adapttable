@@ -203,6 +203,7 @@
     "SlotTable",
     "SortDirection",
     "SummaryRowFn",
+    "TABLE_STORE",
     "TableAssistantAvatars",
     "TableAssistantBoundary",
     "TableAssistantFace",

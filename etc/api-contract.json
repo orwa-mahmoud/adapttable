@@ -8653,6 +8653,7 @@
       "SURFACE_OCCUPIED",
       "SurfaceHandles",
       "SurfaceOccupation",
+      "TABLE_STORE",
       "TableAssistantAvatars",
       "TableAssistantBoundary",
       "TableAssistantFace",

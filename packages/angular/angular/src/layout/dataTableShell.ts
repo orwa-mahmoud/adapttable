@@ -39,6 +39,7 @@ import {
   type RowSelection,
   type SummaryRowFn,
   SURFACE_OCCUPIED,
+  TABLE_STORE,
   type TableAssistantProps,
   tableFeaturesOf,
   type TableQueryHandler,
@@ -190,7 +191,6 @@ import { injectGrouping, type TableGrouping } from "../grouping/tableGrouping";
 import { injectRowReorder } from "../rows/rowReorder";
 import { injectTableRowPinning } from "../rows/tableRowPinning";
 import { frontendRowModelOf } from "../source/rowModel";
-import { TABLE_STORE } from "../tableStore";
 import { injectRowDetail } from "../tree/tableRowDetail";
 import { injectTree } from "../tree/tableTree";
 import { injectColumnWindow } from "../virtual/columnWindow";

@@ -20995,6 +20995,9 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   for the host to update the input. Omitting `density` keeps the chooser
   uncontrolled. Kits share core's `resolveDensity` and `requestDensityChange`,
   re-exported by the Angular binding.
+- `TABLE_STORE` is the injection token of the table's one store
+  (`createTableStore`); the table shell provides it and every stateful part
+  of that table reads it, kit parts included.
 - `createFeatureState`, `ADAPTTABLE_FEATURE_STATE` and `injectFeatureState`
   publish and read typed `FeatureStateKey` handles declared with
   `featureStateKey`. Tables and slots have isolated state scopes. An explicit

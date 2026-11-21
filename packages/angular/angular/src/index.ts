@@ -277,6 +277,7 @@ export {
   type MaybeSignalOptional,
   readMaybe,
 } from "./store";
+export { TABLE_STORE } from "./tableStore";
 export {
   injectLazyChildren,
   type LazyChildrenInjectOptions,

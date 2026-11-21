@@ -192,6 +192,7 @@ import { TableRuntime } from '@adapttable/core/binding';
 import { TableRuntime as TableRuntime_2 } from '@adapttable/core';
 import { TableRuntimeView } from '@adapttable/core/binding';
 import { TableSource } from '@adapttable/core';
+import { TableStore } from '@adapttable/core/binding';
 import { TableViewState } from '@adapttable/core';
 import { TableViewStore } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
@@ -1654,6 +1655,9 @@ export interface SurfaceOccupation {
     readonly grid: boolean;
     readonly grouping: boolean;
 }
+
+// @public
+export const TABLE_STORE: InjectionToken<TableStore>;
 
 // @public
 export type TableAssistantAvatars = TableAssistantAvatars_2<TableAssistantNode>;
