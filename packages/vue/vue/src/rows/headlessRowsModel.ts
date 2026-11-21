@@ -26,6 +26,7 @@ import {
   pinnedRowCellStyle,
   pinnedRowPart,
   resolveCellSpan,
+  resolveRowHeight,
   resolveRowStyle,
   treeTableAria,
 } from "@adapttable/core/binding";
@@ -71,6 +72,55 @@ export function projectedRowSpans(row: object): boolean | undefined {
   return ROW_SPANS.get(row);
 }
 
+/**
+ * Whether a projected row stays out of the scrolled window — a pinned row or a
+ * pinned summary — known without building the row's attributes.
+ */
+const ROW_PINNED = new WeakMap<object, boolean>();
+
+/** Whether this projected row is pinned, if the projection knows. */
+export function projectedRowPinned(row: object): boolean | undefined {
+  return ROW_PINNED.get(row);
+}
+
+/** A projected row's explicit height (`rowHeight`), read without its attributes. */
+const ROW_HEIGHT = new WeakMap<object, () => number | undefined>();
+
+/**
+ * A projected row's explicit height, `null` when it has none, or `undefined`
+ * when the row was not built by this projection.
+ */
+export function projectedRowHeight(row: object): number | null | undefined {
+  const height = ROW_HEIGHT.get(row);
+  return height === undefined ? undefined : (height() ?? null);
+}
+
+/** A row-key reader that reads each row's key once. */
+function keyCache<TRow>(rowKey: (row: TRow) => string): (row: TRow) => string {
+  const keys = new Map<TRow, string>();
+  return (row) => {
+    let key = keys.get(row);
+    if (key === undefined) {
+      key = rowKey(row);
+      keys.set(row, key);
+    }
+    return key;
+  };
+}
+
+/** A value built on its first read and kept. */
+function once<T>(build: () => T): () => T {
+  let built = false;
+  let value: T | undefined;
+  return () => {
+    if (!built) {
+      value = build();
+      built = true;
+    }
+    return value as T;
+  };
+}
+
 /** A body slot keeps native-to-Vue content without rendering controls. @public */
 export type HeadlessBodySlot<TRow> = TableBodySlot<TRow>;
 /** Geometry, extras and presentation use the existing neutral body assembler. @public */
@@ -82,22 +132,29 @@ export function projectHeadlessRows<TRow>(
   const options = input.options as HeadlessRowsOptions<TRow>;
   const rows = table.rows.value;
   const columns = table.columns.value;
-  const base = new Map(desktop.rows.map((row) => [row.key, row]));
-  const cardBase = new Map(mobile.rows.map((row) => [row.key, row]));
+  // The models the table built before this projection, read only for a row
+  // that is drawn: reading `mobile.rows` builds the card model.
+  const base = once(() => new Map(desktop.rows.map((row) => [row.key, row])));
+  const cardBase = once(
+    () => new Map(mobile.rows.map((row) => [row.key, row]))
+  );
+  // Each row's key read once for this pass: the inventory, the cells, the
+  // slots and the index below all ask for it.
+  const rowKey = keyCache(table.rowKey);
   const partition = pinning
-    ? partitionPinnedRows(rows, pinning.state, table.rowKey)
+    ? partitionPinnedRows(rows, pinning.state, rowKey)
     : { top: [], scroll: rows, bottom: [] };
   const visual = (
     input.rowInventory ??
     tableRowInventory({
       rows,
-      rowKey: table.rowKey,
+      rowKey,
       grouping,
       tree,
       pinning,
     })
   ).visibleRows;
-  const visualIds = visual.map(table.rowKey);
+  const visualIds = visual.map(rowKey);
   const summary = resolvePinnedRows(toValue(options.pinnedRows));
   const extras = options.extraRows as readonly NeutralExtraRow[] | undefined;
   // A data-cell span cannot cross a structural group or open detail row.
@@ -123,7 +180,7 @@ export function projectHeadlessRows<TRow>(
   const rawCells = buildBodyCells({
     rows: visual,
     columns,
-    getRowId: table.rowKey,
+    getRowId: rowKey,
     getCellSpan:
       grouping || detail
         ? (args) =>
@@ -138,8 +195,12 @@ export function projectHeadlessRows<TRow>(
     pinOffset: table.layout.value.pinOffset,
   });
   const cells = inflateBodyCellRowSpans(rawCells, visualIds, extras);
-  const dataIndex = new Map(
-    rows.map((row, index) => [table.rowKey(row), index])
+  const dataIndex = new Map(rows.map((row, index) => [rowKey(row), index]));
+  // A card and a pinned summary show every column once: one list for all.
+  const plainCells: readonly BodyCell<TRow>[] = Object.freeze(
+    columns.map((column, columnIndex) =>
+      Object.freeze({ column, columnIndex, colSpan: 1, rowSpan: 1 })
+    )
   );
   const make = (
     args: DesktopRowWiringArgs<TRow>,
@@ -149,30 +210,28 @@ export function projectHeadlessRows<TRow>(
     const index = isSummary
       ? args.index
       : table.windowStart.value + (dataIndex.get(id) ?? args.index);
-    const previousRows = card ? cardBase : base;
-    const prior = isSummary ? undefined : previousRows.get(id);
+    const prior = once(() => {
+      if (isSummary) return undefined;
+      const previous = card ? cardBase() : base();
+      return previous.get(id);
+    });
     const rowCells: readonly BodyCell<TRow>[] =
-      card || isSummary
-        ? columns.map((column, columnIndex) => ({
-            column,
-            columnIndex,
-            colSpan: 1,
-            rowSpan: 1,
-          }))
-        : (cells.get(id) ?? []);
+      card || isSummary ? plainCells : (cells.get(id) ?? []);
     const part = isSummary
       ? pinnedSummaryPart(rowPinSide ?? "top")
       : pinnedRowPart(rowPinSide);
-    let rowAttrs = card
-      ? { ...table.cardAttrs(row, args.index, {}), role: "listitem" }
-      : (prior?.attrs ?? table.rowAttrs(row, args.index, {}));
-    if (isSummary)
-      rowAttrs = {
-        "data-adapttable-part": part,
-        "data-row-id": id,
-        "data-stagger": "",
-        ...(card ? { role: "listitem" } : {}),
-      };
+    const rowAttrs = () => {
+      if (isSummary)
+        return {
+          "data-adapttable-part": part,
+          "data-row-id": id,
+          "data-stagger": "",
+          ...(card ? { role: "listitem" } : {}),
+        };
+      if (card)
+        return { ...table.cardAttrs(row, args.index, {}), role: "listitem" };
+      return prior()?.attrs ?? table.rowAttrs(row, args.index, {});
+    };
     const cellModel = (cell: BodyCell<TRow>): TableCellModel<TRow> => {
       const column = cell.column as ColumnDef<TRow>;
       const span = !card ? cellSpanMark(cell.colSpan, cell.rowSpan) : undefined;
@@ -226,36 +285,60 @@ export function projectHeadlessRows<TRow>(
       };
     };
     const cellModels = lazyCells(() => rowCells.map(cellModel));
-    const model = {
-      key: id,
-      row,
-      index,
-      summary: isSummary,
-      checkboxAttrs: isSummary
+    // Built when the row is drawn: a windowed body draws a few of many rows.
+    const checkboxAttrs = once(() =>
+      isSummary
         ? undefined
-        : (prior?.checkboxAttrs ?? selection?.rowCheckboxAttrs(id)),
-      expandCellAttrs: {
-        style: pinnedRowCellStyle(rowPinSide, options.rowPinOffset ?? 0, false),
-      },
-      detail: hierarchyDetail(
+        : (prior()?.checkboxAttrs ?? selection?.rowCheckboxAttrs(id))
+    );
+    const expandCellAttrs = once(() => ({
+      style: pinnedRowCellStyle(rowPinSide, options.rowPinOffset ?? 0, false),
+    }));
+    const rowDetail = once(() =>
+      hierarchyDetail(
         row,
         id,
         isSummary ? undefined : detail,
         table.labels.value
-      ),
-      attrs: mergeVueAttrs(rowAttrs, {
+      )
+    );
+    const attrs = once(() => {
+      const hierarchy = hierarchyRowAttrs(treeEntry, card);
+      return mergeVueAttrs(rowAttrs(), {
         class: options.rowClassName?.(row, index),
-        ...hierarchyRowAttrs(treeEntry, card),
+        ...hierarchy,
         style: {
           ...resolveRowStyle(options.rowStyle, options.rowHeight, row, index),
-          ...(hierarchyRowAttrs(treeEntry, card).style as object | undefined),
+          ...(hierarchy.style as object | undefined),
         },
         ...(part ? { "data-adapttable-part": part } : {}),
-      }),
+      });
+    });
+    const model: TableRowModel<TRow> = {
+      key: id,
+      row,
+      index,
+      summary: isSummary,
+      get checkboxAttrs() {
+        return checkboxAttrs();
+      },
+      get expandCellAttrs() {
+        return expandCellAttrs();
+      },
+      get detail() {
+        return rowDetail();
+      },
+      get attrs() {
+        return attrs();
+      },
       get cells() {
         return cellModels();
       },
     };
+    ROW_PINNED.set(model, isSummary === true || rowPinSide !== undefined);
+    ROW_HEIGHT.set(model, () =>
+      resolveRowHeight(options.rowHeight, row, index)
+    );
     ROW_SPANS.set(
       model,
       rowCells.some((cell) => cell.rowSpan > 1)
@@ -267,28 +350,28 @@ export function projectHeadlessRows<TRow>(
     desktop.headerCheckboxAttrs,
     desktop.reorderLabel,
   ].filter(Boolean).length;
+  const scrollEntries = partition.scroll.map((row) => {
+    const key = rowKey(row);
+    return { row, key, index: dataIndex.get(key) ?? 0 };
+  });
   const slots = (card: boolean): readonly HeadlessBodySlot<TRow>[] =>
     desktopBodySlots<TRow, TableRowModel<TRow>, VNodeChild, CssProperties>({
       rows,
-      getRowId: table.rowKey,
+      getRowId: rowKey,
       pinnedTopRows: partition.top,
       pinnedBottomRows: partition.bottom,
       pinnedSummaryTop: summary.top,
       pinnedSummaryBottom: summary.bottom,
       extraRows: extras,
       extraFill: (key) =>
-        extraHostFillStyle(key, extras, rows, table.rowKey, options.rowStyle),
+        extraHostFillStyle(key, extras, rows, rowKey, options.rowStyle),
       insertExtraRows,
       insertExtrasBeforeRows,
       paddingTop: 0,
       paddingBottom: 0,
       grouping,
       tree: grouping ? undefined : tree,
-      entries: partition.scroll.map((row) => ({
-        row,
-        key: table.rowKey(row),
-        index: dataIndex.get(table.rowKey(row)) ?? 0,
-      })),
+      entries: scrollEntries,
       columnSpan: desktop.columnCount,
       wiring: (args) => make(args, card),
     }).map((slot) => {
