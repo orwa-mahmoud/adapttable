@@ -4,6 +4,7 @@ import type { TableLabels } from "@adapttable/core";
  * in an injector registers against each table created in it.
  */
 import {
+  type ContrastRules,
   createFeatureHost,
   disposeFeatureHost,
   EMPTY_FEATURE_HOST,
@@ -69,6 +70,8 @@ export interface AdaptTableFeature extends FeatureSetup<
   apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
   /** The strings the feature draws, with their English defaults. */
   readonly labels?: Partial<TableLabels>;
+  /** The high-contrast rules for what the feature draws. */
+  readonly contrast?: ContrastRules;
   /** The slots this feature draws into, and what draws each one. */
   readonly renders?: readonly FeatureRender<never, SlotComponent>[];
   /** Start live behavior once the table runtime exists; dispose with the table. */

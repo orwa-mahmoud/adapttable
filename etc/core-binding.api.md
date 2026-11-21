@@ -2698,6 +2698,12 @@ export interface ContextMenuTriggerHandlers {
 }
 
 // @public
+export interface ContrastRules {
+    readonly css: string;
+    readonly rank: number;
+}
+
+// @public
 export interface ControllableControl<T> {
     readonly onChange?: (next: T) => void;
     readonly value: T | undefined;
@@ -4481,7 +4487,9 @@ export class EndReachedLatch {
 export function engineSearchText<TRow>(row: TRow): string;
 
 // @public
-export function ensureForcedColorsStyles(): void;
+export function ensureForcedColorsStyles(features?: readonly {
+    readonly contrast?: ContrastRules;
+}[]): void;
 
 // @public
 export function entryKeys(entries?: readonly {
@@ -5840,9 +5848,6 @@ export function focusExportTrigger(root?: Pick<ParentNode, "querySelector"> | un
 
 // @public
 export function focusWasDropped(trigger: HTMLElement): boolean;
-
-// @public
-export const FORCED_COLORS_CSS: string;
 
 // @public
 export function formatGroupBy(value: GroupByInput): string | undefined;
@@ -8016,6 +8021,7 @@ export function parsePxWidth(width: number | string | undefined): number | undef
 // @public
 export interface PatchFeature<TRow = unknown> extends FeatureRegistration<TRow> {
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+    readonly contrast?: ContrastRules;
     readonly labels?: Partial<TableLabels>;
 }
 

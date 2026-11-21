@@ -27,6 +27,7 @@ import {
   type TableLabels,
 } from "@adapttable/core";
 import {
+  type ContrastRules,
   type FeatureApplyInput,
   type FeaturePatch,
   getAppliedFeatures as coreGetAppliedFeatures,
@@ -124,6 +125,8 @@ export interface StaticTableFeature {
   readonly id: string;
   /** Merge internal configuration, exactly as {@link TableFeature.apply}. */
   apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+  /** The high-contrast rules for what it draws. */
+  readonly contrast?: ContrastRules;
   /** Register against the live table, minus the row-shaped seams. */
   setup?(host: StaticFeatureHost): void | (() => void);
   /** The React component this feature needs, as {@link TableFeature.provider}. */

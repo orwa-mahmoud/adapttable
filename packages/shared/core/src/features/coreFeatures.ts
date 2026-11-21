@@ -7,6 +7,16 @@
  * and adds what it draws (a provider, slot renders), so every binding turns
  * the same options into the same table configuration.
  */
+import {
+  COMMAND_PALETTE_CONTRAST_RULES,
+  type ContrastRules,
+  EDIT_CONTRAST_RULES,
+  FIND_CONTRAST_RULES,
+  GROUPING_PANEL_CONTRAST_RULES,
+  SAVED_VIEWS_CONTRAST_RULES,
+  SELECTION_CONTRAST_RULES,
+  SIDE_PANEL_CONTRAST_RULES,
+} from "../a11y/forcedColors";
 import type { Command } from "../actions/commandRegistry";
 import type {
   ContextMenuItem,
@@ -102,11 +112,15 @@ export interface CoreFeature<
 function define<TRow>(
   id: string,
   patch: FeaturePatch<TRow>,
-  labels?: Partial<TableLabels>
+  labels?: Partial<TableLabels>,
+  contrast?: ContrastRules
 ): CoreFeature<TRow> {
-  return labels === undefined
-    ? { id, apply: () => patch }
-    : { id, apply: () => patch, labels };
+  return {
+    id,
+    apply: () => patch,
+    ...(labels && { labels }),
+    ...(contrast && { contrast }),
+  };
 }
 
 /** Options a windowing feature accepts — a boolean or its knobs. */
@@ -243,7 +257,8 @@ export function coreCommandPalette(
   const feature = define(
     "command-palette",
     { commandPalette: options },
-    ACTION_LABELS
+    ACTION_LABELS,
+    COMMAND_PALETTE_CONTRAST_RULES
   );
   if (!commands?.length) return feature;
   return {
@@ -291,7 +306,12 @@ export function coreSidePanel<TPanel extends SidePanelEntry>(options: {
   readonly panels: readonly TPanel[];
 }): CoreFeature<unknown, CoreFeatureRegistrar<TPanel>> {
   return {
-    ...define("side-panel", { sidePanel: options }),
+    ...define(
+      "side-panel",
+      { sidePanel: options },
+      undefined,
+      SIDE_PANEL_CONTRAST_RULES
+    ),
     setup(host) {
       for (const panel of options.panels) host.registerPanel(panel);
     },
@@ -338,7 +358,12 @@ export function coreHeaderFilters(): CoreFeature {
 export function coreSavedViews<TOptions extends object>(
   options: TOptions
 ): CoreFeature {
-  return define("saved-views", { savedViews: options }, SAVED_VIEW_LABELS);
+  return define(
+    "saved-views",
+    { savedViews: options },
+    SAVED_VIEW_LABELS,
+    SAVED_VIEWS_CONTRAST_RULES
+  );
 }
 
 /**
@@ -413,7 +438,8 @@ export function coreCellNavigation(
     options.onRangeChange
       ? { cellNavigation: true, onCellRangeChange: options.onRangeChange }
       : { cellNavigation: true },
-    GRID_LABELS
+    GRID_LABELS,
+    SELECTION_CONTRAST_RULES
   );
 }
 
@@ -448,7 +474,12 @@ export function coreEditing<TRow>(
   onCellEdit: CellEditHandler<TRow>,
   extras?: FeaturePatch<TRow>
 ): CoreFeature<TRow> {
-  return define("editing", { onCellEdit, ...extras }, EDITING_LABELS);
+  return define(
+    "editing",
+    { onCellEdit, ...extras },
+    EDITING_LABELS,
+    EDIT_CONTRAST_RULES
+  );
 }
 
 /**
@@ -463,7 +494,8 @@ export function coreRowEditing<TRow>(
   return define(
     "row-editing",
     { rowEditing: true, onRowEdit, ...extras },
-    EDITING_LABELS
+    EDITING_LABELS,
+    EDIT_CONTRAST_RULES
   );
 }
 
@@ -483,7 +515,8 @@ export function coreBatchEditing<TRow>(
       onBatchEdit,
       ...extras,
     },
-    EDITING_LABELS
+    EDITING_LABELS,
+    EDIT_CONTRAST_RULES
   );
 }
 
@@ -493,7 +526,12 @@ export function coreBatchEditing<TRow>(
  * @public
  */
 export function coreDirtyIndicators(): CoreFeature {
-  return define("dirty-indicators", { dirtyIndicators: true }, EDITING_LABELS);
+  return define(
+    "dirty-indicators",
+    { dirtyIndicators: true },
+    EDITING_LABELS,
+    EDIT_CONTRAST_RULES
+  );
 }
 
 /**
@@ -532,7 +570,12 @@ export function coreFilters<TRow, TPanel = never>(
  * @public
  */
 export function coreFindInTable(): CoreFeature {
-  return define("find-in-table", { findInTable: true }, FIND_LABELS);
+  return define(
+    "find-in-table",
+    { findInTable: true },
+    FIND_LABELS,
+    FIND_CONTRAST_RULES
+  );
 }
 
 /**
@@ -568,6 +611,7 @@ export function coreGroupingPanel<TRow>(
   return {
     id: "grouping-panel",
     labels: GROUPING_LABELS,
+    contrast: GROUPING_PANEL_CONTRAST_RULES,
     apply(input) {
       const withoutInitialGroup = { ...base.apply?.(input) };
       delete withoutInitialGroup.groupBy;

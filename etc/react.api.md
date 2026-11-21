@@ -56,6 +56,7 @@ import { ConfirmHandler } from '@adapttable/core';
 import { Context } from 'react';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { createHistoryAdapter } from '@adapttable/core';
 import { createMemoryAdapter } from '@adapttable/core';
 import { CreateTableEngineOptions } from '@adapttable/core';
@@ -1074,6 +1075,7 @@ export type StaticFeatureHost = Omit<TableFeatureHost<never>, "registerColumnMen
 // @public
 export interface StaticTableFeature {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly contrast?: ContrastRules;
     readonly id: string;
     readonly provider?: FeatureProviderContribution;
     readonly renders?: readonly FeatureRender<never>[];

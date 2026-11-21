@@ -85,6 +85,7 @@ import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuPoint } from '@adapttable/core';
 import { ContextMenuSlots as ContextMenuSlots_2 } from '@adapttable/core/binding';
 import { ContextMenuSurfaceProps } from '@adapttable/core/binding';
+import { ContrastRules } from '@adapttable/core/binding';
 import { createMenuNavigation } from '@adapttable/core/binding';
 import { CSSProperties } from 'vue';
 import { CssProperties } from '@adapttable/core/binding';
@@ -2906,7 +2907,9 @@ export const MobileSummaryChrome: (<TRow>(props: TableSummaryChromeProps<TRow>) 
 };
 
 // @public
-export function mountForcedColorsStyles(): void;
+export function mountForcedColorsStyles(features: () => readonly {
+    readonly contrast?: ContrastRules;
+}[]): void;
 
 // @public (undocumented)
 export function mountGrouping<TRow>(context: FeatureMountContext<TRow>): void;
@@ -3528,6 +3531,7 @@ export type StaticFeatureHost = Omit<TableFeatureHost<unknown>, "registerColumnM
 export interface StaticTableFeature {
     // (undocumented)
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly contrast?: ContrastRules;
     // (undocumented)
     readonly dependencies?: readonly unknown[];
     // (undocumented)
@@ -3958,6 +3962,7 @@ export interface TableFeature<TRow> {
     readonly __row?: (row: TRow) => TRow;
     // (undocumented)
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+    readonly contrast?: ContrastRules;
     // (undocumented)
     readonly dependencies?: readonly unknown[];
     // (undocumented)

@@ -23,6 +23,7 @@ import { ColumnMetadata } from '@adapttable/core';
 import { Component } from 'vue';
 import { ComputedRef } from 'vue';
 import { ConfirmHandler } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { CssProperties } from '@adapttable/core/binding';
 import { Direction } from '@adapttable/core';
 import { DirtyCellState } from '@adapttable/core';
@@ -474,6 +475,7 @@ export type StaticFeatureHost = Omit<TableFeatureHost<unknown>, "registerColumnM
 export interface StaticTableFeature {
     // (undocumented)
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly contrast?: ContrastRules;
     // (undocumented)
     readonly dependencies?: readonly unknown[];
     // (undocumented)
@@ -601,6 +603,7 @@ export interface TableFeature<TRow> {
     readonly __row?: (row: TRow) => TRow;
     // (undocumented)
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+    readonly contrast?: ContrastRules;
     // (undocumented)
     readonly dependencies?: readonly unknown[];
     // (undocumented)

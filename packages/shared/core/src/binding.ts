@@ -542,8 +542,8 @@ export { rowSourceIndex, virtualItemMeta } from "./virtual/virtualTableModel";
  * entry can name every part of what it returns.
  */
 export {
+  type ContrastRules,
   ensureForcedColorsStyles,
-  FORCED_COLORS_CSS,
 } from "./a11y/forcedColors";
 export type { Command } from "./actions/commandRegistry";
 export type { ConfirmHandler } from "./actions/confirm";

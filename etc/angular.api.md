@@ -45,6 +45,7 @@ import { ContextMenuRegionHandlers } from '@adapttable/core';
 import { ContextMenuState } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
 import { ContextMenuTriggerHandlers } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { createGroupingPanelController } from '@adapttable/core';
 import { createMemoryAdapter } from '@adapttable/core';
 import { createRowReorderController } from '@adapttable/core';
@@ -257,6 +258,7 @@ export const ADAPTTABLE_URL_ADAPTER: InjectionToken<UrlStateAdapter>;
 // @public
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
+    readonly contrast?: ContrastRules;
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
     readonly labels?: Partial<TableLabels>;

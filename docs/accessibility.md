@@ -74,8 +74,10 @@ above still stands.
 
 Windows High Contrast (and other `forced-colors: active` modes) strips the
 fills and box-shadows a kit painted. AdaptTable does not ask each kit to
-re-theme that itself. One stylesheet — `ForcedColorsStyle`, mounted from
-every adapter — switches those marks to system colors:
+re-theme that itself. One stylesheet per page switches those marks to system
+colors. Every table adds the base rules (focus, validation, pinned edges);
+each composed feature adds the rules for the marks it draws, so a table without
+find or editing carries none of theirs:
 
 | Mark        | Affordances that survive                                                               |
 | ----------- | -------------------------------------------------------------------------------------- |

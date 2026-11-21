@@ -635,6 +635,11 @@ function adapterBaseFixtures() {
       ...(kit === "chakra" || kit === "antd"
         ? []
         : ["Cross-boundary row moves"]),
+      // High-contrast rules that only cell navigation, find and the editing
+      // features carry.
+      "data-cell-selected] {",
+      "data-cell-match-current] {",
+      "data-changed]:not",
     ],
   }));
 }

@@ -97,6 +97,7 @@ import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuPoint } from '@adapttable/core';
 import { ContextMenuRegionHandlers } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { copyContextMenuSelection } from '@adapttable/core/binding';
 import { coreBulkActions } from '@adapttable/core/binding';
 import { coreColumnMenu } from '@adapttable/core/binding';
@@ -4722,6 +4723,7 @@ export class AdaptTableAssistantChrome {
 // @public
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
+    readonly contrast?: ContrastRules;
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
     readonly labels?: Partial<TableLabels>;

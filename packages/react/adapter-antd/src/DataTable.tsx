@@ -44,7 +44,6 @@ import {
   type FiltersFormSlotProps,
   FIND_BAR,
   flattenReactColumnTree,
-  ForcedColorsStyle,
   GRID_FOCUS_ANNOUNCER,
   type GridFocusState,
   type GroupByInput,
@@ -2966,7 +2965,6 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     <ReducedMotionScope off={kit.motionOff}>
       <FeatureProviders props={props}>
         <HeaderFilterOpenProvider>
-          <ForcedColorsStyle />
           <DataTableContent<TRow> {...props} />
         </HeaderFilterOpenProvider>
       </FeatureProviders>

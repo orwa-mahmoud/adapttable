@@ -12,6 +12,7 @@
  * The binding adds what it draws (providers, slot renders) on its own
  * feature type; the merge is the same for every binding, so it lives here.
  */
+import type { ContrastRules } from "../a11y/forcedColors";
 import type { TableLabels } from "../types";
 import {
   type GroupingContribution,
@@ -62,6 +63,8 @@ export interface PatchFeature<
   apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
   /** The strings the feature draws, with their English defaults. */
   readonly labels?: Partial<TableLabels>;
+  /** The high-contrast rules for what the feature draws. */
+  readonly contrast?: ContrastRules;
 }
 
 interface LabelListNode {

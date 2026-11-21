@@ -16890,8 +16890,10 @@ above still stands.
 
 Windows High Contrast (and other `forced-colors: active` modes) strips the
 fills and box-shadows a kit painted. AdaptTable does not ask each kit to
-re-theme that itself. One stylesheet — `ForcedColorsStyle`, mounted from
-every adapter — switches those marks to system colors:
+re-theme that itself. One stylesheet per page switches those marks to system
+colors. Every table adds the base rules (focus, validation, pinned edges);
+each composed feature adds the rules for the marks it draws, so a table without
+find or editing carries none of theirs:
 
 | Mark        | Affordances that survive                                                               |
 | ----------- | -------------------------------------------------------------------------------------- |
@@ -18487,8 +18489,7 @@ table's own props; every binding re-exports them.
   `assistantMicIcon`, `assistantKindIcon` and `assistantReceiptIcon`, over
   the per-kind `ASSISTANT_KIND_PATHS` and `ASSISTANT_KIND_HUES`.
 - Motion and paint rules: `OVERLAY_MOTION`, `MOUNT_STAGGER` (the entrance
-  stagger's selector, step, duration, easing and keyframes),
-  `FORCED_COLORS_CSS`, and the cell rules — `cellHighlightKind` (current
+  stagger's selector, step, duration, easing and keyframes), and the cell rules — `cellHighlightKind` (current
   match over match over selection) and `cellHighlightStyle`, which merges it
   into a kit's cell style, with `CURRENT_MATCH_CELL_STYLE`,
   `MATCHED_CELL_STYLE` and `SELECTED_CELL_OUTLINE`, and `mergedCellStyle`
@@ -18811,11 +18812,14 @@ off. `DISABLED_FIND`, `DISABLED_EXPORT`, `disabledHistory` and
 `windowedTableAria` are the inert shapes the shell already uses — so the
 adapter root never imports the hooks.
 
-**High contrast.** `ForcedColorsStyle` (and `ensureForcedColorsStyles`, which
-it calls) inject `FORCED_COLORS_CSS` once per page so Windows High Contrast
-and `prefers-contrast: more` keep focus, selection, dirty cells, validation
-and find hits visible as outlines. Adapters mount it; app code rarely needs
-to. See [accessibility](./accessibility.md).
+**High contrast.** The table adds its high-contrast rules to one stylesheet
+per page, so Windows High Contrast and `prefers-contrast: more` keep focus,
+selection, dirty cells, validation and find hits visible as outlines. The
+base rules load with every table; a feature carries the rules for what it
+draws in its `contrast` field (a `ContrastRules` block: its CSS and a rank
+that fixes its place in the sheet), and a host plugin can carry its own the
+same way. A binding hands the composed features to `ensureForcedColorsStyles`
+from `@adapttable/core/binding`. See [accessibility](./accessibility.md).
 
 **Status announcements.** Sorting, filtering and paging rewrite the body with
 nothing a screen reader can perceive, so the table says what changed through one
@@ -21858,7 +21862,7 @@ These runtime helpers come from `@adapttable/vue/adapter`.
 | `elementRef`, `composeElementRefs`, `useElementRef`                                                             | Resolve semantic DOM targets from Vue refs and release old targets before publishing replacements.                                                                                                            |
 | `useScopeActivity()`                                                                                            | Mounted/activated state; false during component SSR, deactivation and disposal.                                                                                                                               |
 | `scheduleTick(work)`                                                                                            | Runs work after Vue commits the DOM and rethrows its failure instead of discarding it.                                                                                                                        |
-| `mountForcedColorsStyles()`                                                                                     | Installs the shared high-contrast stylesheet once the table mounts; a server render never touches `document`.                                                                                                 |
+| `mountForcedColorsStyles(features)`                                                                             | Adds the table's high-contrast rules, and each composed feature's, once the table mounts; a server render never touches `document`.                                                                           |
 | `useExternalStore(store)`                                                                                       | Readonly shallow snapshot bridge with replacement-aware subscriptions and cleanup.                                                                                                                            |
 | `FeatureLifecycle`, `useFeatureLifecycle`                                                                       | Retained feature scopes and registrations, with reconcile/dispose operations and a reactive host snapshot.                                                                                                    |
 | `TableFeatureState`, `OwnedFeatureState`, `provideFeatureState`                                                 | Table-local state, ownership-safe publication cleanup and descendant injection. `createFeatureState` constructs the registry; `useFeatureState` reads it.                                                     |
@@ -35777,7 +35781,8 @@ A kit reads its UI library's direction, locale and density into a
 `KitEnvironment` and merges it under the table's props with
 `withKitEnvironment`; `useLocaleLabels` fills that environment's labels for
 the library locale, loading one language on demand. `mountForcedColorsStyles`
-installs the shared high-contrast stylesheet from setup.
+adds the table's high-contrast rules, and those of its composed features, from
+setup.
 
 ## Data sources
 

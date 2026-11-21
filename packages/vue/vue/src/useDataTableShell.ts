@@ -251,7 +251,6 @@ function liveEditingBundle<TRow>(
 export function useDataTableShell<TRow>(
   input: MaybeRefOrGetter<UseDataTableShellOptions<TRow>>
 ) {
-  mountForcedColorsStyles();
   const options = computed(() => toValue(input));
   // The features are composed when the host's features change, not each
   // time another option (the data) does: their slot fills reach every row.
@@ -259,6 +258,7 @@ export function useDataTableShell<TRow>(
   const declarations = computed(() =>
     normalizeFeatures(featureList.value ?? [])
   );
+  mountForcedColorsStyles(() => declarations.value);
   const patches = computed(() => featureOptionsOf(declarations.value));
   // Read option by option: a change to one option reaches its readers only.
   const resolved = useOptionFields(() =>

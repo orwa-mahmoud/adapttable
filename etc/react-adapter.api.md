@@ -169,6 +169,7 @@ import { ContextMenuPoint } from '@adapttable/core';
 import { ContextMenuSlots as ContextMenuSlots_2 } from '@adapttable/core/binding';
 import { ContextMenuSurfaceProps as ContextMenuSurfaceProps_2 } from '@adapttable/core/binding';
 import { ContextMenuTarget } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { createFilterRegistry } from '@adapttable/core';
 import { CreateTableEngineOptions } from '@adapttable/core';
 import { CSSProperties } from 'react';
@@ -219,7 +220,6 @@ import { editorValidationProps } from '@adapttable/core/editing';
 import { EditUnit } from '@adapttable/core';
 import { EditValidationState } from '@adapttable/core';
 import { ElementType } from 'react';
-import { ensureForcedColorsStyles } from '@adapttable/core/binding';
 import { EXPAND_TOGGLE } from '@adapttable/core/binding';
 import { ExpandToggleSlotProps } from '@adapttable/core/binding';
 import { EXPANSION_LIVE } from '@adapttable/core/binding';
@@ -336,7 +336,6 @@ import { fittedTableStyle } from '@adapttable/core/binding';
 import { flattenColumnTree } from '@adapttable/core/binding';
 import { FlattenedColumns } from '@adapttable/core/binding';
 import { focusEditorOnMount } from '@adapttable/core/editing';
-import { FORCED_COLORS_CSS } from '@adapttable/core/binding';
 import { formatMultiDraft } from '@adapttable/core/editing';
 import { FULLSCREEN_LIVE } from '@adapttable/core/binding';
 import { FullscreenLiveSlotProps as FullscreenLiveSlotProps_2 } from '@adapttable/core/binding';
@@ -2224,8 +2223,6 @@ export { EditUnit }
 
 export { EditValidationState }
 
-export { ensureForcedColorsStyles }
-
 // @public
 export interface EscapeCloseOptions {
     readonly ignoreWithin?: string;
@@ -2723,11 +2720,6 @@ export function flattenReactColumnTree<TRow>(columns: readonly ColumnInput_2<TRo
 };
 
 export { focusEditorOnMount }
-
-export { FORCED_COLORS_CSS }
-
-// @public
-export function ForcedColorsStyle(): null;
 
 export { formatMultiDraft }
 
@@ -4819,6 +4811,7 @@ export interface StaticGroupingExtras {
 // @public
 export interface StaticTableFeature {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly contrast?: ContrastRules;
     readonly id: string;
     readonly provider?: FeatureProviderContribution;
     readonly renders?: readonly FeatureRender<never>[];

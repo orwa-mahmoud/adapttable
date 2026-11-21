@@ -7,6 +7,7 @@ import {
   type UrlStateAdapter,
 } from "@adapttable/core";
 import {
+  type ContrastRules,
   drawnSlotFills,
   type FeatureApplyInput,
   type FeatureHostState,
@@ -64,6 +65,8 @@ export interface TableFeature<TRow> {
   apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
   /** The strings the feature draws, with their English defaults. */
   readonly labels?: Partial<TableLabels>;
+  /** The high-contrast rules for what the feature draws. */
+  readonly contrast?: ContrastRules;
   readonly setup?: (host: TableFeatureHost<TRow>) => void | (() => void);
   readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
   readonly renders?: readonly FeatureRender<never, VNodeChild>[];
@@ -84,6 +87,8 @@ export interface StaticTableFeature {
   apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
   /** The strings the feature draws, with their English defaults. */
   readonly labels?: Partial<TableLabels>;
+  /** The high-contrast rules for what the feature draws. */
+  readonly contrast?: ContrastRules;
   readonly setup?: (host: StaticFeatureHost) => void | (() => void);
   readonly mount?: <TRow>(
     context: FeatureMountContext<TRow>

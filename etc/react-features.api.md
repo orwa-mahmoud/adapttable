@@ -40,6 +40,7 @@ import { ComponentType } from 'react';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuItemsFactory } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { CustomCellEditorCtrl } from '@adapttable/core';
 import { CustomCellEditorRender } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
@@ -738,6 +739,7 @@ export interface StaticGroupingExtras {
 // @public
 export interface StaticTableFeature {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly contrast?: ContrastRules;
     readonly id: string;
     readonly provider?: FeatureProviderContribution;
     readonly renders?: readonly FeatureRender<never>[];

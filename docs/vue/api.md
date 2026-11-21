@@ -178,7 +178,8 @@ A kit reads its UI library's direction, locale and density into a
 `KitEnvironment` and merges it under the table's props with
 `withKitEnvironment`; `useLocaleLabels` fills that environment's labels for
 the library locale, loading one language on demand. `mountForcedColorsStyles`
-installs the shared high-contrast stylesheet from setup.
+adds the table's high-contrast rules, and those of its composed features, from
+setup.
 
 ## Data sources
 

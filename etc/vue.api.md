@@ -67,6 +67,7 @@ import { ConfirmHandler } from '@adapttable/core';
 import { ConfirmRequest } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { createTableEngine } from '@adapttable/core/engine';
 import { CssProperties } from '@adapttable/core';
 import { CssProperties as CssProperties_2 } from '@adapttable/core/binding';
@@ -1155,6 +1156,7 @@ export type StaticFeatureHost = Omit<TableFeatureHost<unknown>, "registerColumnM
 export interface StaticTableFeature {
     // (undocumented)
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly contrast?: ContrastRules;
     // (undocumented)
     readonly dependencies?: readonly unknown[];
     // (undocumented)
@@ -1299,6 +1301,7 @@ export interface TableFeature<TRow> {
     readonly __row?: (row: TRow) => TRow;
     // (undocumented)
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+    readonly contrast?: ContrastRules;
     // (undocumented)
     readonly dependencies?: readonly unknown[];
     // (undocumented)

@@ -944,7 +944,9 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   }
 
   constructor() {
-    mountForcedColorsStyles();
+    mountForcedColorsStyles(() =>
+      tableFeaturesOf(this.injector, this.features())
+    );
     // Only the library locale's language is fetched, and only when neither
     // the kit nor the host supplies labels.
     effect((onCleanup) => {

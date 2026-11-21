@@ -9,7 +9,6 @@
 import { overlayChromeExtras } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
-import { ForcedColorsStyle } from "../a11y/forcedColors";
 import type { TableChrome } from "../chrome/tableChromeContract";
 import type { ComposedTableProps } from "../props";
 import { TableStoreContext } from "../state/tableStoreContext";
@@ -100,7 +99,6 @@ export function DataTableShellView<TRow>({
 }): ReactNode {
   return (
     <TableStoreContext.Provider value={shell.tableStore}>
-      <ForcedColorsStyle />
       <HistoryLiveGate shell={shell}>
         {(withHistory) => (
           <ChromeExtrasGate

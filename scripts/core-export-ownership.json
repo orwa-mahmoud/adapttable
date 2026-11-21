@@ -17574,17 +17574,6 @@
       "subpaths": ["./binding"]
     },
     {
-      "name": "FORCED_COLORS_CSS",
-      "kind": "runtime",
-      "module": "a11y/forcedColors.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "a11y/forcedColors.ts#FORCED_COLORS_CSS",
-      "subpaths": ["./binding"]
-    },
-    {
       "name": "formulaSlice",
       "kind": "runtime",
       "module": "formula/formulaUrlSlice.ts",
@@ -23170,6 +23159,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "actions/contextMenuContract.ts#ContextMenuSurfaceProps",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "ContrastRules",
+      "kind": "type",
+      "module": "a11y/forcedColors.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "a11y/forcedColors.ts#ContrastRules",
       "subpaths": ["./binding"]
     },
     {

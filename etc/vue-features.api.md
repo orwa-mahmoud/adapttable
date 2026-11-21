@@ -26,6 +26,7 @@ import { ComputedRef } from 'vue';
 import { ConfirmHandler } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { CssProperties } from '@adapttable/core/binding';
 import { Direction } from '@adapttable/core';
 import { DirtyCellState } from '@adapttable/core';
@@ -768,6 +769,7 @@ export type StaticGroupingExtras = Omit<GroupingExtras<unknown>, "groupSort" | "
 export interface StaticTableFeature {
     // (undocumented)
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly contrast?: ContrastRules;
     // (undocumented)
     readonly dependencies?: readonly unknown[];
     // (undocumented)
@@ -898,6 +900,7 @@ export interface TableFeature<TRow> {
     readonly __row?: (row: TRow) => TRow;
     // (undocumented)
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+    readonly contrast?: ContrastRules;
     // (undocumented)
     readonly dependencies?: readonly unknown[];
     // (undocumented)

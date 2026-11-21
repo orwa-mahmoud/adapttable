@@ -12,6 +12,7 @@ import { CellSpanAppearance } from '@adapttable/core';
 import { Command } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { DirtyCellState } from '@adapttable/core';
 import { EditConflictHandler } from '@adapttable/core';
 import { EditConflictPolicy } from '@adapttable/core';
@@ -51,6 +52,7 @@ import { VirtualizeInput } from '@adapttable/core/binding';
 // @public
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
+    readonly contrast?: ContrastRules;
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
     readonly labels?: Partial<TableLabels>;

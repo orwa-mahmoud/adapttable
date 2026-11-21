@@ -18619,6 +18619,14 @@
       "behavior": ""
     },
     {
+      "export": "ContrastRules",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "ensureForcedColorsStyles",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -20247,14 +20255,6 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FORCED_COLORS_CSS",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -53667,14 +53667,6 @@
       "behavior": ""
     },
     {
-      "export": "ensureForcedColorsStyles",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
       "export": "EscapeCloseOptions",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -54468,22 +54460,6 @@
     },
     {
       "export": "focusEditorOnMount",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "FORCED_COLORS_CSS",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "ForcedColorsStyle",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",

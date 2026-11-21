@@ -3,6 +3,7 @@ import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { ADAPTTABLE_CONTEXT_MENU } from "../actions/tableContextMenu";
+import { dirtyIndicators } from "../features/editing";
 import { AdaptDataTableShell } from "../layout/dataTableShell";
 
 const FORCED_COLORS_STYLE_ID = "adapttable-forced-colors";
@@ -52,5 +53,21 @@ describe("mountForcedColorsStyles", () => {
     ).toHaveLength(1);
     first.destroy();
     expect(document.getElementById(FORCED_COLORS_STYLE_ID)).not.toBeNull();
+  });
+
+  it("adds a feature's rules when the features change", async () => {
+    const fixture = TestBed.createComponent(Shell);
+    bind(fixture);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const sheet = () =>
+      document.getElementById(FORCED_COLORS_STYLE_ID)?.textContent ?? "";
+    expect(sheet()).toContain('[aria-invalid="true"]');
+    expect(sheet()).not.toContain("[data-dirty],");
+    fixture.componentRef.setInput("features", [dirtyIndicators()]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(sheet()).toContain("[data-dirty],");
+    fixture.destroy();
   });
 });

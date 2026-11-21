@@ -29,6 +29,7 @@
  */
 import {
   drawnSlotFills,
+  ensureForcedColorsStyles,
   type FeatureRender as NeutralFeatureRender,
   type FeatureSlotKey,
   type LiveStage,
@@ -49,6 +50,7 @@ import {
   type ReactNode,
   type RefObject,
   useContext,
+  useEffect,
   useMemo,
   useRef,
 } from "react";
@@ -353,6 +355,11 @@ export function FeatureProviders({
   cell.current.featureIds = (features ?? []).map((feature) => feature.id);
   const renders = useMemo(() => slotFillsOf(features ?? []), [features]);
   const stages = useMemo(() => liveStagesOf(features ?? []), [features]);
+  // The page's high-contrast sheet gains the base rules and the rules of
+  // each feature this table composes.
+  useEffect(() => {
+    ensureForcedColorsStyles(features);
+  }, [features]);
   const tree = providers.reduceRight<ReactNode>(
     (inner, { id, contribution: Provider, feature }) => (
       <Provider key={id} feature={feature}>
