@@ -3290,9 +3290,6 @@ export function defaultFindMatchCount(current: number, total: number): string;
 export const defaultLabels: Required<TableLabels>;
 
 // @public
-export function defaultPendingRows(count: number): string;
-
-// @public
 export const defaultRowReorderAnnouncements: RowReorderAnnouncements;
 
 // @public

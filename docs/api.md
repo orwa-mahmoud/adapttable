@@ -1015,8 +1015,7 @@ EditHistoryController` — the history a table runs: records a gesture with
   conflict questions; `resolveRowEditTrigger` (`RowEditTrigger`),
   `rowEditControls` (`RowEditControls`, `RowEditControlsOptions`) and
   `rowEditActionsLayout` (`RowEditActionsLayout`) — the row's controls;
-  `batchEditBarModel` (`BatchEditBarModel`) and `defaultPendingRows` — the
-  batch bar.
+  `batchEditBarModel` (`BatchEditBarModel`) — the batch bar.
 - `approvalReview(pending, labels)` — the model every approval surface
   reads: tallies, the first `APPROVAL_PREVIEW_LIMIT` changes and the summary
   labels. `ApprovalReview`, `ApprovalReviewItem`.

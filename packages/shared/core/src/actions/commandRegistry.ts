@@ -20,6 +20,7 @@
  * paths and a poor one for a list of a dozen actions, where it mostly
  * finds the wrong entry with a high score.
  */
+import { BASE_LABELS } from "../labelGroups/baseLabels";
 import type { ContextMenuItem } from "./contextMenuModel";
 
 /**
@@ -124,21 +125,21 @@ export function tableCommands(options: TableCommandOptions): Command[] {
   if (options.onPrint) {
     commands.push({
       key: "print",
-      label: labels.print ?? "Print",
+      label: labels.print ?? BASE_LABELS.print,
       onSelect: options.onPrint,
     });
   }
   if (options.onExport) {
     commands.push({
       key: "export",
-      label: options.exportLabel ?? labels.exportCsv ?? "Export CSV",
+      label: options.exportLabel ?? labels.exportCsv ?? BASE_LABELS.exportCsv,
       onSelect: options.onExport,
     });
   }
   if (options.onClearFilters) {
     commands.push({
       key: "clear-filters",
-      label: labels.clearAll ?? "Clear all",
+      label: labels.clearAll ?? BASE_LABELS.clearAll,
       disabled: options.hasFilters !== true,
       onSelect: options.onClearFilters,
     });

@@ -18,6 +18,8 @@
  */
 
 import type { ColumnMetadata } from "../contracts/columns";
+import { ACTION_LABELS } from "../labelGroups/actionLabels";
+import { BASE_LABELS } from "../labelGroups/baseLabels";
 import type { RowAction, TableLabels } from "../types";
 
 /**
@@ -121,7 +123,7 @@ function headerItems<TRow>(
     items.push(
       {
         key: "sort-asc",
-        label: labels.sortAscending ?? "Sort ascending",
+        label: labels.sortAscending ?? BASE_LABELS.sortAscending,
         disabled: sorted && options.sortDir === "asc",
         onSelect: () => {
           actions.onSort?.(columnKey, "asc");
@@ -129,7 +131,7 @@ function headerItems<TRow>(
       },
       {
         key: "sort-desc",
-        label: labels.sortDescending ?? "Sort descending",
+        label: labels.sortDescending ?? BASE_LABELS.sortDescending,
         disabled: sorted && options.sortDir === "desc",
         onSelect: () => {
           actions.onSort?.(columnKey, "desc");
@@ -140,7 +142,7 @@ function headerItems<TRow>(
   if (actions.onFilter && column.filter) {
     items.push({
       key: "filter",
-      label: labels.filterColumn ?? "Filter column",
+      label: labels.filterColumn ?? BASE_LABELS.filterColumn,
       separatorBefore: items.length > 0,
       onSelect: () => {
         actions.onFilter?.(columnKey);
@@ -151,8 +153,8 @@ function headerItems<TRow>(
     items.push({
       key: "pin",
       label: options.isPinned?.(columnKey)
-        ? (labels.unpin ?? "Unpin")
-        : (labels.pinStart ?? "Pin to start"),
+        ? (labels.unpin ?? BASE_LABELS.unpin)
+        : (labels.pinStart ?? BASE_LABELS.pinStart),
       separatorBefore: items.length > 0,
       onSelect: () => {
         actions.onTogglePin?.(columnKey);
@@ -162,7 +164,7 @@ function headerItems<TRow>(
   if (actions.onHide && column.lockVisibility !== true) {
     items.push({
       key: "hide",
-      label: labels.hideColumn ?? "Hide column",
+      label: labels.hideColumn ?? BASE_LABELS.hideColumn,
       onSelect: () => {
         actions.onHide?.(columnKey);
       },
@@ -185,7 +187,7 @@ function dataItems<TRow>(
   if (actions.onCopy) {
     items.push({
       key: "copy",
-      label: labels.copyCells ?? "Copy",
+      label: labels.copyCells ?? ACTION_LABELS.copyCells,
       disabled: !addressable,
       onSelect: () => {
         actions.onCopy?.(target);
@@ -195,7 +197,7 @@ function dataItems<TRow>(
   if (actions.onCut) {
     items.push({
       key: "cut",
-      label: labels.cutCells ?? "Cut",
+      label: labels.cutCells ?? ACTION_LABELS.cutCells,
       disabled: !addressable,
       onSelect: () => {
         actions.onCut?.(target);

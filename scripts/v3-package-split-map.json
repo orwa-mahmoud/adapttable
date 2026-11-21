@@ -17691,14 +17691,6 @@
       "behavior": ""
     },
     {
-      "export": "defaultPendingRows",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "defaultRowReorderAnnouncements",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -28863,14 +28855,6 @@
       "currentImport": "@adapttable/core/editing",
       "kind": "value",
       "class": "neutral-model",
-      "proposedImport": "@adapttable/core/editing",
-      "behavior": ""
-    },
-    {
-      "export": "defaultPendingRows",
-      "currentImport": "@adapttable/core/editing",
-      "kind": "value",
-      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/editing",
       "behavior": ""
     },

@@ -238,10 +238,7 @@
           data-adapttable-part="assistant-approval-elsewhere"
           style="margin: 0"
         >
-          {{
-            props().labels?.approvalWaitingElsewhere ??
-              "A change is waiting for your decision."
-          }}
+          {{ copy().approvalWaitingElsewhere }}
         </p>
       }
       @if (scroll.hasUnseen()) {
@@ -263,10 +260,7 @@
       </p>
     } @else if (rejoinable()) {
       <p data-adapttable-part="assistant-detached">
-        {{
-          props().labels?.assistantDetached ??
-            "The connection went. The work may still be running."
-        }}
+        {{ copy().assistantDetached }}
         <ng-container
           [adaptControl]="slots().Button"
           [adaptControlProps]="rejoinButton()"
@@ -274,10 +268,7 @@
       </p>
     } @else if (props().assistant.status === "disconnected") {
       <p data-adapttable-part="assistant-unavailable">
-        {{
-          props().labels?.assistantUnavailable ??
-            "The assistant is not connected."
-        }}
+        {{ copy().assistantUnavailable }}
       </p>
     }
     <adapt-assistant-composer [props]="composer()" [slots]="slots()" />

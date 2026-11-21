@@ -1511,7 +1511,6 @@ export {
   cellConflictAsk,
   controllerConflictAsk,
   customEditorConflict,
-  defaultPendingRows,
   editableCellErrorId,
   editableCellPresentation,
   editorBusyProps,

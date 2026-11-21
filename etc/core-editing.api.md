@@ -749,9 +749,6 @@ export type DeclaredAggregates = Readonly<Record<string, string>>;
 export const DEFAULT_EDIT_HISTORY_DEPTH = 50;
 
 // @public
-export function defaultPendingRows(count: number): string;
-
-// @public
 export function defaultSaveErrorMessage(error: unknown): string;
 
 // @public

@@ -12,6 +12,7 @@
  * Nothing here renders. It is the model the surfaces read.
  */
 import { ASSISTANT_LABELS } from "../labelGroups/assistantLabels";
+import { BASE_LABELS } from "../labelGroups/baseLabels";
 import { resolveTableLabels } from "../labelGroups/tableLabels";
 import type { TableLabels } from "../types";
 import type {
@@ -94,9 +95,13 @@ function approveWord(
   count: number,
   started: boolean
 ): string {
-  if (started) return labels?.approveRemainingProposals ?? "Approve remaining";
-  if (count <= 1) return labels?.approveProposal ?? "Approve";
-  return labels?.approveAllProposals ?? "Approve all";
+  if (started)
+    return (
+      labels?.approveRemainingProposals ??
+      ASSISTANT_LABELS.approveRemainingProposals
+    );
+  if (count <= 1) return labels?.approveProposal ?? BASE_LABELS.approveProposal;
+  return labels?.approveAllProposals ?? ASSISTANT_LABELS.approveAllProposals;
 }
 
 /** The same, for refusing it. */
@@ -105,9 +110,13 @@ function rejectWord(
   count: number,
   started: boolean
 ): string {
-  if (started) return labels?.rejectRemainingProposals ?? "Reject remaining";
-  if (count <= 1) return labels?.rejectProposal ?? "Reject";
-  return labels?.rejectAllProposals ?? "Reject all";
+  if (started)
+    return (
+      labels?.rejectRemainingProposals ??
+      ASSISTANT_LABELS.rejectRemainingProposals
+    );
+  if (count <= 1) return labels?.rejectProposal ?? BASE_LABELS.rejectProposal;
+  return labels?.rejectAllProposals ?? ASSISTANT_LABELS.rejectAllProposals;
 }
 
 export function approvalReview(
@@ -154,11 +163,7 @@ export function approvalReview(
       rows,
     }),
     tally: started
-      ? (
-          labels?.proposalTally ??
-          (({ pending: left, approved: yes, rejected: no }) =>
-            `${String(yes)} approved · ${String(no)} rejected · ${String(left)} left`)
-        )({
+      ? (labels?.proposalTally ?? ASSISTANT_LABELS.proposalTally)({
           pending: pendingCount,
           approved,
           rejected,
@@ -172,10 +177,9 @@ export function approvalReview(
     rejectLabel: rejectWord(labels, items.length, started),
     reviewAllLabel:
       items.length > preview.length
-        ? (
-            labels?.reviewAllProposals ??
-            ((count) => `Review all ${String(count)} changes`)
-          )(items.length)
+        ? (labels?.reviewAllProposals ?? ASSISTANT_LABELS.reviewAllProposals)(
+            items.length
+          )
         : undefined,
   };
 }

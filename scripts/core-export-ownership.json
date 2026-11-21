@@ -24050,20 +24050,6 @@
       ]
     },
     {
-      "name": "defaultPendingRows",
-      "kind": "runtime",
-      "module": "editing/editingGate.ts",
-      "audience": "app",
-      "path": "./editing",
-      "forward": true,
-      "deprecated": false,
-      "identity": "editing/editingGate.ts#defaultPendingRows",
-      "subpaths": [
-        "./binding",
-        "./editing"
-      ]
-    },
-    {
       "name": "defaultSaveErrorMessage",
       "kind": "runtime",
       "module": "editing/editSession.ts",

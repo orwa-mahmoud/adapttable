@@ -20,11 +20,7 @@
     style="display: flex; align-items: flex-end; gap: 0.35em; min-width: 0"
   >
     <div
-      [adaptLiveRegion]="
-        listening()
-          ? (props().labels?.assistantVoiceListening ?? 'Listening')
-          : ''
-      "
+      [adaptLiveRegion]="listening() ? copy().assistantVoiceListening : ''"
       part="assistant-voice-status"
     ></div>
     @if (menu(); as examples) {

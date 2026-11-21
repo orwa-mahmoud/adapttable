@@ -5,6 +5,7 @@
  * layout. A binding passes `isRtl` when horizontal arrows should follow the
  * grip's writing direction.
  */
+import { ROW_LABELS } from "../labelGroups/rowLabels";
 import {
   type RowDropPosition,
   rowDropPosition,
@@ -372,10 +373,12 @@ export function createRowReorderController<TRow>(
     const { labels } = options;
     say(
       request.kind === "group"
-        ? (labels.rowMovedToGroup?.(request.toGroup.label) ??
-            `Row moved to ${request.toGroup.label}`)
-        : (labels.rowMovedUnder?.(request.toParent.label) ??
-            `Row moved under ${request.toParent.label}`)
+        ? (labels.rowMovedToGroup ?? ROW_LABELS.rowMovedToGroup)(
+            request.toGroup.label
+          )
+        : (labels.rowMovedUnder ?? ROW_LABELS.rowMovedUnder)(
+            request.toParent.label
+          )
     );
   };
 
@@ -439,7 +442,7 @@ export function createRowReorderController<TRow>(
       batch(() => {
         say(
           options.labels.moveRejectedPolicyNever ??
-            "Cross-boundary row moves are disabled"
+            ROW_LABELS.moveRejectedPolicyNever
         );
         reset();
       });

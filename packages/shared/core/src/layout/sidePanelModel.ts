@@ -7,6 +7,7 @@
  * from anywhere inside. A binding draws the strip and a kit the tabs; the
  * pattern itself is decided here once.
  */
+import { BASE_LABELS } from "../labelGroups/baseLabels";
 import type { TableLabels } from "../types";
 
 /**
@@ -151,8 +152,8 @@ export function sidePanelModel<TPanel extends SidePanelModelPanel>(input: {
     selected,
     selectedIndex,
     tabbed,
-    tablistLabel: labels?.sidePanel ?? "Table settings",
-    closeLabel: labels?.closePanel ?? "Close panel",
+    tablistLabel: labels?.sidePanel ?? BASE_LABELS.sidePanel,
+    closeLabel: labels?.closePanel ?? BASE_LABELS.closePanel,
     tabs: panels.map((panel, index) => ({
       panel,
       key: panel.key,

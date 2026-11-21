@@ -1265,10 +1265,10 @@ export function AssistantAlwaysAllowed({
             data-adapttable-part="assistant-always-allowed-item"
           >
             <slots.Button
-              label={
-                labels?.assistantAlwaysAllowedRevoke?.(capability) ??
-                `Ask about ${capability} again`
-              }
+              label={resolveFeatureLabels(
+                labels,
+                ASSISTANT_GROUPS
+              ).assistantAlwaysAllowedRevoke(capability)}
               part="assistant-always-allowed-revoke"
               variant="subtle"
               onClick={() => {
