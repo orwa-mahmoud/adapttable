@@ -250,6 +250,32 @@ describe("extraHostFillStyle", () => {
     });
   });
 
+  it("finds each extra's host in the current rows and identity", () => {
+    const extras = [
+      { key: "x", kind: "fullWidth" as const, beforeRowId: "a" },
+      { key: "y", kind: "fullWidth" as const, beforeRowId: "c" },
+    ];
+    const fillOf = (
+      key: string,
+      rows: { id: string; name: string }[],
+      getRowId: (row: { id: string; name: string }) => string
+    ) =>
+      extraHostFillStyle(key, extras, rows, getRowId, (row, index) => ({
+        background: `${row.name}@${String(index)}`,
+      }));
+    const rows = [
+      { id: "a", name: "Ada" },
+      { id: "b", name: "Bea" },
+      { id: "c", name: "Cy" },
+    ];
+    const byId = (row: { id: string }) => row.id;
+    expect(fillOf("x", rows, byId)).toEqual({ background: "Ada@0" });
+    expect(fillOf("y", rows, byId)).toEqual({ background: "Cy@2" });
+    const moved = [rows[2]!, rows[0]!];
+    expect(fillOf("y", moved, byId)).toEqual({ background: "Cy@0" });
+    expect(fillOf("x", rows, (row) => row.name)).toBeUndefined();
+  });
+
   it("is empty when the extra has no person", () => {
     expect(
       extraHostFillStyle(

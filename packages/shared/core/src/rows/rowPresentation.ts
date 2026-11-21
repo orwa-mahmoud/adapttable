@@ -71,6 +71,34 @@ export function estimateFromRowHeight<TRow>(
   };
 }
 
+/** Each row array's first position for every key, for the key function read with. */
+const firstPositions = /* @__PURE__ */ new WeakMap<
+  readonly unknown[],
+  {
+    readonly getRowId: (row: never) => string;
+    readonly byKey: ReadonlyMap<string, number>;
+  }
+>();
+
+/**
+ * Where each key first appears in `rows`, built once per array and key
+ * function, so every extra row of a render reads it instead of scanning.
+ */
+function firstPositionsByKey<TRow>(
+  rows: readonly TRow[],
+  getRowId: (row: TRow) => string
+): ReadonlyMap<string, number> {
+  const cached = firstPositions.get(rows);
+  if (cached?.getRowId === getRowId) return cached.byKey;
+  const byKey = new Map<string, number>();
+  rows.forEach((row, index) => {
+    const key = getRowId(row);
+    if (!byKey.has(key)) byKey.set(key, index);
+  });
+  firstPositions.set(rows, { getRowId, byKey });
+  return byKey;
+}
+
 /**
  * The host row's background fill for an injected extra row.
  *
@@ -85,8 +113,8 @@ export function extraHostFillStyle<TRow>(
 ): CssProperties | undefined {
   const extra = extraRows?.find((item) => item.key === extraKey);
   if (!extra?.beforeRowId) return undefined;
-  const index = rows.findIndex((row) => getRowId(row) === extra.beforeRowId);
-  if (index < 0) return undefined;
+  const index = firstPositionsByKey(rows, getRowId).get(extra.beforeRowId);
+  if (index === undefined) return undefined;
   const visual = resolveRowStyle(rowStyle, undefined, rows[index]!, index);
   if (!visual) return undefined;
   const fill: CssProperties = {};
