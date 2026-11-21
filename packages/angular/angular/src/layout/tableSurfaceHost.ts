@@ -57,6 +57,7 @@ import {
 } from "@adapttable/core";
 import {
   type AssemblyFns,
+  type BodyCell,
   bodyWindowKind,
   cellSpanMark,
   type ChromeBodySlot,
@@ -580,30 +581,41 @@ export function buildSurfaceBody<TRow>(input: SurfaceBodyInput<TRow>) {
     });
   });
   // Each drawn row's cells, as core's span pass left them: a cell another
-  // one covers is absent, and a merged cell carries its extent.
+  // one covers is absent, and a merged cell carries its extent. Rows that
+  // share core's cell list (no spans) share one view list too.
   const bodyCells = computed(() => {
     const byKey = new Map(
       renderModel().columns.map((column) => [column.key, column])
     );
+    const views = new Map<
+      readonly BodyCell<TRow>[],
+      readonly BodyCellView<TRow>[]
+    >();
+    const viewsOf = (
+      rowCells: readonly BodyCell<TRow>[]
+    ): readonly BodyCellView<TRow>[] => {
+      const known = views.get(rowCells);
+      if (known !== undefined) return known;
+      const built = rowCells.flatMap((cell) => {
+        const column = byKey.get(cell.column.key);
+        return column === undefined
+          ? []
+          : [
+              {
+                column,
+                columnIndex: cell.columnIndex,
+                colSpan: cell.colSpan,
+                rowSpan: cell.rowSpan,
+                mark: cellSpanMark(cell.colSpan, cell.rowSpan),
+              },
+            ];
+      });
+      views.set(rowCells, built);
+      return built;
+    };
     const cells = new Map<string, readonly BodyCellView<TRow>[]>();
     for (const [rowId, rowCells] of renderModel().cellsByRow) {
-      cells.set(
-        rowId,
-        rowCells.flatMap((cell) => {
-          const column = byKey.get(cell.column.key);
-          return column === undefined
-            ? []
-            : [
-                {
-                  column,
-                  columnIndex: cell.columnIndex,
-                  colSpan: cell.colSpan,
-                  rowSpan: cell.rowSpan,
-                  mark: cellSpanMark(cell.colSpan, cell.rowSpan),
-                },
-              ];
-        })
-      );
+      cells.set(rowId, viewsOf(rowCells));
     }
     return cells;
   });
