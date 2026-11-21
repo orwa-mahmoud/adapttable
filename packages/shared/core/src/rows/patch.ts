@@ -176,17 +176,42 @@ function rowIds<TRow>(
   };
 }
 
-const PATCH_LOGS = /* @__PURE__ */ new WeakMap<WeakKey, RowPatchLog<unknown>>();
-const ROW_IDENTITIES = /* @__PURE__ */ new WeakMap<WeakKey, object>();
-const PATCH_BASES = /* @__PURE__ */ new WeakMap<WeakKey, object>();
+/** Where patch provenance is kept: which array a log produced, and its base. */
+interface PatchProvenance {
+  readonly logs: WeakMap<WeakKey, RowPatchLog<unknown>>;
+  readonly identities: WeakMap<WeakKey, object>;
+  readonly bases: WeakMap<WeakKey, object>;
+}
+
+/**
+ * One registry per JavaScript realm, keyed by the shape of `RowPatchLog`, so
+ * the ESM and CommonJS builds of this package loaded side by side read each
+ * other's patches. A change to the log's shape takes a new key, so a copy of
+ * another shape never reads it.
+ */
+const PROVENANCE_KEY = Symbol.for("adapttable.rowPatchProvenance.v1");
+
+let provenance: PatchProvenance | undefined;
+
+function patchProvenance(): PatchProvenance {
+  if (provenance) return provenance;
+  const realm = globalThis as { [PROVENANCE_KEY]?: PatchProvenance };
+  provenance = realm[PROVENANCE_KEY] ??= {
+    logs: new WeakMap(),
+    identities: new WeakMap(),
+    bases: new WeakMap(),
+  };
+  return provenance;
+}
 
 /** Check the exact pre-patch identity without retaining older row arrays. */
 export function rowPatchLogStartsAt<TRow>(
   log: RowPatchLog<TRow>,
   rows: readonly TRow[]
 ): boolean {
-  const base = PATCH_BASES.get(log);
-  return base !== undefined && ROW_IDENTITIES.get(rows) === base;
+  const { bases, identities } = patchProvenance();
+  const base = bases.get(log);
+  return base !== undefined && identities.get(rows) === base;
 }
 
 /**
@@ -208,7 +233,7 @@ export function rowPatchLogStartsAt<TRow>(
 export function rowPatchLog<TRow>(
   rows: readonly TRow[]
 ): RowPatchLog<TRow> | undefined {
-  return PATCH_LOGS.get(rows) as RowPatchLog<TRow> | undefined;
+  return patchProvenance().logs.get(rows) as RowPatchLog<TRow> | undefined;
 }
 
 function rememberLog<TRow>(
@@ -216,10 +241,11 @@ function rememberLog<TRow>(
   base: readonly TRow[]
 ): void {
   if (log.events.length === 0) return;
-  PATCH_LOGS.set(log.rows, log);
-  const identity = ROW_IDENTITIES.get(base) ?? {};
-  ROW_IDENTITIES.set(base, identity);
-  PATCH_BASES.set(log, identity);
+  const { logs, identities, bases } = patchProvenance();
+  logs.set(log.rows, log);
+  const identity = identities.get(base) ?? {};
+  identities.set(base, identity);
+  bases.set(log, identity);
 }
 
 /** Apply one patch to a working copy. Returns the event when something changed. */

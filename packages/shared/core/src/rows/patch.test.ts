@@ -397,3 +397,28 @@ describe("applyRowPatchesWithLog id lookup", () => {
     ]);
   });
 });
+
+describe("patch provenance across module copies", () => {
+  // An application can load the ESM and the CommonJS build side by side: a
+  // patch produced by one copy must still read as a patch to the other.
+  it("reads a log and its base that another copy of this module recorded", async () => {
+    const { vi } = await import("vitest");
+    const first = await import("./patch");
+    vi.resetModules();
+    const second = await import("./patch");
+    expect(second).not.toBe(first);
+    const rows = [
+      { id: "a", n: 1 },
+      { id: "b", n: 2 },
+    ];
+    const next = first.applyRowPatches(
+      rows,
+      [{ type: "upsert", row: { id: "b", n: 3 } }],
+      (row) => row.id
+    );
+    const log = second.rowPatchLog(next);
+    expect(log?.events).toHaveLength(1);
+    expect(log && second.rowPatchLogStartsAt(log, rows)).toBe(true);
+    expect(log && second.rowPatchLogStartsAt(log, [...rows])).toBe(false);
+  });
+});
