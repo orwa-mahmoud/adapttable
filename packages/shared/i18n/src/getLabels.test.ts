@@ -161,18 +161,6 @@ const INTERPOLATION_CASES: Record<
     expects: [],
   },
   /**
-   * A capability key is technical identity and appears as given; the status
-   * beside it is translated, so only the key is expected here.
-   */
-  assistantReceipt: {
-    call: (fn) =>
-      (fn as (r: { capability?: string; status: string }) => string)({
-        capability: "view.pinColumn",
-        status: "staged",
-      }),
-    expects: ["view.pinColumn"],
-  },
-  /**
    * Like the badge above, a receipt's headline translates its tokens rather
    * than repeating them, so neither `kind` nor `status` survives into the
    * output. It may also decline a pair it has no sentence for, which is why
@@ -555,7 +543,7 @@ describe("assistant token labels translate every token", () => {
   it("gives every receipt token a word in every locale", () => {
     for (const [tag, labels] of Object.entries(locales)) {
       for (const token of RECEIPT) {
-        const out = labels.assistantReceipt({ status: token });
+        const out = labels.assistantReceiptStatus(token);
         expect(out.length, `${tag}.${token}`).toBeGreaterThan(0);
         if (tag !== "en") expect(out, `${tag}.${token}`).not.toBe(token);
       }
@@ -566,18 +554,8 @@ describe("assistant token labels translate every token", () => {
     for (const [tag, labels] of Object.entries(locales)) {
       // A status this version has no word for still has to say something —
       // a blank receipt is worse than an untranslated one.
-      const out = labels.assistantReceipt({ status: "some-new-status" });
+      const out = labels.assistantReceiptStatus("some-new-status");
       expect(out, tag).toContain("some-new-status");
-    }
-  });
-
-  it("keeps the capability key beside the translated status", () => {
-    for (const [tag, labels] of Object.entries(locales)) {
-      const out = labels.assistantReceipt({
-        capability: "view.setGroupBy",
-        status: "executed",
-      });
-      expect(out, tag).toContain("view.setGroupBy");
     }
   });
 });

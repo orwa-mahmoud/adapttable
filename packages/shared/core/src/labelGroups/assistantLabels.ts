@@ -151,7 +151,6 @@ const ASSISTANT_RECEIPT: Readonly<Record<string, string>> = {
  */
 export const ASSISTANT_LABELS: Pick<
   Required<TableLabels>,
-  | "pendingProposals"
   | "proposalChange"
   | "proposalValueUnavailable"
   | "proposalSummary"
@@ -197,7 +196,6 @@ export const ASSISTANT_LABELS: Pick<
   | "assistantAlwaysAllowedRevoke"
   | "assistantCapabilityName"
   | "assistantConnection"
-  | "assistantReceipt"
   | "assistantActions"
   | "assistantActionsTitle"
   | "assistantUndoAll"
@@ -208,8 +206,6 @@ export const ASSISTANT_LABELS: Pick<
   | "assistantReceiptChange"
   | "assistantReceiptProposed"
 > = {
-  pendingProposals: (count) =>
-    count === 1 ? "1 proposed change" : `${String(count)} proposed changes`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -271,10 +267,6 @@ export const ASSISTANT_LABELS: Pick<
     `Ask about ${ASSISTANT_CAPABILITY[capability] ?? capability} again`,
   assistantCapabilityName: (capability) => ASSISTANT_CAPABILITY[capability],
   assistantConnection: (status) => ASSISTANT_CONNECTION[status] ?? "Ready",
-  assistantReceipt: ({ capability, status }) => {
-    const what = ASSISTANT_RECEIPT[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantActions: (count) =>
     count === 1 ? "1 action" : `${String(count)} actions`,
   assistantActionsTitle: "What this turn changed",

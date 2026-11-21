@@ -19,8 +19,6 @@ export const GROUPING_LABELS: Pick<
   | "removeGroupingColumn"
   | "moveGroupingColumn"
   | "groupingDropToRemove"
-  | "groupingAggregateColumn"
-  | "groupingAggregationDefault"
   | "groupingAggregationNone"
   | "groupingAggregations"
   | "groupingAddAggregation"
@@ -44,8 +42,6 @@ export const GROUPING_LABELS: Pick<
   removeGroupingColumn: (label) => `Remove ${label} from grouping`,
   moveGroupingColumn: (label) => `Move ${label} grouping`,
   groupingDropToRemove: "Drop here to remove grouping",
-  groupingAggregateColumn: "Aggregate column",
-  groupingAggregationDefault: "Default",
   groupingAggregationNone: "None",
   groupingAggregations: "Aggregations",
   groupingAddAggregation: "Add aggregation column",

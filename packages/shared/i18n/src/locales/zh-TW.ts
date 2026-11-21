@@ -193,8 +193,6 @@ export const zhTW: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "有一項變更正在等待你的決定。",
-  pendingProposals: (count) =>
-    count === 1 ? "1 項提議變更" : `${String(count)} 項提議變更`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -331,10 +329,6 @@ export const zhTW: Required<TableLabels> = {
       error: "錯誤",
       disconnected: "未連線",
     })[status] ?? "就緒",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "新增列",
   duplicateRow: "複製列",
@@ -351,10 +345,8 @@ export const zhTW: Required<TableLabels> = {
   rowLifted: (position) => `已提起第 ${String(position)} 列`,
   rowMoved: (from, to) => `已將列從 ${String(from)} 移到 ${String(to)}`,
   rowReorderCancelled: "已取消重新排序",
-  rowMoveOptions: "列移動選項",
   moveToGroup: "移至群組…",
   moveUnder: "移至下層…",
-  moveToTopLevel: "移至最上層",
   confirmRowMoveTitle: "確認移動列",
   confirmRowMoveDescription: (row, from, to) =>
     `將 ${row} 從 ${from} 移至 ${to}？`,
@@ -389,9 +381,7 @@ export const zhTW: Required<TableLabels> = {
   removeGroupingColumn: (label) => `從群組移除 ${label}`,
   moveGroupingColumn: (label) => `移動 ${label} 群組`,
   groupingDropToRemove: "拖放到此處以移除群組",
-  groupingAggregateColumn: "彙總欄",
   groupingAggregation: "群組彙總",
-  groupingAggregationDefault: "預設",
   groupingAggregationNone: "無",
   groupingAggregations: "彙總",
   groupingAddAggregation: "新增彙總欄",

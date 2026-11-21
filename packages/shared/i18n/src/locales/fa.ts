@@ -194,8 +194,6 @@ export const fa: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "یک تغییر منتظر تصمیم شماست.",
-  pendingProposals: (count) =>
-    count === 1 ? "۱ تغییر پیشنهادی" : `${String(count)} تغییر پیشنهادی`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -335,10 +333,6 @@ export const fa: Required<TableLabels> = {
       error: "خطا",
       disconnected: "متصل نیست",
     })[status] ?? "آماده",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "افزودن ردیف",
   duplicateRow: "تکثیر ردیف",
@@ -355,10 +349,8 @@ export const fa: Required<TableLabels> = {
   rowLifted: (position) => `ردیف ${String(position)} برداشته شد`,
   rowMoved: (from, to) => `ردیف از ${String(from)} به ${String(to)} منتقل شد`,
   rowReorderCancelled: "مرتب‌سازی لغو شد",
-  rowMoveOptions: "گزینه‌های انتقال ردیف",
   moveToGroup: "انتقال به گروه…",
   moveUnder: "انتقال به زیر…",
-  moveToTopLevel: "انتقال به سطح اصلی",
   confirmRowMoveTitle: "تأیید انتقال ردیف",
   confirmRowMoveDescription: (row, from, to) =>
     `${row} از ${from} به ${to} منتقل شود؟`,
@@ -394,9 +386,7 @@ export const fa: Required<TableLabels> = {
   removeGroupingColumn: (label) => `حذف ${label} از گروه‌بندی`,
   moveGroupingColumn: (label) => `جابجایی گروه‌بندی ${label}`,
   groupingDropToRemove: "برای حذف گروه‌بندی اینجا رها کنید",
-  groupingAggregateColumn: "ستون تجمیع",
   groupingAggregation: "تجمیع گروه",
-  groupingAggregationDefault: "پیش‌فرض",
   groupingAggregationNone: "هیچ‌کدام",
   groupingAggregations: "تجمیع‌ها",
   groupingAddAggregation: "افزودن ستون تجمیع",

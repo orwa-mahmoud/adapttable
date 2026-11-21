@@ -195,10 +195,6 @@ export const id: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "Ada perubahan yang menunggu keputusan Anda.",
-  pendingProposals: (count) =>
-    count === 1
-      ? "1 perubahan diusulkan"
-      : `${String(count)} perubahan diusulkan`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -342,10 +338,6 @@ export const id: Required<TableLabels> = {
       error: "Kesalahan",
       disconnected: "Tidak terhubung",
     })[status] ?? "Siap",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Tambah baris",
   duplicateRow: "Duplikat baris",
@@ -363,10 +355,8 @@ export const id: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Baris dipindahkan dari ${String(from)} ke ${String(to)}`,
   rowReorderCancelled: "Pengurutan ulang dibatalkan",
-  rowMoveOptions: "Opsi pemindahan baris",
   moveToGroup: "Pindahkan ke grup…",
   moveUnder: "Pindahkan di bawah…",
-  moveToTopLevel: "Pindahkan ke tingkat atas",
   confirmRowMoveTitle: "Konfirmasi pemindahan baris",
   confirmRowMoveDescription: (row, from, to) =>
     `Pindahkan ${row} dari ${from} ke ${to}?`,
@@ -402,9 +392,7 @@ export const id: Required<TableLabels> = {
   removeGroupingColumn: (label) => `Hapus ${label} dari pengelompokan`,
   moveGroupingColumn: (label) => `Pindahkan pengelompokan ${label}`,
   groupingDropToRemove: "Letakkan di sini untuk menghapus pengelompokan",
-  groupingAggregateColumn: "Kolom agregasi",
   groupingAggregation: "Agregasi grup",
-  groupingAggregationDefault: "Bawaan",
   groupingAggregationNone: "Tidak ada",
   groupingAggregations: "Agregasi",
   groupingAddAggregation: "Tambah kolom agregasi",

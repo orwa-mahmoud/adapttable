@@ -4776,10 +4776,6 @@ export interface TableLabels {
     assistantOpen?: string;
     assistantPlaceholder?: string;
     assistantProgress?: (done: number, total?: number) => string;
-    assistantReceipt?: (receipt: {
-        capability?: string;
-        status: string;
-    }) => string;
     assistantReceiptAction?: (action: {
         kind?: string;
         status: string;
@@ -4924,12 +4920,10 @@ export interface TableLabels {
     groupingAddAggregation?: string;
     groupingAdded?: (label: string) => string;
     groupingAggregateChanged?: (label: string, aggregation: string) => string;
-    groupingAggregateColumn?: string;
     groupingAggregateRemoved?: (column: string) => string;
     groupingAggregatesRestored?: string;
     groupingAggregation?: string;
     groupingAggregationCustom?: string;
-    groupingAggregationDefault?: string;
     groupingAggregationFor?: (column: string) => string;
     groupingAggregationNone?: string;
     groupingAggregationReadOnly?: string;
@@ -4960,7 +4954,6 @@ export interface TableLabels {
     moveRowUp?: string;
     moveStart?: string;
     moveToGroup?: string;
-    moveToTopLevel?: string;
     moveUnavailable?: string;
     moveUnder?: string;
     moveViewDown?: string;
@@ -5000,7 +4993,6 @@ export interface TableLabels {
         total: number;
     }) => string;
     pageSelected?: (count: number) => string;
-    pendingProposals?: (count: number) => string;
     pendingRows?: (count: number) => string;
     pinEnd?: string;
     pinnedSummaryBottom?: string;
@@ -5066,7 +5058,6 @@ export interface TableLabels {
     rowMoved?: (from: number, to: number) => string;
     rowMovedToGroup?: (group: string) => string;
     rowMovedUnder?: (parent: string) => string;
-    rowMoveOptions?: string;
     rowReorderCancelled?: string;
     rowSeparator?: string;
     rowsPerPage?: string;

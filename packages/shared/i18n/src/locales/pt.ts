@@ -195,10 +195,6 @@ export const pt: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "Uma alteração aguarda a sua decisão.",
-  pendingProposals: (count) =>
-    count === 1
-      ? "1 alteração proposta"
-      : `${String(count)} alterações propostas`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -345,10 +341,6 @@ export const pt: Required<TableLabels> = {
       error: "Erro",
       disconnected: "Sem conexão",
     })[status] ?? "Pronto",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Adicionar linha",
   duplicateRow: "Duplicar linha",
@@ -365,10 +357,8 @@ export const pt: Required<TableLabels> = {
   rowLifted: (position) => `Linha ${String(position)} levantada`,
   rowMoved: (from, to) => `Linha movida de ${String(from)} para ${String(to)}`,
   rowReorderCancelled: "Reordenação cancelada",
-  rowMoveOptions: "Opções de movimentação da linha",
   moveToGroup: "Mover para o grupo…",
   moveUnder: "Mover para baixo de…",
-  moveToTopLevel: "Mover para o nível superior",
   confirmRowMoveTitle: "Confirmar movimentação da linha",
   confirmRowMoveDescription: (row, from, to) =>
     `Mover ${row} de ${from} para ${to}?`,
@@ -405,9 +395,7 @@ export const pt: Required<TableLabels> = {
   removeGroupingColumn: (label) => `Remover ${label} do agrupamento`,
   moveGroupingColumn: (label) => `Mover o agrupamento de ${label}`,
   groupingDropToRemove: "Solte aqui para remover o agrupamento",
-  groupingAggregateColumn: "Coluna de agregação",
   groupingAggregation: "Agregação do grupo",
-  groupingAggregationDefault: "Padrão",
   groupingAggregationNone: "Nenhuma",
   groupingAggregations: "Agregações",
   groupingAddAggregation: "Adicionar coluna de agregação",

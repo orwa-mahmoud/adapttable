@@ -432,7 +432,7 @@ export const ASSISTANT_KIND_HUES: Readonly<Record<string, number>>;
 export const ASSISTANT_KIND_PATHS: Readonly<Record<string, string>>;
 
 // @public
-export const ASSISTANT_LABELS: Pick<Required<TableLabels>, "pendingProposals" | "proposalChange" | "proposalValueUnavailable" | "proposalSummary" | "reviewAllProposals" | "backToConversation" | "approveAllProposals" | "approveRemainingProposals" | "rejectAllProposals" | "rejectRemainingProposals" | "alwaysAllowProposal" | "proposalTally" | "approvalWaitingElsewhere" | "assistantTitle" | "assistantOpen" | "assistantClose" | "assistantSettings" | "assistantEmpty" | "assistantPlaceholder" | "assistantSend" | "assistantStop" | "assistantVoiceStart" | "assistantVoiceStop" | "assistantVoiceListening" | "assistantVoiceMessage" | "assistantVoiceLanguage" | "assistantYou" | "assistantSpeaker" | "assistantNewMessages" | "assistantUnavailable" | "assistantDetached" | "assistantRejoin" | "assistantProgress" | "assistantBackToTable" | "assistantDetail" | "assistantSaveInTable" | "assistantUndo" | "assistantUndoBlocked" | "assistantUnresolved" | "assistantAnswerLabel" | "assistantAnswerPlaceholder" | "assistantAnswerSend" | "assistantAlwaysAllowedTitle" | "assistantAlwaysAllowedRevoke" | "assistantCapabilityName" | "assistantConnection" | "assistantReceipt" | "assistantActions" | "assistantActionsTitle" | "assistantUndoAll" | "assistantExamples" | "assistantReceiptStatus" | "assistantReceiptAction" | "assistantReceiptTerms" | "assistantReceiptChange" | "assistantReceiptProposed">;
+export const ASSISTANT_LABELS: Pick<Required<TableLabels>, "proposalChange" | "proposalValueUnavailable" | "proposalSummary" | "reviewAllProposals" | "backToConversation" | "approveAllProposals" | "approveRemainingProposals" | "rejectAllProposals" | "rejectRemainingProposals" | "alwaysAllowProposal" | "proposalTally" | "approvalWaitingElsewhere" | "assistantTitle" | "assistantOpen" | "assistantClose" | "assistantSettings" | "assistantEmpty" | "assistantPlaceholder" | "assistantSend" | "assistantStop" | "assistantVoiceStart" | "assistantVoiceStop" | "assistantVoiceListening" | "assistantVoiceMessage" | "assistantVoiceLanguage" | "assistantYou" | "assistantSpeaker" | "assistantNewMessages" | "assistantUnavailable" | "assistantDetached" | "assistantRejoin" | "assistantProgress" | "assistantBackToTable" | "assistantDetail" | "assistantSaveInTable" | "assistantUndo" | "assistantUndoBlocked" | "assistantUnresolved" | "assistantAnswerLabel" | "assistantAnswerPlaceholder" | "assistantAnswerSend" | "assistantAlwaysAllowedTitle" | "assistantAlwaysAllowedRevoke" | "assistantCapabilityName" | "assistantConnection" | "assistantActions" | "assistantActionsTitle" | "assistantUndoAll" | "assistantExamples" | "assistantReceiptStatus" | "assistantReceiptAction" | "assistantReceiptTerms" | "assistantReceiptChange" | "assistantReceiptProposed">;
 
 // @public
 export const ASSISTANT_SEND_ICON: IconDescriptor;
@@ -6509,7 +6509,7 @@ export function groupIndentStyle(level: number): {
 export const GROUPING_COLUMN_DND_MIME = "application/x-adapttable-grouping-column";
 
 // @public
-export const GROUPING_LABELS: Pick<Required<TableLabels>, "moreGroups" | "moreRowsInGroup" | "expandGroup" | "collapseGroup" | "groupingDropColumns" | "addGroupingColumn" | "removeGroupingColumn" | "moveGroupingColumn" | "groupingDropToRemove" | "groupingAggregateColumn" | "groupingAggregationDefault" | "groupingAggregationNone" | "groupingAggregations" | "groupingAddAggregation" | "groupingRestoreAggregations" | "groupingAggregationFor" | "groupingAggregationReadOnly" | "groupingAggregateRemoved" | "groupingAggregatesRestored" | "groupingAdded" | "groupingRemoved" | "groupingMoved" | "groupingAggregateChanged" | "noticeGroupingUnavailable">;
+export const GROUPING_LABELS: Pick<Required<TableLabels>, "moreGroups" | "moreRowsInGroup" | "expandGroup" | "collapseGroup" | "groupingDropColumns" | "addGroupingColumn" | "removeGroupingColumn" | "moveGroupingColumn" | "groupingDropToRemove" | "groupingAggregationNone" | "groupingAggregations" | "groupingAddAggregation" | "groupingRestoreAggregations" | "groupingAggregationFor" | "groupingAggregationReadOnly" | "groupingAggregateRemoved" | "groupingAggregatesRestored" | "groupingAdded" | "groupingRemoved" | "groupingMoved" | "groupingAggregateChanged" | "noticeGroupingUnavailable">;
 
 // @public
 export const GROUPING_LIVE: RowSlotKey<ChromeExtraDraw>;
@@ -9073,7 +9073,7 @@ export const ROW_EDIT_ACTIONS: FeatureSlotKey<RowEditActionsProps<unknown>>;
 export const ROW_ID_ATTRIBUTE = "data-row-id";
 
 // @public
-export const ROW_LABELS: Pick<Required<TableLabels>, "duplicateRow" | "deleteRow" | "deleteRowConfirm" | "moveRowUp" | "moveRowDown" | "rowLifted" | "rowMoved" | "rowReorderCancelled" | "rowMoveOptions" | "moveToGroup" | "moveUnder" | "moveToTopLevel" | "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever" | "moveRejectedSorted" | "moveRejectedCycle" | "moveUnavailable" | "rootLevel" | "pinToTop" | "pinToBottom" | "unpinRow" | "noticePinNested">;
+export const ROW_LABELS: Pick<Required<TableLabels>, "duplicateRow" | "deleteRow" | "deleteRowConfirm" | "moveRowUp" | "moveRowDown" | "rowLifted" | "rowMoved" | "rowReorderCancelled" | "moveToGroup" | "moveUnder" | "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever" | "moveRejectedSorted" | "moveRejectedCycle" | "moveUnavailable" | "rootLevel" | "pinToTop" | "pinToBottom" | "unpinRow" | "noticePinNested">;
 
 // @public
 export const ROW_PIN_STORE_OPTIONS: ControllableStoreOptions<RowPinState>;
@@ -11390,10 +11390,6 @@ export interface TableLabels {
     assistantOpen?: string;
     assistantPlaceholder?: string;
     assistantProgress?: (done: number, total?: number) => string;
-    assistantReceipt?: (receipt: {
-        capability?: string;
-        status: string;
-    }) => string;
     assistantReceiptAction?: (action: {
         kind?: string;
         status: string;
@@ -11538,12 +11534,10 @@ export interface TableLabels {
     groupingAddAggregation?: string;
     groupingAdded?: (label: string) => string;
     groupingAggregateChanged?: (label: string, aggregation: string) => string;
-    groupingAggregateColumn?: string;
     groupingAggregateRemoved?: (column: string) => string;
     groupingAggregatesRestored?: string;
     groupingAggregation?: string;
     groupingAggregationCustom?: string;
-    groupingAggregationDefault?: string;
     groupingAggregationFor?: (column: string) => string;
     groupingAggregationNone?: string;
     groupingAggregationReadOnly?: string;
@@ -11574,7 +11568,6 @@ export interface TableLabels {
     moveRowUp?: string;
     moveStart?: string;
     moveToGroup?: string;
-    moveToTopLevel?: string;
     moveUnavailable?: string;
     moveUnder?: string;
     moveViewDown?: string;
@@ -11614,7 +11607,6 @@ export interface TableLabels {
         total: number;
     }) => string;
     pageSelected?: (count: number) => string;
-    pendingProposals?: (count: number) => string;
     pendingRows?: (count: number) => string;
     pinEnd?: string;
     pinnedSummaryBottom?: string;
@@ -11680,7 +11672,6 @@ export interface TableLabels {
     rowMoved?: (from: number, to: number) => string;
     rowMovedToGroup?: (group: string) => string;
     rowMovedUnder?: (parent: string) => string;
-    rowMoveOptions?: string;
     rowReorderCancelled?: string;
     rowSeparator?: string;
     rowsPerPage?: string;

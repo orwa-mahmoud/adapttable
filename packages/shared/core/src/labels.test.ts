@@ -86,7 +86,6 @@ describe("defaultLabels — every function label", () => {
     assistantUndoBlocked: ["table-moved"],
     assistantCapabilityName: ["edit.cells"],
     assistantAlwaysAllowedRevoke: ["edit.cells"],
-    assistantReceipt: [{ capability: "view.setGroupBy", status: "executed" }],
     sortedBy: [{ column: "COLUMN_X", ascending: true }],
   };
 
@@ -119,9 +118,7 @@ describe("defaultLabels — every function label", () => {
     expect(defaultLabels.findMatchCount(1, 0)).toBe("No matches");
   });
 
-  it("formats one pending proposal and a change without a column or value", () => {
-    expect(defaultLabels.pendingProposals(1)).toBe("1 proposed change");
-    expect(defaultLabels.pendingProposals(3)).toBe("3 proposed changes");
+  it("formats a change without a column or value", () => {
     expect(defaultLabels.proposalChange({ row: "ROW_X" })).toBe("ROW_X");
     expect(
       defaultLabels.proposalChange({

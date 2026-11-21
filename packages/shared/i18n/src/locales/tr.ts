@@ -196,10 +196,6 @@ export const tr: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "Bir değişiklik kararınızı bekliyor.",
-  pendingProposals: (count) =>
-    count === 1
-      ? "1 önerilen değişiklik"
-      : `${String(count)} önerilen değişiklik`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -340,10 +336,6 @@ export const tr: Required<TableLabels> = {
       error: "Hata",
       disconnected: "Bağlı değil",
     })[status] ?? "Hazır",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Satır ekle",
   duplicateRow: "Satırı çoğalt",
@@ -361,10 +353,8 @@ export const tr: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Satır ${String(from)} konumundan ${String(to)} konumuna taşındı`,
   rowReorderCancelled: "Yeniden sıralama iptal edildi",
-  rowMoveOptions: "Satır taşıma seçenekleri",
   moveToGroup: "Gruba taşı…",
   moveUnder: "Altına taşı…",
-  moveToTopLevel: "En üst düzeye taşı",
   confirmRowMoveTitle: "Satır taşımayı onayla",
   confirmRowMoveDescription: (row, from, to) =>
     `${row}, ${from} konumundan ${to} konumuna taşınsın mı?`,
@@ -400,9 +390,7 @@ export const tr: Required<TableLabels> = {
   removeGroupingColumn: (label) => `${label} sütununu gruplamadan kaldır`,
   moveGroupingColumn: (label) => `${label} gruplamasını taşı`,
   groupingDropToRemove: "Gruplamadan kaldırmak için buraya bırakın",
-  groupingAggregateColumn: "Toplama sütunu",
   groupingAggregation: "Grup toplaması",
-  groupingAggregationDefault: "Varsayılan",
   groupingAggregationNone: "Yok",
   groupingAggregations: "Toplamalar",
   groupingAddAggregation: "Toplama sütunu ekle",

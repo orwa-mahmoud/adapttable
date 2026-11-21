@@ -712,8 +712,6 @@ export interface TableLabels {
   approveProposal?: string;
   /** Reject a pending agent proposal. */
   rejectProposal?: string;
-  /** How many agent proposals are waiting — "2 proposed changes". */
-  pendingProposals?: (count: number) => string;
   /**
    * One proposed cell change in the approval list. Names the row, the
    * column, and the before/after values so the reader can see the write
@@ -853,16 +851,6 @@ export interface TableLabels {
    * the reader — which is why this label interpolates none of its argument.
    */
   assistantConnection?: (status: string) => string;
-  /**
-   * One action receipt — the operation that ran and what became of it.
-   *
-   * `capability` is a stable technical key and appears as given; `status` is
-   * a token this label turns into the reader's language.
-   */
-  assistantReceipt?: (receipt: {
-    capability?: string;
-    status: string;
-  }) => string;
   /** Reopens the examples once a conversation has started. */
   assistantExamples?: string;
   /**
@@ -963,14 +951,10 @@ export interface TableLabels {
   rowMoved?: (from: number, to: number) => string;
   /** Live region: Escape cancelled a lift. */
   rowReorderCancelled?: string;
-  /** Accessible name for the row-move menu trigger. */
-  rowMoveOptions?: string;
   /** Opens the target-group picker. */
   moveToGroup?: string;
   /** Opens the target-parent picker. */
   moveUnder?: string;
-  /** Tree destination with no parent. */
-  moveToTopLevel?: string;
   /** Heading on the built-in confirmation surface. */
   confirmRowMoveTitle?: string;
   /** Concrete source and destination shown before a move. */
@@ -1101,12 +1085,8 @@ export interface TableLabels {
   moveGroupingColumn?: (label: string) => string;
   /** Chip-only drop target that removes a grouping field. */
   groupingDropToRemove?: string;
-  /** Select the column whose group aggregate is being changed. */
-  groupingAggregateColumn?: string;
   /** Label for a grouped-table aggregation picker. */
   groupingAggregation?: string;
-  /** Preserve the developer-provided aggregation. */
-  groupingAggregationDefault?: string;
   /** Explicitly hide a column's group aggregate. */
   groupingAggregationNone?: string;
   /** Accessible name of the aggregations group — there is no visible heading. */

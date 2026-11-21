@@ -194,8 +194,6 @@ export const it: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "Una modifica attende la tua decisione.",
-  pendingProposals: (count) =>
-    count === 1 ? "1 modifica proposta" : `${String(count)} modifiche proposte`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -341,10 +339,6 @@ export const it: Required<TableLabels> = {
       error: "Errore",
       disconnected: "Non connesso",
     })[status] ?? "Pronto",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Aggiungi riga",
   duplicateRow: "Duplica riga",
@@ -362,10 +356,8 @@ export const it: Required<TableLabels> = {
   rowLifted: (position) => `Riga ${String(position)} sollevata`,
   rowMoved: (from, to) => `Riga spostata da ${String(from)} a ${String(to)}`,
   rowReorderCancelled: "Riordino annullato",
-  rowMoveOptions: "Opzioni di spostamento della riga",
   moveToGroup: "Sposta nel gruppo…",
   moveUnder: "Sposta sotto…",
-  moveToTopLevel: "Sposta al livello principale",
   confirmRowMoveTitle: "Conferma spostamento riga",
   confirmRowMoveDescription: (row, from, to) =>
     `Spostare ${row} da ${from} a ${to}?`,
@@ -403,9 +395,7 @@ export const it: Required<TableLabels> = {
   removeGroupingColumn: (label) => `Rimuovi ${label} dal raggruppamento`,
   moveGroupingColumn: (label) => `Sposta il raggruppamento ${label}`,
   groupingDropToRemove: "Rilascia qui per rimuovere il raggruppamento",
-  groupingAggregateColumn: "Colonna di aggregazione",
   groupingAggregation: "Aggregazione gruppo",
-  groupingAggregationDefault: "Predefinita",
   groupingAggregationNone: "Nessuna",
   groupingAggregations: "Aggregazioni",
   groupingAddAggregation: "Aggiungi colonna di aggregazione",
