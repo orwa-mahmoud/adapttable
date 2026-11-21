@@ -25,7 +25,6 @@ const props = defineProps<{
   readonly dir?: Direction;
   readonly classNames?: {
     readonly actionButton?: string;
-    readonly rowAction?: string;
     readonly rowActionsMenu?: string;
     readonly rowActionsTrigger?: string;
   };
@@ -57,7 +56,7 @@ const Actions = () =>
       naiveButton(
         mergeProps(control.attrs, {
           key: control.key,
-          class: [props.classNames?.actionButton, props.classNames?.rowAction],
+          class: props.classNames?.actionButton,
           onClick: (event: MouseEvent) => {
             event.stopPropagation();
             open.value = false;

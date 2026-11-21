@@ -36291,7 +36291,7 @@ Optional feature controls use these additional semantic class hooks:
 - Hierarchy/actions: `groupRow`, `groupLabel`, `groupToggle`, `groupCount`,
   `groupAggregate`, `groupMore`, `groupCheckbox`, `treeCell`, `treeToggle`,
   `treeSpacer`, `expandToggle`, `detailRow`, `detailCell`, `actionsHeader`,
-  `actionsCell`, `cardActions`, `rowAction`, `addRow`, `resizeHandle`.
+  `actionsCell`, `cardActions`, `addRow`, `resizeHandle`.
 - View controls: `densitySelect`, `fullscreenButton`, `viewsMenu`, `viewsButton`,
   `viewsPanel`, `viewsRow`, `viewsItem`, `viewsDelete`, `viewsDivider`,
   `viewsSaveRow`, `viewsInput`, `viewsSave`.
@@ -36389,9 +36389,7 @@ Additional class hooks land on their corresponding functional elements:
 The Vue targets `row-action`, `grid-focus-announcer` and `status`
 are corrected to the canonical `action-button`, `grid-announcer` and
 `table-status-announcer` targets. Update selectors that used those old part
-names. The existing `rowAction` class hook remains an alias for `actionButton`,
-and `status` remains an alias for `tableStatusAnnouncer`; both old and new
-classes reach the same native element.
+names.
 
 ## Adapter shell and structural Chrome
 

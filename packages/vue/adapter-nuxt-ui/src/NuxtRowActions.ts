@@ -54,7 +54,7 @@ const NuxtRowActionsPresentation = /*#__PURE__*/ defineComponent(
     };
     const actionAttrs = (action: RowActionControl<unknown>) =>
       mergeVueAttrs(action.attrs, {
-        class: [props.classNames.actionButton, props.classNames.rowAction],
+        class: props.classNames.actionButton,
         onClick: stop,
       });
     // Focus returns to the trigger before the action runs, so a surface the

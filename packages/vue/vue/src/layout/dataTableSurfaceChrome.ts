@@ -584,7 +584,7 @@ export const DataTableSurfaceChrome = /* @__PURE__ */ Object.assign(
             "aria-live": "polite",
             "aria-atomic": "true",
             "data-adapttable-part": "table-status-announcer",
-            class: [names.tableStatusAnnouncer, names.status],
+            class: names.tableStatusAnnouncer,
             style: liveStyle,
           },
           table.statusAnnouncement.value

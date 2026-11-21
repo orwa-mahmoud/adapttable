@@ -163,8 +163,6 @@ export interface DataTableClassNames {
   readonly rowReorderDown?: string;
   readonly virtualSpacer?: string;
   readonly cardActions?: string;
-  /** Legacy alias for actionButton; both classes reach the action button. */
-  readonly rowAction?: string;
   readonly actionButton?: string;
   readonly rowActionsMenu?: string;
   readonly rowActionsTrigger?: string;
@@ -308,8 +306,6 @@ export interface DataTableClassNames {
   readonly gridAnnouncer?: string;
   readonly rowReorderAnnouncer?: string;
   readonly tableStatusAnnouncer?: string;
-  /** Legacy alias for tableStatusAnnouncer. */
-  readonly status?: string;
 }
 
 /** Shared adapter props. Query state is owned by the supplied source when present. */

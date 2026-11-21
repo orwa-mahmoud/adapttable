@@ -47,7 +47,7 @@ watch(
 );
 function actionAttrs(action: RowActionControl<TRow>) {
   return mergeVueAttrs(action.attrs, {
-    class: [props.classNames.actionButton, props.classNames.rowAction],
+    class: props.classNames.actionButton,
     onClick: (event: MouseEvent) => {
       event.stopPropagation();
       if (!action.attrs.disabled) open.value = false;

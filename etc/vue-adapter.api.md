@@ -1341,7 +1341,6 @@ export interface DataTableClassNames {
     readonly retry?: string;
     // (undocumented)
     readonly root?: string;
-    readonly rowAction?: string;
     // (undocumented)
     readonly rowActionsMenu?: string;
     // (undocumented)
@@ -1404,7 +1403,6 @@ export interface DataTableClassNames {
     readonly sortIndex?: string;
     // (undocumented)
     readonly sortSelect?: string;
-    readonly status?: string;
     // (undocumented)
     readonly statusBar?: string;
     // (undocumented)

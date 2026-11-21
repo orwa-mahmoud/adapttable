@@ -145,7 +145,6 @@ describe("native table surfaces", () => {
         rowActionsLayout: "menu",
         classNames: {
           actionButton: "canonical",
-          rowAction: "legacy",
           rowActionsMenu: "menu",
           rowActionsTrigger: "trigger",
         },
@@ -188,7 +187,6 @@ describe("native table surfaces", () => {
       menu.open = true;
       const action = find<HTMLButtonElement>(menu, '[aria-label="Open"]');
       expect(action.classList.contains("canonical")).toBe(true);
-      expect(action.classList.contains("legacy")).toBe(true);
       action.click();
       expect(run).toHaveBeenCalledExactlyOnceWith(rows[0]);
       expect(menu.open).toBe(false);

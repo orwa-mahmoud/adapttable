@@ -19,7 +19,6 @@ import { shadcnAction } from "../tableControls";
 
 interface ActionClassNames {
   readonly actionButton?: string;
-  readonly rowAction?: string;
   readonly rowActionsMenu?: string;
   readonly rowActionsTrigger?: string;
 }
@@ -36,7 +35,7 @@ export const ShadcnRowActions = /* @__PURE__ */ withProps(
       mergeProps(
         {
           key: action.key,
-          class: [props.classNames.actionButton, props.classNames.rowAction],
+          class: props.classNames.actionButton,
           onClick: (event: MouseEvent) => event.stopPropagation(),
         },
         action.attrs

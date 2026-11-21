@@ -22,7 +22,7 @@ export const NativeRowActions = /* @__PURE__ */ withProps(
         mergeProps(
           {
             key: action.key,
-            class: [props.classNames.actionButton, props.classNames.rowAction],
+            class: props.classNames.actionButton,
             onClick: (event: MouseEvent) => {
               event.stopPropagation();
               if (action.attrs.disabled) return;

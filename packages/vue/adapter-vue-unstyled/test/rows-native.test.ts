@@ -94,7 +94,7 @@ describe("native optional rows and columns", () => {
           }),
         ],
         classNames: {
-          rowAction: "action-hook",
+          actionButton: "action-hook",
           addRow: "add-hook",
           actionsCell: "actions-hook",
           cardActions: "cards-actions-hook",
