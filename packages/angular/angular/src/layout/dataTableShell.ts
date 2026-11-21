@@ -111,6 +111,7 @@ import {
   printToolbarProps,
   projectedGroupingSource,
   renderedRowsOf,
+  reportFailure,
   requestDensityChange,
   resolveDensity,
   ROW_REORDER_ANNOUNCER,
@@ -956,9 +957,15 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       });
       // A pending task holds server rendering until the language arrives, so
       // the page is serialized in it rather than in English.
+      // A language that fails to load keeps the current copy and still
+      // settles the task, so server rendering does not wait on it.
       this.pendingTasks.run(async () => {
-        const labels = await loadLabels(locale);
-        if (current) this.libraryLabels.set({ locale, labels });
+        try {
+          const labels = await loadLabels(locale);
+          if (current) this.libraryLabels.set({ locale, labels });
+        } catch (error: unknown) {
+          reportFailure(`labels for "${locale}" did not load`, error);
+        }
       });
     });
     afterRenderEffect(() => {

@@ -2053,6 +2053,7 @@ export { resetDevWarnings } from "./utils/devWarn";
 export { isBrowser, safeLocalStorage } from "./utils/env";
 export { normalizeLocaleTag, resolveLocaleTag } from "./utils/localeTag";
 export { mergeProps } from "./utils/mergeProps";
+export { reportFailure } from "./utils/reportFailure";
 export { safeDecode } from "./utils/safeDecode";
 export {
   bindMobileCardList,

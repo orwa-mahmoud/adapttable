@@ -1,5 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
-import type { KitEnvironment } from "@adapttable/core/binding";
+import { type KitEnvironment, reportFailure } from "@adapttable/core/binding";
 import { loadLabels } from "@adapttable/i18n/load";
 import { computed, type ComputedRef, type Ref, shallowRef, watch } from "vue";
 
@@ -30,9 +30,16 @@ export function useLocaleLabels(
       onCleanup(() => {
         current = false;
       });
-      void loadLabels(locale).then((labels) => {
-        if (current) loaded.value = { locale, labels };
-      });
+      // A language that fails to load keeps the current copy; the next
+      // locale change, or a remount, asks again.
+      loadLabels(locale).then(
+        (labels) => {
+          if (current) loaded.value = { locale, labels };
+        },
+        (error: unknown) => {
+          reportFailure(`labels for "${locale}" did not load`, error);
+        }
+      );
     },
     { immediate: true }
   );

@@ -8703,6 +8703,9 @@ export const replaceSelection: ActionDefinition<Iterable<string>>;
 export function reportedCellRange(range: CellRange | null): CellRange | null;
 
 // @public
+export function reportFailure(context: string, error: unknown): void;
+
+// @public
 export function requestDensityChange(next: TableDensity, route: {
     readonly controlled: boolean;
     readonly setFeatureDensity?: (next: TableDensity) => void;

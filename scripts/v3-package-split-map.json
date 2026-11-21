@@ -23787,6 +23787,14 @@
       "behavior": ""
     },
     {
+      "export": "reportFailure",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "requestDensityChange",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",

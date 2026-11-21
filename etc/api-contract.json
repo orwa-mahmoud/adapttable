@@ -8993,6 +8993,7 @@
       "removeGroupingKey",
       "replaceFilterTreeNode",
       "reportedCellRange",
+      "reportFailure",
       "requestDensityChange",
       "resetDevWarnings",
       "resolveActiveFilterCount",
