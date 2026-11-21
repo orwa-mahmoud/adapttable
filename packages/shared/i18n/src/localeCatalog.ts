@@ -3,7 +3,7 @@
  * synchronous presets and the lazy loader, and holding no dictionary, so a
  * caller that only asks whether a language is bundled loads none.
  */
-import { resolveLocaleTag } from "@adapttable/core/locale";
+import { normalizeLocaleTag, resolveLocaleTag } from "@adapttable/core/locale";
 
 /**
  * A key of the bundled presets: a BCP-47 tag, or a primary subtag.
@@ -59,12 +59,39 @@ const CATALOG: Readonly<Record<LocaleKey, true>> = {
 const LOCALE_KEYS = Object.keys(CATALOG) as LocaleKey[];
 
 /**
- * The preset a locale selects: its exact tag, then its primary subtag.
- * Resolution goes through core's shared resolver, the one per-column `i18n`
- * paths use.
+ * The preset an explicit script selects, by `language-script`: Chinese
+ * written in Traditional characters reads the Traditional preset whatever
+ * region the tag names.
+ */
+const SCRIPT_PRESETS: Readonly<Record<string, LocaleKey>> = {
+  "zh-hant": "zh-TW",
+  "zh-hans": "zh",
+};
+
+/** The `language-script` of a tag that names a script, lower-cased. */
+function languageScript(normalized: string): string | undefined {
+  const [language, script] = normalized.split("-");
+  return script !== undefined && /^[a-z]{4}$/.test(script)
+    ? `${language}-${script}`
+    : undefined;
+}
+
+/**
+ * The preset a locale selects: its exact tag, then the preset its explicit
+ * script names, then its primary subtag. Resolution goes through core's
+ * shared resolver, the one per-column `i18n` paths use.
  */
 export function resolveLocaleKey(locale: string): LocaleKey | undefined {
-  return resolveLocaleTag(LOCALE_KEYS, locale) as LocaleKey | undefined;
+  const resolved = resolveLocaleTag(LOCALE_KEYS, locale) as
+    LocaleKey | undefined;
+  const normalized = normalizeLocaleTag(locale);
+  if (resolved !== undefined && normalizeLocaleTag(resolved) === normalized) {
+    return resolved;
+  }
+  const script = languageScript(normalized);
+  return (
+    (script === undefined ? undefined : SCRIPT_PRESETS[script]) ?? resolved
+  );
 }
 
 /**

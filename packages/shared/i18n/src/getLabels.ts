@@ -54,7 +54,8 @@ export { hasLocale, type LocaleKey } from "./localeCatalog";
 
 /**
  * Resolve the label preset for a locale. Prefers an exact tag match
- * (e.g. `"zh-TW"` → Traditional Chinese) before the primary subtag
+ * (e.g. `"zh-TW"` → Traditional Chinese), then the script a tag names
+ * (`"zh-Hant-HK"` → Traditional Chinese), then the primary subtag
  * (e.g. `"ar-EG"` → Arabic). Falls back to English for unknown locales.
  *
  * @param locale - A BCP-47 locale such as `"en"`, `"ar"`, `"zh-TW"`, or `"ar-EG"`.

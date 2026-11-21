@@ -44,6 +44,29 @@ describe("getLabels", () => {
   });
 });
 
+describe("explicit scripts", () => {
+  it("reads Traditional Chinese for a Hant tag and Simplified for a Hans tag", () => {
+    for (const tag of [
+      "zh-TW",
+      "zh-Hant",
+      "zh-Hant-TW",
+      "zh_hant_tw",
+      "ZH-HANT",
+    ]) {
+      expect(getLabels(tag), tag).toBe(zhTW);
+      expect(hasLocale(tag), tag).toBe(true);
+    }
+    for (const tag of ["zh-Hans", "zh-hans-cn", "zh_Hans", "zh-CN", "zh"]) {
+      expect(getLabels(tag), tag).toBe(zh);
+    }
+  });
+
+  it("keeps an exact tag ahead of a script and a primary subtag", () => {
+    expect(getLabels("zh-tw")).toBe(zhTW);
+    expect(getLabels("ar-Arab")).toBe(ar);
+  });
+});
+
 describe("hasLocale", () => {
   it("reports bundled locales", () => {
     expect(hasLocale("ar-EG")).toBe(true);
