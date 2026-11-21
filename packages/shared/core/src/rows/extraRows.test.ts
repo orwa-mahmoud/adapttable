@@ -189,6 +189,41 @@ describe("extraCoveredTableSlots", () => {
     });
     expect([...slots]).toEqual([3]);
   });
+
+  it("covers each extra a span crosses, and reads new extras or chrome again", () => {
+    const visualIds = ["a", "b", "c", "d"];
+    const cellsByRow = new Map([
+      ["a", [{ columnIndex: 0, colSpan: 2, rowSpan: 4 }]],
+      ["b", [{ columnIndex: 3, colSpan: 1, rowSpan: 2 }]],
+      ["c", []],
+      ["d", []],
+    ]);
+    const extras = [
+      { key: "x", kind: "fullWidth" as const, beforeRowId: "b" },
+      { key: "y", kind: "fullWidth" as const, beforeRowId: "c" },
+      { key: "z", kind: "fullWidth" as const, beforeRowId: "c" },
+      { key: "t", kind: "fullWidth" as const },
+    ];
+    const read = (
+      anchor: string,
+      extraRows: typeof extras,
+      leadingCells = 1
+    ) => [
+      ...extraCoveredTableSlots(anchor, {
+        visualIds,
+        cellsByRow,
+        extraRows,
+        leadingCells,
+      }),
+    ];
+    expect(read("b", extras)).toEqual([1, 2]);
+    // Two extras in front of c: a's span and b's span cross both.
+    expect(read("c", extras).sort((x, y) => x - y)).toEqual([1, 2, 4]);
+    expect(read("d", extras)).toEqual([]);
+    // The same cells with other extras or other leading chrome read again.
+    expect(read("b", extras.slice(1))).toEqual([]);
+    expect(read("c", extras, 3).sort((x, y) => x - y)).toEqual([3, 4, 6]);
+  });
 });
 
 describe("extraUncoveredColSpans", () => {

@@ -275,57 +275,110 @@ function visualBodySlots(
   return slots;
 }
 
-function visualSlotIndexes(
-  slots: readonly VisualSlot[],
-  beforeRowId: string
-): { extraIndexes: number[]; rowSlotIndex: Map<string, number> } {
-  const extraIndexes: number[] = [];
+type SpanCells = ReadonlyMap<
+  string,
+  readonly { columnIndex: number; colSpan: number; rowSpan: number }[]
+>;
+
+/** The first position in sorted `positions` at or after `from`. */
+function firstAtOrAfter(positions: readonly number[], from: number): number {
+  let low = 0;
+  let high = positions.length;
+  while (low < high) {
+    const middle = (low + high) >> 1;
+    if (positions[middle]! < from) low = middle + 1;
+    else high = middle;
+  }
+  return low;
+}
+
+/** Where the extras and the rows sit among the body's slots. */
+interface SlotPositions {
+  readonly extraPositions: readonly number[];
+  readonly extraAnchors: readonly string[];
+  readonly rowSlotIndex: ReadonlyMap<string, number>;
+}
+
+function slotPositions(slots: readonly VisualSlot[]): SlotPositions {
+  const extraPositions: number[] = [];
+  const extraAnchors: string[] = [];
   const rowSlotIndex = new Map<string, number>();
-  for (let index = 0; index < slots.length; index += 1) {
-    const slot = slots[index]!;
-    if (slot.kind === "extra" && slot.beforeId === beforeRowId) {
-      extraIndexes.push(index);
+  slots.forEach((slot, index) => {
+    if (slot.kind === "extra") {
+      extraPositions.push(index);
+      extraAnchors.push(slot.beforeId);
+    } else {
+      rowSlotIndex.set(slot.id, index);
     }
-    if (slot.kind === "row") rowSlotIndex.set(slot.id, index);
-  }
-  return { extraIndexes, rowSlotIndex };
+  });
+  return { extraPositions, extraAnchors, rowSlotIndex };
 }
 
-function coverContinuingSpans(
-  cellsByRow: ReadonlyMap<
-    string,
-    readonly { columnIndex: number; colSpan: number; rowSpan: number }[]
-  >,
-  extraIndexes: number[],
-  rowSlotIndex: Map<string, number>,
-  leadingCells: number,
-  covered: Set<number>
-): void {
-  for (const [id, cells] of cellsByRow) {
-    const start = rowSlotIndex.get(id);
-    if (start === undefined) continue;
-    for (const cell of cells) {
-      addSpanCoverage(cell, start, extraIndexes, leadingCells, covered);
-    }
-  }
-}
-
-function addSpanCoverage(
+/** Add one spanning cell's slots to every extra its span crosses. */
+function coverSpan(
   cell: { columnIndex: number; colSpan: number; rowSpan: number },
   start: number,
-  extraIndexes: number[],
+  positions: SlotPositions,
   leadingCells: number,
-  covered: Set<number>
+  byAnchor: Map<string, Set<number>>
 ): void {
-  if (cell.rowSpan <= 1) return;
+  const { extraPositions, extraAnchors } = positions;
   const end = start + cell.rowSpan;
-  for (const extraIndex of extraIndexes) {
-    if (extraIndex <= start || extraIndex >= end) continue;
+  for (
+    let at = firstAtOrAfter(extraPositions, start + 1);
+    at < extraPositions.length && extraPositions[at]! < end;
+    at += 1
+  ) {
+    const anchor = extraAnchors[at]!;
+    let covered = byAnchor.get(anchor);
+    if (!covered) {
+      covered = new Set();
+      byAnchor.set(anchor, covered);
+    }
     for (let offset = 0; offset < cell.colSpan; offset += 1) {
       covered.add(leadingCells + cell.columnIndex + offset);
     }
   }
 }
+
+/**
+ * The table slots continuing row spans own on every extra row, by the row
+ * the extra sits before: one walk of the slots and the spanning cells, each
+ * span visiting only the extras it crosses.
+ */
+function coverageByAnchor(
+  visualIds: readonly string[],
+  cellsByRow: SpanCells,
+  extraRows: readonly ExtraRow[] | undefined,
+  leadingCells: number
+): ReadonlyMap<string, ReadonlySet<number>> {
+  const positions = slotPositions(visualBodySlots(visualIds, extraRows));
+  const byAnchor = new Map<string, Set<number>>();
+  if (positions.extraPositions.length === 0) return byAnchor;
+  for (const [id, cells] of cellsByRow) {
+    const start = positions.rowSlotIndex.get(id);
+    if (start === undefined) continue;
+    for (const cell of cells) {
+      if (cell.rowSpan > 1) {
+        coverSpan(cell, start, positions, leadingCells, byAnchor);
+      }
+    }
+  }
+  return byAnchor;
+}
+
+/** The last coverage computed for each body's cells, with its inputs. */
+const coverages = /* @__PURE__ */ new WeakMap<
+  SpanCells,
+  {
+    readonly visualIds: readonly string[];
+    readonly extraRows: readonly ExtraRow[] | undefined;
+    readonly leadingCells: number;
+    readonly byAnchor: ReadonlyMap<string, ReadonlySet<number>>;
+  }
+>();
+
+const NO_SLOTS: ReadonlySet<number> = /* @__PURE__ */ new Set<number>();
 
 /**
  * Table-slot indexes (leading chrome + data columns) a continuing row span
@@ -347,20 +400,28 @@ export function extraCoveredTableSlots(
   }
 ): ReadonlySet<number> {
   const { visualIds, cellsByRow, extraRows, leadingCells } = options;
-  const covered = new Set<number>();
-  const { extraIndexes, rowSlotIndex } = visualSlotIndexes(
-    visualBodySlots(visualIds, extraRows),
-    beforeRowId
-  );
-  if (extraIndexes.length === 0) return covered;
-  coverContinuingSpans(
-    cellsByRow,
-    extraIndexes,
-    rowSlotIndex,
-    leadingCells,
-    covered
-  );
-  return covered;
+  // Every extra of one body asks with the same inputs: the first computes
+  // the coverage of all of them.
+  let coverage = coverages.get(cellsByRow);
+  if (
+    coverage?.visualIds !== visualIds ||
+    coverage.extraRows !== extraRows ||
+    coverage.leadingCells !== leadingCells
+  ) {
+    coverage = {
+      visualIds,
+      extraRows,
+      leadingCells,
+      byAnchor: coverageByAnchor(
+        visualIds,
+        cellsByRow,
+        extraRows,
+        leadingCells
+      ),
+    };
+    coverages.set(cellsByRow, coverage);
+  }
+  return coverage.byAnchor.get(beforeRowId) ?? NO_SLOTS;
 }
 
 /**
