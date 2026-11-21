@@ -39,6 +39,7 @@ import {
   desktopTableStyle,
   type FeatureHostState,
   featureLabelsOf,
+  type FeatureListEntry,
   fetchNextBodyPage,
   gridCellAttributes,
   gridColumnHeaderAttributes,
@@ -148,7 +149,9 @@ export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
    */
   readonly activeFilterCount?: Signal<number>;
   /** Features this table composes, beside the provided ones. */
-  readonly features?: MaybeSignalOptional<readonly AdaptTableFeature[]>;
+  readonly features?: MaybeSignalOptional<
+    readonly FeatureListEntry<AdaptTableFeature>[]
+  >;
   /** The injector to run in. Omit to use the current injection context. */
   readonly injector?: Injector;
 }

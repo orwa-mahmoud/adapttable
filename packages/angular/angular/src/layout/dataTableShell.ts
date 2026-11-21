@@ -98,6 +98,7 @@ import {
   copyContextMenuSelection,
   createTableStore,
   defaultConfirm,
+  type FeatureListEntry,
   FILTER_DRAWER,
   FILTER_ENGINE,
   FILTER_HEADER,
@@ -107,6 +108,7 @@ import {
   FIND_BAR,
   type FindBarProps,
   type FindInTableState,
+  flattenFeatures,
   GROUPING_PANEL,
   MOUNT_STAGGER,
   printToolbarProps,
@@ -685,7 +687,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
    * The live features this table composes, such as `columnMenu()`. Replacing
    * the list updates options, slots and mounted behavior.
    */
-  readonly features = input<readonly AdaptTableFeature[]>([]);
+  readonly features = input<
+    readonly AdaptTableFeature[],
+    readonly FeatureListEntry<AdaptTableFeature>[]
+  >([], { transform: flattenFeatures });
   /** Optional conversation props drawn by a composed assistant feature. */
   readonly assistant = input<TableAssistantProps>();
   /** Optional whole-row version used to detect a live cell edit conflict. */

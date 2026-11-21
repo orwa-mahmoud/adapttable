@@ -745,6 +745,16 @@ export {
   type RemainingFeatureDomain,
 } from "./features/featureContribution";
 export {
+  columnLayoutFamilyList,
+  type CoreColumnLayoutFamilyFactories,
+  type CoreEditingFamilyFactories,
+  type CoreFilteringFamilyFactories,
+  editingFamilyList,
+  type FeatureListEntry,
+  filteringFamilyList,
+  flattenFeatures,
+} from "./features/featureFamilies";
+export {
   applyTableFeatures,
   type FeatureApplyInput,
   featureLabelsOf,

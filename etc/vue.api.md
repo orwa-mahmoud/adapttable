@@ -117,6 +117,7 @@ import { FailedCellSave } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
 import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
+import { FeatureListEntry } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
@@ -1721,7 +1722,7 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly facetKeys?: MaybeRefOrGetterOptional<readonly string[]>;
     readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
     // (undocumented)
-    readonly features?: MaybeRefOrGetterOptional<readonly ComposedFeature<NoInfer<TRow>>[]>;
+    readonly features?: MaybeRefOrGetterOptional<readonly FeatureListEntry<ComposedFeature<NoInfer<TRow>>>[]>;
     readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
     readonly maxHeight?: number | string;
     readonly mode?: "frontend" | "server";

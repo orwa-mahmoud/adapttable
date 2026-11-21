@@ -10,10 +10,12 @@ import {
   EMPTY_FEATURE_HOST,
   type FeatureApplyInput,
   type FeatureHostState,
+  type FeatureListEntry,
   type FeaturePatch,
   type FeatureRender,
   type FeatureSetup,
   type FeatureStateKey,
+  flattenFeatures,
   mergeFeaturePatches,
   planFeatureRegistration,
   preferLastById,
@@ -249,11 +251,11 @@ export function provideAdaptTableFeatures(
  */
 export function tableFeaturesOf(
   injector: Injector,
-  own: readonly AdaptTableFeature[] | undefined
+  own: readonly FeatureListEntry<AdaptTableFeature>[] | undefined
 ): readonly (AdaptTableFeature & { readonly id: string })[] {
   const provided =
     injector.get(ADAPTTABLE_FEATURES, null, { optional: true }) ?? [];
-  return withIds([...provided, ...(own ?? [])]);
+  return withIds([...provided, ...flattenFeatures(own ?? [])]);
 }
 
 /**
@@ -262,7 +264,9 @@ export function tableFeaturesOf(
  */
 export function featureHostFor(
   injector: Injector,
-  own: MaybeSignalOptional<readonly AdaptTableFeature[]> | undefined
+  own:
+    | MaybeSignalOptional<readonly FeatureListEntry<AdaptTableFeature>[]>
+    | undefined
 ): Signal<FeatureHostState> {
   const features = computed(() => tableFeaturesOf(injector, readMaybe(own)), {
     equal: sameItems,

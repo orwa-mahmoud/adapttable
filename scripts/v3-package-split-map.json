@@ -9187,6 +9187,14 @@
       "behavior": ""
     },
     {
+      "export": "columnLayoutFamily",
+      "currentImport": "@adapttable/antd/column-layout",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/antd/column-layout",
+      "behavior": ""
+    },
+    {
       "export": "columnSelectionCheckbox",
       "currentImport": "@adapttable/antd/column-selection",
       "kind": "value",
@@ -9244,6 +9252,14 @@
     },
     {
       "export": "editing",
+      "currentImport": "@adapttable/antd/editing",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/antd/editing",
+      "behavior": ""
+    },
+    {
+      "export": "editingFamily",
       "currentImport": "@adapttable/antd/editing",
       "kind": "value",
       "class": "kit-rendering",
@@ -9939,6 +9955,14 @@
       "behavior": ""
     },
     {
+      "export": "filteringFamily",
+      "currentImport": "@adapttable/antd/filtering",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/antd/filtering",
+      "behavior": ""
+    },
+    {
       "export": "findInTable",
       "currentImport": "@adapttable/antd/find-in-table",
       "kind": "value",
@@ -10443,6 +10467,14 @@
       "behavior": ""
     },
     {
+      "export": "columnLayoutFamily",
+      "currentImport": "@adapttable/base-ui/column-layout",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/base-ui/column-layout",
+      "behavior": ""
+    },
+    {
       "export": "columnSelectionCheckbox",
       "currentImport": "@adapttable/base-ui/column-selection",
       "kind": "value",
@@ -10500,6 +10532,14 @@
     },
     {
       "export": "editing",
+      "currentImport": "@adapttable/base-ui/editing",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/base-ui/editing",
+      "behavior": ""
+    },
+    {
+      "export": "editingFamily",
       "currentImport": "@adapttable/base-ui/editing",
       "kind": "value",
       "class": "kit-rendering",
@@ -11195,6 +11235,14 @@
       "behavior": ""
     },
     {
+      "export": "filteringFamily",
+      "currentImport": "@adapttable/base-ui/filtering",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/base-ui/filtering",
+      "behavior": ""
+    },
+    {
       "export": "findInTable",
       "currentImport": "@adapttable/base-ui/find-in-table",
       "kind": "value",
@@ -11707,6 +11755,14 @@
       "behavior": ""
     },
     {
+      "export": "columnLayoutFamily",
+      "currentImport": "@adapttable/chakra/column-layout",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/chakra/column-layout",
+      "behavior": ""
+    },
+    {
       "export": "columnSelectionCheckbox",
       "currentImport": "@adapttable/chakra/column-selection",
       "kind": "value",
@@ -11764,6 +11820,14 @@
     },
     {
       "export": "editing",
+      "currentImport": "@adapttable/chakra/editing",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/chakra/editing",
+      "behavior": ""
+    },
+    {
+      "export": "editingFamily",
       "currentImport": "@adapttable/chakra/editing",
       "kind": "value",
       "class": "kit-rendering",
@@ -12456,6 +12520,14 @@
       "kind": "value",
       "class": "kit-rendering",
       "proposedImport": "@adapttable/chakra/filters",
+      "behavior": ""
+    },
+    {
+      "export": "filteringFamily",
+      "currentImport": "@adapttable/chakra/filtering",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/chakra/filtering",
       "behavior": ""
     },
     {
@@ -26188,6 +26260,70 @@
     },
     {
       "export": "standardFeatureList",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "flattenFeatures",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "filteringFamilyList",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "FeatureListEntry",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "editingFamilyList",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "CoreFilteringFamilyFactories",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "CoreEditingFamilyFactories",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "CoreColumnLayoutFamilyFactories",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "columnLayoutFamilyList",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -47227,6 +47363,14 @@
       "behavior": ""
     },
     {
+      "export": "columnLayoutFamily",
+      "currentImport": "@adapttable/mantine/column-layout",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mantine/column-layout",
+      "behavior": ""
+    },
+    {
       "export": "columnSelectionCheckbox",
       "currentImport": "@adapttable/mantine/column-selection",
       "kind": "value",
@@ -47308,6 +47452,14 @@
     },
     {
       "export": "editing",
+      "currentImport": "@adapttable/mantine/editing",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mantine/editing",
+      "behavior": ""
+    },
+    {
+      "export": "editingFamily",
       "currentImport": "@adapttable/mantine/editing",
       "kind": "value",
       "class": "kit-rendering",
@@ -48003,6 +48155,14 @@
       "behavior": ""
     },
     {
+      "export": "filteringFamily",
+      "currentImport": "@adapttable/mantine/filtering",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mantine/filtering",
+      "behavior": ""
+    },
+    {
       "export": "findInTable",
       "currentImport": "@adapttable/mantine/find-in-table",
       "kind": "value",
@@ -48619,6 +48779,14 @@
       "behavior": ""
     },
     {
+      "export": "columnLayoutFamily",
+      "currentImport": "@adapttable/mui/column-layout",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mui/column-layout",
+      "behavior": ""
+    },
+    {
       "export": "columnSelectionCheckbox",
       "currentImport": "@adapttable/mui/column-selection",
       "kind": "value",
@@ -48676,6 +48844,14 @@
     },
     {
       "export": "editing",
+      "currentImport": "@adapttable/mui/editing",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mui/editing",
+      "behavior": ""
+    },
+    {
+      "export": "editingFamily",
       "currentImport": "@adapttable/mui/editing",
       "kind": "value",
       "class": "kit-rendering",
@@ -49371,6 +49547,14 @@
       "behavior": ""
     },
     {
+      "export": "filteringFamily",
+      "currentImport": "@adapttable/mui/filtering",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mui/filtering",
+      "behavior": ""
+    },
+    {
       "export": "findInTable",
       "currentImport": "@adapttable/mui/find-in-table",
       "kind": "value",
@@ -49875,6 +50059,14 @@
       "behavior": ""
     },
     {
+      "export": "columnLayoutFamily",
+      "currentImport": "@adapttable/radix/column-layout",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/radix/column-layout",
+      "behavior": ""
+    },
+    {
       "export": "columnSelectionCheckbox",
       "currentImport": "@adapttable/radix/column-selection",
       "kind": "value",
@@ -49932,6 +50124,14 @@
     },
     {
       "export": "editing",
+      "currentImport": "@adapttable/radix/editing",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/radix/editing",
+      "behavior": ""
+    },
+    {
+      "export": "editingFamily",
       "currentImport": "@adapttable/radix/editing",
       "kind": "value",
       "class": "kit-rendering",
@@ -50624,6 +50824,14 @@
       "kind": "value",
       "class": "kit-rendering",
       "proposedImport": "@adapttable/radix/filters",
+      "behavior": ""
+    },
+    {
+      "export": "filteringFamily",
+      "currentImport": "@adapttable/radix/filtering",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/radix/filtering",
       "behavior": ""
     },
     {
@@ -52390,6 +52598,70 @@
       "export": "createAdapterStandardFeatures",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "FilteringFamilyFactory",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "EditingFamilyFactory",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "createAdapterFilteringFamily",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "createAdapterEditingFamily",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "createAdapterColumnLayoutFamily",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "AdapterFilteringFamilyFactories",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "AdapterEditingFamilyFactories",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "AdapterColumnLayoutFamilyFactories",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
       "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
@@ -61755,6 +62027,14 @@
       "behavior": ""
     },
     {
+      "export": "@adapttable/unstyled/column-layout",
+      "currentImport": "@adapttable/shadcn/column-layout",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/shadcn/column-layout",
+      "behavior": ""
+    },
+    {
       "export": "@adapttable/unstyled/column-selection",
       "currentImport": "@adapttable/shadcn/column-selection",
       "kind": "type",
@@ -62411,6 +62691,14 @@
       "behavior": ""
     },
     {
+      "export": "@adapttable/unstyled/filtering",
+      "currentImport": "@adapttable/shadcn/filtering",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/shadcn/filtering",
+      "behavior": ""
+    },
+    {
       "export": "@adapttable/unstyled/find-in-table",
       "currentImport": "@adapttable/shadcn/find-in-table",
       "kind": "type",
@@ -62691,6 +62979,14 @@
       "behavior": ""
     },
     {
+      "export": "columnLayoutFamily",
+      "currentImport": "@adapttable/unstyled/column-layout",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/unstyled/column-layout",
+      "behavior": ""
+    },
+    {
       "export": "columnSelectionCheckbox",
       "currentImport": "@adapttable/unstyled/column-selection",
       "kind": "value",
@@ -62748,6 +63044,14 @@
     },
     {
       "export": "editing",
+      "currentImport": "@adapttable/unstyled/editing",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/unstyled/editing",
+      "behavior": ""
+    },
+    {
+      "export": "editingFamily",
       "currentImport": "@adapttable/unstyled/editing",
       "kind": "value",
       "class": "kit-rendering",
@@ -63440,6 +63744,14 @@
       "kind": "value",
       "class": "kit-rendering",
       "proposedImport": "@adapttable/unstyled/filters",
+      "behavior": ""
+    },
+    {
+      "export": "filteringFamily",
+      "currentImport": "@adapttable/unstyled/filtering",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/unstyled/filtering",
       "behavior": ""
     },
     {

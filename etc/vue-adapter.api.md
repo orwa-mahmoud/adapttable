@@ -59,6 +59,7 @@ import { ColumnGroupToggleButtonProps } from '@adapttable/core/binding';
 import { ColumnGroupToggleProps } from '@adapttable/core/binding';
 import { ColumnGroupToggleSlots as ColumnGroupToggleSlots_2 } from '@adapttable/core/binding';
 import { ColumnHeaderRenameSlotProps as ColumnHeaderRenameSlotProps_2 } from '@adapttable/core/binding';
+import { columnLayoutFamilyList } from '@adapttable/core/binding';
 import { ColumnLayoutState } from '@adapttable/core';
 import { columnMenuActions } from '@adapttable/core/binding';
 import { ColumnMenuItem } from '@adapttable/core';
@@ -107,6 +108,7 @@ import { EditConflictPolicy } from '@adapttable/core';
 import { EditHistoryState } from '@adapttable/core';
 import { EditingBundle } from '@adapttable/core';
 import { EditingBundle as EditingBundle_2 } from '@adapttable/core/editing';
+import { editingFamilyList } from '@adapttable/core/binding';
 import { EditLifecycle } from '@adapttable/core';
 import { editorInputType } from '@adapttable/core/editing';
 import { EditValidationStoreOptions } from '@adapttable/core';
@@ -129,6 +131,7 @@ import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
 import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
+import { FeatureListEntry } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
@@ -151,6 +154,7 @@ import { FilterHeaderRowProps as FilterHeaderRowProps_2 } from '@adapttable/core
 import { FilterHeaderSearchProps } from '@adapttable/core/binding';
 import { FilterHeaderSelectProps } from '@adapttable/core/binding';
 import { FilterHeaderSlots as FilterHeaderSlots_2 } from '@adapttable/core/binding';
+import { filteringFamilyList } from '@adapttable/core/binding';
 import { filterLabel } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterRuntime } from '@adapttable/core/binding';
@@ -175,6 +179,7 @@ import { FindButtonProps } from '@adapttable/core/binding';
 import { FindInTableState } from '@adapttable/core/binding';
 import { FindSearchProps } from '@adapttable/core/binding';
 import { flattenColumnTree } from '@adapttable/core/binding';
+import { flattenFeatures } from '@adapttable/core/binding';
 import { formatMultiDraft } from '@adapttable/core/editing';
 import { FrontendEngineFactory } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
@@ -643,6 +648,8 @@ export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
 export type ColumnLayout<TRow> = Omit<UseColumnLayoutResult<TRow>, "visibleColumns"> & {
     readonly visibleColumns: readonly ColumnDef<TRow>[];
 };
+
+export { columnLayoutFamilyList }
 
 // @public (undocumented)
 export interface ColumnLayoutOptions {
@@ -1507,7 +1514,7 @@ export interface DataTableProps<TRow> {
     readonly facetKeys?: readonly string[];
     readonly facets?: FacetMap;
     // (undocumented)
-    readonly features?: readonly ComposedFeature<NoInfer<TRow>>[];
+    readonly features?: readonly FeatureListEntry<ComposedFeature<NoInfer<TRow>>>[];
     // (undocumented)
     readonly fitColumns?: boolean;
     // (undocumented)
@@ -1892,6 +1899,8 @@ export interface EditingChromeModel<TRow> {
 // @public (undocumented)
 export function editingChromeModelKey<TRow>(): FeatureStateKey<EditingChromeModel<TRow>>;
 
+export { editingFamilyList }
+
 // @public (undocumented)
 export function editingModelKey<TRow>(): FeatureStateKey<EditingBundle<TRow>>;
 
@@ -2001,6 +2010,8 @@ export interface FeatureLifecycle<TRow> {
     // (undocumented)
     reconcile(features: readonly ComposedFeature<TRow>[]): void;
 }
+
+export { FeatureListEntry }
 
 // @public (undocumented)
 export interface FeatureMountContext<TRow = unknown> {
@@ -2313,6 +2324,8 @@ export { FilterHeaderSelectProps }
 // @public
 export type FilterHeaderSlots = FilterHeaderSlots_2<VNodeChild>;
 
+export { filteringFamilyList }
+
 // @public (undocumented)
 export interface FilterInputProps {
     // (undocumented)
@@ -2570,6 +2583,8 @@ export { FindButtonProps }
 export { FindSearchProps }
 
 export { flattenColumnTree }
+
+export { flattenFeatures }
 
 // @public
 export interface FooterContext<TRow, TValue = unknown> {
@@ -2939,7 +2954,7 @@ export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
 export const NO_CLASS_NAMES: Readonly<Record<string, undefined>>;
 
 // @public (undocumented)
-export function normalizeFeatures<TRow>(features: readonly ComposedFeature<TRow>[]): readonly ComposedFeature<TRow>[];
+export function normalizeFeatures<TRow>(entries: readonly FeatureListEntry<ComposedFeature<TRow>>[]): readonly ComposedFeature<TRow>[];
 
 export { orderedCardEntries }
 
@@ -4229,7 +4244,7 @@ setQuery: (value: string) => void;
 window: ChecklistWindow;
 ref: (value: HTMLElement | null) => void;
 onScroll: () => void;
-labels: Readonly<Pick<Required<TableLabels>, "value" | "columns" | "searchPlaceholder" | "table" | "search" | "noData" | "noResults" | "expandRow" | "collapseRow" | "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "filterAll" | "boolAny" | "boolTrue" | "boolFalse" | "applyView" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "loading" | "loadMore" | "filters" | "clearAll" | "removeFilter" | "filtersDone" | "filterTree" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "expandColumnGroup" | "collapseColumnGroup" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage">>;
+labels: Readonly<Pick<Required<TableLabels>, "value" | "columns" | "searchPlaceholder" | "search" | "filterTree" | "sortBy" | "table" | "noData" | "noResults" | "expandRow" | "collapseRow" | "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "filterAll" | "boolAny" | "boolTrue" | "boolFalse" | "applyView" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "loading" | "loadMore" | "filters" | "clearAll" | "removeFilter" | "filtersDone" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "expandColumnGroup" | "collapseColumnGroup" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage">>;
 classNames: ChecklistClassNames | undefined;
 }>;
 
@@ -4605,7 +4620,7 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly facetKeys?: MaybeRefOrGetterOptional<readonly string[]>;
     readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
     // (undocumented)
-    readonly features?: MaybeRefOrGetterOptional<readonly ComposedFeature<NoInfer<TRow>>[]>;
+    readonly features?: MaybeRefOrGetterOptional<readonly FeatureListEntry<ComposedFeature<NoInfer<TRow>>>[]>;
     readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
     readonly maxHeight?: number | string;
     readonly mode?: "frontend" | "server";
@@ -4688,7 +4703,7 @@ export function useFilterHeaderControl<TRow>(input: MaybeRefOrGetter<FilterHeade
 
 // @public (undocumented)
 export function useFilterTreeModel<TRow>(input: MaybeRefOrGetter<FilterTreeBuilderProps<TRow>>): ComputedRef<    {
-labels: Readonly<Pick<Required<TableLabels>, "value" | "columns" | "searchPlaceholder" | "table" | "search" | "noData" | "noResults" | "expandRow" | "collapseRow" | "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "filterAll" | "boolAny" | "boolTrue" | "boolFalse" | "applyView" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "loading" | "loadMore" | "filters" | "clearAll" | "removeFilter" | "filtersDone" | "filterTree" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "expandColumnGroup" | "collapseColumnGroup" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage">>;
+labels: Readonly<Pick<Required<TableLabels>, "value" | "columns" | "searchPlaceholder" | "search" | "filterTree" | "sortBy" | "table" | "noData" | "noResults" | "expandRow" | "collapseRow" | "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "filterAll" | "boolAny" | "boolTrue" | "boolFalse" | "applyView" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "loading" | "loadMore" | "filters" | "clearAll" | "removeFilter" | "filtersDone" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "expandColumnGroup" | "collapseColumnGroup" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage">>;
 registry: FilterTypeRegistry;
 expanded: boolean;
 setExpanded: (value: boolean) => void;

@@ -156,6 +156,7 @@ import { FacetCounts } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
 import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core/binding';
+import { FeatureListEntry } from '@adapttable/core/binding';
 import { FeatureNotice } from '@adapttable/core/binding';
 import { FeatureNotice as FeatureNotice_2 } from '@adapttable/core';
 import { FeaturePatch } from '@adapttable/core/binding';
@@ -259,6 +260,7 @@ import { IconDescriptor } from '@adapttable/core/binding';
 import { InjectionToken } from '@angular/core';
 import { Injector } from '@angular/core';
 import { InputSignal } from '@angular/core';
+import { InputSignalWithTransform } from '@angular/core';
 import { insertExtraRows } from '@adapttable/core/binding';
 import { insertExtrasBeforeRows } from '@adapttable/core/binding';
 import { isBooleanEditor } from '@adapttable/core/editing';
@@ -1945,7 +1947,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
     readonly facetKeys: InputSignal<readonly string[] | undefined>;
     readonly facets: InputSignal<Readonly<Record<string, FacetCounts>> | undefined>;
-    readonly features: InputSignal<readonly AdaptTableFeature[]>;
+    readonly features: InputSignalWithTransform<readonly AdaptTableFeature[], readonly FeatureListEntry<AdaptTableFeature>[]>;
     readonly filterFields: InputSignal<boolean>;
     // @internal
     protected readonly filtersIcon: IconDescriptor;
@@ -6534,7 +6536,7 @@ export function tableRuntimeFor<TRow>(table: DataTable<TRow>, source: Signal<Tab
 export interface TableSurfaceHostOptions<TRow> {
     readonly columns: MaybeSignal<readonly ColumnInput<TRow>[]>;
     readonly data?: MaybeSignalOptional<readonly TRow[]>;
-    readonly features?: MaybeSignalOptional<readonly AdaptTableFeature[]>;
+    readonly features?: MaybeSignalOptional<readonly FeatureListEntry<AdaptTableFeature>[]>;
     readonly injector?: Injector;
     readonly maxHeight?: MaybeSignalOptional<number | string>;
     readonly onRowClick?: MaybeSignalOptional<(row: TRow) => void>;

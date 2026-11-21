@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/shadcn",
   "version": "3.5.0",
-  "description": "shadcn/ui adapter for AdaptTable \u2014 a fully-styled React data table in one import, built on the headless @adapttable/core engine and shadcn's design tokens.",
+  "description": "shadcn/ui adapter for AdaptTable — a fully-styled React data table in one import, built on the headless @adapttable/core engine and shadcn's design tokens.",
   "keywords": [
     "react",
     "data-table",
@@ -195,6 +195,16 @@
         "default": "./dist/column-menu.cjs"
       }
     },
+    "./column-layout": {
+      "import": {
+        "types": "./dist/column-layout.d.ts",
+        "default": "./dist/column-layout.js"
+      },
+      "require": {
+        "types": "./dist/column-layout.d.cts",
+        "default": "./dist/column-layout.cjs"
+      }
+    },
     "./resizable-columns": {
       "import": {
         "types": "./dist/resizable-columns.d.ts",
@@ -303,6 +313,16 @@
       "require": {
         "types": "./dist/filters.d.cts",
         "default": "./dist/filters.cjs"
+      }
+    },
+    "./filtering": {
+      "import": {
+        "types": "./dist/filtering.d.ts",
+        "default": "./dist/filtering.js"
+      },
+      "require": {
+        "types": "./dist/filtering.d.cts",
+        "default": "./dist/filtering.cjs"
       }
     },
     "./header-filters": {

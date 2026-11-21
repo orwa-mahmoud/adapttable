@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/unstyled",
   "version": "3.6.0",
-  "description": "Headless, unstyled AdaptTable adapter \u2014 semantic HTML with class + data-attribute hooks for Tailwind, shadcn/ui, or your own CSS.",
+  "description": "Headless, unstyled AdaptTable adapter — semantic HTML with class + data-attribute hooks for Tailwind, shadcn/ui, or your own CSS.",
   "keywords": [
     "react",
     "data-table",
@@ -195,6 +195,16 @@
         "default": "./dist/column-menu.cjs"
       }
     },
+    "./column-layout": {
+      "import": {
+        "types": "./dist/column-layout.d.ts",
+        "default": "./dist/column-layout.js"
+      },
+      "require": {
+        "types": "./dist/column-layout.d.cts",
+        "default": "./dist/column-layout.cjs"
+      }
+    },
     "./resizable-columns": {
       "import": {
         "types": "./dist/resizable-columns.d.ts",
@@ -303,6 +313,16 @@
       "require": {
         "types": "./dist/filters.d.cts",
         "default": "./dist/filters.cjs"
+      }
+    },
+    "./filtering": {
+      "import": {
+        "types": "./dist/filtering.d.ts",
+        "default": "./dist/filtering.js"
+      },
+      "require": {
+        "types": "./dist/filtering.d.cts",
+        "default": "./dist/filtering.cjs"
       }
     },
     "./header-filters": {

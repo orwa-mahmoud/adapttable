@@ -11,10 +11,12 @@ import {
   drawnSlotFills,
   type FeatureApplyInput,
   type FeatureHostState,
+  type FeatureListEntry,
   type FeaturePatch,
   type FeatureRender,
   type FeatureSlotKey,
   type FilterRuntime,
+  flattenFeatures,
   type LiveFeatureHost,
   mergeFeaturePatches,
   type PlainSlotKey,
@@ -98,8 +100,9 @@ export interface StaticTableFeature {
 }
 export type ComposedFeature<TRow> = TableFeature<TRow>;
 export function normalizeFeatures<TRow>(
-  features: readonly ComposedFeature<TRow>[]
+  entries: readonly FeatureListEntry<ComposedFeature<TRow>>[]
 ): readonly ComposedFeature<TRow>[] {
+  const features = flattenFeatures(entries);
   const seen = new Set<string>();
   for (const declaration of features) {
     if (

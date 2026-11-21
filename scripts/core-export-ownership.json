@@ -14890,6 +14890,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "columnLayoutFamilyList",
+      "kind": "runtime",
+      "module": "features/featureFamilies.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureFamilies.ts#columnLayoutFamilyList",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "columnLayoutSlice",
       "kind": "runtime",
       "module": "url/viewStateSlices.ts",
@@ -16760,6 +16771,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "editingFamilyList",
+      "kind": "runtime",
+      "module": "features/featureFamilies.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureFamilies.ts#editingFamilyList",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "effectiveAggregateOps",
       "kind": "runtime",
       "module": "aggregate/aggregationModel.ts",
@@ -17343,6 +17365,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "filteringFamilyList",
+      "kind": "runtime",
+      "module": "features/featureFamilies.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureFamilies.ts#filteringFamilyList",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "filterPredicate",
       "kind": "runtime",
       "module": "filters/filterDefs.ts",
@@ -17582,6 +17615,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "columns/columnTree.ts#flattenColumnTree",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "flattenFeatures",
+      "kind": "runtime",
+      "module": "features/featureFamilies.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureFamilies.ts#flattenFeatures",
       "subpaths": ["./binding"]
     },
     {
@@ -23305,6 +23349,28 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "CoreColumnLayoutFamilyFactories",
+      "kind": "type",
+      "module": "features/featureFamilies.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureFamilies.ts#CoreColumnLayoutFamilyFactories",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "CoreEditingFamilyFactories",
+      "kind": "type",
+      "module": "features/featureFamilies.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureFamilies.ts#CoreEditingFamilyFactories",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "CoreFeature",
       "kind": "type",
       "module": "features/coreFeatures.ts",
@@ -23324,6 +23390,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/coreFeatures.ts#CoreFeatureRegistrar",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "CoreFilteringFamilyFactories",
+      "kind": "type",
+      "module": "features/featureFamilies.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureFamilies.ts#CoreFilteringFamilyFactories",
       "subpaths": ["./binding"]
     },
     {
@@ -23808,6 +23885,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/defineFeature.ts#FeatureContract",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FeatureListEntry",
+      "kind": "type",
+      "module": "features/featureFamilies.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureFamilies.ts#FeatureListEntry",
       "subpaths": ["./binding"]
     },
     {

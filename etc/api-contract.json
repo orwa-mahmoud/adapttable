@@ -478,6 +478,7 @@
       "forwards @adapttable/unstyled/cell-span",
       "forwards @adapttable/unstyled/column-groups",
       "forwards @adapttable/unstyled/column-menu",
+      "forwards @adapttable/unstyled/column-layout",
       "forwards @adapttable/unstyled/column-selection",
       "forwards @adapttable/unstyled/command-palette",
       "forwards @adapttable/unstyled/context-menu",
@@ -486,6 +487,7 @@
       "forwards @adapttable/unstyled/export",
       "forwards @adapttable/unstyled/extra-rows",
       "forwards @adapttable/unstyled/filters",
+      "forwards @adapttable/unstyled/filtering",
       "forwards @adapttable/unstyled/find-in-table",
       "forwards @adapttable/unstyled/fit-columns",
       "forwards @adapttable/unstyled/fullscreen",
@@ -515,6 +517,7 @@
       "kit/cell-span",
       "kit/column-groups",
       "kit/column-menu",
+      "kit/column-layout",
       "kit/column-selection",
       "kit/command-palette",
       "kit/context-menu",
@@ -522,6 +525,7 @@
       "kit/extra-rows",
       "kit/features",
       "kit/filters",
+      "kit/filtering",
       "kit/find-in-table",
       "kit/fit-columns",
       "kit/grouping",
@@ -593,6 +597,7 @@
       "adapter-vue-unstyled-tree",
       "adapter-vue-unstyled-row-detail",
       "adapter-vue-unstyled-filters",
+      "adapter-vue-unstyled-filtering",
       "adapter-vue-unstyled-header-filters",
       "adapter-vue-unstyled-editing",
       "adapter-vue-unstyled-batch-editing",
@@ -615,6 +620,7 @@
       "adapter-vue-unstyled-find-in-table",
       "adapter-vue-unstyled-status-bar",
       "adapter-vue-unstyled-column-menu",
+      "adapter-vue-unstyled-column-layout",
       "adapter-vue-unstyled-column-selection",
       "adapter-vue-unstyled-selection-stats",
       "adapter-vue-unstyled-bulk-actions",
@@ -638,6 +644,7 @@
       "adapter-element-plus-cell-span",
       "adapter-element-plus-column-groups",
       "adapter-element-plus-column-menu",
+      "adapter-element-plus-column-layout",
       "adapter-element-plus-column-selection",
       "adapter-element-plus-columns",
       "adapter-element-plus-command-palette",
@@ -650,6 +657,7 @@
       "adapter-element-plus-export",
       "adapter-element-plus-extra-rows",
       "adapter-element-plus-filters",
+      "adapter-element-plus-filtering",
       "adapter-element-plus-find-in-table",
       "adapter-element-plus-fit-columns",
       "adapter-element-plus-fullscreen",
@@ -683,6 +691,7 @@
       "adapter-naive-ui-cell-span",
       "adapter-naive-ui-column-groups",
       "adapter-naive-ui-column-menu",
+      "adapter-naive-ui-column-layout",
       "adapter-naive-ui-column-selection",
       "adapter-naive-ui-columns",
       "adapter-naive-ui-command-palette",
@@ -695,6 +704,7 @@
       "adapter-naive-ui-export",
       "adapter-naive-ui-extra-rows",
       "adapter-naive-ui-filters",
+      "adapter-naive-ui-filtering",
       "adapter-naive-ui-find-in-table",
       "adapter-naive-ui-fit-columns",
       "adapter-naive-ui-fullscreen",
@@ -729,6 +739,7 @@
       "adapter-nuxt-ui-cell-span",
       "adapter-nuxt-ui-column-groups",
       "adapter-nuxt-ui-column-menu",
+      "adapter-nuxt-ui-column-layout",
       "adapter-nuxt-ui-column-selection",
       "adapter-nuxt-ui-columns",
       "adapter-nuxt-ui-command-palette",
@@ -741,6 +752,7 @@
       "adapter-nuxt-ui-export",
       "adapter-nuxt-ui-extra-rows",
       "adapter-nuxt-ui-filters",
+      "adapter-nuxt-ui-filtering",
       "adapter-nuxt-ui-find-in-table",
       "adapter-nuxt-ui-fit-columns",
       "adapter-nuxt-ui-fullscreen",
@@ -774,6 +786,7 @@
       "adapter-quasar-cell-span",
       "adapter-quasar-column-groups",
       "adapter-quasar-column-menu",
+      "adapter-quasar-column-layout",
       "adapter-quasar-column-selection",
       "adapter-quasar-columns",
       "adapter-quasar-command-palette",
@@ -786,6 +799,7 @@
       "adapter-quasar-export",
       "adapter-quasar-extra-rows",
       "adapter-quasar-filters",
+      "adapter-quasar-filtering",
       "adapter-quasar-find-in-table",
       "adapter-quasar-fit-columns",
       "adapter-quasar-fullscreen",
@@ -820,6 +834,7 @@
       "adapter-reka-ui-cell-span",
       "adapter-reka-ui-column-groups",
       "adapter-reka-ui-column-menu",
+      "adapter-reka-ui-column-layout",
       "adapter-reka-ui-column-selection",
       "adapter-reka-ui-columns",
       "adapter-reka-ui-command-palette",
@@ -833,6 +848,7 @@
       "adapter-reka-ui-extra-rows",
       "adapter-reka-ui-features",
       "adapter-reka-ui-filters",
+      "adapter-reka-ui-filtering",
       "adapter-reka-ui-find-in-table",
       "adapter-reka-ui-fit-columns",
       "adapter-reka-ui-formula",
@@ -869,6 +885,7 @@
       "adapter-shadcn-vue-cell-span",
       "adapter-shadcn-vue-column-groups",
       "adapter-shadcn-vue-column-menu",
+      "adapter-shadcn-vue-column-layout",
       "adapter-shadcn-vue-column-selection",
       "adapter-shadcn-vue-columns",
       "adapter-shadcn-vue-command-palette",
@@ -882,6 +899,7 @@
       "adapter-shadcn-vue-extra-rows",
       "adapter-shadcn-vue-features",
       "adapter-shadcn-vue-filters",
+      "adapter-shadcn-vue-filtering",
       "adapter-shadcn-vue-find-in-table",
       "adapter-shadcn-vue-fit-columns",
       "adapter-shadcn-vue-formula",
@@ -917,6 +935,7 @@
       "adapter-vuetify-cell-span",
       "adapter-vuetify-column-groups",
       "adapter-vuetify-column-menu",
+      "adapter-vuetify-column-layout",
       "adapter-vuetify-column-selection",
       "adapter-vuetify-columns",
       "adapter-vuetify-command-palette",
@@ -929,6 +948,7 @@
       "adapter-vuetify-export",
       "adapter-vuetify-extra-rows",
       "adapter-vuetify-filters",
+      "adapter-vuetify-filtering",
       "adapter-vuetify-find-in-table",
       "adapter-vuetify-fit-columns",
       "adapter-vuetify-fullscreen",
@@ -1097,7 +1117,8 @@
       "multiSelectFilterWidget",
       "rangeFilterWidget",
       "selectFilterWidget",
-      "textFilterWidget"
+      "textFilterWidget",
+      "editingFamily"
     ],
     "adapter-naive-ui-features": [
       "agentApproval",
@@ -1215,7 +1236,8 @@
       "multiSelectFilterWidget",
       "rangeFilterWidget",
       "selectFilterWidget",
-      "textFilterWidget"
+      "textFilterWidget",
+      "editingFamily"
     ],
     "adapter-nuxt-ui-features": [
       "agentApproval",
@@ -1354,7 +1376,8 @@
       "multiSelectFilterWidget",
       "rangeFilterWidget",
       "selectFilterWidget",
-      "textFilterWidget"
+      "textFilterWidget",
+      "editingFamily"
     ],
     "adapter-quasar-features": [
       "agentApproval",
@@ -1462,7 +1485,8 @@
       "multiSelectFilterWidget",
       "rangeFilterWidget",
       "selectFilterWidget",
-      "textFilterWidget"
+      "textFilterWidget",
+      "editingFamily"
     ],
     "adapter-vuetify-features": [
       "agentApproval",
@@ -1601,7 +1625,8 @@
       "multiSelectFilterWidget",
       "rangeFilterWidget",
       "selectFilterWidget",
-      "textFilterWidget"
+      "textFilterWidget",
+      "editingFamily"
     ],
     "adapter-antd": [
       "AgentApproval",
@@ -5642,6 +5667,9 @@
     "forwards @adapttable/unstyled/column-menu": [
       "@adapttable/unstyled/column-menu"
     ],
+    "forwards @adapttable/unstyled/column-layout": [
+      "@adapttable/unstyled/column-layout"
+    ],
     "forwards @adapttable/unstyled/column-selection": [
       "@adapttable/unstyled/column-selection"
     ],
@@ -5665,6 +5693,9 @@
     ],
     "forwards @adapttable/unstyled/filters": [
       "@adapttable/unstyled/filters"
+    ],
+    "forwards @adapttable/unstyled/filtering": [
+      "@adapttable/unstyled/filtering"
     ],
     "forwards @adapttable/unstyled/find-in-table": [
       "@adapttable/unstyled/find-in-table"
@@ -5787,6 +5818,9 @@
     "kit/column-menu": [
       "columnMenu"
     ],
+    "kit/column-layout": [
+      "columnLayoutFamily"
+    ],
     "kit/column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -5802,7 +5836,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "kit/extra-rows": [
       "extraRows"
@@ -5892,6 +5927,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "kit/filtering": [
+      "filteringFamily"
     ],
     "kit/find-in-table": [
       "findInTable"
@@ -7168,7 +7206,15 @@
       "multiSelectFilterSpecs",
       "rangeFilterSpecs",
       "selectFilterSpecs",
-      "textFilterSpecs"
+      "textFilterSpecs",
+      "AdapterColumnLayoutFamilyFactories",
+      "AdapterEditingFamilyFactories",
+      "AdapterFilteringFamilyFactories",
+      "createAdapterColumnLayoutFamily",
+      "createAdapterEditingFamily",
+      "createAdapterFilteringFamily",
+      "EditingFamilyFactory",
+      "FilteringFamilyFactory"
     ],
     "react-features": [
       "applyTableFeatures",
@@ -9170,7 +9216,15 @@
       "multiSelectFilterSpecs",
       "rangeFilterSpecs",
       "selectFilterSpecs",
-      "textFilterSpecs"
+      "textFilterSpecs",
+      "columnLayoutFamilyList",
+      "CoreColumnLayoutFamilyFactories",
+      "CoreEditingFamilyFactories",
+      "CoreFilteringFamilyFactories",
+      "editingFamilyList",
+      "FeatureListEntry",
+      "filteringFamilyList",
+      "flattenFeatures"
     ],
     "core-conformance": [
       "CaseArgs",
@@ -13344,6 +13398,9 @@
       "selectFilterWidget",
       "textFilterWidget"
     ],
+    "adapter-vue-unstyled-filtering": [
+      "filteringFamily"
+    ],
     "adapter-vue-unstyled-header-filters": [
       "FilterHeaderControl",
       "FilterHeaderControlOptions",
@@ -13369,7 +13426,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-vue-unstyled-batch-editing": [
       "BatchEditingState",
@@ -13565,7 +13623,8 @@
       "multiSelectFilterWidget",
       "rangeFilterWidget",
       "selectFilterWidget",
-      "textFilterWidget"
+      "textFilterWidget",
+      "editingFamily"
     ],
     "adapter-vue-unstyled-assistant": [
       "AgentApproval",
@@ -13761,6 +13820,9 @@
       "ColumnMenu",
       "ColumnMenuSlotProps",
       "columnMenu"
+    ],
+    "adapter-vue-unstyled-column-layout": [
+      "columnLayoutFamily"
     ],
     "adapter-vue-unstyled-column-selection": [
       "columnSelectionCheckbox"
@@ -14421,6 +14483,9 @@
       "columnMenu",
       "ColumnMenuSlotProps"
     ],
+    "adapter-element-plus-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-element-plus-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -14459,7 +14524,8 @@
       "rowEditing",
       "RowEditingState",
       "TableEditingOptions",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-element-plus-export-csv": [
       "exportCsv",
@@ -14513,6 +14579,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-element-plus-filtering": [
+      "filteringFamily"
     ],
     "adapter-element-plus-find-in-table": [
       "findInTable"
@@ -14718,6 +14787,9 @@
       "columnMenu",
       "ColumnMenuSlotProps"
     ],
+    "adapter-naive-ui-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-naive-ui-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -14756,7 +14828,8 @@
       "rowEditing",
       "RowEditingState",
       "TableEditingOptions",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-naive-ui-export-csv": [
       "exportCsv",
@@ -14809,6 +14882,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-naive-ui-filtering": [
+      "filteringFamily"
     ],
     "adapter-naive-ui-find-in-table": [
       "findInTable"
@@ -15012,6 +15088,9 @@
       "columnMenu",
       "ColumnMenuSlotProps"
     ],
+    "adapter-nuxt-ui-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-nuxt-ui-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -15050,7 +15129,8 @@
       "rowEditing",
       "RowEditingState",
       "TableEditingOptions",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-nuxt-ui-export-csv": [
       "exportCsv",
@@ -15103,6 +15183,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-nuxt-ui-filtering": [
+      "filteringFamily"
     ],
     "adapter-nuxt-ui-find-in-table": [
       "findInTable"
@@ -15293,6 +15376,9 @@
       "columnMenu",
       "ColumnMenuSlotProps"
     ],
+    "adapter-quasar-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-quasar-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -15334,7 +15420,8 @@
       "rowEditing",
       "RowEditingState",
       "TableEditingOptions",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-quasar-export-pdf": [
       "buildPrintDocument",
@@ -15383,6 +15470,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-quasar-filtering": [
+      "filteringFamily"
     ],
     "adapter-quasar-find-in-table": [
       "FindBar",
@@ -15571,6 +15661,9 @@
       "columnMenu",
       "ColumnMenuSlotProps"
     ],
+    "adapter-reka-ui-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-reka-ui-column-selection": [
       "ColumnSelectCheckboxProps",
       "columnSelectionCheckbox"
@@ -15612,7 +15705,8 @@
       "rowEditing",
       "RowEditingState",
       "TableEditingOptions",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-reka-ui-export-csv": [
       "exportCsv",
@@ -15775,7 +15869,8 @@
       "multiSelectFilterWidget",
       "rangeFilterWidget",
       "selectFilterWidget",
-      "textFilterWidget"
+      "textFilterWidget",
+      "editingFamily"
     ],
     "adapter-reka-ui-filters": [
       "ChecklistFilter",
@@ -15796,6 +15891,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-reka-ui-filtering": [
+      "filteringFamily"
     ],
     "adapter-reka-ui-find-in-table": [
       "findInTable"
@@ -15989,6 +16087,9 @@
       "columnMenu",
       "ColumnMenuSlotProps"
     ],
+    "adapter-shadcn-vue-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-shadcn-vue-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -16029,7 +16130,8 @@
       "rowEditing",
       "RowEditingState",
       "TableEditingOptions",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-shadcn-vue-export-csv": [
       "exportCsv",
@@ -16207,7 +16309,8 @@
       "multiSelectFilterWidget",
       "rangeFilterWidget",
       "selectFilterWidget",
-      "textFilterWidget"
+      "textFilterWidget",
+      "editingFamily"
     ],
     "adapter-shadcn-vue-filters": [
       "BasicFilterField",
@@ -16234,6 +16337,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-shadcn-vue-filtering": [
+      "filteringFamily"
     ],
     "adapter-shadcn-vue-find-in-table": [
       "findInTable"
@@ -16427,6 +16533,9 @@
       "columnMenu",
       "ColumnMenuSlotProps"
     ],
+    "adapter-vuetify-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-vuetify-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -16468,7 +16577,8 @@
       "undoRedoButtons",
       "VuetifyBatchEditBar",
       "VuetifyEditableCell",
-      "VuetifyRowEditActions"
+      "VuetifyRowEditActions",
+      "editingFamily"
     ],
     "adapter-vuetify-export-csv": [
       "exportCsv",
@@ -16521,6 +16631,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-vuetify-filtering": [
+      "filteringFamily"
     ],
     "adapter-vuetify-find-in-table": [
       "findInTable"
@@ -16796,6 +16909,9 @@
     "adapter-antd-column-menu.api.md": {
       "surface": "kit/column-menu"
     },
+    "adapter-antd-column-layout.api.md": {
+      "surface": "kit/column-layout"
+    },
     "adapter-antd-column-selection.api.md": {
       "surface": "kit/column-selection"
     },
@@ -16823,6 +16939,9 @@
     },
     "adapter-antd-filters.api.md": {
       "surface": "kit/filters"
+    },
+    "adapter-antd-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-antd-find-in-table.api.md": {
       "surface": "kit/find-in-table"
@@ -16920,6 +17039,9 @@
     "adapter-base-ui-column-menu.api.md": {
       "surface": "kit/column-menu"
     },
+    "adapter-base-ui-column-layout.api.md": {
+      "surface": "kit/column-layout"
+    },
     "adapter-base-ui-column-selection.api.md": {
       "surface": "kit/column-selection"
     },
@@ -16947,6 +17069,9 @@
     },
     "adapter-base-ui-filters.api.md": {
       "surface": "kit/filters"
+    },
+    "adapter-base-ui-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-base-ui-find-in-table.api.md": {
       "surface": "kit/find-in-table"
@@ -17044,6 +17169,9 @@
     "adapter-chakra-column-menu.api.md": {
       "surface": "kit/column-menu"
     },
+    "adapter-chakra-column-layout.api.md": {
+      "surface": "kit/column-layout"
+    },
     "adapter-chakra-column-selection.api.md": {
       "surface": "kit/column-selection"
     },
@@ -17071,6 +17199,9 @@
     },
     "adapter-chakra-filters.api.md": {
       "surface": "kit/filters"
+    },
+    "adapter-chakra-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-chakra-find-in-table.api.md": {
       "surface": "kit/find-in-table"
@@ -17168,6 +17299,9 @@
     "adapter-mantine-column-menu.api.md": {
       "surface": "kit/column-menu"
     },
+    "adapter-mantine-column-layout.api.md": {
+      "surface": "kit/column-layout"
+    },
     "adapter-mantine-column-selection.api.md": {
       "surface": "kit/column-selection"
     },
@@ -17195,6 +17329,9 @@
     },
     "adapter-mantine-filters.api.md": {
       "surface": "kit/filters"
+    },
+    "adapter-mantine-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-mantine-find-in-table.api.md": {
       "surface": "kit/find-in-table"
@@ -17292,6 +17429,9 @@
     "adapter-mui-column-menu.api.md": {
       "surface": "adapter-mui-column-menu"
     },
+    "adapter-mui-column-layout.api.md": {
+      "surface": "kit/column-layout"
+    },
     "adapter-mui-column-selection.api.md": {
       "surface": "kit/column-selection"
     },
@@ -17319,6 +17459,9 @@
     },
     "adapter-mui-filters.api.md": {
       "surface": "adapter-mui-filters"
+    },
+    "adapter-mui-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-mui-find-in-table.api.md": {
       "surface": "adapter-mui-find-in-table"
@@ -17416,6 +17559,9 @@
     "adapter-radix-column-menu.api.md": {
       "surface": "kit/column-menu"
     },
+    "adapter-radix-column-layout.api.md": {
+      "surface": "kit/column-layout"
+    },
     "adapter-radix-column-selection.api.md": {
       "surface": "kit/column-selection"
     },
@@ -17443,6 +17589,9 @@
     },
     "adapter-radix-filters.api.md": {
       "surface": "kit/filters"
+    },
+    "adapter-radix-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-radix-find-in-table.api.md": {
       "surface": "kit/find-in-table"
@@ -17540,6 +17689,9 @@
     "adapter-shadcn-column-menu.api.md": {
       "reexport": "forwards @adapttable/unstyled/column-menu"
     },
+    "adapter-shadcn-column-layout.api.md": {
+      "reexport": "forwards @adapttable/unstyled/column-layout"
+    },
     "adapter-shadcn-column-selection.api.md": {
       "reexport": "forwards @adapttable/unstyled/column-selection"
     },
@@ -17567,6 +17719,9 @@
     },
     "adapter-shadcn-filters.api.md": {
       "reexport": "forwards @adapttable/unstyled/filters"
+    },
+    "adapter-shadcn-filtering.api.md": {
+      "reexport": "forwards @adapttable/unstyled/filtering"
     },
     "adapter-shadcn-find-in-table.api.md": {
       "reexport": "forwards @adapttable/unstyled/find-in-table"
@@ -17664,6 +17819,9 @@
     "adapter-unstyled-column-menu.api.md": {
       "surface": "kit/column-menu"
     },
+    "adapter-unstyled-column-layout.api.md": {
+      "surface": "kit/column-layout"
+    },
     "adapter-unstyled-column-selection.api.md": {
       "surface": "kit/column-selection"
     },
@@ -17690,6 +17848,9 @@
     },
     "adapter-unstyled-filters.api.md": {
       "surface": "kit/filters"
+    },
+    "adapter-unstyled-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-unstyled-find-in-table.api.md": {
       "surface": "kit/find-in-table"
@@ -19059,6 +19220,9 @@
     "adapter-vue-unstyled-filters.api.md": {
       "surface": "adapter-vue-unstyled-filters"
     },
+    "adapter-vue-unstyled-filtering.api.md": {
+      "surface": "adapter-vue-unstyled-filtering"
+    },
     "adapter-vue-unstyled-header-filters.api.md": {
       "surface": "adapter-vue-unstyled-header-filters"
     },
@@ -19124,6 +19288,9 @@
     },
     "adapter-vue-unstyled-column-menu.api.md": {
       "surface": "adapter-vue-unstyled-column-menu"
+    },
+    "adapter-vue-unstyled-column-layout.api.md": {
+      "surface": "adapter-vue-unstyled-column-layout"
     },
     "adapter-vue-unstyled-column-selection.api.md": {
       "surface": "adapter-vue-unstyled-column-selection"
@@ -19197,6 +19364,9 @@
     "adapter-element-plus-column-menu.api.md": {
       "surface": "adapter-element-plus-column-menu"
     },
+    "adapter-element-plus-column-layout.api.md": {
+      "surface": "adapter-element-plus-column-layout"
+    },
     "adapter-element-plus-column-selection.api.md": {
       "surface": "adapter-element-plus-column-selection"
     },
@@ -19232,6 +19402,9 @@
     },
     "adapter-element-plus-filters.api.md": {
       "surface": "adapter-element-plus-filters"
+    },
+    "adapter-element-plus-filtering.api.md": {
+      "surface": "adapter-element-plus-filtering"
     },
     "adapter-element-plus-find-in-table.api.md": {
       "surface": "adapter-element-plus-find-in-table"
@@ -19332,6 +19505,9 @@
     "adapter-naive-ui-column-menu.api.md": {
       "surface": "adapter-naive-ui-column-menu"
     },
+    "adapter-naive-ui-column-layout.api.md": {
+      "surface": "adapter-naive-ui-column-layout"
+    },
     "adapter-naive-ui-column-selection.api.md": {
       "surface": "adapter-naive-ui-column-selection"
     },
@@ -19367,6 +19543,9 @@
     },
     "adapter-naive-ui-filters.api.md": {
       "surface": "adapter-naive-ui-filters"
+    },
+    "adapter-naive-ui-filtering.api.md": {
+      "surface": "adapter-naive-ui-filtering"
     },
     "adapter-naive-ui-find-in-table.api.md": {
       "surface": "adapter-naive-ui-find-in-table"
@@ -19470,6 +19649,9 @@
     "adapter-nuxt-ui-column-menu.api.md": {
       "surface": "adapter-nuxt-ui-column-menu"
     },
+    "adapter-nuxt-ui-column-layout.api.md": {
+      "surface": "adapter-nuxt-ui-column-layout"
+    },
     "adapter-nuxt-ui-column-selection.api.md": {
       "surface": "adapter-nuxt-ui-column-selection"
     },
@@ -19505,6 +19687,9 @@
     },
     "adapter-nuxt-ui-filters.api.md": {
       "surface": "adapter-nuxt-ui-filters"
+    },
+    "adapter-nuxt-ui-filtering.api.md": {
+      "surface": "adapter-nuxt-ui-filtering"
     },
     "adapter-nuxt-ui-find-in-table.api.md": {
       "surface": "adapter-nuxt-ui-find-in-table"
@@ -19605,6 +19790,9 @@
     "adapter-quasar-column-menu.api.md": {
       "surface": "adapter-quasar-column-menu"
     },
+    "adapter-quasar-column-layout.api.md": {
+      "surface": "adapter-quasar-column-layout"
+    },
     "adapter-quasar-column-selection.api.md": {
       "surface": "adapter-quasar-column-selection"
     },
@@ -19640,6 +19828,9 @@
     },
     "adapter-quasar-filters.api.md": {
       "surface": "adapter-quasar-filters"
+    },
+    "adapter-quasar-filtering.api.md": {
+      "surface": "adapter-quasar-filtering"
     },
     "adapter-quasar-find-in-table.api.md": {
       "surface": "adapter-quasar-find-in-table"
@@ -19743,6 +19934,9 @@
     "adapter-reka-ui-column-menu.api.md": {
       "surface": "adapter-reka-ui-column-menu"
     },
+    "adapter-reka-ui-column-layout.api.md": {
+      "surface": "adapter-reka-ui-column-layout"
+    },
     "adapter-reka-ui-column-selection.api.md": {
       "surface": "adapter-reka-ui-column-selection"
     },
@@ -19781,6 +19975,9 @@
     },
     "adapter-reka-ui-filters.api.md": {
       "surface": "adapter-reka-ui-filters"
+    },
+    "adapter-reka-ui-filtering.api.md": {
+      "surface": "adapter-reka-ui-filtering"
     },
     "adapter-reka-ui-find-in-table.api.md": {
       "surface": "adapter-reka-ui-find-in-table"
@@ -19890,6 +20087,9 @@
     "adapter-shadcn-vue-column-menu.api.md": {
       "surface": "adapter-shadcn-vue-column-menu"
     },
+    "adapter-shadcn-vue-column-layout.api.md": {
+      "surface": "adapter-shadcn-vue-column-layout"
+    },
     "adapter-shadcn-vue-column-selection.api.md": {
       "surface": "adapter-shadcn-vue-column-selection"
     },
@@ -19928,6 +20128,9 @@
     },
     "adapter-shadcn-vue-filters.api.md": {
       "surface": "adapter-shadcn-vue-filters"
+    },
+    "adapter-shadcn-vue-filtering.api.md": {
+      "surface": "adapter-shadcn-vue-filtering"
     },
     "adapter-shadcn-vue-find-in-table.api.md": {
       "surface": "adapter-shadcn-vue-find-in-table"
@@ -20034,6 +20237,9 @@
     "adapter-vuetify-column-menu.api.md": {
       "surface": "adapter-vuetify-column-menu"
     },
+    "adapter-vuetify-column-layout.api.md": {
+      "surface": "adapter-vuetify-column-layout"
+    },
     "adapter-vuetify-column-selection.api.md": {
       "surface": "adapter-vuetify-column-selection"
     },
@@ -20069,6 +20275,9 @@
     },
     "adapter-vuetify-filters.api.md": {
       "surface": "adapter-vuetify-filters"
+    },
+    "adapter-vuetify-filtering.api.md": {
+      "surface": "adapter-vuetify-filtering"
     },
     "adapter-vuetify-find-in-table.api.md": {
       "surface": "adapter-vuetify-find-in-table"

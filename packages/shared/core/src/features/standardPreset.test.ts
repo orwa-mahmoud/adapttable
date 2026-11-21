@@ -24,21 +24,24 @@ const factories: CoreStandardFeatureFactories<Made, string, string, object> = {
   savedViews: (options) => ["savedViews", options],
 };
 
-const zeroConfig: Made[] = [
+/** The column-layout family, then the other fixed members. */
+const fixed: Made[] = [
   ["columnMenu"],
+  ["resizableColumns"],
+  ["fitColumns"],
   ["densityChooser"],
   ["exportCsv"],
   ["findInTable", {}],
-  ["fitColumns"],
   ["fullscreen"],
-  ["headerFilters"],
   ["multiSort"],
-  ["resizableColumns"],
   ["statusBar"],
 ];
 
+/** With no filters given, the header controls stand alone. */
+const zeroConfig: Made[] = [...fixed, ["headerFilters"]];
+
 describe("standardFeatureList", () => {
-  it("lists the zero-configuration members in a fixed order", () => {
+  it("lists the column-layout family and the fixed members, then header filters", () => {
     expect(standardFeatureList(factories)).toEqual(zeroConfig);
     expect(standardFeatureList(factories, {})).toEqual(zeroConfig);
   });
@@ -53,7 +56,7 @@ describe("standardFeatureList", () => {
     expect(findOf()).toEqual(["findInTable", {}]);
   });
 
-  it("appends each configured member after the fixed ones, in order", () => {
+  it("appends each configured member after the fixed ones, filters as the filtering family", () => {
     const views = { storageKey: "v" };
     expect(
       standardFeatureList(factories, {
@@ -63,22 +66,25 @@ describe("standardFeatureList", () => {
         grouping: ["team", "role"],
       })
     ).toEqual([
-      ...zeroConfig,
+      ...fixed,
       ["grouping", ["team", "role"]],
       ["bulkActions", ["archive"]],
       ["filters", ["status"]],
+      ["headerFilters"],
       ["savedViews", views],
     ]);
   });
 
   it("adds only the configured members that were named", () => {
     expect(standardFeatureList(factories, { grouping: "team" })).toEqual([
-      ...zeroConfig,
+      ...fixed,
       ["grouping", "team"],
+      ["headerFilters"],
     ]);
     expect(standardFeatureList(factories, { filters: [] })).toEqual([
-      ...zeroConfig,
+      ...fixed,
       ["filters", []],
+      ["headerFilters"],
     ]);
   });
 });

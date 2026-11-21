@@ -15,7 +15,10 @@ import type {
   TableViewStateConfig,
   UrlStateAdapter,
 } from "@adapttable/core";
-import type { TableDensity } from "@adapttable/core/binding";
+import {
+  type FeatureListEntry,
+  type TableDensity,
+} from "@adapttable/core/binding";
 import type { VNodeChild } from "vue";
 
 import type { SummaryRowFn } from "./aggregate/aggregate";
@@ -339,7 +342,9 @@ export interface DataTableProps<TRow> {
   readonly facets?: FacetMap;
   readonly columns: readonly ColumnInput<TRow>[];
   readonly rowKey: (row: TRow) => string;
-  readonly features?: readonly ComposedFeature<NoInfer<TRow>>[];
+  readonly features?: readonly FeatureListEntry<
+    ComposedFeature<NoInfer<TRow>>
+  >[];
   /** Build footer values from the current source row scope. */
   readonly summaryRow?: SummaryRowFn<TRow>;
   readonly tableLabel?: string;

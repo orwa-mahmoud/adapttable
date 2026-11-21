@@ -18,6 +18,7 @@ import { TableAssistant, tableAssistant } from "./assistant";
 import { bulkActions } from "./bulk-actions";
 import { cellNavigation } from "./cell-navigation";
 import { collapsibleColumnGroups } from "./column-groups";
+import { columnLayoutFamily } from "./column-layout";
 import { columnMenu } from "./column-menu";
 import { columnSelectionCheckbox } from "./column-selection";
 import { commandPalette } from "./command-palette";
@@ -29,10 +30,12 @@ import {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "./editing";
 import { exportCsv } from "./export";
+import { filteringFamily } from "./filtering";
 import { filters, filterTypes } from "./filters";
 import { findInTable } from "./find-in-table";
 import { fullscreen } from "./fullscreen";
@@ -104,6 +107,9 @@ export const kit: ReactKitUnderTest = reactKitUnderTest({
     TableAssistant,
     agentApproval,
     standardFeatures,
+    editingFamily,
+    filteringFamily,
+    columnLayoutFamily,
     tableAssistant,
   },
 });

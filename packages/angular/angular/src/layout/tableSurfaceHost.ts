@@ -71,6 +71,8 @@ import {
   estimateBodyItemSize,
   type ExpandToggleSlotProps,
   extraHostFillStyle,
+  type FeatureListEntry,
+  flattenFeatures,
   type GroupedFlatEntry,
   type GroupHeaderCardSlotProps,
   type GroupHeaderRowSlotProps,
@@ -997,7 +999,9 @@ export interface TableSurfaceHostOptions<TRow> {
   /** A row's stable id. */
   readonly rowKey: (row: TRow) => string;
   /** Features this host mounts. Omitted features are not created. */
-  readonly features?: MaybeSignalOptional<readonly AdaptTableFeature[]>;
+  readonly features?: MaybeSignalOptional<
+    readonly FeatureListEntry<AdaptTableFeature>[]
+  >;
   /** Bounds the body and scrolls inside it. */
   readonly maxHeight?: MaybeSignalOptional<number | string>;
   /** Stick the header while the page scrolls. */
@@ -1187,7 +1191,9 @@ export function injectTableSurfaceHost<TRow>(
   const parent = options.injector ?? inject(Injector);
   const resources = createFeatureResources(parent);
   return resources.use("surface", [], (child) => {
-    const featureList = computed(() => readMaybe(options.features) ?? []);
+    const featureList = computed(() =>
+      flattenFeatures(readMaybe(options.features) ?? [])
+    );
     const columns = computed(
       () => flattenColumns(readMaybe(options.columns)).leaves
     );

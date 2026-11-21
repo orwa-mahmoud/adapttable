@@ -3,6 +3,7 @@ import {
   createAdapterBatchEditing,
   createAdapterEditHistory,
   createAdapterEditing,
+  createAdapterEditingFamily,
   createAdapterRowEditing,
   createAdapterUndoRedoButtons,
   type EditableCellRenderProps,
@@ -45,3 +46,17 @@ export const batchEditing = createAdapterBatchEditing(
   EditableSlot,
   BatchEditBar
 );
+
+/**
+ * All of editing — cell editing, dirty marks, edit history and undo
+ * controls — with this kit's controls, passed to `features` as one entry.
+ * Row and batch editing join beside it.
+ *
+ * @public
+ */
+export const editingFamily = /* @__PURE__ */ createAdapterEditingFamily({
+  editing,
+  dirtyIndicators,
+  editHistory,
+  undoRedoButtons,
+});

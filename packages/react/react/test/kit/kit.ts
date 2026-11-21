@@ -11,6 +11,9 @@ import type {
   AdapterFiltersFeature,
   ChecklistFilterProps,
   createAdapterAgentApprovalFeature,
+  createAdapterColumnLayoutFamily,
+  createAdapterEditingFamily,
+  createAdapterFilteringFamily,
   createAdapterStandardFeatures,
   createAdapterTableAssistantFeature,
   createAgentApproval,
@@ -192,6 +195,11 @@ export interface KitComponents {
     typeof createAdapterTableAssistantFeature
   >;
   readonly standardFeatures: ReturnType<typeof createAdapterStandardFeatures>;
+  readonly editingFamily: ReturnType<typeof createAdapterEditingFamily>;
+  readonly filteringFamily: ReturnType<typeof createAdapterFilteringFamily>;
+  readonly columnLayoutFamily: ReturnType<
+    typeof createAdapterColumnLayoutFamily
+  >;
 }
 
 /** What every kit's filter form takes. */

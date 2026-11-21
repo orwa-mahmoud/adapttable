@@ -350,7 +350,7 @@ describe("adapter feature assembly", () => {
     expect(screen.getByText("body only")).toBeInTheDocument();
   });
 
-  it("builds the standard preset in canonical order and adds only options", () => {
+  it("builds the standard preset from the families and adds only options", () => {
     const standardFeatures = createAdapterStandardFeatures({
       columnMenu: () => ({ id: "column-menu" }),
       densityChooser: () => ({ id: "density" }),
@@ -368,17 +368,18 @@ describe("adapter feature assembly", () => {
       savedViews,
     });
 
+    // The column-layout family, the other fixed members, then header filters.
     expect(standardFeatures().map((feature) => feature.id)).toEqual([
       "column-menu",
+      "resizable-columns",
+      "fit-columns",
       "density",
       "export-csv",
       "find-in-table",
-      "fit-columns",
       "fullscreen",
-      "header-filters",
       "multi-sort",
-      "resizable-columns",
       "status-bar",
+      "header-filters",
     ]);
     expect(
       standardFeatures<{ id: string }>({
@@ -389,18 +390,18 @@ describe("adapter feature assembly", () => {
       }).map((feature) => feature.id)
     ).toEqual([
       "column-menu",
+      "resizable-columns",
+      "fit-columns",
       "density",
       "export-csv",
       "find-in-table",
-      "fit-columns",
       "fullscreen",
-      "header-filters",
       "multi-sort",
-      "resizable-columns",
       "status-bar",
       "grouping",
       "bulk-actions",
       "filters",
+      "header-filters",
       "saved-views",
     ]);
   });

@@ -5,7 +5,10 @@
  * A suite written against the props keeps asserting the same behaviour while
  * composing the real factories, which is the migration a host performs.
  */
-import { flattenReactColumnTree } from "@adapttable/react/adapter";
+import {
+  flattenFeatures,
+  flattenReactColumnTree,
+} from "@adapttable/react/adapter";
 import type { TableFeature } from "@adapttable/react/features";
 
 import type {
@@ -333,7 +336,7 @@ export function composeTestFeatures<TRow>(
   props: HarnessProps<TRow>,
   features: KitFeatureFactories
 ): TableFeature<TRow>[] {
-  const next = [...(props.features ?? [])];
+  const next = [...flattenFeatures(props.features ?? [])];
   bridgeFilterProps(props, features, next);
   bridgeToolbarProps(props, features, next);
   bridgeBarProps(props, features, next);

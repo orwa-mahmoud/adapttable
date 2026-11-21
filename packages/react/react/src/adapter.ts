@@ -78,6 +78,16 @@ export {
   type EditableCellRenderProps,
 } from "./adapterFeatures/editing";
 export {
+  type AdapterColumnLayoutFamilyFactories,
+  type AdapterEditingFamilyFactories,
+  type AdapterFilteringFamilyFactories,
+  createAdapterColumnLayoutFamily,
+  createAdapterEditingFamily,
+  createAdapterFilteringFamily,
+  type EditingFamilyFactory,
+  type FilteringFamilyFactory,
+} from "./adapterFeatures/families";
+export {
   ContextMenuLiveGate,
   OptionalSidePanel,
 } from "./adapterFeatures/featureRoot";
@@ -1013,6 +1023,10 @@ export {
   type VirtualTableRow,
   windowGroupedEntries,
 } from "@adapttable/core";
+export {
+  type FeatureListEntry,
+  flattenFeatures,
+} from "@adapttable/core/binding";
 export {
   booleanFilterSpecs,
   checklistFilterSpecs,

@@ -19,6 +19,7 @@ import {
   mergeGroupingContributions,
   projectGroupingContribution,
 } from "./featureContribution";
+import { type FeatureListEntry, flattenFeatures } from "./featureFamilies";
 import type { FeatureRegistration } from "./featureRegistration";
 
 /**
@@ -163,7 +164,7 @@ function featuresOf(options: object): readonly PatchFeature[] | undefined {
   if (!("features" in options)) return undefined;
   const list = options.features;
   if (!Array.isArray(list)) return [];
-  return list as readonly PatchFeature[];
+  return flattenFeatures(list as readonly FeatureListEntry<PatchFeature>[]);
 }
 
 /**

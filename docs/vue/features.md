@@ -262,6 +262,20 @@ The preset imports all members it can compose, including configured members.
 Use individual entries when bundle size matters. PDF and XLSX writers remain
 outside the preset until their format entry is imported.
 
+A family is every member of an area built by one call and passed to `features`
+as one entry: `editingFamily(save)` from `/editing` (cell editing, dirty marks,
+edit history and undo controls), `filteringFamily(defs)` from `/filtering`
+(the filter panel and header filters) and `columnLayoutFamily()` from
+`/column-layout` (columns menu, resizing and fitting). The preset is built from
+the column-layout and filtering families.
+
+```ts
+import { columnLayoutFamily } from "@adapttable/vue-unstyled/column-layout";
+import { editingFamily } from "@adapttable/vue-unstyled/editing";
+
+const features = [editingFamily<Person>(save), columnLayoutFamily()];
+```
+
 ## Filtering
 
 See [vue table filtering](./filtering.md) for the complete examples and contracts.

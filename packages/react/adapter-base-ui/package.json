@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/base-ui",
   "version": "3.5.0",
-  "description": "Base UI adapter for AdaptTable \u2014 a batteries-included Base UI data table with sorting, filtering, URL state, selection, RTL, and dark mode.",
+  "description": "Base UI adapter for AdaptTable — a batteries-included Base UI data table with sorting, filtering, URL state, selection, RTL, and dark mode.",
   "keywords": [
     "react",
     "base-ui",
@@ -199,6 +199,16 @@
         "default": "./dist/column-menu.cjs"
       }
     },
+    "./column-layout": {
+      "import": {
+        "types": "./dist/column-layout.d.ts",
+        "default": "./dist/column-layout.js"
+      },
+      "require": {
+        "types": "./dist/column-layout.d.cts",
+        "default": "./dist/column-layout.cjs"
+      }
+    },
     "./resizable-columns": {
       "import": {
         "types": "./dist/resizable-columns.d.ts",
@@ -307,6 +317,16 @@
       "require": {
         "types": "./dist/filters.d.cts",
         "default": "./dist/filters.cjs"
+      }
+    },
+    "./filtering": {
+      "import": {
+        "types": "./dist/filtering.d.ts",
+        "default": "./dist/filtering.js"
+      },
+      "require": {
+        "types": "./dist/filtering.d.cts",
+        "default": "./dist/filtering.cjs"
       }
     },
     "./header-filters": {

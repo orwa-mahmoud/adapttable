@@ -1915,6 +1915,9 @@ export interface ColumnLayoutControllerOptions<TRow, TColumn extends ColumnMetad
 }
 
 // @public
+export function columnLayoutFamilyList<TFeature>(factories: CoreColumnLayoutFamilyFactories<TFeature>): TFeature[];
+
+// @public
 export const columnLayoutSlice: UrlSliceSpec<ColumnLayoutState, {
     readonly defaultColumnLayout?: Partial<ColumnLayoutState>;
 }>;
@@ -2770,6 +2773,13 @@ export function coreCellSpan<TRow>(getCellSpan: GetCellSpan<TRow>, cellSpanAppea
 export function coreCollapsibleColumnGroups(): CoreFeature;
 
 // @public
+export interface CoreColumnLayoutFamilyFactories<TFeature> {
+    readonly columnMenu: () => TFeature;
+    readonly fitColumns: () => TFeature;
+    readonly resizableColumns: () => TFeature;
+}
+
+// @public
 export function coreColumnMenu(): CoreFeature;
 
 // @public
@@ -2798,6 +2808,14 @@ export function coreEditHistory(options?: EditHistoryInput): CoreFeature;
 export function coreEditing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: FeaturePatch<TRow>): CoreFeature<TRow>;
 
 // @public
+export interface CoreEditingFamilyFactories<TFeature, TEdit, TExtras> {
+    readonly dirtyIndicators: () => TFeature;
+    readonly editHistory: () => TFeature;
+    readonly editing: (onCellEdit: TEdit, extras?: TExtras) => TFeature;
+    readonly undoRedoButtons: () => TFeature;
+}
+
+// @public
 export function coreExportCsv<TRow>(options?: boolean | {
     readonly writer?: ExportWriterOption;
 }): CoreFeature<TRow>;
@@ -2819,6 +2837,12 @@ export interface CoreFeatureRegistrar<TPanel extends SidePanelEntry = SidePanelE
     registerFilterType(spec: FilterTypeSpec): void;
     registerPanel(panel: TPanel): void;
     registerWriter(writer: ExportWriterOption): void;
+}
+
+// @public
+export interface CoreFilteringFamilyFactories<TFeature, TFilter> {
+    readonly filters: (defs: readonly TFilter[]) => TFeature;
+    readonly headerFilters: () => TFeature;
 }
 
 // @public
@@ -4370,6 +4394,9 @@ export interface EditingContribution<TRow> {
 }
 
 // @public
+export function editingFamilyList<TFeature, TEdit, TExtras>(factories: CoreEditingFamilyFactories<TFeature, TEdit, TExtras>, onCellEdit: TEdit, extras?: TExtras): TFeature[];
+
+// @public
 export interface EditLifecycle<TRow> {
     onEditCancel?: EditEventHandler<TRow>;
     onEditCommit?: EditEventHandler<TRow>;
@@ -5017,6 +5044,9 @@ export interface FeatureHostState<TRow = unknown> {
 export function featureLabelsOf(features: readonly PatchFeature<never>[] | undefined): readonly Partial<TableLabels>[];
 
 // @public
+export type FeatureListEntry<TFeature> = TFeature | readonly TFeature[];
+
+// @public
 export interface FeatureNotice {
     readonly appearance: FeatureNoticeAppearance;
     readonly kind: FeatureNoticeKind;
@@ -5325,6 +5355,9 @@ export interface FilteringContribution<TRow> {
     readonly defs?: readonly FilterDef<TRow>[];
     readonly registry?: FilterTypeRegistry;
 }
+
+// @public
+export function filteringFamilyList<TFeature, TFilter>(factories: CoreFilteringFamilyFactories<TFeature, TFilter>, defs: readonly TFilter[]): TFeature[];
 
 // @public
 export function filterLabel(def: Pick<FilterDef, "key" | "label">): string;
@@ -5860,6 +5893,9 @@ export interface FlattenedColumns<TRow> {
     readonly groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
     readonly leaves: ColumnMetadata<TRow>[];
 }
+
+// @public
+export function flattenFeatures<TFeature>(list: readonly FeatureListEntry<TFeature>[]): readonly TFeature[];
 
 // @public
 export function focusAfterAggregationRemoval(root: ParentNode | null, remainingKeys: readonly string[], removedIndex: number): void;

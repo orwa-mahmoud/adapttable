@@ -78,6 +78,7 @@ import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
 import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
+import { FeatureListEntry } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSetup } from '@adapttable/core/binding';
@@ -552,7 +553,7 @@ export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly columns: MaybeSignal<readonly ColumnInput<TRow>[]>;
     readonly columnWidths?: MaybeSignalOptional<Readonly<Record<string, number>>>;
     readonly dir?: MaybeSignal<Direction>;
-    readonly features?: MaybeSignalOptional<readonly AdaptTableFeature[]>;
+    readonly features?: MaybeSignalOptional<readonly FeatureListEntry<AdaptTableFeature>[]>;
     readonly fitColumns?: MaybeSignal<boolean>;
     readonly forceMobile?: MaybeSignal<boolean>;
     readonly injector?: Injector;
@@ -1717,7 +1718,7 @@ export interface TableEditHistoryProps<TRow> {
 }
 
 // @public
-export function tableFeaturesOf(injector: Injector, own: readonly AdaptTableFeature[] | undefined): readonly (AdaptTableFeature & {
+export function tableFeaturesOf(injector: Injector, own: readonly FeatureListEntry<AdaptTableFeature>[] | undefined): readonly (AdaptTableFeature & {
     readonly id: string;
 })[];
 

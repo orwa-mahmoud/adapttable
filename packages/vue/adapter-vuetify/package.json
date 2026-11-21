@@ -336,6 +336,16 @@
         "default": "./dist/filters.cjs"
       }
     },
+    "./filtering": {
+      "import": {
+        "types": "./dist/filtering.d.ts",
+        "default": "./dist/filtering.js"
+      },
+      "require": {
+        "types": "./dist/filtering.d.cts",
+        "default": "./dist/filtering.cjs"
+      }
+    },
     "./header-filters": {
       "import": {
         "types": "./dist/header-filters.d.ts",
@@ -354,6 +364,16 @@
       "require": {
         "types": "./dist/column-menu.d.cts",
         "default": "./dist/column-menu.cjs"
+      }
+    },
+    "./column-layout": {
+      "import": {
+        "types": "./dist/column-layout.d.ts",
+        "default": "./dist/column-layout.js"
+      },
+      "require": {
+        "types": "./dist/column-layout.d.cts",
+        "default": "./dist/column-layout.cjs"
       }
     },
     "./saved-views": {

@@ -14,6 +14,7 @@ import {
   type TableSource,
 } from "@adapttable/core";
 import {
+  type FeatureListEntry,
   type FilterEngine,
   type RuntimeChromeInput,
   type TableAssistantProps,
@@ -82,7 +83,7 @@ export interface UseDataTableShellOptions<TRow>
   /** Server tier: distinct-value counts from the last fetch. */
   readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
   readonly features?: MaybeRefOrGetterOptional<
-    readonly ComposedFeature<NoInfer<TRow>>[]
+    readonly FeatureListEntry<ComposedFeature<NoInfer<TRow>>>[]
   >;
   readonly assistant?: MaybeRefOrGetterOptional<
     TableAssistantProps<VNodeChild>

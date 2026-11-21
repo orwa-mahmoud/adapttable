@@ -270,6 +270,7 @@ import { FacetMap } from '@adapttable/core';
 import { FailedCellSave } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
+import { FeatureListEntry } from '@adapttable/core/binding';
 import { FeatureNotice } from '@adapttable/core';
 import { FeatureNoticeAppearance } from '@adapttable/core';
 import { FeatureNoticeKind } from '@adapttable/core';
@@ -339,6 +340,7 @@ import { FindSearchProps as FindSearchProps_2 } from '@adapttable/core/binding';
 import { fittedTableStyle } from '@adapttable/core/binding';
 import { flattenColumnTree } from '@adapttable/core/binding';
 import { FlattenedColumns } from '@adapttable/core/binding';
+import { flattenFeatures } from '@adapttable/core/binding';
 import { focusEditorOnMount } from '@adapttable/core/editing';
 import { formatMultiDraft } from '@adapttable/core/editing';
 import { FULLSCREEN_LIVE } from '@adapttable/core/binding';
@@ -734,6 +736,9 @@ export { ActiveFilterChip }
 export { ActiveFilterChipsSlotProps }
 
 // @public
+export type AdapterColumnLayoutFamilyFactories = Pick<AdapterStandardFeatureFactories, "columnMenu" | "resizableColumns" | "fitColumns">;
+
+// @public
 export type AdapterCommandPaletteFeature = (options?: boolean | CommandPaletteOptions) => StaticTableFeature;
 
 // @public
@@ -761,6 +766,9 @@ export interface AdapterEditingComponents {
 }
 
 // @public
+export type AdapterEditingFamilyFactories = Pick<AdapterEditingFeatures, "editing" | "dirtyIndicators" | "editHistory" | "undoRedoButtons">;
+
+// @public
 export interface AdapterEditingFeatures {
     readonly batchEditing: <TRow>(onBatchEdit: (edits: readonly BatchRowEdit<TRow>[]) => unknown) => TableFeature<TRow>;
     readonly dirtyIndicators: () => StaticTableFeature;
@@ -772,6 +780,9 @@ export interface AdapterEditingFeatures {
 
 // @public
 export type AdapterFeatureComponent<TProps> = (props: Readonly<TProps>) => ReactNode;
+
+// @public
+export type AdapterFilteringFamilyFactories = Pick<AdapterStandardFeatureFactories, "filters" | "headerFilters">;
 
 // @public
 export interface AdapterFiltersComponents {
@@ -951,7 +962,7 @@ export { autoSizeColumns }
 // @public
 export interface BaseDataTableProps<TRow> extends TableOptions<TRow, ReactNode> {
     columns: ColumnInput_2<TRow>[];
-    features?: readonly TableFeature<NoInfer<TRow>>[];
+    features?: readonly FeatureListEntry<TableFeature<NoInfer<TRow>>>[];
     renderCard?: ReactMobileCardRenderer<TRow>;
 }
 
@@ -1525,6 +1536,9 @@ export function createAdapterAgentApprovalFeature(AgentApproval: AdapterFeatureC
 export function createAdapterBatchEditing(EditableCell: AdapterEditingComponents["EditableCell"], BatchEditBar: AdapterEditingComponents["BatchEditBar"]): AdapterEditingFeatures["batchEditing"];
 
 // @public
+export function createAdapterColumnLayoutFamily(factories: AdapterColumnLayoutFamilyFactories): () => readonly StaticTableFeature[];
+
+// @public
 export function createAdapterCommandPaletteFeature(CommandPalette: AdapterFeatureComponent<AdapterCommandPaletteProps>, Trigger?: AdapterFeatureComponent<AdapterCommandPaletteTriggerProps>): AdapterCommandPaletteFeature;
 
 // @public
@@ -1537,7 +1551,13 @@ export function createAdapterEditHistory(UndoRedoButtons?: AdapterEditingCompone
 export function createAdapterEditing(EditableCell: AdapterEditingComponents["EditableCell"]): AdapterEditingFeatures["editing"];
 
 // @public
+export function createAdapterEditingFamily(factories: AdapterEditingFamilyFactories): EditingFamilyFactory;
+
+// @public
 export function createAdapterEditingFeatures(components: AdapterEditingComponents): AdapterEditingFeatures;
+
+// @public
+export function createAdapterFilteringFamily(factories: AdapterFilteringFamilyFactories): FilteringFamilyFactory;
 
 // @public
 export function createAdapterFiltersFeature(components: AdapterFiltersComponents): AdapterFiltersFeature;
@@ -2241,6 +2261,9 @@ export { EditHistoryState }
 
 export { EDITING_LIVE }
 
+// @public
+export type EditingFamilyFactory = <TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>) => readonly TableFeature<TRow>[];
+
 export { EditLifecycle }
 
 export { editorBusyProps }
@@ -2401,6 +2424,8 @@ export { FeatureHostState }
 export function featureLabelsFor(props: {
     readonly featureLabels?: readonly Partial<TableLabels>[];
 }): readonly Partial<TableLabels>[];
+
+export { FeatureListEntry }
 
 export { FeatureNotice }
 
@@ -2608,6 +2633,9 @@ export { FilterHeaderSelectProps }
 // @public
 export type FilterHeaderSlots = FilterHeaderSlots_2<ReactNode>;
 
+// @public
+export type FilteringFamilyFactory = <TRow>(defs: readonly FilterDef<TRow>[]) => readonly TableFeature<TRow>[];
+
 export { filterLabel }
 
 export { FilterOption }
@@ -2747,6 +2775,8 @@ export { fittedTableStyle }
 export { flattenColumnTree }
 
 export { FlattenedColumns }
+
+export { flattenFeatures }
 
 // @public
 export function flattenReactColumnTree<TRow>(columns: readonly ColumnInput_2<TRow>[]): {

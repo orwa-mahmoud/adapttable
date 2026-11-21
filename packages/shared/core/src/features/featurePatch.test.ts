@@ -177,6 +177,23 @@ describe("applyTableFeatures", () => {
     expect("features" in resolved).toBe(false);
   });
 
+  it("composes a family entry as its members, in its place", () => {
+    const family = [set("b", { groupBy: "family" }), set("c", { density: 1 })];
+    const before = applyTableFeatures({
+      features: [set("a", { groupBy: "first" }), family],
+    });
+    expect(before).toEqual({ groupBy: "family", density: 1 });
+    expect(getAppliedFeatures(before)?.map((f) => f.id)).toEqual([
+      "a",
+      "b",
+      "c",
+    ]);
+    // A single feature after the family still wins over its member.
+    expect(
+      applyTableFeatures({ features: [family, set("d", { groupBy: "last" })] })
+    ).toEqual({ groupBy: "last", density: 1 });
+  });
+
   it("lets a defined host option win over every feature", () => {
     expect(
       applyTableFeatures({

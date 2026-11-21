@@ -104,6 +104,7 @@ import { FacetMap } from '@adapttable/core';
 import { FailedCellSave } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
+import { FeatureListEntry } from '@adapttable/core/binding';
 import { FeatureNotice } from '@adapttable/core';
 import { FeatureNoticeKind } from '@adapttable/core';
 import { FeaturePatch } from '@adapttable/core/binding';
@@ -269,7 +270,7 @@ export { asGesture }
 // @public
 export interface BaseDataTableProps<TRow> extends TableOptions<TRow, ReactNode> {
     columns: ColumnInput<TRow>[];
-    features?: readonly TableFeature<NoInfer<TRow>>[];
+    features?: readonly FeatureListEntry<TableFeature<NoInfer<TRow>>>[];
     renderCard?: ReactMobileCardRenderer<TRow>;
 }
 

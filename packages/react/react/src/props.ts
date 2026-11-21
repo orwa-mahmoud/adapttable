@@ -16,6 +16,7 @@ import {
   type TableOptions,
   type TableToolbarSlots,
 } from "@adapttable/core";
+import type { FeatureListEntry } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import type { CommandPaletteOptions } from "./actions/useCommandPalette";
@@ -668,12 +669,13 @@ export interface BaseDataTableProps<TRow> extends TableOptions<
    * See [feature composition](https://adapttable.orwamahmoud.com/react/features/).
    *
    * Built-in factories and host plugins are the same {@link TableFeature}
-   * type in this one array.
+   * type in this one array. A family — every member of an area, built by one
+   * call such as a kit's `editingFamily(save)` — is passed as one entry.
    */
   // `NoInfer` so a factory that cannot work out the row type — `grouping("team")`,
   // `virtualize()` — does not offer `unknown` as a candidate and pin the whole
   // table to it, rejecting its own `columns` and `rowKey`.
-  features?: readonly TableFeature<NoInfer<TRow>>[];
+  features?: readonly FeatureListEntry<TableFeature<NoInfer<TRow>>>[];
   /**
    * Replace a mobile card's body with your own layout.
    *

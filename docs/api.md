@@ -254,6 +254,12 @@ rule — `AdapterEditingFeatures`,
 typed. `createAdapterStandardFeatures` takes
 `AdapterStandardFeatureFactories` and returns a `StandardFeaturesFactory`
 using `StandardFeatureOptions`; individual feature imports remain independent.
+`createAdapterEditingFamily` (`AdapterEditingFamilyFactories`,
+`EditingFamilyFactory`), `createAdapterFilteringFamily`
+(`AdapterFilteringFamilyFactories`, `FilteringFamilyFactory`) and
+`createAdapterColumnLayoutFamily` (`AdapterColumnLayoutFamilyFactories`) build
+a kit's families from its own members. `flattenFeatures` and
+`FeatureListEntry` read a `features` list whose entries may be families.
 `ContextMenuLiveGate` and `OptionalSidePanel` are the two invariant root-layout
 helpers. None imports a kit or belongs on the app-facing core entry.
 
@@ -1388,7 +1394,15 @@ shares, so a new binding calls them rather than re-deriving them.
   the types. Each built-in factory's id and option normalization is its own export, named `core` plus the factory: `coreFeature`, `coreCellSpan`, `coreExtraRows`, `corePinnedSummaryRows`, `coreRowAppearance`, `coreColumnMenu`, `coreResizableColumns`, `coreCollapsibleColumnGroups`, `coreCommandPalette`, `coreContextMenu`, `coreSidePanel`, `coreBulkActions`, `coreFilterTypes`, `coreHeaderFilters`, `coreSavedViews`, `corePrint`, `coreStatusBar`, `coreUndoRedoButtons`, `coreMultiSort`, `coreFitColumns`, `coreColumnSelectionCheckbox`, `coreCellNavigation`, `coreDensityChooser`, `coreEditHistory`, `coreEditing`, `coreRowEditing`, `coreBatchEditing`, `coreDirtyIndicators`, `coreExportCsv`, `coreFilters`, `coreFindInTable`, `coreFullscreen`, `coreGrouping`, `coreGroupingPanel`, `coreRowActions`, `coreRowDetail`, `coreNestedTable`, `coreRowPinning`, `coreSelectionStats`, `coreTree`, `coreVirtualize`. They are separate functions so a table bundles only the features it uses; a binding spreads one and adds what it draws.
 - **Standard preset.** `standardFeatureList` (`CoreStandardFeatureFactories`,
   `CoreStandardFeatureOptions`) builds the preset's members in order from the
-  binding's own factories.
+  binding's own factories: the column-layout family, the other fixed members,
+  then each configured member, filters as the filtering family.
+- **Feature families.** `editingFamilyList` (`CoreEditingFamilyFactories`),
+  `filteringFamilyList` (`CoreFilteringFamilyFactories`) and
+  `columnLayoutFamilyList` (`CoreColumnLayoutFamilyFactories`) list a
+  family's members from the binding's factories. A `features` list takes a
+  family as one entry (`FeatureListEntry`); `flattenFeatures` puts each
+  family's members in its place and returns a list without families as
+  itself.
 - **Shell pipeline.** `CHROME_EXTRA_SLOT_ORDER` fixes the order of the extra
   slots. A feature brings its live stage under a `liveStageKey`
   (`LiveStageKey`, `LiveStageDependencies`) that names the live values it reads
@@ -2718,6 +2732,9 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 | `StaticFeatureHost`            | The same host minus the two row-shaped registrations, which is what a static feature sees.                                                                                                     |
 | `standardFeatures(options?)`   | On each kit's `/preset` entry: the zero-configuration members plus the ones whose options you supply; `findButton: true` draws the toolbar Find control. Returns a plain array you can extend. |
 | `StandardFeatureOptions<TRow>` | `grouping`, `bulkActions`, `filters`, `savedViews` — each the argument its own factory already takes.                                                                                          |
+| `editingFamily(onCellEdit)`    | On each kit's `/editing` entry: cell editing, dirty marks, edit history and undo controls, passed to `features` as one entry. Row and batch editing join beside it.                            |
+| `filteringFamily(defs)`        | On each kit's `/filtering` entry: the filter panel for `defs` and the header filter controls, as one entry.                                                                                    |
+| `columnLayoutFamily()`         | On each kit's `/column-layout` entry: the columns menu, resizing and fitting, as one entry.                                                                                                    |
 | `AdapterGroupingPanelFeature`  | The overloaded kit `groupingPanel()` factory after an adapter supplies its group headers and panel chrome.                                                                                     |
 | `GroupingExtras<TRow>`         | Everything `grouping` takes beyond the key, including the row-shaped `groupAggregates` and `groupSort`.                                                                                        |
 | `StaticGroupingExtras`         | The subset that says nothing about the row — paging, collapse state, footers — so `grouping(key, thoseOnly)` stays row-independent.                                                            |
@@ -4922,7 +4939,11 @@ Native `/export` exposes `exportCsv`; `/export-pdf` and `/export-xlsx` expose
 columns and filename. Their entries also retain `pdfWriter` and `xlsxWriter`
 for custom `exportCsv({ writer })` compositions. Native `/preset` provides
 `standardFeatures` and `StandardFeatureOptions<TRow>`; a later format factory
-replaces the preset's CSV action. See [Vue export options and composition](./vue/actions.md)
+replaces the preset's CSV action. The families are `editingFamily` on
+`/editing`, `filteringFamily` on `/filtering` and `columnLayoutFamily` on
+`/column-layout`, each passed to `features` as one entry; the Vue adapter entry
+lists their members through `editingFamilyList`, `filteringFamilyList` and
+`columnLayoutFamilyList`, with `flattenFeatures` and `FeatureListEntry`. See [Vue export options and composition](./vue/actions.md)
 and [standard native features](./vue/features.md#standard-native-features).
 
 ### Vue adapter layout

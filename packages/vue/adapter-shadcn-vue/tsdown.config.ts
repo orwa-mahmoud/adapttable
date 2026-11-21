@@ -5,6 +5,7 @@ export default defineConfig({
   entry: [
     "src/index.ts",
     "src/filters.ts",
+    "src/filtering.ts",
     "src/grouping.ts",
     "src/density.ts",
     "src/fullscreen.ts",
@@ -42,6 +43,7 @@ export default defineConfig({
     "src/export-pdf.ts",
     "src/export-xlsx.ts",
     "src/column-menu.ts",
+    "src/column-layout.ts",
     "src/saved-views.ts",
     "src/context-menu.ts",
     "src/command-palette.ts",
