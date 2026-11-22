@@ -28,6 +28,7 @@ import { ShellLiveGate } from "./shellLiveGate";
 import { disabledHistory } from "./shellLiveStubs";
 import { CHROME_BODY, type ChromeBodySlotProps } from "./slotKeys";
 import {
+  COLUMN_SIZING_STATE,
   EDIT_HISTORY_STATE,
   EDITING_STATE,
   GROUPING_STATE,
@@ -148,6 +149,7 @@ function StagedShell<TRow>({
   const actions = useFeatureState(ROW_ACTIONS_STATE);
   const grouping = useFeatureState(GROUPING_STATE);
   const tree = useFeatureState(TREE_STATE);
+  const sizing = useFeatureState(COLUMN_SIZING_STATE);
   const editHistory = useFeatureState(EDIT_HISTORY_STATE) as
     EditHistoryState<TRow> | undefined;
   // The stages may wrap the commit channels (edit history); the body
@@ -165,6 +167,8 @@ function StagedShell<TRow>({
       rowPinning,
       grouping,
       tree,
+      autoSizeColumns: sizing?.autoSizeColumns,
+      autoSizeColumn: sizing?.autoSizeColumn,
       rowActions: actions?.rowActions,
       rowMutations: actions?.rowMutations,
       hasRowActions: actions?.hasRowActions,

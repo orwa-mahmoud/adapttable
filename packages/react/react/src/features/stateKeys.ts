@@ -135,6 +135,22 @@ export interface TreeState<TRow = unknown> {
 /** The tree, published by the tree stage. */
 export const TREE_STATE = featureStateKey<TreeState>("tree");
 
+/**
+ * The live column layout's sizing actions.
+ *
+ * @public
+ */
+export interface ColumnSizingState {
+  /** Size every visible column to its content. */
+  readonly autoSizeColumns: () => void;
+  /** Size one column to its content. */
+  readonly autoSizeColumn: (key: string) => void;
+}
+
+/** The live column layout, published by the column-layout stage. */
+export const COLUMN_SIZING_STATE =
+  featureStateKey<ColumnSizingState>("column-sizing");
+
 /** The armed cell editing, published by the editing stage. */
 export const EDITING_STATE =
   featureStateKey<EditableCellEditing<unknown>>("editing");

@@ -206,16 +206,12 @@ export function useDataTableShell<TRow>(
    * Measures the DOM, because a cell's width is what the browser laid out
    * rather than anything the data knows.
    */
-  const autoSizeColumns =
-    chrome.autoSizeColumns ??
-    (() => {
-      // Column sizing lives on the layout feature.
-    });
-  const autoSizeColumn =
-    chrome.autoSizeColumn ??
-    ((_key: string) => {
-      // Column sizing lives on the layout feature.
-    });
+  const autoSizeColumns = () => {
+    // Column sizing lives on the layout feature.
+  };
+  const autoSizeColumn = (_key: string) => {
+    // Column sizing lives on the layout feature.
+  };
   // Name the scroll box here so tests and a mock that skips the body gate
   // still have a ref that both windows can find. The gate composes the
   // body's own scroll callback on top of this.

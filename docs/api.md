@@ -282,7 +282,8 @@ row detail its renderer and expansion as `ROW_DETAIL_STATE`
 (`RowDetailState`), row actions the trailing column as `ROW_ACTIONS_STATE`
 (`RowActionsState`), row pinning its pins as `ROW_PINNING_STATE`, grouping
 its grouped rows as `GROUPING_STATE` (`GroupingState`) and the tree its
-hierarchy as `TREE_STATE` (`TreeState`); `SAVED_VIEWS` (`SavedViewsSlotProps`),
+hierarchy as `TREE_STATE` (`TreeState`), and the live column layout its
+sizing actions as `COLUMN_SIZING_STATE` (`ColumnSizingState`); `SAVED_VIEWS` (`SavedViewsSlotProps`),
 `GRID_FOCUS_ANNOUNCER`, the filter surfaces `FILTER_POPOVER` / `FILTER_DRAWER`
 (`FilterOverlaySlotProps`) with `FiltersFormSlotProps` and
 `ActiveFilterChipsSlotProps`, and `CHROME_BODY` (`ChromeBodySlotProps`), which

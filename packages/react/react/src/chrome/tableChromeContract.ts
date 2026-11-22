@@ -85,10 +85,6 @@ export interface TableChrome<TRow> {
    * matched nothing.
    */
   clearSearchAndFilters: () => void;
-  /** Size every visible column to its content. Present with column layout. */
-  autoSizeColumns?: () => void;
-  /** Size one column to its content. Present with column layout. */
-  autoSizeColumn?: (key: string) => void;
   /**
    * Whether a reorder column exists at all, hidden or not — what the column
    * menu offers. Grouped and tree models keep it armed and resolve sibling
@@ -123,12 +119,6 @@ export interface TableChrome<TRow> {
   columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
   /** All declared columns (pre layout/device filtering) for the column menu. */
   allColumns: ColumnDef<TRow>[];
-  /**
-   * Whether hide / order / pin setters on `columnLayout` actually
-   * write. The three-prop table publishes no-ops; a layout-owning feature
-   * replaces them.
-   */
-  columnLayoutLive?: boolean;
   /**
    * Opted-in features that cannot run. Empty when everything the host
    * asked for can. Adapters show these on the status bar (when it is

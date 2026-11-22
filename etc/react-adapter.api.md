@@ -1201,6 +1201,9 @@ export { COLUMN_MENU }
 export const COLUMN_SELECT: FeatureSlotKey<Omit<ColumnSelectCheckboxChromeProps, "slots">>;
 
 // @public
+export const COLUMN_SIZING_STATE: FeatureStateKey<ColumnSizingState>;
+
+// @public
 export interface ColumnDef<TRow> extends ColumnMetadata<TRow> {
     accessor?: (row: TRow) => ReactNode;
     Cell?: ComponentType<CellProps_2<TRow>>;
@@ -1403,6 +1406,12 @@ export function columnsHaveFooter<TRow>(columns: readonly ColumnDef<TRow>[]): bo
 export { columnSizeStyle }
 
 export { ColumnSizingOptions }
+
+// @public
+export interface ColumnSizingState {
+    readonly autoSizeColumn: (key: string) => void;
+    readonly autoSizeColumns: () => void;
+}
 
 // @public
 export function ColumnSpacer(input: Readonly<ColumnSpacerProps>): ReactElement | null;
@@ -4936,14 +4945,11 @@ export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 // @public
 export interface TableChrome<TRow> {
     allColumns: ColumnDef<TRow>[];
-    autoSizeColumn?: (key: string) => void;
-    autoSizeColumns?: () => void;
     body: TableBodyRegion;
     clearFilters: () => void;
     clearSearchAndFilters: () => void;
     columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
     columnLayout: ReactUseColumnLayoutResult<TRow>;
-    columnLayoutLive?: boolean;
     confirm: ConfirmHandler;
     droppedColumns: readonly string[];
     editingRows: readonly TRow[];

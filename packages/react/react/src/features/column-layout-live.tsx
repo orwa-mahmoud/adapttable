@@ -12,18 +12,20 @@ import { flattenReactColumnTree } from "../columns/flattenColumnTree";
 import { applyReactColumnNames } from "../columns/reactColumns";
 import { resolveColumns } from "../columns/resolveColumns";
 import { useColumnLayout } from "../columns/useColumnLayout";
+import { FeatureStateScope } from "./featureState";
 import { slotRender } from "./providers";
 import {
   type ChromeExtraDraw,
   type ChromeExtraSlotProps,
   COLUMN_LAYOUT_LIVE,
 } from "./slotKeys";
+import { COLUMN_SIZING_STATE, type ColumnSizingState } from "./stateKeys";
 
 function LiveColumnLayout<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<TRow>): ReactNode {
+}: Readonly<ChromeExtraSlotProps<TRow>>): ReactNode {
   // Kept across renders explicitly: the values flow into a hook, and the
   // compiler does not memoize across one, so a render would otherwise hand
   // every row new columns.
@@ -60,18 +62,23 @@ function LiveColumnLayout<TRow>({
     },
     [columnLayout, root]
   );
-  return children({
-    ...chrome,
-    allColumns: applyReactColumnNames(
-      declaredColumns,
-      columnLayout.state.names
-    ),
-    columnLayout,
-    columnLayoutLive: true,
-    columnGroups: flattened.groups,
-    autoSizeColumns,
-    autoSizeColumn,
-  });
+  const sizing = useMemo(
+    (): ColumnSizingState => ({ autoSizeColumns, autoSizeColumn }),
+    [autoSizeColumns, autoSizeColumn]
+  );
+  return (
+    <FeatureStateScope stateKey={COLUMN_SIZING_STATE} value={sizing}>
+      {children({
+        ...chrome,
+        allColumns: applyReactColumnNames(
+          declaredColumns,
+          columnLayout.state.names
+        ),
+        columnLayout,
+        columnGroups: flattened.groups,
+      })}
+    </FeatureStateScope>
+  );
 }
 
 /** Shared live render for every feature that owns user column layout. */

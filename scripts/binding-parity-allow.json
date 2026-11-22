@@ -1001,7 +1001,9 @@
         "GROUPING_STATE": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
         "GroupingState": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
         "TREE_STATE": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
-        "TreeState": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots"
+        "TreeState": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
+        "COLUMN_SIZING_STATE": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
+        "ColumnSizingState": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots"
       },
       "features": {
         "BatchRowEdit": "pending: shared-surface decision",

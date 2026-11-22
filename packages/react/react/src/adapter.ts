@@ -394,6 +394,8 @@ export {
   TREE_TOGGLE,
 } from "./features/slotKeys";
 export {
+  COLUMN_SIZING_STATE,
+  type ColumnSizingState,
   EDIT_HISTORY_STATE,
   EDITING_STATE,
   EXPORT_STATE,

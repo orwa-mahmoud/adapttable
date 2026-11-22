@@ -18,6 +18,7 @@ import { useFeatureState } from "./featureState";
 import { useChromeStages, usePublishTableRuntime } from "./providers";
 import type { ChromeExtraSlotProps } from "./slotKeys";
 import {
+  COLUMN_SIZING_STATE,
   EDITING_STATE,
   GROUPING_STATE,
   type GroupingState,
@@ -54,6 +55,7 @@ function RuntimePublisher<TRow, TProps extends StageTableProps<TRow>>({
   const grouping = useFeatureState(GROUPING_STATE) as
     GroupingState<TRow> | undefined;
   const tree = useFeatureState(TREE_STATE) as TreeState<TRow> | undefined;
+  const columnLayoutLive = useFeatureState(COLUMN_SIZING_STATE) !== undefined;
   publisher.stage(
     chrome,
     { rowActions: props.rowActions, bulkActions: props.bulkActions },
@@ -64,6 +66,7 @@ function RuntimePublisher<TRow, TProps extends StageTableProps<TRow>>({
       rowPinning,
       grouping,
       tree,
+      columnLayoutLive,
     }
   );
   const labels = chrome.table.labels;

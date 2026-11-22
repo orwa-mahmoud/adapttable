@@ -919,14 +919,11 @@ export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 // @public
 export interface TableChrome<TRow> {
     allColumns: ColumnDef<TRow>[];
-    autoSizeColumn?: (key: string) => void;
-    autoSizeColumns?: () => void;
     body: TableBodyRegion;
     clearFilters: () => void;
     clearSearchAndFilters: () => void;
     columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
     columnLayout: ReactUseColumnLayoutResult<TRow>;
-    columnLayoutLive?: boolean;
     confirm: ConfirmHandler;
     droppedColumns: readonly string[];
     editingRows: readonly TRow[];
