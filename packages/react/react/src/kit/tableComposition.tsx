@@ -19,8 +19,10 @@ import { TableStatusAnnouncer } from "../a11y/TableStatusAnnouncer";
 import { OptionalSidePanel } from "../adapterFeatures/featureRoot";
 import { DataTableShellView } from "../features/chromeBodyGate";
 import { FeatureHostProvider } from "../features/featureHostContext";
+import { FeatureStateScope } from "../features/featureState";
 import { FeatureSlot } from "../features/providers";
 import { FILTERS_FORM } from "../features/slotKeys";
+import { TABLE_REGION_STATE } from "../features/stateKeys";
 import {
   resolveStickyToolbar,
   useStickyToolbarLayout,
@@ -36,11 +38,10 @@ import { useDataTableShell } from "../useDataTableShell";
 import {
   ANNOUNCERS_AREA,
   BARS_AREA,
-  COLUMN_MENU_REGION,
+  type KitRegionProps,
   MAIN_AREA,
   OVERLAYS_AREA,
   RootRegion,
-  SAVED_VIEWS_REGION,
   SIDE_PANEL_REGION,
   STATUS_BAR_REGION,
 } from "./rootRegion";
@@ -100,7 +101,7 @@ export type KitTableProps<TRow> = DataTableShellProps<TRow> & {
 
 /**
  * What a kit's toolbar receives: the shell's toolbar bundle, the filter
- * container's state, and the two menus the composition mounts in it.
+ * container's state and whether the table loads more as it scrolls.
  *
  * @public
  */
@@ -117,10 +118,6 @@ export interface KitToolbarProps<
   readonly onFiltersTriggerPointerDown: () => void;
   /** Close the filter container. */
   readonly onCloseFilters: () => void;
-  /** The saved-views menu, when the host asked for one. */
-  readonly savedViewsMenu: ReactNode;
-  /** The columns menu, when the host asked for one. */
-  readonly columnMenu: ReactNode;
   /** Whether the table loads its next page as it scrolls, outside a grouped view. */
   readonly loadsMore: boolean;
 }
@@ -280,7 +277,7 @@ function toolbarOf<TRow>(
   props: KitTableProps<TRow>
 ): ReactNode {
   const { chrome } = view;
-  return kit.toolbar<TRow>({
+  const toolbar = kit.toolbar<TRow>({
     ...view.toolbarProps,
     filtersMode: props.filtersMode ?? "popover",
     loadsMore: view.canLoadMore && !chrome.grouping,
@@ -290,14 +287,15 @@ function toolbarOf<TRow>(
     onCloseFilters: () => {
       view.setFiltersOpen(false);
     },
-    savedViewsMenu: props.savedViews ? (
-      <FeatureSlot slot={SAVED_VIEWS_REGION} props={{ view, props }} />
-    ) : null,
-    columnMenu:
-      props.enableColumnMenu && !chrome.isMobile ? (
-        <FeatureSlot slot={COLUMN_MENU_REGION} props={{ view, props }} />
-      ) : null,
   });
+  return (
+    <FeatureStateScope
+      stateKey={TABLE_REGION_STATE}
+      value={{ view, props } as KitRegionProps<unknown>}
+    >
+      {toolbar}
+    </FeatureStateScope>
+  );
 }
 
 /**

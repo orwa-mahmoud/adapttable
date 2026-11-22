@@ -702,6 +702,7 @@ import { treeTableAria } from '@adapttable/core/binding';
 import { TreeToggleButtonProps } from '@adapttable/core/binding';
 import { TreeToggleProps } from '@adapttable/core/binding';
 import { TreeToggleSlots as TreeToggleSlots_2 } from '@adapttable/core/binding';
+import { UndoRedoToolbarProps } from '@adapttable/core/binding';
 import { unpinAllColumns } from '@adapttable/core/binding';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
@@ -3708,14 +3709,12 @@ export interface KitToolbarFrameProps {
 
 // @public
 export interface KitToolbarProps<TRow> extends DataTableShellToolbarProps<TRow> {
-    readonly columnMenu: ReactNode;
     readonly filtersMode: "popover" | "drawer" | "header";
     readonly filtersOpen: boolean;
     readonly loadsMore: boolean;
     readonly onCloseFilters: () => void;
     readonly onFiltersTriggerPointerDown: () => void;
     readonly onToggleFilters: () => void;
-    readonly savedViewsMenu: ReactNode;
 }
 
 // @public
@@ -5098,47 +5097,6 @@ export { toggleCollapsedColumnGroup }
 export const TOOLBAR_EXTRAS: FeatureSlotKey<ToolbarEntrySlotProps>;
 
 // @public
-export interface ToolbarChromeProps<TRow> {
-    activeFilterCount: number;
-    addRowLabel?: string;
-    canRedo?: boolean;
-    canUndo?: boolean;
-    columnMenu?: ReactNode;
-    density: "comfortable" | "compact";
-    dir?: "ltr" | "rtl";
-    exportAnnouncement?: string;
-    exportBusy?: boolean;
-    exportDisabled?: boolean;
-    exportDisabledReason?: string;
-    exportLabel?: string;
-    exportProgressState?: ExportProgressState | null;
-    exportStatus?: ExportStatus;
-    filtersOpen: boolean;
-    hasFilters: boolean;
-    isFullscreen?: boolean;
-    onAddRow?: () => void;
-    onDensityChange: (next: "comfortable" | "compact") => void;
-    onExportCsv?: () => void;
-    onFiltersTriggerPointerDown?: () => void;
-    onPrint?: () => void;
-    onRedo?: () => void;
-    onToggleFilters: () => void;
-    onToggleFullscreen?: () => void;
-    onUndo?: () => void;
-    printLabel?: string;
-    redoLabel?: string;
-    savedViewsMenu?: ReactNode;
-    searchable?: boolean;
-    searchPlaceholder?: string;
-    showRowsPerPage: boolean;
-    sortByOptions?: SortByOption[];
-    table: UseDataTableResult<TRow>;
-    toolbar?: ReactNode;
-    toolbarSlots?: ToolbarSlots;
-    undoLabel?: string;
-}
-
-// @public
 export interface ToolbarEntrySlotProps {
     readonly classNames?: Readonly<Record<string, string | undefined>>;
     readonly labels: Required<TableLabels>;
@@ -5198,7 +5156,7 @@ export { TreeToggleProps }
 export type TreeToggleSlots = TreeToggleSlots_2<ReactNode>;
 
 // @public
-export function undoRedoToolbar<TRow>(wanted: boolean | undefined, history: EditHistoryState<TRow>, labels: TableLabels): Partial<ToolbarChromeProps<TRow>>;
+export function undoRedoToolbar<TRow>(wanted: boolean | undefined, history: EditHistoryState<TRow>, labels: TableLabels): UndoRedoToolbarProps;
 
 export { unpinAllColumns }
 

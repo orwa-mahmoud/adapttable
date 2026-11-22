@@ -214,6 +214,14 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
     "A React toolbar control receives ToolbarEntrySlotProps (labels, class map) and reads its feature's state with useFeatureState: EDIT_HISTORY_STATE, EXPORT_STATE, FULLSCREEN_STATE, TABLE_PROPS_STATE. A Vue undo/redo control receives UndoRedoControlProps, and a Vue feature adds its toolbar control with toolbarEntry.",
   ],
   [
+    /\bToolbarChromeProps\b/g,
+    "ToolbarChromeProps was removed: undoRedoToolbar returns UndoRedoToolbarProps, and the binding draws every kit's toolbar.",
+  ],
+  [
+    /\bsavedViewsMenu\b|\.columnMenu\b(?!\s*\()/g,
+    "A kit toolbar no longer receives savedViewsMenu or columnMenu: the saved-views and column-menu features add toolbar entries, drawn in TOOLBAR_EXTRAS right after Filters.",
+  ],
+  [
     /\b(?:toolbarExtrasProps|hasActionToolbar)\b/g,
     "The Vue shell's toolbarExtrasProps and hasActionToolbar were removed; each feature draws its own toolbar entry (toolbarEntry), and the toolbar shows when an entry draws.",
   ],

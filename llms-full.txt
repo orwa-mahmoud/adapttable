@@ -16387,9 +16387,10 @@ covered in [exporting](./exporting.md).
   `labels.enterFullscreen` / `labels.exitFullscreen`. Selection figures render
   in a status region, read after the range announcement. All captions are
   [labels](./i18n-rtl.md#custom-labels).
-- **Headless.** Adapters render the toolbar through `ToolbarChromeProps`, the
-  strip through `StatusBarChrome`, and the panel through `SidePanelChrome`, all
-  from `@adapttable/react/adapter`. See [customization](./customization.md#toolbar-and-status-bar).
+- **Headless.** Every kit's toolbar is drawn by the binding from the kit's
+  controls, and each feature adds its own toolbar entry; the strip renders
+  through `StatusBarChrome` and the panel through `SidePanelChrome`, all from
+  `@adapttable/react/adapter`. See [customization](./customization.md#toolbar-and-status-bar).
 
 ---
 
@@ -19915,8 +19916,7 @@ menu (header string → `mobileLabel` → key). `runRowAction` runs a row action
 through the confirmation handler. `visibleRowActions` drops `isHidden` entries
 from a resolved list. `LayoutStorage` is the slice of the `Storage`
 API the column-layout hook needs, injectable for tests. `SavedViewsMenu` /
-`SavedViewsLabels` are the adapters' saved-views control and its strings, and
-`ToolbarChromeProps` is the toolbar's kit-agnostic prop surface. The CLI
+`SavedViewsLabels` are the adapters' saved-views control and its strings. The CLI
 exports `Kit`, the union of UI kits `@adapttable/cli init` can detect.
 
 **Locale exports.** `@adapttable/i18n/locales/<tag>` exports one label set,
@@ -24256,6 +24256,8 @@ of 380 kB.
 | React `ToolbarExtrasSlotProps` and the toolbar props `onUndo`, `onRedo`, `canUndo`, `canRedo`, `undoLabel`, `redoLabel`, `onPrint`, `printLabel`, `density`, `onDensityChange`, `onToggleFullscreen`, `isFullscreen` and the export fields                                                                                                | `ToolbarEntrySlotProps` (labels, class map); a control reads its feature's state with `useFeatureState`: `EDIT_HISTORY_STATE`, `EXPORT_STATE`, `FULLSCREEN_STATE`, `TABLE_PROPS_STATE` |
 | Vue `ToolbarExtrasSlotProps`                                                                                                                                                                                                                                                                                                              | `UndoRedoControlProps` for `UNDO_REDO_CONTROL`; a feature adds its toolbar control with `toolbarEntry`, which receives `ToolbarEntryProps`                                             |
 | The Vue shell's `toolbarExtrasProps` and `hasActionToolbar`                                                                                                                                                                                                                                                                               | Each feature draws its own toolbar entry; the toolbar shows when an entry draws                                                                                                        |
+| `ToolbarChromeProps`                                                                                                                                                                                                                                                                                                                      | `undoRedoToolbar` returns `UndoRedoToolbarProps`; the binding draws every kit's toolbar                                                                                                |
+| React `KitToolbarProps.savedViewsMenu` and `columnMenu`                                                                                                                                                                                                                                                                                   | The saved-views and column-menu features add toolbar entries, drawn in `TOOLBAR_EXTRAS` right after Filters                                                                            |
 | `OptionalTreeCell`, `OptionalTreeToggle`, `OptionalFillHandle`, `OptionalExpandToggle`, `OptionalFilterHeader`, `OptionalRowEditActions`, `OptionalRowReorderHandle`, `OptionalRowReorderButtons`, `OptionalColumnGroupToggle`, `OptionalColumnHeaderRename`, `OptionalColumnSelect`, `OptionalGroupHeaderRow`, `OptionalGroupHeaderCard` | `<FeatureSlot slot={…} props={…} fallback={…} />` with the slot's key                                                                                                                  |
 | `defaultPendingRows`                                                                                                                                                                                                                                                                                                                      | `labels.pendingRows`                                                                                                                                                                   |
 | `createEditConflictStore`                                                                                                                                                                                                                                                                                                                 | `createDeferredEditConflictStore` and `loadEditConflictStore`                                                                                                                          |

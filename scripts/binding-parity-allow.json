@@ -771,7 +771,6 @@
         "TableStatusAnnouncementOptions": "pending: shared-surface decision",
         "TableStatusAnnouncer": "pending: shared-surface decision",
         "TableStatusAnnouncerProps": "pending: shared-surface decision",
-        "ToolbarChromeProps": "pending: shared-surface decision",
         "ToolbarSlots": "pending: shared-surface decision",
         "TreeCellChrome": "pending: shared-surface decision",
         "TreeCellChromeProps": "pending: shared-surface decision",

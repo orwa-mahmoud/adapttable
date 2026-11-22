@@ -1,18 +1,15 @@
 /**
- * The toolbar controls' regions: each feature builds its control's props from
- * the finished view and the table's props, so the composition passes the
- * position and nothing about the control.
+ * The saved-views and column-menu toolbar entries: each feature builds its
+ * control's props from the finished view and the table's props, which the
+ * composition publishes, so the toolbar names neither control.
  */
 import type { ReactNode } from "react";
 
-import {
-  COLUMN_MENU_REGION,
-  type KitRegionDraw,
-  type KitRegionProps,
-  SAVED_VIEWS_REGION,
-} from "../kit/rootRegion";
+import type { KitRegionProps } from "../kit/rootRegion";
+import { useFeatureState } from "./featureState";
 import { FeatureSlot, slotRender } from "./providers";
-import { COLUMN_MENU, SAVED_VIEWS } from "./slotKeys";
+import { COLUMN_MENU, SAVED_VIEWS, TOOLBAR_EXTRAS } from "./slotKeys";
+import { TABLE_REGION_STATE } from "./stateKeys";
 
 /** The saved-views menu, on the table's own URL backend and namespace. */
 function SavedViewsRegion<TRow>({
@@ -73,14 +70,28 @@ function ColumnMenuRegion<TRow>({
   );
 }
 
-/** The region render the saved-views feature brings. */
-export const SAVED_VIEWS_REGION_RENDER = slotRender<KitRegionDraw>(
-  SAVED_VIEWS_REGION,
-  (props) => <SavedViewsRegion {...props} />
-);
+/** The saved-views menu's toolbar entry. */
+function SavedViewsEntry(): ReactNode {
+  "use no memo";
+  const region = useFeatureState(TABLE_REGION_STATE);
+  return region ? <SavedViewsRegion {...region} /> : null;
+}
 
-/** The region render the column-menu feature brings. */
-export const COLUMN_MENU_REGION_RENDER = slotRender<KitRegionDraw>(
-  COLUMN_MENU_REGION,
-  (props) => <ColumnMenuRegion {...props} />
-);
+/** The column menu's toolbar entry; the menu is a desktop control. */
+function ColumnMenuEntry(): ReactNode {
+  "use no memo";
+  const region = useFeatureState(TABLE_REGION_STATE);
+  return region && !region.view.chrome.isMobile ? (
+    <ColumnMenuRegion {...region} />
+  ) : null;
+}
+
+/** The toolbar entry the saved-views feature brings. */
+export const SAVED_VIEWS_ENTRY = slotRender(TOOLBAR_EXTRAS, () => (
+  <SavedViewsEntry />
+));
+
+/** The toolbar entry the column-menu feature brings. */
+export const COLUMN_MENU_ENTRY = slotRender(TOOLBAR_EXTRAS, () => (
+  <ColumnMenuEntry />
+));

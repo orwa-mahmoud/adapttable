@@ -176,6 +176,18 @@ describe("migrateV4Source", () => {
     expect(result.issues[0]?.message).toContain("toolbarEntry");
   });
 
+  it("reports the React toolbar's removed menu props and chrome type", () => {
+    const result = migrateV4Source(
+      [
+        "type Props = ToolbarChromeProps<Row>;",
+        "<>{props.savedViewsMenu}{props.columnMenu}</>;",
+        "const features = [columnMenu()];",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 2]);
+  });
+
   it("leaves a file that uses nothing v4 moved untouched", () => {
     const source = 'import { DataTable } from "@adapttable/mui";\n';
     expect(migrateV4Source(source)).toEqual({

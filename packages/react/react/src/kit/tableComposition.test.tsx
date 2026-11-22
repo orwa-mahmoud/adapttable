@@ -11,8 +11,16 @@ import { describe, expect, it, vi } from "vitest";
 import type { ColumnDef } from "../columnDef";
 import { columnMenu, contextMenu } from "../features/factories";
 import { useTableFeatures } from "../features/featureHost";
-import { FeatureProviders, slotRender } from "../features/providers";
-import { COLUMN_MENU, CONTEXT_MENU_LIVE } from "../features/slotKeys";
+import {
+  FeatureProviders,
+  FeatureSlot,
+  slotRender,
+} from "../features/providers";
+import {
+  COLUMN_MENU,
+  CONTEXT_MENU_LIVE,
+  TOOLBAR_EXTRAS,
+} from "../features/slotKeys";
 import type { TableFeature } from "../features/tableFeature";
 import { useFrontendData } from "../source/useFrontendData";
 import { createMemoryAdapter } from "../url/adapter";
@@ -97,8 +105,10 @@ const kit: KitTable = {
       data-filters-mode={props.filtersMode}
       data-filters-open={String(props.filtersOpen)}
     >
-      {props.savedViewsMenu}
-      {props.columnMenu}
+      <FeatureSlot
+        slot={TOOLBAR_EXTRAS}
+        props={{ labels: props.table.labels }}
+      />
       <button type="button" onClick={props.onCloseFilters}>
         Close filters
       </button>

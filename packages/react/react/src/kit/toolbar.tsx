@@ -3,8 +3,8 @@
  *
  * The binding owns what the toolbar holds and in which order: the host's
  * start slot, search, the mobile sort controls, the host's toolbar content,
- * the filters button and its popover, the saved-views and columns menus, the
- * extras the composed features add, add-row, the host's end slot and the
+ * the filters button and its popover, the entries the composed features add
+ * (saved views and columns first), add-row, the host's end slot and the
  * rows-per-page choice. A kit hands over each control and a frame that lays
  * the search and the controls out.
  */
@@ -233,8 +233,6 @@ export function createToolbar(
             )}
             {props.toolbar}
             {filters}
-            {props.savedViewsMenu}
-            {props.columnMenu}
             <FeatureSlot slot={TOOLBAR_EXTRAS} props={{ labels }} />
             {props.onAddRow && (
               <Button

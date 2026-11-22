@@ -141,7 +141,6 @@ export type { PrintToolbar } from "./chrome/toolbarChrome";
 export {
   type FilterTriggerToggle,
   printToolbar,
-  type ToolbarChromeProps,
   undoRedoToolbar,
   type ViewControlsToolbar,
   viewControlsToolbar,

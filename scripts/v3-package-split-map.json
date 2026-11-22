@@ -49750,7 +49750,7 @@
       "export": "KitToolbarProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -51719,14 +51719,6 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "ToolbarChromeProps",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },

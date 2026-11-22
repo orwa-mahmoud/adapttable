@@ -6198,7 +6198,6 @@
       "TableStatusAnnouncer",
       "TableStatusAnnouncerProps",
       "TOOLBAR_EXTRAS",
-      "ToolbarChromeProps",
       "ToolbarSlots",
       "toReactColumnResizeHandleProps",
       "TREE_CELL",

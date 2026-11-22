@@ -2681,8 +2681,7 @@ menu (header string → `mobileLabel` → key). `runRowAction` runs a row action
 through the confirmation handler. `visibleRowActions` drops `isHidden` entries
 from a resolved list. `LayoutStorage` is the slice of the `Storage`
 API the column-layout hook needs, injectable for tests. `SavedViewsMenu` /
-`SavedViewsLabels` are the adapters' saved-views control and its strings, and
-`ToolbarChromeProps` is the toolbar's kit-agnostic prop surface. The CLI
+`SavedViewsLabels` are the adapters' saved-views control and its strings. The CLI
 exports `Kit`, the union of UI kits `@adapttable/cli init` can detect.
 
 **Locale exports.** `@adapttable/i18n/locales/<tag>` exports one label set,

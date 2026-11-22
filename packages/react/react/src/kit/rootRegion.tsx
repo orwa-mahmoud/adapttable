@@ -57,26 +57,6 @@ export interface KitRegionProps<TRow> {
 export type KitRegionDraw = <TRow>(props: KitRegionProps<TRow>) => ReactNode;
 
 /**
- * The toolbar's saved-views position, filled by the saved-views feature.
- *
- * @public
- */
-export const SAVED_VIEWS_REGION = rowSlotKey<KitRegionDraw>(
-  "saved-views-region",
-  { single: true }
-);
-
-/**
- * The toolbar's column-menu position, filled by the column-menu feature.
- *
- * @public
- */
-export const COLUMN_MENU_REGION = rowSlotKey<KitRegionDraw>(
-  "column-menu-region",
-  { single: true }
-);
-
-/**
  * The bars under the toolbar. Every composed feature that draws a bar fills
  * it; the bars stack in feature order.
  *
