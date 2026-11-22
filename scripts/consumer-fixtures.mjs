@@ -246,6 +246,7 @@ const CORE_FIXTURES = [
     name: "core · base navigation",
     kind: "core",
     pkg: "core",
+    entryFile: "binding.js",
     // 7.40 KiB gzip on 2026-11-06. Held at 9 KiB. Range, clipboard, fill
     // and history stay out of this graph.
     initialKB: 9,
