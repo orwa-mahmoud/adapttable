@@ -8050,6 +8050,7 @@ export interface PatchFeature<TRow = unknown> extends FeatureRegistration<TRow> 
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
     readonly contrast?: ContrastRules;
     readonly labels?: Partial<TableLabels>;
+    readonly rank?: number;
 }
 
 // @public
@@ -10507,6 +10508,7 @@ export interface SlotFill<TNode = unknown> {
 // @public
 export function slotFillsOf<TNode>(features: readonly {
     readonly id: string;
+    readonly rank?: number;
     readonly renders?: readonly FeatureRender<never, TNode>[];
 }[]): ReadonlyMap<string, readonly SlotFill<TNode>[]>;
 
@@ -12201,20 +12203,23 @@ export interface TreeToggleSlots<TNode = unknown> {
 }
 
 // @public
+export interface UndoRedoToolbarProps {
+    canRedo?: boolean;
+    canUndo?: boolean;
+    onRedo?: () => void;
+    onUndo?: () => void;
+    redoLabel?: string;
+    undoLabel?: string;
+}
+
+// @public
 export function undoRedoToolbarProps(wanted: boolean | undefined, history: {
     readonly enabled: boolean;
     readonly canUndo: boolean;
     readonly canRedo: boolean;
     readonly undo: () => unknown;
     readonly redo: () => unknown;
-}, labels: Pick<TableLabels, "undoEdit" | "redoEdit">): {
-    onUndo?: () => void;
-    onRedo?: () => void;
-    canUndo?: boolean;
-    canRedo?: boolean;
-    undoLabel?: string;
-    redoLabel?: string;
-};
+}, labels: Pick<TableLabels, "undoEdit" | "redoEdit">): UndoRedoToolbarProps;
 
 // @public
 export function unpinAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;

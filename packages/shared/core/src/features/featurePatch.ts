@@ -66,6 +66,11 @@ export interface PatchFeature<
   readonly labels?: Partial<TableLabels>;
   /** The high-contrast rules for what the feature draws. */
   readonly contrast?: ContrastRules;
+  /**
+   * Where this feature's fills sit in a slot several features fill, such as
+   * the toolbar: lower ranks first, then feature-id order. Left out, 0.
+   */
+  readonly rank?: number;
 }
 
 interface LabelListNode {

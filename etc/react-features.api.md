@@ -742,6 +742,7 @@ export interface StaticTableFeature {
     readonly contrast?: ContrastRules;
     readonly id: string;
     readonly provider?: FeatureProviderContribution;
+    readonly rank?: number;
     readonly renders?: readonly FeatureRender<never>[];
     setup?(host: StaticFeatureHost): void | (() => void);
 }

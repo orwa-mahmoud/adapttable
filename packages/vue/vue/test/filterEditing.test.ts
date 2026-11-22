@@ -8,7 +8,6 @@ import {
   ACTIVE_FILTER_CHIPS,
   loadEditConflictStore,
   slotRender,
-  TOOLBAR_EXTRAS,
 } from "@adapttable/core/binding";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import {
@@ -31,6 +30,7 @@ import {
   useTableEditing,
 } from "../src/editing";
 import { extendFeature, type TableFeature } from "../src/features/tableFeature";
+import { FILTERS_PANEL } from "../src/features/toolbarEntries";
 import {
   FilterFieldChrome,
   filters,
@@ -68,7 +68,7 @@ function deferred<T>() {
 }
 function controls<TRow>(feature: TableFeature<TRow>): TableFeature<TRow> {
   return extendFeature(feature, [
-    slotRender(TOOLBAR_EXTRAS, () => null),
+    slotRender(FILTERS_PANEL, () => null),
     slotRender(ACTIVE_FILTER_CHIPS, () => null),
     slotRender(editableCellSlotKey<TRow>(), () => null),
   ]);

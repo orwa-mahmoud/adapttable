@@ -127,6 +127,8 @@ export interface StaticTableFeature {
   apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
   /** The high-contrast rules for what it draws. */
   readonly contrast?: ContrastRules;
+  /** Where its fills sit in a slot several features fill; lower first. */
+  readonly rank?: number;
   /** Register against the live table, minus the row-shaped seams. */
   setup?(host: StaticFeatureHost): void | (() => void);
   /** The React component this feature needs, as {@link TableFeature.provider}. */

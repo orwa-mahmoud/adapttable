@@ -13,7 +13,7 @@ import {
   type ExportHandlerState,
   featureSlotKey,
   featureStateKey,
-  type ToolbarExtrasSlotProps,
+  type UndoRedoToolbarProps,
 } from "@adapttable/core/binding";
 import type { MaybeRefOrGetter, VNodeChild } from "vue";
 
@@ -110,6 +110,17 @@ export const PRINT_CONTROL = featureSlotKey<
   ActionPresentation & { readonly onPrint: () => void }
 >("vue-print-control");
 
-export const UNDO_REDO_CONTROL = featureSlotKey<ToolbarExtrasSlotProps>(
+/**
+ * What the undo and redo buttons draw from.
+ *
+ * @public
+ */
+export interface UndoRedoControlProps extends UndoRedoToolbarProps {
+  /** The table's resolved labels. */
+  readonly labels: Required<TableLabels>;
+  /** The table's class map. */
+  readonly classNames?: Readonly<Record<string, string | undefined>>;
+}
+export const UNDO_REDO_CONTROL = featureSlotKey<UndoRedoControlProps>(
   "vue-undo-redo-control"
 );

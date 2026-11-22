@@ -15,7 +15,7 @@ import { VNode } from 'vue';
 export const ColumnMenu: (<TRow>(props: ColumnMenuSlotProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
 }>) & {
-    props: ("labels" | "classNames" | "dir" | "allColumns" | "layout" | "hasRowActions" | "hasRowReorder" | "onAutoSize" | "onAutoSizeColumn" | "onSortColumn" | "onFilterColumn" | "onRenameColumn" | "sortBy" | "sortDir" | "groupingPanel" | "featureHost" | "container")[];
+    props: ("labels" | "dir" | "classNames" | "allColumns" | "layout" | "hasRowActions" | "hasRowReorder" | "onAutoSize" | "onAutoSizeColumn" | "onSortColumn" | "onFilterColumn" | "onRenameColumn" | "sortBy" | "sortDir" | "groupingPanel" | "featureHost" | "container")[];
 };
 
 // @public (undocumented)

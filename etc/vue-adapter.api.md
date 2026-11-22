@@ -324,10 +324,9 @@ import { TableSource } from '@adapttable/core';
 import { TableStore } from '@adapttable/core/binding';
 import { TableViewStateConfig } from '@adapttable/core';
 import { toggleCollapsedColumnGroup } from '@adapttable/core/binding';
-import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
-import { ToolbarExtrasSlotProps } from '@adapttable/core/binding';
 import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
+import { UndoRedoToolbarProps } from '@adapttable/core/binding';
 import { unpinAllColumns } from '@adapttable/core/binding';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
@@ -2052,6 +2051,12 @@ export interface FeatureMountContext<TRow = unknown> {
 // @public
 export function featureOptionsOf<TRow>(features: readonly ComposedFeature<TRow>[]): Readonly<Record<string, unknown>>;
 
+// @public
+export interface FeatureSlotDrawer {
+    <TProps>(slot: PlainSlotKey<TProps>, props: TProps): VNodeChild[];
+    <TProps>(slot: RowSlotKey<(props: NoInfer<TProps>) => VNodeChild>, props: TProps): VNodeChild[];
+}
+
 // @public (undocumented)
 export function featureSlotFillsOf<TRow>(features: readonly ComposedFeature<TRow>[]): ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>;
 
@@ -2459,6 +2464,9 @@ export interface FilterPanelSurfaceProps {
     readonly open: boolean;
 }
 
+// @public
+export const FILTERS_PANEL: FeatureSlotKey<Readonly<Record<string, never>>>;
+
 // @public (undocumented)
 export interface FilterSelectProps {
     // (undocumented)
@@ -2813,7 +2821,7 @@ export { hideAllColumns }
 export function HistoryButtonsChrome(props: HistoryButtonsChromeProps): VNodeChild;
 
 // @public (undocumented)
-export interface HistoryButtonsChromeProps extends ToolbarExtrasSlotProps {
+export interface HistoryButtonsChromeProps extends UndoRedoControlProps {
     // (undocumented)
     readonly slots: ActionButtonSlots;
 }
@@ -3537,6 +3545,7 @@ export interface StaticTableFeature {
     readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: <TRow>(context: FeatureMountContext<TRow>) => void | (() => void);
+    readonly rank?: number;
     // (undocumented)
     readonly renders?: readonly FeatureRender<never, VNodeChild>[];
     // (undocumented)
@@ -3968,6 +3977,7 @@ export interface TableFeature<TRow> {
     readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
+    readonly rank?: number;
     // (undocumented)
     readonly renders?: readonly FeatureRender<never, VNodeChild>[];
     // (undocumented)
@@ -4180,9 +4190,20 @@ export const textFieldPart: FilterFieldPart;
 
 export { toggleCollapsedColumnGroup }
 
-export { TOOLBAR_EXTRAS }
+// @public
+export const TOOLBAR_EXTRAS: FeatureSlotKey<ToolbarEntryProps>;
 
-export { ToolbarExtrasSlotProps }
+// @public
+export function toolbarEntry(render: (props: ToolbarEntryProps) => VNodeChild): FeatureRender<ToolbarEntryProps, VNodeChild>;
+
+// @public
+export interface ToolbarEntryProps {
+    readonly density: TableDensity;
+    readonly draw: FeatureSlotDrawer;
+    readonly onDensityChange: (next: TableDensity) => void;
+    readonly presentation: ActionPresentation;
+    read<T>(key: FeatureStateKey<T>): T | undefined;
+}
 
 // @public
 export function toVueAttrs(attrs: Attrs, options?: {
@@ -4206,7 +4227,13 @@ export interface TreeCellModel<TRow> {
 export function treeModelKey<TRow>(): FeatureStateKey<TableTree<TRow>>;
 
 // @public (undocumented)
-export const UNDO_REDO_CONTROL: FeatureSlotKey<ToolbarExtrasSlotProps>;
+export const UNDO_REDO_CONTROL: FeatureSlotKey<UndoRedoControlProps>;
+
+// @public
+export interface UndoRedoControlProps extends UndoRedoToolbarProps {
+    readonly classNames?: Readonly<Record<string, string | undefined>>;
+    readonly labels: Required<TableLabels>;
+}
 
 export { unpinAllColumns }
 
@@ -4558,7 +4585,6 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     savedViews: Readonly<ShallowRef<UseSavedViewsResult | undefined>>;
     urlAdapter: ComputedRef<UrlStateAdapter>;
     flushViewState: () => void;
-    toolbarExtrasProps: ComputedRef<ToolbarExtrasSlotProps>;
     renderToolbarExtras: (classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[];
     renderActiveFilterChips: () => VNodeChild[];
     renderBatchEditBar: () => VNodeChild[];
@@ -4570,7 +4596,6 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     find: Readonly<ShallowRef<FindInTableState | undefined>>;
     selectionStats: Readonly<ShallowRef<SelectionStats | null | undefined>>;
     bodyRows: ComputedRef<TableRowModel<TRow>[]>;
-    hasActionToolbar: ComputedRef<boolean>;
     renderBulkActions: (classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[];
     renderActionOverlays: (classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[];
     renderSidePanel: (classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[];

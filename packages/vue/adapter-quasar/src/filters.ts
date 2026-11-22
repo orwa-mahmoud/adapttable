@@ -3,9 +3,9 @@ import {
   ACTIVE_FILTER_CHIPS,
   type AdapterFiltersFeature,
   extendFeature,
+  FILTERS_PANEL,
   type FilterWidget,
   slotRender,
-  TOOLBAR_EXTRAS,
 } from "@adapttable/vue/adapter";
 import {
   filters as bindingFilters,
@@ -33,7 +33,7 @@ export function filtersWith(
     options: FiltersOptions = {}
   ): TableFeature<TRow> =>
     extendFeature(bindingFilters(defs, options), [
-      slotRender(TOOLBAR_EXTRAS, () => h(QuasarFiltersPanel, { widgets })),
+      slotRender(FILTERS_PANEL, () => h(QuasarFiltersPanel, { widgets })),
       slotRender(ACTIVE_FILTER_CHIPS, (props) =>
         h(QuasarFilterChips, { ...props })
       ),

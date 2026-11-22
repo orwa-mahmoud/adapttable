@@ -510,6 +510,7 @@ export interface StaticTableFeature {
     readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: <TRow>(context: FeatureMountContext<TRow>) => void | (() => void);
+    readonly rank?: number;
     // (undocumented)
     readonly renders?: readonly FeatureRender<never, VNodeChild>[];
     // (undocumented)
@@ -638,6 +639,7 @@ export interface TableFeature<TRow> {
     readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
+    readonly rank?: number;
     // (undocumented)
     readonly renders?: readonly FeatureRender<never, VNodeChild>[];
     // (undocumented)

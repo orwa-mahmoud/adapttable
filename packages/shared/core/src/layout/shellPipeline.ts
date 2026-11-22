@@ -628,6 +628,26 @@ export function viewControlsToolbarProps<TDensity>(
 }
 
 /**
+ * What undo and redo buttons draw from.
+ *
+ * @public
+ */
+export interface UndoRedoToolbarProps {
+  /** Undo the last edit. */
+  onUndo?: () => void;
+  /** Redo the last undone edit. */
+  onRedo?: () => void;
+  /** Whether undo is available. */
+  canUndo?: boolean;
+  /** Whether redo is available. */
+  canRedo?: boolean;
+  /** Accessible undo label. */
+  undoLabel?: string;
+  /** Accessible redo label. */
+  redoLabel?: string;
+}
+
+/**
  * The undo / redo half of a toolbar's props, or nothing: the host asked for
  * the buttons AND a history is armed for them to drive.
  *
@@ -643,14 +663,7 @@ export function undoRedoToolbarProps(
     readonly redo: () => unknown;
   },
   labels: Pick<TableLabels, "undoEdit" | "redoEdit">
-): {
-  onUndo?: () => void;
-  onRedo?: () => void;
-  canUndo?: boolean;
-  canRedo?: boolean;
-  undoLabel?: string;
-  redoLabel?: string;
-} {
+): UndoRedoToolbarProps {
   if (wanted !== true || !history.enabled) return {};
   return {
     onUndo: history.undo,

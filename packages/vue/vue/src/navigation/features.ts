@@ -16,10 +16,12 @@ import { beginCellEdit } from "@adapttable/core/editing";
 import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { computed, toValue, watch } from "vue";
 
+import { toolbarEntry } from "../features/toolbarEntries";
 import { editHistoryModelKey, editingModelKey } from "../layout/modelChannels";
 import {
   type CellNavigationOptions,
   FILL_HANDLE_CONTROL,
+  FIND_BUTTON,
   FIND_MODEL,
   GRID_ANNOUNCER,
   GRID_FOCUS_MODEL,
@@ -151,6 +153,18 @@ export function findInTable(): StaticTableFeature {
   return {
     ...coreFindInTable(),
     mount: useFindMount,
+    renders: [
+      toolbarEntry((entry) => {
+        const openBar = entry.read(FIND_MODEL)?.openBar;
+        return openBar
+          ? entry.draw(FIND_BUTTON, {
+              label: entry.presentation.labels.findInTable,
+              onClick: openBar,
+              className: entry.presentation.classNames?.findButton,
+            })
+          : null;
+      }),
+    ],
     requiredSlots: [FIND_BAR],
   };
 }

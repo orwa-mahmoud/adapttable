@@ -1652,7 +1652,6 @@
         "TableSummaryClassNames": "pending: shared-surface decision",
         "TableSummaryModel": "pending: shared-surface decision",
         "TableTree": "pending: shared-surface decision",
-        "ToolbarExtrasSlotProps": "pending: shared-surface decision",
         "TreeCellModel": "pending: shared-surface decision",
         "UNDO_REDO_CONTROL": "pending: shared-surface decision",
         "UseDataTableOptions": "pending: shared-surface decision",
@@ -1817,7 +1816,12 @@
         "useSummaryCells": "pending: shared-surface decision",
         "useTableSummaryModel": "pending: shared-surface decision",
         "withKitEnvironment": "pending: shared-surface decision",
-        "withProps": "pending: shared-surface decision"
+        "withProps": "pending: shared-surface decision",
+        "FeatureSlotDrawer": "Vue features add their toolbar entries and draw each kit control through these; React kits fill the toolbar slot with the binding's button factories, and Angular kits with their own components",
+        "FILTERS_PANEL": "Vue features add their toolbar entries and draw each kit control through these; React kits fill the toolbar slot with the binding's button factories, and Angular kits with their own components",
+        "toolbarEntry": "Vue features add their toolbar entries and draw each kit control through these; React kits fill the toolbar slot with the binding's button factories, and Angular kits with their own components",
+        "ToolbarEntryProps": "Vue features add their toolbar entries and draw each kit control through these; React kits fill the toolbar slot with the binding's button factories, and Angular kits with their own components",
+        "UndoRedoControlProps": "Vue features add their toolbar entries and draw each kit control through these; React kits fill the toolbar slot with the binding's button factories, and Angular kits with their own components"
       },
       "features": {
         "Attrs": "pending: shared-surface decision",

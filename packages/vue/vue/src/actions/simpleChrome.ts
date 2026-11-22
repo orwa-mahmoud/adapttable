@@ -1,10 +1,10 @@
-import type { ToolbarExtrasSlotProps } from "@adapttable/core/binding";
 import { h, type VNodeChild } from "vue";
 
 import type {
   ActionButton,
   ActionPresentation,
   BulkActionsModel,
+  UndoRedoControlProps,
 } from "./contracts";
 export interface ActionButtonSlots {
   readonly Button: (props: ActionButton) => VNodeChild;
@@ -151,7 +151,7 @@ export function PrintChrome(props: PrintChromeProps): VNodeChild {
   });
 }
 
-export interface HistoryButtonsChromeProps extends ToolbarExtrasSlotProps {
+export interface HistoryButtonsChromeProps extends UndoRedoControlProps {
   readonly slots: ActionButtonSlots;
 }
 export function HistoryButtonsChrome(

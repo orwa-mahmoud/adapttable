@@ -17,8 +17,6 @@ const toolbar = (
   slots: ActionButtonSlots,
   extra: Partial<HistoryButtonsChromeProps> = {}
 ): HistoryButtonsChromeProps => ({
-  density: "comfortable",
-  onDensityChange: vi.fn(),
   labels,
   slots,
   ...extra,

@@ -69,6 +69,8 @@ export interface TableFeature<TRow> {
   readonly labels?: Partial<TableLabels>;
   /** The high-contrast rules for what the feature draws. */
   readonly contrast?: ContrastRules;
+  /** Where its fills sit in a slot several features fill; lower first. */
+  readonly rank?: number;
   readonly setup?: (host: TableFeatureHost<TRow>) => void | (() => void);
   readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
   readonly renders?: readonly FeatureRender<never, VNodeChild>[];
@@ -91,6 +93,8 @@ export interface StaticTableFeature {
   readonly labels?: Partial<TableLabels>;
   /** The high-contrast rules for what the feature draws. */
   readonly contrast?: ContrastRules;
+  /** Where its fills sit in a slot several features fill; lower first. */
+  readonly rank?: number;
   readonly setup?: (host: StaticFeatureHost) => void | (() => void);
   readonly mount?: <TRow>(
     context: FeatureMountContext<TRow>
@@ -156,9 +160,54 @@ export function renderFeatureSlot(
   fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>,
   props: unknown
 ): VNodeChild[] {
-  return drawnSlotFills(slot, fills.get(slot.id) ?? []).map((fill) =>
+  return drawFills(slot, fills.get(slot.id) ?? [], props);
+}
+function drawFills(
+  slot: FeatureSlotKey<never>,
+  fills: readonly SlotFill<VNodeChild>[],
+  props: unknown
+): VNodeChild[] {
+  return drawnSlotFills(slot, fills).map((fill) =>
     (fill.render as (props: unknown) => VNodeChild)(props)
   );
+}
+/**
+ * Draws one feature's fills of a slot with the props given.
+ *
+ * @public
+ */
+export interface FeatureSlotDrawer {
+  /** Draw the feature's fills of a slot with these props. */
+  <TProps>(slot: PlainSlotKey<TProps>, props: TProps): VNodeChild[];
+  /** Draw the feature's fills of a row-typed slot with these props. */
+  <TProps>(
+    slot: RowSlotKey<(props: NoInfer<TProps>) => VNodeChild>,
+    props: TProps
+  ): VNodeChild[];
+}
+/**
+ * A drawer for the fills one feature added: a feature's toolbar entry draws
+ * its own kit control, never another feature's fill of the same slot.
+ */
+export function featureSlotDrawer(
+  fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>,
+  featureId: string
+): FeatureSlotDrawer {
+  function draw<TProps>(
+    slot: PlainSlotKey<TProps>,
+    props: TProps
+  ): VNodeChild[];
+  function draw<TProps>(
+    slot: RowSlotKey<(props: NoInfer<TProps>) => VNodeChild>,
+    props: TProps
+  ): VNodeChild[];
+  function draw(slot: FeatureSlotKey<never>, props: unknown): VNodeChild[] {
+    const own = (fills.get(slot.id) ?? []).filter(
+      (fill) => fill.id === featureId
+    );
+    return drawFills(slot, own, props);
+  }
+  return draw;
 }
 export function assertRequiredSlots<TRow>(
   features: readonly ComposedFeature<TRow>[],

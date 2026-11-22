@@ -27291,6 +27291,14 @@
       "behavior": ""
     },
     {
+      "export": "UndoRedoToolbarProps",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "unpinAllColumns",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",

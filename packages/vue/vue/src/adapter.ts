@@ -25,6 +25,7 @@ export type {
   CommandPaletteModel,
   ContextMenuModel,
   SidePanelControlModel,
+  UndoRedoControlProps,
 } from "./actions/contracts";
 export {
   BULK_ACTIONS_CONTROL,
@@ -179,6 +180,12 @@ export {
   normalizeFeatures,
   renderFeatureSlot,
 } from "./features/tableFeature";
+export type { ToolbarEntryProps } from "./features/toolbarEntries";
+export {
+  FILTERS_PANEL,
+  TOOLBAR_EXTRAS,
+  toolbarEntry,
+} from "./features/toolbarEntries";
 export type { OwnedFeatureState, TableFeatureState } from "./featureState";
 export {
   createFeatureState,
@@ -523,7 +530,6 @@ export type {
   TableAssistantComposerProps,
   TableAssistantLanguageChipProps,
   TableAssistantView,
-  ToolbarExtrasSlotProps,
 } from "@adapttable/core/binding";
 export {
   ACTIVE_FILTER_CHIPS,
@@ -603,7 +609,6 @@ export {
   standardFeatureList,
   STATUS_BAR,
   toggleCollapsedColumnGroup,
-  TOOLBAR_EXTRAS,
   unpinAllColumns,
 } from "@adapttable/core/binding";
 export { BASE_LABELS, resolveCellSpan } from "@adapttable/core/binding";
@@ -640,6 +645,7 @@ export type { DirtyEdits, TableEditingOptions } from "./editing/editingModels";
 export type {
   ComposedFeature,
   FeatureMountContext,
+  FeatureSlotDrawer,
   StaticFeatureHost,
   StaticTableFeature,
   TableFeature,

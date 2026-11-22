@@ -1,4 +1,3 @@
-import { TOOLBAR_EXTRAS } from "@adapttable/core/binding";
 import {
   createCommentVNode,
   createTextVNode,
@@ -14,19 +13,13 @@ import {
 
 import { SidePanelLayoutChrome } from "../actions/sidePanelChrome";
 import { type Attrs, type ElementRef, elementRef } from "../attrs";
-import { COLUMN_MENU } from "../columns/columnMenuContracts";
-import { FIND_BUTTON } from "../navigation/contracts";
+import { drawsSomething } from "../features/toolbarEntries";
 import type {
   DataTableClassNames,
   DataTableProps,
   DataTableSlots,
 } from "../tableAdapterContracts";
 import type { UseDataTableShellResult } from "../useDataTableShell";
-import {
-  DENSITY_CONTROL,
-  FULLSCREEN_CONTROL,
-  SAVED_VIEWS_CONTROL,
-} from "../viewControls/contracts";
 import { NO_CLASS_NAMES } from "./tableChrome";
 import { TableFooterChrome } from "./tableSummaryChrome";
 
@@ -197,20 +190,11 @@ function toolbarContent<TRow>(
   const labels = table.labels.value;
   const button = (attrs: Attrs, child: VNodeChild) =>
     slots.Button({ attrs, content: child });
-  const hasToolbarExtras =
-    [
-      TOOLBAR_EXTRAS,
-      DENSITY_CONTROL,
-      FULLSCREEN_CONTROL,
-      SAVED_VIEWS_CONTROL,
-      FIND_BUTTON,
-      COLUMN_MENU,
-    ].some((slot) => Boolean(shell.slotFills.value.get(slot.id)?.length)) ||
-    shell.hasActionToolbar.value;
+  const entries = shell.renderToolbarExtras({ ...names });
   return options.searchable !== false ||
     table.isMobile.value ||
     content.toolbar ||
-    hasToolbarExtras ||
+    drawsSomething(entries) ||
     shell.rowActions.value?.canAdd
     ? h("div", { "data-adapttable-part": "toolbar", class: names.toolbar }, [
         options.searchable !== false
@@ -272,7 +256,7 @@ function toolbarContent<TRow>(
             ]
           : null,
         contentSlot(content.toolbar, {}),
-        shell.renderToolbarExtras({ ...names }),
+        entries,
         shell.rowActions.value?.canAdd
           ? button(
               {

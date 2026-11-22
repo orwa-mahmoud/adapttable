@@ -913,6 +913,7 @@ export {
   type ShellBodyInput,
   TableRuntimePublisher,
   tableRuntimeView,
+  type UndoRedoToolbarProps,
   undoRedoToolbarProps,
   viewControlsToolbarProps,
 } from "./layout/shellPipeline";

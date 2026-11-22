@@ -5,7 +5,7 @@ import {
   HistoryButtonsChrome,
   RowEditActionsChrome,
   type RowEditActionsProps,
-  type ToolbarExtrasSlotProps,
+  type UndoRedoControlProps,
   useDataTableClassNames,
   withProps,
 } from "@adapttable/vue/adapter";
@@ -131,7 +131,7 @@ export const BatchEditBar = /* @__PURE__ */ withProps(
 );
 
 export const HistoryButtons = defineComponent(
-  (props: ToolbarExtrasSlotProps) => {
+  (props: UndoRedoControlProps) => {
     const names = useDataTableClassNames();
     return () =>
       HistoryButtonsChrome({
@@ -143,29 +143,25 @@ export const HistoryButtons = defineComponent(
   {
     name: "ShadcnHistoryButtons",
     props: {
-      onUndo: { type: Function as PropType<ToolbarExtrasSlotProps["onUndo"]> },
-      onRedo: { type: Function as PropType<ToolbarExtrasSlotProps["onRedo"]> },
+      onUndo: { type: Function as PropType<UndoRedoControlProps["onUndo"]> },
+      onRedo: { type: Function as PropType<UndoRedoControlProps["onRedo"]> },
       canUndo: {
-        type: Boolean as PropType<ToolbarExtrasSlotProps["canUndo"]>,
+        type: Boolean as PropType<UndoRedoControlProps["canUndo"]>,
         default: undefined,
       },
       canRedo: {
-        type: Boolean as PropType<ToolbarExtrasSlotProps["canRedo"]>,
+        type: Boolean as PropType<UndoRedoControlProps["canRedo"]>,
         default: undefined,
       },
       undoLabel: {
-        type: String as PropType<ToolbarExtrasSlotProps["undoLabel"]>,
+        type: String as PropType<UndoRedoControlProps["undoLabel"]>,
       },
       redoLabel: {
-        type: String as PropType<ToolbarExtrasSlotProps["redoLabel"]>,
+        type: String as PropType<UndoRedoControlProps["redoLabel"]>,
       },
-      density: { type: String as PropType<ToolbarExtrasSlotProps["density"]> },
-      onDensityChange: {
-        type: Function as PropType<ToolbarExtrasSlotProps["onDensityChange"]>,
-      },
-      labels: { type: Object as PropType<ToolbarExtrasSlotProps["labels"]> },
+      labels: { type: Object as PropType<UndoRedoControlProps["labels"]> },
       classNames: {
-        type: Object as PropType<ToolbarExtrasSlotProps["classNames"]>,
+        type: Object as PropType<UndoRedoControlProps["classNames"]>,
       },
     },
   }

@@ -123,6 +123,13 @@ function define<TRow>(
   };
 }
 
+/**
+ * The toolbar leads with the view controls, saved views then columns; every
+ * other entry follows in feature-id order.
+ */
+const SAVED_VIEWS_RANK = -2;
+const COLUMN_MENU_RANK = -1;
+
 /** Options a windowing feature accepts — a boolean or its knobs. */
 export type VirtualizeInput =
   | boolean
@@ -211,7 +218,10 @@ export function coreRowAppearance<TRow>(
  * @public
  */
 export function coreColumnMenu(): CoreFeature {
-  return define("column-menu", { enableColumnMenu: true }, COLUMN_MENU_LABELS);
+  return {
+    ...define("column-menu", { enableColumnMenu: true }, COLUMN_MENU_LABELS),
+    rank: COLUMN_MENU_RANK,
+  };
 }
 
 /**
@@ -358,12 +368,15 @@ export function coreHeaderFilters(): CoreFeature {
 export function coreSavedViews<TOptions extends object>(
   options: TOptions
 ): CoreFeature {
-  return define(
-    "saved-views",
-    { savedViews: options },
-    SAVED_VIEW_LABELS,
-    SAVED_VIEWS_CONTRAST_RULES
-  );
+  return {
+    ...define(
+      "saved-views",
+      { savedViews: options },
+      SAVED_VIEW_LABELS,
+      SAVED_VIEWS_CONTRAST_RULES
+    ),
+    rank: SAVED_VIEWS_RANK,
+  };
 }
 
 /**

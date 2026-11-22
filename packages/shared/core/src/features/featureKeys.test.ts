@@ -94,6 +94,21 @@ describe("slotFillsOf", () => {
       "b-feature",
     ]);
   });
+
+  it("puts a lower-ranked feature's fills first, then feature-id order", () => {
+    const fills = slotFillsOf([
+      { id: "alpha", renders: [slotRender(toolbar, () => "a")] },
+      { id: "views", rank: -2, renders: [slotRender(toolbar, () => "v")] },
+      { id: "columns", rank: -1, renders: [slotRender(toolbar, () => "c")] },
+      { id: "beta", rank: 0, renders: [slotRender(toolbar, () => "b")] },
+    ]);
+    expect(fills.get("toolbar")?.map((fill) => fill.id)).toEqual([
+      "views",
+      "columns",
+      "alpha",
+      "beta",
+    ]);
+  });
 });
 
 describe("drawnSlotFills", () => {

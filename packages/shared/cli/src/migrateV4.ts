@@ -211,7 +211,11 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
   ],
   [
     /\bToolbarExtrasSlotProps\b/g,
-    "A React toolbar control receives ToolbarEntrySlotProps (labels, class map) and reads its feature's state with useFeatureState: EDIT_HISTORY_STATE, EXPORT_STATE, FULLSCREEN_STATE, TABLE_PROPS_STATE.",
+    "A React toolbar control receives ToolbarEntrySlotProps (labels, class map) and reads its feature's state with useFeatureState: EDIT_HISTORY_STATE, EXPORT_STATE, FULLSCREEN_STATE, TABLE_PROPS_STATE. A Vue undo/redo control receives UndoRedoControlProps, and a Vue feature adds its toolbar control with toolbarEntry.",
+  ],
+  [
+    /\b(?:toolbarExtrasProps|hasActionToolbar)\b/g,
+    "The Vue shell's toolbarExtrasProps and hasActionToolbar were removed; each feature draws its own toolbar entry (toolbarEntry), and the toolbar shows when an entry draws.",
   ],
   [
     /\b(?:FIND_LIVE|CELL_NAV_LIVE|EXPORT_LIVE|FULLSCREEN_LIVE|SELECTION_STATS_LIVE|FindLiveDraw|CellNavLiveDraw|ExportLiveDraw|FullscreenLiveDraw|SelectionStatsLiveDraw)\b/g,

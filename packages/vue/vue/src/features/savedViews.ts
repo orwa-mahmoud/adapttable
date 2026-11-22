@@ -7,6 +7,7 @@ import {
   SAVED_VIEWS_CONTROL,
   SAVED_VIEWS_MODEL,
 } from "../viewControls/contracts";
+import { toolbarEntry } from "./toolbarEntries";
 
 function useSavedViewsMount<TRow>(context: FeatureMountContext<TRow>): void {
   let live = true;
@@ -37,6 +38,17 @@ export function savedViews(
   return {
     ...coreSavedViews(options),
     mount: useSavedViewsMount,
+    renders: [
+      toolbarEntry((entry) => {
+        const state = entry.read(SAVED_VIEWS_MODEL);
+        return state
+          ? entry.draw(SAVED_VIEWS_CONTROL, {
+              ...entry.presentation,
+              savedViews: state,
+            })
+          : null;
+      }),
+    ],
     requiredSlots: [SAVED_VIEWS_CONTROL],
   };
 }

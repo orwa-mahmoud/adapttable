@@ -268,6 +268,7 @@ export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry>
     readonly implementations?: Readonly<Record<string, unknown>>;
     readonly labels?: Partial<TableLabels>;
     mount?(context: FeatureMountContext): void | (() => void);
+    readonly rank?: number;
     readonly renders?: readonly FeatureRender<never, SlotComponent>[];
 }
 

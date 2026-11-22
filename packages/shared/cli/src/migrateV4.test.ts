@@ -164,6 +164,18 @@ describe("migrateV4Source", () => {
     ]);
   });
 
+  it("reports the Vue shell's toolbar fields with their replacement", () => {
+    const result = migrateV4Source(
+      [
+        "const props = shell.toolbarExtrasProps.value;",
+        "if (shell.hasActionToolbar.value) draw();",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2]);
+    expect(result.issues[0]?.message).toContain("toolbarEntry");
+  });
+
   it("leaves a file that uses nothing v4 moved untouched", () => {
     const source = 'import { DataTable } from "@adapttable/mui";\n';
     expect(migrateV4Source(source)).toEqual({

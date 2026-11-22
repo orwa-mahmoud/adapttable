@@ -1,9 +1,5 @@
 import { resolveLabels } from "@adapttable/core";
-import {
-  ACTIVE_FILTER_CHIPS,
-  slotRender,
-  TOOLBAR_EXTRAS,
-} from "@adapttable/core/binding";
+import { ACTIVE_FILTER_CHIPS, slotRender } from "@adapttable/core/binding";
 import { describe, expect, it, vi } from "vitest";
 import {
   createApp,
@@ -33,6 +29,7 @@ import {
   type ComposedFeature,
   extendFeature,
 } from "../src/features/tableFeature";
+import { FILTERS_PANEL } from "../src/features/toolbarEntries";
 import {
   FilterPanelChrome,
   type FilterPanelSlots,
@@ -66,7 +63,7 @@ describe("integrated optional feature seams", () => {
       extendFeature(
         filters<Row>([{ key: "name", type: "text" }], { tree: true }),
         [
-          slotRender(TOOLBAR_EXTRAS, () => null),
+          slotRender(FILTERS_PANEL, () => null),
           slotRender(ACTIVE_FILTER_CHIPS, () => null),
         ]
       ),
@@ -138,7 +135,7 @@ describe("integrated optional feature seams", () => {
               extendFeature(
                 filters<Row>([{ key: "name", type: "text" }], options),
                 [
-                  slotRender(TOOLBAR_EXTRAS, () => null),
+                  slotRender(FILTERS_PANEL, () => null),
                   slotRender(ACTIVE_FILTER_CHIPS, () => null),
                 ]
               ),
@@ -285,7 +282,7 @@ it("suspends combined editing, filters and view controls across KeepAlive and in
       slotRender(rowEditActionsSlotKey<Row>(), () => null),
     ]),
     extendFeature(filters<Row>([{ key: "name", type: "text" }]), [
-      slotRender(TOOLBAR_EXTRAS, () => null),
+      slotRender(FILTERS_PANEL, () => null),
       slotRender(ACTIVE_FILTER_CHIPS, () => null),
     ]),
     nativeDensity(),

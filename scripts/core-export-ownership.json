@@ -19334,6 +19334,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "UndoRedoToolbarProps",
+      "kind": "type",
+      "module": "layout/shellPipeline.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/shellPipeline.ts#UndoRedoToolbarProps",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "UrlSliceStore",
       "kind": "type",
       "module": "url/viewStateStore.ts",

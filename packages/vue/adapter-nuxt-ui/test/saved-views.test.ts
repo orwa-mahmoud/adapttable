@@ -151,6 +151,7 @@ it("fills only the binding's saved-view channel with the existing managed surfac
   const feature = savedViews({ storageKey: "test", storage: null });
   expect(feature.id).toBe("saved-views");
   expect(feature.renders?.map((fill) => fill.slot.id)).toEqual([
+    "toolbar-extras",
     "vue-saved-views-control",
   ]);
   expect(createNuxtSavedViewsMenuSlots().Panel.interactionOwner).toBe("kit");

@@ -9,8 +9,8 @@ import {
   ACTIVE_FILTER_CHIPS,
   type ActiveFilterChipsSlotProps,
   extendFeature,
+  FILTERS_PANEL,
   slotRender,
-  TOOLBAR_EXTRAS,
 } from "@adapttable/vue/adapter";
 import { filters as bindingFilters } from "@adapttable/vue/features";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -565,7 +565,7 @@ describe("active filter chip ownership", () => {
     const feature = extendFeature(
       bindingFilters<Row>([{ key: "team", type: "text" }]),
       [
-        slotRender(TOOLBAR_EXTRAS, () => null),
+        slotRender(FILTERS_PANEL, () => null),
         slotRender(ACTIVE_FILTER_CHIPS, (props) => {
           current = props;
           return null;

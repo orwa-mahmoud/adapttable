@@ -74,6 +74,8 @@ export interface AdaptTableFeature extends FeatureSetup<
   readonly labels?: Partial<TableLabels>;
   /** The high-contrast rules for what the feature draws. */
   readonly contrast?: ContrastRules;
+  /** Where its fills sit in a slot several features fill; lower first. */
+  readonly rank?: number;
   /** The slots this feature draws into, and what draws each one. */
   readonly renders?: readonly FeatureRender<never, SlotComponent>[];
   /** Start live behavior once the table runtime exists; dispose with the table. */
