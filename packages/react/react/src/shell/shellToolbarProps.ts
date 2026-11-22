@@ -47,9 +47,6 @@ export function shellToolbarProps<TRow>(
     // Hidden in the grouped full-set view, where page size has no effect.
     // The body gate overlays the real sentinel; the shell starts inert.
     showRowsPerPage: false,
-    onAddRow: chrome.rowMutations.canAdd
-      ? chrome.rowMutations.addRow
-      : undefined,
     addRowLabel: chrome.table.labels.addRow,
     dir: props.dir,
   };

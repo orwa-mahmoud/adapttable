@@ -783,7 +783,10 @@ export interface OverlayChrome {
   readonly source: unknown;
   readonly autoSizeColumns?: unknown;
   readonly autoSizeColumn?: unknown;
-  readonly rowMutations: { readonly canAdd: boolean; readonly addRow: unknown };
+  readonly rowMutations?: {
+    readonly canAdd: boolean;
+    readonly addRow: unknown;
+  };
   readonly editingRows: unknown;
   readonly tree?: TreeContribution<unknown>;
   readonly grouping?: GroupingContribution<unknown>;
@@ -792,7 +795,7 @@ export interface OverlayChrome {
   readonly rowPinning?: RowPinningContribution;
   readonly rowActions?: unknown;
   readonly columnGroups: unknown;
-  readonly hasRowActions: boolean;
+  readonly hasRowActions?: boolean;
 }
 
 /**
@@ -841,7 +844,7 @@ export function overlayChromeExtras<
     autoSizeColumn: chrome.autoSizeColumn ?? shell.autoSizeColumn,
     toolbarProps: {
       ...shell.toolbarProps,
-      onAddRow: chrome.rowMutations.canAdd
+      onAddRow: chrome.rowMutations?.canAdd
         ? chrome.rowMutations.addRow
         : undefined,
     },
@@ -876,7 +879,7 @@ export function overlayChromeExtras<
           ? layout.setName
           : undefined,
     },
-    hasRowActions: chrome.hasRowActions,
+    hasRowActions: chrome.hasRowActions ?? false,
   };
 }
 

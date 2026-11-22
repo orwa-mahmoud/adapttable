@@ -233,7 +233,7 @@ export function useDataTableShell<TRow>(
   // state treats its reserved key like any column key, so the Columns menu can
   // hide it (strip rowActions before the renderers) or end-pin it (the
   // renderers stick the actions cells, with zero data columns pinned).
-  const { hasRowActions, hasRowReorder } = chrome;
+  const { hasRowReorder } = chrome;
 
   // Body-dependent fields start inert. {@link finishDataTableShell} overlays
   // the window, pins, and load-more sentinel once a body path has run in-tree.
@@ -318,7 +318,7 @@ export function useDataTableShell<TRow>(
     autoSizeColumn,
     loadMoreRef: { current: null },
     canLoadMore: false,
-    hasRowActions,
+    hasRowActions: false,
     hasRowReorder,
     tableProps,
     toolbarProps,

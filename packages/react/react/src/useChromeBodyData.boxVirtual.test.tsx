@@ -14,11 +14,14 @@ import { type TableChrome } from "./chrome/tableChromeContract";
 import type { ColumnDef } from "./columnDef";
 import { ChromeExtrasGate } from "./features/chromeExtrasGate";
 import { pinnedSummaryRows } from "./features/factories";
+import { useFeatureState } from "./features/featureState";
 import { grouping } from "./features/grouping";
 import { FeatureProviders } from "./features/providers";
 import { rowPinning } from "./features/row-pinning";
+import { ROW_PINNING_STATE } from "./features/stateKeys";
 import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
 import { tree } from "./features/tree";
+import type { RowPinningState } from "./rows/rowPinning";
 import { useFrontendData } from "./source/useFrontendData";
 import { createMemoryAdapter } from "./url/adapter";
 import { useTableChrome } from "./useTableChrome";
@@ -31,11 +34,16 @@ function renderLiveBody<TRow>(
 ) {
   const applied = applyTableFeatures({ features });
   const box: {
-    current: { chrome: TableChrome<TRow>; body: ChromeBodyData<TRow> };
+    current: {
+      chrome: TableChrome<TRow>;
+      body: ChromeBodyData<TRow>;
+      rowPinning: RowPinningState<unknown> | undefined;
+    };
   } = {
     current: undefined as unknown as {
       chrome: TableChrome<TRow>;
       body: ChromeBodyData<TRow>;
+      rowPinning: RowPinningState<unknown> | undefined;
     },
   };
   function BodyInner({
@@ -46,7 +54,8 @@ function renderLiveBody<TRow>(
     props: Parameters<typeof useTableChrome<TRow>>[0];
   }): ReactNode {
     const body = useVirtualChromeBodyData(chrome, props);
-    box.current = { chrome, body };
+    const rowPinning = useFeatureState(ROW_PINNING_STATE);
+    box.current = { chrome, body, rowPinning };
     return null;
   }
   function Probe() {
@@ -540,7 +549,7 @@ describe("useVirtualChromeBodyData with pinned rows", () => {
       }
     );
 
-    expect(result.current.chrome.rowPinning).toBeDefined();
+    expect(result.current.rowPinning).toBeDefined();
     const windowed = result.current.body.virtualization.rows;
     expect(windowed.length).toBeGreaterThan(0);
     // Each entry names where its row sits in the dataset, resolved from the

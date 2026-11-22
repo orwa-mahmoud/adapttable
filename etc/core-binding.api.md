@@ -7942,11 +7942,11 @@ export interface OverlayChrome {
     // (undocumented)
     readonly grouping?: GroupingContribution<unknown>;
     // (undocumented)
-    readonly hasRowActions: boolean;
+    readonly hasRowActions?: boolean;
     // (undocumented)
     readonly rowActions?: unknown;
     // (undocumented)
-    readonly rowMutations: {
+    readonly rowMutations?: {
         readonly canAdd: boolean;
         readonly addRow: unknown;
     };

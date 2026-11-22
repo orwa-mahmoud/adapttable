@@ -26,6 +26,8 @@ export {
 } from "@adapttable/core/binding";
 
 import type { TableChrome } from "../chrome/tableChromeContract";
+import { useFeatureState } from "../features/featureState";
+import { ROW_PINNING_STATE } from "../features/stateKeys";
 import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
 import type { ComposedTableProps } from "../props";
 import type { ColumnWindow } from "./useColumnWindow";
@@ -118,7 +120,7 @@ export function usePinnedScrollRows<TRow>(
   scroll: readonly TRow[];
   bottom: readonly TRow[];
 } {
-  const pinState = chrome.rowPinning?.state;
+  const pinState = useFeatureState(ROW_PINNING_STATE)?.state;
   const sourceRows = chrome.source.rows;
   return useMemo(
     () => pinnedScrollRows(sourceRows, pinState, rowKey),

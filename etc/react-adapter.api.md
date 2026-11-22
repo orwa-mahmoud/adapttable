@@ -4253,6 +4253,9 @@ export { restoreFocusSoon }
 export { ROW_ACTIONS_LIVE }
 
 // @public
+export const ROW_ACTIONS_STATE: FeatureStateKey<RowActionsState<unknown>>;
+
+// @public
 export const ROW_DETAIL_STATE: FeatureStateKey<RowDetailState<unknown>>;
 
 export { ROW_DND_MIME }
@@ -4260,6 +4263,9 @@ export { ROW_DND_MIME }
 export { ROW_EDIT_ACTIONS }
 
 export { ROW_ID_ATTRIBUTE }
+
+// @public
+export const ROW_PINNING_STATE: FeatureStateKey<RowPinningState<unknown>>;
 
 export { ROW_REORDER_ANNOUNCER }
 
@@ -4287,6 +4293,13 @@ export { RowActionsLayout }
 export { RowActionsRenderContext }
 
 export { RowActionsRenderer }
+
+// @public
+export interface RowActionsState<TRow = unknown> {
+    readonly hasRowActions: boolean;
+    readonly rowActions: RowAction<TRow>[] | undefined;
+    readonly rowMutations: RowMutationsState<TRow>;
+}
 
 // @public
 export type RowClickProps = Pick<HTMLAttributes<HTMLElement>, "onClick" | "onKeyDown" | "tabIndex" | "style"> & {
@@ -4932,16 +4945,12 @@ export interface TableChrome<TRow> {
     };
     groupingArmed: boolean;
     groupingPanel?: GroupingPanelState;
-    hasRowActions: boolean;
     hasRowReorder: boolean;
     isMobile: boolean;
     isPaged: boolean;
     isRefreshing: boolean;
     pinnedRows?: PinnedRows<TRow>;
     rootRef: RefObject<HTMLDivElement | null>;
-    rowActions?: RowAction<TRow>[];
-    rowMutations: RowMutationsState<TRow>;
-    rowPinning?: RowPinningState<TRow>;
     rowReorder?: RowReorderState<TRow>;
     showFooter: boolean;
     source: TableSource<TRow>;

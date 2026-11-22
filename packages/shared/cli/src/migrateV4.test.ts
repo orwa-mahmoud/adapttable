@@ -219,9 +219,10 @@ describe("migrateV4Source", () => {
         "const history = chrome.editHistory;",
         "const rows = chrome.editingRows;",
         "const detail = chrome.detail;",
+        "const pins = chrome.rowPinning;",
       ].join("\n")
     );
-    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 4]);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 4, 5]);
   });
 
   it("leaves a file that uses nothing v4 moved untouched", () => {

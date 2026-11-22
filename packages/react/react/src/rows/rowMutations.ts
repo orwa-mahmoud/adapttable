@@ -24,6 +24,15 @@ import { useMemo } from "react";
 import { useEventCallback } from "../hooks/useEventCallback";
 export type { RowMutationsState } from "@adapttable/core/binding";
 
+/** No row mutations: what a table without the row-actions feature has. */
+export const NO_ROW_MUTATIONS: RowMutationsState<never> = {
+  canAdd: false,
+  addRow: () => {
+    // The row-actions feature owns add; a table without it has no handler.
+  },
+  actions: [],
+};
+
 /**
  * How a table asks for a row to be added, copied or removed.
  *

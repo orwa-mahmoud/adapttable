@@ -20,6 +20,8 @@ import {
 import { useCallback, useMemo, useRef } from "react";
 
 import type { TableChrome } from "../chrome/tableChromeContract";
+import { useFeatureState } from "../features/featureState";
+import { ROW_PINNING_STATE } from "../features/stateKeys";
 import type { ComposedTableProps } from "../props";
 import {
   type ChromeBodyData,
@@ -82,7 +84,7 @@ export function useVirtualChromeBody<TRow>(
     [observeWindowList]
   );
   const groupingArmed = Boolean(chrome.grouping);
-  const pinState = chrome.rowPinning?.state;
+  const pinState = useFeatureState(ROW_PINNING_STATE)?.state;
   const partitioned = usePinnedScrollRows(chrome, rowKey);
   const estimateSize = estimateBodyItemSize(chrome, props, partitioned.scroll);
   const scrollOpts = {

@@ -7,7 +7,6 @@ import {
   type GroupedFlatEntry,
   type GroupingPanelState,
   type PinnedRows,
-  type RowAction,
   type TableErrorState,
   type TableSource,
   type TreeEntry,
@@ -18,8 +17,6 @@ import { type RefObject } from "react";
 import type { ColumnDef } from "../columnDef";
 import type { ReactUseColumnLayoutResult } from "../columns/useColumnLayout";
 import type { GroupCollapseState } from "../grouping/useGroupCollapse";
-import type { RowMutationsState } from "../rows/rowMutations";
-import type { RowPinningState } from "../rows/rowPinning";
 import type { RowReorderState } from "../rows/rowReorder";
 import type { TreeExpansionState } from "../tree/useTreeExpansion";
 import { type UseDataTableResult } from "../useDataTable/useDataTable";
@@ -95,26 +92,10 @@ export interface TableChrome<TRow> {
    * matched nothing.
    */
   clearSearchAndFilters: () => void;
-  /**
-   * Adding, duplicating and deleting rows. Empty until `rowActions()` is
-   * composed. `canAdd` says whether the toolbar's Add control renders.
-   */
-  rowMutations: RowMutationsState<TRow>;
   /** Size every visible column to its content. Present with column layout. */
   autoSizeColumns?: () => void;
   /** Size one column to its content. Present with column layout. */
   autoSizeColumn?: (key: string) => void;
-  /**
-   * The row actions to render — the host's, plus duplicate and delete when
-   * those are wired, and `undefined` when the reader hid the actions column.
-   * Adapters read THIS rather than internal feature configuration.
-   */
-  rowActions?: RowAction<TRow>[];
-  /**
-   * Whether an actions column exists at all, hidden or not — what the column
-   * menu offers, and the one figure a hidden column must not change.
-   */
-  hasRowActions: boolean;
   /**
    * Whether a reorder column exists at all, hidden or not — what the column
    * menu offers. Grouped and tree models keep it armed and resolve sibling
@@ -126,11 +107,6 @@ export interface TableChrome<TRow> {
    * grouping/tree are off, and the column is visible. Adapters read THIS.
    */
   rowReorder?: RowReorderState<TRow>;
-  /**
-   * Headless row-pin state. Present iff the pinning feature is composed
-   * and grouping/tree are off.
-   */
-  rowPinning?: RowPinningState<TRow>;
   /**
    * Host-owned summary objects stuck above and below the scroll body.
    * Present iff `pinnedSummaryRows` was composed with at least one row.

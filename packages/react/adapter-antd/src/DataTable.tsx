@@ -1779,7 +1779,7 @@ function AntdViewBody<TRow>({
   const filtersMode = resolveFilterMode(props.filtersMode, props.headerFilters);
   const hasColumnHeaderRename = useFeatureSlotFilled(COLUMN_HEADER_RENAME);
   const { windowStart, cardSetSize } = antdWindowOf(c);
-  const rowActions = c.rowActions;
+  const rowActions = view.tableProps.rowActions;
   const hasRowActions = rowActions !== undefined;
   const virtualBody = antdVirtualBody(props, c);
   const inScrollBox =
@@ -1808,7 +1808,7 @@ function AntdViewBody<TRow>({
   } = antdPinnedDataSource(
     grouping,
     treeEntries,
-    c.rowPinning,
+    view.tableProps.rowPinning,
     source.rows,
     getRowId,
     dataSourceBase,
@@ -2028,7 +2028,7 @@ function AntdViewBody<TRow>({
             reorderIndices={reorderIndices}
             windowStart={windowStart}
             cardSetSize={cardSetSize}
-            rowPinning={c.rowPinning}
+            rowPinning={view.tableProps.rowPinning}
             pinnedTopRows={pinnedTopRows}
             pinnedBottomRows={pinnedBottomRows}
             pinnedSummaryTop={pinnedSummaryTop}

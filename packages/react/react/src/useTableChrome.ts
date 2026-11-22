@@ -37,7 +37,6 @@ import { useEventCallback } from "./hooks/useEventCallback";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useElementWidth } from "./layout/useElementWidth";
 import type { ComposedTableProps } from "./props";
-import type { RowMutationsState } from "./rows/rowMutations";
 import type { RowReorderState } from "./rows/rowReorder";
 import { useDataTable } from "./useDataTable/useDataTable";
 
@@ -46,14 +45,6 @@ export type { ToolbarSlots } from "./props";
 export type { SelectionState } from "./selection/useSelection";
 export type { BulkAction, ConfirmHandler } from "@adapttable/core";
 export type { FeatureNotice, FeatureNoticeKind } from "@adapttable/core";
-
-const NO_ROW_MUTATIONS: RowMutationsState<never> = {
-  canAdd: false,
-  addRow: () => {
-    // The row-actions feature owns add. The lean table has no handler.
-  },
-  actions: [],
-};
 
 /**
  * Assemble every piece of chrome a kit's toolbar and footer need.
@@ -229,9 +220,6 @@ export function useTableChrome<TRow>(
   }, [hasEditableColumn, hasEditHandler]);
 
   const getRowId = selectionGetId ?? rowKey;
-  const rowMutations = NO_ROW_MUTATIONS as RowMutationsState<TRow>;
-  const hasRowActions = false;
-  const rowActions = undefined;
 
   const treeShaped =
     props.getChildren !== undefined || props.getParentId !== undefined;
@@ -255,7 +243,6 @@ export function useTableChrome<TRow>(
   );
   const requestedReorder = hasRowReorder;
 
-  const rowPinning = undefined;
   const resolvedPinnedRows = resolvePinnedRows(props.pinnedRows);
   const pinnedRows =
     resolvedPinnedRows.top.length > 0 || resolvedPinnedRows.bottom.length > 0
@@ -376,12 +363,8 @@ export function useTableChrome<TRow>(
     isRefreshing,
     clearFilters,
     clearSearchAndFilters,
-    rowMutations,
-    rowActions,
-    hasRowActions,
     hasRowReorder,
     rowReorder,
-    rowPinning,
     pinnedRows,
     groupingArmed,
     treeShaped,

@@ -17,8 +17,9 @@ import {
   rowPinningUrlSync,
   withRowPinActions,
 } from "@adapttable/core/binding";
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useMemo } from "react";
 
+import { NO_ROW_MUTATIONS, type RowMutationsState } from "../rows/rowMutations";
 import {
   type RowPinLabels,
   type RowPinningState,
@@ -26,12 +27,18 @@ import {
   useRowPinning,
 } from "../rows/rowPinning";
 import { useRowPinningUrlState } from "../url/useRowPinningUrlState";
+import { FeatureStateScope, useFeatureState } from "./featureState";
 import { slotRender } from "./providers";
 import {
   type ChromeExtraDraw,
   type ChromeExtraSlotProps,
   PINNING_LIVE,
 } from "./slotKeys";
+import {
+  ROW_ACTIONS_STATE,
+  ROW_PINNING_STATE,
+  type RowActionsState,
+} from "./stateKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
 function useLiveRowPinning<TRow>(options: {
@@ -62,7 +69,7 @@ function LivePinning<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<TRow>): ReactNode {
+}: Readonly<ChromeExtraSlotProps<TRow>>): ReactNode {
   const requested = rowPinningRequested(props);
   const pinUrl = useRowPinningUrlState({
     urlAdapter: props.urlAdapter,
@@ -94,19 +101,31 @@ function LivePinning<TRow>({
   });
   // Pin entries ride the same trailing column as the host's row actions, so
   // they are appended rather than given a column of their own.
+  const upstream = useFeatureState(ROW_ACTIONS_STATE) as
+    RowActionsState<TRow> | undefined;
   const { rowActions, hasRowActions } = withRowPinActions({
-    rowActions: chrome.rowActions,
-    hasRowActions: chrome.hasRowActions,
+    rowActions: upstream?.rowActions,
+    hasRowActions: upstream?.hasRowActions ?? false,
     pinning: rowPinning !== undefined,
     pins: rowPinning?.actions ?? [],
     actionsHidden: chrome.columnLayout.isHidden(ACTIONS_COLUMN_KEY),
   });
-  return children({
-    ...chrome,
-    rowPinning,
-    rowActions,
-    hasRowActions,
-  });
+  const actions = useMemo(
+    (): RowActionsState<TRow> => ({
+      rowMutations:
+        upstream?.rowMutations ?? (NO_ROW_MUTATIONS as RowMutationsState<TRow>),
+      rowActions,
+      hasRowActions,
+    }),
+    [upstream?.rowMutations, rowActions, hasRowActions]
+  );
+  return (
+    <FeatureStateScope stateKey={ROW_PINNING_STATE} value={rowPinning}>
+      <FeatureStateScope stateKey={ROW_ACTIONS_STATE} value={actions}>
+        {children(chrome)}
+      </FeatureStateScope>
+    </FeatureStateScope>
+  );
 }
 
 /**

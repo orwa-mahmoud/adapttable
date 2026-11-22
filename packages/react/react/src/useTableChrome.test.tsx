@@ -4,12 +4,12 @@ import { act, render, renderHook } from "@testing-library/react";
 import { type ReactNode, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { type TableChrome } from "./chrome/tableChromeContract";
 import { printToolbar, undoRedoToolbar } from "./chrome/toolbarChrome";
 import type { ColumnDef } from "./columnDef";
 import { ChromeExtrasGate } from "./features/chromeExtrasGate";
 import { dirtyIndicators } from "./features/editing";
 import { bulkActions, pinnedSummaryRows } from "./features/factories";
+import { useFeatureState } from "./features/featureState";
 import { filters } from "./features/filters";
 import { grouping } from "./features/grouping";
 import { groupingPanel } from "./features/grouping-panel";
@@ -17,10 +17,16 @@ import { FeatureProviders } from "./features/providers";
 import { rowActions } from "./features/row-actions";
 import { rowPinning } from "./features/row-pinning";
 import { rowReorder } from "./features/row-reorder";
-import { FILTER_CHIPS_STATE } from "./features/stateKeys";
+import {
+  FILTER_CHIPS_STATE,
+  ROW_ACTIONS_STATE,
+  ROW_PINNING_STATE,
+  type RowActionsState,
+} from "./features/stateKeys";
 import { applyTableFeatures } from "./features/tableFeature";
 import { tree } from "./features/tree";
 import { renderLiveChrome } from "./liveChrome.test-utils";
+import type { RowPinningState } from "./rows/rowPinning";
 import { useFrontendData } from "./source/useFrontendData";
 import { createMemoryAdapter } from "./url/adapter";
 import { useTableChrome } from "./useTableChrome";
@@ -571,7 +577,13 @@ describe("useTableChrome", () => {
         rowKey,
         onPinnedRowIdsChange,
       });
-      let chrome: TableChrome<Row> | undefined;
+      let pins: RowPinningState<unknown> | undefined;
+      let actions: RowActionsState | undefined;
+      function StateProbe() {
+        pins = useFeatureState(ROW_PINNING_STATE);
+        actions = useFeatureState(ROW_ACTIONS_STATE);
+        return null;
+      }
       function Probe(bits: { groupBy?: string }) {
         const source = useFrontendData<Row>({
           data: ROWS,
@@ -583,10 +595,7 @@ describe("useTableChrome", () => {
         const base = useTableChrome<Row>(chromeProps);
         return (
           <ChromeExtrasGate chrome={base} props={chromeProps}>
-            {(overlaid) => {
-              chrome = overlaid;
-              return null;
-            }}
+            {() => <StateProbe />}
           </ChromeExtrasGate>
         );
       }
@@ -595,9 +604,11 @@ describe("useTableChrome", () => {
           <Probe />
         </FeatureProviders>
       );
-      expect(chrome?.rowPinning).toBeDefined();
-      expect(chrome?.hasRowActions).toBe(true);
-      expect(chrome?.rowActions?.some((a) => a.key.includes("pin"))).toBe(true);
+      expect(pins).toBeDefined();
+      expect(actions?.hasRowActions).toBe(true);
+      expect(actions?.rowActions?.some((a) => a.key.includes("pin"))).toBe(
+        true
+      );
 
       const groupedProps = applyTableFeatures({
         features: [rowPinning({ onPinnedRowIdsChange }), grouping("name")],
@@ -613,7 +624,7 @@ describe("useTableChrome", () => {
           <Probe groupBy="name" />
         </FeatureProviders>
       );
-      expect(chrome?.rowPinning).toBeUndefined();
+      expect(pins).toBeUndefined();
       expect(
         warn.mock.calls.some((call) => String(call[0]).includes("row pinning"))
       ).toBe(true);
@@ -880,27 +891,29 @@ describe("useTableChrome — row mutations and lazy tree", () => {
     const hostActions = [
       { key: "edit", label: "Edit", onClick: () => undefined },
     ];
-    const { result } = renderLiveChrome([rowActions<Row>(hostActions)], () => {
-      const source = useFrontendData<Row>({
-        data: ROWS,
-        urlAdapter: adapter,
-        columns,
-        paginationMode: "paged",
-      });
-      return {
-        source,
-        columns,
-        rowKey: (r) => r.id,
-        rowActions: hostActions,
-        onDuplicateRow: vi.fn(),
-        onDeleteRow: vi.fn(),
-      };
-    });
-    expect(result.current.rowActions?.map((action) => action.key)).toEqual([
-      "edit",
-      "adapttable:duplicate-row",
-      "adapttable:delete-row",
-    ]);
+    const { result } = renderLiveChrome(
+      [rowActions<Row>(hostActions)],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: adapter,
+          columns,
+          paginationMode: "paged",
+        });
+        return {
+          source,
+          columns,
+          rowKey: (r) => r.id,
+          rowActions: hostActions,
+          onDuplicateRow: vi.fn(),
+          onDeleteRow: vi.fn(),
+        };
+      },
+      [ROW_ACTIONS_STATE]
+    );
+    expect(
+      result.state(ROW_ACTIONS_STATE)?.rowActions?.map((action) => action.key)
+    ).toEqual(["edit", "adapttable:duplicate-row", "adapttable:delete-row"]);
   });
 
   it("loads children when a collapsed lazy node is opened", async () => {

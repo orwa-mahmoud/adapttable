@@ -400,7 +400,10 @@ export {
   FILTER_CHIPS_STATE,
   type FilterChipsState,
   FULLSCREEN_STATE,
+  ROW_ACTIONS_STATE,
   ROW_DETAIL_STATE,
+  ROW_PINNING_STATE,
+  type RowActionsState,
   type RowDetailState,
   TABLE_PROPS_STATE,
 } from "./features/stateKeys";

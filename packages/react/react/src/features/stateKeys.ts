@@ -3,7 +3,11 @@
  * draws elsewhere in the table — a toolbar button reads its feature's key and
  * nothing the base names.
  */
-import type { ActiveFilterChip, EditHistoryState } from "@adapttable/core";
+import type {
+  ActiveFilterChip,
+  EditHistoryState,
+  RowAction,
+} from "@adapttable/core";
 import { featureStateKey } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
@@ -11,6 +15,8 @@ import type { EditableCellEditing } from "../editing/editableCellController";
 import type { ExportHandlerState } from "../export/useExportHandler";
 import type { KitRegionProps } from "../kit/rootRegion";
 import type { FullscreenState } from "../layout/useFullscreen";
+import type { RowMutationsState } from "../rows/rowMutations";
+import type { RowPinningState } from "../rows/rowPinning";
 import type { RowExpansionState } from "../rows/useRowExpansion";
 import type { DataTableShellChromeProps } from "../shell/shellContract";
 
@@ -44,6 +50,28 @@ export interface RowDetailState<TRow = unknown> {
 
 /** The row detail, published by the expansion stage. */
 export const ROW_DETAIL_STATE = featureStateKey<RowDetailState>("row-detail");
+
+/**
+ * The row actions column and the row mutations behind it.
+ *
+ * @public
+ */
+export interface RowActionsState<TRow = unknown> {
+  /** Adding, duplicating and deleting rows. */
+  readonly rowMutations: RowMutationsState<TRow>;
+  /** The trailing column's actions, host and built-in. */
+  readonly rowActions: RowAction<TRow>[] | undefined;
+  /** Whether that column renders. */
+  readonly hasRowActions: boolean;
+}
+
+/** The row actions, published by the row-actions and row-pinning stages. */
+export const ROW_ACTIONS_STATE =
+  featureStateKey<RowActionsState>("row-actions");
+
+/** The row pins, published by the row-pinning stage. */
+export const ROW_PINNING_STATE =
+  featureStateKey<RowPinningState<unknown>>("row-pinning");
 
 /** The armed cell editing, published by the editing stage. */
 export const EDITING_STATE =

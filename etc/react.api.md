@@ -955,16 +955,12 @@ export interface TableChrome<TRow> {
     };
     groupingArmed: boolean;
     groupingPanel?: GroupingPanelState;
-    hasRowActions: boolean;
     hasRowReorder: boolean;
     isMobile: boolean;
     isPaged: boolean;
     isRefreshing: boolean;
     pinnedRows?: PinnedRows<TRow>;
     rootRef: RefObject<HTMLDivElement | null>;
-    rowActions?: RowAction<TRow>[];
-    rowMutations: RowMutationsState<TRow>;
-    rowPinning?: RowPinningState<TRow>;
     rowReorder?: TableRowReorderState<TRow>;
     showFooter: boolean;
     source: TableSource<TRow>;

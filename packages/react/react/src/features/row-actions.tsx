@@ -8,7 +8,6 @@ import { ACTIONS_COLUMN_KEY, type RowAction } from "@adapttable/core";
 import {
   coreRowActions,
   withRowMutationActions,
-  withRowPinActions,
 } from "@adapttable/core/binding";
 import { type ReactNode, useMemo } from "react";
 
@@ -16,19 +15,21 @@ import {
   type RowMutationHandlers,
   useRowMutations,
 } from "../rows/rowMutations";
+import { FeatureStateScope } from "./featureState";
 import { slotRender } from "./providers";
 import {
   type ChromeExtraDraw,
   type ChromeExtraSlotProps,
   ROW_ACTIONS_LIVE,
 } from "./slotKeys";
+import { ROW_ACTIONS_STATE, type RowActionsState } from "./stateKeys";
 import type { TableFeature } from "./tableFeature";
 
 function LiveRowActions<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<TRow>): ReactNode {
+}: Readonly<ChromeExtraSlotProps<TRow>>): ReactNode {
   const rowMutations = useRowMutations({
     labels: chrome.table.labels,
     onAddRow: props.onAddRow,
@@ -48,21 +49,19 @@ function LiveRowActions<TRow>({
       }),
     [actionsHidden, hostRowActions, mutationActions]
   );
-  // Pin entries ride the same trailing column as the host's row actions, so
-  // they are appended rather than given a column of their own.
-  const visible = withRowPinActions({
-    rowActions: merged.rowActions,
-    hasRowActions: merged.hasRowActions,
-    pinning: chrome.rowPinning !== undefined,
-    pins: chrome.rowPinning?.actions ?? [],
-    actionsHidden,
-  });
-  return children({
-    ...chrome,
-    rowMutations,
-    rowActions: visible.rowActions,
-    hasRowActions: visible.hasRowActions,
-  });
+  const state = useMemo(
+    (): RowActionsState<TRow> => ({
+      rowMutations,
+      rowActions: merged.rowActions,
+      hasRowActions: merged.hasRowActions,
+    }),
+    [rowMutations, merged]
+  );
+  return (
+    <FeatureStateScope stateKey={ROW_ACTIONS_STATE} value={state}>
+      {children(chrome)}
+    </FeatureStateScope>
+  );
 }
 
 /**

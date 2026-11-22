@@ -30,7 +30,9 @@ import { CHROME_BODY, type ChromeBodySlotProps } from "./slotKeys";
 import {
   EDIT_HISTORY_STATE,
   EDITING_STATE,
+  ROW_ACTIONS_STATE,
   ROW_DETAIL_STATE,
+  ROW_PINNING_STATE,
   TABLE_PROPS_STATE,
 } from "./stateKeys";
 
@@ -140,6 +142,8 @@ function StagedShell<TRow>({
   "use no memo";
   const editing = useFeatureState(EDITING_STATE);
   const detail = useFeatureState(ROW_DETAIL_STATE);
+  const rowPinning = useFeatureState(ROW_PINNING_STATE);
+  const actions = useFeatureState(ROW_ACTIONS_STATE);
   const editHistory = useFeatureState(EDIT_HISTORY_STATE) as
     EditHistoryState<TRow> | undefined;
   // The stages may wrap the commit channels (edit history); the body
@@ -151,7 +155,14 @@ function StagedShell<TRow>({
     editHistory: editHistory ?? disabledHistory(),
   };
   const withExtras = withGroupingPanel(
-    overlayChromeExtras(staged, chrome, { editing, detail }),
+    overlayChromeExtras(staged, chrome, {
+      editing,
+      detail,
+      rowPinning,
+      rowActions: actions?.rowActions,
+      rowMutations: actions?.rowMutations,
+      hasRowActions: actions?.hasRowActions,
+    }),
     chrome.groupingPanel
   );
   const afterBody = (view: DataTableShellResult<TRow>) => (

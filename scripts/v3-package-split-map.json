@@ -50411,6 +50411,14 @@
       "behavior": ""
     },
     {
+      "export": "ROW_ACTIONS_STATE",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "ROW_DETAIL_STATE",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -50428,6 +50436,14 @@
     },
     {
       "export": "ROW_EDIT_ACTIONS",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "ROW_PINNING_STATE",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",
@@ -50460,6 +50476,14 @@
     },
     {
       "export": "RowActionButtonsProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "RowActionsState",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",

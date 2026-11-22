@@ -7,14 +7,18 @@ import type { ReactNode } from "react";
 import { ContextMenuLiveGate } from "../adapterFeatures/featureRoot";
 import { contextMenuCopyTarget } from "../focus/contextMenuCopy";
 import { type RootRegionProps, TABLE_ROOT_REGION } from "../kit/rootRegion";
+import type { RowPinningState } from "../rows/rowPinning";
 import type { DataTableShellResult } from "../useDataTableShell";
+import { useFeatureState } from "./featureState";
 import { slotRender } from "./providers";
 import type { ContextMenuLiveSlotProps } from "./slotKeys";
+import { ROW_PINNING_STATE } from "./stateKeys";
 
 /** The menu's inputs, from the finished view and the table's props. */
 function contextMenuOptions<TRow>(
   view: DataTableShellResult<TRow>,
-  props: RootRegionProps<TRow>["props"]
+  props: RootRegionProps<TRow>["props"],
+  rowPinning: RowPinningState<unknown> | undefined
 ): Omit<ContextMenuLiveSlotProps<unknown>, "children"> {
   const { chrome, gridFocus, source } = view;
   const copy = (
@@ -56,7 +60,7 @@ function contextMenuOptions<TRow>(
     },
     sortBy: source.sortBy,
     sortDir: source.sortDir,
-    rowPins: chrome.rowPinning?.actions,
+    rowPins: rowPinning?.actions,
     featureHost: view.featureHost,
     container: view.fullscreen.container,
   } as Omit<ContextMenuLiveSlotProps<unknown>, "children">;
@@ -67,10 +71,11 @@ function ContextMenuRegion<TRow>({
   view,
   props,
   children,
-}: RootRegionProps<TRow>): ReactNode {
+}: Readonly<RootRegionProps<TRow>>): ReactNode {
   "use no memo";
+  const rowPinning = useFeatureState(ROW_PINNING_STATE);
   return (
-    <ContextMenuLiveGate props={contextMenuOptions(view, props)}>
+    <ContextMenuLiveGate props={contextMenuOptions(view, props, rowPinning)}>
       {children}
     </ContextMenuLiveGate>
   );

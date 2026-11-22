@@ -994,7 +994,10 @@
         "FilterChipsState": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
         "EDITING_STATE": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
         "ROW_DETAIL_STATE": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
-        "RowDetailState": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots"
+        "RowDetailState": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
+        "ROW_ACTIONS_STATE": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
+        "ROW_PINNING_STATE": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
+        "RowActionsState": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots"
       },
       "features": {
         "BatchRowEdit": "pending: shared-surface decision",
