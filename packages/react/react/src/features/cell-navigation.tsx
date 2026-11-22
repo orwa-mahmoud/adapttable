@@ -3,7 +3,7 @@
  *
  * The factory and the grid hook live together, so a table that never
  * imports it never carries keyboard-grid state. The hook mounts in-tree
- * through `CELL_NAV_LIVE`.
+ * as its live stage.
  */
 import { type CellRange } from "@adapttable/core";
 import {
@@ -11,7 +11,6 @@ import {
   cellNavigationInput,
   cellRangeKey,
   coreCellNavigation,
-  liveStageKey,
   reportedCellRange,
 } from "@adapttable/core/binding";
 import { beginCellEdit } from "@adapttable/core/editing";
@@ -29,20 +28,10 @@ import { type GridFocusState, useGridFocus } from "../focus/useGridFocus";
 import { RowScrollContext } from "../virtual/rowScroll";
 import { GRID_FOCUS_ANNOUNCER_RENDER } from "./areaRegions";
 import type { LiveStageProps } from "./liveStage";
-import { FeatureSlot, slotRender } from "./providers";
-import {
-  CELL_NAV_LIVE,
-  type CellNavLiveDraw,
-  type CellNavLiveSlotProps,
-  GRID_FOCUS_ANNOUNCER,
-} from "./slotKeys";
+import { slotRender } from "./providers";
+import { type CellNavLiveSlotProps, GRID_FOCUS_ANNOUNCER } from "./slotKeys";
+import { CELL_NAV_STAGE } from "./stageKeys";
 import type { StaticTableFeature } from "./tableFeature";
-
-/** The keyboard grid's live stage: reads find's matches, writes the grid. */
-const CELL_NAV_STAGE = liveStageKey<LiveStageProps<unknown>>(
-  "cell-navigation",
-  { reads: ["find"], writes: "gridFocus" }
-);
 
 /** Build the grid's inputs from the shell and hand them to the grid slot. */
 function CellNavStage<TRow>({
@@ -78,7 +67,7 @@ function CellNavStage<TRow>({
     editing: chrome.editing,
     children: (gridFocus: GridFocusState) => children({ ...live, gridFocus }),
   } satisfies CellNavLiveSlotProps<TRow>;
-  return <FeatureSlot slot={CELL_NAV_LIVE} props={navProps} />;
+  return <LiveCellNav {...navProps} />;
 }
 
 function LiveCellNav<TRow>({
@@ -181,9 +170,6 @@ export function cellNavigation(
     ...coreCellNavigation(options),
     renders: [
       slotRender(CELL_NAV_STAGE, (props) => <CellNavStage {...props} />),
-      slotRender<CellNavLiveDraw>(CELL_NAV_LIVE, (props) => (
-        <LiveCellNav {...props} />
-      )),
       slotRender(GRID_FOCUS_ANNOUNCER, (props) => (
         <GridFocusAnnouncer focus={props.focus} />
       )),

@@ -210,6 +210,10 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
     SERVER_SOURCE_PROP,
   ],
   [
+    /\b(?:FIND_LIVE|CELL_NAV_LIVE|EXPORT_LIVE|FULLSCREEN_LIVE|SELECTION_STATS_LIVE|FindLiveDraw|CellNavLiveDraw|ExportLiveDraw|FullscreenLiveDraw|SelectionStatsLiveDraw)\b/g,
+    "The per-feature live slots were removed; each feature runs its hook from its own live stage (liveStageKey).",
+  ],
+  [
     /\bOptionalEditableCell\b/g,
     "OptionalEditableCell was renamed CellContent.",
   ],

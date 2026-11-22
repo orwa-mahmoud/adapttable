@@ -897,9 +897,6 @@ export interface CapabilitySource {
 export function cardSetSize(source: Pick<TableSource<unknown>, "total" | "rows">, windowStart: number): number;
 
 // @public
-export const CELL_NAV_LIVE: RowSlotKey<CellNavLiveDraw>;
-
-// @public
 export function cellAttributes<TRow>(column: ColumnMetadata<TRow>, sizing: ChromeCellSizing): {
     role: "cell";
     "data-column-key": string;
@@ -1100,9 +1097,6 @@ export function cellNavigationInput<TRow, TColumn>(input: {
         col: number;
     }) => void;
 };
-
-// @public
-export type CellNavLiveDraw = <TOptions, THostProps, TFocus, TNode, TEdit>(props: CellNavLiveSlotProps<TOptions, THostProps, TFocus, TNode, TEdit>) => TNode;
 
 // @public
 export interface CellNavLiveSlotProps<TOptions = unknown, THostProps = unknown, TFocus = unknown, TNode = unknown, TEdit = unknown> {
@@ -4561,9 +4555,6 @@ export const EXPANSION_LIVE: ChromeStageKey;
 export const EXPORT_LABELS: Pick<Required<TableLabels>, "exportFile" | "exportStarted" | "exportProgress" | "exportDone" | "exportFailed" | "exportCancelled" | "exportDownload" | "exportDismiss" | "noticeExportAllPage">;
 
 // @public
-export const EXPORT_LIVE: RowSlotKey<ExportLiveDraw>;
-
-// @public
 export interface ExportAllControls {
     readonly setMessage?: (message: string) => void;
     readonly setProgress?: (progress: number) => void;
@@ -4673,9 +4664,6 @@ export interface ExportInfo<TRow> {
     filename: string;
     rows: readonly TRow[];
 }
-
-// @public
-export type ExportLiveDraw = <TRow, TExport, TColumn, TNode>(props: ExportLiveSlotProps<TRow, TExport, TColumn, TNode>) => TNode;
 
 // @public
 export interface ExportLiveSlotProps<TRow = unknown, TExport = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
@@ -5678,9 +5666,6 @@ export const FIND_CURRENT_MATCH_SELECTOR = "[data-cell-match-current]";
 export const FIND_LABELS: Pick<Required<TableLabels>, "findInTable" | "findPlaceholder" | "findMatchCount" | "findPrevious" | "findNext" | "findClose">;
 
 // @public
-export const FIND_LIVE: RowSlotKey<FindLiveDraw>;
-
-// @public
 export interface FindBarKeyEvent {
     readonly key: string;
     preventDefault(): void;
@@ -5763,9 +5748,6 @@ export interface FindInTableState {
     setOpen: (open: boolean) => void;
     setQuery: (query: string) => void;
 }
-
-// @public
-export type FindLiveDraw = <TOptions, TNode>(props: FindLiveSlotProps<TOptions, TNode>) => TNode;
 
 // @public
 export type FindLiveSlotProps<TOptions = unknown, TNode = unknown> = TOptions & {
@@ -5995,17 +5977,11 @@ export interface FrontendSourceViewState {
 }
 
 // @public
-export const FULLSCREEN_LIVE: RowSlotKey<FullscreenLiveDraw>;
-
-// @public
 export interface FullscreenContribution {
     readonly active: boolean;
     readonly supported: boolean;
     readonly toggle: () => void;
 }
-
-// @public
-export type FullscreenLiveDraw = <TFullscreen, TNode>(props: FullscreenLiveSlotProps<TFullscreen, TNode>) => TNode;
 
 // @public
 export interface FullscreenLiveSlotProps<TFullscreen = unknown, TNode = unknown> {
@@ -10138,9 +10114,6 @@ export function selectFrom<T>(store: TableStore, selector: (read: SliceRead) => 
 export const SELECTION_LIVE: ChromeStageKey;
 
 // @public
-export const SELECTION_STATS_LIVE: RowSlotKey<SelectionStatsLiveDraw>;
-
-// @public
 export interface SelectionContribution {
     readonly acrossPages?: boolean;
     readonly allMatching?: boolean;
@@ -10203,9 +10176,6 @@ export interface SelectionStatsChromeProps<TNode = unknown> {
     slots: SelectionStatsSlots<TNode>;
     stats: SelectionStats | null;
 }
-
-// @public
-export type SelectionStatsLiveDraw = <TRow, TColumn, TNode>(props: SelectionStatsLiveSlotProps<TRow, TColumn, TNode>) => TNode;
 
 // @public
 export interface SelectionStatsLiveSlotProps<TRow = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {

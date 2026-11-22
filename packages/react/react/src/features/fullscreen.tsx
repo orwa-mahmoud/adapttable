@@ -9,12 +9,8 @@ import { type ReactNode, useEffect, useState } from "react";
 
 import { type FullscreenState, useFullscreen } from "../layout/useFullscreen";
 import type { LiveStageProps } from "./liveStage";
-import { FeatureSlot, slotRender } from "./providers";
-import {
-  FULLSCREEN_LIVE,
-  type FullscreenLiveDraw,
-  type FullscreenLiveSlotProps,
-} from "./slotKeys";
+import { slotRender } from "./providers";
+import { type FullscreenLiveSlotProps } from "./slotKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
 /** Fullscreen's live stage: reads nothing, writes the fullscreen state. */
@@ -45,7 +41,7 @@ function FullscreenStage<TRow>({
     children: (fullscreen: FullscreenState) =>
       children({ ...live, fullscreen }),
   } satisfies FullscreenLiveSlotProps;
-  return <FeatureSlot slot={FULLSCREEN_LIVE} props={fullscreenProps} />;
+  return <LiveFullscreen {...fullscreenProps} />;
 }
 
 function LiveFullscreen({
@@ -66,9 +62,6 @@ export function fullscreen(): StaticTableFeature {
     ...coreFullscreen(),
     renders: [
       slotRender(FULLSCREEN_STAGE, (props) => <FullscreenStage {...props} />),
-      slotRender<FullscreenLiveDraw>(FULLSCREEN_LIVE, (props) => (
-        <LiveFullscreen {...props} />
-      )),
     ],
   };
 }

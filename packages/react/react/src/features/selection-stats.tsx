@@ -3,7 +3,7 @@
  *
  * The figures share export value resolution. Computing them mounts only
  * when requested, in-tree through
- * `SELECTION_STATS_LIVE`.
+ * its live stage.
  */
 import { selectionStats as compute } from "@adapttable/core";
 import {
@@ -15,13 +15,9 @@ import type { ReactNode } from "react";
 
 import { STATUS_BAR_RENDER } from "./areaRegions";
 import type { LiveStageProps } from "./liveStage";
-import { FeatureSlot, slotRender } from "./providers";
+import { slotRender } from "./providers";
 import { SELECTION_LIVE_RENDER } from "./selection-live";
-import {
-  SELECTION_STATS_LIVE,
-  type SelectionStatsLiveDraw,
-  type SelectionStatsLiveSlotProps,
-} from "./slotKeys";
+import { type SelectionStatsLiveSlotProps } from "./slotKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
 /** The figures' live stage: reads the grid's range, writes the figures. */
@@ -45,7 +41,7 @@ function SelectionStatsStage<TRow>({
     children: (stats: LiveStageProps<TRow>["live"]["stats"]) =>
       children({ ...live, stats }),
   } satisfies SelectionStatsLiveSlotProps<TRow>;
-  return <FeatureSlot slot={SELECTION_STATS_LIVE} props={statsProps} />;
+  return <LiveSelectionStats {...statsProps} />;
 }
 
 function LiveSelectionStats<TRow>({
@@ -78,9 +74,6 @@ export function selectionStats(): StaticTableFeature {
       SELECTION_LIVE_RENDER,
       slotRender(SELECTION_STATS_STAGE, (props) => (
         <SelectionStatsStage {...props} />
-      )),
-      slotRender<SelectionStatsLiveDraw>(SELECTION_STATS_LIVE, (props) => (
-        <LiveSelectionStats {...props} />
       )),
       STATUS_BAR_RENDER,
     ],

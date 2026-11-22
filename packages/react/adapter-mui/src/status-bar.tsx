@@ -15,8 +15,8 @@ import { StatusBar } from "./components/StatusBar";
  * The MUI strip, offered by whichever of the two features is composed.
  *
  * One element serves both, so the slot is single and draws it once even when a
- * table composes the pair. Concatenate onto the core live renders — replacing
- * `renders` would drop `SELECTION_STATS_LIVE`.
+ * table composes the pair. Concatenate onto the core feature's renders —
+ * replacing `renders` would drop its live stage.
  */
 const draws = [
   slotRender(STATUS_BAR, (props) => <StatusBar {...props} />),

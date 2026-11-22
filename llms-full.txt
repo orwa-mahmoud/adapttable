@@ -17528,17 +17528,16 @@ laid out and run through `ChromeExtrasGate`, each after the stages whose values
 it reads — `EDIT_HISTORY_STAGE`, `COLUMN_LAYOUT_LIVE`, `FILTER_CHIPS_LIVE`,
 `GROUPING_LIVE`, `TREE_LIVE`, `SELECTION_LIVE`, `ROW_ACTIONS_LIVE`,
 `PINNING_LIVE`, `EXPANSION_LIVE` and `EDITING_LIVE`; a chrome stage may hand
-on new props, which is how edit history wraps the commit channels. Interaction
-state arrives through `ShellLiveGate`: `FIND_LIVE` (`FindLiveSlotProps`), `CELL_NAV_LIVE` (`CellNavLiveSlotProps`),
-`EXPORT_LIVE` (`ExportLiveSlotProps`), `FULLSCREEN_LIVE`
-(`FullscreenLiveSlotProps`), `SELECTION_STATS_LIVE`
-(`SelectionStatsLiveSlotProps`), `COMMAND_PALETTE_LIVE` and
-`CONTEXT_MENU_LIVE` (`ContextMenuLiveSlotProps`). An unfilled live slot passes
-an inert stand-in through, so the same chrome renders either way. Every live
-slot above but the command palette and context menu is a row slot key, each
-with its fill's type, which a fill names when it fills the slot: `ChromeExtraDraw`, `ChromeBodyDraw`,
-`FindLiveDraw`, `CellNavLiveDraw`, `ExportLiveDraw`,
-`FullscreenLiveDraw` and `SelectionStatsLiveDraw`.
+on new props, which is how edit history wraps the commit channels. Live
+stages (`liveStageKey`) run through `ShellLiveGate` once the body is built:
+find, find's marks, the keyboard grid, export, fullscreen and the selection
+figures, each building its hook's input from the finished shell
+(`FindLiveSlotProps`, `CellNavLiveSlotProps`, `ExportLiveSlotProps`,
+`FullscreenLiveSlotProps`, `SelectionStatsLiveSlotProps`). The command palette
+and the context menu are slots a kit fills with its own components:
+`COMMAND_PALETTE_LIVE` and `CONTEXT_MENU_LIVE` (`ContextMenuLiveSlotProps`). A
+row-typed slot names its fill's type, which a fill names when it fills the
+slot: `ChromeExtraDraw` and `ChromeBodyDraw`.
 
 Factories: `feature` (ad-hoc) · `rowReorder` · `rowPinning` · `cellSpan` ·
 `extraRows` · `rowAppearance` · `rowDetail` · `nestedTable` · `editing` ·
@@ -24240,6 +24239,7 @@ of 380 kB.
 | `CHROME_EXTRA_SLOT_ORDER`                                                                                                                                                                                                                                                                                                                 | each chrome stage's `stage.reads` and `stage.writes`; `liveStagesOf(features, "chrome")` orders them |
 | `HistoryLiveGate`, `EDIT_HISTORY_LIVE`, `EditHistoryLiveSlotProps`, `EditHistoryLiveDraw`                                                                                                                                                                                                                                                 | the `EDIT_HISTORY_STAGE` chrome stage, which `ChromeExtrasGate` runs                                 |
 | `OptionalEditableCell`                                                                                                                                                                                                                                                                                                                    | `CellContent`                                                                                        |
+| `FIND_LIVE`, `CELL_NAV_LIVE`, `EXPORT_LIVE`, `FULLSCREEN_LIVE`, `SELECTION_STATS_LIVE`, their `*LiveDraw` types and React's `*LiveSlotProps`                                                                                                                                                                                              | each feature's live stage (`liveStageKey`), which runs its hook itself                               |
 | `OptionalTreeCell`, `OptionalTreeToggle`, `OptionalFillHandle`, `OptionalExpandToggle`, `OptionalFilterHeader`, `OptionalRowEditActions`, `OptionalRowReorderHandle`, `OptionalRowReorderButtons`, `OptionalColumnGroupToggle`, `OptionalColumnHeaderRename`, `OptionalColumnSelect`, `OptionalGroupHeaderRow`, `OptionalGroupHeaderCard` | `<FeatureSlot slot={…} props={…} fallback={…} />` with the slot's key                                |
 | `defaultPendingRows`                                                                                                                                                                                                                                                                                                                      | `labels.pendingRows`                                                                                 |
 | `createEditConflictStore`                                                                                                                                                                                                                                                                                                                 | `createDeferredEditConflictStore` and `loadEditConflictStore`                                        |

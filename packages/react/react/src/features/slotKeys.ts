@@ -340,13 +340,6 @@ export interface FindLiveSlotProps<
 }
 
 /**
- * What fills `FIND_LIVE`: the find hook for any row type.
- *
- * @public
- */
-export type FindLiveDraw = <TRow>(props: FindLiveSlotProps<TRow>) => ReactNode;
-
-/**
  * Cell navigation plus the hook that arms the grid —
  * `@adapttable/core`'s `CellNavLiveSlotProps` with React's grid state.
  *
@@ -370,15 +363,6 @@ export type CellNavLiveSlotProps<TRow = never> = NeutralCellNavLiveSlotProps<
 };
 
 /**
- * What fills `CELL_NAV_LIVE`: the grid hook for any row type.
- *
- * @public
- */
-export type CellNavLiveDraw = <TRow>(
-  props: CellNavLiveSlotProps<TRow>
-) => ReactNode;
-
-/**
  * Export plus the hook that single-flights the write —
  * `@adapttable/core`'s `ExportLiveSlotProps` with React's export state.
  *
@@ -392,15 +376,6 @@ export type ExportLiveSlotProps<TRow = never> = NeutralExportLiveSlotProps<
 >;
 
 /**
- * What fills `EXPORT_LIVE`: the export hook for any row type.
- *
- * @public
- */
-export type ExportLiveDraw = <TRow>(
-  props: ExportLiveSlotProps<TRow>
-) => ReactNode;
-
-/**
  * Fullscreen plus the hook that names the portal container —
  * `@adapttable/core`'s `FullscreenLiveSlotProps` with React's state.
  *
@@ -410,13 +385,6 @@ export type FullscreenLiveSlotProps = NeutralFullscreenLiveSlotProps<
   FullscreenState,
   ReactNode
 >;
-
-/**
- * What fills `FULLSCREEN_LIVE`: the fullscreen hook.
- *
- * @public
- */
-export type FullscreenLiveDraw = (props: FullscreenLiveSlotProps) => ReactNode;
 
 /**
  * Optional chrome that transforms the row model or editing bundle —
@@ -458,15 +426,6 @@ export const GROUPING_PANEL: FeatureSlotKey<GroupingPanelSlotProps<unknown>> =
  */
 export type SelectionStatsLiveSlotProps<TRow = never> =
   NeutralSelectionStatsLiveSlotProps<TRow, ColumnDef<TRow>, ReactNode>;
-
-/**
- * What fills `SELECTION_STATS_LIVE`: the figures for any row type.
- *
- * @public
- */
-export type SelectionStatsLiveDraw = <TRow>(
-  props: SelectionStatsLiveSlotProps<TRow>
-) => ReactNode;
 
 /**
  * Header checkbox that selects a column.
@@ -590,20 +549,15 @@ export const GROUP_HEADER_CARD = NEUTRAL_GROUP_HEADER_CARD as FeatureSlotKey<
 >;
 
 export {
-  CELL_NAV_LIVE,
   CHROME_BODY,
   COLUMN_LAYOUT_LIVE,
   EDIT_HISTORY_STAGE,
   EDITING_LIVE,
   EXPANSION_LIVE,
-  EXPORT_LIVE,
   FILTER_CHIPS_LIVE,
-  FIND_LIVE,
-  FULLSCREEN_LIVE,
   GROUPING_LIVE,
   PINNING_LIVE,
   ROW_ACTIONS_LIVE,
   SELECTION_LIVE,
-  SELECTION_STATS_LIVE,
   TREE_LIVE,
 } from "@adapttable/core/binding";

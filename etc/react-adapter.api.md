@@ -59,7 +59,6 @@ import { BulkActionContext } from '@adapttable/core';
 import { bulkActionErrorMessage } from '@adapttable/core/binding';
 import { BulkBarState } from '@adapttable/core/binding';
 import { ButtonHTMLAttributes } from 'react';
-import { CELL_NAV_LIVE } from '@adapttable/core/binding';
 import { CellConflictAsk } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
 import { CellEditCommit } from '@adapttable/core';
@@ -71,7 +70,6 @@ import { CellEditor } from '@adapttable/core';
 import { CellEditorOption } from '@adapttable/core';
 import { CellEditTarget } from '@adapttable/core';
 import { cellFlashAttr } from '@adapttable/core/binding';
-import { CellNavLiveSlotProps as CellNavLiveSlotProps_2 } from '@adapttable/core/binding';
 import { CellProps } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
 import { CellSaveState } from '@adapttable/core';
@@ -225,7 +223,6 @@ import { ElementType } from 'react';
 import { EXPAND_TOGGLE } from '@adapttable/core/binding';
 import { ExpandToggleSlotProps } from '@adapttable/core/binding';
 import { EXPANSION_LIVE } from '@adapttable/core/binding';
-import { EXPORT_LIVE } from '@adapttable/core/binding';
 import { ExportAllControls } from '@adapttable/core';
 import { ExportAllQuery } from '@adapttable/core';
 import { ExportAllResult } from '@adapttable/core';
@@ -235,7 +232,6 @@ import { ExportContext } from '@adapttable/core';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportHandlerState } from '@adapttable/core/binding';
 import { ExportInfo } from '@adapttable/core';
-import { ExportLiveSlotProps as ExportLiveSlotProps_2 } from '@adapttable/core/binding';
 import { ExportPayload } from '@adapttable/core';
 import { ExportProgressAction } from '@adapttable/core/binding';
 import { ExportProgressChromeProps as ExportProgressChromeProps_2 } from '@adapttable/core/binding';
@@ -330,7 +326,6 @@ import { filterWidgetKind } from '@adapttable/core';
 import { FilterWidgetOf } from '@adapttable/core/binding';
 import { FilterWidgetRenderProps } from '@adapttable/core';
 import { FIND_BAR } from '@adapttable/core/binding';
-import { FIND_LIVE } from '@adapttable/core/binding';
 import { FIND_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { FindBarProps } from '@adapttable/core/binding';
 import { FindBarSlots as FindBarSlots_2 } from '@adapttable/core/binding';
@@ -344,8 +339,6 @@ import { FlattenedColumns } from '@adapttable/core/binding';
 import { flattenFeatures } from '@adapttable/core/binding';
 import { focusEditorOnMount } from '@adapttable/core/editing';
 import { formatMultiDraft } from '@adapttable/core/editing';
-import { FULLSCREEN_LIVE } from '@adapttable/core/binding';
-import { FullscreenLiveSlotProps as FullscreenLiveSlotProps_2 } from '@adapttable/core/binding';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
 import { GetCellSpanArgs } from '@adapttable/core';
@@ -616,12 +609,10 @@ import { SavedViewVisibility } from '@adapttable/core';
 import { SearchInputState } from '@adapttable/core/binding';
 import { selectFilterSpecs } from '@adapttable/core/binding';
 import { SELECTION_LIVE } from '@adapttable/core/binding';
-import { SELECTION_STATS_LIVE } from '@adapttable/core/binding';
 import { SelectionState } from '@adapttable/core/binding';
 import { SelectionStatPart } from '@adapttable/core/binding';
 import { SelectionStats } from '@adapttable/core';
 import { SelectionStatsChromeProps as SelectionStatsChromeProps_2 } from '@adapttable/core/binding';
-import { SelectionStatsLiveSlotProps as SelectionStatsLiveSlotProps_2 } from '@adapttable/core/binding';
 import { SelectionStatsSlotProps } from '@adapttable/core/binding';
 import { SelectionStatsSlots as SelectionStatsSlots_2 } from '@adapttable/core/binding';
 import { shallowEqualByKeys } from '@adapttable/core/binding';
@@ -1041,8 +1032,6 @@ export interface BulkBarChromeProps {
 
 export { BulkBarState }
 
-export { CELL_NAV_LIVE }
-
 export { CellConflictAsk }
 
 // @public
@@ -1087,14 +1076,6 @@ export { cellFlashAttr }
 
 // @public
 export const cellHighlightStyle: (props: Readonly<Record<string, unknown>> | undefined, base: CSSProperties | undefined, selected: CSSProperties) => CSSProperties | undefined;
-
-// @public
-export type CellNavLiveDraw = <TRow>(props: CellNavLiveSlotProps<TRow>) => ReactNode;
-
-// @public
-export type CellNavLiveSlotProps<TRow = never> = CellNavLiveSlotProps_2<Omit<UseGridFocusOptions<TRow>, "enabled" | "onPaste" | "onFill" | "onUndo" | "onRedo" | "onFind">, ComposedTableProps<TRow>, GridFocusState, ReactNode, CellEdit<TRow>> & {
-    readonly editing?: EditableCellEditing<TRow>;
-};
 
 export { CellProps }
 
@@ -2277,8 +2258,6 @@ export { ExpandToggleSlotProps }
 
 export { EXPANSION_LIVE }
 
-export { EXPORT_LIVE }
-
 export { ExportAllControls }
 
 export { ExportAllQuery }
@@ -2304,12 +2283,6 @@ export { ExportCsvOptions }
 export { ExportHandlerState }
 
 export { ExportInfo }
-
-// @public
-export type ExportLiveDraw = <TRow>(props: ExportLiveSlotProps<TRow>) => ReactNode;
-
-// @public
-export type ExportLiveSlotProps<TRow = never> = ExportLiveSlotProps_2<TRow, ExportHandlerState, ColumnDef<TRow>, ReactNode>;
 
 export { ExportPayload }
 
@@ -2717,8 +2690,6 @@ export { FilterWidgetRenderProps }
 
 export { FIND_BAR }
 
-export { FIND_LIVE }
-
 export { FIND_URL_WRITE_DEBOUNCE_MS }
 
 // @public
@@ -2744,15 +2715,6 @@ export function findButtonRender(Button: AdapterFeatureComponent<AdapterFindButt
 export { FindInTableState }
 
 // @public
-export type FindLiveDraw = <TRow>(props: FindLiveSlotProps<TRow>) => ReactNode;
-
-// @public
-export interface FindLiveSlotProps<TRow = never> extends UseFindInTableOptions<TRow> {
-    children: (find: FindInTableState) => ReactNode;
-    root?: RefObject<HTMLElement | null>;
-}
-
-// @public
 export type FindSearchProps = FindSearchProps_2<KeyboardEvent_2<HTMLElement>>;
 
 // @public
@@ -2775,14 +2737,6 @@ export function flattenReactColumnTree<TRow>(columns: readonly ColumnInput_2<TRo
 export { focusEditorOnMount }
 
 export { formatMultiDraft }
-
-export { FULLSCREEN_LIVE }
-
-// @public
-export type FullscreenLiveDraw = (props: FullscreenLiveSlotProps) => ReactNode;
-
-// @public
-export type FullscreenLiveSlotProps = FullscreenLiveSlotProps_2<FullscreenState, ReactNode>;
 
 export { FullscreenState }
 
@@ -4581,8 +4535,6 @@ export { selectFilterSpecs }
 
 export { SELECTION_LIVE }
 
-export { SELECTION_STATS_LIVE }
-
 export { SelectionState }
 
 export { SelectionStatPart }
@@ -4594,12 +4546,6 @@ export function SelectionStatsChrome(input: Readonly<SelectionStatsChromeProps>)
 
 // @public
 export type SelectionStatsChromeProps = SelectionStatsChromeProps_2<ReactNode>;
-
-// @public
-export type SelectionStatsLiveDraw = <TRow>(props: SelectionStatsLiveSlotProps<TRow>) => ReactNode;
-
-// @public
-export type SelectionStatsLiveSlotProps<TRow = never> = SelectionStatsLiveSlotProps_2<TRow, ColumnDef<TRow>, ReactNode>;
 
 export { SelectionStatsSlotProps }
 

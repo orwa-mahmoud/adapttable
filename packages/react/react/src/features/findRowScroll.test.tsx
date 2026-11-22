@@ -4,9 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 import type { ColumnDef } from "../columnDef";
 import type { FindInTableState } from "../find/useFindInTable";
 import { RowScrollContext } from "../virtual/rowScroll";
-import { findInTable } from "./find-in-table";
-import { FeatureProviders, FeatureSlot } from "./providers";
-import { FIND_LIVE, type FindLiveSlotProps } from "./slotKeys";
+import { findInTable, LiveFind } from "./find-in-table";
+import { FeatureProviders } from "./providers";
+import type { FindLiveSlotProps } from "./slotKeys";
 import { applyTableFeatures } from "./tableFeature";
 
 interface Row {
@@ -32,20 +32,17 @@ function mount(scrollToRow: ((row: Row) => void) | null) {
   render(
     <FeatureProviders props={props}>
       <RowScrollContext.Provider value={scrollToRow}>
-        <FeatureSlot
-          slot={FIND_LIVE}
-          props={
-            {
-              enabled: true,
-              rows: ROWS,
-              columns,
-              urlSync: false,
-              children: (state) => {
-                find = state;
-                return null;
-              },
-            } satisfies FindLiveSlotProps<Row>
-          }
+        <LiveFind<Row>
+          {...({
+            enabled: true,
+            rows: ROWS,
+            columns,
+            urlSync: false,
+            children: (state) => {
+              find = state;
+              return null;
+            },
+          } satisfies FindLiveSlotProps<Row>)}
         />
       </RowScrollContext.Provider>
     </FeatureProviders>

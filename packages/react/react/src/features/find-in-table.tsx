@@ -2,8 +2,8 @@
  * Find-in-table — `@adapttable/<kit>/find-in-table`.
  *
  * The factory and the hook live together on this entry, so a table that
- * never imports it never carries the find walk. The hook mounts in-tree
- * through `FIND_LIVE`.
+ * never imports it never carries the find walk. The hook mounts in-tree as
+ * find's live stage.
  */
 import { type GridCell } from "@adapttable/core";
 import {
@@ -24,13 +24,9 @@ import { type FindInTableState, useFindInTable } from "../find/useFindInTable";
 import { RowScrollContext } from "../virtual/rowScroll";
 import { FIND_BAR_RENDER } from "./areaRegions";
 import type { LiveStageProps } from "./liveStage";
-import { FeatureSlot, slotRender, useFeatureSlotFilled } from "./providers";
-import {
-  CELL_NAV_LIVE,
-  FIND_LIVE,
-  type FindLiveDraw,
-  type FindLiveSlotProps,
-} from "./slotKeys";
+import { slotRender, useFeatureSlotFilled } from "./providers";
+import { type FindLiveSlotProps } from "./slotKeys";
+import { CELL_NAV_STAGE } from "./stageKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
 /** Find's live stage: reads nothing, writes the matches. */
@@ -66,7 +62,7 @@ function FindMarksStage<TRow>({
   });
 }
 
-/** Build the find walk's inputs from the shell and hand them to its slot. */
+/** Build the find walk's inputs from the shell and run it. */
 function FindStage<TRow>({
   shell,
   live,
@@ -87,7 +83,7 @@ function FindStage<TRow>({
     root: chrome.rootRef,
     children: (find: FindInTableState) => children({ ...live, find }),
   } satisfies FindLiveSlotProps<TRow>;
-  return <FeatureSlot slot={FIND_LIVE} props={findProps} />;
+  return <LiveFind {...findProps} />;
 }
 
 /**
@@ -120,7 +116,8 @@ function useScrollMatchIntoWindow<TRow>(
   }, [current]);
 }
 
-function LiveFind<TRow>({
+/** Run find: the walk, its shortcut, and scrolling the match into view. */
+export function LiveFind<TRow>({
   children,
   root,
   ...options
@@ -128,7 +125,7 @@ function LiveFind<TRow>({
   const find = useFindInTable(options);
   // With cell navigation the grid owns the walk's focus; without it, find
   // brings the current match into view itself.
-  const gridNavigation = useFeatureSlotFilled(CELL_NAV_LIVE);
+  const gridNavigation = useFeatureSlotFilled(CELL_NAV_STAGE);
   useFindShortcut(root, find.openBar);
   useScrollMatchIntoWindow(options.rows, options.firstRowIndex, find.current);
   useFindScroll(root, find.current, !gridNavigation);
@@ -152,7 +149,6 @@ export function findInTable(): StaticTableFeature {
     renders: [
       slotRender(FIND_STAGE, (props) => <FindStage {...props} />),
       slotRender(FIND_MARKS_STAGE, (props) => <FindMarksStage {...props} />),
-      slotRender<FindLiveDraw>(FIND_LIVE, (props) => <LiveFind {...props} />),
       FIND_BAR_RENDER,
     ],
   };

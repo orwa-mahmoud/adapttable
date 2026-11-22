@@ -508,24 +508,6 @@ export type FindLiveSlotProps<
 };
 
 /**
- * What fills the find stage: one function for any row and any binding's types.
- *
- * @public
- */
-export type FindLiveDraw = <TOptions, TNode>(
-  props: FindLiveSlotProps<TOptions, TNode>
-) => TNode;
-
-/**
- * Find state. Filled only by `findInTable()`.
- *
- * @public
- */
-export const FIND_LIVE = featureSlotKey<never>("find-live", {
-  single: true,
-}) as RowSlotKey<FindLiveDraw>;
-
-/**
  * Cell navigation plus the state that arms the grid.
  *
  * @typeParam TOptions - The grid options the binding passes after chrome ran.
@@ -566,24 +548,6 @@ export interface CellNavLiveSlotProps<
 }
 
 /**
- * What fills the cell-navigation stage: one function for any row and any binding's types.
- *
- * @public
- */
-export type CellNavLiveDraw = <TOptions, THostProps, TFocus, TNode, TEdit>(
-  props: CellNavLiveSlotProps<TOptions, THostProps, TFocus, TNode, TEdit>
-) => TNode;
-
-/**
- * Cell navigation.
- *
- * @public
- */
-export const CELL_NAV_LIVE = featureSlotKey<never>("cell-nav-live", {
-  single: true,
-}) as RowSlotKey<CellNavLiveDraw>;
-
-/**
  * Export plus the state that single-flights the write.
  *
  * @typeParam TRow - The row type.
@@ -618,24 +582,6 @@ export interface ExportLiveSlotProps<
 }
 
 /**
- * What fills the export stage: one function for any row and any binding's types.
- *
- * @public
- */
-export type ExportLiveDraw = <TRow, TExport, TColumn, TNode>(
-  props: ExportLiveSlotProps<TRow, TExport, TColumn, TNode>
-) => TNode;
-
-/**
- * Export.
- *
- * @public
- */
-export const EXPORT_LIVE = featureSlotKey<never>("export-live", {
-  single: true,
-}) as RowSlotKey<ExportLiveDraw>;
-
-/**
  * Fullscreen plus the state that names the portal container.
  *
  * @typeParam TFullscreen - The binding's fullscreen state.
@@ -652,24 +598,6 @@ export interface FullscreenLiveSlotProps<
   /** The table; receives fullscreen state. */
   children: (fullscreen: TFullscreen) => TNode;
 }
-
-/**
- * What fills the fullscreen stage: one function for any binding's state.
- *
- * @public
- */
-export type FullscreenLiveDraw = <TFullscreen, TNode>(
-  props: FullscreenLiveSlotProps<TFullscreen, TNode>
-) => TNode;
-
-/**
- * Fullscreen.
- *
- * @public
- */
-export const FULLSCREEN_LIVE = featureSlotKey<never>("fullscreen-live", {
-  single: true,
-}) as RowSlotKey<FullscreenLiveDraw>;
 
 /**
  * Optional chrome that transforms the row model or editing bundle.
@@ -873,25 +801,6 @@ export interface SelectionStatsLiveSlotProps<
   /** Finish with the computed stats. */
   children: (stats: SelectionStats | null) => TNode;
 }
-
-/**
- * What fills the selection-figures stage: one function for any row and any binding's types.
- *
- * @public
- */
-export type SelectionStatsLiveDraw = <TRow, TColumn, TNode>(
-  props: SelectionStatsLiveSlotProps<TRow, TColumn, TNode>
-) => TNode;
-
-/**
- * Selection-stats compute.
- *
- * @public
- */
-export const SELECTION_STATS_LIVE = featureSlotKey<never>(
-  "selection-stats-live",
-  { single: true }
-) as RowSlotKey<SelectionStatsLiveDraw>;
 
 /**
  * Header checkbox that selects a column.

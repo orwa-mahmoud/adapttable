@@ -6387,17 +6387,6 @@
       "subpaths": ["./binding"]
     },
     {
-      "name": "CELL_NAV_LIVE",
-      "kind": "runtime",
-      "module": "features/slotContract.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "features/slotContract.ts#CELL_NAV_LIVE",
-      "subpaths": ["./binding"]
-    },
-    {
       "name": "cellAttributes",
       "kind": "runtime",
       "module": "layout/chromeModel.ts",
@@ -9159,17 +9148,6 @@
       "subpaths": ["./binding"]
     },
     {
-      "name": "EXPORT_LIVE",
-      "kind": "runtime",
-      "module": "features/slotContract.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "features/slotContract.ts#EXPORT_LIVE",
-      "subpaths": ["./binding"]
-    },
-    {
       "name": "exportButtonLabel",
       "kind": "runtime",
       "module": "export/exportLabel.ts",
@@ -9742,17 +9720,6 @@
       "subpaths": ["./binding"]
     },
     {
-      "name": "FIND_LIVE",
-      "kind": "runtime",
-      "module": "features/slotContract.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "features/slotContract.ts#FIND_LIVE",
-      "subpaths": ["./binding"]
-    },
-    {
       "name": "findMatchCountText",
       "kind": "runtime",
       "module": "find/findBar.ts",
@@ -9882,17 +9849,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "source/frontendRowModel.ts#frontendRowModelOf",
-      "subpaths": ["./binding"]
-    },
-    {
-      "name": "FULLSCREEN_LIVE",
-      "kind": "runtime",
-      "module": "features/slotContract.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "features/slotContract.ts#FULLSCREEN_LIVE",
       "subpaths": ["./binding"]
     },
     {
@@ -13207,17 +13163,6 @@
       "subpaths": ["./binding"]
     },
     {
-      "name": "SELECTION_STATS_LIVE",
-      "kind": "runtime",
-      "module": "features/slotContract.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "features/slotContract.ts#SELECTION_STATS_LIVE",
-      "subpaths": ["./binding"]
-    },
-    {
       "name": "selectionObserverIds",
       "kind": "runtime",
       "module": "layout/tableChromeState.ts",
@@ -14582,17 +14527,6 @@
       "subpaths": ["./binding"]
     },
     {
-      "name": "CellNavLiveDraw",
-      "kind": "type",
-      "module": "features/slotContract.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "features/slotContract.ts#CellNavLiveDraw",
-      "subpaths": ["./binding"]
-    },
-    {
       "name": "CellNavLiveSlotProps",
       "kind": "type",
       "module": "features/slotContract.ts",
@@ -15869,17 +15803,6 @@
       "subpaths": ["./binding"]
     },
     {
-      "name": "ExportLiveDraw",
-      "kind": "type",
-      "module": "features/slotContract.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "features/slotContract.ts#ExportLiveDraw",
-      "subpaths": ["./binding"]
-    },
-    {
       "name": "ExportLiveSlotProps",
       "kind": "type",
       "module": "features/slotContract.ts",
@@ -16639,17 +16562,6 @@
       "subpaths": ["./binding"]
     },
     {
-      "name": "FindLiveDraw",
-      "kind": "type",
-      "module": "features/slotContract.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "features/slotContract.ts#FindLiveDraw",
-      "subpaths": ["./binding"]
-    },
-    {
       "name": "FindLiveSlotProps",
       "kind": "type",
       "module": "features/slotContract.ts",
@@ -16779,17 +16691,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "source/frontendSource.ts#FrontendSourceViewState",
-      "subpaths": ["./binding"]
-    },
-    {
-      "name": "FullscreenLiveDraw",
-      "kind": "type",
-      "module": "features/slotContract.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "features/slotContract.ts#FullscreenLiveDraw",
       "subpaths": ["./binding"]
     },
     {
@@ -18550,17 +18451,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "focus/selectionStatsContract.ts#SelectionStatsChromeProps",
-      "subpaths": ["./binding"]
-    },
-    {
-      "name": "SelectionStatsLiveDraw",
-      "kind": "type",
-      "module": "features/slotContract.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "features/slotContract.ts#SelectionStatsLiveDraw",
       "subpaths": ["./binding"]
     },
     {

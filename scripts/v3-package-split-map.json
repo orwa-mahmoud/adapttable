@@ -14523,14 +14523,6 @@
       "behavior": ""
     },
     {
-      "export": "CELL_NAV_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "cellAttributes",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -14727,14 +14719,6 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "CellNavLiveDraw",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -18819,14 +18803,6 @@
       "behavior": ""
     },
     {
-      "export": "EXPORT_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "ExportAllControls",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -18908,14 +18884,6 @@
     },
     {
       "export": "ExportInfo",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ExportLiveDraw",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -20171,14 +20139,6 @@
       "behavior": ""
     },
     {
-      "export": "FIND_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "FindBarKeyEvent",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -20252,14 +20212,6 @@
     },
     {
       "export": "FindInTableState",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FindLiveDraw",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -20523,23 +20475,7 @@
       "behavior": ""
     },
     {
-      "export": "FULLSCREEN_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "FullscreenContribution",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FullscreenLiveDraw",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -25699,14 +25635,6 @@
       "behavior": ""
     },
     {
-      "export": "SELECTION_STATS_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "SelectionContribution",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -25764,14 +25692,6 @@
     },
     {
       "export": "SelectionStatsChromeProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SelectionStatsLiveDraw",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -46323,14 +46243,6 @@
       "behavior": ""
     },
     {
-      "export": "CELL_NAV_LIVE",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
       "export": "CellConflictAsk",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -46406,22 +46318,6 @@
       "export": "cellHighlightStyle",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "CellNavLiveDraw",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "CellNavLiveSlotProps",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
       "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
@@ -48043,14 +47939,6 @@
       "behavior": ""
     },
     {
-      "export": "EXPORT_LIVE",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
       "export": "ExportAnnouncer",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -48071,22 +47959,6 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "ExportLiveDraw",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "ExportLiveSlotProps",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -48691,14 +48563,6 @@
       "behavior": ""
     },
     {
-      "export": "FIND_LIVE",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
       "export": "FIND_URL_WRITE_DEBOUNCE_MS",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -48771,22 +48635,6 @@
       "behavior": ""
     },
     {
-      "export": "FindLiveDraw",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "FindLiveSlotProps",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
       "export": "FindSearchProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -48815,30 +48663,6 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "FULLSCREEN_LIVE",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "FullscreenLiveDraw",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "FullscreenLiveSlotProps",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -51123,14 +50947,6 @@
       "behavior": ""
     },
     {
-      "export": "SELECTION_STATS_LIVE",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
       "export": "SelectionState",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -51156,22 +50972,6 @@
     },
     {
       "export": "SelectionStatsChromeProps",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "SelectionStatsLiveDraw",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "SelectionStatsLiveSlotProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",

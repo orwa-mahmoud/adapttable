@@ -10,10 +10,10 @@ import {
 import { cellNavigation } from "./cell-navigation";
 import { DataTableShellView } from "./chromeBodyGate";
 import { editing } from "./editing";
-import { findInTable } from "./find-in-table";
-import { FeatureProviders, FeatureSlot } from "./providers";
+import { findInTable, LiveFind } from "./find-in-table";
+import { FeatureProviders } from "./providers";
 import { DISABLED_GRID_FOCUS } from "./shellLiveStubs";
-import { FIND_LIVE, type FindLiveSlotProps } from "./slotKeys";
+import type { FindLiveSlotProps } from "./slotKeys";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
 
 /**
@@ -214,21 +214,18 @@ describe("find without cell navigation", () => {
             root.current = element;
           }}
         >
-          <FeatureSlot
-            slot={FIND_LIVE}
-            props={
-              {
-                enabled: false,
-                rows: ROWS,
-                columns,
-                urlSync: false,
-                root,
-                children: (find) => {
-                  seen.push(find.open);
-                  return <span>inside</span>;
-                },
-              } satisfies FindLiveSlotProps<Row>
-            }
+          <LiveFind<Row>
+            {...({
+              enabled: false,
+              rows: ROWS,
+              columns,
+              urlSync: false,
+              root,
+              children: (find) => {
+                seen.push(find.open);
+                return <span>inside</span>;
+              },
+            } satisfies FindLiveSlotProps<Row>)}
           />
         </div>
       </FeatureProviders>

@@ -3,7 +3,7 @@
  *
  * The factory, the writer and the single-flight hook live together, so a
  * table that never imports it never carries export. The hook mounts in-tree
- * through `EXPORT_LIVE`.
+ * as its live stage.
  */
 import {
   type ExportCsvOptions,
@@ -23,12 +23,8 @@ import {
   useExportHandler,
 } from "../export/useExportHandler";
 import type { LiveStageProps } from "./liveStage";
-import { FeatureSlot, slotRender } from "./providers";
-import {
-  EXPORT_LIVE,
-  type ExportLiveDraw,
-  type ExportLiveSlotProps,
-} from "./slotKeys";
+import { slotRender } from "./providers";
+import { type ExportLiveSlotProps } from "./slotKeys";
 import type { TableFeature } from "./tableFeature";
 
 /** Export's live stage: reads the grid's range, writes the export control. */
@@ -68,7 +64,7 @@ function ExportStage<TRow>({
     children: (exportHandler: ExportHandlerState) =>
       children({ ...live, exportHandler }),
   } satisfies ExportLiveSlotProps<TRow>;
-  return <FeatureSlot slot={EXPORT_LIVE} props={exportProps} />;
+  return <LiveExport {...exportProps} />;
 }
 
 function LiveExport<TRow>({
@@ -112,11 +108,6 @@ export function exportCsv<TRow>(
 ): TableFeature<TRow> {
   return {
     ...coreExportCsv<TRow>(options),
-    renders: [
-      slotRender(EXPORT_STAGE, (props) => <ExportStage {...props} />),
-      slotRender<ExportLiveDraw>(EXPORT_LIVE, (props) => (
-        <LiveExport {...props} />
-      )),
-    ],
+    renders: [slotRender(EXPORT_STAGE, (props) => <ExportStage {...props} />)],
   };
 }
