@@ -3,8 +3,9 @@
  * Enter / Escape / Tab keyboard flow.
  *
  * Opt-in by design — calling this hook alone does nothing visible. Adapters
- * only surface editors when the table passes `onCellEdit` (see
- * {@link TableChrome.editing}) and a column sets `editable`.
+ * only surface editors when the table passes `onCellEdit` (the editing
+ * feature publishes its bundle as `EDITING_STATE`) and a column sets
+ * `editable`.
  */
 import { type CellEditingState } from "@adapttable/core";
 import {

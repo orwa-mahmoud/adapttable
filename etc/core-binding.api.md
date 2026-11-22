@@ -7972,7 +7972,7 @@ export function overlayChromeExtras<TShell extends PipelineShell & {
         readonly enableColumnMenu?: boolean;
         readonly onColumnRename?: unknown;
     };
-}>(shell: TShell, chrome: OverlayChrome): TShell;
+}>(shell: TShell, base: OverlayChrome, channels?: Partial<OverlayChrome>): TShell;
 
 // @public
 export interface OverlayDismissOptions {
@@ -9776,6 +9776,9 @@ export interface RuntimeActions<TRow> {
     // (undocumented)
     readonly rowActions?: readonly RowAction<TRow>[];
 }
+
+// @public
+export type RuntimeChannels<TRow> = Partial<RuntimeChromeInput<TRow>>;
 
 // @public
 export interface RuntimeChromeInput<TRow> {
@@ -11787,7 +11790,7 @@ export class TableRuntimePublisher<TRow> {
         readonly source: {
             readonly tableEngine?: TableEngine<TRow>;
         };
-    }, actions: RuntimeActions<TRow>): void;
+    }, actions: RuntimeActions<TRow>, channels?: RuntimeChannels<TRow>): void;
     view(): TableRuntimeView<TRow> | undefined;
     visibleRows(): readonly TRow[];
 }

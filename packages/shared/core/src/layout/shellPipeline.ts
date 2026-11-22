@@ -354,6 +354,25 @@ export function tableRuntimeView<TRow>(
 }
 
 /**
+ * What the features published for the runtime view apart from the chrome.
+ *
+ * @public
+ */
+export type RuntimeChannels<TRow> = Partial<RuntimeChromeInput<TRow>>;
+
+/** Whether two channel sets hold the same values. */
+function sameChannels<TRow>(
+  left: RuntimeChannels<TRow>,
+  right: RuntimeChannels<TRow>
+): boolean {
+  const keys = Object.keys(left) as (keyof RuntimeChannels<TRow>)[];
+  return (
+    keys.length === Object.keys(right).length &&
+    keys.every((key) => left[key] === right[key])
+  );
+}
+
+/**
  * The host's own row and bulk actions, as composed.
  *
  * @public
@@ -369,6 +388,8 @@ export interface RuntimeActions<TRow> {
  */
 class RuntimeFrame<TRow> {
   #chrome: RuntimeChromeInput<TRow> | undefined;
+  #channels: RuntimeChannels<TRow> = {};
+  #input: RuntimeChromeInput<TRow> | undefined;
   #actions: RuntimeActions<TRow> = {};
   #view: TableRuntimeView<TRow> | undefined;
   #rows: readonly TRow[] | undefined;
@@ -383,32 +404,48 @@ class RuntimeFrame<TRow> {
       : undefined;
   }
 
-  stage(chrome: RuntimeChromeInput<TRow>, actions: RuntimeActions<TRow>): void {
+  stage(
+    chrome: RuntimeChromeInput<TRow>,
+    actions: RuntimeActions<TRow>,
+    channels: RuntimeChannels<TRow>
+  ): void {
     if (
       chrome === this.#chrome &&
+      sameChannels(channels, this.#channels) &&
       actions.rowActions === this.#actions.rowActions &&
       actions.bulkActions === this.#actions.bulkActions
     ) {
       return;
     }
     this.#chrome = chrome;
+    this.#channels = channels;
+    this.#input = undefined;
     this.#actions = actions;
     this.#view = undefined;
     this.#rows = undefined;
   }
 
-  view(): TableRuntimeView<TRow> | undefined {
+  /** The chrome with the channels laid over it, built on first read. */
+  #inputOf(): RuntimeChromeInput<TRow> | undefined {
     const chrome = this.#chrome;
     if (chrome === undefined) return undefined;
+    if (Object.keys(this.#channels).length === 0) return chrome;
+    this.#input ??= { ...chrome, ...this.#channels };
+    return this.#input;
+  }
+
+  view(): TableRuntimeView<TRow> | undefined {
+    const input = this.#inputOf();
+    if (input === undefined) return undefined;
     this.#view ??= {
-      ...tableRuntimeView(chrome, this.#actions),
+      ...tableRuntimeView(input, this.#actions),
       neutralTable: this.neutral,
     };
     return this.#view;
   }
 
   visibleRows(): readonly TRow[] {
-    const chrome = this.#chrome;
+    const chrome = this.#inputOf();
     if (chrome === undefined) return [];
     this.#rows ??= this.#view
       ? (this.#view.visibleRows ?? this.#view.rows)
@@ -452,12 +489,16 @@ export class TableRuntimePublisher<TRow> {
    *
    * @param chrome - The chrome after every extra ran.
    * @param actions - The host's own row and bulk actions.
+   * @param channels - What the features published apart from the chrome:
+   *   editing, the filter definitions. The chrome stays the owner the shell's
+   *   operations are read by.
    */
   stage(
     chrome: RuntimeChromeInput<TRow> & {
       readonly source: { readonly tableEngine?: TableEngine<TRow> };
     },
-    actions: RuntimeActions<TRow>
+    actions: RuntimeActions<TRow>,
+    channels: RuntimeChannels<TRow> = {}
   ): void {
     const engine = chrome.source.tableEngine;
     // The neutral table belongs to the engine it reads. A replaced source
@@ -468,7 +509,7 @@ export class TableRuntimePublisher<TRow> {
       this.#engine = engine;
       this.#frame = new RuntimeFrame(engine);
     }
-    this.#frame.stage(chrome, actions);
+    this.#frame.stage(chrome, actions, channels);
   }
 
   /**
@@ -760,7 +801,9 @@ export interface OverlayChrome {
  * The shell captured the BASE chrome: its row universe is the page slice,
  * its table has every visible column. The extras may have grouped the rows,
  * armed editing, dropped columns for width — this carries all of that into
- * the table and toolbar props the kit renders from.
+ * the table and toolbar props the kit renders from. `channels` are what the
+ * features published apart from the chrome (editing, grouping); the result
+ * keeps `base` as its chrome.
  *
  * @public
  */
@@ -775,7 +818,12 @@ export function overlayChromeExtras<
       readonly onColumnRename?: unknown;
     };
   },
->(shell: TShell, chrome: OverlayChrome): TShell {
+>(
+  shell: TShell,
+  base: OverlayChrome,
+  channels: Partial<OverlayChrome> = {}
+): TShell {
+  const chrome: OverlayChrome = { ...base, ...channels };
   const dropped = new Set(chrome.droppedColumns);
   const visible = chrome.columnLayout.visibleColumns;
   const columns =
@@ -786,7 +834,7 @@ export function overlayChromeExtras<
   const layout = chrome.columnLayout;
   return {
     ...shell,
-    chrome,
+    chrome: base,
     source: chrome.source,
     table,
     autoSizeColumns: chrome.autoSizeColumns ?? shell.autoSizeColumns,

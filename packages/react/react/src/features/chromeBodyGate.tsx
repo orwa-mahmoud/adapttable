@@ -6,6 +6,7 @@
  * paint already knows which child to mount — features are static — so SSR
  * and hydration see the same tree.
  */
+import type { EditHistoryState } from "@adapttable/core";
 import { overlayChromeExtras } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
@@ -21,12 +22,16 @@ import type { ChromeBodyData } from "../virtual/chromeBodyShared";
 import { usePlainChromeBodyData } from "../virtual/usePlainChromeBodyData";
 import { ChromeExtrasGate } from "./chromeExtrasGate";
 import { rememberFeatureHost } from "./featureHost";
-import { FeatureStateScope } from "./featureState";
+import { FeatureStateScope, useFeatureState } from "./featureState";
 import { FeatureSlot, useFeatureSlotFilled } from "./providers";
 import { ShellLiveGate } from "./shellLiveGate";
 import { disabledHistory } from "./shellLiveStubs";
 import { CHROME_BODY, type ChromeBodySlotProps } from "./slotKeys";
-import { TABLE_PROPS_STATE } from "./stateKeys";
+import {
+  EDIT_HISTORY_STATE,
+  EDITING_STATE,
+  TABLE_PROPS_STATE,
+} from "./stateKeys";
 
 /**
  * Resolve chrome-body data, then finish the table.
@@ -102,40 +107,65 @@ export function DataTableShellView<TRow>({
   readonly shell: DataTableShellResult<TRow>;
   readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
 }): ReactNode {
+  "use no memo";
   return (
     <TableStoreContext.Provider value={shell.tableStore}>
       <ChromeExtrasGate chrome={shell.chrome} props={shell.chromeProps}>
-        {(chrome, chromeProps) => {
-          // The stages may wrap the commit channels (edit history); the body
-          // and the live stages read the wrapped ones.
-          rememberFeatureHost(chromeProps, shell.featureHost);
-          const staged = {
-            ...shell,
-            chromeProps,
-            editHistory: chrome.editHistory ?? disabledHistory(),
-          };
-          const withExtras = withGroupingPanel(
-            overlayChromeExtras(staged, chrome),
-            chrome.groupingPanel
-          );
-          const afterBody = (view: DataTableShellResult<TRow>) => (
-            <FeatureStateScope
-              stateKey={TABLE_PROPS_STATE}
-              value={view.chromeProps as DataTableShellChromeProps<unknown>}
-            >
-              <ShellLiveGate shell={view}>{children}</ShellLiveGate>
-            </FeatureStateScope>
-          );
-          if (shell.skipChromeBody === true) {
-            return afterBody(withExtras);
-          }
-          return (
-            <ChromeBodyGate chrome={chrome} props={withExtras.chromeProps}>
-              {(body) => afterBody(finishDataTableShell(withExtras, body))}
-            </ChromeBodyGate>
-          );
-        }}
+        {(chrome, chromeProps) => (
+          <StagedShell shell={shell} chrome={chrome} chromeProps={chromeProps}>
+            {children}
+          </StagedShell>
+        )}
       </ChromeExtrasGate>
     </TableStoreContext.Provider>
+  );
+}
+
+/**
+ * The shell after the chrome stages: reads what the stages published and
+ * finishes the body and the live stages from it.
+ */
+function StagedShell<TRow>({
+  shell,
+  chrome,
+  chromeProps,
+  children,
+}: {
+  readonly shell: DataTableShellResult<TRow>;
+  readonly chrome: TableChrome<TRow>;
+  readonly chromeProps: DataTableShellResult<TRow>["chromeProps"];
+  readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
+}): ReactNode {
+  "use no memo";
+  const editing = useFeatureState(EDITING_STATE);
+  const editHistory = useFeatureState(EDIT_HISTORY_STATE) as
+    EditHistoryState<TRow> | undefined;
+  // The stages may wrap the commit channels (edit history); the body
+  // and the live stages read the wrapped ones.
+  rememberFeatureHost(chromeProps, shell.featureHost);
+  const staged = {
+    ...shell,
+    chromeProps,
+    editHistory: editHistory ?? disabledHistory(),
+  };
+  const withExtras = withGroupingPanel(
+    overlayChromeExtras(staged, chrome, { editing }),
+    chrome.groupingPanel
+  );
+  const afterBody = (view: DataTableShellResult<TRow>) => (
+    <FeatureStateScope
+      stateKey={TABLE_PROPS_STATE}
+      value={view.chromeProps as DataTableShellChromeProps<unknown>}
+    >
+      <ShellLiveGate shell={view}>{children}</ShellLiveGate>
+    </FeatureStateScope>
+  );
+  if (shell.skipChromeBody === true) {
+    return afterBody(withExtras);
+  }
+  return (
+    <ChromeBodyGate chrome={chrome} props={withExtras.chromeProps}>
+      {(body) => afterBody(finishDataTableShell(withExtras, body))}
+    </ChromeBodyGate>
   );
 }

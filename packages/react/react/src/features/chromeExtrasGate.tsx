@@ -13,8 +13,11 @@ import {
 import { type ReactNode, useState } from "react";
 
 import type { TableChrome } from "../chrome/tableChromeContract";
+import type { EditableCellEditing } from "../editing/editableCellController";
+import { useFeatureState } from "./featureState";
 import { useChromeStages, usePublishTableRuntime } from "./providers";
 import type { ChromeExtraSlotProps } from "./slotKeys";
+import { EDITING_STATE } from "./stateKeys";
 
 /** The props a chrome stage reads and may hand on. */
 type StageTableProps<TRow> = ChromeExtraSlotProps<TRow>["props"];
@@ -34,13 +37,21 @@ function RuntimePublisher<TRow, TProps extends StageTableProps<TRow>>({
   readonly props: TProps;
   readonly children: WalkDone<TRow, TProps>;
 }): ReactNode {
+  "use no memo";
   // One publisher per table: it keeps the neutral table, and hands it a
   // binding that reads the latest published view.
   const [publisher] = useState(() => new TableRuntimePublisher<TRow>());
-  publisher.stage(chrome, {
-    rowActions: props.rowActions,
-    bulkActions: props.bulkActions,
-  });
+  const editing = useFeatureState(EDITING_STATE) as
+    EditableCellEditing<TRow> | undefined;
+  publisher.stage(
+    chrome,
+    { rowActions: props.rowActions, bulkActions: props.bulkActions },
+    {
+      filterDefs: props.filterDefs,
+      filterRegistry: props.filterRegistry,
+      editing,
+    }
+  );
   const labels = chrome.table.labels;
   usePublishTableRuntime<TRow>({
     rows: () => publisher.visibleRows(),

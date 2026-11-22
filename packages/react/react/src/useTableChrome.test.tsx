@@ -10,7 +10,6 @@ import type { ColumnDef } from "./columnDef";
 import { ChromeExtrasGate } from "./features/chromeExtrasGate";
 import { dirtyIndicators } from "./features/editing";
 import { bulkActions, pinnedSummaryRows } from "./features/factories";
-import { useFeatureState } from "./features/featureState";
 import { filters } from "./features/filters";
 import { grouping } from "./features/grouping";
 import { groupingPanel } from "./features/grouping-panel";
@@ -18,12 +17,10 @@ import { FeatureProviders } from "./features/providers";
 import { rowActions } from "./features/row-actions";
 import { rowPinning } from "./features/row-pinning";
 import { rowReorder } from "./features/row-reorder";
-import {
-  FILTER_CHIPS_STATE,
-  type FilterChipsState,
-} from "./features/stateKeys";
-import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
+import { FILTER_CHIPS_STATE } from "./features/stateKeys";
+import { applyTableFeatures } from "./features/tableFeature";
 import { tree } from "./features/tree";
+import { renderLiveChrome } from "./liveChrome.test-utils";
 import { useFrontendData } from "./source/useFrontendData";
 import { createMemoryAdapter } from "./url/adapter";
 import { useTableChrome } from "./useTableChrome";
@@ -37,48 +34,6 @@ const ROWS: Row[] = [
   { id: "b", name: "Bob" },
 ];
 const columns: ColumnDef<Row>[] = [{ key: "name", header: "Name" }];
-
-function renderLiveChrome<TRow>(
-  features: readonly TableFeature<TRow>[],
-  build: () => Parameters<typeof useTableChrome<TRow>>[0]
-) {
-  const applied = applyTableFeatures({ features });
-  const box: {
-    current: TableChrome<TRow>;
-    filterChips: FilterChipsState | undefined;
-  } = {
-    current: undefined as unknown as TableChrome<TRow>,
-    filterChips: undefined,
-  };
-  function ChipsProbe() {
-    box.filterChips = useFeatureState(FILTER_CHIPS_STATE);
-    return null;
-  }
-  function Probe() {
-    const props = build();
-    const chromeProps = { ...applied, ...props };
-    const base = useTableChrome<TRow>(chromeProps);
-    return (
-      <ChromeExtrasGate chrome={base} props={chromeProps}>
-        {(overlaid) => {
-          box.current = overlaid;
-          return <ChipsProbe />;
-        }}
-      </ChromeExtrasGate>
-    );
-  }
-  const tree = (
-    <FeatureProviders props={applied}>
-      <Probe />
-    </FeatureProviders>
-  );
-  const view = render(tree);
-  return {
-    result: box,
-    unmount: view.unmount,
-    rerender: () => view.rerender(tree),
-  };
-}
 
 function mount(
   initial = "",
@@ -143,70 +98,90 @@ describe("useTableChrome", () => {
   it("merges label chips with extraChips and counts them", () => {
     const adapter = createMemoryAdapter("f_status=Active");
     const extraChips = [{ key: "x", label: "X", onRemove: vi.fn() }];
-    const { result } = renderLiveChrome([filters<Row>([])], () => {
-      const source = useFrontendData<Row>({
-        data: ROWS,
-        urlAdapter: adapter,
-        columns,
-        paginationMode: "paged",
-      });
-      return {
-        source,
-        columns,
-        rowKey: (r) => r.id,
-        filterLabels: { status: (v) => `Status: ${v}` },
-        extraChips,
-      };
-    });
-    const chips = result.filterChips?.chips.map((c) => c.label);
+    const { result } = renderLiveChrome(
+      [filters<Row>([])],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: adapter,
+          columns,
+          paginationMode: "paged",
+        });
+        return {
+          source,
+          columns,
+          rowKey: (r) => r.id,
+          filterLabels: { status: (v) => `Status: ${v}` },
+          extraChips,
+        };
+      },
+      [FILTER_CHIPS_STATE]
+    );
+    const chips = result.state(FILTER_CHIPS_STATE)?.chips.map((c) => c.label);
     expect(chips).toContain("Status: Active");
     expect(chips).toContain("X");
-    expect(result.filterChips?.activeFilterCount).toBe(chips?.length);
+    expect(result.state(FILTER_CHIPS_STATE)?.activeFilterCount).toBe(
+      chips?.length
+    );
   });
 
   it("publishes only extraChips when there are no label chips", () => {
-    const { result } = renderLiveChrome([filters<Row>([])], () => ({
-      source: useFrontendData<Row>({
-        data: ROWS,
-        urlAdapter: createMemoryAdapter(""),
+    const { result } = renderLiveChrome(
+      [filters<Row>([])],
+      () => ({
+        source: useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        }),
         columns,
-        paginationMode: "paged",
+        rowKey: (r) => r.id,
+        extraChips: [{ key: "x", label: "Only", onRemove: vi.fn() }],
       }),
-      columns,
-      rowKey: (r) => r.id,
-      extraChips: [{ key: "x", label: "Only", onRemove: vi.fn() }],
-    }));
-    expect(result.filterChips?.chips.map((c) => c.label)).toEqual(["Only"]);
+      [FILTER_CHIPS_STATE]
+    );
+    expect(result.state(FILTER_CHIPS_STATE)?.chips.map((c) => c.label)).toEqual(
+      ["Only"]
+    );
   });
 
   it("honours an explicit activeFilterCount override", () => {
-    const { result } = renderLiveChrome([filters<Row>([])], () => ({
-      source: useFrontendData<Row>({
-        data: ROWS,
-        urlAdapter: createMemoryAdapter(""),
+    const { result } = renderLiveChrome(
+      [filters<Row>([])],
+      () => ({
+        source: useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        }),
         columns,
-        paginationMode: "paged",
+        rowKey: (r) => r.id,
+        activeFilterCount: 7,
       }),
-      columns,
-      rowKey: (r) => r.id,
-      activeFilterCount: 7,
-    }));
-    expect(result.filterChips?.activeFilterCount).toBe(7);
+      [FILTER_CHIPS_STATE]
+    );
+    expect(result.state(FILTER_CHIPS_STATE)?.activeFilterCount).toBe(7);
   });
 
   it("publishes no chips without the filters feature", () => {
-    const { result } = renderLiveChrome([], () => ({
-      source: useFrontendData<Row>({
-        data: ROWS,
-        urlAdapter: createMemoryAdapter(""),
+    const { result } = renderLiveChrome(
+      [],
+      () => ({
+        source: useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        }),
         columns,
-        paginationMode: "paged",
+        rowKey: (r) => r.id,
+        extraChips: [{ key: "x", label: "Only", onRemove: vi.fn() }],
       }),
-      columns,
-      rowKey: (r) => r.id,
-      extraChips: [{ key: "x", label: "Only", onRemove: vi.fn() }],
-    }));
-    expect(result.filterChips).toBeUndefined();
+      [FILTER_CHIPS_STATE]
+    );
+    expect(result.state(FILTER_CHIPS_STATE)).toBeUndefined();
   });
 
   it("exposes the headless table and a getRowId", () => {
@@ -424,7 +399,8 @@ describe("useTableChrome", () => {
           rowKey: (r) => r.id,
           filterDefs: [{ key: "name", type: "text", label: "Person" }],
         };
-      }
+      },
+      [FILTER_CHIPS_STATE]
     );
     act(() =>
       result.current.source.setFilterTree?.({
@@ -433,11 +409,13 @@ describe("useTableChrome", () => {
       })
     );
     expect(
-      result.filterChips?.chips.some((chip) => chip.label.includes("Ada"))
+      result
+        .state(FILTER_CHIPS_STATE)
+        ?.chips.some((chip) => chip.label.includes("Ada"))
     ).toBe(true);
     act(() => result.current.clearFilters());
     expect(result.current.source.filterTree).toBeUndefined();
-    expect(result.filterChips?.chips).toEqual([]);
+    expect(result.state(FILTER_CHIPS_STATE)?.chips).toEqual([]);
   });
 
   it("onGroupByChange observes — a logging handler never breaks grouping", () => {

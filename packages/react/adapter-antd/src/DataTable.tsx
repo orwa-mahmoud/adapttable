@@ -12,6 +12,7 @@ import {
   type ConfirmHandler,
   type DataTableShellResult,
   DEFAULT_CARD_SIZE_PX,
+  type EditableCellEditing,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_ROW_PARTS,
   type FeatureProps,
@@ -377,7 +378,7 @@ function antdOnRow<TRow>(options: {
   windowStart: number;
   gridFocus: GridFocusState | undefined;
   onRowClick: DataTableProps<TRow>["onRowClick"];
-  editing: NonNullable<ReturnType<typeof useTableChrome<TRow>>>["editing"];
+  editing: EditableCellEditing<TRow> | undefined;
   prefetch: DataTableProps<TRow>["prefetch"];
   rowStyle: ComposedProps<TRow>["rowStyle"];
   rowHeight: ComposedProps<TRow>["rowHeight"];
@@ -990,7 +991,7 @@ interface DataTableBodyRegionProps<TRow> {
   tree: ReturnType<typeof useTableChrome<TRow>>["tree"];
   detailRender: ((row: TRow) => ReactNode) | undefined;
   detailExpansion: RowExpansionState | undefined;
-  editing: NonNullable<ReturnType<typeof useTableChrome<TRow>>>["editing"];
+  editing: EditableCellEditing<TRow> | undefined;
   cardWindow: CardWindow<TRow>;
   tableLabel: string | undefined;
   density: "comfortable" | "compact" | undefined;
@@ -1098,7 +1099,7 @@ function DesktopTableBody<TRow>({
   rowStyle: ComposedProps<TRow>["rowStyle"];
   rowHeight: ComposedProps<TRow>["rowHeight"];
   /** The editing bundle, so a row can carry its dirty mark. */
-  editing: NonNullable<ReturnType<typeof useTableChrome<TRow>>>["editing"];
+  editing: EditableCellEditing<TRow> | undefined;
   onRowClick: DataTableProps<TRow>["onRowClick"];
   prefetch: DataTableProps<TRow>["prefetch"];
   hasPinned: boolean;
@@ -1830,7 +1831,7 @@ function AntdViewBody<TRow>({
     getRowId,
     renderRowDetail: props.renderRowDetail,
     expansion: c.detail?.expansion,
-    editing: c.editing,
+    editing: view.tableProps.editing,
     rowReorder: c.rowReorder,
     pinnedTopRows,
     pinnedBottomRows,
@@ -1856,7 +1857,7 @@ function AntdViewBody<TRow>({
     sortDir: source.sortDir,
     confirm,
     labels,
-    editing: c.editing,
+    editing: view.tableProps.editing,
     rows: c.editingRows,
     groupingPanel: c.groupingPanel,
     getRowId,
@@ -1995,7 +1996,7 @@ function AntdViewBody<TRow>({
             tree={c.tree}
             detailRender={c.detail?.render}
             detailExpansion={c.detail?.expansion}
-            editing={c.editing}
+            editing={view.tableProps.editing}
             cardWindow={cardWindow}
             tableLabel={resolvedTableLabel}
             density={density}

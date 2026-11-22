@@ -25259,6 +25259,14 @@
       "behavior": ""
     },
     {
+      "export": "RuntimeChannels",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "RuntimeChromeInput",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -47860,6 +47868,14 @@
     },
     {
       "export": "EDITING_LIVE",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "EDITING_STATE",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",

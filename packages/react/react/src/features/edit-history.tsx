@@ -87,14 +87,11 @@ function EditHistoryStage<TRow>({
           stateKey={EDIT_HISTORY_STATE}
           value={result.history as EditHistoryState<unknown>}
         >
-          {children(
-            { ...chrome, editHistory: result.history },
-            {
-              ...props,
-              onCellEdit: result.onCellEdit,
-              onBatchEdit: result.onBatchEdit ?? props.onBatchEdit,
-            }
-          )}
+          {children(chrome, {
+            ...props,
+            onCellEdit: result.onCellEdit,
+            onBatchEdit: result.onBatchEdit ?? props.onBatchEdit,
+          })}
         </FeatureStateScope>
       )}
     </LiveEditHistory>

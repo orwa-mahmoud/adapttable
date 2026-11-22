@@ -8,43 +8,16 @@ import { editing } from "../features/editing";
 import { grouping } from "../features/grouping";
 import { groupingPanel } from "../features/grouping-panel";
 import { FeatureProviders } from "../features/providers";
+import { EDITING_STATE } from "../features/stateKeys";
 import {
   applyTableFeatures,
   type TableFeature,
 } from "../features/tableFeature";
+import { renderLiveChrome } from "../liveChrome.test-utils";
 import { useFrontendData } from "../source/useFrontendData";
 import { createMemoryAdapter } from "../url/adapter";
 import { useTableUrlState } from "../url/useTableUrlState";
 import { useTableChrome } from "../useTableChrome";
-
-function renderLiveChrome<TRow>(
-  features: readonly TableFeature<TRow>[],
-  build: () => Parameters<typeof useTableChrome<TRow>>[0]
-) {
-  const applied = applyTableFeatures({ features });
-  const box: { current: TableChrome<TRow> } = {
-    current: undefined as unknown as TableChrome<TRow>,
-  };
-  function Probe() {
-    const props = build();
-    const chromeProps = { ...applied, ...props };
-    const base = useTableChrome<TRow>(chromeProps);
-    return (
-      <ChromeExtrasGate chrome={base} props={chromeProps}>
-        {(overlaid) => {
-          box.current = overlaid;
-          return null;
-        }}
-      </ChromeExtrasGate>
-    );
-  }
-  render(
-    <FeatureProviders props={applied}>
-      <Probe />
-    </FeatureProviders>
-  );
-  return { result: box };
-}
 
 afterEach(() => {
   resetDevWarnings();
@@ -125,7 +98,7 @@ describe("editing row universe under grouping", () => {
         groupBy,
         onCellEdit: () => undefined,
       };
-    });
+    }, [EDITING_STATE]);
   }
 
   it("exposes the grouped leaf set as editingRows, the page slice otherwise", () => {
@@ -148,8 +121,8 @@ describe("editing row universe under grouping", () => {
     // slice) while the grouped body rendered the full filtered set — every
     // off-page row froze as display-only the instant editing began.
     const { result } = chromeWith("team");
-    act(() => result.current.editing?.state.begin("4", "name", "Radia"));
-    expect(result.current.editing?.state.active).toMatchObject({
+    act(() => result.state(EDITING_STATE)?.state.begin("4", "name", "Radia"));
+    expect(result.state(EDITING_STATE)?.state.active).toMatchObject({
       rowId: "4",
       columnKey: "name",
     });
@@ -157,14 +130,14 @@ describe("editing row universe under grouping", () => {
 
   it("still discards an edit whose row is not in the rendered set", () => {
     const { result } = chromeWith("team");
-    act(() => result.current.editing?.state.begin("999", "name", "x"));
-    expect(result.current.editing?.state.active).toBeNull();
+    act(() => result.state(EDITING_STATE)?.state.begin("999", "name", "x"));
+    expect(result.state(EDITING_STATE)?.state.active).toBeNull();
   });
 
   it("keeps page-slice semantics when grouping is off", () => {
     const { result } = chromeWith(undefined);
-    act(() => result.current.editing?.state.begin("4", "name", "Radia"));
-    expect(result.current.editing?.state.active).toBeNull();
+    act(() => result.state(EDITING_STATE)?.state.begin("4", "name", "Radia"));
+    expect(result.state(EDITING_STATE)?.state.active).toBeNull();
   });
 });
 

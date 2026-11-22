@@ -587,6 +587,47 @@ describe("TableRuntimePublisher", () => {
   });
 });
 
+describe("TableRuntimePublisher channels", () => {
+  it("lays channels over the chrome and reads the shell overlay by the chrome", () => {
+    const engine = createTableEngine<Row>({
+      data: ROWS,
+      columns: [{ key: "name", header: "Name" }],
+      rowKey: getRowId,
+      tableId: "people",
+    });
+    const publisher = new TableRuntimePublisher<Row>();
+    const chrome = makeChrome({
+      source: makeSource({ tableEngine: engine }),
+    });
+    const onCellEdit = vi.fn();
+    publisher.stage(chrome, {}, { editing: { onCellEdit } });
+    const view = publisher.view();
+    expect(view?.editing?.onCellEdit).toBe(onCellEdit);
+    publishShellOverlay(chrome, {
+      find: {
+        open: false,
+        query: "",
+        setOpen: vi.fn(),
+        setQuery: vi.fn(),
+        openBar: vi.fn(),
+      },
+    });
+    expect(view?.neutralTable?.operations.find).toBe(true);
+  });
+
+  it("restages when a channel changes and keeps the view when none does", () => {
+    const publisher = new TableRuntimePublisher<Row>();
+    const chrome = makeChrome({ source: makeSource({ rows: ROWS }) });
+    const editing = { onCellEdit: vi.fn() };
+    publisher.stage(chrome, {}, { editing });
+    const first = publisher.view();
+    publisher.stage(chrome, {}, { editing });
+    expect(publisher.view()).toBe(first);
+    publisher.stage(chrome, {}, { editing: { onCellEdit: vi.fn() } });
+    expect(publisher.view()).not.toBe(first);
+  });
+});
+
 describe("cellNavigationInput", () => {
   const columns = ["c0", "c1"];
 
@@ -829,6 +870,16 @@ describe("overlayChromeExtras", () => {
       chromeProps,
     };
   }
+
+  it("reads the channels it is given and keeps the base as its chrome", () => {
+    const chrome = makeOverlayChrome({});
+    const editing = { armed: true };
+    const out = overlayChromeExtras(makeShell({}), chrome, {
+      editing,
+    }) as ReturnType<typeof makeShell> & Record<string, unknown>;
+    expect(out.chrome).toBe(chrome);
+    expect((out.tableProps as Record<string, unknown>).editing).toBe(editing);
+  });
 
   it("carries every extra into the table and toolbar props", () => {
     const chrome = makeOverlayChrome({

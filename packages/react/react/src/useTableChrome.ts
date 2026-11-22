@@ -216,7 +216,6 @@ export function useTableChrome<TRow>(
   // entries. Base chrome leaves those fields empty; ChromeExtrasGate overlays
   // them when the matching feature is composed.
   const detail = undefined;
-  const editing = undefined;
   const onCellEdit = props.onCellEdit;
   const hasEditableColumn = resolvedColumns.some((column) => column.editable);
   const hasEditHandler =
@@ -388,7 +387,6 @@ export function useTableChrome<TRow>(
     pinnedRows,
     groupingArmed,
     treeShaped,
-    editing,
     grouping,
     groupingPanel,
     tree,

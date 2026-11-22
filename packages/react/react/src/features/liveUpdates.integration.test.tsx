@@ -82,7 +82,7 @@ describe("a cell editor open while its row changes", () => {
     const table = harness([
       editing<Row>(vi.fn(), { editConflictPolicy: policy }),
     ]);
-    const state = () => table.view().chrome.editing!.state;
+    const state = () => table.view().tableProps.editing!.state;
     act(() => {
       state().begin("a", "name", "Alice", ROWS[0]);
     });
@@ -100,7 +100,7 @@ describe("a cell editor open while its row changes", () => {
     expect(state().draft).toBe("Mine");
     // The editor now measures against the row that arrived.
     expect(state().openedRow()).toEqual({ id: "a", name: "Alicia" });
-    expect(table.view().chrome.editing?.conflict?.current).toBeNull();
+    expect(table.view().tableProps.editing?.conflict?.current).toBeNull();
   });
 
   it("takes the incoming value under the take policy", () => {
@@ -109,7 +109,7 @@ describe("a cell editor open while its row changes", () => {
     table.setData(renamed("Alicia"));
 
     expect(state().draft).toBe("Alicia");
-    expect(table.view().chrome.editing?.conflict?.current).toBeNull();
+    expect(table.view().tableProps.editing?.conflict?.current).toBeNull();
   });
 });
 
@@ -118,7 +118,7 @@ describe("a row form open while its row changes", () => {
     const table = harness([
       rowEditing<Row>(vi.fn(), { editConflictPolicy: policy }),
     ]);
-    const form = () => table.view().chrome.editing!.rowEditing!;
+    const form = () => table.view().tableProps.editing!.rowEditing!;
     act(() => {
       form().begin(ROWS[0]!, "a");
     });
@@ -150,7 +150,7 @@ describe("a batch draft whose row changes", () => {
     const table = harness([
       batchEditing<Row>(vi.fn(), { editConflictPolicy: "take" }),
     ]);
-    const batch = () => table.view().chrome.editing!.batch!;
+    const batch = () => table.view().tableProps.editing!.batch!;
     act(() => {
       batch().setDraft(ROWS[0]!, "a", "name", "Mine");
     });

@@ -15,7 +15,8 @@ const FeatureStateContext = createContext<ReadonlyMap<string, unknown>>(
  *
  * A provider renders this around its children. The map is copied rather than
  * mutated so a reader re-renders when the value it asked for changes, and only
- * then.
+ * then. `undefined` publishes nothing, so a stage keeps its subtree while its
+ * state comes and goes.
  *
  * @public
  */
@@ -25,7 +26,7 @@ export function FeatureStateScope<T>({
   children,
 }: {
   readonly stateKey: FeatureStateKey<T>;
-  readonly value: T;
+  readonly value: T | undefined;
   readonly children: ReactNode;
 }): ReactNode {
   const parent = useContext(FeatureStateContext);

@@ -395,6 +395,7 @@ export {
 } from "./features/slotKeys";
 export {
   EDIT_HISTORY_STATE,
+  EDITING_STATE,
   EXPORT_STATE,
   FILTER_CHIPS_STATE,
   type FilterChipsState,

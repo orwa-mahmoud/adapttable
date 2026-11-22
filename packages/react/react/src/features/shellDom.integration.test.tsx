@@ -292,7 +292,7 @@ describe("the keyboard grid over real cells", () => {
     });
     fireEvent.keyDown(cell("b-name"), { key: "Enter" });
 
-    expect(view().chrome.editing?.state.active).toEqual(
+    expect(view().tableProps.editing?.state.active).toEqual(
       expect.objectContaining({ rowId: "b", columnKey: "name" })
     );
   });
@@ -307,7 +307,7 @@ describe("the keyboard grid over real cells", () => {
 
     // The grid claims the key for the cell, and the stage has nothing to open.
     expect(notHandled).toBe(false);
-    expect(view().chrome.editing).toBeUndefined();
+    expect(view().tableProps.editing).toBeUndefined();
   });
 
   it("does not open a cell the rendered window has no row for", () => {
@@ -319,7 +319,7 @@ describe("the keyboard grid over real cells", () => {
       view().gridFocus.focusCell({ row: 7, col: 0 });
     });
     fireEvent.keyDown(cell("a-name"), { key: "Enter" });
-    expect(view().chrome.editing?.state.active).toBeNull();
+    expect(view().tableProps.editing?.state.active).toBeNull();
   });
 });
 

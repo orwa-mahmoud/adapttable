@@ -353,7 +353,7 @@ describe("each live feature replaces its stand-in with the real hook", () => {
     ]);
 
     act(() => {
-      view.current.chrome.editing?.batch?.setDraft(
+      view.current.tableProps.editing?.batch?.setDraft(
         ROWS[0]!,
         "a",
         "budget",
@@ -361,7 +361,7 @@ describe("each live feature replaces its stand-in with the real hook", () => {
       );
     });
     act(() => {
-      view.current.chrome.editing?.batch?.saveAll();
+      view.current.tableProps.editing?.batch?.saveAll();
     });
     expect(onBatchEdit).toHaveBeenCalledOnce();
     expect(view.current.editHistory.canUndo).toBe(true);
@@ -419,7 +419,7 @@ describe("each live feature replaces its stand-in with the real hook", () => {
     );
 
     act(() => {
-      view?.chrome.editing?.batch?.setDraft(ROWS[0]!, "a", "budget", "55");
+      view?.tableProps.editing?.batch?.setDraft(ROWS[0]!, "a", "budget", "55");
     });
     act(() => {
       rerender(
@@ -430,7 +430,7 @@ describe("each live feature replaces its stand-in with the real hook", () => {
     });
 
     // Budget is the reader's, so the batch waits for an answer on that cell.
-    const conflict = view?.chrome.editing?.conflict;
+    const conflict = view?.tableProps.editing?.conflict;
     expect(conflict?.contestedCell("a", "budget")).toEqual({
       incomingValue: "99",
     });
@@ -439,9 +439,9 @@ describe("each live feature replaces its stand-in with the real hook", () => {
     act(() => {
       conflict?.keepCell("a", "budget");
     });
-    expect(view?.chrome.editing?.conflict?.anyContested).toBe(false);
+    expect(view?.tableProps.editing?.conflict?.anyContested).toBe(false);
     act(() => {
-      view?.chrome.editing?.batch?.saveAll();
+      view?.tableProps.editing?.batch?.saveAll();
     });
     expect(onBatchEdit).toHaveBeenCalledWith([
       { row: changed[0], rowId: "a", patch: { budget: 55 } },

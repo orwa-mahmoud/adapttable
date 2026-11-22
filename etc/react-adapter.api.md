@@ -2218,6 +2218,9 @@ export { EditHistoryState }
 export { EDITING_LIVE }
 
 // @public
+export const EDITING_STATE: FeatureStateKey<EditableCellEditing<unknown>>;
+
+// @public
 export type EditingFamilyFactory = <TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>) => readonly TableFeature<TRow>[];
 
 export { EditLifecycle }
@@ -2497,7 +2500,7 @@ export { featureStateKey }
 // @public
 export function FeatureStateScope<T>(input: {
     readonly stateKey: FeatureStateKey<T>;
-    readonly value: T;
+    readonly value: T | undefined;
     readonly children: ReactNode;
 }): ReactNode;
 
@@ -4903,8 +4906,6 @@ export interface TableChrome<TRow> {
         expansion: RowExpansionState;
     };
     droppedColumns: readonly string[];
-    editHistory?: EditHistoryState<TRow>;
-    editing?: EditableCellEditing<TRow>;
     editingRows: readonly TRow[];
     emptyVariant: "noData" | "noResults";
     errorState?: TableErrorState;

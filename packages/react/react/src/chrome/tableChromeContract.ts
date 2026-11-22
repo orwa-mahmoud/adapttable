@@ -1,7 +1,6 @@
 import {
   type ColumnGroupRecord,
   type ConfirmHandler,
-  type EditHistoryState,
   type FeatureNotice,
   type GroupAggregatesFn,
   type GroupByInput,
@@ -18,7 +17,6 @@ import { type ReactNode, type RefObject } from "react";
 
 import type { ColumnDef } from "../columnDef";
 import type { ReactUseColumnLayoutResult } from "../columns/useColumnLayout";
-import type { EditableCellEditing } from "../editing/editableCellController";
 import type { GroupCollapseState } from "../grouping/useGroupCollapse";
 import type { RowMutationsState } from "../rows/rowMutations";
 import type { RowPinningState } from "../rows/rowPinning";
@@ -109,16 +107,6 @@ export interface TableChrome<TRow> {
     /** Expansion state for the chevrons. */
     expansion: RowExpansionState;
   };
-  /**
-   * Inline editing bundle — present iff either channel is set (`onCellEdit`
-   * for per-cell commits, `rowEditing` + `onRowEdit` for row-level ones), so
-   * ONE guard narrows the host channel, the state machine, validation, save
-   * state, dirty marks and row mode. Pass neither and editing stays fully
-   * dormant: no UI, no keyboard.
-   */
-  editing?: EditableCellEditing<TRow>;
-  /** Undo and redo; written by the edit-history stage, absent without it. */
-  editHistory?: EditHistoryState<TRow>;
   /**
    * Adding, duplicating and deleting rows. Empty until `rowActions()` is
    * composed. `canAdd` says whether the toolbar's Add control renders.

@@ -22,15 +22,18 @@ import {
   useRef,
 } from "react";
 
+import type { EditableCellEditing } from "../editing/editableCellController";
 import { useFindFocus } from "../find/useFindInTable";
 import { GridFocusAnnouncer } from "../focus/GridFocusAnnouncer";
 import { type GridFocusState, useGridFocus } from "../focus/useGridFocus";
 import { RowScrollContext } from "../virtual/rowScroll";
 import { GRID_FOCUS_ANNOUNCER_RENDER } from "./areaRegions";
+import { useFeatureState } from "./featureState";
 import type { LiveStageProps } from "./liveStage";
 import { slotRender } from "./providers";
 import { type CellNavLiveSlotProps, GRID_FOCUS_ANNOUNCER } from "./slotKeys";
 import { CELL_NAV_STAGE } from "./stageKeys";
+import { EDITING_STATE } from "./stateKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
 /** Build the grid's inputs from the shell and hand them to the grid slot. */
@@ -42,6 +45,8 @@ function CellNavStage<TRow>({
   "use no memo";
   const props = shell.chromeProps;
   const chrome = shell.chrome;
+  const editing = useFeatureState(EDITING_STATE) as
+    EditableCellEditing<TRow> | undefined;
   const navProps = {
     options: {
       ...cellNavigationInput({
@@ -64,7 +69,7 @@ function CellNavStage<TRow>({
     onFind: live.find.openBar,
     matchKeys: live.find.matchKeys,
     currentMatch: live.find.current,
-    editing: chrome.editing,
+    editing,
     children: (gridFocus: GridFocusState) => children({ ...live, gridFocus }),
   } satisfies CellNavLiveSlotProps<TRow>;
   return <LiveCellNav {...navProps} />;

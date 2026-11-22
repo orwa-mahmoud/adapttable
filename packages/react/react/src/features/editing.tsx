@@ -26,6 +26,7 @@ import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
 import type { BatchEditingState, BatchRowEdit } from "../editing/batchEditing";
 import { useDirtyCells } from "../editing/dirtyCells";
+import type { EditableCellEditing } from "../editing/editableCellController";
 import { useEditConflict } from "../editing/editConflict";
 import { type EditLifecycle, useEditLifecycle } from "../editing/editingEvents";
 import type { RowEditingState } from "../editing/rowEditing";
@@ -37,6 +38,7 @@ import { BATCH_EDIT_BAR_RENDER } from "./barRegions";
 import { BATCH_EDITING_RENDERS } from "./batchEditingStage";
 import { BATCH_EDITING_STAGE, ROW_EDITING_STAGE } from "./editingStageKeys";
 import { featureHostOf } from "./featureHost";
+import { FeatureStateScope } from "./featureState";
 import { FeatureSlot, slotRender, useFeatureSlotFilled } from "./providers";
 import { ROW_EDITING_RENDERS } from "./rowEditingStage";
 import {
@@ -44,6 +46,7 @@ import {
   type ChromeExtraSlotProps,
   EDITING_LIVE,
 } from "./slotKeys";
+import { EDITING_STATE } from "./stateKeys";
 import type {
   FeaturePatch,
   StaticTableFeature,
@@ -102,7 +105,7 @@ function EditingAssembly<TRow>({
   editingRows,
   rowEditing,
   batch,
-}: EditingAssemblyProps<TRow>): ReactNode {
+}: Readonly<EditingAssemblyProps<TRow>>): ReactNode {
   const onCellEdit = props.onCellEdit;
   const editing = useMemo(
     () =>
@@ -182,7 +185,14 @@ function EditingAssembly<TRow>({
     props.onEditConflict,
   ]);
 
-  return children({ ...chrome, editing, editingRows } as never);
+  return (
+    <FeatureStateScope
+      stateKey={EDITING_STATE}
+      value={editing as EditableCellEditing<unknown> | undefined}
+    >
+      {children({ ...chrome, editingRows })}
+    </FeatureStateScope>
+  );
 }
 
 function LiveEditing<TRow>({

@@ -6,6 +6,7 @@
 import type { ActiveFilterChip, EditHistoryState } from "@adapttable/core";
 import { featureStateKey } from "@adapttable/core/binding";
 
+import type { EditableCellEditing } from "../editing/editableCellController";
 import type { ExportHandlerState } from "../export/useExportHandler";
 import type { KitRegionProps } from "../kit/rootRegion";
 import type { FullscreenState } from "../layout/useFullscreen";
@@ -26,6 +27,10 @@ export interface FilterChipsState {
 /** The active filters' chips, published by the filter-chips stage. */
 export const FILTER_CHIPS_STATE =
   featureStateKey<FilterChipsState>("filter-chips");
+
+/** The armed cell editing, published by the editing stage. */
+export const EDITING_STATE =
+  featureStateKey<EditableCellEditing<unknown>>("editing");
 
 /** Undo and redo, published by the edit-history stage. */
 export const EDIT_HISTORY_STATE =

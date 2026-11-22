@@ -277,7 +277,8 @@ fullscreen — each reading the state its feature publishes with
 and the table's finished props, `TABLE_PROPS_STATE`. The filters feature
 publishes its chips and badge count as `FILTER_CHIPS_STATE`
 (`FilterChipsState`), which the toolbar badge, the chips bar and the command
-palette read; `SAVED_VIEWS` (`SavedViewsSlotProps`),
+palette read, and the editing feature publishes its bundle as
+`EDITING_STATE`; `SAVED_VIEWS` (`SavedViewsSlotProps`),
 `GRID_FOCUS_ANNOUNCER`, the filter surfaces `FILTER_POPOVER` / `FILTER_DRAWER`
 (`FilterOverlaySlotProps`) with `FiltersFormSlotProps` and
 `ActiveFilterChipsSlotProps`, and `CHROME_BODY` (`ChromeBodySlotProps`), which
@@ -1415,7 +1416,8 @@ shares, so a new binding calls them rather than re-deriving them.
   is laid out, `"live"` after); `liveStagesOf(features, phase)` collects one
   walk's stages and `orderLiveStages` (`LiveStage`) runs each after the stages
   it reads from. `TableRuntimePublisher` stages each render
-  (`stage(chrome, actions)`, the host's `RuntimeActions`) and builds the runtime
+  (`stage(chrome, actions, channels)`: the host's `RuntimeActions`, and the
+  `RuntimeChannels` the features published apart from the chrome) and builds the runtime
   view on its first read (`view`), keeping it until the next render; rendered
   rows (`visibleRows`) are read without the view. It projects through
   `tableRuntimeView`, `renderedRowsOf`, `readableRowLabel`,
@@ -1423,7 +1425,10 @@ shares, so a new binding calls them rather than re-deriving them.
   `RuntimeColumn`). `cellNavigationInput`, `gridRowCount`, `exportPageOnly`,
   build the live stages' inputs; `viewControlsToolbarProps`,
   `undoRedoToolbarProps` (`UndoRedoToolbarProps`) and `printToolbarProps`
-  build a toolbar control's props from its feature's state. `finishShellLive`, `overlayChromeExtras` and
+  build a toolbar control's props from its feature's state.
+  `overlayChromeExtras(shell, base, channels)` lays the finished chrome and
+  the features' published channels onto the shell, keeping `base` as its
+  chrome. `finishShellLive`, `overlayChromeExtras` and
   `finishShellBody` (`PipelineShell`, `OverlayChrome`, `ShellBodyInput`)
   finish the shell.
 - **Table chrome state.** `chromeBodyRegion` (`ChromeBodyRegion`),

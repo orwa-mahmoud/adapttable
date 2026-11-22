@@ -18223,6 +18223,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "RuntimeChannels",
+      "kind": "type",
+      "module": "layout/shellPipeline.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/shellPipeline.ts#RuntimeChannels",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "RuntimeChromeInput",
       "kind": "type",
       "module": "layout/shellPipeline.ts",

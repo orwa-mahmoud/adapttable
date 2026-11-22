@@ -18,7 +18,7 @@ import {
   BATCH_EDIT_BAR,
   BULK_BAR,
 } from "./slotKeys";
-import { FILTER_CHIPS_STATE } from "./stateKeys";
+import { EDITING_STATE, FILTER_CHIPS_STATE } from "./stateKeys";
 
 /** The removable chips of the active filters. */
 function FilterChipsBar<TRow>({ view }: KitRegionProps<TRow>): ReactNode {
@@ -40,7 +40,7 @@ function FilterChipsBar<TRow>({ view }: KitRegionProps<TRow>): ReactNode {
 /** The pending batch of edits, while one is open. */
 function BatchEditBar<TRow>({ view }: KitRegionProps<TRow>): ReactNode {
   "use no memo";
-  const editing = view.chrome.editing;
+  const editing = useFeatureState(EDITING_STATE);
   const batch = editing?.batch;
   if (!batch) return null;
   return (

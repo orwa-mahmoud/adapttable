@@ -21,6 +21,7 @@ import { FeatureProviders } from "./features/providers";
 import { rowDetail } from "./features/row-detail";
 import { rowPinning } from "./features/row-pinning";
 import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
+import { renderLiveChrome } from "./liveChrome.test-utils";
 import { useFrontendData } from "./source/useFrontendData";
 import { tableRenderModel, useSummaryCells } from "./tableRenderProps";
 import { createMemoryAdapter } from "./url/adapter";
@@ -50,34 +51,6 @@ const FULL_ASSEMBLY = {
   extraHostFillStyle,
   columnResizeHandleProps,
 };
-
-function renderLiveChrome<TRow>(
-  features: readonly TableFeature<TRow>[],
-  build: () => Parameters<typeof useTableChrome<TRow>>[0]
-) {
-  const applied = applyTableFeatures({ features });
-  const box: { current: TableChrome<TRow> } = {
-    current: undefined as unknown as TableChrome<TRow>,
-  };
-  function Probe() {
-    const props = { ...applied, ...build() };
-    const base = useTableChrome<TRow>(props);
-    return (
-      <ChromeExtrasGate chrome={base} props={props}>
-        {(overlaid) => {
-          box.current = overlaid;
-          return null;
-        }}
-      </ChromeExtrasGate>
-    );
-  }
-  const view = render(
-    <FeatureProviders props={applied}>
-      <Probe />
-    </FeatureProviders>
-  );
-  return { result: box, unmount: view.unmount };
-}
 
 function renderLiveBody<TRow>(
   features: readonly TableFeature<TRow>[],

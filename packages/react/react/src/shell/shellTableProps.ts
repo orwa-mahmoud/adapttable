@@ -116,7 +116,6 @@ export function shellTableProps<TRow>(
     renderCard: props.renderCard,
     summaryRow: chromeProps.summaryRow,
     expansion: chrome.detail?.expansion,
-    editing: chrome.editing,
     grouping: chrome.grouping,
     groupingPanel: chrome.groupingPanel,
     dir: props.dir,

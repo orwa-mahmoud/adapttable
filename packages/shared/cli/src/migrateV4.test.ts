@@ -212,6 +212,17 @@ describe("migrateV4Source", () => {
     expect(result.issues.map((issue) => issue.line)).toEqual([1, 2]);
   });
 
+  it("reports the chrome's editing and edit history", () => {
+    const result = migrateV4Source(
+      [
+        "const editing = view.chrome.editing;",
+        "const history = chrome.editHistory;",
+        "const rows = chrome.editingRows;",
+      ].join("\n")
+    );
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2]);
+  });
+
   it("leaves a file that uses nothing v4 moved untouched", () => {
     const source = 'import { DataTable } from "@adapttable/mui";\n';
     expect(migrateV4Source(source)).toEqual({

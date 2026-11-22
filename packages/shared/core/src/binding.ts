@@ -908,6 +908,7 @@ export {
   readableRowLabel,
   renderedRowsOf,
   type RuntimeActions,
+  type RuntimeChannels,
   type RuntimeChromeInput,
   type RuntimeColumn,
   type ShellBodyInput,

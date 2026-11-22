@@ -938,8 +938,6 @@ export interface TableChrome<TRow> {
         expansion: RowExpansionState;
     };
     droppedColumns: readonly string[];
-    editHistory?: EditHistoryState<TRow>;
-    editing?: EditableCellEditing<TRow>;
     editingRows: readonly TRow[];
     emptyVariant: "noData" | "noResults";
     errorState?: TableErrorState;

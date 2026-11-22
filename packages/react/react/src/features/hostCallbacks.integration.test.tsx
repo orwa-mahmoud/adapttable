@@ -140,7 +140,7 @@ describe("host callbacks on the owning features", () => {
     expect(seen.at(-1)?.canUndo).toBe(false);
 
     act(() => {
-      view().chrome.editing?.onCellEdit?.(ROWS[0]!, "name", "Alicia");
+      view().tableProps.editing?.onCellEdit?.(ROWS[0]!, "name", "Alicia");
     });
     expect(seen.at(-1)?.canUndo).toBe(true);
 
@@ -176,7 +176,7 @@ describe("host callbacks on the owning features", () => {
     expect(seen.at(-1)?.count).toBe(0);
 
     act(() => {
-      view().chrome.editing?.dirty?.mark("a", "name");
+      view().tableProps.editing?.dirty?.mark("a", "name");
     });
     expect(seen.at(-1)?.count).toBe(1);
 
@@ -195,11 +195,11 @@ describe("host callbacks on the owning features", () => {
     ]);
 
     act(() => {
-      view().chrome.editing?.dirty?.mark("a", "name");
+      view().tableProps.editing?.dirty?.mark("a", "name");
     });
     expect(seen.at(-1)?.count).toBe(1);
-    expect(view().chrome.editing?.dirty?.isDirty("a", "name")).toBe(false);
-    expect(view().chrome.editing?.dirty?.isRowDirty("a")).toBe(false);
+    expect(view().tableProps.editing?.dirty?.isDirty("a", "name")).toBe(false);
+    expect(view().tableProps.editing?.dirty?.isRowDirty("a")).toBe(false);
 
     act(() => {
       seen.at(-1)?.confirmAll();
@@ -217,19 +217,19 @@ describe("host callbacks on the owning features", () => {
     ]);
 
     act(() => {
-      view().chrome.editing?.dirty?.mark("a", "name");
+      view().tableProps.editing?.dirty?.mark("a", "name");
     });
     expect(seen.at(-1)?.count).toBe(1);
-    expect(view().chrome.editing?.dirty?.isDirty("a", "name")).toBe(true);
+    expect(view().tableProps.editing?.dirty?.isDirty("a", "name")).toBe(true);
   });
 
   it("marks nothing for a table that passes neither", () => {
     const view = mount([editing<Row>(vi.fn())]);
 
     act(() => {
-      view().chrome.editing?.dirty?.mark("a", "name");
+      view().tableProps.editing?.dirty?.mark("a", "name");
     });
-    expect(view().chrome.editing?.dirty?.count).toBe(0);
+    expect(view().tableProps.editing?.dirty?.count).toBe(0);
   });
 
   it("reports the selected range and its clearing", () => {
@@ -298,7 +298,7 @@ describe("host callbacks on the owning features", () => {
     expect(view().editHistory.canUndo).toBe(false);
 
     act(() => {
-      view().chrome.editing?.onCellEdit?.(ROWS[0]!, "name", "Alicia");
+      view().tableProps.editing?.onCellEdit?.(ROWS[0]!, "name", "Alicia");
     });
     expect(view().editHistory.canUndo).toBe(true);
 
@@ -318,19 +318,19 @@ describe("host callbacks on the owning features", () => {
     ]);
 
     act(() => {
-      view().chrome.editing?.dirty?.mark("a", "name");
+      view().tableProps.editing?.dirty?.mark("a", "name");
     });
-    expect(view().chrome.editing?.dirty?.count).toBe(1);
+    expect(view().tableProps.editing?.dirty?.count).toBe(1);
 
     act(() => {
-      view().chrome.editing?.onCellEdit?.(ROWS[1]!, "name", "Robert");
+      view().tableProps.editing?.onCellEdit?.(ROWS[1]!, "name", "Robert");
     });
     expect(onEdit).toHaveBeenLastCalledWith(ROWS[1], "name", "Robert");
 
     act(() => {
-      view().chrome.editing?.dirty?.confirmAll();
+      view().tableProps.editing?.dirty?.confirmAll();
     });
-    expect(view().chrome.editing?.dirty?.count).toBe(0);
+    expect(view().tableProps.editing?.dirty?.count).toBe(0);
   });
 
   it("keeps the existing calls working unchanged", () => {
