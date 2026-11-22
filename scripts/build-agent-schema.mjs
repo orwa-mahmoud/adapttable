@@ -13,8 +13,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import prettier from "prettier";
-
+import { formatLikeRepo } from "./format-like-repo.mjs";
 import { packageDir } from "./packages.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -39,14 +38,7 @@ const { agentInstructions } = await import(
 async function write(relative, contents) {
   const path = join(ROOT, relative);
   await mkdir(dirname(path), { recursive: true });
-  const info = await prettier.getFileInfo(path);
-  const formatted = info.inferredParser
-    ? await prettier.format(contents, {
-        ...(await prettier.resolveConfig(path)),
-        parser: info.inferredParser,
-      })
-    : contents;
-  await writeFile(path, formatted, "utf8");
+  await writeFile(path, await formatLikeRepo(path, contents), "utf8");
   console.log(`wrote ${relative}`);
 }
 
