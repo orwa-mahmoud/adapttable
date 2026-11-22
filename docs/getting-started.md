@@ -18,7 +18,7 @@ and use it, or open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 64–73 kB min+gzip (measured 2026-11-21 from
+A plain adapter `DataTable` is 61–69 kB min+gzip (measured 2026-11-22 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
