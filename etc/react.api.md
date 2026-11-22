@@ -210,6 +210,9 @@ import { SavedViewVisibility } from '@adapttable/core';
 import { scalarFilterText } from '@adapttable/core';
 import { SearchInputState } from '@adapttable/core/binding';
 import { SelectionState } from '@adapttable/core/binding';
+import { ServerFilterKeys } from '@adapttable/core';
+import { serverFilterKeys } from '@adapttable/core';
+import { ServerFilterKeysInput } from '@adapttable/core';
 import { HEADER_FILTER_SESSION_ATTR as SESSION_ATTR } from '@adapttable/core';
 import { Shortcut } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
@@ -859,6 +862,12 @@ export { SearchInputState }
 
 export { SelectionState }
 
+export { ServerFilterKeys }
+
+export { serverFilterKeys }
+
+export { ServerFilterKeysInput }
+
 export { SESSION_ATTR }
 
 export { Shortcut }
@@ -1013,6 +1022,12 @@ export interface TableFeatureHost<TRow = unknown> extends NeutralFeatureHost<TRo
 }
 
 export { TableQuery }
+
+// @public
+export type TableQueryHandler = (query: TableQuery, info: {
+    signal: AbortSignal;
+    key: string;
+}) => void | Promise<void>;
 
 // @public
 export type TableRowReorderState<TRow> = RowReorderState<TRow, DragEvent_2<HTMLElement>, KeyboardEvent_2<HTMLElement>>;
@@ -1494,12 +1509,9 @@ export function useTableData<TRow>(options: UseTableDataOptions<TRow>): UseTable
 
 // @public
 export interface UseTableDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "urlKey" | "store"> {
-    aggregates?: readonly QueryAggregate[];
     columns: readonly ColumnDef<TRow>[];
     data?: readonly TRow[];
     error?: Error | null;
-    facetKeys?: readonly string[];
-    facets?: FacetMap;
     featureHost?: FeatureHostState;
     filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
     filters?: readonly FilterDef<TRow>[] | ReactNode;
@@ -1510,13 +1522,9 @@ export interface UseTableDataOptions<TRow> extends Pick<UseTableUrlStateOptions,
     loading?: boolean;
     locale?: string;
     mobileBreakpoint?: number;
-    mode?: "frontend" | "server";
-    onQueryChange?: NonNullable<Parameters<typeof useServerData<TRow>>[0]["onQueryChange"]>;
+    onViewChange?: TableQueryHandler;
     paginationMode?: PaginationMode;
-    responseKey?: string;
     source?: TableSource<TRow>;
-    supports?: QuerySupport;
-    total?: number;
 }
 
 export { UseTableDataResult }

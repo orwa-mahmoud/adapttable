@@ -80,8 +80,8 @@ export class PeopleTable {
 }
 ```
 
-Supply in-memory `data`, a prebuilt `source`, or host-fetched rows with
-`onQueryChange` and `total`. Edits, additions, deletes and reorders call the
+Supply in-memory `data`, or a prebuilt `source` — `injectServerData`'s for
+host-fetched server pages. Edits, additions, deletes and reorders call the
 host; the table never owns or mutates its rows. The binding also owns sorting,
 pagination and virtualization, so the NG-ZORRO table does not run a second
 data pipeline.

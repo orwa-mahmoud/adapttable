@@ -277,7 +277,8 @@ state; the native table's fallback data source does not claim its URL namespace.
 
 Reactive value inputs accept a plain value, a ref or a getter. Optional inputs
 also accept refs/getters whose current value is `undefined`. Callbacks such as
-`rowKey`, `getSearchText`, `refetch` and `onQueryChange` remain callbacks. To
+`rowKey`, `getSearchText`, `refetch`, `onQueryChange` and `onViewChange`
+remain callbacks. To
 replace callback identities reactively, pass a getter for the whole options
 object. Never wrap a renderer in a getter just to make it reactive.
 

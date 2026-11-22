@@ -2,12 +2,12 @@
  * The data tier: which tier serves a table's rows, and the pieces every tier
  * shares.
  *
- * A table is on one of three tiers — rows in memory (`frontend`), rows a
- * host fetches when the query changes (`server`), or a prebuilt `source`.
- * This module resolves the tier, sends a query to a handler with the request
- * it supersedes aborted, and loads each filter's own option list. What a
- * server tier asks for and how its answers accumulate lives in
- * `serverRequest`, which only a server table loads.
+ * A table is on one of two tiers — rows in memory (`frontend`), or a
+ * prebuilt `source`, which is how a server table is built. This module
+ * resolves the tier, sends a query to a handler with the request it
+ * supersedes aborted, and loads each filter's own option list. What a server
+ * source asks for and how its answers accumulate lives in `serverRequest`,
+ * which only a server source loads.
  */
 
 import type { FacetMap, TableQuery } from "../contracts/query";
@@ -21,48 +21,31 @@ import { devWarn } from "../utils/devWarn";
  *
  * @public
  */
-export type DataTier = "frontend" | "server" | "source";
+export type DataTier = "frontend" | "source";
 
 /**
- * The tier a table is on: a prebuilt `source` wins, then an explicit
- * `mode`, then `server` when a query handler is wired.
+ * The tier a table is on: a prebuilt `source`, or the rows in `data`.
  *
  * @public
  */
-export function resolveDataTier(
-  source: unknown,
-  mode: "frontend" | "server" | undefined,
-  onQueryChange: unknown
-): DataTier {
-  if (source) return "source";
-  if (mode) return mode;
-  return onQueryChange ? "server" : "frontend";
+export function resolveDataTier(source: unknown): DataTier {
+  return source ? "source" : "frontend";
 }
 
 /**
- * Warn in development when a table is handed more than one tier, or none.
+ * Warn in development when a table is handed both tiers, or none.
  *
  * @public
  */
-export function warnDataTierMisuse(
-  source: unknown,
-  mode: "frontend" | "server" | undefined,
-  data: unknown,
-  onQueryChange: unknown
-): void {
-  if (source && mode) {
+export function warnDataTierMisuse(source: unknown, data: unknown): void {
+  if (source && data) {
     devWarn(
-      "`mode` is ignored when `source` is provided — the prebuilt source wins. Pass one data tier."
-    );
-  }
-  if (source && (data || onQueryChange)) {
-    devWarn(
-      "both `source` and `data`/`onQueryChange` were provided — using `source`. Pass one data tier."
+      "both `source` and `data` were provided — using `source`. Pass one data tier."
     );
   }
   if (!source && !data) {
     devWarn(
-      "no data tier provided — pass `data` (frontend), `data` + `onQueryChange` (server) or `source`."
+      "no data tier provided — pass `data`, or a `source` such as a server source."
     );
   }
 }

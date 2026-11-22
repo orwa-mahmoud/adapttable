@@ -1,12 +1,10 @@
 import {
   type Direction,
-  type FacetMap,
   type FeatureHostState,
   type FilterDef,
   type FilterRuntime,
   type FilterTypeRegistry,
   type GroupingPanelState,
-  type QuerySupport,
   type SelectionStats,
   type SortByOption,
   type TableLabels,
@@ -25,7 +23,6 @@ import type { FindInTableState } from "../find/useFindInTable";
 import type { GridFocusState } from "../focus/useGridFocus";
 import type { FullscreenState } from "../layout/useFullscreen";
 import type { ComposedTableProps, ToolbarSlots } from "../props";
-import type { DataModeProps } from "../source/useTableDataImpl";
 import type { SharedTableRenderProps } from "../tableRenderProps";
 import { type UrlStateAdapter } from "../url/adapter";
 import type { Density } from "../url/useDensityUrlState";
@@ -47,13 +44,11 @@ export type DataTableShellProps<TRow> = Omit<
   ComposedTableProps<TRow>,
   "source"
 > & {
-  /** Full-control tier: a prebuilt source. */
+  /** A prebuilt source: a server source, a query-library source, … */
   source?: TableSource<TRow>;
-  /** Frontend tier: the raw rows. */
+  /** Frontend tier: every row. */
   data?: readonly TRow[];
-  /** Server tier: total row count across all pages. */
-  total?: number;
-  /** Server tier: a request is in flight. */
+  /** Frontend tier: the rows are still loading. */
   loading?: boolean;
   /** Forwarded error to display in the table's error state. */
   error?: Error | null;
@@ -63,19 +58,7 @@ export type DataTableShellProps<TRow> = Omit<
   urlSync?: boolean;
   /** Namespace for this table's URL params. */
   urlKey?: string;
-  /**
-   * Server tier: what this endpoint can answer. `supports.facets`
-   * unlocks `query.facets` for checklist counts.
-   */
-  supports?: QuerySupport;
-  /**
-   * Server tier: keys to send as `query.facets`. Defaults to every
-   * `checklist` definition.
-   */
-  facetKeys?: readonly string[];
-  /** Server tier: distinct-value counts from the last fetch. */
-  facets?: FacetMap;
-} & DataModeProps<TRow>;
+};
 /**
  * Chrome props the shell passes into {@link TableChrome}. Named so the
  * adapter declaration does not re-infer this bag from object spread order.

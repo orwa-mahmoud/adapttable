@@ -34,7 +34,9 @@ import type {
   SelectionStatsChromeProps,
   TableAssistantProps,
   TableLabels,
+  TableQueryHandler,
   TableSource,
+  UseServerDataOptions,
 } from "@adapttable/react/adapter";
 import type * as bindingFeatures from "@adapttable/react/features";
 import {
@@ -102,11 +104,28 @@ type FactoryName =
   | "virtualize";
 
 /**
+ * What the harness builds a server source from, the way a host would with
+ * `useServerData`: a test that sets `onQueryChange` or `total` is served by
+ * that source, with `data` as the server's current page.
+ */
+export interface HarnessServerProps {
+  readonly total?: number;
+  readonly onQueryChange?: TableQueryHandler;
+  readonly supports?: NonNullable<UseServerDataOptions<unknown>["supports"]>;
+  readonly facetKeys?: readonly string[];
+  readonly facets?: NonNullable<UseServerDataOptions<unknown>["facets"]>;
+  readonly numberExtraKeys?: readonly string[];
+  readonly arrayExtraKeys?: readonly string[];
+}
+
+/**
  * The props a kit test table takes: the shipped props plus the enabling
- * props the harness turns into the kit's own features.
+ * props the harness turns into the kit's own features, and the server props
+ * it turns into a server source.
  */
 export type HarnessProps<TRow> = KitTableProps<TRow> &
-  FeatureProps<TRow> & {
+  FeatureProps<TRow> &
+  HarnessServerProps & {
     /** Compose row reorder, handing each move here. */
     readonly onRowReorder?: Parameters<
       typeof bindingFeatures.rowReorder<TRow>

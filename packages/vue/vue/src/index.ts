@@ -361,6 +361,9 @@ export {
   PIN_BOTTOM_ACTION_KEY,
   PIN_TOP_ACTION_KEY,
   SAVED_VIEW_VERSION,
+  type ServerFilterKeys,
+  serverFilterKeys,
+  type ServerFilterKeysInput,
   UNPIN_ROW_ACTION_KEY,
 } from "@adapttable/core";
 export type {

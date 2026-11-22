@@ -1,4 +1,8 @@
-import { type ColumnDef, type TableQuery } from "@adapttable/angular";
+import {
+  type ColumnDef,
+  injectServerData,
+  type TableQuery,
+} from "@adapttable/angular";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -49,15 +53,12 @@ const answer = (query: TableQuery): City[] => {
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
-      [data]="rows()"
-      [total]="total()"
-      [loading]="loading()"
+      [source]="source"
       [columns]="columns"
       [rowKey]="rowKey"
       [urlSync]="false"
       [forceMobile]="false"
       [defaults]="{ limit: 2 }"
-      [onQueryChange]="fetch"
     />
   `,
 })
@@ -77,20 +78,28 @@ class ServerHost {
       this.loading.set(false);
     });
   };
+  readonly source = injectServerData<City>({
+    rows: this.rows,
+    total: this.total,
+    loading: this.loading,
+    urlSync: false,
+    forceMobile: false,
+    defaults: { limit: 2 },
+    onQueryChange: this.fetch,
+  });
 }
 
 @Component({
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
-      mode="frontend"
       [data]="rows"
       [columns]="columns"
       [rowKey]="rowKey"
       [urlSync]="false"
       [forceMobile]="false"
       [defaults]="{ limit: 2 }"
-      [onQueryChange]="notified"
+      [onViewChange]="notified"
     />
   `,
 })

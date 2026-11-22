@@ -348,7 +348,7 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
 ## Notes
 
 - `"auto"` needs the full dataset, so it only works on the frontend tier
-  (`data` without `onQueryChange`). On the server/source tiers it dev-warns
+  (`data`). With a `source` it dev-warns
   and resolves to no options — pass an array or an async loader instead.
 - The `dateRange` upper bound is inclusive end-of-day: "On or before
   2026-01-31" keeps that day's rows.

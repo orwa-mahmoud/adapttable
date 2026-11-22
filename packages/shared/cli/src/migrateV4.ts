@@ -108,6 +108,29 @@ const REMOVED_LABELS = [
   "groupingAggregationDefault",
 ] as const;
 
+/** Table props that are options of the server source in v4. */
+const SERVER_SOURCE_PROPS = [
+  "total",
+  "responseKey",
+  "aggregates",
+  "supports",
+  "facetKeys",
+  "facets",
+] as const;
+
+/** The same props as a Vue template binds them: camelCase or kebab-case. */
+const VUE_SERVER_SOURCE_PROPS = [
+  ...new Set(
+    SERVER_SOURCE_PROPS.flatMap((name) => [
+      name,
+      name.replaceAll(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`),
+    ])
+  ),
+];
+
+const SERVER_SOURCE_PROP =
+  "If this is a table prop: total, responseKey, aggregates, supports, facetKeys and facets are options of the server source now (useServerData, injectServerData).";
+
 /** Usages v4 changed in meaning or shape: reported, never rewritten. */
 const MANUAL: readonly (readonly [RegExp, string])[] = [
   [
@@ -165,6 +188,30 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
   [
     /\browAction\s*:/g,
     "If this is a Vue classNames key: rowAction was removed; use actionButton.",
+  ],
+  [
+    /(?:\bmode=["'](?:server|frontend)["']|\[mode\]=)/g,
+    'A table takes no mode: pass data, or a source (a server source from useServerData or injectServerData). With mode="frontend", rename the table\'s onQueryChange to onViewChange.',
+  ],
+  [
+    /(?:\bonQueryChange=\{|\[onQueryChange\]=|@query-change=|:on-?[qQ]uery-?[cC]hange=)/g,
+    "A table's onQueryChange moved: a server table builds useServerData({ rows, total, onQueryChange }) (Angular: injectServerData) and passes it as source; a table that keeps its rows and only listens uses onViewChange.",
+  ],
+  [
+    new RegExp(String.raw`\b(?:${SERVER_SOURCE_PROPS.join("|")})=\{`, "g"),
+    SERVER_SOURCE_PROP,
+  ],
+  [
+    new RegExp(String.raw`\[(?:${SERVER_SOURCE_PROPS.join("|")})\]=`, "g"),
+    SERVER_SOURCE_PROP,
+  ],
+  [
+    new RegExp(String.raw`:(?:${VUE_SERVER_SOURCE_PROPS.join("|")})=`, "g"),
+    SERVER_SOURCE_PROP,
+  ],
+  [
+    /\bDataModeProps\b/g,
+    "DataModeProps was removed; DataTableProps is DataTablePropsBase.",
   ],
 ];
 

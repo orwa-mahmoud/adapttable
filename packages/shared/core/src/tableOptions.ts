@@ -25,6 +25,7 @@ import type { CellEdit } from "./focus/cellEdits";
 import type { CellRange } from "./focus/cellRange";
 import type { GroupNode, GroupSort } from "./grouping/groupRows";
 import type { RowActionsLayout, RowActionsRenderer } from "./rows/rowActions";
+import type { TableQueryListener } from "./source/dataTier";
 import type { TableSource } from "./source/TableSource";
 import type {
   Direction,
@@ -152,6 +153,12 @@ export interface TableOptions<TRow, TNode = unknown> {
    * in infinite mode; on a paged desktop table it is inert.
    */
   paginationMode?: PaginationMode;
+  /**
+   * Frontend tier: told of each committed change to page, page size, search,
+   * sort and filters, never of the mount. The table keeps processing `data`;
+   * a server table reads a server `source` instead.
+   */
+  onViewChange?: TableQueryListener;
   /** Hover-prefetch callback fired on desktop row mouse-enter. */
   prefetch?: (row: TRow) => void;
   /**

@@ -97,7 +97,7 @@ const FILTERS: FilterDef<Person>[] = [
 const theme = createTheme();
 
 function mountTable(
-  override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {},
+  override: Partial<Parameters<typeof DataTable<Person>>[0]> = {},
   url = ""
 ) {
   const adapter = createMemoryAdapter(url);
@@ -239,7 +239,10 @@ describe("declarative DataTable (MUI)", () => {
   it("server tier: emits once on mount with URL-restored params, rows untouched, pager from total", () => {
     const onQueryChange = vi.fn();
     mountTable(
-      { total: 100, onQueryChange },
+      {
+        total: 100,
+        onQueryChange,
+      },
       "page=2&q=ali&f_status=blocked&f_budgetMin=300"
     );
 

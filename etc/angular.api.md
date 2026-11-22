@@ -170,6 +170,9 @@ import { SavedView } from '@adapttable/core';
 import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SelectionState } from '@adapttable/core/binding';
 import { SelectionStats } from '@adapttable/core';
+import { ServerFilterKeys } from '@adapttable/core';
+import { serverFilterKeys } from '@adapttable/core';
+import { ServerFilterKeysInput } from '@adapttable/core';
 import { Shortcut } from '@adapttable/core';
 import { SidePanelEntry } from '@adapttable/core/binding';
 import { Signal } from '@angular/core';
@@ -1599,6 +1602,12 @@ export interface ServerDataOptions<TRow> extends Omit<TableUrlStateOptions, "inj
     readonly total: MaybeSignal<number>;
 }
 
+export { ServerFilterKeys }
+
+export { serverFilterKeys }
+
+export { ServerFilterKeysInput }
+
 export { Shortcut }
 
 export { SidePanelEntry }
@@ -1677,14 +1686,11 @@ export type TableAssistantProps = TableAssistantProps_2<TableAssistantNode>;
 
 // @public
 export interface TableDataOptions<TRow> extends Pick<TableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "urlKey"> {
-    readonly aggregates?: MaybeSignalOptional<readonly QueryAggregate[]>;
     readonly columns: MaybeSignal<readonly ColumnDef<TRow>[]>;
     readonly createEngine?: MaybeSignalOptional<FrontendEngineFactory<TRow>>;
     readonly data?: MaybeSignalOptional<readonly TRow[]>;
     readonly engine?: FilterEngine;
     readonly error?: MaybeSignalOptional<Error | null>;
-    readonly facetKeys?: MaybeSignalOptional<readonly string[]>;
-    readonly facets?: MaybeSignalOptional<FacetMap>;
     readonly featureHost?: Signal<FeatureHostState | undefined>;
     readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
     readonly filters?: readonly FilterDef<TRow>[];
@@ -1697,13 +1703,9 @@ export interface TableDataOptions<TRow> extends Pick<TableUrlStateOptions, "urlA
     readonly loading?: MaybeSignalOptional<boolean>;
     readonly locale?: MaybeSignalOptional<string>;
     readonly mobileBreakpoint?: number;
-    readonly mode?: MaybeSignalOptional<"frontend" | "server">;
-    readonly onQueryChange?: MaybeSignalOptional<TableQueryHandler>;
+    readonly onViewChange?: MaybeSignalOptional<TableQueryHandler>;
     readonly paginationMode?: MaybeSignal<PaginationMode>;
-    readonly responseKey?: MaybeSignalOptional<string>;
     readonly source?: MaybeSignalOptional<TableSource<TRow>>;
-    readonly supports?: MaybeSignalOptional<QuerySupport>;
-    readonly total?: MaybeSignalOptional<number>;
 }
 
 // @public

@@ -1,17 +1,17 @@
 # Angular data tiers: arrays, servers and query signals
 
-The table always consumes a `TableSource`. Its kit shell can build one from
-an in-memory array, connect host-fetched pages, or consume a source you already
-created. The columns and visible controls remain the same.
+The table always consumes a `TableSource`. Its kit shell builds one from an
+in-memory array, or consumes a source you created — `injectServerData`'s for
+host-fetched pages. The columns and visible controls remain the same.
 
 ## Select the tier
 
-| Inputs                         | Who processes the data?                                            |
-| ------------------------------ | ------------------------------------------------------------------ |
-| `[data]`                       | Frontend tier searches, filters, sorts and pages all supplied rows |
-| `[data]` and `[onQueryChange]` | Server tier asks the host to fetch the matching page               |
-| `mode="frontend"` with both    | Frontend tier processes rows; the callback observes query changes  |
-| `[source]`                     | Your source controls rows, view state and capabilities             |
+| Inputs                             | Who processes the data?                                            |
+| ---------------------------------- | ------------------------------------------------------------------ |
+| `[data]`                           | Frontend tier searches, filters, sorts and pages all supplied rows |
+| `[data]` and `[onViewChange]`      | Frontend tier processes rows; the callback observes view changes   |
+| `[source]` from `injectServerData` | The server source asks the host to fetch the matching page         |
+| `[source]` from anything else      | Your source controls rows, view state and capabilities             |
 
 Provide only the data contract you intend to use. A prebuilt source owns its
 query and URL setup; shell defaults do not reconfigure that source. URL state
@@ -61,7 +61,11 @@ the query to the complete matching dataset, not merely the returned page.
 
 ```ts
 import { Component, signal } from "@angular/core";
-import type { ColumnDef, TableQueryHandler } from "@adapttable/angular";
+import {
+  type ColumnDef,
+  injectServerData,
+  type TableQueryHandler,
+} from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/angular-unstyled";
 
 interface Person {
@@ -79,12 +83,7 @@ interface PeoplePage {
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
-      [data]="rows()"
-      [total]="total()"
-      [loading]="loading()"
-      [error]="error()"
-      [responseKey]="responseKey()"
-      [onQueryChange]="load"
+      [source]="source"
       [columns]="columns"
       [rowKey]="rowKey"
       paginationMode="paged"
@@ -128,10 +127,20 @@ export class ServerPeopleTable {
       if (!info.signal.aborted) this.loading.set(false);
     }
   };
+
+  readonly source = injectServerData<Person>({
+    rows: this.rows,
+    total: this.total,
+    loading: this.loading,
+    error: this.error,
+    responseKey: this.responseKey,
+    paginationMode: "paged",
+    onQueryChange: this.load,
+  });
 }
 ```
 
-`onQueryChange` is a callback input, not an Angular output. The first callback
+`onQueryChange` is a callback option of the server source. The first callback
 includes restored URL state. A changed query aborts the preceding request;
 destroying the table also aborts the request in flight. Honor that signal and
 ignore late responses, even if your transport cannot cancel its underlying work.
@@ -142,8 +151,12 @@ skeleton, refresh feedback and retryable failures accordingly. `responseKey`
 identifies the query answered by the published data. `total` is the complete
 matching count, not `rows.length`.
 
-For a reusable controller, `injectServerData({ rows, total, loading, error,
-onQueryChange, ... })` returns a source signal with the same lifecycle.
+The server source lives as long as the injection context it was created in;
+build it in a service to share it between components. A range, multi-value
+or checklist filter restored from the URL reaches the first request typed
+when the source knows its keys: spread `serverFilterKeys({ columns, filters
+})` into the options for `arrayExtraKeys`, `numberExtraKeys` and
+`facetKeys`. A table given `data` carries none of the server code.
 
 ## A query library
 

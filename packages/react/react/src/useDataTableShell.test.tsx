@@ -24,6 +24,7 @@ import { rowReorder } from "./features/row-reorder";
 import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
 import { virtualize } from "./features/virtualize";
 import { useFrontendData } from "./source/useFrontendData";
+import { useServerData } from "./source/useServerData";
 import { createMemoryAdapter } from "./url/adapter";
 import {
   type DataTableShellProps,
@@ -465,16 +466,19 @@ describe("useDataTableShell", () => {
     expect(view.toolbarProps.showRowsPerPage).toBe(true);
   });
 
-  it("covers the server tier and the optional pass-through props", () => {
+  it("covers a server source and the optional pass-through props", () => {
     const { result } = renderHook(() =>
       useDataTableShell(
         {
-          data: ROWS,
+          source: useServerData<Row>({
+            rows: ROWS,
+            total: 5,
+            onQueryChange: vi.fn(),
+            urlSync: false,
+          }),
           columns,
           rowKey,
           urlSync: false,
-          onQueryChange: vi.fn(),
-          total: 5,
           loading: false,
           locale: "en",
           urlKey: "t",
@@ -497,16 +501,15 @@ describe("useDataTableShell", () => {
     expect(result.current.toolbarProps.searchPlaceholder).toBe("Search…");
   });
 
-  it("forwards mode and prefetch (previously dead surface)", () => {
-    const onQueryChange = vi.fn();
+  it("forwards onViewChange and prefetch", () => {
+    const onViewChange = vi.fn();
     const prefetch = vi.fn();
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() =>
       useDataTableShell(
         {
           data: ROWS,
-          mode: "frontend",
-          onQueryChange,
+          onViewChange,
           prefetch,
           columns,
           rowKey,
@@ -515,10 +518,10 @@ describe("useDataTableShell", () => {
         noForm
       )
     );
-    // mode="frontend" reached useTableData: local processing kept, and
-    // the notification did NOT fire on mount (server mode would have).
+    // onViewChange reached useTableData: local processing kept, and the
+    // notification does not fire on mount.
     expect(result.current.source.rows).toHaveLength(2);
-    expect(onQueryChange).not.toHaveBeenCalled();
+    expect(onViewChange).not.toHaveBeenCalled();
     // prefetch reaches the table renderer's prop bundle.
     expect(result.current.tableProps.prefetch).toBe(prefetch);
   });

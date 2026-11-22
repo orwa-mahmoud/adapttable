@@ -154,7 +154,6 @@ import { EXTRA_ROW_PARTS } from '@adapttable/core/binding';
 import { ExtraFilters } from '@adapttable/core';
 import { extraHostFillStyle } from '@adapttable/core/binding';
 import { eyeIcon } from '@adapttable/core/binding';
-import { FacetCounts } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
 import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core/binding';
@@ -306,8 +305,6 @@ import { pinnedSummaryPart } from '@adapttable/core';
 import { PinSide } from '@adapttable/core/binding';
 import { printToolbarProps } from '@adapttable/core/binding';
 import { Provider } from '@angular/core';
-import { QueryAggregate } from '@adapttable/core';
-import { QuerySupport } from '@adapttable/core';
 import { RangeFieldWidget } from '@adapttable/core';
 import { RangeOp } from '@adapttable/core';
 import { readMultiDraft } from '@adapttable/core/editing';
@@ -1909,7 +1906,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     // (undocumented)
     protected readonly agentApprovalProps: Signal<AgentApprovalProps>;
     protected readonly agentApprovalSlot: FeatureSlotKey<AgentApprovalProps>;
-    readonly aggregates: InputSignal<readonly QueryAggregate[] | undefined>;
     readonly animate: InputSignal<boolean>;
     readonly assistant: InputSignal<TableAssistantProps | undefined>;
     // @internal
@@ -1950,8 +1946,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly editConflictPolicy: InputSignal<EditConflictPolicy | undefined>;
     readonly error: InputSignal<Error | null | undefined>;
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
-    readonly facetKeys: InputSignal<readonly string[] | undefined>;
-    readonly facets: InputSignal<Readonly<Record<string, FacetCounts>> | undefined>;
     readonly features: InputSignalWithTransform<readonly AdaptTableFeature[], readonly FeatureListEntry<AdaptTableFeature>[]>;
     readonly filterFields: InputSignal<boolean>;
     // @internal
@@ -1979,7 +1973,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly mobileBreakpoint: InputSignal<number | undefined>;
     // @internal
     protected readonly mobileCards: Signal<DataTableSurface | undefined>;
-    readonly mode: InputSignal<"frontend" | "server" | undefined>;
     // (undocumented)
     ngOnInit(): void;
     // @internal
@@ -1993,8 +1986,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     protected onMenuPointerDown(event: PointerEvent): void;
     protected onMenuPointerMove(event: PointerEvent): void;
     protected onMenuPointerUp(): void;
-    readonly onQueryChange: InputSignal<TableQueryHandler | undefined>;
     readonly onRowClick: InputSignal<((row: TRow) => void) | undefined>;
+    readonly onViewChange: InputSignal<TableQueryHandler | undefined>;
     readonly paginationMode: InputSignal<PaginationMode | undefined>;
     readonly renderCard: InputSignal<MobileCardRenderer<TRow> | undefined>;
     readonly renderRowActions: InputSignal<RowActionsRenderer<TRow> | undefined>;
@@ -2002,7 +1995,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     protected readonly reorderAnnouncerSlot: FeatureSlotKey<    {
     announcement: string;
     }>;
-    readonly responseKey: InputSignal<string | undefined>;
     readonly rowKey: InputSignal<(row: TRow) => string>;
     readonly rowVersion: InputSignal<((row: TRow) => string | number) | undefined>;
     // @internal
@@ -2047,14 +2039,12 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly stickyHeader: InputSignal<boolean>;
     readonly stickyTop: InputSignal<number>;
     readonly summaryRow: InputSignal<SummaryRowFn<TRow> | undefined>;
-    readonly supports: InputSignal<QuerySupport | undefined>;
     // (undocumented)
     protected readonly tableAssistantSlot: FeatureSlotKey<TableAssistantProps_2<unknown>>;
     readonly tableFooter: Signal<TemplateRef<unknown> | undefined>;
     readonly tableLabel: InputSignal<string | undefined>;
     // @internal
     protected readonly toolbarExtrasSlot: FeatureSlotKey<ToolbarExtrasSlotProps>;
-    readonly total: InputSignal<number | undefined>;
     readonly urlKey: InputSignal<string | undefined>;
     readonly urlSync: InputSignal<boolean>;
     // @internal
@@ -2071,18 +2061,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
-        "mode": {
-            "alias": "mode";
-            "required": false;
-            "isSignal": true;
-        };
-        "onQueryChange": {
-            "alias": "onQueryChange";
-            "required": false;
-            "isSignal": true;
-        };
-        "total": {
-            "alias": "total";
+        "onViewChange": {
+            "alias": "onViewChange";
             "required": false;
             "isSignal": true;
         };
@@ -2093,31 +2073,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         };
         "error": {
             "alias": "error";
-            "required": false;
-            "isSignal": true;
-        };
-        "supports": {
-            "alias": "supports";
-            "required": false;
-            "isSignal": true;
-        };
-        "aggregates": {
-            "alias": "aggregates";
-            "required": false;
-            "isSignal": true;
-        };
-        "responseKey": {
-            "alias": "responseKey";
-            "required": false;
-            "isSignal": true;
-        };
-        "facets": {
-            "alias": "facets";
-            "required": false;
-            "isSignal": true;
-        };
-        "facetKeys": {
-            "alias": "facetKeys";
             "required": false;
             "isSignal": true;
         };

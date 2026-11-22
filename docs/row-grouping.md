@@ -196,19 +196,20 @@ answer's key comes back:
 const [rows, setRows] = useState<Person[]>([]);
 const [answered, setAnswered] = useState<string>();
 
-<DataTable
-  mode="server"
-  data={rows}
-  total={total}
-  loading={loading}
-  responseKey={answered}
-  onQueryChange={async (query, { signal, key }) => {
+const source = useServerData<Person>({
+  rows,
+  total,
+  loading,
+  responseKey: answered,
+  onQueryChange: async (query, { signal, key }) => {
     const res = await fetch(`/api/people?${toParams(query)}`, { signal });
     const page = await res.json();
     setRows(page.items);
     setAnswered(key);
-  }}
-/>;
+  },
+});
+
+<DataTable source={source} columns={COLUMNS} rowKey={(row) => row.id} />;
 ```
 
 **A controlled tier needs `responseKey` to be accurate about this.** Without

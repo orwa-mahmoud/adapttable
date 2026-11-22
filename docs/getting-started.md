@@ -287,7 +287,7 @@ The source for each lives in
 - [Filtering](./filtering.md) — every filter type, options sources, chips,
   popover vs drawer.
 - [Data tiers](./data-tiers.md) — server data without a query library
-  (`onQueryChange`), or full control via `source` and TanStack Query.
+  (`useServerData`), or full control via `source` and TanStack Query.
 - [Demo](https://adapttable.orwamahmoud.com/react/demo/) — every adapter,
   live.
 

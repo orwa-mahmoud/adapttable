@@ -832,10 +832,7 @@ export type { RowExpansionState } from "./rows/useRowExpansion";
 export type { SelectionState } from "./selection/useSelection";
 export { offersAllMatching } from "./selection/useSelection";
 export type { UseServerDataOptions } from "./source/useServerData";
-export {
-  type DataModeProps,
-  type TableQueryHandler,
-} from "./source/useTableData";
+export type { TableQueryHandler } from "./source/useTableData";
 export type { Slot } from "./state/slots";
 export { fillSlot } from "./state/slots";
 export {

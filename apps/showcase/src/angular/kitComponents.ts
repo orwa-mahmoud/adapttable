@@ -58,8 +58,7 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
 
   readonly data = input<readonly TRow[]>();
   readonly source = input<Signal<TableSource<TRow>> | TableSource<TRow>>();
-  readonly mode = input<"frontend" | "server">();
-  readonly onQueryChange = input<TableQueryHandler>();
+  readonly onViewChange = input<TableQueryHandler>();
   readonly isCellFlashing =
     input<(rowId: string, columnKey: string) => boolean>();
   readonly loading = input<boolean>();
@@ -131,8 +130,7 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
           : []),
         inputBinding("data", this.data),
         inputBinding("source", this.source),
-        inputBinding("mode", this.mode),
-        inputBinding("onQueryChange", this.onQueryChange),
+        inputBinding("onViewChange", this.onViewChange),
         inputBinding("isCellFlashing", this.isCellFlashing),
         inputBinding("loading", this.loading),
         inputBinding("error", this.error),

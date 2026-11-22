@@ -1,5 +1,6 @@
 import {
   type ColumnDef,
+  injectServerData,
   type TableLabels,
   type TableQuery,
 } from "@adapttable/angular";
@@ -58,10 +59,7 @@ export function statusChromeTests(
       imports: [AdaptDataTable],
       template: `
         <adapt-data-table
-          [data]="rows()"
-          [total]="total()"
-          [loading]="loading()"
-          [error]="error()"
+          [source]="source"
           [columns]="columns"
           [rowKey]="rowKey"
           [urlSync]="false"
@@ -69,7 +67,6 @@ export function statusChromeTests(
           [defaults]="{ limit: 2 }"
           [skeletonRows]="skeletonRows()"
           [sidePanelSide]="side()"
-          [onQueryChange]="fetch"
         >
           @if (footer()) {
             <ng-template #tableFooter><p>Under the table</p></ng-template>
@@ -93,9 +90,18 @@ export function statusChromeTests(
       readonly columns = COLUMNS;
       readonly rowKey = (row: City) => row.id;
       readonly asked: TableQuery[] = [];
-      readonly fetch = (query: TableQuery) => {
-        this.asked.push(query);
-      };
+      readonly source = injectServerData<City>({
+        rows: this.rows,
+        total: this.total,
+        loading: this.loading,
+        error: this.error,
+        urlSync: false,
+        forceMobile: this.mobile,
+        defaults: { limit: 2 },
+        onQueryChange: (query) => {
+          this.asked.push(query);
+        },
+      });
     }
 
     async function mount() {
@@ -116,7 +122,6 @@ export function statusChromeTests(
           imports: [AdaptDataTable],
           template: `
             <adapt-data-table
-              mode="frontend"
               [data]="rows"
               [error]="error"
               [columns]="columns"

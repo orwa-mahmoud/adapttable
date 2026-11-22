@@ -2,7 +2,7 @@ import {
   collectConformanceTests,
   type ConformanceTest,
 } from "@adapttable/core/conformance";
-import { type ColumnDef } from "@adapttable/react";
+import { type ColumnDef, useServerData } from "@adapttable/react";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { expect } from "vitest";
 
@@ -21,11 +21,9 @@ export function serverPropsTests(
   const { filters } = kit.features;
   return collectConformanceTests(({ describe, it }) => {
     /**
-     * The server-tier props the shared shell reads, typed and honoured here.
-     *
-     * `error` renders this kit's own error state; `supports` and `facetKeys`
-     * reach the query the table sends, and the server's `facets` reach the
-     * checklist this kit draws.
+     * A table served by a server source: `error` renders this kit's own
+     * error state; the source's `supports` and `facetKeys` reach the query it
+     * sends, and the server's `facets` reach the checklist this kit draws.
      */
 
     interface Row {
@@ -34,6 +32,46 @@ export function serverPropsTests(
     }
     const ROWS: Row[] = [{ id: "1", team: "Core" }];
     const COLS: ColumnDef<Row>[] = [{ key: "team", header: "Team" }];
+
+    type ServerOptions = Parameters<typeof useServerData<Row>>[0];
+
+    function ServerTable({
+      total,
+      supports,
+      facetKeys,
+      facets,
+      onQueryChange,
+      features,
+    }: {
+      readonly total: number;
+      readonly supports: ServerOptions["supports"];
+      readonly facetKeys?: readonly string[];
+      readonly facets: ServerOptions["facets"];
+      readonly onQueryChange: (query: { facets?: readonly string[] }) => void;
+      readonly features?: NonNullable<
+        Parameters<typeof DataTable<Row>>[0]["features"]
+      >;
+    }) {
+      const source = useServerData<Row>({
+        rows: ROWS,
+        total,
+        urlSync: false,
+        supports,
+        facetKeys,
+        facets,
+        onQueryChange,
+      });
+      return (
+        <DataTable<Row>
+          source={source}
+          columns={COLS}
+          rowKey={(r) => r.id}
+          urlSync={false}
+          forceMobile={false}
+          features={features}
+        />
+      );
+    }
 
     describe(`server-tier props (${kit.name})`, () => {
       it("renders the kit's error state for a forwarded error", () => {
@@ -54,12 +92,8 @@ export function serverPropsTests(
       it("sends the declared facet keys to the server", async () => {
         const seen: { facets?: readonly string[] }[] = [];
         render(
-          <DataTable<Row>
-            data={ROWS}
+          <ServerTable
             total={1}
-            columns={COLS}
-            rowKey={(r) => r.id}
-            urlSync={false}
             supports={{ facets: true }}
             facetKeys={["team"]}
             facets={{ team: [{ value: "Core", label: "Core", count: 1 }] }}
@@ -74,14 +108,10 @@ export function serverPropsTests(
 
       it("counts the checklist from the server's facets, not the loaded page", async () => {
         render(
-          <DataTable<Row>
-            data={ROWS}
+          <ServerTable
             total={10}
-            columns={COLS}
-            rowKey={(r) => r.id}
-            urlSync={false}
-            forceMobile={false}
             supports={{ facets: true }}
+            facetKeys={["team"]}
             facets={{
               team: [
                 { value: "Core", label: "Core", count: 7 },

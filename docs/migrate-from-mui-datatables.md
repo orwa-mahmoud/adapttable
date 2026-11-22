@@ -56,7 +56,7 @@ whenever you want.
 | `data` (objects)                                      | `data`                                                     | Array-of-objects only; no array-of-arrays mode.                                                                                          |
 | `data` (arrays)                                       | convert to objects                                         | One `map()` at the boundary — see Gotchas.                                                                                               |
 | `columns` (`name`, `label`, `options`)                | `columns` (`key`, `header`, …)                             | Field-by-field below.                                                                                                                    |
-| `options.serverSide` + `count` + `onTableChange`      | `data` + `total` + `onQueryChange`                         | One consolidated query object replaces the action-string switch.                                                                         |
+| `options.serverSide` + `count` + `onTableChange`      | `useServerData({ rows, total, onQueryChange })`            | One consolidated query object replaces the action-string switch.                                                                         |
 | `options.page` / `rowsPerPage` / `rowsPerPageOptions` | automatic                                                  | Built-in pager; page size control included.                                                                                              |
 | `options.sortOrder` / `onColumnSortChange`            | per-column `sortable` (+ `multiSort()`)                    | AdaptTable owns and applies sort state.                                                                                                  |
 | `options.filterType` / `onFilterChange`               | column `filter` shorthand + `filters([…])`                 | Kit-native widgets + removable chips, derived for you.                                                                                   |
@@ -93,21 +93,21 @@ strings — `'changePage'`, `'sort'`, `'search'`, `'filterChange'`,
 callback receiving one consolidated query:
 
 ```tsx
-<DataTable
-  data={rows}
-  total={total}
-  loading={loading}
-  onQueryChange={async (query, { signal }) => {
+const source = useServerData<Person>({
+  rows,
+  total,
+  loading,
+  onQueryChange: async (query, { signal }) => {
     // query: { page, limit, search, sortBy, sortDir, sortLevels, filters } — one shape,
     // fired once per real change (mount included), previous fetch aborted.
     const res = await fetch(`/api/people?${toParams(query)}`, { signal });
     const body = await res.json();
     setRows(body.items);
     setTotal(body.total);
-  }}
-  columns={columns}
-  rowKey={(r) => r.id}
-/>
+  },
+});
+
+<DataTable source={source} columns={columns} rowKey={(r) => r.id} />;
 ```
 
 ## Before / after

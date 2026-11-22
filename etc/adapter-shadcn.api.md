@@ -13,7 +13,6 @@ import { ColumnFilter } from '@adapttable/react/adapter';
 import { ColumnLayoutState } from '@adapttable/react';
 import { CustomCellEditorCtrl } from '@adapttable/react/adapter';
 import { CustomCellEditorRender } from '@adapttable/react/adapter';
-import { DataModeProps } from '@adapttable/react/adapter';
 import { DataTableClassNames } from '@adapttable/unstyled';
 import { DataTableProps } from '@adapttable/unstyled';
 import { EditConflict } from '@adapttable/react';
@@ -57,8 +56,6 @@ export { ColumnLayoutState }
 export { CustomCellEditorCtrl }
 
 export { CustomCellEditorRender }
-
-export { DataModeProps }
 
 // @public
 export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>): JSX.Element;

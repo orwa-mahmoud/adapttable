@@ -103,6 +103,41 @@ describe("migrateV4Source", () => {
     expect(result.issues[0]?.message).toContain("hideOnMobile");
   });
 
+  it("reports a table's server props and leaves a server source's options alone", () => {
+    const source = [
+      "const source = useServerData({ rows, total: 3, onQueryChange: fetch });",
+      '<DataTable data={rows} total={total} onQueryChange={fetch} mode="server" />;',
+      '<adapt-data-table [data]="rows()" [onQueryChange]="load" [supports]="caps" />',
+      '<DataTable :data="rows" :total="total" @query-change="load" />',
+      "type Props = DataTableProps<Row> & DataModeProps<Row>;",
+    ].join("\n");
+    const result = migrateV4Source(source);
+    expect(result.changed).toBe(false);
+    const reported = (line: number) =>
+      result.issues
+        .filter((issue) => issue.line === line)
+        .map((issue) => issue.message.split(":")[0] ?? "")
+        .sort((a, b) => a.localeCompare(b));
+    // The server source's own options are not table props.
+    expect(reported(1)).toEqual([]);
+    expect(reported(2)).toEqual([
+      "A table takes no mode",
+      "A table's onQueryChange moved",
+      "If this is a table prop",
+    ]);
+    expect(reported(3)).toEqual([
+      "A table's onQueryChange moved",
+      "If this is a table prop",
+    ]);
+    expect(reported(4)).toEqual([
+      "A table's onQueryChange moved",
+      "If this is a table prop",
+    ]);
+    expect(reported(5)).toEqual([
+      "DataModeProps was removed; DataTableProps is DataTablePropsBase.",
+    ]);
+  });
+
   it("leaves a file that uses nothing v4 moved untouched", () => {
     const source = 'import { DataTable } from "@adapttable/mui";\n';
     expect(migrateV4Source(source)).toEqual({

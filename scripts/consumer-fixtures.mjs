@@ -77,6 +77,10 @@ export const ADAPTER_ABSENT = [
   "header-rename-form",
   // A development warning: the production build packs none of their text.
   "no data tier provided",
+  // A table over `data` carries no server tier.
+  "useServerData",
+  "createLazyServerSource",
+  "serverQuery",
 ];
 
 /** Unique identifier that proves a feature entry actually entered the graph. */
@@ -662,6 +666,26 @@ function adapterBaseFixtures() {
   }));
 }
 
+/**
+ * A table served by a server source: the plain table plus the server tier
+ * (`useServerData`, the request builder, and the engine behind a dynamic
+ * import). Packed measurement of 2026-11-22 with ~15% headroom: 64.3 KiB
+ * initial, 68.4 KiB total.
+ */
+function serverTableFixture() {
+  const { pkg } = adapterOf("unstyled");
+  return {
+    name: "unstyled · server table",
+    kind: "adapter-server",
+    kit: "unstyled",
+    pkg,
+    initialKB: 74,
+    totalKB: 79,
+    code: `export { DataTable, useServerData } from "PKG";`,
+    present: ["useServerData", "createLazyServerSource", "serverQuery"],
+  };
+}
+
 function presetFixtures() {
   return ADAPTERS.flatMap(({ kit, pkg }) => [
     {
@@ -867,6 +891,7 @@ const existingFixtures = [
   ...CORE_FIXTURES,
   ...REACT_FIXTURES,
   ...adapterBaseFixtures(),
+  serverTableFixture(),
   ...presetFixtures(),
   ...featureDeltaFixtures(),
   ...composedFiltersFixtures(),

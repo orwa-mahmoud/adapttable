@@ -22,6 +22,7 @@ import type {
   virtualize,
 } from "../src/features";
 import type { ColumnDef } from "../src/index";
+import { useServerData } from "../src/source/useServerData";
 
 interface NativeKit {
   name: string;
@@ -53,9 +54,8 @@ type ScenarioProps = Pick<
   | "onRowClick"
   | "isCellFlashing"
   | "searchPlaceholder"
-  | "mode"
-  | "onQueryChange"
-  | "total"
+  | "source"
+  | "onViewChange"
 >;
 
 interface NativeScenario extends ConformanceScenario {
@@ -63,7 +63,6 @@ interface NativeScenario extends ConformanceScenario {
   onRowClick?: (row: ConformanceRow) => void;
   isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   searchPlaceholder?: string;
-  mode?: "frontend" | "server";
   total?: number;
   /** Table labels beyond the neutral suite's; they replace `labels`. */
   tableLabels?: TableLabels;
@@ -125,31 +124,44 @@ export function nativeConformanceDriver(kit: NativeKit): NativeDriver {
         onRowClick: scenario.onRowClick,
         isCellFlashing: scenario.isCellFlashing,
         searchPlaceholder: scenario.searchPlaceholder,
-        mode: scenario.mode,
-        onQueryChange:
-          scenario.onQueryChange === undefined
-            ? undefined
-            : (query, info) => {
-                scenario.onQueryChange?.(query, info);
-              },
-        total: scenario.total,
+        onViewChange: scenario.onViewChange,
       };
       const container = document.createElement("div");
       document.body.append(container);
       const tick = ref(0);
+      const { onQueryChange } = scenario;
       const app = createApp({
-        setup: () => () => {
-          const generation = tick.value;
-          const flash = scenario.isCellFlashing;
-          return kit.render({
-            ...props,
-            isCellFlashing: flash
-              ? (rowId, columnKey) =>
-                  generation >= 0 && flash(rowId, columnKey) === true
-              : undefined,
-          });
+        setup: () => {
+          // A server scenario is served by a server source, as a host
+          // builds one.
+          const source = onQueryChange
+            ? useServerData<ConformanceRow>({
+                rows: scenario.rows,
+                total: scenario.total ?? scenario.rows.length,
+                urlSync: false,
+                defaults: props.defaults,
+                onQueryChange: (query, info) => {
+                  onQueryChange(query, info);
+                },
+              })
+            : undefined;
+          return () => render(source);
         },
       });
+      const render = (
+        source: ReturnType<typeof useServerData<ConformanceRow>> | undefined
+      ) => {
+        const generation = tick.value;
+        const flash = scenario.isCellFlashing;
+        return kit.render({
+          ...props,
+          ...(source ? { data: undefined, source: source.value } : {}),
+          isCellFlashing: flash
+            ? (rowId, columnKey) =>
+                generation >= 0 && flash(rowId, columnKey) === true
+            : undefined,
+        });
+      };
       kit.install?.(app);
       app.mount(container);
       return {
@@ -448,7 +460,7 @@ export function nativeSearchConformanceTests(
   ];
 }
 
-/** The server tier from `data` + `onQueryChange`, and a frontend notice. */
+/** A table served by a server source, and a frontend table's notice. */
 export function nativeServerConformanceTests(
   driver: NativeDriver
 ): readonly ConformanceTest[] {
@@ -469,7 +481,7 @@ export function nativeServerConformanceTests(
   };
   return [
     {
-      name: "fetches the page from onQueryChange and shows the host's rows",
+      name: "fetches the page from a server source and shows the host's rows",
       async run() {
         const fetch =
           vi.fn<NonNullable<ConformanceScenario["onQueryChange"]>>();
@@ -508,17 +520,16 @@ export function nativeServerConformanceTests(
       },
     },
     {
-      name: 'tells a mode="frontend" table\'s onQueryChange what changed',
+      name: "tells a frontend table's onViewChange what changed",
       async run() {
         const notice =
-          vi.fn<NonNullable<ConformanceScenario["onQueryChange"]>>();
+          vi.fn<NonNullable<ConformanceScenario["onViewChange"]>>();
         const view = driver.mount({
           rows: CONFORMANCE_ROWS,
           columns: CONFORMANCE_COLUMNS,
           tableLabel: "People",
-          mode: "frontend",
-          onQueryChange: (query, info) => {
-            notice(query, info);
+          onViewChange: (query) => {
+            notice(query);
           },
         });
         try {

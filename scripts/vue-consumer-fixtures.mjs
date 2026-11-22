@@ -26,6 +26,13 @@ export const XLSX_WRITER_MARKER = "function xlsxWriter";
 const writers = [PDF_WRITER_MARKER, XLSX_WRITER_MARKER];
 const drawerStyles = ["data-adapttable-filter-dialog", "filters-backdrop"];
 
+/** What only a table served by a server source carries. */
+export const SERVER_TIER_MARKERS = [
+  "useServerData",
+  "createLazyServerSource",
+  "serverQuery",
+];
+
 /** Runtime implementations only: shared feature keys and erased types are allowed. */
 export const VUE_OPTIONAL_BASE_MARKERS = [
   "createCommandPaletteController",
@@ -75,7 +82,12 @@ export const VUE_NATIVE_BASE_SPECS = [
   presentCss: [css],
   functionality: `${kit} table, native controls and published adapter stylesheet`,
   present: ["DataTable"],
-  absent: [...writers, "export-progress-surface", ...VUE_OPTIONAL_BASE_MARKERS],
+  absent: [
+    ...writers,
+    "export-progress-surface",
+    ...VUE_OPTIONAL_BASE_MARKERS,
+    ...SERVER_TIER_MARKERS,
+  ],
   rejectOptionalAi: true,
 }));
 

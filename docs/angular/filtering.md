@@ -2,7 +2,7 @@
 
 Compose `filters()` to turn column filter definitions into a Filters button,
 an AND/OR builder, field controls and removable chips. The frontend data tier
-evaluates the filters; the server tier sends their state to the host's query
+evaluates the filters; a server source sends their state to the host's query
 callback.
 
 These examples use the native kit `@adapttable/angular-unstyled`.
@@ -89,8 +89,10 @@ loader leaves an empty list and a development warning; provide your own
 logging and recovery if option loading is essential. Results arriving after
 the field's injection context is destroyed are ignored.
 
-With server data, declare the endpoint's actual capabilities and implement
-the received query in `[onQueryChange]`. Changing filters does not filter the
+With server data, declare the endpoint's actual capabilities on the
+`injectServerData` source and implement the received query in its
+`onQueryChange`; `serverFilterKeys` gives it the filter keys the columns and
+filters declare. Changing filters does not filter the
 server page locally. See [data tiers](./data-tiers.md) and the shared
 [server query contract](../server-queries.md).
 

@@ -1930,11 +1930,9 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     locale: props.locale,
     source: props.source,
     data: props.data,
-    total: props.total,
     loading: props.loading,
     error: props.error,
-    mode: props.mode,
-    onQueryChange: props.onQueryChange,
+    onViewChange: props.onViewChange,
     urlAdapter: resolvedUrlAdapter,
     // No `urlSync` here on purpose: the decision is already baked into WHICH
     // adapter was resolved above (memory when off, the real one when on), and
@@ -1946,9 +1944,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     filterTypes: props.filterTypes,
     defaults: props.defaults,
     paginationMode: props.paginationMode,
-    supports: props.supports,
-    facetKeys: props.facetKeys,
-    facets: props.facets,
     featureHost,
   });
   // A declarative `filters` array becomes the auto-built form; JSX passes

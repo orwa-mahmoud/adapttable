@@ -148,12 +148,12 @@ per-column aggregation choices.
 
 ### URL & persistence
 
-URL props (`urlSync`, `urlKey`, `urlAdapter`) and the `data` /
-`onQueryChange` tiers live on the adapter components, not the core prop
-surface — see [Adapter extras](#adapter-extras) and
-[URL-synced state](./url-state.md). The two tiers are typed as `DataModeProps`,
-and the server one's callback is `TableQueryHandler`: the consolidated query
-plus the `AbortSignal` for the request it starts.
+URL props (`urlSync`, `urlKey`, `urlAdapter`) and the `data` tier live on
+the adapter components, not the core prop surface — see
+[Adapter extras](#adapter-extras) and [URL-synced state](./url-state.md). A
+server table passes a `useServerData` source; its callback, like
+`onViewChange`, is a `TableQueryHandler`: the consolidated query plus the
+`AbortSignal` for the request it starts.
 
 ### Callbacks
 
@@ -492,29 +492,22 @@ keeps every built-in type.
 
 Props beyond the core surface, with per-kit availability.
 
-| Prop            | Type                                        | Default        | Available on                 | Description                                                                                                                                                                                               |
-| --------------- | ------------------------------------------- | -------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `data`          | `readonly TRow[]`                           | —              | all                          | Frontend tier: raw rows the table filters/sorts/pages; with `onQueryChange` it is the current server page.                                                                                                |
-| `total`         | `number`                                    | —              | all                          | Server tier: total row count across all pages (drives the pager).                                                                                                                                         |
-| `loading`       | `boolean`                                   | —              | all                          | Server tier: a request is in flight.                                                                                                                                                                      |
-| `error`         | `Error \| null`                             | `null`         | all                          | Forwarded error to display in the table's error state (retry via the source's `refetch`).                                                                                                                 |
-| `mode`          | `"frontend" \| "server"`                    | `"frontend"`   | all                          | Data mode from `DataModeProps`. `"server"` requires `onQueryChange`.                                                                                                                                      |
-| `onQueryChange` | `TableQueryHandler`                         | —              | all                          | Server tier: fired with the consolidated query whenever it changes (mount included); fetch and hand back `data` + `total`. `info.key` identifies the request.                                             |
-| `responseKey`   | `string`                                    | —              | all                          | Server tier: the `onQueryChange` `info.key` the current `data` answers, so aggregate metadata belongs to the rows on screen.                                                                              |
-| `aggregates`    | `readonly QueryAggregate[]`                 | —              | all                          | Server tier: aggregates to send as `query.aggregates`; requires `supports.aggregates`. Reader overrides layer over these.                                                                                 |
-| `supports`      | `QuerySupport`                              | —              | all                          | Server tier: capabilities this endpoint answers. `supports.facets` unlocks `query.facets`.                                                                                                                |
-| `facetKeys`     | `readonly string[]`                         | checklist keys | all                          | Server tier: keys sent as `query.facets`. Defaults to every `checklist` definition.                                                                                                                       |
-| `facets`        | `FacetMap`                                  | —              | all                          | Server tier: distinct-value counts from the last fetch, surfaced on the source for the checklist.                                                                                                         |
-| `urlKey`        | `string`                                    | —              | all                          | Namespace for this table's URL params (`urlKey="left"` → `left.q`, `left.page`, …).                                                                                                                       |
-| `urlAdapter`    | `UrlStateAdapter`                           | History API    | all                          | URL-state backend for the `data`/`onQueryChange` tiers (router adapter, `createMemoryAdapter()` in tests).                                                                                                |
-| `urlSync`       | `boolean`                                   | `true`         | all                          | `false` keeps all state in memory — the address bar never changes, any `urlAdapter` is ignored.                                                                                                           |
-| `slots`         | `{ skeleton?, empty?, noResults?, error? }` | —              | all                          | Replace sub-components. `empty` covers both empty states; `noResults` overrides just the filtered one; `error` takes a node or a `(state) => node` receiving the error and its retry (see customization). |
-| `classNames`    | `DataTableClassNames`                       | —              | all                          | Per-part class overrides — five parts on Mantine/MUI/Chakra/antd/Radix/Base UI (`root`/`toolbar`/`table`/`card`/`footer`), every part on unstyled and shadcn.                                             |
-| `className`     | `string`                                    | —              | mui, antd                    | Class name applied to the root wrapper.                                                                                                                                                                   |
-| `animate`       | `boolean`                                   | `false`        | all                          | Animate rows/cards on mount (dependency-free; honors reduced motion).                                                                                                                                     |
-| `size`          | kit-specific union                          | —              | chakra, antd, radix, base-ui | Explicit kit table size, overriding the density mapping. MUI uses `density`; the listed kits retain native values density cannot express.                                                                 |
-| `accentColor`   | kit accent union (chakra: `string`)         | —              | chakra, radix, base-ui       | Accent color for primary controls (buttons, badges, active page).                                                                                                                                         |
-| `bordered`      | `boolean`                                   | `false`        | antd                         | Render the table with cell borders.                                                                                                                                                                       |
+| Prop           | Type                                        | Default     | Available on                 | Description                                                                                                                                                                                               |
+| -------------- | ------------------------------------------- | ----------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`         | `readonly TRow[]`                           | —           | all                          | Every row; the table filters, sorts and pages them. A server table passes `source={useServerData(…)}` instead.                                                                                            |
+| `onViewChange` | `TableQueryHandler`                         | —           | all                          | Told of each committed change to page, page size, search, sort and filters of a table over `data`, never of the mount.                                                                                    |
+| `loading`      | `boolean`                                   | —           | all                          | The rows of `data` are still arriving.                                                                                                                                                                    |
+| `error`        | `Error \| null`                             | `null`      | all                          | Forwarded error to display in the table's error state (retry via the source's `refetch`).                                                                                                                 |
+| `urlKey`       | `string`                                    | —           | all                          | Namespace for this table's URL params (`urlKey="left"` → `left.q`, `left.page`, …).                                                                                                                       |
+| `urlAdapter`   | `UrlStateAdapter`                           | History API | all                          | URL-state backend for the `data` tier (router adapter, `createMemoryAdapter()` in tests).                                                                                                                 |
+| `urlSync`      | `boolean`                                   | `true`      | all                          | `false` keeps all state in memory — the address bar never changes, any `urlAdapter` is ignored.                                                                                                           |
+| `slots`        | `{ skeleton?, empty?, noResults?, error? }` | —           | all                          | Replace sub-components. `empty` covers both empty states; `noResults` overrides just the filtered one; `error` takes a node or a `(state) => node` receiving the error and its retry (see customization). |
+| `classNames`   | `DataTableClassNames`                       | —           | all                          | Per-part class overrides — five parts on Mantine/MUI/Chakra/antd/Radix/Base UI (`root`/`toolbar`/`table`/`card`/`footer`), every part on unstyled and shadcn.                                             |
+| `className`    | `string`                                    | —           | mui, antd                    | Class name applied to the root wrapper.                                                                                                                                                                   |
+| `animate`      | `boolean`                                   | `false`     | all                          | Animate rows/cards on mount (dependency-free; honors reduced motion).                                                                                                                                     |
+| `size`         | kit-specific union                          | —           | chakra, antd, radix, base-ui | Explicit kit table size, overriding the density mapping. MUI uses `density`; the listed kits retain native values density cannot express.                                                                 |
+| `accentColor`  | kit accent union (chakra: `string`)         | —           | chakra, radix, base-ui       | Accent color for primary controls (buttons, badges, active page).                                                                                                                                         |
+| `bordered`     | `boolean`                                   | `false`     | antd                         | Render the table with cell borders.                                                                                                                                                                       |
 
 Mantine also publishes the spacing its density mapping uses, as
 `DENSITY_SPACING` (`DensitySpacing`) from `@adapttable/mantine/density`, so a
@@ -540,10 +533,16 @@ deprecated alias until the next major.
   your `useInfiniteQuery`-style hook into the same contract.
 - `useServerData<TRow>(options): TableSource<TRow>` — hand-rolled-fetch
   server tier: emits one consolidated `TableQuery` per change, aborting
-  superseded requests via `AbortSignal`.
+  superseded requests via `AbortSignal`. Pass it to the table as `source`.
+- `serverFilterKeys(input: ServerFilterKeysInput<TRow>): ServerFilterKeys` —
+  the `arrayExtraKeys`, `numberExtraKeys` and `facetKeys` a server source
+  needs, derived from the `columns`, `filters`, `filterTypes` and `locale`
+  the table is given; spread it into `useServerData` (Vue's `useServerData`,
+  Angular's `injectServerData`) so filters restored from the URL reach the
+  first request typed. On core and every binding's main entry.
 - `useTableData<TRow>(options): { source, runtime }` — tier resolution
-  (source ▸ server ▸ frontend) plus the declarative filter runtime; what
-  every adapter calls internally.
+  (`source`, else `data`) plus the declarative filter runtime; what every
+  adapter calls internally.
 
 ### URL state & persistence
 
@@ -769,7 +768,8 @@ explains which import a program changes. This list is the reference.
   `TableToolbarSlots` names the toolbar slots a binding fills.
 - `TableQueryInput` / `buildTableQuery` / `TableQueryListener` /
   `QueryEmitter` / `createQueryEmitter` — the one consolidated query a table
-  hands `onQueryChange`, and the emitter that fires it once per change.
+  hands `onViewChange` and a server source hands `onQueryChange`, and the
+  emitter that fires it once per change.
 
 ### The view-state store
 
@@ -870,9 +870,8 @@ explains which import a program changes. This list is the reference.
   declarative filter definitions or registry extensions refreshes matching
   rows without changing the data array or query;
   `finish({ resolved, frontend })` adds facet counts computed from the
-  searched rows when nothing answered them; `commit()` tells a
-  `mode="frontend"` table's `onQueryChange` about each change (never the
-  mount), `loadOptions()` loads each filter's own option list once, and
+  searched rows when nothing answered them; `commit()` tells a frontend
+  table's `onViewChange` about each change (never the mount), `loadOptions()` loads each filter's own option list once, and
   `dispose()` aborts a notification in flight. `useTableData` runs on it.
   The optional engine supplies `FilterRuntime.filterKey` from authored
   definitions, registry extensions, locale and loaded options, excluding rows
@@ -2895,7 +2894,7 @@ the source's shape. See [data tiers](./data-tiers.md#what-a-source-can-do--capab
 Misconfiguration warns once per message in development (silent in
 production):
 
-- no data tier, or both `source` and `data`/`onQueryChange` provided;
+- no data tier, or both `source` and `data` provided;
 - duplicate column keys (sorting, selection, and column layout all target keys);
 - unresolvable sorts (no matching column, or a non-primitive accessor without `sortValue`);
 - a column `filter` whose key is also defined in the `filters` array (the array wins);
@@ -2954,9 +2953,7 @@ the widget's structural indexes separate from these data-row indexes.
 `useStickyToolbarLayout`
 and `resolveStickyToolbar` park search and page-size with a sticky header.
 `DataTableShellProps`
-is its kit-agnostic prop surface and `DataModeProps` the discriminated
-`mode` union inside it (`mode="server"` requires `onQueryChange` at
-compile time). `tableRenderModel(props)` / `TableRenderModel` derive the
+is its kit-agnostic prop surface. `tableRenderModel(props)` / `TableRenderModel` derive the
 shared render prelude from `SharedTableRenderProps`; `TableBodyRegion`
 names which body region renders (desktop rows, mobile cards);
 `VirtualTableRow` is one materialized virtual row/card entry.
@@ -3860,11 +3857,9 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   `fetchNextPage` appends. With `supports.cursor` and `nextCursor`, paging
   forward sends the token the last page returned.
 - `injectTableData(options)` chooses the tier a table runs on from
-  `TableDataOptions`: a prebuilt `source`; `data` with `onQueryChange` (or
-  `mode: "server"`), which the server tier asks the host to fetch; or `data`
-  alone, which the frontend tier searches, sorts and pages — and with
-  `mode: "frontend"`, `onQueryChange` is told of each change, not of the
-  first render. Given the filter `engine`, it merges the declared `filters`
+  `TableDataOptions`: a prebuilt `source` (`injectServerData`'s among them),
+  or `data`, which the frontend tier searches, sorts and pages — and
+  `onViewChange` is told of each of its changes, not of the first render. Given the filter `engine`, it merges the declared `filters`
   with the columns' `filter` shorthands, loads each filter's own option list
   once, and counts checklist facets from the rows when no server answered
   them. It returns `TableDataResult`: the `source` and the filter `runtime`,
@@ -4370,10 +4365,9 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
 It is a public npm package and participates in the native-kit contracts.
 See [Angular getting started](./angular/getting-started.md) for installation.
 `AdaptDataTable` (`<adapt-data-table>`)
-takes the rows, columns and row key as inputs — or a prebuilt `source`, or
-the page a host fetches through `onQueryChange` with `total`, `loading`,
-`error`, `supports`, `aggregates`, `responseKey`, `facets` and `facetKeys`,
-the tier chosen by `injectTableData` and `mode` — and renders search, sorting,
+takes the rows, columns and row key as inputs — or a prebuilt `source`,
+`injectServerData`'s for a server, the tier chosen by `injectTableData` —
+and renders search, sorting,
 paging, the phone card layout, row selection and keyboard cell navigation
 with the `data-adapttable-part` names every kit shares. `AdaptDesktopTable`
 and `AdaptMobileCards` are the internal desktop body and phone card list;
@@ -4529,8 +4523,8 @@ binding.
 
 Import `AdaptDataTable` from the root and compose features from this kit's
 own secondary entries. Its `<adapt-data-table>` uses the same Angular
-`ColumnDef`, cell/header/footer templates and data modes: `data`, a prebuilt
-`source`, or host-fetched rows with `onQueryChange` and `total`. The binding
+`ColumnDef`, cell/header/footer templates and data tiers: `data`, or a
+prebuilt `source` such as `injectServerData`'s. The binding
 owns filtering, sorting, pagination and virtualization; NG-ZORRO's visual
 table does not introduce a second state controller. Every write still calls
 the host. `renderCard`, `renderRowActions`, `onRowClick`, `rowAppearance`,
@@ -4699,10 +4693,8 @@ Applications should use the documented table, feature and provider APIs instead.
   install packages or query registry availability.
 - **React adapter packages** — each exports its `DataTable` with `DataTableProps`,
   `DataTablePropsBase`, `DataTableSlots` and `SavedViewsMenuProps` (plus the
-  shared core re-exports). `DataTableProps` is `DataTablePropsBase &
-DataModeProps`: the base carries every prop except the data mode, which is
-  the half to name when you wrap or extend a table's props without committing
-  to a tier. `@adapttable/unstyled` also exports `IconProps`, the props its
+  shared core re-exports). `DataTableProps` is `DataTablePropsBase`.
+  `@adapttable/unstyled` also exports `IconProps`, the props its
   exported icons take, so a caller supplying one has a name for the argument; Radix and Base UI export their accent unions
   (`RadixAccentColor`, `BaseUiAccentColor`); Mantine also exports its
   chrome as reusable components (`ActiveFilterChips`, `AutoFilterForm`,

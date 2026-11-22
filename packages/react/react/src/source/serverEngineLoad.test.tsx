@@ -160,30 +160,25 @@ describe("the server engine on demand", () => {
     expect(engine.imports).toBe(0);
   });
 
-  it("loads the engine when a table switches to the server tier", async () => {
+  it("loads the engine with the first server source", async () => {
     const onQueryChange = vi.fn();
-    const { result, rerender } = renderHook(
-      ({ server }: { server: boolean }) =>
-        useTableData<Row>({
-          data: ROWS,
-          total: 2,
-          mode: server ? "server" : "frontend",
-          onQueryChange: server ? onQueryChange : undefined,
-          columns: [{ key: "id", header: "Id" }],
-          urlAdapter: createMemoryAdapter(""),
-        }),
-      { initialProps: { server: false } }
+    const { result, rerender } = renderHook(() =>
+      useServerData<Row>({
+        rows: ROWS,
+        total: 2,
+        onQueryChange,
+        columns: [{ key: "id", header: "Id" }],
+        urlAdapter: createMemoryAdapter(""),
+      })
     );
-    expect(engine.imports).toBe(0);
-    rerender({ server: true });
     expect(engine.imports).toBe(1);
-    expect(result.current.source.rows).toEqual(ROWS);
+    expect(result.current.rows).toEqual(ROWS);
     expect(onQueryChange).toHaveBeenCalledTimes(1);
     await act(async () => {
       engine.release();
       await Promise.resolve();
     });
-    rerender({ server: true });
+    rerender();
     expect(onQueryChange).toHaveBeenCalledTimes(1);
   });
 

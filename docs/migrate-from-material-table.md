@@ -73,7 +73,7 @@ Same Material look, on a current MUI — and your rows stay untouched.
 | material-table                                       | `@adapttable/mui`                                          | Notes                                                                            |
 | ---------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `data` (array)                                       | `data`                                                     | No `tableData` injection — your objects are never mutated.                       |
-| `data` (query function)                              | `onQueryChange` (or `source`)                              | Mapping below.                                                                   |
+| `data` (query function)                              | `source={useServerData({ onQueryChange })}`                | Mapping below.                                                                   |
 | `columns`                                            | `columns`                                                  | Field-by-field below.                                                            |
 | `title`                                              | `tableLabel` / your own heading                            | The toolbar is yours to compose (`toolbar` slot).                                |
 | `actions` (row actions)                              | `rowActions([…])`                                          | Icon buttons on desktop, card buttons on mobile; `confirm` built in.             |
@@ -115,11 +115,11 @@ material-table's remote mode —
 same idea as AdaptTable's server tier, minus two quirks:
 
 ```tsx
-<DataTable
-  data={rows}
-  total={total}
-  loading={loading}
-  onQueryChange={async (query, { signal }) => {
+const source = useServerData<Person>({
+  rows,
+  total,
+  loading,
+  onQueryChange: async (query, { signal }) => {
     // material-table: query.page, query.pageSize, query.search,
     //                query.orderBy (a whole Column OBJECT), query.orderDirection
     // AdaptTable:    query.page, query.limit, query.search,
@@ -129,10 +129,10 @@ same idea as AdaptTable's server tier, minus two quirks:
     const body = await res.json();
     setRows(body.items); // no { data, page, totalCount } envelope required
     setTotal(body.total);
-  }}
-  columns={columns}
-  rowKey={(r) => r.id}
-/>
+  },
+});
+
+<DataTable source={source} columns={columns} rowKey={(r) => r.id} />;
 ```
 
 The classic material-table stumbling block — `query.orderBy` being a full

@@ -1,5 +1,11 @@
-import { DataTable, type TableQuery } from "@adapttable/antd";
+import { DataTable } from "@adapttable/antd";
 import { filters } from "@adapttable/antd/filters";
+import {
+  type ColumnDef,
+  serverFilterKeys,
+  type TableQuery,
+  useServerData,
+} from "@adapttable/react";
 import { ConfigProvider } from "antd";
 import { useState } from "react";
 
@@ -9,12 +15,28 @@ interface Person {
   city: string;
 }
 
+const COLUMNS: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  {
+    key: "city",
+    // The same declarative filter drives the widget, chip and URL —
+    // the VALUE arrives in `query.filters.city` for your API.
+    filter: {
+      type: "select",
+      options: [
+        { value: "Dubai", label: "Dubai" },
+        { value: "Riyadh", label: "Riyadh" },
+      ],
+    },
+  },
+];
+
 /**
- * Server data WITHOUT a query library: the table owns the query state (URL,
- * filters, debounce) and emits ONE consolidated `onQueryChange` per real
- * change — including the initial mount with URL-restored values. Forward
- * the `signal` to `fetch` and superseded (out-of-order) responses are
- * aborted for you. Your only job: call the API, hand back rows + total.
+ * Server data WITHOUT a query library: `useServerData` owns the query state
+ * (URL, filters, debounce) and emits ONE consolidated `onQueryChange` per
+ * real change — including the initial mount with URL-restored values.
+ * Forward the `signal` to `fetch` and superseded (out-of-order) responses
+ * are aborted for you. Your only job: call the API, hand back rows + total.
  */
 export function AntdServerExample() {
   const [rows, setRows] = useState<Person[]>([]);
@@ -55,31 +77,22 @@ export function AntdServerExample() {
     }
   }
 
+  const source = useServerData<Person>({
+    // The URL keys of the columns' filters, so a restored filter reaches the
+    // first request typed.
+    ...serverFilterKeys({ columns: COLUMNS }),
+    rows,
+    total,
+    loading,
+    responseKey: answered,
+    onQueryChange: (query, { signal, key }) => void load(query, signal, key),
+  });
+
   return (
     <ConfigProvider>
       <DataTable
-        data={rows}
-        total={total}
-        loading={loading}
-        responseKey={answered}
-        onQueryChange={(query, { signal, key }) =>
-          void load(query, signal, key)
-        }
-        columns={[
-          { key: "name", sortable: true },
-          {
-            key: "city",
-            // The same declarative filter drives the widget, chip and URL —
-            // the VALUE arrives in `query.filters.city` for your API.
-            filter: {
-              type: "select",
-              options: [
-                { value: "Dubai", label: "Dubai" },
-                { value: "Riyadh", label: "Riyadh" },
-              ],
-            },
-          },
-        ]}
+        source={source}
+        columns={COLUMNS}
         rowKey={(r) => r.id}
         // Composes the Filters control that column `filter` declarations use.
         features={[filters([])]}

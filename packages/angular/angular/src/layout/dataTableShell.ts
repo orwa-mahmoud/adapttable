@@ -61,15 +61,12 @@ import {
   type ExportCsvOptions,
   type ExtraFilters,
   type ExtraRow,
-  type FacetMap,
   type FilterDef,
   type FilterTypeSpec,
   type FrontendEngineFactory,
   type GetCellSpan,
   type PaginationMode,
   type PinnedRows,
-  type QueryAggregate,
-  type QuerySupport,
   type RowAction,
   type RowActionsLayout,
   type RowHeight,
@@ -544,44 +541,26 @@ export interface TableView<TRow> extends TableSurfaceView<TRow> {
 @Directive({})
 export abstract class AdaptDataTableShell<TRow> implements OnInit {
   /**
-   * The rows: every row for a table that searches, sorts and pages them
-   * itself, or the current page when `onQueryChange` fetches it. The host
-   * owns the array.
+   * Every row; the table searches, sorts and pages them itself. The host owns
+   * the array.
    */
   readonly data = input<readonly TRow[]>();
   /**
-   * A prebuilt source — `injectQuerySource`'s, or any `TableSource` — in
-   * place of `data`. Replacements and signal updates stay live.
+   * A prebuilt source in place of `data`: `injectServerData`'s for rows a
+   * server pages, sorts and filters, `injectQuerySource`'s, or any
+   * `TableSource`. Replacements and signal updates stay live.
    */
   readonly source = input<Signal<TableSource<TRow>> | TableSource<TRow>>();
   /**
-   * `"server"` makes `onQueryChange` fetch the rows; `"frontend"` keeps the
-   * table's own processing and makes `onQueryChange` a notification. Absent:
-   * `data` with `onQueryChange` is server, `data` alone is frontend.
+   * Told of each committed change to page, page size, search, sort and
+   * filters of a table over `data`, never of the mount. The table keeps
+   * processing `data`.
    */
-  readonly mode = input<"frontend" | "server">();
-  /**
-   * Called with one consolidated query per real change: on the server tier
-   * the host fetches that page and the superseded request's `signal` is
-   * aborted; on the frontend tier it is told what the reader did.
-   */
-  readonly onQueryChange = input<TableQueryHandler>();
-  /** Server tier: the row count across every page. */
-  readonly total = input<number>();
-  /** A request in flight. */
+  readonly onViewChange = input<TableQueryHandler>();
+  /** The rows of `data` are still loading. */
   readonly loading = input<boolean>();
   /** A failure to show. */
   readonly error = input<Error | null>();
-  /** Server tier: what the endpoint can answer beyond the baseline query. */
-  readonly supports = input<QuerySupport>();
-  /** Server tier: aggregates to ask the endpoint for. */
-  readonly aggregates = input<readonly QueryAggregate[]>();
-  /** Server tier: the `key` of the query the current `data` answers. */
-  readonly responseKey = input<string>();
-  /** Server tier: distinct-value counts from the last fetch. */
-  readonly facets = input<FacetMap>();
-  /** Server tier: filter keys to count; defaults to every checklist filter. */
-  readonly facetKeys = input<readonly string[]>();
   /** The columns in order, and header groups over them. */
   readonly columns = input.required<readonly ColumnInput<TRow>[]>();
   /** A row's stable id. */
@@ -1128,16 +1107,9 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       injectTableData<TRow>({
         source: computed(() => readMaybe(this.source())),
         data: this.data,
-        mode: this.mode,
-        onQueryChange: this.onQueryChange,
-        total: this.total,
+        onViewChange: this.onViewChange,
         loading: this.loading,
         error: this.error,
-        supports: this.supports,
-        aggregates: this.aggregates,
-        responseKey: this.responseKey,
-        facets: this.facets,
-        facetKeys: this.facetKeys,
         columns: computed(() => flattenColumns(this.columns()).leaves),
         // Read live: the data tier outlives a change of features.
         get engine() {

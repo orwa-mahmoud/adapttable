@@ -2,7 +2,11 @@
  * First-load skeleton, a failed load, a background refresh, the footer slot
  * and a panel beside the body.
  */
-import type { ColumnDef, TableQuery } from "@adapttable/angular";
+import {
+  type ColumnDef,
+  injectServerData,
+  type TableQuery,
+} from "@adapttable/angular";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it } from "vitest";
@@ -39,10 +43,7 @@ const all = (name: string) => [
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
-      [data]="rows()"
-      [total]="total()"
-      [loading]="loading()"
-      [error]="error()"
+      [source]="source"
       [columns]="columns"
       [rowKey]="rowKey"
       [urlSync]="false"
@@ -50,7 +51,6 @@ const all = (name: string) => [
       [defaults]="{ limit: 2 }"
       [skeletonRows]="skeletonRows()"
       [sidePanelSide]="side()"
-      [onQueryChange]="fetch"
     >
       @if (footer()) {
         <ng-template #tableFooter><p>Under the table</p></ng-template>
@@ -77,6 +77,16 @@ class Host {
   readonly fetch = (query: TableQuery) => {
     this.asked.push(query);
   };
+  readonly source = injectServerData<City>({
+    rows: this.rows,
+    total: this.total,
+    loading: this.loading,
+    error: this.error,
+    urlSync: false,
+    forceMobile: this.mobile,
+    defaults: { limit: 2 },
+    onQueryChange: this.fetch,
+  });
 }
 
 async function mount() {

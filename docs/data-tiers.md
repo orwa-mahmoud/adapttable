@@ -1,8 +1,9 @@
 # Client & server React table data — one TableSource API
 
-One `<DataTable>`, three ways to feed it — from "here's an array" to full
-query-library control. Search, sorting, filters, chips, and URL sync behave
-identically in every tier.
+One `<DataTable>`, two ways to feed it: `data`, the rows the table pages,
+sorts and filters itself, or `source`, a source built for it — a server
+source, a query library or your own. Search, sorting, filters, chips and URL
+sync behave identically either way.
 
 ## Example
 
@@ -38,13 +39,14 @@ export function PeopleTable() {
 }
 ```
 
-### 2. Server — `data` + `total` + `loading` + `onQueryChange`
+### 2. Server — `source={useServerData(…)}`
 
-Your API paginates; the table owns the query state and tells you when to
-fetch.
+Your API paginates; the server source owns the query state and tells you when
+to fetch.
 
 ```tsx
 import { useState } from "react";
+import { type ColumnDef, useServerData } from "@adapttable/react";
 // or import from "@adapttable/mui", "@adapttable/chakra", "@adapttable/antd",
 // "@adapttable/radix", "@adapttable/shadcn", "@adapttable/unstyled" — same props everywhere.
 import { DataTable } from "@adapttable/mantine";
@@ -55,43 +57,70 @@ interface Person {
   role: string;
 }
 
+const COLUMNS: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "role" },
+];
+
 export function PeopleTable() {
   const [rows, setRows] = useState<Person[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const source = useServerData<Person>({
+    rows,
+    total,
+    loading,
+    onQueryChange: async (query, { signal }) => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: String(query.page),
+          limit: String(query.limit),
+          search: query.search,
+        });
+        // Forward `signal`: superseded requests abort at the source.
+        const res = await fetch(`/api/people?${params}`, { signal });
+        const body = (await res.json()) as { items: Person[]; total: number };
+        setRows(body.items);
+        setTotal(body.total);
+      } finally {
+        setLoading(false);
+      }
+    },
+  });
 
-  return (
-    <DataTable
-      data={rows}
-      total={total}
-      loading={loading}
-      onQueryChange={async (query, { signal }) => {
-        setLoading(true);
-        try {
-          const params = new URLSearchParams({
-            page: String(query.page),
-            limit: String(query.limit),
-            search: query.search,
-          });
-          // Forward `signal`: superseded requests abort at the source.
-          const res = await fetch(`/api/people?${params}`, { signal });
-          const body = (await res.json()) as { items: Person[]; total: number };
-          setRows(body.items);
-          setTotal(body.total);
-        } finally {
-          setLoading(false);
-        }
-      }}
-      columns={[{ key: "name", sortable: true }, { key: "role" }]}
-      rowKey={(r) => r.id}
-    />
-  );
+  return <DataTable source={source} columns={COLUMNS} rowKey={(r) => r.id} />;
 }
 ```
 
+A table given `data` carries none of this: the server source, its request
+builder and the server engine come with `useServerData`.
+
+#### Filters on a server source
+
+A range, multi-value or checklist filter restored from the URL has to reach
+the first request typed — `budgetMin` as a number, `stage` as a list — and a
+checklist asks the server for its counts. `serverFilterKeys` derives those
+keys from the declarations the table is given:
+
+```tsx
+import { serverFilterKeys, useServerData } from "@adapttable/react";
+
+const source = useServerData<Deal>({
+  ...serverFilterKeys({ columns: COLUMNS, filters: FILTERS }),
+  rows,
+  total,
+  onQueryChange,
+});
+```
+
+It returns `arrayExtraKeys`, `numberExtraKeys` and `facetKeys`; pass
+`filterTypes` and `locale` when the table gets them. Each key can also be
+written by hand.
+
 #### What the query carries, and how it grows
 
-Every server tier receives one consolidated `TableQuery`:
+Every server source receives one consolidated `TableQuery`:
 
 ```ts
 {
@@ -138,11 +167,9 @@ backend could do, not an error.
 | `cursor`      | `cursor`     | Opaque cursor from the previous response                                                                                                                                                                                       |
 | `expandedIds` | `tree`       | Open tree node ids, so the response can carry the children of every open branch                                                                                                                                                |
 
-`cursor` and `expandedIds` need a source built with `useServerData` or
-`useQuerySource` and passed as `source`: they take the `nextCursor` and
-`expandedIds` options, which `<DataTable onQueryChange>` has no prop for.
-`supports`, `facetKeys` and `facets` are props on every kit's `<DataTable>`
-as well as options of those two hooks.
+`cursor` and `expandedIds` arrive through the `nextCursor` and
+`expandedIds` options of `useServerData` and `useQuerySource`, beside
+`supports`, `facetKeys` and `facets`.
 
 The flat `filters` bag is always populated, including when `filterTree` is
 sent, so a server that only reads the simple form keeps working.
@@ -200,45 +227,49 @@ export function PeopleTable() {
 }
 ```
 
-## Explicit `mode` — when inference isn't what you meant
+## Hearing about changes — `onViewChange`
 
-The tier is inferred from what you pass (`data` alone → frontend;
-`data` + `onQueryChange` → server; `source` → full control). The optional
-`mode` prop pins it explicitly — and unlocks one combination inference
-cannot express:
+A table over `data` keeps filtering, sorting and paging its rows, and tells
+`onViewChange` what the reader did: one consolidated `TableQuery` per
+committed change to page, page size, search, sort or filters, never for the
+mount. It is a notification — log it, mirror it, prefetch with it — and the
+rows the table shows stay the ones in `data`.
 
-| I want…                                                           | Pass                                       | `onQueryChange` acts as…                                        |
-| ----------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------- |
-| The table to fetch nothing; my handler runs every query           | `mode="server"` (requires `onQueryChange`) | **the contract** — you fetch and hand back `data` + `total`     |
-| The table to keep filtering/sorting/paging my `data`, but TELL me | `mode="frontend"` + `onQueryChange`        | **a pure notification** — fires per committed change, not mount |
-| Today's inference exactly                                         | omit `mode`                                | contract when present, nothing otherwise                        |
-
-`mode="server"` without `onQueryChange` does not compile; `mode` together
-with `source` dev-warns and `source` wins.
+```tsx
+<DataTable
+  data={PEOPLE}
+  columns={COLUMNS}
+  rowKey={(r) => r.id}
+  onViewChange={(query) => analytics.track("people-view", query)}
+/>
+```
 
 ## How it works
 
-- Tier resolution is by what you pass: `source` wins; otherwise
-  `onQueryChange` selects the server tier; otherwise `data` alone is the
-  frontend tier. Mixing tiers dev-warns and uses `source`.
+- The tier is what you pass: `source`, or `data`. Passing both dev-warns
+  and uses `source`; passing neither dev-warns and renders an empty table.
 - **Frontend**: search, the declarative-filter predicate, sorting, and page
   slicing all run in memory. Pagination defaults to `"auto"` — paged on
   desktop, infinite scroll on mobile.
-- **Server**: the table owns page, page size, debounced search, sort, and
-  filter state (URL-synced), and emits ONE consolidated `TableQuery` —
+- **Server**: `useServerData` owns page, page size, debounced search, sort,
+  and filter state (URL-synced), and emits ONE consolidated `TableQuery` —
   `{ page, limit, search, sortBy, sortDir, sortLevels, filters }` — per real
   change, **including once on mount with the URL-restored values**. Your only
-  job is to fetch and hand back `data` + `total`.
+  job is to fetch and hand back `rows` + `total`. The mount query goes out
+  while the server engine is still loading.
 - Server queries are value-keyed (`stableKey`), so identical re-renders never
   re-fire the same query; when a newer query
   supersedes an in-flight one, the previous call's `signal` aborts — forward
   it to `fetch` and out-of-order responses die at the source.
 - **Full control**: every source builder returns the same
   [`TableSource`](./concepts.md) contract, so the table can't tell in-memory
-  from server data — switch tiers without touching the UI.
+  from server data — switch tiers without touching the UI. Switching after
+  mount is a host handing the table another `source`, or `data`; a server
+  source keeps its own view state, and the page carries across through the
+  URL.
 - Column `filter` shorthands and the `filters` array drive widgets, chips,
-  and URL parsing in **all three tiers**; only the frontend tier also applies
-  the row predicate (the other tiers receive `query.filters` instead).
+  and URL parsing for every source; only the frontend tier also applies the
+  row predicate (a server source receives `query.filters` instead).
 
 ## What a source can do — `capabilities`
 
@@ -338,7 +369,8 @@ happen to be exactly what both expect. The options shape is exported as
 
 ## Which requests actually fire
 
-`onQueryChange` fires per real change, not per render. Four guarantees:
+A server source's `onQueryChange` fires per real change, not per render. Four
+guarantees:
 
 - **One request per query.** Queries are compared by value, so setting the same
   search term three times in a tick or an identical re-render collapses into a
@@ -363,27 +395,38 @@ the way you configured it, and these guarantees do not apply.
 
 ## Options
 
-| Prop            | Type                                                                                       | Default  | Description                                                                                                                                                                                                                                    |
-| --------------- | ------------------------------------------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `data`          | `readonly TRow[]`                                                                          | —        | Frontend tier: all rows. Server tier: the current page, exactly as the server returned it.                                                                                                                                                     |
-| `total`         | `number`                                                                                   | `0`      | Server tier: total row count across all pages (drives the pager).                                                                                                                                                                              |
-| `loading`       | `boolean`                                                                                  | `false`  | Server tier: request in flight (skeleton when no rows yet, subtle refresh indicator otherwise).                                                                                                                                                |
-| `onQueryChange` | `(query: TableQuery, info: { signal: AbortSignal; key: string }) => void \| Promise<void>` | —        | Server tier: fired per consolidated query change, once on mount included. `info.key` identifies the request; echo it back as `responseKey` to say which one the rows answer.                                                                   |
-| `responseKey`   | `string`                                                                                   | —        | The `info.key` of the request the current `data` answers (see [Row grouping](./row-grouping.md#server-tiers)).                                                                                                                                 |
-| `aggregates`    | `readonly QueryAggregate[]`                                                                | —        | Developer defaults sent as `query.aggregates`; sent only when the source declares `supports.aggregates` (a `useServerData` / `useQuerySource` option). Reader overrides overlay this; Restore defaults returns here, not to the last response. |
-| `error`         | `Error \| null`                                                                            | `null`   | Forwarded error to display.                                                                                                                                                                                                                    |
-| `source`        | `TableSource<TRow>`                                                                        | —        | Full control: a prebuilt source from `useFrontendData` / `useQuerySource` / your own.                                                                                                                                                          |
-| `mode`          | `"frontend" \| "server"`                                                                   | inferred | Pins the tier; `"server"` requires `onQueryChange`, `"frontend"` turns it into a notification (see [Explicit `mode`](#explicit-mode--when-inference-isnt-what-you-meant)).                                                                     |
+| Prop           | Type                                                                                       | Default | Description                                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| `data`         | `readonly TRow[]`                                                                          | —       | Every row; the table pages, sorts and filters them.                                                                 |
+| `loading`      | `boolean`                                                                                  | `false` | The rows of `data` are still arriving (skeleton when there are none yet).                                           |
+| `error`        | `Error \| null`                                                                            | `null`  | A failure to display.                                                                                               |
+| `onViewChange` | `(query: TableQuery, info: { signal: AbortSignal; key: string }) => void \| Promise<void>` | —       | Told of each committed change to the view of a table over `data`, never of the mount.                               |
+| `source`       | `TableSource<TRow>`                                                                        | —       | A prebuilt source in place of `data`: `useServerData`, `useQuerySource`, `useFrontendData` or your own (see below). |
+
+`useServerData` takes the server side:
+
+| Option                              | Type                                                                                       | Description                                                                                                                                                                   |
+| ----------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rows`                              | `readonly TRow[]`                                                                          | The current page, exactly as the server returned it.                                                                                                                          |
+| `total`                             | `number`                                                                                   | Row count across all pages (drives the pager).                                                                                                                                |
+| `loading`                           | `boolean`                                                                                  | A request in flight (skeleton when no rows yet, subtle refresh indicator otherwise).                                                                                          |
+| `error`                             | `Error \| null`                                                                            | The failure from the last request.                                                                                                                                            |
+| `onQueryChange`                     | `(query: TableQuery, info: { signal: AbortSignal; key: string }) => void \| Promise<void>` | Fired per consolidated query change, once on mount included. `info.key` identifies the request; echo it back as `responseKey` to say which one the rows answer.               |
+| `responseKey`                       | `string`                                                                                   | The `info.key` of the request the current `rows` answer (see [Row grouping](./row-grouping.md#server-tiers)).                                                                 |
+| `supports`                          | `QuerySupport`                                                                             | What the endpoint can answer beyond the baseline query.                                                                                                                       |
+| `aggregates`                        | `readonly QueryAggregate[]`                                                                | Developer defaults sent as `query.aggregates` when `supports.aggregates` is declared. Reader overrides overlay this; Restore defaults returns here, not to the last response. |
+| `facetKeys`, `facets`               | `readonly string[]`, `FacetMap`                                                            | Filters to count and the counts from the last response.                                                                                                                       |
+| `arrayExtraKeys`, `numberExtraKeys` | `readonly string[]`                                                                        | Filter keys whose URL values parse as lists and as numbers; `serverFilterKeys` derives them.                                                                                  |
+| `nextCursor`, `expandedIds`         | `string \| null`, `readonly string[]`                                                      | Cursor pagination and open tree nodes, read with `supports.cursor` and `supports.tree`.                                                                                       |
 
 ## Notes
 
 - **Picking a tier**: rows already in memory (up to a few thousand) →
-  frontend. A paginated API and no query library → server. Caching, infinite
-  scroll, prefetching, or an existing TanStack Query setup → `source` with
+  `data`. A paginated API and no query library → `useServerData`. Caching,
+  infinite scroll, prefetching, or an existing TanStack Query setup →
   `useQuerySource`.
-- The hooks behind the first two tiers — `useFrontendData` and
-  `useServerData` — are exported for headless use; `useTableData` is the
-  resolver that picks between them.
+- `useFrontendData` and `useServerData` also serve headless use;
+  `useTableData` is the resolver that serves `source`, else `data`.
 - `useQuerySource` accepts `selectPage` (a `PageSelector` — project your
   own page shape to `{ rows, total? }` when it isn't `PaginatedResponse`),
   `baseParams` (static params merged into every call, e.g. a parent scope
@@ -416,7 +459,7 @@ the way you configured it, and these guarantees do not apply.
   inline selector that closes over changing values and omits the key will
   keep showing the previous projection until the next fetch.
 
-- On the server tier, `source.refetch()` re-emits the current query;
+- On a server source, `source.refetch()` re-emits the current query;
   out-of-range pages and stale responses are handled for you via the abort
   signal.
 

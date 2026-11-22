@@ -131,6 +131,7 @@ export {
 } from "./source/useServerData";
 export {
   isDeclarativeFilters,
+  type TableQueryHandler,
   useTableData,
   type UseTableDataOptions,
   type UseTableDataResult,
@@ -143,6 +144,11 @@ export {
 } from "./url/useDensityUrlState";
 export { type FeatureNotice, type FeatureNoticeKind } from "./useTableChrome";
 export type { ActionAiOptions, OverlayDismissOptions } from "@adapttable/core";
+export {
+  type ServerFilterKeys,
+  serverFilterKeys,
+  type ServerFilterKeysInput,
+} from "@adapttable/core";
 /* ── URL state ─────────────────────────────────────────────────────── */
 
 export {

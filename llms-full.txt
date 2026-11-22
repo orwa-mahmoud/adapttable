@@ -296,7 +296,7 @@ The source for each lives in
 - [Filtering](./filtering.md) — every filter type, options sources, chips,
   popover vs drawer.
 - [Data tiers](./data-tiers.md) — server data without a query library
-  (`onQueryChange`), or full control via `source` and TanStack Query.
+  (`useServerData`), or full control via `source` and TanStack Query.
 - [Demo](https://adapttable.orwamahmoud.com/react/demo/) — every adapter,
   live.
 
@@ -1030,9 +1030,10 @@ for the table that invokes it).
 
 # Client & server React table data — one TableSource API
 
-One `<DataTable>`, three ways to feed it — from "here's an array" to full
-query-library control. Search, sorting, filters, chips, and URL sync behave
-identically in every tier.
+One `<DataTable>`, two ways to feed it: `data`, the rows the table pages,
+sorts and filters itself, or `source`, a source built for it — a server
+source, a query library or your own. Search, sorting, filters, chips and URL
+sync behave identically either way.
 
 ## Example
 
@@ -1068,13 +1069,14 @@ export function PeopleTable() {
 }
 ```
 
-### 2. Server — `data` + `total` + `loading` + `onQueryChange`
+### 2. Server — `source={useServerData(…)}`
 
-Your API paginates; the table owns the query state and tells you when to
-fetch.
+Your API paginates; the server source owns the query state and tells you when
+to fetch.
 
 ```tsx
 import { useState } from "react";
+import { type ColumnDef, useServerData } from "@adapttable/react";
 // or import from "@adapttable/mui", "@adapttable/chakra", "@adapttable/antd",
 // "@adapttable/radix", "@adapttable/shadcn", "@adapttable/unstyled" — same props everywhere.
 import { DataTable } from "@adapttable/mantine";
@@ -1085,43 +1087,70 @@ interface Person {
   role: string;
 }
 
+const COLUMNS: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "role" },
+];
+
 export function PeopleTable() {
   const [rows, setRows] = useState<Person[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const source = useServerData<Person>({
+    rows,
+    total,
+    loading,
+    onQueryChange: async (query, { signal }) => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: String(query.page),
+          limit: String(query.limit),
+          search: query.search,
+        });
+        // Forward `signal`: superseded requests abort at the source.
+        const res = await fetch(`/api/people?${params}`, { signal });
+        const body = (await res.json()) as { items: Person[]; total: number };
+        setRows(body.items);
+        setTotal(body.total);
+      } finally {
+        setLoading(false);
+      }
+    },
+  });
 
-  return (
-    <DataTable
-      data={rows}
-      total={total}
-      loading={loading}
-      onQueryChange={async (query, { signal }) => {
-        setLoading(true);
-        try {
-          const params = new URLSearchParams({
-            page: String(query.page),
-            limit: String(query.limit),
-            search: query.search,
-          });
-          // Forward `signal`: superseded requests abort at the source.
-          const res = await fetch(`/api/people?${params}`, { signal });
-          const body = (await res.json()) as { items: Person[]; total: number };
-          setRows(body.items);
-          setTotal(body.total);
-        } finally {
-          setLoading(false);
-        }
-      }}
-      columns={[{ key: "name", sortable: true }, { key: "role" }]}
-      rowKey={(r) => r.id}
-    />
-  );
+  return <DataTable source={source} columns={COLUMNS} rowKey={(r) => r.id} />;
 }
 ```
 
+A table given `data` carries none of this: the server source, its request
+builder and the server engine come with `useServerData`.
+
+#### Filters on a server source
+
+A range, multi-value or checklist filter restored from the URL has to reach
+the first request typed — `budgetMin` as a number, `stage` as a list — and a
+checklist asks the server for its counts. `serverFilterKeys` derives those
+keys from the declarations the table is given:
+
+```tsx
+import { serverFilterKeys, useServerData } from "@adapttable/react";
+
+const source = useServerData<Deal>({
+  ...serverFilterKeys({ columns: COLUMNS, filters: FILTERS }),
+  rows,
+  total,
+  onQueryChange,
+});
+```
+
+It returns `arrayExtraKeys`, `numberExtraKeys` and `facetKeys`; pass
+`filterTypes` and `locale` when the table gets them. Each key can also be
+written by hand.
+
 #### What the query carries, and how it grows
 
-Every server tier receives one consolidated `TableQuery`:
+Every server source receives one consolidated `TableQuery`:
 
 ```ts
 {
@@ -1168,11 +1197,9 @@ backend could do, not an error.
 | `cursor`      | `cursor`     | Opaque cursor from the previous response                                                                                                                                                                                       |
 | `expandedIds` | `tree`       | Open tree node ids, so the response can carry the children of every open branch                                                                                                                                                |
 
-`cursor` and `expandedIds` need a source built with `useServerData` or
-`useQuerySource` and passed as `source`: they take the `nextCursor` and
-`expandedIds` options, which `<DataTable onQueryChange>` has no prop for.
-`supports`, `facetKeys` and `facets` are props on every kit's `<DataTable>`
-as well as options of those two hooks.
+`cursor` and `expandedIds` arrive through the `nextCursor` and
+`expandedIds` options of `useServerData` and `useQuerySource`, beside
+`supports`, `facetKeys` and `facets`.
 
 The flat `filters` bag is always populated, including when `filterTree` is
 sent, so a server that only reads the simple form keeps working.
@@ -1230,45 +1257,49 @@ export function PeopleTable() {
 }
 ```
 
-## Explicit `mode` — when inference isn't what you meant
+## Hearing about changes — `onViewChange`
 
-The tier is inferred from what you pass (`data` alone → frontend;
-`data` + `onQueryChange` → server; `source` → full control). The optional
-`mode` prop pins it explicitly — and unlocks one combination inference
-cannot express:
+A table over `data` keeps filtering, sorting and paging its rows, and tells
+`onViewChange` what the reader did: one consolidated `TableQuery` per
+committed change to page, page size, search, sort or filters, never for the
+mount. It is a notification — log it, mirror it, prefetch with it — and the
+rows the table shows stay the ones in `data`.
 
-| I want…                                                           | Pass                                       | `onQueryChange` acts as…                                        |
-| ----------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------- |
-| The table to fetch nothing; my handler runs every query           | `mode="server"` (requires `onQueryChange`) | **the contract** — you fetch and hand back `data` + `total`     |
-| The table to keep filtering/sorting/paging my `data`, but TELL me | `mode="frontend"` + `onQueryChange`        | **a pure notification** — fires per committed change, not mount |
-| Today's inference exactly                                         | omit `mode`                                | contract when present, nothing otherwise                        |
-
-`mode="server"` without `onQueryChange` does not compile; `mode` together
-with `source` dev-warns and `source` wins.
+```tsx
+<DataTable
+  data={PEOPLE}
+  columns={COLUMNS}
+  rowKey={(r) => r.id}
+  onViewChange={(query) => analytics.track("people-view", query)}
+/>
+```
 
 ## How it works
 
-- Tier resolution is by what you pass: `source` wins; otherwise
-  `onQueryChange` selects the server tier; otherwise `data` alone is the
-  frontend tier. Mixing tiers dev-warns and uses `source`.
+- The tier is what you pass: `source`, or `data`. Passing both dev-warns
+  and uses `source`; passing neither dev-warns and renders an empty table.
 - **Frontend**: search, the declarative-filter predicate, sorting, and page
   slicing all run in memory. Pagination defaults to `"auto"` — paged on
   desktop, infinite scroll on mobile.
-- **Server**: the table owns page, page size, debounced search, sort, and
-  filter state (URL-synced), and emits ONE consolidated `TableQuery` —
+- **Server**: `useServerData` owns page, page size, debounced search, sort,
+  and filter state (URL-synced), and emits ONE consolidated `TableQuery` —
   `{ page, limit, search, sortBy, sortDir, sortLevels, filters }` — per real
   change, **including once on mount with the URL-restored values**. Your only
-  job is to fetch and hand back `data` + `total`.
+  job is to fetch and hand back `rows` + `total`. The mount query goes out
+  while the server engine is still loading.
 - Server queries are value-keyed (`stableKey`), so identical re-renders never
   re-fire the same query; when a newer query
   supersedes an in-flight one, the previous call's `signal` aborts — forward
   it to `fetch` and out-of-order responses die at the source.
 - **Full control**: every source builder returns the same
   [`TableSource`](./concepts.md) contract, so the table can't tell in-memory
-  from server data — switch tiers without touching the UI.
+  from server data — switch tiers without touching the UI. Switching after
+  mount is a host handing the table another `source`, or `data`; a server
+  source keeps its own view state, and the page carries across through the
+  URL.
 - Column `filter` shorthands and the `filters` array drive widgets, chips,
-  and URL parsing in **all three tiers**; only the frontend tier also applies
-  the row predicate (the other tiers receive `query.filters` instead).
+  and URL parsing for every source; only the frontend tier also applies the
+  row predicate (a server source receives `query.filters` instead).
 
 ## What a source can do — `capabilities`
 
@@ -1368,7 +1399,8 @@ happen to be exactly what both expect. The options shape is exported as
 
 ## Which requests actually fire
 
-`onQueryChange` fires per real change, not per render. Four guarantees:
+A server source's `onQueryChange` fires per real change, not per render. Four
+guarantees:
 
 - **One request per query.** Queries are compared by value, so setting the same
   search term three times in a tick or an identical re-render collapses into a
@@ -1393,27 +1425,38 @@ the way you configured it, and these guarantees do not apply.
 
 ## Options
 
-| Prop            | Type                                                                                       | Default  | Description                                                                                                                                                                                                                                    |
-| --------------- | ------------------------------------------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `data`          | `readonly TRow[]`                                                                          | —        | Frontend tier: all rows. Server tier: the current page, exactly as the server returned it.                                                                                                                                                     |
-| `total`         | `number`                                                                                   | `0`      | Server tier: total row count across all pages (drives the pager).                                                                                                                                                                              |
-| `loading`       | `boolean`                                                                                  | `false`  | Server tier: request in flight (skeleton when no rows yet, subtle refresh indicator otherwise).                                                                                                                                                |
-| `onQueryChange` | `(query: TableQuery, info: { signal: AbortSignal; key: string }) => void \| Promise<void>` | —        | Server tier: fired per consolidated query change, once on mount included. `info.key` identifies the request; echo it back as `responseKey` to say which one the rows answer.                                                                   |
-| `responseKey`   | `string`                                                                                   | —        | The `info.key` of the request the current `data` answers (see [Row grouping](./row-grouping.md#server-tiers)).                                                                                                                                 |
-| `aggregates`    | `readonly QueryAggregate[]`                                                                | —        | Developer defaults sent as `query.aggregates`; sent only when the source declares `supports.aggregates` (a `useServerData` / `useQuerySource` option). Reader overrides overlay this; Restore defaults returns here, not to the last response. |
-| `error`         | `Error \| null`                                                                            | `null`   | Forwarded error to display.                                                                                                                                                                                                                    |
-| `source`        | `TableSource<TRow>`                                                                        | —        | Full control: a prebuilt source from `useFrontendData` / `useQuerySource` / your own.                                                                                                                                                          |
-| `mode`          | `"frontend" \| "server"`                                                                   | inferred | Pins the tier; `"server"` requires `onQueryChange`, `"frontend"` turns it into a notification (see [Explicit `mode`](#explicit-mode--when-inference-isnt-what-you-meant)).                                                                     |
+| Prop           | Type                                                                                       | Default | Description                                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| `data`         | `readonly TRow[]`                                                                          | —       | Every row; the table pages, sorts and filters them.                                                                 |
+| `loading`      | `boolean`                                                                                  | `false` | The rows of `data` are still arriving (skeleton when there are none yet).                                           |
+| `error`        | `Error \| null`                                                                            | `null`  | A failure to display.                                                                                               |
+| `onViewChange` | `(query: TableQuery, info: { signal: AbortSignal; key: string }) => void \| Promise<void>` | —       | Told of each committed change to the view of a table over `data`, never of the mount.                               |
+| `source`       | `TableSource<TRow>`                                                                        | —       | A prebuilt source in place of `data`: `useServerData`, `useQuerySource`, `useFrontendData` or your own (see below). |
+
+`useServerData` takes the server side:
+
+| Option                              | Type                                                                                       | Description                                                                                                                                                                   |
+| ----------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rows`                              | `readonly TRow[]`                                                                          | The current page, exactly as the server returned it.                                                                                                                          |
+| `total`                             | `number`                                                                                   | Row count across all pages (drives the pager).                                                                                                                                |
+| `loading`                           | `boolean`                                                                                  | A request in flight (skeleton when no rows yet, subtle refresh indicator otherwise).                                                                                          |
+| `error`                             | `Error \| null`                                                                            | The failure from the last request.                                                                                                                                            |
+| `onQueryChange`                     | `(query: TableQuery, info: { signal: AbortSignal; key: string }) => void \| Promise<void>` | Fired per consolidated query change, once on mount included. `info.key` identifies the request; echo it back as `responseKey` to say which one the rows answer.               |
+| `responseKey`                       | `string`                                                                                   | The `info.key` of the request the current `rows` answer (see [Row grouping](./row-grouping.md#server-tiers)).                                                                 |
+| `supports`                          | `QuerySupport`                                                                             | What the endpoint can answer beyond the baseline query.                                                                                                                       |
+| `aggregates`                        | `readonly QueryAggregate[]`                                                                | Developer defaults sent as `query.aggregates` when `supports.aggregates` is declared. Reader overrides overlay this; Restore defaults returns here, not to the last response. |
+| `facetKeys`, `facets`               | `readonly string[]`, `FacetMap`                                                            | Filters to count and the counts from the last response.                                                                                                                       |
+| `arrayExtraKeys`, `numberExtraKeys` | `readonly string[]`                                                                        | Filter keys whose URL values parse as lists and as numbers; `serverFilterKeys` derives them.                                                                                  |
+| `nextCursor`, `expandedIds`         | `string \| null`, `readonly string[]`                                                      | Cursor pagination and open tree nodes, read with `supports.cursor` and `supports.tree`.                                                                                       |
 
 ## Notes
 
 - **Picking a tier**: rows already in memory (up to a few thousand) →
-  frontend. A paginated API and no query library → server. Caching, infinite
-  scroll, prefetching, or an existing TanStack Query setup → `source` with
+  `data`. A paginated API and no query library → `useServerData`. Caching,
+  infinite scroll, prefetching, or an existing TanStack Query setup →
   `useQuerySource`.
-- The hooks behind the first two tiers — `useFrontendData` and
-  `useServerData` — are exported for headless use; `useTableData` is the
-  resolver that picks between them.
+- `useFrontendData` and `useServerData` also serve headless use;
+  `useTableData` is the resolver that serves `source`, else `data`.
 - `useQuerySource` accepts `selectPage` (a `PageSelector` — project your
   own page shape to `{ rows, total? }` when it isn't `PaginatedResponse`),
   `baseParams` (static params merged into every call, e.g. a parent scope
@@ -1446,7 +1489,7 @@ the way you configured it, and these guarantees do not apply.
   inline selector that closes over changing values and omits the key will
   keep showing the previous projection until the next fetch.
 
-- On the server tier, `source.refetch()` re-emits the current query;
+- On a server source, `source.refetch()` re-emits the current query;
   out-of-range pages and stale responses are handled for you via the abort
   signal.
 
@@ -2127,7 +2170,7 @@ page lists.
 | ---------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Rows already in memory                               | `data` alone, or `useFrontendData` headless — [data tiers](./data-tiers.md#1-frontend--data) |
 | Rows pushed into memory by a socket or poll          | `data` plus `applyRowPatches` / `useRowPatchStream` — [realtime](./realtime.md)              |
-| A paginated endpoint you call yourself               | `onQueryChange`, or `useServerData` headless                                                 |
+| A paginated endpoint you call yourself               | `useServerData` — [server](./data-tiers.md#2-server--sourceuseserverdata)                    |
 | TanStack Query `useInfiniteQuery`, caching, prefetch | `useQuerySource` — [full control](./data-tiers.md#3-full-control--source)                    |
 
 A hand-rolled source fits when:
@@ -2135,7 +2178,7 @@ A hand-rolled source fits when:
 - your data layer already speaks its own protocol — a socket that answers
   queries and pushes invalidations, an SDK with its own paging object — and
   mapping it onto the contract is shorter than routing it through
-  `onQueryChange`;
+  `useServerData`'s `onQueryChange`;
 - the view state (page, sort, filters) must live in a store you already own,
   because other parts of the app read and write it;
 - a test or story needs a fixed source with exact flags.
@@ -2280,8 +2323,8 @@ export function TradesTable() {
 ## How it works
 
 - `source` wins tier resolution: the table uses the object as it is and does
-  no filtering, sorting or paging of its own. Passing `data` or
-  `onQueryChange` alongside it dev-warns.
+  no filtering, sorting or paging of its own. Passing `data` alongside it
+  dev-warns.
 - `useTableUrlState` returns every state field and every setter the contract
   needs (`UseTableUrlStateResult` extends `TableStateMutators`), so spreading
   it covers that half. Pass `urlSync: false` to keep the same state in memory
@@ -2571,7 +2614,6 @@ the adapter's own files (see [the worked reference](#the-worked-reference--adapt
 // src/types.ts
 import type { TableSource } from "@adapttable/core";
 import type { BaseDataTableProps, UrlStateAdapter } from "@adapttable/react";
-import type { DataModeProps } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
 /** The five wrapper hooks every themed kit honours. */
@@ -2595,7 +2637,6 @@ export interface DataTablePropsBase<TRow> extends Omit<
 > {
   source?: TableSource<TRow>;
   data?: readonly TRow[];
-  total?: number;
   loading?: boolean;
   error?: Error | null;
   urlAdapter?: UrlStateAdapter;
@@ -2605,9 +2646,7 @@ export interface DataTablePropsBase<TRow> extends Omit<
   slots?: DataTableSlots;
 }
 
-/** `mode="server"` requires `onQueryChange` at compile time. */
-export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
-  DataModeProps<TRow>;
+export type DataTableProps<TRow> = DataTablePropsBase<TRow>;
 ```
 
 ```tsx
@@ -2851,7 +2890,7 @@ same model, each kit's pixels.
   hooks owns a provider, and its state has to exist before the body reads it.
   `DataTableContent` does the rendering.
 - **`useDataTableShell(props, renderAutoForm)`** resolves the tier
-  (`source`, else `onQueryChange`, else `data`), builds the declarative-filter
+  (`source`, else `data`), builds the declarative-filter
   runtime, wires the chrome, and returns the `tableProps` and `toolbarProps`
   bundles. `renderAutoForm(defs, source, registry)` runs only when there are
   declarative filter definitions, and returns the kit's filter form.
@@ -3074,7 +3113,7 @@ complete adapter for native HTML. Its layout is the one to copy:
 | File                               | Holds                                                                                                                                                   |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DataTable.tsx`                    | The root: `useTableFeatures`, `FeatureProviders`, `useDataTableShell`, `DataTableShellView`, the toolbar, body switch and slot placement.               |
-| `types.ts`                         | `DataTableClassNames`, `DataTableSlots`, `DataTablePropsBase`, and `DataTableProps` intersected with `DataModeProps`.                                   |
+| `types.ts`                         | `DataTableClassNames`, `DataTableSlots`, `DataTablePropsBase`, and `DataTableProps`.                                                                    |
 | `index.ts`                         | `DataTable`, its types, and the re-exported builders and types an app needs without importing core.                                                     |
 | `<feature>.tsx` / `<feature>.ts`   | One file per subpath: a helper call, an `extendFeature` wrap, or a pass-through re-export.                                                              |
 | `features.ts` / `preset.ts`        | The `/features` forward and the `/preset` `standardFeatures`.                                                                                           |
@@ -3279,8 +3318,6 @@ Beyond the suite, the built-in adapters are held to parity by:
 - `@adapttable/react/adapter` is aimed at adapter authors; its exports are
   listed under [the adapter contract](./api.md#the-adapter-contract) and
   [the builder tier](./api.md#the-builder-tier).
-- `DataModeProps` is the discriminated `mode` union: intersect it into the
-  kit's props so `mode="server"` without `onQueryChange` fails to compile.
 - Re-export the source builders and hooks (`useFrontendData`,
   `useServerData`, `useQuerySource`, `useTableUrlState`) and the common types
   from the kit's root, as the built-in adapters do, so an app imports from one
@@ -3878,7 +3915,7 @@ export function People() {
 - `null` / `undefined` / `NaN` always sort last — in both directions. A descending sort never flips the blanks to the top.
 - Sort state lives in the URL: `sortBy` + `sortDir` for a single sort, and the chain as `sort=name:asc,hiredAt:desc` with `multiSort()` composed. `defaults` apply only while the URL is silent; clearing a defaulted sort writes an empty `sortBy=` marker so it does not resurrect.
 - `multiSort()` adds shift-click (or shift-Enter): each shift-click adds the column to the chain or advances it (asc → desc → removed). The first shift-click keeps the current sort as level one, so click Name then shift-click Salary sorts Name → Salary. Chained headers expose a 1-based `data-sort-index` for the order badge. A plain click resets the chain back to a single sort.
-- Server tier (`onQueryChange` / `useQuerySource`): the table only emits the state — `query.sortBy`, `query.sortDir`, and `query.sortLevels` for a chain. Your backend does the comparing; `sortValue` is unused.
+- Server tier (`useServerData` / `useQuerySource`): the table only emits the state — `query.sortBy`, `query.sortDir`, and `query.sortLevels` for a chain. Your backend does the comparing; `sortValue` is unused.
 
 ## Options
 
@@ -4040,6 +4077,7 @@ backend:
 
 ```tsx
 import { useState } from "react";
+import { useServerData } from "@adapttable/react";
 import { DataTable } from "@adapttable/mantine";
 
 interface Person {
@@ -4051,22 +4089,25 @@ interface Person {
 export function PeopleSearch() {
   const [rows, setRows] = useState<Person[]>([]);
   const [total, setTotal] = useState(0);
+  const source = useServerData<Person>({
+    rows,
+    total,
+    onQueryChange: async (query, { signal }) => {
+      const params = new URLSearchParams({
+        page: String(query.page),
+        limit: String(query.limit),
+      });
+      if (query.search) params.set("q", query.search);
+      const res = await fetch(`/api/people?${params}`, { signal });
+      const body = (await res.json()) as { items: Person[]; total: number };
+      setRows(body.items);
+      setTotal(body.total);
+    },
+  });
 
   return (
     <DataTable
-      data={rows}
-      total={total}
-      onQueryChange={async (query, { signal }) => {
-        const params = new URLSearchParams({
-          page: String(query.page),
-          limit: String(query.limit),
-        });
-        if (query.search) params.set("q", query.search);
-        const res = await fetch(`/api/people?${params}`, { signal });
-        const body = (await res.json()) as { items: Person[]; total: number };
-        setRows(body.items);
-        setTotal(body.total);
-      }}
+      source={source}
       columns={[{ key: "name" }, { key: "city" }]}
       rowKey={(row) => row.id}
       searchPlaceholder="Search people…"
@@ -4471,7 +4512,7 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
 ## Notes
 
 - `"auto"` needs the full dataset, so it only works on the frontend tier
-  (`data` without `onQueryChange`). On the server/source tiers it dev-warns
+  (`data`). With a `source` it dev-warns
   and resolves to no options — pass an array or an async loader instead.
 - The `dateRange` upper bound is inclusive end-of-day: "On or before
   2026-01-31" keeps that day's rows.
@@ -5115,8 +5156,9 @@ export function People() {
   50 / 100 (`PAGE_SIZE_OPTIONS`; `pageSizeOptions()` builds the list, both
   from `@adapttable/core`), plus that default when it isn't already in the
   list — so a table that starts at 500 still offers 500 after you pick 10.
-- On the server tier, pagination state arrives in the consolidated
-  `TableQuery` (`{ page, limit, … }`) passed to `onQueryChange` — forward both
+- On a server source, pagination state arrives in the consolidated
+  `TableQuery` (`{ page, limit, … }`) passed to `useServerData`'s
+  `onQueryChange` — forward both
   to your API and return `rows` + `total`; `total` drives the pager.
 
 ## Cursor pagination
@@ -5257,9 +5299,8 @@ it already receives — nothing else about the hook changes.
 - A URL `limit` outside **1–500** falls back to the default page size, and
   the rows-per-page control clamps to 1–500. `defaults.limit` is used as
   given.
-- `paginationMode` applies to every tier. On the `onQueryChange` tier
-  (`useServerData`) infinite mode appends each new page to the rows already
-  shown.
+- `paginationMode` applies to every tier. On a `useServerData` source
+  infinite mode appends each new page to the rows already shown.
 - `nextCursor` is read only when the source declares `supports: { cursor: true }`.
   Without that declaration the field is ignored and no `cursor` is ever sent,
   so an endpoint written before cursors existed keeps its exact query.
@@ -7955,19 +7996,20 @@ answer's key comes back:
 const [rows, setRows] = useState<Person[]>([]);
 const [answered, setAnswered] = useState<string>();
 
-<DataTable
-  mode="server"
-  data={rows}
-  total={total}
-  loading={loading}
-  responseKey={answered}
-  onQueryChange={async (query, { signal, key }) => {
+const source = useServerData<Person>({
+  rows,
+  total,
+  loading,
+  responseKey: answered,
+  onQueryChange: async (query, { signal, key }) => {
     const res = await fetch(`/api/people?${toParams(query)}`, { signal });
     const page = await res.json();
     setRows(page.items);
     setAnswered(key);
-  }}
-/>;
+  },
+});
+
+<DataTable source={source} columns={COLUMNS} rowKey={(row) => row.id} />;
 ```
 
 **A controlled tier needs `responseKey` to be accurate about this.** Without
@@ -8877,8 +8919,8 @@ const source = useQuerySource<Deal, Params, Page>({
   `calculate` is not proof the server knows an id.
 - `formatAggregate` is told the operation the response on screen was
   computed with, not one still in flight. `useServerData` takes the same
-  `supports`, `aggregates` and `columns`; a controlled `mode="server"` table
-  echoes `responseKey` so the table can tie a response to its request. See
+  `supports`, `aggregates` and `columns`, and echoes `responseKey` so the
+  table can tie a response to its request. See
   [server tiers](./row-grouping.md#server-tiers).
 - The table has no slot for a whole-set answer. Read it from your response
   and render it with `summaryRow` or `pinnedSummaryRows`.
@@ -17335,12 +17377,12 @@ per-column aggregation choices.
 
 ### URL & persistence
 
-URL props (`urlSync`, `urlKey`, `urlAdapter`) and the `data` /
-`onQueryChange` tiers live on the adapter components, not the core prop
-surface — see [Adapter extras](#adapter-extras) and
-[URL-synced state](./url-state.md). The two tiers are typed as `DataModeProps`,
-and the server one's callback is `TableQueryHandler`: the consolidated query
-plus the `AbortSignal` for the request it starts.
+URL props (`urlSync`, `urlKey`, `urlAdapter`) and the `data` tier live on
+the adapter components, not the core prop surface — see
+[Adapter extras](#adapter-extras) and [URL-synced state](./url-state.md). A
+server table passes a `useServerData` source; its callback, like
+`onViewChange`, is a `TableQueryHandler`: the consolidated query plus the
+`AbortSignal` for the request it starts.
 
 ### Callbacks
 
@@ -17679,29 +17721,22 @@ keeps every built-in type.
 
 Props beyond the core surface, with per-kit availability.
 
-| Prop            | Type                                        | Default        | Available on                 | Description                                                                                                                                                                                               |
-| --------------- | ------------------------------------------- | -------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `data`          | `readonly TRow[]`                           | —              | all                          | Frontend tier: raw rows the table filters/sorts/pages; with `onQueryChange` it is the current server page.                                                                                                |
-| `total`         | `number`                                    | —              | all                          | Server tier: total row count across all pages (drives the pager).                                                                                                                                         |
-| `loading`       | `boolean`                                   | —              | all                          | Server tier: a request is in flight.                                                                                                                                                                      |
-| `error`         | `Error \| null`                             | `null`         | all                          | Forwarded error to display in the table's error state (retry via the source's `refetch`).                                                                                                                 |
-| `mode`          | `"frontend" \| "server"`                    | `"frontend"`   | all                          | Data mode from `DataModeProps`. `"server"` requires `onQueryChange`.                                                                                                                                      |
-| `onQueryChange` | `TableQueryHandler`                         | —              | all                          | Server tier: fired with the consolidated query whenever it changes (mount included); fetch and hand back `data` + `total`. `info.key` identifies the request.                                             |
-| `responseKey`   | `string`                                    | —              | all                          | Server tier: the `onQueryChange` `info.key` the current `data` answers, so aggregate metadata belongs to the rows on screen.                                                                              |
-| `aggregates`    | `readonly QueryAggregate[]`                 | —              | all                          | Server tier: aggregates to send as `query.aggregates`; requires `supports.aggregates`. Reader overrides layer over these.                                                                                 |
-| `supports`      | `QuerySupport`                              | —              | all                          | Server tier: capabilities this endpoint answers. `supports.facets` unlocks `query.facets`.                                                                                                                |
-| `facetKeys`     | `readonly string[]`                         | checklist keys | all                          | Server tier: keys sent as `query.facets`. Defaults to every `checklist` definition.                                                                                                                       |
-| `facets`        | `FacetMap`                                  | —              | all                          | Server tier: distinct-value counts from the last fetch, surfaced on the source for the checklist.                                                                                                         |
-| `urlKey`        | `string`                                    | —              | all                          | Namespace for this table's URL params (`urlKey="left"` → `left.q`, `left.page`, …).                                                                                                                       |
-| `urlAdapter`    | `UrlStateAdapter`                           | History API    | all                          | URL-state backend for the `data`/`onQueryChange` tiers (router adapter, `createMemoryAdapter()` in tests).                                                                                                |
-| `urlSync`       | `boolean`                                   | `true`         | all                          | `false` keeps all state in memory — the address bar never changes, any `urlAdapter` is ignored.                                                                                                           |
-| `slots`         | `{ skeleton?, empty?, noResults?, error? }` | —              | all                          | Replace sub-components. `empty` covers both empty states; `noResults` overrides just the filtered one; `error` takes a node or a `(state) => node` receiving the error and its retry (see customization). |
-| `classNames`    | `DataTableClassNames`                       | —              | all                          | Per-part class overrides — five parts on Mantine/MUI/Chakra/antd/Radix/Base UI (`root`/`toolbar`/`table`/`card`/`footer`), every part on unstyled and shadcn.                                             |
-| `className`     | `string`                                    | —              | mui, antd                    | Class name applied to the root wrapper.                                                                                                                                                                   |
-| `animate`       | `boolean`                                   | `false`        | all                          | Animate rows/cards on mount (dependency-free; honors reduced motion).                                                                                                                                     |
-| `size`          | kit-specific union                          | —              | chakra, antd, radix, base-ui | Explicit kit table size, overriding the density mapping. MUI uses `density`; the listed kits retain native values density cannot express.                                                                 |
-| `accentColor`   | kit accent union (chakra: `string`)         | —              | chakra, radix, base-ui       | Accent color for primary controls (buttons, badges, active page).                                                                                                                                         |
-| `bordered`      | `boolean`                                   | `false`        | antd                         | Render the table with cell borders.                                                                                                                                                                       |
+| Prop           | Type                                        | Default     | Available on                 | Description                                                                                                                                                                                               |
+| -------------- | ------------------------------------------- | ----------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`         | `readonly TRow[]`                           | —           | all                          | Every row; the table filters, sorts and pages them. A server table passes `source={useServerData(…)}` instead.                                                                                            |
+| `onViewChange` | `TableQueryHandler`                         | —           | all                          | Told of each committed change to page, page size, search, sort and filters of a table over `data`, never of the mount.                                                                                    |
+| `loading`      | `boolean`                                   | —           | all                          | The rows of `data` are still arriving.                                                                                                                                                                    |
+| `error`        | `Error \| null`                             | `null`      | all                          | Forwarded error to display in the table's error state (retry via the source's `refetch`).                                                                                                                 |
+| `urlKey`       | `string`                                    | —           | all                          | Namespace for this table's URL params (`urlKey="left"` → `left.q`, `left.page`, …).                                                                                                                       |
+| `urlAdapter`   | `UrlStateAdapter`                           | History API | all                          | URL-state backend for the `data` tier (router adapter, `createMemoryAdapter()` in tests).                                                                                                                 |
+| `urlSync`      | `boolean`                                   | `true`      | all                          | `false` keeps all state in memory — the address bar never changes, any `urlAdapter` is ignored.                                                                                                           |
+| `slots`        | `{ skeleton?, empty?, noResults?, error? }` | —           | all                          | Replace sub-components. `empty` covers both empty states; `noResults` overrides just the filtered one; `error` takes a node or a `(state) => node` receiving the error and its retry (see customization). |
+| `classNames`   | `DataTableClassNames`                       | —           | all                          | Per-part class overrides — five parts on Mantine/MUI/Chakra/antd/Radix/Base UI (`root`/`toolbar`/`table`/`card`/`footer`), every part on unstyled and shadcn.                                             |
+| `className`    | `string`                                    | —           | mui, antd                    | Class name applied to the root wrapper.                                                                                                                                                                   |
+| `animate`      | `boolean`                                   | `false`     | all                          | Animate rows/cards on mount (dependency-free; honors reduced motion).                                                                                                                                     |
+| `size`         | kit-specific union                          | —           | chakra, antd, radix, base-ui | Explicit kit table size, overriding the density mapping. MUI uses `density`; the listed kits retain native values density cannot express.                                                                 |
+| `accentColor`  | kit accent union (chakra: `string`)         | —           | chakra, radix, base-ui       | Accent color for primary controls (buttons, badges, active page).                                                                                                                                         |
+| `bordered`     | `boolean`                                   | `false`     | antd                         | Render the table with cell borders.                                                                                                                                                                       |
 
 Mantine also publishes the spacing its density mapping uses, as
 `DENSITY_SPACING` (`DensitySpacing`) from `@adapttable/mantine/density`, so a
@@ -17727,10 +17762,16 @@ deprecated alias until the next major.
   your `useInfiniteQuery`-style hook into the same contract.
 - `useServerData<TRow>(options): TableSource<TRow>` — hand-rolled-fetch
   server tier: emits one consolidated `TableQuery` per change, aborting
-  superseded requests via `AbortSignal`.
+  superseded requests via `AbortSignal`. Pass it to the table as `source`.
+- `serverFilterKeys(input: ServerFilterKeysInput<TRow>): ServerFilterKeys` —
+  the `arrayExtraKeys`, `numberExtraKeys` and `facetKeys` a server source
+  needs, derived from the `columns`, `filters`, `filterTypes` and `locale`
+  the table is given; spread it into `useServerData` (Vue's `useServerData`,
+  Angular's `injectServerData`) so filters restored from the URL reach the
+  first request typed. On core and every binding's main entry.
 - `useTableData<TRow>(options): { source, runtime }` — tier resolution
-  (source ▸ server ▸ frontend) plus the declarative filter runtime; what
-  every adapter calls internally.
+  (`source`, else `data`) plus the declarative filter runtime; what every
+  adapter calls internally.
 
 ### URL state & persistence
 
@@ -17956,7 +17997,8 @@ explains which import a program changes. This list is the reference.
   `TableToolbarSlots` names the toolbar slots a binding fills.
 - `TableQueryInput` / `buildTableQuery` / `TableQueryListener` /
   `QueryEmitter` / `createQueryEmitter` — the one consolidated query a table
-  hands `onQueryChange`, and the emitter that fires it once per change.
+  hands `onViewChange` and a server source hands `onQueryChange`, and the
+  emitter that fires it once per change.
 
 ### The view-state store
 
@@ -18057,9 +18099,8 @@ explains which import a program changes. This list is the reference.
   declarative filter definitions or registry extensions refreshes matching
   rows without changing the data array or query;
   `finish({ resolved, frontend })` adds facet counts computed from the
-  searched rows when nothing answered them; `commit()` tells a
-  `mode="frontend"` table's `onQueryChange` about each change (never the
-  mount), `loadOptions()` loads each filter's own option list once, and
+  searched rows when nothing answered them; `commit()` tells a frontend
+  table's `onViewChange` about each change (never the mount), `loadOptions()` loads each filter's own option list once, and
   `dispose()` aborts a notification in flight. `useTableData` runs on it.
   The optional engine supplies `FilterRuntime.filterKey` from authored
   definitions, registry extensions, locale and loaded options, excluding rows
@@ -20082,7 +20123,7 @@ the source's shape. See [data tiers](./data-tiers.md#what-a-source-can-do--capab
 Misconfiguration warns once per message in development (silent in
 production):
 
-- no data tier, or both `source` and `data`/`onQueryChange` provided;
+- no data tier, or both `source` and `data` provided;
 - duplicate column keys (sorting, selection, and column layout all target keys);
 - unresolvable sorts (no matching column, or a non-primitive accessor without `sortValue`);
 - a column `filter` whose key is also defined in the `filters` array (the array wins);
@@ -20141,9 +20182,7 @@ the widget's structural indexes separate from these data-row indexes.
 `useStickyToolbarLayout`
 and `resolveStickyToolbar` park search and page-size with a sticky header.
 `DataTableShellProps`
-is its kit-agnostic prop surface and `DataModeProps` the discriminated
-`mode` union inside it (`mode="server"` requires `onQueryChange` at
-compile time). `tableRenderModel(props)` / `TableRenderModel` derive the
+is its kit-agnostic prop surface. `tableRenderModel(props)` / `TableRenderModel` derive the
 shared render prelude from `SharedTableRenderProps`; `TableBodyRegion`
 names which body region renders (desktop rows, mobile cards);
 `VirtualTableRow` is one materialized virtual row/card entry.
@@ -21047,11 +21086,9 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   `fetchNextPage` appends. With `supports.cursor` and `nextCursor`, paging
   forward sends the token the last page returned.
 - `injectTableData(options)` chooses the tier a table runs on from
-  `TableDataOptions`: a prebuilt `source`; `data` with `onQueryChange` (or
-  `mode: "server"`), which the server tier asks the host to fetch; or `data`
-  alone, which the frontend tier searches, sorts and pages — and with
-  `mode: "frontend"`, `onQueryChange` is told of each change, not of the
-  first render. Given the filter `engine`, it merges the declared `filters`
+  `TableDataOptions`: a prebuilt `source` (`injectServerData`'s among them),
+  or `data`, which the frontend tier searches, sorts and pages — and
+  `onViewChange` is told of each of its changes, not of the first render. Given the filter `engine`, it merges the declared `filters`
   with the columns' `filter` shorthands, loads each filter's own option list
   once, and counts checklist facets from the rows when no server answered
   them. It returns `TableDataResult`: the `source` and the filter `runtime`,
@@ -21557,10 +21594,9 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
 It is a public npm package and participates in the native-kit contracts.
 See [Angular getting started](./angular/getting-started.md) for installation.
 `AdaptDataTable` (`<adapt-data-table>`)
-takes the rows, columns and row key as inputs — or a prebuilt `source`, or
-the page a host fetches through `onQueryChange` with `total`, `loading`,
-`error`, `supports`, `aggregates`, `responseKey`, `facets` and `facetKeys`,
-the tier chosen by `injectTableData` and `mode` — and renders search, sorting,
+takes the rows, columns and row key as inputs — or a prebuilt `source`,
+`injectServerData`'s for a server, the tier chosen by `injectTableData` —
+and renders search, sorting,
 paging, the phone card layout, row selection and keyboard cell navigation
 with the `data-adapttable-part` names every kit shares. `AdaptDesktopTable`
 and `AdaptMobileCards` are the internal desktop body and phone card list;
@@ -21716,8 +21752,8 @@ binding.
 
 Import `AdaptDataTable` from the root and compose features from this kit's
 own secondary entries. Its `<adapt-data-table>` uses the same Angular
-`ColumnDef`, cell/header/footer templates and data modes: `data`, a prebuilt
-`source`, or host-fetched rows with `onQueryChange` and `total`. The binding
+`ColumnDef`, cell/header/footer templates and data tiers: `data`, or a
+prebuilt `source` such as `injectServerData`'s. The binding
 owns filtering, sorting, pagination and virtualization; NG-ZORRO's visual
 table does not introduce a second state controller. Every write still calls
 the host. `renderCard`, `renderRowActions`, `onRowClick`, `rowAppearance`,
@@ -21886,10 +21922,8 @@ Applications should use the documented table, feature and provider APIs instead.
   install packages or query registry availability.
 - **React adapter packages** — each exports its `DataTable` with `DataTableProps`,
   `DataTablePropsBase`, `DataTableSlots` and `SavedViewsMenuProps` (plus the
-  shared core re-exports). `DataTableProps` is `DataTablePropsBase &
-DataModeProps`: the base carries every prop except the data mode, which is
-  the half to name when you wrap or extend a table's props without committing
-  to a tier. `@adapttable/unstyled` also exports `IconProps`, the props its
+  shared core re-exports). `DataTableProps` is `DataTablePropsBase`.
+  `@adapttable/unstyled` also exports `IconProps`, the props its
   exported icons take, so a caller supplying one has a name for the argument; Radix and Base UI export their accent unions
   (`RadixAccentColor`, `BaseUiAccentColor`); Mantine also exports its
   chrome as reusable components (`ActiveFilterChips`, `AutoFilterForm`,
@@ -22923,7 +22957,7 @@ This page maps the API across and shows a before/after.
 Things mantine-datatable leaves to you that AdaptTable does for you:
 
 - **One data contract for client and server.** Pass `data` for in-memory rows,
-  or `data` + `total` + `loading` + `onQueryChange` for a paginated API — no
+  or a `useServerData` source for a paginated API — no
   manual `useEffect`/`fetching`/`totalRecords` juggling. See
   [data tiers](./data-tiers.md).
 - **A real filter UI.** Declare `filter` on a column and get a kit-native
@@ -22958,11 +22992,11 @@ through it exactly as mantine-datatable did.
 
 | mantine-datatable                             | `@adapttable/mantine`                                      | Notes                                                                                                                                 |
 | --------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `records`                                     | `data`                                                     | Frontend tier. Server tier: `data` (current page) + `total` + `onQueryChange`.                                                        |
+| `records`                                     | `data`                                                     | Frontend tier. Server tier: `useServerData({ rows, total, onQueryChange })`.                                                          |
 | `columns`                                     | `columns`                                                  | Field-by-field mapping below.                                                                                                         |
 | `idAccessor`                                  | `rowKey`                                                   | **Required** — `(row) => string`. There is no `"id"` default.                                                                         |
 | `sortStatus` / `onSortStatusChange`           | `sortable` per column (+ `multiSort()`)                    | AdaptTable owns sort state and applies it; you don't sort `records` yourself.                                                         |
-| `page` / `onPageChange` / `totalRecords`      | automatic (frontend) or `total` + `onQueryChange` (server) | Pagination is `"auto"`: paged on desktop, infinite on mobile.                                                                         |
+| `page` / `onPageChange` / `totalRecords`      | automatic (frontend) or `useServerData` (server)           | Pagination is `"auto"`: paged on desktop, infinite on mobile.                                                                         |
 | `recordsPerPage` / `recordsPerPageOptions`    | built-in page-size control                                 | Defaults to `PAGE_SIZE_OPTIONS`; `DEFAULT_LIMIT` is 25.                                                                               |
 | `selectedRecords` / `onSelectedRecordsChange` | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Composing `bulkActions()` turns selection on and mounts the bulk bar.                                                                 |
 | `isRecordSelectable`                          | — (gate in your bulk actions)                              | No per-row checkbox disable; use a bulk action's `disabledReason` to refuse ineligible ids (`selectionGetId` only customises the id). |
@@ -23140,21 +23174,21 @@ DataGrid does.
 
 `<DataGrid>` → `<DataTable>`:
 
-| MUI X DataGrid                                       | `@adapttable/mui`                                          | Notes                                                                  |
-| ---------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `rows`                                               | `data`                                                     | Frontend tier. Server tier: `data` (page) + `total` + `onQueryChange`. |
-| `columns`                                            | `columns`                                                  | `GridColDef` → `ColumnDef`, mapped below.                              |
-| `getRowId`                                           | `rowKey`                                                   | **Required** — `(row) => string`.                                      |
-| `sortModel` / `onSortModelChange`                    | `sortable` per column (+ `multiSort()`)                    | AdaptTable owns and applies sort state.                                |
-| `sortingMode: "server"`                              | `onQueryChange` (or `source`)                              | The consolidated query carries `sortBy`/`sortDir`.                     |
-| `filterModel` / `onFilterModelChange`                | column `filter` shorthand + `filters([…])`                 | Widgets, chips, and URL params are derived for you.                    |
-| `paginationModel` / `onPaginationModelChange`        | automatic (frontend) or `total` + `onQueryChange`          | No 100-row community cap.                                              |
-| `checkboxSelection` + `rowSelectionModel`            | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Multi-row selection is free; no `{ type, ids }` model to manage.       |
-| `getDetailPanelContent` (Pro)                        | `rowDetail(fn)`                                            | `(row) => ReactNode`.                                                  |
-| `loading`                                            | `loading`                                                  | —                                                                      |
-| `slots.noRowsOverlay` / `loadingOverlay`             | `slots.empty` / `slots.skeleton`                           | —                                                                      |
-| `initialState` / `apiRef.exportState()` (state only) | `urlSync` + `urlKey` (+ `savedViews({ storageKey })`)      | State lives in the URL, shareable and reload-safe.                     |
-| `pinnedColumns` (Pro) / `columnVisibilityModel`      | `columnMenu()` / `columnLayout`                            | Show/hide, reorder, pin in one menu.                                   |
+| MUI X DataGrid                                       | `@adapttable/mui`                                          | Notes                                                                        |
+| ---------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `rows`                                               | `data`                                                     | Frontend tier. Server tier: `useServerData({ rows, total, onQueryChange })`. |
+| `columns`                                            | `columns`                                                  | `GridColDef` → `ColumnDef`, mapped below.                                    |
+| `getRowId`                                           | `rowKey`                                                   | **Required** — `(row) => string`.                                            |
+| `sortModel` / `onSortModelChange`                    | `sortable` per column (+ `multiSort()`)                    | AdaptTable owns and applies sort state.                                      |
+| `sortingMode: "server"`                              | `useServerData` (or another `source`)                      | The consolidated query carries `sortBy`/`sortDir`.                           |
+| `filterModel` / `onFilterModelChange`                | column `filter` shorthand + `filters([…])`                 | Widgets, chips, and URL params are derived for you.                          |
+| `paginationModel` / `onPaginationModelChange`        | automatic (frontend) or `useServerData`                    | No 100-row community cap.                                                    |
+| `checkboxSelection` + `rowSelectionModel`            | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Multi-row selection is free; no `{ type, ids }` model to manage.             |
+| `getDetailPanelContent` (Pro)                        | `rowDetail(fn)`                                            | `(row) => ReactNode`.                                                        |
+| `loading`                                            | `loading`                                                  | —                                                                            |
+| `slots.noRowsOverlay` / `loadingOverlay`             | `slots.empty` / `slots.skeleton`                           | —                                                                            |
+| `initialState` / `apiRef.exportState()` (state only) | `urlSync` + `urlKey` (+ `savedViews({ storageKey })`)      | State lives in the URL, shareable and reload-safe.                           |
+| `pinnedColumns` (Pro) / `columnVisibilityModel`      | `columnMenu()` / `columnLayout`                            | Show/hide, reorder, pin in one menu.                                         |
 
 `GridColDef` → `ColumnDef`:
 
@@ -23252,7 +23286,7 @@ the paywall are simply included.
 - **No `sortModel`/`filterModel`/`paginationModel` objects.** Sorting is a
   per-column `sortable` flag; filtering is declarative `filter` shorthands;
   pagination is automatic. For a server API, emit one query via
-  [`onQueryChange`](./data-tiers.md) instead of three `*Mode="server"` props.
+  a [server source](./data-tiers.md) instead of three `*Mode="server"` props.
 - **`valueGetter` becomes `accessor`.** AdaptTable passes the row, so the v7/v8
   `(value, row, column, apiRef)` signature change doesn't apply — and a JSX cell
   uses `Cell` (a `{ row, rowIndex }` component).
@@ -23344,7 +23378,7 @@ pnpm add @adapttable/core @adapttable/mantine @mantine/core @mantine/hooks
 | `enableRowSelection` + `state.rowSelection` + your checkboxes         | `bulkActions([…])` / `selectedIds` / `onSelectionChange`                | —                                                                 |
 | `getExpandedRowModel` + `row.getToggleExpandedHandler()`              | `rowDetail(fn)`                                                         | Toggle UI is provided, not hand-added.                            |
 | `columnVisibility` / `columnOrder` / `columnPinning` state            | `columnMenu()` / `columnLayout`                                         | One built-in menu instead of hand-wired state + DnD.              |
-| `manualSorting` / `manualFiltering` / `manualPagination`              | `onQueryChange` (or `source` via `useQuerySource`)                      | One consolidated server query. See [data tiers](./data-tiers.md). |
+| `manualSorting` / `manualFiltering` / `manualPagination`              | `useServerData` (or `useQuerySource`)                                   | One consolidated server query. See [data tiers](./data-tiers.md). |
 | (serialize state to the URL yourself)                                 | `urlSync` / `urlKey` / `savedViews({ storageKey })`                     | URL sync is on by default; `savedViews()` is opt-in.              |
 
 ## Before / after
@@ -23541,7 +23575,7 @@ whenever you want.
 | `data` (objects)                                      | `data`                                                     | Array-of-objects only; no array-of-arrays mode.                                                                                          |
 | `data` (arrays)                                       | convert to objects                                         | One `map()` at the boundary — see Gotchas.                                                                                               |
 | `columns` (`name`, `label`, `options`)                | `columns` (`key`, `header`, …)                             | Field-by-field below.                                                                                                                    |
-| `options.serverSide` + `count` + `onTableChange`      | `data` + `total` + `onQueryChange`                         | One consolidated query object replaces the action-string switch.                                                                         |
+| `options.serverSide` + `count` + `onTableChange`      | `useServerData({ rows, total, onQueryChange })`            | One consolidated query object replaces the action-string switch.                                                                         |
 | `options.page` / `rowsPerPage` / `rowsPerPageOptions` | automatic                                                  | Built-in pager; page size control included.                                                                                              |
 | `options.sortOrder` / `onColumnSortChange`            | per-column `sortable` (+ `multiSort()`)                    | AdaptTable owns and applies sort state.                                                                                                  |
 | `options.filterType` / `onFilterChange`               | column `filter` shorthand + `filters([…])`                 | Kit-native widgets + removable chips, derived for you.                                                                                   |
@@ -23578,21 +23612,21 @@ strings — `'changePage'`, `'sort'`, `'search'`, `'filterChange'`,
 callback receiving one consolidated query:
 
 ```tsx
-<DataTable
-  data={rows}
-  total={total}
-  loading={loading}
-  onQueryChange={async (query, { signal }) => {
+const source = useServerData<Person>({
+  rows,
+  total,
+  loading,
+  onQueryChange: async (query, { signal }) => {
     // query: { page, limit, search, sortBy, sortDir, sortLevels, filters } — one shape,
     // fired once per real change (mount included), previous fetch aborted.
     const res = await fetch(`/api/people?${toParams(query)}`, { signal });
     const body = await res.json();
     setRows(body.items);
     setTotal(body.total);
-  }}
-  columns={columns}
-  rowKey={(r) => r.id}
-/>
+  },
+});
+
+<DataTable source={source} columns={columns} rowKey={(r) => r.id} />;
 ```
 
 ## Before / after
@@ -23765,7 +23799,7 @@ Same Material look, on a current MUI — and your rows stay untouched.
 | material-table                                       | `@adapttable/mui`                                          | Notes                                                                            |
 | ---------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `data` (array)                                       | `data`                                                     | No `tableData` injection — your objects are never mutated.                       |
-| `data` (query function)                              | `onQueryChange` (or `source`)                              | Mapping below.                                                                   |
+| `data` (query function)                              | `source={useServerData({ onQueryChange })}`                | Mapping below.                                                                   |
 | `columns`                                            | `columns`                                                  | Field-by-field below.                                                            |
 | `title`                                              | `tableLabel` / your own heading                            | The toolbar is yours to compose (`toolbar` slot).                                |
 | `actions` (row actions)                              | `rowActions([…])`                                          | Icon buttons on desktop, card buttons on mobile; `confirm` built in.             |
@@ -23807,11 +23841,11 @@ material-table's remote mode —
 same idea as AdaptTable's server tier, minus two quirks:
 
 ```tsx
-<DataTable
-  data={rows}
-  total={total}
-  loading={loading}
-  onQueryChange={async (query, { signal }) => {
+const source = useServerData<Person>({
+  rows,
+  total,
+  loading,
+  onQueryChange: async (query, { signal }) => {
     // material-table: query.page, query.pageSize, query.search,
     //                query.orderBy (a whole Column OBJECT), query.orderDirection
     // AdaptTable:    query.page, query.limit, query.search,
@@ -23821,10 +23855,10 @@ same idea as AdaptTable's server tier, minus two quirks:
     const body = await res.json();
     setRows(body.items); // no { data, page, totalCount } envelope required
     setTotal(body.total);
-  }}
-  columns={columns}
-  rowKey={(r) => r.id}
-/>
+  },
+});
+
+<DataTable source={source} columns={columns} rowKey={(r) => r.id} />;
 ```
 
 The classic material-table stumbling block — `query.orderBy` being a full
@@ -24009,7 +24043,7 @@ Grid-level (`<AgGridReact>` → `<DataTable>`):
 | `pagination` + `paginationPageSize`                | automatic                                                  | Paged on desktop, infinite on mobile; page-size control built in. |
 | `rowSelection={{ mode: "multiRow" }}`              | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Compose `bulkActions()` to turn on checkboxes.                    |
 | `api.getSelectedRows()`                            | `onSelectionChange` state                                  | Selection is React state, not an API call.                        |
-| `rowModelType: "infinite"`                         | `onQueryChange` (+ infinite mode)                          | One consolidated query; superseded fetches abort via `signal`.    |
+| `rowModelType: "infinite"`                         | `useServerData` (+ infinite mode)                          | One consolidated query; superseded fetches abort via `signal`.    |
 | `api.exportDataAsCsv()`                            | `exportCsv()` / `rowsToCsv` + `downloadCsv`                | Compose `exportCsv()` for a toolbar button or headless helpers.   |
 | `theme={themeQuartz}`                              | your kit's provider/theme                                  | The table inherits the design system, incl. dark mode.            |
 | `<AgGridProvider modules={[AllCommunityModule]}>`  | (nothing)                                                  | No module registry.                                               |
@@ -24205,6 +24239,25 @@ of 380 kB.
 | Vue `groupRowSlotKey()`                                                                                                                                           | `GROUP_ROW` from `@adapttable/vue/adapter`                    |
 | Vue `classNames.rowAction`, `classNames.status`                                                                                                                   | `classNames.actionButton`, `classNames.tableStatusAnnouncer`  |
 | Labels `noticeReorderNested`, `pendingProposals`, `assistantReceipt`, `rowMoveOptions`, `moveToTopLevel`, `groupingAggregateColumn`, `groupingAggregationDefault` | nothing reads them; delete the keys                           |
+
+## Data tiers
+
+A table takes `data` or a `source` and infers nothing from its other props.
+A server table builds its server source and hands it over, so a table over
+`data` ships no server code: 1.8 KiB less on first load and 5.9 KiB less in
+total for the Unstyled table in each framework.
+
+| v3                                                                                  | v4                                                                                                                 |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `data` with `onQueryChange`, or `mode="server"`, on the table                       | `source={useServerData({ rows, total, loading, onQueryChange })}`; Vue `useServerData`, Angular `injectServerData` |
+| `mode="frontend"` with `onQueryChange`                                              | `onViewChange` on the table                                                                                        |
+| Table props `total`, `responseKey`, `aggregates`, `supports`, `facetKeys`, `facets` | Options of the server source                                                                                       |
+| A server table's list, number and facet keys derived from its filters               | `serverFilterKeys({ columns, filters })` spread into the server source                                             |
+| `DataModeProps`                                                                     | Removed; `DataTableProps` is `DataTablePropsBase`                                                                  |
+
+A server source keeps its own page, sort and filter state; a table that
+switches between `data` and a server source carries the view across through
+the URL.
 
 ## Changed signatures
 
@@ -25326,11 +25379,11 @@ providers and stylesheets.
 ## Data and callbacks
 
 The host owns the rows. Replace the array held by `people` after a successful
-write; a renderer does not become your database. For remote data, use
-`[onQueryChange]` with host-owned rows, total, loading and error signals, or
-pass a prebuilt source through `[source]`.
+write; a renderer does not become your database. For remote data, build an
+`injectServerData` source over host-owned rows, total, loading and error
+signals, or any other source, and pass it through `[source]`.
 
-Callback inputs such as `onQueryChange` and `onRowClick` use square brackets.
+Callback inputs such as `onViewChange` and `onRowClick` use square brackets.
 Actual outputs such as `(selectionChange)` and `(columnLayoutChange)` use
 parentheses. Keep callback functions stable on the component.
 
@@ -26539,18 +26592,18 @@ See [Building an adapter](./building-an-adapter.md),
 
 # Angular data tiers: arrays, servers and query signals
 
-The table always consumes a `TableSource`. Its kit shell can build one from
-an in-memory array, connect host-fetched pages, or consume a source you already
-created. The columns and visible controls remain the same.
+The table always consumes a `TableSource`. Its kit shell builds one from an
+in-memory array, or consumes a source you created — `injectServerData`'s for
+host-fetched pages. The columns and visible controls remain the same.
 
 ## Select the tier
 
-| Inputs                         | Who processes the data?                                            |
-| ------------------------------ | ------------------------------------------------------------------ |
-| `[data]`                       | Frontend tier searches, filters, sorts and pages all supplied rows |
-| `[data]` and `[onQueryChange]` | Server tier asks the host to fetch the matching page               |
-| `mode="frontend"` with both    | Frontend tier processes rows; the callback observes query changes  |
-| `[source]`                     | Your source controls rows, view state and capabilities             |
+| Inputs                             | Who processes the data?                                            |
+| ---------------------------------- | ------------------------------------------------------------------ |
+| `[data]`                           | Frontend tier searches, filters, sorts and pages all supplied rows |
+| `[data]` and `[onViewChange]`      | Frontend tier processes rows; the callback observes view changes   |
+| `[source]` from `injectServerData` | The server source asks the host to fetch the matching page         |
+| `[source]` from anything else      | Your source controls rows, view state and capabilities             |
 
 Provide only the data contract you intend to use. A prebuilt source owns its
 query and URL setup; shell defaults do not reconfigure that source. URL state
@@ -26600,7 +26653,11 @@ the query to the complete matching dataset, not merely the returned page.
 
 ```ts
 import { Component, signal } from "@angular/core";
-import type { ColumnDef, TableQueryHandler } from "@adapttable/angular";
+import {
+  type ColumnDef,
+  injectServerData,
+  type TableQueryHandler,
+} from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/angular-unstyled";
 
 interface Person {
@@ -26618,12 +26675,7 @@ interface PeoplePage {
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
-      [data]="rows()"
-      [total]="total()"
-      [loading]="loading()"
-      [error]="error()"
-      [responseKey]="responseKey()"
-      [onQueryChange]="load"
+      [source]="source"
       [columns]="columns"
       [rowKey]="rowKey"
       paginationMode="paged"
@@ -26667,10 +26719,20 @@ export class ServerPeopleTable {
       if (!info.signal.aborted) this.loading.set(false);
     }
   };
+
+  readonly source = injectServerData<Person>({
+    rows: this.rows,
+    total: this.total,
+    loading: this.loading,
+    error: this.error,
+    responseKey: this.responseKey,
+    paginationMode: "paged",
+    onQueryChange: this.load,
+  });
 }
 ```
 
-`onQueryChange` is a callback input, not an Angular output. The first callback
+`onQueryChange` is a callback option of the server source. The first callback
 includes restored URL state. A changed query aborts the preceding request;
 destroying the table also aborts the request in flight. Honor that signal and
 ignore late responses, even if your transport cannot cancel its underlying work.
@@ -26681,8 +26743,12 @@ skeleton, refresh feedback and retryable failures accordingly. `responseKey`
 identifies the query answered by the published data. `total` is the complete
 matching count, not `rows.length`.
 
-For a reusable controller, `injectServerData({ rows, total, loading, error,
-onQueryChange, ... })` returns a source signal with the same lifecycle.
+The server source lives as long as the injection context it was created in;
+build it in a service to share it between components. A range, multi-value
+or checklist filter restored from the URL reaches the first request typed
+when the source knows its keys: spread `serverFilterKeys({ columns, filters
+})` into the options for `arrayExtraKeys`, `numberExtraKeys` and
+`facetKeys`. A table given `data` carries none of the server code.
 
 ## A query library
 
@@ -27799,7 +27865,7 @@ the live input, while `search()` is the committed term. `setSearchValue(text)`
 debounces; `setSearch(text)` commits immediately. Bind `searchInputAttrs()`
 using `AdaptAttrs` to preserve the controlled value and input handler.
 
-On the server tier, committing search invokes `onQueryChange` and resets to
+On a server source, committing search invokes its `onQueryChange` and resets to
 page 1. Honor its abort signal and publish only the current query's response.
 A frontend `getSearchText` cannot customize a server's search implementation;
 that belongs to the endpoint.
@@ -27828,7 +27894,7 @@ See [Filtering](./filtering.md), [Data tiers](./data-tiers.md),
 
 Compose `filters()` to turn column filter definitions into a Filters button,
 an AND/OR builder, field controls and removable chips. The frontend data tier
-evaluates the filters; the server tier sends their state to the host's query
+evaluates the filters; a server source sends their state to the host's query
 callback.
 
 These examples use the native kit `@adapttable/angular-unstyled`.
@@ -27915,8 +27981,10 @@ loader leaves an empty list and a development warning; provide your own
 logging and recovery if option loading is essential. Results arriving after
 the field's injection context is destroyed are ignored.
 
-With server data, declare the endpoint's actual capabilities and implement
-the received query in `[onQueryChange]`. Changing filters does not filter the
+With server data, declare the endpoint's actual capabilities on the
+`injectServerData` source and implement the received query in its
+`onQueryChange`; `serverFilterKeys` gives it the filter keys the columns and
+filters declare. Changing filters does not filter the
 server page locally. See [data tiers](./data-tiers.md) and the shared
 [server query contract](../server-queries.md).
 
@@ -28527,9 +28595,10 @@ loading by itself is not virtualization.
 
 ## Server-side pagination in Angular
 
-Use server-side pagination when an API owns the complete dataset. Bind its
-current page to `[data]`, the full matching count to `[total]`, and a stable
-loader to `[onQueryChange]`. Do not slice the returned page again in the host.
+Use server-side pagination when an API owns the complete dataset. Build an
+`injectServerData` source over its current page (`rows`), the full matching
+count (`total`) and a stable loader (`onQueryChange`), and bind it to
+`[source]`. Do not slice the returned page again in the host.
 The [complete server-side Angular table example](./data-tiers.md#server-pages-with-cancellation-and-errors)
 includes a standalone component, a POST request, cancellation, loading and
 error signals, and the response key needed to reject stale pages.
@@ -28542,7 +28611,7 @@ reuse rows from the previous page size.
 
 ## Cursor pagination and infinite scrolling
 
-On the server tier, changing page invokes `[onQueryChange]`; the host publishes
+On a server source, changing page invokes its `onQueryChange`; the host publishes
 that page's rows, total, loading state and response key. Search, filtering,
 sorting and page-size changes reset the view to page 1. If a total shrinks
 past the current page, built-in sources clamp the requested page into range.
@@ -33303,7 +33372,8 @@ state; the native table's fallback data source does not claim its URL namespace.
 
 Reactive value inputs accept a plain value, a ref or a getter. Optional inputs
 also accept refs/getters whose current value is `undefined`. Callbacks such as
-`rowKey`, `getSearchText`, `refetch` and `onQueryChange` remain callbacks. To
+`rowKey`, `getSearchText`, `refetch`, `onQueryChange` and `onViewChange`
+remain callbacks. To
 replace callback identities reactively, pass a getter for the whole options
 object. Never wrap a renderer in a getter just to make it reactive.
 
@@ -34864,7 +34934,8 @@ state; the native table's fallback data source does not claim its URL namespace.
 
 Reactive value inputs accept a plain value, a ref or a getter. Optional inputs
 also accept refs/getters whose current value is `undefined`. Callbacks such as
-`rowKey`, `getSearchText`, `refetch` and `onQueryChange` remain callbacks. To
+`rowKey`, `getSearchText`, `refetch`, `onQueryChange` and `onViewChange`
+remain callbacks. To
 replace callback identities reactively, pass a getter for the whole options
 object. Never wrap a renderer in a getter just to make it reactive.
 
@@ -34873,17 +34944,24 @@ publishes `rows`/`total`, or `useQuerySource` when an existing query composable
 owns fetching and cancellation. See [source contracts](./api.md#data-sources)
 for request cancellation and query-library lifecycle rules.
 
-## Server rows through table props
+## Server rows through a server source
 
-The table takes the server tier directly: pass the current page as `data`, the
-row count as `total`, and fetch in `onQueryChange`. It is called after mount
-and once per real change with the consolidated query; the previous request's
-`signal` is aborted. `is-loading` and `error` describe the request.
+A server table passes a `useServerData` source as `:source`: the host fetches
+in `onQueryChange` and publishes the current page as `rows` and the row count
+as `total`. `onQueryChange` is called after mount and once per real change
+with the consolidated query; the previous request's `signal` is aborted.
+`loading` and `error` describe the request. A table given `data` carries none
+of the server code.
 
 ```vue
 <script setup lang="ts">
 import { shallowRef } from "vue";
-import type { ColumnDef, TableQuery, TableQueryHandler } from "@adapttable/vue";
+import {
+  type ColumnDef,
+  type TableQuery,
+  type TableQueryHandler,
+  useServerData,
+} from "@adapttable/vue";
 import { DataTable } from "@adapttable/vue-unstyled";
 
 interface Person {
@@ -34915,26 +34993,32 @@ const fetchPage: TableQueryHandler = async (query, { signal }) => {
     if (!signal.aborted) loading.value = false;
   }
 };
+const source = useServerData<Person>({
+  rows,
+  total,
+  loading,
+  onQueryChange: fetchPage,
+});
 </script>
 
 <template>
   <DataTable
-    :data="rows"
-    :total="total"
-    :is-loading="loading"
+    :source="source"
     :columns="columns"
     :row-key="(row: Person) => row.id"
-    @query-change="fetchPage"
   />
 </template>
 ```
 
-`mode` is inferred: `data` with `onQueryChange` is server, `data` alone is
-frontend. `mode="frontend"` keeps the table's own search, sort and paging and
-makes `onQueryChange` a notification of what the reader changed; the mount is
-not a change. `supports`, `aggregates`, `responseKey`, `facetKeys` and `facets`
-carry the same server capabilities as `useServerData`; `facetKeys` defaults to
-every checklist filter. A supplied `source` wins over all of them.
+`supports`, `aggregates`, `responseKey`, `facetKeys` and `facets` are
+`useServerData` options. A range, multi-value or checklist filter restored
+from the URL reaches the first request typed when the source knows its keys:
+spread `serverFilterKeys({ columns, filters })` into the options for
+`arrayExtraKeys`, `numberExtraKeys` and `facetKeys`.
+
+A table over `data` keeps its own search, sort and paging and tells
+`@view-change` what the reader changed: one consolidated query per committed
+change, never for the mount. The rows it shows stay the ones in `data`.
 
 ## Server query ownership
 
@@ -36321,19 +36405,19 @@ changes them.
 
 `DataTable<TRow>` from `@adapttable/vue-unstyled` uses `DataTableProps<TRow>`:
 
-| Prop group          | Props and behavior                                                                                                                                                                                                                                                                          |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Required            | `columns: readonly ColumnInput<TRow>[]`, `rowKey: (row: TRow) => string`.                                                                                                                                                                                                                   |
-| Data                | `data?: readonly TRow[]` or `source?: TableSource<TRow>`; source takes precedence. `getSearchText` customizes local search.                                                                                                                                                                 |
-| Server tier         | `onQueryChange` with `data` as the current page fetches each query; `total`, `supports`, `aggregates`, `responseKey`, `facetKeys`, `facets` describe the reply. `mode="frontend"` makes `onQueryChange` a change notice. See [data tiers](./data-tiers.md#server-rows-through-table-props). |
-| Query               | `defaults`, `paginationMode`, `urlSync`, `urlKey`, `urlAdapter`; these configure the fallback frontend source, not a separately supplied source.                                                                                                                                            |
-| Search and sorting  | `searchable` defaults to true; `searchDebounceMs` defaults to the engine's 300ms interval; `searchPlaceholder` overrides the placeholder label. `multiSort` enables shift-key sort levels.                                                                                                  |
-| Layout              | `forceMobile`, `mobileBreakpoint`, `columnLayout`, `defaultColumnLayout`, `onColumnRename`, `fitColumns`, `columnWidths`, `collapsibleColumnGroups`. Group headings and native desktop collapse buttons render; cards honor the resulting visibility.                                       |
-| Selection           | `selectable`, controlled `selectedIds`, initial `defaultSelectedIds`.                                                                                                                                                                                                                       |
-| Rows                | `onRowClick` activates a row or card; `isCellFlashing` marks changed cells with `data-flash`.                                                                                                                                                                                               |
-| Labels and styling  | `tableLabel`, `labels`, `dir`, `locale`, `classNames`.                                                                                                                                                                                                                                      |
-| Local source status | `isLoading`, `isFetching`, `error`, `refetch`; a supplied source owns its status.                                                                                                                                                                                                           |
-| Extensions          | `features?: readonly ComposedFeature<NoInfer<TRow>>[]`. Compose factories from the native feature entries; the row type is inferred from the data/columns contract.                                                                                                                         |
+| Prop group          | Props and behavior                                                                                                                                                                                                                                    |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Required            | `columns: readonly ColumnInput<TRow>[]`, `rowKey: (row: TRow) => string`.                                                                                                                                                                             |
+| Data                | `data?: readonly TRow[]` or `source?: TableSource<TRow>`; source takes precedence. `getSearchText` customizes local search.                                                                                                                           |
+| Server tier         | A `useServerData` source as `source`; `onViewChange` tells a table over `data` what the reader changed, never the mount. See [data tiers](./data-tiers.md#server-rows-through-a-server-source).                                                       |
+| Query               | `defaults`, `paginationMode`, `urlSync`, `urlKey`, `urlAdapter`; these configure the fallback frontend source, not a separately supplied source.                                                                                                      |
+| Search and sorting  | `searchable` defaults to true; `searchDebounceMs` defaults to the engine's 300ms interval; `searchPlaceholder` overrides the placeholder label. `multiSort` enables shift-key sort levels.                                                            |
+| Layout              | `forceMobile`, `mobileBreakpoint`, `columnLayout`, `defaultColumnLayout`, `onColumnRename`, `fitColumns`, `columnWidths`, `collapsibleColumnGroups`. Group headings and native desktop collapse buttons render; cards honor the resulting visibility. |
+| Selection           | `selectable`, controlled `selectedIds`, initial `defaultSelectedIds`.                                                                                                                                                                                 |
+| Rows                | `onRowClick` activates a row or card; `isCellFlashing` marks changed cells with `data-flash`.                                                                                                                                                         |
+| Labels and styling  | `tableLabel`, `labels`, `dir`, `locale`, `classNames`.                                                                                                                                                                                                |
+| Local source status | `isLoading`, `isFetching`, `error`, `refetch`; a supplied source owns its status.                                                                                                                                                                     |
+| Extensions          | `features?: readonly ComposedFeature<NoInfer<TRow>>[]`. Compose factories from the native feature entries; the row type is inferred from the data/columns contract.                                                                                   |
 
 `summaryRow?: SummaryRowFn<TRow>` builds a column-aligned footer from the current
 source row scope. A visible column `footer` or the table `footer` slot also

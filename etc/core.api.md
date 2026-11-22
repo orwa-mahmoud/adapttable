@@ -4519,6 +4519,24 @@ export function serializePivot(config: PivotConfig): string;
 export function serializePivotState(state: PivotUrlState): string;
 
 // @public
+export interface ServerFilterKeys {
+    readonly arrayExtraKeys: readonly string[];
+    readonly facetKeys: readonly string[];
+    readonly numberExtraKeys: readonly string[];
+}
+
+// @public
+export function serverFilterKeys<TRow>(input: ServerFilterKeysInput<TRow>): ServerFilterKeys;
+
+// @public
+export interface ServerFilterKeysInput<TRow> {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly filters?: readonly FilterDef<TRow>[];
+    readonly filterTypes?: readonly FilterTypeSpec[];
+    readonly locale?: string;
+}
+
+// @public
 export interface ServerPivotOptions {
     config: PivotConfig;
     format?: (value: DisplayValue, measure: PivotConfig["measures"][number]) => DisplayValue;
@@ -5200,6 +5218,7 @@ export interface TableOptions<TRow, TNode = unknown> {
     onRowsChange?: (rows: readonly TRow[]) => void;
     onSelectionChange?: (selectedIds: string[]) => void;
     onValidationFail?: EditEventHandler<TRow>;
+    onViewChange?: TableQueryListener;
     paginationMode?: PaginationMode;
     prefetch?: (row: TRow) => void;
     renderRowActions?: RowActionsRenderer<TRow>;

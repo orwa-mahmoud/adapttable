@@ -49,7 +49,4 @@ export {
   type RowActionsRenderer,
   type TableQuery,
 } from "@adapttable/react/adapter";
-export {
-  type DataModeProps,
-  type TableQueryHandler,
-} from "@adapttable/react/adapter";
+export { type TableQueryHandler } from "@adapttable/react/adapter";

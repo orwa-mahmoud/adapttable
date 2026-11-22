@@ -33,7 +33,6 @@ the adapter's own files (see [the worked reference](#the-worked-reference--adapt
 // src/types.ts
 import type { TableSource } from "@adapttable/core";
 import type { BaseDataTableProps, UrlStateAdapter } from "@adapttable/react";
-import type { DataModeProps } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
 /** The five wrapper hooks every themed kit honours. */
@@ -57,7 +56,6 @@ export interface DataTablePropsBase<TRow> extends Omit<
 > {
   source?: TableSource<TRow>;
   data?: readonly TRow[];
-  total?: number;
   loading?: boolean;
   error?: Error | null;
   urlAdapter?: UrlStateAdapter;
@@ -67,9 +65,7 @@ export interface DataTablePropsBase<TRow> extends Omit<
   slots?: DataTableSlots;
 }
 
-/** `mode="server"` requires `onQueryChange` at compile time. */
-export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
-  DataModeProps<TRow>;
+export type DataTableProps<TRow> = DataTablePropsBase<TRow>;
 ```
 
 ```tsx
@@ -313,7 +309,7 @@ same model, each kit's pixels.
   hooks owns a provider, and its state has to exist before the body reads it.
   `DataTableContent` does the rendering.
 - **`useDataTableShell(props, renderAutoForm)`** resolves the tier
-  (`source`, else `onQueryChange`, else `data`), builds the declarative-filter
+  (`source`, else `data`), builds the declarative-filter
   runtime, wires the chrome, and returns the `tableProps` and `toolbarProps`
   bundles. `renderAutoForm(defs, source, registry)` runs only when there are
   declarative filter definitions, and returns the kit's filter form.
@@ -536,7 +532,7 @@ complete adapter for native HTML. Its layout is the one to copy:
 | File                               | Holds                                                                                                                                                   |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DataTable.tsx`                    | The root: `useTableFeatures`, `FeatureProviders`, `useDataTableShell`, `DataTableShellView`, the toolbar, body switch and slot placement.               |
-| `types.ts`                         | `DataTableClassNames`, `DataTableSlots`, `DataTablePropsBase`, and `DataTableProps` intersected with `DataModeProps`.                                   |
+| `types.ts`                         | `DataTableClassNames`, `DataTableSlots`, `DataTablePropsBase`, and `DataTableProps`.                                                                    |
 | `index.ts`                         | `DataTable`, its types, and the re-exported builders and types an app needs without importing core.                                                     |
 | `<feature>.tsx` / `<feature>.ts`   | One file per subpath: a helper call, an `extendFeature` wrap, or a pass-through re-export.                                                              |
 | `features.ts` / `preset.ts`        | The `/features` forward and the `/preset` `standardFeatures`.                                                                                           |
@@ -741,8 +737,6 @@ Beyond the suite, the built-in adapters are held to parity by:
 - `@adapttable/react/adapter` is aimed at adapter authors; its exports are
   listed under [the adapter contract](./api.md#the-adapter-contract) and
   [the builder tier](./api.md#the-builder-tier).
-- `DataModeProps` is the discriminated `mode` union: intersect it into the
-  kit's props so `mode="server"` without `onQueryChange` fails to compile.
 - Re-export the source builders and hooks (`useFrontendData`,
   `useServerData`, `useQuerySource`, `useTableUrlState`) and the common types
   from the kit's root, as the built-in adapters do, so an app imports from one

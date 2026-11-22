@@ -109,7 +109,6 @@ export interface ConformanceScenario {
     readonly isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     readonly labels?: ConformanceLabels;
     readonly mobile?: boolean;
-    readonly mode?: "frontend" | "server";
     readonly navigable?: boolean;
     readonly onCellEdit?: (rowId: string, columnKey: string, value: unknown) => void;
     readonly onQueryChange?: (query: {
@@ -122,6 +121,12 @@ export interface ConformanceScenario {
     }) => void;
     readonly onRowClick?: (row: ConformanceRow) => void;
     readonly onRowReorder?: (from: number, to: number, rowId: string) => void;
+    readonly onViewChange?: (query: {
+        readonly page?: number;
+        readonly limit?: number;
+        readonly sortBy?: string;
+        readonly sortDir?: string;
+    }) => void;
     readonly pageSize?: number;
     readonly rows: readonly ConformanceRow[];
     readonly searchPlaceholder?: string;

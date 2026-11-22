@@ -3,11 +3,8 @@ import {
   type CellEdit,
   type CellRange,
   type ConfirmHandler,
-  type FacetMap,
   type FilterDef,
   type FilterTypeSpec,
-  type QueryAggregate,
-  type QuerySupport,
   type RowAction,
   type TableDensity,
   type TableQueryListener,
@@ -57,31 +54,16 @@ export interface UseDataTableShellOptions<TRow>
   readonly source?: MaybeRefOrGetterOptional<TableSource<TRow>>;
   /** Bound the rendered scroll body; CSS lengths are measured after mount. */
   readonly maxHeight?: number | string;
+  /**
+   * Frontend tier: every row; the table filters, sorts and pages them. A
+   * server table passes a server `source` (`useServerData`) instead.
+   */
   readonly data?: MaybeRefOrGetter<readonly TRow[]>;
   /**
-   * `"server"` makes `onQueryChange` fetch the rows; `"frontend"` keeps the
-   * table's own processing and makes `onQueryChange` a notification. Absent:
-   * `data` with `onQueryChange` is server, `data` alone is frontend.
+   * Frontend tier: told of each committed change to page, page size,
+   * search, sort and filters, never of the mount.
    */
-  readonly mode?: "frontend" | "server";
-  /**
-   * Called with one consolidated query per real change: on the server tier
-   * the host fetches that page and the superseded request's `signal` is
-   * aborted; on the frontend tier it is told what the reader did.
-   */
-  readonly onQueryChange?: TableQueryListener;
-  /** Server tier: the row count across every page. */
-  readonly total?: MaybeRefOrGetterOptional<number>;
-  /** Server tier: what the endpoint can answer, such as facet counts. */
-  readonly supports?: MaybeRefOrGetterOptional<QuerySupport>;
-  /** Server tier: aggregates the endpoint computes for the query. */
-  readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
-  /** Server tier: names the response the aggregates belong to. */
-  readonly responseKey?: MaybeRefOrGetterOptional<string>;
-  /** Server tier: keys sent as `query.facets`; defaults to every checklist filter. */
-  readonly facetKeys?: MaybeRefOrGetterOptional<readonly string[]>;
-  /** Server tier: distinct-value counts from the last fetch. */
-  readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
+  readonly onViewChange?: TableQueryListener;
   readonly features?: MaybeRefOrGetterOptional<
     readonly FeatureListEntry<ComposedFeature<NoInfer<TRow>>>[]
   >;

@@ -12,7 +12,6 @@ import {
 } from "./useTableDataImpl";
 
 export type {
-  DataModeProps,
   TableQueryHandler,
   UseTableDataOptions,
   UseTableDataResult,

@@ -40,8 +40,8 @@ export const BINDING_CAPABILITIES = Object.freeze([
   },
   { id: "search-placeholder", names: ["searchPlaceholder"], shape: "string" },
   {
-    id: "server-query",
-    names: ["onQueryChange"],
+    id: "view-change",
+    names: ["onViewChange"],
     shape: "callback",
     params: 2,
     param: "row",

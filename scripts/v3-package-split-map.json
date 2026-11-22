@@ -40731,6 +40731,30 @@
       "behavior": ""
     },
     {
+      "export": "serverFilterKeys",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ServerFilterKeys",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ServerFilterKeysInput",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "ServerPivotOptions",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -47447,14 +47471,6 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "DataModeProps",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -55244,6 +55260,14 @@
     },
     {
       "export": "TableFeatureHost",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "TableQueryHandler",
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",

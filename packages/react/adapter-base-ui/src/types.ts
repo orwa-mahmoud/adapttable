@@ -2,10 +2,8 @@ import {
   type BaseDataTableProps,
   type Slot,
   type UrlStateAdapter,
-  type UseTableDataOptions,
 } from "@adapttable/react";
 import {
-  type DataModeProps,
   type TableErrorState,
   type TableSource,
 } from "@adapttable/react/adapter";
@@ -99,10 +97,10 @@ export type BaseUiAccentColor =
  *
  * @public
  */
-export interface DataTablePropsBase<TRow>
-  extends
-    Omit<BaseDataTableProps<TRow>, "source">,
-    Pick<UseTableDataOptions<TRow>, "supports" | "facetKeys" | "facets"> {
+export interface DataTablePropsBase<TRow> extends Omit<
+  BaseDataTableProps<TRow>,
+  "source"
+> {
   /**
    * Full-control tier: a prebuilt source (`useFrontendData`,
    * `useQuerySource`, `useServerData`, …). Omit it and pass `data` for the
@@ -110,15 +108,11 @@ export interface DataTablePropsBase<TRow>
    */
   source?: TableSource<TRow>;
   /**
-   * The raw rows. Alone → frontend tier (the table filters/sorts/pages
-   * them, with declarative filters applied automatically); together with
-   * `onQueryChange` → server tier (rows render untouched and the pager
-   * reads `total`).
+   * The rows: the table filters, sorts and pages them. A server table
+   * passes a server `source` instead.
    */
   data?: readonly TRow[];
-  /** Server tier: total row count across all pages (drives the pager). */
-  total?: number;
-  /** Server tier: a request is in flight. */
+  /** The rows are still loading. */
   loading?: boolean;
   /** Forwarded error to display in the table's error state. */
   error?: Error | null;
@@ -156,12 +150,8 @@ export interface DataTablePropsBase<TRow>
 }
 
 /**
- * Props for the Base UI `<DataTable>`: the base surface intersected
- * with core's data-mode union, so `mode="server"` requires
- * `onQueryChange` at compile time and `mode="frontend"` turns it into a
- * pure notification.
+ * Props for the `<DataTable>`.
  *
  * @public
  */
-export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
-  DataModeProps<TRow>;
+export type DataTableProps<TRow> = DataTablePropsBase<TRow>;

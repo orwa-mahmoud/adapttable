@@ -81,7 +81,7 @@ Grid-level (`<AgGridReact>` → `<DataTable>`):
 | `pagination` + `paginationPageSize`                | automatic                                                  | Paged on desktop, infinite on mobile; page-size control built in. |
 | `rowSelection={{ mode: "multiRow" }}`              | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Compose `bulkActions()` to turn on checkboxes.                    |
 | `api.getSelectedRows()`                            | `onSelectionChange` state                                  | Selection is React state, not an API call.                        |
-| `rowModelType: "infinite"`                         | `onQueryChange` (+ infinite mode)                          | One consolidated query; superseded fetches abort via `signal`.    |
+| `rowModelType: "infinite"`                         | `useServerData` (+ infinite mode)                          | One consolidated query; superseded fetches abort via `signal`.    |
 | `api.exportDataAsCsv()`                            | `exportCsv()` / `rowsToCsv` + `downloadCsv`                | Compose `exportCsv()` for a toolbar button or headless helpers.   |
 | `theme={themeQuartz}`                              | your kit's provider/theme                                  | The table inherits the design system, incl. dark mode.            |
 | `<AgGridProvider modules={[AllCommunityModule]}>`  | (nothing)                                                  | No module registry.                                               |

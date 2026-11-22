@@ -196,11 +196,11 @@ providers and stylesheets.
 ## Data and callbacks
 
 The host owns the rows. Replace the array held by `people` after a successful
-write; a renderer does not become your database. For remote data, use
-`[onQueryChange]` with host-owned rows, total, loading and error signals, or
-pass a prebuilt source through `[source]`.
+write; a renderer does not become your database. For remote data, build an
+`injectServerData` source over host-owned rows, total, loading and error
+signals, or any other source, and pass it through `[source]`.
 
-Callback inputs such as `onQueryChange` and `onRowClick` use square brackets.
+Callback inputs such as `onViewChange` and `onRowClick` use square brackets.
 Actual outputs such as `(selectionChange)` and `(columnLayoutChange)` use
 parentheses. Keep callback functions stable on the component.
 

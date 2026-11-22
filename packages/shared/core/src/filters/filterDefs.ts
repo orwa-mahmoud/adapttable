@@ -938,19 +938,18 @@ function emptyOpChip(field: string, token: string): string {
 }
 
 /**
- * Derive the full runtime (URL keys, chips, predicate) from definitions.
+ * The filter state keys whose URL values parse as lists and as numbers.
  *
- * @public
+ * @param defs - The filter definitions.
+ * @param registry - The types the definitions name.
+ * @returns The list-valued keys and the number-valued keys.
  */
-export function buildFilterRuntime<TRow>(
-  defs: readonly FilterDef<TRow>[],
+export function filterUrlKeys(
+  defs: readonly Pick<FilterDef, "key" | "type">[],
   registry: FilterTypeRegistry
-): FilterRuntime<TRow> {
+): { arrayExtraKeys: string[]; numberExtraKeys: string[] } {
   const arrayExtraKeys: string[] = [];
   const numberExtraKeys: string[] = [];
-  const filterLabels: Record<string, ChipLabelResolver> = {};
-  const predicates = defs.map((def) => filterPredicate(def, registry));
-
   for (const def of defs) {
     const spec = registry.get(def.type);
     if (!spec) continue;
@@ -959,7 +958,45 @@ export function buildFilterRuntime<TRow>(
       const s = RANGE_SUFFIXES.numberRange;
       numberExtraKeys.push(def.key + s.start, def.key + s.end);
     }
-    Object.assign(filterLabels, spec.chips(def));
+  }
+  return { arrayExtraKeys, numberExtraKeys };
+}
+
+/**
+ * The keys of the filters drawn as a checklist: the ones whose distinct
+ * values a server counts.
+ *
+ * @param defs - The filter definitions.
+ * @param registry - The types the definitions name.
+ * @returns The checklist filters' keys.
+ */
+export function checklistFilterKeys(
+  defs: readonly Pick<FilterDef, "key" | "type">[],
+  registry: FilterTypeRegistry
+): string[] {
+  return defs
+    .filter(
+      (def) => (registry.get(def.type)?.widget ?? def.type) === "checklist"
+    )
+    .map((def) => def.key);
+}
+
+/**
+ * Derive the full runtime (URL keys, chips, predicate) from definitions.
+ *
+ * @public
+ */
+export function buildFilterRuntime<TRow>(
+  defs: readonly FilterDef<TRow>[],
+  registry: FilterTypeRegistry
+): FilterRuntime<TRow> {
+  const { arrayExtraKeys, numberExtraKeys } = filterUrlKeys(defs, registry);
+  const filterLabels: Record<string, ChipLabelResolver> = {};
+  const predicates = defs.map((def) => filterPredicate(def, registry));
+
+  for (const def of defs) {
+    const spec = registry.get(def.type);
+    if (spec) Object.assign(filterLabels, spec.chips(def));
   }
 
   return {

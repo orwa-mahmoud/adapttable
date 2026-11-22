@@ -1732,18 +1732,6 @@ export { CustomCellEditorCtrl }
 export { CustomCellEditorRender }
 
 // @public
-export type DataModeProps<_TRow = unknown> = {
-    aggregates?: readonly QueryAggregate[];
-    responseKey?: string;
-} & ({
-    mode: "server";
-    onQueryChange: TableQueryHandler;
-} | {
-    mode?: "frontend";
-    onQueryChange?: TableQueryHandler;
-});
-
-// @public
 export type DataTableShellChromeProps<TRow> = DataTableShellProps<TRow> & {
     density: Density;
     onDensityChange: (next: Density) => void;
@@ -1768,16 +1756,12 @@ export interface DataTableShellGroupingPanelProps<TRow> {
 export type DataTableShellProps<TRow> = Omit<ComposedTableProps<TRow>, "source"> & {
     source?: TableSource<TRow>;
     data?: readonly TRow[];
-    total?: number;
     loading?: boolean;
     error?: Error | null;
     urlAdapter?: UrlStateAdapter;
     urlSync?: boolean;
     urlKey?: string;
-    supports?: QuerySupport;
-    facetKeys?: readonly string[];
-    facets?: FacetMap;
-} & DataModeProps<TRow>;
+};
 
 // @public
 export interface DataTableShellResult<TRow> {

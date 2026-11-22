@@ -33,7 +33,6 @@ import { createHistoryAdapter } from '@adapttable/react';
 import { createMemoryAdapter } from '@adapttable/react';
 import { CustomCellEditorCtrl } from '@adapttable/react/adapter';
 import { CustomCellEditorRender } from '@adapttable/react/adapter';
-import { DataModeProps } from '@adapttable/react/adapter';
 import { defaultConfirm } from '@adapttable/react/adapter';
 import { defaultFilterRegistry } from '@adapttable/react/adapter';
 import { defaultLabels } from '@adapttable/react/adapter';
@@ -183,8 +182,6 @@ export { CustomCellEditorCtrl }
 
 export { CustomCellEditorRender }
 
-export { DataModeProps }
-
 // @public
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>): JSX.Element;
 
@@ -198,10 +195,10 @@ export interface DataTableClassNames {
 }
 
 // @public
-export type DataTableProps<TRow> = DataTablePropsBase<TRow> & DataModeProps<TRow>;
+export type DataTableProps<TRow> = DataTablePropsBase<TRow>;
 
 // @public
-export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>, "source">, Pick<UseTableDataOptions<TRow>, "supports" | "facetKeys" | "facets"> {
+export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>, "source"> {
     accentColor?: string;
     animate?: boolean;
     classNames?: DataTableClassNames;
@@ -211,7 +208,6 @@ export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>,
     size?: "sm" | "md" | "lg";
     slots?: DataTableSlots;
     source?: TableSource<TRow>;
-    total?: number;
     urlAdapter?: UrlStateAdapter;
     urlKey?: string;
     urlSync?: boolean;

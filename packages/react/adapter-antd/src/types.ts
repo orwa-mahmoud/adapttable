@@ -4,10 +4,7 @@ import {
   type UrlStateAdapter,
   type UseTableDataOptions,
 } from "@adapttable/react";
-import {
-  type DataModeProps,
-  type TableErrorState,
-} from "@adapttable/react/adapter";
+import { type TableErrorState } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
 /**
@@ -62,7 +59,7 @@ export interface DataTableClassNames {
 }
 
 /**
- * The props every Ant Design table takes, before the data-mode half is added.
+ * The props every Ant Design table takes.
  * `DataTableProps` is this plus one of the data modes.
  *
  * @public
@@ -72,18 +69,10 @@ export interface DataTablePropsBase<TRow>
     Omit<BaseDataTableProps<TRow>, "source">,
     Pick<
       UseTableDataOptions<TRow>,
-      | "source"
-      | "data"
-      | "total"
-      | "loading"
-      | "error"
-      | "urlKey"
-      | "supports"
-      | "facetKeys"
-      | "facets"
+      "source" | "data" | "loading" | "error" | "urlKey"
     > {
   /**
-   * URL-state backend for the built-in `data` / `onQueryChange` tiers.
+   * URL-state backend for the built-in frontend tier.
    * Defaults to the browser History API; pass a router adapter
    * (react-router / Next.js) to integrate with an existing navigation stack.
    * Ignored when a prebuilt `source` is supplied (the source owns its state).
@@ -119,12 +108,8 @@ export interface DataTablePropsBase<TRow>
 }
 
 /**
- * Props for the antd `<DataTable>`: the base surface intersected with
- * core's data-mode union, so `mode="server"` requires `onQueryChange`
- * at compile time and `mode="frontend"` turns it into a pure
- * notification.
+ * Props for the `<DataTable>`.
  *
  * @public
  */
-export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
-  DataModeProps<TRow>;
+export type DataTableProps<TRow> = DataTablePropsBase<TRow>;

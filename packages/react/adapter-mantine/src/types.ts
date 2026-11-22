@@ -2,10 +2,8 @@ import {
   type BaseDataTableProps,
   type Slot,
   type UrlStateAdapter,
-  type UseTableDataOptions,
 } from "@adapttable/react";
 import {
-  type DataModeProps,
   type TableErrorState,
   type TableSource,
 } from "@adapttable/react/adapter";
@@ -64,35 +62,32 @@ export interface DataTableClassNames {
  *
  * @public
  */
-export interface DataTablePropsBase<TRow>
-  extends
-    Omit<BaseDataTableProps<TRow>, "source">,
-    Pick<UseTableDataOptions<TRow>, "supports" | "facetKeys" | "facets"> {
+export interface DataTablePropsBase<TRow> extends Omit<
+  BaseDataTableProps<TRow>,
+  "source"
+> {
   /**
    * Full-control tier: a prebuilt source (`useFrontendData` /
    * `useQuerySource`). Omit it and pass `data` for the zero-ceremony tiers.
    */
   source?: TableSource<TRow>;
   /**
-   * Frontend tier: the raw rows — the table filters, sorts and pages them.
-   * Combined with `onQueryChange` it becomes the server tier: `data` is the
-   * current page, rendered as-is.
+   * The rows: the table filters, sorts and pages them. A server table
+   * passes a server `source` instead.
    */
   data?: readonly TRow[];
-  /** Server tier: total row count across all pages (drives the pager). */
-  total?: number;
-  /** Server tier: a request is in flight. */
+  /** The rows are still loading. */
   loading?: boolean;
   /** Forwarded error to display in the table's error state. */
   error?: Error | null;
   /**
    * Namespace for this table's URL params (`urlKey="left"` → `left.q`,
    * `left.page`, …) so multiple tables can share one URL. Applies to the
-   * `data` / `onQueryChange` tiers; a prebuilt `source` owns its own state.
+   * frontend tier; a prebuilt `source` owns its own state.
    */
   urlKey?: string;
   /**
-   * URL-state backend for the `data` / `onQueryChange` tiers. Defaults to
+   * URL-state backend for the frontend tier. Defaults to
    * the browser History API; supply a router adapter (react-router,
    * Next.js) — or `createMemoryAdapter()` in tests — to integrate with an
    * existing navigation stack.
@@ -118,15 +113,11 @@ export interface DataTablePropsBase<TRow>
 }
 
 /**
- * Props for the Mantine `<DataTable>`: the base surface intersected
- * with core's data-mode union, so `mode="server"` requires
- * `onQueryChange` at compile time and `mode="frontend"` turns it into a
- * pure notification.
+ * Props for the `<DataTable>`.
  *
  * @public
  */
-export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
-  DataModeProps<TRow>;
+export type DataTableProps<TRow> = DataTablePropsBase<TRow>;
 
 /** Mantine color alias re-export for action colors. */
 export type { MantineColor } from "@mantine/core";

@@ -55,6 +55,25 @@ of 380 kB.
 | Vue `classNames.rowAction`, `classNames.status`                                                                                                                   | `classNames.actionButton`, `classNames.tableStatusAnnouncer`  |
 | Labels `noticeReorderNested`, `pendingProposals`, `assistantReceipt`, `rowMoveOptions`, `moveToTopLevel`, `groupingAggregateColumn`, `groupingAggregationDefault` | nothing reads them; delete the keys                           |
 
+## Data tiers
+
+A table takes `data` or a `source` and infers nothing from its other props.
+A server table builds its server source and hands it over, so a table over
+`data` ships no server code: 1.8 KiB less on first load and 5.9 KiB less in
+total for the Unstyled table in each framework.
+
+| v3                                                                                  | v4                                                                                                                 |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `data` with `onQueryChange`, or `mode="server"`, on the table                       | `source={useServerData({ rows, total, loading, onQueryChange })}`; Vue `useServerData`, Angular `injectServerData` |
+| `mode="frontend"` with `onQueryChange`                                              | `onViewChange` on the table                                                                                        |
+| Table props `total`, `responseKey`, `aggregates`, `supports`, `facetKeys`, `facets` | Options of the server source                                                                                       |
+| A server table's list, number and facet keys derived from its filters               | `serverFilterKeys({ columns, filters })` spread into the server source                                             |
+| `DataModeProps`                                                                     | Removed; `DataTableProps` is `DataTablePropsBase`                                                                  |
+
+A server source keeps its own page, sort and filter state; a table that
+switches between `data` and a server source carries the view across through
+the URL.
+
 ## Changed signatures
 
 - `capabilityReason(capability, labels)` reads the sentence for

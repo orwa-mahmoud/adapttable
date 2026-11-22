@@ -6,6 +6,12 @@
  * composing the real factories, which is the migration a host performs.
  */
 import {
+  type ColumnDef,
+  type ColumnInput,
+  serverFilterKeys,
+  useServerData,
+} from "@adapttable/react";
+import {
   flattenFeatures,
   flattenReactColumnTree,
 } from "@adapttable/react/adapter";
@@ -363,7 +369,60 @@ export function reactKitUnderTest(
   definition: ReactKitDefinition
 ): ReactKitUnderTest {
   const { Table, features } = definition;
+  function leafColumns<TRow>(
+    columns: readonly ColumnInput<TRow>[]
+  ): ColumnDef<TRow>[] {
+    return columns.flatMap((column) =>
+      "children" in column ? leafColumns(column.children) : [column]
+    );
+  }
+  function ServerTable<TRow>(props: Readonly<HarnessProps<TRow>>) {
+    const {
+      total,
+      onQueryChange,
+      supports,
+      facetKeys,
+      facets,
+      numberExtraKeys,
+      arrayExtraKeys,
+      data,
+      ...rest
+    } = props;
+    // The keys a host derives from the filters it hands the table.
+    const keys = serverFilterKeys({
+      columns: leafColumns(props.columns),
+      filters: Array.isArray(props.filters) ? props.filters : undefined,
+      filterTypes: props.filterTypes,
+    });
+    const source = useServerData<TRow>({
+      rows: data ?? [],
+      total: total ?? data?.length ?? 0,
+      onQueryChange,
+      supports,
+      facetKeys: facetKeys ?? keys.facetKeys,
+      facets,
+      numberExtraKeys: numberExtraKeys ?? keys.numberExtraKeys,
+      arrayExtraKeys: arrayExtraKeys ?? keys.arrayExtraKeys,
+      loading: props.loading,
+      urlAdapter: props.urlAdapter,
+      urlSync: props.urlSync,
+      urlKey: props.urlKey,
+      defaults: props.defaults,
+      paginationMode: props.paginationMode,
+      forceMobile: props.forceMobile,
+    });
+    return (
+      <Table
+        {...rest}
+        source={source}
+        features={composeTestFeatures(props, features)}
+      />
+    );
+  }
   function DataTable<TRow>(props: Readonly<HarnessProps<TRow>>) {
+    if (props.onQueryChange !== undefined || props.total !== undefined) {
+      return <ServerTable {...props} />;
+    }
     return <Table {...props} features={composeTestFeatures(props, features)} />;
   }
   return { ...definition, DataTable };

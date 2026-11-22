@@ -36,7 +36,6 @@ import { EditValidationStoreOptions } from '@adapttable/core';
 import { EffectScope } from 'vue';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExtraFilters } from '@adapttable/core';
-import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
 import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
@@ -62,9 +61,7 @@ import { MaybeRefOrGetter } from 'vue';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
-import { QueryAggregate } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
-import { QuerySupport } from '@adapttable/core';
 import { Ref } from 'vue';
 import { RowAction } from '@adapttable/core';
 import { RowEditStoreOptions } from '@adapttable/core';
@@ -879,13 +876,11 @@ export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
 
 // @public (undocumented)
 export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
-    readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
     readonly animate?: MaybeRefOrGetterOptional<boolean>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps<VNodeChild>>;
     // (undocumented)
     readonly confirm?: ConfirmHandler;
-    // (undocumented)
     readonly data?: MaybeRefOrGetter<readonly TRow[]>;
     // (undocumented)
     readonly defaultDensity?: TableDensity;
@@ -893,13 +888,10 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly defaultSelectedIds?: readonly string[];
     // (undocumented)
     readonly density?: MaybeRefOrGetterOptional<TableDensity>;
-    readonly facetKeys?: MaybeRefOrGetterOptional<readonly string[]>;
-    readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
     // (undocumented)
     readonly features?: MaybeRefOrGetterOptional<readonly FeatureListEntry<ComposedFeature<NoInfer<TRow>>>[]>;
     readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
     readonly maxHeight?: number | string;
-    readonly mode?: "frontend" | "server";
     // (undocumented)
     readonly onCellCut?: (range: CellRange) => void;
     // (undocumented)
@@ -908,10 +900,9 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onDensityChange?: (next: TableDensity) => void;
-    readonly onQueryChange?: TableQueryListener;
     // (undocumented)
     readonly onSelectionChange?: (ids: string[]) => void;
-    readonly responseKey?: MaybeRefOrGetterOptional<string>;
+    readonly onViewChange?: TableQueryListener;
     // (undocumented)
     readonly runtimeChannels?: MaybeRefOrGetter<Pick<RuntimeChromeInput<TRow>, "filterDefs" | "filterRegistry" | "grouping" | "tree" | "editing" | "rowPinning">>;
     // (undocumented)
@@ -921,8 +912,6 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     // (undocumented)
     readonly source?: MaybeRefOrGetterOptional<TableSource<TRow>>;
     readonly summaryRow?: SummaryRowFn<TRow>;
-    readonly supports?: MaybeRefOrGetterOptional<QuerySupport>;
-    readonly total?: MaybeRefOrGetterOptional<number>;
 }
 
 // @public

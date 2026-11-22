@@ -90,8 +90,8 @@ export class PeopleTable {
 }
 ```
 
-Use `data` for in-memory rows, a prebuilt `source`, or `onQueryChange` with
-host-fetched rows and `total` for server data. The table never owns the
+Use `data` for in-memory rows, or a prebuilt `source` — `injectServerData`'s
+for host-fetched server pages. The table never owns the
 rows: edits, additions, deletes and reorders call the host.
 
 ## Features

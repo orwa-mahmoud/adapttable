@@ -123,19 +123,15 @@ export function useDataTableShell<TRow>(
       ),
     [props.columns, persistedColumnNames]
   );
-  // Resolve the data tier (source > onQueryChange server > frontend) and the
+  // Resolve the data tier (a prebuilt source, else the frontend rows) and the
   // declarative-filter runtime (defs, chip labels, URL keys, predicate).
   const { source, runtime } = useTableDataLean<TRow>({
     locale: props.locale,
     source: props.source,
     data: props.data,
-    total: props.total,
     loading: props.loading,
     error: props.error,
-    mode: props.mode,
-    onQueryChange: props.onQueryChange,
-    aggregates: props.aggregates,
-    responseKey: props.responseKey,
+    onViewChange: props.onViewChange,
     urlAdapter,
     // No `urlSync` here on purpose: the decision is already baked into WHICH
     // adapter was resolved above (memory when off, the real one when on), and
@@ -151,9 +147,6 @@ export function useDataTableShell<TRow>(
     paginationMode: props.paginationMode,
     forceMobile: props.forceMobile,
     mobileBreakpoint: props.mobileBreakpoint,
-    supports: props.supports,
-    facetKeys: props.facetKeys,
-    facets: props.facets,
   });
   // History, find, grid, export and fullscreen mount in-tree through
   // {@link ShellLiveGate}. The hook only holds inert stand-ins so this

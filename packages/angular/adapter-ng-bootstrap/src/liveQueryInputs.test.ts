@@ -37,7 +37,6 @@ const COLUMNS: ColumnDef<City>[] = [
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
-      mode="frontend"
       [data]="rows"
       [columns]="columns"
       [rowKey]="rowKey"
@@ -47,7 +46,7 @@ const COLUMNS: ColumnDef<City>[] = [
       [urlKey]="urlKey()"
       [urlSync]="urlSync()"
       [forceMobile]="mobile()"
-      [onQueryChange]="notified"
+      [onViewChange]="notified"
     />
   `,
 })

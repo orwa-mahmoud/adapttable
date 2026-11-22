@@ -151,8 +151,8 @@ describe("createTableData", () => {
     // Nothing filters, so there is no predicate to call row by row.
     expect(plan.filterFn).toBeUndefined();
     expect(plan.filterTreeFn).toBeUndefined();
-    expect(plan.facetKeys).toBeUndefined();
-    expect(table.plan(config({ onQueryChange: vi.fn() })).tier).toBe("server");
+    // A change notification does not change the tier.
+    expect(table.plan(config({ onViewChange: vi.fn() })).tier).toBe("frontend");
     // A host predicate alone is the predicate, as it is.
     const hostOnly = (row: Row) => row.id === "a";
     expect(table.plan(config({ filterFn: hostOnly })).filterFn).toBe(hostOnly);
@@ -355,18 +355,6 @@ describe("createTableData", () => {
     expect(table.plan(config({ engine })).filterKey).toBe(first.filterKey);
   });
 
-  it("asks the server for every checklist filter unless told which", () => {
-    const engine = engineStub();
-    const table = createTableData<Row>();
-    expect(table.plan(config({ engine })).facetKeys).toEqual([
-      "team",
-      "labels",
-    ]);
-    expect(
-      table.plan(config({ engine, facetKeys: ["name"] })).facetKeys
-    ).toEqual(["name"]);
-  });
-
   it("computes facets from the searched rows when nothing answered them", () => {
     const engine = engineStub();
     const table = createTableData<Row>();
@@ -419,10 +407,7 @@ describe("createTableData", () => {
       const listener = vi.fn<TableQueryListener>();
       const table = createTableData<Row>();
       const view = sourceOf();
-      const frontendMode = config({
-        mode: "frontend",
-        onQueryChange: listener,
-      });
+      const frontendMode = config({ onViewChange: listener });
 
       table.plan(frontendMode);
       table.finish({ resolved: view, frontend: view });
@@ -450,16 +435,13 @@ describe("createTableData", () => {
       table.dispose();
     });
 
-    it("keeps a retained facade and does not abort a notice when the tier switches", () => {
+    it("keeps a retained facade and does not abort a notice when the table switches to a source", () => {
       const listener = vi.fn<TableQueryListener>();
       const table = createTableData<Row>();
       const frontend = sourceOf({ page: 1 });
       const changed = sourceOf({ page: 2 });
       const server = sourceOf({ page: 4 });
-      const frontendMode = config({
-        mode: "frontend",
-        onQueryChange: listener,
-      });
+      const frontendMode = config({ onViewChange: listener });
 
       table.plan(frontendMode);
       table.finish({ resolved: frontend, frontend });
@@ -471,7 +453,7 @@ describe("createTableData", () => {
       const signal = listener.mock.calls[0]?.[1].signal;
       expect(signal?.aborted).toBe(false);
 
-      table.plan(config({ mode: "server", onQueryChange: listener }));
+      table.plan(config({ source: server, onViewChange: listener }));
       expect(table.finish({ resolved: server, frontend: changed })).toBe(
         server
       );
@@ -484,14 +466,15 @@ describe("createTableData", () => {
       expect(signal?.aborted).toBe(true);
     });
 
-    it("stays quiet unless the mode is explicitly frontend", () => {
+    it("stays quiet for a table that reads a source", () => {
       const listener = vi.fn<TableQueryListener>();
       const table = createTableData<Row>();
-      table.plan(config({ onQueryChange: listener }));
-      table.finish({ resolved: sourceOf(), frontend: sourceOf() });
+      const host = sourceOf();
+      table.plan(config({ source: host, onViewChange: listener }));
+      table.finish({ resolved: host, frontend: sourceOf() });
       table.commit();
-      table.plan(config({ onQueryChange: listener }));
       const moved = sourceOf({ page: 2 });
+      table.plan(config({ source: moved, onViewChange: listener }));
       table.finish({ resolved: moved, frontend: moved });
       table.commit();
       expect(listener).not.toHaveBeenCalled();

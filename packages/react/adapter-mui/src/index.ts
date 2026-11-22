@@ -157,4 +157,3 @@ export {
   type ExportCsvOptions,
   FILTER_TYPES,
 } from "@adapttable/react/adapter";
-export { type DataModeProps } from "@adapttable/react/adapter";

@@ -66,7 +66,7 @@ pnpm add @adapttable/core @adapttable/mantine @mantine/core @mantine/hooks
 | `enableRowSelection` + `state.rowSelection` + your checkboxes         | `bulkActions([…])` / `selectedIds` / `onSelectionChange`                | —                                                                 |
 | `getExpandedRowModel` + `row.getToggleExpandedHandler()`              | `rowDetail(fn)`                                                         | Toggle UI is provided, not hand-added.                            |
 | `columnVisibility` / `columnOrder` / `columnPinning` state            | `columnMenu()` / `columnLayout`                                         | One built-in menu instead of hand-wired state + DnD.              |
-| `manualSorting` / `manualFiltering` / `manualPagination`              | `onQueryChange` (or `source` via `useQuerySource`)                      | One consolidated server query. See [data tiers](./data-tiers.md). |
+| `manualSorting` / `manualFiltering` / `manualPagination`              | `useServerData` (or `useQuerySource`)                                   | One consolidated server query. See [data tiers](./data-tiers.md). |
 | (serialize state to the URL yourself)                                 | `urlSync` / `urlKey` / `savedViews({ storageKey })`                     | URL sync is on by default; `savedViews()` is opt-in.              |
 
 ## Before / after

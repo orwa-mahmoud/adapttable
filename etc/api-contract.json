@@ -4051,7 +4051,10 @@
       "deferredXlsxWriter",
       "PdfWriterOptions",
       "PrintPageBreak",
-      "PrintPageSize"
+      "PrintPageSize",
+      "serverFilterKeys",
+      "ServerFilterKeys",
+      "ServerFilterKeysInput"
     ],
     "core-editing": [
       "ActionAiOptions",
@@ -5613,7 +5616,8 @@
       "ValidationTarget",
       "withKitEnvironment",
       "ActionAiOptions",
-      "OverlayDismissOptions"
+      "OverlayDismissOptions",
+      "TableQueryHandler"
     ],
     "react-adapter": [
       "ACTIVE_FILTER_CHIPS",
@@ -5774,7 +5778,6 @@
       "createAdapterStandardFeatures",
       "createAdapterTableAssistantFeature",
       "createDesktopRow",
-      "DataModeProps",
       "DataTableShellChromeProps",
       "DataTableShellGroupingPanelProps",
       "DataTableShellProps",

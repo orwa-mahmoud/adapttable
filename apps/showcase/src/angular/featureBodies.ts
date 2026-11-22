@@ -1142,7 +1142,6 @@ class ScaleBody {
             [labels]="presentation.tableLabels"
             [attr.lang]="presentation.locale"
             tableLabel="People"
-            mode="frontend"
             [urlSync]="false"
             [forceMobile]="forceMobile()"
             [features]="features"
@@ -1944,8 +1943,7 @@ class RtlBody {
         <adapt-showcase-table
           tableLabel="Live people"
           [urlSync]="false"
-          mode="frontend"
-          [onQueryChange]="followSort"
+          [onViewChange]="followSort"
           [dir]="presentation.tableDir"
           [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"

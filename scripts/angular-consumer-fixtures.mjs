@@ -202,6 +202,10 @@ const BASE_ABSENT = [
   "coreExportCsv",
   "pdfWriter",
   "xlsxWriter",
+  // A table over `data` carries no server tier.
+  "injectServerData",
+  "createLazyServerSource",
+  "serverQuery",
 ];
 
 /**

@@ -9,6 +9,7 @@ import {
 import { KITS } from "./kits.mjs";
 import {
   PDF_WRITER_MARKER,
+  SERVER_TIER_MARKERS,
   VUE_CONSUMER_SPECS,
   VUE_LAYOUT_GRAPH_SPECS,
   VUE_NATIVE_BASE_SPECS,
@@ -89,6 +90,7 @@ describe("packed Vue consumers", () => {
         XLSX_WRITER_MARKER,
         "export-progress-surface",
         ...VUE_OPTIONAL_BASE_MARKERS,
+        ...SERVER_TIER_MARKERS,
       ]);
       assert.ok(
         vueGraphProblems(entry, {

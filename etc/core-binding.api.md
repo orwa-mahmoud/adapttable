@@ -3225,7 +3225,7 @@ export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => DisplayValu
 export function customEditorConflict(ask: CellConflictAsk | undefined): CustomCellEditorConflict | undefined;
 
 // @public
-export type DataTier = "frontend" | "server" | "source";
+export type DataTier = "frontend" | "source";
 
 // @public
 export const DATE_OP_LABEL_KEYS: {
@@ -8916,7 +8916,7 @@ export interface ResolvedAggregateOperation {
 }
 
 // @public
-export function resolveDataTier(source: unknown, mode: "frontend" | "server" | undefined, onQueryChange: unknown): DataTier;
+export function resolveDataTier(source: unknown): DataTier;
 
 // @public
 export interface ResolvedDensity {
@@ -11291,19 +11291,16 @@ export interface TableDataConfig<TRow> {
     readonly data?: readonly TRow[];
     readonly declaredFilters?: readonly FilterDef<TRow>[];
     readonly engine: FilterEngine | undefined;
-    readonly facetKeys?: readonly string[];
     readonly featureHost?: FeatureHostState;
     readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
     readonly filterTypes?: readonly FilterTypeSpec[];
     readonly locale?: string;
-    readonly mode?: "frontend" | "server";
-    readonly onQueryChange?: TableQueryListener;
+    readonly onViewChange?: TableQueryListener;
     readonly source?: TableSource<TRow>;
 }
 
 // @public
 export interface TableDataPlan<TRow> {
-    readonly facetKeys: readonly string[] | undefined;
     readonly filterFn: ((row: TRow, extra: ExtraFilters) => boolean) | undefined;
     readonly filterKey: string;
     readonly filterTreeFn: ((row: TRow, tree: QueryFilterGroup) => boolean) | undefined;
@@ -12500,7 +12497,7 @@ export function walkFilterTreeConditions(tree: QueryFilterGroup | undefined, pat
 }[];
 
 // @public
-export function warnDataTierMisuse(source: unknown, mode: "frontend" | "server" | undefined, data: unknown, onQueryChange: unknown): void;
+export function warnDataTierMisuse(source: unknown, data: unknown): void;
 
 // @public
 export function watchClickedOpener(doc: Document): ClickedOpener;

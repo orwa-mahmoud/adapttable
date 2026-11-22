@@ -3,10 +3,7 @@ import type {
   ColumnLayoutState,
   ConfirmHandler,
   Direction,
-  FacetMap,
   PaginationMode,
-  QueryAggregate,
-  QuerySupport,
   RowActionsLayout,
   TableErrorState,
   TableLabels,
@@ -314,28 +311,18 @@ export interface DataTableProps<TRow> {
   readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
   readonly onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
   readonly onCellCut?: (range: CellRange) => void;
+  /**
+   * Frontend tier: every row; the table filters, sorts and pages them. A
+   * server table passes a server `source` (`useServerData`) instead.
+   */
   readonly data?: readonly TRow[];
+  /** A prebuilt source: a server source, a query-library source, … */
   readonly source?: TableSource<TRow>;
   /**
-   * `"server"` makes `onQueryChange` fetch the rows; `"frontend"` keeps the
-   * table's own processing and makes `onQueryChange` a notification. Absent:
-   * `data` with `onQueryChange` is server, `data` alone is frontend.
+   * Frontend tier: told of each committed change to page, page size,
+   * search, sort and filters, never of the mount.
    */
-  readonly mode?: "frontend" | "server";
-  /** One consolidated query per change: the server page to fetch, or a notice. */
-  readonly onQueryChange?: TableQueryListener;
-  /** Server tier: the row count across every page. */
-  readonly total?: number;
-  /** Server tier: what the endpoint can answer, such as facet counts. */
-  readonly supports?: QuerySupport;
-  /** Server tier: aggregates the endpoint computes for the query. */
-  readonly aggregates?: readonly QueryAggregate[];
-  /** Server tier: names the response the aggregates belong to. */
-  readonly responseKey?: string;
-  /** Server tier: keys sent as `query.facets`; defaults to every checklist filter. */
-  readonly facetKeys?: readonly string[];
-  /** Server tier: distinct-value counts from the last fetch. */
-  readonly facets?: FacetMap;
+  readonly onViewChange?: TableQueryListener;
   readonly columns: readonly ColumnInput<TRow>[];
   readonly rowKey: (row: TRow) => string;
   readonly features?: readonly FeatureListEntry<

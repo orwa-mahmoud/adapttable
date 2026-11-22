@@ -18,7 +18,7 @@ page lists.
 | ---------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Rows already in memory                               | `data` alone, or `useFrontendData` headless — [data tiers](./data-tiers.md#1-frontend--data) |
 | Rows pushed into memory by a socket or poll          | `data` plus `applyRowPatches` / `useRowPatchStream` — [realtime](./realtime.md)              |
-| A paginated endpoint you call yourself               | `onQueryChange`, or `useServerData` headless                                                 |
+| A paginated endpoint you call yourself               | `useServerData` — [server](./data-tiers.md#2-server--sourceuseserverdata)                    |
 | TanStack Query `useInfiniteQuery`, caching, prefetch | `useQuerySource` — [full control](./data-tiers.md#3-full-control--source)                    |
 
 A hand-rolled source fits when:
@@ -26,7 +26,7 @@ A hand-rolled source fits when:
 - your data layer already speaks its own protocol — a socket that answers
   queries and pushes invalidations, an SDK with its own paging object — and
   mapping it onto the contract is shorter than routing it through
-  `onQueryChange`;
+  `useServerData`'s `onQueryChange`;
 - the view state (page, sort, filters) must live in a store you already own,
   because other parts of the app read and write it;
 - a test or story needs a fixed source with exact flags.
@@ -171,8 +171,8 @@ export function TradesTable() {
 ## How it works
 
 - `source` wins tier resolution: the table uses the object as it is and does
-  no filtering, sorting or paging of its own. Passing `data` or
-  `onQueryChange` alongside it dev-warns.
+  no filtering, sorting or paging of its own. Passing `data` alongside it
+  dev-warns.
 - `useTableUrlState` returns every state field and every setter the contract
   needs (`UseTableUrlStateResult` extends `TableStateMutators`), so spreading
   it covers that half. Pass `urlSync: false` to keep the same state in memory

@@ -5,11 +5,12 @@
  * The scenario's switches become the kit's inputs and its own features, so
  * every Angular kit runs the same assertions against its own controls.
  */
-import type {
-  AdaptTableFeature,
-  CellEditHandler,
-  ColumnDef,
-  RowReorderHandler,
+import {
+  type AdaptTableFeature,
+  type CellEditHandler,
+  type ColumnDef,
+  injectServerData,
+  type RowReorderHandler,
 } from "@adapttable/angular";
 import {
   type ConformanceDriver,
@@ -97,7 +98,27 @@ export function angularConformanceDriver(
       const set = (name: string, value: unknown): void => {
         fixture.componentRef.setInput(name, value);
       };
-      set("data", scenario.rows);
+      const { onQueryChange } = scenario;
+      // A server scenario is served by a server source, as a host builds one.
+      const source = onQueryChange
+        ? TestBed.runInInjectionContext(() =>
+            injectServerData<ConformanceRow>({
+              rows: scenario.rows,
+              total: scenario.total ?? scenario.rows.length,
+              urlSync: false,
+              forceMobile: scenario.mobile ?? false,
+              defaults:
+                scenario.pageSize === undefined
+                  ? undefined
+                  : { limit: scenario.pageSize },
+              onQueryChange: (query, info) => {
+                onQueryChange(query, info);
+              },
+            })
+          )
+        : undefined;
+      if (source) set("source", source);
+      else set("data", scenario.rows);
       set("columns", columnsFor(scenario));
       set("rowKey", (row: ConformanceRow) => row.id);
       set("tableLabel", scenario.tableLabel);
@@ -125,9 +146,7 @@ export function angularConformanceDriver(
                 scenario.isCellFlashing?.(rowId, columnKey) === true
         );
         set("searchPlaceholder", scenario.searchPlaceholder);
-        set("onQueryChange", scenario.onQueryChange);
-        set("total", scenario.total);
-        set("mode", scenario.mode);
+        set("onViewChange", scenario.onViewChange);
         fixture.detectChanges();
       };
       applyScenario();

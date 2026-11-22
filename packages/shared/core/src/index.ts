@@ -340,6 +340,11 @@ export {
   resolveRelativeRange,
   splitRelativeToken,
 } from "./filters/relativeDates";
+export {
+  type ServerFilterKeys,
+  serverFilterKeys,
+  type ServerFilterKeysInput,
+} from "./filters/serverFilterKeys";
 export { FIND_URL_WRITE_DEBOUNCE_MS } from "./find/findController";
 export {
   findMatches,
