@@ -49,6 +49,20 @@ import {
   resolveRowEditTrigger,
   rowEditConflict,
 } from "../editing/rowEditTrigger";
+import { FeatureSlot } from "../features/providers";
+import {
+  COLUMN_GROUP_TOGGLE,
+  COLUMN_HEADER_RENAME,
+  COLUMN_SELECT,
+  EXPAND_TOGGLE,
+  FILL_HANDLE,
+  FILTER_HEADER,
+  GROUP_HEADER_ROW,
+  type GroupHeaderRowSlotProps,
+  ROW_EDIT_ACTIONS,
+  ROW_REORDER_HANDLE,
+  TREE_CELL,
+} from "../features/slotKeys";
 import {
   createDesktopRow,
   type DesktopHeaderLeaf,
@@ -65,19 +79,7 @@ import { REORDER_COLUMN_WIDTH } from "../rows/rowReorder";
 import type { SharedTableRenderProps } from "../tableRenderProps";
 import type { SortButtonElementProps } from "../useDataTable/useDataTable";
 import { ColumnSpacer } from "../virtual/ColumnSpacer";
-import {
-  OptionalColumnGroupToggle,
-  OptionalColumnHeaderRename,
-  OptionalColumnSelect,
-  OptionalEditableCell,
-  OptionalExpandToggle,
-  OptionalFillHandle,
-  OptionalFilterHeader,
-  OptionalGroupHeaderRow,
-  OptionalRowEditActions,
-  OptionalRowReorderHandle,
-  OptionalTreeCell,
-} from "./featureSlots";
+import { CellContent } from "./featureSlots";
 import { type KitUsePartClass, noPartClass } from "./partClass";
 import type { KitCheckboxProps, KitDataAttributes } from "./primitives";
 
@@ -478,13 +480,16 @@ export function createDesktopTable<TExtra>(
               data-pinned={pinnedSide("start", hasStartPin)}
               style={rail("start", hasStartPin, railInsets.expand)}
             >
-              <OptionalExpandToggle
-                id={id}
-                expanded={expanded}
-                onToggle={onToggleExpand}
-                dir={dir}
-                expandLabel={labels.expandRow}
-                collapseLabel={labels.collapseRow}
+              <FeatureSlot
+                slot={EXPAND_TOGGLE}
+                props={{
+                  id,
+                  expanded,
+                  onToggle: onToggleExpand,
+                  dir,
+                  expandLabel: labels.expandRow,
+                  collapseLabel: labels.collapseRow,
+                }}
               />
             </Cell>
           )}
@@ -499,15 +504,18 @@ export function createDesktopTable<TExtra>(
                 railInsets.reorder
               )}
             >
-              <OptionalRowReorderHandle
-                reorder={rowReorder}
-                labels={labels}
-                rowId={id}
-                localIndex={index}
-                row={row}
-                windowStart={windowStart}
-                rowCount={rowCount}
-                className={classOf("row-reorder-handle")}
+              <FeatureSlot
+                slot={ROW_REORDER_HANDLE}
+                props={{
+                  reorder: rowReorder,
+                  labels,
+                  rowId: id,
+                  localIndex: index,
+                  row,
+                  windowStart,
+                  rowCount,
+                  className: classOf("row-reorder-handle"),
+                }}
               />
             </Cell>
           )}
@@ -535,6 +543,20 @@ export function createDesktopTable<TExtra>(
               columnIndex
             );
             const cellProps = table.getCellProps(column as ColumnDef<TRow>);
+            const content = (
+              <CellContent
+                editing={editing}
+                row={row}
+                column={column as ColumnDef<TRow>}
+                rowId={id}
+                rowIndex={focusIndex}
+                rows={rows}
+                columns={columns}
+                rowKey={getRowId}
+                editLabel={labels.editCell}
+                undoLabel={labels.undoEdit}
+              />
+            );
             return (
               <Cell
                 key={column.key}
@@ -562,36 +584,31 @@ export function createDesktopTable<TExtra>(
                   cellSpanAppearance
                 )}
               >
-                <OptionalTreeCell
-                  entry={treeEntry}
-                  columnKey={column.key}
-                  treeColumnKey={treeColumnKey}
-                  labels={{
-                    expandRow: labels.expandRow,
-                    collapseRow: labels.collapseRow,
+                <FeatureSlot
+                  slot={TREE_CELL}
+                  props={{
+                    entry: treeEntry,
+                    columnKey: column.key,
+                    treeColumnKey,
+                    labels: {
+                      expandRow: labels.expandRow,
+                      collapseRow: labels.collapseRow,
+                    },
+                    onToggle: onToggleTree,
+                    className: classOf("tree-cell"),
+                    toggleClassName: classOf("tree-toggle"),
+                    spacerClassName: classOf("tree-spacer"),
+                    children: content,
                   }}
-                  onToggle={onToggleTree}
-                  className={classOf("tree-cell")}
-                  toggleClassName={classOf("tree-toggle")}
-                  spacerClassName={classOf("tree-spacer")}
-                >
-                  <OptionalEditableCell
-                    editing={editing}
-                    row={row}
-                    column={column as ColumnDef<TRow>}
-                    rowId={id}
-                    rowIndex={focusIndex}
-                    rows={rows}
-                    columns={columns}
-                    rowKey={getRowId}
-                    editLabel={labels.editCell}
-                    undoLabel={labels.undoEdit}
-                  />
-                </OptionalTreeCell>
-                <OptionalFillHandle
-                  focus={gridFocus}
-                  windowIndex={focusIndex}
-                  col={columnIndex}
+                  fallback={content}
+                />
+                <FeatureSlot
+                  slot={FILL_HANDLE}
+                  props={{
+                    focus: gridFocus,
+                    windowIndex: focusIndex,
+                    col: columnIndex,
+                  }}
                 />
               </Cell>
             );
@@ -611,17 +628,20 @@ export function createDesktopTable<TExtra>(
               )}
             >
               {editing?.rowEditing && (
-                <OptionalRowEditActions
-                  rowEditing={editing.rowEditing}
-                  row={row}
-                  rowId={id}
-                  showBegin={rowEdit.showBegin}
-                  icons={editing.rowEditIcons}
-                  conflict={rowEditConflict(editing, id)}
-                  labels={{
-                    editRow: labels.editRow,
-                    saveRow: labels.saveRow,
-                    cancel: labels.cancel,
+                <FeatureSlot
+                  slot={ROW_EDIT_ACTIONS}
+                  props={{
+                    rowEditing: editing.rowEditing,
+                    row,
+                    rowId: id,
+                    showBegin: rowEdit.showBegin,
+                    icons: editing.rowEditIcons,
+                    conflict: rowEditConflict(editing, id),
+                    labels: {
+                      editRow: labels.editRow,
+                      saveRow: labels.saveRow,
+                      cancel: labels.cancel,
+                    },
                   }}
                 />
               )}
@@ -717,24 +737,30 @@ export function createDesktopTable<TExtra>(
       >
         <div style={paint.captionRow?.(column.align) ?? CAPTION_ROW}>
           {column.renameable === true && props.onRenameColumn ? (
-            <OptionalColumnHeaderRename
-              columnKey={column.key}
-              name={leaf.columnName}
-              labels={labels}
-              onRenameColumn={props.onRenameColumn}
-            >
-              {control}
-            </OptionalColumnHeaderRename>
+            <FeatureSlot
+              slot={COLUMN_HEADER_RENAME}
+              props={{
+                columnKey: column.key,
+                name: leaf.columnName,
+                labels,
+                onRenameColumn: props.onRenameColumn,
+                children: control,
+              }}
+              fallback={control}
+            />
           ) : (
             control
           )}
         </div>
         {leaf.showColumnCheckbox && leaf.onToggleColumn ? (
-          <OptionalColumnSelect
-            label={leaf.columnSelectAriaLabel}
-            checked={leaf.columnCheckboxChecked}
-            onToggle={leaf.onToggleColumn}
-            className={classOf("column-select")}
+          <FeatureSlot
+            slot={COLUMN_SELECT}
+            props={{
+              label: leaf.columnSelectAriaLabel,
+              checked: leaf.columnCheckboxChecked,
+              onToggle: leaf.onToggleColumn,
+              className: classOf("column-select"),
+            }}
           />
         ) : null}
         {column.headerActions ? (
@@ -746,12 +772,15 @@ export function createDesktopTable<TExtra>(
           </span>
         ) : null}
         {leaf.headerDef ? (
-          <OptionalFilterHeader
-            def={leaf.headerDef}
-            source={props.table.source}
-            labels={labels}
-            registry={props.filterRegistry}
-            closeOnSelect={props.closeHeaderFilterOnSelect}
+          <FeatureSlot
+            slot={FILTER_HEADER}
+            props={{
+              def: leaf.headerDef,
+              source: props.table.source,
+              labels,
+              registry: props.filterRegistry,
+              closeOnSelect: props.closeHeaderFilterOnSelect,
+            }}
           />
         ) : null}
         {leaf.resizeHandleProps && (
@@ -922,11 +951,14 @@ export function createDesktopTable<TExtra>(
             >
               <span style={groupedHeaderLabelStyle()}>
                 {props.onToggleColumnGroup ? (
-                  <OptionalColumnGroupToggle
-                    cell={cell.cell}
-                    labels={labels}
-                    onToggle={props.onToggleColumnGroup}
-                    className={classOf("column-group-toggle")}
+                  <FeatureSlot
+                    slot={COLUMN_GROUP_TOGGLE}
+                    props={{
+                      cell: cell.cell,
+                      labels,
+                      onToggle: props.onToggleColumnGroup,
+                      className: classOf("column-group-toggle"),
+                    }}
                   />
                 ) : null}
                 {columnGroupHeaderCaption(cell.cell)}
@@ -944,17 +976,22 @@ export function createDesktopTable<TExtra>(
           />
         )}
         renderGroup={(slot) => (
-          <OptionalGroupHeaderRow
+          <FeatureSlot
             key={slot.key}
-            entry={slot.entry}
-            columns={columns}
-            leadingCells={model.leadingCells}
-            showActions={showActions}
-            getCellProps={props.table.getCellProps}
-            selection={selection}
-            labels={labels}
-            onToggleCollapse={callbacks.onToggleGroup}
-            onShowMore={props.grouping?.showMore ?? NO_MORE}
+            slot={GROUP_HEADER_ROW}
+            props={
+              {
+                entry: slot.entry,
+                columns,
+                leadingCells: model.leadingCells,
+                showActions,
+                getCellProps: props.table.getCellProps,
+                selection,
+                labels,
+                onToggleCollapse: callbacks.onToggleGroup,
+                onShowMore: props.grouping?.showMore ?? NO_MORE,
+              } satisfies GroupHeaderRowSlotProps<TRow> as unknown as GroupHeaderRowSlotProps<unknown>
+            }
           />
         )}
         renderExtra={(slot) => {

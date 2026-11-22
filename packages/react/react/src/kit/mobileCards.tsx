@@ -25,7 +25,15 @@ import {
   resolveRowEditTrigger,
   rowEditConflict,
 } from "../editing/rowEditTrigger";
-import type { GroupHeaderCardSlotProps } from "../features/slotKeys";
+import { FeatureSlot } from "../features/providers";
+import {
+  EXPAND_TOGGLE,
+  GROUP_HEADER_CARD,
+  type GroupHeaderCardSlotProps,
+  ROW_EDIT_ACTIONS,
+  ROW_REORDER_BUTTONS,
+  TREE_TOGGLE,
+} from "../features/slotKeys";
 import {
   MobileCardsChrome,
   type MobileCardsChromeProps,
@@ -42,14 +50,7 @@ import {
   useSummaryCells,
 } from "../tableRenderProps";
 import { mobileCardRegionProps } from "../virtual/mobileCardRegion";
-import {
-  OptionalEditableCell,
-  OptionalExpandToggle,
-  OptionalGroupHeaderCard,
-  OptionalRowEditActions,
-  OptionalRowReorderButtons,
-  OptionalTreeToggle,
-} from "./featureSlots";
+import { CellContent } from "./featureSlots";
 import { MobileTarget } from "./mobileTarget";
 import { type KitUsePartClass, noPartClass } from "./partClass";
 import type { KitDataAttributes } from "./primitives";
@@ -65,12 +66,16 @@ function groupCardOf<TRow>(
   >
 ): MobileCardSlotKit<TRow>["groupCard"] {
   return function GroupCard(entry, grouping) {
+    const props: GroupHeaderCardSlotProps<TRow> = {
+      entry,
+      ...shared,
+      onToggleCollapse: (groupKey) => grouping.collapsed.toggle(groupKey),
+      onShowMore: grouping.showMore,
+    };
     return (
-      <OptionalGroupHeaderCard
-        entry={entry}
-        {...shared}
-        onToggleCollapse={(groupKey) => grouping.collapsed.toggle(groupKey)}
-        onShowMore={grouping.showMore}
+      <FeatureSlot
+        slot={GROUP_HEADER_CARD}
+        props={props as unknown as GroupHeaderCardSlotProps<unknown>}
       />
     );
   };
@@ -301,7 +306,7 @@ export function createMobileCards<TExtra>(
       column,
       label: resolveMobileLabel(column),
       value: (
-        <OptionalEditableCell
+        <CellContent
           // Built inside the map, so it needs its own key: React reads these
           // as a list even though a card renders them one at a time.
           key={column.key}
@@ -360,12 +365,15 @@ export function createMobileCards<TExtra>(
           compact={compact}
           tree={
             treeEntry ? (
-              <OptionalTreeToggle
-                entry={treeEntry}
-                labels={labels}
-                onToggle={onToggleTree ?? NO_TREE_TOGGLE}
-                toggleClassName={classOf("tree-toggle")}
-                spacerClassName={classOf("tree-spacer")}
+              <FeatureSlot
+                slot={TREE_TOGGLE}
+                props={{
+                  entry: treeEntry,
+                  labels,
+                  onToggle: onToggleTree ?? NO_TREE_TOGGLE,
+                  toggleClassName: classOf("tree-toggle"),
+                  spacerClassName: classOf("tree-spacer"),
+                }}
               />
             ) : null
           }
@@ -380,42 +388,51 @@ export function createMobileCards<TExtra>(
           }
           expand={
             onToggleExpand ? (
-              <OptionalExpandToggle
-                id={id}
-                expanded={expanded}
-                onToggle={onToggleExpand}
-                dir={dir}
-                expandLabel={labels.expandRow}
-                collapseLabel={labels.collapseRow}
+              <FeatureSlot
+                slot={EXPAND_TOGGLE}
+                props={{
+                  id,
+                  expanded,
+                  onToggle: onToggleExpand,
+                  dir,
+                  expandLabel: labels.expandRow,
+                  collapseLabel: labels.collapseRow,
+                }}
               />
             ) : null
           }
           body={body}
           reorder={
             rowReorder ? (
-              <OptionalRowReorderButtons
-                reorder={rowReorder}
-                labels={labels}
-                localIndex={index}
-                row={row}
-                windowStart={windowStart}
-                rowCount={rowCount}
-                className={classOf("row-reorder-buttons")}
-                upClassName={classOf("row-reorder-up")}
-                downClassName={classOf("row-reorder-down")}
+              <FeatureSlot
+                slot={ROW_REORDER_BUTTONS}
+                props={{
+                  reorder: rowReorder,
+                  labels,
+                  localIndex: index,
+                  row,
+                  windowStart,
+                  rowCount,
+                  className: classOf("row-reorder-buttons"),
+                  upClassName: classOf("row-reorder-up"),
+                  downClassName: classOf("row-reorder-down"),
+                }}
               />
             ) : null
           }
           rowEdit={
             editing?.rowEditing ? (
-              <OptionalRowEditActions
-                rowEditing={editing.rowEditing}
-                row={row}
-                rowId={id}
-                showBegin={rowEdit.showBegin}
-                icons={editing.rowEditIcons}
-                conflict={rowEditConflict(editing, id)}
-                labels={labels}
+              <FeatureSlot
+                slot={ROW_EDIT_ACTIONS}
+                props={{
+                  rowEditing: editing.rowEditing,
+                  row,
+                  rowId: id,
+                  showBegin: rowEdit.showBegin,
+                  icons: editing.rowEditIcons,
+                  conflict: rowEditConflict(editing, id),
+                  labels,
+                }}
               />
             ) : null
           }

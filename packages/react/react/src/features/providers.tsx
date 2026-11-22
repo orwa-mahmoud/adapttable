@@ -285,17 +285,19 @@ type RenderMap = ReadonlyMap<string, readonly SlotFill<ReactNode>[]>;
 const FeatureRenderContext = createContext<RenderMap>(new Map());
 
 /**
- * Draw whatever features contributed to one slot, or nothing.
+ * Draw whatever features contributed to one slot, or `fallback`.
  *
  * Nothing is the ordinary answer: a table without the feature has no control
  * there, and the surrounding chrome renders as though the position did not
- * exist.
+ * exist. A position the table draws either way — a cell's content, which a
+ * feature may replace — passes what it draws without one as `fallback`.
  *
  * @public
  */
 export function FeatureSlot<TProps>(props: {
   readonly slot: PlainSlotKey<TProps>;
   readonly props: TProps;
+  readonly fallback?: ReactNode;
 }): ReactNode;
 /**
  * Draw every fill of a row-typed slot with this table's props.
@@ -305,19 +307,26 @@ export function FeatureSlot<TProps>(props: {
 export function FeatureSlot<TProps>(props: {
   readonly slot: RowSlotKey<(props: NoInfer<TProps>) => ReactNode>;
   readonly props: TProps;
+  readonly fallback?: ReactNode;
 }): ReactNode;
 export function FeatureSlot({
   slot,
   props,
+  fallback = null,
 }: {
   readonly slot: FeatureSlotKey<never>;
   readonly props: unknown;
+  readonly fallback?: ReactNode;
 }): ReactNode {
   const filled = useContext(FeatureRenderContext).get(slot.id);
-  if (!filled) return null;
-  return drawnSlotFills(slot, filled).map(({ id, render }) => (
-    <Fragment key={id}>{(render as (p: unknown) => ReactNode)(props)}</Fragment>
-  ));
+  const node: ReactNode = filled
+    ? drawnSlotFills(slot, filled).map(({ id, render }) => (
+        <Fragment key={id}>
+          {(render as (p: unknown) => ReactNode)(props)}
+        </Fragment>
+      ))
+    : fallback;
+  return node;
 }
 
 /**

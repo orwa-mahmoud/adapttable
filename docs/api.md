@@ -3089,15 +3089,15 @@ scrolls. The frame receives the table's `density`, and the skeleton renderer a
 `KitSkeletonShape`: whether the body will be cards and whether rows have
 actions.
 
-A kit's desktop table and mobile cards name each optional control through
-its slot wrapper, so a table that omits the feature omits the component:
-`OptionalEditableCell` (which shows `cellDisplay(column, row, rowIndex)` when
-no feature edits cells), `OptionalTreeCell`, `OptionalTreeToggle`,
-`OptionalFillHandle`, `OptionalExpandToggle`, `OptionalFilterHeader`,
-`OptionalRowEditActions`, `OptionalRowReorderHandle`,
-`OptionalRowReorderButtons`, `OptionalColumnGroupToggle`,
-`OptionalColumnHeaderRename`, `OptionalColumnSelect`, `OptionalGroupHeaderRow`
-and `OptionalGroupHeaderCard`.
+A kit's desktop table and mobile cards draw each optional control with
+`FeatureSlot` and its slot key (`TREE_CELL`, `TREE_TOGGLE`, `FILL_HANDLE`,
+`EXPAND_TOGGLE`, `FILTER_HEADER`, `ROW_EDIT_ACTIONS`, `ROW_REORDER_HANDLE`,
+`ROW_REORDER_BUTTONS`, `COLUMN_GROUP_TOGGLE`, `COLUMN_HEADER_RENAME`,
+`COLUMN_SELECT`, `GROUP_HEADER_ROW`, `GROUP_HEADER_CARD`), so a table that omits
+the feature omits the component; `fallback` is what the position draws when no
+feature fills it. `CellContent` draws a body cell's content:
+`cellDisplay(column, row, rowIndex)`, or the editable cell a composed editing
+feature puts in its place.
 
 `createColumnMenu(kit, useLook)` returns the Columns menu drawn with a kit's
 button, icon button, text input, select, popover, text and divider

@@ -46339,6 +46339,14 @@
       "behavior": ""
     },
     {
+      "export": "CellContent",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "cellDisplay",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -50155,119 +50163,7 @@
       "behavior": ""
     },
     {
-      "export": "OptionalColumnGroupToggle",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "OptionalColumnHeaderRename",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "OptionalColumnSelect",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "OptionalEditableCell",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "OptionalExpandToggle",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "OptionalFillHandle",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "OptionalFilterHeader",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "OptionalGroupHeaderCard",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "OptionalGroupHeaderRow",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "OptionalRowEditActions",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "OptionalRowReorderButtons",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "OptionalRowReorderHandle",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
       "export": "OptionalSidePanel",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "OptionalTreeCell",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "OptionalTreeToggle",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "react-chrome",

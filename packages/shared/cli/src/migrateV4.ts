@@ -210,6 +210,14 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
     SERVER_SOURCE_PROP,
   ],
   [
+    /\bOptionalEditableCell\b/g,
+    "OptionalEditableCell was renamed CellContent.",
+  ],
+  [
+    /\bOptional(?:TreeCell|TreeToggle|FillHandle|ExpandToggle|FilterHeader|RowEditActions|RowReorderHandle|RowReorderButtons|ColumnGroupToggle|ColumnHeaderRename|ColumnSelect|GroupHeaderRow|GroupHeaderCard)\b/g,
+    "The Optional* cell wrappers were removed; draw the position with <FeatureSlot slot={…} props={…} fallback={…} /> and its slot key.",
+  ],
+  [
     /\bCHROME_EXTRA_SLOT_ORDER\b/g,
     'CHROME_EXTRA_SLOT_ORDER was removed; chrome stages declare what they read and write, and liveStagesOf(features, "chrome") orders them.',
   ],

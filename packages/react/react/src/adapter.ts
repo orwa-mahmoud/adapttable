@@ -598,23 +598,7 @@ export {
   type KitDesktopTableProps,
   type KitSortLabelProps,
 } from "./kit/desktopTable";
-export {
-  cellDisplay,
-  OptionalColumnGroupToggle,
-  OptionalColumnHeaderRename,
-  OptionalColumnSelect,
-  OptionalEditableCell,
-  OptionalExpandToggle,
-  OptionalFillHandle,
-  OptionalFilterHeader,
-  OptionalGroupHeaderCard,
-  OptionalGroupHeaderRow,
-  OptionalRowEditActions,
-  OptionalRowReorderButtons,
-  OptionalRowReorderHandle,
-  OptionalTreeCell,
-  OptionalTreeToggle,
-} from "./kit/featureSlots";
+export { CellContent, cellDisplay } from "./kit/featureSlots";
 export {
   createGroupHeader,
   type KitGroupCardProps,

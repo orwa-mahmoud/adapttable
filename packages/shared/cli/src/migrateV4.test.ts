@@ -150,6 +150,20 @@ describe("migrateV4Source", () => {
     expect(result.issues[1]?.message).toContain("EDIT_HISTORY_STAGE");
   });
 
+  it("reports the cell wrappers with their replacements", () => {
+    const result = migrateV4Source(
+      [
+        "<OptionalEditableCell {...cell} />;",
+        "<OptionalTreeToggle {...toggle} />;",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.message)).toEqual([
+      expect.stringContaining("CellContent"),
+      expect.stringContaining("FeatureSlot"),
+    ]);
+  });
+
   it("leaves a file that uses nothing v4 moved untouched", () => {
     const source = 'import { DataTable } from "@adapttable/mui";\n';
     expect(migrateV4Source(source)).toEqual({
