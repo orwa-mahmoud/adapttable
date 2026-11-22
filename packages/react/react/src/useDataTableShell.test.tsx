@@ -73,6 +73,27 @@ function renderLiveShell(
   return renderShellWith(props, renderForm);
 }
 
+describe("row reorder on the finished shell", () => {
+  it("keeps row reorder armed when grouping is composed", () => {
+    resetDevWarnings();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      const plain = renderLiveShell([rowReorder(vi.fn())]);
+      expect(plain.current.hasRowReorder).toBe(true);
+      expect(plain.current.tableProps.rowReorder).toBeDefined();
+      const grouped = renderLiveShell([rowReorder(vi.fn()), grouping("name")], {
+        groupBy: "name",
+      });
+      expect(grouped.current.hasRowReorder).toBe(true);
+      expect(grouped.current.tableProps.rowReorder).toBeDefined();
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+      resetDevWarnings();
+    }
+  });
+});
+
 describe("persisted column names enter both shell forks", () => {
   it("renames display/mobile columns and column-derived filter labels", () => {
     let filterLabel: string | undefined;

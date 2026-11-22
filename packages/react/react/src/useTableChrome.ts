@@ -10,7 +10,6 @@ import {
   clearSearchAndFilters as clearSearchAndFiltersOf,
   defaultConfirm,
   responsiveColumns,
-  rowReorderEnablement,
   selectionObserverIds,
   tableErrorState,
 } from "@adapttable/core/binding";
@@ -32,7 +31,6 @@ import { useEventCallback } from "./hooks/useEventCallback";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useElementWidth } from "./layout/useElementWidth";
 import type { ComposedTableProps } from "./props";
-import type { RowReorderState } from "./rows/rowReorder";
 import { useDataTable } from "./useDataTable/useDataTable";
 
 export type { EditHistoryState } from "./editing/editHistory";
@@ -221,19 +219,9 @@ export function useTableChrome<TRow>(
 
   // See TableChrome.editingRows — extras overlay the grouped leaf set.
 
-  // Reorder publishes one engine for flat, grouped and tree rows. Nested
-  // models resolve visual targets into sibling reorders or explicit host move
-  // callbacks; they never splice the flat render list.
-  // The feature owns the hook; this reads what its provider published. A table
-  // that never imported `@adapttable/<kit>/row-reorder` gets `undefined` here
-  // and never carries the drag state machine at all.
-  const publishedReorder = useFeatureState(ROW_REORDER) as
-    RowReorderState<TRow> | undefined;
-  const { hasRowReorder, rowReorder } = rowReorderEnablement(
-    publishedReorder,
-    columnLayout.isHidden
-  );
-  const requestedReorder = hasRowReorder;
+  // Whether row reorder is composed, for its notices; the shell reads the
+  // reorder state the feature published.
+  const requestedReorder = useFeatureState(ROW_REORDER) !== undefined;
 
   const resolvedPinnedRows = resolvePinnedRows(props.pinnedRows);
   const pinnedRows =
@@ -322,8 +310,6 @@ export function useTableChrome<TRow>(
     isRefreshing,
     clearFilters,
     clearSearchAndFilters,
-    hasRowReorder,
-    rowReorder,
     pinnedRows,
     editingRows,
     showFooter,

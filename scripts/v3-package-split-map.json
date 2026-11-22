@@ -48853,8 +48853,8 @@
     {
       "export": "GROUPING_PANEL_VIEW_STATE",
       "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -50476,6 +50476,14 @@
     },
     {
       "export": "ROW_PINNING_STATE",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "ROW_REORDER",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",

@@ -230,8 +230,6 @@ export function LiveGrouping<TRow>({
     ...chrome,
     source: viewSource,
     editingRows: viewSource.rows,
-    hasRowReorder: chrome.hasRowReorder,
-    rowReorder: chrome.rowReorder,
     table: {
       ...chrome.table,
       pagination: computePagination({

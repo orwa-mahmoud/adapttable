@@ -10,7 +10,6 @@ import { type RefObject } from "react";
 
 import type { ColumnDef } from "../columnDef";
 import type { ReactUseColumnLayoutResult } from "../columns/useColumnLayout";
-import type { RowReorderState } from "../rows/rowReorder";
 import { type UseDataTableResult } from "../useDataTable/useDataTable";
 
 /**
@@ -84,17 +83,6 @@ export interface TableChrome<TRow> {
    * matched nothing.
    */
   clearSearchAndFilters: () => void;
-  /**
-   * Whether a reorder column exists at all, hidden or not — what the column
-   * menu offers. Grouped and tree models keep it armed and resolve sibling
-   * reorder separately from cross-boundary moves.
-   */
-  hasRowReorder: boolean;
-  /**
-   * Headless row-reorder state. Present iff the row-reorder feature is composed,
-   * grouping/tree are off, and the column is visible. Adapters read THIS.
-   */
-  rowReorder?: RowReorderState<TRow>;
   /**
    * Host-owned summary objects stuck above and below the scroll body.
    * Present iff `pinnedSummaryRows` was composed with at least one row.

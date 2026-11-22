@@ -1793,6 +1793,7 @@ function AntdViewBody<TRow>({
   const hasColumnHeaderRename = useFeatureSlotFilled(COLUMN_HEADER_RENAME);
   const { windowStart, cardSetSize } = antdWindowOf(c);
   const rowActions = view.tableProps.rowActions;
+  const rowReorder = view.tableProps.rowReorder;
   const hasRowActions = rowActions !== undefined;
   const virtualBody = antdVirtualBody(props, c, grouped);
   const inScrollBox =
@@ -1802,7 +1803,7 @@ function AntdViewBody<TRow>({
     source,
     virtualBody && !c.isPaged && !source.error
   );
-  const reorderIndices = c.rowReorder
+  const reorderIndices = rowReorder
     ? new Map(
         renderedRowsOf({ source: c.source, grouping: grouped, tree }).map(
           (row, index) => [getRowId(row), index]
@@ -1849,7 +1850,7 @@ function AntdViewBody<TRow>({
     renderRowDetail: props.renderRowDetail,
     expansion: view.tableProps.expansion,
     editing: view.tableProps.editing,
-    rowReorder: c.rowReorder,
+    rowReorder,
     pinnedTopRows,
     pinnedBottomRows,
     pinnedSummaryTop,
@@ -1909,7 +1910,7 @@ function AntdViewBody<TRow>({
     collapsedColumnGroups: c.columnLayout.state.collapsedGroups,
     columnGroups: c.columnGroups,
     onToggleColumnGroup: c.columnLayout.toggleColumnGroup,
-    rowReorder: c.rowReorder,
+    rowReorder,
     reorderIndices,
     windowStart,
     cellsByRow,
@@ -1935,7 +1936,7 @@ function AntdViewBody<TRow>({
     c.columnLayout.state.widths,
     Boolean(table.selection),
     hasRowActions,
-    Boolean(c.rowReorder)
+    Boolean(rowReorder)
   );
   const handleChange = sortChangeHandler(source);
   const rowSelection = buildRowSelection(
@@ -1957,7 +1958,7 @@ function AntdViewBody<TRow>({
   const summary = buildSummary(
     chromeProps.summaryRow,
     table.columns,
-    summaryLeadingCells(rowSelection, expandable, Boolean(c.rowReorder)),
+    summaryLeadingCells(rowSelection, expandable, Boolean(rowReorder)),
     hasRowActions
   );
   const sticky: TableProps<unknown>["sticky"] = props.stickyHeader
@@ -2041,7 +2042,7 @@ function AntdViewBody<TRow>({
             minWidth={minWidth}
             hasPinned={hasPinned}
             hasRowActions={hasRowActions}
-            rowReorder={c.rowReorder}
+            rowReorder={rowReorder}
             reorderIndices={reorderIndices}
             windowStart={windowStart}
             cardSetSize={cardSetSize}

@@ -4291,6 +4291,9 @@ export { ROW_ID_ATTRIBUTE }
 // @public
 export const ROW_PINNING_STATE: FeatureStateKey<RowPinningState<unknown>>;
 
+// @public
+export const ROW_REORDER: FeatureStateKey<RowReorderState<unknown>>;
+
 export { ROW_REORDER_ANNOUNCER }
 
 // @public
@@ -4950,13 +4953,11 @@ export interface TableChrome<TRow> {
     errorState?: TableErrorState;
     featureNotices: readonly FeatureNotice[];
     getRowId: (row: TRow) => string;
-    hasRowReorder: boolean;
     isMobile: boolean;
     isPaged: boolean;
     isRefreshing: boolean;
     pinnedRows?: PinnedRows<TRow>;
     rootRef: RefObject<HTMLDivElement | null>;
-    rowReorder?: RowReorderState<TRow>;
     showFooter: boolean;
     source: TableSource<TRow>;
     table: UseDataTableResult<TRow>;

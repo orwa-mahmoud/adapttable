@@ -1,7 +1,7 @@
 import { buildTableCsv } from "@adapttable/core";
 import { resetDevWarnings } from "@adapttable/core/binding";
 import { act, render, renderHook } from "@testing-library/react";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { printToolbar, undoRedoToolbar } from "./chrome/toolbarChrome";
@@ -16,7 +16,6 @@ import { groupingPanel } from "./features/grouping-panel";
 import { FeatureProviders } from "./features/providers";
 import { rowActions } from "./features/row-actions";
 import { rowPinning } from "./features/row-pinning";
-import { rowReorder } from "./features/row-reorder";
 import {
   FILTER_CHIPS_STATE,
   GROUPING_PANEL_VIEW_STATE,
@@ -505,71 +504,6 @@ describe("useTableChrome", () => {
           onCellEdit: vi.fn(),
         };
       });
-      expect(warn).not.toHaveBeenCalled();
-    } finally {
-      warn.mockRestore();
-      resetDevWarnings();
-    }
-  });
-
-  it("keeps row reorder armed when grouping is composed", () => {
-    resetDevWarnings();
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    try {
-      // The chrome no longer builds the reorder state; it reads what the
-      // feature's provider published, which is why this needs the provider.
-      const composed = applyTableFeatures({
-        features: [rowReorder(vi.fn())],
-      });
-      const wrapper = ({ children }: { children: ReactNode }) => (
-        <FeatureProviders props={composed}>{children}</FeatureProviders>
-      );
-      const chrome = (
-        extra: Partial<Parameters<typeof useTableChrome<Row>>[0]>
-      ) =>
-        renderHook(
-          () => {
-            const source = useFrontendData<Row>({
-              data: ROWS,
-              urlAdapter: createMemoryAdapter(""),
-              columns,
-              paginationMode: "paged",
-            });
-            return useTableChrome<Row>({
-              source,
-              columns,
-              rowKey: (r) => r.id,
-              ...extra,
-            });
-          },
-          { wrapper }
-        );
-
-      const { result } = chrome({});
-      expect(result.current.hasRowReorder).toBe(true);
-      expect(result.current.rowReorder).toBeDefined();
-
-      warn.mockClear();
-      resetDevWarnings();
-      const grouped = renderLiveChrome(
-        [rowReorder(vi.fn()), grouping("name")],
-        () => {
-          const source = useFrontendData<Row>({
-            data: ROWS,
-            urlAdapter: createMemoryAdapter(""),
-            columns,
-            paginationMode: "paged",
-          });
-          return {
-            source,
-            columns,
-            rowKey: (r: Row) => r.id,
-            groupBy: "name",
-          };
-        }
-      );
-      expect(grouped.result.current.hasRowReorder).toBe(true);
-      expect(grouped.result.current.rowReorder).toBeDefined();
       expect(warn).not.toHaveBeenCalled();
     } finally {
       warn.mockRestore();

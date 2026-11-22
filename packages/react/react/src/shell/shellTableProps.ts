@@ -19,6 +19,7 @@ import type { RefCallback } from "react";
 
 import type { TableChrome } from "../chrome/tableChromeContract";
 import { disabledGridFocus } from "../features/shellLiveStubs";
+import type { RowReorderState } from "../rows/rowReorder";
 import type { ChromeBodyData } from "../virtual/chromeBodyShared";
 import type {
   DataTableShellChromeProps,
@@ -46,7 +47,8 @@ export function shellTableProps<TRow>(
   chrome: TableChrome<TRow>,
   columnWindow: DataTableShellTableProps<TRow>["columnWindow"],
   runtime: FilterRuntime<TRow>,
-  nameScrollBox: RefCallback<HTMLElement>
+  nameScrollBox: RefCallback<HTMLElement>,
+  rowReorder: RowReorderState<TRow> | undefined
 ): DataTableShellTableProps<TRow> {
   const windowStart = sourceWindowStart(chrome.source);
   const { pinned } = chrome.columnLayout.state;
@@ -57,7 +59,7 @@ export function shellTableProps<TRow>(
     rowActionsLayout: props.rowActionsLayout,
     renderRowActions: props.renderRowActions,
     actionsPinned: pinned[ACTIONS_COLUMN_KEY] === "end",
-    rowReorder: chrome.rowReorder,
+    rowReorder,
     reorderPinned: pinned[REORDER_COLUMN_KEY] === "start",
     pinnedTopRows: [] as readonly TRow[],
     pinnedBottomRows: [] as readonly TRow[],

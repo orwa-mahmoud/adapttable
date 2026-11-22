@@ -320,6 +320,7 @@ export {
   usePublishTableRuntime,
   useTableRuntime,
 } from "./features/providers";
+export { ROW_REORDER } from "./features/rowReorderKey";
 export { ShellLiveGate } from "./features/shellLiveGate";
 export {
   DISABLED_EXPORT,

@@ -930,13 +930,11 @@ export interface TableChrome<TRow> {
     errorState?: TableErrorState;
     featureNotices: readonly FeatureNotice[];
     getRowId: (row: TRow) => string;
-    hasRowReorder: boolean;
     isMobile: boolean;
     isPaged: boolean;
     isRefreshing: boolean;
     pinnedRows?: PinnedRows<TRow>;
     rootRef: RefObject<HTMLDivElement | null>;
-    rowReorder?: TableRowReorderState<TRow>;
     showFooter: boolean;
     source: TableSource<TRow>;
     table: UseDataTableResult<TRow>;

@@ -10,6 +10,7 @@ import {
   createTableStore,
   finishShellBody,
   resolveTableLabels,
+  rowReorderEnablement,
   sortedColumnName,
 } from "@adapttable/core/binding";
 import {
@@ -33,6 +34,8 @@ import {
   rememberFeatureHost,
   useTableFeatures,
 } from "./features/featureHost";
+import { useFeatureState } from "./features/featureState";
+import { ROW_REORDER } from "./features/rowReorderKey";
 import {
   DISABLED_FIND,
   DISABLED_FULLSCREEN,
@@ -42,6 +45,7 @@ import {
   disabledSelectionStats,
 } from "./features/shellLiveStubs";
 import { featureLabelsFor } from "./features/tableFeature";
+import type { RowReorderState } from "./rows/rowReorder";
 import type {
   DataTableShellChromeProps,
   DataTableShellProps,
@@ -225,7 +229,14 @@ export function useDataTableShell<TRow>(
   // state treats its reserved key like any column key, so the Columns menu can
   // hide it (strip rowActions before the renderers) or end-pin it (the
   // renderers stick the actions cells, with zero data columns pinned).
-  const { hasRowReorder } = chrome;
+  // Reorder publishes one engine for flat, grouped and tree rows; a table
+  // that never imported `@adapttable/<kit>/row-reorder` reads nothing here
+  // and never carries the drag state machine. The column menu offers a
+  // hidden reorder column; only a visible one draws.
+  const { hasRowReorder, rowReorder } = rowReorderEnablement(
+    useFeatureState(ROW_REORDER) as RowReorderState<TRow> | undefined,
+    chrome.columnLayout.isHidden
+  );
 
   // Body-dependent fields start inert. {@link finishDataTableShell} overlays
   // the window, pins, and load-more sentinel once a body path has run in-tree.
@@ -235,7 +246,8 @@ export function useDataTableShell<TRow>(
     chrome,
     columnWindow,
     runtime,
-    nameScrollBox
+    nameScrollBox,
+    rowReorder
   );
 
   // The kit-agnostic slice of the toolbar's props — the adapter spreads this

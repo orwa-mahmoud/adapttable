@@ -222,10 +222,11 @@ describe("migrateV4Source", () => {
         "const pins = chrome.rowPinning;",
         "const grouped = view.chrome.grouping;",
         "const panel = chrome.groupingPanel;",
+        "const reorder = chrome.rowReorder;",
       ].join("\n")
     );
     expect(result.issues.map((issue) => issue.line)).toEqual([
-      1, 2, 4, 5, 6, 7,
+      1, 2, 4, 5, 6, 7, 8,
     ]);
   });
 
