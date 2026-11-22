@@ -688,8 +688,6 @@ import { TdHTMLAttributes } from 'react';
 import { textFilterSpecs } from '@adapttable/core/binding';
 import { ThHTMLAttributes } from 'react';
 import { toggleCollapsedColumnGroup } from '@adapttable/core/binding';
-import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
-import { ToolbarExtrasSlotProps } from '@adapttable/core/binding';
 import { toolbarShowsFilters } from '@adapttable/core';
 import { TotalCountCapability } from '@adapttable/core';
 import { TREE_LIVE } from '@adapttable/core/binding';
@@ -737,7 +735,7 @@ export type AdapterCommandPaletteFeature = (options?: boolean | CommandPaletteOp
 export type AdapterCommandPaletteProps = Omit<CommandPaletteChromeProps, "slots">;
 
 // @public
-export interface AdapterCommandPaletteTriggerProps extends ToolbarExtrasSlotProps {
+export interface AdapterCommandPaletteTriggerProps extends ToolbarEntrySlotProps {
     readonly onOpenPalette: () => void;
     readonly paletteOpen: boolean;
 }
@@ -754,7 +752,7 @@ export interface AdapterEditingComponents {
     readonly EditableCell: AdapterFeatureComponent<EditableCellRenderProps<unknown>>;
     readonly historyIncludesControls?: boolean;
     readonly RowEditActions: AdapterFeatureComponent<RowEditActionsProps<unknown>>;
-    readonly UndoRedoButtons: AdapterFeatureComponent<ToolbarExtrasSlotProps>;
+    readonly UndoRedoButtons: AdapterFeatureComponent<ToolbarEntrySlotProps>;
 }
 
 // @public
@@ -791,7 +789,7 @@ export interface AdapterFiltersFeature {
 }
 
 // @public
-export interface AdapterFindButtonProps extends ToolbarExtrasSlotProps {
+export interface AdapterFindButtonProps extends ToolbarEntrySlotProps {
     readonly findOpen: boolean;
     readonly onOpenFind: () => void;
 }
@@ -1613,7 +1611,7 @@ export function createColumnMenu(kit: KitPrimitivesOf<"Button" | "IconButton" | 
 export function createCommandPaletteButton(Button: ComponentType<KitButtonProps>): (props: Readonly<AdapterCommandPaletteTriggerProps>) => ReactElement;
 
 // @public
-export function createDensityButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement;
+export function createDensityButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarEntrySlotProps>) => ReactElement | null;
 
 // @public
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): (props: TProps) => ReactElement;
@@ -1632,7 +1630,7 @@ export function createEditableCell(kit: {
 export function createEditableCellSlots(kit: KitPrimitivesOf<"Button">): EditableCellSlots;
 
 // @public
-export function createExportCsvButton(Button: ComponentType<KitButtonProps>, Surface: (props: ExportProgressSurfaceSlotProps) => ReactNode): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
+export function createExportCsvButton(Button: ComponentType<KitButtonProps>, Surface: (props: ExportProgressSurfaceSlotProps) => ReactNode): (props: Readonly<ToolbarEntrySlotProps>) => ReactElement | null;
 
 // @public
 export function createFilterHeaderControl(kit: KitFilterHeader): <TRow>(props: Readonly<FilterHeaderControlProps<TRow>>) => ReactElement | null;
@@ -1649,7 +1647,7 @@ export function createFindBar(kit: KitPrimitivesOf<"TextInput" | "IconButton">):
 export function createFindButton(Button: ComponentType<KitButtonProps>): (props: Readonly<AdapterFindButtonProps>) => ReactElement;
 
 // @public
-export function createFullscreenButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
+export function createFullscreenButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarEntrySlotProps>) => ReactElement | null;
 
 // @public
 export function createGroupHeader(kit: KitGroupHeader): {
@@ -1672,7 +1670,7 @@ export function createPageButtons(kit: KitPrimitivesOf<"Button" | "Text">, look:
 export function createPager(kit: KitPager): (view: KitPagerView) => ReactElement;
 
 // @public
-export function createPrintButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
+export function createPrintButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarEntrySlotProps>) => ReactElement | null;
 
 // @public
 export function createRowActionButtons(kit: KitRowActions): <TRow>(props: Readonly<RowActionButtonsProps<TRow>>) => ReactElement | null;
@@ -1708,7 +1706,7 @@ export function createTreeToggle(kit: KitPrimitivesOf<"IconButton">): <TRow>(pro
 // @public
 export function createUndoRedoButtons(Button: ComponentType<KitButtonProps>, Group?: ComponentType<{
     readonly children: ReactNode;
-}>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
+}>): (props: Readonly<ToolbarEntrySlotProps>) => ReactElement | null;
 
 export { CustomCellEditorConflict }
 
@@ -1793,25 +1791,14 @@ export interface DataTableShellTableProps<TRow> extends SharedTableRenderProps<T
 }
 
 // @public
-export interface DataTableShellToolbarProps<TRow> extends ExportHandlerState {
+export interface DataTableShellToolbarProps<TRow> {
     activeFilterCount: number;
     addRowLabel: string;
-    canRedo?: boolean;
-    canUndo?: boolean;
-    density: Density;
     dir?: Direction;
     filters: ReactNode;
     hasFilters: boolean;
-    isFullscreen?: boolean;
     onAddRow?: () => void;
     onClearFilters: () => void;
-    onDensityChange: (next: Density) => void;
-    onPrint?: () => void;
-    onRedo?: () => void;
-    onToggleFullscreen?: () => void;
-    onUndo?: () => void;
-    printLabel?: string;
-    redoLabel?: string;
     searchable: boolean;
     searchPlaceholder?: string;
     showRowsPerPage: boolean;
@@ -1819,7 +1806,6 @@ export interface DataTableShellToolbarProps<TRow> extends ExportHandlerState {
     table: UseDataTableResult<TRow>;
     toolbar?: ReactNode;
     toolbarSlots?: ToolbarSlots;
-    undoLabel?: string;
 }
 
 // @public
@@ -2128,6 +2114,9 @@ export function disabledHistory<TRow>(): EditHistoryState<TRow>;
 export { edgePinStyle }
 
 // @public
+export const EDIT_HISTORY_STATE: FeatureStateKey<EditHistoryState<unknown>>;
+
+// @public
 export const EDITABLE_CELL: FeatureSlotKey<EditableCellSlotProps<unknown>>;
 
 // @public
@@ -2257,6 +2246,9 @@ export function ExpandChevron(input: Readonly<{
 export { ExpandToggleSlotProps }
 
 export { EXPANSION_LIVE }
+
+// @public
+export const EXPORT_STATE: FeatureStateKey<ExportHandlerState>;
 
 export { ExportAllControls }
 
@@ -2710,7 +2702,7 @@ export { FindButtonKind }
 export { FindButtonProps }
 
 // @public
-export function findButtonRender(Button: AdapterFeatureComponent<AdapterFindButtonProps>): FeatureRender<ToolbarExtrasSlotProps>;
+export function findButtonRender(Button: AdapterFeatureComponent<AdapterFindButtonProps>): FeatureRender<ToolbarEntrySlotProps>;
 
 export { FindInTableState }
 
@@ -2737,6 +2729,9 @@ export function flattenReactColumnTree<TRow>(columns: readonly ColumnInput_2<TRo
 export { focusEditorOnMount }
 
 export { formatMultiDraft }
+
+// @public
+export const FULLSCREEN_STATE: FeatureStateKey<FullscreenState>;
 
 export { FullscreenState }
 
@@ -4803,6 +4798,9 @@ export type SummaryRowFn<TRow> = SummaryRowFn_2<TRow, ReactNode>;
 // @public
 export const TABLE_ASSISTANT: FeatureSlotKey<TableAssistantProps>;
 
+// @public
+export const TABLE_PROPS_STATE: FeatureStateKey<DataTableShellChromeProps<unknown>>;
+
 export { TableAssistantAllowanceView }
 
 // @public
@@ -5095,7 +5093,8 @@ export { textFilterSpecs }
 
 export { toggleCollapsedColumnGroup }
 
-export { TOOLBAR_EXTRAS }
+// @public
+export const TOOLBAR_EXTRAS: FeatureSlotKey<ToolbarEntrySlotProps>;
 
 // @public
 export interface ToolbarChromeProps<TRow> {
@@ -5138,7 +5137,11 @@ export interface ToolbarChromeProps<TRow> {
     undoLabel?: string;
 }
 
-export { ToolbarExtrasSlotProps }
+// @public
+export interface ToolbarEntrySlotProps {
+    readonly classNames?: Readonly<Record<string, string | undefined>>;
+    readonly labels: Required<TableLabels>;
+}
 
 export { toolbarShowsFilters }
 

@@ -8,9 +8,11 @@ import { coreFullscreen, liveStageKey } from "@adapttable/core/binding";
 import { type ReactNode, useEffect, useState } from "react";
 
 import { type FullscreenState, useFullscreen } from "../layout/useFullscreen";
+import { FeatureStateScope } from "./featureState";
 import type { LiveStageProps } from "./liveStage";
 import { slotRender } from "./providers";
 import { type FullscreenLiveSlotProps } from "./slotKeys";
+import { FULLSCREEN_STATE } from "./stateKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
 /** Fullscreen's live stage: reads nothing, writes the fullscreen state. */
@@ -38,8 +40,11 @@ function FullscreenStage<TRow>({
   }, [rootRef, shell]);
   const fullscreenProps = {
     element,
-    children: (fullscreen: FullscreenState) =>
-      children({ ...live, fullscreen }),
+    children: (fullscreen: FullscreenState) => (
+      <FeatureStateScope stateKey={FULLSCREEN_STATE} value={fullscreen}>
+        {children({ ...live, fullscreen })}
+      </FeatureStateScope>
+    ),
   } satisfies FullscreenLiveSlotProps;
   return <LiveFullscreen {...fullscreenProps} />;
 }

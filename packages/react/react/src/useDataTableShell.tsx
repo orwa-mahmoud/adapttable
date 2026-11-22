@@ -34,7 +34,6 @@ import {
   useTableFeatures,
 } from "./features/featureHost";
 import {
-  DISABLED_EXPORT,
   DISABLED_FIND,
   DISABLED_FULLSCREEN,
   disabledColumnWindow,
@@ -192,13 +191,6 @@ export function useDataTableShell<TRow>(
   const gridFocus = disabledGridFocus();
   const stats = disabledSelectionStats();
   const filtersTrigger = useFilterTriggerToggle(filtersOpen, setFiltersOpen);
-  // Layout-visible columns WITHOUT device filtering: the same button must
-  // produce the same file on phone and desktop. The selection, the full column
-  // set and the highlighted range come along so `scope: "selected"`,
-  // `columns: "all"` and `scope: "range"` work without the host wiring anything
-  // up — the columns here are the same list cell navigation addresses, which is
-  // what makes a range's column indices mean the same thing on both sides.
-  const exportHandler = DISABLED_EXPORT;
   // The chrome owns it: progressive column hiding measures this element.
   const rootRef = chrome.rootRef;
   const fullscreen = DISABLED_FULLSCREEN;
@@ -256,15 +248,7 @@ export function useDataTableShell<TRow>(
 
   // The kit-agnostic slice of the toolbar's props — the adapter spreads this
   // and adds its filters-mode wiring, saved-views / column menus, and colour.
-  const toolbarProps = shellToolbarProps<TRow>(
-    props,
-    chromeProps,
-    chrome,
-    filtersNode,
-    history,
-    exportHandler,
-    fullscreen
-  );
+  const toolbarProps = shellToolbarProps<TRow>(props, chrome, filtersNode);
   const groupingPanelProps = shellGroupingPanelProps<TRow>(chrome, props.dir);
 
   // What the table says out loud when sorting, filtering or paging rewrites the

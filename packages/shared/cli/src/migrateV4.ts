@@ -210,6 +210,10 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
     SERVER_SOURCE_PROP,
   ],
   [
+    /\bToolbarExtrasSlotProps\b/g,
+    "A React toolbar control receives ToolbarEntrySlotProps (labels, class map) and reads its feature's state with useFeatureState: EDIT_HISTORY_STATE, EXPORT_STATE, FULLSCREEN_STATE, TABLE_PROPS_STATE.",
+  ],
+  [
     /\b(?:FIND_LIVE|CELL_NAV_LIVE|EXPORT_LIVE|FULLSCREEN_LIVE|SELECTION_STATS_LIVE|FindLiveDraw|CellNavLiveDraw|ExportLiveDraw|FullscreenLiveDraw|SelectionStatsLiveDraw)\b/g,
     "The per-feature live slots were removed; each feature runs its hook from its own live stage (liveStageKey).",
   ],

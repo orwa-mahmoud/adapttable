@@ -1,8 +1,7 @@
 /**
  * The toolbar region's props and the grouping panel's: the kit-agnostic slice
  * a kit's toolbar spreads before adding its own filters-mode wiring, menus and
- * colour. History, export and fullscreen start inert; the live gate overlays
- * them when their features are composed.
+ * colour. The controls the composed features add read their own state.
  */
 import {
   type Direction,
@@ -12,18 +11,9 @@ import {
 import type { ReactNode } from "react";
 
 import type { TableChrome } from "../chrome/tableChromeContract";
-import {
-  printToolbar,
-  undoRedoToolbar,
-  viewControlsToolbar,
-} from "../chrome/toolbarChrome";
-import type { ExportHandlerState } from "../export/useExportHandler";
-import type { FullscreenState } from "../layout/useFullscreen";
 import type {
-  DataTableShellChromeProps,
   DataTableShellGroupingPanelProps,
   DataTableShellProps,
-  DataTableShellResult,
   DataTableShellToolbarProps,
 } from "./shellContract";
 
@@ -31,22 +21,14 @@ import type {
  * Build the toolbar region's props.
  *
  * @param props - The host's props.
- * @param chromeProps - The props the chrome was built from.
  * @param chrome - The shell's chrome.
  * @param filtersNode - The filters form the shell built.
- * @param history - The edit history, inert until its feature is composed.
- * @param exportHandler - The export handler, inert until its feature is.
- * @param fullscreen - The fullscreen state, inert until its feature is.
  * @returns The toolbar props a kit renders.
  */
 export function shellToolbarProps<TRow>(
   props: DataTableShellProps<TRow>,
-  chromeProps: DataTableShellChromeProps<TRow>,
   chrome: TableChrome<TRow>,
-  filtersNode: ReactNode,
-  history: DataTableShellResult<TRow>["editHistory"],
-  exportHandler: ExportHandlerState,
-  fullscreen: FullscreenState
+  filtersNode: ReactNode
 ): DataTableShellToolbarProps<TRow> {
   return {
     table: chrome.table,
@@ -55,9 +37,6 @@ export function shellToolbarProps<TRow>(
     sortByOptions: props.sortByOptions,
     toolbar: props.toolbar,
     toolbarSlots: props.toolbarSlots,
-    ...undoRedoToolbar(props.undoRedoButtons, history, chrome.table.labels),
-    ...printToolbar(props.printButton, props.onPrint, chrome.table.labels),
-    ...viewControlsToolbar(chromeProps, fullscreen),
     hasFilters: toolbarShowsFilters(
       resolveFilterMode(props.filtersMode, props.headerFilters),
       Boolean(filtersNode),
@@ -73,7 +52,6 @@ export function shellToolbarProps<TRow>(
       ? chrome.rowMutations.addRow
       : undefined,
     addRowLabel: chrome.table.labels.addRow,
-    ...exportHandler,
     dir: props.dir,
   };
 }

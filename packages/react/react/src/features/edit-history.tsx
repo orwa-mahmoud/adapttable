@@ -12,12 +12,14 @@ import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import type { ColumnDef } from "../columnDef";
 import { asBatchGesture, useTableEditHistory } from "../editing/editHistory";
 import type { EditHistoryHandle, EditHistoryOptions } from "../props";
+import { FeatureStateScope } from "./featureState";
 import { slotRender } from "./providers";
 import {
   type ChromeExtraDraw,
   type ChromeExtraSlotProps,
   EDIT_HISTORY_STAGE,
 } from "./slotKeys";
+import { EDIT_HISTORY_STATE } from "./stateKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
 /** What the recorder reads, and what it hands the table. */
@@ -80,16 +82,21 @@ function EditHistoryStage<TRow>({
       onCellEdit={props.onCellEdit}
       onBatchEdit={props.onBatchEdit}
     >
-      {(result) =>
-        children(
-          { ...chrome, editHistory: result.history },
-          {
-            ...props,
-            onCellEdit: result.onCellEdit,
-            onBatchEdit: result.onBatchEdit ?? props.onBatchEdit,
-          }
-        )
-      }
+      {(result) => (
+        <FeatureStateScope
+          stateKey={EDIT_HISTORY_STATE}
+          value={result.history as EditHistoryState<unknown>}
+        >
+          {children(
+            { ...chrome, editHistory: result.history },
+            {
+              ...props,
+              onCellEdit: result.onCellEdit,
+              onBatchEdit: result.onBatchEdit ?? props.onBatchEdit,
+            }
+          )}
+        </FeatureStateScope>
+      )}
     </LiveEditHistory>
   );
 }

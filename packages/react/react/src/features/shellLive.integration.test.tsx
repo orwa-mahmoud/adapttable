@@ -4,6 +4,7 @@ import { act, render, screen } from "@testing-library/react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
+import type { ExportHandlerState } from "../export/useExportHandler";
 import {
   type DataTableShellProps,
   type DataTableShellResult,
@@ -16,11 +17,13 @@ import { editHistory } from "./edit-history";
 import { batchEditing, editing } from "./editing";
 import { exportCsv } from "./export-csv";
 import { bulkActions } from "./factories";
+import { useFeatureState } from "./featureState";
 import { findInTable } from "./find-in-table";
 import { fullscreen } from "./fullscreen";
 import { FeatureProviders, FeatureSlot } from "./providers";
 import { selectionStats } from "./selection-stats";
 import { GRID_FOCUS_ANNOUNCER } from "./slotKeys";
+import { EXPORT_STATE } from "./stateKeys";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
 import { tree } from "./tree";
 
@@ -55,6 +58,16 @@ const columns: ColumnDef<Row>[] = [
 
 const noForm = () => null;
 
+/** Reads the export state the export stage publishes for the toolbar. */
+function ExportProbe({
+  onState,
+}: {
+  readonly onState: (state: ExportHandlerState | undefined) => void;
+}) {
+  onState(useFeatureState(EXPORT_STATE));
+  return null;
+}
+
 function mount(
   features: readonly TableFeature<Row>[],
   scrollToRow: ((row: never) => void) | null = null
@@ -67,13 +80,20 @@ function mount(
     urlSync: false,
   });
   let view: DataTableShellResult<Row> | undefined;
+  let exportState: ExportHandlerState | undefined;
   function Probe() {
     const shell = useDataTableShell(props, noForm);
     return (
       <DataTableShellView<Row> shell={shell}>
         {(next) => {
           view = next;
-          return null;
+          return (
+            <ExportProbe
+              onState={(state) => {
+                exportState = state;
+              }}
+            />
+          );
         }}
       </DataTableShellView>
     );
@@ -89,20 +109,24 @@ function mount(
     get current(): DataTableShellResult<Row> {
       return view!;
     },
+    get exportState(): ExportHandlerState | undefined {
+      return exportState;
+    },
   };
 }
 
 describe("a table that composed none of the live features", () => {
   it("hands the adapter every stand-in, inert and safe to call", () => {
-    const { current } = mount([]);
+    const mounted = mount([]);
+    const { current } = mounted;
 
     expect(current.find.open).toBe(false);
     expect(current.gridFocus.enabled).toBe(false);
     expect(current.editHistory.enabled).toBe(false);
     expect(current.fullscreen.supported).toBe(false);
     expect(current.selectionStats).toBeNull();
-    // No export handler means the toolbar draws no button at all.
-    expect(current.toolbarProps.onExportCsv).toBeUndefined();
+    // No export state means the toolbar draws no button at all.
+    expect(mounted.exportState).toBeUndefined();
   });
 });
 
@@ -230,8 +254,8 @@ describe("each live feature replaces its stand-in with the real hook", () => {
   it("exportCsv gives the toolbar a handler to run", () => {
     const view = mount([exportCsv<Row>()]);
 
-    expect(view.current.toolbarProps.onExportCsv).toBeTypeOf("function");
-    expect(view.current.toolbarProps.exportBusy).toBe(false);
+    expect(view.exportState?.onExportCsv).toBeTypeOf("function");
+    expect(view.exportState?.exportBusy).toBe(false);
   });
 
   it("fullscreen reports what the document supports", () => {
@@ -469,13 +493,20 @@ it.each(["nested", "parent-id"] as const)(
     const request = vi.fn<(info: ExportRequest<TreeExportRow>) => void>();
     const exporter = exportCsv<TreeExportRow>({ scope: "all", request });
     let current: DataTableShellResult<TreeExportRow> | undefined;
+    let exportState: ExportHandlerState | undefined;
     function Probe({ props }: { props: DataTableShellProps<TreeExportRow> }) {
       const shell = useDataTableShell(props, noForm);
       return (
         <DataTableShellView<TreeExportRow> shell={shell}>
           {(next) => {
             current = next;
-            return null;
+            return (
+              <ExportProbe
+                onState={(state) => {
+                  exportState = state;
+                }}
+              />
+            );
           }}
         </DataTableShellView>
       );
@@ -503,7 +534,7 @@ it.each(["nested", "parent-id"] as const)(
     const exportedIds = () =>
       request.mock.lastCall?.[0].rows.map((row) => row.id);
     const run = () => {
-      act(() => current?.toolbarProps.onExportCsv?.());
+      act(() => exportState?.onExportCsv?.());
     };
     try {
       expect(current?.chrome.source.rows.map((row) => row.id)).toEqual([

@@ -25,7 +25,7 @@ import {
   type EditableCellSlotProps,
   ROW_EDIT_ACTIONS,
   TOOLBAR_EXTRAS,
-  type ToolbarExtrasSlotProps,
+  type ToolbarEntrySlotProps,
 } from "../features/slotKeys";
 import type {
   FeaturePatch,
@@ -68,7 +68,7 @@ export interface AdapterEditingComponents {
   /** Save/discard bar for batch editing. */
   readonly BatchEditBar: AdapterFeatureComponent<BatchEditBarProps<unknown>>;
   /** Undo and redo controls contributed to the toolbar. */
-  readonly UndoRedoButtons: AdapterFeatureComponent<ToolbarExtrasSlotProps>;
+  readonly UndoRedoButtons: AdapterFeatureComponent<ToolbarEntrySlotProps>;
   /**
    * Whether composing edit history also draws undo/redo controls.
    *
@@ -155,7 +155,7 @@ function editableCellChrome(
 }
 
 function undoRedoChrome(
-  UndoRedoButtons: AdapterFeatureComponent<ToolbarExtrasSlotProps>
+  UndoRedoButtons: AdapterFeatureComponent<ToolbarEntrySlotProps>
 ): readonly FeatureRender<never>[] {
   // Undo and redo sit where `undoRedoButtons` puts them in every kit, even in
   // a kit whose `editHistory` draws them.

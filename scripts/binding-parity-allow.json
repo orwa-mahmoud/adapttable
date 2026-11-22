@@ -772,7 +772,6 @@
         "TableStatusAnnouncer": "pending: shared-surface decision",
         "TableStatusAnnouncerProps": "pending: shared-surface decision",
         "ToolbarChromeProps": "pending: shared-surface decision",
-        "ToolbarExtrasSlotProps": "pending: shared-surface decision",
         "ToolbarSlots": "pending: shared-surface decision",
         "TreeCellChrome": "pending: shared-surface decision",
         "TreeCellChromeProps": "pending: shared-surface decision",
@@ -986,7 +985,12 @@
         "withKitEnvironment": "pending: shared-surface decision",
         "withRowDropTarget": "pending: shared-surface decision",
         "KEYED_WINDOW_RENDER": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
-        "coreVirtualize": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots"
+        "coreVirtualize": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
+        "EDIT_HISTORY_STATE": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
+        "EXPORT_STATE": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
+        "FULLSCREEN_STATE": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
+        "TABLE_PROPS_STATE": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
+        "ToolbarEntrySlotProps": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots"
       },
       "features": {
         "BatchRowEdit": "pending: shared-surface decision",

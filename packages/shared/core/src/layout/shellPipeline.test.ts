@@ -736,26 +736,11 @@ describe("toolbar prop builders", () => {
 });
 
 describe("finishShellLive", () => {
-  it("lays grid focus, history, view controls and export onto the shell", () => {
-    const editHistory = {
-      enabled: true,
-      canUndo: false,
-      canRedo: true,
-      undo: vi.fn(),
-      redo: vi.fn(),
-    };
-    const onDensityChange = vi.fn();
+  it("lays grid focus, find, fullscreen and the figures onto the shell and leaves the toolbar alone", () => {
     const shell = {
       tableProps: { table: "t" },
       toolbarProps: { search: "s" },
-      editHistory,
-      labels: { undoEdit: "Undo", redoEdit: "Redo" },
-      chromeProps: {
-        density: "normal",
-        onDensityChange,
-        fullscreen: true,
-        undoRedoButtons: true,
-      },
+      chromeProps: { density: "normal" },
     };
     const live = {
       find: {
@@ -765,7 +750,6 @@ describe("finishShellLive", () => {
         setQuery: vi.fn(),
       },
       gridFocus: { enabled: true },
-      exportHandler: { onExport: vi.fn() },
       fullscreen: { supported: true, active: false, toggle: vi.fn() },
       stats: { count: 2 },
     };
@@ -773,7 +757,6 @@ describe("finishShellLive", () => {
       Record<string, unknown>;
     expect(finished.gridFocus).toBe(live.gridFocus);
     expect(finished.find).toBe(live.find);
-    expect(finished.editHistory).toBe(editHistory);
     expect(finished.fullscreen).toBe(live.fullscreen);
     expect(finished.selectionStats).toBe(live.stats);
     expect(finished.chromeProps).toBe(shell.chromeProps);
@@ -781,20 +764,7 @@ describe("finishShellLive", () => {
       table: "t",
       gridFocus: live.gridFocus,
     });
-    expect(finished.toolbarProps).toEqual({
-      search: "s",
-      onUndo: editHistory.undo,
-      onRedo: editHistory.redo,
-      canUndo: false,
-      canRedo: true,
-      undoLabel: "Undo",
-      redoLabel: "Redo",
-      density: "normal",
-      onDensityChange,
-      onToggleFullscreen: live.fullscreen.toggle,
-      isFullscreen: false,
-      onExport: live.exportHandler.onExport,
-    });
+    expect(finished.toolbarProps).toBe(shell.toolbarProps);
   });
 });
 

@@ -17,7 +17,7 @@ import {
 import {
   COMMAND_PALETTE_LIVE,
   TOOLBAR_EXTRAS,
-  type ToolbarExtrasSlotProps,
+  type ToolbarEntrySlotProps,
 } from "../features/slotKeys";
 import type { StaticTableFeature } from "../features/tableFeature";
 import type { AdapterFeatureComponent } from "./component";
@@ -38,7 +38,7 @@ export type AdapterCommandPaletteProps = Omit<
  *
  * @public
  */
-export interface AdapterCommandPaletteTriggerProps extends ToolbarExtrasSlotProps {
+export interface AdapterCommandPaletteTriggerProps extends ToolbarEntrySlotProps {
   /** Open the palette. */
   readonly onOpenPalette: () => void;
   /** Whether the palette is showing, for `aria-expanded`. */
@@ -94,7 +94,7 @@ export function createAdapterCommandPaletteFeature(
     });
   }
 
-  function LiveTrigger(props: Readonly<ToolbarExtrasSlotProps>) {
+  function LiveTrigger(props: Readonly<ToolbarEntrySlotProps>) {
     const state = useContext(CommandPaletteOpenContext);
     if (!Trigger || !state) return null;
     return createElement(Trigger, {

@@ -5830,19 +5830,9 @@ export function finishShellBody<TRef, TShell extends PipelineShell & {
 export function finishShellLive<TShell extends PipelineShell, TLive extends {
     readonly find: FindContribution;
     readonly gridFocus: unknown;
-    readonly exportHandler: object;
     readonly fullscreen: FullscreenContribution;
     readonly stats: unknown;
-}, TDensity>(shell: TShell & {
-    readonly editHistory: Parameters<typeof undoRedoToolbarProps>[1];
-    readonly labels: Pick<TableLabels, "undoEdit" | "redoEdit">;
-    readonly chromeProps: {
-        readonly density: TDensity;
-        readonly onDensityChange: (next: TDensity) => void;
-        readonly fullscreen?: boolean;
-        readonly undoRedoButtons?: boolean;
-    };
-}, live: TLive): TShell;
+}>(shell: TShell, live: TLive): TShell;
 
 // @public
 export interface FirstLoadLatch {

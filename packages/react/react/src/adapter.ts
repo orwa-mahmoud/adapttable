@@ -342,7 +342,7 @@ export type {
   GroupHeaderCardSlotProps,
   GroupHeaderRowSlotProps,
   SavedViewsSlotProps,
-  ToolbarExtrasSlotProps,
+  ToolbarEntrySlotProps,
 } from "./features/slotKeys";
 export {
   ACTIVE_FILTER_CHIPS,
@@ -394,6 +394,12 @@ export {
   TREE_LIVE,
   TREE_TOGGLE,
 } from "./features/slotKeys";
+export {
+  EDIT_HISTORY_STATE,
+  EXPORT_STATE,
+  FULLSCREEN_STATE,
+  TABLE_PROPS_STATE,
+} from "./features/stateKeys";
 export type {
   StaticFeatureHost,
   StaticTableFeature,

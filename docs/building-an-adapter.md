@@ -211,25 +211,30 @@ the kit's component to a slot. This is the whole of a kit's
 import { IconButton } from "@acme/ui";
 import {
   extendFeature,
+  FULLSCREEN_STATE,
   slotRender,
   type StaticTableFeature,
+  TABLE_PROPS_STATE,
   TOOLBAR_EXTRAS,
-  type ToolbarExtrasSlotProps,
+  type ToolbarEntrySlotProps,
+  useFeatureState,
 } from "@adapttable/react/adapter";
 import { fullscreen as core } from "@adapttable/react/features";
 
-function FullscreenButton(props: Readonly<ToolbarExtrasSlotProps>) {
-  const { onToggleFullscreen, isFullscreen, labels } = props;
-  if (!onToggleFullscreen) return null;
+function FullscreenButton({ labels }: Readonly<ToolbarEntrySlotProps>) {
+  // The control reads the state its feature publishes, not the toolbar's.
+  const fullscreen = useFeatureState(FULLSCREEN_STATE);
+  const props = useFeatureState(TABLE_PROPS_STATE);
+  if (!fullscreen?.supported || props?.fullscreen !== true) return null;
   return (
     <IconButton
       aria-label={
-        isFullscreen === true ? labels.exitFullscreen : labels.enterFullscreen
+        fullscreen.active ? labels.exitFullscreen : labels.enterFullscreen
       }
       data-adapttable-part="fullscreen-toggle"
-      onClick={onToggleFullscreen}
+      onClick={fullscreen.toggle}
     >
-      {isFullscreen === true ? "✕" : "⛶"}
+      {fullscreen.active ? "✕" : "⛶"}
     </IconButton>
   );
 }

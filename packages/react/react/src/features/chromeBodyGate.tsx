@@ -11,6 +11,7 @@ import type { ReactNode } from "react";
 
 import type { TableChrome } from "../chrome/tableChromeContract";
 import type { ComposedTableProps } from "../props";
+import type { DataTableShellChromeProps } from "../shell/shellContract";
 import { TableStoreContext } from "../state/tableStoreContext";
 import {
   type DataTableShellResult,
@@ -20,10 +21,12 @@ import type { ChromeBodyData } from "../virtual/chromeBodyShared";
 import { usePlainChromeBodyData } from "../virtual/usePlainChromeBodyData";
 import { ChromeExtrasGate } from "./chromeExtrasGate";
 import { rememberFeatureHost } from "./featureHost";
+import { FeatureStateScope } from "./featureState";
 import { FeatureSlot, useFeatureSlotFilled } from "./providers";
 import { ShellLiveGate } from "./shellLiveGate";
 import { disabledHistory } from "./shellLiveStubs";
 import { CHROME_BODY, type ChromeBodySlotProps } from "./slotKeys";
+import { TABLE_PROPS_STATE } from "./stateKeys";
 
 /**
  * Resolve chrome-body data, then finish the table.
@@ -116,7 +119,12 @@ export function DataTableShellView<TRow>({
             chrome.groupingPanel
           );
           const afterBody = (view: DataTableShellResult<TRow>) => (
-            <ShellLiveGate shell={view}>{children}</ShellLiveGate>
+            <FeatureStateScope
+              stateKey={TABLE_PROPS_STATE}
+              value={view.chromeProps as DataTableShellChromeProps<unknown>}
+            >
+              <ShellLiveGate shell={view}>{children}</ShellLiveGate>
+            </FeatureStateScope>
           );
           if (shell.skipChromeBody === true) {
             return afterBody(withExtras);

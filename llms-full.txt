@@ -2792,25 +2792,30 @@ the kit's component to a slot. This is the whole of a kit's
 import { IconButton } from "@acme/ui";
 import {
   extendFeature,
+  FULLSCREEN_STATE,
   slotRender,
   type StaticTableFeature,
+  TABLE_PROPS_STATE,
   TOOLBAR_EXTRAS,
-  type ToolbarExtrasSlotProps,
+  type ToolbarEntrySlotProps,
+  useFeatureState,
 } from "@adapttable/react/adapter";
 import { fullscreen as core } from "@adapttable/react/features";
 
-function FullscreenButton(props: Readonly<ToolbarExtrasSlotProps>) {
-  const { onToggleFullscreen, isFullscreen, labels } = props;
-  if (!onToggleFullscreen) return null;
+function FullscreenButton({ labels }: Readonly<ToolbarEntrySlotProps>) {
+  // The control reads the state its feature publishes, not the toolbar's.
+  const fullscreen = useFeatureState(FULLSCREEN_STATE);
+  const props = useFeatureState(TABLE_PROPS_STATE);
+  if (!fullscreen?.supported || props?.fullscreen !== true) return null;
   return (
     <IconButton
       aria-label={
-        isFullscreen === true ? labels.exitFullscreen : labels.enterFullscreen
+        fullscreen.active ? labels.exitFullscreen : labels.enterFullscreen
       }
       data-adapttable-part="fullscreen-toggle"
-      onClick={onToggleFullscreen}
+      onClick={fullscreen.toggle}
     >
-      {isFullscreen === true ? "✕" : "⛶"}
+      {fullscreen.active ? "✕" : "⛶"}
     </IconButton>
   );
 }
@@ -17499,8 +17504,11 @@ dirty mark), `FILL_HANDLE` (`FillHandleCellSlotProps`), `EXPAND_TOGGLE`
 `ROW_REORDER_HANDLE`, `ROW_REORDER_BUTTONS` and `ROW_REORDER_ANNOUNCER`,
 `GROUP_HEADER_ROW` (`GroupHeaderRowSlotProps`) and its mobile card
 `GROUP_HEADER_CARD` (`GroupHeaderCardSlotProps`). Around the table:
-`TOOLBAR_EXTRAS` (`ToolbarExtrasSlotProps` — undo/redo, export, print,
-density, fullscreen), `SAVED_VIEWS` (`SavedViewsSlotProps`),
+`TOOLBAR_EXTRAS` (`ToolbarEntrySlotProps`: the labels and class map), where
+the composed features add their controls — undo/redo, export, print, density,
+fullscreen — each reading the state its feature publishes with
+`useFeatureState`: `EDIT_HISTORY_STATE`, `EXPORT_STATE`, `FULLSCREEN_STATE`
+and the table's finished props, `TABLE_PROPS_STATE`; `SAVED_VIEWS` (`SavedViewsSlotProps`),
 `GRID_FOCUS_ANNOUNCER`, the filter surfaces `FILTER_POPOVER` / `FILTER_DRAWER`
 (`FilterOverlaySlotProps`) with `FiltersFormSlotProps` and
 `ActiveFilterChipsSlotProps`, and `CHROME_BODY` (`ChromeBodySlotProps`), which
@@ -18642,8 +18650,9 @@ shares, so a new binding calls them rather than re-deriving them.
   `tableRuntimeView`, `renderedRowsOf`, `readableRowLabel`,
   `liveColumnLayout` and `livePinning` (`RuntimeChromeInput`,
   `RuntimeColumn`). `cellNavigationInput`, `gridRowCount`, `exportPageOnly`,
-  `viewControlsToolbarProps`, `undoRedoToolbarProps` and `printToolbarProps`
-  build the live stages' inputs. `finishShellLive`, `overlayChromeExtras` and
+  build the live stages' inputs; `viewControlsToolbarProps`,
+  `undoRedoToolbarProps` and `printToolbarProps` build a toolbar control's
+  props from its feature's state. `finishShellLive`, `overlayChromeExtras` and
   `finishShellBody` (`PipelineShell`, `OverlayChrome`, `ShellBodyInput`)
   finish the shell.
 - **Table chrome state.** `chromeBodyRegion` (`ChromeBodyRegion`),
@@ -24231,22 +24240,23 @@ of 380 kB.
 
 ## Removed
 
-| Removed                                                                                                                                                                                                                                                                                                                                   | Instead                                                                                              |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `mobileIdentityColumns` (table prop, `useDataTable` option, third argument of `visibleColumns`)                                                                                                                                                                                                                                           | `hideOnMobile` on each column decides what a card shows                                              |
-| `sortRows`, `sortRowsMulti`                                                                                                                                                                                                                                                                                                               | the table's own sort, or `compareValues`                                                             |
-| `SHELL_LIVE_STAGE_ORDER`, `ShellLiveStageId`                                                                                                                                                                                                                                                                                              | `liveStageKey` and `liveStagesOf`                                                                    |
-| `CHROME_EXTRA_SLOT_ORDER`                                                                                                                                                                                                                                                                                                                 | each chrome stage's `stage.reads` and `stage.writes`; `liveStagesOf(features, "chrome")` orders them |
-| `HistoryLiveGate`, `EDIT_HISTORY_LIVE`, `EditHistoryLiveSlotProps`, `EditHistoryLiveDraw`                                                                                                                                                                                                                                                 | the `EDIT_HISTORY_STAGE` chrome stage, which `ChromeExtrasGate` runs                                 |
-| `OptionalEditableCell`                                                                                                                                                                                                                                                                                                                    | `CellContent`                                                                                        |
-| `FIND_LIVE`, `CELL_NAV_LIVE`, `EXPORT_LIVE`, `FULLSCREEN_LIVE`, `SELECTION_STATS_LIVE`, their `*LiveDraw` types and React's `*LiveSlotProps`                                                                                                                                                                                              | each feature's live stage (`liveStageKey`), which runs its hook itself                               |
-| `OptionalTreeCell`, `OptionalTreeToggle`, `OptionalFillHandle`, `OptionalExpandToggle`, `OptionalFilterHeader`, `OptionalRowEditActions`, `OptionalRowReorderHandle`, `OptionalRowReorderButtons`, `OptionalColumnGroupToggle`, `OptionalColumnHeaderRename`, `OptionalColumnSelect`, `OptionalGroupHeaderRow`, `OptionalGroupHeaderCard` | `<FeatureSlot slot={…} props={…} fallback={…} />` with the slot's key                                |
-| `defaultPendingRows`                                                                                                                                                                                                                                                                                                                      | `labels.pendingRows`                                                                                 |
-| `createEditConflictStore`                                                                                                                                                                                                                                                                                                                 | `createDeferredEditConflictStore` and `loadEditConflictStore`                                        |
-| Angular `standardPreset`                                                                                                                                                                                                                                                                                                                  | `standardFeatures` from `@adapttable/angular/features`                                               |
-| Vue `groupRowSlotKey()`                                                                                                                                                                                                                                                                                                                   | `GROUP_ROW` from `@adapttable/vue/adapter`                                                           |
-| Vue `classNames.rowAction`, `classNames.status`                                                                                                                                                                                                                                                                                           | `classNames.actionButton`, `classNames.tableStatusAnnouncer`                                         |
-| Labels `noticeReorderNested`, `pendingProposals`, `assistantReceipt`, `rowMoveOptions`, `moveToTopLevel`, `groupingAggregateColumn`, `groupingAggregationDefault`                                                                                                                                                                         | nothing reads them; delete the keys                                                                  |
+| Removed                                                                                                                                                                                                                                                                                                                                   | Instead                                                                                                                                                                                |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mobileIdentityColumns` (table prop, `useDataTable` option, third argument of `visibleColumns`)                                                                                                                                                                                                                                           | `hideOnMobile` on each column decides what a card shows                                                                                                                                |
+| `sortRows`, `sortRowsMulti`                                                                                                                                                                                                                                                                                                               | the table's own sort, or `compareValues`                                                                                                                                               |
+| `SHELL_LIVE_STAGE_ORDER`, `ShellLiveStageId`                                                                                                                                                                                                                                                                                              | `liveStageKey` and `liveStagesOf`                                                                                                                                                      |
+| `CHROME_EXTRA_SLOT_ORDER`                                                                                                                                                                                                                                                                                                                 | each chrome stage's `stage.reads` and `stage.writes`; `liveStagesOf(features, "chrome")` orders them                                                                                   |
+| `HistoryLiveGate`, `EDIT_HISTORY_LIVE`, `EditHistoryLiveSlotProps`, `EditHistoryLiveDraw`                                                                                                                                                                                                                                                 | the `EDIT_HISTORY_STAGE` chrome stage, which `ChromeExtrasGate` runs                                                                                                                   |
+| `OptionalEditableCell`                                                                                                                                                                                                                                                                                                                    | `CellContent`                                                                                                                                                                          |
+| `FIND_LIVE`, `CELL_NAV_LIVE`, `EXPORT_LIVE`, `FULLSCREEN_LIVE`, `SELECTION_STATS_LIVE`, their `*LiveDraw` types and React's `*LiveSlotProps`                                                                                                                                                                                              | each feature's live stage (`liveStageKey`), which runs its hook itself                                                                                                                 |
+| React `ToolbarExtrasSlotProps` and the toolbar props `onUndo`, `onRedo`, `canUndo`, `canRedo`, `undoLabel`, `redoLabel`, `onPrint`, `printLabel`, `density`, `onDensityChange`, `onToggleFullscreen`, `isFullscreen` and the export fields                                                                                                | `ToolbarEntrySlotProps` (labels, class map); a control reads its feature's state with `useFeatureState`: `EDIT_HISTORY_STATE`, `EXPORT_STATE`, `FULLSCREEN_STATE`, `TABLE_PROPS_STATE` |
+| `OptionalTreeCell`, `OptionalTreeToggle`, `OptionalFillHandle`, `OptionalExpandToggle`, `OptionalFilterHeader`, `OptionalRowEditActions`, `OptionalRowReorderHandle`, `OptionalRowReorderButtons`, `OptionalColumnGroupToggle`, `OptionalColumnHeaderRename`, `OptionalColumnSelect`, `OptionalGroupHeaderRow`, `OptionalGroupHeaderCard` | `<FeatureSlot slot={…} props={…} fallback={…} />` with the slot's key                                                                                                                  |
+| `defaultPendingRows`                                                                                                                                                                                                                                                                                                                      | `labels.pendingRows`                                                                                                                                                                   |
+| `createEditConflictStore`                                                                                                                                                                                                                                                                                                                 | `createDeferredEditConflictStore` and `loadEditConflictStore`                                                                                                                          |
+| Angular `standardPreset`                                                                                                                                                                                                                                                                                                                  | `standardFeatures` from `@adapttable/angular/features`                                                                                                                                 |
+| Vue `groupRowSlotKey()`                                                                                                                                                                                                                                                                                                                   | `GROUP_ROW` from `@adapttable/vue/adapter`                                                                                                                                             |
+| Vue `classNames.rowAction`, `classNames.status`                                                                                                                                                                                                                                                                                           | `classNames.actionButton`, `classNames.tableStatusAnnouncer`                                                                                                                           |
+| Labels `noticeReorderNested`, `pendingProposals`, `assistantReceipt`, `rowMoveOptions`, `moveToTopLevel`, `groupingAggregateColumn`, `groupingAggregationDefault`                                                                                                                                                                         | nothing reads them; delete the keys                                                                                                                                                    |
 
 ## Data tiers
 

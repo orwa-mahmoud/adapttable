@@ -1,5 +1,13 @@
-import { defaultLabels } from "@adapttable/react/adapter";
+import {
+  defaultLabels,
+  EDIT_HISTORY_STATE,
+  EXPORT_STATE,
+  FeatureStateScope,
+  FULLSCREEN_STATE,
+  TABLE_PROPS_STATE,
+} from "@adapttable/react/adapter";
 import { fireEvent, screen } from "@testing-library/react";
+import type { ReactElement, ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { renderMui } from "../test-utils";
@@ -14,62 +22,106 @@ import {
 /**
  * The optional toolbar controls.
  *
- * Optional controls are drawn when their handler is present. Density is the
- * exception: feature composition decides whether its slot exists, and the
- * rendered slot always receives a resolved density contract.
+ * Each control reads the state its feature publishes; without that state it
+ * draws nothing.
  */
-const base = {
-  labels: defaultLabels,
-  density: "comfortable" as const,
-  onDensityChange: vi.fn(),
-};
+const base = { labels: defaultLabels };
 const part = (name: string) =>
   document.querySelector(`[data-adapttable-part="${name}"]`);
 
+/** The table props a control reads, with the given options. */
+function withProps(
+  options: Record<string, unknown>,
+  children: ReactNode
+): ReactElement {
+  return (
+    <FeatureStateScope
+      stateKey={TABLE_PROPS_STATE}
+      value={
+        {
+          density: "comfortable",
+          onDensityChange: vi.fn(),
+          ...options,
+        } as never
+      }
+    >
+      {children}
+    </FeatureStateScope>
+  );
+}
+
+/** Undo and redo as the edit-history stage publishes them. */
+function withHistory(
+  state: {
+    canUndo: boolean;
+    canRedo: boolean;
+    undo?: () => number;
+    redo?: () => number;
+  },
+  children: ReactNode
+): ReactElement {
+  return withProps(
+    { undoRedoButtons: true },
+    <FeatureStateScope
+      stateKey={EDIT_HISTORY_STATE}
+      value={{
+        enabled: true,
+        undo: vi.fn(() => 0),
+        redo: vi.fn(() => 0),
+        clear: vi.fn(),
+        record: vi.fn(),
+        ...state,
+      }}
+    >
+      {children}
+    </FeatureStateScope>
+  );
+}
+
 describe("UndoRedoButtons (mui)", () => {
-  it("draws nothing until both handlers are supplied", () => {
-    renderMui(<UndoRedoButtons {...base} onUndo={vi.fn()} />);
+  it("draws nothing until a history records", () => {
+    renderMui(<UndoRedoButtons {...base} />);
     expect(part("undo-button")).toBeNull();
     expect(part("redo-button")).toBeNull();
   });
 
   it("disables what the history cannot do yet", () => {
     renderMui(
-      <UndoRedoButtons
-        {...base}
-        onUndo={vi.fn()}
-        onRedo={vi.fn()}
-        undoLabel="Undo"
-        redoLabel="Redo"
-      />
+      withHistory(
+        { canUndo: false, canRedo: false },
+        <UndoRedoButtons {...base} />
+      )
     );
-    expect(screen.getByRole("button", { name: "Undo" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Redo" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: defaultLabels.undoEdit })
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: defaultLabels.redoEdit })
+    ).toBeDisabled();
   });
 
   it("runs each handler once the history allows it", () => {
-    const onUndo = vi.fn();
-    const onRedo = vi.fn();
+    const undo = vi.fn(() => 0);
+    const redo = vi.fn(() => 0);
     renderMui(
-      <UndoRedoButtons
-        {...base}
-        onUndo={onUndo}
-        onRedo={onRedo}
-        canUndo
-        canRedo
-        undoLabel="Undo"
-        redoLabel="Redo"
-      />
+      withHistory(
+        { canUndo: true, canRedo: true, undo, redo },
+        <UndoRedoButtons {...base} />
+      )
     );
-    fireEvent.click(screen.getByRole("button", { name: "Undo" }));
-    fireEvent.click(screen.getByRole("button", { name: "Redo" }));
-    expect(onUndo).toHaveBeenCalledTimes(1);
-    expect(onRedo).toHaveBeenCalledTimes(1);
+    fireEvent.click(
+      screen.getByRole("button", { name: defaultLabels.undoEdit })
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: defaultLabels.redoEdit })
+    );
+    expect(undo).toHaveBeenCalledTimes(1);
+    expect(redo).toHaveBeenCalledTimes(1);
   });
 });
 
 describe("ExportCsvButton (mui)", () => {
-  it("draws nothing without a handler", () => {
+  it("draws nothing without the export's state", () => {
     const { container } = renderMui(<ExportCsvButton {...base} />);
     expect(container).toBeEmptyDOMElement();
   });
@@ -77,12 +129,18 @@ describe("ExportCsvButton (mui)", () => {
   it("exports on click and speaks the announcement it was given", () => {
     const onExportCsv = vi.fn();
     renderMui(
-      <ExportCsvButton
-        {...base}
-        onExportCsv={onExportCsv}
-        exportLabel="Export CSV"
-        exportAnnouncement="2 rows exported"
-      />
+      <FeatureStateScope
+        stateKey={EXPORT_STATE}
+        value={
+          {
+            onExportCsv,
+            exportLabel: "Export CSV",
+            exportAnnouncement: "2 rows exported",
+          } as never
+        }
+      >
+        <ExportCsvButton {...base} />
+      </FeatureStateScope>
     );
     const button = screen.getByRole("button", { name: "Export CSV" });
     expect(button).not.toBeDisabled();
@@ -93,12 +151,18 @@ describe("ExportCsvButton (mui)", () => {
 
   it("locks the button and says it is busy while one is running", () => {
     renderMui(
-      <ExportCsvButton
-        {...base}
-        onExportCsv={vi.fn()}
-        exportBusy
-        exportLabel="Export CSV"
-      />
+      <FeatureStateScope
+        stateKey={EXPORT_STATE}
+        value={
+          {
+            onExportCsv: vi.fn(),
+            exportBusy: true,
+            exportLabel: "Export CSV",
+          } as never
+        }
+      >
+        <ExportCsvButton {...base} />
+      </FeatureStateScope>
     );
     const button = screen.getByRole("button", { name: /Export CSV/ });
     expect(button).toBeDisabled();
@@ -109,32 +173,33 @@ describe("ExportCsvButton (mui)", () => {
 
 describe("PrintButton (mui)", () => {
   it("draws nothing without a handler", () => {
-    renderMui(<PrintButton {...base} />);
+    renderMui(withProps({ printButton: true }, <PrintButton {...base} />));
     expect(part("print-button")).toBeNull();
   });
 
   it("prints on click", () => {
     const onPrint = vi.fn();
-    renderMui(<PrintButton {...base} onPrint={onPrint} printLabel="Print" />);
-    fireEvent.click(screen.getByRole("button", { name: "Print" }));
+    renderMui(
+      withProps({ printButton: true, onPrint }, <PrintButton {...base} />)
+    );
+    fireEvent.click(screen.getByRole("button", { name: defaultLabels.print }));
     expect(onPrint).toHaveBeenCalledTimes(1);
   });
 });
 
 describe("DensityButton (mui)", () => {
-  it("draws from the resolved density contract", () => {
-    renderMui(<DensityButton {...base} />);
+  it("draws from the table's density", () => {
+    renderMui(withProps({}, <DensityButton {...base} />));
     expect(part("density-toggle")).not.toBeNull();
   });
 
   it("names the density it is in and asks for the other one", () => {
     const onDensityChange = vi.fn();
     const { unmount } = renderMui(
-      <DensityButton
-        {...base}
-        density="comfortable"
-        onDensityChange={onDensityChange}
-      />
+      withProps(
+        { density: "comfortable", onDensityChange },
+        <DensityButton {...base} />
+      )
     );
     expect(part("density-toggle")?.textContent).toBe(
       defaultLabels.densityComfortable
@@ -144,11 +209,10 @@ describe("DensityButton (mui)", () => {
     unmount();
 
     renderMui(
-      <DensityButton
-        {...base}
-        density="compact"
-        onDensityChange={onDensityChange}
-      />
+      withProps(
+        { density: "compact", onDensityChange },
+        <DensityButton {...base} />
+      )
     );
     expect(part("density-toggle")?.textContent).toBe(
       defaultLabels.densityCompact
@@ -159,31 +223,34 @@ describe("DensityButton (mui)", () => {
 });
 
 describe("FullscreenButton (mui)", () => {
-  it("draws nothing without a handler", () => {
-    renderMui(<FullscreenButton {...base} />);
+  const fullscreen = (active: boolean, toggle: () => void) => (
+    <FeatureStateScope
+      stateKey={FULLSCREEN_STATE}
+      value={{ supported: true, active, toggle, container: undefined } as never}
+    >
+      <FullscreenButton {...base} />
+    </FeatureStateScope>
+  );
+
+  it("draws nothing while the document has no fullscreen", () => {
+    renderMui(withProps({ fullscreen: true }, <FullscreenButton {...base} />));
     expect(part("fullscreen-toggle")).toBeNull();
   });
 
   it("names the way out once it is promoted, and the way in before that", () => {
-    const onToggleFullscreen = vi.fn();
+    const toggle = vi.fn();
     const { unmount } = renderMui(
-      <FullscreenButton {...base} onToggleFullscreen={onToggleFullscreen} />
+      withProps({ fullscreen: true }, fullscreen(false, toggle))
     );
     expect(part("fullscreen-toggle")).toHaveAttribute(
       "aria-label",
       defaultLabels.enterFullscreen
     );
     fireEvent.click(part("fullscreen-toggle")!);
-    expect(onToggleFullscreen).toHaveBeenCalledTimes(1);
+    expect(toggle).toHaveBeenCalledTimes(1);
     unmount();
 
-    renderMui(
-      <FullscreenButton
-        {...base}
-        onToggleFullscreen={onToggleFullscreen}
-        isFullscreen
-      />
-    );
+    renderMui(withProps({ fullscreen: true }, fullscreen(true, toggle)));
     expect(part("fullscreen-toggle")).toHaveAttribute(
       "aria-label",
       defaultLabels.exitFullscreen

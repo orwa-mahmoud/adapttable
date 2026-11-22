@@ -685,8 +685,8 @@ export interface PipelineShell {
 
 /**
  * Lay the live stages' results onto a finished shell: grid focus into the
- * table props, and undo / redo, view controls and the export button into
- * the toolbar props.
+ * table props, and find, fullscreen and the selection figures onto the
+ * shell. The controls a feature adds to the toolbar read its own state.
  *
  * @public
  */
@@ -695,43 +695,18 @@ export function finishShellLive<
   TLive extends {
     readonly find: FindContribution;
     readonly gridFocus: unknown;
-    readonly exportHandler: object;
     readonly fullscreen: FullscreenContribution;
     readonly stats: unknown;
   },
-  TDensity,
->(
-  shell: TShell & {
-    readonly editHistory: Parameters<typeof undoRedoToolbarProps>[1];
-    readonly labels: Pick<TableLabels, "undoEdit" | "redoEdit">;
-    readonly chromeProps: {
-      readonly density: TDensity;
-      readonly onDensityChange: (next: TDensity) => void;
-      readonly fullscreen?: boolean;
-      readonly undoRedoButtons?: boolean;
-    };
-  },
-  live: TLive
-): TShell {
-  const { find, gridFocus, exportHandler, fullscreen, stats } = live;
+>(shell: TShell, live: TLive): TShell {
+  const { find, gridFocus, fullscreen, stats } = live;
   return {
     ...shell,
     gridFocus,
     find,
-    editHistory: shell.editHistory,
     fullscreen,
     selectionStats: stats,
     tableProps: { ...shell.tableProps, gridFocus },
-    toolbarProps: {
-      ...shell.toolbarProps,
-      ...undoRedoToolbarProps(
-        shell.chromeProps.undoRedoButtons,
-        shell.editHistory,
-        shell.labels
-      ),
-      ...viewControlsToolbarProps(shell.chromeProps, fullscreen),
-      ...exportHandler,
-    },
   };
 }
 

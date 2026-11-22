@@ -14,6 +14,7 @@ import {
   SIDE_PANEL_REGION,
   STATUS_BAR_REGION,
 } from "../kit/rootRegion";
+import { useFeatureState } from "./featureState";
 import { FeatureSlot, slotRender } from "./providers";
 import {
   COMMAND_PALETTE_LIVE,
@@ -25,6 +26,7 @@ import {
   SIDE_PANEL,
   STATUS_BAR,
 } from "./slotKeys";
+import { EXPORT_STATE } from "./stateKeys";
 
 function GridFocusAnnouncer<TRow>({ view }: KitRegionProps<TRow>): ReactNode {
   return (
@@ -61,6 +63,7 @@ function CommandPalette<TRow>({
 }: KitRegionProps<TRow>): ReactNode {
   "use no memo";
   const { chrome } = view;
+  const exportState = useFeatureState(EXPORT_STATE);
   return (
     <FeatureSlot
       slot={COMMAND_PALETTE_LIVE}
@@ -68,8 +71,8 @@ function CommandPalette<TRow>({
         commandPalette: props.commandPalette,
         labels: view.labels,
         onPrint: props.onPrint,
-        onExport: view.toolbarProps.onExportCsv,
-        exportLabel: view.toolbarProps.exportLabel,
+        onExport: exportState?.onExportCsv,
+        exportLabel: exportState?.exportLabel,
         onClearFilters: chrome.clearFilters,
         hasFilters: chrome.activeFilterCount > 0,
         featureHost: view.featureHost,

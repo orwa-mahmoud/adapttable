@@ -235,31 +235,7 @@ export function createToolbar(
             {filters}
             {props.savedViewsMenu}
             {props.columnMenu}
-            <FeatureSlot
-              slot={TOOLBAR_EXTRAS}
-              props={{
-                onUndo: props.onUndo,
-                onRedo: props.onRedo,
-                canUndo: props.canUndo,
-                canRedo: props.canRedo,
-                undoLabel: props.undoLabel,
-                redoLabel: props.redoLabel,
-                onPrint: props.onPrint,
-                printLabel: props.printLabel,
-                density: props.density,
-                onDensityChange: props.onDensityChange,
-                onToggleFullscreen: props.onToggleFullscreen,
-                isFullscreen: props.isFullscreen,
-                onExportCsv: props.onExportCsv,
-                exportBusy: props.exportBusy,
-                exportAnnouncement: props.exportAnnouncement ?? "",
-                exportProgressState: props.exportProgressState,
-                exportLabel: props.exportLabel,
-                exportDisabled: props.exportDisabled,
-                exportDisabledReason: props.exportDisabledReason,
-                labels,
-              }}
-            />
+            <FeatureSlot slot={TOOLBAR_EXTRAS} props={{ labels }} />
             {props.onAddRow && (
               <Button
                 variant="filled"

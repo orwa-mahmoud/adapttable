@@ -270,8 +270,11 @@ dirty mark), `FILL_HANDLE` (`FillHandleCellSlotProps`), `EXPAND_TOGGLE`
 `ROW_REORDER_HANDLE`, `ROW_REORDER_BUTTONS` and `ROW_REORDER_ANNOUNCER`,
 `GROUP_HEADER_ROW` (`GroupHeaderRowSlotProps`) and its mobile card
 `GROUP_HEADER_CARD` (`GroupHeaderCardSlotProps`). Around the table:
-`TOOLBAR_EXTRAS` (`ToolbarExtrasSlotProps` — undo/redo, export, print,
-density, fullscreen), `SAVED_VIEWS` (`SavedViewsSlotProps`),
+`TOOLBAR_EXTRAS` (`ToolbarEntrySlotProps`: the labels and class map), where
+the composed features add their controls — undo/redo, export, print, density,
+fullscreen — each reading the state its feature publishes with
+`useFeatureState`: `EDIT_HISTORY_STATE`, `EXPORT_STATE`, `FULLSCREEN_STATE`
+and the table's finished props, `TABLE_PROPS_STATE`; `SAVED_VIEWS` (`SavedViewsSlotProps`),
 `GRID_FOCUS_ANNOUNCER`, the filter surfaces `FILTER_POPOVER` / `FILTER_DRAWER`
 (`FilterOverlaySlotProps`) with `FiltersFormSlotProps` and
 `ActiveFilterChipsSlotProps`, and `CHROME_BODY` (`ChromeBodySlotProps`), which
@@ -1413,8 +1416,9 @@ shares, so a new binding calls them rather than re-deriving them.
   `tableRuntimeView`, `renderedRowsOf`, `readableRowLabel`,
   `liveColumnLayout` and `livePinning` (`RuntimeChromeInput`,
   `RuntimeColumn`). `cellNavigationInput`, `gridRowCount`, `exportPageOnly`,
-  `viewControlsToolbarProps`, `undoRedoToolbarProps` and `printToolbarProps`
-  build the live stages' inputs. `finishShellLive`, `overlayChromeExtras` and
+  build the live stages' inputs; `viewControlsToolbarProps`,
+  `undoRedoToolbarProps` and `printToolbarProps` build a toolbar control's
+  props from its feature's state. `finishShellLive`, `overlayChromeExtras` and
   `finishShellBody` (`PipelineShell`, `OverlayChrome`, `ShellBodyInput`)
   finish the shell.
 - **Table chrome state.** `chromeBodyRegion` (`ChromeBodyRegion`),

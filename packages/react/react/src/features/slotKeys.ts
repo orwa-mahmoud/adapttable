@@ -12,7 +12,7 @@
  * module names the React fill for it (`…Draw`), which a fill names when it
  * fills the slot, and each table asks with its own rows' props.
  */
-import type { CellEdit } from "@adapttable/core";
+import type { CellEdit, TableLabels } from "@adapttable/core";
 import {
   BULK_BAR as NEUTRAL_BULK_BAR,
   type CellNavLiveSlotProps as NeutralCellNavLiveSlotProps,
@@ -29,6 +29,7 @@ import {
   type EditableCellSlotProps as NeutralEditableCellSlotProps,
   type ExportLiveSlotProps as NeutralExportLiveSlotProps,
   type FeatureSlotKey,
+  featureSlotKey,
   FILL_HANDLE as NEUTRAL_FILL_HANDLE,
   type FillHandleCellSlotProps as NeutralFillHandleCellSlotProps,
   FILTER_DRAWER as NEUTRAL_FILTER_DRAWER,
@@ -103,8 +104,6 @@ export {
   FIND_BAR,
   ROW_EDIT_ACTIONS,
   ROW_REORDER_ANNOUNCER,
-  TOOLBAR_EXTRAS,
-  type ToolbarExtrasSlotProps,
   TREE_TOGGLE,
 } from "@adapttable/core/binding";
 
@@ -561,3 +560,27 @@ export {
   SELECTION_LIVE,
   TREE_LIVE,
 } from "@adapttable/core/binding";
+
+/**
+ * What a toolbar entry is drawn with: the table's labels and class map. Each
+ * entry reads its own feature's state; the toolbar passes nothing about it.
+ *
+ * @public
+ */
+export interface ToolbarEntrySlotProps {
+  /** Resolved labels. */
+  readonly labels: Required<TableLabels>;
+  /**
+   * The table's class map, for a kit whose controls are styled through one;
+   * a kit with its own components ignores it.
+   */
+  readonly classNames?: Readonly<Record<string, string | undefined>>;
+}
+
+/**
+ * The toolbar's entries: the controls the composed features add.
+ *
+ * @public
+ */
+export const TOOLBAR_EXTRAS =
+  featureSlotKey<ToolbarEntrySlotProps>("toolbar-extras");

@@ -47651,6 +47651,14 @@
       "behavior": ""
     },
     {
+      "export": "EDIT_HISTORY_STATE",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "EDITABLE_CELL",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -47932,6 +47940,14 @@
     },
     {
       "export": "EXPANSION_LIVE",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "EXPORT_STATE",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",
@@ -48660,6 +48676,14 @@
     },
     {
       "export": "focusEditorOnMount",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "FULLSCREEN_STATE",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",
@@ -51291,6 +51315,14 @@
       "behavior": ""
     },
     {
+      "export": "TABLE_PROPS_STATE",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "TableAssistantAllowanceView",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -51691,7 +51723,7 @@
       "behavior": ""
     },
     {
-      "export": "ToolbarExtrasSlotProps",
+      "export": "ToolbarEntrySlotProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",

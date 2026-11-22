@@ -6199,7 +6199,6 @@
       "TableStatusAnnouncerProps",
       "TOOLBAR_EXTRAS",
       "ToolbarChromeProps",
-      "ToolbarExtrasSlotProps",
       "ToolbarSlots",
       "toReactColumnResizeHandleProps",
       "TREE_CELL",
@@ -6451,7 +6450,12 @@
       "FilteringFamilyFactory",
       "CellContent",
       "KEYED_WINDOW_RENDER",
-      "coreVirtualize"
+      "coreVirtualize",
+      "EDIT_HISTORY_STATE",
+      "EXPORT_STATE",
+      "FULLSCREEN_STATE",
+      "TABLE_PROPS_STATE",
+      "ToolbarEntrySlotProps"
     ],
     "react-features": [
       "applyTableFeatures",

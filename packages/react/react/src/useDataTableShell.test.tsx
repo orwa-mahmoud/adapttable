@@ -259,28 +259,28 @@ describe("useDataTableShell", () => {
     const onDensityChange = vi.fn();
     const view = renderDensityShell({ onDensityChange });
     expect(view.current.density).toBe("comfortable");
-    expect(view.current.toolbarProps.density).toBe("comfortable");
+    expect(view.current.chromeProps.density).toBe("comfortable");
 
     act(() => {
-      view.current.toolbarProps.onDensityChange?.("compact");
+      view.current.chromeProps.onDensityChange?.("compact");
     });
 
     expect(onDensityChange).toHaveBeenCalledExactlyOnceWith("compact");
     expect(view.current.density).toBe("compact");
-    expect(view.current.toolbarProps.density).toBe("compact");
+    expect(view.current.chromeProps.density).toBe("compact");
   });
 
   it("keeps the density request callback stable as uncontrolled state changes", () => {
     const view = renderDensityShell();
-    const request = view.current.toolbarProps.onDensityChange;
+    const request = view.current.chromeProps.onDensityChange;
 
     act(() => {
       request("compact");
     });
-    expect(view.current.toolbarProps.onDensityChange).toBe(request);
+    expect(view.current.chromeProps.onDensityChange).toBe(request);
 
     view.rerender({});
-    expect(view.current.toolbarProps.onDensityChange).toBe(request);
+    expect(view.current.chromeProps.onDensityChange).toBe(request);
   });
 
   it("waits for a controlled density prop to change", () => {
@@ -291,20 +291,20 @@ describe("useDataTableShell", () => {
     });
 
     act(() => {
-      view.current.toolbarProps.onDensityChange?.("compact");
+      view.current.chromeProps.onDensityChange?.("compact");
     });
     expect(onDensityChange).toHaveBeenCalledExactlyOnceWith("compact");
     expect(view.current.density).toBe("comfortable");
 
     view.rerender({ density: "compact", onDensityChange });
     expect(view.current.density).toBe("compact");
-    expect(view.current.toolbarProps.density).toBe("compact");
+    expect(view.current.chromeProps.density).toBe("compact");
   });
 
   it("returns an uncontrolled density to comfortable on remount", () => {
     const first = renderDensityShell();
     act(() => {
-      first.current.toolbarProps.onDensityChange?.("compact");
+      first.current.chromeProps.onDensityChange?.("compact");
     });
     expect(first.current.density).toBe("compact");
     first.unmount();

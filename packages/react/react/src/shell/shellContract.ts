@@ -17,7 +17,6 @@ import type { TableChrome } from "../chrome/tableChromeContract";
 import type { FilterTriggerToggle } from "../chrome/toolbarChrome";
 import type { ColumnDef } from "../columnDef";
 import type { EditHistoryState } from "../editing/editHistory";
-import type { ExportHandlerState } from "../export/useExportHandler";
 import type { ChipLabelResolver } from "../filters/useActiveFilterChips";
 import type { FindInTableState } from "../find/useFindInTable";
 import type { GridFocusState } from "../focus/useGridFocus";
@@ -109,7 +108,7 @@ export interface DataTableShellTableProps<
  *
  * @public
  */
-export interface DataTableShellToolbarProps<TRow> extends ExportHandlerState {
+export interface DataTableShellToolbarProps<TRow> {
   /** Headless table state and prop-getters. */
   table: UseDataTableResult<TRow>;
   /** Whether the search input renders. */
@@ -122,30 +121,6 @@ export interface DataTableShellToolbarProps<TRow> extends ExportHandlerState {
   toolbar?: ReactNode;
   /** Caller-supplied content for the toolbar ends. */
   toolbarSlots?: ToolbarSlots;
-  /** Put the last edit back. */
-  onUndo?: () => void;
-  /** Do the last undone edit again. */
-  onRedo?: () => void;
-  /** Whether there is anything to undo. */
-  canUndo?: boolean;
-  /** Whether there is anything to redo. */
-  canRedo?: boolean;
-  /** Undo button caption. */
-  undoLabel?: string;
-  /** Redo button caption. */
-  redoLabel?: string;
-  /** Open the print dialog. */
-  onPrint?: () => void;
-  /** Print button caption. */
-  printLabel?: string;
-  /** Density the table is rendering. */
-  density: Density;
-  /** Request a density change. */
-  onDensityChange: (next: Density) => void;
-  /** Toggle fullscreen when the feature is armed. */
-  onToggleFullscreen?: () => void;
-  /** Whether the table is fullscreen. */
-  isFullscreen?: boolean;
   /** Whether a filters affordance should render. */
   hasFilters: boolean;
   /** Number shown on the filters badge. */

@@ -22,9 +22,11 @@ import {
   type ExportHandlerState,
   useExportHandler,
 } from "../export/useExportHandler";
+import { FeatureStateScope } from "./featureState";
 import type { LiveStageProps } from "./liveStage";
 import { slotRender } from "./providers";
 import { type ExportLiveSlotProps } from "./slotKeys";
+import { EXPORT_STATE } from "./stateKeys";
 import type { TableFeature } from "./tableFeature";
 
 /** Export's live stage: reads the grid's range, writes the export control. */
@@ -61,8 +63,11 @@ function ExportStage<TRow>({
     featureHost: shell.featureHost,
     labels: shell.labels,
     pageOnly: exportPageOnly(chrome.featureNotices),
-    children: (exportHandler: ExportHandlerState) =>
-      children({ ...live, exportHandler }),
+    children: (exportHandler: ExportHandlerState) => (
+      <FeatureStateScope stateKey={EXPORT_STATE} value={exportHandler}>
+        {children({ ...live, exportHandler })}
+      </FeatureStateScope>
+    ),
   } satisfies ExportLiveSlotProps<TRow>;
   return <LiveExport {...exportProps} />;
 }
