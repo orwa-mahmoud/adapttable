@@ -175,7 +175,9 @@ describe("emitted-file accounting", () => {
       isEntry: false,
       imports: [],
       dynamicImports: [],
-      moduleIds: [`/app/node_modules/@adapttable/i18n/dist/locales/${fileName}`],
+      moduleIds: [
+        `/app/node_modules/@adapttable/i18n/dist/locales/${fileName}`,
+      ],
       code,
     });
     const output = [

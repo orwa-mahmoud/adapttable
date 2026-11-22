@@ -123,7 +123,10 @@ export function capabilityReason(
 export function capabilityReason(
   capability: keyof typeof CAPABILITY_REASON_LABEL,
   labels: Partial<
-    Pick<Required<TableLabels>, "noticeGroupingUnavailable" | "noticeExportAllPage">
+    Pick<
+      Required<TableLabels>,
+      "noticeGroupingUnavailable" | "noticeExportAllPage"
+    >
   >
 ): string {
   const text = labels[CAPABILITY_REASON_LABEL[capability]];
