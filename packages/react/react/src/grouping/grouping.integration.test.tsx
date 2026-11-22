@@ -10,6 +10,7 @@ import { groupingPanel } from "../features/grouping-panel";
 import { FeatureProviders } from "../features/providers";
 import {
   EDITING_STATE,
+  GROUPING_PANEL_VIEW_STATE,
   GROUPING_STATE,
   type GroupingState,
 } from "../features/stateKeys";
@@ -284,11 +285,15 @@ describe("grouping panel integration", () => {
       };
     });
 
-    expect(result.current.groupingPanel?.groupBy).toEqual(["team"]);
-    expect(result.current.groupingPanel?.aggregateOverrides).toEqual({
-      name: "count",
-    });
-    expect(result.current.groupingPanel?.canSetAggregates).toBe(true);
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.groupBy).toEqual(["team"]);
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.aggregateOverrides).toEqual(
+      {
+        name: "count",
+      }
+    );
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.canSetAggregates).toBe(
+      true
+    );
   });
 
   it("shows a plain groupAggregates mapper as owned by the app", () => {
@@ -316,7 +321,7 @@ describe("grouping panel integration", () => {
         };
       }
     );
-    expect(result.current.groupingPanel?.aggregations.items).toEqual(
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.aggregations.items).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           columnKey: "name",

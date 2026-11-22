@@ -402,6 +402,7 @@ export {
   FILTER_CHIPS_STATE,
   type FilterChipsState,
   FULLSCREEN_STATE,
+  GROUPING_PANEL_VIEW_STATE,
   GROUPING_STATE,
   type GroupingState,
   ROW_ACTIONS_STATE,
@@ -869,7 +870,6 @@ export type {
 export { type SearchInputState } from "./useDataTable/useSearchInput";
 export type {
   DataTableShellChromeProps,
-  DataTableShellGroupingPanelProps,
   DataTableShellProps,
   DataTableShellResult,
   DataTableShellTableProps,

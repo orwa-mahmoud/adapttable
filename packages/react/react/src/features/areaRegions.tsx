@@ -82,9 +82,18 @@ function CommandPalette<TRow>({
   );
 }
 
-function GroupingPanel<TRow>({ view }: KitRegionProps<TRow>): ReactNode {
-  const panel = view.groupingPanelProps;
-  if (!panel) return null;
+function GroupingPanel<TRow>({ view, props }: KitRegionProps<TRow>): ReactNode {
+  "use no memo";
+  const state = view.tableProps.groupingPanel;
+  if (!state) return null;
+  const { chrome } = view;
+  const panel: GroupingPanelSlotProps<TRow> = {
+    state,
+    columns: chrome.allColumns,
+    labels: chrome.table.labels,
+    mobile: chrome.isMobile,
+    dir: props.dir,
+  };
   return (
     <FeatureSlot
       slot={GROUPING_PANEL}

@@ -3,16 +3,11 @@
  * a kit's toolbar spreads before adding its own filters-mode wiring, menus and
  * colour. The controls the composed features add read their own state.
  */
-import {
-  type Direction,
-  resolveFilterMode,
-  toolbarShowsFilters,
-} from "@adapttable/core";
+import { resolveFilterMode, toolbarShowsFilters } from "@adapttable/core";
 import type { ReactNode } from "react";
 
 import type { TableChrome } from "../chrome/tableChromeContract";
 import type {
-  DataTableShellGroupingPanelProps,
   DataTableShellProps,
   DataTableShellToolbarProps,
 } from "./shellContract";
@@ -50,26 +45,4 @@ export function shellToolbarProps<TRow>(
     addRowLabel: chrome.table.labels.addRow,
     dir: props.dir,
   };
-}
-
-/**
- * The grouping panel's props, when the grouping panel is composed.
- *
- * @param chrome - The shell's chrome.
- * @param dir - The table's direction.
- * @returns The panel props, or nothing without the panel.
- */
-export function shellGroupingPanelProps<TRow>(
-  chrome: TableChrome<TRow>,
-  dir: Direction | undefined
-): DataTableShellGroupingPanelProps<TRow> | undefined {
-  return chrome.groupingPanel
-    ? {
-        state: chrome.groupingPanel,
-        columns: chrome.allColumns,
-        labels: chrome.table.labels,
-        mobile: chrome.isMobile,
-        dir,
-      }
-    : undefined;
 }

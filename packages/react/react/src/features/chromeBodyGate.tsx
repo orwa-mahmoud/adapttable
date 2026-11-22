@@ -6,7 +6,7 @@
  * paint already knows which child to mount — features are static — so SSR
  * and hydration see the same tree.
  */
-import type { EditHistoryState } from "@adapttable/core";
+import type { EditHistoryState, GroupingPanelState } from "@adapttable/core";
 import { overlayChromeExtras } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
@@ -31,6 +31,7 @@ import {
   COLUMN_SIZING_STATE,
   EDIT_HISTORY_STATE,
   EDITING_STATE,
+  GROUPING_PANEL_VIEW_STATE,
   GROUPING_STATE,
   ROW_ACTIONS_STATE,
   ROW_DETAIL_STATE,
@@ -82,17 +83,16 @@ function PlainChromeBody<TRow>({
   return children(body);
 }
 
-/**
- * The shell snapshots the panel before grouping has computed its cells.
- * The extras overlay is the panel those cells belong on.
- */
+/** The grouping panel the grouping stage published, onto the table's props. */
 function withGroupingPanel<TRow>(
   shell: DataTableShellResult<TRow>,
-  panel: DataTableShellResult<TRow>["chrome"]["groupingPanel"]
+  panel: GroupingPanelState | undefined
 ): DataTableShellResult<TRow> {
-  const props = shell.groupingPanelProps;
-  if (!props || !panel || props.state === panel) return shell;
-  return { ...shell, groupingPanelProps: { ...props, state: panel } };
+  if (!panel) return shell;
+  return {
+    ...shell,
+    tableProps: { ...shell.tableProps, groupingPanel: panel },
+  };
 }
 
 /**
@@ -173,7 +173,7 @@ function StagedShell<TRow>({
       rowMutations: actions?.rowMutations,
       hasRowActions: actions?.hasRowActions,
     }),
-    chrome.groupingPanel
+    useFeatureState(GROUPING_PANEL_VIEW_STATE)
   );
   const afterBody = (view: DataTableShellResult<TRow>) => (
     <FeatureStateScope

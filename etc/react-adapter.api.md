@@ -1739,15 +1739,6 @@ export type DataTableShellChromeProps<TRow> = DataTableShellProps<TRow> & {
 };
 
 // @public
-export interface DataTableShellGroupingPanelProps<TRow> {
-    columns: ColumnDef<TRow>[];
-    dir: Direction | undefined;
-    labels: Required<TableLabels>;
-    mobile: boolean;
-    state: GroupingPanelState;
-}
-
-// @public
 export type DataTableShellProps<TRow> = Omit<ComposedTableProps<TRow>, "source"> & {
     source?: TableSource<TRow>;
     data?: readonly TRow[];
@@ -1774,7 +1765,6 @@ export interface DataTableShellResult<TRow> {
     find: FindInTableState;
     fullscreen: FullscreenState;
     gridFocus: GridFocusState;
-    groupingPanelProps: DataTableShellGroupingPanelProps<TRow> | undefined;
     hasRowActions: boolean;
     hasRowReorder: boolean;
     labels: Required<TableLabels>;
@@ -2829,6 +2819,9 @@ export { GROUPING_LIVE }
 
 // @public
 export const GROUPING_PANEL: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
+
+// @public
+export const GROUPING_PANEL_VIEW_STATE: FeatureStateKey<GroupingPanelState>;
 
 // @public
 export const GROUPING_STATE: FeatureStateKey<GroupingState<unknown>>;
@@ -4957,7 +4950,6 @@ export interface TableChrome<TRow> {
     errorState?: TableErrorState;
     featureNotices: readonly FeatureNotice[];
     getRowId: (row: TRow) => string;
-    groupingPanel?: GroupingPanelState;
     hasRowReorder: boolean;
     isMobile: boolean;
     isPaged: boolean;

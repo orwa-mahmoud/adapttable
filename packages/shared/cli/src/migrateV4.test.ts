@@ -224,7 +224,20 @@ describe("migrateV4Source", () => {
         "const panel = chrome.groupingPanel;",
       ].join("\n")
     );
-    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 4, 5, 6]);
+    expect(result.issues.map((issue) => issue.line)).toEqual([
+      1, 2, 4, 5, 6, 7,
+    ]);
+  });
+
+  it("reports the shell's grouping panel props", () => {
+    const result = migrateV4Source(
+      [
+        "const panel = shell.groupingPanelProps;",
+        "type P = DataTableShellGroupingPanelProps<Row>;",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2]);
   });
 
   it("leaves a file that uses nothing v4 moved untouched", () => {

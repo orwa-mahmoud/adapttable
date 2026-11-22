@@ -9,7 +9,6 @@ import {
   devWarn,
   type GroupByInput,
   groupingIgnoredWarning,
-  groupingPanelAggregations,
   groupingProjectionBundle,
   groupingSourceOf,
   type GroupNode,
@@ -19,18 +18,28 @@ import {
 import {
   computePagination,
   coreGrouping,
+  type GroupingRuntimeSource,
   projectedGroupingSource,
 } from "@adapttable/core/binding";
 import { createTableEngine } from "@adapttable/core/engine";
 import { formatGroupBy, parseGroupBy } from "@adapttable/core/grouping";
-import { type ReactNode, useCallback, useEffect, useMemo } from "react";
+import {
+  type ComponentType,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 
+import type { TableChrome } from "../chrome/tableChromeContract";
 import { useGroupCollapse } from "../grouping/useGroupCollapse";
 import { useGroupPaging } from "../grouping/useGroupPaging";
+import { GROUPING_PANEL_STATE } from "./groupingPanelKey";
 import {
   type FeatureProviderProps,
   FeatureStateScope,
   slotRender,
+  useFeatureState,
 } from "./providers";
 import { FRONTEND_ROW_MODEL } from "./rowModelKey";
 import {
@@ -51,11 +60,33 @@ function GroupingModelProvider({
   );
 }
 
-function LiveGrouping<TRow>({
+/**
+ * What the grouping panel's stage is handed: the keys, columns and sources
+ * this render groups by, and the grouped entries its aggregations read.
+ */
+export interface GroupingPanelStageProps<TRow> {
+  readonly groupBy: readonly string[];
+  readonly columns: TableChrome<TRow>["allColumns"];
+  readonly source: TableChrome<TRow>["source"];
+  readonly groupingSource: GroupingRuntimeSource<TRow>;
+  readonly entries: GroupingState["entries"] | undefined;
+  readonly children: ReactNode;
+}
+
+/**
+ * The grouping stage. The panel's entry passes `Panel`, which publishes the
+ * panel's state; plain grouping carries none of it.
+ */
+export function LiveGrouping<TRow>({
   chrome,
   props,
   children,
-}: Readonly<ChromeExtraSlotProps<TRow>>): ReactNode {
+  Panel,
+}: Readonly<
+  ChromeExtraSlotProps<TRow> & {
+    Panel?: ComponentType<GroupingPanelStageProps<TRow>>;
+  }
+>): ReactNode {
   const source = chrome.source;
   const requestedGroupBy =
     props.groupBy === undefined ? source.groupBy : props.groupBy;
@@ -129,6 +160,9 @@ function LiveGrouping<TRow>({
     extraRows,
     locale,
   } = props;
+  // What the developer's own mapper declares, published by the panel.
+  const panelDeclared =
+    useFeatureState(GROUPING_PANEL_STATE)?.declaredAggregates;
   const projected = useMemo(
     () =>
       projectGrouping({
@@ -139,7 +173,7 @@ function LiveGrouping<TRow>({
         getRowId,
         collapsedGroupIds: groupCollapse.collapsedGroupIds,
         groupAggregates,
-        panelDeclared: chrome.groupingPanel?.declaredAggregates,
+        panelDeclared,
         groupFooters,
         groupSort,
         groupFilter,
@@ -150,7 +184,7 @@ function LiveGrouping<TRow>({
       }),
     [
       chrome.allColumns,
-      chrome.groupingPanel,
+      panelDeclared,
       extraRows,
       getRowId,
       groupAggregates,
@@ -192,28 +226,8 @@ function LiveGrouping<TRow>({
   );
 
   const viewSource = projectedGroupingSource(source, projected);
-  const groupingPanel = useMemo(() => {
-    if (!chrome.groupingPanel) return undefined;
-    return {
-      ...chrome.groupingPanel,
-      groupBy: groupByKeys,
-      aggregations: groupingPanelAggregations({
-        source: groupingSource,
-        columns: chrome.allColumns,
-        declared: chrome.groupingPanel.declaredAggregates,
-        entries: grouping?.entries,
-      }),
-    };
-  }, [
-    chrome.allColumns,
-    chrome.groupingPanel,
-    groupByKeys,
-    grouping,
-    groupingSource,
-  ]);
   const next = {
     ...chrome,
-    groupingPanel,
     source: viewSource,
     editingRows: viewSource.rows,
     hasRowReorder: chrome.hasRowReorder,
@@ -232,7 +246,19 @@ function LiveGrouping<TRow>({
       stateKey={GROUPING_STATE}
       value={grouping as GroupingState | undefined}
     >
-      {children(next)}
+      {Panel ? (
+        <Panel
+          groupBy={groupByKeys}
+          columns={chrome.allColumns}
+          source={source}
+          groupingSource={groupingSource}
+          entries={grouping?.entries}
+        >
+          {children(next)}
+        </Panel>
+      ) : (
+        children(next)
+      )}
     </FeatureStateScope>
   );
 }

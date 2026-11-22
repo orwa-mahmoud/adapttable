@@ -917,7 +917,7 @@ describe("grouping panel on the finished shell", () => {
       groupBy: "name",
       groupAggregates: (rows) => ({ id: rows.length }),
     });
-    expect(current.groupingPanelProps?.state.aggregations.items).toEqual(
+    expect(current.tableProps.groupingPanel?.aggregations.items).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           columnKey: "id",

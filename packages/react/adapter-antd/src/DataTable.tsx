@@ -1876,7 +1876,7 @@ function AntdViewBody<TRow>({
     labels,
     editing: view.tableProps.editing,
     rows: c.editingRows,
-    groupingPanel: c.groupingPanel,
+    groupingPanel: view.tableProps.groupingPanel,
     getRowId,
     pinned: c.columnLayout.state.pinned,
     setWidth: props.resizableColumns ? c.columnLayout.setWidth : undefined,

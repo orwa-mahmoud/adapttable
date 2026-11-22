@@ -7,25 +7,36 @@
 import {
   createGroupingPanelController,
   declaredAggregates,
+  groupingPanelAggregations,
 } from "@adapttable/core";
 import { coreGroupingPanel } from "@adapttable/core/binding";
 import { createTableEngine } from "@adapttable/core/engine";
 import {
   type ReactNode,
   useEffect,
+  useMemo,
   useState,
   useSyncExternalStore,
 } from "react";
 
 import { GROUPING_PANEL_RENDER } from "./areaRegions";
-import { grouping, type GroupingExtras } from "./grouping";
+import {
+  grouping,
+  type GroupingExtras,
+  type GroupingPanelStageProps,
+  LiveGrouping,
+} from "./grouping";
 import { GROUPING_PANEL_STATE } from "./groupingPanelKey";
 import {
   type FeatureProviderProps,
   FeatureStateScope,
+  slotRender,
+  useFeatureState,
   useTableRuntime,
 } from "./providers";
 import { FRONTEND_ROW_MODEL } from "./rowModelKey";
+import { type ChromeExtraDraw, GROUPING_LIVE } from "./slotKeys";
+import { GROUPING_PANEL_VIEW_STATE } from "./stateKeys";
 import type { TableFeature } from "./tableFeature";
 
 interface GroupingPanelFeature<TRow> extends TableFeature<TRow> {
@@ -85,6 +96,54 @@ function GroupingPanelProvider({
 }
 
 /**
+ * The panel's state for this render, published for the strip, the column
+ * menu and the header drag: its interactions with the keys, columns and
+ * aggregations the grouping stage computed.
+ */
+function GroupingPanelStage<TRow>({
+  groupBy,
+  columns,
+  source,
+  groupingSource,
+  entries,
+  children,
+}: Readonly<GroupingPanelStageProps<TRow>>): ReactNode {
+  const interactions = useFeatureState(GROUPING_PANEL_STATE);
+  const panel = useMemo(() => {
+    const state = interactions?.panelState?.({
+      groupBy,
+      columns,
+      source: {
+        ...groupingSource,
+        setGroupAggregateOverrides: source.setGroupAggregateOverrides,
+      },
+    });
+    if (!state) return undefined;
+    return {
+      ...state,
+      aggregations: groupingPanelAggregations({
+        source: groupingSource,
+        columns,
+        declared: state.declaredAggregates,
+        entries,
+      }),
+    };
+  }, [
+    columns,
+    entries,
+    groupBy,
+    groupingSource,
+    interactions,
+    source.setGroupAggregateOverrides,
+  ]);
+  return (
+    <FeatureStateScope stateKey={GROUPING_PANEL_VIEW_STATE} value={panel}>
+      {children}
+    </FeatureStateScope>
+  );
+}
+
+/**
  * Add an interactive grouping panel while retaining the ordinary grouping
  * feature's options and row model.
  *
@@ -101,6 +160,11 @@ export function groupingPanel<TRow = unknown>(
     initialGroupBy: groupBy,
     extras,
     provider: { Provider: GroupingPanelProvider },
-    renders: [...(base.renders ?? []), GROUPING_PANEL_RENDER],
+    renders: [
+      slotRender<ChromeExtraDraw>(GROUPING_LIVE, (props) => (
+        <LiveGrouping {...props} Panel={GroupingPanelStage} />
+      )),
+      GROUPING_PANEL_RENDER,
+    ],
   } as GroupingPanelFeature<TRow>;
 }

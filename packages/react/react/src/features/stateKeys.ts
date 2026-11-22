@@ -9,6 +9,7 @@ import type {
   GroupAggregatesFn,
   GroupByInput,
   GroupedFlatEntry,
+  GroupingPanelState,
   RowAction,
   TreeEntry,
   TreeShape,
@@ -111,6 +112,15 @@ export interface GroupingState<TRow = unknown> {
 
 /** The grouping, published by the grouping stage. */
 export const GROUPING_STATE = featureStateKey<GroupingState>("grouping");
+
+/**
+ * The grouping panel's state for this render: its interactions with the
+ * keys, columns and aggregations the table groups by. Published by the
+ * grouping stage while the panel is composed.
+ */
+export const GROUPING_PANEL_VIEW_STATE = featureStateKey<GroupingPanelState>(
+  "grouping-panel-view"
+);
 
 /**
  * The flattened hierarchy and its expansion.

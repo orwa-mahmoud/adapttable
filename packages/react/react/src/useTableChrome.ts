@@ -1,8 +1,4 @@
-import {
-  devWarn,
-  type GroupingPanelState,
-  resolvePinnedRows,
-} from "@adapttable/core";
+import { devWarn, resolvePinnedRows } from "@adapttable/core";
 import {
   applyFeatureNoticesAttribute,
   chromeBodyRegion,
@@ -30,7 +26,6 @@ import {
   declaredReactColumnLayout,
 } from "./columns/reactColumns";
 import { resolveColumns } from "./columns/resolveColumns";
-import { GROUPING_PANEL_STATE } from "./features/groupingPanelKey";
 import { useFeatureState } from "./features/providers";
 import { ROW_REORDER } from "./features/rowReorderKey";
 import { useEventCallback } from "./hooks/useEventCallback";
@@ -258,38 +253,6 @@ export function useTableChrome<TRow>(
     () => parseGroupBy(requestedGroupBy),
     [requestedGroupBy]
   );
-  const groupingPanelInteractions = useFeatureState(GROUPING_PANEL_STATE);
-  const groupingPanel = useMemo<GroupingPanelState | undefined>(
-    () =>
-      groupingPanelInteractions?.panelState?.({
-        groupBy: groupByKeys,
-        columns: resolvedColumns,
-        source: {
-          groupAggregateOverrides: source.groupAggregateOverrides,
-          setGroupAggregateOverrides: source.setGroupAggregateOverrides,
-          allFilteredRows: source.allFilteredRows,
-          groups: source.groups,
-          capabilities: source.capabilities,
-          honorsAggregates: source.honorsAggregates,
-          queryAggregates: source.queryAggregates,
-          aggregateOperations: source.aggregateOperations,
-        },
-      }),
-    [
-      resolvedColumns,
-      groupByKeys,
-      groupingPanelInteractions,
-      source.aggregateOperations,
-      source.allFilteredRows,
-      source.capabilities,
-      source.groupAggregateOverrides,
-      source.groups,
-      source.queryAggregates,
-      source.setGroupAggregateOverrides,
-      source.honorsAggregates,
-    ]
-  );
-
   const featureNotices = useMemo(
     () =>
       chromeFeatureNotices({
@@ -362,7 +325,6 @@ export function useTableChrome<TRow>(
     hasRowReorder,
     rowReorder,
     pinnedRows,
-    groupingPanel,
     editingRows,
     showFooter,
     columnLayout,

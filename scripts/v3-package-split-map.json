@@ -47419,14 +47419,6 @@
       "behavior": ""
     },
     {
-      "export": "DataTableShellGroupingPanelProps",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
       "export": "DataTableShellProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -48855,6 +48847,14 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "GROUPING_PANEL_VIEW_STATE",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },

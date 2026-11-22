@@ -4,7 +4,6 @@ import {
   type FilterDef,
   type FilterRuntime,
   type FilterTypeRegistry,
-  type GroupingPanelState,
   type SelectionStats,
   type SortByOption,
   type TableLabels,
@@ -15,7 +14,6 @@ import { type ReactNode, type RefCallback, type RefObject } from "react";
 
 import type { TableChrome } from "../chrome/tableChromeContract";
 import type { FilterTriggerToggle } from "../chrome/toolbarChrome";
-import type { ColumnDef } from "../columnDef";
 import type { EditHistoryState } from "../editing/editHistory";
 import type { ChipLabelResolver } from "../filters/useActiveFilterChips";
 import type { FindInTableState } from "../find/useFindInTable";
@@ -138,25 +136,6 @@ export interface DataTableShellToolbarProps<TRow> {
 }
 
 /**
- * Grouping-strip props the shell exposes when the grouping-panel feature is
- * composed.
- *
- * @public
- */
-export interface DataTableShellGroupingPanelProps<TRow> {
-  /** Live grouping-panel state. */
-  state: GroupingPanelState;
-  /** Columns the strip can group by. */
-  columns: ColumnDef<TRow>[];
-  /** Resolved labels. */
-  labels: Required<TableLabels>;
-  /** Whether the table is in the mobile layout. */
-  mobile: boolean;
-  /** Text direction. */
-  dir: Direction | undefined;
-}
-
-/**
  * What {@link useDataTableShell} returns, before or after the body gate.
  * Declared as an explicit contract so API Extractor does not emit a
  * `ReturnType` whose member order follows bundler traversal.
@@ -184,8 +163,6 @@ export interface DataTableShellResult<TRow> {
   urlAdapter: UrlStateAdapter;
   /** Shared adapter chrome. */
   chrome: TableChrome<TRow>;
-  /** Grouping-strip props when that feature is composed. */
-  groupingPanelProps: DataTableShellGroupingPanelProps<TRow> | undefined;
   /** Props the chrome was built with. */
   chromeProps: DataTableShellChromeProps<TRow>;
   /** When true, the view leaves `tableProps` alone. */

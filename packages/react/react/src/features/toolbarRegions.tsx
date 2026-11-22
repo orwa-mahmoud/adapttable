@@ -63,7 +63,7 @@ function ColumnMenuRegion<TRow>({
         labels: view.labels,
         hasRowActions: view.hasRowActions,
         hasRowReorder: view.hasRowReorder,
-        groupingPanel: chrome.groupingPanel,
+        groupingPanel: view.tableProps.groupingPanel,
         dir: props.dir,
       }}
     />

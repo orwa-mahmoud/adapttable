@@ -17516,7 +17516,8 @@ palette read; the editing feature publishes its bundle as `EDITING_STATE`,
 row detail its renderer and expansion as `ROW_DETAIL_STATE`
 (`RowDetailState`), row actions the trailing column as `ROW_ACTIONS_STATE`
 (`RowActionsState`), row pinning its pins as `ROW_PINNING_STATE`, grouping
-its grouped rows as `GROUPING_STATE` (`GroupingState`) and the tree its
+its grouped rows as `GROUPING_STATE` (`GroupingState`), the grouping panel
+its strip state as `GROUPING_PANEL_VIEW_STATE`, and the tree its
 hierarchy as `TREE_STATE` (`TreeState`), and the live column layout its
 sizing actions as `COLUMN_SIZING_STATE` (`ColumnSizingState`); `SAVED_VIEWS` (`SavedViewsSlotProps`),
 `GRID_FOCUS_ANNOUNCER`, the filter surfaces `FILTER_POPOVER` / `FILTER_DRAWER`
@@ -17855,8 +17856,7 @@ deprecated alias until the next major.
   (`@adapttable/react/adapter`) —
   the whole adapter shell in one call: resolved tier, chrome, and the
   `DataTableShellTableProps` / `DataTableShellToolbarProps` bundles a kit
-  spreads, plus `DataTableShellChromeProps` and
-  `DataTableShellGroupingPanelProps`. `DataTableShellView` mounts the gates
+  spreads, plus `DataTableShellChromeProps`. `DataTableShellView` mounts the gates
   below it and hands back the finished view; `finishDataTableShell` folds a
   body into a shell for an adapter that assembles its own.
 - `useColumnLayout(options): ReactUseColumnLayoutResult<TRow>` — headless
@@ -20200,7 +20200,7 @@ shared engine behind a batteries-included `<DataTable>` — it resolves the
 data tier, builds the declarative-filter runtime, wires the chrome, and
 returns the `tableProps` / `toolbarProps` bundles
 (`DataTableShellTableProps`, `DataTableShellToolbarProps`,
-`DataTableShellChromeProps`, `DataTableShellGroupingPanelProps`).
+`DataTableShellChromeProps`).
 `renderedRowsOf(chrome): readonly TRow[]` returns the same data-row inventory
 published by the runtime: grouped leaf rows, tree entries, or source rows.
 Native renderers can map row IDs to that inventory for reorder controls even
@@ -24293,6 +24293,7 @@ of 380 kB.
 | React `TableChrome.rowMutations`, `rowActions`, `hasRowActions` and `rowPinning`                                                                                                                                                                                                                                                          | Row actions publish `ROW_ACTIONS_STATE` (`rowMutations`, `rowActions`, `hasRowActions`) and row pinning `ROW_PINNING_STATE`; the finished shell's `tableProps` carries them to the body                                                                                                                     |
 | React `TableChrome.grouping`, `tree`, `groupingArmed` and `treeShaped`                                                                                                                                                                                                                                                                    | Grouping publishes `GROUPING_STATE` and the tree `TREE_STATE`; a stage or body reads them with `useFeatureState`, and the finished shell's `tableProps.grouping` and `tableProps.tree` carry them to the body                                                                                               |
 | React `TableChrome.autoSizeColumns`, `autoSizeColumn` and `columnLayoutLive`                                                                                                                                                                                                                                                              | The column layout publishes `COLUMN_SIZING_STATE` (`autoSizeColumns`, `autoSizeColumn`); the finished shell's `autoSizeColumns` and `autoSizeColumn` carry them                                                                                                                                             |
+| React `TableChrome.groupingPanel`, the shell's `groupingPanelProps` and `DataTableShellGroupingPanelProps`                                                                                                                                                                                                                                | The grouping panel publishes `GROUPING_PANEL_VIEW_STATE`; the finished shell's `tableProps.groupingPanel` carries it, and the strip's props are `GroupingPanelSlotProps`                                                                                                                                    |
 | `KitPagerView.chrome`                                                                                                                                                                                                                                                                                                                     | `KitPagerView.tableProps` (`grouping`)                                                                                                                                                                                                                                                                      |
 | Core `BodyChrome` with optional `grouping` and `tree`                                                                                                                                                                                                                                                                                     | Both keys are required; pass `undefined` for an ungrouped body                                                                                                                                                                                                                                              |
 | `OptionalTreeCell`, `OptionalTreeToggle`, `OptionalFillHandle`, `OptionalExpandToggle`, `OptionalFilterHeader`, `OptionalRowEditActions`, `OptionalRowReorderHandle`, `OptionalRowReorderButtons`, `OptionalColumnGroupToggle`, `OptionalColumnHeaderRename`, `OptionalColumnSelect`, `OptionalGroupHeaderRow`, `OptionalGroupHeaderCard` | `<FeatureSlot slot={…} props={…} fallback={…} />` with the slot's key                                                                                                                                                                                                                                       |

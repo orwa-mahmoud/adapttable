@@ -126,7 +126,6 @@ import { gridCellAttr } from '@adapttable/core';
 import { GridFocusControllerOptions } from '@adapttable/core';
 import { GridFocusState } from '@adapttable/core/binding';
 import { GroupCollapseState } from '@adapttable/core/binding';
-import { GroupingPanelState } from '@adapttable/core';
 import { GroupPagingState } from '@adapttable/core/binding';
 import { headerFilterFieldIsComplete } from '@adapttable/core';
 import { HeaderFilterOpenHost } from '@adapttable/core';
@@ -931,7 +930,6 @@ export interface TableChrome<TRow> {
     errorState?: TableErrorState;
     featureNotices: readonly FeatureNotice[];
     getRowId: (row: TRow) => string;
-    groupingPanel?: GroupingPanelState;
     hasRowReorder: boolean;
     isMobile: boolean;
     isPaged: boolean;

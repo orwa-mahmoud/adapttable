@@ -48,10 +48,7 @@ import type {
   DataTableShellResult,
 } from "./shell/shellContract";
 import { shellTableProps } from "./shell/shellTableProps";
-import {
-  shellGroupingPanelProps,
-  shellToolbarProps,
-} from "./shell/shellToolbarProps";
+import { shellToolbarProps } from "./shell/shellToolbarProps";
 import { useTableDataLean } from "./source/useTableDataLean";
 import { useResolvedAdapter } from "./url/adapter";
 import { useTableChrome } from "./useTableChrome";
@@ -59,7 +56,6 @@ import type { ChromeBodyData } from "./virtual/chromeBodyShared";
 
 export {
   type DataTableShellChromeProps,
-  type DataTableShellGroupingPanelProps,
   type DataTableShellProps,
   type DataTableShellResult,
   type DataTableShellTableProps,
@@ -245,7 +241,6 @@ export function useDataTableShell<TRow>(
   // The kit-agnostic slice of the toolbar's props — the adapter spreads this
   // and adds its filters-mode wiring, saved-views / column menus, and colour.
   const toolbarProps = shellToolbarProps<TRow>(props, chrome, filtersNode);
-  const groupingPanelProps = shellGroupingPanelProps<TRow>(chrome, props.dir);
 
   // What the table says out loud when sorting, filtering or paging rewrites the
   // body. Derived from the SETTLED source rather than from the controls, which
@@ -285,7 +280,6 @@ export function useDataTableShell<TRow>(
     /** The table's resolved URL backend — pass to saved-views UIs. */
     urlAdapter,
     chrome,
-    groupingPanelProps,
     /**
      * Props the chrome was built with. The body gate reads these.
      */

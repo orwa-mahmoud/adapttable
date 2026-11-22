@@ -281,7 +281,8 @@ palette read; the editing feature publishes its bundle as `EDITING_STATE`,
 row detail its renderer and expansion as `ROW_DETAIL_STATE`
 (`RowDetailState`), row actions the trailing column as `ROW_ACTIONS_STATE`
 (`RowActionsState`), row pinning its pins as `ROW_PINNING_STATE`, grouping
-its grouped rows as `GROUPING_STATE` (`GroupingState`) and the tree its
+its grouped rows as `GROUPING_STATE` (`GroupingState`), the grouping panel
+its strip state as `GROUPING_PANEL_VIEW_STATE`, and the tree its
 hierarchy as `TREE_STATE` (`TreeState`), and the live column layout its
 sizing actions as `COLUMN_SIZING_STATE` (`ColumnSizingState`); `SAVED_VIEWS` (`SavedViewsSlotProps`),
 `GRID_FOCUS_ANNOUNCER`, the filter surfaces `FILTER_POPOVER` / `FILTER_DRAWER`
@@ -620,8 +621,7 @@ deprecated alias until the next major.
   (`@adapttable/react/adapter`) —
   the whole adapter shell in one call: resolved tier, chrome, and the
   `DataTableShellTableProps` / `DataTableShellToolbarProps` bundles a kit
-  spreads, plus `DataTableShellChromeProps` and
-  `DataTableShellGroupingPanelProps`. `DataTableShellView` mounts the gates
+  spreads, plus `DataTableShellChromeProps`. `DataTableShellView` mounts the gates
   below it and hands back the finished view; `finishDataTableShell` folds a
   body into a shell for an adapter that assembles its own.
 - `useColumnLayout(options): ReactUseColumnLayoutResult<TRow>` — headless
@@ -2965,7 +2965,7 @@ shared engine behind a batteries-included `<DataTable>` — it resolves the
 data tier, builds the declarative-filter runtime, wires the chrome, and
 returns the `tableProps` / `toolbarProps` bundles
 (`DataTableShellTableProps`, `DataTableShellToolbarProps`,
-`DataTableShellChromeProps`, `DataTableShellGroupingPanelProps`).
+`DataTableShellChromeProps`).
 `renderedRowsOf(chrome): readonly TRow[]` returns the same data-row inventory
 published by the runtime: grouped leaf rows, tree entries, or source rows.
 Native renderers can map row IDs to that inventory for reorder controls even

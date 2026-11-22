@@ -111,7 +111,6 @@ export function shellTableProps<TRow>(
     rowHeight: props.rowHeight,
     renderCard: props.renderCard,
     summaryRow: chromeProps.summaryRow,
-    groupingPanel: chrome.groupingPanel,
     dir: props.dir,
     assembly: (props as { assembly?: Partial<AssemblyFns<TRow>> }).assembly,
   };

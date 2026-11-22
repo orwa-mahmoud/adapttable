@@ -222,8 +222,12 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
     "The table chrome no longer carries the filter chips: the filters feature publishes FILTER_CHIPS_STATE ({ chips, activeFilterCount }); read it with useFeatureState.",
   ],
   [
-    /\bchrome\.(?:editing|editHistory|detail|rowMutations|rowActions|hasRowActions|rowPinning|grouping|tree|groupingArmed|treeShaped|autoSizeColumns|autoSizeColumn|columnLayoutLive)\b/g,
-    "The table chrome no longer carries feature state: read EDITING_STATE, EDIT_HISTORY_STATE, ROW_DETAIL_STATE, ROW_ACTIONS_STATE, ROW_PINNING_STATE, GROUPING_STATE, TREE_STATE or COLUMN_SIZING_STATE with useFeatureState, or the finished shell's tableProps.",
+    /\bchrome\.(?:editing|editHistory|detail|rowMutations|rowActions|hasRowActions|rowPinning|groupingPanel|grouping|tree|groupingArmed|treeShaped|autoSizeColumns|autoSizeColumn|columnLayoutLive)\b/g,
+    "The table chrome no longer carries feature state: read EDITING_STATE, EDIT_HISTORY_STATE, ROW_DETAIL_STATE, ROW_ACTIONS_STATE, ROW_PINNING_STATE, GROUPING_STATE, GROUPING_PANEL_VIEW_STATE, TREE_STATE or COLUMN_SIZING_STATE with useFeatureState, or the finished shell's tableProps.",
+  ],
+  [
+    /\b(?:groupingPanelProps|DataTableShellGroupingPanelProps)\b/g,
+    "The shell no longer carries the grouping panel's props: the panel's state is the finished shell's tableProps.groupingPanel (GROUPING_PANEL_VIEW_STATE), and the strip's props are GroupingPanelSlotProps.",
   ],
   [
     /\buseChromeScrollReset\(\s*\w+\s*,\s*\w+\s*,/g,

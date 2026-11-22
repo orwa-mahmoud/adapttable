@@ -14,6 +14,7 @@ import { FeatureProviders } from "./features/providers";
 import {
   EDITING_STATE,
   FILTER_CHIPS_STATE,
+  GROUPING_PANEL_VIEW_STATE,
   GROUPING_STATE,
   ROW_ACTIONS_STATE,
   ROW_DETAIL_STATE,
@@ -31,6 +32,7 @@ const CHANNEL_KEYS: readonly FeatureStateKey<unknown>[] = [
   ROW_ACTIONS_STATE,
   ROW_PINNING_STATE,
   GROUPING_STATE,
+  GROUPING_PANEL_VIEW_STATE,
   TREE_STATE,
 ];
 

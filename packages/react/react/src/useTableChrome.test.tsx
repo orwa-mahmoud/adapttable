@@ -19,6 +19,7 @@ import { rowPinning } from "./features/row-pinning";
 import { rowReorder } from "./features/row-reorder";
 import {
   FILTER_CHIPS_STATE,
+  GROUPING_PANEL_VIEW_STATE,
   GROUPING_STATE,
   ROW_ACTIONS_STATE,
   ROW_PINNING_STATE,
@@ -342,12 +343,18 @@ describe("useTableChrome", () => {
         groupBy: "name",
       };
     });
-    expect(result.current.groupingPanel?.groupBy).toEqual(["name"]);
-    expect(result.current.groupingPanel?.aggregateOverrides).toEqual({
-      team: "sum",
-    });
-    expect(result.current.groupingPanel?.canSetAggregates).toBe(true);
-    expect(result.current.groupingPanel?.add).toEqual(expect.any(Function));
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.groupBy).toEqual(["name"]);
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.aggregateOverrides).toEqual(
+      {
+        team: "sum",
+      }
+    );
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.canSetAggregates).toBe(
+      true
+    );
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.add).toEqual(
+      expect.any(Function)
+    );
   });
 
   it("without grouping the source passes through untouched", () => {

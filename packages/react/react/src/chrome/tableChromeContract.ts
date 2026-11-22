@@ -2,7 +2,6 @@ import {
   type ColumnGroupRecord,
   type ConfirmHandler,
   type FeatureNotice,
-  type GroupingPanelState,
   type PinnedRows,
   type TableErrorState,
   type TableSource,
@@ -101,8 +100,6 @@ export interface TableChrome<TRow> {
    * Present iff `pinnedSummaryRows` was composed with at least one row.
    */
   pinnedRows?: PinnedRows<TRow>;
-  /** Interactive grouping strip state, present only with `groupingPanel()`. */
-  groupingPanel?: GroupingPanelState;
   /**
    * The rows the editing layer must treat as present: the grouped leaf set
    * (in render order) while grouping renders the full filtered set, the
