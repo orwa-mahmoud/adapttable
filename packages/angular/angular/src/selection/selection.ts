@@ -11,6 +11,8 @@ import {
   createControllableStore,
   headerSelectionOf,
   type HeaderSelectionState,
+  rekeyedIds,
+  rekeyIdSet,
   resolveTableLabels,
   type SelectionState,
   toggleId,
@@ -35,7 +37,7 @@ import {
   type MaybeSignalOptional,
   readMaybe,
 } from "../store";
-import { tableStoreOf } from "../tableStore";
+import { followRowRekeys, tableStoreOf } from "../tableStore";
 
 /**
  * Options for {@link injectRowSelection}.
@@ -162,6 +164,14 @@ export function injectRowSelection<TRow>(
     control();
     store.commit(next);
   };
+  // A selected row stays selected under its new id; the host hears the move.
+  followRowRekeys<TRow>(injector, (log) => {
+    const current = untracked(selectedIds);
+    const next = rekeyIdSet(current, rekeyedIds(log, options.rowKey));
+    if (next === current) return;
+    control();
+    store.commit(next);
+  });
   effect(
     () => {
       const key = resetKey();

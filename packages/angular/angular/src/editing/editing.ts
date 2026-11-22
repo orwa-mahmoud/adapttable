@@ -32,7 +32,7 @@ import {
 } from "@angular/core";
 
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
-import { tableStoreOf } from "../tableStore";
+import { followRowRekeyMoves, tableStoreOf } from "../tableStore";
 
 export type { BatchRowEdit, CellEditHandler } from "@adapttable/core";
 export type {
@@ -153,6 +153,7 @@ export function injectCellEditing<TRow = unknown>(
     { injector }
   );
   const snapshot = fromStore(session, { injector });
+  followRowRekeyMoves(injector, session);
   return computed(() => cellEditingView(session, snapshot()));
 }
 
@@ -193,6 +194,7 @@ export function injectRowEditing<TRow>(
     { injector }
   );
   const snapshot = fromStore(store, { injector });
+  followRowRekeyMoves(injector, store);
   return computed(() => rowEditingView(store, snapshot(), options.featureHost));
 }
 
@@ -233,6 +235,7 @@ export function injectBatchEditing<TRow>(
     { injector }
   );
   const snapshot = fromStore(store, { injector });
+  followRowRekeyMoves(injector, store);
   return computed(() =>
     batchEditingView(store, snapshot(), {
       columns: readMaybe(options.columns),

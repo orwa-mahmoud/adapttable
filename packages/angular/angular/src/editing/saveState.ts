@@ -46,6 +46,7 @@ export function injectCellSaveState<TRow>(
   const store = createCellSaveStore<TRow>(options, {
     store: tableStoreOf(injector),
   });
+  followRowRekeyMoves(injector, store);
   effect(
     () => {
       store.configure(options);
@@ -62,4 +63,4 @@ export type {
   CellSaveStatus,
   FailedCellSave,
 } from "@adapttable/core";
-import { tableStoreOf } from "../tableStore";
+import { followRowRekeyMoves, tableStoreOf } from "../tableStore";

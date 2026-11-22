@@ -14,7 +14,7 @@ import {
 } from "@angular/core";
 
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
-import { tableStoreOf } from "../tableStore";
+import { followRowRekeyMoves, tableStoreOf } from "../tableStore";
 
 export type { DirtyCellState } from "@adapttable/core";
 
@@ -57,6 +57,7 @@ export function injectDirtyCells(
   const store = createDirtyCellStore(config(), {
     store: tableStoreOf(injector),
   });
+  followRowRekeyMoves(injector, store);
   effect(
     () => {
       store.configure(config());

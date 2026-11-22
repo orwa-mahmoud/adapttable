@@ -42,7 +42,7 @@ export type {
   ReconcileLiveEdit,
   ReconcileLiveRowEdit,
 } from "@adapttable/core";
-import { tableStoreOf } from "../tableStore";
+import { followRowRekeyMoves, tableStoreOf } from "../tableStore";
 
 /**
  * Subscribe to core's conflict store until the injection context is destroyed.
@@ -59,6 +59,7 @@ export function injectEditConflict<TRow>(
   const store = createDeferredEditConflictStore<TRow>({
     store: tableStoreOf(injector),
   });
+  followRowRekeyMoves(injector, store);
   const snapshot = fromStore(store, { injector });
   return computed(() => editConflictView(store, snapshot()));
 }

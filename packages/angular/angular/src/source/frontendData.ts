@@ -13,6 +13,7 @@ import {
   type TableSource,
 } from "@adapttable/core";
 import {
+  commitRowRekeys,
   createFrontendSourceWith,
   resolvePaginationMode,
 } from "@adapttable/core/binding";
@@ -33,6 +34,7 @@ import {
   type MaybeSignalOptional,
   readMaybe,
 } from "../store";
+import { tableStoreOf } from "../tableStore";
 import {
   injectTableUrlState,
   type TableUrlState,
@@ -172,12 +174,21 @@ export function frontendDataWith<TRow>(
       url.state()
     );
   });
+  // The data last committed, which a patched array's log continues from.
+  let committedData: readonly TRow[] | undefined;
   effect(
     () => {
       const next = factory();
       frame();
       untracked(() => {
-        if (source.engineFactory === next) source.commit();
+        if (source.engineFactory !== next) return;
+        source.commit();
+        // A patched array's rekeys move the table's selection, pins and
+        // drafts in the same pass.
+        const data = readMaybe(options.data);
+        const store = tableStoreOf(injector);
+        if (store) commitRowRekeys(store, committedData, data);
+        committedData = data;
       });
     },
     { injector }

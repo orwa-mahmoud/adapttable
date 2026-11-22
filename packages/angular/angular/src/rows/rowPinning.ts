@@ -13,6 +13,7 @@ import {
 import {
   commitRowPin,
   createControllableStore,
+  rekeyRowPins,
   ROW_PIN_STORE_OPTIONS,
   rowPinActions,
   type RowPinningState,
@@ -33,7 +34,7 @@ import {
   type MaybeSignalOptional,
   readMaybe,
 } from "../store";
-import { tableStoreOf } from "../tableStore";
+import { followRowRekeys, tableStoreOf } from "../tableStore";
 
 export type { RowPinLabels, RowPinSide } from "@adapttable/core";
 export type { RowPinningState } from "@adapttable/core/binding";
@@ -92,6 +93,14 @@ export function injectRowPinning<TRow>(
     });
     commitRowPin(store, untracked(enabled), rowId, side);
   };
+  // A pinned row keeps its side and place under its new id.
+  followRowRekeys(injector, (log) => {
+    store.control({
+      value: untracked(controlled),
+      onChange: options.onPinnedRowIdsChange,
+    });
+    store.update((pins) => rekeyRowPins(pins, log));
+  });
   const pin = (rowId: string, side: RowPinSide): void => {
     commit(rowId, side);
   };
