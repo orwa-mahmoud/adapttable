@@ -26,7 +26,7 @@ export function rowRekeyTests(
   kit: AngularKitUnderTest
 ): readonly ConformanceTest[] {
   const { Table: AdaptDataTable, kitSelector } = kit;
-  const { editing, rowPinning } = kit.features;
+  const { cellNavigation, editing, rowPinning } = kit.features;
   return collectConformanceTests(({ describe, it, afterEach }) => {
     interface Person {
       readonly id: string;
@@ -85,6 +85,25 @@ export function rowRekeyTests(
       ];
     }
 
+    @Component({
+      imports: [AdaptDataTable],
+      template: `
+        <adapt-data-table
+          [data]="rows()"
+          [columns]="columns"
+          [rowKey]="rowKey"
+          [urlSync]="false"
+          [features]="features"
+        />
+      `,
+    })
+    class GridHost {
+      readonly rows = signal<readonly Person[]>(PEOPLE);
+      readonly columns = COLUMNS;
+      readonly rowKey = rowKey;
+      readonly features = [cellNavigation()];
+    }
+
     async function mount() {
       const fixture = TestBed.createComponent(Host);
       document.body.append(fixture.nativeElement as HTMLElement);
@@ -105,6 +124,22 @@ export function rowRekeyTests(
     });
 
     describe("a rekeyed row", () => {
+      it("keeps the reader's focus on its cell", async () => {
+        const fixture = TestBed.createComponent(GridHost);
+        document.body.append(fixture.nativeElement as HTMLElement);
+        fixture.autoDetectChanges();
+        await fixture.whenStable();
+        const cell = (): HTMLElement | null =>
+          document.querySelector<HTMLElement>('[data-grid-cell="0:0"]');
+        cell()!.focus();
+        await fixture.whenStable();
+        fixture.componentInstance.rows.set(rekeyed);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(document.activeElement).toBe(cell());
+        expect(document.activeElement).not.toBe(document.body);
+      });
+
       it("asks the host to move its selection and its pin", async () => {
         const { host, settle } = await mount();
         host.rows.set(rekeyed);
