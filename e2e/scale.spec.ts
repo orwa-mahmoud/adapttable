@@ -162,20 +162,21 @@ test.describe("scale — virtualization", () => {
 
       await page.mouse.wheel(0, 800);
       await expect(header).toBeVisible();
+      // One snapshot of the header and every drawn row: the window may redraw
+      // between two reads, so the rows are measured in the same frame.
       await expect
-        .poll(async () => {
-          const stuck = await header.boundingBox();
-          const visible = page.locator('[data-adapttable-part="row"]');
-          const count = await visible.count();
-          let minGap = Number.POSITIVE_INFINITY;
-          for (let i = 0; i < count; i++) {
-            const box = await visible.nth(i).boundingBox();
-            if (!stuck || !box) continue;
-            const gap = box.y - (stuck.y + stuck.height);
-            if (gap >= -2 && gap < minGap) minGap = gap;
-          }
-          return minGap;
-        })
+        .poll(() =>
+          page.locator('[data-adapttable-part="row"]').evaluateAll((rows) => {
+            const stuck = document
+              .querySelector('[data-adapttable-part="header-cell"]')
+              ?.getBoundingClientRect();
+            if (!stuck) return Number.POSITIVE_INFINITY;
+            const gaps = rows
+              .map((row) => row.getBoundingClientRect().top - stuck.bottom)
+              .filter((gap) => gap >= -2);
+            return Math.min(Number.POSITIVE_INFINITY, ...gaps);
+          })
+        )
         .toBeLessThan(16);
     });
   }
