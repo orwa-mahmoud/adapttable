@@ -20,6 +20,7 @@ import { ChromeExtrasGate } from "./features/chromeExtrasGate";
 import { FeatureProviders } from "./features/providers";
 import { rowDetail } from "./features/row-detail";
 import { rowPinning } from "./features/row-pinning";
+import { ROW_DETAIL_STATE } from "./features/stateKeys";
 import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
 import { renderLiveChrome } from "./liveChrome.test-utils";
 import { useFrontendData } from "./source/useFrontendData";
@@ -92,21 +93,25 @@ function renderLiveBody<TRow>(
 describe("tableRenderModel", () => {
   it("columnSpan counts the expansion column when row details are active", () => {
     const adapter = createMemoryAdapter("");
-    const live = renderLiveChrome([rowDetail((r: Row) => r.name)], () => {
-      const source = useFrontendData<Row>({
-        data: ROWS,
-        columns: cols,
-        urlAdapter: adapter,
-        paginationMode: "paged",
-      });
-      return {
-        source,
-        columns: cols,
-        rowKey: (r: Row) => r.id,
-        renderRowDetail: (r: Row) => r.name,
-      };
-    });
-    const detail = live.result.current.detail!;
+    const live = renderLiveChrome(
+      [rowDetail((r: Row) => r.name)],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          columns: cols,
+          urlAdapter: adapter,
+          paginationMode: "paged",
+        });
+        return {
+          source,
+          columns: cols,
+          rowKey: (r: Row) => r.id,
+          renderRowDetail: (r: Row) => r.name,
+        };
+      },
+      [ROW_DETAIL_STATE]
+    );
+    const detail = live.result.state(ROW_DETAIL_STATE)!;
     const model = tableRenderModel<Row>({
       table: live.result.current.table,
       rows: ROWS,
@@ -1055,42 +1060,50 @@ describe("useFilterTriggerToggle", () => {
 describe("chrome row expansion", () => {
   it("exposes expansion state only when renderRowDetail is set", () => {
     const adapter = createMemoryAdapter("");
-    const without = renderLiveChrome([], () => {
-      const source = useFrontendData<Row>({
-        data: ROWS,
-        columns: cols,
-        urlAdapter: adapter,
-        paginationMode: "paged",
-      });
-      return {
-        source,
-        columns: cols,
-        rowKey: (r: Row) => r.id,
-      };
-    });
-    const withDetail = renderLiveChrome([rowDetail((r: Row) => r.name)], () => {
-      const source = useFrontendData<Row>({
-        data: ROWS,
-        columns: cols,
-        urlAdapter: adapter,
-        paginationMode: "paged",
-      });
-      return {
-        source,
-        columns: cols,
-        rowKey: (r: Row) => r.id,
-        renderRowDetail: (r: Row) => r.name,
-      };
-    });
-    expect(without.result.current.detail).toBeUndefined();
+    const without = renderLiveChrome(
+      [],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          columns: cols,
+          urlAdapter: adapter,
+          paginationMode: "paged",
+        });
+        return {
+          source,
+          columns: cols,
+          rowKey: (r: Row) => r.id,
+        };
+      },
+      [ROW_DETAIL_STATE]
+    );
+    const withDetail = renderLiveChrome(
+      [rowDetail((r: Row) => r.name)],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          columns: cols,
+          urlAdapter: adapter,
+          paginationMode: "paged",
+        });
+        return {
+          source,
+          columns: cols,
+          rowKey: (r: Row) => r.id,
+          renderRowDetail: (r: Row) => r.name,
+        };
+      },
+      [ROW_DETAIL_STATE]
+    );
+    expect(without.result.state(ROW_DETAIL_STATE)).toBeUndefined();
     // ONE guard narrows both halves of the bundle.
-    const detail = withDetail.result.current.detail!;
+    const detail = withDetail.result.state(ROW_DETAIL_STATE)!;
     expect(detail.render({ id: "a", name: "Alice" })).toBe("Alice");
     expect(detail.expansion.isExpanded("a")).toBe(false);
     act(() => detail.expansion.toggle("a"));
-    expect(withDetail.result.current.detail!.expansion.isExpanded("a")).toBe(
-      true
-    );
+    expect(
+      withDetail.result.state(ROW_DETAIL_STATE)!.expansion.isExpanded("a")
+    ).toBe(true);
   });
 
   it("measures a row with its panel rather than warning about the pair", () => {

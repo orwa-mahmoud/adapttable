@@ -30,6 +30,7 @@ import { CHROME_BODY, type ChromeBodySlotProps } from "./slotKeys";
 import {
   EDIT_HISTORY_STATE,
   EDITING_STATE,
+  ROW_DETAIL_STATE,
   TABLE_PROPS_STATE,
 } from "./stateKeys";
 
@@ -138,6 +139,7 @@ function StagedShell<TRow>({
 }): ReactNode {
   "use no memo";
   const editing = useFeatureState(EDITING_STATE);
+  const detail = useFeatureState(ROW_DETAIL_STATE);
   const editHistory = useFeatureState(EDIT_HISTORY_STATE) as
     EditHistoryState<TRow> | undefined;
   // The stages may wrap the commit channels (edit history); the body
@@ -149,7 +151,7 @@ function StagedShell<TRow>({
     editHistory: editHistory ?? disabledHistory(),
   };
   const withExtras = withGroupingPanel(
-    overlayChromeExtras(staged, chrome, { editing }),
+    overlayChromeExtras(staged, chrome, { editing, detail }),
     chrome.groupingPanel
   );
   const afterBody = (view: DataTableShellResult<TRow>) => (

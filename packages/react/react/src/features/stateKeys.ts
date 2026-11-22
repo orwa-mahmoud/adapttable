@@ -5,11 +5,13 @@
  */
 import type { ActiveFilterChip, EditHistoryState } from "@adapttable/core";
 import { featureStateKey } from "@adapttable/core/binding";
+import type { ReactNode } from "react";
 
 import type { EditableCellEditing } from "../editing/editableCellController";
 import type { ExportHandlerState } from "../export/useExportHandler";
 import type { KitRegionProps } from "../kit/rootRegion";
 import type { FullscreenState } from "../layout/useFullscreen";
+import type { RowExpansionState } from "../rows/useRowExpansion";
 import type { DataTableShellChromeProps } from "../shell/shellContract";
 
 /**
@@ -27,6 +29,21 @@ export interface FilterChipsState {
 /** The active filters' chips, published by the filter-chips stage. */
 export const FILTER_CHIPS_STATE =
   featureStateKey<FilterChipsState>("filter-chips");
+
+/**
+ * The row-detail renderer and the expansion state its chevrons drive.
+ *
+ * @public
+ */
+export interface RowDetailState<TRow = unknown> {
+  /** The detail-panel renderer. */
+  readonly render: (row: TRow) => ReactNode;
+  /** Which rows are expanded. */
+  readonly expansion: RowExpansionState;
+}
+
+/** The row detail, published by the expansion stage. */
+export const ROW_DETAIL_STATE = featureStateKey<RowDetailState>("row-detail");
 
 /** The armed cell editing, published by the editing stage. */
 export const EDITING_STATE =

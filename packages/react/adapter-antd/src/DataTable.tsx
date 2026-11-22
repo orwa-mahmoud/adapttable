@@ -1830,7 +1830,7 @@ function AntdViewBody<TRow>({
     rowActions,
     getRowId,
     renderRowDetail: props.renderRowDetail,
-    expansion: c.detail?.expansion,
+    expansion: view.tableProps.expansion,
     editing: view.tableProps.editing,
     rowReorder: c.rowReorder,
     pinnedTopRows,
@@ -1930,8 +1930,8 @@ function AntdViewBody<TRow>({
     pinnedSummaryBottom
   );
   const expandable = buildExpandable(
-    c.detail?.render,
-    c.detail?.expansion,
+    view.tableProps.renderRowDetail,
+    view.tableProps.expansion,
     getRowId,
     labels
   );
@@ -1994,8 +1994,8 @@ function AntdViewBody<TRow>({
             emptyNode={emptyNode}
             grouping={grouping}
             tree={c.tree}
-            detailRender={c.detail?.render}
-            detailExpansion={c.detail?.expansion}
+            detailRender={view.tableProps.renderRowDetail}
+            detailExpansion={view.tableProps.expansion}
             editing={view.tableProps.editing}
             cardWindow={cardWindow}
             tableLabel={resolvedTableLabel}

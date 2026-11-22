@@ -9,19 +9,21 @@ import { type ReactNode, useMemo } from "react";
 
 import { useRowExpansion } from "../rows/useRowExpansion";
 import { nestedTableDetail, type NestedTableFor } from "../tree/nestedTable";
+import { FeatureStateScope } from "./featureState";
 import { slotRender } from "./providers";
 import {
   type ChromeExtraDraw,
   type ChromeExtraSlotProps,
   EXPANSION_LIVE,
 } from "./slotKeys";
+import { ROW_DETAIL_STATE, type RowDetailState } from "./stateKeys";
 import type { TableFeature } from "./tableFeature";
 
 function LiveExpansion<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<TRow>): ReactNode {
+}: Readonly<ChromeExtraSlotProps<TRow>>): ReactNode {
   const expansionState = useRowExpansion(props.defaultExpandedRowIds);
   const { nestedTable, density, labels: hostLabels } = props;
   const hostRenderRowDetail = props.renderRowDetail;
@@ -41,7 +43,14 @@ function LiveExpansion<TRow>({
         : undefined,
     [renderRowDetail, expansionState]
   );
-  return children({ ...chrome, detail });
+  return (
+    <FeatureStateScope
+      stateKey={ROW_DETAIL_STATE}
+      value={detail as RowDetailState | undefined}
+    >
+      {children(chrome)}
+    </FeatureStateScope>
+  );
 }
 
 const expansionRender = slotRender<ChromeExtraDraw>(EXPANSION_LIVE, (props) => (

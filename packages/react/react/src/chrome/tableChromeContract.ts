@@ -13,7 +13,7 @@ import {
   type TreeEntry,
   type TreeShape,
 } from "@adapttable/core";
-import { type ReactNode, type RefObject } from "react";
+import { type RefObject } from "react";
 
 import type { ColumnDef } from "../columnDef";
 import type { ReactUseColumnLayoutResult } from "../columns/useColumnLayout";
@@ -21,7 +21,6 @@ import type { GroupCollapseState } from "../grouping/useGroupCollapse";
 import type { RowMutationsState } from "../rows/rowMutations";
 import type { RowPinningState } from "../rows/rowPinning";
 import type { RowReorderState } from "../rows/rowReorder";
-import type { RowExpansionState } from "../rows/useRowExpansion";
 import type { TreeExpansionState } from "../tree/useTreeExpansion";
 import { type UseDataTableResult } from "../useDataTable/useDataTable";
 
@@ -96,17 +95,6 @@ export interface TableChrome<TRow> {
    * matched nothing.
    */
   clearSearchAndFilters: () => void;
-  /**
-   * Row-detail bundle — present iff `renderRowDetail` is set, so ONE guard
-   * narrows both the renderer and the expansion state (no correlated
-   * optionals to re-check).
-   */
-  detail?: {
-    /** The caller's detail-panel renderer. */
-    render: (row: TRow) => ReactNode;
-    /** Expansion state for the chevrons. */
-    expansion: RowExpansionState;
-  };
   /**
    * Adding, duplicating and deleting rows. Empty until `rowActions()` is
    * composed. `canAdd` says whether the toolbar's Add control renders.

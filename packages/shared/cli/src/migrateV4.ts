@@ -222,8 +222,8 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
     "The table chrome no longer carries the filter chips: the filters feature publishes FILTER_CHIPS_STATE ({ chips, activeFilterCount }); read it with useFeatureState.",
   ],
   [
-    /\bchrome\.(?:editing|editHistory)\b/g,
-    "The table chrome no longer carries editing or the edit history: read EDITING_STATE or EDIT_HISTORY_STATE with useFeatureState, or the finished shell's tableProps.editing.",
+    /\bchrome\.(?:editing|editHistory|detail)\b/g,
+    "The table chrome no longer carries editing, the edit history or row detail: read EDITING_STATE, EDIT_HISTORY_STATE or ROW_DETAIL_STATE with useFeatureState, or the finished shell's tableProps (editing, renderRowDetail, expansion).",
   ],
   [
     /\buseChromeScrollReset\(\s*\w+\s*,\s*\w+\s*,/g,

@@ -277,8 +277,9 @@ fullscreen — each reading the state its feature publishes with
 and the table's finished props, `TABLE_PROPS_STATE`. The filters feature
 publishes its chips and badge count as `FILTER_CHIPS_STATE`
 (`FilterChipsState`), which the toolbar badge, the chips bar and the command
-palette read, and the editing feature publishes its bundle as
-`EDITING_STATE`; `SAVED_VIEWS` (`SavedViewsSlotProps`),
+palette read; the editing feature publishes its bundle as `EDITING_STATE`,
+and row detail its renderer and expansion as `ROW_DETAIL_STATE`
+(`RowDetailState`); `SAVED_VIEWS` (`SavedViewsSlotProps`),
 `GRID_FOCUS_ANNOUNCER`, the filter surfaces `FILTER_POPOVER` / `FILTER_DRAWER`
 (`FilterOverlaySlotProps`) with `FiltersFormSlotProps` and
 `ActiveFilterChipsSlotProps`, and `CHROME_BODY` (`ChromeBodySlotProps`), which

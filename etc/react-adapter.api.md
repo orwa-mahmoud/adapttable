@@ -4252,6 +4252,9 @@ export { restoreFocusSoon }
 
 export { ROW_ACTIONS_LIVE }
 
+// @public
+export const ROW_DETAIL_STATE: FeatureStateKey<RowDetailState<unknown>>;
+
 export { ROW_DND_MIME }
 
 export { ROW_EDIT_ACTIONS }
@@ -4292,6 +4295,12 @@ export type RowClickProps = Pick<HTMLAttributes<HTMLElement>, "onClick" | "onKey
 
 // @public (undocumented)
 export function rowClickProps<TRow>(row: TRow, onRowClick: ((row: TRow) => void) | undefined, index?: number): RowClickProps | undefined;
+
+// @public
+export interface RowDetailState<TRow = unknown> {
+    readonly expansion: RowExpansionState;
+    readonly render: (row: TRow) => ReactNode;
+}
 
 export { RowDropPosition }
 
@@ -4901,10 +4910,6 @@ export interface TableChrome<TRow> {
     columnLayout: ReactUseColumnLayoutResult<TRow>;
     columnLayoutLive?: boolean;
     confirm: ConfirmHandler;
-    detail?: {
-        render: (row: TRow) => ReactNode;
-        expansion: RowExpansionState;
-    };
     droppedColumns: readonly string[];
     editingRows: readonly TRow[];
     emptyVariant: "noData" | "noResults";

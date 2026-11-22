@@ -933,10 +933,6 @@ export interface TableChrome<TRow> {
     columnLayout: ReactUseColumnLayoutResult<TRow>;
     columnLayoutLive?: boolean;
     confirm: ConfirmHandler;
-    detail?: {
-        render: (row: TRow) => ReactNode;
-        expansion: RowExpansionState;
-    };
     droppedColumns: readonly string[];
     editingRows: readonly TRow[];
     emptyVariant: "noData" | "noResults";

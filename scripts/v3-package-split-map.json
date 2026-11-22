@@ -50411,6 +50411,14 @@
       "behavior": ""
     },
     {
+      "export": "ROW_DETAIL_STATE",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "ROW_DND_MIME",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -50468,6 +50476,14 @@
     },
     {
       "export": "RowClickProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "RowDetailState",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",
