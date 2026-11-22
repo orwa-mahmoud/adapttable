@@ -281,7 +281,7 @@ describe("useTableChrome grouping bundle", () => {
     }));
     expect(result.current.grouping).toBeUndefined();
     expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining("groupBy is ignored: Grouping is off")
+      expect.stringContaining("groupBy is ignored: this source cannot group")
     );
   });
 });

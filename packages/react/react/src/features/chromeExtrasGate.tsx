@@ -78,15 +78,16 @@ function RuntimePublisher<TRow>({
   // One publisher per table: it keeps the neutral table, and hands it a
   // binding that reads the latest published view.
   const [publisher] = useState(() => new TableRuntimePublisher<TRow>());
-  const view = publisher.update(chrome, {
+  publisher.stage(chrome, {
     rowActions: props.rowActions,
     bulkActions: props.bulkActions,
   });
-  usePublishTableRuntime(
-    view.visibleRows ?? view.rows,
-    chrome.table.labels,
-    view
-  );
+  const labels = chrome.table.labels;
+  usePublishTableRuntime<TRow>({
+    rows: () => publisher.visibleRows(),
+    labels: () => labels,
+    view: () => publisher.view(),
+  });
   return children(chrome);
 }
 

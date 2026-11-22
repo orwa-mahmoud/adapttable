@@ -45,7 +45,11 @@ const ROWS: Row[] = [
 
 /** Publishes a runtime view with NO `neutralTable` — the server-tier shape. */
 function Publisher({ view }: { view: TableRuntimeView<Row> }) {
-  usePublishTableRuntime(view.visibleRows ?? view.rows, undefined, view);
+  usePublishTableRuntime({
+    rows: () => view.visibleRows ?? view.rows,
+    labels: () => undefined,
+    view: () => view,
+  });
   return null;
 }
 

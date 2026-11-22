@@ -1228,7 +1228,6 @@ export function useDataTableShell<TRow>(
   // Follows a replaced source's engine itself; the source owns the engine.
   const publisher = new TableRuntimePublisher<TRow>();
   let disposed = false;
-  let currentView: TableRuntimeView<TRow> | undefined;
   const frame = computed((): RuntimeChromeInput<TRow> => ({
     source: viewSource.value,
     getRowId: table.rowKey,
@@ -1273,20 +1272,20 @@ export function useDataTableShell<TRow>(
       : undefined,
     print: printing.value ? { onPrint: printing.value } : undefined,
   }));
-  const publish = (): TableRuntimeView<TRow> | undefined => {
-    if (disposed) return undefined;
-    const chrome = frame.value;
-    currentView = publisher.update(chrome, {
+  // Staging is cheap; the publisher builds the view on its first read and
+  // keeps it while the frame and the actions are the same objects.
+  const stage = (): boolean => {
+    if (disposed) return false;
+    publisher.stage(frame.value, {
       rowActions: rowActions.value?.hostActions,
       bulkActions: resolved.value.bulkActions,
     });
-    return currentView;
+    return true;
   };
+  const publish = (): TableRuntimeView<TRow> | undefined =>
+    stage() ? publisher.view() : undefined;
   const runtime: TableRuntime<TRow> = {
-    rowAt: (index) => {
-      const view = publish();
-      return (view?.visibleRows ?? view?.rows)?.[index];
-    },
+    rowAt: (index) => (stage() ? publisher.visibleRows()[index] : undefined),
     labels: () => table.labels.value,
     view: publish,
     featureIds: () =>
@@ -1372,7 +1371,6 @@ export function useDataTableShell<TRow>(
   };
   onScopeDispose(() => {
     disposed = true;
-    currentView = undefined;
     surface.value = null;
   });
   useMountStagger(

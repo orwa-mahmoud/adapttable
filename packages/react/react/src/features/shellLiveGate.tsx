@@ -7,6 +7,7 @@ import {
   publishShellOverlay,
   type ShellOperationInput,
   sourceWindowStart,
+  type TableRuntimeView,
   withShellOperations,
 } from "@adapttable/core/binding";
 /**
@@ -26,10 +27,10 @@ import { rememberFeatureHost } from "./featureHost";
 import type { LiveStageProps, ShellLive } from "./liveStage";
 import {
   FeatureSlot,
+  useCurrentTableRuntimeReader,
   useFeatureSlotFilled,
   useLiveStages,
   usePublishTableRuntime,
-  useTableRuntime,
 } from "./providers";
 import {
   DISABLED_EXPORT,
@@ -253,14 +254,21 @@ function PublishLiveOperations<TRow>({
   "use no memo";
   const input = liveShellOperations(shell, live);
   publishShellOverlay(shell.chrome, input);
-  const runtime = useTableRuntime<TRow>();
-  const current = runtime.view();
-  const projected = current ? withShellOperations(current, input) : undefined;
-  usePublishTableRuntime(
-    projected?.visibleRows ?? projected?.rows ?? [],
-    projected ? runtime.labels() : undefined,
-    projected
-  );
+  const prior = useCurrentTableRuntimeReader<TRow>();
+  // Layered over the chrome's view on first read, never during render.
+  let projected: TableRuntimeView<TRow> | undefined | null = null;
+  const view = (): TableRuntimeView<TRow> | undefined => {
+    if (projected === null) {
+      const current = prior.view?.();
+      projected = current ? withShellOperations(current, input) : undefined;
+    }
+    return projected;
+  };
+  usePublishTableRuntime<TRow>({
+    rows: () => prior.rows(),
+    labels: () => prior.labels(),
+    view,
+  });
   return children(finishShellLive(shell, live));
 }
 

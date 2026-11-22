@@ -120,11 +120,30 @@ function providersOf<TRow>(features: readonly TableFeature<TRow>[]) {
 }
 
 interface RuntimeCell {
-  rows: readonly unknown[];
-  labels: Readonly<Record<string, unknown>> | undefined;
-  view?: TableRuntimeView;
+  reader: TableRuntimeReader<unknown>;
   featureIds: readonly string[];
 }
+
+/**
+ * What a chrome hands the providers above it: readers they call from
+ * handlers, so the rendered rows and the view are built only when read.
+ *
+ * @public
+ */
+export interface TableRuntimeReader<TRow> {
+  /** The rows in rendered order. */
+  rows(): readonly TRow[];
+  /** The table's resolved labels. */
+  labels(): Readonly<Record<string, unknown>> | undefined;
+  /** The latest fully composed view, when the chrome composes one. */
+  view?(): TableRuntimeView<TRow> | undefined;
+}
+
+/** What providers read before the chrome first publishes. */
+const NO_RUNTIME: TableRuntimeReader<unknown> = {
+  rows: () => [],
+  labels: () => undefined,
+};
 
 const TableRuntimeContext = createContext<RefObject<RuntimeCell> | undefined>(
   undefined
@@ -140,19 +159,26 @@ const TableRuntimeContext = createContext<RefObject<RuntimeCell> | undefined>(
  * @public
  */
 export function usePublishTableRuntime<TRow>(
-  rows: readonly TRow[],
-  labels: Readonly<Record<string, unknown>> | undefined,
-  view?: TableRuntimeView<TRow>
+  reader: TableRuntimeReader<TRow>
 ): void {
   const cell = useContext(TableRuntimeContext);
   if (cell) {
     cell.current = {
-      rows,
-      labels,
-      view: view,
+      reader: reader,
       featureIds: cell.current.featureIds,
     };
   }
+}
+
+/**
+ * The reader the chrome published last, for a gate that layers its own
+ * view over it during render.
+ *
+ * @returns The current reader.
+ */
+export function useCurrentTableRuntimeReader<TRow>(): TableRuntimeReader<TRow> {
+  const cell = useContext(TableRuntimeContext);
+  return (cell?.current.reader ?? NO_RUNTIME) as TableRuntimeReader<TRow>;
 }
 
 /**
@@ -165,9 +191,10 @@ export function useTableRuntime<TRow = unknown>(): TableRuntime<TRow> {
   return useMemo(
     () => ({
       rowAt: (localIndex: number) =>
-        cell?.current.rows[localIndex] as TRow | undefined,
-      labels: () => cell?.current.labels,
-      view: () => cell?.current.view as TableRuntimeView<TRow> | undefined,
+        cell?.current.reader.rows()[localIndex] as TRow | undefined,
+      labels: () => cell?.current.reader.labels(),
+      view: () =>
+        cell?.current.reader.view?.() as TableRuntimeView<TRow> | undefined,
       featureIds: () => cell?.current.featureIds ?? [],
     }),
     [cell]
@@ -347,9 +374,7 @@ export function FeatureProviders({
   const features = getAppliedFeatures(props);
   const providers = useMemo(() => providersOf(features ?? []), [features]);
   const cell = useRef<RuntimeCell>({
-    rows: [],
-    labels: undefined,
-    view: undefined,
+    reader: NO_RUNTIME,
     featureIds: (features ?? []).map((feature) => feature.id),
   });
   cell.current.featureIds = (features ?? []).map((feature) => feature.id);

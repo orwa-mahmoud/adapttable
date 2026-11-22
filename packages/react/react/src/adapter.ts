@@ -315,6 +315,7 @@ export {
   featureStateKey,
   FeatureStateScope,
   slotRender,
+  type TableRuntimeReader,
   useFeatureSlotFilled,
   useFeatureState,
   usePublishTableRuntime,

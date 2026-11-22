@@ -144,16 +144,23 @@ export function tableRuntimeFor<TRow>(
       },
     };
   });
-  const publish = () => {
-    // Track only the assembled frame, not state read by downstream engine
-    // listeners while the publisher refreshes its neutral view.
+  // Track only the assembled frame, not state read by downstream engine
+  // listeners while the publisher builds its view. Staging is cheap; the
+  // view is built on its first read and kept while the frame is the same.
+  const stage = () => {
     const current = frame();
-    return untracked(() => publisher.update(current.chrome, current.actions));
+    untracked(() => {
+      publisher.stage(current.chrome, current.actions);
+    });
+  };
+  const publish = () => {
+    stage();
+    return untracked(() => publisher.view());
   };
   return {
     rowAt: (index) => {
-      const view = publish();
-      return (view.visibleRows ?? view.rows)[index];
+      stage();
+      return untracked(() => publisher.visibleRows())[index];
     },
     labels: () => table.labels(),
     featureIds,

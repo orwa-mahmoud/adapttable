@@ -79,7 +79,11 @@ function sensitive(ai?: ActionAiOptions) {
 }
 
 function Publisher({ view }: { view: TableRuntimeView<Row> }) {
-  usePublishTableRuntime(view.rows, undefined, view);
+  usePublishTableRuntime({
+    rows: () => view.rows,
+    labels: () => undefined,
+    view: () => view,
+  });
   return null;
 }
 

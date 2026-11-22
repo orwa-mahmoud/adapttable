@@ -6207,6 +6207,7 @@
       "tableRenderModel",
       "TableRenderModel",
       "TableRuntime",
+      "TableRuntimeReader",
       "TableRuntimeView",
       "TableStatusAnnouncementOptions",
       "TableStatusAnnouncer",

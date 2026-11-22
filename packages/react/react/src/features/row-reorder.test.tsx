@@ -50,7 +50,11 @@ function Chrome({
   readonly onState?: (state: RowReorderState<Row>) => void;
   readonly view?: TableRuntimeView<Row>;
 }) {
-  usePublishTableRuntime(ROWS, labels, view);
+  usePublishTableRuntime({
+    rows: () => ROWS,
+    labels: () => labels,
+    view: () => view,
+  });
   const reorder = useFeatureState(ROW_REORDER) as
     RowReorderState<Row> | undefined;
   if (!reorder) return <span data-testid="state">absent</span>;

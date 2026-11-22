@@ -9815,6 +9815,14 @@ export function rowWindow<TRow>(input: {
 export function runCommand(command: Command | undefined, close: () => void): void;
 
 // @public
+interface RuntimeActions<TRow> {
+    // (undocumented)
+    readonly bulkActions?: readonly BulkAction[];
+    // (undocumented)
+    readonly rowActions?: readonly RowAction<TRow>[];
+}
+
+// @public
 export interface RuntimeChromeInput<TRow> {
     readonly allColumns: readonly RuntimeColumn<TRow>[];
     readonly columnLayout: {
@@ -11828,14 +11836,13 @@ export interface TableRuntime<TRow = unknown> {
 
 // @public
 export class TableRuntimePublisher<TRow> {
-    update(chrome: RuntimeChromeInput<TRow> & {
+    stage(chrome: RuntimeChromeInput<TRow> & {
         readonly source: {
             readonly tableEngine?: TableEngine<TRow>;
         };
-    }, options: {
-        readonly rowActions?: readonly RowAction<TRow>[];
-        readonly bulkActions?: readonly BulkAction[];
-    }): TableRuntimeView<TRow>;
+    }, actions: RuntimeActions<TRow>): void;
+    view(): TableRuntimeView<TRow> | undefined;
+    visibleRows(): readonly TRow[];
 }
 
 // @public

@@ -996,6 +996,7 @@
         "useOverlayTransition": "pending: shared-surface decision",
         "usePlainChromeBodyData": "React kit machinery served from the adapter entry",
         "usePublishTableRuntime": "pending: shared-surface decision",
+        "TableRuntimeReader": "the reader React's usePublishTableRuntime takes; Vue and Angular build TableRuntime directly",
         "useResolvedAdapter": "pending: shared-surface decision",
         "useResolvedDensity": "pending: shared-surface decision",
         "useRowPairMeasurer": "pending: shared-surface decision",

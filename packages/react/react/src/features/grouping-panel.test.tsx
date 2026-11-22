@@ -260,7 +260,11 @@ function Chrome({
   readonly onState?: (state: GroupingPanelInteractions) => void;
   readonly view?: TableRuntimeView<unknown>;
 }) {
-  usePublishTableRuntime([], labels, view);
+  usePublishTableRuntime({
+    rows: () => [],
+    labels: () => labels,
+    view: () => view,
+  });
   const panel = useFeatureState(GROUPING_PANEL_STATE);
   if (!panel) return <span data-testid="state">absent</span>;
   onState?.(panel);

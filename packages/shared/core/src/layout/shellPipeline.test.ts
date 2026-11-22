@@ -401,7 +401,67 @@ describe("tableRuntimeView", () => {
   });
 });
 
+function stagedView(
+  target: TableRuntimePublisher<Row>,
+  chrome: Parameters<TableRuntimePublisher<Row>["stage"]>[0],
+  actions: Parameters<TableRuntimePublisher<Row>["stage"]>[1]
+) {
+  target.stage(chrome, actions);
+  const view = target.view();
+  if (!view) throw new Error("staged render has no view");
+  return view;
+}
+
 describe("TableRuntimePublisher", () => {
+  /** A chrome whose column list counts its reads; only the full view reads it. */
+  function countedChrome(rows: Row[]) {
+    const chrome = makeChrome({ source: makeSource({ rows }) });
+    let reads = 0;
+    const columns = chrome.allColumns;
+    Object.defineProperty(chrome, "allColumns", {
+      get: () => {
+        reads += 1;
+        return columns;
+      },
+    });
+    return { chrome, reads: () => reads };
+  }
+
+  it("builds no view for a render nobody reads", () => {
+    const publisher = new TableRuntimePublisher<Row>();
+    const counted = countedChrome(ROWS);
+    publisher.stage(counted.chrome, {});
+    publisher.stage(countedChrome(ROWS).chrome, {});
+    expect(counted.reads()).toBe(0);
+  });
+
+  it("reads rendered rows without building the view", () => {
+    const publisher = new TableRuntimePublisher<Row>();
+    const counted = countedChrome(ROWS);
+    publisher.stage(counted.chrome, {});
+    expect(publisher.visibleRows()).toEqual(ROWS);
+    expect(counted.reads()).toBe(0);
+    const view = publisher.view();
+    expect(counted.reads()).toBeGreaterThan(0);
+    expect(publisher.view()).toBe(view);
+  });
+
+  it("answers a later read with the render committed after the last one", () => {
+    const publisher = new TableRuntimePublisher<Row>();
+    publisher.stage(makeChrome({ source: makeSource({ rows: ROWS }) }), {});
+    expect(publisher.view()?.rows).toBe(ROWS);
+    const next = [{ id: "c", name: "Cleo", score: 5 }];
+    publisher.stage(makeChrome({ source: makeSource({ rows: next }) }), {});
+    expect(publisher.view()?.rows).toBe(next);
+    expect(publisher.visibleRows()).toEqual(next);
+  });
+
+  it("has nothing to read before the first render", () => {
+    const publisher = new TableRuntimePublisher<Row>();
+    expect(publisher.view()).toBeUndefined();
+    expect(publisher.visibleRows()).toEqual([]);
+  });
+
   function makeEngine() {
     return createTableEngine<Row>({
       data: ROWS,
@@ -413,7 +473,7 @@ describe("TableRuntimePublisher", () => {
 
   it("publishes no neutral table without an engine", () => {
     const publisher = new TableRuntimePublisher<Row>();
-    const view = publisher.update(makeChrome(), {});
+    const view = stagedView(publisher, makeChrome(), {});
     expect(view.neutralTable).toBeUndefined();
     expect(view.rows).toBe(ROWS);
   });
@@ -422,7 +482,8 @@ describe("TableRuntimePublisher", () => {
     const engine = makeEngine();
     const publisher = new TableRuntimePublisher<Row>();
     const selection = { selectedIds: new Set<string>(), replace: vi.fn() };
-    const first = publisher.update(
+    const first = stagedView(
+      publisher,
       makeChrome({
         source: makeSource({ tableEngine: engine }),
         table: { labels: {}, selection },
@@ -436,7 +497,8 @@ describe("TableRuntimePublisher", () => {
 
     // The host turns selection off and a tree reorders the rendered rows.
     const tree = { entries: [treeEntry(ROWS[1]!)] };
-    const second = publisher.update(
+    const second = stagedView(
+      publisher,
       makeChrome({
         source: makeSource({ tableEngine: engine }),
         tree,
@@ -451,12 +513,15 @@ describe("TableRuntimePublisher", () => {
 
   it("drops the neutral table from a render whose source lost its engine", () => {
     const publisher = new TableRuntimePublisher<Row>();
-    const withEngine = publisher.update(
+    const withEngine = stagedView(
+      publisher,
       makeChrome({ source: makeSource({ tableEngine: makeEngine() }) }),
       {}
     );
     expect(withEngine.neutralTable).toBeDefined();
-    expect(publisher.update(makeChrome(), {}).neutralTable).toBeUndefined();
+    expect(
+      stagedView(publisher, makeChrome(), {}).neutralTable
+    ).toBeUndefined();
   });
 
   it("follows a replaced engine for every scope and keeps the handle otherwise", () => {
@@ -470,17 +535,20 @@ describe("TableRuntimePublisher", () => {
     const before = people(ROWS, "people");
     const after = people([{ id: "c", name: "Cleo", score: 5 }], "people-next");
     const publisher = new TableRuntimePublisher<Row>();
-    const first = publisher.update(
+    const first = stagedView(
+      publisher,
       makeChrome({ source: makeSource({ tableEngine: before }) }),
       {}
     );
-    const again = publisher.update(
+    const again = stagedView(
+      publisher,
       makeChrome({ source: makeSource({ tableEngine: before }) }),
       {}
     );
     expect(again.neutralTable).toBe(first.neutralTable);
 
-    const swapped = publisher.update(
+    const swapped = stagedView(
+      publisher,
       makeChrome({
         source: makeSource({ tableEngine: after, rows: [] }),
       }),
@@ -495,8 +563,11 @@ describe("TableRuntimePublisher", () => {
     expect(neutral?.rowByKey("c")?.name).toBe("Cleo");
 
     // A server interval with no engine, then a frontend source again.
-    expect(publisher.update(makeChrome(), {}).neutralTable).toBeUndefined();
-    const back = publisher.update(
+    expect(
+      stagedView(publisher, makeChrome(), {}).neutralTable
+    ).toBeUndefined();
+    const back = stagedView(
+      publisher,
       makeChrome({ source: makeSource({ tableEngine: before }) }),
       {}
     );
@@ -510,7 +581,7 @@ describe("TableRuntimePublisher", () => {
     const chrome = makeChrome({
       source: makeSource({ tableEngine: engine }),
     });
-    const view = publisher.update(chrome, {});
+    const view = stagedView(publisher, chrome, {});
     expect(view.neutralTable?.operations.find).toBe(false);
     const find = {
       open: true,
@@ -523,7 +594,8 @@ describe("TableRuntimePublisher", () => {
     expect(view.neutralTable?.operations.find).toBe(true);
     expect(view.find).toBeUndefined();
     const nested = new TableRuntimePublisher<Row>();
-    const nestedView = nested.update(
+    const nestedView = stagedView(
+      nested,
       makeChrome({ source: makeSource({ tableEngine: makeEngine() }) }),
       {}
     );
@@ -1033,7 +1105,8 @@ describe("selection scope publication", () => {
     const selectedIds = new Set(["a"]);
     const replace = vi.fn();
     const publisher = new TableRuntimePublisher<Row>();
-    const published = publisher.update(
+    const published = stagedView(
+      publisher,
       makeChrome({
         table: { labels: {}, selection: { selectedIds, replace } },
       }),
@@ -1049,7 +1122,8 @@ describe("selection scope publication", () => {
       const selectedIds = new Set(["b", "a"]);
       const replace = vi.fn();
       const publisher = new TableRuntimePublisher<Row>();
-      const published = publisher.update(
+      const published = stagedView(
+        publisher,
         makeChrome({
           table: {
             labels: {},

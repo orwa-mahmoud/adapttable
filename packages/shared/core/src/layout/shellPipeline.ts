@@ -264,6 +264,22 @@ export function livePinning<TRow>(
   };
 }
 
+/** The grouping a runtime reads: the host's, or the composed feature's. */
+function runtimeGrouping<TRow>(chrome: RuntimeChromeInput<TRow>) {
+  return projectGroupingContribution({
+    host: chrome.grouping,
+    feature: chrome.featureGrouping,
+  });
+}
+
+/** The rows in rendered order: groups and tree applied, nothing else read. */
+function runtimeVisibleRows<TRow>(
+  chrome: RuntimeChromeInput<TRow>,
+  grouping = runtimeGrouping(chrome)
+): readonly TRow[] {
+  return renderedRowsOf({ source: chrome.source, grouping, tree: chrome.tree });
+}
+
 /**
  * Project the finished chrome into the view a feature above the table reads.
  *
@@ -281,21 +297,14 @@ export function tableRuntimeView<TRow>(
   }
 ): TableRuntimeView<TRow> {
   const source = chrome.source;
-  const grouping = projectGroupingContribution({
-    host: chrome.grouping,
-    feature: chrome.featureGrouping,
-  });
+  const grouping = runtimeGrouping(chrome);
   const filtering = filteringContributionOf({
     defs: chrome.filterDefs,
     registry: chrome.filterRegistry,
   });
   return {
     rows: source.rows,
-    visibleRows: renderedRowsOf({
-      source: chrome.source,
-      grouping,
-      tree: chrome.tree,
-    }),
+    visibleRows: runtimeVisibleRows(chrome, grouping),
     getRowId: chrome.getRowId,
     rowLabel: (row: TRow) => readableRowLabel(chrome, row),
     sortBy: source.sortBy,
@@ -365,82 +374,137 @@ export function tableRuntimeView<TRow>(
   };
 }
 
-/** What one engine's neutral table reads: that engine's latest render. */
-interface PublishedFrame<TRow> {
-  view: TableRuntimeView<TRow> | undefined;
-  chrome: object | undefined;
-  visibleRows: readonly TRow[];
+/** The host's own row and bulk actions, as composed. */
+interface RuntimeActions<TRow> {
+  readonly rowActions?: readonly RowAction<TRow>[];
+  readonly bulkActions?: readonly BulkAction[];
 }
 
-function frameBinding<TRow>(frame: PublishedFrame<TRow>) {
-  return {
-    visibleRows: (): readonly TRow[] => frame.visibleRows,
-    operations: (): Readonly<Record<string, boolean>> => {
-      const { view, chrome } = frame;
-      if (!view) return {};
-      const overlay = chrome ? readShellOverlay<TRow>(chrome) : undefined;
-      return deriveRuntimeOperations(
-        overlay ? withShellOperations(view, overlay) : view
-      );
-    },
-  };
+/**
+ * One engine's latest render: the chrome as staged, and the view and rendered
+ * rows built from it on first read, kept until the next render is staged.
+ */
+class RuntimeFrame<TRow> {
+  #chrome: RuntimeChromeInput<TRow> | undefined;
+  #actions: RuntimeActions<TRow> = {};
+  #view: TableRuntimeView<TRow> | undefined;
+  #rows: readonly TRow[] | undefined;
+  readonly neutral: NeutralTable<TRow> | undefined;
+
+  constructor(engine: TableEngine<TRow> | undefined) {
+    this.neutral = engine
+      ? createNeutralTable(engine, engine.tableId, {
+          visibleRows: () => this.visibleRows(),
+          operations: () => this.#operations(),
+        })
+      : undefined;
+  }
+
+  stage(chrome: RuntimeChromeInput<TRow>, actions: RuntimeActions<TRow>): void {
+    if (
+      chrome === this.#chrome &&
+      actions.rowActions === this.#actions.rowActions &&
+      actions.bulkActions === this.#actions.bulkActions
+    ) {
+      return;
+    }
+    this.#chrome = chrome;
+    this.#actions = actions;
+    this.#view = undefined;
+    this.#rows = undefined;
+  }
+
+  view(): TableRuntimeView<TRow> | undefined {
+    const chrome = this.#chrome;
+    if (chrome === undefined) return undefined;
+    this.#view ??= {
+      ...tableRuntimeView(chrome, this.#actions),
+      neutralTable: this.neutral,
+    };
+    return this.#view;
+  }
+
+  visibleRows(): readonly TRow[] {
+    const chrome = this.#chrome;
+    if (chrome === undefined) return [];
+    this.#rows ??= this.#view
+      ? (this.#view.visibleRows ?? this.#view.rows)
+      : runtimeVisibleRows(chrome);
+    return this.#rows;
+  }
+
+  #operations(): Readonly<Record<string, boolean>> {
+    const view = this.view();
+    if (!view) return {};
+    const overlay = this.#chrome
+      ? readShellOverlay<TRow>(this.#chrome)
+      : undefined;
+    return deriveRuntimeOperations(
+      overlay ? withShellOperations(view, overlay) : view
+    );
+  }
 }
 
 /**
  * Keeps one table's runtime view and its neutral table across renders.
  *
+ * A render is staged, not projected: the full view is built the first time
+ * a reader asks for it and kept until the next render, so a table nobody
+ * reads never builds it, and rendered rows are read without it.
+ *
  * The neutral table is created from the engine the source publishes and
- * keeps the binding it was handed, so it is handed one that reads that
- * engine's LATEST published view on every call: a capability the host later
- * turns off (or on) still reaches the agent. When the source's engine is
- * replaced, a new neutral table is created for the new one and the old one
- * keeps reading its own last render.
+ * reads that engine's LATEST staged render on every call: a capability the
+ * host later turns off (or on) still reaches the agent. When the source's
+ * engine is replaced, a new neutral table is created for the new one and the
+ * old one keeps reading its own last render.
  *
  * @public
  */
 export class TableRuntimePublisher<TRow> {
-  #frame: PublishedFrame<TRow> = {
-    view: undefined,
-    chrome: undefined,
-    visibleRows: [],
-  };
-  #neutral: NeutralTable<TRow> | undefined;
   #engine: TableEngine<TRow> | undefined;
+  #frame = new RuntimeFrame<TRow>(undefined);
 
   /**
-   * Publish this render's chrome.
+   * Stage this render's chrome. Nothing is projected until it is read.
    *
    * @param chrome - The chrome after every extra ran.
-   * @param options - The host's own row and bulk actions.
-   * @returns The view to publish, with the neutral table when an engine exists.
+   * @param actions - The host's own row and bulk actions.
    */
-  update(
+  stage(
     chrome: RuntimeChromeInput<TRow> & {
       readonly source: { readonly tableEngine?: TableEngine<TRow> };
     },
-    options: {
-      readonly rowActions?: readonly RowAction<TRow>[];
-      readonly bulkActions?: readonly BulkAction[];
-    }
-  ): TableRuntimeView<TRow> {
-    const view = tableRuntimeView(chrome, options);
+    actions: RuntimeActions<TRow>
+  ): void {
     const engine = chrome.source.tableEngine;
-    // The neutral table belongs to the engine it reads, and reads only that
-    // engine's renders. A replaced source (another engine, or a server
-    // interval with none) starts a new frame and releases the old reader on
-    // its last render; the source owns its engine, so it is never disposed
-    // here.
+    // The neutral table belongs to the engine it reads. A replaced source
+    // (another engine, or a server interval with none) starts a new frame
+    // and leaves the old reader on its last render; the source owns its
+    // engine, so it is never disposed here.
     if (engine !== this.#engine) {
       this.#engine = engine;
-      this.#frame = { view: undefined, chrome: undefined, visibleRows: [] };
-      this.#neutral = engine
-        ? createNeutralTable(engine, engine.tableId, frameBinding(this.#frame))
-        : undefined;
+      this.#frame = new RuntimeFrame(engine);
     }
-    this.#frame.chrome = chrome;
-    this.#frame.view = view;
-    this.#frame.visibleRows = view.visibleRows ?? view.rows;
-    return { ...view, neutralTable: this.#neutral };
+    this.#frame.stage(chrome, actions);
+  }
+
+  /**
+   * The latest staged render as the view a feature above the table reads,
+   * with the neutral table when an engine exists; built on first read.
+   *
+   * @returns The view, or `undefined` before the first render.
+   */
+  view(): TableRuntimeView<TRow> | undefined {
+    return this.#frame.view();
+  }
+
+  /**
+   * The latest staged render's rows in rendered order, without the view.
+   *
+   * @returns The rendered rows.
+   */
+  visibleRows(): readonly TRow[] {
+    return this.#frame.visibleRows();
   }
 }
 

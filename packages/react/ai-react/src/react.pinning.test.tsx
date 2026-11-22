@@ -28,7 +28,11 @@ const ROWS: Row[] = [{ id: "1", name: "Ada" }];
 const handles: { current: AgentSession | undefined } = { current: undefined };
 
 function Publisher({ view }: { view: TableRuntimeView<Row> }) {
-  usePublishTableRuntime(view.rows, undefined, view);
+  usePublishTableRuntime({
+    rows: () => view.rows,
+    labels: () => undefined,
+    view: () => view,
+  });
   return null;
 }
 

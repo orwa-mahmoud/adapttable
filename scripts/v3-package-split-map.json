@@ -51931,6 +51931,14 @@
       "behavior": ""
     },
     {
+      "export": "TableRuntimeReader",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "TableRuntimeView",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",

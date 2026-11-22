@@ -121,22 +121,26 @@ function ServerPublisher({
   state.search = search;
   state.sortBy = sortBy;
   state.setSearch = setSearch;
-  usePublishTableRuntime(ROWS, undefined, {
-    rows: ROWS,
-    visibleRows: ROWS,
-    getRowId: (row: unknown) => (row as Row).id,
-    rowLabel: (row: unknown) => (row as Row).name,
-    query: {
-      page: 1,
-      limit: 10,
-      search,
-      sortBy,
-      sortDir: sortBy ? "desc" : undefined,
-      setPage: () => undefined,
-      setLimit: () => undefined,
-      setSearch,
-      setSort: (key) => setSortBy(key),
-    },
+  usePublishTableRuntime({
+    rows: () => ROWS,
+    labels: () => undefined,
+    view: () => ({
+      rows: ROWS,
+      visibleRows: ROWS,
+      getRowId: (row: unknown) => (row as Row).id,
+      rowLabel: (row: unknown) => (row as Row).name,
+      query: {
+        page: 1,
+        limit: 10,
+        search,
+        sortBy,
+        sortDir: sortBy ? "desc" : undefined,
+        setPage: () => undefined,
+        setLimit: () => undefined,
+        setSearch,
+        setSort: (key) => setSortBy(key),
+      },
+    }),
   });
   return null;
 }

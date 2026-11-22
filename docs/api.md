@@ -191,7 +191,7 @@ feature-id order. It publishes through `FeatureStateScope` under a
 `FeatureStateKey` from `featureStateKey`, and anything below reads it with
 `useFeatureState`. A provider sits above the chrome, so it reads the live rows
 and labels through `useTableRuntime` (`TableRuntime`, `TableRuntimeView`) rather than being handed
-them (`featureIds()`, optional `query` for page/search/sort); chrome offers them with `usePublishTableRuntime`. A feature also fills
+them (`featureIds()`, optional `query` for page/search/sort); chrome offers them with `usePublishTableRuntime(reader)` (`TableRuntimeReader`: `rows()`, `labels()` and `view()`, called from handlers, so the view is built only when read). A feature also fills
 named positions: `renders` is a list of `FeatureRender` entries, each pairing a
 `FeatureSlotKey` from `featureSlotKey` with what to draw — built with
 `slotRender`, which keeps the props typed — chrome asks through `FeatureSlot`.
@@ -1405,7 +1405,9 @@ shares, so a new binding calls them rather than re-deriving them.
   (`LiveStageKey`, `LiveStageDependencies`) that names the live values it reads
   and the one it writes; `liveStagesOf` collects the composed stages and
   `orderLiveStages` (`LiveStage`) runs each after the stages it reads from.
-  `TableRuntimePublisher` projects the chrome into the runtime view through
+  `TableRuntimePublisher` stages each render (`stage`) and builds the runtime
+  view on its first read (`view`), keeping it until the next render; rendered
+  rows (`visibleRows`) are read without the view. It projects through
   `tableRuntimeView`, `renderedRowsOf`, `readableRowLabel`,
   `liveColumnLayout` and `livePinning` (`RuntimeChromeInput`,
   `RuntimeColumn`). `cellNavigationInput`, `gridRowCount`, `exportPageOnly`,

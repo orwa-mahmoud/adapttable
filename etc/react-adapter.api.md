@@ -5180,6 +5180,13 @@ export function tableRenderModel<TRow>(props: Pick<SharedTableRenderProps<TRow>,
 
 export { TableRuntime }
 
+// @public
+export interface TableRuntimeReader<TRow> {
+    labels(): Readonly<Record<string, unknown>> | undefined;
+    rows(): readonly TRow[];
+    view?(): TableRuntimeView<TRow> | undefined;
+}
+
 export { TableRuntimeView }
 
 export { TableSource }
@@ -5506,7 +5513,7 @@ export function useOverlayTransition(open: boolean, exitMs?: number): OverlayTra
 export function usePlainChromeBodyData<TRow>(chrome: TableChrome<TRow>, props: BaseDataTableProps<TRow>): ChromeBodyData<TRow>;
 
 // @public
-export function usePublishTableRuntime<TRow>(rows: readonly TRow[], labels: Readonly<Record<string, unknown>> | undefined, view?: TableRuntimeView<TRow>): void;
+export function usePublishTableRuntime<TRow>(reader: TableRuntimeReader<TRow>): void;
 
 // @public
 export function useResolvedAdapter(adapter: UrlStateAdapter | undefined, enabled: boolean): UrlStateAdapter;
