@@ -139,6 +139,26 @@ describe("overlayFeatureOptions", () => {
 });
 
 describe("applyTableFeatures", () => {
+  it("reads every part of a duplicated id from its last declaration", () => {
+    const first = {
+      id: "palette",
+      labels: { commandPalette: "First" },
+      apply: () => ({ commandPalette: { commands: ["first"] } }),
+    };
+    const second = {
+      id: "palette",
+      labels: { commandPalette: "Second" },
+      apply: () => ({ commandPalette: true }),
+    };
+    const resolved = applyTableFeatures({ features: [first, second] }) as {
+      commandPalette?: unknown;
+      featureLabels?: unknown;
+    };
+    expect(resolved.commandPalette).toBe(true);
+    expect(resolved.featureLabels).toEqual([{ commandPalette: "Second" }]);
+    expect(getAppliedFeatures(resolved)).toEqual([second]);
+  });
+
   it("returns the same object when no features key is present", () => {
     const props = { columns: [] };
     expect(applyTableFeatures(props)).toBe(props);

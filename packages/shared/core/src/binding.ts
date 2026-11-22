@@ -755,6 +755,7 @@ export {
   type PatchFeature,
   rememberAppliedFeatures,
   resolveFeatureGrouping,
+  resolveFeatureIds,
 } from "./features/featurePatch";
 export {
   type CommandPaletteContribution,

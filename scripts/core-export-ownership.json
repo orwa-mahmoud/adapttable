@@ -12327,6 +12327,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "resolveFeatureIds",
+      "kind": "runtime",
+      "module": "features/featurePatch.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featurePatch.ts#resolveFeatureIds",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "resolveFeatureLabels",
       "kind": "runtime",
       "module": "labelGroups/tableLabels.ts",

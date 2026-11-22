@@ -1,6 +1,5 @@
 /** Scoped extension contracts; importing these never installs a feature. */
 import {
-  devWarn,
   type TableDensity,
   type TableLabels,
   type TableSource,
@@ -20,7 +19,7 @@ import {
   type LiveFeatureHost,
   mergeFeaturePatches,
   type PlainSlotKey,
-  preferLastById,
+  resolveFeatureIds,
   type RowSlotKey,
   type SlotFill,
   slotFillsOf,
@@ -107,7 +106,6 @@ export function normalizeFeatures<TRow>(
   entries: readonly FeatureListEntry<ComposedFeature<TRow>>[]
 ): readonly ComposedFeature<TRow>[] {
   const features = flattenFeatures(entries);
-  const seen = new Set<string>();
   for (const declaration of features) {
     if (
       !declaration ||
@@ -125,13 +123,8 @@ export function normalizeFeatures<TRow>(
         throw new Error(
           `AdaptTable: feature "${declaration.id}" has an invalid ${name}.`
         );
-    if (seen.has(declaration.id))
-      devWarn(
-        `Two features share the id "${declaration.id}". The last declaration wins.`
-      );
-    seen.add(declaration.id);
   }
-  return preferLastById(features);
+  return resolveFeatureIds(features);
 }
 /** Merge only after duplicate resolution; a discarded feature never applies. */
 export function featureOptionsOf<TRow>(

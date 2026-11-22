@@ -14,13 +14,17 @@
  */
 import type { ContrastRules } from "../a11y/forcedColors";
 import type { TableLabels } from "../types";
+import { devWarn } from "../utils/devWarn";
 import {
   type GroupingContribution,
   mergeGroupingContributions,
   projectGroupingContribution,
 } from "./featureContribution";
 import { type FeatureListEntry, flattenFeatures } from "./featureFamilies";
-import type { FeatureRegistration } from "./featureRegistration";
+import {
+  type FeatureRegistration,
+  preferLastById,
+} from "./featureRegistration";
 
 /**
  * Internal table configuration a composed feature may write.
@@ -169,7 +173,36 @@ function featuresOf(options: object): readonly PatchFeature[] | undefined {
   if (!("features" in options)) return undefined;
   const list = options.features;
   if (!Array.isArray(list)) return [];
-  return flattenFeatures(list as readonly FeatureListEntry<PatchFeature>[]);
+  return resolveFeatureIds(
+    flattenFeatures(list as readonly FeatureListEntry<PatchFeature>[])
+  );
+}
+
+/**
+ * One declaration per id, the last one, so a table's options, labels,
+ * registrations, stages and fills all read the same declaration. A list
+ * with unique ids comes back as itself.
+ *
+ * @param features - The composed features, flattened.
+ * @returns The declarations that own their ids.
+ *
+ * @public
+ */
+export function resolveFeatureIds<TFeature extends { readonly id: string }>(
+  features: readonly TFeature[]
+): readonly TFeature[] {
+  const seen = new Set<string>();
+  let duplicated = false;
+  for (const feature of features) {
+    if (seen.has(feature.id)) {
+      duplicated = true;
+      devWarn(
+        `Two features share the id "${feature.id}". The last declaration replaces the earlier one everywhere: its options, labels, registrations and slot fills.`
+      );
+    }
+    seen.add(feature.id);
+  }
+  return duplicated ? preferLastById(features) : features;
 }
 
 /**

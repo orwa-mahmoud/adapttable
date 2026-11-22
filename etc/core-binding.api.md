@@ -8928,6 +8928,11 @@ export function resolveExportProgressState(input: {
 export function resolveFeatureGrouping<TRow>(host: GroupingContribution<TRow> | undefined, features: readonly (GroupingContribution<TRow> | undefined)[]): GroupingContribution<TRow> | undefined;
 
 // @public
+export function resolveFeatureIds<TFeature extends {
+    readonly id: string;
+}>(features: readonly TFeature[]): readonly TFeature[];
+
+// @public
 export function resolveFeatureLabels<const TGroups extends readonly Partial<TableLabels>[]>(labels: TableLabels | undefined, groups: TGroups): FeatureStrings<TGroups>;
 
 // @public

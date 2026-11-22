@@ -17999,7 +17999,9 @@ explains which import a program changes. This list is the reference.
   a runtime view and clears the ones that are no longer armed.
 - `planFeatureRegistration` — which retained features stay and which
   declarations still mount. `preferLastById` keeps the last declaration of
-  each id. `FeatureRegistrationPlan` is the release list and the mount list.
+  each id. `resolveFeatureIds` does the same for a table's whole feature list
+  and warns in development when two declarations share an id, so options,
+  labels, registrations and slot fills all read the one that wins. `FeatureRegistrationPlan` is the release list and the mount list.
   `RegisteredFeature` is one id plus its declaration. `projectFeatureHosts`
   reads the per-feature hosts as one host. `invokeCleanups` runs every
   cleanup and returns the failures; one failure does not skip the rest.
