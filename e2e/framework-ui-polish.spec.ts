@@ -1,7 +1,7 @@
 import { expect, type Locator, test } from "@playwright/test";
 
 import { builtAdapters, pathOf } from "../apps/showcase/matrix.mjs";
-import { getLabels } from "../packages/shared/i18n/src";
+import { getLabels } from "../packages/shared/i18n/src/catalog";
 
 async function settleOverlay(surface: Locator): Promise<void> {
   await expect

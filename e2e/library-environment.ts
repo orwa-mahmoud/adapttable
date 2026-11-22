@@ -10,7 +10,7 @@
 import { expect, type Page } from "@playwright/test";
 
 import { pathOf } from "../apps/showcase/matrix.mjs";
-import { getLabels } from "../packages/shared/i18n/src/index";
+import { getLabels } from "../packages/shared/i18n/src/catalog";
 
 type Framework = "react" | "vue" | "angular";
 

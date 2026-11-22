@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 
 import { expect, test } from "@playwright/test";
 
-import { getLabels } from "../packages/shared/i18n/src/index";
+import { getLabels } from "../packages/shared/i18n/src/catalog";
 
 for (const kit of ["ng-bootstrap", "ngx-bootstrap"] as const) {
   for (const theme of ["light", "dark"] as const) {

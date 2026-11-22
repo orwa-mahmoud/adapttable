@@ -1,7 +1,8 @@
 import { expect, type Page, test } from "@playwright/test";
 
 import { builtAdapters, featuresOf } from "../apps/showcase/matrix.mjs";
-import { getDirection, locales } from "../packages/shared/i18n/src/index";
+import { locales } from "../packages/shared/i18n/src/catalog";
+import { getDirection } from "../packages/shared/i18n/src/index";
 import { angularPart } from "./angular-kit";
 import { gotoFromFeatureGrid } from "./nav";
 

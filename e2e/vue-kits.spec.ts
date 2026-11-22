@@ -2,7 +2,7 @@ import { expect, type Page, test, type TestInfo } from "@playwright/test";
 
 import { VUE_KIT_PAGES } from "../apps/showcase/matrix.mjs";
 import { workspaceCopy } from "../apps/showcase/src/vue/workspace/copy";
-import { getLabels } from "../packages/shared/i18n/src/index";
+import { getLabels } from "../packages/shared/i18n/src/catalog";
 import { expectDensityGeometry } from "./vue-kit-density-geometry";
 
 const part = (name: string) => `[data-adapttable-part="${name}"]`;
