@@ -74,10 +74,13 @@ standing pattern is **Chrome + slots**:
   bindings, and a binding's `./adapter` entry serves its kits. New machinery
   goes on those entries, never on a main entry; a name that leaves a main
   entry stays there as a deprecated alias of the same value or type until the
-  next major. Angular is the exception for state a kit shares with the table
-  (injection tokens, feature registries and the functions that read them):
-  ng-packagr bundles `@adapttable/angular/adapter` with its own copy of every
-  module it reaches, so those stay on `@adapttable/angular`.
+  next major. State a kit and the table share at runtime (an injection
+  token, a feature registry, a store key) is declared once, and every entry
+  imports it by package name from the entry that declares it, never by a
+  relative path that would bundle a second copy. In Angular that entry is
+  `@adapttable/angular`: ng-packagr builds each entry with every module it
+  reaches by path, and `scripts/angular-injection-tokens.test.mjs` fails when
+  a token is constructed in two bundles.
 
 ## Framework packages
 
