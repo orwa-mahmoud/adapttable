@@ -8481,7 +8481,8 @@
       "editingFamilyList",
       "FeatureListEntry",
       "filteringFamilyList",
-      "flattenFeatures"
+      "flattenFeatures",
+      "RuntimeActions"
     ],
     "core-conformance": [
       "CaseArgs",

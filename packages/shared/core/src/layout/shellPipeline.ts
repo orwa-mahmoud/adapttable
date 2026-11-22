@@ -374,8 +374,12 @@ export function tableRuntimeView<TRow>(
   };
 }
 
-/** The host's own row and bulk actions, as composed. */
-interface RuntimeActions<TRow> {
+/**
+ * The host's own row and bulk actions, as composed.
+ *
+ * @public
+ */
+export interface RuntimeActions<TRow> {
   readonly rowActions?: readonly RowAction<TRow>[];
   readonly bulkActions?: readonly BulkAction[];
 }

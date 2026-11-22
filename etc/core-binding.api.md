@@ -9815,7 +9815,7 @@ export function rowWindow<TRow>(input: {
 export function runCommand(command: Command | undefined, close: () => void): void;
 
 // @public
-interface RuntimeActions<TRow> {
+export interface RuntimeActions<TRow> {
     // (undocumented)
     readonly bulkActions?: readonly BulkAction[];
     // (undocumented)

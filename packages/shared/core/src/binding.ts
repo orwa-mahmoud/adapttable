@@ -918,6 +918,7 @@ export {
   printToolbarProps,
   readableRowLabel,
   renderedRowsOf,
+  type RuntimeActions,
   type RuntimeChromeInput,
   type RuntimeColumn,
   type ShellBodyInput,
