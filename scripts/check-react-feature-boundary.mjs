@@ -50,6 +50,7 @@ export const MACHINERY = new Set([
   "features/shellLiveGate.tsx",
   "features/shellLiveStubs.ts",
   "features/slotKeys.ts",
+  "features/stateKeys.ts",
   "features/tableFeature.ts",
 ]);
 
