@@ -18051,6 +18051,14 @@ explains which import a program changes. This list is the reference.
   reads the per-feature hosts as one host. `invokeCleanups` runs every
   cleanup and returns the failures; one failure does not skip the rest.
   These functions are on `@adapttable/core/binding`.
+- `onRowRekeys(store, handler)` — register how one piece of a table's
+  state follows a rekey (`RowRekeyHandler`); it returns what unregisters it.
+  `rekeyTableRows(store, log)` runs every handler in one store change, and
+  `commitRowRekeys(store, previous, data)` does it when committed data's patch
+  log continues from the previous data. `rekeyedIds(log, getId)` maps the ids
+  a function derives — the row id, or a separate selection id — and
+  `rekeyIdSet`, `rekeyIdList`, `rekeyIdRecord`, `rekeyRowIdSet` and
+  `rekeyRowPins` move ids in the common shapes. On `@adapttable/core/binding`.
 - `createFeatureMounts(acquire)` — a table's mounted feature resources
   (`FeatureMounts`): `reconcile` keeps each by id across ordinary option
   changes, replaces it when its `dependencies` change, releases it once when

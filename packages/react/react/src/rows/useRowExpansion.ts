@@ -1,4 +1,8 @@
-import { type RowExpansionState, toggleId } from "@adapttable/core/binding";
+import {
+  rekeyRowIdSet,
+  type RowExpansionState,
+  toggleId,
+} from "@adapttable/core/binding";
 import { useCallback, useMemo } from "react";
 
 import {
@@ -21,7 +25,9 @@ export function useRowExpansion(
 ): RowExpansionState {
   const [expandedIds, store] = useControllableStore<ReadonlySet<string>>(
     () => new Set(defaultExpandedIds),
-    UNCONTROLLED
+    UNCONTROLLED,
+    undefined,
+    rekeyRowIdSet
   );
 
   const isExpanded = useCallback(

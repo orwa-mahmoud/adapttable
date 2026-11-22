@@ -16323,6 +16323,14 @@
       "behavior": ""
     },
     {
+      "export": "commitRowRekeys",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "commitSearchOnBlur",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -22819,6 +22827,14 @@
       "behavior": ""
     },
     {
+      "export": "onRowRekeys",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "OPEN_PALETTE_COMMAND",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -23923,6 +23939,62 @@
       "behavior": ""
     },
     {
+      "export": "rekeyedIds",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "rekeyIdList",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "rekeyIdRecord",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "rekeyIdSet",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "rekeyRowIdSet",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "rekeyRowPins",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "rekeyTableRows",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "RELATIVE_NAMED",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -24939,6 +25011,14 @@
       "behavior": ""
     },
     {
+      "export": "RowPatchLog",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "RowPatchStreamState",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -25052,6 +25132,14 @@
     },
     {
       "export": "RowPinState",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "RowRekeyHandler",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",

@@ -2432,6 +2432,9 @@ export interface CommandPaletteSurfaceProps<TNode = unknown> {
 export function commitRowPin(store: ControllableStore<RowPinState>, enabled: boolean, rowId: string, side: RowPinSide | undefined): void;
 
 // @public
+export function commitRowRekeys<TRow>(store: TableStore, previous: readonly TRow[] | undefined, data: readonly TRow[]): void;
+
+// @public
 export function commitSearchOnBlur(commit: () => void): () => void;
 
 // @public
@@ -7900,6 +7903,9 @@ export function observeRailWidths(head: Element, onChange: (widths: MeasuredRail
 export function offerableOperations(resolved: ResolvedAggregatable | undefined, source?: AggregationSourceSupport): readonly ResolvedAggregateOperation[];
 
 // @public
+export function onRowRekeys<TRow>(store: TableStore, handler: RowRekeyHandler<TRow>): () => void;
+
+// @public
 export const OPEN_PALETTE_COMMAND = "command-palette";
 
 // @public
@@ -8747,6 +8753,27 @@ export interface RegisteredFeature<TFeature> {
 }
 
 // @public
+export function rekeyedIds<TRow>(log: RowPatchLog<TRow>, getId: (row: TRow) => string): ReadonlyMap<string, string>;
+
+// @public
+export function rekeyIdList(ids: readonly string[], moved: ReadonlyMap<string, string>): readonly string[];
+
+// @public
+export function rekeyIdRecord<T>(record: Readonly<Record<string, T>>, moved: ReadonlyMap<string, string>): Readonly<Record<string, T>>;
+
+// @public
+export function rekeyIdSet(ids: ReadonlySet<string>, moved: ReadonlyMap<string, string>): ReadonlySet<string>;
+
+// @public
+export function rekeyRowIdSet(ids: ReadonlySet<string>, log: RowPatchLog<unknown>): ReadonlySet<string>;
+
+// @public
+export function rekeyRowPins(pins: RowPinState, log: RowPatchLog<unknown>): RowPinState;
+
+// @public
+export function rekeyTableRows(store: TableStore, log: RowPatchLog<unknown>): void;
+
+// @public
 export const RELATIVE_NAMED: readonly ["today", "yesterday", "tomorrow", "thisWeek", "thisMonth", "previousMonth"];
 
 // @public
@@ -9459,6 +9486,12 @@ export type RowPatchEvent<TRow> = {
 };
 
 // @public
+export interface RowPatchLog<TRow> {
+    events: readonly RowPatchEvent<TRow>[];
+    rows: readonly TRow[];
+}
+
+// @public
 export interface RowPatchStreamState {
     close: () => void;
     error: Error | null;
@@ -9551,6 +9584,9 @@ export interface RowPinState {
     readonly bottom: readonly string[];
     readonly top: readonly string[];
 }
+
+// @public
+export type RowRekeyHandler<TRow = unknown> = (log: RowPatchLog<TRow>) => void;
 
 // @public
 export type RowReorderAnnouncements = Required<Pick<RowReorderLabels, "rowLifted" | "rowMoved" | "rowReorderCancelled" | "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever" | "moveRejectedSorted" | "moveRejectedCycle" | "moveUnavailable" | "rootLevel" | "moveToGroup" | "moveUnder">>;

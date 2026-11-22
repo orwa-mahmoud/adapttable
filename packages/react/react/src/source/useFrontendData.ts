@@ -28,6 +28,7 @@ import {
 export { defaultFrontendRowId, defaultSearchText } from "@adapttable/core";
 
 import {
+  commitRowRekeys,
   createFrontendSourceWith,
   type FrontendSource,
   resolvePaginationMode,
@@ -246,10 +247,16 @@ export function useFrontendDataWith<TRow>(
     held.current = null;
     setModelEpoch((epoch) => epoch + 1);
   }, [source, createEngine]);
+  // The data last committed, so a patched array's rekeys move the table's
+  // selection, pins and drafts in the same commit.
+  const committedData = useRef<readonly TRow[] | undefined>(undefined);
   useLayoutEffect(() => {
     if (source.engineFactory !== createEngine || skipped) return;
     source.commit();
     markFrameCommitted(held);
+    const { store } = urlOptions;
+    if (store) commitRowRekeys(store, committedData.current, data);
+    committedData.current = data;
   });
 
   const { page: safePage, total, hasNextPage } = frame;

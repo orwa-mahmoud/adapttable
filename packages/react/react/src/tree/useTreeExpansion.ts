@@ -12,6 +12,7 @@
 
 import {
   idSetReader,
+  rekeyRowIdSet,
   treeExpansionActions,
   type TreeExpansionState,
 } from "@adapttable/core/binding";
@@ -40,7 +41,9 @@ export function useTreeExpansion(controlled?: {
       value: readIds(controlled?.expandedIds),
       onChange:
         onExpandedIdsChange && ((next) => onExpandedIdsChange([...next])),
-    }
+    },
+    undefined,
+    rekeyRowIdSet
   );
 
   const isExpanded = useCallback(

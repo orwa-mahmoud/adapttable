@@ -1256,7 +1256,7 @@ export {
 } from "./layout/kitEnvironment";
 export { notifyLayoutChange } from "./layout/layoutChange";
 export type { HighlightedCell } from "./rows/highlightStore";
-export type { RowPatchEvent } from "./rows/patch";
+export type { RowPatchEvent, RowPatchLog } from "./rows/patch";
 export type {
   RowDropPosition,
   RowMoveMenuModel,
@@ -2029,6 +2029,18 @@ export { createControllableStore } from "./state/controllableStore";
 export { fillSlot, tableErrorState } from "./state/errorState";
 export { collectFeatureNotices } from "./state/featureNotices";
 export { createLocalTableViewStore } from "./state/localViewStore";
+export {
+  commitRowRekeys,
+  onRowRekeys,
+  rekeyedIds,
+  rekeyIdList,
+  rekeyIdRecord,
+  rekeyIdSet,
+  rekeyRowIdSet,
+  rekeyRowPins,
+  rekeyTableRows,
+  type RowRekeyHandler,
+} from "./state/rowRekeys";
 export {
   groupsCollapsedToDepth,
   headerSelectionOf,

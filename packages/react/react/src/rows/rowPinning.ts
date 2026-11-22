@@ -20,6 +20,7 @@ import {
 } from "@adapttable/core";
 import {
   commitRowPin,
+  rekeyRowPins,
   ROW_PIN_STORE_OPTIONS,
   rowPinActions,
   type RowPinningState,
@@ -58,7 +59,8 @@ export function useRowPinning<TRow>(options: {
   const [state, store] = useControllableStore<RowPinState>(
     () => EMPTY_ROW_PIN_STATE,
     { value: options.pinnedRowIds, onChange: options.onPinnedRowIdsChange },
-    ROW_PIN_STORE_OPTIONS
+    ROW_PIN_STORE_OPTIONS,
+    rekeyRowPins
   );
 
   const pin = useEventCallback((rowId: string, side: RowPinSide) => {

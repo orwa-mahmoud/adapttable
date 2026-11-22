@@ -4789,7 +4789,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "contracts/rows.ts#RowPatchLog",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "RowPinLabels",
@@ -7352,6 +7352,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "rows/rowActionsRuntime.ts#commitRowPin",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "commitRowRekeys",
+      "kind": "runtime",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#commitRowRekeys",
       "subpaths": ["./binding"]
     },
     {
@@ -11469,6 +11480,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "onRowRekeys",
+      "kind": "runtime",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#onRowRekeys",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "OPEN_PALETTE_COMMAND",
       "kind": "runtime",
       "module": "actions/commandPaletteController.ts",
@@ -12060,6 +12082,83 @@
       "forward": true,
       "deprecated": false,
       "identity": "source/serverRequest.ts#recordCursor",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "rekeyedIds",
+      "kind": "runtime",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#rekeyedIds",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "rekeyIdList",
+      "kind": "runtime",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#rekeyIdList",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "rekeyIdRecord",
+      "kind": "runtime",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#rekeyIdRecord",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "rekeyIdSet",
+      "kind": "runtime",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#rekeyIdSet",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "rekeyRowIdSet",
+      "kind": "runtime",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#rekeyRowIdSet",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "rekeyRowPins",
+      "kind": "runtime",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#rekeyRowPins",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "rekeyTableRows",
+      "kind": "runtime",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#rekeyTableRows",
       "subpaths": ["./binding"]
     },
     {
@@ -18198,6 +18297,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "rows/rowsBindingState.ts#RowPinningState",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "RowRekeyHandler",
+      "kind": "type",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#RowRekeyHandler",
       "subpaths": ["./binding"]
     },
     {

@@ -1,7 +1,12 @@
-import { offersAllMatching as neutralOffersAllMatching } from "@adapttable/core";
+import {
+  offersAllMatching as neutralOffersAllMatching,
+  type RowPatchLog,
+} from "@adapttable/core";
 import {
   headerSelectionOf,
   idSetReader,
+  rekeyedIds,
+  rekeyIdSet,
   type SelectionState,
   toggleId,
   toggleIds,
@@ -116,12 +121,20 @@ export function useSelection<TRow>(
   // The store's mutators are permanently stable: memoized adapter rows can
   // hold `toggle` forever, and a controlled commit still computes from the
   // selection the host last rendered.
+  // A rekey moves a selected row's id by the same function that selects it.
+  const followRekey = useCallback(
+    (ids: ReadonlySet<string>, log: RowPatchLog<unknown>) =>
+      rekeyIdSet(ids, rekeyedIds(log as RowPatchLog<TRow>, getId)),
+    [getId]
+  );
   const [selectedIds, store] = useControllableStore<ReadonlySet<string>>(
     () => new Set(),
     {
       value: readIds(options.selectedIds),
       onChange: onChange && ((next) => onChange([...next])),
-    }
+    },
+    undefined,
+    followRekey
   );
 
   /** Route a change to the parent (controlled) or internal state. */
