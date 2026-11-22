@@ -47035,6 +47035,14 @@
       "behavior": ""
     },
     {
+      "export": "coreVirtualize",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "createAdapterAgentApprovalFeature",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -49212,6 +49220,14 @@
     },
     {
       "export": "KEYED_WINDOW",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KEYED_WINDOW_RENDER",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",

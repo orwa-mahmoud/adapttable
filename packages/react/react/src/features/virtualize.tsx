@@ -67,6 +67,17 @@ function KeyedWindow({
 }
 
 /**
+ * The keyed window a kit's own body asks for grouped or keyed lists: the
+ * virtualizer for those entries, and nothing else.
+ *
+ * @public
+ */
+export const KEYED_WINDOW_RENDER = /* @__PURE__ */ slotRender(
+  KEYED_WINDOW,
+  (slotProps) => <KeyedWindow {...slotProps} />
+);
+
+/**
  * Render only the rows in view.
  *
  * ```tsx
@@ -86,7 +97,7 @@ export function virtualize(
       slotRender<ChromeBodyDraw>(CHROME_BODY, (slotProps) => (
         <VirtualChromeBody {...slotProps} />
       )),
-      slotRender(KEYED_WINDOW, (slotProps) => <KeyedWindow {...slotProps} />),
+      KEYED_WINDOW_RENDER,
     ],
   };
 }

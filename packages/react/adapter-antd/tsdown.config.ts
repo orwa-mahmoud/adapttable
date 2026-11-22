@@ -45,7 +45,7 @@ export default defineConfig({
     "src/grouping.tsx",
     "src/grouping-panel.tsx",
     "src/editing.tsx",
-    "src/virtualize.ts",
+    "src/virtualize.tsx",
     "src/column-menu.tsx",
     "src/column-layout.ts",
     "src/cell-navigation.tsx",

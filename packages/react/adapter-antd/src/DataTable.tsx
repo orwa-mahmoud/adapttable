@@ -1,119 +1,71 @@
 import {
   type ColumnDef,
-  type EditHistoryState,
   HeaderFilterOpenProvider,
   type RowExpansionState,
   type SelectionState,
-  type UrlStateAdapter,
   type UseDataTableResult,
-  useInfiniteScroll,
-  type UseSavedViewsOptions,
-  useTableData,
 } from "@adapttable/react";
 import {
-  ACTIVE_FILTER_CHIPS,
-  AGENT_APPROVAL,
-  AGENT_APPROVAL_STATE,
-  autoSizeColumns as autoSizeAllColumns,
-  BATCH_EDIT_BAR,
-  bindFeatureHostFn,
   bodyCellsHaveRowSpan,
-  BULK_BAR,
-  ChromeExtrasGate,
   COLUMN_HEADER_RENAME,
-  COLUMN_MENU,
   columnsHaveFooter,
-  COMMAND_PALETTE_LIVE,
   type ConfirmHandler,
-  contextMenuCopyTarget,
-  ContextMenuLiveGate,
-  type ContextMenuLiveSlotProps,
+  type DataTableShellResult,
   DEFAULT_CARD_SIZE_PX,
-  disabledHistory,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_ROW_PARTS,
-  featureHostOf,
-  FeatureHostProvider,
-  featureLabelsFor,
   type FeatureProps,
   FeatureProviders,
   FeatureSlot,
   fillSlot,
-  FILTER_DRAWER,
-  type FilterRuntime,
-  FILTERS_FORM,
-  type FiltersFormSlotProps,
-  FIND_BAR,
-  flattenReactColumnTree,
-  GRID_FOCUS_ANNOUNCER,
   type GridFocusState,
   type GroupByInput,
   type GroupCollapseState,
   type GroupedFlatEntry,
-  GROUPING_PANEL,
-  type GroupingPanelSlotProps,
   isBodyEligible,
-  isDeclarativeFilters,
   isExtraEntry,
   KEYED_WINDOW,
   type KeyedVirtualization,
   type KeyedWindow,
   type KeyedWindowSlotProps,
+  type KitSkeletonShape,
+  type KitTable,
+  type KitTableFrameProps,
+  type KitTableProps,
+  type KitToolbarProps,
   mobileCardListStyle,
-  OptionalSidePanel,
   partitionPinnedRows,
   pinnedRowPart,
   pinnedRowStickyStyle,
   pinnedSummaryPart,
   pinnedSummaryRowId,
-  printToolbar,
   ReducedMotionScope,
-  rememberFeatureHost,
   renderedRowsOf,
   REORDER_COLUMN_WIDTH,
   resolveColumnFooter,
   resolveFilterMode,
   resolveRowStyle,
-  resolveStickyToolbar,
-  resolveTableLabels,
-  ROW_REORDER_ANNOUNCER,
   rowClickProps,
   rowIsDirty,
   type RowPinningState,
   type RowPinSide,
   rowReorderDropStyle,
   type RowReorderState,
-  SAVED_VIEWS,
-  showSimpleFilterFields,
-  SIDE_PANEL,
-  STATUS_BAR,
+  TableComposition,
   type TableErrorState,
   type TableLabels,
   tableMinWidth,
   tableRenderModel,
   type TableSource,
-  TableStatusAnnouncer,
-  toolbarShowsFilters,
   type TreeEntry,
   treeRowAria,
   treeTableAria,
-  undoRedoToolbar,
-  useChromeScrollReset,
-  type UseColumnLayoutResult,
   useFeatureSlotFilled,
-  useFeatureState,
-  useFilterTriggerToggle,
-  useFullscreen,
   useLocaleLabels,
   useMountStagger,
   useOffsetHeight,
-  useResolvedAdapter,
-  useResolvedDensity,
-  useStickyToolbarLayout,
-  useTableChrome,
+  type useTableChrome,
   useTableFeatures,
-  useTableStatusAnnouncement,
-  viewControlsToolbar,
   type VirtualTableRow,
   windowGroupedEntries,
   withKitEnvironment,
@@ -140,21 +92,19 @@ import {
   type UIEventHandler,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useRef,
-  useState,
   useSyncExternalStore,
 } from "react";
 
-import { AntdInteractionGate } from "./antdLiveGates";
 import { useAntdTableParts } from "./antdParts";
 import {
   type AntdRowScroll,
+  AntdRowScrollContext,
   type AntdTableRef,
   KeyedScrollRegistration,
-  scrollAntdRow,
   useAntdRowScroll,
+  useAntdRowScrollHandles,
 } from "./antdRowScroll";
 import {
   ANTD_ACTIONS_COLUMN_WIDTH,
@@ -764,119 +714,6 @@ function buildExpandable<TRow>(
 }
 
 /**
- * The column-management menu, gated to desktop + opt-in. Rendered as a
- * component (not an inline ternary) so the `DataTable` body stays flat.
- */
-function ColumnMenuSlot<TRow>({
-  enabled,
-  allColumns,
-  layout,
-  labels,
-  dir,
-  hasRowActions,
-  hasRowReorder,
-  onAutoSize,
-  onAutoSizeColumn,
-  onSortColumn,
-  onFilterColumn,
-  onRenameColumn,
-  sortBy,
-  sortDir,
-  groupingPanel,
-}: Readonly<{
-  enabled: boolean;
-  allColumns: ColumnDef<TRow>[];
-  layout: UseColumnLayoutResult<TRow>;
-  labels: Required<TableLabels>;
-  dir?: "ltr" | "rtl";
-  hasRowActions: boolean;
-  hasRowReorder: boolean;
-  /** Size every rendered column to its content. */
-  onAutoSize: () => void;
-  onAutoSizeColumn?: (key: string) => void;
-  onSortColumn?: (key: string, dir: "asc" | "desc") => void;
-  onFilterColumn?: (key: string) => void;
-  onRenameColumn?: (key: string, name: string) => void;
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  groupingPanel?: NonNullable<
-    ReturnType<typeof useTableChrome<TRow>>["groupingPanel"]
-  >;
-}>) {
-  if (!enabled) return null;
-  return (
-    <FeatureSlot
-      slot={COLUMN_MENU}
-      props={{
-        allColumns,
-        onAutoSize,
-        onAutoSizeColumn,
-        onSortColumn,
-        onFilterColumn,
-        onRenameColumn,
-        sortBy,
-        sortDir,
-        layout,
-        labels,
-        hasRowActions,
-        hasRowReorder,
-        dir,
-        groupingPanel,
-      }}
-    />
-  );
-}
-
-/**
- * The saved-views menu, mounted when the feature is composed. The
- * table's own `urlAdapter` / `urlKey` are the defaults so a captured view
- * holds THIS table's params; explicit options win.
- */
-function SavedViewsSlot({
-  options,
-  urlAdapter,
-  urlKey,
-  labels,
-}: Readonly<{
-  options: UseSavedViewsOptions | undefined;
-  urlAdapter: UrlStateAdapter | undefined;
-  urlKey: string | undefined;
-  labels: Required<TableLabels>;
-}>) {
-  if (!options) return null;
-  return (
-    <FeatureSlot
-      slot={SAVED_VIEWS}
-      props={{
-        options: {
-          urlAdapter,
-          urlKey,
-          ...options,
-        },
-        labels,
-      }}
-    />
-  );
-}
-
-/**
- * Whether the page-level load-more sentinel should stay armed. It disarms
- * only while the antd virtual table renders (desktop): there the rows live in
- * antd's own fixed-height scroll container, and `handleVirtualScroll` drives
- * paging instead. Mobile cards window through core virtualization but still
- * flow in the page (no inner scroll box), so the sentinel stays the single
- * load-more trigger there even with `virtualize` set.
- */
-function sentinelEnabled(
-  isPaged: boolean,
-  error: Error | null,
-  virtualize: boolean,
-  body: string
-): boolean {
-  return !isPaged && !error && !(virtualize && body === "desktop");
-}
-
-/**
  * Map the shared `summaryRow` contract onto antd's NATIVE `summary` slot: one
  * `Table.Summary.Row` whose cells line up under the data columns. antd
  * injects its expand/selection columns at the START of the grid, so the row
@@ -934,46 +771,6 @@ function chainToggler<TRow>(
 ): ((key: string) => void) | undefined {
   if (!multiSort) return undefined;
   return (key) => source.toggleSortLevel(key);
-}
-
-/**
- * The auto-built form for a declarative `filters` array — nothing when the
- * runtime resolved zero definitions (no column shorthands, empty array).
- */
-function autoFilterForm<TRow>(
-  runtime: FilterRuntime<TRow>,
-  source: TableSource<TRow>,
-  labels: Required<TableLabels>,
-  header: boolean,
-  filterFields?: boolean
-) {
-  if (runtime.defs.length === 0) return undefined;
-  const simpleFiltersOn = showSimpleFilterFields(header, filterFields);
-  const formProps = {
-    defs: runtime.defs,
-    source,
-    registry: runtime.registry,
-    labels,
-    defaultExpanded: !simpleFiltersOn,
-    showSimpleFields: simpleFiltersOn,
-  } as unknown as FiltersFormSlotProps<unknown>;
-  return <FeatureSlot slot={FILTERS_FORM} props={formProps} />;
-}
-
-/** Declarative `filters` become the auto form; JSX passes through. */
-function resolveFiltersNode<TRow>(
-  filters: ComposedProps<TRow>["filters"],
-  runtime: FilterRuntime<TRow>,
-  source: TableSource<TRow>,
-  labels: Required<TableLabels>,
-  header: boolean,
-  filterFields?: boolean
-): ReactNode {
-  return (
-    isDeclarativeFilters(filters) || filters === undefined
-      ? autoFilterForm(runtime, source, labels, header, filterFields)
-      : filters
-  ) as ReactNode;
 }
 
 /** antd `<Table>` size tokens. */
@@ -1815,23 +1612,6 @@ function DataTableBodyRegion<TRow>(
   return body;
 }
 
-function AntdRowReorderAnnouncer<TRow>({
-  rowReorder,
-}: Readonly<{ rowReorder: RowReorderState<TRow> | undefined }>) {
-  if (rowReorder === undefined) return null;
-  return (
-    <FeatureSlot
-      slot={ROW_REORDER_ANNOUNCER}
-      props={{ announcement: rowReorder.announcement }}
-    />
-  );
-}
-
-function TableFooterSlot({ children }: Readonly<{ children?: ReactNode }>) {
-  if (children == null) return null;
-  return <div data-adapttable-part="table-footer">{children}</div>;
-}
-
 /**
  * Batteries-included Ant Design data table. Drop in `columns`, a `source`,
  * and a `rowKey` for a fully wired antd `<Table>` — sorting, selection,
@@ -1850,241 +1630,6 @@ function TableFooterSlot({ children }: Readonly<{ children?: ReactNode }>) {
  * so it calls these four directly. Grouping them keeps `DataTable` — which
  * assembles the entire adapter — from carrying their branches too.
  */
-function useAntdWindowState<TRow>(c: ReturnType<typeof useTableChrome<TRow>>) {
-  // The row count is the DATASET total and `windowStart` is where the rendered
-  // slice begins, so Ctrl+End reaches the real last row and the ARIA counts
-  // stay truthful under virtualization.
-  const windowStart =
-    c.source.paginationMode === "paged"
-      ? Math.max(0, (c.source.page - 1) * c.source.limit)
-      : 0;
-  // The same dataset size the grid reports through `aria-rowcount`; the card
-  // list needs it per item, as `aria-setsize`.
-  const cardSetSize = Math.max(
-    c.source.total,
-    windowStart + c.source.rows.length
-  );
-  // Same derivation as the shell's: antd builds its own chrome, so it calls the
-  // status hook directly rather than reading `shell.statusAnnouncement`.
-  const sortedColumn = c.columnLayout.visibleColumns.find(
-    (column) => column.key === c.source.sortBy
-  );
-  const statusAnnouncement = useTableStatusAnnouncement({
-    labels: c.table.labels,
-    total: c.source.total,
-    shown: c.source.rows.length,
-    page: c.source.page,
-    limit: c.source.limit,
-    paged: c.source.paginationMode === "paged",
-    sortBy: c.source.sortBy,
-    sortDir: c.source.sortDir,
-    sortColumnName:
-      typeof sortedColumn?.header === "string"
-        ? sortedColumn.header
-        : sortedColumn?.key,
-  });
-  return {
-    windowStart,
-    cardSetSize,
-    statusAnnouncement,
-  };
-}
-
-/**
- * The Ant Design table. Pass rows and columns — or a `query` (server), or a
- * prebuilt `source` — to get a fully styled, sortable, filterable, paginated
- * table with selection, bulk actions, RTL and dark mode.
- *
- * @typeParam TRow - The row type.
- *
- * @public
- */
-function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = useTableFeatures(incoming);
-  const featureHost = featureHostOf(props);
-  const { density, onDensityChange } = useResolvedDensity(props);
-  const {
-    slots,
-    className,
-    classNames,
-    animate = false,
-    bordered = false,
-    virtualize = false,
-  } = props;
-  const size = resolveSize(props.size, density);
-  const filtersMode = resolveFilterMode(props.filtersMode, props.headerFilters);
-  // Resolve the data tier (source > onQueryChange server > frontend data)
-  // and the declarative-filter runtime; everything below — pagination, row
-  // selection, the sentinel — uses the RESOLVED source via `table.source`.
-  // ONE resolved URL backend for the tier hooks AND the saved-views menu,
-  // so with `urlSync={false}` both share the same in-memory backend instead
-  // of the menu silently reading the real address bar.
-  const resolvedUrlAdapter = useResolvedAdapter(
-    props.urlSync === false ? undefined : props.urlAdapter,
-    props.urlSync !== false
-  );
-  const dataColumns = useMemo(
-    () => flattenReactColumnTree(props.columns).leaves,
-    [props.columns]
-  );
-  const { source: resolvedSource, runtime } = useTableData<TRow>({
-    locale: props.locale,
-    source: props.source,
-    data: props.data,
-    loading: props.loading,
-    error: props.error,
-    onViewChange: props.onViewChange,
-    urlAdapter: resolvedUrlAdapter,
-    // No `urlSync` here on purpose: the decision is already baked into WHICH
-    // adapter was resolved above (memory when off, the real one when on), and
-    // the tier hooks would otherwise apply it a second time — routing the
-    // active tier to a private store that saved views cannot see.
-    urlKey: props.urlKey,
-    columns: dataColumns,
-    filters: props.filters,
-    filterTypes: props.filterTypes,
-    defaults: props.defaults,
-    paginationMode: props.paginationMode,
-    featureHost,
-  });
-  // A declarative `filters` array becomes the auto-built form; JSX passes
-  // through untouched. Column-level `filter` shorthands alone (no `filters`
-  // prop) must still render the form — only explicit JSX takes over. The
-  // form needs the resolved labels before `useTableChrome` resolves its own
-  // (the chrome consumes the form node), so resolve the same prop here.
-  const featureLabels = featureLabelsFor(props);
-  const formLabels = useMemo(
-    () => resolveTableLabels(props.labels, featureLabels),
-    [props.labels, featureLabels]
-  );
-  const filtersNode = resolveFiltersNode(
-    props.filters,
-    runtime,
-    resolvedSource,
-    formLabels,
-    resolveFilterMode(props.filtersMode, props.headerFilters) === "header",
-    props.filterFields
-  );
-  const filterLabels = useMemo(
-    () => ({ ...runtime.filterLabels, ...props.filterLabels }),
-    [runtime.filterLabels, props.filterLabels]
-  );
-  return (
-    <AntdChromeSession
-      props={props}
-      density={density}
-      onDensityChange={onDensityChange}
-      resolvedSource={resolvedSource}
-      filtersNode={filtersNode}
-      runtime={runtime}
-      filterLabels={filterLabels}
-      featureHost={featureHost}
-      resolvedUrlAdapter={resolvedUrlAdapter}
-      slots={slots}
-      className={className}
-      classNames={classNames}
-      animate={animate}
-      bordered={bordered}
-      virtualize={virtualize}
-      size={size}
-      filtersMode={filtersMode}
-    />
-  );
-}
-
-function AntdChromeSession<TRow>({
-  props,
-  density,
-  onDensityChange,
-  resolvedSource,
-  filtersNode,
-  runtime,
-  filterLabels,
-  featureHost,
-  resolvedUrlAdapter,
-  slots,
-  className,
-  classNames,
-  animate,
-  bordered,
-  virtualize,
-  size,
-  filtersMode,
-}: {
-  readonly props: ComposedProps<TRow>;
-  readonly density: ComposedProps<TRow>["density"];
-  readonly onDensityChange: ComposedProps<TRow>["onDensityChange"];
-  readonly resolvedSource: TableSource<TRow>;
-  readonly filtersNode: ReturnType<typeof resolveFiltersNode>;
-  readonly runtime: FilterRuntime<TRow>;
-  readonly filterLabels: ComposedProps<TRow>["filterLabels"];
-  readonly featureHost: ReturnType<typeof featureHostOf>;
-  readonly resolvedUrlAdapter: NonNullable<ComposedProps<TRow>["urlAdapter"]>;
-  readonly slots: ComposedProps<TRow>["slots"];
-  readonly className: string | undefined;
-  readonly classNames: ComposedProps<TRow>["classNames"];
-  readonly animate: boolean;
-  readonly bordered: boolean;
-  readonly virtualize: boolean;
-  readonly size: AntdTableSize;
-  readonly filtersMode: ReturnType<typeof resolveFilterMode>;
-}) {
-  const chromeProps = {
-    ...props,
-    density,
-    onDensityChange,
-    source: resolvedSource,
-    filters: filtersNode,
-    filterDefs: runtime.defs,
-    filterLabels,
-    pinnedRowIds: props.pinnedRowIds,
-    onPinnedRowIdsChange: props.onPinnedRowIdsChange,
-    summaryRow: bindFeatureHostFn(featureHost, props.summaryRow),
-    groupAggregates: bindFeatureHostFn(featureHost, props.groupAggregates),
-  };
-  rememberFeatureHost(chromeProps, featureHost);
-  const rowScroll = useAntdRowScroll();
-  const c = useTableChrome<TRow>(chromeProps);
-  return (
-    <ChromeExtrasGate chrome={c} props={chromeProps}>
-      {(chrome, stagedProps) => (
-        <AntdGroupingWindow<TRow>
-          grouping={chrome.grouping}
-          scrollTarget={rowScroll.groups}
-          props={props}
-          chrome={chrome}
-        >
-          {(grouping) => (
-            <AntdTableBody<TRow>
-              grouping={grouping}
-              rowScroll={rowScroll}
-              props={props}
-              chromeProps={stagedProps}
-              density={density ?? "comfortable"}
-              onDensityChange={onDensityChange ?? (() => undefined)}
-              chrome={chrome}
-              history={chrome.editHistory ?? disabledHistory()}
-              featureHost={featureHost}
-              resolvedSource={resolvedSource}
-              resolvedUrlAdapter={resolvedUrlAdapter}
-              runtime={runtime}
-              filtersNode={filtersNode}
-              slots={slots}
-              className={className}
-              classNames={classNames}
-              animate={animate}
-              bordered={bordered}
-              virtualize={virtualize}
-              size={size}
-              filtersMode={filtersMode}
-            />
-          )}
-        </AntdGroupingWindow>
-      )}
-    </ChromeExtrasGate>
-  );
-}
-
 /**
  * The props this module works with once `features` have applied.
  *
@@ -2099,817 +1644,501 @@ type RenderModelAssembly<TRow> = Parameters<
   typeof tableRenderModel<TRow>
 >[0]["assembly"];
 
-/** Everything the body needs from the half of the table above the gate. */
-interface AntdTableBodyProps<TRow> {
-  /** Find's scroll handles for this table's windows. */
-  readonly rowScroll: AntdRowScroll;
-  readonly props: Readonly<ComposedProps<TRow>>;
-  readonly chromeProps: Parameters<typeof useTableChrome<TRow>>[0];
-  readonly density: "comfortable" | "compact";
-  readonly onDensityChange: (next: "comfortable" | "compact") => void;
-  readonly chrome: ReturnType<typeof useTableChrome<TRow>>;
-  readonly history: EditHistoryState<TRow>;
-  readonly featureHost: ReturnType<typeof featureHostOf>;
-  readonly resolvedSource: ReturnType<typeof useTableData<TRow>>["source"];
-  readonly resolvedUrlAdapter: ReturnType<typeof useResolvedAdapter>;
-  readonly runtime: ReturnType<typeof useTableData<TRow>>["runtime"];
-  readonly filtersNode: ReactNode;
-  readonly slots: DataTableProps<TRow>["slots"];
-  readonly className: string | undefined;
-  readonly classNames: DataTableProps<TRow>["classNames"];
-  readonly animate: boolean;
-  readonly bordered: boolean;
-  readonly virtualize: boolean;
-  readonly size: ReturnType<typeof resolveSize>;
-  readonly filtersMode: ReturnType<typeof resolveFilterMode>;
-  /**
-   * The flat group/leaf list, already windowed. antd does not use the shared
-   * chrome body (that hook arms a page sentinel and a leaf virtualizer, both
-   * of which fight antd's own virtual Table), so the window is resolved above
-   * this component and handed in.
-   */
-  readonly grouping: GroupingBundle<TRow> | undefined;
+/** Whether antd's own virtual `<Table>` windows this table's rows. */
+function antdVirtualBody<TRow>(
+  props: Readonly<ComposedProps<TRow>>,
+  chrome: DataTableShellResult<TRow>["chrome"]
+): boolean {
+  return props.virtualize === true && !chrome.grouping && !chrome.isPaged;
 }
 
-function AntdGroupingPanel<TRow>({
-  state,
-  columns,
+/** The surface, laid out with antd's spacing; popups follow fullscreen. */
+function AntdFrame({
+  rootProps,
+  rootRef,
+  fullscreenContainer,
+  announcers,
+  toolbarRef,
+  toolbarClassName,
+  toolbarStyle,
+  toolbar,
+  bars,
+  main,
+  loadMore,
+  footers,
+  overlays,
   labels,
+  rowCount,
   mobile,
-  dir,
-}: Readonly<{
-  state: GroupingPanelSlotProps<TRow>["state"] | undefined;
-  columns: GroupingPanelSlotProps<TRow>["columns"];
-  labels: GroupingPanelSlotProps<TRow>["labels"];
-  mobile: boolean;
-  dir: GroupingPanelSlotProps<TRow>["dir"];
-}>) {
-  if (!state) return null;
-  return (
-    <FeatureSlot
-      slot={GROUPING_PANEL}
-      props={
-        {
-          state,
-          columns,
-          labels,
-          mobile,
-          dir,
-        } as GroupingPanelSlotProps<unknown>
-      }
-    />
-  );
-}
-
-/**
- * The table itself, below the extras gate.
- *
- * Grouping, tree, expansion, editing, row mutations and row actions are empty
- * on base chrome and arrive only through `ChromeExtrasGate`, which is a
- * component — so everything that reads them, hooks included, has to live under
- * it. That is what this component is: the whole table, one level down.
- */
-function AntdTableBody<TRow>({
-  props,
-  chromeProps,
-  density,
-  onDensityChange,
-  chrome: c,
-  history,
-  featureHost,
-  resolvedSource,
-  resolvedUrlAdapter,
-  runtime,
-  filtersNode,
-  slots,
-  className,
-  classNames,
   animate,
-  bordered,
-  virtualize,
-  size,
-  filtersMode,
-  grouping,
-  rowScroll,
-}: Readonly<AntdTableBodyProps<TRow>>) {
-  const hasColumnHeaderRename = useFeatureSlotFilled(COLUMN_HEADER_RENAME);
-  const { windowStart, cardSetSize, statusAnnouncement } =
-    useAntdWindowState(c);
-  const { confirm, getRowId } = c;
-  // What the user actually sees. Hiding, ordering and collapsing a column group
-  // land on `columnLayout`, which the extras gate mounts above this component;
-  // progressive hiding drops columns on top of that. Base chrome's own
-  // `table.columns` predates both, so the visible set is rebuilt here the same
-  // way the shared shell rebuilds it.
-  const table = useMemo(() => {
-    const dropped = new Set(c.droppedColumns);
-    const visible = c.columnLayout.visibleColumns;
-    return {
-      ...c.table,
-      columns:
-        dropped.size === 0
-          ? visible
-          : visible.filter((column) => !dropped.has(column.key)),
-    };
-  }, [c.table, c.columnLayout.visibleColumns, c.droppedColumns]);
-  const { labels, selection } = table;
-  // The rows the reader sees: a grouped table pages its full filtered set.
-  const source = c.source;
-  const approval = useFeatureState(AGENT_APPROVAL_STATE);
-  // The injected actions column is first-class in column management: it lives
-  // in the layout state under its reserved key, so hiding it strips the
-  // rowActions BEFORE buildColumns — the trailing column, summary spans, and
-  // min-width all adjust together. The Columns menu still lists it (from the
-  // raw prop) so it can be shown again.
-  const rowActions = c.rowActions;
-  const hasRowActions = rowActions !== undefined;
-  const [filtersOpen, setFiltersOpen] = useState(false);
-
-  // One binding covers headers, rows and cells: the target is resolved from
-  // wherever the event started, so there is no third handler to forget.
-  const filtersTrigger = useFilterTriggerToggle(filtersOpen, setFiltersOpen);
-
-  // The palette lists the table's own actions; its shortcut is bound here
-  // so an adapter cannot ship one without the other.
-  // The chrome owns it: progressive column hiding measures this element.
-  const rootRef = c.rootRef;
-  // Fullscreen also decides where every overlay portals: promoted, the rest
-  // of the document is hidden, so a menu on `document.body` is invisible.
-  // The root exists only once the table has committed; read from the ref
-  // during render it is still null, and the button would do nothing.
-  const [rootElement, setRootElement] = useState<HTMLElement | null>(null);
-  const wantsFullscreen = chromeProps.fullscreen === true;
-  useEffect(() => {
-    if (wantsFullscreen) setRootElement(rootRef.current);
-  }, [wantsFullscreen, rootRef, c]);
-  const fullscreen = useFullscreen(rootElement);
-  const fullscreenContainer = fullscreen.container;
+}: Readonly<KitTableFrameProps>) {
+  "use no memo";
   const popupContainer = useCallback(
     () => fullscreenContainer ?? document.body,
     [fullscreenContainer]
   );
-  const viewControls = viewControlsToolbar(
-    { density, onDensityChange, fullscreen: chromeProps.fullscreen },
-    fullscreen
-  );
-  useChromeScrollReset(rootRef, c, chromeProps);
-  // Same action the shell exposes, wired to this adapter's own root: sizing a
-  // column means measuring cells, and the cells are in there.
-  const onAutoSize = useCallback(() => {
-    autoSizeAllColumns(
-      rootRef.current,
-      c.columnLayout.visibleColumns.map((column) => column.key),
-      c.columnLayout.setWidth
-    );
-  }, [c.columnLayout, rootRef]);
-  const onAutoSizeColumn = useCallback(
-    (key: string) =>
-      autoSizeAllColumns(rootRef.current, [key], c.columnLayout.setWidth),
-    [c.columnLayout, rootRef]
-  );
-  useMountStagger(rootRef, [source.rows.length, c.isMobile], {
-    enabled: animate,
-  });
-  const virtualBody = virtualize && !grouping && !c.isPaged;
-  // antd's native virtual table (and any maxHeight box) already scrolls
-  // inside a fixed-height scroller. The toolbar sits outside that box, so
-  // page-sticky search would detach from the card while rows scroll in the
-  // box — pin the toolbar only when the page itself is the scroller.
-  const inScrollBox =
-    props.maxHeight != null || (virtualBody && c.body === "desktop");
-  const stickyBar = useStickyToolbarLayout(
-    resolveStickyToolbar(props.stickyHeader, props.stickyToolbar, inScrollBox),
-    props.stickyTop ?? 0
-  );
-  const resolvedTableLabel = table.getTableProps()["aria-label"];
-  // In virtual mode the rows live inside antd's own fixed-height scroll
-  // container, so the page-level sentinel never reaches the viewport — the
-  // internal scroll (`handleVirtualScroll`) drives paging instead. Disable
-  // the sentinel there to avoid an eager fetch from the always-visible button.
-  // When grouping is armed, antd virtual is off and the page sentinel stays
-  // the load-more trigger (same as mobile cards).
-  const loadMoreRef = useInfiniteScroll<HTMLDivElement>({
-    hasNextPage: Boolean(source.hasNextPage),
-    isFetchingNextPage: Boolean(source.isFetchingNextPage),
-    fetchNextPage: () => source.fetchNextPage(),
-    itemCount: grouping ? grouping.entries.length : source.rows.length,
-    enabled: sentinelEnabled(
-      c.isPaged,
-      source.error,
-      Boolean(virtualBody),
-      c.body
-    ),
-  });
-
-  const scrollToRow = useCallback(
-    (row: TRow) => scrollAntdRow(rowScroll, getRowId(row)),
-    [rowScroll, getRowId]
-  );
-
+  useMountStagger(rootRef, [rowCount, mobile], { enabled: animate });
   return (
-    <AntdInteractionGate
-      scrollToRow={virtualize ? scrollToRow : undefined}
-      root={rootRef}
-      props={props}
-      source={c.source}
-      columns={c.columnLayout.visibleColumns}
-      rows={c.source.rows}
-      firstRowIndex={windowStart}
-      rowCount={Math.max(c.source.total, windowStart + c.source.rows.length)}
-      columnsWindowed={false}
-      urlAdapter={resolvedUrlAdapter}
-      history={history}
-      getRowId={getRowId}
-      selectedIds={selection?.selectedIds}
-      allColumns={c.allColumns}
-      grouping={c.grouping}
-      tree={c.tree}
-      featureHost={featureHost}
-      labels={labels}
-      pageOnly={c.featureNotices.some(
-        (notice) => notice.kind === "export-all-page"
-      )}
-      editing={c.editing}
-    >
-      {({ find, gridFocus, exportHandler, stats }) => {
-        const handleVirtualScroll = virtualScrollEndHandler(
-          source,
-          virtualBody && !c.isPaged && !source.error
-        );
-
-        const reorderIndices = c.rowReorder
-          ? new Map(
-              renderedRowsOf(c).map((row, index) => [getRowId(row), index])
-            )
-          : undefined;
-        const treeEntries = c.tree?.entries;
-        const treeEntryByRow = new Map<TRow, TreeEntry<TRow>>(
-          treeEntries?.map((entry) => [entry.row, entry])
-        );
-        const dataSourceBase: readonly GroupedDataRecord<TRow>[] = grouping
-          ? buildGroupedDataSource(grouping.entries)
-          : (treeEntries?.map((entry) => entry.row) ?? source.rows);
-        const {
-          dataSource: partitionedSource,
-          pinnedTopRows,
-          pinnedBottomRows,
-          pinnedSummaryTop,
-          pinnedSummaryBottom,
-        } = antdPinnedDataSource(
-          grouping,
-          treeEntries,
-          c.rowPinning,
-          source.rows,
-          getRowId,
-          dataSourceBase,
-          c.pinnedRows
-        );
-        const featureAssembly = (
-          props as Partial<{ assembly: RenderModelAssembly<TRow> }>
-        ).assembly;
-        const dataSource = resolveAntdDataSource(
-          grouping,
-          partitionedSource,
-          props.extraRows,
-          getRowId,
-          featureAssembly?.insertExtraRows
-        );
-        const { cellsByRow } = tableRenderModel({
-          table,
-          rows: treeEntries?.map((entry) => entry.row) ?? source.rows,
-          rowActions,
-          getRowId,
-          renderRowDetail: props.renderRowDetail,
-          expansion: c.detail?.expansion,
-          editing: c.editing,
-          rowReorder: c.rowReorder,
-          pinnedTopRows,
-          pinnedBottomRows,
-          pinnedSummaryTop,
-          pinnedSummaryBottom,
-          getCellSpan: props.getCellSpan,
-          pinOffset: c.columnLayout.pinOffset,
-          grouping: c.grouping,
-          // Features that replace an assembly heavy — cell spanning, extra rows —
-          // write it onto the props the feature pass returns. antd assembles its own
-          // table, so it reads that here the way the shared shell does.
-          assembly: featureAssembly,
-        });
-        const pinRowSticky = !bodyCellsHaveRowSpan(cellsByRow);
-
-        const columns = buildColumns<TRow>({
-          gridFocus: gridFocus,
-          getHeaderCellProps: table.getHeaderCellProps,
-          columns: table.columns,
-          rowActions,
-          rowActionsLayout: props.rowActionsLayout,
-          renderRowActions: props.renderRowActions,
-          sortBy: source.sortBy,
-          sortDir: source.sortDir,
-          confirm,
-          labels,
-          editing: c.editing,
-          rows: c.editingRows,
-          groupingPanel: c.groupingPanel,
-          getRowId,
-          pinned: c.columnLayout.state.pinned,
-          setWidth: props.resizableColumns
-            ? c.columnLayout.setWidth
-            : undefined,
-          onRenameColumn:
-            hasColumnHeaderRename && props.onColumnRename
-              ? c.columnLayout.setName
-              : undefined,
-          columnWidths: c.columnLayout.state.widths,
-          resizeLabel: labels.resizeColumn,
-          sortLevels: source.sortLevels,
-          // Shift-click multi-sort is opt-in; without it antd keeps full control
-          // of header clicks (single-sort via `onChange`).
-          onToggleSortLevel: chainToggler(props.multiSort, source),
-          fitColumns: props.fitColumns,
-          tree: c.tree
-            ? {
-                columnKey: c.tree.columnKey,
-                entryFor: (row: TRow) => treeEntryByRow.get(row),
-                toggle: c.tree.expansion.toggle,
-              }
-            : undefined,
-          grouping: grouping
-            ? {
-                collapsed: grouping.collapsed,
-                dataColumnCount: table.columns.length,
-                showMore: grouping.showMore,
-              }
-            : undefined,
-          collapsibleColumnGroups: props.collapsibleColumnGroups === true,
-          collapsedColumnGroups: c.columnLayout.state.collapsedGroups,
-          columnGroups: c.columnGroups,
-          onToggleColumnGroup: c.columnLayout.toggleColumnGroup,
-          rowReorder: c.rowReorder,
-          reorderIndices,
-          windowStart,
-          cellsByRow,
-          pinnedSummaryTop,
-          pinnedSummaryBottom,
-          cellSpanAppearance: props.cellSpanAppearance,
-          headerFilters: filtersMode === "header",
-          filterDefs: runtime.defs,
-          isCellFlashing: props.isCellFlashing,
-          filterSource: resolvedSource,
-          filterRegistry: runtime.registry,
-          closeHeaderFilterOnSelect: props.closeHeaderFilterOnSelect === true,
-        });
-        // A tree is already flat by the time antd sees it: core walks the hierarchy
-        // and hands back the visible rows in reading order, so antd's own
-        // `childrenColumnName` recursion stays out of it and one expansion state
-        // drives all nine adapters.
-        const pinnedSides = Object.values(c.columnLayout.state.pinned);
-        const hasPinned = pinnedSides.length > 0;
-        const hasStartPin = pinnedSides.includes("start");
-        const minWidth = antdMinWidth(
-          table.columns,
-          c.columnLayout.state.widths,
-          Boolean(table.selection),
-          hasRowActions,
-          Boolean(c.rowReorder)
-        );
-
-        const handleChange = sortChangeHandler(source);
-
-        const rowSelection = buildRowSelection(
-          selection,
-          getRowId,
-          labels,
-          hasStartPin,
-          pinnedSummaryTop,
-          pinnedSummaryBottom
-        );
-        const expandable = buildExpandable(
-          c.detail?.render,
-          c.detail?.expansion,
-          getRowId,
-          labels
-        );
-        // The summary row pads one leading cell per column antd injects (expand
-        // first, then selection) so its cells stay aligned under the data columns.
-        const summary = buildSummary(
-          chromeProps.summaryRow,
-          table.columns,
-          summaryLeadingCells(rowSelection, expandable, Boolean(c.rowReorder)),
-          hasRowActions
-        );
-        const sticky: TableProps<unknown>["sticky"] = props.stickyHeader
-          ? { offsetHeader: inScrollBox ? 0 : stickyBar.headerOffset }
-          : undefined;
-        // The filtered empty-state may carry its own slot: `noResults` wins there,
-        // and falls through to `empty` so passing only `empty` still covers both.
-        const emptySlot =
-          (c.emptyVariant === "noResults"
-            ? props.slots?.noResults
-            : undefined) ?? props.slots?.empty;
-        const emptyNode = emptySlot ?? (
-          <EmptyState
-            variant={c.emptyVariant}
-            labels={labels}
-            onClearFilters={c.clearSearchAndFilters}
-          />
-        );
-
-        // Window the MOBILE card list through the seam — desktop rows still window
-        // through antd's own native virtual `<Table>` when grouping is off, and when
-        // grouping is armed `grouping.entries` already carries the window.
-        const bodyRegion = (
-          <AntdCardWindow<TRow>
-            rows={source.rows}
-            rowKey={getRowId}
-            scrollTarget={rowScroll.cards}
-            props={props}
-            virtualize={virtualBody}
-            isPaged={c.isPaged}
-            error={source.error}
-            body={c.body}
+    <div ref={rootRef} {...rootProps} data-adapttable-part="root">
+      <style>{PINNED_ROW_CSS}</style>
+      {/* Every antd popup under the table opens in the fullscreen element
+          while it is up; the rest of the page is hidden. */}
+      <ConfigProvider
+        getPopupContainer={fullscreenContainer ? popupContainer : undefined}
+      >
+        {announcers}
+        <Space orientation="vertical" size="small" style={{ width: "100%" }}>
+          <div
+            data-adapttable-part="toolbar"
+            ref={toolbarRef}
+            className={toolbarClassName}
+            style={toolbarStyle}
           >
-            {(cardWindow) => (
-              <DataTableBodyRegion
-                gridFocus={gridFocus}
-                tableRef={rowScroll.table}
-                chromeBody={c.body}
-                mobile={c.isMobile}
-                errorState={c.errorState}
-                source={source}
-                editingRows={c.editingRows}
-                table={table}
-                slots={slots}
-                columns={columns}
-                rowActions={rowActions}
-                rowActionsLayout={props.rowActionsLayout}
-                renderRowActions={props.renderRowActions}
-                confirm={confirm}
-                getRowId={getRowId}
-                labels={labels}
-                emptyNode={emptyNode}
-                grouping={grouping}
-                tree={c.tree}
-                detailRender={c.detail?.render}
-                detailExpansion={c.detail?.expansion}
-                editing={c.editing}
-                cardWindow={cardWindow}
-                tableLabel={resolvedTableLabel}
-                density={density}
-                prefetch={props.prefetch}
-                onRowClick={props.onRowClick}
-                rowClassName={props.rowClassName}
-                isCellFlashing={props.isCellFlashing}
-                rowStyle={props.rowStyle}
-                rowHeight={props.rowHeight}
-                cardClassName={classNames?.card}
-                summaryRow={chromeProps.summaryRow}
-                renderCard={props.renderCard}
-                skeletonRows={props.skeletonRows}
-                size={size}
-                bordered={bordered}
-                virtualize={virtualBody}
-                maxHeight={props.maxHeight}
-                sticky={sticky}
-                dataSource={dataSource}
-                rowSelection={rowSelection}
-                expandable={expandable}
-                summary={summary}
-                handleVirtualScroll={handleVirtualScroll}
-                handleChange={handleChange}
-                minWidth={minWidth}
-                hasPinned={hasPinned}
-                hasRowActions={hasRowActions}
-                rowReorder={c.rowReorder}
-                reorderIndices={reorderIndices}
-                windowStart={windowStart}
-                cardSetSize={cardSetSize}
-                rowPinning={c.rowPinning}
-                pinnedTopRows={pinnedTopRows}
-                pinnedBottomRows={pinnedBottomRows}
-                pinnedSummaryTop={pinnedSummaryTop}
-                pinnedSummaryBottom={pinnedSummaryBottom}
-                extraRows={props.extraRows}
-                pinRowSticky={pinRowSticky}
-              />
-            )}
-          </AntdCardWindow>
-        );
-        const contextMenuLive = {
-          contextMenu: props.contextMenu,
-          columns: c.allColumns,
-          labels,
-          rowFor: (rowId: string) =>
-            source.rows.find((row) => props.rowKey(row) === rowId),
-          actions: {
-            onCopy: (target) => {
-              // The cell that was right-clicked, unless it sits inside a
-              // selection — then the selection is what was asked for.
-              const copy = contextMenuCopyTarget(gridFocus, target);
-              if (!copy.available) return;
-              gridFocus.copyCells(copy.cell);
-            },
-            // Cut writes the target to the clipboard, then asks the host to
-            // clear it through onCellCut — offered only when both exist.
-            onCut:
-              props.onCellCut && gridFocus.enabled
-                ? (target) => {
-                    const copy = contextMenuCopyTarget(gridFocus, target);
-                    if (!copy.available) return;
-                    gridFocus.copyCells(copy.cell, true);
-                  }
-                : undefined,
-            onSort: (key: string, dir: "asc" | "desc") => {
-              source.setSort(key, dir);
-            },
-            onHide: (key: string) => {
-              c.columnLayout.toggleVisible(key);
-            },
-            onFilter: () => {
-              setFiltersOpen(true);
-            },
-          },
-          sortBy: source.sortBy,
-          sortDir: source.sortDir,
-          rowPins: c.rowPinning?.actions,
-          featureHost,
-          container: fullscreen.container,
-        } as Omit<ContextMenuLiveSlotProps<unknown>, "children">;
-
-        return (
-          <FeatureHostProvider host={featureHost}>
-            <ContextMenuLiveGate props={contextMenuLive}>
-              {(regionProps) => (
-                <div
-                  ref={rootRef}
-                  {...regionProps}
-                  data-adapttable-part="root"
-                  dir={props.dir}
-                  className={
-                    [className, classNames?.root].filter(Boolean).join(" ") ||
-                    undefined
-                  }
-                  aria-busy={c.isRefreshing || undefined}
-                >
-                  <style>{PINNED_ROW_CSS}</style>
-                  {/* Every antd popup under the table opens in the fullscreen
-                      element while it is up; the rest of the page is hidden. */}
-                  <ConfigProvider
-                    getPopupContainer={
-                      fullscreenContainer ? popupContainer : undefined
-                    }
-                  >
-                    <FeatureSlot
-                      slot={GRID_FOCUS_ANNOUNCER}
-                      props={{ focus: gridFocus }}
-                    />
-                    <TableStatusAnnouncer announcement={statusAnnouncement} />
-                    <AntdRowReorderAnnouncer rowReorder={c.rowReorder} />
-                    <FeatureSlot
-                      slot={FIND_BAR}
-                      props={{ find, labels: c.table.labels }}
-                    />
-                    <Space
-                      orientation="vertical"
-                      size="small"
-                      style={{ width: "100%" }}
-                    >
-                      <div
-                        data-adapttable-part="toolbar"
-                        ref={stickyBar.toolbarRef}
-                        className={classNames?.toolbar}
-                        style={stickyBar.toolbarStyle}
-                      >
-                        <Toolbar
-                          table={table}
-                          searchable={props.searchable !== false}
-                          searchPlaceholder={props.searchPlaceholder}
-                          sortByOptions={props.sortByOptions}
-                          toolbar={props.toolbar}
-                          toolbarSlots={props.toolbarSlots}
-                          {...undoRedoToolbar(
-                            props.undoRedoButtons,
-                            history,
-                            labels
-                          )}
-                          {...printToolbar(
-                            props.printButton,
-                            props.onPrint,
-                            labels
-                          )}
-                          {...viewControls}
-                          hasFilters={toolbarShowsFilters(
-                            filtersMode,
-                            Boolean(filtersNode),
-                            Boolean(resolvedSource.setFilterTree)
-                          )}
-                          activeFilterCount={c.activeFilterCount}
-                          filters={filtersNode}
-                          filtersMode={filtersMode}
-                          filtersOpen={filtersOpen}
-                          onToggleFilters={filtersTrigger.onClick}
-                          onFiltersTriggerPointerDown={
-                            filtersTrigger.onPointerDown
-                          }
-                          onCloseFilters={() => setFiltersOpen(false)}
-                          onClearFilters={c.clearFilters}
-                          onAddRow={
-                            c.rowMutations.canAdd
-                              ? c.rowMutations.addRow
-                              : undefined
-                          }
-                          addRowLabel={labels.addRow}
-                          isRefreshing={c.isRefreshing}
-                          dir={props.dir}
-                          columnMenu={
-                            <ColumnMenuSlot
-                              onAutoSize={onAutoSize}
-                              onAutoSizeColumn={onAutoSizeColumn}
-                              onSortColumn={(key, dir) =>
-                                source.setSort(key, dir)
-                              }
-                              onFilterColumn={() => setFiltersOpen(true)}
-                              onRenameColumn={
-                                props.onColumnRename
-                                  ? c.columnLayout.setName
-                                  : undefined
-                              }
-                              sortBy={source.sortBy}
-                              sortDir={source.sortDir}
-                              enabled={
-                                Boolean(props.enableColumnMenu) && !c.isMobile
-                              }
-                              allColumns={c.allColumns}
-                              layout={c.columnLayout}
-                              labels={labels}
-                              dir={props.dir}
-                              hasRowActions={c.hasRowActions}
-                              hasRowReorder={c.hasRowReorder}
-                              groupingPanel={c.groupingPanel}
-                            />
-                          }
-                          {...exportHandler}
-                          savedViewsMenu={
-                            <SavedViewsSlot
-                              options={props.savedViews}
-                              urlAdapter={resolvedUrlAdapter}
-                              urlKey={props.urlKey}
-                              labels={labels}
-                            />
-                          }
-                          showRowsPerPage={!c.isPaged}
-                          loadsMore={!c.isPaged}
-                        />
-                      </div>
-                      <FeatureSlot
-                        slot={ACTIVE_FILTER_CHIPS}
-                        props={{
-                          chips: c.mergedChips,
-                          onClearAll: c.clearFilters,
-                          labels,
-                        }}
-                      />
-                      {c.editing?.batch && (
-                        <FeatureSlot
-                          slot={BATCH_EDIT_BAR}
-                          props={{
-                            batch: c.editing.batch,
-                            contested: c.editing.conflict?.anyContested,
-                            labels,
-                          }}
-                        />
-                      )}
-                      <FeatureSlot
-                        slot={AGENT_APPROVAL}
-                        props={{ pending: approval, labels }}
-                      />
-
-                      {selection && props.bulkActions && (
-                        <FeatureSlot
-                          slot={BULK_BAR}
-                          props={{
-                            selection,
-                            total: source.total,
-                            bulkActions: props.bulkActions,
-                            confirm,
-                            labels,
-                          }}
-                        />
-                      )}
-                      <AntdGroupingPanel
-                        state={c.groupingPanel}
-                        columns={c.allColumns}
-                        labels={labels}
-                        mobile={c.isMobile}
-                        dir={props.dir}
-                      />
-                      <div
-                        className={
-                          c.body === "desktop" ? classNames?.table : undefined
-                        }
-                      >
-                        <OptionalSidePanel
-                          side={props.sidePanel?.side}
-                          body={bodyRegion}
-                          panel={
-                            props.sidePanel?.open != null && (
-                              <FeatureSlot
-                                slot={SIDE_PANEL}
-                                props={{
-                                  panels: props.sidePanel.panels,
-                                  openPanel: props.sidePanel.open,
-                                  onOpenPanel: props.sidePanel.onOpenChange,
-                                  onClose: () => {
-                                    props.sidePanel?.onOpenChange(null);
-                                  },
-                                  side: props.sidePanel?.side,
-                                  labels,
-                                }}
-                              />
-                            )
-                          }
-                        />
-                      </div>
-                      <TableFooterSlot>{props.tableFooter}</TableFooterSlot>
-                      {c.isPaged && !source.error && c.body === "desktop" && (
-                        <div
-                          data-adapttable-part="footer"
-                          className={classNames?.footer}
-                        >
-                          {footer({ table, source, labels, chrome: c })}
-                        </div>
-                      )}
-                      {!c.isPaged && !source.error && source.hasNextPage && (
-                        <Flex ref={loadMoreRef} justify="center">
-                          <Button
-                            loading={source.isFetchingNextPage}
-                            onClick={() => source.fetchNextPage()}
-                          >
-                            {labels.loadMore}
-                          </Button>
-                        </Flex>
-                      )}
-                    </Space>
-                    {filtersNode && filtersMode === "drawer" && (
-                      <FeatureSlot
-                        slot={FILTER_DRAWER}
-                        props={{
-                          open: filtersOpen,
-                          onClose: () => setFiltersOpen(false),
-                          filters: filtersNode,
-                          activeFilterCount: c.activeFilterCount,
-                          onClearFilters: c.clearFilters,
-                          labels,
-                          dir: props.dir,
-                        }}
-                      />
-                    )}
-                    <FeatureSlot
-                      slot={COMMAND_PALETTE_LIVE}
-                      props={{
-                        commandPalette: props.commandPalette,
-                        labels,
-                        onPrint: props.onPrint,
-                        onExport: exportHandler.onExportCsv,
-                        exportLabel: exportHandler.exportLabel,
-                        onClearFilters: c.clearFilters,
-                        hasFilters: c.activeFilterCount > 0,
-                        featureHost,
-                      }}
-                    />
-                    <FeatureSlot
-                      slot={STATUS_BAR}
-                      props={{
-                        enabled: props.statusBar === true,
-                        notices: c.featureNotices,
-                        shown: source.rows.length,
-                        page: source.page,
-                        limit: source.limit,
-                        total: source.total,
-                        selected: table.selection?.selectedCount ?? 0,
-                        stats,
-                        labels,
-                        locale: props.locale,
-                      }}
-                    />
-                  </ConfigProvider>
-                </div>
-              )}
-            </ContextMenuLiveGate>
-          </FeatureHostProvider>
-        );
-      }}
-    </AntdInteractionGate>
+            {toolbar}
+          </div>
+          {bars}
+          {main}
+          {footers}
+          {loadMore && (
+            <Flex ref={loadMore.ref} justify="center">
+              <Button loading={loadMore.busy} onClick={loadMore.onClick}>
+                {labels.loadMore}
+              </Button>
+            </Flex>
+          )}
+        </Space>
+        {overlays}
+      </ConfigProvider>
+    </div>
   );
 }
 
 /**
- * Resolve `features` and mount whatever providers they contribute, then render
- * the table inside them.
+ * antd's desktop table and mobile cards, drawn from the finished view.
  *
- * A feature that owns hooks owns a component, so its provider has to sit ABOVE
- * the body that reads what it publishes — that is the whole reason this is two
- * components rather than one.
+ * antd renders its rows through its own `<Table>`, which takes columns and
+ * data rather than children, so the body is the one region it draws itself.
+ */
+function AntdBody<TRow>({
+  view,
+  headerOffset,
+  props: kitProps,
+}: Readonly<{
+  view: DataTableShellResult<TRow>;
+  headerOffset: number;
+  props: KitTableProps<TRow>;
+}>) {
+  "use no memo";
+  const props = kitProps as Readonly<ComposedProps<TRow>>;
+  const rowScroll = useAntdRowScrollHandles();
+  return (
+    <AntdGroupingWindow<TRow>
+      grouping={view.chrome.grouping}
+      scrollTarget={rowScroll.groups}
+      props={props}
+      chrome={view.chrome}
+    >
+      {(grouping) => (
+        <AntdViewBody<TRow>
+          view={view}
+          headerOffset={headerOffset}
+          props={props}
+          grouping={grouping}
+          rowScroll={rowScroll}
+        />
+      )}
+    </AntdGroupingWindow>
+  );
+}
+
+function AntdViewBody<TRow>({
+  view,
+  headerOffset,
+  props,
+  grouping,
+  rowScroll,
+}: Readonly<{
+  view: DataTableShellResult<TRow>;
+  headerOffset: number;
+  props: Readonly<ComposedProps<TRow>>;
+  grouping: GroupingBundle<TRow> | undefined;
+  rowScroll: AntdRowScroll;
+}>) {
+  "use no memo";
+  const c = view.chrome;
+  const chromeProps = view.chromeProps;
+  const gridFocus = view.gridFocus;
+  const table = view.table;
+  const { labels, selection } = table;
+  const source = c.source;
+  const { confirm, getRowId } = c;
+  const density = view.density;
+  const size = resolveSize(props.size, density);
+  const bordered = props.bordered ?? false;
+  const filtersMode = resolveFilterMode(props.filtersMode, props.headerFilters);
+  const hasColumnHeaderRename = useFeatureSlotFilled(COLUMN_HEADER_RENAME);
+  const { windowStart, cardSetSize } = antdWindowOf(c);
+  const rowActions = c.rowActions;
+  const hasRowActions = rowActions !== undefined;
+  const virtualBody = antdVirtualBody(props, c);
+  const inScrollBox =
+    props.maxHeight != null || (virtualBody && c.body === "desktop");
+  const resolvedTableLabel = table.getTableProps()["aria-label"];
+  const handleVirtualScroll = virtualScrollEndHandler(
+    source,
+    virtualBody && !c.isPaged && !source.error
+  );
+  const reorderIndices = c.rowReorder
+    ? new Map(renderedRowsOf(c).map((row, index) => [getRowId(row), index]))
+    : undefined;
+  const treeEntries = c.tree?.entries;
+  const treeEntryByRow = new Map<TRow, TreeEntry<TRow>>(
+    treeEntries?.map((entry) => [entry.row, entry])
+  );
+  const dataSourceBase: readonly GroupedDataRecord<TRow>[] = grouping
+    ? buildGroupedDataSource(grouping.entries)
+    : (treeEntries?.map((entry) => entry.row) ?? source.rows);
+  const {
+    dataSource: partitionedSource,
+    pinnedTopRows,
+    pinnedBottomRows,
+    pinnedSummaryTop,
+    pinnedSummaryBottom,
+  } = antdPinnedDataSource(
+    grouping,
+    treeEntries,
+    c.rowPinning,
+    source.rows,
+    getRowId,
+    dataSourceBase,
+    c.pinnedRows
+  );
+  const featureAssembly = (
+    props as Partial<{ assembly: RenderModelAssembly<TRow> }>
+  ).assembly;
+  const dataSource = resolveAntdDataSource(
+    grouping,
+    partitionedSource,
+    props.extraRows,
+    getRowId,
+    featureAssembly?.insertExtraRows
+  );
+  const { cellsByRow } = tableRenderModel({
+    table,
+    rows: treeEntries?.map((entry) => entry.row) ?? source.rows,
+    rowActions,
+    getRowId,
+    renderRowDetail: props.renderRowDetail,
+    expansion: c.detail?.expansion,
+    editing: c.editing,
+    rowReorder: c.rowReorder,
+    pinnedTopRows,
+    pinnedBottomRows,
+    pinnedSummaryTop,
+    pinnedSummaryBottom,
+    getCellSpan: props.getCellSpan,
+    pinOffset: c.columnLayout.pinOffset,
+    grouping: c.grouping,
+    // Features that replace an assembly heavy — cell spanning, extra rows —
+    // write it onto the props the feature pass returns. antd assembles its own
+    // table, so it reads that here the way the shared shell does.
+    assembly: featureAssembly,
+  });
+  const pinRowSticky = !bodyCellsHaveRowSpan(cellsByRow);
+  const columns = buildColumns<TRow>({
+    gridFocus,
+    getHeaderCellProps: table.getHeaderCellProps,
+    columns: table.columns,
+    rowActions,
+    rowActionsLayout: props.rowActionsLayout,
+    renderRowActions: props.renderRowActions,
+    sortBy: source.sortBy,
+    sortDir: source.sortDir,
+    confirm,
+    labels,
+    editing: c.editing,
+    rows: c.editingRows,
+    groupingPanel: c.groupingPanel,
+    getRowId,
+    pinned: c.columnLayout.state.pinned,
+    setWidth: props.resizableColumns ? c.columnLayout.setWidth : undefined,
+    onRenameColumn:
+      hasColumnHeaderRename && props.onColumnRename
+        ? c.columnLayout.setName
+        : undefined,
+    columnWidths: c.columnLayout.state.widths,
+    resizeLabel: labels.resizeColumn,
+    sortLevels: source.sortLevels,
+    // Shift-click multi-sort is opt-in; without it antd keeps full control
+    // of header clicks (single-sort via `onChange`).
+    onToggleSortLevel: chainToggler(props.multiSort, source),
+    fitColumns: props.fitColumns,
+    tree: c.tree
+      ? {
+          columnKey: c.tree.columnKey,
+          entryFor: (row: TRow) => treeEntryByRow.get(row),
+          toggle: c.tree.expansion.toggle,
+        }
+      : undefined,
+    grouping: grouping
+      ? {
+          collapsed: grouping.collapsed,
+          dataColumnCount: table.columns.length,
+          showMore: grouping.showMore,
+        }
+      : undefined,
+    collapsibleColumnGroups: props.collapsibleColumnGroups === true,
+    collapsedColumnGroups: c.columnLayout.state.collapsedGroups,
+    columnGroups: c.columnGroups,
+    onToggleColumnGroup: c.columnLayout.toggleColumnGroup,
+    rowReorder: c.rowReorder,
+    reorderIndices,
+    windowStart,
+    cellsByRow,
+    pinnedSummaryTop,
+    pinnedSummaryBottom,
+    cellSpanAppearance: props.cellSpanAppearance,
+    headerFilters: filtersMode === "header",
+    filterDefs: chromeProps.filterDefs,
+    isCellFlashing: props.isCellFlashing,
+    filterSource: chromeProps.source,
+    filterRegistry: chromeProps.filterRegistry,
+    closeHeaderFilterOnSelect: props.closeHeaderFilterOnSelect === true,
+  });
+  // A tree is already flat by the time antd sees it: core walks the hierarchy
+  // and hands back the visible rows in reading order, so antd's own
+  // `childrenColumnName` recursion stays out of it and one expansion state
+  // drives every adapter.
+  const pinnedSides = Object.values(c.columnLayout.state.pinned);
+  const hasPinned = pinnedSides.length > 0;
+  const hasStartPin = pinnedSides.includes("start");
+  const minWidth = antdMinWidth(
+    table.columns,
+    c.columnLayout.state.widths,
+    Boolean(table.selection),
+    hasRowActions,
+    Boolean(c.rowReorder)
+  );
+  const handleChange = sortChangeHandler(source);
+  const rowSelection = buildRowSelection(
+    selection,
+    getRowId,
+    labels,
+    hasStartPin,
+    pinnedSummaryTop,
+    pinnedSummaryBottom
+  );
+  const expandable = buildExpandable(
+    c.detail?.render,
+    c.detail?.expansion,
+    getRowId,
+    labels
+  );
+  // The summary row pads one leading cell per column antd injects (expand
+  // first, then selection) so its cells stay aligned under the data columns.
+  const summary = buildSummary(
+    chromeProps.summaryRow,
+    table.columns,
+    summaryLeadingCells(rowSelection, expandable, Boolean(c.rowReorder)),
+    hasRowActions
+  );
+  const sticky: TableProps<unknown>["sticky"] = props.stickyHeader
+    ? { offsetHeader: inScrollBox ? 0 : headerOffset }
+    : undefined;
+  // The filtered empty-state may carry its own slot: `noResults` wins there,
+  // and falls through to `empty` so passing only `empty` still covers both.
+  const emptySlot =
+    (c.emptyVariant === "noResults" ? props.slots?.noResults : undefined) ??
+    props.slots?.empty;
+  const emptyNode = emptySlot ?? (
+    <EmptyState
+      variant={c.emptyVariant}
+      labels={labels}
+      onClearFilters={c.clearSearchAndFilters}
+    />
+  );
+  // Window the MOBILE card list through the seam — desktop rows still window
+  // through antd's own native virtual `<Table>` when grouping is off, and when
+  // grouping is armed `grouping.entries` already carries the window.
+  return (
+    <div className={c.body === "desktop" ? props.classNames?.table : undefined}>
+      <AntdCardWindow<TRow>
+        rows={source.rows}
+        rowKey={getRowId}
+        scrollTarget={rowScroll.cards}
+        props={props}
+        virtualize={virtualBody}
+        isPaged={c.isPaged}
+        error={source.error}
+        body={c.body}
+      >
+        {(cardWindow) => (
+          <DataTableBodyRegion
+            gridFocus={gridFocus}
+            tableRef={rowScroll.table}
+            chromeBody={c.body}
+            mobile={c.isMobile}
+            errorState={c.errorState}
+            source={source}
+            editingRows={c.editingRows}
+            table={table}
+            slots={props.slots}
+            columns={columns}
+            rowActions={rowActions}
+            rowActionsLayout={props.rowActionsLayout}
+            renderRowActions={props.renderRowActions}
+            confirm={confirm}
+            getRowId={getRowId}
+            labels={labels}
+            emptyNode={emptyNode}
+            grouping={grouping}
+            tree={c.tree}
+            detailRender={c.detail?.render}
+            detailExpansion={c.detail?.expansion}
+            editing={c.editing}
+            cardWindow={cardWindow}
+            tableLabel={resolvedTableLabel}
+            density={density}
+            prefetch={props.prefetch}
+            onRowClick={props.onRowClick}
+            rowClassName={props.rowClassName}
+            isCellFlashing={props.isCellFlashing}
+            rowStyle={props.rowStyle}
+            rowHeight={props.rowHeight}
+            cardClassName={props.classNames?.card}
+            summaryRow={chromeProps.summaryRow}
+            renderCard={props.renderCard}
+            skeletonRows={props.skeletonRows}
+            size={size}
+            bordered={bordered}
+            virtualize={virtualBody}
+            maxHeight={props.maxHeight}
+            sticky={sticky}
+            dataSource={dataSource}
+            rowSelection={rowSelection}
+            expandable={expandable}
+            summary={summary}
+            handleVirtualScroll={handleVirtualScroll}
+            handleChange={handleChange}
+            minWidth={minWidth}
+            hasPinned={hasPinned}
+            hasRowActions={hasRowActions}
+            rowReorder={c.rowReorder}
+            reorderIndices={reorderIndices}
+            windowStart={windowStart}
+            cardSetSize={cardSetSize}
+            rowPinning={c.rowPinning}
+            pinnedTopRows={pinnedTopRows}
+            pinnedBottomRows={pinnedBottomRows}
+            pinnedSummaryTop={pinnedSummaryTop}
+            pinnedSummaryBottom={pinnedSummaryBottom}
+            extraRows={props.extraRows}
+            pinRowSticky={pinRowSticky}
+          />
+        )}
+      </AntdCardWindow>
+    </div>
+  );
+}
+
+/**
+ * Where the rendered slice begins in the dataset, and the dataset size the
+ * card list reports per item as `aria-setsize`.
+ */
+function antdWindowOf<TRow>(c: DataTableShellResult<TRow>["chrome"]): {
+  windowStart: number;
+  cardSetSize: number;
+} {
+  const windowStart =
+    c.source.paginationMode === "paged"
+      ? Math.max(0, (c.source.page - 1) * c.source.limit)
+      : 0;
+  return {
+    windowStart,
+    cardSetSize: Math.max(c.source.total, windowStart + c.source.rows.length),
+  };
+}
+
+/** The table's antd size and border, for the regions drawn before the body. */
+const AntdLookContext = /* @__PURE__ */ createContext<{
+  readonly size: AntdTableSize;
+  readonly bordered: boolean;
+}>({ size: "middle", bordered: false });
+
+const noop = (): void => undefined;
+
+/** The first-load placeholder, in the table's antd size and border. */
+function AntdSkeleton({
+  rows,
+  columns,
+  label,
+  shape,
+}: Readonly<{
+  rows: number;
+  columns: number;
+  label: string;
+  shape: KitSkeletonShape;
+}>) {
+  const look = useContext(AntdLookContext);
+  return (
+    <SkeletonTable
+      columnCount={columns}
+      rowCount={rows}
+      loadingLabel={label}
+      size={look.size}
+      bordered={look.bordered}
+      hasActions={shape.actions}
+      mobile={shape.mobile}
+    />
+  );
+}
+
+/** The toolbar, with antd's spinner while rows refresh. */
+function antdToolbar<TRow>(props: KitToolbarProps<TRow>): ReactNode {
+  return (
+    <Toolbar {...props} isRefreshing={props.table.source.isFetching === true} />
+  );
+}
+
+const ANTD_KIT: KitTable = {
+  Frame: (frame) => <AntdFrame {...frame} />,
+  toolbar: antdToolbar,
+  body: (view, headerOffset, props) => (
+    <AntdBody view={view} headerOffset={headerOffset} props={props} />
+  ),
+  skeleton: (rows, columns, labels, shape) => (
+    <AntdSkeleton
+      rows={rows}
+      columns={columns}
+      label={labels.loading}
+      shape={shape}
+    />
+  ),
+  empty: (labels, onClear) => (
+    <output>
+      <EmptyState
+        variant={onClear ? "noResults" : "noData"}
+        labels={labels}
+        onClearFilters={onClear ?? noop}
+      />
+    </output>
+  ),
+  error: (state, labels) => (
+    <ErrorState error={state.error} labels={labels} onRetry={state.retry} />
+  ),
+  footer: (view) =>
+    footer({
+      table: view.table,
+      source: view.source,
+      labels: view.labels,
+      chrome: view.chrome,
+    }),
+};
+
+/**
+ * The Ant Design table. Pass rows and columns — or a server source, or any
+ * prebuilt `source` — to get a fully styled, sortable, filterable, paginated
+ * table with selection, bulk actions, RTL and dark mode.
  *
  * @typeParam TRow - The row type.
  *
@@ -2933,11 +2162,23 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
       density: incoming.size === undefined ? kit.density : undefined,
     })
   );
+  const rowScroll = useAntdRowScroll();
+  const look = useMemo(
+    () => ({
+      size: resolveSize(props.size, props.density),
+      bordered: props.bordered === true,
+    }),
+    [props.size, props.density, props.bordered]
+  );
   return (
     <ReducedMotionScope off={kit.motionOff}>
       <FeatureProviders props={props}>
         <HeaderFilterOpenProvider>
-          <DataTableContent<TRow> {...props} />
+          <AntdLookContext.Provider value={look}>
+            <AntdRowScrollContext.Provider value={rowScroll}>
+              <TableComposition<TRow> props={props} kit={ANTD_KIT} />
+            </AntdRowScrollContext.Provider>
+          </AntdLookContext.Provider>
         </HeaderFilterOpenProvider>
       </FeatureProviders>
     </ReducedMotionScope>

@@ -644,14 +644,11 @@ function adapterBaseFixtures() {
     code: `export { DataTable } from "PKG";`,
     // A kit that loads locales lazily carries every string in its English
     // locale chunk, so only a base table without one can name them absent.
-    // antd builds its chrome by hand and wires the context menu in its own
-    // table; every other kit draws through the binding's composition.
     absent: [
       ...ADAPTER_ABSENT,
       ...(kit === "mui" ? ["defaultLabels"] : []),
-      ...(kit === "antd"
-        ? []
-        : ["contextMenuCopyTarget", "AGENT_APPROVAL_STATE"]),
+      "contextMenuCopyTarget",
+      "AGENT_APPROVAL_STATE",
       // A string only its feature's labels carry. Chakra and antd load their
       // library's locale, whose English chunk holds every string.
       ...(kit === "chakra" || kit === "antd"

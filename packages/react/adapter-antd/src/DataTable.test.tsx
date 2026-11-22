@@ -716,7 +716,9 @@ describe("<DataTable> (Ant Design)", () => {
       container.querySelector('[data-adapttable-part="cards"]')
     ).toBeInTheDocument();
     expect(container.querySelector(".ant-table")).toBeNull();
-    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+    expect(
+      container.querySelectorAll('[data-adapttable-part="card"]')
+    ).toHaveLength(2);
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(screen.getByText("Riyadh")).toBeInTheDocument();
   });

@@ -417,6 +417,7 @@ export type {
 } from "./features/tableFeature";
 export type { FeatureApplyInput, FeaturePatch } from "./features/tableFeature";
 export { applyTableFeatures, featureLabelsFor } from "./features/tableFeature";
+export { KEYED_WINDOW_RENDER } from "./features/virtualize";
 export {
   type ChecklistButtonProps,
   type ChecklistCheckboxProps,
@@ -1006,6 +1007,7 @@ export {
   type FeatureListEntry,
   flattenFeatures,
 } from "@adapttable/core/binding";
+export { coreVirtualize } from "@adapttable/core/binding";
 export {
   booleanFilterSpecs,
   checklistFilterSpecs,

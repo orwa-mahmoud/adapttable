@@ -173,6 +173,7 @@ import { ContextMenuSlots as ContextMenuSlots_2 } from '@adapttable/core/binding
 import { ContextMenuSurfaceProps as ContextMenuSurfaceProps_2 } from '@adapttable/core/binding';
 import { ContextMenuTarget } from '@adapttable/core';
 import { ContrastRules } from '@adapttable/core/binding';
+import { coreVirtualize } from '@adapttable/core/binding';
 import { createFilterRegistry } from '@adapttable/core';
 import { CreateTableEngineOptions } from '@adapttable/core';
 import { CSSProperties } from 'react';
@@ -1533,6 +1534,8 @@ export type ContextMenuSlots = ContextMenuSlots_2<ReactNode>;
 export type ContextMenuSurfaceProps = ContextMenuSurfaceProps_2<ReactNode>;
 
 export { ContextMenuTarget }
+
+export { coreVirtualize }
 
 // @public
 export function createAdapterAgentApprovalFeature(AgentApproval: AdapterFeatureComponent<AgentApprovalProps>): StaticTableFeature;
@@ -3014,6 +3017,9 @@ export { joinRelativeToken }
 
 // @public
 export const KEYED_WINDOW: FeatureSlotKey<KeyedWindowSlotProps>;
+
+// @public
+export const KEYED_WINDOW_RENDER: FeatureRender<KeyedWindowSlotProps>;
 
 export { KeyedVirtualization }
 

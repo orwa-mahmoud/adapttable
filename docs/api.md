@@ -281,7 +281,9 @@ that assembles its own table body — antd renders through its own `<Table>` —
 asks `KEYED_WINDOW` (`KeyedWindowSlotProps`) for a window over a keyed list
 instead, so the virtualizer stays behind the same import there too. The window
 it gets back is a `KeyedWindow`, whose `scrollToIndex` brings one entry into
-view. Find reaches a match outside the window through `RowScrollContext`: the
+view. `KEYED_WINDOW_RENDER` is that window as a ready fill, for a kit whose own
+`virtualize` keeps its body (antd's fills `CHROME_BODY` with the plain body and
+pages from its native virtual table). Find reaches a match outside the window through `RowScrollContext`: the
 `virtualize` body provides it, and a kit that renders its own body provides it
 above its find stage with a scroll for its own window.
 A kit dresses a core feature with its own parts through `extendFeature`.

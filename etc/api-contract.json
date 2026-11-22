@@ -496,6 +496,7 @@
       "adapter-unstyled-pivot",
       "ai-react",
       "antd/density",
+      "antd/virtualize",
       "antd/export",
       "antd/fullscreen",
       "antd/preset",
@@ -6463,7 +6464,9 @@
       "createAdapterFilteringFamily",
       "EditingFamilyFactory",
       "FilteringFamilyFactory",
-      "CellContent"
+      "CellContent",
+      "KEYED_WINDOW_RENDER",
+      "coreVirtualize"
     ],
     "react-features": [
       "applyTableFeatures",
@@ -16238,6 +16241,9 @@
     ],
     "i18n-locales-zh": [
       "zh"
+    ],
+    "antd/virtualize": [
+      "virtualize"
     ]
   },
   "entrypoints": {
@@ -16381,7 +16387,7 @@
       "surface": "kit/tree"
     },
     "adapter-antd-virtualize.api.md": {
-      "reexport": "kit/virtualize"
+      "surface": "antd/virtualize"
     },
     "adapter-antd.api.md": {
       "surface": "adapter-antd"
