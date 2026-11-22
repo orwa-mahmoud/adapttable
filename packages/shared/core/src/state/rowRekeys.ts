@@ -142,6 +142,73 @@ export function rekeyedIds<TRow>(
 }
 
 /**
+ * The rows a patch log rekeyed, as a piece of state keyed by row id applies
+ * them: each old id with its new id, and the row now under each new id.
+ *
+ * @public
+ */
+export interface RowRekeyMoves<TRow = unknown> {
+  /** Old row id to new row id. */
+  readonly ids: ReadonlyMap<string, string>;
+  /** The row under each new id once the log has run. */
+  readonly rows: ReadonlyMap<string, TRow>;
+}
+
+/**
+ * The rekeys of a patch log as {@link RowRekeyMoves}. Chained rekeys
+ * collapse, a row rekeyed back drops out, and a rekeyed row the log then
+ * removed is not listed.
+ *
+ * @param log - The log the patches produced.
+ * @returns The moves; empty when the log rekeyed no row.
+ *
+ * @public
+ */
+export function rowRekeyMoves<TRow>(
+  log: RowPatchLog<TRow>
+): RowRekeyMoves<TRow> {
+  const ids = rowRekeys(log);
+  const targets = new Set(ids.values());
+  const rows = new Map<string, TRow>();
+  if (targets.size === 0) return { ids, rows };
+  for (const event of log.events) {
+    if (event.type === "update" && targets.has(event.id)) {
+      rows.set(event.id, event.next);
+    }
+  }
+  return { ids, rows };
+}
+
+/**
+ * State keyed by row id that follows a rekey.
+ *
+ * @public
+ */
+export interface RowRekeyable<TRow = unknown> {
+  /** Move this state to the new ids, in the change in progress. */
+  readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
+}
+
+/**
+ * Register state keyed by row id with a table's store, so a rekeyed commit
+ * moves it.
+ *
+ * @param store - The table's store.
+ * @param target - The state to move.
+ * @returns What unregisters it.
+ *
+ * @public
+ */
+export function onRowRekeyMoves<TRow>(
+  store: TableStore,
+  target: RowRekeyable<TRow>
+): () => void {
+  return onRowRekeys<TRow>(store, (log) => {
+    target.rekey(rowRekeyMoves(log));
+  });
+}
+
+/**
  * An id set with each rekeyed id moved; the same set when none moved.
  *
  * @param ids - The ids.
@@ -174,6 +241,24 @@ export function rekeyIdList(
 ): readonly string[] {
   if (!ids.some((id) => moved.has(id))) return ids;
   return ids.map((id) => moved.get(id) ?? id);
+}
+
+/**
+ * A map keyed by row id with each rekeyed entry moved to its new key; the
+ * same map when none moved.
+ *
+ * @param map - The map.
+ * @param moved - Old id to new id.
+ * @returns The map after the rekey.
+ *
+ * @public
+ */
+export function rekeyIdMap<T>(
+  map: ReadonlyMap<string, T>,
+  moved: ReadonlyMap<string, string>
+): ReadonlyMap<string, T> {
+  if (![...map.keys()].some((id) => moved.has(id))) return map;
+  return new Map([...map].map(([id, value]) => [moved.get(id) ?? id, value]));
 }
 
 /**

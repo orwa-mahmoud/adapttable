@@ -14,6 +14,7 @@
  */
 import type { RowCallback } from "../contracts/rowCallback";
 import type { FeatureHostState } from "../features/currentHost";
+import type { RowRekeyMoves } from "../state/rowRekeys";
 import type { TableStore } from "../state/tableStore";
 import { type EditableColumnLike, readEditableCellValue } from "./cellEditing";
 import {
@@ -214,6 +215,8 @@ export interface BatchEditStore<TRow> {
     [row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]],
     void
   >;
+  /** Move each rekeyed row's pending changes to its new id. */
+  readonly rekey: RowCallback<[moves: RowRekeyMoves<NoInfer<TRow>>], void>;
 }
 
 /** A digest of every pending draft; empty when nothing is pending. */
@@ -426,6 +429,19 @@ export function createBatchEditStore<TRow>(
         cancelEvent(rowId, entry);
       }
       write({});
+    },
+    rekey(moves) {
+      const pending = state.get().pending;
+      if (![...moves.ids.keys()].some((id) => id in pending)) return;
+      const next: Record<string, BatchPendingDrafts[string]> = {};
+      for (const [rowId, entry] of Object.entries(pending)) {
+        const id = moves.ids.get(rowId) ?? rowId;
+        next[id] =
+          id === rowId
+            ? entry
+            : { ...entry, row: moves.rows.get(id) ?? entry.row };
+      }
+      write(next);
     },
     cancelRow(rowId) {
       if (disposed) return;

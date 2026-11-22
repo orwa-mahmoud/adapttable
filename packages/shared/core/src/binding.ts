@@ -2031,15 +2031,20 @@ export { collectFeatureNotices } from "./state/featureNotices";
 export { createLocalTableViewStore } from "./state/localViewStore";
 export {
   commitRowRekeys,
+  onRowRekeyMoves,
   onRowRekeys,
   rekeyedIds,
   rekeyIdList,
+  rekeyIdMap,
   rekeyIdRecord,
   rekeyIdSet,
   rekeyRowIdSet,
   rekeyRowPins,
   rekeyTableRows,
+  type RowRekeyable,
   type RowRekeyHandler,
+  type RowRekeyMoves,
+  rowRekeyMoves,
 } from "./state/rowRekeys";
 export {
   groupsCollapsedToDepth,

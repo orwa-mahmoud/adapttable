@@ -13,8 +13,9 @@
  * Marks clear on confirmation and on rollback, and never on their own — a mark
  * that fades on a timer says the change is safe when nobody checked.
  */
+import type { RowRekeyMoves } from "../state/rowRekeys";
 import type { TableStore } from "../state/tableStore";
-import { cellIdentity, cellKeysByRow } from "./cellIdentity";
+import { cellIdentity, cellKeysByRow, rekeyCellSet } from "./cellIdentity";
 import { stateCell } from "./storePlumbing";
 
 /**
@@ -86,6 +87,8 @@ export interface DirtyCellStore {
   readonly confirmRow: (rowId: string) => void;
   /** Clear everything. */
   readonly confirmAll: () => void;
+  /** Move each rekeyed row's marks to its new id. */
+  readonly rekey: (moves: RowRekeyMoves) => void;
 }
 
 /**
@@ -125,6 +128,11 @@ export function createDirtyCellStore(
     subscribe: state.subscribe,
     configure(next) {
       current = next;
+    },
+    rekey(moves) {
+      const { cells } = state.get();
+      const next = rekeyCellSet(cells, moves.ids);
+      if (next !== cells) write(next);
     },
     mark(rowId, columnKey) {
       if (current.enabled !== true) return;

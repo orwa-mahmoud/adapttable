@@ -6,6 +6,7 @@
  * opens (`createDeferredEditConflictStore`); these types, readers and rules
  * stay with the table so a cell can draw its state without it.
  */
+import type { RowRekeyMoves } from "../state/rowRekeys";
 import { devWarn } from "../utils/devWarn";
 import { type EditableColumnLike, readEditableCellValue } from "./cellEditing";
 import { cellIdentity, cellIdentityParts, cellKeysByRow } from "./cellIdentity";
@@ -240,6 +241,8 @@ export interface EditConflictStore<TRow> {
   readonly takeCell: (rowId: string, columnKey: string) => void;
   /** Drop the open cell's conflict without choosing. */
   readonly clear: () => void;
+  /** Move the questions about each rekeyed row to its new id. */
+  readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
 }
 
 /**

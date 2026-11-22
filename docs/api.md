@@ -780,8 +780,14 @@ explains which import a program changes. This list is the reference.
   `commitRowRekeys(store, previous, data)` does it when committed data's patch
   log continues from the previous data. `rekeyedIds(log, getId)` maps the ids
   a function derives — the row id, or a separate selection id — and
-  `rekeyIdSet`, `rekeyIdList`, `rekeyIdRecord`, `rekeyRowIdSet` and
-  `rekeyRowPins` move ids in the common shapes. On `@adapttable/core/binding`.
+  `rekeyIdSet`, `rekeyIdList`, `rekeyIdMap`, `rekeyIdRecord`, `rekeyRowIdSet`
+  and `rekeyRowPins` move ids in the common shapes. `rowRekeyMoves(log)` reads
+  a log as `RowRekeyMoves` — each old id with its new id, and the row now
+  under each new id — and `onRowRekeyMoves(store, target)` registers a
+  `RowRekeyable` with it; every editing store (batch, row and cell editing,
+  saves, validation, dirty marks, conflicts) is one, through its `rekey`
+  method. On `@adapttable/core/binding`; `RowRekeyMoves` is also on the main
+  and `/editing` entries.
 - `createFeatureMounts(acquire)` — a table's mounted feature resources
   (`FeatureMounts`): `reconcile` keeps each by id across ordinary option
   changes, replaces it when its `dependencies` change, releases it once when

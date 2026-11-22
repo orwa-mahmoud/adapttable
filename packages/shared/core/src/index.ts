@@ -424,6 +424,7 @@ export {
   type TableQueryKeyOptions,
 } from "./source/queryKey";
 export type { Slot, TableErrorState } from "./state/errorState";
+export type { RowRekeyMoves } from "./state/rowRekeys";
 export type {
   SliceCell,
   SliceKey,

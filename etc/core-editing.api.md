@@ -169,6 +169,7 @@ export interface BatchEditStore<TRow> {
     readonly configure: RowCallback<[options: BatchEditStoreOptions<TRow>], void>;
     readonly dispose?: () => void;
     readonly getSnapshot: () => BatchEditSnapshot;
+    readonly rekey: RowCallback<[moves: RowRekeyMoves<NoInfer<TRow>>], void>;
     readonly saveAll: () => void;
     readonly setDraft: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string, value: string], void>;
     readonly subscribe: (listener: () => void) => () => void;
@@ -319,6 +320,7 @@ export interface CellEditSession<TRow = unknown> {
     }, navigation?: CellEditNavigation) => CellEditKeyOutcome | null;
     readonly keepLive: (row: unknown) => void;
     readonly openedRow: () => unknown;
+    readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
     readonly setDraft: (value: string) => void;
     readonly subscribe: (listener: () => void) => () => void;
     readonly takeLive: (row: unknown, value: string) => void;
@@ -388,6 +390,7 @@ export interface CellSaveStore<TRow> {
     readonly clear: (rowId: string, columnKey: string) => void;
     readonly configure: (options: CellSaveStoreOptions<TRow>) => void;
     readonly getSnapshot: () => CellSaveSnapshot<TRow>;
+    readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
     readonly rollback: (rowId: string, columnKey: string) => void;
     readonly subscribe: (listener: () => void) => () => void;
     readonly track: (input: {
@@ -787,6 +790,7 @@ export interface DirtyCellStore {
     readonly confirmRow: (rowId: string) => void;
     readonly getSnapshot: () => DirtyCellSnapshot;
     readonly mark: (rowId: string, columnKey: string) => void;
+    readonly rekey: (moves: RowRekeyMoves) => void;
     readonly subscribe: (listener: () => void) => () => void;
 }
 
@@ -983,6 +987,7 @@ export interface EditConflictStore<TRow> {
     readonly reconcile: (input: ReconcileLiveEdit<TRow>) => void;
     readonly reconcileBatch: (input: ReconcileLiveBatchEdit<TRow>) => void;
     readonly reconcileRow: (input: ReconcileLiveRowEdit<TRow>) => void;
+    readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
     readonly subscribe: (listener: () => void) => () => void;
     readonly take: () => void;
     readonly takeCell: (rowId: string, columnKey: string) => void;
@@ -1209,6 +1214,7 @@ export interface EditValidationStore<TRow> {
     readonly configure: (options: EditValidationStoreOptions<TRow>) => void;
     readonly getSnapshot: () => EditValidationSnapshot;
     readonly hasRowValidator: () => boolean;
+    readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
     readonly subscribe: (listener: () => void) => () => void;
 }
 
@@ -1886,6 +1892,7 @@ export interface RowEditStore<TRow> {
     readonly dispose?: () => void;
     readonly getSnapshot: () => RowEditSnapshot;
     readonly openedRow: () => TRow | undefined;
+    readonly rekey: RowCallback<[moves: RowRekeyMoves<NoInfer<TRow>>], void>;
     readonly save: () => void;
     readonly seeds: () => RowEditDrafts | undefined;
     readonly setDraft: (columnKey: string, value: string) => void;
@@ -1915,6 +1922,12 @@ export interface RowEditTrigger<TRow> {
 
 // @public
 export function rowHasValidationError(snapshot: EditValidationSnapshot, rowId: string): boolean;
+
+// @public
+export interface RowRekeyMoves<TRow = unknown> {
+    readonly ids: ReadonlyMap<string, string>;
+    readonly rows: ReadonlyMap<string, TRow>;
+}
 
 // @public
 export type RowValidator<TRow> = (row: TRow) => string | Record<string, string> | undefined | Promise<string | Record<string, string> | undefined>;

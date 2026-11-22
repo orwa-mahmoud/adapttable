@@ -11480,6 +11480,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "onRowRekeyMoves",
+      "kind": "runtime",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#onRowRekeyMoves",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "onRowRekeys",
       "kind": "runtime",
       "module": "state/rowRekeys.ts",
@@ -12104,6 +12115,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "state/rowRekeys.ts#rekeyIdList",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "rekeyIdMap",
+      "kind": "runtime",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#rekeyIdMap",
       "subpaths": ["./binding"]
     },
     {
@@ -12940,6 +12962,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "rows/rowPresentation.ts#rowPinSignature",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "rowRekeyMoves",
+      "kind": "runtime",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#rowRekeyMoves",
       "subpaths": ["./binding"]
     },
     {
@@ -18300,6 +18333,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "RowRekeyable",
+      "kind": "type",
+      "module": "state/rowRekeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#RowRekeyable",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "RowRekeyHandler",
       "kind": "type",
       "module": "state/rowRekeys.ts",
@@ -23562,6 +23606,17 @@
       "deprecated": false,
       "identity": "editing/editingGate.ts#RowEditTrigger",
       "subpaths": [".", "./editing"]
+    },
+    {
+      "name": "RowRekeyMoves",
+      "kind": "type",
+      "module": "state/rowRekeys.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/rowRekeys.ts#RowRekeyMoves",
+      "subpaths": [".", "./binding", "./editing"]
     },
     {
       "name": "RowValidator",

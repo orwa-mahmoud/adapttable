@@ -11,7 +11,7 @@
 import type { TableStore } from "../state/tableStore";
 import { reportFailure } from "../utils/reportFailure";
 import { readEditableCellValue } from "./cellEditing";
-import { cellIdentityParts, cellKeysByRow } from "./cellIdentity";
+import { cellIdentityParts, cellKeysByRow, rekeyCellMap } from "./cellIdentity";
 import type { EditConflictTools } from "./editConflict";
 import {
   contestedCellKey,
@@ -47,6 +47,7 @@ export const EDIT_CONFLICT_TOOLS: EditConflictTools = {
   contestedCellKey,
   liveRowChanged,
   readEditableCellValue,
+  rekeyCellMap,
   resolveConflictChoice,
   stateCell,
 };
@@ -158,5 +159,7 @@ export function createDeferredEditConflictStore<TRow>(
     keepCell: (rowId, columnKey) => store?.keepCell(rowId, columnKey),
     takeCell: (rowId, columnKey) => store?.takeCell(rowId, columnKey),
     clear: () => store?.clear(),
+    // Before the store loads, each pass replaces what it buffered.
+    rekey: (moves) => store?.rekey(moves),
   };
 }

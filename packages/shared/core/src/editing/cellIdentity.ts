@@ -81,3 +81,56 @@ export function cellKeysByRow(
   rowIndexes.set(cells, index);
   return index;
 }
+
+/** A cell key under its row's new id, or the same key when the row kept it. */
+function movedCellKey(key: string, ids: ReadonlyMap<string, string>): string {
+  const [rowId, columnKey] = cellIdentityParts(key);
+  const id = ids.get(rowId);
+  return id === undefined ? key : cellIdentity(id, columnKey);
+}
+
+/** Whether a cell collection holds a cell of a row the rekey moved. */
+function holdsMovedRow(
+  cells: ReadonlySet<string> | ReadonlyMap<string, unknown>,
+  ids: ReadonlyMap<string, string>
+): boolean {
+  if (ids.size === 0 || cells.size === 0) return false;
+  for (const rowId of cellKeysByRow(cells).keys()) {
+    if (ids.has(rowId)) return true;
+  }
+  return false;
+}
+
+/**
+ * A set of cell keys with each rekeyed row's cells under its new id; the same
+ * set when no row moved.
+ *
+ * @param cells - The cell keys.
+ * @param ids - Old row id to new row id.
+ * @returns The cell keys after the rekey.
+ */
+export function rekeyCellSet(
+  cells: ReadonlySet<string>,
+  ids: ReadonlyMap<string, string>
+): ReadonlySet<string> {
+  if (!holdsMovedRow(cells, ids)) return cells;
+  return new Set([...cells].map((key) => movedCellKey(key, ids)));
+}
+
+/**
+ * A map keyed by cell with each rekeyed row's cells under its new id; the
+ * same map when no row moved.
+ *
+ * @param cells - The map.
+ * @param ids - Old row id to new row id.
+ * @returns The map after the rekey.
+ */
+export function rekeyCellMap<T>(
+  cells: ReadonlyMap<string, T>,
+  ids: ReadonlyMap<string, string>
+): ReadonlyMap<string, T> {
+  if (!holdsMovedRow(cells, ids)) return cells;
+  return new Map(
+    [...cells].map(([key, value]) => [movedCellKey(key, ids), value])
+  );
+}

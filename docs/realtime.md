@@ -54,6 +54,14 @@ Patches stored or sent as id-changing updates read as rekeys with
 stream already applies its frames that way (`STREAMED_ROW_PATCHES`), and it
 accepts `{ type: "rekey", id, changes }` frames.
 
+Hand the rekeyed array back as `data` and everything the table keeps by row
+id moves with the row in the same change, in React, Vue and Angular alike: a
+selected row stays selected (a host that holds `selectedIds` hears
+`onSelectionChange` with the new id), a pinned row keeps its side and place,
+an open detail or tree node stays open, and an open editor keeps its draft,
+its dirty mark, its validation and save errors and any conflict question. A
+copy of the array, or new rows that are not a patch of the old, move nothing.
+
 ## Incremental re-evaluation
 
 Hand the array `applyRowPatches` returns back as `data` — do not spread it.

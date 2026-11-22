@@ -11,9 +11,14 @@
  * {@link EditConflictTools} from the module that loads it, so a bundler never
  * has to split the table's own editing code out to share it with this chunk.
  */
+import type { RowRekeyMoves } from "../state/rowRekeys";
 import type { TableStore } from "../state/tableStore";
 import type { EditableColumnLike, readEditableCellValue } from "./cellEditing";
-import type { cellIdentityParts, cellKeysByRow } from "./cellIdentity";
+import type {
+  cellIdentityParts,
+  cellKeysByRow,
+  rekeyCellMap,
+} from "./cellIdentity";
 import type {
   contestedCellKey,
   ContestedEditCell,
@@ -38,6 +43,7 @@ export interface EditConflictTools {
   readonly contestedCellKey: typeof contestedCellKey;
   readonly liveRowChanged: typeof liveRowChanged;
   readonly readEditableCellValue: typeof readEditableCellValue;
+  readonly rekeyCellMap: typeof rekeyCellMap;
   readonly resolveConflictChoice: typeof resolveConflictChoice;
   readonly stateCell: typeof stateCell;
 }
@@ -63,6 +69,7 @@ export function editConflictStoreWith(
     contestedCellKey,
     liveRowChanged,
     readEditableCellValue,
+    rekeyCellMap,
     resolveConflictChoice,
     stateCell,
   } = tools;
@@ -311,10 +318,36 @@ export function editConflictStoreWith(
       });
     };
 
+    /** A question about a rekeyed row, under the row's new id. */
+    const movedConflict = (
+      conflict: EditConflict<TRow> | null,
+      moves: RowRekeyMoves<TRow>
+    ): EditConflict<TRow> | null => {
+      if (!conflict) return conflict;
+      const id = moves.ids.get(conflict.rowId);
+      if (id === undefined) return conflict;
+      return {
+        ...conflict,
+        rowId: id,
+        row: moves.rows.get(id) ?? conflict.row,
+      };
+    };
+
     return {
       getSnapshot: state.get,
       subscribe: state.subscribe,
       clear,
+      rekey(moves) {
+        const current = state.get().current;
+        const moved = movedConflict(current, moves);
+        const next = rekeyCellMap(contested, moves.ids);
+        pending = movedConflict(pending, moves);
+        if (moved === current && next === contested) return;
+        // The next pass asks about the row under its new id afresh.
+        seen = "";
+        contested = next;
+        state.set({ ...state.get(), current: moved, contested: next });
+      },
       keep() {
         const conflict = pending ?? state.get().current;
         if (!conflict || !answer) return;

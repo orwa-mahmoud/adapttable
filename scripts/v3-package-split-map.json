@@ -22827,6 +22827,14 @@
       "behavior": ""
     },
     {
+      "export": "onRowRekeyMoves",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "onRowRekeys",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -23948,6 +23956,14 @@
     },
     {
       "export": "rekeyIdList",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "rekeyIdMap",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -25139,7 +25155,31 @@
       "behavior": ""
     },
     {
+      "export": "RowRekeyable",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "RowRekeyHandler",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "rowRekeyMoves",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "RowRekeyMoves",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -30287,6 +30327,14 @@
       "currentImport": "@adapttable/core/editing",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
+      "export": "RowRekeyMoves",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core/editing",
       "behavior": ""
     },
@@ -40540,6 +40588,14 @@
     },
     {
       "export": "RowPinState",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "RowRekeyMoves",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",

@@ -304,6 +304,7 @@ export interface BatchEditStore<TRow> {
     readonly configure: RowCallback<[options: BatchEditStoreOptions<TRow>], void>;
     readonly dispose?: () => void;
     readonly getSnapshot: () => BatchEditSnapshot;
+    readonly rekey: RowCallback<[moves: RowRekeyMoves<NoInfer<TRow>>], void>;
     readonly saveAll: () => void;
     readonly setDraft: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string, value: string], void>;
     readonly subscribe: (listener: () => void) => () => void;
@@ -589,6 +590,7 @@ export interface CellEditSession<TRow = unknown> {
     }, navigation?: CellEditNavigation) => CellEditKeyOutcome | null;
     readonly keepLive: (row: unknown) => void;
     readonly openedRow: () => unknown;
+    readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
     readonly setDraft: (value: string) => void;
     readonly subscribe: (listener: () => void) => () => void;
     readonly takeLive: (row: unknown, value: string) => void;
@@ -4093,6 +4095,7 @@ export interface RowEditStore<TRow> {
     readonly dispose?: () => void;
     readonly getSnapshot: () => RowEditSnapshot;
     readonly openedRow: () => TRow | undefined;
+    readonly rekey: RowCallback<[moves: RowRekeyMoves<NoInfer<TRow>>], void>;
     readonly save: () => void;
     readonly seeds: () => RowEditDrafts | undefined;
     readonly setDraft: (columnKey: string, value: string) => void;
@@ -4291,6 +4294,12 @@ export type RowPinSide = "top" | "bottom";
 export interface RowPinState {
     readonly bottom: readonly string[];
     readonly top: readonly string[];
+}
+
+// @public
+export interface RowRekeyMoves<TRow = unknown> {
+    readonly ids: ReadonlyMap<string, string>;
+    readonly rows: ReadonlyMap<string, TRow>;
 }
 
 // @public

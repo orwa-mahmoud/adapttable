@@ -6,6 +6,7 @@
  * ignored, including a success, so it cannot clear the save the cell is in now.
  */
 import { runBeforeLayoutChange } from "../layout/layoutChange";
+import type { RowRekeyMoves } from "../state/rowRekeys";
 import type { TableStore } from "../state/tableStore";
 import { devWarn } from "../utils/devWarn";
 import {
@@ -14,7 +15,13 @@ import {
   type EditableColumnLike,
   stepEditableCell,
 } from "./cellEditing";
-import { cellIdentity, cellKeysByRow } from "./cellIdentity";
+import {
+  cellIdentity,
+  cellIdentityParts,
+  cellKeysByRow,
+  rekeyCellMap,
+  rekeyCellSet,
+} from "./cellIdentity";
 import type { EditEvent, EditEventHandler } from "./editContracts";
 import { preserveEditorFocusOnLayoutChange } from "./layoutFocus";
 import { isThenable, stateCell } from "./storePlumbing";
@@ -136,6 +143,8 @@ export interface CellEditSession<TRow = unknown> {
     rows: readonly unknown[],
     rowKey: (row: unknown) => string
   ) => void;
+  /** Move the open editor to its row's new id when a rekey moved it. */
+  readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
   /** The row the editor opened against, or its latest accepted version. */
   readonly openedRow: () => unknown;
   /** Keep the draft over a live update, adopting the incoming row. */
@@ -260,6 +269,20 @@ export function createCellEditSession<TRow = unknown>(
       if (rows.some((row) => rowKey(row) === active.rowId)) return;
       clear();
     },
+    rekey(moves) {
+      const { active, draft } = state.get();
+      if (!active) return;
+      const id = moves.ids.get(active.rowId);
+      if (id === undefined) return;
+      if (opened) {
+        opened = {
+          ...opened,
+          rowId: id,
+          row: moves.rows.get(id) ?? opened.row,
+        };
+      }
+      write({ active: { rowId: id, columnKey: active.columnKey }, draft });
+    },
     openedRow: () => opened?.row,
     keepLive(row) {
       if (!opened) return;
@@ -380,6 +403,8 @@ export interface CellSaveStore<TRow> {
   readonly clear: (rowId: string, columnKey: string) => void;
   /** Whether a rejected save can be put back. */
   readonly canRollback: () => boolean;
+  /** Move each rekeyed row's saving and failed cells to its new id. */
+  readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
 }
 
 /**
@@ -481,6 +506,9 @@ export function createCellSaveStore<TRow>(
     within.store
   );
   const tokens = new Map<string, symbol>();
+  // Where each save in flight now lives: a rekey moves its cell while the
+  // host is still answering.
+  const cellOf = new Map<symbol, { key: string; rowId: string }>();
 
   const markSaving = (key: string, busy: boolean): void => {
     if (state.get().saving.has(key) === busy) return;
@@ -518,27 +546,35 @@ export function createCellSaveStore<TRow>(
         return true;
       }
       const token = Symbol();
+      const replaced = tokens.get(key);
+      if (replaced) cellOf.delete(replaced);
       tokens.set(key, token);
-      const live = (): boolean => tokens.get(key) === token;
+      cellOf.set(token, { key, rowId });
+      const cell = (): { key: string; rowId: string } | undefined => {
+        const at = cellOf.get(token);
+        return at && tokens.get(at.key) === token ? at : undefined;
+      };
       setFailure(key, undefined);
       markSaving(key, true);
       try {
         await result;
-        if (!live()) return false;
-        setFailure(key, undefined);
+        const at = cell();
+        if (!at) return false;
+        setFailure(at.key, undefined);
         return true;
       } catch (error) {
-        if (!live()) return false;
+        const at = cell();
+        if (!at) return false;
         let message: string;
         try {
           message = (current.formatError ?? defaultSaveErrorMessage)(error);
         } catch {
           message = defaultSaveErrorMessage(error);
         }
-        setFailure(key, { previous, attempted, message });
+        setFailure(at.key, { previous, attempted, message });
         observeEdit(current.onEditError, {
           row: previous,
-          rowId,
+          rowId: at.rowId,
           columnKey,
           value: attempted,
           previousValue: previousValue ?? previous,
@@ -547,11 +583,35 @@ export function createCellSaveStore<TRow>(
         });
         return false;
       } finally {
-        if (live()) {
-          tokens.delete(key);
-          markSaving(key, false);
+        const at = cell();
+        cellOf.delete(token);
+        if (at) {
+          tokens.delete(at.key);
+          markSaving(at.key, false);
         }
       }
+    },
+    rekey(moves) {
+      const { ids } = moves;
+      const { saving, failures } = state.get();
+      const movedSaving = rekeyCellSet(saving, ids);
+      const movedFailures = rekeyCellMap(failures, ids);
+      if (movedSaving === saving && movedFailures === failures) return;
+      const moved = [...tokens].map(([key, token]): [string, symbol] => {
+        const [rowId, columnKey] = cellIdentityParts(key);
+        const id = ids.get(rowId);
+        if (id === undefined) return [key, token];
+        const next = cellSaveKey(id, columnKey);
+        cellOf.set(token, { key: next, rowId: id });
+        return [next, token];
+      });
+      tokens.clear();
+      for (const [key, token] of moved) tokens.set(key, token);
+      state.set({
+        ...state.get(),
+        saving: movedSaving,
+        failures: movedFailures,
+      });
     },
     rollback(rowId, columnKey) {
       const key = cellSaveKey(rowId, columnKey);

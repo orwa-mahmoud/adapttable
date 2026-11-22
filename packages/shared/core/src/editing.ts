@@ -367,6 +367,7 @@ export type {
 } from "./source/queryContract";
 export type { QueryGroupRow } from "./source/queryGroups";
 export type { TableSource } from "./source/TableSource";
+export type { RowRekeyMoves } from "./state/rowRekeys";
 export type {
   SliceCell,
   SliceKey,
