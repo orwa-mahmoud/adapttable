@@ -55,7 +55,6 @@ import {
   type CellSpanAppearance,
   type ColumnLayoutState,
   type ConfirmHandler,
-  type ContextMenuTarget,
   type Direction,
   type EditActivation,
   type ExportCsvOptions,
@@ -93,7 +92,6 @@ import {
   type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
   CONTEXT_MENU_LIVE,
-  copyContextMenuSelection,
   createTableStore,
   defaultConfirm,
   type FeatureListEntry,
@@ -159,6 +157,10 @@ import {
 
 import { mountForcedColorsStyles } from "../a11y/forcedColors";
 import { type CommandPaletteInjectOptions } from "../actions/commandPalette";
+import {
+  COMMAND_PALETTE_VIEW,
+  CONTEXT_MENU_VIEW,
+} from "../actions/regionViewKeys";
 import {
   ADAPTTABLE_CONTEXT_MENU,
   type TableContextMenuOptions,
@@ -327,139 +329,39 @@ function scrollFindWindow<TRow>(options: {
   });
 }
 
-/** Copy or cut the cell the menu was opened on, once cell navigation is on. */
-function menuCopy<TRow>(
-  grid: GridFocus<TRow> | undefined,
-  target: ContextMenuTarget<TRow>,
-  cut?: boolean
-): void {
-  if (!grid) return;
-  copyContextMenuSelection(
-    { range: grid.range(), cellAt: grid.cellAt, copyCells: grid.copyCells },
-    target,
-    cut
-  );
-}
-
-/** The menu slot's props, including the handlers the built-in entries call. */
-function mountedContextMenu<TRow>(input: {
-  readonly contextMenu: TableContextMenuOptions<TRow>["contextMenu"];
-  readonly table: DataTable<TRow>;
-  readonly pinning:
-    | Signal<{ readonly actions: readonly RowAction<TRow>[] } | undefined>
-    | undefined;
-  readonly grid: GridFocus<TRow> | undefined;
-  readonly filters: FiltersView | undefined;
-  readonly rowKey: (row: TRow) => string;
-  readonly onCellCut: Signal<((range: CellRange) => void) | undefined>;
-}): Signal<
-  TableContextMenuOptions<TRow> & {
-    readonly children: (regionProps: Record<string, unknown>) => undefined;
+/**
+ * Host-owned row mutations, while row actions wire an add, duplicate or
+ * delete handler.
+ */
+function rowMutationsFor<TRow>(
+  resources: FeatureResources,
+  options: Readonly<Record<string, unknown>>,
+  labels: Signal<Required<TableLabels>>
+): Signal<RowMutationsState<TRow>> | undefined {
+  const { onAddRow, onDuplicateRow, onDeleteRow, confirmDeleteRow } = options;
+  if (
+    onAddRow === undefined &&
+    onDuplicateRow === undefined &&
+    onDeleteRow === undefined
+  ) {
+    return undefined;
   }
-> {
-  const { table, grid, filters } = input;
-  const options = contextMenuOptionsFor({
-    contextMenu: input.contextMenu,
-    columns: table.columns,
-    labels: table.labels,
-    rowFor: (rowId) =>
-      table.source().rows.find((row) => input.rowKey(row) === rowId),
-    sortBy: table.sortBy,
-    sortDir: table.sortDir,
-    isPinned: (columnKey) =>
-      table.layout().state.pinned[columnKey] !== undefined,
-    rowPins: computed(() => input.pinning?.()?.actions ?? []),
-    featureHost: table.featureHost,
-    gridNavigation: grid !== undefined,
-    onSort: (columnKey, direction) => {
-      table.source().setSort(columnKey, direction);
-    },
-    onHide: (columnKey) => {
-      table.layout().toggleVisible(columnKey);
-    },
-    onFilter: filters ? () => filters.show() : undefined,
-    onCopy: (target) => menuCopy(grid, target),
-    cut: computed(() => grid !== undefined && input.onCellCut() !== undefined),
-    onCut: (target) => menuCopy(grid, target, true),
-  });
-  // The slot type requires `children` for the React root wrapper. Angular
-  // binds the region handlers on the table root instead.
-  return computed(() => ({ ...options(), children: () => undefined }));
-}
-
-/** Props for the context-menu slot, whether or not a feature fills it. */
-function contextMenuOptionsFor<TRow>(options: {
-  readonly contextMenu: TableContextMenuOptions<TRow>["contextMenu"];
-  readonly columns: Signal<readonly ColumnDef<TRow>[]>;
-  readonly labels: Signal<TableLabels>;
-  readonly rowFor: (rowId: string) => TRow | undefined;
-  readonly sortBy: Signal<string | undefined>;
-  readonly sortDir: Signal<"asc" | "desc" | undefined>;
-  readonly isPinned: (columnKey: string) => boolean;
-  readonly rowPins: Signal<readonly RowAction<TRow>[]>;
-  readonly featureHost: TableContextMenuOptions<TRow>["featureHost"];
-  readonly gridNavigation: boolean;
-  readonly onSort: (columnKey: string, direction: "asc" | "desc") => void;
-  readonly onHide: (columnKey: string) => void;
-  readonly onFilter: (() => void) | undefined;
-  readonly onCopy: (target: ContextMenuTarget<TRow>) => void;
-  readonly cut: Signal<boolean>;
-  readonly onCut: (target: ContextMenuTarget<TRow>) => void;
-}): Signal<TableContextMenuOptions<TRow>> {
-  return computed(() => ({
-    contextMenu: options.contextMenu,
-    columns: options.columns(),
-    labels: options.labels(),
-    rowFor: options.rowFor,
-    actions: {
-      onCopy: options.onCopy,
-      onCut: options.cut() ? options.onCut : undefined,
-      onSort: options.onSort,
-      onHide: options.onHide,
-      onFilter: options.onFilter,
-    },
-    sortBy: options.sortBy(),
-    sortDir: options.sortDir(),
-    isPinned: options.isPinned,
-    rowPins: options.rowPins(),
-    featureHost: options.featureHost,
-    gridNavigation: options.gridNavigation,
-  }));
-}
-
-/** Props for the command-palette slot, whether or not a feature fills it. */
-function commandPalettePropsFor(options: {
-  readonly commandPalette: CommandPaletteInjectOptions["commandPalette"];
-  readonly onPrint: CommandPaletteInjectOptions["onPrint"];
-  readonly labels: Signal<TableLabels>;
-  readonly dir: Signal<Direction>;
-  readonly clearFilters: () => void;
-  readonly featureHost: CommandPaletteInjectOptions["featureHost"];
-  readonly exportCsv:
-    | Signal<
-        | {
-            readonly onExportCsv?: () => void;
-            readonly exportLabel?: string;
-          }
-        | undefined
-      >
-    | undefined;
-  readonly filterCount: Signal<number>;
-}): Signal<CommandPaletteInjectOptions> {
-  return computed(() => {
-    const exported = options.exportCsv?.();
-    return {
-      commandPalette: options.commandPalette,
-      labels: options.labels(),
-      dir: options.dir(),
-      onPrint: options.onPrint,
-      onExport: exported?.onExportCsv,
-      exportLabel: exported?.exportLabel,
-      onClearFilters: options.clearFilters,
-      hasFilters: options.filterCount() > 0,
-      featureHost: options.featureHost,
-    };
-  });
+  return resources.use(
+    "mutations",
+    [onAddRow, onDuplicateRow, onDeleteRow, confirmDeleteRow],
+    (injector) =>
+      injectRowMutations<TRow>(
+        computed(() => ({
+          onAddRow: onAddRow as (() => unknown) | undefined,
+          onDuplicateRow: onDuplicateRow as
+            ((row: TRow) => unknown) | undefined,
+          onDeleteRow: onDeleteRow as ((row: TRow) => unknown) | undefined,
+          confirmDeleteRow: confirmDeleteRow as boolean | undefined,
+          labels: labels(),
+        })),
+        injector
+      )
+  );
 }
 
 /** The find bar's slot props, while find is composed. */
@@ -503,14 +405,18 @@ export interface TableView<TRow> extends TableSurfaceView<TRow> {
   readonly isCellFlashing: (rowId: string, columnKey: string) => boolean;
   /** The find bar's props, when `findInTable()` is composed. */
   readonly findBar: Signal<FindBarProps> | undefined;
-  /** Props for the command-palette slot. Empty when the feature is absent. */
-  readonly commandPalette: Signal<CommandPaletteInjectOptions>;
-  /** Props for the context-menu slot. Empty when the feature is absent. */
-  readonly contextMenu: Signal<
-    TableContextMenuOptions<TRow> & {
-      readonly children: (regionProps: Record<string, unknown>) => undefined;
-    }
-  >;
+  /** Props for the command-palette slot, when a feature fills it. */
+  readonly commandPalette: Signal<CommandPaletteInjectOptions> | undefined;
+  /** Props for the context-menu slot, when a feature fills it. */
+  readonly contextMenu:
+    | Signal<
+        TableContextMenuOptions<TRow> & {
+          readonly children: (
+            regionProps: Record<string, unknown>
+          ) => undefined;
+        }
+      >
+    | undefined;
   /**
    * A cell's attributes, with find's match marks when the grid is not
    * painting them itself.
@@ -529,8 +435,8 @@ export interface TableView<TRow> extends TableSurfaceView<TRow> {
   readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
   /** A strip of buttons, or a menu. */
   readonly rowActionsLayout: RowActionsLayout | undefined;
-  /** Host-owned row additions and mutations. */
-  readonly rowMutations: Signal<RowMutationsState<TRow>>;
+  /** Host-owned row additions and mutations, when row actions wire any. */
+  readonly rowMutations: Signal<RowMutationsState<TRow>> | undefined;
   /** Asks before an action that declares a `confirm`. */
   readonly confirm: ConfirmHandler;
   /** What every toolbar entry receives: the labels. */
@@ -1255,33 +1161,15 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     const confirm: ConfirmHandler = (request) => {
       (this.confirm() ?? defaultConfirm)(request);
     };
-    const rowMutations = resources.use(
-      "mutations",
-      [
-        featureOptions.onAddRow,
-        featureOptions.onDuplicateRow,
-        featureOptions.onDeleteRow,
-        featureOptions.confirmDeleteRow,
-      ],
-      (injector) =>
-        injectRowMutations<TRow>(
-          computed(() => ({
-            onAddRow: featureOptions.onAddRow as (() => unknown) | undefined,
-            onDuplicateRow: featureOptions.onDuplicateRow as
-              ((row: TRow) => unknown) | undefined,
-            onDeleteRow: featureOptions.onDeleteRow as
-              ((row: TRow) => unknown) | undefined,
-            confirmDeleteRow: featureOptions.confirmDeleteRow as
-              boolean | undefined,
-            labels: table.labels(),
-          })),
-          injector
-        )
+    const rowMutations = rowMutationsFor<TRow>(
+      resources,
+      featureOptions,
+      table.labels
     );
     const rowActions = computed(() =>
       withRowMutationActions({
         host: featureOptions.rowActions as RowAction<TRow>[] | undefined,
-        mutations: rowMutations().actions,
+        mutations: rowMutations?.().actions ?? [],
         actionsHidden: table.layout().isHidden(ACTIONS_COLUMN_KEY),
       })
     );
@@ -1928,7 +1816,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       reportHeaderHeight,
     } = surface;
     const findBar = findBarFor(find, table.labels);
-    const commandPalette = commandPalettePropsFor({
+    // The palette and the menu bring their props' builders with them.
+    const commandPalette = featureImplementation(
+      features,
+      COMMAND_PALETTE_VIEW
+    )?.({
       commandPalette:
         featureOptions.commandPalette as CommandPaletteInjectOptions["commandPalette"],
       onPrint: featureOptions.onPrint as (() => void) | undefined,
@@ -1939,7 +1831,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       exportCsv: exporter,
       filterCount: computed(() => filtersRef()?.count() ?? 0),
     });
-    const contextMenu = mountedContextMenu({
+    const contextMenu = featureImplementation(
+      features,
+      CONTEXT_MENU_VIEW
+    )?.({
       contextMenu:
         featureOptions.contextMenu as TableContextMenuOptions<TRow>["contextMenu"],
       table,

@@ -201,6 +201,19 @@ describe("migrateV4Source", () => {
     expect(result.issues[0]?.message).toContain("toolbarEntry");
   });
 
+  it("reports the Angular view's optional regions", () => {
+    const result = migrateV4Source(
+      [
+        '<x [adaptSlotProps]="v.commandPalette()" />',
+        '<x [adaptSlotProps]="v.contextMenu()" />',
+        "@if (v.rowMutations().canAdd) {}",
+        "const features = [commandPalette()];",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 3]);
+  });
+
   it("reports the chrome's filter chips and the scroll reset's chrome argument", () => {
     const result = migrateV4Source(
       [

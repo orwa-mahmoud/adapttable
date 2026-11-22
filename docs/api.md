@@ -4178,7 +4178,9 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   `injectShortcuts` (`UseShortcutsOptions`) binds `DEFAULT_SHORTCUTS`, and
   `OPEN_PALETTE_COMMAND` is the chord that opens it.
   `ADAPTTABLE_PALETTE_OPEN` publishes a `PaletteOpenState` a toolbar button
-  reads.
+  reads. A kit's `commandPalette()` wraps the binding's feature with
+  `withCommandPaletteView`, which brings the code building the slot's props,
+  so a table without the palette carries none of it.
 - Context menu: `contextMenu()` arms right-click, Shift+F10, the menu key
   and a touch long press. `injectContextMenu` (`ContextMenuController`) is
   one target's open state. `injectTableContextMenu`
@@ -4189,6 +4191,8 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   closes the menu before it runs. `ADAPTTABLE_CONTEXT_MENU` publishes the
   `ContextMenuRegionHandlers` the table binds. `copyContextMenuSelection`
   copies or cuts the cell the menu was opened on when cell navigation is on.
+  A kit's `contextMenu()` wraps the binding's feature with
+  `withContextMenuView`, which brings the code building the menu's props.
 - Side panel: `sidePanel()` docks one or more panels beside the body.
   `SidePanelOptions` is the strip, which panel is open and which edge it
   sits on. `SidePanelPanel` is one panel: a key, an optional label and

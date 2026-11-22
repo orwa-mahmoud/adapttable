@@ -22,6 +22,10 @@ export {
   ADAPTTABLE_PALETTE_OPEN,
   type PaletteOpenState,
 } from "./actions/paletteState";
+export {
+  withCommandPaletteView,
+  withContextMenuView,
+} from "./actions/regionViews";
 export { rowActionsFor, type RowActionsOptions } from "./actions/rowActions";
 export {
   ADAPTTABLE_CONTEXT_MENU,

@@ -218,6 +218,10 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
     "The Angular table view draws one toolbar outlet with v.toolbarEntry(); controls read their feature's state (injectExportToolbar and the rest), and a kit adds SAVED_VIEWS_ENTRY and COLUMN_MENU_ENTRY beside its menus.",
   ],
   [
+    /\b(?:v|view\(\))\.(?:commandPalette|contextMenu|rowMutations)\(\)/g,
+    "The Angular view's commandPalette, contextMenu and rowMutations are undefined unless their feature is composed: draw them behind @if (v.commandPalette; as commandPalette), or read v.rowMutations?.(). A kit's own palette and menu features wrap the binding's with withCommandPaletteView and withContextMenuView.",
+  ],
+  [
     /\bchrome\.(?:mergedChips|activeFilterCount|filterDefs|filterRegistry)\b/g,
     "The table chrome no longer carries the filter chips: the filters feature publishes FILTER_CHIPS_STATE ({ chips, activeFilterCount }); read it with useFeatureState.",
   ],

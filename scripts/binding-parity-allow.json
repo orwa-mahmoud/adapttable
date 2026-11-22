@@ -2635,6 +2635,8 @@
         "injectRowDetail": "pending: shared-surface decision",
         "injectRowReorder": "pending: shared-surface decision",
         "injectTableContextMenu": "pending: shared-surface decision",
+        "withCommandPaletteView": "pending: shared-surface decision",
+        "withContextMenuView": "pending: shared-surface decision",
         "injectTableRowPinning": "pending: shared-surface decision",
         "injectTableSurfaceHost": "pending: shared-surface decision",
         "injectTree": "pending: shared-surface decision",

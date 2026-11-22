@@ -6575,11 +6575,11 @@ export interface TableTree<TRow> {
 export interface TableView<TRow> extends TableSurfaceView<TRow> {
     readonly batchBar: Signal<BatchEditBarProps<TRow> | undefined> | undefined;
     readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
-    readonly commandPalette: Signal<CommandPaletteInjectOptions>;
+    readonly commandPalette: Signal<CommandPaletteInjectOptions> | undefined;
     readonly confirm: ConfirmHandler;
     readonly contextMenu: Signal<TableContextMenuOptions<TRow> & {
         readonly children: (regionProps: Record<string, unknown>) => undefined;
-    }>;
+    }> | undefined;
     readonly filters: FiltersView | undefined;
     readonly findBar: Signal<FindBarProps> | undefined;
     readonly isCellFlashing: (rowId: string, columnKey: string) => boolean;
@@ -6587,7 +6587,7 @@ export interface TableView<TRow> extends TableSurfaceView<TRow> {
     readonly renderRowActions: Signal<RowActionsRenderer<TRow> | undefined>;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;
-    readonly rowMutations: Signal<RowMutationsState<TRow>>;
+    readonly rowMutations: Signal<RowMutationsState<TRow>> | undefined;
     readonly toolbarEntry: Signal<ToolbarEntrySlotProps>;
 }
 
@@ -6633,6 +6633,12 @@ export { watchClickedOpener }
 export { watchOverlayDismiss }
 
 export { windowGroupedEntries }
+
+// @public
+export function withCommandPaletteView(feature: AdaptTableFeature): AdaptTableFeature;
+
+// @public
+export function withContextMenuView(feature: AdaptTableFeature): AdaptTableFeature;
 
 // @public
 export function withFilterWidgets(feature: AdaptTableFeature, widgets: readonly FilterWidget[]): AdaptTableFeature;

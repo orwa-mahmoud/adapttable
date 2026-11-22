@@ -13,16 +13,20 @@
     (pointerup)="onMenuPointerUp()"
     (pointercancel)="onMenuPointerCancel()"
   >
-    <ng-container
-      [adaptSlot]="commandPaletteSlot"
-      [adaptSlotProps]="v.commandPalette()"
-      [adaptSlotTable]="v.table"
-    />
-    <ng-container
-      [adaptSlot]="contextMenuSlot"
-      [adaptSlotProps]="v.contextMenu()"
-      [adaptSlotTable]="v.table"
-    />
+    @if (v.commandPalette; as commandPalette) {
+      <ng-container
+        [adaptSlot]="commandPaletteSlot"
+        [adaptSlotProps]="commandPalette()"
+        [adaptSlotTable]="v.table"
+      />
+    }
+    @if (v.contextMenu; as contextMenu) {
+      <ng-container
+        [adaptSlot]="contextMenuSlot"
+        [adaptSlotProps]="contextMenu()"
+        [adaptSlotTable]="v.table"
+      />
+    }
     @if (v.findBar; as findBar) {
       <ng-container
         [adaptSlot]="findBarSlot"
@@ -150,12 +154,12 @@
         [adaptSlotProps]="v.toolbarEntry()"
         [adaptSlotTable]="v.table"
       />
-      @if (v.rowMutations().canAdd) {
+      @if (v.rowMutations?.().canAdd) {
         <button
           nz-button
           type="button"
           data-adapttable-part="add-row"
-          (click)="v.rowMutations().addRow()"
+          (click)="v.rowMutations?.().addRow()"
         >
           <span>{{ v.table.labels().addRow }}</span>
         </button>

@@ -181,6 +181,12 @@ const FEATURES = {
     call: "exportCsv()",
     present: ["coreExportCsv"],
   },
+  palette: {
+    factory: "commandPalette",
+    entry: "command-palette",
+    call: "commandPalette()",
+    present: ["commandPaletteView"],
+  },
   preset: {
     factory: "standardFeatures",
     entry: "preset",
@@ -206,6 +212,9 @@ const BASE_ABSENT = [
   "injectServerData",
   "createLazyServerSource",
   "serverQuery",
+  // The palette's and the menu's props are built by code their features bring.
+  "commandPaletteView",
+  "contextMenuView",
 ];
 
 /**
@@ -347,6 +356,7 @@ const CEILINGS = {
   "angular · unstyled + text filters": { own: 154, app: 266 },
   "angular · unstyled + virtualize": { own: 140, app: 250 },
   "angular · unstyled + exportCsv": { own: 142, app: 252 },
+  "angular · unstyled + palette": { own: 145, app: 256 },
   "angular · unstyled combination": { own: 156, app: 268 },
   "angular · unstyled + preset": { own: 173, app: 286 },
   "angular · lean table": { own: 56, app: 96 },
@@ -502,6 +512,7 @@ export function angularConsumerFixtures(kits = angularKits()) {
     ),
     feature("virtualize", "Native table with row virtualization"),
     feature("exportCsv", "Native table with CSV export"),
+    feature("palette", "Native table with the command palette"),
     rendered(
       "angular · unstyled combination",
       native,

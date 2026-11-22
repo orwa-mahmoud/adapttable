@@ -13730,6 +13730,8 @@
       "undoRedoToolbarProps",
       "virtualizeIgnoredOnPage",
       "watchClickedOpener",
+      "withCommandPaletteView",
+      "withContextMenuView",
       "withRowMutationActions",
       "CommandPaletteSurfaceProps",
       "resolveRenderer",
