@@ -290,7 +290,12 @@ export function GroupingPanelChrome<TRow>({
               label={label}
               level={index + 1}
               dragProps={state.chipDragProps(key)}
-              keyboardProps={state.chipKeyboardProps(key, label)}
+              keyboardProps={{
+                ...state.chipKeyboardProps(key, label),
+                // This render's labels, so the name and its language agree
+                // the moment the locale changes.
+                "aria-label": labels.moveGroupingColumn(label),
+              }}
               onRemove={() => state.remove(key)}
               removeLabel={labels.removeGroupingColumn(label)}
               data-adapttable-part="grouping-chip"

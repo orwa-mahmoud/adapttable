@@ -266,9 +266,12 @@ describe("GroupingPanelChrome", () => {
       screen.getByRole("combobox", { name: "Add grouping column" }),
       { target: { value: "budget" } }
     );
-    fireEvent.keyDown(screen.getByRole("button", { name: "Move Team" }), {
-      key: "ArrowRight",
-    });
+    fireEvent.keyDown(
+      screen.getByRole("button", { name: "Move Team grouping" }),
+      {
+        key: "ArrowRight",
+      }
+    );
     fireEvent.click(
       screen.getByRole("button", { name: "Remove Team from grouping" })
     );
@@ -712,7 +715,11 @@ describe("GroupingPanelChrome", () => {
       })
     );
     const zone = screen.getByLabelText("Drop here to remove grouping");
-    for (const name of ["Move Team", "Move Budget", "Move Person"]) {
+    for (const name of [
+      "Move Team grouping",
+      "Move Budget grouping",
+      "Move Person grouping",
+    ]) {
       const chip = screen.getByRole("button", { name });
       expect(
         chip.compareDocumentPosition(zone) & Node.DOCUMENT_POSITION_FOLLOWING
@@ -795,7 +802,9 @@ describe("GroupingPanelChrome", () => {
     );
 
     // The chip is the nearest target to the reader's hand.
-    fireEvent.dragOver(screen.getByRole("button", { name: "Move Budget" }));
+    fireEvent.dragOver(
+      screen.getByRole("button", { name: "Move Budget grouping" })
+    );
     expect(seen).toEqual(["over:1"]);
 
     // The caret inside it is the more precise answer, and it answered first.
@@ -837,10 +846,41 @@ describe("GroupingPanelChrome", () => {
     });
     mount(state);
 
-    fireEvent.keyDown(screen.getByRole("button", { name: "Move budget" }), {
-      key: "ArrowLeft",
-    });
+    fireEvent.keyDown(
+      screen.getByRole("button", { name: "Move Budget grouping" }),
+      { key: "ArrowLeft" }
+    );
     expect(moveBy).toHaveBeenCalledWith("budget", -1);
+  });
+
+  it("names a chip in the language the table renders in", () => {
+    const state = panelState({ groupBy: ["team"] });
+    const { rerender } = render(
+      <GroupingPanelChrome
+        state={state}
+        columns={columns}
+        labels={resolveLabels(undefined)}
+        mobile={false}
+        slots={slots}
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: "Move Team grouping" })
+    ).toBeInTheDocument();
+    rerender(
+      <GroupingPanelChrome
+        state={state}
+        columns={[{ key: "team", header: "الفريق" }]}
+        labels={resolveLabels({
+          moveGroupingColumn: (label) => `نقل تجميع ${label}`,
+        })}
+        mobile={false}
+        slots={slots}
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: "نقل تجميع الفريق" })
+    ).toBeInTheDocument();
   });
 
   it("uses select controls instead of drag targets on mobile", () => {
@@ -877,7 +917,7 @@ describe("GroupingPanelChrome", () => {
       { key: "code", header: null, mobileLabel: "Code label" },
     ]);
     expect(
-      screen.getByRole("button", { name: "Move Code label" })
+      screen.getByRole("button", { name: "Move Code label grouping" })
     ).toBeInTheDocument();
   });
 });
