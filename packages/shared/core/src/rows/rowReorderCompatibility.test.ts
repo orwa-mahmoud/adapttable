@@ -26,7 +26,7 @@ function drag(): RowDragEvent {
   };
 }
 
-it("keeps rows-only runtime dragging before the view publishes identity", () => {
+it("refuses a drag while the table has published no row identity", () => {
   const onRowReorder = vi.fn();
   const controller = createRowReorderController(
     rowReorderRuntimeOptions(
@@ -41,8 +41,28 @@ it("keeps rows-only runtime dragging before the view publishes identity", () => 
   );
   const event = drag();
   controller.dragStart(event, "a", 0);
+  expect(event.preventDefault).toHaveBeenCalledOnce();
+  expect(controller.getSnapshot().lifted).toBeNull();
   controller.drop(event, 2, rows[2]!, 0);
-  expect(onRowReorder).toHaveBeenCalledExactlyOnceWith(0, 2, rows[0]);
+  expect(onRowReorder).not.toHaveBeenCalled();
+});
+
+it("hands the host the row as it is now when it changed since the grab", () => {
+  let current = rows;
+  const onRowReorder = vi.fn();
+  const controller = createRowReorderController({
+    enabled: true,
+    onRowReorder,
+    labels: defaultRowReorderAnnouncements,
+    rowAt: (index) => current[index],
+    getRowId: (row) => row.id,
+  });
+  const event = drag();
+  controller.dragStart(event, "a", 0);
+  const updated = { id: "a" };
+  current = [updated, rows[1]!, rows[2]!];
+  controller.drop(event, 2, rows[2]!, 0);
+  expect(onRowReorder).toHaveBeenCalledExactlyOnceWith(0, 2, updated);
 });
 
 it("keeps identity validation when source indexes opt in without a session", () => {

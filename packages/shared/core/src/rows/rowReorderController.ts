@@ -369,8 +369,6 @@ export function createRowReorderController<TRow>(
       changed = true;
     });
   };
-  const ownsRows = (): boolean =>
-    options.session !== undefined || options.getRowIndex !== undefined;
   const sameRow = (expected: TRow, actual: TRow): boolean =>
     options.getRowId
       ? options.getRowId(expected) === options.getRowId(actual)
@@ -379,8 +377,7 @@ export function createRowReorderController<TRow>(
   const currentRowMatches = (
     expected: TRow,
     current: TRow | undefined
-  ): current is TRow =>
-    current !== undefined && (!ownsRows() || sameRow(expected, current));
+  ): current is TRow => current !== undefined && sameRow(expected, current);
 
   const announceMove = (request: RowMoveRequest<TRow>): void => {
     const { labels } = options;
@@ -513,12 +510,10 @@ export function createRowReorderController<TRow>(
       reset();
       return;
     }
-    // Legacy bindings can publish rows before they publish row identity.
-    // An owned session or source-index mapping opts into current-row identity.
-    if (ownsRows()) {
-      row = currentRow;
-      target = currentTarget;
-    }
+    // The rows as they are now: a rekey or an update since the grab hands
+    // the host the current objects.
+    row = currentRow;
+    target = currentTarget;
     const decision = options.resolveMove?.(row, target, position);
     if (decision?.kind === "reject") {
       batch(() => {
@@ -685,7 +680,7 @@ export function createRowReorderController<TRow>(
       const current = options.rowAt(localIndex);
       if (
         current === undefined ||
-        (ownsRows() && options.getRowId && options.getRowId(current) !== rowId)
+        (options.getRowId && options.getRowId(current) !== rowId)
       ) {
         event.preventDefault();
         return;
@@ -720,9 +715,7 @@ export function createRowReorderController<TRow>(
       const dragged = options.rowAt(lifted.from);
       if (
         dragged === undefined ||
-        (ownsRows() &&
-          options.getRowId &&
-          options.getRowId(dragged) !== lifted.rowId)
+        (options.getRowId && options.getRowId(dragged) !== lifted.rowId)
       ) {
         reset();
         return;

@@ -127,9 +127,14 @@ describe("rowReorder", () => {
   it("reads the rows the chrome published", () => {
     const handler = vi.fn();
     let state: RowReorderState<Row> | undefined;
-    mount(rowReorder<Row>(handler), undefined, (next) => {
-      state = next;
-    });
+    mount(
+      rowReorder<Row>(handler),
+      undefined,
+      (next) => {
+        state = next;
+      },
+      runtimeView({})
+    );
 
     // A drop carries the dragged row, which the provider looks up through the
     // runtime rather than holding itself.
