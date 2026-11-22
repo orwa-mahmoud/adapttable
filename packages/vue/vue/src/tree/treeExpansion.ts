@@ -29,7 +29,7 @@ export function useTreeExpansion(
       onChange: value.onExpandedIdsChange,
       enabled: value.enabled,
     };
-  });
+  }, true);
   const actions = treeExpansionActions(state.store);
   return computed(() => ({
     expandedIds: state.ids.value,

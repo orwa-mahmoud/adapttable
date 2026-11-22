@@ -9,11 +9,18 @@ import {
 import {
   type CachedSnapshot,
   cachedSnapshot,
+  commitRowRekeys,
   createFrontendSourceWith,
   sourceViewKey,
 } from "@adapttable/core/binding";
 import { createBasicTableEngine } from "@adapttable/core/engine";
-import { computed, type MaybeRefOrGetter, type ShallowRef, toValue } from "vue";
+import {
+  computed,
+  type MaybeRefOrGetter,
+  type ShallowRef,
+  toValue,
+  watch,
+} from "vue";
 
 import {
   type MaybeRefOrGetterOptional,
@@ -108,6 +115,17 @@ export function useFrontendDataWith<TRow>(
     if (active.value) return options.value.refetch?.();
   };
   const held = { current: null as CachedSnapshot<TableSource<TRow>> | null };
+  // A patched array's rekeys move the table's selection, pins and drafts as
+  // the data arrives. Watching before the snapshot exists puts this ahead of
+  // every reader of the rows, so an open editor finds its row under the new id.
+  watch(
+    () => toValue(options.value.data),
+    (data, previous) => {
+      const { store } = options.value;
+      if (store) commitRowRekeys(store, previous, data);
+    },
+    { flush: "sync" }
+  );
   const snapshot = useSourceSnapshot(
     (): TableSource<TRow> => {
       const value = options.value;

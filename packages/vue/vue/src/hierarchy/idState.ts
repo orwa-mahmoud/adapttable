@@ -1,6 +1,9 @@
 /** Vue ownership around core's controllable id store. */
 
-import { createControllableStore } from "@adapttable/core/binding";
+import {
+  createControllableStore,
+  rekeyRowIdSet,
+} from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,
@@ -15,7 +18,7 @@ import {
   useExternalStore,
   useScopeActivity,
 } from "../store";
-import { injectTableStore } from "../tableStore";
+import { followRowRekeys, injectTableStore } from "../tableStore";
 
 export interface HierarchyIdsOptions {
   readonly ids?: MaybeRefOrGetterOptional<readonly string[]>;
@@ -23,8 +26,16 @@ export interface HierarchyIdsOptions {
   readonly onChange?: (ids: string[]) => void;
   readonly enabled?: MaybeRefOrGetter<boolean>;
 }
-/** Internal adapter; the state machine and controlled semantics remain neutral. */
-export function useHierarchyIds(input: MaybeRefOrGetter<HierarchyIdsOptions>) {
+/**
+ * Internal adapter; the state machine and controlled semantics remain neutral.
+ *
+ * @param input - The ids and their owner.
+ * @param keyedByRow - Whether the ids are row ids, which follow a rekey.
+ */
+export function useHierarchyIds(
+  input: MaybeRefOrGetter<HierarchyIdsOptions>,
+  keyedByRow = false
+) {
   requireScope("useHierarchyIds");
   const options = computed(() => toValue(input));
   const active = useScopeActivity();
@@ -32,10 +43,16 @@ export function useHierarchyIds(input: MaybeRefOrGetter<HierarchyIdsOptions>) {
   onScopeDispose(() => {
     disposed = true;
   });
+  const table = injectTableStore();
   const store = createControllableStore<ReadonlySet<string>>(
     new Set(options.value.defaultIds),
-    { observeUncontrolled: true, store: injectTableStore() }
+    { observeUncontrolled: true, store: table }
   );
+  if (keyedByRow) {
+    followRowRekeys(table, (log) => {
+      store.update((ids) => rekeyRowIdSet(ids, log));
+    });
+  }
   watch(
     () => ({
       ids: toValue(options.value.ids),

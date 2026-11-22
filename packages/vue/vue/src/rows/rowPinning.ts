@@ -8,6 +8,7 @@ import {
 import {
   commitRowPin,
   createControllableStore,
+  rekeyRowPins,
   ROW_PIN_STORE_OPTIONS,
   rowPinActions,
   type RowPinningState,
@@ -41,7 +42,7 @@ export {
   PIN_TOP_ACTION_KEY,
   UNPIN_ROW_ACTION_KEY,
 } from "@adapttable/core";
-import { injectTableStore } from "../tableStore";
+import { followRowRekeys, injectTableStore } from "../tableStore";
 export type { RowPinningState } from "@adapttable/core/binding";
 export { rowPinSignature } from "@adapttable/core/binding";
 
@@ -64,10 +65,20 @@ export function useRowPinning<TRow>(
   onScopeDispose(() => {
     disposed = true;
   });
+  const table = injectTableStore();
   const store = createControllableStore<RowPinState>(EMPTY_ROW_PIN_STATE, {
     ...ROW_PIN_STORE_OPTIONS,
     observeUncontrolled: true,
-    store: injectTableStore(),
+    store: table,
+  });
+  // A pinned row keeps its side and place under its new id.
+  followRowRekeys(table, (log) => {
+    const current = options.value;
+    store.control({
+      value: toValue(current.pinnedRowIds),
+      onChange: current.onPinnedRowIdsChange,
+    });
+    store.update((pins) => rekeyRowPins(pins, log));
   });
   const own = useExternalStore(store);
   const enabled = computed(

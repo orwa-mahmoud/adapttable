@@ -23,6 +23,8 @@ import {
   LiveFeatureHost,
   overlayFeatureOptions,
   projectedGroupingSource,
+  rekeyedIds,
+  rekeyIdSet,
   resolveUrlAdapter,
   type RuntimeChromeInput,
   sameFilterTree,
@@ -134,7 +136,7 @@ import {
   rowReorderModelKey,
 } from "./specialized/contracts";
 import { useOptionFields, useScopeActivity } from "./store";
-import { TABLE_STORE } from "./tableStore";
+import { followRowRekeys, TABLE_STORE, withTableStore } from "./tableStore";
 import { useDataTable } from "./useDataTable";
 import { FULLSCREEN_MODEL, SAVED_VIEWS_MODEL } from "./viewControls/contracts";
 export type {
@@ -318,6 +320,15 @@ export function useDataTableShell<TRow>(
       source.value.capabilities?.fullDataset === true ||
       source.value.allFilteredRows !== undefined,
   }));
+  // A selected row stays selected under its new id; the host hears the move.
+  followRowRekeys<TRow>(tableStore, (log) => {
+    const current = selectionState.selectedIds.value;
+    const next = rekeyIdSet(
+      current,
+      rekeyedIds(log, (row: TRow) => resolved.value.rowKey(row))
+    );
+    if (next !== current) selectionState.replace([...next]);
+  });
   const selection = computed(() =>
     selectionEnabled.value ? selectionState : undefined
   );
@@ -1178,15 +1189,17 @@ export function useDataTableShell<TRow>(
     try {
       assertRequiredSlots(declarations.value, slotFills.value);
       publish();
-      lifecycle.reconcile(declarations.value);
-      const model = resolved.value.editingModel;
-      if (model) {
-        editingLifecycle ??= lifecycleOwner?.run(useEditingLifecycle);
-        // Another model is another implementation: it replaces this one.
-        editingLifecycle?.reconcile([
-          { id: "editing-model", mount: model, dependencies: [model] },
-        ]);
-      } else editingLifecycle?.reconcile([]);
+      withTableStore(tableStore, () => {
+        lifecycle.reconcile(declarations.value);
+        const model = resolved.value.editingModel;
+        if (model) {
+          editingLifecycle ??= lifecycleOwner?.run(useEditingLifecycle);
+          // Another model is another implementation: it replaces this one.
+          editingLifecycle?.reconcile([
+            { id: "editing-model", mount: model, dependencies: [model] },
+          ]);
+        } else editingLifecycle?.reconcile([]);
+      });
       publish();
     } finally {
       reconciling = false;

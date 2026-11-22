@@ -26,7 +26,7 @@ export function useRowExpansion(
       onChange: value.onExpandedRowIdsChange,
       enabled: value.enabled,
     };
-  });
+  }, true);
   const toggle = (id: string): void => {
     state.run(() => state.store.update((ids) => toggleId(ids, id)));
   };
