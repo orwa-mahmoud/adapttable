@@ -7,6 +7,7 @@ import { type DirtyCellState } from "@adapttable/core";
 import { createDirtyCellStore, dirtyCellView } from "@adapttable/core/editing";
 import { useContext, useMemo, useState, useSyncExternalStore } from "react";
 
+import { useRowRekeyMoves } from "../hooks/useRowRekeyMoves";
 import { TableStoreContext } from "../state/tableStoreContext";
 
 export type { DirtyCellState } from "@adapttable/core";
@@ -40,6 +41,7 @@ export function useDirtyCells(
     createDirtyCellStore(options, { store: table })
   );
   store.configure(options);
+  useRowRekeyMoves(store);
   const snapshot = useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,

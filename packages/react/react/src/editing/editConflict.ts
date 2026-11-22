@@ -28,6 +28,7 @@ export {
   liveRowChanged,
   resolveConflictChoice,
 } from "@adapttable/core/editing";
+import { useRowRekeyMoves } from "../hooks/useRowRekeyMoves";
 
 /**
  * Headless conflict state. Inert until `EditConflictState.reconcile`
@@ -37,6 +38,7 @@ export {
  */
 export function useEditConflict<TRow>(): EditConflictState<TRow> {
   const [store] = useState(createDeferredEditConflictStore<TRow>);
+  useRowRekeyMoves(store);
   const snapshot = useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,

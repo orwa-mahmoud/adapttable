@@ -24,6 +24,7 @@ export type {
   CellSaveStatus,
   FailedCellSave,
 } from "@adapttable/core";
+import { useRowRekeyMoves } from "../hooks/useRowRekeyMoves";
 import { TableStoreContext } from "../state/tableStoreContext";
 
 /**
@@ -61,6 +62,7 @@ export function useCellSaveState<TRow>(
     createCellSaveStore<TRow>(options, { store: table })
   );
   store.configure(options);
+  useRowRekeyMoves(store);
   const snapshot = useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,

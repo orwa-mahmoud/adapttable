@@ -9,11 +9,15 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import { DataTableShellView } from "../features/chromeBodyGate";
+import { dirtyIndicators, editing } from "../features/editing";
 import { bulkActions } from "../features/factories";
 import { FeatureProviders } from "../features/providers";
 import { rowDetail } from "../features/row-detail";
 import { rowPinning } from "../features/row-pinning";
-import { applyTableFeatures } from "../features/tableFeature";
+import {
+  applyTableFeatures,
+  type TableFeature,
+} from "../features/tableFeature";
 import {
   type DataTableShellResult,
   useDataTableShell,
@@ -36,7 +40,8 @@ function mount(
   extra: {
     selectedIds?: readonly string[];
     onSelectionChange?: (ids: string[]) => void;
-  } = {}
+  } = {},
+  more: readonly TableFeature<Row>[] = []
 ) {
   let view: DataTableShellResult<Row> | undefined;
   const features = [
@@ -45,6 +50,7 @@ function mount(
     ]),
     rowPinning(),
     rowDetail<Row>(() => null),
+    ...more,
   ];
   function Table({ rows }: { readonly rows: readonly Row[] }) {
     const props = applyTableFeatures({
@@ -118,6 +124,32 @@ describe("a rekeyed row", () => {
       );
     });
     expect(onSelectionChange).toHaveBeenLastCalledWith(["b2"]);
+  });
+
+  it("keeps an open cell editor, its draft and its dirty mark", () => {
+    const table = mount({}, [
+      editing<Row>(() => undefined, { onDirtyChange: () => undefined }),
+      dirtyIndicators(),
+    ]);
+    act(() => {
+      const edit = table.view.tableProps.editing;
+      edit?.state.begin("a", "name", "Ada", ROWS[0]);
+      edit?.state.setDraft("Typed");
+      edit?.dirty?.mark("a", "name");
+    });
+    expect(table.view.tableProps.editing?.dirty?.isDirty("a", "name")).toBe(
+      true
+    );
+    act(() => {
+      table.show(
+        applyRowPatches(ROWS, [rekeyRow<Row>("a", { id: "a2" })], rowKey)
+      );
+    });
+    const edit = table.view.tableProps.editing;
+    expect(edit?.state.active).toEqual({ rowId: "a2", columnKey: "name" });
+    expect(edit?.state.draft).toBe("Typed");
+    expect(edit?.dirty?.isDirty("a2", "name")).toBe(true);
+    expect(edit?.dirty?.isDirty("a", "name")).toBe(false);
   });
 
   it("leaves the state alone for new data that is not a patch of the old", () => {

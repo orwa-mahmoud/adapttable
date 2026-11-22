@@ -22,6 +22,7 @@ export type {
   CellEditKeyOutcome,
   CellEditNavigation,
 } from "@adapttable/core";
+import { useRowRekeyMoves } from "../hooks/useRowRekeyMoves";
 import { TableStoreContext } from "../state/tableStoreContext";
 export { beginCellEdit } from "@adapttable/core/editing";
 
@@ -55,6 +56,7 @@ export function useCellEditing<TRow = unknown>(
     createCellEditSession<TRow>(options, { store: table })
   );
   session.configure(options);
+  useRowRekeyMoves(session);
   const snapshot = useSyncExternalStore(
     session.subscribe,
     session.getSnapshot,

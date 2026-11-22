@@ -17,6 +17,7 @@ import {
 } from "@adapttable/core/editing";
 import { useContext, useMemo, useState, useSyncExternalStore } from "react";
 
+import { useRowRekeyMoves } from "../hooks/useRowRekeyMoves";
 import { TableStoreContext } from "../state/tableStoreContext";
 import type { EditEventHandler } from "./editingEvents";
 
@@ -82,6 +83,7 @@ export function useBatchEditing<TRow>(
     createBatchEditStore<TRow>(options, { store: table })
   );
   store.configure(options);
+  useRowRekeyMoves(store);
   const snapshot = useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,
