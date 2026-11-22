@@ -366,8 +366,11 @@ export function createFrontendSourceWith<TRow>(
   function forgetPatchedRows(log: RowPatchLog<TRow>): void {
     for (const event of log.events) {
       const gone = replacedRow(event);
-      if (gone !== undefined && searchCache.get(event.id)?.row === gone) {
-        searchCache.delete(event.id);
+      // A rekeyed row was cached under the id it had before.
+      const cachedAs =
+        event.type === "update" ? (event.from ?? event.id) : event.id;
+      if (gone !== undefined && searchCache.get(cachedAs)?.row === gone) {
+        searchCache.delete(cachedAs);
       }
     }
   }

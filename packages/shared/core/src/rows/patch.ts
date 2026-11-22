@@ -30,22 +30,47 @@
  */
 import type {
   InsertPatch,
+  RekeyPatch,
   RemovePatch,
   RowPatch,
   RowPatchEvent,
   RowPatchLog,
+  RowPatchOptions,
   UpdatePatch,
   UpsertPatch,
 } from "../contracts/rows";
 export type {
   InsertPatch,
+  RekeyPatch,
   RemovePatch,
   RowPatch,
   RowPatchEvent,
   RowPatchLog,
+  RowPatchOptions,
   UpdatePatch,
   UpsertPatch,
 } from "../contracts/rows";
+
+/**
+ * A rekey asked for an id another row already holds. The patches were not
+ * applied.
+ *
+ * @public
+ */
+export class RowIdConflictError extends Error {
+  /** The row's id before the rekey. */
+  readonly from: string;
+  /** The id another row already holds. */
+  readonly to: string;
+  constructor(from: string, to: string) {
+    super(
+      `Row "${from}" cannot take the id "${to}": another row already has it.`
+    );
+    this.name = "RowIdConflictError";
+    this.from = from;
+    this.to = to;
+  }
+}
 
 /**
  * Insert a row, optionally at a position.
@@ -66,6 +91,18 @@ export function updateRow<TRow>(
   changes: Partial<TRow>
 ): UpdatePatch<TRow> {
   return { type: "update", id, changes };
+}
+
+/**
+ * Give one row a new id, merging `changes` that carry it.
+ *
+ * @public
+ */
+export function rekeyRow<TRow>(
+  id: string,
+  changes: Partial<TRow>
+): RekeyPatch<TRow> {
+  return { type: "rekey", id, changes };
 }
 
 /**
@@ -253,7 +290,8 @@ function applyOne<TRow>(
   list: TRow[],
   patch: RowPatch<TRow>,
   getRowId: (row: TRow) => string,
-  ids: RowIds<TRow>
+  ids: RowIds<TRow>,
+  options: RowPatchOptions
 ): RowPatchEvent<TRow> | undefined {
   if (patch.type === "insert") {
     const index = insertIndex(patch.at, list.length);
@@ -295,10 +333,66 @@ function applyOne<TRow>(
   // per-row memo downstream would be invalidated for no reason.
   if (alreadyApplied(existing, patch.changes)) return undefined;
   const next = { ...existing, ...patch.changes };
+  const nextId = getRowId(next);
+  if (nextId === patch.id) {
+    list[index] = next;
+    ids.replaced(index, next);
+    return { type: "update", id: patch.id, prev: existing, next, index };
+  }
+  if (patch.type === "update" && options.rekeyUpdates !== true) {
+    throw new Error(
+      `updateRow("${patch.id}") gave the row the id "${nextId}". An update keeps the id; change it with rekeyRow("${patch.id}", changes).`
+    );
+  }
+  if (ids.find(nextId) !== -1) throw new RowIdConflictError(patch.id, nextId);
   list[index] = next;
-  // The changes may hold a new id; a later patch looks the row up by it.
+  // A later patch looks the row up by its new id.
   ids.replaced(index, next);
-  return { type: "update", id: patch.id, prev: existing, next, index };
+  return {
+    type: "update",
+    id: nextId,
+    from: patch.id,
+    prev: existing,
+    next,
+    index,
+  };
+}
+
+/**
+ * The ids a patch log changed, from each row's id before the log to its id
+ * after: chained rekeys collapse to one entry, a row rekeyed back drops out,
+ * and a rekeyed row the log then removed is not listed.
+ *
+ * @param log - The log the patches produced.
+ * @returns Old id to new id.
+ *
+ * @public
+ */
+export function rowRekeys<TRow>(
+  log: Pick<RowPatchLog<TRow>, "events">
+): ReadonlyMap<string, string> {
+  const rekeys = new Map<string, string>();
+  const originOf = new Map<string, string>();
+  for (const event of log.events) {
+    if (event.type === "remove") {
+      const origin = originOf.get(event.id);
+      if (origin !== undefined) {
+        rekeys.delete(origin);
+        originOf.delete(event.id);
+      }
+      continue;
+    }
+    if (event.type !== "update" || event.from === undefined) continue;
+    const origin = originOf.get(event.from) ?? event.from;
+    originOf.delete(event.from);
+    if (origin === event.id) {
+      rekeys.delete(origin);
+      continue;
+    }
+    rekeys.set(origin, event.id);
+    originOf.set(event.id, origin);
+  }
+  return rekeys;
 }
 
 /**
@@ -311,15 +405,17 @@ function applyOne<TRow>(
  * @param rows - The current rows.
  * @param patches - The changes to apply, in order.
  * @param getRowId - How a row's id is derived; the table's own `rowKey`.
+ * @param options - How the patches are read.
  *
  * @public
  */
 export function applyRowPatches<TRow>(
   rows: readonly TRow[],
   patches: readonly RowPatch<TRow>[],
-  getRowId: (row: TRow) => string
+  getRowId: (row: TRow) => string,
+  options: RowPatchOptions = {}
 ): readonly TRow[] {
-  return applyRowPatchesWithLog(rows, patches, getRowId).rows;
+  return applyRowPatchesWithLog(rows, patches, getRowId, options).rows;
 }
 
 /**
@@ -333,20 +429,23 @@ export function applyRowPatches<TRow>(
  * @param rows - The current rows.
  * @param patches - The changes to apply, in order.
  * @param getRowId - How a row's id is derived; the table's own `rowKey`.
+ * @param options - How the patches are read.
  *
  * @public
  */
 export function applyRowPatchesWithLog<TRow>(
   rows: readonly TRow[],
   patches: readonly RowPatch<TRow>[],
-  getRowId: (row: TRow) => string
+  getRowId: (row: TRow) => string,
+  options: RowPatchOptions = {}
 ): RowPatchLog<TRow> {
   const working = [...rows];
   const ids = rowIds(working, getRowId);
   const events: RowPatchEvent<TRow>[] = [];
   for (const patch of patches) {
-    // Every patch runs, so a later one acts on what an earlier one did.
-    const event = applyOne(working, patch, getRowId, ids);
+    // Every patch runs, so a later one acts on what an earlier one did. A
+    // refused patch throws before the caller's rows are touched.
+    const event = applyOne(working, patch, getRowId, ids, options);
     if (event) events.push(event);
   }
   const log: RowPatchLog<TRow> = {

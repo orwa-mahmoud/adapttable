@@ -2009,6 +2009,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "rekeyRow",
+      "kind": "runtime",
+      "module": "rows/patch.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "rows/patch.ts#rekeyRow",
+      "subpaths": ["."]
+    },
+    {
       "name": "RELATIVE_PRESET_LABEL_KEYS",
       "kind": "runtime",
       "module": "filters/relativeDates.ts",
@@ -2251,6 +2262,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "RowIdConflictError",
+      "kind": "runtime",
+      "module": "rows/patch.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "rows/patch.ts#RowIdConflictError",
+      "subpaths": ["."]
+    },
+    {
       "name": "rowIsDirty",
       "kind": "runtime",
       "module": "rows/rowPresentation.ts",
@@ -2281,6 +2303,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "rows/rowActionsRuntime.ts#rowPinningControl",
+      "subpaths": ["."]
+    },
+    {
+      "name": "rowRekeys",
+      "kind": "runtime",
+      "module": "rows/patch.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "rows/patch.ts#rowRekeys",
       "subpaths": ["."]
     },
     {
@@ -25664,6 +25697,17 @@
       "subpaths": ["./stream"]
     },
     {
+      "name": "STREAMED_ROW_PATCHES",
+      "kind": "runtime",
+      "module": "stream/parse.ts",
+      "audience": "app",
+      "path": "./stream",
+      "forward": true,
+      "deprecated": false,
+      "identity": "stream/parse.ts#STREAMED_ROW_PATCHES",
+      "subpaths": ["./stream"]
+    },
+    {
       "name": "InsertPatch",
       "kind": "type",
       "module": "contracts/rows.ts",
@@ -25683,6 +25727,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "stream/connect.ts#OpenRowPatchStreamOptions",
+      "subpaths": [".", "./stream"]
+    },
+    {
+      "name": "RekeyPatch",
+      "kind": "type",
+      "module": "contracts/rows.ts",
+      "audience": "app",
+      "path": "./stream",
+      "forward": true,
+      "deprecated": false,
+      "identity": "contracts/rows.ts#RekeyPatch",
       "subpaths": [".", "./stream"]
     },
     {
@@ -25717,6 +25772,17 @@
       "deprecated": false,
       "identity": "contracts/rows.ts#RowPatchEvent",
       "subpaths": [".", "./binding", "./stream"]
+    },
+    {
+      "name": "RowPatchOptions",
+      "kind": "type",
+      "module": "contracts/rows.ts",
+      "audience": "app",
+      "path": "./stream",
+      "forward": true,
+      "deprecated": false,
+      "identity": "contracts/rows.ts#RowPatchOptions",
+      "subpaths": [".", "./stream"]
     },
     {
       "name": "RowPatchStreamHandle",

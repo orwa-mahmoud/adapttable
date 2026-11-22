@@ -2404,7 +2404,9 @@
         "PrintToolbar": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
         "SAVED_VIEWS_TOOLBAR_STATE": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
         "UNDO_REDO_TOOLBAR_STATE": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
-        "UndoRedoToolbar": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry"
+        "UndoRedoToolbar": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "rekeyRow": "Angular's main entry re-exports core's row-patch helpers beside applyRowPatches and updateRow; React and Vue hosts import them from @adapttable/core",
+        "RowIdConflictError": "Angular's main entry re-exports core's row-patch helpers beside applyRowPatches and updateRow; React and Vue hosts import them from @adapttable/core"
       },
       "adapter": {
         "ADAPTTABLE_CONTEXT_MENU": "pending: shared-surface decision",

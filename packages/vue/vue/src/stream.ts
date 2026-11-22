@@ -15,6 +15,7 @@ import {
 import {
   openRowPatchStream,
   parseRowPatchFrame,
+  STREAMED_ROW_PATCHES,
 } from "@adapttable/core/stream";
 import {
   computed,
@@ -128,7 +129,12 @@ export function useRowPatchStream<TRow>(
           const patches = (latest.parse ?? parseRowPatchFrame<TRow>)(frame);
           if (!patches.length) return;
           latest.onPatch((rows) =>
-            applyRowPatches(rows, patches, latest.getRowId)
+            applyRowPatches(
+              rows,
+              patches,
+              latest.getRowId,
+              STREAMED_ROW_PATCHES
+            )
           );
           if (current && !disposed) latest.onPatches?.(patches);
         },

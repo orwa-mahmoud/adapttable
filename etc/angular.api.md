@@ -142,6 +142,7 @@ import { RangeOp } from '@adapttable/core';
 import { ReconcileLiveBatchEdit } from '@adapttable/core';
 import { ReconcileLiveEdit } from '@adapttable/core';
 import { ReconcileLiveRowEdit } from '@adapttable/core';
+import { rekeyRow } from '@adapttable/core';
 import { RelativePreset } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
 import { RowActionsLayout } from '@adapttable/core';
@@ -152,6 +153,7 @@ import { RowEditingState } from '@adapttable/core';
 import { RowEditStoreOptions } from '@adapttable/core/editing';
 import { RowExpansionState } from '@adapttable/core/binding';
 import { RowHeight } from '@adapttable/core';
+import { RowIdConflictError } from '@adapttable/core';
 import { RowMutationsState } from '@adapttable/core/binding';
 import { RowPairMeasurer } from '@adapttable/core/binding';
 import { RowPatchEvent } from '@adapttable/core';
@@ -1464,6 +1466,8 @@ export { ReconcileLiveEdit }
 
 export { ReconcileLiveRowEdit }
 
+export { rekeyRow }
+
 export { RelativePreset }
 
 // @public
@@ -1522,6 +1526,8 @@ export interface RowExpansionOptions {
 export { RowExpansionState }
 
 export { RowHeight }
+
+export { RowIdConflictError }
 
 // @public
 export interface RowMutationHandlers<TRow> {

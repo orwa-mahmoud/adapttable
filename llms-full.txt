@@ -17070,6 +17070,27 @@ export function People({ rows, columns, setRows }) {
 `insertRow`, `updateRow`, `upsertRow` and `removeRow` build the batch. A later
 patch sees what an earlier one did.
 
+## Row identity
+
+An update keeps the row's id. `updateRow` whose changes would give the row a
+new id is refused with an error that names `rekeyRow`. To change an id, rekey
+the row:
+
+```ts
+setRows(applyRowPatches(rows, [rekeyRow("draft-7", { id: "INV-1042" })], byId));
+```
+
+The row keeps its place, and a later patch in the same batch finds it by the
+new id. A new id another row already holds throws `RowIdConflictError`
+(`from`, `to`) and leaves the rows as they were; an id no row holds does
+nothing. `rowRekeys(log)` reads, from a `RowPatchLog`, each row's id before the
+batch and after it, with chained rekeys collapsed.
+
+Patches stored or sent as id-changing updates read as rekeys with
+`applyRowPatches(rows, patches, byId, { rekeyUpdates: true })`. A row patch
+stream already applies its frames that way (`STREAMED_ROW_PATCHES`), and it
+accepts `{ type: "rekey", id, changes }` frames.
+
 ## Incremental re-evaluation
 
 Hand the array `applyRowPatches` returns back as `data` — do not spread it.
@@ -18797,11 +18818,15 @@ Building blocks for columns, rows and queries:
   [columns](./columns.md).
 - `aggregate(spec, options)` — builds the `summaryRow` / `groupAggregates`
   mapper. See [row grouping](./row-grouping.md).
-- `applyRowPatches(rows, patches, getRowId)` with `insertRow` / `updateRow` /
-  `upsertRow` / `removeRow` — apply changes without a refetch, preserving row
-  identity. `applyRowPatchesWithLog` returns the `RowPatchLog` /
-  `RowPatchEvent`s; `rowPatchLog` reads the log `applyRowPatches` attaches
-  (spreading the array drops it). See [cell editing](./cell-editing.md).
+- `applyRowPatches(rows, patches, getRowId, options)` with `insertRow` /
+  `updateRow` / `upsertRow` / `removeRow` / `rekeyRow` (`RekeyPatch`) — apply
+  changes without a refetch, preserving row identity. An update keeps the id;
+  `rekeyRow` changes it, and an id another row holds throws
+  `RowIdConflictError`. `RowPatchOptions.rekeyUpdates` reads id-changing
+  updates as rekeys. `applyRowPatchesWithLog` returns the `RowPatchLog` /
+  `RowPatchEvent`s (a rekeyed row's update carries `from`); `rowRekeys(log)`
+  is the old-to-new id map; `rowPatchLog` reads the log `applyRowPatches`
+  attaches (spreading the array drops it). See [realtime](./realtime.md#row-identity).
 - `tableQueryKey(query, options)` / `tableQueryBaseKey(query, options)` —
   stable cache keys for TanStack Query or SWR. See
   [data tiers](./data-tiers.md).
@@ -19093,7 +19118,8 @@ row patches and go back through the host's own setter.
 `RowPatchStreamReconnect`) is the connector without React, over a
 `StreamSocket` / `StreamSocketEvent` a host can supply itself.
 `parseRowPatchFrame` reads the table's patch shape as JSON and drops
-anything malformed. `RowPatchStreamStatus` is what the connection is
+anything malformed; `STREAMED_ROW_PATCHES` is how a frame's patches are
+applied, reading an id-changing update as a rekey. `RowPatchStreamStatus` is what the connection is
 doing, with `isStreamLive` and `isStreamSettled` as the two questions
 worth asking. `useChangedCellFlash` (`UseChangedCellFlashOptions` in,
 `ChangedCellFlashState` out) tracks the cells a patch just changed so
@@ -24335,6 +24361,7 @@ of 380 kB.
 | React `TableChrome.groupingPanel`, the shell's `groupingPanelProps` and `DataTableShellGroupingPanelProps`                                                                                                                                                                                                                                | The grouping panel publishes `GROUPING_PANEL_VIEW_STATE`; the finished shell's `tableProps.groupingPanel` carries it, and the strip's props are `GroupingPanelSlotProps`                                                                                                                                    |
 | React `TableChrome.hasRowReorder` and `rowReorder`                                                                                                                                                                                                                                                                                        | Row reorder publishes `ROW_REORDER`; the finished shell carries `hasRowReorder` and `tableProps.rowReorder`                                                                                                                                                                                                 |
 | A feature `setup` that returns a cleanup, or calls `host.onDispose`                                                                                                                                                                                                                                                                       | `setup` only registers; acquire the resource in `mount(context)` and return its cleanup there. `context.feature()` is the latest declaration                                                                                                                                                                |
+| An `updateRow` whose changes give the row a new id                                                                                                                                                                                                                                                                                        | `rekeyRow(id, changes)`; a stored or streamed id-changing update reads as a rekey with `applyRowPatches(…, { rekeyUpdates: true })`, which row patch streams already use                                                                                                                                    |
 | A mounted feature replaced by declaring it again with new options                                                                                                                                                                                                                                                                         | The resource is kept and reads `context.feature()`; change its `dependencies` or its id to replace it                                                                                                                                                                                                       |
 | `KitPagerView.chrome`                                                                                                                                                                                                                                                                                                                     | `KitPagerView.tableProps` (`grouping`)                                                                                                                                                                                                                                                                      |
 | Core `BodyChrome` with optional `grouping` and `tree`                                                                                                                                                                                                                                                                                     | Both keys are required; pass `undefined` for an ungrouped body                                                                                                                                                                                                                                              |

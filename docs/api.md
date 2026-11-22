@@ -1541,11 +1541,15 @@ Building blocks for columns, rows and queries:
   [columns](./columns.md).
 - `aggregate(spec, options)` — builds the `summaryRow` / `groupAggregates`
   mapper. See [row grouping](./row-grouping.md).
-- `applyRowPatches(rows, patches, getRowId)` with `insertRow` / `updateRow` /
-  `upsertRow` / `removeRow` — apply changes without a refetch, preserving row
-  identity. `applyRowPatchesWithLog` returns the `RowPatchLog` /
-  `RowPatchEvent`s; `rowPatchLog` reads the log `applyRowPatches` attaches
-  (spreading the array drops it). See [cell editing](./cell-editing.md).
+- `applyRowPatches(rows, patches, getRowId, options)` with `insertRow` /
+  `updateRow` / `upsertRow` / `removeRow` / `rekeyRow` (`RekeyPatch`) — apply
+  changes without a refetch, preserving row identity. An update keeps the id;
+  `rekeyRow` changes it, and an id another row holds throws
+  `RowIdConflictError`. `RowPatchOptions.rekeyUpdates` reads id-changing
+  updates as rekeys. `applyRowPatchesWithLog` returns the `RowPatchLog` /
+  `RowPatchEvent`s (a rekeyed row's update carries `from`); `rowRekeys(log)`
+  is the old-to-new id map; `rowPatchLog` reads the log `applyRowPatches`
+  attaches (spreading the array drops it). See [realtime](./realtime.md#row-identity).
 - `tableQueryKey(query, options)` / `tableQueryBaseKey(query, options)` —
   stable cache keys for TanStack Query or SWR. See
   [data tiers](./data-tiers.md).
@@ -1837,7 +1841,8 @@ row patches and go back through the host's own setter.
 `RowPatchStreamReconnect`) is the connector without React, over a
 `StreamSocket` / `StreamSocketEvent` a host can supply itself.
 `parseRowPatchFrame` reads the table's patch shape as JSON and drops
-anything malformed. `RowPatchStreamStatus` is what the connection is
+anything malformed; `STREAMED_ROW_PATCHES` is how a frame's patches are
+applied, reading an id-changing update as a rekey. `RowPatchStreamStatus` is what the connection is
 doing, with `isStreamLive` and `isStreamSettled` as the two questions
 worth asking. `useChangedCellFlash` (`UseChangedCellFlashOptions` in,
 `ChangedCellFlashState` out) tracks the cells a patch just changed so

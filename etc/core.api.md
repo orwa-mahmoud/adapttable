@@ -185,13 +185,13 @@ export interface AllMatchingScope {
 export function allPinnedSummaryEntries<TRow>(pinnedRows: PinnedRows<TRow> | undefined): readonly PinnedSummaryEntry<TRow>[];
 
 // @public
-export function applyRowPatches<TRow>(rows: readonly TRow[], patches: readonly RowPatch<TRow>[], getRowId: (row: TRow) => string): readonly TRow[];
+export function applyRowPatches<TRow>(rows: readonly TRow[], patches: readonly RowPatch<TRow>[], getRowId: (row: TRow) => string, options?: RowPatchOptions): readonly TRow[];
 
 // @public
-export function applyRowPatchesToView<TRow>(view: IncrementalView<TRow>, patches: readonly RowPatch<TRow>[]): IncrementalView<TRow>;
+export function applyRowPatchesToView<TRow>(view: IncrementalView<TRow>, patches: readonly RowPatch<TRow>[], options?: RowPatchOptions): IncrementalView<TRow>;
 
 // @public
-export function applyRowPatchesWithLog<TRow>(rows: readonly TRow[], patches: readonly RowPatch<TRow>[], getRowId: (row: TRow) => string): RowPatchLog<TRow>;
+export function applyRowPatchesWithLog<TRow>(rows: readonly TRow[], patches: readonly RowPatch<TRow>[], getRowId: (row: TRow) => string, options?: RowPatchOptions): RowPatchLog<TRow>;
 
 // @public
 export function applyRowPatchLogToView<TRow>(view: IncrementalView<TRow>, log: RowPatchLog<TRow>): IncrementalView<TRow>;
@@ -3797,6 +3797,16 @@ export interface ReconcileLiveRowEdit<TRow> {
 }
 
 // @public
+export interface RekeyPatch<TRow> {
+    changes: Partial<TRow>;
+    id: string;
+    type: "rekey";
+}
+
+// @public
+export function rekeyRow<TRow>(id: string, changes: Partial<TRow>): RekeyPatch<TRow>;
+
+// @public
 export const RELATIVE_NAMED: readonly ["today", "yesterday", "tomorrow", "thisWeek", "thisMonth", "previousMonth"];
 
 // @public
@@ -4131,6 +4141,13 @@ export interface RowGroupRef {
 export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
 
 // @public
+export class RowIdConflictError extends Error {
+    constructor(from: string, to: string);
+    readonly from: string;
+    readonly to: string;
+}
+
+// @public
 export function rowIsDirty<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): boolean;
 
 // @public
@@ -4185,7 +4202,7 @@ export interface RowPairMeasurer {
 }
 
 // @public
-export type RowPatch<TRow> = InsertPatch<TRow> | UpdatePatch<TRow> | UpsertPatch<TRow> | RemovePatch;
+export type RowPatch<TRow> = InsertPatch<TRow> | UpdatePatch<TRow> | UpsertPatch<TRow> | RemovePatch | RekeyPatch<TRow>;
 
 // @public
 export type RowPatchEvent<TRow> = {
@@ -4201,6 +4218,7 @@ export type RowPatchEvent<TRow> = {
 } | {
     type: "update";
     id: string;
+    from?: string;
     prev: TRow;
     next: TRow;
     index: number;
@@ -4214,6 +4232,11 @@ export interface RowPatchLog<TRow> {
 
 // @public
 export function rowPatchLog<TRow>(rows: readonly TRow[]): RowPatchLog<TRow> | undefined;
+
+// @public
+export interface RowPatchOptions {
+    readonly rekeyUpdates?: boolean;
+}
 
 // @public
 export interface RowPatchStreamHandle {
@@ -4269,6 +4292,9 @@ export interface RowPinState {
     readonly bottom: readonly string[];
     readonly top: readonly string[];
 }
+
+// @public
+export function rowRekeys<TRow>(log: Pick<RowPatchLog<TRow>, "events">): ReadonlyMap<string, string>;
 
 // @public
 export type RowReorderActions<TRow> = Pick<RowReorderController<TRow>, "dragStart" | "dragEnd" | "dragOver" | "drop" | "keyDown" | "moveBy" | "moveMenu" | "selectMoveTarget" | "confirmMove" | "cancelMove">;

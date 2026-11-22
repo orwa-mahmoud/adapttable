@@ -20,7 +20,8 @@ export interface InsertPatch<TRow> {
 }
 
 /**
- * Merge changes into the row with this id. Absent id: nothing happens.
+ * Merge changes into the row with this id. Absent id: nothing happens. An
+ * update keeps the row's id; a `RekeyPatch` changes it.
  *
  * @public
  */
@@ -58,12 +59,46 @@ export interface RemovePatch {
 }
 
 /**
+ * Give the row with this id a new id: merge `changes`, which carry the new
+ * id. Absent id: nothing happens. A new id another row already holds is
+ * refused with `RowIdConflictError` and the row set is left as it was.
+ *
+ * @public
+ */
+export interface RekeyPatch<TRow> {
+  /** Discriminant for the patch union. */
+  type: "rekey";
+  /** The row's current id. */
+  id: string;
+  /** Fields to merge, the new id among them. */
+  changes: Partial<TRow>;
+}
+
+/**
  * One change to a row set.
  *
  * @public
  */
 export type RowPatch<TRow> =
-  InsertPatch<TRow> | UpdatePatch<TRow> | UpsertPatch<TRow> | RemovePatch;
+  | InsertPatch<TRow>
+  | UpdatePatch<TRow>
+  | UpsertPatch<TRow>
+  | RemovePatch
+  | RekeyPatch<TRow>;
+
+/**
+ * How {@link RowPatch}es are read.
+ *
+ * @public
+ */
+export interface RowPatchOptions {
+  /**
+   * Read an update whose changes give the row a new id as a rekey, for
+   * patches stored or sent as id-changing updates. Without it, such an
+   * update is refused.
+   */
+  readonly rekeyUpdates?: boolean;
+}
 
 /**
  * One mutation `applyRowPatchesWithLog` actually performed.
@@ -77,7 +112,16 @@ export type RowPatch<TRow> =
 export type RowPatchEvent<TRow> =
   | { type: "insert"; id: string; row: TRow; index: number }
   | { type: "remove"; id: string; row: TRow; index: number }
-  | { type: "update"; id: string; prev: TRow; next: TRow; index: number };
+  | {
+      type: "update";
+      /** The row's id after the event. */
+      id: string;
+      /** The id the row had before, when the event rekeyed it. */
+      from?: string;
+      prev: TRow;
+      next: TRow;
+      index: number;
+    };
 
 /**
  * The result of applying patches, plus the events an incremental view needs

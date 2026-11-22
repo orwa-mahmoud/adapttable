@@ -17,6 +17,7 @@ import {
 import {
   openRowPatchStream,
   parseRowPatchFrame,
+  STREAMED_ROW_PATCHES,
 } from "@adapttable/core/stream";
 import {
   assertInInjectionContext,
@@ -110,7 +111,9 @@ export function injectRowPatchStream<TRow>(
     const parse = options.parse ?? parseRowPatchFrame<TRow>;
     const patches = parse(frame);
     if (patches.length === 0) return;
-    options.onPatch((rows) => applyRowPatches(rows, patches, options.getRowId));
+    options.onPatch((rows) =>
+      applyRowPatches(rows, patches, options.getRowId, STREAMED_ROW_PATCHES)
+    );
     options.onPatches?.(patches);
   };
 

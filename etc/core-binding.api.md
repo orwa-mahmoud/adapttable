@@ -9452,6 +9452,7 @@ export type RowPatchEvent<TRow> = {
 } | {
     type: "update";
     id: string;
+    from?: string;
     prev: TRow;
     next: TRow;
     index: number;

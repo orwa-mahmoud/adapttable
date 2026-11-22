@@ -12,6 +12,7 @@ import {
   applyRowPatchesWithLog,
   type InsertPatch,
   insertRow,
+  rekeyRow,
   type RemovePatch,
   removeRow,
   type RowPatch,
@@ -246,6 +247,8 @@ describe("applyRowPatchesWithLog id lookup", () => {
     if (patch.type === "insert") return referenceInsert(list, patch);
     if (patch.type === "remove") return referenceRemove(list, patch);
     if (patch.type === "upsert") return referenceUpsert(list, patch);
+    if (patch.type === "rekey")
+      throw new Error("The reference covers the patches it was written for");
     return referenceUpdate(list, patch);
   }
 
@@ -369,11 +372,11 @@ describe("applyRowPatchesWithLog id lookup", () => {
     expect(calls).toBe(3);
   });
 
-  it("finds a row by the id an earlier update gave it", () => {
+  it("finds a row by the id an earlier rekey gave it", () => {
     const rows = items(5);
     const log = applyRowPatchesWithLog(
       rows,
-      [updateRow<Item>("3", { id: "x" }), updateRow<Item>("x", { v: 9 })],
+      [rekeyRow<Item>("3", { id: "x" }), updateRow<Item>("x", { v: 9 })],
       (row) => row.id
     );
     expect(log.rows[3]).toEqual({ id: "x", v: 9 });

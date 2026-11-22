@@ -34795,6 +34795,14 @@
       "behavior": ""
     },
     {
+      "export": "RekeyPatch",
+      "currentImport": "@adapttable/core/stream",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/stream",
+      "behavior": ""
+    },
+    {
       "export": "RemovePatch",
       "currentImport": "@adapttable/core/stream",
       "kind": "type",
@@ -34812,6 +34820,14 @@
     },
     {
       "export": "RowPatchEvent",
+      "currentImport": "@adapttable/core/stream",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/stream",
+      "behavior": ""
+    },
+    {
+      "export": "RowPatchOptions",
       "currentImport": "@adapttable/core/stream",
       "kind": "type",
       "class": "neutral-model",
@@ -34838,6 +34854,14 @@
       "export": "RowPatchStreamStatus",
       "currentImport": "@adapttable/core/stream",
       "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/stream",
+      "behavior": ""
+    },
+    {
+      "export": "STREAMED_ROW_PATCHES",
+      "currentImport": "@adapttable/core/stream",
+      "kind": "value",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/stream",
       "behavior": ""
@@ -39795,6 +39819,22 @@
       "behavior": ""
     },
     {
+      "export": "RekeyPatch",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "rekeyRow",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "RELATIVE_NAMED",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -40251,6 +40291,14 @@
       "behavior": ""
     },
     {
+      "export": "RowIdConflictError",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "rowIsDirty",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -40347,6 +40395,14 @@
       "behavior": ""
     },
     {
+      "export": "RowPatchOptions",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "RowPatchStreamHandle",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -40399,6 +40455,14 @@
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "rowRekeys",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },

@@ -21,7 +21,7 @@ import type {
   SortDirection,
 } from "../contracts/columns";
 import type { QueryFilterGroup, SortLevel } from "../contracts/query";
-import type { RowPatch, RowPatchLog } from "../contracts/rows";
+import type { RowPatch, RowPatchLog, RowPatchOptions } from "../contracts/rows";
 import type { DisplayValue } from "../display";
 import { engineSearchText } from "../engine/searchText";
 import type { GroupAggregateOps } from "../grouping/groupRowLayout";
@@ -255,17 +255,24 @@ export function createIncrementalView<TRow>(
  * @typeParam TRow - The row type.
  * @param view - The snapshot to continue.
  * @param patches - The changes to apply, in order.
+ * @param options - How the patches are read.
  *
  * @public
  */
 export function applyRowPatchesToView<TRow>(
   view: IncrementalView<TRow>,
-  patches: readonly RowPatch<TRow>[]
+  patches: readonly RowPatch<TRow>[],
+  options: RowPatchOptions = {}
 ): IncrementalView<TRow> {
   const evaluation = evaluated(view, "applyRowPatchesToView");
   return applyPatchLog(
     view,
-    applyRowPatchesWithLog(view.rows, patches, evaluation.config.getRowId)
+    applyRowPatchesWithLog(
+      view.rows,
+      patches,
+      evaluation.config.getRowId,
+      options
+    )
   );
 }
 

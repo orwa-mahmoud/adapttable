@@ -37,13 +37,20 @@ export interface OpenRowPatchStreamOptions {
 export function parseRowPatchFrame<TRow>(frame: string): readonly RowPatch<TRow>[];
 
 // @public
+export interface RekeyPatch<TRow> {
+    changes: Partial<TRow>;
+    id: string;
+    type: "rekey";
+}
+
+// @public
 export interface RemovePatch {
     id: string;
     type: "remove";
 }
 
 // @public
-export type RowPatch<TRow> = InsertPatch<TRow> | UpdatePatch<TRow> | UpsertPatch<TRow> | RemovePatch;
+export type RowPatch<TRow> = InsertPatch<TRow> | UpdatePatch<TRow> | UpsertPatch<TRow> | RemovePatch | RekeyPatch<TRow>;
 
 // @public
 export type RowPatchEvent<TRow> = {
@@ -59,10 +66,16 @@ export type RowPatchEvent<TRow> = {
 } | {
     type: "update";
     id: string;
+    from?: string;
     prev: TRow;
     next: TRow;
     index: number;
 };
+
+// @public
+export interface RowPatchOptions {
+    readonly rekeyUpdates?: boolean;
+}
 
 // @public
 export interface RowPatchStreamHandle {
@@ -90,6 +103,9 @@ export type RowPatchStreamStatus =
 "error" |
 /** The host closed it. Final: nothing reopens on its own. */
 "closed";
+
+// @public
+export const STREAMED_ROW_PATCHES: RowPatchOptions;
 
 // @public
 export interface StreamSocket {

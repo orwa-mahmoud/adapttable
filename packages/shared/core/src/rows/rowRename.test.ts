@@ -1,7 +1,8 @@
 /**
- * A patch may give a row a new id. What the incremental view keeps after a
- * batch that renames rows and then updates, renames again or deletes them must
- * be exactly what a view built from the patched rows shows.
+ * A rekey gives a row a new id. What the incremental view keeps after a batch
+ * that rekeys rows and then updates, rekeys again or deletes them must be
+ * exactly what a view built from the patched rows shows — and so must the
+ * same batch stored as id-changing updates and read with `rekeyUpdates`.
  */
 import { describe, expect, it } from "vitest";
 
@@ -55,26 +56,26 @@ const VIEWS: Record<string, IncrementalViewConfig<Row>> = {
 
 const BATCHES: Record<string, RowPatch<Row>[]> = {
   "rename then update the new id": [
-    { type: "update", id: "r1", changes: { id: "n1" } },
+    { type: "rekey", id: "r1", changes: { id: "n1" } },
     { type: "update", id: "n1", changes: { amount: 5 } },
   ],
   "rename then delete the new id": [
-    { type: "update", id: "r2", changes: { id: "n2" } },
+    { type: "rekey", id: "r2", changes: { id: "n2" } },
     { type: "remove", id: "n2" },
   ],
   "chained renames": [
-    { type: "update", id: "r3", changes: { id: "n3" } },
-    { type: "update", id: "n3", changes: { id: "m3", amount: 999 } },
+    { type: "rekey", id: "r3", changes: { id: "n3" } },
+    { type: "rekey", id: "n3", changes: { id: "m3", amount: 999 } },
     { type: "update", id: "m3", changes: { team: "t9" } },
   ],
   "several events on one row": [
     { type: "update", id: "r4", changes: { amount: 1 } },
-    { type: "update", id: "r4", changes: { id: "n4" } },
+    { type: "rekey", id: "r4", changes: { id: "n4" } },
     { type: "upsert", row: { id: "n4", team: "t2", amount: 2 } },
   ],
 };
 
-describe("a batch that renames rows", () => {
+describe("a batch that rekeys rows", () => {
   for (const [viewName, config] of Object.entries(VIEWS)) {
     for (const [batchName, patches] of Object.entries(BATCHES)) {
       it(`${viewName}: ${batchName}`, () => {
@@ -86,6 +87,24 @@ describe("a batch that renames rows", () => {
           fresh.sorted.map(getRowId)
         );
         expect(patched.filtered).toHaveLength(fresh.filtered.length);
+        expect(patched.groups).toEqual(fresh.groups);
+      });
+
+      it(`${viewName}: ${batchName}, stored as id-changing updates`, () => {
+        const stored = patches.map((patch) =>
+          patch.type === "rekey" ? { ...patch, type: "update" as const } : patch
+        );
+        const view = createIncrementalView(ROWS, config);
+        const log = applyRowPatchesWithLog(ROWS, stored, getRowId, {
+          rekeyUpdates: true,
+        });
+        const expected = applyRowPatchesWithLog(ROWS, patches, getRowId);
+        expect(log.rows).toEqual(expected.rows);
+        const patched = applyRowPatchLogToView(view, log);
+        const fresh = createIncrementalView(log.rows, config);
+        expect(patched.sorted.map(getRowId)).toEqual(
+          fresh.sorted.map(getRowId)
+        );
         expect(patched.groups).toEqual(fresh.groups);
       });
     }
