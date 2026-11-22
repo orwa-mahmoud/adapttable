@@ -23,7 +23,7 @@ import { fullscreen } from "./fullscreen";
 import { FeatureProviders, FeatureSlot } from "./providers";
 import { selectionStats } from "./selection-stats";
 import { GRID_FOCUS_ANNOUNCER } from "./slotKeys";
-import { EXPORT_STATE } from "./stateKeys";
+import { EXPORT_STATE, type TreeState } from "./stateKeys";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
 import { tree } from "./tree";
 
@@ -115,6 +115,12 @@ function mount(
   };
 }
 
+/** The tree the finished shell carries, as the tree stage published it. */
+function treeOf<TRow>(
+  view: { readonly tableProps: { readonly tree?: unknown } } | undefined
+): TreeState<TRow> | undefined {
+  return view?.tableProps.tree as TreeState<TRow> | undefined;
+}
 describe("a table that composed none of the live features", () => {
   it("hands the adapter every stand-in, inert and safe to call", () => {
     const mounted = mount([]);
@@ -540,7 +546,7 @@ it.each(["nested", "parent-id"] as const)(
       expect(current?.chrome.source.rows.map((row) => row.id)).toEqual([
         "first",
       ]);
-      const initialTree = current?.chrome.tree;
+      const initialTree = treeOf(current);
       expect(initialTree).toBeDefined();
       expect(initialTree?.getChildren).toBe(initialShape.getChildren);
       expect(initialTree?.getParentId).toBe(initialShape.getParentId);
@@ -558,24 +564,20 @@ it.each(["nested", "parent-id"] as const)(
         "second",
         "second-child",
       ]);
-      expect(current?.chrome.tree?.allEntries).toBe(runtimeEntries);
+      expect(treeOf(current)?.allEntries).toBe(runtimeEntries);
       const replacementShape: TreeShape<TreeExportRow> =
         kind === "nested"
           ? { getChildren: () => undefined }
           : { getParentId: () => undefined };
       result.rerender(table([tree<TreeExportRow>(replacementShape), exporter]));
-      expect(current?.chrome.tree?.getChildren).toBe(
-        replacementShape.getChildren
-      );
-      expect(current?.chrome.tree?.getParentId).toBe(
-        replacementShape.getParentId
-      );
+      expect(treeOf(current)?.getChildren).toBe(replacementShape.getChildren);
+      expect(treeOf(current)?.getParentId).toBe(replacementShape.getParentId);
       expect(initialTree?.getChildren).toBe(initialShape.getChildren);
       expect(initialTree?.getParentId).toBe(initialShape.getParentId);
       run();
       expect(exportedIds()).toEqual(data.map((row) => row.id));
       result.rerender(table([exporter]));
-      expect(current?.chrome.tree).toBeUndefined();
+      expect(current?.tableProps.tree).toBeUndefined();
       run();
       expect(exportedIds()).toEqual(data.map((row) => row.id));
       expect(request).toHaveBeenCalledTimes(3);

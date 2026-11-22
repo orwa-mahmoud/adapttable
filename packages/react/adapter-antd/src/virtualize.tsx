@@ -11,10 +11,12 @@ import {
   type ChromeBodyDraw,
   type ChromeBodySlotProps,
   coreVirtualize,
+  GROUPING_STATE,
   KEYED_WINDOW_RENDER,
   RowScrollContext,
   slotRender,
   type StaticTableFeature,
+  useFeatureState,
   usePlainChromeBodyData,
 } from "@adapttable/react/adapter";
 import type { VirtualizeOptions } from "@adapttable/react/features";
@@ -32,8 +34,9 @@ function AntdChromeBody<TRow>({
   const getRowId = chrome.getRowId;
   // antd's own virtual `<Table>` windows flat desktop rows; it pages from
   // its scroller, and find scrolls that scroller to an off-window match.
+  const grouped = useFeatureState(GROUPING_STATE) !== undefined;
   const nativeVirtual =
-    chrome.body === "desktop" && !chrome.grouping && !chrome.isPaged;
+    chrome.body === "desktop" && !grouped && !chrome.isPaged;
   const scrollToRow = useCallback(
     (row: TRow) => scrollAntdRow(rowScroll, getRowId(row)),
     [rowScroll, getRowId]

@@ -27,7 +27,13 @@ export {
 
 import type { TableChrome } from "../chrome/tableChromeContract";
 import { useFeatureState } from "../features/featureState";
-import { ROW_PINNING_STATE } from "../features/stateKeys";
+import {
+  GROUPING_STATE,
+  type GroupingState,
+  ROW_PINNING_STATE,
+  TREE_STATE,
+  type TreeState,
+} from "../features/stateKeys";
 import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
 import type { ComposedTableProps } from "../props";
 import type { ColumnWindow } from "./useColumnWindow";
@@ -85,6 +91,36 @@ export function hasLoadedChildren<TRow>(
 }
 
 /**
+ * The chrome a body draws from: the table's chrome with the grouping and the
+ * tree the chrome stages published. Both keys are always present, so a body
+ * helper never reads a chrome that lacks them as "not grouped".
+ *
+ * @public
+ */
+export type BodyChrome<TRow> = TableChrome<TRow> & {
+  readonly grouping: GroupingState<TRow> | undefined;
+  readonly tree: TreeState<TRow> | undefined;
+};
+
+/**
+ * The {@link BodyChrome} for this render.
+ *
+ * @public
+ */
+export function useBodyChrome<TRow>(
+  chrome: TableChrome<TRow>
+): BodyChrome<TRow> {
+  "use no memo";
+  const grouping = useFeatureState(GROUPING_STATE) as
+    GroupingState<TRow> | undefined;
+  const tree = useFeatureState(TREE_STATE) as TreeState<TRow> | undefined;
+  return useMemo(
+    () => ({ ...chrome, grouping, tree }),
+    [chrome, grouping, tree]
+  );
+}
+
+/**
  * Whether the body is a real row/card list the window can apply to.
  *
  * A paged body normally needs no window: the page size already bounds what is
@@ -93,13 +129,13 @@ export function hasLoadedChildren<TRow>(
  * footer — so a page that has been expanded is eligible like any other long
  * list.
  */
-export function isBodyEligible<TRow>(chrome: TableChrome<TRow>): boolean {
+export function isBodyEligible<TRow>(chrome: BodyChrome<TRow>): boolean {
   return coreIsBodyEligible(chrome);
 }
 
 /** A card's height on a phone, a row's on a desktop — or `rowHeight`. */
 export function estimateBodyItemSize<TRow>(
-  chrome: TableChrome<TRow>,
+  chrome: BodyChrome<TRow>,
   props: ComposedTableProps<TRow>,
   scrollRows: readonly TRow[]
 ): (index: number) => number {
@@ -107,7 +143,7 @@ export function estimateBodyItemSize<TRow>(
 }
 
 /** How many items the infinite-scroll sentinel counts as already rendered. */
-export function bodySentinelCount<TRow>(chrome: TableChrome<TRow>): number {
+export function bodySentinelCount<TRow>(chrome: BodyChrome<TRow>): number {
   return coreBodySentinelCount(chrome);
 }
 
@@ -136,7 +172,7 @@ export function useFetchNextPage<TRow>(chrome: TableChrome<TRow>): () => void {
 
 /** Infinite-scroll sentinel used by both the plain and virtual body paths. */
 export function useBodyLoadMore<TRow>(
-  chrome: TableChrome<TRow>,
+  chrome: BodyChrome<TRow>,
   fetchNext: () => void,
   canLoadMore: boolean
 ): RefObject<HTMLDivElement | null> {

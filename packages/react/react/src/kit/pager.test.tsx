@@ -59,7 +59,7 @@ function view(page: number, total: number, grouping?: unknown) {
     table: { pagination: computePagination({ page, limit: 10, total }) },
     source: { limit: 10, defaultLimit: 25, total, setPage, setLimit },
     labels: defaultLabels,
-    chrome: { grouping },
+    tableProps: { grouping },
   };
   return { shown, setPage, setLimit };
 }

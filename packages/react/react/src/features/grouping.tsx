@@ -38,6 +38,7 @@ import {
   type ChromeExtraSlotProps,
   GROUPING_LIVE,
 } from "./slotKeys";
+import { GROUPING_STATE, type GroupingState } from "./stateKeys";
 import type { StaticTableFeature, TableFeature } from "./tableFeature";
 
 function GroupingModelProvider({
@@ -54,7 +55,7 @@ function LiveGrouping<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<TRow>): ReactNode {
+}: Readonly<ChromeExtraSlotProps<TRow>>): ReactNode {
   const source = chrome.source;
   const requestedGroupBy =
     props.groupBy === undefined ? source.groupBy : props.groupBy;
@@ -191,7 +192,6 @@ function LiveGrouping<TRow>({
   );
 
   const viewSource = projectedGroupingSource(source, projected);
-  const groupingArmed = grouping !== undefined;
   const groupingPanel = useMemo(() => {
     if (!chrome.groupingPanel) return undefined;
     return {
@@ -211,11 +211,9 @@ function LiveGrouping<TRow>({
     grouping,
     groupingSource,
   ]);
-  return children({
+  const next = {
     ...chrome,
-    grouping,
     groupingPanel,
-    groupingArmed,
     source: viewSource,
     editingRows: viewSource.rows,
     hasRowReorder: chrome.hasRowReorder,
@@ -228,7 +226,15 @@ function LiveGrouping<TRow>({
         total: viewSource.total,
       }),
     },
-  });
+  };
+  return (
+    <FeatureStateScope
+      stateKey={GROUPING_STATE}
+      value={grouping as GroupingState | undefined}
+    >
+      {children(next)}
+    </FeatureStateScope>
+  );
 }
 
 /**

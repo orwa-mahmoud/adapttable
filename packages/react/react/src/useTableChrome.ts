@@ -111,7 +111,6 @@ export function useTableChrome<TRow>(
     () => declaredReactColumnLayout(resolvedColumns),
     [resolvedColumns]
   );
-  const groupingArmed = false;
   const viewSource = source;
 
   // Progressive hiding sits between the user's own hidden set and what is
@@ -223,8 +222,6 @@ export function useTableChrome<TRow>(
 
   const treeShaped =
     props.getChildren !== undefined || props.getParentId !== undefined;
-  const tree = undefined;
-  const grouping = undefined;
   const editingRows = viewSource.rows;
 
   // See TableChrome.editingRows — extras overlay the grouped leaf set.
@@ -316,7 +313,7 @@ export function useTableChrome<TRow>(
         },
         groupByKeys,
         rowReorderRequested: requestedReorder,
-        nestedArmed: groupingArmed || treeShaped,
+        nestedArmed: treeShaped,
         hasEditableColumn,
         labels: table.labels,
       }),
@@ -331,7 +328,6 @@ export function useTableChrome<TRow>(
       props.pinnedRowIds,
       props.onPinnedRowIdsChange,
       requestedReorder,
-      groupingArmed,
       treeShaped,
       hasEditableColumn,
       onCellEdit,
@@ -366,11 +362,7 @@ export function useTableChrome<TRow>(
     hasRowReorder,
     rowReorder,
     pinnedRows,
-    groupingArmed,
-    treeShaped,
-    grouping,
     groupingPanel,
-    tree,
     editingRows,
     showFooter,
     columnLayout,

@@ -280,7 +280,9 @@ publishes its chips and badge count as `FILTER_CHIPS_STATE`
 palette read; the editing feature publishes its bundle as `EDITING_STATE`,
 row detail its renderer and expansion as `ROW_DETAIL_STATE`
 (`RowDetailState`), row actions the trailing column as `ROW_ACTIONS_STATE`
-(`RowActionsState`), and row pinning its pins as `ROW_PINNING_STATE`; `SAVED_VIEWS` (`SavedViewsSlotProps`),
+(`RowActionsState`), row pinning its pins as `ROW_PINNING_STATE`, grouping
+its grouped rows as `GROUPING_STATE` (`GroupingState`) and the tree its
+hierarchy as `TREE_STATE` (`TreeState`); `SAVED_VIEWS` (`SavedViewsSlotProps`),
 `GRID_FOCUS_ANNOUNCER`, the filter surfaces `FILTER_POPOVER` / `FILTER_DRAWER`
 (`FilterOverlaySlotProps`) with `FiltersFormSlotProps` and
 `ActiveFilterChipsSlotProps`, and `CHROME_BODY` (`ChromeBodySlotProps`), which

@@ -19,13 +19,18 @@ import { rowPinning } from "./features/row-pinning";
 import { rowReorder } from "./features/row-reorder";
 import {
   FILTER_CHIPS_STATE,
+  GROUPING_STATE,
   ROW_ACTIONS_STATE,
   ROW_PINNING_STATE,
   type RowActionsState,
+  TREE_STATE,
 } from "./features/stateKeys";
 import { applyTableFeatures } from "./features/tableFeature";
 import { tree } from "./features/tree";
-import { renderLiveChrome } from "./liveChrome.test-utils";
+import {
+  type LiveChromeResult,
+  renderLiveChrome,
+} from "./liveChrome.test-utils";
 import type { RowPinningState } from "./rows/rowPinning";
 import { useFrontendData } from "./source/useFrontendData";
 import { createMemoryAdapter } from "./url/adapter";
@@ -234,7 +239,7 @@ describe("useTableChrome", () => {
     );
 
     // The view facade presents the full filtered set as one page.
-    expect(result.current.grouping).toBeDefined();
+    expect(result.state(GROUPING_STATE)).toBeDefined();
     expect(result.current.source.rows).toHaveLength(30);
     expect(result.current.table.pagination.totalPages).toBe(1);
     expect(result.current.table.pagination.fromIndex).toBe(1);
@@ -275,13 +280,13 @@ describe("useTableChrome", () => {
         groupBy: "name",
       };
     });
-    const before = result.current.grouping;
+    const before = result.state(GROUPING_STATE);
     expect(before).toBeDefined();
     // Uncommitted keystrokes re-render the table but must not rebuild the
     // O(filtered rows) grouped flat model.
     act(() => result.current.table.setSearchValue("p"));
     act(() => result.current.table.setSearchValue("p1"));
-    expect(result.current.grouping).toBe(before);
+    expect(result.state(GROUPING_STATE)).toBe(before);
   });
 
   it("CSV export columns are identical on desktop and mobile viewports", () => {
@@ -443,8 +448,8 @@ describe("useTableChrome", () => {
         onGroupByChange,
       };
     });
-    expect(result.current.grouping).toBeDefined();
-    act(() => result.current.grouping!.setGroupBy(null));
+    expect(result.state(GROUPING_STATE)).toBeDefined();
+    act(() => result.state(GROUPING_STATE)!.setGroupBy(null));
     // An explicit empty marker keeps the cleared choice across kit remounts.
     expect(onGroupByChange).toHaveBeenCalledTimes(1);
     expect(onGroupByChange).toHaveBeenCalledWith([]);
@@ -660,7 +665,7 @@ describe("useTableChrome", () => {
       }
     );
     expect(result.current.pinnedRows?.top).toEqual([totals]);
-    expect(result.current.grouping).toBeDefined();
+    expect(result.state(GROUPING_STATE)).toBeDefined();
   });
 
   it("publishes host-owned summary rows even when the table is a tree", () => {
@@ -689,7 +694,7 @@ describe("useTableChrome", () => {
       }
     );
     expect(result.current.pinnedRows?.bottom).toEqual([totals]);
-    expect(result.current.tree).toBeDefined();
+    expect(result.state(TREE_STATE)).toBeDefined();
   });
 
   it("controlled selection: change requests go to the handler, state stays put", () => {
@@ -831,34 +836,34 @@ describe("useTableChrome — the whole-tree grouping actions", () => {
         };
       }
     );
-  const headers = (result: {
-    current: { grouping?: { entries: readonly { kind: string }[] } };
-  }) =>
-    result.current.grouping!.entries.filter((entry) => entry.kind === "group");
+  const headers = (result: LiveChromeResult<Person>) =>
+    result
+      .state(GROUPING_STATE)!
+      .entries.filter((entry) => entry.kind === "group");
 
   it("collapses everything, then opens it again", () => {
     const { result } = setup();
     expect(headers(result)).toHaveLength(5);
-    act(() => result.current.grouping!.collapseAll());
+    act(() => result.state(GROUPING_STATE)!.collapseAll());
     // Only the outermost headers survive a full collapse.
     expect(headers(result)).toHaveLength(2);
-    act(() => result.current.grouping!.expandAll());
+    act(() => result.state(GROUPING_STATE)!.expandAll());
     expect(headers(result)).toHaveLength(5);
   });
 
   it("shows the tree down to a depth", () => {
     const { result } = setup();
-    act(() => result.current.grouping!.collapseToDepth(1));
+    act(() => result.state(GROUPING_STATE)!.collapseToDepth(1));
     // Depth 1 keeps the top level open and closes what is inside it.
     expect(headers(result)).toHaveLength(5);
-    act(() => result.current.grouping!.collapseToDepth(0));
+    act(() => result.state(GROUPING_STATE)!.collapseToDepth(0));
     expect(headers(result)).toHaveLength(2);
   });
 
   it("reveals another page of groups", () => {
     const { result } = setup({ groupBy: "role", groupPageSize: 1 });
     expect(headers(result)).toHaveLength(1);
-    act(() => result.current.grouping!.showMore({ scope: "groups" }));
+    act(() => result.state(GROUPING_STATE)!.showMore({ scope: "groups" }));
     expect(headers(result)).toHaveLength(2);
   });
 
@@ -870,10 +875,12 @@ describe("useTableChrome — the whole-tree grouping actions", () => {
       onGroupLoadMore,
     });
     const leaves = () =>
-      result.current.grouping!.entries.filter((entry) => entry.kind === "row");
+      result
+        .state(GROUPING_STATE)!
+        .entries.filter((entry) => entry.kind === "row");
     expect(leaves()).toHaveLength(2);
     act(() =>
-      result.current.grouping!.showMore({
+      result.state(GROUPING_STATE)!.showMore({
         scope: "rows",
         groupKey: "group:role:s:Core",
       })
@@ -935,9 +942,9 @@ describe("useTableChrome — row mutations and lazy tree", () => {
         onLoadChildren,
       };
     });
-    expect(result.current.tree?.entries[0]?.expanded).toBe(false);
+    expect(result.state(TREE_STATE)?.entries[0]?.expanded).toBe(false);
     await act(async () => {
-      result.current.tree?.expansion.toggle("a");
+      result.state(TREE_STATE)?.expansion.toggle("a");
       // The lazy loader is a promise; settle it inside the same act.
       await Promise.resolve();
     });
@@ -964,7 +971,7 @@ describe("useTableChrome — row mutations and lazy tree", () => {
       };
     });
     act(() => {
-      result.current.tree?.expansion.toggle("a");
+      result.state(TREE_STATE)?.expansion.toggle("a");
     });
     expect(onLoadChildren).not.toHaveBeenCalled();
   });

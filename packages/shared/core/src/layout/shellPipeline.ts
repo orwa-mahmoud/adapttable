@@ -923,8 +923,6 @@ export function finishShellBody<
     readonly tableProps: {
       readonly virtualScrollRef: TRef;
       readonly columnWindow: unknown;
-    };
-    readonly chrome: {
       readonly grouping?: { readonly entries: readonly unknown[] };
       readonly tree?: { readonly entries: readonly unknown[] };
     };
@@ -934,7 +932,7 @@ export function finishShellBody<
   body: ShellBodyInput<TRef>,
   composeRefs: (first: TRef, second: TRef) => TRef
 ): TShell {
-  const { grouping, tree } = shell.chrome;
+  const { grouping, tree } = shell.tableProps;
   return {
     ...shell,
     loadMoreRef: body.loadMoreRef,

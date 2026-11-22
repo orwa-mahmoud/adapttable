@@ -30,10 +30,12 @@ import { CHROME_BODY, type ChromeBodySlotProps } from "./slotKeys";
 import {
   EDIT_HISTORY_STATE,
   EDITING_STATE,
+  GROUPING_STATE,
   ROW_ACTIONS_STATE,
   ROW_DETAIL_STATE,
   ROW_PINNING_STATE,
   TABLE_PROPS_STATE,
+  TREE_STATE,
 } from "./stateKeys";
 
 /**
@@ -144,6 +146,8 @@ function StagedShell<TRow>({
   const detail = useFeatureState(ROW_DETAIL_STATE);
   const rowPinning = useFeatureState(ROW_PINNING_STATE);
   const actions = useFeatureState(ROW_ACTIONS_STATE);
+  const grouping = useFeatureState(GROUPING_STATE);
+  const tree = useFeatureState(TREE_STATE);
   const editHistory = useFeatureState(EDIT_HISTORY_STATE) as
     EditHistoryState<TRow> | undefined;
   // The stages may wrap the commit channels (edit history); the body
@@ -159,6 +163,8 @@ function StagedShell<TRow>({
       editing,
       detail,
       rowPinning,
+      grouping,
+      tree,
       rowActions: actions?.rowActions,
       rowMutations: actions?.rowMutations,
       hasRowActions: actions?.hasRowActions,

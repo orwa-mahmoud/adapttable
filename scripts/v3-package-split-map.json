@@ -48843,6 +48843,14 @@
       "behavior": ""
     },
     {
+      "export": "GROUPING_STATE",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "GroupingChipKeyboardProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -48991,6 +48999,14 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "GroupingState",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -51835,6 +51851,14 @@
       "behavior": ""
     },
     {
+      "export": "TREE_STATE",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "TREE_TOGGLE",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -51868,6 +51892,14 @@
     },
     {
       "export": "TreeExpansionState",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TreeState",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",

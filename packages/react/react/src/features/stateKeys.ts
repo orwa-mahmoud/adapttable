@@ -6,19 +6,26 @@
 import type {
   ActiveFilterChip,
   EditHistoryState,
+  GroupAggregatesFn,
+  GroupByInput,
+  GroupedFlatEntry,
   RowAction,
+  TreeEntry,
+  TreeShape,
 } from "@adapttable/core";
 import { featureStateKey } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import type { EditableCellEditing } from "../editing/editableCellController";
 import type { ExportHandlerState } from "../export/useExportHandler";
+import type { GroupCollapseState } from "../grouping/useGroupCollapse";
 import type { KitRegionProps } from "../kit/rootRegion";
 import type { FullscreenState } from "../layout/useFullscreen";
 import type { RowMutationsState } from "../rows/rowMutations";
 import type { RowPinningState } from "../rows/rowPinning";
 import type { RowExpansionState } from "../rows/useRowExpansion";
 import type { DataTableShellChromeProps } from "../shell/shellContract";
+import type { TreeExpansionState } from "../tree/useTreeExpansion";
 
 /**
  * The active filters' chips and count.
@@ -72,6 +79,61 @@ export const ROW_ACTIONS_STATE =
 /** The row pins, published by the row-pinning stage. */
 export const ROW_PINNING_STATE =
   featureStateKey<RowPinningState<unknown>>("row-pinning");
+
+/**
+ * The grouped rows and the grouping's controls.
+ *
+ * @public
+ */
+export interface GroupingState<TRow = unknown> {
+  /** The grouping keys in order — one entry for a flat group, more for nested. */
+  readonly groupBy: readonly string[];
+  readonly collapsed: GroupCollapseState;
+  readonly aggregates?: GroupAggregatesFn<TRow>;
+  /** Flat group-header + leaf entries for adapters to render. */
+  readonly entries: readonly GroupedFlatEntry<TRow>[];
+  readonly setGroupBy: (key: GroupByInput) => void;
+  /** Open every group. */
+  readonly expandAll: () => void;
+  /** Close every group, at every level. */
+  readonly collapseAll: () => void;
+  /**
+   * Show the tree down to `depth` and no further — `0` leaves only the
+   * outermost headers, `1` opens the first level inside them.
+   */
+  readonly collapseToDepth: (depth: number) => void;
+  /** Reveal the next page of groups, or of one group's rows. */
+  readonly showMore: (entry: {
+    scope: "groups" | "rows";
+    groupKey?: string;
+  }) => void;
+}
+
+/** The grouping, published by the grouping stage. */
+export const GROUPING_STATE = featureStateKey<GroupingState>("grouping");
+
+/**
+ * The flattened hierarchy and its expansion.
+ *
+ * @public
+ */
+export interface TreeState<TRow = unknown> {
+  /** The flattened hierarchy, in render order. */
+  readonly entries: readonly TreeEntry<TRow>[];
+  /** Every loaded node, including descendants of collapsed parents. */
+  readonly allEntries?: readonly TreeEntry<TRow>[];
+  /** Loaded descendants to read within an export's source scope. */
+  readonly getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
+  /** Flat ancestry to reconstruct within an export's source scope. */
+  readonly getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
+  /** Which nodes are open. */
+  readonly expansion: TreeExpansionState;
+  /** Which column carries the chevron and the indent. */
+  readonly columnKey?: string;
+}
+
+/** The tree, published by the tree stage. */
+export const TREE_STATE = featureStateKey<TreeState>("tree");
 
 /** The armed cell editing, published by the editing stage. */
 export const EDITING_STATE =

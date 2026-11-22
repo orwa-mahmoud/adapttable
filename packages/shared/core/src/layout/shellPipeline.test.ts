@@ -911,7 +911,7 @@ describe("overlayChromeExtras", () => {
     expect(out.chromeProps).toBe(shell.chromeProps);
     expect(out.toolbarProps).toEqual({
       search: "s",
-      onAddRow: chrome.rowMutations.addRow,
+      onAddRow: chrome.rowMutations?.addRow,
     });
     expect(out.tableProps).toEqual({
       keep: 1,
@@ -981,7 +981,7 @@ describe("overlayChromeExtras", () => {
 });
 
 describe("finishShellBody", () => {
-  function makeShell(chrome: {
+  function makeShell(contributions: {
     grouping?: { readonly entries: readonly unknown[] };
     tree?: { readonly entries: readonly unknown[] };
   }) {
@@ -990,9 +990,9 @@ describe("finishShellBody", () => {
         virtualScrollRef: "shellRef" as string,
         columnWindow: "shellWindow",
         keep: 1,
+        ...contributions,
       },
       toolbarProps: { search: "s" },
-      chrome,
     };
   }
 
@@ -1031,7 +1031,6 @@ describe("finishShellBody", () => {
     expect(compose).toHaveBeenCalledWith("shellRef", "bodyRef");
     expect(out.loadMoreRef).toBe("loadMore");
     expect(out.canLoadMore).toBe(true);
-    expect(out.chrome).toBe(shell.chrome);
     expect(out.tableProps).toEqual({
       keep: 1,
       pinnedTopRows: ["pt"],

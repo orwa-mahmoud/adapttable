@@ -38,7 +38,7 @@ import { BATCH_EDIT_BAR_RENDER } from "./barRegions";
 import { BATCH_EDITING_RENDERS } from "./batchEditingStage";
 import { BATCH_EDITING_STAGE, ROW_EDITING_STAGE } from "./editingStageKeys";
 import { featureHostOf } from "./featureHost";
-import { FeatureStateScope } from "./featureState";
+import { FeatureStateScope, useFeatureState } from "./featureState";
 import { FeatureSlot, slotRender, useFeatureSlotFilled } from "./providers";
 import { ROW_EDITING_RENDERS } from "./rowEditingStage";
 import {
@@ -46,7 +46,7 @@ import {
   type ChromeExtraSlotProps,
   EDITING_LIVE,
 } from "./slotKeys";
-import { EDITING_STATE } from "./stateKeys";
+import { EDITING_STATE, GROUPING_STATE, type GroupingState } from "./stateKeys";
 import type {
   FeaturePatch,
   StaticTableFeature,
@@ -230,14 +230,16 @@ function LiveEditing<TRow>({
     [tracked, markers]
   );
 
+  const grouping = useFeatureState(GROUPING_STATE) as
+    GroupingState<TRow> | undefined;
   const editingRows = useMemo(() => {
-    if (!chrome.grouping) return chrome.source.rows;
+    if (!grouping) return chrome.source.rows;
     const leaves: TRow[] = [];
-    for (const entry of chrome.grouping.entries) {
+    for (const entry of grouping.entries) {
       if (entry.kind === "row") leaves.push(entry.row);
     }
     return leaves;
-  }, [chrome.grouping, chrome.source.rows]);
+  }, [grouping, chrome.source.rows]);
 
   // Row and batch editing run their own stages when composed; a table with
   // only cell editing renders neither.

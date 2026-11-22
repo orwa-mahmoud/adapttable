@@ -702,23 +702,21 @@ export function bodyCellsHaveRowSpan(cellsByRow: ReadonlyMap<string, readonly {
 export interface BodyChrome<TRow> {
     // (undocumented)
     readonly body: string;
-    // (undocumented)
-    readonly grouping?: {
+    readonly grouping: {
         readonly entries: readonly GroupedFlatEntry<TRow>[];
-    };
+    } | undefined;
     // (undocumented)
     readonly isMobile: boolean;
     // (undocumented)
     readonly isPaged: boolean;
     // (undocumented)
     readonly source: Pick<TableSource<TRow>, "rows" | "error" | "paginationMode" | "hasNextPage" | "isFetchingNextPage" | "fetchNextPage">;
-    // (undocumented)
-    readonly tree?: {
+    readonly tree: {
         readonly entries: readonly {
             readonly row: TRow;
             readonly key: string;
         }[];
-    };
+    } | undefined;
 }
 
 // @public
@@ -5815,8 +5813,6 @@ export function finishShellBody<TRef, TShell extends PipelineShell & {
     readonly tableProps: {
         readonly virtualScrollRef: TRef;
         readonly columnWindow: unknown;
-    };
-    readonly chrome: {
         readonly grouping?: {
             readonly entries: readonly unknown[];
         };

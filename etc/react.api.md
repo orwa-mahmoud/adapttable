@@ -125,10 +125,7 @@ import { GRID_CELL_ATTR } from '@adapttable/core';
 import { gridCellAttr } from '@adapttable/core';
 import { GridFocusControllerOptions } from '@adapttable/core';
 import { GridFocusState } from '@adapttable/core/binding';
-import { GroupAggregatesFn } from '@adapttable/core';
-import { GroupByInput } from '@adapttable/core';
 import { GroupCollapseState } from '@adapttable/core/binding';
-import { GroupedFlatEntry } from '@adapttable/core';
 import { GroupingPanelState } from '@adapttable/core';
 import { GroupPagingState } from '@adapttable/core/binding';
 import { headerFilterFieldIsComplete } from '@adapttable/core';
@@ -231,9 +228,7 @@ import { TableToolbarSlots } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
 import { TextFieldWidget } from '@adapttable/core';
 import { TextOp } from '@adapttable/core';
-import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
-import { TreeShape } from '@adapttable/core';
 import { UNPIN_ROW_ACTION_KEY } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
@@ -939,21 +934,6 @@ export interface TableChrome<TRow> {
     errorState?: TableErrorState;
     featureNotices: readonly FeatureNotice[];
     getRowId: (row: TRow) => string;
-    grouping?: {
-        groupBy: readonly string[];
-        collapsed: GroupCollapseState;
-        aggregates?: GroupAggregatesFn<TRow>;
-        entries: readonly GroupedFlatEntry<TRow>[];
-        setGroupBy: (key: GroupByInput) => void;
-        expandAll: () => void;
-        collapseAll: () => void;
-        collapseToDepth: (depth: number) => void;
-        showMore: (entry: {
-            scope: "groups" | "rows";
-            groupKey?: string;
-        }) => void;
-    };
-    groupingArmed: boolean;
     groupingPanel?: GroupingPanelState;
     hasRowReorder: boolean;
     isMobile: boolean;
@@ -965,15 +945,6 @@ export interface TableChrome<TRow> {
     showFooter: boolean;
     source: TableSource<TRow>;
     table: UseDataTableResult<TRow>;
-    tree?: {
-        entries: readonly TreeEntry<TRow>[];
-        allEntries?: readonly TreeEntry<TRow>[];
-        getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
-        getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
-        expansion: TreeExpansionState;
-        columnKey?: string;
-    };
-    treeShaped: boolean;
 }
 
 // @public

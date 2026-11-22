@@ -2,13 +2,17 @@ import { resetDevWarnings } from "@adapttable/core/binding";
 import { act, render, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { type TableChrome } from "../chrome/tableChromeContract";
 import { ChromeExtrasGate } from "../features/chromeExtrasGate";
 import { editing } from "../features/editing";
+import { useFeatureState } from "../features/featureState";
 import { grouping } from "../features/grouping";
 import { groupingPanel } from "../features/grouping-panel";
 import { FeatureProviders } from "../features/providers";
-import { EDITING_STATE } from "../features/stateKeys";
+import {
+  EDITING_STATE,
+  GROUPING_STATE,
+  type GroupingState,
+} from "../features/stateKeys";
 import {
   applyTableFeatures,
   type TableFeature,
@@ -151,14 +155,12 @@ describe("useTableChrome grouping bundle", () => {
         defaults: { limit: 10 },
       })
     );
-    const { result } = renderHook(() =>
-      useTableChrome<Row>({
-        source: sourceResult.current,
-        columns: [{ key: "team" }, { key: "name" }],
-        rowKey: (r) => r.id,
-      })
-    );
-    expect(result.current.grouping).toBeUndefined();
+    const { result } = renderLiveChrome([], () => ({
+      source: sourceResult.current,
+      columns: [{ key: "team" }, { key: "name" }],
+      rowKey: (r: Row) => r.id,
+    }));
+    expect(result.state(GROUPING_STATE)).toBeUndefined();
   });
 
   it("arms grouping from prop groupBy on frontend source", () => {
@@ -178,12 +180,12 @@ describe("useTableChrome grouping bundle", () => {
       };
     });
     // The bundle carries the keys as a list now, one entry for a flat group.
-    expect(result.current.grouping?.groupBy).toEqual(["team"]);
-    expect(result.current.grouping?.entries[0]).toMatchObject({
+    expect(result.state(GROUPING_STATE)?.groupBy).toEqual(["team"]);
+    expect(result.state(GROUPING_STATE)?.entries[0]).toMatchObject({
       kind: "group",
       label: "Core",
     });
-    const core = result.current.grouping?.entries[0];
+    const core = result.state(GROUPING_STATE)?.entries[0];
     if (core?.kind === "group") {
       expect(core.aggregateCells).toEqual({ name: 2 });
     }
@@ -224,7 +226,7 @@ describe("useTableChrome grouping bundle", () => {
         };
       }
     );
-    const core = result.current.grouping?.entries[0];
+    const core = result.state(GROUPING_STATE)?.entries[0];
     expect(core?.kind).toBe("group");
     if (core?.kind === "group") {
       expect(core.aggregateCells).toEqual({ name: 2 });
@@ -252,7 +254,7 @@ describe("useTableChrome grouping bundle", () => {
       rowKey: (r) => r.id,
       groupBy: "team",
     }));
-    expect(result.current.grouping).toBeUndefined();
+    expect(result.state(GROUPING_STATE)).toBeUndefined();
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining("groupBy is ignored: this source cannot group")
     );
@@ -340,9 +342,14 @@ describe("incremental totals follow effective aggregation config", () => {
   ];
 
   it("rebuilds cached group totals when a column default changes", () => {
-    const chrome: { current: TableChrome<PaidRow> | undefined } = {
+    const grouped: { current: GroupingState<PaidRow> | undefined } = {
       current: undefined,
     };
+    function GroupingProbe() {
+      grouped.current = useFeatureState(GROUPING_STATE) as
+        GroupingState<PaidRow> | undefined;
+      return null;
+    }
     function Probe({
       aggregatable,
     }: {
@@ -372,10 +379,7 @@ describe("incremental totals follow effective aggregation config", () => {
         const base = useTableChrome<PaidRow>(chromeProps);
         return (
           <ChromeExtrasGate chrome={base} props={chromeProps}>
-            {(overlaid) => {
-              chrome.current = overlaid;
-              return null;
-            }}
+            {() => <GroupingProbe />}
           </ChromeExtrasGate>
         );
       }
@@ -389,7 +393,7 @@ describe("incremental totals follow effective aggregation config", () => {
     const { rerender } = render(
       <Probe aggregatable={{ default: "sum", operations: ["sum", "avg"] }} />
     );
-    const coreSum = chrome.current?.grouping?.entries.find(
+    const coreSum = grouped.current?.entries.find(
       (entry) => entry.kind === "group" && entry.label === "Core"
     );
     expect(coreSum?.kind === "group" && coreSum.aggregateCells).toEqual({
@@ -399,7 +403,7 @@ describe("incremental totals follow effective aggregation config", () => {
     rerender(
       <Probe aggregatable={{ default: "avg", operations: ["sum", "avg"] }} />
     );
-    const coreAvg = chrome.current?.grouping?.entries.find(
+    const coreAvg = grouped.current?.entries.find(
       (entry) => entry.kind === "group" && entry.label === "Core"
     );
     expect(coreAvg?.kind === "group" && coreAvg.aggregateCells).toEqual({

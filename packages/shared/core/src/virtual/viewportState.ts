@@ -39,10 +39,18 @@ export interface BodyChrome<TRow> {
   readonly isPaged: boolean;
   readonly isMobile: boolean;
   readonly body: string;
-  readonly grouping?: { readonly entries: readonly GroupedFlatEntry<TRow>[] };
-  readonly tree?: {
-    readonly entries: readonly { readonly row: TRow; readonly key: string }[];
-  };
+  /** The grouped entries, or `undefined`: always passed, so "not grouped" is never a default. */
+  readonly grouping:
+    { readonly entries: readonly GroupedFlatEntry<TRow>[] } | undefined;
+  /** The tree entries, or `undefined`: always passed, like `grouping`. */
+  readonly tree:
+    | {
+        readonly entries: readonly {
+          readonly row: TRow;
+          readonly key: string;
+        }[];
+      }
+    | undefined;
 }
 
 /**

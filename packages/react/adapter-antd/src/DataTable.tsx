@@ -23,6 +23,8 @@ import {
   type GroupByInput,
   type GroupCollapseState,
   type GroupedFlatEntry,
+  GROUPING_STATE,
+  type GroupingState,
   isBodyEligible,
   isExtraEntry,
   KEYED_WINDOW,
@@ -58,10 +60,13 @@ import {
   tableMinWidth,
   tableRenderModel,
   type TableSource,
+  TREE_STATE,
   type TreeEntry,
   treeRowAria,
+  type TreeState,
   treeTableAria,
   useFeatureSlotFilled,
+  useFeatureState,
   useLocaleLabels,
   useMountStagger,
   useOffsetHeight,
@@ -932,7 +937,9 @@ function AntdGroupingWindow<TRow>({
   const keys = grouping?.entries.map((entry) => entry.key) ?? [];
   // A grouped page is eligible like any long list: its headers and footers
   // outgrow the page size.
-  const eligible = grouping !== undefined && isBodyEligible(chrome);
+  const eligible =
+    grouping !== undefined &&
+    isBodyEligible({ ...chrome, grouping, tree: undefined });
   const windowed = (indices: readonly number[]) => {
     if (!grouping) return children(undefined);
     return children({
@@ -988,7 +995,7 @@ interface DataTableBodyRegionProps<TRow> {
   labels: Required<TableLabels>;
   emptyNode: ReactNode;
   grouping: GroupingBundle<TRow> | undefined;
-  tree: ReturnType<typeof useTableChrome<TRow>>["tree"];
+  tree: TreeState<TRow> | undefined;
   detailRender: ((row: TRow) => ReactNode) | undefined;
   detailExpansion: RowExpansionState | undefined;
   editing: EditableCellEditing<TRow> | undefined;
@@ -1648,9 +1655,10 @@ type RenderModelAssembly<TRow> = Parameters<
 /** Whether antd's own virtual `<Table>` windows this table's rows. */
 function antdVirtualBody<TRow>(
   props: Readonly<ComposedProps<TRow>>,
-  chrome: DataTableShellResult<TRow>["chrome"]
+  chrome: DataTableShellResult<TRow>["chrome"],
+  grouping: GroupingState<TRow> | undefined
 ): boolean {
-  return props.virtualize === true && !chrome.grouping && !chrome.isPaged;
+  return props.virtualize === true && !grouping && !chrome.isPaged;
 }
 
 /** The surface, laid out with antd's spacing; popups follow fullscreen. */
@@ -1732,9 +1740,11 @@ function AntdBody<TRow>({
   "use no memo";
   const props = kitProps as Readonly<ComposedProps<TRow>>;
   const rowScroll = useAntdRowScrollHandles();
+  const grouping = useFeatureState(GROUPING_STATE) as
+    GroupingState<TRow> | undefined;
   return (
     <AntdGroupingWindow<TRow>
-      grouping={view.chrome.grouping}
+      grouping={grouping}
       scrollTarget={rowScroll.groups}
       props={props}
       chrome={view.chrome}
@@ -1767,6 +1777,9 @@ function AntdViewBody<TRow>({
 }>) {
   "use no memo";
   const c = view.chrome;
+  const grouped = useFeatureState(GROUPING_STATE) as
+    GroupingState<TRow> | undefined;
+  const tree = useFeatureState(TREE_STATE) as TreeState<TRow> | undefined;
   const chromeProps = view.chromeProps;
   const gridFocus = view.gridFocus;
   const table = view.table;
@@ -1781,7 +1794,7 @@ function AntdViewBody<TRow>({
   const { windowStart, cardSetSize } = antdWindowOf(c);
   const rowActions = view.tableProps.rowActions;
   const hasRowActions = rowActions !== undefined;
-  const virtualBody = antdVirtualBody(props, c);
+  const virtualBody = antdVirtualBody(props, c, grouped);
   const inScrollBox =
     props.maxHeight != null || (virtualBody && c.body === "desktop");
   const resolvedTableLabel = table.getTableProps()["aria-label"];
@@ -1790,9 +1803,13 @@ function AntdViewBody<TRow>({
     virtualBody && !c.isPaged && !source.error
   );
   const reorderIndices = c.rowReorder
-    ? new Map(renderedRowsOf(c).map((row, index) => [getRowId(row), index]))
+    ? new Map(
+        renderedRowsOf({ source: c.source, grouping: grouped, tree }).map(
+          (row, index) => [getRowId(row), index]
+        )
+      )
     : undefined;
-  const treeEntries = c.tree?.entries;
+  const treeEntries = tree?.entries;
   const treeEntryByRow = new Map<TRow, TreeEntry<TRow>>(
     treeEntries?.map((entry) => [entry.row, entry])
   );
@@ -1839,7 +1856,7 @@ function AntdViewBody<TRow>({
     pinnedSummaryBottom,
     getCellSpan: props.getCellSpan,
     pinOffset: c.columnLayout.pinOffset,
-    grouping: c.grouping,
+    grouping: grouped,
     // Features that replace an assembly heavy — cell spanning, extra rows —
     // write it onto the props the feature pass returns. antd assembles its own
     // table, so it reads that here the way the shared shell does.
@@ -1874,11 +1891,11 @@ function AntdViewBody<TRow>({
     // of header clicks (single-sort via `onChange`).
     onToggleSortLevel: chainToggler(props.multiSort, source),
     fitColumns: props.fitColumns,
-    tree: c.tree
+    tree: tree
       ? {
-          columnKey: c.tree.columnKey,
+          columnKey: tree.columnKey,
           entryFor: (row: TRow) => treeEntryByRow.get(row),
-          toggle: c.tree.expansion.toggle,
+          toggle: tree.expansion.toggle,
         }
       : undefined,
     grouping: grouping
@@ -1993,7 +2010,7 @@ function AntdViewBody<TRow>({
             labels={labels}
             emptyNode={emptyNode}
             grouping={grouping}
-            tree={c.tree}
+            tree={tree}
             detailRender={view.tableProps.renderRowDetail}
             detailExpansion={view.tableProps.expansion}
             editing={view.tableProps.editing}
@@ -2132,7 +2149,7 @@ const ANTD_KIT: KitTable = {
       table: view.table,
       source: view.source,
       labels: view.labels,
-      chrome: view.chrome,
+      tableProps: view.tableProps,
     }),
 };
 

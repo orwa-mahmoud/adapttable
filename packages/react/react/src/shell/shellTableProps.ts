@@ -82,7 +82,6 @@ export function shellTableProps<TRow>(
       ChromeBodyData<TRow>["virtualization"]["measureRowPair"] | undefined,
     columnWindow,
     fitColumns: props.fitColumns,
-    tree: chrome.tree,
     stickyHeader: props.stickyHeader,
     stickyTop: props.stickyTop,
     headerFilters:
@@ -112,7 +111,6 @@ export function shellTableProps<TRow>(
     rowHeight: props.rowHeight,
     renderCard: props.renderCard,
     summaryRow: chromeProps.summaryRow,
-    grouping: chrome.grouping,
     groupingPanel: chrome.groupingPanel,
     dir: props.dir,
     assembly: (props as { assembly?: Partial<AssemblyFns<TRow>> }).assembly,

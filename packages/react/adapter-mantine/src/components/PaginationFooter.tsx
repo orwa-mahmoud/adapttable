@@ -159,6 +159,6 @@ export function PaginationFooter({
       setPage: onPageChange,
     },
     labels,
-    chrome: { grouping: showRowsPerPage ? undefined : true },
+    tableProps: { grouping: showRowsPerPage ? undefined : true },
   });
 }

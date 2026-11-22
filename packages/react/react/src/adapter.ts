@@ -400,12 +400,16 @@ export {
   FILTER_CHIPS_STATE,
   type FilterChipsState,
   FULLSCREEN_STATE,
+  GROUPING_STATE,
+  type GroupingState,
   ROW_ACTIONS_STATE,
   ROW_DETAIL_STATE,
   ROW_PINNING_STATE,
   type RowActionsState,
   type RowDetailState,
   TABLE_PROPS_STATE,
+  TREE_STATE,
+  type TreeState,
 } from "./features/stateKeys";
 export type {
   StaticFeatureHost,

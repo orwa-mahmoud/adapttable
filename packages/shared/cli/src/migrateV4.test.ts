@@ -220,9 +220,11 @@ describe("migrateV4Source", () => {
         "const rows = chrome.editingRows;",
         "const detail = chrome.detail;",
         "const pins = chrome.rowPinning;",
+        "const grouped = view.chrome.grouping;",
+        "const panel = chrome.groupingPanel;",
       ].join("\n")
     );
-    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 4, 5]);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 4, 5, 6]);
   });
 
   it("leaves a file that uses nothing v4 moved untouched", () => {

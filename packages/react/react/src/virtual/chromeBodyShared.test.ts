@@ -9,9 +9,8 @@
 import { DEFAULT_ROW_SIZE_PX } from "@adapttable/core/binding";
 import { describe, expect, it } from "vitest";
 
-import type { TableChrome } from "../chrome/tableChromeContract";
 import type { ComposedTableProps } from "../props";
-import { estimateBodyItemSize } from "./chromeBodyShared";
+import { type BodyChrome, estimateBodyItemSize } from "./chromeBodyShared";
 
 interface Row {
   id: string;
@@ -35,7 +34,7 @@ describe("estimateBodyItemSize", () => {
           },
         ],
       },
-    } as unknown as TableChrome<Row>;
+    } as unknown as BodyChrome<Row>;
     const sizeOf = estimateBodyItemSize(
       chrome,
       {

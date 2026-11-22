@@ -35,9 +35,11 @@ import {
   PINNING_LIVE,
 } from "./slotKeys";
 import {
+  GROUPING_STATE,
   ROW_ACTIONS_STATE,
   ROW_PINNING_STATE,
   type RowActionsState,
+  TREE_STATE,
 } from "./stateKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
@@ -87,9 +89,11 @@ function LivePinning<TRow>({
     urlPinnedRowIds: pinUrl.pinnedRowIds,
     writeUrl: pinUrl.onPinnedRowIdsChange,
   });
+  const groupingArmed = useFeatureState(GROUPING_STATE) !== undefined;
+  const treeArmed = useFeatureState(TREE_STATE) !== undefined;
   const rowPinning = useLiveRowPinning({
     requested,
-    blocked: chrome.groupingArmed || chrome.treeShaped,
+    blocked: groupingArmed || treeArmed,
     pinnedRowIds,
     onPinnedRowIdsChange,
     getRowId: chrome.getRowId,

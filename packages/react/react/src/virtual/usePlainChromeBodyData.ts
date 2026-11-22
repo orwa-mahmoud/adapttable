@@ -12,6 +12,7 @@ import type { TableChrome } from "../chrome/tableChromeContract";
 import type { BaseDataTableProps } from "../props";
 import {
   type ChromeBodyData,
+  useBodyChrome,
   useBodyLoadMore,
   useFetchNextPage,
   usePinnedScrollRows,
@@ -27,15 +28,16 @@ export function usePlainChromeBodyData<TRow>(
   chrome: TableChrome<TRow>,
   props: BaseDataTableProps<TRow>
 ): ChromeBodyData<TRow> {
+  const body = useBodyChrome(chrome);
   const { rowKey } = props;
-  const fetchNext = useFetchNextPage(chrome);
+  const fetchNext = useFetchNextPage(body);
   const scrollBoxRef = useRef<HTMLElement | null>(null);
   const virtualScrollRef = useCallback<RefCallback<HTMLElement>>((node) => {
     scrollBoxRef.current = node;
   }, []);
-  const partitioned = usePinnedScrollRows(chrome, rowKey);
-  const canLoadMore = bodyCanLoadMore(chrome);
-  const loadMoreRef = useBodyLoadMore(chrome, fetchNext, canLoadMore);
+  const partitioned = usePinnedScrollRows(body, rowKey);
+  const canLoadMore = bodyCanLoadMore(body);
+  const loadMoreRef = useBodyLoadMore(body, fetchNext, canLoadMore);
 
   return {
     virtualization: {
@@ -44,8 +46,8 @@ export function usePlainChromeBodyData<TRow>(
       paddingTop: 0,
       paddingBottom: 0,
     },
-    groupingEntries: chrome.grouping?.entries,
-    treeEntries: chrome.tree?.entries,
+    groupingEntries: body.grouping?.entries,
+    treeEntries: body.tree?.entries,
     loadMoreRef,
     canLoadMore,
     virtualScrollRef,

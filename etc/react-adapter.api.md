@@ -2821,6 +2821,9 @@ export { GROUPING_LIVE }
 // @public
 export const GROUPING_PANEL: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
 
+// @public
+export const GROUPING_STATE: FeatureStateKey<GroupingState<unknown>>;
+
 export { GroupingCapability }
 
 // @public
@@ -2887,6 +2890,25 @@ export { GroupingPanelState }
 
 // @public
 export type GroupingPanelSurfaceProps = GroupingPanelSurfaceProps_2<ReactNode, DragEvent_2>;
+
+// @public
+export interface GroupingState<TRow = unknown> {
+    // (undocumented)
+    readonly aggregates?: GroupAggregatesFn<TRow>;
+    readonly collapseAll: () => void;
+    // (undocumented)
+    readonly collapsed: GroupCollapseState;
+    readonly collapseToDepth: (depth: number) => void;
+    readonly entries: readonly GroupedFlatEntry<TRow>[];
+    readonly expandAll: () => void;
+    readonly groupBy: readonly string[];
+    // (undocumented)
+    readonly setGroupBy: (key: GroupByInput) => void;
+    readonly showMore: (entry: {
+        scope: "groups" | "rows";
+        groupKey?: string;
+    }) => void;
+}
 
 export { groupLeafCount }
 
@@ -3446,13 +3468,13 @@ export interface KitPagerFrameProps {
 
 // @public
 export interface KitPagerView {
-    readonly chrome: {
-        readonly grouping?: unknown;
-    };
     readonly labels: Required<TableLabels>;
     readonly source: Pick<TableSource<unknown>, "limit" | "defaultLimit" | "total" | "setLimit" | "setPage">;
     readonly table: {
         readonly pagination: PaginationInfo;
+    };
+    readonly tableProps: {
+        readonly grouping?: unknown;
     };
 }
 
@@ -4929,21 +4951,6 @@ export interface TableChrome<TRow> {
     errorState?: TableErrorState;
     featureNotices: readonly FeatureNotice[];
     getRowId: (row: TRow) => string;
-    grouping?: {
-        groupBy: readonly string[];
-        collapsed: GroupCollapseState;
-        aggregates?: GroupAggregatesFn<TRow>;
-        entries: readonly GroupedFlatEntry<TRow>[];
-        setGroupBy: (key: GroupByInput) => void;
-        expandAll: () => void;
-        collapseAll: () => void;
-        collapseToDepth: (depth: number) => void;
-        showMore: (entry: {
-            scope: "groups" | "rows";
-            groupKey?: string;
-        }) => void;
-    };
-    groupingArmed: boolean;
     groupingPanel?: GroupingPanelState;
     hasRowReorder: boolean;
     isMobile: boolean;
@@ -4955,15 +4962,6 @@ export interface TableChrome<TRow> {
     showFooter: boolean;
     source: TableSource<TRow>;
     table: UseDataTableResult<TRow>;
-    tree?: {
-        entries: readonly TreeEntry<TRow>[];
-        allEntries?: readonly TreeEntry<TRow>[];
-        getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
-        getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
-        expansion: TreeExpansionState;
-        columnKey?: string;
-    };
-    treeShaped: boolean;
 }
 
 export { TableCommandOptions }
@@ -5133,6 +5131,9 @@ export const TREE_CELL: FeatureSlotKey<TreeCellProps<unknown>>;
 
 export { TREE_LIVE }
 
+// @public
+export const TREE_STATE: FeatureStateKey<TreeState<unknown>>;
+
 export { TREE_TOGGLE }
 
 export { treeCardStyle }
@@ -5153,6 +5154,16 @@ export { TreeEntry }
 export { TreeExpansionState }
 
 export { treeRowAria }
+
+// @public
+export interface TreeState<TRow = unknown> {
+    readonly allEntries?: readonly TreeEntry<TRow>[];
+    readonly columnKey?: string;
+    readonly entries: readonly TreeEntry<TRow>[];
+    readonly expansion: TreeExpansionState;
+    readonly getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
+    readonly getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
+}
 
 export { treeTableAria }
 

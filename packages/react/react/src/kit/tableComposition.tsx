@@ -276,11 +276,10 @@ function toolbarOf<TRow>(
   view: DataTableShellResult<TRow>,
   props: KitTableProps<TRow>
 ): ReactNode {
-  const { chrome } = view;
   const toolbar = kit.toolbar<TRow>({
     ...view.toolbarProps,
     filtersMode: props.filtersMode ?? "popover",
-    loadsMore: view.canLoadMore && !chrome.grouping,
+    loadsMore: view.canLoadMore && !view.tableProps.grouping,
     filtersOpen: view.filtersOpen,
     onToggleFilters: view.filtersTrigger.onClick,
     onFiltersTriggerPointerDown: view.filtersTrigger.onPointerDown,

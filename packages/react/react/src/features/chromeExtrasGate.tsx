@@ -17,7 +17,14 @@ import type { EditableCellEditing } from "../editing/editableCellController";
 import { useFeatureState } from "./featureState";
 import { useChromeStages, usePublishTableRuntime } from "./providers";
 import type { ChromeExtraSlotProps } from "./slotKeys";
-import { EDITING_STATE, ROW_PINNING_STATE } from "./stateKeys";
+import {
+  EDITING_STATE,
+  GROUPING_STATE,
+  type GroupingState,
+  ROW_PINNING_STATE,
+  TREE_STATE,
+  type TreeState,
+} from "./stateKeys";
 
 /** The props a chrome stage reads and may hand on. */
 type StageTableProps<TRow> = ChromeExtraSlotProps<TRow>["props"];
@@ -44,6 +51,9 @@ function RuntimePublisher<TRow, TProps extends StageTableProps<TRow>>({
   const editing = useFeatureState(EDITING_STATE) as
     EditableCellEditing<TRow> | undefined;
   const rowPinning = useFeatureState(ROW_PINNING_STATE);
+  const grouping = useFeatureState(GROUPING_STATE) as
+    GroupingState<TRow> | undefined;
+  const tree = useFeatureState(TREE_STATE) as TreeState<TRow> | undefined;
   publisher.stage(
     chrome,
     { rowActions: props.rowActions, bulkActions: props.bulkActions },
@@ -52,6 +62,8 @@ function RuntimePublisher<TRow, TProps extends StageTableProps<TRow>>({
       filterRegistry: props.filterRegistry,
       editing,
       rowPinning,
+      grouping,
+      tree,
     }
   );
   const labels = chrome.table.labels;

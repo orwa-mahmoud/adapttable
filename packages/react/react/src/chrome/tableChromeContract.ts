@@ -2,23 +2,16 @@ import {
   type ColumnGroupRecord,
   type ConfirmHandler,
   type FeatureNotice,
-  type GroupAggregatesFn,
-  type GroupByInput,
-  type GroupedFlatEntry,
   type GroupingPanelState,
   type PinnedRows,
   type TableErrorState,
   type TableSource,
-  type TreeEntry,
-  type TreeShape,
 } from "@adapttable/core";
 import { type RefObject } from "react";
 
 import type { ColumnDef } from "../columnDef";
 import type { ReactUseColumnLayoutResult } from "../columns/useColumnLayout";
-import type { GroupCollapseState } from "../grouping/useGroupCollapse";
 import type { RowReorderState } from "../rows/rowReorder";
-import type { TreeExpansionState } from "../tree/useTreeExpansion";
 import { type UseDataTableResult } from "../useDataTable/useDataTable";
 
 /**
@@ -112,61 +105,6 @@ export interface TableChrome<TRow> {
    * Present iff `pinnedSummaryRows` was composed with at least one row.
    */
   pinnedRows?: PinnedRows<TRow>;
-  /**
-   * Whether grouping is armed — full-set overlay is on. Pinning and
-   * reorder read this rather than re-parsing `groupBy`.
-   */
-  groupingArmed: boolean;
-  /**
-   * Whether the host declared a tree. Pinning and reorder refuse a
-   * nested list.
-   */
-  treeShaped: boolean;
-  /**
-   * Tree bundle — present iff the host declared a hierarchy (`getChildren` or
-   * `getParentId`). A tree and a grouping are different models and can both be
-   * dormant; a table that arms both renders the tree, since the rows' own
-   * shape outranks a derived one.
-   */
-  tree?: {
-    /** The flattened hierarchy, in render order. */
-    entries: readonly TreeEntry<TRow>[];
-    /** Every loaded node, including descendants of collapsed parents. */
-    allEntries?: readonly TreeEntry<TRow>[];
-    /** Loaded descendants to read within an export's source scope. */
-    getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
-    /** Flat ancestry to reconstruct within an export's source scope. */
-    getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
-    /** Which nodes are open. */
-    expansion: TreeExpansionState;
-    /** Which column carries the chevron and the indent. */
-    columnKey?: string;
-  };
-  /**
-   * Row-grouping bundle — present iff an effective `groupBy` is set AND the
-   * source can supply a full filtered set (`allFilteredRows`). Omit
-   * `groupBy` and grouping stays fully dormant (package DNA: opt-in).
-   */
-  grouping?: {
-    /** The grouping keys in order — one entry for a flat group, more for nested. */
-    groupBy: readonly string[];
-    collapsed: GroupCollapseState;
-    aggregates?: GroupAggregatesFn<TRow>;
-    /** Flat group-header + leaf entries for adapters to render. */
-    entries: readonly GroupedFlatEntry<TRow>[];
-    setGroupBy: (key: GroupByInput) => void;
-    /** Open every group. */
-    expandAll: () => void;
-    /** Close every group, at every level. */
-    collapseAll: () => void;
-    /**
-     * Show the tree down to `depth` and no further — `0` leaves only the
-     * outermost headers, `1` opens the first level inside them.
-     */
-    collapseToDepth: (depth: number) => void;
-    /** Reveal the next page of groups, or of one group's rows. */
-    showMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => void;
-  };
   /** Interactive grouping strip state, present only with `groupingPanel()`. */
   groupingPanel?: GroupingPanelState;
   /**

@@ -196,7 +196,7 @@ describe("a lazily loaded tree node", () => {
 
   it("closes again when its children fail to arrive", async () => {
     const { table, onLoadChildren, fail } = lazyTree();
-    const expansion = () => table.view().chrome.tree!.expansion;
+    const expansion = () => table.view().tableProps.tree!.expansion;
 
     act(() => {
       expansion().toggle("p");
@@ -212,7 +212,7 @@ describe("a lazily loaded tree node", () => {
 
   it("stays closed when the reader closed it before the failure", async () => {
     const { table, fail } = lazyTree();
-    const expansion = () => table.view().chrome.tree!.expansion;
+    const expansion = () => table.view().tableProps.tree!.expansion;
 
     act(() => {
       expansion().toggle("p");
