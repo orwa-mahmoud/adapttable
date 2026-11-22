@@ -335,6 +335,7 @@ export function useSlotFills(slot: {
 const NO_FILLS: readonly SlotFill<ReactNode>[] = [];
 
 const LiveStageContext = createContext<readonly LiveStage<ReactNode>[]>([]);
+const ChromeStageContext = createContext<readonly LiveStage<ReactNode>[]>([]);
 
 /**
  * The live stages the composed features bring, in the order they run.
@@ -343,6 +344,15 @@ const LiveStageContext = createContext<readonly LiveStage<ReactNode>[]>([]);
  */
 export function useLiveStages(): readonly LiveStage<ReactNode>[] {
   return useContext(LiveStageContext);
+}
+
+/**
+ * The chrome stages the composed features bring, in the order they run.
+ *
+ * @returns The stages; empty for a table that composes none.
+ */
+export function useChromeStages(): readonly LiveStage<ReactNode>[] {
+  return useContext(ChromeStageContext);
 }
 
 /**
@@ -380,6 +390,10 @@ export function FeatureProviders({
   cell.current.featureIds = (features ?? []).map((feature) => feature.id);
   const renders = useMemo(() => slotFillsOf(features ?? []), [features]);
   const stages = useMemo(() => liveStagesOf(features ?? []), [features]);
+  const chromeStages = useMemo(
+    () => liveStagesOf(features ?? [], "chrome"),
+    [features]
+  );
   // The page's high-contrast sheet gains the base rules and the rules of
   // each feature this table composes.
   useEffect(() => {
@@ -397,7 +411,9 @@ export function FeatureProviders({
     <TableRuntimeContext.Provider value={cell}>
       <FeatureRenderContext.Provider value={renders}>
         <LiveStageContext.Provider value={stages}>
-          {tree}
+          <ChromeStageContext.Provider value={chromeStages}>
+            {tree}
+          </ChromeStageContext.Provider>
         </LiveStageContext.Provider>
       </FeatureRenderContext.Provider>
     </TableRuntimeContext.Provider>

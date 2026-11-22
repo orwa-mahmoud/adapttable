@@ -195,7 +195,6 @@ import { DirtyCellState } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
 import { DragEvent as DragEvent_2 } from 'react';
 import { edgePinStyle } from '@adapttable/core';
-import { EDIT_HISTORY_LIVE } from '@adapttable/core/binding';
 import { EditableCellActivateProps as EditableCellActivateProps_2 } from '@adapttable/core/binding';
 import { EditableCellButtonProps } from '@adapttable/core/binding';
 import { EditableCellController } from '@adapttable/core';
@@ -212,7 +211,6 @@ import { EditConflictPolicy } from '@adapttable/core';
 import { EditConflictState } from '@adapttable/core';
 import { EditEvent } from '@adapttable/core';
 import { EditEventHandler } from '@adapttable/core';
-import { EditHistoryLiveSlotProps as EditHistoryLiveSlotProps_2 } from '@adapttable/core/binding';
 import { EditHistoryState } from '@adapttable/core';
 import { EDITING_LIVE } from '@adapttable/core/binding';
 import { EditingBundle } from '@adapttable/core';
@@ -1179,10 +1177,10 @@ export type ChromeBodySlotProps<TRow = never> = ChromeBodySlotProps_2<TableChrom
 export type ChromeExtraDraw = <TRow>(props: ChromeExtraSlotProps<TRow>) => ReactNode;
 
 // @public
-export function ChromeExtrasGate<TRow>(input: {
+export function ChromeExtrasGate<TRow, TProps extends ChromeExtraSlotProps<TRow>["props"]>(input: {
     readonly chrome: TableChrome<TRow>;
-    readonly props: ComposedTableProps<TRow>;
-    readonly children: (chrome: TableChrome<TRow>) => ReactNode;
+    readonly props: TProps;
+    readonly children: (chrome: TableChrome<TRow>, props: TProps) => ReactNode;
 }): ReactNode;
 
 // @public
@@ -2142,8 +2140,6 @@ export function disabledHistory<TRow>(): EditHistoryState<TRow>;
 
 export { edgePinStyle }
 
-export { EDIT_HISTORY_LIVE }
-
 // @public
 export const EDITABLE_CELL: FeatureSlotKey<EditableCellSlotProps<unknown>>;
 
@@ -2232,12 +2228,6 @@ export interface EditHistoryHandle {
     readonly redo: () => number;
     readonly undo: () => number;
 }
-
-// @public
-export type EditHistoryLiveDraw = <TRow>(props: EditHistoryLiveSlotProps<TRow>) => ReactNode;
-
-// @public
-export type EditHistoryLiveSlotProps<TRow = never> = EditHistoryLiveSlotProps_2<TRow, EditHistoryState<TRow>, EditHistoryOptions, ColumnDef<TRow>, ReactNode>;
 
 // @public
 export interface EditHistoryOptions {
@@ -2970,12 +2960,6 @@ export { headerGroupRows }
 export { HeaderSelectionState }
 
 export { hideAllColumns }
-
-// @public
-export function HistoryLiveGate<TRow>(input: {
-    readonly shell: DataTableShellResult<TRow>;
-    readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
-}): ReactNode;
 
 // @public
 export interface HorizontalOverflow<E extends HTMLElement> {
@@ -4997,6 +4981,7 @@ export interface TableChrome<TRow> {
         expansion: RowExpansionState;
     };
     droppedColumns: readonly string[];
+    editHistory?: EditHistoryState<TRow>;
     editing?: EditableCellEditing<TRow>;
     editingRows: readonly TRow[];
     emptyVariant: "noData" | "noResults";

@@ -15179,14 +15179,6 @@
       "behavior": ""
     },
     {
-      "export": "CHROME_EXTRA_SLOT_ORDER",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "ChromeBodyDraw",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -15364,6 +15356,14 @@
     },
     {
       "export": "ChromeSortState",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ChromeStageKey",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -18211,7 +18211,7 @@
       "behavior": ""
     },
     {
-      "export": "EDIT_HISTORY_LIVE",
+      "export": "EDIT_HISTORY_STAGE",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-model",
@@ -18476,22 +18476,6 @@
     },
     {
       "export": "EditHistoryInput",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "EditHistoryLiveDraw",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "EditHistoryLiveSlotProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -22428,6 +22412,14 @@
     },
     {
       "export": "LiveStageKey",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "LiveStagePhase",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -47747,14 +47739,6 @@
       "behavior": ""
     },
     {
-      "export": "EDIT_HISTORY_LIVE",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
       "export": "EDITABLE_CELL",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -47927,22 +47911,6 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "EditHistoryLiveDraw",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "EditHistoryLiveSlotProps",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -49198,14 +49166,6 @@
       "export": "HeaderSelectionState",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "HistoryLiveGate",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
       "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""

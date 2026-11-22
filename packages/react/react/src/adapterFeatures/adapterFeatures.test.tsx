@@ -87,7 +87,7 @@ describe("adapter feature assembly", () => {
       "batch-edit-bar",
     ]);
     expect(features.dirtyIndicators().id).toBe("dirty-indicators");
-    expect(renderSlots(features.editHistory())).toEqual(["edit-history-live"]);
+    expect(renderSlots(features.editHistory())).toEqual(["edit-history"]);
     expect(renderSlots(features.undoRedoButtons())).toEqual(["toolbar-extras"]);
     expectKitRenders(editing, ["editable-cell"]);
     expectKitRenders(rowEditing, ["editable-cell", "row-edit-actions"]);
@@ -128,7 +128,7 @@ describe("adapter feature assembly", () => {
     });
 
     expect(renderSlots(features.editHistory())).toEqual([
-      "edit-history-live",
+      "edit-history",
       "toolbar-extras",
     ]);
     expectKitRenders(features.editHistory(), ["toolbar-extras"]);

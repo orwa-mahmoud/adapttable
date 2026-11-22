@@ -1,25 +1,37 @@
 /**
- * Live stages: the controllers a composed feature mounts once the table's
- * chrome is built — find, the keyboard grid, export, the selection figures.
+ * Live stages: what a composed feature mounts while the table renders. Chrome
+ * stages grow the table's chrome before the body is laid out — the column
+ * layout, grouping, the tree, selection, editing. Live stages run once the
+ * body is built — find, the keyboard grid, export, the selection figures.
  *
  * A feature brings its stage as one more render. The base walks the stages it
- * was given and names none of them: each stage says which live values it
- * reads and the one it writes, and the walk runs every writer before its
- * readers. A table that composes none of these features walks nothing and
- * carries none of their code.
+ * was given and names none of them: each stage says which values it reads and
+ * the one it writes, and the walk runs every writer before its readers. A
+ * table that composes none of these features walks nothing and carries none
+ * of their code.
  */
 import { type FeatureRender, type FeatureSlotKey } from "./featureKeys";
 
 /**
- * The live values a stage reads, and the one value it writes.
+ * Which walk a stage runs in: `"chrome"` grows the table's chrome before the
+ * body is laid out, `"live"` runs once the body is built.
+ *
+ * @public
+ */
+export type LiveStagePhase = "chrome" | "live";
+
+/**
+ * The values a stage reads, and the one value it writes.
  *
  * @public
  */
 export interface LiveStageDependencies {
-  /** Values written by earlier stages that this stage reads. */
+  /** Values written by earlier stages of the same walk that this stage reads. */
   readonly reads: readonly string[];
   /** The value this stage produces for the stages after it and the table. */
   readonly writes: string;
+  /** The walk the stage runs in. Defaults to `"live"`. */
+  readonly phase?: LiveStagePhase;
 }
 
 /**
@@ -70,11 +82,13 @@ function isLiveStageKey(
 }
 
 /**
- * The live stages a feature list brings, each after every stage that writes
- * a value it reads. Stages with no order between them keep id order, so the
- * same features always chain the same way whatever order the host wrote.
+ * The stages a feature list brings to one walk, each after every stage that
+ * writes a value it reads. Stages with no order between them keep id order,
+ * so the same features always chain the same way whatever order the host
+ * wrote.
  *
  * @param features - The table's composed features.
+ * @param phase - The walk to collect. Defaults to `"live"`.
  * @returns The stages in the order they run.
  * @throws When two stages write the same value, or stages read each other's
  *   values in a cycle — both are composition errors that no order can fix.
@@ -85,12 +99,14 @@ export function liveStagesOf<TNode>(
   features: readonly {
     readonly id: string;
     readonly renders?: readonly FeatureRender<never, TNode>[];
-  }[]
+  }[],
+  phase: LiveStagePhase = "live"
 ): readonly LiveStage<TNode>[] {
   const byId = new Map<string, LiveStage<TNode>>();
   for (const feature of features) {
     for (const entry of feature.renders ?? []) {
       if (!isLiveStageKey(entry.slot)) continue;
+      if ((entry.slot.stage.phase ?? "live") !== phase) continue;
       byId.set(entry.slot.id, {
         id: entry.slot.id,
         stage: entry.slot.stage,

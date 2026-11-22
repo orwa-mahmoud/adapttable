@@ -222,6 +222,7 @@ export {
   type LiveStageDependencies,
   type LiveStageKey,
   liveStageKey,
+  type LiveStagePhase,
   liveStagesOf,
   orderLiveStages,
 } from "./features/liveStages";
@@ -240,6 +241,7 @@ export {
   type ChromeBodySlotProps,
   type ChromeExtraDraw,
   type ChromeExtraSlotProps,
+  type ChromeStageKey,
   COLUMN_GROUP_TOGGLE,
   COLUMN_HEADER_RENAME,
   COLUMN_LAYOUT_LIVE,
@@ -251,11 +253,9 @@ export {
   CONTEXT_MENU,
   CONTEXT_MENU_LIVE,
   type ContextMenuLiveSlotProps,
-  EDIT_HISTORY_LIVE,
+  EDIT_HISTORY_STAGE,
   EDITABLE_CELL,
   type EditableCellSlotProps,
-  type EditHistoryLiveDraw,
-  type EditHistoryLiveSlotProps,
   EDITING_LIVE,
   EXPAND_TOGGLE,
   type ExpandToggleSlotProps,
@@ -905,7 +905,6 @@ export {
 } from "./layout/desktopAssembly";
 export {
   cellNavigationInput,
-  CHROME_EXTRA_SLOT_ORDER,
   exportPageOnly,
   finishShellBody,
   finishShellLive,

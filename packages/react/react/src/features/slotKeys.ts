@@ -27,7 +27,6 @@ import {
   CONTEXT_MENU_LIVE as NEUTRAL_CONTEXT_MENU_LIVE,
   EDITABLE_CELL as NEUTRAL_EDITABLE_CELL,
   type EditableCellSlotProps as NeutralEditableCellSlotProps,
-  type EditHistoryLiveSlotProps as NeutralEditHistoryLiveSlotProps,
   type ExportLiveSlotProps as NeutralExportLiveSlotProps,
   type FeatureSlotKey,
   FILL_HANDLE as NEUTRAL_FILL_HANDLE,
@@ -65,7 +64,6 @@ import type { BulkBarChromeProps } from "../chrome/bulkBarChrome";
 import type { TableChrome } from "../chrome/tableChromeContract";
 import type { ColumnDef } from "../columnDef";
 import type { EditableCellEditing } from "../editing/editableCellController";
-import type { EditHistoryState } from "../editing/editHistory";
 import type { ExportHandlerState } from "../export/useExportHandler";
 import type {
   FindInTableState,
@@ -80,7 +78,7 @@ import type {
 import type { GroupingPanelSlotProps } from "../grouping/GroupingPanelChrome";
 import type { SidePanelChromeProps } from "../layout/SidePanelChrome";
 import type { FullscreenState } from "../layout/useFullscreen";
-import type { ComposedTableProps, EditHistoryOptions } from "../props";
+import type { ComposedTableProps } from "../props";
 import type {
   RowReorderButtonsProps,
   RowReorderHandleProps,
@@ -349,30 +347,6 @@ export interface FindLiveSlotProps<
 export type FindLiveDraw = <TRow>(props: FindLiveSlotProps<TRow>) => ReactNode;
 
 /**
- * Edit-history plus the hook that records gestures —
- * `@adapttable/core`'s `EditHistoryLiveSlotProps` with React's history state.
- *
- * @public
- */
-export type EditHistoryLiveSlotProps<TRow = never> =
-  NeutralEditHistoryLiveSlotProps<
-    TRow,
-    EditHistoryState<TRow>,
-    EditHistoryOptions,
-    ColumnDef<TRow>,
-    ReactNode
-  >;
-
-/**
- * What fills `EDIT_HISTORY_LIVE`: the undo/redo hook for any row type.
- *
- * @public
- */
-export type EditHistoryLiveDraw = <TRow>(
-  props: EditHistoryLiveSlotProps<TRow>
-) => ReactNode;
-
-/**
  * Cell navigation plus the hook that arms the grid —
  * `@adapttable/core`'s `CellNavLiveSlotProps` with React's grid state.
  *
@@ -619,7 +593,7 @@ export {
   CELL_NAV_LIVE,
   CHROME_BODY,
   COLUMN_LAYOUT_LIVE,
-  EDIT_HISTORY_LIVE,
+  EDIT_HISTORY_STAGE,
   EDITING_LIVE,
   EXPANSION_LIVE,
   EXPORT_LIVE,

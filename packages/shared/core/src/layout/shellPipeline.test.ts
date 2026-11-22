@@ -19,7 +19,6 @@ import type { TableSource } from "../source/TableSource";
 import type { TreeEntry } from "../tree/treeRows";
 import {
   cellNavigationInput,
-  CHROME_EXTRA_SLOT_ORDER,
   exportPageOnly,
   finishShellBody,
   finishShellLive,
@@ -112,22 +111,6 @@ function makeChrome(
     ...overrides,
   };
 }
-
-describe("stage order", () => {
-  it("nests the chrome extras outermost first", () => {
-    expect(CHROME_EXTRA_SLOT_ORDER).toEqual([
-      "column-layout-live",
-      "filter-chips-live",
-      "grouping-live",
-      "tree-live",
-      "selection-live",
-      "row-actions-live",
-      "pinning-live",
-      "expansion-live",
-      "editing-live",
-    ]);
-  });
-});
 
 describe("renderedRowsOf", () => {
   it("prefers grouped leaves over a tree over the source rows", () => {

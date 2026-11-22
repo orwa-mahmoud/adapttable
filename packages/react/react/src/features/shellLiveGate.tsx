@@ -11,8 +11,8 @@ import {
   withShellOperations,
 } from "@adapttable/core/binding";
 /**
- * Mount shell interaction hooks in-tree: edit history, then the live stages
- * the composed features bring.
+ * Mount shell interaction hooks in-tree: the live stages the composed
+ * features bring.
  *
  * Each live value starts inert; a composed feature's stage replaces the one
  * it writes, so the lean table never imports those hooks. Enter-to-edit and batch recording live in
@@ -21,14 +21,10 @@ import {
  */
 import { type ReactNode, useMemo } from "react";
 
-import { withFindMarks } from "../find/findMarks";
 import type { DataTableShellResult } from "../useDataTableShell";
-import { rememberFeatureHost } from "./featureHost";
 import type { LiveStageProps, ShellLive } from "./liveStage";
 import {
-  FeatureSlot,
   useCurrentTableRuntimeReader,
-  useFeatureSlotFilled,
   useLiveStages,
   usePublishTableRuntime,
 } from "./providers";
@@ -37,68 +33,8 @@ import {
   DISABLED_FIND,
   DISABLED_FULLSCREEN,
   disabledGridFocus,
-  disabledHistory,
   windowedTableAria,
 } from "./shellLiveStubs";
-import { EDIT_HISTORY_LIVE, type EditHistoryLiveSlotProps } from "./slotKeys";
-
-interface HistoryResult<TRow> {
-  history: DataTableShellResult<TRow>["editHistory"];
-  onCellEdit: DataTableShellResult<TRow>["chromeProps"]["onCellEdit"];
-  /**
-   * Set by the editing entry. Absent when the slot is empty, so the host's
-   * own batch callback is left untouched and this file does not import the
-   * gesture wrapper.
-   */
-  onBatchEdit?: NonNullable<
-    DataTableShellResult<TRow>["chromeProps"]["onBatchEdit"]
-  >;
-}
-
-/**
- * Record edits before extras and the body run, so the editing bundle
- * sees the recording commit channel.
- *
- * @public
- */
-export function HistoryLiveGate<TRow>({
-  shell,
-  children,
-}: {
-  readonly shell: DataTableShellResult<TRow>;
-  readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
-}): ReactNode {
-  "use no memo";
-  const filled = useFeatureSlotFilled(EDIT_HISTORY_LIVE);
-  const apply = (result: HistoryResult<TRow>) => {
-    const chromeProps = {
-      ...shell.chromeProps,
-      onCellEdit: result.onCellEdit,
-      onBatchEdit: result.onBatchEdit ?? shell.chromeProps.onBatchEdit,
-    };
-    rememberFeatureHost(chromeProps, shell.featureHost);
-    return children({
-      ...shell,
-      editHistory: result.history,
-      chromeProps,
-    });
-  };
-  const historyProps = {
-    editHistory: shell.chromeProps.editHistory,
-    columns: shell.chrome.allColumns,
-    onCellEdit: shell.chromeProps.onCellEdit,
-    onBatchEdit: shell.chromeProps.onBatchEdit,
-    children: apply,
-  } satisfies EditHistoryLiveSlotProps<TRow>;
-  return filled ? (
-    <FeatureSlot slot={EDIT_HISTORY_LIVE} props={historyProps} />
-  ) : (
-    apply({
-      history: disabledHistory(),
-      onCellEdit: shell.chromeProps.onCellEdit,
-    })
-  );
-}
 
 type StageProps<TRow> = LiveStageProps<TRow>;
 
@@ -158,9 +94,8 @@ function LiveChain<TRow>({
 }
 
 /**
- * The grid without the keyboard-grid feature still names its real size —
- * assistive tech can only count the slice in the DOM — and find still marks
- * its matches.
+ * The grid without the keyboard-grid feature still names its real size:
+ * assistive tech can only count the slice in the DOM.
  */
 function PlainGridFocus<TRow>({
   shell,
@@ -189,22 +124,19 @@ function PlainGridFocus<TRow>({
       }),
     [rowCount, rowsLength, columnsLength, columnsWindowed, firstRowIndex]
   );
-  return children({
-    ...live,
-    gridFocus: withFindMarks(windowedAria, live.find, firstRowIndex),
-  });
+  return children({ ...live, gridFocus: windowedAria });
 }
 
 const PLAIN_GRID_STAGE = baseStage(
   "grid-attributes",
-  { reads: ["find"], writes: "gridFocus" },
+  { reads: [], writes: "gridFocus" },
   PlainGridFocus
 );
 
 /**
  * Overlay find, grid focus, export and fullscreen onto a finished shell.
  *
- * History is applied first by {@link HistoryLiveGate}.
+ * Edit history ran earlier, as a chrome stage.
  *
  * @public
  */

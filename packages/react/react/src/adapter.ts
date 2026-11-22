@@ -321,7 +321,7 @@ export {
   usePublishTableRuntime,
   useTableRuntime,
 } from "./features/providers";
-export { HistoryLiveGate, ShellLiveGate } from "./features/shellLiveGate";
+export { ShellLiveGate } from "./features/shellLiveGate";
 export {
   DISABLED_EXPORT,
   DISABLED_FIND,
@@ -338,8 +338,6 @@ export type {
   ColumnHeaderRenameSlotProps,
   ContextMenuLiveSlotProps,
   EditableCellSlotProps,
-  EditHistoryLiveDraw,
-  EditHistoryLiveSlotProps,
   ExpandToggleSlotProps,
   ExportLiveDraw,
   ExportLiveSlotProps,
@@ -372,7 +370,6 @@ export {
   COMMAND_PALETTE_LIVE,
   CONTEXT_MENU,
   CONTEXT_MENU_LIVE,
-  EDIT_HISTORY_LIVE,
   EDITABLE_CELL,
   EDITING_LIVE,
   EXPAND_TOGGLE,

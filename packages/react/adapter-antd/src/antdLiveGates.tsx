@@ -1,13 +1,12 @@
 /**
  * Mount antd interaction hooks in-tree, the same way the shell does.
  *
- * antd builds its chrome by hand, but the engines — edit history, find, grid
- * focus, export — still have to stay behind live slots. This file imports the
+ * antd builds its chrome by hand, but the engines — find, grid focus,
+ * export — still have to stay behind live slots. This file imports the
  * slots and the inert stubs, never the hooks, so the adapter root graph
  * matches the other kits.
  */
 import {
-  type BatchRowEdit,
   type EditHistoryState,
   type FindInTableState,
 } from "@adapttable/react";
@@ -17,11 +16,7 @@ import {
   type ColumnDef,
   DISABLED_EXPORT,
   DISABLED_FIND,
-  disabledHistory,
-  EDIT_HISTORY_LIVE,
   type EditableCellEditing,
-  type EditHistoryLiveSlotProps,
-  type EditHistoryOptions,
   EXPORT_LIVE,
   type ExportHandlerState,
   type ExportLiveSlotProps,
@@ -47,59 +42,6 @@ import { type ReactNode, type RefObject, useMemo } from "react";
 import type { DataTableProps } from "./types";
 
 type LiveProps<TRow> = DataTableProps<TRow> & FeatureProps<TRow>;
-
-/**
- * Record edits before chrome runs, so the editing bundle sees the
- * recording commit channel.
- */
-export function AntdHistoryGate<TRow>({
-  editHistory,
-  columns,
-  onCellEdit,
-  onBatchEdit,
-  children,
-}: {
-  readonly editHistory: boolean | EditHistoryOptions | undefined;
-  readonly columns: readonly ColumnDef<TRow>[];
-  readonly onCellEdit:
-    ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
-  readonly onBatchEdit:
-    ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
-  readonly children: (result: {
-    history: EditHistoryState<TRow>;
-    onCellEdit:
-      ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
-    onBatchEdit:
-      ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
-  }) => ReactNode;
-}): ReactNode {
-  const filled = useFeatureSlotFilled(EDIT_HISTORY_LIVE);
-  const apply = (result: {
-    history: EditHistoryState<TRow>;
-    onCellEdit:
-      ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
-    onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
-  }) =>
-    children({
-      ...result,
-      // The editing entry wraps the callback when the slot is filled. An empty
-      // slot leaves the host callback as it arrived, so this file does not
-      // import the gesture wrapper.
-      onBatchEdit: result.onBatchEdit ?? onBatchEdit,
-    });
-  const historyProps = {
-    editHistory,
-    columns,
-    onCellEdit,
-    onBatchEdit,
-    children: apply,
-  } as unknown as EditHistoryLiveSlotProps<unknown>;
-  return filled ? (
-    <FeatureSlot slot={EDIT_HISTORY_LIVE} props={historyProps} />
-  ) : (
-    apply({ history: disabledHistory(), onCellEdit })
-  );
-}
 
 export interface AntdLiveState {
   find: FindInTableState;

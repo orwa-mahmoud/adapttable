@@ -138,6 +138,18 @@ describe("migrateV4Source", () => {
     ]);
   });
 
+  it("reports the chrome order constant and the history gate", () => {
+    const result = migrateV4Source(
+      [
+        "const order = CHROME_EXTRA_SLOT_ORDER;",
+        "<HistoryLiveGate shell={shell}>{render}</HistoryLiveGate>;",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 2]);
+    expect(result.issues[1]?.message).toContain("EDIT_HISTORY_STAGE");
+  });
+
   it("leaves a file that uses nothing v4 moved untouched", () => {
     const source = 'import { DataTable } from "@adapttable/mui";\n';
     expect(migrateV4Source(source)).toEqual({

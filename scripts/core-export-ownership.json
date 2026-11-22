@@ -6673,17 +6673,6 @@
       "subpaths": ["./binding"]
     },
     {
-      "name": "CHROME_EXTRA_SLOT_ORDER",
-      "kind": "runtime",
-      "module": "layout/shellPipeline.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "layout/shellPipeline.ts#CHROME_EXTRA_SLOT_ORDER",
-      "subpaths": ["./binding"]
-    },
-    {
       "name": "chromeBodyRegion",
       "kind": "runtime",
       "module": "layout/tableChromeState.ts",
@@ -8939,14 +8928,14 @@
       "subpaths": ["./binding"]
     },
     {
-      "name": "EDIT_HISTORY_LIVE",
+      "name": "EDIT_HISTORY_STAGE",
       "kind": "runtime",
       "module": "features/slotContract.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "features/slotContract.ts#EDIT_HISTORY_LIVE",
+      "identity": "features/slotContract.ts#EDIT_HISTORY_STAGE",
       "subpaths": ["./binding"]
     },
     {
@@ -14945,6 +14934,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "ChromeStageKey",
+      "kind": "type",
+      "module": "features/slotContract.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/slotContract.ts#ChromeStageKey",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "ChromeVirtualPadSlot",
       "kind": "type",
       "module": "layout/chromeModel.ts",
@@ -15822,28 +15822,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editableCellContract.ts#EditableCellSlots",
-      "subpaths": ["./binding"]
-    },
-    {
-      "name": "EditHistoryLiveDraw",
-      "kind": "type",
-      "module": "features/slotContract.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "features/slotContract.ts#EditHistoryLiveDraw",
-      "subpaths": ["./binding"]
-    },
-    {
-      "name": "EditHistoryLiveSlotProps",
-      "kind": "type",
-      "module": "features/slotContract.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "features/slotContract.ts#EditHistoryLiveSlotProps",
       "subpaths": ["./binding"]
     },
     {
@@ -17571,6 +17549,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/liveStages.ts#LiveStageKey",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "LiveStagePhase",
+      "kind": "type",
+      "module": "features/liveStages.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/liveStages.ts#LiveStagePhase",
       "subpaths": ["./binding"]
     },
     {

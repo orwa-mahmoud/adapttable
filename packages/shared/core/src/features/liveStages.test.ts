@@ -7,6 +7,19 @@ import { describe, expect, it } from "vitest";
 
 import { featureSlotKey, slotRender } from "./featureKeys";
 import { liveStageKey, liveStagesOf } from "./liveStages";
+import {
+  type ChromeExtraDraw,
+  COLUMN_LAYOUT_LIVE,
+  EDIT_HISTORY_STAGE,
+  EDITING_LIVE,
+  EXPANSION_LIVE,
+  FILTER_CHIPS_LIVE,
+  GROUPING_LIVE,
+  PINNING_LIVE,
+  ROW_ACTIONS_LIVE,
+  SELECTION_LIVE,
+  TREE_LIVE,
+} from "./slotContract";
 
 const stage = (id: string, writes: string, reads: string[] = []) => ({
   id,
@@ -15,6 +28,9 @@ const stage = (id: string, writes: string, reads: string[] = []) => ({
 
 const order = (features: readonly ReturnType<typeof stage>[]) =>
   liveStagesOf(features).map((entry) => entry.id);
+
+/** A chrome stage that hands the chrome on as it found it. */
+const passThrough: ChromeExtraDraw = (props) => props.children(props.chrome);
 
 describe("liveStagesOf", () => {
   const find = stage("find-in-table", "find");
@@ -64,5 +80,71 @@ describe("liveStagesOf", () => {
     expect(() =>
       order([stage("a", "x", ["y"]), stage("b", "y", ["x"])])
     ).toThrow(/cycle: a, b/);
+  });
+
+  it("keeps the chrome walk and the live walk apart", () => {
+    const layout = {
+      id: "column-layout",
+      renders: [slotRender(COLUMN_LAYOUT_LIVE, passThrough)],
+    };
+    expect(liveStagesOf([layout, find])).toEqual([
+      expect.objectContaining({ id: "find-in-table" }),
+    ]);
+    expect(
+      liveStagesOf([layout, find], "chrome").map((entry) => entry.id)
+    ).toEqual(["column-layout-live"]);
+  });
+});
+
+describe("the chrome stages", () => {
+  const chromeStages = [
+    EDITING_LIVE,
+    PINNING_LIVE,
+    EXPANSION_LIVE,
+    ROW_ACTIONS_LIVE,
+    SELECTION_LIVE,
+    TREE_LIVE,
+    GROUPING_LIVE,
+    FILTER_CHIPS_LIVE,
+    COLUMN_LAYOUT_LIVE,
+    EDIT_HISTORY_STAGE,
+  ].map((slot) => ({
+    id: slot.id,
+    renders: [slotRender(slot, passThrough)],
+  }));
+  const walk = liveStagesOf(chromeStages, "chrome").map((entry) => entry.id);
+  const before = (first: string, then: string) =>
+    expect(walk.indexOf(first)).toBeLessThan(walk.indexOf(then));
+
+  it("lays the columns out before grouping buckets them, and groups before the tree", () => {
+    before("column-layout-live", "grouping-live");
+    before("grouping-live", "tree-live");
+  });
+
+  it("settles the row set before selection, row actions and pinning read it", () => {
+    before("grouping-live", "selection-live");
+    before("tree-live", "selection-live");
+    before("selection-live", "row-actions-live");
+    before("row-actions-live", "pinning-live");
+  });
+
+  it("records history before editing, and edits last of the row stages", () => {
+    before("edit-history", "editing-live");
+    for (const id of [
+      "column-layout-live",
+      "grouping-live",
+      "tree-live",
+      "selection-live",
+      "pinning-live",
+    ]) {
+      before(id, "editing-live");
+    }
+  });
+
+  it("runs every chrome stage once", () => {
+    const byName = (left: string, right: string) => left.localeCompare(right);
+    expect([...walk].sort(byName)).toEqual(
+      chromeStages.map((entry) => entry.id).sort(byName)
+    );
   });
 });

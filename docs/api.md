@@ -289,15 +289,16 @@ The heavy pieces of body assembly a feature can replace — cell spanning, extra
 rows, the resize handle — are typed as `AssemblyFns`, and `virtualize` takes
 `VirtualizeOptions`.
 
-A feature whose behaviour is a hook rather than a component fills a **live**
-slot instead: the hook mounts inside the table and hands its state back down,
-so a table that never imported the feature never carries it. Chrome-shaped
-state arrives through `ChromeExtrasGate` (`ChromeExtraSlotProps`) —
-`COLUMN_LAYOUT_LIVE`, `FILTER_CHIPS_LIVE`, `GROUPING_LIVE`, `TREE_LIVE`,
-`SELECTION_LIVE`, `ROW_ACTIONS_LIVE`, `PINNING_LIVE`, `EXPANSION_LIVE` and
-`EDITING_LIVE` — and interaction state through `HistoryLiveGate`
-(`EDIT_HISTORY_LIVE`, `EditHistoryLiveSlotProps`) and `ShellLiveGate`:
-`FIND_LIVE` (`FindLiveSlotProps`), `CELL_NAV_LIVE` (`CellNavLiveSlotProps`),
+A feature whose behaviour is a hook rather than a component fills a **stage**
+instead: the hook mounts inside the table and hands its state on, so a table
+that never imported the feature never carries it. Chrome stages
+(`ChromeStageKey`, `ChromeExtraSlotProps`) grow the chrome before the body is
+laid out and run through `ChromeExtrasGate`, each after the stages whose values
+it reads — `EDIT_HISTORY_STAGE`, `COLUMN_LAYOUT_LIVE`, `FILTER_CHIPS_LIVE`,
+`GROUPING_LIVE`, `TREE_LIVE`, `SELECTION_LIVE`, `ROW_ACTIONS_LIVE`,
+`PINNING_LIVE`, `EXPANSION_LIVE` and `EDITING_LIVE`; a chrome stage may hand
+on new props, which is how edit history wraps the commit channels. Interaction
+state arrives through `ShellLiveGate`: `FIND_LIVE` (`FindLiveSlotProps`), `CELL_NAV_LIVE` (`CellNavLiveSlotProps`),
 `EXPORT_LIVE` (`ExportLiveSlotProps`), `FULLSCREEN_LIVE`
 (`FullscreenLiveSlotProps`), `SELECTION_STATS_LIVE`
 (`SelectionStatsLiveSlotProps`), `COMMAND_PALETTE_LIVE` and
@@ -305,7 +306,7 @@ state arrives through `ChromeExtrasGate` (`ChromeExtraSlotProps`) —
 an inert stand-in through, so the same chrome renders either way. Every live
 slot above but the command palette and context menu is a row slot key, each
 with its fill's type, which a fill names when it fills the slot: `ChromeExtraDraw`, `ChromeBodyDraw`,
-`EditHistoryLiveDraw`, `FindLiveDraw`, `CellNavLiveDraw`, `ExportLiveDraw`,
+`FindLiveDraw`, `CellNavLiveDraw`, `ExportLiveDraw`,
 `FullscreenLiveDraw` and `SelectionStatsLiveDraw`.
 
 Factories: `feature` (ad-hoc) · `rowReorder` · `rowPinning` · `cellSpan` ·
@@ -1399,12 +1400,13 @@ shares, so a new binding calls them rather than re-deriving them.
   family as one entry (`FeatureListEntry`); `flattenFeatures` puts each
   family's members in its place and returns a list without families as
   itself.
-- **Shell pipeline.** `CHROME_EXTRA_SLOT_ORDER` fixes the order of the extra
-  slots. A feature brings its live stage under a `liveStageKey`
-  (`LiveStageKey`, `LiveStageDependencies`) that names the live values it reads
-  and the one it writes; `liveStagesOf` collects the composed stages and
-  `orderLiveStages` (`LiveStage`) runs each after the stages it reads from.
-  `TableRuntimePublisher` stages each render (`stage`) and builds the runtime
+- **Shell pipeline.** A feature brings its stage under a `liveStageKey`
+  (`LiveStageKey`, `LiveStageDependencies`) that names the values it reads,
+  the one it writes and its walk (`LiveStagePhase`: `"chrome"` before the body
+  is laid out, `"live"` after); `liveStagesOf(features, phase)` collects one
+  walk's stages and `orderLiveStages` (`LiveStage`) runs each after the stages
+  it reads from. `TableRuntimePublisher` stages each render
+  (`stage(chrome, actions)`, the host's `RuntimeActions`) and builds the runtime
   view on its first read (`view`), keeping it until the next render; rendered
   rows (`visibleRows`) are read without the view. It projects through
   `tableRuntimeView`, `renderedRowsOf`, `readableRowLabel`,

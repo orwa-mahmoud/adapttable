@@ -56,27 +56,6 @@ import type { TreeContribution } from "../tree/treeBindingState";
 import type { BulkAction, RowAction, TableLabels } from "../types";
 import { sourceWindowStart } from "./chromeModel";
 
-/**
- * The chrome-extra slots, outermost first.
- *
- * Each may replace fields the next reads — the layout decides which columns
- * exist before grouping buckets them, and grouping decides the row set before
- * editing addresses a row — so the sequence is the contract.
- *
- * @public
- */
-export const CHROME_EXTRA_SLOT_ORDER = [
-  "column-layout-live",
-  "filter-chips-live",
-  "grouping-live",
-  "tree-live",
-  "selection-live",
-  "row-actions-live",
-  "pinning-live",
-  "expansion-live",
-  "editing-live",
-] as const;
-
 /** A column as the runtime projection reads it. */
 export type RuntimeColumn<TRow> = ColumnMetadata<TRow>;
 

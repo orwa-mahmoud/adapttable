@@ -22,7 +22,6 @@ import type {
 } from "../columns/columnMenuModel";
 import type { ColumnModel } from "../contracts/columns";
 import type { RowCallback } from "../contracts/rowCallback";
-import type { BatchEditHandler } from "../editing/batchEditing";
 import type {
   BatchEditBarProps,
   RowEditActionsProps,
@@ -53,6 +52,7 @@ import type {
 import type { BulkAction, Direction, TableLabels } from "../types";
 import type { FeatureHostState } from "./currentHost";
 import { featureSlotKey, type RowSlotKey } from "./featureKeys";
+import { type LiveStageDependencies, liveStageKey } from "./liveStages";
 
 /**
  * The Columns menu in the toolbar.
@@ -526,62 +526,6 @@ export const FIND_LIVE = featureSlotKey<never>("find-live", {
 }) as RowSlotKey<FindLiveDraw>;
 
 /**
- * Edit history plus the state that records gestures.
- *
- * @typeParam TRow - The row type.
- * @typeParam THistory - The binding's history state.
- * @typeParam TOptions - The binding's history options.
- * @typeParam TColumn - The binding's column type.
- * @typeParam TNode - The binding's render node.
- *
- * @public
- */
-export interface EditHistoryLiveSlotProps<
-  TRow = unknown,
-  THistory = unknown,
-  TOptions = unknown,
-  TColumn = ColumnModel<TRow>,
-  TNode = unknown,
-> {
-  /** History options from the composed feature / prop. */
-  editHistory: boolean | TOptions | undefined;
-  /** Columns, for reading a cell's value before it changes. */
-  columns: readonly TColumn[];
-  /** The host's commit channel. */
-  onCellEdit?: RowCallback<
-    [row: NoInfer<TRow>, key: string, nextValue: unknown],
-    unknown
-  >;
-  /** The host's batch channel, recorded as one gesture per batch. */
-  onBatchEdit?: BatchEditHandler<TRow>;
-  /** The table; receives history and the recording commit channels. */
-  children: (result: {
-    history: THistory;
-    onCellEdit:
-      ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
-    onBatchEdit?: BatchEditHandler<TRow>;
-  }) => TNode;
-}
-
-/**
- * What fills the edit-history stage: one function for any row and any binding's types.
- *
- * @public
- */
-export type EditHistoryLiveDraw = <TRow, THistory, TOptions, TColumn, TNode>(
-  props: EditHistoryLiveSlotProps<TRow, THistory, TOptions, TColumn, TNode>
-) => TNode;
-
-/**
- * Undo and redo.
- *
- * @public
- */
-export const EDIT_HISTORY_LIVE = featureSlotKey<never>("edit-history-live", {
-  single: true,
-}) as RowSlotKey<EditHistoryLiveDraw>;
-
-/**
  * Cell navigation plus the state that arms the grid.
  *
  * @typeParam TOptions - The grid options the binding passes after chrome ran.
@@ -751,8 +695,12 @@ export interface ChromeExtraSlotProps<
    * backend so extras that own URL state (pin lists) share one adapter.
    */
   props: TProps;
-  /** Continue with the overlaid chrome. */
-  children: (chrome: TChrome) => TNode;
+  /**
+   * Continue with the overlaid chrome, and with new props when this stage
+   * changes what the stages after it and the table read (edit history wraps
+   * the commit channels).
+   */
+  children: (chrome: TChrome, props?: TProps) => TNode;
 }
 
 /**
@@ -765,13 +713,46 @@ export type ChromeExtraDraw = <TChrome, TProps, TNode>(
 ) => TNode;
 
 /**
+ * A chrome stage: one render for any row and binding, run in the chrome walk
+ * in the order its reads and writes give it.
+ *
+ * @public
+ */
+export type ChromeStageKey = RowSlotKey<ChromeExtraDraw> & {
+  readonly stage: LiveStageDependencies;
+};
+
+/* @__NO_SIDE_EFFECTS__ */
+function chromeStageKey(
+  id: string,
+  reads: readonly string[],
+  writes: string
+): ChromeStageKey {
+  return liveStageKey<never>(id, {
+    reads,
+    writes,
+    phase: "chrome",
+  }) as ChromeStageKey;
+}
+
+/**
+ * Undo and redo for the table: records edits and wraps the commit channels
+ * before the stages that edit run.
+ *
+ * @public
+ */
+export const EDIT_HISTORY_STAGE = chromeStageKey("edit-history", [], "history");
+
+/**
  * Grouping row model, collapse and paging.
  *
  * @public
  */
-export const GROUPING_LIVE = featureSlotKey<never>("grouping-live", {
-  single: true,
-}) as RowSlotKey<ChromeExtraDraw>;
+export const GROUPING_LIVE = chromeStageKey(
+  "grouping-live",
+  ["columnLayout"],
+  "grouping"
+);
 
 /**
  * Kit-owned interactive grouping strip above the table body.
@@ -788,72 +769,84 @@ export const GROUPING_PANEL = featureSlotKey<GroupingPanelSlotProps>(
  *
  * @public
  */
-export const TREE_LIVE = featureSlotKey<never>("tree-live", {
-  single: true,
-}) as RowSlotKey<ChromeExtraDraw>;
+export const TREE_LIVE = chromeStageKey(
+  "tree-live",
+  ["columnLayout", "grouping"],
+  "tree"
+);
 
 /**
  * Row-detail / nested-table expansion.
  *
  * @public
  */
-export const EXPANSION_LIVE = featureSlotKey<never>("expansion-live", {
-  single: true,
-}) as RowSlotKey<ChromeExtraDraw>;
+export const EXPANSION_LIVE = chromeStageKey("expansion-live", [], "detail");
 
 /**
  * Cell, row and batch editing.
  *
  * @public
  */
-export const EDITING_LIVE = featureSlotKey<never>("editing-live", {
-  single: true,
-}) as RowSlotKey<ChromeExtraDraw>;
+export const EDITING_LIVE = chromeStageKey(
+  "editing-live",
+  ["history", "columnLayout", "grouping", "tree", "selection", "rowPinning"],
+  "editing"
+);
 
 /**
  * Row-pin state machine.
  *
  * @public
  */
-export const PINNING_LIVE = featureSlotKey<never>("pinning-live", {
-  single: true,
-}) as RowSlotKey<ChromeExtraDraw>;
+export const PINNING_LIVE = chromeStageKey(
+  "pinning-live",
+  ["columnLayout", "grouping", "tree", "rowMutations"],
+  "rowPinning"
+);
 
 /**
  * Filter-tree chips merged onto chrome.
  *
  * @public
  */
-export const FILTER_CHIPS_LIVE = featureSlotKey<never>("filter-chips-live", {
-  single: true,
-}) as RowSlotKey<ChromeExtraDraw>;
+export const FILTER_CHIPS_LIVE = chromeStageKey(
+  "filter-chips-live",
+  [],
+  "filterChips"
+);
 
 /**
  * User column layout (hide / order / pin / resize).
  *
  * @public
  */
-export const COLUMN_LAYOUT_LIVE = featureSlotKey<never>("column-layout-live", {
-  single: true,
-}) as RowSlotKey<ChromeExtraDraw>;
+export const COLUMN_LAYOUT_LIVE = chromeStageKey(
+  "column-layout-live",
+  [],
+  "columnLayout"
+);
 
 /**
  * Add / duplicate / delete and host row actions.
  *
  * @public
  */
-export const ROW_ACTIONS_LIVE = featureSlotKey<never>("row-actions-live", {
-  single: true,
-}) as RowSlotKey<ChromeExtraDraw>;
+export const ROW_ACTIONS_LIVE = chromeStageKey(
+  "row-actions-live",
+  ["columnLayout", "selection"],
+  "rowMutations"
+);
 
 /**
  * Row selection state machine.
  *
  * @public
  */
-export const SELECTION_LIVE = featureSlotKey<never>("selection-live", {
-  single: true,
-}) as RowSlotKey<ChromeExtraDraw>;
+export const SELECTION_LIVE = chromeStageKey(
+  "selection-live",
+  ["grouping", "tree"],
+  "selection"
+);
 
 /**
  * Selection aggregates. Computed only when the feature is composed.

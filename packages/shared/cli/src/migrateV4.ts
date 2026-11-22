@@ -210,6 +210,14 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
     SERVER_SOURCE_PROP,
   ],
   [
+    /\bCHROME_EXTRA_SLOT_ORDER\b/g,
+    'CHROME_EXTRA_SLOT_ORDER was removed; chrome stages declare what they read and write, and liveStagesOf(features, "chrome") orders them.',
+  ],
+  [
+    /\b(?:HistoryLiveGate|EDIT_HISTORY_LIVE|EditHistoryLiveSlotProps|EditHistoryLiveDraw)\b/g,
+    "Edit history is the EDIT_HISTORY_STAGE chrome stage, which ChromeExtrasGate runs; the history gate and its slot were removed.",
+  ],
+  [
     /\bDataModeProps\b/g,
     "DataModeProps was removed; DataTableProps is DataTablePropsBase.",
   ],

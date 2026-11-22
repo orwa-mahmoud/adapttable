@@ -29,6 +29,7 @@ import {
   ContextMenuLiveGate,
   type ContextMenuLiveSlotProps,
   DEFAULT_CARD_SIZE_PX,
+  disabledHistory,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_ROW_PARTS,
   featureHostOf,
@@ -146,7 +147,7 @@ import {
   useSyncExternalStore,
 } from "react";
 
-import { AntdHistoryGate, AntdInteractionGate } from "./antdLiveGates";
+import { AntdInteractionGate } from "./antdLiveGates";
 import { useAntdTableParts } from "./antdParts";
 import {
   type AntdRowScroll,
@@ -1969,41 +1970,25 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     [runtime.filterLabels, props.filterLabels]
   );
   return (
-    <AntdHistoryGate
-      editHistory={props.editHistory}
-      columns={dataColumns}
-      onCellEdit={props.onCellEdit}
-      onBatchEdit={props.onBatchEdit}
-    >
-      {({
-        history,
-        onCellEdit: recordingCellEdit,
-        onBatchEdit: recordingBatchEdit,
-      }) => (
-        <AntdChromeSession
-          props={props}
-          density={density}
-          onDensityChange={onDensityChange}
-          recordingCellEdit={recordingCellEdit}
-          recordingBatchEdit={recordingBatchEdit}
-          history={history}
-          resolvedSource={resolvedSource}
-          filtersNode={filtersNode}
-          runtime={runtime}
-          filterLabels={filterLabels}
-          featureHost={featureHost}
-          resolvedUrlAdapter={resolvedUrlAdapter}
-          slots={slots}
-          className={className}
-          classNames={classNames}
-          animate={animate}
-          bordered={bordered}
-          virtualize={virtualize}
-          size={size}
-          filtersMode={filtersMode}
-        />
-      )}
-    </AntdHistoryGate>
+    <AntdChromeSession
+      props={props}
+      density={density}
+      onDensityChange={onDensityChange}
+      resolvedSource={resolvedSource}
+      filtersNode={filtersNode}
+      runtime={runtime}
+      filterLabels={filterLabels}
+      featureHost={featureHost}
+      resolvedUrlAdapter={resolvedUrlAdapter}
+      slots={slots}
+      className={className}
+      classNames={classNames}
+      animate={animate}
+      bordered={bordered}
+      virtualize={virtualize}
+      size={size}
+      filtersMode={filtersMode}
+    />
   );
 }
 
@@ -2011,9 +1996,6 @@ function AntdChromeSession<TRow>({
   props,
   density,
   onDensityChange,
-  recordingCellEdit,
-  recordingBatchEdit,
-  history,
   resolvedSource,
   filtersNode,
   runtime,
@@ -2032,9 +2014,6 @@ function AntdChromeSession<TRow>({
   readonly props: ComposedProps<TRow>;
   readonly density: ComposedProps<TRow>["density"];
   readonly onDensityChange: ComposedProps<TRow>["onDensityChange"];
-  readonly recordingCellEdit: ComposedProps<TRow>["onCellEdit"];
-  readonly recordingBatchEdit: ComposedProps<TRow>["onBatchEdit"];
-  readonly history: EditHistoryState<TRow>;
   readonly resolvedSource: TableSource<TRow>;
   readonly filtersNode: ReturnType<typeof resolveFiltersNode>;
   readonly runtime: FilterRuntime<TRow>;
@@ -2054,8 +2033,6 @@ function AntdChromeSession<TRow>({
     ...props,
     density,
     onDensityChange,
-    onCellEdit: recordingCellEdit,
-    onBatchEdit: recordingBatchEdit,
     source: resolvedSource,
     filters: filtersNode,
     filterDefs: runtime.defs,
@@ -2070,7 +2047,7 @@ function AntdChromeSession<TRow>({
   const c = useTableChrome<TRow>(chromeProps);
   return (
     <ChromeExtrasGate chrome={c} props={chromeProps}>
-      {(chrome) => (
+      {(chrome, stagedProps) => (
         <AntdGroupingWindow<TRow>
           grouping={chrome.grouping}
           scrollTarget={rowScroll.groups}
@@ -2082,11 +2059,11 @@ function AntdChromeSession<TRow>({
               grouping={grouping}
               rowScroll={rowScroll}
               props={props}
-              chromeProps={chromeProps}
+              chromeProps={stagedProps}
               density={density ?? "comfortable"}
               onDensityChange={onDensityChange ?? (() => undefined)}
               chrome={chrome}
-              history={history}
+              history={chrome.editHistory ?? disabledHistory()}
               featureHost={featureHost}
               resolvedSource={resolvedSource}
               resolvedUrlAdapter={resolvedUrlAdapter}

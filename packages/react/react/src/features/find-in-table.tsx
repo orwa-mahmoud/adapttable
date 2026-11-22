@@ -18,6 +18,7 @@ import {
   FindStateContext,
   useFindScroll,
   useFindShortcut,
+  withFindMarks,
 } from "../find/findMarks";
 import { type FindInTableState, useFindInTable } from "../find/useFindInTable";
 import { RowScrollContext } from "../virtual/rowScroll";
@@ -37,6 +38,33 @@ const FIND_STAGE = liveStageKey<LiveStageProps<unknown>>("find-in-table", {
   reads: [],
   writes: "find",
 });
+
+/**
+ * Find's marks on a grid without cell navigation: reads the matches and the
+ * grid, and marks the matching cells. With cell navigation the grid marks
+ * them itself.
+ */
+const FIND_MARKS_STAGE = liveStageKey<LiveStageProps<unknown>>("find-marks", {
+  reads: ["find", "gridFocus"],
+  writes: "findMarks",
+});
+
+function FindMarksStage<TRow>({
+  shell,
+  live,
+  children,
+}: LiveStageProps<TRow>): ReactNode {
+  "use no memo";
+  if (live.gridFocus.enabled) return children(live);
+  return children({
+    ...live,
+    gridFocus: withFindMarks(
+      live.gridFocus,
+      live.find,
+      sourceWindowStart(shell.chrome.source)
+    ),
+  });
+}
 
 /** Build the find walk's inputs from the shell and hand them to its slot. */
 function FindStage<TRow>({
@@ -123,6 +151,7 @@ export function findInTable(): StaticTableFeature {
     ...coreFindInTable(),
     renders: [
       slotRender(FIND_STAGE, (props) => <FindStage {...props} />),
+      slotRender(FIND_MARKS_STAGE, (props) => <FindMarksStage {...props} />),
       slotRender<FindLiveDraw>(FIND_LIVE, (props) => <LiveFind {...props} />),
       FIND_BAR_RENDER,
     ],

@@ -19,8 +19,10 @@ import {
 import type { ChromeBodyData } from "../virtual/chromeBodyShared";
 import { usePlainChromeBodyData } from "../virtual/usePlainChromeBodyData";
 import { ChromeExtrasGate } from "./chromeExtrasGate";
+import { rememberFeatureHost } from "./featureHost";
 import { FeatureSlot, useFeatureSlotFilled } from "./providers";
-import { HistoryLiveGate, ShellLiveGate } from "./shellLiveGate";
+import { ShellLiveGate } from "./shellLiveGate";
+import { disabledHistory } from "./shellLiveStubs";
 import { CHROME_BODY, type ChromeBodySlotProps } from "./slotKeys";
 
 /**
@@ -80,13 +82,13 @@ function withGroupingPanel<TRow>(
 }
 
 /**
- * Finish a shell with extras, the in-tree chrome-body path, and live
- * interaction hooks.
+ * Finish a shell with the chrome stages, the in-tree chrome-body path, and
+ * the live stages.
  *
  * A mock that already wrote `tableProps.rowEntries` sets
  * `skipChromeBody` so this does not overwrite the injected window.
- * History, extras and find/grid/export still run — those mocks still
- * need real interaction state when the matching feature is composed.
+ * The chrome and live stages still run — those mocks still need real
+ * interaction state when the matching feature is composed.
  *
  * @public
  */
@@ -99,32 +101,33 @@ export function DataTableShellView<TRow>({
 }): ReactNode {
   return (
     <TableStoreContext.Provider value={shell.tableStore}>
-      <HistoryLiveGate shell={shell}>
-        {(withHistory) => (
-          <ChromeExtrasGate
-            chrome={withHistory.chrome}
-            props={withHistory.chromeProps}
-          >
-            {(chrome) => {
-              const withExtras = withGroupingPanel(
-                overlayChromeExtras(withHistory, chrome),
-                chrome.groupingPanel
-              );
-              const afterBody = (view: DataTableShellResult<TRow>) => (
-                <ShellLiveGate shell={view}>{children}</ShellLiveGate>
-              );
-              if (shell.skipChromeBody === true) {
-                return afterBody(withExtras);
-              }
-              return (
-                <ChromeBodyGate chrome={chrome} props={withExtras.chromeProps}>
-                  {(body) => afterBody(finishDataTableShell(withExtras, body))}
-                </ChromeBodyGate>
-              );
-            }}
-          </ChromeExtrasGate>
-        )}
-      </HistoryLiveGate>
+      <ChromeExtrasGate chrome={shell.chrome} props={shell.chromeProps}>
+        {(chrome, chromeProps) => {
+          // The stages may wrap the commit channels (edit history); the body
+          // and the live stages read the wrapped ones.
+          rememberFeatureHost(chromeProps, shell.featureHost);
+          const staged = {
+            ...shell,
+            chromeProps,
+            editHistory: chrome.editHistory ?? disabledHistory(),
+          };
+          const withExtras = withGroupingPanel(
+            overlayChromeExtras(staged, chrome),
+            chrome.groupingPanel
+          );
+          const afterBody = (view: DataTableShellResult<TRow>) => (
+            <ShellLiveGate shell={view}>{children}</ShellLiveGate>
+          );
+          if (shell.skipChromeBody === true) {
+            return afterBody(withExtras);
+          }
+          return (
+            <ChromeBodyGate chrome={chrome} props={withExtras.chromeProps}>
+              {(body) => afterBody(finishDataTableShell(withExtras, body))}
+            </ChromeBodyGate>
+          );
+        }}
+      </ChromeExtrasGate>
     </TableStoreContext.Provider>
   );
 }

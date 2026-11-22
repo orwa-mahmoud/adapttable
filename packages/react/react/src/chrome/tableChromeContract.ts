@@ -1,6 +1,7 @@
 import {
   type ColumnGroupRecord,
   type ConfirmHandler,
+  type EditHistoryState,
   type FeatureNotice,
   type FilterDef,
   type FilterTypeRegistry,
@@ -127,6 +128,8 @@ export interface TableChrome<TRow> {
    * dormant: no UI, no keyboard.
    */
   editing?: EditableCellEditing<TRow>;
+  /** Undo and redo; written by the edit-history stage, absent without it. */
+  editHistory?: EditHistoryState<TRow>;
   /**
    * Adding, duplicating and deleting rows. Empty until `rowActions()` is
    * composed. `canAdd` says whether the toolbar's Add control renders.
