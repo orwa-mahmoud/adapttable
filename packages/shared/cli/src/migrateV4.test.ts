@@ -188,6 +188,19 @@ describe("migrateV4Source", () => {
     expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 2]);
   });
 
+  it("reports the Angular view's toolbar fields", () => {
+    const result = migrateV4Source(
+      [
+        '<ng-container [adaptSlotProps]="v.toolbarExtras()" />',
+        "@if (v.savedViews; as savedViews) {}",
+        '<x [p]="v.columnMenuProps()" />',
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 3]);
+    expect(result.issues[0]?.message).toContain("toolbarEntry");
+  });
+
   it("leaves a file that uses nothing v4 moved untouched", () => {
     const source = 'import { DataTable } from "@adapttable/mui";\n';
     expect(migrateV4Source(source)).toEqual({

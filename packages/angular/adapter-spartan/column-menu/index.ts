@@ -9,6 +9,7 @@ import {
   slotRender,
 } from "@adapttable/angular";
 import { COLUMN_MENU, coreColumnMenu } from "@adapttable/angular/adapter";
+import { COLUMN_MENU_ENTRY } from "@adapttable/angular/toolbar";
 import { AdaptColumnMenu } from "@adapttable/spartan";
 
 /**
@@ -19,6 +20,7 @@ import { AdaptColumnMenu } from "@adapttable/spartan";
  */
 export function columnMenu(): AdaptTableFeature {
   return extendFeature(coreColumnMenu(), [
+    COLUMN_MENU_ENTRY,
     slotRender(COLUMN_MENU, () => AdaptColumnMenu),
   ]);
 }

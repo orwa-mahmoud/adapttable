@@ -36,6 +36,7 @@ import { closeFailedTreeNode } from '@adapttable/core';
 import { ColumnGroupDef } from '@adapttable/core';
 import { ColumnGroupRecord } from '@adapttable/core';
 import { ColumnLayoutState } from '@adapttable/core';
+import { ColumnMenuSlotProps } from '@adapttable/core/binding';
 import { ColumnMetadata } from '@adapttable/core';
 import { ColumnModelFilter } from '@adapttable/core';
 import { Command } from '@adapttable/core';
@@ -168,6 +169,7 @@ import { RowStyle } from '@adapttable/core';
 import { RowValidator } from '@adapttable/core';
 import { SavedView } from '@adapttable/core';
 import { SavedViewsControllerOptions } from '@adapttable/core';
+import { SavedViewsSlotProps } from '@adapttable/core/binding';
 import { SelectionState } from '@adapttable/core/binding';
 import { SelectionStats } from '@adapttable/core';
 import { ServerFilterKeys } from '@adapttable/core';
@@ -207,6 +209,7 @@ import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
 import { treeExportExpandedIds } from '@adapttable/core';
 import { Type } from '@angular/core';
+import { UndoRedoToolbarProps } from '@adapttable/core/binding';
 import { updateRow } from '@adapttable/core';
 import { UrlSliceSpec } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
@@ -384,6 +387,9 @@ export interface ChangedCellFlashOptions {
 }
 
 export { ChromeBodyRegion }
+
+// @public
+export const COLUMN_MENU_TOOLBAR_STATE: FeatureStateKey<Signal<ColumnMenuSlotProps<unknown> | undefined>>;
 
 // @public
 export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header" | "filter"> {
@@ -576,6 +582,9 @@ export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
 export { DEFAULT_SHORTCUTS }
 
 // @public
+export const DENSITY_TOOLBAR_STATE: FeatureStateKey<Signal<DensityToolbar>>;
+
+// @public
 export interface DensityOptions {
     readonly defaultDensity?: TableDensity;
     readonly injector?: Injector;
@@ -588,6 +597,13 @@ export interface DensityOptions {
 export interface DensityState {
     readonly density: Signal<TableDensity>;
     readonly setDensity: (next: TableDensity) => void;
+}
+
+// @public
+export interface DensityToolbar {
+    readonly density: TableDensity;
+    readonly labels: Required<TableLabels>;
+    readonly onDensityChange: (next: TableDensity) => void;
 }
 
 // @public
@@ -703,6 +719,9 @@ export interface EditValidationInjectOptions<TRow> {
 }
 
 // @public
+export const EXPORT_TOOLBAR_STATE: FeatureStateKey<Signal<ExportToolbar>>;
+
+// @public
 export type ExportContext<TRow> = Omit<ExportContext_2<TRow>, "summaryRow"> & {
     readonly summaryRow?: SummaryRowFn<TRow>;
 };
@@ -721,6 +740,11 @@ export interface ExportCsvHandlerOptions<TRow> {
 export { ExportCsvOptions }
 
 export { ExportHandlerState }
+
+// @public
+export interface ExportToolbar extends ExportHandlerState {
+    readonly labels: Required<TableLabels>;
+}
 
 // @public
 export function extendFeature(base: AdaptTableFeature, renders: readonly FeatureRender<never, SlotComponent>[]): AdaptTableFeature;
@@ -906,7 +930,17 @@ export interface FrontendDataOptions<TRow> extends Omit<TableUrlStateOptions, "i
     readonly refetch?: () => Promise<unknown> | void;
 }
 
+// @public
+export const FULLSCREEN_TOOLBAR_STATE: FeatureStateKey<Signal<FullscreenToolbar>>;
+
 export { FullscreenState }
+
+// @public
+export interface FullscreenToolbar {
+    readonly isFullscreen?: boolean;
+    readonly labels: Required<TableLabels>;
+    readonly onToggleFullscreen?: () => void;
+}
 
 export { GetCellSpan }
 
@@ -1062,6 +1096,9 @@ export function injectDataTable<TRow>(options: DataTableOptions<TRow>): DataTabl
 export function injectDensity(options?: DensityOptions): DensityState;
 
 // @public
+export function injectDensityToolbar(): Signal<DensityToolbar | undefined>;
+
+// @public
 export function injectDensityUrlState(options?: DensityUrlStateOptions): DensityUrlState;
 
 // @public
@@ -1078,6 +1115,9 @@ export function injectExportCsv<TRow>(options: ExportCsvHandlerOptions<TRow>): S
 
 // @public
 export function injectExportHandler<TRow>(options: ExportCsvHandlerOptions<TRow>): Signal<ExportHandlerState>;
+
+// @public
+export function injectExportToolbar(): Signal<ExportToolbar | undefined>;
 
 // @public
 export function injectFeatureState<T>(key: FeatureStateKey<T>, injector?: Injector): Signal<T | undefined>;
@@ -1123,6 +1163,9 @@ export function injectFrontendData<TRow>(options: FrontendDataOptions<TRow>): Si
 
 // @public
 export function injectFullscreen(element: Signal<HTMLElement | undefined>, injector?: Injector): Signal<FullscreenState>;
+
+// @public
+export function injectFullscreenToolbar(): Signal<FullscreenToolbar | undefined>;
 
 // @public
 export function injectGridFocus<TRow>(options: GridFocusOptions<TRow>): GridFocus<TRow>;
@@ -1189,6 +1232,9 @@ export function injectMediaQuery(query: string, injector?: Injector): Signal<boo
 export function injectPrefersReducedMotion(injector?: Injector): Signal<boolean>;
 
 // @public
+export function injectPrintToolbar(): Signal<PrintToolbar | undefined>;
+
+// @public
 export function injectQuerySource<TRow, TParams extends TableQueryParams = TableQueryParams, TPage = PaginatedResponse<TRow>>(options: QuerySourceOptions<TRow, TParams, TPage>): Signal<TableSource<TRow>>;
 
 // @public
@@ -1244,6 +1290,9 @@ export function injectTableVirtualizer<TRow>(options: TableVirtualizationOptions
 
 // @public
 export function injectTreeExpansion(options?: TreeExpansionOptions): Signal<TreeExpansionState>;
+
+// @public
+export function injectUndoRedoToolbar(): Signal<UndoRedoToolbar | undefined>;
 
 // @public
 export function injectUrlSlice<T, TConfig extends object>(options: UrlSliceOptions, spec: UrlSliceSpec<T, TConfig>, config: MaybeSignal<TConfig>): UrlSlice<T>;
@@ -1363,6 +1412,15 @@ export { PinnedRows }
 export { PinOffset }
 
 export { PinSide }
+
+// @public
+export const PRINT_TOOLBAR_STATE: FeatureStateKey<Signal<PrintToolbar>>;
+
+// @public
+export interface PrintToolbar {
+    readonly onPrint?: () => void;
+    readonly printLabel?: string;
+}
 
 // @public
 export function provideAdaptTableFeatures(...features: readonly AdaptTableFeature[]): EnvironmentProviders;
@@ -1562,6 +1620,9 @@ export interface RowSelectionOptions<TRow> {
 }
 
 export { RowStyle }
+
+// @public
+export const SAVED_VIEWS_TOOLBAR_STATE: FeatureStateKey<Signal<SavedViewsSlotProps<SavedViewsControllerOptions>>>;
 
 export { SavedView }
 
@@ -1814,6 +1875,15 @@ export interface TreeImplementation {
     readonly exportExpandedIds: typeof treeExportExpandedIds;
     readonly lazyChildren: typeof injectLazyChildren;
     readonly toggle: typeof toggleTreeNode;
+}
+
+// @public
+export const UNDO_REDO_TOOLBAR_STATE: FeatureStateKey<Signal<UndoRedoToolbar>>;
+
+// @public
+export interface UndoRedoToolbar extends UndoRedoToolbarProps {
+    readonly classNames?: Readonly<Record<string, string | undefined>>;
+    readonly labels: Required<TableLabels>;
 }
 
 export { updateRow }

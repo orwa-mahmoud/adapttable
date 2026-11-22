@@ -12062,32 +12062,12 @@ export const toggleRowSelected: ActionDefinition<string>;
 export const toggleRowsSelected: ActionDefinition<readonly string[]>;
 
 // @public
-export const TOOLBAR_EXTRAS: FeatureSlotKey<ToolbarExtrasSlotProps>;
+export const TOOLBAR_EXTRAS: FeatureSlotKey<ToolbarEntrySlotProps>;
 
 // @public
-export interface ToolbarExtrasSlotProps {
-    accentColor?: string;
-    canRedo?: boolean;
-    canUndo?: boolean;
-    classNames?: Readonly<Record<string, string | undefined>>;
-    density: "comfortable" | "compact";
-    exportAnnouncement?: string;
-    exportBusy?: boolean;
-    exportDisabled?: boolean;
-    exportDisabledReason?: string;
-    exportLabel?: string;
-    exportProgressState?: ExportProgressState | null;
-    isFullscreen?: boolean;
-    labels: Required<TableLabels>;
-    onDensityChange: (next: "comfortable" | "compact") => void;
-    onExportCsv?: () => void;
-    onPrint?: () => void;
-    onRedo?: () => void;
-    onToggleFullscreen?: () => void;
-    onUndo?: () => void;
-    printLabel?: string;
-    redoLabel?: string;
-    undoLabel?: string;
+export interface ToolbarEntrySlotProps {
+    readonly classNames?: Readonly<Record<string, string | undefined>>;
+    readonly labels: Required<TableLabels>;
 }
 
 // @public

@@ -8,7 +8,7 @@ import {
   type CommandPaletteSlots,
   type CommandPaletteSurfaceProps,
   injectCommandPalette,
-  type ToolbarExtrasSlotProps,
+  type ToolbarEntrySlotProps,
 } from "@adapttable/angular/adapter";
 import { AdaptMaterialDialog } from "@adapttable/angular-material";
 import { NgTemplateOutlet } from "@angular/common";
@@ -215,7 +215,7 @@ export class AdaptCommandPaletteLive {
 })
 export class AdaptCommandPaletteButton {
   /** The toolbar's props. */
-  readonly props = input.required<ToolbarExtrasSlotProps>();
+  readonly props = input.required<ToolbarEntrySlotProps>();
   /** The palette, when one is armed. */
   readonly open = inject(ADAPTTABLE_PALETTE_OPEN, { optional: true });
 }

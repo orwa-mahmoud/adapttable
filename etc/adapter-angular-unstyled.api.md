@@ -28,6 +28,7 @@ import { ColumnSelectCheckboxChromeProps } from '@adapttable/angular/adapter';
 import { ColumnSelectCheckboxProps } from '@adapttable/angular/adapter';
 import { ColumnSelectSlots } from '@adapttable/angular/adapter';
 import { DataTableClassNames } from '@adapttable/angular';
+import { DensityToolbar } from '@adapttable/angular';
 import { EditableCellEditing } from '@adapttable/angular';
 import { EditableCellEditorCtrl } from '@adapttable/angular/adapter';
 import { EditableCellSlotProps } from '@adapttable/angular/adapter';
@@ -36,6 +37,7 @@ import { editorInputType } from '@adapttable/angular/adapter';
 import { editorValidationProps } from '@adapttable/angular/adapter';
 import { ExpandToggleSlotProps } from '@adapttable/angular/adapter';
 import { ExportProgressSlots } from '@adapttable/angular/adapter';
+import { ExportToolbar } from '@adapttable/angular';
 import { FillHandleChromeProps } from '@adapttable/angular/adapter';
 import { FillHandleSlotProps } from '@adapttable/angular/adapter';
 import { FillHandleSlots } from '@adapttable/angular/adapter';
@@ -45,6 +47,7 @@ import { FiltersMode } from '@adapttable/angular/adapter';
 import { FiltersView } from '@adapttable/angular/adapter';
 import { FilterTreeSlots } from '@adapttable/angular/adapter';
 import { FilterWidget } from '@adapttable/angular/adapter';
+import { FullscreenToolbar } from '@adapttable/angular';
 import { GroupingPanelSlotProps } from '@adapttable/angular/adapter';
 import { GroupingPanelSlots } from '@adapttable/angular/adapter';
 import { GroupMoreButtonSlotProps } from '@adapttable/angular/adapter';
@@ -62,6 +65,7 @@ import { OnInit } from '@angular/core';
 import { PivotConfig } from '@adapttable/angular/pivot';
 import { PivotField } from '@adapttable/angular/pivot';
 import { PivotPanelSlots } from '@adapttable/angular/pivot';
+import { PrintToolbar } from '@adapttable/angular';
 import { readMultiDraft } from '@adapttable/angular/adapter';
 import { RowActionsCell } from '@adapttable/angular/adapter';
 import { SavedView } from '@adapttable/angular';
@@ -74,12 +78,13 @@ import { Signal } from '@angular/core';
 import { TableLabels } from '@adapttable/angular';
 import { TableView } from '@adapttable/angular/adapter';
 import { TemplateRef } from '@angular/core';
-import { ToolbarExtrasSlotProps } from '@adapttable/angular/adapter';
+import { ToolbarEntrySlotProps } from '@adapttable/angular/adapter';
 import { TreeCellProps } from '@adapttable/angular/adapter';
 import { TreeToggleButtonProps } from '@adapttable/angular/adapter';
 import { TreeToggleProps } from '@adapttable/angular/adapter';
 import { TreeToggleSlots } from '@adapttable/angular/adapter';
 import { Type } from '@angular/core';
+import { UndoRedoToolbar } from '@adapttable/angular';
 import { WritableSignal } from '@angular/core';
 
 // @public
@@ -272,7 +277,8 @@ export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {
 
 // @internal
 export class AdaptDensityButton {
-    readonly props: InputSignal<ToolbarExtrasSlotProps>;
+    readonly props: InputSignal<ToolbarEntrySlotProps>;
+    protected readonly state: Signal<DensityToolbar | undefined>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptDensityButton, "adapt-density-button", never, {
         "props": {
@@ -368,8 +374,9 @@ export class AdaptExpandToggle {
 
 // @internal
 export class AdaptExportButton {
-    readonly props: InputSignal<ToolbarExtrasSlotProps>;
+    readonly props: InputSignal<ToolbarEntrySlotProps>;
     protected readonly slots: ExportProgressSlots;
+    protected readonly state: Signal<ExportToolbar | undefined>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptExportButton, "adapt-export-button", never, {
         "props": {
@@ -482,7 +489,8 @@ export class AdaptFiltersForm {
 
 // @internal
 export class AdaptFullscreenButton {
-    readonly props: InputSignal<ToolbarExtrasSlotProps>;
+    readonly props: InputSignal<ToolbarEntrySlotProps>;
+    protected readonly state: Signal<FullscreenToolbar | undefined>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFullscreenButton, "adapt-fullscreen-button", never, {
         "props": {
@@ -659,7 +667,8 @@ export { AdaptPivotRowHeader }
 
 // @internal
 export class AdaptPrintButton {
-    readonly props: InputSignal<ToolbarExtrasSlotProps>;
+    readonly props: InputSignal<ToolbarEntrySlotProps>;
+    protected readonly state: Signal<PrintToolbar | undefined>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptPrintButton, "adapt-print-button", never, {
         "props": {
@@ -891,7 +900,8 @@ export class AdaptTreeToggle {
 
 // @internal
 export class AdaptUndoRedoButtons {
-    readonly props: InputSignal<ToolbarExtrasSlotProps>;
+    readonly props: InputSignal<ToolbarEntrySlotProps>;
+    protected readonly state: Signal<UndoRedoToolbar | undefined>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptUndoRedoButtons, "adapt-undo-redo-buttons", never, {
         "props": {

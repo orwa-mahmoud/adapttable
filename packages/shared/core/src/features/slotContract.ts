@@ -26,7 +26,6 @@ import type {
   BatchEditBarProps,
   RowEditActionsProps,
 } from "../editing/rowEditContract";
-import type { ExportProgressState } from "../export/exportController";
 import type { ExportContext, ExportCsvOptions } from "../export/tableCsv";
 import type { ActiveFilterChipsSlotProps } from "../filters/activeFilterChips";
 import type { FiltersFormSlotProps } from "../filters/filterFormModel";
@@ -922,70 +921,28 @@ export const FILL_HANDLE =
   featureSlotKey<FillHandleCellSlotProps>("fill-handle");
 
 /**
- * Toolbar extras (export, undo, print, density, fullscreen).
- *
- * Several features may fill this; it is a list, not a single element.
+ * What a toolbar entry receives; the entry reads its own feature's state.
  *
  * @public
  */
-export interface ToolbarExtrasSlotProps {
-  /** Undo the last edit. */
-  onUndo?: () => void;
-  /** Redo the last undone edit. */
-  onRedo?: () => void;
-  /** Whether undo is available. */
-  canUndo?: boolean;
-  /** Whether redo is available. */
-  canRedo?: boolean;
-  /** Accessible undo label. */
-  undoLabel?: string;
-  /** Accessible redo label. */
-  redoLabel?: string;
-  /** Print the table. */
-  onPrint?: () => void;
-  /** Accessible print label. */
-  printLabel?: string;
-  /** Current row density. */
-  density: "comfortable" | "compact";
-  /** Request a density change. */
-  onDensityChange: (next: "comfortable" | "compact") => void;
-  /** Enter or exit fullscreen. */
-  onToggleFullscreen?: () => void;
-  /** Whether the table is fullscreen. */
-  isFullscreen?: boolean;
-  /** Export the current view to CSV. */
-  onExportCsv?: () => void;
-  /** Whether an export is in flight. */
-  exportBusy?: boolean;
-  /** Live-region text while exporting. */
-  exportAnnouncement?: string;
-  /** Server-built progress surface state. */
-  exportProgressState?: ExportProgressState | null;
-  /** Accessible export label. */
-  exportLabel?: string;
-  /** The source cannot cover the export the host asked for. */
-  exportDisabled?: boolean;
-  /** Why the Export button is disabled, localized; empty while it is not. */
-  exportDisabledReason?: string;
+export interface ToolbarEntrySlotProps {
+  /** Resolved labels. */
+  readonly labels: Required<TableLabels>;
   /**
-   * The table's class map, for a kit whose controls are styled through one
-   * (`unstyled` and everything built on it). A kit with its own components
-   * ignores it — the documented `classNames` keys are the same either way.
+   * The table's class map, for a kit whose controls are styled through one;
+   * a kit with its own components ignores it.
    */
-  classNames?: Readonly<Record<string, string | undefined>>;
-  /** Kit accent token some controls paint with. */
-  accentColor?: string;
-  /** Resolved labels for density and fullscreen controls. */
-  labels: Required<TableLabels>;
+  readonly classNames?: Readonly<Record<string, string | undefined>>;
 }
 
 /**
- * Optional toolbar controls.
+ * The toolbar's entries: the controls the composed features add. Several
+ * features fill it; it is a list, not a single element.
  *
  * @public
  */
 export const TOOLBAR_EXTRAS =
-  featureSlotKey<ToolbarExtrasSlotProps>("toolbar-extras");
+  featureSlotKey<ToolbarEntrySlotProps>("toolbar-extras");
 
 /**
  * Tree-column cell wrapper. Empty means render the cell contents alone.

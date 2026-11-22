@@ -2,7 +2,7 @@
  * The unstyled command palette: the toolbar button, the dialog, and a command.
  */
 import type { TableLabels } from "@adapttable/angular";
-import type { ToolbarExtrasSlotProps } from "@adapttable/angular/adapter";
+import type { ToolbarEntrySlotProps } from "@adapttable/angular/adapter";
 import { commandPalette } from "@adapttable/spartan/command-palette";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
@@ -347,7 +347,7 @@ describe("command palette (Spartan Angular)", () => {
     class BareButton {
       readonly props = {
         labels: { commandPalette: "Commands" },
-      } as unknown as ToolbarExtrasSlotProps;
+      } as unknown as ToolbarEntrySlotProps;
     }
 
     const fixture = TestBed.createComponent(BareButton);

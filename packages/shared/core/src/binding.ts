@@ -294,7 +294,7 @@ export {
   STATUS_BAR,
   TABLE_ASSISTANT,
   TOOLBAR_EXTRAS,
-  type ToolbarExtrasSlotProps,
+  type ToolbarEntrySlotProps,
   TREE_CELL,
   TREE_LIVE,
   TREE_TOGGLE,

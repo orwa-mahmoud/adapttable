@@ -128,7 +128,7 @@ import {
   STATUS_BAR,
   TABLE_ASSISTANT,
   TOOLBAR_EXTRAS,
-  type ToolbarExtrasSlotProps,
+  type ToolbarEntrySlotProps,
   TREE_CELL,
   undoRedoToolbarProps,
   withRowMutationActions,
@@ -177,6 +177,20 @@ import {
   buildSurfaceBody,
   type TableSurfaceView,
 } from "./tableSurfaceHost";
+import {
+  COLUMN_MENU_TOOLBAR_STATE,
+  DENSITY_TOOLBAR_STATE,
+  type DensityToolbar,
+  EXPORT_TOOLBAR_STATE,
+  type ExportToolbar,
+  FULLSCREEN_TOOLBAR_STATE,
+  type FullscreenToolbar,
+  PRINT_TOOLBAR_STATE,
+  type PrintToolbar,
+  SAVED_VIEWS_TOOLBAR_STATE,
+  UNDO_REDO_TOOLBAR_STATE,
+  type UndoRedoToolbar,
+} from "./toolbarState";
 export type {
   BodyCellView,
   BodyRow,
@@ -507,10 +521,6 @@ export interface TableView<TRow> extends TableSurfaceView<TRow> {
     col: number,
     rowId?: string
   ) => Attrs;
-  /** Whether the Columns menu is composed. */
-  readonly columnMenu: boolean;
-  /** The Columns menu's props. */
-  readonly columnMenuProps: Signal<ColumnMenuSlotProps<unknown>>;
   /** The filters, when a filters feature is composed. */
   readonly filters: FiltersView | undefined;
   /** The selection bar's props, when bulk actions are composed. */
@@ -523,11 +533,8 @@ export interface TableView<TRow> extends TableSurfaceView<TRow> {
   readonly rowMutations: Signal<RowMutationsState<TRow>>;
   /** Asks before an action that declares a `confirm`. */
   readonly confirm: ConfirmHandler;
-  /** The toolbar extras' props: density, fullscreen and export. */
-  readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
-  /** The saved-views menu's props, when it is composed. */
-  readonly savedViews:
-    Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
+  /** What every toolbar entry receives: the labels. */
+  readonly toolbarEntry: Signal<ToolbarEntrySlotProps>;
   /** The batch-edit bar's props, when batch editing is composed. */
   readonly batchBar: Signal<BatchEditBarProps<TRow> | undefined> | undefined;
 }
@@ -1606,7 +1613,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
               injector,
             })
     );
-    const toolbarExtras = computed((): ToolbarExtrasSlotProps => ({
+    const densityToolbar = computed((): DensityToolbar => ({
       density: density(),
       onDensityChange: (next) => {
         requestDensityChange(next, {
@@ -1617,25 +1624,44 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
           },
         });
       },
-      onToggleFullscreen: fullscreen?.().supported
-        ? fullscreen().toggle
-        : undefined,
-      isFullscreen: fullscreen?.().active,
-      ...exporter?.(),
-      ...(history
-        ? undoRedoToolbarProps(
-            featureOptions.undoRedoButtons === true,
-            history().history,
-            table.labels()
-          )
-        : {}),
-      ...printToolbarProps(
+      labels: table.labels(),
+    }));
+    const fullscreenToolbar = fullscreen
+      ? computed((): FullscreenToolbar => ({
+          onToggleFullscreen: fullscreen().supported
+            ? fullscreen().toggle
+            : undefined,
+          isFullscreen: fullscreen().active,
+          labels: table.labels(),
+        }))
+      : undefined;
+    const exportToolbar = exporter
+      ? computed((): ExportToolbar => ({
+          ...exporter(),
+          labels: table.labels(),
+        }))
+      : undefined;
+    const printToolbar = computed((): PrintToolbar =>
+      printToolbarProps(
         featureOptions.printButton === true,
         featureOptions.onPrint as (() => void) | undefined,
         table.labels()
-      ),
-      labels: table.labels(),
-    }));
+      )
+    );
+    const undoRedoToolbar = history
+      ? computed((): UndoRedoToolbar => ({
+          ...undoRedoToolbarProps(
+            featureOptions.undoRedoButtons === true,
+            history().history,
+            table.labels()
+          ),
+          labels: table.labels(),
+        }))
+      : undefined;
+    const columnMenuToolbar =
+      table.featureOptions.enableColumnMenu === true
+        ? computed(() => (table.isMobile() ? undefined : columnMenuProps()))
+        : undefined;
     const assembly = featureOptions.assembly as
       Partial<AssemblyFns<TRow>> | undefined;
     const rowClassName = featureOptions.rowClassName as
@@ -1971,17 +1997,14 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       commandPalette,
       contextMenu,
       markedCellAttrs,
-      columnMenu: table.featureOptions.enableColumnMenu === true,
-      columnMenuProps,
       filters,
       bulkBar,
       rowActions: rowActionList,
       density,
       stickyHead,
       reportHeaderHeight,
-      toolbarExtras,
+      toolbarEntry: computed(() => ({ labels: table.labels() })),
       rowMutations,
-      savedViews,
       groupingPanel,
       reorder,
       tree,
@@ -2013,6 +2036,13 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         RowActionsLayout | undefined,
       confirm,
     });
+    table.featureState.set(DENSITY_TOOLBAR_STATE, densityToolbar);
+    table.featureState.set(FULLSCREEN_TOOLBAR_STATE, fullscreenToolbar);
+    table.featureState.set(EXPORT_TOOLBAR_STATE, exportToolbar);
+    table.featureState.set(PRINT_TOOLBAR_STATE, printToolbar);
+    table.featureState.set(UNDO_REDO_TOOLBAR_STATE, undoRedoToolbar);
+    table.featureState.set(SAVED_VIEWS_TOOLBAR_STATE, savedViews);
+    table.featureState.set(COLUMN_MENU_TOOLBAR_STATE, columnMenuToolbar);
     table.featureState.set(SURFACE_OCCUPIED, {
       grid: grid !== undefined,
       grouping: grouping !== undefined,

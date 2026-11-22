@@ -4,11 +4,18 @@
  * neither its handler nor its button.
  */
 import {
+  injectDensityToolbar,
+  injectExportToolbar,
+  injectFullscreenToolbar,
+  injectPrintToolbar,
+  injectUndoRedoToolbar,
+} from "@adapttable/angular";
+import {
   AdaptExportAnnouncer,
   AdaptExportProgressChrome,
   type ExportProgressSlots,
   type ExportProgressSurfaceSlotProps,
-  type ToolbarExtrasSlotProps,
+  type ToolbarEntrySlotProps,
 } from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 import { NzButtonModule } from "ng-zorro-antd/button";
@@ -25,30 +32,33 @@ import { NzTypographyModule } from "ng-zorro-antd/typography";
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
-    @let p = props();
-    <button
-      nz-button
-      nzSize="small"
-      type="button"
-      data-adapttable-part="density-toggle"
-      [attr.aria-label]="p.labels.density"
-      (click)="
-        p.onDensityChange(p.density === 'compact' ? 'comfortable' : 'compact')
-      "
-    >
-      <span
-        >{{
-          p.density === "compact"
-            ? p.labels.densityCompact
-            : p.labels.densityComfortable
-        }}
-      </span>
-    </button>
+    @if (state(); as p) {
+      <button
+        nz-button
+        nzSize="small"
+        type="button"
+        data-adapttable-part="density-toggle"
+        [attr.aria-label]="p.labels.density"
+        (click)="
+          p.onDensityChange(p.density === 'compact' ? 'comfortable' : 'compact')
+        "
+      >
+        <span
+          >{{
+            p.density === "compact"
+              ? p.labels.densityCompact
+              : p.labels.densityComfortable
+          }}
+        </span>
+      </button>
+    }
   `,
 })
 export class AdaptDensityButton {
   /** The slot's props. */
-  readonly props = input.required<ToolbarExtrasSlotProps>();
+  readonly props = input.required<ToolbarEntrySlotProps>();
+  /** What the control draws, from its feature's state. */
+  protected readonly state = injectDensityToolbar();
 }
 
 /** Takes the table fullscreen, and back. @internal */
@@ -58,26 +68,29 @@ export class AdaptDensityButton {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
-    @let p = props();
-    @if (p.onToggleFullscreen; as toggle) {
-      <button
-        nz-button
-        nzSize="small"
-        type="button"
-        data-adapttable-part="fullscreen-toggle"
-        [attr.aria-label]="
-          p.isFullscreen ? p.labels.exitFullscreen : p.labels.enterFullscreen
-        "
-        (click)="toggle()"
-      >
-        <span>{{ p.isFullscreen ? "✕" : "⛶" }} </span>
-      </button>
+    @if (state(); as p) {
+      @if (p.onToggleFullscreen; as toggle) {
+        <button
+          nz-button
+          nzSize="small"
+          type="button"
+          data-adapttable-part="fullscreen-toggle"
+          [attr.aria-label]="
+            p.isFullscreen ? p.labels.exitFullscreen : p.labels.enterFullscreen
+          "
+          (click)="toggle()"
+        >
+          <span>{{ p.isFullscreen ? "✕" : "⛶" }} </span>
+        </button>
+      }
     }
   `,
 })
 export class AdaptFullscreenButton {
   /** The slot's props. */
-  readonly props = input.required<ToolbarExtrasSlotProps>();
+  readonly props = input.required<ToolbarEntrySlotProps>();
+  /** What the control draws, from its feature's state. */
+  protected readonly state = injectFullscreenToolbar();
 }
 
 /** The server-export progress surface. @internal */
@@ -115,36 +128,39 @@ const EXPORT_SLOTS: ExportProgressSlots = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
-    @let p = props();
-    @if (p.onExportCsv; as start) {
-      <button
-        nz-button
-        nzSize="small"
-        type="button"
-        data-adapttable-part="export-csv-button"
-        style="flex-shrink: 0; white-space: nowrap"
-        [disabled]="p.exportBusy === true || p.exportDisabled === true"
-        [attr.aria-busy]="p.exportBusy ?? null"
-        [attr.title]="p.exportDisabled ? p.exportDisabledReason : null"
-        (click)="start()"
-      >
-        @if (p.exportBusy) {
-          <nz-spin aria-hidden="true" nzSize="small" />
-        }
-        <span>{{ p.exportLabel }} </span>
-      </button>
-      <adapt-export-progress-chrome
-        [progress]="p.exportProgressState ?? null"
-        [labels]="p.labels"
-        [slots]="slots"
-      />
-      <adapt-export-announcer [announcement]="p.exportAnnouncement ?? ''" />
+    @if (state(); as p) {
+      @if (p.onExportCsv; as start) {
+        <button
+          nz-button
+          nzSize="small"
+          type="button"
+          data-adapttable-part="export-csv-button"
+          style="flex-shrink: 0; white-space: nowrap"
+          [disabled]="p.exportBusy === true || p.exportDisabled === true"
+          [attr.aria-busy]="p.exportBusy ?? null"
+          [attr.title]="p.exportDisabled ? p.exportDisabledReason : null"
+          (click)="start()"
+        >
+          @if (p.exportBusy) {
+            <nz-spin aria-hidden="true" nzSize="small" />
+          }
+          <span>{{ p.exportLabel }} </span>
+        </button>
+        <adapt-export-progress-chrome
+          [progress]="p.exportProgressState ?? null"
+          [labels]="p.labels"
+          [slots]="slots"
+        />
+        <adapt-export-announcer [announcement]="p.exportAnnouncement ?? ''" />
+      }
     }
   `,
 })
 export class AdaptExportButton {
   /** The slot's props. */
-  readonly props = input.required<ToolbarExtrasSlotProps>();
+  readonly props = input.required<ToolbarEntrySlotProps>();
+  /** What the control draws, from its feature's state. */
+  protected readonly state = injectExportToolbar();
 
   /** The progress surface. */
   protected readonly slots = EXPORT_SLOTS;
@@ -157,23 +173,26 @@ export class AdaptExportButton {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
-    @let p = props();
-    @if (p.onPrint; as print) {
-      <button
-        nz-button
-        nzSize="small"
-        type="button"
-        data-adapttable-part="print-button"
-        (click)="print()"
-      >
-        <span>{{ p.printLabel }} </span>
-      </button>
+    @if (state(); as p) {
+      @if (p.onPrint; as print) {
+        <button
+          nz-button
+          nzSize="small"
+          type="button"
+          data-adapttable-part="print-button"
+          (click)="print()"
+        >
+          <span>{{ p.printLabel }} </span>
+        </button>
+      }
     }
   `,
 })
 export class AdaptPrintButton {
   /** The slot's props. */
-  readonly props = input.required<ToolbarExtrasSlotProps>();
+  readonly props = input.required<ToolbarEntrySlotProps>();
+  /** What the control draws, from its feature's state. */
+  protected readonly state = injectPrintToolbar();
 }
 
 /** NG-ZORRO controls for the table's edit history. @internal */
@@ -183,34 +202,37 @@ export class AdaptPrintButton {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
-    @let p = props();
-    @if (p.onUndo && p.onRedo) {
-      <button
-        nz-button
-        nzSize="small"
-        type="button"
-        data-adapttable-part="undo-button"
-        [class]="p.classNames?.['undoButton']"
-        [disabled]="p.canUndo !== true"
-        (click)="p.onUndo()"
-      >
-        <span>{{ p.undoLabel }} </span>
-      </button>
-      <button
-        nz-button
-        nzSize="small"
-        type="button"
-        data-adapttable-part="redo-button"
-        [class]="p.classNames?.['redoButton']"
-        [disabled]="p.canRedo !== true"
-        (click)="p.onRedo()"
-      >
-        <span>{{ p.redoLabel }} </span>
-      </button>
+    @if (state(); as p) {
+      @if (p.onUndo && p.onRedo) {
+        <button
+          nz-button
+          nzSize="small"
+          type="button"
+          data-adapttable-part="undo-button"
+          [class]="p.classNames?.['undoButton']"
+          [disabled]="p.canUndo !== true"
+          (click)="p.onUndo()"
+        >
+          <span>{{ p.undoLabel }} </span>
+        </button>
+        <button
+          nz-button
+          nzSize="small"
+          type="button"
+          data-adapttable-part="redo-button"
+          [class]="p.classNames?.['redoButton']"
+          [disabled]="p.canRedo !== true"
+          (click)="p.onRedo()"
+        >
+          <span>{{ p.redoLabel }} </span>
+        </button>
+      }
     }
   `,
 })
 export class AdaptUndoRedoButtons {
   /** The current history controls and labels. */
-  readonly props = input.required<ToolbarExtrasSlotProps>();
+  readonly props = input.required<ToolbarEntrySlotProps>();
+  /** What the control draws, from its feature's state. */
+  protected readonly state = injectUndoRedoToolbar();
 }

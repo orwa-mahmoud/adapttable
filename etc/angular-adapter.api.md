@@ -361,7 +361,6 @@ import { runRowAction } from '@adapttable/core';
 import { RuntimeChromeInput } from '@adapttable/core/binding';
 import { SAVED_VIEWS } from '@adapttable/core/binding';
 import { SavedView } from '@adapttable/core';
-import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SavedViewsSlotProps } from '@adapttable/core/binding';
 import { SEARCH_ICON } from '@adapttable/core/binding';
 import { SelectionState } from '@adapttable/core/binding';
@@ -431,7 +430,7 @@ import { TableVirtualization } from '@adapttable/core';
 import { TemplateRef } from '@angular/core';
 import { TextFieldWidget } from '@adapttable/core';
 import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
-import { ToolbarExtrasSlotProps } from '@adapttable/core/binding';
+import { ToolbarEntrySlotProps } from '@adapttable/core/binding';
 import { TREE_CELL } from '@adapttable/core/binding';
 import { TREE_TOGGLE } from '@adapttable/core/binding';
 import { treeCardStyle } from '@adapttable/core';
@@ -2044,7 +2043,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly tableFooter: Signal<TemplateRef<unknown> | undefined>;
     readonly tableLabel: InputSignal<string | undefined>;
     // @internal
-    protected readonly toolbarExtrasSlot: FeatureSlotKey<ToolbarExtrasSlotProps>;
+    protected readonly toolbarExtrasSlot: FeatureSlotKey<ToolbarEntrySlotProps>;
     readonly urlKey: InputSignal<string | undefined>;
     readonly urlSync: InputSignal<boolean>;
     // @internal
@@ -4389,7 +4388,7 @@ export class AdaptSlot<TProps> {
     constructor();
     readonly props: InputSignal<TProps>;
     readonly slot: InputSignal<FeatureSlotKey<TProps>>;
-    readonly table: InputSignal<SlotTable>;
+    readonly table: InputSignal<SlotTable | undefined>;
     // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptSlot<any>, "[adaptSlot]", never, {
         "slot": {
@@ -4404,7 +4403,7 @@ export class AdaptSlot<TProps> {
         };
         "table": {
             "alias": "adaptSlotTable";
-            "required": true;
+            "required": false;
             "isSignal": true;
         };
     }, {}, never, never, true, never>;
@@ -6576,8 +6575,6 @@ export interface TableTree<TRow> {
 export interface TableView<TRow> extends TableSurfaceView<TRow> {
     readonly batchBar: Signal<BatchEditBarProps<TRow> | undefined> | undefined;
     readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
-    readonly columnMenu: boolean;
-    readonly columnMenuProps: Signal<ColumnMenuSlotProps<unknown>>;
     readonly commandPalette: Signal<CommandPaletteInjectOptions>;
     readonly confirm: ConfirmHandler;
     readonly contextMenu: Signal<TableContextMenuOptions<TRow> & {
@@ -6591,13 +6588,12 @@ export interface TableView<TRow> extends TableSurfaceView<TRow> {
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;
     readonly rowMutations: Signal<RowMutationsState<TRow>>;
-    readonly savedViews: Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
-    readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
+    readonly toolbarEntry: Signal<ToolbarEntrySlotProps>;
 }
 
 export { TOOLBAR_EXTRAS }
 
-export { ToolbarExtrasSlotProps }
+export { ToolbarEntrySlotProps }
 
 export { TREE_CELL }
 

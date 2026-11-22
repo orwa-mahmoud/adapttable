@@ -1,7 +1,7 @@
 {
   "$comment": "Names one binding exports on a shared entry point that the others do not, each with its reason. Read by scripts/check-binding-parity.mjs; `node scripts/check-binding-parity.mjs --write-allow-list` keeps existing reasons and lists new divergences as pending.",
   "frameworkOnlyEntries": {
-    "angular": ["router"]
+    "angular": ["router", "toolbar"]
   },
   "names": {
     "react": {
@@ -2363,7 +2363,24 @@
         "tableFeaturesOf": "pending: shared-surface decision",
         "textFilterFor": "pending: shared-surface decision",
         "urlAdapterFor": "pending: shared-surface decision",
-        "withFeatureImplementation": "pending: shared-surface decision"
+        "withFeatureImplementation": "pending: shared-surface decision",
+        "COLUMN_MENU_TOOLBAR_STATE": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "DENSITY_TOOLBAR_STATE": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "DensityToolbar": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "EXPORT_TOOLBAR_STATE": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "ExportToolbar": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "FULLSCREEN_TOOLBAR_STATE": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "FullscreenToolbar": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "injectDensityToolbar": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "injectExportToolbar": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "injectFullscreenToolbar": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "injectPrintToolbar": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "injectUndoRedoToolbar": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "PRINT_TOOLBAR_STATE": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "PrintToolbar": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "SAVED_VIEWS_TOOLBAR_STATE": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "UNDO_REDO_TOOLBAR_STATE": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry",
+        "UndoRedoToolbar": "Angular toolbar controls inject their feature's state through these; React controls read it with useFeatureState and its state keys, and Vue features draw their controls from toolbarEntry"
       },
       "adapter": {
         "ADAPTTABLE_CONTEXT_MENU": "pending: shared-surface decision",

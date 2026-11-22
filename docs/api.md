@@ -1360,7 +1360,7 @@ table's own props; every binding re-exports them.
   flag each binding shares — `STATUS_BAR`, `FIND_BAR`, `BULK_BAR`
   (`BulkBarSlotProps`), `EDITABLE_CELL`, `GRID_FOCUS_ANNOUNCER`
   (`GridFocusAnnouncerSlotProps`), `TOOLBAR_EXTRAS`
-  (`ToolbarExtrasSlotProps`), the `*_LIVE` keys and the
+  (`ToolbarEntrySlotProps`: the labels and class map), the `*_LIVE` keys and the
   rest — and the props each kit control receives. Props that carry rendered
   content take the binding's node as `TNode`, and key, drag and style types
   are parameters too. A binding re-types a neutral key with its own props;
@@ -3831,6 +3831,20 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   publish and read typed `FeatureStateKey` handles declared with
   `featureStateKey`. Tables and slots have isolated state scopes. An explicit
   publication refreshes readers even when a mutable handle's identity is stable.
+- Toolbar controls read their feature's state: `injectDensityToolbar`,
+  `injectFullscreenToolbar`, `injectExportToolbar`, `injectPrintToolbar` and
+  `injectUndoRedoToolbar` return a signal of `DensityToolbar`,
+  `FullscreenToolbar`, `ExportToolbar`, `PrintToolbar` or `UndoRedoToolbar`,
+  published under `DENSITY_TOOLBAR_STATE`, `FULLSCREEN_TOOLBAR_STATE`,
+  `EXPORT_TOOLBAR_STATE`, `PRINT_TOOLBAR_STATE` and `UNDO_REDO_TOOLBAR_STATE`;
+  each key holds a signal. `SAVED_VIEWS_TOOLBAR_STATE` and
+  `COLUMN_MENU_TOOLBAR_STATE` carry the two menus' props, which the
+  `SAVED_VIEWS_ENTRY` and `COLUMN_MENU_ENTRY` toolbar entries draw; a kit
+  adds each beside its menu fill. They live on `@adapttable/angular/toolbar`,
+  so only a table that composes saved views or the Columns menu carries them.
+  Inside a slot component, `[adaptSlot]` draws in that component's table when
+  `[adaptSlotTable]` is left out. The toolbar outlet passes every
+  entry `ToolbarEntrySlotProps`.
   `tableRuntimeFor` accepts a feature list or signal; retained runtime readers
   observe the current feature IDs. `RuntimeGrouping` and `RuntimeTableOptions`
   project the completed table's filtering, selection, layout, row pins, grouping/tree order, edits and actions

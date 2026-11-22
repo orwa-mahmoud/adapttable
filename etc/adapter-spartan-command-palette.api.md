@@ -13,7 +13,7 @@ import { InputSignal } from '@angular/core';
 import { PaletteOpenState } from '@adapttable/angular/adapter';
 import { Signal } from '@angular/core';
 import { TableCommandPalette } from '@adapttable/angular/adapter';
-import { ToolbarExtrasSlotProps } from '@adapttable/angular/adapter';
+import { ToolbarEntrySlotProps } from '@adapttable/angular/adapter';
 import { WritableSignal } from '@angular/core';
 
 // @internal
@@ -104,7 +104,7 @@ export class AdaptCommandItem {
 // @public
 export class AdaptCommandPaletteButton {
     readonly open: WritableSignal<PaletteOpenState | null> | null;
-    readonly props: InputSignal<ToolbarExtrasSlotProps>;
+    readonly props: InputSignal<ToolbarEntrySlotProps>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptCommandPaletteButton, "adapt-command-palette-button", never, {
         "props": {

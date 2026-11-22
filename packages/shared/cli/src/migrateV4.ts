@@ -211,7 +211,11 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
   ],
   [
     /\bToolbarExtrasSlotProps\b/g,
-    "A React toolbar control receives ToolbarEntrySlotProps (labels, class map) and reads its feature's state with useFeatureState: EDIT_HISTORY_STATE, EXPORT_STATE, FULLSCREEN_STATE, TABLE_PROPS_STATE. A Vue undo/redo control receives UndoRedoControlProps, and a Vue feature adds its toolbar control with toolbarEntry.",
+    "ToolbarExtrasSlotProps was replaced by ToolbarEntrySlotProps (labels, class map); each toolbar control reads its feature's state. React: useFeatureState with EDIT_HISTORY_STATE, EXPORT_STATE, FULLSCREEN_STATE, TABLE_PROPS_STATE. Vue: UndoRedoControlProps for the undo/redo control, toolbarEntry for a feature's control. Angular: injectDensityToolbar, injectFullscreenToolbar, injectExportToolbar, injectPrintToolbar, injectUndoRedoToolbar.",
+  ],
+  [
+    /\.(?:toolbarExtras|columnMenuProps)\b|\bv\.(?:savedViews|columnMenu)\b/g,
+    "The Angular table view draws one toolbar outlet with v.toolbarEntry(); controls read their feature's state (injectExportToolbar and the rest), and a kit adds SAVED_VIEWS_ENTRY and COLUMN_MENU_ENTRY beside its menus.",
   ],
   [
     /\bToolbarChromeProps\b/g,

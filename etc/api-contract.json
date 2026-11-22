@@ -452,7 +452,8 @@
       "adapter-taiga-ui-side-panel",
       "adapter-taiga-ui-status-bar",
       "adapter-taiga-ui-tree",
-      "adapter-taiga-ui-virtualize"
+      "adapter-taiga-ui-virtualize",
+      "angular-toolbar"
     ],
     "react": [
       "adapter-antd",
@@ -7581,7 +7582,7 @@
       "toggleRowSelected",
       "toggleRowsSelected",
       "TOOLBAR_EXTRAS",
-      "ToolbarExtrasSlotProps",
+      "ToolbarEntrySlotProps",
       "TotalCountCapability",
       "TREE_CELL",
       "TREE_LIVE",
@@ -8478,6 +8479,7 @@
     ],
     "angular": [
       "ActionAiOptions",
+      "COLUMN_MENU_TOOLBAR_STATE",
       "DataTableClassNames",
       "ADAPTTABLE_FEATURES",
       "ADAPTTABLE_FEATURE_STATE",
@@ -8520,8 +8522,10 @@
       "DEFAULT_SHORTCUTS",
       "DataTable",
       "DataTableOptions",
+      "DENSITY_TOOLBAR_STATE",
       "DensityOptions",
       "DensityState",
+      "DensityToolbar",
       "DensityUrlState",
       "DensityUrlStateOptions",
       "EditConflict",
@@ -8543,8 +8547,10 @@
       "EditableCellEditing",
       "EditableCellMode",
       "EditingBundle",
+      "EXPORT_TOOLBAR_STATE",
       "ExportContext",
       "ExportCsvHandlerOptions",
+      "ExportToolbar",
       "ExternalStore",
       "FeatureMountContext",
       "FeatureResources",
@@ -8556,6 +8562,8 @@
       "FooterContext",
       "FromStoreOptions",
       "FrontendDataOptions",
+      "FULLSCREEN_TOOLBAR_STATE",
+      "FullscreenToolbar",
       "GridFocus",
       "GridFocusOptions",
       "GroupCollapseOptions",
@@ -8568,6 +8576,11 @@
       "HeaderContext",
       "Highlight",
       "InfiniteQuerySignals",
+      "injectDensityToolbar",
+      "injectExportToolbar",
+      "injectFullscreenToolbar",
+      "injectPrintToolbar",
+      "injectUndoRedoToolbar",
       "IsMobileOptions",
       "KeyedVirtualization",
       "KeyedVirtualizationOptions",
@@ -8580,6 +8593,8 @@
       "NestedTableContext",
       "NestedTableFor",
       "PaginationMode",
+      "PRINT_TOOLBAR_STATE",
+      "PrintToolbar",
       "QuerySourceOptions",
       "ReconcileLiveBatchEdit",
       "ReconcileLiveEdit",
@@ -8603,6 +8618,7 @@
       "RowReorderOptions",
       "RowSelection",
       "RowSelectionOptions",
+      "SAVED_VIEWS_TOOLBAR_STATE",
       "SavedViewsOptions",
       "SavedViewsState",
       "SelectionStats",
@@ -8636,6 +8652,8 @@
       "TableVirtualization",
       "TableVirtualizationOptions",
       "TreeExpansionOptions",
+      "UNDO_REDO_TOOLBAR_STATE",
+      "UndoRedoToolbar",
       "UrlSlice",
       "UrlSliceOptions",
       "UseShortcutsOptions",
@@ -16227,6 +16245,10 @@
     ],
     "antd/virtualize": [
       "virtualize"
+    ],
+    "angular-toolbar": [
+      "COLUMN_MENU_ENTRY",
+      "SAVED_VIEWS_ENTRY"
     ]
   },
   "entrypoints": {
@@ -19818,6 +19840,9 @@
     },
     "i18n-locales-zh.api.md": {
       "surface": "i18n-locales-zh"
+    },
+    "angular-toolbar.api.md": {
+      "surface": "angular-toolbar"
     }
   }
 }

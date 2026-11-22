@@ -688,6 +688,8 @@ import { TdHTMLAttributes } from 'react';
 import { textFilterSpecs } from '@adapttable/core/binding';
 import { ThHTMLAttributes } from 'react';
 import { toggleCollapsedColumnGroup } from '@adapttable/core/binding';
+import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
+import { ToolbarEntrySlotProps } from '@adapttable/core/binding';
 import { toolbarShowsFilters } from '@adapttable/core';
 import { TotalCountCapability } from '@adapttable/core';
 import { TREE_LIVE } from '@adapttable/core/binding';
@@ -5093,14 +5095,9 @@ export { textFilterSpecs }
 
 export { toggleCollapsedColumnGroup }
 
-// @public
-export const TOOLBAR_EXTRAS: FeatureSlotKey<ToolbarEntrySlotProps>;
+export { TOOLBAR_EXTRAS }
 
-// @public
-export interface ToolbarEntrySlotProps {
-    readonly classNames?: Readonly<Record<string, string | undefined>>;
-    readonly labels: Required<TableLabels>;
-}
+export { ToolbarEntrySlotProps }
 
 export { toolbarShowsFilters }
 

@@ -562,7 +562,7 @@ export {
   type TableAssistantUndoView,
   type TableAssistantView,
   TOOLBAR_EXTRAS,
-  type ToolbarExtrasSlotProps,
+  type ToolbarEntrySlotProps,
   TREE_CELL,
   TREE_TOGGLE,
   type TreeCellProps,

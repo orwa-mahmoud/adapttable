@@ -19257,14 +19257,14 @@
       "subpaths": ["./binding"]
     },
     {
-      "name": "ToolbarExtrasSlotProps",
+      "name": "ToolbarEntrySlotProps",
       "kind": "type",
       "module": "features/slotContract.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "features/slotContract.ts#ToolbarExtrasSlotProps",
+      "identity": "features/slotContract.ts#ToolbarEntrySlotProps",
       "subpaths": ["./binding"]
     },
     {

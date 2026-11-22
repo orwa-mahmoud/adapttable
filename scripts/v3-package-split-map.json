@@ -27139,7 +27139,7 @@
       "behavior": ""
     },
     {
-      "export": "ToolbarExtrasSlotProps",
+      "export": "ToolbarEntrySlotProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
