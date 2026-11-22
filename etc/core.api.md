@@ -3143,7 +3143,6 @@ export interface NestedTableParent {
 // @public
 export interface NeutralFeatureHost<TRow = unknown> {
     readonly __row?: (row: TRow) => void;
-    onDispose(cleanup: () => void): void;
 }
 
 // @public
@@ -4289,7 +4288,7 @@ export interface RowReorderController<TRow> {
     readonly getTableSnapshot: () => RowReorderSnapshot<TRow>;
     readonly keyDown: (event: RowKeyEvent, slot: RowReorderSlot<TRow>) => void;
     readonly moveBy: (localIndex: number, delta: -1 | 1, row: TRow, windowStart: number, rowCount: number) => void;
-    readonly moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
+    readonly moveMenu: (row: TRow, view?: TableRuntimeView<TRow>) => RowMoveMenuModel<TRow> | undefined;
     readonly selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
     readonly subscribe: (listener: () => void) => () => void;
 }
@@ -4298,7 +4297,7 @@ export interface RowReorderController<TRow> {
 export interface RowReorderControllerOptions<TRow> {
     confirmMove?: RowMoveConfirmHandler<TRow>;
     enabled: boolean;
-    getMoveMenu?: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
+    getMoveMenu?: (row: TRow, view?: TableRuntimeView<TRow>) => RowMoveMenuModel<TRow> | undefined;
     getRowId?: (row: TRow) => string;
     readonly getRowIndex?: (row: TRow) => number | undefined;
     isRtl?: (element: HTMLElement | null) => boolean;

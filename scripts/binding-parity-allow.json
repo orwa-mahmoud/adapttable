@@ -231,7 +231,9 @@
         "useTableData": "pending: shared-surface decision",
         "useTableVirtualization": "pending: shared-surface decision",
         "useTextFilterWidget": "pending: shared-surface decision",
-        "withKitEnvironment": "pending: shared-surface decision"
+        "withKitEnvironment": "pending: shared-surface decision",
+        "StaticFeatureMountContext": "pending: shared-surface decision",
+        "TableFeatureMountContext": "pending: shared-surface decision"
       },
       "adapter": {
         "ACTIVE_FILTER_CHIPS": "pending: shared-surface decision",
@@ -1004,7 +1006,10 @@
         "TREE_STATE": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
         "TreeState": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
         "COLUMN_SIZING_STATE": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
-        "ColumnSizingState": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots"
+        "ColumnSizingState": "React kit API: the primitives a React kit hands its binding and the factories that compose them; Vue and Angular kits fill their binding's Chrome slots",
+        "StaticFeatureMountContext": "pending: shared-surface decision",
+        "TableFeatureMountContext": "pending: shared-surface decision",
+        "PublishTableRuntime": "pending: shared-surface decision"
       },
       "features": {
         "BatchRowEdit": "pending: shared-surface decision",
@@ -1045,7 +1050,9 @@
         "filters": "pending: shared-surface decision",
         "fullscreen": "pending: shared-surface decision",
         "rowActions": "pending: shared-surface decision",
-        "useTableFeatures": "pending: shared-surface decision"
+        "useTableFeatures": "pending: shared-surface decision",
+        "StaticFeatureMountContext": "pending: shared-surface decision",
+        "TableFeatureMountContext": "pending: shared-surface decision"
       },
       "formula": {
         "FORMULA_URL_WRITE_DEBOUNCE_MS": "pending: shared-surface decision",
@@ -1059,7 +1066,8 @@
         "FeatureProviderProps": "pending: shared-surface decision",
         "FeatureRender": "pending: shared-surface decision",
         "SidePanelEntry": "pending: shared-surface decision",
-        "TableFeatureHost": "pending: shared-surface decision"
+        "TableFeatureHost": "pending: shared-surface decision",
+        "TableFeatureMountContext": "pending: shared-surface decision"
       },
       "pivot": {
         "UsePivotUrlStateOptions": "pending: shared-surface decision",
@@ -1077,7 +1085,8 @@
         "FeatureProviderProps": "pending: shared-surface decision",
         "FeatureRender": "pending: shared-surface decision",
         "SidePanelEntry": "pending: shared-surface decision",
-        "TableFeatureHost": "pending: shared-surface decision"
+        "TableFeatureHost": "pending: shared-surface decision",
+        "TableFeatureMountContext": "pending: shared-surface decision"
       }
     },
     "vue": {

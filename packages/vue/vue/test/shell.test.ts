@@ -214,6 +214,7 @@ describe("shared Vue shell", () => {
     const features = shallowRef<readonly ComposedFeature<Row>[]>([
       {
         id: "custom",
+        dependencies: ["first"],
         mount: (context) => {
           context.state.set(KEY, { old: true });
           late = () => context.state.set(KEY, { late: true });
@@ -227,9 +228,11 @@ describe("shared Vue shell", () => {
       urlSync: false,
       features,
     }));
+    // A changed dependency is the explicit replacement.
     features.value = [
       {
         id: "custom",
+        dependencies: ["second"],
         mount: (context) => {
           expect(context.state.get(KEY).value).toBeUndefined();
           context.state.set(KEY, { new: true });

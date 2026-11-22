@@ -725,6 +725,11 @@ export { SortLevel }
 export type StaticFeatureHost = Omit<TableFeatureHost<never>, "registerColumnMenuAction" | "registerContextMenuItems" | "__row">;
 
 // @public
+export interface StaticFeatureMountContext {
+    feature(): StaticTableFeature;
+}
+
+// @public
 export interface StaticGroupingExtras {
     collapsedGroupIds?: readonly string[];
     groupFilter?: (group: GroupNode<unknown>) => boolean;
@@ -740,11 +745,13 @@ export interface StaticGroupingExtras {
 export interface StaticTableFeature {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
     readonly contrast?: ContrastRules;
+    readonly dependencies?: readonly unknown[];
     readonly id: string;
+    mount?(context: StaticFeatureMountContext): void | (() => void);
     readonly provider?: FeatureProviderContribution;
     readonly rank?: number;
     readonly renders?: readonly FeatureRender<never>[];
-    setup?(host: StaticFeatureHost): void | (() => void);
+    setup?(host: StaticFeatureHost): void;
 }
 
 // @public
@@ -753,17 +760,18 @@ export function statusBar(): StaticTableFeature;
 // @public
 export interface TableFeature<TRow = unknown> extends PatchFeature<TRow> {
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+    readonly dependencies?: readonly unknown[];
     readonly id: string;
+    mount?(context: TableFeatureMountContext<TRow>): void | (() => void);
     readonly provider?: FeatureProviderContribution;
     readonly renders?: readonly FeatureRender<never>[];
-    setup?(host: TableFeatureHost<TRow>): void | (() => void);
+    setup?(host: TableFeatureHost<TRow>): void;
 }
 
 // @public
 export interface TableFeatureHost<TRow = unknown> extends NeutralFeatureHost<TRow> {
     readonly __row?: (row: TRow) => void;
     extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
-    onDispose(cleanup: () => void): void;
     registerAggregator(name: string, aggregator: Aggregator): void;
     registerColumnMenuAction(factory: (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuItem | readonly ColumnMenuItem[] | undefined): void;
     registerCommand(command: Command): void;
@@ -772,6 +780,11 @@ export interface TableFeatureHost<TRow = unknown> extends NeutralFeatureHost<TRo
     registerFilterType(spec: FilterTypeSpec): void;
     registerPanel(panel: SidePanelEntry): void;
     registerWriter(writer: ExportWriter): void;
+}
+
+// @public
+export interface TableFeatureMountContext<TRow = unknown> {
+    feature(): TableFeature<TRow>;
 }
 
 export { TableLabels }

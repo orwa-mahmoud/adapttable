@@ -18,8 +18,16 @@ import {
 } from "@adapttable/core/binding";
 import { resolveCellEditor } from "@adapttable/core/editing";
 import { pivot } from "@adapttable/core/pivot";
-import { fireEvent, render, renderHook, screen } from "@testing-library/react";
-import { StrictMode } from "react";
+import {
+  act,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+} from "@testing-library/react";
+import { type ReactNode, StrictMode, Suspense, use } from "react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { useCommandPalette } from "../actions/useCommandPalette";
@@ -104,18 +112,146 @@ describe("useTableFeatures", () => {
     expect(result.current.first).toBe(result.current.second);
   });
 
-  it("runs setup cleanup on unmount", () => {
-    const cleanup = vi.fn();
+  it("refuses a setup that returns a cleanup, naming where it belongs", () => {
+    const plugin = {
+      id: "leaky",
+      setup: () => () => undefined,
+    } as unknown as TableFeature;
+    expect(() =>
+      renderHook(() => useTableFeatures({ features: [plugin] }))
+    ).toThrow(/mount/);
+  });
+
+  it("mounts once the table has mounted and releases once on unmount", () => {
+    const events: string[] = [];
     const plugin: TableFeature = {
       id: "temp",
-      setup: () => cleanup,
+      mount: () => {
+        events.push("mount");
+        return () => events.push("release");
+      },
     };
     const { unmount } = renderHook(() =>
       useTableFeatures({ features: [plugin] })
     );
-    expect(cleanup).not.toHaveBeenCalled();
+    expect(events).toEqual(["mount"]);
     unmount();
-    expect(cleanup).toHaveBeenCalledTimes(1);
+    expect(events).toEqual(["mount", "release"]);
+  });
+
+  it("mounts once when the adapter and the shell both call it", () => {
+    const mount = vi.fn();
+    const incoming = { features: [{ id: "once", mount } as TableFeature] };
+    renderHook(() => useTableFeatures(useTableFeatures(incoming)));
+    expect(mount).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the resource across an inline option change and hands it the latest options", () => {
+    const events: string[] = [];
+    let seen: (() => TableFeature) | undefined;
+    const declare = (option: string) =>
+      ({
+        id: "inline",
+        option,
+        mount: (context: { feature: () => TableFeature }) => {
+          events.push("mount");
+          seen = context.feature;
+          return () => events.push("release");
+        },
+      }) as TableFeature & { option: string };
+    const { rerender, unmount } = renderHook(
+      ({ option }: { option: string }) =>
+        useTableFeatures({ features: [declare(option)] }),
+      { initialProps: { option: "one" } }
+    );
+    rerender({ option: "two" });
+    expect(events).toEqual(["mount"]);
+    expect((seen?.() as { option?: string } | undefined)?.option).toBe("two");
+    unmount();
+    expect(events).toEqual(["mount", "release"]);
+  });
+
+  it("releases every acquisition exactly once under StrictMode", () => {
+    const acquired: number[] = [];
+    const released: number[] = [];
+    let next = 0;
+    const plugin: TableFeature = {
+      id: "strict",
+      mount: () => {
+        const ticket = (next += 1);
+        acquired.push(ticket);
+        return () => released.push(ticket);
+      },
+    };
+    function Probe(): null {
+      useTableFeatures({ features: [plugin] });
+      return null;
+    }
+    const { unmount } = render(
+      <StrictMode>
+        <Probe />
+      </StrictMode>
+    );
+    unmount();
+    const byTicket = (left: number, right: number) => left - right;
+    expect(released.slice().sort(byTicket)).toEqual(
+      acquired.slice().sort(byTicket)
+    );
+    expect(new Set(released).size).toBe(released.length);
+  });
+
+  it("acquires nothing for a render React discards", async () => {
+    const mount = vi.fn(() => () => undefined);
+    const plugin: TableFeature = { id: "suspended", mount };
+    let resume: (() => void) | undefined;
+    const pending = new Promise<void>((resolve) => {
+      resume = resolve;
+    });
+    function Gate(): null {
+      use(pending);
+      return null;
+    }
+    function Probe(): ReactNode {
+      useTableFeatures({ features: [plugin] });
+      return <Gate />;
+    }
+    let view: ReturnType<typeof render> | undefined;
+    await act(async () => {
+      view = render(
+        <Suspense fallback={null}>
+          <Probe />
+        </Suspense>
+      );
+      await Promise.resolve();
+    });
+    expect(mount).not.toHaveBeenCalled();
+    await act(async () => {
+      resume?.();
+      await pending;
+    });
+    expect(mount).toHaveBeenCalledTimes(1);
+    view?.unmount();
+  });
+
+  it("acquires nothing while rendering on the server and mounts once after hydration", async () => {
+    const mount = vi.fn(() => () => undefined);
+    const plugin: TableFeature = { id: "hydrated", mount };
+    function Probe(): ReactNode {
+      useTableFeatures({ features: [plugin] });
+      return <span>ready</span>;
+    }
+    const host = document.createElement("div");
+    host.innerHTML = renderToString(<Probe />);
+    expect(mount).not.toHaveBeenCalled();
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    await act(async () => {
+      root = hydrateRoot(host, <Probe />);
+      await Promise.resolve();
+    });
+    expect(mount).toHaveBeenCalledTimes(1);
+    act(() => {
+      root?.unmount();
+    });
   });
 
   it("appends a plugin column-menu action through the same actions helper", () => {

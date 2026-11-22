@@ -234,6 +234,10 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
     "The shell no longer carries the grouping panel's props: the panel's state is the finished shell's tableProps.groupingPanel (GROUPING_PANEL_VIEW_STATE), and the strip's props are GroupingPanelSlotProps.",
   ],
   [
+    /\.onDispose\(/g,
+    "A feature's setup only registers: move what onDispose released into the feature's mount(context) and return the cleanup there. An ordinary option change keeps the mounted resource; change its dependencies or id to replace it.",
+  ],
+  [
     /\buseChromeScrollReset\(\s*\w+\s*,\s*\w+\s*,/g,
     "useChromeScrollReset(ref, props) takes the root and the props; drop the chrome argument.",
   ],

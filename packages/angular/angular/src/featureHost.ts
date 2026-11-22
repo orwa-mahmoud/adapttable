@@ -78,8 +78,15 @@ export interface AdaptTableFeature extends FeatureSetup<
   readonly rank?: number;
   /** The slots this feature draws into, and what draws each one. */
   readonly renders?: readonly FeatureRender<never, SlotComponent>[];
-  /** Start live behavior once the table runtime exists; dispose with the table. */
+  /**
+   * Start live behavior once the table runtime exists. The table keeps it
+   * while the feature is composed: an ordinary option change hands
+   * `context.feature()` the new declaration, and only removing the feature,
+   * changing its `dependencies` or destroying the table releases it, once.
+   */
   mount?(context: FeatureMountContext): void | (() => void);
+  /** Values that, when any changes, replace the feature's mounted resource. */
+  readonly dependencies?: readonly unknown[];
   /**
    * The code this feature brings to the table, by key. The table reaches a
    * feature's code only through a composed feature, so a table never bundles

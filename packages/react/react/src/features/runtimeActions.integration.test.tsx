@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import { useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
@@ -38,7 +39,11 @@ function Probe({
 }: {
   onView: (actions: TableRuntimeView<Row>["actions"]) => void;
 }) {
-  onView(useTableRuntime<Row>().view()?.actions);
+  const runtime = useTableRuntime<Row>();
+  // A reader takes the view once the table has committed it.
+  useEffect(() => {
+    onView(runtime.view()?.actions);
+  });
   return null;
 }
 

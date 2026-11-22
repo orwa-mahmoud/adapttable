@@ -15,7 +15,7 @@ import { type ReactNode, useState } from "react";
 import type { TableChrome } from "../chrome/tableChromeContract";
 import type { EditableCellEditing } from "../editing/editableCellController";
 import { useFeatureState } from "./featureState";
-import { useChromeStages, usePublishTableRuntime } from "./providers";
+import { PublishTableRuntime, useChromeStages } from "./providers";
 import type { ChromeExtraSlotProps } from "./slotKeys";
 import {
   COLUMN_SIZING_STATE,
@@ -70,12 +70,17 @@ function RuntimePublisher<TRow, TProps extends StageTableProps<TRow>>({
     }
   );
   const labels = chrome.table.labels;
-  usePublishTableRuntime<TRow>({
-    rows: () => publisher.visibleRows(),
-    labels: () => labels,
-    view: () => publisher.view(),
-  });
-  return children(chrome, props);
+  return (
+    <PublishTableRuntime<TRow>
+      reader={{
+        rows: () => publisher.visibleRows(),
+        labels: () => labels,
+        view: () => publisher.view(),
+      }}
+    >
+      {children(chrome, props)}
+    </PublishTableRuntime>
+  );
 }
 
 /** One link of the walk: run this stage, then hand the rest what it grew. */

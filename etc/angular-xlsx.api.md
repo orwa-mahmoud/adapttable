@@ -24,6 +24,7 @@ import { xlsxWriter } from '@adapttable/core/xlsx';
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
     readonly contrast?: ContrastRules;
+    readonly dependencies?: readonly unknown[];
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
     readonly labels?: Partial<TableLabels>;
@@ -39,6 +40,7 @@ export function exportXlsx<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>
 
 // @public
 export interface FeatureMountContext {
+    feature(): AdaptTableFeature;
     flush<T>(run: () => T): T;
     flushAdmission(): void;
     readonly injector: Injector;

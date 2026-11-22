@@ -71,9 +71,21 @@ export interface TableFeature<TRow = unknown> extends PatchFeature<TRow> {
    * share this method — custom filter types, editors, aggregators,
    * exporters, menu items, panels and commands all go through the host.
    *
-   * Return a function to run when the table unmounts or `features` change.
+   * Registration only: it runs during render and may run for a render React
+   * discards, so it acquires nothing. A resource belongs in `mount`.
    */
-  setup?(host: TableFeatureHost<TRow>): void | (() => void);
+  setup?(host: TableFeatureHost<TRow>): void;
+  /**
+   * Acquire what outlives a render — a subscription, a preload, a timer —
+   * once the table has mounted, and return what releases it. The table
+   * keeps it while the feature is composed: an ordinary change to the
+   * feature's options hands `context.feature()` the new declaration, and
+   * only removing the feature, changing its `dependencies` or unmounting the
+   * table releases it, exactly once.
+   */
+  mount?(context: TableFeatureMountContext<TRow>): void | (() => void);
+  /** Values that, when any changes, replace the feature's mounted resource. */
+  readonly dependencies?: readonly unknown[];
   /**
    * The React component this feature needs in the tree.
    *
@@ -91,6 +103,26 @@ export interface TableFeature<TRow = unknown> extends PatchFeature<TRow> {
    * table that never imported the feature.
    */
   readonly renders?: readonly FeatureRender<never>[];
+}
+
+/**
+ * What a feature's {@link TableFeature.mount} receives.
+ *
+ * @public
+ */
+export interface TableFeatureMountContext<TRow = unknown> {
+  /** The feature's current declaration, with its latest options. */
+  feature(): TableFeature<TRow>;
+}
+
+/**
+ * What a row-independent feature's mount receives.
+ *
+ * @public
+ */
+export interface StaticFeatureMountContext {
+  /** The feature's current declaration, with its latest options. */
+  feature(): StaticTableFeature;
 }
 
 /**
@@ -130,7 +162,11 @@ export interface StaticTableFeature {
   /** Where its fills sit in a slot several features fill; lower first. */
   readonly rank?: number;
   /** Register against the live table, minus the row-shaped seams. */
-  setup?(host: StaticFeatureHost): void | (() => void);
+  setup?(host: StaticFeatureHost): void;
+  /** Acquire what outlives a render, exactly as {@link TableFeature.mount}. */
+  mount?(context: StaticFeatureMountContext): void | (() => void);
+  /** Values that replace the mounted resource, as {@link TableFeature.dependencies}. */
+  readonly dependencies?: readonly unknown[];
   /** The React component this feature needs, as {@link TableFeature.provider}. */
   readonly provider?: FeatureProviderContribution;
   /** Named positions this feature draws into, as {@link TableFeature.renders}. */
@@ -149,8 +185,6 @@ export interface StaticTableFeature {
 export interface TableFeatureHost<
   TRow = unknown,
 > extends NeutralFeatureHost<TRow> {
-  /** Forget a registration when the table unmounts or features change. */
-  onDispose(cleanup: () => void): void;
   /** Register a filter type for this table. */
   registerFilterType(spec: FilterTypeSpec): void;
   /** Extend a registered filter type for this table. */

@@ -614,6 +614,7 @@ export interface FeatureMountContext<TRow = unknown> {
     readonly bodyRows?: Readonly<ShallowRef<readonly TableRowModel<TRow>[]>>;
     // (undocumented)
     readonly density?: Readonly<ShallowRef<TableDensity_2>>;
+    readonly feature: () => TableFeature<TRow>;
     // (undocumented)
     readonly featureHost: Readonly<ShallowRef<FeatureHostState<TRow>>>;
     // (undocumented)
@@ -1178,8 +1179,7 @@ export interface StaticTableFeature {
     readonly renders?: readonly FeatureRender<never, VNodeChild>[];
     // (undocumented)
     readonly requiredSlots?: readonly FeatureSlotKey<never>[];
-    // (undocumented)
-    readonly setup?: (host: StaticFeatureHost) => void | (() => void);
+    readonly setup?: (host: StaticFeatureHost) => void;
 }
 
 // @public
@@ -1324,8 +1324,7 @@ export interface TableFeature<TRow> {
     readonly renders?: readonly FeatureRender<never, VNodeChild>[];
     // (undocumented)
     readonly requiredSlots?: readonly FeatureSlotKey<never>[];
-    // (undocumented)
-    readonly setup?: (host: TableFeatureHost<TRow>) => void | (() => void);
+    readonly setup?: (host: TableFeatureHost<TRow>) => void;
 }
 
 // @public (undocumented)

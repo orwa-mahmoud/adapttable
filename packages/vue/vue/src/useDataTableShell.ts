@@ -1182,7 +1182,10 @@ export function useDataTableShell<TRow>(
       const model = resolved.value.editingModel;
       if (model) {
         editingLifecycle ??= lifecycleOwner?.run(useEditingLifecycle);
-        editingLifecycle?.reconcile([{ id: "editing-model", mount: model }]);
+        // Another model is another implementation: it replaces this one.
+        editingLifecycle?.reconcile([
+          { id: "editing-model", mount: model, dependencies: [model] },
+        ]);
       } else editingLifecycle?.reconcile([]);
       publish();
     } finally {

@@ -48,10 +48,11 @@ export interface CellNavigationOptions {
 export function cellNavigation(
   options: CellNavigationOptions = {}
 ): AdaptTableFeature {
-  return {
+  const feature: CellNavigationFeature = {
     ...coreCellNavigation(
       options.onRangeChange ? { onRangeChange: options.onRangeChange } : {}
     ),
+    cellNavigationOptions: options,
     mount(context) {
       const occupied = context.state.get(SURFACE_OCCUPIED)();
       if (occupied?.grid) return;
@@ -60,7 +61,12 @@ export function cellNavigation(
       const grid = injectGridFocus({
         table: handles.table,
         enabled: true,
-        onRangeChange: options.onRangeChange,
+        // Kept across re-declarations: the latest declaration's callback.
+        onRangeChange: (range) => {
+          cellNavigationOptionsOf(context.feature(), options).onRangeChange?.(
+            range
+          );
+        },
         injector: context.injector,
       });
       context.state.set(SURFACE_GRID, grid);
@@ -69,4 +75,19 @@ export function cellNavigation(
       };
     },
   };
+  return feature;
+}
+
+/** The declaration's options, so a kept grid reads the latest. */
+interface CellNavigationFeature extends AdaptTableFeature {
+  readonly cellNavigationOptions: CellNavigationOptions;
+}
+
+function cellNavigationOptionsOf(
+  feature: object,
+  fallback: CellNavigationOptions
+): CellNavigationOptions {
+  return "cellNavigationOptions" in feature
+    ? (feature as CellNavigationFeature).cellNavigationOptions
+    : fallback;
 }

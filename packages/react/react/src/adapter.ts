@@ -313,6 +313,7 @@ export {
   featureSlotKey,
   featureStateKey,
   FeatureStateScope,
+  PublishTableRuntime,
   slotRender,
   type TableRuntimeReader,
   useFeatureSlotFilled,
@@ -417,9 +418,11 @@ export {
 } from "./features/stateKeys";
 export type {
   StaticFeatureHost,
+  StaticFeatureMountContext,
   StaticTableFeature,
   TableFeature,
   TableFeatureHost,
+  TableFeatureMountContext,
 } from "./features/tableFeature";
 export type { FeatureApplyInput, FeaturePatch } from "./features/tableFeature";
 export { applyTableFeatures, featureLabelsFor } from "./features/tableFeature";

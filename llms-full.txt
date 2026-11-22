@@ -828,8 +828,9 @@ or a `TableFeature` with `setup(host)` for live registration.
 
 A plugin registers on the same `TableFeature` the factories return —
 `filterTypes`, an export writer, palette commands, context-menu items, a side
-panel — so the registration surface is one array, one host, with lifecycle via
-`onDispose` or a function returned from `setup`.
+panel — so the registration surface is one array and one host. `setup`
+registers and nothing else: it runs during render, possibly for a render the
+framework discards. What outlives a render goes in `mount`.
 
 ```tsx
 import type { TableFeature } from "@adapttable/mantine/features";
@@ -847,9 +848,6 @@ const currencyFilter: TableFeature = {
       chips: () => ({}),
       conditionToExtra: () => ({}),
     });
-    return () => {
-      /* table unmounted, or `features` changed */
-    };
   },
 };
 
@@ -874,7 +872,30 @@ methods in `setup`, so a plugin is not a second API.
 | `registerPanel`            | `sidePanel({ panels, … })`                    |
 | `registerCommand`          | `commandPalette({ commands, … })`             |
 | `registerContextMenuItems` | `contextMenu({ items })`                      |
-| `onDispose`                | cleanup when the table unmounts               |
+
+### Resources — `mount`
+
+A subscription, a preload or a timer belongs in `mount(context)`, which runs
+once the table has mounted and returns what releases it. The table keeps it
+by feature id: declaring the feature again with new options, inline included,
+keeps the resource and hands `context.feature()` the new declaration. Only
+removing the feature, changing its `dependencies` or unmounting the table
+releases it, and each acquisition is released exactly once. A render the
+framework discards acquires nothing.
+
+```tsx
+const presence: TableFeature<Row> = {
+  id: "presence",
+  dependencies: [roomId],
+  mount(context) {
+    const channel = openPresence(roomId, () => context.feature());
+    return () => channel.close();
+  },
+};
+```
+
+Two features with one id resolve to the last declaration everywhere: its
+options, labels, registrations, mount and slot fills.
 
 A named editor is a string `column.editor` that is not a built-in (`"text"`,
 `"number"`, …). `resolveCellEditor` turns it into `{ type: "custom", render }`
@@ -5053,9 +5074,9 @@ panel and in the header funnel, persists `f_ratingMin=4`, and chips it as
 
 Registrations apply in order, then the patches, so a feature can register a
 type and extend it in the same `setup`. `extendFilterType` on an unknown type
-warns in development and changes nothing. `setup` may return a cleanup
-function, or call `host.onDispose`, for when the table unmounts or `features`
-changes.
+warns in development and changes nothing. `setup` only registers; a
+resource the feature holds belongs in its `mount`
+([features](./features.md#resources--mount)).
 
 `filterTypes` has one feature id (`filter-types`), and a later feature with
 the same id replaces an earlier one. Pass every spec to one
@@ -17411,7 +17432,10 @@ Types: `TableFeature` · `TableFeatureHost` · `FeaturePatch` ·
 `setup(host)` on the same `TableFeature`: `registerFilterType`,
 `extendFilterType`, `registerEditor`, `registerAggregator`, `registerWriter`,
 `registerColumnMenuAction`, `registerPanel`, `registerCommand`,
-`registerContextMenuItems`, `onDispose`. Adapters run this through
+`registerContextMenuItems`; resources go in `mount(context)`
+(`TableFeatureMountContext`, `StaticFeatureMountContext`), kept by id and
+`dependencies`. `PublishTableRuntime` publishes a chrome's reader and
+commits it in a layout effect. Adapters run this through
 `useTableFeatures`. The host belongs to that table: `featureHostOf` /
 `rememberFeatureHost` thread it into chrome, `FeatureHostProvider` /
 `useFeatureHost` hand it to hooks in the tree, and `bindFeatureHostFn`
@@ -18006,6 +18030,14 @@ explains which import a program changes. This list is the reference.
   reads the per-feature hosts as one host. `invokeCleanups` runs every
   cleanup and returns the failures; one failure does not skip the rest.
   These functions are on `@adapttable/core/binding`.
+- `createFeatureMounts(acquire)` — a table's mounted feature resources
+  (`FeatureMounts`): `reconcile` keeps each by id across ordinary option
+  changes, replaces it when its `dependencies` change, releases it once when
+  the feature leaves, and rolls back what a failed pass acquired; `current`
+  is the declaration a resource reads; `dispose` releases every resource once.
+  `MountableFeature` is what it reads from a declaration and
+  `AcquireFeatureMount` the binding's acquire. `composeMounts` joins a core
+  feature's mount with the binding's own. On `@adapttable/core/binding`.
 - `featureLifecycleConformanceTests(driver, harness)` — the registration
   cases a binding runs against its own lifecycle. `FeatureLifecycleDriver`
   opens an independent table and a nested one. `LifecycleHarness` is the
@@ -24302,6 +24334,8 @@ of 380 kB.
 | React `TableChrome.autoSizeColumns`, `autoSizeColumn` and `columnLayoutLive`                                                                                                                                                                                                                                                              | The column layout publishes `COLUMN_SIZING_STATE` (`autoSizeColumns`, `autoSizeColumn`); the finished shell's `autoSizeColumns` and `autoSizeColumn` carry them                                                                                                                                             |
 | React `TableChrome.groupingPanel`, the shell's `groupingPanelProps` and `DataTableShellGroupingPanelProps`                                                                                                                                                                                                                                | The grouping panel publishes `GROUPING_PANEL_VIEW_STATE`; the finished shell's `tableProps.groupingPanel` carries it, and the strip's props are `GroupingPanelSlotProps`                                                                                                                                    |
 | React `TableChrome.hasRowReorder` and `rowReorder`                                                                                                                                                                                                                                                                                        | Row reorder publishes `ROW_REORDER`; the finished shell carries `hasRowReorder` and `tableProps.rowReorder`                                                                                                                                                                                                 |
+| A feature `setup` that returns a cleanup, or calls `host.onDispose`                                                                                                                                                                                                                                                                       | `setup` only registers; acquire the resource in `mount(context)` and return its cleanup there. `context.feature()` is the latest declaration                                                                                                                                                                |
+| A mounted feature replaced by declaring it again with new options                                                                                                                                                                                                                                                                         | The resource is kept and reads `context.feature()`; change its `dependencies` or its id to replace it                                                                                                                                                                                                       |
 | `KitPagerView.chrome`                                                                                                                                                                                                                                                                                                                     | `KitPagerView.tableProps` (`grouping`)                                                                                                                                                                                                                                                                      |
 | Core `BodyChrome` with optional `grouping` and `tree`                                                                                                                                                                                                                                                                                     | Both keys are required; pass `undefined` for an ungrouped body                                                                                                                                                                                                                                              |
 | `OptionalTreeCell`, `OptionalTreeToggle`, `OptionalFillHandle`, `OptionalExpandToggle`, `OptionalFilterHeader`, `OptionalRowEditActions`, `OptionalRowReorderHandle`, `OptionalRowReorderButtons`, `OptionalColumnGroupToggle`, `OptionalColumnHeaderRename`, `OptionalColumnSelect`, `OptionalGroupHeaderRow`, `OptionalGroupHeaderCard` | `<FeatureSlot slot={…} props={…} fallback={…} />` with the slot's key                                                                                                                                                                                                                                       |

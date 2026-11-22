@@ -407,7 +407,50 @@ describe("reentrant source retirement", () => {
   });
 });
 
+/** The CSV export over every row, drawn by an empty control. */
+function exportAllFeature(
+  run: NonNullable<ExportCsvOptions<Row>["onExportAll"]>
+) {
+  return extendFeature(exportCsv<Row>({ scope: "all", onExportAll: run }), [
+    slotRender(EXPORT_CONTROL, () => null),
+  ]);
+}
+
 describe("reentrant feature replacement", () => {
+  it("keeps a running export when the feature is declared again", () => {
+    const scope = effectScope();
+    const job = deferred<{ url: string }>();
+    const controls: ExportAllControls[] = [];
+    const run = vi.fn<NonNullable<ExportCsvOptions<Row>["onExportAll"]>>(
+      (_query, control) => {
+        controls.push(control);
+        return job.promise;
+      }
+    );
+    const make = () => exportAllFeature(run);
+    const features = shallowRef([make()]);
+    const shell = required(
+      scope.run(() =>
+        useDataTableShell({
+          data: rows,
+          columns: [{ key: "name" }],
+          rowKey: (row: Row) => row.id,
+          features,
+          urlSync: false,
+        })
+      )
+    );
+    try {
+      required(shell.state.get(EXPORT_MODEL).value).onExportCsv?.();
+      features.value = [make()];
+      expect(required(controls[0]).signal.aborted).toBe(false);
+      expect(run).toHaveBeenCalledOnce();
+    } finally {
+      scope.stop();
+    }
+    expect(required(controls[0]).signal.aborted).toBe(true);
+  });
+
   it("rejects a retiring feature's abort-time action before scope cleanup callbacks finish", () => {
     const scope = effectScope();
     const jobs = [deferred<{ url: string }>(), deferred<{ url: string }>()];
@@ -418,10 +461,7 @@ describe("reentrant feature replacement", () => {
         return required(jobs[controls.length - 1]).promise;
       }
     );
-    const make = () =>
-      extendFeature(exportCsv<Row>({ scope: "all", onExportAll: run }), [
-        slotRender(EXPORT_CONTROL, () => null),
-      ]);
+    const make = () => exportAllFeature(run);
     const features = shallowRef([make()]);
     const shell = required(
       scope.run(() =>
@@ -442,9 +482,10 @@ describe("reentrant feature replacement", () => {
         () => retired?.(),
         { once: true }
       );
-      features.value = [make()];
+      features.value = [];
       expect(required(controls[0]).signal.aborted).toBe(true);
       expect(run).toHaveBeenCalledOnce();
+      features.value = [make()];
       required(shell.state.get(EXPORT_MODEL).value).onExportCsv?.();
       expect(run).toHaveBeenCalledTimes(2);
       expect(required(controls[1]).signal.aborted).toBe(false);

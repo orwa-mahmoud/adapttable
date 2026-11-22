@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import { useEffect } from "react";
 import { describe, expect, it } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
@@ -41,10 +42,12 @@ function Probe({
   ) => void;
 }) {
   const runtime = useTableRuntime<Row>();
-  const view = runtime.view();
-  // Read it the way an agent does — through the neutral table the session
-  // holds — not by calling the deriver directly.
-  onOperations(view?.neutralTable?.operations, Boolean(view?.neutralTable));
+  // Read it the way an agent does — after the table committed, through the
+  // neutral table the session holds — not by calling the deriver directly.
+  useEffect(() => {
+    const view = runtime.view();
+    onOperations(view?.neutralTable?.operations, Boolean(view?.neutralTable));
+  });
   return null;
 }
 

@@ -13,6 +13,9 @@ export function absoluteColumnIndex(columns: readonly {
 export function acceptColumnDrag(event: ColumnDragEvent): void;
 
 // @public
+export type AcquireFeatureMount<TFeature> = (id: string, latest: () => TFeature) => (() => void) | void;
+
+// @public
 export const ACTION_LABELS: Pick<Required<TableLabels>, "commandSearch" | "commandEmpty" | "copyCells" | "cutCells">;
 
 // @public
@@ -2438,6 +2441,9 @@ export function compareValues(a: SortableValue, b: SortableValue): number;
 export function composeContextMenuExtra<TRow>(extra: ContextMenuItemsFactory<TRow> | undefined, registered: readonly ContextMenuItemsFactory<TRow>[] | undefined): ContextMenuItemsFactory<TRow> | undefined;
 
 // @public
+export function composeMounts<TContext>(...mounts: readonly (((context: TContext) => void | (() => void)) | undefined)[]): ((context: TContext) => void | (() => void)) | undefined;
+
+// @public
 export function computedAggregateKeys(entries: readonly {
     readonly kind: string;
     readonly aggregateCells?: Readonly<Record<string, unknown>>;
@@ -2819,7 +2825,8 @@ export function coreExtraRows<TExtraRow extends Pick<ExtraRow, "key" | "kind" | 
 
 // @public
 export interface CoreFeature<TRow = unknown, THost = CoreFeatureRegistrar> extends PatchFeature<TRow> {
-    setup?(host: THost): void | (() => void);
+    mount?(): void | (() => void);
+    setup?(host: THost): void;
 }
 
 // @public
@@ -3026,6 +3033,9 @@ export function createExportController(initial: ExportControllerOptions): Export
 
 // @public
 export function createFeatureHost<TPanel extends SidePanelEntry = SidePanelEntry>(features: readonly FeatureSetup<unknown, TPanel>[] | undefined): FeatureHostState;
+
+// @public
+export function createFeatureMounts<TFeature extends MountableFeature>(acquire: AcquireFeatureMount<TFeature>): FeatureMounts<TFeature>;
 
 // @public
 export function createFilterEngine(builtIns: FilterTypeRegistry): FilterEngine;
@@ -5016,6 +5026,13 @@ export function featureLabelsOf(features: readonly PatchFeature<never>[] | undef
 export type FeatureListEntry<TFeature> = TFeature | readonly TFeature[];
 
 // @public
+export interface FeatureMounts<TFeature> {
+    current(id: string): TFeature | undefined;
+    dispose(): void;
+    reconcile(features: readonly TFeature[]): void;
+}
+
+// @public
 export interface FeatureNotice {
     readonly appearance: FeatureNoticeAppearance;
     readonly kind: FeatureNoticeKind;
@@ -5061,7 +5078,7 @@ export interface FeatureRender<TProps, TNode = unknown> {
 
 // @public
 export interface FeatureSetup<TRow, TPanel extends SidePanelEntry> {
-    setup?(host: LiveFeatureHost<TRow, TPanel>): void | (() => void);
+    setup?(host: LiveFeatureHost<TRow, TPanel>): void;
 }
 
 // @public
@@ -7751,6 +7768,13 @@ export const MOUNT_STAGGER: {
 };
 
 // @public
+export interface MountableFeature {
+    readonly dependencies?: readonly unknown[];
+    readonly id: string;
+    readonly mount?: unknown;
+}
+
+// @public
 export function moveGroupingKey(keys: readonly string[], key: string, insertionIndex: number): string[];
 
 // @public
@@ -9325,7 +9349,7 @@ export interface RowMoveMenuModel<TRow> {
 }
 
 // @public
-export function rowMoveMenuProps<TRow>(reorder: RowMoveMenuSource<TRow>, labels: RowReorderLabels | undefined, row: TRow, moveLocked: boolean): RowMoveMenuSlotProps | undefined;
+export function rowMoveMenuProps<TRow>(reorder: RowMoveMenuSource<TRow>, labels: RowReorderLabels | undefined, row: TRow, moveLocked: boolean, view?: TableRuntimeView<TRow>): RowMoveMenuSlotProps | undefined;
 
 // @public
 export interface RowMoveMenuSlotProps {
@@ -9691,7 +9715,7 @@ export interface RowReorderState<TRow, TDragEvent = unknown, TKeyEvent = unknown
         from: number;
     } | null;
     moveBy: RowCallback<[localIndex: number, delta: -1 | 1, row: NoInfer<TRow>, windowStart: number, rowCount: number], void>;
-    moveMenu: RowCallback<[row: NoInfer<TRow>], RowMoveMenuModel<TRow> | undefined>;
+    moveMenu: RowCallback<[row: NoInfer<TRow>, view?: TableRuntimeView<NoInfer<TRow>>], RowMoveMenuModel<TRow> | undefined>;
     overIndex: number | null;
     overPosition: RowDropPosition | null;
     pendingMove: RowMoveRequest<TRow> | null;

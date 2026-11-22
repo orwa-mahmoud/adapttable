@@ -5,6 +5,7 @@
  * layout. A binding passes `isRtl` when horizontal arrows should follow the
  * grip's writing direction.
  */
+import type { TableRuntimeView } from "../features/tableRuntime";
 import { ROW_LABELS } from "../labelGroups/rowLabels";
 import {
   type RowDropPosition,
@@ -54,8 +55,14 @@ export interface RowReorderControllerOptions<TRow> {
   confirmMove?: RowMoveConfirmHandler<TRow>;
   /** The host's write for a cross-boundary move. */
   onRowMove?: (request: RowMoveRequest<TRow>) => unknown;
-  /** Keyboard/touch destinations for a row, when nested. */
-  getMoveMenu?: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
+  /**
+   * Keyboard/touch destinations for a row, when nested. `view` is the table
+   * the caller is drawing; without it, the live table's.
+   */
+  getMoveMenu?: (
+    row: TRow,
+    view?: TableRuntimeView<TRow>
+  ) => RowMoveMenuModel<TRow> | undefined;
   /** Resolve a drop inside grouped or tree rows. */
   resolveMove?: (
     row: TRow,
@@ -236,8 +243,14 @@ export interface RowReorderController<TRow> {
     windowStart: number,
     rowCount: number
   ) => void;
-  /** Keyboard/touch destinations for this row, when nested. */
-  readonly moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
+  /**
+   * Keyboard/touch destinations for this row, when nested. A control drawing
+   * during render passes the view it draws.
+   */
+  readonly moveMenu: (
+    row: TRow,
+    view?: TableRuntimeView<TRow>
+  ) => RowMoveMenuModel<TRow> | undefined;
   /** Select a destination from the move menu. */
   readonly selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
   /** Confirm the move shown by the kit confirmation surface. */
@@ -630,8 +643,10 @@ export function createRowReorderController<TRow>(
         keyDown: guard(controller.keyDown),
         moveBy: guard(controller.moveBy),
         selectMoveTarget: guard(controller.selectMoveTarget),
-        moveMenu: (row) =>
-          live() && epoch === ownedEpoch ? controller.moveMenu(row) : undefined,
+        moveMenu: (row, view) =>
+          live() && epoch === ownedEpoch
+            ? controller.moveMenu(row, view)
+            : undefined,
         confirmMove: guard(() => {
           if (pending !== null && snapshot.pendingMove === pending)
             controller.confirmMove();
@@ -736,9 +751,9 @@ export function createRowReorderController<TRow>(
         delta > 0 ? "after" : "before"
       );
     },
-    moveMenu: (row) => {
+    moveMenu: (row, view) => {
       if (!live()) return undefined;
-      const menu = options.getMoveMenu?.(row);
+      const menu = options.getMoveMenu?.(row, view);
       for (const target of menu?.targets ?? []) menuEpochs.set(target, epoch);
       return menu;
     },

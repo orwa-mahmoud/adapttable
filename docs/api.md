@@ -176,7 +176,10 @@ Types: `TableFeature` · `TableFeatureHost` · `FeaturePatch` ·
 `setup(host)` on the same `TableFeature`: `registerFilterType`,
 `extendFilterType`, `registerEditor`, `registerAggregator`, `registerWriter`,
 `registerColumnMenuAction`, `registerPanel`, `registerCommand`,
-`registerContextMenuItems`, `onDispose`. Adapters run this through
+`registerContextMenuItems`; resources go in `mount(context)`
+(`TableFeatureMountContext`, `StaticFeatureMountContext`), kept by id and
+`dependencies`. `PublishTableRuntime` publishes a chrome's reader and
+commits it in a layout effect. Adapters run this through
 `useTableFeatures`. The host belongs to that table: `featureHostOf` /
 `rememberFeatureHost` thread it into chrome, `FeatureHostProvider` /
 `useFeatureHost` hand it to hooks in the tree, and `bindFeatureHostFn`
@@ -771,6 +774,14 @@ explains which import a program changes. This list is the reference.
   reads the per-feature hosts as one host. `invokeCleanups` runs every
   cleanup and returns the failures; one failure does not skip the rest.
   These functions are on `@adapttable/core/binding`.
+- `createFeatureMounts(acquire)` — a table's mounted feature resources
+  (`FeatureMounts`): `reconcile` keeps each by id across ordinary option
+  changes, replaces it when its `dependencies` change, releases it once when
+  the feature leaves, and rolls back what a failed pass acquired; `current`
+  is the declaration a resource reads; `dispose` releases every resource once.
+  `MountableFeature` is what it reads from a declaration and
+  `AcquireFeatureMount` the binding's acquire. `composeMounts` joins a core
+  feature's mount with the binding's own. On `@adapttable/core/binding`.
 - `featureLifecycleConformanceTests(driver, harness)` — the registration
   cases a binding runs against its own lifecycle. `FeatureLifecycleDriver`
   opens an independent table and a nested one. `LifecycleHarness` is the

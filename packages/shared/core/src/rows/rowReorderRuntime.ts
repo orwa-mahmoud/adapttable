@@ -96,8 +96,8 @@ export function rowReorderRuntimeOptions<TRow>(
     onRowMove: (request) => {
       dispatchRowMove(request, options);
     },
-    getMoveMenu: (row) => {
-      const view = runtime.view();
+    getMoveMenu: (row, drawn) => {
+      const view = drawn ?? runtime.view();
       if (!view) return undefined;
       return rowMoveMenu(rowMoveView(view), row, options, labels);
     },

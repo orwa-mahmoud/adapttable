@@ -7355,6 +7355,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "composeMounts",
+      "kind": "runtime",
+      "module": "features/featureMounts.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureMounts.ts#composeMounts",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "computePagination",
       "kind": "runtime",
       "module": "pagination/paginationMath.ts",
@@ -8012,6 +8023,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/liveFeatureHost.ts#createFeatureHost",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "createFeatureMounts",
+      "kind": "runtime",
+      "module": "features/featureMounts.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureMounts.ts#createFeatureMounts",
       "subpaths": ["./binding"]
     },
     {
@@ -14241,6 +14263,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "AcquireFeatureMount",
+      "kind": "type",
+      "module": "features/featureMounts.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureMounts.ts#AcquireFeatureMount",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "ActionDefinition",
       "kind": "type",
       "module": "state/tableStore.ts",
@@ -15979,6 +16012,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "FeatureMounts",
+      "kind": "type",
+      "module": "features/featureMounts.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureMounts.ts#FeatureMounts",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "FeatureNoticeLabels",
       "kind": "type",
       "module": "state/featureNotices.ts",
@@ -17560,6 +17604,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "rows/rowActionsRuntime.ts#MergedRowActions",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "MountableFeature",
+      "kind": "type",
+      "module": "features/featureMounts.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureMounts.ts#MountableFeature",
       "subpaths": ["./binding"]
     },
     {

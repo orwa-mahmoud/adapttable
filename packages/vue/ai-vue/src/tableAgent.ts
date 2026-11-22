@@ -25,6 +25,7 @@ import {
   type MaybeRefOrGetter,
   nextTick,
   onScopeDispose,
+  shallowRef,
   toValue,
   watch,
 } from "vue";
@@ -44,19 +45,40 @@ export type TableAgentBridge = NeutralBridge<AgentApprovalPending>;
 export function tableAgent(
   options: MaybeRefOrGetter<TableAgentOptions>
 ): StaticTableFeature {
-  return {
+  const feature: TableAgentFeature = {
     id: "table-agent",
-    mount: (context) => mountAgent(options, context),
+    agentOptions: options,
+    mount: (context) =>
+      mountAgent(() => agentOptionsOf(context.feature(), options), context),
   };
+  return feature;
+}
+/** The declaration's agent options, so a re-declared agent reads its latest. */
+interface TableAgentFeature extends StaticTableFeature {
+  readonly agentOptions: MaybeRefOrGetter<TableAgentOptions>;
+}
+function agentOptionsOf(
+  feature: object,
+  fallback: MaybeRefOrGetter<TableAgentOptions>
+): MaybeRefOrGetter<TableAgentOptions> {
+  return "agentOptions" in feature
+    ? (feature as TableAgentFeature).agentOptions
+    : fallback;
 }
 function mountAgent<TRow>(
-  options: MaybeRefOrGetter<TableAgentOptions>,
+  latest: () => MaybeRefOrGetter<TableAgentOptions>,
   context: FeatureMountContext<TRow>
 ): () => void {
-  const resolved = computed(() => toValue(options));
+  // Kept across re-declarations: each read follows the latest declaration,
+  // and a ref or getter keeps Vue's computed snapshot semantics.
+  // Wrapped, so a ref the host passed stays the host's own.
+  const source = shallowRef({ options: latest() });
+  const resolved = computed(() => toValue(source.value.options));
   const controller = createTableAgentController({
     options: {
       get current() {
+        const next = latest();
+        if (next !== source.value.options) source.value = { options: next };
         return resolved.value;
       },
     },

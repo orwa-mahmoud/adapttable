@@ -49,6 +49,7 @@ function rowAware<TRow>(feature: CoreFeature<TRow>): TableFeature<TRow> {
     labels: feature.labels,
     apply: (input) => feature.apply?.(input) ?? {},
     setup: feature.setup ? (host) => feature.setup?.(host) : undefined,
+    mount: feature.mount?.bind(feature),
   };
 }
 

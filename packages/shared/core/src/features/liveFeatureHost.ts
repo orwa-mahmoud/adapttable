@@ -211,10 +211,11 @@ export const EMPTY_FEATURE_HOST: FeatureHostState = new LiveFeatureHost();
  */
 export interface FeatureSetup<TRow, TPanel extends SidePanelEntry> {
   /**
-   * Register against the live table. Return a function to run when the
-   * table is disposed or its features change.
+   * Register against the live table. Registration only: it may run during
+   * render, so it acquires nothing; a resource belongs in the feature's
+   * `mount`.
    */
-  setup?(host: LiveFeatureHost<TRow, TPanel>): void | (() => void);
+  setup?(host: LiveFeatureHost<TRow, TPanel>): void;
 }
 
 /**
@@ -240,8 +241,12 @@ export function createFeatureHost<
   const host = new LiveFeatureHost<unknown, TPanel>();
   try {
     for (const feature of features) {
-      const cleanup = feature.setup?.(host);
-      if (cleanup) host.onDispose(cleanup);
+      const returned: unknown = feature.setup?.(host);
+      if (typeof returned === "function") {
+        throw new TypeError(
+          "A feature's setup returned a cleanup function. setup only registers; acquire the resource in the feature's mount and return its cleanup there."
+        );
+      }
     }
   } catch (error) {
     try {

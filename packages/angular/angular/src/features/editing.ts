@@ -110,6 +110,9 @@ export function editing<TRow>(
   return withEditingImplementation({
     ...coreEditing(onCellEdit, extras),
     onCellEdit,
+    // The editing bundle is built from these: another save callback or
+    // lifecycle replaces it, the same ones declared again keep it.
+    dependencies: [onCellEdit, ...Object.values(extras)],
     mount(context) {
       const occupied = context.state.get(SURFACE_OCCUPIED)();
       if (occupied?.editing) return;

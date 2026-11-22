@@ -79,9 +79,11 @@ export type {
   FeatureApplyInput,
   FeaturePatch,
   StaticFeatureHost,
+  StaticFeatureMountContext,
   StaticTableFeature,
   TableFeature,
   TableFeatureHost,
+  TableFeatureMountContext,
 } from "./features/tableFeature";
 export { applyTableFeatures } from "./features/tableFeature";
 export { tree } from "./features/tree";

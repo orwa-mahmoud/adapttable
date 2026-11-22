@@ -1365,7 +1365,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "setExtras" | "facets">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -4685,6 +4685,7 @@ export class AdaptTableAssistantChrome {
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
     readonly contrast?: ContrastRules;
+    readonly dependencies?: readonly unknown[];
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
     readonly labels?: Partial<TableLabels>;
@@ -5535,6 +5536,7 @@ export { FeatureListEntry }
 
 // @public
 export interface FeatureMountContext {
+    feature(): AdaptTableFeature;
     flush<T>(run: () => T): T;
     flushAdmission(): void;
     readonly injector: Injector;

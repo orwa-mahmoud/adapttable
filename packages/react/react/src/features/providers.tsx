@@ -51,8 +51,10 @@ import {
   type RefObject,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 
 import {
@@ -149,12 +151,67 @@ const TableRuntimeContext = createContext<RefObject<RuntimeCell> | undefined>(
   undefined
 );
 
+/** This render's reader from the publisher above, and its layer's slot. */
+interface RuntimeLayer {
+  readonly base: TableRuntimeReader<unknown>;
+  readonly layered: { current: TableRuntimeReader<unknown> | null };
+}
+
+const RuntimeLayerContext = createContext<RuntimeLayer | undefined>(undefined);
+
+/** The ids of the features this render composed. */
+const FeatureIdsContext = createContext<readonly string[]>([]);
+
+function commitReader(
+  cell: RefObject<RuntimeCell> | undefined,
+  reader: TableRuntimeReader<unknown>,
+  featureIds: readonly string[]
+): void {
+  if (cell) cell.current = { reader, featureIds };
+}
+
 /**
- * Publish what providers above this chrome need to read.
+ * Publish the table's reader for the providers above it, and hand this
+ * render's reader to a layer below ({@link usePublishTableRuntime}) that
+ * builds on it.
  *
- * The write happens during render and the reads happen in handlers, which is
- * the same shape `useEventCallback` and the selection model already use: never
- * read during render, so there is nothing to tear.
+ * Providers read the reader from handlers. It is committed in a layout
+ * effect, after the layers below have registered, so a handler always reads
+ * the last committed table: a render React discards publishes nothing.
+ *
+ * @public
+ */
+export function PublishTableRuntime<TRow>({
+  reader,
+  children,
+}: {
+  readonly reader: TableRuntimeReader<TRow>;
+  readonly children: ReactNode;
+}): ReactNode {
+  "use no memo";
+  const cell = useContext(TableRuntimeContext);
+  const featureIds = useContext(FeatureIdsContext);
+  const [layered] = useState<RuntimeLayer["layered"]>(() => ({
+    current: null,
+  }));
+  const base = reader as TableRuntimeReader<unknown>;
+  // The deepest commit of this table, so providers syncing in their own
+  // layout effects already read this render's reader and feature ids.
+  useLayoutEffect(() => {
+    commitReader(cell, layered.current ?? base, featureIds);
+  });
+  return (
+    <RuntimeLayerContext.Provider value={{ base, layered }}>
+      {children}
+    </RuntimeLayerContext.Provider>
+  );
+}
+
+/**
+ * Publish a reader for the providers above this chrome: as the layer over a
+ * {@link PublishTableRuntime} above it, or on its own when there is none.
+ * Committed in a layout effect, so a render React discards publishes
+ * nothing.
  *
  * @public
  */
@@ -162,23 +219,33 @@ export function usePublishTableRuntime<TRow>(
   reader: TableRuntimeReader<TRow>
 ): void {
   const cell = useContext(TableRuntimeContext);
-  if (cell) {
-    cell.current = {
-      reader: reader,
-      featureIds: cell.current.featureIds,
+  const layer = useContext(RuntimeLayerContext);
+  const featureIds = useContext(FeatureIdsContext);
+  const published = reader as TableRuntimeReader<unknown>;
+  useLayoutEffect(() => {
+    if (!layer) {
+      commitReader(cell, published, featureIds);
+      return undefined;
+    }
+    layer.layered.current = published;
+    return () => {
+      if (layer.layered.current === published) layer.layered.current = null;
     };
-  }
+  });
 }
 
 /**
- * The reader the chrome published last, for a gate that layers its own
- * view over it during render.
+ * The reader this render's publisher built, for a layer that builds on it
+ * during render; the last committed one when there is no publisher above.
  *
  * @returns The current reader.
  */
 export function useCurrentTableRuntimeReader<TRow>(): TableRuntimeReader<TRow> {
   const cell = useContext(TableRuntimeContext);
-  return (cell?.current.reader ?? NO_RUNTIME) as TableRuntimeReader<TRow>;
+  const layer = useContext(RuntimeLayerContext);
+  return (layer?.base ??
+    cell?.current.reader ??
+    NO_RUNTIME) as TableRuntimeReader<TRow>;
 }
 
 /**
@@ -396,7 +463,14 @@ export function FeatureProviders({
     reader: NO_RUNTIME,
     featureIds: (features ?? []).map((feature) => feature.id),
   });
-  cell.current.featureIds = (features ?? []).map((feature) => feature.id);
+  const featureIds = useMemo(
+    () => (features ?? []).map((feature) => feature.id),
+    [features]
+  );
+  // A table without a publisher still reads the committed ids.
+  useLayoutEffect(() => {
+    cell.current.featureIds = featureIds;
+  });
   const renders = useMemo(() => slotFillsOf(features ?? []), [features]);
   const stages = useMemo(() => liveStagesOf(features ?? []), [features]);
   const chromeStages = useMemo(
@@ -418,13 +492,15 @@ export function FeatureProviders({
   );
   return (
     <TableRuntimeContext.Provider value={cell}>
-      <FeatureRenderContext.Provider value={renders}>
-        <LiveStageContext.Provider value={stages}>
-          <ChromeStageContext.Provider value={chromeStages}>
-            {tree}
-          </ChromeStageContext.Provider>
-        </LiveStageContext.Provider>
-      </FeatureRenderContext.Provider>
+      <FeatureIdsContext.Provider value={featureIds}>
+        <FeatureRenderContext.Provider value={renders}>
+          <LiveStageContext.Provider value={stages}>
+            <ChromeStageContext.Provider value={chromeStages}>
+              {tree}
+            </ChromeStageContext.Provider>
+          </LiveStageContext.Provider>
+        </FeatureRenderContext.Provider>
+      </FeatureIdsContext.Provider>
     </TableRuntimeContext.Provider>
   );
 }

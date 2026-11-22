@@ -236,7 +236,7 @@ describe("reactive mounted feature lifecycle", () => {
     expect(unrelatedCleanup).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps anonymous mounts for the same member and replaces a changed member with the same id", async () => {
+  it("keeps anonymous mounts for the same member and replaces a member whose dependencies changed", async () => {
     const anonymousMount = vi.fn();
     const anonymousCleanup = vi.fn();
     const originalMount = vi.fn();
@@ -251,6 +251,7 @@ describe("reactive mounted feature lifecycle", () => {
     };
     const original: AdaptTableFeature = {
       id: "replaceable",
+      dependencies: ["original"],
       mount: () => {
         originalMount();
         return originalCleanup;
@@ -258,6 +259,7 @@ describe("reactive mounted feature lifecycle", () => {
     };
     const replacement: AdaptTableFeature = {
       id: "replaceable",
+      dependencies: ["replacement"],
       mount: () => {
         replacementMount();
         return replacementCleanup;

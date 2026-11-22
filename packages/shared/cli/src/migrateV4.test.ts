@@ -243,6 +243,19 @@ describe("migrateV4Source", () => {
     ]);
   });
 
+  it("reports a feature setup that registers a cleanup", () => {
+    const result = migrateV4Source(
+      [
+        "const plugin = { id: 'p', setup(host) {",
+        "  host.onDispose(() => socket.close());",
+        "} };",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([2]);
+    expect(result.issues[0]?.message).toContain("mount");
+  });
+
   it("reports the shell's grouping panel props", () => {
     const result = migrateV4Source(
       [

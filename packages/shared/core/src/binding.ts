@@ -745,6 +745,13 @@ export {
   flattenFeatures,
 } from "./features/featureFamilies";
 export {
+  type AcquireFeatureMount,
+  composeMounts,
+  createFeatureMounts,
+  type FeatureMounts,
+  type MountableFeature,
+} from "./features/featureMounts";
+export {
   applyTableFeatures,
   type FeatureApplyInput,
   featureLabelsOf,

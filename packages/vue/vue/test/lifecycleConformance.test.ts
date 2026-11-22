@@ -31,7 +31,9 @@ const runtime: TableRuntime<Row> = {
 };
 
 function openTable(scope = effectScope()): LifecycleObservation {
-  const setups = new Map<string, number>();
+  const mounts = new Map<string, number>();
+  const latest = new Map<string, () => TableFeature<Row>>();
+  const optionOf = new WeakMap<TableFeature<Row>, string | undefined>();
   const cleanups = new Map<string, number>();
   let publications = 0;
   let revisions = 0;
@@ -82,28 +84,37 @@ function openTable(scope = effectScope()): LifecycleObservation {
     if (existing) return existing;
     const created: TableFeature<Row> = {
       id: spec.id,
+      dependencies: spec.dependencies,
       setup: (registry) => {
-        setups.set(spec.id, (setups.get(spec.id) ?? 0) + 1);
         if (spec.command)
           registry.registerCommand({
             key: spec.command,
             label: spec.command,
             onSelect: () => undefined,
           });
+      },
+      mount: (context) => {
+        if (spec.fail) throw new Error(`mount ${spec.id}`);
+        mounts.set(spec.id, (mounts.get(spec.id) ?? 0) + 1);
+        latest.set(spec.id, context.feature);
         return () => {
           cleanups.set(spec.id, (cleanups.get(spec.id) ?? 0) + 1);
         };
       },
-      mount: () => {
-        if (spec.fail) throw new Error(`mount ${spec.id}`);
-      },
     };
+    optionOf.set(created, spec.option);
     featuresFor.set(spec, created);
     return created;
   };
   return {
     reconcile(list) {
-      opened.reconcile(list.map(declare));
+      try {
+        opened.reconcile(list.map(declare));
+      } catch (error) {
+        return Promise.reject(
+          error instanceof Error ? error : new Error(String(error))
+        );
+      }
       const next = opened.host.value;
       if (next !== seen) {
         seen = next;
@@ -119,7 +130,11 @@ function openTable(scope = effectScope()): LifecycleObservation {
       return Promise.resolve();
     },
     commands: () => opened.host.value.commands.map((command) => command.key),
-    setups: (id) => setups.get(id) ?? 0,
+    mounts: (id) => mounts.get(id) ?? 0,
+    currentOption: (id) => {
+      const current = latest.get(id)?.();
+      return current ? optionOf.get(current) : undefined;
+    },
     cleanups: (id) => cleanups.get(id) ?? 0,
     hostPublications: () => publications,
     revisionNotifications: () => revisions,

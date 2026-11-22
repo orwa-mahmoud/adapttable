@@ -1,3 +1,4 @@
+import type { TableRuntimeView } from "../features/tableRuntime";
 import { ROW_LABELS } from "../labelGroups/rowLabels";
 import { resolveFeatureLabels } from "../labelGroups/tableLabels";
 import type {
@@ -35,9 +36,10 @@ export function rowMoveMenuProps<TRow>(
   reorder: RowMoveMenuSource<TRow>,
   labels: RowReorderLabels | undefined,
   row: TRow,
-  moveLocked: boolean
+  moveLocked: boolean,
+  view?: TableRuntimeView<TRow>
 ): RowMoveMenuSlotProps | undefined {
-  const menu = reorder.moveMenu?.(row);
+  const menu = reorder.moveMenu?.(row, view);
   if (!menu) return undefined;
   const ownsPending =
     reorder.isMovePending?.(row) ?? reorder.pendingMove?.row === row;

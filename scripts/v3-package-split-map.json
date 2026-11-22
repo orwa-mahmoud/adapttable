@@ -13155,6 +13155,14 @@
       "behavior": ""
     },
     {
+      "export": "AcquireFeatureMount",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "ACTION_LABELS",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -16339,6 +16347,14 @@
       "behavior": ""
     },
     {
+      "export": "composeMounts",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "computedAggregateKeys",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -17204,6 +17220,14 @@
     },
     {
       "export": "createFeatureHost",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "createFeatureMounts",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -19324,6 +19348,14 @@
     },
     {
       "export": "FeatureListEntry",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "FeatureMounts",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -22582,6 +22614,14 @@
       "export": "MOUNT_STAGGER",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "MountableFeature",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
@@ -50243,6 +50283,14 @@
       "behavior": ""
     },
     {
+      "export": "PublishTableRuntime",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "rangeFilterSpecs",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -51355,6 +51403,14 @@
       "behavior": ""
     },
     {
+      "export": "StaticFeatureMountContext",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "StaticGroupingExtras",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -51748,6 +51804,14 @@
     },
     {
       "export": "TableFeatureHost",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableFeatureMountContext",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",
@@ -53139,6 +53203,14 @@
       "behavior": ""
     },
     {
+      "export": "StaticFeatureMountContext",
+      "currentImport": "@adapttable/react/features",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/features",
+      "behavior": ""
+    },
+    {
       "export": "StaticGroupingExtras",
       "currentImport": "@adapttable/react/features",
       "kind": "type",
@@ -53172,6 +53244,14 @@
     },
     {
       "export": "TableFeatureHost",
+      "currentImport": "@adapttable/react/features",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/features",
+      "behavior": ""
+    },
+    {
+      "export": "TableFeatureMountContext",
       "currentImport": "@adapttable/react/features",
       "kind": "type",
       "class": "neutral-model",
@@ -53435,6 +53515,14 @@
       "behavior": ""
     },
     {
+      "export": "TableFeatureMountContext",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
       "export": "ColumnDef",
       "currentImport": "@adapttable/react/pivot",
       "kind": "type",
@@ -53684,6 +53772,14 @@
     },
     {
       "export": "TableFeatureHost",
+      "currentImport": "@adapttable/react/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "TableFeatureMountContext",
       "currentImport": "@adapttable/react/xlsx",
       "kind": "type",
       "class": "neutral-model",
@@ -55051,6 +55147,14 @@
       "behavior": ""
     },
     {
+      "export": "StaticFeatureMountContext",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
       "export": "StaticTableFeature",
       "currentImport": "@adapttable/react",
       "kind": "type",
@@ -55100,6 +55204,14 @@
     },
     {
       "export": "TableFeatureHost",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "TableFeatureMountContext",
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",

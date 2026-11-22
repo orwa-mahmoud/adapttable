@@ -9,10 +9,10 @@ import { type FeatureHostState } from "@adapttable/core";
 import {
   appendByKey,
   createFeatureHost,
-  disposeFeatureHost,
+  createFeatureMounts,
   EMPTY_FEATURE_HOST,
+  type FeatureMounts,
   planFeatureRegistration,
-  preferLastById,
   projectFeatureHosts,
 } from "@adapttable/core/binding";
 import { useLayoutEffect, useRef } from "react";
@@ -77,7 +77,6 @@ interface OwnedFeature {
 interface OwnedRecord {
   owned: Map<string, OwnedFeature>;
   host: FeatureHostState;
-  retire: FeatureHostState[];
 }
 
 function projectedHost(
@@ -89,22 +88,19 @@ function projectedHost(
   return parts.length === 0 ? EMPTY_FEATURE_HOST : projectFeatureHosts(parts);
 }
 
-function mountPlanned(
+function registerPlanned(
   mount: readonly { id: string; feature: TableFeature }[],
   pending: Map<string, OwnedFeature>
 ): unknown {
-  const created: FeatureHostState[] = [];
   try {
     for (const entry of mount) {
-      const createdHost = createFeatureHost<SidePanelEntry>([entry.feature]);
-      pending.set(entry.id, { feature: entry.feature, host: createdHost });
-      created.push(createdHost);
+      pending.set(entry.id, {
+        feature: entry.feature,
+        host: createFeatureHost<SidePanelEntry>([entry.feature]),
+      });
     }
     return undefined;
   } catch (error) {
-    const rolledBack = [...created];
-    rolledBack.reverse();
-    for (const createdHost of rolledBack) disposeFeatureHost(createdHost);
     return error;
   }
 }
@@ -112,20 +108,19 @@ function mountPlanned(
 function ownedRecord(cache: { current: OwnedRecord | null }): OwnedRecord {
   const existing = cache.current;
   if (existing) return existing;
-  const created: OwnedRecord = {
-    owned: new Map(),
-    host: EMPTY_FEATURE_HOST,
-    retire: [],
-  };
+  const created: OwnedRecord = { owned: new Map(), host: EMPTY_FEATURE_HOST };
   cache.current = created;
   return created;
 }
 
+/**
+ * The registrations of the composed features. Registration is pure, so this
+ * runs during render; a declaration already registered keeps its host.
+ */
 function commitFeaturePlan(
   record: OwnedRecord,
-  list: readonly TableFeature[] | undefined
+  resolved: readonly TableFeature[]
 ): FeatureHostState {
-  const resolved = preferLastById(list ?? []);
   const plan = planFeatureRegistration(
     [...record.owned].map(([id, entry]) => ({ id, feature: entry.feature })),
     resolved.map((feature) => ({ id: feature.id, feature })),
@@ -133,7 +128,7 @@ function commitFeaturePlan(
   );
   if (plan.release.length === 0 && plan.mount.length === 0) return record.host;
   const pending = new Map(record.owned);
-  const failure = mountPlanned(plan.mount, pending);
+  const failure = registerPlanned(plan.mount, pending);
   if (failure !== undefined) {
     if (record.owned.size === 0) {
       throw failure instanceof Error
@@ -143,22 +138,45 @@ function commitFeaturePlan(
     registrationFailure.set(record.host, failure);
     return record.host;
   }
-  for (const id of plan.release) {
-    const previous = record.owned.get(id);
-    if (previous && previous.host !== EMPTY_FEATURE_HOST)
-      record.retire.push(previous.host);
-    pending.delete(id);
-  }
+  for (const id of plan.release) pending.delete(id);
   record.owned = pending;
   record.host = projectedHost(pending);
   return record.host;
 }
 
 /**
- * Apply `features`, run `setup(host)`, overlay side-panel panels onto props.
+ * Keep the composed features' mounted resources by id: acquired once the
+ * table has mounted, kept across ordinary option changes with the latest
+ * declaration, released exactly once when a feature leaves or the table
+ * unmounts. A render React discards acquires nothing.
+ */
+function useFeatureMounts(
+  resolved: readonly TableFeature[],
+  owner: boolean
+): void {
+  const mounts = useRef<FeatureMounts<TableFeature> | null>(null);
+  useLayoutEffect(() => {
+    if (!owner) return undefined;
+    const created = createFeatureMounts<TableFeature>((_id, latest) =>
+      latest().mount?.({ feature: latest })
+    );
+    mounts.current = created;
+    return () => {
+      mounts.current = null;
+      created.dispose();
+    };
+  }, [owner]);
+  useLayoutEffect(() => {
+    mounts.current?.reconcile(resolved);
+  });
+}
+
+/**
+ * Apply `features`, register their `setup(host)` registrations, mount their
+ * resources, and overlay side-panel panels onto props.
  *
  * Safe to call from an adapter and again from `useDataTableShell`:
- * the second call reuses the host and does not re-register.
+ * the second call reuses the host and neither registers nor mounts again.
  *
  * @public
  */
@@ -167,27 +185,12 @@ export function useTableFeatures<P extends object>(
 ): P & FeatureProps<RowOf<P>> {
   const reused = hostOf.get(incoming);
   const applied = reused ? incoming : applyTableFeatures(incoming);
-  const list = getAppliedFeatures(applied);
+  const resolved = getAppliedFeatures(applied) ?? [];
   const cache = useRef<OwnedRecord | null>(null);
   const record = ownedRecord(cache);
+  useFeatureMounts(resolved, reused === undefined);
 
-  useLayoutEffect(() => {
-    const retired = record.retire.splice(0);
-    for (const retiredHost of retired) disposeFeatureHost(retiredHost);
-  });
-  useLayoutEffect(() => {
-    const current = cache.current;
-    return () => {
-      if (!current) return;
-      for (const retiredHost of current.retire.splice(0))
-        disposeFeatureHost(retiredHost);
-      for (const entry of current.owned.values())
-        disposeFeatureHost(entry.host);
-      current.owned.clear();
-    };
-  }, [cache]);
-
-  const host = reused ?? commitFeaturePlan(record, list);
+  const host = reused ?? commitFeaturePlan(record, resolved);
 
   if (!reused) hostOf.set(applied, host);
 

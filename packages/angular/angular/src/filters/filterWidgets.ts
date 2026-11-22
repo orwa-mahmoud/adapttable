@@ -52,6 +52,9 @@ export function withFilterWidgets(
 ): AdaptTableFeature {
   return {
     ...feature,
+    // The widgets are what the mounted form draws with: other widgets
+    // replace it, the same ones declared again keep it.
+    dependencies: [...(feature.dependencies ?? []), ...widgets],
     mount(context) {
       const release = feature.mount?.(context);
       context.state.set(FILTER_WIDGETS_STATE, widgets);

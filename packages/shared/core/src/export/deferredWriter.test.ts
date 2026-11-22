@@ -85,22 +85,24 @@ describe("preloading a deferred writer", () => {
     expect(cancel).toHaveBeenCalledWith(7);
   });
 
-  it("starts from the export feature's setup, and only for a deferred writer", () => {
+  it("starts from the export feature's mount, and only for a deferred writer", () => {
     vi.useFakeTimers();
     const host = { registerWriter: vi.fn() };
     const loader = vi.fn(() => Promise.resolve(BUILT));
-    const stop = coreExportCsv({
+    const deferred = coreExportCsv({
       writer: deferredExportWriter("txt", loader),
-    }).setup?.(host as never);
+    });
+    deferred.setup?.(host as never);
+    vi.runAllTimers();
+    expect(loader).not.toHaveBeenCalled();
+    const stop = deferred.mount?.();
     vi.runAllTimers();
     expect(loader).toHaveBeenCalledTimes(1);
     expect(typeof stop).toBe("function");
 
-    const timeout = vi.spyOn(window, "setTimeout");
-    expect(
-      coreExportCsv({ writer: BUILT }).setup?.(host as never)
-    ).toBeUndefined();
-    expect(timeout).not.toHaveBeenCalled();
+    const built = coreExportCsv({ writer: BUILT });
+    built.setup?.(host as never);
+    expect(built.mount).toBeUndefined();
     expect(host.registerWriter).toHaveBeenCalledTimes(2);
   });
 });

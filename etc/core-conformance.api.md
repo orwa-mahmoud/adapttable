@@ -161,8 +161,10 @@ export interface FeatureLifecycleDriver {
 // @public
 export interface LifecycleDeclaration {
     readonly command?: string;
+    readonly dependencies?: readonly unknown[];
     readonly fail?: boolean;
     readonly id: string;
+    readonly option?: string;
 }
 
 // @public
@@ -177,11 +179,12 @@ export interface LifecycleHarness {
 export interface LifecycleObservation {
     cleanups(id: string): number;
     commands(): readonly string[];
+    currentOption(id: string): string | undefined;
     dispose(): Promise<void>;
     hostPublications(): number;
+    mounts(id: string): number;
     reconcile(features: readonly LifecycleDeclaration[]): Promise<void>;
     revisionNotifications(): number;
-    setups(id: string): number;
 }
 
 // @public

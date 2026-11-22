@@ -228,8 +228,9 @@ or a `TableFeature` with `setup(host)` for live registration.
 
 A plugin registers on the same `TableFeature` the factories return —
 `filterTypes`, an export writer, palette commands, context-menu items, a side
-panel — so the registration surface is one array, one host, with lifecycle via
-`onDispose` or a function returned from `setup`.
+panel — so the registration surface is one array and one host. `setup`
+registers and nothing else: it runs during render, possibly for a render the
+framework discards. What outlives a render goes in `mount`.
 
 ```tsx
 import type { TableFeature } from "@adapttable/mantine/features";
@@ -247,9 +248,6 @@ const currencyFilter: TableFeature = {
       chips: () => ({}),
       conditionToExtra: () => ({}),
     });
-    return () => {
-      /* table unmounted, or `features` changed */
-    };
   },
 };
 
@@ -274,7 +272,30 @@ methods in `setup`, so a plugin is not a second API.
 | `registerPanel`            | `sidePanel({ panels, … })`                    |
 | `registerCommand`          | `commandPalette({ commands, … })`             |
 | `registerContextMenuItems` | `contextMenu({ items })`                      |
-| `onDispose`                | cleanup when the table unmounts               |
+
+### Resources — `mount`
+
+A subscription, a preload or a timer belongs in `mount(context)`, which runs
+once the table has mounted and returns what releases it. The table keeps it
+by feature id: declaring the feature again with new options, inline included,
+keeps the resource and hands `context.feature()` the new declaration. Only
+removing the feature, changing its `dependencies` or unmounting the table
+releases it, and each acquisition is released exactly once. A render the
+framework discards acquires nothing.
+
+```tsx
+const presence: TableFeature<Row> = {
+  id: "presence",
+  dependencies: [roomId],
+  mount(context) {
+    const channel = openPresence(roomId, () => context.feature());
+    return () => channel.close();
+  },
+};
+```
+
+Two features with one id resolve to the last declaration everywhere: its
+options, labels, registrations, mount and slot fills.
 
 A named editor is a string `column.editor` that is not a built-in (`"text"`,
 `"number"`, …). `resolveCellEditor` turns it into `{ type: "custom", render }`

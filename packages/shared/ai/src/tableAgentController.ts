@@ -626,6 +626,7 @@ export function createTableAgentController(
     readonly allowances: number;
     readonly stamp: string;
     readonly hostApproves: boolean;
+    readonly manifest: string;
   } | null = null;
 
   // The chrome path is the only one that parks: with `onApprove` the host
@@ -652,7 +653,8 @@ export function createTableAgentController(
       before.progress === progress &&
       before.allowances === allowances &&
       before.stamp === stamp &&
-      before.hostApproves === hostApproves
+      before.hostApproves === hostApproves &&
+      before.manifest === lastManifest
     ) {
       return snapshot;
     }
@@ -686,6 +688,7 @@ export function createTableAgentController(
       allowances,
       stamp,
       hostApproves,
+      manifest: lastManifest,
     };
     return snapshot;
   };
@@ -741,6 +744,9 @@ export function createTableAgentController(
     if (encoded === lastManifest) return;
     lastManifest = encoded;
     optionsRef.current.bridge?.publish?.(manifest);
+    // The table commits what it offers after the surfaces below have
+    // rendered; a new manifest is a new state they re-render with.
+    notify();
   };
 
   const syncBridge = (live: AgentSession) => {

@@ -35,9 +35,11 @@ export type {
   FeatureApplyInput,
   FeaturePatch,
   StaticFeatureHost,
+  StaticFeatureMountContext,
   StaticTableFeature,
   TableFeature,
   TableFeatureHost,
+  TableFeatureMountContext,
 } from "./features/tableFeature";
 export {
   CHECKLIST_ITEM_HEIGHT,

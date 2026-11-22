@@ -232,9 +232,9 @@ panel and in the header funnel, persists `f_ratingMin=4`, and chips it as
 
 Registrations apply in order, then the patches, so a feature can register a
 type and extend it in the same `setup`. `extendFilterType` on an unknown type
-warns in development and changes nothing. `setup` may return a cleanup
-function, or call `host.onDispose`, for when the table unmounts or `features`
-changes.
+warns in development and changes nothing. `setup` only registers; a
+resource the feature holds belongs in its `mount`
+([features](./features.md#resources--mount)).
 
 `filterTypes` has one feature id (`filter-types`), and a later feature with
 the same id replaces an earlier one. Pass every spec to one

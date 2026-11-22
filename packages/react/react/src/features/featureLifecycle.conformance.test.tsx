@@ -64,46 +64,52 @@ function Table({ bridge }: { readonly bridge: Bridge }) {
 
 function observationFor(
   bridge: Bridge,
-  setups: Map<string, number>,
+  mounts: Map<string, number>,
   cleanups: Map<string, number>,
   featuresFor: WeakMap<LifecycleDeclaration, TableFeature<Row>>,
   release: () => void
 ): LifecycleObservation {
+  const latest = new Map<string, () => TableFeature<Row>>();
+  const options = new WeakMap<TableFeature<Row>, string | undefined>();
   const declare = (spec: LifecycleDeclaration): TableFeature<Row> => {
     const existing = featuresFor.get(spec);
     if (existing) return existing;
     const created: TableFeature<Row> = {
       id: spec.id,
+      dependencies: spec.dependencies,
       setup: (host) => {
-        setups.set(spec.id, (setups.get(spec.id) ?? 0) + 1);
         if (spec.command)
           host.registerCommand({
             key: spec.command,
             label: spec.command,
             onSelect: () => undefined,
           });
-        const cleanup = (): void => {
+      },
+      mount: (context) => {
+        if (spec.fail) throw new Error(`mount ${spec.id}`);
+        mounts.set(spec.id, (mounts.get(spec.id) ?? 0) + 1);
+        latest.set(spec.id, context.feature);
+        return () => {
           cleanups.set(spec.id, (cleanups.get(spec.id) ?? 0) + 1);
         };
-        if (spec.fail) {
-          host.onDispose(cleanup);
-          throw new Error(`mount ${spec.id}`);
-        }
-        return cleanup;
       },
     };
+    options.set(created, spec.option);
     featuresFor.set(spec, created);
     return created;
   };
   let disposed = false;
   return {
     reconcile(list) {
-      bridge.failure = undefined;
-      act(() => {
-        bridge.setList(list.map(declare));
-      });
-      if (bridge.failure instanceof Error)
-        return Promise.reject(bridge.failure);
+      try {
+        act(() => {
+          bridge.setList(list.map(declare));
+        });
+      } catch (error) {
+        return Promise.reject(
+          error instanceof Error ? error : new Error(String(error))
+        );
+      }
       return Promise.resolve();
     },
     dispose() {
@@ -113,8 +119,12 @@ function observationFor(
       return Promise.resolve();
     },
     commands: () => bridge.commands,
-    setups: (id) => setups.get(id) ?? 0,
+    mounts: (id) => mounts.get(id) ?? 0,
     cleanups: (id) => cleanups.get(id) ?? 0,
+    currentOption: (id) => {
+      const current = latest.get(id)?.();
+      return current ? options.get(current) : undefined;
+    },
     hostPublications: () => bridge.publications,
     revisionNotifications: () => bridge.revisions,
   };
@@ -135,25 +145,25 @@ function blankBridge(): Bridge {
 const driver: FeatureLifecycleDriver = {
   name: "react",
   open() {
-    const setups = new Map<string, number>();
+    const mounts = new Map<string, number>();
     const cleanups = new Map<string, number>();
     const featuresFor = new WeakMap<LifecycleDeclaration, TableFeature<Row>>();
     const bridge = blankBridge();
     const view = render(<Table bridge={bridge} />);
     return Promise.resolve(
-      observationFor(bridge, setups, cleanups, featuresFor, () => {
+      observationFor(bridge, mounts, cleanups, featuresFor, () => {
         view.unmount();
       })
     );
   },
   openNested() {
-    const outerSetups = new Map<string, number>();
+    const outerMounts = new Map<string, number>();
     const outerCleanups = new Map<string, number>();
     const outerFeatures = new WeakMap<
       LifecycleDeclaration,
       TableFeature<Row>
     >();
-    const innerSetups = new Map<string, number>();
+    const innerMounts = new Map<string, number>();
     const innerCleanups = new Map<string, number>();
     const innerFeatures = new WeakMap<
       LifecycleDeclaration,
@@ -176,14 +186,14 @@ const driver: FeatureLifecycleDriver = {
     return Promise.resolve({
       outer: observationFor(
         outerBridge,
-        outerSetups,
+        outerMounts,
         outerCleanups,
         outerFeatures,
         release
       ),
       inner: observationFor(
         innerBridge,
-        innerSetups,
+        innerMounts,
         innerCleanups,
         innerFeatures,
         release

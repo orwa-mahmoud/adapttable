@@ -52,6 +52,8 @@ export interface FeatureMountContext<TRow = unknown> {
   readonly featureHost: Readonly<ShallowRef<FeatureHostState<TRow>>>;
   readonly filterRuntime: Readonly<ShallowRef<FilterRuntime<TRow> | undefined>>;
   readonly options: Readonly<ShallowRef<ResolvedTableOptions<TRow>>>;
+  /** The feature's current declaration, with its latest options. */
+  readonly feature: () => TableFeature<TRow>;
   readonly state: FeatureState;
   readonly scope: EffectScope;
   readonly active: Readonly<ShallowRef<boolean>>;
@@ -70,7 +72,8 @@ export interface TableFeature<TRow> {
   readonly contrast?: ContrastRules;
   /** Where its fills sit in a slot several features fill; lower first. */
   readonly rank?: number;
-  readonly setup?: (host: TableFeatureHost<TRow>) => void | (() => void);
+  /** Registration only; a resource belongs in `mount`. */
+  readonly setup?: (host: TableFeatureHost<TRow>) => void;
   readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
   readonly renders?: readonly FeatureRender<never, VNodeChild>[];
   readonly requiredSlots?: readonly FeatureSlotKey<never>[];
@@ -94,7 +97,8 @@ export interface StaticTableFeature {
   readonly contrast?: ContrastRules;
   /** Where its fills sit in a slot several features fill; lower first. */
   readonly rank?: number;
-  readonly setup?: (host: StaticFeatureHost) => void | (() => void);
+  /** Registration only; a resource belongs in `mount`. */
+  readonly setup?: (host: StaticFeatureHost) => void;
   readonly mount?: <TRow>(
     context: FeatureMountContext<TRow>
   ) => void | (() => void);

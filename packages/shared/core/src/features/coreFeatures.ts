@@ -105,8 +105,16 @@ export interface CoreFeature<
   TRow = unknown,
   THost = CoreFeatureRegistrar,
 > extends PatchFeature<TRow> {
-  /** Hand the options' registrations to the live host. */
-  setup?(host: THost): void | (() => void);
+  /**
+   * Hand the options' registrations to the live host. Registration only:
+   * it may run during render and acquires nothing.
+   */
+  setup?(host: THost): void;
+  /**
+   * Acquire what outlives a render while the feature is composed; return
+   * what releases it. Runs once the table has mounted.
+   */
+  mount?(): void | (() => void);
 }
 
 function define<TRow>(
@@ -566,10 +574,10 @@ export function coreExportCsv<TRow>(
     ...feature,
     setup(host) {
       host.registerWriter(writer);
-      // A writer that loads on demand starts loading once the table is up,
-      // so an export after the connection drops still has its builder.
-      return "preload" in writer ? writer.preload() : undefined;
     },
+    // A writer that loads on demand starts loading once the table is up, so
+    // an export after the connection drops still has its builder.
+    mount: "preload" in writer ? () => writer.preload() : undefined,
   };
 }
 

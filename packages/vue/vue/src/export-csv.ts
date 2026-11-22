@@ -7,6 +7,7 @@ import {
 } from "@adapttable/core";
 import {
   chromeFeatureNotices,
+  composeMounts,
   coreExportCsv,
   createExportController,
   exportButtonLabel,
@@ -249,7 +250,10 @@ export function exportCsv<TRow>(
     labels: core.labels,
     apply: (input) => core.apply?.(input) ?? {},
     setup: (host) => core.setup?.(host),
-    mount: useExportMount,
+    mount: composeMounts<FeatureMountContext<TRow>>(
+      core.mount?.bind(core),
+      useExportMount
+    ),
     renders: [
       toolbarEntry((entry) => {
         const model = entry.read(EXPORT_MODEL);

@@ -38,20 +38,37 @@ export type TableAgentOptions = TableAgentControllerOptions;
 export function tableAgent(
   options: MaybeSignal<TableAgentOptions>
 ): AdaptTableFeature {
-  return {
+  const feature: TableAgentFeature = {
     id: "table-agent",
-    mount: (context) => mountAgent(options, context),
+    agentOptions: options,
+    mount: (context) =>
+      mountAgent(() => agentOptionsOf(context.feature(), options), context),
   };
+  return feature;
+}
+
+/** The declaration's agent options, so a re-declared agent reads its latest. */
+interface TableAgentFeature extends AdaptTableFeature {
+  readonly agentOptions: MaybeSignal<TableAgentOptions>;
+}
+
+function agentOptionsOf(
+  feature: object,
+  fallback: MaybeSignal<TableAgentOptions>
+): MaybeSignal<TableAgentOptions> {
+  return "agentOptions" in feature
+    ? (feature as TableAgentFeature).agentOptions
+    : fallback;
 }
 
 function mountAgent(
-  options: MaybeSignal<TableAgentOptions>,
+  latest: () => MaybeSignal<TableAgentOptions>,
   context: FeatureMountContext
 ): () => void {
   const controller = createTableAgentController({
     options: {
       get current() {
-        return readMaybe(options);
+        return readMaybe(latest());
       },
     },
     runtime: { current: context.runtime },
@@ -109,7 +126,7 @@ function mountAgent(
   });
   const watcher = effect(
     () => {
-      readMaybe(options);
+      readMaybe(latest());
       const current = context.runtime.view()?.neutralTable;
       untracked(() => {
         if (current !== table) {
