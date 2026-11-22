@@ -7911,8 +7911,6 @@ export const OVERLAY_MOTION: {
 // @public
 export interface OverlayChrome {
     // (undocumented)
-    readonly activeFilterCount: number;
-    // (undocumented)
     readonly autoSizeColumn?: unknown;
     // (undocumented)
     readonly autoSizeColumns?: unknown;

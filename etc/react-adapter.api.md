@@ -1795,7 +1795,6 @@ export interface DataTableShellTableProps<TRow> extends SharedTableRenderProps<T
 
 // @public
 export interface DataTableShellToolbarProps<TRow> {
-    activeFilterCount: number;
     addRowLabel: string;
     dir?: Direction;
     filters: ReactNode;
@@ -2534,6 +2533,9 @@ export function fillSlot<TState>(slot: Slot<TState> | undefined, state: TState):
 export { FILTER_CHIPS_LIVE }
 
 // @public
+export const FILTER_CHIPS_STATE: FeatureStateKey<FilterChipsState>;
+
+// @public
 export const FILTER_DRAWER: FeatureSlotKey<FilterOverlaySlotProps>;
 
 export { FILTER_HEADER }
@@ -2544,6 +2546,12 @@ export { FILTER_LABELS }
 export const FILTER_POPOVER: FeatureSlotKey<FilterOverlaySlotProps>;
 
 export { FILTER_TYPES }
+
+// @public
+export interface FilterChipsState {
+    readonly activeFilterCount: number;
+    readonly chips: readonly ActiveFilterChip[];
+}
 
 export { filterColumnMenuRows }
 
@@ -4880,7 +4888,6 @@ export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 
 // @public
 export interface TableChrome<TRow> {
-    activeFilterCount: number;
     allColumns: ColumnDef<TRow>[];
     autoSizeColumn?: (key: string) => void;
     autoSizeColumns?: () => void;
@@ -4902,8 +4909,6 @@ export interface TableChrome<TRow> {
     emptyVariant: "noData" | "noResults";
     errorState?: TableErrorState;
     featureNotices: readonly FeatureNotice[];
-    filterDefs?: readonly FilterDef<TRow>[];
-    filterRegistry?: FilterTypeRegistry;
     getRowId: (row: TRow) => string;
     grouping?: {
         groupBy: readonly string[];
@@ -4926,7 +4931,6 @@ export interface TableChrome<TRow> {
     isMobile: boolean;
     isPaged: boolean;
     isRefreshing: boolean;
-    mergedChips: readonly ActiveFilterChip[];
     pinnedRows?: PinnedRows<TRow>;
     rootRef: RefObject<HTMLDivElement | null>;
     rowActions?: RowAction<TRow>[];
@@ -5181,7 +5185,7 @@ export interface UseBulkBarStateOptions {
 }
 
 // @public
-export function useChromeScrollReset<TRow>(ref: RefObject<HTMLElement | null>, chrome: TableChrome<TRow>, props: ComposedTableProps<TRow>): void;
+export function useChromeScrollReset<TRow>(ref: RefObject<HTMLElement | null>, props: ComposedTableProps<TRow>): void;
 
 // @public
 export function useColorScheme(preference?: ColorScheme): "light" | "dark";

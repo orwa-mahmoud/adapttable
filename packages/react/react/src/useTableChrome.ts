@@ -21,6 +21,7 @@ import {
 import { parseGroupBy } from "@adapttable/core/grouping";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
+import { baseActiveFilterCount } from "./chrome/baseFilterCount";
 import type { TableChrome } from "./chrome/tableChromeContract";
 import type { ColumnDef } from "./columnDef";
 import { flattenReactColumnTree } from "./columns/flattenColumnTree";
@@ -180,8 +181,10 @@ export function useTableChrome<TRow>(
     if (ids) notifySelectionChange(ids);
   }, [controlledSelection, selectedIds, notifySelectionChange]);
 
-  const mergedChips = extraChips ?? [];
-  const activeFilterCount = activeFilterCountProp ?? mergedChips.length;
+  const activeFilterCount = baseActiveFilterCount(
+    activeFilterCountProp,
+    extraChips
+  );
 
   const isPaged = source.paginationMode === "paged";
 
@@ -366,10 +369,6 @@ export function useTableChrome<TRow>(
     isMobile,
     confirm,
     getRowId,
-    mergedChips,
-    activeFilterCount,
-    filterDefs: props.filterDefs,
-    filterRegistry: props.filterRegistry,
     isPaged,
     rootRef,
     droppedColumns: responsive.dropped,

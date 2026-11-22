@@ -17,8 +17,10 @@ import {
   useRef,
 } from "react";
 
+import { useFeatureState } from "../features/featureState";
 import { FeatureSlot } from "../features/providers";
 import { FILTER_POPOVER, TOOLBAR_EXTRAS } from "../features/slotKeys";
+import { FILTER_CHIPS_STATE } from "../features/stateKeys";
 import type { KitButtonProps } from "./primitives";
 import type { KitToolbarProps } from "./tableComposition";
 
@@ -146,6 +148,8 @@ export function createToolbar(
     const { table, hasFilters, filtersMode, filtersOpen } = props;
     const { labels, source } = table;
     const anchorRef = useRef<HTMLButtonElement>(null);
+    const activeFilterCount =
+      useFeatureState(FILTER_CHIPS_STATE)?.activeFilterCount ?? 0;
     const sortOptions =
       props.sortByOptions ?? (table.isMobile ? table.sortByOptions : undefined);
     const sortable = sortOptions !== undefined && sortOptions.length > 0;
@@ -154,7 +158,7 @@ export function createToolbar(
       <FiltersButton
         elementRef={anchorRef}
         label={labels.filters}
-        count={props.activeFilterCount}
+        count={activeFilterCount}
         expanded={popover ? filtersOpen : undefined}
         open={filtersOpen}
         onPointerDown={props.onFiltersTriggerPointerDown}
@@ -165,7 +169,7 @@ export function createToolbar(
       open: filtersOpen,
       onClose: props.onCloseFilters,
       filters: props.filters,
-      activeFilterCount: props.activeFilterCount,
+      activeFilterCount,
       onClearFilters: props.onClearFilters,
       labels,
       dir: props.dir,

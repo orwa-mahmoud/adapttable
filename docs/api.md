@@ -274,7 +274,10 @@ dirty mark), `FILL_HANDLE` (`FillHandleCellSlotProps`), `EXPAND_TOGGLE`
 the composed features add their controls — undo/redo, export, print, density,
 fullscreen — each reading the state its feature publishes with
 `useFeatureState`: `EDIT_HISTORY_STATE`, `EXPORT_STATE`, `FULLSCREEN_STATE`
-and the table's finished props, `TABLE_PROPS_STATE`; `SAVED_VIEWS` (`SavedViewsSlotProps`),
+and the table's finished props, `TABLE_PROPS_STATE`. The filters feature
+publishes its chips and badge count as `FILTER_CHIPS_STATE`
+(`FilterChipsState`), which the toolbar badge, the chips bar and the command
+palette read; `SAVED_VIEWS` (`SavedViewsSlotProps`),
 `GRID_FOCUS_ANNOUNCER`, the filter surfaces `FILTER_POPOVER` / `FILTER_DRAWER`
 (`FilterOverlaySlotProps`) with `FiltersFormSlotProps` and
 `ActiveFilterChipsSlotProps`, and `CHROME_BODY` (`ChromeBodySlotProps`), which

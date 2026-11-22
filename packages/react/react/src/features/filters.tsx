@@ -32,6 +32,7 @@ import {
   type ChromeExtraSlotProps,
   FILTER_CHIPS_LIVE,
 } from "./slotKeys";
+import { FILTER_CHIPS_STATE, type FilterChipsState } from "./stateKeys";
 import type { StaticTableFeature, TableFeature } from "./tableFeature";
 
 /** One provider per engine, so a feature built twice keeps one component. */
@@ -63,7 +64,7 @@ function LiveFilterChips<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<TRow>): ReactNode {
+}: Readonly<ChromeExtraSlotProps<TRow>>): ReactNode {
   const extraChips = useExtraChips({
     extra: chrome.source.extra,
     setExtra: chrome.source.setExtra,
@@ -74,21 +75,27 @@ function LiveFilterChips<TRow>({
     defs: props.filterDefs ?? [],
     labels: chrome.table.labels,
     setFilterTree: chrome.source.setFilterTree,
-    registry: chrome.filterRegistry,
+    registry: props.filterRegistry,
   });
-  const mergedChips = useMemo(
-    () =>
-      mergeFilterChips(
-        mergeFilterChips(extraChips, chrome.mergedChips),
-        treeChips
+  const hostChips = props.extraChips;
+  const state = useMemo((): FilterChipsState => {
+    const chips = mergeFilterChips(
+      mergeFilterChips(extraChips, hostChips ?? []),
+      treeChips
+    );
+    return {
+      chips,
+      activeFilterCount: resolveActiveFilterCount(
+        props.activeFilterCount,
+        chips.length
       ),
-    [extraChips, chrome.mergedChips, treeChips]
+    };
+  }, [extraChips, hostChips, treeChips, props.activeFilterCount]);
+  return (
+    <FeatureStateScope stateKey={FILTER_CHIPS_STATE} value={state}>
+      {children(chrome)}
+    </FeatureStateScope>
   );
-  const activeFilterCount = resolveActiveFilterCount(
-    props.activeFilterCount,
-    mergedChips.length
-  );
-  return children({ ...chrome, mergedChips, activeFilterCount });
 }
 
 /**

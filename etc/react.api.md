@@ -923,7 +923,6 @@ export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 
 // @public
 export interface TableChrome<TRow> {
-    activeFilterCount: number;
     allColumns: ColumnDef<TRow>[];
     autoSizeColumn?: (key: string) => void;
     autoSizeColumns?: () => void;
@@ -945,8 +944,6 @@ export interface TableChrome<TRow> {
     emptyVariant: "noData" | "noResults";
     errorState?: TableErrorState;
     featureNotices: readonly FeatureNotice[];
-    filterDefs?: readonly FilterDef<TRow>[];
-    filterRegistry?: FilterTypeRegistry;
     getRowId: (row: TRow) => string;
     grouping?: {
         groupBy: readonly string[];
@@ -969,7 +966,6 @@ export interface TableChrome<TRow> {
     isMobile: boolean;
     isPaged: boolean;
     isRefreshing: boolean;
-    mergedChips: readonly ActiveFilterChip[];
     pinnedRows?: PinnedRows<TRow>;
     rootRef: RefObject<HTMLDivElement | null>;
     rowActions?: RowAction<TRow>[];

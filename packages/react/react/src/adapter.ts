@@ -396,6 +396,8 @@ export {
 export {
   EDIT_HISTORY_STATE,
   EXPORT_STATE,
+  FILTER_CHIPS_STATE,
+  type FilterChipsState,
   FULLSCREEN_STATE,
   TABLE_PROPS_STATE,
 } from "./features/stateKeys";

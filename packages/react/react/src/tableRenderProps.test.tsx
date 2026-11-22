@@ -511,7 +511,7 @@ describe("useChromeScrollReset", () => {
       });
       const props = { source, columns: cols, rowKey: (r: Row) => r.id };
       const chrome = useTableChrome<Row>(props);
-      useChromeScrollReset(ref, chrome, props);
+      useChromeScrollReset(ref, props);
       return chrome;
     });
     expect(result.current.table.rows).toHaveLength(2);
@@ -536,8 +536,8 @@ describe("useChromeScrollReset", () => {
         defaults: { limit: 1 },
       });
       const props = { source, columns: cols, rowKey: (r: Row) => r.id };
-      const chrome = useTableChrome<Row>(props);
-      useChromeScrollReset(ref, chrome, props);
+      useTableChrome<Row>(props);
+      useChromeScrollReset(ref, props);
       return source;
     });
     return { hook, scrollBy };

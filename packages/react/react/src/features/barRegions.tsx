@@ -18,16 +18,18 @@ import {
   BATCH_EDIT_BAR,
   BULK_BAR,
 } from "./slotKeys";
+import { FILTER_CHIPS_STATE } from "./stateKeys";
 
 /** The removable chips of the active filters. */
 function FilterChipsBar<TRow>({ view }: KitRegionProps<TRow>): ReactNode {
   "use no memo";
   const { chrome } = view;
+  const filterChips = useFeatureState(FILTER_CHIPS_STATE);
   return (
     <FeatureSlot
       slot={ACTIVE_FILTER_CHIPS}
       props={{
-        chips: chrome.mergedChips,
+        chips: filterChips?.chips ?? [],
         onClearAll: chrome.clearFilters,
         labels: view.labels,
       }}

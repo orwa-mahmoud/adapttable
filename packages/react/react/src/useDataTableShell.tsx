@@ -194,7 +194,7 @@ export function useDataTableShell<TRow>(
   // The chrome owns it: progressive column hiding measures this element.
   const rootRef = chrome.rootRef;
   const fullscreen = DISABLED_FULLSCREEN;
-  useChromeScrollReset(rootRef, chrome, chromeProps);
+  useChromeScrollReset(rootRef, chromeProps);
   // Name the root the way the scroll box is named: the column menu sizes
   // columns by measuring cells, and it has to know which table is its own.
   useEffect(() => {

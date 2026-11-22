@@ -26,7 +26,7 @@ import {
   SIDE_PANEL,
   STATUS_BAR,
 } from "./slotKeys";
-import { EXPORT_STATE } from "./stateKeys";
+import { EXPORT_STATE, FILTER_CHIPS_STATE } from "./stateKeys";
 
 function GridFocusAnnouncer<TRow>({ view }: KitRegionProps<TRow>): ReactNode {
   return (
@@ -64,6 +64,7 @@ function CommandPalette<TRow>({
   "use no memo";
   const { chrome } = view;
   const exportState = useFeatureState(EXPORT_STATE);
+  const filterChips = useFeatureState(FILTER_CHIPS_STATE);
   return (
     <FeatureSlot
       slot={COMMAND_PALETTE_LIVE}
@@ -74,7 +75,7 @@ function CommandPalette<TRow>({
         onExport: exportState?.onExportCsv,
         exportLabel: exportState?.exportLabel,
         onClearFilters: chrome.clearFilters,
-        hasFilters: chrome.activeFilterCount > 0,
+        hasFilters: (filterChips?.activeFilterCount ?? 0) > 0,
         featureHost: view.featureHost,
       }}
     />
@@ -115,6 +116,7 @@ function SidePanel<TRow>({ view, props }: KitRegionProps<TRow>): ReactNode {
 
 function FilterDrawer<TRow>({ view, props }: KitRegionProps<TRow>): ReactNode {
   "use no memo";
+  const filterChips = useFeatureState(FILTER_CHIPS_STATE);
   if (!view.filtersNode || props.filtersMode !== "drawer") return null;
   const { chrome } = view;
   return (
@@ -126,7 +128,7 @@ function FilterDrawer<TRow>({ view, props }: KitRegionProps<TRow>): ReactNode {
           view.setFiltersOpen(false);
         },
         filters: view.filtersNode,
-        activeFilterCount: chrome.activeFilterCount,
+        activeFilterCount: filterChips?.activeFilterCount ?? 0,
         onClearFilters: chrome.clearFilters,
         labels: view.labels,
         dir: props.dir,

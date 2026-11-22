@@ -123,8 +123,6 @@ export interface DataTableShellToolbarProps<TRow> {
   toolbarSlots?: ToolbarSlots;
   /** Whether a filters affordance should render. */
   hasFilters: boolean;
-  /** Number shown on the filters badge. */
-  activeFilterCount: number;
   /** Filter form node. */
   filters: ReactNode;
   /** Clear every active filter. */

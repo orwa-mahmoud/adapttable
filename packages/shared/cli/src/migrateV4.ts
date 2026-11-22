@@ -218,6 +218,14 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
     "The Angular table view draws one toolbar outlet with v.toolbarEntry(); controls read their feature's state (injectExportToolbar and the rest), and a kit adds SAVED_VIEWS_ENTRY and COLUMN_MENU_ENTRY beside its menus.",
   ],
   [
+    /\bchrome\.(?:mergedChips|activeFilterCount|filterDefs|filterRegistry)\b/g,
+    "The table chrome no longer carries the filter chips: the filters feature publishes FILTER_CHIPS_STATE ({ chips, activeFilterCount }); read it with useFeatureState.",
+  ],
+  [
+    /\buseChromeScrollReset\(\s*\w+\s*,\s*\w+\s*,/g,
+    "useChromeScrollReset(ref, props) takes the root and the props; drop the chrome argument.",
+  ],
+  [
     /\bToolbarChromeProps\b/g,
     "ToolbarChromeProps was removed: undoRedoToolbar returns UndoRedoToolbarProps, and the binding draws every kit's toolbar.",
   ],

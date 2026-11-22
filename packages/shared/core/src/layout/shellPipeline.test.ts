@@ -791,7 +791,6 @@ describe("overlayChromeExtras", () => {
       },
       table: { sortBy: "name" },
       source: { rows: [] },
-      activeFilterCount: 3,
       rowMutations: { canAdd: true, addRow: vi.fn() },
       editingRows: ROWS,
       tree: { entries: [] },
@@ -861,7 +860,6 @@ describe("overlayChromeExtras", () => {
     expect(out.chromeProps).toBe(shell.chromeProps);
     expect(out.toolbarProps).toEqual({
       search: "s",
-      activeFilterCount: 3,
       onAddRow: chrome.rowMutations.addRow,
     });
     expect(out.tableProps).toEqual({

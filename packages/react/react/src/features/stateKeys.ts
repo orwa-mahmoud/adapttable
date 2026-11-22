@@ -3,13 +3,29 @@
  * draws elsewhere in the table — a toolbar button reads its feature's key and
  * nothing the base names.
  */
-import type { EditHistoryState } from "@adapttable/core";
+import type { ActiveFilterChip, EditHistoryState } from "@adapttable/core";
 import { featureStateKey } from "@adapttable/core/binding";
 
 import type { ExportHandlerState } from "../export/useExportHandler";
 import type { KitRegionProps } from "../kit/rootRegion";
 import type { FullscreenState } from "../layout/useFullscreen";
 import type { DataTableShellChromeProps } from "../shell/shellContract";
+
+/**
+ * The active filters' chips and count.
+ *
+ * @public
+ */
+export interface FilterChipsState {
+  /** The removable chips: label-driven, the host's `extraChips`, the tree's. */
+  readonly chips: readonly ActiveFilterChip[];
+  /** The badge count: the host's override, or the chip count. */
+  readonly activeFilterCount: number;
+}
+
+/** The active filters' chips, published by the filter-chips stage. */
+export const FILTER_CHIPS_STATE =
+  featureStateKey<FilterChipsState>("filter-chips");
 
 /** Undo and redo, published by the edit-history stage. */
 export const EDIT_HISTORY_STATE =

@@ -3,8 +3,6 @@ import {
   type ConfirmHandler,
   type EditHistoryState,
   type FeatureNotice,
-  type FilterDef,
-  type FilterTypeRegistry,
   type GroupAggregatesFn,
   type GroupByInput,
   type GroupedFlatEntry,
@@ -21,7 +19,6 @@ import { type ReactNode, type RefObject } from "react";
 import type { ColumnDef } from "../columnDef";
 import type { ReactUseColumnLayoutResult } from "../columns/useColumnLayout";
 import type { EditableCellEditing } from "../editing/editableCellController";
-import type { ActiveFilterChip } from "../filters/useActiveFilterChips";
 import type { GroupCollapseState } from "../grouping/useGroupCollapse";
 import type { RowMutationsState } from "../rows/rowMutations";
 import type { RowPinningState } from "../rows/rowPinning";
@@ -61,14 +58,6 @@ export interface TableChrome<TRow> {
   confirm: ConfirmHandler;
   /** Row id extractor (selection id, falling back to rowKey). */
   getRowId: (row: TRow) => string;
-  /** Derived chips: label-driven merged with caller `extraChips`. */
-  mergedChips: readonly ActiveFilterChip[];
-  /** Active filter count (override, or merged chip count). */
-  activeFilterCount: number;
-  /** Declarative filter definitions the shell resolved. */
-  filterDefs?: readonly FilterDef<TRow>[];
-  /** Type registry those defs were built against. */
-  filterRegistry?: FilterTypeRegistry;
   /** Whether the resolved pagination mode is `"paged"`. */
   isPaged: boolean;
   /**

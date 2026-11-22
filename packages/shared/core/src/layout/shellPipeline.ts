@@ -742,7 +742,6 @@ export interface OverlayChrome {
   readonly source: unknown;
   readonly autoSizeColumns?: unknown;
   readonly autoSizeColumn?: unknown;
-  readonly activeFilterCount: number;
   readonly rowMutations: { readonly canAdd: boolean; readonly addRow: unknown };
   readonly editingRows: unknown;
   readonly tree?: TreeContribution<unknown>;
@@ -794,7 +793,6 @@ export function overlayChromeExtras<
     autoSizeColumn: chrome.autoSizeColumn ?? shell.autoSizeColumn,
     toolbarProps: {
       ...shell.toolbarProps,
-      activeFilterCount: chrome.activeFilterCount,
       onAddRow: chrome.rowMutations.canAdd
         ? chrome.rowMutations.addRow
         : undefined,

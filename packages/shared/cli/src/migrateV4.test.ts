@@ -201,6 +201,17 @@ describe("migrateV4Source", () => {
     expect(result.issues[0]?.message).toContain("toolbarEntry");
   });
 
+  it("reports the chrome's filter chips and the scroll reset's chrome argument", () => {
+    const result = migrateV4Source(
+      [
+        "const count = chrome.activeFilterCount;",
+        "useChromeScrollReset(ref, chrome, props);",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2]);
+  });
+
   it("leaves a file that uses nothing v4 moved untouched", () => {
     const source = 'import { DataTable } from "@adapttable/mui";\n';
     expect(migrateV4Source(source)).toEqual({

@@ -42,7 +42,6 @@ export function shellToolbarProps<TRow>(
       Boolean(filtersNode),
       Boolean(chrome.table.source.setFilterTree)
     ),
-    activeFilterCount: chrome.activeFilterCount,
     filters: filtersNode,
     onClearFilters: chrome.clearFilters,
     // Hidden in the grouped full-set view, where page size has no effect.
