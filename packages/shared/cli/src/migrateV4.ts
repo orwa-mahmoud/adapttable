@@ -1,0 +1,191 @@
+import {
+  type ImportMoves,
+  type ImportRoute,
+  type MigrationIssue,
+  type MigrationResult,
+  reportPatterns,
+  rewriteImports,
+} from "./importMigration";
+import { CORE_MAIN_MOVES, REACT_MAIN_TO_ADAPTER } from "./migrateV4Moves";
+
+/** Each bundled language's entry under `@adapttable/i18n/locales/`. */
+const I18N_DICTIONARIES: Readonly<Record<string, string>> = {
+  ar: "ar",
+  cs: "cs",
+  de: "de",
+  en: "en",
+  es: "es",
+  fa: "fa",
+  fr: "fr",
+  he: "he",
+  hi: "hi",
+  id: "id",
+  it: "it",
+  ja: "ja",
+  ko: "ko",
+  pl: "pl",
+  pt: "pt",
+  ru: "ru",
+  tr: "tr",
+  ur: "ur",
+  zh: "zh",
+  zhTW: "zh-TW",
+};
+
+/** The Vue kits whose `/export-csv` entry is now `/export`. */
+const VUE_KITS = [
+  "element-plus",
+  "naive-ui",
+  "nuxt-ui",
+  "quasar",
+  "reka-ui",
+  "shadcn-vue",
+  "vue-unstyled",
+  "vuetify",
+] as const;
+
+function everyTo(
+  names: readonly string[],
+  to: string
+): Record<string, ImportRoute> {
+  return Object.fromEntries(names.map((name) => [name, to]));
+}
+
+const V4_MOVES: ImportMoves = {
+  redirects: {
+    "@adapttable/i18n/load": "@adapttable/i18n",
+    ...Object.fromEntries(
+      VUE_KITS.map((kit) => [
+        `@adapttable/${kit}/export-csv`,
+        `@adapttable/${kit}/export`,
+      ])
+    ),
+  },
+  routes: {
+    "@adapttable/core": Object.fromEntries(
+      Object.entries(CORE_MAIN_MOVES).flatMap(([to, names]) =>
+        names.map((name): [string, ImportRoute] => [name, to])
+      )
+    ),
+    "@adapttable/core/binding": {
+      sameRows: { to: "@adapttable/core/binding", name: "sameItems" },
+    },
+    "@adapttable/react": everyTo(
+      REACT_MAIN_TO_ADAPTER,
+      "@adapttable/react/adapter"
+    ),
+    "@adapttable/server": {
+      splitFilterValues: { to: "@adapttable/server", name: "splitListParam" },
+    },
+    "@adapttable/angular/features": {
+      exportPdf: "@adapttable/angular/pdf",
+      exportXlsx: "@adapttable/angular/xlsx",
+    },
+    "@adapttable/nuxt-ui/cell-navigation": {
+      columnSelectionCheckbox: "@adapttable/nuxt-ui/column-selection",
+    },
+    "@adapttable/i18n": {
+      getLabels: "@adapttable/i18n/catalog",
+      locales: "@adapttable/i18n/catalog",
+      ...Object.fromEntries(
+        Object.entries(I18N_DICTIONARIES).map(([name, tag]) => [
+          name,
+          `@adapttable/i18n/locales/${tag}`,
+        ])
+      ),
+    },
+  },
+};
+
+/** Removed label keys: a host that sets one deletes it. */
+const REMOVED_LABELS = [
+  "noticeReorderNested",
+  "pendingProposals",
+  "assistantReceipt",
+  "rowMoveOptions",
+  "moveToTopLevel",
+  "groupingAggregateColumn",
+  "groupingAggregationDefault",
+] as const;
+
+/** Usages v4 changed in meaning or shape: reported, never rewritten. */
+const MANUAL: readonly (readonly [RegExp, string])[] = [
+  [
+    /\bmobileIdentityColumns\b/g,
+    "mobileIdentityColumns was removed; hideOnMobile on each column decides what a card shows. Delete the prop.",
+  ],
+  [
+    /\bgroupRowSlotKey\s*\(/g,
+    "groupRowSlotKey() was removed; use GROUP_ROW from @adapttable/vue/adapter.",
+  ],
+  [
+    new RegExp(String.raw`\b(?:${REMOVED_LABELS.join("|")})\b`, "g"),
+    "This label was removed from TableLabels; delete the key.",
+  ],
+  [
+    /\bsortRows(?:Multi)?\b/g,
+    "sortRows and sortRowsMulti were removed; sort through the table, or compare with compareValues.",
+  ],
+  [
+    /\b(?:SHELL_LIVE_STAGE_ORDER|ShellLiveStageId)\b/g,
+    "The fixed live-stage order was removed; name a stage's reads and writes with liveStageKey and collect stages with liveStagesOf.",
+  ],
+  [
+    /\bdefaultPendingRows\b/g,
+    "defaultPendingRows was removed; read labels.pendingRows from the resolved labels.",
+  ],
+  [
+    /\bcapabilityReason\s*\(/g,
+    'capabilityReason takes (capability, labels) and answers for "grouping" and "exportScope".',
+  ],
+  [
+    /\b(?:collectFeatureNotices|chromeFeatureNotices|resolveExportDisabledReason)\s*\(/g,
+    "Notices and the export disabled reason read their text from resolved labels; pass them.",
+  ],
+  [
+    /\buseExportHandler\s*\(/g,
+    "useExportHandler(handler, labels) takes the table's resolved labels as its second argument.",
+  ],
+  [
+    /\busePublishTableRuntime\s*\(/g,
+    "usePublishTableRuntime takes a TableRuntimeReader: { rows(), labels(), view() }.",
+  ],
+  [
+    /\bTableRuntimePublisher\b/g,
+    "TableRuntimePublisher stages a render with stage(chrome, actions) and builds the view on view().",
+  ],
+  [
+    /\bcreateEditConflictStore\b/g,
+    "createEditConflictStore was replaced by createDeferredEditConflictStore and loadEditConflictStore.",
+  ],
+  [
+    /\bstandardPreset\b/g,
+    "Angular's standardPreset was replaced by standardFeatures from @adapttable/angular/features.",
+  ],
+  [
+    /\browAction\s*:/g,
+    "If this is a Vue classNames key: rowAction was removed; use actionButton.",
+  ],
+];
+
+/**
+ * Apply only the v4 migrations that preserve meaning mechanically.
+ *
+ * Names that left a main entry move to the entry that serves them, renamed
+ * exports keep the local name through an alias, and moved subpaths redirect.
+ * Usages whose meaning or shape changed are reported and left untouched.
+ *
+ * @param source - A source file's text.
+ * @returns The rewritten text, how many imports moved, and what needs a person.
+ */
+export function migrateV4Source(source: string): MigrationResult {
+  const rewritten = rewriteImports(source, V4_MOVES);
+  const issues: MigrationIssue[] = rewritten.issues;
+  reportPatterns(rewritten.code, MANUAL, issues);
+  return {
+    code: rewritten.code,
+    changed: rewritten.code !== source,
+    movedImports: rewritten.movedImports,
+    issues,
+  };
+}

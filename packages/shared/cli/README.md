@@ -174,6 +174,20 @@ The native kit requires no theme stylesheet.
 For another kit, follow its provider and stylesheet instructions in the
 [Angular setup guide](https://adapttable.orwamahmoud.com/angular/getting-started/).
 
+## Migrate from v3
+
+```bash
+npx @adapttable/cli migrate-v4 src
+npx @adapttable/cli migrate-v4 src --check
+```
+
+The command moves each import v4 moved to the entry that serves it now,
+keeps a renamed export under the name your file uses, and redirects moved
+subpaths. Changes of meaning or shape are reported with their source
+locations and left untouched. The
+[v3 migration guide](https://adapttable.orwamahmoud.com/react/migrate-from-v3/)
+lists every one.
+
 ## Migrate from v2
 
 ```bash
@@ -213,8 +227,8 @@ is omitted, and existing `KitInfo` values need no new required property.
 - **Scaffolds a working table** wired to your kit, not a blank file: sortable out
   of the box, with the full AdaptTable feature set (filtering, selection, editing,
   grouping, saved views, CSV export, virtualization, …) each one import away.
-- **Migrates v2 source safely** — `migrate-v3` moves adapter-contract imports
-  to `@adapttable/react/adapter` and reports every behavior-dependent change
+- **Migrates v2 and v3 source safely** — `migrate-v3` and `migrate-v4` move
+  the imports each major moved and report every behavior-dependent change
   for manual review.
 - **Programmatic API** — call it from your own scripts, not only the terminal.
 

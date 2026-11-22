@@ -9,8 +9,18 @@ import {
 import { dirname, extname, relative, resolve } from "node:path";
 
 import { KITS } from "./detect";
+import type { MigrationResult } from "./importMigration";
 import { InitError, type InitIO, runInit } from "./init";
 import { migrateV3Source } from "./migrateV3";
+import { migrateV4Source } from "./migrateV4";
+
+/** Each migrate command and the transform it applies. */
+const MIGRATIONS: Readonly<
+  Record<string, (source: string) => MigrationResult>
+> = {
+  "migrate-v3": migrateV3Source,
+  "migrate-v4": migrateV4Source,
+};
 
 const SOURCE_EXTENSIONS = new Set([
   ".cjs",
@@ -84,10 +94,11 @@ function sourceFiles(path: string): string[] {
 function migrateFile(
   cwd: string,
   file: string,
-  check: boolean
+  check: boolean,
+  migrate: (source: string) => MigrationResult
 ): { changedFiles: number; movedImports: number; issueCount: number } {
   const source = readFileSync(file, "utf8");
-  const result = migrateV3Source(source);
+  const result = migrate(source);
   const displayPath = relative(cwd, file) || file;
   if (result.changed && !check) writeFileSync(file, result.code, "utf8");
   for (const issue of result.issues) {
@@ -102,13 +113,18 @@ function migrateFile(
   };
 }
 
-function runMigrateV3(cwd: string, argv: readonly string[]): number {
+function runMigrate(
+  command: string,
+  migrate: (source: string) => MigrationResult,
+  cwd: string,
+  argv: readonly string[]
+): number {
   const check = argv.includes("--check");
   const unknownOption = argv.find(
     (argument) => argument.startsWith("-") && argument !== "--check"
   );
   if (unknownOption) {
-    throw new InitError(`Unknown migrate-v3 option: ${unknownOption}`);
+    throw new InitError(`Unknown ${command} option: ${unknownOption}`);
   }
 
   const inputs = argv.filter((argument) => !argument.startsWith("-"));
@@ -124,7 +140,7 @@ function runMigrateV3(cwd: string, argv: readonly string[]): number {
   let issueCount = 0;
 
   for (const file of files) {
-    const result = migrateFile(cwd, file, check);
+    const result = migrateFile(cwd, file, check, migrate);
     changedFiles += result.changedFiles;
     movedImports += result.movedImports;
     issueCount += result.issueCount;
@@ -132,7 +148,7 @@ function runMigrateV3(cwd: string, argv: readonly string[]): number {
 
   const verb = check ? "Would update" : "Updated";
   console.log(
-    `${verb} ${changedFiles} file(s); moved ${movedImports} adapter import(s).`
+    `${verb} ${changedFiles} file(s); moved ${movedImports} import(s).`
   );
   if (issueCount > 0) {
     console.error(
@@ -154,20 +170,21 @@ function main(argv: readonly string[]): number {
     command === "help"
   ) {
     console.log(
-      "Usage:\n  adapttable init [--force] [--kit <kit>]\n  adapttable migrate-v3 [paths...] [--check]\n\nScaffold a table or migrate the provably safe parts of v2 source."
+      "Usage:\n  adapttable init [--force] [--kit <kit>]\n  adapttable migrate-v3 [paths...] [--check]\n  adapttable migrate-v4 [paths...] [--check]\n\nScaffold a table or migrate the provably safe parts of v2 or v3 source."
     );
     return 0;
   }
-  if (command !== "init" && command !== "migrate-v3") {
+  const migrate = MIGRATIONS[command];
+  if (command !== "init" && migrate === undefined) {
     console.error(
-      `Unknown command "${command}". Try: adapttable init or adapttable migrate-v3`
+      `Unknown command "${command}". Try: adapttable init, adapttable migrate-v3 or adapttable migrate-v4`
     );
     return 1;
   }
 
   try {
-    if (command === "migrate-v3") {
-      return runMigrateV3(process.cwd(), argv.slice(1));
+    if (migrate) {
+      return runMigrate(command, migrate, process.cwd(), argv.slice(1));
     }
     const io = createNodeIO(process.cwd());
     let kit;

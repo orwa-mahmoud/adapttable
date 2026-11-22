@@ -1,0 +1,115 @@
+import { describe, expect, it } from "vitest";
+
+import { migrateV4Source } from "./migrateV4";
+
+describe("migrateV4Source", () => {
+  it("moves binding machinery off core's main entry and keeps table names", () => {
+    const result = migrateV4Source(
+      'import { createTableEngine, insertExtraRows, type BodyCell } from "@adapttable/core";\n'
+    );
+    expect(result.code).toBe(
+      'import { createTableEngine } from "@adapttable/core";\n' +
+        'import { insertExtraRows, type BodyCell } from "@adapttable/core/binding";\n'
+    );
+    expect(result.movedImports).toBe(2);
+    expect(result.issues).toEqual([]);
+  });
+
+  it("sends a specialty name to its focused entry, not the binding one", () => {
+    expect(
+      migrateV4Source(
+        'import { createCellEditSession, pivot } from "@adapttable/core";'
+      ).code
+    ).toBe(
+      'import { createCellEditSession } from "@adapttable/core/editing";\nimport { pivot } from "@adapttable/core/pivot";'
+    );
+  });
+
+  it("moves React kit machinery to the adapter entry", () => {
+    const result = migrateV4Source(
+      'import { DataTable, useTableChrome } from "@adapttable/react";'
+    );
+    expect(result.code).toBe(
+      'import { DataTable } from "@adapttable/react";\nimport { useTableChrome } from "@adapttable/react/adapter";'
+    );
+  });
+
+  it("splits the i18n root into the catalog, one language and the root", () => {
+    const result = migrateV4Source(
+      'import { getDirection, getLabels, ar, zhTW } from "@adapttable/i18n";\n' +
+        'import { loadLabels } from "@adapttable/i18n/load";\n'
+    );
+    expect(result.code).toBe(
+      'import { getDirection } from "@adapttable/i18n";\n' +
+        'import { getLabels } from "@adapttable/i18n/catalog";\n' +
+        'import { ar } from "@adapttable/i18n/locales/ar";\n' +
+        'import { zhTW } from "@adapttable/i18n/locales/zh-TW";\n' +
+        'import { loadLabels } from "@adapttable/i18n";\n'
+    );
+  });
+
+  it("renames in place and keeps the name the file uses", () => {
+    expect(
+      migrateV4Source(
+        'import { parseTableQuery, splitFilterValues } from "@adapttable/server";'
+      ).code
+    ).toBe(
+      'import { parseTableQuery, splitListParam as splitFilterValues } from "@adapttable/server";'
+    );
+    expect(
+      migrateV4Source(
+        'import { splitFilterValues as split } from "@adapttable/server";'
+      ).code
+    ).toBe('import { splitListParam as split } from "@adapttable/server";');
+    expect(
+      migrateV4Source('import { sameRows } from "@adapttable/core/binding";')
+        .code
+    ).toBe('import { sameItems as sameRows } from "@adapttable/core/binding";');
+  });
+
+  it("redirects a Vue kit's CSV entry and moves Angular's export forwards", () => {
+    expect(
+      migrateV4Source(
+        'import { exportCsv } from "@adapttable/vue-unstyled/export-csv";'
+      ).code
+    ).toBe('import { exportCsv } from "@adapttable/vue-unstyled/export";');
+    expect(
+      migrateV4Source(
+        'import { exportPdf, selectionStats } from "@adapttable/angular/features";'
+      ).code
+    ).toBe(
+      'import { selectionStats } from "@adapttable/angular/features";\nimport { exportPdf } from "@adapttable/angular/pdf";'
+    );
+    expect(
+      migrateV4Source(
+        'import { columnSelectionCheckbox } from "@adapttable/nuxt-ui/cell-navigation";'
+      ).code
+    ).toBe(
+      'import { columnSelectionCheckbox } from "@adapttable/nuxt-ui/column-selection";'
+    );
+  });
+
+  it("reports what changed meaning and writes nothing for it", () => {
+    const source = [
+      "<DataTable data={rows} mobileIdentityColumns={2} />;",
+      "const key = groupRowSlotKey();",
+      "const labels = { noticeReorderNested: 'x' };",
+      "useExportHandler(run);",
+    ].join("\n");
+    const result = migrateV4Source(source);
+    expect(result.changed).toBe(false);
+    expect(result.code).toBe(source);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 3, 4]);
+    expect(result.issues[0]?.message).toContain("hideOnMobile");
+  });
+
+  it("leaves a file that uses nothing v4 moved untouched", () => {
+    const source = 'import { DataTable } from "@adapttable/mui";\n';
+    expect(migrateV4Source(source)).toEqual({
+      code: source,
+      changed: false,
+      movedImports: 0,
+      issues: [],
+    });
+  });
+});

@@ -1,5 +1,9 @@
 # Upgrading from v2
 
+This guide ends at v3. Continue with [Upgrading from v3](./migrate-from-v3.md)
+to reach v4, which moves the machinery imports listed below to their own
+entries.
+
 v3 removes the enabling props. A feature is an import and an entry in
 `features`, and that is the only way in — which is what lets a table download
 what it named and nothing else. Measured adapter sizes live in the
