@@ -488,7 +488,14 @@ function antdOnRow<TRow>(options: {
     "aria-selected":
       selectedRowKeys === undefined ? undefined : selectedRowKeys.includes(id),
     ...pin,
-    style: { ...visual, ...reorderStyle, ...pin.style },
+    style: {
+      // Under a sticky header a row brought into view (keyboard focus, find)
+      // stops below the header instead of under it.
+      ...(headerOffset > 0 ? { scrollMarginTop: headerOffset } : {}),
+      ...visual,
+      ...reorderStyle,
+      ...pin.style,
+    },
     "data-stagger": "",
     // antd builds its own <tr>, so the dirty mark arrives here too.
     "data-dirty": rowIsDirty(editing, id) ? "" : undefined,
@@ -882,6 +889,7 @@ function AntdCardWindow<TRow>({
     overscan: props.virtualOverscan,
     scrollMargin: props.virtualScrollMargin,
     getScrollElement: inBox ? () => scrollRef.current : undefined,
+    listRoot: scrollRef,
     children: finish,
   };
   return filled ? (
@@ -965,6 +973,7 @@ function AntdGroupingWindow<TRow>({
       : 56,
     overscan: props.virtualOverscan,
     scrollMargin: props.virtualScrollMargin,
+    listRoot: chrome.rootRef,
     children: finish,
   };
   return filled ? (

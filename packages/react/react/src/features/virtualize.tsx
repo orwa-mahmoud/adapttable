@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 import { RowScrollContext } from "../virtual/rowScroll";
 import { useKeyedVirtualizer } from "../virtual/useTableVirtualization";
 import { useVirtualChromeBody } from "../virtual/useVirtualChromeBodyData";
+import { useMeasuredWindowScrollMargin } from "../virtual/windowScrollMargin";
 import { slotRender } from "./providers";
 import {
   CHROME_BODY,
@@ -60,9 +61,19 @@ function VirtualChromeBody<TRow>({
  */
 function KeyedWindow({
   children,
+  listRoot,
   ...options
 }: KeyedWindowSlotProps): ReactNode {
-  const { virtualization, scrollToIndex } = useKeyedVirtualizer(options);
+  const measured = useMeasuredWindowScrollMargin(
+    options.enabled &&
+      options.getScrollElement === undefined &&
+      options.scrollMargin === undefined,
+    listRoot
+  );
+  const { virtualization, scrollToIndex } = useKeyedVirtualizer({
+    ...options,
+    scrollMargin: options.scrollMargin ?? measured.scrollMargin,
+  });
   return children({ ...virtualization, scrollToIndex });
 }
 

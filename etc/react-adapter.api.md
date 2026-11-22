@@ -3016,7 +3016,9 @@ export interface KeyedWindow extends KeyedVirtualization {
 }
 
 // @public
-export type KeyedWindowSlotProps = KeyedWindowSlotProps_2<KeyedWindow, ReactNode>;
+export type KeyedWindowSlotProps = KeyedWindowSlotProps_2<KeyedWindow, ReactNode> & {
+    listRoot?: RefObject<Element | null>;
+};
 
 // @public
 export interface KitBulkBar {

@@ -251,7 +251,14 @@ export interface KeyedWindow extends KeyedVirtualization {
 export type KeyedWindowSlotProps = NeutralKeyedWindowSlotProps<
   KeyedWindow,
   ReactNode
->;
+> & {
+  /**
+   * The element the list is drawn in. A page-scrolled list with no
+   * `scrollMargin` measures where it starts from here, so the window covers
+   * the rows on screen.
+   */
+  listRoot?: RefObject<Element | null>;
+};
 
 /**
  * The keyed window a kit that builds its own body asks for.
