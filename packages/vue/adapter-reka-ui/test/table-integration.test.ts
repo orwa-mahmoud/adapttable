@@ -13,9 +13,9 @@ import {
 import { renderToString } from "vue/server-renderer";
 
 import { DataTable, type DataTableProps } from "../src";
-import { selection } from "../src/selection";
 import { rekaButton } from "../src/controls/basic";
 import { densityChooser } from "../src/density";
+import { selection } from "../src/selection";
 
 interface Person {
   id: string;

@@ -13,7 +13,6 @@ import { createApp, defineComponent, h, nextTick, shallowRef } from "vue";
 import { DataTable, type DataTableProps } from "../src";
 import { Button } from "../src/components/button";
 import { densityChooser } from "../src/density";
-
 import { selection } from "../src/selection";
 interface Person {
   id: string;

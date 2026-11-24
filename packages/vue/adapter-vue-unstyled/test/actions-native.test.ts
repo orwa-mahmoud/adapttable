@@ -16,6 +16,7 @@ import { exportCsv } from "../src/export-csv";
 import { pdfWriter } from "../src/export-pdf";
 import { xlsxWriter } from "../src/export-xlsx";
 import { print } from "../src/print";
+import { selection } from "../src/selection";
 import { sidePanel } from "../src/side-panel";
 import {
   click,
@@ -26,7 +27,6 @@ import {
   tick,
   write,
 } from "./filter-editing-helpers";
-import { selection } from "../src/selection";
 const rows = [
   { id: "a", name: "Ada" },
   { id: "g", name: "Grace" },

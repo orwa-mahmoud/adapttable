@@ -2,9 +2,8 @@ import { expect, it } from "vitest";
 import { defineComponent, h, KeepAlive, shallowRef } from "vue";
 
 import { DataTable } from "../src";
-import { find, mountNative, part, tick } from "./filter-editing-helpers";
-
 import { selection } from "../src/selection";
+import { find, mountNative, part, tick } from "./filter-editing-helpers";
 it("retires retained native selection controls while a table is suspended and after disposal", async () => {
   const shown = shallowRef(true);
   const selected = shallowRef<readonly string[]>([]);

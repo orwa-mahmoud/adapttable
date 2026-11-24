@@ -1,4 +1,3 @@
-import { selection } from "../src/selection";
 // @vitest-environment node
 import { ID_INJECTION_KEY, ZINDEX_INJECTION_KEY } from "element-plus";
 import { describe, expect, it, vi } from "vitest";
@@ -8,6 +7,7 @@ import { renderToString } from "vue/server-renderer";
 import { bulkActions } from "../src/bulk-actions";
 import DataTable from "../src/DataTable.vue";
 import { print } from "../src/print";
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;

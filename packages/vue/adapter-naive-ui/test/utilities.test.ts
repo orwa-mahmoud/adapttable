@@ -5,9 +5,8 @@ import { DataTable } from "../src";
 import { bulkActions } from "../src/bulk-actions";
 import { exportCsv } from "../src/export";
 import { print } from "../src/print";
-import { click, deferred, find, mount, part, tick } from "./editing-helpers";
-
 import { selection } from "../src/selection";
+import { click, deferred, find, mount, part, tick } from "./editing-helpers";
 const rows = [
   { id: "a", name: "Ada" },
   { id: "g", name: "Grace" },

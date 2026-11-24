@@ -5,8 +5,8 @@ import { h, KeepAlive, nextTick, ref, shallowRef } from "vue";
 import { type BulkAction, bulkActions } from "../src/bulk-actions";
 import DataTable from "../src/DataTable.vue";
 import { print } from "../src/print";
-import { mount, node } from "./mount";
 import { selection } from "../src/selection";
+import { mount, node } from "./mount";
 interface Row {
   id: string;
   name: string;
@@ -30,7 +30,6 @@ function options(
   const added = more ?? [];
   const hasSelection = added.some(
     (feature) =>
-      feature !== null &&
       typeof feature === "object" &&
       "id" in feature &&
       feature.id === "selection"

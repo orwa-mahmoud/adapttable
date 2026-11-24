@@ -13,7 +13,6 @@ import { renderToString } from "vue/server-renderer";
 
 import { DataTable } from "../src";
 import { naiveClassNames } from "../src/classNames";
-
 import { selection } from "../src/selection";
 interface Row {
   id: string;

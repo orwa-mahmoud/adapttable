@@ -1,4 +1,3 @@
-import { selection } from "../src/selection";
 // @vitest-environment node
 import type { ColumnDef } from "@adapttable/vue";
 import { setup } from "@css-render/vue3-ssr";
@@ -7,6 +6,7 @@ import { createSSRApp, h } from "vue";
 import { renderToString } from "vue/server-renderer";
 
 import { DataTable } from "../src";
+import { selection } from "../src/selection";
 
 interface Row {
   id: string;

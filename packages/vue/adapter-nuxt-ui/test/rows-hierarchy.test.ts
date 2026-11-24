@@ -20,9 +20,8 @@ import {
   rowAppearance,
   rowPinning,
 } from "../src/rows";
-import { tree } from "../src/tree";
-
 import { selection } from "../src/selection";
+import { tree } from "../src/tree";
 interface Person {
   id: string;
   name: string;

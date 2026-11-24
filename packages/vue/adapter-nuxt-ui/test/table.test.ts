@@ -6,7 +6,6 @@ import { createApp, h, nextTick, shallowRef, type VNodeChild } from "vue";
 
 import { DataTable, type DataTableProps } from "../src";
 import { densityChooser } from "../src/density";
-
 import { selection } from "../src/selection";
 interface Row {
   id: string;

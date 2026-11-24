@@ -6,9 +6,8 @@ import { renderToString } from "vue/server-renderer";
 
 import { DataTable } from "../src";
 import { grouping } from "../src/grouping";
-import { tree } from "../src/tree";
-
 import { selection } from "../src/selection";
+import { tree } from "../src/tree";
 interface Row {
   id: string;
   name: string;

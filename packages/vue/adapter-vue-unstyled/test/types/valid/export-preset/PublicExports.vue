@@ -3,17 +3,17 @@ import type { TableFeature } from "@adapttable/vue";
 import { type ColumnDef, DataTable } from "@adapttable/vue-unstyled";
 import { exportCsv } from "@adapttable/vue-unstyled/export";
 import {
+  exportPdf as barrelPdf,
   exportPdf,
   type ExportPdfOptions,
   pdfWriter,
 } from "@adapttable/vue-unstyled/export-pdf";
 import {
+  exportXlsx as barrelXlsx,
   exportXlsx,
   type ExportXlsxOptions,
   xlsxWriter,
 } from "@adapttable/vue-unstyled/export-xlsx";
-import { exportPdf as barrelPdf } from "@adapttable/vue-unstyled/export-pdf";
-import { exportXlsx as barrelXlsx } from "@adapttable/vue-unstyled/export-xlsx";
 import {
   type StandardFeatureOptions,
   standardFeatures,

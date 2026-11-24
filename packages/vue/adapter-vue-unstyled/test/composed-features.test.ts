@@ -13,6 +13,7 @@ import { batchEditing, editing, rowEditing } from "../src/editing";
 import { filters } from "../src/filters";
 import { NativeFilterSurface } from "../src/filters/NativeFilterSurface";
 import { headerFilters } from "../src/header-filters";
+import { selection as selectionFeature } from "../src/selection";
 import { tree } from "../src/tree";
 import {
   click,
@@ -22,7 +23,6 @@ import {
   tick,
   write,
 } from "./filter-editing-helpers";
-import { selection as selectionFeature } from "../src/selection";
 interface Row {
   id: string;
   name: string;

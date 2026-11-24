@@ -6,10 +6,9 @@ import { renderToString } from "vue/server-renderer";
 
 import { cellSpan } from "../src/cell-span";
 import DataTable from "../src/DataTable.vue";
+import { selection } from "../src/selection";
 import type { DataTableProps } from "../src/types";
 import { mount, node } from "./mount";
-
-import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;

@@ -30,9 +30,8 @@ import { exportCsv } from "../src/export-csv";
 import { exportPdf } from "../src/export-pdf";
 import { exportXlsx } from "../src/export-xlsx";
 import { print } from "../src/print";
-import { sidePanel } from "../src/side-panel";
-
 import { selection } from "../src/selection";
+import { sidePanel } from "../src/side-panel";
 const stops: (() => void)[] = [];
 afterEach(() => {
   for (const stop of stops.splice(0)) {

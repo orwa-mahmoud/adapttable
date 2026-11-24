@@ -1,4 +1,3 @@
-import { selection } from "../src/selection";
 // @vitest-environment node
 import { aggregate, type ColumnDef } from "@adapttable/vue";
 import { setup } from "@css-render/vue3-ssr";
@@ -19,6 +18,7 @@ import { groupingPanel } from "../src/grouping-panel";
 import { print } from "../src/print";
 import { rowReorder } from "../src/row-reorder";
 import { savedViews, SavedViewsPanel } from "../src/saved-views";
+import { selection } from "../src/selection";
 import { selectionStats } from "../src/selection-stats";
 import { sidePanel } from "../src/side-panel";
 import { statusBar } from "../src/status-bar";

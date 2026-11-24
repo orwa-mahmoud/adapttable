@@ -29,9 +29,8 @@ import { rowActions } from "../src/row-actions";
 import { rowDetail } from "../src/row-detail";
 import { rowReorder } from "../src/row-reorder";
 import RowActions from "../src/RowActions.vue";
-import { requiredControl } from "../src/table/requiredControl";
-
 import { selection } from "../src/selection";
+import { requiredControl } from "../src/table/requiredControl";
 const wrappers: ReturnType<typeof mount>[] = [];
 function render(content: () => VNode) {
   const wrapper = mount(

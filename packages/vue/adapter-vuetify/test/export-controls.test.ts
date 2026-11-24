@@ -18,7 +18,6 @@ import { DataTable } from "../src";
 import { exportCsv } from "../src/export";
 import { exportPdf } from "../src/export-pdf";
 import { exportXlsx } from "../src/export-xlsx";
-
 import { selection } from "../src/selection";
 interface Row {
   id: string;

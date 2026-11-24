@@ -5,7 +5,6 @@ import { aliases, mdi } from "vuetify/iconsets/mdi-svg";
 
 import { DataTable } from "../src";
 import { grouping } from "../src/grouping";
-
 import { selection } from "../src/selection";
 interface Person {
   id: string;

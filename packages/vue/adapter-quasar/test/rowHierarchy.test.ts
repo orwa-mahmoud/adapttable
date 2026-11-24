@@ -15,6 +15,7 @@ import { rowActions } from "../src/row-actions";
 import { rowAppearance } from "../src/row-appearance";
 import { rowDetail } from "../src/row-detail";
 import { rowPinning } from "../src/row-pinning";
+import { selection } from "../src/selection";
 import { tree } from "../src/tree";
 import { virtualize } from "../src/virtualize";
 import {
@@ -22,8 +23,6 @@ import {
   type HierarchyRow,
   hierarchyRows,
 } from "./rowHierarchyFixture";
-
-import { selection } from "../src/selection";
 const wrappers: ReturnType<typeof mount>[] = [];
 const settle = async () => {
   await nextTick();

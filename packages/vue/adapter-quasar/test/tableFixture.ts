@@ -1,7 +1,6 @@
 import { h } from "vue";
 
 import { DataTable } from "../src";
-
 import { selection } from "../src/selection";
 export interface FixtureRow {
   id: string;

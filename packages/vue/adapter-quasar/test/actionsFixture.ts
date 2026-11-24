@@ -4,10 +4,9 @@ import { DataTable } from "../src";
 import { bulkActions } from "../src/bulk-actions";
 import { findInTable } from "../src/find-in-table";
 import { print } from "../src/print";
+import { selection } from "../src/selection";
 import { selectionStats } from "../src/selection-stats";
 import { statusBar } from "../src/status-bar";
-
-import { selection } from "../src/selection";
 export function actionsFixture(onPrint: () => void = () => undefined) {
   return h(DataTable<{ id: string; name: string }>, {
     data: [{ id: "a", name: "Ada" }],

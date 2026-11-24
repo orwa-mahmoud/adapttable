@@ -16,9 +16,8 @@ import { nuxtControlSize, provideNuxtDensity } from "../src/densityContext";
 import { rowActions } from "../src/row-actions";
 import { rowDetail } from "../src/row-detail";
 import { rowReorder } from "../src/row-reorder";
-import { find, mountNuxt, part, tick } from "./actions.helpers";
-
 import { selection } from "../src/selection";
+import { find, mountNuxt, part, tick } from "./actions.helpers";
 interface Row {
   id: string;
   name: string;

@@ -13,10 +13,9 @@ import { bulkActions } from "../src/bulk-actions";
 import { findInTable } from "../src/find-in-table";
 import { QuasarStatusBar } from "../src/navigation/QuasarStatusBar";
 import { print } from "../src/print";
+import { selection } from "../src/selection";
 import { selectionStats } from "../src/selection-stats";
 import { statusBar } from "../src/status-bar";
-
-import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;

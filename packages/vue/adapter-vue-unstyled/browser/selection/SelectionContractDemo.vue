@@ -10,8 +10,8 @@ import {
 import { DataTable } from "@adapttable/vue-unstyled";
 import { h, shallowRef } from "vue";
 
-import { ModelCheckbox } from "./ModelCheckbox";
 import { selection } from "../../src/selection";
+import { ModelCheckbox } from "./ModelCheckbox";
 interface Row {
   id: string;
   name: string;

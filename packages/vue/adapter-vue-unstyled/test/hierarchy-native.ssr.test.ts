@@ -1,4 +1,3 @@
-import { selection } from "../src/selection";
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { createSSRApp, h } from "vue";
@@ -8,6 +7,7 @@ import { DataTable } from "../src";
 import { grouping } from "../src/grouping";
 import { rowDetail } from "../src/row-detail";
 import { extraRows, pinnedSummaryRows, rowActions } from "../src/rows";
+import { selection } from "../src/selection";
 import { tree } from "../src/tree";
 interface Row {
   id: string;

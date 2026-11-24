@@ -6,7 +6,6 @@ import { DataTable, type DataTableProps } from "../src";
 import { bulkActions } from "../src/bulk-actions";
 import { exportCsv } from "../src/export-csv";
 import { print } from "../src/print";
-
 import { selection } from "../src/selection";
 interface Row {
   id: string;

@@ -5,6 +5,7 @@ import { renderToString } from "vue/server-renderer";
 import { DataTable } from "../src";
 import { grouping } from "../src/grouping";
 import { nestedTable, rowDetail } from "../src/row-detail";
+import { selection } from "../src/selection";
 import { tree } from "../src/tree";
 import {
   find,
@@ -15,8 +16,6 @@ import {
   type Row,
   tick,
 } from "./feature-helpers";
-
-import { selection } from "../src/selection";
 const rows: readonly Row[] = [
   original,
   { ...original, id: "b", name: "Bea", amount: 3, parent: "a" },

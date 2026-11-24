@@ -9,7 +9,6 @@ import { createVuetify } from "vuetify/framework";
 import { DataTable } from "../src";
 import { bulkActions } from "../src/bulk-actions";
 import { print } from "../src/print";
-
 import { selection } from "../src/selection";
 interface Row {
   id: string;

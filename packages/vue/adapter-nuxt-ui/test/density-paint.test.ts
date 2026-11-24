@@ -8,7 +8,6 @@ import { createApp, h, nextTick, shallowRef } from "vue";
 
 import { DataTable } from "../src";
 import { densityChooser } from "../src/density";
-
 import { selection } from "../src/selection";
 async function settle(): Promise<void> {
   await nextTick();

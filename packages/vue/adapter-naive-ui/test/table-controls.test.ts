@@ -16,7 +16,6 @@ import {
 import { renderToString } from "vue/server-renderer";
 
 import { naiveTableControls } from "../src/controls/table";
-
 import { selection } from "../src/selection";
 interface Row {
   id: string;

@@ -1,4 +1,3 @@
-import { selection } from "../src/selection";
 // @vitest-environment node
 import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, h } from "vue";
@@ -10,6 +9,7 @@ import { commandPalette } from "../src/command-palette";
 import { contextMenu } from "../src/context-menu";
 import { exportCsv } from "../src/export-csv";
 import { print } from "../src/print";
+import { selection } from "../src/selection";
 import { sidePanel } from "../src/side-panel";
 interface Row {
   id: string;

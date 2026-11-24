@@ -17,7 +17,6 @@ import { renderToString } from "vue/server-renderer";
 
 import { DataTable, type DataTableProps } from "../src";
 import { densityChooser } from "../src/density";
-
 import { selection } from "../src/selection";
 interface Row {
   id: string;

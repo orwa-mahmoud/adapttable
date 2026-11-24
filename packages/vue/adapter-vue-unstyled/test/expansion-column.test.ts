@@ -11,10 +11,9 @@ import { rowActions } from "../src/row-actions";
 import { rowDetail } from "../src/row-detail";
 import { rowPinning } from "../src/row-pinning";
 import { rowReorder } from "../src/row-reorder";
+import { selection } from "../src/selection";
 import { virtualize } from "../src/virtualize";
 import { find, mountNative, part, tick } from "./filter-editing-helpers";
-
-import { selection } from "../src/selection";
 interface Row {
   id: string;
   team: string;

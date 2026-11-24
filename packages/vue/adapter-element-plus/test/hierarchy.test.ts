@@ -8,9 +8,9 @@ import { h, nextTick, shallowRef } from "vue";
 import DataTable from "../src/DataTable.vue";
 import { grouping } from "../src/grouping";
 import { nestedTable, rowDetail, useRowExpansion } from "../src/row-detail";
+import { selection as selectionFeature } from "../src/selection";
 import { tree, useLazyChildren, useTreeExpansion } from "../src/tree";
 import { mount, node } from "./mount";
-import { selection as selectionFeature } from "../src/selection";
 interface Row {
   id: string;
   name: string;

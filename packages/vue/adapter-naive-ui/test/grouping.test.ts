@@ -3,9 +3,8 @@ import { h, shallowRef } from "vue";
 
 import { DataTable } from "../src";
 import { grouping } from "../src/grouping";
-import { find, mount, part, tick } from "./filter-helpers";
-
 import { selection } from "../src/selection";
+import { find, mount, part, tick } from "./filter-helpers";
 interface Row {
   id: string;
   team: string;

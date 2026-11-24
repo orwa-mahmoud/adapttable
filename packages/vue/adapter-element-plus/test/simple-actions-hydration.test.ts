@@ -6,9 +6,9 @@ import { renderToString, type SSRContext } from "vue/server-renderer";
 import { bulkActions } from "../src/bulk-actions";
 import DataTable from "../src/DataTable.vue";
 import { print } from "../src/print";
+import { selection } from "../src/selection";
 import { node } from "./mount";
 import { installSsrTeleports } from "./ssr-teleports";
-import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;

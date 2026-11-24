@@ -2,9 +2,9 @@ import { afterEach, expect, it } from "vitest";
 import { createApp, defineComponent, h, nextTick, shallowRef } from "vue";
 
 import { DataTable, type DataTableProps } from "../src";
-import { selection } from "../src/selection";
 import { cellNavigation } from "../src/cell-navigation";
 import { editing } from "../src/editing";
+import { selection } from "../src/selection";
 
 interface Row {
   id: string;

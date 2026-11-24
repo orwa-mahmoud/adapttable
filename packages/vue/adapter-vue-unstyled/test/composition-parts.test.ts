@@ -19,6 +19,7 @@ import {
   SavedViewsPanel,
   type SavedViewsPanelProps,
 } from "../src/saved-views";
+import { selection } from "../src/selection";
 import {
   click,
   find,
@@ -27,8 +28,6 @@ import {
   tick,
   write,
 } from "./filter-editing-helpers";
-
-import { selection } from "../src/selection";
 const rows = [
   { id: "a", name: "Ada", team: "Core", score: 2 },
   { id: "b", name: "Bea", team: "Core", score: 3 },

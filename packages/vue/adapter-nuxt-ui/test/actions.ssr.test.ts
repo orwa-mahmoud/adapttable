@@ -1,4 +1,3 @@
-import { selection } from "../src/selection";
 // @vitest-environment node
 import ui from "@nuxt/ui/vue-plugin";
 import { expect, it, vi } from "vitest";
@@ -9,6 +8,7 @@ import { DataTable } from "../src";
 import { bulkActions } from "../src/bulk-actions";
 import { exportCsv } from "../src/export";
 import { print } from "../src/print";
+import { selection } from "../src/selection";
 it.each([false, true])(
   "renders native action controls without invoking host actions (mobile=%s)",
   async (mobile) => {

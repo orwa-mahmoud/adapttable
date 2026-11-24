@@ -5,8 +5,8 @@ import { DataTable } from "../../src";
 import { editing } from "../../src/editing";
 import { filters } from "../../src/filters";
 import { headerFilters } from "../../src/header-filters";
-import { tree } from "../../src/tree";
 import { selection as selectionFeature } from "../../src/selection";
+import { tree } from "../../src/tree";
 interface Row {
   id: string;
   name: string;

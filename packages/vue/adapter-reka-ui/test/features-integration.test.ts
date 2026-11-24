@@ -4,7 +4,6 @@ import { createApp, h, nextTick } from "vue";
 import { DataTable, type DataTableProps } from "../src";
 import { filters } from "../src/filters";
 import { grouping } from "../src/grouping";
-
 import { selection } from "../src/selection";
 interface Row {
   id: string;

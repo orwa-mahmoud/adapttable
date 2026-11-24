@@ -5,9 +5,8 @@ import { h, shallowRef } from "vue";
 import { DataTable } from "../src";
 import { nativeExportSlots } from "../src/actions/nativeControls";
 import { bulkActions } from "../src/bulk-actions";
-import { find, mountNative, part, tick } from "./filter-editing-helpers";
-
 import { selection } from "../src/selection";
+import { find, mountNative, part, tick } from "./filter-editing-helpers";
 describe("native action semantic parts", () => {
   it("keeps bulk count and clear hooks on their actual controls without inventing new part names", async () => {
     const changed = vi.fn();

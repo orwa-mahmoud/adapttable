@@ -1,4 +1,3 @@
-import { selection } from "../src/selection";
 // @vitest-environment node
 import ui from "@nuxt/ui/vue-plugin";
 import { expect, it } from "vitest";
@@ -8,6 +7,7 @@ import { renderToString } from "vue/server-renderer";
 import { DataTable } from "../src";
 import { grouping } from "../src/grouping";
 import { rowDetail } from "../src/row-detail";
+import { selection } from "../src/selection";
 
 it("server-renders independent grouped requests and host detail content", async () => {
   interface Row {

@@ -15,10 +15,9 @@ import { pinnedSummaryRows } from "../src/pinned-summary-rows";
 import { rowActions } from "../src/row-actions";
 import { rowDetail } from "../src/row-detail";
 import { rowReorder } from "../src/row-reorder";
+import { selection } from "../src/selection";
 import { virtualize } from "../src/virtualize";
 import { find, mountNative, part, tick, write } from "./filter-editing-helpers";
-
-import { selection } from "../src/selection";
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
