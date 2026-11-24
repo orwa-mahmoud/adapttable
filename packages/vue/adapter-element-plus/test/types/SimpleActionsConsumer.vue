@@ -35,6 +35,5 @@ const features = [
     :row-key="(row: Row) => row.id"
     :features="features"
     :url-sync="false"
-    selectable
   /><output>{{ last }}</output>
 </template>

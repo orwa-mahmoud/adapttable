@@ -2,7 +2,7 @@
 import { ref, shallowRef } from "vue";
 
 import { type ColumnDef, DataTable, type DataTableHandle } from "../../src";
-import { selection } from "../../selection";
+import { selection } from "../../src/selection";
 
 interface Row {
   id: string;

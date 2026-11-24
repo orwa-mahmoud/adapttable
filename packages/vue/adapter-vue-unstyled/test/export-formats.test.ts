@@ -13,11 +13,8 @@ import { exportCsv } from "../src/export";
 import { exportCsv as legacyExportCsv } from "../src/export-csv";
 import { exportPdf } from "../src/export-pdf";
 import { exportXlsx } from "../src/export-xlsx";
-import {
-  exportPdf as barrelPdf,
-  exportXlsx as barrelXlsx,
-} from "../src/features";
 import { standardFeatures } from "../src/preset";
+import { selection } from "../src/selection";
 import {
   click,
   deferred,
@@ -27,8 +24,6 @@ import {
   tick,
   write,
 } from "./filter-editing-helpers";
-
-import { selection } from "../src/selection";
 const rows = [
   { id: "a", name: "Ada" },
   { id: "g", name: "Grace" },
@@ -47,10 +42,8 @@ function required<T>(value: T | undefined): T {
 }
 
 describe("public native export entries", () => {
-  it("preserves CSV entry identity and exposes the same format factories from features", () => {
+  it("preserves CSV entry identity", () => {
     expect(exportCsv).toBe(legacyExportCsv);
-    expect(barrelPdf).toBe(exportPdf);
-    expect(barrelXlsx).toBe(exportXlsx);
   });
 });
 

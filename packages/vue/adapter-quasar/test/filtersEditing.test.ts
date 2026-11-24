@@ -39,7 +39,7 @@ import {
   editing,
   rowEditing,
   undoRedoButtons,
-} from "../src/features";
+} from "../src/editing";
 import {
   ChecklistFilter,
   filters,

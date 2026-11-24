@@ -17,6 +17,7 @@ import { DataTable } from "../../src";
 import { densityChooser } from "../../src/density";
 import { filters } from "../../src/filters";
 import { headerFilters } from "../../src/header-filters";
+import { selection } from "../../src/selection";
 
 const query = new URLSearchParams(window.location.search);
 const rtl = query.has("rtl");
@@ -69,6 +70,7 @@ const features = [
   ),
   headerFilters(),
   densityChooser(),
+  selection(),
 ];
 </script>
 
@@ -91,7 +93,6 @@ const features = [
           :dir="rtl ? 'rtl' : 'ltr'"
           :force-mobile="query.has('mobile') ? true : undefined"
           :url-sync="false"
-          selectable
         />
       </NCard>
       <NCard v-bind="portfolioAttrs" :title="text.revenue">

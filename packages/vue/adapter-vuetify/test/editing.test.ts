@@ -13,7 +13,7 @@ import {
   editing,
   rowEditing,
   undoRedoButtons,
-} from "../src/features";
+} from "../src/editing";
 
 interface Person {
   id: string;
