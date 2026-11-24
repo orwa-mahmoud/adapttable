@@ -40,9 +40,9 @@
  * 7. **Every v4 removal is gone.** No prop the `v4Removals` inventory names
  *    is declared on the public prop surface, and the test each group names
  *    exists.
- * 8. **Every published kit serves its canonical feature entries.** The
- *    kit's own feature barrel may locate an entry differently across frameworks;
- *    its configured source must still export every inventoried factory.
+ * 8. **Every published kit serves its canonical feature entries.** A kit may
+ *    serve a factory from the entry named by its id when that differs from the
+ *    shared subpath; that source must still export the factory.
  *
  *   node scripts/check-feature-classification.mjs
  */

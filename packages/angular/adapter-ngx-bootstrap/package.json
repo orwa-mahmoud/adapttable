@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/ngx-bootstrap",
   "version": "0.4.0",
-  "description": "AdaptTable Angular tables with ngx-bootstrap controls and isolated Bootstrap styles \u2014 sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
+  "description": "AdaptTable Angular tables with ngx-bootstrap controls and isolated Bootstrap styles — sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
   "keywords": [
     "angular",
     "data-table",
@@ -96,10 +96,6 @@
     "./extra-rows": {
       "types": "./dist/types/adapttable-ngx-bootstrap-extra-rows.d.ts",
       "default": "./dist/fesm2022/adapttable-ngx-bootstrap-extra-rows.mjs"
-    },
-    "./features": {
-      "types": "./dist/types/adapttable-ngx-bootstrap-features.d.ts",
-      "default": "./dist/fesm2022/adapttable-ngx-bootstrap-features.mjs"
     },
     "./find-in-table": {
       "types": "./dist/types/adapttable-ngx-bootstrap-find-in-table.d.ts",

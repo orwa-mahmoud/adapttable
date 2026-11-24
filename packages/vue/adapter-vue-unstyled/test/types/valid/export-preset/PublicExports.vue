@@ -12,10 +12,8 @@ import {
   type ExportXlsxOptions,
   xlsxWriter,
 } from "@adapttable/vue-unstyled/export-xlsx";
-import {
-  exportPdf as barrelPdf,
-  exportXlsx as barrelXlsx,
-} from "@adapttable/vue-unstyled/features";
+import { exportPdf as barrelPdf } from "@adapttable/vue-unstyled/export-pdf";
+import { exportXlsx as barrelXlsx } from "@adapttable/vue-unstyled/export-xlsx";
 import {
   type StandardFeatureOptions,
   standardFeatures,

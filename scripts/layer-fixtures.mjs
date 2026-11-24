@@ -52,25 +52,8 @@ ${probes.join("\n\n")}
 }
 
 /** Kit factories, a custom feature, and every registration the host offers. */
-export const SENIOR = String.raw`import type {
-  Aggregator,
-  Command,
-  ContextMenuItem,
-  CustomCellEditorRender,
-  ExportWriter,
-  FilterTypeSpec,
-  SidePanelEntry,
-  TableFeature,
-  TableFeatureHost,
-} from "@adapttable/unstyled/features";
-import {
-  cellNavigation,
-  editing,
-  grouping,
-  rowReorder,
-  savedViews,
-  virtualize,
-} from "@adapttable/unstyled/features";
+export const SENIOR = String.raw`import type { Aggregator, Command, ContextMenuItem, CustomCellEditorRender, ExportWriter, FilterTypeSpec, SidePanelEntry, TableFeature, TableFeatureHost } from "@adapttable/react/features";
+import { cellNavigation, editing, grouping, rowReorder, savedViews, virtualize } from "@adapttable/react/features";
 import { columnMenu } from "@adapttable/unstyled/column-menu";
 import { pivot } from "@adapttable/core/pivot";
 import type { ColumnDef } from "@adapttable/unstyled";

@@ -6,7 +6,6 @@ export default defineConfig({
     "src/column-selection.ts",
     "src/columns.ts",
     "src/index.ts",
-    "src/features.ts",
     "src/saved-views.ts",
     "src/side-panel.ts",
     "src/grouping-panel.ts",

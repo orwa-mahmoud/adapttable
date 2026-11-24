@@ -67,6 +67,26 @@ describe("migrateV4Source", () => {
     ).toBe('import { sameItems as sameRows } from "@adapttable/core/binding";');
   });
 
+  it("moves a kit feature barrel onto the entry that owns each name", () => {
+    expect(
+      migrateV4Source(
+        'import { editing, grouping } from "@adapttable/unstyled/features";'
+      ).code
+    ).toBe('import { editing, grouping } from "@adapttable/react/features";');
+    expect(
+      migrateV4Source(
+        'import { grouping } from "@adapttable/vue-unstyled/features";'
+      ).code
+    ).toBe('import { grouping } from "@adapttable/vue-unstyled/grouping";');
+    expect(
+      migrateV4Source(
+        'import { selection } from "@adapttable/angular-material/features";'
+      ).code
+    ).toBe(
+      'import { selection } from "@adapttable/angular-material/selection";'
+    );
+  });
+
   it("redirects a Vue kit's CSV entry and moves Angular's export forwards", () => {
     expect(
       migrateV4Source(

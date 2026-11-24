@@ -3,7 +3,7 @@
  * and no styles of its own, over `@adapttable/angular`.
  *
  * Feature factories live on secondary entries (`bulk-actions`, `filters`,
- * …); import them from those paths or from `@adapttable/taiga-ui/features`.
+ * …); import them from those paths.
  *
  * @packageDocumentation
  */

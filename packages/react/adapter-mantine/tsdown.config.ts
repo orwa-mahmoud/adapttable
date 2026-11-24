@@ -41,7 +41,6 @@ export default defineConfig({
     "src/row-actions.ts",
     "src/column-selection.tsx",
     "src/index.ts",
-    "src/features.ts",
     "src/row-reorder.tsx",
     "src/grouping.tsx",
     "src/grouping-panel.tsx",

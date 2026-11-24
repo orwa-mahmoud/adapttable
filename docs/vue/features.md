@@ -10,9 +10,8 @@ for installation and UI-kit providers.
 ## Choose an entry point
 
 The base `@adapttable/vue-unstyled` entry exports `DataTable` and its types.
-Pass a `readonly ComposedFeature<TRow>[]` through `features`. The optional
-`@adapttable/vue-unstyled/features` barrel collects the factories below; use
-individual entries to state which behaviors a table needs.
+Pass a `readonly ComposedFeature<TRow>[]` through `features`. Import each
+factory from its own entry, which is what states which behaviors a table needs.
 
 | Native import suffix   | Exports and purpose                                                                                                                                          |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -96,7 +95,8 @@ second feature or require a migration of saved state.
 ### Optional helpers differ by adapter
 
 Every Vue kit offers a `/features` barrel for combined native factory imports.
-For example, `import { editing, filters } from "@adapttable/element-plus/features"`
+For example, `import { editing } from "@adapttable/element-plus/editing";
+import { filters } from "@adapttable/element-plus/filters";`
 uses the same Element Plus controls and factory signatures as the individual
 entries. The barrel is optional and is never imported by the base table.
 

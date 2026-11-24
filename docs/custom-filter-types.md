@@ -172,7 +172,7 @@ spec, so a feature changes one member without forking the rest:
 ```tsx
 import { filterLabel, getPath, RANGE_SUFFIXES } from "@adapttable/core";
 import { type FilterTypeSpec } from "@adapttable/mantine";
-import type { TableFeature } from "@adapttable/mantine/features";
+import type { TableFeature } from "@adapttable/react/features";
 import { SegmentedControl } from "@mantine/core";
 
 const minKey = (key: string) => key + RANGE_SUFFIXES.numberRange.start;

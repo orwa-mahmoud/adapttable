@@ -60,16 +60,6 @@
         "default": "./dist/index.cjs"
       }
     },
-    "./features": {
-      "import": {
-        "types": "./dist/features.d.ts",
-        "default": "./dist/features.js"
-      },
-      "require": {
-        "types": "./dist/features.d.cts",
-        "default": "./dist/features.cjs"
-      }
-    },
     "./grouping": {
       "import": {
         "types": "./dist/grouping.d.ts",

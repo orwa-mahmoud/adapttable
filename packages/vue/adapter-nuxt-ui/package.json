@@ -500,16 +500,6 @@
         "types": "./dist/column-selection.d.cts",
         "default": "./dist/column-selection.cjs"
       }
-    },
-    "./features": {
-      "import": {
-        "types": "./dist/features.d.ts",
-        "default": "./dist/features.js"
-      },
-      "require": {
-        "types": "./dist/features.d.cts",
-        "default": "./dist/features.cjs"
-      }
     }
   },
   "dependencies": {

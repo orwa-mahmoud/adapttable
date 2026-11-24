@@ -8,7 +8,6 @@
     "paths": {
       "@adapttable/vue-unstyled": ["./src/index.ts"],
       "@adapttable/vue-unstyled/assistant": ["./src/assistant.ts"],
-      "@adapttable/vue-unstyled/features": ["./src/features.ts"],
       "@adapttable/vue-unstyled/grouping": ["./src/grouping.ts"],
       "@adapttable/vue-unstyled/tree": ["./src/tree.ts"],
       "@adapttable/vue-unstyled/row-detail": ["./src/row-detail.ts"],
@@ -41,6 +40,7 @@
       "@adapttable/vue-unstyled/column-selection": [
         "./src/column-selection.ts"
       ],
+      "@adapttable/vue-unstyled/selection": ["./src/selection.ts"],
       "@adapttable/vue-unstyled/selection-stats": ["./src/selection-stats.ts"],
       "@adapttable/vue-unstyled/bulk-actions": ["./src/bulk-actions.ts"],
       "@adapttable/vue-unstyled/command-palette": ["./src/command-palette.ts"],

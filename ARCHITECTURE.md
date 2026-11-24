@@ -390,9 +390,9 @@ share one subpath: the six editing features are all on
 `@adapttable/<kit>/editing` (`batchEditing` also has its own `/batch-editing`),
 and `filters` and `filterTypes` are both on `@adapttable/<kit>/filters`.
 
-`@adapttable/<kit>/features` forwards the headless `@adapttable/react/features`
-surface as it is. A factory that draws kit UI renders no controls when imported
-from there, so each one comes from its own `@adapttable/<kit>/<subpath>`.
+Each factory comes from its own `@adapttable/<kit>/<subpath>`. A kit does not
+publish a second `/features` barrel. Headless factories that a React kit does
+not wrap live on `@adapttable/react/features`.
 
 ### Static imports
 

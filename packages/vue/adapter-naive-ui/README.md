@@ -13,14 +13,14 @@ import { DataTable } from "@adapttable/naive-ui";
 import "@adapttable/naive-ui/styles.css";
 ```
 
-## Combined feature imports
+## Feature imports
 
-Use `@adapttable/naive-ui/features` to compose the kit's native factories from
-one optional entry. Individual feature subpaths remain available; the base
-`DataTable` import does not load this barrel.
+Import each factory from its own entry. The base `DataTable` import does not
+load a feature.
 
 ```ts
-import { editing, filters } from "@adapttable/naive-ui/features";
+import { editing } from "@adapttable/naive-ui/editing";
+import { filters } from "@adapttable/naive-ui/filters";
 ```
 
 The factories retain their individual signatures, native controls and

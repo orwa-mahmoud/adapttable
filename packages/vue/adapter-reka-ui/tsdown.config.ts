@@ -52,7 +52,6 @@ export default defineConfig({
     "src/row-reorder.ts",
     "src/pivot.ts",
     "src/assistant.ts",
-    "src/features.ts",
     "src/preset.ts",
   ],
   platform: "neutral",

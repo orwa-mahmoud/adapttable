@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/angular-material",
   "version": "0.5.0",
-  "description": "AdaptTable's Angular DataTable rendered with Angular Material components \u2014 sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
+  "description": "AdaptTable's Angular DataTable rendered with Angular Material components — sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
   "keywords": [
     "angular",
     "data-table",
@@ -96,10 +96,6 @@
     "./extra-rows": {
       "types": "./dist/types/adapttable-angular-material-extra-rows.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-material-extra-rows.mjs"
-    },
-    "./features": {
-      "types": "./dist/types/adapttable-angular-material-features.d.ts",
-      "default": "./dist/fesm2022/adapttable-angular-material-features.mjs"
     },
     "./find-in-table": {
       "types": "./dist/types/adapttable-angular-material-find-in-table.d.ts",

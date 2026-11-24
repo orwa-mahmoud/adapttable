@@ -2,7 +2,7 @@
  * `@adapttable/angular-aria` — the Angular table drawn with Angular Aria behavior primitives and adapter-owned native controls, over `@adapttable/angular`.
  *
  * Feature factories live on secondary entries (`bulk-actions`, `filters`,
- * …); import them from those paths or from `@adapttable/angular-aria/features`.
+ * …); import them from those paths.
  *
  * @packageDocumentation
  */

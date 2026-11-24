@@ -525,16 +525,6 @@
         "types": "./dist/side-panel.d.cts",
         "default": "./dist/side-panel.cjs"
       }
-    },
-    "./features": {
-      "import": {
-        "types": "./dist/features.d.ts",
-        "default": "./dist/features.js"
-      },
-      "require": {
-        "types": "./dist/features.d.cts",
-        "default": "./dist/features.cjs"
-      }
     }
   },
   "repository": {

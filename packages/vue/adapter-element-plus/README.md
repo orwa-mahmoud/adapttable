@@ -44,14 +44,14 @@ const rowKey = (row: Person) => row.id;
 </template>
 ```
 
-## Combined feature imports
+## Feature imports
 
-Use `@adapttable/element-plus/features` to compose the kit's native factories from
-one optional entry. Individual feature subpaths remain available; the base
-`DataTable` import does not load this barrel.
+Import each factory from its own entry. The base `DataTable` import does not
+load a feature.
 
 ```ts
-import { editing, filters } from "@adapttable/element-plus/features";
+import { editing } from "@adapttable/element-plus/editing";
+import { filters } from "@adapttable/element-plus/filters";
 ```
 
 The factories retain their individual signatures, native controls and

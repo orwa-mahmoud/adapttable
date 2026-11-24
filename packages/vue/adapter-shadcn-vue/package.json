@@ -552,16 +552,6 @@
         "default": "./dist/assistant.cjs"
       }
     },
-    "./features": {
-      "import": {
-        "types": "./dist/features.d.ts",
-        "default": "./dist/features.js"
-      },
-      "require": {
-        "types": "./dist/features.d.cts",
-        "default": "./dist/features.cjs"
-      }
-    },
     "./preset": {
       "import": {
         "types": "./dist/preset.d.ts",

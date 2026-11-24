@@ -532,16 +532,6 @@
         "types": "./dist/columns.d.cts",
         "default": "./dist/columns.cjs"
       }
-    },
-    "./features": {
-      "import": {
-        "types": "./dist/features.d.ts",
-        "default": "./dist/features.js"
-      },
-      "require": {
-        "types": "./dist/features.d.cts",
-        "default": "./dist/features.cjs"
-      }
     }
   },
   "repository": {

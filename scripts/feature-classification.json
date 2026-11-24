@@ -545,6 +545,26 @@
       "standardPreset": false,
       "note": "Checkbox column rendered with the kit's own Checkbox.",
       "requiresConfig": false
+    },
+    "selection": {
+      "id": "selection",
+      "replacesProps": [
+        "selectable",
+        "selectedIds",
+        "defaultSelectedIds",
+        "onSelectionChange",
+        "selectionGetId"
+      ],
+      "classification": "headless",
+      "subpath": "selection",
+      "implementation": [
+        "react/src/features/factories.ts",
+        "core/src/features/coreFeatures.ts"
+      ],
+      "adapterComponents": [],
+      "standardPreset": false,
+      "note": "Turns row selection on. The host holds the ids, or the table does. Bulk actions, column selection and selection stats select rows as part of what they do.",
+      "requiresConfig": false
     }
   },
   "frameworkBoundary": {

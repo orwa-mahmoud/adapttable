@@ -233,7 +233,7 @@ registers and nothing else: it runs during render, possibly for a render the
 framework discards. What outlives a render goes in `mount`.
 
 ```tsx
-import type { TableFeature } from "@adapttable/mantine/features";
+import type { TableFeature } from "@adapttable/react/features";
 
 const currencyFilter: TableFeature = {
   id: "currency-filter",

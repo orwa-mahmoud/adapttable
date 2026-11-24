@@ -353,7 +353,7 @@ export const VUE_TYPE_EXPECTATIONS = {
     ],
     "InvalidSelectionEvent.vue": [
       {
-        code: 2322,
+        code: 2769,
         message: /Type '\(ids: number\[\]\) => number' is not assignable/,
       },
     ],
@@ -365,13 +365,9 @@ export const VUE_TYPE_EXPECTATIONS = {
     ],
     "InvalidSelection.vue": [
       {
-        code: 2322,
+        code: 2769,
         message:
           /Type 'number\[\]' is not assignable to type 'readonly string\[\]'/,
-      },
-      {
-        code: 2322,
-        message: /Type 'string\[\]' is not assignable to type 'number\[\]'/,
       },
     ],
     "InvalidSlot.vue": [

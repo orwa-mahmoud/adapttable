@@ -116,9 +116,8 @@ A template ref exposes `DataTableHandle<Person>` with `focus()`, `runtime` and
 Feature composition adds the optional behaviors below to the native global
 search box, sorting, pagination, row selection and responsive mobile cards.
 Controlled column management exposes order, visibility, width and pin state.
-Import factories from their named entries, or collect them from
-`@adapttable/vue-unstyled/features`. The base entry does not import the feature
-barrel. Models, validation, data coordination and persistence stay in the Vue
+Import each factory from its own entry. The base entry does not import a
+feature. Models, validation, data coordination and persistence stay in the Vue
 binding and shared core; these contributions provide native controls.
 
 - `/filters`: `filters(defs, { mode: "popover" | "drawer", tree: true })`,

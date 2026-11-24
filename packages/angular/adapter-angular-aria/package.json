@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/angular-aria",
   "version": "0.5.0",
-  "description": "Angular Aria accessible composite controls and adapter-owned styling for AdaptTable \u2014 sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
+  "description": "Angular Aria accessible composite controls and adapter-owned styling for AdaptTable — sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
   "keywords": [
     "angular",
     "angular-aria",
@@ -96,10 +96,6 @@
     "./extra-rows": {
       "types": "./dist/types/adapttable-angular-aria-extra-rows.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-aria-extra-rows.mjs"
-    },
-    "./features": {
-      "types": "./dist/types/adapttable-angular-aria-features.d.ts",
-      "default": "./dist/fesm2022/adapttable-angular-aria-features.mjs"
     },
     "./find-in-table": {
       "types": "./dist/types/adapttable-angular-aria-find-in-table.d.ts",

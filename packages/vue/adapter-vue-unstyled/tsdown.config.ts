@@ -5,7 +5,6 @@ export default defineConfig({
   entry: [
     "src/index.ts",
     "src/assistant.ts",
-    "src/features.ts",
     "src/grouping.ts",
     "src/tree.ts",
     "src/row-detail.ts",

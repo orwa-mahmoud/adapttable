@@ -3,7 +3,7 @@
  * components over the headless `@adapttable/angular` binding.
  *
  * Feature factories live on secondary entries (`bulk-actions`, `filters`,
- * …); import them from those paths or from `@adapttable/ng-zorro/features`.
+ * …); import them from those paths.
  *
  * @packageDocumentation
  */

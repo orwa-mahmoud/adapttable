@@ -4,7 +4,6 @@ import Vue from "unplugin-vue/rolldown";
 export default defineConfig({
   entry: [
     "src/index.ts",
-    "src/features.ts",
     "src/cell-span.ts",
     "src/density.ts",
     "src/fullscreen.ts",

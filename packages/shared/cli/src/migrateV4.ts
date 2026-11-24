@@ -6,6 +6,10 @@ import {
   reportPatterns,
   rewriteImports,
 } from "./importMigration";
+import {
+  KIT_FEATURE_BARREL_REDIRECTS,
+  KIT_FEATURE_BARREL_ROUTES,
+} from "./kitFeatureBarrelMoves";
 import { CORE_MAIN_MOVES, REACT_MAIN_TO_ADAPTER } from "./migrateV4Moves";
 
 /** Each bundled language's entry under `@adapttable/i18n/locales/`. */
@@ -60,6 +64,7 @@ const V4_MOVES: ImportMoves = {
         `@adapttable/${kit}/export`,
       ])
     ),
+    ...KIT_FEATURE_BARREL_REDIRECTS,
   },
   routes: {
     "@adapttable/core": Object.fromEntries(
@@ -84,6 +89,7 @@ const V4_MOVES: ImportMoves = {
     "@adapttable/nuxt-ui/cell-navigation": {
       columnSelectionCheckbox: "@adapttable/nuxt-ui/column-selection",
     },
+    ...KIT_FEATURE_BARREL_ROUTES,
     "@adapttable/i18n": {
       getLabels: "@adapttable/i18n/catalog",
       locales: "@adapttable/i18n/catalog",

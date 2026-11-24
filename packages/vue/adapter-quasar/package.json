@@ -519,16 +519,6 @@
         "types": "./dist/nested-table.d.cts",
         "default": "./dist/nested-table.cjs"
       }
-    },
-    "./features": {
-      "import": {
-        "types": "./dist/features.d.ts",
-        "default": "./dist/features.js"
-      },
-      "require": {
-        "types": "./dist/features.d.cts",
-        "default": "./dist/features.cjs"
-      }
     }
   },
   "repository": {

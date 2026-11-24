@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/spartan",
   "version": "0.5.0",
-  "description": "AdaptTable's Angular DataTable rendered with Spartan Brain and package-owned Helm components \u2014 sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
+  "description": "AdaptTable's Angular DataTable rendered with Spartan Brain and package-owned Helm components — sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
   "keywords": [
     "angular",
     "data-table",
@@ -97,10 +97,6 @@
     "./extra-rows": {
       "types": "./dist/types/adapttable-spartan-extra-rows.d.ts",
       "default": "./dist/fesm2022/adapttable-spartan-extra-rows.mjs"
-    },
-    "./features": {
-      "types": "./dist/types/adapttable-spartan-features.d.ts",
-      "default": "./dist/fesm2022/adapttable-spartan-features.mjs"
     },
     "./find-in-table": {
       "types": "./dist/types/adapttable-spartan-find-in-table.d.ts",

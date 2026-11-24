@@ -15,7 +15,6 @@ export default defineConfig({
     "src/rows.ts",
 
     "src/index.ts",
-    "src/features.ts",
     "src/tree.ts",
     "src/row-detail.ts",
     "src/row-actions.ts",

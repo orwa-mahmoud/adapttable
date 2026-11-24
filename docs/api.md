@@ -4492,7 +4492,7 @@ opens `AdaptNativeCellEditor`,
 separator and full-width rows on the desktop body and the phone cards) and
 `rowAppearance` (`/row-appearance`; a class, style and height on each row
 and card) — each importable from its own
-subpath (or from `@adapttable/angular-unstyled/features`). `standardFeatures`
+subpath. `standardFeatures`
 (`@adapttable/angular-unstyled/preset`, `StandardFeatureOptions`) assembles
 the zero-configuration set from core's `standardFeatureList`. The families are
 `editingFamily` on `/editing`, `filteringFamily` on `/filtering` and

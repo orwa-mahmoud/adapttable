@@ -111,7 +111,7 @@ registration surface is the same `TableFeature` as the factories: one array,
 one host, lifecycle via `onDispose` or a function returned from `setup`.
 
 ```tsx
-import type { TableFeature } from "@adapttable/mantine/features";
+import type { TableFeature } from "@adapttable/react/features";
 
 const currencyFilter: TableFeature = {
   id: "currency-filter",
