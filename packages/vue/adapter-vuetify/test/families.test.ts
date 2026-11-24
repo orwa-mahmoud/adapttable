@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createApp } from "vue";
+import { createApp, h } from "vue";
 import { createVuetify } from "vuetify";
 
 import { columnLayoutFamily } from "../src/column-layout";
@@ -28,7 +28,7 @@ describe("feature families", () => {
     document.body.append(host);
     const app = createApp({
       setup: () => () =>
-        checklistFilterWidget.render({
+        h(checklistFilterWidget.render as never, {
           def: {
             key: "team",
             type: "checklist",
@@ -40,8 +40,8 @@ describe("feature families", () => {
             setValue: () => undefined,
             filters: {},
             extra: {},
-          } as never,
-          labels: {} as never,
+          },
+          labels: {},
         }),
     }).use(createVuetify({ ssr: true }));
     app.mount(host);
