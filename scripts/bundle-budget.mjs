@@ -56,6 +56,11 @@ import {
   PLAIN_ADAPTER_CEILING_KB,
   plantedLeakFixture,
 } from "./consumer-fixtures.mjs";
+import {
+  ESBUILD_CEILINGS,
+  esbuildMarkerProblems,
+  measureEsbuild,
+} from "./esbuild-budget.mjs";
 import { packageRel } from "./packages.mjs";
 import {
   declarationProblems,
@@ -496,6 +501,14 @@ export async function measure(fixture, dir, install, angular) {
   const application = compiled && (await bundled([]));
   const buildMs = Math.round(performance.now() - started);
 
+  const esbuildEntry = compiled?.entry ?? entry;
+  const esbuild = ESBUILD_CEILINGS[fixture.name]
+    ? await measureEsbuild(
+        esbuildEntry,
+        externals,
+        compiled && angular.transformer.plugin.transform
+      )
+    : undefined;
   const accounted = accountOutputs(min.output, readable.output);
   const modules = packedModules(recorder.ids, dir);
   const app =
@@ -515,6 +528,7 @@ export async function measure(fixture, dir, install, angular) {
     ].sort(),
     buildMs,
     ...inspectOutputs(fixture, readable.output),
+    ...(esbuild && { esbuild }),
   };
 }
 
@@ -624,6 +638,25 @@ function headroomText(sizeKB, ceilingKB) {
     : `OVER by ${(-headroom).toFixed(1)}`;
 }
 
+function logEsbuild(fixture, row) {
+  if (!row.esbuild) return;
+  const ceiling = ESBUILD_CEILINGS[fixture.name];
+  console.log(
+    `  └ esbuild initial ${kib(row.esbuild.initialGzip).toFixed(1)} / ${ceiling.initialKB} KiB` +
+      `   total ${kib(row.esbuild.totalGzip).toFixed(1)} / ${ceiling.totalKB} KiB`
+  );
+  if (row.esbuildMarkers?.leaked.length) {
+    console.log(
+      `  └ esbuild reached the base import but should not have: ${row.esbuildMarkers.leaked.join(", ")}`
+    );
+  }
+  if (row.esbuildMarkers?.missing.length) {
+    console.log(
+      `  └ esbuild feature marker missing: ${row.esbuildMarkers.missing.join(", ")}`
+    );
+  }
+}
+
 function logRow(fixture, row) {
   const initialKB = kib(row.initial.gzipBytes);
   const totalKB = kib(row.total.gzipBytes);
@@ -653,6 +686,7 @@ function logRow(fixture, row) {
       `  └ item-1 ${fixture.item1BaselineKB} KiB → ${cut}% smaller · ${vs80}`
     );
   }
+  logEsbuild(fixture, row);
   if (row.leaked.length) {
     console.log(
       `  └ reached the base import but should not have: ${row.leaked.join(", ")}`
@@ -857,12 +891,23 @@ async function measuredRow(fixture, install, angular) {
   const problems = resolutionProblems(fixture, measured);
   const appOver =
     measured.application && kib(measured.application.gzipBytes) > fixture.appKB;
+  const esbuildCeiling = ESBUILD_CEILINGS[fixture.name];
+  const esbuildMarkers = measured.esbuild
+    ? esbuildMarkerProblems(fixture, measured.esbuild)
+    : undefined;
+  const esbuildOver =
+    measured.esbuild &&
+    (kib(measured.esbuild.initialGzip) > esbuildCeiling.initialKB ||
+      kib(measured.esbuild.totalGzip) > esbuildCeiling.totalKB);
   const ok =
     kib(measured.initial.gzipBytes) <= ceilings.initialKB &&
     kib(measured.total.gzipBytes) <= ceilings.totalKB &&
     !appOver &&
+    !esbuildOver &&
     measured.leaked.length === 0 &&
     measured.missing.length === 0 &&
+    (esbuildMarkers?.leaked.length ?? 0) === 0 &&
+    (esbuildMarkers?.missing.length ?? 0) === 0 &&
     problems.length === 0;
   return {
     id: fixture.id,
@@ -873,6 +918,8 @@ async function measuredRow(fixture, install, angular) {
     ...ceilings,
     resolutionProblems: problems,
     ...(appOver && { appOver: true }),
+    ...(esbuildOver && { esbuildOver: true }),
+    ...(esbuildMarkers && { esbuildMarkers }),
     ok,
   };
 }

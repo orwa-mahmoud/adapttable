@@ -9,14 +9,14 @@
  */
 import {
   COMMAND_PALETTE_CONTRAST_RULES,
-  type ContrastRules,
   EDIT_CONTRAST_RULES,
   FIND_CONTRAST_RULES,
   GROUPING_PANEL_CONTRAST_RULES,
   SAVED_VIEWS_CONTRAST_RULES,
   SELECTION_CONTRAST_RULES,
   SIDE_PANEL_CONTRAST_RULES,
-} from "../a11y/forcedColors";
+} from "../a11y/featureContrast";
+import type { ContrastRules } from "../a11y/forcedColors";
 import type { Command } from "../actions/commandRegistry";
 import type {
   ContextMenuItem,

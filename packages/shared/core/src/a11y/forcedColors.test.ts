@@ -6,12 +6,14 @@ import {
   coreFindInTable,
 } from "../features/coreFeatures";
 import {
-  BASE_CONTRAST_RULES,
-  type ContrastRules,
   EDIT_CONTRAST_RULES,
-  ensureForcedColorsStyles,
   FIND_CONTRAST_RULES,
   SELECTION_CONTRAST_RULES,
+} from "./featureContrast";
+import {
+  BASE_CONTRAST_RULES,
+  type ContrastRules,
+  ensureForcedColorsStyles,
 } from "./forcedColors";
 
 const SHEET_ID = "adapttable-forced-colors";

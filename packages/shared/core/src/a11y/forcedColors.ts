@@ -35,10 +35,10 @@ export interface ContrastRules {
 }
 
 /** Ranks, in the order the rules must cascade. */
-const RANK = { selection: 1, find: 2, edit: 3, panel: 4, base: 9 } as const;
+export const RANK = { selection: 1, find: 2, edit: 3, panel: 4, base: 9 } as const;
 
 /** Forced-colours frames for the named parts. */
-function framedParts(parts: readonly string[], extra = ""): string {
+export function framedParts(parts: readonly string[], extra = ""): string {
   return `@media (forced-colors: active) {
   ${[...parts.map((part) => `[data-adapttable-part="${part}"]`), extra]
     .filter(Boolean)
@@ -50,7 +50,7 @@ function framedParts(parts: readonly string[], extra = ""): string {
 }
 
 /* @__NO_SIDE_EFFECTS__ */
-function panelRules(...parts: readonly string[]): ContrastRules {
+export function panelRules(...parts: readonly string[]): ContrastRules {
   return { rank: RANK.panel, css: framedParts(parts) };
 }
 
@@ -106,102 +106,6 @@ ${
   }
 }`,
 };
-
-/**
- * The selected range of a keyboard grid.
- *
- * @public
- */
-export const SELECTION_CONTRAST_RULES: ContrastRules = {
-  rank: RANK.selection,
-  css: `@media (forced-colors: active) {
-  [data-cell-selected] {
-    outline: 2px solid Highlight;
-    outline-offset: -2px;
-  }
-}`,
-};
-
-/**
- * Find hits and the find bar.
- *
- * @public
- */
-export const FIND_CONTRAST_RULES: ContrastRules = {
-  rank: RANK.find,
-  css: `${/* @__PURE__ */ framedParts(["find-bar"])}
-@media (forced-colors: active) {
-  [data-cell-match] {
-    outline: 2px dashed CanvasText;
-    outline-offset: -2px;
-  }
-  [data-cell-match-current] {
-    outline: 2px solid CanvasText;
-    outline-offset: -2px;
-  }
-}`,
-};
-
-/**
- * Dirty and changed cells.
- *
- * @public
- */
-export const EDIT_CONTRAST_RULES: ContrastRules = {
-  rank: RANK.edit,
-  css: `[data-dirty]:not([data-cell-match]):not([data-cell-match-current]) {
-  outline: 2px dotted currentColor;
-  outline-offset: -2px;
-}
-[data-adapttable-part="batch-edit-cell"] {
-  display: block;
-}
-[data-changed]:not([data-cell-match]):not([data-cell-match-current]) {
-  outline: 2px dotted currentColor;
-  outline-offset: 2px;
-}
-
-@media (forced-colors: active) {
-  [data-dirty],
-  [data-changed] {
-    outline: 2px dotted CanvasText;
-    outline-offset: -2px;
-    box-shadow: none !important;
-  }
-}`,
-};
-
-/**
- * The saved-views panel's frame.
- *
- * @public
- */
-export const SAVED_VIEWS_CONTRAST_RULES: ContrastRules =
-  /* @__PURE__ */ panelRules("saved-views-panel");
-
-/**
- * The side panel's frame.
- *
- * @public
- */
-export const SIDE_PANEL_CONTRAST_RULES: ContrastRules =
-  /* @__PURE__ */ panelRules("side-panel-header", "side-panel-body");
-
-/**
- * The command palette's frame.
- *
- * @public
- */
-export const COMMAND_PALETTE_CONTRAST_RULES: ContrastRules =
-  /* @__PURE__ */ panelRules("command-list");
-
-/**
- * The grouping panel's frame.
- *
- * @public
- */
-export const GROUPING_PANEL_CONTRAST_RULES: ContrastRules =
-  /* @__PURE__ */ panelRules("grouping-panel");
 
 /** The blocks each page's stylesheet already holds, in rank order. */
 const MOUNTED = /* @__PURE__ */ new WeakMap<Element, ContrastRules[]>();
