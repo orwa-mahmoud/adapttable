@@ -59,20 +59,20 @@ describe("column menu feature", () => {
     const drawn = vi.fn();
     expect(
       render({
-        presentation: {} as never,
+        presentation: {},
         density: "regular",
         onDensityChange: () => undefined,
         read: () => undefined,
         draw: drawn,
-      })
+      } as never)
     ).toBeNull();
     const node = render({
-      presentation: { dir: "ltr" } as never,
+      presentation: { dir: "ltr" },
       density: "regular",
       onDensityChange: () => undefined,
-      read: (key) => shell.state.get(key).value,
+      read: (key: never) => shell.state.get(key).value,
       draw: drawn,
-    });
+    } as never);
     expect(drawn).toHaveBeenCalled();
     const model = drawn.mock.calls[0]?.[1] as {
       onAutoSize: () => void;
