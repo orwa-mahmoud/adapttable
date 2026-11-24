@@ -14,7 +14,6 @@ vi.mock("./providers", async () => {
 });
 
 import { AGENT_APPROVAL_STATE } from "../editing/AgentApprovalChrome";
-import type { KitRegionProps } from "../kit/rootRegion";
 import {
   COMMAND_PALETTE_RENDER,
   FILTER_DRAWER_RENDER,
@@ -34,14 +33,10 @@ import {
 import { FeatureStateScope } from "./featureState";
 import { EDITING_STATE, EXPORT_STATE, FILTER_CHIPS_STATE } from "./stateKeys";
 
-interface Row {
-  id: string;
-}
-
 function region(
   props: Record<string, unknown> = {},
   view: Record<string, unknown> = {}
-): KitRegionProps<Row> {
+): never {
   return {
     view: {
       chrome: {
@@ -66,7 +61,7 @@ function region(
       ...view,
     },
     props: { dir: "ltr", locale: "en", ...props },
-  } as KitRegionProps<Row>;
+  } as never;
 }
 
 function draw(node: ReactNode) {
