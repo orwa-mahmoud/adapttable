@@ -240,7 +240,7 @@ export function approvalProposalText(
 export interface ApprovalArgumentPair {
   /** The host's key, spaced out of camelCase. Empty when there is one line. */
   readonly name: string;
-  /** {@link approvalValueText}, or `—` when the argument is absent. */
+  /** `approvalValueText`, or `—` when the argument is absent. */
   readonly value: string;
 }
 

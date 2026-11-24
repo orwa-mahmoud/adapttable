@@ -36,9 +36,7 @@ export {
 } from "./approval/agentApprovalContract";
 export {
   type ApprovalArgumentPair,
-  approvalArgumentPairs,
   approvalProposalText,
-  approvalValueText,
 } from "./approval/approvalReview";
 export {
   assistantActionsName,
@@ -2150,14 +2148,10 @@ export type {
   ResolvedAggregatable,
 } from "./aggregate/aggregatable";
 export type { GroupAggregatesMapper } from "./aggregate/aggregate";
-export { aggregate, declaredAggregates } from "./aggregate/aggregate";
 export type { AggregationModelInput } from "./aggregate/aggregationModel";
-export { computedAggregateKeys } from "./aggregate/computedAggregateKeys";
-export { autoSizeColumns } from "./columns/autoSizeColumns";
 export type { ColumnDragRowAttrs } from "./columns/columnReorderModel";
 export type { ColumnResizeHandleOptions } from "./columns/columnResize";
 export type { TableLayout } from "./columns/visibleColumns";
-export { visibleColumns } from "./columns/visibleColumns";
 export type { CapabilitySource } from "./contracts/source";
 export type {
   BatchEditSnapshot,
@@ -2242,11 +2236,8 @@ export type {
   RowEditStore,
   RowEditStoreOptions,
 } from "./editing/rowEditing";
-export { cellValue } from "./engine/cellValue";
 export type { ExportViewEntry } from "./export/exportWriter";
 export type { ChecklistSource } from "./filters/checklistModel";
-export { filterLabel } from "./filters/filterDefs";
-export { conditionToExtra } from "./filters/filterTree";
 export type {
   BooleanChoice,
   BooleanFieldWidget,
@@ -2318,14 +2309,12 @@ export type {
   RowTreeMoveHandler,
 } from "./rows/rowMove";
 export type { RowReorderDecision } from "./rows/rowReorderPolicy";
-export { sourceCapabilities } from "./source/capabilities";
 export type { InfiniteQueryLike, PageSelector } from "./source/dataTier";
 export type { Slot, TableErrorState } from "./state/errorState";
 export type { LayoutStorage } from "./state/tableStores";
 export type { TableViewState, TableViewStateConfig } from "./state/viewState";
 export type { StreamSocket, StreamSocketEvent } from "./stream/connect";
 export type { LazyChildrenOptions } from "./tree/lazyChildren";
-export { treeColumnKey } from "./tree/treeRows";
 export type {
   PaginatedResponse,
   PaginationMode,

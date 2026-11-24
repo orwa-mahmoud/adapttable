@@ -11691,14 +11691,6 @@
       "behavior": ""
     },
     {
-      "export": "aggregate",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "AGGREGATE_NAMES",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -11963,14 +11955,6 @@
       "behavior": ""
     },
     {
-      "export": "approvalArgumentPairs",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "ApprovalPresentation",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -11991,14 +11975,6 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "approvalValueText",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -12332,14 +12308,6 @@
     },
     {
       "export": "attachIncrementalView",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "autoSizeColumns",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -13151,14 +13119,6 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "cellValue",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -14611,23 +14571,7 @@
       "behavior": ""
     },
     {
-      "export": "computedAggregateKeys",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "computePagination",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "conditionToExtra",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -15855,14 +15799,6 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "declaredAggregates",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -18044,14 +17980,6 @@
     },
     {
       "export": "filteringFamilyList",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "filterLabel",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -24587,14 +24515,6 @@
       "behavior": ""
     },
     {
-      "export": "sourceCapabilities",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "sourceViewKey",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -25635,14 +25555,6 @@
       "behavior": ""
     },
     {
-      "export": "treeColumnKey",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "TreeContribution",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -26007,14 +25919,6 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "visibleColumns",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },

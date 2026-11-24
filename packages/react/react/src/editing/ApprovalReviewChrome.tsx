@@ -10,12 +10,12 @@
  * Structure and part names live here; every visible control is a kit slot.
  */
 import {
+  approvalArgumentPairs,
   type ApprovalReview,
   type ApprovalReviewItem,
   type TableLabels,
 } from "@adapttable/core";
 import {
-  approvalArgumentPairs,
   approvalProposalText,
   type ApprovalReviewSlots as NeutralApprovalReviewSlots,
   ASSISTANT_LABELS,

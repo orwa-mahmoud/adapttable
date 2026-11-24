@@ -67,6 +67,16 @@ describe("migrateV4Source", () => {
     ).toBe('import { sameItems as sameRows } from "@adapttable/core/binding";');
   });
 
+  it("sends a main-entry value off the binding entry", () => {
+    expect(
+      migrateV4Source(
+        'import { visibleColumns, type TableLayout } from "@adapttable/core/binding";'
+      ).code
+    ).toBe(
+      'import { type TableLayout } from "@adapttable/core/binding";\nimport { visibleColumns } from "@adapttable/core";'
+    );
+  });
+
   it("gives the two composition helpers one home each", () => {
     expect(
       migrateV4Source(

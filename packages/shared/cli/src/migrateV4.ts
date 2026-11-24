@@ -74,6 +74,23 @@ const V4_MOVES: ImportMoves = {
     ),
     "@adapttable/core/binding": {
       sameRows: { to: "@adapttable/core/binding", name: "sameItems" },
+      ...everyTo(
+        [
+          "aggregate",
+          "approvalArgumentPairs",
+          "approvalValueText",
+          "autoSizeColumns",
+          "cellValue",
+          "computedAggregateKeys",
+          "conditionToExtra",
+          "declaredAggregates",
+          "filterLabel",
+          "sourceCapabilities",
+          "treeColumnKey",
+          "visibleColumns",
+        ],
+        "@adapttable/core"
+      ),
     },
     "@adapttable/react": everyTo(
       REACT_MAIN_TO_ADAPTER,

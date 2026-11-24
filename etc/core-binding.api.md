@@ -206,9 +206,6 @@ export interface AggregatableConfig<TValue = AggregateOrderedValue> {
 }
 
 // @public
-export function aggregate<TRow>(spec: AggregateSpec, options?: AggregateOptions<TRow>): GroupAggregatesMapper<TRow>;
-
-// @public
 export const AGGREGATE_NAMES: AggregateName[];
 
 // @public
@@ -361,9 +358,6 @@ export interface ApprovalArgumentPair {
 }
 
 // @public
-export function approvalArgumentPairs(args: unknown): readonly ApprovalArgumentPair[];
-
-// @public
 export type ApprovalPresentation = "widget" | "table" | "modal";
 
 // @public
@@ -376,9 +370,6 @@ export interface ApprovalReviewSlots<TNode = unknown> {
     readonly List: (props: AgentApprovalListProps<TNode>) => TNode;
     readonly Reject: (props: AgentApprovalButtonProps) => TNode;
 }
-
-// @public
-export function approvalValueText(value: unknown): string | undefined;
 
 // @public
 export interface AssemblyFns<TRow = unknown> {
@@ -538,9 +529,6 @@ export function asSizeEstimator(estimateSize: number | ((index: number) => numbe
 
 // @public
 export function attachIncrementalView<TRow>(rows: readonly TRow[], view: IncrementalView<TRow>): void;
-
-// @public
-export function autoSizeColumns(root: Element | null, keys: readonly string[], setWidth: (key: string, width: number) => void): number;
 
 // @public
 export const BASE_LABELS: Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed">;
@@ -1225,9 +1213,6 @@ export interface CellSpanRequest {
 
 // @public
 export type CellValidator<TRow> = (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
-
-// @public
-export function cellValue<TRow>(row: TRow, column: ColumnMetadata<TRow>, locale?: string): unknown;
 
 // @public
 export const CHANGED_CELL_FLASH_MS = 1200;
@@ -2450,20 +2435,11 @@ export function composeContextMenuExtra<TRow>(extra: ContextMenuItemsFactory<TRo
 export function composeMounts<TContext>(...mounts: readonly (((context: TContext) => void | (() => void)) | undefined)[]): ((context: TContext) => void | (() => void)) | undefined;
 
 // @public
-export function computedAggregateKeys(entries: readonly {
-    readonly kind: string;
-    readonly aggregateCells?: Readonly<Record<string, unknown>>;
-}[]): readonly string[];
-
-// @public
 export function computePagination(input: {
     page: number;
     limit: number;
     total: number;
 }): PaginationInfo;
-
-// @public
-export function conditionToExtra<TRow>(def: FilterDef<TRow>, condition: QueryCondition, registry: FilterTypeRegistry): ExtraFilters;
 
 // @public
 export function configureIncrementalView<TRow>(view: IncrementalView<TRow>, patch: Partial<IncrementalViewConfig<TRow>>): IncrementalView<TRow>;
@@ -2923,7 +2899,7 @@ export function coreRowPinning(options?: FeaturePatch): CoreFeature;
 export function coreSavedViews<TOptions extends object>(options: TOptions): CoreFeature;
 
 // @public
-export function coreSelection<TRow>(options?: SelectionFeatureOptions<TRow>): CoreFeature<TRow>;
+export function coreSelection<TRow, TIds = readonly string[]>(options?: SelectionFeatureOptions<TRow, TIds>): CoreFeature<TRow>;
 
 // @public
 export function coreSelectionStats(): CoreFeature;
@@ -3263,9 +3239,6 @@ const DECLARED: unique symbol;
 
 // @public
 export type DeclaredAggregates = Readonly<Record<string, string>>;
-
-// @public
-export function declaredAggregates(mapper: unknown): DeclaredAggregates | undefined;
 
 // @public
 export function declaredByDeveloper<TRow>(column: ColumnMetadata<TRow>, input: AggregationModelInput<TRow>): boolean;
@@ -5359,9 +5332,6 @@ export interface FilteringContribution<TRow> {
 
 // @public
 export function filteringFamilyList<TFeature, TFilter>(factories: CoreFilteringFamilyFactories<TFeature, TFilter>, defs: readonly TFilter[]): TFeature[];
-
-// @public
-export function filterLabel(def: Pick<FilterDef, "key" | "label">): string;
 
 // @public
 export type FilterOperandPrimitive = string | number | boolean | bigint | symbol | null | undefined;
@@ -10206,10 +10176,11 @@ export interface SelectionContribution {
 }
 
 // @public
-export interface SelectionFeatureOptions<TRow = unknown> {
+export interface SelectionFeatureOptions<TRow = unknown, TIds = readonly string[]> {
+    readonly defaultSelectedIds?: readonly string[];
     readonly getId?: (row: TRow) => string;
     readonly onSelectionChange?: (selectedIds: string[]) => void;
-    readonly selectedIds?: readonly string[];
+    readonly selectedIds?: TIds;
 }
 
 // @public
@@ -10687,9 +10658,6 @@ export function sortLevelOf(levels: readonly {
     key: string;
     dir: SortDirection;
 } | undefined;
-
-// @public
-export function sourceCapabilities(source: CapabilitySource, support?: QuerySupport): TableSourceCapabilities;
 
 // @public
 export function sourceViewKey(state: SourceViewKeyInput): string;
@@ -12196,9 +12164,6 @@ export interface TreeCellProps<TRow, TNode = unknown> {
 }
 
 // @public
-export function treeColumnKey<TRow>(columns: readonly ColumnMetadata<TRow>[], declared?: string): string | undefined;
-
-// @public
 export interface TreeContribution<TRow> {
     readonly allEntries?: readonly TreeEntry<TRow>[];
     readonly entries: readonly TreeEntry<TRow>[];
@@ -12518,9 +12483,6 @@ export interface VirtualTableRow<TRow> {
     sourceIndex?: number;
     virtualItem?: VirtualItemMeta;
 }
-
-// @public
-export function visibleColumns<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], layout: TableLayout): TCol[];
 
 // @public
 export function visibleRowActions<TRow>(actions: readonly RowAction<TRow>[], row: TRow): RowAction<TRow>[];
