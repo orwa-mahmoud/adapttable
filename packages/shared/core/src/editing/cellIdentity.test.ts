@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { EditableCellEditing } from "../rows/rowEditingDigest";
 import { rowEditingSignature } from "../rows/rowPresentation";
 import { batchEditingView, createBatchEditStore } from "./batchEditing";
+import { cellIdentity, cellIdentityParts } from "./cellIdentity";
 import {
   createDirtyCellStore,
   dirtyCellKey,
@@ -44,6 +45,12 @@ const KEYS = [
 ] as const;
 
 describe("cell identity on every edit path", () => {
+  it("reads a cell key back and refuses one that was not built that way", () => {
+    expect(cellIdentityParts(cellIdentity("a", "b"))).toEqual(["a", "b"]);
+    expect(() => cellIdentityParts("nope")).toThrow(/not a cell key/);
+    expect(() => cellIdentityParts("{")).toThrow(/not a cell key/);
+  });
+
   it("gives two cells two keys whatever their ids contain", () => {
     const pairs: readonly (readonly [string, string, string, string])[] = [
       [SPACED.rowId, SPACED.columnKey, SHIFTED.rowId, SHIFTED.columnKey],

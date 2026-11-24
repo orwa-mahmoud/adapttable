@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { applyRowPatchesWithLog, rekeyRow, updateRow } from "../rows/patch";
 import {
   commitRowRekeys,
+  onRowRekeyMoves,
   onRowRekeys,
   rekeyedIds,
   rekeyIdList,
@@ -99,6 +100,20 @@ describe("row rekeys in a table's state", () => {
     expect(handler).toHaveBeenCalledTimes(1);
     commitRowRekeys(store, log.rows, log.rows);
     expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it("hands a registered target the rekey map", () => {
+    const store = createTableStore();
+    const target = { rekey: vi.fn() };
+    onRowRekeyMoves(store, target);
+    rekeyTableRows(
+      store,
+      applyRowPatchesWithLog(ROWS, [rekeyRow<Row>("a", { id: "a2" })], getRowId)
+    );
+    expect(target.rekey).toHaveBeenCalledWith({
+      ids: new Map([["a", "a2"]]),
+      rows: new Map([["a2", { id: "a2", ref: "ra" }]]),
+    });
   });
 });
 

@@ -101,6 +101,15 @@ describe("the lean extra-row splicing", () => {
     expect(
       LEAN_ASSEMBLY.columnResizeHandleProps("name", () => undefined, "Resize")
     ).toBeUndefined();
+    expect(
+      LEAN_ASSEMBLY.extraHostFillStyle(
+        "note",
+        undefined,
+        ROWS,
+        getRowId,
+        undefined
+      )
+    ).toBeUndefined();
   });
 });
 

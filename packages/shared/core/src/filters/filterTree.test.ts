@@ -13,6 +13,7 @@ import {
   serializeFilterTree,
   settledFilterTree,
 } from "./filterTree";
+import { parseStrictFilterTree } from "./filterTreeCodec";
 
 /** The tree evaluated against every built-in type, unless a test passes one. */
 function evaluateFilterTree<TRow>(
@@ -92,6 +93,16 @@ describe("serializeFilterTree / parseFilterTree", () => {
     expect(isActiveFilterTree({ combinator: "or", conditions: [] })).toBe(
       false
     );
+  });
+
+  it("refuses a tree a server cannot trust", () => {
+    expect(parseStrictFilterTree(serializeFilterTree(TREE))).toEqual(TREE);
+    expect(parseStrictFilterTree(null)).toBeUndefined();
+    expect(
+      parseStrictFilterTree(
+        '1.{"combinator":"and","conditions":[{"key":"name","op":"eq","value":"Ada"},{"nope":true}]}'
+      )
+    ).toBeUndefined();
   });
 
   it("strips malformed children instead of inventing a different query", () => {

@@ -4,14 +4,18 @@ import type { ColumnModel } from "../contracts/columns";
 import { resetDevWarnings } from "../utils/devWarn";
 import { defaultFilterRegistry } from "./filterBuiltins";
 import {
+  booleanFilterSpecs,
   buildFilterRuntime,
+  checklistFilterSpecs,
   clearedFilterExtras,
   coerceBooleanValue,
   type FilterDef,
   filterLabel,
   filterPredicate,
   filterStateKeys,
+  multiSelectFilterSpecs,
   resolveFilterDefs,
+  selectFilterSpecs,
 } from "./filterDefs";
 import { emptyFilterRegistry } from "./filterRegistry";
 
@@ -514,5 +518,18 @@ describe("i18n-aware column filters", () => {
     );
     const p = pred(defs[0]!);
     expect(p(ROW_L, { statusEn: "custom" })).toBe(true);
+  });
+});
+
+describe("choice and yes/no filter specs", () => {
+  it("publishes each type from its own entry", () => {
+    expect(selectFilterSpecs().map((spec) => spec.type)).toEqual(["select"]);
+    expect(multiSelectFilterSpecs().map((spec) => spec.type)).toEqual([
+      "multiSelect",
+    ]);
+    expect(checklistFilterSpecs().map((spec) => spec.type)).toEqual([
+      "checklist",
+    ]);
+    expect(booleanFilterSpecs().map((spec) => spec.type)).toEqual(["boolean"]);
   });
 });

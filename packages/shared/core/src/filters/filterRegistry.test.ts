@@ -12,6 +12,7 @@ import {
   filterTypeSpec,
   filterWidgetFor,
   filterWidgetKind,
+  renderRegisteredFilter,
   withExtendedFilterType,
   withFilterType,
 } from "./filterRegistry";
@@ -156,6 +157,28 @@ describe("custom type as a first-class consumer", () => {
       expect.stringContaining('Unknown filter type "nope"')
     );
     warn.mockRestore();
+  });
+});
+
+describe("renderRegisteredFilter", () => {
+  it("draws a type's own render and nothing when the type has none", () => {
+    const render = vi.fn(() => "drawn");
+    const registry = createFilterRegistry([{ ...SKU, render }]);
+    const def = { key: "sku", type: "sku" } as const;
+    expect(
+      renderRegisteredFilter(def, {} as never, {} as never, registry, "field")
+    ).toBe("drawn");
+    expect(render).toHaveBeenCalledWith(
+      expect.objectContaining({ def, className: "field" })
+    );
+    expect(
+      renderRegisteredFilter(
+        def,
+        {} as never,
+        {} as never,
+        emptyFilterRegistry()
+      )
+    ).toBeUndefined();
   });
 });
 
