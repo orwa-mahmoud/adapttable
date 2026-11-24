@@ -106,7 +106,7 @@ describe("the lean extra-row splicing", () => {
         "note",
         undefined,
         ROWS,
-        getRowId,
+        getRowId as never,
         undefined
       )
     ).toBeUndefined();
