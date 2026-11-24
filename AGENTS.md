@@ -112,7 +112,11 @@ standing pattern is **Chrome + slots**:
   config-object API.
 - The showcase is the only demo app. Competitor comparisons stay factual and
   dated.
-- Everything is opt-in: omitting a prop renders nothing and costs nothing.
+- A behaviour turns on only by composing its feature. The base names no
+  feature. Table props are what every table has: the data or source, columns,
+  the row key, labels, locale, layout and class names. Selection, filters,
+  editing, grouping and the rest are `features` entries, with their options
+  in the call. Omitting a feature renders nothing and costs nothing.
 - The table never owns the data. Every write — edits, adds, deletes,
   reorders — is a callback to the host; the table asks, the host does.
 

@@ -312,17 +312,23 @@ and everything below is present without asking:
 - single-column sorting, search, pagination and infinite data
 - column resolution: the `columns` array rendered in order
 
-Nothing else rides that import. Every other capability is a feature.
+Nothing else rides that import. Every other capability is a feature. The base
+names no feature, and a table prop does not turn one on.
+
+A feature reaches the table through the extension points it declares: a live
+stage (`liveStageKey`) that names what it reads and writes, a region or slot
+it fills, and a feature-state key it publishes for the kit that draws it.
+The base does not import a feature's module.
 
 Membership is decided on two questions, both of which must be yes: is it
 reachable from those three props, and is it cheap? Row selection, row actions,
 column visibility and column order were each measured against that test and each
 failed the first half — a three-prop table renders no checkbox, no action
 column, and no way to change the column set. All four are cheap (0.10–1.90 KB),
-and cheap alone is not a reason to charge every table for them, so each belongs
-to the feature that already reaches it: selection to `columnSelectionCheckbox`,
-`bulkActions` and `selectionStats`, the action column to its own factory, and
-both column capabilities to `columnMenu`. The numbers and the method are in
+and cheap alone is not a reason to charge every table for them. Row checkboxes
+are `selection()`. `columnSelectionCheckbox`, `bulkActions` and `selectionStats`
+select rows as part of what they do. The action column is its own factory, and
+both column capabilities are `columnMenu`. The numbers and the method are in
 `provisionalBaseReview` in the classification artifact.
 
 ## Features
