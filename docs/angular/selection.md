@@ -48,10 +48,12 @@ export class SelectPeople {
 }
 ```
 
-`onSelectionChange` receives the complete `string[]` of selected IDs. Omit
-`selectedIds` for table-owned selection. When you supply it, update the
-signal from `onSelectionChange`: the rendered selection is always the value
-the host supplies.
+`selection()` takes `SelectionOptions`. `onSelectionChange` receives the
+complete `string[]` of selected IDs. Omit `selectedIds` for table-owned
+selection, or pass `defaultSelectedIds` to start that selection. `getId`
+selects by an id other than the row key. When you supply `selectedIds`,
+update the signal from `onSelectionChange`: the rendered selection is always
+the value the host supplies.
 
 The NG-ZORRO kit publishes the same `selection()` entry. Replace the root
 kit import with `@adapttable/ng-zorro`; see [getting started](./getting-started.md)

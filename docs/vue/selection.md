@@ -2,7 +2,7 @@
 
 Control selected Vue row IDs, retain stable row identity and compose native bulk actions without transferring ownership of data.
 
-Selection uses stable IDs from `rowKey`. Compose `selection()` from the kit's `/selection` entry. Pass `selectedIds` when the host holds the selection, and apply the ids from `onSelectionChange`.
+Selection uses stable IDs from `rowKey`. Compose `selection()` from the kit's `/selection` entry. Its options are `VueSelectionOptions`: `selectedIds` and `defaultSelectedIds` may be a ref or a getter, `getId` selects by an id other than the row key, and `onSelectionChange` reports the requested ids. Pass `selectedIds` when the host holds the selection, and apply the ids from `onSelectionChange`.
 
 ```vue
 <script setup lang="ts">

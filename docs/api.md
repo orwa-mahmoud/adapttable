@@ -75,8 +75,10 @@ per-column aggregation choices.
 ### Selection & actions
 
 Selection turns on with the `selection(options?)` feature from
-`@adapttable/<kit>/selection` (`selectedIds`, `onSelectionChange`, `getId`;
-`SelectionFeatureOptions`); see [selection](./selection.md).
+`@adapttable/<kit>/selection` (`selectedIds`, `onSelectionChange`, `getId`,
+`defaultSelectedIds`). Core's option type is `SelectionFeatureOptions`.
+Angular's is `SelectionOptions`. Vue's is `VueSelectionOptions`, and its ids
+may be a ref or a getter. See [selection](./selection.md).
 
 | Prop               | Type                       | Default          | Description                                                                                                                                                                                                               |
 | ------------------ | -------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

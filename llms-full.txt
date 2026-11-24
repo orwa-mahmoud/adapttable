@@ -17367,8 +17367,10 @@ per-column aggregation choices.
 ### Selection & actions
 
 Selection turns on with the `selection(options?)` feature from
-`@adapttable/<kit>/selection` (`selectedIds`, `onSelectionChange`, `getId`;
-`SelectionFeatureOptions`); see [selection](./selection.md).
+`@adapttable/<kit>/selection` (`selectedIds`, `onSelectionChange`, `getId`,
+`defaultSelectedIds`). Core's option type is `SelectionFeatureOptions`.
+Angular's is `SelectionOptions`. Vue's is `VueSelectionOptions`, and its ids
+may be a ref or a getter. See [selection](./selection.md).
 
 | Prop               | Type                       | Default          | Description                                                                                                                                                                                                               |
 | ------------------ | -------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -28878,10 +28880,12 @@ export class SelectPeople {
 }
 ```
 
-`onSelectionChange` receives the complete `string[]` of selected IDs. Omit
-`selectedIds` for table-owned selection. When you supply it, update the
-signal from `onSelectionChange`: the rendered selection is always the value
-the host supplies.
+`selection()` takes `SelectionOptions`. `onSelectionChange` receives the
+complete `string[]` of selected IDs. Omit `selectedIds` for table-owned
+selection, or pass `defaultSelectedIds` to start that selection. `getId`
+selects by an id other than the row key. When you supply `selectedIds`,
+update the signal from `onSelectionChange`: the rendered selection is always
+the value the host supplies.
 
 The NG-ZORRO kit publishes the same `selection()` entry. Replace the root
 kit import with `@adapttable/ng-zorro`; see [getting started](./getting-started.md)
@@ -34910,7 +34914,7 @@ Use the [live demo](/vue/demo/) or [Feature Lab](/vue/demo/all-options/) to swit
 
 Control selected Vue row IDs, retain stable row identity and compose native bulk actions without transferring ownership of data.
 
-Selection uses stable IDs from `rowKey`. Compose `selection()` from the kit's `/selection` entry. Pass `selectedIds` when the host holds the selection, and apply the ids from `onSelectionChange`.
+Selection uses stable IDs from `rowKey`. Compose `selection()` from the kit's `/selection` entry. Its options are `VueSelectionOptions`: `selectedIds` and `defaultSelectedIds` may be a ref or a getter, `getId` selects by an id other than the row key, and `onSelectionChange` reports the requested ids. Pass `selectedIds` when the host holds the selection, and apply the ids from `onSelectionChange`.
 
 ```vue
 <script setup lang="ts">
