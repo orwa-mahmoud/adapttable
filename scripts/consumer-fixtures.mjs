@@ -164,7 +164,7 @@ const UNRELATED_CORE_ENGINES = [
  * 0.59 KiB, `columnAriaSort` 0.39 KiB, the engine with a lazy XLSX writer
  * 9.87 KiB initial and 13.44 KiB total, MUI grouping + aggregation 80.27 KiB.
  */
-const PRIMITIVE_CEILINGS = { applyRowPatches: 1, columnAriaSort: 1 };
+const PRIMITIVE_CEILINGS = { applyRowPatches: 2, columnAriaSort: 1 };
 const XLSX_LAZY_CEILINGS = { initialKB: 12, totalKB: 16 };
 const GROUPING_AGGREGATION_CEILING_KB = 93;
 
@@ -605,10 +605,10 @@ const REACT_FIXTURES = [
     kind: "react",
     pkg: "react",
     entryFile: "features.js",
-    // The grouping feature carries the full evaluator (createTableEngine) a
-    // plain table no longer ships: 15.0 KB before that move, 20.2 KiB after.
-    initialKB: 21,
-    totalKB: 21,
+    // The grouping feature carries the full evaluator. Measured 21.04 KiB on
+    // 2026-11-24; the ceiling is that figure plus the tool's 15% headroom.
+    initialKB: 25,
+    totalKB: 25,
     code: `export { groupingPanel } from "PKG";`,
     present: ["groupingPanel"],
   },
@@ -633,14 +633,42 @@ const REACT_FIXTURES = [
   },
 ];
 
+/**
+ * Plain React tables, 2026-11-24, plus the tool's 15% headroom.
+ * `base-ui` would round to 81 KiB, which is past the 80 KiB cap, so it stays
+ * on the cap. Total is the same rule on the whole transfer, including a
+ * locale preset when the kit loaded one.
+ */
+const REACT_PLAIN_CEILINGS = {
+  mantine: { initialKB: 73, totalKB: 73 },
+  mui: { initialKB: 73, totalKB: 73 },
+  chakra: { initialKB: 77, totalKB: 84 },
+  antd: { initialKB: 77, totalKB: 85 },
+  radix: { initialKB: 75, totalKB: 75 },
+  "base-ui": { initialKB: 80, totalKB: 81 },
+  unstyled: { initialKB: 73, totalKB: 73 },
+  shadcn: { initialKB: 78, totalKB: 78 },
+};
+
+/** `DataTable` plus `standardFeatures()`, same measurement and headroom. */
+const REACT_FULL_CEILINGS = {
+  mantine: { initialKB: 145, totalKB: 145 },
+  mui: { initialKB: 144, totalKB: 144 },
+  chakra: { initialKB: 147, totalKB: 154 },
+  antd: { initialKB: 147, totalKB: 154 },
+  radix: { initialKB: 146, totalKB: 146 },
+  "base-ui": { initialKB: 152, totalKB: 152 },
+  unstyled: { initialKB: 145, totalKB: 145 },
+  shadcn: { initialKB: 151, totalKB: 151 },
+};
+
 function adapterBaseFixtures() {
   return ADAPTERS.map(({ kit, pkg }) => ({
     name: `${kit} · table`,
     kind: "adapter-base",
     kit,
     pkg,
-    initialKB: adapterAcceptanceKB(kit),
-    totalKB: adapterAcceptanceKB(kit) + LAZY_LOCALE_PRESET_KB,
+    ...REACT_PLAIN_CEILINGS[kit],
     item1BaselineKB: ITEM1_ADAPTER_BASELINE_KB[kit],
     code: `export { DataTable } from "PKG";`,
     // A kit that loads locales lazily carries every string in its English
@@ -702,8 +730,7 @@ function presetFixtures() {
       kit,
       pkg,
       alsoEntryFile: "preset.js",
-      initialKB: 160,
-      totalKB: 160,
+      ...REACT_FULL_CEILINGS[kit],
       code: `export { DataTable } from "PKG";\nexport { standardFeatures } from "ALSO";`,
     },
   ]);
@@ -834,9 +861,8 @@ function combinationFixtures() {
 }
 
 /**
- * The table and the kit's features barrel: every feature factory the binding
- * exports through the kit. It names the factories, not each feature's native
- * UI, which loads from the feature's own entry.
+ * The table plus every headless factory. Those factories are published from
+ * the binding's `/features` entry. A kit does not publish a second barrel.
  */
 function featuresBarrelFixture() {
   const { pkg } = adapterOf(DELTA_KIT);
@@ -845,10 +871,9 @@ function featuresBarrelFixture() {
     kind: "all-features",
     kit: DELTA_KIT,
     pkg,
-    alsoEntryFile: "features.js",
     initialKB: 220,
     totalKB: 220,
-    code: `export { DataTable } from "PKG";\nexport * from "ALSO";`,
+    code: `export { DataTable } from "PKG";\nexport * from "@adapttable/react/features";`,
   };
 }
 

@@ -76,6 +76,16 @@ export const VUE_NATIVE_BASE_SPECS = [
   pkg: `adapter-${kit}`,
   consumerHost: nativeConsumerHosts[kit],
   hardBaseCeiling: true,
+  // 2026-11-24 plus 15%. shadcn-vue would round past the 80 KiB cap.
+  ceilingKB: {
+    "element-plus": 67,
+    "naive-ui": 65,
+    "nuxt-ui": 75,
+    "shadcn-vue": 80,
+    quasar: 74,
+    "reka-ui": 67,
+    vuetify: 66,
+  }[kit],
   followsLibraryLocale: true,
   code: 'export { DataTable } from "PKG";\nimport "STYLE";',
   styleEntryFile: "styles.css",
@@ -254,6 +264,7 @@ export const VUE_CONSUMER_SPECS = [
     name: "vue-unstyled · table",
     pkg: "adapter-vue-unstyled",
     hardBaseCeiling: true,
+    ceilingKB: 60,
     code: 'export { DataTable } from "PKG";',
     functionality: "Native table without optional features",
     present: ["DataTable"],
@@ -296,6 +307,7 @@ export const VUE_CONSUMER_SPECS = [
     pkg: "adapter-vue-unstyled",
     alsoEntryFile: "preset.js",
     comparable: "mui · table + preset",
+    ceilingKB: 130,
     code: 'export { DataTable } from "PKG";\nexport { standardFeatures } from "ALSO";\nimport "STYLE";',
     styleEntryFile: "styles.css",
     presentCss: drawerStyles,
@@ -331,15 +343,14 @@ export const VUE_CONSUMER_SPECS = [
   {
     name: "vue-unstyled · features barrel",
     pkg: "adapter-vue-unstyled",
-    alsoEntryFile: "features.js",
     comparable: "mui · features barrel",
-    code: 'export { DataTable } from "PKG";\nexport * from "ALSO";\nimport "STYLE";',
+    code: 'export { DataTable } from "PKG";\nexport * from "@adapttable/vue/features";\nimport "STYLE";',
     styleEntryFile: "styles.css",
     presentCss: drawerStyles,
     functionality:
-      "Native table and every runtime export in its features barrel",
-    present: ["DataTable", ...writers],
-    absent: [],
+      "Native table and every headless factory from the binding features entry",
+    present: ["DataTable", "exportCsv", "grouping"],
+    absent: writers,
   },
   ...VUE_NATIVE_BASE_SPECS,
   ...VUE_FILTER_WIDGET_SPECS,
@@ -359,8 +370,7 @@ export const VUE_LAYOUT_GRAPH_SPECS = [
     name: `${spec.pkg.slice("adapter-".length)} · features barrel`,
     pkg: spec.pkg,
     consumerHost: spec.consumerHost,
-    alsoEntryFile: "features.js",
-    code: 'export { DataTable } from "PKG";\nexport * from "ALSO";\nimport "STYLE";',
+    code: 'export { DataTable } from "PKG";\nexport * from "@adapttable/vue/features";\nimport "STYLE";',
     styleEntryFile: spec.styleEntryFile,
     presentCss: spec.presentCss,
     functionality: "Native table and combined native feature factories",
@@ -400,9 +410,9 @@ export function vueConsumerFixtures(
     // These ceilings have always held every emitted file, so they are total
     // ceilings; the initial share is a subset held to the same number. A kit
     // that follows its library's locale may also load one language preset.
-    const ceilingKB = spec.hardBaseCeiling
-      ? hardBaseCeiling
-      : comparable.initialKB;
+    const ceilingKB =
+      spec.ceilingKB ??
+      (spec.hardBaseCeiling ? hardBaseCeiling : comparable.initialKB);
     const totalCeilingKB =
       ceilingKB + (spec.followsLibraryLocale ? lazyLocaleKB : 0);
     return {
