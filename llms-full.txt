@@ -27,7 +27,7 @@ and use it, or open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 61–69 KiB min+gzip (measured 2026-11-22 from
+A plain adapter `DataTable` is 63–70 KiB min+gzip (measured 2026-11-24 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
@@ -763,8 +763,8 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 61 KiB gzipped and the same table with
-`standardFeatures()` composed is 124 KiB.
+Measured on MUI, the table alone is 63 KiB gzipped and the same table with
+`standardFeatures()` composed is 125 KiB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
@@ -22641,24 +22641,24 @@ Every package declares its side effects — none, or only its stylesheet in
 `@adapttable/base-ui` — and ships ESM, so unused code is tree-shaken. You only install the one adapter you use; the headless core has
 zero UI-kit dependencies.
 
-Measured 2026-11-22 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
+Measured 2026-11-24 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
 | What you import                            | min+gzip   |
 | ------------------------------------------ | ---------- |
 | `useFrontendData` + `useDataTable` (react) | ~21 KiB    |
-| every core export                          | ~47 KiB    |
-| `DataTable` from an adapter                | ~61–69 KiB |
+| every core export                          | ~48 KiB    |
+| `DataTable` from an adapter                | ~63–70 KiB |
 
 The first row is the one to read: a headless table costs well under half of
 the full core, because the parts you never import never arrive. The
 every-export row is the whole public surface imported at once, measured
-2026-11-22 at 47.2 KiB: the composed session with one committed state and a
+2026-11-24 at 47.6 KiB: the composed session with one committed state and a
 staged row-model evaluator, the shell operations, the snapshot guard, the
 grouped-snapshot cache, and the shared behaviours the bindings used to copy.
 Binding and kit machinery lives on `@adapttable/core/binding`, and each
 specialty engine (pivot, formula, grouping, editing) on its own entry. It is not the download of a table. All eight React adapters
-land within ~12 KiB of each other, so switching kits does not change what you
+land within ~8 KiB of each other, so switching kits does not change what you
 pay. Tree-shaking drops unused exports from an application bundle. Installing
 a package still installs that package.
 
@@ -22812,7 +22812,7 @@ consumer fixtures in `scripts/bundle-budget.mjs`.
 - `@adapttable/ai` is a separate package. Eleven base graphs contain none
   of `createAgentSession`, `tableAgent`, `adapttable.agent.v1` or
   `@adapttable/ai` (`scripts/ai-isolation.mjs`).
-- Importing every core export measured 47.2 KiB gzip on 2026-11-22. The
+- Importing every core export measured 47.6 KiB gzip on 2026-11-24. The
   fixture ceiling is 55 KiB. The figure is the whole public surface, not a
   table's download. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
 
@@ -22940,8 +22940,8 @@ libraries.
 
 <sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation()`, and paste and fill write through editable columns and the composed `editing()` handler — the channel inline editing uses — unless `onCellPaste` / `onCellFill` take the batch whole; cut reports its range to `onCellCut`. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
-A plain AdaptTable adapter `DataTable` is 61–69 KiB min+gzip (measured
-2026-11-22 from packed fixtures; React and the kit stay external). Competitor
+A plain AdaptTable adapter `DataTable` is 63–70 KiB min+gzip (measured
+2026-11-24 from packed fixtures; React and the kit stay external). Competitor
 bundle sizes are not listed here — they depend on which paid modules you
 licence and are not produced by this repo's fixtures. Method and the rest of
 the grid: [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).

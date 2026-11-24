@@ -173,24 +173,24 @@ Every package declares its side effects — none, or only its stylesheet in
 `@adapttable/base-ui` — and ships ESM, so unused code is tree-shaken. You only install the one adapter you use; the headless core has
 zero UI-kit dependencies.
 
-Measured 2026-11-22 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
+Measured 2026-11-24 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
 | What you import                            | min+gzip   |
 | ------------------------------------------ | ---------- |
 | `useFrontendData` + `useDataTable` (react) | ~21 KiB    |
-| every core export                          | ~47 KiB    |
-| `DataTable` from an adapter                | ~61–69 KiB |
+| every core export                          | ~48 KiB    |
+| `DataTable` from an adapter                | ~63–70 KiB |
 
 The first row is the one to read: a headless table costs well under half of
 the full core, because the parts you never import never arrive. The
 every-export row is the whole public surface imported at once, measured
-2026-11-22 at 47.2 KiB: the composed session with one committed state and a
+2026-11-24 at 47.6 KiB: the composed session with one committed state and a
 staged row-model evaluator, the shell operations, the snapshot guard, the
 grouped-snapshot cache, and the shared behaviours the bindings used to copy.
 Binding and kit machinery lives on `@adapttable/core/binding`, and each
 specialty engine (pivot, formula, grouping, editing) on its own entry. It is not the download of a table. All eight React adapters
-land within ~12 KiB of each other, so switching kits does not change what you
+land within ~8 KiB of each other, so switching kits does not change what you
 pay. Tree-shaking drops unused exports from an application bundle. Installing
 a package still installs that package.
 
