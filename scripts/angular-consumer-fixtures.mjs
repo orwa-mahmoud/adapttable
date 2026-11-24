@@ -354,6 +354,14 @@ const CEILINGS = {
   "angular · unstyled + editing": { own: 148, app: 260 },
   "angular · unstyled + filters": { own: 154, app: 266 },
   "angular · unstyled + text filters": { own: 154, app: 266 },
+  "angular · angular-material + text filters": { own: 155, app: 268 },
+  "angular · ng-bootstrap + text filters": { own: 155, app: 268 },
+  "angular · spartan + text filters": { own: 155, app: 268 },
+  "angular · taiga-ui + text filters": { own: 165, app: 278 },
+  "angular · angular-aria + text filters": { own: 154, app: 266 },
+  "angular · ngx-bootstrap + text filters": { own: 155, app: 268 },
+  "angular · angular-cdk + text filters": { own: 154, app: 266 },
+  "angular · ng-zorro + text filters": { own: 159, app: 417 },
   "angular · unstyled + virtualize": { own: 140, app: 250 },
   "angular · unstyled + exportCsv": { own: 142, app: 252 },
   "angular · unstyled + palette": { own: 145, app: 256 },
@@ -510,6 +518,26 @@ export function angularConsumerFixtures(kits = angularKits()) {
       "Native table with the filter drawer drawn by the text widget only",
       [...BASE_ABSENT, "AdaptRangeFilterField", "AdaptBooleanFilterField"]
     ),
+    ...kits
+      .filter((kit) => kit !== native)
+      .map((kit) =>
+        rendered(
+          `angular · ${kit.name.replace("@adapttable/", "")} + text filters`,
+          kit,
+          [FEATURES["text filters"]],
+          {
+            functionality: `${kit.name} table with the filter drawer drawn by the text widget only`,
+            absent: [
+              ...BASE_ABSENT,
+              "AdaptRangeFilterField",
+              "AdaptBooleanFilterField",
+            ],
+            ...ceilings(
+              `angular · ${kit.name.replace("@adapttable/", "")} + text filters`
+            ),
+          }
+        )
+      ),
     feature("virtualize", "Native table with row virtualization"),
     feature("exportCsv", "Native table with CSV export"),
     feature("palette", "Native table with the command palette"),
