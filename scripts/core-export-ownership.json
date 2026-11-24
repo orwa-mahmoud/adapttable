@@ -48,7 +48,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "aggregate/aggregate.ts#aggregate",
-      "subpaths": [".", "./binding"]
+      "subpaths": ["."]
     },
     {
       "name": "AGGREGATE_SUPPRESSED",
@@ -169,7 +169,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "approval/approvalReview.ts#approvalArgumentPairs",
-      "subpaths": [".", "./binding"]
+      "subpaths": ["."]
     },
     {
       "name": "approvalReview",
@@ -191,7 +191,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "approval/approvalReview.ts#approvalValueText",
-      "subpaths": [".", "./binding"]
+      "subpaths": ["."]
     },
     {
       "name": "AUTO_OPTIONS_LIMIT",
@@ -213,7 +213,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "columns/autoSizeColumns.ts#autoSizeColumns",
-      "subpaths": [".", "./binding"]
+      "subpaths": ["."]
     },
     {
       "name": "bindFeatureHostFn",
@@ -477,7 +477,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "aggregate/computedAggregateKeys.ts#computedAggregateKeys",
-      "subpaths": [".", "./binding"]
+      "subpaths": ["."]
     },
     {
       "name": "computeFilterFacets",
@@ -499,7 +499,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "filters/filterTree.ts#conditionToExtra",
-      "subpaths": [".", "./binding"]
+      "subpaths": ["."]
     },
     {
       "name": "contextMenuCopyTarget",
@@ -697,7 +697,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "aggregate/aggregate.ts#declaredAggregates",
-      "subpaths": [".", "./binding"]
+      "subpaths": ["."]
     },
     {
       "name": "DEFAULT_SHORTCUTS",
@@ -1005,7 +1005,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "filters/filterDefs.ts#filterLabel",
-      "subpaths": [".", "./binding"]
+      "subpaths": ["."]
     },
     {
       "name": "filterOpKey",
@@ -2468,7 +2468,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "source/capabilities.ts#sourceCapabilities",
-      "subpaths": [".", "./binding"]
+      "subpaths": ["."]
     },
     {
       "name": "sparklineExportValue",
@@ -2611,7 +2611,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "tree/treeRows.ts#treeColumnKey",
-      "subpaths": [".", "./binding"]
+      "subpaths": ["."]
     },
     {
       "name": "treeExportExpandedIds",
@@ -2732,7 +2732,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "columns/visibleColumns.ts#visibleColumns",
-      "subpaths": [".", "./binding"]
+      "subpaths": ["."]
     },
     {
       "name": "windowGroupedEntries",
@@ -24011,7 +24011,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "engine/cellValue.ts#cellValue",
-      "subpaths": [".", "./binding", "./engine"]
+      "subpaths": [".", "./engine"]
     },
     {
       "name": "createBasicTableEngine",
