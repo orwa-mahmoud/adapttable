@@ -12,7 +12,6 @@ import {
 } from "@adapttable/vue/pivot";
 import { sparklineColumn } from "@adapttable/vue/sparkline";
 import { type ColumnInput, DataTable } from "@adapttable/vue-unstyled";
-import { selection } from "@adapttable/vue-unstyled/selection";
 import { cellNavigation } from "@adapttable/vue-unstyled/cell-navigation";
 import { editing } from "@adapttable/vue-unstyled/editing";
 import { exportCsv } from "@adapttable/vue-unstyled/export";
@@ -21,6 +20,7 @@ import { useGroupCollapseUrlState } from "@adapttable/vue-unstyled/grouping";
 import { groupingPanel } from "@adapttable/vue-unstyled/grouping-panel";
 import { pinnedSummaryRows } from "@adapttable/vue-unstyled/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/vue-unstyled/pivot";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import { computed, shallowRef } from "vue";
 

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/shadcn-vue";
-import { selection } from "@adapttable/shadcn-vue/selection";
 import { columnMenu } from "@adapttable/shadcn-vue/column-menu";
 import { densityChooser } from "@adapttable/shadcn-vue/density";
 import { fullscreen } from "@adapttable/shadcn-vue/fullscreen";
+import { selection } from "@adapttable/shadcn-vue/selection";
 import { Primitive } from "reka-ui";
 import { h } from "vue";
 

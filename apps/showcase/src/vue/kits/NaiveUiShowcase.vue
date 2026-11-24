@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/naive-ui";
-import { selection } from "@adapttable/naive-ui/selection";
 import { densityChooser } from "@adapttable/naive-ui/density";
 import { fullscreen } from "@adapttable/naive-ui/fullscreen";
+import { selection } from "@adapttable/naive-ui/selection";
 import {
   arDZ,
   darkTheme,

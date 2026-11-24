@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/vuetify";
-import { selection } from "@adapttable/vuetify/selection";
 import { columnMenu } from "@adapttable/vuetify/column-menu";
 import { densityChooser } from "@adapttable/vuetify/density";
 import { fullscreen } from "@adapttable/vuetify/fullscreen";
+import { selection } from "@adapttable/vuetify/selection";
 import { h } from "vue";
 import { VApp } from "vuetify/components/VApp";
 import { VBtn } from "vuetify/components/VBtn";

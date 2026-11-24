@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/nuxt-ui";
-import { selection } from "@adapttable/nuxt-ui/selection";
 import { columnMenu } from "@adapttable/nuxt-ui/column-menu";
 import { densityChooser } from "@adapttable/nuxt-ui/density";
 import { fullscreen } from "@adapttable/nuxt-ui/fullscreen";
+import { selection } from "@adapttable/nuxt-ui/selection";
 import UBadge from "@nuxt/ui/components/Badge.vue";
 import UButton from "@nuxt/ui/components/Button.vue";
 import { h } from "vue";

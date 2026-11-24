@@ -9,10 +9,10 @@ import {
   type CellRange,
 } from "@adapttable/vue-unstyled/cell-navigation";
 import { editing } from "@adapttable/vue-unstyled/editing";
-import { selection } from "@adapttable/vue-unstyled/selection";
 import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { findInTable } from "@adapttable/vue-unstyled/find-in-table";
 import { rowReorder } from "@adapttable/vue-unstyled/row-reorder";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import { tree } from "@adapttable/vue-unstyled/tree";
 import { virtualize } from "@adapttable/vue-unstyled/virtualize";

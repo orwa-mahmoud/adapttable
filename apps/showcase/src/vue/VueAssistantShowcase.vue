@@ -12,11 +12,11 @@ import {
   useTableAssistant,
 } from "@adapttable/ai-vue";
 import { DataTable } from "@adapttable/vue-unstyled";
-import { selection as selectionFeature } from "@adapttable/vue-unstyled/selection";
 import {
   agentApproval,
   TableAssistant,
 } from "@adapttable/vue-unstyled/assistant";
+import { selection as selectionFeature } from "@adapttable/vue-unstyled/selection";
 import { computed, shallowRef } from "vue";
 
 const rows = [

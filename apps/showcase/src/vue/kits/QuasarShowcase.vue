@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/quasar";
-import { selection } from "@adapttable/quasar/selection";
 import { columnMenu } from "@adapttable/quasar/column-menu";
 import { densityChooser } from "@adapttable/quasar/density";
 import { fullscreen } from "@adapttable/quasar/fullscreen";
+import { selection } from "@adapttable/quasar/selection";
 import { QBadge, QBtn } from "quasar";
 import { h } from "vue";
 

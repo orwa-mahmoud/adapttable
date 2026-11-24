@@ -2,12 +2,12 @@
 import { getLabels } from "@adapttable/i18n/catalog";
 import { aggregate } from "@adapttable/vue";
 import { type ColumnDef, DataTable } from "@adapttable/vue-unstyled";
-import { selection } from "@adapttable/vue-unstyled/selection";
 import { cellNavigation } from "@adapttable/vue-unstyled/cell-navigation";
 import { cellSpan } from "@adapttable/vue-unstyled/cell-span";
 import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { findInTable } from "@adapttable/vue-unstyled/find-in-table";
 import { rowReorder } from "@adapttable/vue-unstyled/row-reorder";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import { tree } from "@adapttable/vue-unstyled/tree";
 import { computed, h, shallowRef } from "vue";

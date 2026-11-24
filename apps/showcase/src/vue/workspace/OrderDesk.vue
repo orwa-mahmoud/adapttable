@@ -16,7 +16,6 @@ import {
   tableAssistant,
 } from "@adapttable/vue-unstyled/assistant";
 import { bulkActions } from "@adapttable/vue-unstyled/bulk-actions";
-import { selection } from "@adapttable/vue-unstyled/selection";
 import {
   cellNavigation,
   type CellRange,
@@ -35,6 +34,7 @@ import {
   savedViews,
   SavedViewsPanel,
 } from "@adapttable/vue-unstyled/saved-views";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { sidePanel } from "@adapttable/vue-unstyled/side-panel";
 import { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import { computed, h, shallowRef, watch } from "vue";

@@ -63,7 +63,7 @@ const pageFeatures = computed(() => [
 ]);
 const chrome = pageChromeFeatures(kit, { urlKey: "pdf" });
 const features = computed(() => [
-  ...(exportSelects(mode, scope) ? [kit.selection()] : []),
+  ...(exportSelects(mode.value, scope) ? [kit.selection()] : []),
   ...pageFeatures.value,
   ...chrome,
 ]);

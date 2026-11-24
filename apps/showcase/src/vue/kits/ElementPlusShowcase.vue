@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/element-plus";
-import { selection } from "@adapttable/element-plus/selection";
 import { columnMenu } from "@adapttable/element-plus/column-menu";
 import { densityChooser } from "@adapttable/element-plus/density";
 import { fullscreen } from "@adapttable/element-plus/fullscreen";
+import { selection } from "@adapttable/element-plus/selection";
 import { ElButton, ElConfigProvider, ElTag } from "element-plus";
 import ar from "element-plus/es/locale/lang/ar.mjs";
 import en from "element-plus/es/locale/lang/en.mjs";
