@@ -353,6 +353,29 @@ export const VUE_CONSUMER_SPECS = [
     absent: writers,
   },
   ...VUE_NATIVE_BASE_SPECS,
+  ...VUE_NATIVE_BASE_SPECS.map((spec) => ({
+    name: `${spec.name.replace(" · table", "")} · table + preset`,
+    pkg: spec.pkg,
+    consumerHost: spec.consumerHost,
+    alsoEntryFile: "preset.js",
+    // Packed 2026-11-24, initial gzip plus 15%. Locale chunk sits in the total.
+    ceilingKB: {
+      "element-plus": 132,
+      "naive-ui": 129,
+      "nuxt-ui": 146,
+      "shadcn-vue": 156,
+      quasar: 149,
+      "reka-ui": 131,
+      vuetify: 132,
+    }[spec.name.replace(" · table", "")],
+    followsLibraryLocale: true,
+    code: 'export { DataTable } from "PKG";\nexport { standardFeatures } from "ALSO";\nimport "STYLE";',
+    styleEntryFile: "styles.css",
+    presentCss: spec.presentCss,
+    functionality: `${spec.pkg.replace("adapter-", "")} table and standard preset`,
+    present: ["DataTable", "standardFeatures", "export-progress-surface"],
+    absent: writers,
+  })),
   ...VUE_FILTER_WIDGET_SPECS,
 ];
 
@@ -405,7 +428,11 @@ export function vueConsumerFixtures(
     const comparable = comparables.find(
       (fixture) => fixture.name === spec.comparable
     );
-    if (!spec.hardBaseCeiling && !comparable)
+    if (
+      !spec.hardBaseCeiling &&
+      spec.ceilingKB === undefined &&
+      !comparable
+    )
       throw new Error(`Missing comparable Vue budget: ${spec.comparable}`);
     // These ceilings have always held every emitted file, so they are total
     // ceilings; the initial share is a subset held to the same number. A kit

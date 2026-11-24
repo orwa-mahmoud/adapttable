@@ -21159,9 +21159,10 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   entry's `coreExportCsv`, `coreFilters`, `coreHeaderFilters` and
   `coreFindInTable` are the core factories with their implementations filed,
   for a kit to extend.
-- All supported Angular kits accept live `cellNavigation`, `filtersMode`
-  and `closeHeaderFilterOnSelect` inputs. Row checkboxes come from
-  `selection()`. Their controlled `density` input
+- Angular kits turn the keyboard grid on by composing `cellNavigation()`.
+  They still accept live `filtersMode` and `closeHeaderFilterOnSelect`
+  inputs, which place a composed filter panel and do not turn filtering on.
+  Row checkboxes come from `selection()`. Their controlled `density` input
   overrides the chooser's state; `densityChange` reports requests and waits
   for the host to update the input. Omitting `density` keeps the chooser
   uncontrolled. Kits share core's `resolveDensity` and `requestDensityChange`,
@@ -24417,9 +24418,12 @@ of 380 KiB.
 A behaviour turns on only by composing its feature; its options go in the
 feature call. `migrate-v4` reports each of these props on a table.
 
-| v3 table props                                       | v4                                                                                        |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `selectedIds`, `onSelectionChange`, `selectionGetId` | `selection({ selectedIds, onSelectionChange, getId })` from `@adapttable/<kit>/selection` |
+| v3 table props                                                          | v4                                                                                                                                       |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `selectedIds`, `onSelectionChange`, `selectionGetId`                    | `selection({ selectedIds, onSelectionChange, getId })` from `@adapttable/<kit>/selection`                                                |
+| Vue `v-model:selected-ids`                                              | The same `selection({ selectedIds, onSelectionChange })`. `migrate-v4` reports the binding and leaves it, because the host owns the ref. |
+| Angular `[selectedIds]`, `(selectionChange)`                            | The same feature. `migrate-v4` reports the bindings and leaves them, because the host owns the signal and the callback.                  |
+| `useTableFeatures` imported from a removed React kit `/features` barrel | `@adapttable/react/adapter`, in the same pass as the other names, which stay on `@adapttable/react/features`                             |
 
 ## Data tiers
 
@@ -30210,8 +30214,7 @@ For NG-ZORRO, replace the three feature prefixes and the root component import
 with `@adapttable/ng-zorro`. `onRangeChange` is a callback inside the factory
 options. Its value is a rectangle with `anchor` and `head` coordinates, or
 `null` when the selection clears. It is separate from selected row IDs.
-The direct `[cellNavigation]="true"` input also enables grid navigation; the
-factory is useful when composing the rest of the grid features.
+Compose `cellNavigation()` to turn the grid on. There is no table input for it.
 
 ## Keyboard and clipboard
 

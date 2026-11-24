@@ -12,6 +12,7 @@ import {
   AdaptAgentApproval,
   AdaptTableAssistant,
 } from "@adapttable/ng-zorro/assistant";
+import { cellNavigation } from "@adapttable/ng-zorro/cell-navigation";
 import { columnMenu } from "@adapttable/ng-zorro/column-menu";
 import { editing, rowEditing } from "@adapttable/ng-zorro/editing";
 import { filters } from "@adapttable/ng-zorro/filters";
@@ -32,7 +33,6 @@ import {
 import { kitSelector } from "../testUtils";
 import { AdaptErrorState } from "./components/errorState";
 import { AdaptDataTable } from "./dataTable";
-
 const kit: AngularConformanceKit = {
   name: "ng-zorro",
   Table: AdaptDataTable,
@@ -41,6 +41,7 @@ const kit: AngularConformanceKit = {
   rowReorder,
   virtualize,
   selection,
+  cellNavigation,
 };
 
 describe(`table conformance — ${kit.name}`, () => {

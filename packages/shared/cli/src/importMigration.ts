@@ -200,12 +200,41 @@ function rewriteDeclaration(
 
   const typeOnly = typeKeyword.length > 0;
   if (redirect) {
-    // The whole subpath moved, so the names are untouched and only the
-    // specifier changes.
-    return {
-      text: formatImport(keyword, typeOnly, specifiers, quote, redirect),
-      moved: specifiers.length,
-    };
+    const further = moves.routes[redirect];
+    if (!further) {
+      // The whole subpath moved, so the names are untouched and only the
+      // specifier changes.
+      return {
+        text: formatImport(keyword, typeOnly, specifiers, quote, redirect),
+        moved: specifiers.length,
+      };
+    }
+    // A redirected barrel can still split: each name lands on the entry that
+    // owns it, in this same pass.
+    const { kept, byDestination } = routeSpecifiers(
+      specifiers,
+      parsed,
+      further,
+      redirect
+    );
+    const declarations: string[] = [];
+    if (kept.length > 0) {
+      declarations.push(formatImport(keyword, typeOnly, kept, quote, redirect));
+    }
+    for (const destination of [...byDestination.keys()].sort((left, right) =>
+      left.localeCompare(right)
+    )) {
+      declarations.push(
+        formatImport(
+          keyword,
+          typeOnly,
+          byDestination.get(destination) ?? [],
+          quote,
+          destination
+        )
+      );
+    }
+    return { text: declarations.join("\n"), moved: specifiers.length };
   }
 
   const { kept, byDestination, moved } = routeSpecifiers(

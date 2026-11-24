@@ -37,8 +37,7 @@ export interface CellNavigationOptions {
  * features: [cellNavigation()]
  * ```
  *
- * Prefer this over the table's `cellNavigation` input when composing with
- * other features; the input still works for hosts that toggle it alone.
+ * Compose it to turn the grid on. The table has no input that does this.
  *
  * @param options - Optional range-change listener.
  * @returns The feature.

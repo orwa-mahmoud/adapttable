@@ -137,15 +137,17 @@
         [adaptSlotProps]="v.toolbarEntry()"
         [adaptSlotTable]="v.table"
       />
-      @if (v.rowMutations?.().canAdd) {
-        <button
-          mat-button
-          type="button"
-          data-adapttable-part="add-row"
-          (click)="v.rowMutations?.().addRow()"
-        >
-          {{ v.table.labels().addRow }}
-        </button>
+      @if (v.rowMutations; as mutations) {
+        @if (mutations().canAdd) {
+          <button
+            mat-button
+            type="button"
+            data-adapttable-part="add-row"
+            (click)="mutations().addRow()"
+          >
+            {{ v.table.labels().addRow }}
+          </button>
+        }
       }
     </div>
 

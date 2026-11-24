@@ -12,6 +12,7 @@ import {
   AdaptAgentApproval,
   AdaptTableAssistant,
 } from "@adapttable/angular-cdk/assistant";
+import { cellNavigation } from "@adapttable/angular-cdk/cell-navigation";
 import { columnMenu } from "@adapttable/angular-cdk/column-menu";
 import { editing, rowEditing } from "@adapttable/angular-cdk/editing";
 import { filters } from "@adapttable/angular-cdk/filters";
@@ -32,7 +33,6 @@ import {
 import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import { AdaptErrorState } from "./components/errorState";
 import { AdaptDataTable } from "./dataTable";
-
 const kit: AngularConformanceKit = {
   name: "angular-unstyled",
   Table: AdaptDataTable,
@@ -41,6 +41,7 @@ const kit: AngularConformanceKit = {
   rowReorder,
   virtualize,
   selection,
+  cellNavigation,
 };
 
 describe(`table conformance — ${kit.name}`, () => {

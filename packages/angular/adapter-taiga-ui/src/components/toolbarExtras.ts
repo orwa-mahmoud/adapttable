@@ -199,7 +199,7 @@ const EXPORT_SLOTS: ExportProgressSlots = {
           data-adapttable-part="export-csv-button"
           style="flex-shrink: 0; white-space: nowrap"
           [disabled]="p.exportBusy === true || p.exportDisabled === true"
-          [attr.aria-busy]="p.exportBusy ?? null"
+          [attr.aria-busy]="p.exportBusy"
           [attr.title]="p.exportDisabled ? p.exportDisabledReason : null"
           (click)="start()"
         >
@@ -213,7 +213,7 @@ const EXPORT_SLOTS: ExportProgressSlots = {
           [labels]="p.labels"
           [slots]="slots"
         />
-        <adapt-export-announcer [announcement]="p.exportAnnouncement ?? ''" />
+        <adapt-export-announcer [announcement]="p.exportAnnouncement" />
       }
     }
   `,

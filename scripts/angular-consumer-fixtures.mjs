@@ -367,6 +367,14 @@ const CEILINGS = {
   "angular · unstyled + palette": { own: 145, app: 256 },
   "angular · unstyled combination": { own: 156, app: 268 },
   "angular · unstyled + preset": { own: 156, app: 214 },
+  "angular · angular-material + preset": { own: 167, app: 311 },
+  "angular · ng-bootstrap + preset": { own: 164, app: 246 },
+  "angular · spartan + preset": { own: 165, app: 262 },
+  "angular · taiga-ui + preset": { own: 176, app: 295 },
+  "angular · angular-aria + preset": { own: 164, app: 250 },
+  "angular · ngx-bootstrap + preset": { own: 167, app: 251 },
+  "angular · angular-cdk + preset": { own: 165, app: 250 },
+  "angular · ng-zorro + preset": { own: 174, app: 425 },
   "angular · lean table": { own: 56, app: 96 },
   "angular · lean grouping navigation editing": { own: 82, app: 121 },
 };
@@ -558,6 +566,27 @@ export function angularConsumerFixtures(kits = angularKits()) {
       // engines belong in this graph. The writers it never configures do not.
       ["coreVirtualize", "injectVirtualizer", "pdfWriter", "xlsxWriter"]
     ),
+    ...kits
+      .filter((kit) => kit !== native)
+      .map((kit) =>
+        rendered(
+          `angular · ${kit.name.replace("@adapttable/", "")} + preset`,
+          kit,
+          [FEATURES.preset],
+          {
+            functionality: `${kit.name} table with the standard preset`,
+            absent: [
+              "coreVirtualize",
+              "injectVirtualizer",
+              "pdfWriter",
+              "xlsxWriter",
+            ],
+            ...ceilings(
+              `angular · ${kit.name.replace("@adapttable/", "")} + preset`
+            ),
+          }
+        )
+      ),
   ];
 }
 

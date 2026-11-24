@@ -12,6 +12,7 @@ import {
   AdaptAgentApproval,
   AdaptTableAssistant,
 } from "@adapttable/taiga-ui/assistant";
+import { cellNavigation } from "@adapttable/taiga-ui/cell-navigation";
 import { columnMenu } from "@adapttable/taiga-ui/column-menu";
 import { editing, rowEditing } from "@adapttable/taiga-ui/editing";
 import { filters } from "@adapttable/taiga-ui/filters";
@@ -32,7 +33,6 @@ import {
 import { AdaptErrorState } from "./components/errorState";
 import { AdaptDataTable } from "./dataTable";
 import { taigaOptions } from "./taigaTestHelpers";
-
 const kit: AngularConformanceKit = {
   name: "taiga-ui",
   Table: AdaptDataTable,
@@ -41,6 +41,7 @@ const kit: AngularConformanceKit = {
   rowReorder,
   virtualize,
   selection,
+  cellNavigation,
 };
 
 describe(`table conformance — ${kit.name}`, () => {

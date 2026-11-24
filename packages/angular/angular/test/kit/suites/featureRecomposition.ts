@@ -69,7 +69,6 @@ export function featureRecompositionTests(
           [features]="tableFeatures()"
           [forceMobile]="mobile"
           [urlSync]="false"
-          [cellNavigation]="navigation()"
           [filtersMode]="filterMode()"
           [closeHeaderFilterOnSelect]="closeHeaderFilter()"
           [density]="rowDensity()"
@@ -106,7 +105,6 @@ export function featureRecompositionTests(
           ...base,
         ];
       });
-      readonly navigation = signal(false);
       readonly filterMode = signal<"popover" | "drawer">("popover");
       readonly closeHeaderFilter = signal(false);
       readonly rowDensity = signal<"comfortable" | "compact" | undefined>(

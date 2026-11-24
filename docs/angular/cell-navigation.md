@@ -58,8 +58,7 @@ For NG-ZORRO, replace the three feature prefixes and the root component import
 with `@adapttable/ng-zorro`. `onRangeChange` is a callback inside the factory
 options. Its value is a rectangle with `anchor` and `head` coordinates, or
 `null` when the selection clears. It is separate from selected row IDs.
-The direct `[cellNavigation]="true"` input also enables grid navigation; the
-factory is useful when composing the rest of the grid features.
+Compose `cellNavigation()` to turn the grid on. There is no table input for it.
 
 ## Keyboard and clipboard
 

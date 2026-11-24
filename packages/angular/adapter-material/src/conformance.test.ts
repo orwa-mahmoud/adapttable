@@ -12,6 +12,7 @@ import {
   AdaptAgentApproval,
   AdaptTableAssistant,
 } from "@adapttable/angular-material/assistant";
+import { cellNavigation } from "@adapttable/angular-material/cell-navigation";
 import { columnMenu } from "@adapttable/angular-material/column-menu";
 import { editing, rowEditing } from "@adapttable/angular-material/editing";
 import { filters } from "@adapttable/angular-material/filters";
@@ -32,7 +33,6 @@ import {
 import { kitSelector } from "../testUtils";
 import { AdaptErrorState } from "./components/errorState";
 import { AdaptDataTable } from "./dataTable";
-
 const kit: AngularConformanceKit = {
   name: "angular-material",
   Table: AdaptDataTable,
@@ -41,6 +41,7 @@ const kit: AngularConformanceKit = {
   rowReorder,
   virtualize,
   selection,
+  cellNavigation,
 };
 
 describe(`table conformance — ${kit.name}`, () => {

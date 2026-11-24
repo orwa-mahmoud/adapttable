@@ -91,9 +91,12 @@ of 380 KiB.
 A behaviour turns on only by composing its feature; its options go in the
 feature call. `migrate-v4` reports each of these props on a table.
 
-| v3 table props                                       | v4                                                                                        |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `selectedIds`, `onSelectionChange`, `selectionGetId` | `selection({ selectedIds, onSelectionChange, getId })` from `@adapttable/<kit>/selection` |
+| v3 table props                                                          | v4                                                                                                                                       |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `selectedIds`, `onSelectionChange`, `selectionGetId`                    | `selection({ selectedIds, onSelectionChange, getId })` from `@adapttable/<kit>/selection`                                                |
+| Vue `v-model:selected-ids`                                              | The same `selection({ selectedIds, onSelectionChange })`. `migrate-v4` reports the binding and leaves it, because the host owns the ref. |
+| Angular `[selectedIds]`, `(selectionChange)`                            | The same feature. `migrate-v4` reports the bindings and leaves them, because the host owns the signal and the callback.                  |
+| `useTableFeatures` imported from a removed React kit `/features` barrel | `@adapttable/react/adapter`, in the same pass as the other names, which stay on `@adapttable/react/features`                             |
 
 ## Data tiers
 

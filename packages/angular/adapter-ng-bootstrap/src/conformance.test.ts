@@ -12,6 +12,7 @@ import {
   AdaptAgentApproval,
   AdaptTableAssistant,
 } from "@adapttable/ng-bootstrap/assistant";
+import { cellNavigation } from "@adapttable/ng-bootstrap/cell-navigation";
 import { columnMenu } from "@adapttable/ng-bootstrap/column-menu";
 import { editing, rowEditing } from "@adapttable/ng-bootstrap/editing";
 import { filters } from "@adapttable/ng-bootstrap/filters";
@@ -32,7 +33,6 @@ import {
 import { ngBootstrapPart } from "../testUtils";
 import { AdaptErrorState } from "./components/errorState";
 import { AdaptDataTable } from "./dataTable";
-
 const kit: AngularConformanceKit = {
   name: "ng-bootstrap",
   Table: AdaptDataTable,
@@ -41,6 +41,7 @@ const kit: AngularConformanceKit = {
   rowReorder,
   virtualize,
   selection,
+  cellNavigation,
 };
 
 describe(`table conformance — ${kit.name}`, () => {

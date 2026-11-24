@@ -342,7 +342,29 @@
     "FIND_IN_TABLE_IMPLEMENTATION",
     "applyRowPatches",
     "createMemoryAdapter",
-    "updateRow"
+    "updateRow",
+    "COLUMN_MENU_TOOLBAR_STATE",
+    "DENSITY_TOOLBAR_STATE",
+    "DensityToolbar",
+    "EXPORT_TOOLBAR_STATE",
+    "ExportToolbar",
+    "FULLSCREEN_TOOLBAR_STATE",
+    "FullscreenToolbar",
+    "injectDensityToolbar",
+    "injectExportToolbar",
+    "injectFullscreenToolbar",
+    "injectPrintToolbar",
+    "injectUndoRedoToolbar",
+    "PRINT_TOOLBAR_STATE",
+    "PrintToolbar",
+    "SAVED_VIEWS_TOOLBAR_STATE",
+    "UNDO_REDO_TOOLBAR_STATE",
+    "UndoRedoToolbar",
+    "rekeyRow",
+    "RowIdConflictError",
+    "ServerFilterKeys",
+    "serverFilterKeys",
+    "ServerFilterKeysInput"
   ],
   "features": [
     "CellNavigationOptions",
@@ -394,7 +416,9 @@
     "statusBar",
     "tree",
     "undoRedoButtons",
-    "virtualize"
+    "virtualize",
+    "selection",
+    "SelectionOptions"
   ],
   "adapter": [
     "ACTIONS_COLUMN_KEY",
@@ -714,7 +738,6 @@
     "TableRowPinningOptions",
     "TableTree",
     "TableView",
-    "ToolbarExtrasSlotProps",
     "TreeCellProps",
     "TreeOptions",
     "TreeToggleButtonProps",
@@ -893,6 +916,9 @@
     "ExportRequest",
     "ExportTable",
     "resolveLabels",
-    "defaultLabels"
+    "defaultLabels",
+    "withCommandPaletteView",
+    "withContextMenuView",
+    "ToolbarEntrySlotProps"
   ]
 }

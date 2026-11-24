@@ -167,6 +167,14 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
     "Selection is a feature: compose selection({ selectedIds, onSelectionChange, getId }) from @adapttable/<kit>/selection and delete the table prop.",
   ],
   [
+    /v-model:selected-ids\b|v-model:selectedIds\b/g,
+    "Vue selected ids are a feature: compose selection({ selectedIds, onSelectionChange }) from the kit's selection entry. v-model:selected-ids is reported and left in place, because the host owns the ref.",
+  ],
+  [
+    /\[(?:selectedIds|selectionGetId)\]|\((?:selectionChange|selectedIdsChange)\)/g,
+    "Angular selection bindings are a feature: compose selection({ selectedIds, onSelectionChange, getId }) from the kit's selection entry. [selectedIds] and (selectionChange) are reported and left in place, because the host owns the signal and the callback.",
+  ],
+  [
     /\bmobileIdentityColumns\b/g,
     "mobileIdentityColumns was removed; hideOnMobile on each column decides what a card shows. Delete the prop.",
   ],

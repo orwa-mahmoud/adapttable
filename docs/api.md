@@ -3867,9 +3867,10 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   entry's `coreExportCsv`, `coreFilters`, `coreHeaderFilters` and
   `coreFindInTable` are the core factories with their implementations filed,
   for a kit to extend.
-- All supported Angular kits accept live `cellNavigation`, `filtersMode`
-  and `closeHeaderFilterOnSelect` inputs. Row checkboxes come from
-  `selection()`. Their controlled `density` input
+- Angular kits turn the keyboard grid on by composing `cellNavigation()`.
+  They still accept live `filtersMode` and `closeHeaderFilterOnSelect`
+  inputs, which place a composed filter panel and do not turn filtering on.
+  Row checkboxes come from `selection()`. Their controlled `density` input
   overrides the chooser's state; `densityChange` reports requests and waits
   for the host to update the input. Omitting `density` keeps the chooser
   uncontrolled. Kits share core's `resolveDensity` and `requestDensityChange`,

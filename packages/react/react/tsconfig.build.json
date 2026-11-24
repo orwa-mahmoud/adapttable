@@ -5,5 +5,10 @@
     "types": ["node"],
     "paths": {}
   },
-  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.test-utils.ts",
+    "src/**/*.test-utils.tsx"
+  ]
 }

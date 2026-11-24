@@ -1,4 +1,5 @@
 /** Feature identities change while the mounted table and its state stay alive. */
+
 import {
   type AdaptTableFeature,
   type ColumnDef,
@@ -6,6 +7,7 @@ import {
   type ConfirmHandler,
   type FeatureMountContext,
 } from "@adapttable/angular";
+import { cellNavigation } from "@adapttable/angular-aria/cell-navigation";
 import { columnMenu } from "@adapttable/angular-aria/column-menu";
 import { filters } from "@adapttable/angular-aria/filters";
 import { headerFilters } from "@adapttable/angular-aria/header-filters";
@@ -57,7 +59,6 @@ const COLUMNS: readonly ColumnDef<Row>[] = [
       [features]="tableFeatures()"
       [forceMobile]="mobile"
       [urlSync]="false"
-      [cellNavigation]="navigation()"
       [filtersMode]="filterMode()"
       [closeHeaderFilterOnSelect]="closeHeaderFilter()"
       [density]="rowDensity()"
@@ -81,9 +82,11 @@ class Host {
   readonly selectionIds = computed(() =>
     this.controlledSelection() ? this.selected() : undefined
   );
+  readonly navigation = signal(false);
   readonly tableFeatures = computed(() => {
     const base = this.features();
-    if (!this.selectable()) return base;
+    const listed = this.navigation() ? [cellNavigation(), ...base] : base;
+    if (!this.selectable()) return listed;
     return [
       selection({
         selectedIds: this.selectionIds,
@@ -91,10 +94,9 @@ class Host {
           this.onSelectionChange(ids);
         },
       }),
-      ...base,
+      ...listed,
     ];
   });
-  readonly navigation = signal(false);
   readonly filterMode = signal<"popover" | "drawer">("popover");
   readonly closeHeaderFilter = signal(false);
   readonly rowDensity = signal<"comfortable" | "compact" | undefined>(
@@ -405,7 +407,7 @@ describe("mounted feature recomposition (unstyled Angular)", () => {
     expect(host.onSelectionChange).toHaveBeenCalledOnce();
   });
 
-  it("toggles selection and keyboard navigation inputs without replacing its features", async () => {
+  it("toggles selection through its feature and keyboard navigation by composing it", async () => {
     const mounted = await mount((host) => {
       host.selectable.set(false);
       return [];

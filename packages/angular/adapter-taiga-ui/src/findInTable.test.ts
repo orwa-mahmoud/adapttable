@@ -41,7 +41,6 @@ const COLUMNS: ColumnDef<Row>[] = [
       [rowKey]="rowKey"
       [urlSync]="false"
       [forceMobile]="false"
-      [cellNavigation]="navigable"
       [features]="features"
     />
   `,
@@ -51,7 +50,6 @@ class Host {
   readonly columns = COLUMNS;
   readonly rowKey = (row: Row) => row.id;
   features = [findInTable({ button: true })];
-  navigable = false;
 }
 
 const part = (name: string) =>
@@ -62,7 +60,6 @@ const part = (name: string) =>
 describe("find in table (Taiga UI Angular)", () => {
   async function mount(navigable = false) {
     const fixture = TestBed.createComponent(Host);
-    fixture.componentInstance.navigable = navigable;
     if (navigable) {
       fixture.componentInstance.features = [
         findInTable({ button: true }),

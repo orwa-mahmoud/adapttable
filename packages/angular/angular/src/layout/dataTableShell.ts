@@ -39,6 +39,7 @@ import {
   injectTableData,
   type injectTableEditHistory,
   type LiveEditConflictInput,
+  type MaybeSignalOptional,
   type MobileCardRenderer,
   mountTableFeatures,
   PRINT_TOOLBAR_STATE,
@@ -185,7 +186,6 @@ import {
 } from "../filters/tableFilters";
 import { selectionStatsOf } from "../focus/selectionStats";
 import { staggerMounted } from "../motion/mountStagger";
-import type { MaybeSignalOptional } from "../store";
 import type { KitEnvironment } from "./kitEnvironment";
 import {
   bodyWindowFor,
@@ -438,6 +438,11 @@ export interface TableView<TRow> extends TableSurfaceView<TRow> {
   readonly rowMutations: Signal<RowMutationsState<TRow>> | undefined;
   /** Asks before an action that declares a `confirm`. */
   readonly confirm: ConfirmHandler;
+  /**
+   * The id selection uses for a row. A composed `selection({ getId })`
+   * supplies it; otherwise it is the table row key.
+   */
+  readonly selectionRowId: (row: TRow) => string;
   /** What every toolbar entry receives: the labels. */
   readonly toolbarEntry: Signal<ToolbarEntrySlotProps>;
   /** The batch-edit bar's props, when batch editing is composed. */
@@ -560,14 +565,9 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   /** Which edge a projected side panel sits on. */
   readonly sidePanelSide = input<SidePanelSide>("end");
   /**
-   * Arrow keys move between cells. Prefer composing
-   * `cellNavigation()` when listing features; this input still toggles the
-   * grid alone.
-   */
-  readonly cellNavigation = input(false);
-  /**
    * Told a range after Cut has reached the clipboard — the context menu and
-   * Ctrl/Cmd+X. Read on each cut.
+   * Ctrl/Cmd+X. Read on each cut. The grid itself turns on only through
+   * `cellNavigation()`.
    */
   readonly onCellCut = input<(range: CellRange) => void>();
   /**
@@ -902,7 +902,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     const configuration = computed(() => ({
       features: features(),
       inScrollBox: inScrollBox(),
-      cellNavigation: this.cellNavigation(),
       filtersMode: this.filtersMode(),
       closeHeaderFilterOnSelect: this.closeHeaderFilterOnSelect(),
       urlSync: this.urlSync(),
@@ -1056,25 +1055,29 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     const selectionState = resources.use("selection-state", [], () => ({
       controller: undefined as RowSelection | undefined,
     }));
-    const featureSelected = featureOptions.selectedIds as
-      MaybeSignalOptional<readonly string[]> | undefined;
-    const featureChange = featureOptions.onSelectionChange as
-      ((ids: string[]) => void) | undefined;
-    const featureGetId = featureOptions.selectionGetId as
-      ((row: TRow) => string) | undefined;
     const selectable = featureOptions.selectable === true || bulk !== undefined;
     const selectionController =
       selectable || selectionState.controller !== undefined
         ? resources.use("selection", [], (injector) =>
             injectRowSelection<TRow>({
               rows: computed(() => source().rows),
-              rowKey: (row) => (featureGetId ?? this.rowKey())(row),
-              ...(featureSelected === undefined
-                ? {}
-                : { selectedIds: featureSelected }),
+              rowKey: (row) => {
+                const getId = liveOptions().selectionGetId as
+                  ((row: TRow) => string) | undefined;
+                return (getId ?? this.rowKey())(row);
+              },
+              selectedIds: computed(() => {
+                const ids = liveOptions().selectedIds as
+                  MaybeSignalOptional<readonly string[]> | undefined;
+                return ids === undefined ? undefined : readMaybe(ids);
+              }),
               defaultSelectedIds: featureOptions.defaultSelectedIds as
                 readonly string[] | undefined,
-              ...(featureChange ? { onSelectionChange: featureChange } : {}),
+              onSelectionChange: (ids) => {
+                const change = liveOptions().onSelectionChange as
+                  ((ids: string[]) => void) | undefined;
+                change?.(ids);
+              },
               labels,
               acrossPages: computed(
                 () => sourceCapabilities(source()).selectAcrossPages
@@ -1211,7 +1214,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     const grid = resources.use(
       "grid",
       [
-        this.cellNavigation(),
         featureOptions.cellNavigation,
         editableCell,
         find,
@@ -1222,7 +1224,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         featureOptions.getCellSpan,
       ],
       (injector) =>
-        this.cellNavigation() || featureOptions.cellNavigation === true
+        featureOptions.cellNavigation === true
           ? injectGridFocus({
               table,
               enabled: true,
@@ -1887,6 +1889,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       renderRowActions: this.renderRowActions,
       isCellFlashing,
       selection,
+      selectionRowId: (row) => {
+        const getId = liveOptions().selectionGetId as
+          ((row: TRow) => string) | undefined;
+        return (getId ?? this.rowKey())(row);
+      },
       grid,
       findBar,
       commandPalette,

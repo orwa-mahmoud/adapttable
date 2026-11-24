@@ -43,6 +43,8 @@ export interface AngularConformanceKit {
   readonly virtualize: () => AdaptTableFeature;
   /** The kit's row-selection feature. */
   readonly selection: () => AdaptTableFeature;
+  /** The kit's keyboard-grid feature. */
+  readonly cellNavigation: () => AdaptTableFeature;
 }
 
 function columnsFor(
@@ -82,6 +84,7 @@ function featuresFor(
     ...(groupBy ? [grouping(groupBy)] : []),
     ...(scenario.virtualize ? [virtualize()] : []),
     ...(scenario.selectable ? [kit.selection()] : []),
+    ...(scenario.navigable ? [kit.cellNavigation()] : []),
   ];
 }
 
@@ -129,7 +132,6 @@ export function angularConformanceDriver(
       set("forceMobile", scenario.mobile ?? false);
       set("labels", scenario.labels);
       set("urlSync", false);
-      set("cellNavigation", scenario.navigable ?? false);
       set("features", featuresFor(kit, scenario));
       if (scenario.virtualize) {
         set("paginationMode", "infinite");

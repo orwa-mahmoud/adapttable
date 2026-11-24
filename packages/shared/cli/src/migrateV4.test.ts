@@ -94,6 +94,52 @@ describe("migrateV4Source", () => {
     );
   });
 
+  it("splits a removed React kit barrel in one pass", () => {
+    const source =
+      'import { selectionStats, useTableFeatures as useFeatures } from "@adapttable/mui/features";';
+    const once = migrateV4Source(source);
+    expect(once.code).toBe(
+      'import { selectionStats } from "@adapttable/react/features";\nimport { useTableFeatures as useFeatures } from "@adapttable/react/adapter";'
+    );
+    const twice = migrateV4Source(once.code);
+    expect(twice.code).toBe(once.code);
+    expect(twice.movedImports).toBe(0);
+    for (const kit of [
+      "antd",
+      "base-ui",
+      "chakra",
+      "mantine",
+      "mui",
+      "radix",
+      "shadcn",
+      "unstyled",
+    ]) {
+      const migrated = migrateV4Source(
+        `import { useTableFeatures } from "@adapttable/${kit}/features";`
+      );
+      expect(migrated.code).toBe(
+        'import { useTableFeatures } from "@adapttable/react/adapter";'
+      );
+      expect(migrateV4Source(migrated.code).movedImports).toBe(0);
+    }
+  });
+
+  it("reports Vue and Angular selection bindings without rewriting them", () => {
+    const vue = migrateV4Source('<DataTable v-model:selected-ids="ids" />');
+    expect(vue.code).toBe('<DataTable v-model:selected-ids="ids" />');
+    expect(vue.issues.map((issue) => issue.message).join("\n")).toContain(
+      "v-model:selected-ids"
+    );
+    const angular = migrateV4Source(
+      '<adapt-data-table [selectedIds]="ids" (selectionChange)="onSelection($event)" />'
+    );
+    expect(angular.code).toContain("[selectedIds]");
+    expect(angular.code).toContain("(selectionChange)");
+    const messages = angular.issues.map((issue) => issue.message).join("\n");
+    expect(messages).toContain("[selectedIds]");
+    expect(messages).toContain("(selectionChange)");
+  });
+
   it("moves a kit feature barrel onto the entry that owns each name", () => {
     expect(
       migrateV4Source(

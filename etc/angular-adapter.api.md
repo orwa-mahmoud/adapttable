@@ -1911,7 +1911,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     protected readonly batchEditBarSlot: FeatureSlotKey<BatchEditBarProps<unknown>>;
     // @internal
     protected readonly bulkBarSlot: FeatureSlotKey<BulkBarSlotProps<unknown>>;
-    readonly cellNavigation: InputSignal<boolean>;
     // @internal
     protected readonly cellTemplates: Signal<readonly AdaptCellTemplate[]>;
     readonly classNames: InputSignal<DataTableClassNames>;
@@ -2199,11 +2198,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         };
         "sidePanelSide": {
             "alias": "sidePanelSide";
-            "required": false;
-            "isSignal": true;
-        };
-        "cellNavigation": {
-            "alias": "cellNavigation";
             "required": false;
             "isSignal": true;
         };

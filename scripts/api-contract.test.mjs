@@ -574,6 +574,7 @@ describe("new Angular kit release contracts", () => {
           "./resizable-columns",
           "./row-appearance",
           "./row-pinning",
+          "./selection",
         ],
         kit
       );
