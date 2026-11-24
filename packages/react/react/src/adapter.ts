@@ -425,7 +425,7 @@ export type {
   TableFeatureMountContext,
 } from "./features/tableFeature";
 export type { FeatureApplyInput, FeaturePatch } from "./features/tableFeature";
-export { applyTableFeatures, featureLabelsFor } from "./features/tableFeature";
+export { featureLabelsFor } from "./features/tableFeature";
 export { KEYED_WINDOW_RENDER } from "./features/virtualize";
 export {
   type ChecklistButtonProps,

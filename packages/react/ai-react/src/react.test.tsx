@@ -6,12 +6,12 @@ import type {
 } from "@adapttable/ai";
 import {
   AGENT_VIEW_STATE,
-  applyTableFeatures,
   FeatureProviders,
   type TableRuntimeView,
   useFeatureState,
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
+import { applyTableFeatures } from "@adapttable/react/features";
 import type { ColumnDef } from "@adapttable/unstyled";
 import { act, render, waitFor } from "@testing-library/react";
 import { type ReactNode, useLayoutEffect, useState } from "react";

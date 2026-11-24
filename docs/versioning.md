@@ -106,7 +106,7 @@ off the core main barrel.
 ### `@adapttable/react/adapter`
 
 The supported **adapter-author** boundary. A ninth adapter is built from this
-entry — `useDataTableShell`, chrome components, slot contracts, pager and pin
+entry — `useTableFeatures`, `useDataTableShell`, chrome components, slot contracts, pager and pin
 math, announcers — with the same SemVer promise as the main entry. App code
 rarely imports it; reaching for it is choosing that contract, not an
 undocumented escape. There is no private channel behind it.

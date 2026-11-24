@@ -79,6 +79,12 @@ const V4_MOVES: ImportMoves = {
       REACT_MAIN_TO_ADAPTER,
       "@adapttable/react/adapter"
     ),
+    "@adapttable/react/adapter": {
+      applyTableFeatures: "@adapttable/react/features",
+    },
+    "@adapttable/react/features": {
+      useTableFeatures: "@adapttable/react/adapter",
+    },
     "@adapttable/server": {
       splitFilterValues: { to: "@adapttable/server", name: "splitListParam" },
     },

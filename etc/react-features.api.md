@@ -833,9 +833,6 @@ export interface UseSavedViewsOptions extends Omit<SavedViewsControllerOptions, 
 }
 
 // @public
-export function useTableFeatures<P extends object>(incoming: P): P & FeatureProps<RowOf<P>>;
-
-// @public
 export function virtualize(options?: VirtualizeOptions): StaticTableFeature;
 
 // @public

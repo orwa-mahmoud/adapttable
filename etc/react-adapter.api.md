@@ -30,7 +30,6 @@ import { AggregateFormatContext } from '@adapttable/core';
 import { AggregateName } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
 import { applyCollapsedColumnGroups } from '@adapttable/core/binding';
-import { applyTableFeatures } from '@adapttable/core/binding';
 import { APPROVAL_PREVIEW_LIMIT } from '@adapttable/core/binding';
 import { ApprovalReview } from '@adapttable/core';
 import { approvalReview } from '@adapttable/core';
@@ -911,8 +910,6 @@ export { AggregateName }
 export { Aggregator }
 
 export { applyCollapsedColumnGroups }
-
-export { applyTableFeatures }
 
 export { APPROVAL_PREVIEW_LIMIT }
 

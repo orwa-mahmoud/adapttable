@@ -58,7 +58,6 @@ export {
   undoRedoButtons,
 } from "./features/factories";
 export type { RowOf } from "./features/featureHost";
-export { useTableFeatures } from "./features/featureHost";
 export { filters } from "./features/filters";
 export { findInTable } from "./features/find-in-table";
 export { fullscreen } from "./features/fullscreen";

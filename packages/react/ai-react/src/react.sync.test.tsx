@@ -14,10 +14,10 @@
  */
 import type { AgentManifest } from "@adapttable/ai";
 import {
-  applyTableFeatures,
   FeatureProviders,
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
+import { applyTableFeatures } from "@adapttable/react/features";
 import { act, render, waitFor } from "@testing-library/react";
 import { useRef, useState } from "react";
 import { describe, expect, it, vi } from "vitest";

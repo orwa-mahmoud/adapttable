@@ -437,11 +437,12 @@ registry to learn and nothing global to collide over.
 `headerFilters` · `savedViews` · `selectionStats` · `densityChooser` ·
 `print` · `statusBar` · `undoRedoButtons` · `multiSort` · `fitColumns` ·
 `columnSelectionCheckbox` · `rowActions` · `feature` (ad-hoc patch) ·
-`applyTableFeatures` (the merge used by every adapter) · `useTableFeatures`
-(apply + `setup(host)`, the hook every adapter runs).
+`applyTableFeatures` (the merge, from `@adapttable/react/features`).
 
-Host helpers are exported from `@adapttable/react/adapter`: `featureHostOf` /
-`rememberFeatureHost` (the host of one table, never a sibling's) ·
+`useTableFeatures` (apply + `setup(host)`, the hook every adapter runs) is
+exported from `@adapttable/react/adapter`, with the other host helpers:
+`featureHostOf` / `rememberFeatureHost` (the host of one table, never a
+sibling's) ·
 `FeatureHostProvider` / `useFeatureHost` (hooks under that table) ·
 `bindFeatureHostFn` (a mapper created outside the table still resolves names
 for the table that invokes it).

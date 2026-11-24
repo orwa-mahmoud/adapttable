@@ -67,6 +67,23 @@ describe("migrateV4Source", () => {
     ).toBe('import { sameItems as sameRows } from "@adapttable/core/binding";');
   });
 
+  it("gives the two composition helpers one home each", () => {
+    expect(
+      migrateV4Source(
+        'import { applyTableFeatures, useDataTableShell } from "@adapttable/react/adapter";'
+      ).code
+    ).toBe(
+      'import { useDataTableShell } from "@adapttable/react/adapter";\nimport { applyTableFeatures } from "@adapttable/react/features";'
+    );
+    expect(
+      migrateV4Source(
+        'import { rowReorder, useTableFeatures } from "@adapttable/react/features";'
+      ).code
+    ).toBe(
+      'import { rowReorder } from "@adapttable/react/features";\nimport { useTableFeatures } from "@adapttable/react/adapter";'
+    );
+  });
+
   it("moves a kit feature barrel onto the entry that owns each name", () => {
     expect(
       migrateV4Source(

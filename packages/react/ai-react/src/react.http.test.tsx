@@ -10,7 +10,6 @@
 import type { AgentSession } from "@adapttable/ai";
 import { AGENT_SCHEMA_VERSION, runAgentHttpTurn } from "@adapttable/ai/http";
 import {
-  applyTableFeatures,
   type FeatureProviderProps,
   FeatureProviders,
   type TableFeature,
@@ -18,6 +17,7 @@ import {
   usePublishTableRuntime,
   useTableRuntime,
 } from "@adapttable/react/adapter";
+import { applyTableFeatures } from "@adapttable/react/features";
 import { DataTable } from "@adapttable/unstyled";
 import { act, render, waitFor } from "@testing-library/react";
 import { useEffect, useState } from "react";

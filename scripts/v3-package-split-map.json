@@ -42827,14 +42827,6 @@
       "behavior": ""
     },
     {
-      "export": "applyTableFeatures",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
       "export": "APPROVAL_PREVIEW_LIMIT",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -50015,14 +50007,6 @@
       "currentImport": "@adapttable/react/features",
       "kind": "type",
       "class": "neutral-model",
-      "proposedImport": "@adapttable/react/features",
-      "behavior": ""
-    },
-    {
-      "export": "useTableFeatures",
-      "currentImport": "@adapttable/react/features",
-      "kind": "value",
-      "class": "react-binding",
       "proposedImport": "@adapttable/react/features",
       "behavior": ""
     },

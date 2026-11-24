@@ -1,7 +1,6 @@
 /** The agent follows actual shell-owned state, including state outside the engine. */
 import type { AgentManifest, AgentSession } from "@adapttable/ai";
 import {
-  applyTableFeatures,
   type ColumnDef,
   type DataTableShellProps,
   type DataTableShellResult,
@@ -12,6 +11,7 @@ import {
   useTableRuntime,
 } from "@adapttable/react/adapter";
 import {
+  applyTableFeatures,
   columnMenu,
   columnSelectionCheckbox,
 } from "@adapttable/react/features";

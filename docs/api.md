@@ -180,8 +180,9 @@ Types: `TableFeature` · `TableFeatureHost` · `FeaturePatch` ·
 `registerContextMenuItems`; resources go in `mount(context)`
 (`TableFeatureMountContext`, `StaticFeatureMountContext`), kept by id and
 `dependencies`. `PublishTableRuntime` publishes a chrome's reader and
-commits it in a layout effect. Adapters run this through
-`useTableFeatures`. The host belongs to that table: `featureHostOf` /
+commits it in a layout effect. The merge `applyTableFeatures` is imported
+from `@adapttable/react/features`. Adapters run the hook `useTableFeatures`
+from `@adapttable/react/adapter`. The host belongs to that table: `featureHostOf` /
 `rememberFeatureHost` thread it into chrome, `FeatureHostProvider` /
 `useFeatureHost` hand it to hooks in the tree, and `bindFeatureHostFn`
 scopes a mapper (summary, group aggregates) to the table that invoked it.
