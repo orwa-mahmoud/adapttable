@@ -216,7 +216,10 @@ describe("feature factories", () => {
     expect(patch(findInTable())).toEqual({ findInTable: true });
     expect(patch(fullscreen())).toEqual({ fullscreen: true });
     expect(patch(headerFilters())).toEqual({ headerFilters: true });
-    expect(patch(selectionStats())).toEqual({ selectionStats: true });
+    expect(patch(selectionStats())).toEqual({
+      selectable: true,
+      selectionStats: true,
+    });
     expect(patch(densityChooser())).toEqual({ densityChooser: true });
     expect(patch(statusBar())).toEqual({ statusBar: true });
     expect(patch(undoRedoButtons())).toEqual({ undoRedoButtons: true });
@@ -224,6 +227,7 @@ describe("feature factories", () => {
     expect(patch(fitColumns())).toEqual({ fitColumns: true });
     expect(patch(columnSelectionCheckbox())).toEqual({
       columnSelectionCheckbox: true,
+      selectable: true,
     });
   });
 
@@ -253,7 +257,10 @@ describe("feature factories", () => {
 
   it("bulkActions writes the list", () => {
     const actions = [{ key: "del", label: "Delete", onClick: vi.fn() }];
-    expect(patch(bulkActions(actions))).toEqual({ bulkActions: actions });
+    expect(patch(bulkActions(actions))).toEqual({
+      bulkActions: actions,
+      selectable: true,
+    });
   });
 
   it("filters and filterTypes write the defs", () => {
