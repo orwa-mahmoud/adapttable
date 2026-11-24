@@ -1,7 +1,12 @@
 import native = require("@adapttable/vue-unstyled");
-import actions = require("@adapttable/vue-unstyled/features");
+import bulk = require("@adapttable/vue-unstyled/bulk-actions");
+import palette = require("@adapttable/vue-unstyled/command-palette");
+import menu = require("@adapttable/vue-unstyled/context-menu");
+import csv = require("@adapttable/vue-unstyled/export");
 import pdf = require("@adapttable/vue-unstyled/export-pdf");
 import xlsx = require("@adapttable/vue-unstyled/export-xlsx");
+import printFeature = require("@adapttable/vue-unstyled/print");
+import panel = require("@adapttable/vue-unstyled/side-panel");
 import vue = require("vue");
 interface Person {
   id: string;
@@ -11,7 +16,7 @@ const rows: Person[] = [{ id: "a", name: "Ada" }];
 let selected: string[] = [];
 let allMatching: boolean | undefined;
 const features = [
-  actions.bulkActions([
+  bulk.bulkActions([
     {
       key: "go",
       label: "Go",
@@ -21,7 +26,7 @@ const features = [
       },
     },
   ]),
-  actions.contextMenu<Person>({
+  menu.contextMenu<Person>({
     items: (target) => [
       {
         key: "host",
@@ -30,12 +35,12 @@ const features = [
       },
     ],
   }),
-  actions.commandPalette({ button: true }),
-  actions.sidePanel({ panels: [], open: null, onOpenChange: () => undefined }),
-  actions.exportCsv<Person>({ writer: pdf.pdfWriter() }),
-  actions.print(() => undefined, true),
+  palette.commandPalette({ button: true }),
+  panel.sidePanel({ panels: [], open: null, onOpenChange: () => undefined }),
+  csv.exportCsv<Person>({ writer: pdf.pdfWriter() }),
+  printFeature.print(() => undefined, true),
 ];
-const spreadsheet = actions.exportCsv<Person>({ writer: xlsx.xlsxWriter() });
+const spreadsheet = csv.exportCsv<Person>({ writer: xlsx.xlsxWriter() });
 const tableProps = {
   data: rows,
   columns: [{ key: "name" }],
