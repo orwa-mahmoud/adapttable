@@ -61,7 +61,7 @@ describe("Chakra GroupingPanel", () => {
       />
     );
 
-    const handle = screen.getByRole("button", { name: "Move Team" });
+    const handle = screen.getByRole("button", { name: "Move Team grouping" });
     fireEvent.keyDown(handle, { key: "ArrowRight" });
     fireEvent.click(
       screen.getByRole("button", { name: "Remove Team from grouping" })
