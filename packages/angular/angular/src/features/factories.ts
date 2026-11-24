@@ -7,7 +7,7 @@
  */
 import {
   type AdaptTableFeature,
-  type MaybeSignal,
+  type MaybeSignalOptional,
   withFeatureImplementation,
 } from "@adapttable/angular";
 import {
@@ -318,7 +318,7 @@ export interface SelectionOptions<TRow = unknown> {
   /** The id a row is selected by. Defaults to the row key. */
   readonly getId?: (row: TRow) => string;
   /** Controlled selection. Omit it and the table keeps its own. */
-  readonly selectedIds?: MaybeSignal<readonly string[] | undefined>;
+  readonly selectedIds?: MaybeSignalOptional<readonly string[]>;
   /** The table's own selection to start from, when the host holds none. */
   readonly defaultSelectedIds?: readonly string[];
   /** The selection changed. */
@@ -339,7 +339,7 @@ export function selection<TRow = unknown>(
   options: SelectionOptions<TRow> = {}
 ): AdaptTableFeature {
   const { getId, selectedIds, defaultSelectedIds, onSelectionChange } = options;
-  return coreSelection<TRow, MaybeSignal<readonly string[] | undefined>>({
+  return coreSelection<TRow, MaybeSignalOptional<readonly string[]>>({
     ...(getId ? { getId } : {}),
     ...(selectedIds === undefined ? {} : { selectedIds }),
     ...(defaultSelectedIds ? { defaultSelectedIds } : {}),
