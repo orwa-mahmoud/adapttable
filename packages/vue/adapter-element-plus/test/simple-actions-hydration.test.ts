@@ -8,6 +8,7 @@ import DataTable from "../src/DataTable.vue";
 import { print } from "../src/print";
 import { node } from "./mount";
 import { installSsrTeleports } from "./ssr-teleports";
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -21,12 +22,11 @@ it("hydrates the same bulk and print buttons without running their commands", as
         data: [{ id: "a", name: "Ada" }],
         columns: [{ key: "name" }],
         rowKey: (row) => row.id,
-        selectedIds: ["a"],
-        selectable: true,
         urlSync: false,
         searchable: false,
         forceMobile: false,
         features: [
+          selection({ selectedIds: ["a"] }),
           bulkActions([{ key: "archive", label: "Archive", onClick: action }]),
           print(printed, true),
         ],

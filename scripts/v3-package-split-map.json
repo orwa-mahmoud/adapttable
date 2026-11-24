@@ -10139,6 +10139,14 @@
       "behavior": ""
     },
     {
+      "export": "selection",
+      "currentImport": "@adapttable/antd/selection",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/antd/selection",
+      "behavior": ""
+    },
+    {
       "export": "sidePanel",
       "currentImport": "@adapttable/antd/side-panel",
       "kind": "value",
@@ -11416,6 +11424,14 @@
       "kind": "value",
       "class": "kit-rendering",
       "proposedImport": "@adapttable/base-ui/selection-stats",
+      "behavior": ""
+    },
+    {
+      "export": "selection",
+      "currentImport": "@adapttable/base-ui/selection",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/base-ui/selection",
       "behavior": ""
     },
     {
@@ -12704,6 +12720,14 @@
       "kind": "value",
       "class": "kit-rendering",
       "proposedImport": "@adapttable/chakra/selection-stats",
+      "behavior": ""
+    },
+    {
+      "export": "selection",
+      "currentImport": "@adapttable/chakra/selection",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/chakra/selection",
       "behavior": ""
     },
     {
@@ -17028,6 +17052,14 @@
     },
     {
       "export": "coreSavedViews",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreSelection",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -25820,6 +25852,14 @@
     },
     {
       "export": "SelectionContribution",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "SelectionFeatureOptions",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -40851,6 +40891,14 @@
       "behavior": ""
     },
     {
+      "export": "SelectionFeatureOptions",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "selectionStats",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -43035,6 +43083,14 @@
       "behavior": ""
     },
     {
+      "export": "selection",
+      "currentImport": "@adapttable/mantine/selection",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mantine/selection",
+      "behavior": ""
+    },
+    {
       "export": "sidePanel",
       "currentImport": "@adapttable/mantine/side-panel",
       "kind": "value",
@@ -44427,6 +44483,14 @@
       "behavior": ""
     },
     {
+      "export": "selection",
+      "currentImport": "@adapttable/mui/selection",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mui/selection",
+      "behavior": ""
+    },
+    {
       "export": "sidePanel",
       "currentImport": "@adapttable/mui/side-panel",
       "kind": "value",
@@ -45712,6 +45776,14 @@
       "kind": "value",
       "class": "kit-rendering",
       "proposedImport": "@adapttable/radix/selection-stats",
+      "behavior": ""
+    },
+    {
+      "export": "selection",
+      "currentImport": "@adapttable/radix/selection",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/radix/selection",
       "behavior": ""
     },
     {
@@ -53363,6 +53435,14 @@
       "behavior": ""
     },
     {
+      "export": "selection",
+      "currentImport": "@adapttable/react/features",
+      "kind": "value",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/react/features",
+      "behavior": ""
+    },
+    {
       "export": "selectionStats",
       "currentImport": "@adapttable/react/features",
       "kind": "value",
@@ -57259,6 +57339,14 @@
       "behavior": ""
     },
     {
+      "export": "selection",
+      "currentImport": "@adapttable/shadcn/selection",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/shadcn/selection",
+      "behavior": ""
+    },
+    {
       "export": "@adapttable/unstyled/side-panel",
       "currentImport": "@adapttable/shadcn/side-panel",
       "kind": "type",
@@ -58336,6 +58424,14 @@
       "kind": "value",
       "class": "kit-rendering",
       "proposedImport": "@adapttable/unstyled/selection-stats",
+      "behavior": ""
+    },
+    {
+      "export": "selection",
+      "currentImport": "@adapttable/unstyled/selection",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/unstyled/selection",
       "behavior": ""
     },
     {

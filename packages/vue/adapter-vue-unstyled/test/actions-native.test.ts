@@ -26,6 +26,7 @@ import {
   tick,
   write,
 } from "./filter-editing-helpers";
+import { selection } from "../src/selection";
 const rows = [
   { id: "a", name: "Ada" },
   { id: "g", name: "Grace" },
@@ -113,11 +114,10 @@ describe("native action controls in the real DataTable", () => {
         ...base,
         data: undefined,
         source: remote.source.value,
-        selectable: true,
         confirm: (request) => {
           confirmation = request;
         },
-        features: [bulkActions([action])],
+        features: [selection(), bulkActions([action])],
       })
     );
     await tick();
@@ -160,9 +160,7 @@ describe("native action controls in the real DataTable", () => {
     const { host } = mountNative(() =>
       h(DataTable<Row>, {
         ...base,
-        selectable: true,
-        defaultSelectedIds: ["a"],
-        features: features.value,
+        features: [selection({ defaultSelectedIds: ["a"] }), ...features.value],
       })
     );
     await tick();
@@ -468,8 +466,8 @@ describe("native action controls in the real DataTable", () => {
     const { host } = mountNative(() =>
       h(DataTable<Row>, {
         ...base,
-        selectedIds: selected.value,
         features: [
+          selection({ selectedIds: selected.value }),
           exportCsv<Row>({ scope: "selected", request }),
           print(printed, true),
         ],

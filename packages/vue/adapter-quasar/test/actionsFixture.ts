@@ -7,6 +7,7 @@ import { print } from "../src/print";
 import { selectionStats } from "../src/selection-stats";
 import { statusBar } from "../src/status-bar";
 
+import { selection } from "../src/selection";
 export function actionsFixture(onPrint: () => void = () => undefined) {
   return h(DataTable<{ id: string; name: string }>, {
     data: [{ id: "a", name: "Ada" }],
@@ -14,10 +15,9 @@ export function actionsFixture(onPrint: () => void = () => undefined) {
     rowKey: (row) => row.id,
     urlSync: false,
     forceMobile: false,
-    selectable: true,
-    defaultSelectedIds: ["a"],
     dir: "rtl",
     features: [
+      selection({ defaultSelectedIds: ["a"] }),
       print(onPrint, true),
       bulkActions([{ key: "run", label: "Run", onClick: () => undefined }]),
       findInTable({ button: true }),

@@ -20,7 +20,7 @@ const PAGE_LAYOUT = pageLayoutFor("accessibility");
 const columns = peopleColumns(kit);
 const pageFeatures = [kit.cellNavigation(), kit.columnSelectionCheckbox()];
 const chrome = pageChromeFeatures(kit, { urlKey: "a11y" });
-const features = [...pageFeatures, ...chrome];
+const features = [kit.selection(), ...pageFeatures, ...chrome];
 const tableRoot = useTemplateRef<HTMLElement>("tableRoot");
 const announcements = shallowRef<readonly string[]>([]);
 let observer: MutationObserver | undefined;
@@ -66,7 +66,6 @@ onScopeDispose(() => observer?.disconnect());
         :columns="columns"
         :row-key="rowKey"
         :default-column-layout="PAGE_LAYOUT"
-        selectable
         :features="features"
         :defaults="PAGE_DEFAULTS"
       />

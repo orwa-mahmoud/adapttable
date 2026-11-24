@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/element-plus";
+import { selection } from "@adapttable/element-plus/selection";
 import { columnMenu } from "@adapttable/element-plus/column-menu";
 import { densityChooser } from "@adapttable/element-plus/density";
 import { fullscreen } from "@adapttable/element-plus/fullscreen";
@@ -66,13 +67,21 @@ function renderStatus(row: Order, label: string) {
       </div>
     </template>
     <template
-      #default="{ tableProps, onSelectionChange, onColumnLayoutChange, locale }"
+      #default="{
+        tableProps,
+        selectedIds,
+        onSelectionChange,
+        onColumnLayoutChange,
+        locale,
+      }"
     >
       <ElConfigProvider :locale="locale === 'ar' ? ar : en">
         <DataTable
           v-bind="tableProps"
-          :features="features"
-          @update:selected-ids="onSelectionChange"
+          :features="[
+            selection({ selectedIds, onSelectionChange }),
+            ...features,
+          ]"
           @update:column-layout="onColumnLayoutChange"
         />
       </ElConfigProvider>

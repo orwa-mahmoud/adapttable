@@ -183,6 +183,7 @@
 import type { ColumnDef } from &quot;@adapttable/vue&quot;;
 import { DataTable } from &quot;@adapttable/quasar&quot;;
 import { bulkActions } from &quot;@adapttable/quasar/bulk-actions&quot;;
+import { selection } from &quot;@adapttable/quasar/selection&quot;;
 
 defineProps&lt;{ rows: readonly Person[] }&gt;();
 const emit = defineEmits&lt;{ archive: [ids: string[]] }&gt;();
@@ -194,6 +195,7 @@ const columns: ColumnDef&lt;Person&gt;[] = [
 ];
 const rowKey = (row: Person) =&gt; row.id;
 const features = [
+  selection(),
   bulkActions([
     { key: &quot;archive&quot;, label: &quot;Archive&quot;, onClick: (ids) =&gt; emit(&quot;archive&quot;, ids) },
   ]),
@@ -205,7 +207,6 @@ const features = [
     :data=&quot;rows&quot;
     :columns=&quot;columns&quot;
     :row-key=&quot;rowKey&quot;
-    selectable
     :features=&quot;features&quot;
   /&gt;
 &lt;/template&gt;</code></pre>

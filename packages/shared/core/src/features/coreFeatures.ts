@@ -342,7 +342,58 @@ export function coreSidePanel<TPanel extends SidePanelEntry>(options: {
  * @public
  */
 export function coreBulkActions(actions: readonly BulkAction[]): CoreFeature {
-  return define("bulk-actions", { bulkActions: actions });
+  return define("bulk-actions", { selectable: true, bulkActions: actions });
+}
+
+/**
+ * What a table's `selection()` feature takes.
+ *
+ * @typeParam TRow - The row type.
+ * @typeParam TIds - How the binding holds the host's ids: an array, or a
+ *   reactive value of one.
+ *
+ * @public
+ */
+export interface SelectionFeatureOptions<
+  TRow = unknown,
+  TIds = readonly string[],
+> {
+  /** The id a row is selected by; defaults to the row key. */
+  readonly getId?: (row: TRow) => string;
+  /**
+   * Controlled selection. When provided, the table reads the selection from
+   * this value and reports every change request through
+   * `onSelectionChange`. Omit it for the table's own selection.
+   */
+  readonly selectedIds?: TIds;
+  /** The table's own selection to start from, when the host holds none. */
+  readonly defaultSelectedIds?: readonly string[];
+  /**
+   * The selection changed. Uncontrolled: fires with the selected ids
+   * whenever the set changes — once on mount with the initial selection, on
+   * every toggle and select-all, and on the reset when the search or a
+   * filter changes the result set. Controlled (`selectedIds` provided): the
+   * change request — apply the ids to your state to accept.
+   */
+  readonly onSelectionChange?: (selectedIds: string[]) => void;
+}
+
+/**
+ * Rows can be selected, with the selection the host holds or the table's own.
+ *
+ * @public
+ */
+export function coreSelection<TRow, TIds = readonly string[]>(
+  options: SelectionFeatureOptions<TRow, TIds> = {}
+): CoreFeature<TRow> {
+  const { getId, selectedIds, defaultSelectedIds, onSelectionChange } = options;
+  return define<TRow>("selection", {
+    selectable: true,
+    ...(getId ? { selectionGetId: getId } : {}),
+    ...(selectedIds === undefined ? {} : { selectedIds }),
+    ...(defaultSelectedIds ? { defaultSelectedIds } : {}),
+    ...(onSelectionChange ? { onSelectionChange } : {}),
+  });
 }
 
 /**
@@ -442,6 +493,7 @@ export function coreFitColumns(): CoreFeature {
  */
 export function coreColumnSelectionCheckbox(): CoreFeature {
   return define("column-selection-checkbox", {
+    selectable: true,
     columnSelectionCheckbox: true,
   });
 }
@@ -731,7 +783,11 @@ export function coreRowPinning(options: FeaturePatch = {}): CoreFeature {
  * @public
  */
 export function coreSelectionStats(): CoreFeature {
-  return define("selection-stats", { selectionStats: true }, GRID_LABELS);
+  return define(
+    "selection-stats",
+    { selectable: true, selectionStats: true },
+    GRID_LABELS
+  );
 }
 
 /**

@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import { effectScope } from "vue";
 
+import { selection } from "../src/features/headlessFactories";
 import { useDataTableShell } from "../src/useDataTableShell";
 
 it("publishes selection scope and clears it when explicit ids replace the selection", () => {
@@ -10,7 +11,7 @@ it("publishes selection scope and clears it when explicit ids replace the select
       data: [{ id: "a" }, { id: "b" }],
       columns: [{ key: "id" }],
       rowKey: (row) => row.id,
-      selectable: true,
+      features: [selection()],
       urlSync: false,
     })
   );

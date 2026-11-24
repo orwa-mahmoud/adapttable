@@ -96,6 +96,7 @@ type FactoryName =
   | "rowPinning"
   | "rowReorder"
   | "savedViews"
+  | "selection"
   | "selectionStats"
   | "sidePanel"
   | "statusBar"

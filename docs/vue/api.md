@@ -478,7 +478,7 @@ changes them.
 | Query               | `defaults`, `paginationMode`, `urlSync`, `urlKey`, `urlAdapter`; these configure the fallback frontend source, not a separately supplied source.                                                                                                      |
 | Search and sorting  | `searchable` defaults to true; `searchDebounceMs` defaults to the engine's 300ms interval; `searchPlaceholder` overrides the placeholder label. `multiSort` enables shift-key sort levels.                                                            |
 | Layout              | `forceMobile`, `mobileBreakpoint`, `columnLayout`, `defaultColumnLayout`, `onColumnRename`, `fitColumns`, `columnWidths`, `collapsibleColumnGroups`. Group headings and native desktop collapse buttons render; cards honor the resulting visibility. |
-| Selection           | `selectable`, controlled `selectedIds`, initial `defaultSelectedIds`.                                                                                                                                                                                 |
+| Selection           | Compose `selection()` from `/selection`. `selectedIds` controls it; `defaultSelectedIds` starts the table's own selection.                                                                                                                            |
 | Rows                | `onRowClick` activates a row or card; `isCellFlashing` marks changed cells with `data-flash`.                                                                                                                                                         |
 | Labels and styling  | `tableLabel`, `labels`, `dir`, `locale`, `classNames`.                                                                                                                                                                                                |
 | Local source status | `isLoading`, `isFetching`, `error`, `refetch`; a supplied source owns its status.                                                                                                                                                                     |
@@ -494,14 +494,13 @@ for page, grouped, server and mobile behavior.
 `confirm?: ConfirmHandler` also belong to `DataTableProps`. Density is
 `"comfortable" | "compact"`; `confirm` supplies adapter-owned row-action confirmation.
 
-Events are `update:selectedIds(ids: string[])`,
-`update:columnLayout(layout: ColumnLayoutState)` and
-`update:density(density: TableDensity)`. They are change requests;
-prop replacement does not itself emit another request. The corresponding
-models are `v-model:selected-ids`, `v-model:column-layout` and `v-model:density`.
-The host may accept a request by updating the prop or reject it by keeping the
-current value. `onDensityChange` observes the request once; it is separate from
-the model event. A template ref exposes
+Column layout and density are `v-model:column-layout` and `v-model:density`.
+Row selection is `selection()` from the kit's `/selection` entry: pass
+`selectedIds` when the host holds the ids, and accept or ignore the ids from
+`onSelectionChange`. Replacing a prop does not itself emit another request.
+The host may accept a request by updating its value or reject it by keeping
+the current value. `onDensityChange` observes the density request once; it is
+separate from the model event. A template ref exposes
 `DataTableHandle<TRow>`: `focus()` focuses the scroll surface, `runtime` is the
 table runtime, and `getView()` returns the current `TableRuntimeView` or
 `undefined` after disposal.

@@ -45,6 +45,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/angular-unstyled/saved-views";
+import { selection } from "@adapttable/angular-unstyled/selection";
 import { selectionStats } from "@adapttable/angular-unstyled/selection-stats";
 import { sidePanel } from "@adapttable/angular-unstyled/side-panel";
 import { statusBar } from "@adapttable/angular-unstyled/status-bar";
@@ -100,6 +101,7 @@ export const kit = {
   commandPalette,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   rowAppearance,
   statusBar,

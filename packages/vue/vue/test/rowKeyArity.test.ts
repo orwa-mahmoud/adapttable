@@ -1,6 +1,7 @@
 import { expect, it, vi } from "vitest";
 import { effectScope } from "vue";
 
+import { selection } from "../src/features/headlessFactories";
 import type { RowSelectionOptions } from "../src/selection/selection";
 import { useDataTableShell } from "../src/useDataTableShell";
 
@@ -20,23 +21,22 @@ it("uses the unary row-key contract for selection and rendered row identity", ()
         data: rows,
         columns: [{ key: "id" }],
         rowKey,
-        selectable: true,
+        features: [selection({ onSelectionChange: changed })],
         urlSync: false,
         forceMobile: false,
-        onSelectionChange: changed,
       })
     )!;
     const expected = ["first:stable", "second:stable"];
-    const selection = shell.selection.value!;
+    const chosen = shell.selection.value!;
     expect(shell.desktop.value.rows.map((row) => row.key)).toEqual(expected);
-    expect(selection.state.value.visibleIds).toEqual(expected);
-    selection.headerCheckboxAttrs().onChange();
+    expect(chosen.state.value.visibleIds).toEqual(expected);
+    chosen.headerCheckboxAttrs().onChange();
     expect(changed).toHaveBeenCalledExactlyOnceWith(expected);
-    expect([...selection.selectedIds.value]).toEqual(expected);
+    expect([...chosen.selectedIds.value]).toEqual(expected);
     expect(
       shell.desktop.value.rows.map((row) => row.checkboxAttrs?.checked)
     ).toEqual([true, true]);
-    expect(selection.headerState.value).toBe("all");
+    expect(chosen.headerState.value).toBe("all");
   } finally {
     scope.stop();
   }

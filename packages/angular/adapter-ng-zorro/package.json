@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/ng-zorro",
   "version": "0.5.0",
-  "description": "AdaptTable's Angular DataTable rendered with NG-ZORRO components — sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
+  "description": "AdaptTable's Angular DataTable rendered with NG-ZORRO components \u2014 sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
   "keywords": [
     "angular",
     "data-table",
@@ -113,6 +113,10 @@
     "./fit-columns": {
       "types": "./dist/types/adapttable-ng-zorro-fit-columns.d.ts",
       "default": "./dist/fesm2022/adapttable-ng-zorro-fit-columns.mjs"
+    },
+    "./selection": {
+      "types": "./dist/types/adapttable-ng-zorro-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-selection.mjs"
     },
     "./fullscreen": {
       "types": "./dist/types/adapttable-ng-zorro-fullscreen.d.ts",

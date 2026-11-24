@@ -12,7 +12,6 @@
       "isFetching": "pending: shared-surface decision",
       "isLoading": "pending: shared-surface decision",
       "refetch": "pending: shared-surface decision",
-      "selectable": "pending: shared-surface decision",
       "sidePanelSide": "pending: shared-surface decision"
     },
     "vue": {
@@ -20,6 +19,7 @@
       "applyEdit": "pending: shared-surface decision",
       "closeHeaderFilterOnSelect": "pending: shared-surface decision",
       "collapsedGroupIds": "pending: shared-surface decision",
+      "defaultSelectedIds": "selection() carries this; the React shell type still names the feature channel",
       "editActivation": "pending: shared-surface decision",
       "editConflictPolicy": "pending: shared-surface decision",
       "estimateCardSize": "pending: shared-surface decision",
@@ -67,6 +67,7 @@
       "rowVersion": "pending: shared-surface decision",
       "scrollToTopOnChange": "pending: shared-surface decision",
       "scrollTopGap": "pending: shared-surface decision",
+      "selectedIds": "selection() carries this; the React shell type still names the feature channel",
       "selectionGetId": "pending: shared-surface decision",
       "sidePanelSide": "pending: shared-surface decision",
       "sortByOptions": "pending: shared-surface decision",
@@ -131,6 +132,7 @@
       "rowPinningArmed": "pending: shared-surface decision",
       "scrollToTopOnChange": "pending: shared-surface decision",
       "scrollTopGap": "pending: shared-surface decision",
+      "selectedIds": "selection() carries this; the React shell type still names the feature channel",
       "selectionGetId": "pending: shared-surface decision",
       "sortByOptions": "pending: shared-surface decision",
       "stickyToolbar": "pending: shared-surface decision",

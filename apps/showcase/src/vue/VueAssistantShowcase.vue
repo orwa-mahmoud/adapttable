@@ -12,6 +12,7 @@ import {
   useTableAssistant,
 } from "@adapttable/ai-vue";
 import { DataTable } from "@adapttable/vue-unstyled";
+import { selection as selectionFeature } from "@adapttable/vue-unstyled/selection";
 import {
   agentApproval,
   TableAssistant,
@@ -267,10 +268,17 @@ const view = computed(() => ({
   greeting: "Choose a person to select, or type ask.",
   note: "This local transport executes real table actions and reports their actual receipts.",
 }));
-const features = [agent, agentApproval()];
-const selection = (ids: string[]) => {
+const acceptSelection = (ids: string[]) => {
   if (accept.value) selected.value = ids;
 };
+const features = [
+  selectionFeature({
+    selectedIds: selected,
+    onSelectionChange: acceptSelection,
+  }),
+  agent,
+  agentApproval(),
+];
 </script>
 <template>
   <main>
@@ -311,10 +319,7 @@ const selection = (ids: string[]) => {
         :columns="columns"
         :row-key="rowKey"
         :features="features"
-        selectable
-        :selected-ids="selected"
         :url-sync="false"
-        @update:selected-ids="selection"
       />
       <div class="native-assistant-panel">
         <TableAssistant v-bind="view" presentation="panel" />

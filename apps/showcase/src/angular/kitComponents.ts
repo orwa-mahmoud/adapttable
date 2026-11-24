@@ -109,6 +109,10 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
   readonly selectable = input(false);
   readonly searchable = input(true);
   readonly features = input<readonly AdaptTableFeature[]>([]);
+  private readonly tableFeatures = computed(() => {
+    const rest = this.features();
+    return this.selectable() ? [this.kit.selection(), ...rest] : rest;
+  });
   readonly onRowClick = input<(row: TRow) => void>();
   readonly density = input<TableDensity>();
   readonly animate = input(false);
@@ -149,9 +153,8 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         inputBinding("filtersMode", this.filtersMode),
         inputBinding("filterFields", this.filterFields),
         inputBinding("forceMobile", this.forceMobile),
-        inputBinding("selectable", this.selectable),
         inputBinding("searchable", this.searchable),
-        inputBinding("features", this.features),
+        inputBinding("features", this.tableFeatures),
         inputBinding("onRowClick", this.onRowClick),
         inputBinding("density", this.density),
         inputBinding("animate", this.animate),

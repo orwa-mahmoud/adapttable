@@ -70,27 +70,27 @@ Same Material look, on a current MUI — and your rows stay untouched.
 
 `<MaterialTable>` → `<DataTable>`:
 
-| material-table                                       | `@adapttable/mui`                                          | Notes                                                                            |
-| ---------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `data` (array)                                       | `data`                                                     | No `tableData` injection — your objects are never mutated.                       |
-| `data` (query function)                              | `source={useServerData({ onQueryChange })}`                | Mapping below.                                                                   |
-| `columns`                                            | `columns`                                                  | Field-by-field below.                                                            |
-| `title`                                              | `tableLabel` / your own heading                            | The toolbar is yours to compose (`toolbar` slot).                                |
-| `actions` (row actions)                              | `rowActions([…])`                                          | Icon buttons on desktop, card buttons on mobile; `confirm` built in.             |
-| `actions` (`isFreeAction: true`)                     | `toolbar` slot                                             | Free actions are just toolbar content.                                           |
-| `options.selection` + `onSelectionChange`            | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Compose `bulkActions()` to turn on selection.                                    |
-| `detailPanel`                                        | `rowDetail(fn)`                                            | `(row) => ReactNode`.                                                            |
-| `options.paging` / `pageSize` / `pageSizeOptions`    | automatic                                                  | Paged on desktop, infinite on mobile (`"auto"`).                                 |
-| `options.search` / `searchText` / `debounceInterval` | built-in search                                            | Debounced + URL-synced by default.                                               |
-| `options.filtering`                                  | column `filter` shorthands + `filters([…])`                | Real widgets + removable chips, not per-column text rows.                        |
-| `options.columnsButton`                              | `columnMenu()`                                             | Show/hide, reorder, pin.                                                         |
-| `options.columnResizable`                            | `resizableColumns()`                                       | —                                                                                |
-| `options.fixedColumns: { left, right }`              | column pinning via `columnMenu()` + `columnLayout`         | Logical sides — RTL-correct.                                                     |
-| `options.padding: "dense"`                           | `density="compact"`                                        | —                                                                                |
-| `options.exportButton`                               | `exportCsv()` / `rowsToCsv` + `downloadCsv`                | Compose `exportCsv()` for a built-in button; the writer picks CSV, Excel or PDF. |
-| `options.maxBodyHeight`                              | `maxHeight`                                                | Enables the scroll box + sticky pinning.                                         |
-| `localization`                                       | `labels` (+ [`@adapttable/i18n`](./i18n-rtl.md))           | Flat label object; presets for every bundled locale, RTL included.               |
-| `isLoading`                                          | `loading`                                                  | —                                                                                |
+| material-table                                       | `@adapttable/mui`                                                             | Notes                                                                            |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `data` (array)                                       | `data`                                                                        | No `tableData` injection — your objects are never mutated.                       |
+| `data` (query function)                              | `source={useServerData({ onQueryChange })}`                                   | Mapping below.                                                                   |
+| `columns`                                            | `columns`                                                                     | Field-by-field below.                                                            |
+| `title`                                              | `tableLabel` / your own heading                                               | The toolbar is yours to compose (`toolbar` slot).                                |
+| `actions` (row actions)                              | `rowActions([…])`                                                             | Icon buttons on desktop, card buttons on mobile; `confirm` built in.             |
+| `actions` (`isFreeAction: true`)                     | `toolbar` slot                                                                | Free actions are just toolbar content.                                           |
+| `options.selection` + `onSelectionChange`            | `selection({ selectedIds, onSelectionChange })`, `bulkActions([…])` for a bar | Compose `bulkActions()` to turn on selection.                                    |
+| `detailPanel`                                        | `rowDetail(fn)`                                                               | `(row) => ReactNode`.                                                            |
+| `options.paging` / `pageSize` / `pageSizeOptions`    | automatic                                                                     | Paged on desktop, infinite on mobile (`"auto"`).                                 |
+| `options.search` / `searchText` / `debounceInterval` | built-in search                                                               | Debounced + URL-synced by default.                                               |
+| `options.filtering`                                  | column `filter` shorthands + `filters([…])`                                   | Real widgets + removable chips, not per-column text rows.                        |
+| `options.columnsButton`                              | `columnMenu()`                                                                | Show/hide, reorder, pin.                                                         |
+| `options.columnResizable`                            | `resizableColumns()`                                                          | —                                                                                |
+| `options.fixedColumns: { left, right }`              | column pinning via `columnMenu()` + `columnLayout`                            | Logical sides — RTL-correct.                                                     |
+| `options.padding: "dense"`                           | `density="compact"`                                                           | —                                                                                |
+| `options.exportButton`                               | `exportCsv()` / `rowsToCsv` + `downloadCsv`                                   | Compose `exportCsv()` for a built-in button; the writer picks CSV, Excel or PDF. |
+| `options.maxBodyHeight`                              | `maxHeight`                                                                   | Enables the scroll box + sticky pinning.                                         |
+| `localization`                                       | `labels` (+ [`@adapttable/i18n`](./i18n-rtl.md))                              | Flat label object; presets for every bundled locale, RTL included.               |
+| `isLoading`                                          | `loading`                                                                     | —                                                                                |
 
 Column def → `ColumnDef`:
 

@@ -25,6 +25,7 @@ function LiveSelection<TRow>({
     getId,
     resetKey,
     selectedIds: props.selectedIds,
+    defaultSelectedIds: props.defaultSelectedIds,
     onSelectionChange: props.onSelectionChange,
     acrossPages: sourceCapabilities(chrome.source).selectAcrossPages,
   });

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/vue-unstyled";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { shallowRef } from "vue";
 const rows = [{ id: "ada", name: "Ada" }];
-const selection = shallowRef([10]);
+const selectedIds = shallowRef([10]);
 </script>
 <template>
   <DataTable
-    v-model:selected-ids="selection"
+    :features="[selection({ selectedIds })]"
     :data="rows"
     :columns="[{ key: 'name' }]"
     :row-key="(row) => row.id"

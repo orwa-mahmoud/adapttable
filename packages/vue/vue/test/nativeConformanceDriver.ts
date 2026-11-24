@@ -19,6 +19,7 @@ import type {
   editing,
   grouping,
   rowReorder,
+  selection,
   virtualize,
 } from "../src/features";
 import type { ColumnDef } from "../src/index";
@@ -32,6 +33,7 @@ interface NativeKit {
   editing: typeof editing;
   grouping: typeof grouping;
   rowReorder: typeof rowReorder;
+  selection: typeof selection;
   virtualize: typeof virtualize;
 }
 
@@ -46,7 +48,6 @@ type ScenarioProps = Pick<
   | "dir"
   | "forceMobile"
   | "urlSync"
-  | "selectable"
   | "labels"
   | "defaults"
   | "features"
@@ -93,13 +94,13 @@ export function nativeConformanceDriver(kit: NativeKit): NativeDriver {
         dir: scenario.dir,
         forceMobile: scenario.mobile,
         urlSync: false,
-        selectable: scenario.selectable,
         labels: scenario.tableLabels ?? scenario.labels,
         defaults:
           scenario.pageSize === undefined
             ? undefined
             : { limit: scenario.pageSize },
         features: [
+          ...(scenario.selectable ? [kit.selection()] : []),
           ...(scenario.navigable
             ? [kit.cellNavigation({ onRangeChange: scenario.onRangeChange })]
             : []),

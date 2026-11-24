@@ -138,6 +138,7 @@ initial rows, IDs, locale, direction and responsive settings on server and clien
 <script setup lang="ts">
 import { shallowRef } from "vue";
 import { DataTable, type ColumnDef } from "@adapttable/vue-unstyled";
+import { selection } from "@adapttable/vue-unstyled/selection";
 
 interface Person {
   id: string;
@@ -150,6 +151,9 @@ const rows = shallowRef<readonly Person[]>([
   { id: "grace", name: "Grace", score: 20 },
 ]);
 const selectedIds = shallowRef<string[]>([]);
+function changeSelection(ids: string[]) {
+  selectedIds.value = ids;
+}
 const columns: ColumnDef<Person>[] = [
   { key: "name", header: "Name", sortable: true },
   { key: "score", header: "Score", sortable: true },
@@ -159,13 +163,13 @@ const rowKey = (person: Person) => person.id;
 
 <template>
   <DataTable
-    v-model:selected-ids="selectedIds"
     :data="rows"
     :columns="columns"
     :row-key="rowKey"
     :url-sync="false"
     table-label="People"
     :class-names="{ table: 'people-table', th: 'people-heading' }"
+    :features="[selection({ selectedIds, onSelectionChange: changeSelection })]"
   />
 </template>
 ```
@@ -175,11 +179,12 @@ when the value does not come from that property path. Supply stable, unique row
 IDs through `rowKey`. Replace the host's row array to publish changes; the table
 never owns or mutates the data.
 
-`v-model:selected-ids` accepts selection requests through `update:selectedIds`.
-To inspect or reject a request, pass `:selected-ids` and handle
-`@update:selected-ids` yourself. The same pattern applies to `columnLayout`/`update:columnLayout` and
-`density`/`update:density`. Use `selectable` and `defaultSelectedIds` for local
-selection. Initial defaults do not reset later user changes.
+`selection({ selectedIds, onSelectionChange })` keeps the selected ids in the
+host. To reject a request, leave `selectedIds` unchanged. The same request
+pattern applies to `columnLayout`/`onColumnLayoutChange` and
+`density`/`onDensityChange`. Omit `selectedIds` and pass `defaultSelectedIds`
+when the table should keep its own selection. Initial defaults do not reset
+later user changes.
 
 The kit supplies native controls and no stylesheet. Its `classNames` target
 semantic table, card and control elements; ordinary class/style/listener
@@ -298,10 +303,10 @@ Keep the setup from the first table and replace its template with this one.
 ```vue
 <template>
   <DataTable
-    v-model:selected-ids="selectedIds"
     :data="rows"
     :columns="columns"
     :row-key="rowKey"
+    :features="[selection({ selectedIds, onSelectionChange: changeSelection })]"
   >
     <template #cell="{ row, column, value }">
       <strong v-if="column.key === 'name'">{{ row.name }}</strong>

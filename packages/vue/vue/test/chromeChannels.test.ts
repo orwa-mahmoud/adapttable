@@ -60,6 +60,7 @@ import {
   type UseDataTableShellOptions,
   type UseDataTableShellResult,
 } from "../src/useDataTableShell";
+import { selection } from "../src/features/headlessFactories";
 interface Row {
   id: string;
   name: string;
@@ -319,8 +320,10 @@ it("renders projected groups, pads, extras and summary rows in desktop/mobile wi
     rowKey: (row) => row.id,
     urlSync: false,
     forceMobile: mobile,
-    selectable: true,
-    features: [{ id: "body", apply: () => ({ bodyModel: projector }) }],
+    features: [
+      selection(),
+      { id: "body", apply: () => ({ bodyModel: projector }) },
+    ],
   }));
   expect(
     current.root.querySelectorAll('[data-adapttable-part="full-width-cell"]')
@@ -341,10 +344,10 @@ it("renders projected groups, pads, extras and summary rows in desktop/mobile wi
 });
 it("uses required adapter group buttons and keeps custom headers out of nested sort buttons", async () => {
   const current = fixture(() => ({
+    features: [selection()],
     data,
     rowKey: (row) => row.id,
     urlSync: false,
-    selectable: true,
     collapsibleColumnGroups: true,
     columns: [
       {

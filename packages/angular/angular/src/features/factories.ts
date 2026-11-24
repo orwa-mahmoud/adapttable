@@ -7,6 +7,7 @@
  */
 import {
   type AdaptTableFeature,
+  type MaybeSignal,
   withFeatureImplementation,
 } from "@adapttable/angular";
 import {
@@ -41,6 +42,7 @@ import {
   coreResizableColumns,
   coreRowAppearance,
   coreSavedViews,
+  coreSelection,
   coreSidePanel,
   coreStatusBar,
   coreUndoRedoButtons,
@@ -305,6 +307,44 @@ export function sidePanel(options: SidePanelOptions): AdaptTableFeature {
  */
 export function bulkActions(actions: readonly BulkAction[]): AdaptTableFeature {
   return coreBulkActions(actions);
+}
+
+/**
+ * Options for {@link selection}.
+ *
+ * @public
+ */
+export interface SelectionOptions<TRow = unknown> {
+  /** The id a row is selected by. Defaults to the row key. */
+  readonly getId?: (row: TRow) => string;
+  /** Controlled selection. Omit it and the table keeps its own. */
+  readonly selectedIds?: MaybeSignal<readonly string[] | undefined>;
+  /** The table's own selection to start from, when the host holds none. */
+  readonly defaultSelectedIds?: readonly string[];
+  /** The selection changed. */
+  readonly onSelectionChange?: (selectedIds: string[]) => void;
+}
+
+/**
+ * Let rows be selected, with the selection the host holds or the table's own.
+ * Bulk actions, column selection and selection stats select rows too; this
+ * carries the selection's options to all of them.
+ *
+ * @param options - See {@link SelectionOptions}.
+ * @returns The feature.
+ *
+ * @public
+ */
+export function selection<TRow = unknown>(
+  options: SelectionOptions<TRow> = {}
+): AdaptTableFeature {
+  const { getId, selectedIds, defaultSelectedIds, onSelectionChange } = options;
+  return coreSelection<TRow, MaybeSignal<readonly string[] | undefined>>({
+    ...(getId ? { getId } : {}),
+    ...(selectedIds === undefined ? {} : { selectedIds }),
+    ...(defaultSelectedIds ? { defaultSelectedIds } : {}),
+    ...(onSelectionChange ? { onSelectionChange } : {}),
+  });
 }
 
 /**

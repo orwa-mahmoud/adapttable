@@ -134,6 +134,10 @@ const SERVER_SOURCE_PROP =
 /** Usages v4 changed in meaning or shape: reported, never rewritten. */
 const MANUAL: readonly (readonly [RegExp, string])[] = [
   [
+    /\b(?:selectedIds|onSelectionChange|selectionGetId)=\{/g,
+    "Selection is a feature: compose selection({ selectedIds, onSelectionChange, getId }) from @adapttable/<kit>/selection and delete the table prop.",
+  ],
+  [
     /\bmobileIdentityColumns\b/g,
     "mobileIdentityColumns was removed; hideOnMobile on each column decides what a card shows. Delete the prop.",
   ],

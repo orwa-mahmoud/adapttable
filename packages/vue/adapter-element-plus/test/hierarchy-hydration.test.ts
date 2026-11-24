@@ -8,6 +8,7 @@ import { grouping } from "../src/grouping";
 import { rowDetail } from "../src/row-detail";
 import { node } from "./mount";
 import { installSsrTeleports } from "./ssr-teleports";
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -24,9 +25,8 @@ function app(mobile: boolean) {
       rowKey: (row) => row.id,
       urlSync: false,
       forceMobile: mobile,
-      selectedIds: ["a"],
-      selectable: true,
       features: [
+        selection({ selectedIds: ["a"] }),
         grouping("team"),
         rowDetail<Row>((row) => h("p", `Details for ${row.name}`)),
       ],

@@ -10,7 +10,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { ColumnDef } from "../columnDef";
 import { DataTableShellView } from "../features/chromeBodyGate";
 import { dirtyIndicators, editing } from "../features/editing";
-import { bulkActions } from "../features/factories";
+import { bulkActions, selection } from "../features/factories";
 import { FeatureProviders } from "../features/providers";
 import { rowDetail } from "../features/row-detail";
 import { rowPinning } from "../features/row-pinning";
@@ -45,6 +45,7 @@ function mount(
 ) {
   let view: DataTableShellResult<Row> | undefined;
   const features = [
+    selection(extra),
     bulkActions([
       { key: "archive", label: "Archive", onClick: () => undefined },
     ]),
@@ -59,7 +60,6 @@ function mount(
       columns,
       rowKey,
       urlSync: false,
-      ...extra,
     });
     return (
       <FeatureProviders props={props}>

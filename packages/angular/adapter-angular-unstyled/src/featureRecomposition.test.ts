@@ -11,8 +11,9 @@ import { filters } from "@adapttable/angular-unstyled/filters";
 import { headerFilters } from "@adapttable/angular-unstyled/header-filters";
 import { pinnedSummaryRows } from "@adapttable/angular-unstyled/pinned-summary-rows";
 import { print } from "@adapttable/angular-unstyled/print";
+import { selection } from "@adapttable/angular-unstyled/selection";
 import { tree } from "@adapttable/angular-unstyled/tree";
-import { Component, signal } from "@angular/core";
+import { Component, computed, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -51,10 +52,9 @@ const COLUMNS: readonly ColumnDef<Row>[] = [
       [data]="rows()"
       [columns]="columns"
       [rowKey]="rowKey"
-      [features]="features()"
+      [features]="tableFeatures()"
       [forceMobile]="mobile"
       [urlSync]="false"
-      [selectable]="selectable()"
       [cellNavigation]="navigation()"
       [filtersMode]="filterMode()"
       [closeHeaderFilterOnSelect]="closeHeaderFilter()"
@@ -62,8 +62,6 @@ const COLUMNS: readonly ColumnDef<Row>[] = [
       (densityChange)="onDensityChange($event)"
       [onColumnRename]="renameColumn()"
       [confirm]="confirmAction()"
-      [selectedIds]="controlledSelection() ? selected() : undefined"
-      (selectionChange)="onSelectionChange($event)"
       [columnLayout]="layout()"
       (columnLayoutChange)="onLayoutChange($event)"
     />
@@ -78,6 +76,22 @@ class Host {
   readonly selected = signal<readonly string[]>([]);
   readonly controlledSelection = signal(true);
   readonly selectable = signal(true);
+  readonly selectionIds = computed(() =>
+    this.controlledSelection() ? this.selected() : undefined
+  );
+  readonly tableFeatures = computed(() => {
+    const base = this.features();
+    if (!this.selectable()) return base;
+    return [
+      selection({
+        selectedIds: this.selectionIds,
+        onSelectionChange: (ids: string[]) => {
+          this.onSelectionChange(ids);
+        },
+      }),
+      ...base,
+    ];
+  });
   readonly navigation = signal(false);
   readonly filterMode = signal<"popover" | "drawer">("popover");
   readonly closeHeaderFilter = signal(false);

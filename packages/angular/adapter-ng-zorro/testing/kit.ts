@@ -46,6 +46,7 @@ import { rowDetail } from "@adapttable/ng-zorro/row-detail";
 import { rowPinning } from "@adapttable/ng-zorro/row-pinning";
 import { rowReorder } from "@adapttable/ng-zorro/row-reorder";
 import { savedViews } from "@adapttable/ng-zorro/saved-views";
+import { selection } from "@adapttable/ng-zorro/selection";
 import { selectionStats } from "@adapttable/ng-zorro/selection-stats";
 import { sidePanel } from "@adapttable/ng-zorro/side-panel";
 import { statusBar } from "@adapttable/ng-zorro/status-bar";
@@ -88,6 +89,7 @@ export const kit: AngularKitUnderTest = {
     commandPalette,
     dirtyIndicators,
     filterTypes,
+    selection,
     selectionStats,
     sidePanel,
     statusBar,

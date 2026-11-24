@@ -51,6 +51,8 @@ export interface RowSelectionOptions<TRow> {
   readonly rowKey: (row: TRow) => string;
   /** The selected ids, to control the selection. Omit to let it keep its own. */
   readonly selectedIds?: MaybeSignalOptional<readonly string[]>;
+  /** The table's own selection to start from, when the host holds none. */
+  readonly defaultSelectedIds?: readonly string[];
   /** Every change, as the full list of selected ids. */
   readonly onSelectionChange?: (ids: string[]) => void;
   /** Labels for the checkboxes' accessible names, over the English defaults. */
@@ -120,10 +122,13 @@ export function injectRowSelection<TRow>(
   if (!options.injector) assertInInjectionContext(injectRowSelection);
   const injector = options.injector ?? inject(Injector);
   const destroyRef = injector.get(DestroyRef);
-  const store = createControllableStore<ReadonlySet<string>>(new Set(), {
-    observeUncontrolled: true,
-    store: tableStoreOf(injector),
-  });
+  const store = createControllableStore<ReadonlySet<string>>(
+    new Set(options.defaultSelectedIds),
+    {
+      observeUncontrolled: true,
+      store: tableStoreOf(injector),
+    }
+  );
   const own = fromStore(store, { injector });
   const controlled = computed(() => {
     const ids = options.selectedIds && readMaybe(options.selectedIds);

@@ -130,6 +130,7 @@ import { SavedViewMigration } from '@adapttable/core';
 import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SavedViewsStore } from '@adapttable/core';
 import { SavedViewVisibility } from '@adapttable/core';
+import { SelectionFeatureOptions } from '@adapttable/core/binding';
 import { Shortcut } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
@@ -436,6 +437,7 @@ export interface FeatureProps<TRow> {
     onPinnedRowIdsChange?: (next: RowPinState) => void;
     onPrint?: () => void;
     onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
+    onSelectionChange?: (selectedIds: string[]) => void;
     pinnedRowIds?: RowPinState;
     pinnedRows?: PinnedRows<TRow>;
     printButton?: boolean;
@@ -449,6 +451,8 @@ export interface FeatureProps<TRow> {
     rowPinningArmed?: boolean;
     rowStyle?: RowStyle<TRow>;
     savedViews?: UseSavedViewsOptions;
+    selectedIds?: readonly string[];
+    selectionGetId?: (row: TRow) => string;
     selectionStats?: boolean;
     sidePanel?: SidePanelOptions;
     statusBar?: boolean;
@@ -691,6 +695,14 @@ export function savedViews(options: UseSavedViewsOptions): StaticTableFeature;
 export { SavedViewsStore }
 
 export { SavedViewVisibility }
+
+// @public
+export function selection(options?: Omit<SelectionFeatureOptions, "getId">): StaticTableFeature;
+
+// @public
+export function selection<TRow>(options: SelectionFeatureOptions<TRow> & {
+    readonly getId: (row: TRow) => string;
+}): TableFeature<TRow>;
 
 // @public
 export function selectionStats(): StaticTableFeature;

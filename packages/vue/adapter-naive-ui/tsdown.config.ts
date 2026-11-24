@@ -21,6 +21,7 @@ export default defineConfig({
     "src/export-xlsx.ts",
     "src/find-in-table.ts",
     "src/print.ts",
+    "src/selection.ts",
     "src/selection-stats.ts",
     "src/status-bar.ts",
     "src/preset.ts",

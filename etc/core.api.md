@@ -4516,6 +4516,13 @@ export interface SelectionContribution {
 }
 
 // @public
+export interface SelectionFeatureOptions<TRow = unknown> {
+    readonly getId?: (row: TRow) => string;
+    readonly onSelectionChange?: (selectedIds: string[]) => void;
+    readonly selectedIds?: readonly string[];
+}
+
+// @public
 export interface SelectionStats {
     average: number | null;
     cells: number;
@@ -5250,7 +5257,6 @@ export interface TableOptions<TRow, TNode = unknown> {
     onGroupLoadMore?: (groupKey: string) => void;
     onRowClick?: (row: TRow) => void;
     onRowsChange?: (rows: readonly TRow[]) => void;
-    onSelectionChange?: (selectedIds: string[]) => void;
     onValidationFail?: EditEventHandler<TRow>;
     onViewChange?: TableQueryListener;
     paginationMode?: PaginationMode;
@@ -5264,8 +5270,6 @@ export interface TableOptions<TRow, TNode = unknown> {
     searchable?: boolean;
     searchDebounceMs?: number;
     searchPlaceholder?: string;
-    selectedIds?: readonly string[];
-    selectionGetId?: (row: TRow) => string;
     skeletonRows?: number;
     sortByOptions?: SortByOption[];
     source: TableSource<TRow>;

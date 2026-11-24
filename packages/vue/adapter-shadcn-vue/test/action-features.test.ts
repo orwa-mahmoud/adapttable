@@ -32,6 +32,7 @@ import { exportXlsx } from "../src/export-xlsx";
 import { print } from "../src/print";
 import { sidePanel } from "../src/side-panel";
 
+import { selection } from "../src/selection";
 const stops: (() => void)[] = [];
 afterEach(() => {
   for (const stop of stops.splice(0)) {
@@ -306,7 +307,9 @@ it("exports the current controlled selection and keeps print host-owned", async 
     exportCsv<Row>({ scope: "selected", request }),
     print(printed, true),
   ];
-  const host = mountExport(() => ({ selectedIds: selected.value, features }));
+  const host = mountExport(() => ({
+    features: [selection({ selectedIds: selected.value }), ...features],
+  }));
   await flush();
   exportPart(host, "export-csv-button").click();
   await flush();
@@ -395,9 +398,7 @@ it("runs a bulk action only after the host confirms and never mutates host rows"
     ]),
   ];
   const host = mountExport(() => ({
-    features,
-    selectable: true,
-    defaultSelectedIds: ["a"],
+    features: [selection({ defaultSelectedIds: ["a"] }), ...features],
     confirm: (request) => {
       confirmation = request;
     },

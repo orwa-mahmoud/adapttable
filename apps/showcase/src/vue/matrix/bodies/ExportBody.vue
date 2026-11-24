@@ -62,7 +62,11 @@ const pageFeatures = computed(() => [
   }, true),
 ]);
 const chrome = pageChromeFeatures(kit, { urlKey: "pdf" });
-const features = computed(() => [...pageFeatures.value, ...chrome]);
+const features = computed(() => [
+  ...(exportSelects(mode, scope) ? [kit.selection()] : []),
+  ...pageFeatures.value,
+  ...chrome,
+]);
 </script>
 
 <template>
@@ -87,7 +91,6 @@ const features = computed(() => [...pageFeatures.value, ...chrome]);
         v-bind="TABLE_PRESENTATION"
         table-label="People"
         :url-sync="false"
-        :selectable="exportSelects(mode, scope)"
         :data="ROWS"
         :columns="columns"
         :row-key="rowKey"

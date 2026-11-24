@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { aggregate } from "@adapttable/vue";
 import { type ColumnInput, DataTable } from "@adapttable/vue-unstyled";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { shallowRef } from "vue";
 
 interface Invoice {
@@ -86,7 +87,7 @@ const visible = shallowRef(true);
       :search-debounce-ms="0"
       pagination-mode="paged"
       table-label="Invoice register"
-      selectable
+      :features="[selection()]"
       :class-names="{
         root: 'invoice-table',
         summary: 'totals',

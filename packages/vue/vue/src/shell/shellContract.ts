@@ -83,10 +83,6 @@ export interface UseDataTableShellOptions<TRow>
   readonly animate?: MaybeRefOrGetterOptional<boolean>;
   readonly defaultDensity?: TableDensity;
   readonly onDensityChange?: (next: TableDensity) => void;
-  readonly selectable?: MaybeRefOrGetter<boolean>;
-  readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
-  readonly defaultSelectedIds?: readonly string[];
-  readonly onSelectionChange?: (ids: string[]) => void;
   readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
   readonly onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
   readonly onCellCut?: (range: CellRange) => void;
@@ -115,6 +111,16 @@ export interface ResolvedTableOptions<TRow>
     context: FeatureMountContext<TRow>
   ) => void | (() => void);
   readonly bodyModel?: TableBodyProjector<TRow>;
+  /** Set by `selection()`: rows can be selected. */
+  readonly selectable?: MaybeRefOrGetter<boolean>;
+  /** Set by `selection()`: the host's selection. */
+  readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
+  /** Set by `selection()`: the table's own selection to start from. */
+  readonly defaultSelectedIds?: readonly string[];
+  /** Set by `selection()`: the selection changed. */
+  readonly onSelectionChange?: (ids: string[]) => void;
+  /** Set by `selection()`: the id a row is selected by. */
+  readonly selectionGetId?: (row: TRow) => string;
   readonly filterEngine?: FilterEngine;
   readonly filters?: readonly FilterDef<TRow>[];
   readonly filterTypes?: readonly FilterTypeSpec[];

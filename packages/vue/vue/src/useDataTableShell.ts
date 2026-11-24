@@ -311,7 +311,7 @@ export function useDataTableShell<TRow>(
   const selectionState = useRowSelection(() => ({
     enabled: selectionEnabled,
     rows: rowInventory.value.visibleRows,
-    rowKey: resolved.value.rowKey,
+    rowKey: resolved.value.selectionGetId ?? resolved.value.rowKey,
     selectedIds: resolved.value.selectedIds,
     defaultSelectedIds: resolved.value.defaultSelectedIds,
     onSelectionChange: resolved.value.onSelectionChange,
@@ -325,7 +325,9 @@ export function useDataTableShell<TRow>(
     const current = selectionState.selectedIds.value;
     const next = rekeyIdSet(
       current,
-      rekeyedIds(log, (row: TRow) => resolved.value.rowKey(row))
+      rekeyedIds(log, (row: TRow) =>
+        (resolved.value.selectionGetId ?? resolved.value.rowKey)(row)
+      )
     );
     if (next !== current) selectionState.replace([...next]);
   });

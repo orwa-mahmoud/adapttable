@@ -1,4 +1,5 @@
 import { type ColumnDef, type SelectionStats } from "@adapttable/angular";
+import { selection } from "@adapttable/taiga-ui/selection";
 import { statusBar } from "@adapttable/taiga-ui/status-bar";
 import { Component, computed, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
@@ -54,8 +55,6 @@ const part = (name: string) =>
       [rowKey]="rowKey"
       [urlSync]="false"
       [forceMobile]="false"
-      [selectable]="true"
-      [selectedIds]="selected()"
       [features]="features()"
     />
   `,
@@ -66,7 +65,10 @@ class Host {
   readonly rowKey = (row: Row) => row.id;
   readonly selected = signal<readonly string[]>([]);
   readonly withBar = input(true);
-  readonly features = computed(() => (this.withBar() ? [statusBar()] : []));
+  readonly features = computed(() => [
+    selection({ selectedIds: this.selected }),
+    ...(this.withBar() ? [statusBar()] : []),
+  ]);
 }
 
 @Component({

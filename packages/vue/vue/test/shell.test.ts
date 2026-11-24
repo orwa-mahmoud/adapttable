@@ -19,8 +19,11 @@ import { renderToString } from "vue/server-renderer";
 
 import { composeElementRefs, mergeVueAttrs, toVueAttrs } from "../src/attrs";
 import { type ColumnDef, renderCell } from "../src/columnDef";
+import { selection } from "../src/features/headlessFactories";
+import { rowPinning } from "../src/features/rowPinning";
 import type { ComposedFeature } from "../src/features/tableFeature";
 import { createFeatureState } from "../src/featureState";
+import { rowPinningModelKey } from "../src/layout/modelChannels";
 import {
   DesktopTableChrome,
   MobileCardsChrome,
@@ -49,6 +52,7 @@ function slots(marker: string): TableChromeSlots<Row> {
       h("button", { ...props.attrs, "data-kit": marker }, [props.content]),
     SelectionCheckbox: (props) =>
       h("input", { ...props.attrs, "data-kit": marker }),
+    RowActions: () => h("div"),
   };
 }
 function mount(
@@ -98,7 +102,7 @@ describe("shared Vue shell", () => {
           rowKey: (row) => row.id,
           urlSync: false,
           forceMobile: mobile,
-          selectable: true,
+          features: [selection()],
           defaults: { limit: 1 },
           paginationMode: "paged",
           searchDebounceMs: 0,
@@ -141,6 +145,47 @@ describe("shared Vue shell", () => {
       fixture.unmount();
     }
   );
+  it("takes a new controlled selection and keeps pins when inline features are reordered", async () => {
+    const selectedIds = shallowRef<readonly string[]>(["a"]);
+    const pinsFirst = shallowRef(false);
+    const fixture = mount(() => {
+      const chosen = selection({
+        selectedIds,
+        onSelectionChange: () => undefined,
+      });
+      const pins = rowPinning();
+      return {
+        data,
+        columns,
+        rowKey: (row: Row) => row.id,
+        urlSync: false,
+        features: pinsFirst.value ? [pins, chosen] : [chosen, pins],
+      };
+    });
+    const pinning = () =>
+      fixture.shell.state.get(rowPinningModelKey<Row>()).value;
+    expect(fixture.shell.selection.value?.selectedIds.value.has("a")).toBe(
+      true
+    );
+    pinning()?.pin("g", "top");
+    await nextTick();
+    selectedIds.value = ["g"];
+    await nextTick();
+    expect(fixture.shell.selection.value?.selectedIds.value.has("g")).toBe(
+      true
+    );
+    expect(fixture.shell.selection.value?.selectedIds.value.has("a")).toBe(
+      false
+    );
+    expect(pinning()?.sideOf("g")).toBe("top");
+    pinsFirst.value = true;
+    await nextTick();
+    expect(fixture.shell.selection.value?.selectedIds.value.has("g")).toBe(
+      true
+    );
+    expect(pinning()?.sideOf("g")).toBe("top");
+    fixture.unmount();
+  });
   it("respects rejected and replaced controlled values with one callback", async () => {
     const selectedIds = shallowRef<readonly string[]>([]);
     const onSelectionChange = vi.fn();
@@ -149,8 +194,7 @@ describe("shared Vue shell", () => {
       columns,
       rowKey: (row) => row.id,
       urlSync: false,
-      selectedIds,
-      onSelectionChange,
+      features: [selection({ selectedIds, onSelectionChange })],
     }));
     fixture.shell.selection.value?.toggle("a");
     expect(onSelectionChange).toHaveBeenCalledExactlyOnceWith(["a"]);

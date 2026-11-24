@@ -1,3 +1,4 @@
+import { selection } from "../src/features/headlessFactories";
 /**
  * A render reads the table's stores and writes none of them: every write
  * comes from an event or a watcher. Each table store is wrapped so a write
@@ -86,10 +87,11 @@ describe("a Vue table render", () => {
             columns,
             rowKey,
             urlAdapter: adapter,
-            selectable: true,
-            selectedIds: selectedIds.value,
             defaults: { limit: limit.value },
-            features: [rowPinning()],
+            features: [
+              selection({ selectedIds: selectedIds.value }),
+              rowPinning(),
+            ],
           }));
           return () =>
             DesktopTableChrome({ model: shell!.desktop.value, slots });

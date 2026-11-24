@@ -93,6 +93,7 @@ const baseFeatures = [
   kit.fullscreen(),
 ];
 const features = computed(() => [
+  kit.selection(),
   ...baseFeatures,
   ...(arrangement.value === "grouped"
     ? [kit.groupingPanel<Person>([...PEOPLE_GROUP_BY], PEOPLE_GROUPING)]
@@ -127,7 +128,6 @@ const features = computed(() => [
         :data="rows"
         :columns="columns"
         :row-key="rowKey"
-        selectable
         :defaults="PAGE_DEFAULTS"
         :summary-row="summary"
         :features="features"

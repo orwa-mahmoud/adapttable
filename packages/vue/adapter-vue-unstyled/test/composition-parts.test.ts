@@ -28,6 +28,7 @@ import {
   write,
 } from "./filter-editing-helpers";
 
+import { selection } from "../src/selection";
 const rows = [
   { id: "a", name: "Ada", team: "Core", score: 2 },
   { id: "b", name: "Bea", team: "Core", score: 3 },
@@ -140,7 +141,6 @@ describe("canonical composition parts and class targets", () => {
                 rowKey: (row) => row.id,
                 urlSync: false,
                 forceMobile: mobile,
-                selectable: true,
                 classNames: {
                   groupLabel: "caption",
                   groupCell: "group-cell",
@@ -152,6 +152,7 @@ describe("canonical composition parts and class targets", () => {
                   groupAggregate: "aggregate",
                 },
                 features: [
+                  selection(),
                   grouping<(typeof rows)[number]>("team", {
                     groupFooters: true,
                     groupAggregates: (data) => ({

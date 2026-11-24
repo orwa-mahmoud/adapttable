@@ -6,6 +6,7 @@ import { aliases, mdi } from "vuetify/iconsets/mdi-svg";
 import { DataTable } from "../src";
 import { grouping } from "../src/grouping";
 
+import { selection } from "../src/selection";
 interface Person {
   id: string;
   name: string;
@@ -98,11 +99,15 @@ it("keeps selection host-owned and requests once through a real Vuetify checkbox
   const requested = vi.fn();
   const host = mount(() =>
     h(DataTable<Person>, {
+      features: [
+        selection({
+          onSelectionChange: requested,
+          selectedIds: selectedIds.value,
+        }),
+      ],
       data: people,
       columns,
       rowKey: (row) => row.id,
-      selectedIds: selectedIds.value,
-      "onUpdate:selectedIds": requested,
       urlSync: false,
       forceMobile: false,
     })

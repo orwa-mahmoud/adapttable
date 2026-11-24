@@ -48,6 +48,7 @@ export { rowDetail } from "@adapttable/taiga-ui/row-detail";
 export { rowPinning } from "@adapttable/taiga-ui/row-pinning";
 export { rowReorder } from "@adapttable/taiga-ui/row-reorder";
 export { savedViews } from "@adapttable/taiga-ui/saved-views";
+export { selection } from "@adapttable/taiga-ui/selection";
 export { selectionStats } from "@adapttable/taiga-ui/selection-stats";
 export { sidePanel } from "@adapttable/taiga-ui/side-panel";
 export { statusBar } from "@adapttable/taiga-ui/status-bar";

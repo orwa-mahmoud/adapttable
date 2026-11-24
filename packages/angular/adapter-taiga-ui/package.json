@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/taiga-ui",
   "version": "0.5.1",
-  "description": "AdaptTable's Angular DataTable rendered with Taiga UI controls — sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
+  "description": "AdaptTable's Angular DataTable rendered with Taiga UI controls \u2014 sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
   "keywords": [
     "angular",
     "data-table",
@@ -112,6 +112,10 @@
     "./fit-columns": {
       "types": "./dist/types/adapttable-taiga-ui-fit-columns.d.ts",
       "default": "./dist/fesm2022/adapttable-taiga-ui-fit-columns.mjs"
+    },
+    "./selection": {
+      "types": "./dist/types/adapttable-taiga-ui-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-selection.mjs"
     },
     "./fullscreen": {
       "types": "./dist/types/adapttable-taiga-ui-fullscreen.d.ts",

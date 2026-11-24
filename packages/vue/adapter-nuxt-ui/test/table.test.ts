@@ -7,6 +7,7 @@ import { createApp, h, nextTick, shallowRef, type VNodeChild } from "vue";
 import { DataTable, type DataTableProps } from "../src";
 import { densityChooser } from "../src/density";
 
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -68,8 +69,7 @@ describe("Nuxt UI table surface prototype", () => {
   it("renders one scroll owner and real Nuxt controls over the shared model", async () => {
     const view = await fixture({
       tableLabel: "People",
-      selectable: true,
-      features: [densityChooser()],
+      features: [selection(), densityChooser()],
       classNames: {
         table: "table-paint",
         th: "header-paint",
@@ -119,10 +119,15 @@ describe("Nuxt UI table surface prototype", () => {
 
   it("keeps rejected selection requests controlled and exact-once", async () => {
     const select = vi.fn();
-    const view = await fixture(
-      { selectable: true, selectedIds: [] },
-      { "onUpdate:selectedIds": select }
-    );
+    const selectedIds = shallowRef<readonly string[]>([]);
+    const view = await fixture({
+      features: [
+        selection({
+          selectedIds,
+          onSelectionChange: select,
+        }),
+      ],
+    });
     const checkbox = find<HTMLButtonElement>(
       view.root,
       'tbody button[role="checkbox"]'

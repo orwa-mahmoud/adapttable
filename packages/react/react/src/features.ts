@@ -52,6 +52,7 @@ export {
   resizableColumns,
   rowAppearance,
   savedViews,
+  selection,
   sidePanel,
   statusBar,
   undoRedoButtons,

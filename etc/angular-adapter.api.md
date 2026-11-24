@@ -2003,9 +2003,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     // @internal
     protected readonly searchIcon: IconDescriptor;
     readonly searchPlaceholder: InputSignal<string | undefined>;
-    readonly selectable: InputSignal<boolean>;
-    readonly selectedIds: InputSignal<readonly string[] | undefined>;
-    readonly selectionChange: OutputEmitterRef<string[]>;
     readonly sidePanel: Signal<TemplateRef<unknown> | undefined>;
     protected readonly sidePanelProps: Signal<{
         panels: readonly SidePanelPanel[];
@@ -2205,16 +2202,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
-        "selectable": {
-            "alias": "selectable";
-            "required": false;
-            "isSignal": true;
-        };
-        "selectedIds": {
-            "alias": "selectedIds";
-            "required": false;
-            "isSignal": true;
-        };
         "cellNavigation": {
             "alias": "cellNavigation";
             "required": false;
@@ -2307,7 +2294,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         };
     }, {
         "densityChange": "densityChange";
-        "selectionChange": "selectionChange";
         "columnLayoutChange": "columnLayoutChange";
     }, ["cellTemplates", "tableFooter", "sidePanel"], never, true, never>;
     // (undocumented)

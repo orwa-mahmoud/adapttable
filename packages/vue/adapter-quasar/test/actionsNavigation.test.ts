@@ -16,6 +16,7 @@ import { print } from "../src/print";
 import { selectionStats } from "../src/selection-stats";
 import { statusBar } from "../src/status-bar";
 
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -106,9 +107,7 @@ it("runs confirmed bulk work once, disables pending native buttons, and clears s
     ]),
   ];
   const f = fixture(() => ({
-    features,
-    selectable: true,
-    defaultSelectedIds: ["a"],
+    features: [selection({ defaultSelectedIds: ["a"] }), ...features],
     confirm: (request) => {
       confirmation = request;
     },
@@ -152,9 +151,7 @@ it("shows a bulk failure, allows a deliberate retry, and never invokes a disable
     ]),
   ];
   const f = fixture(() => ({
-    features,
-    selectable: true,
-    defaultSelectedIds: ["a"],
+    features: [selection({ defaultSelectedIds: ["a"] }), ...features],
   }));
   await settle();
   const buttons = f.wrapper.findAll<HTMLButtonElement>(part("bulk-button"));
@@ -193,9 +190,7 @@ it("does not execute a confirmation callback while the table is suspended", asyn
     ]),
   ];
   const f = fixture(() => ({
-    features,
-    selectable: true,
-    defaultSelectedIds: ["a"],
+    features: [selection({ defaultSelectedIds: ["a"] }), ...features],
     confirm: (request) => {
       confirmation = request;
     },

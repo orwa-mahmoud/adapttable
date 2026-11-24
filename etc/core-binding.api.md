@@ -2923,6 +2923,9 @@ export function coreRowPinning(options?: FeaturePatch): CoreFeature;
 export function coreSavedViews<TOptions extends object>(options: TOptions): CoreFeature;
 
 // @public
+export function coreSelection<TRow>(options?: SelectionFeatureOptions<TRow>): CoreFeature<TRow>;
+
+// @public
 export function coreSelectionStats(): CoreFeature;
 
 // @public
@@ -10200,6 +10203,13 @@ export interface SelectionContribution {
     readonly allMatching?: boolean;
     readonly replace: (ids: readonly string[] | undefined) => void;
     readonly selectedIds: ReadonlySet<string>;
+}
+
+// @public
+export interface SelectionFeatureOptions<TRow = unknown> {
+    readonly getId?: (row: TRow) => string;
+    readonly onSelectionChange?: (selectedIds: string[]) => void;
+    readonly selectedIds?: readonly string[];
 }
 
 // @public

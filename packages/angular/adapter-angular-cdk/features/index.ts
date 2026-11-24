@@ -55,6 +55,7 @@ export { rowDetail } from "@adapttable/angular-cdk/row-detail";
 export { rowPinning } from "@adapttable/angular-cdk/row-pinning";
 export { rowReorder } from "@adapttable/angular-cdk/row-reorder";
 export { savedViews } from "@adapttable/angular-cdk/saved-views";
+export { selection } from "@adapttable/angular-cdk/selection";
 export { selectionStats } from "@adapttable/angular-cdk/selection-stats";
 export { sidePanel } from "@adapttable/angular-cdk/side-panel";
 export { statusBar } from "@adapttable/angular-cdk/status-bar";

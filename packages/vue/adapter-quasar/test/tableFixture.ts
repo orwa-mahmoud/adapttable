@@ -2,6 +2,7 @@ import { h } from "vue";
 
 import { DataTable } from "../src";
 
+import { selection } from "../src/selection";
 export interface FixtureRow {
   id: string;
   name: string;
@@ -19,6 +20,7 @@ export function tableFixture(
   selectedIds: readonly string[] = []
 ) {
   return h(DataTable<FixtureRow>, {
+    features: [selection({ selectedIds })],
     data: fixtureRows.map((row) => ({ ...row, name: `${row.name}${suffix}` })),
     columns: [
       { key: "name", header: "Name", sortable: true },
@@ -30,8 +32,6 @@ export function tableFixture(
     forceMobile: mobile,
     urlSync: false,
     searchDebounceMs: 0,
-    selectable: true,
-    selectedIds,
     defaults: { limit: 1 },
     paginationMode: "paged",
   });

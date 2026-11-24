@@ -6,6 +6,7 @@ import { type BulkAction, bulkActions } from "../src/bulk-actions";
 import DataTable from "../src/DataTable.vue";
 import { print } from "../src/print";
 import { mount, node } from "./mount";
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -21,8 +22,19 @@ async function tick() {
   await nextTick();
 }
 function options(
-  extra: Partial<DataTableProps<Row>> = {}
+  extra: Partial<DataTableProps<Row>> & {
+    onSelectionChange?: (ids: string[]) => void;
+  } = {}
 ): DataTableProps<Row> {
+  const { features: more, onSelectionChange, ...rest } = extra;
+  const added = more ?? [];
+  const hasSelection = added.some(
+    (feature) =>
+      feature !== null &&
+      typeof feature === "object" &&
+      "id" in feature &&
+      feature.id === "selection"
+  );
   return {
     data,
     columns: [{ key: "name" }],
@@ -30,9 +42,13 @@ function options(
     searchable: false,
     urlSync: false,
     forceMobile: false,
-    selectable: true,
-    defaultSelectedIds: ["a"],
-    ...extra,
+    ...rest,
+    features: [
+      ...(hasSelection
+        ? []
+        : [selection({ defaultSelectedIds: ["a"], onSelectionChange })]),
+      ...added,
+    ],
   };
 }
 for (const mobile of [false, true])
@@ -50,13 +66,13 @@ for (const mobile of [false, true])
         h(DataTable<Row>, {
           ...options({
             forceMobile: mobile,
+            onSelectionChange: changed,
             features: [
               bulkActions([
                 { key: "archive", label: "Archive", icon: "★", onClick: run },
               ]),
             ],
           }),
-          "onUpdate:selectedIds": changed,
         })
       );
       await tick();
@@ -87,12 +103,14 @@ for (const mobile of [false, true])
         h(DataTable<Row>, {
           ...options({
             forceMobile: mobile,
-            selectedIds: selected.value,
             features: [
+              selection({
+                selectedIds: selected.value,
+                onSelectionChange: changed,
+              }),
               bulkActions([{ key: "archive", label: "Archive", onClick: run }]),
             ],
           }),
-          "onUpdate:selectedIds": changed,
         })
       );
       await tick();
@@ -247,8 +265,8 @@ for (const mobile of [false, true])
             data: rows,
             forceMobile: mobile,
             defaults: { limit: 2 },
-            defaultSelectedIds: ["row-0", "row-1"],
             features: [
+              selection({ defaultSelectedIds: ["row-0", "row-1"] }),
               bulkActions([{ key: "archive", label: "Archive", onClick: run }]),
             ],
           })

@@ -580,6 +580,7 @@
       "kit/row-pinning",
       "kit/row-reorder",
       "kit/saved-views",
+      "kit/selection",
       "kit/selection-stats",
       "kit/side-panel",
       "kit/status-bar",
@@ -3941,6 +3942,7 @@
       "SavedViewVisibility",
       "scalarFilterText",
       "SelectionContribution",
+      "SelectionFeatureOptions",
       "selectionStats",
       "SelectionStats",
       "SelectionStatsOptions",
@@ -5292,6 +5294,9 @@
     "kit/saved-views": [
       "savedViews"
     ],
+    "kit/selection": [
+      "selection"
+    ],
     "kit/selection-stats": [
       "selectionStats"
     ],
@@ -6557,6 +6562,7 @@
       "savedViews",
       "SavedViewsStore",
       "SavedViewVisibility",
+      "selection",
       "selectionStats",
       "Shortcut",
       "sidePanel",
@@ -6947,6 +6953,7 @@
       "CoreRowFeatureRegistrar",
       "coreRowPinning",
       "coreSavedViews",
+      "coreSelection",
       "coreSelectionStats",
       "coreSidePanel",
       "CoreStandardFeatureFactories",
@@ -7520,6 +7527,7 @@
       "selectFrom",
       "SELECTION_LIVE",
       "SelectionContribution",
+      "SelectionFeatureOptions",
       "selectionObserverIds",
       "selectionResetKey",
       "SelectionState",
@@ -16440,6 +16448,9 @@
     "adapter-antd-saved-views.api.md": {
       "surface": "kit/saved-views"
     },
+    "adapter-antd-selection.api.md": {
+      "reexport": "kit/selection"
+    },
     "adapter-antd-selection-stats.api.md": {
       "surface": "kit/selection-stats"
     },
@@ -16569,6 +16580,9 @@
     },
     "adapter-base-ui-saved-views.api.md": {
       "surface": "kit/saved-views"
+    },
+    "adapter-base-ui-selection.api.md": {
+      "reexport": "kit/selection"
     },
     "adapter-base-ui-selection-stats.api.md": {
       "surface": "kit/selection-stats"
@@ -16700,6 +16714,9 @@
     "adapter-chakra-saved-views.api.md": {
       "surface": "kit/saved-views"
     },
+    "adapter-chakra-selection.api.md": {
+      "reexport": "kit/selection"
+    },
     "adapter-chakra-selection-stats.api.md": {
       "surface": "kit/selection-stats"
     },
@@ -16829,6 +16846,9 @@
     },
     "adapter-mantine-saved-views.api.md": {
       "surface": "kit/saved-views"
+    },
+    "adapter-mantine-selection.api.md": {
+      "reexport": "kit/selection"
     },
     "adapter-mantine-selection-stats.api.md": {
       "surface": "kit/selection-stats"
@@ -16960,6 +16980,9 @@
     "adapter-mui-saved-views.api.md": {
       "surface": "kit/saved-views"
     },
+    "adapter-mui-selection.api.md": {
+      "reexport": "kit/selection"
+    },
     "adapter-mui-selection-stats.api.md": {
       "surface": "kit/selection-stats"
     },
@@ -17089,6 +17112,9 @@
     },
     "adapter-radix-saved-views.api.md": {
       "surface": "kit/saved-views"
+    },
+    "adapter-radix-selection.api.md": {
+      "reexport": "kit/selection"
     },
     "adapter-radix-selection-stats.api.md": {
       "surface": "kit/selection-stats"
@@ -17220,6 +17246,9 @@
     "adapter-shadcn-saved-views.api.md": {
       "reexport": "forwards @adapttable/unstyled/saved-views"
     },
+    "adapter-shadcn-selection.api.md": {
+      "reexport": "kit/selection"
+    },
     "adapter-shadcn-selection-stats.api.md": {
       "reexport": "forwards @adapttable/unstyled/selection-stats"
     },
@@ -17348,6 +17377,9 @@
     },
     "adapter-unstyled-saved-views.api.md": {
       "surface": "kit/saved-views"
+    },
+    "adapter-unstyled-selection.api.md": {
+      "reexport": "kit/selection"
     },
     "adapter-unstyled-selection-stats.api.md": {
       "surface": "kit/selection-stats"

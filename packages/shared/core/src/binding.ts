@@ -711,12 +711,14 @@ export {
   type CoreRowFeatureRegistrar,
   coreRowPinning,
   coreSavedViews,
+  coreSelection,
   coreSelectionStats,
   coreSidePanel,
   coreStatusBar,
   coreTree,
   coreUndoRedoButtons,
   coreVirtualize,
+  type SelectionFeatureOptions,
   type VirtualizeInput,
 } from "./features/coreFeatures";
 export type {

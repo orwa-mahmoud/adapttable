@@ -7,20 +7,22 @@ import { nativeExportSlots } from "../src/actions/nativeControls";
 import { bulkActions } from "../src/bulk-actions";
 import { find, mountNative, part, tick } from "./filter-editing-helpers";
 
+import { selection } from "../src/selection";
 describe("native action semantic parts", () => {
   it("keeps bulk count and clear hooks on their actual controls without inventing new part names", async () => {
-    const selection = vi.fn();
+    const changed = vi.fn();
     const { host } = mountNative(() =>
       h(DataTable<{ id: string }>, {
         data: [{ id: "one" }],
         columns: [{ key: "id" }],
         rowKey: (row: { id: string }) => row.id,
-        selectable: true,
-        defaultSelectedIds: ["one"],
-        "onUpdate:selectedIds": selection,
         urlSync: false,
         classNames: { bulkBar: "bulk", bulkCount: "count", bulkClear: "clear" },
         features: [
+          selection({
+            onSelectionChange: changed,
+            defaultSelectedIds: ["one"],
+          }),
           bulkActions([{ key: "run", label: "Run", onClick: () => undefined }]),
         ],
       })
@@ -37,7 +39,7 @@ describe("native action semantic parts", () => {
     expect(clear.hasAttribute("data-adapttable-part")).toBe(false);
     clear.click();
     await tick();
-    expect(selection).toHaveBeenLastCalledWith([]);
+    expect(changed).toHaveBeenLastCalledWith([]);
     expect(host.querySelector(part("bulk-bar"))).toBeNull();
   });
   it("uses canonical progress message and actions parts for both progress and errors", async () => {

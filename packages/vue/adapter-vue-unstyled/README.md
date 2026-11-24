@@ -37,6 +37,7 @@ not insert stylesheet elements at runtime.
 <script setup lang="ts">
 import { shallowRef } from "vue";
 import { DataTable, type ColumnDef } from "@adapttable/vue-unstyled";
+import { selection } from "@adapttable/vue-unstyled/selection";
 
 interface Person {
   id: string;
@@ -47,6 +48,9 @@ const rows = shallowRef<readonly Person[]>([
   { id: "ada", name: "Ada", score: 10 },
 ]);
 const selectedIds = shallowRef<string[]>([]);
+function changeSelection(ids: string[]) {
+  selectedIds.value = ids;
+}
 const columns: ColumnDef<Person>[] = [
   { key: "name", sortable: true },
   { key: "score", sortable: true },
@@ -55,12 +59,12 @@ const rowKey = (person: Person) => person.id;
 </script>
 <template>
   <DataTable
-    v-model:selected-ids="selectedIds"
     :data="rows"
     :columns="columns"
     :row-key="rowKey"
     :url-sync="false"
     table-label="People"
+    :features="[selection({ selectedIds, onSelectionChange: changeSelection })]"
   />
 </template>
 ```

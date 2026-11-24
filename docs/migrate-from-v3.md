@@ -81,6 +81,15 @@ of 380 kB.
 | Vue `classNames.rowAction`, `classNames.status`                                                                                                                                                                                                                                                                                           | `classNames.actionButton`, `classNames.tableStatusAnnouncer`                                                                                                                                                                                                                                                |
 | Labels `noticeReorderNested`, `pendingProposals`, `assistantReceipt`, `rowMoveOptions`, `moveToTopLevel`, `groupingAggregateColumn`, `groupingAggregationDefault`                                                                                                                                                                         | nothing reads them; delete the keys                                                                                                                                                                                                                                                                         |
 
+## Props that became features
+
+A behaviour turns on only by composing its feature; its options go in the
+feature call. `migrate-v4` reports each of these props on a table.
+
+| v3 table props                                       | v4                                                                                        |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `selectedIds`, `onSelectionChange`, `selectionGetId` | `selection({ selectedIds, onSelectionChange, getId })` from `@adapttable/<kit>/selection` |
+
 ## Data tiers
 
 A table takes `data` or a `source` and infers nothing from its other props.

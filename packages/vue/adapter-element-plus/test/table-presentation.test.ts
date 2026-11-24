@@ -9,6 +9,7 @@ import DataTable from "../src/DataTable.vue";
 import type { DataTableProps } from "../src/types";
 import { mount, node } from "./mount";
 
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -105,9 +106,12 @@ describe("Element Plus semantic table presentation", () => {
     const { root } = mount(() =>
       h(DataTable<Row>, {
         ...base,
-        selectable: true,
-        selectedIds: [],
-        "onUpdate:selectedIds": selected,
+        features: [
+          selection({
+            selectedIds: [],
+            onSelectionChange: selected,
+          }),
+        ],
       })
     );
     await tick();
@@ -126,13 +130,16 @@ describe("Element Plus semantic table presentation", () => {
     const selectedIds = ref<readonly string[]>([]);
     const { root } = mount(() =>
       h(DataTable<Row>, {
+        features: [
+          selection({
+            onSelectionChange: (ids) => {
+              selectedIds.value = ids;
+            },
+            selectedIds: selectedIds.value,
+          }),
+        ],
         ...base,
         forceMobile: true,
-        selectable: true,
-        selectedIds: selectedIds.value,
-        "onUpdate:selectedIds": (ids) => {
-          selectedIds.value = ids;
-        },
         classNames: {
           card: "host-card",
           cardLabel: "host-label",

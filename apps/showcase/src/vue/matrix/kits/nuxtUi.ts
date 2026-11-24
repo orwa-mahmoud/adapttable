@@ -34,6 +34,7 @@ import { rowActions } from "@adapttable/nuxt-ui/row-actions";
 import { rowPinning } from "@adapttable/nuxt-ui/row-pinning";
 import { rowReorder } from "@adapttable/nuxt-ui/row-reorder";
 import { savedViews, SavedViewsPanel } from "@adapttable/nuxt-ui/saved-views";
+import { selection } from "@adapttable/nuxt-ui/selection";
 import { selectionStats } from "@adapttable/nuxt-ui/selection-stats";
 import { statusBar } from "@adapttable/nuxt-ui/status-bar";
 import { tree } from "@adapttable/nuxt-ui/tree";
@@ -150,6 +151,7 @@ export const kit: ShowcaseKit = {
   print,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   commandPalette,
   contextMenu,

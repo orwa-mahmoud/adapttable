@@ -5,7 +5,8 @@
 import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
 import { grouping } from "@adapttable/angular-material/grouping";
 import { groupingPanel } from "@adapttable/angular-material/grouping-panel";
-import { Component, input } from "@angular/core";
+import { selection } from "@adapttable/angular-material/selection";
+import { Component, computed, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -49,8 +50,7 @@ const COLS: ColumnDef<Task>[] = [
       [dir]="direction()"
       [paginationMode]="paginationMode()"
       [maxHeight]="maxHeight()"
-      [selectable]="selectable()"
-      [features]="features()"
+      [features]="shownFeatures()"
     />
   `,
 })
@@ -62,6 +62,9 @@ class Host {
   readonly paginationMode = input<"paged" | "infinite">("paged");
   readonly maxHeight = input<number | undefined>(undefined);
   readonly selectable = input(false);
+  readonly shownFeatures = computed(() =>
+    this.selectable() ? [selection(), ...this.features()] : this.features()
+  );
   readonly columns = COLS;
   readonly rowKey = (row: Task) => row.id;
 }

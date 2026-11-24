@@ -282,6 +282,16 @@
         "default": "./dist/preset.cjs"
       }
     },
+    "./selection": {
+      "import": {
+        "types": "./dist/selection.d.ts",
+        "default": "./dist/selection.js"
+      },
+      "require": {
+        "types": "./dist/selection.d.cts",
+        "default": "./dist/selection.cjs"
+      }
+    },
     "./selection-stats": {
       "import": {
         "types": "./dist/selection-stats.d.ts",

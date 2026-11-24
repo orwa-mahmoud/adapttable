@@ -18,6 +18,7 @@ import { rowReorder } from "../src/row-reorder";
 import { virtualize } from "../src/virtualize";
 import { find, mountNative, part, tick, write } from "./filter-editing-helpers";
 
+import { selection } from "../src/selection";
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
@@ -101,8 +102,8 @@ describe("column and custom footers", () => {
     props.value = {
       ...props.value,
       summaryRow,
-      selectable: true,
       features: [
+        selection(),
         rowActions<Row>([{ key: "open", label: "Open", onClick: vi.fn() }]),
         rowReorder<Row>(vi.fn()),
         rowDetail<Row>((row) => row.name),
@@ -228,14 +229,13 @@ describe("column and custom footers", () => {
         columns: grouped,
         summaryRow,
         dir,
-        selectable: true,
         columnWidths: { amount: 190 },
         defaultColumnLayout: {
           order: ["amount", "name", "team"],
           hidden: ["team"],
           pinned: { amount: "start", name: "end" },
         },
-        features: [cellSpan<Row>(() => ({ colSpan: 2 }))],
+        features: [selection(), cellSpan<Row>(() => ({ colSpan: 2 }))],
       });
       const footer = summary(host);
       expect(
@@ -472,9 +472,9 @@ describe("column and custom footers", () => {
 
   it("uses labeled mobile fields for populated values and independent column footers, with no row controls", async () => {
     const { host, props } = mount({
+      features: [selection()],
       summaryRow,
       forceMobile: true,
-      selectable: true,
       classNames: {
         card: "card",
         summaryCard: "summary-card",

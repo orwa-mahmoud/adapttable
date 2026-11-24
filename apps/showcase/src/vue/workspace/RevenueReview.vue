@@ -12,6 +12,7 @@ import {
 } from "@adapttable/vue/pivot";
 import { sparklineColumn } from "@adapttable/vue/sparkline";
 import { type ColumnInput, DataTable } from "@adapttable/vue-unstyled";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { cellNavigation } from "@adapttable/vue-unstyled/cell-navigation";
 import { editing } from "@adapttable/vue-unstyled/editing";
 import { exportCsv } from "@adapttable/vue-unstyled/export";
@@ -109,6 +110,7 @@ const columns = computed<readonly ColumnInput<Order>[]>(() => [
   }),
 ]);
 const features = [
+  selection(),
   editing<Order>((original, key, value) => {
     if (
       key !== "cost" ||
@@ -239,7 +241,6 @@ const model = computed(() => {
       url-key="workspace-revenue"
       :url-sync="true"
       :table-label="text.revenueTable"
-      selectable
     >
       <template #tableFooter
         ><p class="workspace-table-note">{{ text.formulaNote }}</p></template

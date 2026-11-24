@@ -14,6 +14,7 @@ import {
   shallowRef,
 } from "vue";
 
+import { selection } from "../../src/features/headlessFactories";
 /** A Vue kit as the shared card-slot suite drives it. */
 export interface VueCardSlotKit {
   /** The kit's `DataTable`. */
@@ -65,10 +66,10 @@ export function mobileCardSlotTests(
                 ],
                 rowKey: (row: Row) => row.id,
                 forceMobile: true,
-                selectable: true,
                 urlSync: false,
                 maxHeight: 240,
                 features: [
+                  selection(),
                   kit.rowDetail<Row>(
                     (row) => h("p", `Details for ${row.name}`),
                     ["a"]

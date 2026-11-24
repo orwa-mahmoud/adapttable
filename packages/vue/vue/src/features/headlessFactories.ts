@@ -16,12 +16,15 @@ import {
   corePinnedSummaryRows,
   coreResizableColumns,
   coreRowAppearance,
+  coreSelection,
+  type SelectionFeatureOptions,
 } from "@adapttable/core/binding";
-import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
+import type { StaticTableFeature, TableFeature } from "./tableFeature";
 
 import { mountColumnResize } from "../columns/columnResize";
 import type { ExtraRow } from "../rows/extraRows";
 import { projectHeadlessRows } from "../rows/headlessRowsModel";
+import type { MaybeRefOrGetterOptional } from "../store";
 
 export type { ExtraEntry, ExtraRow, ExtraRowKind } from "../rows/extraRows";
 export type {
@@ -56,6 +59,47 @@ function rowAware<TRow>(feature: CoreFeature<TRow>): TableFeature<TRow> {
 /** Add Shift-click multi-column sorting. @public */
 export function multiSort(): StaticTableFeature {
   return coreMultiSort();
+}
+/**
+ * What Vue's `selection()` takes; the host's ids may be a ref or a getter.
+ *
+ * @typeParam TRow - The row type.
+ *
+ * @public
+ */
+export type VueSelectionOptions<TRow = unknown> = SelectionFeatureOptions<
+  TRow,
+  MaybeRefOrGetterOptional<readonly string[]>
+>;
+/**
+ * Let rows be selected. Bulk actions, column selection and selection stats
+ * select rows too; this carries the selection's options to all of them.
+ *
+ * @public
+ */
+export function selection(
+  options?: Omit<VueSelectionOptions, "getId">
+): StaticTableFeature;
+/**
+ * Let rows be selected by an id other than the row key.
+ *
+ * @public
+ */
+export function selection<TRow>(
+  options: VueSelectionOptions<TRow> & {
+    readonly getId: (row: TRow) => string;
+  }
+): TableFeature<TRow>;
+export function selection<TRow>(
+  options: VueSelectionOptions<TRow> = {}
+): TableFeature<TRow> | StaticTableFeature {
+  if (options.getId) return rowAware(coreSelection(options));
+  const { selectedIds, defaultSelectedIds, onSelectionChange } = options;
+  return coreSelection<unknown, MaybeRefOrGetterOptional<readonly string[]>>({
+    selectedIds,
+    defaultSelectedIds,
+    onSelectionChange,
+  });
 }
 /** Let columns share the table width. @public */
 export function fitColumns(): StaticTableFeature {

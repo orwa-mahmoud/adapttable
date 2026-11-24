@@ -1,3 +1,4 @@
+import { selection } from "../src/selection";
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { createSSRApp, h } from "vue";
@@ -86,13 +87,12 @@ describe("native optional rendering without browser globals", () => {
             columns: [{ key: "name" }, { key: "team" }],
             rowKey: (row) => row.id,
             urlSync: false,
-            selectedIds: ["a"],
             dir: "rtl",
             labels: {
               collapseGroup: "Collapse localized",
               selectRow: "Select localized",
             },
-            features: [grouping("team")],
+            features: [selection({ selectedIds: ["a"] }), grouping("team")],
           }),
       })
     );

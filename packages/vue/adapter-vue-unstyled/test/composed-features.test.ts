@@ -22,6 +22,7 @@ import {
   tick,
   write,
 } from "./filter-editing-helpers";
+import { selection as selectionFeature } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -49,10 +50,13 @@ function setup(
       columns,
       rowKey,
       urlSync: false,
-      selectable: true,
-      selectedIds: selection.value,
-      "onUpdate:selectedIds": changes,
-      features: currentFeatures.value,
+      features: [
+        selectionFeature({
+          onSelectionChange: changes,
+          selectedIds: selection.value,
+        }),
+        ...currentFeatures.value,
+      ],
     })
   );
   return { ...mounted, rows, selection, changes, handle, currentFeatures };

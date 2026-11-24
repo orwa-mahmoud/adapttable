@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/shadcn-vue";
+import { selection } from "@adapttable/shadcn-vue/selection";
 import { columnMenu } from "@adapttable/shadcn-vue/column-menu";
 import { densityChooser } from "@adapttable/shadcn-vue/density";
 import { fullscreen } from "@adapttable/shadcn-vue/fullscreen";
@@ -58,12 +59,16 @@ function renderStatus(row: Order, label: string) {
       </div>
     </template>
     <template
-      #default="{ tableProps, onSelectionChange, onColumnLayoutChange }"
+      #default="{
+        tableProps,
+        selectedIds,
+        onSelectionChange,
+        onColumnLayoutChange,
+      }"
     >
       <DataTable
         v-bind="tableProps"
-        :features="features"
-        @update:selected-ids="onSelectionChange"
+        :features="[selection({ selectedIds, onSelectionChange }), ...features]"
         @update:column-layout="onColumnLayoutChange"
       />
     </template>

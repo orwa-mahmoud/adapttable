@@ -74,6 +74,7 @@ import { nestedTable, rowDetail } from "./row-detail";
 import { rowPinning } from "./row-pinning";
 import { rowReorder } from "./row-reorder";
 import { savedViews } from "./saved-views";
+import { selection } from "./selection";
 import { sidePanel } from "./side-panel";
 import { selectionStats, statusBar } from "./status-bar";
 import { renderChakra } from "./test-utils";
@@ -138,6 +139,7 @@ export const kit: ReactKitUnderTest = reactKitUnderTest({
     rowPinning,
     rowReorder,
     savedViews,
+    selection,
     selectionStats,
     sidePanel,
     statusBar,

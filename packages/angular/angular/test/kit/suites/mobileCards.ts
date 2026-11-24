@@ -16,7 +16,7 @@ import {
   type ConformanceTest,
 } from "@adapttable/core/conformance";
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, input, signal } from "@angular/core";
+import { Component, computed, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { expect, vi } from "vitest";
 
@@ -40,6 +40,7 @@ export function mobileCardsTests(
     rowActions,
     rowDetail,
     rowReorder,
+    selection,
   } = kit.features;
   return collectConformanceTests(({ describe, it, afterEach }) => {
     /** Mobile-card parity: real host renderers, activation and live state. */
@@ -176,9 +177,8 @@ export function mobileCardsTests(
           [dir]="dir()"
           [urlSync]="false"
           [forceMobile]="mobile()"
-          [selectable]="selectable()"
           [maxHeight]="maxHeight()"
-          [features]="features()"
+          [features]="shownFeatures()"
           [classNames]="classes()"
           [renderCard]="
             bodyKind() === 'template'
@@ -215,6 +215,9 @@ export function mobileCardsTests(
       readonly features = input<readonly AdaptTableFeature[]>([]);
       readonly mobile = input(true);
       readonly selectable = input(true);
+      readonly shownFeatures = computed(() =>
+        this.selectable() ? [selection(), ...this.features()] : this.features()
+      );
       readonly maxHeight = input<number | string>();
       readonly bodyKind = input<"template" | "component">();
       readonly actionsKind = input<"template" | "component">();

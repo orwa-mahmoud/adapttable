@@ -41,6 +41,7 @@ import {
   savedViews,
   SavedViewsPanel,
 } from "@adapttable/shadcn-vue/saved-views";
+import { selection } from "@adapttable/shadcn-vue/selection";
 import { selectionStats } from "@adapttable/shadcn-vue/selection-stats";
 import { statusBar } from "@adapttable/shadcn-vue/status-bar";
 import { tree } from "@adapttable/shadcn-vue/tree";
@@ -177,6 +178,7 @@ export const kit: ShowcaseKit = {
   print,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   commandPalette,
   contextMenu,

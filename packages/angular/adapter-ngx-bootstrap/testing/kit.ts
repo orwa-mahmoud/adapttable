@@ -50,6 +50,7 @@ import { rowDetail } from "@adapttable/ngx-bootstrap/row-detail";
 import { rowPinning } from "@adapttable/ngx-bootstrap/row-pinning";
 import { rowReorder } from "@adapttable/ngx-bootstrap/row-reorder";
 import { savedViews } from "@adapttable/ngx-bootstrap/saved-views";
+import { selection } from "@adapttable/ngx-bootstrap/selection";
 import { selectionStats } from "@adapttable/ngx-bootstrap/selection-stats";
 import { sidePanel } from "@adapttable/ngx-bootstrap/side-panel";
 import { statusBar } from "@adapttable/ngx-bootstrap/status-bar";
@@ -90,6 +91,7 @@ export const kit: AngularKitUnderTest = {
     commandPalette,
     dirtyIndicators,
     filterTypes,
+    selection,
     selectionStats,
     sidePanel,
     statusBar,

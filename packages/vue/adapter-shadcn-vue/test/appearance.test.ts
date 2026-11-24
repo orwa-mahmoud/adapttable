@@ -14,6 +14,7 @@ import { DataTable, type DataTableProps } from "../src";
 import { Button } from "../src/components/button";
 import { densityChooser } from "../src/density";
 
+import { selection } from "../src/selection";
 interface Person {
   id: string;
   name: string;
@@ -273,7 +274,10 @@ describe("compiled shadcn appearance contracts", () => {
       expect(hover).toContain("var(--muted,");
       expect(hover).toContain("var(--background,");
       expect(hover).not.toContain("transparent");
-      view.props.value = { ...view.props.value, selectedIds: ["a"] };
+      view.props.value = {
+        ...view.props.value,
+        features: [selection({ selectedIds: ["a"] })],
+      };
       await nextTick();
       expect(
         target(row, '[data-adapttable-part="cell"][data-pinned="start"]')
@@ -307,7 +311,10 @@ describe("compiled shadcn appearance contracts", () => {
   });
 
   it("paints selected and unselected desktop rows from their rendered ARIA state", async () => {
-    const view = mount({ forceMobile: false, selectedIds: ["a"] });
+    const view = mount({
+      features: [selection({ selectedIds: ["a"] })],
+      forceMobile: false,
+    });
     await nextTick();
     const first = target(view.root, '[data-row-id="a"]');
     const second = target(view.root, '[data-row-id="b"]');
@@ -329,7 +336,10 @@ describe("compiled shadcn appearance contracts", () => {
     expect(second.hasAttribute("data-selected")).toBe(false);
     expect(highlighted(first)).toBe(true);
     expect(highlighted(second)).toBe(false);
-    view.props.value = { ...view.props.value, selectedIds: ["b"] };
+    view.props.value = {
+      ...view.props.value,
+      features: [selection({ selectedIds: ["b"] })],
+    };
     await nextTick();
     expect(highlighted(first)).toBe(false);
     expect(highlighted(second)).toBe(true);

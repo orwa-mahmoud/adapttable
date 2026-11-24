@@ -41,6 +41,7 @@ import {
   savedViews,
   SavedViewsPanel,
 } from "@adapttable/element-plus/saved-views";
+import { selection } from "@adapttable/element-plus/selection";
 import { selectionStats } from "@adapttable/element-plus/selection-stats";
 import { statusBar } from "@adapttable/element-plus/status-bar";
 import { tree } from "@adapttable/element-plus/tree";
@@ -178,6 +179,7 @@ export const kit: ShowcaseKit = {
   print,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   commandPalette,
   contextMenu,

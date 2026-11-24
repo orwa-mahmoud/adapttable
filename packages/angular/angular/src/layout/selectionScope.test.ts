@@ -5,6 +5,7 @@ import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
 import { ADAPTTABLE_CONTEXT_MENU } from "../actions/tableContextMenu";
+import { selection as selectionFeature } from "../features/factories";
 import { injectFrontendData } from "../source/frontendData";
 import { AdaptDataTableShell } from "./dataTableShell";
 
@@ -37,10 +38,13 @@ async function mount(controlled?: readonly string[]) {
   fixture.componentRef.setInput("columns", [{ key: "name" }]);
   fixture.componentRef.setInput("rowKey", (row: Row) => row.id);
   fixture.componentRef.setInput("urlSync", false);
-  fixture.componentRef.setInput("selectable", true);
-  fixture.componentRef.setInput("selectedIds", controlled);
   const changed = vi.fn();
-  fixture.componentInstance.selectionChange.subscribe(changed);
+  fixture.componentRef.setInput("features", [
+    selectionFeature({
+      ...(controlled === undefined ? {} : { selectedIds: controlled }),
+      onSelectionChange: changed,
+    }),
+  ]);
   fixture.autoDetectChanges();
   await fixture.whenStable();
   const selection = fixture.componentInstance.current()!.selection!;

@@ -23,7 +23,10 @@ export { densityChooser } from "./features/density";
 export { fullscreen } from "./features/fullscreen";
 export type { GroupingExtras, StaticGroupingExtras } from "./features/grouping";
 export { grouping } from "./features/grouping";
-export type { RowAppearanceOptions } from "./features/headlessFactories";
+export type {
+  RowAppearanceOptions,
+  VueSelectionOptions,
+} from "./features/headlessFactories";
 export {
   cellSpan,
   collapsibleColumnGroups,
@@ -33,6 +36,7 @@ export {
   pinnedSummaryRows,
   resizableColumns,
   rowAppearance,
+  selection,
 } from "./features/headlessFactories";
 export { rowActions } from "./features/rowActions";
 export { nestedTable, rowDetail } from "./features/rowDetail";

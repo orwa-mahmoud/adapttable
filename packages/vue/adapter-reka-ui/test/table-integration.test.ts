@@ -13,6 +13,7 @@ import {
 import { renderToString } from "vue/server-renderer";
 
 import { DataTable, type DataTableProps } from "../src";
+import { selection } from "../src/selection";
 import { rekaButton } from "../src/controls/basic";
 import { densityChooser } from "../src/density";
 
@@ -97,10 +98,15 @@ describe("Reka table over the packed binding", () => {
 
   it("keeps controlled row selection rejected until the host accepts it", async () => {
     const changed = vi.fn();
-    const { host, props } = fixture(
-      { selectable: true, selectedIds: [] },
-      { "onUpdate:selectedIds": changed }
-    );
+    const selectedIds = shallowRef<readonly string[]>([]);
+    const { host } = fixture({
+      features: [
+        selection({
+          selectedIds,
+          onSelectionChange: changed,
+        }),
+      ],
+    });
     const row = element<HTMLTableRowElement>(host, "tbody tr");
     const checkbox = element<HTMLButtonElement>(row, '[role="checkbox"]');
     checkbox.click();
@@ -109,7 +115,7 @@ describe("Reka table over the packed binding", () => {
     await flush();
     expect(changed).toHaveBeenCalledTimes(2);
     expect(checkbox.getAttribute("aria-checked")).toBe("false");
-    props.value = { ...props.value, selectedIds: ["b"] };
+    selectedIds.value = ["b"];
     await flush();
     expect(checkbox.getAttribute("aria-checked")).toBe("true");
   });
@@ -153,7 +159,7 @@ describe("Reka table over the packed binding", () => {
   it("hydrates the complete table without mismatch warnings", async () => {
     const render = defineComponent({
       setup: () => () =>
-        h(DataTable<Person>, { ...defaults, selectable: true }),
+        h(DataTable<Person>, { ...defaults, features: [selection()] }),
     });
     const host = document.createElement("div");
     host.innerHTML = await renderToString(createSSRApp(render));

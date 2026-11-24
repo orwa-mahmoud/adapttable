@@ -28,6 +28,7 @@ import {
   write,
 } from "./filter-editing-helpers";
 
+import { selection } from "../src/selection";
 const rows = [
   { id: "a", name: "Ada" },
   { id: "g", name: "Grace" },
@@ -226,8 +227,7 @@ describe.each([
     const { host } = mountNative(() =>
       h(DataTable<Row>, {
         ...base,
-        selectedIds: selected.value,
-        features: [feature],
+        features: [selection({ selectedIds: selected.value }), feature],
       })
     );
     await tick();

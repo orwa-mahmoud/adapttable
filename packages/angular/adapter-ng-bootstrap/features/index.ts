@@ -55,6 +55,7 @@ export { rowDetail } from "@adapttable/ng-bootstrap/row-detail";
 export { rowPinning } from "@adapttable/ng-bootstrap/row-pinning";
 export { rowReorder } from "@adapttable/ng-bootstrap/row-reorder";
 export { savedViews } from "@adapttable/ng-bootstrap/saved-views";
+export { selection } from "@adapttable/ng-bootstrap/selection";
 export { selectionStats } from "@adapttable/ng-bootstrap/selection-stats";
 export { sidePanel } from "@adapttable/ng-bootstrap/side-panel";
 export { statusBar } from "@adapttable/ng-bootstrap/status-bar";

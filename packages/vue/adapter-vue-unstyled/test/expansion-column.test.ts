@@ -14,6 +14,7 @@ import { rowReorder } from "../src/row-reorder";
 import { virtualize } from "../src/virtualize";
 import { find, mountNative, part, tick } from "./filter-editing-helpers";
 
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   team: string;
@@ -34,12 +35,12 @@ const columns: readonly ColumnInput<Row>[] = [
   },
 ];
 const base: DataTableProps<Row> = {
+  features: [selection()],
   data: rows,
   columns,
   rowKey: (row) => row.id,
   urlSync: false,
   forceMobile: false,
-  selectable: true,
   summaryRow: aggregate<Row>({ amount: "sum" }),
   defaultColumnLayout: { pinned: { team: "start" } },
 };
@@ -57,6 +58,7 @@ describe("dedicated expansion column", () => {
     "accounts for grouped headers, data pins, summary pads and detail spans in %s",
     async (dir) => {
       const features = [
+        selection(),
         rowDetail<Row>((row) => h("p", `Detail ${row.id}`)),
         rowActions<Row>([{ key: "open", label: "Open", onClick: vi.fn() }]),
         rowReorder<Row>(vi.fn()),
@@ -124,6 +126,7 @@ describe("dedicated expansion column", () => {
     const props = shallowRef<DataTableProps<Row>>({
       ...base,
       features: [
+        selection(),
         rowDetail<Row>((row) => `Detail ${row.id}`),
         cellSpan<Row>(({ row, column }) =>
           row.id === "a" && column.key === "team" ? { rowSpan: 2 } : undefined
@@ -168,6 +171,7 @@ describe("dedicated expansion column", () => {
       h(DataTable<Row>, {
         ...base,
         features: [
+          selection(),
           grouping<Row>(["team"], {
             groupAggregates: aggregate<Row>({ amount: "sum" }),
           }),

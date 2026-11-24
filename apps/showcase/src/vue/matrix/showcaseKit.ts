@@ -31,6 +31,7 @@ import type { rowActions } from "@adapttable/vue-unstyled/row-actions";
 import type { rowPinning } from "@adapttable/vue-unstyled/row-pinning";
 import type { rowReorder } from "@adapttable/vue-unstyled/row-reorder";
 import type { savedViews } from "@adapttable/vue-unstyled/saved-views";
+import type { selection } from "@adapttable/vue-unstyled/selection";
 import type { selectionStats } from "@adapttable/vue-unstyled/selection-stats";
 import type { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import type { tree } from "@adapttable/vue-unstyled/tree";
@@ -123,6 +124,7 @@ export interface ShowcaseKit {
   readonly print: typeof print;
   readonly extraRows: typeof extraRows;
   readonly findInTable: typeof findInTable;
+  readonly selection: typeof selection;
   readonly selectionStats: typeof selectionStats;
   readonly commandPalette: typeof commandPalette;
   readonly contextMenu: typeof contextMenu;

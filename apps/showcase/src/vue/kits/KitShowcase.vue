@@ -128,8 +128,6 @@ const tableProps = computed(
       tableLabel: text.value.orders,
       searchDebounceMs: 0,
       defaults,
-      selectedIds: selected.value,
-      selectable: true,
       forceMobile:
         presentation.state.value.layout === "cards" ? true : undefined,
       urlKey: `kit-${props.kit}-orders`,
@@ -249,6 +247,7 @@ function presentationLink(key: string, value: string): string {
       </p>
       <slot
         :table-props="tableProps"
+        :selected-ids="selected"
         :on-selection-change="changeSelection"
         :on-column-layout-change="changeColumnLayout"
         :locale="locale"

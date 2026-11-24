@@ -26,7 +26,7 @@ export function rowRekeyTests(
   kit: AngularKitUnderTest
 ): readonly ConformanceTest[] {
   const { Table: AdaptDataTable, kitSelector } = kit;
-  const { cellNavigation, editing, rowPinning } = kit.features;
+  const { cellNavigation, editing, rowPinning, selection } = kit.features;
   return collectConformanceTests(({ describe, it, afterEach }) => {
     interface Person {
       readonly id: string;
@@ -57,9 +57,6 @@ export function rowRekeyTests(
           [columns]="columns"
           [rowKey]="rowKey"
           [urlSync]="false"
-          [selectable]="true"
-          [selectedIds]="selectedIds()"
-          (selectionChange)="onSelectionChange($event)"
           [features]="features"
         />
       `,
@@ -77,6 +74,12 @@ export function rowRekeyTests(
         this.pinnedRowIds.set(next);
       });
       readonly features = [
+        selection({
+          selectedIds: this.selectedIds,
+          onSelectionChange: (ids: string[]) => {
+            this.onSelectionChange(ids);
+          },
+        }),
         rowPinning({
           pinnedRowIds: this.pinnedRowIds,
           onPinnedRowIdsChange: this.onPinnedRowIdsChange,

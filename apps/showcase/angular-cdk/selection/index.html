@@ -183,6 +183,7 @@
 import type { ColumnDef } from &quot;@adapttable/angular&quot;;
 import { AdaptDataTable } from &quot;@adapttable/angular-cdk&quot;;
 import { bulkActions } from &quot;@adapttable/angular-cdk/bulk-actions&quot;;
+import { selection } from &quot;@adapttable/angular-cdk/selection&quot;;
 
 const columns: ColumnDef&lt;Person&gt;[] = [
   { key: &quot;name&quot;, sortable: true },
@@ -198,7 +199,6 @@ const columns: ColumnDef&lt;Person&gt;[] = [
       [data]=&quot;rows()&quot;
       [columns]=&quot;columns&quot;
       [rowKey]=&quot;rowKey&quot;
-      [selectable]=&quot;true&quot;
       [features]=&quot;features&quot;
     /&gt;
   `,
@@ -209,6 +209,7 @@ export class People {
   readonly rowKey = (row: Person) =&gt; row.id;
   readonly archive = input.required&lt;(ids: string[]) =&gt; void&gt;();
   readonly features = [
+    selection(),
     bulkActions([
       { key: &quot;archive&quot;, label: &quot;Archive&quot;, onClick: (ids) =&gt; this.archive()(ids) },
     ]),

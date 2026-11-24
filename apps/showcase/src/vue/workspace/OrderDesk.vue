@@ -16,6 +16,7 @@ import {
   tableAssistant,
 } from "@adapttable/vue-unstyled/assistant";
 import { bulkActions } from "@adapttable/vue-unstyled/bulk-actions";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import {
   cellNavigation,
   type CellRange,
@@ -295,6 +296,12 @@ const edit = editing<Order>((original, key, value) => {
   message.value = `${text.value.saved} ${original.id}.`;
 });
 const features = computed(() => [
+  selection({
+    selectedIds: selected,
+    onSelectionChange: (ids) => {
+      selected.value = ids;
+    },
+  }),
   filters<Order>(
     [
       {
@@ -567,7 +574,6 @@ function restore(): void {
       <DataTable
         v-if="shown"
         ref="table"
-        v-model:selected-ids="selected"
         data-workspace-table="orders"
         :data="rows"
         :columns="columns"
@@ -585,7 +591,6 @@ function restore(): void {
         :url-sync="true"
         :search-debounce-ms="0"
         :table-label="text.orders"
-        selectable
       >
         <template #tableFooter
           ><p class="workspace-table-note">{{ text.reviewNote }}</p></template

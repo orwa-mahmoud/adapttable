@@ -24,6 +24,7 @@ stylesheet reads the standard shadcn CSS tokens (`--background`, `--foreground`,
 <script setup lang="ts">
 import { DataTable, type ColumnDef } from "@adapttable/shadcn-vue";
 import { densityChooser } from "@adapttable/shadcn-vue/density";
+import { selection } from "@adapttable/shadcn-vue/selection";
 import "@adapttable/shadcn-vue/styles.css";
 
 interface Person {
@@ -37,7 +38,7 @@ const columns: readonly ColumnDef<Person>[] = [
   { key: "name", header: "Name", sortable: true },
   { key: "score", header: "Score", sortable: true },
 ];
-const features = [densityChooser()];
+const features = [selection(), densityChooser()];
 </script>
 
 <template>
@@ -46,7 +47,6 @@ const features = [densityChooser()];
     :columns="columns"
     :row-key="(row) => row.id"
     :features="features"
-    selectable
   />
 </template>
 ```

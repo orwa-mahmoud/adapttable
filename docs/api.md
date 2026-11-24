@@ -74,14 +74,15 @@ per-column aggregation choices.
 
 ### Selection & actions
 
-| Prop                | Type                              | Default          | Description                                                                                                                                                                                                               |
-| ------------------- | --------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rowActionsLayout`  | `RowActionsLayout`                | `"buttons"`      | How the trailing actions column renders. Omit or `"buttons"` keeps today's horizontal strip. `"menu"` collapses visible actions into a 3-dot menu using each kit's own Menu. Ignored when `renderRowActions` is set.      |
-| `renderRowActions`  | `RowActionsRenderer<TRow>`        | —                | Replace the trailing actions cell (desktop and mobile cards). Receives the resolved action list (host + built-in duplicate / delete / pin). The column still only appears when there are row actions or row-mode editing. |
-| `selectionGetId`    | `(row: TRow) => string`           | `rowKey`         | Selection id extractor when it must differ from `rowKey`.                                                                                                                                                                 |
-| `selectedIds`       | `readonly string[]`               | —                | Controlled selection; apply `onSelectionChange` requests to your own state.                                                                                                                                               |
-| `onSelectionChange` | `(selectedIds: string[]) => void` | —                | Selection observer (uncontrolled) or change-request handler (controlled).                                                                                                                                                 |
-| `confirm`           | `ConfirmHandler`                  | `window.confirm` | Confirmation handler for actions that declare a `confirm` block. Where no dialog exists (SSR, some webviews), the default DENIES the action and dev-warns — pass your own handler for dialogless environments.            |
+Selection turns on with the `selection(options?)` feature from
+`@adapttable/<kit>/selection` (`selectedIds`, `onSelectionChange`, `getId`;
+`SelectionFeatureOptions`); see [selection](./selection.md).
+
+| Prop               | Type                       | Default          | Description                                                                                                                                                                                                               |
+| ------------------ | -------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rowActionsLayout` | `RowActionsLayout`         | `"buttons"`      | How the trailing actions column renders. Omit or `"buttons"` keeps today's horizontal strip. `"menu"` collapses visible actions into a 3-dot menu using each kit's own Menu. Ignored when `renderRowActions` is set.      |
+| `renderRowActions` | `RowActionsRenderer<TRow>` | —                | Replace the trailing actions cell (desktop and mobile cards). Receives the resolved action list (host + built-in duplicate / delete / pin). The column still only appears when there are row actions or row-mode editing. |
+| `confirm`          | `ConfirmHandler`           | `window.confirm` | Confirmation handler for actions that declare a `confirm` block. Where no dialog exists (SSR, some webviews), the default DENIES the action and dev-warns — pass your own handler for dialogless environments.            |
 
 ### Appearance & chrome
 
@@ -1430,7 +1431,7 @@ shares, so a new binding calls them rather than re-deriving them.
   over its features' patches, with the features' strings as `featureLabels`),
   `getAppliedFeatures` and `rememberAppliedFeatures` are its parts. `FeaturePatch`, `PatchFeature`, `CoreFeature`,
   `CoreFeatureRegistrar`, `CoreRowFeatureRegistrar` and `VirtualizeInput` are
-  the types. Each built-in factory's id and option normalization is its own export, named `core` plus the factory: `coreFeature`, `coreCellSpan`, `coreExtraRows`, `corePinnedSummaryRows`, `coreRowAppearance`, `coreColumnMenu`, `coreResizableColumns`, `coreCollapsibleColumnGroups`, `coreCommandPalette`, `coreContextMenu`, `coreSidePanel`, `coreBulkActions`, `coreFilterTypes`, `coreHeaderFilters`, `coreSavedViews`, `corePrint`, `coreStatusBar`, `coreUndoRedoButtons`, `coreMultiSort`, `coreFitColumns`, `coreColumnSelectionCheckbox`, `coreCellNavigation`, `coreDensityChooser`, `coreEditHistory`, `coreEditing`, `coreRowEditing`, `coreBatchEditing`, `coreDirtyIndicators`, `coreExportCsv`, `coreFilters`, `coreFindInTable`, `coreFullscreen`, `coreGrouping`, `coreGroupingPanel`, `coreRowActions`, `coreRowDetail`, `coreNestedTable`, `coreRowPinning`, `coreSelectionStats`, `coreTree`, `coreVirtualize`. They are separate functions so a table bundles only the features it uses; a binding spreads one and adds what it draws.
+  the types. Each built-in factory's id and option normalization is its own export, named `core` plus the factory: `coreFeature`, `coreCellSpan`, `coreExtraRows`, `corePinnedSummaryRows`, `coreRowAppearance`, `coreColumnMenu`, `coreResizableColumns`, `coreCollapsibleColumnGroups`, `coreCommandPalette`, `coreContextMenu`, `coreSidePanel`, `coreBulkActions`, `coreFilterTypes`, `coreHeaderFilters`, `coreSavedViews`, `corePrint`, `coreStatusBar`, `coreUndoRedoButtons`, `coreMultiSort`, `coreFitColumns`, `coreColumnSelectionCheckbox`, `coreCellNavigation`, `coreDensityChooser`, `coreEditHistory`, `coreEditing`, `coreRowEditing`, `coreBatchEditing`, `coreDirtyIndicators`, `coreExportCsv`, `coreFilters`, `coreFindInTable`, `coreFullscreen`, `coreGrouping`, `coreGroupingPanel`, `coreRowActions`, `coreRowDetail`, `coreNestedTable`, `coreRowPinning`, `coreSelection` (`SelectionFeatureOptions`), `coreSelectionStats`, `coreTree`, `coreVirtualize`. They are separate functions so a table bundles only the features it uses; a binding spreads one and adds what it draws.
 - **Standard preset.** `standardFeatureList` (`CoreStandardFeatureFactories`,
   `CoreStandardFeatureOptions`) builds the preset's members in order from the
   binding's own factories: the column-layout family, the other fixed members,
@@ -3863,8 +3864,9 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   entry's `coreExportCsv`, `coreFilters`, `coreHeaderFilters` and
   `coreFindInTable` are the core factories with their implementations filed,
   for a kit to extend.
-- All supported Angular kits accept live `selectable`, `cellNavigation`, `filtersMode`
-  and `closeHeaderFilterOnSelect` inputs. Their controlled `density` input
+- All supported Angular kits accept live `cellNavigation`, `filtersMode`
+  and `closeHeaderFilterOnSelect` inputs. Row checkboxes come from
+  `selection()`. Their controlled `density` input
   overrides the chooser's state; `densityChange` reports requests and waits
   for the host to update the input. Omitting `density` keeps the chooser
   uncontrolled. Kits share core's `resolveDensity` and `requestDensityChange`,

@@ -34,6 +34,7 @@ stacking follows `ElConfigProvider`'s `zIndex` setting.
 import { ref } from "vue";
 import { DataTable, type ColumnDef } from "@adapttable/element-plus";
 import { filters } from "@adapttable/element-plus/filters";
+import { selection } from "@adapttable/element-plus/selection";
 
 interface Person {
   id: string;
@@ -49,19 +50,23 @@ const columns: ColumnDef<Person>[] = [
   { key: "name", header: "Name", sortable: true },
   { key: "score", header: "Score", sortable: true },
 ];
-const features = [filters<Person>([{ key: "name", type: "text" }])];
 const selectedIds = ref<string[]>([]);
+function changeSelection(ids: string[]) {
+  selectedIds.value = ids;
+}
+const features = [
+  selection({ selectedIds, onSelectionChange: changeSelection }),
+  filters<Person>([{ key: "name", type: "text" }]),
+];
 </script>
 
 <template>
   <DataTable
-    v-model:selected-ids="selectedIds"
     :data="rows"
     :columns="columns"
     :row-key="(row) => row.id"
     :features="features"
     :url-sync="false"
-    selectable
   />
 </template>
 ```

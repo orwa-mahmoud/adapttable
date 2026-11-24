@@ -1,3 +1,4 @@
+import { selection } from "../src/selection";
 // @vitest-environment node
 import { aggregate, type ColumnDef } from "@adapttable/vue";
 import { setup } from "@css-render/vue3-ssr";
@@ -42,8 +43,8 @@ async function render(label: string, mobile: boolean) {
         urlSync: false,
         forceMobile: mobile,
         dir: "rtl",
-        selectable: true,
         features: [
+          selection(),
           bulkActions([{ key: "record", label, onClick: noop }]),
           cellNavigation(),
           columnSelectionCheckbox(),

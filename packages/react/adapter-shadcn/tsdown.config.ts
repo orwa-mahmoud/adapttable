@@ -32,6 +32,7 @@ export default defineConfig({
     "src/filtering.ts",
     "src/header-filters.ts",
     "src/saved-views.ts",
+    "src/selection.ts",
     "src/selection-stats.ts",
     "src/density.ts",
     "src/print.ts",

@@ -23,8 +23,8 @@ Features that are **paid** in MUI X but built into `@adapttable/mui`:
   multi-condition.
 - **Column resizing** (Pro) → `resizableColumns()`.
 - **Master-detail / detail panel** (Pro) → `rowDetail(fn)`.
-- **Multiple row selection** (Pro) → `bulkActions([…])` (+ `selectedIds` /
-  `onSelectionChange` when controlled).
+- **Multiple row selection** (Pro) → `bulkActions([…])`, with
+  `selection({ selectedIds, onSelectionChange })` when controlled.
 - **Footer summary rows** → `summaryRow` (MUI's statistical aggregation is
   Premium; AdaptTable gives you the footer row, you supply the values).
 
@@ -54,21 +54,21 @@ DataGrid does.
 
 `<DataGrid>` → `<DataTable>`:
 
-| MUI X DataGrid                                       | `@adapttable/mui`                                          | Notes                                                                        |
-| ---------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `rows`                                               | `data`                                                     | Frontend tier. Server tier: `useServerData({ rows, total, onQueryChange })`. |
-| `columns`                                            | `columns`                                                  | `GridColDef` → `ColumnDef`, mapped below.                                    |
-| `getRowId`                                           | `rowKey`                                                   | **Required** — `(row) => string`.                                            |
-| `sortModel` / `onSortModelChange`                    | `sortable` per column (+ `multiSort()`)                    | AdaptTable owns and applies sort state.                                      |
-| `sortingMode: "server"`                              | `useServerData` (or another `source`)                      | The consolidated query carries `sortBy`/`sortDir`.                           |
-| `filterModel` / `onFilterModelChange`                | column `filter` shorthand + `filters([…])`                 | Widgets, chips, and URL params are derived for you.                          |
-| `paginationModel` / `onPaginationModelChange`        | automatic (frontend) or `useServerData`                    | No 100-row community cap.                                                    |
-| `checkboxSelection` + `rowSelectionModel`            | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Multi-row selection is free; no `{ type, ids }` model to manage.             |
-| `getDetailPanelContent` (Pro)                        | `rowDetail(fn)`                                            | `(row) => ReactNode`.                                                        |
-| `loading`                                            | `loading`                                                  | —                                                                            |
-| `slots.noRowsOverlay` / `loadingOverlay`             | `slots.empty` / `slots.skeleton`                           | —                                                                            |
-| `initialState` / `apiRef.exportState()` (state only) | `urlSync` + `urlKey` (+ `savedViews({ storageKey })`)      | State lives in the URL, shareable and reload-safe.                           |
-| `pinnedColumns` (Pro) / `columnVisibilityModel`      | `columnMenu()` / `columnLayout`                            | Show/hide, reorder, pin in one menu.                                         |
+| MUI X DataGrid                                       | `@adapttable/mui`                                                             | Notes                                                                        |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `rows`                                               | `data`                                                                        | Frontend tier. Server tier: `useServerData({ rows, total, onQueryChange })`. |
+| `columns`                                            | `columns`                                                                     | `GridColDef` → `ColumnDef`, mapped below.                                    |
+| `getRowId`                                           | `rowKey`                                                                      | **Required** — `(row) => string`.                                            |
+| `sortModel` / `onSortModelChange`                    | `sortable` per column (+ `multiSort()`)                                       | AdaptTable owns and applies sort state.                                      |
+| `sortingMode: "server"`                              | `useServerData` (or another `source`)                                         | The consolidated query carries `sortBy`/`sortDir`.                           |
+| `filterModel` / `onFilterModelChange`                | column `filter` shorthand + `filters([…])`                                    | Widgets, chips, and URL params are derived for you.                          |
+| `paginationModel` / `onPaginationModelChange`        | automatic (frontend) or `useServerData`                                       | No 100-row community cap.                                                    |
+| `checkboxSelection` + `rowSelectionModel`            | `selection({ selectedIds, onSelectionChange })`, `bulkActions([…])` for a bar | Multi-row selection is free; no `{ type, ids }` model to manage.             |
+| `getDetailPanelContent` (Pro)                        | `rowDetail(fn)`                                                               | `(row) => ReactNode`.                                                        |
+| `loading`                                            | `loading`                                                                     | —                                                                            |
+| `slots.noRowsOverlay` / `loadingOverlay`             | `slots.empty` / `slots.skeleton`                                              | —                                                                            |
+| `initialState` / `apiRef.exportState()` (state only) | `urlSync` + `urlKey` (+ `savedViews({ storageKey })`)                         | State lives in the URL, shareable and reload-safe.                           |
+| `pinnedColumns` (Pro) / `columnVisibilityModel`      | `columnMenu()` / `columnLayout`                                               | Show/hide, reorder, pin in one menu.                                         |
 
 `GridColDef` → `ColumnDef`:
 

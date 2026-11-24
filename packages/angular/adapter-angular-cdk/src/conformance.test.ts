@@ -17,6 +17,7 @@ import { editing, rowEditing } from "@adapttable/angular-cdk/editing";
 import { filters } from "@adapttable/angular-cdk/filters";
 import { grouping } from "@adapttable/angular-cdk/grouping";
 import { rowReorder } from "@adapttable/angular-cdk/row-reorder";
+import { selection } from "@adapttable/angular-cdk/selection";
 import { statusBar } from "@adapttable/angular-cdk/status-bar";
 import { virtualize } from "@adapttable/angular-cdk/virtualize";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
@@ -39,6 +40,7 @@ const kit: AngularConformanceKit = {
   grouping,
   rowReorder,
   virtualize,
+  selection,
 };
 
 describe(`table conformance — ${kit.name}`, () => {
@@ -123,9 +125,9 @@ describe("every bundled locale through native Angular controls", () => {
           set("forceMobile", mobile);
           // Auto uses infinite scrolling on mobile; exercise the real pager in both layouts.
           set("paginationMode", "paged");
-          set("selectable", true);
           set("defaults", { limit: 5 });
           set("features", [
+            selection(),
             filters<LocaleRow>([{ key: "name", label: "Name", type: "text" }]),
             columnMenu(),
             rowEditing<LocaleRow>(edit),

@@ -66,6 +66,7 @@ import { Component } from "@angular/core";
 import { AdaptCellTemplate, type ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/ngx-bootstrap";
 import { cellNavigation } from "@adapttable/ngx-bootstrap/cell-navigation";
+import { selection } from "@adapttable/ngx-bootstrap/selection";
 
 interface Person {
   id: string;
@@ -83,7 +84,6 @@ interface Person {
       [rowKey]="rowKey"
       [features]="features"
       tableLabel="People"
-      [selectable]="true"
     >
       <ng-template adaptCellTemplate="name" let-value="value">
         <strong>{{ value }}</strong>
@@ -98,7 +98,7 @@ export class PeopleTable {
     { key: "age", sortable: true },
   ];
   readonly rowKey = (row: Person) => row.id;
-  readonly features = [cellNavigation()];
+  readonly features = [selection(), cellNavigation()];
 }
 ```
 

@@ -7,6 +7,7 @@ import { exportCsv } from "../src/export";
 import { print } from "../src/print";
 import { click, deferred, find, mount, part, tick } from "./editing-helpers";
 
+import { selection } from "../src/selection";
 const rows = [
   { id: "a", name: "Ada" },
   { id: "g", name: "Grace" },
@@ -39,9 +40,8 @@ it("runs one native bulk request, exposes rejection, and retains host rows", asy
   const { host } = mount(() =>
     h(DataTable<Row>, {
       ...base,
-      selectable: true,
-      defaultSelectedIds: ["a"],
       features: [
+        selection({ defaultSelectedIds: ["a"] }),
         bulkActions([
           { key: "archive", label: "Archive selected", onClick: request },
         ]),
@@ -73,8 +73,8 @@ it("exports selected rows and invokes the host print handler", async () => {
   const { host } = mount(() =>
     h(DataTable<Row>, {
       ...base,
-      selectedIds: ["g"],
       features: [
+        selection({ selectedIds: ["g"] }),
         exportCsv<Row>({ scope: "selected", request }),
         print(printed, true),
       ],

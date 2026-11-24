@@ -2,6 +2,7 @@ import { afterEach, expect, it } from "vitest";
 import { createApp, defineComponent, h, nextTick, shallowRef } from "vue";
 
 import { DataTable, type DataTableProps } from "../src";
+import { selection } from "../src/selection";
 import { cellNavigation } from "../src/cell-navigation";
 import { editing } from "../src/editing";
 
@@ -41,16 +42,8 @@ it.each([
   const data = shallowRef<readonly Row[]>(rows);
   // A host's columns and row key stay the same between renders; only the
   // data changes.
-  const props = (): DataTableProps<Row> => ({
-    data: data.value,
-    columns,
-    rowKey,
-    urlSync: false,
-    searchable: false,
-    selectable: variant.selectable,
-    features,
-  });
   const features = [
+    ...(variant.selectable ? [selection()] : []),
     editing<Row>((row, key, value) => {
       if (!("writeBack" in variant)) return;
       data.value = data.value.map((item) =>
@@ -59,6 +52,14 @@ it.each([
     }),
     ...(variant.nav ? [cellNavigation()] : []),
   ];
+  const props = (): DataTableProps<Row> => ({
+    data: data.value,
+    columns,
+    rowKey,
+    urlSync: false,
+    searchable: false,
+    features,
+  });
   const root = document.createElement("div");
   document.body.append(root);
   const app = createApp(

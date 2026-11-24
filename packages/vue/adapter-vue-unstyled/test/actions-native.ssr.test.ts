@@ -1,3 +1,4 @@
+import { selection } from "../src/selection";
 // @vitest-environment node
 import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, h } from "vue";
@@ -27,9 +28,8 @@ describe("action SSR requests", () => {
               columns: [{ key: "name" }],
               rowKey: (row) => row.id,
               urlSync: false,
-              selectable: true,
-              defaultSelectedIds: ["a"],
               features: [
+                selection({ defaultSelectedIds: ["a"] }),
                 bulkActions([{ key: "run", label: "Run", onClick: run }]),
                 commandPalette({
                   button: true,

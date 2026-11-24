@@ -73,22 +73,22 @@ renders through the kit provider your app already has.
 
 Grid-level (`<AgGridReact>` → `<DataTable>`):
 
-| AG Grid                                            | AdaptTable                                                 | Notes                                                             |
-| -------------------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------- |
-| `rowData`                                          | `data`                                                     | —                                                                 |
-| `columnDefs`                                       | `columns`                                                  | `ColDef` mapping below.                                           |
-| `defaultColDef`                                    | (not needed)                                               | Column defaults are explicit per column.                          |
-| `pagination` + `paginationPageSize`                | automatic                                                  | Paged on desktop, infinite on mobile; page-size control built in. |
-| `rowSelection={{ mode: "multiRow" }}`              | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Compose `bulkActions()` to turn on checkboxes.                    |
-| `api.getSelectedRows()`                            | `onSelectionChange` state                                  | Selection is React state, not an API call.                        |
-| `rowModelType: "infinite"`                         | `useServerData` (+ infinite mode)                          | One consolidated query; superseded fetches abort via `signal`.    |
-| `api.exportDataAsCsv()`                            | `exportCsv()` / `rowsToCsv` + `downloadCsv`                | Compose `exportCsv()` for a toolbar button or headless helpers.   |
-| `theme={themeQuartz}`                              | your kit's provider/theme                                  | The table inherits the design system, incl. dark mode.            |
-| `<AgGridProvider modules={[AllCommunityModule]}>`  | (nothing)                                                  | No module registry.                                               |
-| `onGridReady` / `gridRef.current.api`              | (nothing)                                                  | Declarative props replace the imperative API.                     |
-| column tool panel (Enterprise side bar)            | `columnMenu()`                                             | Show/hide, reorder, pin — free.                                   |
-| `rowGroupPanelShow` / tool-panel grouping          | `groupingPanel()`                                          | Dedicated strip; drag headers on desktop, use selects on mobile.  |
-| `getDetailPanelContent`-style master/detail (Ent.) | `rowDetail(fn)`                                            | `(row) => ReactNode`, free.                                       |
+| AG Grid                                            | AdaptTable                                                                    | Notes                                                             |
+| -------------------------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `rowData`                                          | `data`                                                                        | —                                                                 |
+| `columnDefs`                                       | `columns`                                                                     | `ColDef` mapping below.                                           |
+| `defaultColDef`                                    | (not needed)                                                                  | Column defaults are explicit per column.                          |
+| `pagination` + `paginationPageSize`                | automatic                                                                     | Paged on desktop, infinite on mobile; page-size control built in. |
+| `rowSelection={{ mode: "multiRow" }}`              | `selection({ selectedIds, onSelectionChange })`, `bulkActions([…])` for a bar | Compose `bulkActions()` to turn on checkboxes.                    |
+| `api.getSelectedRows()`                            | `onSelectionChange` state                                                     | Selection is React state, not an API call.                        |
+| `rowModelType: "infinite"`                         | `useServerData` (+ infinite mode)                                             | One consolidated query; superseded fetches abort via `signal`.    |
+| `api.exportDataAsCsv()`                            | `exportCsv()` / `rowsToCsv` + `downloadCsv`                                   | Compose `exportCsv()` for a toolbar button or headless helpers.   |
+| `theme={themeQuartz}`                              | your kit's provider/theme                                                     | The table inherits the design system, incl. dark mode.            |
+| `<AgGridProvider modules={[AllCommunityModule]}>`  | (nothing)                                                                     | No module registry.                                               |
+| `onGridReady` / `gridRef.current.api`              | (nothing)                                                                     | Declarative props replace the imperative API.                     |
+| column tool panel (Enterprise side bar)            | `columnMenu()`                                                                | Show/hide, reorder, pin — free.                                   |
+| `rowGroupPanelShow` / tool-panel grouping          | `groupingPanel()`                                                             | Dedicated strip; drag headers on desktop, use selects on mobile.  |
+| `getDetailPanelContent`-style master/detail (Ent.) | `rowDetail(fn)`                                                               | `(row) => ReactNode`, free.                                       |
 
 `ColDef` → `ColumnDef`:
 

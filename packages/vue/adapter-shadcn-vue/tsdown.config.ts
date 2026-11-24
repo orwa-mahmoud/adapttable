@@ -18,6 +18,7 @@ export default defineConfig({
     "src/cell-navigation.ts",
     "src/column-selection.ts",
     "src/status-bar.ts",
+    "src/selection.ts",
     "src/selection-stats.ts",
     "src/find-in-table.ts",
     "src/sparkline.ts",

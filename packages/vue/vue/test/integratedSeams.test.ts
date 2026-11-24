@@ -23,7 +23,10 @@ import {
   useTableEditing,
 } from "../src/editing";
 import { grouping } from "../src/features/grouping";
-import { pinnedSummaryRows } from "../src/features/headlessFactories";
+import {
+  pinnedSummaryRows,
+  selection,
+} from "../src/features/headlessFactories";
 import { rowDetail } from "../src/features/rowDetail";
 import {
   type ComposedFeature,
@@ -177,6 +180,7 @@ describe("integrated optional feature seams", () => {
       slotRender(rowEditActionsSlotKey<Row>(), () => null),
     ]);
     const features = shallowRef<readonly ComposedFeature<Row>[]>([
+      selection(),
       grouping<Row>("team"),
       edit,
       rowDetail<Row>((value) => h("span", value.name), ["a"]),
@@ -191,7 +195,6 @@ describe("integrated optional feature seams", () => {
           columns,
           rowKey: (value: Row) => value.id,
           features,
-          selectable: true,
           urlSync: false,
         })
       )
@@ -224,7 +227,8 @@ describe("integrated optional feature seams", () => {
     expect(shell.grouping.value).toBeUndefined();
     expect(shell.detail.value).toBeUndefined();
     expect(shell.desktop.value.expandLabel).toBeUndefined();
-    expect(shell.desktop.value.columnCount).toBe(3);
+    // Selection was one of the features, so its column left with them.
+    expect(shell.desktop.value.columnCount).toBe(2);
     scope.stop();
   });
   it("projects custom editors from one model and delegates neutral key/focus handlers", () => {

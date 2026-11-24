@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/nuxt-ui";
+import { selection } from "@adapttable/nuxt-ui/selection";
 import { columnMenu } from "@adapttable/nuxt-ui/column-menu";
 import { densityChooser } from "@adapttable/nuxt-ui/density";
 import { fullscreen } from "@adapttable/nuxt-ui/fullscreen";
@@ -60,12 +61,16 @@ function renderStatus(row: Order, label: string) {
       </div>
     </template>
     <template
-      #default="{ tableProps, onSelectionChange, onColumnLayoutChange }"
+      #default="{
+        tableProps,
+        selectedIds,
+        onSelectionChange,
+        onColumnLayoutChange,
+      }"
     >
       <DataTable
         v-bind="tableProps"
-        :features="features"
-        @update:selected-ids="onSelectionChange"
+        :features="[selection({ selectedIds, onSelectionChange }), ...features]"
         @update:column-layout="onColumnLayoutChange"
       />
     </template>

@@ -8,6 +8,7 @@ AdaptTable's Vue data table with Element Plus controls and card surfaces.
 <script setup lang="ts">
 import { ref } from "vue";
 import { DataTable, type ColumnDef } from "@adapttable/element-plus";
+import { selection } from "@adapttable/element-plus/selection";
 import "element-plus/dist/index.css";
 import "@adapttable/element-plus/styles.css";
 
@@ -26,17 +27,19 @@ const columns: ColumnDef<Person>[] = [
   { key: "score", header: "Score", sortable: true },
 ];
 const selectedIds = ref<string[]>([]);
+function changeSelection(ids: string[]) {
+  selectedIds.value = ids;
+}
 const rowKey = (row: Person) => row.id;
 </script>
 
 <template>
   <DataTable
-    v-model:selected-ids="selectedIds"
     :data="rows"
     :columns="columns"
     :row-key="rowKey"
     :url-sync="false"
-    selectable
+    :features="[selection({ selectedIds, onSelectionChange: changeSelection })]"
   />
 </template>
 ```

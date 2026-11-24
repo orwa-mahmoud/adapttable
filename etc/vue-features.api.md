@@ -84,6 +84,7 @@ import { RowReorderOptions } from '@adapttable/core';
 import { RowStyle } from '@adapttable/core';
 import { RuntimeChromeInput } from '@adapttable/core/binding';
 import { SavedViewsControllerOptions } from '@adapttable/core';
+import { SelectionFeatureOptions } from '@adapttable/core/binding';
 import { SelectionState } from '@adapttable/core/binding';
 import { SelectionStatsOptions } from '@adapttable/core';
 import { ShallowRef } from 'vue';
@@ -542,6 +543,7 @@ export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRo
     readonly bulkActions?: readonly BulkAction[];
     // (undocumented)
     readonly columnSelectionCheckbox?: boolean;
+    readonly defaultSelectedIds?: readonly string[];
     // (undocumented)
     readonly editingModel?: (context: FeatureMountContext<TRow>) => void | (() => void);
     // (undocumented)
@@ -560,10 +562,14 @@ export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRo
     readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onCellRangeChange?: (range: CellRange | null) => void;
+    readonly onSelectionChange?: (ids: string[]) => void;
     // (undocumented)
     readonly rowActionControls?: RowActionControlsProjector<TRow>;
     // (undocumented)
     readonly rowActions?: readonly RowAction<TRow>[];
+    readonly selectable?: MaybeRefOrGetter<boolean>;
+    readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
+    readonly selectionGetId?: (row: TRow) => string;
     // (undocumented)
     readonly statusBar?: boolean;
     // (undocumented)
@@ -707,6 +713,14 @@ export interface RowSelection {
 
 // @public
 export function savedViews(options: MaybeRefOrGetter<UseSavedViewsOptions>): StaticTableFeature;
+
+// @public
+export function selection(options?: Omit<VueSelectionOptions, "getId">): StaticTableFeature;
+
+// @public
+export function selection<TRow>(options: VueSelectionOptions<TRow> & {
+    readonly getId: (row: TRow) => string;
+}): TableFeature<TRow>;
 
 // @public
 export interface SelectionCheckboxAttrs extends Attrs {
@@ -1215,8 +1229,6 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     // (undocumented)
     readonly defaultDensity?: TableDensity;
     // (undocumented)
-    readonly defaultSelectedIds?: readonly string[];
-    // (undocumented)
     readonly density?: MaybeRefOrGetterOptional<TableDensity>;
     // (undocumented)
     readonly features?: MaybeRefOrGetterOptional<readonly FeatureListEntry<ComposedFeature<NoInfer<TRow>>>[]>;
@@ -1230,15 +1242,9 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onDensityChange?: (next: TableDensity) => void;
-    // (undocumented)
-    readonly onSelectionChange?: (ids: string[]) => void;
     readonly onViewChange?: TableQueryListener;
     // (undocumented)
     readonly runtimeChannels?: MaybeRefOrGetter<Pick<RuntimeChromeInput<TRow>, "filterDefs" | "filterRegistry" | "grouping" | "tree" | "editing" | "rowPinning">>;
-    // (undocumented)
-    readonly selectable?: MaybeRefOrGetter<boolean>;
-    // (undocumented)
-    readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
     // (undocumented)
     readonly source?: MaybeRefOrGetterOptional<TableSource<TRow>>;
     readonly summaryRow?: SummaryRowFn<TRow>;
@@ -1304,6 +1310,9 @@ export function virtualize(options?: VirtualizeOptions): StaticTableFeature;
 export type VirtualizeOptions = VirtualizeInput & (boolean | {
     readonly maxHeight?: number;
 });
+
+// @public
+export type VueSelectionOptions<TRow = unknown> = SelectionFeatureOptions<TRow, MaybeRefOrGetterOptional<readonly string[]>>;
 
 // (No @packageDocumentation comment for this package)
 

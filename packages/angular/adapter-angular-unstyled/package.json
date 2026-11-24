@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/angular-unstyled",
   "version": "0.4.0",
-  "description": "AdaptTable's Angular DataTable with native HTML controls, responsive cards, opt-in features and no theme of its own — sorting, filters, editing, grouping, column pinning, URL state and RTL.",
+  "description": "AdaptTable's Angular DataTable with native HTML controls, responsive cards, opt-in features and no theme of its own \u2014 sorting, filters, editing, grouping, column pinning, URL state and RTL.",
   "keywords": [
     "angular",
     "data-table",
@@ -112,6 +112,10 @@
     "./fit-columns": {
       "types": "./dist/types/adapttable-angular-unstyled-fit-columns.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-fit-columns.mjs"
+    },
+    "./selection": {
+      "types": "./dist/types/adapttable-angular-unstyled-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-selection.mjs"
     },
     "./fullscreen": {
       "types": "./dist/types/adapttable-angular-unstyled-fullscreen.d.ts",

@@ -2,13 +2,14 @@
 
 Control selected Vue row IDs, retain stable row identity and compose native bulk actions without transferring ownership of data.
 
-Selection uses stable IDs from `rowKey`. This example keeps selected IDs in the Vue host with `v-model:selected-ids`. `selectable` enables native row checkboxes.
+Selection uses stable IDs from `rowKey`. Compose `selection()` from the kit's `/selection` entry. Pass `selectedIds` when the host holds the selection, and apply the ids from `onSelectionChange`.
 
 ```vue
 <script setup lang="ts">
 import { shallowRef } from "vue";
 import type { ColumnDef } from "@adapttable/vue";
 import { DataTable } from "@adapttable/vue-unstyled";
+import { selection } from "@adapttable/vue-unstyled/selection";
 
 interface Person {
   id: string;
@@ -25,6 +26,9 @@ const columns: ColumnDef<Person>[] = [
 ];
 const rowKey = (row: Person) => row.id;
 const selectedIds = shallowRef<string[]>([]);
+function changeSelection(ids: string[]) {
+  selectedIds.value = ids;
+}
 </script>
 
 <template>
@@ -34,13 +38,12 @@ const selectedIds = shallowRef<string[]>([]);
     :row-key="rowKey"
     table-label="People"
     url-key="people"
-    selectable
-    v-model:selected-ids="selectedIds"
+    :features="[selection({ selectedIds, onSelectionChange: changeSelection })]"
   />
 </template>
 ```
 
-To validate or reject a selection request, pass `selectedIds` and handle `update:selectedIds` instead of accepting every model event. `defaultSelectedIds` initializes local selection; it does not reset later changes.
+To reject a request, leave `selectedIds` unchanged inside `onSelectionChange`. `defaultSelectedIds` initializes the table's own selection; it does not reset later changes.
 
 Selection is not an edit or delete operation. Compose your adapter’s `/bulk-actions` factory to request host-owned operations over selected IDs. Filtering and paging can change the visible rows; use the selection model and the callback’s IDs instead of deriving selection from checkbox DOM nodes. Selection and edit drafts are not restored by Saved Views. See [actions](./actions.md), [saved views](./saved-views.md) and [row controls](./rows.md).
 

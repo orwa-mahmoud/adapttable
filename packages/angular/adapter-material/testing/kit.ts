@@ -50,6 +50,7 @@ import { rowDetail } from "@adapttable/angular-material/row-detail";
 import { rowPinning } from "@adapttable/angular-material/row-pinning";
 import { rowReorder } from "@adapttable/angular-material/row-reorder";
 import { savedViews } from "@adapttable/angular-material/saved-views";
+import { selection } from "@adapttable/angular-material/selection";
 import { selectionStats } from "@adapttable/angular-material/selection-stats";
 import { sidePanel } from "@adapttable/angular-material/side-panel";
 import { statusBar } from "@adapttable/angular-material/status-bar";
@@ -89,6 +90,7 @@ export const kit: AngularKitUnderTest = {
     commandPalette,
     dirtyIndicators,
     filterTypes,
+    selection,
     selectionStats,
     sidePanel,
     statusBar,

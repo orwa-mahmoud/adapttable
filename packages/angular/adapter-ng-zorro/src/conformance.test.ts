@@ -17,6 +17,7 @@ import { editing, rowEditing } from "@adapttable/ng-zorro/editing";
 import { filters } from "@adapttable/ng-zorro/filters";
 import { grouping } from "@adapttable/ng-zorro/grouping";
 import { rowReorder } from "@adapttable/ng-zorro/row-reorder";
+import { selection } from "@adapttable/ng-zorro/selection";
 import { statusBar } from "@adapttable/ng-zorro/status-bar";
 import { virtualize } from "@adapttable/ng-zorro/virtualize";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
@@ -39,6 +40,7 @@ const kit: AngularConformanceKit = {
   grouping,
   rowReorder,
   virtualize,
+  selection,
 };
 
 describe(`table conformance — ${kit.name}`, () => {
@@ -116,9 +118,9 @@ describe("every bundled locale through NG-ZORRO Angular controls", () => {
           set("forceMobile", mobile);
           // Auto uses infinite scrolling on mobile; exercise the real pager in both layouts.
           set("paginationMode", "paged");
-          set("selectable", true);
           set("defaults", { limit: 5 });
           set("features", [
+            selection(),
             filters<LocaleRow>([{ key: "name", label: "Name", type: "text" }]),
             columnMenu(),
             rowEditing<LocaleRow>(edit),

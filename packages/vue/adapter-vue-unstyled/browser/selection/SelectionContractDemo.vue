@@ -11,6 +11,7 @@ import { DataTable } from "@adapttable/vue-unstyled";
 import { h, shallowRef } from "vue";
 
 import { ModelCheckbox } from "./ModelCheckbox";
+import { selection } from "../../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -29,6 +30,9 @@ const selectedIds = shallowRef<readonly string[] | undefined>(
 const nativeIds = shallowRef<readonly string[]>(["a", "off-page"]);
 const requests = shallowRef<readonly string[][]>([]);
 const nativeRequests = shallowRef<readonly string[][]>([]);
+function recordNative(ids: string[]): void {
+  nativeRequests.value = [...nativeRequests.value, ids];
+}
 // Rows draw in their own components, so the order their checkboxes report
 // in is not the page's order: keep every one and focus the last on the page.
 const rowCheckboxes = new Set<HTMLInputElement>();
@@ -40,18 +44,21 @@ const focusLastCheckbox = (): void => {
   onPage.at(-1)?.focus();
 };
 const shell = useDataTableShell<Row>(() => ({
+  features: [
+    selection({
+      defaultSelectedIds: ["a", "off-page"],
+      onSelectionChange: (ids) => {
+        requests.value = [...requests.value, ids];
+        if (host === "accept") selectedIds.value = ids;
+      },
+    }),
+  ],
   data: rows,
   columns: [{ key: "name", sortable: true }],
   rowKey: (row) => row.id,
-  selectable: true,
   urlSync: false,
   forceMobile: mobile,
   selectedIds,
-  defaultSelectedIds: ["a", "off-page"],
-  onSelectionChange: (ids) => {
-    requests.value = [...requests.value, ids];
-    if (host === "accept") selectedIds.value = ids;
-  },
 }));
 const rowKey = (row: Row) => row.id;
 const slots: TableChromeSlots<Row> = {
@@ -102,12 +109,12 @@ const ContractTable = () =>
         :row-key="rowKey"
         :url-sync="false"
         :force-mobile="mobile"
-        :selected-ids="nativeIds"
-        @update:selected-ids="
-          (ids) => {
-            nativeRequests = [...nativeRequests, ids];
-          }
-        "
+        :features="[
+          selection({
+            selectedIds: nativeIds,
+            onSelectionChange: recordNative,
+          }),
+        ]"
       />
       <output id="native-requests">{{ JSON.stringify(nativeRequests) }}</output>
     </section>

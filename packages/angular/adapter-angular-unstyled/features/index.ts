@@ -55,6 +55,7 @@ export { rowDetail } from "@adapttable/angular-unstyled/row-detail";
 export { rowPinning } from "@adapttable/angular-unstyled/row-pinning";
 export { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
 export { savedViews } from "@adapttable/angular-unstyled/saved-views";
+export { selection } from "@adapttable/angular-unstyled/selection";
 export { selectionStats } from "@adapttable/angular-unstyled/selection-stats";
 export { sidePanel } from "@adapttable/angular-unstyled/side-panel";
 export { statusBar } from "@adapttable/angular-unstyled/status-bar";

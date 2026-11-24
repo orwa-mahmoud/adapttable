@@ -45,6 +45,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/spartan/saved-views";
+import { selection } from "@adapttable/spartan/selection";
 import { selectionStats } from "@adapttable/spartan/selection-stats";
 import { sidePanel } from "@adapttable/spartan/side-panel";
 import { statusBar } from "@adapttable/spartan/status-bar";
@@ -100,6 +101,7 @@ export const kit = {
   commandPalette,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   rowAppearance,
   statusBar,

@@ -103,6 +103,21 @@ describe("migrateV4Source", () => {
     expect(result.issues[0]?.message).toContain("hideOnMobile");
   });
 
+  it("reports a table's selection props, which belong to selection()", () => {
+    const source = [
+      "<DataTable",
+      "  data={rows}",
+      "  selectedIds={ids}",
+      "  onSelectionChange={setIds}",
+      "/>;",
+      "const state = useSelection({ selectedIds: ids });",
+    ].join("\n");
+    const result = migrateV4Source(source);
+    expect(result.code).toBe(source);
+    expect(result.issues.map((issue) => issue.line)).toEqual([3, 4]);
+    expect(result.issues[0]?.message).toContain("selection(");
+  });
+
   it("reports a table's server props and leaves a server source's options alone", () => {
     const source = [
       "const source = useServerData({ rows, total: 3, onQueryChange: fetch });",

@@ -70,9 +70,11 @@ import {
   coreResizableColumns,
   coreRowAppearance,
   coreSavedViews,
+  coreSelection,
   coreSidePanel,
   coreStatusBar,
   coreUndoRedoButtons,
+  type SelectionFeatureOptions,
 } from "@adapttable/core/binding";
 
 import {
@@ -233,6 +235,46 @@ export function contextMenu<TRow>(
  */
 export function sidePanel(options: SidePanelOptions): StaticTableFeature {
   return { ...coreSidePanel(options), renders: [SIDE_PANEL_RENDER] };
+}
+
+/**
+ * Let rows be selected, with the selection the host holds or the table's
+ * own. Bulk actions, column selection and selection stats each select rows
+ * too; this carries the selection's options to all of them.
+ *
+ * ```tsx
+ * import { selection } from "@adapttable/mantine/selection";
+ *
+ * <DataTable features={[selection({ selectedIds, onSelectionChange })]} … />
+ * ```
+ *
+ * @public
+ */
+export function selection(
+  options?: Omit<SelectionFeatureOptions, "getId">
+): StaticTableFeature;
+/**
+ * Let rows be selected by an id other than the row key.
+ *
+ * @public
+ */
+export function selection<TRow>(
+  options: SelectionFeatureOptions<TRow> & {
+    readonly getId: (row: TRow) => string;
+  }
+): TableFeature<TRow>;
+export function selection<TRow>(
+  options: SelectionFeatureOptions<TRow> = {}
+): TableFeature<TRow> | StaticTableFeature {
+  const renders = [SELECTION_LIVE_RENDER];
+  if (options.getId) return { ...rowAware(coreSelection(options)), renders };
+  const { selectedIds, defaultSelectedIds, onSelectionChange } = options;
+  return {
+    ...rowFree(
+      coreSelection({ selectedIds, defaultSelectedIds, onSelectionChange })
+    ),
+    renders,
+  };
 }
 
 /**

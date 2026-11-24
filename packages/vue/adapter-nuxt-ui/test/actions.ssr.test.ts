@@ -1,3 +1,4 @@
+import { selection } from "../src/selection";
 // @vitest-environment node
 import ui from "@nuxt/ui/vue-plugin";
 import { expect, it, vi } from "vitest";
@@ -22,9 +23,8 @@ it.each([false, true])(
           urlSync: false,
           forceMobile: mobile,
           dir: "rtl",
-          selectable: true,
-          defaultSelectedIds: ["a"],
           features: [
+            selection({ defaultSelectedIds: ["a"] }),
             bulkActions([{ key: "run", label: "Run", onClick: run }]),
             print(run, true),
             exportCsv<{ id: string; name: string }>({ request: run }),

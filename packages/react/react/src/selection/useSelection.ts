@@ -48,6 +48,8 @@ export interface UseSelectionOptions<TRow> {
    * `useColumnLayout`.
    */
   selectedIds?: readonly string[];
+  /** The table's own selection to start from, when the host holds none. */
+  defaultSelectedIds?: readonly string[];
   /** Change handler; required for the controlled mode to update. */
   onSelectionChange?: (selectedIds: string[]) => void;
   /**
@@ -128,7 +130,7 @@ export function useSelection<TRow>(
     [getId]
   );
   const [selectedIds, store] = useControllableStore<ReadonlySet<string>>(
-    () => new Set(),
+    () => new Set(options.defaultSelectedIds),
     {
       value: readIds(options.selectedIds),
       onChange: onChange && ((next) => onChange([...next])),

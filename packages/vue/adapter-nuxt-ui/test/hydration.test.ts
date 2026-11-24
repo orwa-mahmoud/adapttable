@@ -6,6 +6,7 @@ import { renderToString } from "vue/server-renderer";
 import { DataTable } from "../src";
 import { densityChooser } from "../src/density";
 
+import { selection } from "../src/selection";
 describe("Nuxt table hydration", () => {
   it.each([false, true])(
     "hydrates without replacing native model targets (mobile=%s)",
@@ -17,8 +18,7 @@ describe("Nuxt table hydration", () => {
         forceMobile: mobile,
         urlSync: false,
         dir: "rtl" as const,
-        selectable: true,
-        features: [densityChooser()],
+        features: [selection(), densityChooser()],
       };
       const create = () =>
         createSSRApp({

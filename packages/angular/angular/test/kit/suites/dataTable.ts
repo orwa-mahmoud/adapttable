@@ -24,7 +24,7 @@ export function dataTableTests(
   kit: AngularKitUnderTest
 ): readonly ConformanceTest[] {
   const { Table: AdaptDataTable, kitSelector } = kit;
-  const { editing, rowReorder, virtualize } = kit.features;
+  const { editing, rowReorder, virtualize, selection } = kit.features;
   return collectConformanceTests(({ describe, it, afterEach }) => {
     interface City {
       id: string;
@@ -62,10 +62,8 @@ export function dataTableTests(
           [urlSync]="false"
           [defaults]="{ limit: 5 }"
           [forceMobile]="mobile()"
-          [selectable]="true"
-          [selectedIds]="selected()"
           searchPlaceholder="Find a city"
-          (selectionChange)="changes.push($event)"
+          [features]="features"
         >
           <ng-template adaptCellTemplate="country" let-value="value">
             <b class="country">{{ value }}</b>
@@ -79,6 +77,14 @@ export function dataTableTests(
       readonly selected = signal<readonly string[] | undefined>(undefined);
       readonly columns = COLUMNS;
       readonly rowKey = (row: City) => row.id;
+      readonly features = [
+        selection({
+          selectedIds: this.selected,
+          onSelectionChange: (ids: string[]) => {
+            this.changes.push(ids);
+          },
+        }),
+      ];
       readonly changes: string[][] = [];
     }
 

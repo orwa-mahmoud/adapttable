@@ -17,6 +17,7 @@ import { cellNavigation } from "../src/cell-navigation";
 import { editing } from "../src/editing";
 import { grouping } from "../src/grouping";
 import { rowReorder } from "../src/row-reorder";
+import { selection } from "../src/selection";
 import { virtualize } from "../src/virtualize";
 
 const driver = nativeConformanceDriver({
@@ -26,6 +27,7 @@ const driver = nativeConformanceDriver({
   editing,
   grouping,
   rowReorder,
+  selection,
   virtualize,
   install: (app) => {
     app.use(

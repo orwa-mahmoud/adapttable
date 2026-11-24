@@ -109,13 +109,17 @@ describe("coreFeatures — flag features", () => {
     [
       "columnSelectionCheckbox",
       "column-selection-checkbox",
-      { columnSelectionCheckbox: true },
+      { selectable: true, columnSelectionCheckbox: true },
     ],
     ["densityChooser", "density-chooser", { densityChooser: true }],
     ["dirtyIndicators", "dirty-indicators", { dirtyIndicators: true }],
     ["findInTable", "find-in-table", { findInTable: true }],
     ["fullscreen", "fullscreen", { fullscreen: true }],
-    ["selectionStats", "selection-stats", { selectionStats: true }],
+    [
+      "selectionStats",
+      "selection-stats",
+      { selectable: true, selectionStats: true },
+    ],
   ] as const)("%s has id %s and writes its flag", (name, id, expected) => {
     const made = flagFactories[name]();
     expect(made.id).toBe(id);
@@ -200,7 +204,7 @@ describe("coreFeatures — configured features", () => {
     const actions = [{ key: "archive", label: "Archive", onClick: vi.fn() }];
     const made = coreBulkActions(actions);
     expect(made.id).toBe("bulk-actions");
-    expect(patch(made)).toEqual({ bulkActions: actions });
+    expect(patch(made)).toEqual({ selectable: true, bulkActions: actions });
   });
 
   it("savedViews writes its options", () => {

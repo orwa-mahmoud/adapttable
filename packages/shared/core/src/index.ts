@@ -230,6 +230,7 @@ export {
   type RowEditStore,
   type RowEditStoreOptions,
 } from "./editing/rowEditing";
+export type { SelectionFeatureOptions } from "./features/coreFeatures";
 export type { NeutralFeatureHost } from "./features/featureRegistration";
 export type { ActiveFilterChip } from "./filters/activeFilterChips";
 export {

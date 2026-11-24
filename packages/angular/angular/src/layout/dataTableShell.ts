@@ -185,6 +185,7 @@ import {
 } from "../filters/tableFilters";
 import { selectionStatsOf } from "../focus/selectionStats";
 import { staggerMounted } from "../motion/mountStagger";
+import type { MaybeSignalOptional } from "../store";
 import type { KitEnvironment } from "./kitEnvironment";
 import {
   bodyWindowFor,
@@ -558,10 +559,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   readonly skeletonRows = input<number>();
   /** Which edge a projected side panel sits on. */
   readonly sidePanelSide = input<SidePanelSide>("end");
-  /** Offer a checkbox on every row. */
-  readonly selectable = input(false);
-  /** The selected row ids, to control the selection. */
-  readonly selectedIds = input<readonly string[]>();
   /**
    * Arrow keys move between cells. Prefer composing
    * `cellNavigation()` when listing features; this input still toggles the
@@ -632,8 +629,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
    * browser's `confirm`. Each request reads the current handler.
    */
   readonly confirm = input<ConfirmHandler>();
-  /** Every selection change, as the full list of selected ids. */
-  readonly selectionChange = output<string[]>();
   /** Every column-layout change. */
   readonly columnLayoutChange = output<ColumnLayoutState>();
 
@@ -907,7 +902,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     const configuration = computed(() => ({
       features: features(),
       inScrollBox: inScrollBox(),
-      selectable: this.selectable(),
       cellNavigation: this.cellNavigation(),
       filtersMode: this.filtersMode(),
       closeHeaderFilterOnSelect: this.closeHeaderFilterOnSelect(),
@@ -1062,17 +1056,25 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     const selectionState = resources.use("selection-state", [], () => ({
       controller: undefined as RowSelection | undefined,
     }));
-    const selectable = this.selectable() || bulk !== undefined;
+    const featureSelected = featureOptions.selectedIds as
+      MaybeSignalOptional<readonly string[]> | undefined;
+    const featureChange = featureOptions.onSelectionChange as
+      ((ids: string[]) => void) | undefined;
+    const featureGetId = featureOptions.selectionGetId as
+      ((row: TRow) => string) | undefined;
+    const selectable = featureOptions.selectable === true || bulk !== undefined;
     const selectionController =
       selectable || selectionState.controller !== undefined
         ? resources.use("selection", [], (injector) =>
             injectRowSelection<TRow>({
               rows: computed(() => source().rows),
-              rowKey: (row) => this.rowKey()(row),
-              selectedIds: this.selectedIds,
-              onSelectionChange: (ids) => {
-                this.selectionChange.emit(ids);
-              },
+              rowKey: (row) => (featureGetId ?? this.rowKey())(row),
+              ...(featureSelected === undefined
+                ? {}
+                : { selectedIds: featureSelected }),
+              defaultSelectedIds: featureOptions.defaultSelectedIds as
+                readonly string[] | undefined,
+              ...(featureChange ? { onSelectionChange: featureChange } : {}),
               labels,
               acrossPages: computed(
                 () => sourceCapabilities(source()).selectAcrossPages

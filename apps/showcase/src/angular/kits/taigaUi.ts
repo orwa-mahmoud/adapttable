@@ -46,6 +46,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/taiga-ui/saved-views";
+import { selection } from "@adapttable/taiga-ui/selection";
 import { selectionStats } from "@adapttable/taiga-ui/selection-stats";
 import { sidePanel } from "@adapttable/taiga-ui/side-panel";
 import { statusBar } from "@adapttable/taiga-ui/status-bar";
@@ -123,6 +124,7 @@ export const kit = {
   commandPalette,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   rowAppearance,
   statusBar,

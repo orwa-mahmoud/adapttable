@@ -33,7 +33,7 @@ const pageFeatures = [
   ),
 ];
 const chrome = pageChromeFeatures(kit, { urlKey: "sel" });
-const features = [...pageFeatures, ...chrome];
+const features = [kit.selection(), ...pageFeatures, ...chrome];
 </script>
 
 <template>
@@ -53,7 +53,6 @@ const features = [...pageFeatures, ...chrome];
         :columns="columns"
         :row-key="rowKey"
         :default-column-layout="PAGE_LAYOUT"
-        selectable
         :defaults="PAGE_DEFAULTS"
         :features="features"
       />

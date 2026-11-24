@@ -9,6 +9,7 @@ import {
 } from "vue";
 
 import type { Attrs } from "../src/attrs";
+import { selection } from "../src/features/headlessFactories";
 import {
   DesktopTableChrome,
   MobileCardsChrome,
@@ -65,15 +66,18 @@ function mount(options: FixtureOptions = {}) {
           data,
           columns: [{ key: "name", sortable: true }],
           rowKey: (row) => row.id,
-          selectable: true,
           urlSync: false,
           forceMobile: options.mobile ?? false,
-          selectedIds,
-          defaultSelectedIds: options.defaultSelectedIds,
-          onSelectionChange: (ids) => {
-            updates.push(ids);
-            if (options.accept) selectedIds.value = ids;
-          },
+          features: [
+            selection({
+              selectedIds,
+              defaultSelectedIds: options.defaultSelectedIds,
+              onSelectionChange: (ids) => {
+                updates.push(ids);
+                if (options.accept) selectedIds.value = ids;
+              },
+            }),
+          ],
         }));
         const slots: TableChromeSlots<Row> = {
           card: options.card,

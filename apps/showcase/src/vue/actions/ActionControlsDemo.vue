@@ -186,7 +186,6 @@ const features = computed(() => [
         :url-sync="false"
         :force-mobile="mobile"
         :dir="rtl ? 'rtl' : 'ltr'"
-        selectable
       />
     </KeepAlive>
   </main>

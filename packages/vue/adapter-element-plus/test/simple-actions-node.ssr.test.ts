@@ -1,3 +1,4 @@
+import { selection } from "../src/selection";
 // @vitest-environment node
 import { ID_INJECTION_KEY, ZINDEX_INJECTION_KEY } from "element-plus";
 import { describe, expect, it, vi } from "vitest";
@@ -22,12 +23,11 @@ describe("Element bulk and print Node SSR", () => {
           data: [{ id: "a", name: "Ada" }],
           columns: [{ key: "name" }],
           rowKey: (row) => row.id,
-          selectedIds: ["a"],
-          selectable: true,
           urlSync: false,
           searchable: false,
           forceMobile: mobile,
           features: [
+            selection({ selectedIds: ["a"] }),
             bulkActions([
               { key: "archive", label: "Archive", onClick: action },
             ]),

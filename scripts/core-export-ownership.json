@@ -5034,6 +5034,17 @@
       "subpaths": [".", "./binding"]
     },
     {
+      "name": "SelectionFeatureOptions",
+      "kind": "type",
+      "module": "features/coreFeatures.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/coreFeatures.ts#SelectionFeatureOptions",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "SelectionStats",
       "kind": "type",
       "module": "focus/selectionStats.ts",
@@ -7869,6 +7880,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/coreFeatures.ts#coreSavedViews",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "coreSelection",
+      "kind": "runtime",
+      "module": "features/coreFeatures.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/coreFeatures.ts#coreSelection",
       "subpaths": ["./binding"]
     },
     {

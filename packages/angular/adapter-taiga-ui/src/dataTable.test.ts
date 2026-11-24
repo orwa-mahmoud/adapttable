@@ -5,6 +5,7 @@ import {
   type PaginationMode,
 } from "@adapttable/angular";
 import { editing } from "@adapttable/taiga-ui/editing";
+import { selection } from "@adapttable/taiga-ui/selection";
 import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
@@ -58,10 +59,8 @@ function queryParts(element: HTMLElement) {
       [urlSync]="false"
       [defaults]="{ limit: 5 }"
       [forceMobile]="mobile()"
-      [selectable]="true"
-      [selectedIds]="selected()"
       searchPlaceholder="Find a city"
-      (selectionChange)="changes.push($event)"
+      [features]="features"
     >
       <ng-template adaptCellTemplate="country" let-value="value">
         <b class="country">{{ value }}</b>
@@ -75,6 +74,14 @@ class Host {
   readonly selected = signal<readonly string[] | undefined>(undefined);
   readonly columns = COLUMNS;
   readonly rowKey = (row: City) => row.id;
+  readonly features = [
+    selection({
+      selectedIds: this.selected,
+      onSelectionChange: (ids: string[]) => {
+        this.changes.push(ids);
+      },
+    }),
+  ];
   readonly changes: string[][] = [];
 }
 

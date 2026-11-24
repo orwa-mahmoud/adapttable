@@ -52,6 +52,7 @@ const forceMobile = computed(() => forceMobileFor(layout.value));
 const shownRows = computed(() => rowsFor(rows.value, dataState.value));
 const FieldValue = (props: { value: VNodeChild }) => props.value;
 const features = [
+  kit.selection(),
   kit.editing<Person>((row, key, value) => {
     rows.value = applyPersonEdit(rows.value, row, key, value);
   }),
@@ -155,7 +156,6 @@ function activate(row: Person): void {
           table-label="People"
           :url-sync="false"
           :force-mobile="forceMobile"
-          selectable
           searchable
           :features="features"
           :data="shownRows"

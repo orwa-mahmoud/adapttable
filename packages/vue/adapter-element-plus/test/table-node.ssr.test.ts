@@ -1,3 +1,4 @@
+import { selection } from "../src/selection";
 // @vitest-environment node
 import { ID_INJECTION_KEY, ZINDEX_INJECTION_KEY } from "element-plus";
 import { describe, expect, it } from "vitest";
@@ -13,11 +14,10 @@ interface Row {
 function app(mobile: boolean) {
   const result = createSSRApp(() =>
     h(DataTable<Row>, {
+      features: [selection({ selectedIds: ["ada"] })],
       data: [{ id: "ada", name: "Ada" }],
       columns: [{ key: "name", header: "Name" }],
       rowKey: (row) => row.id,
-      selectable: true,
-      selectedIds: ["ada"],
       forceMobile: mobile,
       urlSync: false,
       dir: "rtl",

@@ -142,6 +142,14 @@ export interface DirtyEdits {
 export interface FeatureProps<TRow> {
   /** The strings the composed features draw, set by the features. */
   featureLabels?: readonly Partial<TableLabels>[];
+  /** The id a row is selected by, set by `selection()`; else the row key. */
+  selectionGetId?: (row: TRow) => string;
+  /** The host's selection, set by `selection()`. */
+  selectedIds?: readonly string[];
+  /** The table's own selection to start from, set by `selection()`. */
+  defaultSelectedIds?: readonly string[];
+  /** The selection changed, set by `selection()`. */
+  onSelectionChange?: (selectedIds: string[]) => void;
   /**
    * Saved views: capture the table's current URL state under a name and
    * re-apply it on demand. Setting this renders a Saved-views menu in the

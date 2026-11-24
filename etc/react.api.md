@@ -573,6 +573,7 @@ export interface FeatureProps<TRow> {
     onPinnedRowIdsChange?: (next: RowPinState) => void;
     onPrint?: () => void;
     onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
+    onSelectionChange?: (selectedIds: string[]) => void;
     pinnedRowIds?: RowPinState;
     pinnedRows?: PinnedRows<TRow>;
     printButton?: boolean;
@@ -586,6 +587,8 @@ export interface FeatureProps<TRow> {
     rowPinningArmed?: boolean;
     rowStyle?: RowStyle<TRow>;
     savedViews?: UseSavedViewsOptions;
+    selectedIds?: readonly string[];
+    selectionGetId?: (row: TRow) => string;
     selectionStats?: boolean;
     sidePanel?: SidePanelOptions;
     statusBar?: boolean;

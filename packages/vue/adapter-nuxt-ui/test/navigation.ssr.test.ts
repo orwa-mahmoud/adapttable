@@ -57,8 +57,8 @@ it.each([false, true])(
       expect(html).toContain('data-adapttable-part="footer"');
     }
     // Navigation attaches browser focus handlers after hydration.
+    // Column selection's row checkboxes are part of the server markup.
     expect(html).not.toContain('role="grid"');
-    expect(html).not.toContain('role="checkbox"');
     expect(changed).not.toHaveBeenCalled();
     expect(writes).not.toHaveBeenCalled();
   }

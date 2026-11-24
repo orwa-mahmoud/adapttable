@@ -201,8 +201,9 @@ write; a renderer does not become your database. For remote data, build an
 signals, or any other source, and pass it through `[source]`.
 
 Callback inputs such as `onViewChange` and `onRowClick` use square brackets.
-Actual outputs such as `(selectionChange)` and `(columnLayoutChange)` use
-parentheses. Keep callback functions stable on the component.
+Outputs such as `(columnLayoutChange)` use parentheses. Row selection is
+`selection()` from the kit's `/selection` entry, including the ids the host
+holds and `onSelectionChange`. Keep callback functions stable on the component.
 
 Continue with [Data tiers](./data-tiers.md), [Columns](./columns.md),
 [Accessibility](./accessibility.md), or the

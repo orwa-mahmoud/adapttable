@@ -21,6 +21,7 @@ import {
   tick,
 } from "./feature-helpers";
 
+import { selection } from "../src/selection";
 const data = [
   original,
   { ...original, id: "b", name: "Bea" },
@@ -33,6 +34,7 @@ it.each([false, true])(
   async (forceMobile) => {
     const view = mountFeatures(
       [
+        selection(),
         pinnedSummaryRows<Row>({
           top: [{ ...original, id: "total", name: "TOTAL" }],
         }),
@@ -54,7 +56,6 @@ it.each([false, true])(
       {
         data,
         forceMobile,
-        selectable: true,
         summaryRow: () => ({ name: "Total values" }),
       }
     );

@@ -93,6 +93,7 @@ import type { ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/angular-material";
 import { filters } from "@adapttable/angular-material/filters";
 import { columnMenu } from "@adapttable/angular-material/column-menu";
+import { selection } from "@adapttable/angular-material/selection";
 
 interface Person {
   id: string;
@@ -109,7 +110,6 @@ interface Person {
     [rowKey]="rowKey"
     [features]="features"
     tableLabel="People"
-    [selectable]="true"
   />`,
 })
 export class PeopleTable {
@@ -125,6 +125,7 @@ export class PeopleTable {
     { key: "team", header: "Team", accessor: (row) => row.team },
   ];
   readonly features = [
+    selection(),
     filters<Person>([{ key: "name", type: "text" }]),
     columnMenu(),
   ];

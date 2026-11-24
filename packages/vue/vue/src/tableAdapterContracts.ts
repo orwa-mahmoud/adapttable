@@ -352,9 +352,6 @@ export interface DataTableProps<TRow> {
   readonly urlKey?: string;
   readonly urlAdapter?: UrlStateAdapter;
   readonly getSearchText?: (row: TRow) => string;
-  readonly selectable?: boolean;
-  readonly selectedIds?: readonly string[];
-  readonly defaultSelectedIds?: readonly string[];
   readonly columnLayout?: ColumnLayoutState;
   readonly defaultColumnLayout?: Partial<ColumnLayoutState>;
   readonly onColumnRename?: (key: string, name: string) => void;

@@ -48,6 +48,7 @@ export { rowDetail } from "@adapttable/ng-zorro/row-detail";
 export { rowPinning } from "@adapttable/ng-zorro/row-pinning";
 export { rowReorder } from "@adapttable/ng-zorro/row-reorder";
 export { savedViews } from "@adapttable/ng-zorro/saved-views";
+export { selection } from "@adapttable/ng-zorro/selection";
 export { selectionStats } from "@adapttable/ng-zorro/selection-stats";
 export { sidePanel } from "@adapttable/ng-zorro/side-panel";
 export { statusBar } from "@adapttable/ng-zorro/status-bar";

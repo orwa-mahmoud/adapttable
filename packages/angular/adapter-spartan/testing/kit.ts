@@ -46,6 +46,7 @@ import { rowDetail } from "@adapttable/spartan/row-detail";
 import { rowPinning } from "@adapttable/spartan/row-pinning";
 import { rowReorder } from "@adapttable/spartan/row-reorder";
 import { savedViews } from "@adapttable/spartan/saved-views";
+import { selection } from "@adapttable/spartan/selection";
 import { selectionStats } from "@adapttable/spartan/selection-stats";
 import { sidePanel } from "@adapttable/spartan/side-panel";
 import { statusBar } from "@adapttable/spartan/status-bar";
@@ -88,6 +89,7 @@ export const kit: AngularKitUnderTest = {
     commandPalette,
     dirtyIndicators,
     filterTypes,
+    selection,
     selectionStats,
     sidePanel,
     statusBar,

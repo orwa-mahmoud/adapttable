@@ -27,6 +27,7 @@ export default defineConfig({
     "src/column-selection.ts",
     "src/status-bar.ts",
     "src/preset.ts",
+    "src/selection.ts",
     "src/selection-stats.ts",
     "src/column-menu.ts",
     "src/column-layout.ts",

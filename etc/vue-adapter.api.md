@@ -1496,8 +1496,6 @@ export interface DataTableProps<TRow> {
     // (undocumented)
     readonly defaults?: NonNullable<TableViewStateConfig["defaults"]>;
     // (undocumented)
-    readonly defaultSelectedIds?: readonly string[];
-    // (undocumented)
     readonly density?: TableDensity_2;
     // (undocumented)
     readonly dir?: Direction;
@@ -1550,10 +1548,6 @@ export interface DataTableProps<TRow> {
     // (undocumented)
     readonly searchDebounceMs?: number;
     readonly searchPlaceholder?: string;
-    // (undocumented)
-    readonly selectable?: boolean;
-    // (undocumented)
-    readonly selectedIds?: readonly string[];
     readonly skeletonRows?: number;
     readonly source?: TableSource<TRow>;
     readonly stickyHeader?: boolean;
@@ -3087,6 +3081,7 @@ export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRo
     readonly bulkActions?: readonly BulkAction[];
     // (undocumented)
     readonly columnSelectionCheckbox?: boolean;
+    readonly defaultSelectedIds?: readonly string[];
     // (undocumented)
     readonly editingModel?: (context: FeatureMountContext<TRow>) => void | (() => void);
     // (undocumented)
@@ -3105,10 +3100,14 @@ export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRo
     readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onCellRangeChange?: (range: CellRange | null) => void;
+    readonly onSelectionChange?: (ids: string[]) => void;
     // (undocumented)
     readonly rowActionControls?: RowActionControlsProjector<TRow>;
     // (undocumented)
     readonly rowActions?: readonly RowAction<TRow>[];
+    readonly selectable?: MaybeRefOrGetter<boolean>;
+    readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
+    readonly selectionGetId?: (row: TRow) => string;
     // (undocumented)
     readonly statusBar?: boolean;
     // (undocumented)
@@ -4619,8 +4618,6 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     // (undocumented)
     readonly defaultDensity?: TableDensity;
     // (undocumented)
-    readonly defaultSelectedIds?: readonly string[];
-    // (undocumented)
     readonly density?: MaybeRefOrGetterOptional<TableDensity>;
     // (undocumented)
     readonly features?: MaybeRefOrGetterOptional<readonly FeatureListEntry<ComposedFeature<NoInfer<TRow>>>[]>;
@@ -4634,15 +4631,9 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onDensityChange?: (next: TableDensity) => void;
-    // (undocumented)
-    readonly onSelectionChange?: (ids: string[]) => void;
     readonly onViewChange?: TableQueryListener;
     // (undocumented)
     readonly runtimeChannels?: MaybeRefOrGetter<Pick<RuntimeChromeInput<TRow>, "filterDefs" | "filterRegistry" | "grouping" | "tree" | "editing" | "rowPinning">>;
-    // (undocumented)
-    readonly selectable?: MaybeRefOrGetter<boolean>;
-    // (undocumented)
-    readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
     // (undocumented)
     readonly source?: MaybeRefOrGetterOptional<TableSource<TRow>>;
     readonly summaryRow?: SummaryRowFn<TRow>;

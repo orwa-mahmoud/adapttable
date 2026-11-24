@@ -9,7 +9,7 @@ import {
   collectConformanceTests,
   type ConformanceTest,
 } from "@adapttable/core/conformance";
-import { Component, signal } from "@angular/core";
+import { Component, computed, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { expect, vi } from "vitest";
 
@@ -25,8 +25,15 @@ export function featureRecompositionTests(
   kit: AngularKitUnderTest
 ): readonly ConformanceTest[] {
   const { Table: AdaptDataTable, kitSelector } = kit;
-  const { columnMenu, densityChooser, editing, print, rowActions, tree } =
-    kit.features;
+  const {
+    columnMenu,
+    densityChooser,
+    editing,
+    print,
+    rowActions,
+    tree,
+    selection,
+  } = kit.features;
   return collectConformanceTests(({ describe, it, afterEach }) => {
     /** Feature identities change while the mounted table and its state stay alive. */
 
@@ -59,10 +66,9 @@ export function featureRecompositionTests(
           [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
-          [features]="features()"
+          [features]="tableFeatures()"
           [forceMobile]="mobile"
           [urlSync]="false"
-          [selectable]="selectable()"
           [cellNavigation]="navigation()"
           [filtersMode]="filterMode()"
           [closeHeaderFilterOnSelect]="closeHeaderFilter()"
@@ -70,8 +76,6 @@ export function featureRecompositionTests(
           (densityChange)="onDensityChange($event)"
           [onColumnRename]="renameColumn()"
           [confirm]="confirmAction()"
-          [selectedIds]="controlledSelection() ? selected() : undefined"
-          (selectionChange)="onSelectionChange($event)"
           [columnLayout]="layout()"
           (columnLayoutChange)="onLayoutChange($event)"
         />
@@ -86,6 +90,22 @@ export function featureRecompositionTests(
       readonly selected = signal<readonly string[]>([]);
       readonly controlledSelection = signal(true);
       readonly selectable = signal(true);
+      readonly selectionIds = computed(() =>
+        this.controlledSelection() ? this.selected() : undefined
+      );
+      readonly tableFeatures = computed(() => {
+        const base = this.features();
+        if (!this.selectable()) return base;
+        return [
+          selection({
+            selectedIds: this.selectionIds,
+            onSelectionChange: (ids: string[]) => {
+              this.onSelectionChange(ids);
+            },
+          }),
+          ...base,
+        ];
+      });
       readonly navigation = signal(false);
       readonly filterMode = signal<"popover" | "drawer">("popover");
       readonly closeHeaderFilter = signal(false);

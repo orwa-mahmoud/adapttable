@@ -32,6 +32,8 @@ export {
   rowAppearance,
   type RowAppearanceOptions,
   savedViews,
+  selection,
+  type SelectionOptions,
   sidePanel,
   type SidePanelOptions,
   type SidePanelPanel,

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/naive-ui";
+import { selection } from "@adapttable/naive-ui/selection";
 import { densityChooser } from "@adapttable/naive-ui/density";
 import { fullscreen } from "@adapttable/naive-ui/fullscreen";
 import {
@@ -72,15 +73,19 @@ function renderStatus(row: Order, label: string) {
         </div>
       </NConfigProvider>
     </template>
-    <template #default="{ tableProps, onSelectionChange, dark, locale }">
+    <template
+      #default="{ tableProps, selectedIds, onSelectionChange, dark, locale }"
+    >
       <NConfigProvider
         :theme="dark ? darkTheme : null"
         :locale="locale === 'ar' ? arDZ : enUS"
       >
         <DataTable
           v-bind="tableProps"
-          :features="features"
-          @update:selected-ids="onSelectionChange"
+          :features="[
+            selection({ selectedIds, onSelectionChange }),
+            ...features,
+          ]"
         />
       </NConfigProvider>
     </template>

@@ -55,6 +55,7 @@ export { rowDetail } from "@adapttable/angular-material/row-detail";
 export { rowPinning } from "@adapttable/angular-material/row-pinning";
 export { rowReorder } from "@adapttable/angular-material/row-reorder";
 export { savedViews } from "@adapttable/angular-material/saved-views";
+export { selection } from "@adapttable/angular-material/selection";
 export { selectionStats } from "@adapttable/angular-material/selection-stats";
 export { sidePanel } from "@adapttable/angular-material/side-panel";
 export { statusBar } from "@adapttable/angular-material/status-bar";

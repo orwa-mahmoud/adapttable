@@ -17,6 +17,7 @@ import { editing, rowEditing } from "@adapttable/ngx-bootstrap/editing";
 import { filters } from "@adapttable/ngx-bootstrap/filters";
 import { grouping } from "@adapttable/ngx-bootstrap/grouping";
 import { rowReorder } from "@adapttable/ngx-bootstrap/row-reorder";
+import { selection } from "@adapttable/ngx-bootstrap/selection";
 import { statusBar } from "@adapttable/ngx-bootstrap/status-bar";
 import { virtualize } from "@adapttable/ngx-bootstrap/virtualize";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
@@ -39,6 +40,7 @@ const kit: AngularConformanceKit = {
   grouping,
   rowReorder,
   virtualize,
+  selection,
 };
 
 describe(`table conformance — ${kit.name}`, () => {
@@ -116,9 +118,9 @@ describe("every bundled locale through native Angular controls", () => {
           set("forceMobile", mobile);
           // Auto uses infinite scrolling on mobile; exercise the real pager in both layouts.
           set("paginationMode", "paged");
-          set("selectable", true);
           set("defaults", { limit: 5 });
           set("features", [
+            selection(),
             filters<LocaleRow>([{ key: "name", label: "Name", type: "text" }]),
             columnMenu(),
             rowEditing<LocaleRow>(edit),

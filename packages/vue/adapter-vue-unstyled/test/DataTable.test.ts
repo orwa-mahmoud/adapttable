@@ -19,6 +19,7 @@ import {
 import { renderToString } from "vue/server-renderer";
 
 import { DataTable, type DataTableProps } from "../src";
+import { selection } from "../src/selection";
 import { useChangedCellFlash } from "../src/stream";
 interface Row {
   id: string;
@@ -90,7 +91,7 @@ describe("native DataTable", () => {
     const update = vi.fn();
     const fixture = mount(
       {
-        selectable: true,
+        features: [selection({ onSelectionChange: update })],
         defaults: { limit: 1 },
         tableLabel: "People",
         dir: "rtl",
@@ -102,7 +103,7 @@ describe("native DataTable", () => {
           rowsPerPage: "custom-size",
         },
       },
-      { "onUpdate:selectedIds": update, id: "people", class: "host" }
+      { id: "people", class: "host" }
     );
     await nextTick();
     expect(
@@ -143,16 +144,21 @@ describe("native DataTable", () => {
   });
   it("keeps controlled selection authoritative and emits exactly one request per action", async () => {
     const update = vi.fn();
-    const fixture = mount(
-      { selectedIds: [] },
-      { "onUpdate:selectedIds": update }
-    );
+    const selectedIds = shallowRef<readonly string[]>([]);
+    const fixture = mount({
+      features: [
+        selection({
+          selectedIds,
+          onSelectionChange: update,
+        }),
+      ],
+    });
     await click(fixture.element, "tbody input");
     expect(update).toHaveBeenCalledExactlyOnceWith(["a"]);
     expect(find<HTMLInputElement>(fixture.element, "tbody input").checked).toBe(
       false
     );
-    fixture.props.value = { ...fixture.props.value, selectedIds: ["g"] };
+    selectedIds.value = ["g"];
     await nextTick();
     expect(
       fixture.element.querySelector('tr[data-row-id="g"] input:checked')
@@ -163,13 +169,18 @@ describe("native DataTable", () => {
     expect(update).toHaveBeenCalledTimes(1);
   });
   it("updates controlled selection accepted by the host once without prop-watch feedback", async () => {
+    const selectedIds = shallowRef<readonly string[]>([]);
     const update = vi.fn((ids: string[]) => {
-      fixture.props.value = { ...fixture.props.value, selectedIds: ids };
+      selectedIds.value = ids;
     });
-    const fixture = mount(
-      { selectedIds: [] },
-      { "onUpdate:selectedIds": update }
-    );
+    const fixture = mount({
+      features: [
+        selection({
+          selectedIds,
+          onSelectionChange: update,
+        }),
+      ],
+    });
     await click(fixture.element, "thead input");
     expect(update).toHaveBeenCalledExactlyOnceWith(["a", "g", "k"]);
     expect(
@@ -178,8 +189,8 @@ describe("native DataTable", () => {
   });
   it("renders mobile cards with native sort and selection, respecting RTL and card parts", async () => {
     const fixture = mount({
+      features: [selection()],
       forceMobile: true,
-      selectable: true,
       dir: "rtl",
       classNames: {
         cards: "cards-custom",

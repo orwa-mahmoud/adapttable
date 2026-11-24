@@ -20,6 +20,7 @@ import {
   rowAppearance,
   rowPinning,
 } from "../src/rows";
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   team: string;
@@ -242,8 +243,8 @@ describe("native optional rows and columns", () => {
     async (mobile) => {
       const view = fixture({
         forceMobile: mobile,
-        selectable: true,
         features: [
+          selection(),
           pinnedSummaryRows<Row>({
             top: [{ id: "total", team: "TOTAL", amount: 6 }],
           }),

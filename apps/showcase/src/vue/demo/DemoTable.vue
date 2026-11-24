@@ -152,6 +152,7 @@ const features = [
         kit.cellNavigation(),
       ]
     : []),
+  ...(enabled("selection", true) ? [kit.selection()] : []),
   ...(enabled("selection", true) && !server
     ? [
         kit.bulkActions(
@@ -228,7 +229,6 @@ const density = query.get("density") === "compact" ? "compact" : "comfortable";
         table-label="People directory"
         :url-key="urlKey"
         :url-adapter="demoUrlAdapter"
-        :selectable="enabled('selection', true)"
         :mobile-breakpoint="enabled('mobile') ? Number.MAX_SAFE_INTEGER : 768"
         :column-layout="columnState.layout.value"
         :defaults="{ limit: props.lab ? 10 : 5 }"

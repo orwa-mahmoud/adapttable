@@ -34,6 +34,7 @@ import { rowActions } from "@adapttable/quasar/row-actions";
 import { rowPinning } from "@adapttable/quasar/row-pinning";
 import { rowReorder } from "@adapttable/quasar/row-reorder";
 import { savedViews, SavedViewsPanel } from "@adapttable/quasar/saved-views";
+import { selection } from "@adapttable/quasar/selection";
 import { selectionStats } from "@adapttable/quasar/selection-stats";
 import { statusBar } from "@adapttable/quasar/status-bar";
 import { tree } from "@adapttable/quasar/tree";
@@ -169,6 +170,7 @@ export const kit: ShowcaseKit = {
   print,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   commandPalette,
   contextMenu,

@@ -7,6 +7,7 @@ import { bulkActions } from "../src/bulk-actions";
 import { exportCsv } from "../src/export-csv";
 import { print } from "../src/print";
 
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -66,7 +67,9 @@ it("exports the current controlled selection and keeps print host-owned", async 
     exportCsv<Row>({ scope: "selected", request }),
     print(printed, true),
   ];
-  const host = mount(() => ({ selectedIds: selected.value, features }));
+  const host = mount(() => ({
+    features: [selection({ selectedIds: selected.value }), ...features],
+  }));
   await flush();
   part(host, "export-csv-button").click();
   await flush();
@@ -154,9 +157,7 @@ it("runs a bulk action only after the host confirms and never mutates host rows"
     ]),
   ];
   const host = mount(() => ({
-    features,
-    selectable: true,
-    defaultSelectedIds: ["a"],
+    features: [selection({ defaultSelectedIds: ["a"] }), ...features],
     confirm: (request) => {
       confirmation = request;
     },

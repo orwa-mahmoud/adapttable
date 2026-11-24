@@ -9,6 +9,7 @@ import { createApp, h, nextTick, shallowRef } from "vue";
 import { DataTable } from "../src";
 import { densityChooser } from "../src/density";
 
+import { selection } from "../src/selection";
 async function settle(): Promise<void> {
   await nextTick();
   await nextTick();
@@ -43,11 +44,10 @@ describe("Nuxt density presentation", () => {
             data: [{ id: "a", name: "Ada" }],
             columns: [{ key: "name", sortable: true }],
             rowKey: (row) => row.id,
-            selectable: true,
             urlSync: false,
             forceMobile: mobile,
             density: density.value,
-            features: [densityChooser()],
+            features: [selection(), densityChooser()],
           }),
       }).use(ui);
       try {

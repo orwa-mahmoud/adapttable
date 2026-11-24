@@ -4,6 +4,7 @@ import {
   DataTable,
   type DataTableHandle,
 } from "@adapttable/vue-unstyled";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { shallowRef } from "vue";
 interface Person {
   id: string;
@@ -13,7 +14,10 @@ interface Person {
 const people = shallowRef<readonly Person[]>([
   { id: "ada", name: "Ada", score: 10 },
 ]);
-const selection = shallowRef<string[]>([]);
+const selectedIds = shallowRef<string[]>([]);
+function changeSelection(ids: string[]): void {
+  selectedIds.value = ids;
+}
 const table = shallowRef<DataTableHandle<Person>>();
 defineExpose({ focusTable: () => table.value?.focus() });
 const score: ColumnDef<Person, number> = {
@@ -27,7 +31,7 @@ const rowKey = (person: Person): string => person.id;
 <template>
   <DataTable
     ref="table"
-    v-model:selected-ids="selection"
+    :features="[selection({ selectedIds, onSelectionChange: changeSelection })]"
     :data="people"
     :columns="columns"
     :row-key="rowKey"

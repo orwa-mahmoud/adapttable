@@ -5,6 +5,7 @@ import type {
   ComposedFeature,
 } from "@adapttable/vue";
 import { useDataTableShell } from "@adapttable/vue/adapter";
+import { selection } from "@adapttable/vue/features";
 const props = defineProps<{
   data: readonly TRow[];
   columns: readonly ColumnInput<TRow>[];
@@ -17,7 +18,13 @@ defineSlots<{ cell(context: CellContext<TRow>): unknown }>();
 const shell = useDataTableShell(() => ({
   ...props,
   urlSync: false,
-  onSelectionChange: (ids) => emit("update:selectedIds", ids),
+  features: [
+    ...(props.features ?? []),
+    selection({
+      selectedIds: () => props.selectedIds,
+      onSelectionChange: (ids) => emit("update:selectedIds", ids),
+    }),
+  ],
 }));
 defineExpose(shell.handle);
 </script>

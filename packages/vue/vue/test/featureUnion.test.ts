@@ -9,7 +9,7 @@ import { EXPORT_CONTROL, EXPORT_MODEL } from "../src/actions/contracts";
 import { editing } from "../src/editing";
 import { exportCsv } from "../src/export-csv";
 import { grouping } from "../src/features/grouping";
-import { cellSpan } from "../src/features/headlessFactories";
+import { cellSpan, selection } from "../src/features/headlessFactories";
 import { rowPinning } from "../src/features/rowPinning";
 import {
   type ComposedFeature,
@@ -281,10 +281,9 @@ describe("combined projected rows, navigation, actions and body windows", () => 
         data,
         columns: [{ key: "name", editable: true }],
         rowKey: (row) => row.id,
-        selectable: true,
-        defaultSelectedIds: ["child"],
         urlSync: false,
         features: [
+          selection({ defaultSelectedIds: ["child"] }),
           navigation(),
           tree<Row>({
             getChildren: (row) => row.children,

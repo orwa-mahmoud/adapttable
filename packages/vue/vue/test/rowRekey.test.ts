@@ -9,6 +9,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createApp, defineComponent, h, nextTick, shallowRef } from "vue";
 
 import { dirtyIndicators, editableCellSlotKey, editing } from "../src/editing";
+import { selection } from "../src/features/headlessFactories";
 import { rowDetail } from "../src/features/rowDetail";
 import { rowPinning } from "../src/features/rowPinning";
 import { extendFeature, type TableFeature } from "../src/features/tableFeature";
@@ -50,9 +51,7 @@ function mount(
           columns,
           rowKey,
           urlSync: false,
-          selectable: true,
-          features,
-          ...extra,
+          features: [selection(extra), ...features],
         }));
         return () => h("div");
       },

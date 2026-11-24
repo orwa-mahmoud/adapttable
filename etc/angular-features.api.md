@@ -292,6 +292,17 @@ export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?
 export function savedViews(options: SavedViewsControllerOptions): AdaptTableFeature;
 
 // @public
+export function selection<TRow = unknown>(options?: SelectionOptions<TRow>): AdaptTableFeature;
+
+// @public
+export interface SelectionOptions<TRow = unknown> {
+    readonly defaultSelectedIds?: readonly string[];
+    readonly getId?: (row: TRow) => string;
+    readonly onSelectionChange?: (selectedIds: string[]) => void;
+    readonly selectedIds?: MaybeSignal<readonly string[] | undefined>;
+}
+
+// @public
 export function selectionStats(): AdaptTableFeature;
 
 export { SelectionStatsOptions }

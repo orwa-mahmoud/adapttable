@@ -14,6 +14,7 @@ import { renderToString } from "vue/server-renderer";
 import { DataTable } from "../src";
 import { naiveClassNames } from "../src/classNames";
 
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -129,14 +130,17 @@ describe("Naive DataTable optional shared outer layout", () => {
       const selected = shallowRef<string[]>([]);
       const host = mount(() =>
         h(DataTable<Row>, {
+          features: [
+            selection({
+              onSelectionChange: (ids) => {
+                selected.value = ids;
+              },
+              selectedIds: selected.value,
+            }),
+          ],
           ...base,
           forceMobile: mobile,
           dir: "rtl",
-          selectable: true,
-          selectedIds: selected.value,
-          "onUpdate:selectedIds": (ids) => {
-            selected.value = ids;
-          },
         })
       );
       const targets = host.querySelectorAll<HTMLElement>('[role="checkbox"]');

@@ -26,6 +26,7 @@ import {
   resizableColumns,
   rowAppearance,
   savedViews,
+  selection,
   sidePanel,
   statusBar,
   undoRedoButtons,
@@ -87,12 +88,38 @@ describe("feature factories", () => {
     expect(patch(fitColumns())).toEqual({ fitColumns: true });
     expect(patch(columnSelectionCheckbox())).toEqual({
       columnSelectionCheckbox: true,
+      selectable: true,
+    });
+  });
+
+  it("selection writes the host's selection and turns rows on", () => {
+    const onSelectionChange = vi.fn();
+    const getId = (row: Row) => row.id;
+    expect(patch(selection())).toEqual({ selectable: true });
+    expect(
+      patch(
+        selection({
+          selectedIds: ["a"],
+          defaultSelectedIds: ["b"],
+          onSelectionChange,
+          getId,
+        })
+      )
+    ).toEqual({
+      selectable: true,
+      selectedIds: ["a"],
+      defaultSelectedIds: ["b"],
+      onSelectionChange,
+      selectionGetId: getId,
     });
   });
 
   it("bulkActions and savedViews write their options", () => {
     const actions = [{ key: "del", label: "Delete", onClick: vi.fn() }];
-    expect(patch(bulkActions(actions))).toEqual({ bulkActions: actions });
+    expect(patch(bulkActions(actions))).toEqual({
+      bulkActions: actions,
+      selectable: true,
+    });
     const options = { storageKey: "views" };
     expect(patch(savedViews(options))).toEqual({ savedViews: options });
   });

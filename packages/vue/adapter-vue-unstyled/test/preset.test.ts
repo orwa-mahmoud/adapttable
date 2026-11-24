@@ -4,6 +4,7 @@ import { renderToString } from "vue/server-renderer";
 
 import { DataTable } from "../src";
 import { standardFeatures } from "../src/preset";
+import { selection } from "../src/selection";
 import {
   click,
   find,
@@ -131,13 +132,17 @@ describe("standard native features", () => {
     const { host } = mountNative(() =>
       h(DataTable<Row>, {
         ...base,
-        defaultSelectedIds: ["g"],
-        features: standardFeatures<Row>({
-          grouping: "team",
-          bulkActions: [{ key: "archive", label: "Archive", onClick: run }],
-          filters: [{ key: "name", type: "text", getValue: (row) => row.name }],
-          savedViews: { storageKey: "preset-people", storage: null },
-        }),
+        features: [
+          selection({ defaultSelectedIds: ["g"] }),
+          ...standardFeatures<Row>({
+            grouping: "team",
+            bulkActions: [{ key: "archive", label: "Archive", onClick: run }],
+            filters: [
+              { key: "name", type: "text", getValue: (row) => row.name },
+            ],
+            savedViews: { storageKey: "preset-people", storage: null },
+          }),
+        ],
       })
     );
     await tick();

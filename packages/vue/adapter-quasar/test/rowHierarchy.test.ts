@@ -23,6 +23,7 @@ import {
   hierarchyRows,
 } from "./rowHierarchyFixture";
 
+import { selection } from "../src/selection";
 const wrappers: ReturnType<typeof mount>[] = [];
 const settle = async () => {
   await nextTick();
@@ -304,8 +305,8 @@ it.each([false, true])(
       props: {
         ...common,
         forceMobile: mobile,
-        selectable: true,
         features: [
+          selection(),
           pinnedSummaryRows<HierarchyRow>({
             top: [{ id: "total", name: "Total", score: 3 }],
           }),

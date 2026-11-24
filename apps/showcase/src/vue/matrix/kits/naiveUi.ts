@@ -32,6 +32,7 @@ import { rowActions } from "@adapttable/naive-ui/row-actions";
 import { rowPinning } from "@adapttable/naive-ui/row-pinning";
 import { rowReorder } from "@adapttable/naive-ui/row-reorder";
 import { savedViews, SavedViewsPanel } from "@adapttable/naive-ui/saved-views";
+import { selection } from "@adapttable/naive-ui/selection";
 import { selectionStats } from "@adapttable/naive-ui/selection-stats";
 import { statusBar } from "@adapttable/naive-ui/status-bar";
 import { tree } from "@adapttable/naive-ui/tree";
@@ -197,6 +198,7 @@ export const kit: ShowcaseKit = {
   print,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   commandPalette,
   contextMenu,

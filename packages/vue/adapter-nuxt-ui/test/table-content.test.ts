@@ -18,6 +18,7 @@ import { rowDetail } from "../src/row-detail";
 import { rowReorder } from "../src/row-reorder";
 import { find, mountNuxt, part, tick } from "./actions.helpers";
 
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -114,8 +115,7 @@ describe("Nuxt column-aligned summaries", () => {
           data,
           columns,
           rowKey: (row) => row.id,
-          features,
-          selectable: true,
+          features: [selection(), ...features],
           forceMobile: mobile,
           searchable: false,
           urlSync: false,

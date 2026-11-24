@@ -24,8 +24,15 @@ export function featureRuntimeTests(
   kit: AngularKitUnderTest
 ): readonly ConformanceTest[] {
   const { Table: AdaptDataTable, kitSelector } = kit;
-  const { batchEditing, columnMenu, editing, filters, rowActions, rowPinning } =
-    kit.features;
+  const {
+    batchEditing,
+    columnMenu,
+    editing,
+    filters,
+    rowActions,
+    rowPinning,
+    selection,
+  } = kit.features;
   return collectConformanceTests(({ describe, it }) => {
     /** Mounted runtime channels and admission flushing through the real kit. */
 
@@ -67,9 +74,6 @@ export function featureRuntimeTests(
           [features]="features"
           [urlSync]="false"
           [forceMobile]="false"
-          [selectable]="true"
-          [selectedIds]="selected()"
-          (selectionChange)="selected.set($event)"
           [columnLayout]="layout()"
           (columnLayoutChange)="layout.set($event)"
         />
@@ -95,6 +99,12 @@ export function featureRuntimeTests(
         );
       });
       readonly features = [
+        selection({
+          selectedIds: this.selected,
+          onSelectionChange: (ids: string[]) => {
+            this.selected.set(ids);
+          },
+        }),
         columnMenu(),
         rowPinning(),
         filters<Row>([{ key: "team", type: "text" }]),

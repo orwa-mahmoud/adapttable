@@ -7,6 +7,7 @@ import {
   tableAgent,
   type TableAgentOptions,
 } from "../src/tableAgent";
+import { selection } from "@adapttable/vue/features";
 const props = defineProps<{
   options: TableAgentOptions;
   selectedIds?: readonly string[];
@@ -26,10 +27,13 @@ const shell = useDataTableShell(() => ({
   columns,
   rowKey,
   urlSync: false,
-  features: [feature],
-  selectable: true,
-  selectedIds: props.selectedIds,
-  onSelectionChange: props.onSelectionChange,
+  features: [
+    selection({
+      selectedIds: props.selectedIds,
+      onSelectionChange: props.onSelectionChange,
+    }),
+    feature,
+  ],
   columnLayout: props.columnLayout,
   onColumnLayoutChange: props.onColumnLayoutChange,
 }));

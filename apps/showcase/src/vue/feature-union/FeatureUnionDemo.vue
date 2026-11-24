@@ -9,6 +9,7 @@ import {
   type CellRange,
 } from "@adapttable/vue-unstyled/cell-navigation";
 import { editing } from "@adapttable/vue-unstyled/editing";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { findInTable } from "@adapttable/vue-unstyled/find-in-table";
 import { rowReorder } from "@adapttable/vue-unstyled/row-reorder";
@@ -189,6 +190,12 @@ const reorder = computed(() =>
   )
 );
 const features = computed(() => [
+  selection({
+    selectedIds,
+    onSelectionChange: (ids) => {
+      selectedIds.value = ids;
+    },
+  }),
   hierarchy,
   virtualize({ maxHeight: 320, virtualOverscan: 2, virtualizeColumns: true }),
   navigation,
@@ -303,7 +310,6 @@ function replaceRows(): void {
     <KeepAlive>
       <DataTable
         v-if="shown"
-        v-model:selected-ids="selectedIds"
         data-demo-table="feature-union"
         :data="rows"
         :columns="columns"
@@ -316,7 +322,6 @@ function replaceRows(): void {
         :searchable="false"
         :url-sync="false"
         :dir="rtl ? 'rtl' : 'ltr'"
-        selectable
         table-label="Combined feature records"
       />
     </KeepAlive>

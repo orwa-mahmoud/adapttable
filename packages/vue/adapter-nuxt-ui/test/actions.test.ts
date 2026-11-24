@@ -20,6 +20,7 @@ import {
   part,
   tick,
 } from "./actions.helpers";
+import { selection } from "../src/selection";
 const rows = [
   { id: "a", name: "Ada" },
   { id: "g", name: "Grace" },
@@ -93,11 +94,10 @@ describe("genuine Nuxt action controls", () => {
         ...base,
         data: undefined,
         source: remote.source.value,
-        selectable: true,
         confirm: (request) => {
           confirmation = request;
         },
-        features: [bulkActions([action])],
+        features: [selection(), bulkActions([action])],
       })
     );
     await tick();
@@ -140,9 +140,7 @@ describe("genuine Nuxt action controls", () => {
     const { host } = mountNuxt(() =>
       h(DataTable<Row>, {
         ...base,
-        selectable: true,
-        defaultSelectedIds: ["a"],
-        features: features.value,
+        features: [selection({ defaultSelectedIds: ["a"] }), ...features.value],
       })
     );
     await tick();
@@ -176,8 +174,8 @@ describe("genuine Nuxt action controls", () => {
     const { host } = mountNuxt(() =>
       h(DataTable<Row>, {
         ...base,
-        selectedIds: selected.value,
         features: [
+          selection({ selectedIds: selected.value }),
           exportCsv<Row>({ scope: "selected", request }),
           print(printed, true),
         ],
@@ -358,14 +356,12 @@ it.each([false, true])(
         ...base,
         forceMobile,
         dir: "rtl",
-        selectable: true,
-        selectedIds: [],
-        "onUpdate:selectedIds": requested,
         classNames: {
           printButton: "print-paint",
           exportCsvButton: "export-paint",
         },
         features: [
+          selection({ onSelectionChange: requested, selectedIds: [] }),
           bulkActions([{ key: "run", label: "Run", onClick: vi.fn() }]),
           print(printed, true),
           exportCsv<Row>({ request: vi.fn() }),

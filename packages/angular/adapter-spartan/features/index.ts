@@ -48,6 +48,7 @@ export { rowDetail } from "@adapttable/spartan/row-detail";
 export { rowPinning } from "@adapttable/spartan/row-pinning";
 export { rowReorder } from "@adapttable/spartan/row-reorder";
 export { savedViews } from "@adapttable/spartan/saved-views";
+export { selection } from "@adapttable/spartan/selection";
 export { selectionStats } from "@adapttable/spartan/selection-stats";
 export { sidePanel } from "@adapttable/spartan/side-panel";
 export { statusBar } from "@adapttable/spartan/status-bar";

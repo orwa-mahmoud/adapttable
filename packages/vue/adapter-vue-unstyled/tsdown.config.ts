@@ -34,6 +34,7 @@ export default defineConfig({
     "src/column-menu.ts",
     "src/column-layout.ts",
     "src/column-selection.ts",
+    "src/selection.ts",
     "src/selection-stats.ts",
     "src/bulk-actions.ts",
     "src/command-palette.ts",

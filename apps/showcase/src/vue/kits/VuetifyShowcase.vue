@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/vuetify";
+import { selection } from "@adapttable/vuetify/selection";
 import { columnMenu } from "@adapttable/vuetify/column-menu";
 import { densityChooser } from "@adapttable/vuetify/density";
 import { fullscreen } from "@adapttable/vuetify/fullscreen";
@@ -69,12 +70,19 @@ function renderStatus(row: Order, label: string) {
         </div>
       </template>
       <template
-        #default="{ tableProps, onSelectionChange, onColumnLayoutChange }"
+        #default="{
+          tableProps,
+          selectedIds,
+          onSelectionChange,
+          onColumnLayoutChange,
+        }"
       >
         <DataTable
           v-bind="tableProps"
-          :features="features"
-          @update:selected-ids="onSelectionChange"
+          :features="[
+            selection({ selectedIds, onSelectionChange }),
+            ...features,
+          ]"
           @update:column-layout="onColumnLayoutChange"
         />
       </template>

@@ -46,6 +46,7 @@ import { rowDetail } from "@adapttable/taiga-ui/row-detail";
 import { rowPinning } from "@adapttable/taiga-ui/row-pinning";
 import { rowReorder } from "@adapttable/taiga-ui/row-reorder";
 import { savedViews } from "@adapttable/taiga-ui/saved-views";
+import { selection } from "@adapttable/taiga-ui/selection";
 import { selectionStats } from "@adapttable/taiga-ui/selection-stats";
 import { sidePanel } from "@adapttable/taiga-ui/side-panel";
 import { statusBar } from "@adapttable/taiga-ui/status-bar";
@@ -89,6 +90,7 @@ export const kit: AngularKitUnderTest = {
     commandPalette,
     dirtyIndicators,
     filterTypes,
+    selection,
     selectionStats,
     sidePanel,
     statusBar,

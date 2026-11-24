@@ -8,6 +8,7 @@ import { DataTable } from "../src";
 import { grouping } from "../src/grouping";
 import { tree } from "../src/tree";
 
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -37,8 +38,8 @@ it.each([
             urlSync: false,
             forceMobile: mobile,
             dir: "rtl",
-            selectable: true,
             features: [
+              selection(),
               mode === "group"
                 ? grouping("team")
                 : tree<Row>({ getParentId: (row) => row.parent }),

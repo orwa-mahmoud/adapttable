@@ -51,9 +51,7 @@ it.each([false, true])(
         )
       ).toHaveLength(before.length + (mobile ? 0 : 1));
       expect(root.querySelector('[role="grid"]') !== null).toBe(!mobile);
-      expect(root.querySelector('button[role="checkbox"]') !== null).toBe(
-        !mobile
-      );
+      expect(root.querySelector('button[role="checkbox"]') !== null).toBe(true);
       root
         .querySelector<HTMLButtonElement>(
           '[data-adapttable-part="find-button"]'

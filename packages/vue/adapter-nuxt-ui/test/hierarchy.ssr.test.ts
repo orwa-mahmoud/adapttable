@@ -1,3 +1,4 @@
+import { selection } from "../src/selection";
 // @vitest-environment node
 import ui from "@nuxt/ui/vue-plugin";
 import { expect, it } from "vitest";
@@ -25,8 +26,8 @@ it("server-renders independent grouped requests and host detail content", async 
             rowKey: (row) => row.id,
             forceMobile: mobile,
             urlSync: false,
-            selectable: true,
             features: [
+              selection(),
               grouping("team"),
               rowDetail<Row>((row) => h("p", `Detail ${row.name}`), [name]),
             ],

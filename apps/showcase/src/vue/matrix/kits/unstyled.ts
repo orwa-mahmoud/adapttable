@@ -40,6 +40,7 @@ import {
   savedViews,
   SavedViewsPanel,
 } from "@adapttable/vue-unstyled/saved-views";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { selectionStats } from "@adapttable/vue-unstyled/selection-stats";
 import { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import { tree } from "@adapttable/vue-unstyled/tree";
@@ -123,6 +124,7 @@ export const kit: ShowcaseKit = {
   print,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   commandPalette,
   contextMenu,

@@ -1,3 +1,4 @@
+import { selection } from "../src/selection";
 // @vitest-environment node
 import type { ColumnDef } from "@adapttable/vue";
 import { setup } from "@css-render/vue3-ssr";
@@ -21,13 +22,13 @@ describe("Naive DataTable Node SSR", () => {
       const app = createSSRApp({
         render: () =>
           h(DataTable<Row>, {
+            features: [selection()],
             data: [{ id: "ada", name: "Ada" }],
             columns,
             rowKey: (row) => row.id,
             urlSync: false,
             forceMobile: mobile,
             dir: "rtl",
-            selectable: true,
           }),
       });
       const { collect } = setup(app);

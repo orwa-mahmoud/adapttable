@@ -420,7 +420,6 @@ const otherKits = builtAdapters("vue").map((other) => ({
         :lang="locale"
         :row-key="staffKey"
         :url-sync="false"
-        selectable
         v-bind="
           toggles.paging
             ? {

@@ -42,6 +42,7 @@ import type * as rowDetail from "../../../adapter-angular-unstyled/row-detail/in
 import type * as rowPinning from "../../../adapter-angular-unstyled/row-pinning/index";
 import type * as rowReorderModule from "../../../adapter-angular-unstyled/row-reorder/index";
 import type * as savedViewsModule from "../../../adapter-angular-unstyled/saved-views/index";
+import type * as selectionModule from "../../../adapter-angular-unstyled/selection/index";
 import type * as selectionStatsModule from "../../../adapter-angular-unstyled/selection-stats/index";
 import type * as sidePanelModule from "../../../adapter-angular-unstyled/side-panel/index";
 import type * as statusBarModule from "../../../adapter-angular-unstyled/status-bar/index";
@@ -56,6 +57,7 @@ export interface AngularKitFeatures {
   readonly commandPalette: typeof commandPaletteModule.commandPalette;
   readonly dirtyIndicators: typeof editing.dirtyIndicators;
   readonly filterTypes: typeof filters.filterTypes;
+  readonly selection: typeof selectionModule.selection;
   readonly selectionStats: typeof selectionStatsModule.selectionStats;
   readonly sidePanel: typeof sidePanelModule.sidePanel;
   readonly statusBar: typeof statusBarModule.statusBar;
