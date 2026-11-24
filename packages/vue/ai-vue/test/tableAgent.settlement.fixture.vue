@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { ColumnLayoutState } from "@adapttable/vue";
 import { useDataTableShell } from "@adapttable/vue/adapter";
+import { selection } from "@adapttable/vue/features";
 
 import {
   TABLE_AGENT_STATE,
   tableAgent,
   type TableAgentOptions,
 } from "../src/tableAgent";
-import { selection } from "@adapttable/vue/features";
 const props = defineProps<{
   options: TableAgentOptions;
   selectedIds?: readonly string[];
