@@ -1,5 +1,11 @@
-import { exportPdf, type ExportPdfOptions } from "@adapttable/vue-unstyled/export-pdf";
-import { exportXlsx, type ExportXlsxOptions } from "@adapttable/vue-unstyled/export-xlsx";
+import {
+  exportPdf,
+  type ExportPdfOptions,
+} from "@adapttable/vue-unstyled/export-pdf";
+import {
+  exportXlsx,
+  type ExportXlsxOptions,
+} from "@adapttable/vue-unstyled/export-xlsx";
 interface Person {
   name: string;
 }

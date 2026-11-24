@@ -90,20 +90,20 @@ function gzipFile(path) {
 export async function measureEsbuild(entry, externals, transform) {
   const esbuild = await esbuildBuild();
   const dir = mkdtempSync(join(tmpdir(), "esbuild-budget-"));
-    const external = {
-      name: "budget-externals",
-      setup(build) {
-        build.onResolve({ filter: /^[^.]/ }, (args) => {
-          if (
-            args.path.startsWith("node:") ||
-            externals.some((pattern) => pattern.test(args.path))
-          ) {
-            return { path: args.path, external: true };
-          }
-          return null;
-        });
-      },
-    };
+  const external = {
+    name: "budget-externals",
+    setup(build) {
+      build.onResolve({ filter: /^[^.]/ }, (args) => {
+        if (
+          args.path.startsWith("node:") ||
+          externals.some((pattern) => pattern.test(args.path))
+        ) {
+          return { path: args.path, external: true };
+        }
+        return null;
+      });
+    },
+  };
   try {
     const built = async (minify) => {
       const outdir = join(dir, minify ? "min" : "raw");

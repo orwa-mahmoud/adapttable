@@ -41,7 +41,11 @@ describe("esbuild budget", () => {
     assert.deepEqual(
       esbuildMarkerProblems(
         {
-          absent: ["pdfWriter", "data-cell-selected] {", "column keys must be unique"],
+          absent: [
+            "pdfWriter",
+            "data-cell-selected] {",
+            "column keys must be unique",
+          ],
           present: ["kept"],
         },
         { js: "export const kept = 1;\nconst pdfWriter = 1;\n", css: "" }

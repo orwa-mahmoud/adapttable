@@ -7,8 +7,16 @@ import type {
   RowEditActionsProps,
   VueEditableCellProps,
 } from "@adapttable/vue/adapter";
-import { ChecklistFilter as NativeChecklistFilter, FilterTreeBuilder as NativeFilterTree, NativeFilterField } from "@adapttable/vue-unstyled/filters";
-import { NativeBatchEditBar, NativeEditableCell, NativeRowEditActions } from "@adapttable/vue-unstyled/editing";
+import {
+  NativeBatchEditBar,
+  NativeEditableCell,
+  NativeRowEditActions,
+} from "@adapttable/vue-unstyled/editing";
+import {
+  ChecklistFilter as NativeChecklistFilter,
+  FilterTreeBuilder as NativeFilterTree,
+  NativeFilterField,
+} from "@adapttable/vue-unstyled/filters";
 import { NativeHeaderFilter } from "@adapttable/vue-unstyled/header-filters";
 import { h } from "vue";
 

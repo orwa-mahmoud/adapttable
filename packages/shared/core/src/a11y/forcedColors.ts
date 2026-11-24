@@ -35,7 +35,13 @@ export interface ContrastRules {
 }
 
 /** Ranks, in the order the rules must cascade. */
-export const RANK = { selection: 1, find: 2, edit: 3, panel: 4, base: 9 } as const;
+export const RANK = {
+  selection: 1,
+  find: 2,
+  edit: 3,
+  panel: 4,
+  base: 9,
+} as const;
 
 /** Forced-colours frames for the named parts. */
 export function framedParts(parts: readonly string[], extra = ""): string {
