@@ -360,9 +360,9 @@ AdaptTable unifies the model, never the pixels:
 
 Each feature ships as its own subpath, named after the feature id in kebab
 case. [Kit subpaths](./features.md#kit-subpaths) lists every one and whether it
-draws kit UI; `/features` forwards `@adapttable/react/features` unchanged and
-`/preset` builds `standardFeatures`. An adapter fills each one in one of three
-ways.
+draws kit UI. Headless factories that a kit does not wrap live on
+`@adapttable/react/features`, and `/preset` builds `standardFeatures`. An
+adapter fills each one in one of three ways.
 
 ### Factory helpers
 

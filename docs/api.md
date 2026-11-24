@@ -166,8 +166,8 @@ server table passes a `useServerData` source; its callback, like
 
 ## Feature composition
 
-`features={[rowReorder(fn, options)]}` from `@adapttable/<kit>/row-reorder` (or
-the `@adapttable/<kit>/features` barrel, or `@adapttable/react/features`). The
+`features={[rowReorder(fn, options)]}` from `@adapttable/<kit>/row-reorder`
+(or `@adapttable/react/features` when the factory draws no kit UI). The
 import is the switch, and it is the only way in — see
 [feature composition](./features.md) and, for a v2 table,
 [upgrading from v2](./migrate-from-v2.md).

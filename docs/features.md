@@ -87,14 +87,13 @@ control of its own.
 | `@adapttable/<kit>/assistant`           | `tableAssistant`, `TableAssistant`                                                                            | kit      |
 | `@adapttable/<kit>/pivot`               | `PivotPanel` and the pivot engine (`pivot`, `pivotTableModel`, …)                                             | kit      |
 | `@adapttable/<kit>/preset`              | `standardFeatures`, `StandardFeatureOptions`                                                                  | kit      |
-| `@adapttable/<kit>/features`            | the headless `@adapttable/react/features` surface: `applyTableFeatures`, `feature`, every factory             | headless |
 
 `<kit>` is `mantine`, `mui`, `chakra`, `antd`, `radix`, `base-ui`, `shadcn`,
-or `unstyled`. `@adapttable/<kit>/features` forwards `@adapttable/react/features`
-as it is, so a factory that draws kit UI — `columnMenu`, `filters`,
-`headerFilters`, `collapsibleColumnGroups`, `rowReorder`, `groupingPanel`,
-`exportCsv`, … — renders no controls when imported from there. Import each one
-from its own `@adapttable/<kit>/<subpath>`.
+or `unstyled`. Import each factory from its own `@adapttable/<kit>/<subpath>`.
+`@adapttable/react/features` is the headless surface, so a factory that draws
+kit UI — `columnMenu`, `filters`, `headerFilters`, `collapsibleColumnGroups`,
+`rowReorder`, `groupingPanel`, `exportCsv`, … — renders no controls when
+imported from there.
 
 The pivot engine stays a calculation — `import { pivot } from "@adapttable/core/pivot"`
 — not a `<DataTable>` prop. The kit `/pivot` subpath is the panel plus that
