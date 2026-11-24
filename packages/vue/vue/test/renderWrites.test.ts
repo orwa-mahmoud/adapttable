@@ -1,4 +1,3 @@
-import { selection } from "../src/features/headlessFactories";
 /**
  * A render reads the table's stores and writes none of them: every write
  * comes from an event or a watcher. Each table store is wrapped so a write
@@ -10,6 +9,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createApp, defineComponent, h, nextTick, shallowRef } from "vue";
 
 import type * as TableStoreModule from "../../../shared/core/src/state/tableStore";
+import { selection } from "../src/features/headlessFactories";
 import { rowPinning } from "../src/features/rowPinning";
 import {
   DesktopTableChrome,

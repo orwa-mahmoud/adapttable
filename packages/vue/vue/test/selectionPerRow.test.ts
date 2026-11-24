@@ -9,13 +9,13 @@ import {
   watchEffect,
 } from "vue";
 
+import { selection } from "../src/features/headlessFactories";
 import {
   DesktopTableChrome,
   MobileCardsChrome,
   type TableChromeSlots,
 } from "../src/layout/tableChrome";
 import { useRowSelection } from "../src/selection/selection";
-import { selection } from "../src/features/headlessFactories";
 import { useDataTableShell } from "../src/useDataTableShell";
 
 interface Row {

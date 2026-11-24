@@ -29,6 +29,7 @@ import {
 } from "../src/actions/contracts";
 import { ColumnGroupToggleChrome } from "../src/columns/columnGroupToggle";
 import { undoRedoButtons } from "../src/editing";
+import { selection } from "../src/features/headlessFactories";
 import {
   extendFeature,
   type FeatureMountContext,
@@ -60,7 +61,6 @@ import {
   type UseDataTableShellOptions,
   type UseDataTableShellResult,
 } from "../src/useDataTableShell";
-import { selection } from "../src/features/headlessFactories";
 interface Row {
   id: string;
   name: string;

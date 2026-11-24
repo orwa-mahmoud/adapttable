@@ -19,12 +19,12 @@ import {
   coreSelection,
   type SelectionFeatureOptions,
 } from "@adapttable/core/binding";
-import type { StaticTableFeature, TableFeature } from "./tableFeature";
 
 import { mountColumnResize } from "../columns/columnResize";
 import type { ExtraRow } from "../rows/extraRows";
 import { projectHeadlessRows } from "../rows/headlessRowsModel";
 import type { MaybeRefOrGetterOptional } from "../store";
+import type { StaticTableFeature, TableFeature } from "./tableFeature";
 
 export type { ExtraEntry, ExtraRow, ExtraRowKind } from "../rows/extraRows";
 export type {
