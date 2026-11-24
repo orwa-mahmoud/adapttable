@@ -43,8 +43,8 @@ non-zero when a file would change.
 | `columnHeaderLabel`, `exportViewFromChrome` from `@adapttable/core`                                                                                                                                                                                                  | `@adapttable/react/adapter` in a React app                                                                                                                 |
 
 The `@adapttable/i18n` root holds direction, membership and `loadLabels`, and
-no label data: importing it to call `getDirection` reads 6 kB in Node instead
-of 380 kB.
+no label data: importing it to call `getDirection` reads 6 KiB in Node instead
+of 380 KiB.
 
 ## Removed
 

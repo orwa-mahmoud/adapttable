@@ -54,7 +54,7 @@ describe("consumer fixtures", () => {
     }
   });
 
-  it("never lets a plain adapter ceiling exceed 80 KB or miss the 35% cut", () => {
+  it("never lets a plain adapter ceiling exceed 80 KiB or miss the 35% cut", () => {
     for (const { kit } of ADAPTERS) {
       const ceiling = adapterAcceptanceKB(kit);
       assert.ok(

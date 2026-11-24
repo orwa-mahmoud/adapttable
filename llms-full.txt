@@ -27,7 +27,7 @@ and use it, or open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 61–69 kB min+gzip (measured 2026-11-22 from
+A plain adapter `DataTable` is 61–69 KiB min+gzip (measured 2026-11-22 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
@@ -687,14 +687,13 @@ control of its own.
 | `@adapttable/<kit>/assistant`           | `tableAssistant`, `TableAssistant`                                                                            | kit      |
 | `@adapttable/<kit>/pivot`               | `PivotPanel` and the pivot engine (`pivot`, `pivotTableModel`, …)                                             | kit      |
 | `@adapttable/<kit>/preset`              | `standardFeatures`, `StandardFeatureOptions`                                                                  | kit      |
-| `@adapttable/<kit>/features`            | the headless `@adapttable/react/features` surface: `applyTableFeatures`, `feature`, every factory             | headless |
 
 `<kit>` is `mantine`, `mui`, `chakra`, `antd`, `radix`, `base-ui`, `shadcn`,
-or `unstyled`. `@adapttable/<kit>/features` forwards `@adapttable/react/features`
-as it is, so a factory that draws kit UI — `columnMenu`, `filters`,
-`headerFilters`, `collapsibleColumnGroups`, `rowReorder`, `groupingPanel`,
-`exportCsv`, … — renders no controls when imported from there. Import each one
-from its own `@adapttable/<kit>/<subpath>`.
+or `unstyled`. Import each factory from its own `@adapttable/<kit>/<subpath>`.
+`@adapttable/react/features` is the headless surface, so a factory that draws
+kit UI — `columnMenu`, `filters`, `headerFilters`, `collapsibleColumnGroups`,
+`rowReorder`, `groupingPanel`, `exportCsv`, … — renders no controls when
+imported from there.
 
 The pivot engine stays a calculation — `import { pivot } from "@adapttable/core/pivot"`
 — not a `<DataTable>` prop. The kit `/pivot` subpath is the panel plus that
@@ -764,8 +763,8 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 61 kB gzipped and the same table with
-`standardFeatures()` composed is 124 kB.
+Measured on MUI, the table alone is 61 KiB gzipped and the same table with
+`standardFeatures()` composed is 124 KiB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
@@ -833,7 +832,7 @@ registers and nothing else: it runs during render, possibly for a render the
 framework discards. What outlives a render goes in `mount`.
 
 ```tsx
-import type { TableFeature } from "@adapttable/mantine/features";
+import type { TableFeature } from "@adapttable/react/features";
 
 const currencyFilter: TableFeature = {
   id: "currency-filter",
@@ -1038,11 +1037,12 @@ registry to learn and nothing global to collide over.
 `headerFilters` · `savedViews` · `selectionStats` · `densityChooser` ·
 `print` · `statusBar` · `undoRedoButtons` · `multiSort` · `fitColumns` ·
 `columnSelectionCheckbox` · `rowActions` · `feature` (ad-hoc patch) ·
-`applyTableFeatures` (the merge used by every adapter) · `useTableFeatures`
-(apply + `setup(host)`, the hook every adapter runs).
+`applyTableFeatures` (the merge, from `@adapttable/react/features`).
 
-Host helpers are exported from `@adapttable/react/adapter`: `featureHostOf` /
-`rememberFeatureHost` (the host of one table, never a sibling's) ·
+`useTableFeatures` (apply + `setup(host)`, the hook every adapter runs) is
+exported from `@adapttable/react/adapter`, with the other host helpers:
+`featureHostOf` / `rememberFeatureHost` (the host of one table, never a
+sibling's) ·
 `FeatureHostProvider` / `useFeatureHost` (hooks under that table) ·
 `bindFeatureHostFn` (a mapper created outside the table still resolves names
 for the table that invokes it).
@@ -2962,9 +2962,9 @@ AdaptTable unifies the model, never the pixels:
 
 Each feature ships as its own subpath, named after the feature id in kebab
 case. [Kit subpaths](./features.md#kit-subpaths) lists every one and whether it
-draws kit UI; `/features` forwards `@adapttable/react/features` unchanged and
-`/preset` builds `standardFeatures`. An adapter fills each one in one of three
-ways.
+draws kit UI. Headless factories that a kit does not wrap live on
+`@adapttable/react/features`, and `/preset` builds `standardFeatures`. An
+adapter fills each one in one of three ways.
 
 ### Factory helpers
 
@@ -5014,7 +5014,7 @@ spec, so a feature changes one member without forking the rest:
 ```tsx
 import { filterLabel, getPath, RANGE_SUFFIXES } from "@adapttable/core";
 import { type FilterTypeSpec } from "@adapttable/mantine";
-import type { TableFeature } from "@adapttable/mantine/features";
+import type { TableFeature } from "@adapttable/react/features";
 import { SegmentedControl } from "@mantine/core";
 
 const minKey = (key: string) => key + RANGE_SUFFIXES.numberRange.start;
@@ -6993,7 +6993,7 @@ sticks to is the feature.
 
 ```tsx
 import { DataTable } from "@adapttable/mantine";
-import type { RowPinState } from "@adapttable/mantine/features";
+import type { RowPinState } from "@adapttable/react/features";
 import { rowPinning } from "@adapttable/mantine/row-pinning";
 import { useState } from "react";
 
@@ -9038,7 +9038,7 @@ total per team **per quarter**" — and that second dimension has to become
 columns that were never in the data.
 
 `@adapttable/core/pivot` is a separate entry, so a table that never pivots
-never downloads the engine. It costs 1.6 KB gzipped to the tables that import
+never downloads the engine. It costs 1.6 KiB gzipped to the tables that import
 it and nothing to the rest, which the bundle budget checks on every build.
 
 ▶ **See it working:** [pivot in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/pivot/) — the same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
@@ -9402,7 +9402,7 @@ A column whose value is `=[Unit Price] * Quantity`, typed by the user rather
 than written by you.
 
 `@adapttable/core/formula` is a separate entry, so a table with no computed
-columns never downloads a parser. It costs 2.8 KB gzipped to the tables that
+columns never downloads a parser. It costs 2.8 KiB gzipped to the tables that
 import it and nothing to the rest, which the bundle budget checks on every
 build.
 
@@ -17458,8 +17458,8 @@ server table passes a `useServerData` source; its callback, like
 
 ## Feature composition
 
-`features={[rowReorder(fn, options)]}` from `@adapttable/<kit>/row-reorder` (or
-the `@adapttable/<kit>/features` barrel, or `@adapttable/react/features`). The
+`features={[rowReorder(fn, options)]}` from `@adapttable/<kit>/row-reorder`
+(or `@adapttable/react/features` when the factory draws no kit UI). The
 import is the switch, and it is the only way in — see
 [feature composition](./features.md) and, for a v2 table,
 [upgrading from v2](./migrate-from-v2.md).
@@ -17472,8 +17472,9 @@ Types: `TableFeature` · `TableFeatureHost` · `FeaturePatch` ·
 `registerContextMenuItems`; resources go in `mount(context)`
 (`TableFeatureMountContext`, `StaticFeatureMountContext`), kept by id and
 `dependencies`. `PublishTableRuntime` publishes a chrome's reader and
-commits it in a layout effect. Adapters run this through
-`useTableFeatures`. The host belongs to that table: `featureHostOf` /
+commits it in a layout effect. The merge `applyTableFeatures` is imported
+from `@adapttable/react/features`. Adapters run the hook `useTableFeatures`
+from `@adapttable/react/adapter`. The host belongs to that table: `featureHostOf` /
 `rememberFeatureHost` thread it into chrome, `FeatureHostProvider` /
 `useFeatureHost` hand it to hooks in the tree, and `bindFeatureHostFn`
 scopes a mapper (summary, group aggregates) to the table that invoked it.
@@ -21156,8 +21157,9 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   entry's `coreExportCsv`, `coreFilters`, `coreHeaderFilters` and
   `coreFindInTable` are the core factories with their implementations filed,
   for a kit to extend.
-- All supported Angular kits accept live `selectable`, `cellNavigation`, `filtersMode`
-  and `closeHeaderFilterOnSelect` inputs. Their controlled `density` input
+- All supported Angular kits accept live `cellNavigation`, `filtersMode`
+  and `closeHeaderFilterOnSelect` inputs. Row checkboxes come from
+  `selection()`. Their controlled `density` input
   overrides the chooser's state; `densityChange` reports requests and waits
   for the host to update the input. Omitting `density` keeps the chooser
   uncontrolled. Kits share core's `resolveDensity` and `requestDensityChange`,
@@ -21783,7 +21785,7 @@ opens `AdaptNativeCellEditor`,
 separator and full-width rows on the desktop body and the phone cards) and
 `rowAppearance` (`/row-appearance`; a class, style and height on each row
 and card) — each importable from its own
-subpath (or from `@adapttable/angular-unstyled/features`). `standardFeatures`
+subpath. `standardFeatures`
 (`@adapttable/angular-unstyled/preset`, `StandardFeatureOptions`) assembles
 the zero-configuration set from core's `standardFeatureList`. The families are
 `editingFamily` on `/editing`, `filteringFamily` on `/filtering` and
@@ -22642,11 +22644,11 @@ zero UI-kit dependencies.
 Measured 2026-11-22 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
-| What you import                            | min+gzip  |
-| ------------------------------------------ | --------- |
-| `useFrontendData` + `useDataTable` (react) | ~21 kB    |
-| every core export                          | ~47 kB    |
-| `DataTable` from an adapter                | ~61–69 kB |
+| What you import                            | min+gzip   |
+| ------------------------------------------ | ---------- |
+| `useFrontendData` + `useDataTable` (react) | ~21 KiB    |
+| every core export                          | ~47 KiB    |
+| `DataTable` from an adapter                | ~61–69 KiB |
 
 The first row is the one to read: a headless table costs well under half of
 the full core, because the parts you never import never arrive. The
@@ -22656,7 +22658,7 @@ staged row-model evaluator, the shell operations, the snapshot guard, the
 grouped-snapshot cache, and the shared behaviours the bindings used to copy.
 Binding and kit machinery lives on `@adapttable/core/binding`, and each
 specialty engine (pivot, formula, grouping, editing) on its own entry. It is not the download of a table. All eight React adapters
-land within ~12 kB of each other, so switching kits does not change what you
+land within ~12 KiB of each other, so switching kits does not change what you
 pay. Tree-shaking drops unused exports from an application bundle. Installing
 a package still installs that package.
 
@@ -22801,7 +22803,7 @@ Sizes are minified + gzipped AdaptTable bytes. React and the UI kit are
 external — an application already ships them. The method is packed
 consumer fixtures in `scripts/bundle-budget.mjs`.
 
-- A published adapter's base `DataTable` is held to **≤ 80 KB**
+- A published adapter's base `DataTable` is held to **≤ 80 KiB**
   (`PLAIN_ADAPTER_CEILING_KB`) and at least 35% under that kit's recorded
   pre-v3 size (`scripts/consumer-fixtures.mjs`). Omitted feature markers must be absent from the base graph.
 - Optional features arrive with their import. Called with no argument,
@@ -22884,27 +22886,27 @@ a fix was attempted and failed. None is listed.
 
 ## Sources
 
-| Claim                                    | Source                                                                                                        |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Host callbacks own writes                | [cell-editing](./cell-editing.md), [row-reordering](./row-reordering.md)                                      |
-| Formula grammar and refused tokens       | [formulas](./formulas.md), `parseFormula`                                                                     |
-| Move policy, cycle guard, sort block     | [row-reordering](./row-reordering.md)                                                                         |
-| `fullDataset` / export-all / `rows.read` | [data-tiers](./data-tiers.md), [agent-capabilities](./agent-capabilities.md), `session.governed.test.ts`      |
-| `readMax` default 50                     | `packages/shared/ai/src/commands/rowAddress.ts` `readMaxOf`                                                   |
-| Virtualize DOM count                     | [virtualization](./virtualization.md)                                                                         |
-| Export 50,000 cap                        | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                       |
-| URL-state 8,192 cap, `limit` 1–500       | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`                  |
-| Adapter ≤ 80 KB, omitted-feature markers | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                                  |
-| Every core export at its 55 KiB ceiling  | [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable), `core · every export` in `scripts/consumer-fixtures.mjs` |
-| AI absent from base graphs               | `scripts/ai-isolation.mjs`                                                                                    |
-| Perf baseline                            | `scripts/v3-perf-baseline.json`                                                                               |
-| Chromium e2e                             | `playwright.config.ts`                                                                                        |
-| Nightly Firefox / WebKit / Pixel 5       | `.github/workflows/e2e-nightly.yml`, `name: "firefox"` in `playwright.config.ts`                              |
-| Showcase axe audit                       | `e2e/axe-audit.spec.ts`                                                                                       |
-| Visual baselines                         | `e2e/visual/v3-ui.spec.ts`, `e2e/visual/README.md`                                                            |
-| SSR seams                                | [ssr-rsc](./ssr-rsc.md)                                                                                       |
-| antd sticky header association           | `e2e/aria-parity.spec.ts`, [accessibility](./accessibility.md)                                                |
-| React / Node / kit floors                | [getting-started](./getting-started.md)                                                                       |
+| Claim                                     | Source                                                                                                        |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Host callbacks own writes                 | [cell-editing](./cell-editing.md), [row-reordering](./row-reordering.md)                                      |
+| Formula grammar and refused tokens        | [formulas](./formulas.md), `parseFormula`                                                                     |
+| Move policy, cycle guard, sort block      | [row-reordering](./row-reordering.md)                                                                         |
+| `fullDataset` / export-all / `rows.read`  | [data-tiers](./data-tiers.md), [agent-capabilities](./agent-capabilities.md), `session.governed.test.ts`      |
+| `readMax` default 50                      | `packages/shared/ai/src/commands/rowAddress.ts` `readMaxOf`                                                   |
+| Virtualize DOM count                      | [virtualization](./virtualization.md)                                                                         |
+| Export 50,000 cap                         | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                       |
+| URL-state 8,192 cap, `limit` 1–500        | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`                  |
+| Adapter ≤ 80 KiB, omitted-feature markers | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                                  |
+| Every core export at its 55 KiB ceiling   | [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable), `core · every export` in `scripts/consumer-fixtures.mjs` |
+| AI absent from base graphs                | `scripts/ai-isolation.mjs`                                                                                    |
+| Perf baseline                             | `scripts/v3-perf-baseline.json`                                                                               |
+| Chromium e2e                              | `playwright.config.ts`                                                                                        |
+| Nightly Firefox / WebKit / Pixel 5        | `.github/workflows/e2e-nightly.yml`, `name: "firefox"` in `playwright.config.ts`                              |
+| Showcase axe audit                        | `e2e/axe-audit.spec.ts`                                                                                       |
+| Visual baselines                          | `e2e/visual/v3-ui.spec.ts`, `e2e/visual/README.md`                                                            |
+| SSR seams                                 | [ssr-rsc](./ssr-rsc.md)                                                                                       |
+| antd sticky header association            | `e2e/aria-parity.spec.ts`, [accessibility](./accessibility.md)                                                |
+| React / Node / kit floors                 | [getting-started](./getting-started.md)                                                                       |
 
 ---
 
@@ -22938,7 +22940,7 @@ libraries.
 
 <sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation()`, and paste and fill write through editable columns and the composed `editing()` handler — the channel inline editing uses — unless `onCellPaste` / `onCellFill` take the batch whole; cut reports its range to `onCellCut`. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
-A plain AdaptTable adapter `DataTable` is 61–69 kB min+gzip (measured
+A plain AdaptTable adapter `DataTable` is 61–69 KiB min+gzip (measured
 2026-11-22 from packed fixtures; React and the kit stay external). Competitor
 bundle sizes are not listed here — they depend on which paid modules you
 licence and are not produced by this repo's fixtures. Method and the rest of
@@ -24344,24 +24346,29 @@ non-zero when a file would change.
 
 ## Moved imports
 
-| v3 import                                                                                                                                                                    | v4 import                                                                                                                                                  |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Binding and kit machinery from `@adapttable/core`                                                                                                                            | `@adapttable/core/binding`                                                                                                                                 |
-| Editing, pivot, formula, grouping, stream and selection names from `@adapttable/core`                                                                                        | `@adapttable/core/editing`, `/pivot`, `/formula`, `/grouping`, `/stream`, `/selection`, `/query`, `/engine`, `/locale` and `/xlsx`, each for its own names |
-| Kit machinery from `@adapttable/react` (`useTableChrome`, `useTableEngine`, `useTableEditHistory`, the column, filter-chip, find and body-data hooks and their option types) | `@adapttable/react/adapter`                                                                                                                                |
-| `getLabels`, `locales` from `@adapttable/i18n`                                                                                                                               | `@adapttable/i18n/catalog`                                                                                                                                 |
-| `ar`, `cs`, … `zhTW` from `@adapttable/i18n`                                                                                                                                 | `@adapttable/i18n/locales/<tag>` (`zhTW` from `/locales/zh-TW`)                                                                                            |
-| `loadLabels` from `@adapttable/i18n/load`                                                                                                                                    | `@adapttable/i18n`                                                                                                                                         |
-| `splitFilterValues` from `@adapttable/server`                                                                                                                                | `splitListParam` from `@adapttable/server`                                                                                                                 |
-| `sameRows` from `@adapttable/core/binding`                                                                                                                                   | `sameItems`                                                                                                                                                |
-| `exportPdf`, `exportXlsx` from `@adapttable/angular/features`                                                                                                                | `@adapttable/angular/pdf`, `@adapttable/angular/xlsx`                                                                                                      |
-| `exportCsv` from a Vue kit's `/export-csv`                                                                                                                                   | that kit's `/export`                                                                                                                                       |
-| `columnSelectionCheckbox` from `@adapttable/nuxt-ui/cell-navigation`                                                                                                         | `@adapttable/nuxt-ui/column-selection`                                                                                                                     |
-| `columnHeaderLabel`, `exportViewFromChrome` from `@adapttable/core`                                                                                                          | `@adapttable/react/adapter` in a React app                                                                                                                 |
+| v3 import                                                                                                                                                                                                                                                            | v4 import                                                                                                                                                  |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Binding and kit machinery from `@adapttable/core`                                                                                                                                                                                                                    | `@adapttable/core/binding`                                                                                                                                 |
+| Editing, pivot, formula, grouping, stream and selection names from `@adapttable/core`                                                                                                                                                                                | `@adapttable/core/editing`, `/pivot`, `/formula`, `/grouping`, `/stream`, `/selection`, `/query`, `/engine`, `/locale` and `/xlsx`, each for its own names |
+| Kit machinery from `@adapttable/react` (`useTableChrome`, `useTableEngine`, `useTableEditHistory`, the column, filter-chip, find and body-data hooks and their option types)                                                                                         | `@adapttable/react/adapter`                                                                                                                                |
+| `getLabels`, `locales` from `@adapttable/i18n`                                                                                                                                                                                                                       | `@adapttable/i18n/catalog`                                                                                                                                 |
+| `ar`, `cs`, … `zhTW` from `@adapttable/i18n`                                                                                                                                                                                                                         | `@adapttable/i18n/locales/<tag>` (`zhTW` from `/locales/zh-TW`)                                                                                            |
+| `loadLabels` from `@adapttable/i18n/load`                                                                                                                                                                                                                            | `@adapttable/i18n`                                                                                                                                         |
+| `splitFilterValues` from `@adapttable/server`                                                                                                                                                                                                                        | `splitListParam` from `@adapttable/server`                                                                                                                 |
+| `sameRows` from `@adapttable/core/binding`                                                                                                                                                                                                                           | `sameItems`                                                                                                                                                |
+| `exportPdf`, `exportXlsx` from `@adapttable/angular/features`                                                                                                                                                                                                        | `@adapttable/angular/pdf`, `@adapttable/angular/xlsx`                                                                                                      |
+| `exportCsv` from a Vue kit's `/export-csv`                                                                                                                                                                                                                           | that kit's `/export`                                                                                                                                       |
+| `columnSelectionCheckbox` from `@adapttable/nuxt-ui/cell-navigation`                                                                                                                                                                                                 | `@adapttable/nuxt-ui/column-selection`                                                                                                                     |
+| A React kit's `/features` barrel                                                                                                                                                                                                                                     | `@adapttable/react/features`                                                                                                                               |
+| `applyTableFeatures` from `@adapttable/react/adapter`                                                                                                                                                                                                                | `@adapttable/react/features`                                                                                                                               |
+| `useTableFeatures` from `@adapttable/react/features`                                                                                                                                                                                                                 | `@adapttable/react/adapter`                                                                                                                                |
+| `visibleColumns`, `filterLabel`, `aggregate`, `declaredAggregates`, `computedAggregateKeys`, `autoSizeColumns`, `cellValue`, `conditionToExtra`, `sourceCapabilities`, `treeColumnKey`, `approvalArgumentPairs`, `approvalValueText` from `@adapttable/core/binding` | `@adapttable/core`                                                                                                                                         |
+| A Vue or Angular kit's `/features` barrel                                                                                                                                                                                                                            | that factory's own subpath (`grouping` from `/grouping`, `selection` from `/selection`)                                                                    |
+| `columnHeaderLabel`, `exportViewFromChrome` from `@adapttable/core`                                                                                                                                                                                                  | `@adapttable/react/adapter` in a React app                                                                                                                 |
 
 The `@adapttable/i18n` root holds direction, membership and `loadLabels`, and
-no label data: importing it to call `getDirection` reads 6 kB in Node instead
-of 380 kB.
+no label data: importing it to call `getDirection` reads 6 KiB in Node instead
+of 380 KiB.
 
 ## Removed
 
@@ -24471,7 +24478,7 @@ v3 removes the enabling props. A feature is an import and an entry in
 `features`, and that is the only way in — which is what lets a table download
 what it named and nothing else. Measured adapter sizes live in the
 [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable); the acceptance ceiling
-is 80 KB min+gzip.
+is 80 KiB min+gzip.
 
 Nothing else about the table changed: the same columns, the same data tiers,
 the same URL state, the same labels.
@@ -25191,7 +25198,7 @@ off the core main barrel.
 ### `@adapttable/react/adapter`
 
 The supported **adapter-author** boundary. A ninth adapter is built from this
-entry — `useDataTableShell`, chrome components, slot contracts, pager and pin
+entry — `useTableFeatures`, `useDataTableShell`, chrome components, slot contracts, pager and pin
 math, announcers — with the same SemVer promise as the main entry. App code
 rarely imports it; reaching for it is choosing that contract, not an
 undocumented escape. There is no private channel behind it.
@@ -25561,8 +25568,9 @@ write; a renderer does not become your database. For remote data, build an
 signals, or any other source, and pass it through `[source]`.
 
 Callback inputs such as `onViewChange` and `onRowClick` use square brackets.
-Actual outputs such as `(selectionChange)` and `(columnLayoutChange)` use
-parentheses. Keep callback functions stable on the component.
+Outputs such as `(columnLayoutChange)` use parentheses. Row selection is
+`selection()` from the kit's `/selection` entry, including the ids the host
+holds and `onSelectionChange`. Keep callback functions stable on the component.
 
 Continue with [Data tiers](./data-tiers.md), [Columns](./columns.md),
 [Accessibility](./accessibility.md), or the
@@ -25790,6 +25798,7 @@ import type { ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/angular-material";
 import { filters } from "@adapttable/angular-material/filters";
 import { columnMenu } from "@adapttable/angular-material/column-menu";
+import { selection } from "@adapttable/angular-material/selection";
 
 interface Person {
   id: string;
@@ -25806,7 +25815,6 @@ interface Person {
     [rowKey]="rowKey"
     [features]="features"
     tableLabel="People"
-    [selectable]="true"
   />`,
 })
 export class PeopleTable {
@@ -25822,6 +25830,7 @@ export class PeopleTable {
     { key: "team", header: "Team", accessor: (row) => row.team },
   ];
   readonly features = [
+    selection(),
     filters<Person>([{ key: "name", type: "text" }]),
     columnMenu(),
   ];
@@ -28821,14 +28830,15 @@ See [Data tiers](./data-tiers.md), [Mobile cards](./mobile.md),
 
 # Angular row selection and bulk actions
 
-Set `[selectable]="true"` to add row checkboxes. Selection uses stable row
-IDs, so replacing an object with another object having the same ID does not
-change which record is selected.
+Compose `selection()` from the kit's `/selection` entry to add row checkboxes.
+Selection uses stable row IDs, so replacing an object with another object
+having the same ID does not change which record is selected.
 
 ```ts
 import { Component, signal } from "@angular/core";
 import type { ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/angular-unstyled";
+import { selection } from "@adapttable/angular-unstyled/selection";
 
 interface Person {
   id: string;
@@ -28843,9 +28853,7 @@ interface Person {
       [data]="rows"
       [columns]="columns"
       [rowKey]="rowKey"
-      [selectable]="true"
-      [selectedIds]="selectedIds()"
-      (selectionChange)="selectedIds.set($event)"
+      [features]="features"
       [urlSync]="false"
     />
     <p>{{ selectedIds().length }} selected</p>
@@ -28859,15 +28867,23 @@ export class SelectPeople {
   readonly columns: ColumnDef<Person>[] = [{ key: "name", header: "Name" }];
   readonly rowKey = (row: Person) => row.id;
   readonly selectedIds = signal<readonly string[]>([]);
+  readonly features = [
+    selection({
+      selectedIds: this.selectedIds,
+      onSelectionChange: (ids) => {
+        this.selectedIds.set(ids);
+      },
+    }),
+  ];
 }
 ```
 
-`selectionChange` is an Angular output carrying the complete `string[]` of
-selected IDs. Omit `[selectedIds]` for table-owned selection. When you supply
-it, update the signal in response to the output: the rendered selection is
-always the value the host supplies. `selectable` is read at initialization.
+`onSelectionChange` receives the complete `string[]` of selected IDs. Omit
+`selectedIds` for table-owned selection. When you supply it, update the
+signal from `onSelectionChange`: the rendered selection is always the value
+the host supplies.
 
-The NG-ZORRO kit has the same inputs and output. Replace the root
+The NG-ZORRO kit publishes the same `selection()` entry. Replace the root
 kit import with `@adapttable/ng-zorro`; see [getting started](./getting-started.md)
 for package installation and first-release status.
 
@@ -33089,7 +33105,7 @@ export class AccessiblePeopleTable {
 The NG-ZORRO equivalents live under `@adapttable/ng-zorro`. The grid is opt-in;
 a plain data table does not need to make every cell a Tab stop.
 `columnSelectionCheckbox()` requires cell navigation and selects a column's
-cell range. `[selectable]="true"` separately enables row selection.
+cell range. Compose `selection()` when the table should offer row checkboxes.
 
 ## Keyboard behavior
 
@@ -33410,6 +33426,7 @@ initial rows, IDs, locale, direction and responsive settings on server and clien
 <script setup lang="ts">
 import { shallowRef } from "vue";
 import { DataTable, type ColumnDef } from "@adapttable/vue-unstyled";
+import { selection } from "@adapttable/vue-unstyled/selection";
 
 interface Person {
   id: string;
@@ -33422,6 +33439,9 @@ const rows = shallowRef<readonly Person[]>([
   { id: "grace", name: "Grace", score: 20 },
 ]);
 const selectedIds = shallowRef<string[]>([]);
+function changeSelection(ids: string[]) {
+  selectedIds.value = ids;
+}
 const columns: ColumnDef<Person>[] = [
   { key: "name", header: "Name", sortable: true },
   { key: "score", header: "Score", sortable: true },
@@ -33431,13 +33451,13 @@ const rowKey = (person: Person) => person.id;
 
 <template>
   <DataTable
-    v-model:selected-ids="selectedIds"
     :data="rows"
     :columns="columns"
     :row-key="rowKey"
     :url-sync="false"
     table-label="People"
     :class-names="{ table: 'people-table', th: 'people-heading' }"
+    :features="[selection({ selectedIds, onSelectionChange: changeSelection })]"
   />
 </template>
 ```
@@ -33447,11 +33467,12 @@ when the value does not come from that property path. Supply stable, unique row
 IDs through `rowKey`. Replace the host's row array to publish changes; the table
 never owns or mutates the data.
 
-`v-model:selected-ids` accepts selection requests through `update:selectedIds`.
-To inspect or reject a request, pass `:selected-ids` and handle
-`@update:selected-ids` yourself. The same pattern applies to `columnLayout`/`update:columnLayout` and
-`density`/`update:density`. Use `selectable` and `defaultSelectedIds` for local
-selection. Initial defaults do not reset later user changes.
+`selection({ selectedIds, onSelectionChange })` keeps the selected ids in the
+host. To reject a request, leave `selectedIds` unchanged. The same request
+pattern applies to `columnLayout`/`onColumnLayoutChange` and
+`density`/`onDensityChange`. Omit `selectedIds` and pass `defaultSelectedIds`
+when the table should keep its own selection. Initial defaults do not reset
+later user changes.
 
 The kit supplies native controls and no stylesheet. Its `classNames` target
 semantic table, card and control elements; ordinary class/style/listener
@@ -33570,10 +33591,10 @@ Keep the setup from the first table and replace its template with this one.
 ```vue
 <template>
   <DataTable
-    v-model:selected-ids="selectedIds"
     :data="rows"
     :columns="columns"
     :row-key="rowKey"
+    :features="[selection({ selectedIds, onSelectionChange: changeSelection })]"
   >
     <template #cell="{ row, column, value }">
       <strong v-if="column.key === 'name'">{{ row.name }}</strong>
@@ -33720,6 +33741,7 @@ stacking follows `ElConfigProvider`'s `zIndex` setting.
 import { ref } from "vue";
 import { DataTable, type ColumnDef } from "@adapttable/element-plus";
 import { filters } from "@adapttable/element-plus/filters";
+import { selection } from "@adapttable/element-plus/selection";
 
 interface Person {
   id: string;
@@ -33735,19 +33757,23 @@ const columns: ColumnDef<Person>[] = [
   { key: "name", header: "Name", sortable: true },
   { key: "score", header: "Score", sortable: true },
 ];
-const features = [filters<Person>([{ key: "name", type: "text" }])];
 const selectedIds = ref<string[]>([]);
+function changeSelection(ids: string[]) {
+  selectedIds.value = ids;
+}
+const features = [
+  selection({ selectedIds, onSelectionChange: changeSelection }),
+  filters<Person>([{ key: "name", type: "text" }]),
+];
 </script>
 
 <template>
   <DataTable
-    v-model:selected-ids="selectedIds"
     :data="rows"
     :columns="columns"
     :row-key="(row) => row.id"
     :features="features"
     :url-sync="false"
-    selectable
   />
 </template>
 ```
@@ -34218,6 +34244,7 @@ stylesheet reads the standard shadcn CSS tokens (`--background`, `--foreground`,
 <script setup lang="ts">
 import { DataTable, type ColumnDef } from "@adapttable/shadcn-vue";
 import { densityChooser } from "@adapttable/shadcn-vue/density";
+import { selection } from "@adapttable/shadcn-vue/selection";
 import "@adapttable/shadcn-vue/styles.css";
 
 interface Person {
@@ -34231,7 +34258,7 @@ const columns: readonly ColumnDef<Person>[] = [
   { key: "name", header: "Name", sortable: true },
   { key: "score", header: "Score", sortable: true },
 ];
-const features = [densityChooser()];
+const features = [selection(), densityChooser()];
 </script>
 
 <template>
@@ -34240,7 +34267,6 @@ const features = [densityChooser()];
     :columns="columns"
     :row-key="(row) => row.id"
     :features="features"
-    selectable
   />
 </template>
 ```
@@ -34373,9 +34399,8 @@ for installation and UI-kit providers.
 ## Choose an entry point
 
 The base `@adapttable/vue-unstyled` entry exports `DataTable` and its types.
-Pass a `readonly ComposedFeature<TRow>[]` through `features`. The optional
-`@adapttable/vue-unstyled/features` barrel collects the factories below; use
-individual entries to state which behaviors a table needs.
+Pass a `readonly ComposedFeature<TRow>[]` through `features`. Import each
+factory from its own entry, which is what states which behaviors a table needs.
 
 | Native import suffix   | Exports and purpose                                                                                                                                          |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -34459,7 +34484,8 @@ second feature or require a migration of saved state.
 ### Optional helpers differ by adapter
 
 Every Vue kit offers a `/features` barrel for combined native factory imports.
-For example, `import { editing, filters } from "@adapttable/element-plus/features"`
+For example, `import { editing } from "@adapttable/element-plus/editing";
+import { filters } from "@adapttable/element-plus/filters";`
 uses the same Element Plus controls and factory signatures as the individual
 entries. The barrel is optional and is never imported by the base table.
 
@@ -34884,13 +34910,14 @@ Use the [live demo](/vue/demo/) or [Feature Lab](/vue/demo/all-options/) to swit
 
 Control selected Vue row IDs, retain stable row identity and compose native bulk actions without transferring ownership of data.
 
-Selection uses stable IDs from `rowKey`. This example keeps selected IDs in the Vue host with `v-model:selected-ids`. `selectable` enables native row checkboxes.
+Selection uses stable IDs from `rowKey`. Compose `selection()` from the kit's `/selection` entry. Pass `selectedIds` when the host holds the selection, and apply the ids from `onSelectionChange`.
 
 ```vue
 <script setup lang="ts">
 import { shallowRef } from "vue";
 import type { ColumnDef } from "@adapttable/vue";
 import { DataTable } from "@adapttable/vue-unstyled";
+import { selection } from "@adapttable/vue-unstyled/selection";
 
 interface Person {
   id: string;
@@ -34907,6 +34934,9 @@ const columns: ColumnDef<Person>[] = [
 ];
 const rowKey = (row: Person) => row.id;
 const selectedIds = shallowRef<string[]>([]);
+function changeSelection(ids: string[]) {
+  selectedIds.value = ids;
+}
 </script>
 
 <template>
@@ -34916,13 +34946,12 @@ const selectedIds = shallowRef<string[]>([]);
     :row-key="rowKey"
     table-label="People"
     url-key="people"
-    selectable
-    v-model:selected-ids="selectedIds"
+    :features="[selection({ selectedIds, onSelectionChange: changeSelection })]"
   />
 </template>
 ```
 
-To validate or reject a selection request, pass `selectedIds` and handle `update:selectedIds` instead of accepting every model event. `defaultSelectedIds` initializes local selection; it does not reset later changes.
+To reject a request, leave `selectedIds` unchanged inside `onSelectionChange`. `defaultSelectedIds` initializes the table's own selection; it does not reset later changes.
 
 Selection is not an edit or delete operation. Compose your adapter’s `/bulk-actions` factory to request host-owned operations over selected IDs. Filtering and paging can change the visible rows; use the selection model and the callback’s IDs instead of deriving selection from checkbox DOM nodes. Selection and edit drafts are not restored by Saved Views. See [actions](./actions.md), [saved views](./saved-views.md) and [row controls](./rows.md).
 
@@ -36590,7 +36619,7 @@ changes them.
 | Query               | `defaults`, `paginationMode`, `urlSync`, `urlKey`, `urlAdapter`; these configure the fallback frontend source, not a separately supplied source.                                                                                                      |
 | Search and sorting  | `searchable` defaults to true; `searchDebounceMs` defaults to the engine's 300ms interval; `searchPlaceholder` overrides the placeholder label. `multiSort` enables shift-key sort levels.                                                            |
 | Layout              | `forceMobile`, `mobileBreakpoint`, `columnLayout`, `defaultColumnLayout`, `onColumnRename`, `fitColumns`, `columnWidths`, `collapsibleColumnGroups`. Group headings and native desktop collapse buttons render; cards honor the resulting visibility. |
-| Selection           | `selectable`, controlled `selectedIds`, initial `defaultSelectedIds`.                                                                                                                                                                                 |
+| Selection           | Compose `selection()` from `/selection`. `selectedIds` controls it; `defaultSelectedIds` starts the table's own selection.                                                                                                                            |
 | Rows                | `onRowClick` activates a row or card; `isCellFlashing` marks changed cells with `data-flash`.                                                                                                                                                         |
 | Labels and styling  | `tableLabel`, `labels`, `dir`, `locale`, `classNames`.                                                                                                                                                                                                |
 | Local source status | `isLoading`, `isFetching`, `error`, `refetch`; a supplied source owns its status.                                                                                                                                                                     |
@@ -36606,14 +36635,13 @@ for page, grouped, server and mobile behavior.
 `confirm?: ConfirmHandler` also belong to `DataTableProps`. Density is
 `"comfortable" | "compact"`; `confirm` supplies adapter-owned row-action confirmation.
 
-Events are `update:selectedIds(ids: string[])`,
-`update:columnLayout(layout: ColumnLayoutState)` and
-`update:density(density: TableDensity)`. They are change requests;
-prop replacement does not itself emit another request. The corresponding
-models are `v-model:selected-ids`, `v-model:column-layout` and `v-model:density`.
-The host may accept a request by updating the prop or reject it by keeping the
-current value. `onDensityChange` observes the request once; it is separate from
-the model event. A template ref exposes
+Column layout and density are `v-model:column-layout` and `v-model:density`.
+Row selection is `selection()` from the kit's `/selection` entry: pass
+`selectedIds` when the host holds the ids, and accept or ignore the ids from
+`onSelectionChange`. Replacing a prop does not itself emit another request.
+The host may accept a request by updating its value or reject it by keeping
+the current value. `onDensityChange` observes the density request once; it is
+separate from the model event. A template ref exposes
 `DataTableHandle<TRow>`: `focus()` focuses the scroll surface, `runtime` is the
 table runtime, and `getView()` returns the current `TableRuntimeView` or
 `undefined` after disposal.

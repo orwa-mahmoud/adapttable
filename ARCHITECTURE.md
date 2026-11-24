@@ -324,7 +324,7 @@ Membership is decided on two questions, both of which must be yes: is it
 reachable from those three props, and is it cheap? Row selection, row actions,
 column visibility and column order were each measured against that test and each
 failed the first half — a three-prop table renders no checkbox, no action
-column, and no way to change the column set. All four are cheap (0.10–1.90 KB),
+column, and no way to change the column set. All four are cheap (0.10–1.90 KiB),
 and cheap alone is not a reason to charge every table for them. Row checkboxes
 are `selection()`. `columnSelectionCheckbox`, `bulkActions` and `selectionStats`
 select rows as part of what they do. The action column is its own factory, and
@@ -584,9 +584,9 @@ number. `core-every-export` is 104.28 KiB (106,778 bytes), measured
 2026-11-09. The ceiling is that measurement: the composed session with one
 committed state and a staged row-model evaluator, the grouping projection, and the shell operations, plus the snapshot guard, the
 grouped-snapshot cache, and the shared behaviours the bindings used to copy.
-The FAQ rounds that row to ~104 kB
-and the headless row to ~22 kB. The features page rounds the MUI pair to 72 kB
-and 133 kB. A later `pnpm budget` is what moves those published figures.
+The FAQ rounds that row to ~104 KiB
+and the headless row to ~22 KiB. The features page rounds the MUI pair to 72 KiB
+and 133 KiB. A later `pnpm budget` is what moves those published figures.
 
 ## Supported Node
 

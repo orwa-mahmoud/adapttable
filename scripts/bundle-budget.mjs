@@ -32,7 +32,7 @@
  * already — the measurement adds no dependency of its own.
  *
  * Consumer paths live in `consumer-fixtures.mjs`: core-simple, every adapter
- * base (≤ 80 KB and ≥ 35% below the item-1 baseline), every feature delta on
+ * base (≤ 80 KiB and ≥ 35% below the item-1 baseline), every feature delta on
  * MUI, `standardFeatures()` for every kit, representative combinations, and
  * the all-feature ceiling. Negative markers travel with each fixture.
  */
@@ -65,7 +65,12 @@ import {
   packedModules,
   workspacePackages,
 } from "./packed-consumers.mjs";
-import { publishedFigures, staleReason } from "./published-figures.mjs";
+import {
+  figuresIn,
+  publishedSizeText,
+  staleReason,
+  wrongByteUnit,
+} from "./published-figures.mjs";
 import {
   vueConsumerCoverageProblems,
   vueConsumerExternals,
@@ -555,7 +560,7 @@ export async function provePlantedLeak(install) {
  *
  * A budget is a ceiling, so a fixture can sit well under one for months while
  * the figure published beside it says something else entirely — which is how
- * `~51 kB` outlived a 134 KB measurement. Several of these pages tell the
+ * `~51 kB` outlived a 134 KiB measurement. Several of these pages tell the
  * reader the budget checks them; this is where that becomes true.
  *
  * `find` is the start of the line carrying the figure. `from` names the
@@ -733,14 +738,22 @@ function countStale(rows) {
       .map((r) => kib(r.initial.gzipBytes));
     if (measured.length !== from.length) continue;
     checked++;
-    const figures = publishedFigures(join(ROOT, doc), find);
-    if (figures === null) {
+    const text = publishedSizeText(join(ROOT, doc), find);
+    if (text === null) {
       stale++;
       console.error(
         `✗ ${doc}: no line starting "${find}" — the text moved or was reworded`
       );
       continue;
     }
+    if (wrongByteUnit(text)) {
+      stale++;
+      console.error(
+        `✗ ${doc} · ${find.trim()}: the figure uses kB or KB, but the budget measures KiB (1024 bytes)`
+      );
+      continue;
+    }
+    const figures = figuresIn(text);
     const reason = staleReason(figures, measured);
     if (reason) {
       stale++;

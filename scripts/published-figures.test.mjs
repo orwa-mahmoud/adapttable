@@ -12,6 +12,7 @@ import {
   publishedFigures,
   roundTo,
   staleReason,
+  wrongByteUnit,
 } from "./published-figures.mjs";
 
 const dir = mkdtempSync(join(tmpdir(), "published-figures-"));
@@ -26,29 +27,50 @@ function page(name, lines) {
 
 describe("figuresIn", () => {
   it("reads a single figure, with or without a tilde", () => {
-    assert.deepEqual(figuresIn("| every core export | ~87 kB |"), [87]);
-    assert.deepEqual(figuresIn("It costs 2.7 KB gzipped to the tables"), [2.7]);
+    assert.deepEqual(figuresIn("| every core export | ~87 KiB |"), [87]);
+    assert.deepEqual(
+      figuresIn("It costs 2.7 KiB gzipped to the tables"),
+      [2.7]
+    );
   });
 
   it("reads both ends of a range", () => {
-    assert.deepEqual(figuresIn("| an adapter | ~127–140 kB |"), [127, 140]);
-    assert.deepEqual(figuresIn("~51-57 kB"), [51, 57]);
+    assert.deepEqual(figuresIn("| an adapter | ~127–140 KiB |"), [127, 140]);
+    assert.deepEqual(figuresIn("~51-57 KiB"), [51, 57]);
   });
 
   it("reads every figure on the line, in order", () => {
-    assert.deepEqual(figuresIn("was ~10 kB, now 17.8 KB"), [10, 17.8]);
+    assert.deepEqual(figuresIn("was ~10 KiB, now 17.8 KiB"), [10, 17.8]);
+  });
+
+  it("does not read kB or KB", () => {
+    assert.deepEqual(figuresIn("| every core export | ~87 kB |"), []);
+    assert.deepEqual(figuresIn("It costs 2.7 KB gzipped"), []);
+    assert.deepEqual(figuresIn("87 KiB and also 2 KB"), [87]);
   });
 
   it("is empty when the unit carries no number", () => {
-    assert.deepEqual(figuresIn("a few kB either way"), []);
+    assert.deepEqual(figuresIn("a few KiB either way"), []);
     assert.deepEqual(figuresIn("no unit here at all"), []);
+  });
+});
+
+describe("wrongByteUnit", () => {
+  it("is true for kB and KB, and false for KiB", () => {
+    assert.equal(wrongByteUnit("~87 kB"), true);
+    assert.equal(wrongByteUnit("2.7 KB"), true);
+    assert.equal(wrongByteUnit("a few kB either way"), true);
+    assert.equal(wrongByteUnit("87 KiB"), false);
+    assert.equal(wrongByteUnit("~127–140 KiB"), false);
+    assert.equal(wrongByteUnit("PLAIN_ADAPTER_CEILING_KB"), false);
+    assert.equal(wrongByteUnit("no unit here at all"), false);
   });
 });
 
 describe("figureBefore", () => {
   it("takes the figure at the unit it is given, not the first on the line", () => {
-    const text = "10 kB became 17.8 KB";
-    assert.deepEqual(figureBefore(text, text.lastIndexOf("KB")), [17.8]);
+    const text = "10 KiB became 17.8 KiB";
+    assert.deepEqual(figureBefore(text, text.lastIndexOf("KiB")), [17.8]);
   });
 });
 
@@ -57,7 +79,7 @@ describe("publishedFigures", () => {
     const file = page("table.md", [
       "| What you import | min+gzip |",
       "| --------------- | -------- |",
-      "| every core export | ~87 kB |",
+      "| every core export | ~87 KiB |",
     ]);
     assert.deepEqual(publishedFigures(file, "| every core export"), [87]);
   });
@@ -65,7 +87,7 @@ describe("publishedFigures", () => {
   it("follows prose that wraps onto the next line", () => {
     const file = page("prose.md", [
       "so an Express or Fastify service installs a",
-      "1.6 KB parser and not a UI library.",
+      "1.6 KiB parser and not a UI library.",
     ]);
     assert.deepEqual(
       publishedFigures(file, "so an Express or Fastify service installs a"),
@@ -75,14 +97,14 @@ describe("publishedFigures", () => {
 
   it("stops at the row's own line, so a later row cannot answer for it", () => {
     const file = page("rows.md", [
-      "| core | ~18 kB |",
-      "| an adapter | ~127–140 kB |",
+      "| core | ~18 KiB |",
+      "| an adapter | ~127–140 KiB |",
     ]);
     assert.deepEqual(publishedFigures(file, "| core"), [18]);
   });
 
   it("reports a reworded line as missing rather than as a match", () => {
-    const file = page("gone.md", ["| all core exports | ~87 kB |"]);
+    const file = page("gone.md", ["| all core exports | ~87 KiB |"]);
     assert.equal(publishedFigures(file, "| every core export"), null);
   });
 });
@@ -121,7 +143,7 @@ describe("expectedFigures", () => {
     assert.deepEqual(expectedFigures([133.2, 133.4]), [133]);
   });
 
-  // A page that writes `1.5 KB` is more accurate than one writing `2 kB`, so
+  // A page that writes `1.5 KiB` is more accurate than one writing `2 KiB`, so
   // the rule holds it to a decimal rather than demanding it round away.
   it("keeps the precision the page publishes at", () => {
     assert.deepEqual(expectedFigures([1.5], [1]), [1.5]);
@@ -143,19 +165,25 @@ describe("staleReason", () => {
   it("fails a one-decimal figure that no longer matches", () => {
     assert.match(
       staleReason([1.5], [1.9]),
-      /published 1.5 kB, expected 1.9 kB/
+      /published 1.5 KiB, expected 1.9 KiB/
     );
   });
 
   // The rule the pages state is `published === Math.round(measured)`. A window
-  // around it is how a number drifts a kilobyte at a time while every run stays
+  // around it is how a number drifts one KiB at a time while every run stays
   // green, which is the opposite of what "cannot quietly go stale" promises.
-  it("fails a figure one kilobyte low", () => {
-    assert.match(staleReason([17], [17.8]), /published 17 kB, expected 18 kB/);
+  it("fails a figure one KiB low", () => {
+    assert.match(
+      staleReason([17], [17.8]),
+      /published 17 KiB, expected 18 KiB/
+    );
   });
 
-  it("fails a figure one kilobyte high", () => {
-    assert.match(staleReason([19], [17.8]), /published 19 kB, expected 18 kB/);
+  it("fails a figure one KiB high", () => {
+    assert.match(
+      staleReason([19], [17.8]),
+      /published 19 KiB, expected 18 KiB/
+    );
   });
 
   it("passes a range whose ends both round correctly", () => {
@@ -165,25 +193,25 @@ describe("staleReason", () => {
   it("fails a range whose LOW end is wrong, however right the high one is", () => {
     assert.match(
       staleReason([126, 141], [127.1, 141.1]),
-      /published 126–141 kB, expected 127–141 kB/
+      /published 126–141 KiB, expected 127–141 KiB/
     );
   });
 
   it("fails a range whose HIGH end is wrong, however right the low one is", () => {
     assert.match(
       staleReason([127, 140], [127.1, 141.1]),
-      /published 127–140 kB, expected 127–141 kB/
+      /published 127–140 KiB, expected 127–141 KiB/
     );
   });
 
   it("fails a single figure where a range belongs, and says so", () => {
     assert.match(
       staleReason([127], [127.1, 141.1]),
-      /published 127, expected 127–141 kB/
+      /published 127, expected 127–141 KiB/
     );
   });
 
   it("names the measurement so the fix is obvious", () => {
-    assert.match(staleReason([140], [141.1]), /measured 141.1 KB/);
+    assert.match(staleReason([140], [141.1]), /measured 141.1 KiB/);
   });
 });

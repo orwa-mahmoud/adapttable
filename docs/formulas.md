@@ -6,7 +6,7 @@ A column whose value is `=[Unit Price] * Quantity`, typed by the user rather
 than written by you.
 
 `@adapttable/core/formula` is a separate entry, so a table with no computed
-columns never downloads a parser. It costs 2.8 KB gzipped to the tables that
+columns never downloads a parser. It costs 2.8 KiB gzipped to the tables that
 import it and nothing to the rest, which the bundle budget checks on every
 build.
 
