@@ -14374,8 +14374,8 @@
       "export": "COMMAND_PALETTE",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -14438,8 +14438,8 @@
       "export": "CommandPaletteChromeProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -14486,8 +14486,8 @@
       "export": "CommandPaletteInputProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -14502,8 +14502,8 @@
       "export": "CommandPaletteSlots",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -18390,8 +18390,8 @@
       "export": "FindBarSlots",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -18478,8 +18478,8 @@
       "export": "FindSearchProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -19238,8 +19238,8 @@
       "export": "GroupingChipKeyboardProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -19406,8 +19406,8 @@
       "export": "GroupingPanelChipProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -19470,8 +19470,8 @@
       "export": "GroupingPanelSlots",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -20846,16 +20846,16 @@
       "export": "MultiSelectEditorCheckboxProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
       "export": "MultiSelectEditorSlots",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -22822,8 +22822,8 @@
       "export": "RowClickProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -23446,16 +23446,16 @@
       "export": "RowReorderHandleSlotProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
       "export": "RowReorderHandleSlots",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -24270,16 +24270,16 @@
       "export": "SIDE_PANEL",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
       "export": "SidePanelChromeProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -24350,8 +24350,8 @@
       "export": "SidePanelSlots",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -24382,8 +24382,8 @@
       "export": "SidePanelTabProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -24894,8 +24894,8 @@
       "export": "TableAssistantComposerProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -25038,8 +25038,8 @@
       "export": "TableAssistantSlots",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -27878,8 +27878,8 @@
       "export": "GroupingChipKeyboardProps",
       "currentImport": "@adapttable/core/editing",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/editing",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
       "behavior": ""
     },
     {
@@ -29414,8 +29414,8 @@
       "export": "GroupingChipKeyboardProps",
       "currentImport": "@adapttable/core/engine",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/engine",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/engine",
       "behavior": ""
     },
     {
@@ -30470,8 +30470,8 @@
       "export": "GroupingChipKeyboardProps",
       "currentImport": "@adapttable/core/grouping",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/grouping",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/grouping",
       "behavior": ""
     },
     {
@@ -32390,8 +32390,8 @@
       "export": "GroupingChipKeyboardProps",
       "currentImport": "@adapttable/core/query",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/query",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
       "behavior": ""
     },
     {
@@ -34638,8 +34638,8 @@
       "export": "ColumnMenuChromeProps",
       "currentImport": "@adapttable/core",
       "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
       "behavior": ""
     },
     {
@@ -36102,8 +36102,8 @@
       "export": "FilterChromeMode",
       "currentImport": "@adapttable/core",
       "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
       "behavior": ""
     },
     {
@@ -36630,8 +36630,8 @@
       "export": "GroupingChipKeyboardProps",
       "currentImport": "@adapttable/core",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
       "behavior": ""
     },
     {
@@ -42694,7 +42694,7 @@
       "export": "AgentApprovalChromeProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -42766,7 +42766,7 @@
       "export": "ApprovalReviewChromeProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -42830,7 +42830,7 @@
       "export": "BatchEditBarChromeProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -42918,7 +42918,7 @@
       "export": "BulkBarChromeProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -43062,7 +43062,7 @@
       "export": "ChecklistChromeProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -43478,7 +43478,7 @@
       "export": "CommandPaletteInputProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -44198,7 +44198,7 @@
       "export": "DesktopChromeWidths",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -44270,7 +44270,7 @@
       "export": "DesktopTableChromeClassNames",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -44926,7 +44926,7 @@
       "export": "FillHandleChromeProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -45318,7 +45318,7 @@
       "export": "FindBarChromeProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -45374,7 +45374,7 @@
       "export": "FindSearchProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -45542,7 +45542,7 @@
       "export": "GroupingChipKeyboardProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -45606,7 +45606,7 @@
       "export": "GroupingPanelChipProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -45622,7 +45622,7 @@
       "export": "GroupingPanelChromeProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -45710,7 +45710,7 @@
       "export": "GroupMoreButtonChromeProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -45950,7 +45950,7 @@
       "export": "KitCellEditorProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -46318,7 +46318,7 @@
       "export": "KitRenameFieldProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -46342,7 +46342,7 @@
       "export": "KitRowActionProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -46638,7 +46638,7 @@
       "export": "MobileCardsChromeClassNames",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -47942,7 +47942,7 @@
       "export": "SidePanelTabProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -48182,7 +48182,7 @@
       "export": "TableAssistantChromeProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -48190,7 +48190,7 @@
       "export": "TableAssistantComposerProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -48598,7 +48598,7 @@
       "export": "TreeCellChromeProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -48646,7 +48646,7 @@
       "export": "TreeToggleChromeProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -51854,7 +51854,7 @@
       "export": "TableRowReorderState",
       "currentImport": "@adapttable/react",
       "kind": "type",
-      "class": "react-binding",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/react",
       "behavior": ""
     },

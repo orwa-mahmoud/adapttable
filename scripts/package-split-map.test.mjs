@@ -72,6 +72,35 @@ describe("v3 package-split map", () => {
     }
   });
 
+  it("leaves a DOM slot contract on the core entry that already exports it", () => {
+    const map = buildPackageSplitMap();
+    const moved = map.symbols.filter(
+      (row) =>
+        row.currentImport.startsWith("@adapttable/core") &&
+        row.proposedImport !== row.currentImport
+    );
+    assert.deepEqual(
+      moved.map((row) => `${row.export} ${row.currentImport}`),
+      []
+    );
+    for (const [currentImport, name] of [
+      ["@adapttable/core/binding", "COMMAND_PALETTE"],
+      ["@adapttable/core/binding", "RowClickProps"],
+      ["@adapttable/core", "FilterChromeMode"],
+      ["@adapttable/core", "ColumnMenuChromeProps"],
+    ]) {
+      const row = map.symbols.find(
+        (entry) =>
+          entry.currentImport === currentImport && entry.export === name
+      );
+      assert.equal(row?.proposedImport, currentImport, name);
+      assert.ok(
+        row?.class === "neutral-model" || row?.class === "neutral-operation",
+        name
+      );
+    }
+  });
+
   it("is wired into the library check", () => {
     const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
     assert.ok(gateSteps(pkg.scripts, "check").has("check:package-split"));

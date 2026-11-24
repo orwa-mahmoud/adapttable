@@ -114,7 +114,10 @@ function mentionsReact(text, exportName) {
   }
   const next = text.slice(idx + 1).search(/^export /m);
   const block = next < 0 ? text.slice(idx) : text.slice(idx, idx + 1 + next);
-  return /React(?:Node|Element|Component)|ComponentType|CSSProperties|HTMLAttributes|RefObject|JSX\.|MouseEvent|KeyboardEvent/.test(
+  // DOM MouseEvent and KeyboardEvent are not React. The neutral slot
+  // contracts take them as the default type argument so Vue and Angular
+  // can substitute their own event types.
+  return /React(?:Node|Element|Component)|ComponentType|CSSProperties|HTMLAttributes|RefObject|JSX\./.test(
     block
   );
 }
@@ -160,8 +163,9 @@ function classifyCoreBinding(name, reportText) {
 function classifyCore({ subpath, name, reportText }) {
   if (APPLICATION_HOOKS.has(name)) return "application-hook";
   if (subpath === "./binding") return classifyCoreBinding(name, reportText);
-  if (REACT_CHROME_NAMES.has(name) || /Chrome/.test(name))
-    return "react-chrome";
+  // A name that says Chrome is still neutral when its declaration has no
+  // React type. Core's chrome props are the contract every adapter implements.
+  if (REACT_CHROME_NAMES.has(name)) return "react-chrome";
   if (name.startsWith("use")) return "react-binding";
   if (subpath === "./features") return classifyCoreFeatures(name, reportText);
   if (subpath === "./adapter") return classifyCoreAdapter(name, reportText);
