@@ -438,9 +438,10 @@ function readPaging(
   const askedPage = get(PARAM_PAGE);
   const page = wholeCount(askedPage) ?? 1;
   // The offset is computed here and handed to a database, so it stays a
-  // safe integer: a page past that is refused, not rounded.
-  if (!Number.isSafeInteger((page - 1) * limit)) {
-    refuse(PARAM_PAGE, askedPage ?? "", "beyond the largest safe offset");
+  // safe integer: a page past that is refused, not rounded. A missing page
+  // is already page 1, and its offset is 0.
+  if (askedPage !== null && !Number.isSafeInteger((page - 1) * limit)) {
+    refuse(PARAM_PAGE, askedPage, "beyond the largest safe offset");
     return { page: 1, limit };
   }
   return { page, limit };
@@ -522,7 +523,7 @@ function readFiltering(
 /**
  * A positive whole number written in decimal digits, or `undefined`.
  *
- * Anything else — a float, a negative, an exponent, a word, a number with
+ * Anything else — a float, a negative, a zero, an exponent, a word, a number with
  * text after it, an empty string — reads as absent rather than a thrown
  * error: a page number is the least surprising thing in a URL to be wrong,
  * and the least worth refusing over. A number too large to be exact is still

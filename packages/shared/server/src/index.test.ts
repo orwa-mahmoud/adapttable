@@ -297,6 +297,14 @@ describe("parseTableQuery", () => {
   });
 
   describe("what it tolerates", () => {
+    it("treats a zero page or limit as the default", () => {
+      const query = parseTableQuery("?page=0&limit=00", schema);
+
+      expect(query.page).toBe(1);
+      expect(query.limit).toBe(25);
+      expect(query.rejected).toEqual([]);
+    });
+
     it("treats a nonsense page or limit as the default", () => {
       // A stale bookmark should give a table, not an error page.
       const query = parseTableQuery("?page=-4&limit=abc", schema);
