@@ -407,6 +407,8 @@ export function MantineDemo({
                   contextMenu,
                   filterControls,
                   filterDefs: filters,
+                  filtersMode: filtersUi,
+                  filterFields,
                   filterTypeSpecs: demoFilterTypes(),
                   sidePanel,
                   statusBar,
@@ -417,13 +419,11 @@ export function MantineDemo({
               onDensityChange={onDensityChange}
               {...columns}
               density={density}
-              filtersMode={filtersUi}
               {...pageTablePresentation(locale, s.search)}
               rowActionsLayout={rowMutations ? "menu" : undefined}
               confirm={demoConfirm}
               animate={animate}
               stickyHeader
-              filterFields={filterFields}
               stickyTop={8}
               forceMobile={forceMobile}
               maxHeight={maxHeight}

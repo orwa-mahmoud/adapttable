@@ -60,7 +60,13 @@ export interface KitChromeFactories {
   contextMenu: <TRow>(
     options?: boolean | ContextMenuOptions<TRow>
   ) => TableFeature<TRow>;
-  filters: <TRow>(defs: readonly FilterDef<TRow>[]) => TableFeature<TRow>;
+  filters: <TRow>(
+    defs: readonly FilterDef<TRow>[],
+    options?: {
+      readonly mode?: "popover" | "drawer" | "header";
+      readonly fields?: boolean;
+    }
+  ) => TableFeature<TRow>;
   filterTypes: (specs: readonly FilterTypeSpec[]) => StaticTableFeature;
   findInTable: () => StaticTableFeature;
   selectionStats: () => StaticTableFeature;
@@ -128,6 +134,10 @@ export interface KitChromeFlags {
   contextMenu?: boolean | ContextMenuOptions<Person>;
   /** The Filters control. */
   filterControls?: boolean;
+  /** Where the filter panel opens. */
+  filtersMode?: "popover" | "drawer" | "header";
+  /** Draw the per-field form. */
+  filterFields?: boolean;
   filterDefs: readonly FilterDef<Person>[];
   filterTypeSpecs: readonly FilterTypeSpec[];
   sidePanel?: SidePanelOptions;
@@ -214,7 +224,10 @@ function panelChrome(
       : []),
     ...((flags.filterControls ?? rich)
       ? [
-          kit.filters<Person>(flags.filterDefs),
+          kit.filters<Person>(flags.filterDefs, {
+            mode: flags.filtersMode,
+            fields: flags.filterFields,
+          }),
           kit.filterTypes(flags.filterTypeSpecs),
         ]
       : []),
