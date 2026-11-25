@@ -15,8 +15,8 @@ import { h } from "vue";
 import { ElementColumnSelect } from "./navigation/ElementColumnSelect";
 import { ElementFillHandle } from "./navigation/ElementFillHandle";
 
-export function cellNavigation(
-  options: CellNavigationOptions = {}
+export function cellNavigation<TRow = unknown>(
+  options: CellNavigationOptions<TRow> = {}
 ): StaticTableFeature {
   return extendFeature(bindingCellNavigation(options), [
     slotRender(FILL_HANDLE_CONTROL, (props) => h(ElementFillHandle, props)),

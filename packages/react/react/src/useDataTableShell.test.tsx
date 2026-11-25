@@ -12,7 +12,12 @@ import type { ColumnDef } from "./columnDef";
 import { DataTableShellView } from "./features/chromeBodyGate";
 import { densityChooser } from "./features/density";
 import { editing } from "./features/editing";
-import { columnMenu, resizableColumns, savedViews } from "./features/factories";
+import {
+  columnMenu,
+  headerFilters,
+  resizableColumns,
+  savedViews,
+} from "./features/factories";
 import { useTableFeatures } from "./features/featureHost";
 import { filters } from "./features/filters";
 import { grouping } from "./features/grouping";
@@ -108,7 +113,7 @@ describe("persisted column names enter both shell forks", () => {
       },
     ];
     const { current } = renderLiveShell(
-      [columnMenu(), filters<Row>([])],
+      [columnMenu({ onRename: onColumnRename }), filters<Row>([])],
       {
         columns: renameableColumns,
         columnLayout: {
@@ -119,7 +124,6 @@ describe("persisted column names enter both shell forks", () => {
           names: { name: "Account owner" },
         },
         onColumnLayoutChange: vi.fn(),
-        onColumnRename,
       },
       (defs) => {
         filterLabel = defs[0]?.label;
@@ -781,14 +785,13 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
   it("sizes one named column and windows when virtualizeColumns is on", () => {
     const onColumnLayoutChange = vi.fn();
     const props = applyTableFeatures({
-      features: [columnMenu()],
+      features: [columnMenu(), headerFilters({ closeOnSelect: true })],
       data: ROWS,
       columns,
       rowKey,
       onColumnLayoutChange,
       virtualizeColumns: true,
       cellNavigation: true,
-      closeHeaderFilterOnSelect: true,
       columnLayout: {
         hidden: [],
         order: [],
@@ -930,14 +933,20 @@ describe("a render that changes nothing about the columns", () => {
 
 describe("grouping panel on the finished shell", () => {
   it("shows a plain groupAggregates mapper as set by the app", () => {
-    const { current } = renderLiveShell([grouping("name"), groupingPanel()], {
-      columns: [
-        { key: "name", header: "Name" },
-        { key: "id", header: "Id" },
+    const { current } = renderLiveShell(
+      [
+        grouping("name", {
+          groupAggregates: (rows) => ({ id: rows.length }),
+        }),
+        groupingPanel(),
       ],
-      groupBy: "name",
-      groupAggregates: (rows) => ({ id: rows.length }),
-    });
+      {
+        columns: [
+          { key: "name", header: "Name" },
+          { key: "id", header: "Id" },
+        ],
+      }
+    );
     expect(current.tableProps.groupingPanel?.aggregations.items).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

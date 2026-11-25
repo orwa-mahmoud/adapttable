@@ -6,13 +6,7 @@
  * Webpack is not installed anywhere in the workspace, and adding it would be
  * a new dependency, so it is not a third bundler.
  */
-import {
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  statSync,
-} from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -70,16 +64,6 @@ function esbuildBuild() {
 export function esbuildPath() {
   const vitePackage = requireFrom.resolve("vite/package.json");
   return createRequire(vitePackage).resolve("esbuild");
-}
-
-function outputFiles(dir) {
-  const files = [];
-  for (const name of readdirSync(dir)) {
-    const path = join(dir, name);
-    if (statSync(path).isDirectory()) files.push(...outputFiles(path));
-    else files.push(path);
-  }
-  return files;
 }
 
 function gzipFile(path) {

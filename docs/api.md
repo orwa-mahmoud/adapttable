@@ -2779,6 +2779,11 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 
 ## Feature composition types
 
+`ColumnMenuOptions`, `FilterPanelOptions` and `HeaderFilterOptions` are the
+arguments of `columnMenu()`, `filters()` and `headerFilters()`.
+`FeatureOwnedOptionKey` is one name in `FEATURE_OWNED_OPTION_KEYS`, the
+options those factories set.
+
 | Export                         | What it is                                                                                                                                                                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `TableFeature<TRow>`           | A composed feature: `id`, optional `apply`, `setup`, `provider` and `renders`. Row-aware factories return this and infer `TRow` from their callback.                                           |

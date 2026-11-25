@@ -11,8 +11,8 @@ import {
 import { h } from "vue";
 
 import { NuxtFillHandle } from "./navigation/nuxtNavigation";
-export function cellNavigation(
-  options: CellNavigationOptions = {}
+export function cellNavigation<TRow = unknown>(
+  options: CellNavigationOptions<TRow> = {}
 ): StaticTableFeature {
   return extendFeature(bindingCellNavigation(options), [
     slotRender(FILL_HANDLE_CONTROL, (props) => h(NuxtFillHandle, props)),

@@ -175,7 +175,6 @@ export const FEATURE_OWNED_OPTION_KEYS = [
   "filterRegistry",
   "filterLabels",
   "activeFilterCount",
-  "onClearFilters",
   "onColumnRename",
   "onCellCut",
   "onCellPaste",

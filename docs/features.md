@@ -22,6 +22,10 @@ import { rowReorder } from "@adapttable/mantine/row-reorder";
 
 A built-in factory and a host plugin are the same `TableFeature` type in the
 same array — that is the public plugin surface, not a parallel API.
+`ColumnMenuOptions` and `FilterPanelOptions` are the options `columnMenu()`
+and `filters()` take. `HeaderFilterOptions` is the same for `headerFilters()`.
+`FeatureOwnedOptionKey` names one entry of `FEATURE_OWNED_OPTION_KEYS`, the
+options a feature factory sets and a table prop does not.
 
 ## What the import buys
 

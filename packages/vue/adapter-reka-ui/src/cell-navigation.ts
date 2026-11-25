@@ -12,8 +12,8 @@ import {
 import { Primitive } from "reka-ui";
 import { h } from "vue";
 
-export function cellNavigation(
-  options: CellNavigationOptions = {}
+export function cellNavigation<TRow = unknown>(
+  options: CellNavigationOptions<TRow> = {}
 ): StaticTableFeature {
   return extendFeature(bindingNavigation(options), [
     slotRender(FILL_HANDLE_CONTROL, (props) =>
