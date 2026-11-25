@@ -24,7 +24,9 @@ function updateFrameworkNavigation() {
   document
     .querySelectorAll<HTMLSelectElement>("[data-framework-select]")
     .forEach((select) => {
-      select.value = framework;
+      // A focused select is mid-choice. Writing the current URL's framework
+      // back over that choice drops the change event and the navigation.
+      if (document.activeElement !== select) select.value = framework;
       const icon = select.parentElement?.querySelector("[data-framework-icon]");
       const glyph =
         DOCS_FRAMEWORKS.find(({ key }) => key === framework)?.icon ?? "⚛";
