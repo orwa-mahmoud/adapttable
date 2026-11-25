@@ -7,8 +7,10 @@ import {
   slotRender,
   type StaticTableFeature,
 } from "@adapttable/react/adapter";
-import { columnMenu as core } from "@adapttable/react/features";
-import type { ColumnMenuOptions } from "@adapttable/react/features";
+import {
+  columnMenu as core,
+  type ColumnMenuOptions,
+} from "@adapttable/react/features";
 
 import { ColumnHeaderRename } from "./components/ColumnHeaderRename";
 import { ColumnMenu } from "./components/ColumnMenu";

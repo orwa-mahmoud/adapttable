@@ -5,8 +5,10 @@ import {
   slotRender,
   type StaticTableFeature,
 } from "@adapttable/react/adapter";
-import { headerFilters as core } from "@adapttable/react/features";
-import type { HeaderFilterOptions } from "@adapttable/react/features";
+import {
+  type HeaderFilterOptions,
+  headerFilters as core,
+} from "@adapttable/react/features";
 
 import { useClassNames } from "./components/classNamesContext";
 import { FilterHeaderTrigger } from "./components/kitControls";
