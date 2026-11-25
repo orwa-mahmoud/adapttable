@@ -681,7 +681,7 @@ export interface RowPinningFeatureOptions {
 }
 
 // @public (undocumented)
-export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): TableFeature<TRow>;
+export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: MaybeRefOrGetter<RowReorderOptions<TRow> | undefined>): TableFeature<TRow>;
 
 // @public (undocumented)
 export interface RowSelection {
