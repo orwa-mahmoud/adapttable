@@ -44843,6 +44843,14 @@
       "behavior": ""
     },
     {
+      "export": "FeatureListEntry",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "FeaturePatch",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -45420,6 +45428,14 @@
     },
     {
       "export": "finishDataTableShell",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "flattenFeatures",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",
@@ -51748,6 +51764,30 @@
     },
     {
       "export": "SelectionState",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "serverFilterKeys",
+      "currentImport": "@adapttable/react",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "ServerFilterKeys",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "ServerFilterKeysInput",
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",
