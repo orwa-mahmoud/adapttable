@@ -1607,29 +1607,29 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         featureOptions.onEditError,
         featureOptions.rowEditIcons,
         featureOptions.onValidationFail,
-        featureOptions.rowVersion,
-        featureOptions.editConflictPolicy,
-        featureOptions.onEditConflict,
         featureOptions.editActivation,
         history,
         grouping,
       ],
       (injector) =>
         createEditing?.<TRow>({
-          live: computed(() => ({
-            rows: renderedRowsOf({
-              source: viewSource(),
-              grouping: grouping?.(),
-            }),
-            columns: table.allColumns(),
-            rowKey: this.rowKey(),
-            rowVersion:
-              featureOptions.rowVersion as LiveEditConflictInput<TRow>["rowVersion"],
-            editConflictPolicy: featureOptions.editConflictPolicy as
-              EditConflictPolicy | undefined,
-            onEditConflict: featureOptions.onEditConflict as
-              EditConflictHandler<TRow> | undefined,
-          })),
+          live: computed(() => {
+            const options = liveOptions();
+            return {
+              rows: renderedRowsOf({
+                source: viewSource(),
+                grouping: grouping?.(),
+              }),
+              columns: table.allColumns(),
+              rowKey: this.rowKey(),
+              rowVersion:
+                options.rowVersion as LiveEditConflictInput<TRow>["rowVersion"],
+              editConflictPolicy: options.editConflictPolicy as
+                EditConflictPolicy | undefined,
+              onEditConflict: options.onEditConflict as
+                EditConflictHandler<TRow> | undefined,
+            };
+          }),
           featureOptions: editingOptionsFor(
             featureOptions,
             history,

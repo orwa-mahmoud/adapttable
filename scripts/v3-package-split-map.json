@@ -14115,6 +14115,14 @@
       "behavior": ""
     },
     {
+      "export": "ColumnMenuOptions",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "ColumnMenuRow",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -17491,6 +17499,14 @@
       "behavior": ""
     },
     {
+      "export": "FEATURE_OWNED_OPTION_KEYS",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "FeatureActionMap",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -17599,6 +17615,14 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "FeatureOwnedOptionKey",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -18028,6 +18052,14 @@
     },
     {
       "export": "FilterOverlaySlotProps",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "FilterPanelOptions",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -19788,6 +19820,14 @@
     },
     {
       "export": "HeaderFilterOption",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "HeaderFilterOptions",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",

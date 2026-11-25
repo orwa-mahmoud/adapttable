@@ -14,9 +14,13 @@ export function declareFeatureOptions(
     const patch = feature.id === undefined ? undefined : owned[feature.id];
     if (!patch) return feature;
     const apply = feature.apply?.bind(feature);
+    const defined = Object.fromEntries(
+      Object.entries(patch).filter(([, value]) => value !== undefined)
+    );
+    if (Object.keys(defined).length === 0) return feature;
     return {
       ...feature,
-      apply: (input) => ({ ...apply?.(input), ...patch }),
+      apply: (input) => ({ ...apply?.(input), ...defined }),
     };
   });
 }

@@ -14,7 +14,6 @@ import { Component, computed, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { expect, vi } from "vitest";
 
-import { declareFeatureOptions } from "../declareFeatureOptions";
 import type { AngularKitUnderTest } from "../kit";
 
 /**
@@ -78,18 +77,41 @@ export function editConflictTests(
     })
     class Host {
       readonly features = input<readonly AdaptTableFeature[]>([]);
-      readonly tableFeatures = computed(() => {
-        const conflict = {
-          rowVersion: this.rowVersion(),
-          editConflictPolicy: this.policy(),
-          onEditConflict: this.onConflict(),
+      private readonly conflictWrappers = new WeakMap<
+        AdaptTableFeature,
+        AdaptTableFeature
+      >();
+      readonly tableFeatures = computed(() =>
+        this.features().map((feature) => this.withLiveConflict(feature))
+      );
+      private withLiveConflict(feature: AdaptTableFeature): AdaptTableFeature {
+        if (
+          feature.id !== "editing" &&
+          feature.id !== "row-editing" &&
+          feature.id !== "batch-editing"
+        ) {
+          return feature;
+        }
+        const existing = this.conflictWrappers.get(feature);
+        if (existing) return existing;
+        const apply = feature.apply?.bind(feature);
+        const wrapped: AdaptTableFeature = {
+          ...feature,
+          apply: (input) => {
+            const patch = {
+              rowVersion: this.rowVersion(),
+              editConflictPolicy: this.policy(),
+              onEditConflict: this.onConflict(),
+            };
+            const defined = Object.fromEntries(
+              Object.entries(patch).filter(([, value]) => value !== undefined)
+            );
+            return { ...apply?.(input), ...defined };
+          },
         };
-        return declareFeatureOptions(this.features(), {
-          editing: conflict,
-          "row-editing": conflict,
-          "batch-editing": conflict,
-        });
-      });
+        this.conflictWrappers.set(feature, wrapped);
+        return wrapped;
+      }
       readonly mobile = input(false);
       readonly useSource = input(false);
       readonly rows = signal<readonly Task[]>([ROW]);

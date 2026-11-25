@@ -120,11 +120,24 @@ export function editing<TRow>(
       if (!handles) return;
       const options = featureOptionsOf(handles.features);
       const editing = editingBundleFor<TRow>({
-        live: computed(() => ({
-          rows: handles.viewSource().rows as readonly TRow[],
-          columns: handles.table.allColumns() as readonly ColumnDef<TRow>[],
-          rowKey: handles.table.rowKey,
-        })),
+        live: computed(() => {
+          const current = featureOptionsOf(handles.features);
+          return {
+            rows: handles.viewSource().rows as readonly TRow[],
+            columns: handles.table.allColumns() as readonly ColumnDef<TRow>[],
+            rowKey: handles.table.rowKey,
+            rowVersion: current.rowVersion as
+              | ((row: TRow) => number)
+              | undefined,
+            editConflictPolicy: current.editConflictPolicy as
+              | "ask"
+              | "keep"
+              | "take"
+              | undefined,
+            onEditConflict: current.onEditConflict as
+              EditConflictHandler<TRow> | undefined,
+          };
+        }),
         featureOptions: options,
         activation: computed(
           () => options.editActivation as "doubleClick" | "click" | undefined

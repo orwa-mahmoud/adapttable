@@ -7,12 +7,10 @@ import {
   injectFeatureState,
 } from "@adapttable/angular";
 import type { FilterDef, TableLabels, TableSource } from "@adapttable/core";
-import type { FilterPanelOptions } from "@adapttable/core/binding";
-import {
-  featureStateKey,
+import {   featureStateKey,
+type FilterPanelOptions,
   filterWidgetFor,
-  type FilterWidgetOf,
-} from "@adapttable/core/binding";
+  type FilterWidgetOf } from "@adapttable/core/binding";
 import { computed, Directive, input, type Type } from "@angular/core";
 
 import { AdaptAutoFilterFormModel } from "./filterFieldModels";

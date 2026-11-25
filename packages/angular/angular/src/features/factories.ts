@@ -25,11 +25,11 @@ import {
   type Shortcut,
 } from "@adapttable/core";
 import {
+  type ColumnMenuOptions,
   coreBulkActions,
   coreCellSpan,
   coreCollapsibleColumnGroups,
   coreColumnMenu,
-  type ColumnMenuOptions,
   coreColumnSelectionCheckbox,
   coreCommandPalette,
   coreContextMenu,
@@ -37,7 +37,6 @@ import {
   coreFeature,
   coreFitColumns,
   coreHeaderFilters,
-  type HeaderFilterOptions,
   coreMultiSort,
   corePinnedSummaryRows,
   corePrint,
@@ -51,6 +50,7 @@ import {
   type FeaturePatch,
   FILTER_ENGINE,
   FILTER_ENGINE_IMPL,
+  type HeaderFilterOptions,
   type SidePanelEntry,
 } from "@adapttable/core/binding";
 import { type Signal, type TemplateRef } from "@angular/core";

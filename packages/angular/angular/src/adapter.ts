@@ -417,6 +417,7 @@ export {
   columnGroupHeaderCaption,
   columnLayoutFamilyList,
   columnMenuActions,
+  type ColumnMenuOptions,
   columnMenuRows,
   type ColumnMenuSlotProps,
   type ColumnSelectCheckboxChromeProps,
@@ -425,7 +426,6 @@ export {
   copyContextMenuSelection,
   coreBulkActions,
   coreColumnMenu,
-  type ColumnMenuOptions,
   coreDensityChooser,
   coreFullscreen,
   coreGrouping,
@@ -608,13 +608,13 @@ export {
 } from "@adapttable/core/grouping";
 
 // Types this entry's own signatures hand back, named from their owning entry.
+export type { FilterPanelOptions, HeaderFilterOptions } from "./kitFeatures";
 export {
   coreExportCsv,
   coreFilters,
   coreFindInTable,
   coreHeaderFilters,
 } from "./kitFeatures";
-export type { FilterPanelOptions, HeaderFilterOptions } from "./kitFeatures";
 export type {
   AdaptCellTemplate,
   AdaptTableFeature,
