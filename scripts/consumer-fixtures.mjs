@@ -222,10 +222,10 @@ const CORE_FIXTURES = [
     name: "core · basic table",
     kind: "core",
     pkg: "core",
-    // 4.65 KiB on 2026-11-05, held with headroom. The convenience engine
-    // beside it measured 10.34 KiB in the same run.
-    initialKB: 6,
-    totalKB: 6,
+    // 6.016 KiB on 2026-11-25 after the rekey log. The ceiling is that
+    // measurement plus the 15% headroom.
+    initialKB: 7,
+    totalKB: 7,
     code: `export { createBasicTableEngine } from "PKG";`,
     present: ["createBasicTableEngine"],
     absent: [

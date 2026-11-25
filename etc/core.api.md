@@ -4516,10 +4516,11 @@ export interface SelectionContribution {
 }
 
 // @public
-export interface SelectionFeatureOptions<TRow = unknown> {
+export interface SelectionFeatureOptions<TRow = unknown, TIds = readonly string[]> {
+    readonly defaultSelectedIds?: readonly string[];
     readonly getId?: (row: TRow) => string;
     readonly onSelectionChange?: (selectedIds: string[]) => void;
-    readonly selectedIds?: readonly string[];
+    readonly selectedIds?: TIds;
 }
 
 // @public

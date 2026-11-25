@@ -187,6 +187,16 @@ const FEATURES = {
     call: "commandPalette()",
     present: ["commandPaletteView"],
   },
+  cellNavigation: {
+    factory: "cellNavigation",
+    entry: "cell-navigation",
+    call: "cellNavigation()",
+    present: [
+      "createGridFocusController",
+      "cellNavigationChannels",
+      "injectGridFocus",
+    ],
+  },
   preset: {
     factory: "standardFeatures",
     entry: "preset",
@@ -215,6 +225,11 @@ const BASE_ABSENT = [
   // The palette's and the menu's props are built by code their features bring.
   "commandPaletteView",
   "contextMenuView",
+  // Grid focus is cellNavigation()'s implementation. These names are the
+  // controller, not a label, so a plain table that still constructs it fails.
+  "createGridFocusController",
+  "cellNavigationChannels",
+  "injectGridFocus",
 ];
 
 /**
@@ -365,6 +380,8 @@ const CEILINGS = {
   "angular · unstyled + virtualize": { own: 140, app: 250 },
   "angular · unstyled + exportCsv": { own: 142, app: 252 },
   "angular · unstyled + palette": { own: 145, app: 256 },
+  "angular · unstyled + cellNavigation": { own: 108, app: 159 },
+  "angular · angular-material + cell navigation": { own: 109, app: 232 },
   "angular · unstyled combination": { own: 156, app: 268 },
   "angular · unstyled + preset": { own: 156, app: 214 },
   "angular · angular-material + preset": { own: 167, app: 311 },
@@ -474,6 +491,8 @@ export function angularConsumerFixtures(kits = angularKits()) {
         "AdaptDataTable",
         "coreGrouping",
         "createGridFocusController",
+        "cellNavigationChannels",
+        "injectGridFocus",
         "injectCellEditing",
         "injectVirtualizer",
         "pdfWriter",
@@ -495,6 +514,8 @@ export function angularConsumerFixtures(kits = angularKits()) {
         "injectTableSurfaceHost",
         "coreGrouping",
         "createGridFocusController",
+        "cellNavigationChannels",
+        "injectGridFocus",
         "injectCellEditing",
       ],
       absent: [
@@ -549,6 +570,19 @@ export function angularConsumerFixtures(kits = angularKits()) {
     feature("virtualize", "Native table with row virtualization"),
     feature("exportCsv", "Native table with CSV export"),
     feature("palette", "Native table with the command palette"),
+    feature("cellNavigation", "Native table with keyboard cell navigation"),
+    rendered(
+      "angular · angular-material + cell navigation",
+      kits.find((kit) => kit.folder === "adapter-material"),
+      [FEATURES.cellNavigation],
+      {
+        functionality: "Material table with keyboard cell navigation",
+        absent: BASE_ABSENT.filter(
+          (marker) => !FEATURES.cellNavigation.present.includes(marker)
+        ),
+        ...ceilings("angular · angular-material + cell navigation"),
+      }
+    ),
     rendered(
       "angular · unstyled combination",
       native,

@@ -881,7 +881,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
 export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
 
 // @public (undocumented)
-export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
+export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection" | "onColumnRename">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
     readonly animate?: MaybeRefOrGetterOptional<boolean>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps<VNodeChild>>;
@@ -896,12 +896,6 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly features?: MaybeRefOrGetterOptional<readonly FeatureListEntry<ComposedFeature<NoInfer<TRow>>>[]>;
     readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
     readonly maxHeight?: number | string;
-    // (undocumented)
-    readonly onCellCut?: (range: CellRange) => void;
-    // (undocumented)
-    readonly onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
-    // (undocumented)
-    readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onDensityChange?: (next: TableDensity) => void;
     readonly onViewChange?: TableQueryListener;

@@ -8,7 +8,12 @@
  * commits the new data, and every registered piece moves at once.
  */
 import type { RowPatchEvent, RowPatchLog } from "../contracts/rows";
-import { rowPatchLog, rowPatchLogStartsAt, rowRekeys } from "../rows/patch";
+import {
+  logForCommit,
+  rowPatchLog,
+  rowRekeys,
+  sealPatchLog,
+} from "../rows/patch";
 import type { RowPinState } from "../rows/rowPinModel";
 import type { TableStore } from "./tableStore";
 
@@ -95,8 +100,14 @@ export function commitRowRekeys<TRow>(
 ): void {
   if (previous === undefined || previous === data) return;
   const log = rowPatchLog(data);
-  if (!log || !rowPatchLogStartsAt(log, previous)) return;
-  rekeyTableRows(store, log);
+  if (!log) return;
+  // One commit may cover several applyRowPatches calls. The immediate log
+  // describes the last call; an uncommitted chain describes the calls the
+  // table has not seen yet. A replacement array has neither.
+  const applicable = logForCommit(log, previous);
+  if (!applicable) return;
+  sealPatchLog(log);
+  rekeyTableRows(store, applicable);
 }
 
 /**
@@ -112,31 +123,49 @@ export function commitRowRekeys<TRow>(
  *
  * @public
  */
+function recordMove(
+  moved: Map<string, string>,
+  before: string,
+  after: string
+): void {
+  if (before === after) moved.delete(before);
+  else moved.set(before, after);
+}
+
+function followUpdate<TRow>(
+  event: Extract<RowPatchEvent<TRow>, { type: "update" }>,
+  origin: string | undefined,
+  originOf: Map<TRow, string>,
+  moved: Map<string, string>,
+  getId: (row: TRow) => string
+): void {
+  // A plain update replaces the row object. A rekeyed row's external id is
+  // whatever that row holds once the log has finished with it.
+  if (event.from === undefined) {
+    if (origin === undefined) return;
+    originOf.set(event.next, origin);
+    recordMove(moved, origin, getId(event.next));
+    return;
+  }
+  const before = origin ?? getId(event.prev);
+  originOf.set(event.next, before);
+  recordMove(moved, before, getId(event.next));
+}
+
 export function rekeyedIds<TRow>(
   log: RowPatchLog<TRow>,
   getId: (row: TRow) => string
 ): ReadonlyMap<string, string> {
   const moved = new Map<string, string>();
   const originOf = new Map<TRow, string>();
-  const removed = (event: RowPatchEvent<TRow>): void => {
-    if (event.type !== "remove") return;
-    const origin = originOf.get(event.row);
-    if (origin !== undefined) moved.delete(origin);
-  };
   for (const event of log.events) {
-    removed(event);
-    if (event.type !== "update") continue;
-    const origin = originOf.get(event.prev);
-    if (event.from === undefined) {
-      // A plain update replaces the row object; its lineage carries on.
-      if (origin !== undefined) originOf.set(event.next, origin);
+    if (event.type === "remove") {
+      const origin = originOf.get(event.row);
+      if (origin !== undefined) moved.delete(origin);
       continue;
     }
-    const before = origin ?? getId(event.prev);
-    const after = getId(event.next);
-    originOf.set(event.next, before);
-    if (before === after) moved.delete(before);
-    else moved.set(before, after);
+    if (event.type !== "update") continue;
+    followUpdate(event, originOf.get(event.prev), originOf, moved, getId);
   }
   return moved;
 }

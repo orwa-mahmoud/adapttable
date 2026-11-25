@@ -10,6 +10,7 @@ import {
   coreFilters,
   FILTER_ENGINE_IMPL,
   type FilterEngine,
+  type FilterPanelOptions,
 } from "@adapttable/core/binding";
 import { type ComponentType, type ReactNode, useMemo } from "react";
 
@@ -107,14 +108,18 @@ function LiveFilterChips<TRow>({
  *
  * @public
  */
-export function filters(form: ReactNode): StaticTableFeature;
+export function filters(
+  form: ReactNode,
+  options?: FilterPanelOptions
+): StaticTableFeature;
 /**
  * Declarative filters with custom definitions.
  *
  * @public
  */
 export function filters<TRow>(
-  defs: readonly FilterDef<TRow>[]
+  defs: readonly FilterDef<TRow>[],
+  options?: FilterPanelOptions
 ): TableFeature<TRow>;
 /**
  * Declarative filters with custom definitions or a hand-built panel.
@@ -122,12 +127,14 @@ export function filters<TRow>(
  * @public
  */
 export function filters<TRow>(
-  defs: readonly FilterDef<TRow>[] | ReactNode
+  defs: readonly FilterDef<TRow>[] | ReactNode,
+  options?: FilterPanelOptions
 ): TableFeature<TRow>;
 export function filters<TRow>(
-  defs: readonly FilterDef<TRow>[] | ReactNode
+  defs: readonly FilterDef<TRow>[] | ReactNode,
+  options?: FilterPanelOptions
 ): TableFeature<TRow> {
-  return filtersOn(FILTER_ENGINE_IMPL)(defs);
+  return filtersOn(FILTER_ENGINE_IMPL)(defs, options);
 }
 
 /**
@@ -142,10 +149,16 @@ export function filters<TRow>(
 /* @__NO_SIDE_EFFECTS__ */
 export function filtersOn(
   engine: FilterEngine
-): <TRow>(defs: readonly FilterDef<TRow>[] | ReactNode) => TableFeature<TRow> {
+): <TRow>(
+  defs: readonly FilterDef<TRow>[] | ReactNode,
+  options?: FilterPanelOptions
+) => TableFeature<TRow> {
   const Provider = engineProvider(engine);
-  return <TRow,>(defs: readonly FilterDef<TRow>[] | ReactNode) => ({
-    ...coreFilters<TRow, ReactNode>(defs),
+  return <TRow,>(
+    defs: readonly FilterDef<TRow>[] | ReactNode,
+    options?: FilterPanelOptions
+  ) => ({
+    ...coreFilters<TRow, ReactNode>(defs, options),
     provider: { Provider },
     renders: [
       slotRender<ChromeExtraDraw>(FILTER_CHIPS_LIVE, (props) => (

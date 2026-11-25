@@ -1,5 +1,8 @@
 import type { FilterDef } from "@adapttable/core";
-import type { FilterEngine } from "@adapttable/core/binding";
+import type {
+  FilterEngine,
+  FilterPanelOptions,
+} from "@adapttable/core/binding";
 import { createElement, type ReactNode } from "react";
 
 import { filters as coreFilters, filtersOn } from "../features/filters";
@@ -42,9 +45,12 @@ export interface AdapterFiltersComponents {
  */
 export interface AdapterFiltersFeature {
   /** Compose a hand-built filter form without constraining the row type. */
-  (form: ReactNode): StaticTableFeature;
+  (form: ReactNode, options?: FilterPanelOptions): StaticTableFeature;
   /** Compose row-aware declarative filter definitions. */
-  <TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
+  <TRow>(
+    defs: readonly FilterDef<TRow>[],
+    options?: FilterPanelOptions
+  ): TableFeature<TRow>;
 }
 
 /**
@@ -80,7 +86,8 @@ export function createAdapterFiltersFeatureOn(
 function withFilterChrome(
   components: AdapterFiltersComponents,
   base: <TRow>(
-    defs: readonly FilterDef<TRow>[] | ReactNode
+    defs: readonly FilterDef<TRow>[] | ReactNode,
+    options?: FilterPanelOptions
   ) => TableFeature<TRow>
 ): AdapterFiltersFeature {
   const renders = [
@@ -99,6 +106,7 @@ function withFilterChrome(
   ];
 
   return <TRow>(
-    defs: readonly FilterDef<TRow>[] | ReactNode
-  ): TableFeature<TRow> => extendFeature(base<TRow>(defs), renders);
+    defs: readonly FilterDef<TRow>[] | ReactNode,
+    options?: FilterPanelOptions
+  ): TableFeature<TRow> => extendFeature(base<TRow>(defs, options), renders);
 }

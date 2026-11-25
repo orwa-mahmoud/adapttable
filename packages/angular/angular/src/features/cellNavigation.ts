@@ -15,6 +15,9 @@ import {
 import type { CellRange } from "@adapttable/core";
 import { coreCellNavigation } from "@adapttable/core/binding";
 
+import { withFeatureImplementation } from "../featureHost";
+import { FEATURE_IMPLEMENTATIONS } from "../featureImplementations";
+
 /**
  * Options for {@link cellNavigation}.
  *
@@ -26,6 +29,8 @@ export interface CellNavigationOptions {
    * selection clears.
    */
   readonly onRangeChange?: (range: CellRange | null) => void;
+  /** Ctrl/Cmd+X and the menu's Cut, after the clipboard write succeeds. */
+  readonly onCut?: (range: CellRange) => void;
 }
 
 /**
@@ -48,11 +53,17 @@ export function cellNavigation(
   options: CellNavigationOptions = {}
 ): AdaptTableFeature {
   const feature: CellNavigationFeature = {
-    ...coreCellNavigation(
-      options.onRangeChange ? { onRangeChange: options.onRangeChange } : {}
-    ),
+    ...coreCellNavigation({
+      ...(options.onRangeChange
+        ? { onRangeChange: options.onRangeChange }
+        : {}),
+      ...(options.onCut ? { onCut: options.onCut } : {}),
+    }),
     cellNavigationOptions: options,
     mount(context) {
+      // The rendered table already built this grid through the feature's
+      // implementation. A headless mount is the one that constructs it.
+      if (context.state.get(SURFACE_GRID)()) return;
       const occupied = context.state.get(SURFACE_OCCUPIED)();
       if (occupied?.grid) return;
       const handles = context.injector.get(SURFACE_HANDLES, null);
@@ -74,7 +85,11 @@ export function cellNavigation(
       };
     },
   };
-  return feature;
+  return withFeatureImplementation(
+    feature,
+    FEATURE_IMPLEMENTATIONS.gridFocus,
+    injectGridFocus
+  );
 }
 
 /** The declaration's options, so a kept grid reads the latest. */

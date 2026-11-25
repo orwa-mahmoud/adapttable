@@ -183,8 +183,7 @@ describe("genuine Nuxt grid controls", () => {
     const fill = vi.fn();
     const { root } = mount({
       dir: "rtl",
-      onCellFill: fill,
-      features: [cellNavigation()],
+      features: [cellNavigation({ onFill: fill })],
     });
     await nextTick();
     await nextTick();
@@ -230,7 +229,13 @@ it("keeps typing in the find input and restores focus when its bar closes", asyn
 it("keeps host fill writes as requests and exposes all status markers and classes", async () => {
   const fill = vi.fn();
   const { root } = mount({
-    onCellFill: fill,
+    features: [
+      cellNavigation({ onFill: fill }),
+      columnSelectionCheckbox(),
+      findInTable({ button: true }),
+      selectionStats(),
+      statusBar(),
+    ],
     classNames: {
       statusBar: "status-paint",
       statusItem: "item-paint",

@@ -55,6 +55,7 @@ import {
   coreCellSpan,
   coreCollapsibleColumnGroups,
   coreColumnMenu,
+  type ColumnMenuOptions,
   coreColumnSelectionCheckbox,
   coreCommandPalette,
   coreContextMenu,
@@ -64,6 +65,7 @@ import {
   coreFilterTypes,
   coreFitColumns,
   coreHeaderFilters,
+  type HeaderFilterOptions,
   coreMultiSort,
   corePinnedSummaryRows,
   corePrint,
@@ -169,9 +171,9 @@ export function rowAppearance<TRow>(options: {
  *
  * @public
  */
-export function columnMenu(): StaticTableFeature {
+export function columnMenu(options?: ColumnMenuOptions): StaticTableFeature {
   return {
-    ...rowFree(coreColumnMenu()),
+    ...rowFree(coreColumnMenu(options)),
     renders: [COLUMN_LAYOUT_LIVE_RENDER, COLUMN_MENU_ENTRY],
   };
 }
@@ -307,8 +309,10 @@ export function filterTypes(
  *
  * @public
  */
-export function headerFilters(): StaticTableFeature {
-  return rowFree(coreHeaderFilters());
+export function headerFilters(
+  options?: HeaderFilterOptions
+): StaticTableFeature {
+  return rowFree(coreHeaderFilters(options));
 }
 
 /**

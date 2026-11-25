@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ColumnMenuOptions } from '@adapttable/vue/features';
 import { ColumnMenuSlotProps } from '@adapttable/vue/adapter';
 import { RendererElement } from 'vue';
 import { RendererNode } from 'vue';
@@ -15,11 +16,11 @@ import { VNode } from 'vue';
 export const ColumnMenu: (<TRow>(props: ColumnMenuSlotProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
 }>) & {
-    props: ("labels" | "dir" | "classNames" | "allColumns" | "layout" | "hasRowActions" | "hasRowReorder" | "onAutoSize" | "onAutoSizeColumn" | "onSortColumn" | "onFilterColumn" | "onRenameColumn" | "sortBy" | "sortDir" | "groupingPanel" | "featureHost" | "container")[];
+    props: ("labels" | "classNames" | "dir" | "allColumns" | "layout" | "hasRowActions" | "hasRowReorder" | "onAutoSize" | "onAutoSizeColumn" | "onSortColumn" | "onFilterColumn" | "onRenameColumn" | "sortBy" | "sortDir" | "groupingPanel" | "featureHost" | "container")[];
 };
 
 // @public (undocumented)
-export function columnMenu(): StaticTableFeature;
+export function columnMenu(options?: ColumnMenuOptions): StaticTableFeature;
 
 export { ColumnMenuSlotProps }
 

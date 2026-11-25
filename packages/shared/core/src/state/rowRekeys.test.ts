@@ -1,6 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { applyRowPatchesWithLog, rekeyRow, updateRow } from "../rows/patch";
+import {
+  applyRowPatches,
+  applyRowPatchesWithLog,
+  logForCommit,
+  rekeyRow,
+  removeRow,
+  rowPatchLog,
+  rowPatchLogStartsAt,
+  updateRow,
+} from "../rows/patch";
 import {
   commitRowRekeys,
   onRowRekeyMoves,
@@ -135,6 +144,54 @@ describe("rekeyedIds", () => {
       ["b", "b2"],
     ]);
   });
+
+  it("follows a custom selection id to the row's value after a later update", () => {
+    const rows: readonly Row[] = [{ id: "a", ref: "x" }];
+    const log = applyRowPatchesWithLog(
+      rows,
+      [
+        rekeyRow<Row>("a", { id: "b", ref: "y" }),
+        updateRow<Row>("b", { ref: "z" }),
+      ],
+      getRowId
+    );
+    expect([...rekeyedIds(log, (row) => row.ref)]).toEqual([["x", "z"]]);
+    expect([...rekeyedIds(log, getRowId)]).toEqual([["a", "b"]]);
+  });
+
+  it("collapses chained rekeys, drops a rekey back, and omits a removed row", () => {
+    const rows: readonly Row[] = [
+      { id: "a", ref: "x" },
+      { id: "c", ref: "c" },
+    ];
+    const chained = applyRowPatchesWithLog(
+      rows,
+      [
+        rekeyRow<Row>("a", { id: "b", ref: "y" }),
+        rekeyRow<Row>("b", { id: "d", ref: "z" }),
+      ],
+      getRowId
+    );
+    expect([...rekeyedIds(chained, (row) => row.ref)]).toEqual([["x", "z"]]);
+    expect([...rekeyedIds(chained, getRowId)]).toEqual([["a", "d"]]);
+    const back = applyRowPatchesWithLog(
+      rows,
+      [
+        rekeyRow<Row>("a", { id: "b", ref: "y" }),
+        rekeyRow<Row>("b", { id: "a", ref: "x" }),
+      ],
+      getRowId
+    );
+    expect([...rekeyedIds(back, (row) => row.ref)]).toEqual([]);
+    expect([...rekeyedIds(back, getRowId)]).toEqual([]);
+    const removed = applyRowPatchesWithLog(
+      rows,
+      [rekeyRow<Row>("a", { id: "b", ref: "y" }), removeRow("b")],
+      getRowId
+    );
+    expect([...rekeyedIds(removed, (row) => row.ref)]).toEqual([]);
+    expect([...rekeyedIds(removed, getRowId)]).toEqual([]);
+  });
 });
 
 describe("the remappers", () => {
@@ -151,6 +208,101 @@ describe("the remappers", () => {
     expect([...rekeyIdSet(new Set(["a", "b"]), map)]).toEqual(["a2", "b"]);
     expect(rekeyIdList(["b", "a"], map)).toEqual(["b", "a2"]);
     expect(rekeyIdRecord({ a: 1, b: 2 }, map)).toEqual({ a2: 1, b: 2 });
+  });
+});
+
+describe("rekeys across separately applied patches", () => {
+  const rows: readonly Row[] = [{ id: "a", ref: "x" }];
+
+  function follow(initial: readonly string[], getId: (row: Row) => string) {
+    const store = createTableStore();
+    let selected = [...initial];
+    onRowRekeys<Row>(store, (log) => {
+      selected = [...rekeyIdSet(new Set(selected), rekeyedIds(log, getId))];
+    });
+    return { store, read: () => selected };
+  }
+
+  it("moves selection when a later update commits with the rekey", () => {
+    const { store, read } = follow(["a"], getRowId);
+    const rekeyed = applyRowPatches(
+      rows,
+      [rekeyRow<Row>("a", { id: "b", ref: "y" })],
+      getRowId
+    );
+    const updated = applyRowPatches(
+      rekeyed,
+      [updateRow<Row>("b", { ref: "z" })],
+      getRowId
+    );
+    const log = rowPatchLog(updated);
+    expect(log && rowPatchLogStartsAt(log, rows)).toBe(false);
+    expect(log && rowPatchLogStartsAt(log, rekeyed)).toBe(true);
+    expect(log && logForCommit(log, rows)?.events.length).toBe(2);
+    commitRowRekeys(store, rows, updated);
+    expect(read()).toEqual(["b"]);
+    // The commit consumed the chain. A second look at the original does not
+    // replay it, and the public log still carries only its own events.
+    commitRowRekeys(store, rows, updated);
+    expect(read()).toEqual(["b"]);
+    expect(log?.events).toHaveLength(1);
+    expect(Object.keys(log ?? {})).toEqual(["rows", "events"]);
+  });
+
+  it("follows an external id that the second call changes", () => {
+    const { store, read } = follow(["x"], (row) => row.ref);
+    const rekeyed = applyRowPatches(
+      rows,
+      [rekeyRow<Row>("a", { id: "b", ref: "y" })],
+      getRowId
+    );
+    const updated = applyRowPatches(
+      rekeyed,
+      [updateRow<Row>("b", { ref: "z" })],
+      getRowId
+    );
+    commitRowRekeys(store, rows, updated);
+    expect(read()).toEqual(["z"]);
+  });
+
+  it("collapses a chained rekey that was applied in two calls", () => {
+    const { store, read } = follow(["a"], getRowId);
+    const first = applyRowPatches(
+      rows,
+      [rekeyRow<Row>("a", { id: "b" })],
+      getRowId
+    );
+    const second = applyRowPatches(
+      first,
+      [rekeyRow<Row>("b", { id: "c" })],
+      getRowId
+    );
+    commitRowRekeys(store, rows, second);
+    expect(read()).toEqual(["c"]);
+  });
+
+  it("keeps each commit incremental when the host commits after every call", () => {
+    const { store, read } = follow(["a"], getRowId);
+    const rekeyed = applyRowPatches(
+      rows,
+      [rekeyRow<Row>("a", { id: "b" })],
+      getRowId
+    );
+    commitRowRekeys(store, rows, rekeyed);
+    expect(read()).toEqual(["b"]);
+    const updated = applyRowPatches(
+      rekeyed,
+      [updateRow<Row>("b", { ref: "z" })],
+      getRowId
+    );
+    commitRowRekeys(store, rekeyed, updated);
+    expect(read()).toEqual(["b"]);
+  });
+
+  it("leaves selection on a replacement array that is not a patch", () => {
+    const { store, read } = follow(["a"], getRowId);
+    commitRowRekeys(store, rows, [{ id: "b", ref: "x" }]);
+    expect(read()).toEqual(["a"]);
   });
 });
 

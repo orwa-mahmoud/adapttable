@@ -16,7 +16,10 @@ import {
   type TableOptions,
   type TableToolbarSlots,
 } from "@adapttable/core";
-import type { FeatureListEntry } from "@adapttable/core/binding";
+import type {
+  FeatureListEntry,
+  FeatureOwnedOptionKey,
+} from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import type { CommandPaletteOptions } from "./actions/useCommandPalette";
@@ -139,7 +142,10 @@ export interface DirtyEdits {
  *
  * @public
  */
-export interface FeatureProps<TRow> {
+export interface FeatureProps<TRow> extends Pick<
+  TableOptions<TRow, ReactNode>,
+  FeatureOwnedOptionKey
+> {
   /** The strings the composed features draw, set by the features. */
   featureLabels?: readonly Partial<TableLabels>[];
   /** The id a row is selected by, set by `selection()`; else the row key. */
@@ -663,9 +669,9 @@ export type ComposedTableProps<TRow> = BaseDataTableProps<TRow> &
  *
  * @public
  */
-export interface BaseDataTableProps<TRow> extends TableOptions<
-  TRow,
-  ReactNode
+export interface BaseDataTableProps<TRow> extends Omit<
+  TableOptions<TRow, ReactNode>,
+  FeatureOwnedOptionKey
 > {
   /** Column definitions. A parent with `children` is a column group. */
   columns: ColumnInput<TRow>[];

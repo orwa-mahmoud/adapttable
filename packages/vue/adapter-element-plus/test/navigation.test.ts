@@ -132,8 +132,7 @@ describe("Element Plus grid navigation and status", () => {
     const fill = vi.fn();
     const { root } = fixture({
       dir: "rtl",
-      onCellFill: fill,
-      features: [cellNavigation()],
+      features: [cellNavigation({ onFill: fill })],
     });
     await tick();
     const first = node<HTMLElement>(root, cell(0, 0));
@@ -203,7 +202,15 @@ describe("Element Plus grid navigation and status", () => {
   });
   it("uses a kit status strip on mobile without exposing desktop grid or fill gestures", async () => {
     const fill = vi.fn();
-    const { root } = fixture({ forceMobile: true, onCellFill: fill });
+    const { root } = fixture({
+      forceMobile: true,
+      features: [
+        cellNavigation({ onFill: fill }),
+        columnSelectionCheckbox(),
+        statusBar(),
+        selectionStats(),
+      ],
+    });
     await tick();
     expect(root.querySelector('[role="grid"]')).toBeNull();
     expect(root.querySelector(part("column-select"))).toBeNull();
@@ -228,8 +235,7 @@ describe("Element Plus grid navigation and status", () => {
                 forceMobile: false,
                 searchable: false,
                 urlSync: false,
-                onCellFill: fill,
-                features: [cellNavigation()],
+                features: [cellNavigation({ onFill: fill })],
               })
             : h("span"),
       })

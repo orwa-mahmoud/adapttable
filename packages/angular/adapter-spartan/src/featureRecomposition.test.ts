@@ -16,6 +16,8 @@ import { print } from "@adapttable/spartan/print";
 import { selection } from "@adapttable/spartan/selection";
 import { tree } from "@adapttable/spartan/tree";
 import { Component, computed, signal } from "@angular/core";
+
+import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -57,11 +59,8 @@ const COLUMNS: readonly ColumnDef<Row>[] = [
       [features]="tableFeatures()"
       [forceMobile]="mobile"
       [urlSync]="false"
-      [filtersMode]="filterMode()"
-      [closeHeaderFilterOnSelect]="closeHeaderFilter()"
       [density]="rowDensity()"
       (densityChange)="onDensityChange($event)"
-      [onColumnRename]="renameColumn()"
       [confirm]="confirmAction()"
       [columnLayout]="layout()"
       (columnLayoutChange)="onLayoutChange($event)"
@@ -82,7 +81,13 @@ class Host {
   );
   readonly navigation = signal(false);
   readonly tableFeatures = computed(() => {
-    const base = this.features();
+    const base = declareFeatureOptions(this.features(), {
+      filters: { filtersMode: this.filterMode() },
+      "header-filters": {
+        closeHeaderFilterOnSelect: this.closeHeaderFilter(),
+      },
+      "column-menu": { onColumnRename: this.renameColumn() },
+    });
     const listed = this.navigation() ? [cellNavigation(), ...base] : base;
     if (!this.selectable()) return listed;
     return [

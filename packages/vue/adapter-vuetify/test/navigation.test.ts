@@ -240,8 +240,7 @@ it("mirrors RTL grid keys and delegates fill requests without modifying host row
   const fill = vi.fn();
   const { host } = fixture({
     dir: "rtl",
-    onCellFill: fill,
-    features: [cellNavigation()],
+    features: [cellNavigation({ onFill: fill })],
   });
   await settle();
   const first = node(host, '[data-grid-cell="0:0"]');

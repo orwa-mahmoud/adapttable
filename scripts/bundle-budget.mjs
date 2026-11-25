@@ -643,7 +643,10 @@ function logEsbuild(fixture, row) {
   const ceiling = ESBUILD_CEILINGS[fixture.name];
   console.log(
     `  └ esbuild initial ${kib(row.esbuild.initialGzip).toFixed(1)} / ${ceiling.initialKB} KiB` +
-      `   total ${kib(row.esbuild.totalGzip).toFixed(1)} / ${ceiling.totalKB} KiB`
+      `   total ${kib(row.esbuild.totalGzip).toFixed(1)} / ${ceiling.totalKB} KiB` +
+      (row.esbuild.lazyGzip
+        ? `   lazy ${kib(row.esbuild.lazyGzip).toFixed(1)} KiB`
+        : "")
   );
   if (row.esbuildMarkers?.leaked.length) {
     console.log(

@@ -213,11 +213,23 @@ function rowIds<TRow>(
   };
 }
 
+/**
+ * Rekeys from earlier uncommitted patches of the same array, without keeping
+ * those arrays. `root` is the identity token of the first array; `events`
+ * are the patch events since then. A commit seals the log and drops the chain.
+ */
+interface PendingChain {
+  readonly root: object;
+  readonly events: readonly RowPatchEvent<unknown>[];
+}
+
 /** Where patch provenance is kept: which array a log produced, and its base. */
 interface PatchProvenance {
   readonly logs: WeakMap<WeakKey, RowPatchLog<unknown>>;
   readonly identities: WeakMap<WeakKey, object>;
   readonly bases: WeakMap<WeakKey, object>;
+  readonly pending: WeakMap<object, PendingChain>;
+  readonly sealed: WeakSet<object>;
 }
 
 /**
@@ -226,7 +238,7 @@ interface PatchProvenance {
  * other's patches. A change to the log's shape takes a new key, so a copy of
  * another shape never reads it.
  */
-const PROVENANCE_KEY = Symbol.for("adapttable.rowPatchProvenance.v1");
+const PROVENANCE_KEY = Symbol.for("adapttable.rowPatchProvenance.v2");
 
 let provenance: PatchProvenance | undefined;
 
@@ -237,6 +249,8 @@ function patchProvenance(): PatchProvenance {
     logs: new WeakMap(),
     identities: new WeakMap(),
     bases: new WeakMap(),
+    pending: new WeakMap(),
+    sealed: new WeakSet(),
   };
   return provenance;
 }
@@ -278,11 +292,61 @@ function rememberLog<TRow>(
   base: readonly TRow[]
 ): void {
   if (log.events.length === 0) return;
-  const { logs, identities, bases } = patchProvenance();
+  const { logs, identities, bases, pending, sealed } = patchProvenance();
+  // The previous log, if this array is itself an uncommitted patch result.
+  // Read it before publishing the new log. Only the identity token is kept,
+  // so the previous array can be collected.
+  const prior = logs.get(base);
   logs.set(log.rows, log);
   const identity = identities.get(base) ?? {};
   identities.set(base, identity);
   bases.set(log, identity);
+  if (!prior || prior === log || sealed.has(prior)) return;
+  const carried = pending.get(prior);
+  const root = carried?.root ?? bases.get(prior);
+  if (!root) return;
+  pending.set(log, {
+    root,
+    events: [...(carried?.events ?? prior.events), ...log.events],
+  });
+}
+
+/**
+ * The log a commit should apply when `previous` is this log's input, or the
+ * input of an earlier patch the table has not committed yet.
+ *
+ * The immediate check stays exact. A chain is only the uncommitted events,
+ * and it does not keep the intermediate arrays.
+ *
+ * @param log - The log on the array being committed.
+ * @param previous - The rows the table last committed.
+ * @returns The log whose events the commit should follow, or `undefined`.
+ */
+export function logForCommit<TRow>(
+  log: RowPatchLog<TRow>,
+  previous: readonly TRow[]
+): RowPatchLog<TRow> | undefined {
+  if (rowPatchLogStartsAt(log, previous)) return log;
+  const chain = patchProvenance().pending.get(log);
+  if (!chain) return undefined;
+  if (patchProvenance().identities.get(previous) !== chain.root)
+    return undefined;
+  return {
+    rows: log.rows,
+    events: chain.events as readonly RowPatchEvent<TRow>[],
+  };
+}
+
+/**
+ * The table has committed this log. Later patches start from its result
+ * instead of replaying the events already applied.
+ *
+ * @param log - The log the commit accepted.
+ */
+export function sealPatchLog(log: RowPatchLog<unknown>): void {
+  const { pending, sealed } = patchProvenance();
+  sealed.add(log);
+  pending.delete(log);
 }
 
 /** Apply one patch to a working copy. Returns the event when something changed. */

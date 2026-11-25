@@ -9,6 +9,7 @@ import { BulkAction } from '@adapttable/core';
 import { CellEditHandler } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
+import { ColumnMenuOptions } from '@adapttable/core/binding';
 import { Command } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
@@ -27,6 +28,7 @@ import { FilterTypeSpec } from '@adapttable/core';
 import { GetCellSpan } from '@adapttable/core';
 import { GroupNode } from '@adapttable/core';
 import { GroupSort } from '@adapttable/core';
+import { HeaderFilterOptions } from '@adapttable/core/binding';
 import { Injector } from '@angular/core';
 import { NestedTableDefaults } from '@adapttable/core';
 import { PinnedRows } from '@adapttable/core';
@@ -76,6 +78,7 @@ export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeatu
 
 // @public
 export interface CellNavigationOptions {
+    readonly onCut?: (range: CellRange) => void;
     readonly onRangeChange?: (range: CellRange | null) => void;
 }
 
@@ -86,7 +89,7 @@ export function cellSpan<TRow>(getCellSpan: GetCellSpan<TRow>, cellSpanAppearanc
 export function collapsibleColumnGroups(): AdaptTableFeature;
 
 // @public
-export function columnMenu(): AdaptTableFeature;
+export function columnMenu(options?: ColumnMenuOptions): AdaptTableFeature;
 
 // @public
 export function columnSelectionCheckbox(): AdaptTableFeature;
@@ -212,7 +215,7 @@ export function groupingPanel<TRow = unknown>(groupBy?: string | readonly string
 export type GroupingPanelExtras<TRow = unknown> = GroupingExtras<TRow>;
 
 // @public
-export function headerFilters(): AdaptTableFeature;
+export function headerFilters(options?: HeaderFilterOptions): AdaptTableFeature;
 
 // @public
 export type MaybeSignal<T> = T | Signal<T>;
@@ -299,7 +302,7 @@ export interface SelectionOptions<TRow = unknown> {
     readonly defaultSelectedIds?: readonly string[];
     readonly getId?: (row: TRow) => string;
     readonly onSelectionChange?: (selectedIds: string[]) => void;
-    readonly selectedIds?: MaybeSignal<readonly string[] | undefined>;
+    readonly selectedIds?: readonly string[] | Signal<readonly string[] | undefined>;
 }
 
 // @public

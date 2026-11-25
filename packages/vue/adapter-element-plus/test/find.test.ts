@@ -2,6 +2,7 @@ import type { DataTableProps } from "@adapttable/vue/adapter";
 import { describe, expect, it, vi } from "vitest";
 import { h, nextTick, shallowRef } from "vue";
 
+import { cellNavigation } from "../src/cell-navigation";
 import DataTable from "../src/DataTable.vue";
 import { findInTable } from "../src/find-in-table";
 import { mount, node } from "./mount";
@@ -155,7 +156,10 @@ describe("Element Plus find-in-table", () => {
     const changed = vi.fn();
     const { root } = fixture({
       labels: { findInTable: "ابحث", findClose: "أغلق" },
-      onCellFill: changed,
+      features: [
+        findInTable({ button: true }),
+        cellNavigation({ onFill: changed }),
+      ],
     });
     await tick();
     node<HTMLButtonElement>(root, part("find-button")).click();

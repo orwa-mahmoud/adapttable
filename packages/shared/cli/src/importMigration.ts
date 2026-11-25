@@ -97,6 +97,11 @@ export function reportPatterns(
   }
 }
 
+/** Specifier order is alphabetical, so a second pass sees the same text. */
+function bySpecifier(left: string, right: string): number {
+  return left.localeCompare(right);
+}
+
 function formatImport(
   keyword: string,
   typeOnly: boolean,
@@ -221,9 +226,7 @@ function rewriteDeclaration(
     if (kept.length > 0) {
       declarations.push(formatImport(keyword, typeOnly, kept, quote, redirect));
     }
-    for (const destination of [...byDestination.keys()].sort((left, right) =>
-      left.localeCompare(right)
-    )) {
+    for (const destination of [...byDestination.keys()].sort(bySpecifier)) {
       declarations.push(
         formatImport(
           keyword,
@@ -258,9 +261,7 @@ function rewriteDeclaration(
     declarations.push(formatImport(keyword, typeOnly, kept, quote, from));
   }
   let total = moved;
-  const destinations = [...byDestination.keys()].sort((left, right) =>
-    left.localeCompare(right)
-  );
+  const destinations = [...byDestination.keys()].sort(bySpecifier);
   for (const destination of destinations) {
     const names = byDestination.get(destination) ?? [];
     declarations.push(
@@ -271,6 +272,230 @@ function rewriteDeclaration(
   return { text: declarations.join("\n"), moved: total };
 }
 
+type HideRange = (from: number, until: number) => void;
+
+function hideThrough(
+  source: string,
+  start: number,
+  hide: HideRange,
+  marker: string,
+  extra: number
+): number {
+  const end = source.indexOf(marker, start + marker.length);
+  const until = end === -1 ? source.length : end + extra;
+  hide(start, until);
+  return until;
+}
+
+function skipQuoted(
+  source: string,
+  index: number,
+  hide: HideRange
+): number | undefined {
+  const current = source[index];
+  if (current !== "'" && current !== '"' && current !== "`") return undefined;
+  if (current === "`") return hideTemplate(source, index, hide);
+  const until = endOfString(source, index, current);
+  hide(index, until);
+  return until;
+}
+
+/** True for each index that is source code, not a string, comment or template text. */
+function codeIndexes(source: string): boolean[] {
+  const code = Array.from({ length: source.length }, () => true);
+  const hide: HideRange = (from, until) => {
+    for (let index = from; index < until && index < code.length; index += 1) {
+      code[index] = false;
+    }
+  };
+  let index = 0;
+  while (index < source.length) {
+    const next = source[index + 1];
+    if (source[index] === "/" && next === "/") {
+      index = hideThrough(source, index, hide, "\n", 0);
+      continue;
+    }
+    if (source[index] === "/" && next === "*") {
+      index = hideThrough(source, index, hide, "*/", 2);
+      continue;
+    }
+    const quoted = skipQuoted(source, index, hide);
+    index = quoted ?? index + 1;
+  }
+  return code;
+}
+
+function endOfString(source: string, start: number, quote: string): number {
+  let index = start + 1;
+  while (index < source.length) {
+    if (source[index] === "\\") {
+      index += 2;
+      continue;
+    }
+    if (source[index] === quote) return index + 1;
+    index += 1;
+  }
+  return source.length;
+}
+
+function hideTemplate(source: string, start: number, hide: HideRange): number {
+  let index = start + 1;
+  let text = start;
+  while (index < source.length) {
+    if (source[index] === "\\") {
+      index += 2;
+      continue;
+    }
+    if (source[index] === "`") {
+      hide(text, index + 1);
+      return index + 1;
+    }
+    if (source[index] === "$" && source[index + 1] === "{") {
+      hide(text, index);
+      index = endOfInterpolation(source, index + 2, hide);
+      text = index;
+      continue;
+    }
+    index += 1;
+  }
+  hide(text, source.length);
+  return source.length;
+}
+
+function skipInterpolationToken(
+  source: string,
+  index: number,
+  hide: HideRange
+): number | undefined {
+  const quoted = skipQuoted(source, index, hide);
+  if (quoted !== undefined) return quoted;
+  const next = source[index + 1];
+  if (source[index] === "/" && next === "/") {
+    return hideThrough(source, index, hide, "\n", 0);
+  }
+  if (source[index] === "/" && next === "*") {
+    return hideThrough(source, index, hide, "*/", 2);
+  }
+  return undefined;
+}
+
+function endOfInterpolation(
+  source: string,
+  start: number,
+  hide: HideRange
+): number {
+  let depth = 1;
+  let index = start;
+  while (index < source.length && depth > 0) {
+    const skipped = skipInterpolationToken(source, index, hide);
+    if (skipped !== undefined) {
+      index = skipped;
+      continue;
+    }
+    if (source[index] === "{") depth += 1;
+    if (source[index] === "}") depth -= 1;
+    if (depth === 0) return index + 1;
+    index += 1;
+  }
+  return source.length;
+}
+
+const NAMESPACE_IMPORT =
+  /import\s+\*\s+as\s+[A-Za-z_$][\w$]*\s+from\s+(["'])(@adapttable\/[a-z0-9/-]+)\1/g;
+const WILDCARD_REEXPORT =
+  /export\s+\*(?:\s+as\s+[A-Za-z_$][\w$]*)?\s+from\s+(["'])(@adapttable\/[a-z0-9/-]+)\1/g;
+const DYNAMIC_IMPORT = /import\s*\(\s*(["'])(@adapttable\/[a-z0-9/-]+)\1\s*\)/g;
+const REQUIRE_CALL = /require\s*\(\s*(["'])(@adapttable\/[a-z0-9/-]+)\1\s*\)/g;
+
+/**
+ * Where a whole module moves, when every name shares that one destination.
+ * A barrel whose names then split is not rewritten.
+ */
+export function wholeModuleDestination(
+  from: string,
+  moves: ImportMoves
+): string | undefined {
+  const redirect = moves.redirects[from];
+  if (!redirect) return undefined;
+  const further = moves.routes[redirect];
+  if (further && Object.keys(further).length > 0) return undefined;
+  const own = moves.routes[from];
+  if (!own) return redirect;
+  const destinations = new Set(
+    Object.values(own).map((route) =>
+      typeof route === "string" ? route : route.to
+    )
+  );
+  if (destinations.size === 1 && destinations.has(redirect)) return redirect;
+  return undefined;
+}
+
+function removedModule(from: string, moves: ImportMoves): boolean {
+  return (
+    moves.redirects[from] !== undefined || moves.routes[from] !== undefined
+  );
+}
+
+interface ModuleEdit {
+  readonly start: number;
+  readonly end: number;
+  readonly text: string;
+  readonly moved: number;
+  readonly issue?: MigrationIssue;
+}
+
+function moduleEdits(
+  source: string,
+  moves: ImportMoves,
+  code: boolean[]
+): ModuleEdit[] {
+  const edits: ModuleEdit[] = [];
+  const patterns = [
+    NAMESPACE_IMPORT,
+    WILDCARD_REEXPORT,
+    DYNAMIC_IMPORT,
+    REQUIRE_CALL,
+  ];
+  for (const pattern of patterns) {
+    for (const match of source.matchAll(pattern)) {
+      const start = match.index ?? 0;
+      if (!code[start]) continue;
+      const from = match[2] ?? "";
+      if (!removedModule(from, moves)) continue;
+      const destination = wholeModuleDestination(from, moves);
+      if (!destination) {
+        edits.push({
+          start,
+          end: start + match[0].length,
+          text: match[0],
+          moved: 0,
+          issue: issueAt(
+            source,
+            start,
+            `Whole-module import from ${from} was left unchanged: its names do not share one destination.`
+          ),
+        });
+        continue;
+      }
+      const quoted = match[1] + from + match[1];
+      const at = match[0].lastIndexOf(quoted);
+      const text =
+        match[0].slice(0, at) +
+        match[1] +
+        destination +
+        match[1] +
+        match[0].slice(at + quoted.length);
+      edits.push({
+        start,
+        end: start + match[0].length,
+        text,
+        moved: 1,
+      });
+    }
+  }
+  return edits;
+}
+
 /**
  * Move the named imports and re-exports `moves` describes.
  *
@@ -279,22 +504,74 @@ function rewriteDeclaration(
  * @returns The rewritten text, how many names moved, and the imports too
  *   complex to split safely.
  */
-export function rewriteImports(
+/**
+ * Rewrite each Vue script with `migrate`, leaving the template bytes alone.
+ * Diagnostics use the script's position in the file.
+ */
+export function migrateVueScripts(
   source: string,
-  moves: ImportMoves
-): { code: string; movedImports: number; issues: MigrationIssue[] } {
+  migrate: (block: string) => MigrationResult
+): MigrationResult {
   let code = "";
   let cursor = 0;
   let movedImports = 0;
   const issues: MigrationIssue[] = [];
-  for (const match of source.matchAll(ADAPTTABLE_IMPORT)) {
-    code += source.slice(cursor, match.index);
-    cursor = match.index + match[0].length;
-    const rewritten = rewriteDeclaration(match, moves, source);
-    code += rewritten.text;
-    movedImports += rewritten.moved;
-    if (rewritten.issue) issues.push(rewritten.issue);
+  for (const match of source.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) {
+    const body = match[1] ?? "";
+    const bodyStart = (match.index ?? 0) + match[0].indexOf(body);
+    code += source.slice(cursor, bodyStart);
+    const rewritten = migrate(body);
+    code += rewritten.code;
+    cursor = bodyStart + body.length;
+    movedImports += rewritten.movedImports;
+    const lineOffset = source.slice(0, bodyStart).split("\n").length - 1;
+    for (const issue of rewritten.issues) {
+      issues.push({ ...issue, line: issue.line + lineOffset });
+    }
   }
   code += source.slice(cursor);
-  return { code, movedImports, issues };
+  return {
+    code,
+    changed: code !== source,
+    movedImports,
+    issues,
+  };
+}
+
+export function rewriteImports(
+  source: string,
+  moves: ImportMoves
+): { code: string; movedImports: number; issues: MigrationIssue[] } {
+  const code = codeIndexes(source);
+  const edits: ModuleEdit[] = [];
+  for (const match of source.matchAll(ADAPTTABLE_IMPORT)) {
+    const start = match.index ?? 0;
+    if (!code[start]) continue;
+    const rewritten = rewriteDeclaration(match, moves, source);
+    edits.push({
+      start,
+      end: start + match[0].length,
+      text: rewritten.text,
+      moved: rewritten.moved,
+      ...(rewritten.issue ? { issue: rewritten.issue } : {}),
+    });
+  }
+  edits.push(...moduleEdits(source, moves, code));
+  edits.sort((left, right) => left.start - right.start);
+  let next = "";
+  let cursor = 0;
+  let movedImports = 0;
+  const issues: MigrationIssue[] = [];
+  let coveredUntil = -1;
+  for (const edit of edits) {
+    if (edit.start < coveredUntil) continue;
+    next += source.slice(cursor, edit.start);
+    next += edit.text;
+    cursor = edit.end;
+    coveredUntil = edit.end;
+    movedImports += edit.moved;
+    if (edit.issue) issues.push(edit.issue);
+  }
+  next += source.slice(cursor);
+  return { code: next, movedImports, issues };
 }

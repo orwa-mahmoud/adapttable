@@ -7,12 +7,13 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname, extname, relative, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { KITS } from "./detect";
-import type { MigrationResult } from "./importMigration";
+import { migrateVueScripts, type MigrationResult } from "./importMigration";
 import { InitError, type InitIO, runInit } from "./init";
 import { migrateV3Source } from "./migrateV3";
-import { migrateV4Source } from "./migrateV4";
+import { migrateV4File, migrateV4Source } from "./migrateV4";
 
 /** Each migrate command and the transform it applies. */
 const MIGRATIONS: Readonly<
@@ -24,11 +25,13 @@ const MIGRATIONS: Readonly<
 
 const SOURCE_EXTENSIONS = new Set([
   ".cjs",
+  ".html",
   ".js",
   ".jsx",
   ".mjs",
   ".ts",
   ".tsx",
+  ".vue",
 ]);
 const SKIPPED_DIRECTORIES = new Set([
   ".git",
@@ -92,13 +95,14 @@ function sourceFiles(path: string): string[] {
 }
 
 function migrateFile(
+  command: string,
   cwd: string,
   file: string,
   check: boolean,
   migrate: (source: string) => MigrationResult
 ): { changedFiles: number; movedImports: number; issueCount: number } {
   const source = readFileSync(file, "utf8");
-  const result = migrate(source);
+  const result = migratedSource(command, file, source, migrate);
   const displayPath = relative(cwd, file) || file;
   if (result.changed && !check) writeFileSync(file, result.code, "utf8");
   for (const issue of result.issues) {
@@ -111,6 +115,20 @@ function migrateFile(
     movedImports: result.movedImports,
     issueCount: result.issues.length,
   };
+}
+
+function migratedSource(
+  command: string,
+  file: string,
+  source: string,
+  migrate: (source: string) => MigrationResult
+): MigrationResult {
+  if (command === "migrate-v4") return migrateV4File(source, file);
+  if (file.endsWith(".vue")) return migrateVueScripts(source, migrate);
+  if (file.endsWith(".html")) {
+    return { code: source, changed: false, movedImports: 0, issues: [] };
+  }
+  return migrate(source);
 }
 
 function runMigrate(
@@ -140,7 +158,7 @@ function runMigrate(
   let issueCount = 0;
 
   for (const file of files) {
-    const result = migrateFile(cwd, file, check, migrate);
+    const result = migrateFile(command, cwd, file, check, migrate);
     changedFiles += result.changedFiles;
     movedImports += result.movedImports;
     issueCount += result.issueCount;
@@ -159,7 +177,7 @@ function runMigrate(
   return issueCount > 0 ? 1 : 0;
 }
 
-function main(argv: readonly string[]): number {
+function main(argv: readonly string[], cwd: string): number {
   const command = argv[0];
   // A bare `adapttable` must never write files — require the explicit
   // command and show usage instead.
@@ -184,9 +202,9 @@ function main(argv: readonly string[]): number {
 
   try {
     if (migrate) {
-      return runMigrate(command, migrate, process.cwd(), argv.slice(1));
+      return runMigrate(command, migrate, cwd, argv.slice(1));
     }
-    const io = createNodeIO(process.cwd());
+    const io = createNodeIO(cwd);
     let kit;
     for (let index = 1; index < argv.length; index++) {
       const argument = argv[index];
@@ -208,4 +226,15 @@ function main(argv: readonly string[]): number {
   }
 }
 
-process.exit(main(process.argv.slice(2)));
+/** Run the CLI. Tests call this; the bin exits with its status. */
+export function runCli(
+  argv: readonly string[],
+  cwd: string = process.cwd()
+): number {
+  return main(argv, cwd);
+}
+
+const entry = process.argv[1];
+if (entry && import.meta.url === pathToFileURL(entry).href) {
+  process.exit(runCli(process.argv.slice(2)));
+}

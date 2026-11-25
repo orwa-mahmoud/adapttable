@@ -8,7 +8,11 @@ import {
   extendFeature,
   slotRender,
 } from "@adapttable/angular";
-import { coreHeaderFilters, FILTER_HEADER } from "@adapttable/angular/adapter";
+import {
+  coreHeaderFilters,
+  FILTER_HEADER,
+  type HeaderFilterOptions,
+} from "@adapttable/angular/adapter";
 
 import { AdaptHeaderFilterTrigger } from "./headerFilterTrigger";
 
@@ -23,8 +27,10 @@ export {
  *
  * @public
  */
-export function headerFilters(): AdaptTableFeature {
-  return extendFeature(coreHeaderFilters(), [
+export function headerFilters(
+  options?: HeaderFilterOptions
+): AdaptTableFeature {
+  return extendFeature(coreHeaderFilters(options), [
     slotRender(FILTER_HEADER, () => AdaptHeaderFilterTrigger),
   ]);
 }

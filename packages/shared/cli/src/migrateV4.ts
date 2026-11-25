@@ -1,6 +1,7 @@
 import {
   type ImportMoves,
   type ImportRoute,
+  issueAt,
   type MigrationIssue,
   type MigrationResult,
   reportPatterns,
@@ -167,14 +168,6 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
     "Selection is a feature: compose selection({ selectedIds, onSelectionChange, getId }) from @adapttable/<kit>/selection and delete the table prop.",
   ],
   [
-    /v-model:selected-ids\b|v-model:selectedIds\b/g,
-    "Vue selected ids are a feature: compose selection({ selectedIds, onSelectionChange }) from the kit's selection entry. v-model:selected-ids is reported and left in place, because the host owns the ref.",
-  ],
-  [
-    /\[(?:selectedIds|selectionGetId)\]|\((?:selectionChange|selectedIdsChange)\)/g,
-    "Angular selection bindings are a feature: compose selection({ selectedIds, onSelectionChange, getId }) from the kit's selection entry. [selectedIds] and (selectionChange) are reported and left in place, because the host owns the signal and the callback.",
-  ],
-  [
     /\bmobileIdentityColumns\b/g,
     "mobileIdentityColumns was removed; hideOnMobile on each column decides what a card shows. Delete the prop.",
   ],
@@ -330,10 +323,159 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
  * @param source - A source file's text.
  * @returns The rewritten text, how many imports moved, and what needs a person.
  */
+const TABLE_BINDINGS: readonly (readonly [RegExp, string])[] = [
+  [
+    /v-model:selected-ids\b|v-model:selectedIds\b/g,
+    "Vue selected ids are a feature: compose selection({ selectedIds, onSelectionChange }) from the kit's selection entry. v-model:selected-ids is reported and left in place, because the host owns the ref.",
+  ],
+  [
+    /\[(?:selectedIds|selectionGetId)\]|\((?:selectionChange|selectedIdsChange)\)/g,
+    "Angular selection bindings are a feature: compose selection({ selectedIds, onSelectionChange, getId }) from the kit's selection entry. [selectedIds] and (selectionChange) are reported and left in place, because the host owns the signal and the callback.",
+  ],
+  [
+    /\bfiltersMode\s*=|\[filtersMode\]|\[filterFields\]|\[closeHeaderFilterOnSelect\]|\[extraChips\]/g,
+    'Filter placement is a feature option: filters(defs, { mode: "drawer", fields: false }) and headerFilters({ closeOnSelect: true }). The table prop is reported and left in place.',
+  ],
+  [
+    /\[onColumnRename\]|\bonColumnRename\s*=/g,
+    "Column rename is columnMenu({ onRename }). The table prop is reported and left in place.",
+  ],
+  [
+    /\[(?:onCellCut|rowVersion|editConflictPolicy|onEditConflict|editActivation)\]/g,
+    "Editing and grid options belong on editing() and cellNavigation(). The table binding is reported and left in place, because the host owns the callback.",
+  ],
+];
+
+function isAdaptTableElement(name: string): boolean {
+  if (name === "DataTable" || name === "AdaptDataTable") return true;
+  return /^adapt(?:-[a-z0-9]+)*-table$/i.test(name);
+}
+
+function tagEnd(source: string, start: number): number {
+  let quote = "";
+  for (let index = start; index < source.length; index += 1) {
+    const current = source[index];
+    if (quote) {
+      if (current === "\\") {
+        index += 1;
+        continue;
+      }
+      if (current === quote) quote = "";
+      continue;
+    }
+    if (current === "'" || current === '"' || current === "`") {
+      quote = current;
+      continue;
+    }
+    if (current === ">") return index + 1;
+  }
+  return source.length;
+}
+
+/** Report removed bindings on an AdaptTable element, not on another component. */
+export function reportTableBindings(
+  source: string,
+  issues: MigrationIssue[]
+): void {
+  let index = 0;
+  while (index < source.length) {
+    const open =
+      source[index] === "<" &&
+      source[index + 1] !== "/" &&
+      source[index + 1] !== "!";
+    const name = open
+      ? /^<([A-Za-z][\w.-]*)/.exec(source.slice(index))?.[1]
+      : undefined;
+    if (!name) {
+      index += 1;
+      continue;
+    }
+    const end = tagEnd(source, index);
+    if (isAdaptTableElement(name)) {
+      const tag = source.slice(index, end);
+      for (const [pattern, message] of TABLE_BINDINGS) {
+        for (const match of tag.matchAll(pattern)) {
+          issues.push(issueAt(source, index + (match.index ?? 0), message));
+        }
+      }
+    }
+    index = Math.max(end, index + 1);
+  }
+}
+
+/**
+ * Rewrite one script block and keep diagnostics on the surrounding file.
+ */
+function migrateBlock(
+  source: string,
+  block: string,
+  blockStart: number
+): MigrationResult {
+  const result = migrateV4Source(block);
+  const lineOffset = source.slice(0, blockStart).split("\n").length - 1;
+  return {
+    ...result,
+    issues: result.issues.map((issue) => ({
+      ...issue,
+      line: issue.line + lineOffset,
+    })),
+  };
+}
+
+/**
+ * Vue SFCs: rewrite imports in script blocks, and report table bindings in
+ * the template. Angular templates report bindings and are not rewritten.
+ */
+export function migrateV4File(
+  source: string,
+  filename: string
+): MigrationResult {
+  if (filename.endsWith(".html")) {
+    const issues: MigrationIssue[] = [];
+    reportTableBindings(source, issues);
+    return { code: source, changed: false, movedImports: 0, issues };
+  }
+  if (!filename.endsWith(".vue")) return migrateV4Source(source);
+  const issues: MigrationIssue[] = [];
+  reportTableBindings(source, issues);
+  let code = "";
+  let cursor = 0;
+  let movedImports = 0;
+  const scripts = source.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g);
+  for (const match of scripts) {
+    const body = match[1] ?? "";
+    const bodyStart = (match.index ?? 0) + match[0].indexOf(body);
+    code += source.slice(cursor, bodyStart);
+    const rewritten = migrateBlock(source, body, bodyStart);
+    code += rewritten.code;
+    cursor = bodyStart + body.length;
+    movedImports += rewritten.movedImports;
+    for (const issue of rewritten.issues) {
+      if (
+        !issues.some(
+          (existing) =>
+            existing.line === issue.line && existing.message === issue.message
+        )
+      ) {
+        issues.push(issue);
+      }
+    }
+  }
+  code += source.slice(cursor);
+  return {
+    code,
+    changed: code !== source,
+    movedImports,
+    issues,
+  };
+}
+
 export function migrateV4Source(source: string): MigrationResult {
+  const issues: MigrationIssue[] = [];
+  reportTableBindings(source, issues);
+  reportPatterns(source, MANUAL, issues);
   const rewritten = rewriteImports(source, V4_MOVES);
-  const issues: MigrationIssue[] = rewritten.issues;
-  reportPatterns(rewritten.code, MANUAL, issues);
+  issues.push(...rewritten.issues);
   return {
     code: rewritten.code,
     changed: rewritten.code !== source,

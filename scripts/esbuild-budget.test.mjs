@@ -9,6 +9,7 @@ import {
   esbuildMarkerProblems,
   esbuildPath,
   measureEsbuild,
+  transferBytes,
 } from "./esbuild-budget.mjs";
 
 const dir = mkdtempSync(join(tmpdir(), "esbuild-budget-"));
@@ -51,6 +52,34 @@ describe("esbuild budget", () => {
         { js: "export const kept = 1;\nconst pdfWriter = 1;\n", css: "" }
       ),
       { leaked: ["pdfWriter"], missing: [] }
+    );
+  });
+
+  it("keeps a dynamic import out of the initial transfer", async () => {
+    writeFileSync(join(dir, "lazy.js"), "export const lazyChunk = 1;\n");
+    writeFileSync(
+      join(dir, "split-entry.js"),
+      "export const kept = 1;\nexport function load() { return import('./lazy.js'); }\n"
+    );
+    const built = await measureEsbuild(join(dir, "split-entry.js"), []);
+    assert.ok(built.totalGzip > built.initialGzip);
+    assert.equal(built.lazyGzip, built.totalGzip - built.initialGzip);
+    assert.doesNotMatch(built.js, /lazyChunk/);
+    const graph = {
+      outputs: {
+        "entry.js": {
+          imports: [
+            { path: "static.js", kind: "import-statement" },
+            { path: "lazy.js", kind: "dynamic-import" },
+          ],
+        },
+        "static.js": { imports: [] },
+        "lazy.js": { imports: [] },
+      },
+    };
+    assert.deepEqual(
+      transferBytes(graph, "entry.js", () => 10),
+      { initial: 20, total: 30, lazy: 10 }
     );
   });
 

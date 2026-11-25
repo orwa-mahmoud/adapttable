@@ -677,6 +677,7 @@ export {
   coreCellSpan,
   coreCollapsibleColumnGroups,
   coreColumnMenu,
+  type ColumnMenuOptions,
   coreColumnSelectionCheckbox,
   coreCommandPalette,
   coreContextMenu,
@@ -690,6 +691,7 @@ export {
   coreFeature,
   type CoreFeatureRegistrar,
   coreFilters,
+  type FilterPanelOptions,
   coreFilterTypes,
   coreFindInTable,
   coreFitColumns,
@@ -697,6 +699,7 @@ export {
   coreGrouping,
   coreGroupingPanel,
   coreHeaderFilters,
+  type HeaderFilterOptions,
   coreMultiSort,
   coreNestedTable,
   corePinnedSummaryRows,
@@ -753,6 +756,8 @@ export {
 } from "./features/featureMounts";
 export {
   applyTableFeatures,
+  FEATURE_OWNED_OPTION_KEYS,
+  type FeatureOwnedOptionKey,
   type FeatureApplyInput,
   featureLabelsOf,
   type FeaturePatch,

@@ -5,9 +5,10 @@
 ```ts
 
 import { AdaptTableFeature } from '@adapttable/angular';
+import { ColumnMenuOptions } from '@adapttable/angular/adapter';
 
 // @public
-export function columnMenu(): AdaptTableFeature;
+export function columnMenu(options?: ColumnMenuOptions): AdaptTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

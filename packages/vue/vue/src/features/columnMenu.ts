@@ -1,4 +1,8 @@
-import { coreColumnMenu, featureStateKey } from "@adapttable/core/binding";
+import {
+  type ColumnMenuOptions,
+  coreColumnMenu,
+  featureStateKey,
+} from "@adapttable/core/binding";
 import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { computed, watch } from "vue";
 
@@ -55,9 +59,9 @@ function useColumnMenuMount<TRow>(context: FeatureMountContext<TRow>): void {
 }
 
 /** Opt in to the kit's column manager and direct header rename controls. */
-export function columnMenu(): StaticTableFeature {
+export function columnMenu(options?: ColumnMenuOptions): StaticTableFeature {
   return {
-    ...coreColumnMenu(),
+    ...coreColumnMenu(options),
     mount: useColumnMenuMount,
     renders: [
       toolbarEntry((entry) => {

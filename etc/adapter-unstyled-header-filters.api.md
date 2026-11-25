@@ -4,10 +4,11 @@
 
 ```ts
 
+import { HeaderFilterOptions } from '@adapttable/react/features';
 import { StaticTableFeature } from '@adapttable/react/adapter';
 
 // @public
-export function headerFilters(): StaticTableFeature;
+export function headerFilters(options?: HeaderFilterOptions): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

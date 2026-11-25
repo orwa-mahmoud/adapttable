@@ -13,6 +13,7 @@ import { Component, computed, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { expect, vi } from "vitest";
 
+import { declareFeatureOptions } from "../declareFeatureOptions";
 import type { AngularKitUnderTest } from "../kit";
 
 /**
@@ -69,11 +70,8 @@ export function featureRecompositionTests(
           [features]="tableFeatures()"
           [forceMobile]="mobile"
           [urlSync]="false"
-          [filtersMode]="filterMode()"
-          [closeHeaderFilterOnSelect]="closeHeaderFilter()"
           [density]="rowDensity()"
           (densityChange)="onDensityChange($event)"
-          [onColumnRename]="renameColumn()"
           [confirm]="confirmAction()"
           [columnLayout]="layout()"
           (columnLayoutChange)="onLayoutChange($event)"
@@ -93,7 +91,13 @@ export function featureRecompositionTests(
         this.controlledSelection() ? this.selected() : undefined
       );
       readonly tableFeatures = computed(() => {
-        const base = this.features();
+        const base = declareFeatureOptions(this.features(), {
+          filters: { filtersMode: this.filterMode() },
+          "header-filters": {
+            closeHeaderFilterOnSelect: this.closeHeaderFilter(),
+          },
+          "column-menu": { onColumnRename: this.renameColumn() },
+        });
         if (!this.selectable()) return base;
         return [
           selection({

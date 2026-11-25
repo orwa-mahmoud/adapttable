@@ -46,7 +46,7 @@ export interface DataTableHandle<TRow> {
 }
 export interface UseDataTableShellOptions<TRow>
   extends
-    Omit<UseDataTableOptions<TRow>, "source" | "selection">,
+    Omit<UseDataTableOptions<TRow>, "source" | "selection" | "onColumnRename">,
     Omit<
       UseFrontendDataOptions<TRow>,
       "data" | keyof UseDataTableOptions<TRow>
@@ -83,9 +83,6 @@ export interface UseDataTableShellOptions<TRow>
   readonly animate?: MaybeRefOrGetterOptional<boolean>;
   readonly defaultDensity?: TableDensity;
   readonly onDensityChange?: (next: TableDensity) => void;
-  readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly onCellCut?: (range: CellRange) => void;
   readonly runtimeChannels?: MaybeRefOrGetter<
     Pick<
       RuntimeChromeInput<TRow>,

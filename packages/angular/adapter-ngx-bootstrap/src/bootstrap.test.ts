@@ -33,10 +33,9 @@ async function mount(mode: "popover" | "drawer" = "popover") {
 
     theme: "dark",
     dir: "rtl",
-    filtersMode: mode,
     features: [
       selection(),
-      filters<Row>([{ key: "name", type: "text" }]),
+      filters<Row>([{ key: "name", type: "text" }], { mode }),
       columnMenu(),
     ],
   }))

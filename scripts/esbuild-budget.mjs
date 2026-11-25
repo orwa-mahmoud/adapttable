@@ -19,22 +19,28 @@ import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
 
+import {
+  ANGULAR_CONDITIONS,
+  ANGULAR_DEFINES,
+  ANGULAR_MAIN_FIELDS,
+} from "./angular-consumer-build.mjs";
+
 const requireFrom = createRequire(
   new URL("../apps/showcase/package.json", import.meta.url)
 );
 
 /**
  * The six tables. Ceilings are KiB, `Math.ceil(measured * 1.15)` from the
- * esbuild run on 2026-11-24. Angular is higher than Rolldown because esbuild
- * keeps more of the kit's primary bundle.
+ * split esbuild run. Initial is the entry and its static chunks. Dynamic
+ * chunks, including locale alternatives, are only in the total.
  */
 export const ESBUILD_CEILINGS = {
-  "unstyled · table": { initialKB: 77, totalKB: 77 },
-  "unstyled · table + preset": { initialKB: 152, totalKB: 152 },
-  "vue-unstyled · table": { initialKB: 64, totalKB: 64 },
-  "vue-unstyled · table + preset": { initialKB: 138, totalKB: 138 },
-  "angular · angular-unstyled table": { initialKB: 358, totalKB: 358 },
-  "angular · unstyled + preset": { initialKB: 386, totalKB: 386 },
+  "unstyled · table": { initialKB: 84, totalKB: 236 },
+  "unstyled · table + preset": { initialKB: 158, totalKB: 310 },
+  "vue-unstyled · table": { initialKB: 71, totalKB: 223 },
+  "vue-unstyled · table + preset": { initialKB: 143, totalKB: 295 },
+  "angular · angular-unstyled table": { initialKB: 113, totalKB: 265 },
+  "angular · unstyled + preset": { initialKB: 174, totalKB: 326 },
 };
 
 /**
@@ -47,6 +53,8 @@ const CHUNK_TEXT = new Set([
   "data-changed]:not",
   "column keys must be unique",
   "virtualize only applies",
+  // The shared label module keeps this sentence when esbuild splits chunks.
+  "Cross-boundary row moves",
 ]);
 
 let esbuildPromise;
@@ -76,6 +84,47 @@ function outputFiles(dir) {
 
 function gzipFile(path) {
   return gzipSync(readFileSync(path)).length;
+}
+
+const COUNTED = /\.(?:js|css)$/;
+
+/**
+ * Outputs the entry loads before the first dynamic import.
+ *
+ * A `dynamic-import` is a later chunk — a locale alternative, a writer, a
+ * feature the entry did not name up front. It belongs in the total and not
+ * in the initial transfer.
+ */
+export function staticOutputKeys(metafile, entryKey) {
+  const seen = new Set();
+  const visit = (key) => {
+    if (seen.has(key)) return;
+    seen.add(key);
+    for (const imported of metafile.outputs[key]?.imports ?? []) {
+      if (imported.external || imported.kind === "dynamic-import") continue;
+      visit(imported.path);
+    }
+  };
+  visit(entryKey);
+  for (const key of [...seen]) {
+    const bundle = metafile.outputs[key]?.cssBundle;
+    if (bundle) seen.add(bundle);
+  }
+  return seen;
+}
+
+/** Initial transfer is the static closure. Total adds every counted chunk. */
+export function transferBytes(metafile, entryKey, sizeOf) {
+  const staticKeys = staticOutputKeys(metafile, entryKey);
+  let initial = 0;
+  let total = 0;
+  for (const key of Object.keys(metafile.outputs)) {
+    if (!COUNTED.test(key)) continue;
+    const size = sizeOf(key);
+    total += size;
+    if (staticKeys.has(key)) initial += size;
+  }
+  return { initial, total, lazy: total - initial };
 }
 
 /**
@@ -112,11 +161,14 @@ export async function measureEsbuild(entry, externals, transform) {
         entryPoints: [entry],
         bundle: true,
         format: "esm",
-        // Splitting keeps every export of a shared chunk. That is esbuild's
-        // chunk rule, not a module the table imported, so the comparison is
-        // the one bundled graph.
+        splitting: true,
         outdir,
         minify,
+        ...(transform && {
+          define: { ...ANGULAR_DEFINES },
+          conditions: [...ANGULAR_CONDITIONS],
+          mainFields: [...ANGULAR_MAIN_FIELDS],
+        }),
         metafile: true,
         write: true,
         plugins: [
@@ -137,30 +189,42 @@ export async function measureEsbuild(entry, externals, transform) {
       return { outdir, metafile: result.metafile };
     };
     const [min, raw] = await Promise.all([built(true), built(false)]);
+    const entryBase = entry.slice(entry.lastIndexOf("/") + 1);
     const entryOutput = Object.entries(min.metafile.outputs).find(
-      ([, info]) => info.entryPoint
+      ([, info]) => {
+        const point = info.entryPoint ?? "";
+        const name = point.slice(point.lastIndexOf("/") + 1);
+        return name === entryBase;
+      }
     );
     if (!entryOutput) throw new Error(`esbuild emitted no entry for ${entry}`);
-    const entryName = entryOutput[0].slice(entryOutput[0].lastIndexOf("/") + 1);
-    const minFiles = outputFiles(min.outdir);
-    const jsAndCss = (file) => file.endsWith(".js") || file.endsWith(".css");
-    const gzipOf = (files) =>
-      files.reduce((sum, file) => sum + gzipFile(file), 0);
-    const counted = minFiles.filter(jsAndCss);
-    const initialFiles = counted.filter(
-      (file) => file.endsWith(`/${entryName}`) || file.endsWith(".css")
-    );
-    const rawText = outputFiles(raw.outdir)
-      .filter((file) => file.endsWith(".js"))
-      .map((file) => readFileSync(file, "utf8"))
+    const cwd = dirname(entry);
+    const sizeOf = (key) =>
+      gzipFile(key.startsWith("/") ? key : join(cwd, key));
+    const transfer = transferBytes(min.metafile, entryOutput[0], sizeOf);
+    const readOutput = (metafile, key) => {
+      const path = key.startsWith("/") ? key : join(cwd, key);
+      return readFileSync(path, "utf8");
+    };
+    const rawEntry = Object.entries(raw.metafile.outputs).find(([, info]) => {
+      const point = info.entryPoint ?? "";
+      return point.slice(point.lastIndexOf("/") + 1) === entryBase;
+    });
+    if (!rawEntry)
+      throw new Error(`esbuild emitted no readable entry for ${entry}`);
+    const rawStatic = staticOutputKeys(raw.metafile, rawEntry[0]);
+    const rawText = [...rawStatic]
+      .filter((key) => key.endsWith(".js"))
+      .map((key) => readOutput(raw.metafile, key))
       .join("\n");
-    const css = outputFiles(raw.outdir)
-      .filter((file) => file.endsWith(".css"))
-      .map((file) => readFileSync(file, "utf8"))
+    const css = [...rawStatic]
+      .filter((key) => key.endsWith(".css"))
+      .map((key) => readOutput(raw.metafile, key))
       .join("\n");
     return {
-      initialGzip: gzipOf(initialFiles),
-      totalGzip: gzipOf(counted),
+      initialGzip: transfer.initial,
+      totalGzip: transfer.total,
+      lazyGzip: transfer.lazy,
       js: rawText,
       css,
     };

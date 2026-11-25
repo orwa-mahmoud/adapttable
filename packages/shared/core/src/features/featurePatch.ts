@@ -161,10 +161,72 @@ function definedEntries(value: object): Record<string, unknown> {
   return out;
 }
 
+/**
+ * Options a feature factory writes. A host value for one of these is dropped
+ * so the composed feature is the only way to set it. Layout, data and slots
+ * stay on the host and still win over a feature.
+ */
+export const FEATURE_OWNED_OPTION_KEYS = [
+  "filtersMode",
+  "filterFields",
+  "extraChips",
+  "closeHeaderFilterOnSelect",
+  "filterDefs",
+  "filterRegistry",
+  "filterLabels",
+  "activeFilterCount",
+  "onClearFilters",
+  "onColumnRename",
+  "onCellCut",
+  "onCellPaste",
+  "onCellFill",
+  "validateRow",
+  "applyEdit",
+  "onEditRollback",
+  "formatEditError",
+  "onEditStart",
+  "onEditCancel",
+  "onEditCommit",
+  "onValidationFail",
+  "onEditError",
+  "onEditConflict",
+  "editConflictPolicy",
+  "editActivation",
+  "rowVersion",
+  "hasChildren",
+  "expandedIds",
+  "onExpandedIdsChange",
+  "onGroupByChange",
+  "groupFooters",
+  "groupSort",
+  "groupPageSize",
+  "groupRowPageSize",
+  "onGroupLoadMore",
+  "groupFilter",
+  "groupAggregates",
+  "collapsedGroupIds",
+  "onCollapsedGroupIdsChange",
+  "estimateRowSize",
+  "estimateCardSize",
+  "virtualOverscan",
+  "virtualScrollMargin",
+] as const;
+
+/** One key {@link FEATURE_OWNED_OPTION_KEYS} reserves for a feature. */
+export type FeatureOwnedOptionKey = (typeof FEATURE_OWNED_OPTION_KEYS)[number];
+
+function ownsFeatureKey(key: string): boolean {
+  return (FEATURE_OWNED_OPTION_KEYS as readonly string[]).includes(key);
+}
+
+function ownsFeatureOption(options: object): boolean {
+  return Object.keys(options).some((key) => ownsFeatureKey(key));
+}
+
 function omitFeatures<P extends object>(options: P): P {
   const rest: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(options)) {
-    if (key !== "features") rest[key] = value;
+    if (key !== "features" && !ownsFeatureKey(key)) rest[key] = value;
   }
   return rest as P;
 }
@@ -264,10 +326,12 @@ export function overlayFeatureOptions<
   featureLabels: readonly Partial<TableLabels>[],
   options: TOptions
 ): TResolved {
+  const host = definedEntries(options);
+  for (const key of FEATURE_OWNED_OPTION_KEYS) delete host[key];
   const resolved: Record<string, unknown> = {
     ...patches,
     ...(featureLabels.length > 0 ? { featureLabels } : {}),
-    ...definedEntries(options),
+    ...host,
   };
   return resolved as TResolved;
 }
@@ -275,8 +339,10 @@ export function overlayFeatureOptions<
 /**
  * Resolve `features` onto the existing option surface.
  *
- * Later features win; defined host options win over both. `features` is
- * stripped from the result. Calling twice on the same object is a no-op.
+ * Later features win. A defined host option wins over a feature, except the
+ * keys in {@link FEATURE_OWNED_OPTION_KEYS}: those come only from a feature.
+ * `features` is stripped from the result. Calling twice on the same object
+ * is a no-op.
  *
  * @param options - Table options that may carry a `features` array.
  * @returns The resolved options.
@@ -288,8 +354,13 @@ export function applyTableFeatures<P extends object>(options: P): P {
 
   const list = featuresOf(options);
   if (list == null) {
-    applied.add(options);
-    return options;
+    if (!ownsFeatureOption(options)) {
+      applied.add(options);
+      return options;
+    }
+    const rest = omitFeatures(options);
+    applied.add(rest);
+    return rest;
   }
   if (list.length === 0) {
     const rest = omitFeatures(options);

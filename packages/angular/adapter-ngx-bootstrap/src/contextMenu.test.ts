@@ -61,7 +61,6 @@ const item = (label: string) =>
       [urlSync]="false"
       [forceMobile]="false"
       [features]="features"
-      [onCellCut]="cut"
     />
   `,
 })
@@ -93,7 +92,10 @@ async function mount(
   navigable = false
 ): Promise<ReturnType<typeof TestBed.createComponent<Host>>> {
   const fixture = TestBed.createComponent(Host);
-  if (navigable) fixture.componentInstance.features.push(cellNavigation());
+  if (navigable)
+    fixture.componentInstance.features.push(
+      cellNavigation({ onCut: (range) => fixture.componentInstance.cut(range) })
+    );
   document.body.append(fixture.nativeElement);
   fixture.detectChanges();
   await fixture.whenStable();

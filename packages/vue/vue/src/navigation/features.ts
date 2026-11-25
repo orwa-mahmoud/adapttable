@@ -111,8 +111,8 @@ function useNavigationMount<TRow>(context: FeatureMountContext<TRow>): void {
     { flush: "post" }
   );
 }
-export function cellNavigation(
-  options: CellNavigationOptions = {}
+export function cellNavigation<TRow = unknown>(
+  options: CellNavigationOptions<TRow> = {}
 ): StaticTableFeature {
   return {
     ...coreCellNavigation(options),

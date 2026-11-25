@@ -7,6 +7,7 @@
 import { AdapterFiltersFeature } from '@adapttable/angular/adapter';
 import { AdaptTableFeature } from '@adapttable/angular';
 import { FilterDef } from '@adapttable/angular';
+import { FilterPanelOptions } from '@adapttable/angular/adapter';
 import { filterTypes } from '@adapttable/angular/features';
 import { FilterWidget } from '@adapttable/angular/adapter';
 
@@ -19,7 +20,7 @@ export const booleanFilterWidget: FilterWidget;
 export const checklistFilterWidget: FilterWidget;
 
 // @public
-export function filters<TRow>(defs?: readonly FilterDef<TRow>[]): AdaptTableFeature;
+export function filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: FilterPanelOptions): AdaptTableFeature;
 
 // @public
 export function filtersWith(widgets: readonly FilterWidget[]): AdapterFiltersFeature;

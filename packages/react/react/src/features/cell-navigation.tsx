@@ -161,6 +161,12 @@ export interface CellNavigationOptions {
    * "sum of selection" readout of your own reads.
    */
   readonly onRangeChange?: (range: CellRange | null) => void;
+  /** Ctrl/Cmd+X and the menu's Cut, after the clipboard write succeeds. */
+  readonly onCut?: (range: CellRange) => void;
+  /** Paste into the focused rectangle. */
+  readonly onPaste?: (edits: readonly unknown[]) => unknown;
+  /** Fill the rectangle from its focus cell. */
+  readonly onFill?: (edits: readonly unknown[]) => unknown;
 }
 
 /**
@@ -172,7 +178,12 @@ export function cellNavigation(
   options: CellNavigationOptions = {}
 ): StaticTableFeature {
   return {
-    ...coreCellNavigation(options),
+    ...coreCellNavigation({
+      onRangeChange: options.onRangeChange,
+      onCut: options.onCut,
+      onPaste: options.onPaste,
+      onFill: options.onFill,
+    }),
     renders: [
       slotRender(CELL_NAV_STAGE, (props) => <CellNavStage {...props} />),
       slotRender(GRID_FOCUS_ANNOUNCER, (props) => (

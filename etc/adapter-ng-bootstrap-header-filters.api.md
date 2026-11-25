@@ -10,6 +10,7 @@ import { FilterFormSource } from '@adapttable/angular';
 import { FilterHeaderClassNames } from '@adapttable/angular/adapter';
 import { FilterHeaderSlots } from '@adapttable/angular/adapter';
 import { FilterTypeRegistry } from '@adapttable/angular';
+import { HeaderFilterOptions } from '@adapttable/angular/adapter';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';
 import { TableLabels } from '@adapttable/angular';
@@ -168,7 +169,7 @@ export class AdaptFilterHeaderRow<TRow> {
 }
 
 // @public
-export function headerFilters(): AdaptTableFeature;
+export function headerFilters(options?: HeaderFilterOptions): AdaptTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

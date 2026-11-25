@@ -25,6 +25,8 @@ import {
   type TemplateRef,
   viewChild,
 } from "@angular/core";
+
+import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 
@@ -129,8 +131,7 @@ const DEFS: FilterDef<Person>[] = [
       [rowKey]="rowKey"
       [urlSync]="false"
       [forceMobile]="false"
-      [features]="features()"
-      [filtersMode]="mode()"
+      [features]="shown()"
       [labels]="labels()"
     />
   `,
@@ -138,6 +139,11 @@ const DEFS: FilterDef<Person>[] = [
 class Host {
   readonly features = input([filters(DEFS)]);
   readonly mode = input<FiltersMode>("popover");
+  readonly shown = computed(() =>
+    declareFeatureOptions(this.features(), {
+      filters: { filtersMode: this.mode() },
+    })
+  );
   readonly labels = input<Partial<TableLabels> | undefined>(undefined);
   readonly custom =
     viewChild.required<TemplateRef<FilterWidgetRenderProps<Person>>>("custom");

@@ -153,7 +153,7 @@ describe("Element Plus Columns and rename controls", () => {
   });
   it("focuses the real direct-rename input, validates its error relationship and restores the trigger", async () => {
     const renamed = vi.fn();
-    const view = fixture({ onColumnRename: renamed });
+    const view = fixture({ features: [columnMenu({ onRename: renamed })] });
     await tick();
     const trigger = node<HTMLButtonElement>(
       view.root,
@@ -190,7 +190,10 @@ describe("Element Plus Columns and rename controls", () => {
   });
   it("keeps controlled names unchanged until the host accepts the exact rename request", async () => {
     const renamed = vi.fn();
-    const view = fixture({ columnLayout: layout, onColumnRename: renamed });
+    const view = fixture({
+      columnLayout: layout,
+      features: [columnMenu({ onRename: renamed })],
+    });
     await tick();
     const trigger = node<HTMLButtonElement>(
       view.root,

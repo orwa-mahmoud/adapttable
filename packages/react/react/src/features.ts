@@ -33,6 +33,10 @@ export {
   rowEditing,
 } from "./features/editing";
 export { exportCsv } from "./features/export-csv";
+export type {
+  ColumnMenuOptions,
+  HeaderFilterOptions,
+} from "@adapttable/core/binding";
 export {
   bulkActions,
   cellSpan,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { migrateV4Source } from "./migrateV4";
+import { migrateV4File, migrateV4Source } from "./migrateV4";
 
 describe("migrateV4Source", () => {
   it("moves binding machinery off core's main entry and keeps table names", () => {
@@ -373,6 +373,100 @@ describe("migrateV4Source", () => {
     );
     expect(result.changed).toBe(false);
     expect(result.issues.map((issue) => issue.line)).toEqual([1, 2]);
+  });
+
+  it("does not rewrite an import that is only text", () => {
+    const source =
+      "const example = 'import { selectionStats, useTableFeatures } from \"@adapttable/mui/features\";';\n";
+    const result = migrateV4Source(source);
+    expect(result.code).toBe(source);
+    expect(result.movedImports).toBe(0);
+    expect(result.issues).toEqual([]);
+  });
+
+  it("leaves a comment and a template example untouched", () => {
+    const source = [
+      '// import { selectionStats } from "@adapttable/mui/features";',
+      'const sample = `import { useTableFeatures } from "@adapttable/mui/features";`;',
+      'import { selection } from "@adapttable/mui/features";',
+      "",
+    ].join("\n");
+    const result = migrateV4Source(source);
+    expect(result.code.split("\n")[0]).toContain("@adapttable/mui/features");
+    expect(result.code.split("\n")[1]).toContain("@adapttable/mui/features");
+    expect(result.code).toContain(
+      'import { selection } from "@adapttable/react/features";'
+    );
+  });
+
+  it("reports a namespace import whose names do not share a destination", () => {
+    const source = 'import * as features from "@adapttable/mui/features";\n';
+    const result = migrateV4Source(source);
+    expect(result.code).toBe(source);
+    expect(result.movedImports).toBe(0);
+    expect(result.issues[0]?.message).toContain("do not share one destination");
+    expect(result.issues[0]?.line).toBe(1);
+  });
+
+  it("rewrites a whole module when every name moves together", () => {
+    const source =
+      'const load = require("@adapttable/vue-unstyled/export-csv");\n';
+    expect(migrateV4Source(source).code).toBe(
+      'const load = require("@adapttable/vue-unstyled/export");\n'
+    );
+    const dynamic = migrateV4Source(
+      'export * from "@adapttable/element-plus/export-csv";\n'
+    );
+    expect(dynamic.code).toBe(
+      'export * from "@adapttable/element-plus/export";\n'
+    );
+    expect(migrateV4Source(dynamic.code).movedImports).toBe(0);
+  });
+
+  it("reports an angular binding on the original line after a split import", () => {
+    const source = [
+      'import { selectionStats, useTableFeatures } from "@adapttable/mui/features";',
+      '<adapt-data-table [selectedIds]="ids" (selectionChange)="onSelection($event)" />',
+      "",
+    ].join("\n");
+    const result = migrateV4Source(source);
+    expect(result.code.split("\n")).toHaveLength(4);
+    const binding = result.issues.find((issue) =>
+      issue.message.includes("[selectedIds]")
+    );
+    expect(binding?.line).toBe(2);
+  });
+
+  it("rewrites a vue script and reports only an adapttable template binding", () => {
+    const source = [
+      "<script>",
+      "const example = 'import { selectionStats, useTableFeatures } from \"@adapttable/mui/features\";';",
+      'import { selection } from "@adapttable/mui/features";',
+      "</script>",
+      "<template>",
+      '<adapt-data-table [selectedIds]="ids" (selectionChange)="onSelection($event)" />',
+      '<app-people [selectedIds]="ids" />',
+      '<OtherTable v-model:selected-ids="ids" />',
+      "</template>",
+      "",
+    ].join("\n");
+    const result = migrateV4File(source, "people.vue");
+    expect(result.code).toContain(
+      'import { selection } from "@adapttable/react/features";'
+    );
+    expect(result.code).toContain("@adapttable/mui/features");
+    expect(result.code).toContain('<app-people [selectedIds]="ids" />');
+    const lines = result.issues.map((issue) => issue.line);
+    expect(lines).toContain(6);
+    expect(lines).not.toContain(7);
+    expect(lines).not.toContain(8);
+    const template = migrateV4File(
+      '<adapt-data-table [selectedIds]="ids"></adapt-data-table>\n<app-table [selectedIds]="ids"></app-table>\n',
+      "table.component.html"
+    );
+    expect(template.changed).toBe(false);
+    expect(template.issues).toHaveLength(1);
+    expect(template.issues[0]?.line).toBe(1);
   });
 
   it("leaves a file that uses nothing v4 moved untouched", () => {

@@ -33,6 +33,7 @@ import { ColumnMenuChoice } from '@adapttable/core';
 import { ColumnMenuChoiceOption } from '@adapttable/core';
 import { ColumnMenuItem } from '@adapttable/core';
 import { ColumnMenuLabels } from '@adapttable/core';
+import { ColumnMenuOptions } from '@adapttable/core/binding';
 import { ColumnMenuRow } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
 import { Command } from '@adapttable/core';
@@ -67,6 +68,7 @@ import { FacetCounts } from '@adapttable/core';
 import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
+import { FeatureOwnedOptionKey } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
@@ -75,6 +77,7 @@ import { FilterDef } from '@adapttable/core';
 import { FilterFormSource } from '@adapttable/core/binding';
 import { FilterOption } from '@adapttable/core';
 import { FilterOptionsSource } from '@adapttable/core';
+import { FilterPanelOptions } from '@adapttable/core/binding';
 import { FilterType } from '@adapttable/core';
 import { FilterTypeExtend } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
@@ -95,6 +98,7 @@ import { GroupingPanelInteractions } from '@adapttable/core';
 import { GroupingPanelState } from '@adapttable/core';
 import { GroupNode } from '@adapttable/core';
 import { GroupSort } from '@adapttable/core';
+import { HeaderFilterOptions } from '@adapttable/core/binding';
 import { LayoutStorage } from '@adapttable/core';
 import { NestedTableDefaults } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
@@ -137,6 +141,7 @@ import { SortDirection } from '@adapttable/core';
 import { SortLevel } from '@adapttable/core';
 import { TableDensity } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
+import { TableOptions } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 import { TableStateMutators } from '@adapttable/core';
@@ -174,6 +179,9 @@ export function cellNavigation(options?: CellNavigationOptions): StaticTableFeat
 
 // @public
 export interface CellNavigationOptions {
+    readonly onCut?: (range: CellRange) => void;
+    readonly onFill?: (edits: readonly unknown[]) => unknown;
+    readonly onPaste?: (edits: readonly unknown[]) => unknown;
     readonly onRangeChange?: (range: CellRange | null) => void;
 }
 
@@ -247,7 +255,7 @@ interface ColumnHeaderController_2 {
 export { ColumnLayoutState }
 
 // @public
-export function columnMenu(): StaticTableFeature;
+export function columnMenu(options?: ColumnMenuOptions): StaticTableFeature;
 
 export { ColumnMenuAction }
 
@@ -262,6 +270,8 @@ export { ColumnMenuChoiceOption }
 export { ColumnMenuItem }
 
 export { ColumnMenuLabels }
+
+export { ColumnMenuOptions }
 
 export { ColumnMenuRow }
 
@@ -396,7 +406,7 @@ export { FeatureHostState }
 export { FeaturePatch }
 
 // @public
-export interface FeatureProps<TRow> {
+export interface FeatureProps<TRow> extends Pick<TableOptions<TRow, ReactNode>, FeatureOwnedOptionKey> {
     batchEditing?: boolean;
     bulkActions?: BulkAction[];
     cellNavigation?: boolean;
@@ -407,6 +417,7 @@ export interface FeatureProps<TRow> {
     confirmDeleteRow?: boolean;
     contextMenu?: boolean | ContextMenuOptions<TRow>;
     defaultExpandedRowIds?: readonly string[];
+    defaultSelectedIds?: readonly string[];
     densityChooser?: boolean;
     dirtyIndicators?: boolean;
     editHistory?: boolean | EditHistoryOptions;
@@ -489,13 +500,13 @@ export { FilterOption }
 export { FilterOptionsSource }
 
 // @public
-export function filters(form: ReactNode): StaticTableFeature;
+export function filters(form: ReactNode, options?: FilterPanelOptions): StaticTableFeature;
 
 // @public
-export function filters<TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
+export function filters<TRow>(defs: readonly FilterDef<TRow>[], options?: FilterPanelOptions): TableFeature<TRow>;
 
 // @public
-export function filters<TRow>(defs: readonly FilterDef<TRow>[] | ReactNode): TableFeature<TRow>;
+export function filters<TRow>(defs: readonly FilterDef<TRow>[] | ReactNode, options?: FilterPanelOptions): TableFeature<TRow>;
 
 export { FilterType }
 
@@ -565,8 +576,10 @@ export { GroupNode }
 
 export { GroupSort }
 
+export { HeaderFilterOptions }
+
 // @public
-export function headerFilters(): StaticTableFeature;
+export function headerFilters(options?: HeaderFilterOptions): StaticTableFeature;
 
 export { LayoutStorage }
 

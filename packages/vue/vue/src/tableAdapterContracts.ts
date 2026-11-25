@@ -1,5 +1,4 @@
 import type {
-  CellEdit,
   ColumnLayoutState,
   ConfirmHandler,
   Direction,
@@ -28,7 +27,6 @@ import type {
   HeaderContext,
 } from "./columnDef";
 import type { ComposedFeature } from "./features/tableFeature";
-import type { CellRange } from "./navigation/contracts";
 
 /** CSS hooks for the corresponding table or control presentation target. */
 export interface DataTableClassNames {
@@ -308,9 +306,6 @@ export interface DataTableClassNames {
 /** Shared adapter props. Query state is owned by the supplied source when present. */
 export interface DataTableProps<TRow> {
   readonly assistant?: TableAssistantProps;
-  readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly onCellCut?: (range: CellRange) => void;
   /**
    * Frontend tier: every row; the table filters, sorts and pages them. A
    * server table passes a server `source` (`useServerData`) instead.
@@ -354,7 +349,6 @@ export interface DataTableProps<TRow> {
   readonly getSearchText?: (row: TRow) => string;
   readonly columnLayout?: ColumnLayoutState;
   readonly defaultColumnLayout?: Partial<ColumnLayoutState>;
-  readonly onColumnRename?: (key: string, name: string) => void;
   readonly multiSort?: boolean;
   readonly fitColumns?: boolean;
   readonly columnWidths?: Readonly<Record<string, number>>;

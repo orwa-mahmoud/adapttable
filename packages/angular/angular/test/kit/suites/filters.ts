@@ -13,9 +13,16 @@ import {
   collectConformanceTests,
   type ConformanceTest,
 } from "@adapttable/core/conformance";
-import { Component, input, type TemplateRef, viewChild } from "@angular/core";
+import {
+  Component,
+  computed,
+  input,
+  type TemplateRef,
+  viewChild,
+} from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { declareFeatureOptions } from "../declareFeatureOptions";
 import { type AngularKitUnderTest } from "../kit";
 
 /**
@@ -117,9 +124,7 @@ export function filtersTests(
           [rowKey]="rowKey"
           [urlSync]="false"
           [forceMobile]="false"
-          [features]="features()"
-          [filtersMode]="mode()"
-          [filterFields]="fields()"
+          [features]="shown()"
           [labels]="labels()"
         />
       `,
@@ -128,6 +133,11 @@ export function filtersTests(
       readonly features = input([filters(DEFS)]);
       readonly mode = input<FiltersMode>("popover");
       readonly fields = input(true);
+      readonly shown = computed(() =>
+        declareFeatureOptions(this.features(), {
+          filters: { filtersMode: this.mode(), filterFields: this.fields() },
+        })
+      );
       readonly labels = input<Partial<TableLabels> | undefined>(undefined);
       readonly custom =
         viewChild.required<TemplateRef<FilterWidgetRenderProps<Person>>>(

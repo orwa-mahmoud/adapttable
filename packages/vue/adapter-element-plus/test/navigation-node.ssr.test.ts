@@ -34,9 +34,8 @@ describe("Element Plus grid/status Node SSR", () => {
           urlSync: false,
           dir: "rtl",
           locale: "ar",
-          onCellFill: fill,
           features: [
-            cellNavigation({ onRangeChange: changed }),
+            cellNavigation({ onRangeChange: changed, onFill: fill }),
             columnSelectionCheckbox(),
             statusBar(),
             selectionStats(),

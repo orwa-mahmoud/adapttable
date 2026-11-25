@@ -27,6 +27,7 @@ import type { BatchEditHandler } from "../editing/batchEditing";
 import type { CellEditHandler, EditHistoryInput } from "../editing/editHistory";
 import type { RowEditHandler } from "../editing/rowEditing";
 import type { ExportWriterOption } from "../export/deferredWriter";
+import type { ActiveFilterChip } from "../filters/activeFilterChips";
 import type { FilterDef } from "../filters/filterDefs";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
 import { ACTION_LABELS } from "../labelGroups/actionLabels";
@@ -225,9 +226,28 @@ export function coreRowAppearance<TRow>(
  *
  * @public
  */
-export function coreColumnMenu(): CoreFeature {
+/**
+ * Options for {@link coreColumnMenu}.
+ *
+ * @public
+ */
+export interface ColumnMenuOptions {
+  /** Persist a display-name change. Present, the Columns menu offers rename. */
+  readonly onRename?: (key: string, name: string) => void;
+}
+
+export function coreColumnMenu(options?: ColumnMenuOptions): CoreFeature {
   return {
-    ...define("column-menu", { enableColumnMenu: true }, COLUMN_MENU_LABELS),
+    ...define(
+      "column-menu",
+      {
+        enableColumnMenu: true,
+        ...(options?.onRename === undefined
+          ? {}
+          : { onColumnRename: options.onRename }),
+      },
+      COLUMN_MENU_LABELS
+    ),
     rank: COLUMN_MENU_RANK,
   };
 }
@@ -415,8 +435,27 @@ export function coreFilterTypes(specs: readonly FilterTypeSpec[]): CoreFeature {
  *
  * @public
  */
-export function coreHeaderFilters(): CoreFeature {
-  return define("header-filters", { headerFilters: true }, FILTER_LABELS);
+/**
+ * Options for {@link coreHeaderFilters}.
+ *
+ * @public
+ */
+export interface HeaderFilterOptions {
+  /** Close the header filter once a single-control write finishes. */
+  readonly closeOnSelect?: boolean;
+}
+
+export function coreHeaderFilters(options?: HeaderFilterOptions): CoreFeature {
+  return define(
+    "header-filters",
+    {
+      headerFilters: true,
+      ...(options?.closeOnSelect === undefined
+        ? {}
+        : { closeHeaderFilterOnSelect: options.closeOnSelect }),
+    },
+    FILTER_LABELS
+  );
 }
 
 /**
@@ -504,13 +543,24 @@ export function coreColumnSelectionCheckbox(): CoreFeature {
  * @public
  */
 export function coreCellNavigation(
-  options: { readonly onRangeChange?: (range: never) => void } = {}
+  options: {
+    readonly onRangeChange?: (range: never) => void;
+    readonly onCut?: (range: never) => void;
+    readonly onPaste?: (edits: never) => unknown;
+    readonly onFill?: (edits: never) => unknown;
+  } = {}
 ): CoreFeature {
   return define(
     "cell-navigation",
-    options.onRangeChange
-      ? { cellNavigation: true, onCellRangeChange: options.onRangeChange }
-      : { cellNavigation: true },
+    {
+      cellNavigation: true,
+      ...(options.onRangeChange
+        ? { onCellRangeChange: options.onRangeChange }
+        : {}),
+      ...(options.onCut ? { onCellCut: options.onCut } : {}),
+      ...(options.onPaste ? { onCellPaste: options.onPaste } : {}),
+      ...(options.onFill ? { onCellFill: options.onFill } : {}),
+    },
     GRID_LABELS,
     SELECTION_CONTRAST_RULES
   );
@@ -639,10 +689,38 @@ export function coreExportCsv<TRow>(
  * @typeParam TPanel - A binding's own filter form, when it accepts one.
  * @public
  */
+/**
+ * Options for {@link coreFilters}.
+ *
+ * @public
+ */
+export interface FilterPanelOptions {
+  /** Where the filter panel opens. Header mode is `headerFilters`. */
+  readonly mode?: "popover" | "drawer" | "header";
+  /** Draw the per-field form. Default on. */
+  readonly fields?: boolean;
+  /** Chips the host adds after the table's own. */
+  readonly extraChips?: readonly ActiveFilterChip[];
+}
+
 export function coreFilters<TRow, TPanel = never>(
-  defs: readonly FilterDef<TRow>[] | TPanel
+  defs: readonly FilterDef<TRow>[] | TPanel,
+  options?: FilterPanelOptions
 ): CoreFeature<TRow> {
-  return define("filters", { filters: defs }, FILTER_LABELS);
+  return define(
+    "filters",
+    {
+      filters: defs,
+      ...(options?.mode === undefined ? {} : { filtersMode: options.mode }),
+      ...(options?.fields === undefined
+        ? {}
+        : { filterFields: options.fields }),
+      ...(options?.extraChips === undefined
+        ? {}
+        : { extraChips: options.extraChips }),
+    },
+    FILTER_LABELS
+  );
 }
 
 /**

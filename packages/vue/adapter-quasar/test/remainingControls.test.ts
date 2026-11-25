@@ -126,9 +126,8 @@ it("uses QCheckbox and a binding-owned range, mirrors RTL navigation and request
     props: {
       ...base,
       dir: "rtl",
-      onCellFill: fill,
       features: [
-        cellNavigation({ onRangeChange: changed }),
+        cellNavigation({ onRangeChange: changed, onFill: fill }),
         columnSelectionCheckbox(),
       ],
     },

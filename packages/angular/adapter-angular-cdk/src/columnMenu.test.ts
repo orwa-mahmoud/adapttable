@@ -47,7 +47,6 @@ const COLUMNS: ColumnDef<City>[] = [
       [rowKey]="rowKey"
       [urlSync]="false"
       [features]="features"
-      [onColumnRename]="rename"
       [forceMobile]="false"
       (columnLayoutChange)="layouts.push($event)"
     />
@@ -57,7 +56,9 @@ class Host {
   readonly data = CITIES;
   readonly columns = COLUMNS;
   readonly rowKey = (row: City) => row.id;
-  readonly features = [columnMenu()];
+  readonly features = [
+    columnMenu({ onRename: (key, name) => this.rename(key, name) }),
+  ];
   readonly renames: [string, string][] = [];
   readonly layouts: ColumnLayoutState[] = [];
   readonly rename = (key: string, name: string) => {

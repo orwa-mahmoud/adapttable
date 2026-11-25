@@ -84,9 +84,8 @@ async function key(
 it("uses shared keyboard ranges and genuine Reka column checkboxes with one statistics strip", async () => {
   const range = vi.fn();
   const host = mount({
-    onCellFill: vi.fn(),
     features: [
-      cellNavigation({ onRangeChange: range }),
+      cellNavigation({ onRangeChange: range, onFill: vi.fn() }),
       columnSelectionCheckbox(),
       selectionStats(),
       statusBar(),

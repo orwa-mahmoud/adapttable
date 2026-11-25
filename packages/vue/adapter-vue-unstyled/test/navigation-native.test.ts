@@ -172,8 +172,7 @@ describe("native grid controls", () => {
     const fill = vi.fn();
     const { root } = mount({
       dir: "rtl",
-      onCellFill: fill,
-      features: [cellNavigation()],
+      features: [cellNavigation({ onFill: fill })],
     });
     await nextTick();
     const first = element(root, '[data-grid-cell="0:0"]');

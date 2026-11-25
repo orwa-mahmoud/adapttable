@@ -7,6 +7,7 @@ import {
   injectFeatureState,
 } from "@adapttable/angular";
 import type { FilterDef, TableLabels, TableSource } from "@adapttable/core";
+import type { FilterPanelOptions } from "@adapttable/core/binding";
 import {
   featureStateKey,
   filterWidgetFor,
@@ -30,7 +31,8 @@ export type FilterWidget = FilterWidgetOf<Type<unknown>>;
  * @public
  */
 export type AdapterFiltersFeature = <TRow>(
-  defs?: readonly FilterDef<TRow>[]
+  defs?: readonly FilterDef<TRow>[],
+  options?: FilterPanelOptions
 ) => AdaptTableFeature;
 
 /** The widgets the composed filters feature draws its fields with. */

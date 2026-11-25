@@ -26,6 +26,7 @@ import {
 interface Row {
   readonly id: string;
   readonly name: string;
+  readonly mark?: string;
 }
 
 const columns: ColumnDef<Row>[] = [{ key: "name", header: "Name" }];
@@ -40,12 +41,14 @@ function mount(
   extra: {
     selectedIds?: readonly string[];
     onSelectionChange?: (ids: string[]) => void;
+    getId?: (row: Row) => string;
   } = {},
-  more: readonly TableFeature<Row>[] = []
+  more: readonly TableFeature<Row>[] = [],
+  initialRows: readonly Row[] = ROWS
 ) {
   let view: DataTableShellResult<Row> | undefined;
   const features = [
-    selection(extra),
+    selection(extra.getId ? { ...extra, getId: extra.getId } : extra),
     bulkActions([
       { key: "archive", label: "Archive", onClick: () => undefined },
     ]),
@@ -78,7 +81,7 @@ function mount(
       </DataTableShellView>
     );
   }
-  const screen = render(<Table rows={ROWS} />);
+  const screen = render(<Table rows={initialRows} />);
   return {
     get view() {
       if (!view) throw new Error("The table did not render");
@@ -111,6 +114,67 @@ describe("a rekeyed row", () => {
     expect(selection?.isSelected("a")).toBe(false);
     expect(table.view.tableProps.rowPinning?.sideOf("a2")).toBe("top");
     expect(table.view.tableProps.rowPinning?.sideOf("a")).toBeUndefined();
+    expect(table.view.tableProps.expansion?.isExpanded("a2")).toBe(true);
+  });
+
+  it("follows an external selection id through a rekey and a later update", () => {
+    const rows: readonly Row[] = [
+      { id: "a", name: "Ada", mark: "x" },
+      { id: "b", name: "Bea", mark: "b" },
+    ];
+    const onSelectionChange = vi.fn();
+    const table = mount(
+      {
+        selectedIds: ["x"],
+        onSelectionChange,
+        getId: (row) => row.mark ?? row.id,
+      },
+      [],
+      rows
+    );
+    expect(table.view.tableProps.table.selection?.isSelected("x")).toBe(true);
+    act(() => {
+      table.show(
+        applyRowPatches(
+          rows,
+          [
+            rekeyRow<Row>("a", { id: "b-next", mark: "y" }),
+            updateRow<Row>("b-next", { mark: "z" }),
+          ],
+          rowKey
+        )
+      );
+    });
+    expect(onSelectionChange).toHaveBeenLastCalledWith(["z"]);
+  });
+
+  it("follows a rekey when the next update commits in the same render", () => {
+    const table = mount();
+    act(() => {
+      table.view.tableProps.table.selection?.toggle("a");
+      table.view.tableProps.rowPinning?.pin("a", "top");
+      table.view.tableProps.expansion?.toggle("a");
+    });
+    const rekeyed = applyRowPatches(
+      ROWS,
+      [rekeyRow<Row>("a", { id: "a2" })],
+      rowKey
+    );
+    const updated = applyRowPatches(
+      rekeyed,
+      [updateRow<Row>("a2", { name: "Al" })],
+      rowKey
+    );
+    act(() => {
+      table.show(updated);
+    });
+    const { selection } = table.view.tableProps.table;
+    expect(table.view.tableProps.table.rows.map((row) => row.id)).toContain(
+      "a2"
+    );
+    expect(selection?.isSelected("a2")).toBe(true);
+    expect(selection?.isSelected("a")).toBe(false);
+    expect(table.view.tableProps.rowPinning?.sideOf("a2")).toBe("top");
     expect(table.view.tableProps.expansion?.isExpanded("a2")).toBe(true);
   });
 

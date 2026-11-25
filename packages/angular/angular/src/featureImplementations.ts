@@ -40,6 +40,7 @@ import type {
   injectFindShortcut,
   injectFindWindowScroll,
 } from "./find/findMarks";
+import type { GridFocus, GridFocusOptions } from "./focus/gridFocus";
 import type { injectGroupCollapse } from "./grouping/groupCollapse";
 import type { injectGroupPaging } from "./grouping/groupPaging";
 import type { injectRowPinning } from "./rows/rowPinning";
@@ -209,4 +210,9 @@ export const FEATURE_IMPLEMENTATIONS = {
   tree: featureStateKey<TreeImplementation>("tree"),
   /** The row window, from `virtualize()`. */
   virtualize: featureStateKey<VirtualizeImplementation>("virtualize"),
+  /** Keyboard grid focus, from `cellNavigation()`. */
+  gridFocus:
+    featureStateKey<<TRow>(options: GridFocusOptions<TRow>) => GridFocus<TRow>>(
+      "grid-focus"
+    ),
 } as const;

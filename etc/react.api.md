@@ -105,6 +105,7 @@ import { FeatureHostState } from '@adapttable/core';
 import { FeatureListEntry } from '@adapttable/core/binding';
 import { FeatureNotice } from '@adapttable/core';
 import { FeatureNoticeKind } from '@adapttable/core';
+import { FeatureOwnedOptionKey } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
@@ -259,7 +260,7 @@ export { asBatchGesture }
 export { asGesture }
 
 // @public
-export interface BaseDataTableProps<TRow> extends TableOptions<TRow, ReactNode> {
+export interface BaseDataTableProps<TRow> extends Omit<TableOptions<TRow, ReactNode>, FeatureOwnedOptionKey> {
     columns: ColumnInput<TRow>[];
     features?: readonly FeatureListEntry<TableFeature<NoInfer<TRow>>>[];
     renderCard?: ReactMobileCardRenderer<TRow>;
@@ -532,7 +533,7 @@ export { FeatureNoticeKind }
 export { FeaturePatch }
 
 // @public
-export interface FeatureProps<TRow> {
+export interface FeatureProps<TRow> extends Pick<TableOptions<TRow, ReactNode>, FeatureOwnedOptionKey> {
     batchEditing?: boolean;
     bulkActions?: BulkAction[];
     cellNavigation?: boolean;
@@ -543,6 +544,7 @@ export interface FeatureProps<TRow> {
     confirmDeleteRow?: boolean;
     contextMenu?: boolean | ContextMenuOptions<TRow>;
     defaultExpandedRowIds?: readonly string[];
+    defaultSelectedIds?: readonly string[];
     densityChooser?: boolean;
     dirtyIndicators?: boolean;
     editHistory?: boolean | EditHistoryOptions;
@@ -1437,6 +1439,7 @@ export function useSelection<TRow>(options: UseSelectionOptions<TRow>): Selectio
 // @public
 export interface UseSelectionOptions<TRow> {
     acrossPages?: boolean;
+    defaultSelectedIds?: readonly string[];
     enabled?: boolean;
     getId: (row: TRow) => string;
     onSelectionChange?: (selectedIds: string[]) => void;

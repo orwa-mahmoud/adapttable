@@ -42,7 +42,6 @@ const COLUMNS: ColumnDef<Person>[] = [
       [locale]="locale()"
       [searchDebounceMs]="0"
       [features]="features"
-      filtersMode="drawer"
     />
   `,
 })
@@ -51,7 +50,7 @@ class LocalizedTable {
   readonly columns = COLUMNS;
   readonly rowKey = (row: Person) => row.id;
   readonly locale = signal<string | undefined>("ar");
-  readonly features = [filters<Person>([])];
+  readonly features = [filters<Person>([], { mode: "drawer" })];
 }
 
 async function mount() {

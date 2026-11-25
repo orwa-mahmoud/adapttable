@@ -23,7 +23,7 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && node ../../../scripts/share-map-sources.mjs",
     "typecheck": "vue-tsc --noEmit && node ../../../scripts/check-vue-types.mjs",
     "lint": "eslint .",
     "test": "vitest run",

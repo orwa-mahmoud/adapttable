@@ -214,6 +214,26 @@ describe("applyTableFeatures", () => {
     ).toEqual({ groupBy: "last", density: 1 });
   });
 
+  it("keeps a feature option that the host also passed", () => {
+    expect(
+      applyTableFeatures({
+        features: [set("filters", { filtersMode: "popover" })],
+        filtersMode: "drawer",
+        density: "compact",
+      })
+    ).toEqual({ filtersMode: "popover", density: "compact" });
+  });
+
+  it("drops a feature option the host passed without a feature", () => {
+    expect(
+      applyTableFeatures({
+        features: [],
+        filtersMode: "drawer",
+        density: "compact",
+      })
+    ).toEqual({ density: "compact" });
+  });
+
   it("lets a defined host option win over every feature", () => {
     expect(
       applyTableFeatures({

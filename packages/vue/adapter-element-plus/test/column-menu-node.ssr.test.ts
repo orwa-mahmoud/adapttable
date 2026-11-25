@@ -25,8 +25,7 @@ describe("Element Plus Columns Node SSR", () => {
           searchable: false,
           forceMobile: mobile,
           dir: "rtl",
-          onColumnRename: renamed,
-          features: [columnMenu()],
+          features: [columnMenu({ onRename: renamed })],
         })
       );
       app.provide(ID_INJECTION_KEY, { prefix: 9700, current: 0 });

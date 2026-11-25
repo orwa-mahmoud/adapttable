@@ -2022,6 +2022,11 @@ export interface ColumnMenuLabels {
 }
 
 // @public
+export interface ColumnMenuOptions {
+    readonly onRename?: (key: string, name: string) => void;
+}
+
+// @public
 export interface ColumnMenuRow<TRow> {
     canFilter: boolean;
     canHide: boolean;
@@ -2746,6 +2751,9 @@ export function coreBulkActions(actions: readonly BulkAction[]): CoreFeature;
 // @public
 export function coreCellNavigation(options?: {
     readonly onRangeChange?: (range: never) => void;
+    readonly onCut?: (range: never) => void;
+    readonly onPaste?: (edits: never) => unknown;
+    readonly onFill?: (edits: never) => unknown;
 }): CoreFeature;
 
 // @public
@@ -2761,8 +2769,8 @@ export interface CoreColumnLayoutFamilyFactories<TFeature> {
     readonly resizableColumns: () => TFeature;
 }
 
-// @public
-export function coreColumnMenu(): CoreFeature;
+// @public (undocumented)
+export function coreColumnMenu(options?: ColumnMenuOptions): CoreFeature;
 
 // @public
 export function coreColumnSelectionCheckbox(): CoreFeature;
@@ -2828,8 +2836,8 @@ export interface CoreFilteringFamilyFactories<TFeature, TFilter> {
     readonly headerFilters: () => TFeature;
 }
 
-// @public
-export function coreFilters<TRow, TPanel = never>(defs: readonly FilterDef<TRow>[] | TPanel): CoreFeature<TRow>;
+// @public (undocumented)
+export function coreFilters<TRow, TPanel = never>(defs: readonly FilterDef<TRow>[] | TPanel, options?: FilterPanelOptions): CoreFeature<TRow>;
 
 // @public
 export function coreFilterTypes(specs: readonly FilterTypeSpec[]): CoreFeature;
@@ -2849,8 +2857,8 @@ export function coreGrouping<TRow>(groupBy: string | readonly string[], extras?:
 // @public
 export function coreGroupingPanel<TRow>(groupBy?: string | readonly string[], extras?: object): CoreFeature<TRow>;
 
-// @public
-export function coreHeaderFilters(): CoreFeature;
+// @public (undocumented)
+export function coreHeaderFilters(options?: HeaderFilterOptions): CoreFeature;
 
 // @public
 export function coreMultiSort(): CoreFeature;
@@ -4968,6 +4976,9 @@ export class FakeSocket implements StreamSocket {
 export const FALLBACK_PIN_WIDTH = 150;
 
 // @public
+export const FEATURE_OWNED_OPTION_KEYS: readonly ["filtersMode", "filterFields", "extraChips", "closeHeaderFilterOnSelect", "filterDefs", "filterRegistry", "filterLabels", "activeFilterCount", "onClearFilters", "onColumnRename", "onCellCut", "onCellPaste", "onCellFill", "validateRow", "applyEdit", "onEditRollback", "formatEditError", "onEditStart", "onEditCancel", "onEditCommit", "onValidationFail", "onEditError", "onEditConflict", "editConflictPolicy", "editActivation", "rowVersion", "hasChildren", "expandedIds", "onExpandedIdsChange", "onGroupByChange", "groupFooters", "groupSort", "groupPageSize", "groupRowPageSize", "onGroupLoadMore", "groupFilter", "groupAggregates", "collapsedGroupIds", "onCollapsedGroupIdsChange", "estimateRowSize", "estimateCardSize", "virtualOverscan", "virtualScrollMargin"];
+
+// @public
 export type FeatureActionMap<TActions> = { readonly [K in keyof TActions]: ActionDefinition<ActionPayload<TActions[K]>>; };
 
 // @public
@@ -5035,6 +5046,9 @@ export type FeatureNoticeLabels = Pick<Required<TableLabels>, "noticeVirtualizeP
 
 // @public
 export function featureNoticesAttribute(notices: readonly Pick<FeatureNotice, "kind">[]): string | undefined;
+
+// @public
+export type FeatureOwnedOptionKey = (typeof FEATURE_OWNED_OPTION_KEYS)[number];
 
 // @public
 export interface FeaturePatch<TRow = unknown> {
@@ -5371,6 +5385,13 @@ export interface FilterOverlaySlotProps<TNode = unknown> {
     onClearFilters: () => void;
     onClose: () => void;
     open: boolean;
+}
+
+// @public
+export interface FilterPanelOptions {
+    readonly extraChips?: readonly ActiveFilterChip[];
+    readonly fields?: boolean;
+    readonly mode?: "popover" | "drawer" | "header";
 }
 
 // @public
@@ -7006,6 +7027,11 @@ export interface HeaderFilterOpenHost {
 export interface HeaderFilterOption {
     readonly label: string;
     readonly value: string;
+}
+
+// @public
+export interface HeaderFilterOptions {
+    readonly closeOnSelect?: boolean;
 }
 
 // @public
@@ -8734,7 +8760,7 @@ export interface RegisteredFeature<TFeature> {
     readonly id: string;
 }
 
-// @public
+// @public (undocumented)
 export function rekeyedIds<TRow>(log: RowPatchLog<TRow>, getId: (row: TRow) => string): ReadonlyMap<string, string>;
 
 // @public

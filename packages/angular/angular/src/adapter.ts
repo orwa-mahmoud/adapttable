@@ -425,6 +425,7 @@ export {
   copyContextMenuSelection,
   coreBulkActions,
   coreColumnMenu,
+  type ColumnMenuOptions,
   coreDensityChooser,
   coreFullscreen,
   coreGrouping,
@@ -613,6 +614,7 @@ export {
   coreFindInTable,
   coreHeaderFilters,
 } from "./kitFeatures";
+export type { FilterPanelOptions, HeaderFilterOptions } from "./kitFeatures";
 export type {
   AdaptCellTemplate,
   AdaptTableFeature,

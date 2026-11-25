@@ -777,6 +777,7 @@ export const FEATURE_IMPLEMENTATIONS: {
     readonly rowPinning: FeatureStateKey<RowPinningImplementation>;
     readonly tree: FeatureStateKey<TreeImplementation>;
     readonly virtualize: FeatureStateKey<VirtualizeImplementation>;
+    readonly gridFocus: FeatureStateKey<(<TRow>(options: GridFocusOptions<TRow>) => GridFocus<TRow>)>;
 };
 
 // @public

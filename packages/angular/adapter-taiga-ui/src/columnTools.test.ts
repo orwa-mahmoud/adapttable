@@ -65,7 +65,6 @@ const renamed = vi.fn();
       [forceMobile]="mobile"
       [dir]="dir"
       [features]="features"
-      [onColumnRename]="onColumnRename"
       [defaultColumnLayout]="defaultColumnLayout"
       (columnLayoutChange)="layouts.push($event)"
     />

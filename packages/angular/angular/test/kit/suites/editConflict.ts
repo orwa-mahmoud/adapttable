@@ -14,6 +14,7 @@ import { Component, computed, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { expect, vi } from "vitest";
 
+import { declareFeatureOptions } from "../declareFeatureOptions";
 import type { AngularKitUnderTest } from "../kit";
 
 /**
@@ -69,17 +70,26 @@ export function editConflictTests(
           [source]="useSource() ? source : undefined"
           [columns]="columns"
           [rowKey]="rowKey"
-          [features]="features()"
+          [features]="tableFeatures()"
           [forceMobile]="mobile()"
-          [rowVersion]="rowVersion()"
-          [editConflictPolicy]="policy()"
-          [onEditConflict]="onConflict()"
           [urlSync]="false"
         />
       `,
     })
     class Host {
       readonly features = input<readonly AdaptTableFeature[]>([]);
+      readonly tableFeatures = computed(() => {
+        const conflict = {
+          rowVersion: this.rowVersion(),
+          editConflictPolicy: this.policy(),
+          onEditConflict: this.onConflict(),
+        };
+        return declareFeatureOptions(this.features(), {
+          editing: conflict,
+          "row-editing": conflict,
+          "batch-editing": conflict,
+        });
+      });
       readonly mobile = input(false);
       readonly useSource = input(false);
       readonly rows = signal<readonly Task[]>([ROW]);

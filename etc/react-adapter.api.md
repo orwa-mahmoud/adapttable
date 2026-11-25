@@ -270,6 +270,7 @@ import { FeatureListEntry } from '@adapttable/core/binding';
 import { FeatureNotice } from '@adapttable/core';
 import { FeatureNoticeAppearance } from '@adapttable/core';
 import { FeatureNoticeKind } from '@adapttable/core';
+import { FeatureOwnedOptionKey } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
@@ -303,6 +304,7 @@ import { filterLabel } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterOptionsSource } from '@adapttable/core';
 import { FilterOverlaySlotProps as FilterOverlaySlotProps_2 } from '@adapttable/core/binding';
+import { FilterPanelOptions } from '@adapttable/core/binding';
 import { FilterRuntime } from '@adapttable/core';
 import { FILTERS_FORM } from '@adapttable/core/binding';
 import { FiltersFormSlotProps } from '@adapttable/core/binding';
@@ -786,8 +788,8 @@ export interface AdapterFiltersComponents {
 
 // @public
 export interface AdapterFiltersFeature {
-    (form: ReactNode): StaticTableFeature;
-    <TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
+    (form: ReactNode, options?: FilterPanelOptions): StaticTableFeature;
+    <TRow>(defs: readonly FilterDef<TRow>[], options?: FilterPanelOptions): TableFeature<TRow>;
 }
 
 // @public
@@ -950,7 +952,7 @@ export { assistantIsUsable }
 export { autoSizeColumns }
 
 // @public
-export interface BaseDataTableProps<TRow> extends TableOptions<TRow, ReactNode> {
+export interface BaseDataTableProps<TRow> extends Omit<TableOptions<TRow, ReactNode>, FeatureOwnedOptionKey> {
     columns: ColumnInput_2<TRow>[];
     features?: readonly FeatureListEntry<TableFeature<NoInfer<TRow>>>[];
     renderCard?: ReactMobileCardRenderer<TRow>;
@@ -2388,7 +2390,7 @@ export { FeatureNoticeKind }
 export { FeaturePatch }
 
 // @public
-export interface FeatureProps<TRow> {
+export interface FeatureProps<TRow> extends Pick<TableOptions<TRow, ReactNode>, FeatureOwnedOptionKey> {
     batchEditing?: boolean;
     bulkActions?: BulkAction[];
     cellNavigation?: boolean;
@@ -2399,6 +2401,7 @@ export interface FeatureProps<TRow> {
     confirmDeleteRow?: boolean;
     contextMenu?: boolean | ContextMenuOptions<TRow>;
     defaultExpandedRowIds?: readonly string[];
+    defaultSelectedIds?: readonly string[];
     densityChooser?: boolean;
     dirtyIndicators?: boolean;
     editHistory?: boolean | EditHistoryOptions;

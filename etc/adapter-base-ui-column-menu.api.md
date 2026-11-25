@@ -4,10 +4,11 @@
 
 ```ts
 
+import { ColumnMenuOptions } from '@adapttable/react/features';
 import { StaticTableFeature } from '@adapttable/react/adapter';
 
 // @public
-export function columnMenu(): StaticTableFeature;
+export function columnMenu(options?: ColumnMenuOptions): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

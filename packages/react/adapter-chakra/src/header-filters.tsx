@@ -5,6 +5,7 @@ import {
   type StaticTableFeature,
 } from "@adapttable/react/adapter";
 import { headerFilters as core } from "@adapttable/react/features";
+import type { HeaderFilterOptions } from "@adapttable/react/features";
 
 import { FilterHeaderTrigger } from "./components/kitControls";
 
@@ -13,8 +14,10 @@ import { FilterHeaderTrigger } from "./components/kitControls";
  *
  * @public
  */
-export function headerFilters(): StaticTableFeature {
-  return extendFeature(core(), [
+export function headerFilters(
+  options?: HeaderFilterOptions
+): StaticTableFeature {
+  return extendFeature(core(options), [
     slotRender(FILTER_HEADER, (props) => <FilterHeaderTrigger {...props} />),
   ]);
 }

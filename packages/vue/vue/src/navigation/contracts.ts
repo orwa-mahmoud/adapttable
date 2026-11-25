@@ -1,5 +1,5 @@
 /** Optional navigation models; no controller is imported by the default shell. */
-import type { CellRange, SelectionStats } from "@adapttable/core";
+import type { CellEdit, CellRange, SelectionStats } from "@adapttable/core";
 import {
   featureSlotKey,
   featureStateKey,
@@ -32,8 +32,14 @@ export interface FindButtonControlProps {
   readonly onClick: () => void;
   readonly className?: string;
 }
-export interface CellNavigationOptions {
+export interface CellNavigationOptions<TRow = unknown> {
   readonly onRangeChange?: (range: CellRange | null) => void;
+  /** Ctrl/Cmd+X, after the clipboard accepted the copy. */
+  readonly onCut?: (range: CellRange) => void;
+  /** A paste into the selected cells. */
+  readonly onPaste?: (edits: CellEdit<TRow>[]) => unknown;
+  /** A fill from the selection's edge. */
+  readonly onFill?: (edits: CellEdit<TRow>[]) => unknown;
 }
 export type { FindInTableState, GridFocusState };
 

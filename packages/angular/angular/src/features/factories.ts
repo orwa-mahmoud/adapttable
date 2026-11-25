@@ -29,6 +29,7 @@ import {
   coreCellSpan,
   coreCollapsibleColumnGroups,
   coreColumnMenu,
+  type ColumnMenuOptions,
   coreColumnSelectionCheckbox,
   coreCommandPalette,
   coreContextMenu,
@@ -36,6 +37,7 @@ import {
   coreFeature,
   coreFitColumns,
   coreHeaderFilters,
+  type HeaderFilterOptions,
   coreMultiSort,
   corePinnedSummaryRows,
   corePrint,
@@ -51,7 +53,7 @@ import {
   FILTER_ENGINE_IMPL,
   type SidePanelEntry,
 } from "@adapttable/core/binding";
-import type { Signal, TemplateRef } from "@angular/core";
+import { type Signal, type TemplateRef } from "@angular/core";
 
 /**
  * Options for `commandPalette`.
@@ -227,8 +229,8 @@ export function rowAppearance<TRow>(
  *
  * @public
  */
-export function columnMenu(): AdaptTableFeature {
-  return coreColumnMenu();
+export function columnMenu(options?: ColumnMenuOptions): AdaptTableFeature {
+  return coreColumnMenu(options);
 }
 
 /**
@@ -318,7 +320,8 @@ export interface SelectionOptions<TRow = unknown> {
   /** The id a row is selected by. Defaults to the row key. */
   readonly getId?: (row: TRow) => string;
   /** Controlled selection. Omit it and the table keeps its own. */
-  readonly selectedIds?: MaybeSignalOptional<readonly string[]>;
+  readonly selectedIds?:
+    readonly string[] | Signal<readonly string[] | undefined>;
   /** The table's own selection to start from, when the host holds none. */
   readonly defaultSelectedIds?: readonly string[];
   /** The selection changed. */
@@ -354,9 +357,11 @@ export function selection<TRow = unknown>(
  *
  * @public
  */
-export function headerFilters(): AdaptTableFeature {
+export function headerFilters(
+  options?: HeaderFilterOptions
+): AdaptTableFeature {
   return withFeatureImplementation(
-    coreHeaderFilters(),
+    coreHeaderFilters(options),
     FILTER_ENGINE,
     FILTER_ENGINE_IMPL
   );

@@ -60,7 +60,7 @@ function overlayPanels<P extends object>(props: P, host: FeatureHostState): P {
  * The row type a props object is about, read off its own `rowKey`.
  *
  * Every table props type names the row exactly once, in the function that
- * identifies a row, so {@link useTableFeatures} can type what it hands back
+ * identifies a row, so `useTableFeatures` can type what it hands back
  * without the caller repeating it.
  *
  * @public
@@ -204,7 +204,7 @@ export function useTableFeatures<P extends object>(
 }
 
 /**
- * The host {@link useTableFeatures} created for these resolved props.
+ * The host `useTableFeatures` created for these resolved props.
  *
  * @public
  */
