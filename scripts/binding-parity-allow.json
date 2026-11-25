@@ -1383,6 +1383,9 @@
         "ActiveFilterChipsSlotProps": "pending: shared-surface decision",
         "Attrs": "pending: shared-surface decision",
         "BASE_LABELS": "Vue re-exports this core name for its kits; React and Angular import it from core.",
+        "columnLayoutFamilyList": "Vue and Angular publish the core column-layout family list from the adapter. React composes that list inside the adapter.",
+        "editingFamilyList": "Vue and Angular publish the core editing family list from the adapter. React composes that list inside the adapter.",
+        "filteringFamilyList": "Vue and Angular publish the core filtering family list from the adapter. React composes that list inside the adapter.",
         "BULK_ACTIONS_CONTROL": "pending: shared-surface decision",
         "BULK_ACTIONS_MODEL": "pending: shared-surface decision",
         "BodyWindowModel": "pending: shared-surface decision",
@@ -1846,6 +1849,7 @@
       },
       "features": {
         "Attrs": "pending: shared-surface decision",
+        "ColumnMenuOptions": "Vue's features entry publishes this options type. Angular publishes it from the adapter entry, which owns the name.",
         "CellContext": "pending: shared-surface decision",
         "ColumnDef": "pending: shared-surface decision",
         "ColumnGroup": "pending: shared-surface decision",
@@ -2409,6 +2413,9 @@
       },
       "adapter": {
         "ADAPTTABLE_CONTEXT_MENU": "pending: shared-surface decision",
+        "columnLayoutFamilyList": "Vue and Angular publish the core column-layout family list from the adapter. React composes that list inside the adapter.",
+        "editingFamilyList": "Vue and Angular publish the core editing family list from the adapter. React composes that list inside the adapter.",
+        "filteringFamilyList": "Vue and Angular publish the core filtering family list from the adapter. React composes that list inside the adapter.",
         "ADAPTTABLE_PALETTE_OPEN": "pending: shared-surface decision",
         "AGENT_APPROVAL": "pending: shared-surface decision",
         "AdaptAssistantAlwaysAllowed": "pending: shared-surface decision",

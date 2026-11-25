@@ -4886,7 +4886,10 @@
       "withKitEnvironment",
       "ActionAiOptions",
       "OverlayDismissOptions",
-      "TableQueryHandler"
+      "TableQueryHandler",
+      "ServerFilterKeys",
+      "ServerFilterKeysInput",
+      "serverFilterKeys"
     ],
     "react-adapter": [
       "ACTIVE_FILTER_CHIPS",
@@ -5739,7 +5742,9 @@
       "EXPORT_STATE",
       "FULLSCREEN_STATE",
       "TABLE_PROPS_STATE",
-      "ToolbarEntrySlotProps"
+      "ToolbarEntrySlotProps",
+      "FeatureListEntry",
+      "flattenFeatures"
     ],
     "react-features": [
       "applyTableFeatures",
@@ -8067,7 +8072,10 @@
       "RowReorderImplementation",
       "TreeImplementation",
       "VirtualizeImplementation",
-      "withFeatureImplementation"
+      "withFeatureImplementation",
+      "ServerFilterKeys",
+      "ServerFilterKeysInput",
+      "serverFilterKeys"
     ],
     "angular-formula": [
       "AngularFormulaColumnsResult",
@@ -12501,7 +12509,12 @@
       "AdapterFiltersFeature",
       "AdaptFilterWidgetFormModel",
       "FilterWidget",
-      "withFilterWidgets"
+      "withFilterWidgets",
+      "FeatureListEntry",
+      "columnLayoutFamilyList",
+      "editingFamilyList",
+      "filteringFamilyList",
+      "flattenFeatures"
     ],
     "adapter-element-plus-batch-editing": [
       "batchEditing",
