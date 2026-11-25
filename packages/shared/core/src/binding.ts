@@ -671,13 +671,13 @@ export type {
 } from "./export/tableCsv";
 export type { ExportQuery } from "./export/tableCsv";
 export {
+  type ColumnMenuOptions,
   coreBatchEditing,
   coreBulkActions,
   coreCellNavigation,
   coreCellSpan,
   coreCollapsibleColumnGroups,
   coreColumnMenu,
-  type ColumnMenuOptions,
   coreColumnSelectionCheckbox,
   coreCommandPalette,
   coreContextMenu,
@@ -691,7 +691,6 @@ export {
   coreFeature,
   type CoreFeatureRegistrar,
   coreFilters,
-  type FilterPanelOptions,
   coreFilterTypes,
   coreFindInTable,
   coreFitColumns,
@@ -699,7 +698,6 @@ export {
   coreGrouping,
   coreGroupingPanel,
   coreHeaderFilters,
-  type HeaderFilterOptions,
   coreMultiSort,
   coreNestedTable,
   corePinnedSummaryRows,
@@ -719,6 +717,8 @@ export {
   coreTree,
   coreUndoRedoButtons,
   coreVirtualize,
+  type FilterPanelOptions,
+  type HeaderFilterOptions,
   type SelectionFeatureOptions,
   type VirtualizeInput,
 } from "./features/coreFeatures";
@@ -757,9 +757,9 @@ export {
 export {
   applyTableFeatures,
   FEATURE_OWNED_OPTION_KEYS,
-  type FeatureOwnedOptionKey,
   type FeatureApplyInput,
   featureLabelsOf,
+  type FeatureOwnedOptionKey,
   type FeaturePatch,
   getAppliedFeatures,
   mergeFeaturePatches,
