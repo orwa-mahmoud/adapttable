@@ -33,10 +33,6 @@ export {
   rowEditing,
 } from "./features/editing";
 export { exportCsv } from "./features/export-csv";
-export type {
-  ColumnMenuOptions,
-  HeaderFilterOptions,
-} from "@adapttable/core/binding";
 export {
   bulkActions,
   cellSpan,
@@ -158,6 +154,10 @@ export type {
 export type { RowHeight, RowStyle } from "@adapttable/core";
 export type { RowAction } from "@adapttable/core";
 export type { BulkAction } from "@adapttable/core";
+export type {
+  ColumnMenuOptions,
+  HeaderFilterOptions,
+} from "@adapttable/core/binding";
 
 /**
  * The member types the signatures above hand back.

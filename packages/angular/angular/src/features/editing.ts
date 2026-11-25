@@ -127,13 +127,9 @@ export function editing<TRow>(
             columns: handles.table.allColumns() as readonly ColumnDef<TRow>[],
             rowKey: handles.table.rowKey,
             rowVersion: current.rowVersion as
-              | ((row: TRow) => number)
-              | undefined,
+              ((row: TRow) => number) | undefined,
             editConflictPolicy: current.editConflictPolicy as
-              | "ask"
-              | "keep"
-              | "take"
-              | undefined,
+              "ask" | "keep" | "take" | undefined,
             onEditConflict: current.onEditConflict as
               EditConflictHandler<TRow> | undefined,
           };

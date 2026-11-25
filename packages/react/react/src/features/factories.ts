@@ -51,11 +51,11 @@ export type { ExportCsvOptions } from "@adapttable/core";
 export type { FilterDef } from "@adapttable/core";
 export type { GroupSort } from "@adapttable/core";
 import {
+  type ColumnMenuOptions,
   coreBulkActions,
   coreCellSpan,
   coreCollapsibleColumnGroups,
   coreColumnMenu,
-  type ColumnMenuOptions,
   coreColumnSelectionCheckbox,
   coreCommandPalette,
   coreContextMenu,
@@ -65,7 +65,6 @@ import {
   coreFilterTypes,
   coreFitColumns,
   coreHeaderFilters,
-  type HeaderFilterOptions,
   coreMultiSort,
   corePinnedSummaryRows,
   corePrint,
@@ -76,6 +75,7 @@ import {
   coreSidePanel,
   coreStatusBar,
   coreUndoRedoButtons,
+  type HeaderFilterOptions,
   type SelectionFeatureOptions,
 } from "@adapttable/core/binding";
 
