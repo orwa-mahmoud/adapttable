@@ -26,7 +26,6 @@ interface Person {
       [columns]="columns"
       [rowKey]="rowKey"
       [features]="features"
-      [closeHeaderFilterOnSelect]="true"
       urlKey="people"
     />
   `,
@@ -41,7 +40,10 @@ export class HeaderFilters {
     { key: "active", header: "Active", filter: "boolean" },
   ];
   readonly rowKey = (row: Person) => row.id;
-  readonly features = [filters<Person>(), headerFilters()];
+  readonly features = [
+    filters<Person>(),
+    headerFilters({ closeOnSelect: true }),
+  ];
 }
 ```
 
@@ -56,8 +58,8 @@ definition can use `column` to target a different column key. Header
 controls read the same choice lists and custom-type registry as the main
 form, so server-backed lists still need explicit options or a loader.
 
-By default a header filter stays open while it is edited. Set
-`[closeHeaderFilterOnSelect]="true"` before initialization to dismiss after a
+By default a header filter stays open while it is edited. Pass
+`headerFilters({ closeOnSelect: true })` to dismiss after a
 completed single-control write. Multi-value and range editing retain the
 space needed to finish the selection. Escape and outside presses dismiss
 the overlay. NG-ZORRO's nested choice overlays are treated as part of the

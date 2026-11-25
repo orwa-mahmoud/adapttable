@@ -9434,6 +9434,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "FEATURE_OWNED_OPTION_KEYS",
+      "kind": "runtime",
+      "module": "features/featurePatch.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featurePatch.ts#FEATURE_OWNED_OPTION_KEYS",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "featureLabelsOf",
       "kind": "runtime",
       "module": "features/featurePatch.ts",
@@ -15275,6 +15286,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "ColumnMenuOptions",
+      "kind": "type",
+      "module": "features/coreFeatures.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/coreFeatures.ts#ColumnMenuOptions",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "ColumnRenameEditor",
       "kind": "type",
       "module": "columns/columnRenameEditor.ts",
@@ -16221,6 +16243,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "FeatureOwnedOptionKey",
+      "kind": "type",
+      "module": "features/featurePatch.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featurePatch.ts#FeatureOwnedOptionKey",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "FeaturePatch",
       "kind": "type",
       "module": "features/featurePatch.ts",
@@ -16515,6 +16548,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/slotContract.ts#FilterOverlaySlotProps",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FilterPanelOptions",
+      "kind": "type",
+      "module": "features/coreFeatures.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/coreFeatures.ts#FilterPanelOptions",
       "subpaths": ["./binding"]
     },
     {
@@ -17417,6 +17461,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "filters/headerFilterCells.ts#HeaderFilterOption",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "HeaderFilterOptions",
+      "kind": "type",
+      "module": "features/coreFeatures.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/coreFeatures.ts#HeaderFilterOptions",
       "subpaths": ["./binding"]
     },
     {

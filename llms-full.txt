@@ -27,7 +27,7 @@ and use it, or open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 63–70 KiB min+gzip (measured 2026-11-24 from
+A plain adapter `DataTable` is 63–71 KiB min+gzip (measured 2026-11-25 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
@@ -622,6 +622,10 @@ import { rowReorder } from "@adapttable/mantine/row-reorder";
 
 A built-in factory and a host plugin are the same `TableFeature` type in the
 same array — that is the public plugin surface, not a parallel API.
+`ColumnMenuOptions` and `FilterPanelOptions` are the options `columnMenu()`
+and `filters()` take. `HeaderFilterOptions` is the same for `headerFilters()`.
+`FeatureOwnedOptionKey` names one entry of `FEATURE_OWNED_OPTION_KEYS`, the
+options a feature factory sets and a table prop does not.
 
 ## What the import buys
 
@@ -20071,6 +20075,11 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 
 ## Feature composition types
 
+`ColumnMenuOptions`, `FilterPanelOptions` and `HeaderFilterOptions` are the
+arguments of `columnMenu()`, `filters()` and `headerFilters()`.
+`FeatureOwnedOptionKey` is one name in `FEATURE_OWNED_OPTION_KEYS`, the
+options those factories set.
+
 | Export                         | What it is                                                                                                                                                                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `TableFeature<TRow>`           | A composed feature: `id`, optional `apply`, `setup`, `provider` and `renders`. Row-aware factories return this and infer `TRow` from their callback.                                           |
@@ -22651,7 +22660,7 @@ React and the UI kit external because your app already ships those):
 | ------------------------------------------ | ---------- |
 | `useFrontendData` + `useDataTable` (react) | ~21 KiB    |
 | every core export                          | ~48 KiB    |
-| `DataTable` from an adapter                | ~63–70 KiB |
+| `DataTable` from an adapter                | ~63–71 KiB |
 
 The first row is the one to read: a headless table costs well under half of
 the full core, because the parts you never import never arrive. The
@@ -22943,8 +22952,8 @@ libraries.
 
 <sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation()`, and paste and fill write through editable columns and the composed `editing()` handler — the channel inline editing uses — unless `onCellPaste` / `onCellFill` take the batch whole; cut reports its range to `onCellCut`. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
-A plain AdaptTable adapter `DataTable` is 63–70 KiB min+gzip (measured
-2026-11-24 from packed fixtures; React and the kit stay external). Competitor
+A plain AdaptTable adapter `DataTable` is 63–71 KiB min+gzip (measured
+2026-11-25 from packed fixtures; React and the kit stay external). Competitor
 bundle sizes are not listed here — they depend on which paid modules you
 licence and are not produced by this repo's fixtures. Method and the rest of
 the grid: [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).

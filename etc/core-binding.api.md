@@ -4976,7 +4976,7 @@ export class FakeSocket implements StreamSocket {
 export const FALLBACK_PIN_WIDTH = 150;
 
 // @public
-export const FEATURE_OWNED_OPTION_KEYS: readonly ["filtersMode", "filterFields", "extraChips", "closeHeaderFilterOnSelect", "filterDefs", "filterRegistry", "filterLabels", "activeFilterCount", "onClearFilters", "onColumnRename", "onCellCut", "onCellPaste", "onCellFill", "validateRow", "applyEdit", "onEditRollback", "formatEditError", "onEditStart", "onEditCancel", "onEditCommit", "onValidationFail", "onEditError", "onEditConflict", "editConflictPolicy", "editActivation", "rowVersion", "hasChildren", "expandedIds", "onExpandedIdsChange", "onGroupByChange", "groupFooters", "groupSort", "groupPageSize", "groupRowPageSize", "onGroupLoadMore", "groupFilter", "groupAggregates", "collapsedGroupIds", "onCollapsedGroupIdsChange", "estimateRowSize", "estimateCardSize", "virtualOverscan", "virtualScrollMargin"];
+export const FEATURE_OWNED_OPTION_KEYS: readonly ["filtersMode", "filterFields", "extraChips", "closeHeaderFilterOnSelect", "filterDefs", "filterRegistry", "filterLabels", "activeFilterCount", "onColumnRename", "onCellCut", "onCellPaste", "onCellFill", "validateRow", "applyEdit", "onEditRollback", "formatEditError", "onEditStart", "onEditCancel", "onEditCommit", "onValidationFail", "onEditError", "onEditConflict", "editConflictPolicy", "editActivation", "rowVersion", "hasChildren", "expandedIds", "onExpandedIdsChange", "onGroupByChange", "groupFooters", "groupSort", "groupPageSize", "groupRowPageSize", "onGroupLoadMore", "groupFilter", "groupAggregates", "collapsedGroupIds", "onCollapsedGroupIdsChange", "estimateRowSize", "estimateCardSize", "virtualOverscan", "virtualScrollMargin"];
 
 // @public
 export type FeatureActionMap<TActions> = { readonly [K in keyof TActions]: ActionDefinition<ActionPayload<TActions[K]>>; };
@@ -5391,6 +5391,7 @@ export interface FilterOverlaySlotProps<TNode = unknown> {
 export interface FilterPanelOptions {
     readonly extraChips?: readonly ActiveFilterChip[];
     readonly fields?: boolean;
+    readonly filterLabels?: Readonly<Record<string, ChipLabelResolver>>;
     readonly mode?: "popover" | "drawer" | "header";
 }
 
