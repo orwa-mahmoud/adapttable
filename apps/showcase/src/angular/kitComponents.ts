@@ -115,17 +115,19 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
     const policy = this.editConflictPolicy();
     const flashing = this.isCellFlashing();
     const rest = this.features().map((feature) => {
-      const extra =
-        feature.id === "filters"
-          ? { filtersMode: mode, filterFields: fields }
-          : feature.id === "editing" ||
-              feature.id === "row-editing" ||
-              feature.id === "batch-editing"
-            ? {
-                ...(policy === undefined ? {} : { editConflictPolicy: policy }),
-                ...(flashing === undefined ? {} : { isCellFlashing: flashing }),
-              }
-            : undefined;
+      const editing =
+        feature.id === "editing" ||
+        feature.id === "row-editing" ||
+        feature.id === "batch-editing";
+      let extra: Record<string, unknown> | undefined;
+      if (feature.id === "filters") {
+        extra = { filtersMode: mode, filterFields: fields };
+      } else if (editing) {
+        extra = {
+          ...(policy === undefined ? {} : { editConflictPolicy: policy }),
+          ...(flashing === undefined ? {} : { isCellFlashing: flashing }),
+        };
+      }
       if (!extra || Object.keys(extra).length === 0) return feature;
       const apply = feature.apply?.bind(feature);
       return {

@@ -66,6 +66,8 @@ const features = computed(() =>
           onRangeChange: (next) => {
             range.value = next;
           },
+          onFill: fill,
+          onPaste: fill,
         }),
         columnSelectionCheckbox(),
         columnMenu(),
@@ -106,8 +108,6 @@ function replaceRows(): void {
       :searchable="false"
       :labels="labels"
       :dir="rtl ? 'rtl' : 'ltr'"
-      :on-cell-fill="fill"
-      :on-cell-paste="fill"
       url-key="navigation"
     />
   </main>

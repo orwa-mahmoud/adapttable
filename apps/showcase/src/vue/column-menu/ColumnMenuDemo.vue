@@ -87,7 +87,6 @@ const source = computed(() =>
   secondSource.value ? second.value : first.value
 );
 const rowKey = (row: Person): string => row.id;
-const features = computed(() => (enabled.value ? [columnMenu()] : []));
 const requestLayout = computed(() => {
   const host = replacement.value ? "replacement" : "original";
   return (next: ColumnLayoutState): void => {
@@ -101,6 +100,9 @@ const requestRename = computed(() => {
     renameRequests.value = [...renameRequests.value, { host, key, name }];
   };
 });
+const features = computed(() =>
+  enabled.value ? [columnMenu({ onRename: requestRename.value })] : []
+);
 const BrokenKit = defineComponent({
   setup: () => () =>
     h(DataTable<Person>, {
@@ -150,7 +152,6 @@ function switchKit(): void {
         :row-key="rowKey"
         :features="features"
         :column-layout="layout"
-        :on-column-rename="requestRename"
         :dir="rtl ? 'rtl' : 'ltr'"
         :labels="labels"
         :force-mobile="mobile"
