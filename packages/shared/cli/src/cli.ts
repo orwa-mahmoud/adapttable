@@ -234,7 +234,21 @@ export function runCli(
   return main(argv, cwd);
 }
 
-const entry = process.argv[1];
-if (entry && import.meta.url === pathToFileURL(entry).href) {
-  process.exit(runCli(process.argv.slice(2)));
+/**
+ * Exit when this module is the program the user ran.
+ *
+ * @param moduleUrl - This module's `import.meta.url`.
+ * @param entry - The program path, `process.argv[1]` for the bin.
+ * @param argv - Arguments after the program path.
+ */
+export function runCliEntry(
+  moduleUrl: string,
+  entry: string | undefined = process.argv[1],
+  argv: readonly string[] = process.argv.slice(2)
+): void {
+  if (entry && moduleUrl === pathToFileURL(entry).href) {
+    process.exit(runCli(argv));
+  }
 }
+
+runCliEntry(import.meta.url);
