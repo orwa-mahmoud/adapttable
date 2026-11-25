@@ -7,16 +7,15 @@
  */
 import {
   type AdaptTableFeature,
+  FEATURE_IMPLEMENTATIONS,
   injectGridFocus,
   SURFACE_GRID,
   SURFACE_HANDLES,
   SURFACE_OCCUPIED,
+  withFeatureImplementation,
 } from "@adapttable/angular";
 import type { CellRange } from "@adapttable/core";
 import { coreCellNavigation } from "@adapttable/core/binding";
-
-import { withFeatureImplementation } from "../featureHost";
-import { FEATURE_IMPLEMENTATIONS } from "../featureImplementations";
 
 /**
  * Options for {@link cellNavigation}.
