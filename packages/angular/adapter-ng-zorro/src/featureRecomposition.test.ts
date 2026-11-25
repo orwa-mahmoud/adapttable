@@ -16,11 +16,10 @@ import { print } from "@adapttable/ng-zorro/print";
 import { selection } from "@adapttable/ng-zorro/selection";
 import { tree } from "@adapttable/ng-zorro/tree";
 import { Component, computed, signal } from "@angular/core";
-
-import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { featureRecompositionTests } from "../../angular/test/kit/suites/featureRecomposition";
 import { kit } from "../testing/kit";
 import { kitSelector } from "../testUtils";

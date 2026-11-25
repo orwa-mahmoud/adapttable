@@ -26,12 +26,11 @@ import {
   type TemplateRef,
   viewChild,
 } from "@angular/core";
-
-import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 
+import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { filtersTests } from "../../angular/test/kit/suites/filters";
 import { kit } from "../testing/kit";
 import { kitSelector } from "../testUtils";

@@ -25,12 +25,11 @@ import {
   type TemplateRef,
   viewChild,
 } from "@angular/core";
-
-import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { TuiDropdownOptionsDirective } from "@taiga-ui/core";
 
+import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { filtersTests } from "../../angular/test/kit/suites/filters";
 import { AdaptHeaderFilterTrigger } from "../header-filters/headerFilterTrigger";
 import { kit } from "../testing/kit";
