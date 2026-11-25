@@ -30,7 +30,6 @@ describe("filters feature (mui)", () => {
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
-        extraChips={[{ key: "x", label: "Custom", onRemove: vi.fn() }]}
       />
     );
     expect(screen.queryByText("Custom")).not.toBeInTheDocument();
@@ -43,8 +42,11 @@ describe("filters feature (mui)", () => {
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
-        features={[filters<Row>(DEFS)]}
-        extraChips={[{ key: "x", label: "Custom", onRemove: vi.fn() }]}
+        features={[
+          filters<Row>(DEFS, {
+            extraChips: [{ key: "x", label: "Custom", onRemove: vi.fn() }],
+          }),
+        ]}
       />
     );
     expect(screen.getByText("Custom")).toBeInTheDocument();
