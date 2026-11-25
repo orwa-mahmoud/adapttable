@@ -53,7 +53,9 @@ export interface KitChromeFactories {
   undoRedoButtons: () => StaticTableFeature;
   bulkActions: (actions: readonly BulkAction[]) => StaticTableFeature;
   collapsibleColumnGroups: () => StaticTableFeature;
-  columnMenu: () => StaticTableFeature;
+  columnMenu: (options?: {
+    readonly onRename?: (key: string, name: string) => void;
+  }) => StaticTableFeature;
   commandPalette: (
     options?: boolean | CommandPaletteOptions
   ) => StaticTableFeature;
@@ -83,14 +85,16 @@ export interface KitChromeFactories {
     onBatchEdit: NonNullable<KitFeatureRequests["batchEditing"]>
   ) => TableFeature<Person>;
   editing: (
-    onCellEdit: NonNullable<KitFeatureRequests["editing"]>
+    onCellEdit: NonNullable<KitFeatureRequests["editing"]>,
+    extras?: KitFeatureRequests["editingExtras"]
   ) => TableFeature<Person>;
   groupingPanel: (
     groupBy: NonNullable<KitFeatureRequests["grouping"]>["groupBy"],
     extras: NonNullable<KitFeatureRequests["grouping"]>["extras"]
   ) => TableFeature<Person>;
   rowEditing: (
-    onRowEdit: NonNullable<KitFeatureRequests["rowEditing"]>
+    onRowEdit: NonNullable<KitFeatureRequests["rowEditing"]>,
+    extras?: KitFeatureRequests["editingExtras"]
   ) => TableFeature<Person>;
   rowReorder: (
     onRowReorder: NonNullable<KitFeatureRequests["rowReorder"]>["onRowReorder"],
@@ -217,7 +221,15 @@ function panelChrome(
 ): readonly TableFeature<Person>[] {
   return [
     ...(flags.collapsibleColumnGroups ? [kit.collapsibleColumnGroups()] : []),
-    ...((flags.columnMenu ?? rich) ? [kit.columnMenu()] : []),
+    ...((flags.columnMenu ?? rich)
+      ? [
+          kit.columnMenu(
+            flags.kitFeatures?.columnRename
+              ? { onRename: flags.kitFeatures.columnRename }
+              : undefined
+          ),
+        ]
+      : []),
     ...(flags.sidePanel ? [kit.sidePanel(flags.sidePanel)] : []),
     ...((flags.bulkActions ?? rich)
       ? [kit.bulkActions(flags.bulkActionList)]
@@ -246,8 +258,10 @@ function kitDrawn(
   asked: KitFeatureRequests
 ): readonly TableFeature<Person>[] {
   return [
-    ...(asked.editing ? [kit.editing(asked.editing)] : []),
-    ...(asked.rowEditing ? [kit.rowEditing(asked.rowEditing)] : []),
+    ...(asked.editing ? [kit.editing(asked.editing, asked.editingExtras)] : []),
+    ...(asked.rowEditing
+      ? [kit.rowEditing(asked.rowEditing, asked.editingExtras)]
+      : []),
     ...(asked.batchEditing ? [kit.batchEditing(asked.batchEditing)] : []),
     ...(asked.grouping
       ? [kit.groupingPanel(asked.grouping.groupBy, asked.grouping.extras)]

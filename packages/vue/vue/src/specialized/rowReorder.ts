@@ -301,7 +301,7 @@ export function RowReorderChrome<TRow>(
 }
 export function rowReorder<TRow>(
   onRowReorder: RowReorderHandler<TRow>,
-  options?: RowReorderOptions<TRow>
+  options?: MaybeRefOrGetter<RowReorderOptions<TRow> | undefined>
 ): TableFeature<TRow> {
   function useRowReorderMount(context: FeatureMountContext<TRow>): void {
     let previousOrder: ReadonlyMap<string, number> | undefined;
@@ -366,7 +366,7 @@ export function rowReorder<TRow>(
             context.runtime.rowAt(index),
         },
         onRowReorder,
-        options
+        toValue(options)
       ),
       enabled: context.active.value,
       session: session.value,

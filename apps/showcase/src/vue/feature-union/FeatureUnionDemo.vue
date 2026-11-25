@@ -151,43 +151,41 @@ const edit = editing<UnionRow>((row, key, value) => {
     score: Number(value),
   }));
 });
-const reorder = computed(() =>
-  rowReorder<UnionRow>(
-    (from, to, row) => {
+const reorder = rowReorder<UnionRow>(
+  (from, to, row) => {
+    moveRequests.value++;
+    if (!acceptMoves.value) return;
+    acceptedMoves.value++;
+    rows.value = reorderSiblings(rows.value, row.id, from, to);
+  },
+  () => ({
+    movePolicy: "confirm",
+    confirmMove: nativeConfirmation.value
+      ? undefined
+      : (request) => {
+          pendingMove.value = request.row.id;
+          return new Promise<boolean>((resolve) => {
+            settleMove = resolve;
+          });
+        },
+    onTreeMove: (row, _from, to, position) => {
       moveRequests.value++;
       if (!acceptMoves.value) return;
       acceptedMoves.value++;
-      rows.value = reorderSiblings(rows.value, row.id, from, to);
+      const remaining = withoutRow(rows.value, row.id);
+      if (to.id === null) {
+        const next = [...remaining];
+        next.splice(position, 0, row);
+        rows.value = next;
+      } else {
+        rows.value = updateRow(remaining, to.id, (parent) => {
+          const children = [...(parent.children ?? [])];
+          children.splice(position, 0, row);
+          return { ...parent, children };
+        });
+      }
     },
-    {
-      movePolicy: "confirm",
-      confirmMove: nativeConfirmation.value
-        ? undefined
-        : (request) => {
-            pendingMove.value = request.row.id;
-            return new Promise<boolean>((resolve) => {
-              settleMove = resolve;
-            });
-          },
-      onTreeMove: (row, _from, to, position) => {
-        moveRequests.value++;
-        if (!acceptMoves.value) return;
-        acceptedMoves.value++;
-        const remaining = withoutRow(rows.value, row.id);
-        if (to.id === null) {
-          const next = [...remaining];
-          next.splice(position, 0, row);
-          rows.value = next;
-        } else {
-          rows.value = updateRow(remaining, to.id, (parent) => {
-            const children = [...(parent.children ?? [])];
-            children.splice(position, 0, row);
-            return { ...parent, children };
-          });
-        }
-      },
-    }
-  )
+  })
 );
 const features = computed(() => [
   selection({
@@ -202,7 +200,7 @@ const features = computed(() => [
   findInTable({ button: true }),
   statusBar(),
   edit,
-  reorder.value,
+  reorder,
   exportCsv<UnionRow>({
     scope: scope.value,
     request: (info) => {
