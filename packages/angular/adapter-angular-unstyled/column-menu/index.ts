@@ -10,8 +10,8 @@ import {
 } from "@adapttable/angular";
 import {
   COLUMN_MENU,
-  coreColumnMenu,
   type ColumnMenuOptions,
+  coreColumnMenu,
 } from "@adapttable/angular/adapter";
 import { COLUMN_MENU_ENTRY } from "@adapttable/angular/toolbar";
 import { AdaptColumnMenu } from "@adapttable/angular-unstyled";

@@ -16,11 +16,10 @@ import { print } from "@adapttable/angular-unstyled/print";
 import { selection } from "@adapttable/angular-unstyled/selection";
 import { tree } from "@adapttable/angular-unstyled/tree";
 import { Component, computed, signal } from "@angular/core";
-
-import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { featureRecompositionTests } from "../../angular/test/kit/suites/featureRecomposition";
 import { kit } from "../testing/kit";
 import { AdaptDataTable } from "./dataTable";

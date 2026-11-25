@@ -15,10 +15,10 @@ import {
   coreFilters,
   FILTER_DRAWER,
   FILTER_POPOVER,
+  type FilterPanelOptions,
   FILTERS_FORM,
   type FilterWidget,
   withFilterWidgets,
-  type FilterPanelOptions,
 } from "@adapttable/angular/adapter";
 import {
   AdaptFilterChips,

@@ -16,11 +16,10 @@ import { print } from "@adapttable/ng-bootstrap/print";
 import { selection } from "@adapttable/ng-bootstrap/selection";
 import { tree } from "@adapttable/ng-bootstrap/tree";
 import { Component, computed, signal } from "@angular/core";
-
-import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { featureRecompositionTests } from "../../angular/test/kit/suites/featureRecomposition";
 import { kit } from "../testing/kit";
 import { ngBootstrapPart, settleBootstrap } from "../testUtils";
