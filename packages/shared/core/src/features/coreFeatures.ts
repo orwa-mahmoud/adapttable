@@ -28,7 +28,7 @@ import type { CellEditHandler, EditHistoryInput } from "../editing/editHistory";
 import type { RowEditHandler } from "../editing/rowEditing";
 import type { ExportWriterOption } from "../export/deferredWriter";
 import type { ActiveFilterChip } from "../filters/activeFilterChips";
-import type { FilterDef } from "../filters/filterDefs";
+import type { ChipLabelResolver, FilterDef } from "../filters/filterDefs";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
 import { ACTION_LABELS } from "../labelGroups/actionLabels";
 import { COLUMN_MENU_LABELS } from "../labelGroups/columnMenuLabels";
@@ -701,6 +701,8 @@ export interface FilterPanelOptions {
   readonly fields?: boolean;
   /** Chips the host adds after the table's own. */
   readonly extraChips?: readonly ActiveFilterChip[];
+  /** Labels for the chips the table derives from active filters. */
+  readonly filterLabels?: Readonly<Record<string, ChipLabelResolver>>;
 }
 
 export function coreFilters<TRow, TPanel = never>(
@@ -718,6 +720,9 @@ export function coreFilters<TRow, TPanel = never>(
       ...(options?.extraChips === undefined
         ? {}
         : { extraChips: options.extraChips }),
+      ...(options?.filterLabels === undefined
+        ? {}
+        : { filterLabels: options.filterLabels }),
     },
     FILTER_LABELS
   );

@@ -74,10 +74,10 @@ export function MantineCustomFiltersExample() {
                   <Checkbox key={s} value={s} label={s} />
                 ))}
               </Stack>
-            </Checkbox.Group>
+            </Checkbox.Group>,
+            { filterLabels: { status: (value) => `Status: ${value}` } }
           ),
         ]}
-        filterLabels={{ status: (value) => `Status: ${value}` }}
         onClearFilters={() => source.setExtra("status", undefined)}
       />
     </MantineProvider>
