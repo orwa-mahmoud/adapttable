@@ -240,7 +240,7 @@ const MANUAL: readonly (readonly [RegExp, string])[] = [
     SERVER_SOURCE_PROP,
   ],
   [
-    new RegExp(String.raw`:(?:${VUE_SERVER_SOURCE_PROPS.join("|")})=`, "g"),
+    new RegExp(`:(?:${VUE_SERVER_SOURCE_PROPS.join("|")})=`, "g"),
     SERVER_SOURCE_PROP,
   ],
   [
