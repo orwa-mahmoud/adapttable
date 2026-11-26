@@ -412,7 +412,7 @@ after scaffolding the table.
 
 ## Explore a connected workspace
 
-The [Vue Unstyled order workspace](/v3/vue/demo/unstyled/workspace/) combines the
+The [Vue Unstyled order workspace](/vue/demo/unstyled/workspace/) combines the
 native adapter's controls in three small workflows:
 
 * **Order desk:** search and filter twelve fictional orders, edit an owner, open a

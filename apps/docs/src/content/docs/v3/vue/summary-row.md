@@ -146,7 +146,7 @@ label and typed `FooterContext<TRow>`. Both types are available from
 `@adapttable/vue` and `@adapttable/vue/adapter`, so a custom shell can name its
 summary projection without importing an internal module.
 
-See the [Vue footer demo](/v3/vue/demo/unstyled/table-footers/) for paging, search,
+See the [Vue footer demo](/vue/demo/unstyled/table-footers/) for paging, search,
 mobile cards, hidden columns and logical pinning in both writing directions.
 
 ### Building the summary projection

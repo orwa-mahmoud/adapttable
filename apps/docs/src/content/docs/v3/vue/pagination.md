@@ -69,4 +69,4 @@ Changing search or filters resets the query to the first page. Give independent 
 
 ## Try the native adapters
 
-Use the [live demo](/v3/vue/demo/) or [Feature Lab](/v3/vue/demo/all-options/) to switch all eight Vue kits. Dedicated kit examples show the same feature with each UI kit’s controls.
+Use the [live demo](/vue/demo/) or [Feature Lab](/vue/demo/all-options/) to switch all eight Vue kits. Dedicated kit examples show the same feature with each UI kit’s controls.

@@ -137,4 +137,4 @@ every checklist filter. A supplied `source` wins over all of them.
 
 `useServerData` accepts reactive `rows`, `total`, `loading` and `error`, and an `onQueryChange` callback. The host fetches or computes a response and publishes it through those refs. Use the callback context’s abort signal to avoid applying replies after a newer query or disposal. Declare only the server capabilities your endpoint actually implements.
 
-The complete signatures are in the [Vue API](/v3/vue/api/); the [server query contract](/v3/server-queries/) describes query parameters and endpoint ownership. The [live demo](/v3/vue/demo/) uses a simulated server for its Server mode. It does not provision a backend.
+The complete signatures are in the [Vue API](/v3/vue/api/); the [server query contract](/v3/server-queries/) describes query parameters and endpoint ownership. The [live demo](/vue/demo/) uses a simulated server for its Server mode. It does not provision a backend.

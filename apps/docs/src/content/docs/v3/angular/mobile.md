@@ -54,7 +54,7 @@ custom components and composed editors still render through their kit.
 Long values wrap, and small containers reduce the number of field columns.
 Custom `renderCard` bodies keep their own layout.
 
-The [mobile demo](/v3/angular/demo/ng-zorro/mobile-cards/) offers Automatic,
+The [mobile demo](/angular/demo/ng-zorro/mobile-cards/) offers Automatic,
 Phone cards and Scrollable table choices. Its preview starts with forced cards
 so desktop visitors can see the phone presentation; the library default is automatic.
 

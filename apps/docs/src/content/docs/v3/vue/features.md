@@ -238,7 +238,7 @@ const features = [
 The row callback publishes the accepted order. For grouped or tree rows, follow
 the [move policy and host-index contract](/v3/vue/specialized/#host-owned-row-moves)
 rather than treating every visual position as a source-array index. A real
-[Nuxt UI workspace lab](/v3/vue/demo/nuxt-ui/workspace/) also exercises controlled
+[Nuxt UI workspace lab](/vue/demo/nuxt-ui/workspace/) also exercises controlled
 side panels, Saved Views, keyboard actions and mobile moves.
 
 ## Standard native features
@@ -342,11 +342,11 @@ The optional native `/assistant` entry exports `TableAssistant`, `AgentApproval`
 These UI entries have no dependency on `@adapttable/ai`. Use
 `@adapttable/ai-vue` separately for `tableAgent`, `useTableAssistant` and
 `useSpeechInput`. Read [assistant and approvals](/v3/vue/assistant/) for the full
-integration and try the [native assistant showcase](/v3/vue/demo/unstyled/assistant/).
+integration and try the [native assistant showcase](/vue/demo/unstyled/assistant/).
 
 ## Features together in the showcase
 
-The [order workspace](/v3/vue/demo/unstyled/workspace/) composes the real native
+The [order workspace](/vue/demo/unstyled/workspace/) composes the real native
 features without changing their ownership contracts. Its order desk uses
 `nestedTable` to mount another `DataTable` with independent rows and columns.
 `groupingPanel`, the page summary, `cellNavigation`, `findInTable`, filters,
@@ -403,17 +403,17 @@ row/column keys and serialized pivot configuration stay unchanged.
 
 ## Styled feature labs
 
-Start with the [live adapter switcher](/v3/vue/demo/) or [Feature Lab](/v3/vue/demo/all-options/) to compose the common features with any of the eight kits. Each kit also has a landing page and dedicated examples for all 21 matrix features. The [order workspace](/v3/vue/demo/unstyled/workspace/) connects multiple views with host-owned updates.
+Start with the [live adapter switcher](/vue/demo/) or [Feature Lab](/vue/demo/all-options/) to compose the common features with any of the eight kits. Each kit also has a landing page and dedicated examples for all 21 matrix features. The [order workspace](/vue/demo/unstyled/workspace/) connects multiple views with host-owned updates.
 
 Separate, non-indexed integration labs exercise additional adapter combinations:
 
-* [shadcn-vue filters](/v3/vue/demo/shadcn-vue/filter-panel/): real filter controls,
+* [shadcn-vue filters](/vue/demo/shadcn-vue/filter-panel/): real filter controls,
   popover/drawer dismissal, focus, RTL and mobile behavior.
-* [shadcn-vue table features](/v3/vue/demo/shadcn-vue/feature-parity/): grouping,
+* [shadcn-vue table features](/vue/demo/shadcn-vue/feature-parity/): grouping,
   Saved Views, row menus, keyboard moves and commands.
-* [shadcn-vue action surfaces](/v3/vue/demo/shadcn-vue/action-surfaces/): assistant,
+* [shadcn-vue action surfaces](/vue/demo/shadcn-vue/action-surfaces/): assistant,
   context and command surfaces, plus controlled side panels.
-* [Nuxt UI workspace](/v3/vue/demo/nuxt-ui/workspace/): command/context actions,
+* [Nuxt UI workspace](/vue/demo/nuxt-ui/workspace/): command/context actions,
   Saved Views, controlled panels, row reordering and suspension/resume.
 
 These labs use fictional in-browser data and host-owned writes. The showcase browser suite exercises their native controls; they do not connect to a production backend.

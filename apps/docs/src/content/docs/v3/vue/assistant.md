@@ -149,7 +149,7 @@ the chosen kit's responsive surface. During SSR, keep the initial state stable
 and defer browser transport, focus and speech resources until mounting. Removing
 or suspending the owning component retires its pending UI work.
 
-The [shadcn-vue action lab](/v3/vue/demo/shadcn-vue/action-surfaces/) uses a local
+The [shadcn-vue action lab](/vue/demo/shadcn-vue/action-surfaces/) uses a local
 fixture to exercise the real assistant controls. It is not a live model session
 or a statement that browser CI has passed.
 
@@ -252,7 +252,7 @@ application code. The CLI can scaffold the base table in a plain Vue/Vite
 application; assistant transport, approval callbacks and credentials remain
 explicit application setup. See [getting started](/v3/vue/getting-started/#scaffold-a-vuevite-table).
 
-The [native assistant showcase](/v3/vue/demo/unstyled/assistant/) mounts the actual
+The [native assistant showcase](/vue/demo/unstyled/assistant/) mounts the actual
 Vue native table and assistant. Its local transport can select rows, sort names,
 ask a question or request an approved write. Toggle host acceptance to see a
 rejected controlled update, and choose widget, table or modal approval presentation.
