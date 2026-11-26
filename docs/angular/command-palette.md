@@ -119,7 +119,7 @@ entry point.
 `cell`. Headers identify a column; row and cell targets carry the row and stable
 row ID. Narrow the target before reading row fields. The built-in menu offers
 applicable sort, filter, visibility, copy and pin operations. Cut requires the
-host's `onCellCut` callback; a context-menu operation cannot manufacture write
+host's `cellNavigation({ onCut })` callback; a context-menu operation cannot manufacture write
 permission.
 
 The menu closes before `onSelect` runs. For an asynchronous command, manage

@@ -1,0 +1,133 @@
+---
+title: "Angular table locales and RTL (v3)"
+description: Localize Angular tables with shared locale bundles and direction
+  inputs. Configure translated labels and RTL-aware table and feature layouts.
+head:
+  - tag: meta
+    attrs:
+      name: "robots"
+      content: "noindex, follow"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"Angular
+      table locales and
+      RTL","item":"https://adapttable.orwamahmoud.com/v3/angular/i18n-rtl/"}]}'
+  - tag: meta
+    attrs:
+      property: og:image
+      content: https://adapttable.orwamahmoud.com/og/angular/i18n-rtl.png
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: https://adapttable.orwamahmoud.com/og/angular/i18n-rtl.png
+slug: v3/angular/i18n-rtl
+---
+
+Table labels, row values and text direction are separate inputs. Pass translated
+`labels`, set `dir`, and set `locale` so columns that read by `i18n` path use
+that locale's field. Set the HTML language on the surrounding page or host for
+assistive technology.
+
+## Switch between English and Arabic
+
+```ts
+import { Component, computed, signal } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/ng-zorro";
+import { getDirection, getLabels } from "@adapttable/i18n";
+
+interface Person {
+  id: string;
+  names: { en: string; ar: string };
+}
+
+@Component({
+  selector: "localized-people-table",
+  standalone: true,
+  imports: [AdaptDataTable],
+  template: `
+    <button type="button" (click)="locale.set('en')">English</button>
+    <button type="button" (click)="locale.set('ar')">العربية</button>
+    <adapt-data-table
+      [data]="people"
+      [columns]="columns()"
+      [rowKey]="rowKey"
+      [locale]="locale()"
+      [labels]="labels()"
+      [dir]="direction()"
+      [attr.lang]="locale()"
+      [tableLabel]="locale() === 'ar' ? 'الأشخاص' : 'People'"
+    />
+  `,
+})
+export class LocalizedPeopleTable {
+  readonly locale = signal<"en" | "ar">("en");
+  readonly people: Person[] = [
+    { id: "ada", names: { en: "Ada Lovelace", ar: "آدا لوفليس" } },
+  ];
+  readonly rowKey = (row: Person) => row.id;
+  readonly labels = computed(() => getLabels(this.locale()));
+  readonly direction = computed(() => getDirection(this.locale()));
+  readonly columns = computed((): ColumnDef<Person>[] => [
+    {
+      key: "name",
+      header: this.locale() === "ar" ? "الاسم" : "Name",
+      i18n: { en: "names.en", ar: "names.ar" },
+      sortable: true,
+    },
+  ]);
+}
+```
+
+The table's `locale` picks each column's `i18n` path: the cells, the choices of
+a `"auto"` select filter, search and sort all read the active locale's field.
+An explicit accessor, `sortValue` or filter `getValue` still wins where a column
+sets one. Keep the column key stable when translating the caption.
+
+With a custom source or headless table, `injectFrontendData` and
+`injectDataTable` also accept a locale value or signal. Pass the same locale
+to the source and renderer when their value resolution depends on it;
+`resolveColumns(columns, locale)` resolves the paths for a renderer of your own.
+
+## Labels and formatting
+
+`@adapttable/i18n` is optional and framework-neutral. It exports ready locale
+bundles such as `ar` and `en`, `getLabels`, `getDirection` and RTL helpers.
+You may instead pass your application's own `TableLabels`. Missing labels
+fall back to English, so provide all relevant labels for a fully localized
+experience, including labels contributed by editing, filters and assistants.
+
+Column headers, custom actions, validation messages, arbitrary card text and
+domain-specific sparkline summaries are host content. Translate them in your
+application. Format dates and numbers with your locale-aware formatter and
+keep explicit raw `sortValue` / `exportValue` functions when formatted strings
+would be ambiguous for operations.
+
+Search text is also a host choice. A frontend source's `getSearchText` can
+select the active-language fields; default row-value search may include
+multiple translations. On a server source, pass the locale through your
+application's request contract and let the server implement localized search.
+
+## Direction across the complete table
+
+`dir="rtl"` reaches table/card structure and kit overlays. Logical pin sides
+`"start"` and `"end"` follow direction. Grid Left/Right keys follow the
+screen's visual direction; Home remains the start of the row. Use logical
+CSS properties such as `margin-inline-start` and `padding-inline-end` in
+custom renderers.
+
+The NG-ZORRO kit keeps direction local to its table and portalled controls.
+For other NG-ZORRO widgets in your host application, configure their own
+localization as needed; AdaptTable labels do not translate unrelated widgets.
+
+Sparkline chronology intentionally remains left-to-right. Numeric data should
+not reverse merely because the surrounding language reads right-to-left.
+
+Test translated labels, long captions, nested selects, drawers, pinned columns,
+card actions and keyboard movement together. Direction alone does not translate
+the words, and translated words alone do not mirror the layout.
+
+See [Columns](/v3/angular/columns/), [Mobile cards](/v3/angular/mobile/),
+[Customization](/v3/angular/customization/), [Accessibility](/v3/angular/accessibility/) and
+the shared [localization reference](/v3/angular/i18n-rtl/).

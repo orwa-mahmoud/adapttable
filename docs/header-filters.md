@@ -87,9 +87,8 @@ export function Projects() {
           // The state key is a row path; `column` puts the funnel on "owner".
           { key: "owner.name", column: "owner", type: "text", label: "Owner" },
         ]),
-        headerFilters(),
+        headerFilters({ closeOnSelect: true }),
       ]}
-      closeHeaderFilterOnSelect
     />
   );
 }
@@ -104,8 +103,8 @@ declarations and the standalone definitions into a filter runtime;
 - **Composing it selects header mode.** The table resolves one filter
   container through `resolveFilterMode(filtersMode, headerFilters)` in
   `@adapttable/core`: header mode wins whenever `headerFilters()` is composed,
-  whatever `filtersMode` says, so the toolbar popover or drawer and the header
-  funnels are never mounted for the same fields. `filtersMode="header"`
+  whatever `filters(defs, { mode })` says, so the toolbar popover or drawer and the header
+  funnels are never mounted for the same fields. `filters(defs, { mode: "header" })`
   without the feature resolves to header mode too, but nothing draws the
   funnels — compose `headerFilters()`.
 - **One funnel per column.** A column shows a funnel when a definition
@@ -127,7 +126,7 @@ declarations and the standalone definitions into a filter runtime;
   dropdown the kit portals out of the overlay (a select menu, a date picker)
   is not treated as an outside click. A true outside press or **Escape**
   closes it.
-- **`closeHeaderFilterOnSelect`.** Off by default. When set, the overlay also
+- **`headerFilters({ closeOnSelect: true })`.** Off by default. When set, the overlay also
   closes after a finished single-control write: a `select` or `boolean`
   value, or a valueless operator such as "Is empty". Typed text, range bounds
   and multi-value lists never close it, because another control is still
@@ -145,13 +144,13 @@ expanded.
 
 ## Options
 
-| Option / prop               | Type                                | Default            | Description                                                                                                     |
-| --------------------------- | ----------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------- |
-| `headerFilters()`           | factory, no arguments               | off                | From `@adapttable/<kit>/header-filters`. A funnel per filtered column; selects header mode. Needs `filters(…)`. |
-| `closeHeaderFilterOnSelect` | `boolean` (`DataTable` prop)        | `false`            | Close the overlay after a finished single-control write. Outside press and Escape always close it.              |
-| `filtersMode`               | `"popover" \| "drawer" \| "header"` | `"popover"`        | Ignored for the fields while `headerFilters()` is composed; header mode wins.                                   |
-| `FilterDef.column`          | `string`                            | `key`              | Column whose header carries this definition's funnel.                                                           |
-| `labels.headerFilters`      | `string`                            | `"Column filters"` | Accessible name of the exported compact filter row (`FilterHeaderRow`).                                         |
+| Option / prop             | Type                                 | Default            | Description                                                                                                     |
+| ------------------------- | ------------------------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `headerFilters(options?)` | factory                              | off                | From `@adapttable/<kit>/header-filters`. A funnel per filtered column; selects header mode. Needs `filters(…)`. |
+| `closeOnSelect`           | `boolean` (`headerFilters()` option) | `false`            | Close the overlay after a finished single-control write. Outside press and Escape always close it.              |
+| `filters(defs, { mode })` | `"popover" \| "drawer" \| "header"`  | `"popover"`        | Ignored for the fields while `headerFilters()` is composed; header mode wins.                                   |
+| `FilterDef.column`        | `string`                             | `key`              | Column whose header carries this definition's funnel.                                                           |
+| `labels.headerFilters`    | `string`                             | `"Column filters"` | Accessible name of the exported compact filter row (`FilterHeaderRow`).                                         |
 
 ## Per-kit differences
 
@@ -183,7 +182,7 @@ focus back to the trigger after Escape.
 - **Desktop only.** Mobile cards have no column headers, so no funnel
   renders below the mobile breakpoint. Active filters still show as removable
   chips, and the Filters button still opens the AND/OR tree. A table that
-  must offer per-field filters on phones uses `filtersMode="popover"` or
+  must offer per-field filters on phones uses `filters(defs, { mode: "popover" })` or
   `"drawer"` without `headerFilters()`.
 - **URL state and saved views.** Header filters write the same `f_<key>`
   params as the panel — `f_name` and `f_nameOp`, `f_budgetMin` /

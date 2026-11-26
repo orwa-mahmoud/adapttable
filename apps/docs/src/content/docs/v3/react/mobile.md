@@ -1,0 +1,285 @@
+---
+title: "Responsive React table — mobile card layout (v3)"
+description: React tables with automatic mobile cards or horizontal scrolling.
+  Native kit cells, responsive field layouts, shared filters, selection and URL
+  state.
+head:
+  - tag: meta
+    attrs:
+      name: "robots"
+      content: "noindex, follow"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"Responsive
+      React table — mobile card
+      layout","item":"https://adapttable.orwamahmoud.com/v3/react/mobile/"}]}'
+  - tag: meta
+    attrs:
+      property: og:image
+      content: https://adapttable.orwamahmoud.com/og/mobile.png
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: https://adapttable.orwamahmoud.com/og/mobile.png
+slug: v3/react/mobile
+---
+
+▶ **See it before you install:** [the live mobile demo](https://adapttable.orwamahmoud.com/react/demo/mantine/mobile-cards/) — the same table flipped between desktop rows and phone cards with one toggle.
+
+<video src="https://adapttable.orwamahmoud.com/media/features/mobile.mp4" poster="https://adapttable.orwamahmoud.com/media/features/mobile-poster.png" aria-label="The same AdaptTable data table as phone cards — scrolling the card list, then switching to the desktop table" controls playsinline preload="none" width="1240" height="758" style="width:100%;height:auto;aspect-ratio:1240/758;border-radius:8px" />
+
+Most React data tables answer the phone problem with a horizontal scrollbar.
+AdaptTable answers it with a different layout: below the mobile breakpoint,
+every row renders as a **card** — same columns, same filters, same search,
+same selection, same URL state — and the switch happens by itself. There is
+no second component to build, no `isMobile` plumbing, and nothing to
+configure to get the default behavior.
+
+```tsx
+<DataTable data={rows} columns={columns} rowKey={(r) => r.id} />
+```
+
+That is already responsive. On a desktop viewport it renders the full table;
+on a phone it renders the card list. Everything below is tuning.
+
+## What changes on mobile — and what deliberately doesn't
+
+| Surface                                                             | Desktop                             | Mobile                                                |
+| ------------------------------------------------------------------- | ----------------------------------- | ----------------------------------------------------- |
+| Rows                                                                | `<table>` rows                      | Cards — one per row, labels from the column headers   |
+| Sorting                                                             | Clickable column headers            | Native sort-by select and ascending/descending button |
+| Pagination                                                          | Pager (or infinite)                 | `paginationMode="auto"` resolves to infinite scroll   |
+| Row actions                                                         | Trailing icon buttons               | Card buttons                                          |
+| Long lists                                                          | Row virtualization (`virtualize()`) | Card virtualization through the same feature          |
+| Filters, chips, search, selection, bulk bar, saved views, URL state | identical                           | identical                                             |
+
+The second half of that table is the point: behavior that took real work to
+get right — declarative filters, select-across-pages, shareable URL state —
+does not fork into a second code path on phones. One table, one state, two
+layouts.
+
+## Tuning the cards
+
+The built-in body lays fields out in a grid that responds to the **card's own
+width**. Labels sit above their values; unlabeled fields span the full width.
+This keeps an identity block together while short details sit side by side.
+Narrow cards fall back to one field per line, and long values wrap. Each kit
+supplies its own card, typography, controls and theme colors, including dark
+mode. Custom `renderCard` bodies retain their own layout.
+
+Use a column renderer to show meaningful kit elements: an Avatar beside a
+person's name, a Badge for status, or a Progress for workload. The table preserves
+those renderers in cards; it does not infer a status, avatar or action from a
+column's name. Use `mobileLabel: ""` for a self-explanatory identity block, and
+keep labels on measurements and other values that need context.
+
+* **`mobileLabel`** (per column) — the label a card shows for that field;
+  falls back to the column's string `header`, then to its key. Set it to `""`
+  for a field with no label at all — a bare avatar or title line — rather than
+  an empty caption taking a line. `resolveMobileLabel` from
+  `@adapttable/react/adapter` is the resolver every adapter uses, for a custom
+  card layout that should match.
+* **`hideOnMobile`** (per column) — drop a column from cards entirely.
+* **`hideOnDesktop`** (per column) — show a field on cards only.
+* **`mobileIdentityColumns`** — deprecated, accepted and ignored, removed in
+  v4. `hideOnMobile` decides what a card shows: every column without it
+  appears.
+* **`sortByOptions`** — the options offered by the mobile sort-by select.
+  The direction button is disabled until a column is selected. It keeps the
+  selected column while switching ascending/descending order, and uses the
+  same URL and Saved Views state as desktop sorting. Its accessible name
+  describes the next action; its text shows the current direction. All React,
+  Angular and Vue kits use their native controls and localized sort labels.
+* **`forceMobile`** — pin either layout regardless of viewport: cards inside a
+  desktop dashboard panel, or the full table in a tablet kiosk. The
+  [mobile demo](https://adapttable.orwamahmoud.com/react/demo/mantine/mobile-cards/) uses
+  exactly this prop for its toggle.
+* **`rowAppearance({ rowClassName })`** applies to desktop rows and mobile
+  cards alike, and the
+  [class-hook / `data-adapttable-part` surface](/v3/react/customization/) names the
+  card regions (`cardDetail`, `group-card`, `summaryCard`) for styling.
+* **`rowAppearance({ rowStyle, rowHeight })`** applies the same way — see
+  [row styling and heights](/v3/react/row-styling/).
+
+## Keyboard scrolling inside a fixed-height list
+
+Set `maxHeight` to keep the cards inside a bounded scroll region. The region
+uses the table's accessible name and is a Tab stop, so keyboard readers can
+focus it and use native scrolling keys such as Page Down and Home. Mouse and
+touch scrolling remain native. The inner card list keeps its list semantics,
+row positions, styling parts and custom card content.
+
+Omit `maxHeight` to use page scrolling; the region adds no Tab stop. Changing
+only the height bound keeps the wrapper and list; virtualization still mounts
+and removes off-screen cards as needed. In the mobile demo, use **Bounded list**
+to try the two layouts.
+
+## Your own card
+
+The built-in card groups labeled fields beneath any unlabeled, full-width
+content. For a different hierarchy, `renderCard` can put an order's total above
+its reference or combine several columns into one identity area.
+
+`renderCard` replaces the field body:
+
+```tsx
+<DataTable
+  data={people}
+  columns={columns}
+  rowKey={(r) => r.id}
+  renderCard={(row, card) => (
+    <article className="person-card">
+      <img src={row.avatarUrl} alt="" />
+      <h3>{row.name}</h3>
+      <dl>
+        {card.fields.map(({ column, label, value }) => (
+          <div key={column.key}>
+            {label && <dt>{label}</dt>}
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </article>
+  )}
+/>
+```
+
+The card's shell stays around what you return: the list-item semantics, the
+selection checkbox, the expand and tree toggles, the reorder controls, the row
+actions and the detail panel. A custom card cannot drop the parts that make
+the list usable, because it never owns them.
+
+With `rowReorder(...)` from `@adapttable/mantine/row-reorder` composed, flat
+cards expose up/down controls with a touch target of at least 44×44 px in
+every kit (measured on the production build in
+[`scripts/bench-runs/2026-09-23-2.json`](https://github.com/orwa-mahmoud/adapttable/blob/efd18cf92b4e11175f673269395687617e39c2de/scripts/bench-runs/2026-09-23-2.json)). Grouped and tree cards also expose the
+kit-native **Move to group…** / **Move under…** menu, including explicit
+confirmation with `rowReorder(onRowReorder, { movePolicy: "confirm" })`;
+touch never has to emulate a drag.
+
+`card.fields` is what the built-in would have laid out — each field's
+`column`, its resolved `label` (`undefined` when the column asked for none)
+and its `value`, rendered exactly as the built-in renders it, cell renderers
+and editors included. So this is a layout decision, not a re-implementation:
+reuse the values and arrange them your way. `card.selected`, `card.expanded`
+and `card.index` come along for cards that change with their state.
+
+Omit it to use the built-in card body.
+
+## Where the switch happens
+
+`mobileBreakpoint` is the width, in pixels, at or below which the cards take
+over. It defaults to 768 — a phone in portrait.
+
+```tsx
+<DataTable
+  data={rows}
+  columns={columns}
+  rowKey={(r) => r.id}
+  mobileBreakpoint={1024}
+/>
+```
+
+Raise it when the table lives in a sidebar or a split pane: the viewport says
+"desktop" while the table itself has a phone's width to work with, and the
+default would keep a five-column table in a 300px column. Lower it when the
+table is the whole page and its columns are narrow enough to survive.
+
+## The width in between
+
+Between "everything fits" and "narrow enough for cards" there is a long middle
+where a table has too many columns. The usual outcomes are a horizontal
+scrollbar nobody finds, or columns squeezed until nothing is legible — neither
+is a decision.
+
+`responsivePriority` is the decision, made by the person who knows the data:
+
+```tsx
+const columns = [
+  { key: "name", header: "Name", width: 200 },
+  { key: "team", header: "Team", width: 160, responsivePriority: 1 },
+  { key: "note", header: "Note", width: 240, responsivePriority: 2 },
+];
+```
+
+Priority 1 is kept longest, in the ordinary sense of the word. As the table
+narrows, `note` goes first, then `team`. `name` never goes — a column that
+omits `responsivePriority` is never dropped, which is how the columns carrying
+the row's identity stay put by saying nothing. A table where no column sets it
+behaves exactly as it did before.
+
+The budget is arithmetic on each column's declared `width` (a resize wins over
+it, and a column with no width is budgeted at 150px), so it settles in one pass
+and gives the same answer every time. There is no measure-drop-remeasure loop,
+which is what makes tables that do it flicker.
+
+A dropped column is a fact about the viewport, not a choice the user made: it
+never reaches the layout state, the URL or a saved view, and the column menu
+still lists it.
+
+## It composes with everything else
+
+* **Grouping** renders group header blocks between cards, with the same
+  collapse behavior as desktop — see [row grouping](/v3/react/row-grouping/).
+* **Virtualization** windows the card list the same way it windows rows:
+  one `virtualize()` feature, measured in a real browser across every adapter —
+  see [virtualization](/v3/react/virtualization/).
+* **RTL** flips the cards along with everything else — see
+  [i18n & RTL](/v3/react/i18n-rtl/).
+* **Every adapter ships it**: Mantine, MUI, Chakra, Ant Design, Radix,
+  Base UI, shadcn/ui and unstyled all render the card layout natively —
+  the [comparison table](/v3/react/comparison/) tracks it as a built-in across
+  the board.
+
+## When you still want the table on phones
+
+Set `forceMobile={false}` and the desktop layout renders everywhere —
+sticky header, pinned columns and horizontal scrolling included. The cards
+are the default because thumb-reach beats pinch-zoom for row-by-row work,
+but the choice stays yours per table.
+
+```tsx
+// Automatic cards on phones: omit forceMobile.
+<DataTable data={rows} columns={columns} rowKey={(row) => row.id} />
+
+// Keep the table on phones; wide columns scroll within the table.
+<DataTable
+  data={rows}
+  columns={columns}
+  rowKey={(row) => row.id}
+  forceMobile={false}
+  paginationMode="paged"
+/>
+```
+
+`true` always renders cards; `false` always renders the table; omission follows
+the viewport. These choices also affect `paginationMode="auto"`. Set
+`paginationMode` explicitly when loading behavior must stay the same across
+layouts. A horizontally scrolling table is useful for comparing columns across
+rows; cards are useful for reading and acting on one record at a time.
+
+Related: [Getting started](/v3/react/getting-started/) ·
+[API reference](/v3/react/api/) ·
+[Live mobile demo](https://adapttable.orwamahmoud.com/react/demo/mantine/mobile-cards/)
+
+## Editing across layouts
+
+Custom framework bindings call `notifyLayoutChange()` from
+`@adapttable/core/binding` immediately before publishing a responsive layout
+change. Once the table edits — a cell edit session or a row edit store
+exists — it captures the active editor and caret, then restores them after
+the DOM replacement; a table without editing never loads that code. It leaves
+focus alone if the original control remains mounted, the editor inventory
+changes, or focus moves outside the table. The supplied React, Angular and
+Vue bindings already wire this behavior.
+
+A layout change keeps row drafts, selection, filters and expanded rows in the
+same table state. Native editor focus and text selection follow viewport changes
+when the editor inventory remains unchanged. An explicit layout chooser keeps
+focus on the chooser. Keep stable row keys and render the supplied prepared
+field values in custom cards so native editors remain connected.
+
+Mobile Save/Cancel and hierarchy actions have larger touch targets while desktop
+controls keep their kit sizing. The mobile showcase also exercises bounded
+scrolling and pagination choices.

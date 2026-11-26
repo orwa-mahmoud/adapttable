@@ -53,7 +53,7 @@ Navigation and clipboard operations cover loaded data. They do not fetch unseen 
 
 ## Host-owned clipboard and fill
 
-Copy writes the selected rectangle as tab-separated values. Cut calls `onCellCut` only after the clipboard accepts the copy. Paste proposes ordinary `CellEdit<Row>[]` through `onCellPaste`, or the composed inline-edit callback. The fill handle and Ctrl/Cmd+D use `onCellFill`, with the same inline-edit fallback. The table never changes the host's records itself.
+Copy writes the selected rectangle as tab-separated values. Cut calls `cellNavigation({ onCut })` only after the clipboard accepts the copy. Paste proposes ordinary `CellEdit<Row>[]` through `cellNavigation({ onPaste })`, or the composed inline-edit callback. The fill handle and Ctrl/Cmd+D use `cellNavigation({ onFill })`, with the same inline-edit fallback. The table never changes the host's records itself.
 
 Clipboard and fill text use each column's `parseValue`; a numeric editor alone does not define clipboard parsing. Compose edit history with an inline replay callback to record a paste or fill as one undo gesture. Clipboard permission failures are announced through the grid's localized live region. A pending clipboard result is discarded if its address space or active lifetime changes; replacing equivalent array wrappers preserves the operation and uses current host callbacks.
 

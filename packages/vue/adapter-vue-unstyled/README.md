@@ -75,10 +75,11 @@ collapse buttons, source replacement, loading/refreshing, empty results and
 error/retry rendering. Pass `source` to use a source
 created by `@adapttable/vue` instead of the built-in frontend data path.
 
-`selectedIds` and `columnLayout` are controlled when supplied. Their matching
-`update:selectedIds` and `update:columnLayout` events request changes; the host
-may accept or reject each request. Prop replacement never emits another request.
-Use `selectable` with `defaultSelectedIds` for local selection. The table does
+`columnLayout` is controlled when supplied. Its `update:columnLayout` event
+requests changes; the host may accept or reject each request. Prop replacement
+never emits another request. Row selection is the `selection()` feature from
+`/selection`: pass `selectedIds` and `onSelectionChange` to control it, or
+`defaultSelectedIds` for local selection. The table does
 not modify the host's rows. Defaults seed initial state only.
 
 `summaryRow` maps the current source rows to column-aligned totals. Column

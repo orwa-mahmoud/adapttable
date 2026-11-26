@@ -1,0 +1,81 @@
+---
+title: "React table row styling and heights (v3)"
+description: Conditional row styling and heights for React data tables —
+  rowStyle and rowHeight on desktop rows and mobile cards, with a
+  variable-height virtualizer.
+head:
+  - tag: meta
+    attrs:
+      name: "robots"
+      content: "noindex, follow"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"React
+      table row styling and
+      heights","item":"https://adapttable.orwamahmoud.com/v3/react/row-styling/"}]}'
+  - tag: meta
+    attrs:
+      property: og:image
+      content: https://adapttable.orwamahmoud.com/og/row-styling.png
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: https://adapttable.orwamahmoud.com/og/row-styling.png
+slug: v3/react/row-styling
+---
+
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/efd18cf92b4e11175f673269395687617e39c2de/starters/mantine?file=src%2FApp.tsx) — add `rowAppearance({ rowStyle, rowHeight })` from `@adapttable/mantine/row-appearance` to `features`. [Other UI kits →](/v3/react/getting-started/#try-it-in-stackblitz)
+
+▶ **See it working:** [the all-options demo](https://adapttable.orwamahmoud.com/react/demo/all-options/) — turn **Row style** on.
+
+`rowAppearance` takes three options: `rowClassName` appends a class, and
+`rowStyle` / `rowHeight` set inline style and height. Each is a function of
+`(row, index)` (`rowHeight` also takes a number), applied to desktop rows and
+mobile cards alike. Without the feature nothing is set.
+
+```tsx
+import { DataTable } from "@adapttable/mantine";
+import { rowAppearance } from "@adapttable/mantine/row-appearance";
+
+<DataTable
+  data={rows}
+  columns={columns}
+  rowKey={(row) => row.id}
+  features={[
+    rowAppearance({
+      rowStyle: (row) =>
+        row.overdue ? { backgroundColor: "var(--overdue)" } : undefined,
+      rowHeight: (row) => (row.tall ? 72 : 48),
+    }),
+  ]}
+/>;
+```
+
+A number `rowHeight` is every row. A function is per row. Height wins when
+`rowStyle` also names `height` — `rowHeight` is the dedicated override.
+
+Pass a light fill and a dark fill — AdaptTable does not pick those colours.
+`light-dark()` follows the page `color-scheme` (and RTL uses logical
+properties, so `text-align: start` is already the extra's alignment):
+
+```tsx
+rowAppearance({
+  rowStyle: (row) =>
+    row.overdue
+      ? {
+          backgroundColor:
+            "light-dark(oklch(0.93 0.08 95), oklch(0.38 0.07 85))",
+        }
+      : undefined,
+});
+```
+
+CSS variables that flip under the host's dark class work the same way.
+
+The row virtualizer's `estimateSize` reads the same value, so a
+variable-height table still windows. `measureElement` stays authoritative
+for what the browser actually laid out.
+
+Style and height are functions of the row, not table state — nothing goes
+in the URL or a saved view.

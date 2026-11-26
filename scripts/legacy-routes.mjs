@@ -19,7 +19,15 @@ export const LEGACY_BASE = "/adapttable";
 /** The previous site root, without a trailing slash. */
 export const LEGACY_SITE = `${LEGACY_ORIGIN}${LEGACY_BASE}`;
 
-const VERSIONS = new Set(DOCS_VERSIONS.map(({ slug }) => slug));
+const ARCHIVES = new Map(
+  DOCS_VERSIONS.map((version) => [version.slug, version])
+);
+
+/** Archives first published at their canonical URLs use the host's HTML routing. */
+export const usesNativeArchiveRouting = (path) => {
+  const archive = ARCHIVES.get(path.split("/", 2)[1]);
+  return archive !== undefined && !archive.legacyPaths;
+};
 
 /** Top-level folders that hold files rather than pages. */
 const FILE_DIRS = new Set(["media", "og", "_astro", "pagefind"]);
@@ -41,7 +49,9 @@ export const currentRoute = (path) => {
     return `${DEMO_ROOT}${path.slice(LEGACY_DEMO.length)}`;
   }
   const [, first = "", ...rest] = path.split("/");
-  if (VERSIONS.has(first)) {
+  const archive = ARCHIVES.get(first);
+  if (archive) {
+    if (!archive.legacyPaths) return rest.length === 0 ? `/${first}/` : path;
     const inner = currentRoute(`/${rest.join("/")}`);
     return inner === "/" ? `/${first}/` : `/${first}${inner}`;
   }
@@ -64,7 +74,7 @@ export const legacyRoute = (route) => {
     return `${LEGACY_DEMO}${route.slice(DEMO_ROOT.length)}`;
   }
   const [, first = "", ...rest] = route.split("/");
-  if (VERSIONS.has(first)) {
+  if (ARCHIVES.get(first)?.legacyPaths) {
     const inner = legacyRoute(`/${rest.join("/")}`);
     return inner === "/" ? `/${first}/` : `/${first}${inner}`;
   }

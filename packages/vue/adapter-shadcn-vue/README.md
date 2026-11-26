@@ -129,7 +129,7 @@ The full toolbar feature remains available with mobile cards.
 
 Import `headerFilters` from `@adapttable/shadcn-vue/header-filters` to enable
 column-header trigger filters. Column definitions declare their filter type;
-`closeHeaderFilterOnSelect` optionally dismisses a completed single-choice filter.
+`headerFilters({ closeOnSelect: true })` optionally dismisses a completed single-choice filter.
 The same entry exposes `HeaderFilter`, `FilterHeaderControl`, and
 `FilterHeaderRow` for standalone use. Compact multi-choice headers use the copied
 shadcn Popover and Checkbox components. Header popovers are non-modal, retain

@@ -302,8 +302,7 @@ present, the workbook follows it and `rows` is not read on its own.
 
 ## Bundle isolation
 
-`@adapttable/core/xlsx` is the entry to import from. The `@adapttable/core`
-root still serves `xlsxWriter` and `buildTableXlsx`, marked `@deprecated`.
+`@adapttable/core/xlsx` is the entry to import from.
 `@adapttable/core` declares `sideEffects: false`, so a bundler drops the
 spreadsheet code from any build that does not call them. A bundle that
 exports CSV only contains no XLSX code.

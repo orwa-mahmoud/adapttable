@@ -33,7 +33,6 @@ interface Person {
       [rowKey]="rowKey"
       [features]="features"
       urlKey="people"
-      filtersMode="popover"
     />
   `,
 })
@@ -161,9 +160,9 @@ A widget is a `FilterWidget`: the `kinds` it draws and a component with
 
 ## Interaction and persistence
 
-`filtersMode="popover"` opens an anchored panel without a backdrop. Escape
+`filters(defs, { mode: "popover" })` opens an anchored panel without a backdrop. Escape
 closes it and restores trigger focus; an outside click closes it too.
-`filtersMode="drawer"` uses a backdrop. `[filterFields]="false"` leaves only
+`filters(defs, { mode: "drawer" })` uses a backdrop. `filters(defs, { fields: false })` leaves only
 the AND/OR tree in the panel, opened on first paint. The toolbar remains
 available with mobile cards. Supply `[labels]` and `dir="rtl"` for translated controls and
 direction-aware placement, and `[locale]` so the choices of an `"auto"`

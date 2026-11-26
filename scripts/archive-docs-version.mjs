@@ -25,6 +25,7 @@
  * - ` (<label>)` appended to the title, so no title repeats a current page's;
  * - GitHub `blob/main` / `tree/main` links and StackBlitz starters pinned to
  *   the version's commit, so they open that version's code;
+ * - showcase links pointing to the live demo routes outside the archive;
  * - an og:image with no card in `public/og/` points at the site card.
  *
  * Add `{ slug, label }` to `apps/docs/versions.mjs` afterwards; the snapshot
@@ -48,7 +49,7 @@ import { fileURLToPath } from "node:url";
 
 import { formatLikeRepo } from "./format-like-repo.mjs";
 import { gitBinary } from "./git-binary.mjs";
-import { ORIGIN } from "./site.mjs";
+import { DEMO_ROOTS, ORIGIN } from "./site.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS_APP = join(ROOT, "apps", "docs");
@@ -171,6 +172,11 @@ cpSync(DOCS_APP, siteApp, {
     !path.startsWith(join(DOCS_APP, "src", "content", "versions")),
 });
 symlinkSync(join(DOCS_APP, "node_modules"), join(siteApp, "node_modules"));
+// The docs app's pages read the showcase matrix it ships with.
+cpSync(
+  join(ROOT, "apps", "showcase", "matrix.mjs"),
+  join(site, "apps", "showcase", "matrix.mjs")
+);
 cpSync(join(source, "docs"), join(site, "docs"), { recursive: true });
 cpSync(join(source, "scripts"), join(site, "scripts"), { recursive: true });
 for (const file of ["analytics-guard.mjs", "site.mjs"]) {
@@ -216,6 +222,8 @@ mkdirSync(dirname(versionFile), { recursive: true });
 cpSync(builtVersion, versionFile);
 
 const ROBOTS = `  - tag: meta\n    attrs:\n      name: "robots"\n      content: "noindex, follow"`;
+const archivePrefix = `/${slug}`;
+const demoRoots = Object.values(DEMO_ROOTS);
 
 function archivePage(markdown) {
   const match = /^---\n([\s\S]*?)\n---\n/.exec(markdown);
@@ -240,6 +248,16 @@ function archivePage(markdown) {
   );
   const body = markdown
     .slice(match[0].length)
+    .replace(/\]\((\/[^\s)]+)/g, (link, href) => {
+      if (!href.startsWith(`${archivePrefix}/`)) return link;
+      const liveHref = href.slice(archivePrefix.length);
+      const [pathname] = liveHref.split(/[?#]/, 1);
+      return demoRoots.some(
+        (root) => pathname.startsWith(root) || `${pathname}/` === root
+      )
+        ? `](${liveHref}`
+        : link;
+    })
     .replaceAll(`${REPO}/blob/main/`, `${REPO}/blob/${sha}/`)
     .replaceAll(`${REPO}/tree/main/`, `${REPO}/tree/${sha}/`)
     .replaceAll(

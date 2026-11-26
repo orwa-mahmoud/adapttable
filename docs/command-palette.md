@@ -233,14 +233,14 @@ no menu opens.
 Every kit with a `/context-menu` subpath (Mantine, MUI, Chakra UI, Ant Design,
 Radix, Base UI, shadcn/ui, unstyled) wires the same handlers:
 
-| Target        | Entry                            | Shown when                                                                         | Does                                                                        |
-| ------------- | -------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `header`      | Sort ascending, Sort descending  | The column is `sortable`.                                                          | Sorts by the column; the current direction is disabled.                     |
-| `header`      | Filter column                    | The column has a `filter`.                                                         | Opens the table's filter panel.                                             |
-| `header`      | Hide column                      | The column is not `lockVisibility`.                                                | Hides the column.                                                           |
-| `cell`, `row` | Copy                             | Always; disabled on a `row` target.                                                | Copies the cell, or the selection it sits inside.                           |
-| `cell`, `row` | Cut                              | `cellNavigation()` is composed and `onCellCut` is set; disabled on a `row` target. | Copies like Copy, then calls `onCellCut(range)` once the clipboard took it. |
-| `cell`, `row` | Pin to top, Pin to bottom, Unpin | `rowPinning()` is composed; each shows only where it applies.                      | Pins or unpins the row, as its row actions do.                              |
+| Target        | Entry                            | Shown when                                                           | Does                                                                    |
+| ------------- | -------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `header`      | Sort ascending, Sort descending  | The column is `sortable`.                                            | Sorts by the column; the current direction is disabled.                 |
+| `header`      | Filter column                    | The column has a `filter`.                                           | Opens the table's filter panel.                                         |
+| `header`      | Hide column                      | The column is not `lockVisibility`.                                  | Hides the column.                                                       |
+| `cell`, `row` | Copy                             | Always; disabled on a `row` target.                                  | Copies the cell, or the selection it sits inside.                       |
+| `cell`, `row` | Cut                              | `cellNavigation({ onCut })` is composed; disabled on a `row` target. | Copies like Copy, then calls `onCut(range)` once the clipboard took it. |
+| `cell`, `row` | Pin to top, Pin to bottom, Unpin | `rowPinning()` is composed; each shows only where it applies.        | Pins or unpins the row, as its row actions do.                          |
 
 Labels are `labels.sortAscending`, `sortDescending`, `filterColumn`,
 `hideColumn`, `copyCells`, `cutCells`, `pinToTop`, `pinToBottom` and

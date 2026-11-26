@@ -19,7 +19,14 @@ because a column icon cannot express a group.
 import { DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, shadcn, unstyled
 import { filters } from "@adapttable/mantine/filters";
 
-export function People({ rows }) {
+interface Person {
+  id: string;
+  name: string;
+  team: string;
+  budget: number;
+}
+
+export function People({ rows }: { rows: Person[] }) {
   return (
     <DataTable
       data={rows}
@@ -29,8 +36,7 @@ export function People({ rows }) {
         { key: "team", filter: { type: "select", options: "auto" } },
         { key: "budget", filter: "numberRange" },
       ]}
-      features={[filters([])]}
-      filtersMode="popover"
+      features={[filters([], { mode: "popover" })]}
       urlKey="f"
     />
   );
@@ -58,7 +64,7 @@ filter definition exists.
   reinterpreted. Clear all drops `ft` with the flat `f_*` keys.
 - **Chips.** Tree leaves become chips via `useFilterTreeChips`. Removing a
   chip rewrites that node; it does not flatten the group.
-- **Tree only.** `filterFields={false}` removes the field list and opens the
+- **Tree only.** `filters(defs, { fields: false })` removes the field list and opens the
   builder expanded.
 - **Server.** A source that declares `supports.filterTree` receives the
   same tree on `query.filterTree`. The server must apply it all-or-nothing

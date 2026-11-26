@@ -85,5 +85,6 @@ and Space run it, and its label is the accessible name. With
 
 `useRowMutations` (`UseRowMutationsOptions` in, `RowMutationsState` out) builds
 the state a kit renders: `canAdd`, `addRow`, and the Duplicate and Delete
-actions, which `chrome.rowActions` already includes. See
+actions, which `ROW_ACTIONS_STATE` (read with `useFeatureState`) already
+includes in `rowActions`. See
 [headless](./headless.md) and [building an adapter](./building-an-adapter.md).

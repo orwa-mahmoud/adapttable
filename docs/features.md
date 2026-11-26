@@ -121,7 +121,7 @@ With no arguments it composes the features that work with nothing else
 supplied: the Columns menu, the density chooser, CSV export, find-in-table
 (Ctrl/Cmd+F after a click in the table), fit-columns, the fullscreen toggle, [header filters](./header-filters.md), multi-sort, resizable
 columns and the status bar. Because `headerFilters()` is a member, filters
-from the preset's `filters` option open from the column headers (`filtersMode`
+from the preset's `filters` option open from the column headers (the filter mode
 resolves to `"header"`); compose the members individually for popover or drawer
 filters.
 
@@ -312,7 +312,7 @@ composed feature; they do not pull command-palette, context-menu or side-panel
 chrome into the base table.
 
 The superseded `FilterTypeRegistry.register` / `extend` methods and the
-`filterTypes` enabling prop are not part of the v3 API.
+`filterTypes` enabling prop are not part of the API.
 
 ## Features that own hooks — `provider`
 

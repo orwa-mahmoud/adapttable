@@ -1,0 +1,192 @@
+---
+title: "Build an Angular table adapter (v3)"
+description: Build an Angular UI-kit adapter with structural Chrome and required
+  slots. Keep visible controls kit-native and preserve the public parts
+  contract.
+head:
+  - tag: meta
+    attrs:
+      name: "robots"
+      content: "noindex, follow"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"Build
+      an Angular table
+      adapter","item":"https://adapttable.orwamahmoud.com/v3/angular/building-an-adapter/"}]}'
+  - tag: meta
+    attrs:
+      property: og:image
+      content: https://adapttable.orwamahmoud.com/og/angular/building-an-adapter.png
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: https://adapttable.orwamahmoud.com/og/angular/building-an-adapter.png
+slug: v3/angular/building-an-adapter
+---
+
+An Angular adapter draws a UI kit's components around the headless binding.
+Core owns state and behavior; `@adapttable/angular` turns that behavior into
+signals, structural Chrome and required slots. The adapter owns the controls,
+overlays and visual theme.
+
+Use the implemented
+[native kit](https://github.com/orwa-mahmoud/adapttable/blob/efd18cf92b4e11175f673269395687617e39c2de/packages/angular/adapter-angular-unstyled/src/dataTable.ts)
+and [NG-ZORRO kit](https://github.com/orwa-mahmoud/adapttable/blob/efd18cf92b4e11175f673269395687617e39c2de/packages/angular/adapter-ng-zorro/src/dataTable.ts)
+as complete references. A small headless table is useful, but a full adapter
+also needs mobile cards, async status, focus, feature outlets and lifecycle
+wiring.
+
+## Keep the dependency boundary
+
+A kit imports contracts only from `@adapttable/angular` and its documented
+secondary entries. It does not import core or another kit. If a neutral helper
+is missing from the binding, expose it there instead of bypassing the binding.
+
+Give consumers a root `AdaptDataTable` and separate feature entries. A consumer
+who does not import an optional feature should not pull its control library or
+runtime through the basic table path. Use Angular-compatible package entrypoints
+and declare the actual Angular and UI-kit peer dependencies.
+
+## Fill a required Chrome slot
+
+This native-control example shows the complete group-toggle composition. In
+a themed kit, its `ExampleGroupButton` uses that kit's button component while
+preserving the same label, expanded state, part and activation behavior.
+
+```ts
+import { Component, input } from "@angular/core";
+import {
+  AdaptColumnGroupToggleChrome,
+  COLUMN_GROUP_TOGGLE,
+  type ColumnGroupToggleButtonProps,
+  type ColumnGroupToggleProps,
+  type ColumnGroupToggleSlots,
+} from "@adapttable/angular/adapter";
+import { collapsibleColumnGroups } from "@adapttable/angular/features";
+import { extendFeature, slotRender } from "@adapttable/angular";
+
+@Component({
+  selector: "example-group-button",
+  standalone: true,
+  template: `
+    <button
+      type="button"
+      data-adapttable-part="column-group-toggle"
+      [class]="props().className ?? ''"
+      [attr.aria-expanded]="props().expanded"
+      [attr.aria-label]="props().label"
+      (click)="props().onClick()"
+    >
+      <span aria-hidden="true">{{ props().expanded ? "−" : "+" }}</span>
+    </button>
+  `,
+})
+export class ExampleGroupButton {
+  readonly props = input.required<ColumnGroupToggleButtonProps>();
+}
+
+@Component({
+  selector: "example-group-toggle",
+  standalone: true,
+  imports: [AdaptColumnGroupToggleChrome],
+  template: `
+    <adapt-column-group-toggle-chrome
+      [cell]="props().cell"
+      [labels]="props().labels"
+      [onToggle]="props().onToggle"
+      [className]="props().className"
+      [slots]="slots"
+    />
+  `,
+})
+export class ExampleGroupToggle {
+  readonly props = input.required<ColumnGroupToggleProps>();
+  readonly slots: ColumnGroupToggleSlots = { Button: ExampleGroupButton };
+}
+
+export function exampleColumnGroups() {
+  return extendFeature(collapsibleColumnGroups(), [
+    slotRender(COLUMN_GROUP_TOGGLE, () => ExampleGroupToggle),
+  ]);
+}
+```
+
+The binding decides whether a group can collapse, derives the localized label
+and supplies the action. The button is required; Chrome does not fall back to
+raw HTML. Follow the same rule for every input, select, checkbox, button and
+overlay surface. In particular, the command palette's Surface slot belongs to
+the adapter, including the actual native or kit dialog.
+
+## Assemble the shell
+
+Extend `AdaptDataTableShell` to reuse feature assembly, source reconciliation,
+editing history, URL/filter composition and per-table lifecycle. The inherited
+inputs and outputs remain the kit's public table contract. Render through
+`AdaptDesktopTableModel` / `AdaptMobileCardsModel` and implement
+`DataTableSurface` on each native surface so virtualization reads its actual
+scroll element. The models supply plans and renderer contexts; the adapter
+still supplies its own native table, cards and every required control.
+
+`AdaptDesktopStructure` and `AdaptMobileStructure` draw the one desktop table
+and phone card list every Angular kit shares; the kit passes its own
+elements and controls as `AdaptDesktopSlots` and `AdaptMobileSlots`
+templates. A kit that declares its header-cell template inside its table template, so the cell and the table are one view tree, marks it with `AdaptHeaderTemplate` and provides an `AdaptHeaderTemplateSlot` to read it from. Override the shell's `kitEnvironment()` to return the
+`KitEnvironment` the kit read from its UI library — direction, locale and
+density — and the shell loads that locale's labels on demand. Provide
+`ADAPTTABLE_KIT_MOTION_OFF` with a signal that is `true` when the library has
+turned animation off. The shell installs the shared high-contrast
+stylesheet.
+
+For a shell assembled directly, keep persistent state separate from feature composition:
+
+1. Resolve inherited and local features, their options and slot fills
+2. Create `injectTableData`, preserving its source and filter runtime
+3. Create `injectDataTable` with the source signal, column inputs, labels,
+   direction and any controlled state
+4. Build the live table runtime and per-table feature state, then call
+   `mountTableFeatures` with the runtime, state and injector
+5. Render desktop or card structure and `AdaptSlot` outlets, each carrying
+   its complete props and table context
+
+`AdaptSlot` creates a standalone slot component and updates its `props` input.
+The feature's `mount` callback may return cleanup; `mountTableFeatures` runs
+cleanup when a feature is replaced or removed, and at table destruction. Its
+child injector is released with that behavior. Reconcile options, registrations
+and slot fills when the feature list changes, while keeping the source, layout
+and unchanged feature controllers alive. The retained runtime must expose the
+current capabilities, including revoked editing or mutation operations. Do not
+duplicate core stores or leave stale registrations in the kit.
+
+Use `AdaptCell`, `AdaptHeader` and `AdaptFooter` for column renderers. Custom
+mobile bodies receive real field templates; stamp each with its supplied
+context so editors and formatting survive.
+
+## Bind the actual semantic element
+
+Apply whole `AdaptAttrs` records. If your kit wraps a native table, input or
+focus target, use `adaptAttrsTarget` to reach the actual inner element. A
+getter can follow view replacement; `null` defers attachment until the element
+exists. This bridge preserves attributes, controlled values, classes, styles,
+listeners and refs, and removes them from an old target.
+
+Preserve `data-adapttable-part` names and documented `classNames` placement.
+Use logical CSS edges for pins and overlays. NG-ZORRO demonstrates how to keep
+direction on portalled controls without changing the whole document.
+
+## Prove behavior, not only markup
+
+A usable adapter covers its kit's real controls on desktop and cards:
+search/sort/page, selection, editing and failures, grouped headers, row
+structure, virtualization, menus and exports. Verify keyboard activation,
+roving focus, Escape/outside dismissal, trigger focus restoration, RTL and
+screen-reader announcements in a real browser. A slot that exists in the DOM
+but cannot be operated is not feature parity.
+
+Keep first-load, background-refresh, empty, error and retry states distinct.
+The permanent table status live region must exist before its text changes.
+Row writes go to host callbacks; an adapter never takes ownership of the data.
+
+See [Headless rendering](/v3/angular/headless/), [Features](/v3/angular/features/),
+[Mobile cards](/v3/angular/mobile/), [Accessibility](/v3/angular/accessibility/) and the
+[Angular API reference](/v3/angular/getting-started/?unavailable=api).

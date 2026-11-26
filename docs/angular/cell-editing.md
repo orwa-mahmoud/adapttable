@@ -206,8 +206,7 @@ or the [NG-ZORRO editing demo](https://adapttable.orwamahmoud.com/angular/demo/n
 ## Keyboard, mobile and incoming updates
 
 Double-click a cell to open its editor, or a single click with
-`editing(handler, { editActivation: "click" })` or the table's
-`[editActivation]="'click'"` input. Keyboard grid navigation supplies an
+`editing(handler, { editActivation: "click" })`. Keyboard grid navigation supplies an
 accessible route to editable cells; Enter commits, Escape cancels, and Tab
 commits and advances through the editing flow. Validation failures keep the
 draft available for correction. Editors are also rendered inside mobile fields,

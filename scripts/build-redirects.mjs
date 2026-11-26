@@ -40,7 +40,11 @@ import {
   MATRIX_FEATURES,
   pathOf,
 } from "../apps/showcase/matrix.mjs";
-import { LEGACY_SITE, legacyRoute } from "./legacy-routes.mjs";
+import {
+  LEGACY_SITE,
+  legacyRoute,
+  usesNativeArchiveRouting,
+} from "./legacy-routes.mjs";
 import { listPackages } from "./packages.mjs";
 import {
   DEMO_ROOT,
@@ -295,8 +299,8 @@ export const kitShortcuts = (routes) => {
 /**
  * The `_redirects` table: each changed page's previous path, with and without
  * its trailing slash; one rule for the showcase and one for the framework
- * section's root; every page's own slashless address; and each kit's demo at
- * its address without `/demo/`.
+ * section's root; slashless addresses outside the archives that use native
+ * HTML routing; and each kit's demo at its address without `/demo/`.
  *
  * @param {string} root
  * @returns {string}
@@ -318,10 +322,11 @@ export const redirectsTable = (root) => {
   }
   lines.push(`/demo ${DEMO_ROOT} 301`);
   // A page asked for without its trailing slash answers a permanent redirect
-  // to the address it is served and canonicalised at; the host's own slash
-  // handling would answer a temporary one.
+  // to its canonical address. Archives published at their canonical paths
+  // use the host's automatic trailing slash and consume no static rules.
   const listed = new Set(lines.map((line) => line.split(" ")[0]));
   for (const { route } of sitePages(root)) {
+    if (usesNativeArchiveRouting(route)) continue;
     const bare = route.slice(0, -1);
     if (bare !== "" && !listed.has(bare)) {
       lines.push(`${bare} ${route} 301`);

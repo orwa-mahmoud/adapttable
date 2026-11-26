@@ -25,7 +25,7 @@ quoted the way those applications quote them.
 Values resolve exactly as an export's do, `exportValue` included, so a copy and
 a downloaded file cannot disagree about what a cell contains.
 
-**Ctrl/Cmd+X** copies the same text and then calls `onCellCut(range)`. The table
+**Ctrl/Cmd+X** copies the same text and then calls `cellNavigation({ onCut })` with the range. The table
 clears nothing itself: what "cut" removes is your decision, and a cut that
 emptied cells before the clipboard accepted them would lose the data outright.
 With [`contextMenu()`](./command-palette.md#built-in-entries) composed, the
@@ -67,14 +67,16 @@ shape, same handler — so paste is not a second editing route, and whatever you
 wrap around a single-cell commit already covers a paste of two hundred.
 
 To take the batch whole instead — one server round trip, one undo entry — set
-`onCellPaste`, which takes precedence:
+`cellNavigation({ onPaste })`, which takes precedence:
 
 ```tsx
 <DataTable
   data={rows}
   rowKey={(row) => row.id}
-  features={[cellNavigation(), editing(commit)]}
-  onCellPaste={(edits) => saveAll(edits)}
+  features={[
+    cellNavigation({ onPaste: (edits) => saveAll(edits) }),
+    editing(commit),
+  ]}
   columns={[{ key: "budget", header: "Budget", editable: true }]}
 />
 ```
@@ -111,7 +113,7 @@ stop and a focusable square inside it would break that; the key press announces
 what it wrote through `labels.gridRangeFilled`.
 
 The edits arrive exactly as a paste's do — one call per cell through
-`editing()`, or `onCellFill` for the batch — so the handle appears as soon as a
+`editing()`, or `cellNavigation({ onFill })` for the batch — so the handle appears as soon as a
 table can be edited, and never when it cannot:
 
 ```tsx

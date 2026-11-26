@@ -520,12 +520,12 @@ raw-HTML control is the same defect as drawing it in core. For each feature:
 - the header cell spreads core's header props whole (`...leaf.headerProps`),
   or hands `getHeaderCellProps` to a kit that builds its own `<th>`, so
   attributes core adds reach every kit;
-- overlays use the kit's own primitive. `filtersMode="popover"` is an anchored
+- overlays use the kit's own primitive. `filters(defs, { mode: "popover" })` is an anchored
   card with no backdrop that closes on Escape and outside click, restores
-  focus and sets `aria-expanded` on its trigger; `filtersMode="drawer"` is the
+  focus and sets `aria-expanded` on its trigger; `filters(defs, { mode: "drawer" })` is the
   kit's Drawer with a real backdrop.
 
-The root `DataTable` imports neither another kit nor the `/features` barrel.
+The root `DataTable` imports no other kit and no feature entry.
 A feature reaches a table only through the `features` array, which is what
 keeps a three-prop table's bundle free of every feature it did not name.
 
@@ -540,7 +540,7 @@ complete adapter for native HTML. Its layout is the one to copy:
 | `types.ts`                         | `DataTableClassNames`, `DataTableSlots`, `DataTablePropsBase`, and `DataTableProps`.                                                                    |
 | `index.ts`                         | `DataTable`, its types, and the re-exported builders and types an app needs without importing core.                                                     |
 | `<feature>.tsx` / `<feature>.ts`   | One file per subpath: a helper call, an `extendFeature` wrap, or a pass-through re-export.                                                              |
-| `features.ts` / `preset.ts`        | The `/features` forward and the `/preset` `standardFeatures`.                                                                                           |
+| `preset.ts`                        | The `/preset` `standardFeatures`.                                                                                                                       |
 | `components/DesktopTable.tsx`      | The desktop table, built on `useDesktopTableAssembly` and `createDesktopRow` — see [desktop table assembly](./customization.md#desktop-table-assembly). |
 | `components/MobileCards.tsx`       | The card layout.                                                                                                                                        |
 | `components/featureSlots.tsx`      | The lean `FeatureSlot` wrappers the table and cards import.                                                                                             |

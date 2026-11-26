@@ -95,17 +95,19 @@ export function PeopleTable() {
         { key: "hiredAt", filter: "dateRange" },
       ]}
       features={[
-        filters([
-          {
-            key: "tenure",
-            type: "numberRange",
-            label: "Tenure (years)",
-            getValue: (r) =>
-              (Date.now() - new Date(r.hiredAt).getTime()) / 31_557_600_000,
-          },
-        ]),
+        filters<Person>(
+          [
+            {
+              key: "tenure",
+              type: "numberRange",
+              label: "Tenure (years)",
+              getValue: (r) =>
+                (Date.now() - new Date(r.hiredAt).getTime()) / 31_557_600_000,
+            },
+          ],
+          { mode: "popover" }
+        ), // the default; "drawer" or "header" — one mode, never stacked
       ]}
-      filtersMode="popover" // the default; "drawer" or "header" — one mode, never stacked
     />
   );
 }
@@ -168,18 +170,17 @@ every filter lives on a column, or pass standalone defs as above. See
 | `column`      | `string`                                                    | `key`                 | Column whose header filter shows this widget.                                                                                                                                                                                                                   |
 | `ai`          | `false \| FilterAiOptions`                                  | visible, options ≤ 50 | Assistant catalog. `false` hides the filter. `{ options: false }` keeps it and omits values. A number sends values only when the static list is that long or shorter (`FILTER_AI_OPTIONS_LIMIT`). `"auto"` and async loaders are never fetched into the prompt. |
 
-| Factory / prop              | Type                                | Default     | Description                                                                                                                                                                  |
-| --------------------------- | ----------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `filters([…])`              | `FilterDef[] \| ReactNode`          | —           | Declarative array → the adapter builds the form; JSX → you draw it (escape hatch). Use `filters([])` when every filter is on a column.                                       |
-| `filtersMode`               | `"popover" \| "drawer" \| "header"` | `"popover"` | One container. Popover: anchored card, no backdrop. Drawer: panel + backdrop. Header: the per-column funnel from `headerFilters()`, which alone already selects header mode. |
-| `onClearFilters`            | `() => void`                        | —           | Notification after the table clears the filters (drawer, chip strip, no-results action).                                                                                     |
-| `filterLabels`              | `Record<string, ChipLabelResolver>` | derived     | Per-key chip label resolvers. Derived automatically by declarative filters; needed only for JSX filters (or to override a derived label).                                    |
-| `extraChips`                | `ActiveFilterChip[]`                | —           | Extra chips driven by non-URL state, merged with the derived chips.                                                                                                          |
-| `activeFilterCount`         | `number`                            | chip count  | Overrides the Filters-button badge.                                                                                                                                          |
-| `closeHeaderFilterOnSelect` | `boolean`                           | `false`     | Close a header-filter overlay after a finished single-control write (select/boolean, or a valueless operator). Off by default.                                               |
-| `filterFields`              | `boolean`                           | `true`      | Mount the per-field form inside Filters; `false` leaves only the AND/OR tree.                                                                                                |
-| `filterTypes([…])`          | `FilterTypeSpec[]`                  | built-ins   | Factory from `@adapttable/<kit>/filters`; extra or replacement filter types merged onto `defaultFilterRegistry`. Same `type` replaces.                                       |
-| `headerFilters()`           | factory                             | off         | Factory from `@adapttable/<kit>/header-filters`; per-column header filter funnel. Composing it selects header mode. Desktop only. Never stacked with the popover or drawer.  |
+| Factory / prop                     | Type                                | Default     | Description                                                                                                                                                                  |
+| ---------------------------------- | ----------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filters([…])`                     | `FilterDef[] \| ReactNode`          | —           | Declarative array → the adapter builds the form; JSX → you draw it (escape hatch). Use `filters([])` when every filter is on a column.                                       |
+| `filters(defs, { mode })`          | `"popover" \| "drawer" \| "header"` | `"popover"` | One container. Popover: anchored card, no backdrop. Drawer: panel + backdrop. Header: the per-column funnel from `headerFilters()`, which alone already selects header mode. |
+| `onClearFilters`                   | `() => void`                        | —           | Notification after the table clears the filters (drawer, chip strip, no-results action).                                                                                     |
+| `filters(defs, { filterLabels })`  | `Record<string, ChipLabelResolver>` | derived     | Per-key chip label resolvers. Derived automatically by declarative filters; needed only for JSX filters (or to override a derived label).                                    |
+| `filters(defs, { extraChips })`    | `ActiveFilterChip[]`                | —           | Extra chips driven by non-URL state, merged with the derived chips.                                                                                                          |
+| `headerFilters({ closeOnSelect })` | `boolean`                           | `false`     | Close a header-filter overlay after a finished single-control write (select/boolean, or a valueless operator). Off by default.                                               |
+| `filters(defs, { fields })`        | `boolean`                           | `true`      | Mount the per-field form inside Filters; `false` leaves only the AND/OR tree.                                                                                                |
+| `filterTypes([…])`                 | `FilterTypeSpec[]`                  | built-ins   | Factory from `@adapttable/<kit>/filters`; extra or replacement filter types merged onto `defaultFilterRegistry`. Same `type` replaces.                                       |
+| `headerFilters()`                  | factory                             | off         | Factory from `@adapttable/<kit>/header-filters`; per-column header filter funnel. Composing it selects header mode. Desktop only. Never stacked with the popover or drawer.  |
 
 ## Draw only the widgets you use
 
@@ -302,7 +303,7 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
   `column: "person"`). Checklist / multiSelect open a closed menu of
   checkboxes, not a native `<select multiple>`. The funnel overlay stays open
   while you fill a multi-input field; nested kit dropdowns are not treated as
-  outside clicks. Pass `closeHeaderFilterOnSelect` to dismiss after a finished
+  outside clicks. Pass `headerFilters({ closeOnSelect: true })` to dismiss after a finished
   single-control write (`useHeaderFilterOverlay` /
   `bindHeaderFilterDismiss` / `headerFilterFieldIsComplete` /
   `usePointerDismiss` / `HeaderFilterSessionProps` /
@@ -366,7 +367,7 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
   label with the raw value. A failed load dev-warns and yields no options.
 - Passing JSX to `filters(…)` switches off every derivation — your controls
   update table state themselves (live by default), and you supply
-  `filterLabels` / `extraChips` / `activeFilterCount` for the chips and badge.
+  `filterLabels` / `extraChips` in its options for the chips.
 - Changing any filter resets the page to 1. `multiSelect` URL values are
   comma-separated with each entry encoded, so values containing commas
   round-trip safely. With `urlKey="left"`, params become `left.f_status`, ….

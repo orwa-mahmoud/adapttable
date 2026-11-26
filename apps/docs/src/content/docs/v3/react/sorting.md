@@ -1,0 +1,141 @@
+---
+title: "React table sorting — multi-column, URL-synced (v3)"
+description: React table sorting with single or multi-column sort, custom
+  comparators, server-side sortBy and accessible aria-sort headers — URL-synced
+  when you want it.
+head:
+  - tag: meta
+    attrs:
+      name: "robots"
+      content: "noindex, follow"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"React
+      table sorting — multi-column,
+      URL-synced","item":"https://adapttable.orwamahmoud.com/v3/react/sorting/"}]}'
+  - tag: meta
+    attrs:
+      property: og:image
+      content: https://adapttable.orwamahmoud.com/og/sorting.png
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: https://adapttable.orwamahmoud.com/og/sorting.png
+slug: v3/react/sorting
+---
+
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/efd18cf92b4e11175f673269395687617e39c2de/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (`sortable` columns + `multiSort()` — shift-click a second header); edit it in the browser, no install. [Other UI kits →](/v3/react/getting-started/#try-it-in-stackblitz)
+
+Mark a column `sortable` and header clicks cycle it ascending → descending → cleared, with the state kept in the URL so reloads and shared links restore the exact order. Multi-column sorting is one feature import: `multiSort()` from `@adapttable/<kit>/multi-sort`.
+
+## Example
+
+```tsx
+import {
+  type ColumnDef,
+  DataTable,
+  useFrontendData,
+} from "@adapttable/mantine"; // or mui, chakra, antd, radix, shadcn, unstyled
+import { multiSort } from "@adapttable/mantine/multi-sort";
+
+interface Person {
+  id: string;
+  name: string;
+  team: string;
+  hiredAt: string;
+  rating: number | null;
+}
+
+const people: Person[] = [
+  {
+    id: "1",
+    name: "Amira Hassan",
+    team: "Platform",
+    hiredAt: "2021-03-15",
+    rating: 4.6,
+  },
+  {
+    id: "2",
+    name: "Tom Becker",
+    team: "Design",
+    hiredAt: "2022-11-01",
+    rating: null,
+  },
+  {
+    id: "3",
+    name: "Lina Park",
+    team: "Platform",
+    hiredAt: "2019-07-20",
+    rating: 4.9,
+  },
+  {
+    id: "4",
+    name: "Sam Ortiz",
+    team: "Design",
+    hiredAt: "2023-02-08",
+    rating: 4.1,
+  },
+];
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team", sortable: true },
+  // Formatted cell + sortValue: sort by the real date, not the display string.
+  {
+    key: "hiredAt",
+    accessor: (r) => new Date(r.hiredAt).toLocaleDateString(),
+    sortValue: (r) => r.hiredAt,
+    sortable: true,
+  },
+  // null ratings always sort last, ascending or descending.
+  { key: "rating", sortable: true },
+];
+
+export function People() {
+  // `defaults` sets the initial sort; the URL overrides it once the user sorts.
+  const source = useFrontendData({
+    data: people,
+    columns,
+    defaults: { sortBy: "name", sortDir: "asc" },
+  });
+  return (
+    <DataTable
+      source={source}
+      columns={columns}
+      rowKey={(r) => r.id}
+      features={[multiSort()]} // shift-click chains a second column
+    />
+  );
+}
+```
+
+## How it works
+
+* A header click cycles the column inactive → ascending → descending → cleared. A click on a different column starts it ascending.
+* Frontend tier (`data` / `useFrontendData`): rows are compared by `sortValue`, falling back to `formatValue`, `exportValue`, then the key's data path. Numbers and booleans compare numerically, everything else by locale-aware string comparison; the sort is stable.
+* `null` / `undefined` / `NaN` always sort last — in both directions. A descending sort never flips the blanks to the top.
+* Sort state lives in the URL: `sortBy` + `sortDir` for a single sort, and the chain as `sort=name:asc,hiredAt:desc` with `multiSort()` composed. `defaults` apply only while the URL is silent; clearing a defaulted sort writes an empty `sortBy=` marker so it does not resurrect.
+* `multiSort()` adds shift-click (or shift-Enter): each shift-click adds the column to the chain or advances it (asc → desc → removed). The first shift-click keeps the current sort as level one, so click Name then shift-click Salary sorts Name → Salary. Chained headers expose a 1-based `data-sort-index` for the order badge. A plain click resets the chain back to a single sort.
+* Server tier (`onQueryChange` / `useQuerySource`): the table only emits the state — `query.sortBy`, `query.sortDir`, and `query.sortLevels` for a chain. Your backend does the comparing; `sortValue` is unused.
+
+## Options
+
+| Prop            | Type                                                       | Default                      | Description                                                                        |
+| --------------- | ---------------------------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------- |
+| `sortable`      | `boolean` (per `ColumnDef`)                                | `false`                      | Enable sorting for the column.                                                     |
+| `sortValue`     | `(row) => SortableValue` (per `ColumnDef`)                 | the generated accessor value | Primitive extractor for the client-side comparator. Unused for server-sorted data. |
+| `multiSort()`   | factory from `@adapttable/<kit>/multi-sort`                | off                          | Multi-column sorting via shift-click / shift-Enter.                                |
+| `getSortValue`  | `(row, columnKey) => SortableValue` (on `useFrontendData`) | —                            | One sort-key extractor for the whole row; wins over per-column `sortValue`.        |
+| `defaults`      | `Partial<TableQueryParams> & { extra? }`                   | —                            | Initial sort (`sortBy`, `sortDir`) on the source builders; URL values win.         |
+| `sortByOptions` | `SortByOption[]`                                           | —                            | Options for the mobile sort-by select.                                             |
+
+## Notes
+
+* `defaults` works both as a `<DataTable>` prop and as an option on the source builders — `defaults={{ sortBy: "name" }}` default-sorts the zero-ceremony `data` tier directly (ascending unless `sortDir` is given; explicit URL state wins).
+* A column whose accessor returns JSX sorts by its data path unless it sets `sortValue` (or `formatValue` / `exportValue`); without `sortValue` a development warning fires. A `sortBy` that matches no column warns too.
+* The plain-click reset of a multi-sort chain is deliberate: without it the chain would keep superseding the single sort and the click would appear dead.
+* A hand-edited URL sort with no `sortDir` falls back to ascending.
+* In multi-sort, ties at level N fall through to level N+1; rows that tie on every level keep their original order.
+
+See it live in the [demo](https://adapttable.orwamahmoud.com/react/demo/).
