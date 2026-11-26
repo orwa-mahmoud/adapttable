@@ -505,6 +505,12 @@ function moduleEdits(
  *   complex to split safely.
  */
 /**
+ * A Vue single-file component's script block, its body in group 1. Tag names
+ * match in any case, and the closing tag may carry whitespace before `>`.
+ */
+export const VUE_SCRIPT_BLOCK = /<script\b[^>]*>([\s\S]*?)<\/script\s*>/gi;
+
+/**
  * Rewrite each Vue script with `migrate`, leaving the template bytes alone.
  * Diagnostics use the script's position in the file.
  */
@@ -516,7 +522,7 @@ export function migrateVueScripts(
   let cursor = 0;
   let movedImports = 0;
   const issues: MigrationIssue[] = [];
-  for (const match of source.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) {
+  for (const match of source.matchAll(VUE_SCRIPT_BLOCK)) {
     const body = match[1] ?? "";
     const bodyStart = (match.index ?? 0) + match[0].indexOf(body);
     code += source.slice(cursor, bodyStart);

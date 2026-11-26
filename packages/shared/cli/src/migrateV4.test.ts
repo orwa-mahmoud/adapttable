@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { migrateVueScripts } from "./importMigration";
 import { migrateV4File, migrateV4Source } from "./migrateV4";
 
 describe("migrateV4Source", () => {
@@ -467,6 +468,27 @@ describe("migrateV4Source", () => {
     expect(template.changed).toBe(false);
     expect(template.issues).toHaveLength(1);
     expect(template.issues[0]?.line).toBe(1);
+  });
+
+  it("reads a script block whatever the tag's case and closing spacing", () => {
+    const source = [
+      '<SCRIPT setup lang="ts">',
+      'import { selection } from "@adapttable/mui/features";',
+      "</Script >",
+      "<template><div /></template>",
+      "",
+    ].join("\n");
+    expect(migrateV4File(source, "people.vue").code).toContain(
+      'import { selection } from "@adapttable/react/features";'
+    );
+    expect(
+      migrateVueScripts(source, (block) => ({
+        code: block.toUpperCase(),
+        changed: true,
+        movedImports: 1,
+        issues: [],
+      })).code
+    ).toContain('IMPORT { SELECTION } FROM "@ADAPTTABLE/MUI/FEATURES";');
   });
 
   it("leaves a file that uses nothing v4 moved untouched", () => {

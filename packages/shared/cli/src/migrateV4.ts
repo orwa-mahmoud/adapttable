@@ -6,6 +6,7 @@ import {
   type MigrationResult,
   reportPatterns,
   rewriteImports,
+  VUE_SCRIPT_BLOCK,
 } from "./importMigration";
 import {
   KIT_FEATURE_BARREL_REDIRECTS,
@@ -441,7 +442,7 @@ export function migrateV4File(
   let code = "";
   let cursor = 0;
   let movedImports = 0;
-  const scripts = source.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g);
+  const scripts = source.matchAll(VUE_SCRIPT_BLOCK);
   for (const match of scripts) {
     const body = match[1] ?? "";
     const bodyStart = (match.index ?? 0) + match[0].indexOf(body);
