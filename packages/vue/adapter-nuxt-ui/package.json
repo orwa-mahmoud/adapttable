@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/nuxt-ui",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Nuxt UI components for the AdaptTable headless Vue binding — sorting, filters, editing, grouping, responsive cards, URL state and RTL.",
   "keywords": [
     "vue",
@@ -503,7 +503,7 @@
     }
   },
   "dependencies": {
-    "@adapttable/vue": "0.7.0"
+    "@adapttable/vue": "0.8.0"
   },
   "peerDependencies": {
     "@nuxt/ui": "^4.11.3",

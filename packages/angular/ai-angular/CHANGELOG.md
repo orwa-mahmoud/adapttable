@@ -1,5 +1,43 @@
 # @adapttable/ai-angular
 
+## 0.1.14
+
+### Patch Changes
+
+- 923b252: A table agent loads the WebMCP registrar only when it sets `webmcp`. The controller is also on the new `@adapttable/ai/agent` entry, which the React, Vue and Angular bindings now use, so `tableAgent` starts 0.54–0.58 KiB smaller in each framework and the registrar arrives as a 1.1 KiB chunk the first time a table offers itself to a page agent.
+- 8af4736: A feature's `setup(host)` only registers; what outlives a render goes in its `mount(context)`, which returns what releases it. Every binding keeps a mounted feature by id: declaring it again with new options, inline included, keeps the resource and hands `context.feature()` the new declaration, and only removing the feature, changing its `dependencies` or unmounting the table releases it, exactly once. A render the framework discards acquires nothing, and a failed mount rolls back what its pass acquired. React publishes the table runtime and its feature ids in layout effects, so AI and event callbacks read the last committed table; `PublishTableRuntime` is the chrome's publisher. `createFeatureMounts` and `composeMounts` on `@adapttable/core/binding` are the shared lifecycle. A `setup` that returns a cleanup is refused, and `onDispose` is no longer on the feature host. Vue's and Angular's table agent follows its latest declaration's options. `adapttable migrate-v4` reports `onDispose` calls.
+- Updated dependencies [923b252]
+- Updated dependencies [d1f33b7]
+- Updated dependencies [501fb5c]
+- Updated dependencies [b94b20c]
+- Updated dependencies [bc19944]
+- Updated dependencies [7dbd509]
+- Updated dependencies [06e676e]
+- Updated dependencies [72b4cde]
+- Updated dependencies [35abf7a]
+- Updated dependencies [1ea5a0b]
+- Updated dependencies [35a1ec0]
+- Updated dependencies [ee0f202]
+- Updated dependencies [536aa89]
+- Updated dependencies [cb9f9db]
+- Updated dependencies [da4baa0]
+- Updated dependencies [bee0c9f]
+- Updated dependencies [636d0ad]
+- Updated dependencies [8af4736]
+- Updated dependencies [633e23c]
+- Updated dependencies [ed8a86d]
+- Updated dependencies [a96cfee]
+- Updated dependencies [31e5510]
+- Updated dependencies [fbc52e8]
+- Updated dependencies [ffd1a07]
+- Updated dependencies [4effc96]
+- Updated dependencies [eb084d0]
+- Updated dependencies [5b7bc3c]
+- Updated dependencies [b36d160]
+- Updated dependencies [3b2a5bd]
+  - @adapttable/ai@0.8.0
+  - @adapttable/angular@0.12.0
+
 ## 0.1.13
 
 ### Patch Changes
