@@ -211,6 +211,25 @@ describe("redirectsTable", () => {
     );
   });
 
+  it("reserves explicit redirects for archives with previously published paths", () => {
+    const root = composed();
+    const archivePage = `/v3${docsRoute("filtering")}`;
+    write(root, `${archivePage.slice(1)}index.html`, PAGE);
+
+    assert.deepEqual(
+      addressMap(root).find(({ route }) => route === archivePage),
+      { from: archivePage, route: archivePage, to: archivePage }
+    );
+    const lines = redirectsTable(root).split("\n");
+    const olderPage = `/v1${docsRoute("filtering")}`;
+    assert.ok(lines.includes(`/v1/filtering ${olderPage} 301`));
+    assert.ok(lines.includes(`${olderPage.slice(0, -1)} ${olderPage} 301`));
+    assert.equal(
+      lines.some((line) => line.startsWith("/v3/")),
+      false
+    );
+  });
+
   it("sends each page's slashless address to the page, once", () => {
     const lines = redirectsTable(composed()).split("\n");
     const filtering = docsRoute("filtering");
