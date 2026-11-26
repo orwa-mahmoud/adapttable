@@ -172,7 +172,7 @@ cancels the edit and restores the activation button's focus.
 
 ## Compatibility
 
-This `0.1.0` package requires Vue `^3.5.0` and Naive UI `^2.45.3`.
+This package requires Vue `^3.5.0` and Naive UI `^2.45.3`.
 
 ```sh
 pnpm add @adapttable/naive-ui naive-ui@^2.45.3 vue@^3.5.0

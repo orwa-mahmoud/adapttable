@@ -659,7 +659,7 @@ win over feature patches.
 The result includes `table`, `source`, `selection`, `desktop`, `mobile`,
 `state`, `active`, normalized `features`, `featureHost`, model refs,
 `filterRuntime`, `featureOptions`, `density`, `setDensity`,
-`toolbarExtrasProps`, `renderToolbarExtras`, `renderBatchEditBar`, `slotFills`, `runtime`, `handle`,
+`renderToolbarExtras`, `renderBatchEditBar`, `slotFills`, `runtime`, `handle`,
 `reconcile`, `setSurface`, `rowInventory`, `grouping`, `tree`, `detail`,
 `urlAdapter` and `flushViewState`. Pass a `DataTableSurface` with
 `scrollElement(): HTMLElement | null` to `setSurface` for the exposed focus

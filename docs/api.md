@@ -45,32 +45,46 @@ per-column aggregation choices.
 
 ### Columns & layout
 
-| Prop                   | Type                                  | Default | Description                                                                                                                    |
-| ---------------------- | ------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `columns`              | `ColumnInput<TRow>[]`                 | —       | Leaf `ColumnDef`s and optional `ColumnGroupDef` parents — see [ColumnDef](#columndef) and [column groups](./column-groups.md). |
-| `columnLayout`         | `ColumnLayoutState`                   | —       | Controlled column layout (hidden/order/pinned/widths).                                                                         |
-| `onColumnLayoutChange` | `(next: ColumnLayoutState) => void`   | —       | Change handler for the controlled column layout.                                                                               |
-| `defaultColumnLayout`  | `Partial<ColumnLayoutState>`          | —       | Initial column layout for the uncontrolled mode.                                                                               |
-| `onColumnRename`       | `(key: string, name: string) => void` | —       | Host persistence channel for a `renameable` column's accepted display name; stable keys never change.                          |
-| `maxHeight`            | `number`                              | —       | Fixed-height scroll box (px) enabling sideways scrolling + column pinning; omit for page scroll.                               |
-| `sortByOptions`        | `SortByOption[]`                      | —       | Options for a mobile sort-by select.                                                                                           |
+| Prop                   | Type                                | Default | Description                                                                                                                    |
+| ---------------------- | ----------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `columns`              | `ColumnInput<TRow>[]`               | —       | Leaf `ColumnDef`s and optional `ColumnGroupDef` parents — see [ColumnDef](#columndef) and [column groups](./column-groups.md). |
+| `columnLayout`         | `ColumnLayoutState`                 | —       | Controlled column layout (hidden/order/pinned/widths).                                                                         |
+| `onColumnLayoutChange` | `(next: ColumnLayoutState) => void` | —       | Change handler for the controlled column layout.                                                                               |
+| `defaultColumnLayout`  | `Partial<ColumnLayoutState>`        | —       | Initial column layout for the uncontrolled mode.                                                                               |
+| `maxHeight`            | `number`                            | —       | Fixed-height scroll box (px) enabling sideways scrolling + column pinning; omit for page scroll.                               |
+| `sortByOptions`        | `SortByOption[]`                    | —       | Options for a mobile sort-by select.                                                                                           |
+
+Rename persistence is the Columns menu's option: `columnMenu({ onRename })` from
+`@adapttable/<kit>/column-menu` receives `(key, name)` for a `renameable`
+column's accepted display name.
 
 ### Filters & search
 
-| Prop                        | Type                                | Default     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| --------------------------- | ----------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `filtersMode`               | `"popover" \| "drawer" \| "header"` | `"popover"` | Container for a composed `filters()` feature. Popover: anchored card, no backdrop. Drawer: panel + backdrop. Header: per-column icons; hides the Filters button unless the AND/OR tree is on (`toolbarShowsFilters`).                                                                                                                                                                                                                                                                                      |
-| `closeHeaderFilterOnSelect` | `boolean`                           | `false`     | Close a header-filter overlay after a finished single-control write (a select/boolean value, or a valueless operator such as "Is empty"). Off by default — picking an operator on a field that still has a value input does not dismiss. Outside click and Escape always close. `useHeaderFilterOverlay` / `bindHeaderFilterDismiss` / `headerFilterFieldIsComplete` / `usePointerDismiss` / `HeaderFilterSessionProps` / `HeaderFilterOpenProvider` / `HeaderFilterOpenContext` / `HeaderFilterOpenHost`. |
-| `filterLabels`              | `Record<string, ChipLabelResolver>` | —           | Per-filter-key chip label resolvers. Declarative `filters()` definitions derive them automatically; needed only for hand-drawn JSX filters (or to override a derived label).                                                                                                                                                                                                                                                                                                                               |
-| `extraChips`                | `ActiveFilterChip[]`                | —           | Extra chips driven by non-URL state, merged with the derived chips.                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `activeFilterCount`         | `number`                            | chip count  | Override the active-filter count badge.                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `onClearFilters`            | `() => void`                        | —           | Clear-filters handler used by the panel + chip strip (built-in `clearExtras` fallback otherwise).                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `searchable`                | `boolean`                           | `true`      | Render the built-in search box; pass `false` to hide it.                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `searchPlaceholder`         | `string`                            | —           | Placeholder for the search input.                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `searchDebounceMs`          | `number`                            | `300`       | Debounce in ms for committing the search input to the source.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `filterDefs`                | `readonly FilterDef<TRow>[]`        | —           | Resolved filter definitions used to label AND/OR tree chips. The shell sets this from `filters()`; hosts calling `useTableChrome` directly pass the same defs.                                                                                                                                                                                                                                                                                                                                             |
-| `filterRegistry`            | `FilterTypeRegistry`                | —           | Type registry those defs were built against.                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `filterFields`              | `boolean`                           | `true`      | Mount the per-field Filters form; `false` keeps only the AND/OR tree in that chrome.                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Prop                | Type         | Default | Description                                                                                       |
+| ------------------- | ------------ | ------- | ------------------------------------------------------------------------------------------------- |
+| `onClearFilters`    | `() => void` | —       | Clear-filters handler used by the panel + chip strip (built-in `clearExtras` fallback otherwise). |
+| `searchable`        | `boolean`    | `true`  | Render the built-in search box; pass `false` to hide it.                                          |
+| `searchPlaceholder` | `string`     | —       | Placeholder for the search input.                                                                 |
+| `searchDebounceMs`  | `number`     | `300`   | Debounce in ms for committing the search input to the source.                                     |
+
+#### `filters(defs?, options?)`
+
+Options of the `filters` feature from `@adapttable/<kit>/filters`.
+
+| Option         | Type                                | Default     | Description                                                                                                                                                                                                           |
+| -------------- | ----------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mode`         | `"popover" \| "drawer" \| "header"` | `"popover"` | Container for a composed `filters()` feature. Popover: anchored card, no backdrop. Drawer: panel + backdrop. Header: per-column icons; hides the Filters button unless the AND/OR tree is on (`toolbarShowsFilters`). |
+| `filterLabels` | `Record<string, ChipLabelResolver>` | —           | Per-filter-key chip label resolvers. Declarative `filters()` definitions derive them automatically; needed only for hand-drawn JSX filters (or to override a derived label).                                          |
+| `extraChips`   | `ActiveFilterChip[]`                | —           | Extra chips driven by non-URL state, merged with the derived chips.                                                                                                                                                   |
+| `fields`       | `boolean`                           | `true`      | Mount the per-field Filters form; `false` keeps only the AND/OR tree in that chrome.                                                                                                                                  |
+
+#### `headerFilters(options?)`
+
+Options of the `headerFilters` feature from `@adapttable/<kit>/header-filters`.
+
+| Option          | Type      | Default | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| --------------- | --------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `closeOnSelect` | `boolean` | `false` | Close a header-filter overlay after a finished single-control write (a select/boolean value, or a valueless operator such as "Is empty"). Off by default — picking an operator on a field that still has a value input does not dismiss. Outside click and Escape always close. `useHeaderFilterOverlay` / `bindHeaderFilterDismiss` / `headerFilterFieldIsComplete` / `usePointerDismiss` / `HeaderFilterSessionProps` / `HeaderFilterOpenProvider` / `HeaderFilterOpenContext` / `HeaderFilterOpenHost`. |
 
 ### Selection & actions
 
@@ -88,61 +102,93 @@ may be a ref or a getter. See [selection](./selection.md).
 
 ### Appearance & chrome
 
-| Prop                        | Type                                                            | Default         | Description                                                                                                                                                                                                                       |
-| --------------------------- | --------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tableLabel`                | `string`                                                        | —               | Accessible label for the table.                                                                                                                                                                                                   |
-| `labels`                    | `TableLabels`                                                   | English         | Pre-translated label overrides; missing keys fall back to English defaults.                                                                                                                                                       |
-| `dir`                       | `"ltr" \| "rtl"`                                                | `"ltr"`         | Text direction.                                                                                                                                                                                                                   |
-| `locale`                    | `string`                                                        | —               | Active locale tag (e.g. `"ar"`, `"ar-EG"`) driving per-column `i18n` data-path resolution.                                                                                                                                        |
-| `density`                   | `"comfortable" \| "compact"`                                    | `"comfortable"` | Row density; each adapter maps it to its kit's table size. With `densityChooser()` composed, omit this to let the feature own uncontrolled state; pass it to control density and pair with `onDensityChange` to observe requests. |
-| `onDensityChange`           | `(next: "comfortable" \| "compact") => void`                    | —               | Called when the user picks a density.                                                                                                                                                                                             |
-| `renderCard`                | `(row, card) => ReactNode`                                      | —               | Replace a mobile card's body; the shell keeps selection, actions and expansion. See [mobile](./mobile.md).                                                                                                                        |
-| `mobileBreakpoint`          | `number`                                                        | `768`           | Width (px) at or below which the card layout takes over and `paginationMode="auto"` scrolls. See [mobile](./mobile.md).                                                                                                           |
-| `forceMobile`               | `boolean`                                                       | viewport        | Force the mobile layout instead of resolving from the viewport.                                                                                                                                                                   |
-| `toolbar`                   | `ReactNode`                                                     | —               | Inline toolbar slot for custom controls (view toggles, etc.).                                                                                                                                                                     |
-| `toolbarSlots`              | `ToolbarSlots`                                                  | —               | Toolbar end regions: `start` (ahead of everything) and `end` (after everything). `toolbar` stays the middle region.                                                                                                               |
-| `skeletonRows`              | `number`                                                        | page size       | Number of skeleton rows while loading.                                                                                                                                                                                            |
-| `stickyHeader`              | `boolean`                                                       | `false`         | Keep the desktop table header sticky while scrolling.                                                                                                                                                                             |
-| `stickyToolbar`             | `boolean`                                                       | `stickyHeader`  | Keep search and page-size pinned with the header on page-scroll tables. Pass `false` to let the toolbar scroll away.                                                                                                              |
-| `stickyTop`                 | `number`                                                        | `0`             | Inset in px for the sticky header (and the sticky toolbar) so they clear an app bar.                                                                                                                                              |
-| `scrollToTopOnChange`       | `boolean`                                                       | `true`          | Scroll back to the table when search/filter/page changes.                                                                                                                                                                         |
-| `scrollTopGap`              | `number`                                                        | `8`             | Extra gap below sticky chrome when scrolling back.                                                                                                                                                                                |
-| `isCellFlashing`            | `(rowId: string, columnKey: string) => boolean`                 | —               | Mark cells a patch just changed (`data-flash` on the cell and on the matching card value). Pair with `useChangedCellFlash` from `@adapttable/react/stream`. Omit and nothing is marked. See [realtime](./realtime.md).            |
-| `onEditStart`               | `EditEventHandler<TRow>`                                        | —               | Observe an editor opening (cell, row or batch). Cannot change the outcome.                                                                                                                                                        |
-| `onEditCancel`              | `EditEventHandler<TRow>`                                        | —               | Observe a cancel. Not fired when a successful commit merely closes the editor.                                                                                                                                                    |
-| `onEditCommit`              | `EditEventHandler<TRow>`                                        | —               | Observe a value reaching the host, after parse and validation.                                                                                                                                                                    |
-| `onValidationFail`          | `EditEventHandler<TRow>`                                        | —               | Observe a validator refusing a value; the editor stays open.                                                                                                                                                                      |
-| `onEditError`               | `EditEventHandler<TRow>`                                        | —               | Observe a save promise rejecting.                                                                                                                                                                                                 |
-| `onEditConflict`            | `EditConflictHandler<TRow>`                                     | —               | A row changed under an open editor. Return `"keep"` or `"take"`; omit and `editConflictPolicy` decides.                                                                                                                           |
-| `editConflictPolicy`        | `"keep" \| "take" \| "ask"`                                     | `"ask"`         | What to do when the host does not choose. `"ask"` surfaces Keep mine / Take theirs.                                                                                                                                               |
-| `editActivation`            | `"doubleClick" \| "click"`                                      | `"doubleClick"` | The pointer gesture that opens a cell's editor (an `EditActivation`). `"click"` opens it on the first click; Enter and F2 open it either way.                                                                                     |
-| `rowVersion`                | `(row: TRow) => string \| number`                               | —               | Host version of a row. Any change under an open editor is a conflict, not only the edited column.                                                                                                                                 |
-| `validateRow`               | `RowValidator<TRow>`                                            | —               | Gate a commit on a row-level rule. Receives the row the edit would produce; return a message, a column key → message map, or nothing. May be async.                                                                               |
-| `applyEdit`                 | `(row: TRow, columnKey: string, value: unknown) => TRow`        | shallow spread  | How an edit is applied to a row for `validateRow` to judge; pass it when a column reads a nested path.                                                                                                                            |
-| `onEditRollback`            | `(previous: TRow, columnKey: string) => void`                   | —               | Put a row back after a rejected save. Without it the cell is marked failed and the value stays.                                                                                                                                   |
-| `formatEditError`           | `(error: unknown) => string`                                    | —               | Turn a rejected save into the sentence its cell shows.                                                                                                                                                                            |
-| `onCellPaste`               | `(edits: CellEdit<TRow>[]) => void`                             | —               | Ctrl/Cmd+V with the clipboard parsed into cell edits. Requires `cellNavigation()`. Omit it and each edit goes through the composed `editing()` handler.                                                                           |
-| `onCellFill`                | `(edits: CellEdit<TRow>[]) => void`                             | —               | Fill handle drag or Ctrl/Cmd+D. Requires `cellNavigation()`. Same contract as `onCellPaste`.                                                                                                                                      |
-| `onCellCut`                 | `(range: CellRange) => void`                                    | —               | Ctrl/Cmd+X, after the clipboard accepted the copy. Requires `cellNavigation()`. The table clears nothing itself.                                                                                                                  |
-| `summaryRow`                | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —               | Map the current page's rows to per-column footer summary cells.                                                                                                                                                                   |
-| `tableFooter`               | `ReactNode`                                                     | —               | Free slot under the table, above the pager. Not the column-aligned summary row.                                                                                                                                                   |
-| `onGroupByChange`           | `(groupBy: readonly string[]) => void`                          | —               | Notified after a grouping change, with the keys as a list. The chrome always applies the change itself; take full control via `source.setGroupBy`.                                                                                |
-| `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —               | Per-group aggregate cells — **same signature as `summaryRow`**. Called with each group's leaf rows.                                                                                                                               |
-| `collapsedGroupIds`         | `readonly string[]`                                             | —               | Controlled collapsed group keys (ephemeral — not URL-synced).                                                                                                                                                                     |
-| `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —               | Controlled collapse channel; uncontrolled mode uses internal state.                                                                                                                                                               |
-| `groupSort`                 | `GroupSort<TRow>`                                               | source order    | Order groups within their parent: `"label"`, `"label-desc"`, `"count"`, `"count-desc"`, or a comparator.                                                                                                                          |
-| `groupFilter`               | `(group: GroupNode<TRow>) => boolean`                           | —               | Keep only the groups this answers true for, at every level. Row filters run first.                                                                                                                                                |
-| `groupFooters`              | `boolean`                                                       | —               | Close every group with a footer row carrying its aggregates. Needs `groupAggregates`.                                                                                                                                             |
-| `groupPageSize`             | `number`                                                        | —               | Show at most this many top-level groups at a time, with a row offering the rest.                                                                                                                                                  |
-| `groupRowPageSize`          | `number`                                                        | —               | Show at most this many rows inside each group, with a "load more in this group" row.                                                                                                                                              |
-| `onGroupLoadMore`           | `(groupKey: string) => void`                                    | —               | Called when a reader asks for more rows inside a group. The table reveals what it already holds either way.                                                                                                                       |
-| `hasChildren`               | `(row: TRow) => boolean`                                        | —               | Whether a row has children not fetched yet (server trees).                                                                                                                                                                        |
-| `expandedIds`               | `readonly string[]`                                             | —               | Controlled tree expansion: the ids currently open.                                                                                                                                                                                |
-| `onExpandedIdsChange`       | `(ids: string[]) => void`                                       | —               | Fired after the table opens or closes a node.                                                                                                                                                                                     |
+| Prop                  | Type                                                            | Default         | Description                                                                                                                                                                                                                       |
+| --------------------- | --------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tableLabel`          | `string`                                                        | —               | Accessible label for the table.                                                                                                                                                                                                   |
+| `labels`              | `TableLabels`                                                   | English         | Pre-translated label overrides; missing keys fall back to English defaults.                                                                                                                                                       |
+| `dir`                 | `"ltr" \| "rtl"`                                                | `"ltr"`         | Text direction.                                                                                                                                                                                                                   |
+| `locale`              | `string`                                                        | —               | Active locale tag (e.g. `"ar"`, `"ar-EG"`) driving per-column `i18n` data-path resolution.                                                                                                                                        |
+| `density`             | `"comfortable" \| "compact"`                                    | `"comfortable"` | Row density; each adapter maps it to its kit's table size. With `densityChooser()` composed, omit this to let the feature own uncontrolled state; pass it to control density and pair with `onDensityChange` to observe requests. |
+| `onDensityChange`     | `(next: "comfortable" \| "compact") => void`                    | —               | Called when the user picks a density.                                                                                                                                                                                             |
+| `renderCard`          | `(row, card) => ReactNode`                                      | —               | Replace a mobile card's body; the shell keeps selection, actions and expansion. See [mobile](./mobile.md).                                                                                                                        |
+| `mobileBreakpoint`    | `number`                                                        | `768`           | Width (px) at or below which the card layout takes over and `paginationMode="auto"` scrolls. See [mobile](./mobile.md).                                                                                                           |
+| `forceMobile`         | `boolean`                                                       | viewport        | Force the mobile layout instead of resolving from the viewport.                                                                                                                                                                   |
+| `toolbar`             | `ReactNode`                                                     | —               | Inline toolbar slot for custom controls (view toggles, etc.).                                                                                                                                                                     |
+| `toolbarSlots`        | `ToolbarSlots`                                                  | —               | Toolbar end regions: `start` (ahead of everything) and `end` (after everything). `toolbar` stays the middle region.                                                                                                               |
+| `skeletonRows`        | `number`                                                        | page size       | Number of skeleton rows while loading.                                                                                                                                                                                            |
+| `stickyHeader`        | `boolean`                                                       | `false`         | Keep the desktop table header sticky while scrolling.                                                                                                                                                                             |
+| `stickyToolbar`       | `boolean`                                                       | `stickyHeader`  | Keep search and page-size pinned with the header on page-scroll tables. Pass `false` to let the toolbar scroll away.                                                                                                              |
+| `stickyTop`           | `number`                                                        | `0`             | Inset in px for the sticky header (and the sticky toolbar) so they clear an app bar.                                                                                                                                              |
+| `scrollToTopOnChange` | `boolean`                                                       | `true`          | Scroll back to the table when search/filter/page changes.                                                                                                                                                                         |
+| `scrollTopGap`        | `number`                                                        | `8`             | Extra gap below sticky chrome when scrolling back.                                                                                                                                                                                |
+| `isCellFlashing`      | `(rowId: string, columnKey: string) => boolean`                 | —               | Mark cells a patch just changed (`data-flash` on the cell and on the matching card value). Pair with `useChangedCellFlash` from `@adapttable/react/stream`. Omit and nothing is marked. See [realtime](./realtime.md).            |
+| `summaryRow`          | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —               | Map the current page's rows to per-column footer summary cells.                                                                                                                                                                   |
+| `tableFooter`         | `ReactNode`                                                     | —               | Free slot under the table, above the pager. Not the column-aligned summary row.                                                                                                                                                   |
+
+### Feature options
+
+#### `editing(onCellEdit, options?)`
+
+Options of the `editing` feature from `@adapttable/<kit>/editing`.
+
+| Option               | Type                                                     | Default         | Description                                                                                                                                         |
+| -------------------- | -------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `onEditStart`        | `EditEventHandler<TRow>`                                 | —               | Observe an editor opening (cell, row or batch). Cannot change the outcome.                                                                          |
+| `onEditCancel`       | `EditEventHandler<TRow>`                                 | —               | Observe a cancel. Not fired when a successful commit merely closes the editor.                                                                      |
+| `onEditCommit`       | `EditEventHandler<TRow>`                                 | —               | Observe a value reaching the host, after parse and validation.                                                                                      |
+| `onValidationFail`   | `EditEventHandler<TRow>`                                 | —               | Observe a validator refusing a value; the editor stays open.                                                                                        |
+| `onEditError`        | `EditEventHandler<TRow>`                                 | —               | Observe a save promise rejecting.                                                                                                                   |
+| `onEditConflict`     | `EditConflictHandler<TRow>`                              | —               | A row changed under an open editor. Return `"keep"` or `"take"`; omit and `editConflictPolicy` decides.                                             |
+| `editConflictPolicy` | `"keep" \| "take" \| "ask"`                              | `"ask"`         | What to do when the host does not choose. `"ask"` surfaces Keep mine / Take theirs.                                                                 |
+| `editActivation`     | `"doubleClick" \| "click"`                               | `"doubleClick"` | The pointer gesture that opens a cell's editor (an `EditActivation`). `"click"` opens it on the first click; Enter and F2 open it either way.       |
+| `rowVersion`         | `(row: TRow) => string \| number`                        | —               | Host version of a row. Any change under an open editor is a conflict, not only the edited column.                                                   |
+| `validateRow`        | `RowValidator<TRow>`                                     | —               | Gate a commit on a row-level rule. Receives the row the edit would produce; return a message, a column key → message map, or nothing. May be async. |
+| `applyEdit`          | `(row: TRow, columnKey: string, value: unknown) => TRow` | shallow spread  | How an edit is applied to a row for `validateRow` to judge; pass it when a column reads a nested path.                                              |
+| `onEditRollback`     | `(previous: TRow, columnKey: string) => void`            | —               | Put a row back after a rejected save. Without it the cell is marked failed and the value stays.                                                     |
+| `formatEditError`    | `(error: unknown) => string`                             | —               | Turn a rejected save into the sentence its cell shows.                                                                                              |
+
+#### `cellNavigation(options?)`
+
+Options of the `cellNavigation` feature from `@adapttable/<kit>/cell-navigation`.
+
+| Option    | Type                                | Default | Description                                                                                                                                             |
+| --------- | ----------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `onPaste` | `(edits: CellEdit<TRow>[]) => void` | —       | Ctrl/Cmd+V with the clipboard parsed into cell edits. Requires `cellNavigation()`. Omit it and each edit goes through the composed `editing()` handler. |
+| `onFill`  | `(edits: CellEdit<TRow>[]) => void` | —       | Fill handle drag or Ctrl/Cmd+D. Requires `cellNavigation()`. Same contract as `onPaste`.                                                                |
+| `onCut`   | `(range: CellRange) => void`        | —       | Ctrl/Cmd+X, after the clipboard accepted the copy. Requires `cellNavigation()`. The table clears nothing itself.                                        |
+
+#### `grouping(groupBy, extras?)`
+
+Options of the `grouping` feature from `@adapttable/<kit>/grouping` (`GroupingExtras<TRow>`); `groupingPanel(groupBy?, extras?)` takes the same.
+
+| Option                      | Type                                                            | Default      | Description                                                                                                                                        |
+| --------------------------- | --------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `onGroupByChange`           | `(groupBy: readonly string[]) => void`                          | —            | Notified after a grouping change, with the keys as a list. The chrome always applies the change itself; take full control via `source.setGroupBy`. |
+| `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —            | Per-group aggregate cells — **same signature as `summaryRow`**. Called with each group's leaf rows.                                                |
+| `collapsedGroupIds`         | `readonly string[]`                                             | —            | Controlled collapsed group keys (ephemeral — not URL-synced).                                                                                      |
+| `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —            | Controlled collapse channel; uncontrolled mode uses internal state.                                                                                |
+| `groupSort`                 | `GroupSort<TRow>`                                               | source order | Order groups within their parent: `"label"`, `"label-desc"`, `"count"`, `"count-desc"`, or a comparator.                                           |
+| `groupFilter`               | `(group: GroupNode<TRow>) => boolean`                           | —            | Keep only the groups this answers true for, at every level. Row filters run first.                                                                 |
+| `groupFooters`              | `boolean`                                                       | —            | Close every group with a footer row carrying its aggregates. Needs `groupAggregates`.                                                              |
+| `groupPageSize`             | `number`                                                        | —            | Show at most this many top-level groups at a time, with a row offering the rest.                                                                   |
+| `groupRowPageSize`          | `number`                                                        | —            | Show at most this many rows inside each group, with a "load more in this group" row.                                                               |
+| `onGroupLoadMore`           | `(groupKey: string) => void`                                    | —            | Called when a reader asks for more rows inside a group. The table reveals what it already holds either way.                                        |
+
+#### `tree(options)`
+
+Options of the `tree` feature from `@adapttable/<kit>/tree`.
+
+| Option                | Type                      | Default | Description                                                |
+| --------------------- | ------------------------- | ------- | ---------------------------------------------------------- |
+| `hasChildren`         | `(row: TRow) => boolean`  | —       | Whether a row has children not fetched yet (server trees). |
+| `expandedIds`         | `readonly string[]`       | —       | Controlled tree expansion: the ids currently open.         |
+| `onExpandedIdsChange` | `(ids: string[]) => void` | —       | Fired after the table opens or closes a node.              |
 
 ### Virtualization
 
-| Prop                  | Type     | Default | Description                                                    |
+Options of `virtualize({ … })` from `@adapttable/<kit>/virtualize`.
+
+| Option                | Type     | Default | Description                                                    |
 | --------------------- | -------- | ------- | -------------------------------------------------------------- |
 | `estimateRowSize`     | `number` | `56`    | Desktop row-size estimate in px.                               |
 | `estimateCardSize`    | `number` | `132`   | Mobile card-size estimate in px.                               |
@@ -460,7 +506,7 @@ excluded via `computeFilterFacets` / `rowsExcludingFilter` /
 server that sets `supports.facets` receives `query.facets` and returns
 the same map on the page (`PaginatedResponse.facets`,
 `PageSelector.facets`). Without either surface the widget stays hidden.
-`headerFilters()` selects `filtersMode="header"` (`resolveFilterMode` /
+`headerFilters()` selects the header filter mode (`resolveFilterMode` /
 `FilterChromeMode` / `toolbarShowsFilters`): each adapter mounts a
 per-column filter icon (the `FILTER_HEADER` slot) on the same extra bag and
 hides the toolbar Filters button unless `source.setFilterTree` is set, so
@@ -472,7 +518,7 @@ the AND/OR tree still has a chrome. The shared layout is `FilterHeaderChrome`
 on `@adapttable/react/adapter`. Helpers `filterDefForColumn` /
 `headerFilterStickTop` stay on core. Nested kit dropdowns (Select, DatePicker)
 are not "outside" — the overlay stays open until a true outside click, Escape,
-or (when `closeHeaderFilterOnSelect` is on) a finished single-control write
+or (with `headerFilters({ closeOnSelect: true })`) a finished single-control write
 (`useHeaderFilterOverlay` / `bindHeaderFilterDismiss` /
 `headerFilterFieldIsComplete` / `usePointerDismiss` /
 `HeaderFilterSessionProps` / `HeaderFilterOpenProvider` /
@@ -483,7 +529,7 @@ popover or drawer.
 `emptyFilterRegistry`). A spec supplies widget (`FilterWidgetKind`),
 operators, predicate, chips, tree projection, and optional `render`
 (`FilterWidgetRenderProps`). `FilterTypeRegistry.register` / `extend` and the
-`filterTypes` prop are not v3 APIs — register with
+`filterTypes` prop are not part of the API — register with
 `TableFeatureHost.registerFilterType` / `extendFilterType` in
 `feature.setup(host)`, or `features={[filterTypes(specs)]}`. Lookups:
 `filterTypeSpec` / `filterWidgetKind` / `filterTypeOps` /
@@ -540,9 +586,7 @@ import path covers everything.
 
 ## Headless hooks
 
-All from `@adapttable/react` unless marked `@adapttable/react/adapter`. The
-kit machinery marked there is also still on `@adapttable/react` as a
-deprecated alias until the next major.
+All from `@adapttable/react` unless marked `@adapttable/react/adapter`.
 
 ### Data sources
 
@@ -1337,9 +1381,7 @@ the names a table reaches for, and the editing, pivot, formula, grouping,
 stream and selection names come from their own entries
 (`@adapttable/core/editing`, `/pivot`, `/formula`, `/grouping`, `/stream`,
 `/selection`); the machinery a binding uses, and helpers no
-table, guide or example reaches for, are on this entry, and the main entry
-keeps each of them as a deprecated alias of the same value or type until the
-next major.
+table, guide or example reaches for, are on this entry.
 
 A binding also finds here what its hooks share with every other binding: the
 state shapes they return (`SelectionState`, `GridFocusState`,
@@ -2038,8 +2080,7 @@ intact), and `pasteRangeEdits(options)` maps that grid onto a range
 the column's `parseValue`, ready for the same handler an inline edit uses. `cellPasteHandler(options)`
 resolves who receives them — `onCellPaste` when given, otherwise `onCellEdit`
 one cell at a time, `undefined` when the table takes no edits at all
-(`CellPasteHandlerOptions` in). On `<DataTable>` the props are `onCellPaste` and
-`onCellCut`. See [cell navigation](./cell-navigation.md).
+(`CellPasteHandlerOptions` in). On `<DataTable>` they are `cellNavigation({ onPaste, onCut })`. See [cell navigation](./cell-navigation.md).
 
 **Fill handle.** `fillDirection(source, to)` says which way a drag from the
 selection's corner is filling (`FillDirection`, or `null` inside the selection),
@@ -2051,7 +2092,7 @@ recipient (`CellFillHandlerOptions`), and `batchEditHandler(batch, onCellEdit)`
 is the rule both it and `cellPasteHandler` follow. Adapters export their
 kit-owned `FillHandle` and render it over `FillHandleChrome` /
 `FillHandleChromeProps` / `FillHandleSlots` / `FillHandleSlotProps` from
-`@adapttable/react/adapter`; on `<DataTable>` the prop is `onCellFill`. See
+`@adapttable/react/adapter`; on `<DataTable>` it is `cellNavigation({ onFill })`. See
 [cell navigation](./cell-navigation.md).
 
 **Undo and redo.** `useEditHistory(options)` remembers gestures and replays
@@ -3873,8 +3914,8 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   `coreFindInTable` are the core factories with their implementations filed,
   for a kit to extend.
 - Angular kits turn the keyboard grid on by composing `cellNavigation()`.
-  They still accept live `filtersMode` and `closeHeaderFilterOnSelect`
-  inputs, which place a composed filter panel and do not turn filtering on.
+  Filter placement is a feature option: `filters(defs, { mode })` and
+  `headerFilters({ closeOnSelect })`.
   Row checkboxes come from `selection()`. Their controlled `density` input
   overrides the chooser's state; `densityChange` reports requests and waits
   for the host to update the input. Omitting `density` keeps the chooser
@@ -4510,7 +4551,8 @@ re-exports `editingFamilyList`, `filteringFamilyList`,
 `columnLayoutFamilyList`, `standardFeatureList`, `flattenFeatures` and
 `FeatureListEntry`. Overlay helpers `menuPopover` / `MenuPopover`,
 `OVERLAY_Z` and `placeOverlayBelowTrigger` position kit menus, and
-`filtersMode` (`FiltersMode`) picks the anchored popover or the drawer.
+`FiltersMode` names the anchored popover or the drawer that
+`filters(defs, { mode })` picks.
 `searchable` draws the search box (on by default; a nested table turns it
 off). `summaryRow` adds a summary row under the body (a `summary` table
 footer, and a `summary-card` on phones). `rowPinning`

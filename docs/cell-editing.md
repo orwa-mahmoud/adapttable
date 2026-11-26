@@ -600,9 +600,10 @@ fills it in place; leave editing off and Add is simply a button that runs your
 handler.
 
 Headless: `useRowMutations` (`RowMutationHandlers`, `RowMutationsState`) builds
-the same state a kit renders, and `chrome.rowMutations` carries it — `canAdd`
-plus `addRow`, with the duplicate and delete actions already folded into
-`chrome.rowActions`.
+the same state a kit renders. The row-actions feature publishes it in
+`ROW_ACTIONS_STATE`, read with `useFeatureState`: `rowMutations` (`canAdd` plus
+`addRow`) and `rowActions`, with the duplicate and delete actions already
+folded in.
 
 ## Reordering rows
 
@@ -669,7 +670,7 @@ from `@adapttable/react`; `isCellEditable`, `hasEditableColumns`,
 | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
 | `useCellEditing` / `CellEditingState`                                                                                    | The state machine hook and the state it returns.                                                          |
 | `EditableCellGate` / `EditableCellGateProps`                                                                             | Activation wrapper: display content when idle, the kit's editor while active.                             |
-| `EditableCellEditing`                                                                                                    | The editing bundle adapters receive from the chrome (`chrome.editing`).                                   |
+| `EditableCellEditing`                                                                                                    | The editing bundle a kit reads from `EDITING_STATE` (`useFeatureState`).                                  |
 | `CellEditCommit` / `CellEditTarget`                                                                                      | A commit payload (`row`, `key`, `value`) and the active-cell address.                                     |
 | `CellEditor` / `CellEditorOption`                                                                                        | The column `editor` descriptor and one option of a select editor.                                         |
 | `CellEditKeyAction` / `CellEditKeyOutcome` / `CellEditNavigation`                                                        | Keyboard-flow vocabulary: what a key press means and where focus goes next.                               |

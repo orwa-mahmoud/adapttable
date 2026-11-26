@@ -267,10 +267,10 @@ itself still requires the Frame, Tab and Close controls of `SidePanelChrome`.
 presentation, an `onPrint` callback and `ActionButtonSlots`. It renders only the
 kit's print button; the host callback decides what gets printed.
 
-`UNDO_REDO_CONTROL`, exported by `/adapter`, is a control channel
-for `ToolbarExtrasSlotProps`, not a second history model. Fill it using
+`UNDO_REDO_CONTROL`, exported by `/adapter`, is the slot for the undo/redo
+control (`UndoRedoControlProps`), not a second history model. Fill it using
 `HistoryButtonsChrome` from `/adapter`. Its `HistoryButtonsChromeProps` adds
-`ActionButtonSlots` to those toolbar props, including `onUndo`, `onRedo`,
+`ActionButtonSlots` to those control props, including `onUndo`, `onRedo`,
 `canUndo`, `canRedo` and optional operation labels. The Chrome renders only the
 available actions, disables unavailable operations, and returns nothing without
 either callback. Compose the editing history and its host replay callback as

@@ -140,7 +140,7 @@ builder offers `hasAny` / `hasAll` for the Tags field.
 | `urlNumberKeys`    | `boolean`                                          | no       | Parse `f_<key>Min` and `f_<key>Max` as numbers.                                                                                                                                               |
 
 `widget` also decides the parts the type does not draw itself: the value
-input a tree condition shows, whether `closeHeaderFilterOnSelect` treats a
+input a tree condition shows, whether `headerFilters({ closeOnSelect })` treats a
 write as finished, and — for `widget: "checklist"` — whether the frontend
 tier computes facet counts for the key.
 

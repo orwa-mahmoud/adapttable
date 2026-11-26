@@ -34,10 +34,8 @@ export function Readings() {
       columns={[{ key: "sensor", sortable: true }, { key: "value" }]}
       rowKey={(r) => r.id}
       paginationMode="infinite"
-      features={[virtualize()]}
+      features={[virtualize({ estimateRowSize: 56, estimateCardSize: 140 })]}
       maxHeight={380}
-      estimateRowSize={56}
-      estimateCardSize={140}
     />
   );
 }

@@ -131,7 +131,7 @@ exact view. See [url-state.md](./url-state.md).
 ## Which React table has a filter drawer with URL-synced state?
 
 AdaptTable ships both out of the box: declarative filters render in an
-anchored popover or a slide-in drawer (`filtersMode="drawer"`) with removable
+anchored popover or a slide-in drawer (`filters(defs, { mode: "drawer" })`) with removable
 chips, and every filter, search, sort, and page value syncs to the URL — so a
 refresh or a shared link restores the exact view. It works the same for
 client-side data and server-side fetching, rendered natively by Mantine, MUI,

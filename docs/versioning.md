@@ -35,11 +35,12 @@ Each package carries its own version, and what its stability depends on is
 its major line. The exact current version is on npm and at the top of the
 package's `CHANGELOG.md`.
 
-| Package                                                                 | Major line |
-| ----------------------------------------------------------------------- | ---------- |
-| `@adapttable/core`, the adapters, `@adapttable/cli`, `@adapttable/i18n` | `3.x`      |
-| `@adapttable/react`                                                     | `1.x`      |
-| `@adapttable/server`, `@adapttable/ai`, `@adapttable/ai-react`          | `0.x`      |
+| Package                                                                                                                                                              | Major line |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `@adapttable/core`, the React kits, `@adapttable/i18n`                                                                                                               | `4.x`      |
+| `@adapttable/cli`                                                                                                                                                    | `3.x`      |
+| `@adapttable/react`                                                                                                                                                  | `2.x`      |
+| `@adapttable/vue`, `@adapttable/angular`, their kits, `@adapttable/server`, `@adapttable/ai`, `@adapttable/ai-react`, `@adapttable/ai-vue`, `@adapttable/ai-angular` | `0.x`      |
 
 The packages at `1.0` and above are **stable**. The full SemVer contract above
 applies to them: breaking changes to the public API surface (below) ship only
@@ -213,7 +214,8 @@ re-export it. Its subpaths are supported entries too:
 
 ### `@adapttable/cli`
 
-The `adapttable` binary — `init [--force]` and `migrate-v3 [paths...] [--check]`
+The `adapttable` binary — `init [--force]`, `migrate-v3 [paths...] [--check]`
+and `migrate-v4 [paths...] [--check]`
 — and the programmatic surface:
 `detectKit`, `runInit`, `choosePackageManager`, `installCommand`,
 `scaffoldFiles`, plus `KITS` / `Kit` / `KitInfo` / `SHADCN`,

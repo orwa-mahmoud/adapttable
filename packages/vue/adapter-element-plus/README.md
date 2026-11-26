@@ -394,7 +394,7 @@ into its first grid cell. Status figures use `ElText`, with selection statistics
 inside a polite native `output` live region. Both status features share one strip.
 Standalone aliases are available at `/column-selection` and `/selection-stats`.
 
-Fill requires `onCellFill` and editable columns. The host receives cell edit
+Fill requires `cellNavigation({ onFill })` and editable columns. The host receives cell edit
 requests and decides whether to apply them. The pointer-only fill square uses
 Element Plus theme variables; keyboard fill remains in the shared grid model.
 The handle is hidden from assistive technology and does not add a tab stop.

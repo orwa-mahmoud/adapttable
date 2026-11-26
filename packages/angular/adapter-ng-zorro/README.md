@@ -179,11 +179,11 @@ shared shell `data-adapttable-part` and state attributes. `rowAppearance`
 adds per-row/card classes, styles and heights. NG-ZORRO owns its component
 internals; native-only unstyled-kit parts are not this kit's styling API.
 
-`filtersMode="popover"` uses an anchored NG-ZORRO popover without a backdrop.
+`filters(defs, { mode: "popover" })` uses an anchored NG-ZORRO popover without a backdrop.
 Escape and outside clicks close it, the trigger exposes `aria-expanded`, and
 Escape restores trigger focus. Selecting an option inside a nested select
 keeps the parent panel open; Escape closes the nested control first.
-`filtersMode="drawer"` uses a real NG-ZORRO drawer and backdrop. The command
+`filters(defs, { mode: "drawer" })` uses a real NG-ZORRO drawer and backdrop. The command
 palette fills the binding's required Surface slot with an NG-ZORRO modal.
 
 `isCellFlashing(rowId, columnKey)` marks desktop cells and the built-in mobile

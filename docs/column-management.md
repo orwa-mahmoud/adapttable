@@ -80,7 +80,18 @@ export function People() {
       columns={columns}
       rowKey={(r) => r.id}
       features={[
-        columnMenu(), // Columns menu: rename, show/hide, reorder, pin
+        // Columns menu: rename, show/hide, reorder, pin
+        columnMenu({
+          onRename: (key, name) => {
+            // The table updates its layout immediately. Persist the accepted
+            // domain name in the host just like an edited cell value.
+            setColumns((current) =>
+              current.map((column) =>
+                column.key === key ? { ...column, header: name } : column
+              )
+            );
+          },
+        }),
         resizableColumns(), // drag or arrow-key resize handles
         rowActions([
           { key: "edit", label: "Edit", onClick: (r) => console.log(r) },
@@ -89,15 +100,6 @@ export function People() {
       maxHeight={420} // scroll box so pinned columns visibly stick
       columnLayout={layout}
       onColumnLayoutChange={onLayoutChange}
-      onColumnRename={(key, name) => {
-        // The table updates its layout immediately. Persist the accepted
-        // domain name in the host just like an edited cell value.
-        setColumns((current) =>
-          current.map((column) =>
-            column.key === key ? { ...column, header: name } : column
-          )
-        );
-      }}
     />
   );
 }
@@ -132,7 +134,7 @@ export function People() {
 | `columnLayout`                                              | `ColumnLayoutState`                   | —       | Controlled layout (hidden/order/pinned/widths/names/collapsedGroups).                                                          |
 | `onColumnLayoutChange`                                      | `(next: ColumnLayoutState) => void`   | —       | Change handler for the controlled layout.                                                                                      |
 | `renameable`                                                | `boolean`                             | `false` | Per-column opt-in for the kit-native rename action.                                                                            |
-| `onColumnRename`                                            | `(key: string, name: string) => void` | —       | Host persistence callback; required before rename controls are offered.                                                        |
+| `columnMenu({ onRename })`                                  | `(key: string, name: string) => void` | —       | Host persistence callback; required before rename controls are offered.                                                        |
 | `maxHeight`                                                 | `number`                              | —       | Fixed-height scroll box (px); enables sideways scroll + visible pinning.                                                       |
 
 Custom per-column menu actions register through `host.registerColumnMenuAction`

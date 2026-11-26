@@ -76,7 +76,7 @@ the selection-corner handle also previews a drag-fill. A read-only grid does
 not intercept paste/fill as if it could save. With edit history, a multi-cell
 gesture becomes one undo step.
 
-`onCellCut` is an optional callback input on the table. It receives the range
+`cellNavigation({ onCut })` takes an optional cut callback. It receives the range
 after copying succeeds; your host decides how to clear the underlying values.
 The context-menu Cut action is offered only when that callback is wired. Copy
 permission and write permission are distinct: successful copying does not
