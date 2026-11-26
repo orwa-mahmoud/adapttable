@@ -1,0 +1,190 @@
+---
+title: "Angular responsive mobile cards (v3)"
+description: Angular tables with automatic mobile cards or horizontal scrolling
+  across nine native kits. Preserve custom cells, selection, editing and RTL.
+head:
+  - tag: meta
+    attrs:
+      name: "robots"
+      content: "noindex, follow"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"Angular
+      responsive mobile
+      cards","item":"https://adapttable.orwamahmoud.com/v3/angular/mobile/"}]}'
+  - tag: meta
+    attrs:
+      property: og:image
+      content: https://adapttable.orwamahmoud.com/og/angular/mobile.png
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: https://adapttable.orwamahmoud.com/og/angular/mobile.png
+slug: v3/angular/mobile
+---
+
+All nine supported Angular kits switch from a desktop table to a labeled card list on narrow
+screens. `forceMobile` can choose the layout explicitly. The same source,
+column definitions, host callbacks and optional features drive both layouts.
+
+## Automatic cards or a scrolling table
+
+Omit `forceMobile` for automatic cards below the default 768px viewport
+breakpoint; `[mobileBreakpoint]` sets another width. Set `[forceMobile]="true"` to preview cards at any width, or
+`[forceMobile]="false"` to keep the desktop table with horizontal scrolling on
+phones. No second table instance is needed, so sorting, filtering and selection
+remain with the same table.
+
+```html
+<adapt-data-table
+  [data]="people"
+  [columns]="columns"
+  [rowKey]="rowKey"
+  [forceMobile]="false"
+  paginationMode="paged"
+  tableLabel="People"
+/>
+```
+
+The built-in card body groups fields according to the available card width.
+Labels sit above values, and `mobileLabel: ""` gives a self-explanatory field
+the full width. Native cells remain native: status tags, progress indicators,
+custom components and composed editors still render through their kit.
+Long values wrap, and small containers reduce the number of field columns.
+Custom `renderCard` bodies keep their own layout.
+
+The [mobile demo](/v3/angular/demo/ng-zorro/mobile-cards/) offers Automatic,
+Phone cards and Scrollable table choices. Its preview starts with forced cards
+so desktop visitors can see the phone presentation; the library default is automatic.
+
+## Customize a card's fields
+
+`renderCard` replaces the field body while the kit keeps the card's interactive
+shell. Each field supplies its rendered `value` template and the `context`
+needed to stamp it. Render that pair with `NgTemplateOutlet` to preserve custom
+cells and composed editors.
+
+```ts
+import { NgTemplateOutlet } from "@angular/common";
+import { Component } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/angular-unstyled";
+
+interface Person {
+  id: string;
+  name: string;
+  email: string;
+}
+
+@Component({
+  selector: "people-cards",
+  standalone: true,
+  imports: [AdaptDataTable, NgTemplateOutlet],
+  template: `
+    <ng-template #cardBody let-fields="fields">
+      @for (field of fields; track field.column.key) {
+        <div class="person-field">
+          @if (field.label) {
+            <span class="person-field-label">{{ field.label }}</span>
+          }
+          <ng-container
+            [ngTemplateOutlet]="field.value"
+            [ngTemplateOutletContext]="field.context"
+          />
+        </div>
+      }
+    </ng-template>
+    <adapt-data-table
+      [data]="people"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [forceMobile]="true"
+      [renderCard]="cardBody"
+      tableLabel="People"
+    />
+  `,
+})
+export class PeopleCards {
+  readonly people: Person[] = [
+    { id: "ada", name: "Ada", email: "ada@example.com" },
+  ];
+  readonly columns: ColumnDef<Person>[] = [
+    { key: "name", header: "Name", mobileLabel: "", sortable: true },
+    { key: "email", header: "Email", mobileLabel: "Contact" },
+  ];
+  readonly rowKey = (row: Person) => row.id;
+}
+```
+
+For NG-ZORRO, change the kit import to `@adapttable/ng-zorro`. The body
+contract is shared through `MobileCardRenderer`, `MobileCardContext` and
+`MobileCardField` from `@adapttable/angular`.
+
+`MobileCardContext` includes `$implicit` / `row`, `index`, `selected`,
+`expanded` and `fields`. A component renderer receives the fields it declares
+as inputs. Its `fields` already reflect the current column order and visibility.
+Reading a raw row property instead of stamping `field.value` discards the
+column's renderer and editor.
+
+## Column and layout choices
+
+`mobileLabel` overrides the field caption. When omitted, the caption falls
+back to the column header; an empty string deliberately omits the caption.
+`hideOnMobile` removes a column from cards and `hideOnDesktop` removes it from
+the desktop table. Use captions that make sense without a spanning header.
+
+Automatic pagination becomes infinite on mobile. Readers can load another
+slice using the load-more area and explicit control. Set `paginationMode`
+explicitly if your product requires pages on both layouts. With a prebuilt
+source, configure its mode and mobile state consistently with the shell.
+
+The desktop column menu and stacked grouped-header rows are not card controls.
+The current column layout still affects the fields. Mobile sorting has its own
+sort select. Use [Column management](/v3/angular/column-management/) for host-controlled
+arrangements.
+
+## Interactions stay with the shell
+
+Cards support selection, row actions, editing, tree/detail disclosure,
+reordering, row pinning and virtualization when those features are composed.
+Custom bodies do not replace these surrounding controls. Summary cards remain
+read-only and outside data-card renderers, editors and actions.
+
+`onRowClick` is a callback input. It activates a row/card from a body click or
+Enter/Space while that row/card has focus; interactive descendants keep their
+own behavior. ArrowUp/ArrowDown move between activatable rows with a roving
+Tab stop. A button inside your custom card should remain a button instead of
+manually triggering the row callback.
+
+The default value wrapper carries changed-cell feedback. A custom body owns
+its wrappers and must apply an `isCellFlashing` reader itself if it wants that
+feedback. Preserve reduced-motion preferences and do not use color alone to
+communicate a changed or invalid field.
+
+## Accessible and styled cards
+
+Cards live in a named list with direction and position information, rather
+than pretending to be desktop table rows. Keep the list name, field captions,
+control names, focus indication and logical reading order. Test long text at
+phone widths as well as keyboard access.
+
+Use `classNames.cards`, `card`, `cardRow`, `cardLabel`, `cardValue`,
+`cardActions`, `cardDetail` and `summaryCard` for the built-in surfaces.
+Custom body wrappers use your own CSS.
+
+See [Customization](/v3/angular/customization/), [Pagination](/v3/angular/pagination/),
+[Cell editing](/v3/angular/cell-editing/), [Virtualization](/v3/angular/virtualization/),
+[Accessibility](/v3/angular/accessibility/) and [Localization](/v3/angular/i18n-rtl/).
+
+## Editing across layouts
+
+A layout change keeps row drafts, selection, filters and expanded rows in the
+same table state. Native editor focus and text selection follow viewport changes
+when the editor inventory remains unchanged. An explicit layout chooser keeps
+focus on the chooser. Keep stable row keys and render the supplied prepared
+field values in custom cards so native editors remain connected.
+
+Mobile Save/Cancel and hierarchy actions have larger touch targets while desktop
+controls keep their kit sizing. The mobile showcase also exercises bounded
+scrolling and pagination choices.

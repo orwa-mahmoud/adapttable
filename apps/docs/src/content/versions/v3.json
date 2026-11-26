@@ -1,0 +1,685 @@
+{
+  "sidebar": [
+    {
+      "label": "Vue",
+      "items": [
+        {
+          "label": "Get started with Vue",
+          "slug": "vue/getting-started"
+        },
+        {
+          "label": "UI kits",
+          "items": [
+            {
+              "label": "Element Plus",
+              "slug": "vue/element-plus"
+            },
+            {
+              "label": "Naive UI",
+              "slug": "vue/naive-ui"
+            },
+            {
+              "label": "Nuxt UI",
+              "slug": "vue/nuxt-ui"
+            },
+            {
+              "label": "Quasar",
+              "slug": "vue/quasar"
+            },
+            {
+              "label": "Reka UI",
+              "slug": "vue/reka-ui"
+            },
+            {
+              "label": "shadcn-vue",
+              "slug": "vue/shadcn-vue"
+            },
+            {
+              "label": "Vuetify",
+              "slug": "vue/vuetify"
+            }
+          ]
+        },
+        {
+          "label": "Vue feature composition",
+          "slug": "vue/features"
+        },
+        {
+          "label": "Vue table sorting and search",
+          "slug": "vue/sorting"
+        },
+        {
+          "label": "Vue table pagination and infinite loading",
+          "slug": "vue/pagination"
+        },
+        {
+          "label": "Vue table row selection and bulk actions",
+          "slug": "vue/selection"
+        },
+        {
+          "label": "Responsive Vue tables and mobile cards",
+          "slug": "vue/mobile-cards"
+        },
+        {
+          "label": "Vue reactive data sources and data tiers",
+          "slug": "vue/data-tiers"
+        },
+        {
+          "label": "Vue table filtering",
+          "slug": "vue/filtering"
+        },
+        {
+          "label": "Vue table header filters",
+          "slug": "vue/header-filters"
+        },
+        {
+          "label": "Vue cell, row and batch editing",
+          "slug": "vue/cell-editing"
+        },
+        {
+          "label": "Vue row grouping and tree data",
+          "slug": "vue/row-grouping"
+        },
+        {
+          "label": "Vue column layout and row controls",
+          "slug": "vue/rows"
+        },
+        {
+          "label": "Vue saved views and table preferences",
+          "slug": "vue/saved-views"
+        },
+        {
+          "label": "Vue actions and exports",
+          "slug": "vue/actions"
+        },
+        {
+          "label": "Vue column menu",
+          "slug": "vue/column-menu"
+        },
+        {
+          "label": "Vue navigation, find and status",
+          "slug": "vue/navigation"
+        },
+        {
+          "label": "Vue specialized data views",
+          "slug": "vue/specialized"
+        },
+        {
+          "label": "Vue realtime rows",
+          "slug": "vue/realtime"
+        },
+        {
+          "label": "Vue localization and RTL",
+          "slug": "vue/i18n-rtl"
+        },
+        {
+          "label": "Vue summaries and footers",
+          "slug": "vue/summary-row"
+        },
+        {
+          "label": "Vue API reference",
+          "slug": "vue/api"
+        },
+        {
+          "label": "Vue assistant and approvals",
+          "slug": "vue/assistant"
+        }
+      ]
+    },
+    {
+      "label": "Start",
+      "items": [
+        {
+          "label": "Getting started",
+          "slug": "react/getting-started"
+        },
+        {
+          "label": "Concepts",
+          "slug": "concepts"
+        },
+        {
+          "label": "Data tiers",
+          "slug": "data-tiers"
+        }
+      ]
+    },
+    {
+      "label": "Features",
+      "items": [
+        {
+          "label": "Feature composition",
+          "slug": "react/features"
+        },
+        {
+          "label": "Columns",
+          "slug": "react/columns"
+        },
+        {
+          "label": "Column groups",
+          "slug": "react/column-groups"
+        },
+        {
+          "label": "Sparkline columns",
+          "slug": "react/sparkline"
+        },
+        {
+          "label": "Browser and server exports",
+          "slug": "react/exporting"
+        },
+        {
+          "label": "Excel (XLSX) export",
+          "slug": "react/export-xlsx"
+        },
+        {
+          "label": "PDF export and print",
+          "slug": "react/export-pdf"
+        },
+        {
+          "label": "Sorting",
+          "slug": "react/sorting"
+        },
+        {
+          "label": "Search",
+          "slug": "react/search"
+        },
+        {
+          "label": "Filtering",
+          "slug": "react/filtering"
+        },
+        {
+          "label": "Advanced AND/OR filters",
+          "slug": "react/filter-tree"
+        },
+        {
+          "label": "Header filters",
+          "slug": "react/header-filters"
+        },
+        {
+          "label": "Custom filter types",
+          "slug": "react/custom-filter-types"
+        },
+        {
+          "label": "Pagination",
+          "slug": "react/pagination"
+        },
+        {
+          "label": "Selection & bulk actions",
+          "slug": "react/selection"
+        },
+        {
+          "label": "Row actions",
+          "slug": "react/row-actions"
+        },
+        {
+          "label": "Row expansion",
+          "slug": "react/row-expansion"
+        },
+        {
+          "label": "Nested tables",
+          "slug": "react/nested-tables"
+        },
+        {
+          "label": "Inline cell editing",
+          "slug": "react/cell-editing"
+        },
+        {
+          "label": "Keyboard & cell navigation",
+          "slug": "react/cell-navigation"
+        },
+        {
+          "label": "Row reordering",
+          "slug": "react/row-reordering"
+        },
+        {
+          "label": "Row pinning",
+          "slug": "react/row-pinning"
+        },
+        {
+          "label": "Pinned summary rows",
+          "slug": "react/pinned-summary-rows"
+        },
+        {
+          "label": "Row and column spanning",
+          "slug": "react/row-spanning"
+        },
+        {
+          "label": "Full-width and separator rows",
+          "slug": "react/full-width-rows"
+        },
+        {
+          "label": "Row styling and heights",
+          "slug": "react/row-styling"
+        },
+        {
+          "label": "Row grouping",
+          "slug": "react/row-grouping"
+        },
+        {
+          "label": "Aggregation",
+          "slug": "react/aggregation"
+        },
+        {
+          "label": "Pivot tables",
+          "slug": "react/pivot"
+        },
+        {
+          "label": "Formulas",
+          "slug": "react/formulas"
+        },
+        {
+          "label": "Server queries",
+          "slug": "server-queries"
+        },
+        {
+          "label": "Tree data",
+          "slug": "react/tree-data"
+        },
+        {
+          "label": "Column management",
+          "slug": "react/column-management"
+        },
+        {
+          "label": "Saved views",
+          "slug": "react/saved-views"
+        },
+        {
+          "label": "Toolbar & view controls",
+          "slug": "react/toolbar-and-view-controls"
+        },
+        {
+          "label": "Command palette & menus",
+          "slug": "react/command-palette"
+        },
+        {
+          "label": "Virtualization",
+          "slug": "react/virtualization"
+        },
+        {
+          "label": "Mobile cards",
+          "slug": "react/mobile"
+        }
+      ]
+    },
+    {
+      "label": "Beyond the table",
+      "items": [
+        {
+          "label": "URL state",
+          "slug": "react/url-state"
+        },
+        {
+          "label": "SSR & RSC",
+          "slug": "react/ssr-rsc"
+        },
+        {
+          "label": "Customization",
+          "slug": "react/customization"
+        },
+        {
+          "label": "Headless rendering",
+          "slug": "react/headless"
+        },
+        {
+          "label": "Custom data source",
+          "slug": "custom-table-source"
+        },
+        {
+          "label": "Build an adapter",
+          "slug": "react/building-an-adapter"
+        },
+        {
+          "label": "i18n & RTL",
+          "slug": "react/i18n-rtl"
+        },
+        {
+          "label": "Accessibility",
+          "slug": "react/accessibility"
+        },
+        {
+          "label": "Realtime",
+          "slug": "react/realtime"
+        },
+        {
+          "label": "Adaptive capabilities",
+          "slug": "react/agent-capabilities"
+        },
+        {
+          "label": "@adapttable/ai",
+          "slug": "ai"
+        },
+        {
+          "label": "Agent integrations",
+          "slug": "ai-integrations"
+        },
+        {
+          "label": "Connect a backend",
+          "slug": "ai-http"
+        },
+        {
+          "label": "Voice input",
+          "slug": "react/ai-voice"
+        }
+      ]
+    },
+    {
+      "label": "Reference",
+      "items": [
+        {
+          "label": "API reference",
+          "slug": "react/api"
+        },
+        {
+          "label": "FAQ",
+          "slug": "faq"
+        },
+        {
+          "label": "Limitations and boundaries",
+          "slug": "limitations"
+        },
+        {
+          "label": "Comparison",
+          "slug": "react/comparison"
+        },
+        {
+          "label": "Versioning & stability",
+          "slug": "versioning"
+        }
+      ]
+    },
+    {
+      "label": "Migrating",
+      "items": [
+        {
+          "label": "From AdaptTable v2",
+          "slug": "react/migrate-from-v2"
+        },
+        {
+          "label": "From AdaptTable v1",
+          "slug": "react/migrate-from-v1"
+        },
+        {
+          "label": "From mantine-datatable",
+          "slug": "react/migrate-from-mantine-datatable"
+        },
+        {
+          "label": "From MUI X DataGrid",
+          "slug": "react/migrate-from-mui-x-datagrid"
+        },
+        {
+          "label": "From TanStack Table",
+          "slug": "react/migrate-from-tanstack-table"
+        },
+        {
+          "label": "From mui-datatables",
+          "slug": "react/migrate-from-mui-datatables"
+        },
+        {
+          "label": "From material-table",
+          "slug": "react/migrate-from-material-table"
+        },
+        {
+          "label": "From ag-Grid",
+          "slug": "react/migrate-from-ag-grid"
+        }
+      ]
+    },
+    {
+      "label": "Angular",
+      "items": [
+        {
+          "label": "Migrate to Angular 0.5",
+          "slug": "angular/migrating-to-0-5"
+        },
+        {
+          "label": "UI kits",
+          "items": [
+            {
+              "label": "Angular Material",
+              "slug": "angular/material"
+            },
+            {
+              "label": "ng-bootstrap",
+              "slug": "angular/ng-bootstrap"
+            },
+            {
+              "label": "Spartan",
+              "slug": "angular/spartan"
+            },
+            {
+              "label": "Taiga UI",
+              "slug": "angular/taiga-ui"
+            },
+            {
+              "label": "Angular CDK",
+              "slug": "angular/angular-cdk"
+            },
+            {
+              "label": "ngx-bootstrap",
+              "slug": "angular/ngx-bootstrap"
+            },
+            {
+              "label": "Angular Aria",
+              "slug": "angular/aria"
+            }
+          ]
+        },
+        {
+          "label": "Start",
+          "items": [
+            {
+              "label": "Getting started",
+              "slug": "angular/getting-started"
+            },
+            {
+              "label": "Data tiers",
+              "slug": "angular/data-tiers"
+            }
+          ]
+        },
+        {
+          "label": "Features",
+          "items": [
+            {
+              "label": "Feature composition",
+              "slug": "angular/features"
+            },
+            {
+              "label": "Columns",
+              "slug": "angular/columns"
+            },
+            {
+              "label": "Column groups",
+              "slug": "angular/column-groups"
+            },
+            {
+              "label": "Sparkline columns",
+              "slug": "angular/sparkline"
+            },
+            {
+              "label": "Browser and server exports",
+              "slug": "angular/exporting"
+            },
+            {
+              "label": "Excel (XLSX) export",
+              "slug": "angular/export-xlsx"
+            },
+            {
+              "label": "PDF export and print",
+              "slug": "angular/export-pdf"
+            },
+            {
+              "label": "Sorting",
+              "slug": "angular/sorting"
+            },
+            {
+              "label": "Search",
+              "slug": "angular/search"
+            },
+            {
+              "label": "Filtering",
+              "slug": "angular/filtering"
+            },
+            {
+              "label": "Advanced AND/OR filters",
+              "slug": "angular/filter-tree"
+            },
+            {
+              "label": "Header filters",
+              "slug": "angular/header-filters"
+            },
+            {
+              "label": "Custom filter types",
+              "slug": "angular/custom-filter-types"
+            },
+            {
+              "label": "Pagination",
+              "slug": "angular/pagination"
+            },
+            {
+              "label": "Selection & bulk actions",
+              "slug": "angular/selection"
+            },
+            {
+              "label": "Row actions",
+              "slug": "angular/row-actions"
+            },
+            {
+              "label": "Row expansion",
+              "slug": "angular/row-expansion"
+            },
+            {
+              "label": "Nested tables",
+              "slug": "angular/nested-tables"
+            },
+            {
+              "label": "Inline cell editing",
+              "slug": "angular/cell-editing"
+            },
+            {
+              "label": "Keyboard & cell navigation",
+              "slug": "angular/cell-navigation"
+            },
+            {
+              "label": "Row reordering",
+              "slug": "angular/row-reordering"
+            },
+            {
+              "label": "Row pinning",
+              "slug": "angular/row-pinning"
+            },
+            {
+              "label": "Pinned summary rows",
+              "slug": "angular/pinned-summary-rows"
+            },
+            {
+              "label": "Row and column spanning",
+              "slug": "angular/row-spanning"
+            },
+            {
+              "label": "Full-width and separator rows",
+              "slug": "angular/full-width-rows"
+            },
+            {
+              "label": "Row styling and heights",
+              "slug": "angular/row-styling"
+            },
+            {
+              "label": "Row grouping",
+              "slug": "angular/row-grouping"
+            },
+            {
+              "label": "Aggregation",
+              "slug": "angular/aggregation"
+            },
+            {
+              "label": "Pivot tables",
+              "slug": "angular/pivot"
+            },
+            {
+              "label": "Formulas",
+              "slug": "angular/formulas"
+            },
+            {
+              "label": "Tree data",
+              "slug": "angular/tree-data"
+            },
+            {
+              "label": "Column management",
+              "slug": "angular/column-management"
+            },
+            {
+              "label": "Saved views",
+              "slug": "angular/saved-views"
+            },
+            {
+              "label": "Toolbar & view controls",
+              "slug": "angular/toolbar-and-view-controls"
+            },
+            {
+              "label": "Command palette & menus",
+              "slug": "angular/command-palette"
+            },
+            {
+              "label": "Virtualization",
+              "slug": "angular/virtualization"
+            },
+            {
+              "label": "Mobile cards",
+              "slug": "angular/mobile"
+            }
+          ]
+        },
+        {
+          "label": "Beyond the table",
+          "items": [
+            {
+              "label": "URL state",
+              "slug": "angular/url-state"
+            },
+            {
+              "label": "SSR & hydration",
+              "slug": "angular/ssr-rsc"
+            },
+            {
+              "label": "Customization",
+              "slug": "angular/customization"
+            },
+            {
+              "label": "Headless rendering",
+              "slug": "angular/headless"
+            },
+            {
+              "label": "Custom data source",
+              "slug": "angular/custom-table-source"
+            },
+            {
+              "label": "Build an adapter",
+              "slug": "angular/building-an-adapter"
+            },
+            {
+              "label": "i18n & RTL",
+              "slug": "angular/i18n-rtl"
+            },
+            {
+              "label": "Accessibility",
+              "slug": "angular/accessibility"
+            },
+            {
+              "label": "Realtime",
+              "slug": "angular/realtime"
+            },
+            {
+              "label": "Adaptive capabilities",
+              "slug": "angular/agent-capabilities"
+            },
+            {
+              "label": "Voice input",
+              "slug": "angular/ai-voice"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "excluded": []
+}

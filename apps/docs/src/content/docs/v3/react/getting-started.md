@@ -1,0 +1,319 @@
+---
+title: "Get started — a React table for your UI kit (v3)"
+description: Install AdaptTable for Mantine, MUI, Chakra, Ant, Radix, Base UI or
+  shadcn — one CLI command, or a StackBlitz starter with no install.
+head:
+  - tag: meta
+    attrs:
+      name: "robots"
+      content: "noindex, follow"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"Get
+      started — a React table for your UI
+      kit","item":"https://adapttable.orwamahmoud.com/v3/react/getting-started/"}]}'
+  - tag: meta
+    attrs:
+      property: og:image
+      content: https://adapttable.orwamahmoud.com/og/getting-started.png
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: https://adapttable.orwamahmoud.com/og/getting-started.png
+slug: v3/react/getting-started
+---
+
+AdaptTable is a headless, UI-agnostic React data table. Pick the adapter for
+your design system and you get a styled, sortable, searchable, paginated
+table with URL-synced state, RTL, and dark mode.
+
+## Install
+
+The fastest path is the CLI — it detects your UI kit from `package.json`,
+prints the install command, and scaffolds a starter `src/PeopleTable.tsx`:
+
+```bash
+npx @adapttable/cli init
+```
+
+Nothing to install yet? [Open the live demo](https://adapttable.orwamahmoud.com/react/demo/)
+and use it, or open a live starter in
+[StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/efd18cf92b4e11175f673269395687617e39c2de/starters/mantine)
+— or [any other kit](#try-it-in-stackblitz).
+
+A plain adapter `DataTable` is 64–72 kB min+gzip (measured 2026-11-18 from
+packed fixtures; React and the kit stay external). The [FAQ](/v3/faq/#how-big-is-it--is-it-tree-shakeable)
+has the method and the rest of the grid.
+
+Or install manually: `@adapttable/core`, the adapter for your kit, and the
+kit's own packages (peer dependencies — skip what you already have).
+`react` / `react-dom` 18 or 19 are peers everywhere.
+
+```bash
+# Mantine
+pnpm add @adapttable/core @adapttable/mantine @mantine/core @mantine/hooks
+
+# Material UI
+pnpm add @adapttable/core @adapttable/mui @mui/material
+
+# Chakra UI (v3)
+pnpm add @adapttable/core @adapttable/chakra @chakra-ui/react @emotion/react
+
+# Ant Design
+pnpm add @adapttable/core @adapttable/antd antd
+
+# Radix Themes
+pnpm add @adapttable/core @adapttable/radix @radix-ui/themes
+
+# Base UI
+pnpm add @adapttable/core @adapttable/base-ui @base-ui/react
+
+# shadcn/ui — one import, pre-wired with the shadcn class preset
+pnpm add @adapttable/core @adapttable/shadcn
+
+# Tailwind / unstyled — bring your own classes
+pnpm add @adapttable/core @adapttable/unstyled
+```
+
+Every kit depends on `@adapttable/react`, so it is always installed — but a
+package manager with a strict layout (pnpm by default) lets you import only
+what your own `package.json` lists. Importing a hook such as
+`useDensityUrlState` or `useHighlight` from `@adapttable/react` then needs it
+added too:
+
+```bash
+pnpm add @adapttable/react
+```
+
+Keep it on the version your kit pins, which `pnpm why @adapttable/react`
+shows.
+
+## Supported versions
+
+| Dependency        | Supported range                                                       |
+| ----------------- | --------------------------------------------------------------------- |
+| React / React DOM | `^18.0.0 \|\| ^19.0.0` (CI-tested on 18.3 / 19.0 / 19.2)              |
+| Mantine           | `^7.2.0 \|\| ^8 \|\| ^9`                                              |
+| MUI               | `^6.1.2 \|\| ^7 \|\| ^8 \|\| ^9`                                      |
+| Chakra UI         | `^3.13.0`                                                             |
+| Ant Design        | `^6`                                                                  |
+| Radix Themes      | `^3`                                                                  |
+| Base UI           | `^1.6.0`                                                              |
+| Node.js           | `>=22.12.0` (packed releases are CI-tested on Node 22.12 and Node 24) |
+
+Each floor is the lowest version the adapter actually runs on — verified
+by automated install-and-render probes, not guesswork.
+
+## Provider setup
+
+Each adapter renders with its UI kit's own components, so your app needs that
+kit's provider once at the root — exactly as the kit's docs describe.
+
+**Mantine**
+
+```tsx
+// main.tsx — once per app, straight from Mantine's own setup guide.
+import "@mantine/core/styles.css";
+import { MantineProvider } from "@mantine/core";
+
+<MantineProvider>
+  <App />
+</MantineProvider>;
+```
+
+**Material UI** — works with the default theme out of the box; wrap in
+`ThemeProvider` to customize:
+
+```tsx
+import { createTheme, ThemeProvider } from "@mui/material";
+
+<ThemeProvider theme={createTheme()}>
+  <App />
+</ThemeProvider>;
+```
+
+**Chakra UI** (v3) — the provider takes a system; use the built-in
+`defaultSystem` or your own:
+
+```tsx
+import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
+
+<ChakraProvider value={defaultSystem}>
+  <App />
+</ChakraProvider>;
+```
+
+**Ant Design** — works without a provider; add `ConfigProvider` for theme or
+locale:
+
+```tsx
+import { ConfigProvider } from "antd";
+
+<ConfigProvider>
+  <App />
+</ConfigProvider>;
+```
+
+**Radix Themes** — import the Themes stylesheet and wrap in `<Theme>` (see
+Radix Themes docs).
+
+**Base UI** — no provider. Import `@adapttable/base-ui` (it side-effect-loads
+minimal chrome CSS) or `@adapttable/base-ui/styles.css` once at the app entry.
+
+**shadcn/ui** — no provider. `@adapttable/shadcn` is the unstyled adapter
+pre-wired with the shadcn class preset, so it inherits your app's existing
+shadcn/ui theme (its CSS variables + Tailwind config) automatically.
+
+**Unstyled** — no provider. It renders semantic HTML with `data-*` and
+`className` hooks for your own CSS or Tailwind.
+
+## Your first table
+
+Pass `data` and declare columns — that's the whole thing:
+
+```tsx
+// or import from "@adapttable/mui", "@adapttable/chakra", "@adapttable/antd",
+// "@adapttable/radix", "@adapttable/base-ui", "@adapttable/shadcn",
+// "@adapttable/unstyled" — same props everywhere.
+import { DataTable } from "@adapttable/mantine";
+import { filters } from "@adapttable/mantine/filters";
+
+interface Person {
+  id: string;
+  name: string;
+  role: string;
+  status: string;
+  hiredAt: string;
+}
+
+const PEOPLE: Person[] = [
+  {
+    id: "1",
+    name: "Ada Lovelace",
+    role: "Engineer",
+    status: "active",
+    hiredAt: "2021-03-01",
+  },
+  {
+    id: "2",
+    name: "Alan Turing",
+    role: "Founder",
+    status: "active",
+    hiredAt: "2019-06-15",
+  },
+  {
+    id: "3",
+    name: "Grace Hopper",
+    role: "Admiral",
+    status: "retired",
+    hiredAt: "2018-01-20",
+  },
+];
+
+export function PeopleTable() {
+  return (
+    <DataTable
+      data={PEOPLE}
+      columns={[
+        { key: "name", sortable: true },
+        { key: "role" },
+        { key: "status", filter: { type: "select", options: "auto" } },
+        { key: "hiredAt", filter: "dateRange" },
+      ]}
+      rowKey={(r) => r.id}
+      features={[filters([])]}
+    />
+  );
+}
+```
+
+Filters, selection with bulk actions, and every other feature are opt-in
+imports composed in `features={[...]}`. Column `filter` declarations need the
+filters feature — `filters([])` when
+every filter lives on a column, or pass standalone defs to the factory (below).
+See [feature composition](/v3/react/features/).
+
+What you just got without writing any of it: search, sorting, pagination
+(paged on desktop, infinite scroll on mobile), URL-synced state (reload-safe,
+shareable links), empty/loading states, a mobile card layout, and a filter
+form built from those `filter` declarations with kit-native widgets — each
+filter also drives its own removable chip, URL parsing, and row predicate.
+
+* Headers auto-derive from keys (`hiredAt` → "Hired At"); pass `header` to
+  control the text in any language.
+* Dot-path keys reach nested values: `{ key: "department.name" }`.
+* Filters that aren't columns go in a table-level array:
+
+```tsx
+<DataTable
+  data={PEOPLE}
+  columns={columns}
+  rowKey={(r) => r.id}
+  features={[
+    filters([
+      {
+        key: "companyId",
+        type: "select",
+        label: "Company",
+        options: companies,
+      },
+      { key: "budget", type: "numberRange" },
+    ]),
+  ]}
+/>
+```
+
+## Every kit in the live demo
+
+Flip between [Mantine](https://adapttable.orwamahmoud.com/react/demo/?kit=mantine) · [MUI](https://adapttable.orwamahmoud.com/react/demo/?kit=mui) ·
+[Chakra](https://adapttable.orwamahmoud.com/react/demo/?kit=chakra) · [Ant Design](https://adapttable.orwamahmoud.com/react/demo/?kit=antd) ·
+[Radix](https://adapttable.orwamahmoud.com/react/demo/?kit=radix) · [Base UI](https://adapttable.orwamahmoud.com/react/demo/?kit=base-ui) ·
+[shadcn](https://adapttable.orwamahmoud.com/react/demo/?kit=shadcn) · [Tailwind](https://adapttable.orwamahmoud.com/react/demo/?kit=tailwind) on the same data,
+and toggle grouping and inline editing while you are there.
+
+<video src="https://adapttable.orwamahmoud.com/media/core/tour.mp4" poster="https://adapttable.orwamahmoud.com/media/core/poster.png?v=2" controls playsinline preload="none" width="1500" height="1065" style="width:100%;height:auto;aspect-ratio:1500/1065;border-radius:8px" />
+
+## Try it in StackBlitz
+
+Prefer to try before installing? Each starter is a minimal Vite app — one table
+on a demo dataset — that boots in the browser with no local setup. Every
+starter composes the same features from its own kit: column filters with chips,
+a drag-to-group panel with subtotals, the column menu, resizing, multi-column
+sort, cell navigation, inline editing with undo and redo, and CSV export. Pick
+your kit:
+
+* [Mantine](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/efd18cf92b4e11175f673269395687617e39c2de/starters/mantine)
+* [Material UI](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/efd18cf92b4e11175f673269395687617e39c2de/starters/mui)
+* [Chakra UI](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/efd18cf92b4e11175f673269395687617e39c2de/starters/chakra)
+* [Ant Design](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/efd18cf92b4e11175f673269395687617e39c2de/starters/antd)
+* [Radix Themes](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/efd18cf92b4e11175f673269395687617e39c2de/starters/radix)
+* [Base UI](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/efd18cf92b4e11175f673269395687617e39c2de/starters/base-ui)
+* [shadcn/ui](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/efd18cf92b4e11175f673269395687617e39c2de/starters/shadcn)
+* [Unstyled / Tailwind](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/efd18cf92b4e11175f673269395687617e39c2de/starters/unstyled)
+
+The source for each lives in
+[`starters/`](https://github.com/orwa-mahmoud/adapttable/tree/efd18cf92b4e11175f673269395687617e39c2de/starters).
+
+## Where next
+
+* [Columns](/v3/react/columns/) — headers, custom cells, the Columns menu
+  (show/hide, reorder, pin), resizing.
+* [Inline cell editing](/v3/react/cell-editing/) — compose `editing()`, kit-native
+  editors, keyboard flow.
+* [Row reordering](/v3/react/row-reordering/) — opt-in `rowReorder()`, Space-lift
+  keyboard, dataset-relative indices.
+* [Row pinning](/v3/react/row-pinning/) — sticky top and bottom rows, `{ top, bottom }` ids
+* [Pinned summary rows](/v3/react/pinned-summary-rows/) — host-owned totals outside the row model
+* [Row and column spanning](/v3/react/row-spanning/) — `getCellSpan`, one cell list per row
+* [Full-width and separator rows](/v3/react/full-width-rows/) — `extraRows`, host-injected slots
+* [Row styling and heights](/v3/react/row-styling/) — `rowStyle`, `rowHeight`, variable-height virtualizer
+* [Filtering](/v3/react/filtering/) — every filter type, options sources, chips,
+  popover vs drawer.
+* [Data tiers](/v3/data-tiers/) — server data without a query library
+  (`onQueryChange`), or full control via `source` and TanStack Query.
+* [Demo](https://adapttable.orwamahmoud.com/react/demo/) — every adapter,
+  live.
+
+Full surface: [API reference](/v3/react/api/) ·
+[core concepts](/v3/concepts/).

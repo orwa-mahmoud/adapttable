@@ -171,6 +171,11 @@ cpSync(DOCS_APP, siteApp, {
     !path.startsWith(join(DOCS_APP, "src", "content", "versions")),
 });
 symlinkSync(join(DOCS_APP, "node_modules"), join(siteApp, "node_modules"));
+// The docs app's pages read the showcase matrix it ships with.
+cpSync(
+  join(ROOT, "apps", "showcase", "matrix.mjs"),
+  join(site, "apps", "showcase", "matrix.mjs")
+);
 cpSync(join(source, "docs"), join(site, "docs"), { recursive: true });
 cpSync(join(source, "scripts"), join(site, "scripts"), { recursive: true });
 for (const file of ["analytics-guard.mjs", "site.mjs"]) {
