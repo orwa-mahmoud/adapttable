@@ -3,6 +3,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -209,8 +210,35 @@ describe("adapttable commands", () => {
     }
   });
 
+  it("runs when the program is a symlink to this file, as a package bin is", () => {
+    const root = project();
+    const target = join(root, "cli.mjs");
+    write(root, "cli.mjs", "");
+    const bin = join(root, "adapttable");
+    symlinkSync(target, bin);
+    const exit = vi.spyOn(process, "exit").mockImplementation(() => {
+      throw new Error("exit");
+    });
+    vi.spyOn(console, "log").mockImplementation(() => undefined);
+    expect(() =>
+      runCliEntry(pathToFileURL(realpathSync(target)).href, bin, ["--help"])
+    ).toThrow("exit");
+    expect(exit).toHaveBeenCalledWith(0);
+    vi.restoreAllMocks();
+  });
+
+  it("does not run when the program path does not exist", () => {
+    const entry = join(project(), "missing.mjs");
+    const exit = vi.spyOn(process, "exit");
+    runCliEntry(pathToFileURL(entry).href, entry, ["--help"]);
+    expect(exit).not.toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
+
   it("exits when this file is the program", () => {
-    const entry = join(project(), "cli.mjs");
+    const root = project();
+    write(root, "cli.mjs", "");
+    const entry = realpathSync(join(root, "cli.mjs"));
     const exit = vi.spyOn(process, "exit").mockImplementation(() => {
       throw new Error("exit");
     });

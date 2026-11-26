@@ -3,6 +3,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   statSync,
   writeFileSync,
 } from "node:fs";
@@ -238,7 +239,9 @@ export function runCli(
  * Exit when this module is the program the user ran.
  *
  * @param moduleUrl - This module's `import.meta.url`.
- * @param entry - The program path, `process.argv[1]` for the bin.
+ * @param entry - The program path, `process.argv[1]` for the bin. A package
+ *   bin is a symlink, and Node resolves `import.meta.url` through it, so the
+ *   path is compared after resolving its links.
  * @param argv - Arguments after the program path.
  */
 export function runCliEntry(
@@ -246,7 +249,11 @@ export function runCliEntry(
   entry: string | undefined = process.argv[1],
   argv: readonly string[] = process.argv.slice(2)
 ): void {
-  if (entry && moduleUrl === pathToFileURL(entry).href) {
+  if (
+    entry &&
+    existsSync(entry) &&
+    moduleUrl === pathToFileURL(realpathSync(entry)).href
+  ) {
     process.exit(runCli(argv));
   }
 }
