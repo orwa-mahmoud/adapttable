@@ -97,6 +97,35 @@ describe("adapttable migrate-v4", () => {
     expect(errors.some((line) => line.includes("app-people"))).toBe(false);
     vi.restoreAllMocks();
   });
+
+  it("migrates a file reached through a linked directory once, reported from the project", () => {
+    const root = project();
+    mkdirSync(join(root, "src"));
+    write(root, "src/table.ts", source);
+    write(
+      root,
+      "src/table.component.html",
+      '<adapt-data-table [selectedIds]="ids"></adapt-data-table>\n'
+    );
+    const linked = join(project(), "linked");
+    symlinkSync(join(root, "src"), linked);
+    const logs: string[] = [];
+    const errors: string[] = [];
+    vi.spyOn(console, "log").mockImplementation((message: string) => {
+      logs.push(message);
+    });
+    vi.spyOn(console, "error").mockImplementation((message: string) => {
+      errors.push(String(message));
+    });
+    expect(
+      runCli(["migrate-v4", linked, join(root, "src"), "--check"], root)
+    ).toBe(1);
+    expect(logs).toContain("Would update 1 file(s); moved 2 import(s).");
+    expect(errors.filter((line) => line.includes(":1:"))).toEqual([
+      expect.stringMatching(/^src\/table\.component\.html:1:\d+ /),
+    ]);
+    vi.restoreAllMocks();
+  });
 });
 
 describe("adapttable commands", () => {

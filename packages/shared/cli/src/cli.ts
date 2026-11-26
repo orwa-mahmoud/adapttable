@@ -75,16 +75,17 @@ function sourceFiles(path: string): string[] {
   if (!existsSync(path)) {
     throw new InitError(`Migration path does not exist: ${path}`);
   }
-  const stat = statSync(path);
+  const real = realpathSync(path);
+  const stat = statSync(real);
   if (stat.isFile()) {
-    return SOURCE_EXTENSIONS.has(extname(path)) ? [path] : [];
+    return SOURCE_EXTENSIONS.has(extname(real)) ? [real] : [];
   }
   if (!stat.isDirectory()) return [];
 
   const files: string[] = [];
-  for (const entry of readdirSync(path, { withFileTypes: true })) {
+  for (const entry of readdirSync(real, { withFileTypes: true })) {
     if (entry.isSymbolicLink()) continue;
-    const child = resolve(path, entry.name);
+    const child = resolve(real, entry.name);
     if (entry.isDirectory()) {
       if (!SKIPPED_DIRECTORIES.has(entry.name))
         files.push(...sourceFiles(child));
@@ -154,12 +155,13 @@ function runMigrate(
       )
     ),
   ].sort((left, right) => left.localeCompare(right, "en"));
+  const root = realpathSync(cwd);
   let changedFiles = 0;
   let movedImports = 0;
   let issueCount = 0;
 
   for (const file of files) {
-    const result = migrateFile(command, cwd, file, check, migrate);
+    const result = migrateFile(command, root, file, check, migrate);
     changedFiles += result.changedFiles;
     movedImports += result.movedImports;
     issueCount += result.issueCount;
