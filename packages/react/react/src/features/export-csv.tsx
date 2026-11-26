@@ -18,10 +18,7 @@ import {
 } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
-import {
-  type ExportHandlerState,
-  useExportHandler,
-} from "../export/useExportHandler";
+import { useExportHandler } from "../export/useExportHandler";
 import { FeatureStateScope } from "./featureState";
 import type { LiveStageProps } from "./liveStage";
 import { slotRender } from "./providers";
@@ -34,6 +31,23 @@ const EXPORT_STAGE = liveStageKey<LiveStageProps<unknown>>("export", {
   reads: ["gridFocus"],
   writes: "exportHandler",
 });
+
+/**
+ * The slot's render: scope the export handler, then render the rest of the
+ * stage with it.
+ */
+function renderWithExport<TRow>(
+  live: LiveStageProps<TRow>["live"],
+  children: LiveStageProps<TRow>["children"]
+): ExportLiveSlotProps<TRow>["children"] {
+  return function renderExportStage(exportHandler) {
+    return (
+      <FeatureStateScope stateKey={EXPORT_STATE} value={exportHandler}>
+        {children({ ...live, exportHandler })}
+      </FeatureStateScope>
+    );
+  };
+}
 
 /** Build the export's inputs from the shell and hand them to its slot. */
 function ExportStage<TRow>({
@@ -63,11 +77,7 @@ function ExportStage<TRow>({
     featureHost: shell.featureHost,
     labels: shell.labels,
     pageOnly: exportPageOnly(chrome.featureNotices),
-    children: (exportHandler: ExportHandlerState) => (
-      <FeatureStateScope stateKey={EXPORT_STATE} value={exportHandler}>
-        {children({ ...live, exportHandler })}
-      </FeatureStateScope>
-    ),
+    children: renderWithExport(live, children),
   } satisfies ExportLiveSlotProps<TRow>;
   return <LiveExport {...exportProps} />;
 }

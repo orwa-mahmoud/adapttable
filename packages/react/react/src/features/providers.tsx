@@ -200,8 +200,9 @@ export function PublishTableRuntime<TRow>({
   useLayoutEffect(() => {
     commitReader(cell, layered.current ?? base, featureIds);
   });
+  const layer = useMemo(() => ({ base, layered }), [base, layered]);
   return (
-    <RuntimeLayerContext.Provider value={{ base, layered }}>
+    <RuntimeLayerContext.Provider value={layer}>
       {children}
     </RuntimeLayerContext.Provider>
   );

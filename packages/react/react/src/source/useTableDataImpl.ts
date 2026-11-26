@@ -33,10 +33,9 @@ import type { ColumnDef } from "../columnDef";
 import { resolveColumns } from "../columns/resolveColumns";
 import type { UseTableUrlStateOptions } from "../url/useTableUrlState";
 import { useFrontendData } from "./useFrontendData";
-import type { TableQuery, UseServerDataOptions } from "./useServerData";
+import type { TableQuery } from "./useServerData";
+export type { UseServerDataOptions } from "./useServerData";
 export type { UseTableDataResult } from "@adapttable/core/binding";
-
-export type { UseServerDataOptions };
 
 /**
  * Options for {@link useTableData}.

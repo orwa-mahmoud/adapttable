@@ -7,7 +7,7 @@
 import { coreFullscreen, liveStageKey } from "@adapttable/core/binding";
 import { type ReactNode, useEffect, useState } from "react";
 
-import { type FullscreenState, useFullscreen } from "../layout/useFullscreen";
+import { useFullscreen } from "../layout/useFullscreen";
 import { FeatureStateScope } from "./featureState";
 import type { LiveStageProps } from "./liveStage";
 import { slotRender } from "./providers";
@@ -20,6 +20,23 @@ const FULLSCREEN_STAGE = liveStageKey<LiveStageProps<unknown>>("fullscreen", {
   reads: [],
   writes: "fullscreen",
 });
+
+/**
+ * The slot's render: scope the fullscreen state, then render the rest of the
+ * stage with it.
+ */
+function renderWithFullscreen<TRow>(
+  live: LiveStageProps<TRow>["live"],
+  children: LiveStageProps<TRow>["children"]
+): FullscreenLiveSlotProps["children"] {
+  return function renderFullscreenStage(fullscreen) {
+    return (
+      <FeatureStateScope stateKey={FULLSCREEN_STATE} value={fullscreen}>
+        {children({ ...live, fullscreen })}
+      </FeatureStateScope>
+    );
+  };
+}
 
 /** Hand the committed table root to the fullscreen slot. */
 function FullscreenStage<TRow>({
@@ -40,11 +57,7 @@ function FullscreenStage<TRow>({
   }, [rootRef, shell]);
   const fullscreenProps = {
     element,
-    children: (fullscreen: FullscreenState) => (
-      <FeatureStateScope stateKey={FULLSCREEN_STATE} value={fullscreen}>
-        {children({ ...live, fullscreen })}
-      </FeatureStateScope>
-    ),
+    children: renderWithFullscreen(live, children),
   } satisfies FullscreenLiveSlotProps;
   return <LiveFullscreen {...fullscreenProps} />;
 }
