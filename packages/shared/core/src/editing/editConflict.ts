@@ -55,6 +55,25 @@ interface CellAnswer<TRow> {
 }
 
 /**
+ * Whether two contested sets say the same thing to the reader.
+ *
+ * Keys alone are not enough: a second update to a field already waiting on an
+ * answer leaves the key set untouched while the value it carries changes, and
+ * a set treated as unchanged would go on showing — and taking — what arrived
+ * first.
+ */
+function sameContested<TRow>(
+  left: ReadonlyMap<string, ContestedEditCell<TRow>>,
+  right: ReadonlyMap<string, ContestedEditCell<TRow>>
+): boolean {
+  if (left.size !== right.size) return false;
+  for (const [key, cell] of left) {
+    if (right.get(key)?.incoming !== cell.incoming) return false;
+  }
+  return true;
+}
+
+/**
  * The conflict store's factory, reading the table through `tools`.
  *
  * @param tools - The table functions the store reads.
@@ -91,25 +110,6 @@ export function editConflictStoreWith(
       }
     }
     return changes;
-  }
-
-  /**
-   * Whether two contested sets say the same thing to the reader.
-   *
-   * Keys alone are not enough: a second update to a field already waiting on an
-   * answer leaves the key set untouched while the value it carries changes, and
-   * a set treated as unchanged would go on showing — and taking — what arrived
-   * first.
-   */
-  function sameContested<TRow>(
-    left: ReadonlyMap<string, ContestedEditCell<TRow>>,
-    right: ReadonlyMap<string, ContestedEditCell<TRow>>
-  ): boolean {
-    if (left.size !== right.size) return false;
-    for (const [key, cell] of left) {
-      if (right.get(key)?.incoming !== cell.incoming) return false;
-    }
-    return true;
   }
 
   /** Whether a contested key belongs to this row. */

@@ -57,7 +57,7 @@ export function serverFilterKeys<TRow>(
   input: ServerFilterKeysInput<TRow>
 ): ServerFilterKeys {
   const registry = (input.filterTypes ?? []).reduce(
-    withFilterType,
+    (registry, spec) => withFilterType(registry, spec),
     defaultFilterRegistry
   );
   const defs = resolveFilterDefs(input.columns, input.filters, input.locale);

@@ -198,7 +198,10 @@ function buildRuntimeOn<TRow>(
     ...buildFilterRuntime(
       withAsync,
       applyFilterExtends(
-        (filterTypes ?? []).reduce(withFilterType, builtIns),
+        (filterTypes ?? []).reduce(
+          (registry, spec) => withFilterType(registry, spec),
+          builtIns
+        ),
         featureHost
       )
     ),

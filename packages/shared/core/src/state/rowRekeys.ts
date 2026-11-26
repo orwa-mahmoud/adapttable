@@ -79,7 +79,7 @@ export function rekeyTableRows(
   const handlers = handlersOf.get(store);
   if (!handlers || handlers.size === 0 || !rekeys(log)) return;
   store.batch(() => {
-    for (const handler of [...handlers]) handler(log);
+    for (const handler of handlers) handler(log);
   });
 }
 
