@@ -470,11 +470,11 @@ describe("migrateV4Source", () => {
     expect(template.issues[0]?.line).toBe(1);
   });
 
-  it("reads a script block whatever the tag's case and closing spacing", () => {
+  it("reads a script block whatever the tag's case and closing-tag contents", () => {
     const source = [
       '<SCRIPT setup lang="ts">',
       'import { selection } from "@adapttable/mui/features";',
-      "</Script >",
+      "</Script\t\n bar>",
       "<template><div /></template>",
       "",
     ].join("\n");

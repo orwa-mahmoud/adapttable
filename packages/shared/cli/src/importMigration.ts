@@ -506,9 +506,10 @@ function moduleEdits(
  */
 /**
  * A Vue single-file component's script block, its body in group 1. Tag names
- * match in any case, and the closing tag may carry whitespace before `>`.
+ * match in any case, and the closing tag ends at its own `>` whatever follows
+ * the name, as an HTML parser reads it.
  */
-export const VUE_SCRIPT_BLOCK = /<script\b[^>]*>([\s\S]*?)<\/script\s*>/gi;
+export const VUE_SCRIPT_BLOCK = /<script\b[^>]*>([\s\S]*?)<\/script\b[^>]*>/gi;
 
 /**
  * Rewrite each Vue script with `migrate`, leaving the template bytes alone.
