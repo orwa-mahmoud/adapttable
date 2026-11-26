@@ -9,10 +9,10 @@
  */
 import type { RowPatchEvent, RowPatchLog } from "../contracts/rows";
 import {
+  isRekeySummary,
   logForCommit,
   rowPatchLog,
   rowRekeys,
-  sealPatchLog,
 } from "../rows/patch";
 import type { RowPinState } from "../rows/rowPinModel";
 import type { TableStore } from "./tableStore";
@@ -25,6 +25,7 @@ import type { TableStore } from "./tableStore";
 export type RowRekeyHandler<TRow = unknown> = (log: RowPatchLog<TRow>) => void;
 
 const handlersOf = new WeakMap<TableStore, Set<RowRekeyHandler>>();
+const lastApplied = new WeakMap<TableStore, WeakRef<RowPatchLog<unknown>>>();
 
 /**
  * Register how one piece of a table's state follows a rekey.
@@ -85,7 +86,9 @@ export function rekeyTableRows(
 /**
  * Carry the rekeys of newly committed data through the table's state: when
  * `data` carries a patch log that continues from `previous`, its rekeys move
- * every registered piece of state. Other new arrays change no id.
+ * every registered piece of state. When a commit skips patch results,
+ * handlers receive the net updates for the rekeyed rows that still exist.
+ * Other new arrays change no id.
  *
  * @param store - The table's store.
  * @param previous - The data the table showed before.
@@ -98,16 +101,18 @@ export function commitRowRekeys<TRow>(
   previous: readonly TRow[] | undefined,
   data: readonly TRow[]
 ): void {
-  if (previous === undefined || previous === data) return;
+  if (previous === data) return;
   const log = rowPatchLog(data);
-  if (!log) return;
-  // One commit may cover several applyRowPatches calls. The immediate log
-  // describes the last call; an uncommitted chain describes the calls the
-  // table has not seen yet. A replacement array has neither.
-  const applicable = logForCommit(log, previous);
-  if (!applicable) return;
-  sealPatchLog(log);
+  // A commit may cover several calls. Each table reads the rekeys it missed
+  // from its own last snapshot.
+  const applicable = log && previous && logForCommit(log, previous);
+  if (!log || !applicable) {
+    lastApplied.delete(store);
+    return;
+  }
+  if (lastApplied.get(store)?.deref() === log) return;
   rekeyTableRows(store, applicable);
+  lastApplied.set(store, new WeakRef(log));
 }
 
 /**
@@ -158,6 +163,7 @@ export function rekeyedIds<TRow>(
 ): ReadonlyMap<string, string> {
   const moved = new Map<string, string>();
   const originOf = new Map<TRow, string>();
+  const summary = isRekeySummary(log);
   for (const event of log.events) {
     if (event.type === "remove") {
       const origin = originOf.get(event.row);
@@ -165,7 +171,13 @@ export function rekeyedIds<TRow>(
       continue;
     }
     if (event.type !== "update") continue;
-    followUpdate(event, originOf.get(event.prev), originOf, moved, getId);
+    followUpdate(
+      event,
+      summary ? undefined : originOf.get(event.prev),
+      originOf,
+      moved,
+      getId
+    );
   }
   return moved;
 }

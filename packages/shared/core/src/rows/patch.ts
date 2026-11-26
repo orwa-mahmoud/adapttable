@@ -39,6 +39,7 @@ import type {
   UpdatePatch,
   UpsertPatch,
 } from "../contracts/rows";
+import { advanceRekeyHistory, type RekeyHistory } from "./rekeyHistory";
 export type {
   InsertPatch,
   RekeyPatch,
@@ -213,32 +214,20 @@ function rowIds<TRow>(
   };
 }
 
-/**
- * Rekeys from earlier uncommitted patches of the same array, without keeping
- * those arrays. `root` is the identity token of the first array; `events`
- * are the patch events since then. A commit seals the log and drops the chain.
- */
-interface PendingChain {
-  readonly root: object;
-  readonly events: readonly RowPatchEvent<unknown>[];
-}
-
 /** Where patch provenance is kept: which array a log produced, and its base. */
 interface PatchProvenance {
   readonly logs: WeakMap<WeakKey, RowPatchLog<unknown>>;
   readonly identities: WeakMap<WeakKey, object>;
   readonly bases: WeakMap<WeakKey, object>;
-  readonly pending: WeakMap<object, PendingChain>;
-  readonly sealed: WeakSet<object>;
+  readonly histories: WeakMap<object, RekeyHistory>;
+  readonly summaries: WeakSet<object>;
 }
 
 /**
- * One registry per JavaScript realm, keyed by the shape of `RowPatchLog`, so
- * the ESM and CommonJS builds of this package loaded side by side read each
- * other's patches. A change to the log's shape takes a new key, so a copy of
- * another shape never reads it.
+ * One registry per JavaScript realm, keyed by the shape of the provenance, so
+ * the ESM and CommonJS builds loaded side by side read each other's patches.
  */
-const PROVENANCE_KEY = Symbol.for("adapttable.rowPatchProvenance.v2");
+const PROVENANCE_KEY = Symbol.for("adapttable.rowPatchProvenance.v3");
 
 let provenance: PatchProvenance | undefined;
 
@@ -249,8 +238,8 @@ function patchProvenance(): PatchProvenance {
     logs: new WeakMap(),
     identities: new WeakMap(),
     bases: new WeakMap(),
-    pending: new WeakMap(),
-    sealed: new WeakSet(),
+    histories: new WeakMap(),
+    summaries: new WeakSet(),
   };
   return provenance;
 }
@@ -292,61 +281,48 @@ function rememberLog<TRow>(
   base: readonly TRow[]
 ): void {
   if (log.events.length === 0) return;
-  const { logs, identities, bases, pending, sealed } = patchProvenance();
-  // The previous log, if this array is itself an uncommitted patch result.
-  // Read it before publishing the new log. Only the identity token is kept,
-  // so the previous array can be collected.
+  const { logs, identities, bases, histories } = patchProvenance();
   const prior = logs.get(base);
   logs.set(log.rows, log);
   const identity = identities.get(base) ?? {};
   identities.set(base, identity);
   bases.set(log, identity);
-  if (!prior || prior === log || sealed.has(prior)) return;
-  const carried = pending.get(prior);
-  const root = carried?.root ?? bases.get(prior);
-  if (!root) return;
-  pending.set(log, {
-    root,
-    events: [...(carried?.events ?? prior.events), ...log.events],
-  });
+  histories.set(
+    log,
+    advanceRekeyHistory(prior && histories.get(prior), identity, log.events)
+  );
 }
 
 /**
- * The log a commit should apply when `previous` is this log's input, or the
- * input of an earlier patch the table has not committed yet.
- *
- * The immediate check stays exact. A chain is only the uncommitted events,
- * and it does not keep the intermediate arrays.
+ * Read rekeys since this table's own last commit. The immediate log retains
+ * its original events. For skipped snapshots, pair each rekeyed row's start
+ * and end independently, even when two rows swap ids.
  *
  * @param log - The log on the array being committed.
  * @param previous - The rows the table last committed.
- * @returns The log whose events the commit should follow, or `undefined`.
+ * @returns The log whose rekeys the commit should follow, or `undefined`.
  */
 export function logForCommit<TRow>(
   log: RowPatchLog<TRow>,
   previous: readonly TRow[]
 ): RowPatchLog<TRow> | undefined {
   if (rowPatchLogStartsAt(log, previous)) return log;
-  const chain = patchProvenance().pending.get(log);
-  if (!chain) return undefined;
-  if (patchProvenance().identities.get(previous) !== chain.root)
-    return undefined;
-  return {
+  const { histories, identities, summaries } = patchProvenance();
+  const identity = identities.get(previous);
+  const updates = identity && histories.get(log)?.updates.get(identity);
+  if (!updates?.size) return undefined;
+  const summary: RowPatchLog<TRow> = {
     rows: log.rows,
-    events: chain.events as readonly RowPatchEvent<TRow>[],
+    events: [...updates.values()] as readonly RowPatchEvent<TRow>[],
   };
+  summaries.add(summary.events);
+  return summary;
 }
 
-/**
- * The table has committed this log. Later patches start from its result
- * instead of replaying the events already applied.
- *
- * @param log - The log the commit accepted.
- */
-export function sealPatchLog(log: RowPatchLog<unknown>): void {
-  const { pending, sealed } = patchProvenance();
-  sealed.add(log);
-  pending.delete(log);
+export function isRekeySummary(
+  log: Pick<RowPatchLog<unknown>, "events">
+): boolean {
+  return patchProvenance().summaries.has(log.events);
 }
 
 /** Apply one patch to a working copy. Returns the event when something changed. */
@@ -437,6 +413,7 @@ export function rowRekeys<TRow>(
 ): ReadonlyMap<string, string> {
   const rekeys = new Map<string, string>();
   const originOf = new Map<string, string>();
+  const summary = isRekeySummary(log);
   for (const event of log.events) {
     if (event.type === "remove") {
       const origin = originOf.get(event.id);
@@ -447,7 +424,8 @@ export function rowRekeys<TRow>(
       continue;
     }
     if (event.type !== "update" || event.from === undefined) continue;
-    const origin = originOf.get(event.from) ?? event.from;
+    const origin =
+      (summary ? undefined : originOf.get(event.from)) ?? event.from;
     originOf.delete(event.from);
     if (origin === event.id) {
       rekeys.delete(origin);
