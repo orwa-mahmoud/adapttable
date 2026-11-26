@@ -30,10 +30,19 @@ for (const kit of ANGULAR_KITS) {
         await trigger.evaluate((node) =>
           node.scrollIntoView({ behavior: "instant", block: "center" })
         );
-        await trigger.focus();
-        await trigger.press("Enter");
         const panel = angularPart(kit, page, "views-panel");
-        await expect(panel).toBeVisible();
+        const openViews = async () => {
+          await trigger.press("Enter");
+          await expect(panel).toBeVisible();
+          if (kit.key === "spartan") {
+            // The native popover focuses its first view after rendering.
+            await expect(
+              angularPart(kit, page, "views-item", panel).first()
+            ).toBeFocused();
+          }
+        };
+        await trigger.focus();
+        await openViews();
         const input = angularPart(kit, page, "views-input");
         expect((await input.boundingBox())!.width).toBeGreaterThanOrEqual(120);
         await input.fill("Evaluator view");
@@ -56,8 +65,9 @@ for (const kit of ANGULAR_KITS) {
         await expect(trigger).toHaveAttribute("aria-expanded", "false");
         await search.fill("");
         await expect(row).not.toHaveCount(1);
-        await trigger.press("Enter");
+        await openViews();
         await view.focus();
+        await expect(view).toBeFocused();
         await view.press("Enter");
         await expect(search).toHaveValue(query);
         await expect(row).toHaveCount(1);
