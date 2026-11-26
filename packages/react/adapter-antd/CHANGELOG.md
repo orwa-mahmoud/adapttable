@@ -1,5 +1,78 @@
 # @adapttable/antd
 
+## 4.0.0
+
+### Major Changes
+
+- bee0c9f: `@adapttable/core/binding` no longer re-exports a value that `@adapttable/core` already exports and that the binding entry's own signatures do not name. Import `visibleColumns`, `filterLabel`, `aggregate`, `declaredAggregates`, `computedAggregateKeys`, `autoSizeColumns`, `cellValue`, `conditionToExtra`, `sourceCapabilities`, `treeColumnKey`, `approvalArgumentPairs` and `approvalValueText` from `@adapttable/core`. `adapttable migrate-v4` moves those imports.
+  
+  `applyTableFeatures` is only on `@adapttable/react/features`. `useTableFeatures` is only on `@adapttable/react/adapter`. `adapttable migrate-v4` moves an import that still uses the other entry.
+  
+  A kit no longer publishes a `/features` barrel. Import each factory from its own subpath. A React kit's `/features` only forwarded `@adapttable/react/features`, so those imports move there. `adapttable migrate-v4` rewrites both.
+  
+  A table takes `data` or a `source` and infers no tier from its other props. A server table builds its source with `useServerData` (React, Vue) or `injectServerData` (Angular) and passes it as `source`; the table props `mode`, `onQueryChange`, `total`, `aggregates`, `responseKey`, `supports`, `facetKeys` and `facets`, and React's `DataModeProps`, are gone. `onViewChange` tells a table over `data` what the reader changed. `serverFilterKeys({ columns, filters })` gives a server source the filter keys its first request needs. A table over `data` no longer ships the server tier: the Unstyled table loads 1.8 KiB less up front and 5.9 KiB less in total in each framework. `adapttable migrate-v4` reports every table that passes the removed props.
+  
+  Filter placement, column rename, and cell cut, paste and fill are options of `filters()`, `headerFilters()`, `columnMenu()` and `cellNavigation()`. A table prop no longer sets them. `isCellFlashing` stays on the table: it marks cells the base already draws. Vue's `DataTable` no longer accepts `onCellCut`, `onCellPaste`, `onCellFill` or `onColumnRename`.
+
+### Minor Changes
+
+- 636d0ad: A family composes every member of an area in one call and goes into `features` as one entry: `editingFamily(save)` from each kit's `/editing` (cell editing, dirty marks, edit history and undo controls), `filteringFamily(defs)` from `/filtering` (the filter panel and header filters) and `columnLayoutFamily()` from `/column-layout` (columns menu, resizing and fitting). Each family has its own entry, so a member imported alone still loads alone. `standardFeatures` is built from the column-layout and filtering families. A Vue or Angular kit's `/features` entry gathers the families with the other factories.
+
+### Patch Changes
+
+- 340c486: The Ant Design table draws through the binding's composition: the toolbar, bars, find, keyboard grid, export, context menu, side panel, footer and overlays are the ones every kit shares, and only the body stays antd's own `<Table>` and cards. A plain antd table loads 65.8 KiB instead of 71.0 (72.2 instead of 77.5 in total). antd's `virtualize` keeps windowing desktop rows through antd's virtual table. `@adapttable/react/adapter` exports `coreVirtualize` and `KEYED_WINDOW_RENDER` for a kit that brings its own `virtualize`.
+- f94d978: A grouped antd table and its phone cards, windowed by `virtualize()` on a page-scrolled layout, draw the rows on screen: the window measures where the list starts on the page, as every other kit's does. A row brought into view under the sticky header stops below it.
+- 1bf65dd: A React table runs its column layout, grouping, tree, selection, row actions, pins, expansion, editing and edit history as chrome stages, each after the stages whose values it reads, so the order follows from what each feature reads and writes rather than a fixed list. Find marks its matches from its own stage. `CHROME_EXTRA_SLOT_ORDER`, `HistoryLiveGate`, `EDIT_HISTORY_LIVE` and its props and draw types are removed; `EDIT_HISTORY_STAGE`, `ChromeStageKey` and `LiveStagePhase` name the new pieces, and `adapttable migrate-v4` reports the removed names.
+- ee0f202: High-contrast rules load with the features that draw them. Every table adds the base rules (focus, validation, pinned edges) to the page's one stylesheet; cell navigation, find, the editing features, saved views, the side panel, the command palette and the grouping panel each add their own, so a plain table carries 1.2 kB of rules instead of 2.1 kB. A feature, or a host plugin, carries its rules in a `contrast` field.
+  
+  `FORCED_COLORS_CSS` is removed, and `@adapttable/react/adapter` no longer exports `ForcedColorsStyle` or `ensureForcedColorsStyles`: `FeatureProviders` mounts the rules. `mountForcedColorsStyles` in the Vue and Angular bindings takes a reader of the composed features.
+- ad4c90a: The React editing feature publishes its bundle as `EDITING_STATE`, and the edit history stays on `EDIT_HISTORY_STATE`; the table chrome no longer carries `editing` or `editHistory`. `overlayChromeExtras(shell, base, channels)` and `TableRuntimePublisher.stage(chrome, actions, channels)` take what the features published (`RuntimeChannels`) apart from the chrome, so the runtime view carries editing and the filter definitions. `FeatureStateScope` accepts `undefined` to publish nothing. `adapttable migrate-v4` reports the removed names.
+- 5a791f2: React grouping publishes its grouped rows as `GROUPING_STATE` (`GroupingState`) and the tree its hierarchy as `TREE_STATE` (`TreeState`); the table chrome no longer carries `grouping`, `tree`, `groupingArmed` or `treeShaped`, and the finished shell's `tableProps` carries them to the body. `KitPagerView` takes `tableProps.grouping` in place of `chrome.grouping`. Core's `BodyChrome` requires its `grouping` and `tree` keys, and `finishShellBody` reads them from `tableProps`. The grouping panel publishes its strip state as `GROUPING_PANEL_VIEW_STATE`, which the finished shell's `tableProps.groupingPanel` carries to the strip, the column menu and the header drag; the chrome's `groupingPanel`, the shell's `groupingPanelProps` and `DataTableShellGroupingPanelProps` are removed, and a table without the panel carries none of its code. `adapttable migrate-v4` reports the removed fields.
+- 6612d37: React row actions publish the trailing column and the row mutations as `ROW_ACTIONS_STATE` (`RowActionsState`), and row pinning publishes its pins as `ROW_PINNING_STATE`; the table chrome no longer carries `rowMutations`, `rowActions`, `hasRowActions` or `rowPinning`, and core's `OverlayChrome` treats `rowMutations` and `hasRowActions` as optional. The finished shell's `tableProps` carries them to the body, and the runtime view reads the pins. Row reorder's state is read from `ROW_REORDER`, now on `@adapttable/react/adapter`: the chrome no longer carries `hasRowReorder` or `rowReorder`, and the finished shell carries `hasRowReorder` and `tableProps.rowReorder`. `adapttable migrate-v4` reports the removed fields.
+- c60895f: React row detail publishes its renderer and expansion as `ROW_DETAIL_STATE` (`RowDetailState`); the table chrome no longer carries `detail`, and the finished shell's `tableProps.renderRowDetail` and `tableProps.expansion` carry it to the body. `adapttable migrate-v4` reports the removed field.
+- Updated dependencies [35abf7a]
+- Updated dependencies [340c486]
+- Updated dependencies [f94d978]
+- Updated dependencies [e0ed9dd]
+- Updated dependencies [5545290]
+- Updated dependencies [1bf65dd]
+- Updated dependencies [ee0f202]
+- Updated dependencies [536aa89]
+- Updated dependencies [04d741f]
+- Updated dependencies [cdbba81]
+- Updated dependencies [cb9f9db]
+- Updated dependencies [da4baa0]
+- Updated dependencies [bee0c9f]
+- Updated dependencies [636d0ad]
+- Updated dependencies [8af4736]
+- Updated dependencies [bb9ee7a]
+- Updated dependencies [633e23c]
+- Updated dependencies [ed8a86d]
+- Updated dependencies [d2beb5a]
+- Updated dependencies [a96cfee]
+- Updated dependencies [fbc52e8]
+- Updated dependencies [7ad8d9a]
+- Updated dependencies [03d7f36]
+- Updated dependencies [08245ea]
+- Updated dependencies [5d503be]
+- Updated dependencies [bb4e606]
+- Updated dependencies [ffd1a07]
+- Updated dependencies [ad4c90a]
+- Updated dependencies [3ecb133]
+- Updated dependencies [5a791f2]
+- Updated dependencies [3c0ae19]
+- Updated dependencies [6612d37]
+- Updated dependencies [c60895f]
+- Updated dependencies [48cea86]
+- Updated dependencies [d1b7ece]
+- Updated dependencies [1bfa985]
+- Updated dependencies [4effc96]
+- Updated dependencies [eb084d0]
+- Updated dependencies [5b7bc3c]
+- Updated dependencies [b36d160]
+- Updated dependencies [3b2a5bd]
+  - @adapttable/react@2.0.0
+
 ## 3.5.0
 
 ### Minor Changes

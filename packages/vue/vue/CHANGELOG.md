@@ -1,5 +1,96 @@
 # @adapttable/vue
 
+## 0.8.0
+
+### Minor Changes
+
+- ee0f202: High-contrast rules load with the features that draw them. Every table adds the base rules (focus, validation, pinned edges) to the page's one stylesheet; cell navigation, find, the editing features, saved views, the side panel, the command palette and the grouping panel each add their own, so a plain table carries 1.2 kB of rules instead of 2.1 kB. A feature, or a host plugin, carries its rules in a `contrast` field.
+  
+  `FORCED_COLORS_CSS` is removed, and `@adapttable/react/adapter` no longer exports `ForcedColorsStyle` or `ensureForcedColorsStyles`: `FeatureProviders` mounts the rules. `mountForcedColorsStyles` in the Vue and Angular bindings takes a reader of the composed features.
+- bee0c9f: `@adapttable/core/binding` no longer re-exports a value that `@adapttable/core` already exports and that the binding entry's own signatures do not name. Import `visibleColumns`, `filterLabel`, `aggregate`, `declaredAggregates`, `computedAggregateKeys`, `autoSizeColumns`, `cellValue`, `conditionToExtra`, `sourceCapabilities`, `treeColumnKey`, `approvalArgumentPairs` and `approvalValueText` from `@adapttable/core`. `adapttable migrate-v4` moves those imports.
+  
+  `applyTableFeatures` is only on `@adapttable/react/features`. `useTableFeatures` is only on `@adapttable/react/adapter`. `adapttable migrate-v4` moves an import that still uses the other entry.
+  
+  A kit no longer publishes a `/features` barrel. Import each factory from its own subpath. A React kit's `/features` only forwarded `@adapttable/react/features`, so those imports move there. `adapttable migrate-v4` rewrites both.
+  
+  A table takes `data` or a `source` and infers no tier from its other props. A server table builds its source with `useServerData` (React, Vue) or `injectServerData` (Angular) and passes it as `source`; the table props `mode`, `onQueryChange`, `total`, `aggregates`, `responseKey`, `supports`, `facetKeys` and `facets`, and React's `DataModeProps`, are gone. `onViewChange` tells a table over `data` what the reader changed. `serverFilterKeys({ columns, filters })` gives a server source the filter keys its first request needs. A table over `data` no longer ships the server tier: the Unstyled table loads 1.8 KiB less up front and 5.9 KiB less in total in each framework. `adapttable migrate-v4` reports every table that passes the removed props.
+  
+  Filter placement, column rename, and cell cut, paste and fill are options of `filters()`, `headerFilters()`, `columnMenu()` and `cellNavigation()`. A table prop no longer sets them. `isCellFlashing` stays on the table: it marks cells the base already draws. Vue's `DataTable` no longer accepts `onCellCut`, `onCellPaste`, `onCellFill` or `onColumnRename`.
+- 636d0ad: A family composes every member of an area in one call and goes into `features` as one entry: `editingFamily(save)` from each kit's `/editing` (cell editing, dirty marks, edit history and undo controls), `filteringFamily(defs)` from `/filtering` (the filter panel and header filters) and `columnLayoutFamily()` from `/column-layout` (columns menu, resizing and fitting). Each family has its own entry, so a member imported alone still loads alone. `standardFeatures` is built from the column-layout and filtering families. A Vue or Angular kit's `/features` entry gathers the families with the other factories.
+- 8af4736: A feature's `setup(host)` only registers; what outlives a render goes in its `mount(context)`, which returns what releases it. Every binding keeps a mounted feature by id: declaring it again with new options, inline included, keeps the resource and hands `context.feature()` the new declaration, and only removing the feature, changing its `dependencies` or unmounting the table releases it, exactly once. A render the framework discards acquires nothing, and a failed mount rolls back what its pass acquired. React publishes the table runtime and its feature ids in layout effects, so AI and event callbacks read the last committed table; `PublishTableRuntime` is the chrome's publisher. `createFeatureMounts` and `composeMounts` on `@adapttable/core/binding` are the shared lifecycle. A `setup` that returns a cleanup is refused, and `onDispose` is no longer on the feature host. Vue's and Angular's table agent follows its latest declaration's options. `adapttable migrate-v4` reports `onDispose` calls.
+- 97ca02e: `classNames.actionButton` styles a row action and `classNames.tableStatusAnnouncer` the status announcer; the `rowAction` and `status` keys are gone from Vue's `DataTableClassNames` and every Vue kit.
+- d174bb1: `groupRowSlotKey()` is gone from `@adapttable/vue/adapter`; `GROUP_ROW` is the group-row slot for every row type. `@adapttable/nuxt-ui`'s `columnSelectionCheckbox` comes from `@adapttable/nuxt-ui/column-selection` only.
+- 3b2a5bd: Each Vue feature with a toolbar control adds its own toolbar entry. Density, fullscreen, saved views, the column menu, undo/redo, find, the command palette, export and print read the state they publish and draw their kit control; the shell names none of them. `TOOLBAR_EXTRAS` takes `ToolbarEntryProps`, `toolbarEntry` and `FeatureSlotDrawer` build an entry, a kit's filters trigger and panel fill `FILTERS_PANEL`, and `UNDO_REDO_CONTROL` takes `UndoRedoControlProps` in place of `ToolbarExtrasSlotProps`. The shell's `toolbarExtrasProps` and `hasActionToolbar` are removed.
+  
+  A feature's `rank` places its fills in a slot several features fill, lower first, then feature id. Saved views and the column menu lead the toolbar, so every Vue kit draws Filters, Saved views, Columns, Density, Export, Find, Fullscreen, Print and Undo/Redo in that order. Core names `UndoRedoToolbarProps`, and `adapttable migrate-v4` reports the removed Vue names.
+
+### Patch Changes
+
+- e0ed9dd: `@adapttable/react` and `@adapttable/vue` ship a production build with no development warnings and a development build, selected by the `development` export condition, that keeps them. A plain React table measures 20.6 KiB gzip instead of 20.8 and a Vue Unstyled table 53.3 instead of 53.5.
+- 536aa89: Live-update conflict handling loads when the first edit opens. A table that edits carries a small holder instead of the conflict store, about 0.5 KiB gzip less in every framework, and the store arrives before any conflict can. `createDeferredEditConflictStore` and `loadEditConflictStore` replace `createEditConflictStore` on `@adapttable/core/binding` and `@adapttable/core/editing`; the main-entry alias is gone.
+- 9c18ce9: Each draft and each cell's editing state stays distinct. Dirty marks, saves, validation and conflicts key every cell by an encoding no row id or column key can collide with, and a row's state is looked up by row, so confirming one cell no longer clears another's mark and a draft change after a `;` redraws its row. The dirty, save and batch states gain `rowSignature(rowId)`, which brings the row editing digest for 500 rows with 1,000 pending drafts from 10 ms to 0.1 ms.
+- cdbba81: A feature id resolves to one declaration everywhere: when two features share an id, the last one supplies the table's options, labels, registrations and slot fills, and the earlier one contributes nothing. `resolveFeatureIds` on `@adapttable/core/binding` applies the rule and warns in development.
+- cb9f9db: `@adapttable/core`'s main entry serves the names a table uses. Binding and kit machinery comes from `@adapttable/core/binding`, and the editing, pivot, formula, grouping, stream and selection names from their own entries: `@adapttable/core/editing`, `/pivot`, `/formula`, `/grouping`, `/stream` and `/selection`. Importing every core export drops from 107.2 to 47.2 KiB gzip. The query codecs and engine constructors stay on the main entry. `@adapttable/react`'s kit machinery (the chrome, column, filter-chip and body-data hooks and their types) comes from `@adapttable/react/adapter`, which also exports `columnHeaderLabel` and `exportViewFromChrome`.
+- da4baa0: The Excel and PDF writers load on the first export instead of with the table, and start loading in the background once the table is mounted, so an export still works after the connection drops. A Vue table with `exportPdf` loads 8.1 KiB gzip less up front and one with `exportXlsx` 2.4 KiB less; either now costs 0.2 KiB more than CSV export. A writer that cannot load is a failed export — no download, no `onAfterExport`, the button stays usable — and the next export loads it again. `deferredXlsxWriter`, `deferredPdfWriter` and `deferredExportWriter` give the same behaviour to a writer you configure yourself.
+  
+  `xlsxWriter` and `buildTableXlsx` are no longer on the main entry; import them from `@adapttable/core/xlsx`.
+- 633e23c: Find in table reads only the previous hits when a query gets more specific, instead of every loaded cell on each keystroke. The matches are the same.
+- ed8a86d: `@adapttable/i18n` loads no label data from its root: `getDirection`, `isRtlLocale`, `hasLocale` and the on-demand `loadLabels` read 2 files (6 kB) in Node instead of 23 (380 kB). `getLabels` and `locales` come from `@adapttable/i18n/catalog`, one language alone from `@adapttable/i18n/locales/<tag>` (21 kB for Arabic), and `@adapttable/i18n/load` is part of the root. A tag that names a script picks the preset written in it: `zh-Hant` and `zh-Hant-TW` read Traditional Chinese, `zh-Hans` Simplified; `az-Arab` and `pa-Arab` are right-to-left, `ar-Latn` and `ks-Deva` left-to-right.
+- a96cfee: A kit locale whose labels fail to load no longer raises an unhandled promise rejection in React and Vue: the table keeps its current labels, logs the error with the locale, and loads the language on the next locale change or mount. In Angular the server-rendering task for the labels settles on a failure as it does on success.
+- 31e5510: With entrance animation off or reduced motion preferred, the table no longer searches its rows for animation marks at mount and on every refresh.
+- fbc52e8: Feature notices and disabled-control reasons take their text from the resolved labels only, in every locale: `collectFeatureNotices`, `chromeFeatureNotices` and `resolveExportDisabledReason` take resolved labels, `capabilityReason(capability, labels)` reads the `"grouping"` or `"exportScope"` sentence from them, and React's `useExportHandler(handler, labels)` requires them. A plain Unstyled table measures 64.2 KiB gzip instead of 64.4. Every other built-in string a model or chrome falls back to is its label group's default, so English lives only in the label groups: `defaultPendingRows` is gone, React's assistant shortcuts menu reads "Shortcuts" like Vue and Angular, and its revoke button names the capability ("Ask about editing cells again").
+- 4effc96: An update keeps a row's id: `updateRow` whose changes give the row a new id is refused with an error naming `rekeyRow`. `rekeyRow(id, changes)` changes the id in place, a later patch in the batch finds the row by its new id, and an id another row already holds throws `RowIdConflictError` without touching the rows. `rowRekeys(log)` maps each row's id before a batch to its id after it, and a rekeyed row's update event carries `from`. `applyRowPatches(…, { rekeyUpdates: true })` reads stored or sent id-changing updates as rekeys; row patch streams apply their frames that way (`STREAMED_ROW_PATCHES`) and accept `rekey` frames. `@adapttable/angular` re-exports `rekeyRow` and `RowIdConflictError`. In React, Vue and Angular, a rekey moves the selection (a host-held selection is asked to move), the pinned rows, the open row details, the expanded tree nodes, the focused cell and an open editor's draft, dirty marks, validation and save errors and conflict question to the new id in the change that brought the patched data; new data that is not a patch of the old moves nothing. A row reorder checks the dragged and target rows by id in every binding and hands the host each row as it is at the drop. Every editing store takes `rekey(moves)`; `onRowRekeys`, `onRowRekeyMoves`, `rowRekeyMoves`, `rekeyTableRows`, `commitRowRekeys`, `rekeyedIds` and the id remappers on `@adapttable/core/binding` are what a binding carries a rekey with.
+- eb084d0: When a table's source is replaced, the runtime view and the agent read the new source's rows and columns at once, on every scope, instead of reading page rows from the old one in React. The released reader keeps answering from its own last render, and an ordinary update keeps the same handle.
+- 5b7bc3c: The runtime view a feature above the table reads is built the first time it is read and kept until the next render, so a table nobody reads never builds it, and reading a rendered row no longer builds it. `TableRuntimePublisher` stages each render with `stage(chrome, actions)` and serves `view()` and `visibleRows()`; React's `usePublishTableRuntime(reader)` takes a `TableRuntimeReader` of `rows()`, `labels()` and `view()`.
+- 3c15620: A table drawing desktop rows no longer builds the mobile card projection for every row on mount and on every data refresh; the cards are built when the table draws them.
+- 9382e94: A virtualized Vue table re-reads its geometry only for changes that can move or resize it — its own content, its ancestors, the window — and at most once per frame. Twelve class changes elsewhere on the page used to cause twelve scans; they now cause none.
+- 054986e: A virtualized Vue table builds row attributes, styles and cells only for the rows it draws, on the surface the reader is on. With 10,000 rows and 20 columns, startup calls `rowStyle` 30 times instead of 20,000 and `rowKey` 30,030 times instead of 130,000.
+- Updated dependencies [35abf7a]
+- Updated dependencies [1bf65dd]
+- Updated dependencies [ee0f202]
+- Updated dependencies [225b501]
+- Updated dependencies [7e27f45]
+- Updated dependencies [536aa89]
+- Updated dependencies [20c19a9]
+- Updated dependencies [04d741f]
+- Updated dependencies [9c18ce9]
+- Updated dependencies [29dba96]
+- Updated dependencies [cdbba81]
+- Updated dependencies [bf57e9b]
+- Updated dependencies [7e9d071]
+- Updated dependencies [069735e]
+- Updated dependencies [f6d17be]
+- Updated dependencies [08be47a]
+- Updated dependencies [1ee8c87]
+- Updated dependencies [a4464a0]
+- Updated dependencies [cb9f9db]
+- Updated dependencies [43cf65e]
+- Updated dependencies [69c475a]
+- Updated dependencies [da4baa0]
+- Updated dependencies [bee0c9f]
+- Updated dependencies [636d0ad]
+- Updated dependencies [8af4736]
+- Updated dependencies [bb9ee7a]
+- Updated dependencies [633e23c]
+- Updated dependencies [ed8a86d]
+- Updated dependencies [d2beb5a]
+- Updated dependencies [a96cfee]
+- Updated dependencies [fbc52e8]
+- Updated dependencies [ad4c90a]
+- Updated dependencies [3ecb133]
+- Updated dependencies [5a791f2]
+- Updated dependencies [3c0ae19]
+- Updated dependencies [6612d37]
+- Updated dependencies [48cea86]
+- Updated dependencies [4effc96]
+- Updated dependencies [eb084d0]
+- Updated dependencies [5b7bc3c]
+- Updated dependencies [b36d160]
+- Updated dependencies [3b2a5bd]
+- Updated dependencies [c807131]
+  - @adapttable/core@4.0.0
+  - @adapttable/i18n@4.0.0
+
 ## 0.7.0
 
 ### Minor Changes

@@ -1,5 +1,57 @@
 # @adapttable/ai-react
 
+## 0.2.24
+
+### Patch Changes
+
+- 923b252: A table agent loads the WebMCP registrar only when it sets `webmcp`. The controller is also on the new `@adapttable/ai/agent` entry, which the React, Vue and Angular bindings now use, so `tableAgent` starts 0.54–0.58 KiB smaller in each framework and the registrar arrives as a 1.1 KiB chunk the first time a table offers itself to a page agent.
+- Updated dependencies [923b252]
+- Updated dependencies [d1f33b7]
+- Updated dependencies [501fb5c]
+- Updated dependencies [35abf7a]
+- Updated dependencies [340c486]
+- Updated dependencies [f94d978]
+- Updated dependencies [e0ed9dd]
+- Updated dependencies [5545290]
+- Updated dependencies [1bf65dd]
+- Updated dependencies [ee0f202]
+- Updated dependencies [536aa89]
+- Updated dependencies [04d741f]
+- Updated dependencies [cdbba81]
+- Updated dependencies [cb9f9db]
+- Updated dependencies [da4baa0]
+- Updated dependencies [bee0c9f]
+- Updated dependencies [636d0ad]
+- Updated dependencies [8af4736]
+- Updated dependencies [bb9ee7a]
+- Updated dependencies [633e23c]
+- Updated dependencies [ed8a86d]
+- Updated dependencies [d2beb5a]
+- Updated dependencies [a96cfee]
+- Updated dependencies [fbc52e8]
+- Updated dependencies [7ad8d9a]
+- Updated dependencies [03d7f36]
+- Updated dependencies [08245ea]
+- Updated dependencies [5d503be]
+- Updated dependencies [bb4e606]
+- Updated dependencies [ffd1a07]
+- Updated dependencies [ad4c90a]
+- Updated dependencies [3ecb133]
+- Updated dependencies [5a791f2]
+- Updated dependencies [3c0ae19]
+- Updated dependencies [6612d37]
+- Updated dependencies [c60895f]
+- Updated dependencies [48cea86]
+- Updated dependencies [d1b7ece]
+- Updated dependencies [1bfa985]
+- Updated dependencies [4effc96]
+- Updated dependencies [eb084d0]
+- Updated dependencies [5b7bc3c]
+- Updated dependencies [b36d160]
+- Updated dependencies [3b2a5bd]
+  - @adapttable/ai@0.8.0
+  - @adapttable/react@2.0.0
+
 ## 0.2.23
 
 ### Patch Changes

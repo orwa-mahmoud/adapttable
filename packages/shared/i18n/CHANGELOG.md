@@ -1,5 +1,58 @@
 # @adapttable/i18n
 
+## 4.0.0
+
+### Major Changes
+
+- 04d741f: `mobileIdentityColumns` is gone from the table props, the `useDataTable` options and `visibleColumns`, whose signature is `visibleColumns(columns, layout)`: `hideOnMobile` decides what a card shows. `sameRows` is gone in favour of `sameItems`, `SHELL_LIVE_STAGE_ORDER` and `ShellLiveStageId` in favour of `liveStageKey` and `liveStagesOf`, and the `noticeReorderNested` label leaves `TableLabels` and every locale. `sortRows` and `sortRowsMulti` leave `@adapttable/core/binding`; the engine sorts through `compareValues` and its row model. Six labels no surface draws leave `TableLabels` and every locale: `pendingProposals`, `assistantReceipt`, `rowMoveOptions`, `moveToTopLevel`, `groupingAggregateColumn` and `groupingAggregationDefault`.
+- ed8a86d: `@adapttable/i18n` loads no label data from its root: `getDirection`, `isRtlLocale`, `hasLocale` and the on-demand `loadLabels` read 2 files (6 kB) in Node instead of 23 (380 kB). `getLabels` and `locales` come from `@adapttable/i18n/catalog`, one language alone from `@adapttable/i18n/locales/<tag>` (21 kB for Arabic), and `@adapttable/i18n/load` is part of the root. A tag that names a script picks the preset written in it: `zh-Hant` and `zh-Hant-TW` read Traditional Chinese, `zh-Hans` Simplified; `az-Arab` and `pa-Arab` are right-to-left, `ar-Latn` and `ks-Deva` left-to-right.
+
+### Patch Changes
+
+- Updated dependencies [35abf7a]
+- Updated dependencies [1bf65dd]
+- Updated dependencies [ee0f202]
+- Updated dependencies [225b501]
+- Updated dependencies [7e27f45]
+- Updated dependencies [536aa89]
+- Updated dependencies [20c19a9]
+- Updated dependencies [04d741f]
+- Updated dependencies [9c18ce9]
+- Updated dependencies [29dba96]
+- Updated dependencies [cdbba81]
+- Updated dependencies [bf57e9b]
+- Updated dependencies [7e9d071]
+- Updated dependencies [069735e]
+- Updated dependencies [f6d17be]
+- Updated dependencies [08be47a]
+- Updated dependencies [1ee8c87]
+- Updated dependencies [a4464a0]
+- Updated dependencies [cb9f9db]
+- Updated dependencies [43cf65e]
+- Updated dependencies [69c475a]
+- Updated dependencies [da4baa0]
+- Updated dependencies [bee0c9f]
+- Updated dependencies [636d0ad]
+- Updated dependencies [8af4736]
+- Updated dependencies [bb9ee7a]
+- Updated dependencies [633e23c]
+- Updated dependencies [d2beb5a]
+- Updated dependencies [a96cfee]
+- Updated dependencies [fbc52e8]
+- Updated dependencies [ad4c90a]
+- Updated dependencies [3ecb133]
+- Updated dependencies [5a791f2]
+- Updated dependencies [3c0ae19]
+- Updated dependencies [6612d37]
+- Updated dependencies [48cea86]
+- Updated dependencies [4effc96]
+- Updated dependencies [eb084d0]
+- Updated dependencies [5b7bc3c]
+- Updated dependencies [b36d160]
+- Updated dependencies [3b2a5bd]
+- Updated dependencies [c807131]
+  - @adapttable/core@4.0.0
+
 ## 3.4.2
 
 ### Patch Changes
