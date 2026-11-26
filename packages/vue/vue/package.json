@@ -1,5 +1,5 @@
 {
-  "version": "0.7.0",
+  "version": "0.8.0",
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",
@@ -44,8 +44,8 @@
     "adapttable"
   ],
   "dependencies": {
-    "@adapttable/core": "3.16.0",
-    "@adapttable/i18n": "3.4.2",
+    "@adapttable/core": "4.0.0",
+    "@adapttable/i18n": "4.0.0",
     "@tanstack/virtual-core": "^3.17.11"
   },
   "exports": {

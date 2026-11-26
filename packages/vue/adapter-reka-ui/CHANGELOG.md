@@ -1,5 +1,53 @@
 # @adapttable/reka-ui
 
+## 0.5.0
+
+### Minor Changes
+
+- bee0c9f: `@adapttable/core/binding` no longer re-exports a value that `@adapttable/core` already exports and that the binding entry's own signatures do not name. Import `visibleColumns`, `filterLabel`, `aggregate`, `declaredAggregates`, `computedAggregateKeys`, `autoSizeColumns`, `cellValue`, `conditionToExtra`, `sourceCapabilities`, `treeColumnKey`, `approvalArgumentPairs` and `approvalValueText` from `@adapttable/core`. `adapttable migrate-v4` moves those imports.
+  
+  `applyTableFeatures` is only on `@adapttable/react/features`. `useTableFeatures` is only on `@adapttable/react/adapter`. `adapttable migrate-v4` moves an import that still uses the other entry.
+  
+  A kit no longer publishes a `/features` barrel. Import each factory from its own subpath. A React kit's `/features` only forwarded `@adapttable/react/features`, so those imports move there. `adapttable migrate-v4` rewrites both.
+  
+  A table takes `data` or a `source` and infers no tier from its other props. A server table builds its source with `useServerData` (React, Vue) or `injectServerData` (Angular) and passes it as `source`; the table props `mode`, `onQueryChange`, `total`, `aggregates`, `responseKey`, `supports`, `facetKeys` and `facets`, and React's `DataModeProps`, are gone. `onViewChange` tells a table over `data` what the reader changed. `serverFilterKeys({ columns, filters })` gives a server source the filter keys its first request needs. A table over `data` no longer ships the server tier: the Unstyled table loads 1.8 KiB less up front and 5.9 KiB less in total in each framework. `adapttable migrate-v4` reports every table that passes the removed props.
+  
+  Filter placement, column rename, and cell cut, paste and fill are options of `filters()`, `headerFilters()`, `columnMenu()` and `cellNavigation()`. A table prop no longer sets them. `isCellFlashing` stays on the table: it marks cells the base already draws. Vue's `DataTable` no longer accepts `onCellCut`, `onCellPaste`, `onCellFill` or `onColumnRename`.
+- 636d0ad: A family composes every member of an area in one call and goes into `features` as one entry: `editingFamily(save)` from each kit's `/editing` (cell editing, dirty marks, edit history and undo controls), `filteringFamily(defs)` from `/filtering` (the filter panel and header filters) and `columnLayoutFamily()` from `/column-layout` (columns menu, resizing and fitting). Each family has its own entry, so a member imported alone still loads alone. `standardFeatures` is built from the column-layout and filtering families. A Vue or Angular kit's `/features` entry gathers the families with the other factories.
+- 97ca02e: `classNames.actionButton` styles a row action and `classNames.tableStatusAnnouncer` the status announcer; the `rowAction` and `status` keys are gone from Vue's `DataTableClassNames` and every Vue kit.
+- 97ca02e: Every Vue kit serves `exportCsv` from its `/export` entry only; the `/export-csv` entry is gone. `/export-pdf` and `/export-xlsx` stay separate, so a CSV table never loads a PDF or Excel writer: Vue Unstyled with `/export` measures 62.1 KiB gzip.
+- 3b2a5bd: Each Vue feature with a toolbar control adds its own toolbar entry. Density, fullscreen, saved views, the column menu, undo/redo, find, the command palette, export and print read the state they publish and draw their kit control; the shell names none of them. `TOOLBAR_EXTRAS` takes `ToolbarEntryProps`, `toolbarEntry` and `FeatureSlotDrawer` build an entry, a kit's filters trigger and panel fill `FILTERS_PANEL`, and `UNDO_REDO_CONTROL` takes `UndoRedoControlProps` in place of `ToolbarExtrasSlotProps`. The shell's `toolbarExtrasProps` and `hasActionToolbar` are removed.
+  
+  A feature's `rank` places its fills in a slot several features fill, lower first, then feature id. Saved views and the column menu lead the toolbar, so every Vue kit draws Filters, Saved views, Columns, Density, Export, Find, Fullscreen, Print and Undo/Redo in that order. Core names `UndoRedoToolbarProps`, and `adapttable migrate-v4` reports the removed Vue names.
+
+### Patch Changes
+
+- Updated dependencies [e0ed9dd]
+- Updated dependencies [ee0f202]
+- Updated dependencies [536aa89]
+- Updated dependencies [9c18ce9]
+- Updated dependencies [cdbba81]
+- Updated dependencies [cb9f9db]
+- Updated dependencies [da4baa0]
+- Updated dependencies [bee0c9f]
+- Updated dependencies [636d0ad]
+- Updated dependencies [8af4736]
+- Updated dependencies [633e23c]
+- Updated dependencies [ed8a86d]
+- Updated dependencies [a96cfee]
+- Updated dependencies [31e5510]
+- Updated dependencies [fbc52e8]
+- Updated dependencies [4effc96]
+- Updated dependencies [eb084d0]
+- Updated dependencies [5b7bc3c]
+- Updated dependencies [3c15620]
+- Updated dependencies [97ca02e]
+- Updated dependencies [d174bb1]
+- Updated dependencies [3b2a5bd]
+- Updated dependencies [9382e94]
+- Updated dependencies [054986e]
+  - @adapttable/vue@0.8.0
+
 ## 0.4.0
 
 ### Minor Changes

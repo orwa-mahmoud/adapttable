@@ -1,5 +1,52 @@
 # @adapttable/ng-bootstrap
 
+## 0.6.0
+
+### Minor Changes
+
+- 7dbd509: Angular kits ship the feature families: `editingFamily(save)` from `/editing`, `filteringFamily(defs)` from `/filtering` and `columnLayoutFamily()` from `/column-layout`, each passed to `features` as one entry and each on its own entry, so a member imported alone still loads alone. The kit preset is `standardFeatures` with `StandardFeatureOptions`, the same members and options as the React and Vue kits: columns menu, resizing, fitting, density, CSV export, keyboard Find (`findButton: true` adds its toolbar control), fullscreen, multi-sort, header filters and status bar. `standardPreset` and `StandardPresetOptions` are removed.
+- 35abf7a: Angular toolbar controls read the state their feature publishes. `injectDensityToolbar`, `injectFullscreenToolbar`, `injectExportToolbar`, `injectPrintToolbar` and `injectUndoRedoToolbar` return the control's state as a signal, and every toolbar entry receives `ToolbarEntrySlotProps` (labels and class map) in place of core's `ToolbarExtrasSlotProps`. Saved views and the Columns menu are toolbar entries (`SAVED_VIEWS_ENTRY`, `COLUMN_MENU_ENTRY` on the new `@adapttable/angular/toolbar` entry) that each kit adds beside its menu, so every kit's template draws one toolbar outlet fed `toolbarEntry`, and the table view no longer carries `toolbarExtras`, `savedViews`, `columnMenu` or `columnMenuProps`. Inside a slot component, `[adaptSlot]` draws in that component's table when `[adaptSlotTable]` is left out. `adapttable migrate-v4` reports the removed names.
+- bee0c9f: `@adapttable/core/binding` no longer re-exports a value that `@adapttable/core` already exports and that the binding entry's own signatures do not name. Import `visibleColumns`, `filterLabel`, `aggregate`, `declaredAggregates`, `computedAggregateKeys`, `autoSizeColumns`, `cellValue`, `conditionToExtra`, `sourceCapabilities`, `treeColumnKey`, `approvalArgumentPairs` and `approvalValueText` from `@adapttable/core`. `adapttable migrate-v4` moves those imports.
+  
+  `applyTableFeatures` is only on `@adapttable/react/features`. `useTableFeatures` is only on `@adapttable/react/adapter`. `adapttable migrate-v4` moves an import that still uses the other entry.
+  
+  A kit no longer publishes a `/features` barrel. Import each factory from its own subpath. A React kit's `/features` only forwarded `@adapttable/react/features`, so those imports move there. `adapttable migrate-v4` rewrites both.
+  
+  A table takes `data` or a `source` and infers no tier from its other props. A server table builds its source with `useServerData` (React, Vue) or `injectServerData` (Angular) and passes it as `source`; the table props `mode`, `onQueryChange`, `total`, `aggregates`, `responseKey`, `supports`, `facetKeys` and `facets`, and React's `DataModeProps`, are gone. `onViewChange` tells a table over `data` what the reader changed. `serverFilterKeys({ columns, filters })` gives a server source the filter keys its first request needs. A table over `data` no longer ships the server tier: the Unstyled table loads 1.8 KiB less up front and 5.9 KiB less in total in each framework. `adapttable migrate-v4` reports every table that passes the removed props.
+  
+  Filter placement, column rename, and cell cut, paste and fill are options of `filters()`, `headerFilters()`, `columnMenu()` and `cellNavigation()`. A table prop no longer sets them. `isCellFlashing` stays on the table: it marks cells the base already draws. Vue's `DataTable` no longer accepts `onCellCut`, `onCellPaste`, `onCellFill` or `onColumnRename`.
+
+### Patch Changes
+
+- 1ea5a0b: The Angular table view builds a feature's state only while that feature is composed: `commandPalette` and `contextMenu` are `undefined` unless their feature is composed, and `rowMutations` is `undefined` unless row actions wire an add, duplicate or delete handler. The palette's and the menu's props are built by code their features bring (`withCommandPaletteView` and `withContextMenuView` on `@adapttable/angular/adapter`, which every kit's `commandPalette()` and `contextMenu()` apply), so a plain table neither ships nor runs it, and every kit's template draws those regions behind the same check.
+- Updated dependencies [b94b20c]
+- Updated dependencies [bc19944]
+- Updated dependencies [7dbd509]
+- Updated dependencies [06e676e]
+- Updated dependencies [72b4cde]
+- Updated dependencies [35abf7a]
+- Updated dependencies [1ea5a0b]
+- Updated dependencies [35a1ec0]
+- Updated dependencies [ee0f202]
+- Updated dependencies [536aa89]
+- Updated dependencies [cb9f9db]
+- Updated dependencies [da4baa0]
+- Updated dependencies [bee0c9f]
+- Updated dependencies [636d0ad]
+- Updated dependencies [8af4736]
+- Updated dependencies [633e23c]
+- Updated dependencies [ed8a86d]
+- Updated dependencies [a96cfee]
+- Updated dependencies [31e5510]
+- Updated dependencies [fbc52e8]
+- Updated dependencies [ffd1a07]
+- Updated dependencies [4effc96]
+- Updated dependencies [eb084d0]
+- Updated dependencies [5b7bc3c]
+- Updated dependencies [b36d160]
+- Updated dependencies [3b2a5bd]
+  - @adapttable/angular@0.12.0
+
 ## 0.5.0
 
 ### Minor Changes

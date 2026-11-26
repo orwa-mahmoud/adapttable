@@ -1,5 +1,60 @@
 # @adapttable/ai
 
+## 0.8.0
+
+### Minor Changes
+
+- 923b252: A table agent loads the WebMCP registrar only when it sets `webmcp`. The controller is also on the new `@adapttable/ai/agent` entry, which the React, Vue and Angular bindings now use, so `tableAgent` starts 0.54–0.58 KiB smaller in each framework and the registrar arrives as a 1.1 KiB chunk the first time a table offers itself to a page agent.
+
+### Patch Changes
+
+- d1f33b7: The HTTP transport keeps each connection's state apart and bounds every reply. A backend's session handle stays with the connection that was issued it, so two connections to one table each send their own and resetting one leaves the other intact. A timeout or cancel now also covers header resolution, a streamed reply holds one abort listener instead of one per chunk, and the upstream body is cancelled after the terminal event. JSON replies are refused at 512,000 bytes while reading, or before reading when their length says so, and a failed reply reads only the first 4 KB it shows as its diagnostic.
+- 501fb5c: The agent never reads a column it is not allowed to read. Column discovery applies each column's permission and declared type before sampling a value, so a column marked unreadable is never invoked and a typed one needs no sample. Row reads prepare the requested columns once per read: 50 rows × 100 of 300 columns go from 2.2 ms to 1.6 ms with identical output.
+- 8af4736: A feature's `setup(host)` only registers; what outlives a render goes in its `mount(context)`, which returns what releases it. Every binding keeps a mounted feature by id: declaring it again with new options, inline included, keeps the resource and hands `context.feature()` the new declaration, and only removing the feature, changing its `dependencies` or unmounting the table releases it, exactly once. A render the framework discards acquires nothing, and a failed mount rolls back what its pass acquired. React publishes the table runtime and its feature ids in layout effects, so AI and event callbacks read the last committed table; `PublishTableRuntime` is the chrome's publisher. `createFeatureMounts` and `composeMounts` on `@adapttable/core/binding` are the shared lifecycle. A `setup` that returns a cleanup is refused, and `onDispose` is no longer on the feature host. Vue's and Angular's table agent follows its latest declaration's options. `adapttable migrate-v4` reports `onDispose` calls.
+- Updated dependencies [35abf7a]
+- Updated dependencies [1bf65dd]
+- Updated dependencies [ee0f202]
+- Updated dependencies [225b501]
+- Updated dependencies [7e27f45]
+- Updated dependencies [536aa89]
+- Updated dependencies [20c19a9]
+- Updated dependencies [04d741f]
+- Updated dependencies [9c18ce9]
+- Updated dependencies [29dba96]
+- Updated dependencies [cdbba81]
+- Updated dependencies [bf57e9b]
+- Updated dependencies [7e9d071]
+- Updated dependencies [069735e]
+- Updated dependencies [f6d17be]
+- Updated dependencies [08be47a]
+- Updated dependencies [1ee8c87]
+- Updated dependencies [a4464a0]
+- Updated dependencies [cb9f9db]
+- Updated dependencies [43cf65e]
+- Updated dependencies [69c475a]
+- Updated dependencies [da4baa0]
+- Updated dependencies [bee0c9f]
+- Updated dependencies [636d0ad]
+- Updated dependencies [8af4736]
+- Updated dependencies [bb9ee7a]
+- Updated dependencies [633e23c]
+- Updated dependencies [d2beb5a]
+- Updated dependencies [a96cfee]
+- Updated dependencies [fbc52e8]
+- Updated dependencies [ad4c90a]
+- Updated dependencies [3ecb133]
+- Updated dependencies [5a791f2]
+- Updated dependencies [3c0ae19]
+- Updated dependencies [6612d37]
+- Updated dependencies [48cea86]
+- Updated dependencies [4effc96]
+- Updated dependencies [eb084d0]
+- Updated dependencies [5b7bc3c]
+- Updated dependencies [b36d160]
+- Updated dependencies [3b2a5bd]
+- Updated dependencies [c807131]
+  - @adapttable/core@4.0.0
+
 ## 0.7.2
 
 ### Patch Changes
