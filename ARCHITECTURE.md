@@ -244,13 +244,9 @@ revision.
 `packages/react/react/src/features/tableFeature.ts`:
 
 ```ts
-/** Neutral plugin: id, operators, cleanup. No React configuration bags. */
+/** Neutral plugin identity. */
 export interface FeatureRegistration<TRow = unknown> {
   readonly id: string;
-}
-
-export interface NeutralFeatureHost<TRow = unknown> {
-  onDispose(cleanup: () => void): void;
 }
 
 /** React feature: configuration, registrations, providers and slot renders. */
@@ -259,7 +255,8 @@ export interface TableFeature<
 > extends FeatureRegistration<TRow> {
   readonly id: string;
   apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
-  setup?(host: TableFeatureHost<TRow>): void | (() => void);
+  setup?(host: TableFeatureHost<TRow>): void;
+  mount?(context: TableFeatureMountContext<TRow>): void | (() => void);
   readonly provider?: FeatureProviderContribution;
   readonly renders?: readonly FeatureRender<never>[];
 }
@@ -267,7 +264,8 @@ export interface TableFeature<
 
 `TableFeatureHost` is where custom filter types, editors, aggregators, export
 writers, column-menu actions, side panels, commands and context-menu items
-register, and `setup` returns its cleanup or hands it to `host.onDispose`.
+register during `setup`. A feature acquires resources in `mount` and returns
+its cleanup from that callback.
 A feature whose behavior is a hook contributes a `provider` — mounting it is
 how hooks join the tree, and not importing it keeps them out of the graph.
 Slot and `data-adapttable-part` names are part of the public contract. A React

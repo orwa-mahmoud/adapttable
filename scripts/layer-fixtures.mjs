@@ -114,7 +114,8 @@ const everything: TableFeature<Row> = {
     host.registerCommand(command);
     host.registerContextMenuItems(() => [extraItem]);
     host.extendFilterType("text", { defaultOp: "contains" });
-    host.onDispose(() => {});
+  },
+  mount() {
     return () => {};
   },
 };

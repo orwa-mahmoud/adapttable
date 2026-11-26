@@ -98,7 +98,11 @@ const contextName = (
 const typedFeature: assistantContract.StaticTableFeature = {
   id: "typed-assistant-consumer",
   setup: (host: assistantContract.StaticFeatureHost) =>
-    host.onDispose(() => undefined),
+    host.registerCommand({
+      key: "assistant:inspect",
+      label: "Inspect table",
+      onSelect: () => undefined,
+    }),
   mount: <TRow,>(context: assistantContract.FeatureMountContext<TRow>) => {
     const row: TRow | undefined = context.runtime.rowAt(0);
     return () => row;
