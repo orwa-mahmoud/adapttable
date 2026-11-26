@@ -16,7 +16,8 @@ import type { CellRange } from "../focus/cellRange";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { GetCellSpan } from "../rows/cellSpan";
 import type { TreeEntry, TreeShape } from "../tree/treeRows";
-import type { ExportPayload, ExportWriter } from "./exportWriter";
+import type { ExportWriterOption } from "./deferredWriter";
+import type { ExportPayload } from "./exportWriter";
 
 /**
  * Which rows an export covers.
@@ -122,14 +123,15 @@ export interface ExportCsvOptions<TRow = unknown> {
     controls: ExportAllControls
   ) => ExportAllResult | Promise<ExportAllResult>;
   /**
-   * The file format. Defaults to CSV; `@adapttable/core/xlsx` exports
-   * {@link ExportWriter | a spreadsheet writer}, and any function of the
-   * resolved rows and columns is a valid one.
+   * The file format. Defaults to CSV; `@adapttable/core/xlsx` exports a
+   * spreadsheet writer, and any function of the resolved rows and columns is
+   * a valid one. A {@link ExportWriterOption | writer that loads on demand}
+   * makes the export wait for its builder.
    *
    * The scope options above are unaffected by this — which rows and columns
    * leave the table is decided before a writer sees them.
    */
-  writer?: ExportWriter;
+  writer?: ExportWriterOption;
   /**
    * Hand the export to your backend instead of building the file in the
    * browser.

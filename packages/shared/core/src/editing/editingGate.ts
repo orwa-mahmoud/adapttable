@@ -7,10 +7,13 @@
  * Every binding draws these with its own components; the answers are the same
  * in all of them, so they live here once.
  */
+import { BASE_LABELS } from "../labelGroups/baseLabels";
+import { EDITING_LABELS } from "../labelGroups/editingLabels";
 import type { RowAction, TableLabels } from "../types";
 import type { BatchEditingState } from "./batchEditing";
 import {
   type CellEditor,
+  type CellEditorOption,
   type CustomCellEditorConflict,
   isCustomEditor,
   normalizeEditorOptions,
@@ -338,9 +341,7 @@ export function editorBusyProps(ctrl: EditorAriaState): {
  *
  * @public
  */
-export function editorSelectOptions(
-  editor: CellEditor
-): ReturnType<typeof normalizeEditorOptions> {
+export function editorSelectOptions(editor: CellEditor): CellEditorOption[] {
   if (
     typeof editor === "object" &&
     (editor.type === "select" || editor.type === "multi-select")
@@ -627,9 +628,9 @@ export function rowEditControls<TRow>({
     },
     save: rowEditing.save,
     cancel: rowEditing.cancel,
-    editLabel: labels?.editRow ?? "Edit row",
-    saveLabel: labels?.saveRow ?? "Save row",
-    cancelLabel: labels?.cancel ?? "Cancel",
+    editLabel: labels?.editRow ?? BASE_LABELS.editRow,
+    saveLabel: labels?.saveRow ?? BASE_LABELS.saveRow,
+    cancelLabel: labels?.cancel ?? BASE_LABELS.cancel,
     dirty: rowEditing.isDirty,
   };
 }
@@ -674,15 +675,6 @@ export function rowEditActionsLayout(
 /* ── The batch bar ─────────────────────────────────────────────────── */
 
 /**
- * "3 unsaved rows" — replaceable through `labels.pendingRows`.
- *
- * @public
- */
-export function defaultPendingRows(count: number): string {
-  return count === 1 ? "1 unsaved row" : `${String(count)} unsaved rows`;
-}
-
-/**
  * What the bar that ends a batch shows.
  *
  * @public
@@ -715,13 +707,13 @@ export function batchEditBarModel<TRow>(
 ): BatchEditBarModel | null {
   if (!batch.pending) return null;
   return {
-    count: (labels?.pendingRows ?? defaultPendingRows)(batch.count),
+    count: (labels?.pendingRows ?? EDITING_LABELS.pendingRows)(batch.count),
     conflictMessage:
       contested === true
-        ? (labels?.editConflict ?? "This row changed while you were editing")
+        ? (labels?.editConflict ?? EDITING_LABELS.editConflict)
         : undefined,
-    saveLabel: labels?.saveAll ?? "Save all",
-    cancelLabel: labels?.cancelAll ?? "Cancel all",
+    saveLabel: labels?.saveAll ?? EDITING_LABELS.saveAll,
+    cancelLabel: labels?.cancelAll ?? EDITING_LABELS.cancelAll,
   };
 }
 
@@ -747,7 +739,7 @@ export interface EditorDraftControl {
   /** The editor shape the column declared. */
   editor: CellEditor;
   /** Choices for a select editor, empty for other shapes. */
-  selectOptions: ReturnType<typeof editorSelectOptions>;
+  selectOptions: CellEditorOption[];
   /** A validator's message for this cell, when the last save was refused. */
   error?: string;
   /** Whether a validator is still deciding. */

@@ -4,7 +4,15 @@
  * A newer check of the same cell supersedes an older one. A late answer is
  * ignored, so it cannot replace the message or the draft the cell holds now.
  */
+import { rekeyIdMap, type RowRekeyMoves } from "../state/rowRekeys";
 import type { TableStore } from "../state/tableStore";
+import {
+  cellIdentity,
+  cellIdentityParts,
+  cellKeysByRow,
+  rekeyCellMap,
+  rekeyCellSet,
+} from "./cellIdentity";
 import type {
   CellValidator,
   RowValidator,
@@ -85,6 +93,11 @@ export interface EditValidationStore<TRow> {
   readonly clearAll: () => void;
   /** Whether a row-level validator is declared. */
   readonly hasRowValidator: () => boolean;
+  /**
+   * Move each rekeyed row's errors to its new id. A check still running for
+   * such a row is dropped; its caller sees it as not allowed.
+   */
+  readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
 }
 
 /**
@@ -93,7 +106,7 @@ export interface EditValidationStore<TRow> {
  * @public
  */
 export function validationKey(rowId: string, columnKey: string): string {
-  return `${rowId}\u0000${columnKey}`;
+  return cellIdentity(rowId, columnKey);
 }
 
 /**
@@ -118,12 +131,10 @@ export function rowHasValidationError(
   snapshot: EditValidationSnapshot,
   rowId: string
 ): boolean {
-  if (snapshot.rowErrors.has(rowId)) return true;
-  const prefix = `${rowId}\u0000`;
-  for (const key of snapshot.cellErrors.keys()) {
-    if (key.startsWith(prefix)) return true;
-  }
-  return false;
+  return (
+    snapshot.rowErrors.has(rowId) ||
+    cellKeysByRow(snapshot.cellErrors).has(rowId)
+  );
 }
 
 /**
@@ -132,13 +143,9 @@ export function rowHasValidationError(
  * @public
  */
 export function validationSignature(snapshot: EditValidationSnapshot): string {
-  return [
-    ...snapshot.cellErrors.entries(),
-    ...snapshot.rowErrors.entries(),
-    ...snapshot.validating,
-  ]
-    .flat()
-    .join("\u0001");
+  const { cellErrors, rowErrors, validating } = snapshot;
+  if (cellErrors.size + rowErrors.size + validating.size === 0) return "";
+  return JSON.stringify([[...cellErrors], [...rowErrors], [...validating]]);
 }
 
 function shallowApplyEdit<TRow>(
@@ -312,6 +319,46 @@ export function createEditValidationStore<TRow>(
         validating: new Set(),
       });
     },
+    rekey(moves) {
+      const { ids } = moves;
+      const snapshot = state.get();
+      const cellErrors = rekeyCellMap(snapshot.cellErrors, ids);
+      const rowErrors = rekeyIdMap(snapshot.rowErrors, ids);
+      const movedChecks = [...tokens.keys()].filter((key) =>
+        ids.has(cellIdentityParts(key)[0])
+      );
+      if (
+        cellErrors === snapshot.cellErrors &&
+        rowErrors === snapshot.rowErrors &&
+        movedChecks.length === 0
+      )
+        return;
+      for (const key of movedChecks) tokens.delete(key);
+      const validating = new Set(snapshot.validating);
+      for (const key of movedChecks) validating.delete(key);
+      replaceAll(cellMessages, rekeyCellMap(cellMessages, ids));
+      replaceAll(rowFieldMessages, rekeyCellMap(rowFieldMessages, ids));
+      const fields = [...rowFields].map(
+        ([rowId, keys]): [string, Set<string>] => [
+          ids.get(rowId) ?? rowId,
+          new Set(rekeyCellSet(keys, ids)),
+        ]
+      );
+      rowFields.clear();
+      for (const [rowId, keys] of fields) rowFields.set(rowId, keys);
+      state.set({ ...snapshot, cellErrors, rowErrors, validating });
+    },
     hasRowValidator: () => current.validateRow !== undefined,
   };
+}
+
+/** Refill a map with another's entries. */
+function replaceAll<T>(
+  target: Map<string, T>,
+  source: ReadonlyMap<string, T>
+): void {
+  if (source === target) return;
+  const entries = [...source];
+  target.clear();
+  for (const [key, value] of entries) target.set(key, value);
 }

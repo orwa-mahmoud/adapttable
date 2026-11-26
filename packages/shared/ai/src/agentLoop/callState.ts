@@ -83,7 +83,7 @@ export function traceApply(
         const ticket = ledger?.submit(property, args);
         if (ticket) return ticket.completion;
         if (ledger)
-          return ledger.trackLegacy(
+          return ledger.trackHostCall(
             () => Reflect.apply(call, target, args),
             settled
           );

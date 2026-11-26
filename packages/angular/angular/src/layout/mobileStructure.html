@@ -90,7 +90,7 @@
               <ng-container
                 [ngTemplateOutlet]="kit.checkbox"
                 [ngTemplateOutletContext]="{
-                  attrs: selection.rowCheckboxAttrs(rowId(entry.row)),
+                  attrs: selection.rowCheckboxAttrs(selectionRowId(entry.row)),
                   label: v.table.labels().selectRow,
                   className: classes.checkbox,
                   rowId: rowId(entry.row),

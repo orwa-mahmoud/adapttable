@@ -37,6 +37,7 @@ not insert stylesheet elements at runtime.
 <script setup lang="ts">
 import { shallowRef } from "vue";
 import { DataTable, type ColumnDef } from "@adapttable/vue-unstyled";
+import { selection } from "@adapttable/vue-unstyled/selection";
 
 interface Person {
   id: string;
@@ -47,6 +48,9 @@ const rows = shallowRef<readonly Person[]>([
   { id: "ada", name: "Ada", score: 10 },
 ]);
 const selectedIds = shallowRef<string[]>([]);
+function changeSelection(ids: string[]) {
+  selectedIds.value = ids;
+}
 const columns: ColumnDef<Person>[] = [
   { key: "name", sortable: true },
   { key: "score", sortable: true },
@@ -55,12 +59,12 @@ const rowKey = (person: Person) => person.id;
 </script>
 <template>
   <DataTable
-    v-model:selected-ids="selectedIds"
     :data="rows"
     :columns="columns"
     :row-key="rowKey"
     :url-sync="false"
     table-label="People"
+    :features="[selection({ selectedIds, onSelectionChange: changeSelection })]"
   />
 </template>
 ```
@@ -112,9 +116,8 @@ A template ref exposes `DataTableHandle<Person>` with `focus()`, `runtime` and
 Feature composition adds the optional behaviors below to the native global
 search box, sorting, pagination, row selection and responsive mobile cards.
 Controlled column management exposes order, visibility, width and pin state.
-Import factories from their named entries, or collect them from
-`@adapttable/vue-unstyled/features`. The base entry does not import the feature
-barrel. Models, validation, data coordination and persistence stay in the Vue
+Import each factory from its own entry. The base entry does not import a
+feature. Models, validation, data coordination and persistence stay in the Vue
 binding and shared core; these contributions provide native controls.
 
 - `/filters`: `filters(defs, { mode: "popover" | "drawer", tree: true })`,
@@ -172,7 +175,7 @@ binding and shared core; these contributions provide native controls.
   panel state remain host-owned.
 - `/export` and `/print`: CSV export with loaded, selected, range or
   host-provided all-row scopes, optional server progress/cancellation, and a host
-  print callback. `/export-csv` remains a deprecated compatibility path.
+  print callback.
   `/export-pdf` and `/export-xlsx` provide `exportPdf` and `exportXlsx` with
   the same native controls and lifetime. Their `pdfWriter` and `xlsxWriter`
   helpers remain available for `exportCsv({ writer })`. See
@@ -256,8 +259,8 @@ columns, density, CSV export, Find, fit columns, fullscreen, header filters,
 multi-sort, resize handles and status controls. Add typed `grouping`,
 `bulkActions`, `filters` or `savedViews` options only when you need them.
 
-CSV is available from `@adapttable/vue-unstyled/export`; `/export-csv` remains
-compatible. `exportPdf` and `exportXlsx` live in the separate `/export-pdf` and
+CSV is available from `@adapttable/vue-unstyled/export`. `exportPdf` and
+`exportXlsx` live in the separate `/export-pdf` and
 `/export-xlsx` entries alongside their writer helpers. All accept `false` to
 disable export. Append either factory after `standardFeatures()` to replace
 its CSV control with that format. Import individual entries to keep unused

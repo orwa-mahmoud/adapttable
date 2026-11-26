@@ -364,7 +364,7 @@
                     [ngTemplateOutletInjector]="slotInjector()"
                     [ngTemplateOutlet]="kit.checkbox"
                     [ngTemplateOutletContext]="{
-                      attrs: selection.rowCheckboxAttrs(rowId(entry.row)),
+                      attrs: selection.rowCheckboxAttrs(selectionRowId(entry.row)),
                       label: v.table.labels().selectRow,
                       header: false,
                       rowId: rowId(entry.row),

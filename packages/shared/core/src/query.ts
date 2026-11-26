@@ -58,6 +58,7 @@ export {
   isActiveFilterTree,
   isFilterTreeConditionSet,
   parseFilterTree,
+  parseStrictFilterTree,
   serializeFilterTree,
   settledFilterTree,
 } from "./filters/filterTreeCodec";
@@ -188,6 +189,10 @@ export type {
   TableSnapshot,
 } from "./engine/createTableEngine";
 export type {
+  DeferredExportWriter,
+  ExportWriterOption,
+} from "./export/deferredWriter";
+export type {
   ExportPayload,
   ExportRowMeta,
   ExportRowRole,
@@ -230,6 +235,10 @@ export type {
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "./grouping/groupingPanelModel";
+export type {
+  GroupingPanelSource,
+  GroupingPanelStateInput,
+} from "./grouping/groupingPanelState";
 export type { GroupAggregateOps } from "./grouping/groupRowLayout";
 export type {
   GroupAggregatesFn,
@@ -237,10 +246,6 @@ export type {
   GroupPaging,
   GroupSort,
 } from "./grouping/groupRows";
-export type {
-  GroupingPanelSource,
-  GroupingPanelStateInput,
-} from "./layout/tableChromeState";
 export type { IncrementalViewConfig } from "./rows/incremental";
 export type {
   ExportScopeCapability,

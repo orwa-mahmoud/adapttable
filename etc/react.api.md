@@ -39,7 +39,6 @@ import { ChecklistFilterState } from '@adapttable/core/binding';
 import { ChecklistValue } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
 import { collectChecklistValues } from '@adapttable/core';
-import { ColorScheme } from '@adapttable/core';
 import { ColumnDragRowAttrs } from '@adapttable/core';
 import { ColumnFilter } from '@adapttable/core';
 import { ColumnGroupDef } from '@adapttable/core';
@@ -56,9 +55,9 @@ import { ConfirmHandler } from '@adapttable/core';
 import { Context } from 'react';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { createHistoryAdapter } from '@adapttable/core';
 import { createMemoryAdapter } from '@adapttable/core';
-import { CreateTableEngineOptions } from '@adapttable/core';
 import { CSSProperties } from 'react';
 import { CustomCellEditorRender } from '@adapttable/core';
 import { datasetIndex } from '@adapttable/core';
@@ -103,8 +102,10 @@ import { FacetMap } from '@adapttable/core';
 import { FailedCellSave } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
+import { FeatureListEntry } from '@adapttable/core/binding';
 import { FeatureNotice } from '@adapttable/core';
 import { FeatureNoticeKind } from '@adapttable/core';
+import { FeatureOwnedOptionKey } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
@@ -116,22 +117,16 @@ import { FilterOption } from '@adapttable/core';
 import { filterTreeChipLabel } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
-import { FilterValue } from '@adapttable/core';
 import { FIND_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { FindInTableState } from '@adapttable/core/binding';
 import { FrontendEngineFactory } from '@adapttable/core';
 import { GetCellSpan } from '@adapttable/core';
 import { getHistoryAdapter } from '@adapttable/core';
 import { GRID_CELL_ATTR } from '@adapttable/core';
-import { GridCell } from '@adapttable/core';
 import { gridCellAttr } from '@adapttable/core';
 import { GridFocusControllerOptions } from '@adapttable/core';
 import { GridFocusState } from '@adapttable/core/binding';
-import { GroupAggregatesFn } from '@adapttable/core';
-import { GroupByInput } from '@adapttable/core';
 import { GroupCollapseState } from '@adapttable/core/binding';
-import { GroupedFlatEntry } from '@adapttable/core';
-import { GroupingPanelState } from '@adapttable/core';
 import { GroupPagingState } from '@adapttable/core/binding';
 import { headerFilterFieldIsComplete } from '@adapttable/core';
 import { HeaderFilterOpenHost } from '@adapttable/core';
@@ -182,7 +177,6 @@ import { ReactNode } from 'react';
 import { ReconcileLiveBatchEdit } from '@adapttable/core';
 import { ReconcileLiveEdit } from '@adapttable/core';
 import { ReconcileLiveRowEdit } from '@adapttable/core';
-import { RefCallback } from 'react';
 import { RefObject } from 'react';
 import { RowAction } from '@adapttable/core';
 import { RowEditDrafts } from '@adapttable/core';
@@ -213,6 +207,9 @@ import { SavedViewVisibility } from '@adapttable/core';
 import { scalarFilterText } from '@adapttable/core';
 import { SearchInputState } from '@adapttable/core/binding';
 import { SelectionState } from '@adapttable/core/binding';
+import { ServerFilterKeys } from '@adapttable/core';
+import { serverFilterKeys } from '@adapttable/core';
+import { ServerFilterKeysInput } from '@adapttable/core';
 import { HEADER_FILTER_SESSION_ATTR as SESSION_ATTR } from '@adapttable/core';
 import { Shortcut } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
@@ -220,7 +217,6 @@ import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
 import { SummaryRowFn as SummaryRowFn_2 } from '@adapttable/core';
 import { TableDensity } from '@adapttable/core';
-import { TableEngine } from '@adapttable/core';
 import { TableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableOptions } from '@adapttable/core';
@@ -232,9 +228,7 @@ import { TableToolbarSlots } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
 import { TextFieldWidget } from '@adapttable/core';
 import { TextOp } from '@adapttable/core';
-import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
-import { TreeShape } from '@adapttable/core';
 import { UNPIN_ROW_ACTION_KEY } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
@@ -266,9 +260,9 @@ export { asBatchGesture }
 export { asGesture }
 
 // @public
-export interface BaseDataTableProps<TRow> extends TableOptions<TRow, ReactNode> {
+export interface BaseDataTableProps<TRow> extends Omit<TableOptions<TRow, ReactNode>, FeatureOwnedOptionKey> {
     columns: ColumnInput<TRow>[];
-    features?: readonly TableFeature<NoInfer<TRow>>[];
+    features?: readonly FeatureListEntry<TableFeature<NoInfer<TRow>>>[];
     renderCard?: ReactMobileCardRenderer<TRow>;
 }
 
@@ -337,24 +331,6 @@ export { ChecklistValue }
 
 export { ChipLabelResolver }
 
-// @public @deprecated
-export type ChromeBodyData<TRow> = ChromeBodyData_2<TRow>;
-
-// @public
-interface ChromeBodyData_2<TRow> {
-    canLoadMore: boolean;
-    columnWindow?: ColumnWindow_2<TRow>;
-    groupingEntries?: readonly GroupedFlatEntry<TRow>[];
-    loadMoreRef: RefObject<HTMLDivElement | null>;
-    pinnedBottomRows: readonly TRow[];
-    pinnedSummaryBottom: readonly TRow[];
-    pinnedSummaryTop: readonly TRow[];
-    pinnedTopRows: readonly TRow[];
-    treeEntries?: readonly TreeEntry<TRow>[];
-    virtualization: TableVirtualization<TRow>;
-    virtualScrollRef: RefCallback<HTMLElement>;
-}
-
 export { collectChecklistValues }
 
 // @public
@@ -371,35 +347,6 @@ export interface ColumnDef<TRow> extends ColumnMetadata<TRow> {
 }
 
 export { ColumnDragRowAttrs }
-
-// @public @deprecated
-export type ColumnDragState = ColumnDragState_2;
-
-// @public
-interface ColumnDragState_2 {
-    draggingKey: string | null;
-    dropProps: (index: number, move: (key: string, toIndex: number) => void) => ColumnDropProps_2;
-    overIndex: number | null;
-    rowAttrs: (key: string, index: number) => ColumnDragRowAttrs;
-    rowDragProps: (key: string, index: number) => ColumnRowDragProps_2 & {
-        onDragEnd: () => void;
-    };
-}
-
-// @public @deprecated
-export type ColumnDropProps = ColumnDropProps_2;
-
-// @public @deprecated
-export const columnDropProps: typeof columnDropProps_2;
-
-// @public
-interface ColumnDropProps_2 {
-    onDragOver: (event: DragEvent_2<HTMLElement>) => void;
-    onDrop: (event: DragEvent_2<HTMLElement>) => void;
-}
-
-// @public
-function columnDropProps_2(index: number, move: (key: string, toIndex: number) => void): ColumnDropProps_2;
 
 // @public
 export interface ColumnFooterContext<TRow> {
@@ -423,72 +370,10 @@ export interface ColumnHeaderController {
     }) => void;
 }
 
-// @public @deprecated
-export const columnHeaderController: typeof columnHeaderController_2;
-
-// @public
-function columnHeaderController_2<TRow>(column: ColumnDef<TRow>, extras?: {
-    sortDir?: "asc" | "desc";
-    sortIndex?: number;
-    toggleSort?: (event?: {
-        shiftKey?: boolean;
-    }) => void;
-}): ColumnHeaderController;
-
 // @public
 export type ColumnInput<TRow> = ColumnDef<TRow> | ReactColumnGroupDef<TRow>;
 
 export { ColumnLayoutState }
-
-// @public @deprecated
-export type ColumnReorderKeyProps = ColumnReorderKeyProps_2;
-
-// @public @deprecated
-export const columnReorderKeyProps: typeof columnReorderKeyProps_2;
-
-// @public
-interface ColumnReorderKeyProps_2 {
-    "aria-label": string;
-    "data-adapttable-grip": "";
-    onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
-    role: "button";
-    tabIndex: 0;
-}
-
-// @public
-function columnReorderKeyProps_2(key: string, index: number, move: (key: string, toIndex: number) => void, label: string): ColumnReorderKeyProps_2;
-
-// @public @deprecated
-export type ColumnRowDragProps = ColumnRowDragProps_2;
-
-// @public @deprecated
-export const columnRowDragProps: typeof columnRowDragProps_2;
-
-// @public
-interface ColumnRowDragProps_2 {
-    draggable: true;
-    onDragStart: (event: DragEvent_2<HTMLElement>) => void;
-}
-
-// @public
-function columnRowDragProps_2(key: string): ColumnRowDragProps_2;
-
-// @public @deprecated
-export const columnsHaveFooter: typeof columnsHaveFooter_2;
-
-// @public
-function columnsHaveFooter_2<TRow>(columns: readonly ColumnDef<TRow>[]): boolean;
-
-// @public @deprecated
-export type ColumnWindow<TRow> = ColumnWindow_2<TRow>;
-
-// @public
-interface ColumnWindow_2<TRow> {
-    columns: readonly ColumnDef<TRow>[];
-    enabled: boolean;
-    paddingEnd: number;
-    paddingStart: number;
-}
 
 // @public
 export interface CommandPaletteOptions {
@@ -498,12 +383,6 @@ export interface CommandPaletteOptions {
     open?: boolean;
     shortcuts?: readonly Shortcut[];
 }
-
-// @public @deprecated
-export type ComposedTableProps<TRow> = ComposedTableProps_2<TRow>;
-
-// @public
-type ComposedTableProps_2<TRow> = BaseDataTableProps<TRow> & FeatureProps<TRow>;
 
 // @public
 export function computed<TRow extends object, TValue = SortableValue>(spec: ReactComputedColumnSpec<TRow, TValue>): ColumnDef<TRow>;
@@ -654,7 +533,7 @@ export { FeatureNoticeKind }
 export { FeaturePatch }
 
 // @public
-export interface FeatureProps<TRow> {
+export interface FeatureProps<TRow> extends Pick<TableOptions<TRow, ReactNode>, FeatureOwnedOptionKey> {
     batchEditing?: boolean;
     bulkActions?: BulkAction[];
     cellNavigation?: boolean;
@@ -665,6 +544,7 @@ export interface FeatureProps<TRow> {
     confirmDeleteRow?: boolean;
     contextMenu?: boolean | ContextMenuOptions<TRow>;
     defaultExpandedRowIds?: readonly string[];
+    defaultSelectedIds?: readonly string[];
     densityChooser?: boolean;
     dirtyIndicators?: boolean;
     editHistory?: boolean | EditHistoryOptions;
@@ -695,6 +575,7 @@ export interface FeatureProps<TRow> {
     onPinnedRowIdsChange?: (next: RowPinState) => void;
     onPrint?: () => void;
     onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
+    onSelectionChange?: (selectedIds: string[]) => void;
     pinnedRowIds?: RowPinState;
     pinnedRows?: PinnedRows<TRow>;
     printButton?: boolean;
@@ -708,6 +589,8 @@ export interface FeatureProps<TRow> {
     rowPinningArmed?: boolean;
     rowStyle?: RowStyle<TRow>;
     savedViews?: UseSavedViewsOptions;
+    selectedIds?: readonly string[];
+    selectionGetId?: (row: TRow) => string;
     selectionStats?: boolean;
     sidePanel?: SidePanelOptions;
     statusBar?: boolean;
@@ -740,15 +623,6 @@ export { FilterFormSource }
 export { filterOpLabel }
 
 export { filterTreeChipLabel }
-
-// @public @deprecated
-export type FilterTriggerToggle = FilterTriggerToggle_2;
-
-// @public
-interface FilterTriggerToggle_2 {
-    onClick: () => void;
-    onPointerDown: () => void;
-}
 
 export { FIND_URL_WRITE_DEBOUNCE_MS }
 
@@ -791,15 +665,6 @@ export { HeaderSelectionState }
 export { HighlightedCell }
 
 export { HighlightState }
-
-// @public @deprecated
-export type HorizontalOverflow<E extends HTMLElement> = HorizontalOverflow_2<E>;
-
-// @public
-interface HorizontalOverflow_2<E extends HTMLElement> {
-    overflowing: boolean;
-    ref: (node: E | null) => void;
-}
 
 export { InfiniteQueryLike }
 
@@ -844,12 +709,6 @@ export { NestedTableDefaults }
 export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
 
 export { NumberOp }
-
-// @public @deprecated
-export const offersAllMatching: typeof offersAllMatching_2;
-
-// @public
-function offersAllMatching_2(selection: Pick<SelectionState, "acrossPages" | "headerState" | "visibleIds">, total: number): boolean;
 
 export { OverlayDismissOptions }
 
@@ -912,38 +771,11 @@ export interface ReactUseColumnLayoutResult<TRow> extends Omit<UseColumnLayoutRe
     visibleColumns: ColumnDef<TRow>[];
 }
 
-// @public @deprecated
-export const readCellValue: typeof readCellValue_2;
-
-// @public
-function readCellValue_2<TRow>(row: TRow, column: ColumnDef<TRow>): unknown;
-
 export { ReconcileLiveBatchEdit }
 
 export { ReconcileLiveEdit }
 
 export { ReconcileLiveRowEdit }
-
-// @public @deprecated
-export const ReducedMotionScope: typeof ReducedMotionScope_2;
-
-// @public
-function ReducedMotionScope_2(input: {
-    off: boolean;
-    children: ReactNode;
-}): ReactNode;
-
-// @public @deprecated
-export const resolveColumnFooter: typeof resolveColumnFooter_2;
-
-// @public
-function resolveColumnFooter_2<TRow>(column: ColumnDef<TRow>, value: ReactNode): ReactNode;
-
-// @public @deprecated
-export const resolveColumnHeader: typeof resolveColumnHeader_2;
-
-// @public
-function resolveColumnHeader_2<TRow>(column: ColumnDef<TRow>, controller: ColumnHeaderController): ReactNode;
 
 // @public
 export function resolveColumns<TRow>(columns: readonly ColumnDef<TRow>[], locale?: string): ColumnDef<TRow>[];
@@ -953,12 +785,6 @@ export interface ResolvedFilterOptions {
     loading: boolean;
     options: readonly FilterOption[];
 }
-
-// @public @deprecated
-export const resolveNeutralColumnHeaders: typeof resolveNeutralColumnHeaders_2;
-
-// @public
-function resolveNeutralColumnHeaders_2<TRow>(columns: readonly ColumnMetadata<TRow>[]): ColumnMetadata<TRow>[];
 
 export { RowEditDrafts }
 
@@ -1035,6 +861,12 @@ export { SearchInputState }
 
 export { SelectionState }
 
+export { ServerFilterKeys }
+
+export { serverFilterKeys }
+
+export { ServerFilterKeysInput }
+
 export { SESSION_ATTR }
 
 export { Shortcut }
@@ -1072,12 +904,21 @@ export interface SortButtonElementProps extends Props {
 export type StaticFeatureHost = Omit<TableFeatureHost<never>, "registerColumnMenuAction" | "registerContextMenuItems" | "__row">;
 
 // @public
+export interface StaticFeatureMountContext {
+    feature(): StaticTableFeature;
+}
+
+// @public
 export interface StaticTableFeature {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly contrast?: ContrastRules;
+    readonly dependencies?: readonly unknown[];
     readonly id: string;
+    mount?(context: StaticFeatureMountContext): void | (() => void);
     readonly provider?: FeatureProviderContribution;
+    readonly rank?: number;
     readonly renders?: readonly FeatureRender<never>[];
-    setup?(host: StaticFeatureHost): void | (() => void);
+    setup?(host: StaticFeatureHost): void;
 }
 
 // @public
@@ -1088,80 +929,27 @@ export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 
 // @public
 export interface TableChrome<TRow> {
-    activeFilterCount: number;
     allColumns: ColumnDef<TRow>[];
-    autoSizeColumn?: (key: string) => void;
-    autoSizeColumns?: () => void;
     body: TableBodyRegion;
     clearFilters: () => void;
     clearSearchAndFilters: () => void;
     columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
     columnLayout: ReactUseColumnLayoutResult<TRow>;
-    columnLayoutLive?: boolean;
     confirm: ConfirmHandler;
-    detail?: {
-        render: (row: TRow) => ReactNode;
-        expansion: RowExpansionState;
-    };
     droppedColumns: readonly string[];
-    editing?: EditableCellEditing<TRow>;
     editingRows: readonly TRow[];
     emptyVariant: "noData" | "noResults";
     errorState?: TableErrorState;
     featureNotices: readonly FeatureNotice[];
-    filterDefs?: readonly FilterDef<TRow>[];
-    filterRegistry?: FilterTypeRegistry;
     getRowId: (row: TRow) => string;
-    grouping?: {
-        groupBy: readonly string[];
-        collapsed: GroupCollapseState;
-        aggregates?: GroupAggregatesFn<TRow>;
-        entries: readonly GroupedFlatEntry<TRow>[];
-        setGroupBy: (key: GroupByInput) => void;
-        expandAll: () => void;
-        collapseAll: () => void;
-        collapseToDepth: (depth: number) => void;
-        showMore: (entry: {
-            scope: "groups" | "rows";
-            groupKey?: string;
-        }) => void;
-    };
-    groupingArmed: boolean;
-    groupingPanel?: GroupingPanelState;
-    hasRowActions: boolean;
-    hasRowReorder: boolean;
     isMobile: boolean;
     isPaged: boolean;
     isRefreshing: boolean;
-    mergedChips: readonly ActiveFilterChip[];
     pinnedRows?: PinnedRows<TRow>;
     rootRef: RefObject<HTMLDivElement | null>;
-    rowActions?: RowAction<TRow>[];
-    rowMutations: RowMutationsState<TRow>;
-    rowPinning?: RowPinningState<TRow>;
-    rowReorder?: TableRowReorderState<TRow>;
     showFooter: boolean;
     source: TableSource<TRow>;
     table: UseDataTableResult<TRow>;
-    tree?: {
-        entries: readonly TreeEntry<TRow>[];
-        allEntries?: readonly TreeEntry<TRow>[];
-        getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
-        getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
-        expansion: TreeExpansionState;
-        columnKey?: string;
-    };
-    treeShaped: boolean;
-}
-
-// @public @deprecated
-export type TableEditHistoryProps<TRow> = TableEditHistoryProps_2<TRow>;
-
-// @public
-interface TableEditHistoryProps_2<TRow> {
-    columns: readonly ColumnDef<TRow>[];
-    editHistory?: boolean | EditHistoryOptions;
-    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
 }
 
 // @public
@@ -1176,17 +964,18 @@ export { TableErrorState }
 // @public
 export interface TableFeature<TRow = unknown> extends PatchFeature<TRow> {
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+    readonly dependencies?: readonly unknown[];
     readonly id: string;
+    mount?(context: TableFeatureMountContext<TRow>): void | (() => void);
     readonly provider?: FeatureProviderContribution;
     readonly renders?: readonly FeatureRender<never>[];
-    setup?(host: TableFeatureHost<TRow>): void | (() => void);
+    setup?(host: TableFeatureHost<TRow>): void;
 }
 
 // @public
 export interface TableFeatureHost<TRow = unknown> extends NeutralFeatureHost<TRow> {
     readonly __row?: (row: TRow) => void;
     extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
-    onDispose(cleanup: () => void): void;
     registerAggregator(name: string, aggregator: Aggregator): void;
     registerColumnMenuAction(factory: (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuItem | readonly ColumnMenuItem[] | undefined): void;
     registerCommand(command: Command): void;
@@ -1197,7 +986,18 @@ export interface TableFeatureHost<TRow = unknown> extends NeutralFeatureHost<TRo
     registerWriter(writer: ExportWriter): void;
 }
 
+// @public
+export interface TableFeatureMountContext<TRow = unknown> {
+    feature(): TableFeature<TRow>;
+}
+
 export { TableQuery }
+
+// @public
+export type TableQueryHandler = (query: TableQuery, info: {
+    signal: AbortSignal;
+    key: string;
+}) => void | Promise<void>;
 
 // @public
 export type TableRowReorderState<TRow> = RowReorderState<TRow, DragEvent_2<HTMLElement>, KeyboardEvent_2<HTMLElement>>;
@@ -1214,22 +1014,6 @@ export { TreeExpansionState }
 export { UNPIN_ROW_ACTION_KEY }
 
 export { UrlStateAdapter }
-
-// @public @deprecated
-export const useActiveFilterChips: typeof useActiveFilterChips_2;
-
-// @public
-function useActiveFilterChips_2(input: UseActiveFilterChipsOptions_2): ActiveFilterChip[];
-
-// @public @deprecated
-export type UseActiveFilterChipsOptions = UseActiveFilterChipsOptions_2;
-
-// @public
-interface UseActiveFilterChipsOptions_2 {
-    readonly labels: Readonly<Record<string, ChipLabelResolver>>;
-    readonly onChange: (key: string, next: FilterValue) => void;
-    readonly values: Readonly<Record<string, FilterValue>>;
-}
 
 // @public
 export function useBatchEditing<TRow>(options: UseBatchEditingOptions<TRow>): BatchEditingState<TRow>;
@@ -1279,24 +1063,6 @@ export interface UseCellSaveStateOptions<TRow> {
 
 // @public
 export function useChecklistFilter<TRow>(def: FilterDef<TRow>, source: Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "facets">): ChecklistFilterState;
-
-// @public @deprecated
-export const useChromeScrollReset: typeof useChromeScrollReset_2;
-
-// @public
-function useChromeScrollReset_2<TRow>(ref: RefObject<HTMLElement | null>, chrome: TableChrome<TRow>, props: ComposedTableProps_2<TRow>): void;
-
-// @public @deprecated
-export const useColorScheme: typeof useColorScheme_2;
-
-// @public
-function useColorScheme_2(preference?: ColorScheme): "light" | "dark";
-
-// @public @deprecated
-export const useColumnDragState: typeof useColumnDragState_2;
-
-// @public
-function useColumnDragState_2(): ColumnDragState_2;
 
 // @public
 export function useColumnLayout<TRow>(input: UseColumnLayoutOptions<TRow>): ReactUseColumnLayoutResult<TRow>;
@@ -1354,8 +1120,6 @@ export interface UseDataTableOptions<TRow> {
     forceMobile?: boolean;
     labels?: TableLabels;
     locale?: string;
-    // @deprecated
-    mobileIdentityColumns?: number;
     multiSort?: boolean;
     onSelectedIdsChange?: (selectedIds: string[]) => void;
     rowKey: (row: TRow) => string;
@@ -1396,12 +1160,6 @@ export interface UseDataTableResult<TRow> {
     toggleSort: (key: string) => void;
 }
 
-// @public @deprecated
-export const useDebounce: typeof useDebounce_2;
-
-// @public
-function useDebounce_2<T>(value: T, delay?: number): T;
-
 // @public
 export function useDensityUrlState(options?: UseDensityUrlStateOptions): UseDensityUrlStateResult;
 
@@ -1437,22 +1195,6 @@ export interface UseEditHistoryOptions<TRow> {
     onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
 }
 
-// @public @deprecated
-export const useExtraChips: typeof useExtraChips_2;
-
-// @public
-function useExtraChips_2(input: UseExtraChipsOptions_2): ActiveFilterChip[];
-
-// @public @deprecated
-export type UseExtraChipsOptions = UseExtraChipsOptions_2;
-
-// @public
-interface UseExtraChipsOptions_2 {
-    readonly extra: ExtraFilters;
-    readonly labels: Readonly<Record<string, ChipLabelResolver>>;
-    readonly setExtra: (key: string, value: FilterValue) => void;
-}
-
 // @public
 export function useFilterOptions<TRow>(def: Pick<FilterDef<TRow>, "key" | "options">): ResolvedFilterOptions;
 
@@ -1467,18 +1209,6 @@ export interface UseFilterTreeChipsOptions<TRow> {
     readonly setFilterTree?: (tree: QueryFilterGroup | undefined) => void;
     readonly tree: QueryFilterGroup | undefined;
 }
-
-// @public @deprecated
-export const useFilterTriggerToggle: typeof useFilterTriggerToggle_2;
-
-// @public
-function useFilterTriggerToggle_2(open: boolean, setOpen: (next: boolean | ((current: boolean) => boolean)) => void): FilterTriggerToggle_2;
-
-// @public @deprecated
-export const useFindFocus: typeof useFindFocus_2;
-
-// @public
-function useFindFocus_2(current: GridCell | null, focusCell: (cell: GridCell) => void, selectRange: (range: CellRange | null) => void): void;
 
 // @public
 export function useFindInTable<TRow>(options: UseFindInTableOptions<TRow>): FindInTableState;
@@ -1569,12 +1299,6 @@ export function useHeaderFilterOverlay<TRow>(props: {
 // @public
 export function useHighlight(enabled: boolean): HighlightState;
 
-// @public @deprecated
-export const useHorizontalOverflow: typeof useHorizontalOverflow_2;
-
-// @public
-function useHorizontalOverflow_2<E extends HTMLElement>(): HorizontalOverflow_2<E>;
-
 // @public
 export function useInfiniteScroll<TElement extends HTMLElement = HTMLDivElement>(options: UseInfiniteScrollOptions): RefObject<TElement | null>;
 
@@ -1616,12 +1340,6 @@ export type UseLocalTableViewStateOptions = Pick<UseTableUrlStateOptions, "defau
 
 // @public
 export function useMediaQuery(query: string, defaultValue?: boolean): boolean;
-
-// @public @deprecated
-export const usePlainChromeBodyData: typeof usePlainChromeBodyData_2;
-
-// @public
-function usePlainChromeBodyData_2<TRow>(chrome: TableChrome<TRow>, props: BaseDataTableProps<TRow>): ChromeBodyData_2<TRow>;
 
 // @public
 export function usePointerDismiss(open: boolean, dismiss: () => void, insideSelector: string, options?: OverlayDismissOptions): void;
@@ -1712,25 +1430,6 @@ export interface UseSavedViewsOptions extends Omit<SavedViewsControllerOptions, 
 
 export { UseSavedViewsResult }
 
-// @public @deprecated
-export const useScrollToTableTop: typeof useScrollToTableTop_2;
-
-// @public
-function useScrollToTableTop_2(input: UseScrollToTableTopOptions_2): void;
-
-// @public @deprecated
-export type UseScrollToTableTopOptions = UseScrollToTableTopOptions_2;
-
-// @public
-interface UseScrollToTableTopOptions_2 {
-    behavior?: ScrollBehavior;
-    deps: readonly unknown[];
-    enabled?: boolean;
-    gap?: number;
-    offset?: number;
-    ref: RefObject<HTMLElement | null>;
-}
-
 // @public
 export function useSearchInput(search: string, setSearch: (next: string) => void, debounceMs?: number): SearchInputState;
 
@@ -1740,6 +1439,8 @@ export function useSelection<TRow>(options: UseSelectionOptions<TRow>): Selectio
 // @public
 export interface UseSelectionOptions<TRow> {
     acrossPages?: boolean;
+    defaultSelectedIds?: readonly string[];
+    enabled?: boolean;
     getId: (row: TRow) => string;
     onSelectionChange?: (selectedIds: string[]) => void;
     resetKey?: unknown;
@@ -1774,40 +1475,14 @@ export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions
     total: number;
 }
 
-// @public @deprecated
-export const useShortcuts: typeof useShortcuts_2;
-
-// @public
-function useShortcuts_2(options: UseShortcutsOptions_2): void;
-
-// @public @deprecated
-export type UseShortcutsOptions = UseShortcutsOptions_2;
-
-// @public
-interface UseShortcutsOptions_2 {
-    enabled: boolean;
-    onCommand: (command: string) => void;
-    shortcuts?: readonly Shortcut[];
-    target?: () => EventTarget | null;
-}
-
-// @public @deprecated
-export const useTableChrome: typeof useTableChrome_2;
-
-// @public
-function useTableChrome_2<TRow>(props: ComposedTableProps_2<TRow>): TableChrome<TRow>;
-
 // @public
 export function useTableData<TRow>(options: UseTableDataOptions<TRow>): UseTableDataResult<TRow>;
 
 // @public
 export interface UseTableDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "urlKey" | "store"> {
-    aggregates?: readonly QueryAggregate[];
     columns: readonly ColumnDef<TRow>[];
     data?: readonly TRow[];
     error?: Error | null;
-    facetKeys?: readonly string[];
-    facets?: FacetMap;
     featureHost?: FeatureHostState;
     filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
     filters?: readonly FilterDef<TRow>[] | ReactNode;
@@ -1818,31 +1493,12 @@ export interface UseTableDataOptions<TRow> extends Pick<UseTableUrlStateOptions,
     loading?: boolean;
     locale?: string;
     mobileBreakpoint?: number;
-    mode?: "frontend" | "server";
-    onQueryChange?: NonNullable<Parameters<typeof useServerData<TRow>>[0]["onQueryChange"]>;
+    onViewChange?: TableQueryHandler;
     paginationMode?: PaginationMode;
-    responseKey?: string;
     source?: TableSource<TRow>;
-    supports?: QuerySupport;
-    total?: number;
 }
 
 export { UseTableDataResult }
-
-// @public @deprecated
-export const useTableEditHistory: typeof useTableEditHistory_2;
-
-// @public
-function useTableEditHistory_2<TRow>(props: TableEditHistoryProps_2<TRow>): {
-    history: EditHistoryState<TRow>;
-    onCellEdit: ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
-};
-
-// @public @deprecated
-export const useTableEngine: typeof useTableEngine_2;
-
-// @public
-function useTableEngine_2<TRow>(options: CreateTableEngineOptions<TRow>): TableEngine<TRow>;
 
 // @public
 export function useTableUrlState(options?: UseTableUrlStateOptions): UseTableUrlStateResult;
@@ -1886,12 +1542,6 @@ export function useTreeExpansion(controlled?: {
     expandedIds?: readonly string[];
     onExpandedIdsChange?: (ids: string[]) => void;
 }): TreeExpansionState;
-
-// @public @deprecated
-export const useVirtualChromeBodyData: typeof useVirtualChromeBodyData_2;
-
-// @public
-function useVirtualChromeBodyData_2<TRow>(chrome: TableChrome<TRow>, props: ComposedTableProps_2<TRow>): ChromeBodyData_2<TRow>;
 
 export { ValidationCheckResult }
 

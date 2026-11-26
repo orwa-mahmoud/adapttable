@@ -5,6 +5,7 @@ import { createSSRApp, h } from "vue";
 import { renderToString } from "vue/server-renderer";
 
 import DataTable from "../src/DataTable.vue";
+import { selection } from "../src/selection";
 
 interface Row {
   id: string;
@@ -13,11 +14,10 @@ interface Row {
 function app(mobile: boolean) {
   const result = createSSRApp(() =>
     h(DataTable<Row>, {
+      features: [selection({ selectedIds: ["ada"] })],
       data: [{ id: "ada", name: "Ada" }],
       columns: [{ key: "name", header: "Name" }],
       rowKey: (row) => row.id,
-      selectable: true,
-      selectedIds: ["ada"],
       forceMobile: mobile,
       urlSync: false,
       dir: "rtl",

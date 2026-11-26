@@ -7,6 +7,16 @@
  * and adds what it draws (a provider, slot renders), so every binding turns
  * the same options into the same table configuration.
  */
+import {
+  COMMAND_PALETTE_CONTRAST_RULES,
+  EDIT_CONTRAST_RULES,
+  FIND_CONTRAST_RULES,
+  GROUPING_PANEL_CONTRAST_RULES,
+  SAVED_VIEWS_CONTRAST_RULES,
+  SELECTION_CONTRAST_RULES,
+  SIDE_PANEL_CONTRAST_RULES,
+} from "../a11y/featureContrast";
+import type { ContrastRules } from "../a11y/forcedColors";
 import type { Command } from "../actions/commandRegistry";
 import type {
   ContextMenuItem,
@@ -16,8 +26,9 @@ import { columnResizeHandleProps } from "../columns/columnResize";
 import type { BatchEditHandler } from "../editing/batchEditing";
 import type { CellEditHandler, EditHistoryInput } from "../editing/editHistory";
 import type { RowEditHandler } from "../editing/rowEditing";
-import type { ExportWriter } from "../export/exportWriter";
-import type { FilterDef } from "../filters/filterDefs";
+import type { ExportWriterOption } from "../export/deferredWriter";
+import type { ActiveFilterChip } from "../filters/activeFilterChips";
+import type { ChipLabelResolver, FilterDef } from "../filters/filterDefs";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
 import { ACTION_LABELS } from "../labelGroups/actionLabels";
 import { COLUMN_MENU_LABELS } from "../labelGroups/columnMenuLabels";
@@ -30,6 +41,7 @@ import { GROUPING_LABELS } from "../labelGroups/groupingLabels";
 import { ROW_LABELS } from "../labelGroups/rowLabels";
 import { SAVED_VIEW_LABELS } from "../labelGroups/savedViewLabels";
 import { VIEW_CONTROL_LABELS } from "../labelGroups/viewControlLabels";
+import { VIRTUALIZE_LABELS } from "../labelGroups/virtualizeLabels";
 import {
   buildBodyCells,
   type CellSpanAppearance,
@@ -61,7 +73,7 @@ export interface CoreFeatureRegistrar<
   /** Register a filter type for this table. */
   registerFilterType(spec: FilterTypeSpec): void;
   /** Register an export writer. */
-  registerWriter(writer: ExportWriter): void;
+  registerWriter(writer: ExportWriterOption): void;
   /** Register a side-panel tab. */
   registerPanel(panel: TPanel): void;
   /** Register a command-palette command. */
@@ -94,19 +106,38 @@ export interface CoreFeature<
   TRow = unknown,
   THost = CoreFeatureRegistrar,
 > extends PatchFeature<TRow> {
-  /** Hand the options' registrations to the live host. */
+  /**
+   * Hand the options' registrations to the live host. Registration only:
+   * it may run during render and acquires nothing.
+   */
   setup?(host: THost): void;
+  /**
+   * Acquire what outlives a render while the feature is composed; return
+   * what releases it. Runs once the table has mounted.
+   */
+  mount?(): void | (() => void);
 }
 
 function define<TRow>(
   id: string,
   patch: FeaturePatch<TRow>,
-  labels?: Partial<TableLabels>
+  labels?: Partial<TableLabels>,
+  contrast?: ContrastRules
 ): CoreFeature<TRow> {
-  return labels === undefined
-    ? { id, apply: () => patch }
-    : { id, apply: () => patch, labels };
+  return {
+    id,
+    apply: () => patch,
+    ...(labels && { labels }),
+    ...(contrast && { contrast }),
+  };
 }
+
+/**
+ * The toolbar leads with the view controls, saved views then columns; every
+ * other entry follows in feature-id order.
+ */
+const SAVED_VIEWS_RANK = -2;
+const COLUMN_MENU_RANK = -1;
 
 /** Options a windowing feature accepts — a boolean or its knobs. */
 export type VirtualizeInput =
@@ -195,8 +226,30 @@ export function coreRowAppearance<TRow>(
  *
  * @public
  */
-export function coreColumnMenu(): CoreFeature {
-  return define("column-menu", { enableColumnMenu: true }, COLUMN_MENU_LABELS);
+/**
+ * Options for {@link coreColumnMenu}.
+ *
+ * @public
+ */
+export interface ColumnMenuOptions {
+  /** Persist a display-name change. Present, the Columns menu offers rename. */
+  readonly onRename?: (key: string, name: string) => void;
+}
+
+export function coreColumnMenu(options?: ColumnMenuOptions): CoreFeature {
+  return {
+    ...define(
+      "column-menu",
+      {
+        enableColumnMenu: true,
+        ...(options?.onRename === undefined
+          ? {}
+          : { onColumnRename: options.onRename }),
+      },
+      COLUMN_MENU_LABELS
+    ),
+    rank: COLUMN_MENU_RANK,
+  };
 }
 
 /**
@@ -242,7 +295,8 @@ export function coreCommandPalette(
   const feature = define(
     "command-palette",
     { commandPalette: options },
-    ACTION_LABELS
+    ACTION_LABELS,
+    COMMAND_PALETTE_CONTRAST_RULES
   );
   if (!commands?.length) return feature;
   return {
@@ -290,7 +344,12 @@ export function coreSidePanel<TPanel extends SidePanelEntry>(options: {
   readonly panels: readonly TPanel[];
 }): CoreFeature<unknown, CoreFeatureRegistrar<TPanel>> {
   return {
-    ...define("side-panel", { sidePanel: options }),
+    ...define(
+      "side-panel",
+      { sidePanel: options },
+      undefined,
+      SIDE_PANEL_CONTRAST_RULES
+    ),
     setup(host) {
       for (const panel of options.panels) host.registerPanel(panel);
     },
@@ -303,7 +362,58 @@ export function coreSidePanel<TPanel extends SidePanelEntry>(options: {
  * @public
  */
 export function coreBulkActions(actions: readonly BulkAction[]): CoreFeature {
-  return define("bulk-actions", { bulkActions: actions });
+  return define("bulk-actions", { selectable: true, bulkActions: actions });
+}
+
+/**
+ * What a table's `selection()` feature takes.
+ *
+ * @typeParam TRow - The row type.
+ * @typeParam TIds - How the binding holds the host's ids: an array, or a
+ *   reactive value of one.
+ *
+ * @public
+ */
+export interface SelectionFeatureOptions<
+  TRow = unknown,
+  TIds = readonly string[],
+> {
+  /** The id a row is selected by; defaults to the row key. */
+  readonly getId?: (row: TRow) => string;
+  /**
+   * Controlled selection. When provided, the table reads the selection from
+   * this value and reports every change request through
+   * `onSelectionChange`. Omit it for the table's own selection.
+   */
+  readonly selectedIds?: TIds;
+  /** The table's own selection to start from, when the host holds none. */
+  readonly defaultSelectedIds?: readonly string[];
+  /**
+   * The selection changed. Uncontrolled: fires with the selected ids
+   * whenever the set changes — once on mount with the initial selection, on
+   * every toggle and select-all, and on the reset when the search or a
+   * filter changes the result set. Controlled (`selectedIds` provided): the
+   * change request — apply the ids to your state to accept.
+   */
+  readonly onSelectionChange?: (selectedIds: string[]) => void;
+}
+
+/**
+ * Rows can be selected, with the selection the host holds or the table's own.
+ *
+ * @public
+ */
+export function coreSelection<TRow, TIds = readonly string[]>(
+  options: SelectionFeatureOptions<TRow, TIds> = {}
+): CoreFeature<TRow> {
+  const { getId, selectedIds, defaultSelectedIds, onSelectionChange } = options;
+  return define<TRow>("selection", {
+    selectable: true,
+    ...(getId ? { selectionGetId: getId } : {}),
+    ...(selectedIds === undefined ? {} : { selectedIds }),
+    ...(defaultSelectedIds ? { defaultSelectedIds } : {}),
+    ...(onSelectionChange ? { onSelectionChange } : {}),
+  });
 }
 
 /**
@@ -325,8 +435,27 @@ export function coreFilterTypes(specs: readonly FilterTypeSpec[]): CoreFeature {
  *
  * @public
  */
-export function coreHeaderFilters(): CoreFeature {
-  return define("header-filters", { headerFilters: true }, FILTER_LABELS);
+/**
+ * Options for {@link coreHeaderFilters}.
+ *
+ * @public
+ */
+export interface HeaderFilterOptions {
+  /** Close the header filter once a single-control write finishes. */
+  readonly closeOnSelect?: boolean;
+}
+
+export function coreHeaderFilters(options?: HeaderFilterOptions): CoreFeature {
+  return define(
+    "header-filters",
+    {
+      headerFilters: true,
+      ...(options?.closeOnSelect === undefined
+        ? {}
+        : { closeHeaderFilterOnSelect: options.closeOnSelect }),
+    },
+    FILTER_LABELS
+  );
 }
 
 /**
@@ -337,7 +466,15 @@ export function coreHeaderFilters(): CoreFeature {
 export function coreSavedViews<TOptions extends object>(
   options: TOptions
 ): CoreFeature {
-  return define("saved-views", { savedViews: options }, SAVED_VIEW_LABELS);
+  return {
+    ...define(
+      "saved-views",
+      { savedViews: options },
+      SAVED_VIEW_LABELS,
+      SAVED_VIEWS_CONTRAST_RULES
+    ),
+    rank: SAVED_VIEWS_RANK,
+  };
 }
 
 /**
@@ -395,6 +532,7 @@ export function coreFitColumns(): CoreFeature {
  */
 export function coreColumnSelectionCheckbox(): CoreFeature {
   return define("column-selection-checkbox", {
+    selectable: true,
     columnSelectionCheckbox: true,
   });
 }
@@ -405,14 +543,26 @@ export function coreColumnSelectionCheckbox(): CoreFeature {
  * @public
  */
 export function coreCellNavigation(
-  options: { readonly onRangeChange?: (range: never) => void } = {}
+  options: {
+    readonly onRangeChange?: (range: never) => void;
+    readonly onCut?: (range: never) => void;
+    readonly onPaste?: (edits: never) => unknown;
+    readonly onFill?: (edits: never) => unknown;
+  } = {}
 ): CoreFeature {
   return define(
     "cell-navigation",
-    options.onRangeChange
-      ? { cellNavigation: true, onCellRangeChange: options.onRangeChange }
-      : { cellNavigation: true },
-    GRID_LABELS
+    {
+      cellNavigation: true,
+      ...(options.onRangeChange
+        ? { onCellRangeChange: options.onRangeChange }
+        : {}),
+      ...(options.onCut ? { onCellCut: options.onCut } : {}),
+      ...(options.onPaste ? { onCellPaste: options.onPaste } : {}),
+      ...(options.onFill ? { onCellFill: options.onFill } : {}),
+    },
+    GRID_LABELS,
+    SELECTION_CONTRAST_RULES
   );
 }
 
@@ -447,7 +597,12 @@ export function coreEditing<TRow>(
   onCellEdit: CellEditHandler<TRow>,
   extras?: FeaturePatch<TRow>
 ): CoreFeature<TRow> {
-  return define("editing", { onCellEdit, ...extras }, EDITING_LABELS);
+  return define(
+    "editing",
+    { onCellEdit, ...extras },
+    EDITING_LABELS,
+    EDIT_CONTRAST_RULES
+  );
 }
 
 /**
@@ -462,7 +617,8 @@ export function coreRowEditing<TRow>(
   return define(
     "row-editing",
     { rowEditing: true, onRowEdit, ...extras },
-    EDITING_LABELS
+    EDITING_LABELS,
+    EDIT_CONTRAST_RULES
   );
 }
 
@@ -482,7 +638,8 @@ export function coreBatchEditing<TRow>(
       onBatchEdit,
       ...extras,
     },
-    EDITING_LABELS
+    EDITING_LABELS,
+    EDIT_CONTRAST_RULES
   );
 }
 
@@ -492,7 +649,12 @@ export function coreBatchEditing<TRow>(
  * @public
  */
 export function coreDirtyIndicators(): CoreFeature {
-  return define("dirty-indicators", { dirtyIndicators: true }, EDITING_LABELS);
+  return define(
+    "dirty-indicators",
+    { dirtyIndicators: true },
+    EDITING_LABELS,
+    EDIT_CONTRAST_RULES
+  );
 }
 
 /**
@@ -501,7 +663,7 @@ export function coreDirtyIndicators(): CoreFeature {
  * @public
  */
 export function coreExportCsv<TRow>(
-  options: boolean | { readonly writer?: ExportWriter } = true
+  options: boolean | { readonly writer?: ExportWriterOption } = true
 ): CoreFeature<TRow> {
   const writer = typeof options === "object" ? options.writer : undefined;
   const feature = define<TRow>(
@@ -510,7 +672,15 @@ export function coreExportCsv<TRow>(
     EXPORT_LABELS
   );
   if (!writer) return feature;
-  return { ...feature, setup: (host) => host.registerWriter(writer) };
+  return {
+    ...feature,
+    setup(host) {
+      host.registerWriter(writer);
+    },
+    // A writer that loads on demand starts loading once the table is up, so
+    // an export after the connection drops still has its builder.
+    mount: "preload" in writer ? () => writer.preload() : undefined,
+  };
 }
 
 /**
@@ -519,10 +689,43 @@ export function coreExportCsv<TRow>(
  * @typeParam TPanel - A binding's own filter form, when it accepts one.
  * @public
  */
+/**
+ * Options for {@link coreFilters}.
+ *
+ * @public
+ */
+export interface FilterPanelOptions {
+  /** Where the filter panel opens. Header mode is `headerFilters`. */
+  readonly mode?: "popover" | "drawer" | "header";
+  /** Draw the per-field form. Default on. */
+  readonly fields?: boolean;
+  /** Chips the host adds after the table's own. */
+  readonly extraChips?: readonly ActiveFilterChip[];
+  /** Labels for the chips the table derives from active filters. */
+  readonly filterLabels?: Readonly<Record<string, ChipLabelResolver>>;
+}
+
 export function coreFilters<TRow, TPanel = never>(
-  defs: readonly FilterDef<TRow>[] | TPanel
+  defs: readonly FilterDef<TRow>[] | TPanel,
+  options?: FilterPanelOptions
 ): CoreFeature<TRow> {
-  return define("filters", { filters: defs }, FILTER_LABELS);
+  return define(
+    "filters",
+    {
+      filters: defs,
+      ...(options?.mode === undefined ? {} : { filtersMode: options.mode }),
+      ...(options?.fields === undefined
+        ? {}
+        : { filterFields: options.fields }),
+      ...(options?.extraChips === undefined
+        ? {}
+        : { extraChips: options.extraChips }),
+      ...(options?.filterLabels === undefined
+        ? {}
+        : { filterLabels: options.filterLabels }),
+    },
+    FILTER_LABELS
+  );
 }
 
 /**
@@ -531,7 +734,12 @@ export function coreFilters<TRow, TPanel = never>(
  * @public
  */
 export function coreFindInTable(): CoreFeature {
-  return define("find-in-table", { findInTable: true }, FIND_LABELS);
+  return define(
+    "find-in-table",
+    { findInTable: true },
+    FIND_LABELS,
+    FIND_CONTRAST_RULES
+  );
 }
 
 /**
@@ -567,6 +775,7 @@ export function coreGroupingPanel<TRow>(
   return {
     id: "grouping-panel",
     labels: GROUPING_LABELS,
+    contrast: GROUPING_PANEL_CONTRAST_RULES,
     apply(input) {
       const withoutInitialGroup = { ...base.apply?.(input) };
       delete withoutInitialGroup.groupBy;
@@ -657,7 +866,11 @@ export function coreRowPinning(options: FeaturePatch = {}): CoreFeature {
  * @public
  */
 export function coreSelectionStats(): CoreFeature {
-  return define("selection-stats", { selectionStats: true }, GRID_LABELS);
+  return define(
+    "selection-stats",
+    { selectable: true, selectionStats: true },
+    GRID_LABELS
+  );
 }
 
 /**
@@ -681,6 +894,7 @@ export function coreVirtualize(options: VirtualizeInput = true): CoreFeature {
     "virtualize",
     typeof options === "boolean"
       ? { virtualize: options }
-      : { virtualize: true, ...options }
+      : { virtualize: true, ...options },
+    VIRTUALIZE_LABELS
   );
 }

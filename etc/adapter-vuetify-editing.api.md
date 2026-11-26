@@ -85,6 +85,9 @@ export { editHistory }
 // @public (undocumented)
 export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): TableFeature<TRow>;
 
+// @public
+export function editingFamily<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): readonly TableFeature<TRow>[];
+
 export { EditingLifecycleExtras }
 
 export { RowEditIcons }

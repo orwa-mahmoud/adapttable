@@ -37,7 +37,8 @@ state; the native table's fallback data source does not claim its URL namespace.
 
 Reactive value inputs accept a plain value, a ref or a getter. Optional inputs
 also accept refs/getters whose current value is `undefined`. Callbacks such as
-`rowKey`, `getSearchText`, `refetch` and `onQueryChange` remain callbacks. To
+`rowKey`, `getSearchText`, `refetch`, `onQueryChange` and `onViewChange`
+remain callbacks. To
 replace callback identities reactively, pass a getter for the whole options
 object. Never wrap a renderer in a getter just to make it reactive.
 
@@ -46,17 +47,24 @@ publishes `rows`/`total`, or `useQuerySource` when an existing query composable
 owns fetching and cancellation. See [source contracts](./api.md#data-sources)
 for request cancellation and query-library lifecycle rules.
 
-## Server rows through table props
+## Server rows through a server source
 
-The table takes the server tier directly: pass the current page as `data`, the
-row count as `total`, and fetch in `onQueryChange`. It is called after mount
-and once per real change with the consolidated query; the previous request's
-`signal` is aborted. `is-loading` and `error` describe the request.
+A server table passes a `useServerData` source as `:source`: the host fetches
+in `onQueryChange` and publishes the current page as `rows` and the row count
+as `total`. `onQueryChange` is called after mount and once per real change
+with the consolidated query; the previous request's `signal` is aborted.
+`loading` and `error` describe the request. A table given `data` carries none
+of the server code.
 
 ```vue
 <script setup lang="ts">
 import { shallowRef } from "vue";
-import type { ColumnDef, TableQuery, TableQueryHandler } from "@adapttable/vue";
+import {
+  type ColumnDef,
+  type TableQuery,
+  type TableQueryHandler,
+  useServerData,
+} from "@adapttable/vue";
 import { DataTable } from "@adapttable/vue-unstyled";
 
 interface Person {
@@ -88,26 +96,32 @@ const fetchPage: TableQueryHandler = async (query, { signal }) => {
     if (!signal.aborted) loading.value = false;
   }
 };
+const source = useServerData<Person>({
+  rows,
+  total,
+  loading,
+  onQueryChange: fetchPage,
+});
 </script>
 
 <template>
   <DataTable
-    :data="rows"
-    :total="total"
-    :is-loading="loading"
+    :source="source"
     :columns="columns"
     :row-key="(row: Person) => row.id"
-    @query-change="fetchPage"
   />
 </template>
 ```
 
-`mode` is inferred: `data` with `onQueryChange` is server, `data` alone is
-frontend. `mode="frontend"` keeps the table's own search, sort and paging and
-makes `onQueryChange` a notification of what the reader changed; the mount is
-not a change. `supports`, `aggregates`, `responseKey`, `facetKeys` and `facets`
-carry the same server capabilities as `useServerData`; `facetKeys` defaults to
-every checklist filter. A supplied `source` wins over all of them.
+`supports`, `aggregates`, `responseKey`, `facetKeys` and `facets` are
+`useServerData` options. A range, multi-value or checklist filter restored
+from the URL reaches the first request typed when the source knows its keys:
+spread `serverFilterKeys({ columns, filters })` into the options for
+`arrayExtraKeys`, `numberExtraKeys` and `facetKeys`.
+
+A table over `data` keeps its own search, sort and paging and tells
+`@view-change` what the reader changed: one consolidated query per committed
+change, never for the mount. The rows it shows stay the ones in `data`.
 
 ## Server query ownership
 

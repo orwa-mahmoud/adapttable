@@ -1,7 +1,7 @@
 import "@adapttable/vue-unstyled/styles.css";
 import "./consumer.css";
 
-import { ar } from "@adapttable/i18n";
+import { ar } from "@adapttable/i18n/locales/ar";
 import type { FilterFormSource } from "@adapttable/vue";
 import { resolveLabels } from "@adapttable/vue/adapter";
 import {

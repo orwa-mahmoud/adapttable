@@ -198,7 +198,7 @@ describe("Element Plus row actions", () => {
             onDuplicateRow: duplicate,
           }),
         ],
-        classNames: { rowAction: "host-action", addRow: "host-add" },
+        classNames: { actionButton: "host-action", addRow: "host-add" },
       });
       root.addEventListener("click", click);
       await tick();

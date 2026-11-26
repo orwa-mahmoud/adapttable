@@ -138,6 +138,12 @@ export interface ExportWriter {
   extension: string;
   /** Build the file from the resolved values. */
   build: (context: ExportWriteContext) => ExportPayload;
+  /**
+   * Build the file asynchronously, when the format can do better given time
+   * (the Excel writer deflates its worksheet). The table's own export prefers
+   * it; `build` stays the synchronous answer.
+   */
+  buildAsync?: (context: ExportWriteContext) => Promise<ExportPayload>;
 }
 
 /** Character width a spreadsheet can use, from a column's own `width`. */
@@ -264,7 +270,9 @@ export function buildExportTable<TRow>(
 export { csvWriter } from "./csvWriter";
 
 /** `"export.xlsx"` — the name when the caller did not choose one. */
-export function defaultExportFilename(writer: ExportWriter): string {
+export function defaultExportFilename(
+  writer: Pick<ExportWriter, "extension">
+): string {
   return `export.${writer.extension}`;
 }
 

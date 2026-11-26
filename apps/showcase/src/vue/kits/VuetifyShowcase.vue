@@ -3,6 +3,7 @@ import { DataTable } from "@adapttable/vuetify";
 import { columnMenu } from "@adapttable/vuetify/column-menu";
 import { densityChooser } from "@adapttable/vuetify/density";
 import { fullscreen } from "@adapttable/vuetify/fullscreen";
+import { selection } from "@adapttable/vuetify/selection";
 import { h } from "vue";
 import { VApp } from "vuetify/components/VApp";
 import { VBtn } from "vuetify/components/VBtn";
@@ -69,12 +70,19 @@ function renderStatus(row: Order, label: string) {
         </div>
       </template>
       <template
-        #default="{ tableProps, onSelectionChange, onColumnLayoutChange }"
+        #default="{
+          tableProps,
+          selectedIds,
+          onSelectionChange,
+          onColumnLayoutChange,
+        }"
       >
         <DataTable
           v-bind="tableProps"
-          :features="features"
-          @update:selected-ids="onSelectionChange"
+          :features="[
+            selection({ selectedIds, onSelectionChange }),
+            ...features,
+          ]"
           @update:column-layout="onColumnLayoutChange"
         />
       </template>

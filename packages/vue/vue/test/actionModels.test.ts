@@ -9,6 +9,7 @@ import { contextMenu } from "../src/context-menu";
 import { exportCsv } from "../src/export-csv";
 import { exportPdf } from "../src/export-pdf";
 import { exportXlsx } from "../src/export-xlsx";
+import { selection } from "../src/features/headlessFactories";
 import { extendFeature, type TableFeature } from "../src/features/tableFeature";
 import { useRowSelection } from "../src/selection/selection";
 import { sidePanel } from "../src/side-panel";
@@ -111,12 +112,13 @@ describe("UI-free action model ownership and required slots", () => {
       scope.run(() =>
         useDataTableShell({
           ...base,
-          selectable: true,
-          defaultSelectedIds: ["a"],
           confirm: (request) => {
             accept = request.onConfirm;
           },
-          features: [fill(bulkActions([action, other]))],
+          features: [
+            selection({ defaultSelectedIds: ["a"] }),
+            fill(bulkActions([action, other])),
+          ],
         })
       )
     );
@@ -134,7 +136,7 @@ describe("UI-free action model ownership and required slots", () => {
     model.selectAllMatching();
     expect(run).not.toHaveBeenCalled();
   });
-  it("requires a host confirmer and makes bulk controls absent without selection", () => {
+  it("requires a host confirmer, and bulk actions select rows on their own", () => {
     const action = {
       key: "run",
       label: "Run",
@@ -146,9 +148,10 @@ describe("UI-free action model ownership and required slots", () => {
       scope.run(() =>
         useDataTableShell({
           ...base,
-          selectable: true,
-          defaultSelectedIds: ["a"],
-          features: [fill(bulkActions([action]))],
+          features: [
+            selection({ defaultSelectedIds: ["a"] }),
+            fill(bulkActions([action])),
+          ],
         })
       )
     );
@@ -162,7 +165,8 @@ describe("UI-free action model ownership and required slots", () => {
         useDataTableShell({ ...base, features: [fill(bulkActions([action]))] })
       )
     );
-    expect(noSelection.state.get(BULK_ACTIONS_MODEL).value).toBeUndefined();
+    expect(noSelection.state.get(BULK_ACTIONS_MODEL).value).toBeDefined();
+    expect(noSelection.selection.value).toBeDefined();
     other.stop();
   });
   it("narrows the neutral all-matching scope when a replacement source cannot span pages", () => {

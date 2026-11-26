@@ -12,7 +12,7 @@ import { FindInTableState } from '@adapttable/angular';
 import { FindSearchProps } from '@adapttable/angular/adapter';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';
-import { ToolbarExtrasSlotProps } from '@adapttable/angular/adapter';
+import { ToolbarEntrySlotProps } from '@adapttable/angular/adapter';
 import { WritableSignal } from '@angular/core';
 
 // @public
@@ -67,7 +67,7 @@ export class AdaptFindStep {
 // @public
 export class AdaptFindToolbarButton {
     protected readonly find: WritableSignal<FindInTableState | null> | null;
-    readonly props: InputSignal<ToolbarExtrasSlotProps>;
+    readonly props: InputSignal<ToolbarEntrySlotProps>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFindToolbarButton, "adapt-find-toolbar-button", never, {
         "props": {

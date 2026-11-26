@@ -33,6 +33,7 @@ import type { rowAppearance } from "@adapttable/angular-unstyled/row-appearance"
 import type { rowPinning } from "@adapttable/angular-unstyled/row-pinning";
 import type { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
 import type { savedViews } from "@adapttable/angular-unstyled/saved-views";
+import type { selection } from "@adapttable/angular-unstyled/selection";
 import type { selectionStats } from "@adapttable/angular-unstyled/selection-stats";
 import type { sidePanel } from "@adapttable/angular-unstyled/side-panel";
 import type { statusBar } from "@adapttable/angular-unstyled/status-bar";
@@ -100,6 +101,7 @@ export interface ShowcaseKit {
   readonly commandPalette: typeof commandPalette;
   readonly extraRows: typeof extraRows;
   readonly findInTable: typeof findInTable;
+  readonly selection: typeof selection;
   readonly selectionStats: typeof selectionStats;
   readonly rowAppearance: typeof rowAppearance;
   readonly statusBar: typeof statusBar;

@@ -3,6 +3,7 @@ import { DataTable } from "@adapttable/quasar";
 import { columnMenu } from "@adapttable/quasar/column-menu";
 import { densityChooser } from "@adapttable/quasar/density";
 import { fullscreen } from "@adapttable/quasar/fullscreen";
+import { selection } from "@adapttable/quasar/selection";
 import { QBadge, QBtn } from "quasar";
 import { h } from "vue";
 
@@ -63,12 +64,16 @@ function renderStatus(row: Order, label: string) {
       </div>
     </template>
     <template
-      #default="{ tableProps, onSelectionChange, onColumnLayoutChange }"
+      #default="{
+        tableProps,
+        selectedIds,
+        onSelectionChange,
+        onColumnLayoutChange,
+      }"
     >
       <DataTable
         v-bind="tableProps"
-        :features="features"
-        @update:selected-ids="onSelectionChange"
+        :features="[selection({ selectedIds, onSelectionChange }), ...features]"
         @update:column-layout="onColumnLayoutChange"
       />
     </template>

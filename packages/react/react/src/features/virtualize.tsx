@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 import { RowScrollContext } from "../virtual/rowScroll";
 import { useKeyedVirtualizer } from "../virtual/useTableVirtualization";
 import { useVirtualChromeBody } from "../virtual/useVirtualChromeBodyData";
+import { useMeasuredWindowScrollMargin } from "../virtual/windowScrollMargin";
 import { slotRender } from "./providers";
 import {
   CHROME_BODY,
@@ -60,11 +61,32 @@ function VirtualChromeBody<TRow>({
  */
 function KeyedWindow({
   children,
+  listRoot,
   ...options
 }: KeyedWindowSlotProps): ReactNode {
-  const { virtualization, scrollToIndex } = useKeyedVirtualizer(options);
+  const measured = useMeasuredWindowScrollMargin(
+    options.enabled &&
+      options.getScrollElement === undefined &&
+      options.scrollMargin === undefined,
+    listRoot
+  );
+  const { virtualization, scrollToIndex } = useKeyedVirtualizer({
+    ...options,
+    scrollMargin: options.scrollMargin ?? measured.scrollMargin,
+  });
   return children({ ...virtualization, scrollToIndex });
 }
+
+/**
+ * The keyed window a kit's own body asks for grouped or keyed lists: the
+ * virtualizer for those entries, and nothing else.
+ *
+ * @public
+ */
+export const KEYED_WINDOW_RENDER = /* @__PURE__ */ slotRender(
+  KEYED_WINDOW,
+  (slotProps) => <KeyedWindow {...slotProps} />
+);
 
 /**
  * Render only the rows in view.
@@ -86,7 +108,7 @@ export function virtualize(
       slotRender<ChromeBodyDraw>(CHROME_BODY, (slotProps) => (
         <VirtualChromeBody {...slotProps} />
       )),
-      slotRender(KEYED_WINDOW, (slotProps) => <KeyedWindow {...slotProps} />),
+      KEYED_WINDOW_RENDER,
     ],
   };
 }

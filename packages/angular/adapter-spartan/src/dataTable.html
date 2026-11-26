@@ -14,16 +14,20 @@
     (pointerup)="onMenuPointerUp()"
     (pointercancel)="onMenuPointerCancel()"
   >
-    <ng-container
-      [adaptSlot]="commandPaletteSlot"
-      [adaptSlotProps]="v.commandPalette()"
-      [adaptSlotTable]="v.table"
-    />
-    <ng-container
-      [adaptSlot]="contextMenuSlot"
-      [adaptSlotProps]="v.contextMenu()"
-      [adaptSlotTable]="v.table"
-    />
+    @if (v.commandPalette; as commandPalette) {
+      <ng-container
+        [adaptSlot]="commandPaletteSlot"
+        [adaptSlotProps]="commandPalette()"
+        [adaptSlotTable]="v.table"
+      />
+    }
+    @if (v.contextMenu; as contextMenu) {
+      <ng-container
+        [adaptSlot]="contextMenuSlot"
+        [adaptSlotProps]="contextMenu()"
+        [adaptSlotTable]="v.table"
+      />
+    }
     @if (v.findBar; as findBar) {
       <ng-container
         [adaptSlot]="findBarSlot"
@@ -124,34 +128,22 @@
           }
         }
       }
-      @if (v.savedViews; as savedViews) {
-        <ng-container
-          [adaptSlot]="savedViewsSlot"
-          [adaptSlotProps]="savedViews()"
-          [adaptSlotTable]="v.table"
-        />
-      }
-      @if (v.columnMenu && !v.table.isMobile()) {
-        <ng-container
-          [adaptSlot]="columnMenuSlot"
-          [adaptSlotProps]="v.columnMenuProps()"
-          [adaptSlotTable]="v.table"
-        />
-      }
       <ng-container
         [adaptSlot]="toolbarExtrasSlot"
-        [adaptSlotProps]="v.toolbarExtras()"
+        [adaptSlotProps]="v.toolbarEntry()"
         [adaptSlotTable]="v.table"
       />
-      @if (v.rowMutations().canAdd) {
-        <button
-          adaptHlmButton
-          type="button"
-          data-adapttable-part="add-row"
-          (click)="v.rowMutations().addRow()"
-        >
-          {{ v.table.labels().addRow }}
-        </button>
+      @if (v.rowMutations; as mutations) {
+        @if (mutations().canAdd) {
+          <button
+            adaptHlmButton
+            type="button"
+            data-adapttable-part="add-row"
+            (click)="mutations().addRow()"
+          >
+            {{ v.table.labels().addRow }}
+          </button>
+        }
       }
     </div>
 

@@ -25,6 +25,7 @@ import { ColumnMetadata } from '@adapttable/core';
 import { Component } from 'vue';
 import { ComputedRef } from 'vue';
 import { ConfirmHandler } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { CssProperties } from '@adapttable/core/binding';
 import { Direction } from '@adapttable/core';
 import { DirtyCellState } from '@adapttable/core';
@@ -37,10 +38,10 @@ import { EditValidationStoreOptions } from '@adapttable/core';
 import { EffectScope } from 'vue';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExtraFilters } from '@adapttable/core';
-import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
 import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
+import { FeatureListEntry } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
@@ -70,9 +71,7 @@ import { PrintPageBreak } from '@adapttable/core/pdf';
 import { PrintPageSize } from '@adapttable/core/pdf';
 import { printStyles } from '@adapttable/core/pdf';
 import { printTable } from '@adapttable/core/pdf';
-import { QueryAggregate } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
-import { QuerySupport } from '@adapttable/core';
 import { Ref } from 'vue';
 import { RowAction } from '@adapttable/core';
 import { RowEditStoreOptions } from '@adapttable/core';
@@ -234,6 +233,7 @@ export interface FeatureMountContext<TRow = unknown> {
     readonly bodyRows?: Readonly<ShallowRef<readonly TableRowModel<TRow>[]>>;
     // (undocumented)
     readonly density?: Readonly<ShallowRef<TableDensity>>;
+    readonly feature: () => TableFeature<TRow>;
     // (undocumented)
     readonly featureHost: Readonly<ShallowRef<FeatureHostState<TRow>>>;
     // (undocumented)
@@ -373,6 +373,7 @@ export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRo
     readonly bulkActions?: readonly BulkAction[];
     // (undocumented)
     readonly columnSelectionCheckbox?: boolean;
+    readonly defaultSelectedIds?: readonly string[];
     // (undocumented)
     readonly editingModel?: (context: FeatureMountContext<TRow>) => void | (() => void);
     // (undocumented)
@@ -391,10 +392,14 @@ export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRo
     readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onCellRangeChange?: (range: CellRange | null) => void;
+    readonly onSelectionChange?: (ids: string[]) => void;
     // (undocumented)
     readonly rowActionControls?: RowActionControlsProjector<TRow>;
     // (undocumented)
     readonly rowActions?: readonly RowAction<TRow>[];
+    readonly selectable?: MaybeRefOrGetter<boolean>;
+    readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
+    readonly selectionGetId?: (row: TRow) => string;
     // (undocumented)
     readonly statusBar?: boolean;
     // (undocumented)
@@ -503,6 +508,7 @@ export type StaticFeatureHost = Omit<TableFeatureHost<unknown>, "registerColumnM
 export interface StaticTableFeature {
     // (undocumented)
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly contrast?: ContrastRules;
     // (undocumented)
     readonly dependencies?: readonly unknown[];
     // (undocumented)
@@ -510,12 +516,12 @@ export interface StaticTableFeature {
     readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: <TRow>(context: FeatureMountContext<TRow>) => void | (() => void);
+    readonly rank?: number;
     // (undocumented)
     readonly renders?: readonly FeatureRender<never, VNodeChild>[];
     // (undocumented)
     readonly requiredSlots?: readonly FeatureSlotKey<never>[];
-    // (undocumented)
-    readonly setup?: (host: StaticFeatureHost) => void | (() => void);
+    readonly setup?: (host: StaticFeatureHost) => void;
 }
 
 // @public (undocumented)
@@ -630,6 +636,7 @@ export interface TableFeature<TRow> {
     readonly __row?: (row: TRow) => TRow;
     // (undocumented)
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+    readonly contrast?: ContrastRules;
     // (undocumented)
     readonly dependencies?: readonly unknown[];
     // (undocumented)
@@ -637,12 +644,12 @@ export interface TableFeature<TRow> {
     readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
+    readonly rank?: number;
     // (undocumented)
     readonly renders?: readonly FeatureRender<never, VNodeChild>[];
     // (undocumented)
     readonly requiredSlots?: readonly FeatureSlotKey<never>[];
-    // (undocumented)
-    readonly setup?: (host: TableFeatureHost<TRow>) => void | (() => void);
+    readonly setup?: (host: TableFeatureHost<TRow>) => void;
 }
 
 // @public (undocumented)
@@ -903,51 +910,29 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
 export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
 
 // @public (undocumented)
-export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
-    readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
+export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection" | "onColumnRename">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
     readonly animate?: MaybeRefOrGetterOptional<boolean>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps<VNodeChild>>;
     // (undocumented)
     readonly confirm?: ConfirmHandler;
-    // (undocumented)
     readonly data?: MaybeRefOrGetter<readonly TRow[]>;
     // (undocumented)
     readonly defaultDensity?: TableDensity;
     // (undocumented)
-    readonly defaultSelectedIds?: readonly string[];
-    // (undocumented)
     readonly density?: MaybeRefOrGetterOptional<TableDensity>;
-    readonly facetKeys?: MaybeRefOrGetterOptional<readonly string[]>;
-    readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
     // (undocumented)
-    readonly features?: MaybeRefOrGetterOptional<readonly ComposedFeature<NoInfer<TRow>>[]>;
+    readonly features?: MaybeRefOrGetterOptional<readonly FeatureListEntry<ComposedFeature<NoInfer<TRow>>>[]>;
     readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
     readonly maxHeight?: number | string;
-    readonly mode?: "frontend" | "server";
-    // (undocumented)
-    readonly onCellCut?: (range: CellRange) => void;
-    // (undocumented)
-    readonly onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
-    // (undocumented)
-    readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onDensityChange?: (next: TableDensity) => void;
-    readonly onQueryChange?: TableQueryListener;
-    // (undocumented)
-    readonly onSelectionChange?: (ids: string[]) => void;
-    readonly responseKey?: MaybeRefOrGetterOptional<string>;
+    readonly onViewChange?: TableQueryListener;
     // (undocumented)
     readonly runtimeChannels?: MaybeRefOrGetter<Pick<RuntimeChromeInput<TRow>, "filterDefs" | "filterRegistry" | "grouping" | "tree" | "editing" | "rowPinning">>;
     // (undocumented)
-    readonly selectable?: MaybeRefOrGetter<boolean>;
-    // (undocumented)
-    readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
-    // (undocumented)
     readonly source?: MaybeRefOrGetterOptional<TableSource<TRow>>;
     readonly summaryRow?: SummaryRowFn<TRow>;
-    readonly supports?: MaybeRefOrGetterOptional<QuerySupport>;
-    readonly total?: MaybeRefOrGetterOptional<number>;
 }
 
 // @public

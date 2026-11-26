@@ -218,36 +218,44 @@ describe("inactive source refresh", () => {
     expect(onQueryChange.mock.calls[1]?.[1].signal.aborted).toBe(false);
   });
 
-  it("keeps the frontend page across a server turn and does not abort on a repeat", () => {
+  it("keeps the frontend page across a turn to a server source and back", () => {
     const onQueryChange = vi.fn();
     const adapter = createMemoryAdapter("page=2&limit=1");
     const { result, rerender } = renderHook(
-      ({ mode }: { mode: "frontend" | "server" }) =>
-        useTableData<Row>({
-          data: ROWS,
-          columns: [{ key: "name" }],
-          mode,
+      ({ server }: { server: boolean }) => {
+        // The host owns both: it hands the server source its handler only
+        // while that source serves the table.
+        const remote = useServerData<Row>({
+          rows: ROWS,
           total: 3,
-          onQueryChange,
+          onQueryChange: server ? onQueryChange : undefined,
           urlAdapter: adapter,
           paginationMode: "paged",
-        }),
-      { initialProps: { mode: "frontend" } }
+        });
+        return useTableData<Row>({
+          data: server ? undefined : ROWS,
+          source: server ? remote : undefined,
+          columns: [{ key: "name" }],
+          urlAdapter: adapter,
+          paginationMode: "paged",
+        });
+      },
+      { initialProps: { server: false } }
     );
     expect(result.current.source.page).toBe(2);
     expect(onQueryChange).not.toHaveBeenCalled();
-    rerender({ mode: "server" });
+    rerender({ server: true });
     expect(onQueryChange).toHaveBeenCalledTimes(1);
     const signal = onQueryChange.mock.calls[0]?.[1].signal as AbortSignal;
     expect(signal.aborted).toBe(false);
-    rerender({ mode: "server" });
+    rerender({ server: true });
     expect(onQueryChange).toHaveBeenCalledTimes(1);
     expect(signal.aborted).toBe(false);
-    rerender({ mode: "frontend" });
+    rerender({ server: false });
     expect(result.current.source.page).toBe(2);
     expect(result.current.source.rows.map((row) => row.id)).toEqual(["b"]);
     const afterReturn = onQueryChange.mock.calls.length;
-    rerender({ mode: "frontend" });
+    rerender({ server: false });
     expect(onQueryChange.mock.calls).toHaveLength(afterReturn);
     expect(result.current.source.page).toBe(2);
   });

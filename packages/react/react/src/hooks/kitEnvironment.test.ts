@@ -1,5 +1,5 @@
-import { getLabels } from "@adapttable/i18n";
-import { loadLabels } from "@adapttable/i18n/load";
+import { loadLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

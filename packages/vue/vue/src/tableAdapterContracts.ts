@@ -1,12 +1,8 @@
 import type {
-  CellEdit,
   ColumnLayoutState,
   ConfirmHandler,
   Direction,
-  FacetMap,
   PaginationMode,
-  QueryAggregate,
-  QuerySupport,
   RowActionsLayout,
   TableErrorState,
   TableLabels,
@@ -15,7 +11,10 @@ import type {
   TableViewStateConfig,
   UrlStateAdapter,
 } from "@adapttable/core";
-import type { TableDensity } from "@adapttable/core/binding";
+import {
+  type FeatureListEntry,
+  type TableDensity,
+} from "@adapttable/core/binding";
 import type { VNodeChild } from "vue";
 
 import type { SummaryRowFn } from "./aggregate/aggregate";
@@ -28,7 +27,6 @@ import type {
   HeaderContext,
 } from "./columnDef";
 import type { ComposedFeature } from "./features/tableFeature";
-import type { CellRange } from "./navigation/contracts";
 
 /** CSS hooks for the corresponding table or control presentation target. */
 export interface DataTableClassNames {
@@ -160,8 +158,6 @@ export interface DataTableClassNames {
   readonly rowReorderDown?: string;
   readonly virtualSpacer?: string;
   readonly cardActions?: string;
-  /** Legacy alias for actionButton; both classes reach the action button. */
-  readonly rowAction?: string;
   readonly actionButton?: string;
   readonly rowActionsMenu?: string;
   readonly rowActionsTrigger?: string;
@@ -305,41 +301,28 @@ export interface DataTableClassNames {
   readonly gridAnnouncer?: string;
   readonly rowReorderAnnouncer?: string;
   readonly tableStatusAnnouncer?: string;
-  /** Legacy alias for tableStatusAnnouncer. */
-  readonly status?: string;
 }
 
 /** Shared adapter props. Query state is owned by the supplied source when present. */
 export interface DataTableProps<TRow> {
   readonly assistant?: TableAssistantProps;
-  readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly onCellCut?: (range: CellRange) => void;
+  /**
+   * Frontend tier: every row; the table filters, sorts and pages them. A
+   * server table passes a server `source` (`useServerData`) instead.
+   */
   readonly data?: readonly TRow[];
+  /** A prebuilt source: a server source, a query-library source, … */
   readonly source?: TableSource<TRow>;
   /**
-   * `"server"` makes `onQueryChange` fetch the rows; `"frontend"` keeps the
-   * table's own processing and makes `onQueryChange` a notification. Absent:
-   * `data` with `onQueryChange` is server, `data` alone is frontend.
+   * Frontend tier: told of each committed change to page, page size,
+   * search, sort and filters, never of the mount.
    */
-  readonly mode?: "frontend" | "server";
-  /** One consolidated query per change: the server page to fetch, or a notice. */
-  readonly onQueryChange?: TableQueryListener;
-  /** Server tier: the row count across every page. */
-  readonly total?: number;
-  /** Server tier: what the endpoint can answer, such as facet counts. */
-  readonly supports?: QuerySupport;
-  /** Server tier: aggregates the endpoint computes for the query. */
-  readonly aggregates?: readonly QueryAggregate[];
-  /** Server tier: names the response the aggregates belong to. */
-  readonly responseKey?: string;
-  /** Server tier: keys sent as `query.facets`; defaults to every checklist filter. */
-  readonly facetKeys?: readonly string[];
-  /** Server tier: distinct-value counts from the last fetch. */
-  readonly facets?: FacetMap;
+  readonly onViewChange?: TableQueryListener;
   readonly columns: readonly ColumnInput<TRow>[];
   readonly rowKey: (row: TRow) => string;
-  readonly features?: readonly ComposedFeature<NoInfer<TRow>>[];
+  readonly features?: readonly FeatureListEntry<
+    ComposedFeature<NoInfer<TRow>>
+  >[];
   /** Build footer values from the current source row scope. */
   readonly summaryRow?: SummaryRowFn<TRow>;
   readonly tableLabel?: string;
@@ -364,12 +347,8 @@ export interface DataTableProps<TRow> {
   readonly urlKey?: string;
   readonly urlAdapter?: UrlStateAdapter;
   readonly getSearchText?: (row: TRow) => string;
-  readonly selectable?: boolean;
-  readonly selectedIds?: readonly string[];
-  readonly defaultSelectedIds?: readonly string[];
   readonly columnLayout?: ColumnLayoutState;
   readonly defaultColumnLayout?: Partial<ColumnLayoutState>;
-  readonly onColumnRename?: (key: string, name: string) => void;
   readonly multiSort?: boolean;
   readonly fitColumns?: boolean;
   readonly columnWidths?: Readonly<Record<string, number>>;

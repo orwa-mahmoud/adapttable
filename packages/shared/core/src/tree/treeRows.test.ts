@@ -104,6 +104,55 @@ describe("buildTreeEntries", () => {
     ]);
   });
 
+  it("reads each row's id a bounded number of times on a flat table", () => {
+    // Children listed before their parents, as an export often orders them.
+    const rows: Node[] = [];
+    for (let parent = 0; parent < 40; parent += 1) {
+      for (let child = 0; child < 20; child += 1) {
+        rows.push({
+          id: `p${parent}c${child}`,
+          name: "",
+          parentId: `p${parent}`,
+        });
+      }
+    }
+    for (let parent = 0; parent < 40; parent += 1) {
+      rows.push({ id: `p${parent}`, name: "", parentId: "missing" });
+    }
+    let reads = 0;
+    const entries = buildTreeEntries<Node>({
+      rows,
+      getRowId: (row) => {
+        reads += 1;
+        return row.id;
+      },
+      getParentId: (row) => row.parentId,
+      expandedIds: new Set(["p0", "p39"]),
+    });
+    expect(entries.map((entry) => entry.key).slice(0, 3)).toEqual([
+      "p0",
+      "p0c0",
+      "p0c1",
+    ]);
+    expect(entries).toHaveLength(40 + 40);
+    expect(entries[0]?.descendantIds).toHaveLength(20);
+    expect(reads).toBeLessThanOrEqual(rows.length * 2);
+  });
+
+  it("keeps a row whose parent is missing as a root, in source order", () => {
+    const entries = buildTreeEntries<Node>({
+      rows: [
+        { id: "b", name: "b", parentId: "gone" },
+        { id: "a", name: "a" },
+        { id: "c", name: "c", parentId: "a" },
+      ],
+      getRowId,
+      getParentId: (row) => row.parentId,
+      expandedIds: new Set(["a"]),
+    });
+    expect(entries.map((entry) => entry.key)).toEqual(["b", "a", "c"]);
+  });
+
   it("counts a whole subtree for selection, folded or not", () => {
     // Ticking a folder ticks what is inside it — including the part that is
     // currently folded away, which the reader still means to include.

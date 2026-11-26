@@ -54,6 +54,7 @@ import { toOpenAITools } from "@adapttable/ai/openai";
 import { toMcpTools, toMcpResources, mcpListChanged } from "@adapttable/ai/mcp";
 ```
 
+- `@adapttable/ai/agent` — the table agent controller a framework binding drives
 - `@adapttable/ai/json` — plain JSON function tools + `AgentEnvelope`
 - `@adapttable/ai/openai` — strict function tools with OpenAI-safe names (`view_setPage`); `{ deferred: true }` is the portable trio
 - `@adapttable/ai/mcp` — tools in catalog order with derived annotations, per-key guide resources, list-changed

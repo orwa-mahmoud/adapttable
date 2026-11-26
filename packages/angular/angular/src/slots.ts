@@ -46,8 +46,14 @@ export class AdaptSlot<TProps> {
   });
   /** The props every component drawn here receives. */
   readonly props = input.required<TProps>({ alias: "adaptSlotProps" });
-  /** The table whose features fill the slot. */
-  readonly table = input.required<SlotTable>({ alias: "adaptSlotTable" });
+  /**
+   * The table whose features fill the slot; inside a slot component, the
+   * table that component draws in.
+   */
+  readonly table = input<SlotTable>(undefined, { alias: "adaptSlotTable" });
+  private readonly slotTable = inject(ADAPTTABLE_SLOT_TABLE, {
+    optional: true,
+  });
 
   private readonly container = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
@@ -63,7 +69,11 @@ export class AdaptSlot<TProps> {
     effect(() => {
       const slot = this.slot();
       const props = this.props();
-      const table = this.table();
+      const table = this.table() ?? this.slotTable;
+      if (!table)
+        throw new Error(
+          `AdaptTable: [adaptSlot] for "${slot.id}" needs [adaptSlotTable] outside a table slot.`
+        );
       const components = drawnSlotFills(
         slot,
         table.slotFills.get(slot.id) ?? []

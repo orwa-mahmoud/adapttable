@@ -6,6 +6,7 @@
 
 import { BatchRowEdit } from '@adapttable/react';
 import { EditHistoryOptions } from '@adapttable/react';
+import { EditingFamilyFactory } from '@adapttable/react/adapter';
 import { FeaturePatch } from '@adapttable/react';
 import { StaticTableFeature } from '@adapttable/react';
 import { TableFeature } from '@adapttable/react';
@@ -21,6 +22,9 @@ export const editHistory: (options?: boolean | EditHistoryOptions) => StaticTabl
 
 // @public
 export const editing: <TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>) => TableFeature<TRow>;
+
+// @public
+export const editingFamily: EditingFamilyFactory;
 
 // @public
 export const rowEditing: <TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown, extras?: FeaturePatch<TRow>) => TableFeature<TRow>;

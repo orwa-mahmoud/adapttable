@@ -105,6 +105,8 @@ const cellKeys = (cells: readonly BodyCell<Row>[] | undefined) =>
 
 /* ── Render model ──────────────────────────────────────────────────── */
 
+/** A body with neither grouping nor a tree. */
+const UNGROUPED = { grouping: undefined, tree: undefined } as const;
 describe("chromeRenderModel", () => {
   it("renders every column and row with no chrome when nothing is composed", () => {
     const model = chromeRenderModel({
@@ -392,7 +394,12 @@ const source = (overrides: Partial<FakeSource> = {}): FakeSource => ({
 });
 
 describe("isBodyEligible", () => {
-  const base = { isPaged: false, source: source(), body: "desktop" };
+  const base = {
+    ...UNGROUPED,
+    isPaged: false,
+    source: source(),
+    body: "desktop",
+  };
 
   it("windows a desktop or mobile list that is not paged", () => {
     expect(isBodyEligible(base)).toBe(true);
@@ -427,47 +434,62 @@ describe("virtualizeIgnoredOnPage", () => {
   const paged = source({ paginationMode: "paged" });
 
   it("flags virtualize asked of a flat paged table", () => {
-    expect(virtualizeIgnoredOnPage(true, { source: paged })).toBe(true);
+    expect(virtualizeIgnoredOnPage(true, { ...UNGROUPED, source: paged })).toBe(
+      true
+    );
   });
 
   it("is quiet when virtualize is off, the list is infinite, or expanded", () => {
-    expect(virtualizeIgnoredOnPage(false, { source: paged })).toBe(false);
-    expect(virtualizeIgnoredOnPage(true, { source: source() })).toBe(false);
+    expect(
+      virtualizeIgnoredOnPage(false, { ...UNGROUPED, source: paged })
+    ).toBe(false);
+    expect(
+      virtualizeIgnoredOnPage(true, { ...UNGROUPED, source: source() })
+    ).toBe(false);
     expect(
       virtualizeIgnoredOnPage(true, {
+        ...UNGROUPED,
         source: paged,
         grouping: { entries: [] },
       })
     ).toBe(false);
     expect(
-      virtualizeIgnoredOnPage(true, { source: paged, tree: { entries: [] } })
+      virtualizeIgnoredOnPage(true, {
+        ...UNGROUPED,
+        source: paged,
+        tree: { entries: [] },
+      })
     ).toBe(false);
   });
 });
 
 describe("estimateBodyItemSize", () => {
   it("falls back to a row on desktop and a card on a phone", () => {
-    expect(estimateBodyItemSize({ isMobile: false }, {}, ROWS)(0)).toBe(
-      DEFAULT_ROW_SIZE_PX
-    );
-    expect(estimateBodyItemSize({ isMobile: true }, {}, ROWS)(0)).toBe(
-      DEFAULT_CARD_SIZE_PX
-    );
+    expect(
+      estimateBodyItemSize({ ...UNGROUPED, isMobile: false }, {}, ROWS)(0)
+    ).toBe(DEFAULT_ROW_SIZE_PX);
+    expect(
+      estimateBodyItemSize({ ...UNGROUPED, isMobile: true }, {}, ROWS)(0)
+    ).toBe(DEFAULT_CARD_SIZE_PX);
   });
 
   it("takes the host's own estimates for each layout", () => {
     const options = { estimateRowSize: 44, estimateCardSize: 200 };
-    expect(estimateBodyItemSize({ isMobile: false }, options, ROWS)(0)).toBe(
-      44
-    );
-    expect(estimateBodyItemSize({ isMobile: true }, options, ROWS)(0)).toBe(
-      200
-    );
+    expect(
+      estimateBodyItemSize({ ...UNGROUPED, isMobile: false }, options, ROWS)(0)
+    ).toBe(44);
+    expect(
+      estimateBodyItemSize({ ...UNGROUPED, isMobile: true }, options, ROWS)(0)
+    ).toBe(200);
   });
 
   it("uses a constant rowHeight for every item", () => {
     expect(
-      estimateBodyItemSize({ isMobile: false }, { rowHeight: 30 }, ROWS)(3)
+      estimateBodyItemSize(
+        { ...UNGROUPED, isMobile: false },
+        { rowHeight: 30 },
+        ROWS
+      )(3)
     ).toBe(30);
   });
 
@@ -475,7 +497,7 @@ describe("estimateBodyItemSize", () => {
 
   it("sizes a flat row from the scroll list, falling back past its end", () => {
     const sizeOf = estimateBodyItemSize(
-      { isMobile: false },
+      { ...UNGROUPED, isMobile: false },
       { rowHeight: byId },
       ROWS
     );
@@ -487,6 +509,7 @@ describe("estimateBodyItemSize", () => {
   it("sizes a grouped leaf by its leaf index, and a header by the fallback", () => {
     const sizeOf = estimateBodyItemSize(
       {
+        ...UNGROUPED,
         isMobile: false,
         grouping: { entries: [GROUP_HEADER, groupRow(ROWS[2]!, 7)] },
       },
@@ -500,7 +523,11 @@ describe("estimateBodyItemSize", () => {
 
   it("sizes a tree row from the walked entry, falling back past its end", () => {
     const sizeOf = estimateBodyItemSize(
-      { isMobile: true, tree: { entries: [treeEntry(ROWS[1]!)] } },
+      {
+        ...UNGROUPED,
+        isMobile: true,
+        tree: { entries: [treeEntry(ROWS[1]!)] },
+      },
       { rowHeight: byId },
       []
     );
@@ -511,9 +538,10 @@ describe("estimateBodyItemSize", () => {
 
 describe("bodySentinelCount", () => {
   it("counts grouped entries when grouping renders, source rows otherwise", () => {
-    expect(bodySentinelCount({ source: source() })).toBe(4);
+    expect(bodySentinelCount({ ...UNGROUPED, source: source() })).toBe(4);
     expect(
       bodySentinelCount({
+        ...UNGROUPED,
         source: source(),
         grouping: { entries: [GROUP_HEADER, groupRow(ROWS[0]!, 0)] },
       })
@@ -599,7 +627,12 @@ describe("hasLoadedChildren", () => {
 /* ── Which window is armed ─────────────────────────────────────────── */
 
 describe("bodyWindowKind", () => {
-  const base = { isPaged: false, source: source(), body: "desktop" };
+  const base = {
+    ...UNGROUPED,
+    isPaged: false,
+    source: source(),
+    body: "desktop",
+  };
 
   it("arms nothing when virtualize is off or the body is ineligible", () => {
     expect(bodyWindowKind(false, base)).toBe("none");
@@ -671,6 +704,31 @@ describe("withSourceIndices", () => {
     expect(result.paddingBottom).toBe(8);
     // A row the page does not hold keeps its window index.
     expect(result.rows.map((entry) => entry.sourceIndex)).toEqual([2, 5]);
+  });
+
+  it("follows a new order, new rows and a new key across window updates", () => {
+    const windowOf = (keys: string[]) => ({
+      enabled: true,
+      rows: keys.map((key, index) => ({ row: { id: key }, index, key })),
+      paddingTop: 0,
+      paddingBottom: 0,
+    });
+    const indices = (
+      keys: string[],
+      rows: readonly Row[],
+      key: (row: Row) => string = rowKey
+    ) =>
+      withSourceIndices(windowOf(keys), rows, key).rows.map(
+        (entry) => entry.sourceIndex
+      );
+    expect(indices(["b", "d"], ROWS)).toEqual([1, 3]);
+    expect(indices(["a", "c"], ROWS)).toEqual([0, 2]);
+    const reversed = [...ROWS].reverse();
+    expect(indices(["b", "d"], reversed)).toEqual([2, 0]);
+    const grown = [{ id: "z" }, ...ROWS];
+    expect(indices(["b", "z"], grown)).toEqual([2, 0]);
+    const upper = (row: Row) => row.id.toUpperCase();
+    expect(indices(["B", "D"], ROWS, upper)).toEqual([1, 3]);
   });
 });
 

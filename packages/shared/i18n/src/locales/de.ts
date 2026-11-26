@@ -196,10 +196,6 @@ export const de: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "Eine Änderung wartet auf Ihre Entscheidung.",
-  pendingProposals: (count) =>
-    count === 1
-      ? "1 vorgeschlagene Änderung"
-      : `${String(count)} vorgeschlagene Änderungen`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -347,10 +343,6 @@ export const de: Required<TableLabels> = {
       error: "Fehler",
       disconnected: "Nicht verbunden",
     })[status] ?? "Bereit",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Zeile hinzufügen",
   duplicateRow: "Zeile duplizieren",
@@ -369,10 +361,8 @@ export const de: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Zeile von ${String(from)} nach ${String(to)} verschoben`,
   rowReorderCancelled: "Neuordnung abgebrochen",
-  rowMoveOptions: "Optionen zum Verschieben der Zeile",
   moveToGroup: "In Gruppe verschieben…",
   moveUnder: "Unterordnen unter…",
-  moveToTopLevel: "Auf die oberste Ebene verschieben",
   confirmRowMoveTitle: "Zeilenverschiebung bestätigen",
   confirmRowMoveDescription: (row, from, to) =>
     `Zeile ${row} von ${from} nach ${to} verschieben?`,
@@ -410,9 +400,7 @@ export const de: Required<TableLabels> = {
   removeGroupingColumn: (label) => `${label} aus der Gruppierung entfernen`,
   moveGroupingColumn: (label) => `Gruppierung nach ${label} verschieben`,
   groupingDropToRemove: "Hier ablegen, um die Gruppierung zu entfernen",
-  groupingAggregateColumn: "Aggregatspalte",
   groupingAggregation: "Gruppenaggregation",
-  groupingAggregationDefault: "Standard",
   groupingAggregationNone: "Keine",
   groupingAggregations: "Aggregationen",
   groupingAddAggregation: "Aggregationsspalte hinzufügen",
@@ -484,8 +472,6 @@ export const de: Required<TableLabels> = {
     "Virtualisierung ist aus — diese paginierte Tabelle zeigt eine Seite auf einmal.",
   noticePinNested:
     "Zeilenheften ist aus, solange Gruppierung oder ein Baum aktiv ist.",
-  noticeReorderNested:
-    "Zeilenverschieben ist aus, solange Gruppierung oder ein Baum aktiv ist.",
   noticeGroupingUnavailable:
     "Gruppierung ist aus — diese Quelle kann nicht gruppieren.",
   noticeExportAllPage:

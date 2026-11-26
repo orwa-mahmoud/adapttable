@@ -44,6 +44,7 @@ import { Component } from "@angular/core";
 import { AdaptCellTemplate, type ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/ng-zorro";
 import { cellNavigation } from "@adapttable/ng-zorro/cell-navigation";
+import { selection } from "@adapttable/ng-zorro/selection";
 
 interface Person {
   id: string;
@@ -61,7 +62,6 @@ interface Person {
       [rowKey]="rowKey"
       [features]="features"
       tableLabel="People"
-      [selectable]="true"
     >
       <ng-template adaptCellTemplate="name" let-value="value">
         <strong>{{ value }}</strong>
@@ -76,12 +76,12 @@ export class PeopleTable {
     { key: "age", sortable: true },
   ];
   readonly rowKey = (row: Person) => row.id;
-  readonly features = [cellNavigation()];
+  readonly features = [selection(), cellNavigation()];
 }
 ```
 
-Supply in-memory `data`, a prebuilt `source`, or host-fetched rows with
-`onQueryChange` and `total`. Edits, additions, deletes and reorders call the
+Supply in-memory `data`, or a prebuilt `source` — `injectServerData`'s for
+host-fetched server pages. Edits, additions, deletes and reorders call the
 host; the table never owns or mutates its rows. The binding also owns sorting,
 pagination and virtualization, so the NG-ZORRO table does not run a second
 data pipeline.
@@ -106,7 +106,7 @@ const features = [
 
 The feature entries cover:
 
-- **Feature composition** through individual kit subpaths and `standardPreset()`;
+- **Feature composition** through individual kit subpaths and `standardFeatures()`;
   import only the behavior you need
 - **Global search, sorting and pagination** for in-memory or host-fetched data,
   with URL-synced state and infinite scrolling on mobile
@@ -138,8 +138,8 @@ The feature entries cover:
   separately imported AI bindings
 
 `/features` gathers the feature factories. `/preset` exports
-`standardPreset()`: column menu, density, CSV export, fullscreen, header
-filters and status bar, with grouping, bulk actions, filters and saved views
+`standardFeatures()`: columns menu, resizing, fitting, density, CSV export, keyboard Find,
+fullscreen, multi-sort, header filters and status bar, with grouping, bulk actions, filters and saved views
 included when their options are supplied. Import individual entries when
 controlling bundle cost. See the
 [Angular feature guide](https://adapttable.orwamahmoud.com/angular/features/)

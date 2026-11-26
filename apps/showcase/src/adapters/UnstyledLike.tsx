@@ -602,6 +602,8 @@ function UnstyledLikeTable({
           contextMenu: o.contextMenu,
           filterControls: o.filterControls,
           filterDefs: o.filters,
+          filtersMode: o.filtersUi,
+          filterFields: o.filterFields,
           filterTypeSpecs: demoFilterTypes(),
           sidePanel: o.sidePanel,
           statusBar: o.statusBar,
@@ -634,13 +636,11 @@ function UnstyledLikeTable({
       forceMobile={o.forceMobile}
       maxHeight={o.maxHeight}
       density={o.density}
-      filtersMode={o.filtersUi}
       {...presentation}
       rowActionsLayout={o.rowMutations ? "menu" : undefined}
       confirm={demoConfirm}
       animate={o.animate}
       stickyHeader
-      filterFields={o.filterFields}
       classNames={o.styled}
     />
   );

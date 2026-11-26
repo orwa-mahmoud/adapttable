@@ -4,10 +4,10 @@ import {
   type ActiveFilterChipsSlotProps,
   type AdapterFiltersFeature,
   extendFeature,
+  FILTERS_PANEL,
   filterViewKey,
   type FilterWidget,
   slotRender,
-  TOOLBAR_EXTRAS,
   useDataTableClassNames,
   useFeatureState,
 } from "@adapttable/vue/adapter";
@@ -82,7 +82,7 @@ export function filtersWith(
     options: FiltersOptions = {}
   ): TableFeature<TRow> =>
     extendFeature(bindingFilters(defs, options), [
-      slotRender(TOOLBAR_EXTRAS, () => h(PanelFeatureControl, { widgets })),
+      slotRender(FILTERS_PANEL, () => h(PanelFeatureControl, { widgets })),
       slotRender(ACTIVE_FILTER_CHIPS, (props) => h(ChipsFeatureControl, props)),
     ]);
 }

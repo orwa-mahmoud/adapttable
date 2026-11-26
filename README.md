@@ -188,7 +188,7 @@ Packages are versioned independently and install their matching binding and core
 
 - [Core concepts](https://adapttable.orwamahmoud.com/concepts/) · [Client/server data](https://adapttable.orwamahmoud.com/data-tiers/) · [Customization](https://adapttable.orwamahmoud.com/react/customization/)
 - [AI integration](https://adapttable.orwamahmoud.com/ai-integrations/) · [Accessibility](https://adapttable.orwamahmoud.com/react/accessibility/) · [Versioning](https://adapttable.orwamahmoud.com/versioning/)
-- [Migrate from v2](https://adapttable.orwamahmoud.com/react/migrate-from-v2/) · [FAQ](https://adapttable.orwamahmoud.com/faq/)
+- [Migrate from v3](https://adapttable.orwamahmoud.com/react/migrate-from-v3/) · [Migrate from v2](https://adapttable.orwamahmoud.com/react/migrate-from-v2/) · [FAQ](https://adapttable.orwamahmoud.com/faq/)
 - For agents: [llms.txt](https://adapttable.orwamahmoud.com/llms.txt) · [llms-full.txt](https://adapttable.orwamahmoud.com/llms-full.txt)
 
 ## Contributing

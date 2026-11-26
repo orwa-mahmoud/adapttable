@@ -13,6 +13,18 @@ interface Row {
  * dropped, never applied, because applying half of one can empty a table.
  */
 describe("parseRowPatchFrame", () => {
+  it("reads a rekey frame, and drops one with no usable id or changes", () => {
+    expect(
+      parseRowPatchFrame(
+        JSON.stringify([
+          { type: "rekey", id: "a", changes: { id: "a2" } },
+          { type: "rekey", id: "", changes: { id: "x" } },
+          { type: "rekey", id: "b" },
+        ])
+      )
+    ).toEqual([{ type: "rekey", id: "a", changes: { id: "a2" } }]);
+  });
+
   it("reads a single patch and an array of them alike", () => {
     expect(parseRowPatchFrame<Row>('{"type":"remove","id":"a"}')).toEqual([
       { type: "remove", id: "a" },

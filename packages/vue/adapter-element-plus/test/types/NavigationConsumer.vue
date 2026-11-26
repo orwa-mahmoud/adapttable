@@ -13,15 +13,18 @@ const data: Row[] = [{ id: "a", score: 10 }];
 const columns: ColumnInput<Row>[] = [
   { key: "score", editable: true, editor: "number" },
 ];
+function fill(edits: CellEdit<Row>[]) {
+  return edits.map((edit) => edit.row.id).join(",");
+}
 const features = [
-  cellNavigation({ onRangeChange: (range) => range?.anchor.row }),
+  cellNavigation({
+    onRangeChange: (range) => range?.anchor.row,
+    onFill: fill,
+  }),
   columnSelectionCheckbox(),
   statusBar(),
   selectionStats(),
 ];
-function fill(edits: CellEdit<Row>[]) {
-  return edits.map((edit) => edit.row.id).join(",");
-}
 </script>
 <template>
   <DataTable
@@ -29,7 +32,6 @@ function fill(edits: CellEdit<Row>[]) {
     :columns="columns"
     :row-key="(row: Row) => row.id"
     :features="features"
-    :on-cell-fill="fill"
     :url-sync="false"
   />
 </template>

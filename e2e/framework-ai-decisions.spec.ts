@@ -7,7 +7,7 @@
  */
 import { expect, test } from "@playwright/test";
 
-import { getLabels } from "../packages/shared/i18n/src/index";
+import { getLabels } from "../packages/shared/i18n/src/catalog";
 import {
   AI_KITS,
   ask,

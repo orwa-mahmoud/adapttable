@@ -4,13 +4,14 @@
 
 ```ts
 
+import { MaybeRefOrGetter } from 'vue';
 import { RowReorderHandler } from '@adapttable/vue';
 import { RowReorderOptions } from '@adapttable/vue';
 import { TableFeature } from '@adapttable/vue';
 import { useRowReorder } from '@adapttable/vue';
 
 // @public (undocumented)
-export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): TableFeature<TRow>;
+export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: MaybeRefOrGetter<RowReorderOptions<TRow> | undefined>): TableFeature<TRow>;
 
 export { RowReorderHandler }
 

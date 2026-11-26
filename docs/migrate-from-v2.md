@@ -1,10 +1,14 @@
 # Upgrading from v2
 
+This guide ends at v3. Continue with [Upgrading from v3](./migrate-from-v3.md)
+to reach v4, which moves the machinery imports listed below to their own
+entries.
+
 v3 removes the enabling props. A feature is an import and an entry in
 `features`, and that is the only way in — which is what lets a table download
 what it named and nothing else. Measured adapter sizes live in the
 [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable); the acceptance ceiling
-is 80 KB min+gzip.
+is 80 KiB min+gzip.
 
 Nothing else about the table changed: the same columns, the same data tiers,
 the same URL state, the same labels.
@@ -116,10 +120,9 @@ grouping("team", {
 
 **Main-entry adapter machinery.** The 72 adapter-machinery names v2
 re-exported from `@adapttable/core` are all exported from
-`@adapttable/react/adapter`, which is where to import them. The React-bound
-ones are exported only there; the framework-neutral helpers (column-group,
-extra-row, pinned-row and row-span math) are also still on `@adapttable/core`,
-deprecated there:
+`@adapttable/react/adapter`, which is where to import them, the React-bound
+ones and the framework-neutral helpers (column-group, extra-row, pinned-row and
+row-span math) alike:
 
 ```ts
 // v2
@@ -227,8 +230,9 @@ without writing the object by hand.
 meant, and `density="comfortable"` is `size="medium"`.
 
 The hooks, the React column and the prop-getters a host imports directly are
-exported from `@adapttable/react`. The framework-neutral models and helpers in
-the same list stay on `@adapttable/core`:
+exported from `@adapttable/react`, and the ones that build a kit's chrome from
+`@adapttable/react/adapter`. The framework-neutral models and helpers in the
+same list stay on `@adapttable/core`:
 
 | Name                               | v3 import                                 |
 | ---------------------------------- | ----------------------------------------- |
@@ -238,13 +242,13 @@ the same list stay on `@adapttable/core`:
 | `BaseDataTableProps`               | `@adapttable/react`                       |
 | `BulkAction`                       | `@adapttable/core`                        |
 | `CellElementProps`                 | `@adapttable/react`                       |
-| `ChromeBodyData`                   | `@adapttable/react`                       |
+| `ChromeBodyData`                   | `@adapttable/react/adapter`               |
 | `ColumnFooterContext`              | `@adapttable/core` or `@adapttable/react` |
 | `ColumnGroupDef`                   | `@adapttable/core`                        |
 | `ColumnGroupRecord`                | `@adapttable/core`                        |
 | `ColumnHeaderController`           | `@adapttable/core` or `@adapttable/react` |
-| `columnHeaderLabel`                | `@adapttable/core`                        |
-| `ColumnReorderKeyProps`            | `@adapttable/react`                       |
+| `columnHeaderLabel`                | `@adapttable/react/adapter`               |
+| `ColumnReorderKeyProps`            | `@adapttable/react/adapter`               |
 | `ColumnResizeHandleProps`          | `@adapttable/core`                        |
 | `ComputedColumnSpec`               | `@adapttable/core`                        |
 | `CustomCellEditorRender`           | `@adapttable/core`                        |
@@ -253,7 +257,7 @@ the same list stay on `@adapttable/core`:
 | `EditableCellGate`                 | `@adapttable/react`                       |
 | `EditableCellGateProps`            | `@adapttable/react`                       |
 | `ExportContext`                    | `@adapttable/core`                        |
-| `exportViewFromChrome`             | `@adapttable/core`                        |
+| `exportViewFromChrome`             | `@adapttable/react/adapter`               |
 | `ExtraRow`                         | `@adapttable/core`                        |
 | `FeatureProps`                     | `@adapttable/react`                       |
 | `FeatureProviderContribution`      | `@adapttable/react`                       |
@@ -261,14 +265,14 @@ the same list stay on `@adapttable/core`:
 | `FeatureRender`                    | `@adapttable/react`                       |
 | `FilterChromeMode`                 | `@adapttable/core`                        |
 | `FilterTypeSpec`                   | `@adapttable/core`                        |
-| `groupAggregateEntries`            | `@adapttable/core`                        |
+| `groupAggregateEntries`            | `@adapttable/core/grouping`               |
 | `GroupAggregatesFn`                | `@adapttable/core`                        |
 | `GroupedFlatEntry`                 | `@adapttable/core`                        |
 | `GroupingChipKeyboardProps`        | `@adapttable/core`                        |
 | `GroupingDragProps`                | `@adapttable/core`                        |
 | `GroupingDropProps`                | `@adapttable/core`                        |
 | `GroupRowCell`                     | `@adapttable/core`                        |
-| `groupRowLayout`                   | `@adapttable/core`                        |
+| `groupRowLayout`                   | `@adapttable/core/grouping`               |
 | `HeaderFilterOpenProvider`         | `@adapttable/react`                       |
 | `headerFilterStickTop`             | `@adapttable/react`                       |
 | `IncrementalView`                  | `@adapttable/core`                        |
@@ -282,8 +286,8 @@ the same list stay on `@adapttable/core`:
 | `MultiSelectEditorSlots`           | `@adapttable/react`                       |
 | `NestedTable`                      | `@adapttable/react`                       |
 | `renderRegisteredFilter`           | `@adapttable/core`                        |
-| `resolveColumnFooter`              | `@adapttable/react`                       |
-| `resolveColumnHeader`              | `@adapttable/react`                       |
+| `resolveColumnFooter`              | `@adapttable/react/adapter`               |
+| `resolveColumnHeader`              | `@adapttable/react/adapter`               |
 | `RowAction`                        | `@adapttable/core`                        |
 | `RowActionsRenderer`               | `@adapttable/core`                        |
 | `RowStyle`                         | `@adapttable/core`                        |
@@ -293,30 +297,30 @@ the same list stay on `@adapttable/core`:
 | `TableExtraEntry`                  | `@adapttable/core`                        |
 | `TableRowReorderState`             | `@adapttable/react`                       |
 | `ToolbarSlots`                     | `@adapttable/react`                       |
-| `useActiveFilterChips`             | `@adapttable/react`                       |
+| `useActiveFilterChips`             | `@adapttable/react/adapter`               |
 | `useBatchEditing`                  | `@adapttable/react`                       |
 | `useBooleanFilterWidget`           | `@adapttable/react`                       |
 | `useBulkActionRunner`              | `@adapttable/react`                       |
 | `useCellEditing`                   | `@adapttable/react`                       |
 | `useCellSaveState`                 | `@adapttable/react`                       |
 | `useChecklistFilter`               | `@adapttable/react`                       |
-| `useChromeScrollReset`             | `@adapttable/react`                       |
-| `useColorScheme`                   | `@adapttable/react`                       |
-| `useColumnDragState`               | `@adapttable/react`                       |
+| `useChromeScrollReset`             | `@adapttable/react/adapter`               |
+| `useColorScheme`                   | `@adapttable/react/adapter`               |
+| `useColumnDragState`               | `@adapttable/react/adapter`               |
 | `useColumnLayout`                  | `@adapttable/react`                       |
 | `useColumnLayoutStorageState`      | `@adapttable/react`                       |
 | `useColumnLayoutUrlState`          | `@adapttable/react`                       |
 | `UseDataTableResult`               | `@adapttable/react`                       |
-| `useDebounce`                      | `@adapttable/react`                       |
+| `useDebounce`                      | `@adapttable/react/adapter`               |
 | `useDensityUrlState`               | `@adapttable/react`                       |
 | `useDirtyCells`                    | `@adapttable/react`                       |
 | `useEditConflict`                  | `@adapttable/react`                       |
 | `useEditHistory`                   | `@adapttable/react`                       |
-| `useExtraChips`                    | `@adapttable/react`                       |
+| `useExtraChips`                    | `@adapttable/react/adapter`               |
 | `useFilterOptions`                 | `@adapttable/react`                       |
 | `useFilterTreeChips`               | `@adapttable/react`                       |
-| `useFilterTriggerToggle`           | `@adapttable/react`                       |
-| `useFindFocus`                     | `@adapttable/react`                       |
+| `useFilterTriggerToggle`           | `@adapttable/react/adapter`               |
+| `useFindFocus`                     | `@adapttable/react/adapter`               |
 | `useFindInTable`                   | `@adapttable/react`                       |
 | `useFrontendData`                  | `@adapttable/react`                       |
 | `useGridFocus`                     | `@adapttable/react`                       |
@@ -325,7 +329,7 @@ the same list stay on `@adapttable/core`:
 | `useGroupPaging`                   | `@adapttable/react`                       |
 | `useHeaderFilterOverlay`           | `@adapttable/react`                       |
 | `useHighlight`                     | `@adapttable/react`                       |
-| `useHorizontalOverflow`            | `@adapttable/react`                       |
+| `useHorizontalOverflow`            | `@adapttable/react/adapter`               |
 | `useInfiniteScroll`                | `@adapttable/react`                       |
 | `useIsMobile`                      | `@adapttable/react`                       |
 | `useLazyChildren`                  | `@adapttable/react`                       |
@@ -340,15 +344,15 @@ the same list stay on `@adapttable/core`:
 | `useRowPinningUrlState`            | `@adapttable/react`                       |
 | `useRowReorder`                    | `@adapttable/react`                       |
 | `useSavedViews`                    | `@adapttable/react`                       |
-| `useScrollToTableTop`              | `@adapttable/react`                       |
-| `UseScrollToTableTopOptions`       | `@adapttable/react`                       |
+| `useScrollToTableTop`              | `@adapttable/react/adapter`               |
+| `UseScrollToTableTopOptions`       | `@adapttable/react/adapter`               |
 | `useSearchInput`                   | `@adapttable/react`                       |
 | `useSelection`                     | `@adapttable/react`                       |
 | `useServerData`                    | `@adapttable/react`                       |
-| `useShortcuts`                     | `@adapttable/react`                       |
+| `useShortcuts`                     | `@adapttable/react/adapter`               |
 | `useTableData`                     | `@adapttable/react`                       |
 | `UseTableDataOptions`              | `@adapttable/react`                       |
-| `useTableEditHistory`              | `@adapttable/react`                       |
+| `useTableEditHistory`              | `@adapttable/react/adapter`               |
 | `useTableUrlState`                 | `@adapttable/react`                       |
 | `useTableVirtualization`           | `@adapttable/react`                       |
 | `useTextFilterWidget`              | `@adapttable/react`                       |
@@ -401,7 +405,7 @@ column / AI contracts.
 | `ColumnDef`             | `@adapttable/react`                                          | React column (extends neutral `ColumnModel`)        |
 | `TableSource`           | `@adapttable/core`                                           | Unchanged                                           |
 | `useQuerySource`        | `@adapttable/react`                                          | React source hook; query types stay on core         |
-| `useTableChrome`        | `@adapttable/react`                                          | Chrome binding                                      |
+| `useTableChrome`        | `@adapttable/react/adapter`                                  | Chrome binding                                      |
 | `HeaderGroupCell`       | `@adapttable/react/adapter`                                  | Neutral header-group model                          |
 | `sourceCapabilities`    | `@adapttable/core`                                           | Neutral helper                                      |
 | `grouping`              | `@adapttable/<kit>/grouping` or `@adapttable/react/features` | Feature factory that returns a React `TableFeature` |

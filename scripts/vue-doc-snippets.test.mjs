@@ -174,8 +174,8 @@ function compileExamples(examples) {
             "@adapttable/ai": [
               join(REPO_ROOT, "packages/shared/ai/src/index.ts"),
             ],
-            "@adapttable/ai/voice": [
-              join(REPO_ROOT, "packages/shared/ai/src/voice.ts"),
+            "@adapttable/ai/*": [
+              join(REPO_ROOT, "packages/shared/ai/src/*.ts"),
             ],
             "@adapttable/ai-vue": [
               join(REPO_ROOT, "packages/vue/ai-vue/src/index.ts"),

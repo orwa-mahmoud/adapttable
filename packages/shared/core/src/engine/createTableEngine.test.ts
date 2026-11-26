@@ -252,6 +252,12 @@ describe("createTableEngine", () => {
 
     engine.configure({ locale: "ar" });
     expect(engine.cellValue(first!, "nameEn")).toBe("آدا");
+    // New columns read through their own paths, not the ones read before.
+    engine.configure({ columns: [{ key: "nameEn", i18n: { ar: "ref" } }] });
+    expect(engine.cellValue(first!, "nameEn")).toBe("a");
+    engine.configure({
+      columns: [{ key: "nameEn", i18n: { ar: "nameAr" } }],
+    });
     expect(engine.snapshot().revisions.schema).toBeGreaterThan(1);
 
     engine.configure({ paginationMode: "infinite" });
@@ -282,5 +288,69 @@ describe("createTableEngine", () => {
     engine.invalidate(["data"]);
     expect(engine.rows("full").map((row) => row.id)).toEqual(["1", "2"]);
     engine.dispose();
+  });
+});
+
+describe("lookups by id", () => {
+  interface Item {
+    id: string;
+    name: string;
+  }
+  const items = (names: string[]): Item[] =>
+    names.map((name, index) => ({ id: String(index), name }));
+
+  function engineWith(data: Item[]) {
+    return createTableEngine<Item>({
+      data,
+      columns: [{ key: "name" }],
+      rowKey: (row) => row.id,
+    });
+  }
+
+  it("answers every read, repeated or missing, as a scan would", () => {
+    const data = items(["Ada", "Grace", "Lin"]);
+    const engine = engineWith(data);
+    for (let read = 0; read < 3; read++) {
+      expect(engine.rowByKey("2")).toBe(data[2]);
+      expect(engine.rowByKey("0")).toBe(data[0]);
+      expect(engine.rowByKey("9")).toBeUndefined();
+    }
+  });
+
+  it("keeps the first row when two rows share a key", () => {
+    const first = { id: "x", name: "first" };
+    const engine = engineWith([first, { id: "x", name: "second" }]);
+    expect(engine.rowByKey("x")).toBe(first);
+    expect(engine.rowByKey("x")).toBe(first);
+  });
+
+  it("reads new rows, an in-place change and a new identity", () => {
+    const engine = engineWith(items(["Ada", "Grace"]));
+    expect(engine.rowByKey("1")?.name).toBe("Grace");
+    expect(engine.rowByKey("1")?.name).toBe("Grace");
+    const next = items(["Lin", "Mae"]);
+    engine.stageCandidate({}, { data: next });
+    engine.commitCandidate();
+    expect(engine.rowByKey("1")).toBe(next[1]);
+    expect(engine.rowByKey("1")).toBe(next[1]);
+    // A row the host rekeys in place, then invalidates.
+    next[1]!.id = "7";
+    engine.invalidate(["data"]);
+    expect(engine.rowByKey("7")).toBe(next[1]);
+    expect(engine.rowByKey("1")).toBeUndefined();
+    engine.configure({ getRowId: (row: Item) => row.name });
+    expect(engine.rowByKey("Mae")).toBe(next[1]);
+    expect(engine.rowByKey("Mae")).toBe(next[1]);
+    expect(engine.rowByKey("7")).toBeUndefined();
+  });
+
+  it("gives a staged candidate its own rows", () => {
+    const engine = engineWith(items(["Ada", "Grace"]));
+    expect(engine.rowByKey("0")?.name).toBe("Ada");
+    expect(engine.rowByKey("0")?.name).toBe("Ada");
+    engine.stageCandidate({}, { data: items(["Lin"]) });
+    expect(engine.candidate.rowByKey("0")?.name).toBe("Lin");
+    expect(engine.candidate.rowByKey("1")).toBeUndefined();
+    expect(engine.rowByKey("1")?.name).toBe("Grace");
   });
 });

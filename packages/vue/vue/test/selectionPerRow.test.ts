@@ -9,6 +9,7 @@ import {
   watchEffect,
 } from "vue";
 
+import { selection } from "../src/features/headlessFactories";
 import {
   DesktopTableChrome,
   MobileCardsChrome,
@@ -86,10 +87,10 @@ describe("the body model under a selection change", () => {
     scopes.push(() => scope.stop());
     const shell = scope.run(() =>
       useDataTableShell<Row>(() => ({
+        features: [selection()],
         data: rows,
         columns: [{ key: "id" }],
         rowKey,
-        selectable: true,
         urlSync: false,
         forceMobile: false,
       }))
@@ -120,13 +121,12 @@ describe("a controlled selection change", () => {
     // The host hands the table a fresh options object with only the ids new.
     const shell = scope.run(() =>
       useDataTableShell<Row>(() => ({
+        features: [selection({ selectedIds: ids.value })],
         data: rows,
         columns,
         rowKey,
-        selectable: true,
         urlSync: false,
         forceMobile: false,
-        selectedIds: ids.value,
       }))
     )!;
     const desktop = shell.desktop.value;
@@ -156,10 +156,10 @@ describe("drawing a selection change", () => {
         defineComponent({
           setup() {
             shell = useDataTableShell<Row>(() => ({
+              features: [selection()],
               data: rows,
               columns: [{ key: "id" }],
               rowKey,
-              selectable: true,
               urlSync: false,
               forceMobile: mobile,
               labels: { selectRow: "row" },

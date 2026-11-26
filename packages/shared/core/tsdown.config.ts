@@ -2,35 +2,17 @@ import { fileURLToPath } from "node:url";
 
 import { defineConfig, type TsdownPlugin, type UserConfig } from "tsdown";
 
-import { stripDevWarnings } from "../../../scripts/strip-dev-warnings.mjs";
-
-/**
- * The two builds the package ships. The production build is the default
- * export condition and carries no development warning: every `devWarn`
- * statement and its message is compiled out. The development build, under
- * the `development` condition bundlers select in development, keeps them.
- */
-interface Flavor {
-  readonly outDir: string;
-  readonly production: boolean;
-}
-
-const PRODUCTION: Flavor = { outDir: "dist", production: true };
-const DEVELOPMENT: Flavor = { outDir: "dist/dev", production: false };
+import {
+  DEVELOPMENT,
+  devWarningPlugins,
+  type Flavor,
+  PRODUCTION,
+} from "../../../scripts/dev-build.mjs";
 
 const SOURCE_DIR = fileURLToPath(new URL("src/", import.meta.url));
 
-/** The package's own source modules, whose warnings a production build drops. */
-function isSourceModule(id: string): boolean {
-  return (
-    id.startsWith(SOURCE_DIR) && /\.tsx?$/.test(id) && !id.endsWith(".d.ts")
-  );
-}
-
 function flavorPlugins(flavor: Flavor): TsdownPlugin[] {
-  return flavor.production
-    ? [stripDevWarnings({ callee: "devWarn", include: isSourceModule })]
-    : [];
+  return devWarningPlugins(flavor, SOURCE_DIR);
 }
 
 /**
@@ -115,6 +97,7 @@ const library = (flavor: Flavor) =>
       "src/grouping.ts",
       "src/editing.ts",
       "src/selection.ts",
+      "src/locale.ts",
     ],
     format: ["esm", "cjs"],
     // Both builds share the production build's declarations.

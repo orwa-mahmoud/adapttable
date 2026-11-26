@@ -11,13 +11,12 @@ import type { FeatureHostState } from "./currentHost";
 import { LiveFeatureHost } from "./liveFeatureHost";
 
 /**
- * Live engine a neutral plugin may register against.
+ * Live engine a neutral plugin registers against. Registration only: what
+ * a feature acquires belongs in its `mount`.
  *
  * @public
  */
 export interface NeutralFeatureHost<TRow = unknown> {
-  /** Forget a registration when the table is disposed or features change. */
-  onDispose(cleanup: () => void): void;
   /**
    * Phantom marker that pins the row type; never read at runtime.
    */

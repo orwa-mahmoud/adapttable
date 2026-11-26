@@ -240,13 +240,13 @@ function KitPalette({ open, onClose, commands }: AdapterCommandPaletteProps) {
 function KitTrigger({
   onOpenPalette,
   paletteOpen,
-  undoLabel,
+  labels,
 }: AdapterCommandPaletteTriggerProps) {
   return (
     <button
       type="button"
       aria-expanded={paletteOpen}
-      data-undo-label={undoLabel}
+      data-undo-label={labels.undoEdit}
       onClick={onOpenPalette}
     >
       commands
@@ -257,15 +257,7 @@ function KitTrigger({
 function PaletteTable() {
   return (
     <>
-      <FeatureSlot
-        slot={TOOLBAR_EXTRAS}
-        props={{
-          undoLabel: "Undo",
-          density: "comfortable",
-          onDensityChange: () => undefined,
-          labels: defaultLabels,
-        }}
-      />
+      <FeatureSlot slot={TOOLBAR_EXTRAS} props={{ labels: defaultLabels }} />
       <FeatureSlot
         slot={COMMAND_PALETTE_LIVE}
         props={{ commandPalette: true, labels: defaultLabels }}
@@ -287,7 +279,7 @@ describe("the command palette's toolbar control", () => {
     const trigger = screen.getByRole("button", { name: "commands" });
     expect(trigger).toHaveAttribute("aria-expanded", "false");
     // The toolbar's own props reach the kit control.
-    expect(trigger).toHaveAttribute("data-undo-label", "Undo");
+    expect(trigger).toHaveAttribute("data-undo-label", defaultLabels.undoEdit);
     expect(paletteState()).toBe("closed");
 
     fireEvent.click(trigger);
@@ -316,6 +308,7 @@ describe("the command palette's toolbar control", () => {
     const feature = commandPalette({ button: true });
 
     expect(feature.renders?.map((entry) => entry.slot.id)).toEqual([
+      "table-main",
       "command-palette-live",
     ]);
   });

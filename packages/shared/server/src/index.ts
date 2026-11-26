@@ -57,6 +57,7 @@ import {
   PARAM_SORT_DIR,
   parseFilterTree,
   parseGroupAggregateOverrides,
+  parseStrictFilterTree,
   type PivotConfig,
   type PivotUrlState,
   type QueryFilterGroup,
@@ -67,7 +68,8 @@ import {
 
 import {
   checkTree,
-  declaredFilters,
+  type FilterLookups,
+  filterLookups,
   type Refuse,
   type ServerFilterDef,
   type ServerFilterType,
@@ -88,7 +90,6 @@ export {
   type ServerFilterDef,
   type ServerFilterType,
   type ShapedFilter,
-  splitFilterValues,
   type TextFilter,
   type TypedFilter,
 } from "./filters";
@@ -302,12 +303,90 @@ function treeColumns(group: QueryFilterGroup): string[] {
  */
 export function parseTableQuery(
   input: QueryInput,
-  schema: QuerySchema
+  schema: QuerySchema | PreparedQuerySchema
 ): ServerTableQuery {
   const params = toParams(input);
+  const prepared = preparedLookups.get(schema);
+  if (prepared) return parseWith(params, prepared);
+  if (!("columns" in schema)) {
+    throw new TypeError(
+      "parseTableQuery: a prepared schema must come from prepareQuerySchema"
+    );
+  }
+  return parseWith(params, lookupsOf(schema));
+}
+
+/** The column and filter lookups one schema is checked with. */
+interface SchemaLookups {
+  readonly schema: QuerySchema;
+  readonly listed: ReadonlySet<string> | undefined;
+  readonly filters: FilterLookups | undefined;
+}
+
+/**
+ * A schema whose lookups were prepared once, for a route that answers every
+ * request against the same schema.
+ *
+ * @public
+ */
+export interface PreparedQuerySchema {
+  /** The schema as it was when it was prepared. */
+  readonly schema: Readonly<QuerySchema>;
+}
+
+const preparedLookups = new WeakMap<object, SchemaLookups>();
+
+function lookupsOf(schema: QuerySchema): SchemaLookups {
+  return {
+    schema,
+    listed: schema.columns === "any" ? undefined : new Set(schema.columns),
+    filters:
+      schema.filters === undefined
+        ? undefined
+        : filterLookups(schema.filters, schema.filterTypes ?? []),
+  };
+}
+
+/**
+ * Prepare a schema's column and filter lookups once, for a route that
+ * checks every request against the same schema: the allowed columns, the
+ * declared filters, their parameters and their static choices. Pass the
+ * result to {@link parseTableQuery} in place of the schema; it answers
+ * exactly as the schema would.
+ *
+ * The schema is read now. A schema built per request — scoped to a user or a
+ * role — goes to `parseTableQuery` as it is, and is checked fresh each time.
+ *
+ * @param schema - The schema every request is checked against.
+ * @returns The prepared schema.
+ *
+ * @public
+ */
+export function prepareQuerySchema(schema: QuerySchema): PreparedQuerySchema {
+  const snapshot: QuerySchema = Object.freeze({
+    ...schema,
+    columns:
+      schema.columns === "any" ? "any" : Object.freeze([...schema.columns]),
+  });
+  const prepared: PreparedQuerySchema = Object.freeze({ schema: snapshot });
+  const lookups = lookupsOf(snapshot);
+  // Read every filter's choices and the key index now, so a host that edits
+  // its filter definitions later does not change what this schema allows.
+  for (const def of lookups.filters?.defs ?? []) {
+    lookups.filters?.choicesOf(def);
+  }
+  lookups.filters?.filterFor("");
+  preparedLookups.set(prepared, lookups);
+  return prepared;
+}
+
+function parseWith(
+  params: URLSearchParams,
+  lookups: SchemaLookups
+): ServerTableQuery {
+  const { schema, listed } = lookups;
   const ns = schema.urlKey ? `${schema.urlKey}.` : "";
   const get = (name: string) => params.get(`${ns}${name}`);
-  const listed = schema.columns === "any" ? undefined : new Set(schema.columns);
   const allowed: Allows = (key) => listed === undefined || listed.has(key);
   const rejected: QueryRejection[] = [];
   const refuse = (param: string, value: string, reason: string) => {
@@ -319,7 +398,7 @@ export function parseTableQuery(
   const cursor = get(PARAM_CURSOR);
   const sort = validSort(get, allowed, refuse);
   const grouping = readGrouping(get, schema, allowed, refuse);
-  const filtering = readFiltering(params, ns, schema, listed, allowed, refuse);
+  const filtering = readFiltering(params, ns, lookups, allowed, refuse);
   const pivot = validPivot(get(PARAM_PIVOT), allowed, refuse);
 
   return {
@@ -347,18 +426,25 @@ function readPaging(
 ): { readonly page: number; readonly limit: number } {
   const ceiling = Math.min(schema.maxLimit ?? MAX_LIMIT, MAX_LIMIT);
   const askedLimit = get(PARAM_LIMIT);
-  const limit = readCount(askedLimit, schema.defaultLimit ?? DEFAULT_LIMIT);
-  if (limit > ceiling) {
+  const asked = wholeCount(askedLimit) ?? schema.defaultLimit ?? DEFAULT_LIMIT;
+  if (asked > ceiling) {
     refuse(
       PARAM_LIMIT,
       askedLimit ?? "",
       `above the maximum of ${String(ceiling)}`
     );
   }
-  return {
-    page: readCount(get(PARAM_PAGE), 1),
-    limit: Math.min(limit, ceiling),
-  };
+  const limit = Math.min(asked, ceiling);
+  const askedPage = get(PARAM_PAGE);
+  const page = wholeCount(askedPage) ?? 1;
+  // The offset is computed here and handed to a database, so it stays a
+  // safe integer: a page past that is refused, not rounded. A missing page
+  // is already page 1, and its offset is 0.
+  if (askedPage !== null && !Number.isSafeInteger((page - 1) * limit)) {
+    refuse(PARAM_PAGE, askedPage, "beyond the largest safe offset");
+    return { page: 1, limit };
+  }
+  return { page, limit };
 }
 
 /**
@@ -406,8 +492,7 @@ function readGrouping(
 function readFiltering(
   params: URLSearchParams,
   ns: string,
-  schema: QuerySchema,
-  listed: ReadonlySet<string> | undefined,
+  { listed, filters: lookups }: SchemaLookups,
   allowed: Allows,
   refuse: Refuse
 ): Pick<
@@ -415,7 +500,7 @@ function readFiltering(
   "filters" | "shapedFilters" | "typedFilters" | "filterTree"
 > {
   const tree = params.get(`${ns}${FILTER_TREE_PARAM}`);
-  if (schema.filters === undefined) {
+  if (lookups === undefined) {
     const filters = validFilters(params, ns, allowed, refuse);
     const filterTree = validTree(tree, allowed, refuse);
     return {
@@ -426,10 +511,8 @@ function readFiltering(
       ...(filterTree === undefined ? {} : { filterTree }),
     };
   }
-  const defs = declaredFilters(schema.filters);
-  const custom = schema.filterTypes ?? [];
-  const typed = typeFilters(params, ns, defs, custom, refuse);
-  const filterTree = typedTree(tree, defs, custom, refuse);
+  const typed = typeFilters(params, ns, lookups, refuse);
+  const filterTree = typedTree(tree, lookups, refuse);
   return {
     filters: typed.raw,
     typedFilters: typed.typed,
@@ -438,16 +521,18 @@ function readFiltering(
 }
 
 /**
- * A positive whole number, or the fallback.
+ * A positive whole number written in decimal digits, or `undefined`.
  *
- * Anything else — a float, a negative, a word, an empty string — is the
- * fallback rather than a thrown error: a page number is the least surprising
- * thing in a URL to be wrong, and the least worth refusing over.
+ * Anything else — a float, a negative, a zero, an exponent, a word, a number with
+ * text after it, an empty string — reads as absent rather than a thrown
+ * error: a page number is the least surprising thing in a URL to be wrong,
+ * and the least worth refusing over. A number too large to be exact is still
+ * a number; the caller decides what that means.
  */
-function readCount(raw: string | null, fallback: number): number {
-  if (raw === null) return fallback;
-  const n = Number.parseInt(raw, 10);
-  return Number.isFinite(n) && n > 0 ? n : fallback;
+function wholeCount(raw: string | null): number | undefined {
+  if (raw === null || !/^\d+$/.test(raw)) return undefined;
+  const n = Number(raw);
+  return n > 0 ? n : undefined;
 }
 
 /** Whether the schema lets a client name a column. */
@@ -551,6 +636,27 @@ function validGroupAggregates(
 }
 
 /**
+ * The submitted tree, read strictly: a malformed node refuses the whole tree
+ * rather than being pruned out of it, since a pruned AND matches more rows
+ * than the one the client asked for.
+ */
+function submittedTree(
+  raw: string,
+  refuse: Refuse
+): QueryFilterGroup | undefined {
+  const tree = parseStrictFilterTree(raw);
+  if (tree) return tree;
+  refuse(
+    FILTER_TREE_PARAM,
+    raw,
+    parseFilterTree(raw)
+      ? "filter tree has a malformed condition"
+      : "not a readable filter tree"
+  );
+  return undefined;
+}
+
+/**
  * The filter tree, checked against the declared filters: every condition a
  * declared key, an operator its type allows, a value of its shape, each
  * operator in its type's own spelling. As with columns, one bad condition
@@ -558,17 +664,13 @@ function validGroupAggregates(
  */
 function typedTree(
   raw: string | null,
-  defs: readonly ServerFilterDef[],
-  custom: readonly ServerFilterType[],
+  lookups: FilterLookups,
   refuse: Refuse
 ): QueryFilterGroup | undefined {
   if (raw === null || raw === "") return undefined;
-  const tree = parseFilterTree(raw);
-  if (!tree) {
-    refuse(FILTER_TREE_PARAM, raw, "not a readable filter tree");
-    return undefined;
-  }
-  const checked = checkTree(tree, defs, custom);
+  const tree = submittedTree(raw, refuse);
+  if (!tree) return undefined;
+  const checked = checkTree(tree, lookups);
   if ("problem" in checked) {
     refuse(FILTER_TREE_PARAM, raw, checked.problem);
     return undefined;
@@ -592,7 +694,7 @@ function validFilters(
       return;
     }
     // The table writes a multi-value filter as ONE parameter, entries joined
-    // with commas and each one percent-encoded — `splitFilterValues` reads
+    // with commas and each one percent-encoded — `splitListParam` reads
     // that. A repeated parameter is kept as a list, for a client that sends
     // one.
     const all = params.getAll(key);
@@ -614,11 +716,8 @@ function validTree(
   refuse: Refuse
 ): QueryFilterGroup | undefined {
   if (raw === null || raw === "") return undefined;
-  const tree = parseFilterTree(raw);
-  if (!tree) {
-    refuse(FILTER_TREE_PARAM, raw, "not a readable filter tree");
-    return undefined;
-  }
+  const tree = submittedTree(raw, refuse);
+  if (!tree) return undefined;
   const unknown = treeColumns(tree).filter((field) => !allowed(field));
   if (unknown.length > 0) {
     refuse(

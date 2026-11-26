@@ -13,7 +13,8 @@ import {
   type ColumnMetadata,
   updateRow,
 } from "@adapttable/core";
-import { type Direction, getDirection, getLabels } from "@adapttable/i18n";
+import { type Direction, getDirection } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 
 import {
   allocationCount,

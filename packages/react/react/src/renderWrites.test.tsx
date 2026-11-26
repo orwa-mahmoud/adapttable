@@ -10,7 +10,7 @@ import { describe, expect, it, vi } from "vitest";
 import type * as TableStoreModule from "../../../shared/core/src/state/tableStore";
 import type { ColumnDef } from "./columnDef";
 import { DataTableShellView } from "./features/chromeBodyGate";
-import { columnMenu } from "./features/factories";
+import { columnMenu, selection } from "./features/factories";
 import { FeatureProviders } from "./features/providers";
 import { rowPinning } from "./features/row-pinning";
 import { applyTableFeatures } from "./features/tableFeature";
@@ -79,14 +79,18 @@ describe("a React table render", () => {
       readonly limit: number;
     }) {
       const shellProps = applyTableFeatures({
-        features: [columnMenu(), rowPinning()],
+        features: [
+          columnMenu(),
+          rowPinning(),
+          selection({
+            selectedIds: props.selectedIds,
+            onSelectionChange: () => undefined,
+          }),
+        ],
         data: ROWS,
         columns,
         rowKey,
         urlAdapter: adapter,
-        selectable: true,
-        selectedIds: props.selectedIds,
-        onSelectedIdsChange: () => undefined,
         defaults: { limit: props.limit },
       });
       return (

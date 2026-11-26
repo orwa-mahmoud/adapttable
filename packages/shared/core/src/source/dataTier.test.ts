@@ -22,34 +22,25 @@ const baseQuery = {
   filters: {},
 };
 describe("resolveDataTier", () => {
-  it("prefers a source, then an explicit mode, then a query handler", () => {
-    expect(resolveDataTier({}, "server", undefined)).toBe("source");
-    expect(resolveDataTier(undefined, "frontend", () => undefined)).toBe(
-      "frontend"
-    );
-    expect(resolveDataTier(undefined, undefined, () => undefined)).toBe(
-      "server"
-    );
-    expect(resolveDataTier(undefined, undefined, undefined)).toBe("frontend");
+  it("is the source when one is passed, otherwise the frontend rows", () => {
+    expect(resolveDataTier({})).toBe("source");
+    expect(resolveDataTier(undefined)).toBe("frontend");
   });
 });
 
 describe("warnDataTierMisuse", () => {
-  it("names each way a table can be handed more than one tier, or none", () => {
+  it("names a table handed both tiers, or none", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    warnDataTierMisuse({}, "server", [], undefined);
+    warnDataTierMisuse({}, []);
     expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining("`mode` is ignored when `source` is provided")
+      expect.stringContaining("both `source` and `data`")
     );
-    expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining("both `source` and `data`/`onQueryChange`")
-    );
-    warnDataTierMisuse(undefined, undefined, undefined, undefined);
+    warnDataTierMisuse(undefined, undefined);
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining("no data tier provided")
     );
     warn.mockClear();
-    warnDataTierMisuse(undefined, undefined, [], undefined);
+    warnDataTierMisuse(undefined, []);
     expect(warn).not.toHaveBeenCalled();
   });
 });

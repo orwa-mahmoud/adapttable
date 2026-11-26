@@ -53,14 +53,22 @@ export interface KitChromeFactories {
   undoRedoButtons: () => StaticTableFeature;
   bulkActions: (actions: readonly BulkAction[]) => StaticTableFeature;
   collapsibleColumnGroups: () => StaticTableFeature;
-  columnMenu: () => StaticTableFeature;
+  columnMenu: (options?: {
+    readonly onRename?: (key: string, name: string) => void;
+  }) => StaticTableFeature;
   commandPalette: (
     options?: boolean | CommandPaletteOptions
   ) => StaticTableFeature;
   contextMenu: <TRow>(
     options?: boolean | ContextMenuOptions<TRow>
   ) => TableFeature<TRow>;
-  filters: <TRow>(defs: readonly FilterDef<TRow>[]) => TableFeature<TRow>;
+  filters: <TRow>(
+    defs: readonly FilterDef<TRow>[],
+    options?: {
+      readonly mode?: "popover" | "drawer" | "header";
+      readonly fields?: boolean;
+    }
+  ) => TableFeature<TRow>;
   filterTypes: (specs: readonly FilterTypeSpec[]) => StaticTableFeature;
   findInTable: () => StaticTableFeature;
   selectionStats: () => StaticTableFeature;
@@ -77,14 +85,16 @@ export interface KitChromeFactories {
     onBatchEdit: NonNullable<KitFeatureRequests["batchEditing"]>
   ) => TableFeature<Person>;
   editing: (
-    onCellEdit: NonNullable<KitFeatureRequests["editing"]>
+    onCellEdit: NonNullable<KitFeatureRequests["editing"]>,
+    extras?: KitFeatureRequests["editingExtras"]
   ) => TableFeature<Person>;
   groupingPanel: (
     groupBy: NonNullable<KitFeatureRequests["grouping"]>["groupBy"],
     extras: NonNullable<KitFeatureRequests["grouping"]>["extras"]
   ) => TableFeature<Person>;
   rowEditing: (
-    onRowEdit: NonNullable<KitFeatureRequests["rowEditing"]>
+    onRowEdit: NonNullable<KitFeatureRequests["rowEditing"]>,
+    extras?: KitFeatureRequests["editingExtras"]
   ) => TableFeature<Person>;
   rowReorder: (
     onRowReorder: NonNullable<KitFeatureRequests["rowReorder"]>["onRowReorder"],
@@ -128,6 +138,10 @@ export interface KitChromeFlags {
   contextMenu?: boolean | ContextMenuOptions<Person>;
   /** The Filters control. */
   filterControls?: boolean;
+  /** Where the filter panel opens. */
+  filtersMode?: "popover" | "drawer" | "header";
+  /** Draw the per-field form. */
+  filterFields?: boolean;
   filterDefs: readonly FilterDef<Person>[];
   filterTypeSpecs: readonly FilterTypeSpec[];
   sidePanel?: SidePanelOptions;
@@ -207,14 +221,25 @@ function panelChrome(
 ): readonly TableFeature<Person>[] {
   return [
     ...(flags.collapsibleColumnGroups ? [kit.collapsibleColumnGroups()] : []),
-    ...((flags.columnMenu ?? rich) ? [kit.columnMenu()] : []),
+    ...((flags.columnMenu ?? rich)
+      ? [
+          kit.columnMenu(
+            flags.kitFeatures?.columnRename
+              ? { onRename: flags.kitFeatures.columnRename }
+              : undefined
+          ),
+        ]
+      : []),
     ...(flags.sidePanel ? [kit.sidePanel(flags.sidePanel)] : []),
     ...((flags.bulkActions ?? rich)
       ? [kit.bulkActions(flags.bulkActionList)]
       : []),
     ...((flags.filterControls ?? rich)
       ? [
-          kit.filters<Person>(flags.filterDefs),
+          kit.filters<Person>(flags.filterDefs, {
+            mode: flags.filtersMode,
+            fields: flags.filterFields,
+          }),
           kit.filterTypes(flags.filterTypeSpecs),
         ]
       : []),
@@ -233,8 +258,10 @@ function kitDrawn(
   asked: KitFeatureRequests
 ): readonly TableFeature<Person>[] {
   return [
-    ...(asked.editing ? [kit.editing(asked.editing)] : []),
-    ...(asked.rowEditing ? [kit.rowEditing(asked.rowEditing)] : []),
+    ...(asked.editing ? [kit.editing(asked.editing, asked.editingExtras)] : []),
+    ...(asked.rowEditing
+      ? [kit.rowEditing(asked.rowEditing, asked.editingExtras)]
+      : []),
     ...(asked.batchEditing ? [kit.batchEditing(asked.batchEditing)] : []),
     ...(asked.grouping
       ? [kit.groupingPanel(asked.grouping.groupBy, asked.grouping.extras)]

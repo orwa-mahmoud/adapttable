@@ -25,6 +25,7 @@ import type { CellEdit } from "./focus/cellEdits";
 import type { CellRange } from "./focus/cellRange";
 import type { GroupNode, GroupSort } from "./grouping/groupRows";
 import type { RowActionsLayout, RowActionsRenderer } from "./rows/rowActions";
+import type { TableQueryListener } from "./source/dataTier";
 import type { TableSource } from "./source/TableSource";
 import type {
   Direction,
@@ -153,12 +154,11 @@ export interface TableOptions<TRow, TNode = unknown> {
    */
   paginationMode?: PaginationMode;
   /**
-   * Accepted and ignored.
-   *
-   * @deprecated A card shows every column without `hideOnMobile`, so
-   * `hideOnMobile` decides what a card shows. Removed in v4.
+   * Frontend tier: told of each committed change to page, page size, search,
+   * sort and filters, never of the mount. The table keeps processing `data`;
+   * a server table reads a server `source` instead.
    */
-  mobileIdentityColumns?: number;
+  onViewChange?: TableQueryListener;
   /** Hover-prefetch callback fired on desktop row mouse-enter. */
   prefetch?: (row: TRow) => void;
   /**
@@ -445,26 +445,6 @@ export interface TableOptions<TRow, TNode = unknown> {
    * the AND/OR tree in that chrome — the field list is gone, not hidden.
    */
   filterFields?: boolean;
-
-  /* ── Bulk actions ────────────────────────────────────────────────── */
-  /** Selection id extractor; defaults to `rowKey`. */
-  selectionGetId?: (row: TRow) => string;
-  /**
-   * Controlled selection. When provided, the table reads the selection from
-   * this value and reports every change request through `onSelectionChange`
-   * — the same controlled/uncontrolled split as `columnLayout`. Omit it for
-   * the internal (uncontrolled) selection.
-   */
-  selectedIds?: readonly string[];
-  /**
-   * Selection change channel. Uncontrolled: an observer that fires with the
-   * selected ids whenever the set changes — once on mount with the initial
-   * (empty) selection, on every toggle/select-all, and on the automatic
-   * reset when the search or a filter changes (the result set changed, so
-   * stale ids never linger). Controlled (`selectedIds` provided): the
-   * change-request handler — apply the ids to your state to accept.
-   */
-  onSelectionChange?: (selectedIds: string[]) => void;
 
   /* ── Customisation (common) ──────────────────────────────────────── */
   /** Inline toolbar slot for custom controls (view toggles, etc.). */

@@ -965,7 +965,7 @@ export function TableAssistantChrome({
   // Everything eligible, primary and overflow alike: a menu has room for the
   // lot, which is the whole reason it replaced a list that had to be split.
   const examples = {
-    label: labels?.assistantExamples ?? "Examples",
+    label: resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantExamples,
     items: assistant.suggestions.map((suggestion) => ({
       id: suggestion.id,
       title: suggestion.title,

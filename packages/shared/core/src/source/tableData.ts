@@ -115,12 +115,13 @@ export interface TableDataConfig<TRow> {
   readonly engine: FilterEngine | undefined;
   /** Full-control tier: a prebuilt source. */
   readonly source?: TableSource<TRow>;
-  /** The rows: all of them (frontend) or the current page (server). */
+  /** Frontend tier: every row; the table filters, sorts and pages them. */
   readonly data?: readonly TRow[];
-  /** Explicit data mode; absent, the tier is inferred. */
-  readonly mode?: "frontend" | "server";
-  /** The server tier's fetch, or a frontend table's change notification. */
-  readonly onQueryChange?: TableQueryListener;
+  /**
+   * A frontend table's change notification: told of each committed change
+   * to page, page size, search, sort and filters, never of the mount.
+   */
+  readonly onViewChange?: TableQueryListener;
   /** Columns — their `filter` shorthands feed the runtime. */
   readonly columns: readonly ColumnMetadata<TRow>[];
   /** Table-level declarative filters. */
@@ -133,8 +134,6 @@ export interface TableDataConfig<TRow> {
   readonly locale?: string;
   /** Extra client-side predicate AND-ed with the declarative ones. */
   readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
-  /** Keys the server tier counts; defaults to every checklist filter. */
-  readonly facetKeys?: readonly string[];
 }
 
 /**
@@ -149,13 +148,14 @@ export interface TableDataPlan<TRow> {
   readonly runtime: FilterRuntime<TRow>;
   /** Stable key for declared filter semantics, independent of rows and generated callbacks. */
   readonly filterKey: string;
-  /** The declarative filters AND-ed with the host's `filterFn`. */
-  readonly filterFn: (row: TRow, extra: ExtraFilters) => boolean;
+  /**
+   * The declarative filters AND-ed with the host's `filterFn`; absent when
+   * the table has neither, so nothing filters row by row.
+   */
+  readonly filterFn: ((row: TRow, extra: ExtraFilters) => boolean) | undefined;
   /** Evaluates the AND/OR filter tree, when the engine is composed. */
   readonly filterTreeFn:
     ((row: TRow, tree: QueryFilterGroup) => boolean) | undefined;
-  /** The facet keys a server query asks for. */
-  readonly facetKeys: readonly string[] | undefined;
 }
 
 /**
@@ -169,15 +169,15 @@ export interface TableData<TRow> {
   /**
    * The source the table reads: `resolved` with facet counts computed from
    * its searched rows when nothing answered them. `frontend` is the frontend
-   * tier's source, which a frontend table's `onQueryChange` is told about.
+   * tier's source, which a frontend table's `onViewChange` is told about.
    */
   readonly finish: (sources: {
     readonly resolved: TableSource<TRow>;
     readonly frontend: TableSource<TRow>;
   }) => TableSource<TRow>;
   /**
-   * Once the frame is on screen: tell a frontend table's `onQueryChange`
-   * about a change. The mount is not a change. A server or source tier
+   * Once the frame is on screen: tell a frontend table's `onViewChange`
+   * about a change. The mount is not a change. A source tier
    * records the key and does not notify, and it does not abort a notice a
    * previous frontend commit already sent. `dispose` is what aborts that.
    */
@@ -198,7 +198,7 @@ export interface TableData<TRow> {
   readonly revision: () => number;
 }
 
-/** The change notice a frontend table's `onQueryChange` receives. */
+/** The change notice a frontend table's `onViewChange` receives. */
 function noticeOf<TRow>(source: TableSource<TRow>): TableQuery {
   return {
     page: source.page,
@@ -273,15 +273,19 @@ export function createTableData<TRow>(): TableData<TRow> {
           })
         : (EMPTY_RUNTIME as FilterRuntime<TRow>)
   );
+  // No filters feature and no host predicate: no predicate at all, so the
+  // source skips the filter pass instead of calling `() => true` per row.
   const combinedFilterOf = memoOne(
     (
       runtime: FilterRuntime<TRow>,
       filterFn: ((row: TRow, extra: ExtraFilters) => boolean) | undefined
-    ) =>
-      filterFn
+    ) => {
+      if (runtime === EMPTY_RUNTIME) return filterFn;
+      return filterFn
         ? (row: TRow, extra: ExtraFilters) =>
             runtime.filterFn(row, extra) && filterFn(row, extra)
-        : runtime.filterFn
+        : runtime.filterFn;
+    }
   );
   // Facet counts for the checklist filters, when nothing else answered them:
   // a frontend tier has the rows in hand, so the counts come from the same
@@ -293,14 +297,14 @@ export function createTableData<TRow>(): TableData<TRow> {
       resolved: TableSource<TRow>,
       defs: readonly FilterDef<TRow>[],
       registry: FilterTypeRegistry,
-      filterFn: (row: TRow, extra: ExtraFilters) => boolean
+      filterFn: ((row: TRow, extra: ExtraFilters) => boolean) | undefined
     ): FacetMap | undefined => {
       if (!engine || resolved.facets) return resolved.facets;
       const rows = resolved.allSearchedRows;
       if (!rows) return undefined;
       const tree = resolved.filterTree;
       const keep = (row: TRow, extra: ExtraFilters) => {
-        if (!filterFn(row, extra)) return false;
+        if (filterFn && !filterFn(row, extra)) return false;
         if (!tree) return true;
         return engine.evaluateTree(tree, row, defs, registry);
       };
@@ -313,7 +317,7 @@ export function createTableData<TRow>(): TableData<TRow> {
   );
 
   function plan(config: TableDataConfig<TRow>): TableDataPlan<TRow> {
-    const { engine, source, mode, data, onQueryChange } = config;
+    const { engine, source, data } = config;
     const runtime = runtimeOf(
       engine,
       config.columns,
@@ -323,8 +327,8 @@ export function createTableData<TRow>(): TableData<TRow> {
       loadedOptions,
       extensionsOf(config.filterTypes, config.featureHost)
     );
-    const tier = resolveDataTier(source, mode, onQueryChange);
-    warnDataTierMisuse(source, mode, data, onQueryChange);
+    const tier = resolveDataTier(source);
+    warnDataTierMisuse(source, data);
     const next: TableDataPlan<TRow> = {
       tier,
       runtime,
@@ -338,18 +342,6 @@ export function createTableData<TRow>(): TableData<TRow> {
         ? (row, tree) =>
             engine.evaluateTree(tree, row, runtime.defs, runtime.registry)
         : undefined,
-      // A server query counts every checklist filter unless told which.
-      facetKeys:
-        config.facetKeys ??
-        (engine
-          ? runtime.defs
-              .filter(
-                (def) =>
-                  (runtime.registry.get(def.type)?.widget ?? def.type) ===
-                  "checklist"
-              )
-              .map((def) => def.key)
-          : undefined),
     };
     latest = { config, plan: next };
     return next;
@@ -378,10 +370,8 @@ export function createTableData<TRow>(): TableData<TRow> {
     commit() {
       if (!emitter || !notice || !latest) return;
       const { config, plan: planned } = latest;
-      const notifying =
-        planned.tier === "frontend" && config.mode === "frontend";
       const abort = emitter.emitIfChanged(
-        notifying ? config.onQueryChange : undefined,
+        planned.tier === "frontend" ? config.onViewChange : undefined,
         notice.query,
         notice.key
       );

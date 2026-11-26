@@ -2,7 +2,7 @@
 import { expect, test } from "@playwright/test";
 
 import { builtAdapters, pathOf } from "../apps/showcase/matrix.mjs";
-import { getLabels } from "../packages/shared/i18n/src";
+import { getLabels } from "../packages/shared/i18n/src/catalog";
 
 for (const kit of builtAdapters("vue")) {
   test(`${kit.key}: the frontend bulk action updates the host-owned rows`, async ({

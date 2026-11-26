@@ -348,6 +348,13 @@ export type DeclaredAggregates = Readonly<Record<string, string>>;
 export const DEFAULT_LIMIT = 25;
 
 // @public
+export interface DeferredExportWriter {
+    readonly extension: string;
+    readonly load: () => Promise<ExportWriter>;
+    readonly preload: () => () => void;
+}
+
+// @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
 
 // @public
@@ -397,8 +404,12 @@ export interface ExportWriteContext {
 // @public
 export interface ExportWriter {
     build: (context: ExportWriteContext) => ExportPayload;
+    buildAsync?: (context: ExportWriteContext) => Promise<ExportPayload>;
     extension: string;
 }
+
+// @public
+export type ExportWriterOption = ExportWriter | DeferredExportWriter;
 
 // @public
 export type ExtraFilters = Record<string, FilterValue>;
@@ -419,7 +430,7 @@ export interface FeatureHostState<TRow = unknown> {
     readonly filterExtends: readonly FilterTypeExtend[];
     readonly filterTypes: readonly FilterTypeSpec[];
     readonly panels: readonly SidePanelEntry[];
-    readonly writers: readonly ExportWriter[];
+    readonly writers: readonly ExportWriterOption[];
 }
 
 // @public
@@ -522,7 +533,7 @@ export interface FormulaColumnSpec {
 }
 
 // @public
-export type FormulaErrorCode = (typeof FORMULA_ERRORS)[keyof typeof FORMULA_ERRORS];
+export type FormulaErrorCode = "#NAME?" | "#VALUE!" | "#DIV/0!" | "#CYCLE!" | "#ERROR!";
 
 // @public
 export type FormulaValue = {
@@ -774,6 +785,9 @@ export function parseGroupAggregateOverrides(value: string | null | undefined): 
 export function parseRelativeToken(raw: string | undefined): RelativeDateToken | undefined;
 
 // @public
+export function parseStrictFilterTree(raw: string | null | undefined): QueryFilterGroup | undefined;
+
+// @public
 export type PinnedSide = PinSide | undefined;
 
 // @public
@@ -992,10 +1006,6 @@ export interface TableLabels {
     assistantOpen?: string;
     assistantPlaceholder?: string;
     assistantProgress?: (done: number, total?: number) => string;
-    assistantReceipt?: (receipt: {
-        capability?: string;
-        status: string;
-    }) => string;
     assistantReceiptAction?: (action: {
         kind?: string;
         status: string;
@@ -1140,12 +1150,10 @@ export interface TableLabels {
     groupingAddAggregation?: string;
     groupingAdded?: (label: string) => string;
     groupingAggregateChanged?: (label: string, aggregation: string) => string;
-    groupingAggregateColumn?: string;
     groupingAggregateRemoved?: (column: string) => string;
     groupingAggregatesRestored?: string;
     groupingAggregation?: string;
     groupingAggregationCustom?: string;
-    groupingAggregationDefault?: string;
     groupingAggregationFor?: (column: string) => string;
     groupingAggregationNone?: string;
     groupingAggregationReadOnly?: string;
@@ -1176,7 +1184,6 @@ export interface TableLabels {
     moveRowUp?: string;
     moveStart?: string;
     moveToGroup?: string;
-    moveToTopLevel?: string;
     moveUnavailable?: string;
     moveUnder?: string;
     moveViewDown?: string;
@@ -1188,8 +1195,6 @@ export interface TableLabels {
     noticeExportAllPage?: string;
     noticeGroupingUnavailable?: string;
     noticePinNested?: string;
-    // @deprecated
-    noticeReorderNested?: string;
     noticeVirtualizePaged?: string;
     opAfter?: string;
     opAtLeast?: string;
@@ -1218,7 +1223,6 @@ export interface TableLabels {
         total: number;
     }) => string;
     pageSelected?: (count: number) => string;
-    pendingProposals?: (count: number) => string;
     pendingRows?: (count: number) => string;
     pinEnd?: string;
     pinnedSummaryBottom?: string;
@@ -1284,7 +1288,6 @@ export interface TableLabels {
     rowMoved?: (from: number, to: number) => string;
     rowMovedToGroup?: (group: string) => string;
     rowMovedUnder?: (parent: string) => string;
-    rowMoveOptions?: string;
     rowReorderCancelled?: string;
     rowSeparator?: string;
     rowsPerPage?: string;

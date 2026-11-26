@@ -279,7 +279,7 @@ it("uses the actual projected span cells and ignores summary rows", async () => 
   const grid = view.shell.gridFocus.value;
   if (!grid) throw new Error("Missing grid");
   expect(grid.getColumnHeaderProps(0)).toHaveProperty("aria-colindex", 1);
-  const header = element(view.root, "th");
+  const header = element(view.root, 'th[aria-colindex="1"]');
   header.click();
   await nextTick();
   expect(view.shell.gridFocus.value?.isColumnSelected(0)).toBe(true);

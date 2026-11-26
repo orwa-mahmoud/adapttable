@@ -7,18 +7,20 @@ import { renderToString } from "vue/server-renderer";
 import { DataTable } from "../src";
 import { standardFeatures } from "../src/preset";
 
-const ZERO_CONFIGURATION = [
+/** The column-layout family, then the other fixed members. */
+const FIXED_MEMBERS = [
   "column-menu",
+  "resizable-columns",
+  "fit-columns",
   "density-chooser",
   "export-csv",
   "find-in-table",
-  "fit-columns",
   "fullscreen",
-  "header-filters",
   "multi-sort",
-  "resizable-columns",
   "status-bar",
 ];
+/** With no filters given, the header controls stand alone. */
+const ZERO_CONFIGURATION = [...FIXED_MEMBERS, "header-filters"];
 
 describe("standard features", () => {
   it("composes zero-configuration features and only configured optional members", () => {
@@ -30,10 +32,11 @@ describe("standard features", () => {
       savedViews: { storageKey: "people", storage: null },
     });
     expect(configured.map(({ id }) => id)).toEqual([
-      ...ZERO_CONFIGURATION,
+      ...FIXED_MEMBERS,
       "grouping",
       "bulk-actions",
       "filters",
+      "header-filters",
       "saved-views",
     ]);
   });

@@ -192,8 +192,6 @@ export const zh: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "有一项更改正在等待你的决定。",
-  pendingProposals: (count) =>
-    count === 1 ? "1 项提议更改" : `${String(count)} 项提议更改`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -330,10 +328,6 @@ export const zh: Required<TableLabels> = {
       error: "错误",
       disconnected: "未连接",
     })[status] ?? "就绪",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "添加行",
   duplicateRow: "复制行",
@@ -350,10 +344,8 @@ export const zh: Required<TableLabels> = {
   rowLifted: (position) => `已提起第 ${String(position)} 行`,
   rowMoved: (from, to) => `已将行从 ${String(from)} 移到 ${String(to)}`,
   rowReorderCancelled: "已取消重新排序",
-  rowMoveOptions: "行移动选项",
   moveToGroup: "移至分组…",
   moveUnder: "移至下级…",
-  moveToTopLevel: "移至顶层",
   confirmRowMoveTitle: "确认移动行",
   confirmRowMoveDescription: (row, from, to) =>
     `将 ${row} 从 ${from} 移至 ${to}？`,
@@ -388,9 +380,7 @@ export const zh: Required<TableLabels> = {
   removeGroupingColumn: (label) => `从分组中移除 ${label}`,
   moveGroupingColumn: (label) => `移动 ${label} 分组`,
   groupingDropToRemove: "拖到此处取消分组",
-  groupingAggregateColumn: "聚合列",
   groupingAggregation: "分组聚合",
-  groupingAggregationDefault: "默认",
   groupingAggregationNone: "无",
   groupingAggregations: "聚合",
   groupingAddAggregation: "添加聚合列",
@@ -458,7 +448,6 @@ export const zh: Required<TableLabels> = {
     `已选择第 ${fromRow} 至 ${toRow} 行、第 ${fromColumn} 至 ${toColumn} 列，共 ${cells} 个单元格`,
   noticeVirtualizePaged: "虚拟滚动已关闭 — 此分页表格每次只显示一页。",
   noticePinNested: "分组或树开启时，行固定已关闭。",
-  noticeReorderNested: "分组或树开启时，行重排已关闭。",
   noticeGroupingUnavailable: "分组已关闭 — 此数据源无法分组。",
   noticeExportAllPage: "导出全部已关闭 — 此数据源每次仅提供一页。",
   noticeEditWithoutWriter: "编辑已关闭 — 未接入写入处理函数。",

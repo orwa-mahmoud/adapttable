@@ -106,28 +106,40 @@ export function buildTreeEntries<TRow>(
     getParentId,
     hasChildren,
   } = options;
+  // One id per row for this build: the walk, the roots and the subtree
+  // lists below all ask for it, and the host's `getRowId` may not be cheap.
+  const ids = new Map<TRow, string>();
+  const idOf = (row: TRow): string => {
+    let id = ids.get(row);
+    if (id === undefined) {
+      id = getRowId(row);
+      ids.set(row, id);
+    }
+    return id;
+  };
   const childrenOf =
-    getChildren ?? childrenFromParentIds(rows, getParentId, getRowId);
+    getChildren ?? childrenFromParentIds(rows, getParentId, idOf);
+  const present = getParentId ? new Set(rows.map(idOf)) : undefined;
   const roots = getParentId
     ? rows.filter((row) => {
         const parent = getParentId(row);
-        return (
-          parent === undefined || !rows.some((r) => getRowId(r) === parent)
-        );
+        return parent === undefined || !present?.has(parent);
       })
     : rows;
-
   const entries: TreeEntry<TRow>[] = [];
-
-  /** Collect a subtree's ids, folded or not — selection covers all of it. */
-  const descendantsOf = (row: TRow): string[] => {
-    const ids: string[] = [];
+  // Each row's subtree, listed once and reused by every ancestor's list.
+  const subtrees = new Map<TRow, readonly string[]>();
+  const descendantsOf = (row: TRow): readonly string[] => {
+    const known = subtrees.get(row);
+    if (known) return known;
+    const list: string[] = [];
     for (const child of childrenOf(row) ?? []) {
-      ids.push(getRowId(child), ...descendantsOf(child));
+      list.push(idOf(child));
+      for (const id of descendantsOf(child)) list.push(id);
     }
-    return ids;
+    subtrees.set(row, list);
+    return list;
   };
-
   const walk = (
     list: readonly TRow[],
     level: number,
@@ -135,7 +147,7 @@ export function buildTreeEntries<TRow>(
     parentId?: string
   ): void => {
     for (const [siblingIndex, row] of list.entries()) {
-      const key = getRowId(row);
+      const key = idOf(row);
       const children = childrenOf(row) ?? [];
       const expandable = children.length > 0 || hasChildren?.(row) === true;
       const expanded = expandable && expandedIds.has(key);

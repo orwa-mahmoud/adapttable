@@ -36,9 +36,7 @@ export {
 } from "./approval/agentApprovalContract";
 export {
   type ApprovalArgumentPair,
-  approvalArgumentPairs,
   approvalProposalText,
-  approvalValueText,
 } from "./approval/approvalReview";
 export {
   assistantActionsName,
@@ -217,6 +215,15 @@ export {
   type FeatureSetup,
   LiveFeatureHost,
 } from "./features/liveFeatureHost";
+export {
+  type LiveStage,
+  type LiveStageDependencies,
+  type LiveStageKey,
+  liveStageKey,
+  type LiveStagePhase,
+  liveStagesOf,
+  orderLiveStages,
+} from "./features/liveStages";
 export { deriveRuntimeOperations } from "./features/runtimeOperations";
 export {
   ACTIVE_FILTER_CHIPS,
@@ -224,14 +231,13 @@ export {
   BATCH_EDIT_BAR,
   BULK_BAR,
   type BulkBarSlotProps,
-  CELL_NAV_LIVE,
-  type CellNavLiveDraw,
   type CellNavLiveSlotProps,
   CHROME_BODY,
   type ChromeBodyDraw,
   type ChromeBodySlotProps,
   type ChromeExtraDraw,
   type ChromeExtraSlotProps,
+  type ChromeStageKey,
   COLUMN_GROUP_TOGGLE,
   COLUMN_HEADER_RENAME,
   COLUMN_LAYOUT_LIVE,
@@ -243,17 +249,13 @@ export {
   CONTEXT_MENU,
   CONTEXT_MENU_LIVE,
   type ContextMenuLiveSlotProps,
-  EDIT_HISTORY_LIVE,
+  EDIT_HISTORY_STAGE,
   EDITABLE_CELL,
   type EditableCellSlotProps,
-  type EditHistoryLiveDraw,
-  type EditHistoryLiveSlotProps,
   EDITING_LIVE,
   EXPAND_TOGGLE,
   type ExpandToggleSlotProps,
   EXPANSION_LIVE,
-  EXPORT_LIVE,
-  type ExportLiveDraw,
   type ExportLiveSlotProps,
   FILL_HANDLE,
   type FillHandleCellSlotProps,
@@ -264,11 +266,7 @@ export {
   type FilterOverlaySlotProps,
   FILTERS_FORM,
   FIND_BAR,
-  FIND_LIVE,
-  type FindLiveDraw,
   type FindLiveSlotProps,
-  FULLSCREEN_LIVE,
-  type FullscreenLiveDraw,
   type FullscreenLiveSlotProps,
   GRID_FOCUS_ANNOUNCER,
   type GridFocusAnnouncerSlotProps,
@@ -289,14 +287,12 @@ export {
   SAVED_VIEWS,
   type SavedViewsSlotProps,
   SELECTION_LIVE,
-  SELECTION_STATS_LIVE,
-  type SelectionStatsLiveDraw,
   type SelectionStatsLiveSlotProps,
   SIDE_PANEL,
   STATUS_BAR,
   TABLE_ASSISTANT,
   TOOLBAR_EXTRAS,
-  type ToolbarExtrasSlotProps,
+  type ToolbarEntrySlotProps,
   TREE_CELL,
   TREE_LIVE,
   TREE_TOGGLE,
@@ -534,8 +530,8 @@ export { rowSourceIndex, virtualItemMeta } from "./virtual/virtualTableModel";
  * entry can name every part of what it returns.
  */
 export {
+  type ContrastRules,
   ensureForcedColorsStyles,
-  FORCED_COLORS_CSS,
 } from "./a11y/forcedColors";
 export type { Command } from "./actions/commandRegistry";
 export type { ConfirmHandler } from "./actions/confirm";
@@ -645,6 +641,11 @@ export type {
   TableSnapshot,
 } from "./engine/createTableEngine";
 export type { NeutralTable } from "./engine/neutralTable";
+export {
+  type DeferredExportWriter,
+  type ExportWriterOption,
+  isDeferredExportWriter,
+} from "./export/deferredWriter";
 export type {
   ExportProgressState,
   ExportStatus,
@@ -670,6 +671,7 @@ export type {
 } from "./export/tableCsv";
 export type { ExportQuery } from "./export/tableCsv";
 export {
+  type ColumnMenuOptions,
   coreBatchEditing,
   coreBulkActions,
   coreCellNavigation,
@@ -708,12 +710,16 @@ export {
   type CoreRowFeatureRegistrar,
   coreRowPinning,
   coreSavedViews,
+  coreSelection,
   coreSelectionStats,
   coreSidePanel,
   coreStatusBar,
   coreTree,
   coreUndoRedoButtons,
   coreVirtualize,
+  type FilterPanelOptions,
+  type HeaderFilterOptions,
+  type SelectionFeatureOptions,
   type VirtualizeInput,
 } from "./features/coreFeatures";
 export type {
@@ -732,9 +738,28 @@ export {
   type RemainingFeatureDomain,
 } from "./features/featureContribution";
 export {
+  columnLayoutFamilyList,
+  type CoreColumnLayoutFamilyFactories,
+  type CoreEditingFamilyFactories,
+  type CoreFilteringFamilyFactories,
+  editingFamilyList,
+  type FeatureListEntry,
+  filteringFamilyList,
+  flattenFeatures,
+} from "./features/featureFamilies";
+export {
+  type AcquireFeatureMount,
+  composeMounts,
+  createFeatureMounts,
+  type FeatureMounts,
+  type MountableFeature,
+} from "./features/featureMounts";
+export {
   applyTableFeatures,
+  FEATURE_OWNED_OPTION_KEYS,
   type FeatureApplyInput,
   featureLabelsOf,
+  type FeatureOwnedOptionKey,
   type FeaturePatch,
   getAppliedFeatures,
   mergeFeaturePatches,
@@ -742,6 +767,7 @@ export {
   type PatchFeature,
   rememberAppliedFeatures,
   resolveFeatureGrouping,
+  resolveFeatureIds,
 } from "./features/featurePatch";
 export {
   type CommandPaletteContribution,
@@ -814,6 +840,11 @@ export type {
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "./grouping/groupingPanelModel";
+export {
+  type GroupingPanelSource,
+  groupingPanelState,
+  type GroupingPanelStateInput,
+} from "./grouping/groupingPanelState";
 export type { GroupAggregateOps } from "./grouping/groupRowLayout";
 export type {
   GroupAggregatesFn,
@@ -847,6 +878,7 @@ export {
   resolveTableLabels,
 } from "./labelGroups/tableLabels";
 export { VIEW_CONTROL_LABELS } from "./labelGroups/viewControlLabels";
+export { VIRTUALIZE_LABELS } from "./labelGroups/virtualizeLabels";
 export {
   absoluteColumnIndex,
   columnHeaderControllerFor,
@@ -876,10 +908,10 @@ export {
 } from "./layout/desktopAssembly";
 export {
   cellNavigationInput,
-  CHROME_EXTRA_SLOT_ORDER,
   exportPageOnly,
   finishShellBody,
   finishShellLive,
+  gridRowCount,
   liveColumnLayout,
   livePinning,
   type OverlayChrome,
@@ -888,13 +920,14 @@ export {
   printToolbarProps,
   readableRowLabel,
   renderedRowsOf,
+  type RuntimeActions,
+  type RuntimeChannels,
   type RuntimeChromeInput,
   type RuntimeColumn,
-  SHELL_LIVE_STAGE_ORDER,
   type ShellBodyInput,
-  type ShellLiveStageId,
   TableRuntimePublisher,
   tableRuntimeView,
+  type UndoRedoToolbarProps,
   undoRedoToolbarProps,
   viewControlsToolbarProps,
 } from "./layout/shellPipeline";
@@ -912,9 +945,6 @@ export {
   clearSearchAndFilters,
   featureNoticesAttribute,
   FilterTriggerToggleState,
-  type GroupingPanelSource,
-  groupingPanelState,
-  type GroupingPanelStateInput,
   rowReorderEnablement,
   scrollResetKeys,
   selectionObserverIds,
@@ -979,7 +1009,10 @@ export {
 export type { TableSource } from "./source/TableSource";
 export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
 export type { FeatureNoticeAppearance } from "./state/featureNotices";
-export type { CollectFeatureNoticesInput } from "./state/featureNotices";
+export type {
+  CollectFeatureNoticesInput,
+  FeatureNoticeLabels,
+} from "./state/featureNotices";
 export {
   cellHighlightKind,
   cellHighlightStyle,
@@ -1096,7 +1129,6 @@ export {
   resolveColumnDefaults,
   resolveColumnHeaders,
 } from "./columns/resolveColumns";
-export { sameRows } from "./engine/sameRows";
 export { isRecord } from "./utils/isRecord";
 export { retainItems, sameItems } from "./utils/sameItems";
 
@@ -1185,6 +1217,7 @@ export type {
   SelectionContribution,
   SelectionState,
 } from "./selection/selectionBindingState";
+export { selectionResetKey } from "./selection/selectionBindingState";
 export type { HeaderSelectionState } from "./selection/selectionState";
 export type {
   SearchInputState,
@@ -1228,7 +1261,7 @@ export {
 } from "./layout/kitEnvironment";
 export { notifyLayoutChange } from "./layout/layoutChange";
 export type { HighlightedCell } from "./rows/highlightStore";
-export type { RowPatchEvent } from "./rows/patch";
+export type { RowPatchEvent, RowPatchLog } from "./rows/patch";
 export type {
   RowDropPosition,
   RowMoveMenuModel,
@@ -1432,6 +1465,10 @@ export {
   readMultiDraft,
   stepEditableCell,
 } from "./editing/cellEditing";
+export {
+  createDeferredEditConflictStore,
+  loadEditConflictStore,
+} from "./editing/deferredEditConflict";
 export type { DirtyCellSnapshot, DirtyCellStore } from "./editing/dirtyCells";
 export {
   createDirtyCellStore,
@@ -1447,15 +1484,14 @@ export {
   focusEditorOnMount,
   stopCellEditKeyboard,
 } from "./editing/editableCell";
-export type { EditConflictStore } from "./editing/editConflict";
+export type { EditConflictStore } from "./editing/editConflictView";
 export {
   contestedCellKey,
   contestedRowSignature,
-  createEditConflictStore,
   editConflictView,
   isCellInConflict,
   resolveConflictChoice,
-} from "./editing/editConflict";
+} from "./editing/editConflictView";
 export type { EditHistoryStack } from "./editing/editHistory";
 export {
   cellsOfBatch,
@@ -1480,7 +1516,6 @@ export {
   cellConflictAsk,
   controllerConflictAsk,
   customEditorConflict,
-  defaultPendingRows,
   editableCellErrorId,
   editableCellPresentation,
   editorBusyProps,
@@ -1550,7 +1585,7 @@ export {
   summaryExportValues,
   viewFromTreeEntries,
 } from "./export/exportView";
-export { columnLetter, safeSheetName } from "./export/xlsx";
+export { columnLetter, safeSheetName } from "./export/sheetText";
 export {
   appendByKey,
   applyFilterExtends,
@@ -1586,7 +1621,19 @@ export {
   filterPredicate,
   materializeAutoOptions,
 } from "./filters/filterDefs";
-export { FILTER_ENGINE_IMPL } from "./filters/filterEngine";
+export {
+  booleanFilterSpecs,
+  checklistFilterSpecs,
+  multiSelectFilterSpecs,
+  rangeFilterSpecs,
+  selectFilterSpecs,
+  textFilterSpecs,
+} from "./filters/filterDefs";
+export {
+  createFilterEngine,
+  FILTER_ENGINE_IMPL,
+  filterEngineForWidgets,
+} from "./filters/filterEngine";
 export { withFilterType } from "./filters/filterRegistry";
 export { filterTreeConditionChips } from "./filters/filterTreeChips";
 export {
@@ -1679,7 +1726,11 @@ export {
   createFindController,
   readFindQuery,
 } from "./find/findController";
-export { matchKey } from "./find/findMatches";
+export {
+  createFindMatcher,
+  type FindMatchesOptions,
+  matchKey,
+} from "./find/findMatches";
 export { batchEditHandler } from "./focus/cellEdits";
 export {
   cellNavigationChannels,
@@ -1901,7 +1952,7 @@ export {
 } from "./rows/rowReorderPolicy";
 export { dispatchRowMove, rowMoveView } from "./rows/rowReorderRuntime";
 export { rowStyleArmed } from "./rows/rowStyle";
-export { compareValues, sortRows, sortRowsMulti } from "./sort/compare";
+export { compareValues } from "./sort/compare";
 export { nextSort } from "./sort/cycleSort";
 export { deriveSortByOptions } from "./sort/sortByOptions";
 export type {
@@ -1984,6 +2035,23 @@ export { fillSlot, tableErrorState } from "./state/errorState";
 export { collectFeatureNotices } from "./state/featureNotices";
 export { createLocalTableViewStore } from "./state/localViewStore";
 export {
+  commitRowRekeys,
+  onRowRekeyMoves,
+  onRowRekeys,
+  rekeyedIds,
+  rekeyIdList,
+  rekeyIdMap,
+  rekeyIdRecord,
+  rekeyIdSet,
+  rekeyRowIdSet,
+  rekeyRowPins,
+  rekeyTableRows,
+  type RowRekeyable,
+  type RowRekeyHandler,
+  type RowRekeyMoves,
+  rowRekeyMoves,
+} from "./state/rowRekeys";
+export {
   groupsCollapsedToDepth,
   headerSelectionOf,
   idSetReader,
@@ -2048,6 +2116,7 @@ export { resetDevWarnings } from "./utils/devWarn";
 export { isBrowser, safeLocalStorage } from "./utils/env";
 export { normalizeLocaleTag, resolveLocaleTag } from "./utils/localeTag";
 export { mergeProps } from "./utils/mergeProps";
+export { reportFailure } from "./utils/reportFailure";
 export { safeDecode } from "./utils/safeDecode";
 export {
   bindMobileCardList,
@@ -2084,14 +2153,10 @@ export type {
   ResolvedAggregatable,
 } from "./aggregate/aggregatable";
 export type { GroupAggregatesMapper } from "./aggregate/aggregate";
-export { aggregate, declaredAggregates } from "./aggregate/aggregate";
 export type { AggregationModelInput } from "./aggregate/aggregationModel";
-export { computedAggregateKeys } from "./aggregate/aggregationModel";
-export { autoSizeColumns } from "./columns/autoSizeColumns";
 export type { ColumnDragRowAttrs } from "./columns/columnReorderModel";
 export type { ColumnResizeHandleOptions } from "./columns/columnResize";
 export type { TableLayout } from "./columns/visibleColumns";
-export { visibleColumns } from "./columns/visibleColumns";
 export type { CapabilitySource } from "./contracts/source";
 export type {
   BatchEditSnapshot,
@@ -2127,8 +2192,8 @@ export type {
   ReconcileLiveBatchEdit,
   ReconcileLiveEdit,
   ReconcileLiveRowEdit,
-} from "./editing/editConflict";
-export { isRowContested } from "./editing/editConflict";
+} from "./editing/editConflictView";
+export { isRowContested } from "./editing/editConflictView";
 export type {
   CellValidator,
   EditConflict,
@@ -2176,11 +2241,8 @@ export type {
   RowEditStore,
   RowEditStoreOptions,
 } from "./editing/rowEditing";
-export { cellValue } from "./engine/cellValue";
 export type { ExportViewEntry } from "./export/exportWriter";
 export type { ChecklistSource } from "./filters/checklistModel";
-export { filterLabel } from "./filters/filterDefs";
-export { conditionToExtra } from "./filters/filterTree";
 export type {
   BooleanChoice,
   BooleanFieldWidget,
@@ -2252,14 +2314,12 @@ export type {
   RowTreeMoveHandler,
 } from "./rows/rowMove";
 export type { RowReorderDecision } from "./rows/rowReorderPolicy";
-export { sourceCapabilities } from "./source/capabilities";
 export type { InfiniteQueryLike, PageSelector } from "./source/dataTier";
 export type { Slot, TableErrorState } from "./state/errorState";
 export type { LayoutStorage } from "./state/tableStores";
 export type { TableViewState, TableViewStateConfig } from "./state/viewState";
 export type { StreamSocket, StreamSocketEvent } from "./stream/connect";
 export type { LazyChildrenOptions } from "./tree/lazyChildren";
-export { treeColumnKey } from "./tree/treeRows";
 export type {
   PaginatedResponse,
   PaginationMode,

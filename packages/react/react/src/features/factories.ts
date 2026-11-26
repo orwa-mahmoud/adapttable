@@ -20,13 +20,16 @@ import type { CommandPaletteOptions } from "../actions/useCommandPalette";
 import type { ContextMenuOptions } from "../actions/useTableContextMenu";
 import type { SidePanelOptions } from "../props";
 import type { UseSavedViewsOptions } from "../url/useSavedViews";
+import { BULK_ACTIONS_BAR_RENDER } from "./barRegions";
 import { COLUMN_LAYOUT_LIVE_RENDER } from "./column-layout-live";
+import { CONTEXT_MENU_REGION_RENDER } from "./contextMenuRegion";
 import { SELECTION_LIVE_RENDER } from "./selection-live";
 import type {
   FeaturePatch,
   StaticTableFeature,
   TableFeature,
 } from "./tableFeature";
+import { COLUMN_MENU_ENTRY, SAVED_VIEWS_ENTRY } from "./toolbarRegions";
 
 export type {
   BulkAction,
@@ -48,6 +51,7 @@ export type { ExportCsvOptions } from "@adapttable/core";
 export type { FilterDef } from "@adapttable/core";
 export type { GroupSort } from "@adapttable/core";
 import {
+  type ColumnMenuOptions,
   coreBulkActions,
   coreCellSpan,
   coreCollapsibleColumnGroups,
@@ -67,10 +71,19 @@ import {
   coreResizableColumns,
   coreRowAppearance,
   coreSavedViews,
+  coreSelection,
   coreSidePanel,
   coreStatusBar,
   coreUndoRedoButtons,
+  type HeaderFilterOptions,
+  type SelectionFeatureOptions,
 } from "@adapttable/core/binding";
+
+import {
+  COMMAND_PALETTE_RENDER,
+  SIDE_PANEL_RENDER,
+  STATUS_BAR_RENDER,
+} from "./areaRegions";
 
 /**
  * A core feature, as a row-aware feature of this binding. Every built-in
@@ -158,10 +171,10 @@ export function rowAppearance<TRow>(options: {
  *
  * @public
  */
-export function columnMenu(): StaticTableFeature {
+export function columnMenu(options?: ColumnMenuOptions): StaticTableFeature {
   return {
-    ...rowFree(coreColumnMenu()),
-    renders: [COLUMN_LAYOUT_LIVE_RENDER],
+    ...rowFree(coreColumnMenu(options)),
+    renders: [COLUMN_LAYOUT_LIVE_RENDER, COLUMN_MENU_ENTRY],
   };
 }
 
@@ -197,7 +210,10 @@ export function collapsibleColumnGroups(): StaticTableFeature {
 export function commandPalette(
   options: boolean | CommandPaletteOptions = true
 ): StaticTableFeature {
-  return rowFree(coreCommandPalette(options));
+  return {
+    ...rowFree(coreCommandPalette(options)),
+    renders: [COMMAND_PALETTE_RENDER],
+  };
 }
 
 /**
@@ -210,7 +226,7 @@ export function contextMenu<TRow>(
 ): TableFeature<TRow> {
   return {
     ...rowAware(coreContextMenu(options)),
-    renders: [COLUMN_LAYOUT_LIVE_RENDER],
+    renders: [COLUMN_LAYOUT_LIVE_RENDER, CONTEXT_MENU_REGION_RENDER],
   };
 }
 
@@ -220,7 +236,47 @@ export function contextMenu<TRow>(
  * @public
  */
 export function sidePanel(options: SidePanelOptions): StaticTableFeature {
-  return coreSidePanel(options);
+  return { ...coreSidePanel(options), renders: [SIDE_PANEL_RENDER] };
+}
+
+/**
+ * Let rows be selected, with the selection the host holds or the table's
+ * own. Bulk actions, column selection and selection stats each select rows
+ * too; this carries the selection's options to all of them.
+ *
+ * ```tsx
+ * import { selection } from "@adapttable/mantine/selection";
+ *
+ * <DataTable features={[selection({ selectedIds, onSelectionChange })]} … />
+ * ```
+ *
+ * @public
+ */
+export function selection(
+  options?: Omit<SelectionFeatureOptions, "getId">
+): StaticTableFeature;
+/**
+ * Let rows be selected by an id other than the row key.
+ *
+ * @public
+ */
+export function selection<TRow>(
+  options: SelectionFeatureOptions<TRow> & {
+    readonly getId: (row: TRow) => string;
+  }
+): TableFeature<TRow>;
+export function selection<TRow>(
+  options: SelectionFeatureOptions<TRow> = {}
+): TableFeature<TRow> | StaticTableFeature {
+  const renders = [SELECTION_LIVE_RENDER];
+  if (options.getId) return { ...rowAware(coreSelection(options)), renders };
+  const { selectedIds, defaultSelectedIds, onSelectionChange } = options;
+  return {
+    ...rowFree(
+      coreSelection({ selectedIds, defaultSelectedIds, onSelectionChange })
+    ),
+    renders,
+  };
 }
 
 /**
@@ -233,7 +289,7 @@ export function bulkActions(
 ): StaticTableFeature {
   return {
     ...rowFree(coreBulkActions(actions)),
-    renders: [SELECTION_LIVE_RENDER],
+    renders: [SELECTION_LIVE_RENDER, BULK_ACTIONS_BAR_RENDER],
   };
 }
 
@@ -253,8 +309,10 @@ export function filterTypes(
  *
  * @public
  */
-export function headerFilters(): StaticTableFeature {
-  return rowFree(coreHeaderFilters());
+export function headerFilters(
+  options?: HeaderFilterOptions
+): StaticTableFeature {
+  return rowFree(coreHeaderFilters(options));
 }
 
 /**
@@ -268,7 +326,7 @@ export function savedViews(options: UseSavedViewsOptions): StaticTableFeature {
     // A view is the whole table state, columns included: restoring one writes
     // the layout params back, so this feature has to own the layout they land
     // in. Without it a restored view changes everything except its columns.
-    renders: [COLUMN_LAYOUT_LIVE_RENDER],
+    renders: [COLUMN_LAYOUT_LIVE_RENDER, SAVED_VIEWS_ENTRY],
   };
 }
 
@@ -290,7 +348,7 @@ export function print(
  * @public
  */
 export function statusBar(): StaticTableFeature {
-  return rowFree(coreStatusBar());
+  return { ...rowFree(coreStatusBar()), renders: [STATUS_BAR_RENDER] };
 }
 
 /**

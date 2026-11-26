@@ -26,6 +26,13 @@ export const XLSX_WRITER_MARKER = "function xlsxWriter";
 const writers = [PDF_WRITER_MARKER, XLSX_WRITER_MARKER];
 const drawerStyles = ["data-adapttable-filter-dialog", "filters-backdrop"];
 
+/** What only a table served by a server source carries. */
+export const SERVER_TIER_MARKERS = [
+  "useServerData",
+  "createLazyServerSource",
+  "serverQuery",
+];
+
 /** Runtime implementations only: shared feature keys and erased types are allowed. */
 export const VUE_OPTIONAL_BASE_MARKERS = [
   "createCommandPaletteController",
@@ -69,13 +76,28 @@ export const VUE_NATIVE_BASE_SPECS = [
   pkg: `adapter-${kit}`,
   consumerHost: nativeConsumerHosts[kit],
   hardBaseCeiling: true,
+  // 2026-11-24 plus 15%. shadcn-vue would round past the 80 KiB cap.
+  ceilingKB: {
+    "element-plus": 67,
+    "naive-ui": 65,
+    "nuxt-ui": 75,
+    "shadcn-vue": 80,
+    quasar: 74,
+    "reka-ui": 67,
+    vuetify: 66,
+  }[kit],
   followsLibraryLocale: true,
   code: 'export { DataTable } from "PKG";\nimport "STYLE";',
   styleEntryFile: "styles.css",
   presentCss: [css],
   functionality: `${kit} table, native controls and published adapter stylesheet`,
   present: ["DataTable"],
-  absent: [...writers, "export-progress-surface", ...VUE_OPTIONAL_BASE_MARKERS],
+  absent: [
+    ...writers,
+    "export-progress-surface",
+    ...VUE_OPTIONAL_BASE_MARKERS,
+    ...SERVER_TIER_MARKERS,
+  ],
   rejectOptionalAi: true,
 }));
 
@@ -242,6 +264,7 @@ export const VUE_CONSUMER_SPECS = [
     name: "vue-unstyled · table",
     pkg: "adapter-vue-unstyled",
     hardBaseCeiling: true,
+    ceilingKB: 60,
     code: 'export { DataTable } from "PKG";',
     functionality: "Native table without optional features",
     present: ["DataTable"],
@@ -284,6 +307,7 @@ export const VUE_CONSUMER_SPECS = [
     pkg: "adapter-vue-unstyled",
     alsoEntryFile: "preset.js",
     comparable: "mui · table + preset",
+    ceilingKB: 130,
     code: 'export { DataTable } from "PKG";\nexport { standardFeatures } from "ALSO";\nimport "STYLE";',
     styleEntryFile: "styles.css",
     presentCss: drawerStyles,
@@ -293,7 +317,6 @@ export const VUE_CONSUMER_SPECS = [
   },
   ...[
     ["export", "exportCsv", [], writers],
-    ["export-csv", "exportCsv", [], writers],
     ["export-pdf", "exportPdf", [PDF_WRITER_MARKER], [XLSX_WRITER_MARKER]],
     ["export-xlsx", "exportXlsx", [XLSX_WRITER_MARKER], [PDF_WRITER_MARKER]],
   ].map(([entry, factory, present, absent]) => ({
@@ -320,17 +343,39 @@ export const VUE_CONSUMER_SPECS = [
   {
     name: "vue-unstyled · features barrel",
     pkg: "adapter-vue-unstyled",
-    alsoEntryFile: "features.js",
     comparable: "mui · features barrel",
-    code: 'export { DataTable } from "PKG";\nexport * from "ALSO";\nimport "STYLE";',
+    code: 'export { DataTable } from "PKG";\nexport * from "@adapttable/vue/features";\nimport "STYLE";',
     styleEntryFile: "styles.css",
     presentCss: drawerStyles,
     functionality:
-      "Native table and every runtime export in its features barrel",
-    present: ["DataTable", ...writers],
-    absent: [],
+      "Native table and every headless factory from the binding features entry",
+    present: ["DataTable", "exportCsv", "grouping"],
+    absent: writers,
   },
   ...VUE_NATIVE_BASE_SPECS,
+  ...VUE_NATIVE_BASE_SPECS.map((spec) => ({
+    name: `${spec.name.replace(" · table", "")} · table + preset`,
+    pkg: spec.pkg,
+    consumerHost: spec.consumerHost,
+    alsoEntryFile: "preset.js",
+    // Packed 2026-11-24, initial gzip plus 15%. Locale chunk sits in the total.
+    ceilingKB: {
+      "element-plus": 132,
+      "naive-ui": 129,
+      "nuxt-ui": 146,
+      "shadcn-vue": 156,
+      quasar: 149,
+      "reka-ui": 131,
+      vuetify: 132,
+    }[spec.name.replace(" · table", "")],
+    followsLibraryLocale: true,
+    code: 'export { DataTable } from "PKG";\nexport { standardFeatures } from "ALSO";\nimport "STYLE";',
+    styleEntryFile: "styles.css",
+    presentCss: spec.presentCss,
+    functionality: `${spec.pkg.replace("adapter-", "")} table and standard preset`,
+    present: ["DataTable", "standardFeatures", "export-progress-surface"],
+    absent: writers,
+  })),
   ...VUE_FILTER_WIDGET_SPECS,
 ];
 
@@ -348,8 +393,7 @@ export const VUE_LAYOUT_GRAPH_SPECS = [
     name: `${spec.pkg.slice("adapter-".length)} · features barrel`,
     pkg: spec.pkg,
     consumerHost: spec.consumerHost,
-    alsoEntryFile: "features.js",
-    code: 'export { DataTable } from "PKG";\nexport * from "ALSO";\nimport "STYLE";',
+    code: 'export { DataTable } from "PKG";\nexport * from "@adapttable/vue/features";\nimport "STYLE";',
     styleEntryFile: spec.styleEntryFile,
     presentCss: spec.presentCss,
     functionality: "Native table and combined native feature factories",
@@ -384,14 +428,14 @@ export function vueConsumerFixtures(
     const comparable = comparables.find(
       (fixture) => fixture.name === spec.comparable
     );
-    if (!spec.hardBaseCeiling && !comparable)
+    if (!spec.hardBaseCeiling && spec.ceilingKB === undefined && !comparable)
       throw new Error(`Missing comparable Vue budget: ${spec.comparable}`);
     // These ceilings have always held every emitted file, so they are total
     // ceilings; the initial share is a subset held to the same number. A kit
     // that follows its library's locale may also load one language preset.
-    const ceilingKB = spec.hardBaseCeiling
-      ? hardBaseCeiling
-      : comparable.initialKB;
+    const ceilingKB =
+      spec.ceilingKB ??
+      (spec.hardBaseCeiling ? hardBaseCeiling : comparable.initialKB);
     const totalCeilingKB =
       ceilingKB + (spec.followsLibraryLocale ? lazyLocaleKB : 0);
     return {

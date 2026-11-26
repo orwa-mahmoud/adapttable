@@ -92,7 +92,7 @@ export function People() {
 - `null` / `undefined` / `NaN` always sort last — in both directions. A descending sort never flips the blanks to the top.
 - Sort state lives in the URL: `sortBy` + `sortDir` for a single sort, and the chain as `sort=name:asc,hiredAt:desc` with `multiSort()` composed. `defaults` apply only while the URL is silent; clearing a defaulted sort writes an empty `sortBy=` marker so it does not resurrect.
 - `multiSort()` adds shift-click (or shift-Enter): each shift-click adds the column to the chain or advances it (asc → desc → removed). The first shift-click keeps the current sort as level one, so click Name then shift-click Salary sorts Name → Salary. Chained headers expose a 1-based `data-sort-index` for the order badge. A plain click resets the chain back to a single sort.
-- Server tier (`onQueryChange` / `useQuerySource`): the table only emits the state — `query.sortBy`, `query.sortDir`, and `query.sortLevels` for a chain. Your backend does the comparing; `sortValue` is unused.
+- Server tier (`useServerData` / `useQuerySource`): the table only emits the state — `query.sortBy`, `query.sortDir`, and `query.sortLevels` for a chain. Your backend does the comparing; `sortValue` is unused.
 
 ## Options
 

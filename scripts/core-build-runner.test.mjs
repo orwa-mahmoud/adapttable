@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import {
   existsSync,
   mkdirSync,
@@ -10,9 +11,11 @@ import {
   symlinkSync,
   writeFileSync,
 } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, relative } from "node:path";
 import { it } from "node:test";
+import { pathToFileURL } from "node:url";
 
 import { originalPositionFor, TraceMap } from "@jridgewell/trace-mapping";
 import ts from "typescript";
@@ -22,6 +25,7 @@ import {
   declarationConfig,
   declarationConfigs,
   inlineDeclarationSources,
+  shareMapSources,
 } from "./build-library.mjs";
 
 it("keeps every core entry and bundler option while selecting the declaration module extension", () => {
@@ -173,15 +177,17 @@ it("runs all four phases serially and leaves self-contained declaration maps aft
           "utf8"
         )
       );
-      assert.deepEqual(map.sources, ["../src/model.ts"]);
-      assert.deepEqual(map.sourcesContent, [
-        "// Original implementation\nexport const spare = 0;\n\nexport interface Model { value: string }\n",
-      ]);
+      assert.deepEqual(map.sources, ["sources/model.ts"]);
+      assert.equal(map.sourcesContent, undefined);
+      assert.equal(
+        readFileSync(join(f.packageDir, "dist/sources/model.ts"), "utf8"),
+        "// Original implementation\nexport const spare = 0;\n\nexport interface Model { value: string }\n"
+      );
       assert.equal(map.sourceRoot, undefined);
       assert.deepEqual(
         originalPositionFor(new TraceMap(map), { line: 1, column: 0 }),
         {
-          source: "../src/model.ts",
+          source: "sources/model.ts",
           line: 4,
           column: 0,
           name: null,
@@ -366,7 +372,12 @@ it("composes canonical declaration sources when the staging parent is a symlink"
     const map = JSON.parse(
       readFileSync(join(f.packageDir, "dist/index.d.ts.map"), "utf8")
     );
-    assert.deepEqual(map.sources, ["../src/model.ts"]);
+    assert.deepEqual(map.sources, ["sources/model.ts"]);
+    assert.equal(map.sourcesContent, undefined);
+    assert.equal(
+      readFileSync(join(f.packageDir, "dist/sources/model.ts"), "utf8"),
+      readFileSync(join(f.packageDir, "src/model.ts"), "utf8")
+    );
     assert.equal(
       originalPositionFor(new TraceMap(map), { line: 1, column: 0 }).line,
       4
@@ -374,5 +385,84 @@ it("composes canonical declaration sources when the staging parent is a symlink"
     assert.deepEqual(readdirSync(f.tempParent), []);
   } finally {
     f.cleanup();
+  }
+});
+
+it("ships one copy of a source and debuggers still read that copy", async () => {
+  const root = mkdtempSync(join(tmpdir(), "shared-map-"));
+  const packageDir = join(root, "package");
+  const outDir = join(packageDir, "dist");
+  const source =
+    'export function explode() {\n  throw new Error("boom-from-source");\n}\n';
+  mkdirSync(join(packageDir, "src"), { recursive: true });
+  mkdirSync(join(outDir, "dev"), { recursive: true });
+  writeFileSync(join(packageDir, "src/model.ts"), source);
+  for (const file of [
+    "dist/index.js.map",
+    "dist/index.cjs.map",
+    "dist/dev/index.js.map",
+  ]) {
+    const mapFile = join(packageDir, file);
+    writeFileSync(
+      mapFile,
+      JSON.stringify({
+        version: 3,
+        file: "index.js",
+        sources: [relative(dirname(mapFile), join(packageDir, "src/model.ts"))],
+        sourcesContent: [source],
+        names: ["explode"],
+        mappings: ";AACE",
+      })
+    );
+  }
+  writeFileSync(
+    join(outDir, "index.js"),
+    'export function explode() {\n  throw new Error("boom-from-source");\n}\n//# sourceMappingURL=index.js.map\n'
+  );
+  shareMapSources(outDir, packageDir);
+  assert.equal(readFileSync(join(outDir, "sources/model.ts"), "utf8"), source);
+  for (const file of ["index.js.map", "index.cjs.map", "dev/index.js.map"]) {
+    const map = JSON.parse(readFileSync(join(outDir, file), "utf8"));
+    assert.equal(map.sourcesContent, undefined);
+    assert.equal(
+      readFileSync(join(dirname(join(outDir, file)), map.sources[0]), "utf8"),
+      source
+    );
+  }
+  writeFileSync(
+    join(root, "run.mjs"),
+    'import { explode } from "./package/dist/index.js";\nexplode();\n'
+  );
+  let stack = "";
+  try {
+    execFileSync(
+      process.execPath,
+      ["--enable-source-maps", join(root, "run.mjs")],
+      { encoding: "utf8" }
+    );
+  } catch (error) {
+    stack = `${error.stdout ?? ""}\n${error.stderr ?? ""}`;
+  }
+  assert.match(stack, /sources\/model\.ts:2/);
+  assert.match(stack, /boom-from-source/);
+
+  const require = createRequire(
+    new URL("../apps/showcase/package.json", import.meta.url)
+  );
+  const { createServer } = await import(
+    pathToFileURL(require.resolve("vite")).href
+  );
+  const server = await createServer({
+    root,
+    server: { middlewareMode: true },
+    appType: "custom",
+    logLevel: "silent",
+  });
+  try {
+    const transformed = await server.transformRequest("/package/dist/index.js");
+    assert.equal(transformed.map.sourcesContent[0], source);
+  } finally {
+    await server.close();
+    rmSync(root, { recursive: true, force: true });
   }
 });

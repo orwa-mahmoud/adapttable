@@ -13,7 +13,9 @@
  * Marks clear on confirmation and on rollback, and never on their own — a mark
  * that fades on a timer says the change is safe when nobody checked.
  */
+import type { RowRekeyMoves } from "../state/rowRekeys";
 import type { TableStore } from "../state/tableStore";
+import { cellIdentity, cellKeysByRow, rekeyCellSet } from "./cellIdentity";
 import { stateCell } from "./storePlumbing";
 
 /**
@@ -38,10 +40,12 @@ export interface DirtyCellState {
   confirmAll: () => void;
   /** A digest of the marks, for a row memo comparator. */
   signature: string;
+  /** A digest of one row's marks, for that row's memo comparator. */
+  rowSignature?: (rowId: string) => string;
 }
 
 /**
- * What {@link createDirtyCellStore} needs.
+ * What `createDirtyCellStore` needs.
  *
  * @public
  */
@@ -83,6 +87,8 @@ export interface DirtyCellStore {
   readonly confirmRow: (rowId: string) => void;
   /** Clear everything. */
   readonly confirmAll: () => void;
+  /** Move each rekeyed row's marks to its new id. */
+  readonly rekey: (moves: RowRekeyMoves) => void;
 }
 
 /**
@@ -91,7 +97,7 @@ export interface DirtyCellStore {
  * @public
  */
 export function dirtyCellKey(rowId: string, columnKey: string): string {
-  return `${rowId} ${columnKey}`;
+  return cellIdentity(rowId, columnKey);
 }
 
 /**
@@ -123,6 +129,11 @@ export function createDirtyCellStore(
     configure(next) {
       current = next;
     },
+    rekey(moves) {
+      const { cells } = state.get();
+      const next = rekeyCellSet(cells, moves.ids);
+      if (next !== cells) write(next);
+    },
     mark(rowId, columnKey) {
       if (current.enabled !== true) return;
       const key = dirtyCellKey(rowId, columnKey);
@@ -137,11 +148,12 @@ export function createDirtyCellStore(
       write(next);
     },
     confirmRow(rowId) {
-      const prefix = `${rowId} `;
-      const next = new Set(
-        [...state.get().cells].filter((key) => !key.startsWith(prefix))
-      );
-      if (next.size !== state.get().cells.size) write(next);
+      const { cells } = state.get();
+      const marked = cellKeysByRow(cells).get(rowId);
+      if (!marked) return;
+      const next = new Set(cells);
+      for (const key of marked) next.delete(key);
+      write(next);
     },
     confirmAll() {
       if (state.get().cells.size > 0) write(new Set());
@@ -165,24 +177,25 @@ export function dirtyCellView(
   const { cells } = snapshot;
   return {
     isDirty: (rowId, columnKey) => cells.has(dirtyCellKey(rowId, columnKey)),
-    isRowDirty: (rowId) => {
-      const prefix = `${rowId} `;
-      for (const key of cells) {
-        if (key.startsWith(prefix)) return true;
-      }
-      return false;
-    },
+    isRowDirty: (rowId) => cellKeysByRow(cells).has(rowId),
     count: cells.size,
     mark: store.mark,
     confirm: store.confirm,
     confirmRow: store.confirmRow,
     confirmAll: store.confirmAll,
-    signature: [...cells].join(""),
+    signature: cells.size === 0 ? "" : JSON.stringify([...cells]),
+    rowSignature: (rowId) => keysSignature(cellKeysByRow(cells).get(rowId)),
   };
+}
+
+/** A digest of some cell keys; empty when there are none. */
+function keysSignature(keys: readonly string[] | undefined): string {
+  return keys ? JSON.stringify(keys) : "";
 }
 
 /** A dirty set that draws nothing, for a host that only counts. */
 const NOT_DIRTY = (): boolean => false;
+const NO_ROW_SIGNATURE = (): string => "";
 
 /**
  * The dirty set the cells read. It is always the tracked one — the same
@@ -205,5 +218,6 @@ export function dirtyMarkerView(
     isDirty: NOT_DIRTY,
     isRowDirty: NOT_DIRTY,
     signature: "",
+    rowSignature: NO_ROW_SIGNATURE,
   };
 }

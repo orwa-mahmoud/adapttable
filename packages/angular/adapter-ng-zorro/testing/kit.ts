@@ -3,6 +3,7 @@ import { bulkActions } from "@adapttable/ng-zorro/bulk-actions";
 import { cellNavigation } from "@adapttable/ng-zorro/cell-navigation";
 import { cellSpan } from "@adapttable/ng-zorro/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/ng-zorro/column-groups";
+import { columnLayoutFamily } from "@adapttable/ng-zorro/column-layout";
 import { columnMenu } from "@adapttable/ng-zorro/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/ng-zorro/column-selection";
 import { commandPalette } from "@adapttable/ng-zorro/command-palette";
@@ -11,11 +12,13 @@ import {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/ng-zorro/editing";
 import { exportCsv, exportPdf, exportXlsx } from "@adapttable/ng-zorro/export";
 import { extraRows } from "@adapttable/ng-zorro/extra-rows";
+import { filteringFamily } from "@adapttable/ng-zorro/filtering";
 import {
   filters,
   filtersWith,
@@ -43,6 +46,7 @@ import { rowDetail } from "@adapttable/ng-zorro/row-detail";
 import { rowPinning } from "@adapttable/ng-zorro/row-pinning";
 import { rowReorder } from "@adapttable/ng-zorro/row-reorder";
 import { savedViews } from "@adapttable/ng-zorro/saved-views";
+import { selection } from "@adapttable/ng-zorro/selection";
 import { selectionStats } from "@adapttable/ng-zorro/selection-stats";
 import { sidePanel } from "@adapttable/ng-zorro/side-panel";
 import { statusBar } from "@adapttable/ng-zorro/status-bar";
@@ -79,9 +83,13 @@ export const kit: AngularKitUnderTest = {
   name: "ng-zorro",
   Table: AdaptDataTable,
   features: {
+    editingFamily,
+    filteringFamily,
+    columnLayoutFamily,
     commandPalette,
     dirtyIndicators,
     filterTypes,
+    selection,
     selectionStats,
     sidePanel,
     statusBar,

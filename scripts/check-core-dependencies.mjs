@@ -19,6 +19,8 @@ import { fileURLToPath } from "node:url";
 
 import ts from "typescript";
 
+import { formatLikeRepo } from "./format-like-repo.mjs";
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OWNERSHIP_FILE = join(ROOT, "scripts", "core-export-ownership.json");
 
@@ -469,7 +471,7 @@ function compareExports(left, right) {
   return left.name.localeCompare(right.name);
 }
 
-function main() {
+async function main() {
   const write = process.argv.includes("--write-inventory");
   const checked = checkCoreDependencies();
   if (checked.problems.length > 0) {
@@ -484,7 +486,13 @@ function main() {
   const fresh = JSON.stringify(exports);
   if (write) {
     ownership.exports = exports;
-    writeFileSync(OWNERSHIP_FILE, `${JSON.stringify(ownership, null, 2)}\n`);
+    writeFileSync(
+      OWNERSHIP_FILE,
+      await formatLikeRepo(
+        OWNERSHIP_FILE,
+        `${JSON.stringify(ownership, null, 2)}\n`
+      )
+    );
     console.log(`core dependencies: wrote ${exports.length} exports`);
   } else if (recorded !== fresh) {
     console.error(
@@ -499,4 +507,4 @@ function main() {
   );
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) await main();

@@ -2,49 +2,27 @@ import { resetDevWarnings } from "@adapttable/core/binding";
 import { act, render, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { type TableChrome } from "../chrome/tableChromeContract";
 import { ChromeExtrasGate } from "../features/chromeExtrasGate";
 import { editing } from "../features/editing";
+import { useFeatureState } from "../features/featureState";
 import { grouping } from "../features/grouping";
 import { groupingPanel } from "../features/grouping-panel";
 import { FeatureProviders } from "../features/providers";
 import {
+  EDITING_STATE,
+  GROUPING_PANEL_VIEW_STATE,
+  GROUPING_STATE,
+  type GroupingState,
+} from "../features/stateKeys";
+import {
   applyTableFeatures,
   type TableFeature,
 } from "../features/tableFeature";
+import { renderLiveChrome } from "../liveChrome.test-utils";
 import { useFrontendData } from "../source/useFrontendData";
 import { createMemoryAdapter } from "../url/adapter";
 import { useTableUrlState } from "../url/useTableUrlState";
 import { useTableChrome } from "../useTableChrome";
-
-function renderLiveChrome<TRow>(
-  features: readonly TableFeature<TRow>[],
-  build: () => Parameters<typeof useTableChrome<TRow>>[0]
-) {
-  const applied = applyTableFeatures({ features });
-  const box: { current: TableChrome<TRow> } = {
-    current: undefined as unknown as TableChrome<TRow>,
-  };
-  function Probe() {
-    const props = build();
-    const chromeProps = { ...applied, ...props };
-    const base = useTableChrome<TRow>(chromeProps);
-    return (
-      <ChromeExtrasGate chrome={base} props={chromeProps}>
-        {(overlaid) => {
-          box.current = overlaid;
-          return null;
-        }}
-      </ChromeExtrasGate>
-    );
-  }
-  render(
-    <FeatureProviders props={applied}>
-      <Probe />
-    </FeatureProviders>
-  );
-  return { result: box };
-}
 
 afterEach(() => {
   resetDevWarnings();
@@ -125,7 +103,7 @@ describe("editing row universe under grouping", () => {
         groupBy,
         onCellEdit: () => undefined,
       };
-    });
+    }, [EDITING_STATE]);
   }
 
   it("exposes the grouped leaf set as editingRows, the page slice otherwise", () => {
@@ -148,8 +126,8 @@ describe("editing row universe under grouping", () => {
     // slice) while the grouped body rendered the full filtered set — every
     // off-page row froze as display-only the instant editing began.
     const { result } = chromeWith("team");
-    act(() => result.current.editing?.state.begin("4", "name", "Radia"));
-    expect(result.current.editing?.state.active).toMatchObject({
+    act(() => result.state(EDITING_STATE)?.state.begin("4", "name", "Radia"));
+    expect(result.state(EDITING_STATE)?.state.active).toMatchObject({
       rowId: "4",
       columnKey: "name",
     });
@@ -157,14 +135,14 @@ describe("editing row universe under grouping", () => {
 
   it("still discards an edit whose row is not in the rendered set", () => {
     const { result } = chromeWith("team");
-    act(() => result.current.editing?.state.begin("999", "name", "x"));
-    expect(result.current.editing?.state.active).toBeNull();
+    act(() => result.state(EDITING_STATE)?.state.begin("999", "name", "x"));
+    expect(result.state(EDITING_STATE)?.state.active).toBeNull();
   });
 
   it("keeps page-slice semantics when grouping is off", () => {
     const { result } = chromeWith(undefined);
-    act(() => result.current.editing?.state.begin("4", "name", "Radia"));
-    expect(result.current.editing?.state.active).toBeNull();
+    act(() => result.state(EDITING_STATE)?.state.begin("4", "name", "Radia"));
+    expect(result.state(EDITING_STATE)?.state.active).toBeNull();
   });
 });
 
@@ -178,14 +156,12 @@ describe("useTableChrome grouping bundle", () => {
         defaults: { limit: 10 },
       })
     );
-    const { result } = renderHook(() =>
-      useTableChrome<Row>({
-        source: sourceResult.current,
-        columns: [{ key: "team" }, { key: "name" }],
-        rowKey: (r) => r.id,
-      })
-    );
-    expect(result.current.grouping).toBeUndefined();
+    const { result } = renderLiveChrome([], () => ({
+      source: sourceResult.current,
+      columns: [{ key: "team" }, { key: "name" }],
+      rowKey: (r: Row) => r.id,
+    }));
+    expect(result.state(GROUPING_STATE)).toBeUndefined();
   });
 
   it("arms grouping from prop groupBy on frontend source", () => {
@@ -205,12 +181,12 @@ describe("useTableChrome grouping bundle", () => {
       };
     });
     // The bundle carries the keys as a list now, one entry for a flat group.
-    expect(result.current.grouping?.groupBy).toEqual(["team"]);
-    expect(result.current.grouping?.entries[0]).toMatchObject({
+    expect(result.state(GROUPING_STATE)?.groupBy).toEqual(["team"]);
+    expect(result.state(GROUPING_STATE)?.entries[0]).toMatchObject({
       kind: "group",
       label: "Core",
     });
-    const core = result.current.grouping?.entries[0];
+    const core = result.state(GROUPING_STATE)?.entries[0];
     if (core?.kind === "group") {
       expect(core.aggregateCells).toEqual({ name: 2 });
     }
@@ -251,7 +227,7 @@ describe("useTableChrome grouping bundle", () => {
         };
       }
     );
-    const core = result.current.grouping?.entries[0];
+    const core = result.state(GROUPING_STATE)?.entries[0];
     expect(core?.kind).toBe("group");
     if (core?.kind === "group") {
       expect(core.aggregateCells).toEqual({ name: 2 });
@@ -279,9 +255,9 @@ describe("useTableChrome grouping bundle", () => {
       rowKey: (r) => r.id,
       groupBy: "team",
     }));
-    expect(result.current.grouping).toBeUndefined();
+    expect(result.state(GROUPING_STATE)).toBeUndefined();
     expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining("groupBy is ignored: Grouping is off")
+      expect.stringContaining("groupBy is ignored: this source cannot group")
     );
   });
 });
@@ -309,11 +285,15 @@ describe("grouping panel integration", () => {
       };
     });
 
-    expect(result.current.groupingPanel?.groupBy).toEqual(["team"]);
-    expect(result.current.groupingPanel?.aggregateOverrides).toEqual({
-      name: "count",
-    });
-    expect(result.current.groupingPanel?.canSetAggregates).toBe(true);
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.groupBy).toEqual(["team"]);
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.aggregateOverrides).toEqual(
+      {
+        name: "count",
+      }
+    );
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.canSetAggregates).toBe(
+      true
+    );
   });
 
   it("shows a plain groupAggregates mapper as owned by the app", () => {
@@ -341,7 +321,7 @@ describe("grouping panel integration", () => {
         };
       }
     );
-    expect(result.current.groupingPanel?.aggregations.items).toEqual(
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.aggregations.items).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           columnKey: "name",
@@ -367,9 +347,14 @@ describe("incremental totals follow effective aggregation config", () => {
   ];
 
   it("rebuilds cached group totals when a column default changes", () => {
-    const chrome: { current: TableChrome<PaidRow> | undefined } = {
+    const grouped: { current: GroupingState<PaidRow> | undefined } = {
       current: undefined,
     };
+    function GroupingProbe() {
+      grouped.current = useFeatureState(GROUPING_STATE) as
+        GroupingState<PaidRow> | undefined;
+      return null;
+    }
     function Probe({
       aggregatable,
     }: {
@@ -399,10 +384,7 @@ describe("incremental totals follow effective aggregation config", () => {
         const base = useTableChrome<PaidRow>(chromeProps);
         return (
           <ChromeExtrasGate chrome={base} props={chromeProps}>
-            {(overlaid) => {
-              chrome.current = overlaid;
-              return null;
-            }}
+            {() => <GroupingProbe />}
           </ChromeExtrasGate>
         );
       }
@@ -416,7 +398,7 @@ describe("incremental totals follow effective aggregation config", () => {
     const { rerender } = render(
       <Probe aggregatable={{ default: "sum", operations: ["sum", "avg"] }} />
     );
-    const coreSum = chrome.current?.grouping?.entries.find(
+    const coreSum = grouped.current?.entries.find(
       (entry) => entry.kind === "group" && entry.label === "Core"
     );
     expect(coreSum?.kind === "group" && coreSum.aggregateCells).toEqual({
@@ -426,7 +408,7 @@ describe("incremental totals follow effective aggregation config", () => {
     rerender(
       <Probe aggregatable={{ default: "avg", operations: ["sum", "avg"] }} />
     );
-    const coreAvg = chrome.current?.grouping?.entries.find(
+    const coreAvg = grouped.current?.entries.find(
       (entry) => entry.kind === "group" && entry.label === "Core"
     );
     expect(coreAvg?.kind === "group" && coreAvg.aggregateCells).toEqual({

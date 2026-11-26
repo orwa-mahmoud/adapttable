@@ -7,6 +7,7 @@ import { renderToString } from "vue/server-renderer";
 import { bulkActions } from "../src/bulk-actions";
 import DataTable from "../src/DataTable.vue";
 import { print } from "../src/print";
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -22,12 +23,11 @@ describe("Element bulk and print Node SSR", () => {
           data: [{ id: "a", name: "Ada" }],
           columns: [{ key: "name" }],
           rowKey: (row) => row.id,
-          selectedIds: ["a"],
-          selectable: true,
           urlSync: false,
           searchable: false,
           forceMobile: mobile,
           features: [
+            selection({ selectedIds: ["a"] }),
             bulkActions([
               { key: "archive", label: "Archive", onClick: action },
             ]),

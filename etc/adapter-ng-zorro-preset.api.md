@@ -10,15 +10,16 @@ import { FilterDef } from '@adapttable/angular';
 import { SavedViewsControllerOptions } from '@adapttable/angular';
 
 // @public
-export function standardPreset<TRow>(options?: StandardPresetOptions<TRow>): AdaptTableFeature[];
-
-// @public
-export interface StandardPresetOptions<TRow> {
+export interface StandardFeatureOptions<TRow> {
     readonly bulkActions?: readonly BulkAction[];
     readonly filters?: readonly FilterDef<TRow>[];
+    readonly findButton?: boolean;
     readonly grouping?: string | readonly string[];
     readonly savedViews?: SavedViewsControllerOptions;
 }
+
+// @public
+export function standardFeatures<TRow>(options?: StandardFeatureOptions<TRow>): AdaptTableFeature[];
 
 // (No @packageDocumentation comment for this package)
 

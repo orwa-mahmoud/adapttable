@@ -1,9 +1,10 @@
 /** A table's generic feature lifecycle, independent of optional features. */
 import type { TableRuntime } from "@adapttable/core";
 import {
+  createFeatureMounts,
   invokeCleanups,
   orderedContributions,
-  planFeatureRegistration,
+  preferLastById,
 } from "@adapttable/core/binding";
 import {
   ApplicationRef,
@@ -37,6 +38,8 @@ export interface FeatureMountContext {
   flush<T>(run: () => T): T;
   /** Commit pending host inputs before a reader takes an admission snapshot. */
   flushAdmission(): void;
+  /** The feature's current declaration, with its latest options. */
+  feature(): AdaptTableFeature;
 }
 
 /**
@@ -52,7 +55,8 @@ function mountFeaturesOnce<TRow>(
     readonly runtime: TableRuntime<TRow>;
     readonly state: FeatureState;
     readonly injector: Injector;
-  }
+  },
+  latest?: () => AdaptTableFeature
 ): () => void {
   const parent = options.injector;
   const injector = Injector.create({
@@ -80,7 +84,9 @@ function mountFeaturesOnce<TRow>(
       flushing = false;
     }
   };
-  const context: FeatureMountContext = {
+  const contextFor = (
+    feature: () => AdaptTableFeature
+  ): FeatureMountContext => ({
     runtime: options.runtime,
     injector,
     state: options.state,
@@ -90,7 +96,8 @@ function mountFeaturesOnce<TRow>(
       return result;
     },
     flushAdmission,
-  };
+    feature,
+  });
   const cleanups: (() => void)[] = [];
   const dispose = (): void => {
     if (disposed) return;
@@ -107,14 +114,16 @@ function mountFeaturesOnce<TRow>(
   };
   const removeDestroy = parent.get(DestroyRef).onDestroy(dispose);
   try {
-    for (const { contribution } of orderedContributions(
+    for (const { contribution, feature } of orderedContributions(
       features.map((feature, index) => ({
         ...feature,
         id: feature.id ?? `feature-${String(index)}`,
+        entry: feature,
       })),
       (feature) => feature.mount?.bind(feature),
       "mount"
     )) {
+      const context = contextFor(latest ?? (() => feature.entry));
       const cleanup = runInInjectionContext(injector, () =>
         contribution(context)
       );
@@ -263,58 +272,32 @@ export function mountTableFeatures<TRow>(
   }
 ): () => void {
   if (!isSignal(features)) return mountFeaturesOnce(features, options);
-  const mounted = new Map<
-    string,
-    { readonly feature: AdaptTableFeature; readonly dispose: () => void }
-  >();
+  type Identified = AdaptTableFeature & { readonly id: string };
+  // Kept by id: an ordinary option change hands the mounted feature its new
+  // declaration; a removed feature or changed dependencies release it once.
+  const mounts = createFeatureMounts<Identified>((_id, latest) =>
+    mountFeaturesOnce([latest()], options, latest)
+  );
   let disposed = false;
-  const release = (ids: readonly string[]): void => {
-    const cleanups: (() => void)[] = [];
-    for (const id of ids) {
-      const current = mounted.get(id);
-      mounted.delete(id);
-      if (current) cleanups.push(current.dispose);
-    }
-    const failures = invokeCleanups(cleanups);
-    if (failures.length > 0)
-      throw new AggregateError(failures, "Table feature cleanup failed");
-  };
   const dispose = (): void => {
     if (disposed) return;
     disposed = true;
     removeDestroy();
-    release([...mounted.keys()].reverse());
+    mounts.dispose();
   };
   const removeDestroy = options.injector.get(DestroyRef).onDestroy(dispose);
   const update = (list: readonly AdaptTableFeature[]): void => {
     if (disposed) return;
-    const contributions = orderedContributions(
-      list.map((entry, index) => ({
-        ...entry,
-        id: entry.id ?? `feature-${String(index)}`,
-        entry,
-      })),
-      (entry) => entry.mount?.bind(entry),
-      "mount"
+    mounts.reconcile(
+      preferLastById(
+        list.map((entry, index): Identified =>
+          // The host's own declaration, so `context.feature()` is it.
+          entry.id === undefined
+            ? { ...entry, id: `feature-${String(index)}` }
+            : (entry as Identified)
+        )
+      )
     );
-    const next = contributions.map(({ id, feature }) => ({
-      id,
-      feature: feature.entry,
-    }));
-    const retained = [...mounted.keys()].reverse().map((id) => {
-      const current = mounted.get(id);
-      if (!current) throw new Error("Missing mounted feature");
-      return { id, feature: current.feature };
-    });
-    const plan = planFeatureRegistration(retained, next, Object.is);
-    // Retract old publications before a new owner publishes the same state key.
-    release(plan.release);
-    for (const entry of plan.mount) {
-      mounted.set(entry.id, {
-        feature: entry.feature,
-        dispose: mountFeaturesOnce([entry.feature], options),
-      });
-    }
   };
   try {
     update(readMaybe(features));
@@ -333,26 +316,7 @@ export function mountTableFeatures<TRow>(
     () => {
       const list = features();
       untracked(() => {
-        const before = new Set(mounted.keys());
-        try {
-          update(list);
-        } catch (error) {
-          const added = [...mounted.keys()]
-            .filter((id) => !before.has(id))
-            .reverse();
-          const failures = [error];
-          try {
-            release(added);
-          } catch (cleanupError) {
-            failures.push(cleanupError);
-          }
-          if (failures.length > 1)
-            throw new AggregateError(
-              failures,
-              "Table feature mounting and cleanup failed"
-            );
-          throw error;
-        }
+        update(list);
       });
     },
     { injector: options.injector }

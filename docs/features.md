@@ -22,6 +22,10 @@ import { rowReorder } from "@adapttable/mantine/row-reorder";
 
 A built-in factory and a host plugin are the same `TableFeature` type in the
 same array — that is the public plugin surface, not a parallel API.
+`ColumnMenuOptions` and `FilterPanelOptions` are the options `columnMenu()`
+and `filters()` take. `HeaderFilterOptions` is the same for `headerFilters()`.
+`FeatureOwnedOptionKey` names one entry of `FEATURE_OWNED_OPTION_KEYS`, the
+options a feature factory sets and a table prop does not.
 
 ## What the import buys
 
@@ -44,55 +48,56 @@ the factory to that kit's own components; **headless** means it re-exports the
 `@adapttable/react/features` factory unchanged, because the feature draws no
 control of its own.
 
-| Import                                  | Exports                                                                                           | Draws    |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------- | -------- |
-| `@adapttable/<kit>/row-reorder`         | `rowReorder`                                                                                      | kit      |
-| `@adapttable/<kit>/row-pinning`         | `rowPinning`                                                                                      | headless |
-| `@adapttable/<kit>/pinned-summary-rows` | `pinnedSummaryRows`                                                                               | headless |
-| `@adapttable/<kit>/cell-span`           | `cellSpan`                                                                                        | headless |
-| `@adapttable/<kit>/extra-rows`          | `extraRows`                                                                                       | headless |
-| `@adapttable/<kit>/row-appearance`      | `rowAppearance`                                                                                   | headless |
-| `@adapttable/<kit>/row-detail`          | `rowDetail`, `nestedTable`                                                                        | kit      |
-| `@adapttable/<kit>/nested-table`        | `nestedTable`                                                                                     | kit      |
-| `@adapttable/<kit>/row-actions`         | `rowActions`                                                                                      | headless |
-| `@adapttable/<kit>/editing`             | `editing`, `rowEditing`, `batchEditing`, `editHistory`, `dirtyIndicators`, `undoRedoButtons`      | kit      |
-| `@adapttable/<kit>/batch-editing`       | `batchEditing`                                                                                    | kit      |
-| `@adapttable/<kit>/grouping`            | `grouping` — code-fixed grouping without the interactive panel                                    | kit      |
-| `@adapttable/<kit>/grouping-panel`      | `groupingPanel`, `GroupingPanel` — grouping headers + interactive panel                           | kit      |
-| `@adapttable/<kit>/tree`                | `tree`                                                                                            | kit      |
-| `@adapttable/<kit>/virtualize`          | `virtualize`                                                                                      | headless |
-| `@adapttable/<kit>/column-menu`         | `columnMenu`                                                                                      | kit      |
-| `@adapttable/<kit>/resizable-columns`   | `resizableColumns`                                                                                | headless |
-| `@adapttable/<kit>/fit-columns`         | `fitColumns`                                                                                      | headless |
-| `@adapttable/<kit>/column-groups`       | `collapsibleColumnGroups`                                                                         | kit      |
-| `@adapttable/<kit>/column-selection`    | `columnSelectionCheckbox`                                                                         | kit      |
-| `@adapttable/<kit>/multi-sort`          | `multiSort`                                                                                       | headless |
-| `@adapttable/<kit>/filters`             | `filters` (kit), `filterTypes` (headless)                                                         | kit      |
-| `@adapttable/<kit>/header-filters`      | `headerFilters`                                                                                   | kit      |
-| `@adapttable/<kit>/saved-views`         | `savedViews`                                                                                      | kit      |
-| `@adapttable/<kit>/export`              | `exportCsv`                                                                                       | kit      |
-| `@adapttable/<kit>/cell-navigation`     | `cellNavigation`                                                                                  | kit      |
-| `@adapttable/<kit>/selection-stats`     | `selectionStats`                                                                                  | kit      |
-| `@adapttable/<kit>/status-bar`          | `statusBar`, `selectionStats`                                                                     | kit      |
-| `@adapttable/<kit>/find-in-table`       | `findInTable`                                                                                     | kit      |
-| `@adapttable/<kit>/fullscreen`          | `fullscreen`                                                                                      | kit      |
-| `@adapttable/<kit>/density`             | `densityChooser`                                                                                  | kit      |
-| `@adapttable/<kit>/print`               | `print`                                                                                           | kit      |
-| `@adapttable/<kit>/command-palette`     | `commandPalette`                                                                                  | kit      |
-| `@adapttable/<kit>/context-menu`        | `contextMenu`                                                                                     | kit      |
-| `@adapttable/<kit>/side-panel`          | `sidePanel`                                                                                       | kit      |
-| `@adapttable/<kit>/bulk-actions`        | `bulkActions`                                                                                     | kit      |
-| `@adapttable/<kit>/assistant`           | `tableAssistant`, `TableAssistant`                                                                | kit      |
-| `@adapttable/<kit>/pivot`               | `PivotPanel` and the pivot engine (`pivot`, `pivotTableModel`, …)                                 | kit      |
-| `@adapttable/<kit>/preset`              | `standardFeatures`, `StandardFeatureOptions`                                                      | kit      |
-| `@adapttable/<kit>/features`            | the headless `@adapttable/react/features` surface: `applyTableFeatures`, `feature`, every factory | headless |
+| Import                                  | Exports                                                                                                       | Draws    |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------- | -------- |
+| `@adapttable/<kit>/row-reorder`         | `rowReorder`                                                                                                  | kit      |
+| `@adapttable/<kit>/row-pinning`         | `rowPinning`                                                                                                  | headless |
+| `@adapttable/<kit>/pinned-summary-rows` | `pinnedSummaryRows`                                                                                           | headless |
+| `@adapttable/<kit>/cell-span`           | `cellSpan`                                                                                                    | headless |
+| `@adapttable/<kit>/extra-rows`          | `extraRows`                                                                                                   | headless |
+| `@adapttable/<kit>/row-appearance`      | `rowAppearance`                                                                                               | headless |
+| `@adapttable/<kit>/row-detail`          | `rowDetail`, `nestedTable`                                                                                    | kit      |
+| `@adapttable/<kit>/nested-table`        | `nestedTable`                                                                                                 | kit      |
+| `@adapttable/<kit>/row-actions`         | `rowActions`                                                                                                  | headless |
+| `@adapttable/<kit>/editing`             | `editing`, `rowEditing`, `batchEditing`, `editHistory`, `dirtyIndicators`, `undoRedoButtons`, `editingFamily` | kit      |
+| `@adapttable/<kit>/batch-editing`       | `batchEditing`                                                                                                | kit      |
+| `@adapttable/<kit>/grouping`            | `grouping` — code-fixed grouping without the interactive panel                                                | kit      |
+| `@adapttable/<kit>/grouping-panel`      | `groupingPanel`, `GroupingPanel` — grouping headers + interactive panel                                       | kit      |
+| `@adapttable/<kit>/tree`                | `tree`                                                                                                        | kit      |
+| `@adapttable/<kit>/virtualize`          | `virtualize`                                                                                                  | headless |
+| `@adapttable/<kit>/column-menu`         | `columnMenu`                                                                                                  | kit      |
+| `@adapttable/<kit>/column-layout`       | `columnLayoutFamily`                                                                                          | kit      |
+| `@adapttable/<kit>/resizable-columns`   | `resizableColumns`                                                                                            | headless |
+| `@adapttable/<kit>/fit-columns`         | `fitColumns`                                                                                                  | headless |
+| `@adapttable/<kit>/column-groups`       | `collapsibleColumnGroups`                                                                                     | kit      |
+| `@adapttable/<kit>/column-selection`    | `columnSelectionCheckbox`                                                                                     | kit      |
+| `@adapttable/<kit>/multi-sort`          | `multiSort`                                                                                                   | headless |
+| `@adapttable/<kit>/filters`             | `filters` (kit), `filterTypes` (headless)                                                                     | kit      |
+| `@adapttable/<kit>/filtering`           | `filteringFamily`                                                                                             | kit      |
+| `@adapttable/<kit>/header-filters`      | `headerFilters`                                                                                               | kit      |
+| `@adapttable/<kit>/saved-views`         | `savedViews`                                                                                                  | kit      |
+| `@adapttable/<kit>/export`              | `exportCsv`                                                                                                   | kit      |
+| `@adapttable/<kit>/cell-navigation`     | `cellNavigation`                                                                                              | kit      |
+| `@adapttable/<kit>/selection-stats`     | `selectionStats`                                                                                              | kit      |
+| `@adapttable/<kit>/status-bar`          | `statusBar`, `selectionStats`                                                                                 | kit      |
+| `@adapttable/<kit>/find-in-table`       | `findInTable`                                                                                                 | kit      |
+| `@adapttable/<kit>/fullscreen`          | `fullscreen`                                                                                                  | kit      |
+| `@adapttable/<kit>/density`             | `densityChooser`                                                                                              | kit      |
+| `@adapttable/<kit>/print`               | `print`                                                                                                       | kit      |
+| `@adapttable/<kit>/command-palette`     | `commandPalette`                                                                                              | kit      |
+| `@adapttable/<kit>/context-menu`        | `contextMenu`                                                                                                 | kit      |
+| `@adapttable/<kit>/side-panel`          | `sidePanel`                                                                                                   | kit      |
+| `@adapttable/<kit>/bulk-actions`        | `bulkActions`                                                                                                 | kit      |
+| `@adapttable/<kit>/assistant`           | `tableAssistant`, `TableAssistant`                                                                            | kit      |
+| `@adapttable/<kit>/pivot`               | `PivotPanel` and the pivot engine (`pivot`, `pivotTableModel`, …)                                             | kit      |
+| `@adapttable/<kit>/preset`              | `standardFeatures`, `StandardFeatureOptions`                                                                  | kit      |
 
 `<kit>` is `mantine`, `mui`, `chakra`, `antd`, `radix`, `base-ui`, `shadcn`,
-or `unstyled`. `@adapttable/<kit>/features` forwards `@adapttable/react/features`
-as it is, so a factory that draws kit UI — `columnMenu`, `filters`,
-`headerFilters`, `collapsibleColumnGroups`, `rowReorder`, `groupingPanel`,
-`exportCsv`, … — renders no controls when imported from there. Import each one
-from its own `@adapttable/<kit>/<subpath>`.
+or `unstyled`. Import each factory from its own `@adapttable/<kit>/<subpath>`.
+`@adapttable/react/features` is the headless surface, so a factory that draws
+kit UI — `columnMenu`, `filters`, `headerFilters`, `collapsibleColumnGroups`,
+`rowReorder`, `groupingPanel`, `exportCsv`, … — renders no controls when
+imported from there.
 
 The pivot engine stays a calculation — `import { pivot } from "@adapttable/core/pivot"`
 — not a `<DataTable>` prop. The kit `/pivot` subpath is the panel plus that
@@ -162,10 +167,44 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 64 kB gzipped and the same table with
-`standardFeatures()` composed is 124 kB.
+Measured on MUI, the table alone is 63 KiB gzipped and the same table with
+`standardFeatures()` composed is 125 KiB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
+
+## Families — one entry for an area
+
+A table composes at three levels: one feature per capability, one family per
+area, and the preset for the common table. A family is every member of an
+area built by one call and passed to `features` as one entry:
+
+```tsx
+import { columnLayoutFamily } from "@adapttable/mantine/column-layout";
+import { editingFamily } from "@adapttable/mantine/editing";
+import { filteringFamily } from "@adapttable/mantine/filtering";
+
+<DataTable
+  features={[
+    editingFamily(save),
+    filteringFamily([{ key: "team", type: "select", options: teams }]),
+    columnLayoutFamily(),
+  ]}
+  …
+/>;
+```
+
+| Family                  | Members                                                                    |
+| ----------------------- | -------------------------------------------------------------------------- |
+| `editingFamily(save)`   | `editing(save)`, `dirtyIndicators()`, `editHistory()`, `undoRedoButtons()` |
+| `filteringFamily(defs)` | `filters(defs)`, `headerFilters()`                                         |
+| `columnLayoutFamily()`  | `columnMenu()`, `resizableColumns()`, `fitColumns()`                       |
+
+Row and batch editing commit through handlers of their own and join beside
+`editingFamily`; collapsible column groups need column groups and join beside
+`columnLayoutFamily`. `groupingPanel` already composes every grouping member.
+Each family has its own entry, so a family loads its members and nothing
+else, and a member imported alone still loads alone. `standardFeatures` is built from the column-layout and
+filtering families.
 
 ## Types, and why no annotation is needed
 
@@ -192,11 +231,12 @@ or a `TableFeature` with `setup(host)` for live registration.
 
 A plugin registers on the same `TableFeature` the factories return —
 `filterTypes`, an export writer, palette commands, context-menu items, a side
-panel — so the registration surface is one array, one host, with lifecycle via
-`onDispose` or a function returned from `setup`.
+panel — so the registration surface is one array and one host. `setup`
+registers and nothing else: it runs during render, possibly for a render the
+framework discards. What outlives a render goes in `mount`.
 
 ```tsx
-import type { TableFeature } from "@adapttable/mantine/features";
+import type { TableFeature } from "@adapttable/react/features";
 
 const currencyFilter: TableFeature = {
   id: "currency-filter",
@@ -211,9 +251,6 @@ const currencyFilter: TableFeature = {
       chips: () => ({}),
       conditionToExtra: () => ({}),
     });
-    return () => {
-      /* table unmounted, or `features` changed */
-    };
   },
 };
 
@@ -238,7 +275,30 @@ methods in `setup`, so a plugin is not a second API.
 | `registerPanel`            | `sidePanel({ panels, … })`                    |
 | `registerCommand`          | `commandPalette({ commands, … })`             |
 | `registerContextMenuItems` | `contextMenu({ items })`                      |
-| `onDispose`                | cleanup when the table unmounts               |
+
+### Resources — `mount`
+
+A subscription, a preload or a timer belongs in `mount(context)`, which runs
+once the table has mounted and returns what releases it. The table keeps it
+by feature id: declaring the feature again with new options, inline included,
+keeps the resource and hands `context.feature()` the new declaration. Only
+removing the feature, changing its `dependencies` or unmounting the table
+releases it, and each acquisition is released exactly once. A render the
+framework discards acquires nothing.
+
+```tsx
+const presence: TableFeature<Row> = {
+  id: "presence",
+  dependencies: [roomId],
+  mount(context) {
+    const channel = openPresence(roomId, () => context.feature());
+    return () => channel.close();
+  },
+};
+```
+
+Two features with one id resolve to the last declaration everywhere: its
+options, labels, registrations, mount and slot fills.
 
 A named editor is a string `column.editor` that is not a built-in (`"text"`,
 `"number"`, …). `resolveCellEditor` turns it into `{ type: "custom", render }`
@@ -381,11 +441,12 @@ registry to learn and nothing global to collide over.
 `headerFilters` · `savedViews` · `selectionStats` · `densityChooser` ·
 `print` · `statusBar` · `undoRedoButtons` · `multiSort` · `fitColumns` ·
 `columnSelectionCheckbox` · `rowActions` · `feature` (ad-hoc patch) ·
-`applyTableFeatures` (the merge used by every adapter) · `useTableFeatures`
-(apply + `setup(host)`, the hook every adapter runs).
+`applyTableFeatures` (the merge, from `@adapttable/react/features`).
 
-Host helpers are exported from `@adapttable/react/adapter`: `featureHostOf` /
-`rememberFeatureHost` (the host of one table, never a sibling's) ·
+`useTableFeatures` (apply + `setup(host)`, the hook every adapter runs) is
+exported from `@adapttable/react/adapter`, with the other host helpers:
+`featureHostOf` / `rememberFeatureHost` (the host of one table, never a
+sibling's) ·
 `FeatureHostProvider` / `useFeatureHost` (hooks under that table) ·
 `bindFeatureHostFn` (a mapper created outside the table still resolves names
 for the table that invokes it).

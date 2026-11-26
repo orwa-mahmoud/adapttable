@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest";
 import type { TableSourceCapabilities } from "../contracts/source";
 import { exportAllFallsBackToPage } from "../export/tableCsv";
 import { groupingComputationKind } from "../grouping/groupingStrategy";
+import { defaultLabels } from "../labels";
 import { capabilityReason, sourceCapabilities } from "./capabilities";
 
 const ROWS = [{ id: "1", team: "eng" }];
@@ -108,16 +109,13 @@ describe("sourceCapabilities — the declaration wins", () => {
 });
 
 describe("capabilityReason", () => {
-  it("has a sentence for every capability", () => {
-    const keys: (keyof TableSourceCapabilities)[] = [
-      "fullDataset",
-      "grouping",
-      "selectAcrossPages",
-      "exportScope",
-      "totalCount",
-    ];
-    for (const key of keys)
-      expect(capabilityReason(key).endsWith(".")).toBe(true);
+  it("reads each reason from the labels it is given", () => {
+    expect(capabilityReason("grouping", defaultLabels)).toBe(
+      defaultLabels.noticeGroupingUnavailable
+    );
+    expect(
+      capabilityReason("exportScope", { noticeExportAllPage: "Une page" })
+    ).toBe("Une page");
   });
 });
 

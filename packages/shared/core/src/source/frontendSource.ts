@@ -11,6 +11,7 @@
  * own reactivity and the moment it commits.
  */
 
+import { columnValueInputs } from "../columns/columnValueInputs";
 import type {
   ColumnMetadata,
   ExtraFilters,
@@ -30,6 +31,8 @@ import {
   sessionEvaluator,
   stageSessionEvaluator,
 } from "../engine/tableSession";
+import type { IncrementalView } from "../rows/incremental";
+import { incrementalViewOf } from "../rows/incrementalView";
 import {
   type RowPatchEvent,
   type RowPatchLog,
@@ -162,7 +165,7 @@ export interface FrontendSourceFrame<TRow> {
 /**
  * Builds the engine a frontend source drives.
  *
- * {@link createFrontendSource} passes the full evaluator. A plain table
+ * `createFrontendSource` passes the full evaluator. A plain table
  * passes `createBasicTableEngine` so grouping stays out of that graph.
  *
  * @public
@@ -203,7 +206,10 @@ export interface FrontendSource<TRow> {
   readonly replaceEngine: (createEngine: FrontendEngineFactory<TRow>) => void;
 }
 
-/** Value-only inputs. Callback and array identity are ignored. */
+/**
+ * Value-only inputs. Callback and array identity are ignored; a column counts
+ * by what its value is read from.
+ */
 function viewFingerprint<TRow>(
   config: FrontendSourceConfig<TRow>,
   view: FrontendSourceViewState
@@ -219,7 +225,7 @@ function viewFingerprint<TRow>(
       dir: level.dir,
     })),
     groupBy: view.groupBy ?? null,
-    columnKeys: (config.columns ?? []).map((column) => column.key),
+    columns: columnValueInputs(config.columns),
     hasFilterFn: config.filterFn !== undefined,
     hasFilterTreeFn: config.filterTreeFn !== undefined,
     hasGetSortValue: config.getSortValue !== undefined,
@@ -297,7 +303,7 @@ function warnUnresolvableSort<TRow>(
  * What the source last staged is compared only while the engine still holds
  * it: an update that threw, or a candidate that was dropped before its
  * commit, is staged again whole.
- * {@link createFrontendSource} is the convenience form that supplies the
+ * `createFrontendSource` is the convenience form that supplies the
  * full evaluator.
  *
  * @returns The source; call `FrontendSource.update` before reading.
@@ -360,8 +366,11 @@ export function createFrontendSourceWith<TRow>(
   function forgetPatchedRows(log: RowPatchLog<TRow>): void {
     for (const event of log.events) {
       const gone = replacedRow(event);
-      if (gone !== undefined && searchCache.get(event.id)?.row === gone) {
-        searchCache.delete(event.id);
+      // A rekeyed row was cached under the id it had before.
+      const cachedAs =
+        event.type === "update" ? (event.from ?? event.id) : event.id;
+      if (gone !== undefined && searchCache.get(cachedAs)?.row === gone) {
+        searchCache.delete(cachedAs);
       }
     }
   }
@@ -483,6 +492,23 @@ export function createFrontendSourceWith<TRow>(
     return next;
   }
 
+  /**
+   * The engine's filtered rows when nothing but search filtered them: then
+   * they are the searched rows, in source order, and searching again would
+   * read every row a second time.
+   */
+  function searchOnlyRows(
+    config: FrontendSourceConfig<TRow>,
+    view: FrontendSourceViewState,
+    sorted: readonly TRow[]
+  ): readonly TRow[] | undefined {
+    const filters =
+      config.filterFn !== undefined ||
+      (view.filterTree !== undefined && config.filterTreeFn !== undefined);
+    if (filters) return undefined;
+    return incrementalViewOf<IncrementalView<TRow>>(sorted)?.filtered;
+  }
+
   function update(
     config: FrontendSourceConfig<TRow>,
     view: FrontendSourceViewState
@@ -493,10 +519,7 @@ export function createFrontendSourceWith<TRow>(
     const table = engineOf(config, view);
     const held = heldFrame(table);
 
-    if (config.data !== held?.data) {
-      table.stageCandidate({}, { data: config.data });
-      stages += 1;
-    }
+    const dataChanged = config.data !== held?.data;
 
     const viewConfig = {
       getRowId,
@@ -530,18 +553,22 @@ export function createFrontendSourceWith<TRow>(
         !Object.is(held.filterKey, config.filterKey)) ||
       searchReaderChanged;
     if (held?.fingerprint !== nextFingerprint || filtersChanged) {
-      table.stageCandidate({
-        ...viewConfig,
-        paginationMode: config.paginationMode,
-        page: view.page,
-        limit: view.limit,
-      });
-      if (filtersChanged) {
-        // First adopt the new callbacks, then re-evaluate the same dataset.
-        // The engine stages changed row membership as a view revision and
-        // publishes it only at commit; the host's data identity stays intact.
-        table.stageCandidate({}, { data: config.data });
-      }
+      // One stage carries the view and, when they changed or the filters
+      // must read them again, the rows, so the engine evaluates once. The
+      // engine stages changed row membership as a view revision and publishes
+      // it only at commit; the host's data identity stays intact.
+      table.stageCandidate(
+        {
+          ...viewConfig,
+          paginationMode: config.paginationMode,
+          page: view.page,
+          limit: view.limit,
+        },
+        dataChanged || filtersChanged ? { data: config.data } : undefined
+      );
+      stages += 1;
+    } else if (dataChanged) {
+      table.stageCandidate({}, { data: config.data });
       stages += 1;
     }
 
@@ -596,7 +623,9 @@ export function createFrontendSourceWith<TRow>(
       allFilteredRows: sorted,
       // Facets count after search, BEFORE extra filters: `filtered` already
       // applied filterFn, so a selected checklist would hide every other value.
-      allSearchedRows: searchedRows(config.data, view.search),
+      allSearchedRows:
+        searchOnlyRows(config, view, sorted) ??
+        searchedRows(config.data, view.search),
       total: snapshot.total,
       page: snapshot.page,
       hasNextPage:

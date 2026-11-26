@@ -4,7 +4,7 @@ import { builtAdapters } from "../apps/showcase/matrix.mjs";
 import { kitSelector as materialPart } from "../packages/angular/adapter-material/testUtils";
 import { ngBootstrapPart } from "../packages/angular/adapter-ng-bootstrap/testUtils";
 import { ngxBootstrapPart } from "../packages/angular/adapter-ngx-bootstrap/testUtils";
-import { getLabels } from "../packages/shared/i18n/src/index";
+import { getLabels } from "../packages/shared/i18n/src/catalog";
 
 /** Every registered Angular shell runs the same operation assertions. */
 export const ANGULAR_KITS = builtAdapters("angular");

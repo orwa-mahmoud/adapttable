@@ -198,10 +198,6 @@ export const ru: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "Изменение ждёт вашего решения.",
-  pendingProposals: (count) =>
-    count === 1
-      ? "1 предложенное изменение"
-      : `${String(count)} предложенных изменений`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -343,10 +339,6 @@ export const ru: Required<TableLabels> = {
       error: "Ошибка",
       disconnected: "Нет подключения",
     })[status] ?? "Готов",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Добавить строку",
   duplicateRow: "Дублировать строку",
@@ -364,10 +356,8 @@ export const ru: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Строка перемещена с ${String(from)} на ${String(to)}`,
   rowReorderCancelled: "Перестановка отменена",
-  rowMoveOptions: "Параметры перемещения строки",
   moveToGroup: "Переместить в группу…",
   moveUnder: "Переместить под…",
-  moveToTopLevel: "Переместить на верхний уровень",
   confirmRowMoveTitle: "Подтвердить перемещение строки",
   confirmRowMoveDescription: (row, from, to) =>
     `Переместить ${row} из ${from} в ${to}?`,
@@ -403,9 +393,7 @@ export const ru: Required<TableLabels> = {
   removeGroupingColumn: (label) => `Удалить ${label} из группировки`,
   moveGroupingColumn: (label) => `Переместить ${label} в группировке`,
   groupingDropToRemove: "Перетащите сюда, чтобы удалить из группировки",
-  groupingAggregateColumn: "Столбец агрегации",
   groupingAggregation: "Агрегация группы",
-  groupingAggregationDefault: "По умолчанию",
   groupingAggregationNone: "Нет",
   groupingAggregations: "Агрегации",
   groupingAddAggregation: "Добавить столбец агрегации",
@@ -477,8 +465,6 @@ export const ru: Required<TableLabels> = {
     "Виртуализация выключена — эта страница таблицы показывает одну страницу за раз.",
   noticePinNested:
     "Закрепление строк выключено, пока включена группировка или дерево.",
-  noticeReorderNested:
-    "Перестановка строк выключена, пока включена группировка или дерево.",
   noticeGroupingUnavailable:
     "Группировка отключена: этот источник не умеет группировать.",
   noticeExportAllPage:

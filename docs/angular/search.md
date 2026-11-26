@@ -70,7 +70,7 @@ the live input, while `search()` is the committed term. `setSearchValue(text)`
 debounces; `setSearch(text)` commits immediately. Bind `searchInputAttrs()`
 using `AdaptAttrs` to preserve the controlled value and input handler.
 
-On the server tier, committing search invokes `onQueryChange` and resets to
+On a server source, committing search invokes its `onQueryChange` and resets to
 page 1. Honor its abort signal and publish only the current query's response.
 A frontend `getSearchText` cannot customize a server's search implementation;
 that belongs to the endpoint.

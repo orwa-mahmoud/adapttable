@@ -65,6 +65,10 @@
       "types": "./dist/types/adapttable-angular-aria-column-menu.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-aria-column-menu.mjs"
     },
+    "./column-layout": {
+      "types": "./dist/types/adapttable-angular-aria-column-layout.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-column-layout.mjs"
+    },
     "./column-selection": {
       "types": "./dist/types/adapttable-angular-aria-column-selection.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-aria-column-selection.mjs"
@@ -93,10 +97,6 @@
       "types": "./dist/types/adapttable-angular-aria-extra-rows.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-aria-extra-rows.mjs"
     },
-    "./features": {
-      "types": "./dist/types/adapttable-angular-aria-features.d.ts",
-      "default": "./dist/fesm2022/adapttable-angular-aria-features.mjs"
-    },
     "./find-in-table": {
       "types": "./dist/types/adapttable-angular-aria-find-in-table.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-aria-find-in-table.mjs"
@@ -105,9 +105,17 @@
       "types": "./dist/types/adapttable-angular-aria-filters.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-aria-filters.mjs"
     },
+    "./filtering": {
+      "types": "./dist/types/adapttable-angular-aria-filtering.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-filtering.mjs"
+    },
     "./fit-columns": {
       "types": "./dist/types/adapttable-angular-aria-fit-columns.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-aria-fit-columns.mjs"
+    },
+    "./selection": {
+      "types": "./dist/types/adapttable-angular-aria-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-selection.mjs"
     },
     "./fullscreen": {
       "types": "./dist/types/adapttable-angular-aria-fullscreen.d.ts",

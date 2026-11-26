@@ -48,7 +48,6 @@ export function liveQueryInputsTests(
       imports: [AdaptDataTable],
       template: `
         <adapt-data-table
-          mode="frontend"
           [data]="rows"
           [columns]="columns"
           [rowKey]="rowKey"
@@ -58,7 +57,7 @@ export function liveQueryInputsTests(
           [urlKey]="urlKey()"
           [urlSync]="urlSync()"
           [forceMobile]="mobile()"
-          [onQueryChange]="notified"
+          [onViewChange]="notified"
         />
       `,
     })

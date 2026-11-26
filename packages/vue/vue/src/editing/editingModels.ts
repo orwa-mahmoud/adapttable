@@ -28,8 +28,8 @@ import {
   createBatchEditStore,
   createCellEditSession,
   createCellSaveStore,
+  createDeferredEditConflictStore,
   createDirtyCellStore,
-  createEditConflictStore,
   createEditHistory,
   createEditValidationStore,
   createRowEditStore,
@@ -43,6 +43,7 @@ import {
   recordingCellEdit,
   resolveEditHistory,
   rowEditingView,
+  validationKey,
 } from "@adapttable/core/editing";
 import {
   computed,
@@ -60,16 +61,16 @@ import {
   useExternalStore,
   useScopeActivity,
 } from "../store";
-import { injectTableStore } from "../tableStore";
+import { followRowRekeyMoves, injectTableStore } from "../tableStore";
 
 export function useCellEditing<TRow>(
   input: MaybeRefOrGetter<CellEditSessionOptions<TRow>> = {},
   activity: ExternalStoreOptions = {}
 ) {
   requireScope("useCellEditing");
-  const session = createCellEditSession(toValue(input), {
-    store: injectTableStore(),
-  });
+  const table = injectTableStore();
+  const session = createCellEditSession(toValue(input), { store: table });
+  followRowRekeyMoves(table, session);
   watch(
     () => toValue(input),
     (options) => session.configure(options),
@@ -87,9 +88,9 @@ export function useCellSaveState<TRow>(
   activity: ExternalStoreOptions = {}
 ) {
   requireScope("useCellSaveState");
-  const store = createCellSaveStore(toValue(input), {
-    store: injectTableStore(),
-  });
+  const table = injectTableStore();
+  const store = createCellSaveStore(toValue(input), { store: table });
+  followRowRekeyMoves(table, store);
   watch(
     () => toValue(input),
     (options) => store.configure(options),
@@ -106,9 +107,9 @@ export function useEditValidation<TRow>(
   activity: ExternalStoreOptions = {}
 ) {
   requireScope("useEditValidation");
-  const store = createEditValidationStore(toValue(input), {
-    store: injectTableStore(),
-  });
+  const table = injectTableStore();
+  const store = createEditValidationStore(toValue(input), { store: table });
+  followRowRekeyMoves(table, store);
   const pending = new Map<
     string,
     { rowId: string; columnKey: string; count: number }
@@ -126,7 +127,7 @@ export function useEditValidation<TRow>(
   let disposed = false;
   const check: typeof store.check = async (value) => {
     if (disposed) return { allowed: false };
-    const key = `${value.target.rowId}\u0000${value.target.columnKey}`;
+    const key = validationKey(value.target.rowId, value.target.columnKey);
     const target = pending.get(key) ?? { ...value.target, count: 0 };
     target.count += 1;
     pending.set(key, target);
@@ -163,9 +164,9 @@ export function useDirtyCells(
   activity: ExternalStoreOptions = {}
 ) {
   requireScope("useDirtyCells");
-  const store = createDirtyCellStore(toValue(input), {
-    store: injectTableStore(),
-  });
+  const table = injectTableStore();
+  const store = createDirtyCellStore(toValue(input), { store: table });
+  followRowRekeyMoves(table, store);
   watch(
     () => toValue(input).enabled,
     (enabled) => {
@@ -206,6 +207,9 @@ export function useRowEditing<TRow>(
   }));
   const table = injectTableStore();
   const store = shallowRef(createRowEditStore(options.value, { store: table }));
+  followRowRekeyMoves<TRow>(table, {
+    rekey: (moves) => store.value.rekey(moves),
+  });
   watch(
     () => toValue(input).enabled === true,
     (enabled, previous) => {
@@ -246,6 +250,9 @@ export function useBatchEditing<TRow>(
   const store = shallowRef(
     createBatchEditStore(options.value, { store: table })
   );
+  followRowRekeyMoves<TRow>(table, {
+    rekey: (moves) => store.value.rekey(moves),
+  });
   watch(
     () => toValue(input).enabled === true,
     (enabled, previous) => {
@@ -502,9 +509,11 @@ export function useTableEditing<TRow>(
     },
     { immediate: true, flush: "sync" }
   );
-  const conflicts = createEditConflictStore<TRow>({
-    store: injectTableStore(),
+  const conflictTable = injectTableStore();
+  const conflicts = createDeferredEditConflictStore<TRow>({
+    store: conflictTable,
   });
+  followRowRekeyMoves(conflictTable, conflicts);
   const conflictSnapshot = useExternalStore(conflicts, lifecycle);
   const conflict = computed(() =>
     editConflictView(conflicts, conflictSnapshot.value)

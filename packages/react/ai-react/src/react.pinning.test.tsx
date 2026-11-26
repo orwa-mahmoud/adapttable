@@ -7,12 +7,12 @@
  */
 import type { AgentSession } from "@adapttable/ai";
 import {
-  applyTableFeatures,
   FeatureProviders,
   type TableRuntimeView,
   useFeatureState,
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
+import { applyTableFeatures } from "@adapttable/react/features";
 import { render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -28,7 +28,11 @@ const ROWS: Row[] = [{ id: "1", name: "Ada" }];
 const handles: { current: AgentSession | undefined } = { current: undefined };
 
 function Publisher({ view }: { view: TableRuntimeView<Row> }) {
-  usePublishTableRuntime(view.rows, undefined, view);
+  usePublishTableRuntime({
+    rows: () => view.rows,
+    labels: () => undefined,
+    view: () => view,
+  });
   return null;
 }
 

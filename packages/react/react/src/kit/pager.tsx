@@ -74,8 +74,8 @@ export interface KitPagerView {
   >;
   /** Resolved labels. */
   readonly labels: Required<TableLabels>;
-  /** Whether rows are grouped, which puts every row on one page. */
-  readonly chrome: { readonly grouping?: unknown };
+  /** The grouping, when rows are grouped: every row is then on one page. */
+  readonly tableProps: { readonly grouping?: unknown };
 }
 
 /**
@@ -114,7 +114,7 @@ export function createPager(
       <Frame
         rowsPerPage={
           // Every row of a grouped table is on one page.
-          view.chrome.grouping ? null : (
+          view.tableProps.grouping ? null : (
             <RowsPerPage
               label={labels.rowsPerPage}
               value={source.limit}

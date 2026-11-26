@@ -51,7 +51,6 @@ export function findInTableTests(
           [rowKey]="rowKey"
           [urlSync]="false"
           [forceMobile]="false"
-          [cellNavigation]="navigable"
           [features]="features"
         />
       `,
@@ -61,7 +60,6 @@ export function findInTableTests(
       readonly columns = COLUMNS;
       readonly rowKey = (row: Row) => row.id;
       features = [findInTable({ button: true })];
-      navigable = false;
     }
 
     const part = (name: string) =>
@@ -70,7 +68,6 @@ export function findInTableTests(
     describe(`find in table (${kit.name} Angular)`, () => {
       async function mount(navigable = false) {
         const fixture = TestBed.createComponent(Host);
-        fixture.componentInstance.navigable = navigable;
         if (navigable) {
           fixture.componentInstance.features = [
             findInTable({ button: true }),

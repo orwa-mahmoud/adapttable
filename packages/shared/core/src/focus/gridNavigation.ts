@@ -551,6 +551,42 @@ export function composeGridNavigation<TRow>(
     session.focusCell({ row: session.firstRow(), col });
   };
 
+  // The grid cell that holds the reader's focus. When its row is drawn
+  // again under a new key the element is replaced and focus falls to the
+  // document; the cell at the active position takes it back.
+  let focusedCell: HTMLElement | null = null;
+  const trackFocusIn = (event: Event): void => {
+    const { target } = event;
+    focusedCell =
+      target instanceof HTMLElement && target.hasAttribute(GRID_CELL_ATTR)
+        ? target
+        : null;
+  };
+  const trackFocusOut = (event: Event): void => {
+    const { target } = event;
+    if (!(target instanceof HTMLElement) || target !== focusedCell) return;
+    // A cell the reader left is no longer theirs; one that was replaced is.
+    queueMicrotask(() => {
+      if (target === focusedCell && target.isConnected) focusedCell = null;
+    });
+  };
+  const cellElement = (cell: GridCell): HTMLElement | null =>
+    session.container?.querySelector<HTMLElement>(
+      `[${GRID_CELL_ATTR}="${gridCellAttr(cell)}"]`
+    ) ?? null;
+  const restoreReplacedFocus = (): void => {
+    const lost = focusedCell;
+    const { active } = session.snapshot;
+    const container = session.container;
+    if (!lost || lost.isConnected || !active || !container) return;
+    const { activeElement, body } = container.ownerDocument;
+    if (activeElement !== null && activeElement !== body) {
+      focusedCell = null;
+      return;
+    }
+    cellElement(active)?.focus();
+  };
+
   const syncFocus = (): void => {
     if (session.pointerPreviewCancelled) {
       session.pointerPreviewCancelled = false;
@@ -558,10 +594,11 @@ export function composeGridNavigation<TRow>(
     }
     if (!session.options.enabled) return;
     const target = session.pending;
-    if (!target || !session.container) return;
-    const element = session.container.querySelector<HTMLElement>(
-      `[${GRID_CELL_ATTR}="${gridCellAttr(target)}"]`
-    );
+    if (!target) {
+      restoreReplacedFocus();
+      return;
+    }
+    const element = cellElement(target);
     if (!element) return;
     session.pending = null;
     element.focus();
@@ -647,6 +684,13 @@ export function composeGridNavigation<TRow>(
       if (node === null) {
         session.gestureVersion++;
         session.clipboardVersion++;
+      }
+      if (node !== session.container) {
+        session.container?.removeEventListener("focusin", trackFocusIn);
+        session.container?.removeEventListener("focusout", trackFocusOut);
+        node?.addEventListener("focusin", trackFocusIn);
+        node?.addEventListener("focusout", trackFocusOut);
+        focusedCell = null;
       }
       session.container = node;
     },

@@ -18,7 +18,10 @@ import { packedConsumer } from "./packed-consumers.mjs";
 
 const SUBPATHS = ["engine", "grouping", "editing", "selection"];
 
-/** A code-split barrel points at chunks; those chunks carry the maps. */
+/**
+ * A code-split barrel points at chunks, and those chunks carry the maps; an
+ * entry no other entry shares is one file with its own map.
+ */
 function assertChunkMaps(file, pattern, mapSuffix) {
   const text = readFileSync(file, "utf8");
   const seen = new Set();
@@ -30,7 +33,10 @@ function assertChunkMaps(file, pattern, mapSuffix) {
     const map = join(file, "..", `${base}${mapSuffix}`);
     assert.equal(existsSync(map), true, `${file} -> ${base}${mapSuffix}`);
   }
-  assert.ok(seen.size > 0, file);
+  if (seen.size === 0) {
+    const own = file.replace(/\.(?:d\.ts|js|cjs)$/, mapSuffix);
+    assert.equal(existsSync(own), true, `${file} -> ${own}`);
+  }
 }
 
 /** Packs core's build; CI runs this in the job that builds. */
@@ -58,9 +64,15 @@ describe("focused core entries from a tarball", { skip: UNBUILT }, () => {
     );
     assert.equal(engine.createTableEngine, main.createTableEngine);
     assert.equal(engine.createBasicTableEngine, main.createBasicTableEngine);
-    assert.equal(grouping.buildGroupedFlatModel, main.buildGroupedFlatModel);
-    assert.equal(editing.createCellEditSession, main.createCellEditSession);
-    assert.equal(selection.createAllMatchingScope, main.createAllMatchingScope);
+    assert.equal(typeof grouping.buildGroupedFlatModel, "function");
+    assert.equal(typeof editing.createCellEditSession, "function");
+    assert.equal(typeof selection.createAllMatchingScope, "function");
+    for (const name of [
+      "buildGroupedFlatModel",
+      "createCellEditSession",
+      "createAllMatchingScope",
+    ])
+      assert.equal(name in main, false, name);
     assert.equal("createIncrementalView" in engine, false);
 
     const require = createRequire(join(consumer.dir, "package.json"));

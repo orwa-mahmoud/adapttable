@@ -69,7 +69,11 @@ const pageFeatures = computed(() => [
   ...persistentFeatures,
 ]);
 const chrome = pageChromeFeatures(kit, { editing: true, urlKey: "edit" });
-const features = computed(() => [...pageFeatures.value, ...chrome]);
+const features = computed(() => [
+  kit.selection(),
+  ...pageFeatures.value,
+  ...chrome,
+]);
 </script>
 
 <template>
@@ -106,7 +110,6 @@ const features = computed(() => [...pageFeatures.value, ...chrome]);
     <div class="mx-demo__body">
       <component
         :is="kit.DataTable"
-        selectable
         v-bind="TABLE_PRESENTATION"
         table-label="People"
         :url-sync="false"

@@ -50,6 +50,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/angular-material/saved-views";
+import { selection } from "@adapttable/angular-material/selection";
 import { selectionStats } from "@adapttable/angular-material/selection-stats";
 import { sidePanel } from "@adapttable/angular-material/side-panel";
 import { statusBar } from "@adapttable/angular-material/status-bar";
@@ -105,6 +106,7 @@ export const kit = {
   commandPalette,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   rowAppearance,
   statusBar,

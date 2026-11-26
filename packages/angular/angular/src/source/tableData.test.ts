@@ -18,6 +18,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ColumnDef } from "../columnDef";
 import { ADAPTTABLE_URL_ADAPTER } from "../url/tableUrlState";
 import { injectFrontendData } from "./frontendData";
+import { injectServerData } from "./serverData";
 import { injectTableData } from "./tableData";
 
 interface Row {
@@ -54,8 +55,8 @@ function countingEngine(
 }
 
 let config: {
-  mode?: "frontend" | "server";
   onQueryChange?: (query: TableQuery, info: { signal: AbortSignal }) => void;
+  onViewChange?: (query: TableQuery, info: { signal: AbortSignal }) => void;
   prebuilt?: boolean;
   filters?: FilterDef<Row>[];
   engine?: boolean;
@@ -73,16 +74,23 @@ class Host {
   readonly total = signal(3);
   readonly loading = signal(false);
   readonly error = signal<Error | null>(null);
+  // A server table: the host builds the server source and hands it over.
+  readonly server = config.onQueryChange
+    ? injectServerData<Row>({
+        rows: this.rows,
+        total: this.total,
+        onQueryChange: config.onQueryChange,
+        defaults: { limit: 2 },
+      })
+    : undefined;
   readonly data = injectTableData<Row>({
-    data: this.rows,
-    total: this.total,
+    data: this.server ? undefined : this.rows,
     loading: this.loading,
     error: this.error,
     columns: COLUMNS,
     getRowId: (row) => row.id,
-    mode: config.mode,
-    onQueryChange: config.onQueryChange,
-    source: config.prebuilt ? this.prebuilt : undefined,
+    onViewChange: config.onViewChange,
+    source: config.prebuilt ? this.prebuilt : this.server,
     filters: config.filters,
     engine: config.engine ? FILTER_ENGINE_IMPL : undefined,
     createEngine: config.createEngine,
@@ -125,7 +133,7 @@ describe("injectTableData", () => {
     expect(ids(source())).toEqual(["3"]);
   });
 
-  it("serves rows with onQueryChange from the server tier, which asks the host", async () => {
+  it("serves a server source, which asks the host", async () => {
     const onQueryChange = vi.fn();
     config = { onQueryChange };
     const { host, source, settle } = await mount();
@@ -143,16 +151,16 @@ describe("injectTableData", () => {
     expect(onQueryChange.mock.calls[1]![0]).toMatchObject({ page: 2 });
   });
 
-  it("tells a frontend table's onQueryChange about a change, not about the mount", async () => {
-    const onQueryChange = vi.fn();
-    config = { mode: "frontend", onQueryChange };
+  it("tells a frontend table's onViewChange about a change, not about the mount", async () => {
+    const onViewChange = vi.fn();
+    config = { onViewChange };
     const { source, settle } = await mount();
-    expect(onQueryChange).not.toHaveBeenCalled();
+    expect(onViewChange).not.toHaveBeenCalled();
     expect(ids(source())).toEqual(["1", "2"]);
     source().setSearch("Web");
     await settle();
-    expect(onQueryChange).toHaveBeenCalledTimes(1);
-    expect(onQueryChange.mock.calls[0]![0]).toMatchObject({ search: "Web" });
+    expect(onViewChange).toHaveBeenCalledTimes(1);
+    expect(onViewChange.mock.calls[0]![0]).toMatchObject({ search: "Web" });
     expect(ids(source())).toEqual(["2"]);
   });
 
@@ -218,8 +226,7 @@ describe("injectTableData", () => {
   it("aborts a frontend notification in flight when the table goes away", async () => {
     const signals: AbortSignal[] = [];
     config = {
-      mode: "frontend",
-      onQueryChange: (_query, info) => {
+      onViewChange: (_query, info) => {
         signals.push(info.signal);
       },
     };
@@ -231,7 +238,6 @@ describe("injectTableData", () => {
   });
 
   it("shows a frontend table's loading flag and failure, which the host owns", async () => {
-    config = { mode: "frontend" };
     const { host, source, settle } = await mount();
     expect(source().isLoading).toBe(false);
     host.loading.set(true);
@@ -241,16 +247,8 @@ describe("injectTableData", () => {
     expect(source().error?.message).toBe("could not load");
   });
 
-  it("keeps a table without an explicit frontend mode out of loading", async () => {
-    const { host, source, settle } = await mount();
-    host.loading.set(true);
-    await settle();
-    expect(source().isLoading).toBe(false);
-  });
-
-  it("does not refresh an idle frontend when its rows are read or replaced", async () => {
+  it("does not refresh an idle frontend while a source serves the table", async () => {
     config = {
-      mode: "server",
       onQueryChange: vi.fn(),
       createEngine: countingEngine,
     };
@@ -267,7 +265,7 @@ describe("injectTableData", () => {
   });
 
   it("refreshes the frontend tier when its own rows change", async () => {
-    config = { mode: "frontend", createEngine: countingEngine };
+    config = { createEngine: countingEngine };
     const { host, source, settle } = await mount();
     const applied = refreshes;
     host.rows.set([{ id: "9", team: "Data" }]);

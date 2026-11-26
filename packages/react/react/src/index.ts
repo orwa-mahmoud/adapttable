@@ -35,9 +35,11 @@ export type {
   FeatureApplyInput,
   FeaturePatch,
   StaticFeatureHost,
+  StaticFeatureMountContext,
   StaticTableFeature,
   TableFeature,
   TableFeatureHost,
+  TableFeatureMountContext,
 } from "./features/tableFeature";
 export {
   CHECKLIST_ITEM_HEIGHT,
@@ -131,6 +133,7 @@ export {
 } from "./source/useServerData";
 export {
   isDeclarativeFilters,
+  type TableQueryHandler,
   useTableData,
   type UseTableDataOptions,
   type UseTableDataResult,
@@ -143,6 +146,11 @@ export {
 } from "./url/useDensityUrlState";
 export { type FeatureNotice, type FeatureNoticeKind } from "./useTableChrome";
 export type { ActionAiOptions, OverlayDismissOptions } from "@adapttable/core";
+export {
+  type ServerFilterKeys,
+  serverFilterKeys,
+  type ServerFilterKeysInput,
+} from "@adapttable/core";
 /* ── URL state ─────────────────────────────────────────────────────── */
 
 export {
@@ -411,7 +419,6 @@ export {
   type GroupPagingState,
   useGroupPaging,
 } from "./grouping/useGroupPaging";
-export * from "./mainEntryAliases";
 export type { Slot } from "./state/slots";
 export {
   useGroupCollapseUrlState,

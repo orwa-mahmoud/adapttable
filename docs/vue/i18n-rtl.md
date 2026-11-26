@@ -12,7 +12,8 @@ assistive technology.
 import { computed, shallowRef } from "vue";
 import type { ColumnDef } from "@adapttable/vue";
 import { DataTable } from "@adapttable/vue-unstyled";
-import { getDirection, getLabels } from "@adapttable/i18n";
+import { getDirection } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 
 interface Person {
   id: string;

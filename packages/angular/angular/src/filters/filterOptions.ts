@@ -56,7 +56,7 @@ export function filterOptionsFor<TRow>(
       return;
     }
     if (typeof source !== "function") {
-      if (source === "auto") {
+      if (ngDevMode && source === "auto") {
         devWarn(
           `filter "${next.key}" uses options: "auto" on a tier with no full dataset — provide an options array or loader.`
         );
@@ -79,7 +79,8 @@ export function filterOptionsFor<TRow>(
       },
       () => {
         if (!isCurrent()) return;
-        devWarn(`async options for filter "${next.key}" failed to load.`);
+        if (ngDevMode)
+          devWarn(`async options for filter "${next.key}" failed to load.`);
         state.set({ options: NO_OPTIONS, loading: false });
       }
     );

@@ -27,6 +27,12 @@ async function settle() {
   await nextTick();
   await nextTick();
 }
+/** Geometry reads land on the next frame, once however many signals came. */
+async function nextFrame() {
+  await settle();
+  await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+  await settle();
+}
 it("remeasures the real list margin on window resize and surrounding layout changes", async () => {
   vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
   let top = 200;
@@ -67,16 +73,16 @@ it("remeasures the real list margin on window resize and surrounding layout chan
     expect(page.options.scrollMargin).toBe(200);
     top = 400;
     window.dispatchEvent(new Event("resize"));
-    await settle();
+    await nextFrame();
     expect(page.options.scrollMargin).toBe(400);
     top = 600;
     root.style.marginTop = "400px";
-    await settle();
+    await nextFrame();
     expect(page.options.scrollMargin).toBe(600);
     scope.stop();
     top = 800;
     window.dispatchEvent(new Event("resize"));
-    await settle();
+    await nextFrame();
     expect(page.options.scrollMargin).toBe(600);
   } finally {
     scope.stop();

@@ -60,7 +60,7 @@ export interface TableRuntimeView<TRow = unknown> {
   /** Active sort key, when visual order is source-controlled. */
   readonly sortBy?: string;
   /**
-   * Grouping's owned entries, projected for compatibility.
+   * Grouping's owned entries.
    *
    * The runtime stores the contribution a binding or feature already owns.
    * It does not keep a second grouping controller.

@@ -52,12 +52,12 @@ export {
   resizableColumns,
   rowAppearance,
   savedViews,
+  selection,
   sidePanel,
   statusBar,
   undoRedoButtons,
 } from "./features/factories";
 export type { RowOf } from "./features/featureHost";
-export { useTableFeatures } from "./features/featureHost";
 export { filters } from "./features/filters";
 export { findInTable } from "./features/find-in-table";
 export { fullscreen } from "./features/fullscreen";
@@ -79,9 +79,11 @@ export type {
   FeatureApplyInput,
   FeaturePatch,
   StaticFeatureHost,
+  StaticFeatureMountContext,
   StaticTableFeature,
   TableFeature,
   TableFeatureHost,
+  TableFeatureMountContext,
 } from "./features/tableFeature";
 export { applyTableFeatures } from "./features/tableFeature";
 export { tree } from "./features/tree";
@@ -152,6 +154,10 @@ export type {
 export type { RowHeight, RowStyle } from "@adapttable/core";
 export type { RowAction } from "@adapttable/core";
 export type { BulkAction } from "@adapttable/core";
+export type {
+  ColumnMenuOptions,
+  HeaderFilterOptions,
+} from "@adapttable/core/binding";
 
 /**
  * The member types the signatures above hand back.

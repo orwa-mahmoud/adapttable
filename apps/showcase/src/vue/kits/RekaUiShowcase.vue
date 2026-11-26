@@ -3,6 +3,7 @@ import { DataTable } from "@adapttable/reka-ui";
 import { columnMenu } from "@adapttable/reka-ui/column-menu";
 import { densityChooser } from "@adapttable/reka-ui/density";
 import { fullscreen } from "@adapttable/reka-ui/fullscreen";
+import { selection } from "@adapttable/reka-ui/selection";
 import { Primitive } from "reka-ui";
 import { h } from "vue";
 
@@ -58,12 +59,16 @@ function renderStatus(row: Order, label: string) {
       </div>
     </template>
     <template
-      #default="{ tableProps, onSelectionChange, onColumnLayoutChange }"
+      #default="{
+        tableProps,
+        selectedIds,
+        onSelectionChange,
+        onColumnLayoutChange,
+      }"
     >
       <DataTable
         v-bind="tableProps"
-        :features="features"
-        @update:selected-ids="onSelectionChange"
+        :features="[selection({ selectedIds, onSelectionChange }), ...features]"
         @update:column-layout="onColumnLayoutChange"
       />
     </template>

@@ -19,8 +19,8 @@ import { quasarAttrs } from "./controls/controlAttrs";
 import QuasarCheckbox from "./controls/QuasarCheckbox.vue";
 
 /** The binding owns navigation, range selection, fill requests and announcements. */
-export function cellNavigation(
-  options: CellNavigationOptions = {}
+export function cellNavigation<TRow = unknown>(
+  options: CellNavigationOptions<TRow> = {}
 ): StaticTableFeature {
   return extendFeature(bindingCellNavigation(options), [
     slotRender(FILL_HANDLE_CONTROL, (props) =>

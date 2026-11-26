@@ -52,25 +52,8 @@ ${probes.join("\n\n")}
 }
 
 /** Kit factories, a custom feature, and every registration the host offers. */
-export const SENIOR = String.raw`import type {
-  Aggregator,
-  Command,
-  ContextMenuItem,
-  CustomCellEditorRender,
-  ExportWriter,
-  FilterTypeSpec,
-  SidePanelEntry,
-  TableFeature,
-  TableFeatureHost,
-} from "@adapttable/unstyled/features";
-import {
-  cellNavigation,
-  editing,
-  grouping,
-  rowReorder,
-  savedViews,
-  virtualize,
-} from "@adapttable/unstyled/features";
+export const SENIOR = String.raw`import type { Aggregator, Command, ContextMenuItem, CustomCellEditorRender, ExportWriter, FilterTypeSpec, SidePanelEntry, TableFeature, TableFeatureHost } from "@adapttable/react/features";
+import { cellNavigation, editing, grouping, rowReorder, savedViews, virtualize } from "@adapttable/react/features";
 import { columnMenu } from "@adapttable/unstyled/column-menu";
 import { pivot } from "@adapttable/core/pivot";
 import type { ColumnDef } from "@adapttable/unstyled";
@@ -131,7 +114,8 @@ const everything: TableFeature<Row> = {
     host.registerCommand(command);
     host.registerContextMenuItems(() => [extraItem]);
     host.extendFilterType("text", { defaultOp: "contains" });
-    host.onDispose(() => {});
+  },
+  mount() {
     return () => {};
   },
 };
@@ -309,13 +293,9 @@ export function Headless() {
 `;
 
 /**
- * The names v3 moved off the main entry, as the inventory records them.
- *
- * They used to be read out of `mainEntryAliases.ts`; v3 deleted that module,
- * and the list is now closed — nothing joins a set of removals that already
- * happened. What the probes check is the other half of the promise: every one
- * of them still ships from `@adapttable/react/adapter`, which is the import a
- * host moves to.
+ * The names v3 moved off the main entry, as the inventory records them. The
+ * list is closed. The probes check that every one of them ships from
+ * `@adapttable/react/adapter`, the import a host moves to.
  */
 export function movedAliases(manifest) {
   const group = manifest.v3Removals.groups.find(

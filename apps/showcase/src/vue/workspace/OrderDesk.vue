@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import {
   aggregate,
   type TableFeature,
@@ -24,7 +24,7 @@ import { commandPalette } from "@adapttable/vue-unstyled/command-palette";
 import { contextMenu } from "@adapttable/vue-unstyled/context-menu";
 import { densityChooser } from "@adapttable/vue-unstyled/density";
 import { editing } from "@adapttable/vue-unstyled/editing";
-import { exportCsv } from "@adapttable/vue-unstyled/export-csv";
+import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { filters } from "@adapttable/vue-unstyled/filters";
 import { findInTable } from "@adapttable/vue-unstyled/find-in-table";
 import { useGroupCollapseUrlState } from "@adapttable/vue-unstyled/grouping";
@@ -34,6 +34,7 @@ import {
   savedViews,
   SavedViewsPanel,
 } from "@adapttable/vue-unstyled/saved-views";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { sidePanel } from "@adapttable/vue-unstyled/side-panel";
 import { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import { computed, h, shallowRef, watch } from "vue";
@@ -295,6 +296,12 @@ const edit = editing<Order>((original, key, value) => {
   message.value = `${text.value.saved} ${original.id}.`;
 });
 const features = computed(() => [
+  selection({
+    selectedIds: selected,
+    onSelectionChange: (ids) => {
+      selected.value = ids;
+    },
+  }),
   filters<Order>(
     [
       {
@@ -567,7 +574,6 @@ function restore(): void {
       <DataTable
         v-if="shown"
         ref="table"
-        v-model:selected-ids="selected"
         data-workspace-table="orders"
         :data="rows"
         :columns="columns"
@@ -585,7 +591,6 @@ function restore(): void {
         :url-sync="true"
         :search-debounce-ms="0"
         :table-label="text.orders"
-        selectable
       >
         <template #tableFooter
           ><p class="workspace-table-note">{{ text.reviewNote }}</p></template

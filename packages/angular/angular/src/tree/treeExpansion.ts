@@ -11,6 +11,7 @@
 import {
   createControllableStore,
   idSetReader,
+  rekeyRowIdSet,
   treeExpansionActions,
   type TreeExpansionState,
 } from "@adapttable/core/binding";
@@ -24,7 +25,7 @@ import {
 } from "@angular/core";
 
 import { fromStore, type MaybeSignalOptional, readMaybe } from "../store";
-import { tableStoreOf } from "../tableStore";
+import { followRowRekeys, tableStoreOf } from "../tableStore";
 
 export type { TreeExpansionState } from "@adapttable/core/binding";
 
@@ -79,6 +80,11 @@ export function injectTreeExpansion(
     store.control({ value: untracked(controlled), onChange });
   };
   const actions = treeExpansionActions(store);
+  // An expanded node stays open under its new id.
+  followRowRekeys(injector, (log) => {
+    control();
+    store.update((ids) => rekeyRowIdSet(ids, log));
+  });
   const toggle = (id: string): void => {
     control();
     actions.toggle(id);

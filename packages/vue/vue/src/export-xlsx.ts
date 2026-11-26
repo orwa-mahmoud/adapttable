@@ -1,5 +1,5 @@
+import { deferredXlsxWriter } from "@adapttable/core";
 /** Optional XLSX export; the writer stays outside the base and CSV entries. */
-import { xlsxWriter } from "@adapttable/core/xlsx";
 import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
 
 import { exportCsv, type ExportCsvOptions } from "./export-csv";
@@ -18,6 +18,6 @@ export function exportXlsx<TRow>(
   return exportCsv<TRow>(
     options === false
       ? false
-      : { ...(options === true ? {} : options), writer: xlsxWriter() }
+      : { ...(options === true ? {} : options), writer: deferredXlsxWriter() }
   );
 }

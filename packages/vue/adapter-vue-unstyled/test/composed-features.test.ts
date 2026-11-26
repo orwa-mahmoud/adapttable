@@ -13,6 +13,7 @@ import { batchEditing, editing, rowEditing } from "../src/editing";
 import { filters } from "../src/filters";
 import { NativeFilterSurface } from "../src/filters/NativeFilterSurface";
 import { headerFilters } from "../src/header-filters";
+import { selection as selectionFeature } from "../src/selection";
 import { tree } from "../src/tree";
 import {
   click,
@@ -49,10 +50,13 @@ function setup(
       columns,
       rowKey,
       urlSync: false,
-      selectable: true,
-      selectedIds: selection.value,
-      "onUpdate:selectedIds": changes,
-      features: currentFeatures.value,
+      features: [
+        selectionFeature({
+          onSelectionChange: changes,
+          selectedIds: selection.value,
+        }),
+        ...currentFeatures.value,
+      ],
     })
   );
   return { ...mounted, rows, selection, changes, handle, currentFeatures };

@@ -48,7 +48,7 @@ export interface FormulaColumnSpec {
 }
 
 /**
- * What {@link buildFormulaColumns} reports back.
+ * What `buildFormulaColumns` reports back.
  *
  * @public
  */

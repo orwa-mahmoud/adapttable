@@ -19,18 +19,20 @@
 import { AdaptControl } from "@adapttable/angular/adapter";
 import {
   type AggregateName,
-  assignField,
-  moveField,
   type PivotConfig,
   type PivotField,
   type PivotZone,
-  removeField,
   resolveLabels,
-  setMeasureAgg,
   type TableLabels,
 } from "@adapttable/core";
 import { PIVOT_AGGREGATIONS, pivotPanelZones } from "@adapttable/core/binding";
-import type { PivotZoneModel } from "@adapttable/core/pivot";
+import {
+  assignField,
+  moveField,
+  type PivotZoneModel,
+  removeField,
+  setMeasureAgg,
+} from "@adapttable/core/pivot";
 import {
   ChangeDetectionStrategy,
   Component,

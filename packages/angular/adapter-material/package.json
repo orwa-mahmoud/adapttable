@@ -65,6 +65,10 @@
       "types": "./dist/types/adapttable-angular-material-column-menu.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-material-column-menu.mjs"
     },
+    "./column-layout": {
+      "types": "./dist/types/adapttable-angular-material-column-layout.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-column-layout.mjs"
+    },
     "./column-selection": {
       "types": "./dist/types/adapttable-angular-material-column-selection.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-material-column-selection.mjs"
@@ -93,10 +97,6 @@
       "types": "./dist/types/adapttable-angular-material-extra-rows.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-material-extra-rows.mjs"
     },
-    "./features": {
-      "types": "./dist/types/adapttable-angular-material-features.d.ts",
-      "default": "./dist/fesm2022/adapttable-angular-material-features.mjs"
-    },
     "./find-in-table": {
       "types": "./dist/types/adapttable-angular-material-find-in-table.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-material-find-in-table.mjs"
@@ -105,9 +105,17 @@
       "types": "./dist/types/adapttable-angular-material-filters.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-material-filters.mjs"
     },
+    "./filtering": {
+      "types": "./dist/types/adapttable-angular-material-filtering.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-filtering.mjs"
+    },
     "./fit-columns": {
       "types": "./dist/types/adapttable-angular-material-fit-columns.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-material-fit-columns.mjs"
+    },
+    "./selection": {
+      "types": "./dist/types/adapttable-angular-material-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-selection.mjs"
     },
     "./fullscreen": {
       "types": "./dist/types/adapttable-angular-material-fullscreen.d.ts",

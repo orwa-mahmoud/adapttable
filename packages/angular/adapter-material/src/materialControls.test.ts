@@ -1,4 +1,5 @@
 import type { TableLabels } from "@adapttable/angular";
+import { selection } from "@adapttable/angular-material/selection";
 import {
   CDK_CONNECTED_OVERLAY_DEFAULT_CONFIG,
   CdkConnectedOverlay,
@@ -24,11 +25,12 @@ import { AdaptDataTable } from "./dataTable";
     [urlSync]="false"
     [forceMobile]="mobile()"
     [labels]="labels()"
-    [selectable]="true"
+    [features]="features"
     tableLabel="People"
   />`,
 })
 class TableHost {
+  readonly features = [selection()];
   readonly mobile = signal(false);
   readonly labels = signal<TableLabels>({});
   readonly rows = [{ id: "ada", name: "Ada" }];

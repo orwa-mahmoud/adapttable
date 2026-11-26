@@ -36,7 +36,10 @@ import { useShowcaseKit } from "../showcaseKit";
 const kit = useShowcaseKit();
 const PAGE_DEFAULTS = pageDefaultsFor("realtime");
 const PAGE_LAYOUT = pageLayoutFor("realtime");
-const features = pageChromeFeatures(kit, { urlKey: "rt" });
+const features = [
+  kit.selection(),
+  ...pageChromeFeatures(kit, { urlKey: "rt" }),
+];
 const columns = peopleColumns(kit);
 // The direction the table sorts in now: a patch lands where the reader is
 // looking, whichever way they have turned the sort.
@@ -110,8 +113,7 @@ function applyNext(): void {
         v-bind="TABLE_PRESENTATION"
         table-label="Live people"
         :url-sync="false"
-        mode="frontend"
-        :on-query-change="followSort"
+        :on-view-change="followSort"
         :data="rows"
         :columns="columns"
         :row-key="rowKey"
@@ -119,7 +121,6 @@ function applyNext(): void {
         :features="features"
         :is-cell-flashing="isCellFlashing"
         density="compact"
-        selectable
         :defaults="PAGE_DEFAULTS"
       />
     </div>

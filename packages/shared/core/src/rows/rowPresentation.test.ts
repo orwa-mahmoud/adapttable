@@ -292,21 +292,42 @@ describe("the editing digests", () => {
     expect(digest?.startsWith("invalid")).toBe(true);
   });
 
-  it("keeps only the signatures that name this row", () => {
+  it("keeps only this row's share of each per-row digest", () => {
+    const ofRow = (label: string) => (rowId: string) =>
+      rowId === "r1" ? `${label} r1` : "";
+    const digest = rowEditingSignature(
+      editing({
+        state: {},
+        saving: { signature: "every save", rowSignature: () => "" },
+        dirty: {
+          isRowDirty: () => false,
+          signature: "every mark",
+          rowSignature: ofRow("dirty"),
+        },
+        batch: { signature: "every draft", rowSignature: ofRow("batch") },
+        rowEditing: { activeRowId: "r1", signature: "row-draft" },
+      }),
+      "r1"
+    );
+    expect(digest).toContain("dirty r1");
+    expect(digest).toContain("batch r1");
+    expect(digest).toContain("row-draft");
+    expect(digest).not.toContain("every");
+  });
+
+  it("reads the whole digest of a part that has no per-row one", () => {
     const digest = rowEditingSignature(
       editing({
         state: {},
         saving: { signature: "r2 saving" },
         dirty: { isRowDirty: () => false, signature: "r1 dirty" },
         batch: { signature: "r1:a;r2:b" },
-        rowEditing: { activeRowId: "r1", signature: "row-draft" },
       }),
       "r1"
     );
+    expect(digest).toContain("r2 saving");
     expect(digest).toContain("r1 dirty");
-    expect(digest).not.toContain("r2 saving");
-    expect(digest).toContain("r1:a");
-    expect(digest).toContain("row-draft");
+    expect(digest).toContain("r1:a;r2:b");
   });
 
   it("changes when a conflict arrives on this row", () => {

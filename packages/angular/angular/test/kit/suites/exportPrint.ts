@@ -329,16 +329,56 @@ export function exportPrintTests(
       return new Uint8Array(await readDownload(blob));
     }
 
-    function workbookRows(bytes: Uint8Array): (string | null)[][] {
+    /** The entries of a ZIP, by name, inflated when they were deflated. */
+    async function unzip(bytes: Uint8Array): Promise<Map<string, string>> {
+      const int = (at: number, size: number) => {
+        let value = 0;
+        for (let i = size - 1; i >= 0; i--)
+          value = value * 256 + bytes[at + i]!;
+        return value;
+      };
+      const decoder = new TextDecoder();
+      const files = new Map<string, string>();
+      let at = 0;
+      while (int(at, 4) === 0x04034b50) {
+        const method = int(at + 8, 2);
+        const size = int(at + 18, 4);
+        const nameLength = int(at + 26, 2);
+        const start = at + 30 + nameLength + int(at + 28, 2);
+        const body = bytes.slice(start, start + size);
+        const data =
+          method === 8
+            ? await new Response(
+                new Response(body).body!.pipeThrough(
+                  new DecompressionStream("deflate-raw")
+                )
+              ).arrayBuffer()
+            : body;
+        files.set(
+          decoder.decode(bytes.slice(at + 30, at + 30 + nameLength)),
+          decoder.decode(data)
+        );
+        at = start + size;
+      }
+      return files;
+    }
+
+    async function workbookRows(
+      bytes: Uint8Array
+    ): Promise<(string | null)[][]> {
       expect([...bytes.slice(0, 4)]).toEqual([0x50, 0x4b, 0x03, 0x04]);
-      const text = new TextDecoder().decode(bytes);
-      expect(text).toContain("[Content_Types].xml");
-      expect(text).toContain("xl/workbook.xml");
-      expect(text).toContain("xl/worksheets/sheet1.xml");
-      // Core stores worksheet entries uncompressed, so their XML is readable.
-      const sheet = /<worksheet\b[\s\S]*?<\/worksheet>/.exec(text);
-      expect(sheet).not.toBeNull();
-      const document = new DOMParser().parseFromString(sheet![0], "text/xml");
+      const files = await unzip(bytes);
+      expect([...files.keys()]).toEqual(
+        expect.arrayContaining([
+          "[Content_Types].xml",
+          "xl/workbook.xml",
+          "xl/worksheets/sheet1.xml",
+        ])
+      );
+      const document = new DOMParser().parseFromString(
+        files.get("xl/worksheets/sheet1.xml")!,
+        "text/xml"
+      );
       expect(document.querySelector("parsererror")).toBeNull();
       return [...document.querySelectorAll("sheetData > row")].map((row) =>
         [...row.querySelectorAll("c")].map((cell) => cell.textContent)
@@ -372,7 +412,8 @@ export function exportPrintTests(
                   ["Amman", "Jordan"],
                 ]
               : [["Name"], ["Amman"]];
-          if (format === "xlsx") expect(workbookRows(bytes)).toEqual(expected);
+          if (format === "xlsx")
+            expect(await workbookRows(bytes)).toEqual(expected);
           else expect(pdfCells(bytes)).toEqual(expected.flat());
         }
       );

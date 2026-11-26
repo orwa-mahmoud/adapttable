@@ -23,7 +23,7 @@ export function columnToolsTests(
   kit: AngularKitUnderTest
 ): readonly ConformanceTest[] {
   const { Table: AdaptDataTable, kitSelector } = kit;
-  const { resizableColumns } = kit.features;
+  const { columnMenu, resizableColumns } = kit.features;
   return collectConformanceTests(({ describe, it, afterEach }) => {
     /**
      * Column tools on the each kit table: a multi-sort badge, a resize handle,
@@ -74,7 +74,6 @@ export function columnToolsTests(
           [forceMobile]="mobile"
           [dir]="dir"
           [features]="features"
-          [onColumnRename]="onColumnRename"
           [defaultColumnLayout]="defaultColumnLayout"
           (columnLayoutChange)="layouts.push($event)"
         />
@@ -87,7 +86,6 @@ export function columnToolsTests(
       readonly features = features;
       readonly mobile = mobile;
       readonly dir = dir;
-      readonly onColumnRename = renamed;
       readonly defaultColumnLayout = { widths: { name: 150, country: 120 } };
       readonly layouts: ColumnLayoutState[] = [];
     }
@@ -257,6 +255,7 @@ export function columnToolsTests(
       });
 
       it("renames a column from its header", async () => {
+        features = [columnMenu({ onRename: renamed })];
         const fixture = await mount();
         parts("header-rename-button")[0]!.click();
         await fixture.whenStable();

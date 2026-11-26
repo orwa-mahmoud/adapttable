@@ -2,10 +2,12 @@
  * The standard feature preset — which features, in which order.
  *
  * A kit's `standardFeatures()` is the same list in every binding: the
- * zero-configuration members in a fixed order, then each configured member
- * the caller named. The binding supplies the factories (its own, drawing its
- * own controls); this owns the list.
+ * column-layout family and the other zero-configuration members in a fixed
+ * order, then each configured member the caller named, the filtering family
+ * when filters are given. The binding supplies the factories (its own,
+ * drawing its own controls); this owns the list.
  */
+import { columnLayoutFamilyList, filteringFamilyList } from "./featureFamilies";
 
 /**
  * Options for the configured members of the standard preset.
@@ -86,15 +88,12 @@ export function standardFeatureList<TFeature, TBulk, TFilter, TViews>(
   options: CoreStandardFeatureOptions<TBulk, TFilter, TViews> = {}
 ): TFeature[] {
   return [
-    factories.columnMenu(),
+    ...columnLayoutFamilyList(factories),
     factories.densityChooser(),
     factories.exportCsv(),
     factories.findInTable(options.findButton === true ? { button: true } : {}),
-    factories.fitColumns(),
     factories.fullscreen(),
-    factories.headerFilters(),
     factories.multiSort(),
-    factories.resizableColumns(),
     factories.statusBar(),
     ...(options.grouping === undefined
       ? []
@@ -103,8 +102,8 @@ export function standardFeatureList<TFeature, TBulk, TFilter, TViews>(
       ? []
       : [factories.bulkActions(options.bulkActions)]),
     ...(options.filters === undefined
-      ? []
-      : [factories.filters(options.filters)]),
+      ? [factories.headerFilters()]
+      : filteringFamilyList(factories, options.filters)),
     ...(options.savedViews === undefined
       ? []
       : [factories.savedViews(options.savedViews)]),

@@ -57,7 +57,12 @@ const contextName = (
 ): string | undefined => context.runtime.rowAt(0)?.name;
 const typedFeature: binding2.StaticTableFeature = {
   id: "typed-assistant-consumer",
-  setup: (host: binding2.StaticFeatureHost) => host.onDispose(() => undefined),
+  setup: (host: binding2.StaticFeatureHost) =>
+    host.registerCommand({
+      key: "assistant:inspect",
+      label: "Inspect table",
+      onSelect: () => undefined,
+    }),
   mount: <TRow,>(context: binding2.FeatureMountContext<TRow>) => {
     const row: TRow | undefined = context.runtime.rowAt(0);
     return () => row;

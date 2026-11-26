@@ -12,11 +12,13 @@ import {
   AdaptAgentApproval,
   AdaptTableAssistant,
 } from "@adapttable/angular-material/assistant";
+import { cellNavigation } from "@adapttable/angular-material/cell-navigation";
 import { columnMenu } from "@adapttable/angular-material/column-menu";
 import { editing, rowEditing } from "@adapttable/angular-material/editing";
 import { filters } from "@adapttable/angular-material/filters";
 import { grouping } from "@adapttable/angular-material/grouping";
 import { rowReorder } from "@adapttable/angular-material/row-reorder";
+import { selection } from "@adapttable/angular-material/selection";
 import { statusBar } from "@adapttable/angular-material/status-bar";
 import { virtualize } from "@adapttable/angular-material/virtualize";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
@@ -31,7 +33,6 @@ import {
 import { kitSelector } from "../testUtils";
 import { AdaptErrorState } from "./components/errorState";
 import { AdaptDataTable } from "./dataTable";
-
 const kit: AngularConformanceKit = {
   name: "angular-material",
   Table: AdaptDataTable,
@@ -39,6 +40,8 @@ const kit: AngularConformanceKit = {
   grouping,
   rowReorder,
   virtualize,
+  selection,
+  cellNavigation,
 };
 
 describe(`table conformance — ${kit.name}`, () => {
@@ -116,9 +119,9 @@ describe("every bundled locale through native Angular controls", () => {
           set("forceMobile", mobile);
           // Auto uses infinite scrolling on mobile; exercise the real pager in both layouts.
           set("paginationMode", "paged");
-          set("selectable", true);
           set("defaults", { limit: 5 });
           set("features", [
+            selection(),
             filters<LocaleRow>([{ key: "name", label: "Name", type: "text" }]),
             columnMenu(),
             rowEditing<LocaleRow>(edit),

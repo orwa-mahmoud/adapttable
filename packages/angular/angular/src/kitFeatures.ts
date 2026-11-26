@@ -17,7 +17,11 @@ import {
   coreHeaderFilters as neutralHeaderFilters,
   FILTER_ENGINE,
   FILTER_ENGINE_IMPL,
+  type FilterPanelOptions,
+  type HeaderFilterOptions,
 } from "@adapttable/core/binding";
+
+export type { FilterPanelOptions, HeaderFilterOptions };
 
 /**
  * CSV export; a custom `writer` registers on the host.
@@ -47,10 +51,11 @@ export function coreExportCsv<TRow>(
  * @public
  */
 export function coreFilters<TRow, TPanel = never>(
-  defs: readonly FilterDef<TRow>[] | TPanel
+  defs: readonly FilterDef<TRow>[] | TPanel,
+  options?: FilterPanelOptions
 ): CoreFeature<TRow> {
   return withFeatureImplementation(
-    neutralFilters<TRow, TPanel>(defs),
+    neutralFilters<TRow, TPanel>(defs, options),
     FILTER_ENGINE,
     FILTER_ENGINE_IMPL
   );
@@ -63,9 +68,9 @@ export function coreFilters<TRow, TPanel = never>(
  *
  * @public
  */
-export function coreHeaderFilters(): CoreFeature {
+export function coreHeaderFilters(options?: HeaderFilterOptions): CoreFeature {
   return withFeatureImplementation(
-    neutralHeaderFilters(),
+    neutralHeaderFilters(options),
     FILTER_ENGINE,
     FILTER_ENGINE_IMPL
   );

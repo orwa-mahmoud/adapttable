@@ -8,7 +8,6 @@ import {
   cellConflictAsk,
   controllerConflictAsk,
   customEditorConflict,
-  defaultPendingRows,
   editableCellErrorId,
   editableCellPresentation,
   editorBusyProps,
@@ -480,7 +479,6 @@ describe("batch bar", () => {
   });
 
   it("counts rows, and says what holds the save", () => {
-    expect(defaultPendingRows(1)).toBe("1 unsaved row");
     expect(
       batchEditBarModel({ pending: true, count: 2 }, undefined, undefined)
     ).toEqual({

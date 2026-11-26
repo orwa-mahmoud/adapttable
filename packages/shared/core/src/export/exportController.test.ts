@@ -5,6 +5,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { defaultLabels } from "../labels";
 import { resetDevWarnings } from "../utils/devWarn";
 import {
   createExportController,
@@ -674,12 +675,12 @@ describe("resolveExportProgressState", () => {
 
 describe("resolveExportDisabledReason", () => {
   it("is empty while the button is enabled", () => {
-    expect(resolveExportDisabledReason(undefined, false)).toBe("");
+    expect(resolveExportDisabledReason(defaultLabels, false)).toBe("");
   });
 
   it("says why a page-only source cannot export all", () => {
-    expect(resolveExportDisabledReason(undefined, true)).toBe(
-      "Export all is off — this source provides one page at a time."
+    expect(resolveExportDisabledReason(defaultLabels, true)).toBe(
+      defaultLabels.noticeExportAllPage
     );
     expect(
       resolveExportDisabledReason(

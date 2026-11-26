@@ -26,12 +26,12 @@ import { DataTable } from "../src";
 import QuasarButton from "../src/controls/QuasarButton.vue";
 import { grouping } from "../src/grouping";
 import { rowActions } from "../src/row-actions";
+import { selection as selectionFeature } from "../src/selection";
 import { quasarTableControls } from "../src/table/controls";
 import { QuasarDesktop } from "../src/table/desktop";
 import { quasarLoading } from "../src/table/loading";
 import { QuasarMobile } from "../src/table/mobile";
 import QuasarRowActions from "../src/table/QuasarRowActions.vue";
-
 interface Row {
   id: string;
   name: string;
@@ -759,8 +759,7 @@ describe("Quasar prepared table renderer", () => {
         rowKey: (row: Row) => row.id,
         urlSync: false,
         forceMobile: true,
-        selectable: true,
-        features: [grouping("score")],
+        features: [selectionFeature(), grouping("score")],
       },
     });
     await settle();
@@ -822,14 +821,17 @@ describe("Quasar prepared table renderer", () => {
       defineComponent(
         () => () =>
           h(DataTable<Row>, {
+            features: [
+              selectionFeature({
+                onSelectionChange: changed,
+                selectedIds: selected.value,
+              }),
+            ],
             data: rows,
             columns,
             rowKey: (row: Row) => row.id,
             urlSync: false,
             forceMobile: false,
-            selectable: true,
-            selectedIds: selected.value,
-            "onUpdate:selectedIds": changed,
           })
       )
     );

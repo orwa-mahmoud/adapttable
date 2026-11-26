@@ -4,7 +4,8 @@
  * The wire format is deliberately the patch shape the table already has:
  * one patch, or an array of them, as JSON. A server that already speaks
  * `{ type: "update", id, changes }` needs no translation layer, and one
- * that speaks something else supplies its own `parse`.
+ * that speaks something else supplies its own `parse`. A streamed update
+ * that changes a row's id is applied as a rekey.
  *
  * Nothing here trusts the wire. A frame that is not JSON, an entry that is
  * not an object, a patch with no usable `type` or a `remove` with no id —
@@ -12,10 +13,20 @@
  * be able to empty a table.
  */
 
-import type { RowPatch } from "../contracts/rows";
+import type { RowPatch, RowPatchOptions } from "../contracts/rows";
 import { isRecord } from "../utils/isRecord";
 
 export type { RowPatch };
+
+/**
+ * How a streamed frame's patches are applied: a server that sends a rename as
+ * an id-changing update is read as a rekey.
+ *
+ * @public
+ */
+export const STREAMED_ROW_PATCHES: RowPatchOptions = Object.freeze({
+  rekeyUpdates: true,
+});
 
 /** One entry of a frame, before it is known to be a patch. */
 
@@ -41,10 +52,15 @@ function toPatch<TRow>(entry: unknown): RowPatch<TRow> | undefined {
       const at = typeof entry.at === "number" ? entry.at : undefined;
       return { type: "insert", row: entry.row as TRow, at };
     }
-    case "update": {
+    case "update":
+    case "rekey": {
       const id = idOf(entry.id);
       if (id === undefined || !isRecord(entry.changes)) return undefined;
-      return { type: "update", id, changes: entry.changes as Partial<TRow> };
+      return {
+        type: entry.type,
+        id,
+        changes: entry.changes as Partial<TRow>,
+      };
     }
     case "upsert": {
       if (!isRecord(entry.row)) return undefined;

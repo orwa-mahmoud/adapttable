@@ -48,6 +48,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/angular-cdk/saved-views";
+import { selection } from "@adapttable/angular-cdk/selection";
 import { selectionStats } from "@adapttable/angular-cdk/selection-stats";
 import { sidePanel } from "@adapttable/angular-cdk/side-panel";
 import { statusBar } from "@adapttable/angular-cdk/status-bar";
@@ -103,6 +104,7 @@ export const kit = {
   commandPalette,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   rowAppearance,
   statusBar,

@@ -196,10 +196,6 @@ export const hi: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "एक बदलाव आपके निर्णय की प्रतीक्षा में है।",
-  pendingProposals: (count) =>
-    count === 1
-      ? "1 प्रस्तावित परिवर्तन"
-      : `${String(count)} प्रस्तावित परिवर्तन`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -340,10 +336,6 @@ export const hi: Required<TableLabels> = {
       error: "त्रुटि",
       disconnected: "जुड़ा नहीं",
     })[status] ?? "तैयार",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "पंक्ति जोड़ें",
   duplicateRow: "पंक्ति की प्रतिलिपि बनाएँ",
@@ -360,10 +352,8 @@ export const hi: Required<TableLabels> = {
   rowLifted: (position) => `पंक्ति ${String(position)} उठाई गई`,
   rowMoved: (from, to) => `पंक्ति ${String(from)} से ${String(to)} पर गई`,
   rowReorderCancelled: "क्रम बदलना रद्द हुआ",
-  rowMoveOptions: "पंक्ति ले जाने के विकल्प",
   moveToGroup: "समूह में ले जाएँ…",
   moveUnder: "इसके नीचे ले जाएँ…",
-  moveToTopLevel: "शीर्ष स्तर पर ले जाएँ",
   confirmRowMoveTitle: "पंक्ति ले जाने की पुष्टि करें",
   confirmRowMoveDescription: (row, from, to) =>
     `${row} को ${from} से ${to} पर ले जाएँ?`,
@@ -399,9 +389,7 @@ export const hi: Required<TableLabels> = {
   removeGroupingColumn: (label) => `${label} को समूहीकरण से हटाएँ`,
   moveGroupingColumn: (label) => `${label} समूहीकरण को ले जाएँ`,
   groupingDropToRemove: "समूहीकरण हटाने के लिए यहाँ छोड़ें",
-  groupingAggregateColumn: "एकत्रीकरण स्तंभ",
   groupingAggregation: "समूह एकत्रीकरण",
-  groupingAggregationDefault: "डिफ़ॉल्ट",
   groupingAggregationNone: "कोई नहीं",
   groupingAggregations: "एकत्रीकरण",
   groupingAddAggregation: "एकत्रीकरण स्तंभ जोड़ें",
@@ -471,8 +459,6 @@ export const hi: Required<TableLabels> = {
   noticeVirtualizePaged:
     "वर्चुअलाइज़ेशन बंद है — यह पृष्ठांकित तालिका एक समय में एक पृष्ठ दिखाती है।",
   noticePinNested: "समूहीकरण या वृक्ष चालू होने पर पंक्ति पिन बंद है।",
-  noticeReorderNested:
-    "समूहीकरण या वृक्ष चालू होने पर पंक्ति क्रम बदलना बंद है।",
   noticeGroupingUnavailable: "समूहन बंद है — यह स्रोत समूहन नहीं कर सकता।",
   noticeExportAllPage:
     "सभी निर्यात बंद है — यह स्रोत एक बार में एक ही पृष्ठ देता है।",

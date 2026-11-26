@@ -24,6 +24,7 @@ import { filters } from "../src/filters";
 import { findInTable } from "../src/find-in-table";
 import { headerFilters } from "../src/header-filters";
 import { rowDetail } from "../src/row-detail";
+import { selection } from "../src/selection";
 import { selectionStats, statusBar } from "../src/status-bar";
 import { tree } from "../src/tree";
 
@@ -152,12 +153,14 @@ function pageFeatures() {
     ];
   return [];
 }
-const features = pageFeatures();
-
 function changeSelection(next: string[]): void {
   selectionRequests.value++;
   if (!rejectChanges.value) selectedIds.value = next;
 }
+const features = [
+  selection({ selectedIds, onSelectionChange: changeSelection }),
+  ...pageFeatures(),
+];
 </script>
 
 <template>
@@ -203,13 +206,11 @@ function changeSelection(next: string[]): void {
           :features="features"
           :density="density"
           :row-key="(row) => row.id"
-          :selected-ids="selectedIds"
           :url-sync="false"
           :search-debounce-ms="0"
           :dir="rtl ? 'rtl' : 'ltr'"
           :class-names="{ root: decorated ? 'decorated' : undefined }"
           table-label="People"
-          @update:selected-ids="changeSelection"
           @update:density="changeDensity"
         />
         <output aria-label="Selected row IDs">{{

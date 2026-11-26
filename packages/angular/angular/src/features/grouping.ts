@@ -58,6 +58,7 @@ export function grouping<TRow = unknown>(
   groupBy: string | readonly string[],
   extras: GroupingExtras<TRow> = {}
 ): AdaptTableFeature {
+  const extraValues: readonly unknown[] = Object.values(extras);
   return {
     ...withFeatureImplementation(
       withFrontendRowModel(
@@ -67,6 +68,9 @@ export function grouping<TRow = unknown>(
       FEATURE_IMPLEMENTATIONS.grouping,
       GROUPING_IMPLEMENTATION
     ),
+    // The grouped model is built from these: other keys or extras replace
+    // it, the same ones declared again keep it.
+    dependencies: [String(groupBy), ...extraValues],
     mount(context) {
       const occupied = context.state.get(SURFACE_OCCUPIED)();
       if (occupied?.grouping) return;

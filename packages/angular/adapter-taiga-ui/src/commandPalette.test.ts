@@ -1,5 +1,5 @@
 import type { TableLabels } from "@adapttable/angular";
-import type { ToolbarExtrasSlotProps } from "@adapttable/angular/adapter";
+import type { ToolbarEntrySlotProps } from "@adapttable/angular/adapter";
 import { commandPalette } from "@adapttable/taiga-ui/command-palette";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
@@ -308,7 +308,7 @@ describe("command palette (Taiga UI Angular)", () => {
     class BareButton {
       readonly props = {
         labels: { commandPalette: "Commands" },
-      } as unknown as ToolbarExtrasSlotProps;
+      } as unknown as ToolbarEntrySlotProps;
     }
 
     const fixture = TestBed.createComponent(BareButton);

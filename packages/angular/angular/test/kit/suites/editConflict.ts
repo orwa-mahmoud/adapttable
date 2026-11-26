@@ -5,6 +5,7 @@ import {
   type EditConflictPolicy,
   injectQuerySource,
 } from "@adapttable/angular";
+import { loadEditConflictStore } from "@adapttable/core/binding";
 import {
   collectConformanceTests,
   type ConformanceTest,
@@ -26,7 +27,11 @@ export function editConflictTests(
 ): readonly ConformanceTest[] {
   const { Table: AdaptDataTable, kitSelector } = kit;
   const { batchEditing, editing, grouping, rowEditing } = kit.features;
-  return collectConformanceTests(({ describe, it, afterEach }) => {
+  return collectConformanceTests(({ describe, it, afterEach, beforeEach }) => {
+    // The conflict store loads when an edit first opens; these specs are about
+    // the question it asks, so it is loaded up front. Core covers the load.
+    beforeEach(() => loadEditConflictStore());
+
     /**
      * Live updates through mounted native editors: conflict choices, guarded
      * commits and session cleanup on desktop rows and mobile cards.
@@ -64,17 +69,49 @@ export function editConflictTests(
           [source]="useSource() ? source : undefined"
           [columns]="columns"
           [rowKey]="rowKey"
-          [features]="features()"
+          [features]="tableFeatures()"
           [forceMobile]="mobile()"
-          [rowVersion]="rowVersion()"
-          [editConflictPolicy]="policy()"
-          [onEditConflict]="onConflict()"
           [urlSync]="false"
         />
       `,
     })
     class Host {
       readonly features = input<readonly AdaptTableFeature[]>([]);
+      private readonly conflictWrappers = new WeakMap<
+        AdaptTableFeature,
+        AdaptTableFeature
+      >();
+      readonly tableFeatures = computed(() =>
+        this.features().map((feature) => this.withLiveConflict(feature))
+      );
+      private withLiveConflict(feature: AdaptTableFeature): AdaptTableFeature {
+        if (
+          feature.id !== "editing" &&
+          feature.id !== "row-editing" &&
+          feature.id !== "batch-editing"
+        ) {
+          return feature;
+        }
+        const existing = this.conflictWrappers.get(feature);
+        if (existing) return existing;
+        const apply = feature.apply?.bind(feature);
+        const wrapped: AdaptTableFeature = {
+          ...feature,
+          apply: (input) => {
+            const patch = {
+              rowVersion: this.rowVersion(),
+              editConflictPolicy: this.policy(),
+              onEditConflict: this.onConflict(),
+            };
+            const defined = Object.fromEntries(
+              Object.entries(patch).filter(([, value]) => value !== undefined)
+            );
+            return { ...apply?.(input), ...defined };
+          },
+        };
+        this.conflictWrappers.set(feature, wrapped);
+        return wrapped;
+      }
       readonly mobile = input(false);
       readonly useSource = input(false);
       readonly rows = signal<readonly Task[]>([ROW]);

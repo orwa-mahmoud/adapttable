@@ -9,7 +9,6 @@ import { createSSRApp, h, shallowRef } from "vue";
 import { renderToString } from "vue/server-renderer";
 
 import { DataTable, type DataTableProps } from "../src";
-import { NaiveHistoryButtons } from "../src/editing/NaiveHistoryButtons";
 import {
   batchEditing,
   dirtyIndicators,
@@ -17,7 +16,8 @@ import {
   editing,
   rowEditing,
   undoRedoButtons,
-} from "../src/features";
+} from "../src/editing";
+import { NaiveHistoryButtons } from "../src/editing/NaiveHistoryButtons";
 import {
   click,
   deferred,
@@ -421,8 +421,10 @@ describe("Naive UI editing alternate controls", () => {
     const input = await activate(view.host);
     await write(input, "Mine");
     view.rows.value = [{ ...original, name: "Theirs" }];
-    await tick();
-    const conflict = find(view.host, part("edit-cell-conflict"));
+    // The conflict store loads with the first open edit; the question follows.
+    const conflict = await vi.waitFor(() =>
+      find(view.host, part("edit-cell-conflict"))
+    );
     expect(conflict.tagName).toBe("SPAN");
     expect(conflict.getAttribute("role")).toBe("alert");
     expect(input.getAttribute("aria-describedby")).toBe(conflict.id);

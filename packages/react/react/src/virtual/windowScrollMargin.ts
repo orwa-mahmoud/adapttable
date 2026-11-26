@@ -2,6 +2,7 @@ import { measureWindowScrollMargin } from "@adapttable/core/binding";
 import {
   type RefObject,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -55,6 +56,13 @@ export function useMeasuredWindowScrollMargin(
       setScrollMargin(0);
       return;
     }
+    read();
+  }, [enabled, read]);
+
+  // An ancestor's ref attaches after this component's layout effects, so the
+  // table root is read again, and observed, once every ref is in place.
+  useEffect(() => {
+    if (!enabled) return;
     read();
     if (typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(read);

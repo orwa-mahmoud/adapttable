@@ -545,6 +545,26 @@
       "standardPreset": false,
       "note": "Checkbox column rendered with the kit's own Checkbox.",
       "requiresConfig": false
+    },
+    "selection": {
+      "id": "selection",
+      "replacesProps": [
+        "selectable",
+        "selectedIds",
+        "defaultSelectedIds",
+        "onSelectionChange",
+        "selectionGetId"
+      ],
+      "classification": "headless",
+      "subpath": "selection",
+      "implementation": [
+        "react/src/features/factories.ts",
+        "core/src/features/coreFeatures.ts"
+      ],
+      "adapterComponents": [],
+      "standardPreset": false,
+      "note": "Turns row selection on. The host holds the ids, or the table does. Bulk actions, column selection and selection stats select rows as part of what they do.",
+      "requiresConfig": false
     }
   },
   "frameworkBoundary": {
@@ -1201,7 +1221,7 @@
         "id": "chrome-body-hook",
         "removes": "the `useChromeBodyData` aggregate hook",
         "v2Path": "import { useChromeBodyData } from \"@adapttable/core\"",
-        "v3Path": "import { usePlainChromeBodyData, useVirtualChromeBodyData } from \"@adapttable/react\"",
+        "v3Path": "import { usePlainChromeBodyData, useVirtualChromeBodyData } from \"@adapttable/react/adapter\"",
         "packages": ["@adapttable/react"],
         "warnedBy": "removed — choose the plain or virtual implementation explicitly",
         "test": "packages/react/react/src/useChromeBodyData.boxVirtual.test.tsx"
@@ -1227,7 +1247,7 @@
     ]
   },
   "v4Removals": {
-    "note": "Deprecated in v3 and removed by the v4 major. Each entry is still declared and still works, and carries a @deprecated notice until then; scripts/check-feature-classification.mjs holds each one to that.",
+    "note": "Removed by the v4 major. scripts/check-feature-classification.mjs holds each prop off the public prop surface.",
     "groups": [
       {
         "id": "mobile-identity-columns",
@@ -1239,7 +1259,7 @@
           "@adapttable/react",
           "every @adapttable/<kit>"
         ],
-        "warnedBy": "@deprecated on BaseDataTableProps, the useDataTable option and the visibleColumns overload",
+        "warnedBy": "removed — hideOnMobile decides what a card shows",
         "test": "packages/shared/core/src/columns/visibleColumns.test.ts — \"is every column without hideOnMobile, in declared order\"",
         "props": ["mobileIdentityColumns"]
       }

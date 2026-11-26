@@ -39,6 +39,7 @@ import {
   desktopTableStyle,
   type FeatureHostState,
   featureLabelsOf,
+  type FeatureListEntry,
   fetchNextBodyPage,
   gridCellAttributes,
   gridColumnHeaderAttributes,
@@ -148,7 +149,9 @@ export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
    */
   readonly activeFilterCount?: Signal<number>;
   /** Features this table composes, beside the provided ones. */
-  readonly features?: MaybeSignalOptional<readonly AdaptTableFeature[]>;
+  readonly features?: MaybeSignalOptional<
+    readonly FeatureListEntry<AdaptTableFeature>[]
+  >;
   /** The injector to run in. Omit to use the current injection context. */
   readonly injector?: Injector;
 }
@@ -378,21 +381,23 @@ export function injectDataTable<TRow>(
   });
 
   // Duplicate keys corrupt sorting, selection and column layout — every
-  // feature targets columns by key.
-  effect(
-    () => {
-      const seen = new Set<string>();
-      for (const column of allColumns()) {
-        if (seen.has(column.key)) {
-          devWarn(
-            `duplicate column key "${column.key}" — column keys must be unique; sorting, selection, and column layout all target keys.`
-          );
+  // feature targets columns by key. A production build drops the check.
+  if (ngDevMode) {
+    effect(
+      () => {
+        const seen = new Set<string>();
+        for (const column of allColumns()) {
+          if (seen.has(column.key)) {
+            devWarn(
+              `duplicate column key "${column.key}" — column keys must be unique; sorting, selection, and column layout all target keys.`
+            );
+          }
+          seen.add(column.key);
         }
-        seen.add(column.key);
-      }
-    },
-    { injector }
-  );
+      },
+      { injector }
+    );
+  }
 
   const layout = columnLayoutFor(allColumns, options, injector, {
     columnGroups,

@@ -2334,6 +2334,7 @@ export function People({ source, columns, api }) {
 import type { ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "{pkg}";
 import { bulkActions } from "{pkg}/bulk-actions";
+import { selection } from "{pkg}/selection";
 
 const columns: ColumnDef<Person>[] = [
   { key: "name", sortable: true },
@@ -2349,7 +2350,6 @@ const columns: ColumnDef<Person>[] = [
       [data]="rows()"
       [columns]="columns"
       [rowKey]="rowKey"
-      [selectable]="true"
       [features]="features"
     />
   \`,
@@ -2360,6 +2360,7 @@ export class People {
   readonly rowKey = (row: Person) => row.id;
   readonly archive = input.required<(ids: string[]) => void>();
   readonly features = [
+    selection(),
     bulkActions([
       { key: "archive", label: "Archive", onClick: (ids) => this.archive()(ids) },
     ]),
@@ -2369,6 +2370,7 @@ export class People {
 import type { ColumnDef } from "{binding}";
 import { DataTable } from "{pkg}";
 import { bulkActions } from "{pkg}/bulk-actions";
+import { selection } from "{pkg}/selection";
 
 defineProps<{ rows: readonly Person[] }>();
 const emit = defineEmits<{ archive: [ids: string[]] }>();
@@ -2380,6 +2382,7 @@ const columns: ColumnDef<Person>[] = [
 ];
 const rowKey = (row: Person) => row.id;
 const features = [
+  selection(),
   bulkActions([
     { key: "archive", label: "Archive", onClick: (ids) => emit("archive", ids) },
   ]),
@@ -2391,7 +2394,6 @@ const features = [
     :data="rows"
     :columns="columns"
     :row-key="rowKey"
-    selectable
     :features="features"
   />
 </template>`,
@@ -2799,7 +2801,8 @@ export function People({ rows }) {
     snippets: {
       angular: `import { Component, input } from "@angular/core";
 import type { ColumnDef } from "@adapttable/angular";
-import { getDirection, getLabels } from "@adapttable/i18n";
+import { getDirection } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { AdaptDataTable } from "{pkg}";
 import { filters } from "{pkg}/filters";
 
@@ -2823,7 +2826,8 @@ export class ArabicPeople {
   readonly features = [filters([{ key: "name", type: "text", label: "الاسم" }])];
 }`,
       vue: `<script setup lang="ts">
-import { getDirection, getLabels } from "@adapttable/i18n";
+import { getDirection } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import type { ColumnDef } from "{binding}";
 import { DataTable } from "{pkg}";
 import { filters } from "{pkg}/filters";

@@ -5,7 +5,11 @@ import { renderToString } from "vue/server-renderer";
 
 import type { ColumnDef } from "../src/columnDef";
 import { grouping } from "../src/features/grouping";
-import { cellSpan, pinnedSummaryRows } from "../src/features/headlessFactories";
+import {
+  cellSpan,
+  pinnedSummaryRows,
+  selection,
+} from "../src/features/headlessFactories";
 import { nestedTable, rowDetail } from "../src/features/rowDetail";
 import { rowPinning } from "../src/features/rowPinning";
 import type { ComposedFeature } from "../src/features/tableFeature";
@@ -176,8 +180,8 @@ it("keeps grouped aggregates aligned with leading selection and trailing actions
   const shell = scope.run(() =>
     useDataTableShell({
       ...base,
-      selectable: true,
       features: [
+        selection(),
         grouping<Row>("team", {
           groupAggregates: (rows) => ({ score: rows.length }),
         }),
@@ -220,8 +224,8 @@ it("renders mobile groups, footer aggregates, empty slots and required controls"
   const shell = scope.run(() =>
     useDataTableShell({
       ...base,
-      selectable: true,
       features: [
+        selection(),
         grouping<Row>("team", {
           groupFooters: true,
           groupPageSize: 1,
@@ -296,8 +300,8 @@ it("renders summary selection placeholders and blocks data pins with hierarchy",
   const shell = scope.run(() =>
     useDataTableShell({
       ...base,
-      selectable: true,
       features: [
+        selection(),
         tree<Row>({ getParentId: (row) => row.parent }),
         rowPinning({ pinnedRowIds: { top: ["b"], bottom: [] } }),
         pinnedSummaryRows<Row>({ top: [required(data[0])] }),

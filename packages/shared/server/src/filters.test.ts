@@ -15,7 +15,6 @@ import {
 } from "@adapttable/core";
 import { describe, expect, it } from "vitest";
 
-import * as server from "./index";
 import {
   parseTableQuery,
   pickFilters,
@@ -65,11 +64,6 @@ describe("splitListParam", () => {
 
   it("trims entries and drops empty ones", () => {
     expect(splitListParam(" Core , ,Data,")).toEqual(["Core", "Data"]);
-  });
-
-  it("is what the splitFilterValues name still serves", () => {
-    // Read by name: the old name carries the deprecation notice.
-    expect(Reflect.get(server, "splitFilterValues")).toBe(splitListParam);
   });
 });
 
@@ -279,6 +273,31 @@ describe("typed filters", () => {
       }
     });
 
+    it("refuses a day the calendar does not have", () => {
+      for (const bad of [
+        "2026-02-30",
+        "2026-02-29",
+        "1900-02-29",
+        "2026-04-31",
+        "2026-13-01",
+        "2026-00-10",
+        "2026-02-30T10:00:00Z",
+      ]) {
+        expect(read({ hiredAtTo: bad }).rejected, bad).toEqual([
+          { param: "f_hiredAtTo", value: bad, reason: "not an ISO date" },
+        ]);
+      }
+      for (const good of [
+        "2024-02-29",
+        "2000-02-29",
+        "0000-02-29",
+        "2026-12-31",
+        "2026-02-28T23:59:59Z",
+      ]) {
+        expect(read({ hiredAtTo: good }).rejected, good).toEqual([]);
+      }
+    });
+
     it("keeps a range open at the start when only the end is sent", () => {
       expect(read({ hiredAtTo: "2024-12-31" }).typedFilters).toEqual({
         hiredAt: { type: "dateRange", op: "lte", to: "2024-12-31" },
@@ -348,6 +367,26 @@ describe("typed filter trees", () => {
     const query = parseTableQuery(treeUrl(tree), schema);
     expect(query.filterTree).toEqual(tree);
     expect(query.rejected).toEqual([]);
+  });
+
+  it("drops a typed tree with a malformed condition and says so", () => {
+    const tree = {
+      combinator: "and",
+      conditions: [
+        { key: "name", op: "contains", value: "a" },
+        { key: "status", value: "open" },
+      ],
+    };
+    const stored = `1.${JSON.stringify(tree)}`;
+    const raw = `?ft=${encodeURIComponent(stored)}`;
+    const query = parseTableQuery(raw, schema);
+    expect(query.filterTree).toBeUndefined();
+    expect(query.rejected).toEqual([
+      expect.objectContaining({
+        param: "ft",
+        reason: "filter tree has a malformed condition",
+      }),
+    ]);
   });
 
   it("refuses a tree it cannot read", () => {

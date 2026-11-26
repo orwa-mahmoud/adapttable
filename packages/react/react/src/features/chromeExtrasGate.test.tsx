@@ -1,3 +1,4 @@
+import type { FilterDef } from "@adapttable/core";
 import { act, render } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -37,7 +38,11 @@ function Probe({
 }: {
   features: readonly TableFeature<Row>[];
   columns: ColumnDef<Row>[];
-  extraProps?: { groupBy?: string; urlSync?: boolean };
+  extraProps?: {
+    groupBy?: string;
+    urlSync?: boolean;
+    filterDefs?: readonly FilterDef<Row>[];
+  };
   onView: (view: TableRuntimeView<Row> | undefined) => void;
 }) {
   const applied = applyTableFeatures({ features, columns });
@@ -112,6 +117,20 @@ describe("ChromeExtrasGate runtime publish", () => {
     expect(view?.groupingState?.columnLabel("missing")).toBe("missing");
     expect(view?.editing?.stageCell).toEqual(expect.any(Function));
     view?.editing?.stageCell?.(ROWS[0]!, "a", "name", "Ada");
+  });
+
+  it("publishes the filter definitions the table's props carry", () => {
+    const views: (TableRuntimeView<Row> | undefined)[] = [];
+    const filterDefs: FilterDef<Row>[] = [{ key: "name", type: "text" }];
+    render(
+      <Probe
+        features={[]}
+        columns={[{ key: "name" }]}
+        extraProps={{ filterDefs }}
+        onView={(view) => views.push(view)}
+      />
+    );
+    expect(views.at(-1)?.filterDefs).toEqual(filterDefs);
   });
 
   it("falls back to the row id and publishes tree rows", () => {

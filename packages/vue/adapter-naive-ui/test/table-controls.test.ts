@@ -16,7 +16,7 @@ import {
 import { renderToString } from "vue/server-renderer";
 
 import { naiveTableControls } from "../src/controls/table";
-
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -40,17 +40,20 @@ function fixture(mobile: boolean, dir: "ltr" | "rtl" = "ltr") {
     setup() {
       const selectedIds = shallowRef<string[]>([]);
       const shell = useDataTableShell<Row>(() => ({
+        features: [
+          selection({
+            selectedIds: selectedIds.value,
+            onSelectionChange: (ids) => {
+              selectedIds.value = ids;
+            },
+          }),
+        ],
         data: rows,
         columns,
         rowKey: (row) => row.id,
         urlSync: false,
         forceMobile: mobile,
         dir,
-        selectable: true,
-        selectedIds: selectedIds.value,
-        onSelectionChange: (ids) => {
-          selectedIds.value = ids;
-        },
       }));
       return () =>
         h("div", { dir }, [

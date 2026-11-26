@@ -37,10 +37,10 @@ import {
 } from "@adapttable/angular/stream";
 import {
   applyRowPatchesWithLog,
+  deferredXlsxWriter,
   type RowPatchEvent,
   rowPatchLog,
 } from "@adapttable/core";
-import { xlsxWriter } from "@adapttable/core/xlsx";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
@@ -1142,7 +1142,6 @@ class ScaleBody {
             [labels]="presentation.tableLabels"
             [attr.lang]="presentation.locale"
             tableLabel="People"
-            mode="frontend"
             [urlSync]="false"
             [forceMobile]="forceMobile()"
             [features]="features"
@@ -1711,7 +1710,7 @@ class ColumnsBody {
     this.kit.cellNavigation(),
     this.kit.exportCsv({
       scope: "range",
-      writer: xlsxWriter({ sheetName: "People" }),
+      writer: deferredXlsxWriter({ sheetName: "People" }),
       filename: "people.xlsx",
     }),
   ];
@@ -1944,8 +1943,7 @@ class RtlBody {
         <adapt-showcase-table
           tableLabel="Live people"
           [urlSync]="false"
-          mode="frontend"
-          [onQueryChange]="followSort"
+          [onViewChange]="followSort"
           [dir]="presentation.tableDir"
           [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"

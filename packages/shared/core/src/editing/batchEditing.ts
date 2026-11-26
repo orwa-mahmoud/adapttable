@@ -14,6 +14,7 @@
  */
 import type { RowCallback } from "../contracts/rowCallback";
 import type { FeatureHostState } from "../features/currentHost";
+import type { RowRekeyMoves } from "../state/rowRekeys";
 import type { TableStore } from "../state/tableStore";
 import { type EditableColumnLike, readEditableCellValue } from "./cellEditing";
 import {
@@ -108,6 +109,8 @@ export interface BatchEditingState<TRow> {
   >;
   /** A digest of the pending drafts, for a row memo comparator. */
   signature: string;
+  /** A digest of one row's pending drafts, for that row's memo comparator. */
+  rowSignature?: (rowId: string) => string;
   /** The table that owns these editors — never a sibling's host. */
   featureHost?: FeatureHostState;
 }
@@ -212,6 +215,15 @@ export interface BatchEditStore<TRow> {
     [row: NoInfer<TRow>, rowId: string, columnKeys: readonly string[]],
     void
   >;
+  /** Move each rekeyed row's pending changes to its new id. */
+  readonly rekey: RowCallback<[moves: RowRekeyMoves<NoInfer<TRow>>], void>;
+}
+
+/** A digest of every pending draft; empty when nothing is pending. */
+function batchSignature(pending: BatchPendingDrafts): string {
+  const rows = Object.entries(pending);
+  if (rows.length === 0) return "";
+  return JSON.stringify(rows.map(([rowId, entry]) => [rowId, entry.drafts]));
 }
 
 /** The snapshot for a pending set. */
@@ -224,14 +236,7 @@ function batchSnapshot(pending: BatchPendingDrafts): BatchEditSnapshot {
       seeds: entry.seeds,
       drafts: entry.drafts,
     })),
-    signature: Object.entries(pending)
-      .map(
-        ([rowId, entry]) =>
-          `${rowId}:${Object.entries(entry.drafts)
-            .map(([key, value]) => `${key}=${value}`)
-            .join("|")}`
-      )
-      .join(";"),
+    signature: batchSignature(pending),
   };
 }
 
@@ -425,6 +430,19 @@ export function createBatchEditStore<TRow>(
       }
       write({});
     },
+    rekey(moves) {
+      const pending = state.get().pending;
+      if (![...moves.ids.keys()].some((id) => id in pending)) return;
+      const next: Record<string, BatchPendingDrafts[string]> = {};
+      for (const [rowId, entry] of Object.entries(pending)) {
+        const id = moves.ids.get(rowId) ?? rowId;
+        next[id] =
+          id === rowId
+            ? entry
+            : { ...entry, row: moves.rows.get(id) ?? entry.row };
+      }
+      write(next);
+    },
     cancelRow(rowId) {
       if (disposed) return;
       const entry = state.get().pending[rowId];
@@ -510,6 +528,10 @@ export function batchEditingView<TRow>(
     acceptSeeds: store.acceptSeeds,
     takeSeeds: store.takeSeeds,
     signature: snapshot.signature,
+    rowSignature: (rowId) => {
+      const entry = pending[rowId];
+      return entry ? JSON.stringify(entry.drafts) : "";
+    },
     featureHost: options.featureHost,
   };
 }

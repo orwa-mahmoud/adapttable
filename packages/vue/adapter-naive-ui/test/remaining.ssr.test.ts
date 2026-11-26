@@ -18,6 +18,7 @@ import { groupingPanel } from "../src/grouping-panel";
 import { print } from "../src/print";
 import { rowReorder } from "../src/row-reorder";
 import { savedViews, SavedViewsPanel } from "../src/saved-views";
+import { selection } from "../src/selection";
 import { selectionStats } from "../src/selection-stats";
 import { sidePanel } from "../src/side-panel";
 import { statusBar } from "../src/status-bar";
@@ -42,8 +43,8 @@ async function render(label: string, mobile: boolean) {
         urlSync: false,
         forceMobile: mobile,
         dir: "rtl",
-        selectable: true,
         features: [
+          selection(),
           bulkActions([{ key: "record", label, onClick: noop }]),
           cellNavigation(),
           columnSelectionCheckbox(),

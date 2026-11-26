@@ -19,6 +19,7 @@ import type { RefCallback } from "react";
 
 import type { TableChrome } from "../chrome/tableChromeContract";
 import { disabledGridFocus } from "../features/shellLiveStubs";
+import type { RowReorderState } from "../rows/rowReorder";
 import type { ChromeBodyData } from "../virtual/chromeBodyShared";
 import type {
   DataTableShellChromeProps,
@@ -46,7 +47,8 @@ export function shellTableProps<TRow>(
   chrome: TableChrome<TRow>,
   columnWindow: DataTableShellTableProps<TRow>["columnWindow"],
   runtime: FilterRuntime<TRow>,
-  nameScrollBox: RefCallback<HTMLElement>
+  nameScrollBox: RefCallback<HTMLElement>,
+  rowReorder: RowReorderState<TRow> | undefined
 ): DataTableShellTableProps<TRow> {
   const windowStart = sourceWindowStart(chrome.source);
   const { pinned } = chrome.columnLayout.state;
@@ -54,17 +56,15 @@ export function shellTableProps<TRow>(
     table: chrome.table,
     gridFocus: disabledGridFocus(),
     rows: chrome.editingRows,
-    rowActions: chrome.rowActions,
     rowActionsLayout: props.rowActionsLayout,
     renderRowActions: props.renderRowActions,
     actionsPinned: pinned[ACTIONS_COLUMN_KEY] === "end",
-    rowReorder: chrome.rowReorder,
+    rowReorder,
     reorderPinned: pinned[REORDER_COLUMN_KEY] === "start",
     pinnedTopRows: [] as readonly TRow[],
     pinnedBottomRows: [] as readonly TRow[],
     pinnedSummaryTop: [] as readonly TRow[],
     pinnedSummaryBottom: [] as readonly TRow[],
-    rowPinning: chrome.rowPinning,
     getCellSpan: props.getCellSpan,
     cellSpanAppearance: props.cellSpanAppearance,
     extraRows: props.extraRows,
@@ -84,7 +84,6 @@ export function shellTableProps<TRow>(
       ChromeBodyData<TRow>["virtualization"]["measureRowPair"] | undefined,
     columnWindow,
     fitColumns: props.fitColumns,
-    tree: chrome.tree,
     stickyHeader: props.stickyHeader,
     stickyTop: props.stickyTop,
     headerFilters:
@@ -112,13 +111,8 @@ export function shellTableProps<TRow>(
         : undefined,
     rowStyle: props.rowStyle,
     rowHeight: props.rowHeight,
-    renderRowDetail: chrome.detail?.render,
     renderCard: props.renderCard,
     summaryRow: chromeProps.summaryRow,
-    expansion: chrome.detail?.expansion,
-    editing: chrome.editing,
-    grouping: chrome.grouping,
-    groupingPanel: chrome.groupingPanel,
     dir: props.dir,
     assembly: (props as { assembly?: Partial<AssemblyFns<TRow>> }).assembly,
   };

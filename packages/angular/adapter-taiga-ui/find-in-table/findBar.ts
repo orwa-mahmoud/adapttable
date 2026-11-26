@@ -6,7 +6,7 @@ import {
   type FindButtonKind,
   type FindButtonProps,
   type FindSearchProps,
-  type ToolbarExtrasSlotProps,
+  type ToolbarEntrySlotProps,
 } from "@adapttable/angular/adapter";
 import { ɵTAIGA_CONTROLS as TAIGA_CONTROLS } from "@adapttable/taiga-ui";
 import {
@@ -161,7 +161,7 @@ export class AdaptFindBar {
 })
 export class AdaptFindToolbarButton {
   /** The toolbar extras' props. */
-  readonly props = input.required<ToolbarExtrasSlotProps>();
+  readonly props = input.required<ToolbarEntrySlotProps>();
   /** The table's find state, when find is composed. */
   protected readonly find = inject(ADAPTTABLE_FIND_STATE, { optional: true });
 }

@@ -4,7 +4,7 @@ import { createApp, h, nextTick } from "vue";
 import { DataTable, type DataTableProps } from "../src";
 import { filters } from "../src/filters";
 import { grouping } from "../src/grouping";
-
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -54,7 +54,7 @@ async function flush() {
 
 describe("Reka feature fills", () => {
   it("renders group rows using the shared lazy group slot and real selection controls", async () => {
-    const host = mount({ features: [grouping("team")], selectable: true });
+    const host = mount({ features: [selection(), grouping("team")] });
     await flush();
     expect(host.textContent).toContain("Engineering");
     const toggle = target<HTMLButtonElement>(host, part("group-toggle"));

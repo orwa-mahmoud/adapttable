@@ -33,6 +33,7 @@ import { ColumnMenuChoice } from '@adapttable/core';
 import { ColumnMenuChoiceOption } from '@adapttable/core';
 import { ColumnMenuItem } from '@adapttable/core';
 import { ColumnMenuLabels } from '@adapttable/core';
+import { ColumnMenuOptions } from '@adapttable/core/binding';
 import { ColumnMenuRow } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
 import { Command } from '@adapttable/core';
@@ -40,6 +41,7 @@ import { ComponentType } from 'react';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuItemsFactory } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { CustomCellEditorCtrl } from '@adapttable/core';
 import { CustomCellEditorRender } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
@@ -66,6 +68,7 @@ import { FacetCounts } from '@adapttable/core';
 import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
+import { FeatureOwnedOptionKey } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
@@ -74,6 +77,7 @@ import { FilterDef } from '@adapttable/core';
 import { FilterFormSource } from '@adapttable/core/binding';
 import { FilterOption } from '@adapttable/core';
 import { FilterOptionsSource } from '@adapttable/core';
+import { FilterPanelOptions } from '@adapttable/core/binding';
 import { FilterType } from '@adapttable/core';
 import { FilterTypeExtend } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
@@ -94,6 +98,7 @@ import { GroupingPanelInteractions } from '@adapttable/core';
 import { GroupingPanelState } from '@adapttable/core';
 import { GroupNode } from '@adapttable/core';
 import { GroupSort } from '@adapttable/core';
+import { HeaderFilterOptions } from '@adapttable/core/binding';
 import { LayoutStorage } from '@adapttable/core';
 import { NestedTableDefaults } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
@@ -129,12 +134,14 @@ import { SavedViewMigration } from '@adapttable/core';
 import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SavedViewsStore } from '@adapttable/core';
 import { SavedViewVisibility } from '@adapttable/core';
+import { SelectionFeatureOptions } from '@adapttable/core/binding';
 import { Shortcut } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
 import { SortLevel } from '@adapttable/core';
 import { TableDensity } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
+import { TableOptions } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 import { TableStateMutators } from '@adapttable/core';
@@ -172,6 +179,9 @@ export function cellNavigation(options?: CellNavigationOptions): StaticTableFeat
 
 // @public
 export interface CellNavigationOptions {
+    readonly onCut?: (range: CellRange) => void;
+    readonly onFill?: (edits: readonly unknown[]) => unknown;
+    readonly onPaste?: (edits: readonly unknown[]) => unknown;
     readonly onRangeChange?: (range: CellRange | null) => void;
 }
 
@@ -245,7 +255,7 @@ interface ColumnHeaderController_2 {
 export { ColumnLayoutState }
 
 // @public
-export function columnMenu(): StaticTableFeature;
+export function columnMenu(options?: ColumnMenuOptions): StaticTableFeature;
 
 export { ColumnMenuAction }
 
@@ -260,6 +270,8 @@ export { ColumnMenuChoiceOption }
 export { ColumnMenuItem }
 
 export { ColumnMenuLabels }
+
+export { ColumnMenuOptions }
 
 export { ColumnMenuRow }
 
@@ -394,7 +406,7 @@ export { FeatureHostState }
 export { FeaturePatch }
 
 // @public
-export interface FeatureProps<TRow> {
+export interface FeatureProps<TRow> extends Pick<TableOptions<TRow, ReactNode>, FeatureOwnedOptionKey> {
     batchEditing?: boolean;
     bulkActions?: BulkAction[];
     cellNavigation?: boolean;
@@ -405,6 +417,7 @@ export interface FeatureProps<TRow> {
     confirmDeleteRow?: boolean;
     contextMenu?: boolean | ContextMenuOptions<TRow>;
     defaultExpandedRowIds?: readonly string[];
+    defaultSelectedIds?: readonly string[];
     densityChooser?: boolean;
     dirtyIndicators?: boolean;
     editHistory?: boolean | EditHistoryOptions;
@@ -435,6 +448,7 @@ export interface FeatureProps<TRow> {
     onPinnedRowIdsChange?: (next: RowPinState) => void;
     onPrint?: () => void;
     onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
+    onSelectionChange?: (selectedIds: string[]) => void;
     pinnedRowIds?: RowPinState;
     pinnedRows?: PinnedRows<TRow>;
     printButton?: boolean;
@@ -448,6 +462,8 @@ export interface FeatureProps<TRow> {
     rowPinningArmed?: boolean;
     rowStyle?: RowStyle<TRow>;
     savedViews?: UseSavedViewsOptions;
+    selectedIds?: readonly string[];
+    selectionGetId?: (row: TRow) => string;
     selectionStats?: boolean;
     sidePanel?: SidePanelOptions;
     statusBar?: boolean;
@@ -484,13 +500,13 @@ export { FilterOption }
 export { FilterOptionsSource }
 
 // @public
-export function filters(form: ReactNode): StaticTableFeature;
+export function filters(form: ReactNode, options?: FilterPanelOptions): StaticTableFeature;
 
 // @public
-export function filters<TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
+export function filters<TRow>(defs: readonly FilterDef<TRow>[], options?: FilterPanelOptions): TableFeature<TRow>;
 
 // @public
-export function filters<TRow>(defs: readonly FilterDef<TRow>[] | ReactNode): TableFeature<TRow>;
+export function filters<TRow>(defs: readonly FilterDef<TRow>[] | ReactNode, options?: FilterPanelOptions): TableFeature<TRow>;
 
 export { FilterType }
 
@@ -560,8 +576,10 @@ export { GroupNode }
 
 export { GroupSort }
 
+export { HeaderFilterOptions }
+
 // @public
-export function headerFilters(): StaticTableFeature;
+export function headerFilters(options?: HeaderFilterOptions): StaticTableFeature;
 
 export { LayoutStorage }
 
@@ -692,6 +710,14 @@ export { SavedViewsStore }
 export { SavedViewVisibility }
 
 // @public
+export function selection(options?: Omit<SelectionFeatureOptions, "getId">): StaticTableFeature;
+
+// @public
+export function selection<TRow>(options: SelectionFeatureOptions<TRow> & {
+    readonly getId: (row: TRow) => string;
+}): TableFeature<TRow>;
+
+// @public
 export function selectionStats(): StaticTableFeature;
 
 export { Shortcut }
@@ -724,6 +750,11 @@ export { SortLevel }
 export type StaticFeatureHost = Omit<TableFeatureHost<never>, "registerColumnMenuAction" | "registerContextMenuItems" | "__row">;
 
 // @public
+export interface StaticFeatureMountContext {
+    feature(): StaticTableFeature;
+}
+
+// @public
 export interface StaticGroupingExtras {
     collapsedGroupIds?: readonly string[];
     groupFilter?: (group: GroupNode<unknown>) => boolean;
@@ -738,10 +769,14 @@ export interface StaticGroupingExtras {
 // @public
 export interface StaticTableFeature {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly contrast?: ContrastRules;
+    readonly dependencies?: readonly unknown[];
     readonly id: string;
+    mount?(context: StaticFeatureMountContext): void | (() => void);
     readonly provider?: FeatureProviderContribution;
+    readonly rank?: number;
     readonly renders?: readonly FeatureRender<never>[];
-    setup?(host: StaticFeatureHost): void | (() => void);
+    setup?(host: StaticFeatureHost): void;
 }
 
 // @public
@@ -750,17 +785,18 @@ export function statusBar(): StaticTableFeature;
 // @public
 export interface TableFeature<TRow = unknown> extends PatchFeature<TRow> {
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+    readonly dependencies?: readonly unknown[];
     readonly id: string;
+    mount?(context: TableFeatureMountContext<TRow>): void | (() => void);
     readonly provider?: FeatureProviderContribution;
     readonly renders?: readonly FeatureRender<never>[];
-    setup?(host: TableFeatureHost<TRow>): void | (() => void);
+    setup?(host: TableFeatureHost<TRow>): void;
 }
 
 // @public
 export interface TableFeatureHost<TRow = unknown> extends NeutralFeatureHost<TRow> {
     readonly __row?: (row: TRow) => void;
     extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
-    onDispose(cleanup: () => void): void;
     registerAggregator(name: string, aggregator: Aggregator): void;
     registerColumnMenuAction(factory: (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuItem | readonly ColumnMenuItem[] | undefined): void;
     registerCommand(command: Command): void;
@@ -769,6 +805,11 @@ export interface TableFeatureHost<TRow = unknown> extends NeutralFeatureHost<TRo
     registerFilterType(spec: FilterTypeSpec): void;
     registerPanel(panel: SidePanelEntry): void;
     registerWriter(writer: ExportWriter): void;
+}
+
+// @public
+export interface TableFeatureMountContext<TRow = unknown> {
+    feature(): TableFeature<TRow>;
 }
 
 export { TableLabels }
@@ -803,9 +844,6 @@ export { UseColumnLayoutResult }
 export interface UseSavedViewsOptions extends Omit<SavedViewsControllerOptions, "storage"> {
     storage?: LayoutStorage;
 }
-
-// @public
-export function useTableFeatures<P extends object>(incoming: P): P & FeatureProps<RowOf<P>>;
 
 // @public
 export function virtualize(options?: VirtualizeOptions): StaticTableFeature;

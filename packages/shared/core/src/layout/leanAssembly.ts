@@ -17,7 +17,6 @@ import type { FilterDef } from "../filters/filterDefs";
 import type { BodyCell, GetCellSpan } from "../rows/cellSpan";
 import type { ExtraEntry, ExtraRow } from "../rows/extraRows";
 import type { RowPinSide } from "../rows/rowPinModel";
-import { extraHostFillStyle } from "../rows/rowPresentation";
 import type { RowStyle } from "../rows/rowStyle";
 import type { CssProperties } from "../style/cssProperties";
 import type { TreeEntry } from "../tree/treeRows";
@@ -110,15 +109,17 @@ function leanBuildBodyCells<TRow>(options: {
   getRowId: (row: TRow) => string;
   windowKeys?: ReadonlySet<string>;
 }): ReadonlyMap<string, readonly BodyCell<TRow>[]> {
-  const result = new Map<string, BodyCell<TRow>[]>();
-  for (const row of options.rows) {
-    const cells: BodyCell<TRow>[] = [];
-    options.columns.forEach((column, columnIndex) => {
-      if (options.windowKeys && !options.windowKeys.has(column.key)) return;
-      cells.push({ column, columnIndex, colSpan: 1, rowSpan: 1 });
-    });
-    result.set(options.getRowId(row), cells);
-  }
+  // Without spans every row has the same cells, so every row shares one
+  // frozen list rather than building its own.
+  const cells: readonly BodyCell<TRow>[] = Object.freeze(
+    options.columns.flatMap((column, columnIndex) =>
+      options.windowKeys && !options.windowKeys.has(column.key)
+        ? []
+        : [Object.freeze({ column, columnIndex, colSpan: 1, rowSpan: 1 })]
+    )
+  );
+  const result = new Map<string, readonly BodyCell<TRow>[]>();
+  for (const row of options.rows) result.set(options.getRowId(row), cells);
   return result;
 }
 
@@ -146,6 +147,10 @@ function leanExtraCoveredTableSlots(): ReadonlySet<number> {
   return new Set();
 }
 
+function leanExtraHostFillStyle(): undefined {
+  return undefined;
+}
+
 function leanColumnResizeHandleProps(): undefined {
   return undefined;
 }
@@ -155,7 +160,7 @@ export const LEAN_ASSEMBLY: AssemblyFns = {
   buildBodyCells: leanBuildBodyCells,
   insertExtraRows: leanInsertExtraRows,
   insertExtrasBeforeRows: leanInsertExtrasBeforeRows,
-  extraHostFillStyle,
+  extraHostFillStyle: leanExtraHostFillStyle,
   inflateBodyCellRowSpans: leanInflateBodyCellRowSpans,
   extraCoveredTableSlots: leanExtraCoveredTableSlots,
   columnResizeHandleProps: leanColumnResizeHandleProps,

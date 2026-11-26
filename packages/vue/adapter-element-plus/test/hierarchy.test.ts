@@ -8,6 +8,7 @@ import { h, nextTick, shallowRef } from "vue";
 import DataTable from "../src/DataTable.vue";
 import { grouping } from "../src/grouping";
 import { nestedTable, rowDetail, useRowExpansion } from "../src/row-detail";
+import { selection as selectionFeature } from "../src/selection";
 import { tree, useLazyChildren, useTreeExpansion } from "../src/tree";
 import { mount, node } from "./mount";
 interface Row {
@@ -69,8 +70,8 @@ describe("Element Plus hierarchy features", () => {
       }));
       const view = fixture({
         forceMobile: mobile,
-        selectable: true,
         features: [
+          selectionFeature(),
           grouping<Row>("team", {
             groupFooters: true,
             groupRowPageSize: 1,
@@ -127,15 +128,17 @@ describe("Element Plus hierarchy features", () => {
 
     it(`keeps mixed group selection authoritative on rejection and accepted updates, mobile=${mobile}`, async () => {
       const update = vi.fn();
-      const view = fixture(
-        {
-          forceMobile: mobile,
-          selectable: true,
-          selectedIds: ["a"],
-          features: [grouping("team")],
-        },
-        { "onUpdate:selectedIds": update }
-      );
+      const selectedIds = shallowRef<readonly string[]>(["a"]);
+      const view = fixture({
+        forceMobile: mobile,
+        features: [
+          selectionFeature({
+            selectedIds,
+            onSelectionChange: update,
+          }),
+          grouping("team"),
+        ],
+      });
       await tick();
       const host = node<HTMLLabelElement>(view.root, part("group-select"));
       const input = node<HTMLInputElement>(host, "input");
@@ -147,7 +150,7 @@ describe("Element Plus hierarchy features", () => {
       expect(update.mock.calls).toEqual([[["a", "b"]], [["a", "b"]]]);
       expect(input.checked).toBe(false);
       expect(input.indeterminate).toBe(true);
-      view.props.value = { ...view.props.value, selectedIds: ["a", "b"] };
+      selectedIds.value = ["a", "b"];
       await tick();
       expect(input.checked).toBe(true);
       expect(input.indeterminate).toBe(false);

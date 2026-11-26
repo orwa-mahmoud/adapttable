@@ -106,7 +106,7 @@ off the core main barrel.
 ### `@adapttable/react/adapter`
 
 The supported **adapter-author** boundary. A ninth adapter is built from this
-entry — `useDataTableShell`, chrome components, slot contracts, pager and pin
+entry — `useTableFeatures`, `useDataTableShell`, chrome components, slot contracts, pager and pin
 math, announcers — with the same SemVer promise as the main entry. App code
 rarely imports it; reaching for it is choosing that contract, not an
 undocumented escape. There is no private channel behind it.
@@ -122,12 +122,18 @@ Each is a published, supported entry — not an implementation detail:
 | `@adapttable/core/engine`    | Table constructors (`createTableEngine`, `createBasicTableEngine`, …)                                 |
 | `@adapttable/core/formula`   | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                                            |
 | `@adapttable/core/grouping`  | Row grouping (`buildGroupedFlatModel`, `groupSelectionState`, …)                                      |
+| `@adapttable/core/locale`    | The shared locale-tag resolver (`resolveLocaleTag`, `normalizeLocaleTag`)                             |
 | `@adapttable/core/pdf`       | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …)                            |
 | `@adapttable/core/pivot`     | Pivot engine (`pivot`, `serverPivotResult`, field helpers, pivot URL codecs)                          |
 | `@adapttable/core/query`     | The query model without React — codecs a backend can load                                             |
 | `@adapttable/core/selection` | Selection (`SelectionContribution`, `createAllMatchingScope`, …)                                      |
 | `@adapttable/core/stream`    | Live row patches (`RowPatch`, `RowPatchEvent`, …)                                                     |
 | `@adapttable/core/xlsx`      | Spreadsheet export writer                                                                             |
+
+A name a focused entry owns is served by that entry only: the editing, pivot,
+formula, grouping, stream and selection names are not on the main entry. The
+query codecs and the engine constructors are on the main entry as well, since
+every table speaks them.
 
 `@adapttable/react` publishes the React-facing counterparts of the ones that
 need elements — `/formula`, `/pivot`, `/stream` — plus `/sparkline`, the
@@ -181,6 +187,7 @@ re-export it. Its subpaths are supported entries too:
 
 | Entry                      | What it is                                                                 |
 | -------------------------- | -------------------------------------------------------------------------- |
+| `@adapttable/ai/agent`     | The table agent controller (`createTableAgentController`)                  |
 | `@adapttable/ai/json`      | Provider-neutral JSON tool envelope (`executeEnvelope`, `executeJsonTool`) |
 | `@adapttable/ai/openai`    | OpenAI tool definitions and execution (`executeOpenAITool`)                |
 | `@adapttable/ai/mcp`       | MCP tool execution (`executeMcpTool`, `mcpListChanged`)                    |

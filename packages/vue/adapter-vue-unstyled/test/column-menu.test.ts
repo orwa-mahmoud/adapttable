@@ -143,6 +143,7 @@ describe("native column manager", () => {
     const feature = columnMenu();
     expect(feature.id).toBe("column-menu");
     expect(feature.renders?.map((fill) => fill.slot.id)).toEqual([
+      "toolbar-extras",
       "column-menu",
       "column-header-rename",
     ]);

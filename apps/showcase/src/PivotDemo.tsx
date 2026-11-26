@@ -1,4 +1,4 @@
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { usePivotUrlState } from "@adapttable/react/pivot";
 import { Suspense } from "react";
 

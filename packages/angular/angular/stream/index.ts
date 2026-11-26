@@ -56,4 +56,4 @@ export {
   isStreamSettled,
   openRowPatchStream,
   parseRowPatchFrame,
-} from "@adapttable/core";
+} from "@adapttable/core/stream";

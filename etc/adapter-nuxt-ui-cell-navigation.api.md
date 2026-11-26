@@ -13,14 +13,11 @@ import { StaticTableFeature } from '@adapttable/vue';
 export { CellEdit }
 
 // @public (undocumented)
-export function cellNavigation(options?: CellNavigationOptions): StaticTableFeature;
+export function cellNavigation<TRow = unknown>(options?: CellNavigationOptions<TRow>): StaticTableFeature;
 
 export { CellNavigationOptions }
 
 export { CellRange }
-
-// @public
-export function columnSelectionCheckbox(): StaticTableFeature;
 
 export { GridCell }
 

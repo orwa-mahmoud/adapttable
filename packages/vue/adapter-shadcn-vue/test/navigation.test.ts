@@ -122,9 +122,8 @@ describe("shadcn navigation presentations", () => {
 
   it("mirrors live RTL navigation and leaves fill writes to the host", async () => {
     const fill = vi.fn();
-    const { root, props } = mountFeatures([cellNavigation()], {
+    const { root, props } = mountFeatures([cellNavigation({ onFill: fill })], {
       data: rows,
-      onCellFill: fill,
     });
     await tick();
     props.value = { ...props.value, dir: "rtl" };

@@ -5,6 +5,7 @@ import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { filters } from "@adapttable/vue-unstyled/filters";
 import { rowActions } from "@adapttable/vue-unstyled/row-actions";
 import { rowDetail } from "@adapttable/vue-unstyled/row-detail";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { h, shallowRef } from "vue";
 
 interface Row {
@@ -50,6 +51,7 @@ const expansionRequests = shallowRef<readonly string[]>([]);
 const lastAction = shallowRef("");
 const completeExport = shallowRef<(() => void) | null>(null);
 const features = [
+  selection(),
   filters<Row>([
     {
       key: "team",
@@ -145,7 +147,6 @@ const summaryRow = aggregate<Row>({ amount: "sum" });
       :url-sync="false"
       :search-debounce-ms="0"
       table-label="People"
-      selectable
       multi-sort
     >
       <template #headerActions="{ column }"

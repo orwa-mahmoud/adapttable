@@ -9,7 +9,7 @@ import {
   slotRender,
 } from "@adapttable/vue/adapter";
 import { rowReorder as bindingRowReorder } from "@adapttable/vue/features";
-import { h } from "vue";
+import { h, type MaybeRefOrGetter } from "vue";
 
 import NativeRowReorder from "./reorder/NativeRowReorder.vue";
 export {
@@ -19,7 +19,7 @@ export {
 } from "@adapttable/vue";
 export function rowReorder<TRow>(
   onRowReorder: RowReorderHandler<TRow>,
-  options?: RowReorderOptions<TRow>
+  options?: MaybeRefOrGetter<RowReorderOptions<TRow> | undefined>
 ): TableFeature<TRow> {
   return extendFeature(bindingRowReorder(onRowReorder, options), [
     slotRender(rowReorderControlKey<TRow>(), (props) =>

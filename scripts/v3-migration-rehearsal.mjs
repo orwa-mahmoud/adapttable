@@ -229,7 +229,7 @@ function main() {
   const lean = join(scratch, "mantine-v2-minimal.tsx");
   process.stdout.write("packed migrate-v3 moves adapter aliases … ");
   const first = migrateOutput(cli, scratch, [rich, lean]);
-  if (!/moved 1 adapter import/.test(first)) {
+  if (!/moved 1 import/.test(first)) {
     console.error(`\n✗ expected one moved import, got:\n${first}`);
     process.exit(1);
   }

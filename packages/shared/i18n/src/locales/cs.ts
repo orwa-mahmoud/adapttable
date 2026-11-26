@@ -193,8 +193,6 @@ export const cs: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "Změna čeká na vaše rozhodnutí.",
-  pendingProposals: (count) =>
-    count === 1 ? "1 navržená změna" : `${String(count)} navržených změn`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -338,10 +336,6 @@ export const cs: Required<TableLabels> = {
       error: "Chyba",
       disconnected: "Bez připojení",
     })[status] ?? "Připraveno",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Přidat řádek",
   duplicateRow: "Duplikovat řádek",
@@ -358,10 +352,8 @@ export const cs: Required<TableLabels> = {
   rowLifted: (position) => `Řádek ${String(position)} zvednut`,
   rowMoved: (from, to) => `Řádek přesunut z ${String(from)} na ${String(to)}`,
   rowReorderCancelled: "Změna pořadí zrušena",
-  rowMoveOptions: "Možnosti přesunu řádku",
   moveToGroup: "Přesunout do skupiny…",
   moveUnder: "Přesunout pod…",
-  moveToTopLevel: "Přesunout na nejvyšší úroveň",
   confirmRowMoveTitle: "Potvrdit přesun řádku",
   confirmRowMoveDescription: (row, from, to) =>
     `Přesunout ${row} z ${from} do ${to}?`,
@@ -397,9 +389,7 @@ export const cs: Required<TableLabels> = {
   removeGroupingColumn: (label) => `Odebrat ${label} ze seskupení`,
   moveGroupingColumn: (label) => `Přesunout seskupení ${label}`,
   groupingDropToRemove: "Pusťte sem pro odebrání seskupení",
-  groupingAggregateColumn: "Sloupec agregace",
   groupingAggregation: "Agregace skupiny",
-  groupingAggregationDefault: "Výchozí",
   groupingAggregationNone: "Žádná",
   groupingAggregations: "Agregace",
   groupingAddAggregation: "Přidat sloupec agregace",
@@ -469,8 +459,6 @@ export const cs: Required<TableLabels> = {
   noticeVirtualizePaged:
     "Virtualizace je vypnutá: tato stránkovaná tabulka zobrazuje po jedné stránce.",
   noticePinNested: "Připínání řádků je vypnuté při seskupení nebo stromu.",
-  noticeReorderNested:
-    "Změna pořadí řádků je vypnutá při seskupení nebo stromu.",
   noticeGroupingUnavailable:
     "Seskupení je vypnuté: tento zdroj seskupení nepodporuje.",
   noticeExportAllPage:

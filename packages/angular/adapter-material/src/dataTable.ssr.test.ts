@@ -8,7 +8,7 @@ import "@angular/compiler";
  * Runs under `vitest.ssr.config.ts`: Node, and no browser testing platform.
  */
 import type { ColumnDef } from "@adapttable/angular";
-import { standardPreset } from "@adapttable/angular-material/preset";
+import { standardFeatures } from "@adapttable/angular-material/preset";
 import { virtualize } from "@adapttable/angular-material/virtualize";
 import { Component, provideZonelessChangeDetection } from "@angular/core";
 import {
@@ -56,7 +56,7 @@ class App {
   readonly columns = COLUMNS;
   readonly rowKey = (row: City) => row.id;
   readonly features = [
-    ...standardPreset<City>({ filters: [] }),
+    ...standardFeatures<City>({ filters: [] }),
     virtualize({ estimateRowSize: 40 }),
   ];
 }

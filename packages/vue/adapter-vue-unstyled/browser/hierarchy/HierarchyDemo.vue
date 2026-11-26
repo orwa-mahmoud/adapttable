@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/vue-unstyled";
-import { grouping, rowDetail, tree } from "@adapttable/vue-unstyled/features";
+import { grouping } from "@adapttable/vue-unstyled/grouping";
+import { rowDetail } from "@adapttable/vue-unstyled/row-detail";
+import { tree } from "@adapttable/vue-unstyled/tree";
 import { h, shallowRef } from "vue";
 interface Person {
   id: string;

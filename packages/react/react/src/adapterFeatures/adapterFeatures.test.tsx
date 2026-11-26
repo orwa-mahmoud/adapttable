@@ -68,28 +68,30 @@ describe("adapter feature assembly", () => {
     const rowEditing = features.rowEditing<{ id: string }>(() => undefined);
     const batch = features.batchEditing<{ id: string }>(() => undefined);
 
-    expect(renderSlots(editing)).toEqual([
+    // Row controls draw only while row editing is armed, so only row editing
+    // fills them; each mode adds its own stage and cell.
+    expect(renderSlots(editing)).toEqual(["editing-live", "editable-cell"]);
+    expect(renderSlots(rowEditing)).toEqual([
       "editing-live",
+      "row-editing-stage",
+      "row-edit-cell",
       "editable-cell",
       "row-edit-actions",
     ]);
     expect(renderSlots(batch)).toEqual([
       "editing-live",
+      "batch-editing-stage",
+      "batch-edit-cell",
+      "table-bars",
       "editable-cell",
-      "row-edit-actions",
       "batch-edit-bar",
     ]);
-    expect(renderSlots(rowEditing)).toEqual(renderSlots(editing));
     expect(features.dirtyIndicators().id).toBe("dirty-indicators");
-    expect(renderSlots(features.editHistory())).toEqual(["edit-history-live"]);
+    expect(renderSlots(features.editHistory())).toEqual(["edit-history"]);
     expect(renderSlots(features.undoRedoButtons())).toEqual(["toolbar-extras"]);
-    expectKitRenders(editing, ["editable-cell", "row-edit-actions"]);
+    expectKitRenders(editing, ["editable-cell"]);
     expectKitRenders(rowEditing, ["editable-cell", "row-edit-actions"]);
-    expectKitRenders(batch, [
-      "editable-cell",
-      "row-edit-actions",
-      "batch-edit-bar",
-    ]);
+    expectKitRenders(batch, ["editable-cell", "batch-edit-bar"]);
     expectKitRenders(features.undoRedoButtons(), ["toolbar-extras"]);
     expectTypeOf(editing).toEqualTypeOf<TableFeature<{ id: string }>>();
   });
@@ -126,7 +128,7 @@ describe("adapter feature assembly", () => {
     });
 
     expect(renderSlots(features.editHistory())).toEqual([
-      "edit-history-live",
+      "edit-history",
       "toolbar-extras",
     ]);
     expectKitRenders(features.editHistory(), ["toolbar-extras"]);
@@ -147,6 +149,8 @@ describe("adapter feature assembly", () => {
     expect(feature.provider).toBeDefined();
     expect(renderSlots(feature)).toEqual([
       "filter-chips-live",
+      "table-bars",
+      "table-overlays",
       "filters-form",
       "active-filter-chips",
       "filter-drawer",
@@ -199,6 +203,7 @@ describe("adapter feature assembly", () => {
     const reorderFeature = reorder<{ id: string }>(() => undefined);
     expect(reorderFeature.provider).toBeDefined();
     expect(renderSlots(reorderFeature)).toEqual([
+      "table-announcers",
       "row-reorder-handle",
       "row-reorder-buttons",
       "row-reorder-announcer",
@@ -220,6 +225,7 @@ describe("adapter feature assembly", () => {
     expect(feature.provider).toBeDefined();
     expect(renderSlots(feature)).toEqual([
       "grouping-live",
+      "table-main",
       "group-header-row",
       "group-header-card",
       "grouping-panel",
@@ -234,7 +240,7 @@ describe("adapter feature assembly", () => {
   it("binds the kit approval strip to the agent-approval slot", () => {
     const feature = createAdapterAgentApprovalFeature(KitComponent);
     expect(feature.id).toBe("agent-approval");
-    expect(renderSlots(feature)).toEqual(["agent-approval"]);
+    expect(renderSlots(feature)).toEqual(["table-bars", "agent-approval"]);
     expectKitRenders(feature, ["agent-approval"]);
   });
 
@@ -246,9 +252,13 @@ describe("adapter feature assembly", () => {
 
     expect(renderSlots(contextFeature)).toEqual([
       "column-layout-live",
+      "table-root-region",
       "context-menu-live",
     ]);
-    expect(renderSlots(commandFeature)).toEqual(["command-palette-live"]);
+    expect(renderSlots(commandFeature)).toEqual([
+      "table-main",
+      "command-palette-live",
+    ]);
 
     render(
       featureTree(
@@ -340,7 +350,7 @@ describe("adapter feature assembly", () => {
     expect(screen.getByText("body only")).toBeInTheDocument();
   });
 
-  it("builds the standard preset in canonical order and adds only options", () => {
+  it("builds the standard preset from the families and adds only options", () => {
     const standardFeatures = createAdapterStandardFeatures({
       columnMenu: () => ({ id: "column-menu" }),
       densityChooser: () => ({ id: "density" }),
@@ -358,17 +368,18 @@ describe("adapter feature assembly", () => {
       savedViews,
     });
 
+    // The column-layout family, the other fixed members, then header filters.
     expect(standardFeatures().map((feature) => feature.id)).toEqual([
       "column-menu",
+      "resizable-columns",
+      "fit-columns",
       "density",
       "export-csv",
       "find-in-table",
-      "fit-columns",
       "fullscreen",
-      "header-filters",
       "multi-sort",
-      "resizable-columns",
       "status-bar",
+      "header-filters",
     ]);
     expect(
       standardFeatures<{ id: string }>({
@@ -379,18 +390,18 @@ describe("adapter feature assembly", () => {
       }).map((feature) => feature.id)
     ).toEqual([
       "column-menu",
+      "resizable-columns",
+      "fit-columns",
       "density",
       "export-csv",
       "find-in-table",
-      "fit-columns",
       "fullscreen",
-      "header-filters",
       "multi-sort",
-      "resizable-columns",
       "status-bar",
       "grouping",
       "bulk-actions",
       "filters",
+      "header-filters",
       "saved-views",
     ]);
   });

@@ -51,24 +51,24 @@ whenever you want.
 
 `<MUIDataTable>` → `<DataTable>`:
 
-| mui-datatables                                        | `@adapttable/mui`                                          | Notes                                                                                                                                    |
-| ----------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `data` (objects)                                      | `data`                                                     | Array-of-objects only; no array-of-arrays mode.                                                                                          |
-| `data` (arrays)                                       | convert to objects                                         | One `map()` at the boundary — see Gotchas.                                                                                               |
-| `columns` (`name`, `label`, `options`)                | `columns` (`key`, `header`, …)                             | Field-by-field below.                                                                                                                    |
-| `options.serverSide` + `count` + `onTableChange`      | `data` + `total` + `onQueryChange`                         | One consolidated query object replaces the action-string switch.                                                                         |
-| `options.page` / `rowsPerPage` / `rowsPerPageOptions` | automatic                                                  | Built-in pager; page size control included.                                                                                              |
-| `options.sortOrder` / `onColumnSortChange`            | per-column `sortable` (+ `multiSort()`)                    | AdaptTable owns and applies sort state.                                                                                                  |
-| `options.filterType` / `onFilterChange`               | column `filter` shorthand + `filters([…])`                 | Kit-native widgets + removable chips, derived for you.                                                                                   |
-| `options.search` / `searchText` / `onSearchChange`    | built-in search (`searchPlaceholder`, `searchable`)        | Debounced and URL-synced.                                                                                                                |
-| `options.selectableRows` + `onRowSelectionChange`     | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Compose `bulkActions()` to enable selection + the bulk bar.                                                                              |
-| `options.expandableRows` + `renderExpandableRow`      | `rowDetail(fn)`                                            | `(row) => ReactNode` — no separate flag, no colSpan markup.                                                                              |
-| `options.viewColumns` / `draggableColumns`            | `columnMenu()`                                             | Show/hide, reorder, and pin in one menu.                                                                                                 |
-| `options.resizableColumns`                            | `resizableColumns()`                                       | Drag + keyboard resize.                                                                                                                  |
-| `options.responsive` (`'vertical'`, …)                | automatic mobile cards                                     | Cards render below the breakpoint — no mode to configure.                                                                                |
-| `options.download` / `print`                          | `exportCsv()` / `rowsToCsv` + `downloadCsv`                | Compose `exportCsv()` for a toolbar button, or headless helpers on a custom `toolbar` button; `print(onPrint, true)` for a print button. |
-| `options.textLabels`                                  | `labels`                                                   | Same idea; English defaults fill missing keys.                                                                                           |
-| `options.storageKey`                                  | `savedViews({ storageKey })` / URL state                   | Views are named, shareable snapshots instead of one implicit save.                                                                       |
+| mui-datatables                                        | `@adapttable/mui`                                                             | Notes                                                                                                                                    |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `data` (objects)                                      | `data`                                                                        | Array-of-objects only; no array-of-arrays mode.                                                                                          |
+| `data` (arrays)                                       | convert to objects                                                            | One `map()` at the boundary — see Gotchas.                                                                                               |
+| `columns` (`name`, `label`, `options`)                | `columns` (`key`, `header`, …)                                                | Field-by-field below.                                                                                                                    |
+| `options.serverSide` + `count` + `onTableChange`      | `useServerData({ rows, total, onQueryChange })`                               | One consolidated query object replaces the action-string switch.                                                                         |
+| `options.page` / `rowsPerPage` / `rowsPerPageOptions` | automatic                                                                     | Built-in pager; page size control included.                                                                                              |
+| `options.sortOrder` / `onColumnSortChange`            | per-column `sortable` (+ `multiSort()`)                                       | AdaptTable owns and applies sort state.                                                                                                  |
+| `options.filterType` / `onFilterChange`               | column `filter` shorthand + `filters([…])`                                    | Kit-native widgets + removable chips, derived for you.                                                                                   |
+| `options.search` / `searchText` / `onSearchChange`    | built-in search (`searchPlaceholder`, `searchable`)                           | Debounced and URL-synced.                                                                                                                |
+| `options.selectableRows` + `onRowSelectionChange`     | `selection({ selectedIds, onSelectionChange })`, `bulkActions([…])` for a bar | Compose `bulkActions()` to enable selection + the bulk bar.                                                                              |
+| `options.expandableRows` + `renderExpandableRow`      | `rowDetail(fn)`                                                               | `(row) => ReactNode` — no separate flag, no colSpan markup.                                                                              |
+| `options.viewColumns` / `draggableColumns`            | `columnMenu()`                                                                | Show/hide, reorder, and pin in one menu.                                                                                                 |
+| `options.resizableColumns`                            | `resizableColumns()`                                                          | Drag + keyboard resize.                                                                                                                  |
+| `options.responsive` (`'vertical'`, …)                | automatic mobile cards                                                        | Cards render below the breakpoint — no mode to configure.                                                                                |
+| `options.download` / `print`                          | `exportCsv()` / `rowsToCsv` + `downloadCsv`                                   | Compose `exportCsv()` for a toolbar button, or headless helpers on a custom `toolbar` button; `print(onPrint, true)` for a print button. |
+| `options.textLabels`                                  | `labels`                                                                      | Same idea; English defaults fill missing keys.                                                                                           |
+| `options.storageKey`                                  | `savedViews({ storageKey })` / URL state                                      | Views are named, shareable snapshots instead of one implicit save.                                                                       |
 
 Column options → `ColumnDef`:
 
@@ -93,21 +93,21 @@ strings — `'changePage'`, `'sort'`, `'search'`, `'filterChange'`,
 callback receiving one consolidated query:
 
 ```tsx
-<DataTable
-  data={rows}
-  total={total}
-  loading={loading}
-  onQueryChange={async (query, { signal }) => {
+const source = useServerData<Person>({
+  rows,
+  total,
+  loading,
+  onQueryChange: async (query, { signal }) => {
     // query: { page, limit, search, sortBy, sortDir, sortLevels, filters } — one shape,
     // fired once per real change (mount included), previous fetch aborted.
     const res = await fetch(`/api/people?${toParams(query)}`, { signal });
     const body = await res.json();
     setRows(body.items);
     setTotal(body.total);
-  }}
-  columns={columns}
-  rowKey={(r) => r.id}
-/>
+  },
+});
+
+<DataTable source={source} columns={columns} rowKey={(r) => r.id} />;
 ```
 
 ## Before / after

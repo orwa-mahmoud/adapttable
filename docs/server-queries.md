@@ -158,13 +158,35 @@ const query = parseTableQuery(request, {
 
 A filter outside the subset is refused like any undeclared one.
 
+### One schema for every request
+
+A route that checks every request against the same schema can prepare it
+once. `prepareQuerySchema(schema)` reads the allowed columns, the declared
+filters, their parameters and their static choices, and `parseTableQuery`
+takes the result in place of the schema and answers exactly as the schema
+would:
+
+```ts
+import { parseTableQuery, prepareQuerySchema } from "@adapttable/server";
+
+const PEOPLE = prepareQuerySchema({ columns: COLUMNS, filters: FILTER_DEFS });
+
+export function handle(request: Request) {
+  const query = parseTableQuery(request, PEOPLE);
+  // …
+}
+```
+
+The schema is read when it is prepared; later edits to it do not change what
+the prepared schema allows. A schema built per request, scoped to a user or a
+role, goes to `parseTableQuery` as it is.
+
 ### Multi-value filters and nested grouping
 
 The table writes a multi-value filter (`multiSelect`, checklist) as ONE
 parameter: entries joined with commas, each percent-encoded, so a value may
 itself contain a comma. `typedFilters` splits it; at level 1 the raw string
-is in `filters`, and `splitListParam(raw)` is the exact inverse
-(`splitFilterValues` is its deprecated name).
+is in `filters`, and `splitListParam(raw)` is the exact inverse.
 
 `groupByKeys` lists every grouping key, outermost first
 (`groupBy=team,status` → `["team", "status"]`), each checked against
@@ -259,6 +281,13 @@ import { deserializePivot, parseFilterTree } from "@adapttable/core/query";
 const tree = parseFilterTree(params.get("ft"));
 const config = deserializePivot(params.get("pivot"));
 ```
+
+`parseFilterTree` keeps the readable part of a hand-edited link and drops a
+node it cannot read. Before a request reaches a database, read the tree with
+`parseStrictFilterTree` instead: it answers `undefined` when any node is
+malformed, because an AND with one condition removed matches more rows than
+the one the client asked for. `parseTableQuery` reads it this way and reports
+the refusal.
 
 It exports the `ft=1.{…}` codec (`parseFilterTree`, `serializeFilterTree`,
 `isActiveFilterTree`, `FILTER_TREE_PARAM`, `FILTER_TREE_VERSION`), the

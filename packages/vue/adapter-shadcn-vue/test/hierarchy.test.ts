@@ -5,6 +5,7 @@ import { renderToString } from "vue/server-renderer";
 import { DataTable } from "../src";
 import { grouping } from "../src/grouping";
 import { nestedTable, rowDetail } from "../src/row-detail";
+import { selection } from "../src/selection";
 import { tree } from "../src/tree";
 import {
   find,
@@ -15,7 +16,6 @@ import {
   type Row,
   tick,
 } from "./feature-helpers";
-
 const rows: readonly Row[] = [
   original,
   { ...original, id: "b", name: "Bea", amount: 3, parent: "a" },
@@ -26,8 +26,13 @@ describe("shadcn hierarchy feature fills", () => {
     "renders group paging, collapse and mixed controlled selection through kit targets (mobile=%s)",
     async (forceMobile) => {
       const changed = vi.fn();
+      const selectedIds = shallowRef<readonly string[]>(["a"]);
       const view = mountFeatures(
         [
+          selection({
+            selectedIds,
+            onSelectionChange: changed,
+          }),
           grouping<Row>("team", {
             groupRowPageSize: 1,
             groupFooters: true,
@@ -39,13 +44,11 @@ describe("shadcn hierarchy feature fills", () => {
         {
           data: rows,
           forceMobile,
-          selectedIds: ["a"],
           classNames: {
             groupCheckbox: "group-checkbox-hook",
             groupToggle: "group-toggle-hook",
           },
-        },
-        { "onUpdate:selectedIds": changed }
+        }
       );
       await tick();
       const checkbox = find<HTMLButtonElement>(view.root, part("group-select"));
@@ -58,7 +61,7 @@ describe("shadcn hierarchy feature fills", () => {
       await tick();
       expect(changed.mock.calls).toEqual([[["a", "b"]], [["a", "b"]]]);
       expect(checkbox.getAttribute("aria-checked")).toBe("mixed");
-      view.props.value = { ...view.props.value, selectedIds: ["a", "b"] };
+      selectedIds.value = ["a", "b"];
       await tick();
       expect(checkbox.getAttribute("aria-checked")).toBe("true");
       const more = find<HTMLButtonElement>(view.root, part("group-more"));

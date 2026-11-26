@@ -9,6 +9,9 @@ import type { CustomCellEditorCtrl } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { rowEditing as rowEditingFeature } from "../features/editing";
+import { FeatureProviders } from "../features/providers";
+import { applyTableFeatures } from "../features/tableFeature";
 import { editableCellTestSlots } from "../internal/chromeTestSlots";
 import { EditableCellGate } from "./EditableCellGate";
 import { useRowEditing } from "./rowEditing";
@@ -223,27 +226,33 @@ describe("the gate in row mode", () => {
         >
           open
         </button>
-        <EditableCellGate
-          slots={editableCellTestSlots}
-          editing={{ state, rowEditing }}
-          row={ROW}
-          column={COLUMNS[columnIndex]!}
-          rowId="1"
-          rows={[ROW]}
-          columns={COLUMNS}
-          rowKey={(row) => row.id}
-          editLabel="Edit cell"
-          display={columnIndex === 0 ? ROW.name : ROW.id}
-          renderEditor={(ctrl) => (
-            <input
-              aria-label="field"
-              ref={ctrl.focusRef}
-              value={ctrl.draft}
-              onChange={(event) => ctrl.setDraft(event.target.value)}
-              onKeyDown={ctrl.onEditorKeyDown}
-            />
-          )}
-        />
+        <FeatureProviders
+          props={applyTableFeatures({
+            features: [rowEditingFeature(onRowEdit)],
+          })}
+        >
+          <EditableCellGate
+            slots={editableCellTestSlots}
+            editing={{ state, rowEditing }}
+            row={ROW}
+            column={COLUMNS[columnIndex]!}
+            rowId="1"
+            rows={[ROW]}
+            columns={COLUMNS}
+            rowKey={(row) => row.id}
+            editLabel="Edit cell"
+            display={columnIndex === 0 ? ROW.name : ROW.id}
+            renderEditor={(ctrl) => (
+              <input
+                aria-label="field"
+                ref={ctrl.focusRef}
+                value={ctrl.draft}
+                onChange={(event) => ctrl.setDraft(event.target.value)}
+                onKeyDown={ctrl.onEditorKeyDown}
+              />
+            )}
+          />
+        </FeatureProviders>
       </>
     );
   }

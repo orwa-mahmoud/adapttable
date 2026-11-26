@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ColumnMenuOptions } from '@adapttable/vue/features';
 import { ColumnMenuSlotProps } from '@adapttable/vue/adapter';
 import { PublicProps } from 'vue';
 import { StaticTableFeature } from '@adapttable/vue';
@@ -29,7 +30,7 @@ type __VLS_PrettifyLocal<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K 
 export const ColumnMenu: typeof __VLS_export;
 
 // @public
-export function columnMenu(): StaticTableFeature;
+export function columnMenu(options?: ColumnMenuOptions): StaticTableFeature;
 
 export { ColumnMenuSlotProps }
 

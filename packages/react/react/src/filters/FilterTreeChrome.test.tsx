@@ -120,6 +120,7 @@ function Harness({ initial }: Readonly<{ initial?: QueryFilterGroup }> = {}) {
   );
   return (
     <FilterTreeChrome
+      registry={defaultFilterRegistry}
       defs={DEFS}
       source={{ filterTree, setFilterTree }}
       slots={slots}
@@ -220,6 +221,7 @@ describe("FilterTreeChrome", () => {
   it("renders nothing without defs or a setter", () => {
     const { container } = render(
       <FilterTreeChrome
+        registry={defaultFilterRegistry}
         defs={[]}
         source={{ filterTree: undefined }}
         slots={slots}

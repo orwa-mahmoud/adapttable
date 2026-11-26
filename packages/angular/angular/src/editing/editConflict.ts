@@ -11,7 +11,7 @@ import {
   type RowEditingState,
 } from "@adapttable/core";
 import {
-  createEditConflictStore,
+  createDeferredEditConflictStore,
   editConflictView,
 } from "@adapttable/core/editing";
 import {
@@ -42,7 +42,7 @@ export type {
   ReconcileLiveEdit,
   ReconcileLiveRowEdit,
 } from "@adapttable/core";
-import { tableStoreOf } from "../tableStore";
+import { followRowRekeyMoves, tableStoreOf } from "../tableStore";
 
 /**
  * Subscribe to core's conflict store until the injection context is destroyed.
@@ -56,9 +56,10 @@ export function injectEditConflict<TRow>(
 ): Signal<EditConflictState<TRow>> {
   if (!options.injector) assertInInjectionContext(injectEditConflict);
   const injector = options.injector ?? inject(Injector);
-  const store = createEditConflictStore<TRow>({
+  const store = createDeferredEditConflictStore<TRow>({
     store: tableStoreOf(injector),
   });
+  followRowRekeyMoves(injector, store);
   const snapshot = fromStore(store, { injector });
   return computed(() => editConflictView(store, snapshot()));
 }

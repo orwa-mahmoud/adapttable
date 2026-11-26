@@ -5,7 +5,16 @@
  * A suite written against the props keeps asserting the same behaviour while
  * composing the real factories, which is the migration a host performs.
  */
-import { flattenReactColumnTree } from "@adapttable/react/adapter";
+import {
+  type ColumnDef,
+  type ColumnInput,
+  serverFilterKeys,
+  useServerData,
+} from "@adapttable/react";
+import {
+  flattenFeatures,
+  flattenReactColumnTree,
+} from "@adapttable/react/adapter";
 import type { TableFeature } from "@adapttable/react/features";
 
 import type {
@@ -20,6 +29,101 @@ function hasId<TRow>(
   id: string
 ): boolean {
   return features.some((feature) => feature.id === id);
+}
+
+function definedPatch(
+  entries: Record<string, unknown>
+): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(entries).filter(([, value]) => value !== undefined)
+  );
+}
+
+/** Copy a test's feature options onto the feature the harness composed. */
+function withOwnedOptions<TRow>(
+  features: readonly TableFeature<TRow>[],
+  props: HarnessProps<TRow>
+): TableFeature<TRow>[] {
+  const filters = definedPatch({
+    filtersMode: props.filtersMode,
+    filterFields: props.filterFields,
+    extraChips: props.extraChips,
+    filterLabels: props.filterLabels,
+    filterDefs: props.filterDefs,
+    filterRegistry: props.filterRegistry,
+    activeFilterCount: props.activeFilterCount,
+    onClearFilters: props.onClearFilters,
+  });
+  const header = definedPatch({
+    closeHeaderFilterOnSelect: props.closeHeaderFilterOnSelect,
+  });
+  const columnMenu = definedPatch({ onColumnRename: props.onColumnRename });
+  const editing = definedPatch({
+    validateRow: props.validateRow,
+    applyEdit: props.applyEdit,
+    onEditRollback: props.onEditRollback,
+    formatEditError: props.formatEditError,
+    onEditStart: props.onEditStart,
+    onEditCancel: props.onEditCancel,
+    onEditCommit: props.onEditCommit,
+    onValidationFail: props.onValidationFail,
+    onEditError: props.onEditError,
+    onEditConflict: props.onEditConflict,
+    editConflictPolicy: props.editConflictPolicy,
+    editActivation: props.editActivation,
+    rowVersion: props.rowVersion,
+  });
+  const grid = definedPatch({
+    onCellCut: props.onCellCut,
+    onCellPaste: props.onCellPaste,
+    onCellFill: props.onCellFill,
+    isCellFlashing: props.isCellFlashing,
+  });
+  const grouping = definedPatch({
+    onGroupByChange: props.onGroupByChange,
+    groupFooters: props.groupFooters,
+    groupSort: props.groupSort,
+    groupPageSize: props.groupPageSize,
+    groupRowPageSize: props.groupRowPageSize,
+    onGroupLoadMore: props.onGroupLoadMore,
+    groupFilter: props.groupFilter,
+    groupAggregates: props.groupAggregates,
+    collapsedGroupIds: props.collapsedGroupIds,
+    onCollapsedGroupIdsChange: props.onCollapsedGroupIdsChange,
+  });
+  const virtual = definedPatch({
+    estimateRowSize: props.estimateRowSize,
+    estimateCardSize: props.estimateCardSize,
+    virtualOverscan: props.virtualOverscan,
+    virtualScrollMargin: props.virtualScrollMargin,
+  });
+  const tree = definedPatch({
+    hasChildren: props.hasChildren,
+    expandedIds: props.expandedIds,
+    onExpandedIdsChange: props.onExpandedIdsChange,
+  });
+  const owned: Record<string, Record<string, unknown>> = {
+    filters,
+    "header-filters": header,
+    "column-menu": columnMenu,
+    editing,
+    "row-editing": editing,
+    "batch-editing": editing,
+    "cell-navigation": grid,
+    grouping,
+    "grouping-panel": grouping,
+    virtualize: virtual,
+    tree,
+  };
+  return features.map((feature) => {
+    const patch = feature.id ? owned[feature.id] : undefined;
+    if (!patch || Object.keys(patch).length === 0) return feature;
+    const apply = feature.apply?.bind(feature);
+    return {
+      ...feature,
+      apply: (input) => ({ ...apply?.(input), ...patch }),
+    };
+  });
 }
 
 /** Filtering, and the header row that reads a filter. */
@@ -333,7 +437,7 @@ export function composeTestFeatures<TRow>(
   props: HarnessProps<TRow>,
   features: KitFeatureFactories
 ): TableFeature<TRow>[] {
-  const next = [...(props.features ?? [])];
+  const next = [...flattenFeatures(props.features ?? [])];
   bridgeFilterProps(props, features, next);
   bridgeToolbarProps(props, features, next);
   bridgeBarProps(props, features, next);
@@ -346,7 +450,7 @@ export function composeTestFeatures<TRow>(
   bridgeColumnProps(props, features, next);
   bridgeOutputProps(props, features, next);
   bridgeViewProps(props, features, next);
-  return next;
+  return withOwnedOptions(next, props);
 }
 
 /**
@@ -360,7 +464,60 @@ export function reactKitUnderTest(
   definition: ReactKitDefinition
 ): ReactKitUnderTest {
   const { Table, features } = definition;
+  function leafColumns<TRow>(
+    columns: readonly ColumnInput<TRow>[]
+  ): ColumnDef<TRow>[] {
+    return columns.flatMap((column) =>
+      "children" in column ? leafColumns(column.children) : [column]
+    );
+  }
+  function ServerTable<TRow>(props: Readonly<HarnessProps<TRow>>) {
+    const {
+      total,
+      onQueryChange,
+      supports,
+      facetKeys,
+      facets,
+      numberExtraKeys,
+      arrayExtraKeys,
+      data,
+      ...rest
+    } = props;
+    // The keys a host derives from the filters it hands the table.
+    const keys = serverFilterKeys({
+      columns: leafColumns(props.columns),
+      filters: Array.isArray(props.filters) ? props.filters : undefined,
+      filterTypes: props.filterTypes,
+    });
+    const source = useServerData<TRow>({
+      rows: data ?? [],
+      total: total ?? data?.length ?? 0,
+      onQueryChange,
+      supports,
+      facetKeys: facetKeys ?? keys.facetKeys,
+      facets,
+      numberExtraKeys: numberExtraKeys ?? keys.numberExtraKeys,
+      arrayExtraKeys: arrayExtraKeys ?? keys.arrayExtraKeys,
+      loading: props.loading,
+      urlAdapter: props.urlAdapter,
+      urlSync: props.urlSync,
+      urlKey: props.urlKey,
+      defaults: props.defaults,
+      paginationMode: props.paginationMode,
+      forceMobile: props.forceMobile,
+    });
+    return (
+      <Table
+        {...rest}
+        source={source}
+        features={composeTestFeatures(props, features)}
+      />
+    );
+  }
   function DataTable<TRow>(props: Readonly<HarnessProps<TRow>>) {
+    if (props.onQueryChange !== undefined || props.total !== undefined) {
+      return <ServerTable {...props} />;
+    }
     return <Table {...props} features={composeTestFeatures(props, features)} />;
   }
   return { ...definition, DataTable };

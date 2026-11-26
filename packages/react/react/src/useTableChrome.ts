@@ -1,4 +1,4 @@
-import { type GroupingPanelState, resolvePinnedRows } from "@adapttable/core";
+import { devWarn, resolvePinnedRows } from "@adapttable/core";
 import {
   applyFeatureNoticesAttribute,
   chromeBodyRegion,
@@ -10,13 +10,13 @@ import {
   clearSearchAndFilters as clearSearchAndFiltersOf,
   defaultConfirm,
   responsiveColumns,
-  rowReorderEnablement,
   selectionObserverIds,
   tableErrorState,
 } from "@adapttable/core/binding";
 import { parseGroupBy } from "@adapttable/core/grouping";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
+import { baseActiveFilterCount } from "./chrome/baseFilterCount";
 import type { TableChrome } from "./chrome/tableChromeContract";
 import type { ColumnDef } from "./columnDef";
 import { flattenReactColumnTree } from "./columns/flattenColumnTree";
@@ -25,15 +25,12 @@ import {
   declaredReactColumnLayout,
 } from "./columns/reactColumns";
 import { resolveColumns } from "./columns/resolveColumns";
-import { GROUPING_PANEL_STATE } from "./features/groupingPanelKey";
 import { useFeatureState } from "./features/providers";
 import { ROW_REORDER } from "./features/rowReorderKey";
 import { useEventCallback } from "./hooks/useEventCallback";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useElementWidth } from "./layout/useElementWidth";
 import type { ComposedTableProps } from "./props";
-import type { RowMutationsState } from "./rows/rowMutations";
-import type { RowReorderState } from "./rows/rowReorder";
 import { useDataTable } from "./useDataTable/useDataTable";
 
 export type { EditHistoryState } from "./editing/editHistory";
@@ -41,14 +38,6 @@ export type { ToolbarSlots } from "./props";
 export type { SelectionState } from "./selection/useSelection";
 export type { BulkAction, ConfirmHandler } from "@adapttable/core";
 export type { FeatureNotice, FeatureNoticeKind } from "@adapttable/core";
-
-const NO_ROW_MUTATIONS: RowMutationsState<never> = {
-  canAdd: false,
-  addRow: () => {
-    // The row-actions feature owns add. The lean table has no handler.
-  },
-  actions: [],
-};
 
 /**
  * Assemble every piece of chrome a kit's toolbar and footer need.
@@ -115,7 +104,6 @@ export function useTableChrome<TRow>(
     () => declaredReactColumnLayout(resolvedColumns),
     [resolvedColumns]
   );
-  const groupingArmed = false;
   const viewSource = source;
 
   // Progressive hiding sits between the user's own hidden set and what is
@@ -176,8 +164,10 @@ export function useTableChrome<TRow>(
     if (ids) notifySelectionChange(ids);
   }, [controlledSelection, selectedIds, notifySelectionChange]);
 
-  const mergedChips = extraChips ?? [];
-  const activeFilterCount = activeFilterCountProp ?? mergedChips.length;
+  const activeFilterCount = baseActiveFilterCount(
+    activeFilterCountProp,
+    extraChips
+  );
 
   const isPaged = source.paginationMode === "paged";
 
@@ -208,39 +198,31 @@ export function useTableChrome<TRow>(
   // Grouping, tree, expansion and editing hooks live on their feature
   // entries. Base chrome leaves those fields empty; ChromeExtrasGate overlays
   // them when the matching feature is composed.
-  const detail = undefined;
-  const editing = undefined;
   const onCellEdit = props.onCellEdit;
   const hasEditableColumn = resolvedColumns.some((column) => column.editable);
+  const hasEditHandler =
+    onCellEdit !== undefined ||
+    props.onRowEdit !== undefined ||
+    props.onBatchEdit !== undefined;
+  useEffect(() => {
+    if (!hasEditableColumn || hasEditHandler) return;
+    devWarn(
+      "columns declare `editable` but no edit handler is composed — cell editing stays inert. Add `editing(handler)` to the table's features."
+    );
+  }, [hasEditableColumn, hasEditHandler]);
 
   const getRowId = selectionGetId ?? rowKey;
-  const rowMutations = NO_ROW_MUTATIONS as RowMutationsState<TRow>;
-  const hasRowActions = false;
-  const rowActions = undefined;
 
   const treeShaped =
     props.getChildren !== undefined || props.getParentId !== undefined;
-  const tree = undefined;
-  const grouping = undefined;
   const editingRows = viewSource.rows;
 
   // See TableChrome.editingRows — extras overlay the grouped leaf set.
 
-  // Reorder publishes one engine for flat, grouped and tree rows. Nested
-  // models resolve visual targets into sibling reorders or explicit host move
-  // callbacks; they never splice the flat render list.
-  // The feature owns the hook; this reads what its provider published. A table
-  // that never imported `@adapttable/<kit>/row-reorder` gets `undefined` here
-  // and never carries the drag state machine at all.
-  const publishedReorder = useFeatureState(ROW_REORDER) as
-    RowReorderState<TRow> | undefined;
-  const { hasRowReorder, rowReorder } = rowReorderEnablement(
-    publishedReorder,
-    columnLayout.isHidden
-  );
-  const requestedReorder = hasRowReorder;
+  // Whether row reorder is composed, for its notices; the shell reads the
+  // reorder state the feature published.
+  const requestedReorder = useFeatureState(ROW_REORDER) !== undefined;
 
-  const rowPinning = undefined;
   const resolvedPinnedRows = resolvePinnedRows(props.pinnedRows);
   const pinnedRows =
     resolvedPinnedRows.top.length > 0 || resolvedPinnedRows.bottom.length > 0
@@ -259,38 +241,6 @@ export function useTableChrome<TRow>(
     () => parseGroupBy(requestedGroupBy),
     [requestedGroupBy]
   );
-  const groupingPanelInteractions = useFeatureState(GROUPING_PANEL_STATE);
-  const groupingPanel = useMemo<GroupingPanelState | undefined>(
-    () =>
-      groupingPanelInteractions?.panelState?.({
-        groupBy: groupByKeys,
-        columns: resolvedColumns,
-        source: {
-          groupAggregateOverrides: source.groupAggregateOverrides,
-          setGroupAggregateOverrides: source.setGroupAggregateOverrides,
-          allFilteredRows: source.allFilteredRows,
-          groups: source.groups,
-          capabilities: source.capabilities,
-          honorsAggregates: source.honorsAggregates,
-          queryAggregates: source.queryAggregates,
-          aggregateOperations: source.aggregateOperations,
-        },
-      }),
-    [
-      resolvedColumns,
-      groupByKeys,
-      groupingPanelInteractions,
-      source.aggregateOperations,
-      source.allFilteredRows,
-      source.capabilities,
-      source.groupAggregateOverrides,
-      source.groups,
-      source.queryAggregates,
-      source.setGroupAggregateOverrides,
-      source.honorsAggregates,
-    ]
-  );
-
   const featureNotices = useMemo(
     () =>
       chromeFeatureNotices({
@@ -314,7 +264,7 @@ export function useTableChrome<TRow>(
         },
         groupByKeys,
         rowReorderRequested: requestedReorder,
-        nestedArmed: groupingArmed || treeShaped,
+        nestedArmed: treeShaped,
         hasEditableColumn,
         labels: table.labels,
       }),
@@ -329,7 +279,6 @@ export function useTableChrome<TRow>(
       props.pinnedRowIds,
       props.onPinnedRowIdsChange,
       requestedReorder,
-      groupingArmed,
       treeShaped,
       hasEditableColumn,
       onCellEdit,
@@ -352,10 +301,6 @@ export function useTableChrome<TRow>(
     isMobile,
     confirm,
     getRowId,
-    mergedChips,
-    activeFilterCount,
-    filterDefs: props.filterDefs,
-    filterRegistry: props.filterRegistry,
     isPaged,
     rootRef,
     droppedColumns: responsive.dropped,
@@ -365,20 +310,7 @@ export function useTableChrome<TRow>(
     isRefreshing,
     clearFilters,
     clearSearchAndFilters,
-    detail,
-    rowMutations,
-    rowActions,
-    hasRowActions,
-    hasRowReorder,
-    rowReorder,
-    rowPinning,
     pinnedRows,
-    groupingArmed,
-    treeShaped,
-    editing,
-    grouping,
-    groupingPanel,
-    tree,
     editingRows,
     showFooter,
     columnLayout,

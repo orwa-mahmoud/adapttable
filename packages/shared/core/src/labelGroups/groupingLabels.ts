@@ -19,8 +19,6 @@ export const GROUPING_LABELS: Pick<
   | "removeGroupingColumn"
   | "moveGroupingColumn"
   | "groupingDropToRemove"
-  | "groupingAggregateColumn"
-  | "groupingAggregationDefault"
   | "groupingAggregationNone"
   | "groupingAggregations"
   | "groupingAddAggregation"
@@ -33,6 +31,7 @@ export const GROUPING_LABELS: Pick<
   | "groupingRemoved"
   | "groupingMoved"
   | "groupingAggregateChanged"
+  | "noticeGroupingUnavailable"
 > = {
   moreGroups: (remaining) => `Show ${remaining} more groups`,
   moreRowsInGroup: (remaining) => `Show ${remaining} more in this group`,
@@ -43,8 +42,6 @@ export const GROUPING_LABELS: Pick<
   removeGroupingColumn: (label) => `Remove ${label} from grouping`,
   moveGroupingColumn: (label) => `Move ${label} grouping`,
   groupingDropToRemove: "Drop here to remove grouping",
-  groupingAggregateColumn: "Aggregate column",
-  groupingAggregationDefault: "Default",
   groupingAggregationNone: "None",
   groupingAggregations: "Aggregations",
   groupingAddAggregation: "Add aggregation column",
@@ -59,4 +56,5 @@ export const GROUPING_LABELS: Pick<
     `${label} moved to grouping position ${position}`,
   groupingAggregateChanged: (label, aggregation) =>
     `${label} group aggregation changed to ${aggregation}`,
+  noticeGroupingUnavailable: "Grouping is off — this source cannot group.",
 };

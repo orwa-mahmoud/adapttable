@@ -21,7 +21,7 @@ import type {
 } from "@adapttable/ai";
 import { tableAgent, useTableAssistant } from "@adapttable/ai-react";
 import type { ApprovalPresentation, RowPinState } from "@adapttable/core";
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import type { BatchRowEdit, CellProps, ColumnDef } from "@adapttable/react";
 import {
   type AgentApprovalPending,

@@ -15,6 +15,7 @@
  * silent, and a failed one is silent in exactly the same way. Every binding
  * goes through this, so none of it can differ between kits or frameworks.
  */
+import { EXPORT_LABELS } from "../labelGroups/exportLabels";
 import { capabilityReason } from "../source/capabilities";
 import type { TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
@@ -375,18 +376,16 @@ function outcomeText(
   serverBuilt: boolean
 ): string {
   if (status === "busy" && serverBuilt && progress !== undefined) {
-    return (
-      labels?.exportProgress?.(progress) ??
-      `Export ${String(progress)}% complete`
-    );
+    return (labels?.exportProgress ?? EXPORT_LABELS.exportProgress)(progress);
   }
   if (status === "busy" && serverBuilt) {
-    return labels?.exportStarted ?? "Preparing export";
+    return labels?.exportStarted ?? EXPORT_LABELS.exportStarted;
   }
-  if (status === "done") return labels?.exportDone ?? "Export complete";
-  if (status === "failed") return labels?.exportFailed ?? "Export failed";
+  if (status === "done") return labels?.exportDone ?? EXPORT_LABELS.exportDone;
+  if (status === "failed")
+    return labels?.exportFailed ?? EXPORT_LABELS.exportFailed;
   if (status === "cancelled") {
-    return labels?.exportCancelled ?? "Export cancelled";
+    return labels?.exportCancelled ?? EXPORT_LABELS.exportCancelled;
   }
   return "";
 }
@@ -464,9 +463,9 @@ export function resolveExportProgressState(input: {
  * @public
  */
 export function resolveExportDisabledReason(
-  labels: TableLabels | undefined,
+  labels: Pick<Required<TableLabels>, "noticeExportAllPage">,
   pageOnly: boolean
 ): string {
   if (!pageOnly) return "";
-  return labels?.noticeExportAllPage ?? capabilityReason("exportScope");
+  return capabilityReason("exportScope", labels);
 }

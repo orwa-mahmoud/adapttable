@@ -1,5 +1,6 @@
 import type { TableLabels } from "@adapttable/core";
-import { loadLabels } from "@adapttable/i18n/load";
+import { reportFailure } from "@adapttable/core/binding";
+import { loadLabels } from "@adapttable/i18n";
 import { useEffect, useState } from "react";
 
 export {
@@ -32,9 +33,16 @@ export function useLocaleLabels(
   useEffect(() => {
     if (locale === undefined) return;
     let current = true;
-    void loadLabels(locale).then((labels) => {
-      if (current) setLoaded({ locale, labels });
-    });
+    // A language that fails to load keeps the current copy; the next
+    // locale change, or a remount, asks again.
+    loadLabels(locale).then(
+      (labels) => {
+        if (current) setLoaded({ locale, labels });
+      },
+      (error: unknown) => {
+        reportFailure(`labels for "${locale}" did not load`, error);
+      }
+    );
     return () => {
       current = false;
     };

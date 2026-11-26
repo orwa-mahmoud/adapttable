@@ -13,11 +13,3 @@ export type GroupRowDraw = <TRow>(props: GroupRowSlotProps<TRow>) => VNodeChild;
 export const GROUP_ROW = featureSlotKey<never>(
   "vue-unstyled-group-row"
 ) as RowSlotKey<GroupRowDraw>;
-/**
- * The group-row slot.
- *
- * @deprecated Use {@link GROUP_ROW}; it is typed for every row.
- */
-export function groupRowSlotKey<_TRow = unknown>(): RowSlotKey<GroupRowDraw> {
-  return GROUP_ROW;
-}

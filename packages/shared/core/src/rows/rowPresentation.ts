@@ -71,6 +71,34 @@ export function estimateFromRowHeight<TRow>(
   };
 }
 
+/** Each row array's first position for every key, for the key function read with. */
+const firstPositions = /* @__PURE__ */ new WeakMap<
+  readonly unknown[],
+  {
+    readonly getRowId: (row: never) => string;
+    readonly byKey: ReadonlyMap<string, number>;
+  }
+>();
+
+/**
+ * Where each key first appears in `rows`, built once per array and key
+ * function, so every extra row of a render reads it instead of scanning.
+ */
+function firstPositionsByKey<TRow>(
+  rows: readonly TRow[],
+  getRowId: (row: TRow) => string
+): ReadonlyMap<string, number> {
+  const cached = firstPositions.get(rows);
+  if (cached?.getRowId === getRowId) return cached.byKey;
+  const byKey = new Map<string, number>();
+  rows.forEach((row, index) => {
+    const key = getRowId(row);
+    if (!byKey.has(key)) byKey.set(key, index);
+  });
+  firstPositions.set(rows, { getRowId, byKey });
+  return byKey;
+}
+
 /**
  * The host row's background fill for an injected extra row.
  *
@@ -85,8 +113,8 @@ export function extraHostFillStyle<TRow>(
 ): CssProperties | undefined {
   const extra = extraRows?.find((item) => item.key === extraKey);
   if (!extra?.beforeRowId) return undefined;
-  const index = rows.findIndex((row) => getRowId(row) === extra.beforeRowId);
-  if (index < 0) return undefined;
+  const index = firstPositionsByKey(rows, getRowId).get(extra.beforeRowId);
+  if (index === undefined) return undefined;
   const visual = resolveRowStyle(rowStyle, undefined, rows[index]!, index);
   if (!visual) return undefined;
   const fill: CssProperties = {};
@@ -259,6 +287,24 @@ export function rowIsDirty<TRow>(
 }
 
 /**
+ * One row's share of an editing digest: the part's own per-row digest, or —
+ * for a part that only digests the whole table — all of it, which redraws
+ * more rows than needed but never misses one.
+ */
+function rowPart(
+  part:
+    | {
+        readonly signature?: string;
+        readonly rowSignature?: (rowId: string) => string;
+      }
+    | undefined,
+  rowId: string
+): string {
+  if (!part) return "";
+  return part.rowSignature ? part.rowSignature(rowId) : (part.signature ?? "");
+}
+
+/**
  * Memo digest for one row's editing state.
  *
  * @public
@@ -271,16 +317,12 @@ export function rowEditingSignature<TRow>(
   const { active, draft } = editing.state;
   const marked = editing.validation?.rowHasError(rowId) ?? false;
   const busy = editing.validation?.isValidating(rowId, active?.columnKey ?? "");
-  const save = editing.saving?.signature ?? "";
-  const rowSave = save.includes(`${rowId} `) ? save : "";
-  const marks = editing.dirty?.signature ?? "";
-  const rowMarks = marks.includes(`${rowId} `) ? marks : "";
+  const rowSave = rowPart(editing.saving, rowId);
+  const rowMarks = rowPart(editing.dirty, rowId);
   const rowMode = editing.rowEditing;
   const rowDrafts =
     rowMode?.activeRowId === rowId ? (rowMode.signature ?? "") : "";
-  const batchAll = editing.batch?.signature ?? "";
-  const batchRow =
-    batchAll.split(";").find((entry) => entry.startsWith(`${rowId}:`)) ?? "";
+  const batchRow = rowPart(editing.batch, rowId);
   const live = editing.conflict?.current;
   const contested = editing.conflict?.rowSignature?.(rowId) ?? "";
   const conflictMark =

@@ -30,14 +30,18 @@ describe("optional editing model lifetime", () => {
     };
     const setup = () => {
       events.push("setup");
+    };
+    const mount = () => {
+      events.push("mount");
       return () => {
-        events.push("setup-stop");
+        events.push("mount-stop");
       };
     };
     const feature = (dependency: number): TableFeature<Row> => ({
       id: "editing",
       dependencies: [dependency],
       setup,
+      mount,
       apply: () => ({ editingModel: model, testValue: dependency }),
     });
     const declarations = shallowRef<readonly TableFeature<Row>[]>([]);
@@ -53,9 +57,18 @@ describe("optional editing model lifetime", () => {
     )!;
     expect(events).toEqual([]);
     declarations.value = [feature(1)];
-    expect(events).toEqual(["setup", "model"]);
+    expect(events).toEqual(["setup", "mount", "model"]);
+    // A changed dependency replaces the feature's own resource; the lazy
+    // editing model stays and reads the new options.
     declarations.value = [feature(2)];
-    expect(events).toEqual(["setup", "model", "setup-stop", "setup"]);
+    expect(events).toEqual([
+      "setup",
+      "mount",
+      "model",
+      "setup",
+      "mount-stop",
+      "mount",
+    ]);
     expect(values.at(-1)).toBe(2);
     expect(shell.state.get(key).value).toBe(1);
     const replacement = (context: FeatureMountContext<Row>) => {
@@ -67,7 +80,7 @@ describe("optional editing model lifetime", () => {
       { id: "replacement", apply: () => ({ editingModel: replacement }) },
     ];
     expect(events.slice(-4)).toEqual([
-      "setup-stop",
+      "mount-stop",
       "model-cleanup",
       "model-scope-stop",
       "replacement",

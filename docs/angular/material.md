@@ -93,6 +93,7 @@ import type { ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/angular-material";
 import { filters } from "@adapttable/angular-material/filters";
 import { columnMenu } from "@adapttable/angular-material/column-menu";
+import { selection } from "@adapttable/angular-material/selection";
 
 interface Person {
   id: string;
@@ -109,7 +110,6 @@ interface Person {
     [rowKey]="rowKey"
     [features]="features"
     tableLabel="People"
-    [selectable]="true"
   />`,
 })
 export class PeopleTable {
@@ -125,6 +125,7 @@ export class PeopleTable {
     { key: "team", header: "Team", accessor: (row) => row.team },
   ];
   readonly features = [
+    selection(),
     filters<Person>([{ key: "name", type: "text" }]),
     columnMenu(),
   ];
@@ -132,7 +133,7 @@ export class PeopleTable {
 ```
 
 Import only needed feature entries, or use `/features` and `/preset` for the
-aggregated factories and `standardPreset()`. Omitting a feature renders no
+aggregated factories and `standardFeatures()`. Omitting a feature renders no
 controls for it. All edits, row operations and assistant actions remain host
 callbacks; the table never owns or mutates the application data.
 

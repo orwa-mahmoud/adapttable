@@ -85,12 +85,6 @@ export const BASE_LABELS: Pick<
   | "groupingRemoveAggregation"
   | "groupingAggregationCustom"
   | "groupingAverage"
-  | "noticeVirtualizePaged"
-  | "noticePinNested"
-  | "noticeReorderNested"
-  | "noticeGroupingUnavailable"
-  | "noticeExportAllPage"
-  | "noticeEditWithoutWriter"
   | "pageSelected"
   | "selectAllMatching"
   | "allMatchingSelected"
@@ -180,15 +174,6 @@ export const BASE_LABELS: Pick<
   groupingRemoveAggregation: (column: string) => `Remove ${column} aggregation`,
   groupingAggregationCustom: "Custom",
   groupingAverage: "Average",
-  noticeVirtualizePaged:
-    "Virtualization is off — this paged table shows one page at a time.",
-  noticePinNested: "Row pinning is off while grouping or a tree is on.",
-  noticeReorderNested:
-    "Cross-boundary row moves follow the configured move policy.",
-  noticeGroupingUnavailable: "Grouping is off — this source cannot group.",
-  noticeExportAllPage:
-    "Export all is off — this source provides one page at a time.",
-  noticeEditWithoutWriter: "Editing is off — no write handler is wired.",
   pageSelected: (count) => `All ${count} on this page selected`,
   selectAllMatching: (total) => `Select all ${total} matching`,
   allMatchingSelected: (total) => `All ${total} matching selected`,

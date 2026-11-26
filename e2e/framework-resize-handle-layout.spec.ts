@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { builtAdapters } from "../apps/showcase/matrix.mjs";
-import { getLabels } from "../packages/shared/i18n/src";
+import { getLabels } from "../packages/shared/i18n/src/catalog";
 
 for (const framework of ["angular", "vue"]) {
   for (const kit of builtAdapters(framework)) {

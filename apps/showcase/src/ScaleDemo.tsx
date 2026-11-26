@@ -3,7 +3,7 @@ import {
   applyRowPatchesWithLog,
   updateRow,
 } from "@adapttable/core";
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import {
   type CellProps,
   type ColumnDef,
@@ -11,11 +11,11 @@ import {
   useServerData,
 } from "@adapttable/react";
 import {
-  editing as editing_,
   rowAppearance,
   tree as tree_,
   virtualize as virtualize_,
 } from "@adapttable/react/features";
+import type { editing as kitEditingShape } from "@adapttable/unstyled/editing";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { initialDemoDirection, initialDemoLocale } from "./demoPresentation";
@@ -81,6 +81,54 @@ function widen(
  * browser never holds the set. `total` is what the pager and the ARIA counts
  * report, so 1,000,000 means 1,000,000.
  */
+
+/** A kit's own cell editing, drawn with its controls. */
+type KitEditing = typeof kitEditingShape;
+
+/**
+ * Each kit's own editing, loaded when `?edit=1` asks for it, so the scale page
+ * carries none of it otherwise.
+ */
+const KIT_EDITING: Readonly<
+  Partial<Record<string, () => Promise<{ readonly editing: KitEditing }>>>
+> = {
+  antd: () => import("@adapttable/antd/editing"),
+  "base-ui": () => import("@adapttable/base-ui/editing"),
+  chakra: () => import("@adapttable/chakra/editing"),
+  mantine: () => import("@adapttable/mantine/editing"),
+  mui: () => import("@adapttable/mui/editing"),
+  radix: () => import("@adapttable/radix/editing"),
+  shadcn: () => import("@adapttable/shadcn/editing"),
+  tailwind: () => import("@adapttable/unstyled/editing"),
+};
+
+/**
+ * The kit's editing once it has loaded, or `null` while it loads and when
+ * editing is off.
+ */
+function useKitEditing(kit: string, edit: boolean): KitEditing | null {
+  const [loaded, setLoaded] = useState<KitEditing | null>(null);
+  useEffect(() => {
+    if (!edit) return;
+    const load = KIT_EDITING[kit];
+    if (load === undefined) {
+      throw new Error(`The scale demo has no editing entry for kit "${kit}".`);
+    }
+    let live = true;
+    load().then(
+      (module) => {
+        if (live) setLoaded(() => module.editing);
+      },
+      (error: unknown) => {
+        console.error(`Loading the ${kit} kit's editing failed`, error);
+      }
+    );
+    return () => {
+      live = false;
+    };
+  }, [edit, kit]);
+  return edit ? loaded : null;
+}
 
 function ServerScaleTable({
   total,
@@ -318,6 +366,7 @@ function FrontendScaleTable({
   });
   const Table = kitTable<BigPerson>(kit);
   const navHeight = useNavHeight();
+  const kitEditing = useKitEditing(kit, edit);
   const onScaleCellEdit = (
     row: BigPerson,
     _key: string,
@@ -372,7 +421,7 @@ function FrontendScaleTable({
                   }),
                 ]
               : []),
-            ...(edit ? [editing_<BigPerson>(onScaleCellEdit)] : []),
+            ...(kitEditing ? [kitEditing<BigPerson>(onScaleCellEdit)] : []),
           ]}
           classNames={kitClassNames(kit)}
           // Page-scroll window mode with a pinned header: the page itself

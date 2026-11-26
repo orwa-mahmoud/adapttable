@@ -32,6 +32,9 @@ async function resolveHeaders(
   return headers;
 }
 
+/** How much of a failed reply is read: enough for the diagnostic it shows. */
+const ERROR_BODY_BYTES = 4096;
+
 function abortReason(signal: AbortSignal): Error {
   const reason: unknown = signal.reason;
   // An explicit reason — a timeout, a host's own error — is carried through.
@@ -41,15 +44,128 @@ function abortReason(signal: AbortSignal): Error {
   return new Error("agent HTTP cancelled");
 }
 
-function abortPromise(signal: AbortSignal): Promise<never> {
-  return new Promise((_, reject) => {
-    const fail = () => reject(abortReason(signal));
-    if (signal.aborted) {
-      fail();
-      return;
+/**
+ * The one owner of an exchange's cancellation: the caller's signal and the
+ * timeout, merged, for headers, fetch and every body read alike.
+ */
+interface Cancellation {
+  readonly signal: AbortSignal;
+  /**
+   * Settle with `work`, or reject when the exchange is cancelled first. The
+   * abort listener lives only while `work` is pending, so a stream read
+   * chunk by chunk holds one listener, not one per chunk.
+   */
+  readonly race: <T>(work: Promise<T>) => Promise<T>;
+  /** Stop the timeout and let go of the caller's signal. */
+  readonly cleanup: () => void;
+}
+
+function cancellation(
+  timeoutMs: number | undefined,
+  external?: AbortSignal
+): Cancellation {
+  const controller = new AbortController();
+  const { signal } = controller;
+  const onAbort = () => controller.abort(external?.reason);
+  if (external) {
+    if (external.aborted) controller.abort(external.reason);
+    else external.addEventListener("abort", onAbort, { once: true });
+  }
+  const timer =
+    timeoutMs !== undefined && timeoutMs > 0
+      ? setTimeout(() => {
+          controller.abort(
+            new Error(`agent HTTP request timed out after ${timeoutMs}ms`)
+          );
+        }, timeoutMs)
+      : undefined;
+  return {
+    signal,
+    race: (work) =>
+      new Promise((resolve, reject) => {
+        if (signal.aborted) {
+          reject(abortReason(signal));
+          return;
+        }
+        const fail = () => reject(abortReason(signal));
+        signal.addEventListener("abort", fail, { once: true });
+        work.then(
+          (value) => {
+            signal.removeEventListener("abort", fail);
+            resolve(value);
+          },
+          (error: unknown) => {
+            signal.removeEventListener("abort", fail);
+            reject(error instanceof Error ? error : new Error(String(error)));
+          }
+        );
+      }),
+    cleanup: () => {
+      external?.removeEventListener("abort", onAbort);
+      if (timer !== undefined) clearTimeout(timer);
+    },
+  };
+}
+
+/**
+ * Let go of a body this exchange will not finish reading. A cancelled exchange
+ * has already torn its request down, and cancelling that stream again would
+ * only report the abort a second time.
+ */
+async function abandon(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  owner: Cancellation
+): Promise<void> {
+  if (!owner.signal.aborted) await reader.cancel();
+}
+
+/** The declared length of a reply, when it gives a usable one. */
+function declaredLength(response: Response): number | undefined {
+  const raw = response.headers.get("content-length");
+  if (raw === null || !/^\d+$/.test(raw.trim())) return undefined;
+  return Number(raw);
+}
+
+/**
+ * Read a reply's text without holding more than `limit` bytes of it.
+ *
+ * A reply that declares a larger length is refused before a byte is read. One
+ * that declares nothing is read until it ends or passes the limit; then the
+ * reader is cancelled and the reply is either refused (`"refuse"`) or cut at
+ * the limit (`"cut"`, for a failure whose diagnostic is all that is shown).
+ */
+async function readText(
+  response: Response,
+  owner: Cancellation,
+  limit: number,
+  past: "refuse" | "cut"
+): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) return "";
+  const declared = declaredLength(response);
+  const decoder = new TextDecoder();
+  let text = "";
+  let bytes = 0;
+  try {
+    if (past === "refuse" && declared !== undefined && declared > limit) {
+      await abandon(reader, owner);
+      assertResponseSize(declared);
     }
-    signal.addEventListener("abort", fail, { once: true });
-  });
+    for (;;) {
+      const chunk = await owner.race(reader.read());
+      if (chunk.done) return text + decoder.decode();
+      const room = limit - bytes;
+      bytes += chunk.value.byteLength;
+      if (bytes > limit) {
+        await abandon(reader, owner);
+        if (past === "refuse") assertResponseSize(bytes);
+        return text + decoder.decode(chunk.value.subarray(0, room));
+      }
+      text += decoder.decode(chunk.value, { stream: true });
+    }
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 function assertResponseSize(bytes: number): void {
@@ -87,17 +203,17 @@ function httpError(status: number, body: string): Error {
 async function postJson(
   options: AgentHttpClientOptions,
   body: AgentHttpRequest,
-  signal: AbortSignal
+  owner: Cancellation
 ): Promise<unknown> {
+  const { signal } = owner;
   // A signal that is already aborted starts no network work at all.
   if (signal.aborted) throw abortReason(signal);
   if (options.request) {
     // The callback is free to ignore the signal, so the timeout is enforced
     // out here rather than trusting it to return.
-    const value = await Promise.race([
-      Promise.resolve(options.request(body, signal)),
-      abortPromise(signal),
-    ]);
+    const value = await owner.race(
+      Promise.resolve(options.request(body, signal))
+    );
     assertResponseSize(jsonBytes(value));
     return value;
   }
@@ -107,7 +223,9 @@ async function postJson(
   if (typeof fetchImpl !== "function") {
     throw new TypeError("agent HTTP requires fetch");
   }
-  const headers = new Headers(await resolveHeaders(options.headers));
+  const headers = new Headers(
+    await owner.race(resolveHeaders(options.headers))
+  );
   if (!headers.has("content-type")) {
     headers.set("content-type", "application/json");
   }
@@ -119,15 +237,14 @@ async function postJson(
   );
   let response: Response;
   try {
-    response = await Promise.race([
+    response = await owner.race(
       fetchImpl(endpoint, {
         method: "POST",
         headers,
         body: JSON.stringify(body),
         signal,
-      }),
-      abortPromise(signal),
-    ]);
+      })
+    );
   } catch (error) {
     if (signal.aborted) {
       throw abortReason(signal);
@@ -140,11 +257,15 @@ async function postJson(
     response.body &&
     (response.headers.get("content-type") ?? "").includes("text/event-stream")
   ) {
-    return readStream(response, options, signal);
+    return readStream(response, options, owner);
   }
-  const text = await Promise.race([response.text(), abortPromise(signal)]);
-  if (!response.ok) throw httpError(response.status, text);
-  assertResponseSize(new TextEncoder().encode(text).byteLength);
+  if (!response.ok) {
+    throw httpError(
+      response.status,
+      await readText(response, owner, ERROR_BODY_BYTES, "cut")
+    );
+  }
+  const text = await readText(response, owner, MAX_RESPONSE_BYTES, "refuse");
   if (text.trim() === "") {
     throw new TypeError("agent HTTP response was empty");
   }
@@ -166,11 +287,11 @@ export async function exchange(
       `agent HTTP request exceeds ${MAX_REQUEST_BYTES} bytes`
     );
   }
-  const merged = mergeSignals(options.timeoutMs, signal);
+  const owner = cancellation(options.timeoutMs, signal);
   try {
-    return parseAgentHttpResponse(await postJson(options, body, merged.signal));
+    return parseAgentHttpResponse(await postJson(options, body, owner));
   } finally {
-    merged.cleanup();
+    owner.cleanup();
   }
 }
 
@@ -184,7 +305,7 @@ export async function exchange(
 async function readStream(
   response: Response,
   options: AgentHttpClientOptions,
-  signal: AbortSignal
+  owner: Cancellation
 ): Promise<unknown> {
   const reader = response.body?.getReader();
   if (!reader) throw new TypeError("agent HTTP stream had no body");
@@ -195,10 +316,13 @@ async function readStream(
 
   try {
     for (;;) {
-      const chunk = await Promise.race([reader.read(), abortPromise(signal)]);
+      const chunk = await owner.race(reader.read());
       if (chunk.done) break;
       bytes += chunk.value.byteLength;
-      assertResponseSize(bytes);
+      if (bytes > MAX_RESPONSE_BYTES) {
+        await abandon(reader, owner);
+        assertResponseSize(bytes);
+      }
       buffer += decoder.decode(chunk.value, { stream: true });
       const split = splitRecords(buffer);
       buffer = split.rest;
@@ -207,41 +331,15 @@ async function readStream(
         const event = parseStreamRecord(record);
         if (event && reply.absorb(event)) finished = true;
       }
-      if (finished) break;
+      if (finished) {
+        // The terminal event ends the reply; whatever the backend still
+        // sends after it is not read, so the upstream is told to stop.
+        await abandon(reader, owner);
+        break;
+      }
     }
   } finally {
-    // Releasing rather than cancelling: an abort has already torn the request
-    // down, and a cancel on a settled reader throws over the real reason.
     reader.releaseLock();
   }
   return reply.finish(AGENT_SCHEMA_VERSION);
-}
-
-function mergeSignals(
-  timeoutMs: number | undefined,
-  external?: AbortSignal
-): { signal: AbortSignal; cleanup: () => void } {
-  const controller = new AbortController();
-  const timers: ReturnType<typeof setTimeout>[] = [];
-  const onAbort = () => controller.abort(external?.reason);
-  if (external) {
-    if (external.aborted) controller.abort(external.reason);
-    else external.addEventListener("abort", onAbort, { once: true });
-  }
-  if (timeoutMs !== undefined && timeoutMs > 0) {
-    timers.push(
-      setTimeout(() => {
-        controller.abort(
-          new Error(`agent HTTP request timed out after ${timeoutMs}ms`)
-        );
-      }, timeoutMs)
-    );
-  }
-  return {
-    signal: controller.signal,
-    cleanup: () => {
-      external?.removeEventListener("abort", onAbort);
-      for (const timer of timers) clearTimeout(timer);
-    },
-  };
 }

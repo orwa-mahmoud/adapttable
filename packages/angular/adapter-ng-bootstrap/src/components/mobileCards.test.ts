@@ -14,8 +14,9 @@ import { rowActions } from "@adapttable/ng-bootstrap/row-actions";
 import { rowAppearance } from "@adapttable/ng-bootstrap/row-appearance";
 import { rowDetail } from "@adapttable/ng-bootstrap/row-detail";
 import { rowReorder } from "@adapttable/ng-bootstrap/row-reorder";
+import { selection } from "@adapttable/ng-bootstrap/selection";
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, input, signal } from "@angular/core";
+import { Component, computed, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -154,9 +155,8 @@ class Detail {
       [dir]="dir()"
       [urlSync]="false"
       [forceMobile]="mobile()"
-      [selectable]="selectable()"
       [maxHeight]="maxHeight()"
-      [features]="features()"
+      [features]="shownFeatures()"
       [classNames]="classes()"
       [renderCard]="
         bodyKind() === 'template'
@@ -193,6 +193,9 @@ class Host {
   readonly features = input<readonly AdaptTableFeature[]>([]);
   readonly mobile = input(true);
   readonly selectable = input(true);
+  readonly shownFeatures = computed(() =>
+    this.selectable() ? [selection(), ...this.features()] : this.features()
+  );
   readonly maxHeight = input<number | string>();
   readonly bodyKind = input<"template" | "component">();
   readonly actionsKind = input<"template" | "component">();

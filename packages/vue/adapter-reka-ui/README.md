@@ -73,8 +73,9 @@ const features = [filters<Person>([{ key: "name", type: "text" }])];
 ```
 
 Generic row types flow into column renderers, slots, row keys and update events.
-Selection supports `v-model:selected-ids`; a controlled host can reject an update
-without leaving the checkbox showing an unaccepted state.
+Compose `selection({ selectedIds, onSelectionChange })`. A controlled host
+can reject an update by leaving `selectedIds` unchanged, without the checkbox
+showing an unaccepted state.
 
 ## Rendering and styling
 

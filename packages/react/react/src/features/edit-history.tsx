@@ -2,20 +2,45 @@
  * Edit history — `@adapttable/<kit>/editing`.
  *
  * The undo stack lives on this entry. A table that never imports it never
- * records gestures. The hook mounts in-tree through `EDIT_HISTORY_LIVE`.
+ * records gestures. The hook mounts in-tree as the `EDIT_HISTORY_STAGE`
+ * chrome stage, before the stages that edit.
  */
+import { type BatchEditHandler, type EditHistoryState } from "@adapttable/core";
 import { coreEditHistory } from "@adapttable/core/binding";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
+import type { ColumnDef } from "../columnDef";
 import { asBatchGesture, useTableEditHistory } from "../editing/editHistory";
 import type { EditHistoryHandle, EditHistoryOptions } from "../props";
+import { FeatureStateScope } from "./featureState";
 import { slotRender } from "./providers";
 import {
-  EDIT_HISTORY_LIVE,
-  type EditHistoryLiveDraw,
-  type EditHistoryLiveSlotProps,
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  EDIT_HISTORY_STAGE,
 } from "./slotKeys";
+import { EDIT_HISTORY_STATE } from "./stateKeys";
 import type { StaticTableFeature } from "./tableFeature";
+
+/** What the recorder reads, and what it hands the table. */
+interface EditHistoryRecorderProps<TRow> {
+  /** History options from the composed feature or the prop. */
+  readonly editHistory: boolean | EditHistoryOptions | undefined;
+  /** Columns, for reading a cell's value before it changes. */
+  readonly columns: readonly ColumnDef<TRow>[];
+  /** The host's commit channel. */
+  readonly onCellEdit:
+    ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
+  /** The host's batch channel, recorded as one gesture per batch. */
+  readonly onBatchEdit: BatchEditHandler<TRow> | undefined;
+  /** The table; receives history and the recording commit channels. */
+  readonly children: (result: {
+    history: EditHistoryState<TRow>;
+    onCellEdit:
+      ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
+    onBatchEdit?: BatchEditHandler<TRow>;
+  }) => ReactNode;
+}
 
 function LiveEditHistory<TRow>({
   children,
@@ -23,7 +48,7 @@ function LiveEditHistory<TRow>({
   columns,
   onCellEdit,
   onBatchEdit,
-}: EditHistoryLiveSlotProps<TRow>): ReactNode {
+}: EditHistoryRecorderProps<TRow>): ReactNode {
   const result = useTableEditHistory({
     editHistory,
     columns,
@@ -39,6 +64,38 @@ function LiveEditHistory<TRow>({
     ...result,
     onBatchEdit: asBatchGesture(onBatchEdit, result.history.record),
   });
+}
+
+/**
+ * The history as a chrome stage: records edits, and hands the stages after it
+ * and the table the recording commit channels and the undo state.
+ */
+function EditHistoryStage<TRow>({
+  chrome,
+  props,
+  children,
+}: Readonly<ChromeExtraSlotProps<TRow>>): ReactNode {
+  return (
+    <LiveEditHistory
+      editHistory={props.editHistory}
+      columns={chrome.allColumns}
+      onCellEdit={props.onCellEdit}
+      onBatchEdit={props.onBatchEdit}
+    >
+      {(result) => (
+        <FeatureStateScope
+          stateKey={EDIT_HISTORY_STATE}
+          value={result.history as EditHistoryState<unknown>}
+        >
+          {children(chrome, {
+            ...props,
+            onCellEdit: result.onCellEdit,
+            onBatchEdit: result.onBatchEdit ?? props.onBatchEdit,
+          })}
+        </FeatureStateScope>
+      )}
+    </LiveEditHistory>
+  );
 }
 
 /**
@@ -94,8 +151,8 @@ export function editHistory(
   return {
     ...coreEditHistory(options),
     renders: [
-      slotRender<EditHistoryLiveDraw>(EDIT_HISTORY_LIVE, (props) => (
-        <LiveEditHistory {...props} />
+      slotRender<ChromeExtraDraw>(EDIT_HISTORY_STAGE, (props) => (
+        <EditHistoryStage {...props} />
       )),
     ],
   };

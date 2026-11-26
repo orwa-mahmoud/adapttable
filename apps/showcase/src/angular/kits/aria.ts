@@ -49,6 +49,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/angular-aria/saved-views";
+import { selection } from "@adapttable/angular-aria/selection";
 import { selectionStats } from "@adapttable/angular-aria/selection-stats";
 import { sidePanel } from "@adapttable/angular-aria/side-panel";
 import { statusBar } from "@adapttable/angular-aria/status-bar";
@@ -104,6 +105,7 @@ export const kit = {
   commandPalette,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   rowAppearance,
   statusBar,

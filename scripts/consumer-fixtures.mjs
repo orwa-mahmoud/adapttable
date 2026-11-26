@@ -66,6 +66,7 @@ export const ADAPTER_ABSENT = [
   "buildExportTable",
   "useFilterTreeChips",
   "matchKeySet",
+  "cellNavigationInput",
   "useRowPinningUrlState",
   "useTableEditHistory",
   "beginCellEdit",
@@ -76,6 +77,10 @@ export const ADAPTER_ABSENT = [
   "header-rename-form",
   // A development warning: the production build packs none of their text.
   "no data tier provided",
+  // A table over `data` carries no server tier.
+  "useServerData",
+  "createLazyServerSource",
+  "serverQuery",
 ];
 
 /** Unique identifier that proves a feature entry actually entered the graph. */
@@ -135,13 +140,23 @@ function adapterOf(kit) {
  * Core engines a consumer of one named primitive must not download: the
  * table engine, pivot, formula, the export writers and the filter-tree codec.
  */
-const UNRELATED_CORE_ENGINES = [
+/** Engines on core's main entry. */
+const ROOT_CORE_ENGINES = [
   "createTableEngine",
-  "PIVOT_BLANK",
-  "parseFormula",
   "buildExportTable",
-  "xlsxWriter",
   "parseFilterTree",
+];
+
+/** Engines only their own entries serve (`/pivot`, `/formula`). */
+const SPECIALTY_CORE_ENGINES = ["columnTreeOf", "parseFormula"];
+
+// The Excel writer is reachable from the main entry only lazily, through
+// `deferredXlsxWriter`, so it is absent from a small graph but not from the
+// whole surface.
+const UNRELATED_CORE_ENGINES = [
+  ...ROOT_CORE_ENGINES,
+  ...SPECIALTY_CORE_ENGINES,
+  "xlsxWriter",
 ];
 
 /**
@@ -149,7 +164,7 @@ const UNRELATED_CORE_ENGINES = [
  * 0.59 KiB, `columnAriaSort` 0.39 KiB, the engine with a lazy XLSX writer
  * 9.87 KiB initial and 13.44 KiB total, MUI grouping + aggregation 80.27 KiB.
  */
-const PRIMITIVE_CEILINGS = { applyRowPatches: 1, columnAriaSort: 1 };
+const PRIMITIVE_CEILINGS = { applyRowPatches: 2, columnAriaSort: 1 };
 const XLSX_LAZY_CEILINGS = { initialKB: 12, totalKB: 16 };
 const GROUPING_AGGREGATION_CEILING_KB = 93;
 
@@ -207,10 +222,10 @@ const CORE_FIXTURES = [
     name: "core · basic table",
     kind: "core",
     pkg: "core",
-    // 4.65 KiB on 2026-11-05, held with headroom. The convenience engine
-    // beside it measured 10.34 KiB in the same run.
-    initialKB: 6,
-    totalKB: 6,
+    // 6.016 KiB on 2026-11-25 after the rekey log. The ceiling is that
+    // measurement plus the 15% headroom.
+    initialKB: 7,
+    totalKB: 7,
     code: `export { createBasicTableEngine } from "PKG";`,
     present: ["createBasicTableEngine"],
     absent: [
@@ -231,6 +246,7 @@ const CORE_FIXTURES = [
     name: "core · base navigation",
     kind: "core",
     pkg: "core",
+    entryFile: "binding.js",
     // 7.40 KiB gzip on 2026-11-06. Held at 9 KiB. Range, clipboard, fill
     // and history stay out of this graph.
     initialKB: 9,
@@ -307,13 +323,20 @@ const CORE_FIXTURES = [
     // controllers and state machines every binding drives, and the shared
     // behaviours the bindings would otherwise copy. A table bundles only the
     // names it imports, so this row tracks the surface, not a table's cost.
-    initialKB: 107,
-    totalKB: 107,
+    // The total also holds the PDF and Excel builders, which the main entry
+    // reaches only lazily through `deferredPdfWriter` / `deferredXlsxWriter`.
+    // Packed 2026-11-22: 47.2 KiB initial, 58.5 KiB total.
+    initialKB: 55,
+    totalKB: 68,
     code: `export * from "PKG";`,
     // The engines a named primitive must not carry are real identifiers of
     // the full graph, so their absence there is a finding, not a typo.
-    present: [...UNRELATED_CORE_ENGINES, "defaultLabels", "resolveLabels"],
-    absent: ["useRowPatchStream", "grouping-drop-zone"],
+    present: [...ROOT_CORE_ENGINES, "defaultLabels", "resolveLabels"],
+    absent: [
+      ...SPECIALTY_CORE_ENGINES,
+      "useRowPatchStream",
+      "grouping-drop-zone",
+    ],
   },
   {
     name: "core · pivot",
@@ -323,6 +346,7 @@ const CORE_FIXTURES = [
     initialKB: 5,
     totalKB: 5,
     code: `export { pivot } from "PKG";`,
+    present: ["columnTreeOf"],
   },
   {
     name: "core · formula",
@@ -332,6 +356,7 @@ const CORE_FIXTURES = [
     initialKB: 6,
     totalKB: 6,
     code: `export { buildFormulaColumns } from "PKG";`,
+    present: ["parseFormula"],
   },
   {
     name: "core · stream",
@@ -359,7 +384,7 @@ const CORE_FIXTURES = [
     absent: [
       "useState",
       "useSyncExternalStore",
-      "PIVOT_BLANK",
+      "columnTreeOf",
       "toCsv",
       "parseFormula",
     ],
@@ -455,7 +480,7 @@ const CORE_FIXTURES = [
     initialKB: 5,
     totalKB: 5,
     code: `export { parseTableQuery } from "PKG";`,
-    absent: ["useState", "PIVOT_BLANK", "toCsv"],
+    absent: ["useState", "columnTreeOf", "toCsv"],
     node: [
       `import { parseTableQuery } from "PKG";`,
       `const query = parseTableQuery("?page=2&limit=10&sort=name", { columns: ["name"] });`,
@@ -580,10 +605,10 @@ const REACT_FIXTURES = [
     kind: "react",
     pkg: "react",
     entryFile: "features.js",
-    // The grouping feature carries the full evaluator (createTableEngine) a
-    // plain table no longer ships: 15.0 KB before that move, 20.2 KiB after.
-    initialKB: 21,
-    totalKB: 21,
+    // The grouping feature carries the full evaluator. Measured 21.04 KiB on
+    // 2026-11-24; the ceiling is that figure plus the tool's 15% headroom.
+    initialKB: 25,
+    totalKB: 25,
     code: `export { groupingPanel } from "PKG";`,
     present: ["groupingPanel"],
   },
@@ -608,21 +633,83 @@ const REACT_FIXTURES = [
   },
 ];
 
+/**
+ * Plain React tables, 2026-11-24, plus the tool's 15% headroom.
+ * `base-ui` would round to 81 KiB, which is past the 80 KiB cap, so it stays
+ * on the cap. Total is the same rule on the whole transfer, including a
+ * locale preset when the kit loaded one.
+ */
+const REACT_PLAIN_CEILINGS = {
+  mantine: { initialKB: 73, totalKB: 73 },
+  mui: { initialKB: 73, totalKB: 73 },
+  chakra: { initialKB: 77, totalKB: 84 },
+  antd: { initialKB: 77, totalKB: 85 },
+  radix: { initialKB: 75, totalKB: 75 },
+  "base-ui": { initialKB: 80, totalKB: 81 },
+  unstyled: { initialKB: 73, totalKB: 73 },
+  shadcn: { initialKB: 78, totalKB: 78 },
+};
+
+/** `DataTable` plus `standardFeatures()`, same measurement and headroom. */
+const REACT_FULL_CEILINGS = {
+  mantine: { initialKB: 145, totalKB: 145 },
+  mui: { initialKB: 144, totalKB: 144 },
+  chakra: { initialKB: 147, totalKB: 154 },
+  antd: { initialKB: 147, totalKB: 154 },
+  radix: { initialKB: 146, totalKB: 146 },
+  "base-ui": { initialKB: 152, totalKB: 152 },
+  unstyled: { initialKB: 145, totalKB: 145 },
+  shadcn: { initialKB: 151, totalKB: 151 },
+};
+
 function adapterBaseFixtures() {
   return ADAPTERS.map(({ kit, pkg }) => ({
     name: `${kit} · table`,
     kind: "adapter-base",
     kit,
     pkg,
-    initialKB: adapterAcceptanceKB(kit),
-    totalKB: adapterAcceptanceKB(kit) + LAZY_LOCALE_PRESET_KB,
+    ...REACT_PLAIN_CEILINGS[kit],
     item1BaselineKB: ITEM1_ADAPTER_BASELINE_KB[kit],
     code: `export { DataTable } from "PKG";`,
     // A kit that loads locales lazily carries every string in its English
     // locale chunk, so only a base table without one can name them absent.
-    absent:
-      kit === "mui" ? [...ADAPTER_ABSENT, "defaultLabels"] : ADAPTER_ABSENT,
+    absent: [
+      ...ADAPTER_ABSENT,
+      ...(kit === "mui" ? ["defaultLabels"] : []),
+      "contextMenuCopyTarget",
+      "AGENT_APPROVAL_STATE",
+      // A string only its feature's labels carry. Chakra and antd load their
+      // library's locale, whose English chunk holds every string.
+      ...(kit === "chakra" || kit === "antd"
+        ? []
+        : ["Cross-boundary row moves"]),
+      // High-contrast rules that only cell navigation, find and the editing
+      // features carry.
+      "data-cell-selected] {",
+      "data-cell-match-current] {",
+      "data-changed]:not",
+    ],
   }));
+}
+
+/**
+ * A table served by a server source: the plain table plus the server tier
+ * (`useServerData`, the request builder, and the engine behind a dynamic
+ * import). Packed measurement of 2026-11-22 with ~15% headroom: 64.3 KiB
+ * initial, 68.4 KiB total.
+ */
+function serverTableFixture() {
+  const { pkg } = adapterOf("unstyled");
+  return {
+    name: "unstyled · server table",
+    kind: "adapter-server",
+    kit: "unstyled",
+    pkg,
+    initialKB: 74,
+    totalKB: 79,
+    code: `export { DataTable, useServerData } from "PKG";`,
+    present: ["useServerData", "createLazyServerSource", "serverQuery"],
+  };
 }
 
 function presetFixtures() {
@@ -643,8 +730,7 @@ function presetFixtures() {
       kit,
       pkg,
       alsoEntryFile: "preset.js",
-      initialKB: 160,
-      totalKB: 160,
+      ...REACT_FULL_CEILINGS[kit],
       code: `export { DataTable } from "PKG";\nexport { standardFeatures } from "ALSO";`,
     },
   ]);
@@ -775,9 +861,8 @@ function combinationFixtures() {
 }
 
 /**
- * The table and the kit's features barrel: every feature factory the binding
- * exports through the kit. It names the factories, not each feature's native
- * UI, which loads from the feature's own entry.
+ * The table plus every headless factory. Those factories are published from
+ * the binding's `/features` entry. A kit does not publish a second barrel.
  */
 function featuresBarrelFixture() {
   const { pkg } = adapterOf(DELTA_KIT);
@@ -786,10 +871,9 @@ function featuresBarrelFixture() {
     kind: "all-features",
     kit: DELTA_KIT,
     pkg,
-    alsoEntryFile: "features.js",
     initialKB: 220,
     totalKB: 220,
-    code: `export { DataTable } from "PKG";\nexport * from "ALSO";`,
+    code: `export { DataTable } from "PKG";\nexport * from "@adapttable/react/features";`,
   };
 }
 
@@ -830,6 +914,7 @@ const existingFixtures = [
   ...CORE_FIXTURES,
   ...REACT_FIXTURES,
   ...adapterBaseFixtures(),
+  serverTableFixture(),
   ...presetFixtures(),
   ...featureDeltaFixtures(),
   ...composedFiltersFixtures(),
@@ -884,7 +969,7 @@ export function plantedLeakFixture() {
     name: "planted leak · antd + useTableEditHistory",
     kind: "planted-leak",
     pkg: "adapter-antd",
-    code: `export { DataTable } from "PKG";\nexport { useTableEditHistory, asBatchGesture } from "@adapttable/react";`,
+    code: `export { DataTable } from "PKG";\nexport { useTableEditHistory } from "@adapttable/react/adapter";\nexport { asBatchGesture } from "@adapttable/react";`,
     absent: ["useTableEditHistory", "asBatchGesture"],
   };
 }

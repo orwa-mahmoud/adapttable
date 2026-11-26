@@ -1,5 +1,5 @@
+import { deferredPdfWriter } from "@adapttable/core";
 /** Optional PDF export; the writer stays outside the base and CSV entries. */
-import { pdfWriter } from "@adapttable/core/pdf";
 import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
 
 import { exportCsv, type ExportCsvOptions } from "./export-csv";
@@ -18,6 +18,6 @@ export function exportPdf<TRow>(
   return exportCsv<TRow>(
     options === false
       ? false
-      : { ...(options === true ? {} : options), writer: pdfWriter() }
+      : { ...(options === true ? {} : options), writer: deferredPdfWriter() }
   );
 }

@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
-import { getLabels } from "../packages/shared/i18n/src/index";
+import { getLabels } from "../packages/shared/i18n/src/catalog";
 import { ANGULAR_KITS, angularPart } from "./angular-kit";
 
 const positionedKits = ANGULAR_KITS.filter((kit) =>

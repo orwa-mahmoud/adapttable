@@ -2,26 +2,21 @@
  * The server tier's engine loads on demand: the first server table shows the
  * host's rows and its loading state at once and sends its first query while
  * the engine travels; a query that asks for aggregates follows the engine. A
- * table that is not on the server tier never loads it.
+ * table over `data` never loads it.
  */
 import {
   createMemoryAdapter,
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
-import {
-  Component,
-  computed,
-  ErrorHandler,
-  type Signal,
-  signal,
-} from "@angular/core";
+import { Component, ErrorHandler, type Signal, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type * as LazyServerSourceModule from "../../../../shared/core/src/source/lazyServerSource";
 import { ADAPTTABLE_URL_ADAPTER } from "../url/tableUrlState";
-import { injectServerData, injectServerTier } from "./serverData";
+import { injectServerData } from "./serverData";
+import { injectTableData } from "./tableData";
 
 const engine = vi.hoisted(() => ({
   imports: 0,
@@ -95,27 +90,13 @@ class AggregateHost {
   });
 }
 
-const serving = signal(false);
-
 @Component({ template: "" })
-class SwitchingHost {
-  readonly sent: TableQuery[] = [];
-  readonly source: Signal<TableSource<Row>> = injectServerTier<Row>(
-    {
-      rows: signal(ROWS),
-      total: signal(2),
-      forceMobile: true,
-      // The table hands the server tier its handler only while it serves.
-      onQueryChange: computed(() =>
-        serving()
-          ? (query: TableQuery) => {
-              this.sent.push(query);
-            }
-          : undefined
-      ),
-    },
-    serving
-  );
+class FrontendHost {
+  readonly source: Signal<TableSource<Row>> = injectTableData<Row>({
+    data: signal(ROWS),
+    columns: signal([{ key: "id", header: "Id" }]),
+    forceMobile: true,
+  }).source;
 }
 
 beforeEach(async () => {
@@ -124,7 +105,6 @@ beforeEach(async () => {
       resetEngine: () => void;
     };
   mocked.resetEngine();
-  serving.set(false);
   TestBed.configureTestingModule({
     providers: [
       { provide: ADAPTTABLE_URL_ADAPTER, useValue: createMemoryAdapter() },
@@ -168,21 +148,12 @@ describe("the server engine on demand", () => {
     expect(host.source().groupAggregations).toEqual({ id: "count" });
   });
 
-  it("loads the engine only while the table is on the server tier", async () => {
-    const fixture = TestBed.createComponent(SwitchingHost);
+  it("never loads the engine for a table over data", async () => {
+    const fixture = TestBed.createComponent(FrontendHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const host = fixture.componentInstance;
-    expect(host.source().rows).toEqual(ROWS);
+    expect(fixture.componentInstance.source().rows).toEqual(ROWS);
     expect(engine.imports).toBe(0);
-
-    serving.set(true);
-    await fixture.whenStable();
-    expect(engine.imports).toBe(1);
-    expect(host.sent).toHaveLength(1);
-    engine.release();
-    await fixture.whenStable();
-    expect(host.sent).toHaveLength(1);
   });
 
   it("reports a failed load to Angular's error handler", async () => {

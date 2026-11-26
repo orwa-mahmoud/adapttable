@@ -1,3 +1,4 @@
+import { loadEditConflictStore } from "@adapttable/core/binding";
 import { formatMultiDraft } from "@adapttable/core/editing";
 import {
   act,
@@ -6,9 +7,12 @@ import {
   renderHook,
   screen,
 } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
+import { batchEditing } from "../features/editing";
+import { FeatureProviders } from "../features/providers";
+import { applyTableFeatures } from "../features/tableFeature";
 import { editableCellTestSlots } from "../internal/chromeTestSlots";
 import { useBatchEditing } from "./batchEditing";
 import { focusEditorOnMount } from "./editableCellController";
@@ -23,6 +27,12 @@ import {
 import { useEditConflict } from "./editConflict";
 import { useCellSaveState } from "./saveState";
 import { useCellEditing } from "./useCellEditing";
+
+// The conflict store loads when an edit first opens; these specs are about
+// the question it asks, so it is loaded up front. Core covers the load.
+beforeAll(async () => {
+  await loadEditConflictStore();
+});
 
 interface Person {
   id: string;
@@ -200,29 +210,33 @@ describe("EditableCellGate", () => {
       }),
     }));
     render(
-      <EditableCellGate
-        slots={editableCellTestSlots}
-        editing={{
-          onCellEdit,
-          state: result.current.state,
-          batch: result.current.batch,
-        }}
-        row={ROW}
-        column={COLS[0]!}
-        rowId="1"
-        rows={[ROW]}
-        columns={COLS}
-        rowKey={(r) => r.id}
-        editLabel="Edit cell"
-        display={<span>{ROW.name}</span>}
-        renderEditor={(ctrl) => (
-          <input
-            aria-label="Edit cell"
-            value={ctrl.draft}
-            onChange={(event) => ctrl.setDraft(event.target.value)}
-          />
-        )}
-      />
+      <FeatureProviders
+        props={applyTableFeatures({ features: [batchEditing(vi.fn())] })}
+      >
+        <EditableCellGate
+          slots={editableCellTestSlots}
+          editing={{
+            onCellEdit,
+            state: result.current.state,
+            batch: result.current.batch,
+          }}
+          row={ROW}
+          column={COLS[0]!}
+          rowId="1"
+          rows={[ROW]}
+          columns={COLS}
+          rowKey={(r) => r.id}
+          editLabel="Edit cell"
+          display={<span>{ROW.name}</span>}
+          renderEditor={(ctrl) => (
+            <input
+              aria-label="Edit cell"
+              value={ctrl.draft}
+              onChange={(event) => ctrl.setDraft(event.target.value)}
+            />
+          )}
+        />
+      </FeatureProviders>
     );
     expect(
       document.querySelector('[data-adapttable-part="batch-edit-cell"]')

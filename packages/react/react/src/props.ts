@@ -16,6 +16,10 @@ import {
   type TableOptions,
   type TableToolbarSlots,
 } from "@adapttable/core";
+import type {
+  FeatureListEntry,
+  FeatureOwnedOptionKey,
+} from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import type { CommandPaletteOptions } from "./actions/useCommandPalette";
@@ -138,9 +142,20 @@ export interface DirtyEdits {
  *
  * @public
  */
-export interface FeatureProps<TRow> {
+export interface FeatureProps<TRow> extends Pick<
+  TableOptions<TRow, ReactNode>,
+  FeatureOwnedOptionKey
+> {
   /** The strings the composed features draw, set by the features. */
   featureLabels?: readonly Partial<TableLabels>[];
+  /** The id a row is selected by, set by `selection()`; else the row key. */
+  selectionGetId?: (row: TRow) => string;
+  /** The host's selection, set by `selection()`. */
+  selectedIds?: readonly string[];
+  /** The table's own selection to start from, set by `selection()`. */
+  defaultSelectedIds?: readonly string[];
+  /** The selection changed, set by `selection()`. */
+  onSelectionChange?: (selectedIds: string[]) => void;
   /**
    * Saved views: capture the table's current URL state under a name and
    * re-apply it on demand. Setting this renders a Saved-views menu in the
@@ -654,9 +669,9 @@ export type ComposedTableProps<TRow> = BaseDataTableProps<TRow> &
  *
  * @public
  */
-export interface BaseDataTableProps<TRow> extends TableOptions<
-  TRow,
-  ReactNode
+export interface BaseDataTableProps<TRow> extends Omit<
+  TableOptions<TRow, ReactNode>,
+  FeatureOwnedOptionKey
 > {
   /** Column definitions. A parent with `children` is a column group. */
   columns: ColumnInput<TRow>[];
@@ -668,12 +683,13 @@ export interface BaseDataTableProps<TRow> extends TableOptions<
    * See [feature composition](https://adapttable.orwamahmoud.com/react/features/).
    *
    * Built-in factories and host plugins are the same {@link TableFeature}
-   * type in this one array.
+   * type in this one array. A family — every member of an area, built by one
+   * call such as a kit's `editingFamily(save)` — is passed as one entry.
    */
   // `NoInfer` so a factory that cannot work out the row type — `grouping("team")`,
   // `virtualize()` — does not offer `unknown` as a candidate and pin the whole
   // table to it, rejecting its own `columns` and `rowKey`.
-  features?: readonly TableFeature<NoInfer<TRow>>[];
+  features?: readonly FeatureListEntry<TableFeature<NoInfer<TRow>>>[];
   /**
    * Replace a mobile card's body with your own layout.
    *

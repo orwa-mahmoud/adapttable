@@ -189,6 +189,41 @@ describe("extraCoveredTableSlots", () => {
     });
     expect([...slots]).toEqual([3]);
   });
+
+  it("covers each extra a span crosses, and reads new extras or chrome again", () => {
+    const visualIds = ["a", "b", "c", "d"];
+    const cellsByRow = new Map([
+      ["a", [{ columnIndex: 0, colSpan: 2, rowSpan: 4 }]],
+      ["b", [{ columnIndex: 3, colSpan: 1, rowSpan: 2 }]],
+      ["c", []],
+      ["d", []],
+    ]);
+    const extras = [
+      { key: "x", kind: "fullWidth" as const, beforeRowId: "b" },
+      { key: "y", kind: "fullWidth" as const, beforeRowId: "c" },
+      { key: "z", kind: "fullWidth" as const, beforeRowId: "c" },
+      { key: "t", kind: "fullWidth" as const },
+    ];
+    const read = (
+      anchor: string,
+      extraRows: typeof extras,
+      leadingCells = 1
+    ) => [
+      ...extraCoveredTableSlots(anchor, {
+        visualIds,
+        cellsByRow,
+        extraRows,
+        leadingCells,
+      }),
+    ];
+    expect(read("b", extras)).toEqual([1, 2]);
+    // Two extras in front of c: a's span and b's span cross both.
+    expect(read("c", extras).sort((x, y) => x - y)).toEqual([1, 2, 4]);
+    expect(read("d", extras)).toEqual([]);
+    // The same cells with other extras or other leading chrome read again.
+    expect(read("b", extras.slice(1))).toEqual([]);
+    expect(read("c", extras, 3).sort((x, y) => x - y)).toEqual([3, 4, 6]);
+  });
 });
 
 describe("extraUncoveredColSpans", () => {
@@ -213,6 +248,32 @@ describe("extraHostFillStyle", () => {
     expect(fill).toEqual({
       backgroundColor: "light-dark(#ffe, #432)",
     });
+  });
+
+  it("finds each extra's host in the current rows and identity", () => {
+    const extras = [
+      { key: "x", kind: "fullWidth" as const, beforeRowId: "a" },
+      { key: "y", kind: "fullWidth" as const, beforeRowId: "c" },
+    ];
+    const fillOf = (
+      key: string,
+      rows: { id: string; name: string }[],
+      getRowId: (row: { id: string; name: string }) => string
+    ) =>
+      extraHostFillStyle(key, extras, rows, getRowId, (row, index) => ({
+        background: `${row.name}@${String(index)}`,
+      }));
+    const rows = [
+      { id: "a", name: "Ada" },
+      { id: "b", name: "Bea" },
+      { id: "c", name: "Cy" },
+    ];
+    const byId = (row: { id: string }) => row.id;
+    expect(fillOf("x", rows, byId)).toEqual({ background: "Ada@0" });
+    expect(fillOf("y", rows, byId)).toEqual({ background: "Cy@2" });
+    const moved = [rows[2]!, rows[0]!];
+    expect(fillOf("y", moved, byId)).toEqual({ background: "Cy@0" });
+    expect(fillOf("x", rows, (row) => row.name)).toBeUndefined();
   });
 
   it("is empty when the extra has no person", () => {

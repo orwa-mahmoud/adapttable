@@ -161,7 +161,7 @@ import { multiSort } from "@adapttable/angular-unstyled/multi-sort";
 const features = [columnMenu(), multiSort()];
 ```
 
-`standardPreset()` from the kit's `/preset` entry is a convenient larger
+`standardFeatures()` from the kit's `/preset` entry is a convenient larger
 composition. See [Features](./features.md) for its exact members and the
 individual imports.
 
@@ -196,13 +196,14 @@ providers and stylesheets.
 ## Data and callbacks
 
 The host owns the rows. Replace the array held by `people` after a successful
-write; a renderer does not become your database. For remote data, use
-`[onQueryChange]` with host-owned rows, total, loading and error signals, or
-pass a prebuilt source through `[source]`.
+write; a renderer does not become your database. For remote data, build an
+`injectServerData` source over host-owned rows, total, loading and error
+signals, or any other source, and pass it through `[source]`.
 
-Callback inputs such as `onQueryChange` and `onRowClick` use square brackets.
-Actual outputs such as `(selectionChange)` and `(columnLayoutChange)` use
-parentheses. Keep callback functions stable on the component.
+Callback inputs such as `onViewChange` and `onRowClick` use square brackets.
+Outputs such as `(columnLayoutChange)` use parentheses. Row selection is
+`selection()` from the kit's `/selection` entry, including the ids the host
+holds and `onSelectionChange`. Keep callback functions stable on the component.
 
 Continue with [Data tiers](./data-tiers.md), [Columns](./columns.md),
 [Accessibility](./accessibility.md), or the

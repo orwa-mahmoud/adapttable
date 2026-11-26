@@ -1,5 +1,7 @@
 import Vue = require("vue");
-import Native = require("@adapttable/vue-unstyled/features");
+import EditingKit = require("@adapttable/vue-unstyled/editing");
+import Filters = require("@adapttable/vue-unstyled/filters");
+import HeaderFilters = require("@adapttable/vue-unstyled/header-filters");
 import Editing = require("@adapttable/vue/adapter");
 interface Row {
   id: string;
@@ -15,13 +17,13 @@ function render(props: {
   header: Editing.HeaderFilterOptions<Row>;
 }) {
   return [
-    Vue.h(Native.NativeEditableCell<Row>, props.cell),
-    Vue.h(Native.NativeRowEditActions<Row>, props.row),
-    Vue.h(Native.NativeBatchEditBar<Row>, props.batch),
-    Vue.h(Native.NativeFilterField<Row>, props.field),
-    Vue.h(Native.ChecklistFilter<Row>, props.checklist),
-    Vue.h(Native.FilterTreeBuilder<Row>, props.tree),
-    Vue.h(Native.NativeHeaderFilter<Row>, props.header),
+    Vue.h(EditingKit.NativeEditableCell<Row>, props.cell),
+    Vue.h(EditingKit.NativeRowEditActions<Row>, props.row),
+    Vue.h(EditingKit.NativeBatchEditBar<Row>, props.batch),
+    Vue.h(Filters.NativeFilterField<Row>, props.field),
+    Vue.h(Filters.ChecklistFilter<Row>, props.checklist),
+    Vue.h(Filters.FilterTreeBuilder<Row>, props.tree),
+    Vue.h(HeaderFilters.NativeHeaderFilter<Row>, props.header),
   ];
 }
 export = render;

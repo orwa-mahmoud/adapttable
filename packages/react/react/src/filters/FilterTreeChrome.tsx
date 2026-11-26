@@ -3,7 +3,6 @@
  * Input and Button the end user clicks. Core does not draw form controls.
  */
 import {
-  defaultFilterRegistry,
   type FilterDef,
   type FilterTypeRegistry,
   isFilterGroup,
@@ -13,7 +12,7 @@ import {
 import {
   type FeatureStrings,
   FILTER_LABELS,
-  type FilterTreeBuilderProps,
+  type FilterTreeBuilderProps as NeutralFilterTreeBuilderProps,
   type FilterTreeClassNames,
   filterTreeCombinatorOptions,
   type FilterTreeConditionModel,
@@ -28,7 +27,6 @@ import { type CSSProperties, type ReactNode, useState } from "react";
 const FILTER_GROUPS = [FILTER_LABELS] as const;
 
 export type {
-  FilterTreeBuilderProps,
   FilterTreeButtonProps,
   FilterTreeClassNames,
   FilterTreeInputProps,
@@ -97,7 +95,22 @@ const TREE_GROUP_NESTED: CSSProperties = {
 };
 
 /**
- * Props for {@link FilterTreeChrome}.
+ * Props a kit's filter-tree builder takes: the table's defs, source, labels
+ * and filter types.
+ *
+ * @public
+ */
+export interface FilterTreeBuilderProps<TRow> extends Omit<
+  NeutralFilterTreeBuilderProps<TRow>,
+  "registry"
+> {
+  /** The table's filter types: the ones its filters feature carries. */
+  readonly registry: FilterTypeRegistry;
+}
+
+/**
+ * Props for {@link FilterTreeChrome}: the builder's props and the kit's
+ * controls.
  *
  * @public
  */
@@ -423,7 +436,7 @@ export function FilterTreeChrome<TRow>({
   source,
   labels: labelOverrides,
   classNames = {},
-  registry = defaultFilterRegistry,
+  registry,
   slots,
   defaultExpanded,
 }: Readonly<FilterTreeChromeProps<TRow>>) {

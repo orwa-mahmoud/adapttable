@@ -12,6 +12,7 @@ import { PIVOT_LABELS } from "./labelGroups/pivotLabels";
 import { ROW_LABELS } from "./labelGroups/rowLabels";
 import { SAVED_VIEW_LABELS } from "./labelGroups/savedViewLabels";
 import { VIEW_CONTROL_LABELS } from "./labelGroups/viewControlLabels";
+import { VIRTUALIZE_LABELS } from "./labelGroups/virtualizeLabels";
 import type { TableLabels } from "./types";
 
 /**
@@ -34,11 +35,12 @@ export const defaultLabels: Required<TableLabels> = /* @__PURE__ */ allLabels(
   GROUPING_LABELS,
   COLUMN_MENU_LABELS,
   ACTION_LABELS,
-  VIEW_CONTROL_LABELS
+  VIEW_CONTROL_LABELS,
+  VIRTUALIZE_LABELS
 );
 
 /**
- * Merge caller overrides over {@link defaultLabels}. Undefined entries in
+ * Merge caller overrides over `defaultLabels`. Undefined entries in
  * the override are ignored, so partial `labels` objects are safe.
  *
  * @param overrides - A partial set of label overrides.

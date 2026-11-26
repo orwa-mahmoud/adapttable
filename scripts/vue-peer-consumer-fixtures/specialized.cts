@@ -8,7 +8,6 @@ import stream = require("@adapttable/vue/stream");
 import sparkline = require("@adapttable/vue/sparkline");
 import savedViews = require("@adapttable/vue-unstyled/saved-views");
 import bindingFeatures = require("@adapttable/vue/features");
-import nativeFeatures = require("@adapttable/vue-unstyled/features");
 interface Row {
   id: string;
   team: string;
@@ -20,7 +19,7 @@ type Equal<A, B> =
     : false;
 type Expect<T extends true> = T;
 const groupingTypeIsCanonical: Expect<
-  Equal<nativeFeatures.GroupingExtras<Row>, bindingFeatures.GroupingExtras<Row>>
+  Equal<grouping.GroupingExtras<Row>, bindingFeatures.GroupingExtras<Row>>
 > = true;
 const specialized: NonNullable<native.DataTableProps<Row>["features"]> = [
   virtual.virtualize({ maxHeight: 360 }),

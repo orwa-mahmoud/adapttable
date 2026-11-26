@@ -25,5 +25,9 @@ export type {
   FeatureProviderProps,
   FeatureRender,
 } from "./features/providers";
-export type { TableFeature, TableFeatureHost } from "./features/tableFeature";
+export type {
+  TableFeature,
+  TableFeatureHost,
+  TableFeatureMountContext,
+} from "./features/tableFeature";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";

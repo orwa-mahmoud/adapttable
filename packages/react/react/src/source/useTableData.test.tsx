@@ -1,13 +1,12 @@
 import { type FilterDef } from "@adapttable/core";
 import { resetDevWarnings } from "@adapttable/core/binding";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import { createMemoryAdapter } from "../url/adapter";
-import { useFrontendData } from "./useFrontendData";
-import { type TableQuery, useServerData } from "./useServerData";
-import { type DataModeProps, useTableData } from "./useTableData";
+import { useServerData } from "./useServerData";
+import { useTableData } from "./useTableData";
 
 interface Row {
   id: string;
@@ -273,28 +272,6 @@ describe("useTableData — tier resolution", () => {
     warn.mockRestore();
   });
 
-  it("warns when source is combined with onQueryChange too", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    const adapter = createMemoryAdapter("");
-    renderHook(() => {
-      const { source } = useTableData<Row>({
-        data: ROWS,
-        columns,
-        urlAdapter: adapter,
-      });
-      return useTableData<Row>({
-        source,
-        onQueryChange: vi.fn(),
-        columns,
-        urlAdapter: adapter,
-      });
-    });
-    expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining("using `source`")
-    );
-    warn.mockRestore();
-  });
-
   it("warns when no tier is provided at all", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     renderHook(() =>
@@ -307,16 +284,15 @@ describe("useTableData — tier resolution", () => {
   });
 });
 
-describe("useTableData — explicit mode", () => {
-  it("mode='frontend' keeps local processing and notifies without rerouting", async () => {
+describe("useTableData — frontend change notices", () => {
+  it("keeps local processing and tells onViewChange of each change", async () => {
     const onQueryChange = vi.fn();
     // limit=2 → two real pages, so a page change actually commits.
     const adapter = createMemoryAdapter("limit=2");
     const { result } = renderHook(() =>
       useTableData<Row>({
         data: ROWS,
-        mode: "frontend",
-        onQueryChange,
+        onViewChange: onQueryChange,
         columns,
         urlAdapter: adapter,
         paginationMode: "paged",
@@ -360,61 +336,22 @@ describe("useTableData — explicit mode", () => {
     );
   });
 
-  it("mode='server' selects the server tier explicitly", () => {
+  it("a server source fires its query on mount and passes rows through", () => {
     const onQueryChange = vi.fn();
     const adapter = createMemoryAdapter("");
-    const { result } = renderHook(() =>
-      useTableData<Row>({
-        data: ROWS,
+    const { result } = renderHook(() => ({
+      source: useServerData<Row>({
+        rows: ROWS,
         total: 30,
-        mode: "server",
         onQueryChange,
         columns,
         urlAdapter: adapter,
-      })
-    );
+      }),
+    }));
     // Server tier: rows pass through untouched, mount fire happens.
     expect(result.current.source.rows).toHaveLength(3);
     expect(result.current.source.total).toBe(30);
     expect(onQueryChange).toHaveBeenCalledTimes(1);
-  });
-
-  it("mode together with source dev-warns and source wins", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    resetDevWarnings();
-    const adapter = createMemoryAdapter("");
-    const { result } = renderHook(() => {
-      const prebuilt = useFrontendData<Row>({
-        data: ROWS,
-        urlAdapter: adapter,
-        columns,
-        paginationMode: "paged",
-      });
-      return useTableData<Row>({
-        source: prebuilt,
-        mode: "frontend",
-        columns,
-        urlAdapter: adapter,
-      });
-    });
-    expect(result.current.source.rows).toHaveLength(3);
-    expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining("`mode` is ignored when `source` is provided")
-    );
-    warn.mockRestore();
-    resetDevWarnings();
-  });
-
-  it("mode='server' without onQueryChange does not compile", () => {
-    // Compile-time contract: the union's server branch REQUIRES the
-    // handler; the frontend branch forbids mode="server".
-    expectTypeOf<{ mode: "server" }>().not.toExtend<DataModeProps<Row>>();
-    expectTypeOf<{
-      mode: "server";
-      onQueryChange: (q: TableQuery, i: { signal: AbortSignal }) => void;
-    }>().toExtend<DataModeProps<Row>>();
-    expectTypeOf<{ mode: "frontend" }>().toExtend<DataModeProps<Row>>();
-    expectTypeOf<object>().toExtend<DataModeProps<Row>>();
   });
 });
 
@@ -422,17 +359,17 @@ describe("useTableData / useServerData — server tier", () => {
   it("server mode with no rows yet starts empty and URL-enabled", () => {
     const onQueryChange = vi.fn();
     const adapter = createMemoryAdapter("");
-    const { result } = renderHook(() =>
-      useTableData<Row>({
-        // No `data` yet (first fetch still out) — rows default to [].
+    const { result } = renderHook(() => ({
+      source: useServerData<Row>({
+        rows: [],
         total: 0,
         loading: true,
         onQueryChange,
         columns,
         urlAdapter: adapter,
         urlSync: true,
-      })
-    );
+      }),
+    }));
     expect(result.current.source.rows).toEqual([]);
     expect(result.current.source.isLoading).toBe(true);
     expect(onQueryChange).toHaveBeenCalledTimes(1);
@@ -441,16 +378,16 @@ describe("useTableData / useServerData — server tier", () => {
   it("emits the URL-restored query once on mount with an abort signal", () => {
     const onQueryChange = vi.fn();
     const adapter = createMemoryAdapter("q=ali&f_status=active&page=2");
-    const { rerender } = renderHook(() =>
-      useTableData<Row>({
-        data: ROWS,
+    const { rerender } = renderHook(() => ({
+      source: useServerData<Row>({
+        rows: ROWS,
         total: 40,
         loading: false,
         onQueryChange,
         columns,
         urlAdapter: adapter,
-      })
-    );
+      }),
+    }));
     expect(onQueryChange).toHaveBeenCalledTimes(1);
     const [query, info] = onQueryChange.mock.calls[0]!;
     expect(query).toMatchObject({

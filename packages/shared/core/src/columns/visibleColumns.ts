@@ -26,25 +26,6 @@ export function visibleColumns<TCol extends ColumnMetadata<never>>(
   columns: readonly TCol[],
   layout: TableLayout
 ): TCol[];
-/**
- * Resolve the columns visible for a layout.
- *
- * @deprecated The third argument changes nothing: a card shows every column
- * without `hideOnMobile`, so `hideOnMobile` decides what a card shows. Call
- * `visibleColumns(columns, layout)`; the argument is removed in v4.
- *
- * @param columns - All declared columns.
- * @param layout - The current layout.
- * @param mobileIdentityColumns - Ignored.
- * @returns The columns to render, in declared order.
- *
- * @public
- */
-export function visibleColumns<TCol extends ColumnMetadata<never>>(
-  columns: readonly TCol[],
-  layout: TableLayout,
-  mobileIdentityColumns: number
-): TCol[];
 export function visibleColumns<TCol extends ColumnMetadata<never>>(
   columns: readonly TCol[],
   layout: TableLayout

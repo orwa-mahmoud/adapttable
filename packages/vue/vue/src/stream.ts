@@ -1,8 +1,6 @@
 /** Host-owned row updates, with resource ownership tied to the Vue scope. */
 import {
   applyRowPatches,
-  openRowPatchStream,
-  parseRowPatchFrame,
   type RowPatch,
   type RowPatchStreamHandle,
   type RowPatchStreamReconnect,
@@ -14,6 +12,11 @@ import {
   type ChangedCellFlashState,
   createChangedCellFlashStore,
 } from "@adapttable/core/binding";
+import {
+  openRowPatchStream,
+  parseRowPatchFrame,
+  STREAMED_ROW_PATCHES,
+} from "@adapttable/core/stream";
 import {
   computed,
   type MaybeRefOrGetter,
@@ -126,7 +129,12 @@ export function useRowPatchStream<TRow>(
           const patches = (latest.parse ?? parseRowPatchFrame<TRow>)(frame);
           if (!patches.length) return;
           latest.onPatch((rows) =>
-            applyRowPatches(rows, patches, latest.getRowId)
+            applyRowPatches(
+              rows,
+              patches,
+              latest.getRowId,
+              STREAMED_ROW_PATCHES
+            )
           );
           if (current && !disposed) latest.onPatches?.(patches);
         },

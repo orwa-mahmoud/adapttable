@@ -1,7 +1,6 @@
-import { type TableLabels } from "@adapttable/core";
-import { resolveLocaleTag } from "@adapttable/core/binding";
+import type { TableLabels } from "@adapttable/core";
 
-import type { LocaleKey } from "./getLabels";
+import { type LocaleKey, resolveLocaleKey } from "./localeCatalog";
 
 type Loader = () => Promise<Required<TableLabels>>;
 
@@ -33,7 +32,7 @@ const LOADERS = {
  * Loads the label preset for a BCP 47 tag, fetching only that language.
  *
  * Resolves the tag the way `getLabels` does (`ar-EG` → Arabic,
- * `zh-TW` → Traditional Chinese). Unlike `getLabels`, an unknown
+ * `zh-TW` and `zh-Hant` → Traditional Chinese). Unlike `getLabels`, an unknown
  * language resolves to `undefined` instead of English, so a caller can
  * keep its current copy.
  *
@@ -45,7 +44,6 @@ const LOADERS = {
 export async function loadLabels(
   locale: string
 ): Promise<Required<TableLabels> | undefined> {
-  const key = resolveLocaleTag(Object.keys(LOADERS), locale) as
-    LocaleKey | undefined;
+  const key = resolveLocaleKey(locale);
   return key === undefined ? undefined : LOADERS[key]();
 }

@@ -23,7 +23,7 @@ import type {
 import type { Aggregator } from "../contracts/columns";
 import type { RowCallback } from "../contracts/rowCallback";
 import type { CustomCellEditorRender } from "../editing/cellEditing";
-import type { ExportWriter } from "../export/exportWriter";
+import type { ExportWriterOption } from "../export/deferredWriter";
 import {
   type FilterTypeRegistry,
   type FilterTypeSpec,
@@ -85,7 +85,7 @@ export interface FeatureHostState<TRow = unknown> {
   /** Aggregators, by aggregate name. */
   readonly aggregators: ReadonlyMap<string, Aggregator>;
   /** Export writers features added. */
-  readonly writers: readonly ExportWriter[];
+  readonly writers: readonly ExportWriterOption[];
   /** Factories that add entries to the column menu. */
   readonly columnMenuActions: readonly ColumnMenuActionFactory<TRow>[];
   /** Side-panel tabs features added. */

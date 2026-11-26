@@ -17,6 +17,7 @@ export const EDITING_LABELS: Pick<
   | "keepMine"
   | "takeTheirs"
   | "theirsValue"
+  | "noticeEditWithoutWriter"
 > = {
   pendingRows: (count) =>
     count === 1 ? "1 unsaved row" : `${String(count)} unsaved rows`,
@@ -26,4 +27,5 @@ export const EDITING_LABELS: Pick<
   keepMine: "Keep mine",
   takeTheirs: "Take theirs",
   theirsValue: (value) => `Theirs: ${value}`,
+  noticeEditWithoutWriter: "Editing is off — no write handler is wired.",
 };

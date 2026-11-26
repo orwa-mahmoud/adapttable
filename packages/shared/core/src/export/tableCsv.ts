@@ -11,6 +11,7 @@ import type { FeatureHostState } from "../features/currentHost";
 import type { TableSource } from "../source/TableSource";
 import { devWarn } from "../utils/devWarn";
 import { csvWriter } from "./csvWriter";
+import { isDeferredExportWriter } from "./deferredWriter";
 import {
   exportAllFallsBackToPage,
   exportAllQueryOf,
@@ -25,6 +26,7 @@ import {
   buildExportTable,
   defaultExportFilename,
   downloadExportFile,
+  type ExportPayload,
   type ExportWriter,
 } from "./exportWriter";
 import type {
@@ -83,7 +85,7 @@ export function downloadTableCsv<TRow>(options: {
   writer?: ExportWriter;
   onBeforeExport?: NonNullable<ExportCsvOptions<TRow>["onBeforeExport"]>;
   onAfterExport?: NonNullable<ExportCsvOptions<TRow>["onAfterExport"]>;
-}): void {
+}): void | Promise<void> {
   const resolved = resolveExport(options);
   const { rows, columns } = resolved;
   const writer = options.writer ?? csvWriter;
@@ -97,7 +99,7 @@ export function downloadTableCsv<TRow>(options: {
 
   // Built after the hook, so a filename the hook chose reaches a writer that
   // embeds it — and so a cancelled export builds nothing at all.
-  const file = writer.build({
+  const context = {
     table: buildExportTable(
       rows,
       columns,
@@ -105,9 +107,15 @@ export function downloadTableCsv<TRow>(options: {
     ),
     filename,
     escapeFormulas: options.escapeFormulas,
-  });
-  downloadExportFile(filename, file);
-  options.onAfterExport?.({ rows, columns, filename, csv: file.text, file });
+  };
+  const finish = (file: ExportPayload): void => {
+    downloadExportFile(filename, file);
+    options.onAfterExport?.({ rows, columns, filename, csv: file.text, file });
+  };
+  // A writer that can build a better file given time (the Excel writer
+  // deflates its worksheet) is waited for; the run is then asynchronous.
+  if (writer.buildAsync) return writer.buildAsync(context).then(finish);
+  finish(writer.build(context));
 }
 
 /**
@@ -175,7 +183,10 @@ export function makeExportCsvHandler<TRow>(
   if (serverAll) {
     return async () => {
       const rows = await fetchAllExportRows(source, serverAll);
-      downloadTableCsv({
+      const built = isDeferredExportWriter(writer)
+        ? await writer.load()
+        : writer;
+      await downloadTableCsv({
         source: { ...source, allFilteredRows: rows },
         columns,
         filename: options.filename,
@@ -183,7 +194,7 @@ export function makeExportCsvHandler<TRow>(
         columnScope: options.columns,
         escapeFormulas: options.escapeFormulas,
         context,
-        writer,
+        writer: built,
         onBeforeExport: options.onBeforeExport,
         onAfterExport: options.onAfterExport,
       });
@@ -202,7 +213,7 @@ export function makeExportCsvHandler<TRow>(
     };
   }
 
-  return () =>
+  const download = (built: ExportWriter): void | Promise<void> =>
     downloadTableCsv({
       source,
       columns,
@@ -211,10 +222,19 @@ export function makeExportCsvHandler<TRow>(
       columnScope: options.columns,
       escapeFormulas: options.escapeFormulas,
       context,
-      writer,
+      writer: built,
       onBeforeExport: options.onBeforeExport,
       onAfterExport: options.onAfterExport,
     });
+  // A writer that loads on demand makes the run asynchronous: the export
+  // waits for the builder, and a load that fails is a failed run, reported
+  // by the export controller without a download or `onAfterExport`.
+  if (isDeferredExportWriter(writer)) {
+    return async () => {
+      await download(await writer.load());
+    };
+  }
+  return () => download(writer);
 }
 
 export { exportableColumns, resolveExportColumns } from "./exportRows";

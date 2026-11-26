@@ -1,5 +1,5 @@
 import { isPivotReady, type PivotConfig } from "@adapttable/core/pivot";
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { FilterDrawer } from "@adapttable/mantine";
 import {
   type ColumnDef,

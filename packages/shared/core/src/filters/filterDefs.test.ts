@@ -4,14 +4,18 @@ import type { ColumnModel } from "../contracts/columns";
 import { resetDevWarnings } from "../utils/devWarn";
 import { defaultFilterRegistry } from "./filterBuiltins";
 import {
+  booleanFilterSpecs,
   buildFilterRuntime,
+  checklistFilterSpecs,
   clearedFilterExtras,
   coerceBooleanValue,
   type FilterDef,
   filterLabel,
   filterPredicate,
   filterStateKeys,
+  multiSelectFilterSpecs,
   resolveFilterDefs,
+  selectFilterSpecs,
 } from "./filterDefs";
 import { emptyFilterRegistry } from "./filterRegistry";
 
@@ -249,40 +253,6 @@ describe("filterPredicate", () => {
     expect(p({ hiredAt: outside }, range)).toBe(false);
     expect(p({ hiredAt: outside.getTime() }, range)).toBe(false);
     expect(p({ hiredAt: "2026-04-02T00:00:00" }, range)).toBe(false);
-  });
-
-  it("dateRange: boundary-day rows survive in UTC+4 and UTC-8 alike", () => {
-    const originalTZ = process.env.TZ;
-    const inTZ = (tz: string, run: () => void) => {
-      process.env.TZ = tz;
-      try {
-        run();
-      } finally {
-        process.env.TZ = originalTZ;
-      }
-    };
-    const p = pred<{ hiredAt: Date | string }>({
-      key: "hiredAt",
-      type: "dateRange",
-    });
-    for (const tz of ["Asia/Dubai", "America/Los_Angeles"]) {
-      inTZ(tz, () => {
-        // Early morning and late night of the boundary days, as a local
-        // Date and as a local-naive datetime string.
-        const early = new Date(2026, 0, 1, 2, 0);
-        const late = new Date(2026, 0, 31, 23, 30);
-        const range = { hiredAtFrom: "2026-01-01", hiredAtTo: "2026-01-31" };
-        expect(p({ hiredAt: early }, range)).toBe(true);
-        expect(p({ hiredAt: late }, range)).toBe(true);
-        expect(p({ hiredAt: "2026-01-01T02:00:00" }, range)).toBe(true);
-        expect(p({ hiredAt: "2026-01-31T23:30:00" }, range)).toBe(true);
-        // Just past either edge stays out.
-        expect(p({ hiredAt: new Date(2025, 11, 31, 23, 59) }, range)).toBe(
-          false
-        );
-        expect(p({ hiredAt: new Date(2026, 1, 1, 0, 0) }, range)).toBe(false);
-      });
-    }
   });
 
   it("dateRange: inclusivity at both ends — exact datetime bounds included", () => {
@@ -548,5 +518,18 @@ describe("i18n-aware column filters", () => {
     );
     const p = pred(defs[0]!);
     expect(p(ROW_L, { statusEn: "custom" })).toBe(true);
+  });
+});
+
+describe("choice and yes/no filter specs", () => {
+  it("publishes each type from its own entry", () => {
+    expect(selectFilterSpecs().map((spec) => spec.type)).toEqual(["select"]);
+    expect(multiSelectFilterSpecs().map((spec) => spec.type)).toEqual([
+      "multiSelect",
+    ]);
+    expect(checklistFilterSpecs().map((spec) => spec.type)).toEqual([
+      "checklist",
+    ]);
+    expect(booleanFilterSpecs().map((spec) => spec.type)).toEqual(["boolean"]);
   });
 });

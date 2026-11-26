@@ -27,7 +27,7 @@ export {
 import { rowEditingSignature as coreRowEditingSignature } from "@adapttable/core/binding";
 
 /**
- * Opt-in editing bundle from {@link TableChrome.editing}.
+ * The opt-in editing bundle the editing feature publishes as `EDITING_STATE`.
  *
  * @public
  */

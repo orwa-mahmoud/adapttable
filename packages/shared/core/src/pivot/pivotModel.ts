@@ -221,30 +221,38 @@ function dimensionOf<TRow>(
   return dimensionLabel(resolveAggregateValue(row, key, byKey.get(key)));
 }
 
-/**
- * Distinct paths for a set of dimensions, in sorted order, with each level
- * sorted within its parent.
- */
-function distinctPaths<TRow>(
+/** Each row's labels for a set of dimensions, read once. */
+function labelsOf<TRow>(
   rows: readonly TRow[],
   dimensions: readonly string[],
   byKey: ReadonlyMap<string, ColumnMetadata<TRow>>
 ): string[][] {
-  if (dimensions.length === 0) return [[]];
+  return rows.map((row) =>
+    dimensions.map((dimension) => dimensionOf(row, dimension, byKey))
+  );
+}
+
+/**
+ * Distinct paths through `depth` dimensions, in sorted order, with each level
+ * sorted within its parent, from each row's labels.
+ */
+function distinctPaths(
+  labels: readonly (readonly string[])[],
+  depth: number
+): string[][] {
+  if (depth === 0) return [[]];
   let paths: string[][] = [[]];
-  for (const [level, dimension] of dimensions.entries()) {
+  for (let level = 0; level < depth; level++) {
     const next: string[][] = [];
     const seen = new Map<string, Set<string>>();
-    for (const row of rows) {
-      const prefix = pivotPathKey(
-        dimensions.slice(0, level).map((d) => dimensionOf(row, d, byKey))
-      );
+    for (const row of labels) {
+      const prefix = pivotPathKey(row.slice(0, level));
       let bucket = seen.get(prefix);
       if (!bucket) {
         bucket = new Set();
         seen.set(prefix, bucket);
       }
-      bucket.add(dimensionOf(row, dimension, byKey));
+      bucket.add(row[level] ?? "");
     }
     for (const path of paths) {
       const values = [...(seen.get(pivotPathKey(path)) ?? [])].sort(
@@ -255,6 +263,29 @@ function distinctPaths<TRow>(
     paths = next;
   }
   return paths;
+}
+
+/**
+ * The rows under every row-path prefix, as indexes into the rows: built once,
+ * so each body line reads its rows instead of filtering all of them.
+ */
+function prefixIndex(
+  labels: readonly (readonly string[])[],
+  depth: number
+): ReadonlyMap<string, number[]> {
+  const byPrefix = new Map<string, number[]>();
+  labels.forEach((row, index) => {
+    for (let level = 0; level <= depth; level++) {
+      const key = pivotPathKey(row.slice(0, level));
+      let bucket = byPrefix.get(key);
+      if (!bucket) {
+        bucket = [];
+        byPrefix.set(key, bucket);
+      }
+      bucket.push(index);
+    }
+  });
+  return byPrefix;
 }
 
 /** Build the column header tree from the leaf paths. */
@@ -323,30 +354,40 @@ function columnLeavesOf(
   return leaves;
 }
 
-/** Compute one line's cells from the rows it covers. */
+/**
+ * Compute one line's cells from the rows it covers. The covered rows are
+ * grouped by their column path once, then each column leaf reads its group.
+ */
 function cellsOf<TRow>(
-  covered: readonly TRow[],
+  rows: readonly TRow[],
+  covered: readonly number[],
+  columnKeys: readonly string[],
   leaves: readonly PivotColumnLeaf[],
-  columnDimensions: readonly string[],
   byKey: ReadonlyMap<string, ColumnMetadata<TRow>>,
   aggregate: (leaf: PivotColumnLeaf) => Aggregator,
   format: PivotOptions<TRow>["format"]
 ): (DisplayValue | undefined)[] {
+  const byColumn = new Map<string, number[]>();
+  for (const index of covered) {
+    const key = columnKeys[index] ?? "";
+    let bucket = byColumn.get(key);
+    if (!bucket) {
+      bucket = [];
+      byColumn.set(key, bucket);
+    }
+    bucket.push(index);
+  }
   return leaves.map((leaf) => {
     const matching = leaf.total
       ? covered
-      : covered.filter((row) =>
-          leaf.path.every(
-            (value, i) =>
-              dimensionOf(row, columnDimensions[i] ?? "", byKey) === value
-          )
-        );
+      : (byColumn.get(pivotPathKey(leaf.path)) ?? []);
+    const column = byKey.get(leaf.measure.key);
     const values: AggregateOrderedValue[] = [];
-    for (const row of matching) {
+    for (const index of matching) {
       const value = resolveAggregateValue(
-        row,
+        rows[index]!,
         leaf.measure.key,
-        byKey.get(leaf.measure.key)
+        column
       );
       // A missing value is not a zero — the aggregator sees only what is
       // really there, the same rule the summary row follows.
@@ -394,7 +435,10 @@ export function pivot<TRow>(
   const subtotals = config.subtotals ?? true;
   const grandTotals = config.grandTotals ?? true;
 
-  const columnPaths = distinctPaths(rows, config.columns, byKey);
+  const rowLabels = labelsOf(rows, config.rows, byKey);
+  const columnLabels = labelsOf(rows, config.columns, byKey);
+  const columnKeys = columnLabels.map(pivotPathKey);
+  const columnPaths = distinctPaths(columnLabels, config.columns.length);
   const columnLeaves = columnLeavesOf(
     columnPaths,
     config.measures,
@@ -407,21 +451,21 @@ export function pivot<TRow>(
     config.columns.length
   );
 
-  const cells = (covered: readonly TRow[]) =>
+  const cells = (covered: readonly number[]) =>
     cellsOf(
+      rows,
       covered,
+      columnKeys,
       columnLeaves,
-      config.columns,
       byKey,
       (leaf) => aggregatorOf(leaf.measure, aggregators),
       format
     );
 
+  const byPrefix = prefixIndex(rowLabels, config.rows.length);
   const body = bodyRows({
-    rows,
-    dimensions: config.rows,
-    paths: distinctPaths(rows, config.rows, byKey),
-    byKey,
+    paths: distinctPaths(rowLabels, config.rows.length),
+    byPrefix,
     subtotals,
     collapsed,
     cells,
@@ -434,7 +478,7 @@ export function pivot<TRow>(
       depth: 0,
       kind: "grandTotal",
       label: "",
-      cells: cells(rows),
+      cells: cells(byPrefix.get(pivotPathKey([])) ?? []),
       count: rows.length,
     });
   }
@@ -448,14 +492,12 @@ export function pivot<TRow>(
 }
 
 /** What {@link bodyRows} needs. */
-interface BodyInput<TRow> {
-  rows: readonly TRow[];
-  dimensions: readonly string[];
+interface BodyInput {
   paths: readonly (readonly string[])[];
-  byKey: ReadonlyMap<string, ColumnMetadata<TRow>>;
+  byPrefix: ReadonlyMap<string, readonly number[]>;
   subtotals: boolean;
   collapsed: ReadonlySet<string>;
-  cells: (covered: readonly TRow[]) => (DisplayValue | undefined)[];
+  cells: (covered: readonly number[]) => (DisplayValue | undefined)[];
 }
 
 /**
@@ -466,15 +508,13 @@ interface BodyInput<TRow> {
  * has no effect — hiding a leaf would take its data out of view with no
  * subtotal standing in for it.
  */
-function bodyRows<TRow>({
-  rows,
-  dimensions,
+function bodyRows({
   paths,
-  byKey,
+  byPrefix,
   subtotals,
   collapsed,
   cells,
-}: BodyInput<TRow>): PivotRow[] {
+}: BodyInput): PivotRow[] {
   const body: PivotRow[] = [];
   const emitted = new Set<string>();
 
@@ -484,7 +524,7 @@ function bodyRows<TRow>({
     kind: PivotRowKind,
     label: string
   ) => {
-    const covered = rowsUnder(rows, path, dimensions, byKey);
+    const covered = byPrefix.get(pivotPathKey(path)) ?? [];
     body.push({
       key: pivotPathKey(path),
       path,
@@ -510,20 +550,6 @@ function bodyRows<TRow>({
     push(path, Math.max(path.length - 1, 0), "leaf", path.at(-1) ?? "");
   }
   return body;
-}
-
-/** The rows matching a row-dimension prefix. */
-function rowsUnder<TRow>(
-  rows: readonly TRow[],
-  prefix: readonly string[],
-  dimensions: readonly string[],
-  byKey: ReadonlyMap<string, ColumnMetadata<TRow>>
-): TRow[] {
-  return rows.filter((row) =>
-    prefix.every(
-      (value, i) => dimensionOf(row, dimensions[i] ?? "", byKey) === value
-    )
-  );
 }
 
 const BUILT_IN_NAMES: readonly AggregateName[] = [

@@ -23,7 +23,10 @@ export { densityChooser } from "./features/density";
 export { fullscreen } from "./features/fullscreen";
 export type { GroupingExtras, StaticGroupingExtras } from "./features/grouping";
 export { grouping } from "./features/grouping";
-export type { RowAppearanceOptions } from "./features/headlessFactories";
+export type {
+  RowAppearanceOptions,
+  VueSelectionOptions,
+} from "./features/headlessFactories";
 export {
   cellSpan,
   collapsibleColumnGroups,
@@ -33,6 +36,7 @@ export {
   pinnedSummaryRows,
   resizableColumns,
   rowAppearance,
+  selection,
 } from "./features/headlessFactories";
 export { rowActions } from "./features/rowActions";
 export { nestedTable, rowDetail } from "./features/rowDetail";
@@ -60,6 +64,7 @@ export { rowReorder } from "./specialized/rowReorder";
 export type { VirtualizeOptions } from "./specialized/virtualize";
 export { virtualize } from "./specialized/virtualize";
 export type { ExportCsvOptions, SelectionStatsOptions } from "@adapttable/core";
+export type { ColumnMenuOptions } from "@adapttable/core/binding";
 
 // Types this entry's own signatures hand back.
 export type { SummaryRowFn } from "./aggregate/aggregate";

@@ -1,12 +1,9 @@
 import {
   type Direction,
-  type FacetMap,
   type FeatureHostState,
   type FilterDef,
   type FilterRuntime,
   type FilterTypeRegistry,
-  type GroupingPanelState,
-  type QuerySupport,
   type SelectionStats,
   type SortByOption,
   type TableLabels,
@@ -17,15 +14,12 @@ import { type ReactNode, type RefCallback, type RefObject } from "react";
 
 import type { TableChrome } from "../chrome/tableChromeContract";
 import type { FilterTriggerToggle } from "../chrome/toolbarChrome";
-import type { ColumnDef } from "../columnDef";
 import type { EditHistoryState } from "../editing/editHistory";
-import type { ExportHandlerState } from "../export/useExportHandler";
 import type { ChipLabelResolver } from "../filters/useActiveFilterChips";
 import type { FindInTableState } from "../find/useFindInTable";
 import type { GridFocusState } from "../focus/useGridFocus";
 import type { FullscreenState } from "../layout/useFullscreen";
 import type { ComposedTableProps, ToolbarSlots } from "../props";
-import type { DataModeProps } from "../source/useTableDataImpl";
 import type { SharedTableRenderProps } from "../tableRenderProps";
 import { type UrlStateAdapter } from "../url/adapter";
 import type { Density } from "../url/useDensityUrlState";
@@ -47,13 +41,11 @@ export type DataTableShellProps<TRow> = Omit<
   ComposedTableProps<TRow>,
   "source"
 > & {
-  /** Full-control tier: a prebuilt source. */
+  /** A prebuilt source: a server source, a query-library source, … */
   source?: TableSource<TRow>;
-  /** Frontend tier: the raw rows. */
+  /** Frontend tier: every row. */
   data?: readonly TRow[];
-  /** Server tier: total row count across all pages. */
-  total?: number;
-  /** Server tier: a request is in flight. */
+  /** Frontend tier: the rows are still loading. */
   loading?: boolean;
   /** Forwarded error to display in the table's error state. */
   error?: Error | null;
@@ -63,19 +55,7 @@ export type DataTableShellProps<TRow> = Omit<
   urlSync?: boolean;
   /** Namespace for this table's URL params. */
   urlKey?: string;
-  /**
-   * Server tier: what this endpoint can answer. `supports.facets`
-   * unlocks `query.facets` for checklist counts.
-   */
-  supports?: QuerySupport;
-  /**
-   * Server tier: keys to send as `query.facets`. Defaults to every
-   * `checklist` definition.
-   */
-  facetKeys?: readonly string[];
-  /** Server tier: distinct-value counts from the last fetch. */
-  facets?: FacetMap;
-} & DataModeProps<TRow>;
+};
 /**
  * Chrome props the shell passes into {@link TableChrome}. Named so the
  * adapter declaration does not re-infer this bag from object spread order.
@@ -126,7 +106,7 @@ export interface DataTableShellTableProps<
  *
  * @public
  */
-export interface DataTableShellToolbarProps<TRow> extends ExportHandlerState {
+export interface DataTableShellToolbarProps<TRow> {
   /** Headless table state and prop-getters. */
   table: UseDataTableResult<TRow>;
   /** Whether the search input renders. */
@@ -139,34 +119,8 @@ export interface DataTableShellToolbarProps<TRow> extends ExportHandlerState {
   toolbar?: ReactNode;
   /** Caller-supplied content for the toolbar ends. */
   toolbarSlots?: ToolbarSlots;
-  /** Put the last edit back. */
-  onUndo?: () => void;
-  /** Do the last undone edit again. */
-  onRedo?: () => void;
-  /** Whether there is anything to undo. */
-  canUndo?: boolean;
-  /** Whether there is anything to redo. */
-  canRedo?: boolean;
-  /** Undo button caption. */
-  undoLabel?: string;
-  /** Redo button caption. */
-  redoLabel?: string;
-  /** Open the print dialog. */
-  onPrint?: () => void;
-  /** Print button caption. */
-  printLabel?: string;
-  /** Density the table is rendering. */
-  density: Density;
-  /** Request a density change. */
-  onDensityChange: (next: Density) => void;
-  /** Toggle fullscreen when the feature is armed. */
-  onToggleFullscreen?: () => void;
-  /** Whether the table is fullscreen. */
-  isFullscreen?: boolean;
   /** Whether a filters affordance should render. */
   hasFilters: boolean;
-  /** Number shown on the filters badge. */
-  activeFilterCount: number;
   /** Filter form node. */
   filters: ReactNode;
   /** Clear every active filter. */
@@ -179,25 +133,6 @@ export interface DataTableShellToolbarProps<TRow> extends ExportHandlerState {
   addRowLabel: string;
   /** Text direction. */
   dir?: Direction;
-}
-
-/**
- * Grouping-strip props the shell exposes when the grouping-panel feature is
- * composed.
- *
- * @public
- */
-export interface DataTableShellGroupingPanelProps<TRow> {
-  /** Live grouping-panel state. */
-  state: GroupingPanelState;
-  /** Columns the strip can group by. */
-  columns: ColumnDef<TRow>[];
-  /** Resolved labels. */
-  labels: Required<TableLabels>;
-  /** Whether the table is in the mobile layout. */
-  mobile: boolean;
-  /** Text direction. */
-  dir: Direction | undefined;
 }
 
 /**
@@ -228,8 +163,6 @@ export interface DataTableShellResult<TRow> {
   urlAdapter: UrlStateAdapter;
   /** Shared adapter chrome. */
   chrome: TableChrome<TRow>;
-  /** Grouping-strip props when that feature is composed. */
-  groupingPanelProps: DataTableShellGroupingPanelProps<TRow> | undefined;
   /** Props the chrome was built with. */
   chromeProps: DataTableShellChromeProps<TRow>;
   /** When true, the view leaves `tableProps` alone. */

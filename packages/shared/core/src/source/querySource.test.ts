@@ -154,6 +154,38 @@ describe("createQuerySource", () => {
     expect(last.hasNextPage).toBe(false);
   });
 
+  // Larger than a spread argument list can carry, in a worker thread too.
+  it("holds a page of any size in both modes, pages in order", () => {
+    const big: Page = {
+      rows: Array.from({ length: 600_000 }, (_, index) => ({
+        id: `r${index}`,
+      })),
+      total: 600_002,
+    };
+    const tail: Page = {
+      rows: rowsOf("y", "z"),
+      total: 600_002,
+      facets: { team: [{ value: "t", label: "T", count: 2 }] },
+    };
+    const store = viewStore();
+    for (const paginationMode of ["paged", "infinite"] as const) {
+      const source = createQuerySource<Row, TableQueryParams, Page>();
+      source.params({ paginationMode }, store.view);
+      const frame = source.update({ query: queryOf([big]) });
+      expect(frame.rows).toHaveLength(600_000);
+      expect(frame.total).toBe(600_002);
+    }
+    const infinite = createQuerySource<Row, TableQueryParams, Page>();
+    infinite.params({ paginationMode: "infinite" }, store.view);
+    const frame = infinite.update({ query: queryOf([big, tail]) });
+    expect(frame.rows).toHaveLength(600_002);
+    expect(frame.rows[0]?.id).toBe("r0");
+    expect(frame.rows[599_999]?.id).toBe("r599999");
+    expect(frame.rows.slice(-2).map((row) => row.id)).toEqual(["y", "z"]);
+    expect(frame.total).toBe(600_002);
+    expect(frame.facets).toEqual(tail.facets);
+  });
+
   it("falls back to the rows held when no total is reported", () => {
     const store = viewStore();
     const pages: Page[] = [{ rows: rowsOf("a") }, { rows: rowsOf("b") }];

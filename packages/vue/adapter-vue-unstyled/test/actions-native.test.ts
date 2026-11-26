@@ -16,6 +16,7 @@ import { exportCsv } from "../src/export-csv";
 import { pdfWriter } from "../src/export-pdf";
 import { xlsxWriter } from "../src/export-xlsx";
 import { print } from "../src/print";
+import { selection } from "../src/selection";
 import { sidePanel } from "../src/side-panel";
 import {
   click,
@@ -113,11 +114,10 @@ describe("native action controls in the real DataTable", () => {
         ...base,
         data: undefined,
         source: remote.source.value,
-        selectable: true,
         confirm: (request) => {
           confirmation = request;
         },
-        features: [bulkActions([action])],
+        features: [selection(), bulkActions([action])],
       })
     );
     await tick();
@@ -160,9 +160,7 @@ describe("native action controls in the real DataTable", () => {
     const { host } = mountNative(() =>
       h(DataTable<Row>, {
         ...base,
-        selectable: true,
-        defaultSelectedIds: ["a"],
-        features: features.value,
+        features: [selection({ defaultSelectedIds: ["a"] }), ...features.value],
       })
     );
     await tick();
@@ -468,8 +466,8 @@ describe("native action controls in the real DataTable", () => {
     const { host } = mountNative(() =>
       h(DataTable<Row>, {
         ...base,
-        selectedIds: selected.value,
         features: [
+          selection({ selectedIds: selected.value }),
           exportCsv<Row>({ scope: "selected", request }),
           print(printed, true),
         ],
@@ -774,7 +772,10 @@ describe("native action controls in the real DataTable", () => {
           writer.extension.toUpperCase()
         );
         await click(host, "export-csv-button");
-        expect(after).toHaveBeenCalledOnce();
+        // The Excel writer deflates asynchronously; the file lands a tick later.
+        await vi.waitFor(() => {
+          expect(after).toHaveBeenCalledOnce();
+        });
         expect(after.mock.calls[0]?.[0].file.parts.length).toBeGreaterThan(0);
         stop();
       }

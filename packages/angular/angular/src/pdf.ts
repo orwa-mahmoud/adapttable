@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-export { exportPdf } from "./features/export";
+export { exportPdf } from "./features/exportPdf";
 export type {
   PdfWriterOptions,
   PrintLayoutOptions,

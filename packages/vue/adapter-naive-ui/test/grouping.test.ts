@@ -3,8 +3,8 @@ import { h, shallowRef } from "vue";
 
 import { DataTable } from "../src";
 import { grouping } from "../src/grouping";
+import { selection } from "../src/selection";
 import { find, mount, part, tick } from "./filter-helpers";
-
 interface Row {
   id: string;
   team: string;
@@ -25,9 +25,8 @@ it.each([false, true])(
         columns,
         rowKey: (row) => row.id,
         forceMobile,
-        selectable: true,
         urlSync: false,
-        features: [grouping("team")],
+        features: [selection(), grouping("team")],
       })
     );
     await tick();
@@ -58,13 +57,14 @@ it.each([false, true])(
         columns,
         rowKey: (row) => row.id,
         forceMobile,
-        selectable: true,
-        selectedIds: selected.value,
-        "onUpdate:selectedIds": (ids) => {
-          selected.value = ids;
-        },
         urlSync: false,
         features: [
+          selection({
+            onSelectionChange: (ids) => {
+              selected.value = ids;
+            },
+            selectedIds: selected.value,
+          }),
           grouping("team", { groupRowPageSize: 1, groupFooters: true }),
         ],
       })

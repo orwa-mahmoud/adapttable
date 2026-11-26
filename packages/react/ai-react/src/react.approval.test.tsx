@@ -13,12 +13,12 @@ import {
   AGENT_APPROVAL_STATE,
   type AgentAlwaysAllowState,
   type AgentApprovalPending,
-  applyTableFeatures,
   FeatureProviders,
   type TableRuntimeView,
   useFeatureState,
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
+import { applyTableFeatures } from "@adapttable/react/features";
 import { act, render, waitFor } from "@testing-library/react";
 import { StrictMode, useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -79,7 +79,11 @@ function sensitive(ai?: ActionAiOptions) {
 }
 
 function Publisher({ view }: { view: TableRuntimeView<Row> }) {
-  usePublishTableRuntime(view.rows, undefined, view);
+  usePublishTableRuntime({
+    rows: () => view.rows,
+    labels: () => undefined,
+    view: () => view,
+  });
   return null;
 }
 

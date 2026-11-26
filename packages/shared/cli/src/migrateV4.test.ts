@@ -1,0 +1,503 @@
+import { describe, expect, it } from "vitest";
+
+import { migrateVueScripts } from "./importMigration";
+import { migrateV4File, migrateV4Source } from "./migrateV4";
+
+describe("migrateV4Source", () => {
+  it("moves binding machinery off core's main entry and keeps table names", () => {
+    const result = migrateV4Source(
+      'import { createTableEngine, insertExtraRows, type BodyCell } from "@adapttable/core";\n'
+    );
+    expect(result.code).toBe(
+      'import { createTableEngine } from "@adapttable/core";\n' +
+        'import { insertExtraRows, type BodyCell } from "@adapttable/core/binding";\n'
+    );
+    expect(result.movedImports).toBe(2);
+    expect(result.issues).toEqual([]);
+  });
+
+  it("sends a specialty name to its focused entry, not the binding one", () => {
+    expect(
+      migrateV4Source(
+        'import { createCellEditSession, pivot } from "@adapttable/core";'
+      ).code
+    ).toBe(
+      'import { createCellEditSession } from "@adapttable/core/editing";\nimport { pivot } from "@adapttable/core/pivot";'
+    );
+  });
+
+  it("moves React kit machinery to the adapter entry", () => {
+    const result = migrateV4Source(
+      'import { DataTable, useTableChrome } from "@adapttable/react";'
+    );
+    expect(result.code).toBe(
+      'import { DataTable } from "@adapttable/react";\nimport { useTableChrome } from "@adapttable/react/adapter";'
+    );
+  });
+
+  it("splits the i18n root into the catalog, one language and the root", () => {
+    const result = migrateV4Source(
+      'import { getDirection, getLabels, ar, zhTW } from "@adapttable/i18n";\n' +
+        'import { loadLabels } from "@adapttable/i18n/load";\n'
+    );
+    expect(result.code).toBe(
+      'import { getDirection } from "@adapttable/i18n";\n' +
+        'import { getLabels } from "@adapttable/i18n/catalog";\n' +
+        'import { ar } from "@adapttable/i18n/locales/ar";\n' +
+        'import { zhTW } from "@adapttable/i18n/locales/zh-TW";\n' +
+        'import { loadLabels } from "@adapttable/i18n";\n'
+    );
+  });
+
+  it("renames in place and keeps the name the file uses", () => {
+    expect(
+      migrateV4Source(
+        'import { parseTableQuery, splitFilterValues } from "@adapttable/server";'
+      ).code
+    ).toBe(
+      'import { parseTableQuery, splitListParam as splitFilterValues } from "@adapttable/server";'
+    );
+    expect(
+      migrateV4Source(
+        'import { splitFilterValues as split } from "@adapttable/server";'
+      ).code
+    ).toBe('import { splitListParam as split } from "@adapttable/server";');
+    expect(
+      migrateV4Source('import { sameRows } from "@adapttable/core/binding";')
+        .code
+    ).toBe('import { sameItems as sameRows } from "@adapttable/core/binding";');
+  });
+
+  it("sends a main-entry value off the binding entry", () => {
+    expect(
+      migrateV4Source(
+        'import { visibleColumns, type TableLayout } from "@adapttable/core/binding";'
+      ).code
+    ).toBe(
+      'import { type TableLayout } from "@adapttable/core/binding";\nimport { visibleColumns } from "@adapttable/core";'
+    );
+  });
+
+  it("gives the two composition helpers one home each", () => {
+    expect(
+      migrateV4Source(
+        'import { applyTableFeatures, useDataTableShell } from "@adapttable/react/adapter";'
+      ).code
+    ).toBe(
+      'import { useDataTableShell } from "@adapttable/react/adapter";\nimport { applyTableFeatures } from "@adapttable/react/features";'
+    );
+    expect(
+      migrateV4Source(
+        'import { rowReorder, useTableFeatures } from "@adapttable/react/features";'
+      ).code
+    ).toBe(
+      'import { rowReorder } from "@adapttable/react/features";\nimport { useTableFeatures } from "@adapttable/react/adapter";'
+    );
+  });
+
+  it("splits a removed React kit barrel in one pass", () => {
+    const source =
+      'import { selectionStats, useTableFeatures as useFeatures } from "@adapttable/mui/features";';
+    const once = migrateV4Source(source);
+    expect(once.code).toBe(
+      'import { selectionStats } from "@adapttable/react/features";\nimport { useTableFeatures as useFeatures } from "@adapttable/react/adapter";'
+    );
+    const twice = migrateV4Source(once.code);
+    expect(twice.code).toBe(once.code);
+    expect(twice.movedImports).toBe(0);
+    for (const kit of [
+      "antd",
+      "base-ui",
+      "chakra",
+      "mantine",
+      "mui",
+      "radix",
+      "shadcn",
+      "unstyled",
+    ]) {
+      const migrated = migrateV4Source(
+        `import { useTableFeatures } from "@adapttable/${kit}/features";`
+      );
+      expect(migrated.code).toBe(
+        'import { useTableFeatures } from "@adapttable/react/adapter";'
+      );
+      expect(migrateV4Source(migrated.code).movedImports).toBe(0);
+    }
+  });
+
+  it("reports Vue and Angular selection bindings without rewriting them", () => {
+    const vue = migrateV4Source('<DataTable v-model:selected-ids="ids" />');
+    expect(vue.code).toBe('<DataTable v-model:selected-ids="ids" />');
+    expect(vue.issues.map((issue) => issue.message).join("\n")).toContain(
+      "v-model:selected-ids"
+    );
+    const angular = migrateV4Source(
+      '<adapt-data-table [selectedIds]="ids" (selectionChange)="onSelection($event)" />'
+    );
+    expect(angular.code).toContain("[selectedIds]");
+    expect(angular.code).toContain("(selectionChange)");
+    const messages = angular.issues.map((issue) => issue.message).join("\n");
+    expect(messages).toContain("[selectedIds]");
+    expect(messages).toContain("(selectionChange)");
+  });
+
+  it("moves a kit feature barrel onto the entry that owns each name", () => {
+    expect(
+      migrateV4Source(
+        'import { editing, grouping } from "@adapttable/unstyled/features";'
+      ).code
+    ).toBe('import { editing, grouping } from "@adapttable/react/features";');
+    expect(
+      migrateV4Source(
+        'import { grouping } from "@adapttable/vue-unstyled/features";'
+      ).code
+    ).toBe('import { grouping } from "@adapttable/vue-unstyled/grouping";');
+    expect(
+      migrateV4Source(
+        'import { selection } from "@adapttable/angular-material/features";'
+      ).code
+    ).toBe(
+      'import { selection } from "@adapttable/angular-material/selection";'
+    );
+  });
+
+  it("redirects a Vue kit's CSV entry and moves Angular's export forwards", () => {
+    expect(
+      migrateV4Source(
+        'import { exportCsv } from "@adapttable/vue-unstyled/export-csv";'
+      ).code
+    ).toBe('import { exportCsv } from "@adapttable/vue-unstyled/export";');
+    expect(
+      migrateV4Source(
+        'import { exportPdf, selectionStats } from "@adapttable/angular/features";'
+      ).code
+    ).toBe(
+      'import { selectionStats } from "@adapttable/angular/features";\nimport { exportPdf } from "@adapttable/angular/pdf";'
+    );
+    expect(
+      migrateV4Source(
+        'import { columnSelectionCheckbox } from "@adapttable/nuxt-ui/cell-navigation";'
+      ).code
+    ).toBe(
+      'import { columnSelectionCheckbox } from "@adapttable/nuxt-ui/column-selection";'
+    );
+  });
+
+  it("reports what changed meaning and writes nothing for it", () => {
+    const source = [
+      "<DataTable data={rows} mobileIdentityColumns={2} />;",
+      "const key = groupRowSlotKey();",
+      "const labels = { noticeReorderNested: 'x' };",
+      "useExportHandler(run);",
+    ].join("\n");
+    const result = migrateV4Source(source);
+    expect(result.changed).toBe(false);
+    expect(result.code).toBe(source);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 3, 4]);
+    expect(result.issues[0]?.message).toContain("hideOnMobile");
+  });
+
+  it("reports a table's selection props, which belong to selection()", () => {
+    const source = [
+      "<DataTable",
+      "  data={rows}",
+      "  selectedIds={ids}",
+      "  onSelectionChange={setIds}",
+      "/>;",
+      "const state = useSelection({ selectedIds: ids });",
+    ].join("\n");
+    const result = migrateV4Source(source);
+    expect(result.code).toBe(source);
+    expect(result.issues.map((issue) => issue.line)).toEqual([3, 4]);
+    expect(result.issues[0]?.message).toContain("selection(");
+  });
+
+  it("reports a table's server props and leaves a server source's options alone", () => {
+    const source = [
+      "const source = useServerData({ rows, total: 3, onQueryChange: fetch });",
+      '<DataTable data={rows} total={total} onQueryChange={fetch} mode="server" />;',
+      '<adapt-data-table [data]="rows()" [onQueryChange]="load" [supports]="caps" />',
+      '<DataTable :data="rows" :total="total" @query-change="load" />',
+      "type Props = DataTableProps<Row> & DataModeProps<Row>;",
+    ].join("\n");
+    const result = migrateV4Source(source);
+    expect(result.changed).toBe(false);
+    const reported = (line: number) =>
+      result.issues
+        .filter((issue) => issue.line === line)
+        .map((issue) => issue.message.split(":")[0] ?? "")
+        .sort((a, b) => a.localeCompare(b));
+    // The server source's own options are not table props.
+    expect(reported(1)).toEqual([]);
+    expect(reported(2)).toEqual([
+      "A table takes no mode",
+      "A table's onQueryChange moved",
+      "If this is a table prop",
+    ]);
+    expect(reported(3)).toEqual([
+      "A table's onQueryChange moved",
+      "If this is a table prop",
+    ]);
+    expect(reported(4)).toEqual([
+      "A table's onQueryChange moved",
+      "If this is a table prop",
+    ]);
+    expect(reported(5)).toEqual([
+      "DataModeProps was removed; DataTableProps is DataTablePropsBase.",
+    ]);
+  });
+
+  it("reports the chrome order constant and the history gate", () => {
+    const result = migrateV4Source(
+      [
+        "const order = CHROME_EXTRA_SLOT_ORDER;",
+        "<HistoryLiveGate shell={shell}>{render}</HistoryLiveGate>;",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 2]);
+    expect(result.issues[1]?.message).toContain("EDIT_HISTORY_STAGE");
+  });
+
+  it("reports the cell wrappers with their replacements", () => {
+    const result = migrateV4Source(
+      [
+        "<OptionalEditableCell {...cell} />;",
+        "<OptionalTreeToggle {...toggle} />;",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.message)).toEqual([
+      expect.stringContaining("CellContent"),
+      expect.stringContaining("FeatureSlot"),
+    ]);
+  });
+
+  it("reports the Vue shell's toolbar fields with their replacement", () => {
+    const result = migrateV4Source(
+      [
+        "const props = shell.toolbarExtrasProps.value;",
+        "if (shell.hasActionToolbar.value) draw();",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2]);
+    expect(result.issues[0]?.message).toContain("toolbarEntry");
+  });
+
+  it("reports the React toolbar's removed menu props and chrome type", () => {
+    const result = migrateV4Source(
+      [
+        "type Props = ToolbarChromeProps<Row>;",
+        "<>{props.savedViewsMenu}{props.columnMenu}</>;",
+        "const features = [columnMenu()];",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 2]);
+  });
+
+  it("reports the Angular view's toolbar fields", () => {
+    const result = migrateV4Source(
+      [
+        '<ng-container [adaptSlotProps]="v.toolbarExtras()" />',
+        "@if (v.savedViews; as savedViews) {}",
+        '<x [p]="v.columnMenuProps()" />',
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 3]);
+    expect(result.issues[0]?.message).toContain("toolbarEntry");
+  });
+
+  it("reports the Angular view's optional regions", () => {
+    const result = migrateV4Source(
+      [
+        '<x [adaptSlotProps]="v.commandPalette()" />',
+        '<x [adaptSlotProps]="v.contextMenu()" />',
+        "@if (v.rowMutations().canAdd) {}",
+        "const features = [commandPalette()];",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2, 3]);
+  });
+
+  it("reports the chrome's filter chips and the scroll reset's chrome argument", () => {
+    const result = migrateV4Source(
+      [
+        "const count = chrome.activeFilterCount;",
+        "useChromeScrollReset(ref, chrome, props);",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2]);
+  });
+
+  it("reports the chrome's editing and edit history", () => {
+    const result = migrateV4Source(
+      [
+        "const editing = view.chrome.editing;",
+        "const history = chrome.editHistory;",
+        "const rows = chrome.editingRows;",
+        "const detail = chrome.detail;",
+        "const pins = chrome.rowPinning;",
+        "const grouped = view.chrome.grouping;",
+        "const panel = chrome.groupingPanel;",
+        "const reorder = chrome.rowReorder;",
+      ].join("\n")
+    );
+    expect(result.issues.map((issue) => issue.line)).toEqual([
+      1, 2, 4, 5, 6, 7, 8,
+    ]);
+  });
+
+  it("reports a feature setup that registers a cleanup", () => {
+    const result = migrateV4Source(
+      [
+        "const plugin = { id: 'p', setup(host) {",
+        "  host.onDispose(() => socket.close());",
+        "} };",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([2]);
+    expect(result.issues[0]?.message).toContain("mount");
+  });
+
+  it("reports the shell's grouping panel props", () => {
+    const result = migrateV4Source(
+      [
+        "const panel = shell.groupingPanelProps;",
+        "type P = DataTableShellGroupingPanelProps<Row>;",
+      ].join("\n")
+    );
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.line)).toEqual([1, 2]);
+  });
+
+  it("does not rewrite an import that is only text", () => {
+    const source =
+      "const example = 'import { selectionStats, useTableFeatures } from \"@adapttable/mui/features\";';\n";
+    const result = migrateV4Source(source);
+    expect(result.code).toBe(source);
+    expect(result.movedImports).toBe(0);
+    expect(result.issues).toEqual([]);
+  });
+
+  it("leaves a comment and a template example untouched", () => {
+    const source = [
+      '// import { selectionStats } from "@adapttable/mui/features";',
+      'const sample = `import { useTableFeatures } from "@adapttable/mui/features";`;',
+      'import { selection } from "@adapttable/mui/features";',
+      "",
+    ].join("\n");
+    const result = migrateV4Source(source);
+    expect(result.code.split("\n")[0]).toContain("@adapttable/mui/features");
+    expect(result.code.split("\n")[1]).toContain("@adapttable/mui/features");
+    expect(result.code).toContain(
+      'import { selection } from "@adapttable/react/features";'
+    );
+  });
+
+  it("reports a namespace import whose names do not share a destination", () => {
+    const source = 'import * as features from "@adapttable/mui/features";\n';
+    const result = migrateV4Source(source);
+    expect(result.code).toBe(source);
+    expect(result.movedImports).toBe(0);
+    expect(result.issues[0]?.message).toContain("do not share one destination");
+    expect(result.issues[0]?.line).toBe(1);
+  });
+
+  it("rewrites a whole module when every name moves together", () => {
+    const source =
+      'const load = require("@adapttable/vue-unstyled/export-csv");\n';
+    expect(migrateV4Source(source).code).toBe(
+      'const load = require("@adapttable/vue-unstyled/export");\n'
+    );
+    const dynamic = migrateV4Source(
+      'export * from "@adapttable/element-plus/export-csv";\n'
+    );
+    expect(dynamic.code).toBe(
+      'export * from "@adapttable/element-plus/export";\n'
+    );
+    expect(migrateV4Source(dynamic.code).movedImports).toBe(0);
+  });
+
+  it("reports an angular binding on the original line after a split import", () => {
+    const source = [
+      'import { selectionStats, useTableFeatures } from "@adapttable/mui/features";',
+      '<adapt-data-table [selectedIds]="ids" (selectionChange)="onSelection($event)" />',
+      "",
+    ].join("\n");
+    const result = migrateV4Source(source);
+    expect(result.code.split("\n")).toHaveLength(4);
+    const binding = result.issues.find((issue) =>
+      issue.message.includes("[selectedIds]")
+    );
+    expect(binding?.line).toBe(2);
+  });
+
+  it("rewrites a vue script and reports only an adapttable template binding", () => {
+    const source = [
+      "<script>",
+      "const example = 'import { selectionStats, useTableFeatures } from \"@adapttable/mui/features\";';",
+      'import { selection } from "@adapttable/mui/features";',
+      "</script>",
+      "<template>",
+      '<adapt-data-table [selectedIds]="ids" (selectionChange)="onSelection($event)" />',
+      '<app-people [selectedIds]="ids" />',
+      '<OtherTable v-model:selected-ids="ids" />',
+      "</template>",
+      "",
+    ].join("\n");
+    const result = migrateV4File(source, "people.vue");
+    expect(result.code).toContain(
+      'import { selection } from "@adapttable/react/features";'
+    );
+    expect(result.code).toContain("@adapttable/mui/features");
+    expect(result.code).toContain('<app-people [selectedIds]="ids" />');
+    const lines = result.issues.map((issue) => issue.line);
+    expect(lines).toContain(6);
+    expect(lines).not.toContain(7);
+    expect(lines).not.toContain(8);
+    const template = migrateV4File(
+      '<adapt-data-table [selectedIds]="ids"></adapt-data-table>\n<app-table [selectedIds]="ids"></app-table>\n',
+      "table.component.html"
+    );
+    expect(template.changed).toBe(false);
+    expect(template.issues).toHaveLength(1);
+    expect(template.issues[0]?.line).toBe(1);
+  });
+
+  it("reads a script block whatever the tag's case and closing-tag contents", () => {
+    const source = [
+      '<SCRIPT setup lang="ts">',
+      'import { selection } from "@adapttable/mui/features";',
+      "</Script\t\n bar>",
+      "<template><div /></template>",
+      "",
+    ].join("\n");
+    expect(migrateV4File(source, "people.vue").code).toContain(
+      'import { selection } from "@adapttable/react/features";'
+    );
+    expect(
+      migrateVueScripts(source, (block) => ({
+        code: block.toUpperCase(),
+        changed: true,
+        movedImports: 1,
+        issues: [],
+      })).code
+    ).toContain('IMPORT { SELECTION } FROM "@ADAPTTABLE/MUI/FEATURES";');
+  });
+
+  it("leaves a file that uses nothing v4 moved untouched", () => {
+    const source = 'import { DataTable } from "@adapttable/mui";\n';
+    expect(migrateV4Source(source)).toEqual({
+      code: source,
+      changed: false,
+      movedImports: 0,
+      issues: [],
+    });
+  });
+});

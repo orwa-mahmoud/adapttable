@@ -4,6 +4,7 @@
     "neutral": [
       "ai",
       "ai-ag-ui",
+      "ai-agent",
       "ai-ai-sdk",
       "ai-assistant",
       "ai-context",
@@ -22,6 +23,7 @@
       "core-engine",
       "core-formula",
       "core-grouping",
+      "core-locale",
       "core-pdf",
       "core-pivot",
       "core-query",
@@ -29,7 +31,27 @@
       "core-stream",
       "core-xlsx",
       "i18n",
-      "i18n-load",
+      "i18n-catalog",
+      "i18n-locales-ar",
+      "i18n-locales-cs",
+      "i18n-locales-de",
+      "i18n-locales-en",
+      "i18n-locales-es",
+      "i18n-locales-fa",
+      "i18n-locales-fr",
+      "i18n-locales-he",
+      "i18n-locales-hi",
+      "i18n-locales-id",
+      "i18n-locales-it",
+      "i18n-locales-ja",
+      "i18n-locales-ko",
+      "i18n-locales-pl",
+      "i18n-locales-pt",
+      "i18n-locales-ru",
+      "i18n-locales-tr",
+      "i18n-locales-ur",
+      "i18n-locales-zh",
+      "i18n-locales-zh-TW",
       "server"
     ],
     "angular": [
@@ -52,6 +74,7 @@
       "adapter-angular-unstyled-cell-span",
       "adapter-angular-unstyled-column-groups",
       "adapter-angular-unstyled-column-menu",
+      "adapter-angular-unstyled-column-layout",
       "adapter-angular-unstyled-column-selection",
       "adapter-angular-unstyled-command-palette",
       "adapter-angular-unstyled-context-menu",
@@ -59,8 +82,8 @@
       "adapter-angular-unstyled-editing",
       "adapter-angular-unstyled-export",
       "adapter-angular-unstyled-extra-rows",
-      "adapter-angular-unstyled-features",
       "adapter-angular-unstyled-filters",
+      "adapter-angular-unstyled-filtering",
       "adapter-angular-unstyled-find-in-table",
       "adapter-angular-unstyled-fit-columns",
       "adapter-angular-unstyled-fullscreen",
@@ -93,6 +116,7 @@
       "adapter-ng-zorro-cell-span",
       "adapter-ng-zorro-column-groups",
       "adapter-ng-zorro-column-menu",
+      "adapter-ng-zorro-column-layout",
       "adapter-ng-zorro-column-selection",
       "adapter-ng-zorro-command-palette",
       "adapter-ng-zorro-context-menu",
@@ -100,8 +124,8 @@
       "adapter-ng-zorro-editing",
       "adapter-ng-zorro-export",
       "adapter-ng-zorro-extra-rows",
-      "adapter-ng-zorro-features",
       "adapter-ng-zorro-filters",
+      "adapter-ng-zorro-filtering",
       "adapter-ng-zorro-find-in-table",
       "adapter-ng-zorro-fit-columns",
       "adapter-ng-zorro-fullscreen",
@@ -134,6 +158,7 @@
       "adapter-angular-aria-cell-span",
       "adapter-angular-aria-column-groups",
       "adapter-angular-aria-column-menu",
+      "adapter-angular-aria-column-layout",
       "adapter-angular-aria-column-selection",
       "adapter-angular-aria-command-palette",
       "adapter-angular-aria-context-menu",
@@ -141,8 +166,8 @@
       "adapter-angular-aria-editing",
       "adapter-angular-aria-export",
       "adapter-angular-aria-extra-rows",
-      "adapter-angular-aria-features",
       "adapter-angular-aria-filters",
+      "adapter-angular-aria-filtering",
       "adapter-angular-aria-find-in-table",
       "adapter-angular-aria-fit-columns",
       "adapter-angular-aria-fullscreen",
@@ -175,6 +200,7 @@
       "adapter-angular-cdk-cell-span",
       "adapter-angular-cdk-column-groups",
       "adapter-angular-cdk-column-menu",
+      "adapter-angular-cdk-column-layout",
       "adapter-angular-cdk-column-selection",
       "adapter-angular-cdk-command-palette",
       "adapter-angular-cdk-context-menu",
@@ -182,8 +208,8 @@
       "adapter-angular-cdk-editing",
       "adapter-angular-cdk-export",
       "adapter-angular-cdk-extra-rows",
-      "adapter-angular-cdk-features",
       "adapter-angular-cdk-filters",
+      "adapter-angular-cdk-filtering",
       "adapter-angular-cdk-find-in-table",
       "adapter-angular-cdk-fit-columns",
       "adapter-angular-cdk-fullscreen",
@@ -216,6 +242,7 @@
       "adapter-material-cell-span",
       "adapter-material-column-groups",
       "adapter-material-column-menu",
+      "adapter-material-column-layout",
       "adapter-material-column-selection",
       "adapter-material-command-palette",
       "adapter-material-context-menu",
@@ -223,8 +250,8 @@
       "adapter-material-editing",
       "adapter-material-export",
       "adapter-material-extra-rows",
-      "adapter-material-features",
       "adapter-material-filters",
+      "adapter-material-filtering",
       "adapter-material-find-in-table",
       "adapter-material-fit-columns",
       "adapter-material-fullscreen",
@@ -257,6 +284,7 @@
       "adapter-ng-bootstrap-cell-span",
       "adapter-ng-bootstrap-column-groups",
       "adapter-ng-bootstrap-column-menu",
+      "adapter-ng-bootstrap-column-layout",
       "adapter-ng-bootstrap-column-selection",
       "adapter-ng-bootstrap-command-palette",
       "adapter-ng-bootstrap-context-menu",
@@ -264,8 +292,8 @@
       "adapter-ng-bootstrap-editing",
       "adapter-ng-bootstrap-export",
       "adapter-ng-bootstrap-extra-rows",
-      "adapter-ng-bootstrap-features",
       "adapter-ng-bootstrap-filters",
+      "adapter-ng-bootstrap-filtering",
       "adapter-ng-bootstrap-find-in-table",
       "adapter-ng-bootstrap-fit-columns",
       "adapter-ng-bootstrap-fullscreen",
@@ -298,6 +326,7 @@
       "adapter-ngx-bootstrap-cell-span",
       "adapter-ngx-bootstrap-column-groups",
       "adapter-ngx-bootstrap-column-menu",
+      "adapter-ngx-bootstrap-column-layout",
       "adapter-ngx-bootstrap-column-selection",
       "adapter-ngx-bootstrap-command-palette",
       "adapter-ngx-bootstrap-context-menu",
@@ -305,8 +334,8 @@
       "adapter-ngx-bootstrap-editing",
       "adapter-ngx-bootstrap-export",
       "adapter-ngx-bootstrap-extra-rows",
-      "adapter-ngx-bootstrap-features",
       "adapter-ngx-bootstrap-filters",
+      "adapter-ngx-bootstrap-filtering",
       "adapter-ngx-bootstrap-find-in-table",
       "adapter-ngx-bootstrap-fit-columns",
       "adapter-ngx-bootstrap-fullscreen",
@@ -339,6 +368,7 @@
       "adapter-spartan-cell-span",
       "adapter-spartan-column-groups",
       "adapter-spartan-column-menu",
+      "adapter-spartan-column-layout",
       "adapter-spartan-column-selection",
       "adapter-spartan-command-palette",
       "adapter-spartan-context-menu",
@@ -346,8 +376,8 @@
       "adapter-spartan-editing",
       "adapter-spartan-export",
       "adapter-spartan-extra-rows",
-      "adapter-spartan-features",
       "adapter-spartan-filters",
+      "adapter-spartan-filtering",
       "adapter-spartan-find-in-table",
       "adapter-spartan-fit-columns",
       "adapter-spartan-fullscreen",
@@ -380,6 +410,7 @@
       "adapter-taiga-ui-cell-span",
       "adapter-taiga-ui-column-groups",
       "adapter-taiga-ui-column-menu",
+      "adapter-taiga-ui-column-layout",
       "adapter-taiga-ui-column-selection",
       "adapter-taiga-ui-command-palette",
       "adapter-taiga-ui-context-menu",
@@ -387,8 +418,8 @@
       "adapter-taiga-ui-editing",
       "adapter-taiga-ui-export",
       "adapter-taiga-ui-extra-rows",
-      "adapter-taiga-ui-features",
       "adapter-taiga-ui-filters",
+      "adapter-taiga-ui-filtering",
       "adapter-taiga-ui-find-in-table",
       "adapter-taiga-ui-fit-columns",
       "adapter-taiga-ui-fullscreen",
@@ -412,7 +443,9 @@
       "adapter-taiga-ui-side-panel",
       "adapter-taiga-ui-status-bar",
       "adapter-taiga-ui-tree",
-      "adapter-taiga-ui-virtualize"
+      "adapter-taiga-ui-virtualize",
+      "angular-toolbar",
+      "angular/selection"
     ],
     "react": [
       "adapter-antd",
@@ -456,6 +489,7 @@
       "adapter-unstyled-pivot",
       "ai-react",
       "antd/density",
+      "antd/virtualize",
       "antd/export",
       "antd/fullscreen",
       "antd/preset",
@@ -476,6 +510,7 @@
       "forwards @adapttable/unstyled/cell-span",
       "forwards @adapttable/unstyled/column-groups",
       "forwards @adapttable/unstyled/column-menu",
+      "forwards @adapttable/unstyled/column-layout",
       "forwards @adapttable/unstyled/column-selection",
       "forwards @adapttable/unstyled/command-palette",
       "forwards @adapttable/unstyled/context-menu",
@@ -484,6 +519,7 @@
       "forwards @adapttable/unstyled/export",
       "forwards @adapttable/unstyled/extra-rows",
       "forwards @adapttable/unstyled/filters",
+      "forwards @adapttable/unstyled/filtering",
       "forwards @adapttable/unstyled/find-in-table",
       "forwards @adapttable/unstyled/fit-columns",
       "forwards @adapttable/unstyled/fullscreen",
@@ -513,13 +549,14 @@
       "kit/cell-span",
       "kit/column-groups",
       "kit/column-menu",
+      "kit/column-layout",
       "kit/column-selection",
       "kit/command-palette",
       "kit/context-menu",
       "kit/editing",
       "kit/extra-rows",
-      "kit/features",
       "kit/filters",
+      "kit/filtering",
       "kit/find-in-table",
       "kit/fit-columns",
       "kit/grouping",
@@ -534,6 +571,7 @@
       "kit/row-pinning",
       "kit/row-reorder",
       "kit/saved-views",
+      "kit/selection",
       "kit/selection-stats",
       "kit/side-panel",
       "kit/status-bar",
@@ -573,11 +611,6 @@
     "vue": [
       "vue",
       "vue-adapter",
-      "adapter-element-plus-features",
-      "adapter-naive-ui-features",
-      "adapter-nuxt-ui-features",
-      "adapter-quasar-features",
-      "adapter-vuetify-features",
       "vue-features",
       "vue-formula",
       "vue-pivot",
@@ -586,11 +619,11 @@
       "vue-pdf",
       "vue-xlsx",
       "adapter-vue-unstyled",
-      "adapter-vue-unstyled-features",
       "adapter-vue-unstyled-grouping",
       "adapter-vue-unstyled-tree",
       "adapter-vue-unstyled-row-detail",
       "adapter-vue-unstyled-filters",
+      "adapter-vue-unstyled-filtering",
       "adapter-vue-unstyled-header-filters",
       "adapter-vue-unstyled-editing",
       "adapter-vue-unstyled-batch-editing",
@@ -613,6 +646,7 @@
       "adapter-vue-unstyled-find-in-table",
       "adapter-vue-unstyled-status-bar",
       "adapter-vue-unstyled-column-menu",
+      "adapter-vue-unstyled-column-layout",
       "adapter-vue-unstyled-column-selection",
       "adapter-vue-unstyled-selection-stats",
       "adapter-vue-unstyled-bulk-actions",
@@ -620,7 +654,6 @@
       "adapter-vue-unstyled-context-menu",
       "adapter-vue-unstyled-side-panel",
       "adapter-vue-unstyled-print",
-      "adapter-vue-unstyled-export-csv",
       "adapter-vue-unstyled-export-pdf",
       "adapter-vue-unstyled-export-xlsx",
       "adapter-vue-unstyled-pivot",
@@ -636,18 +669,19 @@
       "adapter-element-plus-cell-span",
       "adapter-element-plus-column-groups",
       "adapter-element-plus-column-menu",
+      "adapter-element-plus-column-layout",
       "adapter-element-plus-column-selection",
       "adapter-element-plus-columns",
       "adapter-element-plus-command-palette",
       "adapter-element-plus-context-menu",
       "adapter-element-plus-density",
       "adapter-element-plus-editing",
-      "adapter-element-plus-export-csv",
       "adapter-element-plus-export-pdf",
       "adapter-element-plus-export-xlsx",
       "adapter-element-plus-export",
       "adapter-element-plus-extra-rows",
       "adapter-element-plus-filters",
+      "adapter-element-plus-filtering",
       "adapter-element-plus-find-in-table",
       "adapter-element-plus-fit-columns",
       "adapter-element-plus-fullscreen",
@@ -681,18 +715,19 @@
       "adapter-naive-ui-cell-span",
       "adapter-naive-ui-column-groups",
       "adapter-naive-ui-column-menu",
+      "adapter-naive-ui-column-layout",
       "adapter-naive-ui-column-selection",
       "adapter-naive-ui-columns",
       "adapter-naive-ui-command-palette",
       "adapter-naive-ui-context-menu",
       "adapter-naive-ui-density",
       "adapter-naive-ui-editing",
-      "adapter-naive-ui-export-csv",
       "adapter-naive-ui-export-pdf",
       "adapter-naive-ui-export-xlsx",
       "adapter-naive-ui-export",
       "adapter-naive-ui-extra-rows",
       "adapter-naive-ui-filters",
+      "adapter-naive-ui-filtering",
       "adapter-naive-ui-find-in-table",
       "adapter-naive-ui-fit-columns",
       "adapter-naive-ui-fullscreen",
@@ -727,18 +762,19 @@
       "adapter-nuxt-ui-cell-span",
       "adapter-nuxt-ui-column-groups",
       "adapter-nuxt-ui-column-menu",
+      "adapter-nuxt-ui-column-layout",
       "adapter-nuxt-ui-column-selection",
       "adapter-nuxt-ui-columns",
       "adapter-nuxt-ui-command-palette",
       "adapter-nuxt-ui-context-menu",
       "adapter-nuxt-ui-density",
       "adapter-nuxt-ui-editing",
-      "adapter-nuxt-ui-export-csv",
       "adapter-nuxt-ui-export-pdf",
       "adapter-nuxt-ui-export-xlsx",
       "adapter-nuxt-ui-export",
       "adapter-nuxt-ui-extra-rows",
       "adapter-nuxt-ui-filters",
+      "adapter-nuxt-ui-filtering",
       "adapter-nuxt-ui-find-in-table",
       "adapter-nuxt-ui-fit-columns",
       "adapter-nuxt-ui-fullscreen",
@@ -772,6 +808,7 @@
       "adapter-quasar-cell-span",
       "adapter-quasar-column-groups",
       "adapter-quasar-column-menu",
+      "adapter-quasar-column-layout",
       "adapter-quasar-column-selection",
       "adapter-quasar-columns",
       "adapter-quasar-command-palette",
@@ -780,10 +817,10 @@
       "adapter-quasar-editing",
       "adapter-quasar-export-pdf",
       "adapter-quasar-export-xlsx",
-      "adapter-quasar-export-csv",
       "adapter-quasar-export",
       "adapter-quasar-extra-rows",
       "adapter-quasar-filters",
+      "adapter-quasar-filtering",
       "adapter-quasar-find-in-table",
       "adapter-quasar-fit-columns",
       "adapter-quasar-fullscreen",
@@ -818,19 +855,19 @@
       "adapter-reka-ui-cell-span",
       "adapter-reka-ui-column-groups",
       "adapter-reka-ui-column-menu",
+      "adapter-reka-ui-column-layout",
       "adapter-reka-ui-column-selection",
       "adapter-reka-ui-columns",
       "adapter-reka-ui-command-palette",
       "adapter-reka-ui-context-menu",
       "adapter-reka-ui-density",
       "adapter-reka-ui-editing",
-      "adapter-reka-ui-export-csv",
       "adapter-reka-ui-export-pdf",
       "adapter-reka-ui-export-xlsx",
       "adapter-reka-ui-export",
       "adapter-reka-ui-extra-rows",
-      "adapter-reka-ui-features",
       "adapter-reka-ui-filters",
+      "adapter-reka-ui-filtering",
       "adapter-reka-ui-find-in-table",
       "adapter-reka-ui-fit-columns",
       "adapter-reka-ui-formula",
@@ -867,19 +904,19 @@
       "adapter-shadcn-vue-cell-span",
       "adapter-shadcn-vue-column-groups",
       "adapter-shadcn-vue-column-menu",
+      "adapter-shadcn-vue-column-layout",
       "adapter-shadcn-vue-column-selection",
       "adapter-shadcn-vue-columns",
       "adapter-shadcn-vue-command-palette",
       "adapter-shadcn-vue-context-menu",
       "adapter-shadcn-vue-density",
       "adapter-shadcn-vue-editing",
-      "adapter-shadcn-vue-export-csv",
       "adapter-shadcn-vue-export-pdf",
       "adapter-shadcn-vue-export-xlsx",
       "adapter-shadcn-vue-export",
       "adapter-shadcn-vue-extra-rows",
-      "adapter-shadcn-vue-features",
       "adapter-shadcn-vue-filters",
+      "adapter-shadcn-vue-filtering",
       "adapter-shadcn-vue-find-in-table",
       "adapter-shadcn-vue-fit-columns",
       "adapter-shadcn-vue-formula",
@@ -915,18 +952,19 @@
       "adapter-vuetify-cell-span",
       "adapter-vuetify-column-groups",
       "adapter-vuetify-column-menu",
+      "adapter-vuetify-column-layout",
       "adapter-vuetify-column-selection",
       "adapter-vuetify-columns",
       "adapter-vuetify-command-palette",
       "adapter-vuetify-context-menu",
       "adapter-vuetify-density",
       "adapter-vuetify-editing",
-      "adapter-vuetify-export-csv",
       "adapter-vuetify-export-pdf",
       "adapter-vuetify-export-xlsx",
       "adapter-vuetify-export",
       "adapter-vuetify-extra-rows",
       "adapter-vuetify-filters",
+      "adapter-vuetify-filtering",
       "adapter-vuetify-find-in-table",
       "adapter-vuetify-fit-columns",
       "adapter-vuetify-fullscreen",
@@ -953,654 +991,11 @@
       "adapter-vuetify",
       "adapter-vuetify-preset",
       "adapter-vuetify-pivot",
-      "adapter-vuetify-assistant"
+      "adapter-vuetify-assistant",
+      "vue/selection"
     ]
   },
   "surfaces": {
-    "adapter-element-plus-features": [
-      "agentApproval",
-      "AgentApproval",
-      "AgentApprovalProps",
-      "batchEditing",
-      "BatchEditingState",
-      "BatchRowEdit",
-      "bulkActions",
-      "CellEdit",
-      "CellEditHandler",
-      "cellNavigation",
-      "CellNavigationOptions",
-      "CellRange",
-      "cellSpan",
-      "CellSpanAppearance",
-      "CellSpanRequest",
-      "ChecklistFilter",
-      "ChecklistFilterProps",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "ColumnMenuSlotProps",
-      "ColumnResizeHandleOptions",
-      "ColumnResizeHandleProps",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "ConfirmHandler",
-      "ConfirmRequest",
-      "contextMenu",
-      "DataTableClassNames",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "EditingLifecycleExtras",
-      "ElementBatchEditBar",
-      "ElementEditableCell",
-      "ElementHeaderFilter",
-      "ElementRowEditActions",
-      "exportCsv",
-      "ExportPdfOptions",
-      "ExportXlsxOptions",
-      "ExtraEntry",
-      "ExtraRow",
-      "ExtraRowKind",
-      "extraRows",
-      "FilterDef",
-      "FilterField",
-      "FilterFieldOptions",
-      "FilterHeaderControl",
-      "FilterHeaderControlOptions",
-      "FilterHeaderControlProps",
-      "FilterHeaderRow",
-      "FilterHeaderRowProps",
-      "FilterOption",
-      "filters",
-      "FiltersOptions",
-      "FilterTreeBuilder",
-      "FilterTreeBuilderProps",
-      "filterTypes",
-      "FilterTypeSpec",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "GetCellSpan",
-      "GetCellSpanArgs",
-      "GridCell",
-      "GroupCollapseOptions",
-      "grouping",
-      "GroupingExtras",
-      "groupingPanel",
-      "GroupingPanelProps",
-      "GroupNode",
-      "GroupSort",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "NestedTable",
-      "nestedTableDetail",
-      "NestedTableFor",
-      "PinnedRows",
-      "PinnedSummaryEntry",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "RowAction",
-      "rowActions",
-      "rowAppearance",
-      "RowAppearanceOptions",
-      "rowDetail",
-      "RowEditIcons",
-      "rowEditing",
-      "RowEditingState",
-      "RowExpansionOptions",
-      "RowHeight",
-      "RowMutationHandlers",
-      "rowPinning",
-      "RowPinningFeatureOptions",
-      "RowPinSide",
-      "RowPinState",
-      "rowReorder",
-      "RowReorderHandler",
-      "RowReorderOptions",
-      "RowStyle",
-      "SavedView",
-      "savedViews",
-      "SavedViewsPanel",
-      "SavedViewsPanelProps",
-      "SavedViewsStore",
-      "selectionStats",
-      "sidePanel",
-      "StaticGroupingExtras",
-      "statusBar",
-      "tableAssistant",
-      "TableAssistant",
-      "TableAssistantProps",
-      "TableEditingOptions",
-      "TableRowDetail",
-      "TableTree",
-      "tree",
-      "TreeExpansionOptions",
-      "TreeFeatureOptions",
-      "undoRedoButtons",
-      "useGroupCollapse",
-      "useGroupCollapseUrlState",
-      "useGroupPaging",
-      "useLazyChildren",
-      "useRowExpansion",
-      "useRowReorder",
-      "UseSavedViewsOptions",
-      "useTreeExpansion",
-      "virtualize",
-      "VirtualizeOptions",
-      "booleanFilterWidget",
-      "checklistFilterWidget",
-      "filtersWith",
-      "multiSelectFilterWidget",
-      "rangeFilterWidget",
-      "selectFilterWidget",
-      "textFilterWidget"
-    ],
-    "adapter-naive-ui-features": [
-      "agentApproval",
-      "AgentApproval",
-      "AgentApprovalProps",
-      "batchEditing",
-      "BatchEditingState",
-      "BatchRowEdit",
-      "bulkActions",
-      "CellEdit",
-      "CellEditHandler",
-      "cellNavigation",
-      "CellNavigationOptions",
-      "CellRange",
-      "cellSpan",
-      "ChecklistFilter",
-      "ChecklistFilterProps",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "ColumnMenuSlotProps",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "contextMenu",
-      "DataTableClassNames",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "EditingLifecycleExtras",
-      "exportCsv",
-      "ExportPdfOptions",
-      "ExportXlsxOptions",
-      "extraRows",
-      "FilterDef",
-      "FilterHeaderControl",
-      "FilterHeaderControlOptions",
-      "FilterHeaderControlProps",
-      "FilterHeaderRow",
-      "FilterHeaderRowProps",
-      "FilterOption",
-      "filters",
-      "FiltersOptions",
-      "FilterTreeBuilder",
-      "FilterTreeBuilderProps",
-      "filterTypes",
-      "FilterTypeSpec",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "GridCell",
-      "GroupCollapseOptions",
-      "grouping",
-      "GroupingExtras",
-      "groupingPanel",
-      "GroupingPanelProps",
-      "GroupNode",
-      "GroupSort",
-      "headerFilters",
-      "multiSort",
-      "NaiveBatchEditBar",
-      "NaiveEditableCell",
-      "NaiveFilterField",
-      "NaiveHeaderFilter",
-      "NaiveRowEditActions",
-      "nestedTable",
-      "NestedTable",
-      "nestedTableDetail",
-      "NestedTableFor",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "rowActions",
-      "rowAppearance",
-      "rowDetail",
-      "RowEditIcons",
-      "rowEditing",
-      "RowEditingState",
-      "RowExpansionOptions",
-      "rowPinning",
-      "rowReorder",
-      "RowReorderHandler",
-      "RowReorderOptions",
-      "SavedView",
-      "savedViews",
-      "SavedViewsPanel",
-      "SavedViewsPanelProps",
-      "SavedViewsStore",
-      "selectionStats",
-      "sidePanel",
-      "StaticGroupingExtras",
-      "statusBar",
-      "tableAssistant",
-      "TableAssistant",
-      "TableAssistantProps",
-      "TableEditingOptions",
-      "TableRowDetail",
-      "TableTree",
-      "tree",
-      "TreeExpansionOptions",
-      "TreeFeatureOptions",
-      "undoRedoButtons",
-      "useGroupCollapse",
-      "useGroupCollapseUrlState",
-      "useGroupPaging",
-      "useLazyChildren",
-      "useRowExpansion",
-      "useRowReorder",
-      "UseSavedViewsOptions",
-      "useTreeExpansion",
-      "virtualize",
-      "VirtualizeOptions",
-      "booleanFilterWidget",
-      "checklistFilterWidget",
-      "filtersWith",
-      "multiSelectFilterWidget",
-      "rangeFilterWidget",
-      "selectFilterWidget",
-      "textFilterWidget"
-    ],
-    "adapter-nuxt-ui-features": [
-      "agentApproval",
-      "AgentApproval",
-      "AgentApprovalProps",
-      "batchEditing",
-      "BatchEditingState",
-      "BatchRowEdit",
-      "bulkActions",
-      "CellEdit",
-      "CellEditHandler",
-      "cellNavigation",
-      "CellNavigationOptions",
-      "CellRange",
-      "cellSpan",
-      "CellSpanAppearance",
-      "CellSpanRequest",
-      "ChecklistFilter",
-      "ChecklistFilterProps",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "ColumnMenuSlotProps",
-      "ColumnResizeHandleOptions",
-      "ColumnResizeHandleProps",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "ConfirmHandler",
-      "ConfirmRequest",
-      "contextMenu",
-      "DataTableClassNames",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "EditingLifecycleExtras",
-      "exportCsv",
-      "ExportPdfOptions",
-      "ExportXlsxOptions",
-      "ExtraEntry",
-      "ExtraRow",
-      "ExtraRowKind",
-      "extraRows",
-      "FilterDef",
-      "FilterHeaderControl",
-      "FilterHeaderControlOptions",
-      "FilterHeaderControlProps",
-      "FilterHeaderRow",
-      "FilterHeaderRowProps",
-      "FilterOption",
-      "filters",
-      "FiltersOptions",
-      "FilterTreeBuilder",
-      "FilterTreeBuilderProps",
-      "filterTypes",
-      "FilterTypeSpec",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "GetCellSpan",
-      "GetCellSpanArgs",
-      "GridCell",
-      "GroupCollapseOptions",
-      "grouping",
-      "GroupingExtras",
-      "groupingPanel",
-      "GroupingPanelProps",
-      "GroupNode",
-      "GroupSort",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "NestedTable",
-      "nestedTableDetail",
-      "NestedTableFor",
-      "NuxtBatchEditBar",
-      "NuxtEditableCell",
-      "NuxtFilterField",
-      "NuxtHeaderFilter",
-      "NuxtRowEditActions",
-      "PinnedRows",
-      "PinnedSummaryEntry",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "RowAction",
-      "rowActions",
-      "rowAppearance",
-      "RowAppearanceOptions",
-      "rowDetail",
-      "RowEditIcons",
-      "rowEditing",
-      "RowEditingState",
-      "RowExpansionOptions",
-      "RowHeight",
-      "RowMutationHandlers",
-      "rowPinning",
-      "RowPinningFeatureOptions",
-      "RowPinSide",
-      "RowPinState",
-      "rowReorder",
-      "RowReorderHandler",
-      "RowReorderOptions",
-      "RowStyle",
-      "SavedView",
-      "savedViews",
-      "SavedViewsPanel",
-      "SavedViewsPanelProps",
-      "SavedViewsStore",
-      "selectionStats",
-      "sidePanel",
-      "StaticGroupingExtras",
-      "statusBar",
-      "tableAssistant",
-      "TableAssistant",
-      "TableAssistantProps",
-      "TableEditingOptions",
-      "TableRowDetail",
-      "TableTree",
-      "tree",
-      "TreeExpansionOptions",
-      "TreeFeatureOptions",
-      "undoRedoButtons",
-      "useGroupCollapse",
-      "useGroupCollapseUrlState",
-      "useGroupPaging",
-      "useLazyChildren",
-      "useRowExpansion",
-      "useRowReorder",
-      "UseSavedViewsOptions",
-      "useTreeExpansion",
-      "virtualize",
-      "VirtualizeOptions",
-      "booleanFilterWidget",
-      "checklistFilterWidget",
-      "filtersWith",
-      "multiSelectFilterWidget",
-      "rangeFilterWidget",
-      "selectFilterWidget",
-      "textFilterWidget"
-    ],
-    "adapter-quasar-features": [
-      "agentApproval",
-      "AgentApproval",
-      "AgentApprovalProps",
-      "batchEditing",
-      "BatchEditingState",
-      "BatchRowEdit",
-      "bulkActions",
-      "CellEdit",
-      "CellEditHandler",
-      "cellNavigation",
-      "CellNavigationOptions",
-      "CellRange",
-      "cellSpan",
-      "ChecklistFilter",
-      "ChecklistFilterProps",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "ColumnMenuSlotProps",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "EditingLifecycleExtras",
-      "exportCsv",
-      "exportPdf",
-      "ExportPdfOptions",
-      "exportXlsx",
-      "ExportXlsxOptions",
-      "extraRows",
-      "FilterDef",
-      "FilterHeaderControl",
-      "FilterHeaderControlOptions",
-      "FilterHeaderControlProps",
-      "FilterHeaderRow",
-      "FilterHeaderRowProps",
-      "FilterOption",
-      "filters",
-      "FiltersOptions",
-      "FilterTreeBuilder",
-      "FilterTreeBuilderProps",
-      "filterTypes",
-      "FilterTypeSpec",
-      "FindBar",
-      "FindBarProps",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "GridCell",
-      "grouping",
-      "GroupingExtras",
-      "groupingPanel",
-      "GroupingPanelProps",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "pinnedSummaryRows",
-      "print",
-      "QuasarBatchEditBar",
-      "QuasarEditableCell",
-      "QuasarFilterField",
-      "QuasarHeaderFilter",
-      "QuasarRowEditActions",
-      "resizableColumns",
-      "rowActions",
-      "rowAppearance",
-      "RowAppearanceOptions",
-      "rowDetail",
-      "RowEditIcons",
-      "rowEditing",
-      "RowEditingState",
-      "rowPinning",
-      "RowPinningFeatureOptions",
-      "rowReorder",
-      "RowReorderHandler",
-      "RowReorderOptions",
-      "SavedView",
-      "savedViews",
-      "SavedViewsPanel",
-      "SavedViewsPanelProps",
-      "SavedViewsStore",
-      "SelectionStats",
-      "selectionStats",
-      "sidePanel",
-      "StaticGroupingExtras",
-      "statusBar",
-      "tableAssistant",
-      "TableAssistant",
-      "TableAssistantProps",
-      "TableEditingOptions",
-      "tree",
-      "TreeFeatureOptions",
-      "undoRedoButtons",
-      "useRowReorder",
-      "UseSavedViewsOptions",
-      "virtualize",
-      "VirtualizeOptions",
-      "booleanFilterWidget",
-      "checklistFilterWidget",
-      "filtersWith",
-      "multiSelectFilterWidget",
-      "rangeFilterWidget",
-      "selectFilterWidget",
-      "textFilterWidget"
-    ],
-    "adapter-vuetify-features": [
-      "agentApproval",
-      "AgentApproval",
-      "AgentApprovalProps",
-      "batchEditing",
-      "BatchEditingState",
-      "BatchRowEdit",
-      "bulkActions",
-      "CellEdit",
-      "CellEditHandler",
-      "cellNavigation",
-      "CellNavigationOptions",
-      "CellRange",
-      "cellSpan",
-      "CellSpanAppearance",
-      "CellSpanRequest",
-      "ChecklistFilter",
-      "ChecklistFilterProps",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "ColumnMenuSlotProps",
-      "ColumnResizeHandleOptions",
-      "ColumnResizeHandleProps",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "ConfirmHandler",
-      "ConfirmRequest",
-      "contextMenu",
-      "DataTableClassNames",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "EditingLifecycleExtras",
-      "exportCsv",
-      "ExportPdfOptions",
-      "ExportXlsxOptions",
-      "ExtraEntry",
-      "ExtraRow",
-      "ExtraRowKind",
-      "extraRows",
-      "FilterDef",
-      "FilterHeaderControl",
-      "FilterHeaderControlOptions",
-      "FilterHeaderControlProps",
-      "FilterHeaderRow",
-      "FilterHeaderRowProps",
-      "FilterOption",
-      "filters",
-      "FiltersOptions",
-      "FilterTreeBuilder",
-      "FilterTreeBuilderProps",
-      "filterTypes",
-      "FilterTypeSpec",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "GetCellSpan",
-      "GetCellSpanArgs",
-      "GridCell",
-      "GroupCollapseOptions",
-      "grouping",
-      "GroupingExtras",
-      "groupingPanel",
-      "GroupingPanelProps",
-      "GroupNode",
-      "GroupSort",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "NestedTable",
-      "nestedTableDetail",
-      "NestedTableFor",
-      "PinnedRows",
-      "PinnedSummaryEntry",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "RowAction",
-      "rowActions",
-      "rowAppearance",
-      "RowAppearanceOptions",
-      "rowDetail",
-      "RowEditIcons",
-      "rowEditing",
-      "RowEditingState",
-      "RowExpansionOptions",
-      "RowHeight",
-      "RowMutationHandlers",
-      "rowPinning",
-      "RowPinningFeatureOptions",
-      "RowPinSide",
-      "RowPinState",
-      "rowReorder",
-      "RowReorderHandler",
-      "RowReorderOptions",
-      "RowStyle",
-      "SavedView",
-      "savedViews",
-      "SavedViewsPanel",
-      "SavedViewsPanelProps",
-      "SavedViewsStore",
-      "selectionStats",
-      "sidePanel",
-      "StaticGroupingExtras",
-      "statusBar",
-      "tableAssistant",
-      "TableAssistant",
-      "TableAssistantProps",
-      "TableEditingOptions",
-      "TableRowDetail",
-      "TableTree",
-      "tree",
-      "TreeExpansionOptions",
-      "TreeFeatureOptions",
-      "undoRedoButtons",
-      "useGroupCollapse",
-      "useGroupCollapseUrlState",
-      "useGroupPaging",
-      "useLazyChildren",
-      "useRowExpansion",
-      "useRowReorder",
-      "UseSavedViewsOptions",
-      "useTreeExpansion",
-      "virtualize",
-      "VirtualizeOptions",
-      "VuetifyBatchEditBar",
-      "VuetifyEditableCell",
-      "VuetifyFilterField",
-      "VuetifyHeaderFilter",
-      "VuetifyRowEditActions",
-      "booleanFilterWidget",
-      "checklistFilterWidget",
-      "filtersWith",
-      "multiSelectFilterWidget",
-      "rangeFilterWidget",
-      "selectFilterWidget",
-      "textFilterWidget"
-    ],
     "adapter-antd": [
       "AgentApproval",
       "agentApproval",
@@ -2296,6 +1691,71 @@
       "WritePolicy",
       "WriteProposal",
       "WriteRowResult"
+    ],
+    "ai-agent": [
+      "AgentAggregateOperation",
+      "AgentAggregationColumn",
+      "AgentAggregations",
+      "AgentAggregationsPatch",
+      "AgentApply",
+      "AgentCapabilityContext",
+      "AgentCapabilityDefinition",
+      "AgentCapabilityKind",
+      "AgentCellEdit",
+      "AgentColumn",
+      "AgentColumnAuthoring",
+      "AgentContextInputs",
+      "AgentFilter",
+      "AgentFilterOption",
+      "AgentLimits",
+      "AgentManifest",
+      "AgentManifestAggregation",
+      "AgentObservation",
+      "AgentPagination",
+      "AgentPolicy",
+      "AgentRowAddressing",
+      "AgentSession",
+      "AlwaysAllowedState",
+      "ApprovalPolicy",
+      "ApprovalResult",
+      "ApprovalSubject",
+      "AssistantSuggestion",
+      "CAPABILITY_KEYS",
+      "CapabilityFamily",
+      "CapabilityGuide",
+      "CapabilityKey",
+      "CapabilityPartial",
+      "CapabilityPlan",
+      "CapabilityPresentation",
+      "CapabilityProgress",
+      "CapabilityStaging",
+      "CatalogEntry",
+      "CommitPolicy",
+      "ExecuteError",
+      "ExecuteResult",
+      "JsonSchema",
+      "ResolvedRow",
+      "RowAddressScope",
+      "RowKeyRef",
+      "RowPositionRef",
+      "RowReadQuery",
+      "RowRef",
+      "RowWindow",
+      "RowWindowRow",
+      "SharedApproval",
+      "TABLE_AGENT_STATE",
+      "TableAgentBridge",
+      "TableAgentColumnPatch",
+      "TableAgentController",
+      "TableAgentControllerInputs",
+      "TableAgentControllerOptions",
+      "TableAgentRuntimeOptions",
+      "TableAgentState",
+      "TableAgentViewReader",
+      "TableAgentWebMcpOptions",
+      "WritePolicy",
+      "WriteProposal",
+      "createTableAgentController"
     ],
     "ai-ai-sdk": [
       "AgentAggregateOperation",
@@ -3132,19 +2592,11 @@
       "starterComponent"
     ],
     "core": [
-      "acceptColumnDrag",
       "ActionAiOptions",
       "ActionApprovalPolicy",
       "ActionConfirm",
       "ACTIONS_COLUMN_KEY",
       "ActiveFilterChip",
-      "activeFilterChips",
-      "ActiveFilterChipsOptions",
-      "activeTierValue",
-      "addAggregation",
-      "addFilterTreeCondition",
-      "addFilterTreeGroup",
-      "advanceGroupPaging",
       "AgentApprovalDecision",
       "AgentApprovalOperation",
       "AgentApprovalPending",
@@ -3153,7 +2605,6 @@
       "Aggregatable",
       "AggregatableConfig",
       "aggregate",
-      "AGGREGATE_NAMES",
       "AGGREGATE_SUPPRESSED",
       "AggregateFn",
       "AggregateFormatContext",
@@ -3169,23 +2620,10 @@
       "AggregationModel",
       "AggregationModelInput",
       "AggregationOrigin",
-      "aggregationRemovalFocusSelectors",
       "AggregationSourceSupport",
       "Aggregator",
       "AllMatchingScope",
-      "allowsOperation",
-      "allowsReaderOperation",
       "allPinnedSummaryEntries",
-      "appendBaseKey",
-      "appendByKey",
-      "appendedRows",
-      "AppendStash",
-      "applyCollapsedColumnGroups",
-      "applyColumnNames",
-      "applyColumnOrder",
-      "applyFilterExtends",
-      "applyGroupLeafSelection",
-      "applyQuerySupport",
       "applyRowPatches",
       "applyRowPatchesToView",
       "applyRowPatchesWithLog",
@@ -3193,7 +2631,6 @@
       "applyRowPin",
       "applyRowReorder",
       "applyTableUrlState",
-      "APPROVAL_PREVIEW_LIMIT",
       "ApprovalArgumentPair",
       "approvalArgumentPairs",
       "ApprovalPresentation",
@@ -3201,76 +2638,42 @@
       "ApprovalReview",
       "ApprovalReviewItem",
       "approvalValueText",
-      "asBatchGesture",
-      "asGesture",
-      "AssemblyFns",
-      "assignField",
-      "attachIncrementalView",
       "AUTO_OPTIONS_LIMIT",
       "autoSizeColumns",
-      "availableFields",
-      "BASE_LABELS",
-      "batchEditBarModel",
-      "BatchEditBarModel",
       "BatchEditEntry",
-      "batchEditErrorId",
-      "batchEditHandler",
       "BatchEditHandler",
       "BatchEditingState",
-      "batchEditingView",
-      "batchEditorControl",
       "BatchEditSnapshot",
       "BatchEditStore",
       "BatchEditStoreOptions",
       "BatchPendingDrafts",
       "BatchRowEdit",
-      "beginCellEdit",
       "BinaryOp",
       "bindFeatureHostFn",
       "bindHeaderFilterDismiss",
-      "bindMobileCardList",
-      "BodyCell",
-      "bodyCellsHaveRowSpan",
       "bodyRowEntries",
       "BodyRowEntry",
       "BooleanChoice",
-      "booleanDraft",
       "BooleanFieldWidget",
-      "booleanFilterWidget",
-      "buildBodyCells",
       "buildExportTable",
       "buildFilterRuntime",
-      "buildFormulaColumns",
-      "buildGroupedFlatModel",
       "BuildGroupedFlatModelOptions",
       "buildTableCsv",
-      "buildTableQuery",
-      "buildTableXlsx",
       "buildTreeEntries",
       "BuildTreeEntriesOptions",
-      "BUILTIN_AGGREGATE_LABELS",
       "builtInFilterSpecs",
       "BulkAction",
       "BulkActionContext",
-      "bulkActionErrorMessage",
       "BulkActionOutcome",
-      "BulkActionRunnerController",
       "BulkActionRunnerOptions",
-      "BulkActionRunnerSnapshot",
-      "bulkBarModel",
-      "BulkBarModel",
-      "BulkBarSelection",
-      "canRequestCursorPage",
       "capabilityReason",
       "CapabilitySource",
       "captureTableUrlState",
-      "cellConflictAsk",
       "CellConflictAsk",
       "CellEdit",
       "CellEditCommit",
       "CellEditHandler",
       "CellEditingState",
-      "cellEditingView",
       "CellEditKeyAction",
       "CellEditKeyOutcome",
       "CellEditNavigation",
@@ -3280,116 +2683,50 @@
       "CellEditSessionOptions",
       "CellEditSnapshot",
       "CellEditTarget",
-      "cellFillHandler",
       "CellFillHandlerOptions",
-      "cellFlashAttr",
-      "cellNavigationChannels",
       "CellNavigationChannelsOptions",
-      "cellPasteHandler",
       "CellPasteHandlerOptions",
       "CellProps",
       "CellRange",
       "cellRangeBounds",
       "CellRangeBounds",
       "cellRangeIndices",
-      "cellRangeKey",
       "cellRangeSize",
-      "cellSaveFailure",
-      "cellSaveKey",
-      "cellSaveSignature",
-      "CellSaveSnapshot",
       "CellSaveState",
-      "cellSaveStatus",
       "CellSaveStatus",
-      "CellSaveStore",
       "CellSaveStoreOptions",
-      "cellSaveView",
-      "cellsForRow",
-      "cellsOfBatch",
-      "cellSortValue",
       "CellSpanAppearance",
-      "cellSpanMark",
       "CellSpanRequest",
       "CellValidator",
       "cellValue",
-      "CHANGED_CELL_FLASH_MS",
       "ChangedCellFlashOptions",
-      "ChangedCellFlashStore",
-      "changedRowFields",
       "CHECKLIST_ITEM_HEIGHT",
-      "CHECKLIST_ITEM_WIDTH",
       "CHECKLIST_LIST_HEIGHT",
-      "CHECKLIST_OPTION_GAP",
       "CHECKLIST_VIRTUALIZE_AT",
-      "checklistActions",
-      "ChecklistActions",
-      "checklistColumnsAcross",
-      "checklistItems",
-      "ChecklistItems",
-      "checklistSlice",
       "ChecklistSource",
       "ChecklistValue",
-      "checklistWindow",
-      "ChecklistWindow",
       "ChipLabelResolver",
-      "chipValuesOf",
-      "chordHasCommandModifier",
-      "ChordKeyEvent",
-      "chordMatches",
-      "clampedPage",
-      "clampMatchIndex",
       "clearCountFilterExtra",
-      "clearedFilterExtras",
       "ClipboardRangeOptions",
       "clipboardRangeText",
       "closeFailedTreeNode",
-      "coerceBooleanValue",
       "collectChecklistValues",
-      "collectFeatureNotices",
-      "CollectFeatureNoticesInput",
       "ColorScheme",
-      "COLUMN_DND_MIME",
-      "COLUMN_GROUP_ID_SEP",
-      "COLUMN_GROUP_RENDER_PREFIX",
-      "COLUMN_GROUP_STUB_PREFIX",
-      "COLUMN_GROUP_STUB_WIDTH",
-      "COLUMN_LAYOUT_STORE_OPTIONS",
-      "columnAggregationSignature",
       "ColumnAiOptions",
-      "ColumnDataTransfer",
-      "columnDragAllowed",
-      "ColumnDragController",
-      "ColumnDragEvent",
-      "columnDragRowAttrs",
       "ColumnDragRowAttrs",
-      "ColumnDragSnapshot",
-      "ColumnDragSource",
-      "ColumnDragTarget",
       "ColumnFilter",
-      "columnFlexShares",
       "ColumnFooterContext",
       "ColumnGroupDef",
-      "columnGroupHeaderCaption",
-      "columnGroupId",
-      "columnGroupPath",
       "ColumnGroupRecord",
       "ColumnGroupShow",
-      "columnGroupStubStyle",
       "ColumnHeaderContext",
       "ColumnHeaderController",
-      "columnHeaderLabel",
       "ColumnInput",
       "ColumnLayoutContribution",
-      "ColumnLayoutController",
-      "ColumnLayoutControllerOptions",
-      "columnLayoutSlice",
       "ColumnLayoutState",
-      "columnLayoutVisibleColumns",
-      "columnLetter",
       "ColumnMenuAction",
       "ColumnMenuActionContext",
       "ColumnMenuActionFactory",
-      "columnMenuActions",
       "ColumnMenuChoice",
       "ColumnMenuChoiceOption",
       "ColumnMenuChromeProps",
@@ -3397,55 +2734,24 @@
       "columnMenuLabel",
       "ColumnMenuLabels",
       "ColumnMenuRow",
-      "columnMenuRows",
       "ColumnMenuSlotProps",
       "ColumnMetadata",
       "ColumnModel",
       "ColumnModelEditor",
       "ColumnModelFilter",
-      "columnPinInsets",
-      "ColumnRenameEditor",
-      "ColumnRenameEditorOptions",
-      "ColumnRenameEditorSnapshot",
-      "ColumnRenameSubmit",
-      "columnReorderKeyDown",
-      "ColumnReorderKeyEvent",
-      "columnReorderKeyStep",
-      "columnResizeHandleProps",
       "ColumnResizeHandleOptions",
       "ColumnResizeHandleProps",
-      "columnSelectLabel",
-      "columnSizeStyle",
-      "ColumnSizingOptions",
       "columnText",
       "Command",
-      "CommandListController",
-      "commandListKeyAction",
-      "CommandListKeyAction",
-      "CommandListSnapshot",
-      "commandListView",
-      "CommandListView",
-      "commandPaletteCommands",
-      "CommandPaletteCommandsOptions",
       "CommandPaletteContribution",
-      "CommandPaletteController",
-      "CommandPaletteControllerOptions",
-      "CommandPaletteSnapshot",
-      "commitRowPin",
-      "compareValues",
-      "composeContextMenuExtra",
       "computed",
       "computedAggregateKeys",
       "ComputedColumnSpec",
       "computeFilterFacets",
-      "computePagination",
       "conditionToExtra",
-      "configureIncrementalView",
       "ConfirmHandler",
       "ConfirmRequest",
-      "contestedCellKey",
       "ContestedEditCell",
-      "contestedRowSignature",
       "ContextMenuActions",
       "ContextMenuContribution",
       "ContextMenuCopyFocus",
@@ -3457,9 +2763,6 @@
       "ContextMenuKeyEvent",
       "ContextMenuModelOptions",
       "ContextMenuMoveEvent",
-      "ContextMenuOpenController",
-      "ContextMenuOpenControllerOptions",
-      "ContextMenuOpenSnapshot",
       "ContextMenuPoint",
       "ContextMenuPointerEvent",
       "ContextMenuPressEvent",
@@ -3467,12 +2770,6 @@
       "ContextMenuState",
       "ContextMenuTarget",
       "ContextMenuTriggerHandlers",
-      "ControllableControl",
-      "ControllableStore",
-      "ControllableStoreOptions",
-      "controllerConflictAsk",
-      "copyContextMenuSelection",
-      "copyContextMenuTargetCell",
       "COUNT_OPERATOR_SYMBOL",
       "COUNT_OPERATORS",
       "countedRelativeToken",
@@ -3481,130 +2778,52 @@
       "CountFilterState",
       "countFilterStateFromExtra",
       "CountOperator",
-      "coveredAddressSet",
-      "createAllMatchingScope",
       "createBasicTableEngine",
-      "createBatchEditStore",
-      "createBulkActionRunner",
-      "createCellEditSession",
-      "createCellSaveStore",
-      "createChangedCellFlashStore",
-      "createColumnDragController",
-      "createColumnLayoutController",
-      "createColumnRenameEditor",
-      "createCommandList",
-      "createCommandPaletteController",
-      "createContextMenuOpenController",
-      "createControllableStore",
-      "createDirtyCellStore",
-      "createEditConflictStore",
-      "createEditHistory",
-      "createEditHistoryStack",
-      "createEditValidationStore",
-      "createExportController",
-      "createFilterOptionsLoader",
       "createFilterRegistry",
-      "createFindController",
-      "createFindShortcutScope",
-      "createFirstLoadLatch",
-      "createFrontendSource",
-      "createFrontendSourceWith",
-      "createGridFocusController",
-      "createGridNavigation",
       "createGroupingPanelController",
-      "createGroupPagingController",
-      "createHeaderFilterOverlay",
-      "createHighlightStore",
       "createHistoryAdapter",
       "createIncrementalView",
-      "createLazyChildrenController",
       "createMemoryAdapter",
       "createNeutralTable",
-      "createQueryEmitter",
-      "createQuerySource",
-      "createResponseAggregateOps",
-      "createRowEditStore",
       "createRowReorderController",
-      "createSavedViewRenameController",
-      "createSavedViewsController",
-      "createServerSource",
-      "createShortcutHandler",
-      "createTableData",
       "createTableEngine",
       "CreateTableEngineOptions",
-      "createTableViewStore",
-      "createUrlSliceStore",
       "CssProperties",
       "csvWriter",
-      "currentFeatureHost",
-      "cursorHasMore",
-      "CursorTrail",
-      "cursorTrailKey",
-      "CUSTOM_AGGREGATE",
       "CustomAggregateOperation",
       "CustomCellEditorConflict",
       "CustomCellEditorCtrl",
       "CustomCellEditorRender",
-      "customEditorConflict",
       "datasetIndex",
-      "DataTier",
       "DATE_OP_LABEL_KEYS",
       "DATE_OPS",
       "DateOp",
       "declaredAggregates",
       "DeclaredAggregates",
-      "declaredByDeveloper",
-      "declaredColumnLayout",
-      "declaredColumnName",
-      "DEFAULT_CARD_SIZE_PX",
-      "DEFAULT_DENSITY",
-      "DEFAULT_EDIT_HISTORY_DEPTH",
       "DEFAULT_LIMIT",
-      "DEFAULT_ROW_SIZE_PX",
       "DEFAULT_SHORTCUTS",
-      "DEFAULT_SIDE_PANEL_ID_PREFIX",
-      "defaultConfirm",
       "defaultFilterRegistry",
-      "defaultFindMatchCount",
       "defaultFrontendRowId",
-      "defaultLabels",
-      "defaultPendingRows",
-      "defaultRowReorderAnnouncements",
-      "defaultSaveErrorMessage",
       "defaultSearchText",
-      "deferGroupingDropToInner",
       "DELETE_ROW_ACTION_KEY",
       "DensityContribution",
-      "densitySlice",
-      "deriveSortByOptions",
       "deserializeFormulaColumns",
       "deserializePivot",
       "deserializePivotState",
       "devWarn",
       "Direction",
-      "dirtyCellKey",
-      "DirtyCellSnapshot",
       "DirtyCellState",
-      "DirtyCellStore",
       "DirtyCellStoreOptions",
-      "dirtyCellView",
-      "dirtyMarkerView",
-      "dispatchRowMove",
       "DisplayValue",
       "downloadCsv",
       "downloadExportFile",
       "downloadTableCsv",
-      "dropColumn",
       "DUPLICATE_ROW_ACTION_KEY",
       "edgePinStyle",
-      "editableCellController",
       "EditableCellController",
       "EditableCellEditing",
       "EditableCellEditorCtrl",
-      "editableCellErrorId",
       "EditableCellMode",
-      "editableCellPresentation",
-      "EditableCellPresentation",
       "EditableColumnLike",
       "EditActivation",
       "EditCommitSnapshot",
@@ -3618,137 +2837,81 @@
       "EditConflictPolicy",
       "EditConflictSnapshot",
       "EditConflictState",
-      "EditConflictStore",
-      "editConflictView",
       "EditEvent",
       "EditEventHandler",
       "EditHistoryController",
       "EditHistoryControllerOptions",
-      "editHistoryEntry",
       "EditHistoryEntry",
-      "EditHistoryInput",
       "EditHistorySnapshot",
-      "EditHistoryStack",
       "EditHistoryState",
-      "editHistoryView",
-      "EditingArming",
-      "EditingArmingProps",
       "EditingBundle",
       "EditingContribution",
       "EditLifecycle",
       "EditorAriaState",
-      "editorBusyProps",
       "EditorDraftControl",
-      "editorInputType",
-      "editorKeyRestoresFocus",
-      "editorSelectOptions",
-      "editorValidationProps",
       "EditUnit",
-      "EditValidationSnapshot",
       "EditValidationState",
-      "EditValidationStore",
       "EditValidationStoreOptions",
-      "editValidationView",
-      "effectiveAggregateOps",
       "EffectiveAggregation",
       "EffectiveAggregationInput",
       "EffectiveAggregationKind",
-      "effectiveQueryAggregates",
       "ElementRef",
-      "EMPTY_COLUMN_LAYOUT",
-      "EMPTY_CURSOR_TRAIL",
-      "EMPTY_PINNED_ROWS",
-      "EMPTY_PIVOT_CONFIG",
       "EMPTY_ROW_PIN_STATE",
       "emptyFilterRegistry",
-      "emptyFilterTree",
-      "engineSearchText",
-      "estimateFromRowHeight",
       "evaluateFilterTree",
-      "evaluateFormula",
       "EXPORT_FETCH_ALL_MAX_ROWS",
       "exportableColumns",
       "ExportAllControls",
       "ExportAllQuery",
       "ExportAllResult",
-      "exportButtonLabel",
       "ExportColumnScope",
       "ExportContext",
-      "ExportController",
-      "ExportControllerOptions",
       "ExportCsvOptions",
       "ExportCsvProp",
       "ExportInfo",
       "ExportPayload",
-      "ExportProgressAction",
-      "ExportProgressDownload",
-      "exportProgressHeading",
       "ExportProgressState",
-      "exportProgressView",
-      "ExportProgressView",
       "ExportQuery",
       "ExportRequest",
       "ExportRowMeta",
       "ExportRowRole",
       "ExportRowScope",
-      "ExportRunHandler",
       "ExportScopeCapability",
-      "ExportSnapshot",
       "ExportStatus",
       "ExportTable",
       "ExportViewEntry",
-      "exportViewFromChrome",
       "ExportWriteContext",
       "ExportWriter",
       "extendCellRange",
-      "EXTRA_OVER_SPAN_ROW_STYLE",
-      "EXTRA_OVER_SPAN_STYLE",
-      "EXTRA_ROW_PARTS",
-      "extraCountBeforeRowIds",
-      "extraCoveredTableSlots",
       "ExtraFilters",
-      "extraHostFillStyle",
       "ExtraRow",
       "ExtraRowKind",
-      "extraRowsArmed",
-      "extraRowsForSection",
-      "extraUncoveredColSpans",
       "FacetCounts",
       "FacetMap",
       "FailedCellSave",
-      "FakeSocket",
-      "FALLBACK_PIN_WIDTH",
       "FeatureHostState",
       "FeatureNotice",
       "FeatureNoticeAppearance",
       "FeatureNoticeKind",
-      "FeatureRegistration",
-      "FeatureStrings",
       "FetchAllExport",
       "fetchAllExportRows",
       "fillDirection",
       "FillDirection",
       "fillRangeEdits",
       "FillRangeOptions",
-      "fillSlot",
       "fillTargetRange",
       "FILTER_AI_OPTIONS_LIMIT",
-      "FILTER_ENGINE_IMPL",
-      "FILTER_LABELS",
       "FILTER_OP_SUFFIX",
       "FILTER_PREFIX",
       "FILTER_TREE_PARAM",
       "FILTER_TREE_VERSION",
-      "FILTER_TYPE_OPS",
       "FILTER_TYPES",
       "FilterAiOptions",
       "FilterChromeMode",
-      "filterColumnMenuRows",
       "filterCommands",
       "FilterDef",
       "filterDefForColumn",
       "FilterEngine",
-      "filterExportView",
       "FilterFormSource",
       "FilteringContribution",
       "filterLabel",
@@ -3756,29 +2919,14 @@
       "filterOpKey",
       "filterOpLabel",
       "FilterOption",
-      "FilterOptionsLoader",
       "FilterOptionsSource",
-      "filterPredicate",
       "FilterRuntime",
       "filterStateKeys",
-      "FilterStrings",
       "filterTreeChipLabel",
-      "filterTreeCombinatorOptions",
-      "filterTreeConditionChips",
-      "filterTreeConditionModel",
-      "FilterTreeConditionModel",
-      "filterTreeEditorActions",
-      "FilterTreeEditorActions",
-      "FilterTreeNode",
-      "filterTreeOpLabel",
-      "FilterTreeOption",
       "filterTreeRows",
-      "filterTreeValueEditor",
-      "FilterTreeValueEditor",
       "FilterType",
       "filterTypeDefaultOp",
       "FilterTypeExtend",
-      "FilterTypeOps",
       "filterTypeOps",
       "FilterTypeRegistry",
       "filterTypeSpec",
@@ -3787,55 +2935,19 @@
       "filterWidgetKind",
       "FilterWidgetKind",
       "FilterWidgetRenderProps",
-      "FIND_CURRENT_MATCH_SELECTOR",
       "FIND_URL_WRITE_DEBOUNCE_MS",
-      "FindBarKeyEvent",
-      "FindBarKeyTarget",
       "FindContribution",
-      "FindController",
-      "FindControllerOptions",
-      "findMatchCountText",
       "findMatches",
       "FindMatchesOptions",
-      "findMatchRow",
-      "FindShortcutScope",
-      "FindShortcutScopeOptions",
-      "FindSnapshot",
       "finiteSparklineValues",
-      "FirstLoadLatch",
-      "fittedTableStyle",
-      "flattenColumnTree",
-      "FlattenedColumns",
-      "focusAfterAggregationRemoval",
-      "focusEditorOnMount",
-      "focusExportTrigger",
-      "focusWasDropped",
       "formatFilterChip",
-      "formatGroupBy",
-      "formatGroupLabel",
-      "formatMultiDraft",
-      "FORMULA_BLANK",
-      "FORMULA_ERRORS",
-      "FORMULA_FUNCTIONS",
-      "formulaBoolean",
       "FormulaColumnSpec",
       "FormulaColumnsResult",
-      "formulaDisplay",
-      "formulaError",
       "FormulaErrorCode",
       "FormulaNode",
-      "formulaNumber",
-      "formulaRefs",
       "FormulaScope",
-      "formulaSlice",
-      "formulaSortValue",
-      "formulaText",
       "FormulaValue",
       "FrontendEngineFactory",
-      "FrontendSource",
-      "FrontendSourceConfig",
-      "FrontendSourceFrame",
-      "FrontendSourceViewState",
       "FullscreenContribution",
       "GetCellSpan",
       "GetCellSpanArgs",
@@ -3845,70 +2957,31 @@
       "GridBounds",
       "GridCell",
       "gridCellAttr",
-      "gridCellAttributes",
-      "GridCellAttributes",
-      "GridCellAttributesInput",
-      "gridColumnHeaderAttributes",
-      "gridContainerAttributes",
-      "GridContainerAttributes",
-      "gridFillHandleCell",
-      "GridFocusController",
       "GridFocusControllerOptions",
       "GridFocusMove",
       "gridFocusMoveForKey",
-      "GridFocusSnapshot",
-      "GridKeyEvent",
       "GridKeyPress",
-      "gridRowAttributes",
-      "groupAggregateEntries",
-      "groupAggregateNode",
       "GroupAggregateOps",
       "GroupAggregateOverride",
       "GroupAggregateOverrides",
       "GroupAggregatesFn",
       "GroupAggregatesMapper",
       "GroupByInput",
-      "groupCollapseActions",
       "GroupCollapseActions",
-      "groupCollapseSlice",
-      "groupedEntriesForStrategy",
-      "GroupedEntriesForStrategyOptions",
       "GroupedFlatEntry",
-      "groupedHeaderAlign",
       "GroupedHeaderAlign",
-      "groupedHeaderCellStyle",
-      "groupedHeaderChildRule",
-      "groupedHeaderLabelStyle",
-      "groupedRowModel",
       "GroupedRowModel",
-      "GroupedRowModelOptions",
-      "groupedViewSource",
-      "GROUPING_COLUMN_DND_MIME",
-      "groupingAggregates",
       "GroupingAggregates",
-      "GroupingAggregatesOptions",
-      "groupingAggregationOptions",
-      "groupingAggregationSource",
-      "groupingAvailableColumns",
       "GroupingCapability",
       "GroupingChipKeyboardProps",
-      "groupingCollapseCommands",
-      "groupingColumnName",
-      "groupingComputationKind",
-      "GroupingComputationKind",
       "GroupingContribution",
       "GroupingDragEventLike",
-      "groupingDragKey",
       "GroupingDragProps",
       "GroupingDragSource",
       "GroupingDragState",
-      "GroupingDropHandlers",
-      "groupingDropPlan",
-      "GroupingDropPlan",
       "GroupingDropProps",
       "groupingIgnoredWarning",
       "GroupingKeyEventLike",
-      "groupingOperationLabel",
       "groupingPanelAggregations",
       "GroupingPanelController",
       "GroupingPanelControllerOptions",
@@ -3921,197 +2994,74 @@
       "groupingProjectionBundle",
       "GroupingProjectionInput",
       "GroupingRuntimeSource",
-      "groupingShowMoreAction",
       "GroupingShowMoreTarget",
       "groupingSourceOf",
-      "GroupKeys",
-      "groupLeafCount",
       "GroupNode",
       "GroupPaging",
-      "GroupPagingController",
       "GroupRowCell",
-      "groupRowLayout",
       "GroupRowLayout",
-      "groupsCollapsedToDepth",
-      "groupSelectionState",
-      "groupShowMoreRequest",
-      "GroupShowMoreRequest",
       "GroupSort",
-      "groupValueKey",
-      "handleFindBarKey",
-      "handleRowEditorKey",
-      "handleSidePanelBodyKey",
-      "handleSidePanelTabKey",
-      "hasActiveHeaderFilter",
-      "hasEditableColumns",
-      "hasGroupingColumnDrag",
       "HEADER_FILTER_SESSION_ATTR",
-      "headerFilterBooleanOptions",
-      "headerFilterCellKind",
-      "HeaderFilterCellKind",
       "headerFilterFieldIsComplete",
-      "headerFilterInsideSelector",
-      "headerFilterMultiModel",
-      "HeaderFilterMultiModel",
       "HeaderFilterOpenHost",
-      "HeaderFilterOption",
-      "HeaderFilterOverlayController",
-      "HeaderFilterOverlayOptions",
-      "HeaderFilterOverlaySnapshot",
-      "headerFilterRangeModel",
-      "HeaderFilterRangeModel",
-      "headerFilterSelectModel",
-      "HeaderFilterSelectModel",
       "HeaderFilterWrites",
-      "HeaderGroupCell",
-      "headerGroupRow",
-      "headerGroupRows",
-      "headerSelectionOf",
       "HeaderSelectionState",
-      "hideAllColumns",
-      "HIGHLIGHT_FADE_MS",
-      "HIGHLIGHT_STEADY_MS",
-      "highlightCellKey",
-      "highlightDuration",
       "HighlightedCell",
-      "HighlightSnapshot",
-      "HighlightStore",
-      "HighlightStoreOptions",
-      "HtmlGroupedHeaderCell",
-      "htmlGroupedHeaderPlan",
       "humanizeKey",
-      "idSetReader",
       "impliedOperations",
-      "INACTIVE_TIER_ROWS",
-      "incrementalSearchText",
       "IncrementalView",
-      "incrementalViewConfig",
       "IncrementalViewConfig",
-      "incrementalViewOf",
-      "INERT_GROUPING_DROP_HANDLERS",
       "InfiniteQueryLike",
-      "inflateBodyCellRowSpans",
-      "initialColumnLayout",
-      "initialOperation",
-      "initialRangeFilterOp",
-      "initialTextFilterOp",
-      "insertExtraRows",
-      "insertExtrasBeforeRows",
       "InsertPatch",
       "insertRow",
       "isActiveFilterTree",
       "isBetweenFilterOp",
-      "isBooleanEditor",
-      "isBrowser",
-      "isCellEditable",
-      "isCellEditActive",
-      "isCellInConflict",
       "isColumnGroup",
-      "isColumnGroupRenderKey",
-      "isColumnGroupStubKey",
-      "isColumnGroupSummaryKey",
-      "isCommandPaletteArmed",
-      "isContextMenuArmed",
-      "isContextMenuKey",
       "isCountFilterComplete",
-      "isCustomEditor",
       "isDeclarativeFilters",
-      "isDraftChecked",
-      "isEditActivateKey",
-      "isElementShowing",
       "isEmptyFilterValue",
       "isEmptyRowValue",
-      "isExtraEntry",
       "isFilterGroup",
       "isFilterOpKey",
-      "isFilterTreeConditionSet",
-      "isFindShortcut",
-      "isFirstEditableColumn",
-      "isFormulaError",
-      "isGridColumnSelected",
-      "isHeaderFilterOpen",
       "isInCellRange",
       "isListFilterOp",
-      "isMultiSelectEditor",
       "isPinnedSummaryRowId",
-      "isPivotReady",
       "isRelativeDateToken",
-      "isRowContested",
       "isRowMovePending",
-      "isRtlElement",
-      "isSelectEditor",
       "isSingleCell",
-      "isStreamLive",
-      "isStreamSettled",
-      "isTextEntryTarget",
       "isValuelessFilterOp",
       "joinRelativeToken",
       "KeyedVirtualization",
       "LayoutStorage",
-      "LazyChildrenController",
       "LazyChildrenOptions",
-      "LazyChildrenSnapshot",
       "listFilterValues",
-      "liveRowChanged",
-      "LoadedFilterOption",
-      "localizedColumnPath",
       "makeExportCsvHandler",
       "marriedOrderHolds",
-      "matchKey",
       "matchKeySet",
-      "materializeAutoOptions",
       "matrixToCsv",
-      "MAX_COLUMN_WIDTH",
       "MAX_LIMIT",
       "measureColumnWidth",
-      "measuredToolbarHeight",
-      "measureLabel",
-      "MergedRowActions",
-      "mergeFilterChips",
-      "mergeGroupingContributions",
-      "MIN_COLUMN_WIDTH",
-      "MOBILE_BREAKPOINT_PX",
       "MobileCardField",
-      "mobileCardListStyle",
       "MobileCardModel",
       "MobileCardRenderer",
-      "moveField",
       "moveGridFocus",
-      "moveGroupingKey",
-      "moveGroupingKeyBy",
-      "MULTI_SEPARATOR",
-      "NESTED_TABLE_DEFAULT_LABEL",
       "nestedTableDefaults",
       "NestedTableDefaults",
-      "nestedTableLabel",
       "NestedTableParent",
       "NeutralFeatureHost",
       "NeutralTable",
       "NeutralTableBinding",
-      "newFilterTreeCondition",
-      "nextChecklistViewport",
-      "nextCommandIndex",
-      "nextPinSide",
-      "nextSort",
-      "normalizeEditorOptions",
-      "normalizeLocaleTag",
       "NUMBER_OP_LABEL_KEYS",
       "NUMBER_OPS",
       "NumberOp",
-      "observeEdit",
-      "offerableOperations",
       "offersAllMatching",
-      "OPEN_PALETTE_COMMAND",
-      "openRowPatchStream",
       "OpenRowPatchStreamOptions",
-      "orderedCardEntries",
       "PAGE_SIZE_OPTIONS",
       "PageSelector",
       "pageSizeOptions",
       "PaginatedResponse",
       "PaginationInfo",
       "PaginationItem",
-      "paginationItems",
       "PaginationMode",
       "PaginationSlot",
       "paginationSlots",
@@ -4126,51 +3076,32 @@
       "PARAM_PAGE",
       "PARAM_PIVOT",
       "PARAM_SEARCH",
-      "PARAM_SORT",
       "PARAM_SORT_BY",
       "PARAM_SORT_DIR",
       "parseBooleanChoice",
-      "parseCellEditValue",
-      "parseChord",
       "parseClipboardTable",
-      "parseColumnDraft",
       "parseDateOp",
-      "ParsedChord",
       "parseFilterTree",
-      "parseFormula",
       "parseGroupAggregateOverrides",
-      "parseGroupBy",
       "parseListOperand",
       "parseNumberList",
       "parseNumberOp",
-      "parsePxWidth",
       "parseRelativeToken",
       "ParseResult",
-      "parseRowPatchFrame",
       "parseTableUrlState",
       "parseTextOp",
       "partitionPinnedRows",
       "pasteRangeEdits",
       "PasteRangeOptions",
-      "patchTouchedKeys",
       "PIN_BOTTOM_ACTION_KEY",
       "PIN_TOP_ACTION_KEY",
       "PIN_Z",
-      "pinActionLabel",
       "PinLeads",
-      "PINNED_BOTTOM_PART",
       "PINNED_SUMMARY_BOTTOM_PART",
-      "PINNED_SUMMARY_KEY_PREFIX",
       "PINNED_SUMMARY_TOP_PART",
-      "PINNED_TOP_PART",
       "pinnedCellStyle",
       "PinnedCellStyle",
-      "pinnedColumnWidth",
-      "pinnedRowCellStyle",
-      "pinnedRowPart",
       "PinnedRows",
-      "pinnedRowSticky",
-      "pinnedRowStickyStyle",
       "PinnedSide",
       "pinnedSummaryEntries",
       "PinnedSummaryEntry",
@@ -4180,95 +3111,53 @@
       "PinningContribution",
       "PinOffset",
       "PinSide",
-      "pivot",
-      "PIVOT_AGGREGATIONS",
-      "PIVOT_BLANK",
-      "PIVOT_GRAND_TOTAL_KEY",
-      "PIVOT_ROW_COLUMN_KEY",
-      "PIVOT_ROW_INDENT",
-      "PIVOT_ZONES",
       "PivotColumnLeaf",
       "PivotColumnNode",
       "PivotConfig",
       "PivotField",
-      "pivotLeafColumnKey",
-      "PivotLeafColumnLayout",
-      "pivotLeafGroup",
       "PivotMeasure",
-      "pivotMeasureAggName",
       "PivotOptions",
-      "pivotPanelZones",
       "PivotResult",
       "PivotRow",
-      "pivotRowCaption",
-      "pivotRowIndentStyle",
       "PivotRowKind",
-      "pivotSlice",
-      "pivotTableLayout",
-      "PivotTableLayout",
       "PivotUrlState",
       "PivotZone",
-      "PivotZoneEntry",
-      "pivotZoneLabel",
-      "PivotZoneModel",
-      "PointerReleaseTarget",
       "PrintContribution",
-      "projectedGroupingSource",
       "projectGrouping",
-      "projectGroupingContribution",
-      "projectShellOperations",
       "Props",
       "QueryAggregate",
-      "queryAggregateOps",
-      "queryAggregationSource",
       "QueryCondition",
       "QueryContribution",
-      "QueryEmitter",
       "QueryExtensions",
       "QueryFilterGroup",
-      "queryGroupBy",
       "QueryGroupRow",
-      "QueryGroupsPage",
       "QueryPivotPage",
       "QueryPivotRow",
-      "QuerySource",
-      "QuerySourceAnswer",
-      "QuerySourceConfig",
-      "QuerySourceFrame",
       "QuerySupport",
       "RANGE_OP_LABEL_KEYS",
       "RANGE_OPS",
       "RANGE_SUFFIXES",
       "RangeFieldWidget",
-      "rangeFilterWidget",
       "RangeOp",
       "RangeOpArity",
       "RangeOpLabelKeys",
       "RangeWidgetState",
-      "readCellValue",
       "readClipboardText",
       "readCollapsedGroups",
       "readColumnLayout",
-      "readEditableCellValue",
-      "readerControlAllowed",
       "readExtra",
       "readFilterOp",
       "readFilterTreeParam",
-      "readFindQuery",
       "readLimit",
-      "readMultiDraft",
       "readPage",
-      "readRangeWidget",
       "readRowPins",
       "readSortDir",
       "readSortLevels",
-      "readStoredColumnLayout",
-      "reconcileAggregations",
       "ReconcileLiveBatchEdit",
       "ReconcileLiveEdit",
       "ReconcileLiveRowEdit",
-      "recordCursor",
-      "recordingCellEdit",
+      "RekeyPatch",
+      "rekeyRow",
       "RELATIVE_NAMED",
       "RELATIVE_PRESET_LABEL_KEYS",
       "RELATIVE_PRESETS",
@@ -4276,306 +3165,153 @@
       "RelativeDateToken",
       "RelativePreset",
       "relativeTokenLabel",
-      "REMAINING_FEATURE_OWNERSHIP",
-      "RemainingFeatureDomain",
-      "removeAggregation",
-      "removeField",
-      "removeFilterTreeNode",
-      "removeGroupingKey",
       "RemovePatch",
       "removeRow",
       "renderRegisteredFilter",
       "REORDER_COLUMN_KEY",
-      "REORDER_COLUMN_WIDTH",
-      "replaceFilterTreeNode",
-      "reportedCellRange",
-      "requestDensityChange",
-      "resetColumnLayout",
-      "resetDevWarnings",
       "ResizeHandleEventLike",
       "ResizeKeyEventLike",
       "ResizePointerEventLike",
-      "resolveActiveFilterCount",
       "resolveAggregatable",
       "resolveAggregatableColumns",
-      "resolveAssembly",
-      "resolveCellEditor",
-      "resolveColumnPath",
-      "resolveColumnWidth",
       "resolveCommitValue",
-      "resolveConflictChoice",
       "resolveContextTarget",
       "ResolvedAggregatable",
       "ResolvedAggregateOperation",
-      "resolveDataTier",
       "ResolvedContextTarget",
-      "resolveDensity",
-      "resolveDisabledReason",
       "ResolvedPaginationMode",
-      "resolveEditableCellDisplay",
-      "resolveEditHistory",
-      "resolveEditingArming",
       "resolveEffectiveAggregation",
-      "resolveExportAnnouncement",
       "resolveExportColumns",
       "resolveExportCsv",
-      "resolveExportDisabledReason",
-      "resolveExportProgressState",
       "resolveFilterDefs",
       "resolveFilterMode",
       "resolveFilterRegistry",
       "resolveLabels",
-      "resolveLocaleTag",
-      "resolvePaginationMode",
       "resolvePinnedRows",
       "resolveRelativeRange",
-      "resolveRowEditTrigger",
-      "resolveRowHeight",
-      "resolveRowMove",
-      "resolveRowStyle",
-      "resolveStickyToolbar",
-      "resolveTableStatus",
-      "resolveUrlAdapter",
-      "resolveVirtualRows",
-      "ResponseAggregateOps",
-      "ResponseAggregateOpsInput",
-      "responsiveColumns",
-      "ResponsiveColumns",
-      "ResponsiveFit",
       "restoreAggregationDefaults",
-      "restoreFocusSoon",
       "revisionToken",
       "routerUrlAdapter",
       "RouterUrlAdapterOptions",
-      "ROW_ID_ATTRIBUTE",
-      "ROW_PIN_STORE_OPTIONS",
       "RowAction",
       "RowActionsLayout",
       "RowActionsRenderContext",
       "RowActionsRenderer",
       "RowCallback",
-      "rowClickProps",
-      "RowClickProps",
       "RowDragEvent",
       "rowDropPosition",
       "RowDropPosition",
-      "rowEditActionsLayout",
-      "RowEditActionsLayout",
-      "rowEditConflict",
       "RowEditConflict",
-      "rowEditControls",
       "RowEditControls",
       "RowEditControlsOptions",
       "RowEditDrafts",
-      "rowEditErrorId",
       "RowEditHandler",
-      "rowEditingSignature",
       "RowEditingState",
-      "rowEditingView",
-      "rowEditorControl",
-      "rowEditSaveBlocked",
-      "rowEditSignature",
       "RowEditSnapshot",
       "RowEditStore",
       "RowEditStoreOptions",
       "RowEditTrigger",
-      "rowFlashSignature",
       "RowGroupLevel",
       "RowGroupMoveHandler",
       "RowGroupRef",
-      "rowHasValidationError",
       "RowHeight",
+      "RowIdConflictError",
       "rowIsDirty",
       "RowKeyEvent",
       "RowMoveConfirmHandler",
-      "RowMoveDrop",
-      "rowMoveMenu",
       "RowMoveMenuModel",
       "RowMovePolicy",
       "RowMoveRequest",
       "RowMoveTarget",
-      "rowMoveView",
-      "RowMoveView",
-      "rowMutationActions",
       "RowPairMeasurer",
       "RowPatch",
       "RowPatchEvent",
       "rowPatchLog",
       "RowPatchLog",
+      "RowPatchOptions",
       "RowPatchStreamHandle",
       "RowPatchStreamReconnect",
       "RowPatchStreamStatus",
-      "rowPinActions",
       "RowPinLabels",
-      "RowPinLookup",
-      "rowPinningBlockedWarning",
       "rowPinningControl",
-      "rowPinningRequested",
-      "rowPinningSlice",
-      "rowPinningUrlSync",
       "RowPinSide",
-      "rowPinSideOf",
-      "rowPinSignature",
       "RowPinState",
+      "RowRekeyMoves",
+      "rowRekeys",
       "RowReorderActions",
-      "rowReorderAnnouncements",
-      "RowReorderAnnouncements",
       "RowReorderController",
       "RowReorderControllerOptions",
       "RowReorderDecision",
-      "RowReorderDigest",
-      "rowReorderDropStyle",
       "RowReorderHandler",
       "RowReorderLabels",
       "RowReorderOptions",
       "rowReorderRowAttributes",
       "rowReorderRuntimeOptions",
-      "rowReorderSignature",
       "RowReorderSlot",
       "RowReorderSnapshot",
       "rowsExcludingFilter",
-      "rowSourceIndex",
-      "rowSpanSignature",
       "rowsToCsv",
       "RowsToCsvOptions",
       "RowStyle",
-      "rowStyleArmed",
-      "rowStyleSignature",
       "RowTreeMoveHandler",
       "RowTreeParentRef",
       "RowValidator",
-      "runCommand",
       "runRowAction",
-      "runWithFeatureHost",
-      "safeDecode",
-      "safeLocalStorage",
-      "safeSheetName",
       "sameGridCell",
-      "sameRowPins",
       "sanitizeCountFilterParams",
-      "sanitizeStoredLayout",
-      "SAVED_VIEW_GLYPH_PATHS",
       "SAVED_VIEW_VERSION",
       "SavedView",
       "SavedViewControlKey",
-      "SavedViewGlyph",
       "SavedViewMigration",
-      "SavedViewRenameController",
-      "SavedViewRenameSnapshot",
-      "SavedViewRowControlModel",
-      "savedViewRowControls",
-      "SavedViewRowControlsInput",
-      "SavedViewsController",
       "SavedViewsControllerOptions",
-      "SavedViewsSnapshot",
       "SavedViewsStore",
       "SavedViewVisibility",
       "scalarFilterText",
-      "scrollCurrentMatchIntoView",
-      "SEARCH_DEBOUNCE_MS",
-      "searchChecklistItems",
       "SelectionContribution",
-      "SelectionStatPart",
-      "selectionStatParts",
+      "SelectionFeatureOptions",
       "selectionStats",
       "SelectionStats",
       "SelectionStatsOptions",
       "serializeAggregationDerivedKey",
       "serializeFilterTree",
       "serializeFormulaColumns",
-      "serializeGroupAggregateOverrides",
       "serializePivot",
       "serializePivotState",
-      "serverGroupEntries",
-      "ServerGroupEntriesOptions",
       "ServerPivotOptions",
-      "serverPivotResult",
-      "ServerSource",
-      "ServerSourceConfig",
-      "ServerSourceFrame",
-      "ServerSourceViewState",
-      "setFilterTreeCombinator",
-      "setMeasureAgg",
-      "settledFilterTree",
-      "SHELL_OPERATION_OWNERS",
-      "ShellOperation",
-      "ShellOperationInput",
       "Shortcut",
-      "ShortcutKeyEvent",
-      "shouldEscapeClose",
-      "showAllColumns",
-      "showSimpleFilterFields",
       "SidePanelEntry",
-      "SidePanelKeyEvent",
-      "sidePanelModel",
-      "SidePanelModel",
-      "SidePanelModelPanel",
-      "sidePanelTabId",
-      "sidePanelTabIndex",
-      "SidePanelTabModel",
       "singleCellRange",
       "Slot",
       "SortableValue",
       "SortByOption",
       "SortDirection",
       "SortLevel",
-      "sortRows",
-      "sortRowsMulti",
       "sourceCapabilities",
-      "spanningArmed",
-      "SPARKLINE_DEFAULT_HEIGHT",
-      "SPARKLINE_DEFAULT_WIDTH",
-      "sparklineAreaPath",
-      "SparklineBar",
-      "sparklineBars",
       "sparklineExportValue",
-      "SparklineKind",
-      "sparklineLinePath",
-      "SparklinePoint",
-      "sparklinePoints",
-      "sparklineSortValue",
       "sparklineSummary",
       "splitListParam",
       "splitRelativeToken",
       "stableKey",
-      "staleAppendStash",
-      "startColumnDrag",
-      "StatusBarItem",
-      "statusBarItems",
-      "StatusBarItemsInput",
-      "stepEditableCell",
       "stepMatch",
-      "stickyHeaderOffset",
-      "stickyToolbarStyle",
-      "StickyToolbarStyle",
-      "stopCellEditKeyboard",
-      "stopEditKeys",
       "StreamSocket",
       "StreamSocketEvent",
-      "summaryExportValues",
       "SummaryRowFn",
       "TableBodyCell",
       "TableCallbackRefresh",
       "TableCommandOptions",
       "tableCommands",
-      "TableData",
-      "TableDataConfig",
-      "TableDataPlan",
       "TableDensity",
       "TableEngine",
       "TableEngineConfigPatch",
       "TableEngineReader",
-      "tableErrorState",
       "TableErrorState",
       "TableExtraEntry",
       "TableLabels",
       "TableLayout",
-      "tableMinWidth",
       "TableOperation",
       "TableOptions",
       "TableQuery",
       "tableQueryBaseKey",
-      "TableQueryInput",
       "tableQueryKey",
       "TableQueryKeyOptions",
       "TableQueryListener",
@@ -4589,26 +3325,15 @@
       "TableSource",
       "TableSourceCapabilities",
       "TableStateMutators",
-      "TableStatusAnnouncementOptions",
-      "TableStatusSignature",
       "TableToolbarSlots",
       "TableViewState",
       "TableViewStateConfig",
       "TableViewStore",
       "TableVirtualization",
-      "tabTrapTarget",
       "TEXT_OP_LABEL_KEYS",
       "TEXT_OPS",
       "TextFieldWidget",
-      "textFilterWidget",
       "TextOp",
-      "tierRows",
-      "toAggregateInstant",
-      "toAggregateOrdered",
-      "toFormulaValue",
-      "toggleCollapsedColumnGroup",
-      "toggleId",
-      "toggleIds",
       "toggleTreeNode",
       "toolbarShowsFilters",
       "TotalCountCapability",
@@ -4616,16 +3341,11 @@
       "treeColumnKey",
       "TreeContribution",
       "TreeEntry",
-      "treeExpansionActions",
-      "TreeExpansionActions",
       "treeExportExpandedIds",
       "treeIndentStyle",
       "treeMoveCreatesCycle",
-      "treeRowAria",
-      "treeTableAria",
       "TreeShape",
       "UNPIN_ROW_ACTION_KEY",
-      "unpinAllColumns",
       "UpdatePatch",
       "updateRow",
       "updateTableUrlState",
@@ -4633,55 +3353,25 @@
       "upsertRow",
       "URL_SLICE_WRITE_DEBOUNCE_MS",
       "UrlSliceSpec",
-      "UrlSliceStore",
       "UrlStateAdapter",
       "UseColumnLayoutResult",
       "ValidationCheckResult",
-      "validationErrorFor",
-      "validationKey",
-      "validationSignature",
       "ValidationTarget",
       "viewFromGroupedEntries",
-      "viewFromTreeEntries",
-      "ViewStateSource",
       "ViewStateSubscription",
-      "VIRTUAL_OVERSCAN",
-      "virtualColumnSpan",
       "virtualItemMeta",
       "VirtualItemMeta",
       "VirtualTableRow",
       "visibleColumns",
-      "visibleRowActions",
-      "walkFilterTreeConditions",
-      "warnDataTierMisuse",
-      "watchOverlayDismiss",
-      "WidthColumn",
       "windowGroupedEntries",
-      "withColumnHidden",
-      "withColumnMoved",
-      "withColumnOrder",
-      "withColumnPinned",
-      "withColumnWidth",
-      "withContextMenuCellCopy",
-      "withDeclaredAggregates",
-      "withFilterType",
-      "withGroupAggregateOverrides",
-      "withQueryAggregateOverrides",
-      "withRowMutationActions",
-      "withRowPinActions",
       "writeClipboardText",
       "writeCollapsedGroups",
       "writeColumnLayout",
       "writeExtra",
       "writeFilterTreeParam",
       "writeRangeFilter",
-      "writeRangeWidget",
       "writeRowPins",
       "writeSortLevels",
-      "writeStoredColumnLayout",
-      "xlsxWriter",
-      "approvalProposalText",
-      "gridRowFocusSignature",
       "OverlayDismissOptions",
       "SliceCell",
       "SliceKey",
@@ -4690,8 +3380,17 @@
       "StoreWriter",
       "TableAction",
       "TableStore",
-      "mergeProps",
-      "resetHistoryAdapter"
+      "DeferredExportWriter",
+      "ExportWriterOption",
+      "deferredExportWriter",
+      "deferredPdfWriter",
+      "deferredXlsxWriter",
+      "PdfWriterOptions",
+      "PrintPageBreak",
+      "PrintPageSize",
+      "serverFilterKeys",
+      "ServerFilterKeys",
+      "ServerFilterKeysInput"
     ],
     "core-editing": [
       "ActionAiOptions",
@@ -4787,7 +3486,8 @@
       "createCellEditSession",
       "createCellSaveStore",
       "createDirtyCellStore",
-      "createEditConflictStore",
+      "createDeferredEditConflictStore",
+      "loadEditConflictStore",
       "createEditHistory",
       "createEditHistoryStack",
       "createEditValidationStore",
@@ -4799,7 +3499,6 @@
       "customEditorConflict",
       "DeclaredAggregates",
       "DEFAULT_EDIT_HISTORY_DEPTH",
-      "defaultPendingRows",
       "defaultSaveErrorMessage",
       "dirtyCellKey",
       "DirtyCellSnapshot",
@@ -4967,6 +3666,7 @@
       "RowEditStoreOptions",
       "RowEditTrigger",
       "rowHasValidationError",
+      "RowRekeyMoves",
       "RowValidator",
       "SidePanelEntry",
       "SortableValue",
@@ -5000,7 +3700,9 @@
       "StoreReader",
       "StoreWriter",
       "TableAction",
-      "TableStore"
+      "TableStore",
+      "DeferredExportWriter",
+      "ExportWriterOption"
     ],
     "core-engine": [
       "Aggregatable",
@@ -5127,7 +3829,9 @@
       "TableSourceCapabilities",
       "TableStateMutators",
       "TotalCountCapability",
-      "UseColumnLayoutResult"
+      "UseColumnLayoutResult",
+      "DeferredExportWriter",
+      "ExportWriterOption"
     ],
     "core-formula": [
       "Aggregatable",
@@ -5252,6 +3956,10 @@
       "TotalCountCapability",
       "withGroupAggregateOverrides",
       "withQueryAggregateOverrides"
+    ],
+    "core-locale": [
+      "normalizeLocaleTag",
+      "resolveLocaleTag"
     ],
     "core-pdf": [
       "Aggregatable",
@@ -5491,6 +4199,7 @@
       "PARAM_SORT_DIR",
       "parseDateOp",
       "parseFilterTree",
+      "parseStrictFilterTree",
       "parseGroupAggregateOverrides",
       "parseRelativeToken",
       "PinnedSide",
@@ -5535,7 +4244,9 @@
       "TableStateMutators",
       "TEXT_OPS",
       "TotalCountCapability",
-      "UseColumnLayoutResult"
+      "UseColumnLayoutResult",
+      "DeferredExportWriter",
+      "ExportWriterOption"
     ],
     "core-selection": [
       "AllMatchingScope",
@@ -5550,12 +4261,15 @@
       "openRowPatchStream",
       "OpenRowPatchStreamOptions",
       "parseRowPatchFrame",
+      "RekeyPatch",
       "RemovePatch",
       "RowPatch",
       "RowPatchEvent",
+      "RowPatchOptions",
       "RowPatchStreamHandle",
       "RowPatchStreamReconnect",
       "RowPatchStreamStatus",
+      "STREAMED_ROW_PATCHES",
       "StreamSocket",
       "StreamSocketEvent",
       "UpdatePatch",
@@ -5623,6 +4337,9 @@
     "forwards @adapttable/unstyled/column-menu": [
       "@adapttable/unstyled/column-menu"
     ],
+    "forwards @adapttable/unstyled/column-layout": [
+      "@adapttable/unstyled/column-layout"
+    ],
     "forwards @adapttable/unstyled/column-selection": [
       "@adapttable/unstyled/column-selection"
     ],
@@ -5646,6 +4363,9 @@
     ],
     "forwards @adapttable/unstyled/filters": [
       "@adapttable/unstyled/filters"
+    ],
+    "forwards @adapttable/unstyled/filtering": [
+      "@adapttable/unstyled/filtering"
     ],
     "forwards @adapttable/unstyled/find-in-table": [
       "@adapttable/unstyled/find-in-table"
@@ -5717,38 +4437,14 @@
       "@adapttable/unstyled/virtualize"
     ],
     "i18n": [
-      "ar",
-      "cs",
-      "de",
       "Direction",
-      "en",
-      "es",
-      "fa",
-      "fr",
       "getDirection",
-      "getLabels",
       "hasLocale",
-      "he",
-      "hi",
-      "id",
       "isRtlLocale",
-      "it",
-      "ja",
-      "ko",
+      "loadLabels",
       "LocaleKey",
-      "locales",
-      "pl",
       "primarySubtag",
-      "pt",
-      "RTL_LANGUAGES",
-      "ru",
-      "tr",
-      "ur",
-      "zh",
-      "zhTW"
-    ],
-    "i18n-load": [
-      "loadLabels"
+      "RTL_LANGUAGES"
     ],
     "kit/batch-editing": [
       "batchEditing"
@@ -5768,6 +4464,9 @@
     "kit/column-menu": [
       "columnMenu"
     ],
+    "kit/column-layout": [
+      "columnLayoutFamily"
+    ],
     "kit/column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -5783,86 +4482,11 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "kit/extra-rows": [
       "extraRows"
-    ],
-    "kit/features": [
-      "Aggregator",
-      "BatchRowEdit",
-      "BulkAction",
-      "CellSpanAppearance",
-      "ColumnMenuAction",
-      "ColumnMenuActionContext",
-      "ColumnMenuRow",
-      "Command",
-      "CommandPaletteOptions",
-      "ContextMenuItem",
-      "ContextMenuOptions",
-      "ContextMenuTarget",
-      "CustomCellEditorRender",
-      "ExportCsvOptions",
-      "ExportWriter",
-      "ExtraRow",
-      "FeatureApplyInput",
-      "FeaturePatch",
-      "FilterDef",
-      "FilterTypeSpec",
-      "GetCellSpan",
-      "GroupSort",
-      "NestedTableFor",
-      "RowHeight",
-      "RowPinState",
-      "RowReorderHandler",
-      "RowStyle",
-      "SidePanelEntry",
-      "SidePanelOptions",
-      "TableFeature",
-      "TableFeatureHost",
-      "UseSavedViewsOptions",
-      "applyTableFeatures",
-      "batchEditing",
-      "bulkActions",
-      "cellNavigation",
-      "cellSpan",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "exportCsv",
-      "extraRows",
-      "feature",
-      "filterTypes",
-      "filters",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "grouping",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "print",
-      "resizableColumns",
-      "rowActions",
-      "rowAppearance",
-      "rowDetail",
-      "rowEditing",
-      "rowPinning",
-      "rowReorder",
-      "savedViews",
-      "selectionStats",
-      "sidePanel",
-      "statusBar",
-      "tree",
-      "undoRedoButtons",
-      "useTableFeatures",
-      "virtualize"
     ],
     "kit/filters": [
       "filters",
@@ -5873,6 +4497,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "kit/filtering": [
+      "filteringFamily"
     ],
     "kit/find-in-table": [
       "findInTable"
@@ -5916,6 +4543,9 @@
     ],
     "kit/saved-views": [
       "savedViews"
+    ],
+    "kit/selection": [
+      "selection"
     ],
     "kit/selection-stats": [
       "selectionStats"
@@ -6010,26 +4640,14 @@
       "CHECKLIST_VIRTUALIZE_AT",
       "ChecklistFilterState",
       "ChecklistValue",
-      "ChromeBodyData",
       "collectChecklistValues",
       "ColumnDef",
       "ColumnDragRowAttrs",
-      "ColumnDragState",
-      "ColumnDropProps",
-      "columnDropProps",
       "ColumnFooterContext",
       "ColumnHeaderContext",
       "ColumnHeaderController",
-      "columnHeaderController",
       "ColumnInput",
-      "ColumnReorderKeyProps",
-      "columnReorderKeyProps",
-      "ColumnRowDragProps",
-      "columnRowDragProps",
-      "columnsHaveFooter",
-      "ColumnWindow",
       "CommandPaletteOptions",
-      "ComposedTableProps",
       "computed",
       "ContextMenuOptions",
       "createHistoryAdapter",
@@ -6081,7 +4699,6 @@
       "FilterFormSource",
       "filterOpLabel",
       "filterTreeChipLabel",
-      "FilterTriggerToggle",
       "FIND_URL_WRITE_DEBOUNCE_MS",
       "FindInTableState",
       "getHistoryAdapter",
@@ -6099,7 +4716,6 @@
       "HeaderSelectionState",
       "HighlightedCell",
       "HighlightState",
-      "HorizontalOverflow",
       "InfiniteQueryLike",
       "KitEnvironment",
       "LayoutStorage",
@@ -6113,7 +4729,6 @@
       "NestedTable",
       "NestedTableDefaults",
       "NestedTableFor",
-      "offersAllMatching",
       "PageSelector",
       "parseBooleanChoice",
       "PIN_BOTTOM_ACTION_KEY",
@@ -6127,16 +4742,11 @@
       "ReactMobileCardModel",
       "ReactMobileCardRenderer",
       "ReactUseColumnLayoutResult",
-      "readCellValue",
       "ReconcileLiveBatchEdit",
       "ReconcileLiveEdit",
       "ReconcileLiveRowEdit",
-      "ReducedMotionScope",
-      "resolveColumnFooter",
-      "resolveColumnHeader",
       "resolveColumns",
       "ResolvedFilterOptions",
-      "resolveNeutralColumnHeaders",
       "RowEditDrafts",
       "RowEditIcons",
       "RowEditingState",
@@ -6169,21 +4779,20 @@
       "Slot",
       "SortButtonElementProps",
       "StaticFeatureHost",
+      "StaticFeatureMountContext",
       "StaticTableFeature",
       "SummaryRowFn",
       "TableBodyRegion",
       "TableChrome",
-      "TableEditHistoryProps",
       "TableElementProps",
       "TableFeature",
       "TableFeatureHost",
+      "TableFeatureMountContext",
       "TableRowReorderState",
       "TextFieldWidget",
       "ToolbarSlots",
       "TreeExpansionState",
       "UNPIN_ROW_ACTION_KEY",
-      "useActiveFilterChips",
-      "UseActiveFilterChipsOptions",
       "useBatchEditing",
       "UseBatchEditingOptions",
       "useBooleanFilterWidget",
@@ -6194,9 +4803,6 @@
       "useCellSaveState",
       "UseCellSaveStateOptions",
       "useChecklistFilter",
-      "useChromeScrollReset",
-      "useColorScheme",
-      "useColumnDragState",
       "useColumnLayout",
       "UseColumnLayoutOptions",
       "useColumnLayoutStorageState",
@@ -6208,7 +4814,6 @@
       "useDataTable",
       "UseDataTableOptions",
       "UseDataTableResult",
-      "useDebounce",
       "useDensityUrlState",
       "UseDensityUrlStateOptions",
       "UseDensityUrlStateResult",
@@ -6217,13 +4822,9 @@
       "useEditConflict",
       "useEditHistory",
       "UseEditHistoryOptions",
-      "useExtraChips",
-      "UseExtraChipsOptions",
       "useFilterOptions",
       "useFilterTreeChips",
       "UseFilterTreeChipsOptions",
-      "useFilterTriggerToggle",
-      "useFindFocus",
       "useFindInTable",
       "UseFindInTableOptions",
       "useFrontendData",
@@ -6241,14 +4842,12 @@
       "useGroupPaging",
       "useHeaderFilterOverlay",
       "useHighlight",
-      "useHorizontalOverflow",
       "useInfiniteScroll",
       "UseInfiniteScrollOptions",
       "useIsMobile",
       "useLazyChildren",
       "UseLazyChildrenOptions",
       "useMediaQuery",
-      "usePlainChromeBodyData",
       "usePointerDismiss",
       "usePrefersReducedMotion",
       "useQuerySource",
@@ -6267,21 +4866,14 @@
       "useSavedViews",
       "UseSavedViewsOptions",
       "UseSavedViewsResult",
-      "useScrollToTableTop",
-      "UseScrollToTableTopOptions",
       "useSearchInput",
       "useSelection",
       "UseSelectionOptions",
       "useServerData",
       "UseServerDataOptions",
-      "useShortcuts",
-      "UseShortcutsOptions",
-      "useTableChrome",
       "useTableData",
       "UseTableDataOptions",
       "UseTableDataResult",
-      "useTableEditHistory",
-      "useTableEngine",
       "useTableUrlState",
       "UseTableUrlStateOptions",
       "UseTableUrlStateResult",
@@ -6289,12 +4881,15 @@
       "UseTableVirtualizationOptions",
       "useTextFilterWidget",
       "useTreeExpansion",
-      "useVirtualChromeBodyData",
       "ValidationCheckResult",
       "ValidationTarget",
       "withKitEnvironment",
       "ActionAiOptions",
-      "OverlayDismissOptions"
+      "OverlayDismissOptions",
+      "TableQueryHandler",
+      "ServerFilterKeys",
+      "ServerFilterKeysInput",
+      "serverFilterKeys"
     ],
     "react-adapter": [
       "ACTIVE_FILTER_CHIPS",
@@ -6333,7 +4928,6 @@
       "AgentApprovalProps",
       "AgentApprovalSlots",
       "AgentViewState",
-      "applyTableFeatures",
       "APPROVAL_PREVIEW_LIMIT",
       "approvalReview",
       "ApprovalReview",
@@ -6358,7 +4952,6 @@
       "bulkActionErrorMessage",
       "BulkBarChromeProps",
       "BulkBarState",
-      "CELL_NAV_LIVE",
       "CellConflictAsk",
       "CellEditingState",
       "CellEditKeyAction",
@@ -6366,8 +4959,6 @@
       "CellEditNavigation",
       "CellElementProps",
       "cellHighlightStyle",
-      "CellNavLiveDraw",
-      "CellNavLiveSlotProps",
       "CellSaveState",
       "CellSaveStatus",
       "CellValidator",
@@ -6393,6 +4984,7 @@
       "COLUMN_LAYOUT_LIVE",
       "COLUMN_MENU",
       "COLUMN_SELECT",
+      "COLUMN_SIZING_STATE",
       "ColumnDef",
       "ColumnDragRowAttrs",
       "ColumnDragState",
@@ -6411,6 +5003,7 @@
       "ColumnSelectCheckboxProps",
       "columnSelectLabel",
       "ColumnSelectSlots",
+      "ColumnSizingState",
       "ColumnSpacer",
       "ColumnSpacerProps",
       "ColumnWindow",
@@ -6441,6 +5034,11 @@
       "createAdapterAgentApprovalFeature",
       "createAdapterCommandPaletteFeature",
       "createAdapterContextMenuFeature",
+      "createAdapterBatchEditing",
+      "createAdapterEditHistory",
+      "createAdapterEditing",
+      "createAdapterRowEditing",
+      "createAdapterUndoRedoButtons",
       "createAdapterEditingFeatures",
       "createAdapterFiltersFeature",
       "createAdapterGroupingFeature",
@@ -6450,9 +5048,7 @@
       "createAdapterStandardFeatures",
       "createAdapterTableAssistantFeature",
       "createDesktopRow",
-      "DataModeProps",
       "DataTableShellChromeProps",
-      "DataTableShellGroupingPanelProps",
       "DataTableShellProps",
       "DataTableShellResult",
       "DataTableShellTableProps",
@@ -6485,7 +5081,6 @@
       "DISABLED_EXPORT",
       "DISABLED_FIND",
       "disabledHistory",
-      "EDIT_HISTORY_LIVE",
       "EDITABLE_CELL",
       "EditableCellActivateProps",
       "EditableCellButtonProps",
@@ -6506,28 +5101,23 @@
       "EditEvent",
       "EditEventHandler",
       "EditHistoryHandle",
-      "EditHistoryLiveDraw",
-      "EditHistoryLiveSlotProps",
       "EditHistoryOptions",
       "EditHistoryState",
       "EDITING_LIVE",
+      "EDITING_STATE",
       "EditLifecycle",
       "editorBusyProps",
       "editorValidationProps",
       "EditUnit",
       "EditValidationState",
-      "ensureForcedColorsStyles",
       "EscapeCloseOptions",
       "EXPAND_TOGGLE",
       "ExpandChevron",
       "ExpandToggleSlotProps",
       "EXPANSION_LIVE",
-      "EXPORT_LIVE",
       "ExportAnnouncer",
       "ExportAnnouncerProps",
       "ExportHandlerState",
-      "ExportLiveDraw",
-      "ExportLiveSlotProps",
       "ExportProgressAction",
       "ExportProgressChrome",
       "ExportProgressChromeProps",
@@ -6563,10 +5153,12 @@
       "FillHandleSlots",
       "fillSlot",
       "FILTER_CHIPS_LIVE",
+      "FILTER_CHIPS_STATE",
       "FILTER_DRAWER",
       "FILTER_HEADER",
       "FILTER_LABELS",
       "FILTER_POPOVER",
+      "FilterChipsState",
       "FilterFormSource",
       "FilterHeaderChrome",
       "FilterHeaderChromeProps",
@@ -6597,7 +5189,6 @@
       "FilterTreeSlots",
       "FilterTriggerToggle",
       "FIND_BAR",
-      "FIND_LIVE",
       "FIND_URL_WRITE_DEBOUNCE_MS",
       "FindBarChrome",
       "FindBarChromeProps",
@@ -6607,17 +5198,10 @@
       "FindButtonProps",
       "findButtonRender",
       "FindInTableState",
-      "FindLiveDraw",
-      "FindLiveSlotProps",
       "FindSearchProps",
       "finishDataTableShell",
       "flattenReactColumnTree",
       "focusEditorOnMount",
-      "FORCED_COLORS_CSS",
-      "ForcedColorsStyle",
-      "FULLSCREEN_LIVE",
-      "FullscreenLiveDraw",
-      "FullscreenLiveSlotProps",
       "FullscreenState",
       "GRID_FOCUS_ANNOUNCER",
       "GridFocusAnnouncer",
@@ -6632,6 +5216,8 @@
       "groupIndentStyle",
       "GROUPING_LIVE",
       "GROUPING_PANEL",
+      "GROUPING_PANEL_VIEW_STATE",
+      "GROUPING_STATE",
       "GroupingChipKeyboardProps",
       "GroupingDragProps",
       "GroupingDropProps",
@@ -6651,6 +5237,7 @@
       "GroupingPanelSlotProps",
       "GroupingPanelSlots",
       "GroupingPanelSurfaceProps",
+      "GroupingState",
       "GroupMoreButtonChrome",
       "GroupMoreButtonChromeProps",
       "GroupMoreButtonProps",
@@ -6661,7 +5248,6 @@
       "GroupToggleSpacer",
       "hasActiveHeaderFilter",
       "HeaderSelectionState",
-      "HistoryLiveGate",
       "isCurrentMatchCell",
       "isMatchedCell",
       "isSelectedCell",
@@ -6706,6 +5292,7 @@
       "PivotZoneProps",
       "printToolbar",
       "PrintToolbar",
+      "PublishTableRuntime",
       "ReactColumnGroupDef",
       "ReactColumnResizeHandleProps",
       "ReactMobileCardField",
@@ -6727,13 +5314,19 @@
       "resolveTableLabels",
       "restoreFocusSoon",
       "ROW_ACTIONS_LIVE",
+      "ROW_ACTIONS_STATE",
+      "ROW_DETAIL_STATE",
       "ROW_DND_MIME",
       "ROW_EDIT_ACTIONS",
+      "ROW_PINNING_STATE",
+      "ROW_REORDER",
       "ROW_REORDER_ANNOUNCER",
       "ROW_REORDER_BUTTONS",
       "ROW_REORDER_HANDLE",
+      "RowActionsState",
       "rowClickProps",
       "RowClickProps",
+      "RowDetailState",
       "RowEditActionsChrome",
       "RowEditActionsChromeProps",
       "RowEditActionsProps",
@@ -6800,13 +5393,10 @@
       "SearchInputElementProps",
       "SearchInputState",
       "SELECTION_LIVE",
-      "SELECTION_STATS_LIVE",
       "SelectionState",
       "SelectionStatPart",
       "SelectionStatsChrome",
       "SelectionStatsChromeProps",
-      "SelectionStatsLiveDraw",
-      "SelectionStatsLiveSlotProps",
       "SelectionStatsSlotProps",
       "SelectionStatsSlots",
       "shallowEqualByKeys",
@@ -6835,6 +5425,7 @@
       "StandardFeatureOptions",
       "StandardFeaturesFactory",
       "StaticFeatureHost",
+      "StaticFeatureMountContext",
       "StaticGroupingExtras",
       "StaticTableFeature",
       "STATUS_BAR",
@@ -6882,26 +5473,28 @@
       "TableElementProps",
       "TableFeature",
       "TableFeatureHost",
+      "TableFeatureMountContext",
       "TableQueryHandler",
       "tableRenderModel",
       "TableRenderModel",
       "TableRuntime",
+      "TableRuntimeReader",
       "TableRuntimeView",
       "TableStatusAnnouncementOptions",
       "TableStatusAnnouncer",
       "TableStatusAnnouncerProps",
       "TOOLBAR_EXTRAS",
-      "ToolbarChromeProps",
-      "ToolbarExtrasSlotProps",
       "ToolbarSlots",
       "toReactColumnResizeHandleProps",
       "TREE_CELL",
       "TREE_LIVE",
+      "TREE_STATE",
       "TREE_TOGGLE",
       "TreeCellChrome",
       "TreeCellChromeProps",
       "TreeCellProps",
       "TreeExpansionState",
+      "TreeState",
       "TreeToggleButtonProps",
       "TreeToggleChrome",
       "TreeToggleChromeProps",
@@ -7006,20 +5599,6 @@
       "KitToolbarProps",
       "TableComposition",
       "cellDisplay",
-      "OptionalEditableCell",
-      "OptionalTreeCell",
-      "OptionalTreeToggle",
-      "OptionalFillHandle",
-      "OptionalExpandToggle",
-      "OptionalFilterHeader",
-      "OptionalRowEditActions",
-      "OptionalRowReorderHandle",
-      "OptionalRowReorderButtons",
-      "OptionalColumnGroupToggle",
-      "OptionalColumnHeaderRename",
-      "OptionalColumnSelect",
-      "OptionalGroupHeaderRow",
-      "OptionalGroupHeaderCard",
       "createColumnMenu",
       "KitColumnMenuLook",
       "KitDividerProps",
@@ -7139,7 +5718,33 @@
       "FilterWidget",
       "FilterWidgetField",
       "FilterWidgetFieldProps",
-      "FilterWidgetProps"
+      "FilterWidgetProps",
+      "createAdapterFiltersFeatureOn",
+      "booleanFilterSpecs",
+      "checklistFilterSpecs",
+      "filterEngineForWidgets",
+      "multiSelectFilterSpecs",
+      "rangeFilterSpecs",
+      "selectFilterSpecs",
+      "textFilterSpecs",
+      "AdapterColumnLayoutFamilyFactories",
+      "AdapterEditingFamilyFactories",
+      "AdapterFilteringFamilyFactories",
+      "createAdapterColumnLayoutFamily",
+      "createAdapterEditingFamily",
+      "createAdapterFilteringFamily",
+      "EditingFamilyFactory",
+      "FilteringFamilyFactory",
+      "CellContent",
+      "KEYED_WINDOW_RENDER",
+      "coreVirtualize",
+      "EDIT_HISTORY_STATE",
+      "EXPORT_STATE",
+      "FULLSCREEN_STATE",
+      "TABLE_PROPS_STATE",
+      "ToolbarEntrySlotProps",
+      "FeatureListEntry",
+      "flattenFeatures"
     ],
     "react-features": [
       "applyTableFeatures",
@@ -7211,21 +5816,23 @@
       "savedViews",
       "SavedViewsStore",
       "SavedViewVisibility",
+      "selection",
       "selectionStats",
       "Shortcut",
       "sidePanel",
       "SidePanelEntry",
       "SidePanelOptions",
       "StaticFeatureHost",
+      "StaticFeatureMountContext",
       "StaticGroupingExtras",
       "StaticTableFeature",
       "statusBar",
       "TableFeature",
       "TableFeatureHost",
+      "TableFeatureMountContext",
       "tree",
       "undoRedoButtons",
       "UseSavedViewsOptions",
-      "useTableFeatures",
       "virtualize",
       "VirtualizeOptions"
     ],
@@ -7275,6 +5882,8 @@
       "NumberRangeFilter",
       "parseTableQuery",
       "pickFilters",
+      "PreparedQuerySchema",
+      "prepareQuerySchema",
       "QueryInput",
       "QueryRejection",
       "QuerySchema",
@@ -7284,7 +5893,6 @@
       "ServerFilterValue",
       "ServerTableQuery",
       "ShapedFilter",
-      "splitFilterValues",
       "splitListParam",
       "TextFilter",
       "TypedFilter"
@@ -7307,6 +5915,7 @@
     ],
     "core-binding": [
       "absoluteColumnIndex",
+      "AcquireFeatureMount",
       "ACTION_LABELS",
       "ActionAiOptions",
       "ActionApprovalPolicy",
@@ -7352,10 +5961,8 @@
       "applyFeatureNoticesAttribute",
       "applyTableFeatures",
       "ApprovalArgumentPair",
-      "approvalArgumentPairs",
       "ApprovalPresentation",
       "ApprovalReviewSlots",
-      "approvalValueText",
       "AssemblyFns",
       "ASSISTANT_ACTIONS_ICON",
       "ASSISTANT_AVATAR_ICON",
@@ -7421,13 +6028,11 @@
       "cachedSnapshot",
       "CachedSnapshot",
       "cardSetSize",
-      "CELL_NAV_LIVE",
       "cellAttributes",
       "CellEditHandler",
       "cellHighlightKind",
       "cellHighlightStyle",
       "cellNavigationInput",
-      "CellNavLiveDraw",
       "CellNavLiveSlotProps",
       "CellRange",
       "cellsForRow",
@@ -7447,7 +6052,6 @@
       "ChecklistWindowState",
       "ChipLabelResolver",
       "CHROME_BODY",
-      "CHROME_EXTRA_SLOT_ORDER",
       "ChromeBodyDraw",
       "ChromeBodyRegion",
       "chromeBodyRegion",
@@ -7514,6 +6118,7 @@
       "ColumnMenuChromeProps",
       "ColumnMenuItem",
       "ColumnMenuLabels",
+      "ColumnMenuOptions",
       "ColumnMenuRow",
       "ColumnMenuSlotProps",
       "ColumnMetadata",
@@ -7541,7 +6146,9 @@
       "CommandPaletteItemProps",
       "CommandPaletteSlots",
       "CommandPaletteSurfaceProps",
+      "commitRowRekeys",
       "commitSearchOnBlur",
+      "composeMounts",
       "ConfirmHandler",
       "ConfirmRequest",
       "CONTEXT_MENU",
@@ -7598,6 +6205,7 @@
       "CoreRowFeatureRegistrar",
       "coreRowPinning",
       "coreSavedViews",
+      "coreSelection",
       "coreSelectionStats",
       "coreSidePanel",
       "CoreStandardFeatureFactories",
@@ -7607,6 +6215,7 @@
       "coreUndoRedoButtons",
       "coreVirtualize",
       "createFeatureHost",
+      "createFeatureMounts",
       "createLazyServerSource",
       "CreateTableEngineOptions",
       "createTableStore",
@@ -7667,7 +6276,6 @@
       "disposeFeatureHost",
       "documentOffsetTop",
       "drawnSlotFills",
-      "EDIT_HISTORY_LIVE",
       "EDITABLE_CELL",
       "EditableCellActivateProps",
       "EditableCellButtonProps",
@@ -7678,13 +6286,21 @@
       "EditCommitValidationFailure",
       "EditCommitValidationOptions",
       "EditHistoryInput",
-      "EditHistoryLiveDraw",
-      "EditHistoryLiveSlotProps",
       "EDITING_LABELS",
       "EDITING_LIVE",
       "EditingContribution",
       "EMPTY_FEATURE_HOST",
       "EndReachedLatch",
+      "ContrastRules",
+      "DeferredExportWriter",
+      "ExportWriterOption",
+      "FEATURE_OWNED_OPTION_KEYS",
+      "FeatureMounts",
+      "FeatureNoticeLabels",
+      "FeatureOwnedOptionKey",
+      "FilterPanelOptions",
+      "HeaderFilterOptions",
+      "isDeferredExportWriter",
       "ensureForcedColorsStyles",
       "entryKeys",
       "estimateBodyItemSize",
@@ -7693,7 +6309,6 @@
       "ExpandToggleSlotProps",
       "EXPANSION_LIVE",
       "EXPORT_LABELS",
-      "EXPORT_LIVE",
       "ExportAllControls",
       "ExportAllQuery",
       "ExportAllResult",
@@ -7702,7 +6317,6 @@
       "ExportCsvOptions",
       "ExportHandlerState",
       "ExportInfo",
-      "ExportLiveDraw",
       "ExportLiveSlotProps",
       "exportPageOnly",
       "ExportPayload",
@@ -7822,14 +6436,12 @@
       "FilterWidgetRenderProps",
       "FIND_BAR",
       "FIND_LABELS",
-      "FIND_LIVE",
       "FindBarProps",
       "FindBarSlots",
       "FindButtonKind",
       "FindButtonProps",
       "FindContribution",
       "FindInTableState",
-      "FindLiveDraw",
       "FindLiveSlotProps",
       "FindSearchProps",
       "FindStrings",
@@ -7837,12 +6449,9 @@
       "finishShellLive",
       "flattenColumnTree",
       "FlattenedColumns",
-      "FORCED_COLORS_CSS",
       "FrontendEngineFactory",
       "frontendRowModelOf",
-      "FULLSCREEN_LIVE",
       "FullscreenContribution",
-      "FullscreenLiveDraw",
       "FullscreenLiveSlotProps",
       "FullscreenState",
       "getAppliedFeatures",
@@ -7853,6 +6462,7 @@
       "GridCell",
       "GridFocusAnnouncerSlotProps",
       "GridFocusState",
+      "gridRowCount",
       "GRIP_ICON",
       "GROUP_HEADER_CARD",
       "GROUP_HEADER_ROW",
@@ -7953,6 +6563,11 @@
       "liveColumnLayout",
       "LiveFeatureHost",
       "livePinning",
+      "LiveStage",
+      "LiveStageDependencies",
+      "liveStageKey",
+      "LiveStageKey",
+      "liveStagesOf",
       "logicalAlign",
       "MATCHED_CELL_STYLE",
       "materializeWindowRows",
@@ -7964,15 +6579,19 @@
       "mergeFeaturePatches",
       "mergeGroupingContributions",
       "MOUNT_STAGGER",
+      "MountableFeature",
       "MultiSelectEditorCheckboxProps",
       "MultiSelectEditorSlots",
       "NeutralTable",
       "NoFeatureState",
       "notifyLayoutChange",
       "observeRailWidths",
+      "onRowRekeyMoves",
+      "onRowRekeys",
       "orderedCardEntries",
       "OrderedContribution",
       "orderedContributions",
+      "orderLiveStages",
       "OVERLAY_MOTION",
       "OverlayChrome",
       "overlayChromeExtras",
@@ -8034,6 +6653,14 @@
       "readColumnViewport",
       "readRailWidths",
       "RegisteredFeature",
+      "rekeyedIds",
+      "rekeyIdList",
+      "rekeyIdMap",
+      "rekeyIdRecord",
+      "rekeyIdSet",
+      "rekeyRowIdSet",
+      "rekeyRowPins",
+      "rekeyTableRows",
       "REMAINING_FEATURE_OWNERSHIP",
       "RemainingFeatureDomain",
       "rememberAppliedFeatures",
@@ -8053,6 +6680,7 @@
       "ResolvedDensity",
       "ResolvedPaginationMode",
       "resolveFeatureGrouping",
+      "resolveFeatureIds",
       "resolveFeatureLabels",
       "resolveMobileLabel",
       "resolveRowHeight",
@@ -8093,6 +6721,7 @@
       "RowPairMeasureController",
       "RowPairMeasurer",
       "RowPatchEvent",
+      "RowPatchLog",
       "RowPatchStreamState",
       "RowPatchStreamStatus",
       "RowPinLookup",
@@ -8101,6 +6730,10 @@
       "RowPinSide",
       "rowPinSignature",
       "RowPinState",
+      "RowRekeyable",
+      "RowRekeyHandler",
+      "RowRekeyMoves",
+      "rowRekeyMoves",
       "RowReorderButtonsProps",
       "RowReorderButtonsSlots",
       "RowReorderDigest",
@@ -8124,10 +6757,10 @@
       "RowTreeParentRef",
       "RowValidator",
       "rowWindow",
+      "RuntimeChannels",
       "RuntimeChromeInput",
       "RuntimeColumn",
       "sameFilterTree",
-      "sameRows",
       "SAVED_VIEW_LABELS",
       "SAVED_VIEWS",
       "SavedView",
@@ -8149,14 +6782,14 @@
       "SELECTED_IDS",
       "selectFrom",
       "SELECTION_LIVE",
-      "SELECTION_STATS_LIVE",
       "SelectionContribution",
+      "SelectionFeatureOptions",
       "selectionObserverIds",
+      "selectionResetKey",
       "SelectionState",
       "SelectionStatPart",
       "SelectionStats",
       "SelectionStatsChromeProps",
-      "SelectionStatsLiveDraw",
       "SelectionStatsLiveSlotProps",
       "SelectionStatsSlotProps",
       "SelectionStatsSlots",
@@ -8168,10 +6801,8 @@
       "ServerTierFrame",
       "shallowEqualByKeys",
       "SHARED_DESKTOP_ROW_KEYS",
-      "SHELL_LIVE_STAGE_ORDER",
       "SHELL_OPERATION_OWNERS",
       "ShellBodyInput",
-      "ShellLiveStageId",
       "ShellOperation",
       "ShellOperationInput",
       "showAllColumns",
@@ -8270,7 +6901,7 @@
       "toggleRowSelected",
       "toggleRowsSelected",
       "TOOLBAR_EXTRAS",
-      "ToolbarExtrasSlotProps",
+      "ToolbarEntrySlotProps",
       "TotalCountCapability",
       "TREE_CELL",
       "TREE_LIVE",
@@ -8283,6 +6914,7 @@
       "TreeToggleProps",
       "TreeToggleSlots",
       "undoRedoToolbarProps",
+      "UndoRedoToolbarProps",
       "unpinAllColumns",
       "UseColumnLayoutResult",
       "UseColumnLayoutStorageStateResult",
@@ -8295,6 +6927,7 @@
       "UseTableDataResult",
       "UseTableUrlStateResult",
       "VIEW_CONTROL_LABELS",
+      "VIRTUALIZE_LABELS",
       "viewControlsToolbarProps",
       "virtualItemMeta",
       "VirtualItemMeta",
@@ -8330,7 +6963,6 @@
       "addFilterTreeCondition",
       "addFilterTreeGroup",
       "advanceGroupPaging",
-      "aggregate",
       "AGGREGATE_NAMES",
       "AggregationModelInput",
       "aggregationRemovalFocusSelectors",
@@ -8348,7 +6980,6 @@
       "applyQuerySupport",
       "APPROVAL_PREVIEW_LIMIT",
       "attachIncrementalView",
-      "autoSizeColumns",
       "batchEditBarModel",
       "BatchEditBarModel",
       "batchEditErrorId",
@@ -8414,7 +7045,6 @@
       "cellsOfBatch",
       "cellSortValue",
       "CellValidator",
-      "cellValue",
       "CHANGED_CELL_FLASH_MS",
       "ChangedCellFlashOptions",
       "ChangedCellFlashStore",
@@ -8484,9 +7114,7 @@
       "commitRowPin",
       "compareValues",
       "composeContextMenuExtra",
-      "computedAggregateKeys",
       "computePagination",
-      "conditionToExtra",
       "configureIncrementalView",
       "contestedCellKey",
       "ContestedEditCell",
@@ -8520,12 +7148,14 @@
       "createContextMenuOpenController",
       "createControllableStore",
       "createDirtyCellStore",
-      "createEditConflictStore",
+      "createDeferredEditConflictStore",
+      "loadEditConflictStore",
       "createEditHistoryStack",
       "createEditValidationStore",
       "createExportController",
       "createFilterOptionsLoader",
       "createFindController",
+      "createFindMatcher",
       "createFindShortcutScope",
       "createFirstLoadLatch",
       "createFrontendSource",
@@ -8557,7 +7187,6 @@
       "DATE_OP_LABEL_KEYS",
       "DATE_OPS",
       "DateOp",
-      "declaredAggregates",
       "declaredByDeveloper",
       "declaredColumnLayout",
       "declaredColumnName",
@@ -8569,7 +7198,6 @@
       "defaultConfirm",
       "defaultFindMatchCount",
       "defaultLabels",
-      "defaultPendingRows",
       "defaultRowReorderAnnouncements",
       "defaultSaveErrorMessage",
       "deferGroupingDropToInner",
@@ -8653,7 +7281,6 @@
       "FILTER_ENGINE_IMPL",
       "FILTER_TYPE_OPS",
       "filterExportView",
-      "filterLabel",
       "FilterOptionsLoader",
       "filterPredicate",
       "filterTreeCombinatorOptions",
@@ -8673,6 +7300,7 @@
       "FindController",
       "FindControllerOptions",
       "findMatchCountText",
+      "FindMatchesOptions",
       "findMatchRow",
       "FindShortcutScope",
       "FindShortcutScopeOptions",
@@ -8916,6 +7544,7 @@
       "removeGroupingKey",
       "replaceFilterTreeNode",
       "reportedCellRange",
+      "reportFailure",
       "requestDensityChange",
       "resetDevWarnings",
       "resolveActiveFilterCount",
@@ -9025,9 +7654,6 @@
       "SidePanelTabModel",
       "Slot",
       "SortByOption",
-      "sortRows",
-      "sortRowsMulti",
-      "sourceCapabilities",
       "spanningArmed",
       "SPARKLINE_DEFAULT_HEIGHT",
       "SPARKLINE_DEFAULT_WIDTH",
@@ -9078,7 +7704,6 @@
       "toAggregateOrdered",
       "toggleId",
       "toggleIds",
-      "treeColumnKey",
       "treeExpansionActions",
       "TreeExpansionActions",
       "treeRowAria",
@@ -9096,7 +7721,6 @@
       "ViewStateSubscription",
       "VIRTUAL_OVERSCAN",
       "virtualColumnSpan",
-      "visibleColumns",
       "visibleRowActions",
       "walkFilterTreeConditions",
       "warnDataTierMisuse",
@@ -9115,7 +7739,27 @@
       "writeRangeWidget",
       "writeStoredColumnLayout",
       "filterWidgetFor",
-      "FilterWidgetOf"
+      "FilterWidgetOf",
+      "booleanFilterSpecs",
+      "checklistFilterSpecs",
+      "createFilterEngine",
+      "filterEngineForWidgets",
+      "multiSelectFilterSpecs",
+      "rangeFilterSpecs",
+      "selectFilterSpecs",
+      "textFilterSpecs",
+      "columnLayoutFamilyList",
+      "CoreColumnLayoutFamilyFactories",
+      "CoreEditingFamilyFactories",
+      "CoreFilteringFamilyFactories",
+      "editingFamilyList",
+      "FeatureListEntry",
+      "filteringFamilyList",
+      "flattenFeatures",
+      "RuntimeActions",
+      "ChromeStageKey",
+      "EDIT_HISTORY_STAGE",
+      "LiveStagePhase"
     ],
     "core-conformance": [
       "CaseArgs",
@@ -9144,6 +7788,7 @@
     ],
     "angular": [
       "ActionAiOptions",
+      "COLUMN_MENU_TOOLBAR_STATE",
       "DataTableClassNames",
       "ADAPTTABLE_FEATURES",
       "ADAPTTABLE_FEATURE_STATE",
@@ -9186,8 +7831,10 @@
       "DEFAULT_SHORTCUTS",
       "DataTable",
       "DataTableOptions",
+      "DENSITY_TOOLBAR_STATE",
       "DensityOptions",
       "DensityState",
+      "DensityToolbar",
       "DensityUrlState",
       "DensityUrlStateOptions",
       "EditConflict",
@@ -9209,8 +7856,10 @@
       "EditableCellEditing",
       "EditableCellMode",
       "EditingBundle",
+      "EXPORT_TOOLBAR_STATE",
       "ExportContext",
       "ExportCsvHandlerOptions",
+      "ExportToolbar",
       "ExternalStore",
       "FeatureMountContext",
       "FeatureResources",
@@ -9222,6 +7871,8 @@
       "FooterContext",
       "FromStoreOptions",
       "FrontendDataOptions",
+      "FULLSCREEN_TOOLBAR_STATE",
+      "FullscreenToolbar",
       "GridFocus",
       "GridFocusOptions",
       "GroupCollapseOptions",
@@ -9234,6 +7885,11 @@
       "HeaderContext",
       "Highlight",
       "InfiniteQuerySignals",
+      "injectDensityToolbar",
+      "injectExportToolbar",
+      "injectFullscreenToolbar",
+      "injectPrintToolbar",
+      "injectUndoRedoToolbar",
       "IsMobileOptions",
       "KeyedVirtualization",
       "KeyedVirtualizationOptions",
@@ -9246,12 +7902,16 @@
       "NestedTableContext",
       "NestedTableFor",
       "PaginationMode",
+      "PRINT_TOOLBAR_STATE",
+      "PrintToolbar",
       "QuerySourceOptions",
       "ReconcileLiveBatchEdit",
       "ReconcileLiveEdit",
       "ReconcileLiveRowEdit",
+      "rekeyRow",
       "Renderer",
       "ResizableVirtualizer",
+      "RowIdConflictError",
       "RowMutationHandlers",
       "RowMutationsOptions",
       "RowMutationsState",
@@ -9269,6 +7929,7 @@
       "RowReorderOptions",
       "RowSelection",
       "RowSelectionOptions",
+      "SAVED_VIEWS_TOOLBAR_STATE",
       "SavedViewsOptions",
       "SavedViewsState",
       "SelectionStats",
@@ -9283,6 +7944,7 @@
       "SURFACE_OCCUPIED",
       "SurfaceHandles",
       "SurfaceOccupation",
+      "TABLE_STORE",
       "TableAssistantAvatars",
       "TableAssistantBoundary",
       "TableAssistantFace",
@@ -9301,6 +7963,8 @@
       "TableVirtualization",
       "TableVirtualizationOptions",
       "TreeExpansionOptions",
+      "UNDO_REDO_TOOLBAR_STATE",
+      "UndoRedoToolbar",
       "UrlSlice",
       "UrlSliceOptions",
       "UseShortcutsOptions",
@@ -9407,7 +8071,11 @@
       "RowPinningImplementation",
       "RowReorderImplementation",
       "TreeImplementation",
-      "withFeatureImplementation"
+      "VirtualizeImplementation",
+      "withFeatureImplementation",
+      "ServerFilterKeys",
+      "ServerFilterKeysInput",
+      "serverFilterKeys"
     ],
     "angular-formula": [
       "AngularFormulaColumnsResult",
@@ -9601,6 +8269,9 @@
     "adapter-angular-unstyled-column-menu": [
       "columnMenu"
     ],
+    "adapter-angular-unstyled-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-angular-unstyled-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -9627,7 +8298,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-angular-unstyled-export": [
       "exportCsv",
@@ -9636,54 +8308,6 @@
     ],
     "adapter-angular-unstyled-extra-rows": [
       "extraRows"
-    ],
-    "adapter-angular-unstyled-features": [
-      "RowActionsFeatureOptions",
-      "agentApproval",
-      "batchEditing",
-      "bulkActions",
-      "cellNavigation",
-      "cellSpan",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "exportCsv",
-      "exportPdf",
-      "exportXlsx",
-      "extraRows",
-      "filterTypes",
-      "filters",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "grouping",
-      "groupingPanel",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "rowActions",
-      "rowAppearance",
-      "rowDetail",
-      "rowEditing",
-      "rowPinning",
-      "rowReorder",
-      "savedViews",
-      "selectionStats",
-      "sidePanel",
-      "statusBar",
-      "tableAssistant",
-      "tree",
-      "undoRedoButtons",
-      "virtualize"
     ],
     "adapter-angular-unstyled-filters": [
       "filterTypes",
@@ -9695,6 +8319,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-angular-unstyled-filtering": [
+      "filteringFamily"
     ],
     "adapter-angular-unstyled-find-in-table": [
       "AdaptFindBar",
@@ -9754,8 +8381,8 @@
       "pivotTableModel"
     ],
     "adapter-angular-unstyled-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-angular-unstyled-print": [
       "print"
@@ -9900,6 +8527,9 @@
     "adapter-ng-zorro-column-menu": [
       "columnMenu"
     ],
+    "adapter-ng-zorro-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-ng-zorro-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -9926,7 +8556,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-ng-zorro-export": [
       "exportCsv",
@@ -9935,54 +8566,6 @@
     ],
     "adapter-ng-zorro-extra-rows": [
       "extraRows"
-    ],
-    "adapter-ng-zorro-features": [
-      "RowActionsFeatureOptions",
-      "agentApproval",
-      "batchEditing",
-      "bulkActions",
-      "cellNavigation",
-      "cellSpan",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "exportCsv",
-      "exportPdf",
-      "exportXlsx",
-      "extraRows",
-      "filterTypes",
-      "filters",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "grouping",
-      "groupingPanel",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "rowActions",
-      "rowAppearance",
-      "rowDetail",
-      "rowEditing",
-      "rowPinning",
-      "rowReorder",
-      "savedViews",
-      "selectionStats",
-      "sidePanel",
-      "statusBar",
-      "tableAssistant",
-      "tree",
-      "undoRedoButtons",
-      "virtualize"
     ],
     "adapter-ng-zorro-filters": [
       "filterTypes",
@@ -9994,6 +8577,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-ng-zorro-filtering": [
+      "filteringFamily"
     ],
     "adapter-ng-zorro-find-in-table": [
       "AdaptFindBar",
@@ -10053,8 +8639,8 @@
       "pivotTableModel"
     ],
     "adapter-ng-zorro-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-ng-zorro-print": [
       "print"
@@ -10201,6 +8787,9 @@
     "adapter-angular-aria-column-menu": [
       "columnMenu"
     ],
+    "adapter-angular-aria-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-angular-aria-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -10227,7 +8816,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-angular-aria-export": [
       "exportCsv",
@@ -10236,54 +8826,6 @@
     ],
     "adapter-angular-aria-extra-rows": [
       "extraRows"
-    ],
-    "adapter-angular-aria-features": [
-      "RowActionsFeatureOptions",
-      "agentApproval",
-      "batchEditing",
-      "bulkActions",
-      "cellNavigation",
-      "cellSpan",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "exportCsv",
-      "exportPdf",
-      "exportXlsx",
-      "extraRows",
-      "filterTypes",
-      "filters",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "grouping",
-      "groupingPanel",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "rowActions",
-      "rowAppearance",
-      "rowDetail",
-      "rowEditing",
-      "rowPinning",
-      "rowReorder",
-      "savedViews",
-      "selectionStats",
-      "sidePanel",
-      "statusBar",
-      "tableAssistant",
-      "tree",
-      "undoRedoButtons",
-      "virtualize"
     ],
     "adapter-angular-aria-filters": [
       "filterTypes",
@@ -10295,6 +8837,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-angular-aria-filtering": [
+      "filteringFamily"
     ],
     "adapter-angular-aria-find-in-table": [
       "AdaptFindBar",
@@ -10354,8 +8899,8 @@
       "pivotTableModel"
     ],
     "adapter-angular-aria-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-angular-aria-print": [
       "print"
@@ -10504,6 +9049,9 @@
     "adapter-angular-cdk-column-menu": [
       "columnMenu"
     ],
+    "adapter-angular-cdk-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-angular-cdk-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -10530,7 +9078,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-angular-cdk-export": [
       "exportCsv",
@@ -10539,54 +9088,6 @@
     ],
     "adapter-angular-cdk-extra-rows": [
       "extraRows"
-    ],
-    "adapter-angular-cdk-features": [
-      "RowActionsFeatureOptions",
-      "agentApproval",
-      "batchEditing",
-      "bulkActions",
-      "cellNavigation",
-      "cellSpan",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "exportCsv",
-      "exportPdf",
-      "exportXlsx",
-      "extraRows",
-      "filterTypes",
-      "filters",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "grouping",
-      "groupingPanel",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "rowActions",
-      "rowAppearance",
-      "rowDetail",
-      "rowEditing",
-      "rowPinning",
-      "rowReorder",
-      "savedViews",
-      "selectionStats",
-      "sidePanel",
-      "statusBar",
-      "tableAssistant",
-      "tree",
-      "undoRedoButtons",
-      "virtualize"
     ],
     "adapter-angular-cdk-filters": [
       "filterTypes",
@@ -10598,6 +9099,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-angular-cdk-filtering": [
+      "filteringFamily"
     ],
     "adapter-angular-cdk-find-in-table": [
       "AdaptFindBar",
@@ -10657,8 +9161,8 @@
       "pivotTableModel"
     ],
     "adapter-angular-cdk-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-angular-cdk-print": [
       "print"
@@ -10803,6 +9307,9 @@
     "adapter-material-column-menu": [
       "columnMenu"
     ],
+    "adapter-material-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-material-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -10829,7 +9336,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-material-export": [
       "exportCsv",
@@ -10838,54 +9346,6 @@
     ],
     "adapter-material-extra-rows": [
       "extraRows"
-    ],
-    "adapter-material-features": [
-      "RowActionsFeatureOptions",
-      "agentApproval",
-      "batchEditing",
-      "bulkActions",
-      "cellNavigation",
-      "cellSpan",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "exportCsv",
-      "exportPdf",
-      "exportXlsx",
-      "extraRows",
-      "filterTypes",
-      "filters",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "grouping",
-      "groupingPanel",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "rowActions",
-      "rowAppearance",
-      "rowDetail",
-      "rowEditing",
-      "rowPinning",
-      "rowReorder",
-      "savedViews",
-      "selectionStats",
-      "sidePanel",
-      "statusBar",
-      "tableAssistant",
-      "tree",
-      "undoRedoButtons",
-      "virtualize"
     ],
     "adapter-material-filters": [
       "filterTypes",
@@ -10897,6 +9357,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-material-filtering": [
+      "filteringFamily"
     ],
     "adapter-material-find-in-table": [
       "AdaptFindBar",
@@ -10956,8 +9419,8 @@
       "pivotTableModel"
     ],
     "adapter-material-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-material-print": [
       "print"
@@ -11102,6 +9565,9 @@
     "adapter-ng-bootstrap-column-menu": [
       "columnMenu"
     ],
+    "adapter-ng-bootstrap-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-ng-bootstrap-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -11128,7 +9594,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-ng-bootstrap-export": [
       "exportCsv",
@@ -11137,54 +9604,6 @@
     ],
     "adapter-ng-bootstrap-extra-rows": [
       "extraRows"
-    ],
-    "adapter-ng-bootstrap-features": [
-      "RowActionsFeatureOptions",
-      "agentApproval",
-      "batchEditing",
-      "bulkActions",
-      "cellNavigation",
-      "cellSpan",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "exportCsv",
-      "exportPdf",
-      "exportXlsx",
-      "extraRows",
-      "filterTypes",
-      "filters",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "grouping",
-      "groupingPanel",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "rowActions",
-      "rowAppearance",
-      "rowDetail",
-      "rowEditing",
-      "rowPinning",
-      "rowReorder",
-      "savedViews",
-      "selectionStats",
-      "sidePanel",
-      "statusBar",
-      "tableAssistant",
-      "tree",
-      "undoRedoButtons",
-      "virtualize"
     ],
     "adapter-ng-bootstrap-filters": [
       "filterTypes",
@@ -11196,6 +9615,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-ng-bootstrap-filtering": [
+      "filteringFamily"
     ],
     "adapter-ng-bootstrap-find-in-table": [
       "AdaptFindBar",
@@ -11255,8 +9677,8 @@
       "pivotTableModel"
     ],
     "adapter-ng-bootstrap-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-ng-bootstrap-print": [
       "print"
@@ -11401,6 +9823,9 @@
     "adapter-ngx-bootstrap-column-menu": [
       "columnMenu"
     ],
+    "adapter-ngx-bootstrap-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-ngx-bootstrap-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -11427,7 +9852,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-ngx-bootstrap-export": [
       "exportCsv",
@@ -11436,54 +9862,6 @@
     ],
     "adapter-ngx-bootstrap-extra-rows": [
       "extraRows"
-    ],
-    "adapter-ngx-bootstrap-features": [
-      "RowActionsFeatureOptions",
-      "agentApproval",
-      "batchEditing",
-      "bulkActions",
-      "cellNavigation",
-      "cellSpan",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "exportCsv",
-      "exportPdf",
-      "exportXlsx",
-      "extraRows",
-      "filterTypes",
-      "filters",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "grouping",
-      "groupingPanel",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "rowActions",
-      "rowAppearance",
-      "rowDetail",
-      "rowEditing",
-      "rowPinning",
-      "rowReorder",
-      "savedViews",
-      "selectionStats",
-      "sidePanel",
-      "statusBar",
-      "tableAssistant",
-      "tree",
-      "undoRedoButtons",
-      "virtualize"
     ],
     "adapter-ngx-bootstrap-filters": [
       "filterTypes",
@@ -11495,6 +9873,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-ngx-bootstrap-filtering": [
+      "filteringFamily"
     ],
     "adapter-ngx-bootstrap-find-in-table": [
       "AdaptFindBar",
@@ -11554,8 +9935,8 @@
       "pivotTableModel"
     ],
     "adapter-ngx-bootstrap-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-ngx-bootstrap-print": [
       "print"
@@ -11700,6 +10081,9 @@
     "adapter-spartan-column-menu": [
       "columnMenu"
     ],
+    "adapter-spartan-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-spartan-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -11726,7 +10110,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-spartan-export": [
       "exportCsv",
@@ -11735,54 +10120,6 @@
     ],
     "adapter-spartan-extra-rows": [
       "extraRows"
-    ],
-    "adapter-spartan-features": [
-      "RowActionsFeatureOptions",
-      "agentApproval",
-      "batchEditing",
-      "bulkActions",
-      "cellNavigation",
-      "cellSpan",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "exportCsv",
-      "exportPdf",
-      "exportXlsx",
-      "extraRows",
-      "filterTypes",
-      "filters",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "grouping",
-      "groupingPanel",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "rowActions",
-      "rowAppearance",
-      "rowDetail",
-      "rowEditing",
-      "rowPinning",
-      "rowReorder",
-      "savedViews",
-      "selectionStats",
-      "sidePanel",
-      "statusBar",
-      "tableAssistant",
-      "tree",
-      "undoRedoButtons",
-      "virtualize"
     ],
     "adapter-spartan-filters": [
       "filterTypes",
@@ -11794,6 +10131,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-spartan-filtering": [
+      "filteringFamily"
     ],
     "adapter-spartan-find-in-table": [
       "AdaptFindBar",
@@ -11853,8 +10193,8 @@
       "pivotTableModel"
     ],
     "adapter-spartan-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-spartan-print": [
       "print"
@@ -12003,6 +10343,9 @@
     "adapter-taiga-ui-column-menu": [
       "columnMenu"
     ],
+    "adapter-taiga-ui-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-taiga-ui-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -12029,7 +10372,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-taiga-ui-export": [
       "exportCsv",
@@ -12038,54 +10382,6 @@
     ],
     "adapter-taiga-ui-extra-rows": [
       "extraRows"
-    ],
-    "adapter-taiga-ui-features": [
-      "RowActionsFeatureOptions",
-      "agentApproval",
-      "batchEditing",
-      "bulkActions",
-      "cellNavigation",
-      "cellSpan",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "exportCsv",
-      "exportPdf",
-      "exportXlsx",
-      "extraRows",
-      "filterTypes",
-      "filters",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "grouping",
-      "groupingPanel",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "rowActions",
-      "rowAppearance",
-      "rowDetail",
-      "rowEditing",
-      "rowPinning",
-      "rowReorder",
-      "savedViews",
-      "selectionStats",
-      "sidePanel",
-      "statusBar",
-      "tableAssistant",
-      "tree",
-      "undoRedoButtons",
-      "virtualize"
     ],
     "adapter-taiga-ui-filters": [
       "filterTypes",
@@ -12097,6 +10393,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-taiga-ui-filtering": [
+      "filteringFamily"
     ],
     "adapter-taiga-ui-find-in-table": [
       "AdaptFindBar",
@@ -12156,8 +10455,8 @@
       "pivotTableModel"
     ],
     "adapter-taiga-ui-preset": [
-      "StandardPresetOptions",
-      "standardPreset"
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "adapter-taiga-ui-print": [
       "print"
@@ -12422,6 +10721,8 @@
       "SelectionState",
       "SelectionStats",
       "ServerDataState",
+      "ServerFilterKeys",
+      "ServerFilterKeysInput",
       "Shortcut",
       "SortByOption",
       "SortDirection",
@@ -12506,6 +10807,7 @@
       "partitionPinnedRows",
       "primitiveText",
       "resolveColumns",
+      "serverFilterKeys",
       "useBatchEditing",
       "useBooleanFilterWidget",
       "useCellEditing",
@@ -12673,14 +10975,17 @@
       "ExternalStore",
       "ExtraEntry",
       "ExtraRow",
+      "FeatureSlotDrawer",
       "FILL_HANDLE_CONTROL",
       "FILTER_VIEW",
+      "FILTERS_PANEL",
       "FIND_BAR",
       "FIND_BUTTON",
       "FIND_MODEL",
       "FULLSCREEN_CONTROL",
       "FULLSCREEN_MODEL",
       "FeatureLifecycle",
+      "FeatureListEntry",
       "FillHandleChrome",
       "FillHandleChromeProps",
       "FillHandleSlotProps",
@@ -12852,8 +11157,10 @@
       "TableSummaryChrome",
       "TableSummaryChromeProps",
       "TableSummaryClassNames",
-      "ToolbarExtrasSlotProps",
+      "toolbarEntry",
+      "ToolbarEntryProps",
       "UNDO_REDO_CONTROL",
+      "UndoRedoControlProps",
       "UseDataTableShellResult",
       "ViewControlButtonProps",
       "ViewControlPresentation",
@@ -12870,6 +11177,7 @@
       "columnGroupId",
       "columnGroupPath",
       "columnGroupStubStyle",
+      "columnLayoutFamilyList",
       "columnMenuActions",
       "columnMenuSlotKey",
       "composeElementRefs",
@@ -12882,6 +11190,7 @@
       "editableCellSlotKey",
       "editableCustomControl",
       "editingChromeModelKey",
+      "editingFamilyList",
       "editingModelKey",
       "editorInputType",
       "elementRef",
@@ -12900,9 +11209,10 @@
       "filterLabel",
       "filterViewKey",
       "filterWidgetKind",
+      "filteringFamilyList",
       "flattenColumnTree",
+      "flattenFeatures",
       "formatMultiDraft",
-      "groupRowSlotKey",
       "groupedHeaderAlign",
       "groupedHeaderCellStyle",
       "groupedHeaderChildRule",
@@ -13118,22 +11428,85 @@
       "TableSource"
     ],
     "vue-features": [
+      "Attrs",
+      "CellContext",
       "CellNavigationOptions",
+      "ColumnDef",
+      "ColumnGroup",
+      "ColumnInput",
+      "ColumnLayout",
+      "ColumnLayoutOptions",
+      "ColumnMenuOptions",
       "CommandPaletteOptions",
+      "ComponentRenderer",
+      "ComposedFeature",
       "ContextMenuOptions",
+      "DesktopTableModel",
+      "DirtyEdits",
       "EditingLifecycleExtras",
       "ExportCsvOptions",
+      "ExtraRow",
+      "FeatureMountContext",
+      "FeatureState",
       "FiltersOptions",
+      "FooterContext",
+      "GroupCollapseOptions",
+      "GroupRowModel",
       "GroupingExtras",
+      "HeaderContext",
+      "MaybeRefOrGetterOptional",
+      "MobileCardsModel",
+      "NestedTable",
+      "NestedTableFor",
+      "RenderFunction",
+      "Renderer",
+      "ResolvedTableOptions",
+      "RowActionControl",
+      "RowActionControlsInput",
+      "RowActionControlsProjector",
       "RowAppearanceOptions",
+      "RowDetailModel",
+      "RowExpansionOptions",
+      "RowMutationHandlers",
       "RowPinningFeatureOptions",
+      "RowSelection",
+      "SelectionCheckboxAttrs",
       "SelectionStatsOptions",
       "SidePanelOptions",
       "SidePanelPanel",
+      "SourceViewportOptions",
+      "StaticFeatureHost",
       "StaticGroupingExtras",
+      "StaticTableFeature",
+      "SummaryRowFn",
+      "TableBodyProjection",
+      "TableBodyProjectionInput",
+      "TableBodyProjector",
+      "TableBodySlot",
+      "TableCellModel",
+      "TableEditingOptions",
+      "TableFeature",
+      "TableFeatureHost",
+      "TableGrouping",
+      "TableHeaderModel",
       "TableRail",
+      "TableRowDetail",
+      "TableRowInventory",
+      "TableRowModel",
+      "TableSummaryCellModel",
+      "TableSummaryModel",
+      "TableTree",
+      "TreeCellModel",
+      "TreeExpansionOptions",
       "TreeFeatureOptions",
+      "UseDataTableOptions",
+      "UseDataTableResult",
+      "UseDataTableShellOptions",
+      "UseFrontendDataOptions",
+      "UseSavedViewsOptions",
+      "UseTableUrlStateOptions",
       "VirtualizeOptions",
+      "VueSelectionOptions",
       "batchEditing",
       "bulkActions",
       "cellNavigation",
@@ -13170,74 +11543,14 @@
       "rowPinning",
       "rowReorder",
       "savedViews",
+      "selection",
       "selectionStats",
       "sidePanel",
       "statusBar",
       "tree",
       "undoRedoButtons",
-      "virtualize",
-      "Attrs",
-      "CellContext",
-      "ColumnDef",
-      "ColumnGroup",
-      "ColumnInput",
-      "ColumnLayout",
-      "ColumnLayoutOptions",
-      "ComponentRenderer",
-      "ComposedFeature",
-      "DesktopTableModel",
-      "DirtyEdits",
-      "ExtraRow",
-      "FeatureMountContext",
-      "FeatureState",
-      "FooterContext",
-      "GroupCollapseOptions",
-      "GroupRowModel",
-      "HeaderContext",
-      "MaybeRefOrGetterOptional",
-      "MobileCardsModel",
-      "NestedTable",
-      "NestedTableFor",
-      "Renderer",
-      "RenderFunction",
-      "ResolvedTableOptions",
-      "RowActionControl",
-      "RowActionControlsInput",
-      "RowActionControlsProjector",
-      "RowDetailModel",
-      "RowExpansionOptions",
-      "RowMutationHandlers",
-      "RowSelection",
-      "SelectionCheckboxAttrs",
-      "SourceViewportOptions",
-      "StaticFeatureHost",
-      "StaticTableFeature",
-      "SummaryRowFn",
-      "TableBodyProjection",
-      "TableBodyProjectionInput",
-      "TableBodyProjector",
-      "TableBodySlot",
-      "TableCellModel",
-      "TableEditingOptions",
-      "TableFeature",
-      "TableFeatureHost",
-      "TableGrouping",
-      "TableHeaderModel",
-      "TableRowDetail",
-      "TableRowInventory",
-      "TableRowModel",
-      "TableSummaryCellModel",
-      "TableSummaryModel",
-      "TableTree",
-      "TreeCellModel",
-      "TreeExpansionOptions",
       "useDataTable",
-      "UseDataTableOptions",
-      "UseDataTableResult",
-      "UseDataTableShellOptions",
-      "UseFrontendDataOptions",
-      "UseSavedViewsOptions",
-      "UseTableUrlStateOptions"
+      "virtualize"
     ],
     "adapter-vue-unstyled-grouping": [
       "GroupCollapseOptions",
@@ -13288,6 +11601,9 @@
       "selectFilterWidget",
       "textFilterWidget"
     ],
+    "adapter-vue-unstyled-filtering": [
+      "filteringFamily"
+    ],
     "adapter-vue-unstyled-header-filters": [
       "FilterHeaderControl",
       "FilterHeaderControlOptions",
@@ -13313,7 +11629,8 @@
       "editHistory",
       "editing",
       "rowEditing",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-vue-unstyled-batch-editing": [
       "BatchEditingState",
@@ -13369,147 +11686,6 @@
     ],
     "adapter-vue-unstyled-nested-table": [
       "nestedTable"
-    ],
-    "adapter-vue-unstyled-features": [
-      "AgentApproval",
-      "AgentApprovalProps",
-      "BatchEditingState",
-      "BatchRowEdit",
-      "CellEdit",
-      "CellEditHandler",
-      "CellNavigationOptions",
-      "CellRange",
-      "CellSpanAppearance",
-      "CellSpanRequest",
-      "ChecklistFilter",
-      "ChecklistFilterProps",
-      "ColumnMenuSlotProps",
-      "ColumnResizeHandleOptions",
-      "ColumnResizeHandleProps",
-      "ConfirmHandler",
-      "ConfirmRequest",
-      "DataTableClassNames",
-      "EditingLifecycleExtras",
-      "ExportPdfOptions",
-      "ExportXlsxOptions",
-      "ExtraEntry",
-      "ExtraRow",
-      "ExtraRowKind",
-      "FilterDef",
-      "FilterHeaderControl",
-      "FilterHeaderControlOptions",
-      "FilterHeaderControlProps",
-      "FilterHeaderRow",
-      "FilterHeaderRowProps",
-      "FilterOption",
-      "FilterTreeBuilder",
-      "FilterTreeBuilderProps",
-      "FilterTypeSpec",
-      "FiltersOptions",
-      "GetCellSpan",
-      "GetCellSpanArgs",
-      "GridCell",
-      "GroupCollapseOptions",
-      "GroupNode",
-      "GroupSort",
-      "GroupingExtras",
-      "GroupingPanelProps",
-      "NativeBatchEditBar",
-      "NativeEditableCell",
-      "NativeFilterField",
-      "NativeHeaderFilter",
-      "NativeRowEditActions",
-      "NestedTable",
-      "NestedTableFor",
-      "PinnedRows",
-      "PinnedSummaryEntry",
-      "RowAction",
-      "RowAppearanceOptions",
-      "RowEditIcons",
-      "RowEditingState",
-      "RowExpansionOptions",
-      "RowHeight",
-      "RowMutationHandlers",
-      "RowPinSide",
-      "RowPinState",
-      "RowPinningFeatureOptions",
-      "RowReorderHandler",
-      "RowReorderOptions",
-      "RowStyle",
-      "SavedView",
-      "SavedViewsPanel",
-      "SavedViewsPanelProps",
-      "SavedViewsStore",
-      "StaticGroupingExtras",
-      "TableAssistant",
-      "TableAssistantProps",
-      "TableEditingOptions",
-      "TableRowDetail",
-      "TableTree",
-      "TreeExpansionOptions",
-      "TreeFeatureOptions",
-      "UseSavedViewsOptions",
-      "VirtualizeOptions",
-      "agentApproval",
-      "batchEditing",
-      "bulkActions",
-      "cellNavigation",
-      "cellSpan",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "editHistory",
-      "editing",
-      "exportCsv",
-      "exportPdf",
-      "exportXlsx",
-      "extraRows",
-      "filterTypes",
-      "filters",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "grouping",
-      "groupingPanel",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "nestedTableDetail",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "rowActions",
-      "rowAppearance",
-      "rowDetail",
-      "rowEditing",
-      "rowPinning",
-      "rowReorder",
-      "savedViews",
-      "selectionStats",
-      "sidePanel",
-      "statusBar",
-      "tableAssistant",
-      "tree",
-      "undoRedoButtons",
-      "useGroupCollapse",
-      "useGroupCollapseUrlState",
-      "useGroupPaging",
-      "useLazyChildren",
-      "useRowExpansion",
-      "useRowReorder",
-      "useTreeExpansion",
-      "virtualize",
-      "booleanFilterWidget",
-      "checklistFilterWidget",
-      "filtersWith",
-      "multiSelectFilterWidget",
-      "rangeFilterWidget",
-      "selectFilterWidget",
-      "textFilterWidget"
     ],
     "adapter-vue-unstyled-assistant": [
       "AgentApproval",
@@ -13706,6 +11882,9 @@
       "ColumnMenuSlotProps",
       "columnMenu"
     ],
+    "adapter-vue-unstyled-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-vue-unstyled-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -13730,10 +11909,6 @@
     ],
     "adapter-vue-unstyled-print": [
       "print"
-    ],
-    "adapter-vue-unstyled-export-csv": [
-      "ExportCsvOptions",
-      "exportCsv"
     ],
     "adapter-vue-unstyled-pivot": [
       "PivotPanel",
@@ -13913,17 +12088,34 @@
       "exportCsv"
     ],
     "angular-features": [
+      "AdaptTableFeature",
+      "BatchEditHandler",
+      "CellEditHandler",
       "CellNavigationOptions",
       "CommandPaletteOptions",
       "ContextMenuOptions",
+      "DirtyEdits",
+      "EditHistoryHandle",
+      "EditHistoryOptions",
       "EditingLifecycleExtras",
+      "FeatureMountContext",
+      "FeatureState",
       "GroupingExtras",
       "GroupingPanelExtras",
+      "MaybeSignal",
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableFor",
+      "Renderer",
       "RowAppearanceOptions",
+      "RowDetailContext",
+      "RowEditHandler",
       "RowPinningFeatureOptions",
+      "SelectionOptions",
       "SelectionStatsOptions",
       "SidePanelOptions",
       "SidePanelPanel",
+      "SlotComponent",
       "TreeFeatureOptions",
       "VirtualizeOptions",
       "batchEditing",
@@ -13938,8 +12130,6 @@
       "dirtyIndicators",
       "editHistory",
       "editing",
-      "exportPdf",
-      "exportXlsx",
       "extraRows",
       "feature",
       "filterTypes",
@@ -13959,28 +12149,13 @@
       "rowPinning",
       "rowReorder",
       "savedViews",
+      "selection",
       "selectionStats",
       "sidePanel",
       "statusBar",
       "tree",
       "undoRedoButtons",
-      "virtualize",
-      "AdaptTableFeature",
-      "BatchEditHandler",
-      "CellEditHandler",
-      "DirtyEdits",
-      "EditHistoryHandle",
-      "EditHistoryOptions",
-      "FeatureMountContext",
-      "FeatureState",
-      "MaybeSignal",
-      "NestedTable",
-      "NestedTableContext",
-      "NestedTableFor",
-      "Renderer",
-      "RowDetailContext",
-      "RowEditHandler",
-      "SlotComponent"
+      "virtualize"
     ],
     "angular-adapter": [
       "ADAPTTABLE_CONTEXT_MENU",
@@ -14263,6 +12438,8 @@
       "undoRedoToolbarProps",
       "virtualizeIgnoredOnPage",
       "watchClickedOpener",
+      "withCommandPaletteView",
+      "withContextMenuView",
       "withRowMutationActions",
       "CommandPaletteSurfaceProps",
       "resolveRenderer",
@@ -14332,7 +12509,12 @@
       "AdapterFiltersFeature",
       "AdaptFilterWidgetFormModel",
       "FilterWidget",
-      "withFilterWidgets"
+      "withFilterWidgets",
+      "FeatureListEntry",
+      "columnLayoutFamilyList",
+      "editingFamilyList",
+      "filteringFamilyList",
+      "flattenFeatures"
     ],
     "adapter-element-plus-batch-editing": [
       "batchEditing",
@@ -14364,6 +12546,9 @@
       "ColumnMenu",
       "columnMenu",
       "ColumnMenuSlotProps"
+    ],
+    "adapter-element-plus-column-layout": [
+      "columnLayoutFamily"
     ],
     "adapter-element-plus-column-selection": [
       "columnSelectionCheckbox"
@@ -14403,11 +12588,8 @@
       "rowEditing",
       "RowEditingState",
       "TableEditingOptions",
-      "undoRedoButtons"
-    ],
-    "adapter-element-plus-export-csv": [
-      "exportCsv",
-      "ExportCsvOptions"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-element-plus-export-pdf": [
       "buildPrintDocument",
@@ -14457,6 +12639,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-element-plus-filtering": [
+      "filteringFamily"
     ],
     "adapter-element-plus-find-in-table": [
       "findInTable"
@@ -14662,6 +12847,9 @@
       "columnMenu",
       "ColumnMenuSlotProps"
     ],
+    "adapter-naive-ui-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-naive-ui-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -14700,11 +12888,8 @@
       "rowEditing",
       "RowEditingState",
       "TableEditingOptions",
-      "undoRedoButtons"
-    ],
-    "adapter-naive-ui-export-csv": [
-      "exportCsv",
-      "ExportCsvOptions"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-naive-ui-export-pdf": [
       "buildPrintDocument",
@@ -14753,6 +12938,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-naive-ui-filtering": [
+      "filteringFamily"
     ],
     "adapter-naive-ui-find-in-table": [
       "findInTable"
@@ -14942,7 +13130,6 @@
       "cellNavigation",
       "CellNavigationOptions",
       "CellRange",
-      "columnSelectionCheckbox",
       "GridCell"
     ],
     "adapter-nuxt-ui-cell-span": [
@@ -14955,6 +13142,9 @@
       "ColumnMenu",
       "columnMenu",
       "ColumnMenuSlotProps"
+    ],
+    "adapter-nuxt-ui-column-layout": [
+      "columnLayoutFamily"
     ],
     "adapter-nuxt-ui-column-selection": [
       "columnSelectionCheckbox"
@@ -14994,11 +13184,8 @@
       "rowEditing",
       "RowEditingState",
       "TableEditingOptions",
-      "undoRedoButtons"
-    ],
-    "adapter-nuxt-ui-export-csv": [
-      "exportCsv",
-      "ExportCsvOptions"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-nuxt-ui-export-pdf": [
       "buildPrintDocument",
@@ -15047,6 +13234,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-nuxt-ui-filtering": [
+      "filteringFamily"
     ],
     "adapter-nuxt-ui-find-in-table": [
       "findInTable"
@@ -15237,6 +13427,9 @@
       "columnMenu",
       "ColumnMenuSlotProps"
     ],
+    "adapter-quasar-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-quasar-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -15278,7 +13471,8 @@
       "rowEditing",
       "RowEditingState",
       "TableEditingOptions",
-      "undoRedoButtons"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-quasar-export-pdf": [
       "buildPrintDocument",
@@ -15296,10 +13490,6 @@
       "exportXlsx",
       "ExportXlsxOptions",
       "xlsxWriter"
-    ],
-    "adapter-quasar-export-csv": [
-      "exportCsv",
-      "ExportCsvOptions"
     ],
     "adapter-quasar-export": [
       "exportCsv",
@@ -15327,6 +13517,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-quasar-filtering": [
+      "filteringFamily"
     ],
     "adapter-quasar-find-in-table": [
       "FindBar",
@@ -15515,6 +13708,9 @@
       "columnMenu",
       "ColumnMenuSlotProps"
     ],
+    "adapter-reka-ui-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-reka-ui-column-selection": [
       "ColumnSelectCheckboxProps",
       "columnSelectionCheckbox"
@@ -15556,11 +13752,8 @@
       "rowEditing",
       "RowEditingState",
       "TableEditingOptions",
-      "undoRedoButtons"
-    ],
-    "adapter-reka-ui-export-csv": [
-      "exportCsv",
-      "ExportCsvOptions"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-reka-ui-export-pdf": [
       "buildPrintDocument",
@@ -15590,137 +13783,6 @@
     "adapter-reka-ui-extra-rows": [
       "extraRows"
     ],
-    "adapter-reka-ui-features": [
-      "agentApproval",
-      "AgentApproval",
-      "AgentApprovalProps",
-      "BatchEditBar",
-      "batchEditing",
-      "BatchEditingState",
-      "BatchRowEdit",
-      "bulkActions",
-      "CellEdit",
-      "CellEditHandler",
-      "cellNavigation",
-      "CellNavigationOptions",
-      "CellRange",
-      "cellSpan",
-      "CellSpanAppearance",
-      "CellSpanRequest",
-      "ChecklistFilter",
-      "ChecklistFilterProps",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "ColumnMenuSlotProps",
-      "ColumnResizeHandleOptions",
-      "ColumnResizeHandleProps",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "ConfirmHandler",
-      "ConfirmRequest",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "EditableCell",
-      "editHistory",
-      "editing",
-      "EditingLifecycleExtras",
-      "exportCsv",
-      "exportPdf",
-      "ExportPdfOptions",
-      "exportXlsx",
-      "ExportXlsxOptions",
-      "ExtraEntry",
-      "ExtraRow",
-      "ExtraRowKind",
-      "extraRows",
-      "FilterDef",
-      "FilterField",
-      "FilterHeaderControl",
-      "FilterHeaderControlOptions",
-      "FilterHeaderControlProps",
-      "FilterHeaderRow",
-      "FilterHeaderRowProps",
-      "FilterOption",
-      "filters",
-      "FiltersOptions",
-      "FilterTreeBuilder",
-      "FilterTreeBuilderProps",
-      "filterTypes",
-      "FilterTypeSpec",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "GetCellSpan",
-      "GetCellSpanArgs",
-      "GridCell",
-      "GridFocusState",
-      "GroupCollapseOptions",
-      "grouping",
-      "GroupingExtras",
-      "groupingPanel",
-      "GroupingPanelProps",
-      "GroupNode",
-      "GroupSort",
-      "HeaderFilter",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "PinnedRows",
-      "PinnedSummaryEntry",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "RowAction",
-      "rowActions",
-      "rowAppearance",
-      "RowAppearanceOptions",
-      "rowDetail",
-      "RowEditActions",
-      "RowEditIcons",
-      "rowEditing",
-      "RowEditingState",
-      "RowHeight",
-      "RowMutationHandlers",
-      "rowPinning",
-      "RowPinningFeatureOptions",
-      "RowPinSide",
-      "RowPinState",
-      "rowReorder",
-      "RowReorderHandler",
-      "RowReorderOptions",
-      "RowStyle",
-      "SavedView",
-      "savedViews",
-      "SavedViewsPanel",
-      "SavedViewsPanelProps",
-      "SavedViewsStore",
-      "SelectionStats",
-      "selectionStats",
-      "sidePanel",
-      "StaticGroupingExtras",
-      "statusBar",
-      "tableAssistant",
-      "TableAssistant",
-      "TableAssistantProps",
-      "TableEditingOptions",
-      "tree",
-      "undoRedoButtons",
-      "useGroupCollapse",
-      "useGroupCollapseUrlState",
-      "useGroupPaging",
-      "useRowReorder",
-      "UseSavedViewsOptions",
-      "virtualize",
-      "VirtualizeOptions",
-      "booleanFilterWidget",
-      "checklistFilterWidget",
-      "filtersWith",
-      "multiSelectFilterWidget",
-      "rangeFilterWidget",
-      "selectFilterWidget",
-      "textFilterWidget"
-    ],
     "adapter-reka-ui-filters": [
       "ChecklistFilter",
       "ChecklistFilterProps",
@@ -15740,6 +13802,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-reka-ui-filtering": [
+      "filteringFamily"
     ],
     "adapter-reka-ui-find-in-table": [
       "findInTable"
@@ -15933,6 +13998,9 @@
       "columnMenu",
       "ColumnMenuSlotProps"
     ],
+    "adapter-shadcn-vue-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-shadcn-vue-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -15973,11 +14041,8 @@
       "rowEditing",
       "RowEditingState",
       "TableEditingOptions",
-      "undoRedoButtons"
-    ],
-    "adapter-shadcn-vue-export-csv": [
-      "exportCsv",
-      "ExportCsvOptions"
+      "undoRedoButtons",
+      "editingFamily"
     ],
     "adapter-shadcn-vue-export-pdf": [
       "buildPrintDocument",
@@ -16007,152 +14072,6 @@
     "adapter-shadcn-vue-extra-rows": [
       "extraRows"
     ],
-    "adapter-shadcn-vue-features": [
-      "agentApproval",
-      "AgentApproval",
-      "AgentApprovalProps",
-      "BasicFilterField",
-      "BasicFilterFieldProps",
-      "BatchEditBar",
-      "batchEditing",
-      "BatchEditingState",
-      "BatchRowEdit",
-      "bulkActions",
-      "CellEdit",
-      "CellEditHandler",
-      "cellNavigation",
-      "CellNavigationOptions",
-      "CellRange",
-      "cellSpan",
-      "CellSpanAppearance",
-      "CellSpanRequest",
-      "ChecklistFilter",
-      "ChecklistFilterProps",
-      "collapsibleColumnGroups",
-      "columnMenu",
-      "ColumnMenuSlotProps",
-      "ColumnResizeHandleOptions",
-      "ColumnResizeHandleProps",
-      "columnSelectionCheckbox",
-      "commandPalette",
-      "ConfirmHandler",
-      "ConfirmRequest",
-      "contextMenu",
-      "densityChooser",
-      "dirtyIndicators",
-      "EditableCell",
-      "editHistory",
-      "editing",
-      "EditingLifecycleExtras",
-      "exportCsv",
-      "exportPdf",
-      "ExportPdfOptions",
-      "exportXlsx",
-      "ExportXlsxOptions",
-      "ExtraEntry",
-      "ExtraRow",
-      "ExtraRowKind",
-      "extraRows",
-      "FilterChips",
-      "FilterChipsProps",
-      "FilterDef",
-      "FilterField",
-      "FilterHeaderControl",
-      "FilterHeaderControlOptions",
-      "FilterHeaderRow",
-      "FilterHeaderRowProps",
-      "FilterOption",
-      "FilterPanel",
-      "FilterPanelProps",
-      "filters",
-      "FiltersOptions",
-      "FilterTree",
-      "FilterTreeBuilderProps",
-      "filterTypes",
-      "FilterTypeSpec",
-      "findInTable",
-      "fitColumns",
-      "fullscreen",
-      "GetCellSpan",
-      "GetCellSpanArgs",
-      "GridCell",
-      "GroupCollapseOptions",
-      "grouping",
-      "GroupingExtras",
-      "groupingPanel",
-      "GroupingPanelProps",
-      "GroupNode",
-      "GroupSort",
-      "HeaderFilter",
-      "HeaderFilterProps",
-      "headerFilters",
-      "multiSort",
-      "nestedTable",
-      "NestedTable",
-      "nestedTableDetail",
-      "NestedTableFor",
-      "PinnedRows",
-      "PinnedSummaryEntry",
-      "pinnedSummaryRows",
-      "print",
-      "resizableColumns",
-      "RowAction",
-      "rowActions",
-      "rowAppearance",
-      "RowAppearanceOptions",
-      "rowDetail",
-      "RowEditActions",
-      "RowEditIcons",
-      "rowEditing",
-      "RowEditingState",
-      "RowExpansionOptions",
-      "RowHeight",
-      "RowMutationHandlers",
-      "rowPinning",
-      "RowPinningFeatureOptions",
-      "RowPinSide",
-      "RowPinState",
-      "rowReorder",
-      "RowReorderHandler",
-      "RowReorderOptions",
-      "RowStyle",
-      "SavedView",
-      "savedViews",
-      "SavedViewsPanel",
-      "SavedViewsPanelProps",
-      "SavedViewsStore",
-      "selectionStats",
-      "sidePanel",
-      "StaticGroupingExtras",
-      "statusBar",
-      "tableAssistant",
-      "TableAssistant",
-      "TableAssistantProps",
-      "TableEditingOptions",
-      "TableRowDetail",
-      "TableTree",
-      "tree",
-      "TreeExpansionOptions",
-      "TreeFeatureOptions",
-      "undoRedoButtons",
-      "useGroupCollapse",
-      "useGroupCollapseUrlState",
-      "useGroupPaging",
-      "useLazyChildren",
-      "useRowExpansion",
-      "useRowReorder",
-      "UseSavedViewsOptions",
-      "useTreeExpansion",
-      "virtualize",
-      "VirtualizeOptions",
-      "booleanFilterWidget",
-      "checklistFilterWidget",
-      "filtersWith",
-      "multiSelectFilterWidget",
-      "rangeFilterWidget",
-      "selectFilterWidget",
-      "textFilterWidget"
-    ],
     "adapter-shadcn-vue-filters": [
       "BasicFilterField",
       "BasicFilterFieldProps",
@@ -16178,6 +14097,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-shadcn-vue-filtering": [
+      "filteringFamily"
     ],
     "adapter-shadcn-vue-find-in-table": [
       "findInTable"
@@ -16371,6 +14293,9 @@
       "columnMenu",
       "ColumnMenuSlotProps"
     ],
+    "adapter-vuetify-column-layout": [
+      "columnLayoutFamily"
+    ],
     "adapter-vuetify-column-selection": [
       "columnSelectionCheckbox"
     ],
@@ -16412,11 +14337,8 @@
       "undoRedoButtons",
       "VuetifyBatchEditBar",
       "VuetifyEditableCell",
-      "VuetifyRowEditActions"
-    ],
-    "adapter-vuetify-export-csv": [
-      "exportCsv",
-      "ExportCsvOptions"
+      "VuetifyRowEditActions",
+      "editingFamily"
     ],
     "adapter-vuetify-export-pdf": [
       "buildPrintDocument",
@@ -16465,6 +14387,9 @@
       "rangeFilterWidget",
       "selectFilterWidget",
       "textFilterWidget"
+    ],
+    "adapter-vuetify-filtering": [
+      "filteringFamily"
     ],
     "adapter-vuetify-find-in-table": [
       "findInTable"
@@ -16661,7 +14586,8 @@
       "printTable",
       "SidePanelEntry",
       "TableFeature",
-      "TableFeatureHost"
+      "TableFeatureHost",
+      "TableFeatureMountContext"
     ],
     "react-xlsx": [
       "buildTableXlsx",
@@ -16673,6 +14599,7 @@
       "SidePanelEntry",
       "TableFeature",
       "TableFeatureHost",
+      "TableFeatureMountContext",
       "xlsxWriter"
     ],
     "angular-pdf": [
@@ -16701,24 +14628,86 @@
       "FeatureState",
       "SlotComponent",
       "xlsxWriter"
+    ],
+    "i18n-catalog": [
+      "getLabels",
+      "locales"
+    ],
+    "i18n-locales-ar": [
+      "ar"
+    ],
+    "i18n-locales-cs": [
+      "cs"
+    ],
+    "i18n-locales-de": [
+      "de"
+    ],
+    "i18n-locales-en": [
+      "en"
+    ],
+    "i18n-locales-es": [
+      "es"
+    ],
+    "i18n-locales-fa": [
+      "fa"
+    ],
+    "i18n-locales-fr": [
+      "fr"
+    ],
+    "i18n-locales-he": [
+      "he"
+    ],
+    "i18n-locales-hi": [
+      "hi"
+    ],
+    "i18n-locales-id": [
+      "id"
+    ],
+    "i18n-locales-it": [
+      "it"
+    ],
+    "i18n-locales-ja": [
+      "ja"
+    ],
+    "i18n-locales-ko": [
+      "ko"
+    ],
+    "i18n-locales-pl": [
+      "pl"
+    ],
+    "i18n-locales-pt": [
+      "pt"
+    ],
+    "i18n-locales-ru": [
+      "ru"
+    ],
+    "i18n-locales-tr": [
+      "tr"
+    ],
+    "i18n-locales-ur": [
+      "ur"
+    ],
+    "i18n-locales-zh-TW": [
+      "zhTW"
+    ],
+    "i18n-locales-zh": [
+      "zh"
+    ],
+    "antd/virtualize": [
+      "virtualize"
+    ],
+    "angular-toolbar": [
+      "COLUMN_MENU_ENTRY",
+      "SAVED_VIEWS_ENTRY"
+    ],
+    "vue/selection": [
+      "selection"
+    ],
+    "angular/selection": [
+      "selection"
     ]
   },
   "entrypoints": {
-    "adapter-element-plus-features.api.md": {
-      "surface": "adapter-element-plus-features"
-    },
-    "adapter-naive-ui-features.api.md": {
-      "surface": "adapter-naive-ui-features"
-    },
-    "adapter-nuxt-ui-features.api.md": {
-      "surface": "adapter-nuxt-ui-features"
-    },
-    "adapter-quasar-features.api.md": {
-      "surface": "adapter-quasar-features"
-    },
-    "adapter-vuetify-features.api.md": {
-      "surface": "adapter-vuetify-features"
-    },
     "adapter-antd-assistant.api.md": {
       "surface": "adapter-antd-assistant"
     },
@@ -16739,6 +14728,9 @@
     },
     "adapter-antd-column-menu.api.md": {
       "surface": "kit/column-menu"
+    },
+    "adapter-antd-column-layout.api.md": {
+      "surface": "kit/column-layout"
     },
     "adapter-antd-column-selection.api.md": {
       "surface": "kit/column-selection"
@@ -16761,12 +14753,11 @@
     "adapter-antd-extra-rows.api.md": {
       "reexport": "kit/extra-rows"
     },
-    "adapter-antd-features.api.md": {
-      "reexport": "kit/features",
-      "from": "@adapttable/react/features"
-    },
     "adapter-antd-filters.api.md": {
       "surface": "kit/filters"
+    },
+    "adapter-antd-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-antd-find-in-table.api.md": {
       "surface": "kit/find-in-table"
@@ -16825,6 +14816,9 @@
     "adapter-antd-saved-views.api.md": {
       "surface": "kit/saved-views"
     },
+    "adapter-antd-selection.api.md": {
+      "reexport": "kit/selection"
+    },
     "adapter-antd-selection-stats.api.md": {
       "surface": "kit/selection-stats"
     },
@@ -16838,7 +14832,7 @@
       "surface": "kit/tree"
     },
     "adapter-antd-virtualize.api.md": {
-      "reexport": "kit/virtualize"
+      "surface": "antd/virtualize"
     },
     "adapter-antd.api.md": {
       "surface": "adapter-antd"
@@ -16864,6 +14858,9 @@
     "adapter-base-ui-column-menu.api.md": {
       "surface": "kit/column-menu"
     },
+    "adapter-base-ui-column-layout.api.md": {
+      "surface": "kit/column-layout"
+    },
     "adapter-base-ui-column-selection.api.md": {
       "surface": "kit/column-selection"
     },
@@ -16885,12 +14882,11 @@
     "adapter-base-ui-extra-rows.api.md": {
       "reexport": "kit/extra-rows"
     },
-    "adapter-base-ui-features.api.md": {
-      "reexport": "kit/features",
-      "from": "@adapttable/react/features"
-    },
     "adapter-base-ui-filters.api.md": {
       "surface": "kit/filters"
+    },
+    "adapter-base-ui-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-base-ui-find-in-table.api.md": {
       "surface": "kit/find-in-table"
@@ -16949,6 +14945,9 @@
     "adapter-base-ui-saved-views.api.md": {
       "surface": "kit/saved-views"
     },
+    "adapter-base-ui-selection.api.md": {
+      "reexport": "kit/selection"
+    },
     "adapter-base-ui-selection-stats.api.md": {
       "surface": "kit/selection-stats"
     },
@@ -16988,6 +14987,9 @@
     "adapter-chakra-column-menu.api.md": {
       "surface": "kit/column-menu"
     },
+    "adapter-chakra-column-layout.api.md": {
+      "surface": "kit/column-layout"
+    },
     "adapter-chakra-column-selection.api.md": {
       "surface": "kit/column-selection"
     },
@@ -17009,12 +15011,11 @@
     "adapter-chakra-extra-rows.api.md": {
       "reexport": "kit/extra-rows"
     },
-    "adapter-chakra-features.api.md": {
-      "reexport": "kit/features",
-      "from": "@adapttable/react/features"
-    },
     "adapter-chakra-filters.api.md": {
       "surface": "kit/filters"
+    },
+    "adapter-chakra-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-chakra-find-in-table.api.md": {
       "surface": "kit/find-in-table"
@@ -17073,6 +15074,9 @@
     "adapter-chakra-saved-views.api.md": {
       "surface": "kit/saved-views"
     },
+    "adapter-chakra-selection.api.md": {
+      "reexport": "kit/selection"
+    },
     "adapter-chakra-selection-stats.api.md": {
       "surface": "kit/selection-stats"
     },
@@ -17112,6 +15116,9 @@
     "adapter-mantine-column-menu.api.md": {
       "surface": "kit/column-menu"
     },
+    "adapter-mantine-column-layout.api.md": {
+      "surface": "kit/column-layout"
+    },
     "adapter-mantine-column-selection.api.md": {
       "surface": "kit/column-selection"
     },
@@ -17133,12 +15140,11 @@
     "adapter-mantine-extra-rows.api.md": {
       "reexport": "kit/extra-rows"
     },
-    "adapter-mantine-features.api.md": {
-      "reexport": "kit/features",
-      "from": "@adapttable/react/features"
-    },
     "adapter-mantine-filters.api.md": {
       "surface": "kit/filters"
+    },
+    "adapter-mantine-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-mantine-find-in-table.api.md": {
       "surface": "kit/find-in-table"
@@ -17197,6 +15203,9 @@
     "adapter-mantine-saved-views.api.md": {
       "surface": "kit/saved-views"
     },
+    "adapter-mantine-selection.api.md": {
+      "reexport": "kit/selection"
+    },
     "adapter-mantine-selection-stats.api.md": {
       "surface": "kit/selection-stats"
     },
@@ -17236,6 +15245,9 @@
     "adapter-mui-column-menu.api.md": {
       "surface": "adapter-mui-column-menu"
     },
+    "adapter-mui-column-layout.api.md": {
+      "surface": "kit/column-layout"
+    },
     "adapter-mui-column-selection.api.md": {
       "surface": "kit/column-selection"
     },
@@ -17257,12 +15269,11 @@
     "adapter-mui-extra-rows.api.md": {
       "reexport": "kit/extra-rows"
     },
-    "adapter-mui-features.api.md": {
-      "reexport": "kit/features",
-      "from": "@adapttable/react/features"
-    },
     "adapter-mui-filters.api.md": {
       "surface": "adapter-mui-filters"
+    },
+    "adapter-mui-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-mui-find-in-table.api.md": {
       "surface": "adapter-mui-find-in-table"
@@ -17321,6 +15332,9 @@
     "adapter-mui-saved-views.api.md": {
       "surface": "kit/saved-views"
     },
+    "adapter-mui-selection.api.md": {
+      "reexport": "kit/selection"
+    },
     "adapter-mui-selection-stats.api.md": {
       "surface": "kit/selection-stats"
     },
@@ -17360,6 +15374,9 @@
     "adapter-radix-column-menu.api.md": {
       "surface": "kit/column-menu"
     },
+    "adapter-radix-column-layout.api.md": {
+      "surface": "kit/column-layout"
+    },
     "adapter-radix-column-selection.api.md": {
       "surface": "kit/column-selection"
     },
@@ -17381,12 +15398,11 @@
     "adapter-radix-extra-rows.api.md": {
       "reexport": "kit/extra-rows"
     },
-    "adapter-radix-features.api.md": {
-      "reexport": "kit/features",
-      "from": "@adapttable/react/features"
-    },
     "adapter-radix-filters.api.md": {
       "surface": "kit/filters"
+    },
+    "adapter-radix-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-radix-find-in-table.api.md": {
       "surface": "kit/find-in-table"
@@ -17445,6 +15461,9 @@
     "adapter-radix-saved-views.api.md": {
       "surface": "kit/saved-views"
     },
+    "adapter-radix-selection.api.md": {
+      "reexport": "kit/selection"
+    },
     "adapter-radix-selection-stats.api.md": {
       "surface": "kit/selection-stats"
     },
@@ -17484,6 +15503,9 @@
     "adapter-shadcn-column-menu.api.md": {
       "reexport": "forwards @adapttable/unstyled/column-menu"
     },
+    "adapter-shadcn-column-layout.api.md": {
+      "reexport": "forwards @adapttable/unstyled/column-layout"
+    },
     "adapter-shadcn-column-selection.api.md": {
       "reexport": "forwards @adapttable/unstyled/column-selection"
     },
@@ -17505,12 +15527,11 @@
     "adapter-shadcn-extra-rows.api.md": {
       "reexport": "forwards @adapttable/unstyled/extra-rows"
     },
-    "adapter-shadcn-features.api.md": {
-      "reexport": "kit/features",
-      "from": "@adapttable/unstyled/features"
-    },
     "adapter-shadcn-filters.api.md": {
       "reexport": "forwards @adapttable/unstyled/filters"
+    },
+    "adapter-shadcn-filtering.api.md": {
+      "reexport": "forwards @adapttable/unstyled/filtering"
     },
     "adapter-shadcn-find-in-table.api.md": {
       "reexport": "forwards @adapttable/unstyled/find-in-table"
@@ -17569,6 +15590,9 @@
     "adapter-shadcn-saved-views.api.md": {
       "reexport": "forwards @adapttable/unstyled/saved-views"
     },
+    "adapter-shadcn-selection.api.md": {
+      "reexport": "kit/selection"
+    },
     "adapter-shadcn-selection-stats.api.md": {
       "reexport": "forwards @adapttable/unstyled/selection-stats"
     },
@@ -17608,6 +15632,9 @@
     "adapter-unstyled-column-menu.api.md": {
       "surface": "kit/column-menu"
     },
+    "adapter-unstyled-column-layout.api.md": {
+      "surface": "kit/column-layout"
+    },
     "adapter-unstyled-column-selection.api.md": {
       "surface": "kit/column-selection"
     },
@@ -17629,11 +15656,11 @@
     "adapter-unstyled-extra-rows.api.md": {
       "reexport": "kit/extra-rows"
     },
-    "adapter-unstyled-features.api.md": {
-      "reexport": "kit/features"
-    },
     "adapter-unstyled-filters.api.md": {
       "surface": "kit/filters"
+    },
+    "adapter-unstyled-filtering.api.md": {
+      "surface": "kit/filtering"
     },
     "adapter-unstyled-find-in-table.api.md": {
       "surface": "kit/find-in-table"
@@ -17692,6 +15719,9 @@
     "adapter-unstyled-saved-views.api.md": {
       "surface": "kit/saved-views"
     },
+    "adapter-unstyled-selection.api.md": {
+      "reexport": "kit/selection"
+    },
     "adapter-unstyled-selection-stats.api.md": {
       "surface": "kit/selection-stats"
     },
@@ -17712,6 +15742,9 @@
     },
     "ai-ag-ui.api.md": {
       "surface": "ai-ag-ui"
+    },
+    "ai-agent.api.md": {
+      "surface": "ai-agent"
     },
     "ai-ai-sdk.api.md": {
       "surface": "ai-ai-sdk"
@@ -17764,6 +15797,9 @@
     "core-grouping.api.md": {
       "surface": "core-grouping"
     },
+    "core-locale.api.md": {
+      "surface": "core-locale"
+    },
     "core-pdf.api.md": {
       "surface": "core-pdf"
     },
@@ -17787,9 +15823,6 @@
     },
     "i18n.api.md": {
       "surface": "i18n"
-    },
-    "i18n-load.api.md": {
-      "surface": "i18n-load"
     },
     "react-adapter.api.md": {
       "surface": "react-adapter"
@@ -17866,6 +15899,9 @@
     "adapter-angular-unstyled-column-menu.api.md": {
       "surface": "adapter-angular-unstyled-column-menu"
     },
+    "adapter-angular-unstyled-column-layout.api.md": {
+      "surface": "adapter-angular-unstyled-column-layout"
+    },
     "adapter-angular-unstyled-column-selection.api.md": {
       "surface": "adapter-angular-unstyled-column-selection"
     },
@@ -17887,11 +15923,11 @@
     "adapter-angular-unstyled-extra-rows.api.md": {
       "reexport": "adapter-angular-unstyled-extra-rows"
     },
-    "adapter-angular-unstyled-features.api.md": {
-      "surface": "adapter-angular-unstyled-features"
-    },
     "adapter-angular-unstyled-filters.api.md": {
       "surface": "adapter-angular-unstyled-filters"
+    },
+    "adapter-angular-unstyled-filtering.api.md": {
+      "surface": "adapter-angular-unstyled-filtering"
     },
     "adapter-angular-unstyled-find-in-table.api.md": {
       "surface": "adapter-angular-unstyled-find-in-table"
@@ -17989,6 +16025,9 @@
     "adapter-ng-zorro-column-menu.api.md": {
       "surface": "adapter-ng-zorro-column-menu"
     },
+    "adapter-ng-zorro-column-layout.api.md": {
+      "surface": "adapter-ng-zorro-column-layout"
+    },
     "adapter-ng-zorro-column-selection.api.md": {
       "surface": "adapter-ng-zorro-column-selection"
     },
@@ -18010,11 +16049,11 @@
     "adapter-ng-zorro-extra-rows.api.md": {
       "reexport": "adapter-ng-zorro-extra-rows"
     },
-    "adapter-ng-zorro-features.api.md": {
-      "surface": "adapter-ng-zorro-features"
-    },
     "adapter-ng-zorro-filters.api.md": {
       "surface": "adapter-ng-zorro-filters"
+    },
+    "adapter-ng-zorro-filtering.api.md": {
+      "surface": "adapter-ng-zorro-filtering"
     },
     "adapter-ng-zorro-find-in-table.api.md": {
       "surface": "adapter-ng-zorro-find-in-table"
@@ -18112,6 +16151,9 @@
     "adapter-angular-aria-column-menu.api.md": {
       "surface": "adapter-angular-aria-column-menu"
     },
+    "adapter-angular-aria-column-layout.api.md": {
+      "surface": "adapter-angular-aria-column-layout"
+    },
     "adapter-angular-aria-column-selection.api.md": {
       "surface": "adapter-angular-aria-column-selection"
     },
@@ -18133,11 +16175,11 @@
     "adapter-angular-aria-extra-rows.api.md": {
       "reexport": "adapter-angular-aria-extra-rows"
     },
-    "adapter-angular-aria-features.api.md": {
-      "surface": "adapter-angular-aria-features"
-    },
     "adapter-angular-aria-filters.api.md": {
       "surface": "adapter-angular-aria-filters"
+    },
+    "adapter-angular-aria-filtering.api.md": {
+      "surface": "adapter-angular-aria-filtering"
     },
     "adapter-angular-aria-find-in-table.api.md": {
       "surface": "adapter-angular-aria-find-in-table"
@@ -18235,6 +16277,9 @@
     "adapter-angular-cdk-column-menu.api.md": {
       "surface": "adapter-angular-cdk-column-menu"
     },
+    "adapter-angular-cdk-column-layout.api.md": {
+      "surface": "adapter-angular-cdk-column-layout"
+    },
     "adapter-angular-cdk-column-selection.api.md": {
       "surface": "adapter-angular-cdk-column-selection"
     },
@@ -18256,11 +16301,11 @@
     "adapter-angular-cdk-extra-rows.api.md": {
       "reexport": "adapter-angular-cdk-extra-rows"
     },
-    "adapter-angular-cdk-features.api.md": {
-      "surface": "adapter-angular-cdk-features"
-    },
     "adapter-angular-cdk-filters.api.md": {
       "surface": "adapter-angular-cdk-filters"
+    },
+    "adapter-angular-cdk-filtering.api.md": {
+      "surface": "adapter-angular-cdk-filtering"
     },
     "adapter-angular-cdk-find-in-table.api.md": {
       "surface": "adapter-angular-cdk-find-in-table"
@@ -18358,6 +16403,9 @@
     "adapter-material-column-menu.api.md": {
       "surface": "adapter-material-column-menu"
     },
+    "adapter-material-column-layout.api.md": {
+      "surface": "adapter-material-column-layout"
+    },
     "adapter-material-column-selection.api.md": {
       "surface": "adapter-material-column-selection"
     },
@@ -18379,11 +16427,11 @@
     "adapter-material-extra-rows.api.md": {
       "reexport": "adapter-material-extra-rows"
     },
-    "adapter-material-features.api.md": {
-      "surface": "adapter-material-features"
-    },
     "adapter-material-filters.api.md": {
       "surface": "adapter-material-filters"
+    },
+    "adapter-material-filtering.api.md": {
+      "surface": "adapter-material-filtering"
     },
     "adapter-material-find-in-table.api.md": {
       "surface": "adapter-material-find-in-table"
@@ -18481,6 +16529,9 @@
     "adapter-ng-bootstrap-column-menu.api.md": {
       "surface": "adapter-ng-bootstrap-column-menu"
     },
+    "adapter-ng-bootstrap-column-layout.api.md": {
+      "surface": "adapter-ng-bootstrap-column-layout"
+    },
     "adapter-ng-bootstrap-column-selection.api.md": {
       "surface": "adapter-ng-bootstrap-column-selection"
     },
@@ -18502,11 +16553,11 @@
     "adapter-ng-bootstrap-extra-rows.api.md": {
       "reexport": "adapter-ng-bootstrap-extra-rows"
     },
-    "adapter-ng-bootstrap-features.api.md": {
-      "surface": "adapter-ng-bootstrap-features"
-    },
     "adapter-ng-bootstrap-filters.api.md": {
       "surface": "adapter-ng-bootstrap-filters"
+    },
+    "adapter-ng-bootstrap-filtering.api.md": {
+      "surface": "adapter-ng-bootstrap-filtering"
     },
     "adapter-ng-bootstrap-find-in-table.api.md": {
       "surface": "adapter-ng-bootstrap-find-in-table"
@@ -18604,6 +16655,9 @@
     "adapter-ngx-bootstrap-column-menu.api.md": {
       "surface": "adapter-ngx-bootstrap-column-menu"
     },
+    "adapter-ngx-bootstrap-column-layout.api.md": {
+      "surface": "adapter-ngx-bootstrap-column-layout"
+    },
     "adapter-ngx-bootstrap-column-selection.api.md": {
       "surface": "adapter-ngx-bootstrap-column-selection"
     },
@@ -18625,11 +16679,11 @@
     "adapter-ngx-bootstrap-extra-rows.api.md": {
       "reexport": "adapter-ngx-bootstrap-extra-rows"
     },
-    "adapter-ngx-bootstrap-features.api.md": {
-      "surface": "adapter-ngx-bootstrap-features"
-    },
     "adapter-ngx-bootstrap-filters.api.md": {
       "surface": "adapter-ngx-bootstrap-filters"
+    },
+    "adapter-ngx-bootstrap-filtering.api.md": {
+      "surface": "adapter-ngx-bootstrap-filtering"
     },
     "adapter-ngx-bootstrap-find-in-table.api.md": {
       "surface": "adapter-ngx-bootstrap-find-in-table"
@@ -18727,6 +16781,9 @@
     "adapter-spartan-column-menu.api.md": {
       "surface": "adapter-spartan-column-menu"
     },
+    "adapter-spartan-column-layout.api.md": {
+      "surface": "adapter-spartan-column-layout"
+    },
     "adapter-spartan-column-selection.api.md": {
       "surface": "adapter-spartan-column-selection"
     },
@@ -18748,11 +16805,11 @@
     "adapter-spartan-extra-rows.api.md": {
       "reexport": "adapter-spartan-extra-rows"
     },
-    "adapter-spartan-features.api.md": {
-      "surface": "adapter-spartan-features"
-    },
     "adapter-spartan-filters.api.md": {
       "surface": "adapter-spartan-filters"
+    },
+    "adapter-spartan-filtering.api.md": {
+      "surface": "adapter-spartan-filtering"
     },
     "adapter-spartan-find-in-table.api.md": {
       "surface": "adapter-spartan-find-in-table"
@@ -18850,6 +16907,9 @@
     "adapter-taiga-ui-column-menu.api.md": {
       "surface": "adapter-taiga-ui-column-menu"
     },
+    "adapter-taiga-ui-column-layout.api.md": {
+      "surface": "adapter-taiga-ui-column-layout"
+    },
     "adapter-taiga-ui-column-selection.api.md": {
       "surface": "adapter-taiga-ui-column-selection"
     },
@@ -18871,11 +16931,11 @@
     "adapter-taiga-ui-extra-rows.api.md": {
       "reexport": "adapter-taiga-ui-extra-rows"
     },
-    "adapter-taiga-ui-features.api.md": {
-      "surface": "adapter-taiga-ui-features"
-    },
     "adapter-taiga-ui-filters.api.md": {
       "surface": "adapter-taiga-ui-filters"
+    },
+    "adapter-taiga-ui-filtering.api.md": {
+      "surface": "adapter-taiga-ui-filtering"
     },
     "adapter-taiga-ui-find-in-table.api.md": {
       "surface": "adapter-taiga-ui-find-in-table"
@@ -18982,9 +17042,6 @@
     "adapter-vue-unstyled.api.md": {
       "surface": "adapter-vue-unstyled"
     },
-    "adapter-vue-unstyled-features.api.md": {
-      "surface": "adapter-vue-unstyled-features"
-    },
     "adapter-vue-unstyled-grouping.api.md": {
       "surface": "adapter-vue-unstyled-grouping"
     },
@@ -18996,6 +17053,9 @@
     },
     "adapter-vue-unstyled-filters.api.md": {
       "surface": "adapter-vue-unstyled-filters"
+    },
+    "adapter-vue-unstyled-filtering.api.md": {
+      "surface": "adapter-vue-unstyled-filtering"
     },
     "adapter-vue-unstyled-header-filters.api.md": {
       "surface": "adapter-vue-unstyled-header-filters"
@@ -19063,6 +17123,9 @@
     "adapter-vue-unstyled-column-menu.api.md": {
       "surface": "adapter-vue-unstyled-column-menu"
     },
+    "adapter-vue-unstyled-column-layout.api.md": {
+      "surface": "adapter-vue-unstyled-column-layout"
+    },
     "adapter-vue-unstyled-column-selection.api.md": {
       "surface": "adapter-vue-unstyled-column-selection"
     },
@@ -19083,9 +17146,6 @@
     },
     "adapter-vue-unstyled-print.api.md": {
       "surface": "adapter-vue-unstyled-print"
-    },
-    "adapter-vue-unstyled-export-csv.api.md": {
-      "surface": "adapter-vue-unstyled-export-csv"
     },
     "adapter-vue-unstyled-export-pdf.api.md": {
       "surface": "adapter-vue-unstyled-export-pdf"
@@ -19135,6 +17195,9 @@
     "adapter-element-plus-column-menu.api.md": {
       "surface": "adapter-element-plus-column-menu"
     },
+    "adapter-element-plus-column-layout.api.md": {
+      "surface": "adapter-element-plus-column-layout"
+    },
     "adapter-element-plus-column-selection.api.md": {
       "surface": "adapter-element-plus-column-selection"
     },
@@ -19153,9 +17216,6 @@
     "adapter-element-plus-editing.api.md": {
       "surface": "adapter-element-plus-editing"
     },
-    "adapter-element-plus-export-csv.api.md": {
-      "surface": "adapter-element-plus-export-csv"
-    },
     "adapter-element-plus-export-pdf.api.md": {
       "surface": "adapter-element-plus-export-pdf"
     },
@@ -19170,6 +17230,9 @@
     },
     "adapter-element-plus-filters.api.md": {
       "surface": "adapter-element-plus-filters"
+    },
+    "adapter-element-plus-filtering.api.md": {
+      "surface": "adapter-element-plus-filtering"
     },
     "adapter-element-plus-find-in-table.api.md": {
       "surface": "adapter-element-plus-find-in-table"
@@ -19270,6 +17333,9 @@
     "adapter-naive-ui-column-menu.api.md": {
       "surface": "adapter-naive-ui-column-menu"
     },
+    "adapter-naive-ui-column-layout.api.md": {
+      "surface": "adapter-naive-ui-column-layout"
+    },
     "adapter-naive-ui-column-selection.api.md": {
       "surface": "adapter-naive-ui-column-selection"
     },
@@ -19288,9 +17354,6 @@
     "adapter-naive-ui-editing.api.md": {
       "surface": "adapter-naive-ui-editing"
     },
-    "adapter-naive-ui-export-csv.api.md": {
-      "surface": "adapter-naive-ui-export-csv"
-    },
     "adapter-naive-ui-export-pdf.api.md": {
       "surface": "adapter-naive-ui-export-pdf"
     },
@@ -19305,6 +17368,9 @@
     },
     "adapter-naive-ui-filters.api.md": {
       "surface": "adapter-naive-ui-filters"
+    },
+    "adapter-naive-ui-filtering.api.md": {
+      "surface": "adapter-naive-ui-filtering"
     },
     "adapter-naive-ui-find-in-table.api.md": {
       "surface": "adapter-naive-ui-find-in-table"
@@ -19408,6 +17474,9 @@
     "adapter-nuxt-ui-column-menu.api.md": {
       "surface": "adapter-nuxt-ui-column-menu"
     },
+    "adapter-nuxt-ui-column-layout.api.md": {
+      "surface": "adapter-nuxt-ui-column-layout"
+    },
     "adapter-nuxt-ui-column-selection.api.md": {
       "surface": "adapter-nuxt-ui-column-selection"
     },
@@ -19426,9 +17495,6 @@
     "adapter-nuxt-ui-editing.api.md": {
       "surface": "adapter-nuxt-ui-editing"
     },
-    "adapter-nuxt-ui-export-csv.api.md": {
-      "surface": "adapter-nuxt-ui-export-csv"
-    },
     "adapter-nuxt-ui-export-pdf.api.md": {
       "surface": "adapter-nuxt-ui-export-pdf"
     },
@@ -19443,6 +17509,9 @@
     },
     "adapter-nuxt-ui-filters.api.md": {
       "surface": "adapter-nuxt-ui-filters"
+    },
+    "adapter-nuxt-ui-filtering.api.md": {
+      "surface": "adapter-nuxt-ui-filtering"
     },
     "adapter-nuxt-ui-find-in-table.api.md": {
       "surface": "adapter-nuxt-ui-find-in-table"
@@ -19543,6 +17612,9 @@
     "adapter-quasar-column-menu.api.md": {
       "surface": "adapter-quasar-column-menu"
     },
+    "adapter-quasar-column-layout.api.md": {
+      "surface": "adapter-quasar-column-layout"
+    },
     "adapter-quasar-column-selection.api.md": {
       "surface": "adapter-quasar-column-selection"
     },
@@ -19567,9 +17639,6 @@
     "adapter-quasar-export-xlsx.api.md": {
       "surface": "adapter-quasar-export-xlsx"
     },
-    "adapter-quasar-export-csv.api.md": {
-      "surface": "adapter-quasar-export-csv"
-    },
     "adapter-quasar-export.api.md": {
       "surface": "adapter-quasar-export"
     },
@@ -19578,6 +17647,9 @@
     },
     "adapter-quasar-filters.api.md": {
       "surface": "adapter-quasar-filters"
+    },
+    "adapter-quasar-filtering.api.md": {
+      "surface": "adapter-quasar-filtering"
     },
     "adapter-quasar-find-in-table.api.md": {
       "surface": "adapter-quasar-find-in-table"
@@ -19681,6 +17753,9 @@
     "adapter-reka-ui-column-menu.api.md": {
       "surface": "adapter-reka-ui-column-menu"
     },
+    "adapter-reka-ui-column-layout.api.md": {
+      "surface": "adapter-reka-ui-column-layout"
+    },
     "adapter-reka-ui-column-selection.api.md": {
       "surface": "adapter-reka-ui-column-selection"
     },
@@ -19699,9 +17774,6 @@
     "adapter-reka-ui-editing.api.md": {
       "surface": "adapter-reka-ui-editing"
     },
-    "adapter-reka-ui-export-csv.api.md": {
-      "surface": "adapter-reka-ui-export-csv"
-    },
     "adapter-reka-ui-export-pdf.api.md": {
       "surface": "adapter-reka-ui-export-pdf"
     },
@@ -19714,11 +17786,11 @@
     "adapter-reka-ui-extra-rows.api.md": {
       "surface": "adapter-reka-ui-extra-rows"
     },
-    "adapter-reka-ui-features.api.md": {
-      "surface": "adapter-reka-ui-features"
-    },
     "adapter-reka-ui-filters.api.md": {
       "surface": "adapter-reka-ui-filters"
+    },
+    "adapter-reka-ui-filtering.api.md": {
+      "surface": "adapter-reka-ui-filtering"
     },
     "adapter-reka-ui-find-in-table.api.md": {
       "surface": "adapter-reka-ui-find-in-table"
@@ -19828,6 +17900,9 @@
     "adapter-shadcn-vue-column-menu.api.md": {
       "surface": "adapter-shadcn-vue-column-menu"
     },
+    "adapter-shadcn-vue-column-layout.api.md": {
+      "surface": "adapter-shadcn-vue-column-layout"
+    },
     "adapter-shadcn-vue-column-selection.api.md": {
       "surface": "adapter-shadcn-vue-column-selection"
     },
@@ -19846,9 +17921,6 @@
     "adapter-shadcn-vue-editing.api.md": {
       "surface": "adapter-shadcn-vue-editing"
     },
-    "adapter-shadcn-vue-export-csv.api.md": {
-      "surface": "adapter-shadcn-vue-export-csv"
-    },
     "adapter-shadcn-vue-export-pdf.api.md": {
       "surface": "adapter-shadcn-vue-export-pdf"
     },
@@ -19861,11 +17933,11 @@
     "adapter-shadcn-vue-extra-rows.api.md": {
       "surface": "adapter-shadcn-vue-extra-rows"
     },
-    "adapter-shadcn-vue-features.api.md": {
-      "surface": "adapter-shadcn-vue-features"
-    },
     "adapter-shadcn-vue-filters.api.md": {
       "surface": "adapter-shadcn-vue-filters"
+    },
+    "adapter-shadcn-vue-filtering.api.md": {
+      "surface": "adapter-shadcn-vue-filtering"
     },
     "adapter-shadcn-vue-find-in-table.api.md": {
       "surface": "adapter-shadcn-vue-find-in-table"
@@ -19972,6 +18044,9 @@
     "adapter-vuetify-column-menu.api.md": {
       "surface": "adapter-vuetify-column-menu"
     },
+    "adapter-vuetify-column-layout.api.md": {
+      "surface": "adapter-vuetify-column-layout"
+    },
     "adapter-vuetify-column-selection.api.md": {
       "surface": "adapter-vuetify-column-selection"
     },
@@ -19990,9 +18065,6 @@
     "adapter-vuetify-editing.api.md": {
       "surface": "adapter-vuetify-editing"
     },
-    "adapter-vuetify-export-csv.api.md": {
-      "surface": "adapter-vuetify-export-csv"
-    },
     "adapter-vuetify-export-pdf.api.md": {
       "surface": "adapter-vuetify-export-pdf"
     },
@@ -20007,6 +18079,9 @@
     },
     "adapter-vuetify-filters.api.md": {
       "surface": "adapter-vuetify-filters"
+    },
+    "adapter-vuetify-filtering.api.md": {
+      "surface": "adapter-vuetify-filtering"
     },
     "adapter-vuetify-find-in-table.api.md": {
       "surface": "adapter-vuetify-find-in-table"
@@ -20100,6 +18175,123 @@
     },
     "angular-xlsx.api.md": {
       "surface": "angular-xlsx"
+    },
+    "i18n-catalog.api.md": {
+      "surface": "i18n-catalog"
+    },
+    "i18n-locales-ar.api.md": {
+      "surface": "i18n-locales-ar"
+    },
+    "i18n-locales-cs.api.md": {
+      "surface": "i18n-locales-cs"
+    },
+    "i18n-locales-de.api.md": {
+      "surface": "i18n-locales-de"
+    },
+    "i18n-locales-en.api.md": {
+      "surface": "i18n-locales-en"
+    },
+    "i18n-locales-es.api.md": {
+      "surface": "i18n-locales-es"
+    },
+    "i18n-locales-fa.api.md": {
+      "surface": "i18n-locales-fa"
+    },
+    "i18n-locales-fr.api.md": {
+      "surface": "i18n-locales-fr"
+    },
+    "i18n-locales-he.api.md": {
+      "surface": "i18n-locales-he"
+    },
+    "i18n-locales-hi.api.md": {
+      "surface": "i18n-locales-hi"
+    },
+    "i18n-locales-id.api.md": {
+      "surface": "i18n-locales-id"
+    },
+    "i18n-locales-it.api.md": {
+      "surface": "i18n-locales-it"
+    },
+    "i18n-locales-ja.api.md": {
+      "surface": "i18n-locales-ja"
+    },
+    "i18n-locales-ko.api.md": {
+      "surface": "i18n-locales-ko"
+    },
+    "i18n-locales-pl.api.md": {
+      "surface": "i18n-locales-pl"
+    },
+    "i18n-locales-pt.api.md": {
+      "surface": "i18n-locales-pt"
+    },
+    "i18n-locales-ru.api.md": {
+      "surface": "i18n-locales-ru"
+    },
+    "i18n-locales-tr.api.md": {
+      "surface": "i18n-locales-tr"
+    },
+    "i18n-locales-ur.api.md": {
+      "surface": "i18n-locales-ur"
+    },
+    "i18n-locales-zh-TW.api.md": {
+      "surface": "i18n-locales-zh-TW"
+    },
+    "i18n-locales-zh.api.md": {
+      "surface": "i18n-locales-zh"
+    },
+    "angular-toolbar.api.md": {
+      "surface": "angular-toolbar"
+    },
+    "adapter-vue-unstyled-selection.api.md": {
+      "reexport": "vue/selection"
+    },
+    "adapter-element-plus-selection.api.md": {
+      "reexport": "vue/selection"
+    },
+    "adapter-naive-ui-selection.api.md": {
+      "reexport": "vue/selection"
+    },
+    "adapter-nuxt-ui-selection.api.md": {
+      "reexport": "vue/selection"
+    },
+    "adapter-quasar-selection.api.md": {
+      "reexport": "vue/selection"
+    },
+    "adapter-reka-ui-selection.api.md": {
+      "reexport": "vue/selection"
+    },
+    "adapter-shadcn-vue-selection.api.md": {
+      "reexport": "vue/selection"
+    },
+    "adapter-vuetify-selection.api.md": {
+      "reexport": "vue/selection"
+    },
+    "adapter-angular-unstyled-selection.api.md": {
+      "reexport": "angular/selection"
+    },
+    "adapter-angular-aria-selection.api.md": {
+      "reexport": "angular/selection"
+    },
+    "adapter-angular-cdk-selection.api.md": {
+      "reexport": "angular/selection"
+    },
+    "adapter-material-selection.api.md": {
+      "reexport": "angular/selection"
+    },
+    "adapter-ng-bootstrap-selection.api.md": {
+      "reexport": "angular/selection"
+    },
+    "adapter-ng-zorro-selection.api.md": {
+      "reexport": "angular/selection"
+    },
+    "adapter-ngx-bootstrap-selection.api.md": {
+      "reexport": "angular/selection"
+    },
+    "adapter-spartan-selection.api.md": {
+      "reexport": "angular/selection"
+    },
+    "adapter-taiga-ui-selection.api.md": {
+      "reexport": "angular/selection"
     }
   }
 }

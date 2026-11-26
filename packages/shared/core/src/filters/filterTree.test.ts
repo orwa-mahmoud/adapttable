@@ -1,17 +1,40 @@
 import { describe, expect, it } from "vitest";
 
 import type { QueryFilterGroup } from "../contracts/query";
+import { defaultFilterRegistry } from "./filterBuiltins";
 import type { FilterDef } from "./filterDefs";
-import { emptyFilterRegistry } from "./filterRegistry";
+import { emptyFilterRegistry, type FilterTypeRegistry } from "./filterRegistry";
 import {
-  conditionToExtra,
-  evaluateFilterTree,
+  conditionToExtra as conditionToExtraOn,
+  evaluateFilterTree as evaluateFilterTreeOn,
   isActiveFilterTree,
   isFilterTreeConditionSet,
   parseFilterTree,
   serializeFilterTree,
   settledFilterTree,
 } from "./filterTree";
+import { parseStrictFilterTree } from "./filterTreeCodec";
+
+/** The tree evaluated against every built-in type, unless a test passes one. */
+function evaluateFilterTree<TRow>(
+  tree: QueryFilterGroup | undefined,
+  row: TRow,
+  defs: readonly FilterDef<TRow>[],
+  registry: FilterTypeRegistry = defaultFilterRegistry
+): boolean {
+  return evaluateFilterTreeOn(tree, row, defs, registry);
+}
+
+/** A condition projected with every built-in type, unless a test passes one. */
+function conditionToExtra<TRow>(
+  def: Parameters<typeof conditionToExtraOn<TRow>>[0],
+  condition: Parameters<typeof conditionToExtraOn<TRow>>[1],
+  registry: Parameters<
+    typeof conditionToExtraOn<TRow>
+  >[2] = defaultFilterRegistry
+) {
+  return conditionToExtraOn(def, condition, registry);
+}
 
 interface Row {
   name: string;
@@ -70,6 +93,16 @@ describe("serializeFilterTree / parseFilterTree", () => {
     expect(isActiveFilterTree({ combinator: "or", conditions: [] })).toBe(
       false
     );
+  });
+
+  it("refuses a tree a server cannot trust", () => {
+    expect(parseStrictFilterTree(serializeFilterTree(TREE))).toEqual(TREE);
+    expect(parseStrictFilterTree(null)).toBeUndefined();
+    expect(
+      parseStrictFilterTree(
+        '1.{"combinator":"and","conditions":[{"key":"name","op":"eq","value":"Ada"},{"nope":true}]}'
+      )
+    ).toBeUndefined();
   });
 
   it("strips malformed children instead of inventing a different query", () => {

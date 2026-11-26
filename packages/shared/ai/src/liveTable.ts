@@ -112,14 +112,18 @@ export function agentColumnsFromNeutral<TRow>(
 ): readonly AgentColumn[] {
   const sampleRow = table.rows("page")[0];
   return table.columns.map((column) => {
-    const sample =
-      sampleRow !== undefined
-        ? table.cellValue(sampleRow, column.key)
-        : undefined;
+    const patch = patches?.[column.key];
+    // A column the agent may not read is never read, and a column whose type
+    // the host declared needs no sample to guess it.
+    const readable = patch?.readable ?? true;
+    const sampled =
+      readable && patch?.type === undefined && sampleRow !== undefined;
     const base: AgentColumn = {
       id: column.key,
       label: columnLabel(column),
-      type: inferColumnType(sample),
+      type: sampled
+        ? inferColumnType(table.cellValue(sampleRow, column.key))
+        : "unknown",
       readable: true,
       writable: Boolean(column.editor),
       sortable: column.sortable === true,
@@ -142,16 +146,28 @@ function boundLimit(requested: number, readMax: number): number {
   return Math.max(0, Math.min(requested, readMax));
 }
 
+/**
+ * The column ids one read returns, in column order: every readable column,
+ * or those of them the query asked for. Prepared once per read, not per row.
+ */
+function projectedColumns(
+  readable: readonly AgentColumn[],
+  wanted: readonly string[] | undefined
+): readonly string[] {
+  const ids = readable.map((column) => column.id);
+  if (!wanted) return ids;
+  const asked = new Set(wanted);
+  return ids.filter((id) => asked.has(id));
+}
+
 function cellsForRow<TRow>(
   table: NeutralTable<TRow>,
   row: TRow,
-  columns: readonly AgentColumn[],
-  wanted?: readonly string[]
+  projected: readonly string[]
 ): Record<string, unknown> {
   const cells: Record<string, unknown> = {};
-  for (const column of columns) {
-    if (wanted && !wanted.includes(column.id)) continue;
-    cells[column.id] = transportCellValue(table.cellValue(row, column.id));
+  for (const id of projected) {
+    cells[id] = transportCellValue(table.cellValue(row, id));
   }
   return cells;
 }
@@ -181,11 +197,11 @@ export function readRowsFromNeutral<TRow>(
   const hidden = columns.filter((column) => !column.readable).map((c) => c.id);
   const limit = boundLimit(query.limit, readMax);
   const sliced = rows.slice(query.offset, query.offset + limit);
-  const wanted = query.columns;
+  const projected = projectedColumns(readable, query.columns);
   return {
     rows: sliced.map((row) => ({
       rowKey: table.rowKey(row),
-      cells: cellsForRow(table, row, readable, wanted),
+      cells: cellsForRow(table, row, projected),
     })),
     offset: query.offset,
     limit,
@@ -344,9 +360,7 @@ export function observationFromNeutral<TRow>(
   featureIds: readonly string[],
   query?: NeutralQueryOverlay
 ): AgentObservation {
-  const columns = agentColumnsFromNeutral(table, options.columns).map(
-    (column) => mergeColumnPatch(column, options.columns)
-  );
+  const columns = agentColumnsFromNeutral(table, options.columns);
   const page = query?.page ?? 1;
   const limit = query?.limit ?? Math.max(1, table.rows("page").length || 10);
   const ops = table.operations;

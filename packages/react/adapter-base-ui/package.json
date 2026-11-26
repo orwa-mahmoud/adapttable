@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/base-ui",
   "version": "3.5.0",
-  "description": "Base UI adapter for AdaptTable \u2014 a batteries-included Base UI data table with sorting, filtering, URL state, selection, RTL, and dark mode.",
+  "description": "Base UI adapter for AdaptTable — a batteries-included Base UI data table with sorting, filtering, URL state, selection, RTL, and dark mode.",
   "keywords": [
     "react",
     "base-ui",
@@ -57,16 +57,6 @@
       "require": {
         "types": "./dist/assistant.d.cts",
         "default": "./dist/assistant.cjs"
-      }
-    },
-    "./features": {
-      "import": {
-        "types": "./dist/features.d.ts",
-        "default": "./dist/features.js"
-      },
-      "require": {
-        "types": "./dist/features.d.cts",
-        "default": "./dist/features.cjs"
       }
     },
     "./row-reorder": {
@@ -199,6 +189,16 @@
         "default": "./dist/column-menu.cjs"
       }
     },
+    "./column-layout": {
+      "import": {
+        "types": "./dist/column-layout.d.ts",
+        "default": "./dist/column-layout.js"
+      },
+      "require": {
+        "types": "./dist/column-layout.d.cts",
+        "default": "./dist/column-layout.cjs"
+      }
+    },
     "./resizable-columns": {
       "import": {
         "types": "./dist/resizable-columns.d.ts",
@@ -309,6 +309,16 @@
         "default": "./dist/filters.cjs"
       }
     },
+    "./filtering": {
+      "import": {
+        "types": "./dist/filtering.d.ts",
+        "default": "./dist/filtering.js"
+      },
+      "require": {
+        "types": "./dist/filtering.d.cts",
+        "default": "./dist/filtering.cjs"
+      }
+    },
     "./header-filters": {
       "import": {
         "types": "./dist/header-filters.d.ts",
@@ -327,6 +337,16 @@
       "require": {
         "types": "./dist/saved-views.d.cts",
         "default": "./dist/saved-views.cjs"
+      }
+    },
+    "./selection": {
+      "import": {
+        "types": "./dist/selection.d.ts",
+        "default": "./dist/selection.js"
+      },
+      "require": {
+        "types": "./dist/selection.d.cts",
+        "default": "./dist/selection.cjs"
       }
     },
     "./selection-stats": {

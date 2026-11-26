@@ -46,6 +46,10 @@
       "types": "./dist/types/adapttable-angular-adapter.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-adapter.mjs"
     },
+    "./toolbar": {
+      "types": "./dist/types/adapttable-angular-toolbar.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-toolbar.mjs"
+    },
     "./formula": {
       "types": "./dist/types/adapttable-angular-formula.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-formula.mjs"

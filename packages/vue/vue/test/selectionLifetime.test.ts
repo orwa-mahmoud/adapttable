@@ -9,10 +9,10 @@ it("keeps a row's control while its row is drawn, retires the header's on row re
   const scope = effectScope();
   const selection = scope.run(() =>
     useRowSelection({
+      onSelectionChange: changes,
       rows,
       rowKey: (row) => row.id,
       acrossPages: true,
-      onSelectionChange: changes,
     })
   )!;
   const oldRow = selection.rowCheckboxAttrs("first");
@@ -67,10 +67,10 @@ it("preserves equivalent row wrappers, repeated toggles and the current controll
   try {
     const selection = scope.run(() =>
       useRowSelection(() => ({
-        rows: rows.value,
-        rowKey: (row) => row.id,
         selectedIds: selected,
         onSelectionChange: callback.value,
+        rows: rows.value,
+        rowKey: (row) => row.id,
       }))
     )!;
     const retained = selection.rowCheckboxAttrs("first");

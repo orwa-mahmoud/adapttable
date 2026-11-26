@@ -71,7 +71,7 @@ export async function runExecute(
     options.apply,
     () => {
       own = options.observe().viewRevision;
-      ledger?.observeLegacy(own);
+      ledger?.observeHostRevision(own);
     },
     () => ledger
   );

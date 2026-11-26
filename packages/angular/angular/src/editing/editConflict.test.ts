@@ -1,7 +1,8 @@
 /** Live source updates keep, replace or contest drafts through core's sessions. */
+import { loadEditConflictStore } from "@adapttable/core/binding";
 import { Injector, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import {
   injectEditConflict,
@@ -13,6 +14,12 @@ import {
   injectCellEditing,
   injectRowEditing,
 } from "./editing";
+
+// The conflict store loads when an edit first opens; these specs are about
+// the question it asks, so it is loaded up front. Core covers the load.
+beforeAll(async () => {
+  await loadEditConflictStore();
+});
 
 interface Row {
   id: string;

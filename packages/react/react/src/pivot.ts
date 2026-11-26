@@ -37,21 +37,8 @@ export {
 export type { UrlStateAdapter } from "./url/adapter";
 export type { AggregateName, Aggregator } from "@adapttable/core";
 export type { TableLabels } from "@adapttable/core";
+export { type PivotField, type PivotZone } from "@adapttable/core";
 export {
-  assignField,
-  availableFields,
-  EMPTY_PIVOT_CONFIG,
-  isPivotReady,
-  measureLabel,
-  moveField,
-  type PivotField,
-  type PivotZone,
-  removeField,
-  setMeasureAgg,
-} from "@adapttable/core";
-export {
-  pivot,
-  PIVOT_BLANK,
   type PivotColumnLeaf,
   type PivotColumnNode,
   type PivotConfig,
@@ -72,8 +59,19 @@ export {
   type QueryPivotPage,
   type QueryPivotRow,
   type ServerPivotOptions,
-  serverPivotResult,
 } from "@adapttable/core";
+export {
+  assignField,
+  availableFields,
+  EMPTY_PIVOT_CONFIG,
+  isPivotReady,
+  measureLabel,
+  moveField,
+  removeField,
+  setMeasureAgg,
+} from "@adapttable/core/pivot";
+export { pivot, PIVOT_BLANK } from "@adapttable/core/pivot";
+export { serverPivotResult } from "@adapttable/core/pivot";
 // Everything `@adapttable/core/pivot` exports, so a kit's pivot entry passes
 // this binding on and never imports core itself.
 export * from "@adapttable/core/pivot";

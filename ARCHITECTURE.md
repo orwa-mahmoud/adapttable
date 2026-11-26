@@ -68,7 +68,8 @@ behavior, not a guarantee that unused members disappear.
 
 Angular hosts import `AdaptDataTable` from `@adapttable/angular-unstyled` or
 `@adapttable/ng-zorro`, and features from that kit’s subpaths. Its
-`standardPreset()` composes the default feature set. Templates and component
+`standardFeatures()` composes the default feature set, as in the React and
+Vue kits. Templates and component
 renderers stay in the binding; neutral values and operations stay in core.
 The Angular kits and `@adapttable/ai-angular` are prepared for their first
 public `0.1.0` release; the binding is `@adapttable/angular`. Publishable
@@ -243,13 +244,9 @@ revision.
 `packages/react/react/src/features/tableFeature.ts`:
 
 ```ts
-/** Neutral plugin: id, operators, cleanup. No React configuration bags. */
+/** Neutral plugin identity. */
 export interface FeatureRegistration<TRow = unknown> {
   readonly id: string;
-}
-
-export interface NeutralFeatureHost<TRow = unknown> {
-  onDispose(cleanup: () => void): void;
 }
 
 /** React feature: configuration, registrations, providers and slot renders. */
@@ -258,7 +255,8 @@ export interface TableFeature<
 > extends FeatureRegistration<TRow> {
   readonly id: string;
   apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
-  setup?(host: TableFeatureHost<TRow>): void | (() => void);
+  setup?(host: TableFeatureHost<TRow>): void;
+  mount?(context: TableFeatureMountContext<TRow>): void | (() => void);
   readonly provider?: FeatureProviderContribution;
   readonly renders?: readonly FeatureRender<never>[];
 }
@@ -266,7 +264,8 @@ export interface TableFeature<
 
 `TableFeatureHost` is where custom filter types, editors, aggregators, export
 writers, column-menu actions, side panels, commands and context-menu items
-register, and `setup` returns its cleanup or hands it to `host.onDispose`.
+register during `setup`. A feature acquires resources in `mount` and returns
+its cleanup from that callback.
 A feature whose behavior is a hook contributes a `provider` — mounting it is
 how hooks join the tree, and not importing it keeps them out of the graph.
 Slot and `data-adapttable-part` names are part of the public contract. A React
@@ -311,17 +310,23 @@ and everything below is present without asking:
 - single-column sorting, search, pagination and infinite data
 - column resolution: the `columns` array rendered in order
 
-Nothing else rides that import. Every other capability is a feature.
+Nothing else rides that import. Every other capability is a feature. The base
+names no feature, and a table prop does not turn one on.
+
+A feature reaches the table through the extension points it declares: a live
+stage (`liveStageKey`) that names what it reads and writes, a region or slot
+it fills, and a feature-state key it publishes for the kit that draws it.
+The base does not import a feature's module.
 
 Membership is decided on two questions, both of which must be yes: is it
 reachable from those three props, and is it cheap? Row selection, row actions,
 column visibility and column order were each measured against that test and each
 failed the first half — a three-prop table renders no checkbox, no action
-column, and no way to change the column set. All four are cheap (0.10–1.90 KB),
-and cheap alone is not a reason to charge every table for them, so each belongs
-to the feature that already reaches it: selection to `columnSelectionCheckbox`,
-`bulkActions` and `selectionStats`, the action column to its own factory, and
-both column capabilities to `columnMenu`. The numbers and the method are in
+column, and no way to change the column set. All four are cheap (0.10–1.90 KiB),
+and cheap alone is not a reason to charge every table for them. Row checkboxes
+are `selection()`. `columnSelectionCheckbox`, `bulkActions` and `selectionStats`
+select rows as part of what they do. The action column is its own factory, and
+both column capabilities are `columnMenu`. The numbers and the method are in
 `provisionalBaseReview` in the classification artifact.
 
 ## Features
@@ -383,9 +388,9 @@ share one subpath: the six editing features are all on
 `@adapttable/<kit>/editing` (`batchEditing` also has its own `/batch-editing`),
 and `filters` and `filterTypes` are both on `@adapttable/<kit>/filters`.
 
-`@adapttable/<kit>/features` forwards the headless `@adapttable/react/features`
-surface as it is. A factory that draws kit UI renders no controls when imported
-from there, so each one comes from its own `@adapttable/<kit>/<subpath>`.
+Each factory comes from its own `@adapttable/<kit>/<subpath>`. A kit does not
+publish a second `/features` barrel. Headless factories that a React kit does
+not wrap live on `@adapttable/react/features`.
 
 ### Static imports
 
@@ -577,9 +582,9 @@ number. `core-every-export` is 104.28 KiB (106,778 bytes), measured
 2026-11-09. The ceiling is that measurement: the composed session with one
 committed state and a staged row-model evaluator, the grouping projection, and the shell operations, plus the snapshot guard, the
 grouped-snapshot cache, and the shared behaviours the bindings used to copy.
-The FAQ rounds that row to ~104 kB
-and the headless row to ~22 kB. The features page rounds the MUI pair to 72 kB
-and 133 kB. A later `pnpm budget` is what moves those published figures.
+The FAQ rounds that row to ~104 KiB
+and the headless row to ~22 KiB. The features page rounds the MUI pair to 72 KiB
+and 133 KiB. A later `pnpm budget` is what moves those published figures.
 
 ## Supported Node
 

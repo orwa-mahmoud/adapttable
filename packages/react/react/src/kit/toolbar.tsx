@@ -3,8 +3,8 @@
  *
  * The binding owns what the toolbar holds and in which order: the host's
  * start slot, search, the mobile sort controls, the host's toolbar content,
- * the filters button and its popover, the saved-views and columns menus, the
- * extras the composed features add, add-row, the host's end slot and the
+ * the filters button and its popover, the entries the composed features add
+ * (saved views and columns first), add-row, the host's end slot and the
  * rows-per-page choice. A kit hands over each control and a frame that lays
  * the search and the controls out.
  */
@@ -17,8 +17,10 @@ import {
   useRef,
 } from "react";
 
+import { useFeatureState } from "../features/featureState";
 import { FeatureSlot } from "../features/providers";
 import { FILTER_POPOVER, TOOLBAR_EXTRAS } from "../features/slotKeys";
+import { FILTER_CHIPS_STATE } from "../features/stateKeys";
 import type { KitButtonProps } from "./primitives";
 import type { KitToolbarProps } from "./tableComposition";
 
@@ -146,6 +148,8 @@ export function createToolbar(
     const { table, hasFilters, filtersMode, filtersOpen } = props;
     const { labels, source } = table;
     const anchorRef = useRef<HTMLButtonElement>(null);
+    const activeFilterCount =
+      useFeatureState(FILTER_CHIPS_STATE)?.activeFilterCount ?? 0;
     const sortOptions =
       props.sortByOptions ?? (table.isMobile ? table.sortByOptions : undefined);
     const sortable = sortOptions !== undefined && sortOptions.length > 0;
@@ -154,7 +158,7 @@ export function createToolbar(
       <FiltersButton
         elementRef={anchorRef}
         label={labels.filters}
-        count={props.activeFilterCount}
+        count={activeFilterCount}
         expanded={popover ? filtersOpen : undefined}
         open={filtersOpen}
         onPointerDown={props.onFiltersTriggerPointerDown}
@@ -165,7 +169,7 @@ export function createToolbar(
       open: filtersOpen,
       onClose: props.onCloseFilters,
       filters: props.filters,
-      activeFilterCount: props.activeFilterCount,
+      activeFilterCount,
       onClearFilters: props.onClearFilters,
       labels,
       dir: props.dir,
@@ -233,33 +237,7 @@ export function createToolbar(
             )}
             {props.toolbar}
             {filters}
-            {props.savedViewsMenu}
-            {props.columnMenu}
-            <FeatureSlot
-              slot={TOOLBAR_EXTRAS}
-              props={{
-                onUndo: props.onUndo,
-                onRedo: props.onRedo,
-                canUndo: props.canUndo,
-                canRedo: props.canRedo,
-                undoLabel: props.undoLabel,
-                redoLabel: props.redoLabel,
-                onPrint: props.onPrint,
-                printLabel: props.printLabel,
-                density: props.density,
-                onDensityChange: props.onDensityChange,
-                onToggleFullscreen: props.onToggleFullscreen,
-                isFullscreen: props.isFullscreen,
-                onExportCsv: props.onExportCsv,
-                exportBusy: props.exportBusy,
-                exportAnnouncement: props.exportAnnouncement ?? "",
-                exportProgressState: props.exportProgressState,
-                exportLabel: props.exportLabel,
-                exportDisabled: props.exportDisabled,
-                exportDisabledReason: props.exportDisabledReason,
-                labels,
-              }}
-            />
+            <FeatureSlot slot={TOOLBAR_EXTRAS} props={{ labels }} />
             {props.onAddRow && (
               <Button
                 variant="filled"

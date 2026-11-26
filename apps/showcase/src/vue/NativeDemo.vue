@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import {
   type ColumnDef,
   DataTable,
   type DataTableHandle,
 } from "@adapttable/vue-unstyled";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { computed, shallowRef } from "vue";
 
 import { VUE_NATIVE_BASELINE, VUE_NATIVE_PAGES } from "../../matrix.mjs";
@@ -27,6 +28,9 @@ const columns: readonly ColumnDef<Person>[] = [
   { key: "score", header: "Score", sortable: true },
 ];
 const selectedIds = shallowRef<string[]>([]);
+function changeSelection(ids: string[]): void {
+  selectedIds.value = ids;
+}
 const rtl = shallowRef(false);
 const labels = computed(() => getLabels(rtl.value ? "ar" : "en"));
 const table = shallowRef<DataTableHandle<Person>>();
@@ -74,7 +78,12 @@ const examples = VUE_NATIVE_PAGES.filter(
       </div>
       <DataTable
         ref="table"
-        v-model:selected-ids="selectedIds"
+        :features="[
+          selection({
+            selectedIds,
+            onSelectionChange: changeSelection,
+          }),
+        ]"
         :data="rows"
         :columns="columns"
         :row-key="rowKey"

@@ -135,6 +135,7 @@ backend:
 
 ```tsx
 import { useState } from "react";
+import { useServerData } from "@adapttable/react";
 import { DataTable } from "@adapttable/mantine";
 
 interface Person {
@@ -146,22 +147,25 @@ interface Person {
 export function PeopleSearch() {
   const [rows, setRows] = useState<Person[]>([]);
   const [total, setTotal] = useState(0);
+  const source = useServerData<Person>({
+    rows,
+    total,
+    onQueryChange: async (query, { signal }) => {
+      const params = new URLSearchParams({
+        page: String(query.page),
+        limit: String(query.limit),
+      });
+      if (query.search) params.set("q", query.search);
+      const res = await fetch(`/api/people?${params}`, { signal });
+      const body = (await res.json()) as { items: Person[]; total: number };
+      setRows(body.items);
+      setTotal(body.total);
+    },
+  });
 
   return (
     <DataTable
-      data={rows}
-      total={total}
-      onQueryChange={async (query, { signal }) => {
-        const params = new URLSearchParams({
-          page: String(query.page),
-          limit: String(query.limit),
-        });
-        if (query.search) params.set("q", query.search);
-        const res = await fetch(`/api/people?${params}`, { signal });
-        const body = (await res.json()) as { items: Person[]; total: number };
-        setRows(body.items);
-        setTotal(body.total);
-      }}
+      source={source}
       columns={[{ key: "name" }, { key: "city" }]}
       rowKey={(row) => row.id}
       searchPlaceholder="Search people…"

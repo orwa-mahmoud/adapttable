@@ -19,7 +19,7 @@ import type {
   BatchRowEdit,
   RowPinState,
 } from "@adapttable/core";
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import type { AgentApprovalPending, TableFeature } from "@adapttable/vue";
 import { computed, shallowRef } from "vue";
 
@@ -420,7 +420,6 @@ const otherKits = builtAdapters("vue").map((other) => ({
         :lang="locale"
         :row-key="staffKey"
         :url-sync="false"
-        selectable
         v-bind="
           toggles.paging
             ? {

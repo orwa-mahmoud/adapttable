@@ -5,8 +5,8 @@
 import {
   type ColumnDef,
   injectFrontendData,
+  injectServerData,
   type TableQuery,
-  type TableQueryHandler,
   type TableSource,
 } from "@adapttable/angular";
 import { Component, computed, type Signal, signal } from "@angular/core";
@@ -53,15 +53,12 @@ const answer = (query: TableQuery): City[] => {
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
-      [data]="rows()"
-      [total]="total()"
-      [loading]="loading()"
+      [source]="source"
       [columns]="columns"
       [rowKey]="rowKey"
       [urlSync]="false"
       [forceMobile]="false"
       [defaults]="{ limit: 2 }"
-      [onQueryChange]="fetch"
     />
   `,
 })
@@ -81,20 +78,28 @@ class ServerHost {
       this.loading.set(false);
     });
   };
+  readonly source = injectServerData<City>({
+    rows: this.rows,
+    total: this.total,
+    loading: this.loading,
+    urlSync: false,
+    forceMobile: false,
+    defaults: { limit: 2 },
+    onQueryChange: this.fetch,
+  });
 }
 
 @Component({
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
-      mode="frontend"
       [data]="rows"
       [columns]="columns"
       [rowKey]="rowKey"
       [urlSync]="false"
       [forceMobile]="false"
       [defaults]="{ limit: 2 }"
-      [onQueryChange]="notified"
+      [onViewChange]="notified"
     />
   `,
 })
@@ -105,16 +110,13 @@ class FrontendHost {
   readonly notified = vi.fn();
 }
 
-/** Two independent live sources and the table's optional built-in tiers. */
+/** Two independent live sources and the table's own rows. */
 @Component({
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
       [source]="source()"
       [data]="rows()"
-      [mode]="mode()"
-      [total]="total()"
-      [onQueryChange]="onQueryChange()"
       [columns]="columns"
       [rowKey]="rowKey"
       [urlSync]="urlSync()"
@@ -162,10 +164,6 @@ class ReplacingSourceHost {
     Signal<TableSource<City>> | TableSource<City> | undefined
   >(this.firstSource);
   readonly rows = signal<readonly City[] | undefined>(undefined);
-  readonly mode = signal<"frontend" | "server" | undefined>(undefined);
-  readonly total = signal(CITIES.length);
-  readonly notified = vi.fn<TableQueryHandler>();
-  readonly onQueryChange = signal<TableQueryHandler | undefined>(undefined);
 }
 
 function citiesNamed(prefix: string): City[] {

@@ -25,6 +25,7 @@ export type {
   CommandPaletteModel,
   ContextMenuModel,
   SidePanelControlModel,
+  UndoRedoControlProps,
 } from "./actions/contracts";
 export {
   BULK_ACTIONS_CONTROL,
@@ -179,6 +180,12 @@ export {
   normalizeFeatures,
   renderFeatureSlot,
 } from "./features/tableFeature";
+export type { ToolbarEntryProps } from "./features/toolbarEntries";
+export {
+  FILTERS_PANEL,
+  TOOLBAR_EXTRAS,
+  toolbarEntry,
+} from "./features/toolbarEntries";
 export type { OwnedFeatureState, TableFeatureState } from "./featureState";
 export {
   createFeatureState,
@@ -280,7 +287,7 @@ export type {
 } from "./layout/dataTableSurfaceChrome";
 export { DataTableSurfaceChrome } from "./layout/dataTableSurfaceChrome";
 export type { GroupRowDraw, GroupRowSlotProps } from "./layout/groupRowSlot";
-export { GROUP_ROW, groupRowSlotKey } from "./layout/groupRowSlot";
+export { GROUP_ROW } from "./layout/groupRowSlot";
 export type {
   ColumnResizeModel,
   EditingChromeModel,
@@ -523,7 +530,6 @@ export type {
   TableAssistantComposerProps,
   TableAssistantLanguageChipProps,
   TableAssistantView,
-  ToolbarExtrasSlotProps,
 } from "@adapttable/core/binding";
 export {
   ACTIVE_FILTER_CHIPS,
@@ -544,8 +550,10 @@ export {
   columnGroupId,
   columnGroupPath,
   columnGroupStubStyle,
+  columnLayoutFamilyList,
   columnMenuActions,
   defaultConfirm,
+  editingFamilyList,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
   EXTRA_ROW_PARTS,
@@ -554,11 +562,14 @@ export {
   extraHostFillStyle,
   extraRowsForSection,
   extraUncoveredColSpans,
+  type FeatureListEntry,
   featureSlotKey,
   featureStateKey,
   filterColumnMenuRows,
+  filteringFamilyList,
   FIND_BAR,
   flattenColumnTree,
+  flattenFeatures,
   groupedHeaderAlign,
   groupedHeaderCellStyle,
   groupedHeaderChildRule,
@@ -598,7 +609,6 @@ export {
   standardFeatureList,
   STATUS_BAR,
   toggleCollapsedColumnGroup,
-  TOOLBAR_EXTRAS,
   unpinAllColumns,
 } from "@adapttable/core/binding";
 export { BASE_LABELS, resolveCellSpan } from "@adapttable/core/binding";
@@ -635,6 +645,7 @@ export type { DirtyEdits, TableEditingOptions } from "./editing/editingModels";
 export type {
   ComposedFeature,
   FeatureMountContext,
+  FeatureSlotDrawer,
   StaticFeatureHost,
   StaticTableFeature,
   TableFeature,

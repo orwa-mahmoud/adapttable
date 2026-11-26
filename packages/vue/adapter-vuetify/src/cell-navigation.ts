@@ -16,8 +16,8 @@ import { VuetifyColumnSelect } from "./navigation/columnSelect";
 import { VuetifyFillHandle } from "./navigation/fillHandle";
 
 /** Grid state, shortcuts and host write requests remain in the Vue binding. */
-export function cellNavigation(
-  options: CellNavigationOptions = {}
+export function cellNavigation<TRow = unknown>(
+  options: CellNavigationOptions<TRow> = {}
 ): StaticTableFeature {
   return extendFeature(bindingCellNavigation(options), [
     slotRender(FILL_HANDLE_CONTROL, (props) => h(VuetifyFillHandle, props)),

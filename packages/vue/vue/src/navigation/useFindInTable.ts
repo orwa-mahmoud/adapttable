@@ -1,13 +1,13 @@
 /** Scope-owned find state. Core owns query, URL debounce and match walking. */
 import {
   type ColumnMetadata,
-  findMatches,
   matchKeySet,
   type UrlStateAdapter,
 } from "@adapttable/core";
 import {
   clampMatchIndex,
   createFindController,
+  createFindMatcher,
   createFindShortcutScope,
   type FindInTableState,
   scrollCurrentMatchIntoView,
@@ -60,6 +60,7 @@ export function useFindInTable<TRow>(
     urlKey: options.value.urlKey,
   }));
   const controller = createFindController(config.value);
+  const match = createFindMatcher<TRow>();
   watch(config, (next) => controller.configure(next), { flush: "sync" });
   const snapshot = useExternalStore(controller, { active });
   const search = useExternalStore(
@@ -89,7 +90,7 @@ export function useFindInTable<TRow>(
     const enabled = options.value.enabled !== false;
     const matches =
       enabled && open
-        ? findMatches({
+        ? match({
             query,
             rows: options.value.rows,
             columns: options.value.columns,

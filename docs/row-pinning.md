@@ -14,7 +14,7 @@ sticks to is the feature.
 
 ```tsx
 import { DataTable } from "@adapttable/mantine";
-import type { RowPinState } from "@adapttable/mantine/features";
+import type { RowPinState } from "@adapttable/react/features";
 import { rowPinning } from "@adapttable/mantine/row-pinning";
 import { useState } from "react";
 

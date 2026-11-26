@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { aggregate } from "@adapttable/vue";
 import { type ColumnDef, DataTable } from "@adapttable/vue-unstyled";
 import { cellNavigation } from "@adapttable/vue-unstyled/cell-navigation";
 import { cellSpan } from "@adapttable/vue-unstyled/cell-span";
-import { exportCsv } from "@adapttable/vue-unstyled/export-csv";
+import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { findInTable } from "@adapttable/vue-unstyled/find-in-table";
 import { rowReorder } from "@adapttable/vue-unstyled/row-reorder";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import { tree } from "@adapttable/vue-unstyled/tree";
 import { computed, h, shallowRef } from "vue";
@@ -114,6 +115,12 @@ function move(from: number, to: number, row: Delivery): void {
   message.value = text.value.moved;
 }
 const features = [
+  selection({
+    selectedIds: selected,
+    onSelectionChange: (ids) => {
+      selected.value = ids;
+    },
+  }),
   tree<Delivery>({
     getChildren: (row) => row.children,
     treeColumn: "name",
@@ -147,6 +154,7 @@ const manifestColumns = computed<readonly ColumnDef<Delivery>[]>(() => [
   },
 ]);
 const manifestFeatures = [
+  selection(),
   cellSpan<Delivery>(({ row, column, sectionRows, sectionRowIndex }) => {
     if (column.key !== "pickup") return undefined;
     let count = 1;
@@ -173,7 +181,6 @@ const summary = aggregate<Delivery>({ parcels: "sum" });
       {{ message || text.dispatchNote }}
     </p>
     <DataTable
-      v-model:selected-ids="selected"
       data-workspace-table="dispatch"
       :data="deliveries"
       :columns="columns"
@@ -189,7 +196,6 @@ const summary = aggregate<Delivery>({ parcels: "sum" });
       :url-sync="true"
       :search-debounce-ms="0"
       :table-label="text.dispatch"
-      selectable
     >
       <template #tableFooter
         ><p class="workspace-table-note">{{ text.dispatchNote }}</p></template
@@ -215,7 +221,6 @@ const summary = aggregate<Delivery>({ parcels: "sum" });
       :url-sync="true"
       :search-debounce-ms="0"
       :table-label="text.manifest"
-      selectable
     >
       <template #tableFooter
         ><p class="workspace-table-note">{{ text.spanNote }}</p></template

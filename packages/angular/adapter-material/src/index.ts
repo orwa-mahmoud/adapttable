@@ -3,7 +3,7 @@
  * over `@adapttable/angular`, with host-owned Material theming.
  *
  * Feature factories live on secondary entries (`bulk-actions`, `filters`,
- * …); import them from those paths or from `@adapttable/angular-material/features`.
+ * …); import them from those paths.
  *
  * @packageDocumentation
  */

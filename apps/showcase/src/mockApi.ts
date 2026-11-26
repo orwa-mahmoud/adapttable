@@ -110,7 +110,12 @@ export async function fetchPeople(
   const searched = rows;
   rows = rows.filter((r) => matchesDemoFilters(r, extra));
   rows = rows.filter((r) =>
-    evaluateFilterTree(params.filterTree, r, DEMO_FILTER_RUNTIME.defs)
+    evaluateFilterTree(
+      params.filterTree,
+      r,
+      DEMO_FILTER_RUNTIME.defs,
+      DEMO_FILTER_RUNTIME.registry
+    )
   );
 
   const facets =
@@ -124,7 +129,8 @@ export async function fetchPeople(
             return evaluateFilterTree(
               params.filterTree,
               row,
-              DEMO_FILTER_RUNTIME.defs
+              DEMO_FILTER_RUNTIME.defs,
+              DEMO_FILTER_RUNTIME.registry
             );
           }
         )

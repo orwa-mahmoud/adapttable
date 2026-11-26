@@ -15,6 +15,7 @@ import {
   coreFilters,
   FILTER_DRAWER,
   FILTER_POPOVER,
+  type FilterPanelOptions,
   FILTERS_FORM,
   type FilterWidget,
   withFilterWidgets,
@@ -44,9 +45,12 @@ import {
 export function filtersWith(
   widgets: readonly FilterWidget[]
 ): AdapterFiltersFeature {
-  return <TRow>(defs: readonly FilterDef<TRow>[] = []): AdaptTableFeature =>
+  return <TRow>(
+    defs: readonly FilterDef<TRow>[] = [],
+    options?: FilterPanelOptions
+  ): AdaptTableFeature =>
     withFilterWidgets(
-      extendFeature(coreFilters(defs), [
+      extendFeature(coreFilters(defs, options), [
         slotRender(FILTERS_FORM, () => AdaptFiltersForm),
         slotRender(FILTER_POPOVER, () => AdaptFilterPopover),
         slotRender(FILTER_DRAWER, () => AdaptFilterDrawer),
@@ -77,9 +81,10 @@ const everyWidget = /* @__PURE__ */ filtersWith([
  * @public
  */
 export function filters<TRow>(
-  defs?: readonly FilterDef<TRow>[]
+  defs?: readonly FilterDef<TRow>[],
+  options?: FilterPanelOptions
 ): AdaptTableFeature {
-  return everyWidget(defs);
+  return everyWidget(defs, options);
 }
 
 export {

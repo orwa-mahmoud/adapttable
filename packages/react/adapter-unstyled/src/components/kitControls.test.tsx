@@ -1,4 +1,7 @@
-import { type QueryFilterGroup } from "@adapttable/react/adapter";
+import {
+  defaultFilterRegistry,
+  type QueryFilterGroup,
+} from "@adapttable/react/adapter";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
@@ -83,7 +86,11 @@ function HeaderHarness({ extra: initial = {} }: { extra?: ExtraFilters }) {
 function TreeHarness() {
   const [filterTree, setFilterTree] = useState<QueryFilterGroup | undefined>();
   return (
-    <FilterTreeBuilder defs={DEFS} source={{ filterTree, setFilterTree }} />
+    <FilterTreeBuilder
+      defs={DEFS}
+      source={{ filterTree, setFilterTree }}
+      registry={defaultFilterRegistry}
+    />
   );
 }
 

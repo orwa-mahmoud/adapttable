@@ -22,6 +22,10 @@ export {
   ADAPTTABLE_PALETTE_OPEN,
   type PaletteOpenState,
 } from "./actions/paletteState";
+export {
+  withCommandPaletteView,
+  withContextMenuView,
+} from "./actions/regionViews";
 export { rowActionsFor, type RowActionsOptions } from "./actions/rowActions";
 export {
   ADAPTTABLE_CONTEXT_MENU,
@@ -411,7 +415,9 @@ export {
   COLUMN_MENU,
   COLUMN_SELECT,
   columnGroupHeaderCaption,
+  columnLayoutFamilyList,
   columnMenuActions,
+  type ColumnMenuOptions,
   columnMenuRows,
   type ColumnMenuSlotProps,
   type ColumnSelectCheckboxChromeProps,
@@ -434,6 +440,7 @@ export {
   type DesktopRowWiringArgs,
   EDITABLE_CELL,
   type EditableCellSlotProps,
+  editingFamilyList,
   estimateBodyItemSize,
   EXPAND_TOGGLE,
   expandChevronIcon,
@@ -444,6 +451,7 @@ export {
   EXTRA_ROW_PARTS,
   extraHostFillStyle,
   eyeIcon,
+  type FeatureListEntry,
   type FeatureNotice,
   FILL_HANDLE,
   FILTER_DRAWER,
@@ -458,6 +466,7 @@ export {
   type FilterHeaderRangeProps,
   type FilterHeaderSearchProps,
   type FilterHeaderSelectProps,
+  filteringFamilyList,
   type FilterOverlaySlotProps,
   FILTERS_FORM,
   FILTERS_ICON,
@@ -471,6 +480,7 @@ export {
   type FindButtonKind,
   type FindButtonProps,
   type FindSearchProps,
+  flattenFeatures,
   GRIP_ICON,
   GROUP_HEADER_CARD,
   GROUP_HEADER_ROW,
@@ -542,6 +552,7 @@ export {
   type SpeechInputHandle,
   type SpeechInputState,
   type SpeechInputStatus,
+  standardFeatureList,
   STATUS_BAR,
   TABLE_ASSISTANT,
   type TableAssistantAllowanceView,
@@ -556,7 +567,7 @@ export {
   type TableAssistantUndoView,
   type TableAssistantView,
   TOOLBAR_EXTRAS,
-  type ToolbarExtrasSlotProps,
+  type ToolbarEntrySlotProps,
   TREE_CELL,
   TREE_TOGGLE,
   type TreeCellProps,
@@ -597,6 +608,7 @@ export {
 } from "@adapttable/core/grouping";
 
 // Types this entry's own signatures hand back, named from their owning entry.
+export type { FilterPanelOptions, HeaderFilterOptions } from "./kitFeatures";
 export {
   coreExportCsv,
   coreFilters,

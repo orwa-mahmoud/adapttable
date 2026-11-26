@@ -171,6 +171,7 @@ export const TITLES = {
   "faq.md": "FAQ — the free MUI X & ag-Grid alternative",
   "limitations.md": "Limitations — what AdaptTable does not do",
   "comparison.md": "React table comparison — AG Grid, TanStack, MUI",
+  "migrate-from-v3.md": "AdaptTable v3 to v4 migration guide",
   "migrate-from-v2.md": "AdaptTable v2 to v3 migration guide",
   "migrate-from-v1.md": "Migrate from AdaptTable v1 to v2 — every rename",
   "migrate-from-mantine-datatable.md":
@@ -279,7 +280,7 @@ export const DESCRIPTIONS = {
   "angular/getting-started.md":
     "Install an Angular table with native HTML or NG-ZORRO controls. Follow npm setup, CLI scaffolding and a standalone component example with signal-backed rows.",
   "angular/features.md":
-    "Compose Angular table features through kit subpaths and standardPreset. Add only the required controls and keep data ownership in your application.",
+    "Compose Angular table features through kit subpaths, families and standardFeatures. Add only the required controls and keep data ownership in your application.",
   "angular/data-tiers.md":
     "Connect Angular tables to in-memory data, server paging or query-library signals with injectTableData, injectServerData and injectQuerySource.",
   "angular/headless.md":
@@ -484,6 +485,8 @@ export const DESCRIPTIONS = {
     "Connect a live AdaptTable to your backend: optional HTTP bridge, the request/response protocol, and a runnable OpenAI/Anthropic/Gemini/DeepSeek example.",
   "tree-data.md":
     "Render hierarchical rows in a React data table — compose tree({ getChildren }) for expandable data with keyboard access and announcements.",
+  "migrate-from-v3.md":
+    "Upgrade AdaptTable v3 to v4: run the migrate-v4 codemod, move machinery imports to their entries, and replace the removed compatibility paths.",
   "migrate-from-v2.md":
     "Upgrade AdaptTable v2 to v3: move React hooks to @adapttable/react, replace enabling props with feature imports and check package compatibility.",
   "migrate-from-v1.md":

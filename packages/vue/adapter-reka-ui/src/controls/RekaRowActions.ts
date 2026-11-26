@@ -19,7 +19,6 @@ import { rekaTarget } from "./target";
 
 interface ActionClassNames {
   readonly actionButton?: string;
-  readonly rowAction?: string;
   readonly rowActionsMenu?: string;
   readonly rowActionsTrigger?: string;
 }
@@ -36,7 +35,7 @@ export const RekaRowActions = /* @__PURE__ */ withProps(
       mergeProps(
         {
           key: action.key,
-          class: [props.classNames.actionButton, props.classNames.rowAction],
+          class: props.classNames.actionButton,
           onClick: (event: MouseEvent) => event.stopPropagation(),
         },
         action.attrs

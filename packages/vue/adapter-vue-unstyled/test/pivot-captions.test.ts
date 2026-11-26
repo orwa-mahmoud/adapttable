@@ -1,4 +1,4 @@
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { type PivotConfig } from "@adapttable/vue/pivot";
 import { expect, it } from "vitest";
 import { createApp, h, nextTick, shallowRef } from "vue";

@@ -15,7 +15,6 @@ import { describe, expect, it, vi } from "vitest";
 import { createMemoryAdapter } from "../url/adapter";
 import { useQuerySource } from "./useQuerySource";
 import { useServerData } from "./useServerData";
-import { useTableData } from "./useTableData";
 
 interface Row {
   id: string;
@@ -461,10 +460,9 @@ describe("the server props a `<DataTable>` host writes", () => {
     const asked: (readonly QueryAggregate[] | undefined)[] = [];
     const adapter = createMemoryAdapter("");
     const view = renderHook(
-      (props: { responseKey?: string }) =>
-        useTableData<Row>({
-          mode: "server",
-          data: ROWS,
+      (props: { responseKey?: string }) => ({
+        source: useServerData<Row>({
+          rows: ROWS,
           total: ROWS.length,
           columns: [
             {
@@ -485,6 +483,7 @@ describe("the server props a `<DataTable>` host writes", () => {
             asked.push(query.aggregates);
           },
         }),
+      }),
       { initialProps: {} }
     );
     // The component's own `aggregates` reach the request and describe its rows.

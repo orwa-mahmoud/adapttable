@@ -17,6 +17,7 @@ import {
   EXPORT_MODEL,
 } from "./actions/contracts";
 import { featureActivity, ownsTableEvent } from "./actions/lifecycle";
+import { toolbarEntry } from "./features/toolbarEntries";
 import { useExternalStore } from "./store";
 function usePaletteMount<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);
@@ -85,10 +86,15 @@ function usePaletteMount<TRow>(context: FeatureMountContext<TRow>): void {
     close: () => setOpen(false),
     commands: commands.value,
   }));
-  watch(model, (value) => context.state.set(COMMAND_PALETTE_MODEL, value), {
-    immediate: true,
-    flush: "sync",
-  });
+  watch(
+    model,
+    (value) =>
+      context.state.set(
+        COMMAND_PALETTE_MODEL,
+        context.options.value.commandPalette === false ? undefined : value
+      ),
+    { immediate: true, flush: "sync" }
+  );
   watch(
     [context.root, context.active, () => config()?.shortcuts],
     ([root, live], _old, onCleanup) => {
@@ -115,6 +121,19 @@ export function commandPalette(
   return {
     ...coreCommandPalette(options),
     mount: usePaletteMount,
+    renders: [
+      toolbarEntry((entry) => {
+        const model = entry.read(COMMAND_PALETTE_MODEL);
+        // Drawn while the palette is on, open or not: a chosen command runs
+        // on the next tick, from the mounted surface.
+        return model
+          ? entry.draw(COMMAND_PALETTE_CONTROL, {
+              ...entry.presentation,
+              model,
+            })
+          : null;
+      }),
+    ],
     requiredSlots: [COMMAND_PALETTE_CONTROL],
   };
 }

@@ -61,6 +61,7 @@ describe.each([exportCsv, exportPdf, exportXlsx])(
         shell.state.set(selection, {
           range: { anchor: { row: 0, col: 0 }, head: { row: 0, col: 0 } },
         });
+        const feature = factory<Row>({ scope: "range", request });
         const context: FeatureMountContext<Row> = {
           runtime: shell.runtime,
           root: shallowRef(null),
@@ -76,6 +77,7 @@ describe.each([exportCsv, exportPdf, exportXlsx])(
           featureHost: shell.featureHost,
           filterRuntime: shell.filterRuntime,
           options,
+          feature: () => feature,
           state: shell.state,
           scope,
           active: shell.active,
@@ -83,9 +85,7 @@ describe.each([exportCsv, exportPdf, exportXlsx])(
           flushAdmission: () => undefined,
           flush: (run) => run(),
         };
-        scope.run(() =>
-          factory<Row>({ scope: "range", request }).mount?.(context)
-        );
+        scope.run(() => feature.mount?.(context));
         required(shell.state.get(EXPORT_MODEL).value).onExportCsv?.();
         expect(request).toHaveBeenLastCalledWith(
           expect.objectContaining({

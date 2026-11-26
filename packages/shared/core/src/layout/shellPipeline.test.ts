@@ -19,7 +19,6 @@ import type { TableSource } from "../source/TableSource";
 import type { TreeEntry } from "../tree/treeRows";
 import {
   cellNavigationInput,
-  CHROME_EXTRA_SLOT_ORDER,
   exportPageOnly,
   finishShellBody,
   finishShellLive,
@@ -30,7 +29,6 @@ import {
   readableRowLabel,
   renderedRowsOf,
   type RuntimeChromeInput,
-  SHELL_LIVE_STAGE_ORDER,
   TableRuntimePublisher,
   tableRuntimeView,
   undoRedoToolbarProps,
@@ -113,32 +111,6 @@ function makeChrome(
     ...overrides,
   };
 }
-
-describe("stage order", () => {
-  it("nests the chrome extras outermost first", () => {
-    expect(CHROME_EXTRA_SLOT_ORDER).toEqual([
-      "column-layout-live",
-      "filter-chips-live",
-      "grouping-live",
-      "tree-live",
-      "selection-live",
-      "row-actions-live",
-      "pinning-live",
-      "expansion-live",
-      "editing-live",
-    ]);
-  });
-
-  it("runs the live stages after history, each after what it reads", () => {
-    expect(SHELL_LIVE_STAGE_ORDER).toEqual([
-      "find-live",
-      "cell-nav-live",
-      "export-live",
-      "fullscreen-live",
-      "selection-stats-live",
-    ]);
-  });
-});
 
 describe("renderedRowsOf", () => {
   it("prefers grouped leaves over a tree over the source rows", () => {
@@ -412,7 +384,67 @@ describe("tableRuntimeView", () => {
   });
 });
 
+function stagedView(
+  target: TableRuntimePublisher<Row>,
+  chrome: Parameters<TableRuntimePublisher<Row>["stage"]>[0],
+  actions: Parameters<TableRuntimePublisher<Row>["stage"]>[1]
+) {
+  target.stage(chrome, actions);
+  const view = target.view();
+  if (!view) throw new Error("staged render has no view");
+  return view;
+}
+
 describe("TableRuntimePublisher", () => {
+  /** A chrome whose column list counts its reads; only the full view reads it. */
+  function countedChrome(rows: Row[]) {
+    const chrome = makeChrome({ source: makeSource({ rows }) });
+    let reads = 0;
+    const columns = chrome.allColumns;
+    Object.defineProperty(chrome, "allColumns", {
+      get: () => {
+        reads += 1;
+        return columns;
+      },
+    });
+    return { chrome, reads: () => reads };
+  }
+
+  it("builds no view for a render nobody reads", () => {
+    const publisher = new TableRuntimePublisher<Row>();
+    const counted = countedChrome(ROWS);
+    publisher.stage(counted.chrome, {});
+    publisher.stage(countedChrome(ROWS).chrome, {});
+    expect(counted.reads()).toBe(0);
+  });
+
+  it("reads rendered rows without building the view", () => {
+    const publisher = new TableRuntimePublisher<Row>();
+    const counted = countedChrome(ROWS);
+    publisher.stage(counted.chrome, {});
+    expect(publisher.visibleRows()).toEqual(ROWS);
+    expect(counted.reads()).toBe(0);
+    const view = publisher.view();
+    expect(counted.reads()).toBeGreaterThan(0);
+    expect(publisher.view()).toBe(view);
+  });
+
+  it("answers a later read with the render committed after the last one", () => {
+    const publisher = new TableRuntimePublisher<Row>();
+    publisher.stage(makeChrome({ source: makeSource({ rows: ROWS }) }), {});
+    expect(publisher.view()?.rows).toBe(ROWS);
+    const next = [{ id: "c", name: "Cleo", score: 5 }];
+    publisher.stage(makeChrome({ source: makeSource({ rows: next }) }), {});
+    expect(publisher.view()?.rows).toBe(next);
+    expect(publisher.visibleRows()).toEqual(next);
+  });
+
+  it("has nothing to read before the first render", () => {
+    const publisher = new TableRuntimePublisher<Row>();
+    expect(publisher.view()).toBeUndefined();
+    expect(publisher.visibleRows()).toEqual([]);
+  });
+
   function makeEngine() {
     return createTableEngine<Row>({
       data: ROWS,
@@ -424,7 +456,7 @@ describe("TableRuntimePublisher", () => {
 
   it("publishes no neutral table without an engine", () => {
     const publisher = new TableRuntimePublisher<Row>();
-    const view = publisher.update(makeChrome(), {});
+    const view = stagedView(publisher, makeChrome(), {});
     expect(view.neutralTable).toBeUndefined();
     expect(view.rows).toBe(ROWS);
   });
@@ -433,7 +465,8 @@ describe("TableRuntimePublisher", () => {
     const engine = makeEngine();
     const publisher = new TableRuntimePublisher<Row>();
     const selection = { selectedIds: new Set<string>(), replace: vi.fn() };
-    const first = publisher.update(
+    const first = stagedView(
+      publisher,
       makeChrome({
         source: makeSource({ tableEngine: engine }),
         table: { labels: {}, selection },
@@ -447,7 +480,8 @@ describe("TableRuntimePublisher", () => {
 
     // The host turns selection off and a tree reorders the rendered rows.
     const tree = { entries: [treeEntry(ROWS[1]!)] };
-    const second = publisher.update(
+    const second = stagedView(
+      publisher,
       makeChrome({
         source: makeSource({ tableEngine: engine }),
         tree,
@@ -462,12 +496,66 @@ describe("TableRuntimePublisher", () => {
 
   it("drops the neutral table from a render whose source lost its engine", () => {
     const publisher = new TableRuntimePublisher<Row>();
-    const withEngine = publisher.update(
+    const withEngine = stagedView(
+      publisher,
       makeChrome({ source: makeSource({ tableEngine: makeEngine() }) }),
       {}
     );
     expect(withEngine.neutralTable).toBeDefined();
-    expect(publisher.update(makeChrome(), {}).neutralTable).toBeUndefined();
+    expect(
+      stagedView(publisher, makeChrome(), {}).neutralTable
+    ).toBeUndefined();
+  });
+
+  it("follows a replaced engine for every scope and keeps the handle otherwise", () => {
+    const people = (rows: Row[], tableId: string) =>
+      createTableEngine<Row>({
+        data: rows,
+        columns: [{ key: "name", header: "Name" }],
+        rowKey: getRowId,
+        tableId,
+      });
+    const before = people(ROWS, "people");
+    const after = people([{ id: "c", name: "Cleo", score: 5 }], "people-next");
+    const publisher = new TableRuntimePublisher<Row>();
+    const first = stagedView(
+      publisher,
+      makeChrome({ source: makeSource({ tableEngine: before }) }),
+      {}
+    );
+    const again = stagedView(
+      publisher,
+      makeChrome({ source: makeSource({ tableEngine: before }) }),
+      {}
+    );
+    expect(again.neutralTable).toBe(first.neutralTable);
+
+    const swapped = stagedView(
+      publisher,
+      makeChrome({
+        source: makeSource({ tableEngine: after, rows: [] }),
+      }),
+      {}
+    );
+    const neutral = swapped.neutralTable;
+    expect(neutral).not.toBe(first.neutralTable);
+    expect(neutral?.tableId).toBe("people-next");
+    expect(neutral?.rows("full").map((row) => row.id)).toEqual(["c"]);
+    expect(neutral?.rows("page").map((row) => row.id)).toEqual(["c"]);
+    expect(neutral?.columns.map((column) => column.key)).toEqual(["name"]);
+    expect(neutral?.rowByKey("c")?.name).toBe("Cleo");
+
+    // A server interval with no engine, then a frontend source again.
+    expect(
+      stagedView(publisher, makeChrome(), {}).neutralTable
+    ).toBeUndefined();
+    const back = stagedView(
+      publisher,
+      makeChrome({ source: makeSource({ tableEngine: before }) }),
+      {}
+    );
+    expect(back.neutralTable?.tableId).toBe("people");
+    expect(back.neutralTable?.rows("full")).toEqual(ROWS);
   });
 
   it("reads a shell overlay published after the view, per chrome", () => {
@@ -476,7 +564,7 @@ describe("TableRuntimePublisher", () => {
     const chrome = makeChrome({
       source: makeSource({ tableEngine: engine }),
     });
-    const view = publisher.update(chrome, {});
+    const view = stagedView(publisher, chrome, {});
     expect(view.neutralTable?.operations.find).toBe(false);
     const find = {
       open: true,
@@ -489,12 +577,54 @@ describe("TableRuntimePublisher", () => {
     expect(view.neutralTable?.operations.find).toBe(true);
     expect(view.find).toBeUndefined();
     const nested = new TableRuntimePublisher<Row>();
-    const nestedView = nested.update(
+    const nestedView = stagedView(
+      nested,
       makeChrome({ source: makeSource({ tableEngine: makeEngine() }) }),
       {}
     );
     expect(nestedView.neutralTable?.operations.find).toBe(false);
     expect(view.neutralTable?.operations.find).toBe(true);
+  });
+});
+
+describe("TableRuntimePublisher channels", () => {
+  it("lays channels over the chrome and reads the shell overlay by the chrome", () => {
+    const engine = createTableEngine<Row>({
+      data: ROWS,
+      columns: [{ key: "name", header: "Name" }],
+      rowKey: getRowId,
+      tableId: "people",
+    });
+    const publisher = new TableRuntimePublisher<Row>();
+    const chrome = makeChrome({
+      source: makeSource({ tableEngine: engine }),
+    });
+    const onCellEdit = vi.fn();
+    publisher.stage(chrome, {}, { editing: { onCellEdit } });
+    const view = publisher.view();
+    expect(view?.editing?.onCellEdit).toBe(onCellEdit);
+    publishShellOverlay(chrome, {
+      find: {
+        open: false,
+        query: "",
+        setOpen: vi.fn(),
+        setQuery: vi.fn(),
+        openBar: vi.fn(),
+      },
+    });
+    expect(view?.neutralTable?.operations.find).toBe(true);
+  });
+
+  it("restages when a channel changes and keeps the view when none does", () => {
+    const publisher = new TableRuntimePublisher<Row>();
+    const chrome = makeChrome({ source: makeSource({ rows: ROWS }) });
+    const editing = { onCellEdit: vi.fn() };
+    publisher.stage(chrome, {}, { editing });
+    const first = publisher.view();
+    publisher.stage(chrome, {}, { editing });
+    expect(publisher.view()).toBe(first);
+    publisher.stage(chrome, {}, { editing: { onCellEdit: vi.fn() } });
+    expect(publisher.view()).not.toBe(first);
   });
 });
 
@@ -647,26 +777,11 @@ describe("toolbar prop builders", () => {
 });
 
 describe("finishShellLive", () => {
-  it("lays grid focus, history, view controls and export onto the shell", () => {
-    const editHistory = {
-      enabled: true,
-      canUndo: false,
-      canRedo: true,
-      undo: vi.fn(),
-      redo: vi.fn(),
-    };
-    const onDensityChange = vi.fn();
+  it("lays grid focus, find, fullscreen and the figures onto the shell and leaves the toolbar alone", () => {
     const shell = {
       tableProps: { table: "t" },
       toolbarProps: { search: "s" },
-      editHistory,
-      labels: { undoEdit: "Undo", redoEdit: "Redo" },
-      chromeProps: {
-        density: "normal",
-        onDensityChange,
-        fullscreen: true,
-        undoRedoButtons: true,
-      },
+      chromeProps: { density: "normal" },
     };
     const live = {
       find: {
@@ -676,7 +791,6 @@ describe("finishShellLive", () => {
         setQuery: vi.fn(),
       },
       gridFocus: { enabled: true },
-      exportHandler: { onExport: vi.fn() },
       fullscreen: { supported: true, active: false, toggle: vi.fn() },
       stats: { count: 2 },
     };
@@ -684,7 +798,6 @@ describe("finishShellLive", () => {
       Record<string, unknown>;
     expect(finished.gridFocus).toBe(live.gridFocus);
     expect(finished.find).toBe(live.find);
-    expect(finished.editHistory).toBe(editHistory);
     expect(finished.fullscreen).toBe(live.fullscreen);
     expect(finished.selectionStats).toBe(live.stats);
     expect(finished.chromeProps).toBe(shell.chromeProps);
@@ -692,20 +805,7 @@ describe("finishShellLive", () => {
       table: "t",
       gridFocus: live.gridFocus,
     });
-    expect(finished.toolbarProps).toEqual({
-      search: "s",
-      onUndo: editHistory.undo,
-      onRedo: editHistory.redo,
-      canUndo: false,
-      canRedo: true,
-      undoLabel: "Undo",
-      redoLabel: "Redo",
-      density: "normal",
-      onDensityChange,
-      onToggleFullscreen: live.fullscreen.toggle,
-      isFullscreen: false,
-      onExport: live.exportHandler.onExport,
-    });
+    expect(finished.toolbarProps).toBe(shell.toolbarProps);
   });
 });
 
@@ -732,7 +832,6 @@ describe("overlayChromeExtras", () => {
       },
       table: { sortBy: "name" },
       source: { rows: [] },
-      activeFilterCount: 3,
       rowMutations: { canAdd: true, addRow: vi.fn() },
       editingRows: ROWS,
       tree: { entries: [] },
@@ -772,6 +871,16 @@ describe("overlayChromeExtras", () => {
     };
   }
 
+  it("reads the channels it is given and keeps the base as its chrome", () => {
+    const chrome = makeOverlayChrome({});
+    const editing = { armed: true };
+    const out = overlayChromeExtras(makeShell({}), chrome, {
+      editing,
+    }) as ReturnType<typeof makeShell> & Record<string, unknown>;
+    expect(out.chrome).toBe(chrome);
+    expect((out.tableProps as Record<string, unknown>).editing).toBe(editing);
+  });
+
   it("carries every extra into the table and toolbar props", () => {
     const chrome = makeOverlayChrome({
       autoSizeColumns: "chromeAll",
@@ -802,8 +911,7 @@ describe("overlayChromeExtras", () => {
     expect(out.chromeProps).toBe(shell.chromeProps);
     expect(out.toolbarProps).toEqual({
       search: "s",
-      activeFilterCount: 3,
-      onAddRow: chrome.rowMutations.addRow,
+      onAddRow: chrome.rowMutations?.addRow,
     });
     expect(out.tableProps).toEqual({
       keep: 1,
@@ -873,7 +981,7 @@ describe("overlayChromeExtras", () => {
 });
 
 describe("finishShellBody", () => {
-  function makeShell(chrome: {
+  function makeShell(contributions: {
     grouping?: { readonly entries: readonly unknown[] };
     tree?: { readonly entries: readonly unknown[] };
   }) {
@@ -882,9 +990,9 @@ describe("finishShellBody", () => {
         virtualScrollRef: "shellRef" as string,
         columnWindow: "shellWindow",
         keep: 1,
+        ...contributions,
       },
       toolbarProps: { search: "s" },
-      chrome,
     };
   }
 
@@ -923,7 +1031,6 @@ describe("finishShellBody", () => {
     expect(compose).toHaveBeenCalledWith("shellRef", "bodyRef");
     expect(out.loadMoreRef).toBe("loadMore");
     expect(out.canLoadMore).toBe(true);
-    expect(out.chrome).toBe(shell.chrome);
     expect(out.tableProps).toEqual({
       keep: 1,
       pinnedTopRows: ["pt"],
@@ -999,7 +1106,8 @@ describe("selection scope publication", () => {
     const selectedIds = new Set(["a"]);
     const replace = vi.fn();
     const publisher = new TableRuntimePublisher<Row>();
-    const published = publisher.update(
+    const published = stagedView(
+      publisher,
       makeChrome({
         table: { labels: {}, selection: { selectedIds, replace } },
       }),
@@ -1015,7 +1123,8 @@ describe("selection scope publication", () => {
       const selectedIds = new Set(["b", "a"]);
       const replace = vi.fn();
       const publisher = new TableRuntimePublisher<Row>();
-      const published = publisher.update(
+      const published = stagedView(
+        publisher,
         makeChrome({
           table: {
             labels: {},

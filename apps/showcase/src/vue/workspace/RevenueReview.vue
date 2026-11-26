@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { aggregate } from "@adapttable/vue";
 import { buildFormulaColumns, formulaDisplay } from "@adapttable/vue/formula";
 import {
@@ -14,12 +14,13 @@ import { sparklineColumn } from "@adapttable/vue/sparkline";
 import { type ColumnInput, DataTable } from "@adapttable/vue-unstyled";
 import { cellNavigation } from "@adapttable/vue-unstyled/cell-navigation";
 import { editing } from "@adapttable/vue-unstyled/editing";
-import { exportCsv } from "@adapttable/vue-unstyled/export-csv";
+import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { findInTable } from "@adapttable/vue-unstyled/find-in-table";
 import { useGroupCollapseUrlState } from "@adapttable/vue-unstyled/grouping";
 import { groupingPanel } from "@adapttable/vue-unstyled/grouping-panel";
 import { pinnedSummaryRows } from "@adapttable/vue-unstyled/pinned-summary-rows";
 import { PivotPanel } from "@adapttable/vue-unstyled/pivot";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import { computed, shallowRef } from "vue";
 
@@ -109,6 +110,7 @@ const columns = computed<readonly ColumnInput<Order>[]>(() => [
   }),
 ]);
 const features = [
+  selection(),
   editing<Order>((original, key, value) => {
     if (
       key !== "cost" ||
@@ -239,7 +241,6 @@ const model = computed(() => {
       url-key="workspace-revenue"
       :url-sync="true"
       :table-label="text.revenueTable"
-      selectable
     >
       <template #tableFooter
         ><p class="workspace-table-note">{{ text.formulaNote }}</p></template

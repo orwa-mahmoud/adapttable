@@ -12,13 +12,19 @@
  * The binding adds what it draws (providers, slot renders) on its own
  * feature type; the merge is the same for every binding, so it lives here.
  */
+import type { ContrastRules } from "../a11y/forcedColors";
 import type { TableLabels } from "../types";
+import { devWarn } from "../utils/devWarn";
 import {
   type GroupingContribution,
   mergeGroupingContributions,
   projectGroupingContribution,
 } from "./featureContribution";
-import type { FeatureRegistration } from "./featureRegistration";
+import { type FeatureListEntry, flattenFeatures } from "./featureFamilies";
+import {
+  type FeatureRegistration,
+  preferLastById,
+} from "./featureRegistration";
 
 /**
  * Internal table configuration a composed feature may write.
@@ -62,6 +68,13 @@ export interface PatchFeature<
   apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
   /** The strings the feature draws, with their English defaults. */
   readonly labels?: Partial<TableLabels>;
+  /** The high-contrast rules for what the feature draws. */
+  readonly contrast?: ContrastRules;
+  /**
+   * Where this feature's fills sit in a slot several features fill, such as
+   * the toolbar: lower ranks first, then feature-id order. Left out, 0.
+   */
+  readonly rank?: number;
 }
 
 interface LabelListNode {
@@ -148,10 +161,71 @@ function definedEntries(value: object): Record<string, unknown> {
   return out;
 }
 
+/**
+ * Options a feature factory writes. A host value for one of these is dropped
+ * so the composed feature is the only way to set it. Layout, data and slots
+ * stay on the host and still win over a feature.
+ */
+export const FEATURE_OWNED_OPTION_KEYS = [
+  "filtersMode",
+  "filterFields",
+  "extraChips",
+  "closeHeaderFilterOnSelect",
+  "filterDefs",
+  "filterRegistry",
+  "filterLabels",
+  "activeFilterCount",
+  "onColumnRename",
+  "onCellCut",
+  "onCellPaste",
+  "onCellFill",
+  "validateRow",
+  "applyEdit",
+  "onEditRollback",
+  "formatEditError",
+  "onEditStart",
+  "onEditCancel",
+  "onEditCommit",
+  "onValidationFail",
+  "onEditError",
+  "onEditConflict",
+  "editConflictPolicy",
+  "editActivation",
+  "rowVersion",
+  "hasChildren",
+  "expandedIds",
+  "onExpandedIdsChange",
+  "onGroupByChange",
+  "groupFooters",
+  "groupSort",
+  "groupPageSize",
+  "groupRowPageSize",
+  "onGroupLoadMore",
+  "groupFilter",
+  "groupAggregates",
+  "collapsedGroupIds",
+  "onCollapsedGroupIdsChange",
+  "estimateRowSize",
+  "estimateCardSize",
+  "virtualOverscan",
+  "virtualScrollMargin",
+] as const;
+
+/** One key {@link FEATURE_OWNED_OPTION_KEYS} reserves for a feature. */
+export type FeatureOwnedOptionKey = (typeof FEATURE_OWNED_OPTION_KEYS)[number];
+
+function ownsFeatureKey(key: string): boolean {
+  return (FEATURE_OWNED_OPTION_KEYS as readonly string[]).includes(key);
+}
+
+function ownsFeatureOption(options: object): boolean {
+  return Object.keys(options).some((key) => ownsFeatureKey(key));
+}
+
 function omitFeatures<P extends object>(options: P): P {
   const rest: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(options)) {
-    if (key !== "features") rest[key] = value;
+    if (key !== "features" && !ownsFeatureKey(key)) rest[key] = value;
   }
   return rest as P;
 }
@@ -160,7 +234,36 @@ function featuresOf(options: object): readonly PatchFeature[] | undefined {
   if (!("features" in options)) return undefined;
   const list = options.features;
   if (!Array.isArray(list)) return [];
-  return list as readonly PatchFeature[];
+  return resolveFeatureIds(
+    flattenFeatures(list as readonly FeatureListEntry<PatchFeature>[])
+  );
+}
+
+/**
+ * One declaration per id, the last one, so a table's options, labels,
+ * registrations, stages and fills all read the same declaration. A list
+ * with unique ids comes back as itself.
+ *
+ * @param features - The composed features, flattened.
+ * @returns The declarations that own their ids.
+ *
+ * @public
+ */
+export function resolveFeatureIds<TFeature extends { readonly id: string }>(
+  features: readonly TFeature[]
+): readonly TFeature[] {
+  const seen = new Set<string>();
+  let duplicated = false;
+  for (const feature of features) {
+    if (seen.has(feature.id)) {
+      duplicated = true;
+      devWarn(
+        `Two features share the id "${feature.id}". The last declaration replaces the earlier one everywhere: its options, labels, registrations and slot fills.`
+      );
+    }
+    seen.add(feature.id);
+  }
+  return duplicated ? preferLastById(features) : features;
 }
 
 /**
@@ -222,10 +325,12 @@ export function overlayFeatureOptions<
   featureLabels: readonly Partial<TableLabels>[],
   options: TOptions
 ): TResolved {
+  const host = definedEntries(options);
+  for (const key of FEATURE_OWNED_OPTION_KEYS) delete host[key];
   const resolved: Record<string, unknown> = {
     ...patches,
     ...(featureLabels.length > 0 ? { featureLabels } : {}),
-    ...definedEntries(options),
+    ...host,
   };
   return resolved as TResolved;
 }
@@ -233,8 +338,10 @@ export function overlayFeatureOptions<
 /**
  * Resolve `features` onto the existing option surface.
  *
- * Later features win; defined host options win over both. `features` is
- * stripped from the result. Calling twice on the same object is a no-op.
+ * Later features win. A defined host option wins over a feature, except the
+ * keys in {@link FEATURE_OWNED_OPTION_KEYS}: those come only from a feature.
+ * `features` is stripped from the result. Calling twice on the same object
+ * is a no-op.
  *
  * @param options - Table options that may carry a `features` array.
  * @returns The resolved options.
@@ -246,8 +353,13 @@ export function applyTableFeatures<P extends object>(options: P): P {
 
   const list = featuresOf(options);
   if (list == null) {
-    applied.add(options);
-    return options;
+    if (!ownsFeatureOption(options)) {
+      applied.add(options);
+      return options;
+    }
+    const rest = omitFeatures(options);
+    applied.add(rest);
+    return rest;
   }
   if (list.length === 0) {
     const rest = omitFeatures(options);

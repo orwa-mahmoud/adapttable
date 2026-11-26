@@ -2,10 +2,8 @@ import {
   type BaseDataTableProps,
   type Slot,
   type UrlStateAdapter,
-  type UseTableDataOptions,
 } from "@adapttable/react";
 import {
-  type DataModeProps,
   type TableErrorState,
   type TableSource,
 } from "@adapttable/react/adapter";
@@ -63,15 +61,15 @@ export interface DataTableClassNames {
 }
 
 /**
- * The props every MUI table takes, before the data-mode half is added.
+ * The props every MUI table takes.
  * `DataTableProps` is this plus one of the data modes.
  *
  * @public
  */
-export interface DataTablePropsBase<TRow>
-  extends
-    Omit<BaseDataTableProps<TRow>, "source">,
-    Pick<UseTableDataOptions<TRow>, "supports" | "facetKeys" | "facets"> {
+export interface DataTablePropsBase<TRow> extends Omit<
+  BaseDataTableProps<TRow>,
+  "source"
+> {
   /**
    * Full-control data tier: a prebuilt source (`useFrontendData` /
    * `useQuerySource`). Omit it and pass `data` instead for the zero-ceremony
@@ -79,14 +77,11 @@ export interface DataTablePropsBase<TRow>
    */
   source?: TableSource<TRow>;
   /**
-   * Frontend tier: the raw rows — the table filters/sorts/pages them.
-   * With `onQueryChange` it becomes the server tier: the current page of
-   * rows, exactly as the server returned them.
+   * The rows: the table filters, sorts and pages them. A server table
+   * passes a server `source` instead.
    */
   data?: readonly TRow[];
-  /** Server tier: total row count across all pages (drives the pager). */
-  total?: number;
-  /** Server tier: request in flight. */
+  /** The rows are still loading. */
   loading?: boolean;
   /** Forwarded error to display in the table's error state. */
   error?: Error | null;
@@ -123,12 +118,8 @@ export interface DataTablePropsBase<TRow>
 }
 
 /**
- * Props for the MUI `<DataTable>`: the base surface intersected
- * with core's data-mode union, so `mode="server"` requires
- * `onQueryChange` at compile time and `mode="frontend"` turns it into a
- * pure notification.
+ * Props for the `<DataTable>`.
  *
  * @public
  */
-export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
-  DataModeProps<TRow>;
+export type DataTableProps<TRow> = DataTablePropsBase<TRow>;

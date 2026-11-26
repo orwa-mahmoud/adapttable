@@ -9,7 +9,9 @@
 export type { RowPatch, RowPatchEvent } from "./rows/patch";
 export type {
   InsertPatch,
+  RekeyPatch,
   RemovePatch,
+  RowPatchOptions,
   UpdatePatch,
   UpsertPatch,
 } from "./rows/patch";
@@ -21,7 +23,7 @@ export {
   type StreamSocket,
   type StreamSocketEvent,
 } from "./stream/connect";
-export { parseRowPatchFrame } from "./stream/parse";
+export { parseRowPatchFrame, STREAMED_ROW_PATCHES } from "./stream/parse";
 export {
   isStreamLive,
   isStreamSettled,

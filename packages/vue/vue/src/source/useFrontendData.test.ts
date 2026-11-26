@@ -86,13 +86,42 @@ describe("useFrontendData", () => {
     allowed = 3;
     key.value = 2;
     expect(source?.value.total).toBe(3);
+    // A sort value that reads differently re-sorts at once.
     columns.value = [{ key: "score", sortValue: (row: Row) => -row.score }];
-    // Core intentionally ignores callback identity until an explicit semantic input changes.
-    expect(source?.value.rows.map((row) => row.score)).toEqual([1, 2, 3]);
-    key.value = 3;
     expect(source?.value.rows.map((row) => row.score)).toEqual([3, 2, 1]);
+    // The same column rebuilt is not a new query.
+    const sorted = source?.value.rows;
+    columns.value = [{ key: "score", sortValue: (row: Row) => -row.score }];
+    expect(source?.value.rows).toBe(sorted);
     locale.value = "ar";
     expect(source?.value.total).toBe(3);
+    scope.stop();
+  });
+
+  it("re-sorts when a localized column's data path changes under the same key", () => {
+    interface Localized {
+      id: string;
+      label: string;
+      labelAr: string;
+      labelAlt: string;
+    }
+    const scope = effectScope();
+    const columns = shallowRef([{ key: "label", i18n: { ar: "labelAr" } }]);
+    const source = scope.run(() =>
+      useFrontendData<Localized>({
+        data: [
+          { id: "1", label: "a", labelAr: "ab", labelAlt: "ba" },
+          { id: "2", label: "b", labelAr: "a", labelAlt: "z" },
+        ],
+        columns,
+        locale: "ar",
+        urlSync: false,
+        defaults: { sortBy: "label", sortDir: "asc" },
+      })
+    );
+    expect(source?.value.rows.map((row) => row.id)).toEqual(["2", "1"]);
+    columns.value = [{ key: "label", i18n: { ar: "labelAlt" } }];
+    expect(source?.value.rows.map((row) => row.id)).toEqual(["1", "2"]);
     scope.stop();
   });
 

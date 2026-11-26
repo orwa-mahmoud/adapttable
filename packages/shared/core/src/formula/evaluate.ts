@@ -36,7 +36,7 @@ export const FORMULA_ERRORS = {
   cycle: "#CYCLE!",
   /** The formula could not be parsed at all. */
   syntax: "#ERROR!",
-} as const;
+} as const satisfies Readonly<Record<string, FormulaErrorCode>>;
 
 /**
  * One of the error codes above.
@@ -44,7 +44,7 @@ export const FORMULA_ERRORS = {
  * @public
  */
 export type FormulaErrorCode =
-  (typeof FORMULA_ERRORS)[keyof typeof FORMULA_ERRORS];
+  "#NAME?" | "#VALUE!" | "#DIV/0!" | "#CYCLE!" | "#ERROR!";
 
 /**
  * What a formula evaluates to.

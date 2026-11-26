@@ -21,7 +21,7 @@ const SURFACE = `export interface DataTableProps {
   onRowClick?: (row: { id: string }) => void;
   isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   searchPlaceholder?: string;
-  onQueryChange?: (
+  onViewChange?: (
     query: { page?: number; limit?: number },
     info: { signal: AbortSignal }
   ) => void;
@@ -135,7 +135,7 @@ export class Shell {
     ((rowId: string, columnKey: string) => boolean) | undefined
   > = undefined;
   searchPlaceholder: InputSignal<string | undefined> = undefined;
-  onQueryChange: InputSignal<
+  onViewChange: InputSignal<
     | ((
         query: { page?: number },
         info: { signal: AbortSignal }

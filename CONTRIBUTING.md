@@ -98,8 +98,9 @@ feature PR mergeable:
   contracts under `@adapttable/react/adapter`. An adapter maps those
   contracts to its kit's components and adds no logic. If a feature seems to
   need logic inside an adapter, the core contract needs extending instead.
-- **Everything is opt-in.** Omitting a feature's prop renders no UI, attaches
-  no handlers, and costs nothing for anyone not using it.
+- **A behaviour turns on only by composing its feature.** The base names no
+  feature. Omitting a feature renders no UI, attaches no handlers, and costs
+  nothing for anyone not using it.
 - **Heavy capabilities stay out of the base bundle.** Anything sizable ships
   as an optional package or subpath entry, so a simple CRUD table never pays
   for what it doesn't use.

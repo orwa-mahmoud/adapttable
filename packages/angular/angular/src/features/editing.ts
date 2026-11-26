@@ -110,6 +110,9 @@ export function editing<TRow>(
   return withEditingImplementation({
     ...coreEditing(onCellEdit, extras),
     onCellEdit,
+    // The editing bundle is built from these: another save callback or
+    // lifecycle replaces it, the same ones declared again keep it.
+    dependencies: [onCellEdit, ...Object.values(extras)],
     mount(context) {
       const occupied = context.state.get(SURFACE_OCCUPIED)();
       if (occupied?.editing) return;
@@ -117,11 +120,20 @@ export function editing<TRow>(
       if (!handles) return;
       const options = featureOptionsOf(handles.features);
       const editing = editingBundleFor<TRow>({
-        live: computed(() => ({
-          rows: handles.viewSource().rows as readonly TRow[],
-          columns: handles.table.allColumns() as readonly ColumnDef<TRow>[],
-          rowKey: handles.table.rowKey,
-        })),
+        live: computed(() => {
+          const current = featureOptionsOf(handles.features);
+          return {
+            rows: handles.viewSource().rows as readonly TRow[],
+            columns: handles.table.allColumns() as readonly ColumnDef<TRow>[],
+            rowKey: handles.table.rowKey,
+            rowVersion: current.rowVersion as
+              ((row: TRow) => number) | undefined,
+            editConflictPolicy: current.editConflictPolicy as
+              "ask" | "keep" | "take" | undefined,
+            onEditConflict: current.onEditConflict as
+              EditConflictHandler<TRow> | undefined,
+          };
+        }),
         featureOptions: options,
         activation: computed(
           () => options.editActivation as "doubleClick" | "click" | undefined
@@ -179,12 +191,15 @@ export function batchEditing<TRow>(
 /**
  * Marks on the cells and rows that hold unsaved edits.
  *
+ * Marks follow the edits an editing feature makes, and that feature brings
+ * the editing code; this one only turns the marks on.
+ *
  * @returns The feature.
  *
  * @public
  */
 export function dirtyIndicators(): AdaptTableFeature {
-  return withEditingImplementation(coreDirtyIndicators());
+  return coreDirtyIndicators();
 }
 
 export type {

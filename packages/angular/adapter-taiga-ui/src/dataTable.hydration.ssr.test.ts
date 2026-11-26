@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 
 import { type ColumnDef } from "@adapttable/angular";
-import { standardPreset } from "@adapttable/taiga-ui/preset";
+import { standardFeatures } from "@adapttable/taiga-ui/preset";
 import { virtualize } from "@adapttable/taiga-ui/virtualize";
 import {
   Component,
@@ -70,7 +70,7 @@ class App {
   readonly columns = COLUMNS;
   readonly rowKey = (row: City) => row.id;
   readonly features = [
-    ...standardPreset<City>({ filters: [] }),
+    ...standardFeatures<City>({ filters: [] }),
     virtualize({ estimateRowSize: 40 }),
   ];
 }

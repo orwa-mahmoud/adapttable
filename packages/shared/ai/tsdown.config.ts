@@ -18,6 +18,7 @@ export default defineConfig({
   ...common,
   entry: [
     "src/index.ts",
+    "src/agent.ts",
     "src/json.ts",
     "src/openai.ts",
     "src/mcp.ts",

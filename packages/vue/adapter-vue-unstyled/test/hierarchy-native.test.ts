@@ -13,6 +13,7 @@ import { renderToString } from "vue/server-renderer";
 import { DataTable, type DataTableProps } from "../src";
 import { grouping } from "../src/grouping";
 import { nestedTable, rowDetail } from "../src/row-detail";
+import { selection } from "../src/selection";
 import { tree } from "../src/tree";
 interface Row {
   id: string;
@@ -78,8 +79,8 @@ describe("native hierarchy contributions", () => {
     async (mobile) => {
       const view = mount({
         forceMobile: mobile,
-        selectable: true,
         features: [
+          selection(),
           grouping<Row>("team", {
             groupFooters: true,
             groupRowPageSize: 1,
@@ -128,14 +129,17 @@ describe("native hierarchy contributions", () => {
     "restores mixed controlled group selection on rejection, mobile=%s",
     async (mobile) => {
       const update = vi.fn();
-      const view = mount(
-        {
-          forceMobile: mobile,
-          selectedIds: ["a"],
-          features: [grouping("team")],
-        },
-        { "onUpdate:selectedIds": update }
-      );
+      const selectedIds = shallowRef<readonly string[]>(["a"]);
+      const view = mount({
+        forceMobile: mobile,
+        features: [
+          selection({
+            selectedIds,
+            onSelectionChange: update,
+          }),
+          grouping("team"),
+        ],
+      });
       await settle();
       const checkbox = node<HTMLInputElement>(view.root, part("group-select"));
       expect(checkbox.indeterminate).toBe(true);
@@ -146,7 +150,7 @@ describe("native hierarchy contributions", () => {
       expect(update.mock.calls).toEqual([[["a", "b"]], [["a", "b"]]]);
       expect(checkbox.checked).toBe(false);
       expect(checkbox.indeterminate).toBe(true);
-      view.props.value = { ...view.props.value, selectedIds: ["a", "b"] };
+      selectedIds.value = ["a", "b"];
       await settle();
       expect(checkbox.checked).toBe(true);
       expect(checkbox.indeterminate).toBe(false);

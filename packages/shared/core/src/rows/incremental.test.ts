@@ -10,6 +10,7 @@ import { serializeAggregationDerivedKey } from "../aggregate/aggregationModel";
 import type { ColumnModel } from "../contracts/columns";
 import type { QueryFilterGroup } from "../contracts/query";
 import type { RowPatch, RowPatchEvent } from "../contracts/rows";
+import { defaultFilterRegistry } from "../filters/filterBuiltins";
 import type { FilterDef } from "../filters/filterDefs";
 import { evaluateFilterTree } from "../filters/filterTree";
 import { withGroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
@@ -17,7 +18,7 @@ import {
   buildGroupedFlatModel,
   type GroupedFlatEntry,
 } from "../grouping/groupRows";
-import { sortRows, sortRowsMulti } from "../sort/compare";
+import { sortRows, sortRowsMulti } from "../sort/referenceSort";
 import {
   applyRowPatchesToView,
   applyRowPatchLogToView,
@@ -284,7 +285,7 @@ describe("createIncrementalView / applyRowPatchesToView", () => {
       getRowId: byId,
       filterTree: tree,
       filterTreeFn: (row, active) =>
-        evaluateFilterTree(active, row, FILTER_DEFS),
+        evaluateFilterTree(active, row, FILTER_DEFS, defaultFilterRegistry),
     };
     const start = createIncrementalView(ROWS, config);
     expect(ids(start.filtered)).toEqual(["1", "3"]);
@@ -616,6 +617,59 @@ describe("configureIncrementalView", () => {
     });
     expect(again).toBe(next);
     expect(again.sorted).toBe(view.sorted);
+  });
+
+  describe("a column's value inputs under the same key", () => {
+    interface Named {
+      id: string;
+      name: string;
+      nameAr: string;
+      nameAlt: string;
+    }
+    const NAMED: readonly Named[] = [
+      { id: "1", name: "a", nameAr: "ab", nameAlt: "ba" },
+      { id: "2", name: "b", nameAr: "a", nameAlt: "z" },
+    ];
+    const named = (column: ColumnModel<Named>) =>
+      createIncrementalView(NAMED, {
+        getRowId: (row) => row.id,
+        columns: [column],
+        locale: "ar",
+        sortBy: "name",
+        sortDir: "asc",
+      });
+    const order = (view: IncrementalView<Named>) =>
+      view.sorted.map((row) => row.id);
+
+    it("re-sorts when a localized column's data path changes", () => {
+      const view = named({ key: "name", i18n: { ar: "nameAr" } });
+      expect(order(view)).toEqual(["2", "1"]);
+      const next = configureIncrementalView(view, {
+        columns: [{ key: "name", i18n: { ar: "nameAlt" } }],
+      });
+      expect(order(next)).toEqual(["1", "2"]);
+    });
+
+    it("re-sorts when a column's sort value reads another field", () => {
+      const view = named({ key: "name", sortValue: (row) => row.nameAr });
+      expect(order(view)).toEqual(["2", "1"]);
+      const next = configureIncrementalView(view, {
+        columns: [{ key: "name", sortValue: (row) => row.nameAlt }],
+      });
+      expect(order(next)).toEqual(["1", "2"]);
+    });
+
+    it("keeps the view when the columns are rebuilt equal on each render", () => {
+      const render = (): ColumnModel<Named> => ({
+        key: "name",
+        i18n: { ar: "nameAr" },
+        sortValue: (row) => row.nameAr,
+      });
+      const view = named(render());
+      const next = configureIncrementalView(view, { columns: [render()] });
+      expect(next).toBe(view);
+      expect(next.sorted).toBe(view.sorted);
+    });
   });
 
   it("rebuilds the groups when the derived key says the answer changed", () => {

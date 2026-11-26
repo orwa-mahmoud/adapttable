@@ -4,10 +4,8 @@ import { createSSRApp, h, nextTick } from "vue";
 import { renderToString } from "vue/server-renderer";
 
 import { DataTable } from "../src";
-import {
-  cellNavigation,
-  columnSelectionCheckbox,
-} from "../src/cell-navigation";
+import { cellNavigation } from "../src/cell-navigation";
+import { columnSelectionCheckbox } from "../src/column-selection";
 import { findInTable } from "../src/find-in-table";
 import { selectionStats, statusBar } from "../src/status-bar";
 
@@ -53,9 +51,7 @@ it.each([false, true])(
         )
       ).toHaveLength(before.length + (mobile ? 0 : 1));
       expect(root.querySelector('[role="grid"]') !== null).toBe(!mobile);
-      expect(root.querySelector('button[role="checkbox"]') !== null).toBe(
-        !mobile
-      );
+      expect(root.querySelector('button[role="checkbox"]')).not.toBeNull();
       root
         .querySelector<HTMLButtonElement>(
           '[data-adapttable-part="find-button"]'

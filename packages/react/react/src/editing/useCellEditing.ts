@@ -3,8 +3,9 @@
  * Enter / Escape / Tab keyboard flow.
  *
  * Opt-in by design — calling this hook alone does nothing visible. Adapters
- * only surface editors when the table passes `onCellEdit` (see
- * {@link TableChrome.editing}) and a column sets `editable`.
+ * only surface editors when the table passes `onCellEdit` (the editing
+ * feature publishes its bundle as `EDITING_STATE`) and a column sets
+ * `editable`.
  */
 import { type CellEditingState } from "@adapttable/core";
 import {
@@ -21,6 +22,7 @@ export type {
   CellEditKeyOutcome,
   CellEditNavigation,
 } from "@adapttable/core";
+import { useRowRekeyMoves } from "../hooks/useRowRekeyMoves";
 import { TableStoreContext } from "../state/tableStoreContext";
 export { beginCellEdit } from "@adapttable/core/editing";
 
@@ -54,6 +56,7 @@ export function useCellEditing<TRow = unknown>(
     createCellEditSession<TRow>(options, { store: table })
   );
   session.configure(options);
+  useRowRekeyMoves(session);
   const snapshot = useSyncExternalStore(
     session.subscribe,
     session.getSnapshot,

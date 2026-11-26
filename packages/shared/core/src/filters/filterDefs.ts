@@ -18,7 +18,7 @@ import { FILTER_LABELS } from "../labelGroups/filterLabels";
 import type { TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { humanizeKey } from "../utils/humanizeKey";
-import { getPath } from "../utils/path";
+import { getPath, pathReader } from "../utils/path";
 import type { FilterTypeRegistry, FilterTypeSpec } from "./filterRegistry";
 import {
   DATE_OP_LABEL_KEYS,
@@ -37,7 +37,11 @@ import {
   TEXT_OP_LABEL_KEYS,
   TEXT_OPS,
 } from "./operators";
-import { relativeTokenLabel, resolveRelativeRange } from "./relativeDates";
+import {
+  localDayEndMs,
+  relativeTokenLabel,
+  resolveRelativeRange,
+} from "./relativeDates";
 
 /**
  * Resolve a chip's visible label from its raw extra-filter value.
@@ -264,9 +268,7 @@ export function resolveFilterDefs<TRow>(
       label:
         declaredLabel ??
         (typeof column.header === "string" ? column.header : undefined),
-      ...(path === column.key
-        ? {}
-        : { getValue: (row: TRow) => getPath(row, path) }),
+      ...(path === column.key ? {} : { getValue: pathReader(path) }),
       ...base,
     } as FilterDef<TRow>);
   }
@@ -303,7 +305,12 @@ function valueText(value: unknown): string {
 }
 
 const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;
-const END_OF_DAY_MS = 86_399_999;
+
+/** The year, month index and day of a date-only string. */
+function dateOnlyParts(text: string): [number, number, number] {
+  const [year = 0, month = 1, day = 1] = text.split("-").map(Number);
+  return [year, month - 1, day];
+}
 
 /**
  * One coercion path for everything `dateRange` compares — row values and
@@ -322,8 +329,8 @@ function dateValueToEpochMs(value: unknown): number {
   const text = value.trim();
   if (text === "") return Number.NaN;
   if (DATE_ONLY_RE.test(text)) {
-    const [year = 0, month = 1, day = 1] = text.split("-").map(Number);
-    return new Date(year, month - 1, day).getTime();
+    const [year, monthIndex, day] = dateOnlyParts(text);
+    return new Date(year, monthIndex, day).getTime();
   }
   return new Date(text).getTime();
 }
@@ -370,13 +377,15 @@ function textRowMatches(
   }
 }
 
+/**
+ * The latest instant a bound includes: the last millisecond of its local
+ * calendar day for a date-only bound, the instant itself otherwise.
+ */
 function dateUpperBoundMs(bound: FilterValue): number {
-  return (
-    dateValueToEpochMs(bound) +
-    (typeof bound === "string" && DATE_ONLY_RE.test(bound.trim())
-      ? END_OF_DAY_MS
-      : 0)
-  );
+  if (typeof bound === "string" && DATE_ONLY_RE.test(bound.trim())) {
+    return localDayEndMs(...dateOnlyParts(bound.trim()));
+  }
+  return dateValueToEpochMs(bound);
 }
 
 function dateOnMatch(time: number, day: FilterValue | undefined): boolean {
@@ -718,7 +727,81 @@ function rangeSpec(flavour: "dateRange" | "numberRange"): FilterTypeSpec {
   };
 }
 
-/** Built-in types — the registry's first consumers. */
+/**
+ * The text filter's rules: its operators, predicate, chips and URL keys.
+ *
+ * A kit's text widget carries these, so a table that draws only text filters
+ * carries only text rules.
+ *
+ * @returns The `"text"` type.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function textFilterSpecs(): readonly FilterTypeSpec[] {
+  return [textSpec()];
+}
+
+/**
+ * The single-choice filter's rules.
+ *
+ * @returns The `"select"` type.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function selectFilterSpecs(): readonly FilterTypeSpec[] {
+  return [selectSpec("select")];
+}
+
+/**
+ * The multiple-choice filter's rules.
+ *
+ * @returns The `"multiSelect"` type.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function multiSelectFilterSpecs(): readonly FilterTypeSpec[] {
+  return [listSpec("multiSelect")];
+}
+
+/**
+ * The checklist filter's rules.
+ *
+ * @returns The `"checklist"` type.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function checklistFilterSpecs(): readonly FilterTypeSpec[] {
+  return [listSpec("checklist")];
+}
+
+/**
+ * The yes/no filter's rules.
+ *
+ * @returns The `"boolean"` type.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function booleanFilterSpecs(): readonly FilterTypeSpec[] {
+  return [booleanSpec()];
+}
+
+/**
+ * The date and number range filters' rules, relative dates included.
+ *
+ * @returns The `"dateRange"` and `"numberRange"` types.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function rangeFilterSpecs(): readonly FilterTypeSpec[] {
+  return [rangeSpec("dateRange"), rangeSpec("numberRange")];
+}
+
 /** Built-in specs — imported only by {@link defaultFilterRegistry}. */
 export function createBuiltInFilterSpecs(): FilterTypeSpec[] {
   return [
@@ -855,19 +938,18 @@ function emptyOpChip(field: string, token: string): string {
 }
 
 /**
- * Derive the full runtime (URL keys, chips, predicate) from definitions.
+ * The filter state keys whose URL values parse as lists and as numbers.
  *
- * @public
+ * @param defs - The filter definitions.
+ * @param registry - The types the definitions name.
+ * @returns The list-valued keys and the number-valued keys.
  */
-export function buildFilterRuntime<TRow>(
-  defs: readonly FilterDef<TRow>[],
+export function filterUrlKeys(
+  defs: readonly Pick<FilterDef, "key" | "type">[],
   registry: FilterTypeRegistry
-): FilterRuntime<TRow> {
+): { arrayExtraKeys: string[]; numberExtraKeys: string[] } {
   const arrayExtraKeys: string[] = [];
   const numberExtraKeys: string[] = [];
-  const filterLabels: Record<string, ChipLabelResolver> = {};
-  const predicates = defs.map((def) => filterPredicate(def, registry));
-
   for (const def of defs) {
     const spec = registry.get(def.type);
     if (!spec) continue;
@@ -876,7 +958,45 @@ export function buildFilterRuntime<TRow>(
       const s = RANGE_SUFFIXES.numberRange;
       numberExtraKeys.push(def.key + s.start, def.key + s.end);
     }
-    Object.assign(filterLabels, spec.chips(def));
+  }
+  return { arrayExtraKeys, numberExtraKeys };
+}
+
+/**
+ * The keys of the filters drawn as a checklist: the ones whose distinct
+ * values a server counts.
+ *
+ * @param defs - The filter definitions.
+ * @param registry - The types the definitions name.
+ * @returns The checklist filters' keys.
+ */
+export function checklistFilterKeys(
+  defs: readonly Pick<FilterDef, "key" | "type">[],
+  registry: FilterTypeRegistry
+): string[] {
+  return defs
+    .filter(
+      (def) => (registry.get(def.type)?.widget ?? def.type) === "checklist"
+    )
+    .map((def) => def.key);
+}
+
+/**
+ * Derive the full runtime (URL keys, chips, predicate) from definitions.
+ *
+ * @public
+ */
+export function buildFilterRuntime<TRow>(
+  defs: readonly FilterDef<TRow>[],
+  registry: FilterTypeRegistry
+): FilterRuntime<TRow> {
+  const { arrayExtraKeys, numberExtraKeys } = filterUrlKeys(defs, registry);
+  const filterLabels: Record<string, ChipLabelResolver> = {};
+  const predicates = defs.map((def) => filterPredicate(def, registry));
+
+  for (const def of defs) {
+    const spec = registry.get(def.type);
+    if (spec) Object.assign(filterLabels, spec.chips(def));
   }
 
   return {

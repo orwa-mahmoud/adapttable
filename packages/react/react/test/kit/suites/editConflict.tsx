@@ -1,3 +1,4 @@
+import { loadEditConflictStore } from "@adapttable/core/binding";
 import {
   collectConformanceTests,
   type ConformanceTest,
@@ -18,7 +19,11 @@ export function editConflictTests(
   kit: ReactKitUnderTest
 ): readonly ConformanceTest[] {
   const { DataTable, render } = kit;
-  return collectConformanceTests(({ describe, it }) => {
+  return collectConformanceTests(({ beforeEach, describe, it }) => {
+    // The conflict store loads when an edit first opens; these tests are about
+    // the question it asks, so it is loaded up front. Core covers the load.
+    beforeEach(() => loadEditConflictStore());
+
     /** The conflict notices on screen. */
     const notices = () =>
       document.querySelectorAll('[data-adapttable-part="edit-cell-conflict"]');

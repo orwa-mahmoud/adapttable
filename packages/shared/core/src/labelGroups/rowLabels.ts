@@ -18,10 +18,8 @@ export const ROW_LABELS: Pick<
   | "rowLifted"
   | "rowMoved"
   | "rowReorderCancelled"
-  | "rowMoveOptions"
   | "moveToGroup"
   | "moveUnder"
-  | "moveToTopLevel"
   | "rowMovedToGroup"
   | "rowMovedUnder"
   | "moveRejectedPolicyNever"
@@ -32,6 +30,7 @@ export const ROW_LABELS: Pick<
   | "pinToTop"
   | "pinToBottom"
   | "unpinRow"
+  | "noticePinNested"
 > = {
   duplicateRow: "Duplicate row",
   deleteRow: "Delete row",
@@ -41,10 +40,8 @@ export const ROW_LABELS: Pick<
   rowLifted: (position) => `Row ${String(position)} lifted`,
   rowMoved: (from, to) => `Row moved from ${String(from)} to ${String(to)}`,
   rowReorderCancelled: "Reorder cancelled",
-  rowMoveOptions: "Row move options",
   moveToGroup: "Move to group…",
   moveUnder: "Move under…",
-  moveToTopLevel: "Move to top level",
   rowMovedToGroup: (group) => `Row moved to ${group}`,
   rowMovedUnder: (parent) => `Row moved under ${parent}`,
   moveRejectedPolicyNever: "Cross-boundary row moves are disabled",
@@ -55,4 +52,5 @@ export const ROW_LABELS: Pick<
   pinToTop: "Pin to top",
   pinToBottom: "Pin to bottom",
   unpinRow: "Unpin row",
+  noticePinNested: "Row pinning is off while grouping or a tree is on.",
 };

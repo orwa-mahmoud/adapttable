@@ -5,14 +5,15 @@
  * A framework adds only its controls and renderers.
  */
 import {
-  buildGroupedFlatModel,
   type ColumnMetadata,
+  deferredPdfWriter,
   type ExportAllControls,
   type ExportAllResult,
   type ExportCsvOptions,
   viewFromGroupedEntries,
 } from "@adapttable/core";
-import { pdfWriter, printTable } from "@adapttable/core/pdf";
+import { buildGroupedFlatModel } from "@adapttable/core/grouping";
+import { printTable } from "@adapttable/core/pdf";
 
 import { rosterFor } from "../casts";
 import {
@@ -252,7 +253,7 @@ export function exportScenarioOptions(
   }
   return {
     scope: "all",
-    writer: pdfWriter({
+    writer: deferredPdfWriter({
       title: locale === "ar" ? "الموظفون" : "People",
       direction: locale === "ar" ? "rtl" : "ltr",
       font: locale === "ar" ? font : undefined,

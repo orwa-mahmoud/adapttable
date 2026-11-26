@@ -15,7 +15,7 @@ import {
   editing,
   rowEditing,
   undoRedoButtons,
-} from "../src/features";
+} from "../src/editing";
 
 interface Row {
   id: string;

@@ -5,7 +5,7 @@ total per team **per quarter**" — and that second dimension has to become
 columns that were never in the data.
 
 `@adapttable/core/pivot` is a separate entry, so a table that never pivots
-never downloads the engine. It costs 1.5 KB gzipped to the tables that import
+never downloads the engine. It costs 1.6 KiB gzipped to the tables that import
 it and nothing to the rest, which the bundle budget checks on every build.
 
 ▶ **See it working:** [pivot in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/pivot/) — the same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.

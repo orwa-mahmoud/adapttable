@@ -259,3 +259,17 @@ describe("controlled selection", () => {
     expect(result.current.allMatching).toBe(false);
   });
 });
+
+describe("useSelection when selection is off", () => {
+  it("reads no row id and keeps no visible ids", () => {
+    const getId = vi.fn((row: { id: string }) => row.id);
+    const rows = Array.from({ length: 5000 }, (_, index) => ({
+      id: String(index),
+    }));
+    const { result } = renderHook(() =>
+      useSelection({ rows, getId, enabled: false })
+    );
+    expect(getId).not.toHaveBeenCalled();
+    expect(result.current.visibleIds).toEqual([]);
+  });
+});

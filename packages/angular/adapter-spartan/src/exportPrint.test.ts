@@ -1,19 +1,24 @@
 /**
  * The export progress surface and the print button, through the toolbar slot.
  */
-import type {
-  AdaptTableFeature,
-  ColumnDef,
-  ExportCsvOptions,
+import {
+  ADAPTTABLE_FEATURE_STATE,
+  type AdaptTableFeature,
+  type ColumnDef,
+  createFeatureState,
+  EXPORT_TOOLBAR_STATE,
+  type ExportCsvOptions,
+  type ExportToolbar,
+  PRINT_TOOLBAR_STATE,
+  type PrintToolbar,
 } from "@adapttable/angular";
 import {
   type ExportProgressState,
   type ExportTable,
-  type ToolbarExtrasSlotProps,
 } from "@adapttable/angular/adapter";
 import { bulkActions } from "@adapttable/spartan/bulk-actions";
 import { exportCsv } from "@adapttable/spartan/export";
-import { Component, input } from "@angular/core";
+import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -32,18 +37,28 @@ const part = (name: string) =>
     `:is([data-adapttable-part="${name}"], [data-spartan-part="${name}"])`
   );
 
-const labels = {} as ToolbarExtrasSlotProps["labels"];
+const labels = {} as ExportToolbar["labels"];
 
-function props(progress: ExportProgressState | null): ToolbarExtrasSlotProps {
+function exportState(progress: ExportProgressState | null): ExportToolbar {
   return {
-    density: "comfortable",
-    onDensityChange: () => undefined,
     labels,
     onExportCsv: () => undefined,
+    exportBusy: false,
+    exportStatus: "idle",
     exportAnnouncement: "",
     exportProgressState: progress,
+    exportLabel: "Export CSV",
+    exportDisabled: false,
+    exportDisabledReason: "",
   };
 }
+
+/** The state the toolbar controls read, as their features publish it. */
+const toolbarState = createFeatureState();
+const exporting = signal(exportState(null));
+const printing = signal<PrintToolbar>({});
+toolbarState.set(EXPORT_TOOLBAR_STATE, exporting);
+toolbarState.set(PRINT_TOOLBAR_STATE, printing);
 
 const BUSY: ExportProgressState = {
   status: "busy",
@@ -69,18 +84,20 @@ const FAILED: ExportProgressState = {
 
 @Component({
   imports: [AdaptExportButton],
-  template: `<adapt-export-button [props]="props()" />`,
+  providers: [{ provide: ADAPTTABLE_FEATURE_STATE, useValue: toolbarState }],
+  template: `<adapt-export-button [props]="{ labels }" />`,
 })
 class ExportHost {
-  readonly props = input.required<ToolbarExtrasSlotProps>();
+  protected readonly labels = labels;
 }
 
 @Component({
   imports: [AdaptPrintButton],
-  template: `<adapt-print-button [props]="props()" />`,
+  providers: [{ provide: ADAPTTABLE_FEATURE_STATE, useValue: toolbarState }],
+  template: `<adapt-print-button [props]="{ labels }" />`,
 })
 class PrintHost {
-  readonly props = input.required<ToolbarExtrasSlotProps>();
+  protected readonly labels = labels;
 }
 
 describe("export progress", () => {
@@ -89,9 +106,7 @@ describe("export progress", () => {
     const retry = vi.fn();
     const dismiss = vi.fn();
     const fixture = TestBed.createComponent(ExportHost);
-    fixture.componentRef.setInput("props", {
-      ...props({ ...BUSY, onCancel: cancel }),
-    });
+    exporting.set(exportState({ ...BUSY, onCancel: cancel }));
     document.body.append(fixture.nativeElement);
     fixture.detectChanges();
     expect(part("export-progress-bar")?.getAttribute("value")).toBeNull();
@@ -101,16 +116,14 @@ describe("export progress", () => {
     part("export-progress-cancel")!.click();
     expect(cancel).toHaveBeenCalledOnce();
 
-    fixture.componentRef.setInput("props", {
-      ...props({ ...BUSY, value: 40, message: "" }),
-    });
+    exporting.set(exportState({ ...BUSY, value: 40, message: "" }));
     fixture.detectChanges();
     expect(part("export-progress-bar")?.getAttribute("value")).toBe("40");
     expect(part("export-progress-message")).toBeNull();
 
-    fixture.componentRef.setInput("props", {
-      ...props({ ...FAILED, onRetry: retry, onDismiss: dismiss }),
-    });
+    exporting.set(
+      exportState({ ...FAILED, onRetry: retry, onDismiss: dismiss })
+    );
     fixture.detectChanges();
     expect(part("export-progress-bar")).toBeNull();
     expect(part("export-progress-message")?.textContent).toContain("Nope");
@@ -127,18 +140,14 @@ describe("export progress", () => {
 describe("AdaptPrintButton", () => {
   it("renders only when printing is a toolbar action", () => {
     const hidden = TestBed.createComponent(PrintHost);
-    hidden.componentRef.setInput("props", props(null));
+    printing.set({});
     document.body.append(hidden.nativeElement);
     hidden.detectChanges();
     expect(part("print-button")).toBeNull();
     hidden.destroy();
 
     const shown = TestBed.createComponent(PrintHost);
-    shown.componentRef.setInput("props", {
-      ...props(null),
-      onPrint: () => undefined,
-      printLabel: "Print",
-    });
+    printing.set({ onPrint: () => undefined, printLabel: "Print" });
     document.body.append(shown.nativeElement);
     shown.detectChanges();
     expect(part("print-button")?.textContent?.trim()).toBe("Print");

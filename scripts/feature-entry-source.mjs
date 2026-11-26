@@ -215,12 +215,31 @@ export function entryExports(specifier, root = REPO_ROOT) {
   return exportsOf(entrySource(specifier, root), new Set(), root);
 }
 
+/**
+ * Where a kit serves one factory. The shared subpath is the home. A barrel
+ * may name another entry, and so may the feature id when the shared subpath
+ * does not export the factory (Angular's `batchEditing` is `/batch-editing`).
+ */
+function featureHome(packageName, factory, feature, declared, root) {
+  const target = declared.get(factory);
+  if (target) return { specifier: target.from, name: target.name };
+  const classified = `${packageName}/${feature.subpath}`;
+  if (
+    feature.id &&
+    feature.id !== feature.subpath &&
+    !entryExports(classified, root).has(factory)
+  ) {
+    const byId = `${packageName}/${feature.id}`;
+    if (entryExports(byId, root).has(factory)) {
+      return { specifier: byId, name: factory };
+    }
+  }
+  return { specifier: classified, name: factory };
+}
+
 /** The canonical feature inventory must be served by every published kit. */
 export function featureEntryProblems(packageName, features, root = REPO_ROOT) {
   const problems = [];
-  // A kit may explicitly place a feature in a different secondary entry from
-  // React's inventory, for example Angular's /batch-editing. Read that public
-  // mapping from its own feature barrel, then verify the actual target source.
   const declared = new Map();
   const barrel = entrySource(`${packageName}/features`, root);
   const source = barrel ? readFileSync(barrel, "utf8") : "";
@@ -234,10 +253,15 @@ export function featureEntryProblems(packageName, features, root = REPO_ROOT) {
         declared.set(entry.name, { from: match[2], name: entry.source });
     }
   }
-  for (const [factory, { subpath }] of Object.entries(features)) {
-    const target = declared.get(factory);
-    const specifier = target?.from ?? `${packageName}/${subpath}`;
-    if (!entryExports(specifier, root).has(target?.name ?? factory)) {
+  for (const [factory, feature] of Object.entries(features)) {
+    const { specifier, name } = featureHome(
+      packageName,
+      factory,
+      feature,
+      declared,
+      root
+    );
+    if (!entryExports(specifier, root).has(name)) {
       problems.push(
         `feature classification: ${specifier} does not export ${factory}`
       );

@@ -52,7 +52,7 @@ export class AccessiblePeopleTable {
 The NG-ZORRO equivalents live under `@adapttable/ng-zorro`. The grid is opt-in;
 a plain data table does not need to make every cell a Tab stop.
 `columnSelectionCheckbox()` requires cell navigation and selects a column's
-cell range. `[selectable]="true"` separately enables row selection.
+cell range. Compose `selection()` when the table should offer row checkboxes.
 
 ## Keyboard behavior
 

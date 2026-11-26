@@ -175,7 +175,9 @@ describe("emitted-file accounting", () => {
       isEntry: false,
       imports: [],
       dynamicImports: [],
-      moduleIds: [`/app/node_modules/@adapttable/i18n/dist/${fileName}`],
+      moduleIds: [
+        `/app/node_modules/@adapttable/i18n/dist/locales/${fileName}`,
+      ],
       code,
     });
     const output = [
@@ -210,7 +212,7 @@ describe("emitted-file accounting", () => {
   });
 
   it("counts a preset's chunk as that preset, with the strings it spreads", () => {
-    const presetDir = "/app/node_modules/@adapttable/i18n/dist";
+    const presetDir = "/app/node_modules/@adapttable/i18n/dist/locales";
     const output = [
       {
         type: "chunk",

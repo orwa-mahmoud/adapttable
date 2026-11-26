@@ -59,6 +59,7 @@ import { ColumnGroupToggleButtonProps } from '@adapttable/core/binding';
 import { ColumnGroupToggleProps } from '@adapttable/core/binding';
 import { ColumnGroupToggleSlots as ColumnGroupToggleSlots_2 } from '@adapttable/core/binding';
 import { ColumnHeaderRenameSlotProps as ColumnHeaderRenameSlotProps_2 } from '@adapttable/core/binding';
+import { columnLayoutFamilyList } from '@adapttable/core/binding';
 import { ColumnLayoutState } from '@adapttable/core';
 import { columnMenuActions } from '@adapttable/core/binding';
 import { ColumnMenuItem } from '@adapttable/core';
@@ -85,6 +86,7 @@ import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuPoint } from '@adapttable/core';
 import { ContextMenuSlots as ContextMenuSlots_2 } from '@adapttable/core/binding';
 import { ContextMenuSurfaceProps } from '@adapttable/core/binding';
+import { ContrastRules } from '@adapttable/core/binding';
 import { createMenuNavigation } from '@adapttable/core/binding';
 import { CSSProperties } from 'vue';
 import { CssProperties } from '@adapttable/core/binding';
@@ -106,6 +108,7 @@ import { EditConflictPolicy } from '@adapttable/core';
 import { EditHistoryState } from '@adapttable/core';
 import { EditingBundle } from '@adapttable/core';
 import { EditingBundle as EditingBundle_2 } from '@adapttable/core/editing';
+import { editingFamilyList } from '@adapttable/core/binding';
 import { EditLifecycle } from '@adapttable/core';
 import { editorInputType } from '@adapttable/core/editing';
 import { EditValidationStoreOptions } from '@adapttable/core';
@@ -124,10 +127,10 @@ import { extraHostFillStyle } from '@adapttable/core/binding';
 import { ExtraRow as ExtraRow_2 } from '@adapttable/core';
 import { extraRowsForSection } from '@adapttable/core/binding';
 import { extraUncoveredColSpans } from '@adapttable/core/binding';
-import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
 import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
+import { FeatureListEntry } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
@@ -150,6 +153,7 @@ import { FilterHeaderRowProps as FilterHeaderRowProps_2 } from '@adapttable/core
 import { FilterHeaderSearchProps } from '@adapttable/core/binding';
 import { FilterHeaderSelectProps } from '@adapttable/core/binding';
 import { FilterHeaderSlots as FilterHeaderSlots_2 } from '@adapttable/core/binding';
+import { filteringFamilyList } from '@adapttable/core/binding';
 import { filterLabel } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterRuntime } from '@adapttable/core/binding';
@@ -174,6 +178,7 @@ import { FindButtonProps } from '@adapttable/core/binding';
 import { FindInTableState } from '@adapttable/core/binding';
 import { FindSearchProps } from '@adapttable/core/binding';
 import { flattenColumnTree } from '@adapttable/core/binding';
+import { flattenFeatures } from '@adapttable/core/binding';
 import { formatMultiDraft } from '@adapttable/core/editing';
 import { FrontendEngineFactory } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
@@ -230,10 +235,8 @@ import { PivotPanelChromeProps as PivotPanelChromeProps_2 } from '@adapttable/co
 import { PivotPanelSlots as PivotPanelSlots_2 } from '@adapttable/core/binding';
 import { PlainSlotKey } from '@adapttable/core/binding';
 import { PublicProps } from 'vue';
-import { QueryAggregate } from '@adapttable/core';
 import { QueryCondition } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
-import { QuerySupport } from '@adapttable/core';
 import { readMultiDraft } from '@adapttable/core/editing';
 import { Ref } from 'vue';
 import { REORDER_COLUMN_WIDTH } from '@adapttable/core/binding';
@@ -321,10 +324,9 @@ import { TableSource } from '@adapttable/core';
 import { TableStore } from '@adapttable/core/binding';
 import { TableViewStateConfig } from '@adapttable/core';
 import { toggleCollapsedColumnGroup } from '@adapttable/core/binding';
-import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
-import { ToolbarExtrasSlotProps } from '@adapttable/core/binding';
 import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
+import { UndoRedoToolbarProps } from '@adapttable/core/binding';
 import { unpinAllColumns } from '@adapttable/core/binding';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
@@ -642,6 +644,8 @@ export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
 export type ColumnLayout<TRow> = Omit<UseColumnLayoutResult<TRow>, "visibleColumns"> & {
     readonly visibleColumns: readonly ColumnDef<TRow>[];
 };
+
+export { columnLayoutFamilyList }
 
 // @public (undocumented)
 export interface ColumnLayoutOptions {
@@ -1333,7 +1337,6 @@ export interface DataTableClassNames {
     readonly retry?: string;
     // (undocumented)
     readonly root?: string;
-    readonly rowAction?: string;
     // (undocumented)
     readonly rowActionsMenu?: string;
     // (undocumented)
@@ -1396,7 +1399,6 @@ export interface DataTableClassNames {
     readonly sortIndex?: string;
     // (undocumented)
     readonly sortSelect?: string;
-    readonly status?: string;
     // (undocumented)
     readonly statusBar?: string;
     // (undocumented)
@@ -1471,7 +1473,6 @@ export interface DataTableHandle<TRow> {
 
 // @public
 export interface DataTableProps<TRow> {
-    readonly aggregates?: readonly QueryAggregate[];
     readonly animate?: boolean;
     // (undocumented)
     readonly assistant?: TableAssistantProps;
@@ -1487,7 +1488,6 @@ export interface DataTableProps<TRow> {
     readonly columnWidths?: Readonly<Record<string, number>>;
     // (undocumented)
     readonly confirm?: ConfirmHandler;
-    // (undocumented)
     readonly data?: readonly TRow[];
     // (undocumented)
     readonly defaultColumnLayout?: Partial<ColumnLayoutState>;
@@ -1496,17 +1496,13 @@ export interface DataTableProps<TRow> {
     // (undocumented)
     readonly defaults?: NonNullable<TableViewStateConfig["defaults"]>;
     // (undocumented)
-    readonly defaultSelectedIds?: readonly string[];
-    // (undocumented)
     readonly density?: TableDensity_2;
     // (undocumented)
     readonly dir?: Direction;
     // (undocumented)
     readonly error?: Error | null;
-    readonly facetKeys?: readonly string[];
-    readonly facets?: FacetMap;
     // (undocumented)
-    readonly features?: readonly ComposedFeature<NoInfer<TRow>>[];
+    readonly features?: readonly FeatureListEntry<ComposedFeature<NoInfer<TRow>>>[];
     // (undocumented)
     readonly fitColumns?: boolean;
     // (undocumented)
@@ -1525,26 +1521,16 @@ export interface DataTableProps<TRow> {
     readonly maxHeight?: number | string;
     // (undocumented)
     readonly mobileBreakpoint?: number;
-    readonly mode?: "frontend" | "server";
     // (undocumented)
     readonly multiSort?: boolean;
     // (undocumented)
-    readonly onCellCut?: (range: CellRange) => void;
-    // (undocumented)
-    readonly onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
-    // (undocumented)
-    readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
-    // (undocumented)
-    readonly onColumnRename?: (key: string, name: string) => void;
-    // (undocumented)
     readonly onDensityChange?: (density: TableDensity_2) => void;
-    readonly onQueryChange?: TableQueryListener;
     readonly onRowClick?: (row: TRow) => void;
+    readonly onViewChange?: TableQueryListener;
     // (undocumented)
     readonly paginationMode?: PaginationMode;
     // (undocumented)
     readonly refetch?: () => void | Promise<unknown>;
-    readonly responseKey?: string;
     // (undocumented)
     readonly rowActionsLayout?: RowActionsLayout;
     // (undocumented)
@@ -1554,20 +1540,13 @@ export interface DataTableProps<TRow> {
     // (undocumented)
     readonly searchDebounceMs?: number;
     readonly searchPlaceholder?: string;
-    // (undocumented)
-    readonly selectable?: boolean;
-    // (undocumented)
-    readonly selectedIds?: readonly string[];
     readonly skeletonRows?: number;
-    // (undocumented)
     readonly source?: TableSource<TRow>;
     readonly stickyHeader?: boolean;
     readonly stickyTop?: number;
     readonly summaryRow?: SummaryRowFn<TRow>;
-    readonly supports?: QuerySupport;
     // (undocumented)
     readonly tableLabel?: string;
-    readonly total?: number;
     // (undocumented)
     readonly urlAdapter?: UrlStateAdapter;
     // (undocumented)
@@ -1891,6 +1870,8 @@ export interface EditingChromeModel<TRow> {
 // @public (undocumented)
 export function editingChromeModelKey<TRow>(): FeatureStateKey<EditingChromeModel<TRow>>;
 
+export { editingFamilyList }
+
 // @public (undocumented)
 export function editingModelKey<TRow>(): FeatureStateKey<EditingBundle<TRow>>;
 
@@ -2001,6 +1982,8 @@ export interface FeatureLifecycle<TRow> {
     reconcile(features: readonly ComposedFeature<TRow>[]): void;
 }
 
+export { FeatureListEntry }
+
 // @public (undocumented)
 export interface FeatureMountContext<TRow = unknown> {
     // (undocumented)
@@ -2011,6 +1994,7 @@ export interface FeatureMountContext<TRow = unknown> {
     readonly bodyRows?: Readonly<ShallowRef<readonly TableRowModel<TRow>[]>>;
     // (undocumented)
     readonly density?: Readonly<ShallowRef<TableDensity>>;
+    readonly feature: () => TableFeature<TRow>;
     // (undocumented)
     readonly featureHost: Readonly<ShallowRef<FeatureHostState<TRow>>>;
     // (undocumented)
@@ -2053,6 +2037,12 @@ export interface FeatureMountContext<TRow = unknown> {
 
 // @public
 export function featureOptionsOf<TRow>(features: readonly ComposedFeature<TRow>[]): Readonly<Record<string, unknown>>;
+
+// @public
+export interface FeatureSlotDrawer {
+    <TProps>(slot: PlainSlotKey<TProps>, props: TProps): VNodeChild[];
+    <TProps>(slot: RowSlotKey<(props: NoInfer<TProps>) => VNodeChild>, props: TProps): VNodeChild[];
+}
 
 // @public (undocumented)
 export function featureSlotFillsOf<TRow>(features: readonly ComposedFeature<TRow>[]): ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>;
@@ -2312,6 +2302,8 @@ export { FilterHeaderSelectProps }
 // @public
 export type FilterHeaderSlots = FilterHeaderSlots_2<VNodeChild>;
 
+export { filteringFamilyList }
+
 // @public (undocumented)
 export interface FilterInputProps {
     // (undocumented)
@@ -2459,6 +2451,9 @@ export interface FilterPanelSurfaceProps {
     readonly open: boolean;
 }
 
+// @public
+export const FILTERS_PANEL: FeatureSlotKey<Readonly<Record<string, never>>>;
+
 // @public (undocumented)
 export interface FilterSelectProps {
     // (undocumented)
@@ -2569,6 +2564,8 @@ export { FindButtonProps }
 export { FindSearchProps }
 
 export { flattenColumnTree }
+
+export { flattenFeatures }
 
 // @public
 export interface FooterContext<TRow, TValue = unknown> {
@@ -2720,9 +2717,6 @@ export interface GroupRowModel<TRow> {
     readonly trailingColumns: number;
 }
 
-// @public @deprecated
-export function groupRowSlotKey<_TRow = unknown>(): RowSlotKey<GroupRowDraw>;
-
 // @public
 export type GroupRowSlotProps<TRow> = Parameters<NonNullable<TableChromeSlots<TRow>["GroupRow"]>>[0];
 
@@ -2814,7 +2808,7 @@ export { hideAllColumns }
 export function HistoryButtonsChrome(props: HistoryButtonsChromeProps): VNodeChild;
 
 // @public (undocumented)
-export interface HistoryButtonsChromeProps extends ToolbarExtrasSlotProps {
+export interface HistoryButtonsChromeProps extends UndoRedoControlProps {
     // (undocumented)
     readonly slots: ActionButtonSlots;
 }
@@ -2906,7 +2900,9 @@ export const MobileSummaryChrome: (<TRow>(props: TableSummaryChromeProps<TRow>) 
 };
 
 // @public
-export function mountForcedColorsStyles(): void;
+export function mountForcedColorsStyles(features: () => readonly {
+    readonly contrast?: ContrastRules;
+}[]): void;
 
 // @public (undocumented)
 export function mountGrouping<TRow>(context: FeatureMountContext<TRow>): void;
@@ -2936,7 +2932,7 @@ export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
 export const NO_CLASS_NAMES: Readonly<Record<string, undefined>>;
 
 // @public (undocumented)
-export function normalizeFeatures<TRow>(features: readonly ComposedFeature<TRow>[]): readonly ComposedFeature<TRow>[];
+export function normalizeFeatures<TRow>(entries: readonly FeatureListEntry<ComposedFeature<TRow>>[]): readonly ComposedFeature<TRow>[];
 
 export { orderedCardEntries }
 
@@ -3077,6 +3073,7 @@ export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRo
     readonly bulkActions?: readonly BulkAction[];
     // (undocumented)
     readonly columnSelectionCheckbox?: boolean;
+    readonly defaultSelectedIds?: readonly string[];
     // (undocumented)
     readonly editingModel?: (context: FeatureMountContext<TRow>) => void | (() => void);
     // (undocumented)
@@ -3095,10 +3092,14 @@ export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRo
     readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onCellRangeChange?: (range: CellRange | null) => void;
+    readonly onSelectionChange?: (ids: string[]) => void;
     // (undocumented)
     readonly rowActionControls?: RowActionControlsProjector<TRow>;
     // (undocumented)
     readonly rowActions?: readonly RowAction<TRow>[];
+    readonly selectable?: MaybeRefOrGetter<boolean>;
+    readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
+    readonly selectionGetId?: (row: TRow) => string;
     // (undocumented)
     readonly statusBar?: boolean;
     // (undocumented)
@@ -3528,6 +3529,7 @@ export type StaticFeatureHost = Omit<TableFeatureHost<unknown>, "registerColumnM
 export interface StaticTableFeature {
     // (undocumented)
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly contrast?: ContrastRules;
     // (undocumented)
     readonly dependencies?: readonly unknown[];
     // (undocumented)
@@ -3535,12 +3537,12 @@ export interface StaticTableFeature {
     readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: <TRow>(context: FeatureMountContext<TRow>) => void | (() => void);
+    readonly rank?: number;
     // (undocumented)
     readonly renders?: readonly FeatureRender<never, VNodeChild>[];
     // (undocumented)
     readonly requiredSlots?: readonly FeatureSlotKey<never>[];
-    // (undocumented)
-    readonly setup?: (host: StaticFeatureHost) => void | (() => void);
+    readonly setup?: (host: StaticFeatureHost) => void;
 }
 
 export { STATUS_BAR }
@@ -3958,6 +3960,7 @@ export interface TableFeature<TRow> {
     readonly __row?: (row: TRow) => TRow;
     // (undocumented)
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+    readonly contrast?: ContrastRules;
     // (undocumented)
     readonly dependencies?: readonly unknown[];
     // (undocumented)
@@ -3965,12 +3968,12 @@ export interface TableFeature<TRow> {
     readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
+    readonly rank?: number;
     // (undocumented)
     readonly renders?: readonly FeatureRender<never, VNodeChild>[];
     // (undocumented)
     readonly requiredSlots?: readonly FeatureSlotKey<never>[];
-    // (undocumented)
-    readonly setup?: (host: TableFeatureHost<TRow>) => void | (() => void);
+    readonly setup?: (host: TableFeatureHost<TRow>) => void;
 }
 
 // @public (undocumented)
@@ -4177,9 +4180,20 @@ export const textFieldPart: FilterFieldPart;
 
 export { toggleCollapsedColumnGroup }
 
-export { TOOLBAR_EXTRAS }
+// @public
+export const TOOLBAR_EXTRAS: FeatureSlotKey<ToolbarEntryProps>;
 
-export { ToolbarExtrasSlotProps }
+// @public
+export function toolbarEntry(render: (props: ToolbarEntryProps) => VNodeChild): FeatureRender<ToolbarEntryProps, VNodeChild>;
+
+// @public
+export interface ToolbarEntryProps {
+    readonly density: TableDensity;
+    readonly draw: FeatureSlotDrawer;
+    readonly onDensityChange: (next: TableDensity) => void;
+    readonly presentation: ActionPresentation;
+    read<T>(key: FeatureStateKey<T>): T | undefined;
+}
 
 // @public
 export function toVueAttrs(attrs: Attrs, options?: {
@@ -4203,7 +4217,13 @@ export interface TreeCellModel<TRow> {
 export function treeModelKey<TRow>(): FeatureStateKey<TableTree<TRow>>;
 
 // @public (undocumented)
-export const UNDO_REDO_CONTROL: FeatureSlotKey<ToolbarExtrasSlotProps>;
+export const UNDO_REDO_CONTROL: FeatureSlotKey<UndoRedoControlProps>;
+
+// @public
+export interface UndoRedoControlProps extends UndoRedoToolbarProps {
+    readonly classNames?: Readonly<Record<string, string | undefined>>;
+    readonly labels: Required<TableLabels>;
+}
 
 export { unpinAllColumns }
 
@@ -4224,7 +4244,7 @@ setQuery: (value: string) => void;
 window: ChecklistWindow;
 ref: (value: HTMLElement | null) => void;
 onScroll: () => void;
-labels: Readonly<Pick<Required<TableLabels>, "value" | "columns" | "searchPlaceholder" | "search" | "filterTree" | "sortBy" | "table" | "noData" | "noResults" | "expandRow" | "collapseRow" | "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "filterAll" | "boolAny" | "boolTrue" | "boolFalse" | "applyView" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "loading" | "loadMore" | "filters" | "clearAll" | "removeFilter" | "filtersDone" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "expandColumnGroup" | "collapseColumnGroup" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter">>;
+labels: Readonly<Pick<Required<TableLabels>, "value" | "columns" | "searchPlaceholder" | "search" | "filterTree" | "sortBy" | "table" | "noData" | "noResults" | "expandRow" | "collapseRow" | "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "filterAll" | "boolAny" | "boolTrue" | "boolFalse" | "applyView" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "loading" | "loadMore" | "filters" | "clearAll" | "removeFilter" | "filtersDone" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "expandColumnGroup" | "collapseColumnGroup" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage">>;
 classNames: ChecklistClassNames | undefined;
 }>;
 
@@ -4555,7 +4575,6 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     savedViews: Readonly<ShallowRef<UseSavedViewsResult | undefined>>;
     urlAdapter: ComputedRef<UrlStateAdapter>;
     flushViewState: () => void;
-    toolbarExtrasProps: ComputedRef<ToolbarExtrasSlotProps>;
     renderToolbarExtras: (classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[];
     renderActiveFilterChips: () => VNodeChild[];
     renderBatchEditBar: () => VNodeChild[];
@@ -4567,7 +4586,6 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     find: Readonly<ShallowRef<FindInTableState | undefined>>;
     selectionStats: Readonly<ShallowRef<SelectionStats | null | undefined>>;
     bodyRows: ComputedRef<TableRowModel<TRow>[]>;
-    hasActionToolbar: ComputedRef<boolean>;
     renderBulkActions: (classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[];
     renderActionOverlays: (classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[];
     renderSidePanel: (classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[];
@@ -4582,51 +4600,29 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
 };
 
 // @public (undocumented)
-export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
-    readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
+export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection" | "onColumnRename">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
     readonly animate?: MaybeRefOrGetterOptional<boolean>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps_2<VNodeChild>>;
     // (undocumented)
     readonly confirm?: ConfirmHandler;
-    // (undocumented)
     readonly data?: MaybeRefOrGetter<readonly TRow[]>;
     // (undocumented)
     readonly defaultDensity?: TableDensity;
     // (undocumented)
-    readonly defaultSelectedIds?: readonly string[];
-    // (undocumented)
     readonly density?: MaybeRefOrGetterOptional<TableDensity>;
-    readonly facetKeys?: MaybeRefOrGetterOptional<readonly string[]>;
-    readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
     // (undocumented)
-    readonly features?: MaybeRefOrGetterOptional<readonly ComposedFeature<NoInfer<TRow>>[]>;
+    readonly features?: MaybeRefOrGetterOptional<readonly FeatureListEntry<ComposedFeature<NoInfer<TRow>>>[]>;
     readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
     readonly maxHeight?: number | string;
-    readonly mode?: "frontend" | "server";
-    // (undocumented)
-    readonly onCellCut?: (range: CellRange) => void;
-    // (undocumented)
-    readonly onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
-    // (undocumented)
-    readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onDensityChange?: (next: TableDensity) => void;
-    readonly onQueryChange?: TableQueryListener;
-    // (undocumented)
-    readonly onSelectionChange?: (ids: string[]) => void;
-    readonly responseKey?: MaybeRefOrGetterOptional<string>;
+    readonly onViewChange?: TableQueryListener;
     // (undocumented)
     readonly runtimeChannels?: MaybeRefOrGetter<Pick<RuntimeChromeInput<TRow>, "filterDefs" | "filterRegistry" | "grouping" | "tree" | "editing" | "rowPinning">>;
     // (undocumented)
-    readonly selectable?: MaybeRefOrGetter<boolean>;
-    // (undocumented)
-    readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
-    // (undocumented)
     readonly source?: MaybeRefOrGetterOptional<TableSource<TRow>>;
     readonly summaryRow?: SummaryRowFn<TRow>;
-    readonly supports?: MaybeRefOrGetterOptional<QuerySupport>;
-    readonly total?: MaybeRefOrGetterOptional<number>;
 }
 
 // @public (undocumented)
@@ -4683,7 +4679,7 @@ export function useFilterHeaderControl<TRow>(input: MaybeRefOrGetter<FilterHeade
 
 // @public (undocumented)
 export function useFilterTreeModel<TRow>(input: MaybeRefOrGetter<FilterTreeBuilderProps<TRow>>): ComputedRef<    {
-labels: Readonly<Pick<Required<TableLabels>, "value" | "columns" | "searchPlaceholder" | "search" | "filterTree" | "sortBy" | "table" | "noData" | "noResults" | "expandRow" | "collapseRow" | "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "filterAll" | "boolAny" | "boolTrue" | "boolFalse" | "applyView" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "loading" | "loadMore" | "filters" | "clearAll" | "removeFilter" | "filtersDone" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "expandColumnGroup" | "collapseColumnGroup" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter">>;
+labels: Readonly<Pick<Required<TableLabels>, "value" | "columns" | "searchPlaceholder" | "search" | "filterTree" | "sortBy" | "table" | "noData" | "noResults" | "expandRow" | "collapseRow" | "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "filterAll" | "boolAny" | "boolTrue" | "boolFalse" | "applyView" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "loading" | "loadMore" | "filters" | "clearAll" | "removeFilter" | "filtersDone" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "expandColumnGroup" | "collapseColumnGroup" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage">>;
 registry: FilterTypeRegistry;
 expanded: boolean;
 setExpanded: (value: boolean) => void;

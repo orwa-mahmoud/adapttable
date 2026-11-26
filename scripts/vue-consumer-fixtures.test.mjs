@@ -9,6 +9,7 @@ import {
 import { KITS } from "./kits.mjs";
 import {
   PDF_WRITER_MARKER,
+  SERVER_TIER_MARKERS,
   VUE_CONSUMER_SPECS,
   VUE_LAYOUT_GRAPH_SPECS,
   VUE_NATIVE_BASE_SPECS,
@@ -32,7 +33,7 @@ const fixture = (name) => {
 
 describe("packed Vue consumers", () => {
   it("registers every distinct real entry and matches existing comparable ceilings", () => {
-    assert.equal(VUE_CONSUMER_SPECS.length, 38);
+    assert.equal(VUE_CONSUMER_SPECS.length, 44);
     assert.deepEqual(
       vue.map((entry) => entry.name),
       VUE_CONSUMER_SPECS.map((entry) => entry.name)
@@ -47,9 +48,9 @@ describe("packed Vue consumers", () => {
           (entry.followsLibraryLocale ? LAZY_LOCALE_PRESET_KB : 0)
       );
       if (entry.hardBaseCeiling) {
-        assert.equal(entry.initialKB, PLAIN_ADAPTER_CEILING_KB);
+        assert.ok(entry.initialKB <= PLAIN_ADAPTER_CEILING_KB, entry.name);
         assert.equal("item1BaselineKB" in entry, false);
-      } else {
+      } else if (entry.ceilingKB === undefined) {
         const comparable = FIXTURES.find(
           (candidate) => candidate.name === entry.comparable
         );
@@ -63,7 +64,7 @@ describe("packed Vue consumers", () => {
     );
   });
 
-  it("measures all seven native kit roots with real adapter CSS and the 80 KiB ceiling", () => {
+  it("measures all seven native kit roots with real adapter CSS, at most 80 KiB", () => {
     assert.deepEqual(
       VUE_NATIVE_BASE_SPECS.map((entry) => entry.pkg).sort(),
       KITS.filter((kit) => kit.framework === "vue" && kit.role === "shell")
@@ -74,11 +75,8 @@ describe("packed Vue consumers", () => {
     for (const spec of VUE_NATIVE_BASE_SPECS) {
       const entry = fixture(spec.name);
       assert.equal(entry.kit, spec.pkg.replace(/^adapter-/, ""));
-      assert.equal(entry.initialKB, PLAIN_ADAPTER_CEILING_KB);
-      assert.equal(
-        entry.totalKB,
-        PLAIN_ADAPTER_CEILING_KB + LAZY_LOCALE_PRESET_KB
-      );
+      assert.ok(entry.initialKB <= PLAIN_ADAPTER_CEILING_KB);
+      assert.equal(entry.totalKB, entry.initialKB + LAZY_LOCALE_PRESET_KB);
       assert.equal(entry.styleEntryFile, "styles.css");
       assert.equal(
         entry.code,
@@ -89,6 +87,7 @@ describe("packed Vue consumers", () => {
         XLSX_WRITER_MARKER,
         "export-progress-surface",
         ...VUE_OPTIONAL_BASE_MARKERS,
+        ...SERVER_TIER_MARKERS,
       ]);
       assert.ok(
         vueGraphProblems(entry, {
@@ -200,16 +199,11 @@ describe("packed Vue consumers", () => {
       ),
       []
     );
-    assert.ok(
-      fixture("vue-unstyled · features barrel").present.includes(
-        PDF_WRITER_MARKER
-      )
-    );
-    assert.ok(
-      fixture("vue-unstyled · features barrel").present.includes(
-        XLSX_WRITER_MARKER
-      )
-    );
+    const barrel = fixture("vue-unstyled · features barrel");
+    assert.match(barrel.code, /@adapttable\/vue\/features/);
+    assert.ok(barrel.present.includes("exportCsv"));
+    assert.ok(barrel.absent.includes(PDF_WRITER_MARKER));
+    assert.ok(barrel.absent.includes(XLSX_WRITER_MARKER));
   });
 
   it("covers both view controls and rejects optional writers and AI", () => {
@@ -372,8 +366,8 @@ it("includes emitted drawer CSS in the three drawer-capable unstyled consumers",
 
 describe("optional Vue layout graphs", () => {
   it("covers all five combined native entries without changing base ceilings", () => {
-    const entries = VUE_LAYOUT_GRAPH_SPECS.filter(
-      (entry) => entry.alsoEntryFile === "features.js"
+    const entries = VUE_LAYOUT_GRAPH_SPECS.filter((entry) =>
+      entry.code?.includes("@adapttable/vue/features")
     );
     assert.deepEqual(entries.map((entry) => entry.pkg).sort(), [
       "adapter-element-plus",

@@ -12,11 +12,13 @@ import {
   AdaptAgentApproval,
   AdaptTableAssistant,
 } from "@adapttable/taiga-ui/assistant";
+import { cellNavigation } from "@adapttable/taiga-ui/cell-navigation";
 import { columnMenu } from "@adapttable/taiga-ui/column-menu";
 import { editing, rowEditing } from "@adapttable/taiga-ui/editing";
 import { filters } from "@adapttable/taiga-ui/filters";
 import { grouping } from "@adapttable/taiga-ui/grouping";
 import { rowReorder } from "@adapttable/taiga-ui/row-reorder";
+import { selection } from "@adapttable/taiga-ui/selection";
 import { statusBar } from "@adapttable/taiga-ui/status-bar";
 import { virtualize } from "@adapttable/taiga-ui/virtualize";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
@@ -31,7 +33,6 @@ import {
 import { AdaptErrorState } from "./components/errorState";
 import { AdaptDataTable } from "./dataTable";
 import { taigaOptions } from "./taigaTestHelpers";
-
 const kit: AngularConformanceKit = {
   name: "taiga-ui",
   Table: AdaptDataTable,
@@ -39,6 +40,8 @@ const kit: AngularConformanceKit = {
   grouping,
   rowReorder,
   virtualize,
+  selection,
+  cellNavigation,
 };
 
 describe(`table conformance — ${kit.name}`, () => {
@@ -118,9 +121,9 @@ describe("every bundled locale through native Angular controls", () => {
           set("forceMobile", mobile);
           // Auto uses infinite scrolling on mobile; exercise the real pager in both layouts.
           set("paginationMode", "paged");
-          set("selectable", true);
           set("defaults", { limit: 5 });
           set("features", [
+            selection(),
             filters<LocaleRow>([{ key: "name", label: "Name", type: "text" }]),
             columnMenu(),
             rowEditing<LocaleRow>(edit),

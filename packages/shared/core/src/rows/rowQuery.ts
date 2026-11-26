@@ -3,9 +3,10 @@
  * filters, how they sort, and which configuration changes force a re-query.
  * The basic and full row models both evaluate it from here.
  */
+import { columnValueInputs } from "../columns/columnValueInputs";
 import type { SortableValue } from "../contracts/columns";
 import type { SortLevel } from "../contracts/query";
-import { cellSortValue } from "../engine/cellValue";
+import { cellSortReader } from "../engine/cellValue";
 import { engineSearchText } from "../engine/searchText";
 import { stableKey } from "../utils/stableKey";
 import type { IncrementalViewConfig } from "./incremental";
@@ -36,7 +37,7 @@ export function queryConfigFingerprint<TRow>(
       key: level.key,
       dir: level.dir,
     })),
-    columnKeys: (config.columns ?? []).map((column) => column.key),
+    columns: columnValueInputs(config.columns),
     locale: config.locale ?? null,
     hasFilterFn: config.filterFn !== undefined,
     hasFilterTreeFn: config.filterTreeFn !== undefined,
@@ -64,10 +65,6 @@ export function sortLevels<TRow>(
     : [];
 }
 
-export function hasSort<TRow>(config: IncrementalViewConfig<TRow>): boolean {
-  return sortLevels(config).length > 0;
-}
-
 export function searchTerm<TRow>(config: IncrementalViewConfig<TRow>): string {
   return config.search?.trim().toLowerCase() ?? "";
 }
@@ -90,12 +87,16 @@ export function rowMatcher<TRow>(
   };
 }
 
-export function resolveSortValue<TRow>(
-  row: TRow,
+/**
+ * How one sort level reads a row, prepared once per sort: the host's
+ * `getSortValue`, else the level's column, found once rather than per row.
+ */
+export function sortValueReader<TRow>(
   key: string,
   config: IncrementalViewConfig<TRow>
-): SortableValue {
-  if (config.getSortValue) return config.getSortValue(row, key);
+): (row: TRow) => SortableValue {
+  const { getSortValue } = config;
+  if (getSortValue) return (row) => getSortValue(row, key);
   const column = config.columns?.find((item) => item.key === key);
   // A column that declares `sortValue` owns its whole ordering, including the
   // rows it answers `null` for — that answer means "this one has no place in
@@ -103,6 +104,6 @@ export function resolveSortValue<TRow>(
   // accessor for those rows instead would order one column by two different
   // extractors at once: some rows by their value, the rest by their rendered
   // text, with nothing on screen to say which row got which.
-  if (column) return cellSortValue(row, column, config.locale);
-  return null;
+  if (!column) return () => null;
+  return cellSortReader(column, config.locale);
 }

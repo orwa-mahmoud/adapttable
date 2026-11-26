@@ -19,8 +19,8 @@ import {
   rowAppearance,
   rowPinning,
 } from "../src/rows";
+import { selection } from "../src/selection";
 import { tree } from "../src/tree";
-
 interface Person {
   id: string;
   name: string;
@@ -122,8 +122,8 @@ it.each([false, true])(
   async (mobile) => {
     const { host } = fixture({
       forceMobile: mobile,
-      selectable: true,
       features: [
+        selection(),
         pinnedSummaryRows<Person>({
           top: [{ id: "total", name: "Total", team: "All", score: 60 }],
         }),

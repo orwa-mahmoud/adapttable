@@ -7,6 +7,7 @@ import { renderToString } from "vue/server-renderer";
 import DataTable from "../src/DataTable.vue";
 import { grouping } from "../src/grouping";
 import { rowDetail } from "../src/row-detail";
+import { selection } from "../src/selection";
 import { tree } from "../src/tree";
 interface Row {
   id: string;
@@ -74,15 +75,15 @@ describe("Element Plus hierarchy Node SSR", () => {
             columns: [{ key: "name" }, { key: "team" }],
             rowKey: (row) => row.id,
             urlSync: false,
-            selectedIds: ["a"],
-            selectable: true,
             dir: "rtl",
             labels: {
               collapseGroup: "Collapse localized",
               selectRow: "Select localized",
             },
-            features: [grouping("team")],
-            "onUpdate:selectedIds": update,
+            features: [
+              selection({ onSelectionChange: update, selectedIds: ["a"] }),
+              grouping("team"),
+            ],
           })
         )
       )

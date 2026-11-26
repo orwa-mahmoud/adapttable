@@ -64,6 +64,10 @@
       "types": "./dist/types/adapttable-angular-cdk-column-menu.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-cdk-column-menu.mjs"
     },
+    "./column-layout": {
+      "types": "./dist/types/adapttable-angular-cdk-column-layout.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-cdk-column-layout.mjs"
+    },
     "./column-selection": {
       "types": "./dist/types/adapttable-angular-cdk-column-selection.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-cdk-column-selection.mjs"
@@ -92,10 +96,6 @@
       "types": "./dist/types/adapttable-angular-cdk-extra-rows.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-cdk-extra-rows.mjs"
     },
-    "./features": {
-      "types": "./dist/types/adapttable-angular-cdk-features.d.ts",
-      "default": "./dist/fesm2022/adapttable-angular-cdk-features.mjs"
-    },
     "./find-in-table": {
       "types": "./dist/types/adapttable-angular-cdk-find-in-table.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-cdk-find-in-table.mjs"
@@ -104,9 +104,17 @@
       "types": "./dist/types/adapttable-angular-cdk-filters.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-cdk-filters.mjs"
     },
+    "./filtering": {
+      "types": "./dist/types/adapttable-angular-cdk-filtering.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-cdk-filtering.mjs"
+    },
     "./fit-columns": {
       "types": "./dist/types/adapttable-angular-cdk-fit-columns.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-cdk-fit-columns.mjs"
+    },
+    "./selection": {
+      "types": "./dist/types/adapttable-angular-cdk-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-cdk-selection.mjs"
     },
     "./fullscreen": {
       "types": "./dist/types/adapttable-angular-cdk-fullscreen.d.ts",

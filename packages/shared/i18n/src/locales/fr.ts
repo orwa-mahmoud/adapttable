@@ -195,10 +195,6 @@ export const fr: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "Une modification attend votre décision.",
-  pendingProposals: (count) =>
-    count === 1
-      ? "1 modification proposée"
-      : `${String(count)} modifications proposées`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -348,10 +344,6 @@ export const fr: Required<TableLabels> = {
       error: "Erreur",
       disconnected: "Non connecté",
     })[status] ?? "Prêt",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Ajouter une ligne",
   duplicateRow: "Dupliquer la ligne",
@@ -369,10 +361,8 @@ export const fr: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Ligne déplacée de ${String(from)} vers ${String(to)}`,
   rowReorderCancelled: "Réorganisation annulée",
-  rowMoveOptions: "Options de déplacement de la ligne",
   moveToGroup: "Déplacer vers le groupe…",
   moveUnder: "Déplacer sous…",
-  moveToTopLevel: "Déplacer au niveau supérieur",
   confirmRowMoveTitle: "Confirmer le déplacement de la ligne",
   confirmRowMoveDescription: (row, from, to) =>
     `Déplacer ${row} de ${from} vers ${to} ?`,
@@ -410,9 +400,7 @@ export const fr: Required<TableLabels> = {
   removeGroupingColumn: (label) => `Retirer ${label} du groupement`,
   moveGroupingColumn: (label) => `Déplacer le groupement ${label}`,
   groupingDropToRemove: "Déposez ici pour retirer le groupement",
-  groupingAggregateColumn: "Colonne d’agrégation",
   groupingAggregation: "Agrégation du groupe",
-  groupingAggregationDefault: "Par défaut",
   groupingAggregationNone: "Aucune",
   groupingAggregations: "Agrégations",
   groupingAddAggregation: "Ajouter une colonne d'agrégation",
@@ -483,8 +471,6 @@ export const fr: Required<TableLabels> = {
     "La virtualisation est inactive — ce tableau paginé affiche une page à la fois.",
   noticePinNested:
     "L’épinglage des lignes est inactif tant que le regroupement ou un arbre est actif.",
-  noticeReorderNested:
-    "Le réordonnancement des lignes est inactif tant que le regroupement ou un arbre est actif.",
   noticeGroupingUnavailable:
     "Le groupement est désactivé — cette source ne peut pas grouper.",
   noticeExportAllPage:

@@ -17,8 +17,7 @@ import { AdaptFillHandle } from "@adapttable/taiga-ui";
  */
 
 /**
- * A keyboard grid with a focused cell. Compose it, or set the table's
- * `cellNavigation` input — either turns the grid on.
+ * A keyboard grid with a focused cell. Compose it to turn the grid on.
  *
  * @param options - Optional range-change listener.
  *

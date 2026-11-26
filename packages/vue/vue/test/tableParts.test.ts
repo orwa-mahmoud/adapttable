@@ -3,6 +3,7 @@ import { createApp, h, nextTick, shallowRef } from "vue";
 
 import { mergeVueAttrs } from "../src/attrs";
 import type { ColumnInput } from "../src/columnDef";
+import { selection } from "../src/features/headlessFactories";
 import {
   DesktopTableChrome,
   MobileCardsChrome,
@@ -92,7 +93,7 @@ it.each(["first", "second"])(
           data,
           columns,
           rowKey: (row) => row.id,
-          selectable: true,
+          features: [selection()],
           forceMobile: mobile,
           urlSync: false,
         });

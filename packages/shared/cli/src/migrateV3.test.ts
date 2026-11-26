@@ -323,6 +323,13 @@ export { assistant };
     );
   });
 
+  it("does not rewrite an import that is only text", () => {
+    const source =
+      "const sample = 'import { HeaderGroupCell } from \"@adapttable/core\";';\n";
+    expect(migrateV3Source(source).code).toBe(source);
+    expect(migrateV3Source(source).movedImports).toBe(0);
+  });
+
   it("still redirects the React subpath wholesale, names untouched", () => {
     const input = `import { tableAgent } from "@adapttable/ai/react";
 `;

@@ -7,6 +7,8 @@
  * {@link SelectionStats}. This decides their order, their wording and when
  * each one is left out; a binding owns the structure and a kit the look.
  */
+import { BASE_LABELS } from "../labelGroups/baseLabels";
+import { GRID_LABELS } from "../labelGroups/gridLabels";
 import { computePagination } from "../pagination/paginationMath";
 import type { FeatureNotice, FeatureNoticeKind } from "../state/featureNotices";
 import type { TableLabels } from "../types";
@@ -145,11 +147,31 @@ export function selectionStatParts(
   return [
     {
       key: "count" as const,
-      text: `${labels?.selectionCount ?? "Count"} ${format(stats.cells)}`,
+      text: `${labels?.selectionCount ?? BASE_LABELS.selectionCount} ${format(stats.cells)}`,
     },
-    figure("sum", labels?.selectionSum ?? "Sum", stats.sum, format),
-    figure("average", labels?.selectionAverage ?? "Avg", stats.average, format),
-    figure("min", labels?.selectionMin ?? "Min", stats.min, format),
-    figure("max", labels?.selectionMax ?? "Max", stats.max, format),
+    figure(
+      "sum",
+      labels?.selectionSum ?? BASE_LABELS.selectionSum,
+      stats.sum,
+      format
+    ),
+    figure(
+      "average",
+      labels?.selectionAverage ?? GRID_LABELS.selectionAverage,
+      stats.average,
+      format
+    ),
+    figure(
+      "min",
+      labels?.selectionMin ?? BASE_LABELS.selectionMin,
+      stats.min,
+      format
+    ),
+    figure(
+      "max",
+      labels?.selectionMax ?? BASE_LABELS.selectionMax,
+      stats.max,
+      format
+    ),
   ].filter((part): part is SelectionStatPart => part !== null);
 }

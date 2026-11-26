@@ -30,22 +30,48 @@
  */
 import type {
   InsertPatch,
+  RekeyPatch,
   RemovePatch,
   RowPatch,
   RowPatchEvent,
   RowPatchLog,
+  RowPatchOptions,
   UpdatePatch,
   UpsertPatch,
 } from "../contracts/rows";
+import { advanceRekeyHistory, type RekeyHistory } from "./rekeyHistory";
 export type {
   InsertPatch,
+  RekeyPatch,
   RemovePatch,
   RowPatch,
   RowPatchEvent,
   RowPatchLog,
+  RowPatchOptions,
   UpdatePatch,
   UpsertPatch,
 } from "../contracts/rows";
+
+/**
+ * A rekey asked for an id another row already holds. The patches were not
+ * applied.
+ *
+ * @public
+ */
+export class RowIdConflictError extends Error {
+  /** The row's id before the rekey. */
+  readonly from: string;
+  /** The id another row already holds. */
+  readonly to: string;
+  constructor(from: string, to: string) {
+    super(
+      `Row "${from}" cannot take the id "${to}": another row already has it.`
+    );
+    this.name = "RowIdConflictError";
+    this.from = from;
+    this.to = to;
+  }
+}
 
 /**
  * Insert a row, optionally at a position.
@@ -66,6 +92,18 @@ export function updateRow<TRow>(
   changes: Partial<TRow>
 ): UpdatePatch<TRow> {
   return { type: "update", id, changes };
+}
+
+/**
+ * Give one row a new id, merging `changes` that carry it.
+ *
+ * @public
+ */
+export function rekeyRow<TRow>(
+  id: string,
+  changes: Partial<TRow>
+): RekeyPatch<TRow> {
+  return { type: "rekey", id, changes };
 }
 
 /**
@@ -176,17 +214,44 @@ function rowIds<TRow>(
   };
 }
 
-const PATCH_LOGS = /* @__PURE__ */ new WeakMap<WeakKey, RowPatchLog<unknown>>();
-const ROW_IDENTITIES = /* @__PURE__ */ new WeakMap<WeakKey, object>();
-const PATCH_BASES = /* @__PURE__ */ new WeakMap<WeakKey, object>();
+/** Where patch provenance is kept: which array a log produced, and its base. */
+interface PatchProvenance {
+  readonly logs: WeakMap<WeakKey, RowPatchLog<unknown>>;
+  readonly identities: WeakMap<WeakKey, object>;
+  readonly bases: WeakMap<WeakKey, object>;
+  readonly histories: WeakMap<object, RekeyHistory>;
+  readonly summaries: WeakSet<object>;
+}
+
+/**
+ * One registry per JavaScript realm, keyed by the shape of the provenance, so
+ * the ESM and CommonJS builds loaded side by side read each other's patches.
+ */
+const PROVENANCE_KEY = Symbol.for("adapttable.rowPatchProvenance.v3");
+
+let provenance: PatchProvenance | undefined;
+
+function patchProvenance(): PatchProvenance {
+  if (provenance) return provenance;
+  const realm = globalThis as { [PROVENANCE_KEY]?: PatchProvenance };
+  provenance = realm[PROVENANCE_KEY] ??= {
+    logs: new WeakMap(),
+    identities: new WeakMap(),
+    bases: new WeakMap(),
+    histories: new WeakMap(),
+    summaries: new WeakSet(),
+  };
+  return provenance;
+}
 
 /** Check the exact pre-patch identity without retaining older row arrays. */
 export function rowPatchLogStartsAt<TRow>(
   log: RowPatchLog<TRow>,
   rows: readonly TRow[]
 ): boolean {
-  const base = PATCH_BASES.get(log);
-  return base !== undefined && ROW_IDENTITIES.get(rows) === base;
+  const { bases, identities } = patchProvenance();
+  const base = bases.get(log);
+  return base !== undefined && identities.get(rows) === base;
 }
 
 /**
@@ -208,7 +273,7 @@ export function rowPatchLogStartsAt<TRow>(
 export function rowPatchLog<TRow>(
   rows: readonly TRow[]
 ): RowPatchLog<TRow> | undefined {
-  return PATCH_LOGS.get(rows) as RowPatchLog<TRow> | undefined;
+  return patchProvenance().logs.get(rows) as RowPatchLog<TRow> | undefined;
 }
 
 function rememberLog<TRow>(
@@ -216,10 +281,48 @@ function rememberLog<TRow>(
   base: readonly TRow[]
 ): void {
   if (log.events.length === 0) return;
-  PATCH_LOGS.set(log.rows, log);
-  const identity = ROW_IDENTITIES.get(base) ?? {};
-  ROW_IDENTITIES.set(base, identity);
-  PATCH_BASES.set(log, identity);
+  const { logs, identities, bases, histories } = patchProvenance();
+  const prior = logs.get(base);
+  logs.set(log.rows, log);
+  const identity = identities.get(base) ?? {};
+  identities.set(base, identity);
+  bases.set(log, identity);
+  histories.set(
+    log,
+    advanceRekeyHistory(prior && histories.get(prior), identity, log.events)
+  );
+}
+
+/**
+ * Read rekeys since this table's own last commit. The immediate log retains
+ * its original events. For skipped snapshots, pair each rekeyed row's start
+ * and end independently, even when two rows swap ids.
+ *
+ * @param log - The log on the array being committed.
+ * @param previous - The rows the table last committed.
+ * @returns The log whose rekeys the commit should follow, or `undefined`.
+ */
+export function logForCommit<TRow>(
+  log: RowPatchLog<TRow>,
+  previous: readonly TRow[]
+): RowPatchLog<TRow> | undefined {
+  if (rowPatchLogStartsAt(log, previous)) return log;
+  const { histories, identities, summaries } = patchProvenance();
+  const identity = identities.get(previous);
+  const updates = identity && histories.get(log)?.updates.get(identity);
+  if (!updates?.size) return undefined;
+  const summary: RowPatchLog<TRow> = {
+    rows: log.rows,
+    events: [...updates.values()] as readonly RowPatchEvent<TRow>[],
+  };
+  summaries.add(summary.events);
+  return summary;
+}
+
+export function isRekeySummary(
+  log: Pick<RowPatchLog<unknown>, "events">
+): boolean {
+  return patchProvenance().summaries.has(log.events);
 }
 
 /** Apply one patch to a working copy. Returns the event when something changed. */
@@ -227,7 +330,8 @@ function applyOne<TRow>(
   list: TRow[],
   patch: RowPatch<TRow>,
   getRowId: (row: TRow) => string,
-  ids: RowIds<TRow>
+  ids: RowIds<TRow>,
+  options: RowPatchOptions
 ): RowPatchEvent<TRow> | undefined {
   if (patch.type === "insert") {
     const index = insertIndex(patch.at, list.length);
@@ -269,10 +373,68 @@ function applyOne<TRow>(
   // per-row memo downstream would be invalidated for no reason.
   if (alreadyApplied(existing, patch.changes)) return undefined;
   const next = { ...existing, ...patch.changes };
+  const nextId = getRowId(next);
+  if (nextId === patch.id) {
+    list[index] = next;
+    ids.replaced(index, next);
+    return { type: "update", id: patch.id, prev: existing, next, index };
+  }
+  if (patch.type === "update" && options.rekeyUpdates !== true) {
+    throw new Error(
+      `updateRow("${patch.id}") gave the row the id "${nextId}". An update keeps the id; change it with rekeyRow("${patch.id}", changes).`
+    );
+  }
+  if (ids.find(nextId) !== -1) throw new RowIdConflictError(patch.id, nextId);
   list[index] = next;
-  // The changes may hold a new id; a later patch looks the row up by it.
+  // A later patch looks the row up by its new id.
   ids.replaced(index, next);
-  return { type: "update", id: patch.id, prev: existing, next, index };
+  return {
+    type: "update",
+    id: nextId,
+    from: patch.id,
+    prev: existing,
+    next,
+    index,
+  };
+}
+
+/**
+ * The ids a patch log changed, from each row's id before the log to its id
+ * after: chained rekeys collapse to one entry, a row rekeyed back drops out,
+ * and a rekeyed row the log then removed is not listed.
+ *
+ * @param log - The log the patches produced.
+ * @returns Old id to new id.
+ *
+ * @public
+ */
+export function rowRekeys<TRow>(
+  log: Pick<RowPatchLog<TRow>, "events">
+): ReadonlyMap<string, string> {
+  const rekeys = new Map<string, string>();
+  const originOf = new Map<string, string>();
+  const summary = isRekeySummary(log);
+  for (const event of log.events) {
+    if (event.type === "remove") {
+      const origin = originOf.get(event.id);
+      if (origin !== undefined) {
+        rekeys.delete(origin);
+        originOf.delete(event.id);
+      }
+      continue;
+    }
+    if (event.type !== "update" || event.from === undefined) continue;
+    const origin =
+      (summary ? undefined : originOf.get(event.from)) ?? event.from;
+    originOf.delete(event.from);
+    if (origin === event.id) {
+      rekeys.delete(origin);
+      continue;
+    }
+    rekeys.set(origin, event.id);
+    originOf.set(event.id, origin);
+  }
+  return rekeys;
 }
 
 /**
@@ -285,15 +447,17 @@ function applyOne<TRow>(
  * @param rows - The current rows.
  * @param patches - The changes to apply, in order.
  * @param getRowId - How a row's id is derived; the table's own `rowKey`.
+ * @param options - How the patches are read.
  *
  * @public
  */
 export function applyRowPatches<TRow>(
   rows: readonly TRow[],
   patches: readonly RowPatch<TRow>[],
-  getRowId: (row: TRow) => string
+  getRowId: (row: TRow) => string,
+  options: RowPatchOptions = {}
 ): readonly TRow[] {
-  return applyRowPatchesWithLog(rows, patches, getRowId).rows;
+  return applyRowPatchesWithLog(rows, patches, getRowId, options).rows;
 }
 
 /**
@@ -307,20 +471,23 @@ export function applyRowPatches<TRow>(
  * @param rows - The current rows.
  * @param patches - The changes to apply, in order.
  * @param getRowId - How a row's id is derived; the table's own `rowKey`.
+ * @param options - How the patches are read.
  *
  * @public
  */
 export function applyRowPatchesWithLog<TRow>(
   rows: readonly TRow[],
   patches: readonly RowPatch<TRow>[],
-  getRowId: (row: TRow) => string
+  getRowId: (row: TRow) => string,
+  options: RowPatchOptions = {}
 ): RowPatchLog<TRow> {
   const working = [...rows];
   const ids = rowIds(working, getRowId);
   const events: RowPatchEvent<TRow>[] = [];
   for (const patch of patches) {
-    // Every patch runs, so a later one acts on what an earlier one did.
-    const event = applyOne(working, patch, getRowId, ids);
+    // Every patch runs, so a later one acts on what an earlier one did. A
+    // refused patch throws before the caller's rows are touched.
+    const event = applyOne(working, patch, getRowId, ids, options);
     if (event) events.push(event);
   }
   const log: RowPatchLog<TRow> = {

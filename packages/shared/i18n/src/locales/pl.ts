@@ -196,10 +196,6 @@ export const pl: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "Zmiana czeka na Twoją decyzję.",
-  pendingProposals: (count) =>
-    count === 1
-      ? "1 zaproponowana zmiana"
-      : `${String(count)} zaproponowanych zmian`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -344,10 +340,6 @@ export const pl: Required<TableLabels> = {
       error: "Błąd",
       disconnected: "Brak połączenia",
     })[status] ?? "Gotowe",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Dodaj wiersz",
   duplicateRow: "Duplikuj wiersz",
@@ -365,10 +357,8 @@ export const pl: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Wiersz przeniesiono z ${String(from)} do ${String(to)}`,
   rowReorderCancelled: "Anulowano zmianę kolejności",
-  rowMoveOptions: "Opcje przenoszenia wiersza",
   moveToGroup: "Przenieś do grupy…",
   moveUnder: "Przenieś pod…",
-  moveToTopLevel: "Przenieś do najwyższego poziomu",
   confirmRowMoveTitle: "Potwierdź przeniesienie wiersza",
   confirmRowMoveDescription: (row, from, to) =>
     `Przenieść ${row} z ${from} do ${to}?`,
@@ -405,9 +395,7 @@ export const pl: Required<TableLabels> = {
   removeGroupingColumn: (label) => `Usuń ${label} z grupowania`,
   moveGroupingColumn: (label) => `Przenieś grupowanie ${label}`,
   groupingDropToRemove: "Upuść tutaj, aby usunąć grupowanie",
-  groupingAggregateColumn: "Kolumna agregacji",
   groupingAggregation: "Agregacja grupy",
-  groupingAggregationDefault: "Domyślna",
   groupingAggregationNone: "Brak",
   groupingAggregations: "Agregacje",
   groupingAddAggregation: "Dodaj kolumnę agregacji",
@@ -478,8 +466,6 @@ export const pl: Required<TableLabels> = {
     "Wirtualizacja jest wyłączona: ta tabela paginowana wyświetla po jednej stronie na raz.",
   noticePinNested:
     "Przypinanie wierszy jest wyłączone podczas grupowania lub drzewa.",
-  noticeReorderNested:
-    "Zmiana kolejności wierszy jest wyłączona podczas grupowania lub drzewa.",
   noticeGroupingUnavailable:
     "Grupowanie jest wyłączone: to źródło nie obsługuje grupowania.",
   noticeExportAllPage:

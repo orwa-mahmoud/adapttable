@@ -25,7 +25,7 @@ import {
 } from "./pasteRange";
 
 /**
- * What {@link cellNavigationChannels} reads.
+ * What `cellNavigationChannels` reads.
  *
  * @public
  */

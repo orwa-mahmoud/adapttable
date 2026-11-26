@@ -3,7 +3,8 @@
  * (`../../shared/peopleTable`) as Vue columns, with the kit's own cells.
  */
 import { aggregate } from "@adapttable/core";
-import type { Direction, getLabels } from "@adapttable/i18n";
+import type { Direction } from "@adapttable/i18n";
+import type { getLabels } from "@adapttable/i18n/catalog";
 import type { ColumnDef, ColumnInput } from "@adapttable/vue";
 import { h, type VNodeChild } from "vue";
 

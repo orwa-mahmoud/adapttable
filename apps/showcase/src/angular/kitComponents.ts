@@ -58,8 +58,7 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
 
   readonly data = input<readonly TRow[]>();
   readonly source = input<Signal<TableSource<TRow>> | TableSource<TRow>>();
-  readonly mode = input<"frontend" | "server">();
-  readonly onQueryChange = input<TableQueryHandler>();
+  readonly onViewChange = input<TableQueryHandler>();
   readonly isCellFlashing =
     input<(rowId: string, columnKey: string) => boolean>();
   readonly loading = input<boolean>();
@@ -110,6 +109,34 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
   readonly selectable = input(false);
   readonly searchable = input(true);
   readonly features = input<readonly AdaptTableFeature[]>([]);
+  private readonly tableFeatures = computed(() => {
+    const mode = this.filtersMode();
+    const fields = this.filterFields();
+    const policy = this.editConflictPolicy();
+    const flashing = this.isCellFlashing();
+    const rest = this.features().map((feature) => {
+      const editing =
+        feature.id === "editing" ||
+        feature.id === "row-editing" ||
+        feature.id === "batch-editing";
+      let extra: Record<string, unknown> | undefined;
+      if (feature.id === "filters") {
+        extra = { filtersMode: mode, filterFields: fields };
+      } else if (editing) {
+        extra = {
+          ...(policy === undefined ? {} : { editConflictPolicy: policy }),
+          ...(flashing === undefined ? {} : { isCellFlashing: flashing }),
+        };
+      }
+      if (!extra || Object.keys(extra).length === 0) return feature;
+      const apply = feature.apply?.bind(feature);
+      return {
+        ...feature,
+        apply: (input: object) => ({ ...apply?.(input), ...extra }),
+      };
+    });
+    return this.selectable() ? [this.kit.selection(), ...rest] : rest;
+  });
   readonly onRowClick = input<(row: TRow) => void>();
   readonly density = input<TableDensity>();
   readonly animate = input(false);
@@ -131,9 +158,7 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
           : []),
         inputBinding("data", this.data),
         inputBinding("source", this.source),
-        inputBinding("mode", this.mode),
-        inputBinding("onQueryChange", this.onQueryChange),
-        inputBinding("isCellFlashing", this.isCellFlashing),
+        inputBinding("onViewChange", this.onViewChange),
         inputBinding("loading", this.loading),
         inputBinding("error", this.error),
         inputBinding("skeletonRows", this.skeletonRows),
@@ -148,12 +173,9 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         inputBinding("paginationMode", this.paginationMode),
         inputBinding("maxHeight", this.maxHeight),
         inputBinding("renderCard", this.renderCard),
-        inputBinding("filtersMode", this.filtersMode),
-        inputBinding("filterFields", this.filterFields),
         inputBinding("forceMobile", this.forceMobile),
-        inputBinding("selectable", this.selectable),
         inputBinding("searchable", this.searchable),
-        inputBinding("features", this.features),
+        inputBinding("features", this.tableFeatures),
         inputBinding("onRowClick", this.onRowClick),
         inputBinding("density", this.density),
         inputBinding("animate", this.animate),
@@ -162,7 +184,6 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
           this.densityChange.emit(density)
         ),
         inputBinding("summaryRow", this.summaryRow),
-        inputBinding("editConflictPolicy", this.editConflictPolicy),
         inputBinding("columnLayout", this.columnLayout),
         outputBinding<ColumnLayoutState>("columnLayoutChange", (layout) =>
           this.columnLayoutChange.emit(layout)

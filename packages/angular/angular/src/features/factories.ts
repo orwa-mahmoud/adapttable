@@ -7,6 +7,7 @@
  */
 import {
   type AdaptTableFeature,
+  type MaybeSignalOptional,
   withFeatureImplementation,
 } from "@adapttable/angular";
 import {
@@ -24,6 +25,7 @@ import {
   type Shortcut,
 } from "@adapttable/core";
 import {
+  type ColumnMenuOptions,
   coreBulkActions,
   coreCellSpan,
   coreCollapsibleColumnGroups,
@@ -41,15 +43,17 @@ import {
   coreResizableColumns,
   coreRowAppearance,
   coreSavedViews,
+  coreSelection,
   coreSidePanel,
   coreStatusBar,
   coreUndoRedoButtons,
   type FeaturePatch,
   FILTER_ENGINE,
   FILTER_ENGINE_IMPL,
+  type HeaderFilterOptions,
   type SidePanelEntry,
 } from "@adapttable/core/binding";
-import type { Signal, TemplateRef } from "@angular/core";
+import { type Signal, type TemplateRef } from "@angular/core";
 
 /**
  * Options for `commandPalette`.
@@ -225,8 +229,8 @@ export function rowAppearance<TRow>(
  *
  * @public
  */
-export function columnMenu(): AdaptTableFeature {
-  return coreColumnMenu();
+export function columnMenu(options?: ColumnMenuOptions): AdaptTableFeature {
+  return coreColumnMenu(options);
 }
 
 /**
@@ -308,15 +312,56 @@ export function bulkActions(actions: readonly BulkAction[]): AdaptTableFeature {
 }
 
 /**
+ * Options for {@link selection}.
+ *
+ * @public
+ */
+export interface SelectionOptions<TRow = unknown> {
+  /** The id a row is selected by. Defaults to the row key. */
+  readonly getId?: (row: TRow) => string;
+  /** Controlled selection. Omit it and the table keeps its own. */
+  readonly selectedIds?:
+    readonly string[] | Signal<readonly string[] | undefined>;
+  /** The table's own selection to start from, when the host holds none. */
+  readonly defaultSelectedIds?: readonly string[];
+  /** The selection changed. */
+  readonly onSelectionChange?: (selectedIds: string[]) => void;
+}
+
+/**
+ * Let rows be selected, with the selection the host holds or the table's own.
+ * Bulk actions, column selection and selection stats select rows too; this
+ * carries the selection's options to all of them.
+ *
+ * @param options - See {@link SelectionOptions}.
+ * @returns The feature.
+ *
+ * @public
+ */
+export function selection<TRow = unknown>(
+  options: SelectionOptions<TRow> = {}
+): AdaptTableFeature {
+  const { getId, selectedIds, defaultSelectedIds, onSelectionChange } = options;
+  return coreSelection<TRow, MaybeSignalOptional<readonly string[]>>({
+    ...(getId ? { getId } : {}),
+    ...(selectedIds === undefined ? {} : { selectedIds }),
+    ...(defaultSelectedIds ? { defaultSelectedIds } : {}),
+    ...(onSelectionChange ? { onSelectionChange } : {}),
+  });
+}
+
+/**
  * A filter control under each column header.
  *
  * @returns The feature.
  *
  * @public
  */
-export function headerFilters(): AdaptTableFeature {
+export function headerFilters(
+  options?: HeaderFilterOptions
+): AdaptTableFeature {
   return withFeatureImplementation(
-    coreHeaderFilters(),
+    coreHeaderFilters(options),
     FILTER_ENGINE,
     FILTER_ENGINE_IMPL
   );

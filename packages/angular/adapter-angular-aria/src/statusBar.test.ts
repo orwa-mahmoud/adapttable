@@ -2,6 +2,7 @@
  * The Angular Aria status bar: row counts, a selected row, and the figures.
  */
 import type { ColumnDef, SelectionStats } from "@adapttable/angular";
+import { selection } from "@adapttable/angular-aria/selection";
 import { statusBar } from "@adapttable/angular-aria/status-bar";
 import { Component, computed, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
@@ -51,8 +52,6 @@ const part = (name: string) =>
       [rowKey]="rowKey"
       [urlSync]="false"
       [forceMobile]="false"
-      [selectable]="true"
-      [selectedIds]="selected()"
       [features]="features()"
     />
   `,
@@ -63,7 +62,10 @@ class Host {
   readonly rowKey = (row: Row) => row.id;
   readonly selected = signal<readonly string[]>([]);
   readonly withBar = input(true);
-  readonly features = computed(() => (this.withBar() ? [statusBar()] : []));
+  readonly features = computed(() => [
+    selection({ selectedIds: this.selected }),
+    ...(this.withBar() ? [statusBar()] : []),
+  ]);
 }
 
 @Component({

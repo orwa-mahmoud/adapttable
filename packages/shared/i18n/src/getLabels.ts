@@ -1,6 +1,6 @@
-import { type TableLabels } from "@adapttable/core";
-import { resolveLocaleTag } from "@adapttable/core/binding";
+import type { TableLabels } from "@adapttable/core";
 
+import { type LocaleKey, resolveLocaleKey } from "./localeCatalog";
 import { ar } from "./locales/ar";
 import { cs } from "./locales/cs";
 import { de } from "./locales/de";
@@ -48,38 +48,12 @@ export const locales = {
   ur,
   zh,
   "zh-TW": zhTW,
-} as const;
-
-/**
- * A key of {@link locales}.
- *
- * @public
- */
-export type LocaleKey = keyof typeof locales;
-
-/**
- * Resolve a BCP-47 tag to a bundled key through core's SHARED locale
- * resolver — the same rules per-column `i18n` paths use. Iterating
- * `Object.keys` (never the `in` operator) keeps prototype names like
- * `"constructor"` from resolving a preset.
- */
-function resolveLocaleKey(locale: string): LocaleKey | undefined {
-  return resolveLocaleTag(Object.keys(locales), locale) as
-    LocaleKey | undefined;
-}
-
-/**
- * Whether a locale has a bundled preset.
- *
- * @public
- */
-export function hasLocale(locale: string): boolean {
-  return resolveLocaleKey(locale) !== undefined;
-}
+} as const satisfies Record<LocaleKey, Required<TableLabels>>;
 
 /**
  * Resolve the label preset for a locale. Prefers an exact tag match
- * (e.g. `"zh-TW"` → Traditional Chinese) before the primary subtag
+ * (e.g. `"zh-TW"` → Traditional Chinese), then the script a tag names
+ * (`"zh-Hant-HK"` → Traditional Chinese), then the primary subtag
  * (e.g. `"ar-EG"` → Arabic). Falls back to English for unknown locales.
  *
  * @param locale - A BCP-47 locale such as `"en"`, `"ar"`, `"zh-TW"`, or `"ar-EG"`.

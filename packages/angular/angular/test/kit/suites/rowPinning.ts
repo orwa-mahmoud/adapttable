@@ -25,7 +25,7 @@ export function rowPinningTests(
   kit: AngularKitUnderTest
 ): readonly ConformanceTest[] {
   const { Table: AdaptDataTable, kitSelector } = kit;
-  const { rowPinning, tree } = kit.features;
+  const { rowPinning, tree, selection } = kit.features;
   return collectConformanceTests(({ describe, it, afterEach }) => {
     /**
      * Pinned rows, summary rows and the summary row through the each kit table:
@@ -68,7 +68,6 @@ export function rowPinningTests(
           [urlSync]="false"
           [forceMobile]="mobile"
           [maxHeight]="maxHeight"
-          [selectable]="selectable"
           [summaryRow]="summaryRow"
           [features]="features"
         />
@@ -82,18 +81,20 @@ export function rowPinningTests(
       readonly onPinnedRowIdsChange = vi.fn((next: RowPinState) => {
         this.pinnedRowIds.set(next);
       });
-      readonly features = controlled
-        ? [
-            rowPinning({
-              pinnedRowIds: this.pinnedRowIds,
-              onPinnedRowIdsChange: this.onPinnedRowIdsChange,
-            }),
-          ]
-        : features;
+      readonly features = [
+        ...(selectable ? [selection()] : []),
+        ...(controlled
+          ? [
+              rowPinning({
+                pinnedRowIds: this.pinnedRowIds,
+                onPinnedRowIdsChange: this.onPinnedRowIdsChange,
+              }),
+            ]
+          : features),
+      ];
       readonly summaryRow = summaryRow;
       readonly mobile = mobile;
       readonly maxHeight = maxHeight;
-      readonly selectable = selectable;
     }
 
     async function mount() {

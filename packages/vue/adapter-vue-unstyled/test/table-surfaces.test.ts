@@ -9,8 +9,8 @@ import {
   ACTIVE_FILTER_CHIPS,
   type ActiveFilterChipsSlotProps,
   extendFeature,
+  FILTERS_PANEL,
   slotRender,
-  TOOLBAR_EXTRAS,
 } from "@adapttable/vue/adapter";
 import { filters as bindingFilters } from "@adapttable/vue/features";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -145,7 +145,6 @@ describe("native table surfaces", () => {
         rowActionsLayout: "menu",
         classNames: {
           actionButton: "canonical",
-          rowAction: "legacy",
           rowActionsMenu: "menu",
           rowActionsTrigger: "trigger",
         },
@@ -188,7 +187,6 @@ describe("native table surfaces", () => {
       menu.open = true;
       const action = find<HTMLButtonElement>(menu, '[aria-label="Open"]');
       expect(action.classList.contains("canonical")).toBe(true);
-      expect(action.classList.contains("legacy")).toBe(true);
       action.click();
       expect(run).toHaveBeenCalledExactlyOnceWith(rows[0]);
       expect(menu.open).toBe(false);
@@ -567,7 +565,7 @@ describe("active filter chip ownership", () => {
     const feature = extendFeature(
       bindingFilters<Row>([{ key: "team", type: "text" }]),
       [
-        slotRender(TOOLBAR_EXTRAS, () => null),
+        slotRender(FILTERS_PANEL, () => null),
         slotRender(ACTIVE_FILTER_CHIPS, (props) => {
           current = props;
           return null;

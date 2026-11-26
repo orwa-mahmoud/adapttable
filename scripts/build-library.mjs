@@ -1,6 +1,8 @@
 /** Build both module formats without keeping TypeScript and bundler heaps alive together. */
 import { spawnSync } from "node:child_process";
 import {
+  existsSync,
+  mkdirSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
@@ -156,6 +158,73 @@ export function inlineDeclarationSources(outDir, typesDir, packageDir) {
   }
 }
 
+function mapFiles(dir, skip, out = []) {
+  if (!existsSync(dir)) return out;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (path === skip) continue;
+    if (entry.isDirectory()) mapFiles(path, skip, out);
+    else if (entry.name.endsWith(".map")) out.push(path);
+  }
+  return out;
+}
+
+/**
+ * The file a map should name for one of its sources.
+ *
+ * Every production, development, ESM, CommonJS and declaration map would
+ * otherwise carry the same source text. The text is written once under
+ * `dist/sources`, which ships inside the package, and the map points at it.
+ */
+function publishedSource(mapFile, source, content, sourceDir, publishedDir) {
+  const absolute = resolve(dirname(mapFile), source);
+  if (within(publishedDir, absolute)) {
+    return relative(dirname(mapFile), absolute).split(sep).join("/");
+  }
+  if (!within(sourceDir, absolute)) {
+    throw new Error(
+      `Source map points outside the package source: ${mapFile} -> ${source}`
+    );
+  }
+  const text = content ?? readFileSync(absolute, "utf8");
+  const dest = join(publishedDir, relative(sourceDir, absolute));
+  mkdirSync(dirname(dest), { recursive: true });
+  if (existsSync(dest) && readFileSync(dest, "utf8") !== text) {
+    throw new Error(
+      `Source map text disagrees for ${relative(sourceDir, absolute)}`
+    );
+  }
+  if (!existsSync(dest)) writeFileSync(dest, text);
+  return relative(dirname(mapFile), dest).split(sep).join("/");
+}
+
+/**
+ * Point every map in `outDir` at one shared copy of each source.
+ *
+ * @param {string} outDir
+ * @param {string} packageDir
+ */
+export function shareMapSources(outDir, packageDir) {
+  const sourceDir = join(packageDir, "src");
+  const publishedDir = join(outDir, "sources");
+  for (const mapFile of mapFiles(outDir, publishedDir)) {
+    const map = JSON.parse(readFileSync(mapFile, "utf8"));
+    const sources = map.sources.map((source, index) =>
+      publishedSource(
+        mapFile,
+        source,
+        map.sourcesContent?.[index],
+        sourceDir,
+        publishedDir
+      )
+    );
+    delete map.sourcesContent;
+    delete map.sourceRoot;
+    map.sources = sources;
+    writeFileSync(mapFile, JSON.stringify(map));
+  }
+}
+
 function packageBin(name, command) {
   const file = join(ROOT, "node_modules", name, "package.json");
   const manifest = JSON.parse(readFileSync(file, "utf8"));
@@ -241,6 +310,7 @@ export function buildLibrary({
       ]);
     }
     inlineDeclarationSources(outDir, typesDir, packageDir);
+    shareMapSources(outDir, packageDir);
   } catch (error) {
     rmSync(outDir, { recursive: true, force: true });
     throw error;

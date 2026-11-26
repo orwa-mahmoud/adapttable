@@ -1,8 +1,4 @@
-import {
-  ACTIVE_FILTER_CHIPS,
-  slotRender,
-  TOOLBAR_EXTRAS,
-} from "@adapttable/core/binding";
+import { ACTIVE_FILTER_CHIPS, slotRender } from "@adapttable/core/binding";
 import { afterEach, expect, it } from "vitest";
 import { effectScope, shallowRef } from "vue";
 
@@ -11,6 +7,7 @@ import {
   type ComposedFeature,
   extendFeature,
 } from "../src/features/tableFeature";
+import { FILTERS_PANEL } from "../src/features/toolbarEntries";
 import { filters, filterViewKey } from "../src/filters";
 import { useHeaderFilter } from "../src/filters/headerFilterChrome";
 import { useDataTableShell } from "../src/useDataTableShell";
@@ -32,7 +29,7 @@ function fixture() {
   stops.push(() => scope.stop());
   const feature = () =>
     extendFeature(filters<Row>([{ key: "name", type: "text" }]), [
-      slotRender(TOOLBAR_EXTRAS, () => null),
+      slotRender(FILTERS_PANEL, () => null),
       slotRender(ACTIVE_FILTER_CHIPS, () => null),
     ]);
   const features = shallowRef<readonly ComposedFeature<Row>[]>([feature()]);

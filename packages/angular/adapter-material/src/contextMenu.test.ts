@@ -2,10 +2,11 @@
  * The unstyled context menu: right-click, the keyboard, and a host entry.
  */
 import type { ColumnDef } from "@adapttable/angular";
+import { cellNavigation } from "@adapttable/angular-material/cell-navigation";
 import { contextMenu } from "@adapttable/angular-material/context-menu";
 import { filters } from "@adapttable/angular-material/filters";
 import { rowPinning } from "@adapttable/angular-material/row-pinning";
-import { Component, input, signal, viewChild } from "@angular/core";
+import { Component, signal, viewChild } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
@@ -55,8 +56,6 @@ const item = (label: string) =>
       [urlSync]="false"
       [forceMobile]="false"
       [features]="features"
-      [cellNavigation]="navigable()"
-      [onCellCut]="cut"
     />
   `,
 })
@@ -64,7 +63,6 @@ class Host {
   readonly rows = ROWS;
   readonly columns = COLUMNS;
   readonly rowKey = (row: Row) => row.id;
-  readonly navigable = input(false);
   readonly audited = vi.fn();
   readonly cut = vi.fn();
   readonly features = [
@@ -89,7 +87,10 @@ async function mount(
   navigable = false
 ): Promise<ReturnType<typeof TestBed.createComponent<Host>>> {
   const fixture = TestBed.createComponent(Host);
-  fixture.componentRef.setInput("navigable", navigable);
+  if (navigable)
+    fixture.componentInstance.features.push(
+      cellNavigation({ onCut: (range) => fixture.componentInstance.cut(range) })
+    );
   document.body.append(fixture.nativeElement);
   fixture.detectChanges();
   await fixture.whenStable();
@@ -208,7 +209,6 @@ describe("context menu (Angular Material)", () => {
           [rowKey]="rowKey"
           [urlSync]="false"
           [forceMobile]="false"
-          [cellNavigation]="true"
           [features]="features"
         />
       `,
@@ -217,7 +217,7 @@ describe("context menu (Angular Material)", () => {
       readonly rows = ROWS;
       readonly columns = COLUMNS;
       readonly rowKey = (row: Row) => row.id;
-      readonly features = [contextMenu()];
+      readonly features = [contextMenu(), cellNavigation()];
     }
 
     const fixture = TestBed.createComponent(Navigable);

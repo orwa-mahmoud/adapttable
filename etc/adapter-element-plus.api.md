@@ -43,7 +43,6 @@ const __VLS_export$1: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup
 // @public (undocumented)
 const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
     props: PublicProps & __VLS_PrettifyLocal<DataTableProps<TRow> & {
-        "onUpdate:selectedIds"?: ((ids: string[]) => any) | undefined;
         "onUpdate:columnLayout"?: ((layout: ColumnLayoutState) => any) | undefined;
         "onUpdate:density"?: ((density: TableDensity) => any) | undefined;
     }> & (typeof globalThis extends {
@@ -52,7 +51,7 @@ const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>
     expose: (exposed: ShallowUnwrapRef<DataTableHandle<TRow>>) => void;
     attrs: any;
     slots: DataTableSlots<TRow>;
-    emit: ((evt: "update:selectedIds", ids: string[]) => void) & ((evt: "update:columnLayout", layout: ColumnLayoutState) => void) & ((evt: "update:density", density: TableDensity) => void);
+    emit: ((evt: "update:columnLayout", layout: ColumnLayoutState) => void) & ((evt: "update:density", density: TableDensity) => void);
 }>) => VNode & {
     __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
 };

@@ -1,11 +1,13 @@
-import type { ExportPdfOptions as FocusedPdfOptions } from "@adapttable/vue-unstyled/export-pdf";
-import type { ExportXlsxOptions as FocusedXlsxOptions } from "@adapttable/vue-unstyled/export-xlsx";
 import {
   exportPdf,
   type ExportPdfOptions,
+  type ExportPdfOptions as FocusedPdfOptions,
+} from "@adapttable/vue-unstyled/export-pdf";
+import {
   exportXlsx,
   type ExportXlsxOptions,
-} from "@adapttable/vue-unstyled/features";
+  type ExportXlsxOptions as FocusedXlsxOptions,
+} from "@adapttable/vue-unstyled/export-xlsx";
 interface Person {
   name: string;
 }

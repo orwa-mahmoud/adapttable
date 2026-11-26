@@ -9,14 +9,15 @@ import { BulkAction } from '@adapttable/core';
 import { CellEditHandler } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
+import { ColumnMenuOptions } from '@adapttable/core/binding';
 import { Command } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { DirtyCellState } from '@adapttable/core';
 import { EditConflictHandler } from '@adapttable/core';
 import { EditConflictPolicy } from '@adapttable/core';
 import { EditEventHandler } from '@adapttable/core';
-import { ExportCsvOptions } from '@adapttable/core';
 import { ExtraRow } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
@@ -27,6 +28,7 @@ import { FilterTypeSpec } from '@adapttable/core';
 import { GetCellSpan } from '@adapttable/core';
 import { GroupNode } from '@adapttable/core';
 import { GroupSort } from '@adapttable/core';
+import { HeaderFilterOptions } from '@adapttable/core/binding';
 import { Injector } from '@angular/core';
 import { NestedTableDefaults } from '@adapttable/core';
 import { PinnedRows } from '@adapttable/core';
@@ -51,10 +53,13 @@ import { VirtualizeInput } from '@adapttable/core/binding';
 // @public
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
+    readonly contrast?: ContrastRules;
+    readonly dependencies?: readonly unknown[];
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
     readonly labels?: Partial<TableLabels>;
     mount?(context: FeatureMountContext): void | (() => void);
+    readonly rank?: number;
     readonly renders?: readonly FeatureRender<never, SlotComponent>[];
 }
 
@@ -73,6 +78,7 @@ export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeatu
 
 // @public
 export interface CellNavigationOptions {
+    readonly onCut?: (range: CellRange) => void;
     readonly onRangeChange?: (range: CellRange | null) => void;
 }
 
@@ -83,7 +89,7 @@ export function cellSpan<TRow>(getCellSpan: GetCellSpan<TRow>, cellSpanAppearanc
 export function collapsibleColumnGroups(): AdaptTableFeature;
 
 // @public
-export function columnMenu(): AdaptTableFeature;
+export function columnMenu(options?: ColumnMenuOptions): AdaptTableFeature;
 
 // @public
 export function columnSelectionCheckbox(): AdaptTableFeature;
@@ -155,18 +161,6 @@ export interface EditingLifecycleExtras<TRow = unknown> {
 }
 
 // @public
-function exportPdf$1<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
-
-// @public @deprecated
-export const exportPdf: typeof exportPdf$1;
-
-// @public
-function exportXlsx$1<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
-
-// @public @deprecated
-export const exportXlsx: typeof exportXlsx$1;
-
-// @public
 export function extraRows(rows: readonly ExtraRow[]): AdaptTableFeature;
 
 // @public
@@ -174,6 +168,7 @@ export function feature(id: string, patch?: FeaturePatch, setup?: AdaptTableFeat
 
 // @public
 export interface FeatureMountContext {
+    feature(): AdaptTableFeature;
     flush<T>(run: () => T): T;
     flushAdmission(): void;
     readonly injector: Injector;
@@ -220,7 +215,7 @@ export function groupingPanel<TRow = unknown>(groupBy?: string | readonly string
 export type GroupingPanelExtras<TRow = unknown> = GroupingExtras<TRow>;
 
 // @public
-export function headerFilters(): AdaptTableFeature;
+export function headerFilters(options?: HeaderFilterOptions): AdaptTableFeature;
 
 // @public
 export type MaybeSignal<T> = T | Signal<T>;
@@ -298,6 +293,17 @@ export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?
 
 // @public
 export function savedViews(options: SavedViewsControllerOptions): AdaptTableFeature;
+
+// @public
+export function selection<TRow = unknown>(options?: SelectionOptions<TRow>): AdaptTableFeature;
+
+// @public
+export interface SelectionOptions<TRow = unknown> {
+    readonly defaultSelectedIds?: readonly string[];
+    readonly getId?: (row: TRow) => string;
+    readonly onSelectionChange?: (selectedIds: string[]) => void;
+    readonly selectedIds?: readonly string[] | Signal<readonly string[] | undefined>;
+}
 
 // @public
 export function selectionStats(): AdaptTableFeature;

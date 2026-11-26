@@ -195,10 +195,6 @@ export const ur: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "ایک تبدیلی آپ کے فیصلے کی منتظر ہے۔",
-  pendingProposals: (count) =>
-    count === 1
-      ? "1 تجویز کردہ تبدیلی"
-      : `${String(count)} تجویز کردہ تبدیلیاں`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -338,10 +334,6 @@ export const ur: Required<TableLabels> = {
       error: "خرابی",
       disconnected: "منسلک نہیں",
     })[status] ?? "تیار",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "قطار شامل کریں",
   duplicateRow: "قطار کی نقل بنائیں",
@@ -358,10 +350,8 @@ export const ur: Required<TableLabels> = {
   rowLifted: (position) => `قطار ${String(position)} اٹھائی گئی`,
   rowMoved: (from, to) => `قطار ${String(from)} سے ${String(to)} پر گئی`,
   rowReorderCancelled: "ترتیب منسوخ ہوئی",
-  rowMoveOptions: "قطار منتقل کرنے کے اختیارات",
   moveToGroup: "گروپ میں منتقل کریں…",
   moveUnder: "اس کے تحت منتقل کریں…",
-  moveToTopLevel: "اعلیٰ ترین سطح پر منتقل کریں",
   confirmRowMoveTitle: "قطار کی منتقلی کی تصدیق کریں",
   confirmRowMoveDescription: (row, from, to) =>
     `${row} کو ${from} سے ${to} منتقل کریں؟`,
@@ -397,9 +387,7 @@ export const ur: Required<TableLabels> = {
   removeGroupingColumn: (label) => `${label} کو گروپ بندی سے ہٹائیں`,
   moveGroupingColumn: (label) => `${label} کی گروپ بندی منتقل کریں`,
   groupingDropToRemove: "گروپ بندی ہٹانے کے لیے یہاں چھوڑیں",
-  groupingAggregateColumn: "مجموعی کالم",
   groupingAggregation: "گروپ کا مجموعہ",
-  groupingAggregationDefault: "طے شدہ",
   groupingAggregationNone: "کوئی نہیں",
   groupingAggregations: "مجموعے",
   groupingAddAggregation: "مجموعی کالم شامل کریں",
@@ -469,8 +457,6 @@ export const ur: Required<TableLabels> = {
   noticeVirtualizePaged:
     "ورچوئلائزیشن بند ہے — یہ صفحہ بند جدول ایک وقت میں ایک صفحہ دکھاتا ہے۔",
   noticePinNested: "گروپنگ یا درخت آن ہونے پر قطار پن بند ہے۔",
-  noticeReorderNested:
-    "گروپنگ یا درخت آن ہونے پر قطاروں کی ترتیب بدلنا بند ہے۔",
   noticeGroupingUnavailable:
     "گروہ بندی بند ہے — یہ ماخذ گروہ بندی نہیں کر سکتا۔",
   noticeExportAllPage:

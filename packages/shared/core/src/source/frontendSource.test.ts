@@ -207,6 +207,52 @@ describe("createFrontendSource", () => {
     expect(unsearched.allSearchedRows).toBe(ROWS);
   });
 
+  it("filters each row once when the rows and the query change together", () => {
+    const filterFn = vi.fn(() => true);
+    const source = createFrontendSource<Row>();
+    source.update(config({ filterFn, filterKey: "a" }), VIEW);
+    source.commit();
+    filterFn.mockClear();
+    const next = ROWS.map((row) => ({ ...row }));
+    const frame = source.update(
+      config({ data: next, filterFn, filterKey: "a" }),
+      {
+        ...VIEW,
+        sortBy: "count",
+        sortDir: "asc",
+      }
+    );
+    expect(ids(frame.rows)).toEqual(["c", "a", "b"]);
+    expect(filterFn).toHaveBeenCalledTimes(next.length);
+    source.commit();
+    filterFn.mockClear();
+    // New filter semantics read the same rows again, once.
+    source.update(config({ data: next, filterFn, filterKey: "b" }), {
+      ...VIEW,
+      sortBy: "count",
+      sortDir: "desc",
+    });
+    expect(filterFn).toHaveBeenCalledTimes(next.length);
+  });
+
+  it("gives the searched rows in source order when nothing else filters", () => {
+    const frame = createFrontendSource<Row>().update(config(), {
+      ...VIEW,
+      search: "li",
+      sortBy: "count",
+      sortDir: "asc",
+    });
+    expect(ids(frame.rows)).toEqual(["c", "a"]);
+    // Search alone filtered, so these are the searched rows, in source order.
+    expect(ids(frame.allSearchedRows)).toEqual(["a", "c"]);
+    const sortedOnly = createFrontendSource<Row>().update(config(), {
+      ...VIEW,
+      sortBy: "count",
+      sortDir: "asc",
+    });
+    expect(ids(sortedOnly.allSearchedRows)).toEqual(ids(ROWS));
+  });
+
   it("keeps the facet rows while data and search stay the same", () => {
     const source = createFrontendSource<Row>();
     const first = source.update(config(), { ...VIEW, search: "a" });
@@ -236,6 +282,58 @@ describe("createFrontendSource", () => {
       VIEW
     );
     expect(second.rows).toBe(first.rows);
+  });
+
+  it("re-sorts when a column's value input changes under the same key", () => {
+    const source = createFrontendSource<Row>();
+    const byCount = { ...VIEW, sortBy: "count", sortDir: "asc" as const };
+    const first = source.update(
+      config({ columns: [{ key: "count", sortValue: (row) => row.count }] }),
+      byCount
+    );
+    expect(ids(first.rows)).toEqual(["c", "a", "b"]);
+    source.commit();
+    const reversed = source.update(
+      config({ columns: [{ key: "count", sortValue: (row) => -row.count }] }),
+      byCount
+    );
+    expect(ids(reversed.rows)).toEqual(["b", "a", "c"]);
+  });
+
+  it("re-reads a localized column when its data path changes", () => {
+    interface Localized {
+      id: string;
+      label: string;
+      labelAr: string;
+      labelAlt: string;
+    }
+    const data: Localized[] = [
+      { id: "1", label: "a", labelAr: "ab", labelAlt: "ba" },
+      { id: "2", label: "b", labelAr: "a", labelAlt: "z" },
+    ];
+    const source = createFrontendSource<Localized>();
+    const view = { ...VIEW, sortBy: "label", sortDir: "asc" as const };
+    const first = source.update(
+      {
+        data,
+        locale: "ar",
+        paginationMode: "paged",
+        columns: [{ key: "label", i18n: { ar: "labelAr" } }],
+      },
+      view
+    );
+    expect(first.rows.map((row) => row.id)).toEqual(["2", "1"]);
+    source.commit();
+    const moved = source.update(
+      {
+        data,
+        locale: "ar",
+        paginationMode: "paged",
+        columns: [{ key: "label", i18n: { ar: "labelAlt" } }],
+      },
+      view
+    );
+    expect(moved.rows.map((row) => row.id)).toEqual(["1", "2"]);
   });
 
   it("re-evaluates an explicit filter key on the same data and commits only the changed view", () => {

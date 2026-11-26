@@ -118,7 +118,7 @@ describe("GroupingPanel (radix)", () => {
     fireEvent.click(screen.getByRole("option", { name: "Budget" }));
     expect(state.add).toHaveBeenCalledWith("budget");
 
-    const handle = screen.getByRole("button", { name: "Move Team" });
+    const handle = screen.getByRole("button", { name: "Move Team grouping" });
     expect(handle).toHaveAttribute("draggable", "true");
     expect(handle).toHaveStyle({ minWidth: "44px", minHeight: "44px" });
     expect(

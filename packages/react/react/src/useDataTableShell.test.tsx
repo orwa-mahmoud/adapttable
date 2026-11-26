@@ -12,7 +12,12 @@ import type { ColumnDef } from "./columnDef";
 import { DataTableShellView } from "./features/chromeBodyGate";
 import { densityChooser } from "./features/density";
 import { editing } from "./features/editing";
-import { columnMenu, resizableColumns, savedViews } from "./features/factories";
+import {
+  columnMenu,
+  headerFilters,
+  resizableColumns,
+  savedViews,
+} from "./features/factories";
 import { useTableFeatures } from "./features/featureHost";
 import { filters } from "./features/filters";
 import { grouping } from "./features/grouping";
@@ -24,6 +29,7 @@ import { rowReorder } from "./features/row-reorder";
 import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
 import { virtualize } from "./features/virtualize";
 import { useFrontendData } from "./source/useFrontendData";
+import { useServerData } from "./source/useServerData";
 import { createMemoryAdapter } from "./url/adapter";
 import {
   type DataTableShellProps,
@@ -72,6 +78,27 @@ function renderLiveShell(
   return renderShellWith(props, renderForm);
 }
 
+describe("row reorder on the finished shell", () => {
+  it("keeps row reorder armed when grouping is composed", () => {
+    resetDevWarnings();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      const plain = renderLiveShell([rowReorder(vi.fn())]);
+      expect(plain.current.hasRowReorder).toBe(true);
+      expect(plain.current.tableProps.rowReorder).toBeDefined();
+      const grouped = renderLiveShell([rowReorder(vi.fn()), grouping("name")], {
+        groupBy: "name",
+      });
+      expect(grouped.current.hasRowReorder).toBe(true);
+      expect(grouped.current.tableProps.rowReorder).toBeDefined();
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+      resetDevWarnings();
+    }
+  });
+});
+
 describe("persisted column names enter both shell forks", () => {
   it("renames display/mobile columns and column-derived filter labels", () => {
     let filterLabel: string | undefined;
@@ -86,7 +113,7 @@ describe("persisted column names enter both shell forks", () => {
       },
     ];
     const { current } = renderLiveShell(
-      [columnMenu(), filters<Row>([])],
+      [columnMenu({ onRename: onColumnRename }), filters<Row>([])],
       {
         columns: renameableColumns,
         columnLayout: {
@@ -97,7 +124,6 @@ describe("persisted column names enter both shell forks", () => {
           names: { name: "Account owner" },
         },
         onColumnLayoutChange: vi.fn(),
-        onColumnRename,
       },
       (defs) => {
         filterLabel = defs[0]?.label;
@@ -258,28 +284,28 @@ describe("useDataTableShell", () => {
     const onDensityChange = vi.fn();
     const view = renderDensityShell({ onDensityChange });
     expect(view.current.density).toBe("comfortable");
-    expect(view.current.toolbarProps.density).toBe("comfortable");
+    expect(view.current.chromeProps.density).toBe("comfortable");
 
     act(() => {
-      view.current.toolbarProps.onDensityChange?.("compact");
+      view.current.chromeProps.onDensityChange?.("compact");
     });
 
     expect(onDensityChange).toHaveBeenCalledExactlyOnceWith("compact");
     expect(view.current.density).toBe("compact");
-    expect(view.current.toolbarProps.density).toBe("compact");
+    expect(view.current.chromeProps.density).toBe("compact");
   });
 
   it("keeps the density request callback stable as uncontrolled state changes", () => {
     const view = renderDensityShell();
-    const request = view.current.toolbarProps.onDensityChange;
+    const request = view.current.chromeProps.onDensityChange;
 
     act(() => {
       request("compact");
     });
-    expect(view.current.toolbarProps.onDensityChange).toBe(request);
+    expect(view.current.chromeProps.onDensityChange).toBe(request);
 
     view.rerender({});
-    expect(view.current.toolbarProps.onDensityChange).toBe(request);
+    expect(view.current.chromeProps.onDensityChange).toBe(request);
   });
 
   it("waits for a controlled density prop to change", () => {
@@ -290,20 +316,20 @@ describe("useDataTableShell", () => {
     });
 
     act(() => {
-      view.current.toolbarProps.onDensityChange?.("compact");
+      view.current.chromeProps.onDensityChange?.("compact");
     });
     expect(onDensityChange).toHaveBeenCalledExactlyOnceWith("compact");
     expect(view.current.density).toBe("comfortable");
 
     view.rerender({ density: "compact", onDensityChange });
     expect(view.current.density).toBe("compact");
-    expect(view.current.toolbarProps.density).toBe("compact");
+    expect(view.current.chromeProps.density).toBe("compact");
   });
 
   it("returns an uncontrolled density to comfortable on remount", () => {
     const first = renderDensityShell();
     act(() => {
-      first.current.toolbarProps.onDensityChange?.("compact");
+      first.current.chromeProps.onDensityChange?.("compact");
     });
     expect(first.current.density).toBe("compact");
     first.unmount();
@@ -465,16 +491,19 @@ describe("useDataTableShell", () => {
     expect(view.toolbarProps.showRowsPerPage).toBe(true);
   });
 
-  it("covers the server tier and the optional pass-through props", () => {
+  it("covers a server source and the optional pass-through props", () => {
     const { result } = renderHook(() =>
       useDataTableShell(
         {
-          data: ROWS,
+          source: useServerData<Row>({
+            rows: ROWS,
+            total: 5,
+            onQueryChange: vi.fn(),
+            urlSync: false,
+          }),
           columns,
           rowKey,
           urlSync: false,
-          onQueryChange: vi.fn(),
-          total: 5,
           loading: false,
           locale: "en",
           urlKey: "t",
@@ -497,16 +526,15 @@ describe("useDataTableShell", () => {
     expect(result.current.toolbarProps.searchPlaceholder).toBe("Search…");
   });
 
-  it("forwards mode and prefetch (previously dead surface)", () => {
-    const onQueryChange = vi.fn();
+  it("forwards onViewChange and prefetch", () => {
+    const onViewChange = vi.fn();
     const prefetch = vi.fn();
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() =>
       useDataTableShell(
         {
           data: ROWS,
-          mode: "frontend",
-          onQueryChange,
+          onViewChange,
           prefetch,
           columns,
           rowKey,
@@ -515,10 +543,10 @@ describe("useDataTableShell", () => {
         noForm
       )
     );
-    // mode="frontend" reached useTableData: local processing kept, and
-    // the notification did NOT fire on mount (server mode would have).
+    // onViewChange reached useTableData: local processing kept, and the
+    // notification does not fire on mount.
     expect(result.current.source.rows).toHaveLength(2);
-    expect(onQueryChange).not.toHaveBeenCalled();
+    expect(onViewChange).not.toHaveBeenCalled();
     // prefetch reaches the table renderer's prop bundle.
     expect(result.current.tableProps.prefetch).toBe(prefetch);
   });
@@ -757,14 +785,13 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
   it("sizes one named column and windows when virtualizeColumns is on", () => {
     const onColumnLayoutChange = vi.fn();
     const props = applyTableFeatures({
-      features: [columnMenu()],
+      features: [columnMenu(), headerFilters({ closeOnSelect: true })],
       data: ROWS,
       columns,
       rowKey,
       onColumnLayoutChange,
       virtualizeColumns: true,
       cellNavigation: true,
-      closeHeaderFilterOnSelect: true,
       columnLayout: {
         hidden: [],
         order: [],
@@ -906,15 +933,21 @@ describe("a render that changes nothing about the columns", () => {
 
 describe("grouping panel on the finished shell", () => {
   it("shows a plain groupAggregates mapper as set by the app", () => {
-    const { current } = renderLiveShell([grouping("name"), groupingPanel()], {
-      columns: [
-        { key: "name", header: "Name" },
-        { key: "id", header: "Id" },
+    const { current } = renderLiveShell(
+      [
+        grouping("name", {
+          groupAggregates: (rows) => ({ id: rows.length }),
+        }),
+        groupingPanel(),
       ],
-      groupBy: "name",
-      groupAggregates: (rows) => ({ id: rows.length }),
-    });
-    expect(current.groupingPanelProps?.state.aggregations.items).toEqual(
+      {
+        columns: [
+          { key: "name", header: "Name" },
+          { key: "id", header: "Id" },
+        ],
+      }
+    );
+    expect(current.tableProps.groupingPanel?.aggregations.items).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           columnKey: "id",

@@ -1,9 +1,9 @@
 import {
   type ConfirmHandler,
   type ConfirmRequest,
-  formatMultiDraft,
   type RowAction,
 } from "@adapttable/core";
+import { formatMultiDraft } from "@adapttable/core/editing";
 import {
   aggregate,
   type ColumnDef,

@@ -11,11 +11,9 @@ import {
   type UrlStateAdapter,
 } from "@adapttable/core";
 import {
-  activeTierValue,
   createTableData,
   type FeatureHostState,
   INACTIVE_TIER_ROWS,
-  retainItems,
   type TableStore,
   tierRows,
 } from "@adapttable/core/binding";
@@ -33,7 +31,6 @@ import { type ComposedFeature } from "../features/tableFeature";
 import { createFilterOptionCache } from "../layout/filterOptionCache";
 import { frontendRowModelOf } from "../source/rowModel";
 import { useFrontendData } from "../source/useFrontendData";
-import { useServerTier } from "../source/useServerData";
 import type { ResolvedTableOptions } from "./shellContract";
 
 /**
@@ -93,9 +90,9 @@ export function useShellDataTier<TRow>(
       : true;
     return keep && (resolved.value.filterTreeFn?.(row, tree) ?? true);
   };
-  // The data tier: a supplied source, then the host's server page when
-  // onQueryChange is wired (or mode says so), then the table's own rows.
-  // The active tier owns the URL; an inactive one keeps private state.
+  // The data tier: a supplied source (a server source among them), else the
+  // table's own rows. While a source serves the table the frontend tier
+  // keeps private state.
   const dataController = createTableData<TRow>();
   onScopeDispose(dataController.dispose);
   const tier = computed(
@@ -104,13 +101,11 @@ export function useShellDataTier<TRow>(
         engine: undefined,
         source: supplied.value,
         data: toValue(resolved.value.data),
-        mode: resolved.value.mode,
-        onQueryChange: resolved.value.onQueryChange,
+        onViewChange: resolved.value.onViewChange,
         columns: [],
       }).tier
   );
   const onFrontend = computed(() => tier.value === "frontend");
-  const onServer = computed(() => tier.value === "server");
   let columnSource: unknown;
   let columnLeaves: ReturnType<typeof flattenColumns<TRow>>["leaves"] = [];
   const tierColumns = (live: boolean) => {
@@ -121,7 +116,6 @@ export function useShellDataTier<TRow>(
     columnLeaves = input ? flattenColumns(input).leaves : [];
     return columnLeaves;
   };
-  let facetKeyList: readonly string[] | undefined;
   const frontend = useFrontendData(() => ({
     ...resolved.value,
     store: tableStore,
@@ -149,58 +143,11 @@ export function useShellDataTier<TRow>(
     createEngine: frontendRowModelOf(declarations.value) as
       FrontendEngineFactory<TRow> | undefined,
   }));
-  const server = useServerTier<TRow>(
-    () => {
-      const value = resolved.value;
-      const live = onServer.value;
-      const filters = filterRuntime.value;
-      if (live) {
-        const checklistKeys = filters?.defs
-          .filter(
-            (def) =>
-              (filters.registry.get(def.type)?.widget ?? def.type) ===
-              "checklist"
-          )
-          .map((def) => def.key);
-        facetKeyList = retainItems(
-          facetKeyList,
-          toValue(value.facetKeys) ?? checklistKeys
-        );
-      }
-      return {
-        store: tableStore,
-        rows: tierRows(live, toValue(value.data)),
-        total: () => toValue(value.total) ?? 0,
-        loading: value.isLoading,
-        error: value.error,
-        onQueryChange: activeTierValue(live, value.onQueryChange, undefined),
-        // A column's default aggregate is a request to the server, so only the
-        // server tier reads the columns.
-        columns: tierColumns(live),
-        supports: activeTierValue(live, value.supports, undefined),
-        aggregates: activeTierValue(live, value.aggregates, undefined),
-        responseKey: activeTierValue(live, value.responseKey, undefined),
-        facets: activeTierValue(live, value.facets, undefined),
-        // A server query counts every checklist filter unless told which.
-        facetKeys: live ? facetKeyList : undefined,
-        urlAdapter: live ? urlAdapter : undefined,
-        urlSync: live,
-        urlKey: value.urlKey,
-        defaults: value.defaults,
-        arrayExtraKeys: filters?.arrayExtraKeys,
-        numberExtraKeys: filters?.numberExtraKeys,
-        paginationMode: value.paginationMode,
-        forceMobile: isMobile,
-      };
-    },
-    () => onServer.value
-  );
-  // Once the frame is on screen, a frontend table's onQueryChange hears
+  // Once the frame is on screen, a frontend table's onViewChange hears
   // about a change; the mount is not one.
   const tierSource = computed(() =>
     dataController.finish({
-      resolved:
-        supplied.value ?? (onServer.value ? server.value : frontend.value),
+      resolved: supplied.value ?? frontend.value,
       frontend: frontend.value,
     })
   );

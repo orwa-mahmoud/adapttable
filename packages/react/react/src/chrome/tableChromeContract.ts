@@ -2,31 +2,14 @@ import {
   type ColumnGroupRecord,
   type ConfirmHandler,
   type FeatureNotice,
-  type FilterDef,
-  type FilterTypeRegistry,
-  type GroupAggregatesFn,
-  type GroupByInput,
-  type GroupedFlatEntry,
-  type GroupingPanelState,
   type PinnedRows,
-  type RowAction,
   type TableErrorState,
   type TableSource,
-  type TreeEntry,
-  type TreeShape,
 } from "@adapttable/core";
-import { type ReactNode, type RefObject } from "react";
+import { type RefObject } from "react";
 
 import type { ColumnDef } from "../columnDef";
 import type { ReactUseColumnLayoutResult } from "../columns/useColumnLayout";
-import type { EditableCellEditing } from "../editing/editableCellController";
-import type { ActiveFilterChip } from "../filters/useActiveFilterChips";
-import type { GroupCollapseState } from "../grouping/useGroupCollapse";
-import type { RowMutationsState } from "../rows/rowMutations";
-import type { RowPinningState } from "../rows/rowPinning";
-import type { RowReorderState } from "../rows/rowReorder";
-import type { RowExpansionState } from "../rows/useRowExpansion";
-import type { TreeExpansionState } from "../tree/useTreeExpansion";
 import { type UseDataTableResult } from "../useDataTable/useDataTable";
 
 /**
@@ -60,14 +43,6 @@ export interface TableChrome<TRow> {
   confirm: ConfirmHandler;
   /** Row id extractor (selection id, falling back to rowKey). */
   getRowId: (row: TRow) => string;
-  /** Derived chips: label-driven merged with caller `extraChips`. */
-  mergedChips: readonly ActiveFilterChip[];
-  /** Active filter count (override, or merged chip count). */
-  activeFilterCount: number;
-  /** Declarative filter definitions the shell resolved. */
-  filterDefs?: readonly FilterDef<TRow>[];
-  /** Type registry those defs were built against. */
-  filterRegistry?: FilterTypeRegistry;
   /** Whether the resolved pagination mode is `"paged"`. */
   isPaged: boolean;
   /**
@@ -109,122 +84,10 @@ export interface TableChrome<TRow> {
    */
   clearSearchAndFilters: () => void;
   /**
-   * Row-detail bundle — present iff `renderRowDetail` is set, so ONE guard
-   * narrows both the renderer and the expansion state (no correlated
-   * optionals to re-check).
-   */
-  detail?: {
-    /** The caller's detail-panel renderer. */
-    render: (row: TRow) => ReactNode;
-    /** Expansion state for the chevrons. */
-    expansion: RowExpansionState;
-  };
-  /**
-   * Inline editing bundle — present iff either channel is set (`onCellEdit`
-   * for per-cell commits, `rowEditing` + `onRowEdit` for row-level ones), so
-   * ONE guard narrows the host channel, the state machine, validation, save
-   * state, dirty marks and row mode. Pass neither and editing stays fully
-   * dormant: no UI, no keyboard.
-   */
-  editing?: EditableCellEditing<TRow>;
-  /**
-   * Adding, duplicating and deleting rows. Empty until `rowActions()` is
-   * composed. `canAdd` says whether the toolbar's Add control renders.
-   */
-  rowMutations: RowMutationsState<TRow>;
-  /** Size every visible column to its content. Present with column layout. */
-  autoSizeColumns?: () => void;
-  /** Size one column to its content. Present with column layout. */
-  autoSizeColumn?: (key: string) => void;
-  /**
-   * The row actions to render — the host's, plus duplicate and delete when
-   * those are wired, and `undefined` when the reader hid the actions column.
-   * Adapters read THIS rather than internal feature configuration.
-   */
-  rowActions?: RowAction<TRow>[];
-  /**
-   * Whether an actions column exists at all, hidden or not — what the column
-   * menu offers, and the one figure a hidden column must not change.
-   */
-  hasRowActions: boolean;
-  /**
-   * Whether a reorder column exists at all, hidden or not — what the column
-   * menu offers. Grouped and tree models keep it armed and resolve sibling
-   * reorder separately from cross-boundary moves.
-   */
-  hasRowReorder: boolean;
-  /**
-   * Headless row-reorder state. Present iff the row-reorder feature is composed,
-   * grouping/tree are off, and the column is visible. Adapters read THIS.
-   */
-  rowReorder?: RowReorderState<TRow>;
-  /**
-   * Headless row-pin state. Present iff the pinning feature is composed
-   * and grouping/tree are off.
-   */
-  rowPinning?: RowPinningState<TRow>;
-  /**
    * Host-owned summary objects stuck above and below the scroll body.
    * Present iff `pinnedSummaryRows` was composed with at least one row.
    */
   pinnedRows?: PinnedRows<TRow>;
-  /**
-   * Whether grouping is armed — full-set overlay is on. Pinning and
-   * reorder read this rather than re-parsing `groupBy`.
-   */
-  groupingArmed: boolean;
-  /**
-   * Whether the host declared a tree. Pinning and reorder refuse a
-   * nested list.
-   */
-  treeShaped: boolean;
-  /**
-   * Tree bundle — present iff the host declared a hierarchy (`getChildren` or
-   * `getParentId`). A tree and a grouping are different models and can both be
-   * dormant; a table that arms both renders the tree, since the rows' own
-   * shape outranks a derived one.
-   */
-  tree?: {
-    /** The flattened hierarchy, in render order. */
-    entries: readonly TreeEntry<TRow>[];
-    /** Every loaded node, including descendants of collapsed parents. */
-    allEntries?: readonly TreeEntry<TRow>[];
-    /** Loaded descendants to read within an export's source scope. */
-    getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
-    /** Flat ancestry to reconstruct within an export's source scope. */
-    getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
-    /** Which nodes are open. */
-    expansion: TreeExpansionState;
-    /** Which column carries the chevron and the indent. */
-    columnKey?: string;
-  };
-  /**
-   * Row-grouping bundle — present iff an effective `groupBy` is set AND the
-   * source can supply a full filtered set (`allFilteredRows`). Omit
-   * `groupBy` and grouping stays fully dormant (package DNA: opt-in).
-   */
-  grouping?: {
-    /** The grouping keys in order — one entry for a flat group, more for nested. */
-    groupBy: readonly string[];
-    collapsed: GroupCollapseState;
-    aggregates?: GroupAggregatesFn<TRow>;
-    /** Flat group-header + leaf entries for adapters to render. */
-    entries: readonly GroupedFlatEntry<TRow>[];
-    setGroupBy: (key: GroupByInput) => void;
-    /** Open every group. */
-    expandAll: () => void;
-    /** Close every group, at every level. */
-    collapseAll: () => void;
-    /**
-     * Show the tree down to `depth` and no further — `0` leaves only the
-     * outermost headers, `1` opens the first level inside them.
-     */
-    collapseToDepth: (depth: number) => void;
-    /** Reveal the next page of groups, or of one group's rows. */
-    showMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => void;
-  };
-  /** Interactive grouping strip state, present only with `groupingPanel()`. */
-  groupingPanel?: GroupingPanelState;
   /**
    * The rows the editing layer must treat as present: the grouped leaf set
    * (in render order) while grouping renders the full filtered set, the
@@ -241,12 +104,6 @@ export interface TableChrome<TRow> {
   columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
   /** All declared columns (pre layout/device filtering) for the column menu. */
   allColumns: ColumnDef<TRow>[];
-  /**
-   * Whether hide / order / pin setters on `columnLayout` actually
-   * write. The three-prop table publishes no-ops; a layout-owning feature
-   * replaces them.
-   */
-  columnLayoutLive?: boolean;
   /**
    * Opted-in features that cannot run. Empty when everything the host
    * asked for can. Adapters show these on the status bar (when it is

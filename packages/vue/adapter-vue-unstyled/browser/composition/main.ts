@@ -5,6 +5,7 @@ import { DataTable } from "../../src";
 import { editing } from "../../src/editing";
 import { filters } from "../../src/filters";
 import { headerFilters } from "../../src/header-filters";
+import { selection as selectionFeature } from "../../src/selection";
 import { tree } from "../../src/tree";
 interface Row {
   id: string;
@@ -34,12 +35,13 @@ const Table = defineComponent({
           filtersPopover: "consumer-flex",
           filtersDrawer: "consumer-flex",
         },
-        selectable: true,
-        selectedIds: selection.value,
-        "onUpdate:selectedIds": (ids: string[]) => {
-          selection.value = ids;
-        },
         features: [
+          selectionFeature({
+            onSelectionChange: (ids: string[]) => {
+              selection.value = ids;
+            },
+            selectedIds: selection.value,
+          }),
           tree<Row>({
             getChildren: (row) => row.children,
             defaultExpandedIds: ["p"],

@@ -16,14 +16,9 @@
  * of exporting to a spreadsheet rather than a CSV.
  */
 
-import type { ColumnMetadata } from "../contracts/columns";
-import {
-  buildExportTable,
-  type ExportTable,
-  type ExportViewEntry,
-  type ExportWriter,
-} from "./exportWriter";
-import { buildZip, utf8, type ZipEntry } from "./zip";
+import type { ExportTable, ExportWriter } from "./exportWriter";
+import { columnLetter, safeSheetName, safeText } from "./sheetText";
+import { buildZip, deflateRaw, utf8, type ZipEntry } from "./zip";
 
 export type { ExportWriter };
 
@@ -35,53 +30,6 @@ function xml(text: string): string {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
-}
-
-/**
- * A column's spreadsheet letter: 0 → A, 25 → Z, 26 → AA.
- *
- * Base-26 with no zero digit, so the usual `% 26` loop is off by one without
- * the decrement — the bug that puts column 26 at "BA".
- *
- * @public
- */
-export function columnLetter(index: number): string {
-  let n = index;
-  let out = "";
-  do {
-    out = String.fromCodePoint(65 + (n % 26)) + out;
-    n = Math.floor(n / 26) - 1;
-  } while (n >= 0);
-  return out;
-}
-
-/**
- * Strip what XML 1.0 cannot carry: control characters other than tab, newline
- * and carriage return, lone surrogates, and U+FFFE / U+FFFF. One such
- * character from a database makes the whole workbook unopenable, and the user
- * has no way to tell which cell did it.
- *
- * Written as a scan rather than a regex because the regex form needs a lint
- * suppression, and a rule worth silencing here is a rule worth not tripping.
- */
-function safeText(text: string): string {
-  let out = "";
-  for (const ch of text) {
-    if (isXmlChar(ch.codePointAt(0) ?? 0)) out += ch;
-  }
-  return out;
-}
-
-/**
- * Whether XML 1.0 allows a code point: tab, newline, carriage return, and
- * U+0020–U+D7FF, U+E000–U+FFFD and U+10000–U+10FFFF. A lone surrogate
- * (U+D800–U+DFFF) and U+FFFE / U+FFFF are outside every range.
- */
-function isXmlChar(point: number): boolean {
-  if (point === 0x9 || point === 0xa || point === 0xd) return true;
-  if (point >= 0x20 && point <= 0xd7ff) return true;
-  if (point >= 0xe000 && point <= 0xfffd) return true;
-  return point >= 0x10000 && point <= 0x10ffff;
 }
 
 /** Style index in `styles.xml`: default, header/total bold, date, datetime. */
@@ -303,66 +251,36 @@ function documents(table: ExportTable, sheetName: string): ZipEntry[] {
 }
 
 /**
- * Excel's own rules for a sheet name: at most 31 characters and none of
- * `: \ / ? * [ ]`. A name that breaks them makes the whole file unopenable, so
- * it is corrected rather than passed through.
- */
-export function safeSheetName(name: string): string {
-  const cleaned = safeText(name)
-    .replaceAll(/[:\\/?*[\]]/g, " ")
-    .trim();
-  return firstUnits(cleaned === "" ? "Sheet1" : cleaned, 31);
-}
-
-/**
- * The first `limit` UTF-16 units of `text`, never ending halfway through a
- * surrogate pair — half of one is a lone surrogate XML cannot carry.
- */
-function firstUnits(text: string, limit: number): string {
-  let out = "";
-  for (const ch of text) {
-    if (out.length + ch.length > limit) break;
-    out += ch;
-  }
-  return out;
-}
-
-/**
- * Build an `.xlsx` for the given rows and columns.
+ * The workbook for an already-resolved table — what the writer and
+ * `buildTableXlsx` call.
  *
- * Cell values resolve exactly as they do for CSV — a column's `exportValue`
- * first, then its accessor or `sortValue` — so the same table produces the same
- * data in either format. What differs is that numbers, booleans and dates stay
- * typed, because a spreadsheet that cannot sum a column is a screenshot.
- *
- * @typeParam TRow - The row type.
- * @param options - Rows, columns, and the sheet's name.
- * @returns The workbook bytes, ready to download.
- *
- * @public
+ * @internal
  */
-export function buildTableXlsx<TRow>(options: {
-  rows: readonly TRow[];
-  columns: readonly ColumnMetadata<TRow>[];
-  sheetName?: string;
-  view?: readonly ExportViewEntry<TRow>[];
-  summary?: Readonly<Partial<Record<string, unknown>>>;
-}): Uint8Array<ArrayBuffer> {
-  return xlsxBytes(
-    buildExportTable(options.rows, options.columns, {
-      view: options.view,
-      summary: options.summary,
-    }),
-    options.sheetName
-  );
-}
-
-/** The workbook for an already-resolved table — what the writer calls. */
-function xlsxBytes(
+export function xlsxBytes(
   table: ExportTable,
   sheetName?: string
 ): Uint8Array<ArrayBuffer> {
   return buildZip(documents(table, sheetName ?? "Sheet1"));
+}
+
+/**
+ * The workbook with its worksheet deflated where the browser can, for the
+ * asynchronous export path. The worksheet is nearly all of the file; the small
+ * parts stay stored.
+ */
+async function deflatedXlsxBytes(
+  table: ExportTable,
+  sheetName?: string
+): Promise<Uint8Array<ArrayBuffer>> {
+  const entries = documents(table, sheetName ?? "Sheet1");
+  const sheet = entries.find((entry) =>
+    entry.name.startsWith("xl/worksheets/")
+  );
+  if (sheet) {
+    const deflated = await deflateRaw(sheet.data);
+    if (deflated) sheet.deflated = deflated;
+  }
+  return buildZip(entries);
 }
 
 /** The MIME type Excel, Numbers and Google Sheets all register for `.xlsx`. */
@@ -393,6 +311,11 @@ export function xlsxWriter(options?: { sheetName?: string }): ExportWriter {
       parts: [xlsxBytes(table, options?.sheetName)],
       mimeType: XLSX_MIME,
       // Binary: the bytes are the file, and there is no text form of them.
+      text: "",
+    }),
+    buildAsync: async ({ table }) => ({
+      parts: [await deflatedXlsxBytes(table, options?.sheetName)],
+      mimeType: XLSX_MIME,
       text: "",
     }),
   };

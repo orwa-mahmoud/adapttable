@@ -10,8 +10,8 @@ import { pinnedSummaryRows } from "../src/pinned-summary-rows";
 import { rowActions } from "../src/row-actions";
 import { rowAppearance } from "../src/row-appearance";
 import { rowPinning } from "../src/row-pinning";
+import { selection } from "../src/selection";
 import { mount, node } from "./mount";
-
 interface Row {
   id: string;
   team: string;
@@ -103,8 +103,8 @@ describe("Element Plus prepared row surfaces", () => {
       const summary: Row = { id: "total", team: "TOTAL", amount: 6 };
       const view = fixture({
         forceMobile: mobile,
-        selectable: true,
         features: [
+          selection(),
           pinnedSummaryRows<Row>({ top: [summary] }),
           extraRows([
             {

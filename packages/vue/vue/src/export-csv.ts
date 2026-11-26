@@ -7,6 +7,7 @@ import {
 } from "@adapttable/core";
 import {
   chromeFeatureNotices,
+  composeMounts,
   coreExportCsv,
   createExportController,
   exportButtonLabel,
@@ -27,6 +28,7 @@ import { computed, shallowRef, watch } from "vue";
 
 import { EXPORT_CONTROL, EXPORT_MODEL } from "./actions/contracts";
 import { featureActivity } from "./actions/lifecycle";
+import { toolbarEntry } from "./features/toolbarEntries";
 import { groupingModelKey, treeModelKey } from "./hierarchy/models";
 import { useExternalStore } from "./store";
 const GRID_FOCUS_MODEL = featureStateKey<GridFocusState>(
@@ -248,7 +250,18 @@ export function exportCsv<TRow>(
     labels: core.labels,
     apply: (input) => core.apply?.(input) ?? {},
     setup: (host) => core.setup?.(host),
-    mount: useExportMount,
+    mount: composeMounts<FeatureMountContext<TRow>>(
+      core.mount?.bind(core),
+      useExportMount
+    ),
+    renders: [
+      toolbarEntry((entry) => {
+        const model = entry.read(EXPORT_MODEL);
+        return model?.onExportCsv
+          ? entry.draw(EXPORT_CONTROL, { ...entry.presentation, model })
+          : null;
+      }),
+    ],
     requiredSlots: [EXPORT_CONTROL],
   };
 }

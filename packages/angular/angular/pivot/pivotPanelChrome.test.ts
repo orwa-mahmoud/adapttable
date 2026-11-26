@@ -5,11 +5,8 @@
  * zones exist, which move buttons are offered, and what each button does to
  * the configuration.
  */
-import {
-  EMPTY_PIVOT_CONFIG,
-  type PivotConfig,
-  type PivotField,
-} from "@adapttable/core";
+import { type PivotConfig, type PivotField } from "@adapttable/core";
+import { EMPTY_PIVOT_CONFIG } from "@adapttable/core/pivot";
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, input, type TemplateRef } from "@angular/core";
 import { TestBed } from "@angular/core/testing";

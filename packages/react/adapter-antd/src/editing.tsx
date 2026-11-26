@@ -1,4 +1,7 @@
-import { createAdapterEditingFeatures } from "@adapttable/react/adapter";
+import {
+  createAdapterEditingFamily,
+  createAdapterEditingFeatures,
+} from "@adapttable/react/adapter";
 
 import { EditableDataCell } from "./components/EditableCell";
 import { BatchEditBar, RowEditActions } from "./components/kitControls";
@@ -23,3 +26,17 @@ export const editHistory = editingFeatures.editHistory;
 export const undoRedoButtons = editingFeatures.undoRedoButtons;
 /** Hold edits until the batch is saved or discarded. @public */
 export const batchEditing = editingFeatures.batchEditing;
+
+/**
+ * All of editing — cell editing, dirty marks, edit history and undo
+ * controls — with this kit's controls, passed to `features` as one entry.
+ * Row and batch editing join beside it.
+ *
+ * @public
+ */
+export const editingFamily = /* @__PURE__ */ createAdapterEditingFamily({
+  editing,
+  dirtyIndicators,
+  editHistory,
+  undoRedoButtons,
+});

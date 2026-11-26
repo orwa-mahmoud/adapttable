@@ -55,12 +55,19 @@ overrides:
   "brace-expansion@1": "^1.1.21"
   "brace-expansion@2": "^2.1.7"
   "brace-expansion@5": "^5.0.12"
+  # the Nuxt development server served files from a parent directory
+  # holding a stray lockfile or workspace file
+  "@nuxt/schema": "^4.6.4"
   # shared-memory serialization, quadratic and sparse-array expansion in
   # uneval, unhandled rejection in stringifyAsync, __proto__ key bypass
   devalue: "^5.9.3"
   # development-server file read on Windows; 0.28.2 is already in the tree
   esbuild: "^0.28.1"
-  "eslint-plugin-sonarjs>minimatch": "^10.2.3"
+  # globparts amplification denial of service in every 7.x–11.0.0 release;
+  # 11 keeps the 9 and 10 exports and Node floor
+  "minimatch@9": "^11.0.1"
+  "minimatch@10": "^11.0.1"
+  "eslint-plugin-sonarjs>minimatch": "^11.0.1"
   # host confusion via backslash authority introducer, an unclosed bracket
   # in the authority and unchecked WHATWG host canonicalization; scheme
   # spoofing via percent-encoded schemes; scheme injection via a

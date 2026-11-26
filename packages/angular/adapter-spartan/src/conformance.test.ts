@@ -12,11 +12,13 @@ import {
   AdaptAgentApproval,
   AdaptTableAssistant,
 } from "@adapttable/spartan/assistant";
+import { cellNavigation } from "@adapttable/spartan/cell-navigation";
 import { columnMenu } from "@adapttable/spartan/column-menu";
 import { editing, rowEditing } from "@adapttable/spartan/editing";
 import { filters } from "@adapttable/spartan/filters";
 import { grouping } from "@adapttable/spartan/grouping";
 import { rowReorder } from "@adapttable/spartan/row-reorder";
+import { selection } from "@adapttable/spartan/selection";
 import { statusBar } from "@adapttable/spartan/status-bar";
 import { virtualize } from "@adapttable/spartan/virtualize";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
@@ -30,7 +32,6 @@ import {
 } from "../../angular/test/kit/conformance";
 import { AdaptErrorState } from "./components/errorState";
 import { AdaptDataTable } from "./dataTable";
-
 const kit: AngularConformanceKit = {
   name: "spartan",
   Table: AdaptDataTable,
@@ -38,6 +39,8 @@ const kit: AngularConformanceKit = {
   grouping,
   rowReorder,
   virtualize,
+  selection,
+  cellNavigation,
 };
 
 describe(`table conformance — ${kit.name}`, () => {
@@ -121,9 +124,9 @@ describe("every bundled locale through native Angular controls", () => {
           set("forceMobile", mobile);
           // Auto uses infinite scrolling on mobile; exercise the real pager in both layouts.
           set("paginationMode", "paged");
-          set("selectable", true);
           set("defaults", { limit: 5 });
           set("features", [
+            selection(),
             filters<LocaleRow>([{ key: "name", label: "Name", type: "text" }]),
             columnMenu(),
             rowEditing<LocaleRow>(edit),

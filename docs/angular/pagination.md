@@ -64,9 +64,10 @@ loading by itself is not virtualization.
 
 ## Server-side pagination in Angular
 
-Use server-side pagination when an API owns the complete dataset. Bind its
-current page to `[data]`, the full matching count to `[total]`, and a stable
-loader to `[onQueryChange]`. Do not slice the returned page again in the host.
+Use server-side pagination when an API owns the complete dataset. Build an
+`injectServerData` source over its current page (`rows`), the full matching
+count (`total`) and a stable loader (`onQueryChange`), and bind it to
+`[source]`. Do not slice the returned page again in the host.
 The [complete server-side Angular table example](./data-tiers.md#server-pages-with-cancellation-and-errors)
 includes a standalone component, a POST request, cancellation, loading and
 error signals, and the response key needed to reject stale pages.
@@ -79,7 +80,7 @@ reuse rows from the previous page size.
 
 ## Cursor pagination and infinite scrolling
 
-On the server tier, changing page invokes `[onQueryChange]`; the host publishes
+On a server source, changing page invokes its `onQueryChange`; the host publishes
 that page's rows, total, loading state and response key. Search, filtering,
 sorting and page-size changes reset the view to page 1. If a total shrinks
 past the current page, built-in sources clamp the requested page into range.

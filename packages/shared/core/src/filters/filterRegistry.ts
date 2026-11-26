@@ -199,6 +199,12 @@ export interface FilterWidgetOf<TRender> {
   readonly kinds: readonly FilterWidgetKind[];
   /** What the binding draws for a field of one of those kinds. */
   readonly render: TRender;
+  /**
+   * The rules of the kinds this widget draws (`textFilterSpecs()`, …). When
+   * every widget of a filters feature carries them, the table's filter engine
+   * holds only those types.
+   */
+  readonly specs?: readonly FilterTypeSpec[];
 }
 
 /**

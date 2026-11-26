@@ -3,7 +3,10 @@ import {
   extendFeature,
   slotRender,
 } from "@adapttable/angular";
-import { CONTEXT_MENU_LIVE } from "@adapttable/angular/adapter";
+import {
+  CONTEXT_MENU_LIVE,
+  withContextMenuView,
+} from "@adapttable/angular/adapter";
 import {
   contextMenu as bindingContextMenu,
   type ContextMenuOptions,
@@ -36,7 +39,7 @@ export {
 export function contextMenu<TRow>(
   options: boolean | ContextMenuOptions<TRow> = true
 ): AdaptTableFeature {
-  return extendFeature(bindingContextMenu(options), [
+  return extendFeature(withContextMenuView(bindingContextMenu(options)), [
     slotRender(CONTEXT_MENU_LIVE, () => AdaptContextMenuLive),
   ]);
 }

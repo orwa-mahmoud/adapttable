@@ -1,12 +1,13 @@
-import type {
-  CellEditHandler,
-  StaticTableFeature,
-  TableEditingOptions,
-  TableFeature,
+import {
+  type CellEditHandler,
+  type StaticTableFeature,
+  type TableEditingOptions,
+  type TableFeature,
 } from "@adapttable/vue";
 import {
   batchEditBarSlotKey,
   editableCellSlotKey,
+  editingFamilyList,
   extendFeature,
   rowEditActionsSlotKey,
   slotRender,
@@ -14,6 +15,8 @@ import {
 } from "@adapttable/vue/adapter";
 import {
   batchEditing as bindingBatchEditing,
+  dirtyIndicators,
+  editHistory,
   editing as bindingEditing,
   type EditingLifecycleExtras,
   rowEditing as bindingRowEditing,
@@ -82,7 +85,7 @@ export type {
 } from "@adapttable/vue";
 export type { RowEditIcons } from "@adapttable/vue/adapter";
 export type { EditingLifecycleExtras } from "@adapttable/vue/features";
-export { dirtyIndicators, editHistory } from "@adapttable/vue/features";
+export { dirtyIndicators, editHistory };
 
 /** Opt-in Element Plus Undo and Redo buttons use the shell's history projection. */
 export function undoRedoButtons(): StaticTableFeature {
@@ -91,4 +94,31 @@ export function undoRedoButtons(): StaticTableFeature {
       h(ElementHistoryButtons, { ...props })
     ),
   ]);
+}
+
+/**
+ * All of editing — cell editing, dirty marks, edit history and undo
+ * controls — with this kit's controls, passed to `features` as one entry.
+ * Row and batch editing join beside it.
+ *
+ * @public
+ */
+export function editingFamily<TRow>(
+  onCellEdit: CellEditHandler<TRow>,
+  extras?: EditingLifecycleExtras<TRow>
+): readonly TableFeature<TRow>[] {
+  return editingFamilyList<
+    TableFeature<TRow>,
+    CellEditHandler<TRow>,
+    EditingLifecycleExtras<TRow> | undefined
+  >(
+    {
+      editing: (save, more) => editing(save, more),
+      dirtyIndicators,
+      editHistory: () => editHistory(),
+      undoRedoButtons,
+    },
+    onCellEdit,
+    extras
+  );
 }

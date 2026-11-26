@@ -1,7 +1,7 @@
 import type { ColumnModel } from "../contracts/columns";
 import { humanizeKey } from "../utils/humanizeKey";
 import { resolveLocaleTag } from "../utils/localeTag";
-import { getPath } from "../utils/path";
+import { pathReader } from "../utils/path";
 
 /**
  * The data path a column reads for the active locale: the exact locale tag
@@ -86,8 +86,9 @@ export function resolveColumnDefaults<
     const needsAccessor = !column.accessor && !rendersItself(column);
     if (!needsHeader && !needsAccessor) return column;
     const path = localizedColumnPath(column, locale);
+    const read = pathReader(path);
     const generated =
-      column.formatValue ?? ((row: TRow) => columnPathText(getPath(row, path)));
+      column.formatValue ?? ((row: TRow) => columnPathText(read(row)));
     return {
       ...column,
       header: needsHeader ? humanizeKey(column.key) : column.header,

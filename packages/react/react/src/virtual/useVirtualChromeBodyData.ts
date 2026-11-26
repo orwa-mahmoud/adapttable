@@ -20,13 +20,17 @@ import {
 import { useCallback, useMemo, useRef } from "react";
 
 import type { TableChrome } from "../chrome/tableChromeContract";
+import { useFeatureState } from "../features/featureState";
+import { ROW_PINNING_STATE } from "../features/stateKeys";
 import type { ComposedTableProps } from "../props";
 import {
+  type BodyChrome,
   type ChromeBodyData,
   entryKeys,
   estimateBodyItemSize,
   isBodyEligible,
   measureRowDetailAsPair,
+  useBodyChrome,
   useBodyLoadMore,
   useFetchNextPage,
   usePinnedScrollRows,
@@ -62,12 +66,13 @@ export function useVirtualChromeBody<TRow>(
 ): { body: ChromeBodyData<TRow>; scrollToRow: (row: TRow) => void } {
   const { rowKey, virtualize = false } = props;
   const { source } = chrome;
-  if (virtualizeIgnoredOnPage(virtualize, chrome)) {
+  const bodyChrome = useBodyChrome(chrome);
+  if (virtualizeIgnoredOnPage(virtualize, bodyChrome)) {
     devWarn(
       'virtualize only applies in infinite mode — this paged table renders unvirtualized. Pass paginationMode="infinite" to enable it, or group the rows: an expanded page is windowed.'
     );
   }
-  const fetchNext = useFetchNextPage(chrome);
+  const fetchNext = useFetchNextPage(bodyChrome);
   const scrollBoxRef = useRef<HTMLElement | null>(null);
   const inScrollBox = props.maxHeight != null;
   const measureWindowOffset =
@@ -81,10 +86,14 @@ export function useVirtualChromeBody<TRow>(
     },
     [observeWindowList]
   );
-  const groupingArmed = Boolean(chrome.grouping);
-  const pinState = chrome.rowPinning?.state;
-  const partitioned = usePinnedScrollRows(chrome, rowKey);
-  const estimateSize = estimateBodyItemSize(chrome, props, partitioned.scroll);
+  const groupingArmed = Boolean(bodyChrome.grouping);
+  const pinState = useFeatureState(ROW_PINNING_STATE)?.state;
+  const partitioned = usePinnedScrollRows(bodyChrome, rowKey);
+  const estimateSize = estimateBodyItemSize(
+    bodyChrome,
+    props,
+    partitioned.scroll
+  );
   const scrollOpts = {
     overscan: props.virtualOverscan,
     scrollMargin: props.virtualScrollMargin ?? measuredScrollMargin,
@@ -98,13 +107,16 @@ export function useVirtualChromeBody<TRow>(
     treeVirtualization,
     virtualization,
     scrollToRow,
-  } = useBodyWindows(chrome, props, partitioned.scroll, scrollOpts);
+  } = useBodyWindows(bodyChrome, props, partitioned.scroll, scrollOpts);
 
-  const groupingEntries = chrome.grouping
-    ? windowGroupedEntries(chrome.grouping.entries, groupVirtualization.indices)
+  const groupingEntries = bodyChrome.grouping
+    ? windowGroupedEntries(
+        bodyChrome.grouping.entries,
+        groupVirtualization.indices
+      )
     : undefined;
-  const treeEntries = chrome.tree
-    ? windowGroupedEntries(chrome.tree.entries, treeVirtualization.indices)
+  const treeEntries = bodyChrome.tree
+    ? windowGroupedEntries(bodyChrome.tree.entries, treeVirtualization.indices)
     : undefined;
 
   const resolvedVirtualization = resolveBodyVirtualization(
@@ -113,8 +125,8 @@ export function useVirtualChromeBody<TRow>(
   );
 
   const boxVirtual = resolvedVirtualization.enabled && inScrollBox;
-  const canLoadMore = bodyCanLoadMore(chrome, boxVirtual);
-  const loadMoreRef = useBodyLoadMore(chrome, fetchNext, canLoadMore);
+  const canLoadMore = bodyCanLoadMore(bodyChrome, boxVirtual);
+  const loadMoreRef = useBodyLoadMore(bodyChrome, fetchNext, canLoadMore);
 
   const columnWindow = useColumnWindow<TRow>({
     columns: chrome.columnLayout.visibleColumns,
@@ -157,7 +169,7 @@ export function useVirtualChromeBody<TRow>(
  * rows, at most one of them armed — and the row scroll over whichever it is.
  */
 function useBodyWindows<TRow>(
-  chrome: TableChrome<TRow>,
+  chrome: BodyChrome<TRow>,
   props: ComposedTableProps<TRow>,
   scrollRows: readonly TRow[],
   scrollOpts: Omit<Parameters<typeof useKeyedVirtualizer>[0], "keys">
@@ -208,7 +220,7 @@ function useBodyWindows<TRow>(
 
 /**
  * Bring one row into the window when it is not rendered: the flat window by
- * the row's index, a grouped or tree window by its entry key. A row already
+ * the row's index, a grouped or chrome.tree window by its entry key. A row already
  * in the window is left where it is, so a call never fights the reader.
  *
  * The callback is stable and reads the current window through a ref.

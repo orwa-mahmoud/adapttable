@@ -64,7 +64,8 @@ export async function fetchAllExportRows<TRow>(
   let page = 1;
   while (out.length < maxRows && !reachedEnd) {
     const batch = await config.fetchPage({ ...base, page, limit });
-    out.push(...batch);
+    // One push per row: a host's page size can exceed what a spread can pass.
+    for (const row of batch) out.push(row);
     // A short page is the end of the set; an empty one guards a source that
     // answers the page after the last with an empty array rather than fewer.
     reachedEnd = batch.length < limit;
@@ -72,7 +73,8 @@ export async function fetchAllExportRows<TRow>(
   }
   // Stopping ON the cap is still stopping short — a full last page says
   // nothing about whether more exist, so only a short page proves the end.
-  if (!reachedEnd) {
+  // A page that carries the set past the cap is capped too, whatever its size.
+  if (!reachedEnd || out.length > maxRows) {
     const rows = Math.min(out.length, maxRows);
     config.onCapped?.({ rows, maxRows });
     return out.slice(0, rows);
@@ -377,7 +379,7 @@ export function exportAllQueryOf<TRow>(
   visibleColumns: readonly ColumnMetadata<TRow>[],
   options: ExportCsvOptions<TRow>,
   context: ExportContext<TRow> | undefined,
-  writer: ExportWriter
+  writer: Pick<ExportWriter, "extension">
 ): ExportAllQuery {
   const columns = resolveExportColumns(
     options.columns,

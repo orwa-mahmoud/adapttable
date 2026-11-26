@@ -1,8 +1,7 @@
 /**
  * PDF export — the export feature with core's PDF writer.
  */
-import type { ExportCsvOptions } from "@adapttable/core";
-import { pdfWriter } from "@adapttable/core/pdf";
+import { deferredPdfWriter, type ExportCsvOptions } from "@adapttable/core";
 
 import { exportCsv } from "./export-csv";
 import type { TableFeature } from "./tableFeature";
@@ -28,6 +27,6 @@ export function exportPdf<TRow>(
   return exportCsv<TRow>(
     options === false
       ? false
-      : { ...(options === true ? {} : options), writer: pdfWriter() }
+      : { ...(options === true ? {} : options), writer: deferredPdfWriter() }
   );
 }

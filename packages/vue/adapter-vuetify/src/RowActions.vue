@@ -51,7 +51,7 @@ function actionAttrs(action: RowActionControl<TRow>, menu: boolean): Attrs {
     action.attrs,
     { ...native },
     {
-      class: [config.classNames.actionButton, config.classNames.rowAction],
+      class: config.classNames.actionButton,
       ...(menu
         ? { title: action.label, tag: "button" }
         : { variant: "text", size: "small" }),

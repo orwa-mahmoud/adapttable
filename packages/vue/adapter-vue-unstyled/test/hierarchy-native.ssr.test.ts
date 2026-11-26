@@ -7,6 +7,7 @@ import { DataTable } from "../src";
 import { grouping } from "../src/grouping";
 import { rowDetail } from "../src/row-detail";
 import { extraRows, pinnedSummaryRows, rowActions } from "../src/rows";
+import { selection } from "../src/selection";
 import { tree } from "../src/tree";
 interface Row {
   id: string;
@@ -86,13 +87,12 @@ describe("native optional rendering without browser globals", () => {
             columns: [{ key: "name" }, { key: "team" }],
             rowKey: (row) => row.id,
             urlSync: false,
-            selectedIds: ["a"],
             dir: "rtl",
             labels: {
               collapseGroup: "Collapse localized",
               selectRow: "Select localized",
             },
-            features: [grouping("team")],
+            features: [selection({ selectedIds: ["a"] }), grouping("team")],
           }),
       })
     );

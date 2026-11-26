@@ -2,8 +2,8 @@ import { expect, it } from "vitest";
 import { defineComponent, h, KeepAlive, shallowRef } from "vue";
 
 import { DataTable } from "../src";
+import { selection } from "../src/selection";
 import { find, mountNative, part, tick } from "./filter-editing-helpers";
-
 it("retires retained native selection controls while a table is suspended and after disposal", async () => {
   const shown = shallowRef(true);
   const selected = shallowRef<readonly string[]>([]);
@@ -12,16 +12,19 @@ it("retires retained native selection controls while a table is suspended and af
   const Table = defineComponent(
     () => () =>
       h(DataTable<{ id: string }>, {
+        features: [
+          selection({
+            onSelectionChange: (ids) => {
+              requests.push(ids);
+              if (accept.value) selected.value = ids;
+            },
+            selectedIds: selected.value,
+          }),
+        ],
         data: [{ id: "first" }, { id: "second" }],
         columns: [{ key: "id" }],
         rowKey: (row) => row.id,
-        selectable: true,
         forceMobile: false,
-        selectedIds: selected.value,
-        "onUpdate:selectedIds": (ids) => {
-          requests.push(ids);
-          if (accept.value) selected.value = ids;
-        },
         urlSync: false,
       })
   );
@@ -73,12 +76,11 @@ it("retires removed row controls and lets the current header select a replacemen
   const requests: string[][] = [];
   const view = mountNative(() =>
     h(DataTable<{ id: string }>, {
+      features: [selection({ onSelectionChange: (ids) => requests.push(ids) })],
       data: data.value,
       columns: [{ key: "id" }],
       rowKey: (row) => row.id,
-      selectable: true,
       forceMobile: false,
-      "onUpdate:selectedIds": (ids) => requests.push(ids),
       urlSync: false,
     })
   );
@@ -109,12 +111,15 @@ it("does not mutate retained selection state while its controls are unavailable"
   const data = [{ id: "first" }, { id: "second" }];
   const view = mountNative(() =>
     h(DataTable<{ id: string }>, {
+      features: [
+        ...(enabled.value
+          ? [selection({ onSelectionChange: (ids) => requests.push(ids) })]
+          : []),
+      ],
       data,
       columns: [{ key: "id" }],
       rowKey: (row) => row.id,
-      selectable: enabled.value,
       forceMobile: false,
-      "onUpdate:selectedIds": (ids) => requests.push(ids),
       urlSync: false,
     })
   );

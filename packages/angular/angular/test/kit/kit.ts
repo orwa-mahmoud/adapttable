@@ -15,6 +15,7 @@ import type * as bulkActionsModule from "../../../adapter-angular-unstyled/bulk-
 import type * as cellNavigation from "../../../adapter-angular-unstyled/cell-navigation/index";
 import type * as cellSpanModule from "../../../adapter-angular-unstyled/cell-span/index";
 import type * as columnGroupsModule from "../../../adapter-angular-unstyled/column-groups/index";
+import type * as columnLayoutModule from "../../../adapter-angular-unstyled/column-layout/index";
 import type * as columnMenu from "../../../adapter-angular-unstyled/column-menu/index";
 import type * as columnSelectionModule from "../../../adapter-angular-unstyled/column-selection/index";
 import type * as commandPaletteModule from "../../../adapter-angular-unstyled/command-palette/index";
@@ -22,6 +23,7 @@ import type * as densityModule from "../../../adapter-angular-unstyled/density/i
 import type * as editing from "../../../adapter-angular-unstyled/editing/index";
 import type * as exportModule from "../../../adapter-angular-unstyled/export/index";
 import type * as extraRowsModule from "../../../adapter-angular-unstyled/extra-rows/index";
+import type * as filteringModule from "../../../adapter-angular-unstyled/filtering/index";
 import type * as filters from "../../../adapter-angular-unstyled/filters/index";
 import type * as findInTableModule from "../../../adapter-angular-unstyled/find-in-table/index";
 import type * as fullscreenModule from "../../../adapter-angular-unstyled/fullscreen/index";
@@ -40,6 +42,7 @@ import type * as rowDetail from "../../../adapter-angular-unstyled/row-detail/in
 import type * as rowPinning from "../../../adapter-angular-unstyled/row-pinning/index";
 import type * as rowReorderModule from "../../../adapter-angular-unstyled/row-reorder/index";
 import type * as savedViewsModule from "../../../adapter-angular-unstyled/saved-views/index";
+import type * as selectionModule from "../../../adapter-angular-unstyled/selection/index";
 import type * as selectionStatsModule from "../../../adapter-angular-unstyled/selection-stats/index";
 import type * as sidePanelModule from "../../../adapter-angular-unstyled/side-panel/index";
 import type * as statusBarModule from "../../../adapter-angular-unstyled/status-bar/index";
@@ -48,9 +51,13 @@ import type * as virtualize from "../../../adapter-angular-unstyled/virtualize/i
 
 /** The feature factories every Angular kit exports, by their shipped names. */
 export interface AngularKitFeatures {
+  readonly editingFamily: typeof editing.editingFamily;
+  readonly filteringFamily: typeof filteringModule.filteringFamily;
+  readonly columnLayoutFamily: typeof columnLayoutModule.columnLayoutFamily;
   readonly commandPalette: typeof commandPaletteModule.commandPalette;
   readonly dirtyIndicators: typeof editing.dirtyIndicators;
   readonly filterTypes: typeof filters.filterTypes;
+  readonly selection: typeof selectionModule.selection;
   readonly selectionStats: typeof selectionStatsModule.selectionStats;
   readonly sidePanel: typeof sidePanelModule.sidePanel;
   readonly statusBar: typeof statusBarModule.statusBar;

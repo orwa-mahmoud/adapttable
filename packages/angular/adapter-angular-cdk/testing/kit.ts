@@ -3,6 +3,7 @@ import { bulkActions } from "@adapttable/angular-cdk/bulk-actions";
 import { cellNavigation } from "@adapttable/angular-cdk/cell-navigation";
 import { cellSpan } from "@adapttable/angular-cdk/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/angular-cdk/column-groups";
+import { columnLayoutFamily } from "@adapttable/angular-cdk/column-layout";
 import { columnMenu } from "@adapttable/angular-cdk/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/angular-cdk/column-selection";
 import { commandPalette } from "@adapttable/angular-cdk/command-palette";
@@ -11,6 +12,7 @@ import {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/angular-cdk/editing";
@@ -20,6 +22,7 @@ import {
   exportXlsx,
 } from "@adapttable/angular-cdk/export";
 import { extraRows } from "@adapttable/angular-cdk/extra-rows";
+import { filteringFamily } from "@adapttable/angular-cdk/filtering";
 import {
   filters,
   filtersWith,
@@ -47,6 +50,7 @@ import { rowDetail } from "@adapttable/angular-cdk/row-detail";
 import { rowPinning } from "@adapttable/angular-cdk/row-pinning";
 import { rowReorder } from "@adapttable/angular-cdk/row-reorder";
 import { savedViews } from "@adapttable/angular-cdk/saved-views";
+import { selection } from "@adapttable/angular-cdk/selection";
 import { selectionStats } from "@adapttable/angular-cdk/selection-stats";
 import { sidePanel } from "@adapttable/angular-cdk/side-panel";
 import { statusBar } from "@adapttable/angular-cdk/status-bar";
@@ -83,9 +87,13 @@ export const kit: AngularKitUnderTest = {
   name: "angular-cdk",
   Table: AdaptDataTable,
   features: {
+    editingFamily,
+    filteringFamily,
+    columnLayoutFamily,
     commandPalette,
     dirtyIndicators,
     filterTypes,
+    selection,
     selectionStats,
     sidePanel,
     statusBar,

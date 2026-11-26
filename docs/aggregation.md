@@ -359,8 +359,8 @@ const source = useQuerySource<Deal, Params, Page>({
   `calculate` is not proof the server knows an id.
 - `formatAggregate` is told the operation the response on screen was
   computed with, not one still in flight. `useServerData` takes the same
-  `supports`, `aggregates` and `columns`; a controlled `mode="server"` table
-  echoes `responseKey` so the table can tie a response to its request. See
+  `supports`, `aggregates` and `columns`, and echoes `responseKey` so the
+  table can tie a response to its request. See
   [server tiers](./row-grouping.md#server-tiers).
 - The table has no slot for a whole-set answer. Read it from your response
   and render it with `summaryRow` or `pinnedSummaryRows`.

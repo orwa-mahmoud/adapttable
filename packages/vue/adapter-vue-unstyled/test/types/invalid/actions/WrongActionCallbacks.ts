@@ -1,5 +1,5 @@
 import { bulkActions } from "@adapttable/vue-unstyled/bulk-actions";
-import { exportCsv } from "@adapttable/vue-unstyled/export-csv";
+import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { sidePanel } from "@adapttable/vue-unstyled/side-panel";
 interface Person {
   id: string;

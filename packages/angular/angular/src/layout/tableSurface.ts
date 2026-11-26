@@ -37,6 +37,11 @@ export abstract class AdaptTableSurface<TRow> {
     return tree ? { ...attrs, ...treeTableAria(tree.entries.length) } : attrs;
   });
 
+  /** The id a selection checkbox uses: the feature's resolver, or the row key. */
+  protected selectionRowId(row: TRow): string {
+    return this.view().selectionRowId(row);
+  }
+
   /** The scroll box the shell virtualizes against. */
   scrollElement(): HTMLElement | null {
     return this.scrollBox()?.nativeElement ?? null;

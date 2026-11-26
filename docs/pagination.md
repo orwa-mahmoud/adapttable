@@ -53,8 +53,9 @@ export function People() {
   50 / 100 (`PAGE_SIZE_OPTIONS`; `pageSizeOptions()` builds the list, both
   from `@adapttable/core`), plus that default when it isn't already in the
   list — so a table that starts at 500 still offers 500 after you pick 10.
-- On the server tier, pagination state arrives in the consolidated
-  `TableQuery` (`{ page, limit, … }`) passed to `onQueryChange` — forward both
+- On a server source, pagination state arrives in the consolidated
+  `TableQuery` (`{ page, limit, … }`) passed to `useServerData`'s
+  `onQueryChange` — forward both
   to your API and return `rows` + `total`; `total` drives the pager.
 
 ## Cursor pagination
@@ -195,9 +196,8 @@ it already receives — nothing else about the hook changes.
 - A URL `limit` outside **1–500** falls back to the default page size, and
   the rows-per-page control clamps to 1–500. `defaults.limit` is used as
   given.
-- `paginationMode` applies to every tier. On the `onQueryChange` tier
-  (`useServerData`) infinite mode appends each new page to the rows already
-  shown.
+- `paginationMode` applies to every tier. On a `useServerData` source
+  infinite mode appends each new page to the rows already shown.
 - `nextCursor` is read only when the source declares `supports: { cursor: true }`.
   Without that declaration the field is ignored and no `cursor` is ever sent,
   so an endpoint written before cursors existed keeps its exact query.

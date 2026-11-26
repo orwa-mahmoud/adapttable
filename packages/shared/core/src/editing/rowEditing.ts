@@ -13,6 +13,7 @@
 import type { RowCallback } from "../contracts/rowCallback";
 import type { FeatureHostState } from "../features/currentHost";
 import { runBeforeLayoutChange } from "../layout/layoutChange";
+import type { RowRekeyMoves } from "../state/rowRekeys";
 import type { TableStore } from "../state/tableStore";
 import {
   type EditableColumnLike,
@@ -203,6 +204,8 @@ export interface RowEditStore<TRow> {
     [row: NoInfer<TRow>, columnKeys: readonly string[]],
     void
   >;
+  /** Move the open row to its new id when a rekey moved it. */
+  readonly rekey: RowCallback<[moves: RowRekeyMoves<NoInfer<TRow>>], void>;
 }
 
 /** Every column a reader may edit on a given row. */
@@ -448,6 +451,14 @@ export function createRowEditStore<TRow>(
       if (disposed) return;
       commit.invalidate();
       close("cancel");
+    },
+    rekey(moves) {
+      const open = opened;
+      if (!open) return;
+      const id = moves.ids.get(open.rowId);
+      if (id === undefined) return;
+      opened = { ...open, rowId: id, row: moves.rows.get(id) ?? open.row };
+      write(id, state.get().drafts);
     },
     openedRow: () => opened?.row,
     seeds: () => opened?.seeds,

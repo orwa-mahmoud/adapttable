@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { getLabels, locales } from "./getLabels";
 import { loadLabels } from "./loadLabels";
+import { zh } from "./locales/zh";
+import { zhTW } from "./locales/zh-TW";
 
 describe("loadLabels", () => {
   it("loads the same preset getLabels returns for every bundled locale", async () => {
@@ -15,6 +17,13 @@ describe("loadLabels", () => {
       expect(await loadLabels(tag)).toBe(getLabels(tag));
     }
     expect(await loadLabels("ar-EG")).toBe(locales.ar);
+  });
+
+  it("reads an explicit script the way getLabels does", async () => {
+    for (const tag of ["zh-Hant", "zh-Hant-TW", "zh_HANT"]) {
+      expect(await loadLabels(tag), tag).toBe(zhTW);
+    }
+    expect(await loadLabels("zh-Hans")).toBe(zh);
   });
 
   it("resolves an unknown language to undefined instead of English", async () => {

@@ -241,6 +241,16 @@
         "default": "./dist/filters.cjs"
       }
     },
+    "./filtering": {
+      "import": {
+        "types": "./dist/filtering.d.ts",
+        "default": "./dist/filtering.js"
+      },
+      "require": {
+        "types": "./dist/filtering.d.cts",
+        "default": "./dist/filtering.cjs"
+      }
+    },
     "./header-filters": {
       "import": {
         "types": "./dist/header-filters.d.ts",
@@ -261,6 +271,16 @@
       "require": {
         "types": "./dist/column-menu.d.cts",
         "default": "./dist/column-menu.cjs"
+      }
+    },
+    "./column-layout": {
+      "import": {
+        "types": "./dist/column-layout.d.ts",
+        "default": "./dist/column-layout.js"
+      },
+      "require": {
+        "types": "./dist/column-layout.d.cts",
+        "default": "./dist/column-layout.cjs"
       }
     },
     "./editing": {
@@ -323,16 +343,6 @@
         "default": "./dist/export.cjs"
       }
     },
-    "./export-csv": {
-      "import": {
-        "types": "./dist/export-csv.d.ts",
-        "default": "./dist/export-csv.js"
-      },
-      "require": {
-        "types": "./dist/export-csv.d.cts",
-        "default": "./dist/export-csv.cjs"
-      }
-    },
     "./export-pdf": {
       "import": {
         "types": "./dist/export-pdf.d.ts",
@@ -391,6 +401,16 @@
       "require": {
         "types": "./dist/print.d.cts",
         "default": "./dist/print.cjs"
+      }
+    },
+    "./selection": {
+      "import": {
+        "types": "./dist/selection.d.ts",
+        "default": "./dist/selection.js"
+      },
+      "require": {
+        "types": "./dist/selection.d.cts",
+        "default": "./dist/selection.cjs"
       }
     },
     "./selection-stats": {
@@ -511,16 +531,6 @@
       "require": {
         "types": "./dist/columns.d.cts",
         "default": "./dist/columns.cjs"
-      }
-    },
-    "./features": {
-      "import": {
-        "types": "./dist/features.d.ts",
-        "default": "./dist/features.js"
-      },
-      "require": {
-        "types": "./dist/features.d.cts",
-        "default": "./dist/features.cjs"
       }
     }
   },

@@ -20,18 +20,17 @@
  */
 import type { CellContext, ColumnDef, Renderer } from "@adapttable/angular";
 import {
-  PIVOT_ROW_COLUMN_KEY,
   type PivotField,
   type PivotResult,
   type PivotRow,
-  pivotRowCaption,
   resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
+import { PIVOT_ROW_COLUMN_KEY, pivotRowCaption } from "@adapttable/core/pivot";
 
 import { AdaptPivotRowHeader } from "./rowHeader";
 
-export { PIVOT_ROW_COLUMN_KEY } from "@adapttable/core";
+export { PIVOT_ROW_COLUMN_KEY } from "@adapttable/core/pivot";
 
 import { PIVOT_ROW_INDENT, pivotTableLayout } from "@adapttable/core/binding";
 

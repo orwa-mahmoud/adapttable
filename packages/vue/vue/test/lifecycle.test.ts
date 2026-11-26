@@ -219,21 +219,15 @@ describe("retained feature resource failures", () => {
     if (!host) throw new Error("missing host");
     const failed: TableFeature<Row> = {
       id: "failed",
-      setup: (registry) => {
-        registry.onDispose(() => {
-          cleanup.push("registered");
-          throw new Error("cleanup failed");
-        });
-      },
       mount: () => {
         onScopeDispose(() => cleanup.push("scope"));
         throw new Error("mount failed");
       },
     };
-    expect(() => host.reconcile([failed])).toThrow(AggregateError);
-    expect(cleanup).toEqual(["registered", "scope"]);
+    expect(() => host.reconcile([failed])).toThrow("mount failed");
+    expect(cleanup).toEqual(["scope"]);
     scope.stop();
-    expect(cleanup).toEqual(["registered", "scope"]);
+    expect(cleanup).toEqual(["scope"]);
   });
   it("cleans all removed resources even if one throws", () => {
     const cleanup: string[] = [];
@@ -264,10 +258,11 @@ describe("retained feature resource failures", () => {
         },
       },
     ]);
-    expect(() => host.reconcile([])).toThrow(AggregateError);
-    expect(cleanup).toEqual(["a", "b"]);
+    // Newest first; the one failure surfaces as itself after every release.
+    expect(() => host.reconcile([])).toThrow("a");
+    expect(cleanup).toEqual(["b", "a"]);
     scope.stop();
-    expect(cleanup).toEqual(["a", "b"]);
+    expect(cleanup).toEqual(["b", "a"]);
   });
   it("chooses a duplicate winner consistently before any apply or mount", () => {
     const first = vi.fn(() => ({ value: 1 }));
@@ -351,7 +346,6 @@ it("retains explicit resource dependencies and tears down only replaced dependen
   const setup: NonNullable<TableFeature<Row>["setup"]> = (registry) => {
     registry.registerEditor("custom", () => null);
     registry.registerAggregator("one", () => 1);
-    return cleanup;
   };
   host.reconcile([{ id: "same", dependencies: [first], mount, setup }]);
   expect(flushValue).toBe(42);
@@ -362,13 +356,13 @@ it("retains explicit resource dependencies and tears down only replaced dependen
   expect(mounts).toHaveBeenCalledOnce();
   host.reconcile([{ id: "same", dependencies: [second], mount, setup }]);
   expect(mounts).toHaveBeenCalledTimes(2);
-  expect(cleanup).toHaveBeenCalledTimes(2);
+  expect(cleanup).toHaveBeenCalledTimes(1);
   host.dispose();
   host.dispose();
   host.reconcile([{ id: "ignored", mount }]);
   expect(mounts).toHaveBeenCalledTimes(2);
   scope.stop();
-  expect(cleanup).toHaveBeenCalledTimes(4);
+  expect(cleanup).toHaveBeenCalledTimes(2);
 });
 it.each([false, true])(
   "rolls back newly added features when a later mount fails, cleanupThrows=%s",
@@ -405,7 +399,7 @@ it.each([false, true])(
       },
     };
     expect(() => host.reconcile([first, failing])).toThrow(
-      cleanupThrows ? "composition and rollback failed" : "mount"
+      cleanupThrows ? "mount failed and its rollback failed too" : "mount"
     );
     expect(calls).toEqual(["cleanup"]);
     scope.stop();
@@ -449,7 +443,7 @@ it("surfaces disposal failures after every resource and state has been released"
       },
     },
   ]);
-  expect(() => host.dispose()).toThrow("feature disposal failed");
+  expect(() => host.dispose()).toThrow('cleanup failed for feature "a"');
   expect(calls).toEqual(["b"]);
   expect(state.get(KEY).value).toBeUndefined();
   scope.stop();

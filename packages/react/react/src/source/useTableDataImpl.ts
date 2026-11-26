@@ -1,6 +1,5 @@
 import {
   type ExtraFilters,
-  type FacetMap,
   type FeatureHostState,
   type FilterDef,
   type FilterEngine,
@@ -8,16 +7,13 @@ import {
   type FilterTypeSpec,
   isDeclarativeFilters,
   type PaginationMode,
-  type QueryAggregate,
   type QueryFilterGroup,
-  type QuerySupport,
   type SortableValue,
   type TableSource,
 } from "@adapttable/core";
 import {
   activeTierValue,
   createTableData,
-  INACTIVE_TIER_ROWS,
   type TableData,
   type TableDataPlan,
   tierRows,
@@ -37,14 +33,9 @@ import type { ColumnDef } from "../columnDef";
 import { resolveColumns } from "../columns/resolveColumns";
 import type { UseTableUrlStateOptions } from "../url/useTableUrlState";
 import { useFrontendData } from "./useFrontendData";
-import {
-  type TableQuery,
-  useServerData,
-  type UseServerDataOptions,
-} from "./useServerData";
+import type { TableQuery } from "./useServerData";
+export type { UseServerDataOptions } from "./useServerData";
 export type { UseTableDataResult } from "@adapttable/core/binding";
-
-export type { UseServerDataOptions };
 
 /**
  * Options for {@link useTableData}.
@@ -55,32 +46,22 @@ export interface UseTableDataOptions<TRow> extends Pick<
   UseTableUrlStateOptions,
   "urlAdapter" | "urlSync" | "defaults" | "urlKey" | "store"
 > {
-  /** Full-control tier: a prebuilt source (e.g. `useQuerySource`). */
+  /**
+   * A prebuilt source, used as-is: a server source (`useServerData`), a
+   * query-library source (`useQuerySource`) or any other `TableSource`.
+   */
   source?: TableSource<TRow>;
-  /** Frontend tier: the raw rows; the table filters/sorts/pages them. */
+  /** Frontend tier: every row; the table filters, sorts and pages them. */
   data?: readonly TRow[];
-  /** Server tier: total row count across all pages. */
-  total?: number;
-  /** Server tier: request in flight. */
+  /** Frontend tier: the rows are still loading. */
   loading?: boolean;
   /** Forwarded error. */
   error?: Error | null;
   /**
-   * Explicit data mode. `"server"` makes `onQueryChange` the data
-   * contract (the caller fetches); `"frontend"` keeps the table's own
-   * data processing and turns `onQueryChange` into a pure notification.
-   * Absent, the tier is inferred exactly as before: `data` alone →
-   * frontend; `data` + `onQueryChange` → server; `source` → source tier.
+   * Frontend tier: told of each committed change to page, page size, search,
+   * sort and filters, never of the mount. The table keeps processing `data`.
    */
-  mode?: "frontend" | "server";
-  /** Server tier: see {@link UseServerDataOptions.aggregates}. */
-  aggregates?: readonly QueryAggregate[];
-  /** Server tier: see {@link UseServerDataOptions.responseKey}. */
-  responseKey?: string;
-  /** Server tier: see {@link UseServerDataOptions.onQueryChange}. */
-  onQueryChange?: NonNullable<
-    Parameters<typeof useServerData<TRow>>[0]["onQueryChange"]
-  >;
+  onViewChange?: TableQueryHandler;
   /** Columns — their `filter` shorthands feed the runtime. */
   columns: readonly ColumnDef<TRow>[];
   /** Table-level filters: declarative array, or JSX for a hand-drawn form. */
@@ -112,18 +93,6 @@ export interface UseTableDataOptions<TRow> extends Pick<
   getSortValue?: (row: TRow, columnKey: string) => SortableValue;
   /** Active locale — drives per-column `i18n` path resolution. */
   locale?: string;
-  /**
-   * Server tier: what this endpoint can answer. `supports.facets`
-   * unlocks `query.facets` (checklist keys, or `facetKeys`).
-   */
-  supports?: QuerySupport;
-  /**
-   * Server tier: keys to send as `query.facets`. Defaults to every
-   * `checklist` definition when omitted.
-   */
-  facetKeys?: readonly string[];
-  /** Server tier: distinct-value counts from the last fetch. */
-  facets?: FacetMap;
   /** The host of THIS table — filter-type plugins resolve from here. */
   featureHost?: FeatureHostState;
 }
@@ -144,45 +113,10 @@ export type TableQueryHandler = (
 ) => void | Promise<void>;
 
 /**
- * The public `mode` prop surface, shared by every batteries-included
- * `<DataTable>`.
+ * What the frontend tier is given. Inert while the table reads a source.
  *
- * @typeParam _TRow - The row type. Every adapter writes `DataModeProps<TRow>`,
- * so the parameter stays; the query itself never mentions a row.
- *
- * @public
- */
-export type DataModeProps<_TRow = unknown> = {
-  /**
-   * Server tier: the aggregates to ask the endpoint for —
-   * `[{ key: "budget", fn: "sum" }]`. Sent only when `supports.aggregates`
-   * is declared, and layered under whatever the reader chooses in the
-   * grouping panel.
-   */
-  aggregates?: readonly QueryAggregate[];
-  /**
-   * Server tier: the `info.key` of the `onQueryChange` call the current
-   * `data` answers. Echo it back and a column's `formatAggregate` is told
-   * exactly which operation produced the numbers on screen, through a
-   * failure, a cancellation and a late `loading` flag alike.
-   */
-  responseKey?: string;
-} & (
-  | {
-      mode: "server";
-      onQueryChange: TableQueryHandler;
-    }
-  | {
-      mode?: "frontend";
-      onQueryChange?: TableQueryHandler;
-    }
-);
-
-/**
- * What the frontend tier is given. Inert while the table is on the server.
- *
- * The tier a table is not on still has its hook called, so it receives no
- * rows, no URL and no query callback. The facade itself stays.
+ * The frontend hook is called on every render, so while a source serves the
+ * rows it receives no rows and no URL. The facade itself stays.
  */
 function frontendTierInput<TRow>(input: {
   active: boolean;
@@ -190,7 +124,6 @@ function frontendTierInput<TRow>(input: {
   data: readonly TRow[] | undefined;
   runtime: FilterRuntime<TRow>;
   filterTreeFn: TableDataPlan<TRow>["filterTreeFn"];
-  isFrontendMode: boolean;
   loading: boolean | undefined;
 }) {
   const { runtime } = input;
@@ -201,36 +134,7 @@ function frontendTierInput<TRow>(input: {
     filterTreeFn: input.filterTreeFn,
     arrayExtraKeys: runtime.arrayExtraKeys,
     numberExtraKeys: runtime.numberExtraKeys,
-    isLoading: activeTierValue(input.isFrontendMode, input.loading, undefined),
-  };
-}
-
-/** What the server tier is given. Inert while the table is on the frontend. */
-function serverTierInput<TRow>(input: {
-  active: boolean;
-  urlSync: boolean | undefined;
-  data: readonly TRow[] | undefined;
-  runtime: FilterRuntime<TRow>;
-  onQueryChange: TableQueryHandler | undefined;
-  aggregates: readonly QueryAggregate[] | undefined;
-  responseKey: string | undefined;
-  supports: UseServerDataOptions<TRow>["supports"];
-  facetKeys: readonly string[] | undefined;
-  facets: FacetMap | undefined;
-}) {
-  const { active, runtime } = input;
-  return {
-    active,
-    urlSync: activeTierValue(active, input.urlSync, false),
-    rows: tierRows(active, input.data),
-    onQueryChange: activeTierValue(active, input.onQueryChange, undefined),
-    aggregates: activeTierValue(active, input.aggregates, undefined),
-    responseKey: activeTierValue(active, input.responseKey, undefined),
-    arrayExtraKeys: runtime.arrayExtraKeys,
-    numberExtraKeys: runtime.numberExtraKeys,
-    supports: activeTierValue(active, input.supports, undefined),
-    facetKeys: activeTierValue(active, input.facetKeys, undefined),
-    facets: activeTierValue(active, input.facets, undefined),
+    isLoading: activeTierValue(input.active, input.loading, undefined),
   };
 }
 
@@ -244,13 +148,9 @@ export function useTableDataWithEngine<TRow>(
   const {
     source,
     data,
-    total = 0,
     loading,
     error,
-    mode,
-    onQueryChange,
-    aggregates,
-    responseKey,
+    onViewChange,
     columns,
     filters,
     filterTypes,
@@ -261,9 +161,6 @@ export function useTableDataWithEngine<TRow>(
     getSearchText,
     getSortValue,
     locale,
-    supports,
-    facetKeys,
-    facets: serverFacets,
     featureHost,
     store,
     ...urlOptions
@@ -280,15 +177,13 @@ export function useTableDataWithEngine<TRow>(
     engine,
     source,
     data,
-    mode,
-    onQueryChange,
+    onViewChange,
     columns,
     declaredFilters: isDeclarativeFilters(filters) ? filters : undefined,
     filterTypes,
     featureHost,
     locale,
     filterFn,
-    facetKeys,
   });
   const { tier, runtime, filterFn: combinedFilterFn } = plan;
 
@@ -317,7 +212,6 @@ export function useTableDataWithEngine<TRow>(
       data,
       runtime,
       filterTreeFn: plan.filterTreeFn ? applyFilterTree : undefined,
-      isFrontendMode: mode === "frontend",
       loading,
     }),
     columns: resolvedColumns,
@@ -331,39 +225,9 @@ export function useTableDataWithEngine<TRow>(
     getSortValue,
     error,
   });
-  const server = useServerData<TRow>({
-    ...urlOptions,
-    store: tier === "server" ? store : undefined,
-    ...serverTierInput<TRow>({
-      active: tier === "server",
-      urlSync: urlOptions.urlSync,
-      data,
-      runtime,
-      onQueryChange,
-      aggregates,
-      responseKey,
-      supports,
-      facetKeys: plan.facetKeys,
-      facets: serverFacets,
-    }),
-    // A column's default aggregate is a request to the server; the hook that
-    // would send it only runs for the server tier, so only that tier reads it.
-    columns: tier === "server" ? resolvedColumns : INACTIVE_TIER_ROWS,
-    total,
-    loading,
-    error,
-    paginationMode,
-    forceMobile,
-    mobileBreakpoint,
-  });
-
-  let resolved: TableSource<TRow>;
-  if (source) resolved = source;
-  else if (tier === "server") resolved = server;
-  else resolved = frontend;
-
+  const resolved = source ?? frontend;
   const sourced = controller.finish({ resolved, frontend });
-  // Once React accepts the render: tell a frontend table's `onQueryChange`
+  // Once React accepts the render: tell a frontend table's `onViewChange`
   // about a change.
   useEffect(() => {
     controller.commit();

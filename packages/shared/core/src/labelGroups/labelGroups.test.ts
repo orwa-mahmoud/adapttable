@@ -17,6 +17,7 @@ import { ROW_LABELS } from "./rowLabels";
 import { SAVED_VIEW_LABELS } from "./savedViewLabels";
 import { resolveFeatureLabels, resolveTableLabels } from "./tableLabels";
 import { VIEW_CONTROL_LABELS } from "./viewControlLabels";
+import { VIRTUALIZE_LABELS } from "./virtualizeLabels";
 
 const GROUPS = {
   ACTION_LABELS,
@@ -33,6 +34,7 @@ const GROUPS = {
   ROW_LABELS,
   SAVED_VIEW_LABELS,
   VIEW_CONTROL_LABELS,
+  VIRTUALIZE_LABELS,
 };
 
 type GroupKeys = {

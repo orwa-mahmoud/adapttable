@@ -195,8 +195,6 @@ export const ko: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "결정을 기다리는 변경이 있습니다.",
-  pendingProposals: (count) =>
-    count === 1 ? "제안된 변경 1개" : `제안된 변경 ${String(count)}개`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -337,10 +335,6 @@ export const ko: Required<TableLabels> = {
       error: "오류",
       disconnected: "연결 안 됨",
     })[status] ?? "준비됨",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "행 추가",
   duplicateRow: "행 복제",
@@ -358,10 +352,8 @@ export const ko: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `행을 ${String(from)}에서 ${String(to)}(으)로 옮겼습니다`,
   rowReorderCancelled: "순서 변경을 취소했습니다",
-  rowMoveOptions: "행 이동 옵션",
   moveToGroup: "그룹으로 이동…",
   moveUnder: "하위로 이동…",
-  moveToTopLevel: "최상위로 이동",
   confirmRowMoveTitle: "행 이동 확인",
   confirmRowMoveDescription: (row, from, to) =>
     `${row}을(를) ${from}에서 ${to}(으)로 이동할까요?`,
@@ -397,9 +389,7 @@ export const ko: Required<TableLabels> = {
   removeGroupingColumn: (label) => `그룹화에서 ${label} 제거`,
   moveGroupingColumn: (label) => `${label} 그룹화 이동`,
   groupingDropToRemove: "그룹화를 제거하려면 여기에 놓으세요",
-  groupingAggregateColumn: "집계 열",
   groupingAggregation: "그룹 집계",
-  groupingAggregationDefault: "기본값",
   groupingAggregationNone: "없음",
   groupingAggregations: "집계",
   groupingAddAggregation: "집계 열 추가",
@@ -469,7 +459,6 @@ export const ko: Required<TableLabels> = {
   noticeVirtualizePaged:
     "가상화는 꺼져 있습니다. 이 페이지 테이블은 한 번에 한 페이지만 보여 줍니다.",
   noticePinNested: "그룹화 또는 트리가 켜져 있으면 행 고정은 꺼집니다.",
-  noticeReorderNested: "그룹화 또는 트리가 켜져 있으면 행 재배치는 꺼집니다.",
   noticeGroupingUnavailable:
     "그룹화가 꺼져 있습니다. 이 소스는 그룹화할 수 없습니다.",
   noticeExportAllPage:

@@ -28,6 +28,7 @@ import {
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 
+import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { filtersTests } from "../../angular/test/kit/suites/filters";
 import { AdaptHeaderFilterTrigger } from "../header-filters/headerFilterTrigger";
 import { kit } from "../testing/kit";
@@ -130,8 +131,7 @@ const DEFS: FilterDef<Person>[] = [
       [rowKey]="rowKey"
       [urlSync]="false"
       [forceMobile]="false"
-      [features]="features()"
-      [filtersMode]="mode()"
+      [features]="shown()"
       [labels]="labels()"
     />
   `,
@@ -139,6 +139,11 @@ const DEFS: FilterDef<Person>[] = [
 class Host {
   readonly features = input([filters(DEFS)]);
   readonly mode = input<FiltersMode>("popover");
+  readonly shown = computed(() =>
+    declareFeatureOptions(this.features(), {
+      filters: { filtersMode: this.mode() },
+    })
+  );
   readonly labels = input<Partial<TableLabels> | undefined>(undefined);
   readonly custom =
     viewChild.required<TemplateRef<FilterWidgetRenderProps<Person>>>("custom");

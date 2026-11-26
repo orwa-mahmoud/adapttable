@@ -33,6 +33,7 @@ export type {
   ValidationCheckResult,
   ValidationTarget,
 } from "@adapttable/core";
+import { useRowRekeyMoves } from "../hooks/useRowRekeyMoves";
 import { TableStoreContext } from "../state/tableStoreContext";
 
 /** What {@link useEditValidation} needs. */
@@ -62,6 +63,7 @@ export function useEditValidation<TRow>(
     createEditValidationStore<TRow>(options, { store: table })
   );
   store.configure(options);
+  useRowRekeyMoves(store);
   const snapshot = useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,

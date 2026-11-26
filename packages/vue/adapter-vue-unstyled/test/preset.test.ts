@@ -4,6 +4,7 @@ import { renderToString } from "vue/server-renderer";
 
 import { DataTable } from "../src";
 import { standardFeatures } from "../src/preset";
+import { selection } from "../src/selection";
 import {
   click,
   find,
@@ -28,18 +29,20 @@ const base = {
   urlSync: false,
   searchable: false,
 };
-const zeroIds = [
+/** The column-layout family, then the other fixed members. */
+const fixedIds = [
   "column-menu",
+  "resizable-columns",
+  "fit-columns",
   "density-chooser",
   "export-csv",
   "find-in-table",
-  "fit-columns",
   "fullscreen",
-  "header-filters",
   "multi-sort",
-  "resizable-columns",
   "status-bar",
 ];
+/** With no filters given, the header controls stand alone. */
+const zeroIds = [...fixedIds, "header-filters"];
 
 describe("standard native features", () => {
   it("composes useful zero-configuration features and only explicitly configured optional members", () => {
@@ -52,10 +55,11 @@ describe("standard native features", () => {
       savedViews: { storageKey: "people", storage: null },
     });
     expect(configured.map(({ id }) => id)).toEqual([
-      ...zeroIds,
+      ...fixedIds,
       "grouping",
       "bulk-actions",
       "filters",
+      "header-filters",
       "saved-views",
     ]);
   });
@@ -128,13 +132,17 @@ describe("standard native features", () => {
     const { host } = mountNative(() =>
       h(DataTable<Row>, {
         ...base,
-        defaultSelectedIds: ["g"],
-        features: standardFeatures<Row>({
-          grouping: "team",
-          bulkActions: [{ key: "archive", label: "Archive", onClick: run }],
-          filters: [{ key: "name", type: "text", getValue: (row) => row.name }],
-          savedViews: { storageKey: "preset-people", storage: null },
-        }),
+        features: [
+          selection({ defaultSelectedIds: ["g"] }),
+          ...standardFeatures<Row>({
+            grouping: "team",
+            bulkActions: [{ key: "archive", label: "Archive", onClick: run }],
+            filters: [
+              { key: "name", type: "text", getValue: (row) => row.name },
+            ],
+            savedViews: { storageKey: "preset-people", storage: null },
+          }),
+        ],
       })
     );
     await tick();

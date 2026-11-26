@@ -14,12 +14,12 @@ import type {
   RowWindow,
 } from "@adapttable/ai";
 import {
-  applyTableFeatures,
   FeatureProviders,
   type TableRuntimeView,
   useFeatureState,
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
+import { applyTableFeatures } from "@adapttable/react/features";
 import { render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -45,7 +45,11 @@ const ROWS: Row[] = [
 
 /** Publishes a runtime view with NO `neutralTable` — the server-tier shape. */
 function Publisher({ view }: { view: TableRuntimeView<Row> }) {
-  usePublishTableRuntime(view.visibleRows ?? view.rows, undefined, view);
+  usePublishTableRuntime({
+    rows: () => view.visibleRows ?? view.rows,
+    labels: () => undefined,
+    view: () => view,
+  });
   return null;
 }
 

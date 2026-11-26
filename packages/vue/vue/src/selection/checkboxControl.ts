@@ -36,7 +36,7 @@ export function selectionCheckboxControl(
 /**
  * Attributes for a kit control that owns its value/change API. Forward these
  * to that kit's actual checkbox target and connect `onToggle` exactly once.
- * The legacy native listener must not also handle a kit's change event.
+ * The native `onChange` listener must not also handle a kit's change event.
  * ARIA, data, refs, keyboard, disabled and form attributes remain untouched.
  */
 export function selectionCheckboxInputAttrs(attrs: Attrs): Attrs {

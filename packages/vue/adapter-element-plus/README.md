@@ -8,6 +8,7 @@ AdaptTable's Vue data table with Element Plus controls and card surfaces.
 <script setup lang="ts">
 import { ref } from "vue";
 import { DataTable, type ColumnDef } from "@adapttable/element-plus";
+import { selection } from "@adapttable/element-plus/selection";
 import "element-plus/dist/index.css";
 import "@adapttable/element-plus/styles.css";
 
@@ -26,29 +27,31 @@ const columns: ColumnDef<Person>[] = [
   { key: "score", header: "Score", sortable: true },
 ];
 const selectedIds = ref<string[]>([]);
+function changeSelection(ids: string[]) {
+  selectedIds.value = ids;
+}
 const rowKey = (row: Person) => row.id;
 </script>
 
 <template>
   <DataTable
-    v-model:selected-ids="selectedIds"
     :data="rows"
     :columns="columns"
     :row-key="rowKey"
     :url-sync="false"
-    selectable
+    :features="[selection({ selectedIds, onSelectionChange: changeSelection })]"
   />
 </template>
 ```
 
-## Combined feature imports
+## Feature imports
 
-Use `@adapttable/element-plus/features` to compose the kit's native factories from
-one optional entry. Individual feature subpaths remain available; the base
-`DataTable` import does not load this barrel.
+Import each factory from its own entry. The base `DataTable` import does not
+load a feature.
 
 ```ts
-import { editing, filters } from "@adapttable/element-plus/features";
+import { editing } from "@adapttable/element-plus/editing";
+import { filters } from "@adapttable/element-plus/filters";
 ```
 
 The factories retain their individual signatures, native controls and

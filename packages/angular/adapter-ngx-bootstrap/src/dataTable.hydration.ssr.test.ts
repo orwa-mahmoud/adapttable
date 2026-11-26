@@ -13,7 +13,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 
 import type { ColumnDef } from "@adapttable/angular";
-import { standardPreset } from "@adapttable/ngx-bootstrap/preset";
+import { standardFeatures } from "@adapttable/ngx-bootstrap/preset";
 import { virtualize } from "@adapttable/ngx-bootstrap/virtualize";
 import {
   type ApplicationRef,
@@ -75,7 +75,7 @@ class App {
   readonly columns = COLUMNS;
   readonly rowKey = (row: City) => row.id;
   readonly features = [
-    ...standardPreset<City>({ filters: [] }),
+    ...standardFeatures<City>({ filters: [] }),
     virtualize({ estimateRowSize: 40 }),
   ];
 }

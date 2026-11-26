@@ -9,9 +9,10 @@ import {
   type CellRange,
 } from "@adapttable/vue-unstyled/cell-navigation";
 import { editing } from "@adapttable/vue-unstyled/editing";
-import { exportCsv } from "@adapttable/vue-unstyled/export-csv";
+import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { findInTable } from "@adapttable/vue-unstyled/find-in-table";
 import { rowReorder } from "@adapttable/vue-unstyled/row-reorder";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import { tree } from "@adapttable/vue-unstyled/tree";
 import { virtualize } from "@adapttable/vue-unstyled/virtualize";
@@ -150,52 +151,56 @@ const edit = editing<UnionRow>((row, key, value) => {
     score: Number(value),
   }));
 });
-const reorder = computed(() =>
-  rowReorder<UnionRow>(
-    (from, to, row) => {
+const reorder = rowReorder<UnionRow>(
+  (from, to, row) => {
+    moveRequests.value++;
+    if (!acceptMoves.value) return;
+    acceptedMoves.value++;
+    rows.value = reorderSiblings(rows.value, row.id, from, to);
+  },
+  () => ({
+    movePolicy: "confirm",
+    confirmMove: nativeConfirmation.value
+      ? undefined
+      : (request) => {
+          pendingMove.value = request.row.id;
+          return new Promise<boolean>((resolve) => {
+            settleMove = resolve;
+          });
+        },
+    onTreeMove: (row, _from, to, position) => {
       moveRequests.value++;
       if (!acceptMoves.value) return;
       acceptedMoves.value++;
-      rows.value = reorderSiblings(rows.value, row.id, from, to);
+      const remaining = withoutRow(rows.value, row.id);
+      if (to.id === null) {
+        const next = [...remaining];
+        next.splice(position, 0, row);
+        rows.value = next;
+      } else {
+        rows.value = updateRow(remaining, to.id, (parent) => {
+          const children = [...(parent.children ?? [])];
+          children.splice(position, 0, row);
+          return { ...parent, children };
+        });
+      }
     },
-    {
-      movePolicy: "confirm",
-      confirmMove: nativeConfirmation.value
-        ? undefined
-        : (request) => {
-            pendingMove.value = request.row.id;
-            return new Promise<boolean>((resolve) => {
-              settleMove = resolve;
-            });
-          },
-      onTreeMove: (row, _from, to, position) => {
-        moveRequests.value++;
-        if (!acceptMoves.value) return;
-        acceptedMoves.value++;
-        const remaining = withoutRow(rows.value, row.id);
-        if (to.id === null) {
-          const next = [...remaining];
-          next.splice(position, 0, row);
-          rows.value = next;
-        } else {
-          rows.value = updateRow(remaining, to.id, (parent) => {
-            const children = [...(parent.children ?? [])];
-            children.splice(position, 0, row);
-            return { ...parent, children };
-          });
-        }
-      },
-    }
-  )
+  })
 );
 const features = computed(() => [
+  selection({
+    selectedIds,
+    onSelectionChange: (ids) => {
+      selectedIds.value = ids;
+    },
+  }),
   hierarchy,
   virtualize({ maxHeight: 320, virtualOverscan: 2, virtualizeColumns: true }),
   navigation,
   findInTable({ button: true }),
   statusBar(),
   edit,
-  reorder.value,
+  reorder,
   exportCsv<UnionRow>({
     scope: scope.value,
     request: (info) => {
@@ -303,7 +308,6 @@ function replaceRows(): void {
     <KeepAlive>
       <DataTable
         v-if="shown"
-        v-model:selected-ids="selectedIds"
         data-demo-table="feature-union"
         :data="rows"
         :columns="columns"
@@ -316,7 +320,6 @@ function replaceRows(): void {
         :searchable="false"
         :url-sync="false"
         :dir="rtl ? 'rtl' : 'ltr'"
-        selectable
         table-label="Combined feature records"
       />
     </KeepAlive>

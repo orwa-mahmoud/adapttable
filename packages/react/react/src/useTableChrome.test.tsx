@@ -1,24 +1,37 @@
 import { buildTableCsv } from "@adapttable/core";
 import { resetDevWarnings } from "@adapttable/core/binding";
 import { act, render, renderHook } from "@testing-library/react";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { type TableChrome } from "./chrome/tableChromeContract";
 import { printToolbar, undoRedoToolbar } from "./chrome/toolbarChrome";
 import type { ColumnDef } from "./columnDef";
 import { ChromeExtrasGate } from "./features/chromeExtrasGate";
 import { dirtyIndicators } from "./features/editing";
 import { bulkActions, pinnedSummaryRows } from "./features/factories";
+import { useFeatureState } from "./features/featureState";
 import { filters } from "./features/filters";
 import { grouping } from "./features/grouping";
 import { groupingPanel } from "./features/grouping-panel";
 import { FeatureProviders } from "./features/providers";
 import { rowActions } from "./features/row-actions";
 import { rowPinning } from "./features/row-pinning";
-import { rowReorder } from "./features/row-reorder";
-import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
+import {
+  FILTER_CHIPS_STATE,
+  GROUPING_PANEL_VIEW_STATE,
+  GROUPING_STATE,
+  ROW_ACTIONS_STATE,
+  ROW_PINNING_STATE,
+  type RowActionsState,
+  TREE_STATE,
+} from "./features/stateKeys";
+import { applyTableFeatures } from "./features/tableFeature";
 import { tree } from "./features/tree";
+import {
+  type LiveChromeResult,
+  renderLiveChrome,
+} from "./liveChrome.test-utils";
+import type { RowPinningState } from "./rows/rowPinning";
 import { useFrontendData } from "./source/useFrontendData";
 import { createMemoryAdapter } from "./url/adapter";
 import { useTableChrome } from "./useTableChrome";
@@ -32,40 +45,6 @@ const ROWS: Row[] = [
   { id: "b", name: "Bob" },
 ];
 const columns: ColumnDef<Row>[] = [{ key: "name", header: "Name" }];
-
-function renderLiveChrome<TRow>(
-  features: readonly TableFeature<TRow>[],
-  build: () => Parameters<typeof useTableChrome<TRow>>[0]
-) {
-  const applied = applyTableFeatures({ features });
-  const box: { current: TableChrome<TRow> } = {
-    current: undefined as unknown as TableChrome<TRow>,
-  };
-  function Probe() {
-    const props = build();
-    const chromeProps = { ...applied, ...props };
-    const base = useTableChrome<TRow>(chromeProps);
-    return (
-      <ChromeExtrasGate chrome={base} props={chromeProps}>
-        {(overlaid) => {
-          box.current = overlaid;
-          return null;
-        }}
-      </ChromeExtrasGate>
-    );
-  }
-  const tree = (
-    <FeatureProviders props={applied}>
-      <Probe />
-    </FeatureProviders>
-  );
-  const view = render(tree);
-  return {
-    result: box,
-    unmount: view.unmount,
-    rerender: () => view.rerender(tree),
-  };
-}
 
 function mount(
   initial = "",
@@ -130,40 +109,90 @@ describe("useTableChrome", () => {
   it("merges label chips with extraChips and counts them", () => {
     const adapter = createMemoryAdapter("f_status=Active");
     const extraChips = [{ key: "x", label: "X", onRemove: vi.fn() }];
-    const { result } = renderLiveChrome([filters<Row>([])], () => {
-      const source = useFrontendData<Row>({
-        data: ROWS,
-        urlAdapter: adapter,
-        columns,
-        paginationMode: "paged",
-      });
-      return {
-        source,
-        columns,
-        rowKey: (r) => r.id,
-        filterLabels: { status: (v) => `Status: ${v}` },
-        extraChips,
-      };
-    });
-    expect(result.current.mergedChips.map((c) => c.label)).toContain(
-      "Status: Active"
+    const { result } = renderLiveChrome(
+      [filters<Row>([])],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: adapter,
+          columns,
+          paginationMode: "paged",
+        });
+        return {
+          source,
+          columns,
+          rowKey: (r) => r.id,
+          filterLabels: { status: (v) => `Status: ${v}` },
+          extraChips,
+        };
+      },
+      [FILTER_CHIPS_STATE]
     );
-    expect(result.current.mergedChips.map((c) => c.label)).toContain("X");
-    expect(result.current.activeFilterCount).toBe(
-      result.current.mergedChips.length
+    const chips = result.state(FILTER_CHIPS_STATE)?.chips.map((c) => c.label);
+    expect(chips).toContain("Status: Active");
+    expect(chips).toContain("X");
+    expect(result.state(FILTER_CHIPS_STATE)?.activeFilterCount).toBe(
+      chips?.length
     );
   });
 
-  it("returns only extraChips when there are no label chips", () => {
-    const { result } = mount("", {
-      extraChips: [{ key: "x", label: "Only", onRemove: vi.fn() }],
-    });
-    expect(result.current.mergedChips.map((c) => c.label)).toEqual(["Only"]);
+  it("publishes only extraChips when there are no label chips", () => {
+    const { result } = renderLiveChrome(
+      [filters<Row>([])],
+      () => ({
+        source: useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        }),
+        columns,
+        rowKey: (r) => r.id,
+        extraChips: [{ key: "x", label: "Only", onRemove: vi.fn() }],
+      }),
+      [FILTER_CHIPS_STATE]
+    );
+    expect(result.state(FILTER_CHIPS_STATE)?.chips.map((c) => c.label)).toEqual(
+      ["Only"]
+    );
   });
 
   it("honours an explicit activeFilterCount override", () => {
-    const { result } = mount("", { activeFilterCount: 7 });
-    expect(result.current.activeFilterCount).toBe(7);
+    const { result } = renderLiveChrome(
+      [filters<Row>([])],
+      () => ({
+        source: useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        }),
+        columns,
+        rowKey: (r) => r.id,
+        activeFilterCount: 7,
+      }),
+      [FILTER_CHIPS_STATE]
+    );
+    expect(result.state(FILTER_CHIPS_STATE)?.activeFilterCount).toBe(7);
+  });
+
+  it("publishes no chips without the filters feature", () => {
+    const { result } = renderLiveChrome(
+      [],
+      () => ({
+        source: useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        }),
+        columns,
+        rowKey: (r) => r.id,
+        extraChips: [{ key: "x", label: "Only", onRemove: vi.fn() }],
+      }),
+      [FILTER_CHIPS_STATE]
+    );
+    expect(result.state(FILTER_CHIPS_STATE)).toBeUndefined();
   });
 
   it("exposes the headless table and a getRowId", () => {
@@ -210,7 +239,7 @@ describe("useTableChrome", () => {
     );
 
     // The view facade presents the full filtered set as one page.
-    expect(result.current.grouping).toBeDefined();
+    expect(result.state(GROUPING_STATE)).toBeDefined();
     expect(result.current.source.rows).toHaveLength(30);
     expect(result.current.table.pagination.totalPages).toBe(1);
     expect(result.current.table.pagination.fromIndex).toBe(1);
@@ -251,13 +280,13 @@ describe("useTableChrome", () => {
         groupBy: "name",
       };
     });
-    const before = result.current.grouping;
+    const before = result.state(GROUPING_STATE);
     expect(before).toBeDefined();
     // Uncommitted keystrokes re-render the table but must not rebuild the
     // O(filtered rows) grouped flat model.
     act(() => result.current.table.setSearchValue("p"));
     act(() => result.current.table.setSearchValue("p1"));
-    expect(result.current.grouping).toBe(before);
+    expect(result.state(GROUPING_STATE)).toBe(before);
   });
 
   it("CSV export columns are identical on desktop and mobile viewports", () => {
@@ -313,12 +342,18 @@ describe("useTableChrome", () => {
         groupBy: "name",
       };
     });
-    expect(result.current.groupingPanel?.groupBy).toEqual(["name"]);
-    expect(result.current.groupingPanel?.aggregateOverrides).toEqual({
-      team: "sum",
-    });
-    expect(result.current.groupingPanel?.canSetAggregates).toBe(true);
-    expect(result.current.groupingPanel?.add).toEqual(expect.any(Function));
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.groupBy).toEqual(["name"]);
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.aggregateOverrides).toEqual(
+      {
+        team: "sum",
+      }
+    );
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.canSetAggregates).toBe(
+      true
+    );
+    expect(result.state(GROUPING_PANEL_VIEW_STATE)?.add).toEqual(
+      expect.any(Function)
+    );
   });
 
   it("without grouping the source passes through untouched", () => {
@@ -381,7 +416,8 @@ describe("useTableChrome", () => {
           rowKey: (r) => r.id,
           filterDefs: [{ key: "name", type: "text", label: "Person" }],
         };
-      }
+      },
+      [FILTER_CHIPS_STATE]
     );
     act(() =>
       result.current.source.setFilterTree?.({
@@ -390,11 +426,13 @@ describe("useTableChrome", () => {
       })
     );
     expect(
-      result.current.mergedChips.some((chip) => chip.label.includes("Ada"))
+      result
+        .state(FILTER_CHIPS_STATE)
+        ?.chips.some((chip) => chip.label.includes("Ada"))
     ).toBe(true);
     act(() => result.current.clearFilters());
     expect(result.current.source.filterTree).toBeUndefined();
-    expect(result.current.mergedChips).toEqual([]);
+    expect(result.state(FILTER_CHIPS_STATE)?.chips).toEqual([]);
   });
 
   it("onGroupByChange observes — a logging handler never breaks grouping", () => {
@@ -416,8 +454,8 @@ describe("useTableChrome", () => {
         onGroupByChange,
       };
     });
-    expect(result.current.grouping).toBeDefined();
-    act(() => result.current.grouping!.setGroupBy(null));
+    expect(result.state(GROUPING_STATE)).toBeDefined();
+    act(() => result.state(GROUPING_STATE)!.setGroupBy(null));
     // An explicit empty marker keeps the cleared choice across kit remounts.
     expect(onGroupByChange).toHaveBeenCalledTimes(1);
     expect(onGroupByChange).toHaveBeenCalledWith([]);
@@ -473,71 +511,6 @@ describe("useTableChrome", () => {
     }
   });
 
-  it("keeps row reorder armed when grouping is composed", () => {
-    resetDevWarnings();
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    try {
-      // The chrome no longer builds the reorder state; it reads what the
-      // feature's provider published, which is why this needs the provider.
-      const composed = applyTableFeatures({
-        features: [rowReorder(vi.fn())],
-      });
-      const wrapper = ({ children }: { children: ReactNode }) => (
-        <FeatureProviders props={composed}>{children}</FeatureProviders>
-      );
-      const chrome = (
-        extra: Partial<Parameters<typeof useTableChrome<Row>>[0]>
-      ) =>
-        renderHook(
-          () => {
-            const source = useFrontendData<Row>({
-              data: ROWS,
-              urlAdapter: createMemoryAdapter(""),
-              columns,
-              paginationMode: "paged",
-            });
-            return useTableChrome<Row>({
-              source,
-              columns,
-              rowKey: (r) => r.id,
-              ...extra,
-            });
-          },
-          { wrapper }
-        );
-
-      const { result } = chrome({});
-      expect(result.current.hasRowReorder).toBe(true);
-      expect(result.current.rowReorder).toBeDefined();
-
-      warn.mockClear();
-      resetDevWarnings();
-      const grouped = renderLiveChrome(
-        [rowReorder(vi.fn()), grouping("name")],
-        () => {
-          const source = useFrontendData<Row>({
-            data: ROWS,
-            urlAdapter: createMemoryAdapter(""),
-            columns,
-            paginationMode: "paged",
-          });
-          return {
-            source,
-            columns,
-            rowKey: (r: Row) => r.id,
-            groupBy: "name",
-          };
-        }
-      );
-      expect(grouped.result.current.hasRowReorder).toBe(true);
-      expect(grouped.result.current.rowReorder).toBeDefined();
-      expect(warn).not.toHaveBeenCalled();
-    } finally {
-      warn.mockRestore();
-      resetDevWarnings();
-    }
-  });
-
   it("arms row pinning when the feature is composed, and warns under grouping", () => {
     resetDevWarnings();
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
@@ -550,7 +523,13 @@ describe("useTableChrome", () => {
         rowKey,
         onPinnedRowIdsChange,
       });
-      let chrome: TableChrome<Row> | undefined;
+      let pins: RowPinningState<unknown> | undefined;
+      let actions: RowActionsState | undefined;
+      function StateProbe() {
+        pins = useFeatureState(ROW_PINNING_STATE);
+        actions = useFeatureState(ROW_ACTIONS_STATE);
+        return null;
+      }
       function Probe(bits: { groupBy?: string }) {
         const source = useFrontendData<Row>({
           data: ROWS,
@@ -562,10 +541,7 @@ describe("useTableChrome", () => {
         const base = useTableChrome<Row>(chromeProps);
         return (
           <ChromeExtrasGate chrome={base} props={chromeProps}>
-            {(overlaid) => {
-              chrome = overlaid;
-              return null;
-            }}
+            {() => <StateProbe />}
           </ChromeExtrasGate>
         );
       }
@@ -574,9 +550,11 @@ describe("useTableChrome", () => {
           <Probe />
         </FeatureProviders>
       );
-      expect(chrome?.rowPinning).toBeDefined();
-      expect(chrome?.hasRowActions).toBe(true);
-      expect(chrome?.rowActions?.some((a) => a.key.includes("pin"))).toBe(true);
+      expect(pins).toBeDefined();
+      expect(actions?.hasRowActions).toBe(true);
+      expect(actions?.rowActions?.some((a) => a.key.includes("pin"))).toBe(
+        true
+      );
 
       const groupedProps = applyTableFeatures({
         features: [rowPinning({ onPinnedRowIdsChange }), grouping("name")],
@@ -592,7 +570,7 @@ describe("useTableChrome", () => {
           <Probe groupBy="name" />
         </FeatureProviders>
       );
-      expect(chrome?.rowPinning).toBeUndefined();
+      expect(pins).toBeUndefined();
       expect(
         warn.mock.calls.some((call) => String(call[0]).includes("row pinning"))
       ).toBe(true);
@@ -628,7 +606,7 @@ describe("useTableChrome", () => {
       }
     );
     expect(result.current.pinnedRows?.top).toEqual([totals]);
-    expect(result.current.grouping).toBeDefined();
+    expect(result.state(GROUPING_STATE)).toBeDefined();
   });
 
   it("publishes host-owned summary rows even when the table is a tree", () => {
@@ -657,7 +635,7 @@ describe("useTableChrome", () => {
       }
     );
     expect(result.current.pinnedRows?.bottom).toEqual([totals]);
-    expect(result.current.tree).toBeDefined();
+    expect(result.state(TREE_STATE)).toBeDefined();
   });
 
   it("controlled selection: change requests go to the handler, state stays put", () => {
@@ -799,34 +777,34 @@ describe("useTableChrome — the whole-tree grouping actions", () => {
         };
       }
     );
-  const headers = (result: {
-    current: { grouping?: { entries: readonly { kind: string }[] } };
-  }) =>
-    result.current.grouping!.entries.filter((entry) => entry.kind === "group");
+  const headers = (result: LiveChromeResult<Person>) =>
+    result
+      .state(GROUPING_STATE)!
+      .entries.filter((entry) => entry.kind === "group");
 
   it("collapses everything, then opens it again", () => {
     const { result } = setup();
     expect(headers(result)).toHaveLength(5);
-    act(() => result.current.grouping!.collapseAll());
+    act(() => result.state(GROUPING_STATE)!.collapseAll());
     // Only the outermost headers survive a full collapse.
     expect(headers(result)).toHaveLength(2);
-    act(() => result.current.grouping!.expandAll());
+    act(() => result.state(GROUPING_STATE)!.expandAll());
     expect(headers(result)).toHaveLength(5);
   });
 
   it("shows the tree down to a depth", () => {
     const { result } = setup();
-    act(() => result.current.grouping!.collapseToDepth(1));
+    act(() => result.state(GROUPING_STATE)!.collapseToDepth(1));
     // Depth 1 keeps the top level open and closes what is inside it.
     expect(headers(result)).toHaveLength(5);
-    act(() => result.current.grouping!.collapseToDepth(0));
+    act(() => result.state(GROUPING_STATE)!.collapseToDepth(0));
     expect(headers(result)).toHaveLength(2);
   });
 
   it("reveals another page of groups", () => {
     const { result } = setup({ groupBy: "role", groupPageSize: 1 });
     expect(headers(result)).toHaveLength(1);
-    act(() => result.current.grouping!.showMore({ scope: "groups" }));
+    act(() => result.state(GROUPING_STATE)!.showMore({ scope: "groups" }));
     expect(headers(result)).toHaveLength(2);
   });
 
@@ -838,10 +816,12 @@ describe("useTableChrome — the whole-tree grouping actions", () => {
       onGroupLoadMore,
     });
     const leaves = () =>
-      result.current.grouping!.entries.filter((entry) => entry.kind === "row");
+      result
+        .state(GROUPING_STATE)!
+        .entries.filter((entry) => entry.kind === "row");
     expect(leaves()).toHaveLength(2);
     act(() =>
-      result.current.grouping!.showMore({
+      result.state(GROUPING_STATE)!.showMore({
         scope: "rows",
         groupKey: "group:role:s:Core",
       })
@@ -859,27 +839,29 @@ describe("useTableChrome — row mutations and lazy tree", () => {
     const hostActions = [
       { key: "edit", label: "Edit", onClick: () => undefined },
     ];
-    const { result } = renderLiveChrome([rowActions<Row>(hostActions)], () => {
-      const source = useFrontendData<Row>({
-        data: ROWS,
-        urlAdapter: adapter,
-        columns,
-        paginationMode: "paged",
-      });
-      return {
-        source,
-        columns,
-        rowKey: (r) => r.id,
-        rowActions: hostActions,
-        onDuplicateRow: vi.fn(),
-        onDeleteRow: vi.fn(),
-      };
-    });
-    expect(result.current.rowActions?.map((action) => action.key)).toEqual([
-      "edit",
-      "adapttable:duplicate-row",
-      "adapttable:delete-row",
-    ]);
+    const { result } = renderLiveChrome(
+      [rowActions<Row>(hostActions)],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: adapter,
+          columns,
+          paginationMode: "paged",
+        });
+        return {
+          source,
+          columns,
+          rowKey: (r) => r.id,
+          rowActions: hostActions,
+          onDuplicateRow: vi.fn(),
+          onDeleteRow: vi.fn(),
+        };
+      },
+      [ROW_ACTIONS_STATE]
+    );
+    expect(
+      result.state(ROW_ACTIONS_STATE)?.rowActions?.map((action) => action.key)
+    ).toEqual(["edit", "adapttable:duplicate-row", "adapttable:delete-row"]);
   });
 
   it("loads children when a collapsed lazy node is opened", async () => {
@@ -901,9 +883,9 @@ describe("useTableChrome — row mutations and lazy tree", () => {
         onLoadChildren,
       };
     });
-    expect(result.current.tree?.entries[0]?.expanded).toBe(false);
+    expect(result.state(TREE_STATE)?.entries[0]?.expanded).toBe(false);
     await act(async () => {
-      result.current.tree?.expansion.toggle("a");
+      result.state(TREE_STATE)?.expansion.toggle("a");
       // The lazy loader is a promise; settle it inside the same act.
       await Promise.resolve();
     });
@@ -930,7 +912,7 @@ describe("useTableChrome — row mutations and lazy tree", () => {
       };
     });
     act(() => {
-      result.current.tree?.expansion.toggle("a");
+      result.state(TREE_STATE)?.expansion.toggle("a");
     });
     expect(onLoadChildren).not.toHaveBeenCalled();
   });

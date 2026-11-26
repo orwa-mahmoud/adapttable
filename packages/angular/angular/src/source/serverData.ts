@@ -124,18 +124,6 @@ export function injectServerData<TRow>(
   options: ServerDataOptions<TRow>
 ): Signal<TableSource<TRow>> {
   if (!options.injector) assertInInjectionContext(injectServerData);
-  return injectServerTier(options, () => true);
-}
-
-/**
- * {@link injectServerData} for a table that holds a server tier whatever tier
- * it is on: the engine loads only while `serving` says the table is on it.
- */
-export function injectServerTier<TRow>(
-  options: ServerDataOptions<TRow>,
-  serving: () => boolean
-): Signal<TableSource<TRow>> {
-  if (!options.injector) assertInInjectionContext(injectServerTier);
   const injector = options.injector ?? inject(Injector);
   const url = injectTableUrlState({ ...options, injector });
   const viewportMobile = injectIsMobile({
@@ -162,7 +150,7 @@ export function injectServerTier<TRow>(
 
   const frame = computed(() => {
     revision();
-    if (serving()) source.load();
+    source.load();
     return source.update(
       {
         rows: readMaybe(options.rows),

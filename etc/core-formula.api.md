@@ -162,7 +162,7 @@ export function formulaDisplay(value: FormulaValue): string;
 export function formulaError(code: FormulaErrorCode): FormulaValue;
 
 // @public
-export type FormulaErrorCode = (typeof FORMULA_ERRORS)[keyof typeof FORMULA_ERRORS];
+export type FormulaErrorCode = "#NAME?" | "#VALUE!" | "#DIV/0!" | "#CYCLE!" | "#ERROR!";
 
 // @public
 export type FormulaNode = {

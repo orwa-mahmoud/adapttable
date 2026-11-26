@@ -20,8 +20,8 @@ import {
   rowAppearance,
   rowPinning,
 } from "../src/rows";
+import { selection } from "../src/selection";
 import { tree } from "../src/tree";
-
 interface Person {
   id: string;
   name: string;
@@ -128,8 +128,8 @@ it.each([false, true])(
   async (mobile) => {
     const { host } = fixture({
       forceMobile: mobile,
-      selectable: true,
       features: [
+        selection(),
         pinnedSummaryRows<Person>({
           top: [{ id: "total", name: "Total", team: "All", score: 60 }],
         }),
@@ -480,19 +480,21 @@ it.each([false, true])(
   "renders grouped rows and controlled selection with Nuxt controls, mobile=%s",
   async (mobile) => {
     const requested = vi.fn();
-    const { host, props } = fixture(
-      {
-        forceMobile: mobile,
-        features: [grouping("team")],
-        selectable: true,
-        selectedIds: [],
-        classNames: {
-          groupToggle: "group-toggle-hook",
-          groupSelect: "group-select-hook",
-        },
+    const selectedIds = shallowRef<readonly string[]>([]);
+    const { host, props } = fixture({
+      forceMobile: mobile,
+      features: [
+        selection({
+          selectedIds,
+          onSelectionChange: requested,
+        }),
+        grouping("team"),
+      ],
+      classNames: {
+        groupToggle: "group-toggle-hook",
+        groupSelect: "group-select-hook",
       },
-      { "onUpdate:selectedIds": requested }
-    );
+    });
     await settle();
     const toggle = node<HTMLButtonElement>(host, part("group-toggle"));
     const checkbox = node<HTMLButtonElement>(host, part("group-select"));
@@ -504,11 +506,8 @@ it.each([false, true])(
     await settle();
     expect(requested).toHaveBeenCalledTimes(1);
     expect(checkbox.getAttribute("aria-checked")).toBe("false");
-    props.value = {
-      ...props.value,
-      selectedIds: requested.mock.calls[0]?.[0],
-      dir: "rtl",
-    };
+    selectedIds.value = requested.mock.calls[0]?.[0] ?? [];
+    props.value = { ...props.value, dir: "rtl" };
     await settle();
     expect(checkbox.getAttribute("aria-checked")).toBe("true");
     toggle.click();

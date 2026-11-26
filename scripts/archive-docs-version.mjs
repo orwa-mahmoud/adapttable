@@ -46,6 +46,7 @@ import {
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { formatLikeRepo } from "./format-like-repo.mjs";
 import { gitBinary } from "./git-binary.mjs";
 import { ORIGIN } from "./site.mjs";
 
@@ -261,13 +262,9 @@ let pages = 0;
 })(snapshotDir);
 
 // The plugin writes the sidebar as plain JSON; format it like the repo does.
-const prettier = await import("prettier");
 writeFileSync(
   versionFile,
-  await prettier.format(readFileSync(versionFile, "utf8"), {
-    ...(await prettier.resolveConfig(versionFile)),
-    filepath: versionFile,
-  })
+  await formatLikeRepo(versionFile, readFileSync(versionFile, "utf8"))
 );
 
 rmSync(work, { recursive: true, force: true });

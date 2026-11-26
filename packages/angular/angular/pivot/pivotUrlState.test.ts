@@ -5,11 +5,8 @@
  * injector: reading the parameter, writing it back, and the two setters not
  * clobbering each other.
  */
-import {
-  createMemoryAdapter,
-  EMPTY_PIVOT_CONFIG,
-  type PivotConfig,
-} from "@adapttable/core";
+import { createMemoryAdapter, type PivotConfig } from "@adapttable/core";
+import { EMPTY_PIVOT_CONFIG } from "@adapttable/core/pivot";
 import {
   createEnvironmentInjector,
   EnvironmentInjector,

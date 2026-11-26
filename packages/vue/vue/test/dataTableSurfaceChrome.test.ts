@@ -13,6 +13,7 @@ import {
 } from "vue";
 import { renderToString } from "vue/server-renderer";
 
+import { selection } from "../src/features/headlessFactories";
 import {
   DataTableSurfaceChrome,
   type DataTableSurfaceSlots,
@@ -512,7 +513,7 @@ it.each([false, true])(
     const props: DataTableProps<Row> = {
       ...options,
       defaults: { limit: 10 },
-      selectable: true,
+      features: [selection()],
       forceMobile,
     };
     const Table = defineComponent({

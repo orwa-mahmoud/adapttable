@@ -14,6 +14,7 @@ import {
 import type { DragEvent, KeyboardEvent, ReactElement, ReactNode } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
+import { useCurrentTableRuntimeReader } from "../features/providers";
 import type { RowReorderLabels, RowReorderState } from "./rowReorder";
 
 export type { RowReorderLabels };
@@ -96,7 +97,11 @@ function RowMoveMenu<TRow>({
   moveLocked: boolean;
   Menu: (props: RowMoveMenuSlotProps) => ReactNode;
 }>): ReactNode {
-  const props = rowMoveMenuProps(reorder, labels, row, moveLocked);
+  "use no memo";
+  // Drawn during render, so it reads the table this render publishes, not
+  // the last one committed.
+  const view = useCurrentTableRuntimeReader<TRow>().view?.();
+  const props = rowMoveMenuProps(reorder, labels, row, moveLocked, view);
   return props ? <Menu {...props} /> : null;
 }
 

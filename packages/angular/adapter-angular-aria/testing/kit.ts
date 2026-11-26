@@ -3,6 +3,7 @@ import { bulkActions } from "@adapttable/angular-aria/bulk-actions";
 import { cellNavigation } from "@adapttable/angular-aria/cell-navigation";
 import { cellSpan } from "@adapttable/angular-aria/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/angular-aria/column-groups";
+import { columnLayoutFamily } from "@adapttable/angular-aria/column-layout";
 import { columnMenu } from "@adapttable/angular-aria/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/angular-aria/column-selection";
 import { commandPalette } from "@adapttable/angular-aria/command-palette";
@@ -11,6 +12,7 @@ import {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/angular-aria/editing";
@@ -20,6 +22,7 @@ import {
   exportXlsx,
 } from "@adapttable/angular-aria/export";
 import { extraRows } from "@adapttable/angular-aria/extra-rows";
+import { filteringFamily } from "@adapttable/angular-aria/filtering";
 import {
   filters,
   filtersWith,
@@ -47,6 +50,7 @@ import { rowDetail } from "@adapttable/angular-aria/row-detail";
 import { rowPinning } from "@adapttable/angular-aria/row-pinning";
 import { rowReorder } from "@adapttable/angular-aria/row-reorder";
 import { savedViews } from "@adapttable/angular-aria/saved-views";
+import { selection } from "@adapttable/angular-aria/selection";
 import { selectionStats } from "@adapttable/angular-aria/selection-stats";
 import { sidePanel } from "@adapttable/angular-aria/side-panel";
 import { statusBar } from "@adapttable/angular-aria/status-bar";
@@ -83,9 +87,13 @@ export const kit: AngularKitUnderTest = {
   name: "angular-aria",
   Table: AdaptDataTable,
   features: {
+    editingFamily,
+    filteringFamily,
+    columnLayoutFamily,
     commandPalette,
     dirtyIndicators,
     filterTypes,
+    selection,
     selectionStats,
     sidePanel,
     statusBar,

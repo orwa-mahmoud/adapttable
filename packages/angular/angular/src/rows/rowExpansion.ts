@@ -6,6 +6,7 @@
 
 import {
   createControllableStore,
+  rekeyRowIdSet,
   type RowExpansionState,
   toggleId,
 } from "@adapttable/core/binding";
@@ -18,7 +19,7 @@ import {
 } from "@angular/core";
 
 import { fromStore } from "../store";
-import { tableStoreOf } from "../tableStore";
+import { followRowRekeys, tableStoreOf } from "../tableStore";
 
 export type { RowExpansionState } from "@adapttable/core/binding";
 
@@ -52,6 +53,10 @@ export function injectRowExpansion(
     { store: tableStoreOf(injector) }
   );
   const own = fromStore(store, { injector });
+  // An open row stays open under its new id.
+  followRowRekeys(injector, (log) => {
+    store.update((ids) => rekeyRowIdSet(ids, log));
+  });
   const toggle = (id: string): void => {
     store.update((prev) => toggleId(prev, id));
   };

@@ -1,7 +1,17 @@
+import { readdirSync } from "node:fs";
+import { basename } from "node:path";
+
 import { defineConfig } from "tsdown";
 
+/** Each bundled language is its own entry, `@adapttable/i18n/locales/<tag>`. */
+const localeEntries = Object.fromEntries(
+  readdirSync("src/locales")
+    .filter((file) => file.endsWith(".ts") && !file.includes(".test."))
+    .map((file) => [`locales/${basename(file, ".ts")}`, `src/locales/${file}`])
+);
+
 export default defineConfig({
-  entry: ["src/index.ts", "src/load.ts"],
+  entry: { index: "src/index.ts", catalog: "src/catalog.ts", ...localeEntries },
   format: ["esm", "cjs"],
   // The published declarations come from `src` alone. The package's own
   // tsconfig also covers its vitest and tsdown configs so typecheck sees

@@ -50,6 +50,7 @@ export function injectEditValidation<TRow>(
     { validateRow: options.validateRow, applyEdit: options.applyEdit },
     { store: tableStoreOf(injector) }
   );
+  followRowRekeyMoves(injector, store);
   effect(
     () => {
       store.configure({
@@ -72,4 +73,4 @@ export type {
   ValidationCheckResult,
   ValidationTarget,
 } from "@adapttable/core";
-import { tableStoreOf } from "../tableStore";
+import { followRowRekeyMoves, tableStoreOf } from "../tableStore";

@@ -12,11 +12,6 @@
  * @packageDocumentation
  */
 
-export {
-  ensureForcedColorsStyles,
-  FORCED_COLORS_CSS,
-  ForcedColorsStyle,
-} from "./a11y/forcedColors";
 export { LiveRegion, type LiveRegionProps } from "./a11y/LiveRegion";
 export {
   TableStatusAnnouncer,
@@ -74,9 +69,24 @@ export {
 export {
   type AdapterEditingComponents,
   type AdapterEditingFeatures,
+  createAdapterBatchEditing,
+  createAdapterEditHistory,
+  createAdapterEditing,
   createAdapterEditingFeatures,
+  createAdapterRowEditing,
+  createAdapterUndoRedoButtons,
   type EditableCellRenderProps,
 } from "./adapterFeatures/editing";
+export {
+  type AdapterColumnLayoutFamilyFactories,
+  type AdapterEditingFamilyFactories,
+  type AdapterFilteringFamilyFactories,
+  createAdapterColumnLayoutFamily,
+  createAdapterEditingFamily,
+  createAdapterFilteringFamily,
+  type EditingFamilyFactory,
+  type FilteringFamilyFactory,
+} from "./adapterFeatures/families";
 export {
   ContextMenuLiveGate,
   OptionalSidePanel,
@@ -85,6 +95,7 @@ export {
   type AdapterFiltersComponents,
   type AdapterFiltersFeature,
   createAdapterFiltersFeature,
+  createAdapterFiltersFeatureOn,
 } from "./adapterFeatures/filters";
 export {
   type FilterWidget,
@@ -130,7 +141,6 @@ export type { PrintToolbar } from "./chrome/toolbarChrome";
 export {
   type FilterTriggerToggle,
   printToolbar,
-  type ToolbarChromeProps,
   undoRedoToolbar,
   type ViewControlsToolbar,
   viewControlsToolbar,
@@ -303,13 +313,16 @@ export {
   featureSlotKey,
   featureStateKey,
   FeatureStateScope,
+  PublishTableRuntime,
   slotRender,
+  type TableRuntimeReader,
   useFeatureSlotFilled,
   useFeatureState,
   usePublishTableRuntime,
   useTableRuntime,
 } from "./features/providers";
-export { HistoryLiveGate, ShellLiveGate } from "./features/shellLiveGate";
+export { ROW_REORDER } from "./features/rowReorderKey";
+export { ShellLiveGate } from "./features/shellLiveGate";
 export {
   DISABLED_EXPORT,
   DISABLED_FIND,
@@ -317,8 +330,6 @@ export {
   windowedTableAria,
 } from "./features/shellLiveStubs";
 export type {
-  CellNavLiveDraw,
-  CellNavLiveSlotProps,
   ChromeBodyDraw,
   ChromeBodySlotProps,
   ChromeExtraDraw,
@@ -326,30 +337,19 @@ export type {
   ColumnHeaderRenameSlotProps,
   ContextMenuLiveSlotProps,
   EditableCellSlotProps,
-  EditHistoryLiveDraw,
-  EditHistoryLiveSlotProps,
   ExpandToggleSlotProps,
-  ExportLiveDraw,
-  ExportLiveSlotProps,
   FillHandleCellSlotProps,
   FilterOverlaySlotProps,
-  FindLiveDraw,
-  FindLiveSlotProps,
-  FullscreenLiveDraw,
-  FullscreenLiveSlotProps,
   GroupHeaderCardSlotProps,
   GroupHeaderRowSlotProps,
   SavedViewsSlotProps,
-  SelectionStatsLiveDraw,
-  SelectionStatsLiveSlotProps,
-  ToolbarExtrasSlotProps,
+  ToolbarEntrySlotProps,
 } from "./features/slotKeys";
 export {
   ACTIVE_FILTER_CHIPS,
   AGENT_APPROVAL,
   BATCH_EDIT_BAR,
   BULK_BAR,
-  CELL_NAV_LIVE,
   CHROME_BODY,
   COLUMN_GROUP_TOGGLE,
   COLUMN_HEADER_RENAME,
@@ -360,12 +360,10 @@ export {
   COMMAND_PALETTE_LIVE,
   CONTEXT_MENU,
   CONTEXT_MENU_LIVE,
-  EDIT_HISTORY_LIVE,
   EDITABLE_CELL,
   EDITING_LIVE,
   EXPAND_TOGGLE,
   EXPANSION_LIVE,
-  EXPORT_LIVE,
   FILL_HANDLE,
   FILTER_CHIPS_LIVE,
   FILTER_DRAWER,
@@ -373,8 +371,6 @@ export {
   FILTER_POPOVER,
   FILTERS_FORM,
   FIND_BAR,
-  FIND_LIVE,
-  FULLSCREEN_LIVE,
   GRID_FOCUS_ANNOUNCER,
   GROUP_HEADER_CARD,
   GROUP_HEADER_ROW,
@@ -391,7 +387,6 @@ export {
   ROW_REORDER_HANDLE,
   SAVED_VIEWS,
   SELECTION_LIVE,
-  SELECTION_STATS_LIVE,
   SIDE_PANEL,
   STATUS_BAR,
   TABLE_ASSISTANT,
@@ -400,14 +395,38 @@ export {
   TREE_LIVE,
   TREE_TOGGLE,
 } from "./features/slotKeys";
+export {
+  COLUMN_SIZING_STATE,
+  type ColumnSizingState,
+  EDIT_HISTORY_STATE,
+  EDITING_STATE,
+  EXPORT_STATE,
+  FILTER_CHIPS_STATE,
+  type FilterChipsState,
+  FULLSCREEN_STATE,
+  GROUPING_PANEL_VIEW_STATE,
+  GROUPING_STATE,
+  type GroupingState,
+  ROW_ACTIONS_STATE,
+  ROW_DETAIL_STATE,
+  ROW_PINNING_STATE,
+  type RowActionsState,
+  type RowDetailState,
+  TABLE_PROPS_STATE,
+  TREE_STATE,
+  type TreeState,
+} from "./features/stateKeys";
 export type {
   StaticFeatureHost,
+  StaticFeatureMountContext,
   StaticTableFeature,
   TableFeature,
   TableFeatureHost,
+  TableFeatureMountContext,
 } from "./features/tableFeature";
 export type { FeatureApplyInput, FeaturePatch } from "./features/tableFeature";
-export { applyTableFeatures, featureLabelsFor } from "./features/tableFeature";
+export { featureLabelsFor } from "./features/tableFeature";
+export { KEYED_WINDOW_RENDER } from "./features/virtualize";
 export {
   type ChecklistButtonProps,
   type ChecklistCheckboxProps,
@@ -589,23 +608,7 @@ export {
   type KitDesktopTableProps,
   type KitSortLabelProps,
 } from "./kit/desktopTable";
-export {
-  cellDisplay,
-  OptionalColumnGroupToggle,
-  OptionalColumnHeaderRename,
-  OptionalColumnSelect,
-  OptionalEditableCell,
-  OptionalExpandToggle,
-  OptionalFillHandle,
-  OptionalFilterHeader,
-  OptionalGroupHeaderCard,
-  OptionalGroupHeaderRow,
-  OptionalRowEditActions,
-  OptionalRowReorderButtons,
-  OptionalRowReorderHandle,
-  OptionalTreeCell,
-  OptionalTreeToggle,
-} from "./kit/featureSlots";
+export { CellContent, cellDisplay } from "./kit/featureSlots";
 export {
   createGroupHeader,
   type KitGroupCardProps,
@@ -820,10 +823,7 @@ export type { RowExpansionState } from "./rows/useRowExpansion";
 export type { SelectionState } from "./selection/useSelection";
 export { offersAllMatching } from "./selection/useSelection";
 export type { UseServerDataOptions } from "./source/useServerData";
-export {
-  type DataModeProps,
-  type TableQueryHandler,
-} from "./source/useTableData";
+export type { TableQueryHandler } from "./source/useTableData";
 export type { Slot } from "./state/slots";
 export { fillSlot } from "./state/slots";
 export {
@@ -874,7 +874,6 @@ export type {
 export { type SearchInputState } from "./useDataTable/useSearchInput";
 export type {
   DataTableShellChromeProps,
-  DataTableShellGroupingPanelProps,
   DataTableShellProps,
   DataTableShellResult,
   DataTableShellTableProps,
@@ -1012,6 +1011,20 @@ export {
   type VirtualTableRow,
   windowGroupedEntries,
 } from "@adapttable/core";
+export {
+  type FeatureListEntry,
+  flattenFeatures,
+} from "@adapttable/core/binding";
+export { coreVirtualize } from "@adapttable/core/binding";
+export {
+  booleanFilterSpecs,
+  checklistFilterSpecs,
+  filterEngineForWidgets,
+  multiSelectFilterSpecs,
+  rangeFilterSpecs,
+  selectFilterSpecs,
+  textFilterSpecs,
+} from "@adapttable/core/binding";
 
 /**
  * The member types the signatures above hand back.
@@ -1277,6 +1290,7 @@ export {
   columnGroupId,
   columnGroupPath,
   columnGroupStubStyle,
+  columnHeaderLabel,
   columnMenuActions,
   columnMenuRows,
   columnResizeHandleProps,
@@ -1287,6 +1301,7 @@ export {
   defaultLabels,
   deriveSortByOptions,
   exportButtonLabel,
+  exportViewFromChrome,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
   EXTRA_ROW_PARTS,
@@ -1416,7 +1431,7 @@ export type {
   WidthColumn,
 } from "@adapttable/core/binding";
 
-/* ── Kit machinery the main entry serves only as deprecated aliases ── */
+/* ── Kit machinery ── */
 export type { UseShortcutsOptions } from "./actions/useShortcuts";
 export { useShortcuts } from "./actions/useShortcuts";
 export { useChromeScrollReset } from "./chrome/scrollReset";

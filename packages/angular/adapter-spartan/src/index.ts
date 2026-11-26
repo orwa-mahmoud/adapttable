@@ -3,7 +3,7 @@
  * with an owned Helm layer over `@adapttable/angular`.
  *
  * Feature factories live on secondary entries (`bulk-actions`, `filters`,
- * …); import them from those paths or from `@adapttable/spartan/features`.
+ * …); import them from those paths.
  *
  * @packageDocumentation
  */

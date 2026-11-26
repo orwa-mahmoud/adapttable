@@ -13,7 +13,8 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import type { ColumnModel } from "../contracts/columns";
 import { buildExportTable } from "./exportWriter";
-import { buildTablePdf, pdfWriter } from "./pdf";
+import { pdfWriter } from "./pdf";
+import { buildTablePdf } from "./tablePdf";
 import { fontCovering } from "./testFont";
 
 interface Row {

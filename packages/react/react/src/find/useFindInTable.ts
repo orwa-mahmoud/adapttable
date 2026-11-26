@@ -9,7 +9,6 @@
  */
 import {
   type CellRange,
-  findMatches,
   type GridCell,
   matchKeySet,
   singleCellRange,
@@ -17,6 +16,7 @@ import {
 import {
   clampMatchIndex,
   createFindController,
+  createFindMatcher,
   type FindInTableState,
 } from "@adapttable/core/binding";
 import {
@@ -83,6 +83,7 @@ export function useFindInTable<TRow>(
     () => adapter.getSearch(),
     () => (urlAdapter ? urlAdapter.getSearch() : "")
   );
+  const [match] = useState(() => createFindMatcher<TRow>());
   const [controller] = useState(() =>
     createFindController({ enabled, adapter, urlKey })
   );
@@ -103,10 +104,8 @@ export function useFindInTable<TRow>(
 
   const matches = useMemo(
     () =>
-      enabled && open
-        ? findMatches({ query, rows, columns, firstRowIndex })
-        : [],
-    [enabled, open, query, rows, columns, firstRowIndex]
+      enabled && open ? match({ query, rows, columns, firstRowIndex }) : [],
+    [enabled, open, query, rows, columns, firstRowIndex, match]
   );
   const matchKeys = useMemo(() => matchKeySet(matches), [matches]);
 

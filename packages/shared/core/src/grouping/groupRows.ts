@@ -395,8 +395,28 @@ export interface GroupPartition<TRow> {
   valueKey: string;
   /** Every leaf beneath this node, in source (sorted) order. */
   rows: readonly TRow[];
-  /** Nested buckets, when another grouping key remains. */
-  children?: readonly GroupPartition<TRow>[];
+  /**
+   * Nested buckets, when another grouping key remains. Built the first time
+   * it is read, then kept.
+   */
+  readonly children?: readonly GroupPartition<TRow>[];
+}
+
+/** The leaf ids of a group's rows, read once per rows array and id reader. */
+const leafIdCache = /* @__PURE__ */ new WeakMap<
+  object,
+  { readonly getRowId: (row: never) => string; readonly ids: readonly string[] }
+>();
+
+function leafIdsOf<TRow>(
+  rows: readonly TRow[],
+  getRowId: (row: TRow) => string
+): readonly string[] {
+  const known = leafIdCache.get(rows);
+  if (known?.getRowId === getRowId) return known.ids;
+  const ids = rows.map((row) => getRowId(row));
+  leafIdCache.set(rows, { getRowId, ids });
+  return ids;
 }
 
 /**
@@ -487,15 +507,27 @@ function partitionLevel<TRow>(
   const { order, buckets } = bucketBy(rows, paths, level);
   return order.map((valueKey) => {
     const bucket = buckets.get(valueKey)!;
-    return {
+    const part: GroupPartition<TRow> = {
       value: bucket.value,
       valueKey,
       rows: bucket.rows,
-      children:
-        level + 1 < depth
-          ? partitionLevel(bucket.rows, bucket.paths, depth, level + 1)
-          : undefined,
     };
+    if (level + 1 < depth) {
+      // A nested level is bucketed the first time it is read: the groups of
+      // a folded or paged-away parent are never built.
+      let children: readonly GroupPartition<TRow>[] | undefined;
+      Object.defineProperty(part, "children", {
+        enumerable: true,
+        get: () =>
+          (children ??= partitionLevel(
+            bucket.rows,
+            bucket.paths,
+            depth,
+            level + 1
+          )),
+      });
+    }
+    return part;
   });
 }
 
@@ -576,6 +608,7 @@ export function flattenGroupPartitions<TRow>(
       const groupKey = makeGroupRowKey(keys.slice(0, level + 1), here);
       const collapsed = collapsedGroupIds.has(groupKey);
       const aggregateCells = aggregates?.(part.rows);
+      const leafIds = leafIdsOf(part.rows, getRowId);
       const label = node.label;
       const levels = [
         ...parentLevels,
@@ -597,7 +630,7 @@ export function flattenGroupPartitions<TRow>(
         path: here,
         group,
         leafRows: part.rows,
-        leafIds: part.rows.map((row) => getRowId(row)),
+        leafIds,
         aggregateCells,
         aggregateOps,
         collapsed,
@@ -611,7 +644,7 @@ export function flattenGroupPartitions<TRow>(
           groupKey,
           group,
           level,
-          getRowId,
+          ids: leafIds,
           from: leafIndex,
           limit: pageLimit(
             part.rows.length,
@@ -633,7 +666,7 @@ export function flattenGroupPartitions<TRow>(
           groupBy: key,
           label,
           leafRows: part.rows,
-          leafIds: part.rows.map((row) => getRowId(row)),
+          leafIds,
           aggregateCells,
           aggregateOps,
         });
@@ -725,17 +758,17 @@ function emitLeaves<TRow>(
     groupKey: string;
     group: RowGroupRef;
     level: number;
-    getRowId: (row: TRow) => string;
+    ids: readonly string[];
     from: number;
     limit: number;
   }
 ): number {
-  const { groupKey, group, level, getRowId, from, limit } = options;
+  const { groupKey, group, level, ids, from, limit } = options;
   let index = from;
   for (const [groupPosition, row] of rows.slice(0, limit).entries()) {
     flat.push({
       kind: "row",
-      key: getRowId(row),
+      key: ids[groupPosition]!,
       row,
       index: index++,
       groupKey,

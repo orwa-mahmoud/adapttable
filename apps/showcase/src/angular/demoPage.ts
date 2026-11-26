@@ -25,7 +25,8 @@ import {
   type PivotRow,
 } from "@adapttable/angular/pivot";
 import { sparklineColumn } from "@adapttable/angular/sparkline";
-import { applyRowReorder, formatMultiDraft } from "@adapttable/core";
+import { applyRowReorder } from "@adapttable/core";
+import { formatMultiDraft } from "@adapttable/core/editing";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,

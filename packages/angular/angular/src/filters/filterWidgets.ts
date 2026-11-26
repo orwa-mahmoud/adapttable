@@ -9,6 +9,7 @@ import {
 import type { FilterDef, TableLabels, TableSource } from "@adapttable/core";
 import {
   featureStateKey,
+  type FilterPanelOptions,
   filterWidgetFor,
   type FilterWidgetOf,
 } from "@adapttable/core/binding";
@@ -30,7 +31,8 @@ export type FilterWidget = FilterWidgetOf<Type<unknown>>;
  * @public
  */
 export type AdapterFiltersFeature = <TRow>(
-  defs?: readonly FilterDef<TRow>[]
+  defs?: readonly FilterDef<TRow>[],
+  options?: FilterPanelOptions
 ) => AdaptTableFeature;
 
 /** The widgets the composed filters feature draws its fields with. */
@@ -52,6 +54,9 @@ export function withFilterWidgets(
 ): AdaptTableFeature {
   return {
     ...feature,
+    // The widgets are what the mounted form draws with: other widgets
+    // replace it, the same ones declared again keep it.
+    dependencies: [...(feature.dependencies ?? []), ...widgets],
     mount(context) {
       const release = feature.mount?.(context);
       context.state.set(FILTER_WIDGETS_STATE, widgets);

@@ -42,7 +42,7 @@ function table(options: {
       classNames: {
         rowActionsMenu: "custom-menu",
         rowActionsTrigger: "custom-trigger",
-        rowAction: "custom-action",
+        actionButton: "custom-action",
       },
       features: [
         rowActions<Row>([

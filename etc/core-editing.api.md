@@ -140,6 +140,7 @@ export interface BatchEditingState<TRow> {
     isChanged: (rowId: string, columnKey: string) => boolean;
     isPending: (rowId: string) => boolean;
     pending: boolean;
+    rowSignature?: (rowId: string) => string;
     saveAll: () => void;
     setDraft: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string, value: string], void>;
     signature: string;
@@ -168,6 +169,7 @@ export interface BatchEditStore<TRow> {
     readonly configure: RowCallback<[options: BatchEditStoreOptions<TRow>], void>;
     readonly dispose?: () => void;
     readonly getSnapshot: () => BatchEditSnapshot;
+    readonly rekey: RowCallback<[moves: RowRekeyMoves<NoInfer<TRow>>], void>;
     readonly saveAll: () => void;
     readonly setDraft: RowCallback<[row: NoInfer<TRow>, rowId: string, columnKey: string, value: string], void>;
     readonly subscribe: (listener: () => void) => () => void;
@@ -318,6 +320,7 @@ export interface CellEditSession<TRow = unknown> {
     }, navigation?: CellEditNavigation) => CellEditKeyOutcome | null;
     readonly keepLive: (row: unknown) => void;
     readonly openedRow: () => unknown;
+    readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
     readonly setDraft: (value: string) => void;
     readonly subscribe: (listener: () => void) => () => void;
     readonly takeLive: (row: unknown, value: string) => void;
@@ -362,6 +365,7 @@ export interface CellSaveState<TRow> {
     clear: (rowId: string, columnKey: string) => void;
     failureFor: (rowId: string, columnKey: string) => FailedCellSave<TRow> | undefined;
     rollback: (rowId: string, columnKey: string) => void;
+    rowSignature?: (rowId: string) => string;
     signature: string;
     statusFor: (rowId: string, columnKey: string) => CellSaveStatus | undefined;
     track: (options: {
@@ -386,6 +390,7 @@ export interface CellSaveStore<TRow> {
     readonly clear: (rowId: string, columnKey: string) => void;
     readonly configure: (options: CellSaveStoreOptions<TRow>) => void;
     readonly getSnapshot: () => CellSaveSnapshot<TRow>;
+    readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
     readonly rollback: (rowId: string, columnKey: string) => void;
     readonly subscribe: (listener: () => void) => () => void;
     readonly track: (input: {
@@ -668,14 +673,14 @@ export function createCellSaveStore<TRow>(options?: CellSaveStoreOptions<TRow>, 
 }): CellSaveStore<TRow>;
 
 // @public
+export function createDeferredEditConflictStore<TRow>(within?: {
+    readonly store?: TableStore;
+}): EditConflictStore<TRow>;
+
+// @public
 export function createDirtyCellStore(options?: DirtyCellStoreOptions, within?: {
     readonly store?: TableStore;
 }): DirtyCellStore;
-
-// @public
-export function createEditConflictStore<TRow>(within?: {
-    readonly store?: TableStore;
-}): EditConflictStore<TRow>;
 
 // @public
 export function createEditHistory<TRow>(options: EditHistoryControllerOptions<TRow>, within?: {
@@ -747,10 +752,14 @@ export type DeclaredAggregates = Readonly<Record<string, string>>;
 export const DEFAULT_EDIT_HISTORY_DEPTH = 50;
 
 // @public
-export function defaultPendingRows(count: number): string;
+export function defaultSaveErrorMessage(error: unknown): string;
 
 // @public
-export function defaultSaveErrorMessage(error: unknown): string;
+export interface DeferredExportWriter {
+    readonly extension: string;
+    readonly load: () => Promise<ExportWriter>;
+    readonly preload: () => () => void;
+}
 
 // @public
 export function dirtyCellKey(rowId: string, columnKey: string): string;
@@ -769,6 +778,7 @@ export interface DirtyCellState {
     isDirty: (rowId: string, columnKey: string) => boolean;
     isRowDirty: (rowId: string) => boolean;
     mark: (rowId: string, columnKey: string) => void;
+    rowSignature?: (rowId: string) => string;
     signature: string;
 }
 
@@ -780,6 +790,7 @@ export interface DirtyCellStore {
     readonly confirmRow: (rowId: string) => void;
     readonly getSnapshot: () => DirtyCellSnapshot;
     readonly mark: (rowId: string, columnKey: string) => void;
+    readonly rekey: (moves: RowRekeyMoves) => void;
     readonly subscribe: (listener: () => void) => () => void;
 }
 
@@ -821,7 +832,7 @@ export interface EditableCellController<TRow = unknown> {
     rollback: () => void;
     saveFailure?: FailedCellSave<TRow>;
     saveStatus?: CellSaveStatus;
-    selectOptions: ReturnType<typeof normalizeEditorOptions>;
+    selectOptions: CellEditorOption[];
     setDraft: (value: string) => void;
     takeConflict: () => void;
     validating: boolean;
@@ -976,6 +987,7 @@ export interface EditConflictStore<TRow> {
     readonly reconcile: (input: ReconcileLiveEdit<TRow>) => void;
     readonly reconcileBatch: (input: ReconcileLiveBatchEdit<TRow>) => void;
     readonly reconcileRow: (input: ReconcileLiveRowEdit<TRow>) => void;
+    readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
     readonly subscribe: (listener: () => void) => () => void;
     readonly take: () => void;
     readonly takeCell: (rowId: string, columnKey: string) => void;
@@ -1139,7 +1151,7 @@ export interface EditorDraftControl {
         preventDefault: () => void;
         shiftKey?: boolean;
     }) => void;
-    selectOptions: ReturnType<typeof editorSelectOptions>;
+    selectOptions: CellEditorOption[];
     setDraft: (value: string) => void;
     validating: boolean;
 }
@@ -1151,7 +1163,7 @@ export function editorInputType(editor: CellEditor | null): "text" | "number" | 
 export function editorKeyRestoresFocus(key: string): boolean;
 
 // @public
-export function editorSelectOptions(editor: CellEditor): ReturnType<typeof normalizeEditorOptions>;
+export function editorSelectOptions(editor: CellEditor): CellEditorOption[];
 
 // @public
 export function editorValidationProps(ctrl: EditorAriaState): {
@@ -1202,6 +1214,7 @@ export interface EditValidationStore<TRow> {
     readonly configure: (options: EditValidationStoreOptions<TRow>) => void;
     readonly getSnapshot: () => EditValidationSnapshot;
     readonly hasRowValidator: () => boolean;
+    readonly rekey: (moves: RowRekeyMoves<TRow>) => void;
     readonly subscribe: (listener: () => void) => () => void;
 }
 
@@ -1252,8 +1265,12 @@ export interface ExportWriteContext {
 // @public
 export interface ExportWriter {
     build: (context: ExportWriteContext) => ExportPayload;
+    buildAsync?: (context: ExportWriteContext) => Promise<ExportPayload>;
     extension: string;
 }
+
+// @public
+export type ExportWriterOption = ExportWriter | DeferredExportWriter;
 
 // @public
 export type ExtraFilters = Record<string, FilterValue>;
@@ -1281,7 +1298,7 @@ export interface FeatureHostState<TRow = unknown> {
     readonly filterExtends: readonly FilterTypeExtend[];
     readonly filterTypes: readonly FilterTypeSpec[];
     readonly panels: readonly SidePanelEntry[];
-    readonly writers: readonly ExportWriter[];
+    readonly writers: readonly ExportWriterOption[];
 }
 
 // @public
@@ -1597,6 +1614,9 @@ export function liveRowChanged<TRow>(input: {
 }): boolean;
 
 // @public
+export function loadEditConflictStore(): Promise<void>;
+
+// @public
 export const MULTI_SEPARATOR = "";
 
 // @public
@@ -1872,6 +1892,7 @@ export interface RowEditStore<TRow> {
     readonly dispose?: () => void;
     readonly getSnapshot: () => RowEditSnapshot;
     readonly openedRow: () => TRow | undefined;
+    readonly rekey: RowCallback<[moves: RowRekeyMoves<NoInfer<TRow>>], void>;
     readonly save: () => void;
     readonly seeds: () => RowEditDrafts | undefined;
     readonly setDraft: (columnKey: string, value: string) => void;
@@ -1901,6 +1922,12 @@ export interface RowEditTrigger<TRow> {
 
 // @public
 export function rowHasValidationError(snapshot: EditValidationSnapshot, rowId: string): boolean;
+
+// @public
+export interface RowRekeyMoves<TRow = unknown> {
+    readonly ids: ReadonlyMap<string, string>;
+    readonly rows: ReadonlyMap<string, TRow>;
+}
 
 // @public
 export type RowValidator<TRow> = (row: TRow) => string | Record<string, string> | undefined | Promise<string | Record<string, string> | undefined>;
@@ -2068,10 +2095,6 @@ export interface TableLabels {
     assistantOpen?: string;
     assistantPlaceholder?: string;
     assistantProgress?: (done: number, total?: number) => string;
-    assistantReceipt?: (receipt: {
-        capability?: string;
-        status: string;
-    }) => string;
     assistantReceiptAction?: (action: {
         kind?: string;
         status: string;
@@ -2216,12 +2239,10 @@ export interface TableLabels {
     groupingAddAggregation?: string;
     groupingAdded?: (label: string) => string;
     groupingAggregateChanged?: (label: string, aggregation: string) => string;
-    groupingAggregateColumn?: string;
     groupingAggregateRemoved?: (column: string) => string;
     groupingAggregatesRestored?: string;
     groupingAggregation?: string;
     groupingAggregationCustom?: string;
-    groupingAggregationDefault?: string;
     groupingAggregationFor?: (column: string) => string;
     groupingAggregationNone?: string;
     groupingAggregationReadOnly?: string;
@@ -2252,7 +2273,6 @@ export interface TableLabels {
     moveRowUp?: string;
     moveStart?: string;
     moveToGroup?: string;
-    moveToTopLevel?: string;
     moveUnavailable?: string;
     moveUnder?: string;
     moveViewDown?: string;
@@ -2264,8 +2284,6 @@ export interface TableLabels {
     noticeExportAllPage?: string;
     noticeGroupingUnavailable?: string;
     noticePinNested?: string;
-    // @deprecated
-    noticeReorderNested?: string;
     noticeVirtualizePaged?: string;
     opAfter?: string;
     opAtLeast?: string;
@@ -2294,7 +2312,6 @@ export interface TableLabels {
         total: number;
     }) => string;
     pageSelected?: (count: number) => string;
-    pendingProposals?: (count: number) => string;
     pendingRows?: (count: number) => string;
     pinEnd?: string;
     pinnedSummaryBottom?: string;
@@ -2360,7 +2377,6 @@ export interface TableLabels {
     rowMoved?: (from: number, to: number) => string;
     rowMovedToGroup?: (group: string) => string;
     rowMovedUnder?: (parent: string) => string;
-    rowMoveOptions?: string;
     rowReorderCancelled?: string;
     rowSeparator?: string;
     rowsPerPage?: string;

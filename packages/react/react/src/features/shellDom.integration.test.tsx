@@ -10,10 +10,10 @@ import {
 import { cellNavigation } from "./cell-navigation";
 import { DataTableShellView } from "./chromeBodyGate";
 import { editing } from "./editing";
-import { findInTable } from "./find-in-table";
-import { FeatureProviders, FeatureSlot } from "./providers";
+import { findInTable, LiveFind } from "./find-in-table";
+import { FeatureProviders } from "./providers";
 import { DISABLED_GRID_FOCUS } from "./shellLiveStubs";
-import { FIND_LIVE, type FindLiveSlotProps } from "./slotKeys";
+import type { FindLiveSlotProps } from "./slotKeys";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
 
 /**
@@ -214,21 +214,18 @@ describe("find without cell navigation", () => {
             root.current = element;
           }}
         >
-          <FeatureSlot
-            slot={FIND_LIVE}
-            props={
-              {
-                enabled: false,
-                rows: ROWS,
-                columns,
-                urlSync: false,
-                root,
-                children: (find) => {
-                  seen.push(find.open);
-                  return <span>inside</span>;
-                },
-              } satisfies FindLiveSlotProps<Row>
-            }
+          <LiveFind<Row>
+            {...({
+              enabled: false,
+              rows: ROWS,
+              columns,
+              urlSync: false,
+              root,
+              children: (find) => {
+                seen.push(find.open);
+                return <span>inside</span>;
+              },
+            } satisfies FindLiveSlotProps<Row>)}
           />
         </div>
       </FeatureProviders>
@@ -295,7 +292,7 @@ describe("the keyboard grid over real cells", () => {
     });
     fireEvent.keyDown(cell("b-name"), { key: "Enter" });
 
-    expect(view().chrome.editing?.state.active).toEqual(
+    expect(view().tableProps.editing?.state.active).toEqual(
       expect.objectContaining({ rowId: "b", columnKey: "name" })
     );
   });
@@ -310,7 +307,7 @@ describe("the keyboard grid over real cells", () => {
 
     // The grid claims the key for the cell, and the stage has nothing to open.
     expect(notHandled).toBe(false);
-    expect(view().chrome.editing).toBeUndefined();
+    expect(view().tableProps.editing).toBeUndefined();
   });
 
   it("does not open a cell the rendered window has no row for", () => {
@@ -322,7 +319,7 @@ describe("the keyboard grid over real cells", () => {
       view().gridFocus.focusCell({ row: 7, col: 0 });
     });
     fireEvent.keyDown(cell("a-name"), { key: "Enter" });
-    expect(view().chrome.editing?.state.active).toBeNull();
+    expect(view().tableProps.editing?.state.active).toBeNull();
   });
 });
 

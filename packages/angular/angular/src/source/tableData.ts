@@ -1,21 +1,18 @@
 /**
  * The table data controller for Angular: which tier serves a table's rows —
- * a prebuilt source, the server tier or the frontend tier — and the
- * declarative filters every tier shares. The choice, the merged filter
- * runtime, loading each filter's own options, facet counts and a frontend
- * table's `onQueryChange` are `@adapttable/core`'s table data controller.
+ * a supplied source (a server source among them) or the frontend tier over
+ * `data` — and the declarative filters both share. The choice, the merged
+ * filter runtime, loading each filter's own options and a frontend table's
+ * `onViewChange` are `@adapttable/core`'s table data controller.
  */
 import {
   type ExtraFilters,
-  type FacetMap,
   type FilterDef,
   type FilterEngine,
   type FilterRuntime,
   type FilterTypeSpec,
   type FrontendEngineFactory,
   type PaginationMode,
-  type QueryAggregate,
-  type QuerySupport,
   type SortableValue,
   type TableSource,
 } from "@adapttable/core";
@@ -45,7 +42,7 @@ import {
 } from "../store";
 import type { TableUrlStateOptions } from "../url/tableUrlState";
 import { injectFrontendData } from "./frontendData";
-import { injectServerTier, type TableQueryHandler } from "./serverData";
+import { type TableQueryHandler } from "./serverData";
 
 /**
  * Options for {@link injectTableData}.
@@ -56,29 +53,23 @@ export interface TableDataOptions<TRow> extends Pick<
   TableUrlStateOptions,
   "urlAdapter" | "urlSync" | "defaults" | "urlKey"
 > {
-  /** Full-control tier: a prebuilt source, such as `injectQuerySource`'s. */
+  /**
+   * A prebuilt source: `injectServerData`'s for rows a server pages, sorts
+   * and filters, `injectQuerySource`'s, or any `TableSource`. Takes the
+   * place of `data`.
+   */
   readonly source?: MaybeSignalOptional<TableSource<TRow>>;
-  /** The rows: all of them (frontend) or the current page (server). */
+  /** Every row; the table pages, sorts and filters them itself. */
   readonly data?: MaybeSignalOptional<readonly TRow[]>;
-  /** Server tier: total row count across all pages. */
-  readonly total?: MaybeSignalOptional<number>;
-  /** A request in flight. */
+  /** Frontend tier: the rows are still loading. */
   readonly loading?: MaybeSignalOptional<boolean>;
   /** A failure to show. */
   readonly error?: MaybeSignalOptional<Error | null>;
   /**
-   * Explicit data mode. `"server"` makes `onQueryChange` the data contract
-   * (the host fetches); `"frontend"` keeps the table's own processing and
-   * makes `onQueryChange` a notification. Absent: `data` alone is frontend,
-   * `data` with `onQueryChange` is server, `source` is the source tier.
+   * Frontend tier: told of each committed change to page, page size, search,
+   * sort and filters, never of the mount. The table keeps processing `data`.
    */
-  readonly mode?: MaybeSignalOptional<"frontend" | "server">;
-  /** Server tier: aggregates to ask the endpoint for. */
-  readonly aggregates?: MaybeSignalOptional<readonly QueryAggregate[]>;
-  /** Server tier: the key of the query the current `data` answers. */
-  readonly responseKey?: MaybeSignalOptional<string>;
-  /** The server tier's fetch, or a frontend table's change notification. */
-  readonly onQueryChange?: MaybeSignalOptional<TableQueryHandler>;
+  readonly onViewChange?: MaybeSignalOptional<TableQueryHandler>;
   /** Columns — their `filter` shorthands feed the runtime. */
   readonly columns: MaybeSignal<readonly ColumnDef<TRow>[]>;
   /**
@@ -106,12 +97,6 @@ export interface TableDataOptions<TRow> extends Pick<
   readonly getSortValue?: (row: TRow, columnKey: string) => SortableValue;
   /** Active locale for `i18n` column paths. */
   readonly locale?: MaybeSignalOptional<string>;
-  /** Server tier: what the endpoint can answer. */
-  readonly supports?: MaybeSignalOptional<QuerySupport>;
-  /** Server tier: keys to count; defaults to every checklist filter. */
-  readonly facetKeys?: MaybeSignalOptional<readonly string[]>;
-  /** Server tier: distinct-value counts from the last fetch. */
-  readonly facets?: MaybeSignalOptional<FacetMap>;
   /** The host of this table — filter-type plugins resolve from here. */
   readonly featureHost?: Signal<FeatureHostState | undefined>;
   /** The injector to run in. Omit to use the current injection context. */
@@ -138,9 +123,8 @@ export interface TableDataResult<TRow> {
 /**
  * Resolve a table's data tier and its declarative-filter runtime.
  *
- * Both built-in tiers exist for the table's lifetime; the one not serving
- * it is handed no rows, no query callback and no URL. The active tier owns
- * the URL, including after replacing a source or changing the data mode.
+ * The frontend tier exists for the table's lifetime; while a source serves
+ * the table it is handed no rows and no URL, and keeps its private state.
  *
  * @param options - See {@link TableDataOptions}.
  * @returns The source and the filter runtime.
@@ -169,32 +153,26 @@ export function injectTableData<TRow>(
       engine: options.engine,
       source: readMaybe(options.source),
       data: data(),
-      mode: readMaybe(options.mode),
-      onQueryChange: readMaybe(options.onQueryChange),
+      onViewChange: readMaybe(options.onViewChange),
       columns: columns(),
       declaredFilters: options.filters,
       filterTypes: options.filterTypes,
       featureHost: options.featureHost?.(),
       locale: locale(),
       filterFn: options.filterFn,
-      facetKeys: readMaybe(options.facetKeys),
     });
   });
   const tier = computed(() => plan().tier);
-  // The active tier owns the URL; each inactive tier retains private view
-  // state. Filter keys parsed as lists and numbers follow the runtime.
-  const urlOptions = {
+  // The frontend tier owns the URL while it serves the table. Filter keys
+  // parsed as lists and numbers follow the runtime.
+  const onFrontend = computed(() => tier() === "frontend");
+  const mode = options.paginationMode;
+  const frontend = injectFrontendData<TRow>({
     urlAdapter: options.urlAdapter,
     urlKey: options.urlKey,
     defaults: options.defaults,
     arrayExtraKeys: computed(() => plan().runtime.arrayExtraKeys),
     numberExtraKeys: computed(() => plan().runtime.numberExtraKeys),
-  };
-  const onServer = computed(() => tier() === "server");
-  const onFrontend = computed(() => tier() === "frontend");
-  const mode = options.paginationMode;
-  const frontend = injectFrontendData<TRow>({
-    ...urlOptions,
     urlSync: computed(() =>
       onFrontend() ? readMaybe(options.urlSync) : false
     ),
@@ -220,61 +198,16 @@ export function injectTableData<TRow>(
     forceMobile: options.forceMobile,
     mobileBreakpoint: options.mobileBreakpoint,
     isLoading: computed(() =>
-      readMaybe(options.mode) === "frontend"
-        ? readMaybe(options.loading)
-        : undefined
+      onFrontend() ? readMaybe(options.loading) : undefined
     ),
     error: options.error,
     injector,
   });
-  const server = injectServerTier<TRow>(
-    {
-      ...urlOptions,
-      urlSync: computed(() =>
-        onServer() ? readMaybe(options.urlSync) : false
-      ),
-      rows: computed(() =>
-        onServer() ? tierRows(true, data()) : INACTIVE_TIER_ROWS
-      ),
-      total: computed(() => readMaybe(options.total) ?? 0),
-      loading: options.loading,
-      error: options.error,
-      paginationMode: mode,
-      forceMobile: options.forceMobile,
-      mobileBreakpoint: options.mobileBreakpoint,
-      // A column's default aggregate is a request to the server, so only the
-      // server tier reads the columns.
-      columns: computed(() => (onServer() ? columns() : INACTIVE_TIER_ROWS)),
-      onQueryChange: computed(() =>
-        onServer() ? readMaybe(options.onQueryChange) : undefined
-      ),
-      aggregates: computed(() =>
-        onServer() ? readMaybe(options.aggregates) : undefined
-      ),
-      responseKey: computed(() =>
-        onServer() ? readMaybe(options.responseKey) : undefined
-      ),
-      supports: computed(() =>
-        onServer() ? readMaybe(options.supports) : undefined
-      ),
-      facetKeys: computed(() => (onServer() ? plan().facetKeys : undefined)),
-      facets: computed(() =>
-        onServer() ? readMaybe(options.facets) : undefined
-      ),
-      injector,
-    },
-    onServer
-  );
-
   const source = computed(() => {
-    const prebuilt = readMaybe(options.source);
-    let resolved: TableSource<TRow>;
-    if (prebuilt) resolved = prebuilt;
-    else if (onServer()) resolved = server();
-    else resolved = frontend();
+    const resolved = readMaybe(options.source) ?? frontend();
     return controller.finish({ resolved, frontend: frontend() });
   });
-  // Once the frame is on screen: tell a frontend table's `onQueryChange`
+  // Once the frame is on screen: tell a frontend table's `onViewChange`
   // about a change.
   effect(
     () => {

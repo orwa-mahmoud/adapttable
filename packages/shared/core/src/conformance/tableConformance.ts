@@ -146,11 +146,19 @@ export interface ConformanceScenario {
   /** Placeholder shown in the search box, ahead of the label. */
   readonly searchPlaceholder?: string;
   /**
-   * `"server"` shows the host's rows as sent. `"frontend"` keeps sorting them
-   * and only notifies `onQueryChange`. Omit it and `onQueryChange` means server.
+   * A frontend table's change notification: the table keeps sorting its rows
+   * and tells this of each change.
    */
-  readonly mode?: "frontend" | "server";
-  /** One consolidated query per change. */
+  readonly onViewChange?: (query: {
+    readonly page?: number;
+    readonly limit?: number;
+    readonly sortBy?: string;
+    readonly sortDir?: string;
+  }) => void;
+  /**
+   * Serve the table from a server source: the binding builds one with this
+   * handler and `total`, and the table shows the host's rows as sent.
+   */
   readonly onQueryChange?: (
     query: {
       readonly page?: number;
@@ -160,7 +168,7 @@ export interface ConformanceScenario {
     },
     info: { readonly signal: AbortSignal }
   ) => void;
-  /** Row count across every page, on the server tier. */
+  /** Row count across every page, for the server source. */
   readonly total?: number;
 }
 
@@ -876,8 +884,7 @@ export function tableConformanceTests(
     return withTable(
       {
         ...BASE,
-        mode: "frontend",
-        onQueryChange: (query) => {
+        onViewChange: (query) => {
           queries.push(query);
         },
       },

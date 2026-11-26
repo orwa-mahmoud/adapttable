@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ColumnMenuOptions } from '@adapttable/vue/features';
 import { ColumnMenuSlotProps } from '@adapttable/vue/adapter';
 import { RendererElement } from 'vue';
 import { RendererNode } from 'vue';
@@ -37,7 +38,7 @@ export const ColumnMenu: (<TRow>(props: ColumnMenuSlotProps<TRow>, context: Pick
 };
 
 // @public (undocumented)
-export function columnMenu(): StaticTableFeature;
+export function columnMenu(options?: ColumnMenuOptions): StaticTableFeature;
 
 export { ColumnMenuSlotProps }
 

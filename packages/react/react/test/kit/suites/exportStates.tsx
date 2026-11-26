@@ -1,3 +1,5 @@
+import { csvWriter, deferredExportWriter } from "@adapttable/core";
+import { type ExportWriter } from "@adapttable/core/binding";
 import {
   collectConformanceTests,
   type ConformanceTest,
@@ -123,6 +125,102 @@ export function exportStatesTests(
         expect(part("export-progress-download")).toHaveTextContent(
           "Download export"
         );
+      });
+    });
+
+    describe(`writers that load on demand (${kit.name})`, () => {
+      function renderWith(
+        writer: ExportWriter | ReturnType<typeof deferredExportWriter>
+      ) {
+        return render(
+          <DataTable
+            data={rows}
+            columns={columns}
+            rowKey={(r) => r.id}
+            urlSync={false}
+            exportCsv={{ writer }}
+          />
+        );
+      }
+
+      function downloads() {
+        return vi
+          .spyOn(HTMLAnchorElement.prototype, "click")
+          .mockImplementation(() => undefined);
+      }
+
+      it("starts loading the writer once the table is mounted", async () => {
+        const load = vi.fn(() => Promise.resolve(csvWriter));
+        renderWith(deferredExportWriter("csv", load));
+        await vi.waitFor(() => {
+          expect(load).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      it("waits for a writer still loading, then downloads", async () => {
+        const click = downloads();
+        let finish: ((writer: ExportWriter) => void) | undefined;
+        const load = vi.fn(
+          () =>
+            new Promise<ExportWriter>((resolve) => {
+              finish = resolve;
+            })
+        );
+        renderWith(deferredExportWriter("csv", load));
+        await startExport();
+        expect(click).not.toHaveBeenCalled();
+        await act(async () => {
+          finish?.(csvWriter);
+          await Promise.resolve();
+        });
+        await vi.waitFor(() => {
+          expect(click).toHaveBeenCalledTimes(1);
+        });
+        expect(screen.getByRole("status")).toHaveTextContent("Export complete");
+        click.mockRestore();
+      });
+
+      it("reports a writer that cannot load and loads it again on the next export", async () => {
+        const click = downloads();
+        const load = vi
+          .fn<() => Promise<ExportWriter>>()
+          .mockRejectedValueOnce(new Error("offline"))
+          .mockRejectedValueOnce(new Error("offline"))
+          .mockResolvedValue(csvWriter);
+        renderWith(deferredExportWriter("csv", load));
+        await vi.waitFor(() => {
+          expect(load).toHaveBeenCalledTimes(1);
+        });
+        await startExport();
+        await vi.waitFor(() => {
+          expect(screen.getByRole("status")).toHaveTextContent("Export failed");
+        });
+        expect(click).not.toHaveBeenCalled();
+        // By part: a kit's loading icon can linger in the button's name while
+        // its exit animation runs.
+        const button = part("export-csv-button");
+        expect(button).not.toBeDisabled();
+        await act(async () => {
+          button?.click();
+          await Promise.resolve();
+        });
+        await vi.waitFor(() => {
+          expect(click).toHaveBeenCalledTimes(1);
+        });
+        expect(load).toHaveBeenCalledTimes(3);
+        click.mockRestore();
+      });
+
+      it("downloads at once with a writer that builds at once", async () => {
+        const click = downloads();
+        const idle = vi.fn();
+        vi.stubGlobal("requestIdleCallback", idle);
+        renderWith(csvWriter);
+        await startExport();
+        expect(click).toHaveBeenCalledTimes(1);
+        expect(idle).not.toHaveBeenCalled();
+        vi.unstubAllGlobals();
+        click.mockRestore();
       });
     });
 

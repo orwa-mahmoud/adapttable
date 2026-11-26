@@ -7,6 +7,7 @@
 import { buildPrintDocument } from '@adapttable/core/pdf';
 import { buildPrintTableHtml } from '@adapttable/core/pdf';
 import { buildTablePdf } from '@adapttable/core/pdf';
+import { ContrastRules } from '@adapttable/core/binding';
 import { ExportCsvOptions } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
@@ -31,10 +32,13 @@ import { Type } from '@angular/core';
 // @public
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
+    readonly contrast?: ContrastRules;
+    readonly dependencies?: readonly unknown[];
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
     readonly labels?: Partial<TableLabels>;
     mount?(context: FeatureMountContext): void | (() => void);
+    readonly rank?: number;
     readonly renders?: readonly FeatureRender<never, SlotComponent>[];
 }
 
@@ -49,6 +53,7 @@ export function exportPdf<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>,
 
 // @public
 export interface FeatureMountContext {
+    feature(): AdaptTableFeature;
     flush<T>(run: () => T): T;
     flushAdmission(): void;
     readonly injector: Injector;

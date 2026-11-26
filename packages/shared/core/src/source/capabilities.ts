@@ -20,6 +20,7 @@ import type {
   GroupingCapability,
   TableSourceCapabilities,
 } from "../contracts/source";
+import type { TableLabels } from "../types";
 export type {
   CapabilitySource,
   ExportScopeCapability,
@@ -78,6 +79,17 @@ export function sourceCapabilities(
 }
 
 /**
+ * The label that says why a surface turned a capability's control off: a
+ * grouping control, or export's "all" scope.
+ */
+const CAPABILITY_REASON_LABEL = {
+  grouping: "noticeGroupingUnavailable",
+  exportScope: "noticeExportAllPage",
+} as const satisfies Partial<
+  Record<keyof TableSourceCapabilities, keyof TableLabels>
+>;
+
+/**
  * Why a control is disabled, in the reader's language.
  *
  * A capability that is missing is not an error, and the table already draws
@@ -85,23 +97,43 @@ export function sourceCapabilities(
  * kit can attach it to the disabled control rather than leaving the reader to
  * guess.
  *
+ * @param capability - `"grouping"`.
+ * @param labels - Resolved labels.
+ * @returns The sentence, from `labels`.
+ *
  * @public
  */
 export function capabilityReason(
-  capability: keyof TableSourceCapabilities
+  capability: "grouping",
+  labels: Pick<Required<TableLabels>, "noticeGroupingUnavailable">
+): string;
+/**
+ * Why export's "all" scope is disabled, in the reader's language.
+ *
+ * @param capability - `"exportScope"`.
+ * @param labels - Resolved labels.
+ * @returns The sentence, from `labels`.
+ *
+ * @public
+ */
+export function capabilityReason(
+  capability: "exportScope",
+  labels: Pick<Required<TableLabels>, "noticeExportAllPage">
+): string;
+export function capabilityReason(
+  capability: keyof typeof CAPABILITY_REASON_LABEL,
+  labels: Partial<
+    Pick<
+      Required<TableLabels>,
+      "noticeGroupingUnavailable" | "noticeExportAllPage"
+    >
+  >
 ): string {
-  switch (capability) {
-    case "fullDataset":
-      return "This source provides one page at a time, not the full filtered set.";
-    case "grouping":
-      return "Grouping is off — this source cannot group.";
-    case "selectAcrossPages":
-      return "Selection covers the rows on screen — this source does not count the rest.";
-    case "exportScope":
-      return "Export all is off — this source provides one page at a time.";
-    case "totalCount":
-      return "The row count is what has loaded, not the whole set.";
-    case "aggregateOperations":
-      return "This source did not name the aggregate operations it can compute.";
+  const text = labels[CAPABILITY_REASON_LABEL[capability]];
+  if (text === undefined) {
+    throw new Error(
+      `capabilityReason: labels carry no ${CAPABILITY_REASON_LABEL[capability]} for "${capability}"`
+    );
   }
+  return text;
 }

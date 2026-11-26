@@ -195,8 +195,6 @@ export const ar: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "هناك تغيير ينتظر قرارك.",
-  pendingProposals: (count) =>
-    count === 1 ? "تغيير مقترح واحد" : `${String(count)} تغييرات مقترحة`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -336,10 +334,6 @@ export const ar: Required<TableLabels> = {
       error: "خطأ",
       disconnected: "غير متصل",
     })[status] ?? "جاهز",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "إضافة صف",
   duplicateRow: "تكرار الصف",
@@ -356,10 +350,8 @@ export const ar: Required<TableLabels> = {
   rowLifted: (position) => `تم رفع الصف ${String(position)}`,
   rowMoved: (from, to) => `نُقل الصف من ${String(from)} إلى ${String(to)}`,
   rowReorderCancelled: "أُلغيت إعادة الترتيب",
-  rowMoveOptions: "خيارات نقل الصف",
   moveToGroup: "نقل إلى مجموعة…",
   moveUnder: "نقل تحت…",
-  moveToTopLevel: "نقل إلى المستوى الأعلى",
   confirmRowMoveTitle: "تأكيد نقل الصف",
   confirmRowMoveDescription: (row, from, to) =>
     `نقل ${row} من ${from} إلى ${to}؟`,
@@ -394,9 +386,7 @@ export const ar: Required<TableLabels> = {
   removeGroupingColumn: (label) => `إزالة ${label} من التجميع`,
   moveGroupingColumn: (label) => `نقل تجميع ${label}`,
   groupingDropToRemove: "أفلت هنا لإزالة التجميع",
-  groupingAggregateColumn: "عمود التجميع",
   groupingAggregation: "دالة تجميع المجموعة",
-  groupingAggregationDefault: "افتراضي",
   groupingAggregationNone: "بلا",
   groupingAggregations: "التجميعات",
   groupingAddAggregation: "إضافة عمود تجميعة",
@@ -466,7 +456,6 @@ export const ar: Required<TableLabels> = {
   noticeVirtualizePaged:
     "التصفح الافتراضي متوقف — يعرض هذا الجدول المقسّم صفحة واحدة في كل مرة.",
   noticePinNested: "تثبيت الصفوف متوقف أثناء التجميع أو الشجرة.",
-  noticeReorderNested: "إعادة ترتيب الصفوف متوقفة أثناء التجميع أو الشجرة.",
   noticeGroupingUnavailable: "التجميع متوقف — هذا المصدر لا يدعم التجميع.",
   noticeExportAllPage:
     "تصدير الكل متوقف — هذا المصدر يوفّر صفحة واحدة في كل مرة.",

@@ -1,5 +1,6 @@
 /** Shared shell behavior exercised through the native reference kit's slots. */
 
+import { selection } from "@adapttable/angular-unstyled/selection";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { expect, it } from "vitest";
@@ -16,8 +17,7 @@ it("keeps search and selection scoped to each inherited table shell", async () =
         [rowKey]="rowKey"
         [urlSync]="false"
         [forceMobile]="false"
-        [selectable]="true"
-        (selectionChange)="firstSelection = $event"
+        [features]="firstFeatures"
       />
       <adapt-data-table
         [data]="rows"
@@ -25,8 +25,7 @@ it("keeps search and selection scoped to each inherited table shell", async () =
         [rowKey]="rowKey"
         [urlSync]="false"
         [forceMobile]="false"
-        [selectable]="true"
-        (selectionChange)="secondSelection = $event"
+        [features]="secondFeatures"
       />
     `,
   })
@@ -41,6 +40,20 @@ it("keeps search and selection scoped to each inherited table shell", async () =
     readonly rowKey = (row: { id: string }) => row.id;
     firstSelection: string[] = [];
     secondSelection: string[] = [];
+    readonly firstFeatures = [
+      selection({
+        onSelectionChange: (ids) => {
+          this.firstSelection = ids;
+        },
+      }),
+    ];
+    readonly secondFeatures = [
+      selection({
+        onSelectionChange: (ids) => {
+          this.secondSelection = ids;
+        },
+      }),
+    ];
   }
   const fixture = TestBed.createComponent(Host);
   fixture.autoDetectChanges();

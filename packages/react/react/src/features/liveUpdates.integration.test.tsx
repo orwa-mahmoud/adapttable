@@ -1,5 +1,6 @@
+import { loadEditConflictStore } from "@adapttable/core/binding";
 import { act, render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import type { EditConflictPolicy } from "../editing/editConflict";
@@ -12,6 +13,12 @@ import { batchEditing, editing, rowEditing } from "./editing";
 import { FeatureProviders } from "./providers";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
 import { tree } from "./tree";
+
+// The conflict store loads when an edit first opens; these specs are about
+// the question it asks, so it is loaded up front. Core covers the load.
+beforeAll(async () => {
+  await loadEditConflictStore();
+});
 
 /**
  * What an open editor and an expanding tree do when the host's data moves
@@ -75,7 +82,7 @@ describe("a cell editor open while its row changes", () => {
     const table = harness([
       editing<Row>(vi.fn(), { editConflictPolicy: policy }),
     ]);
-    const state = () => table.view().chrome.editing!.state;
+    const state = () => table.view().tableProps.editing!.state;
     act(() => {
       state().begin("a", "name", "Alice", ROWS[0]);
     });
@@ -93,7 +100,7 @@ describe("a cell editor open while its row changes", () => {
     expect(state().draft).toBe("Mine");
     // The editor now measures against the row that arrived.
     expect(state().openedRow()).toEqual({ id: "a", name: "Alicia" });
-    expect(table.view().chrome.editing?.conflict?.current).toBeNull();
+    expect(table.view().tableProps.editing?.conflict?.current).toBeNull();
   });
 
   it("takes the incoming value under the take policy", () => {
@@ -102,7 +109,7 @@ describe("a cell editor open while its row changes", () => {
     table.setData(renamed("Alicia"));
 
     expect(state().draft).toBe("Alicia");
-    expect(table.view().chrome.editing?.conflict?.current).toBeNull();
+    expect(table.view().tableProps.editing?.conflict?.current).toBeNull();
   });
 });
 
@@ -111,7 +118,7 @@ describe("a row form open while its row changes", () => {
     const table = harness([
       rowEditing<Row>(vi.fn(), { editConflictPolicy: policy }),
     ]);
-    const form = () => table.view().chrome.editing!.rowEditing!;
+    const form = () => table.view().tableProps.editing!.rowEditing!;
     act(() => {
       form().begin(ROWS[0]!, "a");
     });
@@ -143,7 +150,7 @@ describe("a batch draft whose row changes", () => {
     const table = harness([
       batchEditing<Row>(vi.fn(), { editConflictPolicy: "take" }),
     ]);
-    const batch = () => table.view().chrome.editing!.batch!;
+    const batch = () => table.view().tableProps.editing!.batch!;
     act(() => {
       batch().setDraft(ROWS[0]!, "a", "name", "Mine");
     });
@@ -189,7 +196,7 @@ describe("a lazily loaded tree node", () => {
 
   it("closes again when its children fail to arrive", async () => {
     const { table, onLoadChildren, fail } = lazyTree();
-    const expansion = () => table.view().chrome.tree!.expansion;
+    const expansion = () => table.view().tableProps.tree!.expansion;
 
     act(() => {
       expansion().toggle("p");
@@ -205,7 +212,7 @@ describe("a lazily loaded tree node", () => {
 
   it("stays closed when the reader closed it before the failure", async () => {
     const { table, fail } = lazyTree();
-    const expansion = () => table.view().chrome.tree!.expansion;
+    const expansion = () => table.view().tableProps.tree!.expansion;
 
     act(() => {
       expansion().toggle("p");

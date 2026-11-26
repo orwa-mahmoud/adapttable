@@ -193,8 +193,6 @@ export const ja: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "判断を待っている変更があります。",
-  pendingProposals: (count) =>
-    count === 1 ? "提案 1 件" : `${String(count)} 件の提案`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -335,10 +333,6 @@ export const ja: Required<TableLabels> = {
       error: "エラー",
       disconnected: "未接続",
     })[status] ?? "準備完了",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "行を追加",
   duplicateRow: "行を複製",
@@ -356,10 +350,8 @@ export const ja: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `行を ${String(from)} から ${String(to)} へ移動しました`,
   rowReorderCancelled: "並び替えを取り消しました",
-  rowMoveOptions: "行の移動オプション",
   moveToGroup: "グループへ移動…",
   moveUnder: "配下へ移動…",
-  moveToTopLevel: "最上位へ移動",
   confirmRowMoveTitle: "行の移動を確認",
   confirmRowMoveDescription: (row, from, to) =>
     `${row} を ${from} から ${to} へ移動しますか？`,
@@ -395,9 +387,7 @@ export const ja: Required<TableLabels> = {
   removeGroupingColumn: (label) => `${label} をグループ化から削除`,
   moveGroupingColumn: (label) => `${label} のグループ化を移動`,
   groupingDropToRemove: "ここにドロップしてグループ化を解除",
-  groupingAggregateColumn: "集計列",
   groupingAggregation: "グループ集計",
-  groupingAggregationDefault: "既定",
   groupingAggregationNone: "なし",
   groupingAggregations: "集計",
   groupingAddAggregation: "集計する列を追加",
@@ -467,8 +457,6 @@ export const ja: Required<TableLabels> = {
   noticeVirtualizePaged:
     "仮想化はオフです。このページ分割テーブルは一度に1ページだけ表示します。",
   noticePinNested: "グループ化またはツリーの使用中は行の固定はオフです。",
-  noticeReorderNested:
-    "グループ化またはツリーの使用中は行の並べ替えはオフです。",
   noticeGroupingUnavailable:
     "グループ化はオフです。このソースはグループ化できません。",
   noticeExportAllPage:

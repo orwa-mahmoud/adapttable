@@ -93,6 +93,10 @@ const primarySidebar = [
     label: "Migrating",
     items: [
       {
+        label: "From AdaptTable v3",
+        slug: "migrate-from-v3",
+      },
+      {
         label: "From AdaptTable v2",
         slug: "migrate-from-v2",
       },

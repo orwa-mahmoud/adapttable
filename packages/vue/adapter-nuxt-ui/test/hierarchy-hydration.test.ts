@@ -6,8 +6,8 @@ import { renderToString } from "vue/server-renderer";
 
 import { DataTable } from "../src";
 import { grouping } from "../src/grouping";
+import { selection } from "../src/selection";
 import { tree } from "../src/tree";
-
 interface Row {
   id: string;
   name: string;
@@ -37,8 +37,8 @@ it.each([
             urlSync: false,
             forceMobile: mobile,
             dir: "rtl",
-            selectable: true,
             features: [
+              selection(),
               mode === "group"
                 ? grouping("team")
                 : tree<Row>({ getParentId: (row) => row.parent }),

@@ -3,7 +3,7 @@ import { createElement, type ReactNode } from "react";
 import { type FeatureRender, slotRender } from "../features/providers";
 import {
   TOOLBAR_EXTRAS,
-  type ToolbarExtrasSlotProps,
+  type ToolbarEntrySlotProps,
 } from "../features/slotKeys";
 import { useFindState } from "../find/findMarks";
 import type { AdapterFeatureComponent } from "./component";
@@ -14,7 +14,7 @@ import type { AdapterFeatureComponent } from "./component";
  *
  * @public
  */
-export interface AdapterFindButtonProps extends ToolbarExtrasSlotProps {
+export interface AdapterFindButtonProps extends ToolbarEntrySlotProps {
   /** Open the find bar. */
   readonly onOpenFind: () => void;
   /** Whether the find bar is showing, for `aria-expanded`. */
@@ -29,8 +29,8 @@ export interface AdapterFindButtonProps extends ToolbarExtrasSlotProps {
  */
 export function findButtonRender(
   Button: AdapterFeatureComponent<AdapterFindButtonProps>
-): FeatureRender<ToolbarExtrasSlotProps> {
-  function LiveFindButton(props: Readonly<ToolbarExtrasSlotProps>): ReactNode {
+): FeatureRender<ToolbarEntrySlotProps> {
+  function LiveFindButton(props: Readonly<ToolbarEntrySlotProps>): ReactNode {
     const find = useFindState();
     const openBar = find?.openBar;
     if (!find || !openBar) return null;

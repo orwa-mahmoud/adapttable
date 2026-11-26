@@ -63,7 +63,7 @@ function fixture(
     pinned: {},
     widths: {},
   };
-  const features = [columnMenu(), ...extraFeatures];
+  const features = [columnMenu({ onRename: rename }), ...extraFeatures];
   const app = createApp({
     render: () =>
       h(DataTable<Row>, {
@@ -77,7 +77,6 @@ function fixture(
         dir: dir.value,
         columnLayout: controlled ? layout : undefined,
         "onUpdate:columnLayout": request,
-        onColumnRename: rename,
       }),
   }).use(ui);
   app.mount(root);

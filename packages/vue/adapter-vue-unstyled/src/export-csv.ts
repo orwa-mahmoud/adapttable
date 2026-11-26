@@ -1,9 +1,3 @@
-/**
- * Compatibility entry for native CSV export.
- *
- * @deprecated Import from `@adapttable/vue-unstyled/export`.
- * @packageDocumentation
- */
 import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
 import {
   exportCsv as bindingExportCsv,

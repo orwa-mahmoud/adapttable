@@ -9,6 +9,7 @@ import {
   EDITABLE_CELL,
   ROW_EDIT_ACTIONS,
   type RowEditIcons,
+  undoRedoToolbarProps,
 } from "@adapttable/core/binding";
 import {
   resolveRowEditTrigger,
@@ -26,6 +27,7 @@ import {
   type TableEditingOptions,
   useTableEditing,
 } from "./editing/editingModels";
+import { toolbarEntry } from "./features/toolbarEntries";
 import {
   editHistoryModelKey,
   type EditingChromeModel,
@@ -168,7 +170,22 @@ export function batchEditing<TRow>(
   };
 }
 export function undoRedoButtons(): StaticTableFeature {
-  return { ...coreUndoRedoButtons(), requiredSlots: [UNDO_REDO_CONTROL] };
+  return {
+    ...coreUndoRedoButtons(),
+    renders: [
+      toolbarEntry((entry) => {
+        const history = entry.read(editHistoryModelKey<unknown>());
+        const { labels, classNames } = entry.presentation;
+        const buttons = history
+          ? undoRedoToolbarProps(true, history, labels)
+          : {};
+        return buttons.onUndo
+          ? entry.draw(UNDO_REDO_CONTROL, { ...buttons, labels, classNames })
+          : null;
+      }),
+    ],
+    requiredSlots: [UNDO_REDO_CONTROL],
+  };
 }
 export function dirtyIndicators(): StaticTableFeature {
   return coreDirtyIndicators();

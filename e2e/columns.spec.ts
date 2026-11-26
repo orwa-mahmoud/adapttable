@@ -1,3 +1,5 @@
+import { inflateRawSync } from "node:zlib";
+
 import { expect, type Page, test } from "@playwright/test";
 
 import { builtAdapters } from "../apps/showcase/matrix.mjs";
@@ -145,18 +147,20 @@ test.describe("columns — export the selected range", () => {
     return value;
   };
 
-  /** The stored entries of a ZIP, by name. Entries are uncompressed. */
+  /** The entries of a ZIP, by name, inflated when they were deflated. */
   function unzip(bytes: Uint8Array): Map<string, string> {
     const decoder = new TextDecoder();
     const files = new Map<string, string>();
     let at = 0;
     while (readInt(bytes, at, 4) === 0x04034b50) {
+      const method = readInt(bytes, at + 8, 2);
       const size = readInt(bytes, at + 18, 4);
       const nameLength = readInt(bytes, at + 26, 2);
       const start = at + 30 + nameLength + readInt(bytes, at + 28, 2);
+      const body = bytes.slice(start, start + size);
       files.set(
         decoder.decode(bytes.slice(at + 30, at + 30 + nameLength)),
-        decoder.decode(bytes.slice(start, start + size))
+        decoder.decode(method === 8 ? inflateRawSync(body) : body)
       );
       at = start + size;
     }

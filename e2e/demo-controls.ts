@@ -8,7 +8,7 @@
  */
 import { expect, type Page } from "@playwright/test";
 
-import { getLabels } from "../packages/shared/i18n/src/index";
+import { getLabels } from "../packages/shared/i18n/src/catalog";
 
 type Framework = "react" | "vue" | "angular";
 

@@ -32,6 +32,7 @@ import {
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 
+import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { filtersTests } from "../../angular/test/kit/suites/filters";
 import { kit } from "../testing/kit";
 import {
@@ -135,8 +136,7 @@ const DEFS: FilterDef<Person>[] = [
       [forceMobile]="false"
       [searchable]="searchable()"
       [dir]="dir()"
-      [features]="features()"
-      [filtersMode]="mode()"
+      [features]="shown()"
       [labels]="labels()"
     />
   `,
@@ -146,6 +146,11 @@ class Host {
   readonly dir = input<"ltr" | "rtl">("ltr");
   readonly features = input([filters(DEFS)]);
   readonly mode = input<FiltersMode>("popover");
+  readonly shown = computed(() =>
+    declareFeatureOptions(this.features(), {
+      filters: { filtersMode: this.mode() },
+    })
+  );
   readonly labels = input<Partial<TableLabels> | undefined>(undefined);
   readonly custom =
     viewChild.required<TemplateRef<FilterWidgetRenderProps<Person>>>("custom");

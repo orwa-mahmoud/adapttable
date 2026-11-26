@@ -1,7 +1,7 @@
 import { savedViews as antdSavedViews } from "@adapttable/antd/saved-views";
 import { savedViews as baseUiSavedViews } from "@adapttable/base-ui/saved-views";
 import { savedViews as chakraSavedViews } from "@adapttable/chakra/saved-views";
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { savedViews as mantineSavedViews } from "@adapttable/mantine/saved-views";
 import { savedViews as muiSavedViews } from "@adapttable/mui/saved-views";
 import { savedViews as radixSavedViews } from "@adapttable/radix/saved-views";

@@ -9,10 +9,11 @@ import {
   collectConformanceTests,
   type ConformanceTest,
 } from "@adapttable/core/conformance";
-import { Component, signal } from "@angular/core";
+import { Component, computed, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { expect, vi } from "vitest";
 
+import { declareFeatureOptions } from "../declareFeatureOptions";
 import type { AngularKitUnderTest } from "../kit";
 
 /**
@@ -25,8 +26,15 @@ export function featureRecompositionTests(
   kit: AngularKitUnderTest
 ): readonly ConformanceTest[] {
   const { Table: AdaptDataTable, kitSelector } = kit;
-  const { columnMenu, densityChooser, editing, print, rowActions, tree } =
-    kit.features;
+  const {
+    columnMenu,
+    densityChooser,
+    editing,
+    print,
+    rowActions,
+    tree,
+    selection,
+  } = kit.features;
   return collectConformanceTests(({ describe, it, afterEach }) => {
     /** Feature identities change while the mounted table and its state stay alive. */
 
@@ -59,19 +67,12 @@ export function featureRecompositionTests(
           [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
-          [features]="features()"
+          [features]="tableFeatures()"
           [forceMobile]="mobile"
           [urlSync]="false"
-          [selectable]="selectable()"
-          [cellNavigation]="navigation()"
-          [filtersMode]="filterMode()"
-          [closeHeaderFilterOnSelect]="closeHeaderFilter()"
           [density]="rowDensity()"
           (densityChange)="onDensityChange($event)"
-          [onColumnRename]="renameColumn()"
           [confirm]="confirmAction()"
-          [selectedIds]="controlledSelection() ? selected() : undefined"
-          (selectionChange)="onSelectionChange($event)"
           [columnLayout]="layout()"
           (columnLayoutChange)="onLayoutChange($event)"
         />
@@ -86,7 +87,28 @@ export function featureRecompositionTests(
       readonly selected = signal<readonly string[]>([]);
       readonly controlledSelection = signal(true);
       readonly selectable = signal(true);
-      readonly navigation = signal(false);
+      readonly selectionIds = computed(() =>
+        this.controlledSelection() ? this.selected() : undefined
+      );
+      readonly tableFeatures = computed(() => {
+        const base = declareFeatureOptions(this.features(), {
+          filters: { filtersMode: this.filterMode() },
+          "header-filters": {
+            closeHeaderFilterOnSelect: this.closeHeaderFilter(),
+          },
+          "column-menu": { onColumnRename: this.renameColumn() },
+        });
+        if (!this.selectable()) return base;
+        return [
+          selection({
+            selectedIds: this.selectionIds,
+            onSelectionChange: (ids: string[]) => {
+              this.onSelectionChange(ids);
+            },
+          }),
+          ...base,
+        ];
+      });
       readonly filterMode = signal<"popover" | "drawer">("popover");
       readonly closeHeaderFilter = signal(false);
       readonly rowDensity = signal<"comfortable" | "compact" | undefined>(
@@ -496,20 +518,16 @@ export function featureRecompositionTests(
         expect(host.features()).toBe(features);
       });
 
-      it("releases replaced, removed and destroyed setup and mount listeners exactly once", async () => {
+      it("releases replaced, removed and destroyed mount listeners exactly once", async () => {
         const cleanup = vi.fn();
         const started = vi.fn();
+        // Each version is its own dependency: a new version replaces the
+        // mounted listener, a re-declared one keeps it.
         const lifecycle = (host: Host, version: string): AdaptTableFeature => ({
           id: "live-probe",
-          setup: (featureHost) => {
+          dependencies: [version],
+          setup: () => {
             started(`${version}:setup`);
-            const listener = () => host.record(`${version}:setup`);
-            host.probe.addEventListener("probe", listener);
-            featureHost.onDispose(() => cleanup(`${version}:onDispose`));
-            return () => {
-              host.probe.removeEventListener("probe", listener);
-              cleanup(`${version}:setup`);
-            };
           },
           mount: () => {
             started(`${version}:mount`);
@@ -532,7 +550,11 @@ export function featureRecompositionTests(
           await mounted.settle();
           return one(mounted.root, "[data-host-events]").textContent;
         };
-        expect(await probe()).toBe("first:setup,first:mount");
+        const released = () =>
+          cleanup.mock.calls
+            .map(([value]) => value as string)
+            .sort((left, right) => left.localeCompare(right));
+        expect(await probe()).toBe("first:mount");
         expect(started.mock.calls.map(([value]) => value)).toEqual([
           "first:setup",
           "first:mount",
@@ -540,51 +562,26 @@ export function featureRecompositionTests(
         if (!first)
           throw new Error("The initial lifecycle feature was not created");
         await mounted.replace([first]);
-        expect(await probe()).toBe("first:setup,first:mount");
+        expect(await probe()).toBe("first:mount");
         expect(started).toHaveBeenCalledTimes(2);
         expect(cleanup).not.toHaveBeenCalled();
 
         await mounted.replace([lifecycle(mounted.host, "second")]);
-        expect(await probe()).toBe("second:setup,second:mount");
-        expect(
-          cleanup.mock.calls
-            .map(([value]) => value)
-            .sort((left, right) => left.localeCompare(right))
-        ).toEqual(["first:mount", "first:onDispose", "first:setup"]);
+        expect(await probe()).toBe("second:mount");
+        expect(released()).toEqual(["first:mount"]);
         await mounted.replace([]);
         expect(await probe()).toBe("");
-        expect(
-          cleanup.mock.calls
-            .map(([value]) => value)
-            .sort((left, right) => left.localeCompare(right))
-        ).toEqual([
-          "first:mount",
-          "first:onDispose",
-          "first:setup",
-          "second:mount",
-          "second:onDispose",
-          "second:setup",
-        ]);
+        expect(released()).toEqual(["first:mount", "second:mount"]);
         await mounted.replace([lifecycle(mounted.host, "third")]);
-        expect(await probe()).toBe("third:setup,third:mount");
+        expect(await probe()).toBe("third:mount");
         mounted.destroy();
         mounted.host.events.set([]);
         mounted.host.probe.dispatchEvent(new Event("probe"));
         expect(mounted.host.events()).toEqual([]);
-        expect(
-          cleanup.mock.calls
-            .map(([value]) => value)
-            .sort((left, right) => left.localeCompare(right))
-        ).toEqual([
+        expect(released()).toEqual([
           "first:mount",
-          "first:onDispose",
-          "first:setup",
           "second:mount",
-          "second:onDispose",
-          "second:setup",
           "third:mount",
-          "third:onDispose",
-          "third:setup",
         ]);
       });
     });

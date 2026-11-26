@@ -1,7 +1,15 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { createApp, createSSRApp, defineComponent, h, nextTick } from "vue";
+import {
+  createApp,
+  createSSRApp,
+  defineComponent,
+  h,
+  nextTick,
+  shallowRef,
+} from "vue";
 import { renderToString } from "vue/server-renderer";
 
+import { dirtyIndicators } from "../editing";
 import { useDataTableShell } from "../useDataTableShell";
 
 const FORCED_COLORS_STYLE_ID = "adapttable-forced-colors";
@@ -35,6 +43,31 @@ describe("mountForcedColorsStyles", () => {
     ).toHaveLength(1);
     app.unmount();
     expect(document.getElementById(FORCED_COLORS_STYLE_ID)).not.toBeNull();
+    host.remove();
+  });
+
+  it("adds a feature's rules when the features change", async () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    const features = shallowRef<readonly ReturnType<typeof dirtyIndicators>[]>(
+      []
+    );
+    const app = createApp({
+      setup() {
+        useDataTableShell(() => ({ ...options, features: features.value }));
+        return () => h("div");
+      },
+    });
+    app.mount(host);
+    await nextTick();
+    const sheet = () =>
+      document.getElementById(FORCED_COLORS_STYLE_ID)?.textContent ?? "";
+    expect(sheet()).toContain('[aria-invalid="true"]');
+    expect(sheet()).not.toContain("[data-dirty],");
+    features.value = [dirtyIndicators()];
+    await nextTick();
+    expect(sheet()).toContain("[data-dirty],");
+    app.unmount();
     host.remove();
   });
 

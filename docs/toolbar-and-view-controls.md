@@ -454,6 +454,7 @@ covered in [exporting](./exporting.md).
   `labels.enterFullscreen` / `labels.exitFullscreen`. Selection figures render
   in a status region, read after the range announcement. All captions are
   [labels](./i18n-rtl.md#custom-labels).
-- **Headless.** Adapters render the toolbar through `ToolbarChromeProps`, the
-  strip through `StatusBarChrome`, and the panel through `SidePanelChrome`, all
-  from `@adapttable/react/adapter`. See [customization](./customization.md#toolbar-and-status-bar).
+- **Headless.** Every kit's toolbar is drawn by the binding from the kit's
+  controls, and each feature adds its own toolbar entry; the strip renders
+  through `StatusBarChrome` and the panel through `SidePanelChrome`, all from
+  `@adapttable/react/adapter`. See [customization](./customization.md#toolbar-and-status-bar).

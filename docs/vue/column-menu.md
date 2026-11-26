@@ -5,7 +5,7 @@ Add `columnMenu()` from the chosen Vue kit's `/column-menu` entry to the table's
 Reka UI, shadcn-vue, Nuxt UI and Quasar; use the same kit for the table and feature.
 The menu provides column search, visibility, pinning,
 reordering, sorting, sizing, and reset. Rename controls appear for columns
-that declare `renameable: true` when the table provides its rename channel.
+that declare `renameable: true` when `columnMenu({ onRename })` provides the rename channel.
 
 ```vue
 <script setup lang="ts">
@@ -15,12 +15,12 @@ import { columnMenu } from "@adapttable/vue-unstyled/column-menu";
 
 const rows = [{ id: "a", name: "Ada" }];
 const columns = shallowRef([{ key: "name", header: "Name", renameable: true }]);
-const features = [columnMenu()];
 const rename = (key: string, name: string) => {
   columns.value = columns.value.map((column) =>
     column.key === key ? { ...column, header: name } : column
   );
 };
+const features = [columnMenu({ onRename: rename })];
 </script>
 
 <template>
@@ -29,7 +29,6 @@ const rename = (key: string, name: string) => {
     :columns="columns"
     :features="features"
     :row-key="(row) => row.id"
-    :on-column-rename="rename"
   />
 </template>
 ```

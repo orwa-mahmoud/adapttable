@@ -15,6 +15,8 @@ import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
 import { type AdaptTableFeature, featureHostFor } from "./featureHost";
+import { mountTableFeatures } from "./featureLifecycle";
+import { createFeatureState } from "./featureState";
 import { injectFrontendData } from "./source/frontendData";
 
 function openTable(parent: Injector): LifecycleObservation {
@@ -32,7 +34,9 @@ function openTable(parent: Injector): LifecycleObservation {
     parent,
   });
   const features = signal<readonly AdaptTableFeature[]>([]);
-  const setups = new Map<string, number>();
+  const mounts = new Map<string, number>();
+  const latest = new Map<string, () => AdaptTableFeature>();
+  const optionOf = new WeakMap<AdaptTableFeature, string | undefined>();
   const cleanups = new Map<string, number>();
   let publications = 0;
   let revisions = 0;
@@ -50,6 +54,18 @@ function openTable(parent: Injector): LifecycleObservation {
   const host = runInInjectionContext(injector, () =>
     featureHostFor(injector, features)
   );
+  const unmount = runInInjectionContext(injector, () =>
+    mountTableFeatures(features, {
+      runtime: {
+        view: () => undefined,
+        rowAt: () => undefined,
+        labels: () => undefined,
+        featureIds: () => [],
+      },
+      state: createFeatureState(),
+      injector,
+    })
+  );
   let disposed = false;
   let published = host();
   if (published !== seen) {
@@ -62,20 +78,25 @@ function openTable(parent: Injector): LifecycleObservation {
     if (existing) return existing;
     const created: AdaptTableFeature = {
       id: spec.id,
+      dependencies: spec.dependencies,
       setup: (registry) => {
-        setups.set(spec.id, (setups.get(spec.id) ?? 0) + 1);
         if (spec.command)
           registry.registerCommand({
             key: spec.command,
             label: spec.command,
             onSelect: () => undefined,
           });
-        registry.onDispose(() => {
-          cleanups.set(spec.id, (cleanups.get(spec.id) ?? 0) + 1);
-        });
+      },
+      mount: (context) => {
         if (spec.fail) throw new Error(`mount ${spec.id}`);
+        mounts.set(spec.id, (mounts.get(spec.id) ?? 0) + 1);
+        latest.set(spec.id, context.feature);
+        return () => {
+          cleanups.set(spec.id, (cleanups.get(spec.id) ?? 0) + 1);
+        };
       },
     };
+    optionOf.set(created, spec.option);
     featuresFor.set(spec, created);
     return created;
   };
@@ -104,11 +125,16 @@ function openTable(parent: Injector): LifecycleObservation {
     dispose() {
       if (disposed) return Promise.resolve();
       disposed = true;
+      unmount();
       injector.destroy();
       return Promise.resolve();
     },
     commands: () => published.commands.map((command) => command.key),
-    setups: (id) => setups.get(id) ?? 0,
+    mounts: (id) => mounts.get(id) ?? 0,
+    currentOption: (id) => {
+      const current = latest.get(id)?.();
+      return current ? optionOf.get(current) : undefined;
+    },
     cleanups: (id) => cleanups.get(id) ?? 0,
     hostPublications: () => publications,
     revisionNotifications: () => revisions,

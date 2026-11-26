@@ -57,9 +57,6 @@ keep labels on measurements and other values that need context.
   card layout that should match.
 - **`hideOnMobile`** (per column) — drop a column from cards entirely.
 - **`hideOnDesktop`** (per column) — show a field on cards only.
-- **`mobileIdentityColumns`** — deprecated, accepted and ignored, removed in
-  v4. `hideOnMobile` decides what a card shows: every column without it
-  appears.
 - **`sortByOptions`** — the options offered by the mobile sort-by select.
   The direction button is disabled until a column is selected. It keeps the
   selected column while switching ascending/descending order, and uses the

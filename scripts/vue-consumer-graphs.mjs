@@ -20,7 +20,12 @@ import { buildVueNativeConsumer } from "./vue-native-consumer.mjs";
 export async function vueConsumerGraph(fixture, dir) {
   const base = join(packageDir(fixture.pkg), "dist");
   const entries = [join(base, fixture.entryFile ?? "index.js")];
-  let code = fixture.code.replaceAll("PKG", entries[0]);
+  let code = fixture.code
+    .replaceAll("PKG", entries[0])
+    .replaceAll(
+      "@adapttable/vue/features",
+      join(packageDir("vue"), "dist/features.js")
+    );
   if (fixture.alsoEntryFile) {
     entries.push(join(base, fixture.alsoEntryFile));
     code = code.replaceAll("ALSO", entries[1]);

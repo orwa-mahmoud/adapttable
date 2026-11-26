@@ -9,7 +9,14 @@
  */
 import type { KeyedWindow } from "@adapttable/react/adapter";
 import type { GetRef, Table } from "antd";
-import { type RefObject, useEffect, useMemo, useRef } from "react";
+import {
+  createContext,
+  type RefObject,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 
 /** antd's `<Table>` handle: its scroll and its root element. */
 export type AntdTableRef = GetRef<typeof Table>;
@@ -33,6 +40,25 @@ export function useAntdRowScroll(): AntdRowScroll {
   const cards = useRef<KeyScroll | null>(null);
   const groups = useRef<KeyScroll | null>(null);
   return useMemo(() => ({ table, cards, groups }), []);
+}
+
+/** One table's scroll handles, for the regions drawn inside it. */
+export const AntdRowScrollContext =
+  /* @__PURE__ */ createContext<AntdRowScroll | null>(null);
+
+/**
+ * The scroll handles of the table this region is drawn in.
+ *
+ * @throws When the region renders outside an antd `DataTable`.
+ */
+export function useAntdRowScrollHandles(): AntdRowScroll {
+  const rowScroll = useContext(AntdRowScrollContext);
+  if (!rowScroll) {
+    throw new Error(
+      "[adapttable] an antd table region rendered outside its DataTable; its row scroll handles are missing"
+    );
+  }
+  return rowScroll;
 }
 
 /**

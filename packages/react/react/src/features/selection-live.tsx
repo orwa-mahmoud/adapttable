@@ -1,7 +1,8 @@
 /**
  * Row selection — mounts only when a selection-owning feature is composed.
  */
-import { sourceCapabilities, stableKey } from "@adapttable/core";
+import { sourceCapabilities } from "@adapttable/core";
+import { selectionResetKey } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { useSelection } from "../selection/useSelection";
@@ -18,17 +19,13 @@ function LiveSelection<TRow>({
   children,
 }: ChromeExtraSlotProps<TRow>): ReactNode {
   const getId = chrome.getRowId;
-  const resetKey = stableKey([
-    chrome.source.search,
-    chrome.source.extra,
-    chrome.source.filterTree,
-    chrome.source.groupBy,
-  ]);
+  const resetKey = selectionResetKey(chrome.source);
   const selection = useSelection({
     rows: chrome.source.rows,
     getId,
     resetKey,
     selectedIds: props.selectedIds,
+    defaultSelectedIds: props.defaultSelectedIds,
     onSelectionChange: props.onSelectionChange,
     acrossPages: sourceCapabilities(chrome.source).selectAcrossPages,
   });

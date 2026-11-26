@@ -127,7 +127,6 @@ export {
   aggregationModel,
   type AggregationModelInput,
   type AggregationOrigin,
-  computedAggregateKeys,
   type EffectiveAggregation,
   type EffectiveAggregationInput,
   type EffectiveAggregationKind,
@@ -135,6 +134,7 @@ export {
   restoreAggregationDefaults,
   serializeAggregationDerivedKey,
 } from "./aggregate/aggregationModel";
+export { computedAggregateKeys } from "./aggregate/computedAggregateKeys";
 export {
   type ApprovalArgumentPair,
   approvalArgumentPairs,
@@ -153,7 +153,6 @@ export {
   type BatchEditStore,
   type BatchEditStoreOptions,
   type BatchPendingDrafts,
-  createBatchEditStore,
 } from "./editing/batchEditing";
 export {
   type DirtyCellState,
@@ -163,7 +162,6 @@ export {
   type CellEditingState,
   type CellSaveState,
   type EditableCellController,
-  editableCellController,
   type EditableCellMode,
   type EditActivation,
   type EditConflictLabels,
@@ -174,12 +172,10 @@ export {
   type ContestedEditCell,
   type EditConflictSnapshot,
   type EditConflictState,
-  isRowContested,
-  liveRowChanged,
   type ReconcileLiveBatchEdit,
   type ReconcileLiveEdit,
   type ReconcileLiveRowEdit,
-} from "./editing/editConflict";
+} from "./editing/editConflictView";
 export type {
   BatchRowEdit,
   CellValidator,
@@ -197,14 +193,11 @@ export type {
 } from "./editing/editContracts";
 export {
   type CellEditHandler,
-  createEditHistory,
   type EditHistoryController,
   type EditHistoryControllerOptions,
   type EditHistoryState,
 } from "./editing/editHistory";
 export {
-  asBatchGesture,
-  asGesture,
   type CellEditKeyAction,
   type CellEditKeyOutcome,
   type CellEditNavigation,
@@ -213,12 +206,10 @@ export {
   type CellEditSnapshot,
   type CellSaveStatus,
   type CellSaveStoreOptions,
-  createCellEditSession,
   type EditHistoryEntry,
   type EditHistorySnapshot,
   type EditValidationStoreOptions,
   type FailedCellSave,
-  readCellValue,
   type ValidationCheckResult,
 } from "./editing/editingController";
 export {
@@ -226,18 +217,12 @@ export {
   type EditableCellEditorCtrl,
   type EditorAriaState,
   type EditorDraftControl,
-  editorSelectOptions,
-  editorValidationProps,
-  resolveRowEditTrigger,
   type RowEditConflict,
-  rowEditConflict,
   type RowEditControls,
-  rowEditControls,
   type RowEditControlsOptions,
   type RowEditTrigger,
 } from "./editing/editingGate";
 export {
-  createRowEditStore,
   type RowEditDrafts,
   type RowEditHandler,
   type RowEditingState,
@@ -245,6 +230,7 @@ export {
   type RowEditStore,
   type RowEditStoreOptions,
 } from "./editing/rowEditing";
+export type { SelectionFeatureOptions } from "./features/coreFeatures";
 export type { NeutralFeatureHost } from "./features/featureRegistration";
 export type { ActiveFilterChip } from "./filters/activeFilterChips";
 export {
@@ -355,6 +341,11 @@ export {
   resolveRelativeRange,
   splitRelativeToken,
 } from "./filters/relativeDates";
+export {
+  type ServerFilterKeys,
+  serverFilterKeys,
+  type ServerFilterKeysInput,
+} from "./filters/serverFilterKeys";
 export { FIND_URL_WRITE_DEBOUNCE_MS } from "./find/findController";
 export {
   findMatches,
@@ -434,6 +425,7 @@ export {
   type TableQueryKeyOptions,
 } from "./source/queryKey";
 export type { Slot, TableErrorState } from "./state/errorState";
+export type { RowRekeyMoves } from "./state/rowRekeys";
 export type {
   SliceCell,
   SliceKey,
@@ -586,13 +578,6 @@ export {
   type CustomCellEditorCtrl,
   type CustomCellEditorRender,
   type EditableColumnLike,
-  editorInputType,
-  formatMultiDraft,
-  hasEditableColumns,
-  isCellEditable,
-  normalizeEditorOptions,
-  parseCellEditValue,
-  resolveCellEditor,
 } from "./editing/cellEditing";
 export {
   type CellSpanAppearance,
@@ -614,12 +599,17 @@ export {
   applyRowPatchesWithLog,
   type InsertPatch,
   insertRow,
+  type RekeyPatch,
+  rekeyRow,
   type RemovePatch,
   removeRow,
+  RowIdConflictError,
   type RowPatch,
   type RowPatchEvent,
   type RowPatchLog,
   rowPatchLog,
+  type RowPatchOptions,
+  rowRekeys,
   type UpdatePatch,
   updateRow,
   type UpsertPatch,
@@ -692,9 +682,6 @@ export {
   type GroupAggregateOverride,
   type GroupAggregateOverrides,
   parseGroupAggregateOverrides,
-  serializeGroupAggregateOverrides,
-  withGroupAggregateOverrides,
-  withQueryAggregateOverrides,
 } from "./grouping/groupAggregateOverrides";
 export type {
   GroupingChipKeyboardProps,
@@ -705,31 +692,25 @@ export type {
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "./grouping/groupingPanelModel";
+export type {
+  GroupingPanelSource,
+  GroupingPanelStateInput,
+} from "./grouping/groupingPanelState";
 export { type GroupByInput } from "./grouping/groupKeys";
 export {
-  groupAggregateEntries,
   type GroupAggregateOps,
   type GroupRowCell,
   type GroupRowLayout,
-  groupRowLayout,
 } from "./grouping/groupRowLayout";
 export {
-  buildGroupedFlatModel,
-  formatGroupLabel,
   type GroupAggregatesFn,
   type GroupedFlatEntry,
   type GroupNode,
   type GroupPaging,
   type GroupSort,
-  groupValueKey,
   type RowGroupLevel,
   type RowGroupRef,
 } from "./grouping/groupRows";
-export { groupSelectionState } from "./grouping/groupSelection";
-export type {
-  GroupingPanelSource,
-  GroupingPanelStateInput,
-} from "./layout/tableChromeState";
 export type { SelectionContribution } from "./selection/selectionBindingState";
 export { type QueryGroupRow } from "./source/queryGroups";
 /* ── Export (CSV, and any format a writer adds) ────────────────────── */
@@ -819,75 +800,18 @@ export type {
 // Adapter machinery on the main entry, each name deprecated where it is
 // declared. These shadow the same names from the barrel above, so
 // `@adapttable/core/binding` and `@adapttable/react/adapter` carry no notice.
-export {
-  applyCollapsedColumnGroups,
-  type BodyCell,
-  bodyCellsHaveRowSpan,
-  buildTableXlsx,
-  cellsForRow,
-  cellSpanMark,
-  COLUMN_GROUP_ID_SEP,
-  COLUMN_GROUP_RENDER_PREFIX,
-  COLUMN_GROUP_STUB_PREFIX,
-  COLUMN_GROUP_STUB_WIDTH,
-  columnGroupHeaderCaption,
-  columnGroupId,
-  columnGroupPath,
-  columnGroupStubStyle,
-  columnMenuActions,
-  EXTRA_OVER_SPAN_ROW_STYLE,
-  EXTRA_OVER_SPAN_STYLE,
-  EXTRA_ROW_PARTS,
-  extraCountBeforeRowIds,
-  extraCoveredTableSlots,
-  extraHostFillStyle,
-  extraRowsForSection,
-  extraUncoveredColSpans,
-  filterColumnMenuRows,
-  flattenColumnTree,
-  groupedHeaderAlign,
-  groupedHeaderCellStyle,
-  groupedHeaderChildRule,
-  groupedHeaderLabelStyle,
-  type HeaderGroupCell,
-  headerGroupRow,
-  headerGroupRows,
-  hideAllColumns,
-  type HtmlGroupedHeaderCell,
-  htmlGroupedHeaderPlan,
-  inflateBodyCellRowSpans,
-  insertExtraRows,
-  insertExtrasBeforeRows,
-  isColumnGroupRenderKey,
-  isColumnGroupStubKey,
-  isColumnGroupSummaryKey,
-  isExtraEntry,
-  orderedCardEntries,
-  PINNED_BOTTOM_PART,
-  PINNED_TOP_PART,
-  pinnedRowCellStyle,
-  pinnedRowPart,
-  pinnedRowSticky,
-  pinnedRowStickyStyle,
-  REORDER_COLUMN_WIDTH,
-  resetColumnLayout,
-  resolveRowHeight,
-  resolveRowStyle,
-  rowPinSignature,
-  rowReorderDropStyle,
-  rowReorderSignature,
-  rowSourceIndex,
-  rowSpanSignature,
-  rowStyleSignature,
-  showAllColumns,
-  toggleCollapsedColumnGroup,
-  unpinAllColumns,
-  xlsxWriter,
-} from "./adapterMachinery";
 export type {
   EditCommitSnapshot,
   EditCommitValidationFailure,
   EditCommitValidationOptions,
 } from "./editing/editCommitLifecycle";
-export * from "./mainEntryAliases";
+export {
+  type DeferredExportWriter,
+  deferredExportWriter,
+  deferredPdfWriter,
+  deferredXlsxWriter,
+  type ExportWriterOption,
+} from "./export/deferredWriter";
+export type { PdfWriterOptions } from "./export/pdf";
+export type { PrintPageBreak, PrintPageSize } from "./export/printLayout";
 export * from "./panelFeatureExports";

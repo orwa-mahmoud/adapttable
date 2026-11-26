@@ -61,7 +61,7 @@ describe("Mantine GroupingPanel", () => {
       />
     );
 
-    const handle = screen.getByRole("button", { name: "Move Team" });
+    const handle = screen.getByRole("button", { name: "Move Team grouping" });
     const remove = screen.getByRole("button", {
       name: "Remove Team from grouping",
     });

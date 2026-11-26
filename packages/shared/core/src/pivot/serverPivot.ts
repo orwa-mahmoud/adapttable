@@ -91,7 +91,7 @@ export interface QueryPivotPage {
 }
 
 /**
- * What {@link serverPivotResult} needs.
+ * What `serverPivotResult` needs.
  *
  * @public
  */

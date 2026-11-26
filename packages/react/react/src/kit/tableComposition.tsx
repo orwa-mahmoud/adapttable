@@ -16,34 +16,13 @@ import {
 import type { CSSProperties, ReactNode, RefCallback, RefObject } from "react";
 
 import { TableStatusAnnouncer } from "../a11y/TableStatusAnnouncer";
-import {
-  ContextMenuLiveGate,
-  OptionalSidePanel,
-} from "../adapterFeatures/featureRoot";
-import { AGENT_APPROVAL_STATE } from "../editing/AgentApprovalChrome";
+import { OptionalSidePanel } from "../adapterFeatures/featureRoot";
 import { DataTableShellView } from "../features/chromeBodyGate";
 import { FeatureHostProvider } from "../features/featureHostContext";
-import { FeatureSlot, useFeatureState } from "../features/providers";
-import {
-  ACTIVE_FILTER_CHIPS,
-  AGENT_APPROVAL,
-  BATCH_EDIT_BAR,
-  BULK_BAR,
-  COLUMN_MENU,
-  COMMAND_PALETTE_LIVE,
-  type ContextMenuLiveSlotProps,
-  FILTER_DRAWER,
-  FILTERS_FORM,
-  FIND_BAR,
-  GRID_FOCUS_ANNOUNCER,
-  GROUPING_PANEL,
-  ROW_REORDER_ANNOUNCER,
-  SAVED_VIEWS,
-  SIDE_PANEL,
-  STATUS_BAR,
-} from "../features/slotKeys";
-import { contextMenuCopyTarget } from "../focus/contextMenuCopy";
-import type { GroupingPanelSlotProps } from "../grouping/GroupingPanelChrome";
+import { FeatureStateScope } from "../features/featureState";
+import { FeatureSlot } from "../features/providers";
+import { FILTERS_FORM } from "../features/slotKeys";
+import { TABLE_REGION_STATE } from "../features/stateKeys";
 import {
   resolveStickyToolbar,
   useStickyToolbarLayout,
@@ -56,6 +35,16 @@ import type {
 import { fillSlot, type Slot } from "../state/slots";
 import type { Density } from "../url/useDensityUrlState";
 import { useDataTableShell } from "../useDataTableShell";
+import {
+  ANNOUNCERS_AREA,
+  BARS_AREA,
+  type KitRegionProps,
+  MAIN_AREA,
+  OVERLAYS_AREA,
+  RootRegion,
+  SIDE_PANEL_REGION,
+  STATUS_BAR_REGION,
+} from "./rootRegion";
 
 /**
  * Content a host puts in place of a kit's own state views.
@@ -112,7 +101,7 @@ export type KitTableProps<TRow> = DataTableShellProps<TRow> & {
 
 /**
  * What a kit's toolbar receives: the shell's toolbar bundle, the filter
- * container's state, and the two menus the composition mounts in it.
+ * container's state and whether the table loads more as it scrolls.
  *
  * @public
  */
@@ -129,10 +118,6 @@ export interface KitToolbarProps<
   readonly onFiltersTriggerPointerDown: () => void;
   /** Close the filter container. */
   readonly onCloseFilters: () => void;
-  /** The saved-views menu, when the host asked for one. */
-  readonly savedViewsMenu: ReactNode;
-  /** The columns menu, when the host asked for one. */
-  readonly columnMenu: ReactNode;
   /** Whether the table loads its next page as it scrolls, outside a grouped view. */
   readonly loadsMore: boolean;
 }
@@ -286,114 +271,30 @@ function bodyOf<TRow>(
   return kit.body(view, headerOffset, props);
 }
 
-function contextMenuProps<TRow>(
-  view: DataTableShellResult<TRow>,
-  props: KitTableProps<TRow>
-): Omit<ContextMenuLiveSlotProps<unknown>, "children"> {
-  const { chrome, gridFocus, source } = view;
-  const copy = (
-    target: Parameters<typeof contextMenuCopyTarget>[1],
-    cut?: true
-  ) => {
-    // The cell that was right-clicked, unless it sits inside a selection —
-    // then the selection is what was asked for.
-    const found = contextMenuCopyTarget(gridFocus, target);
-    if (found.available) gridFocus.copyCells(found.cell, cut);
-  };
-  return {
-    contextMenu: props.contextMenu,
-    columns: chrome.allColumns,
-    labels: view.labels,
-    rowFor: (rowId: string) =>
-      source.rows.find((row) => props.rowKey(row) === rowId),
-    actions: {
-      onCopy: (target) => {
-        copy(target);
-      },
-      // Cut writes the target to the clipboard, then asks the host to clear
-      // it through onCellCut — offered only when both exist.
-      onCut:
-        props.onCellCut && gridFocus.enabled
-          ? (target) => {
-              copy(target, true);
-            }
-          : undefined,
-      onSort: (key: string, dir: "asc" | "desc") => {
-        source.setSort(key, dir);
-      },
-      onHide: (key: string) => {
-        chrome.columnLayout.toggleVisible(key);
-      },
-      onFilter: () => {
-        view.setFiltersOpen(true);
-      },
-    },
-    sortBy: source.sortBy,
-    sortDir: source.sortDir,
-    rowPins: chrome.rowPinning?.actions,
-    featureHost: view.featureHost,
-    container: view.fullscreen.container,
-  } as Omit<ContextMenuLiveSlotProps<unknown>, "children">;
-}
-
 function toolbarOf<TRow>(
   kit: KitTable,
   view: DataTableShellResult<TRow>,
   props: KitTableProps<TRow>
 ): ReactNode {
-  const { chrome, labels, source } = view;
-  return kit.toolbar<TRow>({
+  const toolbar = kit.toolbar<TRow>({
     ...view.toolbarProps,
     filtersMode: props.filtersMode ?? "popover",
-    loadsMore: view.canLoadMore && !chrome.grouping,
+    loadsMore: view.canLoadMore && !view.tableProps.grouping,
     filtersOpen: view.filtersOpen,
     onToggleFilters: view.filtersTrigger.onClick,
     onFiltersTriggerPointerDown: view.filtersTrigger.onPointerDown,
     onCloseFilters: () => {
       view.setFiltersOpen(false);
     },
-    // Saved views capture the table's own URL params, so the menu defaults
-    // to the table's URL backend and namespace; an explicit option wins.
-    savedViewsMenu: props.savedViews ? (
-      <FeatureSlot
-        slot={SAVED_VIEWS}
-        props={{
-          options: {
-            urlAdapter: view.urlAdapter,
-            urlKey: props.urlKey,
-            ...props.savedViews,
-          },
-          labels,
-        }}
-      />
-    ) : null,
-    columnMenu:
-      props.enableColumnMenu && !chrome.isMobile ? (
-        <FeatureSlot
-          slot={COLUMN_MENU}
-          props={{
-            allColumns: chrome.allColumns,
-            onAutoSize: view.autoSizeColumns,
-            onAutoSizeColumn: view.autoSizeColumn,
-            onSortColumn: (key, sortDir) => source.setSort(key, sortDir),
-            onFilterColumn: () => {
-              view.setFiltersOpen(true);
-            },
-            onRenameColumn: props.onColumnRename
-              ? chrome.columnLayout.setName
-              : undefined,
-            sortBy: source.sortBy,
-            sortDir: source.sortDir,
-            layout: chrome.columnLayout,
-            labels,
-            hasRowActions: view.hasRowActions,
-            hasRowReorder: view.hasRowReorder,
-            groupingPanel: chrome.groupingPanel,
-            dir: props.dir,
-          }}
-        />
-      ) : null,
   });
+  return (
+    <FeatureStateScope
+      stateKey={TABLE_REGION_STATE}
+      value={{ view, props } as KitRegionProps<unknown>}
+    >
+      {toolbar}
+    </FeatureStateScope>
+  );
 }
 
 /**
@@ -432,7 +333,6 @@ export function TableComposition<TRow>({
       return <FeatureSlot slot={FILTERS_FORM} props={form} />;
     }
   );
-  const approval = useFeatureState(AGENT_APPROVAL_STATE);
   const sticky = useStickyToolbarLayout(
     resolveStickyToolbar(
       props.stickyHeader,
@@ -445,12 +345,10 @@ export function TableComposition<TRow>({
   return (
     <DataTableShellView shell={shell}>
       {(view) => {
-        const { chrome, labels, source, table } = view;
-        const batch = chrome.editing?.batch;
-        const reorder = view.tableProps.rowReorder;
+        const { chrome, labels, source } = view;
         return (
           <FeatureHostProvider host={view.featureHost}>
-            <ContextMenuLiveGate props={contextMenuProps(view, props)}>
+            <RootRegion view={view} props={props}>
               {(regionProps) => (
                 <Frame
                   rootProps={{
@@ -466,22 +364,12 @@ export function TableComposition<TRow>({
                   fullscreenContainer={view.fullscreen.container}
                   announcers={
                     <>
-                      <FeatureSlot
-                        slot={GRID_FOCUS_ANNOUNCER}
-                        props={{ focus: view.gridFocus }}
-                      />
                       <TableStatusAnnouncer
                         announcement={view.statusAnnouncement}
                       />
-                      {reorder ? (
-                        <FeatureSlot
-                          slot={ROW_REORDER_ANNOUNCER}
-                          props={{ announcement: reorder.announcement }}
-                        />
-                      ) : null}
                       <FeatureSlot
-                        slot={FIND_BAR}
-                        props={{ find: view.find, labels }}
+                        slot={ANNOUNCERS_AREA}
+                        props={{ view, props }}
                       />
                     </>
                   }
@@ -490,84 +378,20 @@ export function TableComposition<TRow>({
                   toolbarStyle={sticky.toolbarStyle}
                   toolbar={toolbarOf(kit, view, props)}
                   bars={
-                    <>
-                      <FeatureSlot
-                        slot={ACTIVE_FILTER_CHIPS}
-                        props={{
-                          chips: chrome.mergedChips,
-                          onClearAll: chrome.clearFilters,
-                          labels,
-                        }}
-                      />
-                      {batch ? (
-                        <FeatureSlot
-                          slot={BATCH_EDIT_BAR}
-                          props={{
-                            batch,
-                            contested: chrome.editing?.conflict?.anyContested,
-                            labels,
-                          }}
-                        />
-                      ) : null}
-                      <FeatureSlot
-                        slot={AGENT_APPROVAL}
-                        props={{ pending: approval, labels }}
-                      />
-                      {table.selection && props.bulkActions ? (
-                        <FeatureSlot
-                          slot={BULK_BAR}
-                          props={{
-                            selection: table.selection,
-                            total: source.total,
-                            bulkActions: props.bulkActions,
-                            confirm: chrome.confirm,
-                            labels,
-                          }}
-                        />
-                      ) : null}
-                    </>
+                    <FeatureSlot slot={BARS_AREA} props={{ view, props }} />
                   }
                   refreshing={chrome.isRefreshing}
                   main={
                     <>
-                      <FeatureSlot
-                        slot={COMMAND_PALETTE_LIVE}
-                        props={{
-                          commandPalette: props.commandPalette,
-                          labels,
-                          onPrint: props.onPrint,
-                          onExport: view.toolbarProps.onExportCsv,
-                          exportLabel: view.toolbarProps.exportLabel,
-                          onClearFilters: chrome.clearFilters,
-                          hasFilters: chrome.activeFilterCount > 0,
-                          featureHost: view.featureHost,
-                        }}
-                      />
-                      {view.groupingPanelProps ? (
-                        <FeatureSlot
-                          slot={GROUPING_PANEL}
-                          props={
-                            view.groupingPanelProps as GroupingPanelSlotProps<unknown>
-                          }
-                        />
-                      ) : null}
+                      <FeatureSlot slot={MAIN_AREA} props={{ view, props }} />
                       <OptionalSidePanel
                         side={sidePanel?.side}
                         body={bodyOf(kit, view, sticky.headerOffset, props)}
                         panel={
                           sidePanel?.open != null && (
                             <FeatureSlot
-                              slot={SIDE_PANEL}
-                              props={{
-                                panels: sidePanel.panels,
-                                openPanel: sidePanel.open,
-                                onOpenPanel: sidePanel.onOpenChange,
-                                onClose: () => {
-                                  sidePanel.onOpenChange(null);
-                                },
-                                side: sidePanel.side,
-                                labels,
-                              }}
+                              slot={SIDE_PANEL_REGION}
+                              props={{ view, props }}
                             />
                           )
                         }
@@ -607,36 +431,13 @@ export function TableComposition<TRow>({
                   }
                   overlays={
                     <>
-                      {view.filtersNode && props.filtersMode === "drawer" ? (
-                        <FeatureSlot
-                          slot={FILTER_DRAWER}
-                          props={{
-                            open: view.filtersOpen,
-                            onClose: () => {
-                              view.setFiltersOpen(false);
-                            },
-                            filters: view.filtersNode,
-                            activeFilterCount: chrome.activeFilterCount,
-                            onClearFilters: chrome.clearFilters,
-                            labels,
-                            dir: props.dir,
-                          }}
-                        />
-                      ) : null}
                       <FeatureSlot
-                        slot={STATUS_BAR}
-                        props={{
-                          enabled: props.statusBar === true,
-                          notices: chrome.featureNotices,
-                          shown: source.rows.length,
-                          page: source.page,
-                          limit: source.limit,
-                          total: source.total,
-                          selected: table.selection?.selectedCount ?? 0,
-                          stats: view.selectionStats,
-                          labels,
-                          locale: props.locale,
-                        }}
+                        slot={OVERLAYS_AREA}
+                        props={{ view, props }}
+                      />
+                      <FeatureSlot
+                        slot={STATUS_BAR_REGION}
+                        props={{ view, props }}
                       />
                     </>
                   }
@@ -650,7 +451,7 @@ export function TableComposition<TRow>({
                   animate={props.animate === true}
                 />
               )}
-            </ContextMenuLiveGate>
+            </RootRegion>
           </FeatureHostProvider>
         );
       }}

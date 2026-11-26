@@ -194,8 +194,6 @@ export const es: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "Un cambio espera tu decisión.",
-  pendingProposals: (count) =>
-    count === 1 ? "1 cambio propuesto" : `${String(count)} cambios propuestos`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -340,10 +338,6 @@ export const es: Required<TableLabels> = {
       error: "Error",
       disconnected: "Sin conexión",
     })[status] ?? "Listo",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Añadir fila",
   duplicateRow: "Duplicar fila",
@@ -360,10 +354,8 @@ export const es: Required<TableLabels> = {
   rowLifted: (position) => `Fila ${String(position)} levantada`,
   rowMoved: (from, to) => `Fila movida de ${String(from)} a ${String(to)}`,
   rowReorderCancelled: "Reordenación cancelada",
-  rowMoveOptions: "Opciones para mover la fila",
   moveToGroup: "Mover al grupo…",
   moveUnder: "Mover debajo de…",
-  moveToTopLevel: "Mover al nivel superior",
   confirmRowMoveTitle: "Confirmar movimiento de fila",
   confirmRowMoveDescription: (row, from, to) =>
     `¿Mover ${row} de ${from} a ${to}?`,
@@ -401,9 +393,7 @@ export const es: Required<TableLabels> = {
   removeGroupingColumn: (label) => `Quitar ${label} de la agrupación`,
   moveGroupingColumn: (label) => `Mover la agrupación de ${label}`,
   groupingDropToRemove: "Suelta aquí para quitar la agrupación",
-  groupingAggregateColumn: "Columna de agregación",
   groupingAggregation: "Agregación del grupo",
-  groupingAggregationDefault: "Predeterminada",
   groupingAggregationNone: "Ninguna",
   groupingAggregations: "Agregaciones",
   groupingAddAggregation: "Añadir columna de agregación",
@@ -475,8 +465,6 @@ export const es: Required<TableLabels> = {
     "La virtualización está desactivada: esta tabla paginada muestra una página cada vez.",
   noticePinNested:
     "El anclaje de filas está desactivado mientras hay agrupación o un árbol.",
-  noticeReorderNested:
-    "El reorden de filas está desactivado mientras hay agrupación o un árbol.",
   noticeGroupingUnavailable:
     "La agrupación está desactivada: esta fuente no puede agrupar.",
   noticeExportAllPage:

@@ -1,23 +1,31 @@
 /**
- * Registration parity for a binding's real feature lifecycle.
+ * Lifecycle parity for a binding's real feature host.
  *
- * The driver mounts that binding's own host. The assertions are the
- * registration contract: last id wins, a repeated or reordered list does not
- * mount again, a failed feature rolls back alone, and a nested table's
- * cleanup runs once. Revision fan-out is the engine's existing `all`
- * subscription, not a new selector.
+ * The driver mounts that binding's own table. The assertions are the
+ * lifecycle contract: one declaration per id, registrations read from the
+ * last one; a feature's resource is acquired once and kept across a
+ * repeated, reordered or re-declared list, handed the latest declaration;
+ * changed dependencies replace it; a failed mount rolls back what its pass
+ * acquired; every acquired resource is released exactly once. Revision
+ * fan-out is the engine's existing `all` subscription, not a new selector.
  */
 /**
- * One feature the driver turns into its binding's declaration.
+ * One feature the driver turns into its binding's declaration. The driver
+ * builds a new declaration object for every spec object it is handed, so a
+ * new spec with the same id is an inline option change.
  *
  * @public
  */
 export interface LifecycleDeclaration {
   /** Stable id. */
   readonly id: string;
-  /** Command key `setup` registers. Omit when the feature fails first. */
+  /** Command key `setup` registers. */
   readonly command?: string;
-  /** The feature fails while mounting, after it has registered a cleanup. */
+  /** An option the feature's mount reads through its latest declaration. */
+  readonly option?: string;
+  /** Values that, when any changes, replace the mounted resource. */
+  readonly dependencies?: readonly unknown[];
+  /** The feature's mount throws instead of acquiring. */
   readonly fail?: boolean;
 }
 
@@ -27,16 +35,21 @@ export interface LifecycleDeclaration {
  * @public
  */
 export interface LifecycleObservation {
-  /** Replace the mounted features with this list. */
+  /**
+   * Replace the composed features with this list. Rejects with the failure
+   * when a mount fails.
+   */
   reconcile(features: readonly LifecycleDeclaration[]): Promise<void>;
   /** Release the table. */
   dispose(): Promise<void>;
   /** Command keys on the published host, in read order. */
   commands(): readonly string[];
-  /** How many times this id's setup ran. */
-  setups(id: string): number;
-  /** How many times this id's cleanup ran. */
+  /** How many times this id's mount acquired its resource. */
+  mounts(id: string): number;
+  /** How many times this id's resource was released. */
   cleanups(id: string): number;
+  /** The option the id's mounted resource reads from its latest declaration. */
+  currentOption(id: string): string | undefined;
   /** How many distinct host objects have been published. */
   hostPublications(): number;
   /** Notifications from the table engine's existing revision subscription. */
@@ -74,7 +87,7 @@ export interface LifecycleHarness {
 }
 
 /**
- * The registration cases every binding runs against its own lifecycle.
+ * The lifecycle cases every binding runs against its own table.
  *
  * @param driver - The binding's opener.
  * @param harness - The runner's `expect`.
@@ -89,6 +102,14 @@ export function featureLifecycleConformanceTests(
   const { expect } = harness;
   const alpha: LifecycleDeclaration = { id: "alpha", command: "alpha" };
   const beta: LifecycleDeclaration = { id: "beta", command: "beta" };
+  const rejected = async (run: () => Promise<void>): Promise<boolean> => {
+    try {
+      await run();
+      return false;
+    } catch {
+      return true;
+    }
+  };
   return [
     {
       name: `${driver.name} keeps a repeated feature list on the same host`,
@@ -98,8 +119,8 @@ export function featureLifecycleConformanceTests(
         const publications = table.hostPublications();
         const revisions = table.revisionNotifications();
         await table.reconcile([alpha, beta]);
-        expect(table.setups("alpha")).toBe(1);
-        expect(table.setups("beta")).toBe(1);
+        expect(table.mounts("alpha")).toBe(1);
+        expect(table.mounts("beta")).toBe(1);
         expect(table.cleanups("alpha")).toBe(0);
         expect(table.commands()).toEqual(["alpha", "beta"]);
         expect(table.hostPublications()).toBe(publications);
@@ -119,8 +140,8 @@ export function featureLifecycleConformanceTests(
         await table.reconcile([alpha, beta]);
         const revisions = table.revisionNotifications();
         await table.reconcile([beta, alpha]);
-        expect(table.setups("alpha")).toBe(1);
-        expect(table.setups("beta")).toBe(1);
+        expect(table.mounts("alpha")).toBe(1);
+        expect(table.mounts("beta")).toBe(1);
         expect(table.cleanups("alpha")).toBe(0);
         expect(table.cleanups("beta")).toBe(0);
         expect(
@@ -134,38 +155,67 @@ export function featureLifecycleConformanceTests(
       },
     },
     {
-      name: `${driver.name} keeps the last feature of a duplicated id`,
+      name: `${driver.name} keeps a resource across an inline option change and hands it the latest options`,
       run: async () => {
         const table = await driver.open();
         await table.reconcile([
-          { id: "alpha", command: "first" },
-          { id: "alpha", command: "second" },
+          { id: "alpha", command: "alpha", option: "one" },
         ]);
-        expect(table.commands()).toEqual(["second"]);
-        expect(table.setups("alpha")).toBe(1);
+        await table.reconcile([
+          { id: "alpha", command: "alpha", option: "two" },
+        ]);
+        expect(table.mounts("alpha")).toBe(1);
+        expect(table.cleanups("alpha")).toBe(0);
+        expect(table.currentOption("alpha")).toBe("two");
         await table.dispose();
         expect(table.cleanups("alpha")).toBe(1);
       },
     },
     {
-      name: `${driver.name} rolls a failed feature back and leaves the earlier one`,
+      name: `${driver.name} replaces a resource when its dependencies change`,
+      run: async () => {
+        const table = await driver.open();
+        await table.reconcile([{ id: "alpha", dependencies: [1] }]);
+        await table.reconcile([{ id: "alpha", dependencies: [1] }]);
+        expect(table.mounts("alpha")).toBe(1);
+        await table.reconcile([{ id: "alpha", dependencies: [2] }]);
+        expect(table.mounts("alpha")).toBe(2);
+        expect(table.cleanups("alpha")).toBe(1);
+        await table.dispose();
+        expect(table.cleanups("alpha")).toBe(2);
+      },
+    },
+    {
+      name: `${driver.name} reads every part of a duplicated id from its last declaration`,
+      run: async () => {
+        const table = await driver.open();
+        await table.reconcile([
+          { id: "alpha", command: "first", option: "first" },
+          { id: "alpha", command: "second", option: "second" },
+        ]);
+        expect(table.commands()).toEqual(["second"]);
+        expect(table.mounts("alpha")).toBe(1);
+        expect(table.currentOption("alpha")).toBe("second");
+        await table.dispose();
+        expect(table.cleanups("alpha")).toBe(1);
+      },
+    },
+    {
+      name: `${driver.name} rolls back what a failed mount's pass acquired`,
       run: async () => {
         const table = await driver.open();
         await table.reconcile([alpha]);
-        let failed = false;
-        try {
-          await table.reconcile([alpha, { id: "bad", fail: true }]);
-        } catch {
-          failed = true;
-        }
+        const failed = await rejected(() =>
+          table.reconcile([alpha, beta, { id: "bad", fail: true }])
+        );
         expect(failed).toBe(true);
-        expect(table.commands()).toEqual(["alpha"]);
-        expect(table.setups("alpha")).toBe(1);
-        expect(table.cleanups("alpha")).toBe(0);
-        expect(table.cleanups("bad")).toBe(1);
+        expect(table.mounts("alpha")).toBe(1);
+        expect(table.mounts("beta")).toBe(1);
+        expect(table.cleanups("beta")).toBe(1);
+        expect(table.cleanups("bad")).toBe(0);
         await table.dispose();
         expect(table.cleanups("alpha")).toBe(1);
-        expect(table.cleanups("bad")).toBe(1);
+        expect(table.cleanups("beta")).toBe(1);
       },
     },
     {

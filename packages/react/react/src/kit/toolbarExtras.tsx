@@ -13,12 +13,24 @@ import type { ComponentType, ReactElement, ReactNode } from "react";
 
 import type { AdapterCommandPaletteTriggerProps } from "../adapterFeatures/commandPalette";
 import type { AdapterFindButtonProps } from "../adapterFeatures/findButton";
+import {
+  printToolbar,
+  undoRedoToolbar,
+  viewControlsToolbar,
+} from "../chrome/toolbarChrome";
 import { ExportAnnouncer } from "../export/ExportAnnouncer";
 import {
   ExportProgressChrome,
   type ExportProgressSurfaceSlotProps,
 } from "../export/ExportProgressChrome";
-import type { ToolbarExtrasSlotProps } from "../features/slotKeys";
+import { useFeatureState } from "../features/featureState";
+import type { ToolbarEntrySlotProps } from "../features/slotKeys";
+import {
+  EDIT_HISTORY_STATE,
+  EXPORT_STATE,
+  FULLSCREEN_STATE,
+  TABLE_PROPS_STATE,
+} from "../features/stateKeys";
 import type { KitButtonProps } from "./primitives";
 
 /**
@@ -32,15 +44,13 @@ import type { KitButtonProps } from "./primitives";
 export function createUndoRedoButtons(
   Button: ComponentType<KitButtonProps>,
   Group?: ComponentType<{ readonly children: ReactNode }>
-): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null {
-  return function UndoRedoButtons({
-    onUndo,
-    onRedo,
-    canUndo,
-    canRedo,
-    undoLabel,
-    redoLabel,
-  }) {
+): (props: Readonly<ToolbarEntrySlotProps>) => ReactElement | null {
+  return function UndoRedoButtons({ labels }) {
+    const history = useFeatureState(EDIT_HISTORY_STATE);
+    const props = useFeatureState(TABLE_PROPS_STATE);
+    if (!history) return null;
+    const { onUndo, onRedo, canUndo, canRedo, undoLabel, redoLabel } =
+      undoRedoToolbar(props?.undoRedoButtons, history, labels);
     if (!onUndo || !onRedo) return null;
     const buttons = (
       <>
@@ -77,19 +87,20 @@ export function createUndoRedoButtons(
 export function createExportCsvButton(
   Button: ComponentType<KitButtonProps>,
   Surface: (props: ExportProgressSurfaceSlotProps) => ReactNode
-): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null {
+): (props: Readonly<ToolbarEntrySlotProps>) => ReactElement | null {
   const slots = { Surface };
-  return function ExportCsvButton({
-    onExportCsv,
-    exportBusy,
-    exportAnnouncement = "",
-    exportProgressState = null,
-    exportLabel,
-    exportDisabled = false,
-    exportDisabledReason = "",
-    labels,
-  }) {
-    if (!onExportCsv) return null;
+  return function ExportCsvButton({ labels }) {
+    const state = useFeatureState(EXPORT_STATE);
+    if (!state?.onExportCsv) return null;
+    const {
+      onExportCsv,
+      exportBusy,
+      exportAnnouncement = "",
+      exportProgressState = null,
+      exportLabel,
+      exportDisabled = false,
+      exportDisabledReason = "",
+    } = state;
     return (
       <>
         <Button
@@ -121,8 +132,14 @@ export function createExportCsvButton(
  */
 export function createPrintButton(
   Button: ComponentType<KitButtonProps>
-): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null {
-  return function PrintButton({ onPrint, printLabel }) {
+): (props: Readonly<ToolbarEntrySlotProps>) => ReactElement | null {
+  return function PrintButton({ labels }) {
+    const props = useFeatureState(TABLE_PROPS_STATE);
+    const { onPrint, printLabel } = printToolbar(
+      props?.printButton,
+      props?.onPrint,
+      labels
+    );
     if (!onPrint) return null;
     return (
       <Button
@@ -143,8 +160,11 @@ export function createPrintButton(
  */
 export function createDensityButton(
   Button: ComponentType<KitButtonProps>
-): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement {
-  return function DensityButton({ density, onDensityChange, labels }) {
+): (props: Readonly<ToolbarEntrySlotProps>) => ReactElement | null {
+  return function DensityButton({ labels }) {
+    const props = useFeatureState(TABLE_PROPS_STATE);
+    if (!props) return null;
+    const { density, onDensityChange } = props;
     const compact = density === "compact";
     return (
       <Button
@@ -166,12 +186,15 @@ export function createDensityButton(
  */
 export function createFullscreenButton(
   Button: ComponentType<KitButtonProps>
-): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null {
-  return function FullscreenButton({
-    onToggleFullscreen,
-    isFullscreen,
-    labels,
-  }) {
+): (props: Readonly<ToolbarEntrySlotProps>) => ReactElement | null {
+  return function FullscreenButton({ labels }) {
+    const props = useFeatureState(TABLE_PROPS_STATE);
+    const fullscreen = useFeatureState(FULLSCREEN_STATE);
+    if (!props || !fullscreen) return null;
+    const { onToggleFullscreen, isFullscreen } = viewControlsToolbar(
+      props,
+      fullscreen
+    );
     if (!onToggleFullscreen) return null;
     const on = isFullscreen === true;
     return (

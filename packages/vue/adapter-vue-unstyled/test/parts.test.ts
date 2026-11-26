@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createApp, defineComponent, h, nextTick, shallowRef } from "vue";
 
 import { DataTable, type DataTableProps } from "../src";
+import { selection } from "../src/selection";
 
 interface Row {
   id: string;
@@ -56,7 +57,7 @@ function part(
 describe("native canonical semantic parts", () => {
   it("places search, selection and scroll parts on the real native elements while retaining classNames keys", () => {
     const view = mount({
-      selectable: true,
+      features: [selection()],
       classNames: {
         table: "table-class",
         th: "header-cell-class",
@@ -217,8 +218,8 @@ describe("native canonical semantic parts", () => {
 
   it("keeps mobile selection and card parts on the semantic card elements", () => {
     const view = mount({
+      features: [selection()],
       forceMobile: true,
-      selectable: true,
       classNames: {
         cards: "cards-class",
         card: "card-class",

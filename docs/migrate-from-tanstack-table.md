@@ -63,10 +63,10 @@ pnpm add @adapttable/core @adapttable/mantine @mantine/core @mantine/hooks
 | `enableSorting` / `state.sorting` / `onSortingChange`                 | `sortable` per column (+ `multiSort()`)                                 | AdaptTable owns sort state.                                       |
 | `columnFilters` + `getFilteredRowModel` + your inputs                 | column `filter` shorthand + `filters([…])`                              | Widgets + chips built for you.                                    |
 | `state.pagination` + `getPaginationRowModel` + your controls          | automatic pagination                                                    | Paged on desktop, infinite on mobile.                             |
-| `enableRowSelection` + `state.rowSelection` + your checkboxes         | `bulkActions([…])` / `selectedIds` / `onSelectionChange`                | —                                                                 |
+| `enableRowSelection` + `state.rowSelection` + your checkboxes         | `selection({ selectedIds, onSelectionChange })`, `bulkActions([…])`     | —                                                                 |
 | `getExpandedRowModel` + `row.getToggleExpandedHandler()`              | `rowDetail(fn)`                                                         | Toggle UI is provided, not hand-added.                            |
 | `columnVisibility` / `columnOrder` / `columnPinning` state            | `columnMenu()` / `columnLayout`                                         | One built-in menu instead of hand-wired state + DnD.              |
-| `manualSorting` / `manualFiltering` / `manualPagination`              | `onQueryChange` (or `source` via `useQuerySource`)                      | One consolidated server query. See [data tiers](./data-tiers.md). |
+| `manualSorting` / `manualFiltering` / `manualPagination`              | `useServerData` (or `useQuerySource`)                                   | One consolidated server query. See [data tiers](./data-tiers.md). |
 | (serialize state to the URL yourself)                                 | `urlSync` / `urlKey` / `savedViews({ storageKey })`                     | URL sync is on by default; `savedViews()` is opt-in.              |
 
 ## Before / after

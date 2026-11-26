@@ -17,7 +17,7 @@ import {
   type TableSource,
   type TableSourceCapabilities,
 } from "@adapttable/core";
-import { resetDevWarnings } from "@adapttable/core/binding";
+import { defaultLabels, resetDevWarnings } from "@adapttable/core/binding";
 import {
   act,
   fireEvent,
@@ -436,7 +436,7 @@ function ServerExportHarness({
       serverSource(),
       COLUMNS
     ),
-    undefined,
+    defaultLabels,
     "csv",
     false,
     true
@@ -712,7 +712,8 @@ describe("useExportHandler", () => {
   /** A button wired exactly the way every adapter wires it. */
   function Harness({ request }: { request: () => void | Promise<void> }) {
     const { onExportCsv, exportBusy, exportAnnouncement } = useExportHandler(
-      makeExportCsvHandler<Row>({ request }, source(), COLUMNS)
+      makeExportCsvHandler<Row>({ request }, source(), COLUMNS),
+      defaultLabels
     );
     return (
       <>
@@ -839,7 +840,7 @@ describe("useExportHandler", () => {
           source(),
           COLUMNS
         ),
-        { exportDone: "Exportation terminée" }
+        { ...defaultLabels, exportDone: "Exportation terminée" }
       );
       return (
         <>
@@ -863,7 +864,8 @@ describe("useExportHandler", () => {
   it("reports the status for a kit that shows more than a spinner", () => {
     function Status() {
       const { exportStatus, onExportCsv } = useExportHandler(
-        makeExportCsvHandler<Row>(true, source(), COLUMNS)
+        makeExportCsvHandler<Row>(true, source(), COLUMNS),
+        defaultLabels
       );
       return (
         <button type="button" onClick={onExportCsv} data-status={exportStatus}>
@@ -884,7 +886,7 @@ describe("useExportHandler", () => {
     const { result } = renderHook(() =>
       useExportHandler(() => {
         throw new Error("disk full");
-      })
+      }, defaultLabels)
     );
     let thrown: unknown;
     act(() => {
@@ -902,7 +904,8 @@ describe("useExportHandler", () => {
   it("stays synchronous, and never busy, for the built-in export", () => {
     function Plain() {
       const { exportBusy, onExportCsv } = useExportHandler(
-        makeExportCsvHandler<Row>(true, source(), COLUMNS)
+        makeExportCsvHandler<Row>(true, source(), COLUMNS),
+        defaultLabels
       );
       return (
         <button type="button" onClick={onExportCsv} aria-busy={exportBusy}>
@@ -920,7 +923,7 @@ describe("useExportHandler", () => {
     const exported = vi.fn();
     function Fallback() {
       const { exportLabel, exportDisabled, exportDisabledReason, onExportCsv } =
-        useExportHandler(exported, undefined, "csv", true);
+        useExportHandler(exported, defaultLabels, "csv", true);
       return (
         <button
           type="button"
@@ -948,7 +951,7 @@ describe("useExportHandler", () => {
     function Unguarded() {
       const { onExportCsv } = useExportHandler(
         exported,
-        undefined,
+        defaultLabels,
         "csv",
         true
       );

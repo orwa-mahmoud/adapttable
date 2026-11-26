@@ -42,6 +42,8 @@ import {
 
 import type { TableBodyProjection } from "../layout/modelChannels";
 import {
+  projectedRowHeight,
+  projectedRowPinned,
   projectedRowSpans,
   projectHeadlessRows,
 } from "../rows/headlessRowsModel";
@@ -56,11 +58,26 @@ export interface BodyWindowModel<TRow> {
 }
 function pinned<TRow>(slot: TableBodySlot<TRow>): boolean {
   if (slot.kind !== "row") return false;
+  // The projection knows which rows are pinned without building their
+  // attributes; a body built elsewhere is read from its attributes.
+  const known = projectedRowPinned(slot.wiring);
+  if (known !== undefined) return known;
   const part = slot.wiring.attrs["data-adapttable-part"];
   return (
     slot.wiring.summary === true ||
     (typeof part === "string" && part.startsWith("pinned-"))
   );
+}
+/**
+ * A row's explicit height for the size estimate: from the projection when it
+ * built the row, so no row attributes are built for rows never drawn; from the
+ * row's style otherwise.
+ */
+function explicitHeight<TRow>(row: TableRowModel<TRow>): number {
+  const projected = projectedRowHeight(row);
+  if (projected !== undefined) return projected ?? Number.NaN;
+  const style = row.attrs.style as { height?: number | string } | undefined;
+  return Number.parseFloat(String(style?.height ?? ""));
 }
 function bodySections<TRow>(slots: readonly TableBodySlot<TRow>[]) {
   const firstScroll = slots.findIndex((slot) => !pinned(slot));
@@ -267,28 +284,53 @@ function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
         )
           injectedWidths.value = { leadingWidth, trailingWidth };
       };
-      node.addEventListener("scroll", read, { passive: true });
-      window.addEventListener("resize", read);
+      // One read per frame, however many signals arrive in it.
+      let pending: number | undefined;
+      const schedule = () => {
+        pending ??= requestAnimationFrame(() => {
+          pending = undefined;
+          read();
+        });
+      };
+      node.addEventListener("scroll", schedule, { passive: true });
+      window.addEventListener("resize", schedule);
       const observer =
         typeof ResizeObserver === "undefined"
           ? undefined
-          : new ResizeObserver(read);
+          : new ResizeObserver(schedule);
       observer?.observe(node);
       observer?.observe(document.documentElement);
+      // What can move or resize the table: its own content (header controls
+      // that come and go), and each ancestor's attributes and direct children
+      // (visibility, a style that shifts it, content inserted above it).
+      // Changes elsewhere in the page cannot, so they are not watched.
       const mutation =
         typeof MutationObserver === "undefined"
           ? undefined
-          : new MutationObserver(read);
-      mutation?.observe(document.body, {
+          : new MutationObserver(schedule);
+      const attributeFilter = ["style", "class", "hidden"];
+      mutation?.observe(node, {
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ["style", "class", "hidden"],
+        attributeFilter,
       });
+      for (
+        let ancestor = node.parentElement;
+        ancestor !== null;
+        ancestor = ancestor.parentElement
+      ) {
+        mutation?.observe(ancestor, {
+          childList: true,
+          attributes: true,
+          attributeFilter,
+        });
+      }
       read();
       cleanup(() => {
-        node.removeEventListener("scroll", read);
-        window.removeEventListener("resize", read);
+        if (pending !== undefined) cancelAnimationFrame(pending);
+        node.removeEventListener("scroll", schedule);
+        window.removeEventListener("resize", schedule);
         observer?.disconnect();
         mutation?.disconnect();
       });
@@ -307,12 +349,8 @@ function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
     const sizes = new Float64Array(slots.length);
     const keys = new Array<string>(slots.length);
     slots.forEach((slot, index) => {
-      const style =
-        slot.kind === "row"
-          ? (slot.wiring.attrs.style as
-              { height?: number | string } | undefined)
-          : undefined;
-      const measured = Number.parseFloat(String(style?.height ?? ""));
+      const measured =
+        slot.kind === "row" ? explicitHeight(slot.wiring) : Number.NaN;
       sizes[index] =
         Number.isFinite(measured) && measured > 0 ? measured : fallback;
       keys[index] = slot.key;

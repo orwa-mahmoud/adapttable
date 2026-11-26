@@ -194,8 +194,6 @@ export const he: Required<TableLabels> = {
       .replace("{j}", String(rejected))
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "שינוי ממתין להחלטתך.",
-  pendingProposals: (count) =>
-    count === 1 ? "שינוי מוצע אחד" : `${String(count)} שינויים מוצעים`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -333,10 +331,6 @@ export const he: Required<TableLabels> = {
       error: "שגיאה",
       disconnected: "לא מחובר",
     })[status] ?? "מוכן",
-  assistantReceipt: ({ capability, status }) => {
-    const what = RECEIPT_STATUS[status] ?? status;
-    return capability ? `${capability}: ${what}` : what;
-  },
   assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "הוסף שורה",
   duplicateRow: "שכפל שורה",
@@ -353,10 +347,8 @@ export const he: Required<TableLabels> = {
   rowLifted: (position) => `שורה ${String(position)} הורמה`,
   rowMoved: (from, to) => `שורה הועברה מ-${String(from)} אל ${String(to)}`,
   rowReorderCancelled: "סידור מחדש בוטל",
-  rowMoveOptions: "אפשרויות העברת שורה",
   moveToGroup: "העברה לקבוצה…",
   moveUnder: "העברה תחת…",
-  moveToTopLevel: "העברה לרמה העליונה",
   confirmRowMoveTitle: "אישור העברת שורה",
   confirmRowMoveDescription: (row, from, to) =>
     `להעביר את ${row} מ-${from} אל ${to}?`,
@@ -391,9 +383,7 @@ export const he: Required<TableLabels> = {
   removeGroupingColumn: (label) => `הסרת ${label} מהקיבוץ`,
   moveGroupingColumn: (label) => `העברת הקיבוץ של ${label}`,
   groupingDropToRemove: "שחררו כאן כדי להסיר מהקיבוץ",
-  groupingAggregateColumn: "עמודת צבירה",
   groupingAggregation: "צבירת קבוצה",
-  groupingAggregationDefault: "ברירת מחדל",
   groupingAggregationNone: "ללא",
   groupingAggregations: "צבירות",
   groupingAddAggregation: "הוספת עמודת צבירה",
@@ -463,7 +453,6 @@ export const he: Required<TableLabels> = {
   noticeVirtualizePaged:
     "הווירטואליזציה כבויה — הטבלה המחולקת לעמודים מציגה עמוד אחד בכל פעם.",
   noticePinNested: "נעיצת שורות כבויה כשיש קיבוץ או עץ.",
-  noticeReorderNested: "סידור מחדש של שורות כבוי כשיש קיבוץ או עץ.",
   noticeGroupingUnavailable: "הקיבוץ כבוי — מקור זה אינו יכול לקבץ.",
   noticeExportAllPage: "ייצוא הכל כבוי — מקור זה מספק עמוד אחד בכל פעם.",
   noticeEditWithoutWriter: "העריכה כבויה — לא חובר מטפל כתיבה.",

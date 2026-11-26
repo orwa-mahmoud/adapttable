@@ -7,6 +7,7 @@
  * already ships in every locale and a host may have overridden the string; every other
  * format asks `TableLabels.exportFile` for a caption instead.
  */
+import { BASE_LABELS } from "../labelGroups/baseLabels";
 import type { TableLabels } from "../types";
 
 /**
@@ -22,7 +23,7 @@ export function exportButtonLabel(
   labels: TableLabels | undefined,
   format: string
 ): string {
-  if (format === "csv") return labels?.exportCsv ?? "Export CSV";
+  if (format === "csv") return labels?.exportCsv ?? BASE_LABELS.exportCsv;
   const named = labels?.exportFile?.(format);
   return named ?? `Export ${format.toUpperCase()}`;
 }

@@ -3,7 +3,7 @@
  * and adapter-owned neutral styles, over `@adapttable/angular`.
  *
  * Feature factories live on secondary entries (`bulk-actions`, `filters`,
- * …); import them from those paths or from `@adapttable/angular-cdk/features`.
+ * …); import them from those paths.
  *
  * @packageDocumentation
  */

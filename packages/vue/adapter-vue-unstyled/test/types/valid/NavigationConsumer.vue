@@ -20,9 +20,13 @@ const rows: Row[] = [{ id: "one", score: 1 }];
 const columns: ColumnDef<Row>[] = [
   { key: "score", accessor: (row) => row.score, renameable: true },
 ];
+function fill(edits: CellEdit<Row>[]): void {
+  edits.forEach((edit) => Number(edit.row.score));
+}
 const features = [
   cellNavigation({
     onRangeChange: (range: CellRange | null) => range?.head.col,
+    onFill: fill,
   }),
   columnSelectionCheckbox(),
   findInTable({ button: true }),
@@ -30,9 +34,6 @@ const features = [
   selectionStats(),
   columnMenu(),
 ];
-function fill(edits: CellEdit<Row>[]): void {
-  edits.forEach((edit) => Number(edit.row.score));
-}
 </script>
 <template>
   <!-- @vue-generic {Row} -->
@@ -41,7 +42,6 @@ function fill(edits: CellEdit<Row>[]): void {
     :columns="columns"
     :row-key="(row) => row.id"
     :features="features"
-    :on-cell-fill="fill"
   >
     <template #cell="{ row }">{{ row.score.toFixed(1) }}</template>
   </DataTable>

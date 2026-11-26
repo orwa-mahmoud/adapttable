@@ -9,6 +9,7 @@ import { commandPalette } from "../src/command-palette";
 import { contextMenu } from "../src/context-menu";
 import { exportCsv } from "../src/export-csv";
 import { print } from "../src/print";
+import { selection } from "../src/selection";
 import { sidePanel } from "../src/side-panel";
 interface Row {
   id: string;
@@ -27,9 +28,8 @@ describe("action SSR requests", () => {
               columns: [{ key: "name" }],
               rowKey: (row) => row.id,
               urlSync: false,
-              selectable: true,
-              defaultSelectedIds: ["a"],
               features: [
+                selection({ defaultSelectedIds: ["a"] }),
                 bulkActions([{ key: "run", label: "Run", onClick: run }]),
                 commandPalette({
                   button: true,

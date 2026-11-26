@@ -1,4 +1,5 @@
-import { getDirection, getLabels } from "@adapttable/i18n";
+import { getDirection } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { type ColumnDef, DataTable } from "@adapttable/unstyled";
 
 interface Product {

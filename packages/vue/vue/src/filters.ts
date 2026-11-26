@@ -11,7 +11,6 @@ import {
   FilterTriggerToggleState,
   removeFilterTreeNode,
   sameFilterTree,
-  TOOLBAR_EXTRAS,
 } from "@adapttable/core/binding";
 import type {
   FeatureMountContext,
@@ -20,6 +19,7 @@ import type {
 } from "@adapttable/vue";
 import { computed, onScopeDispose, shallowRef, toValue, watch } from "vue";
 
+import { FILTERS_PANEL } from "./features/toolbarEntries";
 import type { FilterPanelModel } from "./filters/filterPanelChrome";
 import { FULLSCREEN_MODEL } from "./viewControls/contracts";
 export const FILTER_VIEW =
@@ -202,7 +202,7 @@ export function filters<TRow>(
       filterFields: options.fields,
     }),
     mount: mountFilters,
-    requiredSlots: [TOOLBAR_EXTRAS, ACTIVE_FILTER_CHIPS],
+    requiredSlots: [FILTERS_PANEL, ACTIVE_FILTER_CHIPS],
   };
 }
 export function filterTypes(

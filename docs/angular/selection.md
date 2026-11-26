@@ -1,13 +1,14 @@
 # Angular row selection and bulk actions
 
-Set `[selectable]="true"` to add row checkboxes. Selection uses stable row
-IDs, so replacing an object with another object having the same ID does not
-change which record is selected.
+Compose `selection()` from the kit's `/selection` entry to add row checkboxes.
+Selection uses stable row IDs, so replacing an object with another object
+having the same ID does not change which record is selected.
 
 ```ts
 import { Component, signal } from "@angular/core";
 import type { ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/angular-unstyled";
+import { selection } from "@adapttable/angular-unstyled/selection";
 
 interface Person {
   id: string;
@@ -22,9 +23,7 @@ interface Person {
       [data]="rows"
       [columns]="columns"
       [rowKey]="rowKey"
-      [selectable]="true"
-      [selectedIds]="selectedIds()"
-      (selectionChange)="selectedIds.set($event)"
+      [features]="features"
       [urlSync]="false"
     />
     <p>{{ selectedIds().length }} selected</p>
@@ -38,15 +37,25 @@ export class SelectPeople {
   readonly columns: ColumnDef<Person>[] = [{ key: "name", header: "Name" }];
   readonly rowKey = (row: Person) => row.id;
   readonly selectedIds = signal<readonly string[]>([]);
+  readonly features = [
+    selection({
+      selectedIds: this.selectedIds,
+      onSelectionChange: (ids) => {
+        this.selectedIds.set(ids);
+      },
+    }),
+  ];
 }
 ```
 
-`selectionChange` is an Angular output carrying the complete `string[]` of
-selected IDs. Omit `[selectedIds]` for table-owned selection. When you supply
-it, update the signal in response to the output: the rendered selection is
-always the value the host supplies. `selectable` is read at initialization.
+`selection()` takes `SelectionOptions`. `onSelectionChange` receives the
+complete `string[]` of selected IDs. Omit `selectedIds` for table-owned
+selection, or pass `defaultSelectedIds` to start that selection. `getId`
+selects by an id other than the row key. When you supply `selectedIds`,
+update the signal from `onSelectionChange`: the rendered selection is always
+the value the host supplies.
 
-The NG-ZORRO kit has the same inputs and output. Replace the root
+The NG-ZORRO kit publishes the same `selection()` entry. Replace the root
 kit import with `@adapttable/ng-zorro`; see [getting started](./getting-started.md)
 for package installation and first-release status.
 

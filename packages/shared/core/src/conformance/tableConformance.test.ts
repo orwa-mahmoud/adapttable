@@ -82,7 +82,7 @@ const referenceDriver: ConformanceDriver = {
       for (const button of container.querySelectorAll("th button")) {
         button.addEventListener("click", () => {
           const sort = state.sort === "asc" ? "desc" : "asc";
-          if (scenario.mode !== "frontend" && scenario.onQueryChange) {
+          if (scenario.onQueryChange) {
             notify(sort);
             return;
           }
@@ -91,7 +91,12 @@ const referenceDriver: ConformanceDriver = {
             column: button.textContent ?? "",
             ascending: sort === "asc",
           });
-          if (scenario.onQueryChange) notify(sort);
+          scenario.onViewChange?.({
+            page: state.page + 1,
+            limit: scenario.pageSize ?? scenario.rows.length,
+            sortBy: "age",
+            sortDir: sort === "asc" ? "asc" : "desc",
+          });
           draw();
         });
       }
@@ -198,7 +203,7 @@ const referenceDriver: ConformanceDriver = {
         });
     };
     draw();
-    if (scenario.onQueryChange && scenario.mode !== "frontend") notify();
+    if (scenario.onQueryChange) notify();
     return {
       container,
       refresh: () => {
@@ -372,8 +377,7 @@ function build(scenario: ConformanceScenario, state: DrawState): HTMLElement {
   const labels = { ...defaultLabels, ...scenario.labels };
   const navigable = scenario.navigable === true;
   const size = scenario.pageSize ?? scenario.rows.length;
-  const server =
-    scenario.onQueryChange !== undefined && scenario.mode !== "frontend";
+  const server = scenario.onQueryChange !== undefined;
   const sorted = [...scenario.rows];
   if (sort && !server) {
     sorted.sort((a, b) => (sort === "asc" ? a.age - b.age : b.age - a.age));

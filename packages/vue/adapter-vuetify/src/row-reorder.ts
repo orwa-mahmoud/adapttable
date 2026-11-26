@@ -10,12 +10,13 @@ import {
   slotRender,
 } from "@adapttable/vue/adapter";
 import { rowReorder as bindingRowReorder } from "@adapttable/vue/features";
+import type { MaybeRefOrGetter } from "vue";
 
 import { vuetifyReorderSlots } from "./reorder/controls";
 
 export function rowReorder<TRow>(
   onRowReorder: RowReorderHandler<TRow>,
-  options?: RowReorderOptions<TRow>
+  options?: MaybeRefOrGetter<RowReorderOptions<TRow> | undefined>
 ): TableFeature<TRow> {
   return extendFeature(bindingRowReorder(onRowReorder, options), [
     slotRender(rowReorderControlKey<TRow>(), (props) =>

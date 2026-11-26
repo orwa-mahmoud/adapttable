@@ -8,6 +8,7 @@
  * are decisions rather than markup, so they live here once and each binding
  * draws what they return with its own components.
  */
+import { ASSISTANT_LABELS } from "../labelGroups/assistantLabels";
 import type { TableLabels } from "../types";
 import {
   assistantIsBusy,
@@ -45,11 +46,11 @@ export function assistantLauncherName(
   labels: TableLabels | undefined,
   waiting: boolean
 ): string {
-  const open = labels?.assistantOpen ?? "Ask AI";
+  const open = labels?.assistantOpen ?? ASSISTANT_LABELS.assistantOpen;
   if (!waiting) return open;
   const note =
     labels?.approvalWaitingElsewhere ??
-    "A change is waiting for your decision.";
+    ASSISTANT_LABELS.approvalWaitingElsewhere;
   return `${open} — ${note}`;
 }
 
@@ -148,7 +149,7 @@ export function assistantWithGreeting(
   labels: TableLabels | undefined
 ): readonly TableAssistantMessageView[] {
   const said =
-    greeting ?? labels?.assistantEmpty ?? "What would you like to do?";
+    greeting ?? labels?.assistantEmpty ?? ASSISTANT_LABELS.assistantEmpty;
   if (!said.trim()) return messages;
   return [
     { id: "assistant-greeting", role: "assistant", text: said },
@@ -167,7 +168,11 @@ export function assistantVoicePlaceholder(
   labels: TableLabels | undefined
 ): TableAssistantMessageView {
   if (!message.transcribing || message.text) return message;
-  return { ...message, text: labels?.assistantVoiceMessage ?? "Voice message" };
+  return {
+    ...message,
+    text:
+      labels?.assistantVoiceMessage ?? ASSISTANT_LABELS.assistantVoiceMessage,
+  };
 }
 
 /**
@@ -286,8 +291,11 @@ export function assistantUndoReason(
   labels: TableLabels | undefined
 ): string {
   return (
-    labels?.assistantUndoBlocked?.(blockedCode ?? "") ??
-    "The table has changed since this ran."
+    (labels?.assistantUndoBlocked ?? ASSISTANT_LABELS.assistantUndoBlocked)(
+      blockedCode ?? "table-moved"
+    ) ??
+    ASSISTANT_LABELS.assistantUndoBlocked("table-moved") ??
+    ""
   );
 }
 
@@ -306,8 +314,8 @@ export function assistantUndoTurnLabel(
   labels: TableLabels | undefined
 ): string {
   return undoableRows > 1
-    ? (labels?.assistantUndoAll ?? "Undo all")
-    : (labels?.assistantUndo ?? "Undo");
+    ? (labels?.assistantUndoAll ?? ASSISTANT_LABELS.assistantUndoAll)
+    : (labels?.assistantUndo ?? ASSISTANT_LABELS.assistantUndo);
 }
 
 /**
@@ -319,10 +327,7 @@ export function assistantActionsName(
   count: number,
   labels: TableLabels | undefined
 ): string {
-  return (
-    labels?.assistantActions?.(count) ??
-    `${String(count)} action${count === 1 ? "" : "s"}`
-  );
+  return (labels?.assistantActions ?? ASSISTANT_LABELS.assistantActions)(count);
 }
 
 /**
@@ -360,7 +365,9 @@ export function assistantWorkingText(
   labels: TableLabels | undefined
 ): string {
   if (!progress) {
-    return labels?.assistantConnection?.("sending") ?? "Working…";
+    return (
+      labels?.assistantConnection ?? ASSISTANT_LABELS.assistantConnection
+    )("sending");
   }
   const count = assistantProgressText(progress, labels);
   return progress.label ? `${progress.label} — ${count}` : count;

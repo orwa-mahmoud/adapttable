@@ -107,12 +107,19 @@ describe("@adapttable/core/binding", () => {
     expect(typeof binding.flattenColumnTree).toBe("function");
   });
 
-  it("serves the same functions the main entry still serves", () => {
-    // Read by name: the main entry's copies carry the deprecation notice.
-    for (const name of ["columnGroupId", "insertExtraRows"]) {
-      expect(Reflect.get(main, name)).toBe(Reflect.get(binding, name));
+  it("serves the binding machinery the main entry does not", () => {
+    for (const name of ["columnGroupId", "insertExtraRows", "pinnedRowPart"]) {
+      expect(typeof Reflect.get(binding, name)).toBe("function");
+      expect(name in main).toBe(false);
     }
-    expect(Reflect.get(main, "xlsxWriter")).toBe(xlsx.xlsxWriter);
+  });
+
+  it("serves the Excel writer from its own entry only", () => {
+    // The main entry must not reach the workbook code: an export that loads
+    // the writer on demand would otherwise ship it with every table.
+    expect(typeof xlsx.xlsxWriter).toBe("function");
+    expect("xlsxWriter" in main).toBe(false);
+    expect("buildTableXlsx" in main).toBe(false);
   });
 });
 
@@ -123,19 +130,102 @@ describe("the focused domain entries", () => {
     expect(engine.createNeutralTable).toBe(main.createNeutralTable);
   });
 
-  it("serves the same grouping projection the root serves", () => {
-    expect(grouping.buildGroupedFlatModel).toBe(main.buildGroupedFlatModel);
-    expect(grouping.groupSelectionState).toBe(main.groupSelectionState);
-  });
+  // Names a specialty entry owns. The root keeps the query and engine names.
+  const SPECIALTY: Record<string, readonly string[]> = {
+    editing: [
+      "asBatchGesture",
+      "asGesture",
+      "createBatchEditStore",
+      "createCellEditSession",
+      "createEditHistory",
+      "createRowEditStore",
+      "editableCellController",
+      "editorInputType",
+      "editorSelectOptions",
+      "editorValidationProps",
+      "formatMultiDraft",
+      "hasEditableColumns",
+      "isCellEditable",
+      "isRowContested",
+      "liveRowChanged",
+      "normalizeEditorOptions",
+      "parseCellEditValue",
+      "readCellValue",
+      "resolveCellEditor",
+      "resolveRowEditTrigger",
+      "rowEditConflict",
+      "rowEditControls",
+    ],
+    pivot: [
+      "assignField",
+      "availableFields",
+      "EMPTY_PIVOT_CONFIG",
+      "isPivotReady",
+      "measureLabel",
+      "moveField",
+      "pivot",
+      "PIVOT_BLANK",
+      "PIVOT_ROW_COLUMN_KEY",
+      "pivotLeafColumnKey",
+      "pivotRowCaption",
+      "removeField",
+      "serverPivotResult",
+      "setMeasureAgg",
+    ],
+    formula: [
+      "buildFormulaColumns",
+      "evaluateFormula",
+      "FORMULA_BLANK",
+      "FORMULA_ERRORS",
+      "FORMULA_FUNCTIONS",
+      "formulaBoolean",
+      "formulaDisplay",
+      "formulaError",
+      "formulaNumber",
+      "formulaRefs",
+      "formulaSortValue",
+      "formulaText",
+      "isFormulaError",
+      "parseFormula",
+      "toFormulaValue",
+    ],
+    grouping: [
+      "buildGroupedFlatModel",
+      "formatGroupLabel",
+      "groupAggregateEntries",
+      "groupRowLayout",
+      "groupSelectionState",
+      "groupValueKey",
+      "serializeGroupAggregateOverrides",
+      "withGroupAggregateOverrides",
+      "withQueryAggregateOverrides",
+    ],
+    stream: [
+      "isStreamLive",
+      "isStreamSettled",
+      "openRowPatchStream",
+      "parseRowPatchFrame",
+    ],
+    selection: ["createAllMatchingScope"],
+  };
+  const ENTRIES: Record<string, object> = {
+    editing,
+    pivot,
+    formula,
+    grouping,
+    stream,
+    selection,
+  };
 
-  it("serves the same editing session the root serves", () => {
-    expect(editing.createCellEditSession).toBe(main.createCellEditSession);
-    expect(editing.createEditHistory).toBe(main.createEditHistory);
-  });
-
-  it("serves the same selection scope the root serves", () => {
-    expect(selection.createAllMatchingScope).toBe(main.createAllMatchingScope);
-  });
+  it.each(Object.entries(SPECIALTY))(
+    "serves the %s names on their own entry only",
+    (entry, names) => {
+      for (const name of names) {
+        expect(Reflect.get(ENTRIES[entry] ?? {}, name), name).toBeDefined();
+        expect(name in main, name).toBe(false);
+      }
+    }
+  );
 
   it("leaves the incremental cache off the engine door", () => {
     expect("createIncrementalView" in engine).toBe(false);

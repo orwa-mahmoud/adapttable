@@ -259,6 +259,19 @@ export interface KitFeatureRequests {
     key: string,
     nextValue: unknown
   ) => void | Promise<void>;
+  /**
+   * Options the editing feature owns: click-to-edit on the live demo, the
+   * row version a conflict compares, and the edit lifecycle.
+   */
+  editingExtras?: {
+    readonly editActivation?: "click";
+    readonly rowVersion?: (row: Person) => number;
+    readonly onEditStart?: EditEventHandler<Person>;
+    readonly onEditCancel?: EditEventHandler<Person>;
+    readonly onEditCommit?: EditEventHandler<Person>;
+  };
+  /** Rename stays on the column menu, including a host that only records it. */
+  columnRename?: (key: string, name: string) => void;
   rowEditing?: (row: Person, patch: Record<string, unknown>) => void;
   batchEditing?: (
     edits: readonly { row: Person; patch: Record<string, unknown> }[]
@@ -673,22 +686,6 @@ function applyRowModelFlags(
   if (flags.editing) {
     Object.assign(next, { onCellEdit: flags.onCellEdit });
   }
-  // On the live demo a visitor's first click on a value opens it, as a form
-  // field would; the feature pages and the lab keep the default double-click.
-  if (flags.editing && flags.urlKey === "live") {
-    Object.assign(next, { editActivation: "click" });
-  }
-  // The lifecycle belongs to every editing mode, not just the cell: the
-  // simulated incoming update aims at whatever the reader has open, and a row
-  // or a batch is as open as a cell.
-  if (flags.editing || rowFormArmed(flags) || flags.batch) {
-    Object.assign(next, {
-      onEditStart: flags.onEditStart,
-      onEditCancel: flags.onEditCancel,
-      onEditCommit: flags.onEditCommit,
-      rowVersion: (row: Person) => row.revision ?? 0,
-    });
-  }
   if (rowFormArmed(flags)) {
     Object.assign(next, { rowEditing: true, onRowEdit });
   }
@@ -704,12 +701,32 @@ function applyRowModelFlags(
  * group headers, editor and grip are the adapter's. This side names the
  * behaviour and the handler; the adapter's demo picks the factory.
  */
+function editingExtras(
+  flags: Parameters<typeof frontendColumnProps>[1]
+): KitFeatureRequests["editingExtras"] {
+  if (!(flags.editing || rowFormArmed(flags) || flags.batch)) return undefined;
+  return {
+    // On the live demo a visitor's first click on a value opens it, as a form
+    // field would; the feature pages and the lab keep the default double-click.
+    ...(flags.editing && flags.urlKey === "live"
+      ? { editActivation: "click" as const }
+      : {}),
+    onEditStart: flags.onEditStart,
+    onEditCancel: flags.onEditCancel,
+    onEditCommit: flags.onEditCommit,
+    rowVersion: (row: Person) => row.revision ?? 0,
+  };
+}
+
 function kitRequests(
   flags: Parameters<typeof frontendColumnProps>[1],
-  onRowEdit: (row: Person, patch: Record<string, unknown>) => void
+  onRowEdit: (row: Person, patch: Record<string, unknown>) => void,
+  columnRename: DemoColumnProps["onColumnRename"]
 ): KitFeatureRequests {
   return {
+    columnRename,
     ...(flags.editing ? { editing: flags.onCellEdit } : {}),
+    editingExtras: editingExtras(flags),
     ...(rowFormArmed(flags) ? { rowEditing: onRowEdit } : {}),
     ...(flags.batch ? { batchEditing: flags.onBatchEdit } : {}),
     ...(flags.grouping
@@ -844,7 +861,9 @@ function frontendColumnProps(
   if (accentRowStyle) {
     Object.assign(next, { rowStyle: accentRowStyle, rowHeight: 48 });
   }
-  Object.assign(next, { kitFeatures: kitRequests(flags, onRowEdit) });
+  Object.assign(next, {
+    kitFeatures: kitRequests(flags, onRowEdit, columns.onColumnRename),
+  });
   const composed = composeDemoFeatures(flags, {
     teamSpan,
     demoExtraRows,

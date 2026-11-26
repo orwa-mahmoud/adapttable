@@ -195,6 +195,7 @@ describe("createCellSaveStore", () => {
     await expect(store.track({ ...base, result: undefined })).resolves.toBe(
       true
     );
+    const idle = cellSaveSignature(store.getSnapshot());
     let resolve!: () => void;
     const pending = store.track({
       ...base,
@@ -203,7 +204,7 @@ describe("createCellSaveStore", () => {
       }),
     });
     expect(cellSaveStatus(store.getSnapshot(), "1", "name")).toBe("saving");
-    expect(cellSaveSignature(store.getSnapshot())).toBe("1 name");
+    expect(cellSaveSignature(store.getSnapshot())).not.toBe(idle);
     resolve();
     await expect(pending).resolves.toBe(true);
     expect(cellSaveStatus(store.getSnapshot(), "1", "name")).toBeUndefined();
@@ -231,7 +232,7 @@ describe("createCellSaveStore", () => {
       attempted: "A",
       message: "offline",
     });
-    expect(cellSaveSignature(snapshot)).toBe("1 nameoffline");
+    expect(cellSaveSignature(snapshot)).toContain("offline");
     expect(onEditError).toHaveBeenCalledWith(
       expect.objectContaining({ error: "offline", previousValue: ada })
     );

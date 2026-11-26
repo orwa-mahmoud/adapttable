@@ -11,7 +11,7 @@ import {
   type ConformanceTest,
   tableConformanceTests,
 } from "@adapttable/core/conformance";
-import type { ColumnDef } from "@adapttable/react";
+import { type ColumnDef, useServerData } from "@adapttable/react";
 import type { TableFeature } from "@adapttable/react/features";
 import { fireEvent, waitFor } from "@testing-library/react";
 import { expect } from "vitest";
@@ -59,6 +59,59 @@ function featuresFor(
   ];
 }
 
+/** The props every scenario gives the table, whichever tier serves it. */
+function scenarioProps(kit: ReactKitUnderTest, scenario: ConformanceScenario) {
+  return {
+    columns: columnsFor(scenario),
+    rowKey: (row: ConformanceRow) => row.id,
+    urlSync: false,
+    tableLabel: scenario.tableLabel,
+    dir: scenario.dir,
+    forceMobile: scenario.mobile,
+    defaults:
+      scenario.pageSize === undefined
+        ? undefined
+        : { limit: scenario.pageSize },
+    labels: scenario.labels,
+    onRowClick: scenario.onRowClick,
+    isCellFlashing:
+      scenario.isCellFlashing === undefined
+        ? undefined
+        : (rowId: string, columnKey: string) =>
+            scenario.isCellFlashing?.(rowId, columnKey) === true,
+    searchPlaceholder: scenario.searchPlaceholder,
+    features: featuresFor(kit, scenario),
+    ...(scenario.virtualize
+      ? { paginationMode: "infinite" as const, maxHeight: 200 }
+      : {}),
+    bulkActions: scenario.selectable
+      ? [{ key: "archive", label: "Archive", onClick: () => undefined }]
+      : undefined,
+  };
+}
+
+/** A scenario served by a server source the host builds. */
+function ServerScenario({
+  kit,
+  scenario,
+}: {
+  readonly kit: ReactKitUnderTest;
+  readonly scenario: ConformanceScenario;
+}) {
+  const { DataTable } = kit;
+  const source = useServerData<ConformanceRow>({
+    rows: [...scenario.rows],
+    total: scenario.total ?? scenario.rows.length,
+    onQueryChange: scenario.onQueryChange,
+    urlSync: false,
+    defaults:
+      scenario.pageSize === undefined
+        ? undefined
+        : { limit: scenario.pageSize },
+  });
+  return <DataTable source={source} {...scenarioProps(kit, scenario)} />;
+}
+
 /**
  * Renders the kit's table for a conformance scenario.
  *
@@ -72,43 +125,16 @@ export function reactConformanceDriver(
   return {
     name: kit.name,
     mount: (scenario) => {
-      const element = () => (
-        <DataTable
-          data={[...scenario.rows]}
-          columns={columnsFor(scenario)}
-          rowKey={(row) => row.id}
-          urlSync={false}
-          tableLabel={scenario.tableLabel}
-          dir={scenario.dir}
-          forceMobile={scenario.mobile}
-          defaults={
-            scenario.pageSize === undefined
-              ? undefined
-              : { limit: scenario.pageSize }
-          }
-          labels={scenario.labels}
-          onRowClick={scenario.onRowClick}
-          isCellFlashing={
-            scenario.isCellFlashing === undefined
-              ? undefined
-              : (rowId: string, columnKey: string) =>
-                  scenario.isCellFlashing?.(rowId, columnKey) === true
-          }
-          searchPlaceholder={scenario.searchPlaceholder}
-          onQueryChange={scenario.onQueryChange}
-          total={scenario.total}
-          mode={scenario.mode === "frontend" ? "frontend" : undefined}
-          features={featuresFor(kit, scenario)}
-          {...(scenario.virtualize
-            ? { paginationMode: "infinite" as const, maxHeight: 200 }
-            : {})}
-          bulkActions={
-            scenario.selectable
-              ? [{ key: "archive", label: "Archive", onClick: () => undefined }]
-              : undefined
-          }
-        />
-      );
+      const element = () =>
+        scenario.onQueryChange ? (
+          <ServerScenario kit={kit} scenario={scenario} />
+        ) : (
+          <DataTable
+            data={[...scenario.rows]}
+            onViewChange={scenario.onViewChange}
+            {...scenarioProps(kit, scenario)}
+          />
+        );
       const view = kit.render(element());
       return {
         container: view.container,

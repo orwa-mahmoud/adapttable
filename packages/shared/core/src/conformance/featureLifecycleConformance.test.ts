@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { createFeatureMounts } from "../features/featureMounts";
+import { resolveFeatureIds } from "../features/featurePatch";
 import {
   featureLifecycleConformanceTests,
   type FeatureLifecycleDriver,
@@ -7,70 +9,81 @@ import {
   type LifecycleObservation,
 } from "./featureLifecycleConformance";
 
+interface MemoryFeature extends LifecycleDeclaration {
+  readonly mount: () => void;
+}
+
 /**
- * A table that follows the registration contract the cases describe:
- * the last id wins, a repeated or reordered list does not mount again,
- * a failed feature rolls back alone, and disposing an outer table
- * disposes the nested one once.
+ * A table built on core's own lifecycle: duplicate ids resolved once,
+ * registrations read from the winning declarations, resources kept by
+ * {@link createFeatureMounts}. Disposing an outer table disposes the nested
+ * one.
  */
 function createObservation(
   linked: LifecycleObservation[] = []
 ): LifecycleObservation {
-  const setups = new Map<string, number>();
-  const cleanups = new Map<string, number>();
-  let mounted: LifecycleDeclaration[] = [];
-  let disposed = false;
-  const publications = 1;
+  const mountCount = new Map<string, number>();
+  const cleanupCount = new Map<string, number>();
+  const latest = new Map<string, () => MemoryFeature>();
+  let composed: readonly MemoryFeature[] = [];
   let revisions = 0;
-
+  let disposed = false;
   const bump = (map: Map<string, number>, id: string): void => {
     map.set(id, (map.get(id) ?? 0) + 1);
   };
-
-  const observation: LifecycleObservation = {
+  const mounts = createFeatureMounts<MemoryFeature>((id, current) => {
+    if (current().fail) throw new Error(`${id} failed`);
+    bump(mountCount, id);
+    latest.set(id, current);
+    return () => {
+      bump(cleanupCount, id);
+    };
+  });
+  const declarations = new WeakMap<LifecycleDeclaration, MemoryFeature>();
+  const declare = (spec: LifecycleDeclaration): MemoryFeature => {
+    const known = declarations.get(spec);
+    if (known) return known;
+    const created = { ...spec, mount: () => undefined };
+    declarations.set(spec, created);
+    return created;
+  };
+  return {
     reconcile(features) {
-      const byId = new Map<string, LifecycleDeclaration>();
-      for (const feature of features) byId.set(feature.id, feature);
-      const next = [...byId.values()];
-      const same =
-        next.length === mounted.length &&
-        next.every((feature) =>
-          mounted.some(
-            (current) =>
-              current.id === feature.id && current.command === feature.command
-          )
+      const next = resolveFeatureIds(features.map(declare));
+      const changed =
+        next.length !== composed.length ||
+        next.some((feature, index) => feature !== composed[index]);
+      if (!changed) return Promise.resolve();
+      try {
+        mounts.reconcile(next);
+      } catch (error) {
+        return Promise.reject(
+          error instanceof Error ? error : new Error(String(error))
         );
-      if (same) return Promise.resolve();
-      const failing = next.find((feature) => feature.fail);
-      for (const feature of next) {
-        if (mounted.some((current) => current.id === feature.id)) continue;
-        bump(setups, feature.id);
-        if (feature === failing) {
-          bump(cleanups, feature.id);
-          throw new Error(`${feature.id} failed`);
-        }
       }
-      mounted = next.filter((feature) => feature !== failing);
-      revisions += 1;
+      const sameIds =
+        next.length === composed.length &&
+        next.every((feature) => composed.some((c) => c.id === feature.id));
+      composed = next;
+      if (!sameIds) revisions += 1;
       return Promise.resolve();
     },
     async dispose() {
       if (disposed) return;
       disposed = true;
-      for (const feature of mounted) bump(cleanups, feature.id);
-      mounted = [];
+      mounts.dispose();
       for (const inner of linked) await inner.dispose();
     },
     commands: () =>
-      mounted.flatMap((feature) =>
+      composed.flatMap((feature) =>
         feature.command == null ? [] : [feature.command]
       ),
-    setups: (id) => setups.get(id) ?? 0,
-    cleanups: (id) => cleanups.get(id) ?? 0,
-    hostPublications: () => publications,
+    mounts: (id) => mountCount.get(id) ?? 0,
+    cleanups: (id) => cleanupCount.get(id) ?? 0,
+    currentOption: (id) => latest.get(id)?.().option,
+    hostPublications: () => 1,
     revisionNotifications: () => revisions,
   };
-  return observation;
 }
 
 const driver: FeatureLifecycleDriver = {

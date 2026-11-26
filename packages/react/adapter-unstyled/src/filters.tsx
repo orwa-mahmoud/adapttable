@@ -1,6 +1,7 @@
 import {
   type AdapterFiltersFeature,
-  createAdapterFiltersFeature,
+  createAdapterFiltersFeatureOn,
+  filterEngineForWidgets,
   type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
   type FilterWidget,
@@ -82,12 +83,16 @@ function PopoverSlot(props: Readonly<FilterOverlaySlotProps>) {
 export function filtersWith(
   widgets: readonly FilterWidget[]
 ): AdapterFiltersFeature {
-  return createAdapterFiltersFeature({
-    FiltersForm: filtersFormWith(widgets),
-    ActiveFilterChips: ChipsSlot,
-    FilterDrawer: DrawerSlot,
-    FilterPopover: PopoverSlot,
-  });
+  // The engine holds only the types these widgets carry.
+  return createAdapterFiltersFeatureOn(
+    {
+      FiltersForm: filtersFormWith(widgets),
+      ActiveFilterChips: ChipsSlot,
+      FilterDrawer: DrawerSlot,
+      FilterPopover: PopoverSlot,
+    },
+    filterEngineForWidgets(widgets)
+  );
 }
 
 /** Declarative filters with this kit's chip strip, panel and every widget. @public */

@@ -834,7 +834,7 @@ available for correction or retry. A successful callback does not make the
 store write the host's data.
 
 ```ts
-import { createRowEditStore } from "@adapttable/core";
+import { createRowEditStore } from "@adapttable/core/editing";
 
 type Person = { id: string; name: string };
 const edits = createRowEditStore<Person>({

@@ -199,7 +199,8 @@ export interface SlotFill<TNode = unknown> {
 }
 
 /**
- * The fills of one feature list, grouped by slot id in feature-id order.
+ * The fills of one feature list, grouped by slot id: by feature rank, then
+ * in feature-id order.
  *
  * Two features may fill one slot — a toolbar takes several controls — so each
  * slot keeps a list rather than the last writer, ordered the same way
@@ -211,21 +212,33 @@ export interface SlotFill<TNode = unknown> {
 export function slotFillsOf<TNode>(
   features: readonly {
     readonly id: string;
+    readonly rank?: number;
     readonly renders?: readonly FeatureRender<never, TNode>[];
   }[]
 ): ReadonlyMap<string, readonly SlotFill<TNode>[]> {
-  const bySlot = new Map<string, SlotFill<TNode>[]>();
+  const bySlot = new Map<string, (SlotFill<TNode> & { rank: number })[]>();
   for (const feature of features) {
     for (const entry of feature.renders ?? []) {
       const list = bySlot.get(entry.slot.id) ?? [];
-      list.push({ id: entry.orderAs ?? feature.id, render: entry.render });
+      list.push({
+        id: entry.orderAs ?? feature.id,
+        rank: feature.rank ?? 0,
+        render: entry.render,
+      });
       bySlot.set(entry.slot.id, list);
     }
   }
-  for (const list of bySlot.values()) {
-    list.sort((left, right) => (left.id < right.id ? -1 : 1));
+  const fills = new Map<string, readonly SlotFill<TNode>[]>();
+  for (const [slot, list] of bySlot) {
+    list.sort(
+      (left, right) => left.rank - right.rank || (left.id < right.id ? -1 : 1)
+    );
+    fills.set(
+      slot,
+      list.map(({ id, render }) => ({ id, render }))
+    );
   }
-  return bySlot;
+  return fills;
 }
 
 /**

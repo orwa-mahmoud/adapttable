@@ -418,6 +418,8 @@ export function ChakraDemo({
                     contextMenu,
                     filterControls,
                     filterDefs: filters,
+                    filtersMode: filtersUi,
+                    filterFields,
                     filterTypeSpecs: demoFilterTypes(),
                     sidePanel,
                     statusBar,
@@ -430,13 +432,11 @@ export function ChakraDemo({
                 forceMobile={forceMobile}
                 maxHeight={maxHeight}
                 density={density}
-                filtersMode={filtersUi}
                 {...pageTablePresentation(locale, s.search)}
                 rowActionsLayout={rowMutations ? "menu" : undefined}
                 confirm={demoConfirm}
                 animate={animate}
                 stickyHeader
-                filterFields={filterFields}
               />
             )}
           />

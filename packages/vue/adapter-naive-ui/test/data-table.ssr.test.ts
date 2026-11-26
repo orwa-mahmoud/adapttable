@@ -6,6 +6,7 @@ import { createSSRApp, h } from "vue";
 import { renderToString } from "vue/server-renderer";
 
 import { DataTable } from "../src";
+import { selection } from "../src/selection";
 
 interface Row {
   id: string;
@@ -21,13 +22,13 @@ describe("Naive DataTable Node SSR", () => {
       const app = createSSRApp({
         render: () =>
           h(DataTable<Row>, {
+            features: [selection()],
             data: [{ id: "ada", name: "Ada" }],
             columns,
             rowKey: (row) => row.id,
             urlSync: false,
             forceMobile: mobile,
             dir: "rtl",
-            selectable: true,
           }),
       });
       const { collect } = setup(app);

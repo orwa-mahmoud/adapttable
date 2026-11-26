@@ -3,6 +3,7 @@ import { DataTable } from "@adapttable/nuxt-ui";
 import { columnMenu } from "@adapttable/nuxt-ui/column-menu";
 import { densityChooser } from "@adapttable/nuxt-ui/density";
 import { fullscreen } from "@adapttable/nuxt-ui/fullscreen";
+import { selection } from "@adapttable/nuxt-ui/selection";
 import UBadge from "@nuxt/ui/components/Badge.vue";
 import UButton from "@nuxt/ui/components/Button.vue";
 import { h } from "vue";
@@ -60,12 +61,16 @@ function renderStatus(row: Order, label: string) {
       </div>
     </template>
     <template
-      #default="{ tableProps, onSelectionChange, onColumnLayoutChange }"
+      #default="{
+        tableProps,
+        selectedIds,
+        onSelectionChange,
+        onColumnLayoutChange,
+      }"
     >
       <DataTable
         v-bind="tableProps"
-        :features="features"
-        @update:selected-ids="onSelectionChange"
+        :features="[selection({ selectedIds, onSelectionChange }), ...features]"
         @update:column-layout="onColumnLayoutChange"
       />
     </template>

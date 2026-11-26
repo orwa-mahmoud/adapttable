@@ -173,7 +173,7 @@ const FEATURES = {
     factory: "virtualize",
     entry: "virtualize",
     call: "virtualize()",
-    present: ["coreVirtualize"],
+    present: ["coreVirtualize", "injectVirtualizer"],
   },
   exportCsv: {
     factory: "exportCsv",
@@ -181,12 +181,28 @@ const FEATURES = {
     call: "exportCsv()",
     present: ["coreExportCsv"],
   },
+  palette: {
+    factory: "commandPalette",
+    entry: "command-palette",
+    call: "commandPalette()",
+    present: ["commandPaletteView"],
+  },
+  cellNavigation: {
+    factory: "cellNavigation",
+    entry: "cell-navigation",
+    call: "cellNavigation()",
+    present: [
+      "createGridFocusController",
+      "cellNavigationChannels",
+      "injectGridFocus",
+    ],
+  },
   preset: {
-    factory: "standardPreset",
+    factory: "standardFeatures",
     entry: "preset",
     // The preset returns the feature list itself, so it spreads into features.
-    call: "...standardPreset()",
-    present: ["standardPreset"],
+    call: "...standardFeatures()",
+    present: ["standardFeatures"],
   },
 };
 
@@ -198,10 +214,29 @@ const FEATURES = {
 const BASE_ABSENT = [
   "coreGrouping",
   "coreVirtualize",
+  "injectVirtualizer",
   "coreExportCsv",
   "pdfWriter",
   "xlsxWriter",
+  // A table over `data` carries no server tier.
+  "injectServerData",
+  "createLazyServerSource",
+  "serverQuery",
+  // The palette's and the menu's props are built by code their features bring.
+  "commandPaletteView",
+  "contextMenuView",
+  // Grid focus is cellNavigation()'s implementation. These names are the
+  // controller, not a label, so a plain table that still constructs it fails.
+  "createGridFocusController",
+  "cellNavigationChannels",
+  "injectGridFocus",
 ];
+
+/**
+ * Development warnings a production application drops: each is guarded by
+ * `ngDevMode`, which `ng build` defines as false.
+ */
+const DEV_WARNINGS = ["column keys must be unique", "virtualize only applies"];
 
 const LEAN = `import { Component, input } from "@angular/core";
 import { injectTableSurfaceHost } from "@adapttable/angular/adapter";
@@ -320,24 +355,43 @@ const LOCAL_HEADLESS = HEADLESS.replaceAll(
 const CEILINGS = {
   "angular · headless table": { own: 37, app: 120 },
   "angular · local headless table": { own: 28, app: 71 },
-  "angular · angular-unstyled table": { own: 140, app: 250 },
-  "angular · angular-material table": { own: 141, app: 252 },
-  "angular · ng-bootstrap table": { own: 141, app: 252 },
-  "angular · spartan table": { own: 141, app: 252 },
-  "angular · taiga-ui table": { own: 151, app: 262 },
-  "angular · angular-aria table": { own: 140, app: 250 },
-  "angular · ngx-bootstrap table": { own: 141, app: 252 },
-  "angular · angular-cdk table": { own: 140, app: 250 },
-  "angular · ng-zorro table": { own: 145, app: 401 },
+  "angular · angular-unstyled table": { own: 99, app: 158 },
+  "angular · angular-material table": { own: 100, app: 230 },
+  "angular · ng-bootstrap table": { own: 100, app: 184 },
+  "angular · spartan table": { own: 101, app: 200 },
+  "angular · taiga-ui table": { own: 111, app: 237 },
+  "angular · angular-aria table": { own: 99, app: 167 },
+  "angular · ngx-bootstrap table": { own: 101, app: 188 },
+  "angular · angular-cdk table": { own: 99, app: 188 },
+  "angular · ng-zorro table": { own: 105, app: 350 },
   "angular · unstyled + grouping": { own: 143, app: 254 },
   "angular · unstyled grouping + aggregation": { own: 143, app: 254 },
   "angular · unstyled + editing": { own: 148, app: 260 },
   "angular · unstyled + filters": { own: 154, app: 266 },
   "angular · unstyled + text filters": { own: 154, app: 266 },
+  "angular · angular-material + text filters": { own: 155, app: 268 },
+  "angular · ng-bootstrap + text filters": { own: 155, app: 268 },
+  "angular · spartan + text filters": { own: 155, app: 268 },
+  "angular · taiga-ui + text filters": { own: 165, app: 278 },
+  "angular · angular-aria + text filters": { own: 154, app: 266 },
+  "angular · ngx-bootstrap + text filters": { own: 155, app: 268 },
+  "angular · angular-cdk + text filters": { own: 154, app: 266 },
+  "angular · ng-zorro + text filters": { own: 159, app: 417 },
   "angular · unstyled + virtualize": { own: 140, app: 250 },
   "angular · unstyled + exportCsv": { own: 142, app: 252 },
+  "angular · unstyled + palette": { own: 145, app: 256 },
+  "angular · unstyled + cellNavigation": { own: 108, app: 159 },
+  "angular · angular-material + cell navigation": { own: 109, app: 232 },
   "angular · unstyled combination": { own: 156, app: 268 },
-  "angular · unstyled + preset": { own: 173, app: 286 },
+  "angular · unstyled + preset": { own: 156, app: 214 },
+  "angular · angular-material + preset": { own: 167, app: 311 },
+  "angular · ng-bootstrap + preset": { own: 164, app: 246 },
+  "angular · spartan + preset": { own: 165, app: 262 },
+  "angular · taiga-ui + preset": { own: 176, app: 295 },
+  "angular · angular-aria + preset": { own: 164, app: 250 },
+  "angular · ngx-bootstrap + preset": { own: 167, app: 251 },
+  "angular · angular-cdk + preset": { own: 165, app: 250 },
+  "angular · ng-zorro + preset": { own: 174, app: 425 },
   "angular · lean table": { own: 56, app: 96 },
   "angular · lean grouping navigation editing": { own: 82, app: 121 },
 };
@@ -365,7 +419,7 @@ export function angularConsumerFixtures(kits = angularKits()) {
       [],
       {
         functionality: `${kit.name} base table, no optional feature`,
-        absent: BASE_ABSENT,
+        absent: [...BASE_ABSENT, ...DEV_WARNINGS],
         ...ceilings(`angular · ${kit.name.replace("@adapttable/", "")} table`),
       }
     )
@@ -388,7 +442,13 @@ export function angularConsumerFixtures(kits = angularKits()) {
       peerPolicy: "own-share",
       functionality: "Headless table: signals, attributes and cell projection",
       present: ["injectDataTable", "injectFrontendData", "resolveTableLabels"],
-      absent: ["AdaptDataTable", "coreGrouping", "xlsxWriter", "defaultLabels"],
+      absent: [
+        "AdaptDataTable",
+        "coreGrouping",
+        "xlsxWriter",
+        "defaultLabels",
+        ...DEV_WARNINGS,
+      ],
       ...ceilings("angular · headless table"),
       code: HEADLESS,
     },
@@ -431,7 +491,10 @@ export function angularConsumerFixtures(kits = angularKits()) {
         "AdaptDataTable",
         "coreGrouping",
         "createGridFocusController",
+        "cellNavigationChannels",
+        "injectGridFocus",
         "injectCellEditing",
+        "injectVirtualizer",
         "pdfWriter",
         "xlsxWriter",
       ],
@@ -451,9 +514,16 @@ export function angularConsumerFixtures(kits = angularKits()) {
         "injectTableSurfaceHost",
         "coreGrouping",
         "createGridFocusController",
+        "cellNavigationChannels",
+        "injectGridFocus",
         "injectCellEditing",
       ],
-      absent: ["AdaptDataTable", "pdfWriter", "xlsxWriter"],
+      absent: [
+        "AdaptDataTable",
+        "injectVirtualizer",
+        "pdfWriter",
+        "xlsxWriter",
+      ],
       ...ceilings("angular · lean grouping navigation editing"),
       code: LEAN_COMPOSED,
     },
@@ -477,8 +547,42 @@ export function angularConsumerFixtures(kits = angularKits()) {
       "Native table with the filter drawer drawn by the text widget only",
       [...BASE_ABSENT, "AdaptRangeFilterField", "AdaptBooleanFilterField"]
     ),
+    ...kits
+      .filter((kit) => kit !== native)
+      .map((kit) =>
+        rendered(
+          `angular · ${kit.name.replace("@adapttable/", "")} + text filters`,
+          kit,
+          [FEATURES["text filters"]],
+          {
+            functionality: `${kit.name} table with the filter drawer drawn by the text widget only`,
+            absent: [
+              ...BASE_ABSENT,
+              "AdaptRangeFilterField",
+              "AdaptBooleanFilterField",
+            ],
+            ...ceilings(
+              `angular · ${kit.name.replace("@adapttable/", "")} + text filters`
+            ),
+          }
+        )
+      ),
     feature("virtualize", "Native table with row virtualization"),
     feature("exportCsv", "Native table with CSV export"),
+    feature("palette", "Native table with the command palette"),
+    feature("cellNavigation", "Native table with keyboard cell navigation"),
+    rendered(
+      "angular · angular-material + cell navigation",
+      kits.find((kit) => kit.folder === "adapter-material"),
+      [FEATURES.cellNavigation],
+      {
+        functionality: "Material table with keyboard cell navigation",
+        absent: BASE_ABSENT.filter(
+          (marker) => !FEATURES.cellNavigation.present.includes(marker)
+        ),
+        ...ceilings("angular · angular-material + cell navigation"),
+      }
+    ),
     rendered(
       "angular · unstyled combination",
       native,
@@ -494,8 +598,29 @@ export function angularConsumerFixtures(kits = angularKits()) {
       "Native table with the standard preset",
       // The preset's own list includes grouping and CSV export, so their
       // engines belong in this graph. The writers it never configures do not.
-      ["coreVirtualize", "pdfWriter", "xlsxWriter"]
+      ["coreVirtualize", "injectVirtualizer", "pdfWriter", "xlsxWriter"]
     ),
+    ...kits
+      .filter((kit) => kit !== native)
+      .map((kit) =>
+        rendered(
+          `angular · ${kit.name.replace("@adapttable/", "")} + preset`,
+          kit,
+          [FEATURES.preset],
+          {
+            functionality: `${kit.name} table with the standard preset`,
+            absent: [
+              "coreVirtualize",
+              "injectVirtualizer",
+              "pdfWriter",
+              "xlsxWriter",
+            ],
+            ...ceilings(
+              `angular · ${kit.name.replace("@adapttable/", "")} + preset`
+            ),
+          }
+        )
+      ),
   ];
 }
 

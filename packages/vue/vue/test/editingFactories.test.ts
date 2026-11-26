@@ -1,6 +1,6 @@
 import { ACTIONS_COLUMN_KEY } from "@adapttable/core";
-import { slotRender } from "@adapttable/core/binding";
-import { describe, expect, it, vi } from "vitest";
+import { loadEditConflictStore, slotRender } from "@adapttable/core/binding";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import {
   createApp,
   defineComponent,
@@ -196,6 +196,13 @@ function mount(features: readonly TableFeature<Row>[], mobile = false) {
     },
   };
 }
+
+// The conflict store loads when an edit first opens; load it once so these
+// specs read the question asked, not the load.
+beforeAll(async () => {
+  await loadEditConflictStore();
+});
+
 describe("complete composed editing factories", () => {
   it.each([false, true])(
     "row-only native fields/toolbar preserve pending validation/save/failure on mobile=%s",

@@ -2,7 +2,8 @@ import { localizedColumnPath } from "@adapttable/core/binding";
 import { describe, expect, it } from "vitest";
 
 import { getDirection } from "./direction";
-import { getLabels, hasLocale, locales } from "./getLabels";
+import { getLabels, locales } from "./getLabels";
+import { hasLocale } from "./localeCatalog";
 import { ar } from "./locales/ar";
 import { cs } from "./locales/cs";
 import { de } from "./locales/de";
@@ -41,6 +42,29 @@ describe("getLabels", () => {
   it("falls back to English for unbundled locales", () => {
     expect(getLabels("sv")).toBe(en);
     expect(getLabels("zz-ZZ")).toBe(en);
+  });
+});
+
+describe("explicit scripts", () => {
+  it("reads Traditional Chinese for a Hant tag and Simplified for a Hans tag", () => {
+    for (const tag of [
+      "zh-TW",
+      "zh-Hant",
+      "zh-Hant-TW",
+      "zh_hant_tw",
+      "ZH-HANT",
+    ]) {
+      expect(getLabels(tag), tag).toBe(zhTW);
+      expect(hasLocale(tag), tag).toBe(true);
+    }
+    for (const tag of ["zh-Hans", "zh-hans-cn", "zh_Hans", "zh-CN", "zh"]) {
+      expect(getLabels(tag), tag).toBe(zh);
+    }
+  });
+
+  it("keeps an exact tag ahead of a script and a primary subtag", () => {
+    expect(getLabels("zh-tw")).toBe(zhTW);
+    expect(getLabels("ar-Arab")).toBe(ar);
   });
 });
 
@@ -136,18 +160,6 @@ const INTERPOLATION_CASES: Record<
   assistantConnection: {
     call: (fn) => (fn as (status: string) => string)("connecting"),
     expects: [],
-  },
-  /**
-   * A capability key is technical identity and appears as given; the status
-   * beside it is translated, so only the key is expected here.
-   */
-  assistantReceipt: {
-    call: (fn) =>
-      (fn as (r: { capability?: string; status: string }) => string)({
-        capability: "view.pinColumn",
-        status: "staged",
-      }),
-    expects: ["view.pinColumn"],
   },
   /**
    * Like the badge above, a receipt's headline translates its tokens rather
@@ -532,7 +544,7 @@ describe("assistant token labels translate every token", () => {
   it("gives every receipt token a word in every locale", () => {
     for (const [tag, labels] of Object.entries(locales)) {
       for (const token of RECEIPT) {
-        const out = labels.assistantReceipt({ status: token });
+        const out = labels.assistantReceiptStatus(token);
         expect(out.length, `${tag}.${token}`).toBeGreaterThan(0);
         if (tag !== "en") expect(out, `${tag}.${token}`).not.toBe(token);
       }
@@ -543,18 +555,8 @@ describe("assistant token labels translate every token", () => {
     for (const [tag, labels] of Object.entries(locales)) {
       // A status this version has no word for still has to say something —
       // a blank receipt is worse than an untranslated one.
-      const out = labels.assistantReceipt({ status: "some-new-status" });
+      const out = labels.assistantReceiptStatus("some-new-status");
       expect(out, tag).toContain("some-new-status");
-    }
-  });
-
-  it("keeps the capability key beside the translated status", () => {
-    for (const [tag, labels] of Object.entries(locales)) {
-      const out = labels.assistantReceipt({
-        capability: "view.setGroupBy",
-        status: "executed",
-      });
-      expect(out, tag).toContain("view.setGroupBy");
     }
   });
 });

@@ -5,6 +5,8 @@
  * layout. A binding passes `isRtl` when horizontal arrows should follow the
  * grip's writing direction.
  */
+import type { TableRuntimeView } from "../features/tableRuntime";
+import { ROW_LABELS } from "../labelGroups/rowLabels";
 import {
   type RowDropPosition,
   rowDropPosition,
@@ -53,8 +55,14 @@ export interface RowReorderControllerOptions<TRow> {
   confirmMove?: RowMoveConfirmHandler<TRow>;
   /** The host's write for a cross-boundary move. */
   onRowMove?: (request: RowMoveRequest<TRow>) => unknown;
-  /** Keyboard/touch destinations for a row, when nested. */
-  getMoveMenu?: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
+  /**
+   * Keyboard/touch destinations for a row, when nested. `view` is the table
+   * the caller is drawing; without it, the live table's.
+   */
+  getMoveMenu?: (
+    row: TRow,
+    view?: TableRuntimeView<TRow>
+  ) => RowMoveMenuModel<TRow> | undefined;
   /** Resolve a drop inside grouped or tree rows. */
   resolveMove?: (
     row: TRow,
@@ -235,8 +243,14 @@ export interface RowReorderController<TRow> {
     windowStart: number,
     rowCount: number
   ) => void;
-  /** Keyboard/touch destinations for this row, when nested. */
-  readonly moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
+  /**
+   * Keyboard/touch destinations for this row, when nested. A control drawing
+   * during render passes the view it draws.
+   */
+  readonly moveMenu: (
+    row: TRow,
+    view?: TableRuntimeView<TRow>
+  ) => RowMoveMenuModel<TRow> | undefined;
   /** Select a destination from the move menu. */
   readonly selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
   /** Confirm the move shown by the kit confirmation surface. */
@@ -355,8 +369,6 @@ export function createRowReorderController<TRow>(
       changed = true;
     });
   };
-  const ownsRows = (): boolean =>
-    options.session !== undefined || options.getRowIndex !== undefined;
   const sameRow = (expected: TRow, actual: TRow): boolean =>
     options.getRowId
       ? options.getRowId(expected) === options.getRowId(actual)
@@ -365,17 +377,18 @@ export function createRowReorderController<TRow>(
   const currentRowMatches = (
     expected: TRow,
     current: TRow | undefined
-  ): current is TRow =>
-    current !== undefined && (!ownsRows() || sameRow(expected, current));
+  ): current is TRow => current !== undefined && sameRow(expected, current);
 
   const announceMove = (request: RowMoveRequest<TRow>): void => {
     const { labels } = options;
     say(
       request.kind === "group"
-        ? (labels.rowMovedToGroup?.(request.toGroup.label) ??
-            `Row moved to ${request.toGroup.label}`)
-        : (labels.rowMovedUnder?.(request.toParent.label) ??
-            `Row moved under ${request.toParent.label}`)
+        ? (labels.rowMovedToGroup ?? ROW_LABELS.rowMovedToGroup)(
+            request.toGroup.label
+          )
+        : (labels.rowMovedUnder ?? ROW_LABELS.rowMovedUnder)(
+            request.toParent.label
+          )
     );
   };
 
@@ -439,7 +452,7 @@ export function createRowReorderController<TRow>(
       batch(() => {
         say(
           options.labels.moveRejectedPolicyNever ??
-            "Cross-boundary row moves are disabled"
+            ROW_LABELS.moveRejectedPolicyNever
         );
         reset();
       });
@@ -497,12 +510,10 @@ export function createRowReorderController<TRow>(
       reset();
       return;
     }
-    // Legacy bindings can publish rows before they publish row identity.
-    // An owned session or source-index mapping opts into current-row identity.
-    if (ownsRows()) {
-      row = currentRow;
-      target = currentTarget;
-    }
+    // The rows as they are now: a rekey or an update since the grab hands
+    // the host the current objects.
+    row = currentRow;
+    target = currentTarget;
     const decision = options.resolveMove?.(row, target, position);
     if (decision?.kind === "reject") {
       batch(() => {
@@ -627,8 +638,10 @@ export function createRowReorderController<TRow>(
         keyDown: guard(controller.keyDown),
         moveBy: guard(controller.moveBy),
         selectMoveTarget: guard(controller.selectMoveTarget),
-        moveMenu: (row) =>
-          live() && epoch === ownedEpoch ? controller.moveMenu(row) : undefined,
+        moveMenu: (row, view) =>
+          live() && epoch === ownedEpoch
+            ? controller.moveMenu(row, view)
+            : undefined,
         confirmMove: guard(() => {
           if (pending !== null && snapshot.pendingMove === pending)
             controller.confirmMove();
@@ -667,7 +680,7 @@ export function createRowReorderController<TRow>(
       const current = options.rowAt(localIndex);
       if (
         current === undefined ||
-        (ownsRows() && options.getRowId && options.getRowId(current) !== rowId)
+        (options.getRowId && options.getRowId(current) !== rowId)
       ) {
         event.preventDefault();
         return;
@@ -702,9 +715,7 @@ export function createRowReorderController<TRow>(
       const dragged = options.rowAt(lifted.from);
       if (
         dragged === undefined ||
-        (ownsRows() &&
-          options.getRowId &&
-          options.getRowId(dragged) !== lifted.rowId)
+        (options.getRowId && options.getRowId(dragged) !== lifted.rowId)
       ) {
         reset();
         return;
@@ -733,9 +744,9 @@ export function createRowReorderController<TRow>(
         delta > 0 ? "after" : "before"
       );
     },
-    moveMenu: (row) => {
+    moveMenu: (row, view) => {
       if (!live()) return undefined;
-      const menu = options.getMoveMenu?.(row);
+      const menu = options.getMoveMenu?.(row, view);
       for (const target of menu?.targets ?? []) menuEpochs.set(target, epoch);
       return menu;
     },

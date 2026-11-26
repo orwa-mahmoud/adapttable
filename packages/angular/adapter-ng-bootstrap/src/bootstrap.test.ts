@@ -1,4 +1,5 @@
 import { type ColumnDef } from "@adapttable/angular";
+import { selection } from "@adapttable/ng-bootstrap/selection";
 import { TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { NgbPopover } from "@ng-bootstrap/ng-bootstrap/popover";
@@ -30,11 +31,14 @@ async function mount(mode: "popover" | "drawer" = "popover") {
     urlSync: false,
     forceMobile: false,
     searchable: true,
-    selectable: true,
+
     theme: "dark",
     dir: "rtl",
-    filtersMode: mode,
-    features: [filters<Row>([{ key: "name", type: "text" }]), columnMenu()],
+    features: [
+      selection(),
+      filters<Row>([{ key: "name", type: "text" }], { mode }),
+      columnMenu(),
+    ],
   }))
     fixture.componentRef.setInput(name, value);
   fixture.autoDetectChanges();

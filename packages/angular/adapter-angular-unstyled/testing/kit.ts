@@ -3,6 +3,7 @@ import { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
 import { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
 import { cellSpan } from "@adapttable/angular-unstyled/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/angular-unstyled/column-groups";
+import { columnLayoutFamily } from "@adapttable/angular-unstyled/column-layout";
 import { columnMenu } from "@adapttable/angular-unstyled/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/angular-unstyled/column-selection";
 import { commandPalette } from "@adapttable/angular-unstyled/command-palette";
@@ -11,6 +12,7 @@ import {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "@adapttable/angular-unstyled/editing";
@@ -20,6 +22,7 @@ import {
   exportXlsx,
 } from "@adapttable/angular-unstyled/export";
 import { extraRows } from "@adapttable/angular-unstyled/extra-rows";
+import { filteringFamily } from "@adapttable/angular-unstyled/filtering";
 import {
   filters,
   filtersWith,
@@ -47,6 +50,7 @@ import { rowDetail } from "@adapttable/angular-unstyled/row-detail";
 import { rowPinning } from "@adapttable/angular-unstyled/row-pinning";
 import { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
 import { savedViews } from "@adapttable/angular-unstyled/saved-views";
+import { selection } from "@adapttable/angular-unstyled/selection";
 import { selectionStats } from "@adapttable/angular-unstyled/selection-stats";
 import { sidePanel } from "@adapttable/angular-unstyled/side-panel";
 import { statusBar } from "@adapttable/angular-unstyled/status-bar";
@@ -83,9 +87,13 @@ export const kit: AngularKitUnderTest = {
   name: "angular-unstyled",
   Table: AdaptDataTable,
   features: {
+    editingFamily,
+    filteringFamily,
+    columnLayoutFamily,
     commandPalette,
     dirtyIndicators,
     filterTypes,
+    selection,
     selectionStats,
     sidePanel,
     statusBar,

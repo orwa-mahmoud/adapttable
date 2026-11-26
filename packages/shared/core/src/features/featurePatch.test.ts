@@ -139,6 +139,26 @@ describe("overlayFeatureOptions", () => {
 });
 
 describe("applyTableFeatures", () => {
+  it("reads every part of a duplicated id from its last declaration", () => {
+    const first = {
+      id: "palette",
+      labels: { commandPalette: "First" },
+      apply: () => ({ commandPalette: { commands: ["first"] } }),
+    };
+    const second = {
+      id: "palette",
+      labels: { commandPalette: "Second" },
+      apply: () => ({ commandPalette: true }),
+    };
+    const resolved = applyTableFeatures({ features: [first, second] }) as {
+      commandPalette?: unknown;
+      featureLabels?: unknown;
+    };
+    expect(resolved.commandPalette).toBe(true);
+    expect(resolved.featureLabels).toEqual([{ commandPalette: "Second" }]);
+    expect(getAppliedFeatures(resolved)).toEqual([second]);
+  });
+
   it("returns the same object when no features key is present", () => {
     const props = { columns: [] };
     expect(applyTableFeatures(props)).toBe(props);
@@ -175,6 +195,43 @@ describe("applyTableFeatures", () => {
     });
     expect(resolved).toEqual({ groupBy: "second" });
     expect("features" in resolved).toBe(false);
+  });
+
+  it("composes a family entry as its members, in its place", () => {
+    const family = [set("b", { groupBy: "family" }), set("c", { density: 1 })];
+    const before = applyTableFeatures({
+      features: [set("a", { groupBy: "first" }), family],
+    });
+    expect(before).toEqual({ groupBy: "family", density: 1 });
+    expect(getAppliedFeatures(before)?.map((f) => f.id)).toEqual([
+      "a",
+      "b",
+      "c",
+    ]);
+    // A single feature after the family still wins over its member.
+    expect(
+      applyTableFeatures({ features: [family, set("d", { groupBy: "last" })] })
+    ).toEqual({ groupBy: "last", density: 1 });
+  });
+
+  it("keeps a feature option that the host also passed", () => {
+    expect(
+      applyTableFeatures({
+        features: [set("filters", { filtersMode: "popover" })],
+        filtersMode: "drawer",
+        density: "compact",
+      })
+    ).toEqual({ filtersMode: "popover", density: "compact" });
+  });
+
+  it("drops a feature option the host passed without a feature", () => {
+    expect(
+      applyTableFeatures({
+        features: [],
+        filtersMode: "drawer",
+        density: "compact",
+      })
+    ).toEqual({ density: "compact" });
   });
 
   it("lets a defined host option win over every feature", () => {

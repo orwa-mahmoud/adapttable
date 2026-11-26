@@ -14,10 +14,10 @@
  */
 import type { AgentManifest } from "@adapttable/ai";
 import {
-  applyTableFeatures,
   FeatureProviders,
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
+import { applyTableFeatures } from "@adapttable/react/features";
 import { act, render, waitFor } from "@testing-library/react";
 import { useRef, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -41,12 +41,16 @@ const ROWS: Row[] = [
 
 function Publisher({ neutral }: { neutral: NeutralTable }) {
   const rows = useRef<readonly unknown[]>(ROWS);
-  usePublishTableRuntime(rows.current, undefined, {
-    rows: rows.current,
-    visibleRows: rows.current,
-    neutralTable: neutral,
-    getRowId: (row: unknown) => (row as Row).id,
-    rowLabel: (row: unknown) => (row as Row).name,
+  usePublishTableRuntime({
+    rows: () => rows.current,
+    labels: () => undefined,
+    view: () => ({
+      rows: rows.current,
+      visibleRows: rows.current,
+      neutralTable: neutral,
+      getRowId: (row: unknown) => (row as Row).id,
+      rowLabel: (row: unknown) => (row as Row).name,
+    }),
   });
   return null;
 }

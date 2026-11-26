@@ -1,12 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  compareSortEntries,
-  compareSortLevel,
-  compareValues,
-  sortRows,
-  sortRowsMulti,
-} from "./compare";
+import { compareSortEntries, compareSortLevel, compareValues } from "./compare";
+import { sortRows, sortRowsMulti } from "./referenceSort";
 
 describe("compareValues", () => {
   it("returns 0 for equal values", () => {

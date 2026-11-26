@@ -29,8 +29,8 @@ import { rowActions } from "../src/row-actions";
 import { rowDetail } from "../src/row-detail";
 import { rowReorder } from "../src/row-reorder";
 import RowActions from "../src/RowActions.vue";
+import { selection } from "../src/selection";
 import { requiredControl } from "../src/table/requiredControl";
-
 const wrappers: ReturnType<typeof mount>[] = [];
 function render(content: () => VNode) {
   const wrapper = mount(
@@ -133,7 +133,6 @@ it.each([false, true])(
       h(DataTable<Row>, {
         ...base,
         forceMobile: mobile,
-        selectable: true,
         columns: [
           { key: "name", mobileLabel: "Person" },
           {
@@ -143,6 +142,7 @@ it.each([false, true])(
         ],
         summaryRow: () => ({ amount: 5 }),
         features: [
+          selection(),
           rowDetail<Row>(() => h("p", "Details")),
           rowReorder<Row>(vi.fn()),
           rowActions<Row>([{ key: "open", label: "Open", onClick: vi.fn() }]),

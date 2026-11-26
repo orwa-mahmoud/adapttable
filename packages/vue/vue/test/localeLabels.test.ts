@@ -1,4 +1,4 @@
-import { getLabels } from "@adapttable/i18n";
+import { getLabels } from "@adapttable/i18n/catalog";
 import { describe, expect, it, vi } from "vitest";
 import { effectScope, nextTick, shallowRef } from "vue";
 

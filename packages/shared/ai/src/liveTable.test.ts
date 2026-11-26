@@ -3,7 +3,7 @@ import {
   createTableEngine,
   revisionToken,
 } from "@adapttable/core";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   agentColumnsFromNeutral,
@@ -145,6 +145,63 @@ describe("liveTable bridge", () => {
     expect(window.redacted).toContain("team");
     expect(window.rows[0]?.cells.team).toBeUndefined();
     expect(window.rows[0]?.cells.name).toBe("Ada");
+  });
+
+  it("never reads a column it may not read, or one whose type is declared", () => {
+    const name = vi.fn((row: Row) => row.name);
+    const team = vi.fn((row: Row) => row.team);
+    const id = vi.fn((row: Row) => row.id);
+    const engine = createTableEngine({
+      data: [{ id: "1", name: "Ada", team: "secret" }],
+      columns: [
+        { key: "name", sortValue: name },
+        { key: "team", sortValue: team },
+        { key: "id", sortValue: id },
+      ],
+      rowKey: (row) => row.id,
+    });
+    const neutral = createNeutralTable(engine, "sampled");
+    const columns = agentColumnsFromNeutral(neutral, {
+      team: { readable: false },
+      name: { type: "text" },
+    });
+    expect(team).not.toHaveBeenCalled();
+    expect(name).not.toHaveBeenCalled();
+    expect(columns.map((column) => [column.id, column.type])).toEqual([
+      ["name", "text"],
+      ["team", "unknown"],
+      ["id", "string"],
+    ]);
+  });
+
+  it("projects the requested readable columns in column order", () => {
+    const neutral = table([
+      { id: "1", name: "Ada", team: "ops" },
+      { id: "2", name: "Grace", team: "eng" },
+    ]);
+    const columns = agentColumnsFromNeutral(neutral, {
+      team: { readable: false },
+    });
+    const read = (wanted?: readonly string[]) =>
+      readRowsFromNeutral(
+        neutral,
+        columns,
+        {
+          offset: 0,
+          limit: 10,
+          scope: "page",
+          ...(wanted ? { columns: wanted } : {}),
+        },
+        50
+      );
+    expect(read().rows.map((row) => Object.keys(row.cells))).toEqual([
+      ["name"],
+      ["name"],
+    ]);
+    expect(read(["team", "name"]).rows[1]?.cells).toEqual({ name: "Grace" });
+    expect(read([]).rows.map((row) => row.cells)).toEqual([{}, {}]);
+    expect(read(["team"]).redacted).toEqual(["team"]);
+    expect(read(["team"]).rows.map((row) => row.rowKey)).toEqual(["1", "2"]);
   });
 
   it("advertises edit when the neutral binding wires editCells", () => {

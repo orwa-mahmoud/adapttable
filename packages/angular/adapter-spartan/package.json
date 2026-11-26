@@ -66,6 +66,10 @@
       "types": "./dist/types/adapttable-spartan-column-menu.d.ts",
       "default": "./dist/fesm2022/adapttable-spartan-column-menu.mjs"
     },
+    "./column-layout": {
+      "types": "./dist/types/adapttable-spartan-column-layout.d.ts",
+      "default": "./dist/fesm2022/adapttable-spartan-column-layout.mjs"
+    },
     "./column-selection": {
       "types": "./dist/types/adapttable-spartan-column-selection.d.ts",
       "default": "./dist/fesm2022/adapttable-spartan-column-selection.mjs"
@@ -94,10 +98,6 @@
       "types": "./dist/types/adapttable-spartan-extra-rows.d.ts",
       "default": "./dist/fesm2022/adapttable-spartan-extra-rows.mjs"
     },
-    "./features": {
-      "types": "./dist/types/adapttable-spartan-features.d.ts",
-      "default": "./dist/fesm2022/adapttable-spartan-features.mjs"
-    },
     "./find-in-table": {
       "types": "./dist/types/adapttable-spartan-find-in-table.d.ts",
       "default": "./dist/fesm2022/adapttable-spartan-find-in-table.mjs"
@@ -106,9 +106,17 @@
       "types": "./dist/types/adapttable-spartan-filters.d.ts",
       "default": "./dist/fesm2022/adapttable-spartan-filters.mjs"
     },
+    "./filtering": {
+      "types": "./dist/types/adapttable-spartan-filtering.d.ts",
+      "default": "./dist/fesm2022/adapttable-spartan-filtering.mjs"
+    },
     "./fit-columns": {
       "types": "./dist/types/adapttable-spartan-fit-columns.d.ts",
       "default": "./dist/fesm2022/adapttable-spartan-fit-columns.mjs"
+    },
+    "./selection": {
+      "types": "./dist/types/adapttable-spartan-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-spartan-selection.mjs"
     },
     "./fullscreen": {
       "types": "./dist/types/adapttable-spartan-fullscreen.d.ts",

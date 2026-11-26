@@ -17,6 +17,7 @@ import { TableAssistant, tableAssistant } from "./assistant";
 import { bulkActions } from "./bulk-actions";
 import { cellNavigation } from "./cell-navigation";
 import { collapsibleColumnGroups } from "./column-groups";
+import { columnLayoutFamily } from "./column-layout";
 import { columnMenu } from "./column-menu";
 import { columnSelectionCheckbox } from "./column-selection";
 import { commandPalette } from "./command-palette";
@@ -54,10 +55,12 @@ import {
   dirtyIndicators,
   editHistory,
   editing,
+  editingFamily,
   rowEditing,
   undoRedoButtons,
 } from "./editing";
 import { exportCsv } from "./export";
+import { filteringFamily } from "./filtering";
 import { filters, filterTypes } from "./filters";
 import { findInTable } from "./find-in-table";
 import { fullscreen } from "./fullscreen";
@@ -71,6 +74,7 @@ import { nestedTable, rowDetail } from "./row-detail";
 import { rowPinning } from "./row-pinning";
 import { rowReorder } from "./row-reorder";
 import { savedViews } from "./saved-views";
+import { selection } from "./selection";
 import { sidePanel } from "./side-panel";
 import { selectionStats, statusBar } from "./status-bar";
 import { renderChakra } from "./test-utils";
@@ -135,6 +139,7 @@ export const kit: ReactKitUnderTest = reactKitUnderTest({
     rowPinning,
     rowReorder,
     savedViews,
+    selection,
     selectionStats,
     sidePanel,
     statusBar,
@@ -162,6 +167,9 @@ export const kit: ReactKitUnderTest = reactKitUnderTest({
     UndoRedoButtons,
     agentApproval,
     standardFeatures,
+    editingFamily,
+    filteringFamily,
+    columnLayoutFamily,
     tableAssistant,
   },
 });

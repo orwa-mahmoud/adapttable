@@ -65,6 +65,10 @@
       "types": "./dist/types/adapttable-ngx-bootstrap-column-menu.d.ts",
       "default": "./dist/fesm2022/adapttable-ngx-bootstrap-column-menu.mjs"
     },
+    "./column-layout": {
+      "types": "./dist/types/adapttable-ngx-bootstrap-column-layout.d.ts",
+      "default": "./dist/fesm2022/adapttable-ngx-bootstrap-column-layout.mjs"
+    },
     "./column-selection": {
       "types": "./dist/types/adapttable-ngx-bootstrap-column-selection.d.ts",
       "default": "./dist/fesm2022/adapttable-ngx-bootstrap-column-selection.mjs"
@@ -93,10 +97,6 @@
       "types": "./dist/types/adapttable-ngx-bootstrap-extra-rows.d.ts",
       "default": "./dist/fesm2022/adapttable-ngx-bootstrap-extra-rows.mjs"
     },
-    "./features": {
-      "types": "./dist/types/adapttable-ngx-bootstrap-features.d.ts",
-      "default": "./dist/fesm2022/adapttable-ngx-bootstrap-features.mjs"
-    },
     "./find-in-table": {
       "types": "./dist/types/adapttable-ngx-bootstrap-find-in-table.d.ts",
       "default": "./dist/fesm2022/adapttable-ngx-bootstrap-find-in-table.mjs"
@@ -105,9 +105,17 @@
       "types": "./dist/types/adapttable-ngx-bootstrap-filters.d.ts",
       "default": "./dist/fesm2022/adapttable-ngx-bootstrap-filters.mjs"
     },
+    "./filtering": {
+      "types": "./dist/types/adapttable-ngx-bootstrap-filtering.d.ts",
+      "default": "./dist/fesm2022/adapttable-ngx-bootstrap-filtering.mjs"
+    },
     "./fit-columns": {
       "types": "./dist/types/adapttable-ngx-bootstrap-fit-columns.d.ts",
       "default": "./dist/fesm2022/adapttable-ngx-bootstrap-fit-columns.mjs"
+    },
+    "./selection": {
+      "types": "./dist/types/adapttable-ngx-bootstrap-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-ngx-bootstrap-selection.mjs"
     },
     "./fullscreen": {
       "types": "./dist/types/adapttable-ngx-bootstrap-fullscreen.d.ts",

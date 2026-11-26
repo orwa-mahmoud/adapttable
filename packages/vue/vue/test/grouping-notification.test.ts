@@ -131,17 +131,14 @@ it("matches ordinary Vue grouping notification semantics when the source rejects
   expect(f.state().groupBy).toEqual(["team"]);
 });
 
-it("retires old feature callbacks and reads the current notification owner", async () => {
+it("keeps the panel across a callback change and notifies only the current callback", async () => {
   const f = fixture();
-  const old = f.state();
+  const kept = f.state();
   const next = vi.fn<(keys: readonly string[]) => void>();
   f.features.value = [panel(next)];
   await nextTick();
-  old.add("team");
-  expect(f.write).not.toHaveBeenCalled();
-  expect(f.notify).not.toHaveBeenCalled();
-  expect(next).not.toHaveBeenCalled();
-  f.state().add("team");
+  kept.add("team");
+  expect(f.write).toHaveBeenCalledExactlyOnceWith("team");
   expect(next).toHaveBeenCalledExactlyOnceWith(["team"]);
   expect(f.notify).not.toHaveBeenCalled();
   const retained = f.state();

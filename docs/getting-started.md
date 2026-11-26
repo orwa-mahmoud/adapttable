@@ -18,7 +18,7 @@ and use it, or open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 64–72 kB min+gzip (measured 2026-11-18 from
+A plain adapter `DataTable` is 63–71 KiB min+gzip (measured 2026-11-25 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
@@ -287,7 +287,7 @@ The source for each lives in
 - [Filtering](./filtering.md) — every filter type, options sources, chips,
   popover vs drawer.
 - [Data tiers](./data-tiers.md) — server data without a query library
-  (`onQueryChange`), or full control via `source` and TanStack Query.
+  (`useServerData`), or full control via `source` and TanStack Query.
 - [Demo](https://adapttable.orwamahmoud.com/react/demo/) — every adapter,
   live.
 

@@ -6,7 +6,10 @@ import {
   slotRender,
   type StaticTableFeature,
 } from "@adapttable/react/adapter";
-import { columnMenu as core } from "@adapttable/react/features";
+import {
+  columnMenu as core,
+  type ColumnMenuOptions,
+} from "@adapttable/react/features";
 
 import { ColumnHeaderRename } from "./components/ColumnHeaderRename";
 import { ColumnMenu } from "./components/ColumnMenu";
@@ -23,8 +26,8 @@ function ColumnMenuSlot(props: Readonly<ColumnMenuSlotProps<unknown>>) {
  *
  * @public
  */
-export function columnMenu(): StaticTableFeature {
-  return extendFeature(core(), [
+export function columnMenu(options?: ColumnMenuOptions): StaticTableFeature {
+  return extendFeature(core(options), [
     slotRender(COLUMN_MENU, (props) => <ColumnMenuSlot {...props} />),
     slotRender(COLUMN_HEADER_RENAME, (props) => (
       <ColumnHeaderRename {...props} />

@@ -50,6 +50,7 @@ import {
   type CoreRowFeatureRegistrar,
   coreRowPinning,
   coreSavedViews,
+  coreSelection,
   coreSelectionStats,
   coreSidePanel,
   coreStatusBar,
@@ -109,13 +110,17 @@ describe("coreFeatures — flag features", () => {
     [
       "columnSelectionCheckbox",
       "column-selection-checkbox",
-      { columnSelectionCheckbox: true },
+      { selectable: true, columnSelectionCheckbox: true },
     ],
     ["densityChooser", "density-chooser", { densityChooser: true }],
     ["dirtyIndicators", "dirty-indicators", { dirtyIndicators: true }],
     ["findInTable", "find-in-table", { findInTable: true }],
     ["fullscreen", "fullscreen", { fullscreen: true }],
-    ["selectionStats", "selection-stats", { selectionStats: true }],
+    [
+      "selectionStats",
+      "selection-stats",
+      { selectable: true, selectionStats: true },
+    ],
   ] as const)("%s has id %s and writes its flag", (name, id, expected) => {
     const made = flagFactories[name]();
     expect(made.id).toBe(id);
@@ -125,6 +130,28 @@ describe("coreFeatures — flag features", () => {
 });
 
 describe("coreFeatures — configured features", () => {
+  it("selection carries the host's ids and stays the table's own when they are omitted", () => {
+    const getId = (row: { id: string }) => row.id;
+    const onSelectionChange = vi.fn();
+    expect(patch(coreSelection())).toEqual({ selectable: true });
+    expect(
+      patch(
+        coreSelection({
+          getId,
+          selectedIds: ["a"],
+          defaultSelectedIds: ["b"],
+          onSelectionChange,
+        })
+      )
+    ).toEqual({
+      selectable: true,
+      selectionGetId: getId,
+      selectedIds: ["a"],
+      defaultSelectedIds: ["b"],
+      onSelectionChange,
+    });
+  });
+
   it("feature writes an ad-hoc patch, empty by default", () => {
     const made = coreFeature("audit", { statusBar: true });
     expect(made.id).toBe("audit");
@@ -200,7 +227,7 @@ describe("coreFeatures — configured features", () => {
     const actions = [{ key: "archive", label: "Archive", onClick: vi.fn() }];
     const made = coreBulkActions(actions);
     expect(made.id).toBe("bulk-actions");
-    expect(patch(made)).toEqual({ bulkActions: actions });
+    expect(patch(made)).toEqual({ selectable: true, bulkActions: actions });
   });
 
   it("savedViews writes its options", () => {

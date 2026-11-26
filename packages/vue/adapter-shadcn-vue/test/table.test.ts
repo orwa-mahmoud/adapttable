@@ -17,7 +17,7 @@ import { renderToString } from "vue/server-renderer";
 
 import { DataTable, type DataTableProps } from "../src";
 import { densityChooser } from "../src/density";
-
+import { selection } from "../src/selection";
 interface Row {
   id: string;
   name: string;
@@ -68,8 +68,8 @@ describe("shadcn-vue table surface", () => {
       h(
         DataTable<Row>,
         {
+          features: [selection()],
           ...base,
-          selectable: true,
           id: "people",
           classNames: {
             root: "host-root",
@@ -144,8 +144,12 @@ describe("shadcn-vue table surface", () => {
     const root = mount(() =>
       h(DataTable<Row>, {
         ...base,
-        selectedIds: selected.value,
-        "onUpdate:selectedIds": update,
+        features: [
+          selection({
+            selectedIds: selected,
+            onSelectionChange: update,
+          }),
+        ],
       })
     );
     const checkbox = node<HTMLButtonElement>(root, `tbody ${part("checkbox")}`);
@@ -211,10 +215,10 @@ describe("shadcn-vue table surface", () => {
   it("renders real RTL cards, semantic field pairs, selections and sort control", async () => {
     const root = mount(() =>
       h(DataTable<Row>, {
+        features: [selection()],
         ...base,
         forceMobile: true,
         dir: "rtl",
-        selectable: true,
       })
     );
     await nextTick();

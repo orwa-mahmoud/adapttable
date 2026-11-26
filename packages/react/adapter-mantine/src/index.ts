@@ -189,7 +189,4 @@ export {
   type ExportCsvOptions,
   FILTER_TYPES,
 } from "@adapttable/react/adapter";
-export {
-  type DataModeProps,
-  type TableQueryHandler,
-} from "@adapttable/react/adapter";
+export { type TableQueryHandler } from "@adapttable/react/adapter";

@@ -51,7 +51,11 @@ export default defineConfig({
 });
 `;
 
-const TEST = `import { type ColumnDef, DataTable } from "@adapttable/unstyled";
+const TEST = `import {
+  type ColumnDef,
+  DataTable,
+  useServerData,
+} from "@adapttable/unstyled";
 import {
   cleanup,
   fireEvent,
@@ -144,15 +148,18 @@ describe(\`AdaptTable on React \${version}\`, () => {
       }
     );
 
-    render(
-      <DataTable
-        data={ROWS.slice(0, 25)}
-        total={30}
-        onQueryChange={onQueryChange}
-        columns={columns}
-        rowKey={(r) => r.id}
-      />
-    );
+    function ServerTable() {
+      const source = useServerData<Row>({
+        rows: ROWS.slice(0, 25),
+        total: 30,
+        onQueryChange,
+      });
+      return (
+        <DataTable source={source} columns={columns} rowKey={(r) => r.id} />
+      );
+    }
+
+    render(<ServerTable />);
 
     // The mount fire delivers the initial consolidated query.
     await waitFor(() => {

@@ -6,12 +6,12 @@ import type {
 } from "@adapttable/ai";
 import {
   AGENT_VIEW_STATE,
-  applyTableFeatures,
   FeatureProviders,
   type TableRuntimeView,
   useFeatureState,
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
+import { applyTableFeatures } from "@adapttable/react/features";
 import type { ColumnDef } from "@adapttable/unstyled";
 import { act, render, waitFor } from "@testing-library/react";
 import { type ReactNode, useLayoutEffect, useState } from "react";
@@ -61,19 +61,23 @@ function Publisher({
   view?: TableRuntimeView;
   neutral?: NeutralTable;
 }) {
-  usePublishTableRuntime(view?.visibleRows ?? view?.rows ?? [], undefined, {
-    ...view,
-    rows: view?.rows ?? [],
-    visibleRows: view?.visibleRows ?? view?.rows,
-    neutralTable: view?.neutralTable ?? neutral,
-    getRowId: view?.getRowId ?? ((row) => (row as { id: string }).id),
-    rowLabel:
-      view?.rowLabel ??
-      ((row) =>
-        String(
-          (row as { id: string; name?: string }).name ??
-            (row as { id: string }).id
-        )),
+  usePublishTableRuntime({
+    rows: () => view?.visibleRows ?? view?.rows ?? [],
+    labels: () => undefined,
+    view: () => ({
+      ...view,
+      rows: view?.rows ?? [],
+      visibleRows: view?.visibleRows ?? view?.rows,
+      neutralTable: view?.neutralTable ?? neutral,
+      getRowId: view?.getRowId ?? ((row) => (row as { id: string }).id),
+      rowLabel:
+        view?.rowLabel ??
+        ((row) =>
+          String(
+            (row as { id: string; name?: string }).name ??
+              (row as { id: string }).id
+          )),
+    }),
   });
   return null;
 }

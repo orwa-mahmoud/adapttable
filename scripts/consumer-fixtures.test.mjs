@@ -54,7 +54,7 @@ describe("consumer fixtures", () => {
     }
   });
 
-  it("never lets a plain adapter ceiling exceed 80 KB or miss the 35% cut", () => {
+  it("never lets a plain adapter ceiling exceed 80 KiB or miss the 35% cut", () => {
     for (const { kit } of ADAPTERS) {
       const ceiling = adapterAcceptanceKB(kit);
       assert.ok(
@@ -73,7 +73,7 @@ describe("consumer fixtures", () => {
     assert.ok(planted.absent.includes("useTableEditHistory"));
     assert.match(
       planted.code,
-      /export \{ useTableEditHistory, asBatchGesture \} from "@adapttable\/react";/
+      /export \{ useTableEditHistory \} from "@adapttable\/react\/adapter";/
     );
     assert.doesNotMatch(planted.code, /dist|packages\//);
   });
@@ -144,16 +144,15 @@ describe("consumer fixtures", () => {
     assert.ok(mui.absent.includes("defaultLabels"));
   });
 
-  it("measures named primitives against engines the full graph really holds", () => {
-    const every = FIXTURES.find((f) => f.name === "core · every export");
+  it("measures named primitives against engines a core graph really holds", () => {
+    const live = new Set(
+      FIXTURES.filter((f) => f.kind === "core").flatMap((f) => f.present ?? [])
+    );
     for (const name of ["core · one primitive", "core · binding helper"]) {
       const primitive = FIXTURES.find((f) => f.name === name);
       assert.ok(primitive.absent.length >= 5, name);
       for (const marker of primitive.absent) {
-        assert.ok(
-          every.present.includes(marker),
-          `${marker} is not proven live`
-        );
+        assert.ok(live.has(marker), `${marker} is not proven live`);
       }
     }
     const typeOnly = FIXTURES.find((f) => f.name === "core · type only");

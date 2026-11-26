@@ -4,9 +4,6 @@
  * {@link resolveRelativeRange} is the only place a token becomes a window.
  */
 
-const DAY_MS = 86_400_000;
-const END_OF_DAY_MS = DAY_MS - 1;
-
 /**
  * Named windows that need no extra number.
  *
@@ -37,7 +34,7 @@ export type RelativeDateToken =
 export interface RelativeDateRange {
   /** Start of the range, inclusive, in epoch milliseconds. */
   startMs: number;
-  /** End of the range, exclusive, in epoch milliseconds. */
+  /** End of the range, inclusive: its last millisecond, in epoch milliseconds. */
   endMs: number;
 }
 
@@ -47,8 +44,21 @@ function startOfDay(now: Date): Date {
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
+/**
+ * The last millisecond of a local calendar day: one before the next day's
+ * local midnight, so a 23- or 25-hour day on a daylight-saving change keeps
+ * its true length.
+ */
+export function localDayEndMs(
+  year: number,
+  monthIndex: number,
+  day: number
+): number {
+  return new Date(year, monthIndex, day + 1).getTime() - 1;
+}
+
 function endOfDay(day: Date): number {
-  return day.getTime() + END_OF_DAY_MS;
+  return localDayEndMs(day.getFullYear(), day.getMonth(), day.getDate());
 }
 
 function addDays(day: Date, days: number): Date {

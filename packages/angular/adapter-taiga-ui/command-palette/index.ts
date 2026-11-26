@@ -6,6 +6,7 @@ import {
 import {
   COMMAND_PALETTE_LIVE,
   TOOLBAR_EXTRAS,
+  withCommandPaletteView,
 } from "@adapttable/angular/adapter";
 import {
   commandPalette as bindingCommandPalette,
@@ -37,7 +38,7 @@ export function commandPalette(
   options: boolean | CommandPaletteOptions = true
 ): AdaptTableFeature {
   const config = typeof options === "object" ? options : undefined;
-  return extendFeature(bindingCommandPalette(options), [
+  return extendFeature(withCommandPaletteView(bindingCommandPalette(options)), [
     slotRender(COMMAND_PALETTE_LIVE, () => AdaptCommandPaletteLive),
     ...(config?.button === true
       ? [

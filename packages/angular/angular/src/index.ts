@@ -129,6 +129,7 @@ export {
   type RowPinningImplementation,
   type RowReorderImplementation,
   type TreeImplementation,
+  type VirtualizeImplementation,
 } from "./featureImplementations";
 export {
   createFeatureResources,
@@ -204,6 +205,25 @@ export {
   injectFullscreen,
 } from "./layout/toolbar";
 export {
+  COLUMN_MENU_TOOLBAR_STATE,
+  DENSITY_TOOLBAR_STATE,
+  type DensityToolbar,
+  EXPORT_TOOLBAR_STATE,
+  type ExportToolbar,
+  FULLSCREEN_TOOLBAR_STATE,
+  type FullscreenToolbar,
+  injectDensityToolbar,
+  injectExportToolbar,
+  injectFullscreenToolbar,
+  injectPrintToolbar,
+  injectUndoRedoToolbar,
+  PRINT_TOOLBAR_STATE,
+  type PrintToolbar,
+  SAVED_VIEWS_TOOLBAR_STATE,
+  UNDO_REDO_TOOLBAR_STATE,
+  type UndoRedoToolbar,
+} from "./layout/toolbarState";
+export {
   type ChangedCellFlash,
   type ChangedCellFlashOptions,
   injectChangedCellFlash,
@@ -276,6 +296,7 @@ export {
   type MaybeSignalOptional,
   readMaybe,
 } from "./store";
+export { TABLE_STORE } from "./tableStore";
 export {
   injectLazyChildren,
   type LazyChildrenInjectOptions,
@@ -403,17 +424,22 @@ export {
   type QueryAggregate,
   type QuerySupport,
   type RangeOp,
+  rekeyRow,
   type RelativePreset,
   type RowAction,
   type RowActionsLayout,
   type RowEditingState,
   type RowHeight,
+  RowIdConflictError,
   type RowReorderHandler,
   type RowReorderOptions,
   type RowStyle,
   type SavedView,
   type SavedViewsControllerOptions,
   type SelectionStats,
+  type ServerFilterKeys,
+  serverFilterKeys,
+  type ServerFilterKeysInput,
   type Shortcut,
   type SortDirection,
   type TableDensity,

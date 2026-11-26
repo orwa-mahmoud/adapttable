@@ -11,7 +11,7 @@
  * directive, a signal graph — but the order and the data passed between
  * stages are the same everywhere, so they live here.
  */
-import { computedAggregateKeys } from "../aggregate/aggregationModel";
+import { computedAggregateKeys } from "../aggregate/computedAggregateKeys";
 import {
   applyColumnOrder,
   type ColumnLayoutContribution,
@@ -55,49 +55,6 @@ import type { TableSource } from "../source/TableSource";
 import type { TreeContribution } from "../tree/treeBindingState";
 import type { BulkAction, RowAction, TableLabels } from "../types";
 import { sourceWindowStart } from "./chromeModel";
-
-/**
- * The chrome-extra slots, outermost first.
- *
- * Each may replace fields the next reads — the layout decides which columns
- * exist before grouping buckets them, and grouping decides the row set before
- * editing addresses a row — so the sequence is the contract.
- *
- * @public
- */
-export const CHROME_EXTRA_SLOT_ORDER = [
-  "column-layout-live",
-  "filter-chips-live",
-  "grouping-live",
-  "tree-live",
-  "selection-live",
-  "row-actions-live",
-  "pinning-live",
-  "expansion-live",
-  "editing-live",
-] as const;
-
-/**
- * The live stages after history, in the order they run. Each reads what
- * the ones before it produced: cell navigation needs find's walk, export
- * and the selection figures need the selected range.
- *
- * @public
- */
-export const SHELL_LIVE_STAGE_ORDER = [
-  "find-live",
-  "cell-nav-live",
-  "export-live",
-  "fullscreen-live",
-  "selection-stats-live",
-] as const;
-
-/**
- * One of {@link SHELL_LIVE_STAGE_ORDER}.
- *
- * @public
- */
-export type ShellLiveStageId = (typeof SHELL_LIVE_STAGE_ORDER)[number];
 
 /** A column as the runtime projection reads it. */
 export type RuntimeColumn<TRow> = ColumnMetadata<TRow>;
@@ -286,6 +243,22 @@ export function livePinning<TRow>(
   };
 }
 
+/** The grouping a runtime reads: the host's, or the composed feature's. */
+function runtimeGrouping<TRow>(chrome: RuntimeChromeInput<TRow>) {
+  return projectGroupingContribution({
+    host: chrome.grouping,
+    feature: chrome.featureGrouping,
+  });
+}
+
+/** The rows in rendered order: groups and tree applied, nothing else read. */
+function runtimeVisibleRows<TRow>(
+  chrome: RuntimeChromeInput<TRow>,
+  grouping = runtimeGrouping(chrome)
+): readonly TRow[] {
+  return renderedRowsOf({ source: chrome.source, grouping, tree: chrome.tree });
+}
+
 /**
  * Project the finished chrome into the view a feature above the table reads.
  *
@@ -303,21 +276,14 @@ export function tableRuntimeView<TRow>(
   }
 ): TableRuntimeView<TRow> {
   const source = chrome.source;
-  const grouping = projectGroupingContribution({
-    host: chrome.grouping,
-    feature: chrome.featureGrouping,
-  });
+  const grouping = runtimeGrouping(chrome);
   const filtering = filteringContributionOf({
     defs: chrome.filterDefs,
     registry: chrome.filterRegistry,
   });
   return {
     rows: source.rows,
-    visibleRows: renderedRowsOf({
-      source: chrome.source,
-      grouping,
-      tree: chrome.tree,
-    }),
+    visibleRows: runtimeVisibleRows(chrome, grouping),
     getRowId: chrome.getRowId,
     rowLabel: (row: TRow) => readableRowLabel(chrome, row),
     sortBy: source.sortBy,
@@ -388,61 +354,210 @@ export function tableRuntimeView<TRow>(
 }
 
 /**
+ * What the features published for the runtime view apart from the chrome.
+ *
+ * @public
+ */
+export type RuntimeChannels<TRow> = Partial<RuntimeChromeInput<TRow>>;
+
+/** Whether two channel sets hold the same values. */
+function sameChannels<TRow>(
+  left: RuntimeChannels<TRow>,
+  right: RuntimeChannels<TRow>
+): boolean {
+  const keys = Object.keys(left) as (keyof RuntimeChannels<TRow>)[];
+  return (
+    keys.length === Object.keys(right).length &&
+    keys.every((key) => left[key] === right[key])
+  );
+}
+
+/**
+ * The host's own row and bulk actions, as composed.
+ *
+ * @public
+ */
+export interface RuntimeActions<TRow> {
+  readonly rowActions?: readonly RowAction<TRow>[];
+  readonly bulkActions?: readonly BulkAction[];
+}
+
+/**
+ * One engine's latest render: the chrome as staged, and the view and rendered
+ * rows built from it on first read, kept until the next render is staged.
+ */
+class RuntimeFrame<TRow> {
+  #chrome: RuntimeChromeInput<TRow> | undefined;
+  #channels: RuntimeChannels<TRow> = {};
+  #input: RuntimeChromeInput<TRow> | undefined;
+  #actions: RuntimeActions<TRow> = {};
+  #view: TableRuntimeView<TRow> | undefined;
+  #rows: readonly TRow[] | undefined;
+  readonly neutral: NeutralTable<TRow> | undefined;
+
+  constructor(engine: TableEngine<TRow> | undefined) {
+    this.neutral = engine
+      ? createNeutralTable(engine, engine.tableId, {
+          visibleRows: () => this.visibleRows(),
+          operations: () => this.#operations(),
+        })
+      : undefined;
+  }
+
+  stage(
+    chrome: RuntimeChromeInput<TRow>,
+    actions: RuntimeActions<TRow>,
+    channels: RuntimeChannels<TRow>
+  ): void {
+    if (
+      chrome === this.#chrome &&
+      sameChannels(channels, this.#channels) &&
+      actions.rowActions === this.#actions.rowActions &&
+      actions.bulkActions === this.#actions.bulkActions
+    ) {
+      return;
+    }
+    this.#chrome = chrome;
+    this.#channels = channels;
+    this.#input = undefined;
+    this.#actions = actions;
+    this.#view = undefined;
+    this.#rows = undefined;
+  }
+
+  /** The chrome with the channels laid over it, built on first read. */
+  #inputOf(): RuntimeChromeInput<TRow> | undefined {
+    const chrome = this.#chrome;
+    if (chrome === undefined) return undefined;
+    if (Object.keys(this.#channels).length === 0) return chrome;
+    this.#input ??= { ...chrome, ...this.#channels };
+    return this.#input;
+  }
+
+  view(): TableRuntimeView<TRow> | undefined {
+    const input = this.#inputOf();
+    if (input === undefined) return undefined;
+    this.#view ??= {
+      ...tableRuntimeView(input, this.#actions),
+      neutralTable: this.neutral,
+    };
+    return this.#view;
+  }
+
+  visibleRows(): readonly TRow[] {
+    const chrome = this.#inputOf();
+    if (chrome === undefined) return [];
+    this.#rows ??= this.#view
+      ? (this.#view.visibleRows ?? this.#view.rows)
+      : runtimeVisibleRows(chrome);
+    return this.#rows;
+  }
+
+  #operations(): Readonly<Record<string, boolean>> {
+    const view = this.view();
+    if (!view) return {};
+    const overlay = this.#chrome
+      ? readShellOverlay<TRow>(this.#chrome)
+      : undefined;
+    return deriveRuntimeOperations(
+      overlay ? withShellOperations(view, overlay) : view
+    );
+  }
+}
+
+/**
  * Keeps one table's runtime view and its neutral table across renders.
  *
- * The neutral table is created once, from the first engine the source
- * publishes, and keeps whatever binding it was handed — so it is handed a
- * stable one that reads the LATEST published view on every call. Handing it
- * the first view would freeze it, and a capability the host later turns off
- * (or on) would never reach the agent.
+ * A render is staged, not projected: the full view is built the first time
+ * a reader asks for it and kept until the next render, so a table nobody
+ * reads never builds it, and rendered rows are read without it.
+ *
+ * The neutral table is created from the engine the source publishes and
+ * reads that engine's LATEST staged render on every call: a capability the
+ * host later turns off (or on) still reaches the agent. When the source's
+ * engine is replaced, a new neutral table is created for the new one and the
+ * old one keeps reading its own last render.
  *
  * @public
  */
 export class TableRuntimePublisher<TRow> {
-  #view: TableRuntimeView<TRow> | undefined;
-  #chrome: object | undefined;
-  #visibleRows: readonly TRow[] = [];
-  #neutral: NeutralTable<TRow> | undefined;
-  readonly #binding = {
-    visibleRows: (): readonly TRow[] => this.#visibleRows,
-    operations: (): Readonly<Record<string, boolean>> => {
-      const view = this.#view;
-      if (!view) return {};
-      const overlay = this.#chrome
-        ? readShellOverlay<TRow>(this.#chrome)
-        : undefined;
-      return deriveRuntimeOperations(
-        overlay ? withShellOperations(view, overlay) : view
-      );
-    },
-  };
+  #engine: TableEngine<TRow> | undefined;
+  #frame = new RuntimeFrame<TRow>(undefined);
 
   /**
-   * Publish this render's chrome.
+   * Stage this render's chrome. Nothing is projected until it is read.
    *
    * @param chrome - The chrome after every extra ran.
-   * @param options - The host's own row and bulk actions.
-   * @returns The view to publish, with the neutral table when an engine exists.
+   * @param actions - The host's own row and bulk actions.
+   * @param channels - What the features published apart from the chrome:
+   *   editing, the filter definitions. The chrome stays the owner the shell's
+   *   operations are read by.
    */
-  update(
+  stage(
     chrome: RuntimeChromeInput<TRow> & {
       readonly source: { readonly tableEngine?: TableEngine<TRow> };
     },
-    options: {
-      readonly rowActions?: readonly RowAction<TRow>[];
-      readonly bulkActions?: readonly BulkAction[];
-    }
-  ): TableRuntimeView<TRow> {
-    const view = tableRuntimeView(chrome, options);
-    this.#chrome = chrome;
-    this.#view = view;
-    this.#visibleRows = view.visibleRows ?? view.rows;
+    actions: RuntimeActions<TRow>,
+    channels: RuntimeChannels<TRow> = {}
+  ): void {
     const engine = chrome.source.tableEngine;
-    if (engine && !this.#neutral) {
-      this.#neutral = createNeutralTable(engine, engine.tableId, this.#binding);
+    // The neutral table belongs to the engine it reads. A replaced source
+    // (another engine, or a server interval with none) starts a new frame
+    // and leaves the old reader on its last render; the source owns its
+    // engine, so it is never disposed here.
+    if (engine !== this.#engine) {
+      this.#engine = engine;
+      this.#frame = new RuntimeFrame(engine);
     }
-    return { ...view, neutralTable: engine ? this.#neutral : undefined };
+    this.#frame.stage(chrome, actions, channels);
   }
+
+  /**
+   * The latest staged render as the view a feature above the table reads,
+   * with the neutral table when an engine exists; built on first read.
+   *
+   * @returns The view, or `undefined` before the first render.
+   */
+  view(): TableRuntimeView<TRow> | undefined {
+    return this.#frame.view();
+  }
+
+  /**
+   * The latest staged render's rows in rendered order, without the view.
+   *
+   * @returns The rendered rows.
+   */
+  visibleRows(): readonly TRow[] {
+    return this.#frame.visibleRows();
+  }
+}
+
+/**
+ * How many rows the grid spans: the whole dataset (or the rows loaded so
+ * far, when more than it reports) and any pinned rows. What a table names as
+ * its row count to assistive tech, with or without the keyboard grid.
+ *
+ * @param source - The table's source.
+ * @param pinnedRows - Rows pinned above and below the body.
+ * @returns The row count.
+ *
+ * @public
+ */
+export function gridRowCount<TRow>(
+  source: Pick<
+    TableSource<TRow>,
+    "rows" | "total" | "paginationMode" | "page" | "limit"
+  >,
+  pinnedRows?: {
+    readonly top?: readonly TRow[];
+    readonly bottom?: readonly TRow[];
+  }
+): number {
+  return (
+    Math.max(source.total, sourceWindowStart(source) + source.rows.length) +
+    (pinnedRows?.top?.length ?? 0) +
+    (pinnedRows?.bottom?.length ?? 0)
+  );
 }
 
 /**
@@ -484,10 +599,7 @@ export function cellNavigationInput<TRow, TColumn>(input: {
   ];
   return {
     headerCheckbox: input.headerCheckbox,
-    rowCount:
-      Math.max(source.total, windowStart + source.rows.length) +
-      (pinnedRows?.top?.length ?? 0) +
-      (pinnedRows?.bottom?.length ?? 0),
+    rowCount: gridRowCount(source, pinnedRows),
     columns: input.columns,
     columnsWindowed: input.columnsWindowed,
     rows,
@@ -557,6 +669,26 @@ export function viewControlsToolbarProps<TDensity>(
 }
 
 /**
+ * What undo and redo buttons draw from.
+ *
+ * @public
+ */
+export interface UndoRedoToolbarProps {
+  /** Undo the last edit. */
+  onUndo?: () => void;
+  /** Redo the last undone edit. */
+  onRedo?: () => void;
+  /** Whether undo is available. */
+  canUndo?: boolean;
+  /** Whether redo is available. */
+  canRedo?: boolean;
+  /** Accessible undo label. */
+  undoLabel?: string;
+  /** Accessible redo label. */
+  redoLabel?: string;
+}
+
+/**
  * The undo / redo half of a toolbar's props, or nothing: the host asked for
  * the buttons AND a history is armed for them to drive.
  *
@@ -572,14 +704,7 @@ export function undoRedoToolbarProps(
     readonly redo: () => unknown;
   },
   labels: Pick<TableLabels, "undoEdit" | "redoEdit">
-): {
-  onUndo?: () => void;
-  onRedo?: () => void;
-  canUndo?: boolean;
-  canRedo?: boolean;
-  undoLabel?: string;
-  redoLabel?: string;
-} {
+): UndoRedoToolbarProps {
   if (wanted !== true || !history.enabled) return {};
   return {
     onUndo: history.undo,
@@ -614,8 +739,8 @@ export interface PipelineShell {
 
 /**
  * Lay the live stages' results onto a finished shell: grid focus into the
- * table props, and undo / redo, view controls and the export button into
- * the toolbar props.
+ * table props, and find, fullscreen and the selection figures onto the
+ * shell. The controls a feature adds to the toolbar read its own state.
  *
  * @public
  */
@@ -624,43 +749,18 @@ export function finishShellLive<
   TLive extends {
     readonly find: FindContribution;
     readonly gridFocus: unknown;
-    readonly exportHandler: object;
     readonly fullscreen: FullscreenContribution;
     readonly stats: unknown;
   },
-  TDensity,
->(
-  shell: TShell & {
-    readonly editHistory: Parameters<typeof undoRedoToolbarProps>[1];
-    readonly labels: Pick<TableLabels, "undoEdit" | "redoEdit">;
-    readonly chromeProps: {
-      readonly density: TDensity;
-      readonly onDensityChange: (next: TDensity) => void;
-      readonly fullscreen?: boolean;
-      readonly undoRedoButtons?: boolean;
-    };
-  },
-  live: TLive
-): TShell {
-  const { find, gridFocus, exportHandler, fullscreen, stats } = live;
+>(shell: TShell, live: TLive): TShell {
+  const { find, gridFocus, fullscreen, stats } = live;
   return {
     ...shell,
     gridFocus,
     find,
-    editHistory: shell.editHistory,
     fullscreen,
     selectionStats: stats,
     tableProps: { ...shell.tableProps, gridFocus },
-    toolbarProps: {
-      ...shell.toolbarProps,
-      ...undoRedoToolbarProps(
-        shell.chromeProps.undoRedoButtons,
-        shell.editHistory,
-        shell.labels
-      ),
-      ...viewControlsToolbarProps(shell.chromeProps, fullscreen),
-      ...exportHandler,
-    },
   };
 }
 
@@ -683,8 +783,10 @@ export interface OverlayChrome {
   readonly source: unknown;
   readonly autoSizeColumns?: unknown;
   readonly autoSizeColumn?: unknown;
-  readonly activeFilterCount: number;
-  readonly rowMutations: { readonly canAdd: boolean; readonly addRow: unknown };
+  readonly rowMutations?: {
+    readonly canAdd: boolean;
+    readonly addRow: unknown;
+  };
   readonly editingRows: unknown;
   readonly tree?: TreeContribution<unknown>;
   readonly grouping?: GroupingContribution<unknown>;
@@ -693,7 +795,7 @@ export interface OverlayChrome {
   readonly rowPinning?: RowPinningContribution;
   readonly rowActions?: unknown;
   readonly columnGroups: unknown;
-  readonly hasRowActions: boolean;
+  readonly hasRowActions?: boolean;
 }
 
 /**
@@ -702,7 +804,9 @@ export interface OverlayChrome {
  * The shell captured the BASE chrome: its row universe is the page slice,
  * its table has every visible column. The extras may have grouped the rows,
  * armed editing, dropped columns for width — this carries all of that into
- * the table and toolbar props the kit renders from.
+ * the table and toolbar props the kit renders from. `channels` are what the
+ * features published apart from the chrome (editing, grouping); the result
+ * keeps `base` as its chrome.
  *
  * @public
  */
@@ -717,7 +821,12 @@ export function overlayChromeExtras<
       readonly onColumnRename?: unknown;
     };
   },
->(shell: TShell, chrome: OverlayChrome): TShell {
+>(
+  shell: TShell,
+  base: OverlayChrome,
+  channels: Partial<OverlayChrome> = {}
+): TShell {
+  const chrome: OverlayChrome = { ...base, ...channels };
   const dropped = new Set(chrome.droppedColumns);
   const visible = chrome.columnLayout.visibleColumns;
   const columns =
@@ -728,15 +837,14 @@ export function overlayChromeExtras<
   const layout = chrome.columnLayout;
   return {
     ...shell,
-    chrome,
+    chrome: base,
     source: chrome.source,
     table,
     autoSizeColumns: chrome.autoSizeColumns ?? shell.autoSizeColumns,
     autoSizeColumn: chrome.autoSizeColumn ?? shell.autoSizeColumn,
     toolbarProps: {
       ...shell.toolbarProps,
-      activeFilterCount: chrome.activeFilterCount,
-      onAddRow: chrome.rowMutations.canAdd
+      onAddRow: chrome.rowMutations?.canAdd
         ? chrome.rowMutations.addRow
         : undefined,
     },
@@ -771,7 +879,7 @@ export function overlayChromeExtras<
           ? layout.setName
           : undefined,
     },
-    hasRowActions: chrome.hasRowActions,
+    hasRowActions: chrome.hasRowActions ?? false,
   };
 }
 
@@ -815,8 +923,6 @@ export function finishShellBody<
     readonly tableProps: {
       readonly virtualScrollRef: TRef;
       readonly columnWindow: unknown;
-    };
-    readonly chrome: {
       readonly grouping?: { readonly entries: readonly unknown[] };
       readonly tree?: { readonly entries: readonly unknown[] };
     };
@@ -826,7 +932,7 @@ export function finishShellBody<
   body: ShellBodyInput<TRef>,
   composeRefs: (first: TRef, second: TRef) => TRef
 ): TShell {
-  const { grouping, tree } = shell.chrome;
+  const { grouping, tree } = shell.tableProps;
   return {
     ...shell,
     loadMoreRef: body.loadMoreRef,

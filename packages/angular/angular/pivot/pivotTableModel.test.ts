@@ -6,11 +6,11 @@
  */
 import type { CellContext } from "@adapttable/angular";
 import {
-  pivot,
   type PivotConfig,
   type PivotField,
   type PivotRow,
 } from "@adapttable/core";
+import { pivot } from "@adapttable/core/pivot";
 import {
   Component,
   input,

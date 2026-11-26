@@ -6,12 +6,13 @@
  * paint already knows which child to mount — features are static — so SSR
  * and hydration see the same tree.
  */
+import type { EditHistoryState, GroupingPanelState } from "@adapttable/core";
 import { overlayChromeExtras } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
-import { ForcedColorsStyle } from "../a11y/forcedColors";
 import type { TableChrome } from "../chrome/tableChromeContract";
 import type { ComposedTableProps } from "../props";
+import type { DataTableShellChromeProps } from "../shell/shellContract";
 import { TableStoreContext } from "../state/tableStoreContext";
 import {
   type DataTableShellResult,
@@ -20,9 +21,24 @@ import {
 import type { ChromeBodyData } from "../virtual/chromeBodyShared";
 import { usePlainChromeBodyData } from "../virtual/usePlainChromeBodyData";
 import { ChromeExtrasGate } from "./chromeExtrasGate";
+import { rememberFeatureHost } from "./featureHost";
+import { FeatureStateScope, useFeatureState } from "./featureState";
 import { FeatureSlot, useFeatureSlotFilled } from "./providers";
-import { HistoryLiveGate, ShellLiveGate } from "./shellLiveGate";
+import { ShellLiveGate } from "./shellLiveGate";
+import { disabledHistory } from "./shellLiveStubs";
 import { CHROME_BODY, type ChromeBodySlotProps } from "./slotKeys";
+import {
+  COLUMN_SIZING_STATE,
+  EDIT_HISTORY_STATE,
+  EDITING_STATE,
+  GROUPING_PANEL_VIEW_STATE,
+  GROUPING_STATE,
+  ROW_ACTIONS_STATE,
+  ROW_DETAIL_STATE,
+  ROW_PINNING_STATE,
+  TABLE_PROPS_STATE,
+  TREE_STATE,
+} from "./stateKeys";
 
 /**
  * Resolve chrome-body data, then finish the table.
@@ -67,27 +83,26 @@ function PlainChromeBody<TRow>({
   return children(body);
 }
 
-/**
- * The shell snapshots the panel before grouping has computed its cells.
- * The extras overlay is the panel those cells belong on.
- */
+/** The grouping panel the grouping stage published, onto the table's props. */
 function withGroupingPanel<TRow>(
   shell: DataTableShellResult<TRow>,
-  panel: DataTableShellResult<TRow>["chrome"]["groupingPanel"]
+  panel: GroupingPanelState | undefined
 ): DataTableShellResult<TRow> {
-  const props = shell.groupingPanelProps;
-  if (!props || !panel || props.state === panel) return shell;
-  return { ...shell, groupingPanelProps: { ...props, state: panel } };
+  if (!panel) return shell;
+  return {
+    ...shell,
+    tableProps: { ...shell.tableProps, groupingPanel: panel },
+  };
 }
 
 /**
- * Finish a shell with extras, the in-tree chrome-body path, and live
- * interaction hooks.
+ * Finish a shell with the chrome stages, the in-tree chrome-body path, and
+ * the live stages.
  *
  * A mock that already wrote `tableProps.rowEntries` sets
  * `skipChromeBody` so this does not overwrite the injected window.
- * History, extras and find/grid/export still run — those mocks still
- * need real interaction state when the matching feature is composed.
+ * The chrome and live stages still run — those mocks still need real
+ * interaction state when the matching feature is composed.
  *
  * @public
  */
@@ -98,35 +113,82 @@ export function DataTableShellView<TRow>({
   readonly shell: DataTableShellResult<TRow>;
   readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
 }): ReactNode {
+  "use no memo";
   return (
     <TableStoreContext.Provider value={shell.tableStore}>
-      <ForcedColorsStyle />
-      <HistoryLiveGate shell={shell}>
-        {(withHistory) => (
-          <ChromeExtrasGate
-            chrome={withHistory.chrome}
-            props={withHistory.chromeProps}
-          >
-            {(chrome) => {
-              const withExtras = withGroupingPanel(
-                overlayChromeExtras(withHistory, chrome),
-                chrome.groupingPanel
-              );
-              const afterBody = (view: DataTableShellResult<TRow>) => (
-                <ShellLiveGate shell={view}>{children}</ShellLiveGate>
-              );
-              if (shell.skipChromeBody === true) {
-                return afterBody(withExtras);
-              }
-              return (
-                <ChromeBodyGate chrome={chrome} props={withExtras.chromeProps}>
-                  {(body) => afterBody(finishDataTableShell(withExtras, body))}
-                </ChromeBodyGate>
-              );
-            }}
-          </ChromeExtrasGate>
+      <ChromeExtrasGate chrome={shell.chrome} props={shell.chromeProps}>
+        {(chrome, chromeProps) => (
+          <StagedShell shell={shell} chrome={chrome} chromeProps={chromeProps}>
+            {children}
+          </StagedShell>
         )}
-      </HistoryLiveGate>
+      </ChromeExtrasGate>
     </TableStoreContext.Provider>
+  );
+}
+
+/**
+ * The shell after the chrome stages: reads what the stages published and
+ * finishes the body and the live stages from it.
+ */
+function StagedShell<TRow>({
+  shell,
+  chrome,
+  chromeProps,
+  children,
+}: {
+  readonly shell: DataTableShellResult<TRow>;
+  readonly chrome: TableChrome<TRow>;
+  readonly chromeProps: DataTableShellResult<TRow>["chromeProps"];
+  readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
+}): ReactNode {
+  "use no memo";
+  const editing = useFeatureState(EDITING_STATE);
+  const detail = useFeatureState(ROW_DETAIL_STATE);
+  const rowPinning = useFeatureState(ROW_PINNING_STATE);
+  const actions = useFeatureState(ROW_ACTIONS_STATE);
+  const grouping = useFeatureState(GROUPING_STATE);
+  const tree = useFeatureState(TREE_STATE);
+  const sizing = useFeatureState(COLUMN_SIZING_STATE);
+  const editHistory = useFeatureState(EDIT_HISTORY_STATE) as
+    EditHistoryState<TRow> | undefined;
+  // The stages may wrap the commit channels (edit history); the body
+  // and the live stages read the wrapped ones.
+  rememberFeatureHost(chromeProps, shell.featureHost);
+  const staged = {
+    ...shell,
+    chromeProps,
+    editHistory: editHistory ?? disabledHistory(),
+  };
+  const withExtras = withGroupingPanel(
+    overlayChromeExtras(staged, chrome, {
+      editing,
+      detail,
+      rowPinning,
+      grouping,
+      tree,
+      autoSizeColumns: sizing?.autoSizeColumns,
+      autoSizeColumn: sizing?.autoSizeColumn,
+      rowActions: actions?.rowActions,
+      rowMutations: actions?.rowMutations,
+      hasRowActions: actions?.hasRowActions,
+    }),
+    useFeatureState(GROUPING_PANEL_VIEW_STATE)
+  );
+  const afterBody = (view: DataTableShellResult<TRow>) => (
+    <FeatureStateScope
+      stateKey={TABLE_PROPS_STATE}
+      value={view.chromeProps as DataTableShellChromeProps<unknown>}
+    >
+      <ShellLiveGate shell={view}>{children}</ShellLiveGate>
+    </FeatureStateScope>
+  );
+  if (shell.skipChromeBody === true) {
+    return afterBody(withExtras);
+  }
+  return (
+    <ChromeBodyGate chrome={chrome} props={withExtras.chromeProps}>
+      {(body) => afterBody(finishDataTableShell(withExtras, body))}
+    </ChromeBodyGate>
   );
 }

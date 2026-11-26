@@ -96,6 +96,7 @@ import type { ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/angular-material";
 import { filters } from "@adapttable/angular-material/filters";
 import { columnMenu } from "@adapttable/angular-material/column-menu";
+import { selection } from "@adapttable/angular-material/selection";
 
 interface Person {
   id: string;
@@ -112,7 +113,6 @@ interface Person {
     [rowKey]="rowKey"
     [features]="features"
     tableLabel="People"
-    [selectable]="true"
   />`,
 })
 export class PeopleTable {
@@ -127,12 +127,12 @@ export class PeopleTable {
     },
     { key: "team", header: "Team", accessor: (row) => row.team },
   ];
-  readonly features = [filters<Person>(), columnMenu()];
+  readonly features = [selection(), filters<Person>(), columnMenu()];
 }
 ```
 
 Import only needed feature entries, or use `/features` and `/preset` for the
-aggregated factories and `standardPreset()`. Omitting a feature renders no
+aggregated factories and `standardFeatures()`. Omitting a feature renders no
 controls for it. All edits, row operations and assistant actions remain host
 callbacks; the table never owns or mutates the application data.
 
@@ -164,7 +164,7 @@ The kit implements the same applicable inventory as Angular unstyled:
   and example menus using the separately imported AI bindings
 - Spreadsheet formula engine and sparkline integration through the Angular
   binding, SSR and hydration
-- Feature composition through individual subpaths, `/features` and `standardPreset()`
+- Feature composition through individual subpaths, `/features` and `standardFeatures()`
 
 React Server Components are not an Angular integration. No Angular feature is
 silently replaced with a React kit or native-HTML fallback.

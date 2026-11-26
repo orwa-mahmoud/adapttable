@@ -8,7 +8,6 @@ import {
   DENSITY_STATE,
   type HeaderGroupCell,
   slotRender,
-  TOOLBAR_EXTRAS,
 } from "@adapttable/core/binding";
 import {
   cellEditingView,
@@ -24,11 +23,22 @@ import {
   shallowRef,
 } from "vue";
 
+import {
+  UNDO_REDO_CONTROL,
+  type UndoRedoControlProps,
+} from "../src/actions/contracts";
 import { ColumnGroupToggleChrome } from "../src/columns/columnGroupToggle";
-import type {
-  FeatureMountContext,
-  TableFeature,
+import { undoRedoButtons } from "../src/editing";
+import { selection } from "../src/features/headlessFactories";
+import {
+  extendFeature,
+  type FeatureMountContext,
+  type TableFeature,
 } from "../src/features/tableFeature";
+import {
+  TOOLBAR_EXTRAS,
+  type ToolbarEntryProps,
+} from "../src/features/toolbarEntries";
 import {
   COLUMN_RESIZE_MODEL,
   editableCellSlotKey,
@@ -310,8 +320,10 @@ it("renders projected groups, pads, extras and summary rows in desktop/mobile wi
     rowKey: (row) => row.id,
     urlSync: false,
     forceMobile: mobile,
-    selectable: true,
-    features: [{ id: "body", apply: () => ({ bodyModel: projector }) }],
+    features: [
+      selection(),
+      { id: "body", apply: () => ({ bodyModel: projector }) },
+    ],
   }));
   expect(
     current.root.querySelectorAll('[data-adapttable-part="full-width-cell"]')
@@ -332,10 +344,10 @@ it("renders projected groups, pads, extras and summary rows in desktop/mobile wi
 });
 it("uses required adapter group buttons and keeps custom headers out of nested sort buttons", async () => {
   const current = fixture(() => ({
+    features: [selection()],
     data,
     rowKey: (row) => row.id,
     urlSync: false,
-    selectable: true,
     collapsibleColumnGroups: true,
     columns: [
       {
@@ -432,6 +444,7 @@ it("provides real density updates and typed toolbar renders while retaining cont
   const controlled = shallowRef<TableDensity>();
   const changed = vi.fn();
   const featureDensity = shallowRef<TableDensity>("compact");
+  let changeDensity: ToolbarEntryProps["onDensityChange"] | undefined;
   const shell = scope.run(() =>
     useDataTableShell({
       data,
@@ -457,10 +470,10 @@ it("provides real density updates and typed toolbar renders while retaining cont
               },
             }),
           renders: [
-            slotRender(
-              TOOLBAR_EXTRAS,
-              (props) => `${props.density}:${props.classNames?.toolbar ?? ""}`
-            ),
+            slotRender(TOOLBAR_EXTRAS, (entry) => {
+              changeDensity = entry.onDensityChange;
+              return `${entry.density}:${entry.presentation.classNames?.toolbar ?? ""}`;
+            }),
           ],
         },
       ],
@@ -471,7 +484,7 @@ it("provides real density updates and typed toolbar renders while retaining cont
   expect(shell.renderToolbarExtras({ toolbar: "kit" })).toEqual([
     "compact:kit",
   ]);
-  shell.toolbarExtrasProps.value.onDensityChange("comfortable");
+  changeDensity?.("comfortable");
   expect(shell.density.value).toBe("comfortable");
   controlled.value = "compact";
   shell.setDensity("comfortable");
@@ -500,6 +513,7 @@ it("routes confirmation through the adapter and keeps toolbar history callbacks 
   const run = vi.fn();
   const undo = vi.fn(() => 1);
   const redo = vi.fn(() => 1);
+  let history: UndoRedoControlProps | undefined;
   let context: FeatureMountContext<Row> | undefined;
   const actions: RowAction<Row>[] = [{ key: "do", label: "Do", onClick: run }];
   const projector: RowActionControlsProjector<Row> = (props) =>
@@ -555,6 +569,12 @@ it("routes confirmation through the adapter and keeps toolbar history callbacks 
             });
           },
         },
+        extendFeature(undoRedoButtons(), [
+          slotRender(UNDO_REDO_CONTROL, (props) => {
+            history = props;
+            return null;
+          }),
+        ]),
       ],
     }))
   );
@@ -566,13 +586,15 @@ it("routes confirmation through the adapter and keeps toolbar history callbacks 
   confirm.value = (request) => request.onConfirm();
   click();
   expect(run).toHaveBeenCalledOnce();
-  shell.toolbarExtrasProps.value.onUndo?.();
-  shell.toolbarExtrasProps.value.onRedo?.();
+  shell.renderToolbarExtras();
+  history?.onUndo?.();
+  history?.onRedo?.();
   expect(undo).toHaveBeenCalledOnce();
   expect(redo).toHaveBeenCalledOnce();
-  expect(shell.toolbarExtrasProps.value.canUndo).toBe(true);
+  expect(history?.canUndo).toBe(true);
+  expect(history?.canRedo).toBe(false);
   expect(shell.runtime.labels()).toBeDefined();
-  expect(shell.runtime.featureIds()).toEqual(["actions"]);
+  expect(shell.runtime.featureIds()).toEqual(["actions", "undo-redo-buttons"]);
   await context.flushAdmission();
   scope.stop();
   expect(shell.runtime.featureIds()).toEqual([]);

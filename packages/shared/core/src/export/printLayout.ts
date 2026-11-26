@@ -19,6 +19,7 @@ import {
   type ExportTable,
   type ExportViewEntry,
 } from "./exportWriter";
+import { exportCellText, resolvePrintDirection } from "./printText";
 
 export type { ExportTable };
 
@@ -78,62 +79,6 @@ export interface PrintLayoutOptions {
    * it. Nothing is subset: the browser needs every glyph it might shape.
    */
   font?: Uint8Array | ArrayBuffer;
-}
-
-/**
- * The direction the print document should use.
- *
- * An explicit value wins. Otherwise a browser inherits the page's `dir`,
- * which is what the reader is looking at; outside a window the fallback is
- * `"ltr"` rather than guessing.
- */
-export function resolvePrintDirection(
-  direction?: "ltr" | "rtl"
-): "ltr" | "rtl" {
-  if (direction === "rtl" || direction === "ltr") return direction;
-  if (!isBrowser()) return "ltr";
-  return document.documentElement.getAttribute("dir") === "rtl" ? "rtl" : "ltr";
-}
-
-/** A date with no clock is a day; anything else is a day-and-time. */
-function isDateOnly(date: Date): boolean {
-  return (
-    (date.getUTCHours() === 0 &&
-      date.getUTCMinutes() === 0 &&
-      date.getUTCSeconds() === 0 &&
-      date.getUTCMilliseconds() === 0) ||
-    (date.getHours() === 0 &&
-      date.getMinutes() === 0 &&
-      date.getSeconds() === 0 &&
-      date.getMilliseconds() === 0)
-  );
-}
-
-/**
- * Strip what a table cell cannot carry: control characters. Tab, newline
- * and carriage return become a space so a cell stays one line.
- */
-function safeText(text: string): string {
-  let out = "";
-  for (const ch of text) {
-    if (ch === "\t" || ch === "\n" || ch === "\r") out += " ";
-    else if (ch >= " ") out += ch;
-  }
-  return out;
-}
-
-/** A cell as the print document and the PDF both show it. */
-export function exportCellText(value: unknown): string {
-  if (typeof value === "string") return safeText(value);
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return String(value);
-  }
-  if (typeof value === "boolean") return value ? "true" : "false";
-  if (value instanceof Date && !Number.isNaN(value.getTime())) {
-    if (isDateOnly(value)) return value.toISOString().slice(0, 10);
-    return value.toISOString().slice(0, 16).replace("T", " ");
-  }
-  return "";
 }
 
 /** Escape the five characters HTML cannot carry literally. */

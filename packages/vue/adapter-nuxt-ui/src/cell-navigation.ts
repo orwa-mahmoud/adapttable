@@ -11,15 +11,13 @@ import {
 import { h } from "vue";
 
 import { NuxtFillHandle } from "./navigation/nuxtNavigation";
-export function cellNavigation(
-  options: CellNavigationOptions = {}
+export function cellNavigation<TRow = unknown>(
+  options: CellNavigationOptions<TRow> = {}
 ): StaticTableFeature {
   return extendFeature(bindingCellNavigation(options), [
     slotRender(FILL_HANDLE_CONTROL, (props) => h(NuxtFillHandle, props)),
   ]);
 }
-/** @deprecated Prefer the canonical @adapttable/nuxt-ui/column-selection entry. */
-export { columnSelectionCheckbox } from "./column-selection";
 export type { CellEdit, GridCell } from "@adapttable/vue";
 export type { CellRange } from "@adapttable/vue/adapter";
 export type { CellNavigationOptions } from "@adapttable/vue/features";

@@ -207,26 +207,25 @@ Query example is in [Data tiers — Full control](./data-tiers.md#3-full-control
 
 ## `useDataTable` options
 
-| Option                  | Type                                | Default        | Description                                                                             |
-| ----------------------- | ----------------------------------- | -------------- | --------------------------------------------------------------------------------------- |
-| `source`                | `TableSource<TRow>`                 | required       | The data and query state.                                                               |
-| `columns`               | `ColumnDef<TRow>[]`                 | required       | Column definitions.                                                                     |
-| `rowKey`                | `(row: TRow) => string`             | required       | Stable row identity; the React key and, by default, the selection id.                   |
-| `tableLabel`            | `string`                            | `labels.table` | The table's accessible name.                                                            |
-| `labels`                | `TableLabels`                       | English        | Label overrides, merged over the defaults.                                              |
-| `locale`                | `string`                            | —              | Resolves per-column `i18n` data paths for bare-key columns.                             |
-| `dir`                   | `"ltr" \| "rtl"`                    | `"ltr"`        | Written to the table element by `getTableProps`.                                        |
-| `forceMobile`           | `boolean`                           | `false`        | Use the mobile column set; reported back as `isMobile`.                                 |
-| `mobileIdentityColumns` | `number`                            | —              | Deprecated and ignored; removed in v4. `hideOnMobile` decides the mobile column set.    |
-| `searchDebounceMs`      | `number`                            | `300`          | Delay between typing and `source.setSearch`.                                            |
-| `multiSort`             | `boolean`                           | `false`        | Shift-press on a sort button adds or cycles a sort level instead of replacing the sort. |
-| `bulkActions`           | `BulkAction[]`                      | —              | Any action turns selection on.                                                          |
-| `selectionGetId`        | `(row: TRow) => string`             | `rowKey`       | Selection id when it differs from the row key.                                          |
-| `selectedIds`           | `readonly string[]`                 | —              | Controlled selection.                                                                   |
-| `onSelectedIdsChange`   | `(ids: string[]) => void`           | —              | Change handler for the controlled selection.                                            |
-| `filterLabels`          | `Record<string, ChipLabelResolver>` | —              | Chip label per filter key; drives `filterChips`.                                        |
-| `fitColumns`            | `boolean`                           | `false`        | Share the container width: `flex` columns get a percentage width.                       |
-| `columnWidths`          | `Record<string, number>`            | —              | User widths (for example from a column layout); they win over `width` and `flex`.       |
+| Option                | Type                                | Default        | Description                                                                             |
+| --------------------- | ----------------------------------- | -------------- | --------------------------------------------------------------------------------------- |
+| `source`              | `TableSource<TRow>`                 | required       | The data and query state.                                                               |
+| `columns`             | `ColumnDef<TRow>[]`                 | required       | Column definitions.                                                                     |
+| `rowKey`              | `(row: TRow) => string`             | required       | Stable row identity; the React key and, by default, the selection id.                   |
+| `tableLabel`          | `string`                            | `labels.table` | The table's accessible name.                                                            |
+| `labels`              | `TableLabels`                       | English        | Label overrides, merged over the defaults.                                              |
+| `locale`              | `string`                            | —              | Resolves per-column `i18n` data paths for bare-key columns.                             |
+| `dir`                 | `"ltr" \| "rtl"`                    | `"ltr"`        | Written to the table element by `getTableProps`.                                        |
+| `forceMobile`         | `boolean`                           | `false`        | Use the mobile column set; reported back as `isMobile`.                                 |
+| `searchDebounceMs`    | `number`                            | `300`          | Delay between typing and `source.setSearch`.                                            |
+| `multiSort`           | `boolean`                           | `false`        | Shift-press on a sort button adds or cycles a sort level instead of replacing the sort. |
+| `bulkActions`         | `BulkAction[]`                      | —              | Any action turns selection on.                                                          |
+| `selectionGetId`      | `(row: TRow) => string`             | `rowKey`       | Selection id when it differs from the row key.                                          |
+| `selectedIds`         | `readonly string[]`                 | —              | Controlled selection.                                                                   |
+| `onSelectedIdsChange` | `(ids: string[]) => void`           | —              | Change handler for the controlled selection.                                            |
+| `filterLabels`        | `Record<string, ChipLabelResolver>` | —              | Chip label per filter key; drives `filterChips`.                                        |
+| `fitColumns`          | `boolean`                           | `false`        | Share the container width: `flex` columns get a percentage width.                       |
+| `columnWidths`        | `Record<string, number>`            | —              | User widths (for example from a column layout); they win over `width` and `flex`.       |
 
 ## The result
 

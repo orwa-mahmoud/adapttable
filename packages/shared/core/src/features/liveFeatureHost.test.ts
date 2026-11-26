@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { SidePanelEntry } from "./currentHost";
 import {
   createFeatureHost,
   disposeFeatureHost,
   EMPTY_FEATURE_HOST,
+  type FeatureSetup,
   LiveFeatureHost,
 } from "./liveFeatureHost";
 
@@ -88,22 +90,25 @@ describe("createFeatureHost", () => {
     expect(createFeatureHost([{}, {}])).toBe(EMPTY_FEATURE_HOST);
   });
 
-  it("runs every setup against one fresh host and keeps its cleanups", () => {
-    const cleanup = vi.fn();
+  it("runs every setup against one fresh host", () => {
     const host = createFeatureHost([
       { setup: (live) => live.registerPanel({ key: "a" }) },
-      {
-        setup: (live) => {
-          live.registerPanel({ key: "b" });
-          return cleanup;
-        },
-      },
+      { setup: (live) => live.registerPanel({ key: "b" }) },
     ]);
     expect(host).toBeInstanceOf(LiveFeatureHost);
     expect(host.panels.map((panel) => panel.key)).toEqual(["a", "b"]);
+  });
 
-    disposeFeatureHost(host);
-    expect(cleanup).toHaveBeenCalledTimes(1);
+  it("refuses a setup that returns a cleanup, naming where it belongs", () => {
+    const cleanup = vi.fn();
+    const leaky = {
+      setup: (live: LiveFeatureHost) => {
+        live.registerPanel({ key: "a" });
+        return cleanup;
+      },
+    } as unknown as FeatureSetup<unknown, SidePanelEntry>;
+    expect(() => createFeatureHost([leaky])).toThrow(/mount/);
+    expect(cleanup).not.toHaveBeenCalled();
   });
 
   it("rolls back earlier and partial setups once and skips later setups", () => {
@@ -121,7 +126,7 @@ describe("createFeatureHost", () => {
           setup: (host) => {
             hosts.push(host);
             host.onDispose(registeredCleanup);
-            return returnedCleanup;
+            host.onDispose(returnedCleanup);
           },
         },
         {
@@ -164,7 +169,7 @@ describe("createFeatureHost", () => {
           {
             setup: (host) => {
               hosts.push(host);
-              return failedCleanup;
+              host.onDispose(failedCleanup);
             },
           },
           {
@@ -234,7 +239,7 @@ describe("grouping contributions", () => {
         {
           setup: (host) => {
             host.contributeGrouping("grouping", later);
-            return ownedCleanup;
+            host.onFeatureDispose("grouping", ownedCleanup);
           },
         },
         {

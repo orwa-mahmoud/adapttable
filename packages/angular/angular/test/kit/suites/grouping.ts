@@ -3,7 +3,7 @@ import {
   collectConformanceTests,
   type ConformanceTest,
 } from "@adapttable/core/conformance";
-import { Component, input } from "@angular/core";
+import { Component, computed, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { expect } from "vitest";
 
@@ -19,7 +19,7 @@ export function groupingTests(
   kit: AngularKitUnderTest
 ): readonly ConformanceTest[] {
   const { Table: AdaptDataTable, kitSelector } = kit;
-  const { grouping, groupingPanel, virtualize } = kit.features;
+  const { grouping, groupingPanel, virtualize, selection } = kit.features;
   return collectConformanceTests(({ describe, it, afterEach }) => {
     /**
      * Grouping through the each kit table — headers with counts and subtotals,
@@ -63,8 +63,7 @@ export function groupingTests(
           [dir]="direction()"
           [paginationMode]="paginationMode()"
           [maxHeight]="maxHeight()"
-          [selectable]="selectable()"
-          [features]="features()"
+          [features]="shownFeatures()"
         />
       `,
     })
@@ -76,6 +75,9 @@ export function groupingTests(
       readonly paginationMode = input<"paged" | "infinite">("paged");
       readonly maxHeight = input<number | undefined>(undefined);
       readonly selectable = input(false);
+      readonly shownFeatures = computed(() =>
+        this.selectable() ? [selection(), ...this.features()] : this.features()
+      );
       readonly columns = COLS;
       readonly rowKey = (row: Task) => row.id;
     }

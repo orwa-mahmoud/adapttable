@@ -14,13 +14,13 @@ import {
   type DataTable,
   type DataTableClassNames,
   type EditableCellEditing,
+  FEATURE_IMPLEMENTATIONS,
+  featureImplementation,
   featureOptionsOf,
   flattenColumns,
   type GridFocus,
   injectDataTable,
-  injectKeyedVirtualization,
   injectTableData,
-  injectTableVirtualizer,
   type MaybeSignal,
   type MaybeSignalOptional,
   type MobileCardRenderer,
@@ -33,6 +33,7 @@ import {
   SURFACE_GROUPING,
   SURFACE_HANDLES,
   type SurfaceHandles,
+  type VirtualizeImplementation,
 } from "@adapttable/angular";
 import {
   type CellSpanAppearance,
@@ -56,6 +57,7 @@ import {
 } from "@adapttable/core";
 import {
   type AssemblyFns,
+  type BodyCell,
   bodyWindowKind,
   cellSpanMark,
   type ChromeBodySlot,
@@ -69,6 +71,8 @@ import {
   estimateBodyItemSize,
   type ExpandToggleSlotProps,
   extraHostFillStyle,
+  type FeatureListEntry,
+  flattenFeatures,
   type GroupedFlatEntry,
   type GroupHeaderCardSlotProps,
   type GroupHeaderRowSlotProps,
@@ -348,6 +352,8 @@ export function bodyWindowFor<TRow>(options: {
   /** The rows that scroll — every row but the pinned ones. */
   readonly scrollRows: Signal<readonly TRow[]>;
   readonly featureOptions: Readonly<Record<string, unknown>>;
+  /** The windowing code `virtualize()` brought, when it is composed. */
+  readonly virtualizer: VirtualizeImplementation | undefined;
   readonly rowKey: (row: TRow) => string;
   readonly maxHeight: number | string | undefined;
   readonly scrollBox: () => HTMLElement | null;
@@ -361,6 +367,7 @@ export function bodyWindowFor<TRow>(options: {
     expandable,
     scrollRows,
     featureOptions,
+    virtualizer,
     rowKey,
     maxHeight,
     scrollBox,
@@ -368,7 +375,8 @@ export function bodyWindowFor<TRow>(options: {
     injector,
   } = options;
   const source = table.source;
-  const wantVirtualize = featureOptions.virtualize === true;
+  const wantVirtualize =
+    featureOptions.virtualize === true && virtualizer !== undefined;
   const groupEntries = computed(() => grouping?.()?.entries);
   const treeEntries = computed(() => tree?.()?.entries);
   const bodyChrome = computed(() => {
@@ -383,7 +391,11 @@ export function bodyWindowFor<TRow>(options: {
       isMobile: table.isMobile(),
     };
   });
-  if (wantVirtualize && virtualizeIgnoredOnPage(true, bodyChrome())) {
+  if (
+    ngDevMode &&
+    wantVirtualize &&
+    virtualizeIgnoredOnPage(true, bodyChrome())
+  ) {
     devWarn(
       'virtualize only applies in infinite mode — this paged table renders unvirtualized. Pass paginationMode="infinite" to enable it, or group the rows: an expanded page is windowed.'
     );
@@ -429,7 +441,7 @@ export function bodyWindowFor<TRow>(options: {
     table.loadMore();
   };
   const kind = computed(() => bodyWindowKind(true, bodyChrome()));
-  const flat = injectTableVirtualizer<TRow>({
+  const flat = virtualizer.flat<TRow>({
     rows: scrollRows,
     rowKey,
     enabled: computed(() => kind() === "flat"),
@@ -441,7 +453,7 @@ export function bodyWindowFor<TRow>(options: {
     onEndReached,
     injector,
   });
-  const keyed = injectKeyedVirtualization({
+  const keyed = virtualizer.keyed({
     keys: computed(() =>
       (kind() === "tree" ? (treeEntries() ?? []) : (groupEntries() ?? [])).map(
         (entry) => entry.key
@@ -575,30 +587,41 @@ export function buildSurfaceBody<TRow>(input: SurfaceBodyInput<TRow>) {
     });
   });
   // Each drawn row's cells, as core's span pass left them: a cell another
-  // one covers is absent, and a merged cell carries its extent.
+  // one covers is absent, and a merged cell carries its extent. Rows that
+  // share core's cell list (no spans) share one view list too.
   const bodyCells = computed(() => {
     const byKey = new Map(
       renderModel().columns.map((column) => [column.key, column])
     );
+    const views = new Map<
+      readonly BodyCell<TRow>[],
+      readonly BodyCellView<TRow>[]
+    >();
+    const viewsOf = (
+      rowCells: readonly BodyCell<TRow>[]
+    ): readonly BodyCellView<TRow>[] => {
+      const known = views.get(rowCells);
+      if (known !== undefined) return known;
+      const built = rowCells.flatMap((cell) => {
+        const column = byKey.get(cell.column.key);
+        return column === undefined
+          ? []
+          : [
+              {
+                column,
+                columnIndex: cell.columnIndex,
+                colSpan: cell.colSpan,
+                rowSpan: cell.rowSpan,
+                mark: cellSpanMark(cell.colSpan, cell.rowSpan),
+              },
+            ];
+      });
+      views.set(rowCells, built);
+      return built;
+    };
     const cells = new Map<string, readonly BodyCellView<TRow>[]>();
     for (const [rowId, rowCells] of renderModel().cellsByRow) {
-      cells.set(
-        rowId,
-        rowCells.flatMap((cell) => {
-          const column = byKey.get(cell.column.key);
-          return column === undefined
-            ? []
-            : [
-                {
-                  column,
-                  columnIndex: cell.columnIndex,
-                  colSpan: cell.colSpan,
-                  rowSpan: cell.rowSpan,
-                  mark: cellSpanMark(cell.colSpan, cell.rowSpan),
-                },
-              ];
-        })
-      );
+      cells.set(rowId, viewsOf(rowCells));
     }
     return cells;
   });
@@ -980,7 +1003,9 @@ export interface TableSurfaceHostOptions<TRow> {
   /** A row's stable id. */
   readonly rowKey: (row: TRow) => string;
   /** Features this host mounts. Omitted features are not created. */
-  readonly features?: MaybeSignalOptional<readonly AdaptTableFeature[]>;
+  readonly features?: MaybeSignalOptional<
+    readonly FeatureListEntry<AdaptTableFeature>[]
+  >;
   /** Bounds the body and scrolls inside it. */
   readonly maxHeight?: MaybeSignalOptional<number | string>;
   /** Stick the header while the page scrolls. */
@@ -1031,6 +1056,10 @@ function surfaceViewFor<TRow>(
     expandable: false,
     scrollRows: computed(() => table.source().rows),
     featureOptions,
+    virtualizer: featureImplementation(
+      features,
+      FEATURE_IMPLEMENTATIONS.virtualize
+    ),
     rowKey: options.rowKey,
     maxHeight: readMaybe(options.maxHeight),
     scrollBox: () => null,
@@ -1166,7 +1195,9 @@ export function injectTableSurfaceHost<TRow>(
   const parent = options.injector ?? inject(Injector);
   const resources = createFeatureResources(parent);
   return resources.use("surface", [], (child) => {
-    const featureList = computed(() => readMaybe(options.features) ?? []);
+    const featureList = computed(() =>
+      flattenFeatures(readMaybe(options.features) ?? [])
+    );
     const columns = computed(
       () => flattenColumns(readMaybe(options.columns)).leaves
     );

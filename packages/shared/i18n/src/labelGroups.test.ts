@@ -23,6 +23,7 @@ import {
   ROW_LABELS,
   SAVED_VIEW_LABELS,
   VIEW_CONTROL_LABELS,
+  VIRTUALIZE_LABELS,
 } from "@adapttable/core/binding";
 import { describe, expect, it } from "vitest";
 
@@ -45,6 +46,7 @@ const GROUPS: Readonly<Record<string, object>> = {
   COLUMN_MENU_LABELS,
   ACTION_LABELS,
   VIEW_CONTROL_LABELS,
+  VIRTUALIZE_LABELS,
 };
 
 /** Whether a locale's string stands in for the English one it translates. */

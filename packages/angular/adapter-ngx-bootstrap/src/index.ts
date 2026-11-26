@@ -3,7 +3,7 @@
  * overlays and scoped Bootstrap controls, over `@adapttable/angular`.
  *
  * Feature factories live on secondary entries (`bulk-actions`, `filters`,
- * …); import them from those paths or from `@adapttable/ngx-bootstrap/features`.
+ * …); import them from those paths.
  *
  * @packageDocumentation
  */

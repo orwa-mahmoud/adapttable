@@ -6,6 +6,7 @@ import {
   type InfiniteQuerySignals,
   injectFrontendData,
   injectQuerySource,
+  injectServerData,
   type PaginatedResponse,
   type TableQueryHandler,
   type TableSource,
@@ -102,16 +103,17 @@ export function dataTiersTests(
       readonly rowKey = (row: City) => row.id;
     }
 
-    /** Two independent live sources and the table's optional built-in tiers. */
+    /**
+     * Two independent live sources, the host's server source and the table's
+     * own rows.
+     */
     @Component({
       imports: [AdaptDataTable],
       template: `
         <adapt-data-table
           [source]="source()"
           [data]="rows()"
-          [mode]="mode()"
-          [total]="total()"
-          [onQueryChange]="onQueryChange()"
+          [onViewChange]="onViewChange()"
           [columns]="columns"
           [rowKey]="rowKey"
           [urlSync]="urlSync()"
@@ -161,10 +163,33 @@ export function dataTiersTests(
         Signal<TableSource<City>> | TableSource<City> | undefined
       >(this.firstSource);
       readonly rows = signal<readonly City[] | undefined>(undefined);
-      readonly mode = signal<"frontend" | "server" | undefined>(undefined);
-      readonly total = signal(CITIES.length);
       readonly notified = vi.fn<TableQueryHandler>();
-      readonly onQueryChange = signal<TableQueryHandler | undefined>(undefined);
+      readonly onViewChange = signal<TableQueryHandler | undefined>(undefined);
+      // The host owns the server source: it asks and writes the URL only
+      // while it serves the table.
+      readonly serving = signal(false);
+      readonly serverRows = signal<readonly City[]>([]);
+      readonly total = signal(CITIES.length);
+      readonly fetched = vi.fn<TableQueryHandler>();
+      readonly server = injectServerData<City>({
+        rows: this.serverRows,
+        total: this.total,
+        urlSync: computed(() => this.serving() && this.urlSync()),
+        urlKey: "table",
+        forceMobile: this.mobile,
+        paginationMode: "paged",
+        defaults: { limit: 2 },
+        onQueryChange: computed(() =>
+          this.serving() ? this.fetched : undefined
+        ),
+      });
+      /** Hand the table the server source. */
+      serve(rows: readonly City[]): void {
+        this.serving.set(true);
+        this.serverRows.set(rows);
+        this.rows.set(undefined);
+        this.source.set(this.server);
+      }
     }
 
     /** Keep the rows and query fixed while filter definitions are recomposed. */
@@ -312,13 +337,12 @@ export function dataTiersTests(
           expect(part("pager")?.textContent).toContain("Page 2 of 3");
         });
 
-        it("falls back to live rows and mode, then accepts a source again", async () => {
+        it("falls back to live rows, turns to a server source, then accepts a source again", async () => {
           const { host, settle } = await mount(ReplacingSourceHost);
           host.mobile.set(mobile);
           host.source.set(undefined);
           host.rows.set(citiesNamed("Fallback"));
-          host.mode.set("frontend");
-          host.onQueryChange.set(host.notified);
+          host.onViewChange.set(host.notified);
           await settle();
           expect(renderedNames(mobile)).toEqual(["Fallback 1", "Fallback 2"]);
           expect(host.notified).not.toHaveBeenCalled();
@@ -339,25 +363,25 @@ export function dataTiersTests(
             "Fallback live 4",
           ]);
           expect(host.notified).toHaveBeenCalledTimes(1);
+          expect(host.fetched).not.toHaveBeenCalled();
 
-          host.mode.set("server");
-          host.rows.set(citiesNamed("Server").slice(2, 4));
-          await settle();
-          expect(renderedNames(mobile)).toEqual(["Server 3", "Server 4"]);
-          expect(host.notified).toHaveBeenCalledTimes(2);
-          expect(host.notified.mock.calls[1]![0]).toMatchObject({ page: 2 });
-          part("page-prev")!.click();
-          await settle();
-          expect(host.notified).toHaveBeenCalledTimes(3);
-          expect(host.notified.mock.calls[2]![0]).toMatchObject({ page: 1 });
-          expect(renderedNames(mobile)).toEqual(["Server 3", "Server 4"]);
-          host.rows.set(citiesNamed("Server").slice(0, 2));
+          // The server source keeps its own view state: it starts on page 1.
+          host.serve(citiesNamed("Server").slice(0, 2));
           await settle();
           expect(renderedNames(mobile)).toEqual(["Server 1", "Server 2"]);
+          expect(host.fetched).toHaveBeenCalledTimes(1);
+          expect(host.fetched.mock.calls[0]![0]).toMatchObject({ page: 1 });
+          part("page-next")!.click();
+          await settle();
+          expect(host.fetched).toHaveBeenCalledTimes(2);
+          expect(host.fetched.mock.calls[1]![0]).toMatchObject({ page: 2 });
+          expect(renderedNames(mobile)).toEqual(["Server 1", "Server 2"]);
+          host.serverRows.set(citiesNamed("Server").slice(2, 4));
+          await settle();
+          expect(renderedNames(mobile)).toEqual(["Server 3", "Server 4"]);
+          expect(host.notified).toHaveBeenCalledTimes(1);
 
-          host.rows.set(undefined);
-          host.mode.set(undefined);
-          host.onQueryChange.set(undefined);
+          host.serving.set(false);
           host.source.set(host.secondSource);
           await settle();
           expect(renderedNames(mobile)).toEqual([
@@ -371,10 +395,11 @@ export function dataTiersTests(
             "Replacement 4",
           ]);
           expect(host.secondPage).toHaveBeenCalledExactlyOnceWith(2);
-          expect(host.notified).toHaveBeenCalledTimes(3);
+          expect(host.fetched).toHaveBeenCalledTimes(2);
+          expect(host.notified).toHaveBeenCalledTimes(1);
         });
 
-        it("moves URL ownership to the fallback tier and follows later mode switches", async () => {
+        it("moves URL ownership to the serving tier across a server source and back", async () => {
           const adapter = createMemoryAdapter("table.page=2&other=kept");
           TestBed.configureTestingModule({
             providers: [{ provide: ADAPTTABLE_URL_ADAPTER, useValue: adapter }],
@@ -390,45 +415,45 @@ export function dataTiersTests(
 
           host.source.set(undefined);
           host.rows.set(citiesNamed("Fallback"));
-          host.mode.set("frontend");
-          host.onQueryChange.set(host.notified);
+          host.onViewChange.set(host.notified);
           await settle();
           expect(renderedNames(mobile)).toEqual(["Fallback 3", "Fallback 4"]);
           expect(part("pager")?.textContent).toContain("Page 2 of 3");
-          expect(host.notified).toHaveBeenCalledTimes(1);
-          expect(host.notified.mock.calls[0]![0]).toMatchObject({ page: 2 });
 
           part("page-next")!.click();
           await settle();
           expect(renderedNames(mobile)).toEqual(["Fallback 5"]);
           expect(page()).toBe("3");
-          expect(host.notified).toHaveBeenCalledTimes(2);
-          expect(host.notified.mock.calls[1]![0]).toMatchObject({ page: 3 });
+          expect(host.notified.mock.calls.at(-1)![0]).toMatchObject({
+            page: 3,
+          });
           // The idle server source must not clamp the active frontend's URL.
           host.total.set(1);
           await settle();
           expect(page()).toBe("3");
           expect(renderedNames(mobile)).toEqual(["Fallback 5"]);
+          expect(host.fetched).not.toHaveBeenCalled();
 
-          host.mode.set("server");
+          // The server source reads the page the URL holds.
           host.total.set(CITIES.length);
-          host.rows.set(citiesNamed("Server").slice(4));
+          host.serve(citiesNamed("Server").slice(4));
           await settle();
           expect(renderedNames(mobile)).toEqual(["Server 5"]);
           expect(page()).toBe("3");
-          expect(host.notified).toHaveBeenCalledTimes(3);
-          expect(host.notified.mock.calls[2]![0]).toMatchObject({ page: 3 });
+          expect(host.fetched).toHaveBeenCalledTimes(1);
+          expect(host.fetched.mock.calls[0]![0]).toMatchObject({ page: 3 });
           part("page-prev")!.click();
           await settle();
           expect(page()).toBe("2");
-          expect(host.notified).toHaveBeenCalledTimes(4);
-          expect(host.notified.mock.calls[3]![0]).toMatchObject({ page: 2 });
-          host.rows.set(citiesNamed("Server").slice(2, 4));
+          expect(host.fetched).toHaveBeenCalledTimes(2);
+          expect(host.fetched.mock.calls[1]![0]).toMatchObject({ page: 2 });
+          host.serverRows.set(citiesNamed("Server").slice(2, 4));
           await settle();
           expect(renderedNames(mobile)).toEqual(["Server 3", "Server 4"]);
 
-          host.mode.set("frontend");
+          host.serving.set(false);
           host.total.set(1);
+          host.source.set(undefined);
           host.rows.set(citiesNamed("Fallback"));
           await settle();
           expect(renderedNames(mobile)).toEqual(["Fallback 3", "Fallback 4"]);

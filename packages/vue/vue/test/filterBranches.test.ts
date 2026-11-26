@@ -12,7 +12,6 @@ import {
   type FilterTreeInputProps,
   type FilterTreeSelectProps,
   slotRender,
-  TOOLBAR_EXTRAS,
 } from "@adapttable/core/binding";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -25,6 +24,7 @@ import {
 } from "vue";
 
 import { extendFeature } from "../src/features/tableFeature";
+import { FILTERS_PANEL } from "../src/features/toolbarEntries";
 import {
   ChecklistChrome,
   FilterFieldChrome,
@@ -258,7 +258,7 @@ describe("complete filter control contracts", () => {
     const feature = extendFeature(
       filters<Row>([{ key: "name", type: "text" }], { mode: "drawer" }),
       [
-        slotRender(TOOLBAR_EXTRAS, () => null),
+        slotRender(FILTERS_PANEL, () => null),
         slotRender(ACTIVE_FILTER_CHIPS, () => null),
       ]
     );
@@ -358,7 +358,7 @@ describe("complete filter control contracts", () => {
     const feature = extendFeature(
       filters<Row>([{ key: "name", type: "custom-text" }]),
       [
-        slotRender(TOOLBAR_EXTRAS, () => null),
+        slotRender(FILTERS_PANEL, () => null),
         slotRender(ACTIVE_FILTER_CHIPS, () => null),
       ]
     );

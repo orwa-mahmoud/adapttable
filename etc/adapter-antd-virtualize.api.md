@@ -4,9 +4,11 @@
 
 ```ts
 
-import { virtualize } from '@adapttable/react/features';
+import { StaticTableFeature } from '@adapttable/react/adapter';
+import { VirtualizeOptions } from '@adapttable/react/features';
 
-export { virtualize }
+// @public
+export function virtualize(options?: VirtualizeOptions): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

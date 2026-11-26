@@ -181,6 +181,18 @@
         "default": "./dist/selection.cjs"
       }
     },
+    "./locale": {
+      "import": {
+        "types": "./dist/locale.d.ts",
+        "development": "./dist/dev/locale.js",
+        "default": "./dist/locale.js"
+      },
+      "require": {
+        "types": "./dist/locale.d.cts",
+        "development": "./dist/dev/locale.cjs",
+        "default": "./dist/locale.cjs"
+      }
+    },
     "./conformance": {
       "import": {
         "types": "./dist/conformance.d.ts",

@@ -13,7 +13,7 @@ import { StaticTableFeature } from '@adapttable/vue';
 export { CellEdit }
 
 // @public
-export function cellNavigation(options?: CellNavigationOptions): StaticTableFeature;
+export function cellNavigation<TRow = unknown>(options?: CellNavigationOptions<TRow>): StaticTableFeature;
 
 export { CellNavigationOptions }
 

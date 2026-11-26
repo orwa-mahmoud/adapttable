@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/vue-unstyled";
+import { selection } from "@adapttable/vue-unstyled/selection";
 
 const rows = [{ id: "a" }];
 const onSelection = (ids: number[]) => ids.length;
@@ -9,6 +10,6 @@ const onSelection = (ids: number[]) => ids.length;
     :data="rows"
     :columns="[{ key: 'id' }]"
     :row-key="(row) => row.id"
-    @update:selected-ids="onSelection"
+    :features="[selection({ onSelectionChange: onSelection })]"
   />
 </template>

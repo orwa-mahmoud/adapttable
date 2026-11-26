@@ -44,6 +44,10 @@ export {
   resolveCellEditor,
 } from "./editing/cellEditing";
 export {
+  createDeferredEditConflictStore,
+  loadEditConflictStore,
+} from "./editing/deferredEditConflict";
+export {
   createDirtyCellStore,
   dirtyCellKey,
   type DirtyCellSnapshot,
@@ -79,7 +83,6 @@ export {
   contestedCellKey,
   type ContestedEditCell,
   contestedRowSignature,
-  createEditConflictStore,
   type EditConflictSnapshot,
   type EditConflictState,
   type EditConflictStore,
@@ -91,7 +94,7 @@ export {
   type ReconcileLiveEdit,
   type ReconcileLiveRowEdit,
   resolveConflictChoice,
-} from "./editing/editConflict";
+} from "./editing/editConflictView";
 export type {
   BatchRowEdit,
   CellValidator,
@@ -168,7 +171,6 @@ export {
   cellConflictAsk,
   controllerConflictAsk,
   customEditorConflict,
-  defaultPendingRows,
   type EditableCellEditorCtrl,
   editableCellErrorId,
   type EditableCellPresentation,
@@ -287,6 +289,10 @@ export type {
   TableSnapshot,
 } from "./engine/createTableEngine";
 export type {
+  DeferredExportWriter,
+  ExportWriterOption,
+} from "./export/deferredWriter";
+export type {
   ExportPayload,
   ExportRowMeta,
   ExportRowRole,
@@ -334,6 +340,10 @@ export type {
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "./grouping/groupingPanelModel";
+export type {
+  GroupingPanelSource,
+  GroupingPanelStateInput,
+} from "./grouping/groupingPanelState";
 export type { GroupAggregateOps } from "./grouping/groupRowLayout";
 export type {
   GroupAggregatesFn,
@@ -341,10 +351,6 @@ export type {
   GroupPaging,
   GroupSort,
 } from "./grouping/groupRows";
-export type {
-  GroupingPanelSource,
-  GroupingPanelStateInput,
-} from "./layout/tableChromeState";
 export type { IncrementalViewConfig } from "./rows/incremental";
 export type { SortLevel } from "./sort/compare";
 export type {
@@ -361,6 +367,7 @@ export type {
 } from "./source/queryContract";
 export type { QueryGroupRow } from "./source/queryGroups";
 export type { TableSource } from "./source/TableSource";
+export type { RowRekeyMoves } from "./state/rowRekeys";
 export type {
   SliceCell,
   SliceKey,

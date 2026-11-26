@@ -79,8 +79,8 @@ Vue exports to their owning entries. Separate formula, pivot, sparkline and
 stream helpers are not automatically loaded by the feature barrel.
 
 The native `/preset` entry exports `standardFeatures` and
-`StandardFeatureOptions<TRow>`. Native `/export` is the canonical CSV entry;
-`/export-csv` remains available. Binding `/pdf` and `/xlsx`, and native `/export-pdf` and
+`StandardFeatureOptions<TRow>`. Native `/export` is the CSV entry. Binding
+`/pdf` and `/xlsx`, and native `/export-pdf` and
 `/export-xlsx`, expose `exportPdf` / `exportXlsx`,
 `ExportPdfOptions<TRow>` / `ExportXlsxOptions<TRow>` and writer utilities. Native `/features` also exports these factories.
 See [export scope and lifecycle](./actions.md) and
@@ -147,7 +147,7 @@ The framework-neutral core remains independent of rendered UI.
 `DataTableProps<TRow>`, `DataTableSlots<TRow>`, and `DataTableClassNames` are
 canonical adapter contracts. `provideDataTableClassNames` and
 `useDataTableClassNames` share reactive presentation hooks with feature controls.
-`GROUP_ROW`, `groupRowSlotKey<TRow>()`, and `GroupRowSlotProps<TRow>` let a grouping
+`GROUP_ROW` and `GroupRowSlotProps<TRow>` let a grouping
 feature supply its row renderer lazily; importing the table surface does not
 install a grouping renderer or another optional feature.
 
@@ -178,7 +178,8 @@ A kit reads its UI library's direction, locale and density into a
 `KitEnvironment` and merges it under the table's props with
 `withKitEnvironment`; `useLocaleLabels` fills that environment's labels for
 the library locale, loading one language on demand. `mountForcedColorsStyles`
-installs the shared high-contrast stylesheet from setup.
+adds the table's high-contrast rules, and those of its composed features, from
+setup.
 
 ## Data sources
 
@@ -469,19 +470,19 @@ changes them.
 
 `DataTable<TRow>` from `@adapttable/vue-unstyled` uses `DataTableProps<TRow>`:
 
-| Prop group          | Props and behavior                                                                                                                                                                                                                                                                          |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Required            | `columns: readonly ColumnInput<TRow>[]`, `rowKey: (row: TRow) => string`.                                                                                                                                                                                                                   |
-| Data                | `data?: readonly TRow[]` or `source?: TableSource<TRow>`; source takes precedence. `getSearchText` customizes local search.                                                                                                                                                                 |
-| Server tier         | `onQueryChange` with `data` as the current page fetches each query; `total`, `supports`, `aggregates`, `responseKey`, `facetKeys`, `facets` describe the reply. `mode="frontend"` makes `onQueryChange` a change notice. See [data tiers](./data-tiers.md#server-rows-through-table-props). |
-| Query               | `defaults`, `paginationMode`, `urlSync`, `urlKey`, `urlAdapter`; these configure the fallback frontend source, not a separately supplied source.                                                                                                                                            |
-| Search and sorting  | `searchable` defaults to true; `searchDebounceMs` defaults to the engine's 300ms interval; `searchPlaceholder` overrides the placeholder label. `multiSort` enables shift-key sort levels.                                                                                                  |
-| Layout              | `forceMobile`, `mobileBreakpoint`, `columnLayout`, `defaultColumnLayout`, `onColumnRename`, `fitColumns`, `columnWidths`, `collapsibleColumnGroups`. Group headings and native desktop collapse buttons render; cards honor the resulting visibility.                                       |
-| Selection           | `selectable`, controlled `selectedIds`, initial `defaultSelectedIds`.                                                                                                                                                                                                                       |
-| Rows                | `onRowClick` activates a row or card; `isCellFlashing` marks changed cells with `data-flash`.                                                                                                                                                                                               |
-| Labels and styling  | `tableLabel`, `labels`, `dir`, `locale`, `classNames`.                                                                                                                                                                                                                                      |
-| Local source status | `isLoading`, `isFetching`, `error`, `refetch`; a supplied source owns its status.                                                                                                                                                                                                           |
-| Extensions          | `features?: readonly ComposedFeature<NoInfer<TRow>>[]`. Compose factories from the native feature entries; the row type is inferred from the data/columns contract.                                                                                                                         |
+| Prop group          | Props and behavior                                                                                                                                                                                                                                    |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Required            | `columns: readonly ColumnInput<TRow>[]`, `rowKey: (row: TRow) => string`.                                                                                                                                                                             |
+| Data                | `data?: readonly TRow[]` or `source?: TableSource<TRow>`; source takes precedence. `getSearchText` customizes local search.                                                                                                                           |
+| Server tier         | A `useServerData` source as `source`; `onViewChange` tells a table over `data` what the reader changed, never the mount. See [data tiers](./data-tiers.md#server-rows-through-a-server-source).                                                       |
+| Query               | `defaults`, `paginationMode`, `urlSync`, `urlKey`, `urlAdapter`; these configure the fallback frontend source, not a separately supplied source.                                                                                                      |
+| Search and sorting  | `searchable` defaults to true; `searchDebounceMs` defaults to the engine's 300ms interval; `searchPlaceholder` overrides the placeholder label. `multiSort` enables shift-key sort levels.                                                            |
+| Layout              | `forceMobile`, `mobileBreakpoint`, `columnLayout`, `defaultColumnLayout`, `onColumnRename`, `fitColumns`, `columnWidths`, `collapsibleColumnGroups`. Group headings and native desktop collapse buttons render; cards honor the resulting visibility. |
+| Selection           | Compose `selection()` from `/selection`. `selectedIds` controls it; `defaultSelectedIds` starts the table's own selection.                                                                                                                            |
+| Rows                | `onRowClick` activates a row or card; `isCellFlashing` marks changed cells with `data-flash`.                                                                                                                                                         |
+| Labels and styling  | `tableLabel`, `labels`, `dir`, `locale`, `classNames`.                                                                                                                                                                                                |
+| Local source status | `isLoading`, `isFetching`, `error`, `refetch`; a supplied source owns its status.                                                                                                                                                                     |
+| Extensions          | `features?: readonly ComposedFeature<NoInfer<TRow>>[]`. Compose factories from the native feature entries; the row type is inferred from the data/columns contract.                                                                                   |
 
 `summaryRow?: SummaryRowFn<TRow>` builds a column-aligned footer from the current
 source row scope. A visible column `footer` or the table `footer` slot also
@@ -493,14 +494,13 @@ for page, grouped, server and mobile behavior.
 `confirm?: ConfirmHandler` also belong to `DataTableProps`. Density is
 `"comfortable" | "compact"`; `confirm` supplies adapter-owned row-action confirmation.
 
-Events are `update:selectedIds(ids: string[])`,
-`update:columnLayout(layout: ColumnLayoutState)` and
-`update:density(density: TableDensity)`. They are change requests;
-prop replacement does not itself emit another request. The corresponding
-models are `v-model:selected-ids`, `v-model:column-layout` and `v-model:density`.
-The host may accept a request by updating the prop or reject it by keeping the
-current value. `onDensityChange` observes the request once; it is separate from
-the model event. A template ref exposes
+Column layout and density are `v-model:column-layout` and `v-model:density`.
+Row selection is `selection()` from the kit's `/selection` entry: pass
+`selectedIds` when the host holds the ids, and accept or ignore the ids from
+`onSelectionChange`. Replacing a prop does not itself emit another request.
+The host may accept a request by updating its value or reject it by keeping
+the current value. `onDensityChange` observes the density request once; it is
+separate from the model event. A template ref exposes
 `DataTableHandle<TRow>`: `focus()` focuses the scroll surface, `runtime` is the
 table runtime, and `getView()` returns the current `TableRuntimeView` or
 `undefined` after disposal.
@@ -541,7 +541,7 @@ Optional feature controls use these additional semantic class hooks:
 - Hierarchy/actions: `groupRow`, `groupLabel`, `groupToggle`, `groupCount`,
   `groupAggregate`, `groupMore`, `groupCheckbox`, `treeCell`, `treeToggle`,
   `treeSpacer`, `expandToggle`, `detailRow`, `detailCell`, `actionsHeader`,
-  `actionsCell`, `cardActions`, `rowAction`, `addRow`, `resizeHandle`.
+  `actionsCell`, `cardActions`, `addRow`, `resizeHandle`.
 - View controls: `densitySelect`, `fullscreenButton`, `viewsMenu`, `viewsButton`,
   `viewsPanel`, `viewsRow`, `viewsItem`, `viewsDelete`, `viewsDivider`,
   `viewsSaveRow`, `viewsInput`, `viewsSave`.
@@ -639,9 +639,7 @@ Additional class hooks land on their corresponding functional elements:
 The Vue targets `row-action`, `grid-focus-announcer` and `status`
 are corrected to the canonical `action-button`, `grid-announcer` and
 `table-status-announcer` targets. Update selectors that used those old part
-names. The existing `rowAction` class hook remains an alias for `actionButton`,
-and `status` remains an alias for `tableStatusAnnouncer`; both old and new
-classes reach the same native element.
+names.
 
 ## Adapter shell and structural Chrome
 

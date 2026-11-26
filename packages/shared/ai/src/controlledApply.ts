@@ -36,9 +36,9 @@ export interface ApplyCallLedger {
     method: PropertyKey,
     args: readonly unknown[]
   ): { readonly completion: Promise<void> } | null;
-  trackLegacy(run: () => unknown, capture: () => void): unknown;
+  trackHostCall(run: () => unknown, capture: () => void): unknown;
   assertActive(): void;
-  observeLegacy(revision: number): void;
+  observeHostRevision(revision: number): void;
   seal(): void;
   drain(): Promise<void> | void;
   whenApplied(): Promise<void>;
@@ -91,7 +91,7 @@ function copyArguments(args: readonly unknown[]): readonly unknown[] {
 
 interface ApplyLane {
   readonly queue: Job[];
-  readonly legacyPending: Set<object>;
+  readonly hostPending: Set<object>;
   active: Job | undefined;
   epoch: number;
   pump(): void;
@@ -102,7 +102,7 @@ export function createLiveApplyCoordinator(
 ): LiveApplyCoordinator {
   const lane: ApplyLane = {
     queue: [],
-    legacyPending: new Set(),
+    hostPending: new Set(),
     active: undefined,
     epoch: 0,
     pump() {
@@ -134,14 +134,14 @@ function beginCall(
   let ordinal = 0;
   let failure: ControlledApplyError | undefined;
   let listening = false;
-  const ownedLegacy = new Set<object>();
+  const ownedHostCalls = new Set<object>();
   const fail = (error: ControlledApplyError): void => {
     if (failure || closed) return;
     failure = error;
-    if (ownedLegacy.size > 0) {
+    if (ownedHostCalls.size > 0) {
       lane.epoch += 1;
-      for (const token of ownedLegacy) lane.legacyPending.delete(token);
-      ownedLegacy.clear();
+      for (const token of ownedHostCalls) lane.hostPending.delete(token);
+      ownedHostCalls.clear();
     }
     // Cancelling an owned job splices the queue; retain the admission snapshot.
     for (const job of lane.queue.slice())
@@ -310,7 +310,7 @@ function beginCall(
         execute: () => {
           try {
             check();
-            if (lane.legacyPending.size > 0)
+            if (lane.hostPending.size > 0)
               throw new ControlledApplyError(
                 "apply-pending",
                 "wait for the earlier host mutation before requesting a controlled change",
@@ -440,7 +440,7 @@ function beginCall(
       return { completion };
     },
     assertActive,
-    trackLegacy(run, capture) {
+    trackHostCall(run, capture) {
       listen();
       try {
         if (sealed)
@@ -450,7 +450,7 @@ function beginCall(
             lastRevision
           );
         check();
-        if (lane.active || lane.queue.length > 0 || lane.legacyPending.size > 0)
+        if (lane.active || lane.queue.length > 0 || lane.hostPending.size > 0)
           throw new ControlledApplyError(
             "apply-pending",
             "wait for earlier mutations before invoking another mutator",
@@ -462,8 +462,8 @@ function beginCall(
         throw problem;
       }
       const token = {};
-      lane.legacyPending.add(token);
-      ownedLegacy.add(token);
+      lane.hostPending.add(token);
+      ownedHostCalls.add(token);
       const captured = (): void => {
         assertActive();
         capture();
@@ -474,8 +474,8 @@ function beginCall(
         invoked = true;
         result = run();
       } catch (error) {
-        lane.legacyPending.delete(token);
-        ownedLegacy.delete(token);
+        lane.hostPending.delete(token);
+        ownedHostCalls.delete(token);
         throw error;
       }
       if (
@@ -487,8 +487,8 @@ function beginCall(
           captured();
           return result;
         } finally {
-          lane.legacyPending.delete(token);
-          ownedLegacy.delete(token);
+          lane.hostPending.delete(token);
+          ownedHostCalls.delete(token);
         }
       }
       const completion = Promise.resolve(result)
@@ -497,8 +497,8 @@ function beginCall(
           return value;
         })
         .finally(() => {
-          lane.legacyPending.delete(token);
-          ownedLegacy.delete(token);
+          lane.hostPending.delete(token);
+          ownedHostCalls.delete(token);
         });
       settlements.push(
         completion.then(
@@ -510,7 +510,7 @@ function beginCall(
       );
       return completion;
     },
-    observeLegacy(revision) {
+    observeHostRevision(revision) {
       lastRevision = revision;
     },
     seal() {
@@ -522,7 +522,7 @@ function beginCall(
     close() {
       if (closed) return;
       if (
-        ownedLegacy.size > 0 ||
+        ownedHostCalls.size > 0 ||
         lane.active?.owner === owner ||
         lane.queue.some((job) => job.owner === owner)
       )

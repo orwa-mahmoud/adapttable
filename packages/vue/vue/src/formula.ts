@@ -1,9 +1,9 @@
 /** Opt-in spreadsheet formulas over the neutral parser and evaluator. */
 import {
-  buildFormulaColumns as buildNeutralFormulaColumns,
   type FormulaColumnSpec,
   type FormulaColumnsResult,
 } from "@adapttable/core";
+import { buildFormulaColumns as buildNeutralFormulaColumns } from "@adapttable/core/formula";
 import { type MaybeRefOrGetter, toValue } from "vue";
 
 import type { ColumnDef } from "./columnDef";

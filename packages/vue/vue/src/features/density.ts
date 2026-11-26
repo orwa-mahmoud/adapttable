@@ -4,6 +4,7 @@ import { toValue, watch } from "vue";
 
 import { useDensityUrlState } from "../url/useDensityUrlState";
 import { DENSITY_CONTROL } from "../viewControls/contracts";
+import { toolbarEntry } from "./toolbarEntries";
 
 function useDensityMount<TRow>(context: FeatureMountContext<TRow>): void {
   const density = useDensityUrlState(
@@ -35,6 +36,17 @@ export function densityChooser(): StaticTableFeature {
   return {
     ...coreDensityChooser(),
     mount: useDensityMount,
+    renders: [
+      toolbarEntry((entry) =>
+        entry.read(DENSITY_STATE)
+          ? entry.draw(DENSITY_CONTROL, {
+              ...entry.presentation,
+              density: entry.density,
+              onDensityChange: entry.onDensityChange,
+            })
+          : null
+      ),
+    ],
     requiredSlots: [DENSITY_CONTROL],
   };
 }

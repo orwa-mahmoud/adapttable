@@ -2,6 +2,7 @@
 import { ref, shallowRef } from "vue";
 
 import { type ColumnDef, DataTable, type DataTableHandle } from "../../src";
+import { selection } from "../../src/selection";
 
 interface Row {
   id: string;
@@ -14,6 +15,9 @@ const columns: ColumnDef<Row>[] = [
   { key: "score", header: "Score" },
 ];
 const selected = ref<string[]>([]);
+function changeSelection(ids: string[]): void {
+  selected.value = ids;
+}
 const table = shallowRef<DataTableHandle<Row>>();
 const rowKey = (row: Row) => row.id;
 </script>
@@ -21,11 +25,12 @@ const rowKey = (row: Row) => row.id;
 <template>
   <DataTable
     ref="table"
-    v-model:selected-ids="selected"
     :data="rows"
     :columns="columns"
     :row-key="rowKey"
-    selectable
+    :features="[
+      selection({ selectedIds: selected, onSelectionChange: changeSelection }),
+    ]"
     :url-sync="false"
   >
     <template #cell="{ row }"

@@ -14,11 +14,20 @@ import { type TableChrome } from "./chrome/tableChromeContract";
 import type { ColumnDef } from "./columnDef";
 import { ChromeExtrasGate } from "./features/chromeExtrasGate";
 import { pinnedSummaryRows } from "./features/factories";
+import { useFeatureState } from "./features/featureState";
 import { grouping } from "./features/grouping";
 import { FeatureProviders } from "./features/providers";
 import { rowPinning } from "./features/row-pinning";
+import {
+  GROUPING_STATE,
+  type GroupingState,
+  ROW_PINNING_STATE,
+  TREE_STATE,
+  type TreeState,
+} from "./features/stateKeys";
 import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
 import { tree } from "./features/tree";
+import type { RowPinningState } from "./rows/rowPinning";
 import { useFrontendData } from "./source/useFrontendData";
 import { createMemoryAdapter } from "./url/adapter";
 import { useTableChrome } from "./useTableChrome";
@@ -31,11 +40,20 @@ function renderLiveBody<TRow>(
 ) {
   const applied = applyTableFeatures({ features });
   const box: {
-    current: { chrome: TableChrome<TRow>; body: ChromeBodyData<TRow> };
+    current: {
+      chrome: TableChrome<TRow>;
+      body: ChromeBodyData<TRow>;
+      rowPinning: RowPinningState<unknown> | undefined;
+      grouping: GroupingState<TRow> | undefined;
+      tree: TreeState<TRow> | undefined;
+    };
   } = {
     current: undefined as unknown as {
       chrome: TableChrome<TRow>;
       body: ChromeBodyData<TRow>;
+      rowPinning: RowPinningState<unknown> | undefined;
+      grouping: GroupingState<TRow> | undefined;
+      tree: TreeState<TRow> | undefined;
     },
   };
   function BodyInner({
@@ -46,7 +64,11 @@ function renderLiveBody<TRow>(
     props: Parameters<typeof useTableChrome<TRow>>[0];
   }): ReactNode {
     const body = useVirtualChromeBodyData(chrome, props);
-    box.current = { chrome, body };
+    const rowPinning = useFeatureState(ROW_PINNING_STATE);
+    const grouping = useFeatureState(GROUPING_STATE) as
+      GroupingState<TRow> | undefined;
+    const tree = useFeatureState(TREE_STATE) as TreeState<TRow> | undefined;
+    box.current = { chrome, body, rowPinning, grouping, tree };
     return null;
   }
   function Probe() {
@@ -226,7 +248,7 @@ describe("useVirtualChromeBodyData with row grouping", () => {
       };
     });
 
-    expect(result.current.chrome.grouping).toBeDefined();
+    expect(result.current.grouping).toBeDefined();
     expect(result.current.body.groupingEntries).toBeDefined();
     expect(result.current.body.groupingEntries!).toHaveLength(2);
     // Leaf row virtualization is off while grouping is armed — the keyed
@@ -288,7 +310,7 @@ describe("useVirtualChromeBodyData with tree data", () => {
     );
 
     // One entry per row the source handed over — the whole walked tree.
-    expect(result.current.chrome.tree?.entries).toHaveLength(
+    expect(result.current.tree?.entries).toHaveLength(
       result.current.chrome.source.rows.length
     );
     // The body renders the window, not the walked tree.
@@ -540,7 +562,7 @@ describe("useVirtualChromeBodyData with pinned rows", () => {
       }
     );
 
-    expect(result.current.chrome.rowPinning).toBeDefined();
+    expect(result.current.rowPinning).toBeDefined();
     const windowed = result.current.body.virtualization.rows;
     expect(windowed.length).toBeGreaterThan(0);
     // Each entry names where its row sits in the dataset, resolved from the

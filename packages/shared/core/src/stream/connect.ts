@@ -56,7 +56,7 @@ export interface RowPatchStreamReconnect {
 }
 
 /**
- * What {@link openRowPatchStream} needs.
+ * What `openRowPatchStream` needs.
  *
  * @public
  */

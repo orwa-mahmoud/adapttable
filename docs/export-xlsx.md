@@ -337,11 +337,13 @@ use: `ExportWriter`, `ExportViewEntry`, `ExportPayload`, `ExportWriteContext`,
   cell colours beyond the header, group and total styling, or a
   right-to-left sheet view; text in any script is stored as UTF-8 and reads correctly, and a
   reader can switch the sheet's direction in the spreadsheet application.
-- ZIP entries are stored uncompressed, which keeps the writer free of a
-  compression library. The file is larger than one a spreadsheet application
-  saves; past the browser's comfortable size, build it on the server with
-  `onExportAll`.
+- The table's own export deflates the worksheet with the browser's
+  `CompressionStream`, with no compression library: a 15,000-row, 12-column
+  workbook is about 1 MB instead of 10 MB. Where the browser cannot deflate,
+  and in the synchronous `build()` and `buildTableXlsx`, entries are stored
+  uncompressed. Past the browser's comfortable size, build the file on the
+  server with `onExportAll`.
 - The archive timestamp is fixed, so the same table produces the same bytes
-  every time — convenient for tests and caching.
+  every time in the same browser — convenient for tests and caching.
 - For CSV and the full export flow, see [Browser and server exports](./exporting.md);
   for PDF and print, see [PDF export and print layout](./export-pdf.md).

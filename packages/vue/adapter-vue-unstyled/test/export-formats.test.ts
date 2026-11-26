@@ -13,11 +13,8 @@ import { exportCsv } from "../src/export";
 import { exportCsv as legacyExportCsv } from "../src/export-csv";
 import { exportPdf } from "../src/export-pdf";
 import { exportXlsx } from "../src/export-xlsx";
-import {
-  exportPdf as barrelPdf,
-  exportXlsx as barrelXlsx,
-} from "../src/features";
 import { standardFeatures } from "../src/preset";
+import { selection } from "../src/selection";
 import {
   click,
   deferred,
@@ -27,7 +24,6 @@ import {
   tick,
   write,
 } from "./filter-editing-helpers";
-
 const rows = [
   { id: "a", name: "Ada" },
   { id: "g", name: "Grace" },
@@ -46,10 +42,8 @@ function required<T>(value: T | undefined): T {
 }
 
 describe("public native export entries", () => {
-  it("preserves CSV entry identity and exposes the same format factories from features", () => {
+  it("preserves CSV entry identity", () => {
     expect(exportCsv).toBe(legacyExportCsv);
-    expect(barrelPdf).toBe(exportPdf);
-    expect(barrelXlsx).toBe(exportXlsx);
   });
 });
 
@@ -93,7 +87,10 @@ describe.each([
         extension.toUpperCase()
       );
       await click(host, "export-csv-button");
-      expect(after).toHaveBeenCalledOnce();
+      // The format's writer loads on the first export; the file follows.
+      await vi.waitFor(() => {
+        expect(after).toHaveBeenCalledOnce();
+      });
       expect(required(files[0]).mimeType).toBe(
         extension === "pdf"
           ? "application/pdf"
@@ -148,6 +145,10 @@ describe.each([
         extension.toUpperCase()
       );
       await click(host, "export-csv-button");
+      // The format's writer loads on the first export; the file follows.
+      await vi.waitFor(() => {
+        expect(files).toHaveLength(1);
+      });
       expect(required(files[0]).type).toBe(
         extension === "pdf"
           ? "application/pdf"
@@ -219,8 +220,7 @@ describe.each([
     const { host } = mountNative(() =>
       h(DataTable<Row>, {
         ...base,
-        selectedIds: selected.value,
-        features: [feature],
+        features: [selection({ selectedIds: selected.value }), feature],
       })
     );
     await tick();

@@ -131,8 +131,9 @@ export function tableRuntimeFor<TRow>(
       (feature, index) => feature.id ?? `feature-${String(index)}`
     )
   );
-  let publisher = new TableRuntimePublisher<TRow>();
-  let publishedEngine: TableSource<TRow>["tableEngine"];
+  // Follows a replaced source's engine itself, an intervening server source
+  // with no engine included; the source owns its engine.
+  const publisher = new TableRuntimePublisher<TRow>();
   const frame = computed(() => {
     const current: RuntimeTableOptions<TRow> = options?.() ?? {};
     return {
@@ -143,27 +144,23 @@ export function tableRuntimeFor<TRow>(
       },
     };
   });
-  const publish = () => {
-    // Track only the assembled frame, not state read by downstream engine
-    // listeners while the publisher refreshes its neutral view.
+  // Track only the assembled frame, not state read by downstream engine
+  // listeners while the publisher builds its view. Staging is cheap; the
+  // view is built on its first read and kept while the frame is the same.
+  const stage = () => {
     const current = frame();
-    return untracked(() => {
-      const engine = current.chrome.source.tableEngine;
-      if (engine !== publishedEngine) {
-        // The neutral publisher belongs to the engine it first observes.
-        // Release that binding when a host replaces its source, including
-        // an intervening server source with no engine. The source itself
-        // owns its engine; replacing the reader must never dispose it.
-        publisher = new TableRuntimePublisher<TRow>();
-        publishedEngine = engine;
-      }
-      return publisher.update(current.chrome, current.actions);
+    untracked(() => {
+      publisher.stage(current.chrome, current.actions);
     });
+  };
+  const publish = () => {
+    stage();
+    return untracked(() => publisher.view());
   };
   return {
     rowAt: (index) => {
-      const view = publish();
-      return (view.visibleRows ?? view.rows)[index];
+      stage();
+      return untracked(() => publisher.visibleRows())[index];
     },
     labels: () => table.labels(),
     featureIds,

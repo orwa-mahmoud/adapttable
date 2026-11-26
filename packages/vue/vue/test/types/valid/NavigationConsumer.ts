@@ -36,8 +36,10 @@ export const columns: readonly ColumnDef<Row>[] = [
   { key: "score", accessor: (row) => row.score, editable: true },
 ];
 export const features: readonly TableFeature<Row>[] = [
-  cellNavigation({
+  cellNavigation<Row>({
     onRangeChange: (range: CellRange | null) => range?.head.col,
+    onPaste: (edits: CellEdit<Row>[]) => edits.map((edit) => edit.row.score),
+    onCut: (range) => range.head.row,
   }),
   columnSelectionCheckbox(),
   findInTable(),
@@ -50,8 +52,6 @@ export const options: UseDataTableShellOptions<Row> = {
   columns,
   rowKey: (row) => row.id,
   features,
-  onCellPaste: (edits: CellEdit<Row>[]) => edits.map((edit) => edit.row.score),
-  onCellCut: (range) => range.head.row,
 };
 export type PublicNavigationContracts = [
   GridFocusOptions<Row>,

@@ -48,9 +48,10 @@ describe("applyTableFeatures", () => {
     const resolved = applyTableFeatures({
       features: [grouping("first"), grouping("second")],
     });
+    // One id, one declaration: the earlier one's labels do not ride along.
     expect(resolved).toEqual({
       groupBy: "second",
-      featureLabels: [GROUPING_LABELS, GROUPING_LABELS],
+      featureLabels: [GROUPING_LABELS],
     });
   });
 

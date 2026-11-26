@@ -33,6 +33,36 @@ export function People({ rows, columns, setRows }) {
 `insertRow`, `updateRow`, `upsertRow` and `removeRow` build the batch. A later
 patch sees what an earlier one did.
 
+## Row identity
+
+An update keeps the row's id. `updateRow` whose changes would give the row a
+new id is refused with an error that names `rekeyRow`. To change an id, rekey
+the row:
+
+```ts
+setRows(applyRowPatches(rows, [rekeyRow("draft-7", { id: "INV-1042" })], byId));
+```
+
+The row keeps its place, and a later patch in the same batch finds it by the
+new id. A new id another row already holds throws `RowIdConflictError`
+(`from`, `to`) and leaves the rows as they were; an id no row holds does
+nothing. `rowRekeys(log)` reads, from a `RowPatchLog`, each row's id before the
+batch and after it, with chained rekeys collapsed.
+
+Patches stored or sent as id-changing updates read as rekeys with
+`applyRowPatches(rows, patches, byId, { rekeyUpdates: true })`. A row patch
+stream already applies its frames that way (`STREAMED_ROW_PATCHES`), and it
+accepts `{ type: "rekey", id, changes }` frames.
+
+Hand the rekeyed array back as `data` and everything the table keeps by row
+id moves with the row in the same change, in React, Vue and Angular alike: a
+selected row stays selected (a host that holds `selectedIds` hears
+`onSelectionChange` with the new id), a pinned row keeps its side and place,
+an open detail or tree node stays open, a focused cell keeps the keyboard
+focus, and an open editor keeps its draft,
+its dirty mark, its validation and save errors and any conflict question. A
+copy of the array, or new rows that are not a patch of the old, move nothing.
+
 ## Incremental re-evaluation
 
 Hand the array `applyRowPatches` returns back as `data` — do not spread it.

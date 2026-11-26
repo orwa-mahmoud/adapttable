@@ -3,7 +3,7 @@ import { type RefObject } from "react";
 
 import { useScrollToTableTop } from "../hooks/useScrollToTableTop";
 import type { ComposedTableProps } from "../props";
-import type { TableChrome } from "./tableChromeContract";
+import { baseActiveFilterCount } from "./baseFilterCount";
 
 /**
  * The shared scroll-restoration wiring every adapter `<DataTable>` needs:
@@ -13,14 +13,12 @@ import type { TableChrome } from "./tableChromeContract";
  *
  * @typeParam TRow - The row type.
  * @param ref - The adapter's root element.
- * @param chrome - The {@link useTableChrome} result.
  * @param props - The adapter's `ComposedTableProps`.
  *
  * @public
  */
 export function useChromeScrollReset<TRow>(
   ref: RefObject<HTMLElement | null>,
-  chrome: TableChrome<TRow>,
   props: ComposedTableProps<TRow>
 ): void {
   // In infinite mode a page increment means "the window grew at the
@@ -29,7 +27,10 @@ export function useChromeScrollReset<TRow>(
   // keys only count the page when paged.
   useScrollToTableTop({
     ref,
-    deps: scrollResetKeys(props.source, chrome.activeFilterCount),
+    deps: scrollResetKeys(
+      props.source,
+      baseActiveFilterCount(props.activeFilterCount, props.extraChips)
+    ),
     enabled: props.scrollToTopOnChange,
     offset: props.stickyTop,
     gap: props.scrollTopGap,

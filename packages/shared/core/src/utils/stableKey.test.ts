@@ -35,4 +35,23 @@ describe("stableKey", () => {
   it("keeps null entries inside objects", () => {
     expect(stableKey({ a: null })).toBe('{"a":null}');
   });
+
+  it("keeps distinct dates distinct, as JSON writes them", () => {
+    const first = new Date("2026-03-08T00:00:00.000Z");
+    const second = new Date("2026-03-09T00:00:00.000Z");
+    expect(stableKey({ from: first })).not.toBe(stableKey({ from: second }));
+    expect(stableKey({ from: first })).toBe(JSON.stringify({ from: first }));
+    expect(stableKey([first])).toBe(JSON.stringify([first]));
+  });
+
+  it("orders keys the same way whatever order they arrive in", () => {
+    const composed = "\u00e9";
+    const decomposed = "e\u0301";
+    const a = { [composed]: 1, [decomposed]: 2, z: 3, Z: 4, "10": 5, "9": 6 };
+    const b = { Z: 4, z: 3, [decomposed]: 2, "9": 6, [composed]: 1, "10": 5 };
+    expect(stableKey(a)).toBe(stableKey(b));
+    expect(stableKey({ [composed]: 1 })).not.toBe(
+      stableKey({ [decomposed]: 1 })
+    );
+  });
 });

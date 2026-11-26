@@ -11,6 +11,7 @@
  */
 import type { RowCallback } from "../contracts/rowCallback";
 import { featureStateKey } from "../features/featureKeys";
+import type { TableRuntimeView } from "../features/tableRuntime";
 import type {
   RowDropPosition,
   RowMoveMenuModel,
@@ -287,9 +288,12 @@ export interface RowReorderState<
     ],
     void
   >;
-  /** Keyboard/touch destinations for this row, when nested. */
+  /**
+   * Keyboard/touch destinations for this row, when nested. A control drawing
+   * during render passes the view it draws.
+   */
   moveMenu: RowCallback<
-    [row: NoInfer<TRow>],
+    [row: NoInfer<TRow>, view?: TableRuntimeView<NoInfer<TRow>>],
     RowMoveMenuModel<TRow> | undefined
   >;
   /** Select a destination from the move menu. */

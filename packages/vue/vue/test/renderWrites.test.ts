@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createApp, defineComponent, h, nextTick, shallowRef } from "vue";
 
 import type * as TableStoreModule from "../../../shared/core/src/state/tableStore";
+import { selection } from "../src/features/headlessFactories";
 import { rowPinning } from "../src/features/rowPinning";
 import {
   DesktopTableChrome,
@@ -86,10 +87,11 @@ describe("a Vue table render", () => {
             columns,
             rowKey,
             urlAdapter: adapter,
-            selectable: true,
-            selectedIds: selectedIds.value,
             defaults: { limit: limit.value },
-            features: [rowPinning()],
+            features: [
+              selection({ selectedIds: selectedIds.value }),
+              rowPinning(),
+            ],
           }));
           return () =>
             DesktopTableChrome({ model: shell!.desktop.value, slots });

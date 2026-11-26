@@ -18,7 +18,7 @@ import {
   type GroupAggregateOverrides,
   parseGroupAggregateOverrides,
   serializeGroupAggregateOverrides,
-} from "../grouping/groupAggregateOverrides";
+} from "../grouping/groupAggregateUrlCodec";
 import { viewStoreActions } from "../state/localViewStore";
 import {
   createTableStore,

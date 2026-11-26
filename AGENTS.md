@@ -74,10 +74,13 @@ standing pattern is **Chrome + slots**:
   bindings, and a binding's `./adapter` entry serves its kits. New machinery
   goes on those entries, never on a main entry; a name that leaves a main
   entry stays there as a deprecated alias of the same value or type until the
-  next major. Angular is the exception for state a kit shares with the table
-  (injection tokens, feature registries and the functions that read them):
-  ng-packagr bundles `@adapttable/angular/adapter` with its own copy of every
-  module it reaches, so those stay on `@adapttable/angular`.
+  next major. State a kit and the table share at runtime (an injection
+  token, a feature registry, a store key) is declared once, and every entry
+  imports it by package name from the entry that declares it, never by a
+  relative path that would bundle a second copy. In Angular that entry is
+  `@adapttable/angular`: ng-packagr builds each entry with every module it
+  reaches by path, and `scripts/angular-injection-tokens.test.mjs` fails when
+  a token is constructed in two bundles.
 
 ## Framework packages
 
@@ -109,7 +112,11 @@ standing pattern is **Chrome + slots**:
   config-object API.
 - The showcase is the only demo app. Competitor comparisons stay factual and
   dated.
-- Everything is opt-in: omitting a prop renders nothing and costs nothing.
+- A behaviour turns on only by composing its feature. The base names no
+  feature. Table props are what every table has: the data or source, columns,
+  the row key, labels, locale, layout and class names. Selection, filters,
+  editing, grouping and the rest are `features` entries, with their options
+  in the call. Omitting a feature renders nothing and costs nothing.
 - The table never owns the data. Every write — edits, adds, deletes,
   reorders — is a callback to the host; the table asks, the host does.
 

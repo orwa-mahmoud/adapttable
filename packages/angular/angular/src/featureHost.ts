@@ -4,15 +4,18 @@ import type { TableLabels } from "@adapttable/core";
  * in an injector registers against each table created in it.
  */
 import {
+  type ContrastRules,
   createFeatureHost,
   disposeFeatureHost,
   EMPTY_FEATURE_HOST,
   type FeatureApplyInput,
   type FeatureHostState,
+  type FeatureListEntry,
   type FeaturePatch,
   type FeatureRender,
   type FeatureSetup,
   type FeatureStateKey,
+  flattenFeatures,
   mergeFeaturePatches,
   planFeatureRegistration,
   preferLastById,
@@ -69,10 +72,21 @@ export interface AdaptTableFeature extends FeatureSetup<
   apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
   /** The strings the feature draws, with their English defaults. */
   readonly labels?: Partial<TableLabels>;
+  /** The high-contrast rules for what the feature draws. */
+  readonly contrast?: ContrastRules;
+  /** Where its fills sit in a slot several features fill; lower first. */
+  readonly rank?: number;
   /** The slots this feature draws into, and what draws each one. */
   readonly renders?: readonly FeatureRender<never, SlotComponent>[];
-  /** Start live behavior once the table runtime exists; dispose with the table. */
+  /**
+   * Start live behavior once the table runtime exists. The table keeps it
+   * while the feature is composed: an ordinary option change hands
+   * `context.feature()` the new declaration, and only removing the feature,
+   * changing its `dependencies` or destroying the table releases it, once.
+   */
   mount?(context: FeatureMountContext): void | (() => void);
+  /** Values that, when any changes, replace the feature's mounted resource. */
+  readonly dependencies?: readonly unknown[];
   /**
    * The code this feature brings to the table, by key. The table reaches a
    * feature's code only through a composed feature, so a table never bundles
@@ -246,11 +260,11 @@ export function provideAdaptTableFeatures(
  */
 export function tableFeaturesOf(
   injector: Injector,
-  own: readonly AdaptTableFeature[] | undefined
+  own: readonly FeatureListEntry<AdaptTableFeature>[] | undefined
 ): readonly (AdaptTableFeature & { readonly id: string })[] {
   const provided =
     injector.get(ADAPTTABLE_FEATURES, null, { optional: true }) ?? [];
-  return withIds([...provided, ...(own ?? [])]);
+  return withIds([...provided, ...flattenFeatures(own ?? [])]);
 }
 
 /**
@@ -259,7 +273,9 @@ export function tableFeaturesOf(
  */
 export function featureHostFor(
   injector: Injector,
-  own: MaybeSignalOptional<readonly AdaptTableFeature[]> | undefined
+  own:
+    | MaybeSignalOptional<readonly FeatureListEntry<AdaptTableFeature>[]>
+    | undefined
 ): Signal<FeatureHostState> {
   const features = computed(() => tableFeaturesOf(injector, readMaybe(own)), {
     equal: sameItems,

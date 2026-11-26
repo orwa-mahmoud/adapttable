@@ -6,6 +6,7 @@ import { resizableColumns } from "@adapttable/vue-unstyled/resizable-columns";
 import { rowActions } from "@adapttable/vue-unstyled/row-actions";
 import { rowAppearance } from "@adapttable/vue-unstyled/row-appearance";
 import { rowPinning } from "@adapttable/vue-unstyled/row-pinning";
+import { selection } from "@adapttable/vue-unstyled/selection";
 import { h, shallowRef } from "vue";
 interface Person {
   id: string;
@@ -25,6 +26,7 @@ const columns: readonly ColumnDef<Person>[] = [
   { key: "score", header: "Score", sortable: true },
 ];
 const features = [
+  selection(),
   resizableColumns(),
   rowPinning({
     pinnedRowIds: pins,
@@ -84,7 +86,6 @@ const rowKey = (row: Person) => row.id;
       :features="features"
       :dir="rtl ? 'rtl' : 'ltr'"
       :url-sync="false"
-      :selectable="true"
       table-label="Native row behaviors"
     />
   </main>

@@ -16,7 +16,7 @@ This page maps the API across and shows a before/after.
 Things mantine-datatable leaves to you that AdaptTable does for you:
 
 - **One data contract for client and server.** Pass `data` for in-memory rows,
-  or `data` + `total` + `loading` + `onQueryChange` for a paginated API — no
+  or a `useServerData` source for a paginated API — no
   manual `useEffect`/`fetching`/`totalRecords` juggling. See
   [data tiers](./data-tiers.md).
 - **A real filter UI.** Declare `filter` on a column and get a kit-native
@@ -49,20 +49,20 @@ through it exactly as mantine-datatable did.
 
 `<DataTable>` props:
 
-| mantine-datatable                             | `@adapttable/mantine`                                      | Notes                                                                                                                                 |
-| --------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `records`                                     | `data`                                                     | Frontend tier. Server tier: `data` (current page) + `total` + `onQueryChange`.                                                        |
-| `columns`                                     | `columns`                                                  | Field-by-field mapping below.                                                                                                         |
-| `idAccessor`                                  | `rowKey`                                                   | **Required** — `(row) => string`. There is no `"id"` default.                                                                         |
-| `sortStatus` / `onSortStatusChange`           | `sortable` per column (+ `multiSort()`)                    | AdaptTable owns sort state and applies it; you don't sort `records` yourself.                                                         |
-| `page` / `onPageChange` / `totalRecords`      | automatic (frontend) or `total` + `onQueryChange` (server) | Pagination is `"auto"`: paged on desktop, infinite on mobile.                                                                         |
-| `recordsPerPage` / `recordsPerPageOptions`    | built-in page-size control                                 | Defaults to `PAGE_SIZE_OPTIONS`; `DEFAULT_LIMIT` is 25.                                                                               |
-| `selectedRecords` / `onSelectedRecordsChange` | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Composing `bulkActions()` turns selection on and mounts the bulk bar.                                                                 |
-| `isRecordSelectable`                          | — (gate in your bulk actions)                              | No per-row checkbox disable; use a bulk action's `disabledReason` to refuse ineligible ids (`selectionGetId` only customises the id). |
-| `rowExpansion={{ content }}`                  | `rowDetail(fn)`                                            | `(row) => ReactNode`; multiple rows may be open at once.                                                                              |
-| `fetching`                                    | `loading`                                                  | Server tier: skeleton when empty, subtle refresh indicator otherwise.                                                                 |
-| `noRecordsText` / `emptyState`                | `slots.empty`                                              | Replace the empty state; `slots.skeleton` replaces the loader.                                                                        |
-| `column.filter` (your JSX popover)            | column `filter` shorthand                                  | Declarative — see below. JSX is still allowed via the `filters(<Form />)` feature.                                                    |
+| mantine-datatable                             | `@adapttable/mantine`                                                         | Notes                                                                                                                                 |
+| --------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `records`                                     | `data`                                                                        | Frontend tier. Server tier: `useServerData({ rows, total, onQueryChange })`.                                                          |
+| `columns`                                     | `columns`                                                                     | Field-by-field mapping below.                                                                                                         |
+| `idAccessor`                                  | `rowKey`                                                                      | **Required** — `(row) => string`. There is no `"id"` default.                                                                         |
+| `sortStatus` / `onSortStatusChange`           | `sortable` per column (+ `multiSort()`)                                       | AdaptTable owns sort state and applies it; you don't sort `records` yourself.                                                         |
+| `page` / `onPageChange` / `totalRecords`      | automatic (frontend) or `useServerData` (server)                              | Pagination is `"auto"`: paged on desktop, infinite on mobile.                                                                         |
+| `recordsPerPage` / `recordsPerPageOptions`    | built-in page-size control                                                    | Defaults to `PAGE_SIZE_OPTIONS`; `DEFAULT_LIMIT` is 25.                                                                               |
+| `selectedRecords` / `onSelectedRecordsChange` | `selection({ selectedIds, onSelectionChange })`, `bulkActions([…])` for a bar | Composing `bulkActions()` turns selection on and mounts the bulk bar.                                                                 |
+| `isRecordSelectable`                          | — (gate in your bulk actions)                                                 | No per-row checkbox disable; use a bulk action's `disabledReason` to refuse ineligible ids (`selectionGetId` only customises the id). |
+| `rowExpansion={{ content }}`                  | `rowDetail(fn)`                                                               | `(row) => ReactNode`; multiple rows may be open at once.                                                                              |
+| `fetching`                                    | `loading`                                                                     | Server tier: skeleton when empty, subtle refresh indicator otherwise.                                                                 |
+| `noRecordsText` / `emptyState`                | `slots.empty`                                                                 | Replace the empty state; `slots.skeleton` replaces the loader.                                                                        |
+| `column.filter` (your JSX popover)            | column `filter` shorthand                                                     | Declarative — see below. JSX is still allowed via the `filters(<Form />)` feature.                                                    |
 
 Column fields (`DataTableColumn` → `ColumnDef`):
 

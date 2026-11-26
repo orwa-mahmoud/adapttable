@@ -48,6 +48,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/ng-bootstrap/saved-views";
+import { selection } from "@adapttable/ng-bootstrap/selection";
 import { selectionStats } from "@adapttable/ng-bootstrap/selection-stats";
 import { sidePanel } from "@adapttable/ng-bootstrap/side-panel";
 import { statusBar } from "@adapttable/ng-bootstrap/status-bar";
@@ -103,6 +104,7 @@ export const kit = {
   commandPalette,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   rowAppearance,
   statusBar,

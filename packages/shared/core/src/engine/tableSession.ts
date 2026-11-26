@@ -18,7 +18,7 @@ import { attachIncrementalView } from "../rows/incrementalView";
 import { rowPatchLog, rowPatchLogStartsAt } from "../rows/patch";
 import { sourceCapabilities } from "../source/capabilities";
 import { sameItems } from "../utils/sameItems";
-import { cellValue } from "./cellValue";
+import { cellValueReader } from "./cellValue";
 import type {
   CreateTableEngineOptions,
   TableCallbackRefresh,
@@ -527,6 +527,24 @@ export function createTableSession<TRow>(
 
   /** The reads of one state, as a {@link TableEngineReader}. */
   function readerOf(state: () => SessionState<TRow>): TableEngineReader<TRow> {
+    /** Lookups by id against one row array: a scan, then an index. */
+    let lookups:
+      | {
+          readonly data: readonly TRow[];
+          readonly getRowId: (row: TRow) => string;
+          readonly revision: number;
+          reads: number;
+          index: Map<string, TRow> | undefined;
+        }
+      | undefined;
+    /** Each column's cell reader, for the columns and locale they read. */
+    let readers:
+      | {
+          readonly columns: readonly ColumnMetadata<TRow>[];
+          readonly locale: string | undefined;
+          readonly byKey: Map<string, (row: TRow) => unknown>;
+        }
+      | undefined;
     return {
       snapshot() {
         assertLive();
@@ -538,10 +556,18 @@ export function createTableSession<TRow>(
       },
       cellValue(row, columnKey) {
         assertLive();
-        const current = state();
-        const column = columnByKey(current.view.columns, columnKey);
-        if (!column) return undefined;
-        return cellValue(row, column, current.view.locale);
+        const { columns, locale } = state().view;
+        if (readers?.columns !== columns || readers.locale !== locale) {
+          readers = { columns, locale, byKey: new Map() };
+        }
+        let read = readers.byKey.get(columnKey);
+        if (read === undefined) {
+          const column = columnByKey(columns, columnKey);
+          if (!column) return undefined;
+          read = cellValueReader(column, locale);
+          readers.byKey.set(columnKey, read);
+        }
+        return read(row);
       },
       rows(scope) {
         assertLive();
@@ -552,9 +578,28 @@ export function createTableSession<TRow>(
       rowByKey(rowKey) {
         assertLive();
         const current = state();
-        return current.view.data.find(
-          (row) => current.view.getRowId(row) === rowKey
-        );
+        const { data, getRowId } = current.view;
+        // The data revision moves on an in-place change the host invalidates.
+        const revision = current.revisions.data;
+        if (
+          lookups?.data !== data ||
+          lookups.getRowId !== getRowId ||
+          lookups.revision !== revision
+        ) {
+          lookups = { data, getRowId, revision, reads: 0, index: undefined };
+        }
+        lookups.reads += 1;
+        // One read scans; a second read of the same rows indexes them once.
+        if (lookups.index === undefined && lookups.reads > 1) {
+          const index = new Map<string, TRow>();
+          for (const row of data) {
+            const id = getRowId(row);
+            if (!index.has(id)) index.set(id, row);
+          }
+          lookups.index = index;
+        }
+        if (lookups.index) return lookups.index.get(rowKey);
+        return data.find((row) => getRowId(row) === rowKey);
       },
     };
   }
@@ -654,9 +699,14 @@ export function createTableSession<TRow>(
     candidate = { ...next, revisions: bump(committed.revisions, pendingAxes) };
   }
 
+  /**
+   * Apply a configure patch to the draft's view. With `derive` false the
+   * caller rebuilds the derivation itself, once, after its other changes.
+   */
   function applyConfigurePatch(
     draft: Draft<TRow>,
-    patch: TableEngineConfigPatch<TRow>
+    patch: TableEngineConfigPatch<TRow>,
+    derive = true
   ): readonly TableRevisionAxis[] {
     const current = draft.view;
     const next: EngineView<TRow> = { ...current };
@@ -696,6 +746,7 @@ export function createTableSession<TRow>(
 
     if (changed.size === 0) return [];
     draft.view = next;
+    if (!derive) return axesForChange(changed);
     if (changed.has("identity")) {
       // Row identity decides membership in every incremental bucket, so the
       // view is rebuilt rather than reconciled.
@@ -876,6 +927,17 @@ export function createTableSession<TRow>(
     stageCandidate(patch, next) {
       assertLive();
       writeCandidate((draft) => {
+        // Rows that arrive with a changed view derive once, under that view,
+        // rather than under the old view and again under the new one.
+        if (next?.data && applyConfigurePatch(draft, patch, false).length > 0) {
+          draft.view = {
+            ...draft.view,
+            data: next.data,
+            ...(next.columns ? { columns: next.columns } : {}),
+          };
+          rebuild(draft);
+          return;
+        }
         if (next?.data) replaceData(draft, next.data);
         if (next?.columns) {
           draft.view = { ...draft.view, columns: next.columns };

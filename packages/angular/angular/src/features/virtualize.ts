@@ -1,7 +1,14 @@
 /**
  * Virtualize feature factory for Angular.
  */
-import type { AdaptTableFeature } from "@adapttable/angular";
+import {
+  type AdaptTableFeature,
+  FEATURE_IMPLEMENTATIONS,
+  injectKeyedVirtualization,
+  injectTableVirtualizer,
+  type VirtualizeImplementation,
+  withFeatureImplementation,
+} from "@adapttable/angular";
 import { coreVirtualize, type VirtualizeInput } from "@adapttable/core/binding";
 
 /**
@@ -10,6 +17,12 @@ import { coreVirtualize, type VirtualizeInput } from "@adapttable/core/binding";
  * @public
  */
 export type VirtualizeOptions = VirtualizeInput;
+
+/** The windowing code, filed by {@link virtualize}. */
+const VIRTUALIZE_IMPLEMENTATION: VirtualizeImplementation = {
+  flat: injectTableVirtualizer,
+  keyed: injectKeyedVirtualization,
+};
 
 /**
  * Render only the rows in view.
@@ -28,5 +41,9 @@ export type VirtualizeOptions = VirtualizeInput;
 export function virtualize(
   options: VirtualizeOptions = true
 ): AdaptTableFeature {
-  return coreVirtualize(options);
+  return withFeatureImplementation(
+    coreVirtualize(options) as AdaptTableFeature,
+    FEATURE_IMPLEMENTATIONS.virtualize,
+    VIRTUALIZE_IMPLEMENTATION
+  );
 }

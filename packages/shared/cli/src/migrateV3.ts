@@ -1,32 +1,10 @@
-/**
- * One source location that the v3 migration cannot rewrite safely.
- *
- * @public
- */
-export interface V3MigrationIssue {
-  /** One-based source line. */
-  line: number;
-  /** One-based source column. */
-  column: number;
-  /** Why the source needs a person to choose its replacement. */
-  message: string;
-}
-
-/**
- * Result of applying the safe v3 source transforms.
- *
- * @public
- */
-export interface V3MigrationResult {
-  /** Rewritten source, or the original source when nothing was safe to change. */
-  code: string;
-  /** Whether `code` differs from the input. */
-  changed: boolean;
-  /** Number of named imports moved to `@adapttable/react/adapter`. */
-  movedImports: number;
-  /** Ambiguous v2 usages left untouched. */
-  issues: readonly V3MigrationIssue[];
-}
+import {
+  issueAt,
+  type MigrationIssue,
+  type MigrationResult,
+  reportPatterns,
+  rewriteImports,
+} from "./importMigration";
 
 /**
  * Where each moved export now lives, keyed by the specifier a v2 source
@@ -326,141 +304,6 @@ const REMOVED_DATA_TABLE_PROPS = [
   "rowActions",
 ] as const;
 
-const ADAPTTABLE_IMPORT =
-  /(import|export)\s+(type\s+)?\{([^{}]*)\}\s+from\s+(["'])(@adapttable\/[a-z0-9/-]+)\4[ \t]*;?/g;
-const IMPORT_SPECIFIER =
-  /^(?:type\s+)?([A-Za-z_$][\w$]*)(?:\s+as\s+[A-Za-z_$][\w$]*)?$/;
-
-function locationAt(
-  source: string,
-  index: number
-): Pick<V3MigrationIssue, "line" | "column"> {
-  const before = source.slice(0, index);
-  const line = before.split("\n").length;
-  const lineStart = before.lastIndexOf("\n");
-  return { line, column: index - lineStart };
-}
-
-function issueAt(
-  source: string,
-  index: number,
-  message: string
-): V3MigrationIssue {
-  return { ...locationAt(source, index), message };
-}
-
-function formatImport(
-  keyword: string,
-  typeOnly: boolean,
-  specifiers: readonly string[],
-  quote: string,
-  source: string
-): string {
-  return `${keyword}${typeOnly ? " type" : ""} { ${specifiers.join(
-    ", "
-  )} } from ${quote}${source}${quote};`;
-}
-
-function rewriteCoreImports(source: string): {
-  code: string;
-  movedImports: number;
-  issues: V3MigrationIssue[];
-} {
-  let code = "";
-  let cursor = 0;
-  let movedImports = 0;
-  const issues: V3MigrationIssue[] = [];
-
-  for (const match of source.matchAll(ADAPTTABLE_IMPORT)) {
-    const index = match.index;
-    const [
-      declaration,
-      keyword = "import",
-      typeKeyword = "",
-      body = "",
-      quote = '"',
-      from = "",
-    ] = match;
-    code += source.slice(cursor, index);
-    cursor = index + declaration.length;
-
-    const redirect = REDIRECTED_SPECIFIERS[from];
-    const routes = MOVED_EXPORTS[from];
-    if (!redirect && !routes) {
-      code += declaration;
-      continue;
-    }
-
-    const specifiers = body
-      .split(",")
-      .map((part) => part.trim())
-      .filter(Boolean);
-    const parsed = specifiers.map((specifier) =>
-      IMPORT_SPECIFIER.exec(specifier)
-    );
-    if (specifiers.length === 0 || parsed.includes(null)) {
-      code += declaration;
-      issues.push(
-        issueAt(
-          source,
-          index,
-          `Complex ${from} import left unchanged; split or comment-preserving migration requires review.`
-        )
-      );
-      continue;
-    }
-
-    const typeOnly = typeKeyword.length > 0;
-    if (redirect) {
-      // The whole subpath moved, so the names are untouched and only the
-      // specifier changes.
-      code += formatImport(keyword, typeOnly, specifiers, quote, redirect);
-      movedImports += specifiers.length;
-      continue;
-    }
-
-    // Group by destination so a mixed import becomes one declaration per
-    // package it now spans, in a stable order.
-    const kept: string[] = [];
-    const byDestination = new Map<string, string[]>();
-    specifiers.forEach((specifier, specifierIndex) => {
-      const importedName = parsed[specifierIndex]?.[1] ?? "";
-      const destination = routes?.[importedName];
-      if (destination === undefined) {
-        kept.push(specifier);
-        return;
-      }
-      const bucket = byDestination.get(destination) ?? [];
-      bucket.push(specifier);
-      byDestination.set(destination, bucket);
-    });
-
-    if (byDestination.size === 0) {
-      code += declaration;
-      continue;
-    }
-
-    const declarations: string[] = [];
-    if (kept.length > 0) {
-      declarations.push(formatImport(keyword, typeOnly, kept, quote, from));
-    }
-    const destinations = [...byDestination.keys()].sort((left, right) =>
-      left.localeCompare(right)
-    );
-    for (const destination of destinations) {
-      const names = byDestination.get(destination) ?? [];
-      declarations.push(
-        formatImport(keyword, typeOnly, names, quote, destination)
-      );
-      movedImports += names.length;
-    }
-    code += declarations.join("\n");
-  }
-
-  code += source.slice(cursor);
-  return { code, movedImports, issues };
-}
-
 /** Next index after a quoted JSX attribute, or -1 when the quote never closes. */
 function skipQuoted(source: string, from: number, quote: string): number {
   let i = from + 1;
@@ -514,10 +357,7 @@ function eachDataTableOpeningTag(
   }
 }
 
-function reportAmbiguousUsages(
-  source: string,
-  issues: V3MigrationIssue[]
-): void {
+function reportAmbiguousUsages(source: string, issues: MigrationIssue[]): void {
   eachDataTableOpeningTag(source, (text, tagIndex) => {
     for (const prop of REMOVED_DATA_TABLE_PROPS) {
       const propMatch = new RegExp(
@@ -557,11 +397,7 @@ function reportAmbiguousUsages(
     ],
   ];
 
-  for (const [pattern, message] of ambiguousPatterns) {
-    for (const match of source.matchAll(pattern)) {
-      issues.push(issueAt(source, match.index, message));
-    }
-  }
+  reportPatterns(source, ambiguousPatterns, issues);
 }
 
 /**
@@ -573,8 +409,11 @@ function reportAmbiguousUsages(
  *
  * @public
  */
-export function migrateV3Source(source: string): V3MigrationResult {
-  const rewritten = rewriteCoreImports(source);
+export function migrateV3Source(source: string): MigrationResult {
+  const rewritten = rewriteImports(source, {
+    redirects: REDIRECTED_SPECIFIERS,
+    routes: MOVED_EXPORTS,
+  });
   reportAmbiguousUsages(rewritten.code, rewritten.issues);
   return {
     code: rewritten.code,

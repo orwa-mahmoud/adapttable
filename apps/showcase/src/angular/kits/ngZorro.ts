@@ -3,7 +3,8 @@
 // the native Angular or React entry graphs.
 import "../ngZorro.css";
 
-import { type LocaleKey, locales } from "@adapttable/i18n";
+import { type LocaleKey } from "@adapttable/i18n";
+import { locales } from "@adapttable/i18n/catalog";
 import { AdaptDataTable } from "@adapttable/ng-zorro";
 import {
   AdaptAssistantButton,
@@ -47,6 +48,7 @@ import {
   AdaptSavedViewsPanel,
   savedViews,
 } from "@adapttable/ng-zorro/saved-views";
+import { selection } from "@adapttable/ng-zorro/selection";
 import { selectionStats } from "@adapttable/ng-zorro/selection-stats";
 import { sidePanel } from "@adapttable/ng-zorro/side-panel";
 import { statusBar } from "@adapttable/ng-zorro/status-bar";
@@ -198,6 +200,7 @@ export const kit = {
   commandPalette,
   extraRows,
   findInTable,
+  selection,
   selectionStats,
   rowAppearance,
   statusBar,

@@ -6,6 +6,7 @@ import {
 } from "@adapttable/angular";
 import { pinnedSummaryRows } from "@adapttable/taiga-ui/pinned-summary-rows";
 import { rowPinning } from "@adapttable/taiga-ui/row-pinning";
+import { selection } from "@adapttable/taiga-ui/selection";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -57,7 +58,6 @@ let selectable = false;
       [urlSync]="false"
       [forceMobile]="mobile"
       [maxHeight]="maxHeight"
-      [selectable]="selectable"
       [summaryRow]="summaryRow"
       [features]="features"
     />
@@ -71,18 +71,20 @@ class Host {
   readonly onPinnedRowIdsChange = vi.fn((next: RowPinState) => {
     this.pinnedRowIds.set(next);
   });
-  readonly features = controlled
-    ? [
-        rowPinning({
-          pinnedRowIds: this.pinnedRowIds,
-          onPinnedRowIdsChange: this.onPinnedRowIdsChange,
-        }),
-      ]
-    : features;
+  readonly features = [
+    ...(selectable ? [selection()] : []),
+    ...(controlled
+      ? [
+          rowPinning({
+            pinnedRowIds: this.pinnedRowIds,
+            onPinnedRowIdsChange: this.onPinnedRowIdsChange,
+          }),
+        ]
+      : features),
+  ];
   readonly summaryRow = summaryRow;
   readonly mobile = mobile;
   readonly maxHeight = maxHeight;
-  readonly selectable = selectable;
 }
 
 async function mount() {

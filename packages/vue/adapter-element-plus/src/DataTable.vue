@@ -41,7 +41,6 @@ const {
   searchable = true,
   forceMobile = undefined,
   urlSync = undefined,
-  selectable = undefined,
   multiSort = undefined,
   fitColumns = undefined,
   collapsibleColumnGroups = undefined,
@@ -50,7 +49,6 @@ const {
   ...props
 } = defineProps<DataTableProps<TRow>>();
 const emit = defineEmits<{
-  "update:selectedIds": [ids: string[]];
   "update:columnLayout": [layout: ColumnLayoutState];
   "update:density": [density: TableDensity];
 }>();
@@ -78,7 +76,6 @@ const shell = useDataTableShell<TRow>(() =>
       searchable,
       forceMobile,
       urlSync,
-      selectable,
       multiSort,
       fitColumns,
       collapsibleColumnGroups,
@@ -90,12 +87,6 @@ const shell = useDataTableShell<TRow>(() =>
         props.onDensityChange?.(density);
         emit("update:density", density);
       },
-      onSelectionChange:
-        selectable ||
-        props.selectedIds !== undefined ||
-        props.defaultSelectedIds !== undefined
-          ? (ids: string[]) => emit("update:selectedIds", ids)
-          : undefined,
       onColumnLayoutChange: (layout: ColumnLayoutState) =>
         emit("update:columnLayout", layout),
     },

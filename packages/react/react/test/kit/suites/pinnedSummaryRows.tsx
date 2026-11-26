@@ -18,7 +18,7 @@ export function pinnedSummaryRowsTests(
   kit: ReactKitUnderTest
 ): readonly ConformanceTest[] {
   const { DataTable, render } = kit;
-  const { grouping, pinnedSummaryRows } = kit.features;
+  const { grouping, pinnedSummaryRows, selection } = kit.features;
   return collectConformanceTests(({ describe, it }) => {
     interface Task {
       id: string;
@@ -105,8 +105,7 @@ export function pinnedSummaryRowsTests(
             rowKey={(r) => r.id}
             urlSync={false}
             forceMobile
-            onSelectionChange={() => undefined}
-            features={[pinnedSummaryRows({ top: [TOP] })]}
+            features={[selection(), pinnedSummaryRows({ top: [TOP] })]}
           />
         );
         const card = part("pinned-summary-top");

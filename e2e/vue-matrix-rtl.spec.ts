@@ -2,7 +2,7 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
 import { builtAdapters, pathOf } from "../apps/showcase/matrix.mjs";
-import { getLabels } from "../packages/shared/i18n/src/index";
+import { getLabels } from "../packages/shared/i18n/src/catalog";
 
 const part = (page: Page, name: string) =>
   page.locator(`[data-adapttable-part="${name}"]`);

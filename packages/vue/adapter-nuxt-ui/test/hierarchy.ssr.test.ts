@@ -7,6 +7,7 @@ import { renderToString } from "vue/server-renderer";
 import { DataTable } from "../src";
 import { grouping } from "../src/grouping";
 import { rowDetail } from "../src/row-detail";
+import { selection } from "../src/selection";
 
 it("server-renders independent grouped requests and host detail content", async () => {
   interface Row {
@@ -25,8 +26,8 @@ it("server-renders independent grouped requests and host detail content", async 
             rowKey: (row) => row.id,
             forceMobile: mobile,
             urlSync: false,
-            selectable: true,
             features: [
+              selection(),
               grouping("team"),
               rowDetail<Row>((row) => h("p", `Detail ${row.name}`), [name]),
             ],

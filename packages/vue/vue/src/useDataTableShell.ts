@@ -6,7 +6,6 @@ import {
   type RowAction,
   stableKey,
   type TableDensity,
-  type TableSource,
 } from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
@@ -18,11 +17,14 @@ import {
   DENSITY_STATE,
   type FeatureHostState,
   featureLabelsOf,
+  type FeatureStateKey,
   filterTreeSnapshot,
   FIND_BAR,
   LiveFeatureHost,
   overlayFeatureOptions,
   projectedGroupingSource,
+  rekeyedIds,
+  rekeyIdSet,
   resolveUrlAdapter,
   type RuntimeChromeInput,
   sameFilterTree,
@@ -31,9 +33,6 @@ import {
   type TableRuntime,
   TableRuntimePublisher,
   type TableRuntimeView,
-  TOOLBAR_EXTRAS,
-  type ToolbarExtrasSlotProps,
-  undoRedoToolbarProps,
   withRowPinActions,
 } from "@adapttable/core/binding";
 import { type EditingBundle, isCellEditable } from "@adapttable/core/editing";
@@ -56,32 +55,26 @@ import { mountForcedColorsStyles } from "./a11y/forcedColors";
 import {
   BULK_ACTIONS_CONTROL,
   BULK_ACTIONS_MODEL,
-  COMMAND_PALETTE_CONTROL,
   COMMAND_PALETTE_MODEL,
   CONTEXT_MENU_CONTROL,
   CONTEXT_MENU_MODEL,
-  EXPORT_CONTROL,
-  EXPORT_MODEL,
-  PRINT_CONTROL,
   PRINT_MODEL,
   SIDE_PANEL_CONTROL,
   SIDE_PANEL_MODEL,
-  UNDO_REDO_CONTROL,
 } from "./actions/contracts";
 import { mergeVueAttrs, toVueAttrs } from "./attrs";
-import {
-  COLUMN_HEADER_RENAME,
-  columnMenuSlotKey,
-} from "./columns/columnMenuContracts";
+import { COLUMN_HEADER_RENAME } from "./columns/columnMenuContracts";
 import { drawnRowEditing, sameDrawnView } from "./editing/editableUnitModel";
 import { type FeatureLifecycle, useFeatureLifecycle } from "./featureLifecycle";
 import {
   assertRequiredSlots,
   featureOptionsOf,
+  featureSlotDrawer,
   featureSlotFillsOf,
   normalizeFeatures,
   renderFeatureSlot,
 } from "./features/tableFeature";
+import { FILTERS_PANEL, renderToolbarEntries } from "./features/toolbarEntries";
 import { createFeatureState, provideFeatureState } from "./featureState";
 import {
   groupingModelKey,
@@ -93,7 +86,6 @@ import {
   batchEditBarSlotKey,
   COLUMN_RESIZE_MODEL,
   editableCellSlotKey,
-  editHistoryModelKey,
   editingChromeModelKey,
   editingModelKey,
   filterViewKey,
@@ -121,7 +113,6 @@ import {
 import { useMountStagger } from "./motion/useMountStagger";
 import {
   FILL_HANDLE_CONTROL,
-  FIND_BUTTON,
   FIND_MODEL,
   GRID_ANNOUNCER,
   GRID_FOCUS_MODEL,
@@ -145,15 +136,9 @@ import {
   rowReorderModelKey,
 } from "./specialized/contracts";
 import { useOptionFields, useScopeActivity } from "./store";
-import { TABLE_STORE } from "./tableStore";
+import { followRowRekeys, TABLE_STORE, withTableStore } from "./tableStore";
 import { useDataTable } from "./useDataTable";
-import {
-  DENSITY_CONTROL,
-  FULLSCREEN_CONTROL,
-  FULLSCREEN_MODEL,
-  SAVED_VIEWS_CONTROL,
-  SAVED_VIEWS_MODEL,
-} from "./viewControls/contracts";
+import { FULLSCREEN_MODEL, SAVED_VIEWS_MODEL } from "./viewControls/contracts";
 export type {
   DataTableHandle,
   DataTableSurface,
@@ -252,7 +237,6 @@ function liveEditingBundle<TRow>(
 export function useDataTableShell<TRow>(
   input: MaybeRefOrGetter<UseDataTableShellOptions<TRow>>
 ) {
-  mountForcedColorsStyles();
   const options = computed(() => toValue(input));
   // The features are composed when the host's features change, not each
   // time another option (the data) does: their slot fills reach every row.
@@ -260,6 +244,7 @@ export function useDataTableShell<TRow>(
   const declarations = computed(() =>
     normalizeFeatures(featureList.value ?? [])
   );
+  mountForcedColorsStyles(() => declarations.value);
   const patches = computed(() => featureOptionsOf(declarations.value));
   // Read option by option: a change to one option reaches its readers only.
   const resolved = useOptionFields(() =>
@@ -326,7 +311,7 @@ export function useDataTableShell<TRow>(
   const selectionState = useRowSelection(() => ({
     enabled: selectionEnabled,
     rows: rowInventory.value.visibleRows,
-    rowKey: resolved.value.rowKey,
+    rowKey: resolved.value.selectionGetId ?? resolved.value.rowKey,
     selectedIds: resolved.value.selectedIds,
     defaultSelectedIds: resolved.value.defaultSelectedIds,
     onSelectionChange: resolved.value.onSelectionChange,
@@ -335,6 +320,17 @@ export function useDataTableShell<TRow>(
       source.value.capabilities?.fullDataset === true ||
       source.value.allFilteredRows !== undefined,
   }));
+  // A selected row stays selected under its new id; the host hears the move.
+  followRowRekeys<TRow>(tableStore, (log) => {
+    const current = selectionState.selectedIds.value;
+    const next = rekeyIdSet(
+      current,
+      rekeyedIds(log, (row: TRow) =>
+        (resolved.value.selectionGetId ?? resolved.value.rowKey)(row)
+      )
+    );
+    if (next !== current) selectionState.replace([...next]);
+  });
   const selection = computed(() =>
     selectionEnabled.value ? selectionState : undefined
   );
@@ -379,7 +375,6 @@ export function useDataTableShell<TRow>(
     },
     { flush: "post" }
   );
-  const editHistory = state.get(editHistoryModelKey<TRow>());
   const gridFocus = state.get(GRID_FOCUS_MODEL);
   const find = state.get(FIND_MODEL);
   const selectionStats = state.get(SELECTION_STATS_MODEL);
@@ -399,111 +394,37 @@ export function useDataTableShell<TRow>(
     }
     resolved.value.onDensityChange?.(next);
   };
-  const toolbarExtrasProps = computed((): ToolbarExtrasSlotProps => ({
-    density: density.value,
-    onDensityChange: setDensity,
-    labels: table.labels.value,
-    ...(editHistory.value
-      ? undoRedoToolbarProps(
-          resolved.value.undoRedoButtons,
-          editHistory.value,
-          table.labels.value
-        )
-      : {}),
-  }));
   const fullscreen = state.get(FULLSCREEN_MODEL);
   const savedViewsState = state.get(SAVED_VIEWS_MODEL);
-  const renderViewControls = (
+  const actionPresentation = (
     classNames?: Readonly<Record<string, string | undefined>>
-  ) => {
-    const presentation = {
-      labels: table.labels.value,
-      dir: table.dir.value,
-      classNames,
-      container: fullscreen.value?.container,
-    };
-    return {
-      savedViews: savedViewsState.value
-        ? renderFeatureSlot(SAVED_VIEWS_CONTROL, slotFills.value, {
-            ...presentation,
-            savedViews: savedViewsState.value,
-          })
-        : [],
-      display: [
-        ...(featureDensity.value
-          ? renderFeatureSlot(DENSITY_CONTROL, slotFills.value, {
-              ...presentation,
-              density: density.value,
-              onDensityChange: setDensity,
-            })
-          : []),
-        ...(fullscreen.value
-          ? renderFeatureSlot(FULLSCREEN_CONTROL, slotFills.value, {
-              ...presentation,
-              fullscreen: fullscreen.value,
-            })
-          : []),
-      ],
-    };
-  };
+  ) => ({
+    labels: table.labels.value,
+    dir: table.dir.value,
+    classNames,
+    container: fullscreen.value?.container,
+  });
   /**
-   * The toolbar's controls in the order every binding draws them: the
-   * filters, saved views and columns first, then undo and redo, find, the
-   * display controls and the actions that export, print or open the
-   * palette.
+   * The toolbar's controls: the kit's filters panel, then each composed
+   * feature's entry in feature-id order.
    */
   const renderToolbarExtras = (
     classNames?: Readonly<Record<string, string | undefined>>
-  ) => {
-    const view = renderViewControls(classNames);
+  ): VNodeChild[] => {
+    const presentation = actionPresentation(classNames);
+    const read = <T>(key: FeatureStateKey<T>): T | undefined =>
+      state.get(key).value;
     return [
-      ...renderFeatureSlot(TOOLBAR_EXTRAS, slotFills.value, {
-        ...toolbarExtrasProps.value,
-        classNames,
-      }),
-      ...view.savedViews,
-      ...renderColumnMenu(classNames),
-      ...renderFeatureSlot(UNDO_REDO_CONTROL, slotFills.value, {
-        ...toolbarExtrasProps.value,
-        classNames,
-      }),
-      ...(find.value?.openBar
-        ? renderFeatureSlot(FIND_BUTTON, slotFills.value, {
-            label: table.labels.value.findInTable,
-            onClick: find.value.openBar,
-            className: classNames?.findButton,
-          })
-        : []),
-      ...view.display,
-      ...renderActionToolbar(classNames),
+      ...renderFeatureSlot(FILTERS_PANEL, slotFills.value, {}),
+      ...renderToolbarEntries(slotFills.value, (featureId) => ({
+        presentation,
+        density: density.value,
+        onDensityChange: setDensity,
+        read,
+        draw: featureSlotDrawer(slotFills.value, featureId),
+      })),
     ];
   };
-  const renderColumnMenu = (
-    classNames?: Readonly<Record<string, string | undefined>>
-  ) => [
-    ...(resolved.value.enableColumnMenu
-      ? renderFeatureSlot(columnMenuSlotKey<TRow>(), slotFills.value, {
-          allColumns: table.allColumns.value,
-          layout: table.layout.value,
-          labels: table.labels.value,
-          featureHost: registered.value,
-          classNames,
-          container: fullscreen.value?.container,
-          dir: table.dir.value,
-          hasRowActions: rowActions.value?.hasRowActions,
-          hasRowReorder: resolved.value.rowReorder === true,
-          onAutoSize: () => table.autoSizeColumns(root.value),
-          onAutoSizeColumn: (key) => table.autoSizeColumn(root.value, key),
-          onSortColumn: (key, dir) => source.value.setSort(key, dir),
-          onRenameColumn: (key, name) => table.layout.value.setName(key, name),
-          onFilterColumn: filterPanel.value?.openPanel
-            ? () => filterPanel.value?.openPanel?.()
-            : undefined,
-          sortBy: table.sortBy.value,
-          sortDir: table.sortDir.value,
-        })
-      : []),
-  ];
   const publishedReorder = state.get(rowReorderModelKey<TRow>());
   const rowReorder = computed(() =>
     table.layout.value.isHidden(REORDER_COLUMN_KEY)
@@ -523,39 +444,8 @@ export function useDataTableShell<TRow>(
   const bulkActions = state.get(BULK_ACTIONS_MODEL);
   const commandPalette = state.get(COMMAND_PALETTE_MODEL);
   const contextMenu = state.get(CONTEXT_MENU_MODEL);
-  const exporting = state.get(EXPORT_MODEL);
   const printing = state.get(PRINT_MODEL);
   const sidePanel = state.get(SIDE_PANEL_MODEL);
-  const actionPresentation = (
-    classNames?: Readonly<Record<string, string | undefined>>
-  ) => ({
-    labels: table.labels.value,
-    dir: table.dir.value,
-    classNames,
-    container: fullscreen.value?.container,
-  });
-  const renderActionToolbar = (
-    classNames?: Readonly<Record<string, string | undefined>>
-  ) => [
-    ...(commandPalette.value
-      ? renderFeatureSlot(COMMAND_PALETTE_CONTROL, slotFills.value, {
-          ...actionPresentation(classNames),
-          model: commandPalette.value,
-        })
-      : []),
-    ...(exporting.value
-      ? renderFeatureSlot(EXPORT_CONTROL, slotFills.value, {
-          ...actionPresentation(classNames),
-          model: exporting.value,
-        })
-      : []),
-    ...(printing.value
-      ? renderFeatureSlot(PRINT_CONTROL, slotFills.value, {
-          ...actionPresentation(classNames),
-          onPrint: printing.value,
-        })
-      : []),
-  ];
   const renderBulkActions = (
     classNames?: Readonly<Record<string, string | undefined>>
   ) =>
@@ -662,6 +552,8 @@ export function useDataTableShell<TRow>(
       (rowReorder.value ? 1 : 0) +
       (mergedActions.value.rowActions || rowEditControlsVisible.value ? 1 : 0),
   }));
+  // The card projection is read on demand: a table drawing desktop rows
+  // never builds it, and one drawing cards builds it when it reads `mobile`.
   const body = computed<TableBodyProjection<TRow>>(
     () =>
       resolved.value.bodyModel?.({
@@ -669,13 +561,20 @@ export function useDataTableShell<TRow>(
         rowInventory: rowInventory.value,
         options: resolved.value,
         desktop: actionsDesktop.value,
-        mobile: baseMobile.value,
+        get mobile() {
+          return baseMobile.value;
+        },
         pinning: pinning.value,
         grouping: grouping.value,
         tree: tree.value,
         detail: detail.value,
         selection: selection.value,
-      }) ?? { desktop: actionsDesktop.value, mobile: baseMobile.value }
+      }) ?? {
+        desktop: actionsDesktop.value,
+        get mobile() {
+          return baseMobile.value;
+        },
+      }
   );
   const windowedBody = computed(
     () => bodyWindow.value?.projection ?? body.value
@@ -1217,10 +1116,9 @@ export function useDataTableShell<TRow>(
   // reconciliation. A throwing computed can cache undefined and mask that
   // contract error on the error boundary's next render.
   const slotFills = computed(() => featureSlotFillsOf(declarations.value));
-  let publisher = new TableRuntimePublisher<TRow>();
-  let publishedEngine: TableSource<TRow>["tableEngine"];
+  // Follows a replaced source's engine itself; the source owns the engine.
+  const publisher = new TableRuntimePublisher<TRow>();
   let disposed = false;
-  let currentView: TableRuntimeView<TRow> | undefined;
   const frame = computed((): RuntimeChromeInput<TRow> => ({
     source: viewSource.value,
     getRowId: table.rowKey,
@@ -1265,24 +1163,20 @@ export function useDataTableShell<TRow>(
       : undefined,
     print: printing.value ? { onPrint: printing.value } : undefined,
   }));
-  const publish = (): TableRuntimeView<TRow> | undefined => {
-    if (disposed) return undefined;
-    const chrome = frame.value;
-    if (chrome.source.tableEngine !== publishedEngine) {
-      publisher = new TableRuntimePublisher<TRow>();
-      publishedEngine = chrome.source.tableEngine;
-    }
-    currentView = publisher.update(chrome, {
+  // Staging is cheap; the publisher builds the view on its first read and
+  // keeps it while the frame and the actions are the same objects.
+  const stage = (): boolean => {
+    if (disposed) return false;
+    publisher.stage(frame.value, {
       rowActions: rowActions.value?.hostActions,
       bulkActions: resolved.value.bulkActions,
     });
-    return currentView;
+    return true;
   };
+  const publish = (): TableRuntimeView<TRow> | undefined =>
+    stage() ? publisher.view() : undefined;
   const runtime: TableRuntime<TRow> = {
-    rowAt: (index) => {
-      const view = publish();
-      return (view?.visibleRows ?? view?.rows)?.[index];
-    },
+    rowAt: (index) => (stage() ? publisher.visibleRows()[index] : undefined),
     labels: () => table.labels.value,
     view: publish,
     featureIds: () =>
@@ -1297,12 +1191,17 @@ export function useDataTableShell<TRow>(
     try {
       assertRequiredSlots(declarations.value, slotFills.value);
       publish();
-      lifecycle.reconcile(declarations.value);
-      const model = resolved.value.editingModel;
-      if (model) {
-        editingLifecycle ??= lifecycleOwner?.run(useEditingLifecycle);
-        editingLifecycle?.reconcile([{ id: "editing-model", mount: model }]);
-      } else editingLifecycle?.reconcile([]);
+      withTableStore(tableStore, () => {
+        lifecycle.reconcile(declarations.value);
+        const model = resolved.value.editingModel;
+        if (model) {
+          editingLifecycle ??= lifecycleOwner?.run(useEditingLifecycle);
+          // Another model is another implementation: it replaces this one.
+          editingLifecycle?.reconcile([
+            { id: "editing-model", mount: model, dependencies: [model] },
+          ]);
+        } else editingLifecycle?.reconcile([]);
+      });
       publish();
     } finally {
       reconciling = false;
@@ -1368,7 +1267,6 @@ export function useDataTableShell<TRow>(
   };
   onScopeDispose(() => {
     disposed = true;
-    currentView = undefined;
     surface.value = null;
   });
   useMountStagger(
@@ -1403,7 +1301,6 @@ export function useDataTableShell<TRow>(
     savedViews: savedViewsState,
     urlAdapter,
     flushViewState,
-    toolbarExtrasProps,
     renderToolbarExtras,
     renderActiveFilterChips,
     renderBatchEditBar,
@@ -1415,16 +1312,6 @@ export function useDataTableShell<TRow>(
     find,
     selectionStats,
     bodyRows,
-    hasActionToolbar: computed(() =>
-      [
-        commandPalette.value?.button,
-        commandPalette.value?.open,
-        exporting.value?.onExportCsv,
-        printing.value,
-        toolbarExtrasProps.value.onUndo,
-        toolbarExtrasProps.value.onRedo,
-      ].some(Boolean)
-    ),
     renderBulkActions,
     renderActionOverlays,
     renderSidePanel,

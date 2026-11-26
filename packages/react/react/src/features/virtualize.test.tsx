@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { useRef } from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   FeatureProviders,
@@ -85,6 +86,67 @@ describe("virtualize fills the keyed window", () => {
       {
         virtualize: false,
       }
+    );
+  });
+});
+
+/** Where the list starts on the page, and how far the page is scrolled. */
+const LIST_TOP = 2000;
+const SCROLLED = 2500;
+const ENTRY = 50;
+
+function PageList() {
+  const root = useRef<HTMLDivElement | null>(null);
+  const keys = Array.from({ length: 200 }, (_, index) => `k${String(index)}`);
+  return (
+    <div ref={root}>
+      <FeatureSlot
+        slot={KEYED_WINDOW}
+        props={{
+          keys,
+          enabled: true,
+          estimateSize: ENTRY,
+          overscan: 0,
+          listRoot: root,
+          children: (window) => (
+            <div data-adapttable-part="tbody" data-testid="list">
+              {window.indices[0]}
+            </div>
+          ),
+        }}
+      />
+    </div>
+  );
+}
+
+describe("a page-scrolled keyed window", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    window.scrollY = 0;
+  });
+
+  it("measures where its list starts, so it covers the entries on screen", () => {
+    window.scrollY = SCROLLED;
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: Element) {
+        const top =
+          this.getAttribute("data-adapttable-part") === "tbody"
+            ? LIST_TOP - window.scrollY
+            : 0;
+        return DOMRect.fromRect({ x: 0, y: top, width: 800, height: 0 });
+      }
+    );
+    render(
+      <FeatureProviders
+        props={applyTableFeatures({ features: [virtualize()] })}
+      >
+        <PageList />
+      </FeatureProviders>
+    );
+    // 500px into the list is entry 10; a window that thought the list began
+    // at the top of the page would start at entry 50.
+    expect(screen.getByTestId("list")).toHaveTextContent(
+      String((SCROLLED - LIST_TOP) / ENTRY)
     );
   });
 });

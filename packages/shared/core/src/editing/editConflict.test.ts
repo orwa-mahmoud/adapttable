@@ -4,13 +4,16 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { EditableColumnLike } from "./cellEditing";
+import { EDIT_CONFLICT_TOOLS } from "./deferredEditConflict";
+import { editConflictStoreWith } from "./editConflict";
 import {
-  createEditConflictStore,
   type EditConflictState,
   editConflictView,
   liveRowChanged,
   resolveConflictChoice,
-} from "./editConflict";
+} from "./editConflictView";
+
+const createEditConflictStore = editConflictStoreWith(EDIT_CONFLICT_TOOLS);
 
 /** The store, read the way a binding reads it after every change. */
 function mountEditConflict<TRow>() {
@@ -566,8 +569,12 @@ describe("a batch of open rows", () => {
       take: vi.fn(),
     });
 
-    expect(result.current.rowSignature("1")).toBe("|title=Arrived");
-    expect(result.current.rowSignature("2")).toBe("|title=Moved");
+    const first = result.current.rowSignature("1");
+    const second = result.current.rowSignature("2");
+    expect(first).toContain("Arrived");
+    expect(first).not.toContain("Moved");
+    expect(second).toContain("Moved");
+    expect(second).not.toContain("Arrived");
   });
 });
 

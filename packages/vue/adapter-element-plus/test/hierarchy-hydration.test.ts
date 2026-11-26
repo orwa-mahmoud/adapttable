@@ -6,6 +6,7 @@ import { renderToString, type SSRContext } from "vue/server-renderer";
 import DataTable from "../src/DataTable.vue";
 import { grouping } from "../src/grouping";
 import { rowDetail } from "../src/row-detail";
+import { selection } from "../src/selection";
 import { node } from "./mount";
 import { installSsrTeleports } from "./ssr-teleports";
 interface Row {
@@ -24,9 +25,8 @@ function app(mobile: boolean) {
       rowKey: (row) => row.id,
       urlSync: false,
       forceMobile: mobile,
-      selectedIds: ["a"],
-      selectable: true,
       features: [
+        selection({ selectedIds: ["a"] }),
         grouping("team"),
         rowDetail<Row>((row) => h("p", `Details for ${row.name}`)),
       ],

@@ -10,6 +10,7 @@ import { pinnedSummaryRows } from "../src/pinned-summary-rows";
 import { resizableColumns } from "../src/resizable-columns";
 import { rowActions } from "../src/row-actions";
 import { rowAppearance } from "../src/row-appearance";
+import { selection } from "../src/selection";
 import { virtualize } from "../src/virtualize";
 import {
   find,
@@ -20,7 +21,6 @@ import {
   type Row,
   tick,
 } from "./feature-helpers";
-
 const data = [
   original,
   { ...original, id: "b", name: "Bea" },
@@ -33,6 +33,7 @@ it.each([false, true])(
   async (forceMobile) => {
     const view = mountFeatures(
       [
+        selection(),
         pinnedSummaryRows<Row>({
           top: [{ ...original, id: "total", name: "TOTAL" }],
         }),
@@ -54,7 +55,6 @@ it.each([false, true])(
       {
         data,
         forceMobile,
-        selectable: true,
         summaryRow: () => ({ name: "Total values" }),
       }
     );

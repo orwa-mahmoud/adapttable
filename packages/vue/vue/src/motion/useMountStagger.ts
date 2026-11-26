@@ -49,13 +49,14 @@ export function useMountStagger(
         root.value,
       ] as const,
     ([enabled, prefersReduced, key, element]) => {
+      // Motion off or reduced: nothing plays, so nothing is looked up.
+      if (!enabled || prefersReduced) {
+        generation = `${enabled}:${prefersReduced}:${key}`;
+        return;
+      }
       const marked =
         element?.querySelectorAll(MOUNT_STAGGER.selector).length ?? 0;
       const next = `${enabled}:${prefersReduced}:${key}:${marked}`;
-      if (!enabled || prefersReduced) {
-        generation = next;
-        return;
-      }
       if (!element || marked === 0 || next === generation) return;
       generation = next;
       const current = options();

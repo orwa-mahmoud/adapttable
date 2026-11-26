@@ -40,7 +40,7 @@ const { layout, onLayoutChange } = useColumnLayoutUrlState({
   defaultColumnLayout: { pinned: { person: "start" } },
 });
 const pageFeatures = [
-  kit.columnMenu(),
+  kit.columnMenu({ onRename: renameColumn }),
   kit.densityChooser(),
   kit.cellNavigation(),
   kit.exportCsv({
@@ -64,7 +64,6 @@ const features = [...pageFeatures, ...chrome];
         :is="kit.DataTable"
         v-bind="TABLE_PRESENTATION"
         :column-layout="layout"
-        :on-column-rename="renameColumn"
         table-label="People"
         url-key="cols"
         :data="ROWS"

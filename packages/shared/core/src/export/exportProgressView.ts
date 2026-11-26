@@ -8,6 +8,8 @@
  * are legal; this turns that state into the words and actions every binding
  * hands to its kit's surface.
  */
+import { BASE_LABELS } from "../labelGroups/baseLabels";
+import { EXPORT_LABELS } from "../labelGroups/exportLabels";
 import type { TableLabels } from "../types";
 import type { ExportProgressState, ExportStatus } from "./exportController";
 
@@ -76,10 +78,12 @@ export function exportProgressHeading(
   status: Exclude<ExportStatus, "idle">,
   labels: TableLabels
 ): string {
-  if (status === "busy") return labels.exportStarted ?? "Preparing export";
-  if (status === "done") return labels.exportDone ?? "Export complete";
-  if (status === "failed") return labels.exportFailed ?? "Export failed";
-  return labels.exportCancelled ?? "Export cancelled";
+  if (status === "busy")
+    return labels.exportStarted ?? EXPORT_LABELS.exportStarted;
+  if (status === "done") return labels.exportDone ?? EXPORT_LABELS.exportDone;
+  if (status === "failed")
+    return labels.exportFailed ?? EXPORT_LABELS.exportFailed;
+  return labels.exportCancelled ?? EXPORT_LABELS.exportCancelled;
 }
 
 /** The part the export button carries, which dismissing returns focus to. */
@@ -131,18 +135,19 @@ export function exportProgressView(
     progress: progress.status === "busy" ? progress.value : undefined,
     progressLabel:
       progress.value === undefined
-        ? (labels.exportStarted ?? "Preparing export")
-        : (labels.exportProgress?.(progress.value) ??
-          `Export ${String(progress.value)}% complete`),
+        ? (labels.exportStarted ?? EXPORT_LABELS.exportStarted)
+        : (labels.exportProgress ?? EXPORT_LABELS.exportProgress)(
+            progress.value
+          ),
     cancel: onCancel
-      ? { label: labels.cancel ?? "Cancel", onAction: onCancel }
+      ? { label: labels.cancel ?? BASE_LABELS.cancel, onAction: onCancel }
       : undefined,
     retry: onRetry
-      ? { label: labels.retry ?? "Retry", onAction: onRetry }
+      ? { label: labels.retry ?? BASE_LABELS.retry, onAction: onRetry }
       : undefined,
     dismiss: onDismiss
       ? {
-          label: labels.exportDismiss ?? "Dismiss",
+          label: labels.exportDismiss ?? EXPORT_LABELS.exportDismiss,
           onAction: () => {
             onDismiss();
             focusExportTrigger();
@@ -152,7 +157,7 @@ export function exportProgressView(
     download: progress.downloadUrl
       ? {
           url: progress.downloadUrl,
-          label: labels.exportDownload ?? "Download export",
+          label: labels.exportDownload ?? EXPORT_LABELS.exportDownload,
         }
       : undefined,
   };

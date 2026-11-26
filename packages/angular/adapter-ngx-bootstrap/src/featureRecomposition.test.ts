@@ -1,4 +1,5 @@
 /** Feature identities change while the mounted table and its state stay alive. */
+
 import {
   type AdaptTableFeature,
   type ColumnDef,
@@ -6,16 +7,19 @@ import {
   type ConfirmHandler,
   type FeatureMountContext,
 } from "@adapttable/angular";
+import { cellNavigation } from "@adapttable/ngx-bootstrap/cell-navigation";
 import { columnMenu } from "@adapttable/ngx-bootstrap/column-menu";
 import { filters } from "@adapttable/ngx-bootstrap/filters";
 import { headerFilters } from "@adapttable/ngx-bootstrap/header-filters";
 import { pinnedSummaryRows } from "@adapttable/ngx-bootstrap/pinned-summary-rows";
 import { print } from "@adapttable/ngx-bootstrap/print";
+import { selection } from "@adapttable/ngx-bootstrap/selection";
 import { tree } from "@adapttable/ngx-bootstrap/tree";
-import { Component, signal } from "@angular/core";
+import { Component, computed, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { declareFeatureOptions } from "../../angular/test/kit/declareFeatureOptions";
 import { featureRecompositionTests } from "../../angular/test/kit/suites/featureRecomposition";
 import { kit } from "../testing/kit";
 import { ngxBootstrapPart } from "../testUtils";
@@ -52,19 +56,12 @@ const COLUMNS: readonly ColumnDef<Row>[] = [
       [data]="rows()"
       [columns]="columns"
       [rowKey]="rowKey"
-      [features]="features()"
+      [features]="tableFeatures()"
       [forceMobile]="mobile"
       [urlSync]="false"
-      [selectable]="selectable()"
-      [cellNavigation]="navigation()"
-      [filtersMode]="filterMode()"
-      [closeHeaderFilterOnSelect]="closeHeaderFilter()"
       [density]="rowDensity()"
       (densityChange)="onDensityChange($event)"
-      [onColumnRename]="renameColumn()"
       [confirm]="confirmAction()"
-      [selectedIds]="controlledSelection() ? selected() : undefined"
-      (selectionChange)="onSelectionChange($event)"
       [columnLayout]="layout()"
       (columnLayoutChange)="onLayoutChange($event)"
     />
@@ -79,7 +76,30 @@ class Host {
   readonly selected = signal<readonly string[]>([]);
   readonly controlledSelection = signal(true);
   readonly selectable = signal(true);
+  readonly selectionIds = computed(() =>
+    this.controlledSelection() ? this.selected() : undefined
+  );
   readonly navigation = signal(false);
+  readonly tableFeatures = computed(() => {
+    const base = declareFeatureOptions(this.features(), {
+      filters: { filtersMode: this.filterMode() },
+      "header-filters": {
+        closeHeaderFilterOnSelect: this.closeHeaderFilter(),
+      },
+      "column-menu": { onColumnRename: this.renameColumn() },
+    });
+    const listed = this.navigation() ? [cellNavigation(), ...base] : base;
+    if (!this.selectable()) return listed;
+    return [
+      selection({
+        selectedIds: this.selectionIds,
+        onSelectionChange: (ids: string[]) => {
+          this.onSelectionChange(ids);
+        },
+      }),
+      ...listed,
+    ];
+  });
   readonly filterMode = signal<"popover" | "drawer">("popover");
   readonly closeHeaderFilter = signal(false);
   readonly rowDensity = signal<"comfortable" | "compact" | undefined>(
@@ -390,7 +410,7 @@ describe("mounted feature recomposition (unstyled Angular)", () => {
     expect(host.onSelectionChange).toHaveBeenCalledOnce();
   });
 
-  it("toggles selection and keyboard navigation inputs without replacing its features", async () => {
+  it("toggles selection through its feature and keyboard navigation by composing it", async () => {
     const mounted = await mount((host) => {
       host.selectable.set(false);
       return [];

@@ -1,6 +1,5 @@
 /** `null` / `undefined` / `NaN` are unorderable and always sort last. */
 import type { SortableValue, SortDirection } from "../contracts/columns";
-import type { SortLevel } from "../contracts/query";
 export type { SortLevel } from "../contracts/query";
 
 function sortsLast(value: SortableValue): boolean {
@@ -50,9 +49,8 @@ function typeRank(value: SortableValue): number {
 }
 
 /**
- * Compare two already-extracted sort keys the way {@link sortRows} does,
- * including "nulls last" regardless of direction and a stable index
- * tie-break. Incremental repositioning uses this so a patched row lands
+ * Compare two already-extracted sort keys, with "nulls last" regardless of
+ * direction and a stable index tie-break. Incremental repositioning uses this so a patched row lands
  * where a full re-sort would have put it.
  *
  * @param a - The first key and its index in the unsorted (filtered) list.
@@ -94,58 +92,4 @@ export function compareSortLevel(
   if (cmp === 0) return undefined;
   if (sortsLast(a) || sortsLast(b)) return cmp;
   return direction === "asc" ? cmp : -cmp;
-}
-
-/**
- * Return a new array sorted by the given value extractor and direction.
- * The sort is stable (input order is preserved for equal keys). The input
- * array is not mutated.
- *
- * @typeParam TRow - The row type.
- * @param rows - The rows to sort.
- * @param getValue - Extracts the comparison key for a row.
- * @param direction - Sort direction.
- * @returns A new, sorted array.
- *
- * @public
- */
-export function sortRows<TRow>(
-  rows: readonly TRow[],
-  getValue: (row: TRow) => SortableValue,
-  direction: SortDirection
-): TRow[] {
-  return [...rows]
-    .map((row, index) => ({ row, index, value: getValue(row) }))
-    .sort((x, y) => compareSortEntries(x, y, direction))
-    .map((entry) => entry.row);
-}
-
-/**
- * Sort rows by a CHAIN of levels: ties at level N fall through to level
- * N+1. Null-ish values sort last per level regardless of direction, same
- * as {@link sortRows}.
- *
- * @public
- */
-export function sortRowsMulti<TRow>(
-  rows: readonly TRow[],
-  levels: readonly SortLevel[],
-  getValue: (row: TRow, key: string) => SortableValue
-): TRow[] {
-  if (levels.length === 0) return [...rows];
-  return [...rows]
-    .map((row, index) => ({
-      row,
-      index,
-      values: levels.map((l) => getValue(row, l.key)),
-    }))
-    .sort((x, y) => {
-      for (const [i, level] of levels.entries()) {
-        const decided = compareSortLevel(x.values[i], y.values[i], level.dir);
-        if (decided !== undefined) return decided;
-      }
-      // Stable: preserve the original order for full ties.
-      return x.index - y.index;
-    })
-    .map((entry) => entry.row);
 }

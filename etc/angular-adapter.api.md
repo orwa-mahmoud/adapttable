@@ -71,11 +71,13 @@ import { columnGroupHeaderCaption } from '@adapttable/core/binding';
 import { ColumnGroupRecord } from '@adapttable/core';
 import { ColumnGroupToggleButtonProps } from '@adapttable/core/binding';
 import { ColumnGroupToggleProps } from '@adapttable/core/binding';
+import { columnLayoutFamilyList } from '@adapttable/core/binding';
 import { ColumnLayoutState } from '@adapttable/core';
 import { columnMenuActions } from '@adapttable/core/binding';
 import { ColumnMenuChoice } from '@adapttable/core';
 import { ColumnMenuItem } from '@adapttable/core';
 import { ColumnMenuLabels } from '@adapttable/core';
+import { ColumnMenuOptions } from '@adapttable/core/binding';
 import { ColumnMenuRow } from '@adapttable/core';
 import { columnMenuRows } from '@adapttable/core/binding';
 import { ColumnMenuSlotProps } from '@adapttable/core/binding';
@@ -97,6 +99,7 @@ import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuPoint } from '@adapttable/core';
 import { ContextMenuRegionHandlers } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
+import { ContrastRules } from '@adapttable/core/binding';
 import { copyContextMenuSelection } from '@adapttable/core/binding';
 import { coreBulkActions } from '@adapttable/core/binding';
 import { coreColumnMenu } from '@adapttable/core/binding';
@@ -126,11 +129,9 @@ import { EditableCellController } from '@adapttable/core';
 import { EditableCellEditorCtrl as EditableCellEditorCtrl_2 } from '@adapttable/core/editing';
 import { EditableCellPresentation } from '@adapttable/core/binding';
 import { EditableCellSlotProps } from '@adapttable/core/binding';
-import { EditActivation } from '@adapttable/core';
-import { EditConflictHandler } from '@adapttable/core';
 import { EditConflictLabels } from '@adapttable/core';
-import { EditConflictPolicy } from '@adapttable/core';
 import { EditingBundle } from '@adapttable/core';
+import { editingFamilyList } from '@adapttable/core/binding';
 import { editorBusyProps } from '@adapttable/core/editing';
 import { editorInputType } from '@adapttable/core/editing';
 import { editorValidationProps } from '@adapttable/core/editing';
@@ -151,10 +152,10 @@ import { EXTRA_ROW_PARTS } from '@adapttable/core/binding';
 import { ExtraFilters } from '@adapttable/core';
 import { extraHostFillStyle } from '@adapttable/core/binding';
 import { eyeIcon } from '@adapttable/core/binding';
-import { FacetCounts } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
 import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core/binding';
+import { FeatureListEntry } from '@adapttable/core/binding';
 import { FeatureNotice } from '@adapttable/core/binding';
 import { FeatureNotice as FeatureNotice_2 } from '@adapttable/core';
 import { FeaturePatch } from '@adapttable/core/binding';
@@ -180,10 +181,12 @@ import { FilterHeaderOption } from '@adapttable/core/binding';
 import { FilterHeaderRangeProps } from '@adapttable/core/binding';
 import { FilterHeaderSearchProps } from '@adapttable/core/binding';
 import { FilterHeaderSelectProps } from '@adapttable/core/binding';
+import { filteringFamilyList } from '@adapttable/core/binding';
 import { filterLabel } from '@adapttable/core';
 import { filterOpLabel } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterOverlaySlotProps } from '@adapttable/core/binding';
+import { FilterPanelOptions } from '@adapttable/core/binding';
 import { FilterRuntime } from '@adapttable/core';
 import { FILTERS_FORM } from '@adapttable/core/binding';
 import { FILTERS_ICON } from '@adapttable/core/binding';
@@ -204,6 +207,7 @@ import { FindButtonProps } from '@adapttable/core/binding';
 import { FindInTableState } from '@adapttable/core/binding';
 import { FindSearchProps } from '@adapttable/core/binding';
 import { FindStrings } from '@adapttable/core/binding';
+import { flattenFeatures } from '@adapttable/core/binding';
 import { focusEditorOnMount } from '@adapttable/core/editing';
 import { formatMultiDraft } from '@adapttable/core/editing';
 import { GridCell } from '@adapttable/core';
@@ -247,6 +251,7 @@ import { groupSelectionState } from '@adapttable/core/grouping';
 import { hasActiveHeaderFilter } from '@adapttable/core/binding';
 import { HeaderFilterCellKind } from '@adapttable/core/binding';
 import { headerFilterInsideSelector } from '@adapttable/core/binding';
+import { HeaderFilterOptions } from '@adapttable/core/binding';
 import { HeaderGroupCell } from '@adapttable/core/binding';
 import { HeaderSelectionState } from '@adapttable/core/binding';
 import { HeaderSelectionState as HeaderSelectionState_2 } from '@adapttable/core';
@@ -258,6 +263,7 @@ import { IconDescriptor } from '@adapttable/core/binding';
 import { InjectionToken } from '@angular/core';
 import { Injector } from '@angular/core';
 import { InputSignal } from '@angular/core';
+import { InputSignalWithTransform } from '@angular/core';
 import { insertExtraRows } from '@adapttable/core/binding';
 import { insertExtrasBeforeRows } from '@adapttable/core/binding';
 import { isBooleanEditor } from '@adapttable/core/editing';
@@ -299,8 +305,6 @@ import { pinnedSummaryPart } from '@adapttable/core';
 import { PinSide } from '@adapttable/core/binding';
 import { printToolbarProps } from '@adapttable/core/binding';
 import { Provider } from '@angular/core';
-import { QueryAggregate } from '@adapttable/core';
-import { QuerySupport } from '@adapttable/core';
 import { RangeFieldWidget } from '@adapttable/core';
 import { RangeOp } from '@adapttable/core';
 import { readMultiDraft } from '@adapttable/core/editing';
@@ -357,7 +361,6 @@ import { runRowAction } from '@adapttable/core';
 import { RuntimeChromeInput } from '@adapttable/core/binding';
 import { SAVED_VIEWS } from '@adapttable/core/binding';
 import { SavedView } from '@adapttable/core';
-import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SavedViewsSlotProps } from '@adapttable/core/binding';
 import { SEARCH_ICON } from '@adapttable/core/binding';
 import { SelectionState } from '@adapttable/core/binding';
@@ -381,6 +384,7 @@ import { SpeechInputHandle } from '@adapttable/core/binding';
 import { SpeechInputState } from '@adapttable/core/binding';
 import { SpeechInputStatus } from '@adapttable/core/binding';
 import { splitRelativeToken } from '@adapttable/core';
+import { standardFeatureList } from '@adapttable/core/binding';
 import { STATUS_BAR } from '@adapttable/core/binding';
 import { StatusBarChromeProps } from '@adapttable/core/binding';
 import { StatusBarItem } from '@adapttable/core/binding';
@@ -426,7 +430,7 @@ import { TableVirtualization } from '@adapttable/core';
 import { TemplateRef } from '@angular/core';
 import { TextFieldWidget } from '@adapttable/core';
 import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
-import { ToolbarExtrasSlotProps } from '@adapttable/core/binding';
+import { ToolbarEntrySlotProps } from '@adapttable/core/binding';
 import { TREE_CELL } from '@adapttable/core/binding';
 import { TREE_TOGGLE } from '@adapttable/core/binding';
 import { treeCardStyle } from '@adapttable/core';
@@ -1901,18 +1905,15 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     // (undocumented)
     protected readonly agentApprovalProps: Signal<AgentApprovalProps>;
     protected readonly agentApprovalSlot: FeatureSlotKey<AgentApprovalProps>;
-    readonly aggregates: InputSignal<readonly QueryAggregate[] | undefined>;
     readonly animate: InputSignal<boolean>;
     readonly assistant: InputSignal<TableAssistantProps | undefined>;
     // @internal
     protected readonly batchEditBarSlot: FeatureSlotKey<BatchEditBarProps<unknown>>;
     // @internal
     protected readonly bulkBarSlot: FeatureSlotKey<BulkBarSlotProps<unknown>>;
-    readonly cellNavigation: InputSignal<boolean>;
     // @internal
     protected readonly cellTemplates: Signal<readonly AdaptCellTemplate[]>;
     readonly classNames: InputSignal<DataTableClassNames>;
-    readonly closeHeaderFilterOnSelect: InputSignal<boolean>;
     readonly columnLayout: InputSignal<ColumnLayoutState | undefined>;
     readonly columnLayoutChange: OutputEmitterRef<ColumnLayoutState>;
     // @internal
@@ -1938,14 +1939,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly dir: InputSignal<Direction | undefined>;
     protected readonly dockedPanel: Signal<TemplateRef<unknown> | undefined>;
     protected readonly dockedSide: Signal<SidePanelSide>;
-    readonly editActivation: InputSignal<EditActivation | undefined>;
-    readonly editConflictPolicy: InputSignal<EditConflictPolicy | undefined>;
     readonly error: InputSignal<Error | null | undefined>;
-    readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
-    readonly facetKeys: InputSignal<readonly string[] | undefined>;
-    readonly facets: InputSignal<Readonly<Record<string, FacetCounts>> | undefined>;
-    readonly features: InputSignal<readonly AdaptTableFeature[]>;
-    readonly filterFields: InputSignal<boolean>;
+    readonly features: InputSignalWithTransform<readonly AdaptTableFeature[], readonly FeatureListEntry<AdaptTableFeature>[]>;
     // @internal
     protected readonly filtersIcon: IconDescriptor;
     // @internal
@@ -1956,7 +1951,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         chips: FeatureSlotKey<ActiveFilterChipsSlotProps>;
         header: FeatureSlotKey<FilterHeaderControlProps<unknown>>;
     };
-    readonly filtersMode: InputSignal<FiltersMode>;
     // @internal
     protected readonly findBarSlot: FeatureSlotKey<FindBarProps>;
     readonly forceMobile: InputSignal<boolean | undefined>;
@@ -1971,22 +1965,18 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly mobileBreakpoint: InputSignal<number | undefined>;
     // @internal
     protected readonly mobileCards: Signal<DataTableSurface | undefined>;
-    readonly mode: InputSignal<"frontend" | "server" | undefined>;
     // (undocumented)
     ngOnInit(): void;
     // @internal
     protected readonly noResults: Signal<boolean>;
-    readonly onCellCut: InputSignal<((range: CellRange) => void) | undefined>;
-    readonly onColumnRename: InputSignal<((key: string, name: string) => void) | undefined>;
-    readonly onEditConflict: InputSignal<EditConflictHandler<TRow> | undefined>;
     protected onMenuContext(event: MouseEvent): void;
     protected onMenuKey(event: KeyboardEvent): void;
     protected onMenuPointerCancel(): void;
     protected onMenuPointerDown(event: PointerEvent): void;
     protected onMenuPointerMove(event: PointerEvent): void;
     protected onMenuPointerUp(): void;
-    readonly onQueryChange: InputSignal<TableQueryHandler | undefined>;
     readonly onRowClick: InputSignal<((row: TRow) => void) | undefined>;
+    readonly onViewChange: InputSignal<TableQueryHandler | undefined>;
     readonly paginationMode: InputSignal<PaginationMode | undefined>;
     readonly renderCard: InputSignal<MobileCardRenderer<TRow> | undefined>;
     readonly renderRowActions: InputSignal<RowActionsRenderer<TRow> | undefined>;
@@ -1994,9 +1984,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     protected readonly reorderAnnouncerSlot: FeatureSlotKey<    {
     announcement: string;
     }>;
-    readonly responseKey: InputSignal<string | undefined>;
     readonly rowKey: InputSignal<(row: TRow) => string>;
-    readonly rowVersion: InputSignal<((row: TRow) => string | number) | undefined>;
     // @internal
     protected readonly savedViewsSlot: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
     readonly searchable: InputSignal<boolean>;
@@ -2004,9 +1992,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     // @internal
     protected readonly searchIcon: IconDescriptor;
     readonly searchPlaceholder: InputSignal<string | undefined>;
-    readonly selectable: InputSignal<boolean>;
-    readonly selectedIds: InputSignal<readonly string[] | undefined>;
-    readonly selectionChange: OutputEmitterRef<string[]>;
     readonly sidePanel: Signal<TemplateRef<unknown> | undefined>;
     protected readonly sidePanelProps: Signal<{
         panels: readonly SidePanelPanel[];
@@ -2039,14 +2024,12 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly stickyHeader: InputSignal<boolean>;
     readonly stickyTop: InputSignal<number>;
     readonly summaryRow: InputSignal<SummaryRowFn<TRow> | undefined>;
-    readonly supports: InputSignal<QuerySupport | undefined>;
     // (undocumented)
     protected readonly tableAssistantSlot: FeatureSlotKey<TableAssistantProps_2<unknown>>;
     readonly tableFooter: Signal<TemplateRef<unknown> | undefined>;
     readonly tableLabel: InputSignal<string | undefined>;
     // @internal
-    protected readonly toolbarExtrasSlot: FeatureSlotKey<ToolbarExtrasSlotProps>;
-    readonly total: InputSignal<number | undefined>;
+    protected readonly toolbarExtrasSlot: FeatureSlotKey<ToolbarEntrySlotProps>;
     readonly urlKey: InputSignal<string | undefined>;
     readonly urlSync: InputSignal<boolean>;
     // @internal
@@ -2063,18 +2046,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
-        "mode": {
-            "alias": "mode";
-            "required": false;
-            "isSignal": true;
-        };
-        "onQueryChange": {
-            "alias": "onQueryChange";
-            "required": false;
-            "isSignal": true;
-        };
-        "total": {
-            "alias": "total";
+        "onViewChange": {
+            "alias": "onViewChange";
             "required": false;
             "isSignal": true;
         };
@@ -2085,31 +2058,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         };
         "error": {
             "alias": "error";
-            "required": false;
-            "isSignal": true;
-        };
-        "supports": {
-            "alias": "supports";
-            "required": false;
-            "isSignal": true;
-        };
-        "aggregates": {
-            "alias": "aggregates";
-            "required": false;
-            "isSignal": true;
-        };
-        "responseKey": {
-            "alias": "responseKey";
-            "required": false;
-            "isSignal": true;
-        };
-        "facets": {
-            "alias": "facets";
-            "required": false;
-            "isSignal": true;
-        };
-        "facetKeys": {
-            "alias": "facetKeys";
             "required": false;
             "isSignal": true;
         };
@@ -2243,26 +2191,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
-        "selectable": {
-            "alias": "selectable";
-            "required": false;
-            "isSignal": true;
-        };
-        "selectedIds": {
-            "alias": "selectedIds";
-            "required": false;
-            "isSignal": true;
-        };
-        "cellNavigation": {
-            "alias": "cellNavigation";
-            "required": false;
-            "isSignal": true;
-        };
-        "onCellCut": {
-            "alias": "onCellCut";
-            "required": false;
-            "isSignal": true;
-        };
         "features": {
             "alias": "features";
             "required": false;
@@ -2273,26 +2201,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
-        "rowVersion": {
-            "alias": "rowVersion";
-            "required": false;
-            "isSignal": true;
-        };
-        "editConflictPolicy": {
-            "alias": "editConflictPolicy";
-            "required": false;
-            "isSignal": true;
-        };
-        "onEditConflict": {
-            "alias": "onEditConflict";
-            "required": false;
-            "isSignal": true;
-        };
-        "editActivation": {
-            "alias": "editActivation";
-            "required": false;
-            "isSignal": true;
-        };
         "columnLayout": {
             "alias": "columnLayout";
             "required": false;
@@ -2300,31 +2208,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         };
         "defaultColumnLayout": {
             "alias": "defaultColumnLayout";
-            "required": false;
-            "isSignal": true;
-        };
-        "onColumnRename": {
-            "alias": "onColumnRename";
-            "required": false;
-            "isSignal": true;
-        };
-        "filtersMode": {
-            "alias": "filtersMode";
-            "required": false;
-            "isSignal": true;
-        };
-        "filterFields": {
-            "alias": "filterFields";
-            "required": false;
-            "isSignal": true;
-        };
-        "closeHeaderFilterOnSelect": {
-            "alias": "closeHeaderFilterOnSelect";
-            "required": false;
-            "isSignal": true;
-        };
-        "extraChips": {
-            "alias": "extraChips";
             "required": false;
             "isSignal": true;
         };
@@ -2345,7 +2228,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         };
     }, {
         "densityChange": "densityChange";
-        "selectionChange": "selectionChange";
         "columnLayoutChange": "columnLayoutChange";
     }, ["cellTemplates", "tableFooter", "sidePanel"], never, true, never>;
     // (undocumented)
@@ -2679,7 +2561,7 @@ export class AdaptEditableCellGate<TRow> {
 }
 
 // @public
-export type AdapterFiltersFeature = <TRow>(defs?: readonly FilterDef<TRow>[]) => AdaptTableFeature;
+export type AdapterFiltersFeature = <TRow>(defs?: readonly FilterDef<TRow>[], options?: FilterPanelOptions) => AdaptTableFeature;
 
 // @public
 export class AdaptExportAnnouncer {
@@ -4426,7 +4308,7 @@ export class AdaptSlot<TProps> {
     constructor();
     readonly props: InputSignal<TProps>;
     readonly slot: InputSignal<FeatureSlotKey<TProps>>;
-    readonly table: InputSignal<SlotTable>;
+    readonly table: InputSignal<SlotTable | undefined>;
     // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptSlot<any>, "[adaptSlot]", never, {
         "slot": {
@@ -4441,7 +4323,7 @@ export class AdaptSlot<TProps> {
         };
         "table": {
             "alias": "adaptSlotTable";
-            "required": true;
+            "required": false;
             "isSignal": true;
         };
     }, {}, never, never, true, never>;
@@ -4722,10 +4604,13 @@ export class AdaptTableAssistantChrome {
 // @public
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
+    readonly contrast?: ContrastRules;
+    readonly dependencies?: readonly unknown[];
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
     readonly labels?: Partial<TableLabels>;
     mount?(context: FeatureMountContext): void | (() => void);
+    readonly rank?: number;
     readonly renders?: readonly FeatureRender<never, SlotComponent>[];
 }
 
@@ -4753,6 +4638,7 @@ export abstract class AdaptTableSurface<TRow> {
     // (undocumented)
     protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
     scrollElement(): HTMLElement | null;
+    protected selectionRowId(row: TRow): string;
     protected readonly tableElementAttrs: Signal<Readonly<Record<string, unknown>>>;
     // (undocumented)
     readonly view: InputSignal<TableView<TRow>>;
@@ -5195,6 +5081,8 @@ export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
 // @public
 export type ColumnLayout<TRow> = UseColumnLayoutResult<TRow>;
 
+export { columnLayoutFamilyList }
+
 export { columnMenuActions }
 
 export { ColumnMenuChoice }
@@ -5202,6 +5090,8 @@ export { ColumnMenuChoice }
 export { ColumnMenuItem }
 
 export { ColumnMenuLabels }
+
+export { ColumnMenuOptions }
 
 export { ColumnMenuRow }
 
@@ -5348,7 +5238,7 @@ export function coreExportCsv<TRow>(options?: boolean | {
 }): CoreFeature<TRow>;
 
 // @public
-export function coreFilters<TRow, TPanel = never>(defs: readonly FilterDef<TRow>[] | TPanel): CoreFeature<TRow>;
+export function coreFilters<TRow, TPanel = never>(defs: readonly FilterDef<TRow>[] | TPanel, options?: FilterPanelOptions): CoreFeature<TRow>;
 
 // @public
 export function coreFindInTable(): CoreFeature;
@@ -5360,7 +5250,7 @@ export { coreGrouping }
 export { coreGroupingPanel }
 
 // @public
-export function coreHeaderFilters(): CoreFeature;
+export function coreHeaderFilters(options?: HeaderFilterOptions): CoreFeature;
 
 export { coreRowActions }
 
@@ -5526,6 +5416,8 @@ export interface EditableCellSlots {
     readonly Button: Type<unknown>;
 }
 
+export { editingFamilyList }
+
 export { editorBusyProps }
 
 export { editorInputType }
@@ -5563,8 +5455,11 @@ export { extraHostFillStyle }
 
 export { eyeIcon }
 
+export { FeatureListEntry }
+
 // @public
 export interface FeatureMountContext {
+    feature(): AdaptTableFeature;
     flush<T>(run: () => T): T;
     flushAdmission(): void;
     readonly injector: Injector;
@@ -5635,6 +5530,8 @@ export interface FilterHeaderSlots {
     readonly Select: Type<unknown>;
 }
 
+export { filteringFamilyList }
+
 export { filterLabel }
 
 export { filterOpLabel }
@@ -5646,6 +5543,8 @@ export interface FilterOptionsState {
 }
 
 export { FilterOverlaySlotProps }
+
+export { FilterPanelOptions }
 
 export { FILTERS_FORM }
 
@@ -5740,6 +5639,8 @@ export { FindButtonKind }
 export { FindButtonProps }
 
 export { FindSearchProps }
+
+export { flattenFeatures }
 
 // @public (undocumented)
 export const FLOATING_MIN_WIDTH = 640;
@@ -5886,6 +5787,8 @@ export interface HeaderContext<TRow> {
 }
 
 export { headerFilterInsideSelector }
+
+export { HeaderFilterOptions }
 
 export { HeaderGroupCell }
 
@@ -6357,6 +6260,8 @@ export { SpeechInputStatus }
 
 export { splitRelativeToken }
 
+export { standardFeatureList }
+
 export { STATUS_BAR }
 
 // @public
@@ -6532,7 +6437,7 @@ export function tableRuntimeFor<TRow>(table: DataTable<TRow>, source: Signal<Tab
 export interface TableSurfaceHostOptions<TRow> {
     readonly columns: MaybeSignal<readonly ColumnInput<TRow>[]>;
     readonly data?: MaybeSignalOptional<readonly TRow[]>;
-    readonly features?: MaybeSignalOptional<readonly AdaptTableFeature[]>;
+    readonly features?: MaybeSignalOptional<readonly FeatureListEntry<AdaptTableFeature>[]>;
     readonly injector?: Injector;
     readonly maxHeight?: MaybeSignalOptional<number | string>;
     readonly onRowClick?: MaybeSignalOptional<(row: TRow) => void>;
@@ -6599,13 +6504,11 @@ export interface TableTree<TRow> {
 export interface TableView<TRow> extends TableSurfaceView<TRow> {
     readonly batchBar: Signal<BatchEditBarProps<TRow> | undefined> | undefined;
     readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
-    readonly columnMenu: boolean;
-    readonly columnMenuProps: Signal<ColumnMenuSlotProps<unknown>>;
-    readonly commandPalette: Signal<CommandPaletteInjectOptions>;
+    readonly commandPalette: Signal<CommandPaletteInjectOptions> | undefined;
     readonly confirm: ConfirmHandler;
     readonly contextMenu: Signal<TableContextMenuOptions<TRow> & {
         readonly children: (regionProps: Record<string, unknown>) => undefined;
-    }>;
+    }> | undefined;
     readonly filters: FiltersView | undefined;
     readonly findBar: Signal<FindBarProps> | undefined;
     readonly isCellFlashing: (rowId: string, columnKey: string) => boolean;
@@ -6613,14 +6516,14 @@ export interface TableView<TRow> extends TableSurfaceView<TRow> {
     readonly renderRowActions: Signal<RowActionsRenderer<TRow> | undefined>;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;
-    readonly rowMutations: Signal<RowMutationsState<TRow>>;
-    readonly savedViews: Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
-    readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
+    readonly rowMutations: Signal<RowMutationsState<TRow>> | undefined;
+    readonly selectionRowId: (row: TRow) => string;
+    readonly toolbarEntry: Signal<ToolbarEntrySlotProps>;
 }
 
 export { TOOLBAR_EXTRAS }
 
-export { ToolbarExtrasSlotProps }
+export { ToolbarEntrySlotProps }
 
 export { TREE_CELL }
 
@@ -6660,6 +6563,12 @@ export { watchClickedOpener }
 export { watchOverlayDismiss }
 
 export { windowGroupedEntries }
+
+// @public
+export function withCommandPaletteView(feature: AdaptTableFeature): AdaptTableFeature;
+
+// @public
+export function withContextMenuView(feature: AdaptTableFeature): AdaptTableFeature;
 
 // @public
 export function withFilterWidgets(feature: AdaptTableFeature, widgets: readonly FilterWidget[]): AdaptTableFeature;

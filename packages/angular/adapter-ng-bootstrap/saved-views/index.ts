@@ -10,6 +10,7 @@ import {
   slotRender,
 } from "@adapttable/angular";
 import { coreSavedViews, SAVED_VIEWS } from "@adapttable/angular/adapter";
+import { SAVED_VIEWS_ENTRY } from "@adapttable/angular/toolbar";
 import { AdaptSavedViewsMenu } from "@adapttable/ng-bootstrap";
 
 export { AdaptSavedViewsPanel } from "@adapttable/ng-bootstrap";
@@ -28,6 +29,7 @@ export function savedViews(
   options: SavedViewsControllerOptions
 ): AdaptTableFeature {
   return extendFeature(coreSavedViews(options), [
+    SAVED_VIEWS_ENTRY,
     slotRender(SAVED_VIEWS, () => AdaptSavedViewsMenu),
   ]);
 }

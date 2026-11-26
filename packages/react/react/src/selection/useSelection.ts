@@ -1,7 +1,12 @@
-import { offersAllMatching as neutralOffersAllMatching } from "@adapttable/core";
+import {
+  offersAllMatching as neutralOffersAllMatching,
+  type RowPatchLog,
+} from "@adapttable/core";
 import {
   headerSelectionOf,
   idSetReader,
+  rekeyedIds,
+  rekeyIdSet,
   type SelectionState,
   toggleId,
   toggleIds,
@@ -43,6 +48,8 @@ export interface UseSelectionOptions<TRow> {
    * `useColumnLayout`.
    */
   selectedIds?: readonly string[];
+  /** The table's own selection to start from, when the host holds none. */
+  defaultSelectedIds?: readonly string[];
   /** Change handler; required for the controlled mode to update. */
   onSelectionChange?: (selectedIds: string[]) => void;
   /**
@@ -52,6 +59,11 @@ export interface UseSelectionOptions<TRow> {
    * cannot describe.
    */
   acrossPages?: boolean;
+  /**
+   * When false the hook keeps its state but reads no row ids, for a table
+   * whose selection is turned off. Defaults to true.
+   */
+  enabled?: boolean;
 }
 
 /**
@@ -111,12 +123,20 @@ export function useSelection<TRow>(
   // The store's mutators are permanently stable: memoized adapter rows can
   // hold `toggle` forever, and a controlled commit still computes from the
   // selection the host last rendered.
+  // A rekey moves a selected row's id by the same function that selects it.
+  const followRekey = useCallback(
+    (ids: ReadonlySet<string>, log: RowPatchLog<unknown>) =>
+      rekeyIdSet(ids, rekeyedIds(log as RowPatchLog<TRow>, getId)),
+    [getId]
+  );
   const [selectedIds, store] = useControllableStore<ReadonlySet<string>>(
-    () => new Set(),
+    () => new Set(options.defaultSelectedIds),
     {
       value: readIds(options.selectedIds),
       onChange: onChange && ((next) => onChange([...next])),
-    }
+    },
+    undefined,
+    followRekey
   );
 
   /** Route a change to the parent (controlled) or internal state. */
@@ -152,7 +172,11 @@ export function useSelection<TRow>(
     commit(() => new Set());
   }, [resetKey, store, commit, scope]);
 
-  const visibleIds = useMemo(() => rows.map(getId), [rows, getId]);
+  const enabled = options.enabled ?? true;
+  const visibleIds = useMemo(
+    () => (enabled ? rows.map(getId) : []),
+    [enabled, rows, getId]
+  );
 
   const headerState = useMemo(
     () => headerSelectionOf(visibleIds, selectedIds),

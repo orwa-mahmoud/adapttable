@@ -15,8 +15,7 @@ Bulk actions receive selected IDs plus `{ allMatching, total }`. The all-matchin
 
 The command palette offers current print, export, clear-filter and registered commands. It supports a controlled open value, configurable shortcuts, type-to-filter, keyboard highlighting and focus restoration. Shortcuts belong to the focused table, including nested tables. Context menus reuse neutral column/cell targets for mouse, keyboard and touch; grid Copy/Cut consume the existing navigation model, while a table without grid selection copies the target cell. Side panels are controlled by the host and use an RTL-aware tablist. Mobile panels stack below the table.
 
-Import `exportCsv` from `@adapttable/vue-unstyled/export`. The existing
-`/export-csv` compatibility path is deprecated and continues to work. For a built-in binary format, import
+Import `exportCsv` from `@adapttable/vue-unstyled/export`. For a built-in binary format, import
 `exportPdf` from `/export-pdf` or `exportXlsx` from `/export-xlsx`. Each factory
 installs the native toolbar button and progress controls over the same export
 controller. It accepts `true`, `false`, or typed scope, columns, filename and
@@ -38,8 +37,8 @@ feature identity, so a later declaration replaces an earlier one. For example,
 XLSX. The `export-csv-button` part and `exportCsvButton` class hook stay stable
 across formats. The command palette uses the same current export action.
 
-The base table and `/export` do not import PDF or XLSX writers. The compatibility
-`/export-csv` path and `/preset`, where exported, also keep those writers optional. Import a format entry only when needed. The optional `/features` barrel
+The base table and `/export` do not import PDF or XLSX writers. `/preset`,
+where exported, also keeps those writers optional. Import a format entry only when needed. The optional `/features` barrel
 exposes all three factories and is broader; individual entries provide the
 smallest import graph.
 

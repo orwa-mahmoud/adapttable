@@ -1,140 +1,150 @@
 /**
- * Mount optional chrome extras in-tree: grouping, tree, expansion, editing.
+ * Walk the chrome stages the composed features bring: the column layout,
+ * grouping, the tree, selection, row actions and pins, expansion, editing and
+ * edit history, each after the stages whose values it reads.
  *
- * Each feature fills its live slot with a child that calls the hooks.
- * Empty slots pass chrome through unchanged, so the lean table never
- * imports those modules.
+ * The base names none of them. A table that composes none walks nothing and
+ * never imports their modules.
  */
-import { TableRuntimePublisher } from "@adapttable/core/binding";
+import {
+  type LiveStage,
+  TableRuntimePublisher,
+} from "@adapttable/core/binding";
 import { type ReactNode, useState } from "react";
 
 import type { TableChrome } from "../chrome/tableChromeContract";
-import type { ComposedTableProps } from "../props";
+import type { EditableCellEditing } from "../editing/editableCellController";
+import { useFeatureState } from "./featureState";
+import { PublishTableRuntime, useChromeStages } from "./providers";
+import type { ChromeExtraSlotProps } from "./slotKeys";
 import {
-  FeatureSlot,
-  useFeatureSlotFilled,
-  usePublishTableRuntime,
-} from "./providers";
-import {
-  type ChromeExtraSlotProps,
-  COLUMN_LAYOUT_LIVE,
-  EDITING_LIVE,
-  EXPANSION_LIVE,
-  FILTER_CHIPS_LIVE,
-  GROUPING_LIVE,
-  PINNING_LIVE,
-  ROW_ACTIONS_LIVE,
-  SELECTION_LIVE,
-  TREE_LIVE,
-} from "./slotKeys";
+  COLUMN_SIZING_STATE,
+  EDITING_STATE,
+  GROUPING_STATE,
+  type GroupingState,
+  ROW_PINNING_STATE,
+  TREE_STATE,
+  type TreeState,
+} from "./stateKeys";
 
-function ExtraGate<TRow>({
-  slot,
-  chrome,
-  props,
-  children,
-}: {
-  readonly slot: typeof COLUMN_LAYOUT_LIVE;
-  readonly chrome: TableChrome<TRow>;
-  readonly props: ComposedTableProps<TRow>;
-  readonly children: (chrome: TableChrome<TRow>) => ReactNode;
-}): ReactNode {
-  const filled = useFeatureSlotFilled(slot);
-  const slotProps = {
-    chrome,
-    props,
-    children,
-  } satisfies ChromeExtraSlotProps<TRow>;
-  return filled ? (
-    <FeatureSlot slot={slot} props={slotProps} />
-  ) : (
-    children(chrome)
-  );
-}
+/** The props a chrome stage reads and may hand on. */
+type StageTableProps<TRow> = ChromeExtraSlotProps<TRow>["props"];
 
-/** Each extra's slot key, by id; core owns the order they nest in. */
-/** The extra slots, in core's `CHROME_EXTRA_SLOT_ORDER`; a test holds them. */
-export const EXTRA_SLOTS = [
-  COLUMN_LAYOUT_LIVE,
-  FILTER_CHIPS_LIVE,
-  GROUPING_LIVE,
-  TREE_LIVE,
-  SELECTION_LIVE,
-  ROW_ACTIONS_LIVE,
-  PINNING_LIVE,
-  EXPANSION_LIVE,
-  EDITING_LIVE,
-] as const;
+/** What the walk hands on once every stage ran. */
+type WalkDone<TRow, TProps> = (
+  chrome: TableChrome<TRow>,
+  props: TProps
+) => ReactNode;
 
-function RuntimePublisher<TRow>({
+function RuntimePublisher<TRow, TProps extends StageTableProps<TRow>>({
   chrome,
   props,
   children,
 }: {
   readonly chrome: TableChrome<TRow>;
-  readonly props: ComposedTableProps<TRow>;
-  readonly children: (chrome: TableChrome<TRow>) => ReactNode;
+  readonly props: TProps;
+  readonly children: WalkDone<TRow, TProps>;
 }): ReactNode {
+  "use no memo";
   // One publisher per table: it keeps the neutral table, and hands it a
   // binding that reads the latest published view.
   const [publisher] = useState(() => new TableRuntimePublisher<TRow>());
-  const view = publisher.update(chrome, {
-    rowActions: props.rowActions,
-    bulkActions: props.bulkActions,
-  });
-  usePublishTableRuntime(
-    view.visibleRows ?? view.rows,
-    chrome.table.labels,
-    view
+  const editing = useFeatureState(EDITING_STATE) as
+    EditableCellEditing<TRow> | undefined;
+  const rowPinning = useFeatureState(ROW_PINNING_STATE);
+  const grouping = useFeatureState(GROUPING_STATE) as
+    GroupingState<TRow> | undefined;
+  const tree = useFeatureState(TREE_STATE) as TreeState<TRow> | undefined;
+  const columnLayoutLive = useFeatureState(COLUMN_SIZING_STATE) !== undefined;
+  publisher.stage(
+    chrome,
+    { rowActions: props.rowActions, bulkActions: props.bulkActions },
+    {
+      filterDefs: props.filterDefs,
+      filterRegistry: props.filterRegistry,
+      editing,
+      rowPinning,
+      grouping,
+      tree,
+      columnLayoutLive,
+    }
   );
-  return children(chrome);
+  const labels = chrome.table.labels;
+  return (
+    <PublishTableRuntime<TRow>
+      reader={{
+        rows: () => publisher.visibleRows(),
+        labels: () => labels,
+        view: () => publisher.view(),
+      }}
+    >
+      {children(chrome, props)}
+    </PublishTableRuntime>
+  );
 }
 
-/** One link of the chain: gate on this slot, then hand the rest the result. */
-function ExtraGateChain<TRow>({
+/** One link of the walk: run this stage, then hand the rest what it grew. */
+function ChromeStageChain<TRow, TProps extends StageTableProps<TRow>>({
+  stages,
   index,
   chrome,
   props,
   children,
 }: {
+  readonly stages: readonly LiveStage<ReactNode>[];
   readonly index: number;
   readonly chrome: TableChrome<TRow>;
-  readonly props: ComposedTableProps<TRow>;
-  readonly children: (chrome: TableChrome<TRow>) => ReactNode;
+  readonly props: TProps;
+  readonly children: WalkDone<TRow, TProps>;
 }): ReactNode {
-  const slot = EXTRA_SLOTS[index];
-  return slot === undefined ? (
+  const stage = stages[index];
+  const rest = (
+    next: TableChrome<TRow>,
+    nextProps: StageTableProps<TRow> | undefined
+  ): ReactNode => (
+    // A stage hands on the props it was given, grown: the same shape.
+    <ChromeStageChain
+      stages={stages}
+      index={index + 1}
+      chrome={next}
+      props={(nextProps ?? props) as TProps}
+    >
+      {children}
+    </ChromeStageChain>
+  );
+  const run = stage?.render as
+    ((props: ChromeExtraSlotProps<TRow>) => ReactNode) | undefined;
+  const node: ReactNode = run ? (
+    run({ chrome, props, children: rest })
+  ) : (
     <RuntimePublisher chrome={chrome} props={props}>
       {children}
     </RuntimePublisher>
-  ) : (
-    <ExtraGate slot={slot} chrome={chrome} props={props}>
-      {(next) => (
-        <ExtraGateChain index={index + 1} chrome={next} props={props}>
-          {children}
-        </ExtraGateChain>
-      )}
-    </ExtraGate>
   );
+  return node;
 }
 
 /**
- * Overlay grouping, tree, expansion and editing onto base chrome.
+ * Grow base chrome through the composed chrome stages.
  *
  * @public
  */
-export function ChromeExtrasGate<TRow>({
+export function ChromeExtrasGate<
+  TRow,
+  TProps extends ChromeExtraSlotProps<TRow>["props"],
+>({
   chrome,
   props,
   children,
 }: {
   readonly chrome: TableChrome<TRow>;
-  readonly props: ComposedTableProps<TRow>;
-  readonly children: (chrome: TableChrome<TRow>) => ReactNode;
+  readonly props: TProps;
+  readonly children: (chrome: TableChrome<TRow>, props: TProps) => ReactNode;
 }): ReactNode {
+  const stages = useChromeStages();
   return (
-    <ExtraGateChain index={0} chrome={chrome} props={props}>
+    <ChromeStageChain stages={stages} index={0} chrome={chrome} props={props}>
       {children}
-    </ExtraGateChain>
+    </ChromeStageChain>
   );
 }

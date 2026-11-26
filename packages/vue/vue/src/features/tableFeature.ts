@@ -1,23 +1,25 @@
 /** Scoped extension contracts; importing these never installs a feature. */
 import {
-  devWarn,
   type TableDensity,
   type TableLabels,
   type TableSource,
   type UrlStateAdapter,
 } from "@adapttable/core";
 import {
+  type ContrastRules,
   drawnSlotFills,
   type FeatureApplyInput,
   type FeatureHostState,
+  type FeatureListEntry,
   type FeaturePatch,
   type FeatureRender,
   type FeatureSlotKey,
   type FilterRuntime,
+  flattenFeatures,
   type LiveFeatureHost,
   mergeFeaturePatches,
   type PlainSlotKey,
-  preferLastById,
+  resolveFeatureIds,
   type RowSlotKey,
   type SlotFill,
   slotFillsOf,
@@ -50,6 +52,8 @@ export interface FeatureMountContext<TRow = unknown> {
   readonly featureHost: Readonly<ShallowRef<FeatureHostState<TRow>>>;
   readonly filterRuntime: Readonly<ShallowRef<FilterRuntime<TRow> | undefined>>;
   readonly options: Readonly<ShallowRef<ResolvedTableOptions<TRow>>>;
+  /** The feature's current declaration, with its latest options. */
+  readonly feature: () => TableFeature<TRow>;
   readonly state: FeatureState;
   readonly scope: EffectScope;
   readonly active: Readonly<ShallowRef<boolean>>;
@@ -64,7 +68,12 @@ export interface TableFeature<TRow> {
   apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
   /** The strings the feature draws, with their English defaults. */
   readonly labels?: Partial<TableLabels>;
-  readonly setup?: (host: TableFeatureHost<TRow>) => void | (() => void);
+  /** The high-contrast rules for what the feature draws. */
+  readonly contrast?: ContrastRules;
+  /** Where its fills sit in a slot several features fill; lower first. */
+  readonly rank?: number;
+  /** Registration only; a resource belongs in `mount`. */
+  readonly setup?: (host: TableFeatureHost<TRow>) => void;
   readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
   readonly renders?: readonly FeatureRender<never, VNodeChild>[];
   readonly requiredSlots?: readonly FeatureSlotKey<never>[];
@@ -84,7 +93,12 @@ export interface StaticTableFeature {
   apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
   /** The strings the feature draws, with their English defaults. */
   readonly labels?: Partial<TableLabels>;
-  readonly setup?: (host: StaticFeatureHost) => void | (() => void);
+  /** The high-contrast rules for what the feature draws. */
+  readonly contrast?: ContrastRules;
+  /** Where its fills sit in a slot several features fill; lower first. */
+  readonly rank?: number;
+  /** Registration only; a resource belongs in `mount`. */
+  readonly setup?: (host: StaticFeatureHost) => void;
   readonly mount?: <TRow>(
     context: FeatureMountContext<TRow>
   ) => void | (() => void);
@@ -93,9 +107,9 @@ export interface StaticTableFeature {
 }
 export type ComposedFeature<TRow> = TableFeature<TRow>;
 export function normalizeFeatures<TRow>(
-  features: readonly ComposedFeature<TRow>[]
+  entries: readonly FeatureListEntry<ComposedFeature<TRow>>[]
 ): readonly ComposedFeature<TRow>[] {
-  const seen = new Set<string>();
+  const features = flattenFeatures(entries);
   for (const declaration of features) {
     if (
       !declaration ||
@@ -113,13 +127,8 @@ export function normalizeFeatures<TRow>(
         throw new Error(
           `AdaptTable: feature "${declaration.id}" has an invalid ${name}.`
         );
-    if (seen.has(declaration.id))
-      devWarn(
-        `Two features share the id "${declaration.id}". The last declaration wins.`
-      );
-    seen.add(declaration.id);
   }
-  return preferLastById(features);
+  return resolveFeatureIds(features);
 }
 /** Merge only after duplicate resolution; a discarded feature never applies. */
 export function featureOptionsOf<TRow>(
@@ -148,9 +157,54 @@ export function renderFeatureSlot(
   fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>,
   props: unknown
 ): VNodeChild[] {
-  return drawnSlotFills(slot, fills.get(slot.id) ?? []).map((fill) =>
+  return drawFills(slot, fills.get(slot.id) ?? [], props);
+}
+function drawFills(
+  slot: FeatureSlotKey<never>,
+  fills: readonly SlotFill<VNodeChild>[],
+  props: unknown
+): VNodeChild[] {
+  return drawnSlotFills(slot, fills).map((fill) =>
     (fill.render as (props: unknown) => VNodeChild)(props)
   );
+}
+/**
+ * Draws one feature's fills of a slot with the props given.
+ *
+ * @public
+ */
+export interface FeatureSlotDrawer {
+  /** Draw the feature's fills of a slot with these props. */
+  <TProps>(slot: PlainSlotKey<TProps>, props: TProps): VNodeChild[];
+  /** Draw the feature's fills of a row-typed slot with these props. */
+  <TProps>(
+    slot: RowSlotKey<(props: NoInfer<TProps>) => VNodeChild>,
+    props: TProps
+  ): VNodeChild[];
+}
+/**
+ * A drawer for the fills one feature added: a feature's toolbar entry draws
+ * its own kit control, never another feature's fill of the same slot.
+ */
+export function featureSlotDrawer(
+  fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>,
+  featureId: string
+): FeatureSlotDrawer {
+  function draw<TProps>(
+    slot: PlainSlotKey<TProps>,
+    props: TProps
+  ): VNodeChild[];
+  function draw<TProps>(
+    slot: RowSlotKey<(props: NoInfer<TProps>) => VNodeChild>,
+    props: TProps
+  ): VNodeChild[];
+  function draw(slot: FeatureSlotKey<never>, props: unknown): VNodeChild[] {
+    const own = (fills.get(slot.id) ?? []).filter(
+      (fill) => fill.id === featureId
+    );
+    return drawFills(slot, own, props);
+  }
+  return draw;
 }
 export function assertRequiredSlots<TRow>(
   features: readonly ComposedFeature<TRow>[],
