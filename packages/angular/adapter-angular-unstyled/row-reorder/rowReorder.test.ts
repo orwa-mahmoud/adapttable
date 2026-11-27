@@ -150,6 +150,51 @@ describe("row reorder on phones", () => {
   });
 });
 
+@Component({
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="data"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [urlSync]="false"
+      [defaults]="{ limit: 10, search: '5' }"
+      [features]="features"
+    />
+  `,
+})
+class SearchedReorderHost {
+  readonly data = ROWS;
+  readonly columns = COLUMNS;
+  readonly rowKey = (row: Task) => row.id;
+  readonly onRowReorder = vi.fn();
+  readonly features = [rowReorder(this.onRowReorder)];
+}
+
+describe("row reorder under a search", () => {
+  it("reports positions in the host's data while a search hides rows", async () => {
+    const fixture = TestBed.createComponent(SearchedReorderHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const element = fixture.nativeElement as HTMLElement;
+    document.body.append(element);
+    const grips = [
+      ...element.querySelectorAll<HTMLElement>(
+        '[data-adapttable-part="row-reorder-handle"]'
+      ),
+    ];
+    // Task 05, 15, 25, 35, 45 and 50 match.
+    expect(grips).toHaveLength(6);
+    const grip = grips[1]!;
+    for (const key of [" ", "ArrowUp", " "]) {
+      grip.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+      await fixture.whenStable();
+    }
+    const { onRowReorder } = fixture.componentInstance;
+    expect(onRowReorder).toHaveBeenCalledExactlyOnceWith(14, 4, ROWS[14]);
+  });
+});
+
 describe("row reorder keyboard page clamp", () => {
   it("clamps ArrowDown to the paged page, not the source total", async () => {
     const { element, onRowReorder, settle } = await mount("paged");

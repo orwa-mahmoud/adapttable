@@ -43,7 +43,10 @@ export const ROW_DND_MIME = "application/x-adapttable-row";
 export interface RowReorderControllerOptions<TRow> {
   /** A changed owner/source/view token retires every in-flight interaction. */
   readonly session?: unknown;
-  /** Authoritative dataset index for flat rows. Nested decisions keep their sibling scope. */
+  /**
+   * A flat row's index in the host's own data. When it knows neither row, the
+   * move reports dataset indices. Nested decisions keep their sibling scope.
+   */
   readonly getRowIndex?: (row: TRow) => number | undefined;
   /** Whether reordering is on; when false every gesture resets. */
   enabled: boolean;
@@ -538,19 +541,19 @@ export function createRowReorderController<TRow>(
       reset();
       return;
     }
-    if (options.getRowIndex) {
-      const from = options.getRowIndex(row);
-      const targetIndex = options.getRowIndex(target);
-      if (from === undefined || targetIndex === undefined) {
-        reset();
-        return;
-      }
+    const from = options.getRowIndex?.(row);
+    const targetIndex = options.getRowIndex?.(target);
+    if (from !== undefined && targetIndex !== undefined) {
       const to = sameScopeDestination(from, targetIndex, position);
       if (from === to) {
         reset();
         return;
       }
       reorder(from, to, row);
+      return;
+    }
+    if (from !== undefined || targetIndex !== undefined) {
+      reset();
       return;
     }
     reorder(

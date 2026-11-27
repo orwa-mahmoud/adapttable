@@ -2060,6 +2060,7 @@ export interface TableEngineReader<TRow = unknown> {
     readonly cellValue: RowCallback<[row: NoInfer<TRow>, columnKey: string], unknown>;
     readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
     readonly rowByKey: (rowKey: string) => TRow | undefined;
+    readonly rowIndex: (rowKey: string) => number | undefined;
     readonly rows: (scope: TableRowScope) => readonly TRow[];
     readonly snapshot: () => TableSnapshot<TRow>;
 }

@@ -317,6 +317,18 @@ describe("lookups by id", () => {
     }
   });
 
+  it("places a key in the host's data, whatever the search hides", () => {
+    const data = items(["Ada", "Grace", "Lin"]);
+    const engine = engineWith(data);
+    engine.dispatch({ type: "setSearch", search: "lin" });
+    expect(engine.rows("page")).toEqual([data[2]]);
+    for (let read = 0; read < 2; read++) {
+      expect(engine.rowIndex("2")).toBe(2);
+      expect(engine.rowIndex("0")).toBe(0);
+      expect(engine.rowIndex("9")).toBeUndefined();
+    }
+  });
+
   it("keeps the first row when two rows share a key", () => {
     const first = { id: "x", name: "first" };
     const engine = engineWith([first, { id: "x", name: "second" }]);
