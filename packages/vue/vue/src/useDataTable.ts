@@ -1,7 +1,6 @@
 /** Destructurable readonly projections and stable actions, with no rendered UI. */
 import {
   autoSizeColumns,
-  devWarn,
   type Direction,
   pageSizeOptions,
   paginationSlots,
@@ -47,6 +46,7 @@ import {
   tableAttributes,
   tableErrorState,
   type TableStatusSignature,
+  warnDuplicateColumnKeys,
 } from "@adapttable/core/binding";
 import {
   computed,
@@ -145,14 +145,7 @@ export function useDataTable<TRow>(
   watch(
     allColumns,
     (columns) => {
-      const keys = new Set<string>();
-      for (const column of columns) {
-        if (keys.has(column.key))
-          devWarn(
-            `Duplicate column key "${column.key}". Column keys must be unique.`
-          );
-        keys.add(column.key);
-      }
+      warnDuplicateColumnKeys(columns);
     },
     { immediate: true, flush: "sync" }
   );

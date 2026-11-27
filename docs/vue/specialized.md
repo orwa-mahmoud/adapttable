@@ -42,7 +42,10 @@ listeners. A body can be rendered on the server without starting those resources
 
 Import `rowReorder` from `@adapttable/vue-unstyled/row-reorder` and pass
 `rowReorder((from, to, row) => updateRows(from, to, row))`. The host decides whether
-to replace its array. The controls never mutate the host's rows.
+to replace its array. The controls never mutate the host's rows. For a table
+given `data`, `from` and `to` are indices in that array, whatever search,
+filters or sort hide or move; for a table given a `source`, they are indices in
+the source and include its page offset.
 
 Desktop handles support pointer drag and Space/arrow/Space keyboard moves. Mobile
 cards offer native move-up/down buttons. A nested destination menu supports group

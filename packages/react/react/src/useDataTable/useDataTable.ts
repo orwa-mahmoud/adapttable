@@ -1,6 +1,5 @@
 import {
   type BulkAction,
-  devWarn,
   type Direction,
   type PaginationInfo,
   type Props,
@@ -25,6 +24,7 @@ import {
   selectionResetKey,
   sortButtonAttributes,
   tableAttributes,
+  warnDuplicateColumnKeys,
 } from "@adapttable/core/binding";
 import {
   createElement,
@@ -328,18 +328,8 @@ export function useDataTable<TRow>(
     [declaredColumns, locale]
   );
 
-  // Duplicate keys silently corrupt sorting, selection, and column layout —
-  // every feature targets columns by key. Catch it in development.
   useEffect(() => {
-    const seen = new Set<string>();
-    for (const column of allColumns) {
-      if (seen.has(column.key)) {
-        devWarn(
-          `duplicate column key "${column.key}" — column keys must be unique; sorting, selection, and column layout all target keys.`
-        );
-      }
-      seen.add(column.key);
-    }
+    warnDuplicateColumnKeys(allColumns);
   }, [allColumns]);
 
   const columns = useMemo(

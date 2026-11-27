@@ -54,12 +54,12 @@ and first-release status.
 
 ## Index and write contracts
 
-The callback receives `(from, to, row)`. For flat rows, indices include the
-source page/window offset; they are not DOM row positions. For grouped and
-tree rows, same-scope reorder uses positions within the sibling group or
-parent. Use the supplied row identity and the actual source ordering when a
-filtered view differs from your stored array. Do not blindly splice the
-unfiltered array using filtered-view indices.
+The callback receives `(from, to, row)`. For flat rows of a table given
+`data`, `from` and `to` are indices in that array, whatever search, filters or
+sort hide or move, so `applyRowReorder(rows, from, to)` moves the dragged row.
+For a table given a `source`, they are indices in the source and include its
+page/window offset. They are never DOM row positions. For grouped and tree
+rows, same-scope reorder uses positions within the sibling group or parent.
 
 The table bounds keyboard movement to the available page or loaded infinite
 window. A server-backed host must persist the requested ordering and return

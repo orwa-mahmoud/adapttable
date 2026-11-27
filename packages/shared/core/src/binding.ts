@@ -1361,6 +1361,7 @@ export {
 } from "./aggregate/aggregationModel";
 export { APPROVAL_PREVIEW_LIMIT } from "./approval/approvalReview";
 export { columnHeaderLabel } from "./columns/columnHeader";
+export { warnDuplicateColumnKeys } from "./columns/columnKeys";
 export type {
   ColumnLayoutController,
   ColumnLayoutControllerOptions,

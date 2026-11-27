@@ -146,6 +146,13 @@ describe("owned row reorder sessions", () => {
     controller.forSession().moveBy(0, 1, rows[2]!, 0, 3);
     expect(onRowReorder).toHaveBeenCalledWith(2, 1, rows[2]);
   });
+  it("reports dataset indices when the host order knows neither row", () => {
+    const { controller, onRowReorder } = setup({
+      getRowIndex: () => undefined,
+    });
+    controller.forSession().moveBy(0, 1, rows[0]!, 4, 3);
+    expect(onRowReorder).toHaveBeenCalledWith(4, 5, rows[0]);
+  });
   it("rejects stale pointer identity even before owner configuration is refreshed", () => {
     let current = rows;
     const { controller, onRowReorder } = setup({
@@ -164,7 +171,10 @@ describe("owned row reorder sessions", () => {
     event.dataTransfer.setData(ROW_DND_MIME, "b:0");
     controller.drop(event, 2, rows[2]!, 0);
     expect(onRowReorder).not.toHaveBeenCalled();
-    controller.configure({ ...options, getRowIndex: () => undefined });
+    controller.configure({
+      ...options,
+      getRowIndex: (row) => (row.id === "a" ? 0 : undefined),
+    });
     controller.moveBy(0, 1, rows[0]!, 0, 3);
     expect(onRowReorder).not.toHaveBeenCalled();
     controller.configure({ ...options, enabled: false });

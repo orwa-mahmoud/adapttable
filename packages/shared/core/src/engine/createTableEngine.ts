@@ -189,6 +189,11 @@ export interface TableEngineReader<TRow = unknown> {
   readonly rows: (scope: TableRowScope) => readonly TRow[];
   /** The row behind a key, or `undefined` when it is not loaded. */
   readonly rowByKey: (rowKey: string) => TRow | undefined;
+  /**
+   * Where the row behind a key sits in the host's data, before search,
+   * filters and sort; `undefined` when no row has that key.
+   */
+  readonly rowIndex: (rowKey: string) => number | undefined;
 }
 
 /**

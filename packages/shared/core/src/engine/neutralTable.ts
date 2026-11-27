@@ -48,6 +48,8 @@ export interface NeutralTable<TRow = unknown> {
   >;
   readonly rows: (scope: TableRowScope) => readonly TRow[];
   readonly rowByKey: (rowKey: string) => TRow | undefined;
+  /** Where the row behind a key sits in the host's data, before search, filters and sort. */
+  readonly rowIndex: (rowKey: string) => number | undefined;
   readonly rowKey: RowCallback<[row: NoInfer<TRow>], string>;
   readonly capabilities: TableSourceCapabilities;
   readonly operations: Readonly<Record<string, boolean>>;
@@ -114,6 +116,9 @@ export function createNeutralTable<TRow>(
     },
     rowByKey(rowKey) {
       return engine.rowByKey(rowKey);
+    },
+    rowIndex(rowKey) {
+      return engine.rowIndex(rowKey);
     },
     rowKey(row) {
       return engine.rowKey(row);

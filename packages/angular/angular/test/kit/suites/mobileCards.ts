@@ -748,7 +748,12 @@ export function mobileCardsTests(
           expect(over.defaultPrevented).toBe(false);
           expect(drop.defaultPrevented).toBe(false);
           expect(reordered).not.toHaveBeenCalled();
-          // The same drag can still finish on an ordinary data row.
+          // The same drag can still finish on an ordinary data row. jsdom
+          // lays out nothing, so the row gets a box and the drop lands on
+          // its top edge, before it.
+          vi.spyOn(first!, "getBoundingClientRect").mockReturnValue(
+            new DOMRect(0, 0, 300, 40)
+          );
           first!.dispatchEvent(drag("drop"));
           await settle();
           expect(reordered).toHaveBeenCalledExactlyOnceWith(1, 0, ROWS[1]);

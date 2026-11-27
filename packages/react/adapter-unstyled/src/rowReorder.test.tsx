@@ -75,6 +75,35 @@ describe("row reorder (unstyled)", () => {
     expect(onRowReorder).toHaveBeenCalledExactlyOnceWith(0, 1, ROWS[0]);
   });
 
+  it("reports positions in the host's data while a search hides rows", () => {
+    const tasks: Task[] = [
+      { id: "1", title: "Ship one", team: "Core" },
+      { id: "2", title: "Test", team: "Core" },
+      { id: "3", title: "Docs one", team: "Docs" },
+      { id: "4", title: "Demo one", team: "Docs" },
+    ];
+    const onRowReorder = vi.fn();
+    render(
+      <DataTable
+        data={tasks}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        defaults={{ search: "one" }}
+        {...enable(onRowReorder)}
+      />
+    );
+    const grips = document.querySelectorAll<HTMLElement>(
+      '[data-adapttable-part="row-reorder-handle"]'
+    );
+    expect(grips).toHaveLength(3);
+    const demo = grips[2]!;
+    fireEvent.keyDown(demo, { key: " " });
+    fireEvent.keyDown(demo, { key: "ArrowUp" });
+    fireEvent.keyDown(demo, { key: " " });
+    expect(onRowReorder).toHaveBeenCalledExactlyOnceWith(3, 2, tasks[3]);
+  });
+
   it("prevents default on a neighbour's dragover after a pointer lift", () => {
     render(
       <DataTable

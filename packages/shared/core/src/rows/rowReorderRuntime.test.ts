@@ -1,9 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { createTableEngine } from "../engine/createTableEngine";
+import { createNeutralTable } from "../engine/neutralTable";
 import type { TableRuntime, TableRuntimeView } from "../features/tableRuntime";
 import type { RowGroupRef } from "../grouping/groupRows";
 import type { TreeEntry } from "../tree/treeRows";
 import type { RowMoveRequest } from "./rowMove";
+import { createRowReorderController } from "./rowReorderController";
+import { applyRowReorder } from "./rowReorderPolicy";
 import {
   dispatchRowMove,
   rowMoveView,
@@ -160,6 +164,46 @@ describe("rowReorderRuntimeOptions", () => {
       kind: "move",
     });
     expect(options.getMoveMenu?.(B)?.targets.length).toBeGreaterThan(0);
+  });
+
+  it("reports positions in the host's data while a filter hides rows", () => {
+    const C: Row = { id: "c", name: "Cy" };
+    const data = [A, B, C, D];
+    const engine = createTableEngine<Row>({
+      data,
+      columns: [{ key: "name" }],
+      rowKey: (row) => row.id,
+    });
+    // A filter hides Bea: the table draws Ada, Cy, Dee.
+    const visible = [A, C, D];
+    const onRowReorder = vi.fn();
+    const controller = createRowReorderController(
+      rowReorderRuntimeOptions(
+        {
+          ...runtime(
+            view({
+              rows: visible,
+              neutralTable: createNeutralTable(engine, "t"),
+            })
+          ),
+          rowAt: (index) => visible[index],
+        },
+        onRowReorder
+      )
+    );
+    controller.moveBy(2, -1, D, 0, visible.length);
+    expect(onRowReorder).toHaveBeenCalledWith(3, 2, D);
+    const [from, to] = onRowReorder.mock.calls[0] as [number, number];
+    expect(applyRowReorder(data, from, to)).toEqual([A, B, D, C]);
+  });
+
+  it("reports dataset positions when the table has no engine", () => {
+    const onRowReorder = vi.fn();
+    const controller = createRowReorderController(
+      rowReorderRuntimeOptions(runtime(view()), onRowReorder)
+    );
+    controller.moveBy(2, -1, D, 10, 3);
+    expect(onRowReorder).toHaveBeenCalledWith(12, 11, D);
   });
 
   it("answers nothing while no view is published", () => {

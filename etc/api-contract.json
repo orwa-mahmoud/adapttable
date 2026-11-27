@@ -7547,6 +7547,7 @@
       "reportFailure",
       "requestDensityChange",
       "resetDevWarnings",
+      "warnDuplicateColumnKeys",
       "resolveActiveFilterCount",
       "resolveAssembly",
       "resolveColumnPath",

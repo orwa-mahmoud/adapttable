@@ -7834,6 +7834,7 @@ export interface NeutralTable<TRow = unknown> {
     readonly revisions: TableRevisions;
     // (undocumented)
     readonly rowByKey: (rowKey: string) => TRow | undefined;
+    readonly rowIndex: (rowKey: string) => number | undefined;
     // (undocumented)
     readonly rowKey: RowCallback<[row: NoInfer<TRow>], string>;
     // (undocumented)
@@ -11397,6 +11398,7 @@ export interface TableEngineReader<TRow = unknown> {
     readonly cellValue: RowCallback<[row: NoInfer<TRow>, columnKey: string], unknown>;
     readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
     readonly rowByKey: (rowKey: string) => TRow | undefined;
+    readonly rowIndex: (rowKey: string) => number | undefined;
     readonly rows: (scope: TableRowScope) => readonly TRow[];
     readonly snapshot: () => TableSnapshot<TRow>;
 }
@@ -12522,6 +12524,11 @@ export function walkFilterTreeConditions(tree: QueryFilterGroup | undefined, pat
 
 // @public
 export function warnDataTierMisuse(source: unknown, data: unknown): void;
+
+// @public
+export function warnDuplicateColumnKeys(columns: readonly {
+    readonly key: string;
+}[]): void;
 
 // @public
 export function watchClickedOpener(doc: Document): ClickedOpener;

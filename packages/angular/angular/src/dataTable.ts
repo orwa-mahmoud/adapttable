@@ -7,7 +7,6 @@
 import {
   autoSizeColumns,
   type ColumnGroupRecord,
-  devWarn,
   type Direction,
   pageSizeOptions,
   type PaginationInfo,
@@ -58,6 +57,7 @@ import {
   sourceWindowStart,
   tableAttributes,
   tableErrorState,
+  warnDuplicateColumnKeys,
 } from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
@@ -385,15 +385,7 @@ export function injectDataTable<TRow>(
   if (ngDevMode) {
     effect(
       () => {
-        const seen = new Set<string>();
-        for (const column of allColumns()) {
-          if (seen.has(column.key)) {
-            devWarn(
-              `duplicate column key "${column.key}" — column keys must be unique; sorting, selection, and column layout all target keys.`
-            );
-          }
-          seen.add(column.key);
-        }
+        warnDuplicateColumnKeys(allColumns());
       },
       { injector }
     );

@@ -33,10 +33,13 @@ function Tasks({ seed }: { seed: Task[] }) {
 }
 ```
 
-`from` and `to` are **dataset-relative**: the row's index in the current source
-plus the page offset, so a virtual window or a paged slice does not lie about
-where the row sits. The third argument is the row that moved, so a host that
-keys by identity never has to look it up.
+`from` and `to` are positions in your data. A table given `data` reports the
+row's index in that array, whatever search, filters or sort hide or move, so
+`applyRowReorder(rows, from, to)` moves the row that was dragged. A table given
+a `source` reports the row's index in the source plus the page offset, so a
+virtual window or a paged slice does not lie about where the row sits. The
+third argument is the row that moved, so a host that keys by identity never has
+to look it up.
 
 `applyRowReorder(rows, from, to)` is the in-memory helper — a copy, never a
 mutate. Out of range is a no-op copy.

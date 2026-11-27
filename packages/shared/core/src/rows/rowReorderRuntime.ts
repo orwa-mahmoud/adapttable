@@ -114,5 +114,9 @@ export function rowReorderRuntimeOptions<TRow>(
     labels,
     rowAt: (localIndex) => runtime.rowAt(localIndex),
     getRowId: (row) => runtime.view()?.getRowId(row) ?? "",
+    getRowIndex: (row) => {
+      const table = runtime.view()?.neutralTable;
+      return table?.rowIndex(table.rowKey(row));
+    },
   };
 }

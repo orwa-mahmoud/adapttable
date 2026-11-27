@@ -6861,10 +6861,13 @@ function Tasks({ seed }: { seed: Task[] }) {
 }
 ```
 
-`from` and `to` are **dataset-relative**: the row's index in the current source
-plus the page offset, so a virtual window or a paged slice does not lie about
-where the row sits. The third argument is the row that moved, so a host that
-keys by identity never has to look it up.
+`from` and `to` are positions in your data. A table given `data` reports the
+row's index in that array, whatever search, filters or sort hide or move, so
+`applyRowReorder(rows, from, to)` moves the row that was dragged. A table given
+a `source` reports the row's index in the source plus the page offset, so a
+virtual window or a paged slice does not lie about where the row sits. The
+third argument is the row that moved, so a host that keys by identity never has
+to look it up.
 
 `applyRowReorder(rows, from, to)` is the in-memory helper — a copy, never a
 mutate. Out of range is a no-op copy.
@@ -20303,7 +20306,9 @@ Misconfiguration warns once per message in development (silent in
 production):
 
 - no data tier, or both `source` and `data` provided;
-- duplicate column keys (sorting, selection, and column layout all target keys);
+- duplicate column keys (sorting, selection, and column layout all target
+  keys), checked by `warnDuplicateColumnKeys(columns)` on
+  `@adapttable/core/binding` in every binding;
 - unresolvable sorts (no matching column, or a non-primitive accessor without `sortValue`);
 - a column `filter` whose key is also defined in the `filters` array (the array wins);
 - `options: "auto"` on a tier with no full dataset, and async options that fail to load;
@@ -29615,12 +29620,12 @@ and first-release status.
 
 ## Index and write contracts
 
-The callback receives `(from, to, row)`. For flat rows, indices include the
-source page/window offset; they are not DOM row positions. For grouped and
-tree rows, same-scope reorder uses positions within the sibling group or
-parent. Use the supplied row identity and the actual source ordering when a
-filtered view differs from your stored array. Do not blindly splice the
-unfiltered array using filtered-view indices.
+The callback receives `(from, to, row)`. For flat rows of a table given
+`data`, `from` and `to` are indices in that array, whatever search, filters or
+sort hide or move, so `applyRowReorder(rows, from, to)` moves the dragged row.
+For a table given a `source`, they are indices in the source and include its
+page/window offset. They are never DOM row positions. For grouped and tree
+rows, same-scope reorder uses positions within the sibling group or parent.
 
 The table bounds keyboard movement to the available page or loaded infinite
 window. A server-backed host must persist the requested ordering and return
@@ -38253,7 +38258,10 @@ listeners. A body can be rendered on the server without starting those resources
 
 Import `rowReorder` from `@adapttable/vue-unstyled/row-reorder` and pass
 `rowReorder((from, to, row) => updateRows(from, to, row))`. The host decides whether
-to replace its array. The controls never mutate the host's rows.
+to replace its array. The controls never mutate the host's rows. For a table
+given `data`, `from` and `to` are indices in that array, whatever search,
+filters or sort hide or move; for a table given a `source`, they are indices in
+the source and include its page offset.
 
 Desktop handles support pointer drag and Space/arrow/Space keyboard moves. Mobile
 cards offer native move-up/down buttons. A nested destination menu supports group
