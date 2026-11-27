@@ -1,5 +1,5 @@
 {
-  "version": "0.6.0",
+  "version": "0.6.1",
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",
@@ -48,7 +48,7 @@
     "naive-ui"
   ],
   "dependencies": {
-    "@adapttable/vue": "0.8.0"
+    "@adapttable/vue": "0.8.1"
   },
   "exports": {
     ".": {

@@ -1,5 +1,12 @@
 # @adapttable/element-plus
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [ea5761c]
+  - @adapttable/vue@0.8.1
+
 ## 0.6.0
 
 ### Minor Changes

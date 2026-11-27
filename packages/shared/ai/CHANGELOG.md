@@ -1,5 +1,13 @@
 # @adapttable/ai
 
+## 0.8.1
+
+### Patch Changes
+
+- Updated dependencies [ea5761c]
+- Updated dependencies [93bf6f1]
+  - @adapttable/core@4.1.0
+
 ## 0.8.0
 
 ### Minor Changes

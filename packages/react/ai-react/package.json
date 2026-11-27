@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/ai-react",
-  "version": "0.2.24",
+  "version": "0.2.25",
   "description": "React bindings for AdaptTable AI — tableAgent and useTableAssistant.",
   "keywords": [
     "react",
@@ -53,8 +53,8 @@
     "clean": "rimraf dist coverage .turbo"
   },
   "dependencies": {
-    "@adapttable/ai": "0.8.0",
-    "@adapttable/react": "2.0.0",
+    "@adapttable/ai": "0.8.1",
+    "@adapttable/react": "2.0.1",
     "react-compiler-runtime": "^1.0.0"
   },
   "peerDependencies": {
@@ -62,7 +62,7 @@
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
-    "@adapttable/unstyled": "4.0.0",
+    "@adapttable/unstyled": "4.0.1",
     "@testing-library/react": "^16.3.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
