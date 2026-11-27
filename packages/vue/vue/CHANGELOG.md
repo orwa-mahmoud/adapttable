@@ -1,5 +1,15 @@
 # @adapttable/vue
 
+## 0.8.1
+
+### Patch Changes
+
+- ea5761c: React, Vue and Angular warn about a duplicate column key with the same development message, from one check: `warnDuplicateColumnKeys(columns)` on `@adapttable/core/binding`.
+- Updated dependencies [ea5761c]
+- Updated dependencies [93bf6f1]
+  - @adapttable/core@4.1.0
+  - @adapttable/i18n@4.0.1
+
 ## 0.8.0
 
 ### Minor Changes

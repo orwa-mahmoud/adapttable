@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/mui",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Material UI adapter for AdaptTable — a batteries-included MUI data table with sorting, filtering, URL state, selection, RTL, dark mode, and a free DataGrid-style experience.",
   "keywords": [
     "react",
@@ -478,7 +478,7 @@
   },
   "dependencies": {
     "react-compiler-runtime": "^1.0.0",
-    "@adapttable/react": "2.0.0"
+    "@adapttable/react": "2.0.1"
   },
   "peerDependencies": {
     "@mui/material": "^6.1.2 || ^7.0.0 || ^8.0.0 || ^9.0.0",

@@ -1,5 +1,12 @@
 # @adapttable/core
 
+## 4.1.0
+
+### Minor Changes
+
+- ea5761c: React, Vue and Angular warn about a duplicate column key with the same development message, from one check: `warnDuplicateColumnKeys(columns)` on `@adapttable/core/binding`.
+- 93bf6f1: Row reorder reports positions in your data while a search or filter hides rows. On a table given `data`, React and Angular now pass `onRowReorder(from, to, row)` the row's index in that array, as Vue does, so `applyRowReorder(rows, from, to)` moves the row that was dragged, and a pointer drop lands on the edge its drop line shows. The table engine gains `rowIndex(rowKey)`.
+
 ## 4.0.0
 
 ### Major Changes

@@ -1,5 +1,13 @@
 # @adapttable/spartan
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [ea5761c]
+- Updated dependencies [93bf6f1]
+  - @adapttable/angular@0.12.1
+
 ## 0.6.0
 
 ### Minor Changes
