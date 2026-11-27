@@ -14263,6 +14263,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "warnDuplicateColumnKeys",
+      "kind": "runtime",
+      "module": "columns/columnKeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "columns/columnKeys.ts#warnDuplicateColumnKeys",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "watchClickedOpener",
       "kind": "runtime",
       "module": "overlays/clickedOpener.ts",

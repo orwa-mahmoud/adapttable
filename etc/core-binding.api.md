@@ -12526,6 +12526,11 @@ export function walkFilterTreeConditions(tree: QueryFilterGroup | undefined, pat
 export function warnDataTierMisuse(source: unknown, data: unknown): void;
 
 // @public
+export function warnDuplicateColumnKeys(columns: readonly {
+    readonly key: string;
+}[]): void;
+
+// @public
 export function watchClickedOpener(doc: Document): ClickedOpener;
 
 // @public

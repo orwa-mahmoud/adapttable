@@ -2998,7 +2998,9 @@ Misconfiguration warns once per message in development (silent in
 production):
 
 - no data tier, or both `source` and `data` provided;
-- duplicate column keys (sorting, selection, and column layout all target keys);
+- duplicate column keys (sorting, selection, and column layout all target
+  keys), checked by `warnDuplicateColumnKeys(columns)` on
+  `@adapttable/core/binding` in every binding;
 - unresolvable sorts (no matching column, or a non-primitive accessor without `sortValue`);
 - a column `filter` whose key is also defined in the `filters` array (the array wins);
 - `options: "auto"` on a tier with no full dataset, and async options that fail to load;

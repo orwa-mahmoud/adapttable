@@ -290,3 +290,23 @@ it("renders live shared geometry and accessible names when switching desktop and
   );
   expect(header("b").style.insetInlineStart).toBe("0px");
 });
+
+it("warns in development about a duplicate column key", () => {
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  const scope = effectScope();
+  scope.run(() => {
+    const twice = [...columns, { key: "a" }];
+    const source = useFrontendData({
+      data,
+      columns: twice,
+      getRowId: rowKey,
+      urlSync: false,
+    });
+    useDataTable({ source, columns: twice, rowKey });
+  });
+  expect(warn).toHaveBeenCalledWith(
+    expect.stringContaining('duplicate column key "a"')
+  );
+  scope.stop();
+  warn.mockRestore();
+});
