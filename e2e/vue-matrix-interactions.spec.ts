@@ -3,6 +3,7 @@ import { expect, type Locator, type Page, test } from "@playwright/test";
 
 import { builtAdapters, pathOf } from "../apps/showcase/matrix.mjs";
 import { expectMatchingRows } from "./table-total";
+import { vueChoice } from "./vue-choice";
 
 function part(page: Page, name: string): Locator {
   return page.locator(`.mx-demo [data-adapttable-part="${name}"]`);
@@ -292,12 +293,7 @@ for (const kit of builtAdapters("vue")) {
     );
     await expect(rows).toHaveCount(5);
     const zone = page.locator('.mx-demo [data-zone="rows"]');
-    await chooseOption(
-      page,
-      zone.getByRole("combobox", { name: "Add field", exact: true }),
-      "role",
-      "Role"
-    );
+    await chooseOption(page, vueChoice(zone, "Add field"), "role", "Role");
     await expect(page.getByTestId("pivot-fold")).toHaveCount(5);
     const count = await rows.count();
     expect(count).toBeGreaterThan(5);

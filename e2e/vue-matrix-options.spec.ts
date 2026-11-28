@@ -5,6 +5,7 @@ import { expect, type Locator, type Page, test } from "@playwright/test";
 
 import { builtAdapters, pathOf } from "../apps/showcase/matrix.mjs";
 import { expectMatchingRows } from "./table-total";
+import { vueChoice } from "./vue-choice";
 
 function part(page: Page, name: string): Locator {
   return page.locator(`.mx-demo [data-adapttable-part="${name}"]`);
@@ -23,10 +24,7 @@ async function choose(
   value: string,
   option: string
 ): Promise<void> {
-  const field =
-    typeof label === "string"
-      ? page.getByRole("combobox", { name: label, exact: true })
-      : label;
+  const field = typeof label === "string" ? vueChoice(page, label) : label;
   if (await field.evaluate((element) => element instanceof HTMLSelectElement)) {
     await field.selectOption(value);
     return;
@@ -268,12 +266,7 @@ for (const kit of builtAdapters("vue")) {
         .getByRole("textbox", { name: "Value", exact: true })
         .fill("Priya Nair");
       await expect(rows).toHaveCount(0);
-      await choose(
-        page,
-        surface.getByRole("combobox", { name: "Advanced", exact: true }),
-        "or",
-        "OR"
-      );
+      await choose(page, vueChoice(surface, "Advanced"), "or", "OR");
       await expect(rows).toHaveCount(2);
       await surface
         .getByRole("button", { name: "Add group", exact: true })

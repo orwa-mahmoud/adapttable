@@ -392,9 +392,12 @@ for (const kit of VUE_KIT_PAGES) {
         const labels = getLabels(scenario.lang);
         const surface = page.locator(".vue-kit-preview__table");
         const root = surface.locator(part("root"));
-        const radio = ["element-plus", "nuxt-ui", "shadcn-vue"].includes(
-          kit.kit
-        );
+        const radio = [
+          "element-plus",
+          "nuxt-ui",
+          "shadcn-vue",
+          "headless-ui",
+        ].includes(kit.kit);
         const density = surface.getByRole(radio ? "radiogroup" : "group", {
           name: labels.density,
           exact: true,
