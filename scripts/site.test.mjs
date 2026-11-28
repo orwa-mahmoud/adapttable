@@ -42,6 +42,7 @@ describe("site addresses", () => {
     assert.deepEqual(VUE_DOCS, [
       "vue/getting-started.md",
       "vue/element-plus.md",
+      "vue/headless-ui.md",
       "vue/naive-ui.md",
       "vue/nuxt-ui.md",
       "vue/quasar.md",

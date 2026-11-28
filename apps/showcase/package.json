@@ -74,6 +74,7 @@
     "@adapttable/vuetify": "workspace:*",
     "@adapttable/naive-ui": "workspace:*",
     "@adapttable/reka-ui": "workspace:*",
+    "@adapttable/vue-headless-ui": "workspace:*",
     "@adapttable/shadcn-vue": "workspace:*",
     "@adapttable/nuxt-ui": "workspace:*",
     "@adapttable/quasar": "workspace:*",
@@ -81,6 +82,7 @@
     "vuetify": "4.2.4",
     "naive-ui": "2.45.3",
     "reka-ui": "2.11.0",
+    "@headlessui/vue": "1.7.23",
     "@nuxt/ui": "4.11.3",
     "quasar": "2.34.0"
   },

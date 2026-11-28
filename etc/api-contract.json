@@ -897,6 +897,55 @@
       "adapter-reka-ui-tree",
       "adapter-reka-ui-virtualize",
       "adapter-reka-ui",
+      "adapter-vue-headless-ui-assistant",
+      "adapter-vue-headless-ui-batch-editing",
+      "adapter-vue-headless-ui-bulk-actions",
+      "adapter-vue-headless-ui-cell-navigation",
+      "adapter-vue-headless-ui-cell-span",
+      "adapter-vue-headless-ui-column-groups",
+      "adapter-vue-headless-ui-column-menu",
+      "adapter-vue-headless-ui-column-layout",
+      "adapter-vue-headless-ui-column-selection",
+      "adapter-vue-headless-ui-columns",
+      "adapter-vue-headless-ui-command-palette",
+      "adapter-vue-headless-ui-context-menu",
+      "adapter-vue-headless-ui-density",
+      "adapter-vue-headless-ui-editing",
+      "adapter-vue-headless-ui-export-pdf",
+      "adapter-vue-headless-ui-export-xlsx",
+      "adapter-vue-headless-ui-export",
+      "adapter-vue-headless-ui-extra-rows",
+      "adapter-vue-headless-ui-filters",
+      "adapter-vue-headless-ui-filtering",
+      "adapter-vue-headless-ui-find-in-table",
+      "adapter-vue-headless-ui-fit-columns",
+      "adapter-vue-headless-ui-formula",
+      "adapter-vue-headless-ui-fullscreen",
+      "adapter-vue-headless-ui-grouping-panel",
+      "adapter-vue-headless-ui-grouping",
+      "adapter-vue-headless-ui-header-filters",
+      "adapter-vue-headless-ui-multi-sort",
+      "adapter-vue-headless-ui-nested-table",
+      "adapter-vue-headless-ui-pinned-summary-rows",
+      "adapter-vue-headless-ui-pivot",
+      "adapter-vue-headless-ui-preset",
+      "adapter-vue-headless-ui-print",
+      "adapter-vue-headless-ui-resizable-columns",
+      "adapter-vue-headless-ui-row-actions",
+      "adapter-vue-headless-ui-row-appearance",
+      "adapter-vue-headless-ui-row-detail",
+      "adapter-vue-headless-ui-row-pinning",
+      "adapter-vue-headless-ui-row-reorder",
+      "adapter-vue-headless-ui-rows",
+      "adapter-vue-headless-ui-saved-views",
+      "adapter-vue-headless-ui-selection-stats",
+      "adapter-vue-headless-ui-side-panel",
+      "adapter-vue-headless-ui-sparkline",
+      "adapter-vue-headless-ui-status-bar",
+      "adapter-vue-headless-ui-stream",
+      "adapter-vue-headless-ui-tree",
+      "adapter-vue-headless-ui-virtualize",
+      "adapter-vue-headless-ui",
       "adapter-shadcn-vue-assistant",
       "adapter-shadcn-vue-batch-editing",
       "adapter-shadcn-vue-bulk-actions",
@@ -13962,6 +14011,297 @@
       "TableDensity",
       "TableSource"
     ],
+    "adapter-vue-headless-ui-assistant": [
+      "agentApproval",
+      "AgentApproval",
+      "AgentApprovalProps",
+      "tableAssistant",
+      "TableAssistant",
+      "TableAssistantProps"
+    ],
+    "adapter-vue-headless-ui-batch-editing": [
+      "BatchEditBar",
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "EditingLifecycleExtras"
+    ],
+    "adapter-vue-headless-ui-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-vue-headless-ui-cell-navigation": [
+      "CellEdit",
+      "cellNavigation",
+      "CellNavigationOptions",
+      "CellRange",
+      "columnSelectionCheckbox",
+      "GridCell",
+      "GridFocusState"
+    ],
+    "adapter-vue-headless-ui-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-vue-headless-ui-column-groups": [
+      "collapsibleColumnGroups"
+    ],
+    "adapter-vue-headless-ui-column-menu": [
+      "ColumnMenu",
+      "columnMenu",
+      "ColumnMenuSlotProps"
+    ],
+    "adapter-vue-headless-ui-column-layout": [
+      "columnLayoutFamily"
+    ],
+    "adapter-vue-headless-ui-column-selection": [
+      "ColumnSelectCheckboxProps",
+      "columnSelectionCheckbox"
+    ],
+    "adapter-vue-headless-ui-columns": [
+      "collapsibleColumnGroups",
+      "ColumnResizeHandleOptions",
+      "ColumnResizeHandleProps",
+      "fitColumns",
+      "multiSort",
+      "resizableColumns"
+    ],
+    "adapter-vue-headless-ui-command-palette": [
+      "commandPalette",
+      "CommandPaletteOptions"
+    ],
+    "adapter-vue-headless-ui-context-menu": [
+      "contextMenu",
+      "ContextMenuItem",
+      "ContextMenuOptions",
+      "ContextMenuTarget"
+    ],
+    "adapter-vue-headless-ui-density": [
+      "densityChooser"
+    ],
+    "adapter-vue-headless-ui-editing": [
+      "BatchEditBar",
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "CellEditHandler",
+      "dirtyIndicators",
+      "EditableCell",
+      "editHistory",
+      "editing",
+      "EditingLifecycleExtras",
+      "RowEditActions",
+      "RowEditIcons",
+      "rowEditing",
+      "RowEditingState",
+      "TableEditingOptions",
+      "undoRedoButtons",
+      "editingFamily"
+    ],
+    "adapter-vue-headless-ui-export-pdf": [
+      "buildPrintDocument",
+      "buildPrintTableHtml",
+      "buildTablePdf",
+      "exportPdf",
+      "ExportPdfOptions",
+      "openPrintLayout",
+      "pdfWriter",
+      "PdfWriterOptions",
+      "PrintLayoutOptions",
+      "PrintPageBreak",
+      "PrintPageSize",
+      "printStyles",
+      "printTable"
+    ],
+    "adapter-vue-headless-ui-export-xlsx": [
+      "buildTableXlsx",
+      "exportXlsx",
+      "ExportXlsxOptions",
+      "xlsxWriter"
+    ],
+    "adapter-vue-headless-ui-export": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-vue-headless-ui-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-vue-headless-ui-filters": [
+      "ChecklistFilter",
+      "ChecklistFilterProps",
+      "FilterDef",
+      "FilterField",
+      "FilterOption",
+      "filters",
+      "FiltersOptions",
+      "FilterTreeBuilder",
+      "FilterTreeBuilderProps",
+      "filterTypes",
+      "FilterTypeSpec",
+      "booleanFilterWidget",
+      "checklistFilterWidget",
+      "filtersWith",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
+    ],
+    "adapter-vue-headless-ui-filtering": [
+      "filteringFamily"
+    ],
+    "adapter-vue-headless-ui-find-in-table": [
+      "findInTable"
+    ],
+    "adapter-vue-headless-ui-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-vue-headless-ui-formula": [],
+    "adapter-vue-headless-ui-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-vue-headless-ui-grouping-panel": [
+      "GroupingExtras",
+      "groupingPanel",
+      "GroupingPanelProps"
+    ],
+    "adapter-vue-headless-ui-grouping": [
+      "GroupCollapseOptions",
+      "grouping",
+      "GroupingExtras",
+      "GroupNode",
+      "GroupSort",
+      "StaticGroupingExtras",
+      "useGroupCollapse",
+      "useGroupCollapseUrlState",
+      "useGroupPaging"
+    ],
+    "adapter-vue-headless-ui-header-filters": [
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderControlProps",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "HeaderFilter",
+      "headerFilters"
+    ],
+    "adapter-vue-headless-ui-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-vue-headless-ui-nested-table": [
+      "nestedTable"
+    ],
+    "adapter-vue-headless-ui-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-vue-headless-ui-pivot": [
+      "PivotPanel",
+      "PivotPanelProps"
+    ],
+    "adapter-vue-headless-ui-preset": [
+      "FilterDef",
+      "StandardFeatureOptions",
+      "standardFeatures",
+      "UseSavedViewsOptions"
+    ],
+    "adapter-vue-headless-ui-print": [
+      "print"
+    ],
+    "adapter-vue-headless-ui-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-vue-headless-ui-row-actions": [
+      "rowActions"
+    ],
+    "adapter-vue-headless-ui-row-appearance": [
+      "rowAppearance"
+    ],
+    "adapter-vue-headless-ui-row-detail": [
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-vue-headless-ui-row-pinning": [
+      "rowPinning"
+    ],
+    "adapter-vue-headless-ui-row-reorder": [
+      "rowReorder",
+      "RowReorderHandler",
+      "RowReorderOptions",
+      "useRowReorder"
+    ],
+    "adapter-vue-headless-ui-rows": [
+      "cellSpan",
+      "CellSpanAppearance",
+      "CellSpanRequest",
+      "ConfirmHandler",
+      "ConfirmRequest",
+      "ExtraEntry",
+      "ExtraRow",
+      "ExtraRowKind",
+      "extraRows",
+      "GetCellSpan",
+      "GetCellSpanArgs",
+      "PinnedRows",
+      "PinnedSummaryEntry",
+      "pinnedSummaryRows",
+      "RowAction",
+      "rowActions",
+      "rowAppearance",
+      "RowAppearanceOptions",
+      "RowHeight",
+      "RowMutationHandlers",
+      "rowPinning",
+      "RowPinningFeatureOptions",
+      "RowPinSide",
+      "RowPinState",
+      "RowStyle"
+    ],
+    "adapter-vue-headless-ui-saved-views": [
+      "SavedView",
+      "savedViews",
+      "SavedViewsPanel",
+      "SavedViewsPanelProps",
+      "SavedViewsStore",
+      "UseSavedViewsOptions"
+    ],
+    "adapter-vue-headless-ui-selection-stats": [
+      "SelectionStats",
+      "selectionStats"
+    ],
+    "adapter-vue-headless-ui-side-panel": [
+      "sidePanel",
+      "SidePanelOptions",
+      "SidePanelPanel"
+    ],
+    "adapter-vue-headless-ui-sparkline": [],
+    "adapter-vue-headless-ui-status-bar": [
+      "SelectionStats",
+      "selectionStats",
+      "statusBar"
+    ],
+    "adapter-vue-headless-ui-stream": [],
+    "adapter-vue-headless-ui-tree": [
+      "tree"
+    ],
+    "adapter-vue-headless-ui-virtualize": [
+      "virtualize",
+      "VirtualizeOptions"
+    ],
+    "adapter-vue-headless-ui": [
+      "CellContext",
+      "CellEdit",
+      "CellRange",
+      "ColumnDef",
+      "ColumnGroup",
+      "ColumnInput",
+      "DataTable",
+      "DataTableClassNames",
+      "DataTableHandle",
+      "DataTableProps",
+      "DataTableSlots",
+      "FooterContext",
+      "HeaderContext",
+      "SummaryRowFn",
+      "TableDensity",
+      "TableSource"
+    ],
     "adapter-shadcn-vue-assistant": [
       "agentApproval",
       "AgentApproval",
@@ -18259,6 +18599,156 @@
       "reexport": "vue/selection"
     },
     "adapter-reka-ui-selection.api.md": {
+      "reexport": "vue/selection"
+    },
+    "adapter-vue-headless-ui-assistant.api.md": {
+      "surface": "adapter-vue-headless-ui-assistant"
+    },
+    "adapter-vue-headless-ui-batch-editing.api.md": {
+      "surface": "adapter-vue-headless-ui-batch-editing"
+    },
+    "adapter-vue-headless-ui-bulk-actions.api.md": {
+      "surface": "adapter-vue-headless-ui-bulk-actions"
+    },
+    "adapter-vue-headless-ui-cell-navigation.api.md": {
+      "surface": "adapter-vue-headless-ui-cell-navigation"
+    },
+    "adapter-vue-headless-ui-cell-span.api.md": {
+      "surface": "adapter-vue-headless-ui-cell-span"
+    },
+    "adapter-vue-headless-ui-column-groups.api.md": {
+      "surface": "adapter-vue-headless-ui-column-groups"
+    },
+    "adapter-vue-headless-ui-column-menu.api.md": {
+      "surface": "adapter-vue-headless-ui-column-menu"
+    },
+    "adapter-vue-headless-ui-column-layout.api.md": {
+      "surface": "adapter-vue-headless-ui-column-layout"
+    },
+    "adapter-vue-headless-ui-column-selection.api.md": {
+      "surface": "adapter-vue-headless-ui-column-selection"
+    },
+    "adapter-vue-headless-ui-columns.api.md": {
+      "surface": "adapter-vue-headless-ui-columns"
+    },
+    "adapter-vue-headless-ui-command-palette.api.md": {
+      "surface": "adapter-vue-headless-ui-command-palette"
+    },
+    "adapter-vue-headless-ui-context-menu.api.md": {
+      "surface": "adapter-vue-headless-ui-context-menu"
+    },
+    "adapter-vue-headless-ui-density.api.md": {
+      "surface": "adapter-vue-headless-ui-density"
+    },
+    "adapter-vue-headless-ui-editing.api.md": {
+      "surface": "adapter-vue-headless-ui-editing"
+    },
+    "adapter-vue-headless-ui-export-pdf.api.md": {
+      "surface": "adapter-vue-headless-ui-export-pdf"
+    },
+    "adapter-vue-headless-ui-export-xlsx.api.md": {
+      "surface": "adapter-vue-headless-ui-export-xlsx"
+    },
+    "adapter-vue-headless-ui-export.api.md": {
+      "surface": "adapter-vue-headless-ui-export"
+    },
+    "adapter-vue-headless-ui-extra-rows.api.md": {
+      "surface": "adapter-vue-headless-ui-extra-rows"
+    },
+    "adapter-vue-headless-ui-filters.api.md": {
+      "surface": "adapter-vue-headless-ui-filters"
+    },
+    "adapter-vue-headless-ui-filtering.api.md": {
+      "surface": "adapter-vue-headless-ui-filtering"
+    },
+    "adapter-vue-headless-ui-find-in-table.api.md": {
+      "surface": "adapter-vue-headless-ui-find-in-table"
+    },
+    "adapter-vue-headless-ui-fit-columns.api.md": {
+      "surface": "adapter-vue-headless-ui-fit-columns"
+    },
+    "adapter-vue-headless-ui-formula.api.md": {
+      "surface": "adapter-vue-headless-ui-formula"
+    },
+    "adapter-vue-headless-ui-fullscreen.api.md": {
+      "surface": "adapter-vue-headless-ui-fullscreen"
+    },
+    "adapter-vue-headless-ui-grouping-panel.api.md": {
+      "surface": "adapter-vue-headless-ui-grouping-panel"
+    },
+    "adapter-vue-headless-ui-grouping.api.md": {
+      "surface": "adapter-vue-headless-ui-grouping"
+    },
+    "adapter-vue-headless-ui-header-filters.api.md": {
+      "surface": "adapter-vue-headless-ui-header-filters"
+    },
+    "adapter-vue-headless-ui-multi-sort.api.md": {
+      "surface": "adapter-vue-headless-ui-multi-sort"
+    },
+    "adapter-vue-headless-ui-nested-table.api.md": {
+      "surface": "adapter-vue-headless-ui-nested-table"
+    },
+    "adapter-vue-headless-ui-pinned-summary-rows.api.md": {
+      "surface": "adapter-vue-headless-ui-pinned-summary-rows"
+    },
+    "adapter-vue-headless-ui-pivot.api.md": {
+      "surface": "adapter-vue-headless-ui-pivot"
+    },
+    "adapter-vue-headless-ui-preset.api.md": {
+      "surface": "adapter-vue-headless-ui-preset"
+    },
+    "adapter-vue-headless-ui-print.api.md": {
+      "surface": "adapter-vue-headless-ui-print"
+    },
+    "adapter-vue-headless-ui-resizable-columns.api.md": {
+      "surface": "adapter-vue-headless-ui-resizable-columns"
+    },
+    "adapter-vue-headless-ui-row-actions.api.md": {
+      "surface": "adapter-vue-headless-ui-row-actions"
+    },
+    "adapter-vue-headless-ui-row-appearance.api.md": {
+      "surface": "adapter-vue-headless-ui-row-appearance"
+    },
+    "adapter-vue-headless-ui-row-detail.api.md": {
+      "surface": "adapter-vue-headless-ui-row-detail"
+    },
+    "adapter-vue-headless-ui-row-pinning.api.md": {
+      "surface": "adapter-vue-headless-ui-row-pinning"
+    },
+    "adapter-vue-headless-ui-row-reorder.api.md": {
+      "surface": "adapter-vue-headless-ui-row-reorder"
+    },
+    "adapter-vue-headless-ui-rows.api.md": {
+      "surface": "adapter-vue-headless-ui-rows"
+    },
+    "adapter-vue-headless-ui-saved-views.api.md": {
+      "surface": "adapter-vue-headless-ui-saved-views"
+    },
+    "adapter-vue-headless-ui-selection-stats.api.md": {
+      "surface": "adapter-vue-headless-ui-selection-stats"
+    },
+    "adapter-vue-headless-ui-side-panel.api.md": {
+      "surface": "adapter-vue-headless-ui-side-panel"
+    },
+    "adapter-vue-headless-ui-sparkline.api.md": {
+      "surface": "adapter-vue-headless-ui-sparkline"
+    },
+    "adapter-vue-headless-ui-status-bar.api.md": {
+      "surface": "adapter-vue-headless-ui-status-bar"
+    },
+    "adapter-vue-headless-ui-stream.api.md": {
+      "surface": "adapter-vue-headless-ui-stream"
+    },
+    "adapter-vue-headless-ui-tree.api.md": {
+      "surface": "adapter-vue-headless-ui-tree"
+    },
+    "adapter-vue-headless-ui-virtualize.api.md": {
+      "surface": "adapter-vue-headless-ui-virtualize"
+    },
+    "adapter-vue-headless-ui.api.md": {
+      "surface": "adapter-vue-headless-ui"
+    },
+    "adapter-vue-headless-ui-selection.api.md": {
       "reexport": "vue/selection"
     },
     "adapter-shadcn-vue-selection.api.md": {

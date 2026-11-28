@@ -27,6 +27,7 @@ overrides:
   '@adapttable/shadcn': workspace:*
   '@adapttable/shadcn-vue': workspace:*
   '@adapttable/unstyled': workspace:*
+  '@adapttable/vue-headless-ui': workspace:*
   '@adapttable/vuetify': workspace:*
   '@chakra-ui/react>@ark-ui/react': 5.39.3
   '@rolldown/plugin-babel>@babel/core': ^7.29.7
@@ -355,6 +356,9 @@ importers:
       '@adapttable/vue':
         specifier: workspace:*
         version: link:../../packages/vue/vue
+      '@adapttable/vue-headless-ui':
+        specifier: workspace:*
+        version: link:../../packages/vue/adapter-vue-headless-ui
       '@adapttable/vue-unstyled':
         specifier: workspace:*
         version: link:../../packages/vue/adapter-vue-unstyled
@@ -379,6 +383,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.14.1
         version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
+      '@headlessui/vue':
+        specifier: 1.7.23
+        version: 1.7.23(vue@3.5.43(typescript@6.0.3))
       '@mantine/core':
         specifier: ^9.5.2
         version: 9.5.2(@mantine/hooks@9.5.2(react@19.2.8))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -1812,6 +1819,25 @@ importers:
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
+      vue:
+        specifier: ^3.5.43
+        version: 3.5.43(typescript@6.0.3)
+
+  packages/vue/adapter-vue-headless-ui:
+    dependencies:
+      '@adapttable/vue':
+        specifier: 0.8.1
+        version: link:../vue
+    devDependencies:
+      '@adapttable/i18n':
+        specifier: workspace:*
+        version: link:../../shared/i18n
+      '@headlessui/vue':
+        specifier: ^1.7.23
+        version: 1.7.23(vue@3.5.43(typescript@6.0.3))
+      '@vue/test-utils':
+        specifier: 2.4.6
+        version: 2.4.6
       vue:
         specifier: ^3.5.43
         version: 3.5.43(typescript@6.0.3)
@@ -3663,6 +3689,12 @@ packages:
 
   '@harperfast/extended-iterable@1.0.3':
     resolution: {integrity: sha512-sSAYhQca3rDWtQUHSAPeO7axFIUJOI6hn1gjRC5APVE1a90tuyT8f5WIgRsFhhWA7htNkju2veB9eWL6YHi/Lw==}
+
+  '@headlessui/vue@1.7.23':
+    resolution: {integrity: sha512-JzdCNqurrtuu0YW6QaDtR2PIYCKPUWq28csDyMvN4zmGccmE7lz40Is6hc3LA4HFeCI7sekZ/PQMTNmn9I/4Wg==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      vue: ^3.2.0
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -15321,6 +15353,11 @@ snapshots:
 
   '@harperfast/extended-iterable@1.0.3':
     optional: true
+
+  '@headlessui/vue@1.7.23(vue@3.5.43(typescript@6.0.3))':
+    dependencies:
+      '@tanstack/vue-virtual': 3.13.39(vue@3.5.43(typescript@6.0.3))
+      vue: 3.5.43(typescript@6.0.3)
 
   '@humanfs/core@0.19.2':
     dependencies:

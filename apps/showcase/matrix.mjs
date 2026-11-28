@@ -836,6 +836,24 @@ export const SHOWCASE_ADAPTERS = [
     built: true,
   },
   {
+    key: "headless-ui",
+    framework: "vue",
+    label: "Headless UI",
+    blurb: "Unstyled primitives, neutral theme",
+    accentLight: "oklch(0.55 0.14 255)",
+    accentDark: "oklch(0.76 0.12 255)",
+    pkg: "@adapttable/vue-headless-ui",
+    peer: "@headlessui/vue",
+    install:
+      "pnpm add @adapttable/vue-headless-ui @adapttable/vue @adapttable/core @headlessui/vue",
+    provider: "",
+    tagline:
+      "A Headless UI data table — accessible Vue primitives in a compact, neutral theme.",
+    surface:
+      "Headless UI's Popover, Dialog, Listbox, Menu, Tabs and RadioGroup components",
+    built: true,
+  },
+  {
     key: "shadcn-vue",
     framework: "vue",
     label: "shadcn-vue",
@@ -4552,6 +4570,18 @@ export const VUE_KIT_PAGES = Object.freeze([
     notice:
       "Preview of table controls, selection, search, pagination and presentation settings.",
     entry: "/src/vue/kits/entry-reka-ui.ts",
+  },
+  {
+    key: "vue-headless-ui-orders",
+    kit: "headless-ui",
+    dir: "vue/headless-ui/orders",
+    path: "headless-ui/orders",
+    title: "Headless UI order desk — Vue — AdaptTable",
+    description:
+      "Explore real Headless UI Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
+    notice:
+      "Preview of table controls, selection, search, pagination and presentation settings.",
+    entry: "/src/vue/kits/entry-headless-ui.ts",
   },
   {
     key: "vue-shadcn-vue-orders",

@@ -3,6 +3,7 @@ export const kitPreviews = [
   { key: "vuetify", name: "Vuetify" },
   { key: "naive-ui", name: "Naive UI" },
   { key: "reka-ui", name: "Reka UI" },
+  { key: "headless-ui", name: "Headless UI" },
   { key: "shadcn-vue", name: "shadcn-vue" },
   { key: "nuxt-ui", name: "Nuxt UI" },
   { key: "quasar", name: "Quasar" },

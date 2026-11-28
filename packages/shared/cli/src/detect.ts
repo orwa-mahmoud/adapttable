@@ -33,6 +33,7 @@ export type Kit =
   | "vuetify"
   | "naive-ui"
   | "reka-ui"
+  | "vue-headless-ui"
   | "shadcn-vue"
   | "nuxt-ui"
   | "quasar";
@@ -312,6 +313,14 @@ export const KITS: readonly KitInfo[] = [
     signals: ["reka-ui"],
     extras: ["reka-ui@^2.11.0"],
     label: "Reka UI",
+  },
+  {
+    kit: "vue-headless-ui",
+    framework: "vue",
+    adapter: "@adapttable/vue-headless-ui",
+    signals: ["@headlessui/vue"],
+    extras: ["@headlessui/vue@^1.7.23"],
+    label: "Headless UI",
   },
   {
     kit: "vue-unstyled",

@@ -230,6 +230,7 @@ body:has(.vue-kit-preview) > .vue-baseline a:focus-visible {
   outline-offset: 3px;
 }
 .vue-kit-preview__reka-choice,
+.vue-kit-preview__headless-choice,
 .vue-kit-preview__shadcn-choice {
   min-block-size: 32px;
   padding: 5px 10px;
@@ -241,7 +242,8 @@ body:has(.vue-kit-preview) > .vue-baseline a:focus-visible {
   font-size: 12px;
   cursor: pointer;
 }
-.vue-kit-preview__reka-choice[aria-pressed="true"] {
+.vue-kit-preview__reka-choice[aria-pressed="true"],
+.vue-kit-preview__headless-choice[aria-pressed="true"] {
   border-color: #7c3aed;
   background: #7c3aed;
   color: #fff;

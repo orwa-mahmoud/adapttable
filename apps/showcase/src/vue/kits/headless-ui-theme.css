@@ -1,0 +1,19 @@
+.dark [data-vue-kit="headless-ui"],
+.dark
+  :is(
+    .at-headless,
+    .at-headless-surface,
+    .at-headless-select-content,
+    .at-headless-menu
+  ) {
+  --at-headless-background: #1c202b;
+  --at-headless-subtle: #252b38;
+  --at-headless-border: #3a4253;
+  --at-headless-text: #eff1f7;
+  --at-headless-muted: #adb7ce;
+  --at-headless-accent: #c4a5fd;
+  --at-headless-accent-soft: #33274b;
+}
+.dark .at-headless tbody tr:hover td {
+  background: var(--at-headless-subtle);
+}

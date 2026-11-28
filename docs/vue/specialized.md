@@ -3,8 +3,8 @@
 These packages are published on npm.
 
 Every Vue adapter provides kit-owned grouping configuration and row-reordering
-controls, plus the shared virtualization feature. Unstyled, Reka UI and shadcn-vue
-also export a controlled `PivotPanel`; the other styled adapters leave pivot
+controls, plus the shared virtualization feature. Unstyled, Reka UI, Headless UI
+and shadcn-vue also export a controlled `PivotPanel`; the other styled adapters leave pivot
 configuration controls to the host. Optional Vue entries use the same
 framework-neutral formula, pivot, stream, sparkline, reorder and virtualization
 models as the other bindings.
@@ -93,7 +93,7 @@ table's state. Saved Views may capture this same URL slice.
 ### Styled pivot and reorder surfaces
 
 Import `PivotPanel` from the kit's own `/pivot` entry — Element Plus, Vuetify,
-Naive UI, Reka UI, shadcn-vue, Nuxt UI and Quasar each build it from their
+Naive UI, Reka UI, Headless UI, shadcn-vue, Nuxt UI and Quasar each build it from their
 controls. Pass `fields`, the current `config` and `onChange(next)`, plus optional
 labels and a class name. Accept a change by passing the new configuration back. Build the data with
 `pivotTableModel` from `@adapttable/vue/pivot`; the configuration panel does not

@@ -46,6 +46,12 @@
       "@adapttable/reka-ui/*": [
         "../../../../packages/vue/adapter-reka-ui/src/*"
       ],
+      "@adapttable/vue-headless-ui": [
+        "../../../../packages/vue/adapter-vue-headless-ui/src/index.ts"
+      ],
+      "@adapttable/vue-headless-ui/*": [
+        "../../../../packages/vue/adapter-vue-headless-ui/src/*"
+      ],
       "@adapttable/shadcn-vue": [
         "../../../../packages/vue/adapter-shadcn-vue/src/index.ts"
       ],

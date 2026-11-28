@@ -76,6 +76,14 @@ export const KIT_PEER_RUNS = {
       ],
     },
   ],
+  "adapter-vue-headless-ui": [
+    {
+      files: [
+        "test/structural-parts.ssr.test.ts",
+        "test/table-integration.test.ts",
+      ],
+    },
+  ],
   "adapter-shadcn-vue": [
     { files: ["test/structural-parts.ssr.test.ts", "test/table.test.ts"] },
   ],

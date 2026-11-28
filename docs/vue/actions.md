@@ -6,7 +6,7 @@ The Vue binding, Unstyled kit and seven styled adapters are public
 The action factories are opt-in: `bulkActions`, `commandPalette`, `contextMenu`,
 `sidePanel`, `undoRedoButtons`, `exportCsv` and `print` are available through each
 adapter's focused entries. Dedicated `exportPdf` and `exportXlsx` factories are
-exported by Unstyled, Reka UI, shadcn-vue and Quasar; the other kits accept those
+exported by Unstyled, Reka UI, Headless UI, shadcn-vue and Quasar; the other kits accept those
 writers through their own `exportCsv` factory.
 
 The binding owns structural Chrome and reads the neutral engine's state. A kit supplies every visible control through required typed slots. The native adapter fills these slots with native buttons, inputs, a dialog and a manual popover. No visible HTML-control fallback is installed by the binding.

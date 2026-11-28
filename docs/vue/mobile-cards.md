@@ -134,4 +134,4 @@ and `error` for a failed request. The host owns recovery and every saved edit.
 
 ## Try the native adapters
 
-Use the [live demo](/vue/demo/) or [Feature Lab](/vue/demo/all-options/) to switch all eight Vue kits. Dedicated kit examples show the same feature with each UI kit’s controls.
+Use the [live demo](/vue/demo/) or [Feature Lab](/vue/demo/all-options/) to switch all nine Vue kits. Dedicated kit examples show the same feature with each UI kit’s controls.

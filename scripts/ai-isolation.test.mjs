@@ -58,6 +58,7 @@ describe("AI isolation", () => {
         "quasar",
         "reka-ui",
         "shadcn-vue",
+        "vue-headless-ui",
         "vuetify",
       ].map((kit) => `packages/vue/adapter-${kit}/dist/index.js`),
       "packages/angular/angular/dist/fesm2022/adapttable-angular.mjs",

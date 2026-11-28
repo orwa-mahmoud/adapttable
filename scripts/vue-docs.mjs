@@ -2,6 +2,7 @@
 export const VUE_DOCS = Object.freeze([
   "vue/getting-started.md",
   "vue/element-plus.md",
+  "vue/headless-ui.md",
   "vue/naive-ui.md",
   "vue/nuxt-ui.md",
   "vue/quasar.md",

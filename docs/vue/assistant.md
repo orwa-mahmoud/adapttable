@@ -3,7 +3,8 @@
 The Vue packages are published on npm. `@adapttable/ai-vue`
 connects neutral AI stores to Vue 3.5. `@adapttable/vue/adapter` provides
 structural Chrome and required control slots. Every Vue kit — Unstyled,
-Element Plus, Vuetify, Naive UI, Reka UI, shadcn-vue, Nuxt UI and Quasar —
+Element Plus, Vuetify, Naive UI, Reka UI, Headless UI, shadcn-vue, Nuxt UI and
+Quasar —
 supplies the visible controls through its optional `/assistant` entry, built
 from that kit's own components. A table can also use the headless agent feature
 on its own.
@@ -109,6 +110,8 @@ The same `TableAssistant`, `AgentApproval`, `tableAssistant()` and
 
 - `@adapttable/vue-unstyled/assistant`, with native HTML controls.
 - `@adapttable/reka-ui/assistant`, with Reka primitives.
+- `@adapttable/vue-headless-ui/assistant`, with Headless UI Dialog, Menu and
+  Listbox components.
 - `@adapttable/shadcn-vue/assistant`, with shadcn Sheet, input, button and other
   copied kit controls.
 

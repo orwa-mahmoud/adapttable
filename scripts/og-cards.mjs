@@ -24,7 +24,7 @@ export const ogCardMetadata = (pages = sidebarPages()) =>
       footer = "Headless Angular data table · native kit controls";
     } else if (slug.startsWith("vue/")) {
       framework = "vue";
-      footer = "Vue reactive tables · eight native UI kits";
+      footer = "Vue reactive tables · nine native UI kits";
     } else if (SHARED_DOCS.includes(slug)) {
       framework = "shared";
       footer = "Framework-neutral engine · React, Angular and Vue bindings";

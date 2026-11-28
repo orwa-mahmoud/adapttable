@@ -4,6 +4,7 @@ import { VUE_KIT_PAGES } from "../apps/showcase/matrix.mjs";
 
 const kits = [
   ["reka-ui", "Reka UI"],
+  ["headless-ui", "Headless UI"],
   ["shadcn-vue", "shadcn-vue"],
   ["quasar", "Quasar"],
 ] as const;

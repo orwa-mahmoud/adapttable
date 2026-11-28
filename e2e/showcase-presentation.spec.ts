@@ -19,6 +19,7 @@ const nativeStatus: Readonly<Record<string, string>> = {
   vuetify: ".v-chip",
   "naive-ui": ".n-tag",
   "reka-ui": ".vue-kit-preview__status",
+  "headless-ui": ".vue-kit-preview__status",
   "shadcn-vue": ".vue-kit-preview__status",
   "nuxt-ui": '[data-order-status="Review"]',
   quasar: ".q-badge",
@@ -116,9 +117,14 @@ for (const kit of VUE_KIT_PAGES) {
     expect(errors).toEqual([]);
   });
   if (
-    ["element-plus", "vuetify", "reka-ui", "shadcn-vue", "nuxt-ui"].includes(
-      kit.kit
-    )
+    [
+      "element-plus",
+      "vuetify",
+      "reka-ui",
+      "headless-ui",
+      "shadcn-vue",
+      "nuxt-ui",
+    ].includes(kit.kit)
   ) {
     test(`${kit.kit}: native column menu pins and retains the visible column demo`, async ({
       page,

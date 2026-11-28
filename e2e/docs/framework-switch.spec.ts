@@ -227,6 +227,7 @@ test("Vue docs expose all published guides and supported counterparts", async ({
   ).toHaveCount(0);
   for (const slug of [
     "element-plus",
+    "headless-ui",
     "naive-ui",
     "nuxt-ui",
     "quasar",

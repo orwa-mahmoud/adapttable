@@ -15,6 +15,8 @@ export const loadVueShowcaseKit = (
       return import("./kits/naiveUi");
     case "reka-ui":
       return import("./kits/rekaUi");
+    case "headless-ui":
+      return import("./kits/headlessUi");
     case "shadcn-vue":
       return import("./kits/shadcnVue");
     case "nuxt-ui":

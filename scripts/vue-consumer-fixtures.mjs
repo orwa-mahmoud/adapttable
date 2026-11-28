@@ -70,6 +70,7 @@ export const VUE_NATIVE_BASE_SPECS = [
   ["shadcn-vue", "adapttable-shadcn-vue"],
   ["quasar", "adapttable-quasar"],
   ["reka-ui", "at-reka"],
+  ["vue-headless-ui", "at-headless"],
   ["vuetify", "adapttable-vuetify"],
 ].map(([kit, css]) => ({
   name: `${kit} · table`,
@@ -84,6 +85,7 @@ export const VUE_NATIVE_BASE_SPECS = [
     "shadcn-vue": 80,
     quasar: 74,
     "reka-ui": 67,
+    "vue-headless-ui": 67,
     vuetify: 66,
   }[kit],
   followsLibraryLocale: true,
@@ -117,6 +119,7 @@ const VUE_KITS = [
   "quasar",
   "reka-ui",
   "shadcn-vue",
+  "vue-headless-ui",
   "vue-unstyled",
   "vuetify",
 ];
@@ -366,6 +369,7 @@ export const VUE_CONSUMER_SPECS = [
       "shadcn-vue": 156,
       quasar: 149,
       "reka-ui": 131,
+      "vue-headless-ui": 132,
       vuetify: 132,
     }[spec.name.replace(" · table", "")],
     followsLibraryLocale: true,

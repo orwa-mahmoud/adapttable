@@ -1,4 +1,8 @@
 {
+  "@headlessui/vue@1.7.23": {
+    "source": "https://raw.githubusercontent.com/tailwindlabs/headlessui/2a46945675c4b52d7b73e1ed612cf70605e2b576/LICENSE",
+    "files": ["headlessui-vue-1.7.23.txt"]
+  },
   "react-compiler-runtime@1.0.0": {
     "source": "https://raw.githubusercontent.com/facebook/react/5c15c1cd3442f28044217703b5625f98c40042ee/LICENSE",
     "files": ["react-compiler-runtime-1.0.0.txt"]

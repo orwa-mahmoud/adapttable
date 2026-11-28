@@ -1,0 +1,113 @@
+import {
+  FilterPanelChrome,
+  type FilterPanelSlots,
+  filterViewKey,
+  type FilterWidget,
+  filterWidgetComponent,
+  useFeatureState,
+} from "@adapttable/vue/adapter";
+import { defineComponent, h, type PropType } from "vue";
+
+import { useHeadlessClasses } from "../context";
+import { headlessButton } from "../controls/basic";
+import { HeadlessSurface } from "../controls/HeadlessSurface";
+import FilterTreeBuilder from "./FilterTreeBuilder.vue";
+
+function useHeadlessFiltersPanel(props: {
+  readonly widgets: readonly FilterWidget[];
+}) {
+  const widgets = props.widgets;
+  const names = useHeadlessClasses();
+  const model = useFeatureState(filterViewKey<unknown>());
+  const buttonClass = (part: string) => {
+    if (part === "filters-clear") return names.value.filtersClear;
+    if (part === "filters-close") return names.value.filtersClose;
+    return names.value.filtersDone;
+  };
+  const controls: FilterPanelSlots<unknown> = {
+    Trigger: (control) =>
+      headlessButton(
+        {
+          ...control.attrs,
+          ref: control.triggerRef,
+          class: names.value.filtersButton,
+          onPointerdown: control.onPointerDown,
+          onClick: control.onClick,
+        },
+        [
+          h(
+            "svg",
+            {
+              "data-adapttable-part": "filters-icon",
+              class: names.value.filtersIcon,
+              viewBox: "0 0 24 24",
+              width: 16,
+              height: 16,
+              "aria-hidden": true,
+            },
+            [
+              h("path", {
+                d: "M3 4h18l-7 8v7l-4 2v-9z",
+                fill: "none",
+                stroke: "currentColor",
+                "stroke-width": 1.5,
+              }),
+            ]
+          ),
+          control.label,
+          control.count
+            ? h(
+                "span",
+                {
+                  "data-adapttable-part": "filters-count",
+                  class: names.value.filtersCount,
+                },
+                String(control.count)
+              )
+            : null,
+        ]
+      ),
+    Button: (control) =>
+      headlessButton(
+        {
+          "data-adapttable-part": control.part,
+          disabled: control.disabled,
+          onClick: control.onClick,
+          class: buttonClass(control.part),
+        },
+        control.label
+      ),
+    Field: (control) =>
+      h(filterWidgetComponent(control.def, control.registry, widgets), control),
+    Tree: (control) =>
+      h(FilterTreeBuilder, { ...control, classNames: names.value }),
+    Popover: (control) => h(HeadlessSurface, { ...control, modal: false }),
+    Drawer: (control) =>
+      h(HeadlessSurface, {
+        ...control,
+        modal: true,
+        backdropClassName: names.value.filtersBackdrop,
+        drawerClassName: names.value.filtersDrawer,
+      }),
+  };
+  return () =>
+    model.value
+      ? FilterPanelChrome({
+          model: model.value,
+          controls,
+          classNames: names.value,
+        })
+      : null;
+}
+
+export const HeadlessFiltersPanel = defineComponent({
+  name: "HeadlessFiltersPanel",
+  props: {
+    /** The widgets the panel draws its fields with. */
+    widgets: {
+      type: Array as PropType<readonly FilterWidget[]>,
+      required: true,
+    },
+  },
+  setup: useHeadlessFiltersPanel,
+});
