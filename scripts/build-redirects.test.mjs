@@ -283,6 +283,18 @@ describe("kitShortcuts", () => {
     assert.deepEqual(splats, ["/react/mui/* /react/demo/mui/:splat 301"]);
   });
 
+  it("uses a splat when only the kit guide sits at the short address", () => {
+    const { statics, splats } = kitShortcuts([
+      "/vue/headless-ui/",
+      "/vue/demo/headless-ui/",
+      "/vue/demo/headless-ui/columns/",
+    ]);
+    assert.deepEqual(statics, []);
+    assert.deepEqual(splats, [
+      "/vue/headless-ui/* /vue/demo/headless-ui/:splat 301",
+    ]);
+  });
+
   it("keeps a kit's guide page and answers each demo page beneath it", () => {
     const { statics, splats } = kitShortcuts([
       "/vue/vuetify/",
