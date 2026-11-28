@@ -1,0 +1,50 @@
+// @vitest-environment node
+import { describe, expect, it } from "vitest";
+import { createSSRApp, h } from "vue";
+import { renderToString } from "vue/server-renderer";
+
+import DataTable from "../src/DataTable.vue";
+import { selection } from "../src/selection";
+
+interface Row {
+  id: string;
+  name: string;
+}
+function app(mobile: boolean) {
+  const result = createSSRApp(() =>
+    h(DataTable<Row>, {
+      features: [selection({ selectedIds: ["ada"] })],
+      data: [{ id: "ada", name: "Ada" }],
+      columns: [{ key: "name", header: "Name" }],
+      rowKey: (row) => row.id,
+      forceMobile: mobile,
+      urlSync: false,
+      dir: "rtl",
+      tableLabel: "Team records",
+    })
+  );
+  return result;
+}
+
+describe("Ant Design Vue pure Node table SSR", () => {
+  it("renders the actual desktop table and checked kit control without DOM globals", async () => {
+    expect(typeof window).toBe("undefined");
+    expect(typeof document).toBe("undefined");
+    const html = await renderToString(app(false));
+    expect(html).toMatch(/<table[^>]*data-adapttable-part="table"/);
+    expect(html).toContain('aria-label="Team records"');
+    expect(html).toContain('dir="rtl"');
+    expect(html).toMatch(/<input[^>]*type="checkbox"[^>]*checked/);
+    expect(html).toContain("Ada");
+  });
+
+  it("renders real mobile kit cards and native label/value semantics without DOM globals", async () => {
+    expect(typeof window).toBe("undefined");
+    const html = await renderToString(app(true));
+    expect(html).toContain("adapttable-ant-design-vue-mobile-card");
+    expect(html).toContain('role="listitem"');
+    expect(html).toMatch(/<dt[^>]*data-adapttable-part="card-label"/);
+    expect(html).toMatch(/<dd[^>]*data-adapttable-part="card-value"/);
+    expect(html).toContain("Ada");
+  });
+});

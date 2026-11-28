@@ -1,6 +1,7 @@
 /** Canonical Vue guides published in the documentation and LLM index. */
 export const VUE_DOCS = Object.freeze([
   "vue/getting-started.md",
+  "vue/ant-design-vue.md",
   "vue/element-plus.md",
   "vue/naive-ui.md",
   "vue/nuxt-ui.md",

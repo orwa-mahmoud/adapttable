@@ -992,7 +992,53 @@
       "adapter-vuetify-preset",
       "adapter-vuetify-pivot",
       "adapter-vuetify-assistant",
-      "vue/selection"
+      "vue/selection",
+      "adapter-ant-design-vue-batch-editing",
+      "adapter-ant-design-vue-bulk-actions",
+      "adapter-ant-design-vue-cell-navigation",
+      "adapter-ant-design-vue-cell-span",
+      "adapter-ant-design-vue-column-groups",
+      "adapter-ant-design-vue-column-menu",
+      "adapter-ant-design-vue-column-layout",
+      "adapter-ant-design-vue-column-selection",
+      "adapter-ant-design-vue-columns",
+      "adapter-ant-design-vue-command-palette",
+      "adapter-ant-design-vue-context-menu",
+      "adapter-ant-design-vue-density",
+      "adapter-ant-design-vue-editing",
+      "adapter-ant-design-vue-export-pdf",
+      "adapter-ant-design-vue-export-xlsx",
+      "adapter-ant-design-vue-export",
+      "adapter-ant-design-vue-extra-rows",
+      "adapter-ant-design-vue-filters",
+      "adapter-ant-design-vue-filtering",
+      "adapter-ant-design-vue-find-in-table",
+      "adapter-ant-design-vue-fit-columns",
+      "adapter-ant-design-vue-fullscreen",
+      "adapter-ant-design-vue-grouping-panel",
+      "adapter-ant-design-vue-grouping",
+      "adapter-ant-design-vue-header-filters",
+      "adapter-ant-design-vue-multi-sort",
+      "adapter-ant-design-vue-nested-table",
+      "adapter-ant-design-vue-pinned-summary-rows",
+      "adapter-ant-design-vue-print",
+      "adapter-ant-design-vue-resizable-columns",
+      "adapter-ant-design-vue-row-actions",
+      "adapter-ant-design-vue-row-appearance",
+      "adapter-ant-design-vue-row-detail",
+      "adapter-ant-design-vue-row-pinning",
+      "adapter-ant-design-vue-row-reorder",
+      "adapter-ant-design-vue-rows",
+      "adapter-ant-design-vue-saved-views",
+      "adapter-ant-design-vue-selection-stats",
+      "adapter-ant-design-vue-side-panel",
+      "adapter-ant-design-vue-status-bar",
+      "adapter-ant-design-vue-tree",
+      "adapter-ant-design-vue-virtualize",
+      "adapter-ant-design-vue",
+      "adapter-ant-design-vue-preset",
+      "adapter-ant-design-vue-pivot",
+      "adapter-ant-design-vue-assistant"
     ]
   },
   "surfaces": {
@@ -12524,7 +12570,19 @@
       "EditingLifecycleExtras",
       "ElementBatchEditBar"
     ],
+    "adapter-ant-design-vue-batch-editing": [
+      "AntdBatchEditBar",
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "EditingLifecycleExtras"
+    ],
     "adapter-element-plus-bulk-actions": [
+      "BulkAction",
+      "BulkActionContext",
+      "bulkActions"
+    ],
+    "adapter-ant-design-vue-bulk-actions": [
       "BulkAction",
       "BulkActionContext",
       "bulkActions"
@@ -12537,10 +12595,24 @@
       "columnSelectionCheckbox",
       "GridCell"
     ],
+    "adapter-ant-design-vue-cell-navigation": [
+      "CellEdit",
+      "cellNavigation",
+      "CellNavigationOptions",
+      "CellRange",
+      "columnSelectionCheckbox",
+      "GridCell"
+    ],
     "adapter-element-plus-cell-span": [
       "cellSpan"
     ],
+    "adapter-ant-design-vue-cell-span": [
+      "cellSpan"
+    ],
     "adapter-element-plus-column-groups": [
+      "collapsibleColumnGroups"
+    ],
+    "adapter-ant-design-vue-column-groups": [
       "collapsibleColumnGroups"
     ],
     "adapter-element-plus-column-menu": [
@@ -12548,13 +12620,32 @@
       "columnMenu",
       "ColumnMenuSlotProps"
     ],
+    "adapter-ant-design-vue-column-menu": [
+      "columnMenu",
+      "ColumnMenu",
+      "ColumnMenuSlotProps"
+    ],
     "adapter-element-plus-column-layout": [
+      "columnLayoutFamily"
+    ],
+    "adapter-ant-design-vue-column-layout": [
       "columnLayoutFamily"
     ],
     "adapter-element-plus-column-selection": [
       "columnSelectionCheckbox"
     ],
+    "adapter-ant-design-vue-column-selection": [
+      "columnSelectionCheckbox"
+    ],
     "adapter-element-plus-columns": [
+      "collapsibleColumnGroups",
+      "ColumnResizeHandleOptions",
+      "ColumnResizeHandleProps",
+      "fitColumns",
+      "multiSort",
+      "resizableColumns"
+    ],
+    "adapter-ant-design-vue-columns": [
       "collapsibleColumnGroups",
       "ColumnResizeHandleOptions",
       "ColumnResizeHandleProps",
@@ -12566,11 +12657,22 @@
       "commandPalette",
       "CommandPaletteOptions"
     ],
+    "adapter-ant-design-vue-command-palette": [
+      "commandPalette",
+      "CommandPaletteOptions"
+    ],
     "adapter-element-plus-context-menu": [
       "contextMenu",
       "ContextMenuOptions"
     ],
+    "adapter-ant-design-vue-context-menu": [
+      "contextMenu",
+      "ContextMenuOptions"
+    ],
     "adapter-element-plus-density": [
+      "densityChooser"
+    ],
+    "adapter-ant-design-vue-density": [
       "densityChooser"
     ],
     "adapter-element-plus-editing": [
@@ -12592,7 +12694,41 @@
       "undoRedoButtons",
       "editingFamily"
     ],
+    "adapter-ant-design-vue-editing": [
+      "AntdBatchEditBar",
+      "AntdEditableCell",
+      "AntdRowEditActions",
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "CellEditHandler",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "editingFamily",
+      "EditingLifecycleExtras",
+      "RowEditIcons",
+      "rowEditing",
+      "RowEditingState",
+      "TableEditingOptions",
+      "undoRedoButtons"
+    ],
     "adapter-element-plus-export-pdf": [
+      "buildPrintDocument",
+      "buildPrintTableHtml",
+      "buildTablePdf",
+      "exportPdf",
+      "ExportPdfOptions",
+      "openPrintLayout",
+      "pdfWriter",
+      "PdfWriterOptions",
+      "PrintLayoutOptions",
+      "PrintPageBreak",
+      "PrintPageSize",
+      "printStyles",
+      "printTable"
+    ],
+    "adapter-ant-design-vue-export-pdf": [
       "buildPrintDocument",
       "buildPrintTableHtml",
       "buildTablePdf",
@@ -12613,11 +12749,24 @@
       "ExportXlsxOptions",
       "xlsxWriter"
     ],
+    "adapter-ant-design-vue-export-xlsx": [
+      "buildTableXlsx",
+      "exportXlsx",
+      "ExportXlsxOptions",
+      "xlsxWriter"
+    ],
     "adapter-element-plus-export": [
       "exportCsv",
       "ExportCsvOptions"
     ],
+    "adapter-ant-design-vue-export": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
     "adapter-element-plus-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-ant-design-vue-extra-rows": [
       "extraRows"
     ],
     "adapter-element-plus-filters": [
@@ -12641,16 +12790,51 @@
       "selectFilterWidget",
       "textFilterWidget"
     ],
+    "adapter-ant-design-vue-filters": [
+      "AdapterFiltersFeature",
+      "booleanFilterWidget",
+      "ChecklistFilter",
+      "ChecklistFilterProps",
+      "checklistFilterWidget",
+      "FilterDef",
+      "FilterField",
+      "FilterFieldOptions",
+      "FilterOption",
+      "filters",
+      "FiltersOptions",
+      "filtersWith",
+      "FilterTreeBuilder",
+      "FilterTreeBuilderProps",
+      "filterTypes",
+      "FilterTypeSpec",
+      "FilterWidget",
+      "multiSelectFilterWidget",
+      "rangeFilterWidget",
+      "selectFilterWidget",
+      "textFilterWidget"
+    ],
     "adapter-element-plus-filtering": [
+      "filteringFamily"
+    ],
+    "adapter-ant-design-vue-filtering": [
       "filteringFamily"
     ],
     "adapter-element-plus-find-in-table": [
       "findInTable"
     ],
+    "adapter-ant-design-vue-find-in-table": [
+      "findInTable"
+    ],
     "adapter-element-plus-fit-columns": [
       "fitColumns"
     ],
+    "adapter-ant-design-vue-fit-columns": [
+      "fitColumns"
+    ],
     "adapter-element-plus-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-ant-design-vue-fullscreen": [
       "fullscreen"
     ],
     "adapter-element-plus-grouping-panel": [
@@ -12658,7 +12842,23 @@
       "groupingPanel",
       "GroupingPanelProps"
     ],
+    "adapter-ant-design-vue-grouping-panel": [
+      "GroupingExtras",
+      "groupingPanel",
+      "GroupingPanelProps"
+    ],
     "adapter-element-plus-grouping": [
+      "GroupCollapseOptions",
+      "grouping",
+      "GroupingExtras",
+      "GroupNode",
+      "GroupSort",
+      "StaticGroupingExtras",
+      "useGroupCollapse",
+      "useGroupCollapseUrlState",
+      "useGroupPaging"
+    ],
+    "adapter-ant-design-vue-grouping": [
       "GroupCollapseOptions",
       "grouping",
       "GroupingExtras",
@@ -12678,25 +12878,55 @@
       "FilterHeaderRowProps",
       "headerFilters"
     ],
+    "adapter-ant-design-vue-header-filters": [
+      "AntdHeaderFilter",
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderControlProps",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "headerFilters"
+    ],
     "adapter-element-plus-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-ant-design-vue-multi-sort": [
       "multiSort"
     ],
     "adapter-element-plus-nested-table": [
       "nestedTable"
     ],
+    "adapter-ant-design-vue-nested-table": [
+      "nestedTable"
+    ],
     "adapter-element-plus-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-ant-design-vue-pinned-summary-rows": [
       "pinnedSummaryRows"
     ],
     "adapter-element-plus-print": [
       "print"
     ],
+    "adapter-ant-design-vue-print": [
+      "print"
+    ],
     "adapter-element-plus-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-ant-design-vue-resizable-columns": [
       "resizableColumns"
     ],
     "adapter-element-plus-row-actions": [
       "rowActions"
     ],
+    "adapter-ant-design-vue-row-actions": [
+      "rowActions"
+    ],
     "adapter-element-plus-row-appearance": [
+      "rowAppearance"
+    ],
+    "adapter-ant-design-vue-row-appearance": [
       "rowAppearance"
     ],
     "adapter-element-plus-row-detail": [
@@ -12709,7 +12939,20 @@
       "TableRowDetail",
       "useRowExpansion"
     ],
+    "adapter-ant-design-vue-row-detail": [
+      "nestedTable",
+      "NestedTable",
+      "nestedTableDetail",
+      "NestedTableFor",
+      "rowDetail",
+      "RowExpansionOptions",
+      "TableRowDetail",
+      "useRowExpansion"
+    ],
     "adapter-element-plus-row-pinning": [
+      "rowPinning"
+    ],
+    "adapter-ant-design-vue-row-pinning": [
       "rowPinning"
     ],
     "adapter-element-plus-row-reorder": [
@@ -12718,7 +12961,40 @@
       "RowReorderOptions",
       "useRowReorder"
     ],
+    "adapter-ant-design-vue-row-reorder": [
+      "rowReorder",
+      "RowReorderHandler",
+      "RowReorderOptions",
+      "useRowReorder"
+    ],
     "adapter-element-plus-rows": [
+      "cellSpan",
+      "CellSpanAppearance",
+      "CellSpanRequest",
+      "ConfirmHandler",
+      "ConfirmRequest",
+      "ExtraEntry",
+      "ExtraRow",
+      "ExtraRowKind",
+      "extraRows",
+      "GetCellSpan",
+      "GetCellSpanArgs",
+      "PinnedRows",
+      "PinnedSummaryEntry",
+      "pinnedSummaryRows",
+      "RowAction",
+      "rowActions",
+      "rowAppearance",
+      "RowAppearanceOptions",
+      "RowHeight",
+      "RowMutationHandlers",
+      "rowPinning",
+      "RowPinningFeatureOptions",
+      "RowPinSide",
+      "RowPinState",
+      "RowStyle"
+    ],
+    "adapter-ant-design-vue-rows": [
       "cellSpan",
       "CellSpanAppearance",
       "CellSpanRequest",
@@ -12754,7 +13030,19 @@
       "SavedViewsStore",
       "UseSavedViewsOptions"
     ],
+    "adapter-ant-design-vue-saved-views": [
+      "DataTableClassNames",
+      "SavedView",
+      "savedViews",
+      "SavedViewsPanel",
+      "SavedViewsPanelProps",
+      "SavedViewsStore",
+      "UseSavedViewsOptions"
+    ],
     "adapter-element-plus-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-ant-design-vue-selection-stats": [
       "selectionStats"
     ],
     "adapter-element-plus-side-panel": [
@@ -12762,7 +13050,16 @@
       "SidePanelOptions",
       "SidePanelPanel"
     ],
+    "adapter-ant-design-vue-side-panel": [
+      "sidePanel",
+      "SidePanelOptions",
+      "SidePanelPanel"
+    ],
     "adapter-element-plus-status-bar": [
+      "selectionStats",
+      "statusBar"
+    ],
+    "adapter-ant-design-vue-status-bar": [
       "selectionStats",
       "statusBar"
     ],
@@ -12774,11 +13071,46 @@
       "useLazyChildren",
       "useTreeExpansion"
     ],
+    "adapter-ant-design-vue-tree": [
+      "TableTree",
+      "tree",
+      "TreeExpansionOptions",
+      "TreeFeatureOptions",
+      "useLazyChildren",
+      "useTreeExpansion"
+    ],
     "adapter-element-plus-virtualize": [
       "virtualize",
       "VirtualizeOptions"
     ],
+    "adapter-ant-design-vue-virtualize": [
+      "virtualize",
+      "VirtualizeOptions"
+    ],
     "adapter-element-plus": [
+      "CellContext",
+      "CellEdit",
+      "CellRange",
+      "ColumnDef",
+      "ColumnGroup",
+      "ColumnInput",
+      "DataTable",
+      "DataTableClassNames",
+      "DataTableHandle",
+      "DataTableProps",
+      "DataTableSlots",
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderControlProps",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "FooterContext",
+      "HeaderContext",
+      "SummaryRowFn",
+      "TableDensity",
+      "TableSource"
+    ],
+    "adapter-ant-design-vue": [
       "CellContext",
       "CellEdit",
       "CellRange",
@@ -12807,11 +13139,29 @@
       "standardFeatures",
       "UseSavedViewsOptions"
     ],
+    "adapter-ant-design-vue-preset": [
+      "FilterDef",
+      "StandardFeatureOptions",
+      "standardFeatures",
+      "UseSavedViewsOptions"
+    ],
     "adapter-element-plus-pivot": [
       "PivotPanel",
       "PivotPanelProps"
     ],
+    "adapter-ant-design-vue-pivot": [
+      "PivotPanel",
+      "PivotPanelProps"
+    ],
     "adapter-element-plus-assistant": [
+      "agentApproval",
+      "AgentApproval",
+      "AgentApprovalProps",
+      "tableAssistant",
+      "TableAssistant",
+      "TableAssistantProps"
+    ],
+    "adapter-ant-design-vue-assistant": [
       "agentApproval",
       "AgentApproval",
       "AgentApprovalProps",
@@ -17181,140 +17531,278 @@
     "adapter-element-plus-batch-editing.api.md": {
       "surface": "adapter-element-plus-batch-editing"
     },
+    "adapter-ant-design-vue-batch-editing.api.md": {
+      "surface": "adapter-ant-design-vue-batch-editing"
+    },
     "adapter-element-plus-bulk-actions.api.md": {
       "surface": "adapter-element-plus-bulk-actions"
+    },
+    "adapter-ant-design-vue-bulk-actions.api.md": {
+      "surface": "adapter-ant-design-vue-bulk-actions"
     },
     "adapter-element-plus-cell-navigation.api.md": {
       "surface": "adapter-element-plus-cell-navigation"
     },
+    "adapter-ant-design-vue-cell-navigation.api.md": {
+      "surface": "adapter-ant-design-vue-cell-navigation"
+    },
     "adapter-element-plus-cell-span.api.md": {
       "surface": "adapter-element-plus-cell-span"
+    },
+    "adapter-ant-design-vue-cell-span.api.md": {
+      "surface": "adapter-ant-design-vue-cell-span"
     },
     "adapter-element-plus-column-groups.api.md": {
       "surface": "adapter-element-plus-column-groups"
     },
+    "adapter-ant-design-vue-column-groups.api.md": {
+      "surface": "adapter-ant-design-vue-column-groups"
+    },
     "adapter-element-plus-column-menu.api.md": {
       "surface": "adapter-element-plus-column-menu"
+    },
+    "adapter-ant-design-vue-column-menu.api.md": {
+      "surface": "adapter-ant-design-vue-column-menu"
     },
     "adapter-element-plus-column-layout.api.md": {
       "surface": "adapter-element-plus-column-layout"
     },
+    "adapter-ant-design-vue-column-layout.api.md": {
+      "surface": "adapter-ant-design-vue-column-layout"
+    },
     "adapter-element-plus-column-selection.api.md": {
       "surface": "adapter-element-plus-column-selection"
+    },
+    "adapter-ant-design-vue-column-selection.api.md": {
+      "surface": "adapter-ant-design-vue-column-selection"
     },
     "adapter-element-plus-columns.api.md": {
       "surface": "adapter-element-plus-columns"
     },
+    "adapter-ant-design-vue-columns.api.md": {
+      "surface": "adapter-ant-design-vue-columns"
+    },
     "adapter-element-plus-command-palette.api.md": {
       "surface": "adapter-element-plus-command-palette"
+    },
+    "adapter-ant-design-vue-command-palette.api.md": {
+      "surface": "adapter-ant-design-vue-command-palette"
     },
     "adapter-element-plus-context-menu.api.md": {
       "surface": "adapter-element-plus-context-menu"
     },
+    "adapter-ant-design-vue-context-menu.api.md": {
+      "surface": "adapter-ant-design-vue-context-menu"
+    },
     "adapter-element-plus-density.api.md": {
       "surface": "adapter-element-plus-density"
+    },
+    "adapter-ant-design-vue-density.api.md": {
+      "surface": "adapter-ant-design-vue-density"
     },
     "adapter-element-plus-editing.api.md": {
       "surface": "adapter-element-plus-editing"
     },
+    "adapter-ant-design-vue-editing.api.md": {
+      "surface": "adapter-ant-design-vue-editing"
+    },
     "adapter-element-plus-export-pdf.api.md": {
       "surface": "adapter-element-plus-export-pdf"
+    },
+    "adapter-ant-design-vue-export-pdf.api.md": {
+      "surface": "adapter-ant-design-vue-export-pdf"
     },
     "adapter-element-plus-export-xlsx.api.md": {
       "surface": "adapter-element-plus-export-xlsx"
     },
+    "adapter-ant-design-vue-export-xlsx.api.md": {
+      "surface": "adapter-ant-design-vue-export-xlsx"
+    },
     "adapter-element-plus-export.api.md": {
       "surface": "adapter-element-plus-export"
+    },
+    "adapter-ant-design-vue-export.api.md": {
+      "surface": "adapter-ant-design-vue-export"
     },
     "adapter-element-plus-extra-rows.api.md": {
       "surface": "adapter-element-plus-extra-rows"
     },
+    "adapter-ant-design-vue-extra-rows.api.md": {
+      "surface": "adapter-ant-design-vue-extra-rows"
+    },
     "adapter-element-plus-filters.api.md": {
       "surface": "adapter-element-plus-filters"
+    },
+    "adapter-ant-design-vue-filters.api.md": {
+      "surface": "adapter-ant-design-vue-filters"
     },
     "adapter-element-plus-filtering.api.md": {
       "surface": "adapter-element-plus-filtering"
     },
+    "adapter-ant-design-vue-filtering.api.md": {
+      "surface": "adapter-ant-design-vue-filtering"
+    },
     "adapter-element-plus-find-in-table.api.md": {
       "surface": "adapter-element-plus-find-in-table"
+    },
+    "adapter-ant-design-vue-find-in-table.api.md": {
+      "surface": "adapter-ant-design-vue-find-in-table"
     },
     "adapter-element-plus-fit-columns.api.md": {
       "surface": "adapter-element-plus-fit-columns"
     },
+    "adapter-ant-design-vue-fit-columns.api.md": {
+      "surface": "adapter-ant-design-vue-fit-columns"
+    },
     "adapter-element-plus-fullscreen.api.md": {
       "surface": "adapter-element-plus-fullscreen"
+    },
+    "adapter-ant-design-vue-fullscreen.api.md": {
+      "surface": "adapter-ant-design-vue-fullscreen"
     },
     "adapter-element-plus-grouping-panel.api.md": {
       "surface": "adapter-element-plus-grouping-panel"
     },
+    "adapter-ant-design-vue-grouping-panel.api.md": {
+      "surface": "adapter-ant-design-vue-grouping-panel"
+    },
     "adapter-element-plus-grouping.api.md": {
       "surface": "adapter-element-plus-grouping"
+    },
+    "adapter-ant-design-vue-grouping.api.md": {
+      "surface": "adapter-ant-design-vue-grouping"
     },
     "adapter-element-plus-header-filters.api.md": {
       "surface": "adapter-element-plus-header-filters"
     },
+    "adapter-ant-design-vue-header-filters.api.md": {
+      "surface": "adapter-ant-design-vue-header-filters"
+    },
     "adapter-element-plus-multi-sort.api.md": {
       "surface": "adapter-element-plus-multi-sort"
+    },
+    "adapter-ant-design-vue-multi-sort.api.md": {
+      "surface": "adapter-ant-design-vue-multi-sort"
     },
     "adapter-element-plus-nested-table.api.md": {
       "surface": "adapter-element-plus-nested-table"
     },
+    "adapter-ant-design-vue-nested-table.api.md": {
+      "surface": "adapter-ant-design-vue-nested-table"
+    },
     "adapter-element-plus-pinned-summary-rows.api.md": {
       "surface": "adapter-element-plus-pinned-summary-rows"
+    },
+    "adapter-ant-design-vue-pinned-summary-rows.api.md": {
+      "surface": "adapter-ant-design-vue-pinned-summary-rows"
     },
     "adapter-element-plus-print.api.md": {
       "surface": "adapter-element-plus-print"
     },
+    "adapter-ant-design-vue-print.api.md": {
+      "surface": "adapter-ant-design-vue-print"
+    },
     "adapter-element-plus-resizable-columns.api.md": {
       "surface": "adapter-element-plus-resizable-columns"
+    },
+    "adapter-ant-design-vue-resizable-columns.api.md": {
+      "surface": "adapter-ant-design-vue-resizable-columns"
     },
     "adapter-element-plus-row-actions.api.md": {
       "surface": "adapter-element-plus-row-actions"
     },
+    "adapter-ant-design-vue-row-actions.api.md": {
+      "surface": "adapter-ant-design-vue-row-actions"
+    },
     "adapter-element-plus-row-appearance.api.md": {
       "surface": "adapter-element-plus-row-appearance"
+    },
+    "adapter-ant-design-vue-row-appearance.api.md": {
+      "surface": "adapter-ant-design-vue-row-appearance"
     },
     "adapter-element-plus-row-detail.api.md": {
       "surface": "adapter-element-plus-row-detail"
     },
+    "adapter-ant-design-vue-row-detail.api.md": {
+      "surface": "adapter-ant-design-vue-row-detail"
+    },
     "adapter-element-plus-row-pinning.api.md": {
       "surface": "adapter-element-plus-row-pinning"
+    },
+    "adapter-ant-design-vue-row-pinning.api.md": {
+      "surface": "adapter-ant-design-vue-row-pinning"
     },
     "adapter-element-plus-row-reorder.api.md": {
       "surface": "adapter-element-plus-row-reorder"
     },
+    "adapter-ant-design-vue-row-reorder.api.md": {
+      "surface": "adapter-ant-design-vue-row-reorder"
+    },
     "adapter-element-plus-rows.api.md": {
       "surface": "adapter-element-plus-rows"
+    },
+    "adapter-ant-design-vue-rows.api.md": {
+      "surface": "adapter-ant-design-vue-rows"
     },
     "adapter-element-plus-saved-views.api.md": {
       "surface": "adapter-element-plus-saved-views"
     },
+    "adapter-ant-design-vue-saved-views.api.md": {
+      "surface": "adapter-ant-design-vue-saved-views"
+    },
     "adapter-element-plus-selection-stats.api.md": {
       "surface": "adapter-element-plus-selection-stats"
+    },
+    "adapter-ant-design-vue-selection-stats.api.md": {
+      "surface": "adapter-ant-design-vue-selection-stats"
     },
     "adapter-element-plus-side-panel.api.md": {
       "surface": "adapter-element-plus-side-panel"
     },
+    "adapter-ant-design-vue-side-panel.api.md": {
+      "surface": "adapter-ant-design-vue-side-panel"
+    },
     "adapter-element-plus-status-bar.api.md": {
       "surface": "adapter-element-plus-status-bar"
+    },
+    "adapter-ant-design-vue-status-bar.api.md": {
+      "surface": "adapter-ant-design-vue-status-bar"
     },
     "adapter-element-plus-tree.api.md": {
       "surface": "adapter-element-plus-tree"
     },
+    "adapter-ant-design-vue-tree.api.md": {
+      "surface": "adapter-ant-design-vue-tree"
+    },
     "adapter-element-plus-virtualize.api.md": {
       "surface": "adapter-element-plus-virtualize"
+    },
+    "adapter-ant-design-vue-virtualize.api.md": {
+      "surface": "adapter-ant-design-vue-virtualize"
     },
     "adapter-element-plus.api.md": {
       "surface": "adapter-element-plus"
     },
+    "adapter-ant-design-vue.api.md": {
+      "surface": "adapter-ant-design-vue"
+    },
     "adapter-element-plus-preset.api.md": {
       "surface": "adapter-element-plus-preset"
+    },
+    "adapter-ant-design-vue-preset.api.md": {
+      "surface": "adapter-ant-design-vue-preset"
     },
     "adapter-element-plus-pivot.api.md": {
       "surface": "adapter-element-plus-pivot"
     },
+    "adapter-ant-design-vue-pivot.api.md": {
+      "surface": "adapter-ant-design-vue-pivot"
+    },
     "adapter-element-plus-assistant.api.md": {
       "surface": "adapter-element-plus-assistant"
+    },
+    "adapter-ant-design-vue-assistant.api.md": {
+      "surface": "adapter-ant-design-vue-assistant"
     },
     "adapter-naive-ui-batch-editing.api.md": {
       "surface": "adapter-naive-ui-batch-editing"
@@ -18247,6 +18735,9 @@
       "reexport": "vue/selection"
     },
     "adapter-element-plus-selection.api.md": {
+      "reexport": "vue/selection"
+    },
+    "adapter-ant-design-vue-selection.api.md": {
       "reexport": "vue/selection"
     },
     "adapter-naive-ui-selection.api.md": {

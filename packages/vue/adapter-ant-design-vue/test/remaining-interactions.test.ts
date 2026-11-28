@@ -1,0 +1,236 @@
+import {
+  CommandPaletteChrome,
+  ContextMenuChrome,
+  ExportProgressChrome,
+  resolveLabels,
+  SidePanelChrome,
+} from "@adapttable/vue/adapter";
+import { expect, it, vi } from "vitest";
+import { defineComponent, h, KeepAlive, nextTick, shallowRef } from "vue";
+
+import { antdExportSlots } from "../src/actions/antdExportSlots";
+import {
+  antdContextMenuSlots,
+  antdPaletteSlots,
+  antdSidePanelSlots,
+} from "../src/actions/antdRemainingControls";
+import AntdSelect from "../src/controls/AntdSelect.vue";
+import { mount, node } from "./mount";
+const part = (name: string) => `[data-adapttable-part="${name}"]`;
+async function tick() {
+  await nextTick();
+  await new Promise((resolve) => setTimeout(resolve, 35));
+  await nextTick();
+}
+// Ant Design Vue's menu and select read the legacy key codes.
+const legacyKeyCodes: Record<string, number> = {
+  Enter: 13,
+  Escape: 27,
+  Home: 36,
+  End: 35,
+  ArrowUp: 38,
+  ArrowDown: 40,
+};
+async function key(target: HTMLElement, key: string) {
+  target.dispatchEvent(
+    new KeyboardEvent("keydown", {
+      key,
+      keyCode: legacyKeyCodes[key],
+      which: legacyKeyCodes[key],
+      bubbles: true,
+      cancelable: true,
+    })
+  );
+  await tick();
+}
+it("uses native menu keyboard navigation and rejects controlled dismissal without losing the menu", async () => {
+  const close = vi.fn();
+  const selected = vi.fn();
+  const slots = antdContextMenuSlots();
+  const at = shallowRef<{ x: number; y: number } | null>({ x: 1, y: 2 });
+  mount(() =>
+    h(ContextMenuChrome, {
+      at: at.value,
+      onClose: close,
+      slots,
+      items: [
+        {
+          key: "disabled",
+          label: "Disabled",
+          disabled: true,
+          onSelect: vi.fn(),
+        },
+        { key: "first", label: "First", onSelect: selected },
+        { key: "last", label: "Last", onSelect: selected },
+      ],
+    })
+  );
+  await tick();
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  const menu = node<HTMLElement>(document.body, part("context-menu"));
+  const items = [...menu.querySelectorAll<HTMLElement>('[role="menuitem"]')];
+  items[1]!.focus();
+  await key(items[1]!, "ArrowDown");
+  expect(document.activeElement).toBe(items[2]);
+  await key(items[2]!, "Home");
+  expect(document.activeElement).toBe(items[1]);
+  await key(items[1]!, "Escape");
+  expect(close).toHaveBeenCalledTimes(1);
+  expect(document.querySelector(part("context-menu"))).not.toBeNull();
+  expect(selected).not.toHaveBeenCalled();
+  at.value = null;
+  await tick();
+  expect(document.querySelector(part("context-menu"))).toBeNull();
+});
+it("retires the native palette surface during KeepAlive and reopens cleanly", async () => {
+  const close = vi.fn();
+  const selected = vi.fn();
+  const slots = antdPaletteSlots();
+  const shown = shallowRef(true);
+  const Child = defineComponent(
+    () => () =>
+      h(CommandPaletteChrome, {
+        open: true,
+        commands: [{ key: "a", label: "Alpha", onSelect: selected }],
+        onClose: close,
+        slots,
+      })
+  );
+  mount(() =>
+    h(KeepAlive, null, { default: () => (shown.value ? h(Child) : h("span")) })
+  );
+  await tick();
+  const old = node<HTMLButtonElement>(document.body, part("command-item"));
+  shown.value = false;
+  await tick();
+  expect(document.querySelector(part("command-palette"))).toBeNull();
+  old.click();
+  await tick();
+  expect(selected).not.toHaveBeenCalled();
+  shown.value = true;
+  await tick();
+  expect(document.querySelector(part("command-palette"))).not.toBeNull();
+});
+it("lets the nested native Select consume its first Escape before closing the side panel", async () => {
+  const close = vi.fn();
+  const slots = antdSidePanelSlots();
+  const model = {
+    open: "one",
+    side: "end" as const,
+    onOpenChange: close,
+    panels: [
+      {
+        key: "one",
+        label: "Choice",
+        content: () =>
+          h(AntdSelect, {
+            value: "a",
+            options: [
+              { value: "a", label: "Alpha" },
+              { value: "b", label: "Beta" },
+            ],
+          }),
+      },
+    ],
+  };
+  const view = mount(() =>
+    h(SidePanelChrome, {
+      model,
+      slots,
+      labels: resolveLabels(undefined),
+      dir: "rtl",
+    })
+  );
+  await tick();
+  const input = node<HTMLInputElement>(view.root, 'input[role="combobox"]');
+  input.dispatchEvent(
+    new MouseEvent("mousedown", { bubbles: true, cancelable: true })
+  );
+  await tick();
+  expect(input.getAttribute("aria-expanded")).toBe("true");
+  await key(input, "Escape");
+  expect(close).not.toHaveBeenCalled();
+  expect(input.getAttribute("aria-expanded")).not.toBe("true");
+  await key(input, "Escape");
+  expect(close).toHaveBeenCalledExactlyOnceWith(null);
+});
+it("renders native export progress and forwards cancel, retry and dismiss", async () => {
+  const cancel = vi.fn();
+  const retry = vi.fn();
+  const dismiss = vi.fn();
+  const progress = shallowRef({
+    status: "busy" as const,
+    value: 35,
+    message: "Working",
+    error: "",
+    downloadUrl: undefined,
+    onCancel: cancel,
+    onRetry: undefined,
+    onDismiss: undefined,
+  });
+  const view = mount(() =>
+    h(ExportProgressChrome, {
+      progress: progress.value,
+      labels: resolveLabels(undefined),
+      slots: antdExportSlots(),
+    })
+  );
+  await tick();
+  expect(
+    node(view.root, part("export-progress-surface")).classList.contains(
+      "ant-card"
+    )
+  ).toBe(true);
+  expect(view.root.querySelector(".ant-progress")).not.toBeNull();
+  node<HTMLButtonElement>(view.root, part("export-progress-cancel")).click();
+  expect(cancel).toHaveBeenCalledTimes(1);
+  const failed = mount(() =>
+    h(ExportProgressChrome, {
+      progress: {
+        status: "failed",
+        value: undefined,
+        message: "",
+        error: "Try again",
+        downloadUrl: undefined,
+        onCancel: undefined,
+        onRetry: retry,
+        onDismiss: dismiss,
+      },
+      labels: resolveLabels(undefined),
+      slots: antdExportSlots(),
+    })
+  );
+  await tick();
+  expect(node(failed.root, '[role="alert"]').textContent).toContain(
+    "Try again"
+  );
+  node<HTMLButtonElement>(failed.root, part("export-progress-retry")).click();
+  node<HTMLButtonElement>(failed.root, part("export-progress-dismiss")).click();
+  expect(retry).toHaveBeenCalledTimes(1);
+  expect(dismiss).toHaveBeenCalledTimes(1);
+});
+it("replaces the busy export button's icon with the named spinner", async () => {
+  const busy = shallowRef(true);
+  const { Button } = antdExportSlots({ exportSpinner: "custom-spinner" });
+  const view = mount(() =>
+    Button({
+      attrs: {
+        "data-adapttable-part": "export-csv-button",
+        "aria-busy": busy.value || undefined,
+      },
+      label: "Export CSV",
+      icon: h("span", { "data-icon": "" }),
+    })
+  );
+  await tick();
+  const button = node<HTMLButtonElement>(view.root, part("export-csv-button"));
+  const spinner = node(button, part("export-spinner"));
+  expect(spinner.getAttribute("aria-hidden")).toBe("true");
+  expect(spinner.classList.contains("anticon-spin")).toBe(true);
+  expect(spinner.classList.contains("custom-spinner")).toBe(true);
+  expect(button.querySelector("[data-icon]")).toBeNull();
+  busy.value = false;
+  await tick();
+  expect(button.querySelector(part("export-spinner"))).toBeNull();
+  expect(button.querySelector("[data-icon]")).not.toBeNull();
+});

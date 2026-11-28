@@ -11,6 +11,10 @@
           "label": "UI kits",
           "items": [
             {
+              "label": "Ant Design Vue",
+              "slug": "vue/ant-design-vue"
+            },
+            {
               "label": "Element Plus",
               "slug": "vue/element-plus"
             },

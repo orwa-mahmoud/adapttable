@@ -244,6 +244,7 @@ const VUE_SOURCES = [
   `${packageDir("vue")}${sep}`,
   `${packageDir("adapter-vue-unstyled")}${sep}`,
   `${packageDir("ai-vue")}${sep}`,
+  `${packageDir("adapter-ant-design-vue")}${sep}`,
   `${packageDir("adapter-element-plus")}${sep}`,
   `${packageDir("adapter-vuetify")}${sep}`,
   `${packageDir("adapter-naive-ui")}${sep}`,
@@ -374,6 +375,7 @@ export default defineConfig({
     // at a time.
     alias: [
       ...[
+        "ant-design-vue",
         "element-plus",
         "vuetify",
         "naive-ui",

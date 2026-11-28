@@ -1,7 +1,7 @@
 # Get started with Vue tables
 
 The Vue integration provides reactive data sources, a headless
-table controller and adapters for Vue Unstyled, Element Plus, Vuetify, Naive UI,
+table controller and adapters for Vue Unstyled, Ant Design Vue, Element Plus, Vuetify, Naive UI,
 Reka UI, shadcn-vue, Nuxt UI and Quasar. They share AdaptTable's framework-neutral
 engine, with Vue-native refs, renderers, effect scopes and component lifecycles.
 Each adapter supplies its own controls; the binding owns the table model.
@@ -99,35 +99,37 @@ Use the table and its feature factories from the same adapter. For example,
 Nuxt controls. Switching adapters does not transfer ownership of row data or
 create a second query, selection or editing engine.
 
-| Adapter package            | Application setup                                                                                                                                  |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@adapttable/vue-unstyled` | Native HTML controls; no stylesheet or UI-kit provider.                                                                                            |
-| `@adapttable/element-plus` | Element Plus theme CSS and the adapter's `/styles.css`; use Element Plus configuration for locale and SSR providers.                               |
-| `@adapttable/vuetify`      | Register Vuetify, provide its application context, and load `vuetify/styles` plus the adapter's `/styles.css`.                                     |
-| `@adapttable/naive-ui`     | Load the adapter's `/styles.css`; configure Naive UI's theme and locale providers as needed. Collect Naive UI styles when rendering on the server. |
-| `@adapttable/reka-ui`      | Load the adapter's `/styles.css`; the adapter uses Reka primitives.                                                                                |
-| `@adapttable/shadcn-vue`   | Load the adapter's `/styles.css` and provide shadcn theme tokens. The package includes its licensed, copied controls and compiled CSS.             |
-| `@adapttable/nuxt-ui`      | Use Nuxt UI's module in Nuxt, or its official Vite and Vue plugins in a plain Vue app; load theme CSS and provide `UApp`.                          |
-| `@adapttable/quasar`       | Register Quasar and load Quasar CSS plus the adapter's `/styles.css`; configure Quasar's locale and RTL support.                                   |
+| Adapter package              | Application setup                                                                                                                                                                             |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@adapttable/vue-unstyled`   | Native HTML controls; no stylesheet or UI-kit provider.                                                                                                                                       |
+| `@adapttable/ant-design-vue` | Load the adapter's `/styles.css`; Ant Design Vue draws its own styles, so configure its theme and locale through `ConfigProvider`. Collect its CSS-in-JS styles when rendering on the server. |
+| `@adapttable/element-plus`   | Element Plus theme CSS and the adapter's `/styles.css`; use Element Plus configuration for locale and SSR providers.                                                                          |
+| `@adapttable/vuetify`        | Register Vuetify, provide its application context, and load `vuetify/styles` plus the adapter's `/styles.css`.                                                                                |
+| `@adapttable/naive-ui`       | Load the adapter's `/styles.css`; configure Naive UI's theme and locale providers as needed. Collect Naive UI styles when rendering on the server.                                            |
+| `@adapttable/reka-ui`        | Load the adapter's `/styles.css`; the adapter uses Reka primitives.                                                                                                                           |
+| `@adapttable/shadcn-vue`     | Load the adapter's `/styles.css` and provide shadcn theme tokens. The package includes its licensed, copied controls and compiled CSS.                                                        |
+| `@adapttable/nuxt-ui`        | Use Nuxt UI's module in Nuxt, or its official Vite and Vue plugins in a plain Vue app; load theme CSS and provide `UApp`.                                                                     |
+| `@adapttable/quasar`         | Register Quasar and load Quasar CSS plus the adapter's `/styles.css`; configure Quasar's locale and RTL support.                                                                              |
 
 Install your chosen adapter and its UI-kit peers, then follow its setup guide:
 
-| Kit          | Install in your Vue application                                     | Setup                             |
-| ------------ | ------------------------------------------------------------------- | --------------------------------- |
-| Element Plus | `pnpm add @adapttable/element-plus element-plus@^2.14.7 vue@^3.5.0` | [Element Plus](./element-plus.md) |
-| Vuetify      | `pnpm add @adapttable/vuetify vuetify@^4.2.4 vue@^3.5.0`            | [Vuetify](./vuetify.md)           |
-| Naive UI     | `pnpm add @adapttable/naive-ui naive-ui@^2.45.3 vue@^3.5.0`         | [Naive UI](./naive-ui.md)         |
-| Reka UI      | `pnpm add @adapttable/reka-ui reka-ui@^2.11.0 vue@^3.5.0`           | [Reka UI](./reka-ui.md)           |
-| shadcn-vue   | `pnpm add @adapttable/shadcn-vue reka-ui@^2.11.0 vue@^3.5.0`        | [shadcn-vue](./shadcn-vue.md)     |
-| Nuxt UI      | `pnpm add @adapttable/nuxt-ui @nuxt/ui@^4.11.3 vue@^3.5.18`         | [Nuxt UI](./nuxt-ui.md)           |
-| Quasar       | `pnpm add @adapttable/quasar quasar@2.34.0 vue@^3.5.0`              | [Quasar](./quasar.md)             |
+| Kit            | Install in your Vue application                                        | Setup                                 |
+| -------------- | ---------------------------------------------------------------------- | ------------------------------------- |
+| Ant Design Vue | `pnpm add @adapttable/ant-design-vue ant-design-vue@^4.2.6 vue@^3.5.0` | [Ant Design Vue](./ant-design-vue.md) |
+| Element Plus   | `pnpm add @adapttable/element-plus element-plus@^2.14.7 vue@^3.5.0`    | [Element Plus](./element-plus.md)     |
+| Vuetify        | `pnpm add @adapttable/vuetify vuetify@^4.2.4 vue@^3.5.0`               | [Vuetify](./vuetify.md)               |
+| Naive UI       | `pnpm add @adapttable/naive-ui naive-ui@^2.45.3 vue@^3.5.0`            | [Naive UI](./naive-ui.md)             |
+| Reka UI        | `pnpm add @adapttable/reka-ui reka-ui@^2.11.0 vue@^3.5.0`              | [Reka UI](./reka-ui.md)               |
+| shadcn-vue     | `pnpm add @adapttable/shadcn-vue reka-ui@^2.11.0 vue@^3.5.0`           | [shadcn-vue](./shadcn-vue.md)         |
+| Nuxt UI        | `pnpm add @adapttable/nuxt-ui @nuxt/ui@^4.11.3 vue@^3.5.18`            | [Nuxt UI](./nuxt-ui.md)               |
+| Quasar         | `pnpm add @adapttable/quasar quasar@2.34.0 vue@^3.5.0`                 | [Quasar](./quasar.md)                 |
 
 Each package README also contains its peer versions and complete host setup.
 Use a Vue version compatible with every UI kit in your application.
 
 A component's SSR support does not replace the UI kit's application pipeline.
-Element Plus needs request-local ID/z-index providers and its teleport handling;
-Naive UI needs CSS-render collection. Vuetify and Nuxt UI require host compilation
+Ant Design Vue needs its CSS-in-JS styles collected per request. Element Plus
+needs request-local ID/z-index providers and its teleport handling; Naive UI needs CSS-render collection. Vuetify and Nuxt UI require host compilation
 for their CSS or Vue SFC imports. For production Quasar SSR/SSG, use Quasar CLI
 with Vite; its standalone Vite plugin does not support that mode. Keep identical
 initial rows, IDs, locale, direction and responsive settings on server and client.
@@ -359,9 +361,9 @@ Inside an existing plain Vue application, run:
 npx @adapttable/cli init
 ```
 
-The CLI detects all eight shipped Vue kits and defaults to Vue Unstyled when
+The CLI detects all nine shipped Vue kits and defaults to Vue Unstyled when
 no styled kit is declared. To choose one explicitly, use
-`npx @adapttable/cli init --kit element-plus` (or `vue-unstyled`, `vuetify`,
+`npx @adapttable/cli init --kit element-plus` (or `vue-unstyled`, `ant-design-vue`, `vuetify`,
 `naive-ui`, `reka-ui`, `shadcn-vue`, `nuxt-ui`, `quasar`). Run the printed
 install command, import `PeopleTable.vue` into your host, and call the generated
 `installAdaptTable(app)` before mounting. The starter includes native sorting

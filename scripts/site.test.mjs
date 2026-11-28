@@ -41,6 +41,7 @@ describe("site addresses", () => {
   it("registers only implemented Vue guides with framework-aware fallback", () => {
     assert.deepEqual(VUE_DOCS, [
       "vue/getting-started.md",
+      "vue/ant-design-vue.md",
       "vue/element-plus.md",
       "vue/naive-ui.md",
       "vue/nuxt-ui.md",

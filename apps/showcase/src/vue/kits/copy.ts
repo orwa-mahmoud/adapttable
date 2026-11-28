@@ -1,5 +1,6 @@
 export const kitPreviews = [
   { key: "element-plus", name: "Element Plus" },
+  { key: "ant-design-vue", name: "Ant Design Vue" },
   { key: "vuetify", name: "Vuetify" },
   { key: "naive-ui", name: "Naive UI" },
   { key: "reka-ui", name: "Reka UI" },

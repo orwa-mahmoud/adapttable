@@ -1,6 +1,6 @@
 # Responsive Vue tables and mobile cards
 
-Render responsive Vue table cards with native controls, shared columns, editing, selection and RTL across eight adapters.
+Render responsive Vue table cards with native controls, shared columns, editing, selection and RTL across nine adapters.
 
 Cards are automatic below `mobileBreakpoint` (768px by default). Omit
 `forceMobile` to follow the viewport, set it to `true` to always show cards, or
@@ -78,7 +78,7 @@ Use `locale` for translated labels and `dir` for reading direction; changing dir
 
 ## Custom card bodies
 
-All eight kits accept the `card` slot. It replaces only the fields inside the
+All nine kits accept the `card` slot. It replaces only the fields inside the
 native card; selection, expansion, row actions and Save/Cancel remain owned by
 the table. The context contains `row`, `index`, `selected`, `expanded`, and
 `fields`. Each field provides its `column`, resolved `label`, and prepared
@@ -134,4 +134,4 @@ and `error` for a failed request. The host owns recovery and every saved edit.
 
 ## Try the native adapters
 
-Use the [live demo](/vue/demo/) or [Feature Lab](/vue/demo/all-options/) to switch all eight Vue kits. Dedicated kit examples show the same feature with each UI kit’s controls.
+Use the [live demo](/vue/demo/) or [Feature Lab](/vue/demo/all-options/) to switch all nine Vue kits. Dedicated kit examples show the same feature with each UI kit’s controls.

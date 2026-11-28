@@ -22159,6 +22159,7 @@ covered by the [Vue assistant guide](./vue/assistant.md).
 Each kit renders the same Vue `DataTable` props, public parts and feature-factory
 contracts with its own controls. Follow each guide's peers, styles and setup:
 
+- [Ant Design Vue](./vue/ant-design-vue.md): `@adapttable/ant-design-vue` — `AntdEditableCell`, `AntdRowEditActions`, `AntdBatchEditBar`, `FilterField`, `AntdHeaderFilter`.
 - [Element Plus](./vue/element-plus.md): `@adapttable/element-plus` — `ElementEditableCell`, `ElementRowEditActions`, `ElementBatchEditBar`, `FilterField`, `ElementHeaderFilter`.
 - [Naive UI](./vue/naive-ui.md): `@adapttable/naive-ui` — `NaiveEditableCell`, `NaiveRowEditActions`, `NaiveBatchEditBar`, `NaiveFilterField`, `NaiveHeaderFilter`, and the `/renderers` entry's `NaiveDesktopTable`, `NaiveMobileCards` and `naiveTableControls`.
 - [Nuxt UI](./vue/nuxt-ui.md): `@adapttable/nuxt-ui` — `NuxtEditableCell`, `NuxtRowEditActions`, `NuxtBatchEditBar`, `NuxtFilterField`, `NuxtHeaderFilter`.
@@ -33363,7 +33364,7 @@ See [Data tiers](./data-tiers.md), [SSR](./ssr-rsc.md) and the
 # Get started with Vue tables
 
 The Vue integration provides reactive data sources, a headless
-table controller and adapters for Vue Unstyled, Element Plus, Vuetify, Naive UI,
+table controller and adapters for Vue Unstyled, Ant Design Vue, Element Plus, Vuetify, Naive UI,
 Reka UI, shadcn-vue, Nuxt UI and Quasar. They share AdaptTable's framework-neutral
 engine, with Vue-native refs, renderers, effect scopes and component lifecycles.
 Each adapter supplies its own controls; the binding owns the table model.
@@ -33461,35 +33462,37 @@ Use the table and its feature factories from the same adapter. For example,
 Nuxt controls. Switching adapters does not transfer ownership of row data or
 create a second query, selection or editing engine.
 
-| Adapter package            | Application setup                                                                                                                                  |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@adapttable/vue-unstyled` | Native HTML controls; no stylesheet or UI-kit provider.                                                                                            |
-| `@adapttable/element-plus` | Element Plus theme CSS and the adapter's `/styles.css`; use Element Plus configuration for locale and SSR providers.                               |
-| `@adapttable/vuetify`      | Register Vuetify, provide its application context, and load `vuetify/styles` plus the adapter's `/styles.css`.                                     |
-| `@adapttable/naive-ui`     | Load the adapter's `/styles.css`; configure Naive UI's theme and locale providers as needed. Collect Naive UI styles when rendering on the server. |
-| `@adapttable/reka-ui`      | Load the adapter's `/styles.css`; the adapter uses Reka primitives.                                                                                |
-| `@adapttable/shadcn-vue`   | Load the adapter's `/styles.css` and provide shadcn theme tokens. The package includes its licensed, copied controls and compiled CSS.             |
-| `@adapttable/nuxt-ui`      | Use Nuxt UI's module in Nuxt, or its official Vite and Vue plugins in a plain Vue app; load theme CSS and provide `UApp`.                          |
-| `@adapttable/quasar`       | Register Quasar and load Quasar CSS plus the adapter's `/styles.css`; configure Quasar's locale and RTL support.                                   |
+| Adapter package              | Application setup                                                                                                                                                                             |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@adapttable/vue-unstyled`   | Native HTML controls; no stylesheet or UI-kit provider.                                                                                                                                       |
+| `@adapttable/ant-design-vue` | Load the adapter's `/styles.css`; Ant Design Vue draws its own styles, so configure its theme and locale through `ConfigProvider`. Collect its CSS-in-JS styles when rendering on the server. |
+| `@adapttable/element-plus`   | Element Plus theme CSS and the adapter's `/styles.css`; use Element Plus configuration for locale and SSR providers.                                                                          |
+| `@adapttable/vuetify`        | Register Vuetify, provide its application context, and load `vuetify/styles` plus the adapter's `/styles.css`.                                                                                |
+| `@adapttable/naive-ui`       | Load the adapter's `/styles.css`; configure Naive UI's theme and locale providers as needed. Collect Naive UI styles when rendering on the server.                                            |
+| `@adapttable/reka-ui`        | Load the adapter's `/styles.css`; the adapter uses Reka primitives.                                                                                                                           |
+| `@adapttable/shadcn-vue`     | Load the adapter's `/styles.css` and provide shadcn theme tokens. The package includes its licensed, copied controls and compiled CSS.                                                        |
+| `@adapttable/nuxt-ui`        | Use Nuxt UI's module in Nuxt, or its official Vite and Vue plugins in a plain Vue app; load theme CSS and provide `UApp`.                                                                     |
+| `@adapttable/quasar`         | Register Quasar and load Quasar CSS plus the adapter's `/styles.css`; configure Quasar's locale and RTL support.                                                                              |
 
 Install your chosen adapter and its UI-kit peers, then follow its setup guide:
 
-| Kit          | Install in your Vue application                                     | Setup                             |
-| ------------ | ------------------------------------------------------------------- | --------------------------------- |
-| Element Plus | `pnpm add @adapttable/element-plus element-plus@^2.14.7 vue@^3.5.0` | [Element Plus](./element-plus.md) |
-| Vuetify      | `pnpm add @adapttable/vuetify vuetify@^4.2.4 vue@^3.5.0`            | [Vuetify](./vuetify.md)           |
-| Naive UI     | `pnpm add @adapttable/naive-ui naive-ui@^2.45.3 vue@^3.5.0`         | [Naive UI](./naive-ui.md)         |
-| Reka UI      | `pnpm add @adapttable/reka-ui reka-ui@^2.11.0 vue@^3.5.0`           | [Reka UI](./reka-ui.md)           |
-| shadcn-vue   | `pnpm add @adapttable/shadcn-vue reka-ui@^2.11.0 vue@^3.5.0`        | [shadcn-vue](./shadcn-vue.md)     |
-| Nuxt UI      | `pnpm add @adapttable/nuxt-ui @nuxt/ui@^4.11.3 vue@^3.5.18`         | [Nuxt UI](./nuxt-ui.md)           |
-| Quasar       | `pnpm add @adapttable/quasar quasar@2.34.0 vue@^3.5.0`              | [Quasar](./quasar.md)             |
+| Kit            | Install in your Vue application                                        | Setup                                 |
+| -------------- | ---------------------------------------------------------------------- | ------------------------------------- |
+| Ant Design Vue | `pnpm add @adapttable/ant-design-vue ant-design-vue@^4.2.6 vue@^3.5.0` | [Ant Design Vue](./ant-design-vue.md) |
+| Element Plus   | `pnpm add @adapttable/element-plus element-plus@^2.14.7 vue@^3.5.0`    | [Element Plus](./element-plus.md)     |
+| Vuetify        | `pnpm add @adapttable/vuetify vuetify@^4.2.4 vue@^3.5.0`               | [Vuetify](./vuetify.md)               |
+| Naive UI       | `pnpm add @adapttable/naive-ui naive-ui@^2.45.3 vue@^3.5.0`            | [Naive UI](./naive-ui.md)             |
+| Reka UI        | `pnpm add @adapttable/reka-ui reka-ui@^2.11.0 vue@^3.5.0`              | [Reka UI](./reka-ui.md)               |
+| shadcn-vue     | `pnpm add @adapttable/shadcn-vue reka-ui@^2.11.0 vue@^3.5.0`           | [shadcn-vue](./shadcn-vue.md)         |
+| Nuxt UI        | `pnpm add @adapttable/nuxt-ui @nuxt/ui@^4.11.3 vue@^3.5.18`            | [Nuxt UI](./nuxt-ui.md)               |
+| Quasar         | `pnpm add @adapttable/quasar quasar@2.34.0 vue@^3.5.0`                 | [Quasar](./quasar.md)                 |
 
 Each package README also contains its peer versions and complete host setup.
 Use a Vue version compatible with every UI kit in your application.
 
 A component's SSR support does not replace the UI kit's application pipeline.
-Element Plus needs request-local ID/z-index providers and its teleport handling;
-Naive UI needs CSS-render collection. Vuetify and Nuxt UI require host compilation
+Ant Design Vue needs its CSS-in-JS styles collected per request. Element Plus
+needs request-local ID/z-index providers and its teleport handling; Naive UI needs CSS-render collection. Vuetify and Nuxt UI require host compilation
 for their CSS or Vue SFC imports. For production Quasar SSR/SSG, use Quasar CLI
 with Vite; its standalone Vite plugin does not support that mode. Keep identical
 initial rows, IDs, locale, direction and responsive settings on server and client.
@@ -33721,9 +33724,9 @@ Inside an existing plain Vue application, run:
 npx @adapttable/cli init
 ```
 
-The CLI detects all eight shipped Vue kits and defaults to Vue Unstyled when
+The CLI detects all nine shipped Vue kits and defaults to Vue Unstyled when
 no styled kit is declared. To choose one explicitly, use
-`npx @adapttable/cli init --kit element-plus` (or `vue-unstyled`, `vuetify`,
+`npx @adapttable/cli init --kit element-plus` (or `vue-unstyled`, `ant-design-vue`, `vuetify`,
 `naive-ui`, `reka-ui`, `shadcn-vue`, `nuxt-ui`, `quasar`). Run the printed
 install command, import `PeopleTable.vue` into your host, and call the generated
 `installAdaptTable(app)` before mounting. The starter includes native sorting
@@ -33776,6 +33779,118 @@ stay in the browser. Authored orders use this tab’s session storage; named vie
 use browser storage when available and survive a later visit. Restore sample data resets the order desk;
 the dispatch plan is rebuilt from the restored Ready orders. Reloading and retry restore authored changes and selections from this tab’s session storage. Presentation, table queries and pivot choices remain shareable in the URL. See the [feature guide](./features.md) for the supported APIs and composition
 boundaries.
+
+---
+
+# Ant Design Vue table
+
+`@adapttable/ant-design-vue` renders AdaptTable's Vue binding with Ant Design Vue
+controls and card surfaces. The binding owns table state, feature lifetimes,
+query ownership and host-write callbacks; this kit supplies buttons, fields,
+checkboxes, selects, popovers, drawers and modals.
+
+## Availability and versions
+
+This is a public package. Install `@adapttable/ant-design-vue`
+and its UI-kit peers using [Get started with Vue](./getting-started.md#choose-a-ui-kit),
+then complete the application setup below.
+
+Peers: Vue `^3.5.0` and Ant Design Vue `^4.2.6`. Node.js 22.12.0 or newer.
+
+Applications checking dependency declarations should read the
+[strict dependency compatibility notes](./getting-started.md#strict-dependency-type-checking).
+
+## Application setup
+
+Register Ant Design Vue the way your application already does, then load the
+kit's stylesheet once. Ant Design Vue draws its own styles at runtime, so it has
+no stylesheet to import:
+
+```ts
+import "@adapttable/ant-design-vue/styles.css";
+```
+
+Set the dark theme through `ConfigProvider`'s `theme.algorithm`; the kit reads
+its colors from `theme.useToken()`. Popup stacking follows the `ConfigProvider`
+`zIndexPopupBase` token.
+
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+import { DataTable, type ColumnDef } from "@adapttable/ant-design-vue";
+import { filters } from "@adapttable/ant-design-vue/filters";
+import { selection } from "@adapttable/ant-design-vue/selection";
+
+interface Person {
+  id: string;
+  name: string;
+  score: number;
+}
+
+const rows: Person[] = [
+  { id: "ada", name: "Ada", score: 92 },
+  { id: "bea", name: "Bea", score: 87 },
+];
+const columns: ColumnDef<Person>[] = [
+  { key: "name", header: "Name", sortable: true },
+  { key: "score", header: "Score", sortable: true },
+];
+const selectedIds = ref<string[]>([]);
+function changeSelection(ids: string[]) {
+  selectedIds.value = ids;
+}
+const features = [
+  selection({ selectedIds, onSelectionChange: changeSelection }),
+  filters<Person>([{ key: "name", type: "text" }]),
+];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :row-key="(row) => row.id"
+    :features="features"
+    :url-sync="false"
+  />
+</template>
+```
+
+## Kit components
+
+Each feature entry exports the kit component it renders, for custom layouts over
+the same binding models:
+
+| Component            | Entry points                 | Renders                                                  |
+| -------------------- | ---------------------------- | -------------------------------------------------------- |
+| `AntdEditableCell`   | `/editing`                   | An editable cell with Ant Design Vue inputs and selects. |
+| `AntdRowEditActions` | `/editing`                   | Edit, save and cancel buttons for one row.               |
+| `AntdBatchEditBar`   | `/editing`, `/batch-editing` | The unsaved-row count with Save all and Cancel all.      |
+| `FilterField`        | `/filters`                   | A filter definition's field with the kit's controls.     |
+| `AntdHeaderFilter`   | `/header-filters`            | A column header filter button and its popover.           |
+| `PivotPanel`         | `/pivot`                     | The pivot axes and measures with Ant Design Vue selects. |
+| `TableAssistant`     | `/assistant`                 | The optional assistant in a panel, window or drawer.     |
+| `AgentApproval`      | `/assistant`                 | Proposed row changes with approve and reject buttons.    |
+
+## Controls and styling
+
+- The desktop renderer places a semantic HTML table inside `Card`; mobile
+  cards use one `Card` per row.
+- Sorting, selection, search and paging use Ant Design Vue components. Filter
+  popovers use `Popover`; `{ mode: "drawer" }` uses a modal `Drawer` with a real
+  backdrop, a focus trap and Escape to close.
+- Menus (row actions, context menu, assistant examples) use `Dropdown` and
+  `Menu`. Ant Design Vue's `Menu` has no arrow-key navigation, so the kit adds
+  ArrowUp, ArrowDown, Home, End and Space.
+- Row-action confirmation uses `Modal`, inside the fullscreen table.
+- `classNames` styles the named part. `Checkbox` forwards the part to its native
+  input; `Select` keeps the part on its root and names its combobox input.
+
+`ConfigProvider`'s locale, size and direction cannot be read by a kit, so the
+table's own `labels` and `dir` drive its text and layout.
+
+The [Vue feature guide](./features.md) covers feature composition. The
+package README lists every feature entry point and its Ant Design Vue control.
 
 ---
 
@@ -34524,8 +34639,8 @@ with the Unstyled kit. A React or Angular import does not define a Vue feature.
 
 ## Styled adapter feature entries
 
-Element Plus, Vuetify, Naive UI, Reka UI, shadcn-vue, Nuxt UI and Quasar each
-export the same 41 canonical feature factories. This describes their callable
+Ant Design Vue, Element Plus, Vuetify, Naive UI, Reka UI, shadcn-vue, Nuxt UI
+and Quasar each export the same 41 canonical feature factories. This describes their callable
 feature surface, not identical optional helper exports or a completed browser
 validation run. Import a factory from the selected adapter's focused path; every
 visible field, button, menu and dialog belongs to that adapter's kit.
@@ -34563,15 +34678,16 @@ import { filters } from "@adapttable/element-plus/filters";`
 uses the same Element Plus controls and factory signatures as the individual
 entries. The barrel is optional and is never imported by the base table.
 
-| Adapter                    | Feature barrel and preset | Kit-specific optional surfaces and writers                                                                  |
-| -------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `@adapttable/element-plus` | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
-| `@adapttable/vuetify`      | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
-| `@adapttable/naive-ui`     | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
-| `@adapttable/reka-ui`      | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`.                         |
-| `@adapttable/shadcn-vue`   | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`.                         |
-| `@adapttable/nuxt-ui`      | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
-| `@adapttable/quasar`       | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`.                         |
+| Adapter                      | Feature barrel and preset | Kit-specific optional surfaces and writers                                                                  |
+| ---------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `@adapttable/ant-design-vue` | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
+| `@adapttable/element-plus`   | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
+| `@adapttable/vuetify`        | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
+| `@adapttable/naive-ui`       | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
+| `@adapttable/reka-ui`        | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`.                         |
+| `@adapttable/shadcn-vue`     | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`.                         |
+| `@adapttable/nuxt-ui`        | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
+| `@adapttable/quasar`         | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`.                         |
 
 All adapters can render data prepared by binding `/pivot`, `/formula`, `/sparkline`
 and `/stream` helpers, and every adapter's own `/pivot` entry adds a controlled
@@ -34861,7 +34977,7 @@ row/column keys and serialized pivot configuration stay unchanged.
 
 ## Styled feature labs
 
-Start with the [live adapter switcher](/vue/demo/) or [Feature Lab](/vue/demo/all-options/) to compose the common features with any of the eight kits. Each kit also has a landing page and dedicated examples for all 21 matrix features. The [order workspace](/vue/demo/unstyled/workspace/) connects multiple views with host-owned updates.
+Start with the [live adapter switcher](/vue/demo/) or [Feature Lab](/vue/demo/all-options/) to compose the common features with any of the nine kits. Each kit also has a landing page and dedicated examples for all 21 matrix features. The [order workspace](/vue/demo/unstyled/workspace/) connects multiple views with host-owned updates.
 
 Separate, non-indexed integration labs exercise additional adapter combinations:
 
@@ -35037,7 +35153,7 @@ Use the [live demo](/vue/demo/) or [Feature Lab](/vue/demo/all-options/) to swit
 
 # Responsive Vue tables and mobile cards
 
-Render responsive Vue table cards with native controls, shared columns, editing, selection and RTL across eight adapters.
+Render responsive Vue table cards with native controls, shared columns, editing, selection and RTL across nine adapters.
 
 Cards are automatic below `mobileBreakpoint` (768px by default). Omit
 `forceMobile` to follow the viewport, set it to `true` to always show cards, or
@@ -35115,7 +35231,7 @@ Use `locale` for translated labels and `dir` for reading direction; changing dir
 
 ## Custom card bodies
 
-All eight kits accept the `card` slot. It replaces only the fields inside the
+All nine kits accept the `card` slot. It replaces only the fields inside the
 native card; selection, expansion, row actions and Save/Cancel remain owned by
 the table. The context contains `row`, `index`, `selected`, `expanded`, and
 `fields`. Each field provides its `column`, resolved `label`, and prepared
@@ -35171,7 +35287,7 @@ and `error` for a failed request. The host owns recovery and every saved edit.
 
 ## Try the native adapters
 
-Use the [live demo](/vue/demo/) or [Feature Lab](/vue/demo/all-options/) to switch all eight Vue kits. Dedicated kit examples show the same feature with each UI kit’s controls.
+Use the [live demo](/vue/demo/) or [Feature Lab](/vue/demo/all-options/) to switch all nine Vue kits. Dedicated kit examples show the same feature with each UI kit’s controls.
 
 ---
 
@@ -36307,8 +36423,8 @@ importing the binding root never installs controls, optional features or AI.
 
 ## Styled adapter entry points
 
-`@adapttable/element-plus`, `@adapttable/vuetify`, `@adapttable/naive-ui`,
-`@adapttable/reka-ui`, `@adapttable/shadcn-vue`, `@adapttable/nuxt-ui` and
+`@adapttable/ant-design-vue`, `@adapttable/element-plus`,
+`@adapttable/vuetify`, `@adapttable/naive-ui`, `@adapttable/reka-ui`, `@adapttable/shadcn-vue`, `@adapttable/nuxt-ui` and
 `@adapttable/quasar` export their own `DataTable` and 41 canonical feature
 factories through focused entries. All are `0.1.0` packages on npm.
 Their controls consume the shared Vue model and Chrome contracts; they do not
@@ -36322,8 +36438,8 @@ Older aliases remain available where they were already exported.
 
 Every Vue kit exports `/preset`. Only Unstyled, Reka UI and shadcn-vue expose the
 documented `/features` barrel, `/assistant` and controlled `/pivot` panel. Quasar additionally
-provides dedicated `/export-pdf` and `/export-xlsx` entries. Element Plus,
-Vuetify, Naive UI and Nuxt UI use their own `/export` feature with optional
+provides dedicated `/export-pdf` and `/export-xlsx` entries. Ant Design Vue,
+Element Plus, Vuetify, Naive UI and Nuxt UI use their own `/export` feature with optional
 `pdfWriter` or `xlsxWriter` from binding `/pdf` or `/xlsx`.
 
 Shared pivot data, formulas, streams and sparkline helpers remain available from

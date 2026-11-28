@@ -142,6 +142,7 @@ export const sidebar = [
       {
         label: "UI kits",
         items: [
+          { label: "Ant Design Vue", slug: "vue/ant-design-vue" },
           { label: "Element Plus", slug: "vue/element-plus" },
           { label: "Naive UI", slug: "vue/naive-ui" },
           { label: "Nuxt UI", slug: "vue/nuxt-ui" },

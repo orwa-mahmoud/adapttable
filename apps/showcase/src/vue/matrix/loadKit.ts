@@ -9,6 +9,8 @@ export const loadVueShowcaseKit = (
       return import("./kits/unstyled");
     case "element-plus":
       return import("./kits/elementPlus");
+    case "ant-design-vue":
+      return import("./kits/antDesignVue");
     case "vuetify":
       return import("./kits/vuetify");
     case "naive-ui":

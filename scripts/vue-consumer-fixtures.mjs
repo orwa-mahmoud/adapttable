@@ -64,6 +64,7 @@ const nativeConsumerHosts = {
 
 /** Styled base consumers include their actual shipped CSS and native kit graph. */
 export const VUE_NATIVE_BASE_SPECS = [
+  ["ant-design-vue", "adapttable-ant-design-vue"],
   ["element-plus", "adapttable-element-plus"],
   ["naive-ui", "adapttable-naive"],
   ["nuxt-ui", "adapttable-nuxt"],
@@ -78,6 +79,7 @@ export const VUE_NATIVE_BASE_SPECS = [
   hardBaseCeiling: true,
   // 2026-11-24 plus 15%. shadcn-vue would round past the 80 KiB cap.
   ceilingKB: {
+    "ant-design-vue": 67,
     "element-plus": 67,
     "naive-ui": 65,
     "nuxt-ui": 75,
@@ -111,6 +113,7 @@ const URL_STATE_MARKERS = [
 
 /** Every published Vue kit, by its package folder suffix. */
 const VUE_KITS = [
+  "ant-design-vue",
   "element-plus",
   "naive-ui",
   "nuxt-ui",
@@ -360,6 +363,7 @@ export const VUE_CONSUMER_SPECS = [
     alsoEntryFile: "preset.js",
     // Packed 2026-11-24, initial gzip plus 15%. Locale chunk sits in the total.
     ceilingKB: {
+      "ant-design-vue": 132,
       "element-plus": 132,
       "naive-ui": 129,
       "nuxt-ui": 146,
@@ -383,6 +387,7 @@ export const VUE_CONSUMER_SPECS = [
 export const VUE_LAYOUT_GRAPH_SPECS = [
   ...VUE_NATIVE_BASE_SPECS.filter((spec) =>
     [
+      "adapter-ant-design-vue",
       "adapter-element-plus",
       "adapter-naive-ui",
       "adapter-nuxt-ui",

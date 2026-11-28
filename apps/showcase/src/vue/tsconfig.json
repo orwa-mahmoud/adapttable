@@ -34,6 +34,12 @@
       "@adapttable/vuetify/*": [
         "../../../../packages/vue/adapter-vuetify/src/*"
       ],
+      "@adapttable/ant-design-vue": [
+        "../../../../packages/vue/adapter-ant-design-vue/src/index.ts"
+      ],
+      "@adapttable/ant-design-vue/*": [
+        "../../../../packages/vue/adapter-ant-design-vue/src/*"
+      ],
       "@adapttable/naive-ui": [
         "../../../../packages/vue/adapter-naive-ui/src/index.ts"
       ],

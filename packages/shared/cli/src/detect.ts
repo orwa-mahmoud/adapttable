@@ -30,6 +30,7 @@ export type Kit =
   | "ngx-bootstrap"
   | "vue-unstyled"
   | "element-plus"
+  | "ant-design-vue"
   | "vuetify"
   | "naive-ui"
   | "reka-ui"
@@ -272,6 +273,14 @@ export const KITS: readonly KitInfo[] = [
     signals: ["element-plus"],
     extras: ["element-plus@^2.14.7"],
     label: "Element Plus",
+  },
+  {
+    kit: "ant-design-vue",
+    framework: "vue",
+    adapter: "@adapttable/ant-design-vue",
+    signals: ["ant-design-vue"],
+    extras: ["ant-design-vue@^4.2.6"],
+    label: "Ant Design Vue",
   },
   {
     kit: "vuetify",
