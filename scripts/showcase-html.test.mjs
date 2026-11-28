@@ -73,15 +73,15 @@ describe("the generated showcase pages", () => {
   it("writes one page per matrix entry and per replaced address", () => {
     // Twenty-two pages per React adapter — a landing plus twenty-one
     // features — across all eight kits; the same twenty-two for each of the
-    // nine Angular kits and the eight Vue kits; and the eight replaced
+    // nine Angular kits and the nine Vue kits; and the eight replaced
     // top-level addresses, two Angular modes, sixteen native Vue previews,
-    // seven kit order desks and five real-control labs. Kit `/accessibility/`
+    // eight kit order desks and five real-control labs. Kit `/accessibility/`
     // URLs are matrix pages again, not redirects to editing. Written out rather
     // than recomputed from the matrix: the writer reads that same list, so a
     // derived count would agree with itself no matter what it produced.
     assert.equal(
       files.length,
-      8 * 22 + 9 * (1 + 21) + 8 * (1 + 21) + 8 + 2 + 2 + 16 + 7 + 5
+      8 * 22 + 9 * (1 + 21) + 9 * (1 + 21) + 8 + 2 + 2 + 16 + 8 + 5
     );
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
   });
@@ -148,11 +148,12 @@ describe("the generated showcase pages", () => {
     }
   });
 
-  it("generates seven genuine Vue kit order desks without a parity claim", () => {
+  it("generates eight genuine Vue kit order desks without a parity claim", () => {
     assert.deepEqual(
       VUE_KIT_PAGES.map((page) => page.path),
       [
         "element-plus/orders",
+        "ant-design-vue/orders",
         "vuetify/orders",
         "naive-ui/orders",
         "reka-ui/orders",
@@ -253,7 +254,7 @@ describe("the generated showcase pages", () => {
   it("gives every Vue kit the pages every React kit has", () => {
     const expected = MATRIX_FEATURES.map((feature) => feature.slug).sort();
     const kits = builtAdapters("vue");
-    assert.equal(kits.length, 8);
+    assert.equal(kits.length, 9);
     for (const kit of kits)
       assert.deepEqual(
         featuresOf(kit)
@@ -270,7 +271,7 @@ describe("the generated showcase pages", () => {
 
   it("indexes every Vue kit landing and feature page under the Vue demo root", () => {
     const pages = matrixPages().filter((page) => page.framework === "vue");
-    assert.equal(pages.length, 176);
+    assert.equal(pages.length, 198);
     for (const page of pages) {
       assert.equal(page.indexable, true, page.dir);
       assert.equal(page.dir, `vue/${page.path}`);
@@ -464,14 +465,14 @@ describe("the generated showcase pages", () => {
 
   it("names the v3 AI integration capabilities in static HTML", () => {
     const ai = files.filter((file) => file.dir.endsWith("/ai"));
-    assert.equal(ai.length, 25);
+    assert.equal(ai.length, 26);
     const vueDirs = new Set(
       matrixPages()
         .filter((page) => page.framework === "vue")
         .map((page) => page.dir)
     );
     const vue = ai.filter((file) => vueDirs.has(file.dir));
-    assert.equal(vue.length, 8);
+    assert.equal(vue.length, 9);
     for (const file of vue) {
       assert.match(file.html, /useTableAssistant/);
       assert.match(file.html, /tableAgent/);

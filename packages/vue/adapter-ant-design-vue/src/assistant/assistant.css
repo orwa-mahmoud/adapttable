@@ -1,0 +1,16 @@
+.adapttable-ant-design-vue-assistant-panel,
+.adapttable-ant-design-vue-assistant-window {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 18rem;
+}
+.adapttable-ant-design-vue-assistant-input {
+  inline-size: 100%;
+}
+.adapttable-ant-design-vue-approval-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

@@ -42,6 +42,7 @@ const VUE_PREVIEW_ENTRIES = new Map([
 
 const VUE_KIT_PREVIEW_ENTRIES = new Map([
   ["element-plus", "src/vue/kits/entry-element-plus.ts"],
+  ["ant-design-vue", "src/vue/kits/entry-ant-design-vue.ts"],
   ["vuetify", "src/vue/kits/entry-vuetify.ts"],
   ["naive-ui", "src/vue/kits/entry-naive-ui.ts"],
   ["reka-ui", "src/vue/kits/entry-reka-ui.ts"],
@@ -305,7 +306,7 @@ describe("the showcase page manifest", () => {
     }
   });
 
-  it("boots real-control Vue labs separately from the seven basic kit previews", () => {
+  it("boots real-control Vue labs separately from the eight basic kit previews", () => {
     const indexed = indexableRoutes(SHOWCASE_PAGES);
     for (const [path, entry] of VUE_KIT_LAB_ENTRIES) {
       const key = `vue-${path.replaceAll("/", "-")}`;

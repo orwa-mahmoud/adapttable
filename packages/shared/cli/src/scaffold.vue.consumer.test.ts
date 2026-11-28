@@ -150,6 +150,7 @@ describe(
           expect(rendered.descendingRows).toEqual([...expectedRows].reverse());
           expect(rendered.tableCount).toBe(1);
           const classes: Record<string, string> = {
+            "ant-design-vue": "ant-btn",
             "element-plus": "el-button",
             "naive-ui": "n-button",
             "nuxt-ui": "focus-visible",

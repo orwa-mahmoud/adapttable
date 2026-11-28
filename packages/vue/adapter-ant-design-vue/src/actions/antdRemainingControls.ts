@@ -1,0 +1,139 @@
+import {
+  type ActionButton,
+  type CommandPaletteSlots,
+  type ContextMenuSlots,
+  managedCommandPaletteSurface,
+  type SidePanelSlots,
+  toVueAttrs,
+} from "@adapttable/vue/adapter";
+import { MenuDivider, MenuItem } from "ant-design-vue";
+import { h } from "vue";
+
+import AntdInput from "../controls/AntdInput.vue";
+import { antdButton } from "../controls/button";
+import { AntdCard } from "../presentation/AntdCard";
+import { AntdCommandSurface } from "./AntdCommandSurface";
+import { AntdContextSurface } from "./AntdContextSurface";
+export const antdActionButton = ({ attrs, label, icon }: ActionButton) =>
+  antdButton(attrs, [icon, label]);
+export const antdPaletteSlots = (
+  names: () => Readonly<Record<string, string | undefined>> = () => ({}),
+  container: () => HTMLElement | undefined = () => undefined,
+  dir: () => "ltr" | "rtl" | undefined = () => undefined
+): CommandPaletteSlots => ({
+  Surface: managedCommandPaletteSurface((control) =>
+    h(AntdCommandSurface, { control, container: container(), dir: dir() })
+  ),
+  Input: ({ inputProps }) => {
+    const { onChange, ref, value, ...attrs } = inputProps;
+    return h(AntdInput, {
+      ...toVueAttrs(attrs),
+      value,
+      inputRef: (element) => {
+        if (element instanceof HTMLInputElement || element === null)
+          ref(element);
+      },
+      class: names().commandInput,
+      onChange,
+    });
+  },
+  Item: ({ command, itemProps }) =>
+    antdButton(
+      {
+        ...toVueAttrs(itemProps),
+        class: names().commandItem,
+        type: "button",
+        tabindex: -1,
+        disabled: command.disabled,
+      },
+      command.label
+    ),
+  Empty: ({ message }) =>
+    h(
+      "p",
+      { "data-adapttable-part": "command-empty", class: names().commandEmpty },
+      message
+    ),
+});
+export const antdContextMenuSlots = (
+  names: () => Readonly<Record<string, string | undefined>> = () => ({}),
+  dir: () => "ltr" | "rtl" | undefined = () => undefined
+): ContextMenuSlots => ({
+  Surface: (props) => h(AntdContextSurface, { ...props, dir: dir() }),
+  Item: ({ item, onSelect }) =>
+    h(
+      MenuItem,
+      {
+        disabled: item.disabled,
+        "aria-disabled": item.disabled,
+        "data-danger": item.danger ? "" : undefined,
+        "data-adapttable-part": "context-menu-item",
+        class: names().contextMenuItem,
+        onClick: () => onSelect(),
+      },
+      { default: () => item.label }
+    ),
+  Separator: () =>
+    h(MenuDivider, {
+      "data-adapttable-part": "context-menu-separator",
+      class: names().contextMenuSeparator,
+    }),
+});
+export const antdSidePanelSlots = (
+  names: () => Readonly<Record<string, string | undefined>> = () => ({})
+): SidePanelSlots => {
+  let closeChoice: (() => void) | undefined;
+  return {
+    Frame: (props) => {
+      const close = closeChoice;
+      return h(
+        AntdCard,
+        {
+          attrs: {
+            "data-adapttable-part": "side-panel",
+            class: props.className,
+            "data-side": props.side,
+            style: { minWidth: "min(18rem,100%)", maxWidth: "100%" },
+            onKeydownCapture: (event: KeyboardEvent) => {
+              const target = event.target;
+              // Ant Design Vue's select stops Escape even while closed; forward that case to the
+              // binding's current close callback before the native event is consumed.
+              if (
+                event.key === "Escape" &&
+                !event.defaultPrevented &&
+                !event.isComposing &&
+                target instanceof Element &&
+                target.getAttribute("role") === "combobox" &&
+                target.getAttribute("aria-expanded") !== "true" &&
+                !target.closest('[role="dialog"],[role="menu"]')
+              ) {
+                event.preventDefault();
+                event.stopPropagation();
+                close?.();
+              }
+            },
+          },
+        },
+        { default: () => props.children }
+      );
+    },
+    Tab: (props) =>
+      antdButton(
+        { ...toVueAttrs(props.buttonProps), class: names().sidePanelTab },
+        props.panel.label
+      ),
+    Close: (props) => {
+      closeChoice = props.onClose;
+      return antdButton(
+        {
+          type: "button",
+          "aria-label": props.label,
+          "data-adapttable-part": "side-panel-close",
+          class: names().sidePanelClose,
+          onClick: props.onClose,
+        },
+        props.label
+      );
+    },
+  };
+};

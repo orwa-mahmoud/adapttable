@@ -24,6 +24,7 @@ overrides:
   # only follows a matching semver range, so each starter also names the
   # workspace `#build` it needs (see starters/*/turbo.json).
   "@adapttable/antd": "workspace:*"
+  "@adapttable/ant-design-vue": "workspace:*"
   "@adapttable/base-ui": "workspace:*"
   "@adapttable/chakra": "workspace:*"
   "@adapttable/core": "workspace:*"

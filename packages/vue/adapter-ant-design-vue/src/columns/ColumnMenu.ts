@@ -1,0 +1,45 @@
+import {
+  ColumnMenuChrome,
+  type ColumnMenuSlotProps,
+  useColumnMenu,
+  withProps,
+} from "@adapttable/vue/adapter";
+import { createVNode, defineComponent, h, type SetupContext } from "vue";
+
+import { antdColumnMenuSlots } from "./antdColumnMenuControls";
+
+const menuProps = {
+  allColumns: null,
+  layout: null,
+  labels: null,
+  hasRowActions: Boolean,
+  hasRowReorder: Boolean,
+  onAutoSize: null,
+  onAutoSizeColumn: null,
+  onSortColumn: null,
+  onFilterColumn: null,
+  onRenameColumn: null,
+  sortBy: null,
+  sortDir: null,
+  dir: null,
+  groupingPanel: null,
+  featureHost: null,
+  classNames: null,
+  container: null,
+} satisfies Record<keyof ColumnMenuSlotProps<unknown>, unknown>;
+const AntdColumnMenuPresentation = defineComponent(
+  (props: ColumnMenuSlotProps<unknown>) => {
+    const model = useColumnMenu(() => props);
+    return () => h(ColumnMenuChrome, { model, slots: antdColumnMenuSlots });
+  },
+  { name: "AntdColumnMenuPresentation", props: menuProps }
+);
+export const ColumnMenu = /* @__PURE__ */ withProps(function ColumnMenu<TRow>(
+  props: ColumnMenuSlotProps<TRow>,
+  context: Pick<SetupContext, "attrs">
+) {
+  return createVNode(AntdColumnMenuPresentation, {
+    ...context.attrs,
+    ...props,
+  });
+}, menuProps);

@@ -115,6 +115,7 @@ export const KITS = Object.freeze([
   { name: "adapter-reka-ui", framework: "vue", role: "shell" },
   { name: "adapter-naive-ui", framework: "vue", role: "shell" },
   { name: "adapter-vuetify", framework: "vue", role: "shell" },
+  { name: "adapter-ant-design-vue", framework: "vue", role: "shell" },
 ]);
 
 /** The folder-name prefix every kit package carries. */

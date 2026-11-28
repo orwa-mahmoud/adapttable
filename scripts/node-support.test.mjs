@@ -41,6 +41,7 @@ const PUBLISHED_SNAPSHOT = [
   "@adapttable/angular-cdk",
   "@adapttable/angular-material",
   "@adapttable/angular-unstyled",
+  "@adapttable/ant-design-vue",
   "@adapttable/antd",
   "@adapttable/base-ui",
   "@adapttable/chakra",
@@ -71,6 +72,7 @@ const PUBLISHED_SNAPSHOT = [
 ];
 const VUE_PUBLIC_PACKAGES = [
   "@adapttable/ai-vue",
+  "@adapttable/ant-design-vue",
   "@adapttable/element-plus",
   "@adapttable/naive-ui",
   "@adapttable/nuxt-ui",
@@ -110,7 +112,7 @@ function packageManifests() {
 describe("supported Node contract", () => {
   it("declares the baseline floor and every Angular 22 native kit floor", () => {
     const manifests = [join(ROOT, "package.json"), ...packageManifests()];
-    assert.equal(manifests.length, 37);
+    assert.equal(manifests.length, 38);
     for (const manifest of manifests) {
       const pkg = json(manifest);
       const floor = ANGULAR_22_KITS.has(pkg.name) ? ANGULAR_22_FLOOR : FLOOR;
@@ -159,7 +161,7 @@ describe("supported Node contract", () => {
   it("derives the packed set from non-private manifests, not a count", () => {
     const names = publishedPackageNames();
     assert.deepEqual(names, PUBLISHED_SNAPSHOT);
-    assert.equal(names.length, 36);
+    assert.equal(names.length, 37);
     assert.ok(!names.includes("@adapttable/private-fixture"));
     assert.ok(!names.includes("@adapttable/unregistered-fixture"));
     for (const name of VUE_PUBLIC_PACKAGES) assert.ok(names.includes(name));

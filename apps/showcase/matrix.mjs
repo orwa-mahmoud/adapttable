@@ -784,6 +784,24 @@ export const SHOWCASE_ADAPTERS = [
     built: true,
   },
   {
+    key: "ant-design-vue",
+    framework: "vue",
+    label: "Ant Design Vue",
+    blurb: "Enterprise polish, Ant blue",
+    accentLight: "oklch(0.58 0.19 258)",
+    accentDark: "oklch(0.72 0.14 258)",
+    pkg: "@adapttable/ant-design-vue",
+    peer: "ant-design-vue",
+    install:
+      "pnpm add @adapttable/ant-design-vue @adapttable/vue @adapttable/core ant-design-vue",
+    provider: "",
+    tagline:
+      "An Ant Design Vue data table, in Ant Design Vue's own components.",
+    surface:
+      "Ant Design Vue's Popover, Drawer, Card, Select, Checkbox, Dropdown and Tag",
+    built: true,
+  },
+  {
     key: "vuetify",
     framework: "vue",
     label: "Vuetify",
@@ -4516,6 +4534,18 @@ export const VUE_KIT_PAGES = Object.freeze([
     notice:
       "Preview of table controls, selection, search, pagination and presentation settings.",
     entry: "/src/vue/kits/entry-element-plus.ts",
+  },
+  {
+    key: "vue-ant-design-vue-orders",
+    kit: "ant-design-vue",
+    dir: "vue/ant-design-vue/orders",
+    path: "ant-design-vue/orders",
+    title: "Ant Design Vue order desk — Vue — AdaptTable",
+    description:
+      "Explore real Ant Design Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
+    notice:
+      "Preview of table controls, selection, search, pagination and presentation settings.",
+    entry: "/src/vue/kits/entry-ant-design-vue.ts",
   },
   {
     key: "vue-vuetify-orders",

@@ -52,6 +52,7 @@ describe("AI isolation", () => {
       "packages/vue/vue/dist/dev/index.js",
       "packages/vue/adapter-vue-unstyled/dist/index.js",
       ...[
+        "ant-design-vue",
         "element-plus",
         "naive-ui",
         "nuxt-ui",

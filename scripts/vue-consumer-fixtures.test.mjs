@@ -33,7 +33,7 @@ const fixture = (name) => {
 
 describe("packed Vue consumers", () => {
   it("registers every distinct real entry and matches existing comparable ceilings", () => {
-    assert.equal(VUE_CONSUMER_SPECS.length, 44);
+    assert.equal(VUE_CONSUMER_SPECS.length, 48);
     assert.deepEqual(
       vue.map((entry) => entry.name),
       VUE_CONSUMER_SPECS.map((entry) => entry.name)
@@ -64,14 +64,14 @@ describe("packed Vue consumers", () => {
     );
   });
 
-  it("measures all seven native kit roots with real adapter CSS, at most 80 KiB", () => {
+  it("measures all eight native kit roots with real adapter CSS, at most 80 KiB", () => {
     assert.deepEqual(
       VUE_NATIVE_BASE_SPECS.map((entry) => entry.pkg).sort(),
       KITS.filter((kit) => kit.framework === "vue" && kit.role === "shell")
         .map((kit) => kit.name)
         .sort()
     );
-    assert.equal(VUE_NATIVE_BASE_SPECS.length, 7);
+    assert.equal(VUE_NATIVE_BASE_SPECS.length, 8);
     for (const spec of VUE_NATIVE_BASE_SPECS) {
       const entry = fixture(spec.name);
       assert.equal(entry.kit, spec.pkg.replace(/^adapter-/, ""));
@@ -306,6 +306,7 @@ describe("packed Vue consumers", () => {
       ["adapter-vuetify", "vuetify/components"],
       ["adapter-nuxt-ui", "@nuxt/ui/components/Table.vue"],
       ["adapter-quasar", "quasar/src/components/btn/QBtn.js"],
+      ["adapter-ant-design-vue", "ant-design-vue"],
       ["adapter-element-plus", "element-plus"],
       ["adapter-naive-ui", "naive-ui"],
       ["adapter-vue-unstyled", "vue"],
@@ -365,11 +366,12 @@ it("includes emitted drawer CSS in the three drawer-capable unstyled consumers",
 });
 
 describe("optional Vue layout graphs", () => {
-  it("covers all five combined native entries without changing base ceilings", () => {
+  it("covers all six combined native entries without changing base ceilings", () => {
     const entries = VUE_LAYOUT_GRAPH_SPECS.filter((entry) =>
       entry.code?.includes("@adapttable/vue/features")
     );
     assert.deepEqual(entries.map((entry) => entry.pkg).sort(), [
+      "adapter-ant-design-vue",
       "adapter-element-plus",
       "adapter-naive-ui",
       "adapter-nuxt-ui",

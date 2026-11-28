@@ -34,6 +34,15 @@ const readJson = (file) => JSON.parse(readFileSync(file, "utf8"));
 
 /** The tests each kit runs per Vue: its contract render, preset and table. */
 export const KIT_PEER_RUNS = {
+  "adapter-ant-design-vue": [
+    {
+      files: [
+        "test/structural-parts.ssr.test.ts",
+        "test/preset.ssr.test.ts",
+        "test/table-presentation.test.ts",
+      ],
+    },
+  ],
   "adapter-element-plus": [
     {
       files: [
