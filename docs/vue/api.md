@@ -92,8 +92,8 @@ importing the binding root never installs controls, optional features or AI.
 
 ## Styled adapter entry points
 
-`@adapttable/element-plus`, `@adapttable/vuetify`, `@adapttable/naive-ui`,
-`@adapttable/reka-ui`, `@adapttable/shadcn-vue`, `@adapttable/nuxt-ui` and
+`@adapttable/ant-design-vue`, `@adapttable/element-plus`,
+`@adapttable/vuetify`, `@adapttable/naive-ui`, `@adapttable/reka-ui`, `@adapttable/shadcn-vue`, `@adapttable/nuxt-ui` and
 `@adapttable/quasar` export their own `DataTable` and 41 canonical feature
 factories through focused entries. All are `0.1.0` packages on npm.
 Their controls consume the shared Vue model and Chrome contracts; they do not
@@ -107,8 +107,8 @@ Older aliases remain available where they were already exported.
 
 Every Vue kit exports `/preset`. Only Unstyled, Reka UI and shadcn-vue expose the
 documented `/features` barrel, `/assistant` and controlled `/pivot` panel. Quasar additionally
-provides dedicated `/export-pdf` and `/export-xlsx` entries. Element Plus,
-Vuetify, Naive UI and Nuxt UI use their own `/export` feature with optional
+provides dedicated `/export-pdf` and `/export-xlsx` entries. Ant Design Vue,
+Element Plus, Vuetify, Naive UI and Nuxt UI use their own `/export` feature with optional
 `pdfWriter` or `xlsxWriter` from binding `/pdf` or `/xlsx`.
 
 Shared pivot data, formulas, streams and sparkline helpers remain available from

@@ -4851,6 +4851,7 @@ covered by the [Vue assistant guide](./vue/assistant.md).
 Each kit renders the same Vue `DataTable` props, public parts and feature-factory
 contracts with its own controls. Follow each guide's peers, styles and setup:
 
+- [Ant Design Vue](./vue/ant-design-vue.md): `@adapttable/ant-design-vue` — `AntdEditableCell`, `AntdRowEditActions`, `AntdBatchEditBar`, `FilterField`, `AntdHeaderFilter`.
 - [Element Plus](./vue/element-plus.md): `@adapttable/element-plus` — `ElementEditableCell`, `ElementRowEditActions`, `ElementBatchEditBar`, `FilterField`, `ElementHeaderFilter`.
 - [Naive UI](./vue/naive-ui.md): `@adapttable/naive-ui` — `NaiveEditableCell`, `NaiveRowEditActions`, `NaiveBatchEditBar`, `NaiveFilterField`, `NaiveHeaderFilter`, and the `/renderers` entry's `NaiveDesktopTable`, `NaiveMobileCards` and `naiveTableControls`.
 - [Nuxt UI](./vue/nuxt-ui.md): `@adapttable/nuxt-ui` — `NuxtEditableCell`, `NuxtRowEditActions`, `NuxtBatchEditBar`, `NuxtFilterField`, `NuxtHeaderFilter`.

@@ -57,6 +57,7 @@ export const TITLES = {
   "vue/i18n-rtl.md": "Vue table localization and RTL",
   "vue/summary-row.md": "Vue summaries and footers",
   "vue/getting-started.md": "Get started with Vue tables",
+  "vue/ant-design-vue.md": "Ant Design Vue tables",
   "vue/element-plus.md": "Element Plus Vue tables",
   "vue/naive-ui.md": "Naive UI Vue tables",
   "vue/nuxt-ui.md": "Nuxt UI Vue tables",
@@ -245,6 +246,8 @@ export const DESCRIPTIONS = {
     "Connect Vue agents and conversations with native controls, explicit approval and host-controlled state.",
   "vue/getting-started.md":
     "Build an Vue table with native controls, reactive sources, optional features, controlled state and SSR lifecycle rules.",
+  "vue/ant-design-vue.md":
+    "Build Vue tables with Ant Design Vue controls and card surfaces, host-owned data and composable features.",
   "vue/element-plus.md":
     "Build Vue tables with Element Plus controls and card surfaces, host-owned data and composable features.",
   "vue/naive-ui.md":

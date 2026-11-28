@@ -9,7 +9,6 @@ AdaptTable's Vue data table with Ant Design Vue controls and card surfaces.
 import { ref } from "vue";
 import { DataTable, type ColumnDef } from "@adapttable/ant-design-vue";
 import { selection } from "@adapttable/ant-design-vue/selection";
-import "ant-design-vue/dist/index.css";
 import "@adapttable/ant-design-vue/styles.css";
 
 interface Person {
@@ -94,25 +93,28 @@ from `sparklineColumn` in `@adapttable/vue/sparkline`.
 
 ## Rendering and styling
 
-The desktop renderer places a semantic HTML table inside `ElCard`. The mobile
-renderer uses an `ElCard` for each prepared row. Sorting, selection, search and
+The desktop renderer places a semantic HTML table inside `Card`. The mobile
+renderer uses a `Card` for each prepared row. Sorting, selection, search and
 paging controls use Ant Design Vue components; AdaptTable's Vue binding owns the
 data model, query state and host-write callbacks.
 
 Native table rows and cells retain their semantic attributes, spans and focus
 references. The table surface uses one scroll owner. Its colors and spacing use
-Ant Design Vue theme variables. Load Ant Design Vue's dark-theme CSS variables when
-using its dark theme.
+Ant Design Vue's design tokens, read through `theme.useToken()`, so the table
+follows the `ConfigProvider` theme, including its dark algorithm. Ant Design Vue
+draws its own styles at runtime; only this kit's stylesheet is imported.
 
 `classNames` styles the named part. Compound controls follow their kit's public
 attribute API:
 
-- `ElCheckbox`: the label host owns the part and styling class. Its associated
-  native input owns checked, mixed and disabled state, and receives focus.
-- `ElInput`: the native input owns data attributes and its accessible name;
+- `Checkbox`: Ant Design Vue forwards `data-*` and `aria-*` attributes to the
+  native input, so the part sits on that input, which owns checked, mixed and
+  disabled state and receives focus. The styling class stays on the label host.
+- `Input`: the native input owns data attributes and its accessible name;
   the Ant Design Vue field host owns the styling class.
-- `ElSelect`: the kit host owns the styling class; its native combobox owns the
-  accessible name and focus behavior.
+- `Select`: Ant Design Vue puts every attribute on the root element, so the kit
+  host owns the part and styling class, and the kit copies the `aria-*` name
+  onto the native combobox input, which owns focus behavior.
 
 ## Filtering
 
@@ -129,13 +131,14 @@ modal drawer. `FilterField`, `ChecklistFilter` and `FilterTreeBuilder` are also
 available from the filtering entry point for custom layouts over the same
 binding models.
 
-The nonmodal popup uses `ElPopover` for positioning and dialog semantics, with
-an `ElCard` content body. The `filters-popover` part and
-`classNames.filtersPopover` belong to that body. The drawer's `filters-panel`
-part and class belong to the actual `ElDrawer` dialog root. `ElDrawer` renders
-its modal mask internally and exposes only `modalClass`, so
-`classNames.filtersBackdrop` styles the mask and no `filters-backdrop` part is
-written to it.
+The nonmodal popup uses `Popover` for positioning and dialog semantics, with
+a dialog body. The popover has no backdrop, closes on Escape and on an
+outside click, restores focus to its trigger and sets `aria-expanded` on it. The
+`filters-popover` part and `classNames.filtersPopover` belong to that body. The
+drawer is modal: its `filters-panel` part and class belong to the dialog panel,
+Tab stays inside it, and Escape closes it. `Drawer` forwards no attributes to its
+mask, so the kit marks the real mask with the `filters-backdrop` part and adds
+`classNames.filtersBackdrop` to it.
 
 ### Column header filters
 
@@ -152,13 +155,13 @@ const features = [
 ];
 ```
 
-The header popup uses `ElPopover` and the same binding-owned filter fields.
+The header popup uses `Popover` and the same binding-owned filter fields.
 `FilterHeaderControl`, `FilterHeaderRow` and `AntdHeaderFilter` are available
 from the header-filter entry point for custom layouts. Compact text and range
-fields use `ElInput`; single and Boolean choices use `ElSelect`; multiple choices
-use `ElCheckbox` inside an `ElPopover`. Their menus portal outside the scrolling
+fields use `Input`; single and Boolean choices use `Select`; multiple choices
+use `Checkbox` inside a `Popover`. Their menus portal outside the scrolling
 viewport and stay inside the table root during fullscreen. Popup stacking follows
-`ElConfigProvider`'s `zIndex` setting.
+`ConfigProvider`'s `zIndex` setting.
 
 Pass `dir="rtl"` or `dir="ltr"` to a standalone `FilterHeaderControl` or
 `FilterHeaderRow` to keep its open popup synchronized with your reactive layout.
@@ -209,43 +212,40 @@ inherited density consistent with the parent.
 
 ## Server rendering
 
-Use Ant Design Vue's documented per-request `ID_INJECTION_KEY` and
-`ZINDEX_INJECTION_KEY` setup, with the same seeds on the server and client.
-Also inject the actual `ssrContext.teleports` payload into its reported targets
-before hydration, as described in the Ant Design Vue SSR guide. Internal select
-anchors can be present in that payload even when `teleported` is false.
+Collect Ant Design Vue's CSS-in-JS styles for each request and include them in
+the rendered document, as described in the Ant Design Vue server-side rendering
+guide, so the first paint matches the hydrated page. Popups, drawers and dialogs
+render in the browser after mount, not in the server payload.
 
-Ant Design Vue 2.14.7 assigns supplied form-control IDs after mounting. Checkbox
-labels therefore use their native nested-label association during server
-rendering. Input accessible names remain available through `aria-label`.
-Applications that use external `label[for]` associations should account for
-those IDs becoming available after hydration.
+Checkbox labels use their native nested-label association during server
+rendering, and input accessible names stay available through `aria-label`.
+Applications that use external `label[for]` associations should confirm their IDs
+after hydration.
 
-[Ant Design Vue SSR documentation](https://ant-design-vue.org/en-US/guide/ssr.html)
+## Ant Design Vue behavior this kit supplies
 
-### npm 10 co-installation with Popper
+Ant Design Vue 4 leaves a few behaviors to the application. The kit adds them so
+every surface meets the shared accessibility contract:
 
-The packed Node harness uses npm's `--legacy-peer-deps` consumer profile.
-With npm 10.9.8, Ant Design Vue 2.14.7's declared
-`@popperjs/core: npm:@sxzz/popperjs-es@^2.11.8` dependency can be collapsed
-onto a co-installed real `@popperjs/core`, causing an ESM `placements` error.
-For that specific resolver profile, preserve the declared vendor identity
-with this consumer `package.json` override:
+- `Menu` has no arrow-key navigation. Row actions, context menus and the
+  assistant examples menu handle ArrowUp, ArrowDown, Home, End and Space
+  themselves, move focus to the first item on open, and return focus to the
+  trigger on Escape.
+- `Drawer` has no focus trap and moves focus on open. The filter drawer and the
+  assistant sheet keep Tab inside the panel, and Escape closes them.
+- `Select` marks Escape as handled while its list is open, so a select inside a
+  column-menu or filter popover closes its own list first and leaves the popover
+  open.
+- `Modal` and `Drawer` do not forward attributes. Named parts reach their real
+  elements through `wrapProps`, `rootClassName` or the panel content.
 
-```json
-{
-  "overrides": {
-    "ant-design-vue@2.14.7": {
-      "@popperjs/core": "https://registry.npmjs.org/@sxzz/popperjs-es/-/popperjs-es-2.11.8.tgz"
-    }
-  }
-}
-```
+### ConfigProvider limits
 
-This is the official `@sxzz/popperjs-es` tarball required by Ant Design Vue;
-it does not change vendor files or replace another kit's real Popper.
-The selector applies only to Ant Design Vue 2.14.7, leaving future releases
-on their own declared dependency graph.
+Ant Design Vue does not expose a public way to read the `ConfigProvider` locale,
+size or direction. The kit therefore takes the table's own `labels` and `dir`
+for its text and layout, and reads colors from `theme.useToken()`. Wrap the table
+in `ConfigProvider` for Ant Design Vue's own components and pass `dir` to the
+table for right-to-left layouts.
 
 ## Row actions
 
@@ -269,8 +269,8 @@ const features = [
 ```
 
 Row-action controls activate after client mount, following the Vue binding's
-server-rendering lifecycle. Actions receive the original host row. Ant Design Vue buttons request the action;
-the host performs the change. Confirmation uses `ElMessageBox`, stays inside the
+server-rendering lifecycle. Actions receive the original host row. Ant Design Vue buttons request the action; the host
+performs the change. Confirmation uses `Modal`, stays inside the
 fullscreen table and uses the owning Vue app's providers. Dismissal, table
 deactivation and unmount cancel that table's pending dialogs. Supply `confirm`
 on `DataTable` to use your own confirmation handler.
@@ -306,7 +306,7 @@ support data-row pinning. Independent summary rows remain outside selection,
 sorting and filtering.
 
 Desktop summaries and extras retain native table geometry, including spans.
-Mobile summaries and supplementary content use `ElCard`; their data rows keep
+Mobile summaries and supplementary content use `Card`; their data rows keep
 all fields visible. Host row classes, styles and heights apply to the actual
 row or card. Individual optional entries are also available at `/row-pinning`,
 `/pinned-summary-rows`, `/extra-rows` and `/row-appearance`.
@@ -340,7 +340,7 @@ const features = [
 ];
 ```
 
-Column-group toggles, sort actions and resize handles use `ElButton`. Shift-click
+Column-group toggles, sort actions and resize handles use `Button`. Shift-click
 a desktop sort heading to add another priority. Resize handles support native
 pointer interaction and direction-aware Arrow keys through the shared binding.
 Use `v-model:column-layout` to accept layout requests; a supplied layout remains
@@ -359,7 +359,7 @@ const features = [findInTable({ button: true })];
 ```
 
 Find searches the prepared rows without filtering them. Its optional toolbar
-button opens an `ElInput` search field with `ElButton` previous, next and close
+button opens an `Input` search field with `Button` previous, next and close
 controls. Ctrl/Cmd+F is scoped to the active table. Enter and Shift+Enter move
 between matches; Escape closes the bar and restores the preceding focus target.
 The same controls and match markers work with mobile cards.
@@ -392,9 +392,9 @@ const features = [
 ```
 
 Desktop cells use the binding's direction-aware keyboard navigation and range
-selection. Column selection uses `ElCheckbox`; selecting a column moves focus
-into its first grid cell. Status figures use `ElText`, with selection statistics
-inside a polite native `output` live region. Both status features share one strip.
+selection. Column selection uses `Checkbox`; selecting a column moves focus
+into its first grid cell. Status figures use `Typography.Text`, with selection
+statistics inside a polite native `output` live region. Both status features share one strip.
 Standalone aliases are available at `/column-selection` and `/selection-stats`.
 
 Fill requires `cellNavigation({ onFill })` and editable columns. The host receives cell edit
@@ -414,8 +414,8 @@ import { columnMenu } from "@adapttable/ant-design-vue/column-menu";
 const features = [columnMenu()];
 ```
 
-The Columns button opens an Ant Design Vue popover containing a named `ElCard`
-dialog, real search and action buttons, and `ElSelect` plugin choices. Use it to
+The Columns button opens an Ant Design Vue popover containing a named `Card`
+dialog, real search and action buttons, and `Select` plugin choices. Use it to
 show, hide, pin, reorder, resize or rename supported columns. Columns marked
 `renameable: true` also receive a direct header rename action. Menu and header
 renaming share the binding's validation, announcements and host callbacks.
@@ -492,7 +492,7 @@ const stagedFeatures = [batchEditing(saveRows)];
 
 Mark a column `editable: true` and choose its editor: text, number, date, datetime,
 time, boolean, select, multi-select, or a host custom editor. Ant Design Vue supplies
-`ElInput`, `ElSelect`, `ElCheckbox` and `ElButton`; the binding owns drafts,
+`Input`, `Select`, `Checkbox` and `Button`; the binding owns drafts,
 validation, parsing, save state, conflicts and host callbacks. The table never
 mutates host rows.
 
@@ -529,17 +529,17 @@ import { savedViews } from "@adapttable/ant-design-vue/saved-views";
 import { sidePanel } from "@adapttable/ant-design-vue/side-panel";
 ```
 
-Command search and active items remain in the shared command model; `ElDialog`
-owns the palette's modal interaction. Context menus use `ElDropdown` and
-`ElDropdownItem` for native menu navigation. Both surfaces honor their table's
-fullscreen container. `ElButton`, `ElInput`, `ElSelect`, `ElCheckbox`, `ElTag`,
-`ElCard`, `ElProgress`, and `ElLink` render the other controls without introducing
+Command search and active items remain in the shared command model; `Modal`
+owns the palette's modal interaction. Context menus use `Dropdown` and
+`Menu item` for native menu navigation. Both surfaces honor their table's
+fullscreen container. `Button`, `Input`, `Select`, `Checkbox`, `Tag`,
+`Card`, `Progress`, and `Typography.Link` render the other controls without introducing
 another feature store.
 
 Grouping chips forward drag and keyboard interactions to the shared grouping
 controller. Aggregation changes use the same shared operations and host
 notifications. Row reorder requests preserve host row ownership; cross-group
-and tree moves use the shared confirmation model rendered through `ElDialog`.
+and tree moves use the shared confirmation model rendered through `Modal`.
 
 The `saved-views` entry also exports `SavedViewsPanel` and `SavedViewsPanelProps`
 for management surfaces. Rename drafts, read-only/default rules, ordering, URL
@@ -550,7 +550,7 @@ retains controlled panel selection, with native buttons and a native card frame.
 
 The `assistant` entry provides `TableAssistant`, `AgentApproval`,
 `tableAssistant()`, and `agentApproval()` using the binding's conversation and
-approval contracts. Its sheet is an `ElDrawer`, examples use `ElDropdown`, the
-composer is an `ElInput` textarea, and speech language choices use `ElSelect`.
+approval contracts. Its sheet is a `Drawer`, examples use `Dropdown`, the
+composer is an `Input` textarea, and speech language choices use `Select`.
 It does not import an AI transport or own approval decisions. The `pivot` entry
-provides a controlled `PivotPanel` with `ElSelect` and `ElButton` controls.
+provides a controlled `PivotPanel` with `Select` and `Button` controls.
