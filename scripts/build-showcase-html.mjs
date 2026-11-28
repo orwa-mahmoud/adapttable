@@ -624,8 +624,8 @@ export const vueModePage = (lab = false) => {
     ? "Vue data table Feature Lab — AdaptTable"
     : "Vue data table live demo — AdaptTable";
   const description = lab
-    ? "Compose Vue table filters, cell editing, selection, grouping and row controls. Switch eight native UI kits, test RTL and explore interactive feature examples."
-    : "Explore a Vue data table with eight native UI kits: filters, sorting, editable cells, selection, saved views and CSV export, with responsive cards and RTL.";
+    ? "Compose Vue table filters, cell editing, selection, grouping and row controls. Switch nine native UI kits, test RTL and explore interactive feature examples."
+    : "Explore a Vue data table with nine native UI kits: filters, sorting, editable cells, selection, saved views and CSV export, with responsive cards and RTL.";
   const links = SHOWCASE_ADAPTERS.filter(
     (adapter) => adapter.framework === "vue" && adapter.built !== false
   )

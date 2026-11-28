@@ -4813,7 +4813,7 @@ Applications should use the documented table, feature and provider APIs instead.
   A declared Vue dependency selects Vue, which scaffolds `src/PeopleTable.vue`
   and native kit setup for plain Vue/Vite applications. Nuxt projects receive
   module setup guidance instead of generated Vite files. All nine Angular and
-  eight Vue kits are published. `KitInfo.privatePreview` is optional metadata
+  nine Vue kits are published. `KitInfo.privatePreview` is optional metadata
   for unpublished kits; none of the supported kits currently needs it.
   Init writes starter files and prints install guidance; it does not
   install packages or query registry availability.
@@ -4836,7 +4836,7 @@ Applications should use the documented table, feature and provider APIs instead.
 
 ## Vue binding and kits
 
-`@adapttable/vue`, `@adapttable/vue-unstyled` and the seven Vue UI kits below are
+`@adapttable/vue`, `@adapttable/vue-unstyled` and the eight Vue UI kits below are
 public `0.1.0` packages on npm, requiring Vue
 `^3.5.0` or a kit's newer floor. The
 [Vue getting-started guide](./vue/getting-started.md) and
@@ -4856,6 +4856,7 @@ contracts with its own controls. Follow each guide's peers, styles and setup:
 - [Nuxt UI](./vue/nuxt-ui.md): `@adapttable/nuxt-ui` — `NuxtEditableCell`, `NuxtRowEditActions`, `NuxtBatchEditBar`, `NuxtFilterField`, `NuxtHeaderFilter`.
 - [Quasar](./vue/quasar.md): `@adapttable/quasar` — `QuasarEditableCell`, `QuasarRowEditActions`, `QuasarBatchEditBar`, `QuasarFilterField`, `QuasarHeaderFilter`.
 - [Reka UI](./vue/reka-ui.md): `@adapttable/reka-ui` — `FilterField`, `HeaderFilter`.
+- [Headless UI](./vue/headless-ui.md): `@adapttable/vue-headless-ui` — `FilterField`, `HeaderFilter`.
 - [shadcn-vue](./vue/shadcn-vue.md): `@adapttable/shadcn-vue` — `FilterField`, `BasicFilterField`, `FilterTree`, `FilterChips`, `HeaderFilter`, with `BasicFilterFieldProps`, `FilterChipsProps` and `HeaderFilterProps`.
 - [Vuetify](./vue/vuetify.md): `@adapttable/vuetify` — `VuetifyEditableCell`, `VuetifyRowEditActions`, `VuetifyBatchEditBar`, `VuetifyFilterField`, `VuetifyHeaderFilter`.
 

@@ -45,6 +45,7 @@ const VUE_KIT_PREVIEW_ENTRIES = new Map([
   ["vuetify", "src/vue/kits/entry-vuetify.ts"],
   ["naive-ui", "src/vue/kits/entry-naive-ui.ts"],
   ["reka-ui", "src/vue/kits/entry-reka-ui.ts"],
+  ["headless-ui", "src/vue/kits/entry-headless-ui.ts"],
   ["shadcn-vue", "src/vue/kits/entry-shadcn-vue.ts"],
   ["nuxt-ui", "src/vue/kits/entry-nuxt-ui.ts"],
   ["quasar", "src/vue/kits/entry-quasar.ts"],

@@ -29,6 +29,7 @@ const EXPECTED: Record<string, { dir: "ltr" | "rtl"; locale: "en" | "ar" }> = {
   vuetify: { dir: "rtl", locale: "ar" },
   "naive-ui": { dir: "rtl", locale: "ar" },
   "reka-ui": { dir: "rtl", locale: "ar" },
+  "headless-ui": { dir: "ltr", locale: "en" },
   "shadcn-vue": { dir: "rtl", locale: "ar" },
   "nuxt-ui": { dir: "rtl", locale: "ar" },
   quasar: { dir: "rtl", locale: "ar" },

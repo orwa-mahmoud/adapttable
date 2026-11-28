@@ -61,8 +61,8 @@ with the Unstyled kit. A React or Angular import does not define a Vue feature.
 
 ## Styled adapter feature entries
 
-Element Plus, Vuetify, Naive UI, Reka UI, shadcn-vue, Nuxt UI and Quasar each
-export the same 41 canonical feature factories. This describes their callable
+Element Plus, Vuetify, Naive UI, Reka UI, Headless UI, shadcn-vue, Nuxt UI and
+Quasar each export the same 41 canonical feature factories. This describes their callable
 feature surface, not identical optional helper exports or a completed browser
 validation run. Import a factory from the selected adapter's focused path; every
 visible field, button, menu and dialog belongs to that adapter's kit.
@@ -100,15 +100,16 @@ import { filters } from "@adapttable/element-plus/filters";`
 uses the same Element Plus controls and factory signatures as the individual
 entries. The barrel is optional and is never imported by the base table.
 
-| Adapter                    | Feature barrel and preset | Kit-specific optional surfaces and writers                                                                  |
-| -------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `@adapttable/element-plus` | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
-| `@adapttable/vuetify`      | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
-| `@adapttable/naive-ui`     | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
-| `@adapttable/reka-ui`      | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`.                         |
-| `@adapttable/shadcn-vue`   | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`.                         |
-| `@adapttable/nuxt-ui`      | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
-| `@adapttable/quasar`       | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`.                         |
+| Adapter                       | Feature barrel and preset | Kit-specific optional surfaces and writers                                                                  |
+| ----------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `@adapttable/element-plus`    | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
+| `@adapttable/vuetify`         | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
+| `@adapttable/naive-ui`        | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
+| `@adapttable/reka-ui`         | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`.                         |
+| `@adapttable/vue-headless-ui` | `/preset`                 | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`.                         |
+| `@adapttable/shadcn-vue`      | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`.                         |
+| `@adapttable/nuxt-ui`         | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`; CSV controls accept optional binding PDF/XLSX writers. |
+| `@adapttable/quasar`          | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`.                         |
 
 All adapters can render data prepared by binding `/pivot`, `/formula`, `/sparkline`
 and `/stream` helpers, and every adapter's own `/pivot` entry adds a controlled
@@ -144,6 +145,21 @@ features release their observers, shortcuts and temporary overlays when their
 owner is removed or suspended under `KeepAlive`. Component-level tests and
 registered browser fixtures are distinct evidence; neither alone proves a full
 application's SSR or browser gate is complete.
+
+## Headless UI feature entries
+
+`@adapttable/vue-headless-ui` renders the Vue table with Headless UI components
+and its own stylesheet. Its 41 canonical feature factories use the same table
+model and host-owned callbacks as the binding. Import factories from their
+focused kit entries; the root `DataTable` entry does not import optional writer
+integrations or assistant controls.
+
+The kit includes the same feature families as the other styled kits. Its
+overlays are Headless UI parts: `Menu` for row actions and move destinations,
+`Listbox` for choices, `Popover` for filters and column menus, `Dialog` for the
+command palette, assistant sheet and confirmations, and `TabGroup` for
+`sidePanel()`. See [Headless UI](./headless-ui.md) for the controls Headless UI
+does not provide.
 
 ## Reka UI feature entries
 

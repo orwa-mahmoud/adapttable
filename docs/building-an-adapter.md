@@ -718,7 +718,7 @@ whatever rendered the table. Nothing in the suite changes.
 A queued mount can also return `ready: nextTick()` (Vue) or its framework's
 render-completion promise. The suite awaits `ready` before its first DOM
 assertion and always unmounts, including when readiness rejects. Synchronous
-drivers can omit it. All eight Vue kits register the same shared cases over
+drivers can omit it. All nine Vue kits register the same shared cases over
 their native components, plus LTR and RTL keyboard range checks.
 
 Beyond the suite, the built-in adapters are held to parity by:

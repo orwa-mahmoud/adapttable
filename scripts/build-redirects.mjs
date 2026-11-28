@@ -267,8 +267,11 @@ export const REDIRECT_LIMITS = Object.freeze({ static: 2000, dynamic: 100 });
 /**
  * The address a kit's demo answers without `/demo/`: `/react/mui/columns`
  * reaches `/react/demo/mui/columns/`. A kit with no page of its own under that
- * address takes it whole, as one splat rule; a kit whose guide lives there
- * keeps the guide, and each demo page beneath it answers by a rule of its own.
+ * address takes it whole, as one splat rule. A kit whose only guide is the
+ * short root keeps that page and uses a splat for every path beneath it. A
+ * kit with further guides under the same address keeps those pages, and each
+ * demo page beneath it that is not already served answers by a rule of its
+ * own.
  *
  * @param {readonly string[]} routes - Every route the site serves.
  * @returns {{ statics: string[], splats: string[] }}
@@ -281,8 +284,17 @@ export const kitShortcuts = (routes) => {
     const kit = /^\/([^/]+)\/demo\/([^/]+)\/$/.exec(demo);
     if (!kit) continue;
     const short = `/${kit[1]}/${kit[2]}/`;
-    if (!routes.some((route) => route.startsWith(short))) {
+    const owned = routes.filter((route) => route.startsWith(short));
+    if (owned.length === 0) {
       statics.push(`${short.slice(0, -1)} ${demo} 301`, `${short} ${demo} 301`);
+      splats.push(`${short}* ${demo}:splat 301`);
+      continue;
+    }
+    // A splat would steal a guide that lives under the kit address, so those
+    // kits keep a static rule per demo page. When only the kit guide sits at
+    // the short root, one splat covers every demo beneath it and stays inside
+    // the host's static-rule limit as more kits ship.
+    if (owned.every((route) => route === short)) {
       splats.push(`${short}* ${demo}:splat 301`);
       continue;
     }

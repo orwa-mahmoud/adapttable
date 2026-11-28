@@ -33,7 +33,7 @@ const fixture = (name) => {
 
 describe("packed Vue consumers", () => {
   it("registers every distinct real entry and matches existing comparable ceilings", () => {
-    assert.equal(VUE_CONSUMER_SPECS.length, 44);
+    assert.equal(VUE_CONSUMER_SPECS.length, 48);
     assert.deepEqual(
       vue.map((entry) => entry.name),
       VUE_CONSUMER_SPECS.map((entry) => entry.name)
@@ -64,14 +64,14 @@ describe("packed Vue consumers", () => {
     );
   });
 
-  it("measures all seven native kit roots with real adapter CSS, at most 80 KiB", () => {
+  it("measures all eight native kit roots with real adapter CSS, at most 80 KiB", () => {
     assert.deepEqual(
       VUE_NATIVE_BASE_SPECS.map((entry) => entry.pkg).sort(),
       KITS.filter((kit) => kit.framework === "vue" && kit.role === "shell")
         .map((kit) => kit.name)
         .sort()
     );
-    assert.equal(VUE_NATIVE_BASE_SPECS.length, 7);
+    assert.equal(VUE_NATIVE_BASE_SPECS.length, 8);
     for (const spec of VUE_NATIVE_BASE_SPECS) {
       const entry = fixture(spec.name);
       assert.equal(entry.kit, spec.pkg.replace(/^adapter-/, ""));

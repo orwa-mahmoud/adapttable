@@ -35,7 +35,8 @@ Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 
 - **Detects your UI kit** from `package.json` — Mantine, MUI, Chakra, Ant
   Design, Radix Themes, Base UI, shadcn/ui (via `components.json`), or
   Tailwind for React; all nine shipped Angular kits; Vue Unstyled, Element Plus,
-  Vuetify, Naive UI, Reka UI, shadcn-vue, Nuxt UI and Quasar for plain Vue/Vite.
+  Vuetify, Naive UI, Reka UI, Headless UI, shadcn-vue, Nuxt UI and Quasar for plain
+  Vue/Vite.
   Kit detection stays within the detected framework, including in mixed projects.
 - **Detects your package manager** from the lockfile (pnpm / yarn / bun /
   npm) and **prints** the right install command — it never installs
@@ -61,7 +62,7 @@ npx @adapttable/cli init --kit element-plus
 ```
 
 Explicit Vue kit identifiers: `vue-unstyled`, `element-plus`, `vuetify`,
-`naive-ui`, `reka-ui`, `shadcn-vue`, `nuxt-ui`, `quasar`. Dependency detection
+`naive-ui`, `reka-ui`, `vue-headless-ui`, `shadcn-vue`, `nuxt-ui`, `quasar`. Dependency detection
 stays within Vue. A `components.json` selects shadcn-vue before its underlying
 Reka dependency; a concrete styled-kit dependency still takes priority.
 

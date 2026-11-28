@@ -248,6 +248,7 @@ const VUE_SOURCES = [
   `${packageDir("adapter-vuetify")}${sep}`,
   `${packageDir("adapter-naive-ui")}${sep}`,
   `${packageDir("adapter-reka-ui")}${sep}`,
+  `${packageDir("adapter-vue-headless-ui")}${sep}`,
   `${packageDir("adapter-shadcn-vue")}${sep}`,
   `${packageDir("adapter-nuxt-ui")}${sep}`,
   `${packageDir("adapter-quasar")}${sep}`,
@@ -396,6 +397,10 @@ export default defineConfig({
       { find: /^@adapttable\/core$/, replacement: pkg("core") },
       { find: /^@adapttable\/react$/, replacement: pkg("react") },
       { find: /^@adapttable\/vue$/, replacement: pkg("vue") },
+      {
+        find: /^@adapttable\/vue-headless-ui$/,
+        replacement: pkg("adapter-vue-headless-ui"),
+      },
       {
         find: /^@adapttable\/vue-unstyled$/,
         replacement: pkg("adapter-vue-unstyled"),

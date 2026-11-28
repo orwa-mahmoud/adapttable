@@ -40,6 +40,7 @@ overrides:
   "@adapttable/shadcn": "workspace:*"
   "@adapttable/shadcn-vue": "workspace:*"
   "@adapttable/unstyled": "workspace:*"
+  "@adapttable/vue-headless-ui": "workspace:*"
   "@adapttable/vuetify": "workspace:*"
   # Chakra pins one Ark release; 5.39.3 brings @zag-js/presence 1.45, which
   # unmounts a closing popover whose exit animation ended before presence

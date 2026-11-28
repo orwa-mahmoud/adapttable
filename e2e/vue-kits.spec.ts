@@ -3,6 +3,7 @@ import { expect, type Page, test, type TestInfo } from "@playwright/test";
 import { VUE_KIT_PAGES } from "../apps/showcase/matrix.mjs";
 import { workspaceCopy } from "../apps/showcase/src/vue/workspace/copy";
 import { getLabels } from "../packages/shared/i18n/src/catalog";
+import { vueChoice } from "./vue-choice";
 import { expectDensityGeometry } from "./vue-kit-density-geometry";
 
 const part = (name: string) => `[data-adapttable-part="${name}"]`;
@@ -11,7 +12,7 @@ async function paginationControl(
   name: string,
   cards: boolean
 ) {
-  const pageSize = surface.getByRole("combobox", { name, exact: true });
+  const pageSize = vueChoice(surface, name);
   // Auto pagination uses incremental loading for cards and pages for tables.
   if (cards) {
     await expect(pageSize).toHaveCount(0);
@@ -392,9 +393,12 @@ for (const kit of VUE_KIT_PAGES) {
         const labels = getLabels(scenario.lang);
         const surface = page.locator(".vue-kit-preview__table");
         const root = surface.locator(part("root"));
-        const radio = ["element-plus", "nuxt-ui", "shadcn-vue"].includes(
-          kit.kit
-        );
+        const radio = [
+          "element-plus",
+          "nuxt-ui",
+          "shadcn-vue",
+          "headless-ui",
+        ].includes(kit.kit);
         const density = surface.getByRole(radio ? "radiogroup" : "group", {
           name: labels.density,
           exact: true,

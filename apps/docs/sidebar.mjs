@@ -143,6 +143,7 @@ export const sidebar = [
         label: "UI kits",
         items: [
           { label: "Element Plus", slug: "vue/element-plus" },
+          { label: "Headless UI", slug: "vue/headless-ui" },
           { label: "Naive UI", slug: "vue/naive-ui" },
           { label: "Nuxt UI", slug: "vue/nuxt-ui" },
           { label: "Quasar", slug: "vue/quasar" },

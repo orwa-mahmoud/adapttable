@@ -58,6 +58,7 @@ export const TITLES = {
   "vue/summary-row.md": "Vue summaries and footers",
   "vue/getting-started.md": "Get started with Vue tables",
   "vue/element-plus.md": "Element Plus Vue tables",
+  "vue/headless-ui.md": "Headless UI Vue tables",
   "vue/naive-ui.md": "Naive UI Vue tables",
   "vue/nuxt-ui.md": "Nuxt UI Vue tables",
   "vue/quasar.md": "Quasar Vue tables",
@@ -247,6 +248,8 @@ export const DESCRIPTIONS = {
     "Build an Vue table with native controls, reactive sources, optional features, controlled state and SSR lifecycle rules.",
   "vue/element-plus.md":
     "Build Vue tables with Element Plus controls and card surfaces, host-owned data and composable features.",
+  "vue/headless-ui.md":
+    "Build Vue tables with Headless UI components, a neutral theme, host-owned data and composable features.",
   "vue/naive-ui.md":
     "Build Vue tables with Naive UI controls and semantic table primitives, host-owned data and composable features.",
   "vue/nuxt-ui.md":

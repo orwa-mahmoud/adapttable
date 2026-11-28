@@ -14,6 +14,7 @@
         "@adapttable/nuxt-ui#build",
         "@adapttable/quasar#build",
         "@adapttable/reka-ui#build",
+        "@adapttable/vue-headless-ui#build",
         "@adapttable/shadcn-vue#build",
         "@adapttable/vuetify#build"
       ]
@@ -31,6 +32,7 @@
         "@adapttable/nuxt-ui#build",
         "@adapttable/quasar#build",
         "@adapttable/reka-ui#build",
+        "@adapttable/vue-headless-ui#build",
         "@adapttable/shadcn-vue#build",
         "@adapttable/vuetify#build"
       ]

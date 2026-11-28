@@ -113,6 +113,7 @@ export const KITS = Object.freeze([
   { name: "adapter-nuxt-ui", framework: "vue", role: "shell" },
   { name: "adapter-shadcn-vue", framework: "vue", role: "shell" },
   { name: "adapter-reka-ui", framework: "vue", role: "shell" },
+  { name: "adapter-vue-headless-ui", framework: "vue", role: "shell" },
   { name: "adapter-naive-ui", framework: "vue", role: "shell" },
   { name: "adapter-vuetify", framework: "vue", role: "shell" },
 ]);
