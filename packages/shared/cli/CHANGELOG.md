@@ -1,5 +1,11 @@
 # @adapttable/cli
 
+## 3.5.0
+
+### Minor Changes
+
+- 7214f4d: Detect `@headlessui/vue` in Vue projects and scaffold the Headless UI kit with `init --kit vue-headless-ui`.
+
 ## 3.4.0
 
 ### Minor Changes
